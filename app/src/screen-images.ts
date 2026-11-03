@@ -1,4 +1,4 @@
-import type { CompositionCommand, CompositionView } from "./screen-composition.ts";
+import type { CompositionCommand, CompositionView, CopyDraftParticipant } from "./screen-composition.ts";
 import type { ScreenDocument, ScreenNode } from "./screen-ui.ts";
 import type { CoreOperation } from "./protocol.ts";
 import type { MediaPresentation } from "./scene-ui.ts";
@@ -35,6 +35,8 @@ interface SubmittedImage {
 }
 interface Host {
   view: () => CompositionView | undefined;
+  writeBlocked?: () => boolean;
+  cancelComponentCopy?: () => void;
   current: () => boolean;
   request: <T>(operation: CoreOperation, payload?: Record<string, unknown>) => Promise<T>;
   coordinate: <T>(task: () => Promise<T>) => Promise<T>;
@@ -104,6 +106,42 @@ export class ScreenImages {
   hasAddition(): boolean {
     return !!this.addition;
   }
+  captureCopyDraft(view: CompositionView, trackNewDrafts=false): CopyDraftParticipant | undefined {
+    const currentKeys = () => [...this.drafts.values(), ...(this.addition ? [this.addition] : [])]
+      .filter(draft => draft.document.path === view.document.path && draft.screenId === view.screenId)
+      .map(draft => ({key:draft.key,addition:!draft.nodeId}));
+    const captured=currentKeys(),keys=()=>trackNewDrafts?currentKeys():captured;
+    if (!captured.length && !trackNewDrafts) return;
+    const read = () => keys().map(({key,addition}) => {
+      const draft = addition ? this.addition : this.drafts.get(key);
+      if (!draft || draft.key !== key || draft.document.revision !== view.document.revision) throw Error("The image draft changed its Source target. Input retained.");
+      const invalid = this.invalidDraft(draft);
+      if (invalid) throw Error(invalid.text);
+      return draft;
+    });
+    return {
+      validate: () => { read(); },
+      prepare: (fresh,nodeIds) => {
+        const drafts = read().map(draft => {
+          const nodeId = draft.nodeId ? nodeIds.get(draft.nodeId) : undefined;
+          const parentId = nodeIds.get(draft.parentId);
+          if (!parentId || !fresh.nodes.some(node => node.id === parentId) || draft.nodeId && !fresh.nodes.some(node => node.id === nodeId && node.kind === "image")) throw Error("The copied image target or parent is unavailable. Input retained.");
+          const key = nodeId ? JSON.stringify([fresh.document.path,fresh.screenId,nodeId]) : draft.key;
+          if (nodeId && this.drafts.has(key)) throw Error("The copied image target already has a draft. Input retained.");
+          return {original:draft.key,draft:{...draft,key,document:fresh.document,screenId:fresh.screenId,nodeId,parentId,returnId:draft.returnId ? nodeIds.get(draft.returnId) : undefined}};
+        });
+        return () => {
+          for (const {original,draft} of drafts) {
+            this.drafts.delete(original); this.errors.delete(original);
+            const lock = this.locks.get(original); this.locks.delete(original);
+            if (lock !== undefined) this.locks.set(draft.key,lock);
+            if (draft.nodeId) this.drafts.set(draft.key,draft); else this.addition = draft;
+          }
+        };
+      },
+      cancel: () => { for (const {key,addition} of keys()) { if (addition && this.addition?.key === key) this.addition = undefined; else this.drafts.delete(key); this.errors.delete(key); this.locks.delete(key); } },
+    };
+  }
   renderRetained(host: HTMLElement, documents: ScreenDocument[]): void {
     for (const [key, draft] of this.drafts) {
       if (
@@ -143,6 +181,8 @@ export class ScreenImages {
   private asset(id?: string): UiImageAsset | undefined {
     return this.assets.find((a) => a.id === id);
   }
+  assetName(id: string): string { return this.asset(id)?.displayName ?? "Unavailable image"; }
+  assetIdForLiteral(literal: string | null | undefined): string | undefined { return this.assets.find(asset => asset.relativePath === `game/${literal}`)?.id; }
   private accepted(view: CompositionView): Draft {
     const asset = this.assets.find(
       (a) => a.kind === "uiImage" && a.relativePath === `game/${view.selected.literal}`,
@@ -560,8 +600,8 @@ export class ScreenImages {
     const dirty = this.hasCurrentDraft() || layout;
     const apply = this.card.querySelector<HTMLButtonElement>("[data-image-apply]"),
       cancel = this.card.querySelector<HTMLButtonElement>("[data-image-cancel]");
-    if (apply) apply.disabled = this.saving || !dirty;
-    if (cancel) cancel.disabled = this.saving || !dirty;
+    if (apply) apply.disabled = this.saving || !dirty || !!this.host.writeBlocked?.();
+    if (cancel) cancel.disabled = this.saving || !dirty && !this.host.writeBlocked?.();
     const state = this.card.querySelector<HTMLElement>(".screen-image-state");
     if (state)
       state.textContent = this.saving ? "Applying image…" : dirty ? "Pending changes" : "No pending changes";
@@ -594,6 +634,7 @@ export class ScreenImages {
     this.host.note(text, true);
   }
   private cancel(): void {
+    if (this.host.writeBlocked?.()) { this.host.cancelComponentCopy?.(); return; }
     if (this.saving) return;
     const draft = this.value();
     if (!draft) return;
@@ -613,29 +654,23 @@ export class ScreenImages {
     this.host.note("Changes cancelled.");
     this.host.preview();
   }
+  private invalidDraft(draft: Draft): {field:string;text:string} | undefined {
+    for (const field of ["width","height"] as const) if (!valid(draft[field]))
+      return {field,text:"Enter a whole number from 1 to 16384. Your draft is retained."};
+    const asset = this.asset(draft.assetId);
+    if (!asset) return {field:"asset",text:"Choose an available UI image. Your draft is retained."};
+    if (asset.status !== "available" && !draft.replacement) return {field:"asset",text:asset.status === "changed"
+      ? "This file changed. Review it before applying. Your draft is retained."
+      : "This image is missing or unreadable. Choose another image. Your draft is retained."};
+  }
   private async apply(): Promise<void> {
+    if (this.host.writeBlocked?.()) { this.host.note("Reload or cancel the copy before applying. Input retained.",true); return; }
     const view = this.host.view(),
       draft = this.value(view);
     if (!view || !draft || this.saving) return;
-    for (const field of ["width", "height"] as const)
-      if (!valid(draft[field])) {
-        this.fail(field, "Enter a whole number from 1 to 16384. Your draft is retained.");
-        return;
-      }
-    const asset = this.asset(draft.assetId);
-    if (!asset) {
-      this.fail("asset", "Choose an available UI image. Your draft is retained.");
-      return;
-    }
-    if (asset.status !== "available" && !draft.replacement) {
-      this.fail(
-        "asset",
-        asset.status === "changed"
-          ? "This file changed. Review it before applying. Your draft is retained."
-          : "This image is missing or unreadable. Choose another image. Your draft is retained.",
-      );
-      return;
-    }
+    const invalid = this.invalidDraft(draft);
+    if (invalid) { this.fail(invalid.field,invalid.text); return; }
+    const asset = this.asset(draft.assetId)!;
     let layout: ReturnType<ScreenLayoutEditor["currentDraft"]>;
     try {
       layout = this.layout.currentDraft(true);

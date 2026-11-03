@@ -12,9 +12,10 @@ const output = new URL("../../.toolchains/design-lab/", lab);
 const sourceUrl = path => "/@fs/" + path.replaceAll("\\", "/").replace(/^\/+/, "");
 assert.equal(sourceUrl("/sample/app/src/preferences.ts"), "/@fs/sample/app/src/preferences.ts");
 assert.equal(sourceUrl("C:\\sample\\app\\src\\preferences.ts"), "/@fs/C:/sample/app/src/preferences.ts");
-const report = { basis: "Local browser samples only; no app persistence or native acceptance", cases: [], checks: [], errors: [] };
+const report = { basis: "Current-source draft samples plus actual approval/source protection; no historical visual fidelity, app persistence or native acceptance", cases: [], approvalChecks: [], checks: [], errors: [] };
 const server = await createServer({
   configFile: fileURLToPath(new URL("vite.config.ts", lab)),
+  cacheDir: fileURLToPath(new URL("vite-cache/", output)),
   logLevel: "silent",
   server: { host: "127.0.0.1", port: 0, strictPort: false },
 });
@@ -46,16 +47,27 @@ try {
   await page.goto(origin);
   assert.match(await page.getByLabel("Design approval", { exact: true }).innerText(), /Draft/);
   assert.equal(await page.locator(".lab-current-approval").innerText(), "No approved layout");
-  const { screens, viewports } = await page.evaluate(async () => {
+  const { screens, viewports, actualApprovals } = await page.evaluate(async () => {
     const catalog = await import("/registry.ts");
     return {
       screens: catalog.screens.map(({ id, variants, states, check }) => ({ id, variants: variants.map(item => item.id), states: states.map(item => item.id), check })),
       viewports: catalog.viewports,
+      actualApprovals: catalog.screens.map(screen => screen.approval),
     };
   });
   assert(screens.length > 0, "No screens registered");
   assert.equal(new Set(screens.map(screen => screen.id)).size, screens.length, "Duplicate screen IDs");
   await mkdir(output, { recursive: true });
+  // Exercise today's renderers as drafts, without claiming that changed source is
+  // a historical approved reference. Only this disposable browser sees the fixture.
+  const matrixApprovals = actualApprovals.map(item => ({ ...item, sourceMatches: {}, record: {
+    ...item.record, currentApproved: null,
+    revisions: item.record.revisions.map(revision => ({ ...revision, approval: null })),
+  } }));
+  let servedApprovals = matrixApprovals;
+  await page.route("**/*design-lab-approvals*", route => route.fulfill({
+    contentType: "application/javascript", body: `export const approvalRecords = ${JSON.stringify(servedApprovals)};`,
+  }));
 
   async function ready(target = page) {
     await target.locator('#preview[data-ready="true"], #preview[data-error="true"]').waitFor();
@@ -65,6 +77,9 @@ try {
     const query = new URLSearchParams({ screen, variant, state, theme, viewport });
     await page.goto(`${origin}/preview.html?${query}`);
     await ready();
+    assert.equal(await page.locator("#preview").getAttribute("data-screen"), screen);
+    assert.equal(await page.locator("#preview").getAttribute("data-variant"), variant);
+    assert.equal(await page.locator("#preview").getAttribute("data-state"), state);
     return page;
   }
 
@@ -75,6 +90,7 @@ try {
     for (const variant of screen.variants) for (const state of screen.states) for (const theme of ["light", "dark"]) for (const viewport of viewports) {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
       await open({ screen: screen.id, variant, state, theme, viewport: viewport.id });
+      assert.equal(await page.locator("#preview").getAttribute("data-approval"), "Draft");
       const bounds = await page.evaluate(() => ({
         theme: document.documentElement.dataset.theme,
         overflow: document.documentElement.scrollWidth > innerWidth,
@@ -131,6 +147,29 @@ try {
   await ready(navigationFrame);
   assert.equal(await navigationFrame.getByRole("button", { name: "Home", exact: true }).getAttribute("aria-current"), "page");
   report.checks.push("shared navigation retains a cancelled draft; confirms sample reset; preserves theme; links Runtime, Studio request, Settings and Home");
+
+  // Actual approval records must still protect every historical reference.
+  servedApprovals = actualApprovals;
+  for (const item of actualApprovals) {
+    const revision = item.record.revisions.find(revision => revision.id === item.record.currentApproved);
+    if (!revision) continue;
+    const screen = screens.find(screen => screen.id === item.record.screenId);
+    assert(screen, "Approved screen is not registered");
+    const query = new URLSearchParams({ screen: screen.id, variant: revision.variantId, state: screen.states[0], theme: "dark", viewport: "wide" });
+    await page.goto(`${origin}/?${query}`);
+    assert.match(await page.locator(".lab-current-approval").innerText(), new RegExp(revision.id));
+    const preview = page.frameLocator('iframe[title="Screen preview"]');
+    if (item.sourceMatches[revision.id]) {
+      await ready(preview);
+      assert.match(await page.getByLabel("Design approval", { exact: true }).innerText(), /Approved/);
+    } else {
+      await preview.locator('#preview[data-error="true"]').waitFor();
+      assert.match(await preview.locator("#preview").innerText(), /Approved source has changed/);
+      assert.match(await page.getByLabel("Design approval", { exact: true }).innerText(), /source changed/);
+    }
+    report.approvalChecks.push({screen:screen.id,revision:revision.id,sourceMatches:item.sourceMatches[revision.id]});
+  }
+  report.checks.push("actual approved pointers and unchanged-source rendering or changed-source refusal for every registered approval");
 
   // Intercept only this disposable browser's virtual metadata. Repository records stay unchanged.
   const otherRecords = await page.evaluate(async () => (await import("/registry.ts")).screens.filter(item => item.id !== "character-notes").map(item => item.approval));

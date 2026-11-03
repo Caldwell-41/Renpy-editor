@@ -292,13 +292,15 @@ fn append_definition(mut source: Vec<u8>, definition: Vec<u8>) -> Vec<u8> {
 
 impl Index {
     pub(super) fn read(inventory: &ownership::Inventory) -> Result<Self, SceneError> {
+        let graph = references::component_graph(&inventory.source_map, inventory);
         let mut result = Self {
             definitions: vec![],
             revision: inventory.revision.clone(),
             references: vec![],
-            complete: inventory.unresolved_styles.is_empty(),
+            complete: graph.complete,
             unavailable: (!inventory.unresolved_styles.is_empty()).then(||
-                "Archives or orphan bytecode may contain style uses. Review Source before sharing a style.".into()),
+                "Archives or orphan bytecode may contain style uses. Review Source before sharing a style.".into())
+                .or_else(||(!graph.complete).then(||"Screen inclusions stay in Source. Their affected screens cannot be reviewed for a shared style.".into())),
         };
         let mut duplicates = BTreeSet::new();
         let mut inherited = BTreeSet::new();
@@ -308,15 +310,6 @@ impl Index {
                 result.complete = false;
                 continue;
             };
-            // Includes may add affected parent screens. Until those edges and
-            // their overrides are modeled, an explicit-use-only review is unsafe.
-            if lines
-                .iter()
-                .any(|line| line.code.split_whitespace().next() == Some("use"))
-            {
-                result.complete = false;
-                result.unavailable = Some("Screen inclusions stay in Source. Their affected screens cannot be reviewed for a shared style.".into());
-            }
             let mut known_references = HashSet::new();
             for (i, line) in lines.iter().enumerate() {
                 if line.indent != 0 || !line.single {
@@ -450,6 +443,37 @@ impl Index {
                 result.complete = false;
             }
         }
+        if graph.complete {
+            let mut next = 0;
+            'uses: while next < result.references.len() {
+                let (name, usage) = result.references[next].clone();
+                next += 1;
+                let Some(owner) = inventory
+                    .source_map
+                    .owned_screens
+                    .iter()
+                    .find(|s| s.path == usage.path && s.name == usage.screen_name)
+                else {
+                    continue;
+                };
+                for parent in graph.uses.iter().filter(|u| u.component_id == owner.id) {
+                    if result.definitions.len() + result.references.len() >= MAX_NODES {
+                        result.exhausted();
+                        break 'uses;
+                    }
+                    result.references.push((
+                        name.clone(),
+                        StyleUse {
+                            path: parent.path.clone(),
+                            screen_name: parent.screen_name.clone(),
+                            node_id: Some(parent.node_id.clone()),
+                            node_start: parent.span.as_ref().unwrap().start,
+                            overrides: usage.overrides.clone(),
+                        },
+                    ));
+                }
+            }
+        }
         // Referencing an undeclared name creates its implicit parent chain in
         // Ren'Py: caption_ll_body -> ll_body -> body. Those uses are not explicit
         // edges of our supported definitions, so their ancestors stay in Source.
@@ -504,7 +528,7 @@ impl Index {
             }),
         }
     }
-    fn definition(&self, name: &str) -> Result<&Definition, SceneError> {
+    pub(super) fn definition(&self, name: &str) -> Result<&Definition, SceneError> {
         self.definitions
             .iter()
             .find(|d| d.name == name && d.error.is_none())

@@ -902,6 +902,21 @@ impl LifecycleService {
             .map_err(LifecycleError::Scene)
     }
 
+    pub fn screens_resolve_target(
+        &self,
+        request: crate::screens::references::ResolveTargetRequest,
+    ) -> Result<crate::screens::references::ResolvedScreenTarget, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .screens_resolve_target(
+                &authority,
+                &project_id,
+                &request.binding,
+                request.expected.as_ref(),
+            )
+            .map_err(LifecycleError::Scene)
+    }
+
     pub fn screens_compose(
         &self,
         request: crate::screens::ComposeRequest,
@@ -909,6 +924,56 @@ impl LifecycleService {
         let (authority, project_id) = self.authoring_context()?;
         self.authoring
             .screens_compose(&authority, &project_id, request)
+            .map_err(LifecycleError::Scene)
+    }
+
+    pub fn screens_component_prepare_extract(
+        &self,
+        request: crate::screens::components::PrepareExtractRequest,
+    ) -> Result<crate::screens::components::PreparedGroup, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .prepare_extract_group(&authority, &project_id, request)
+            .map_err(LifecycleError::Scene)
+    }
+
+    pub fn screens_component_extract(
+        &self,
+        request: crate::screens::components::ExtractRequest,
+    ) -> Result<crate::screens::components::ComponentChange, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .screens_component_extract(&authority, &project_id, request)
+            .map_err(LifecycleError::Scene)
+    }
+
+    pub fn screens_component_place(
+        &self,
+        request: crate::screens::components::PlaceRequest,
+    ) -> Result<crate::screens::components::ComponentChange, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .screens_component_place(&authority, &project_id, request)
+            .map_err(LifecycleError::Scene)
+    }
+
+    pub fn screens_component_copy(
+        &self,
+        request: crate::screens::components::CopyRequest,
+    ) -> Result<crate::screens::components::ComponentChange, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .screens_component_copy(&authority, &project_id, request)
+            .map_err(LifecycleError::Scene)
+    }
+
+    pub fn screens_component_review(
+        &self,
+        request: crate::screens::components::ReviewRequest,
+    ) -> Result<crate::screens::components::ComponentReview, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .screens_component_review(&authority, &project_id, &request.component_id)
             .map_err(LifecycleError::Scene)
     }
 
@@ -1625,6 +1690,7 @@ fn build_overlay_model(
         ],
         scene_mappings: Vec::new(),
         owned_screens: Vec::new(),
+        component_uses: Vec::new(),
         extra: Map::new(),
     };
     (metadata, source_map, script, scene_source)
@@ -2584,13 +2650,21 @@ mod tests {
         for change in [
             "draft", "external", "combined", "base", "missing", "session", "success",
         ] {
-            let temp = tempfile::tempdir().unwrap();
+            let mut temp = tempfile::tempdir().unwrap();
             let root = temp.path().join("review-project");
             make_openable_project(&root, "Review binding");
             let path = "game/custom.rpy";
             fs::write(root.join(path), b"alpha beta gamma\n").unwrap();
             let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
-            let project = service.open_path(&root).unwrap();
+            let project = service.open_path(&root).unwrap_or_else(|error| {
+                // Keep this public fixture's migration journal if opening fails;
+                // deleting it would lose the only filesystem evidence of recovery.
+                temp.disable_cleanup(true);
+                panic!(
+                    "initial open for {change} failed: {error:?}; fixture retained at {}",
+                    temp.path().display()
+                );
+            });
             let mut session = project.session_id.clone();
             let opened = closeout_ipc(
                 &mut service,

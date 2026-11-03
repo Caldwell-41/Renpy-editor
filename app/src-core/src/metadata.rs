@@ -3,7 +3,7 @@ use serde_json::{Map, Value};
 use std::{collections::HashSet, fs, io, path::Path};
 
 pub const PROJECT_SCHEMA_VERSION: u32 = 2;
-pub const SOURCE_MAP_SCHEMA_VERSION: u32 = 6;
+pub const SOURCE_MAP_SCHEMA_VERSION: u32 = 7;
 pub(crate) const MAX_SOURCE_MAP_BYTES: usize = 1_000_000;
 pub const LEGACY_PROJECT_SCHEMA_VERSION: u32 = 1;
 pub const LEGACY_SOURCE_MAP_SCHEMA_VERSION: u32 = 1;
@@ -95,6 +95,8 @@ pub struct SourceMapMetadata {
     pub scene_mappings: Vec<SceneSourceMapping>,
     #[serde(default)]
     pub owned_screens: Vec<OwnedScreen>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub component_uses: Vec<ComponentUse>,
     #[serde(flatten)]
     pub extra: Map<String, Value>,
 }
@@ -107,8 +109,34 @@ pub struct OwnedScreen {
     pub root_id: String,
     pub name: String,
     pub path: String,
+    #[serde(default)]
+    pub kind: OwnedScreenKind,
     #[serde(flatten)]
     pub extra: Map<String, Value>,
+}
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum OwnedScreenKind {
+    #[default]
+    Panel,
+    Component,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ComponentUse {
+    pub screen_id: String,
+    pub node_id: String,
+    pub component_id: String,
+}
+
+/// Persist intent even when its source target is unavailable or has been renamed.
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ScreenTargetBinding {
+    pub screen_id: String,
+    pub source_name: String,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -131,6 +159,8 @@ pub struct BeatSourceMapping {
     pub owner: Option<BeatOwner>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub conditional_branch: Option<ConditionalBranch>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub screen_target: Option<ScreenTargetBinding>,
     pub id: String,
     pub kind: String,
     pub byte_start: u64,
@@ -332,12 +362,13 @@ impl SourceMapMetadata {
     pub fn validate(&self, project_id: &str) -> Result<(), MetadataError> {
         if !matches!(
             self.schema_version,
-            LEGACY_SOURCE_MAP_SCHEMA_VERSION | 2 | 3 | 4 | 5 | SOURCE_MAP_SCHEMA_VERSION
+            LEGACY_SOURCE_MAP_SCHEMA_VERSION | 2 | 3 | 4 | 5 | 6 | SOURCE_MAP_SCHEMA_VERSION
         ) || !valid_id(&self.project_id)
             || self.project_id != project_id
             || self.sources.len() > 4096
             || self.scene_mappings.len() > 4096
             || self.owned_screens.len() > 4096
+            || self.component_uses.len() > 4096
         {
             return Err(MetadataError::InvalidIdentity);
         }
@@ -362,6 +393,22 @@ impl SourceMapMetadata {
                 || !owned_paths.insert(screen.path.to_ascii_lowercase())
                 || !owned_names.insert(screen.name.to_ascii_lowercase())
                 || !sources.contains(&screen.path.to_ascii_lowercase())
+                || (self.schema_version < 7 && screen.kind == OwnedScreenKind::Component)
+            {
+                return Err(MetadataError::InvalidStructure);
+            }
+        }
+        let mut use_ids = HashSet::new();
+        for usage in &self.component_uses {
+            if self.schema_version < 7
+                || !valid_id(&usage.node_id)
+                || !use_ids.insert(&usage.node_id)
+                || owned_ids.contains(&usage.node_id)
+                || !self.owned_screens.iter().any(|s| s.id == usage.screen_id)
+                || !self
+                    .owned_screens
+                    .iter()
+                    .any(|s| s.id == usage.component_id && s.kind == OwnedScreenKind::Component)
             {
                 return Err(MetadataError::InvalidStructure);
             }
@@ -397,6 +444,20 @@ impl SourceMapMetadata {
                     return Err(MetadataError::InvalidStructure);
                 }
                 last_end = beat.byte_end;
+                if matches!(beat.kind.as_str(), "showScreen" | "hideScreen")
+                    && (self.schema_version < 7 || beat.screen_target.is_none())
+                {
+                    return Err(MetadataError::InvalidStructure);
+                }
+                if let Some(target) = &beat.screen_target {
+                    if self.schema_version < 7
+                        || !matches!(beat.kind.as_str(), "showScreen" | "hideScreen")
+                        || !valid_id(&target.screen_id)
+                        || !crate::screens::valid_name(&target.source_name)
+                    {
+                        return Err(MetadataError::InvalidStructure);
+                    }
+                }
                 if self.schema_version < 3
                     && (beat.owner.is_some() || beat.conditional_branch.is_some())
                 {
@@ -577,6 +638,78 @@ mod tests {
         let decoded: ProjectMetadata = serde_json::from_slice(&encoded).unwrap();
         assert_eq!(decoded, value);
         assert!(decoded.validate(Some("a-project")).is_ok());
+    }
+
+    #[test]
+    fn component_uses_require_owned_component_targets_and_unique_identity() {
+        let project = uuid::Uuid::new_v4().to_string();
+        let panel = uuid::Uuid::new_v4().to_string();
+        let component = uuid::Uuid::new_v4().to_string();
+        let use_id = uuid::Uuid::new_v4().to_string();
+        let mut value = serde_json::json!({
+            "schemaVersion": SOURCE_MAP_SCHEMA_VERSION,
+            "projectId": project,
+            "sources": ["game/ui/help.rpy", "game/ui/details.rpy"],
+            "ownedScreens": [
+                {"id": panel, "rootId": uuid::Uuid::new_v4().to_string(),
+                 "name": "help", "path": "game/ui/help.rpy", "kind": "panel"},
+                {"id": component, "rootId": uuid::Uuid::new_v4().to_string(),
+                 "name": "details", "path": "game/ui/details.rpy", "kind": "component"}
+            ],
+            "componentUses": [{"screenId": panel, "nodeId": use_id, "componentId": component}]
+        });
+        let read = |value: &Value| {
+            SourceMapMetadata::read_bytes(&serde_json::to_vec(value).unwrap(), &project)
+        };
+        assert!(read(&value).is_ok());
+        value["componentUses"][0]["componentId"] = Value::String(panel.clone());
+        assert_eq!(read(&value), Err(MetadataError::InvalidStructure));
+        value["componentUses"][0]["componentId"] = Value::String(component);
+        let duplicate = value["componentUses"][0].clone();
+        value["componentUses"]
+            .as_array_mut()
+            .unwrap()
+            .push(duplicate);
+        assert_eq!(read(&value), Err(MetadataError::InvalidStructure));
+    }
+
+    #[test]
+    fn story_screen_bindings_validate_intent_and_retain_missing_targets() {
+        let project = uuid::Uuid::new_v4().to_string();
+        let target = uuid::Uuid::new_v4().to_string();
+        let mut value = serde_json::json!({
+            "schemaVersion": SOURCE_MAP_SCHEMA_VERSION,
+            "projectId": project,
+            "sources": ["game/story.rpy"],
+            "sceneMappings": [{
+                "sceneId": uuid::Uuid::new_v4().to_string(),
+                "path": "game/story.rpy", "sourceRevision": "a".repeat(64),
+                "labelStart": 0, "labelEnd": 80,
+                "beats": [{
+                    "id": uuid::Uuid::new_v4().to_string(), "kind": "showScreen",
+                    "byteStart": 12, "byteEnd": 40, "sourceSha256": "b".repeat(64),
+                    "screenTarget": {"screenId": target, "sourceName": "help"}
+                }]
+            }]
+        });
+        let read = |value: &Value| {
+            SourceMapMetadata::read_bytes(&serde_json::to_vec(value).unwrap(), &project)
+        };
+        let map = read(&value).unwrap();
+        let round_trip = serde_json::to_value(map).unwrap();
+        assert_eq!(
+            round_trip["sceneMappings"][0]["beats"][0]["screenTarget"],
+            value["sceneMappings"][0]["beats"][0]["screenTarget"]
+        );
+        let binding = value["sceneMappings"][0]["beats"][0]["screenTarget"].take();
+        assert_eq!(read(&value), Err(MetadataError::InvalidStructure));
+        value["sceneMappings"][0]["beats"][0]["screenTarget"] = binding;
+        value["sceneMappings"][0]["beats"][0]["screenTarget"]["screenId"] =
+            Value::String("invalid-id".into());
+        assert_eq!(read(&value), Err(MetadataError::InvalidStructure));
+        value["sceneMappings"][0]["beats"][0]["screenTarget"]["screenId"] = Value::String(target);
+        value["sceneMappings"][0]["beats"][0]["kind"] = Value::String("narration".into());
+        assert_eq!(read(&value), Err(MetadataError::InvalidStructure));
     }
 
     #[test]

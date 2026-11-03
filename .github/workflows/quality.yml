@@ -165,6 +165,18 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 24.19.0
+      - name: Prepare isolated Python image evidence dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$HARNESS_PYTHON" -m venv "$RUNNER_TEMP/harness-python"
+          if test "$RUNNER_OS" = Windows; then
+            harness_python="$RUNNER_TEMP/harness-python/Scripts/python.exe"
+          else
+            harness_python="$RUNNER_TEMP/harness-python/bin/python"
+          fi
+          "$harness_python" -m pip install Pillow==12.3.0
+          printf 'HARNESS_PYTHON=%s\n' "$harness_python" >> "$GITHUB_ENV"
       - name: Run all independent harness groups and print failed assertions
         shell: bash
         run: '"$HARNESS_PYTHON" app/scripts/run-harness-checks.py --output "$RUNNER_TEMP/harness-regressions"'

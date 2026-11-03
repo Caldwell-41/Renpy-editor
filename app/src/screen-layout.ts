@@ -1,5 +1,6 @@
 import type { ScreenDocument, ScreenNode } from "./screen-ui.ts";
 import { validateField } from "./authoring-input.ts";
+import type { CompositionView, CopyDraftParticipant } from "./screen-composition.ts";
 
 export type LayoutUnit = "pixels" | "relative" | "count";
 export interface LayoutValue { unit: LayoutUnit; value: number }
@@ -16,6 +17,8 @@ interface View { document: ScreenDocument; screen: string; node: ScreenNode; nod
 interface Host {
   view: () => View | undefined;
   commit: (draft: Draft, edits: LayoutEdits) => Promise<void>;
+  writeBlocked?: () => boolean;
+  cancelComponentCopy?: () => void;
   preview: () => void;
   note: (text: string, error?: boolean) => void;
   select: (node: ScreenNode) => void;
@@ -26,6 +29,7 @@ const labels: Record<string, string> = {
   xsize: "Width", ysize: "Height", xminimum: "Minimum width", xmaximum: "Maximum width", yminimum: "Minimum height", ymaximum: "Maximum height",
   left_padding: "Left padding", right_padding: "Right padding", top_padding: "Top padding", bottom_padding: "Bottom padding", spacing: "Spacing",
 };
+export { labels as layoutFieldLabels };
 const coordinate = (key: string) => ["xpos", "ypos", "xanchor", "yanchor"].includes(key);
 const numericSpelling = (key: string, text: string) => (["columns", "rows"].includes(key) ? /^\d+$/ : /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/).test(text.trim());
 const nodeKey = (node: ScreenNode) => node.id ?? JSON.stringify([node.kind, node.literal, node.span.start]);
@@ -50,6 +54,39 @@ export class ScreenLayoutEditor {
   private presentation: LayoutPresentation = {};
   constructor(private readonly host: Host) {}
   hasDraft(): boolean { return this.drafts.size > 0; }
+  captureCopyDraft(view: CompositionView, trackNewDrafts=false): CopyDraftParticipant | undefined {
+    const currentKeys = () => [...this.drafts].filter(([, draft]) => draft.document.path === view.document.path && draft.screen === view.screenName).map(([key]) => key);
+    const captured=currentKeys(),keys=()=>trackNewDrafts?currentKeys():captured;
+    if (!captured.length && !trackNewDrafts) return;
+    const read = () => keys().map(key => {
+      const draft = this.drafts.get(key), node = view.nodes.find(node => node.id === draft?.node.id);
+      if (!draft || !node || draft.document.revision !== view.document.revision) throw Error("The layout draft changed its Source target. Input retained.");
+      const invalid = this.validate({document:view.document,screen:view.screenName,node,nodes:view.nodes,busy:false,otherDraft:false}, draft.fields);
+      if (invalid) throw Error(invalid.text);
+      return draft;
+    });
+    return {
+      validate: () => { read(); },
+      prepare: (fresh, nodeIds) => {
+        const drafts = read().map(draft => {
+          const node = fresh.nodes.find(node => node.id === nodeIds.get(draft.node.id!));
+          if (!node?.numericLayout) throw Error("The copied layout target is unavailable. Input retained.");
+          const key = draftKey(fresh.document, fresh.screenName, node);
+          if (this.drafts.has(key)) throw Error("The copied layout target already has a draft. Input retained.");
+          return { original: draft.key, draft: {...draft,key,document:fresh.document,screen:fresh.screenName,node,fields:structuredClone(draft.fields)} };
+        });
+        return () => {
+          for (const {original,draft} of drafts) {
+            this.drafts.delete(original); this.errors.delete(original);
+            const units = this.emptyUnits.get(original); this.emptyUnits.delete(original);
+            if (units) this.emptyUnits.set(draft.key, units);
+            this.drafts.set(draft.key, draft);
+          }
+        };
+      },
+      cancel: () => { for (const key of keys()) { this.drafts.delete(key); this.errors.delete(key); this.emptyUnits.delete(key); } },
+    };
+  }
   hasNodeDraft(document: ScreenDocument, screen: string, node: ScreenNode): boolean { return this.drafts.has(draftKey(document, screen, node)); }
   renderRetained(host: HTMLElement, documents: ScreenDocument[]): void {
     for (const [key, draft] of this.drafts) {
@@ -176,6 +213,7 @@ export class ScreenLayoutEditor {
   }
   private async apply(): Promise<void> {
     const view = this.host.view(); if (!view || view.busy || this.saving || this.composing) return;
+    if (this.host.writeBlocked?.()) { this.host.note("Reload or cancel the copy before applying. Input retained.",true); return; }
     const draft = this.drafts.get(this.key(view));
     if (!draft) { this.host.note("No change. No undo entry added."); return; }
     const invalid = this.validate(view, draft.fields); if (invalid) { this.fail(invalid.text, invalid.key); return; }
@@ -187,6 +225,7 @@ export class ScreenLayoutEditor {
     finally { this.saving = false; this.sync(); }
   }
   private cancel(): void {
+    if (this.host.writeBlocked?.()) { this.host.cancelComponentCopy?.(); return; }
     const view = this.host.view(); if (!view || view.busy || this.saving || this.composing) return;
     const key = (document.activeElement as HTMLElement | null)?.dataset.layoutField;
     this.drafts.delete(this.key(view)); this.emptyUnits.delete(this.key(view)); this.errors.delete(this.key(view)); const host = this.hostElement; if (host) this.render(host,this.presentation);
@@ -282,7 +321,7 @@ export class ScreenLayoutEditor {
     const commit = el("div", "layout-commit"), feedback = el("p", "layout-feedback"); feedback.role = "alert";
     const state = el("p", "layout-commit-state"), actions = el("div", "layout-actions");
     const apply = el("button", "button primary", "Apply layout"); apply.type = "submit"; apply.setAttribute("form", this.formId);
-    const cancel = action("Cancel layout", () => this.cancel()); actions.append(apply, cancel); commit.append(feedback, state, actions);
+    const cancel = action("Cancel layout", () => this.cancel()); cancel.dataset.layoutCancel = ""; actions.append(apply, cancel); commit.append(feedback, state, actions);
     heading.hidden = commit.hidden = sharedCommit; host.append(heading, form, commit); this.sync();
     const error = this.errors.get(this.key(view));
     if (error?.field) { try { this.fieldValidators.get(error.field)?.(); } catch { /* Retain the field's explanation after remounting. */ } }
@@ -298,8 +337,8 @@ export class ScreenLayoutEditor {
     host.querySelectorAll<HTMLInputElement>("input").forEach(input => { input.readOnly = view.busy || this.saving; });
     host.querySelectorAll<HTMLSelectElement>("select").forEach(select => select.disabled = view.busy || this.saving);
     host.querySelectorAll<HTMLButtonElement>("button").forEach(button => {
-      const disabled = view.busy || this.saving || button.textContent === "Cancel layout" && !dirty;
-      if (button.type === "submit") { button.ariaDisabled = String(disabled); button.disabled = false; }
+      const disabled = view.busy || this.saving || button.textContent === "Cancel layout" && !dirty && !this.host.writeBlocked?.();
+      if (button.type === "submit") { button.ariaDisabled = String(disabled || this.host.writeBlocked?.()); button.disabled = !!this.host.writeBlocked?.(); }
       else button.disabled = disabled;
     });
     host.querySelectorAll<HTMLButtonElement>("[data-align-x]").forEach(button => button.ariaPressed = String(["xpos", "xanchor", "ypos", "yanchor"].every(key => fields[key]!.text !== "" && fields[key]!.unit === "relative" && Number(fields[key]!.text) === Number(key.startsWith("x") ? button.dataset.alignX : button.dataset.alignY))));

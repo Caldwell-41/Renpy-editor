@@ -35,6 +35,18 @@ pub struct CreateRequest {
     pub expected_project_revision: String,
     pub expected_source_map_revision: String,
     pub expected_inventory_revision: String,
+    #[serde(default)]
+    pub starter: Option<panels::HelpStarter>,
+}
+
+pub(super) struct PreparedOwnedScreenCreate {
+    pub(super) owner: OwnedScreen,
+    pub(super) map: SourceMapMetadata,
+    pub(super) map_bytes: Vec<u8>,
+    pub(super) map_revision: Revision,
+    pub(super) project_revision: Revision,
+    pub(super) inventory: Inventory,
+    pub(super) source: Vec<u8>,
 }
 
 pub(super) struct Inventory {
@@ -43,13 +55,16 @@ pub(super) struct Inventory {
     pub(super) script_files: Vec<String>,
     pub(super) unresolved_styles: Vec<String>,
     opaque_revisions: Vec<(String, String)>,
-    names: Vec<String>,
-    complete: bool,
+    pub(super) names: Vec<String>,
+    pub(super) complete: bool,
+    pub(super) source_map: SourceMapMetadata,
+    pub(super) source_map_revision: String,
 }
 
 impl Inventory {
     pub(super) fn refresh_revision(&mut self) {
         let mut digest = Sha256::new();
+        digest.update(self.source_map_revision.as_bytes());
         for (path, bytes) in &self.files {
             digest.update((path.len() as u64).to_le_bytes());
             digest.update(path.as_bytes());
@@ -157,7 +172,7 @@ fn marker(id: &str) -> String {
     format!("# loomlight-screen: {id}")
 }
 
-fn resolves(screen: &OwnedScreen, inventory: &Inventory) -> bool {
+pub(super) fn resolves(screen: &OwnedScreen, inventory: &Inventory) -> bool {
     if !inventory.complete {
         return false;
     }
@@ -212,6 +227,17 @@ impl AuthoringService {
         source_path: String,
         revision: String,
     ) -> Result<Document, SceneError> {
+        self.owned_screen_document_with_inventory(project, bytes, source_path, revision, None)
+    }
+
+    pub(super) fn owned_screen_document_with_inventory(
+        &self,
+        project: &ProjectId,
+        bytes: &[u8],
+        source_path: String,
+        revision: String,
+        inventory: Option<&Inventory>,
+    ) -> Result<Document, SceneError> {
         let mut document = inspect(bytes, source_path, revision)?;
         let (project_bytes, _) = self
             .transactions
@@ -220,6 +246,17 @@ impl AuthoringService {
         let metadata = ProjectMetadata::read_bytes(&project_bytes, None)
             .map_err(|_| SceneError::InvalidMetadata)?;
         let (map, _, _, _) = self.screen_metadata(project, &metadata.project_id)?;
+        let captured_inventory = if inventory.is_none()
+            && document
+                .screens
+                .iter()
+                .any(|s| s.nodes.iter().any(|n| n.kind == "use"))
+        {
+            Some(self.screen_inventory(project)?)
+        } else {
+            None
+        };
+        let inventory = inventory.or(captured_inventory.as_ref());
         for screen in &mut document.screens {
             let owner = map
                 .owned_screens
@@ -273,6 +310,7 @@ impl AuthoringService {
                             numeric_layout: None,
                             text_properties: None,
                             style: None,
+                            component: None,
                             span: span.clone(),
                             parent_start: Some(parent.span.start),
                             properties: vec![],
@@ -294,6 +332,57 @@ impl AuthoringService {
                 if node.id.as_ref().is_some_and(|id| counts[id] != 1) {
                     node.id = None;
                 }
+                if node.kind == "use" {
+                    let binding = owned.and_then(|owner| {
+                        map.component_uses.iter().find(|usage| {
+                            usage.screen_id == owner.id && node.id.as_ref() == Some(&usage.node_id)
+                        })
+                    });
+                    node.component = binding.map(|binding| {
+                        let target = map
+                            .owned_screens
+                            .iter()
+                            .find(|s| s.id == binding.component_id);
+                        let resolved =
+                            target
+                                .zip(inventory.as_ref())
+                                .is_some_and(|(target, inventory)| {
+                                    target.kind == crate::metadata::OwnedScreenKind::Component
+                                        && node.literal.as_deref() == Some(target.name.as_str())
+                                        && resolves(target, inventory)
+                                });
+                        ComponentReference {
+                            component_id: binding.component_id.clone(),
+                            resolved,
+                            source_revision: if resolved {
+                                let target = target.unwrap();
+                                inventory
+                                    .as_ref()
+                                    .unwrap()
+                                    .files
+                                    .iter()
+                                    .find(|(p, _)| p == &target.path)
+                                    .map(|(_, b)| hex::encode(Sha256::digest(b)))
+                            } else {
+                                None
+                            },
+                        }
+                    });
+                    if !node
+                        .component
+                        .as_ref()
+                        .is_some_and(|reference| reference.resolved)
+                    {
+                        node.protected.push(node.span.clone());
+                    }
+                }
+            }
+            if let Some(owner) = owned {
+                let qualified = references::qualified_panel_spans(owner, screen, bytes);
+                for node in &mut screen.nodes {
+                    node.protected
+                        .retain(|span| !qualified.contains_key(&span.start));
+                }
             }
         }
         Ok(document)
@@ -303,7 +392,7 @@ impl AuthoringService {
         self.screen_inventory_for_create(project, None)
     }
 
-    fn screen_inventory_for_create(
+    pub(super) fn screen_inventory_for_create(
         &self,
         project: &ProjectId,
         destination: Option<&RelativePath>,
@@ -390,6 +479,18 @@ impl AuthoringService {
             }
             files.push((path.clone(), bytes));
         }
+        let (project_bytes, _) = self
+            .transactions
+            .snapshot(project, RelativePath::new(PROJECT).unwrap())
+            .map_err(|_| SceneError::SourceConflict)?;
+        let metadata = ProjectMetadata::read_bytes(&project_bytes, None)
+            .map_err(|_| SceneError::InvalidMetadata)?;
+        let (map_bytes, map_revision) = self
+            .transactions
+            .snapshot(project, RelativePath::new(MAP).unwrap())
+            .map_err(|_| SceneError::SourceConflict)?;
+        let source_map = SourceMapMetadata::read_bytes(&map_bytes, &metadata.project_id)
+            .map_err(|_| SceneError::InvalidMetadata)?;
         let mut inventory = Inventory {
             revision: String::new(),
             files,
@@ -398,15 +499,25 @@ impl AuthoringService {
             opaque_revisions,
             names,
             complete,
+            source_map,
+            source_map_revision: map_revision.sha256,
         };
         inventory.refresh_revision();
         Ok(inventory)
     }
 
-    fn screen_metadata(
+    pub(super) fn screen_metadata(
         &self,
         project: &ProjectId,
         project_id: &str,
+    ) -> Result<(SourceMapMetadata, Vec<u8>, Revision, Revision), SceneError> {
+        self.screen_metadata_for_project(project, Some(project_id))
+    }
+
+    pub(super) fn screen_metadata_for_project(
+        &self,
+        project: &ProjectId,
+        expected_project_id: Option<&str>,
     ) -> Result<(SourceMapMetadata, Vec<u8>, Revision, Revision), SceneError> {
         let (project_bytes, project_revision) = self
             .transactions
@@ -414,14 +525,14 @@ impl AuthoringService {
             .map_err(|_| SceneError::SourceConflict)?;
         let metadata = ProjectMetadata::read_bytes(&project_bytes, None)
             .map_err(|_| SceneError::InvalidMetadata)?;
-        if metadata.project_id != project_id {
+        if expected_project_id.is_some_and(|id| metadata.project_id != id) {
             return Err(SceneError::InvalidMetadata);
         }
         let (bytes, revision) = self
             .transactions
             .snapshot(project, RelativePath::new(MAP).unwrap())
             .map_err(|_| SceneError::SourceConflict)?;
-        let map = SourceMapMetadata::read_bytes(&bytes, project_id)
+        let map = SourceMapMetadata::read_bytes(&bytes, &metadata.project_id)
             .map_err(|_| SceneError::InvalidMetadata)?;
         if map.schema_version != crate::metadata::SOURCE_MAP_SCHEMA_VERSION {
             return Err(SceneError::InvalidMetadata);
@@ -436,6 +547,9 @@ impl AuthoringService {
     ) -> Result<Catalog, SceneError> {
         let (map, _, revision, project_revision) = self.screen_metadata(project, project_id)?;
         let inventory = self.screen_inventory(project)?;
+        if inventory.source_map_revision != revision.sha256 {
+            return Err(SceneError::SourceConflict);
+        }
         catalog(map, inventory, revision.sha256, project_revision.sha256)
     }
 
@@ -443,8 +557,33 @@ impl AuthoringService {
         &self,
         project: &ProjectId,
         project_id: &str,
-        request: CreateRequest,
+        mut request: CreateRequest,
     ) -> Result<Catalog, SceneError> {
+        let starter = request.starter.take();
+        let prepared = self.prepare_owned_screen_create(
+            project,
+            project_id,
+            request,
+            crate::metadata::OwnedScreenKind::Panel,
+            |owner| match starter {
+                Some(starter) => self.prepare_help_panel(project, project_id, &owner.name, starter),
+                None => Ok(format!("screen {}():\n    pass\n", owner.name).into_bytes()),
+            },
+        )?;
+        self.commit_owned_screen_create(project, project_id, prepared, Vec::new())
+    }
+
+    pub(super) fn prepare_owned_screen_create(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        request: CreateRequest,
+        kind: crate::metadata::OwnedScreenKind,
+        source_builder: impl FnOnce(&OwnedScreen) -> Result<Vec<u8>, SceneError>,
+    ) -> Result<PreparedOwnedScreenCreate, SceneError> {
+        if request.starter.is_some() {
+            return Err(SceneError::InvalidPayload);
+        }
         if !valid_name(&request.name) {
             return Err(SceneError::InvalidPayload);
         }
@@ -495,14 +634,11 @@ impl AuthoringService {
             root_id: uuid::Uuid::new_v4().to_string(),
             name: request.name,
             path: destination.clone(),
+            kind,
             extra: Default::default(),
         };
-        let source = format!(
-            "{}\nscreen {}():\n    pass\n",
-            marker(&screen.id),
-            screen.name
-        )
-        .into_bytes();
+        let mut source = format!("{}\n", marker(&screen.id)).into_bytes();
+        source.extend(source_builder(&screen)?);
         if inventory
             .files
             .iter()
@@ -529,15 +665,92 @@ impl AuthoringService {
         });
         inventory.refresh_revision();
         map.sources.push(destination.clone());
-        map.owned_screens.push(screen);
+        map.owned_screens.push(screen.clone());
         map.validate(project_id)
             .map_err(|_| SceneError::InvalidMetadata)?;
-        let proposed = crate::scene::source_map_bytes(&map)?;
-        let committed_catalog = catalog(
+        if !resolves(&screen, &inventory) {
+            return Err(SceneError::UnsupportedSource);
+        }
+        Ok(PreparedOwnedScreenCreate {
+            owner: screen,
             map,
+            map_bytes: bytes,
+            map_revision: revision,
+            project_revision,
             inventory,
+            source,
+        })
+    }
+
+    pub(super) fn commit_owned_screen_create(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        mut prepared: PreparedOwnedScreenCreate,
+        companions: Vec<FileMutation>,
+    ) -> Result<Catalog, SceneError> {
+        let Some((_, source)) = prepared
+            .inventory
+            .files
+            .iter_mut()
+            .find(|(path, _)| path == &prepared.owner.path)
+        else {
+            return Err(SceneError::InvalidMetadata);
+        };
+        *source = prepared.source.clone();
+        if !prepared
+            .map
+            .owned_screens
+            .iter()
+            .any(|owner| owner == &prepared.owner)
+            || !resolves(&prepared.owner, &prepared.inventory)
+        {
+            return Err(SceneError::InvalidMetadata);
+        }
+        let mut paths = HashSet::new();
+        for mutation in &companions {
+            if !matches!(mutation.kind, MutationKind::ReplaceExisting)
+                || mutation.path.as_str() == prepared.owner.path
+                || !paths.insert(mutation.path.as_str())
+            {
+                return Err(SceneError::InvalidPayload);
+            }
+            let Some((_, bytes)) = prepared
+                .inventory
+                .files
+                .iter_mut()
+                .find(|(path, _)| path == mutation.path.as_str())
+            else {
+                return Err(SceneError::InvalidPayload);
+            };
+            if *bytes != mutation.expected_bytes
+                || hex::encode(Sha256::digest(&*bytes)) != mutation.base.sha256
+            {
+                return Err(SceneError::SourceConflict);
+            }
+            *bytes = mutation.proposed.clone();
+        }
+        if prepared
+            .inventory
+            .files
+            .iter()
+            .map(|(_, bytes)| bytes.len())
+            .sum::<usize>()
+            > MAX_SCRIPT_BYTES
+        {
+            return Err(SceneError::InvariantBlocked);
+        }
+        prepared
+            .map
+            .validate(project_id)
+            .map_err(|_| SceneError::InvalidMetadata)?;
+        prepared.inventory.refresh_revision();
+        let proposed = crate::scene::source_map_bytes(&prepared.map)?;
+        let committed_catalog = catalog(
+            prepared.map,
+            prepared.inventory,
             hex::encode(Sha256::digest(&proposed)),
-            project_revision.sha256,
+            prepared.project_revision.sha256,
         )?;
         self.transactions
             .ensure_directory(project, "game/ui")
@@ -548,25 +761,27 @@ impl AuthoringService {
                     SceneError::SourceConflict
                 }
             })?;
+        let mut mutations = vec![
+            FileMutation {
+                path: path(&prepared.owner.path)?,
+                kind: MutationKind::CreateNew,
+                base: Revision::expected_absence(),
+                expected_bytes: vec![],
+                proposed: prepared.source,
+            },
+            FileMutation {
+                path: RelativePath::new(MAP).unwrap(),
+                kind: MutationKind::ReplaceExisting,
+                base: prepared.map_revision,
+                expected_bytes: prepared.map_bytes,
+                proposed,
+            },
+        ];
+        mutations.extend(companions);
         self.commit_history(
             project,
             TransactionProposal {
-                mutations: vec![
-                    FileMutation {
-                        path: path(&destination)?,
-                        kind: MutationKind::CreateNew,
-                        base: Revision::expected_absence(),
-                        expected_bytes: vec![],
-                        proposed: source,
-                    },
-                    FileMutation {
-                        path: RelativePath::new(MAP).unwrap(),
-                        kind: MutationKind::ReplaceExisting,
-                        base: revision,
-                        expected_bytes: bytes,
-                        proposed,
-                    },
-                ],
+                mutations,
                 intent: TransactionIntent::Edit,
             },
         )?;
@@ -576,10 +791,13 @@ impl AuthoringService {
 
 fn catalog(
     map: SourceMapMetadata,
-    inventory: Inventory,
+    mut inventory: Inventory,
     source_map_revision: String,
     project_revision: String,
 ) -> Result<Catalog, SceneError> {
+    inventory.source_map = map.clone();
+    inventory.source_map_revision = source_map_revision.clone();
+    inventory.refresh_revision();
     let styles = styles::Index::read(&inventory)?.catalog(&source_map_revision);
     let owned = map
         .owned_screens

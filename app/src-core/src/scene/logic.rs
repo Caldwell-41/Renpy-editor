@@ -244,7 +244,7 @@ pub(super) fn parse_menu(
     lines: &[(usize, usize, &str)],
     index: usize,
     indent: usize,
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+    loaded: Option<SceneParseContext<'_>>,
     lexical: &HashSet<usize>,
 ) -> Option<(usize, ParsedBeat)> {
     let (start, end, header) = lines[index];
@@ -254,7 +254,7 @@ pub(super) fn parse_menu(
     {
         return None;
     }
-    let (project, authoring) = loaded?;
+    let (project, authoring, _) = loaded?;
     let mut next = index + 1;
     let mut options = Vec::new();
     let mut menu_end = end;
@@ -422,7 +422,15 @@ pub(super) fn validate_conditional_completion(
     scene: &SceneMetadata,
     loaded: &Loaded,
 ) -> Result<(), SceneError> {
-    let (_, _, parsed) = parse_scene(scene, bytes, Some((&loaded.project, &loaded.authoring)))?;
+    let (_, _, parsed) = parse_scene(
+        scene,
+        bytes,
+        Some((
+            &loaded.project,
+            &loaded.authoring,
+            &loaded.source_map.owned_screens,
+        )),
+    )?;
     if !parsed.iter().any(|b| {
         matches!(&b.payload, BeatPayload::Call { .. })
             || matches!(&b.payload, BeatPayload::Choice { options } if choice_may_continue(options))
@@ -736,7 +744,7 @@ mod tests {
             let (label_start, label_end, parsed) = parse_scene_mode(
                 &project_metadata.scenes[0],
                 &bytes,
-                Some((&project_metadata, &authoring)),
+                Some((&project_metadata, &authoring, &[])),
                 version,
             )
             .unwrap();
@@ -752,6 +760,7 @@ mod tests {
             map.scene_mappings[0].beats = parsed
                 .iter()
                 .map(|parsed| BeatSourceMapping {
+                    screen_target: None,
                     id: uuid::Uuid::new_v4().to_string(),
                     kind: parsed.payload.kind().into(),
                     byte_start: parsed.start as u64,
@@ -1112,7 +1121,7 @@ mod boundary_tests {
             let (_, _, parsed) = parse_scene_mode(
                 &project_metadata.scenes[0],
                 &source,
-                Some((&project_metadata, &authoring)),
+                Some((&project_metadata, &authoring, &[])),
                 4,
             )
             .unwrap();
@@ -1126,6 +1135,7 @@ mod boundary_tests {
             map.scene_mappings[0].beats = parsed
                 .iter()
                 .map(|p| BeatSourceMapping {
+                    screen_target: None,
                     id: uuid::Uuid::new_v4().to_string(),
                     kind: p.payload.kind().into(),
                     byte_start: p.start as u64,
@@ -1636,3 +1646,6 @@ mod structural_review_tests {
 #[cfg(test)]
 #[path = "structure/tests.rs"]
 mod structural_tests;
+
+#[cfg(test)]
+mod panel_tests;

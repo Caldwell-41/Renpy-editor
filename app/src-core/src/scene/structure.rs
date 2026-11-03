@@ -101,8 +101,15 @@ impl AuthoringService {
             if bytes_seen > 32 * 1024 * 1024 {
                 return Err(SceneError::UnsupportedCallRoute);
             }
-            let (_, _, parsed) =
-                parse_scene(scene, bytes, Some((&loaded.project, &loaded.authoring)))?;
+            let (_, _, parsed) = parse_scene(
+                scene,
+                bytes,
+                Some((
+                    &loaded.project,
+                    &loaded.authoring,
+                    &loaded.source_map.owned_screens,
+                )),
+            )?;
             adjacency.insert(
                 scene.id.clone(),
                 parsed
@@ -164,7 +171,11 @@ impl AuthoringService {
             &revision.sha256,
             Some(&stored),
             &[],
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )?;
         let edit = match edit {
             edit @ BodyEdit::Structural(_) => edit,
@@ -218,6 +229,12 @@ impl AuthoringService {
                 transfer(payload)
             }
         };
+        let screen_update = match &edit {
+            BodyEdit::Update { id, payload, .. } => payload
+                .screen_target()
+                .map(|target| (id.clone(), target.clone())),
+            _ => None,
+        };
         let (proposed, forced) = apply(&source, &beats, edit, &loaded, &scene)?;
         logic::validate_conditional_completion(&proposed, &scene, &loaded)?;
         if transfer_edit {
@@ -227,14 +244,19 @@ impl AuthoringService {
                 &[(scene_id, proposed.as_slice())],
             )?;
         }
-        let (mapping, next_beats) = build_mapping(
+        let (mut mapping, next_beats) = build_mapping(
             &scene,
             &proposed,
             &sha256(&proposed),
             Some(&stored),
             &forced,
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )?;
+        set_prepared_screen_target(&mut mapping, screen_update)?;
         if next_beats.len() > MAX_BEATS_PER_SCENE {
             return Err(SceneError::InvariantBlocked);
         }
@@ -577,6 +599,12 @@ fn apply(
                 (BeatPayload::Choice { options: previous }, BeatPayload::Choice { options }) => {
                     logic::patch_menu(original, previous, options, loaded)?
                         .unwrap_or(generated_at_indent(&payload, loaded, newline, body.indent)?)
+                }
+                (previous, next)
+                    if previous.screen_target().is_some() && next.screen_target().is_some() =>
+                {
+                    patch_screen_beat(original, previous, next)?
+                        .ok_or(SceneError::OpaqueBoundary)?
                 }
                 (
                     BeatPayload::Dialogue {

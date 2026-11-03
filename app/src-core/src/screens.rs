@@ -16,10 +16,13 @@ const MAX_PIXELS: u32 = 16384;
 
 pub mod canvas;
 pub(crate) mod canvas_session;
+pub mod components;
 mod composition;
 mod images;
 pub mod layout;
 mod ownership;
+pub mod panels;
+pub mod references;
 mod styles;
 pub mod text;
 pub use composition::{ComposeRequest, ComposeResult};
@@ -80,6 +83,8 @@ pub struct SetPixelRequest {
     pub node_start: usize,
     pub property: PixelProperty,
     pub value: u32,
+    #[serde(default)]
+    pub component_revisions: Option<references::ScreenRevisions>,
 }
 
 /// Both dimensions are prepared against one revision and accepted in one transaction.
@@ -92,6 +97,8 @@ pub struct SetSizeRequest {
     pub node_start: usize,
     pub width: u32,
     pub height: u32,
+    #[serde(default)]
+    pub component_revisions: Option<references::ScreenRevisions>,
 }
 
 /// Move the representative aligned frame without changing its coordinate type.
@@ -104,6 +111,8 @@ pub struct SetPositionRequest {
     pub node_start: usize,
     pub xalign: f64,
     pub yalign: f64,
+    #[serde(default)]
+    pub component_revisions: Option<references::ScreenRevisions>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -156,12 +165,21 @@ pub struct Node {
     pub numeric_layout: Option<layout::NumericLayout>,
     pub text_properties: Option<text::TextProperties>,
     pub style: Option<styles::StyleReference>,
+    pub component: Option<ComponentReference>,
     pub span: Span,
     pub parent_start: Option<usize>,
     pub properties: Vec<Property>,
     pub protected: Vec<Span>,
     #[serde(skip)]
     source_end: usize,
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ComponentReference {
+    pub component_id: String,
+    pub resolved: bool,
+    pub source_revision: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -254,6 +272,9 @@ fn kind(line: &Line<'_>) -> Option<&'static str> {
     if !line.single {
         return None;
     }
+    if line.element_id.is_some() && line.code.strip_prefix("use ").is_some_and(valid_name) {
+        return Some("use");
+    }
     match line.code {
         "fixed:" => return Some("fixed"),
         "frame:" => return Some("frame"),
@@ -337,15 +358,19 @@ fn parse_body(
             kind(line).unwrap()
         }
         .into(),
-        literal: line
-            .code
-            .split_once(' ')
-            .and_then(|(_, raw)| serde_json::from_str(raw.strip_suffix(':').unwrap_or(raw)).ok()),
+        literal: if kind(line) == Some("use") {
+            line.code.strip_prefix("use ").map(str::to_owned)
+        } else {
+            line.code.split_once(' ').and_then(|(_, raw)| {
+                serde_json::from_str(raw.strip_suffix(':').unwrap_or(raw)).ok()
+            })
+        },
         layout: Default::default(),
         position: None,
         numeric_layout: None,
         text_properties: None,
         style: None,
+        component: None,
         span: Span {
             start: line.start,
             end,
@@ -745,6 +770,11 @@ impl AuthoringService {
         project: &ProjectId,
         request: SetPixelRequest,
     ) -> Result<Document, SceneError> {
+        self.require_screen_write_review(
+            project,
+            &request.path,
+            request.component_revisions.as_ref(),
+        )?;
         self.screens_set_properties(
             project,
             request.path,
@@ -760,6 +790,11 @@ impl AuthoringService {
         project: &ProjectId,
         request: SetSizeRequest,
     ) -> Result<Document, SceneError> {
+        self.require_screen_write_review(
+            project,
+            &request.path,
+            request.component_revisions.as_ref(),
+        )?;
         self.screens_set_properties(
             project,
             request.path,
@@ -778,6 +813,11 @@ impl AuthoringService {
         project: &ProjectId,
         request: SetPositionRequest,
     ) -> Result<Document, SceneError> {
+        self.require_screen_write_review(
+            project,
+            &request.path,
+            request.component_revisions.as_ref(),
+        )?;
         if ![request.xalign, request.yalign]
             .iter()
             .all(|v| v.is_finite() && (0.0..=1.0).contains(v))

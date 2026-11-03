@@ -824,3 +824,98 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   focus, revision-bound submission, refusal retention and cancellation. Existing
   nested-fixed and ambiguous-parent cases remain covered.
 - **Evidence:** [Independent-review corrections](../tasks/evidence/phase-3b-audit-fixes.md#independent-review-corrections).
+
+## H59. LibreSSL derives a fixture serial path outside a dotted worktree
+
+- **Class/search:** harness; TLS fixture, OpenSSL, LibreSSL, CAcreateserial,
+  extensionless CA certificate, dotted parent directory, sandbox write refusal.
+- **Cause/correction:** automatic serial-path derivation uses the last dot in the
+  CA certificate's full path. An extensionless certificate below a dotted parent
+  can place the serial file outside the fixture. Supply `-CAserial` with an explicit
+  path inside the same owned temporary root before allowing broader execution.
+- **Verification:** actual host certificate preparation under a dotted temporary
+  path now creates the serial and certificate inside that root and cleans up all
+  generated material. No listener, provider request or native application runs.
+- **Evidence:** [TLS fixture isolation](../tasks/evidence/components-and-help-panel.md#tls-fixture-isolation).
+
+## H60. Normal-entry fixture calls Start outside a menu context
+
+- **Class/search:** harness; Ren'Py testcase, Start(), JumpOutException, missing menu.
+- **Cause/correction:** a minimal fixture without a main-menu interaction had already
+  entered the story when the hook invoked Start, which jumps out of a menu context.
+  Supply a fixture-only menu and require observed menu entry before Start. Preserve
+  accepted bootstrap and Story bytes. Suite teardown must account for all unselected
+  cases before exit; each selected positive result remains mandatory across the campaign.
+- **Verification:** the first SDK failure and exact pinned implementation establish
+  the cause. Cheap admission checks require the new entry signal; corrected SDK
+  execution remains pending at this record.
+- **Evidence:** [Entry diagnosis](../tasks/evidence/components-and-help-panel.md#first-help-sdk-campaign-and-entry-diagnosis).
+
+## H61. Exact completion-line comparison rejects reporter whitespace
+
+- **Class/search:** harness admission; Ren'Py rpytest Status PASSED, trailing space.
+- **Cause/correction:** the pinned reporter emits a trailing space on its completion
+  line; a byte-identical line-count check rejected an otherwise valid result.
+  Remove trailing line whitespace before exact status/uniqueness checks. Preserve
+  all case, duration, source-identity and observation requirements.
+- **Verification:** the new cheap assertion fails before correction and passes
+  afterward; the retained real Show log now admits without another SDK process.
+  Its original failed campaign remains failed and the other cases remain unrun.
+- **Evidence:** [Reporter admission](../tasks/evidence/components-and-help-panel.md#second-help-sdk-campaign-and-reporter-admission).
+
+## H62. Interrupted bounded command skips process cleanup
+
+- **Class/search:** harness adapter; KeyboardInterrupt, orphan process, repeated
+  killpg, EPERM, bounded output queue.
+- **Cause/correction:** the post-launch read loop had no unwind cleanup. A real
+  interruption left its process alive. Repeated group kills also signalled an
+  already-terminated group. Cleanup now reaps the process and drains/closes the
+  reader on unwind; stop requests are idempotent and incomplete pipe cleanup errors.
+- **Verification:** the new real-process cancellation case first fails, then all
+  thirteen adapter tests pass on macOS. A syscall trace separates repeated-kill
+  EPERM from a denied initial termination. Windows target evidence remains pending.
+- **Evidence:** [Cancellation correction](../tasks/evidence/components-and-help-panel.md#component-harness-review-and-shared-cancellation).
+
+## H63. Design Lab approval loading exceeds initial navigation deadline
+
+- **Class/search:** browser harness; initial page.goto, 8000 ms, zero cases,
+  approval source fingerprints, per-file Git subprocesses, shared Vite cache.
+- **Cause/correction:** generating virtual approval metadata reads each approved
+  source blob in a separate Git process. The real loader takes 19.7 seconds before
+  the page can load. One bounded batch object read preserves the exact blob bytes
+  and framing checks; the equivalent verification takes 0.35 seconds. The runner
+  also puts its cache under its worktree-local output rather than shared dependencies.
+- **Verification:** real Git/shared-source approval checks pass, including binary
+  newline and Unicode inputs; the exact approved A2 fingerprint remains identical.
+  The corrected current-source gate passes 1,216 rendering cases, 29 groups and
+  nine actual approval/source guards. Its original zero-case timeout and later
+  interaction failures remain failed, with their separate corrections retained.
+- **Evidence:** [A2 integration](../tasks/evidence/components-and-help-panel.md#a2-approval-integration-and-first-production-ui-wiring).
+
+
+## H64: Image evidence dependency install rejected by managed macOS Python
+
+- **Class/search:** CI environment; pip, externally-managed-environment, Homebrew,
+  Pillow, harness regressions, macos-26.
+- **Cause/correction:** the paired harness job installs Pillow directly into the
+  runner's externally managed Python. macOS refuses before any harness group runs.
+  Create a job-local virtual environment, install the pinned dependency there and
+  export its interpreter to later steps. Keep system package protections intact.
+- **Verification:** original CI1 has successful Windows groups but a failed Mac
+  dependency step; retained partial Mac evidence has no result. Actionlint and local
+  interpreter-isolation checks pass. Corrected paired run 41548765954 at `ee17b94`
+  passes all four harness groups on both hosts; exact-head artifacts and declared
+  checkout filters verify. Original failed Mac preflight remains failed.
+- **Evidence:** [CI1 diagnosis](../tasks/evidence/components-and-help-panel.md#ci1-macos-dependency-failure-and-isolated-environment-correction).
+
+
+## H65: Native form validation bypasses component-name errors
+
+- **Class/search:** product/test; Enter, component name, pattern, requestSubmit, aria-invalid.
+- **Cause/correction:** the shared naming form left native pattern validation enabled,
+  so invalid submission stopped before the shared field validator. Disable native
+  form validation there; keep the existing validator as the submission owner.
+- **Regression:** use `requestSubmit()` in the existing naming test. Directly dispatching
+  `submit` bypassed the browser gate. Assert associated error, retained input/focus
+  and no write. The case fails before the fix and passes afterward.
+- **Evidence:** [Naming correction](../tasks/evidence/components-and-help-panel.md#component-name-submission-correction-2026-11-03).

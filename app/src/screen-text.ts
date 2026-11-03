@@ -1,5 +1,5 @@
 import { ScreenCanvasFrames } from "./screen-canvas-frames.ts";
-import type { CompositionCommand, CompositionView } from "./screen-composition.ts";
+import type { CompositionCommand, CompositionView, CopyDraftParticipant } from "./screen-composition.ts";
 import type { ScreenDocument, ScreenNode } from "./screen-ui.ts";
 import type { CoreOperation } from "./protocol.ts";
 import type { SelectedAsset } from "./asset-import-ui.ts";
@@ -30,6 +30,9 @@ interface Host {
   inspect: (path:string) => Promise<ScreenDocument>;
   resolution?: {width:number;height:number};
   reviewing?: (active:boolean) => void;
+  componentScope?: (host:HTMLElement,view:CompositionView) => boolean;
+  writeBlocked?: () => boolean;
+  cancelComponentCopy?: () => void;
   current: () => boolean;
   request: <T>(operation: CoreOperation, payload?: Record<string, unknown>) => Promise<T>;
   coordinate: <T>(task: () => Promise<T>) => Promise<T>;
@@ -70,6 +73,8 @@ export class ScreenText {
   private styleDialog?: HTMLDialogElement;
   private dismissStyle?: () => void;
   private lastField?: string;
+  private readonly carets=new Map<string,{field:string;start:number|null;end:number|null}>();
+  private copyFocus?:{key:string;field:string;start:number|null;end:number|null};
   private readonly appearanceStates = new Map<string,string>();
   private pickerKey?: string;
   private search = "";
@@ -101,15 +106,67 @@ export class ScreenText {
   }
   hasDraft(): boolean { return this.drafts.size > 0; }
   hasNodeDraft(screenId: string, nodeId: string): boolean { return this.drafts.has(`${screenId}:${nodeId}`); }
+  captureComponentDrafts(view:CompositionView,trackNewDrafts=false):readonly CopyDraftParticipant[] {
+    const currentKeys=()=>[...this.drafts.values()].filter(draft=>draft.screenId===view.screenId && draft.document.path===view.document.path).map(draft=>draft.key);
+    const captured=currentKeys(),keys=()=>trackNewDrafts?currentKeys():captured;
+    if(!captured.length && !trackNewDrafts)return [];
+    const catalog=this.host.styles?.();
+    const definitions=structuredClone(catalog?.definitions??[]);
+    const read=()=>keys().map(key=>{
+      const draft=this.drafts.get(key);
+      if(!draft || draft.document.revision!==view.document.revision || !view.nodes.some(node=>node.id===draft.node.id))throw Error("The text draft changed its Source target. Your input is kept.");
+      if(draft.style && draft.style.expectedRevision!==catalog?.revision && draft.style.expectedRevision!==this.host.styles?.()?.revision)throw Error("The Style changed. Your input is kept.");
+      this.values(draft,true);return draft;
+    });
+    return [{
+      validate:()=>{read();},
+      prepare:(fresh,nodeIds)=>{
+        const selectedKey=`${view.screenId}:${view.selected.id}`;
+        const focus=this.cardKey===selectedKey ? this.caret() : this.carets.get(selectedKey);
+        const drafts=read().map(draft=>{
+          const node=fresh.nodes.find(node=>node.id===nodeIds.get(draft.node.id!));
+          if(!node?.textProperties || node.kind!==draft.node.kind)throw Error("The copied text target is unavailable. Your input is kept.");
+          const key=`${fresh.screenId}:${node.id}`;
+          if(this.drafts.has(key))throw Error("The copied text target already has a draft. Your input is kept.");
+          const style=draft.style ? {...draft.style} : undefined;
+          if(style) {
+            const current=this.host.styles?.(), before=definitions.find(definition=>definition.name===style.name), after=current?.definitions.find(definition=>definition.name===style.name);
+            if(!current || before && (!after || !same({kind:before.kind,path:before.path,values:before.values,error:before.error},{kind:after.kind,path:after.path,values:after.values,error:after.error})) || !before && after)
+              throw Error("The copied Style could not be verified. Your input is kept.");
+            style.expectedRevision=current.revision;
+          }
+          return {original:draft.key,draft:{...draft,key,document:fresh.document,screenId:fresh.screenId,node,fields:{...draft.fields},appearance:{...draft.appearance},edited:new Set(draft.edited),style}};
+        });
+        return ()=>{
+          for(const {original,draft} of drafts) {
+            this.drafts.delete(original);this.errors.delete(original);this.fieldErrors.delete(original);
+            const appearance=this.appearanceStates.get(original);this.appearanceStates.delete(original);
+            if(appearance)this.appearanceStates.set(draft.key,appearance);
+            const scroll=this.scrolls.get(original),expanded=this.expanded.get(original);
+            if(scroll!==undefined)this.scrolls.set(draft.key,scroll);
+            if(expanded!==undefined)this.expanded.set(draft.key,expanded);
+            if(original===selectedKey && focus)this.copyFocus={...focus,key:draft.key};
+            this.drafts.set(draft.key,draft);
+          }
+        };
+      },
+      cancel:()=>{for(const key of keys()){this.drafts.delete(key);this.errors.delete(key);this.fieldErrors.delete(key);this.appearanceStates.delete(key);}},
+    }];
+  }
   isSaving(): boolean { return !!this.submitted || this.importing || this.preparing || !!this.styleDialog; }
   invalidate(): void { this.loaded = false; this.generation++; this.loading = undefined; }
   unmount(): void {
     if (this.card && this.cardKey) {
+      this.carets.set(this.cardKey,this.caret());
       this.scrolls.set(this.cardKey,this.card.querySelector(".screen-text-body")?.scrollTop ?? 0);
       const layout = this.card.querySelector<HTMLDetailsElement>(".screen-text-layout");
       if (layout) this.expanded.set(this.cardKey,layout.open);
     }
     this.keys?.abort(); this.fieldValidators.clear(); this.card = undefined; this.cardKey = undefined;
+  }
+  private caret():{field:string;start:number|null;end:number|null} {
+    const field=this.lastField??"text",control=this.fieldControl(field);
+    return {field,start:control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement?control.selectionStart:null,end:control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement?control.selectionEnd:null};
   }
   dispose(): void { this.disposed = true; this.generation++; this.closePicker(false); this.dismissStyle?.(); this.styleDialog?.remove(); this.styleDialog = undefined; this.unmount(); this.media.dispose(); }
   private async refreshAssets(): Promise<void> {
@@ -152,8 +209,15 @@ export class ScreenText {
       this.registerField(view,field,control,() => control.readOnly ? undefined : this.fieldError(field,control.value,draft.node.literal));
       return label;
     };
+    const componentScope=el("div"),component=this.host.componentScope?.(componentScope,view)??false;
+    if(component) {
+      heading.querySelector("h2")!.textContent=view.screenName.replaceAll("_"," ").replace(/^./,letter=>letter.toUpperCase());
+      body.append(componentScope);
+      if(this.host.cancelComponentCopy)componentScope.querySelectorAll<HTMLElement>("[data-component-cancel]").forEach(control=>{control.hidden=true;});
+    }
+    card.dataset.componentScope=String(component);
     const content = el("section","screen-text-content");
-    const localLabel = el("div","screen-text-local-label");localLabel.append(el("strong","","Text content"),el("span","","This element only"));
+    const localLabel = el("div","screen-text-local-label");localLabel.append(el("strong","","Text content"),el("span","",component?"Within this component":"This element only"));
     content.append(localLabel,input("text","Text"));content.hidden=!["text","textbutton"].includes(view.selected.kind);
     const typography = el("section","screen-text-typography");
     if (view.selected.style || this.host.styles?.()) {typography.classList.add("screen-style-appearance");typography.append(this.renderScope());}
@@ -173,7 +237,7 @@ export class ScreenText {
     if(["frame","window"].includes(view.selected.kind)){trigger.hidden=true;warning.hidden=true;fields.hidden=true;row.hidden=true;}
     if(["frame","window","textbutton"].includes(view.selected.kind)) {const extra=el("div","screen-appearance-fields");this.renderAppearance(extra,view);typography.append(extra);}
     body.append(content,typography);
-    const disclosure = el("details","screen-text-layout");disclosure.open = this.expanded.get(this.cardKey) ?? false;const layoutSummary = el("summary","","Layout"), local = el("span","screen-text-local-scope","This element only");layoutSummary.append(local);disclosure.append(layoutSummary);
+    const disclosure = el("details","screen-text-layout");disclosure.open = this.expanded.get(this.cardKey) ?? false;const layoutSummary = el("summary","","Layout"), local = el("span","screen-text-local-scope",component?"Within this component":"This element only");layoutSummary.append(local);disclosure.append(layoutSummary);
     const layoutHost = el("div");disclosure.append(layoutHost);this.layout.render(layoutHost,{sharedCommit:true});this.host.layoutTools(disclosure);this.host.order(disclosure);body.append(disclosure);
     const commit = el("div","screen-text-commit"), error = el("p","screen-text-error");error.role = "alert";
     const review = action("Review Source",this.host.source);review.dataset.textReview = "";
@@ -187,6 +251,11 @@ export class ScreenText {
     },{signal:this.keys.signal});
     void this.refreshAssets().catch(error => {if (this.active()) this.host.note((error as Error).message,true);});this.sync();
     for (const field of this.fieldErrors.get(this.key(view)) ?? []) {try {this.fieldValidators.get(field)?.();} catch { /* Restore this element's field error after navigation. */ }}
+    if(this.copyFocus?.key===this.cardKey && !view.busy && !this.isSaving()) {
+      const focus=this.copyFocus;this.copyFocus=undefined;this.focus(focus.field);
+      const field=this.fieldControl(focus.field);
+      if(focus.start!==null && focus.end!==null && (field instanceof HTMLTextAreaElement || field instanceof HTMLInputElement && ["text","search","tel","url","password"].includes(field.type)))field.setSelectionRange(focus.start,focus.end);
+    }
     return true;
   }
   sync(): void {
@@ -209,9 +278,11 @@ export class ScreenText {
     const general = card.querySelector<HTMLElement>(".screen-text-error")!;general.textContent = error && !["text","size","color"].includes(error.field) ? error.text : "";general.hidden = !general.textContent;
     card.querySelector<HTMLElement>("[data-text-review]")!.hidden = error?.field !== "source";
     const style=this.styleAction(draft,this.values(draft,false)),uses=this.uses(draft),screens=new Set(uses.map(u=>JSON.stringify([u.path,u.screenName]))).size,shared=style?.scope==="shared"&&Object.keys(this.sharedValues(draft,this.values(draft,false))).length>0;
-    card.querySelector<HTMLElement>(".screen-text-state")!.textContent = busy ? "Applying changes…" : dirty ? shared ? `Shared appearance changes apply to ${screens} screens and ${uses.length} elements. Text content and Layout change this element only.` : "Changes apply to this element only." : "";
-    card.querySelector<HTMLButtonElement>("[data-text-apply]")!.textContent=style ? shared ? `Apply to ${screens} ${screens===1?"screen":"screens"}…` : "Apply to this element…" : "Apply";
-    card.querySelector<HTMLButtonElement>("[data-text-apply]")!.disabled = card.querySelector<HTMLButtonElement>("[data-text-cancel]")!.disabled = busy || !dirty;
+    const component=card.dataset.componentScope==="true",componentShared=card.querySelector<HTMLElement>(".screen-component-scope")?.dataset.shared!=="false",blockedWrite=!!this.host.writeBlocked?.();
+    card.querySelector<HTMLElement>(".screen-text-state")!.textContent = blockedWrite ? "Edits retained · reload needed" : busy ? "Applying changes…" : dirty ? component ? "Changes update this component wherever it is used." : shared ? `Shared appearance changes apply to ${screens} screens and ${uses.length} elements. Text content and Layout change this element only.` : "Changes apply to this element only." : "";
+    card.querySelector<HTMLButtonElement>("[data-text-apply]")!.textContent=component ? componentShared?"Review changes…":"Apply changes" : style ? shared ? `Apply to ${screens} ${screens===1?"screen":"screens"}…` : "Apply to this element…" : "Apply";
+    card.querySelector<HTMLButtonElement>("[data-text-apply]")!.disabled = busy || !dirty || !!this.host.writeBlocked?.();
+    card.querySelector<HTMLButtonElement>("[data-text-cancel]")!.disabled = busy || !dirty && !blockedWrite;
   }
   private styleAction(draft:Draft,values:TextEdits):StyleEdit|undefined {
     return draft.style&&(draft.style.scope!=="shared"||draft.style.name!==draft.node.style?.name||Object.keys(this.sharedValues(draft,values)).length)?{...draft.style}:undefined;
@@ -502,11 +573,17 @@ export class ScreenText {
   private focus(field:string):void {this.fieldControl(field)?.focus({preventScroll:true});}
   private cancel(): void {
     const view = this.host.view();if (!view || this.isSaving() || view.busy) return;
+    if(this.host.writeBlocked?.()) {
+      if(this.host.cancelComponentCopy)this.host.cancelComponentCopy();
+      else this.host.note("Cancel the retained copy operation in its component controls.",true);
+      return;
+    }
     const active = (document.activeElement as HTMLElement | null)?.dataset, field = active?.textField ?? (active?.layoutField ? `layout:${active.layoutField}` : undefined);
     this.drafts.delete(this.key(view));this.errors.delete(this.key(view));this.fieldErrors.delete(this.key(view));this.layout.cancelCurrent();this.host.redraw();if (field) this.focus(field);this.host.preview();this.host.note("Text changes cancelled. No source was written.");
   }
   private async apply(): Promise<void> {
     const view = this.host.view();if (!view || this.isSaving() || view.busy) return;
+    if(this.host.writeBlocked?.()){this.host.note("Reload the copy or cancel its unsaved edits before applying.",true);return;}
     const draft = this.value(view);let values: TextEdits, layout: ReturnType<ScreenLayoutEditor["currentDraft"]>;
     try {values = this.values(draft,true);layout = this.layout.currentDraft(true);} catch {return;}
     if (!Object.keys(values).length && !layout && (!draft.style || draft.style.scope === "shared" && draft.style.name === view.selected.style?.name)) return;

@@ -1,0 +1,30 @@
+.screen-panels-form { display: grid; gap: 12px; min-width: 0; }
+.screen-panels-form .field { margin: 0; min-width: 0; }
+.screen-panels-starters { border: 0; padding: 0; margin: 0; min-width: 0; }
+.screen-panels-starters legend { font-weight: 650; margin-bottom: 8px; }
+.screen-panels-option { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-left: 2px solid transparent; cursor: pointer; }
+.screen-panels-option:has(input:checked) { background: var(--accent-subtle); border-left-color: var(--accent-primary); }
+.screen-panels-option input { width: auto; margin: 3px 0 0; accent-color:var(--accent-primary); }
+.screen-panels-option span span { display: block; margin-top: 4px; }
+.screen-panels-help { display: grid; gap: 12px; }
+.screen-panels-help[hidden] { display: none; }
+.screen-panels-purpose, .screen-panels-error, .screen-panels-blocked { margin: 0; }
+.screen-panels-error:empty { display: none; }
+.screen-panels-error, .screen-panels-blocked { color: var(--status-error); }
+.screen-panels-form .screen-create-actions { border-top: 1px solid var(--border-normal); padding-top: 14px; display: flex; gap: 6px; flex-wrap: wrap; }
+.story-screen-fields pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.screen-panels-preview { display: flex; align-items: center; gap: 16px; padding: 12px; background: var(--surface-raised); }
+.screen-panels-preview img { width: 92px; height: 52px; object-fit: contain; flex: none; }
+.screen-panels-preview p { margin: 4px 0; }
+.screen-panels-preview-status { margin: 0; }
+.screen-panels-preview-status:empty { display: none; }
+.screen-create:has(.screen-panels-form) { width:min(570px,calc(100vw - 28px));max-width:calc(100vw - 28px);max-height:calc(100dvh - 28px);overflow:auto;padding:20px;border-radius:0;font-size:12px; }
+.screen-create:has(.screen-panels-form) h2 { font-size:17px;margin-bottom:16px; }
+.screen-panels-form .field>span { display:block;font-size:11px;font-weight:600; }
+.screen-panels-form .field input,.screen-panels-form .field select { box-sizing:border-box;width:100%;min-height:32px;font-size:12px;border-radius:0; }
+.screen-panels-form .screen-panels-option { display:flex;font-size:12px;line-height:1.6; }
+.screen-panels-form .screen-panels-starters legend { font-size:11px;font-weight:600; }
+.screen-panels-form .screen-create-actions { justify-content:flex-start;margin-top:0; }
+.screen-panels-form .button { border-radius:0;font-size:11px;min-height:28px; }
+@media(max-width:680px) { .screen-create:has(.screen-panels-form) { padding:16px; } }

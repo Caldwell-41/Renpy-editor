@@ -5,6 +5,11 @@ import stat
 import sys
 import tempfile
 import unittest
+import subprocess
+import threading
+import time
+import _thread
+from unittest import mock
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -15,7 +20,7 @@ from sdk_adapter import AdapterError, Command, command_argv, parse_diagnostics, 
 class AdapterTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory()
-        self.root = Path(self.temporary.name)
+        self.root = Path(self.temporary.name).resolve()
         self.sdk = self.root / "sdk"
         self.sdk.mkdir()
         self.launcher = self.sdk / "renpy.sh"
@@ -29,6 +34,21 @@ class AdapterTests(unittest.TestCase):
     def test_builds_argument_arrays_without_shell_quoting(self) -> None:
         argv = command_argv(self.sdk, Command.LINT, self.project, allow_project_execution=True)
         self.assertEqual(argv[-3:], (str(self.project), "lint", "--error-code"))
+
+    def test_suite_case_selection_is_one_bounded_trusted_argument(self) -> None:
+        argv = command_argv(
+            self.sdk, Command.TEST, self.project, testcase="help_panel::keyboard_close",
+            allow_project_execution=True, platform="posix",
+        )
+        self.assertEqual(argv[-3:], (str(self.project), "test", "help_panel::keyboard_close"))
+        with self.assertRaisesRegex(AdapterError, "explicit trust"):
+            command_argv(self.sdk, Command.TEST, self.project,
+                         testcase="help_panel::keyboard_close", platform="posix")
+        for selector in ("help_panel::", "::keyboard_close", "help_panel::::keyboard_close",
+                         "help_panel::close now", "help_panel::close\n", "--help", "help_panel::close;run"):
+            with self.subTest(selector=selector), self.assertRaisesRegex(AdapterError, "testcase name"):
+                command_argv(self.sdk, Command.TEST, self.project, testcase=selector,
+                             allow_project_execution=True, platform="posix")
 
     def test_distribute_uses_absolute_launcher_project(self) -> None:
         (self.sdk / "launcher").mkdir()
@@ -109,6 +129,47 @@ class AdapterTests(unittest.TestCase):
         self.assertEqual([(d.file, d.line, d.severity) for d in diagnostics], [
             ("game/script.rpy", 7, "error"), ("other.rpy", 9, "warning")
         ])
+
+    def test_keyboard_interrupt_reaps_the_real_started_process(self) -> None:
+        marker = self.root / "started"
+        actual_popen = subprocess.Popen
+        launched = []
+        stop = threading.Event()
+
+        def start(*args, **kwargs):
+            process = actual_popen(*args, **kwargs)
+            launched.append(process)
+            return process
+
+        def interrupt_when_ready():
+            deadline = time.monotonic() + 2
+            while not stop.is_set() and time.monotonic() < deadline:
+                if marker.exists():
+                    _thread.interrupt_main()
+                    return
+                stop.wait(0.01)
+
+        watcher = threading.Thread(target=interrupt_when_ready)
+        watcher.start()
+        try:
+            with mock.patch("sdk_adapter.subprocess.Popen", side_effect=start):
+                with self.assertRaises(KeyboardInterrupt) as interrupted:
+                    run_bounded((sys.executable, "-c", "from pathlib import Path; "
+                        + "print('partial exporter output', flush=True); "
+                        + "Path(" + repr(str(marker)) + ").write_text('ready'); "
+                        + "import time; time.sleep(10)"), timeout_seconds=3)
+            self.assertTrue(launched)
+            self.assertIsNotNone(launched[0].poll(), "cancelled process remains alive")
+            self.assertIn("partial exporter output", interrupted.exception.command_output)
+            self.assertTrue(interrupted.exception.command_process_reaped)
+            self.assertTrue(interrupted.exception.command_cleanup_complete)
+        finally:
+            stop.set()
+            watcher.join(timeout=1)
+            for process in launched:
+                if process.poll() is None:
+                    process.kill()
+                process.wait()
 
     @unittest.skipIf(os.name == "nt", "synthetic shell helper is POSIX-only")
     def test_process_output_is_bounded(self) -> None:

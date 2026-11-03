@@ -45,7 +45,7 @@ def generate(arguments):
     subprocess.run([str(openssl), *map(str, arguments)], check=True, timeout=15, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 generate(["req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "2", "-config", configuration, "-extensions", "ca", "-keyout", ca_key, "-out", ca_certificate])
 generate(["req", "-new", "-newkey", "rsa:2048", "-nodes", "-config", configuration, "-keyout", key, "-out", request])
-generate(["x509", "-req", "-in", request, "-CA", ca_certificate, "-CAkey", ca_key, "-CAcreateserial", "-days", "2", "-extfile", configuration, "-extensions", "server", "-out", certificate])
+generate(["x509", "-req", "-in", request, "-CA", ca_certificate, "-CAkey", ca_key, "-CAserial", root / "ca-serial", "-CAcreateserial", "-days", "2", "-extfile", configuration, "-extensions", "server", "-out", certificate])
 context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 context.load_cert_chain(certificate, key)
 if mode == "wrong_host":

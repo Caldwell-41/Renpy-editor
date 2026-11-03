@@ -7,6 +7,8 @@ pub struct ComposeRequest {
     pub screen_id: String,
     pub expected_revision: String,
     pub command: Command,
+    #[serde(default)]
+    pub component_revisions: Option<references::ScreenRevisions>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -75,7 +77,7 @@ pub struct ComposeResult {
     pub documents: Vec<Document>,
 }
 
-fn text_literal(text: &str) -> Result<String, SceneError> {
+pub(super) fn text_literal(text: &str) -> Result<String, SceneError> {
     if text.trim().is_empty() || text.len() > 8192 || text.contains('\0') {
         return Err(SceneError::InvalidPayload);
     }
@@ -98,6 +100,7 @@ pub(super) fn can_add(screen: &Screen, parent: &Node, kind: &str) -> bool {
             "text",
             "textbutton",
             "image",
+            "use",
         ]
         .contains(&kind)
         && (parent.kind != "grid"
@@ -125,7 +128,7 @@ pub(super) fn can_add(screen: &Screen, parent: &Node, kind: &str) -> bool {
                     .any(|n| n.parent_start == Some(parent.span.start))))
 }
 
-fn movable(screen: &Screen, node: &Node) -> bool {
+pub(super) fn movable(screen: &Screen, node: &Node) -> bool {
     node.parent_start.is_some()
         && screen
             .nodes
@@ -151,6 +154,21 @@ impl AuthoringService {
             .iter()
             .find(|s| s.screen.id == request.screen_id && s.resolved)
             .ok_or(SceneError::ReferenceBlocked)?;
+        if owner.screen.kind == crate::metadata::OwnedScreenKind::Component {
+            let expected = request
+                .component_revisions
+                .as_ref()
+                .ok_or(SceneError::InvalidPayload)?;
+            self.require_component_write_review(
+                project,
+                project_id,
+                &crate::metadata::ScreenTargetBinding {
+                    screen_id: owner.screen.id.clone(),
+                    source_name: owner.screen.name.clone(),
+                },
+                expected,
+            )?;
+        }
         let source_path = &owner.screen.path;
         self.ensure_source_paths_clean(project, [source_path.as_str()])
             .map_err(|_| SceneError::DirtySource)?;
@@ -186,7 +204,7 @@ impl AuthoringService {
                     .iter()
                     .find(|n| n.id.as_ref() == Some(&parent_id))
                     .ok_or(SceneError::UnknownEntity)?;
-                if kind == "image" || !can_add(screen, parent, &kind) {
+                if matches!(kind.as_str(), "image" | "use") || !can_add(screen, parent, &kind) {
                     return Err(SceneError::OpaqueBoundary);
                 }
                 let id = uuid::Uuid::new_v4().to_string();
@@ -493,6 +511,35 @@ impl AuthoringService {
                 if !movable(screen, node) {
                     return Err(SceneError::OpaqueBoundary);
                 }
+                let removed_ids = screen
+                    .nodes
+                    .iter()
+                    .filter(|child| {
+                        child.span.start >= node.span.start && child.span.start < node.source_end
+                    })
+                    .filter_map(|child| child.id.as_deref())
+                    .collect::<std::collections::HashSet<_>>();
+                let (mut map, map_bytes, map_revision, _) =
+                    self.screen_metadata(project, project_id)?;
+                if map_revision.sha256 != catalog.source_map_revision {
+                    return Err(SceneError::SourceConflict);
+                }
+                let old_count = map.component_uses.len();
+                map.component_uses.retain(|usage| {
+                    usage.screen_id != owner.screen.id
+                        || !removed_ids.contains(usage.node_id.as_str())
+                });
+                if map.component_uses.len() != old_count {
+                    map.validate(project_id)
+                        .map_err(|_| SceneError::InvalidMetadata)?;
+                    companions.push(FileMutation {
+                        path: RelativePath::new(".renpy-editor/source-map.json").unwrap(),
+                        kind: MutationKind::ReplaceExisting,
+                        base: map_revision,
+                        expected_bytes: map_bytes,
+                        proposed: crate::scene::source_map_bytes(&map)?,
+                    });
+                }
                 let siblings = screen
                     .nodes
                     .iter()
@@ -568,13 +615,20 @@ impl AuthoringService {
                 documents: vec![],
             });
         }
-        let mut accepted = self.owned_screen_document(
-            project,
-            &proposed,
-            source_path.clone(),
-            hex::encode(Sha256::digest(&proposed)),
-        )?;
         let mut accepted_inventory = self.screen_inventory(project)?;
+        if let Some(mutation) = companions
+            .iter()
+            .find(|mutation| mutation.path.as_str() == ".renpy-editor/source-map.json")
+        {
+            if accepted_inventory.source_map_revision != mutation.base.sha256 {
+                return Err(SceneError::SourceConflict);
+            }
+            accepted_inventory.source_map =
+                crate::metadata::SourceMapMetadata::read_bytes(&mutation.proposed, project_id)
+                    .map_err(|_| SceneError::InvalidMetadata)?;
+            accepted_inventory.source_map_revision =
+                hex::encode(Sha256::digest(&mutation.proposed));
+        }
         for (p, b) in &mut accepted_inventory.files {
             if p == source_path {
                 *b = proposed.clone();
@@ -584,20 +638,28 @@ impl AuthoringService {
             }
         }
         accepted_inventory.refresh_revision();
+        let mut accepted = self.owned_screen_document_with_inventory(
+            project,
+            &proposed,
+            source_path.clone(),
+            hex::encode(Sha256::digest(&proposed)),
+            Some(&accepted_inventory),
+        )?;
         let index = styles::Index::read(&accepted_inventory)?;
         index.resolve(&mut accepted, &proposed)?;
-        let style_catalog = index.catalog(&catalog.source_map_revision);
+        let style_catalog = index.catalog(&accepted_inventory.source_map_revision);
         let mut documents = vec![];
         for (p, b) in &accepted_inventory.files {
             if path(p).is_err() {
                 continue;
             }
             let affected = p == source_path || companions.iter().any(|m| m.path.as_str() == p);
-            let mut doc = match self.owned_screen_document(
+            let mut doc = match self.owned_screen_document_with_inventory(
                 project,
                 b,
                 p.clone(),
                 hex::encode(Sha256::digest(b)),
+                Some(&accepted_inventory),
             ) {
                 Ok(doc) => doc,
                 // Unrelated source-only files need not be inspectable to edit this owner.

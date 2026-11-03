@@ -12,9 +12,11 @@ mod structure;
 use crate::{
     authoring::{AssetKind, AuthoringMetadata, AuthoringService, VariableType},
     metadata::{
-        BeatSourceMapping, ChapterMetadata, ProjectMetadata, SceneMetadata, SceneSourceMapping,
-        Selection, SourceMapMetadata, PROJECT_SCHEMA_VERSION, SOURCE_MAP_SCHEMA_VERSION,
+        BeatSourceMapping, ChapterMetadata, OwnedScreenKind, ProjectMetadata, SceneMetadata,
+        SceneSourceMapping, ScreenTargetBinding, Selection, SourceMapMetadata,
+        PROJECT_SCHEMA_VERSION, SOURCE_MAP_SCHEMA_VERSION,
     },
+    screens::references::{ScreenEffects, ScreenRevisions},
     transaction::{
         CommitOutcome, ErrorCode, FileMutation, HistoryEntry, HistoryMutation, MutationKind,
         ProjectId, RecoveryReport, RecoveryResolution, RelativePath, Revision, TransactionIntent,
@@ -33,6 +35,12 @@ const MAX_CHAPTERS: usize = 256;
 const MAX_SCENES: usize = 4096;
 const MAX_TEXT_BYTES: usize = 10_000;
 type ForcedBeatId = (String, String, String, Option<usize>);
+
+pub(crate) type SceneParseContext<'a> = (
+    &'a ProjectMetadata,
+    &'a AuthoringMetadata,
+    &'a [crate::metadata::OwnedScreen],
+);
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -70,6 +78,16 @@ pub enum BeatPayload {
     HideCharacter {
         character_id: String,
         transition: TransitionRef,
+    },
+    ShowScreen {
+        target: ScreenTargetBinding,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        revisions: Option<ScreenRevisions>,
+    },
+    HideScreen {
+        target: ScreenTargetBinding,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        revisions: Option<ScreenRevisions>,
     },
     ChangeAppearance {
         character_id: String,
@@ -120,11 +138,20 @@ pub enum BeatPayload {
 }
 
 impl BeatPayload {
+    fn screen_target(&self) -> Option<&ScreenTargetBinding> {
+        match self {
+            Self::ShowScreen { target, .. } | Self::HideScreen { target, .. } => Some(target),
+            _ => None,
+        }
+    }
+
     pub(crate) fn kind(&self) -> &'static str {
         match self {
             Self::Background { .. } => "background",
             Self::ShowCharacter { .. } => "showCharacter",
             Self::HideCharacter { .. } => "hideCharacter",
+            Self::ShowScreen { .. } => "showScreen",
+            Self::HideScreen { .. } => "hideScreen",
             Self::ChangeAppearance { .. } => "changeAppearance",
             Self::Placement { .. } => "placement",
             Self::Dialogue { .. } => "dialogue",
@@ -144,8 +171,10 @@ impl BeatPayload {
 }
 
 pub(crate) fn logic_boundary(payload: &BeatPayload) -> bool {
-    matches!(payload, BeatPayload::Call { .. })
-        || matches!(payload, BeatPayload::Choice { options } if options.iter().any(|o| o.condition.is_some()))
+    matches!(
+        payload,
+        BeatPayload::Call { .. } | BeatPayload::ShowScreen { .. } | BeatPayload::HideScreen { .. }
+    ) || matches!(payload, BeatPayload::Choice { options } if options.iter().any(|o| o.condition.is_some()))
 }
 
 fn is_terminal_payload(payload: &BeatPayload) -> bool {
@@ -175,6 +204,8 @@ pub struct SceneBeat {
     pub protected: bool,
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub structural_placeholder: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub screen_effects: Option<ScreenEffects>,
     pub payload: BeatPayload,
 }
 
@@ -555,7 +586,7 @@ impl AuthoringService {
                 let (_, _, parsed) = parse_scene_mode(
                     scene,
                     &bytes,
-                    Some((&metadata, &authoring)),
+                    Some((&metadata, &authoring, &source_map.owned_screens)),
                     previous_schema,
                 )?;
                 if old.source_revision != revision.sha256 {
@@ -574,7 +605,11 @@ impl AuthoringService {
                 {
                     return Err(SceneError::InvalidMetadata);
                 }
-                let (_, _, parsed) = parse_scene(scene, &bytes, Some((&metadata, &authoring)))?;
+                let (_, _, parsed) = parse_scene(
+                    scene,
+                    &bytes,
+                    Some((&metadata, &authoring, &source_map.owned_screens)),
+                )?;
                 forced = logic::refine_legacy_ids(old, &parsed, &bytes)?;
                 old.source_revision.clear();
             }
@@ -584,7 +619,7 @@ impl AuthoringService {
                 &revision.sha256,
                 legacy.as_ref(),
                 &forced,
-                Some((&metadata, &authoring)),
+                Some((&metadata, &authoring, &source_map.owned_screens)),
             )?;
             source_map.scene_mappings.push(mapping);
         }
@@ -622,6 +657,7 @@ impl AuthoringService {
             .map_err(|_| SceneError::SourceConflict)?;
         let loaded = self.load(project, project_id)?;
         let mut scenes = Vec::with_capacity(loaded.project.scenes.len());
+        let mut screen_targets = HashMap::new();
         for scene in &loaded.project.scenes {
             let stored = loaded
                 .source_map
@@ -645,7 +681,7 @@ impl AuthoringService {
                 continue;
             };
             let conflict = revision.sha256 != stored.source_revision;
-            let beats = if conflict {
+            let mut beats = if conflict {
                 Vec::new()
             } else {
                 build_mapping(
@@ -654,10 +690,34 @@ impl AuthoringService {
                     &revision.sha256,
                     Some(stored),
                     &[],
-                    Some((&loaded.project, &loaded.authoring)),
+                    Some((
+                        &loaded.project,
+                        &loaded.authoring,
+                        &loaded.source_map.owned_screens,
+                    )),
                 )?
                 .1
             };
+            for beat in &mut beats {
+                let (BeatPayload::ShowScreen { target, revisions }
+                | BeatPayload::HideScreen { target, revisions }) = &mut beat.payload
+                else {
+                    continue;
+                };
+                if beat.protected {
+                    continue;
+                }
+                let captured = screen_targets
+                    .entry((target.screen_id.clone(), target.source_name.clone()))
+                    .or_insert_with(|| {
+                        self.screens_resolve_target(project, project_id, target, None)
+                            .ok()
+                            .filter(|resolved| resolved.kind == OwnedScreenKind::Panel)
+                    });
+                *revisions = captured.as_ref().map(|resolved| resolved.revisions.clone());
+                beat.screen_effects = captured.as_ref().map(|resolved| resolved.effects.clone());
+                beat.protected = captured.is_none();
+            }
             scenes.push(SceneDocument {
                 id: scene.id.clone(),
                 chapter_id: scene.chapter_id.clone(),
@@ -708,11 +768,54 @@ impl AuthoringService {
                 {
                     return Err(SceneError::SourceConflict);
                 }
+                self.admit_screen_command(project, project_id, &command)?;
                 let proposal = self.build_command(project, loaded, command)?;
-                self.commit_history(project, proposal)?;
+                if proposal.mutations.iter().any(|mutation| {
+                    mutation.kind != MutationKind::ReplaceExisting
+                        || mutation.expected_bytes != mutation.proposed
+                }) {
+                    self.commit_history(project, proposal)?;
+                } else {
+                    for mutation in proposal.mutations {
+                        let (bytes, revision) = self
+                            .transactions
+                            .snapshot(project, mutation.path)
+                            .map_err(|_| SceneError::SourceConflict)?;
+                        if revision != mutation.base || bytes != mutation.expected_bytes {
+                            return Err(SceneError::SourceConflict);
+                        }
+                    }
+                }
             }
         }
         self.scene_workspace(project, project_id)
+    }
+
+    fn admit_screen_command(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        command: &SceneCommand,
+    ) -> Result<(), SceneError> {
+        let payload = match command {
+            SceneCommand::InsertBeat { beat, .. }
+            | SceneCommand::UpdateBeat { beat, .. }
+            | SceneCommand::InsertBodyBeat { beat, .. }
+            | SceneCommand::UpdateBodyBeat { beat, .. } => beat,
+            _ => return Ok(()),
+        };
+        let (BeatPayload::ShowScreen { target, revisions }
+        | BeatPayload::HideScreen { target, revisions }) = payload
+        else {
+            return Ok(());
+        };
+        let expected = revisions.as_ref().ok_or(SceneError::InvalidPayload)?;
+        let resolved = self.screens_resolve_target(project, project_id, target, Some(expected))?;
+        if resolved.kind != OwnedScreenKind::Panel {
+            return Err(SceneError::ReferenceBlocked);
+        }
+        self.ensure_source_paths_clean(project, [resolved.path.as_str()])
+            .map_err(|_| SceneError::DirtySource)
     }
 
     /// Prepare an existing ordinary dialogue/narration replacement without writing.
@@ -796,7 +899,11 @@ impl AuthoringService {
                     &revision.sha256,
                     Some(mapping),
                     &[],
-                    Some((&loaded.project, &loaded.authoring)),
+                    Some((
+                        &loaded.project,
+                        &loaded.authoring,
+                        &loaded.source_map.owned_screens,
+                    )),
                 )?;
             }
             mutations = proposal.mutations;
@@ -838,7 +945,11 @@ impl AuthoringService {
                     &sha256(&bytes),
                     Some(&mapping),
                     &[],
-                    Some((&loaded.project, &loaded.authoring)),
+                    Some((
+                        &loaded.project,
+                        &loaded.authoring,
+                        &loaded.source_map.owned_screens,
+                    )),
                 )?;
                 let (next, mut forced) = apply_beat_edit(&bytes, &beats, edit, &loaded)?;
                 if let Some(ids) = assigned {
@@ -855,7 +966,11 @@ impl AuthoringService {
                     &sha256(&next),
                     Some(&mapping),
                     &forced,
-                    Some((&loaded.project, &loaded.authoring)),
+                    Some((
+                        &loaded.project,
+                        &loaded.authoring,
+                        &loaded.source_map.owned_screens,
+                    )),
                 )?;
                 bytes = next;
                 mapping = next_map;
@@ -935,7 +1050,11 @@ impl AuthoringService {
             &sha256(&bytes),
             None,
             &[],
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )?;
         if beats
             .last()
@@ -1437,7 +1556,11 @@ impl AuthoringService {
             &synthetic_revision,
             None,
             &[],
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )?;
         loaded.project.scenes.push(scene);
         loaded.project.last_open = Selection {
@@ -1518,7 +1641,11 @@ impl AuthoringService {
             &source_revision.sha256,
             Some(&stored),
             &[],
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )?;
         let choice = beats
             .iter()
@@ -1583,7 +1710,11 @@ impl AuthoringService {
             &proposed_source_revision,
             Some(&stored),
             &forced,
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )?;
         *loaded
             .source_map
@@ -1597,7 +1728,11 @@ impl AuthoringService {
             &destination_revision,
             None,
             &[],
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )?;
         loaded.source_map.scene_mappings.push(destination_mapping);
 
@@ -1810,7 +1945,11 @@ impl AuthoringService {
                 &revision.sha256,
                 Some(stored),
                 &[],
-                Some((&loaded.project, &loaded.authoring)),
+                Some((
+                    &loaded.project,
+                    &loaded.authoring,
+                    &loaded.source_map.owned_screens,
+                )),
             )?;
             if beats.iter().any(|beat| {
                 beat.protected
@@ -1864,7 +2003,11 @@ impl AuthoringService {
             &source_revision.sha256,
             Some(&stored),
             &[],
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )?;
         if beats.len() >= MAX_BEATS_PER_SCENE
             && matches!(
@@ -1876,6 +2019,12 @@ impl AuthoringService {
         }
         let transfer_edit = structure::edit_changes_transfers(&edit);
         let edit = self.prepare_call_labels(project, &loaded, scene_id, &beats, edit)?;
+        let screen_update = match &edit {
+            BeatEdit::Update { id, payload } => payload
+                .screen_target()
+                .map(|target| (id.clone(), target.clone())),
+            _ => None,
+        };
         let (proposed_source, forced) = apply_beat_edit(&source_bytes, &beats, edit, &loaded)?;
         logic::validate_conditional_completion(&proposed_source, &scene, &loaded)?;
         if transfer_edit {
@@ -1886,14 +2035,19 @@ impl AuthoringService {
             )?;
         }
         let proposed_revision = sha256(&proposed_source);
-        let (new_mapping, _) = build_mapping(
+        let (mut new_mapping, _) = build_mapping(
             &scene,
             &proposed_source,
             &proposed_revision,
             Some(&stored),
             &forced,
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )?;
+        set_prepared_screen_target(&mut new_mapping, screen_update)?;
         *loaded
             .source_map
             .scene_mappings
@@ -1950,7 +2104,7 @@ impl AuthoringService {
                 &revision.sha256,
                 Some(&stored),
                 &[],
-                Some((&loaded.project, &previous)),
+                Some((&loaded.project, &previous, &loaded.source_map.owned_screens)),
             )?;
             if beats.iter().any(|b| b.protected) {
                 return Err(SceneError::OpaqueBoundary);
@@ -2011,7 +2165,7 @@ impl AuthoringService {
                 &sha256(&proposed),
                 Some(&stored),
                 &forced,
-                Some((&loaded.project, next)),
+                Some((&loaded.project, next, &loaded.source_map.owned_screens)),
             )?;
             *loaded
                 .source_map
@@ -2097,7 +2251,7 @@ impl AuthoringService {
                 &revision.sha256,
                 Some(stored),
                 &[],
-                Some((metadata, &authoring)),
+                Some((metadata, &authoring, &source_map.owned_screens)),
             )?;
         }
         Ok(())
@@ -2467,7 +2621,20 @@ fn apply_beat_edit(
             }
             let rendered = render_payload(&payload, loaded, newline)?;
             let id = uuid::Uuid::new_v4().to_string();
-            let mut forced = vec![(payload.kind().into(), sha256(rendered.as_bytes()), id, None)];
+            let anchor = matches!(
+                payload,
+                BeatPayload::ShowScreen { .. } | BeatPayload::HideScreen { .. }
+            )
+            .then_some(
+                insertion
+                    + usize::from(insertion > 0 && source[insertion - 1] != b'\n') * newline.len(),
+            );
+            let mut forced = vec![(
+                payload.kind().into(),
+                sha256(rendered.as_bytes()),
+                id,
+                anchor,
+            )];
             let mut output = Vec::with_capacity(source.len() + rendered.len());
             output.extend_from_slice(&source[..insertion]);
             // An EOF child can have no line terminator. Separate the new root
@@ -2546,7 +2713,22 @@ fn apply_beat_edit(
                     loaded,
                 )?
                 .unwrap_or(render_payload(&payload, loaded, newline)?)
+            } else if let Some(patched) = patch_screen_beat(
+                &source[beat.byte_start as usize..beat.byte_end as usize],
+                &beat.payload,
+                &payload,
+            )? {
+                patched
             } else {
+                if beat.payload.screen_target().is_some() {
+                    let original = std::str::from_utf8(
+                        &source[beat.byte_start as usize..beat.byte_end as usize],
+                    )
+                    .map_err(|_| SceneError::UnsupportedSource)?;
+                    if logic::without_comment(original).len() != original.len() {
+                        return Err(SceneError::OpaqueBoundary);
+                    }
+                }
                 render_payload(&payload, loaded, newline)?
             };
             let mut output = source.to_vec();
@@ -2556,7 +2738,16 @@ fn apply_beat_edit(
             );
             Ok((
                 output,
-                vec![(payload.kind().into(), sha256(rendered.as_bytes()), id, None)],
+                vec![(
+                    payload.kind().into(),
+                    sha256(rendered.as_bytes()),
+                    id,
+                    matches!(
+                        payload,
+                        BeatPayload::ShowScreen { .. } | BeatPayload::HideScreen { .. }
+                    )
+                    .then_some(beat.byte_start as usize),
+                )],
             ))
         }
         BeatEdit::ContinueDialogue {
@@ -2861,6 +3052,8 @@ fn render_payload(
                 .ok_or(SceneError::InvalidPayload)?;
             format!("    call {} from {label}", target.technical_label)
         }
+        BeatPayload::ShowScreen { target, .. } => format!("    show screen {}", target.source_name),
+        BeatPayload::HideScreen { target, .. } => format!("    hide screen {}", target.source_name),
         BeatPayload::Return => "    return".into(),
         BeatPayload::CustomCode { .. } => return Err(SceneError::InvalidPayload),
     };
@@ -2930,6 +3123,15 @@ fn validate_payload(payload: &BeatPayload, loaded: &Loaded) -> Result<(), SceneE
         | BeatPayload::Placement { character_id, .. } => {
             character(loaded, character_id)?;
         }
+        BeatPayload::ShowScreen { target, .. } | BeatPayload::HideScreen { target, .. } => {
+            if !loaded.source_map.owned_screens.iter().any(|owner| {
+                owner.id == target.screen_id
+                    && owner.name == target.source_name
+                    && owner.kind == OwnedScreenKind::Panel
+            }) {
+                return Err(SceneError::ReferenceBlocked);
+            }
+        }
         BeatPayload::PlayMusic { asset_id } => {
             asset(loaded, asset_id, AssetKind::Music)?;
         }
@@ -2962,10 +3164,7 @@ fn dialogue_quotes(line: &str) -> Option<(usize, usize)> {
     None
 }
 
-fn nested_dialogue(
-    line: &str,
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
-) -> Option<BeatPayload> {
+fn nested_dialogue(line: &str, loaded: Option<SceneParseContext<'_>>) -> Option<BeatPayload> {
     let body = line.strip_prefix("        ")?;
     if body.starts_with(char::is_whitespace) {
         return None;
@@ -2984,7 +3183,7 @@ fn nested_dialogue(
 fn parse_bool_group(
     lines: &[(usize, usize, &str)],
     index: usize,
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+    loaded: Option<SceneParseContext<'_>>,
 ) -> Option<(usize, Vec<ParsedBeat>)> {
     let (group_start, _, header) = lines[index];
     let name = header.strip_prefix("    if ")?.strip_suffix(':')?;
@@ -3073,7 +3272,7 @@ fn indentation(body: &str) -> usize {
 fn parse_condition_group(
     lines: &[(usize, usize, &str)],
     index: usize,
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+    loaded: Option<SceneParseContext<'_>>,
     indent: usize,
     parent: Option<(usize, usize)>,
     depth: usize,
@@ -3224,7 +3423,7 @@ fn parse_condition_group(
 fn parse_scene(
     scene: &SceneMetadata,
     bytes: &[u8],
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+    loaded: Option<SceneParseContext<'_>>,
 ) -> Result<(usize, usize, Vec<ParsedBeat>), SceneError> {
     parse_scene_mode(scene, bytes, loaded, SOURCE_MAP_SCHEMA_VERSION)
 }
@@ -3232,9 +3431,16 @@ fn parse_scene(
 fn parse_scene_mode(
     scene: &SceneMetadata,
     bytes: &[u8],
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+    loaded: Option<SceneParseContext<'_>>,
     source_version: u32,
 ) -> Result<(usize, usize, Vec<ParsedBeat>), SceneError> {
+    let loaded = loaded.map(|(project, authoring, screens)| {
+        (
+            project,
+            authoring,
+            if source_version >= 7 { screens } else { &[] },
+        )
+    });
     let legacy = source_version < 4;
     let rich_logic = source_version >= 5;
     let bom = usize::from(bytes.starts_with(&[0xef, 0xbb, 0xbf])) * 3;
@@ -3316,7 +3522,7 @@ fn parse_scene_mode(
                     break;
                 };
                 let destination = loaded
-                    .and_then(|(project, _)| {
+                    .and_then(|(project, _, _)| {
                         project
                             .scenes
                             .iter()
@@ -3378,7 +3584,7 @@ fn choice_option_text(line: &str) -> Option<String> {
 
 fn parse_line_version(
     body: &str,
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+    loaded: Option<SceneParseContext<'_>>,
     rich_logic: bool,
 ) -> Option<BeatPayload> {
     if !rich_logic && body.trim_start().starts_with("call ") {
@@ -3387,11 +3593,74 @@ fn parse_line_version(
     parse_line(body, loaded)
 }
 
-fn parse_line(
-    body: &str,
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
-) -> Option<BeatPayload> {
+pub(crate) fn screen_statement(line: &str) -> Option<(bool, &str)> {
+    if line.contains(['\r', '\n']) {
+        return None;
+    }
+    let line = logic::without_comment(line).trim_end_matches([' ', '\t']);
+    let (show, name) = line
+        .strip_prefix("show screen ")
+        .map(|name| (true, name))
+        .or_else(|| line.strip_prefix("hide screen ").map(|name| (false, name)))?;
+    crate::screens::valid_name(name).then_some((show, name))
+}
+
+fn patch_screen_beat(
+    bytes: &[u8],
+    previous: &BeatPayload,
+    next: &BeatPayload,
+) -> Result<Option<String>, SceneError> {
+    let (Some(old), Some(target)) = (previous.screen_target(), next.screen_target()) else {
+        return Ok(None);
+    };
+    let text = std::str::from_utf8(bytes).map_err(|_| SceneError::UnsupportedSource)?;
+    let indent = text.len() - text.trim_start_matches(' ').len();
+    let (show, name) = screen_statement(text[indent..].trim_end_matches(['\r', '\n']))
+        .ok_or(SceneError::OpaqueBoundary)?;
+    if name != old.source_name || show != matches!(previous, BeatPayload::ShowScreen { .. }) {
+        return Err(SceneError::OpaqueBoundary);
+    }
+    let start = indent + "show screen ".len();
+    let mut patched = text.to_owned();
+    patched.replace_range(start..start + name.len(), &target.source_name);
+    patched.replace_range(
+        indent..indent + 4,
+        if matches!(next, BeatPayload::ShowScreen { .. }) {
+            "show"
+        } else {
+            "hide"
+        },
+    );
+    Ok(Some(patched))
+}
+
+fn parse_line(body: &str, loaded: Option<SceneParseContext<'_>>) -> Option<BeatPayload> {
     let line = body.strip_prefix("    ")?;
+    if let Some((show, name)) = screen_statement(line) {
+        let mut owners = loaded?
+            .2
+            .iter()
+            .filter(|owner| owner.name == name && owner.kind == OwnedScreenKind::Panel);
+        let owner = owners.next()?;
+        if owners.next().is_some() {
+            return None;
+        }
+        let target = ScreenTargetBinding {
+            screen_id: owner.id.clone(),
+            source_name: name.into(),
+        };
+        return Some(if show {
+            BeatPayload::ShowScreen {
+                target,
+                revisions: None,
+            }
+        } else {
+            BeatPayload::HideScreen {
+                target,
+                revisions: None,
+            }
+        });
+    }
     if line == "return" {
         return Some(BeatPayload::Return);
     }
@@ -3414,7 +3683,7 @@ fn parse_line(
     }
     if let Some(label) = line.strip_prefix("jump ") {
         return loaded
-            .and_then(|(project, _)| {
+            .and_then(|(project, _, _)| {
                 project
                     .scenes
                     .iter()
@@ -3453,7 +3722,7 @@ fn parse_line(
     }
     if let Some(rest) = line.strip_prefix("$ ") {
         let (name, literal) = rest.split_once(" = ")?;
-        let (_, authoring) = loaded?;
+        let (_, authoring, _) = loaded?;
         let variable = authoring
             .variables
             .iter()
@@ -3511,10 +3780,7 @@ fn rename_appearance_token(
     Ok(output)
 }
 
-fn parse_show(
-    rest: &str,
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
-) -> Option<BeatPayload> {
+fn parse_show(rest: &str, loaded: Option<SceneParseContext<'_>>) -> Option<BeatPayload> {
     let (without_transition, transition) = split_transition(rest)?;
     let (main, placement) = if let Some((main, at)) = without_transition.rsplit_once(" at ") {
         (main, Some(parse_placement(at)?))
@@ -3527,7 +3793,7 @@ fn parse_show(
     if parts.next().is_some() {
         return None;
     }
-    let (_, authoring) = loaded?;
+    let (_, authoring, _) = loaded?;
     let character = authoring
         .characters
         .iter()
@@ -3559,15 +3825,146 @@ fn parse_show(
     }
 }
 
+/// Only an admitted authoring command can replace a retained target binding.
+/// Source reconciliation preserves intent and never calls this preparation step.
+fn set_prepared_screen_target(
+    mapping: &mut SceneSourceMapping,
+    update: Option<(String, ScreenTargetBinding)>,
+) -> Result<(), SceneError> {
+    if let Some((id, target)) = update {
+        let beat = mapping
+            .beats
+            .iter_mut()
+            .find(|beat| beat.id == id && matches!(beat.kind.as_str(), "showScreen" | "hideScreen"))
+            .ok_or(SceneError::InvariantBlocked)?;
+        beat.screen_target = Some(target);
+    }
+    Ok(())
+}
+
 pub(crate) fn build_mapping(
     scene: &SceneMetadata,
     bytes: &[u8],
     revision: &str,
     previous: Option<&SceneSourceMapping>,
     forced: &[ForcedBeatId],
-    context: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+    context: Option<SceneParseContext<'_>>,
 ) -> Result<(SceneSourceMapping, Vec<SceneBeat>), SceneError> {
-    let (label_start, label_end, parsed) = parse_scene(scene, bytes, context)?;
+    let (label_start, label_end, mut parsed) = parse_scene(scene, bytes, context)?;
+    let mut unresolved_screens = HashSet::new();
+    if let Some(previous) = previous.filter(|mapping| !mapping.source_revision.is_empty()) {
+        let assigned = forced
+            .iter()
+            .map(|(_, _, id, _)| id.as_str())
+            .collect::<HashSet<_>>();
+        let mut previous_kinds = HashMap::<&str, VecDeque<&str>>::new();
+        for beat in &previous.beats {
+            if !assigned.contains(beat.id.as_str()) {
+                previous_kinds
+                    .entry(&beat.source_sha256)
+                    .or_default()
+                    .push_back(&beat.kind);
+            }
+        }
+        let current_hashes = parsed
+            .iter()
+            .map(|beat| sha256(&bytes[beat.start..beat.end]))
+            .collect::<HashSet<_>>();
+        let mut unmatched_targets = HashMap::<&str, Vec<&BeatSourceMapping>>::new();
+        for beat in &previous.beats {
+            if beat.screen_target.is_some() && !current_hashes.contains(&beat.source_sha256) {
+                unmatched_targets.entry(&beat.kind).or_default().push(beat);
+            }
+        }
+        let mut unknown_statements = HashMap::<&str, usize>::new();
+        for beat in &parsed {
+            if matches!(beat.payload, BeatPayload::CustomCode { .. }) {
+                if let Some((show, _)) = std::str::from_utf8(&bytes[beat.start..beat.end])
+                    .ok()
+                    .and_then(|source| screen_statement(source.trim()))
+                {
+                    *unknown_statements
+                        .entry(if show { "showScreen" } else { "hideScreen" })
+                        .or_default() += 1;
+                }
+            }
+        }
+        for parsed in &mut parsed {
+            let hash = sha256(&bytes[parsed.start..parsed.end]);
+            if matches!(parsed.payload, BeatPayload::CustomCode { .. }) {
+                let source = std::str::from_utf8(&bytes[parsed.start..parsed.end])
+                    .map_err(|_| SceneError::UnsupportedSource)?;
+                if let Some((show, _)) = screen_statement(source.trim()) {
+                    let kind = if show { "showScreen" } else { "hideScreen" };
+                    let retained = forced
+                        .iter()
+                        .find(|(forced_kind, source_hash, _, anchor)| {
+                            forced_kind == kind
+                                && source_hash == &hash
+                                && anchor.is_none_or(|start| start == parsed.start)
+                        })
+                        .and_then(|(_, _, id, _)| {
+                            previous
+                                .beats
+                                .iter()
+                                .find(|beat| &beat.id == id && beat.screen_target.is_some())
+                        })
+                        .or_else(|| {
+                            previous.beats.iter().find(|beat| {
+                                beat.source_sha256 == hash
+                                    && beat.kind == kind
+                                    && beat.screen_target.is_some()
+                            })
+                        })
+                        .or_else(|| {
+                            unmatched_targets
+                                .get(kind)
+                                .filter(|targets| {
+                                    targets.len() == 1 && unknown_statements.get(kind) == Some(&1)
+                                })
+                                .map(|targets| targets[0])
+                        });
+                    if let Some(retained) = retained {
+                        let target = retained.screen_target.clone().unwrap();
+                        parsed.payload = if show {
+                            BeatPayload::ShowScreen {
+                                target,
+                                revisions: None,
+                            }
+                        } else {
+                            BeatPayload::HideScreen {
+                                target,
+                                revisions: None,
+                            }
+                        };
+                        unresolved_screens.insert(parsed.start);
+                    }
+                }
+            }
+            let retained_kind = forced
+                .iter()
+                .find(|(_, source_hash, _, anchor)| {
+                    source_hash == &hash && anchor.is_none_or(|start| start == parsed.start)
+                })
+                .map(|(kind, _, _, _)| kind.as_str())
+                .or_else(|| {
+                    previous_kinds
+                        .get_mut(hash.as_str())
+                        .and_then(VecDeque::pop_front)
+                });
+            if retained_kind == Some("customCode")
+                && matches!(
+                    parsed.payload,
+                    BeatPayload::ShowScreen { .. } | BeatPayload::HideScreen { .. }
+                )
+            {
+                let source = std::str::from_utf8(&bytes[parsed.start..parsed.end])
+                    .map_err(|_| SceneError::UnsupportedSource)?
+                    .trim_end_matches(['\r', '\n']);
+                parsed.payload = custom(parsed.start, parsed.end, source).payload;
+            }
+        }
+    }
     if let Some(previous) = previous.filter(|mapping| mapping.source_revision == revision) {
         if previous.path != scene.source_path
             || previous.label_start as usize != label_start
@@ -3620,7 +4017,7 @@ pub(crate) fn build_mapping(
         .iter()
         .map(|p| (p.start, p.nesting.clone()))
         .collect::<Vec<_>>();
-    for parsed in parsed {
+    for mut parsed in parsed {
         let hash = sha256(&bytes[parsed.start..parsed.end]);
         let kind = parsed.payload.kind().to_owned();
         let id = ids
@@ -3632,9 +4029,39 @@ pub(crate) fn build_mapping(
                 queue.remove(index).map(|(id, _)| id)
             })
             .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+        let screen_target = match &mut parsed.payload {
+            BeatPayload::ShowScreen { target, .. } | BeatPayload::HideScreen { target, .. } => {
+                if let Some(retained) = previous
+                    .and_then(|mapping| mapping.beats.iter().find(|beat| beat.id == id))
+                    .and_then(|beat| beat.screen_target.as_ref())
+                {
+                    *target = retained.clone();
+                }
+                Some(target.clone())
+            }
+            _ => None,
+        };
+        let protected = if let Some(target) = &screen_target {
+            let statement = std::str::from_utf8(&bytes[parsed.start..parsed.end])
+                .ok()
+                .and_then(|source| screen_statement(source.trim()));
+            let show = matches!(parsed.payload, BeatPayload::ShowScreen { .. });
+            unresolved_screens.contains(&parsed.start)
+                || statement != Some((show, target.source_name.as_str()))
+                || context.is_none_or(|(_, _, owners)| {
+                    !owners.iter().any(|owner| {
+                        owner.id == target.screen_id
+                            && owner.name == target.source_name
+                            && owner.kind == OwnedScreenKind::Panel
+                    })
+                })
+        } else {
+            matches!(parsed.payload, BeatPayload::CustomCode { .. })
+        };
         mappings.push(BeatSourceMapping {
             owner: None,
             conditional_branch: None,
+            screen_target,
             id: id.clone(),
             kind,
             byte_start: parsed.start as u64,
@@ -3648,8 +4075,9 @@ pub(crate) fn build_mapping(
             id,
             byte_start: parsed.start as u64,
             byte_end: parsed.end as u64,
-            protected: matches!(parsed.payload, BeatPayload::CustomCode { .. }),
+            protected,
             structural_placeholder: false,
+            screen_effects: None,
             payload: parsed.payload,
         });
     }
@@ -3997,10 +4425,7 @@ fn asset<'a>(
         .ok_or(SceneError::UnknownEntity)
 }
 
-fn find_character(
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
-    technical: &str,
-) -> Option<String> {
+fn find_character(loaded: Option<SceneParseContext<'_>>, technical: &str) -> Option<String> {
     loaded?
         .1
         .characters
@@ -4010,7 +4435,7 @@ fn find_character(
 }
 
 fn find_asset(
-    loaded: Option<(&ProjectMetadata, &AuthoringMetadata)>,
+    loaded: Option<SceneParseContext<'_>>,
     discovery: &str,
     kind: AssetKind,
 ) -> Option<String> {
@@ -4293,6 +4718,7 @@ impl BoolNot for bool {
 mod tests {
     mod candidate_proof;
     mod observed;
+    mod panels;
     use super::*;
     use crate::authoring::{
         Appearance, Asset, Character, CreateCharacterRequest, CreateVariableRequest,
@@ -4436,6 +4862,7 @@ mod tests {
                 sources: vec!["game/chapters/chapter_01/scene_001.rpy".into()],
                 scene_mappings: Vec::new(),
                 owned_screens: Vec::new(),
+                component_uses: Vec::new(),
                 extra: map_extra,
             };
             fs::write(
@@ -5079,6 +5506,7 @@ mod tests {
                 sources: vec![],
                 scene_mappings: vec![],
                 owned_screens: vec![],
+                component_uses: vec![],
                 extra: Map::new(),
             },
             source_map_bytes: vec![],
@@ -5162,8 +5590,16 @@ mod tests {
         for payload in &payloads {
             source.extend_from_slice(render_payload(payload, &loaded, "\n").unwrap().as_bytes());
         }
-        let (_, _, parsed) =
-            parse_scene(&scene, &source, Some((&project, &loaded.authoring))).unwrap();
+        let (_, _, parsed) = parse_scene(
+            &scene,
+            &source,
+            Some((
+                &project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
+        )
+        .unwrap();
         assert_eq!(
             parsed
                 .iter()
@@ -6641,7 +7077,11 @@ mod tests {
                 &sha256(source.as_bytes()),
                 None,
                 &[],
-                Some((&loaded.project, &loaded.authoring)),
+                Some((
+                    &loaded.project,
+                    &loaded.authoring,
+                    &loaded.source_map.owned_screens,
+                )),
             )
             .unwrap();
             fs::write(fixture.root.join(&scene.source_path), source).unwrap();
@@ -6775,7 +7215,11 @@ mod tests {
             &sha256(source),
             None,
             &[],
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )
         .unwrap();
         fs::write(fixture.root.join(&excess.source_path), source).unwrap();

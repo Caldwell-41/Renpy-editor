@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-02",
+  "screenId": "components-and-help-panel",
+  "revision": "refined-v1",
+  "variant": "refined",
+  "status": "Explicit design approval recorded; full promotion validation failed",
+  "source": {
+    "commit": "c0ded415aba484633ac68981c48910afb82a959c",
+    "fingerprint": "1d99e9d4ce1a0b450881753f19c10234ca95541043733bc1710989e6aee9fd08"
+  },
+  "sourceAndReviewedCapturesUnchanged": true,
+  "historicalAlternativeEntriesUnchanged": true,
+  "decisionEvidence": {
+    "path": "docs/design/design-lab-components-and-help-panel/approval-decision.json",
+    "sha256": "71b559cfbfb5593c86d5e309a8a87a0add62f118e6fa4b73351486ceb7ee2971"
+  },
+  "approvalRecord": {
+    "path": "docs/design/design-lab-components-and-help-panel/approval.json",
+    "sha256": "6225ec24ee3be155020c5636a2aa35d7abee22c44e62fe3778fe6a823d889826"
+  },
+  "referenceCaptures": {
+    "count": 25,
+    "allHashesVerified": true,
+    "allBytesMatchReviewedCommit": true,
+    "manifestPath": "docs/design/design-lab-components-and-help-panel/refined-captures.json",
+    "manifestSha256": "b728ddc8f036c64835a85a9ee1f5deeb9ad39547e8432191936b53b193581056",
+    "manifestStatusNote": "The manifest is a preserved draft-time artifact; approval.json owns current approval."
+  },
+  "fullPromotionGate": {
+    "command": "npm run design:check",
+    "attempts": 1,
+    "status": "failed",
+    "exitCode": 1,
+    "typecheck": "passed",
+    "approvalValidation": "passed",
+    "browserVersion": "156.0.8078.74",
+    "navigationTimeoutMs": 8000,
+    "phase": "First navigation to the local ephemeral Design Lab origin, waiting for load",
+    "failure": "page.goto: Timeout 8000ms exceeded. At app/design-lab/check-browser.mjs:46:14.",
+    "renderedCases": 0,
+    "browserCheckGroups": 0,
+    "productionBuildExclusion": "not reached",
+    "rawLocalLog": ".toolchains/components-and-help-panel/promotion/full-design-check.log",
+    "rawLocalLogSha256": "47fcc5e41084131b04db71c2f0f2dc24064172d81e1cab140eeaa5d52073306c",
+    "localReport": ".toolchains/design-lab/report.json",
+    "localReportSha256": "4191b49d59dc7459fdd7642fd13601e8961d5a514ae3dba9d3f6d64d19de7f7e"
+  },
+  "scopedApprovedInspection": {
+    "status": "passed",
+    "scope": "Selected approved A2 in real Design Lab, browser sample only",
+    "browserVersion": "153.0.8010.12",
+    "navigationTimeoutMs": 45000,
+    "cache": "worktree-local",
+    "cases": [
+      {
+        "state": "shared",
+        "theme": "dark",
+        "width": 1100,
+        "height": 720,
+        "viewport": "wide"
+      },
+      {
+        "state": "shared",
+        "theme": "dark",
+        "width": 560,
+        "height": 640,
+        "viewport": "compact"
+      },
+      {
+        "state": "no-images",
+        "theme": "dark",
+        "width": 1100,
+        "height": 720,
+        "viewport": "wide"
+      },
+      {
+        "state": "copy-refresh-failure",
+        "theme": "dark",
+        "width": 1100,
+        "height": 720,
+        "viewport": "wide"
+      }
+    ],
+    "catalog": {
+      "pointer": "refined-v1",
+      "matches": true,
+      "revisions": [
+        {
+          "id": "refined-v1",
+          "variant": "refined",
+          "status": "Approved"
+        },
+        {
+          "id": "inspector-v1",
+          "variant": "inspector",
+          "status": "Draft"
+        },
+        {
+          "id": "library-v1",
+          "variant": "library",
+          "status": "Draft"
+        },
+        {
+          "id": "worksheet-v1",
+          "variant": "worksheet",
+          "status": "Draft"
+        }
+      ]
+    },
+    "approvalLabel": "Approved \u00b7 refined-v1",
+    "currentApproval": "Current approved layout: refined-v1",
+    "errors": [],
+    "localReport": ".toolchains/components-and-help-panel/promotion/approved-inspection.json",
+    "localReportSha256": "874b7cc17c6da82565962662b8ac6db9e1012852408e4ddb6f1de90185996ef5",
+    "doesNotReplaceFullGate": true
+  },
+  "postApprovalObservations": [
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/approval-observations/approved-lab-controls.png",
+      "sha256": "0cd0bb1e15adadd2adb6425959824931056950678b07f5cef8878a3970260a99",
+      "scope": "Post-approval observation only; not a replacement reference capture"
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/approval-observations/approved-shared-dark-wide.png",
+      "sha256": "740b8bd6435923cae0c43d5921dcb75a09a01727eb10a7cdc80eb0aebe99b7e1",
+      "scope": "Post-approval observation only; not a replacement reference capture"
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/approval-observations/approved-shared-dark-compact.png",
+      "sha256": "f2ed1adc3b0c907d18f87aa4a81c2960f91363c248d5541c61f52d348483b7fe",
+      "scope": "Post-approval observation only; not a replacement reference capture"
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/approval-observations/approved-no-images-dark-wide.png",
+      "sha256": "00e35197c54dd759a76d7aacde28100661ec365afab061fe1f480a87d1c21784",
+      "scope": "Post-approval observation only; not a replacement reference capture"
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/approval-observations/approved-copy-refresh-failure-dark-wide.png",
+      "sha256": "0b2c0a0469d0a0def0f086364318b45af391c5d5d0fef9759f40010f46859e49",
+      "scope": "Post-approval observation only; not a replacement reference capture"
+    }
+  ],
+  "dependencyCacheException": {
+    "runner": "Required unmodified full design:check",
+    "location": "app/node_modules/.vite/deps through the reused dependency link",
+    "writtenFiles": [
+      "_metadata.json",
+      "package.json"
+    ],
+    "optimizedModules": 0,
+    "chunks": 0,
+    "action": "Shared cache metadata left in place to avoid deleting unrelated state. Subsequent scoped inspection uses an explicit worktree-local cache."
+  },
+  "remainingProof": [
+    "Full Design Lab promotion browser gate",
+    "Production visual fidelity including the accepted Screens/Use in Story clarification",
+    "Actual source-backed UI-to-core transactions, history/reopen/recovery and migration",
+    "Pinned-SDK component output, panel dialogue/dismissal/focus and target qualification"
+  ],
+  "noProductionSourceEdits": true,
+  "noReferenceSourceEdits": true,
+  "noDependencyInstall": true,
+  "noSdkHelperNativePackageCiOrPublication": true
+}

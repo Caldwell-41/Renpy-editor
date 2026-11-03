@@ -83,3 +83,8 @@ and interaction module and writes isolated outputs under
 `.toolchains/design-lab/pages/<screen-id>/`. It blocks only the disposable browser's
 HMR WebSocket so other agents' edits do not reload its current sample. The combined
 `design:check` remains the final check for registry, approval, HMR and build isolation.
+Its complete rendering matrix uses private, memory-only draft approval metadata for
+the current source. It then checks the actual approved pointers and verifies either
+matching-source rendering or changed-source refusal for every approved screen.
+It does not establish visual fidelity to historical sources; app comparison uses
+the pinned approved reference under [INTEGRATION](INTEGRATION.md).

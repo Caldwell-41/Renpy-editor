@@ -14,7 +14,7 @@ import tempfile
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / 'spikes/renpy-sdk'))
 from archive_safety import expected_sha256, install_verified_tar
-from sdk_adapter import launcher_for, run_bounded
+from sdk_adapter import Command, command_argv, parse_version, run_bounded
 
 SDK_SHA256 = 'eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45'
 TESTS = (
@@ -177,7 +177,6 @@ def main():
             archive_root = temporary / 'sdk'
             install_verified_tar(args.archive, SDK_SHA256, archive_root)
             sdk = archive_root / 'renpy-8.5.3-sdk'
-            launcher = launcher_for(sdk)
             game = temporary / 'game-project'
             (game / 'game/ui').mkdir(parents=True)
             (game / 'game/ui/help.rpy').write_bytes(accepted)
@@ -213,11 +212,12 @@ label start:
         $ print("SCREEN_PROOF_OBSERVED " + __import__("json").dumps(dict(panelSize=list(screen_panel_size), continuationCount=screen_finished_count, opaqueNeighbor=(screen_proof_neighbor == "kept exactly"))), flush=True)
 ''', encoding='utf-8')
             sdk_env = dict(os.environ, RENPY_PATH_TO_SAVES=str(temporary / 'saves'), SDL_AUDIODRIVER='dummy')
-            assert 'Ren\'Py 8.5.3' in run('sdk-version', [*launcher, '--version'], sdk, sdk_env)
-            run('sdk-compile', [*launcher, game, 'compile'], sdk, sdk_env)
-            run('sdk-lint', [*launcher, game, 'lint', '--error-code'], sdk, sdk_env)
+            parse_version(run('sdk-version', command_argv(sdk, Command.VERSION), sdk, sdk_env))
+            run('sdk-compile', command_argv(sdk, Command.COMPILE, game, allow_project_execution=True), sdk, sdk_env)
+            run('sdk-lint', command_argv(sdk, Command.LINT, game, allow_project_execution=True), sdk, sdk_env)
             result['sdkPreviewLaunches'] += 1
-            runtime = run('sdk-render', [*launcher, game, 'test', 'screenproof::layout'], sdk, sdk_env)
+            runtime = run('sdk-render', command_argv(sdk, Command.TEST, game,
+                          testcase='screenproof::layout', allow_project_execution=True), sdk, sdk_env)
             result['runtimeObserved'] = validate_runtime_output(runtime)
             assert (game / 'game/ui/help.rpy').read_bytes() == accepted
             screenshot = game / 'screen.png'

@@ -314,7 +314,11 @@ fn observe_inner(
             &revision.sha256,
             mapping,
             &[],
-            Some((&loaded.project, &loaded.authoring)),
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
         )
         .map(|(_, beats)| beats)
         .unwrap_or_default();

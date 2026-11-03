@@ -248,7 +248,7 @@ export const mount: LabMount = async (host, context) => {
     if (!viewOnly && appearanceChanged()) {
       const diff = el("div", "sle-diff"), before = resolvedValues(sample, selected.doc, selected.node, choice);
       const labels = { size: "Size", color: "Color", align: "Alignment", bold: "Bold", italic: "Italic", font: "Font" };
-      for (const field of Object.keys(labels) as Array<keyof Appearance>) if (values[field] !== before[field]) diff.append(el("p", "", `${labels[field]}: ${before[field] ?? "Default"} → ${values[field] ?? "Default"}`));
+      for (const field of Object.keys(labels) as Array<keyof typeof labels>) if (values[field] !== before[field]) diff.append(el("p", "", `${labels[field]}: ${before[field] ?? "Default"} → ${values[field] ?? "Default"}`));
       modal.append(diff);
     }
     const warning = el("p", "sle-warning"); warning.role = "alert"; warning.hidden = true;

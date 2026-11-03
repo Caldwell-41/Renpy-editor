@@ -1,0 +1,235 @@
+{
+  "status": "unapproved draft",
+  "captures": [
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/inspector-shared-dark-wide.png",
+      "sha256": "74f811bf73b162c484c4e46db569e7806cc15747f028e6125d4b21e23eb45a34",
+      "variant": "inspector",
+      "state": "shared",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/inspector-shared-dark-compact.png",
+      "sha256": "862b8e45cead51c7a4690bef72d2c20aea56a855d074498a97c5fc11b33b3110",
+      "variant": "inspector",
+      "state": "shared",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/inspector-shared-review-dark-wide.png",
+      "sha256": "02bbbc75b3771b48768a839f6c8344f28ea81fdd15ff3f9905e995c6e5a1c637",
+      "variant": "inspector",
+      "state": "shared-review",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/inspector-shared-review-dark-compact.png",
+      "sha256": "ec589517a515dcf90e18f7d93a388805994257d187a0dc242ca187f16177ea54",
+      "variant": "inspector",
+      "state": "shared-review",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/inspector-retained-draft-dark-wide.png",
+      "sha256": "9d8dffb0ff604ad7450599037ce0fee265bd0beaf69392a5300a6c022929a150",
+      "variant": "inspector",
+      "state": "retained-draft",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/inspector-dialogue-continues-dark-wide.png",
+      "sha256": "fc86f617547d84d2af7e745b46f44f943012838edb9328a8509a87546e00a2d9",
+      "variant": "inspector",
+      "state": "dialogue-continues",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/library-shared-dark-wide.png",
+      "sha256": "4f342f8d9f7f870a2f7690d8ed6c620fcbd365eb6a6e666638c6d13928ca378d",
+      "variant": "library",
+      "state": "shared",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/library-shared-dark-compact.png",
+      "sha256": "680d3b67e97329ddb7ed0aaf235a6193ef7c0c6960defc3c184323fb435259c1",
+      "variant": "library",
+      "state": "shared",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/library-shared-review-dark-wide.png",
+      "sha256": "8d1015e295b541d364dfa110a41b332aa65a3cb581ece80afe1f7b46720d601c",
+      "variant": "library",
+      "state": "shared-review",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/library-shared-review-dark-compact.png",
+      "sha256": "125ac1dbe657b7e777edf62fa3469245a91dd1df0faae094089dec90dd3037bb",
+      "variant": "library",
+      "state": "shared-review",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/library-retained-draft-dark-wide.png",
+      "sha256": "8c2b7934b58e28a5dd919aa1d742db010536c8622f2ccbd584fb611cacd620f6",
+      "variant": "library",
+      "state": "retained-draft",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/library-dialogue-continues-dark-wide.png",
+      "sha256": "5b40204937b962ad33bc7c2b75f0a091a85cd261c607d2f91219e7a25271c944",
+      "variant": "library",
+      "state": "dialogue-continues",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/worksheet-shared-dark-wide.png",
+      "sha256": "0135059b16492bebd4f48b9f8f6dffeeb3fb004198f7438031a3550dc28d89b7",
+      "variant": "worksheet",
+      "state": "shared",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/worksheet-shared-dark-compact.png",
+      "sha256": "be6f45b57eb2f28261618d8f388f42d6c1236bcbf198723599aae82eb7f5f255",
+      "variant": "worksheet",
+      "state": "shared",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/worksheet-shared-review-dark-wide.png",
+      "sha256": "1269a32aa9eaa1dab236da0030a27cfb1e3660af502800cf283d37dcff915403",
+      "variant": "worksheet",
+      "state": "shared-review",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/worksheet-shared-review-dark-compact.png",
+      "sha256": "a94268f99c90f00d47d8a7eff171244cd7040109dd81a058ce46b9fb2716fe61",
+      "variant": "worksheet",
+      "state": "shared-review",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/worksheet-retained-draft-dark-wide.png",
+      "sha256": "786e0c6129906006aa01b3effbc842e0617a2ac7eec91d57e8f223c82ef0dc67",
+      "variant": "worksheet",
+      "state": "retained-draft",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/worksheet-dialogue-continues-dark-wide.png",
+      "sha256": "8d16e48310feb51e70c032e2d4aa4fd2fef9cac0328c2cf18fdea8f87144d092",
+      "variant": "worksheet",
+      "state": "dialogue-continues",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/inspector-shared-light-wide.png",
+      "sha256": "951c7da5a85298e873c31e8141c3313b0bd41da87703decb82eba7fbc01d64a5",
+      "variant": "inspector",
+      "state": "shared",
+      "theme": "light",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/inspector-shared-light-compact.png",
+      "sha256": "4921dc2614bdb43f814b360a4ac579cb8e9db4d75e4b89605771abe9f23bdda8",
+      "variant": "inspector",
+      "state": "shared",
+      "theme": "light",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/inspector-starter-dark-wide.png",
+      "sha256": "0a1383be34423f2c6244a67e309197299fd259456ea5f87157ad525a2edd2d93",
+      "variant": "inspector",
+      "state": "starter",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/inspector-story-dark-wide.png",
+      "sha256": "7b9baff8c3c85bce2221659194f418ca43b3c0b68adcfdc361369b9eaebc1768",
+      "variant": "inspector",
+      "state": "story",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-components-and-help-panel/captures/draft-v1/inspector-missing-dark-wide.png",
+      "sha256": "4209201933acdad690b70decea8a9d194282f88c12a94682f492ded36da7d478",
+      "variant": "inspector",
+      "state": "missing",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    }
+  ]
+}

@@ -526,7 +526,11 @@ impl AuthoringService {
                 &revision.sha256,
                 mapping,
                 &[],
-                Some((&loaded.project, &loaded.authoring)),
+                Some((
+                    &loaded.project,
+                    &loaded.authoring,
+                    &loaded.source_map.owned_screens,
+                )),
             )
             .map(|(_, beats)| beats)
             .unwrap_or_default();
@@ -795,10 +799,14 @@ fn project_scene_legacy(
             title = "Jump".into();
             label = Some(target).filter(|value| identifier(value));
         } else {
-            if beats
-                .iter()
-                .any(|beat| beat.byte_start == start as u64 && !beat.protected)
-            {
+            if beats.iter().any(|beat| {
+                beat.byte_start == start as u64
+                    && !beat.protected
+                    && !matches!(
+                        beat.payload,
+                        BeatPayload::ShowScreen { .. } | BeatPayload::HideScreen { .. }
+                    )
+            }) {
                 continue;
             }
             unknown_block = true;

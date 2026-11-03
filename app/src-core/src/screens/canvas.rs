@@ -167,7 +167,13 @@ impl AuthoringService {
             return Err(SceneError::SourceConflict);
         }
         let style_index = super::styles::Index::read(&style_inventory)?;
-        let mut document = inspect(&bytes, request.path, revision.sha256.clone())?;
+        let mut document = self.owned_screen_document_with_inventory(
+            project,
+            &bytes,
+            request.path,
+            revision.sha256.clone(),
+            Some(&style_inventory),
+        )?;
         style_index.resolve(&mut document, &bytes)?;
         let screen = document
             .screens
@@ -234,6 +240,17 @@ impl AuthoringService {
                         .push(format!("Source-only statement at {}", node.span.start));
                     continue;
                 };
+                if matches!(key, "key" | "default_focus")
+                    && source.iter().any(|entry| {
+                        entry.start > node.span.start
+                            && entry.start < node.source_end
+                            && entry.indent == indent
+                            && entry.code == line
+                            && !node.protected.iter().any(|span| span.start == entry.start)
+                    })
+                {
+                    continue;
+                }
                 if matches!(key, "style" | "text_style")
                     && node.style.as_ref().is_some_and(|s| s.error.is_none())
                 {
@@ -461,7 +478,7 @@ impl AuthoringService {
                 .iter()
                 .find(|n| n.span.start == addition.parent_start)
                 .ok_or(SceneError::InvalidPayload)?;
-            if addition.kind == "image"
+            if matches!(addition.kind.as_str(), "image" | "use")
                 || !composition::can_add(&screen, parent, &addition.kind)
                 || addition.text.len() > 8192
                 || addition.text.contains('\0')
