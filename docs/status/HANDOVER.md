@@ -2,29 +2,33 @@
 
 ## Help dialog and base Help canvas implementation
 
-Continue approved #45/#46 on local integration branch `codex/help-dialog-canvas`,
-from `e32ded4`. Shared UI/inspection checkpoint is `faf9611`, after the reviewed
-backend checkpoint `d9107a5`. Both portable lanes
-are integrated. The coordinator owns shared contracts, findings, integration and
-final review. [The evidence owner](../tasks/evidence/help-dialog-and-canvas.md)
-records assignments, exact candidates, tests, failures and cumulative operation use.
+The selected local implementation is delivered on `codex/help-dialog-canvas`,
+from `e32ded4`; final code candidate is `cbe5bb3`. Both implementation lanes are
+complete and frozen, with shared contracts, integration, review and finding fixes
+owned by the coordinator. [The evidence owner](../tasks/evidence/help-dialog-and-canvas.md)
+records exact scopes and [final UI captures](../tasks/evidence/help-dialog-and-canvas-ui/verification.json).
+Next action is Kris's review of the local delivery and remaining acceptance limits.
+No push, PR, merge, issue closure or release is selected.
 
 Blocking Dialog creation/resolution, Call/Finish, conservative source/history and
 inert Null editing are implemented. Kris approved A4, `inspector-v4`, at source
 `8851689b62eda03127c199ca0276a776b0d623ab`; evidence commit `2443e72` records
 "Approved" and the clarification "Sorry a4". The prototype owner delivered
 `HANDOFF.md` directly to implementation and copied the coordinator. B4/C4 remain
-drafts. Production implementation is underway on the original Dialog lane. Its
-three UI checkpoints are integrated; shared navigation, Assets retention and
-source-qualified Finish inspection/wiring pass 30 focused DOM cases and twelve
-core reference cases. A fresh integrated controller/core journey and all 357
-frontend tests pass at `548ed47`, with zero skips and complete owned-driver cleanup.
-The implementation owner is completing production-main handoff and Terra visual
-comparison. The final owned corrections are integrated as `9de4f25`. Combined
-review reports Standards zero and one P2 Spec finding, corrected by the coordinator
-with two red/green recovery tests and 33 affected DOM passes. The fix retains a
-deleted insertion Scene's intent while allowing explicit replacement placement;
-it also restores ordinary Add Beat. Product visual/main-handoff proof remains open.
+drafts. A4's inspector, larger passive preview, compact selectors, outlined Cancel
+and pending insertion markers are implemented. Combined independent review reports
+Standards zero and one P2 Spec finding, now fixed: a deleted remembered Scene
+retains intent while allowing explicit replacement, without blocking ordinary
+authoring. Terra's disappeared-image Assets and pending-marker findings are fixed.
+The final code passes 34 focused DOM cases, production build, the actual
+creation/Call/Finish/history/reopen journey, and five production-main/core recovery
+groups with zero page errors and complete cleanup. The frontend routine passes
+361 cases at `1b1fde7`; later display/copy corrections have focused final coverage.
+The completed Terra worker was not replaced. The coordinator used a narrow
+automated probe after two continuation requests were rejected. Ten hashed final
+captures bind the implementation trees and actual driver. Whole-page pixel
+identity is not claimed; compact PNG repetition remains unexplained and is also
+present in the earlier Terra captures. It is not established as a native defect.
 Help still requires a typed UI image. Placement uses existing Story body/Position
 ownership, with no new IPC/persistence or general action builder. Preserve the
 approved reference checkout, earlier revisions, failures and proof limits.
@@ -43,8 +47,10 @@ two P2 Standards findings and no actionable Spec findings, with known UI gaps. B
 `218f116` restores qualified duplicate-ID authority for dismissal; `d9107a5` retains
 Canvas reference scratch until process cleanup is proven. Their red/green checks,
 12 Dialog cases, six Canvas gates, production compilation and formatting pass.
-No SDK rerun was selected for these failure-path corrections. Preserve successful
-proof scope and all original failures; final combined UI review is still pending.
+No SDK rerun was selected for the later failure-path/UI corrections. Preserve
+successful proof scope and all original failures. Final combined review and
+in-scope finding corrections are complete; user/native/physical acceptance and
+the stated visual limits remain.
 
 SUNDOWN's assigned qualification worktree is clean at `4c084a4`; primary checkout,
 protected stash and unrelated processes remain intact. Prior path/PowerShell
@@ -56,8 +62,9 @@ game content/build output. Synchronize only the assigned test checkout.
 Stop SDK failures for coordinator review; reviewed corrections may proceed within
 the approved ceilings. No native editor/package/CI launch, push/PR/merge/issue closure
 or release is selected. Preserve the unrelated untracked audit, ignored evidence,
-SDK archives and protected recovery state. Next, finish any focused correction
-verification, then integrate the approved UI and verify actual UI-to-core journeys.
+SDK archives and protected recovery state. No selected qualification process is
+running. Preserve the local delivery for Kris's review and keep its evidence scope
+separate from unselected native/package/CI or wider editor acceptance.
 
 ## PR 77 merge and workspace closeout
 

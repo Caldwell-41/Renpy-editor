@@ -1,6 +1,6 @@
 # Current status
 
-## Help dialog and base Help canvas selected
+## Help dialog and base Help canvas local delivery
 
 Kris approved [#45](https://github.com/Caldwell-41/Renpy-editor/issues/45) and
 [#46](https://github.com/Caldwell-41/Renpy-editor/issues/46) on local integration
@@ -9,19 +9,21 @@ the coordinator owns shared contracts, review findings, integration and final re
 
 | Capability | Implemented and automated proof | Remaining acceptance |
 | --- | --- | --- |
-| Blocking Help dialog and Story Call/Finish backend | Eight normal-entry cases pass on both targets; source/history/refusal checks pass | A4 production UI integration and actual UI-to-core journeys |
-| Base Help canvas | Eight matched cases per target have exact pixels and geometry at `4c084a4`; lossless geometry transport is tested | Final combined integration review; wider canvas acceptance stays separate |
-| Combined backend | 575 routine core passes at `4c084a4`; two backend Standards findings fixed with focused red/green checks | UI integration and final combined review |
+| Help dialog and Story Call/Finish | A4 UI is integrated; final controller/core and five production-main recovery groups pass; eight normal-entry cases pass per target at recorded candidates | Whole-page/compact visual limits and final user acceptance |
+| Base Help canvas | Eight matched cases per target have exact pixels and geometry at `4c084a4`; lossless geometry transport is tested | Wider canvas/native/physical acceptance stays separate |
+| Combined implementation | Independent Standards zero; Spec P2 and Terra findings resolved; 361 frontend routine passes, 34 final focused passes and final production build pass | No known functional finding; publication is unselected |
 
 Kris approved A4 (`inspector-v4`) at source `8851689`; B4/C4 remain drafts.
-The direct approved handoff is received. Production UI implementation is underway,
-with shared Assets/draft navigation and bounded Finish wiring committed at
-`faf9611`. Thirty focused DOM cases and twelve core reference cases pass.
-Help still requires a typed UI image; placement uses existing Story body/Position
-ownership. The actual creation/Call/Finish controller-to-core journey and all 357
-frontend tests pass at `548ed47`. Final combined review at `9de4f25` found zero
-Standards issues and one Spec issue, now corrected with two red/green tests and
-33 affected DOM passes. Production-main handoff and visual comparison remain open.
+Final code is `cbe5bb3`, with the exact approved reference and retained product
+captures committed separately from the production renderer. Help still requires
+a typed UI image; insertion remains client-only existing Scene/body/Position
+context. Missing images, deleted placement Scenes and unresolved action drafts
+retain intent and expose explicit recovery. No implicit Apply, Beat or Blank
+fallback is introduced. Both implementation lanes are complete and frozen.
+The final main/core probe records zero page errors and complete cleanup. It
+intercepts engine rendering before dispatch. Whole-page pixel identity is not
+claimed; a compact PNG repetition also present in the earlier Terra capture
+remains unexplained. Native/physical and broader editor acceptance remain separate.
 [Delivery evidence](../tasks/evidence/help-dialog-and-canvas.md) owns candidates,
 checks, earlier failures, operation counts and exact scope. Physical/human and
 published package/CI acceptance remain separate. Neither ticket is closed; this

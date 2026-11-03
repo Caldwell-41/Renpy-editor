@@ -1,5 +1,63 @@
 # Help dialog and base canvas delivery evidence
 
+## Local delivery, 2026-11-04
+
+The selected implementation is committed on `codex/help-dialog-canvas`; final
+code candidate is `cbe5bb379573269a998f4ccc4fa15101e9bd657c`. Later delivery
+documentation and captures do not change its frontend or core trees. Nothing is
+pushed, published, merged or closed, and no PR has been created.
+
+### Standards
+
+The independent combined review of `e32ded4...9de4f25` reports zero documented
+violations and zero actionable heuristic smells. The coordinator self-reviewed
+the subsequent bounded review fixes, removal of the superseded modal/radio path,
+inspector/preview ownership and browser-probe cleanup. No duplicate production
+parser, transaction owner or persisted insertion context was introduced.
+
+### Spec
+
+The independent review found one P2: deleted remembered insertion Scenes blocked
+recovery. It is reproduced and fixed in `caaf1969`. Terra's production inspection
+then identified unreachable Assets after image disappearance and absent pending
+markers; both are fixed. The coordinator also matched A4's creation inspector,
+larger passive preview and outlined Cancel, retaining the established typed image
+requirement, Panel defaults and the 320x180 image transform. No known functional
+finding remains open. The visual limits below are acceptance limits, not passes.
+
+| Check | Result and exact scope |
+| --- | --- |
+| Frontend routine | 361 passed, zero failures/skips at `1b1fde7`; later display/copy corrections have 34 focused DOM passes at `cbe5bb3` |
+| Final production build | Typechecking and Vite build pass at `cbe5bb3`; existing large-chunk diagnostic remains nonblocking |
+| Actual UI controllers through core | Final `cbe5bb3` creation/Call/Finish journey passes minimal writes, no-op, Cancel/stale retention, Undo/Redo and renamed-reference reopen; driver exit zero and scratch removed |
+| Final production main through core | Five groups pass at exact `cbe5bb3`: inspector/Assets return, disappeared-image recovery, deleted-Scene replacement, pending marker/accepted placement, unresolved-screen action Cancel and close protection; zero page errors, complete cleanup |
+| Routine core | 575 passed, zero failures, 55 declared ignores and three selected exclusions at `4c084a4`; later shared inspection has twelve focused reference passes. Core material is unchanged since `c0ab6d4` |
+| Dialog normal entry | Eight case/resolution rows pass per host: Mac at `dff0c64`, Windows at `4c084a4`; no fresh final-UI SDK claim |
+| Base Help fidelity | Eight rows per host at `4c084a4`, zero differing pixels and exact geometry; unchanged render inputs/behavior retain that bounded evidence |
+
+[Final UI verification and ten hashed captures](help-dialog-and-canvas-ui/verification.json)
+bind the actual frontend/core trees, driver hash, conditions, refusals and cleanup.
+They show the approved A4 control hierarchy within the retained production shell.
+Reference and production sample text/art/kind differ, so whole-page pixel identity
+is not claimed. Compact PNGs show repeated top content at the bottom, also present
+in the original Terra captures; cause remains unresolved. They do not establish a
+native product defect or a native visual pass. Engine canvas was intercepted
+before dispatch in the authoring probes. Its both-target exact proof is separate.
+Physical input, native WebView/package/signing, published CI, broader editor/3B and
+Kris's final acceptance remain outside these results. Both tickets remain open.
+
+The final authoring probe's original failures are retained: sandbox localhost
+refusal, missing exact accessible names, a correctly refused protected Scene
+fixture and two incorrect fixture-path assumptions. Diagnosis traced the real
+source-foundation protected Python Beats. The final deletion case deliberately
+creates reference-free disposable Scene sources through the existing Source
+transaction owner; no production guard was weakened. Wrong-candidate admission
+also refuses before starting the owned driver. The completed Terra worker was
+not replaced; after two rejected continuation attempts the coordinator ran this
+narrow automated probe. No additional SDK/helper, editor, package or CI process
+was started. Cumulative SDK use remains Mac Dialog 20/24, Canvas 16/20; Windows
+Dialog 11/16, Canvas 8/12, with no uncertain starts or outstanding reservations.
+
 ## A4 approval and shared UI continuation, 2026-11-04
 
 Kris approved Help A4, `inspector-v4`, and clarified "Sorry a4" in the sole
