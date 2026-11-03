@@ -3,7 +3,7 @@
 ## Help dialog and base Help canvas implementation
 
 The selected local implementation is delivered on `codex/help-dialog-canvas`,
-from `e32ded4`; completion code candidate is `31c4afa`. Both implementation lanes are
+from `e32ded4`; completion code candidate is `a3131b3`. Both implementation lanes are
 preserved, with shared contracts, integration, review and finding fixes owned by
 the coordinator. [The evidence owner](../tasks/evidence/help-dialog-and-canvas.md)
 records exact scopes and [final UI captures](../tasks/evidence/help-dialog-and-canvas-ui/verification.json).
@@ -20,8 +20,12 @@ P2 Spec defect. `31c4afa` resolves them: current controller/session insertion co
 stays synchronized after acceptance, Call admission shares one predicate, and the
 older handover review is explicitly scoped. Thirty focused UI tests, 24 affected
 core tests and the six-stage actual controller/core journey pass, with a separately
-built current driver and complete cleanup. The final visual assessment and final
-frontend check remain before publication/CI. No new SDK/package/native
+built current driver and complete cleanup. Terra's `5b0ab97` pass found six wide
+nested focus cases obscured by the sticky toolbar, despite correct opener/context
+restoration in all 36 cases. `a3131b3` reserves the toolbar's measured height in its
+scroll container and explicitly scrolls restored nested openers into view; 31 focused
+tests pass. Targeted browser geometry and the final frontend check remain before
+publication/CI. No new SDK/package/native
 qualification matrix, merge, issue closure or release is selected.
 
 Blocking Dialog creation/resolution, Call/Finish, conservative source/history and

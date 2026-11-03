@@ -43,6 +43,21 @@ targeted final assessment, run the final frontend check for the corrected contro
 No CI, SDK/helper, native editor, package or publication occurred. Original review
 and test failures remain retained. No unresolved finding from either axis remains.
 
+Terra's final `5b0ab97` matrix restores the recreated opener and captured placement
+in all 36 cancellations without writes; six wide nested cases remain covered by
+the sticky Beats toolbar. It confirms approved creation field order, Panel default,
+required-image/Assets retention and action spacing. Coordinator `a3131b3` fixes the
+scroll owner: reserve the measured toolbar height as scroll padding, update it when
+tools wrap, and explicitly scroll the restored nested opener. A red check showed no
+toolbar reservation; 31 focused cases and typecheck pass after correction. Targeted
+browser geometry verification remains pending; do not count the earlier scripted
+matrix's `passed: true` as a pass for its six visible occlusions.
+
+The new compact A/B also distinguishes capture paths: CDP returns a 560x553 PNG
+before/after paint while the DOM is 560x640; settled Playwright returns the full
+560x640 view with the footer. Their shared area differs only by a caret. Exact
+compositor attribution remains open. No persistent layout defect is established.
+
 ## Completion corrections and local verification, 2026-11-04
 
 Sol's `cb0ac5c74f910ab7f0609e85a6479ef9ced0883f` is integrated as `282cc28`.
