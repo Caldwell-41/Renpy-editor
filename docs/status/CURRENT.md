@@ -1,44 +1,28 @@
 # Current status
 
-## PR 77 review corrections
+## Components and Help panel merged and accepted
 
-The later P3 review finding is fixed in the shared component-name form. The
-existing naming test now exercises normal form submission and checks the associated
-error, retained input/focus and no write. [The correction record](../tasks/evidence/components-and-help-panel.md#component-name-submission-correction-2026-11-03)
-owns the red/green result; PR #77 owns the pending CI update.
+[PR #77](https://github.com/Caldwell-41/Renpy-editor/pull/77) squash-merged as
+`966c437` into `codex/phase3b-screen-designer`. Its tree exactly matches audited
+head `cc5718f`. [L08 #41](https://github.com/Caldwell-41/Renpy-editor/issues/41)
+and [L09 #44](https://github.com/Caldwell-41/Renpy-editor/issues/44) are accepted
+and closed for their four bounded component and Help/Story criteria each.
+The [terminal audit](https://github.com/Caldwell-41/Renpy-editor/pull/77#issuecomment-6604465101)
+confirms 344 frontend passes, repository/Rust-format checks and both-target harness
+success, with source/artifact hashes verified. The six original corrections and
+final component-name validation finding are fixed.
 
-Kris selected all six audited fixes, updating [PR #77](https://github.com/Caldwell-41/Renpy-editor/pull/77),
-selected CI and worker cleanup. Implementation checkpoint `8f6b406` preserves Story
-screen intent across multiple Source edits, marks unqualified text tags unknown,
-separates reusable Help content from Close, allows selected-use Copy within one
-panel, inspects insertion destinations without navigation, and shares SDK command
-arguments/version parsing. The parent owns coding, integration and final audit;
-Terra 6.1 max owns browser verification under the replacement agent instructions.
+[Merge and retirement evidence](../tasks/evidence/components-and-help-panel.md#merge-acceptance-and-workspace-retirement-2026-11-03) owns final identities and ticket coverage.
+Thirteen tickets are reconciled. #45 is dependency-ready but unselected; #50 has
+#42/#41 satisfied and still waits on #46. Aggregate editor/canvas/native/human and
+Phase 3B acceptance remain open. SDK totals are closed at #41 16/24 and #44 44/44,
+with zero uncertain/reserved starts. No successor or new execution is selected.
 
-All 344 frontend tests and the production build pass. Focused red/green tests cover
-all six defects and ambiguous Source replacement. The final coherent core run at
-`1cc4f65` passes 556 tests, with zero failures, 54 intentional ignores and three
-documented exclusions. The first failed run remains preserved; its runtime
-descendant assertion's cause is unproven. Both automatic quality and selected
-Windows/macOS harness CI pass at that head, with all executed steps and returned
-artifact/input hashes audited.
-
-The parent audits all six original fixes. Browser proof passes ten component
-groups, four Help/Story groups and three focused real-core cases plus preflight.
-The two review worker checkouts are retired after evidence preservation; the
-cancelled draft has a local recovery commit. PR #77 owns terminal CI/cleanup
-receipts, including validation of this documentation-only successor.
-Kris approved fresh Help SDK campaigns and raised #44's cumulative cap to 44.
-Both macOS ARM64 and Windows x64 pass nine commands and six normal-entry cases at
-`1cc4f65`. The parent re-admits all raw logs and verifies source, launcher counts
-and cleanup. [#44](https://github.com/Caldwell-41/Renpy-editor/issues/44) owns the
-final count, 44/44 confirmed with zero uncertain starts. No further campaign is
-selected. #41 stays 16/24.
-
-[Review evidence](../tasks/evidence/components-and-help-panel.md#pr-77-review-corrections-2026-11-03)
-owns failures, tested candidates and remaining proof. Approved A2, source-map v7,
-protected recovery and broader native/human/Phase 3B limits remain. Both tickets
-stay open; PR #77 stays draft, with merge and release unselected.
+Five completed worktrees, six local branches and the merged remote feature branch
+are retired after verification. Original source and 3,876 evidence paths remain
+hash-preserved in an ignored archive; recovery tags retain the approved prototype
+and cancelled draft. The primary checkout remains on the integration branch.
+The unrelated audit, protected recovery and open Dependabot work remain intact.
 
 ## Phase 3B audit corrections merged
 
@@ -58,7 +42,7 @@ original commits and 131 unique evidence files remain hash-preserved in the
 ignored retirement archive. This primary checkout is on the integration branch;
 the unrelated audit, protected recovery and open Dependabot branch remain.
 
-L08 #41 and L09 #44 are now selected above. Their accepted prerequisites retain
+L08 #41 and L09 #44 are now merged and accepted above. Their prerequisites retain
 their bounded evidence and acceptance.
 
 ## Connected native testing policy accepted
