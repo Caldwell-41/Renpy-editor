@@ -6,7 +6,7 @@ Kris selected squash merge, all associated ticket updates and safe retirement of
 unused branches/worktrees. [PR #77](https://github.com/Caldwell-41/Renpy-editor/pull/77)
 merged as `966c437fa659883491e44a793093f881e8a2d4c1` into `codex/phase3b-screen-designer`.
 Its tree exactly matches audited `cc5718f148bc80c3b6228aa7b0f7a0922ba640d9`.
-The primary checkout is current on that branch. #41 and #44 are accepted and
+The merged baseline is on that branch. #41 and #44 are accepted and
 closed for their four bounded criteria each; thirteen ticket records are updated.
 
 [The terminal audit](https://github.com/Caldwell-41/Renpy-editor/pull/77#issuecomment-6604465101)
@@ -14,8 +14,8 @@ owns exact-head automatic/paired CI, all 344 frontend passes and source/artifact
 verification. Earlier core, browser and SDK proof retains its candidate and limits.
 Fresh both-target Help SDK proof stays at `1cc4f65`; the later form fix changes no
 generated source/runtime behavior. SDK counts close at #41 16/24 and #44 44/44,
-zero uncertain/reserved. Original failures remain failed. No CI watch, package,
-native session or new SDK operation remains selected.
+zero uncertain/reserved. Original failures remain failed. No package, native
+session or new SDK operation remains selected.
 
 [Merge and retirement evidence](../tasks/evidence/components-and-help-panel.md#merge-acceptance-and-workspace-retirement-2026-11-03) records five retired worktrees,
 six local branches and one remote branch. The ignored
@@ -34,6 +34,17 @@ open; no successor is selected. The
 retains original producing candidates and linked Windows primary/stash recovery.
 Its pending PR instructions are superseded here. Historical sections below retain
 unique recovery/evidence; their existing size exception renews no selection.
+
+### Documentation publication
+
+The initial direct closeout push was refused by GitHub rule GH013 because
+`Loomlight validation` is required. Commit `f147d3e` preserves those local records;
+no remote change or rule bypass occurred. Publish the documentation-only follow-up
+on `codex/pr77-merge-closeout` with an empty qualification list, selecting ordinary
+Repository quality only. No product, test, SDK or workflow implementation changes.
+PR #77 links the follow-up and owns its final publication receipt. After that PR
+passes checks and merges, return the primary checkout to the integration branch
+and retire only the follow-up branch. No successor work is selected.
 
 ## Audit correction merge and workspace closeout
 

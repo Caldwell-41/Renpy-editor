@@ -21,8 +21,10 @@ with zero uncertain/reserved starts. No successor or new execution is selected.
 Five completed worktrees, six local branches and the merged remote feature branch
 are retired after verification. Original source and 3,876 evidence paths remain
 hash-preserved in an ignored archive; recovery tags retain the approved prototype
-and cancelled draft. The primary checkout remains on the integration branch.
-The unrelated audit, protected recovery and open Dependabot work remain intact.
+and cancelled draft. The integration branch owns the merged baseline. The
+closeout records publish through a documentation-only follow-up PR under the
+required validation rule. The unrelated audit, protected recovery and open
+Dependabot work remain intact.
 
 ## Phase 3B audit corrections merged
 

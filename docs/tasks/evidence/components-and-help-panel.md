@@ -1386,3 +1386,14 @@ archive/recovery tag, local `main`, the integration branch, remote `main` and op
 Dependabot PR #69 remain. Protected refs and the unrelated audit's SHA256 are
 unchanged. No history rewrite, forced push or protected draft action occurs.
 The primary checkout is the only remaining local worktree.
+
+
+### Documentation publication rule
+
+The validated documentation closeout commit `f147d3e` is initially local. GitHub
+rejects its direct integration push with GH013 because `Loomlight validation` is
+required; no remote ref changes. The records move to a dedicated documentation
+PR branch, `codex/pr77-merge-closeout`, selecting automatic Repository quality and
+no manual qualification. This selects no product/core, SDK, helper, native or
+package work. PR #77 owns the follow-up link and final publication/retirement
+receipt. Existing source/evidence retirement is already complete.
