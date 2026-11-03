@@ -25,6 +25,7 @@ const element = <K extends keyof HTMLElementTagNameMap>(tag: K, className = "", 
 };
 function field(caption: string, control: HTMLElement) {
   const label = element("label", "field compact-field");
+  control.setAttribute("aria-label",caption);
   label.append(element("span", "", caption), control); return label;
 }
 function input(name: string, value: string, type = "text") {
