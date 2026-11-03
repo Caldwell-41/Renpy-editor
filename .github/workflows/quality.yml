@@ -167,8 +167,9 @@ jobs:
         if: ${{ failure() }}
         run: |
           python3 - <<'PY'
-          import os, runpy
+          import os, runpy, sys
           from pathlib import Path
+          sys.path.insert(0, str(Path('scripts').resolve()))
           folder = Path(os.environ['RUNNER_TEMP']) / 'help-offline'
           folder.mkdir(parents=True, exist_ok=True)
           utilities = runpy.run_path('scripts/check-thinking-evidence.py')

@@ -28,6 +28,9 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   Unix process absence. Route only named host cases; inject absence for portable logic.
 - **Regression:** `test_macos_development_credentials`, cleanup live/unknown-state refusal,
   and exact named Python exclusions in `check-thinking-evidence.py`.
+- **Related Linux case:** a portable Help cleanup fixture mocked SDK execution but
+  leaked the real target lookup. Supply the mocked target explicitly; keep actual
+  SDK host admission strict. [Diagnosis and correction](../tasks/evidence/help-dialog-and-canvas.md#linux-offline-ci-fixture-correction-2026-11-04).
 - **Evidence:** [CI2 diagnosis and correction](../tasks/evidence/phase-2-execution.md#ci2-terminal-diagnosis-and-proposed-correction--2026-10-16),
   [failed run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38850950449).
 
@@ -919,6 +922,19 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   `submit` bypassed the browser gate. Assert associated error, retained input/focus
   and no write. The case fails before the fix and passes afterward.
 - **Evidence:** [Naming correction](../tasks/evidence/components-and-help-panel.md#component-name-submission-correction-2026-11-03).
+
+## H66: Inline script loading loses sibling imports
+
+- **Class/search:** CI caller; `runpy`, `ModuleNotFoundError`, `runtime_probe_cases`,
+  failure-artifact sealing.
+- **Cause/correction:** the utility normally runs with its script directory on
+  Python's import path. An inline caller used `runpy` without that directory, so
+  nested sibling imports failed. The caller now supplies the directory; the
+  established utility stays unchanged.
+- **Verification:** the import error reproduces locally. Corrected invocation
+  retains both actual executables, verifies hashes, emits the source/manifest
+  receipts and passes the artifact privacy scan.
+- **Evidence:** [Offline CI correction](../tasks/evidence/help-dialog-and-canvas.md#linux-offline-ci-fixture-correction-2026-11-04).
 
 ## P06. Canvas JSON decoding changes fractional geometry
 

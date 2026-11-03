@@ -93,6 +93,7 @@ class AdmissionTests(unittest.TestCase):
                                        candidate='a'*40, output=output)
                 manifest = dict(acceptedSHA256=proof.digest(source.read_bytes()))
                 with patch.object(runner, 'preflight', return_value=manifest), \
+                     patch.object(runner, 'target', return_value='macos-arm64'), \
                      patch.object(runner, 'install_verified_tar', side_effect=install), \
                      patch.object(runner, 'launcher_for', return_value=('unused-sdk',)), \
                      patch.object(runner, 'run_reference_command',
@@ -107,7 +108,8 @@ class AdmissionTests(unittest.TestCase):
                         self.assertEqual(receipt['scratchPath'], str(scratch[0]))
                         self.assertEqual(receipt['commands'][0]['argv'][0], 'unused-sdk')
                     finally:
-                        shutil.rmtree(scratch[0], ignore_errors=True)
+                        for directory in scratch:
+                            shutil.rmtree(directory, ignore_errors=True)
 
     def test_reference_errors_retain_started_or_uncertain_attempts_and_partial_cleanup(self):
         for observed in [False, True]:

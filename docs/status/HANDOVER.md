@@ -11,13 +11,18 @@ binds the actual source/driver, 36 browser conditions and six hashed captures.
 
 Kris selected a draft PR and CI updates, then required completion before CI. That
 completion condition is satisfied. [Draft PR #79](https://github.com/Caldwell-41/Renpy-editor/pull/79)
-is published against `codex/phase3b-screen-designer`, with implementation/CI inputs
-at `bd2e365`. Its current-head gate is the PR's `Loomlight validation` status.
+is published against `codex/phase3b-screen-designer`; implementation remains `b2a5694`.
+Its current-head gate is the PR's `Loomlight validation` status.
 The [first ordinary run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41740136714)
 at `bd2e365` was observed in progress: repository validation passed and code checks
-were running, run updated at 2026-11-03 23:34:02 UTC. This publication-note update
-changes only documentation; audit current-head quality and complete validation
-before handback. The plan selects no manual qualification matrix. No merge,
+were running, run updated at 2026-11-03 23:34:02 UTC. The subsequent CI audit found
+two plumbing faults: an offline fixture leaked the real SDK host check on Linux,
+and the inline failure wrapper omitted its sibling import directory. Both are
+corrected without production changes. Six Canvas gates pass with simulated Linux
+and on Mac; actual executable retention/sealing/privacy checks pass locally.
+Original failed runs and unavailable uploads retain their scope. Audit current-head
+quality and complete validation before handback. The plan selects no manual
+qualification matrix. No merge,
 issue closure, release, new SDK campaign or native/package execution is selected.
 
 Final local proof passes 366 frontend cases without failures/skips, 31 focused UI

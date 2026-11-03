@@ -1,5 +1,37 @@
 # Help dialog and base canvas delivery evidence
 
+## Linux offline CI fixture correction, 2026-11-04
+
+The initial ordinary runs at `bd2e365` and `52d92a8` expose CI plumbing faults,
+not a rendering/runtime defect. The first run's complete failed-step log identifies
+two failed steps; frontend tests, production build, formatting and repository
+validation pass. Original failed runs remain failed.
+
+The portable cleanup fixture mocked preflight, SDK installation and command execution
+but called the real Mac/Windows target lookup. On Ubuntu it raised
+`AssertionError: ('Linux', 'x86_64')`; its cleanup then masked that error by indexing
+an uncreated scratch directory. The original single-case failure reproduces locally
+with a simulated Linux host. The fixture now explicitly supplies its mocked SDK
+target and cleans up only created directories. All six Canvas gates pass both with
+simulated Linux and on Mac. A separate check still proves the real SDK target guard
+rejects Linux. No SDK process starts and no production host admission changes.
+
+The new inline failure wrapper also used `runpy` without the helper scripts'
+normal import directory. Sealing failed with `ModuleNotFoundError` for
+`runtime_probe_cases`, preventing upload. The exact import failure reproduces
+locally. The caller now adds the scripts directory before loading the unchanged
+utilities. A local failure-path check retains and hashes both actual compiled
+executables, emits source identity and a hash-verified manifest, and passes the
+seven-file privacy scan. This is retention plumbing proof, not a new qualification
+receipt; local source identity truthfully includes the unrelated dirty guide files.
+The original CI binaries were not downloadable after the failed upload and are
+not claimed newly verified. Logs and local red/green receipts remain ignored.
+
+The CI-only correction changes one offline fixture and the wrapper's import path.
+Production frontend/core trees and all completed leaf behavior remain unchanged.
+Current-head automatic quality must pass before CI handback; no manual workflow,
+SDK/helper, native editor or package launch is selected.
+
 ## Draft publication and ordinary CI, 2026-11-04
 
 [Draft PR #79](https://github.com/Caldwell-41/Renpy-editor/pull/79) publishes the
