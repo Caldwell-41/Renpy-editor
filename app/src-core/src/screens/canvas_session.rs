@@ -15,6 +15,15 @@ use std::{
     time::{Duration, Instant},
 };
 
+#[cfg(test)]
+static HELPER_START_ATTEMPTS: std::sync::atomic::AtomicUsize =
+    std::sync::atomic::AtomicUsize::new(0);
+
+#[cfg(test)]
+pub(crate) fn helper_start_attempts_for_test() -> usize {
+    HELPER_START_ATTEMPTS.load(std::sync::atomic::Ordering::SeqCst)
+}
+
 pub(crate) struct Session {
     root: PathBuf,
     anchor: Option<DirectoryAnchor>,
@@ -33,6 +42,8 @@ impl Session {
             HelperProcess::start(sdk, session.anchor().clone())
                 .map_err(|_| SceneError::InvariantBlocked)?,
         );
+        #[cfg(test)]
+        HELPER_START_ATTEMPTS.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
         Ok(session)
     }
     #[cfg(test)]

@@ -15,7 +15,7 @@ SPEC.loader.exec_module(proof)
 
 def accepted_fixture():
     """A synthetic receipt for gate tests, distinct from the public-core export."""
-    source = proof.FIXTURE.read_text()
+    source = proof.FIXTURE.read_text(encoding='utf-8')
     files = {proof.SOURCE_PATH: {'text': source, 'sha256': proof.digest(source.encode())}}
     metadata = json.dumps({'schemaVersion': 8})
     files['.renpy-editor/source-map.json'] = dict(text=metadata, sha256=proof.digest(metadata.encode()))
@@ -36,12 +36,14 @@ def accepted_fixture():
 
 def captures(root, accepted, role):
     root.mkdir()
-    (root / 'accepted.json').write_text(json.dumps(accepted))
+    (root / 'accepted.json').write_text(json.dumps(accepted), encoding='utf-8', newline='\n')
     records = []
     for case_key in proof.MATRIX:
         screen, width, height, state = case_key
         filename = proof.name(case_key) + '.png'
-        Image.new('RGBA', (width, height), '#273649' if state == 'normal' else '#463729').save(root / filename)
+        image = Image.new('RGBA', (width, height), '#273649' if state == 'normal' else '#463729')
+        image.putpixel((30, 30), (211, 218, 224, 255))
+        image.save(root / filename)
         records.append(dict(screen=screen, aspect=[width, height], state=state, filename=filename,
                             imageSHA256=proof.digest((root / filename).read_bytes()), inputs=proof.inputs(accepted),
                             revision=proof.inputs(accepted)[proof.SOURCE_PATH], renderer='gl2',
@@ -50,15 +52,40 @@ def captures(root, accepted, role):
     receipt = dict(outcome=proof.OUTCOME, role=role, passed=True, cleanupComplete=True, sourceUnchanged=True,
                    acceptedSHA256=proof.digest((root / 'accepted.json').read_bytes()), target='macos-arm64',
                    candidate='a' * 40, rendererSHA256=proof.digest((proof.REPO / 'app/src-core/src/screens/canvas-renderer.rpy').read_bytes()),
-                   coreTestSHA256='b' * 64,
+                   coreTestSHA256=proof.digest(b'designated core test'),
                    inputs=proof.inputs(accepted), sdkProcesses=4, sdkCliProcesses=3, helperSessions=1,
                    shutdown=dict(cooperative=True, cleanupComplete=True, exitCode=0), records=records,
                    commands=[dict(name=name, exitCode=0, timedOut=False, outputLimited=False) for name in ['compile', 'lint', 'run', 'run']])
-    (root / 'result.json').write_text(json.dumps(receipt))
+    (root / 'result.json').write_text(json.dumps(receipt), encoding='utf-8', newline='\n')
     return receipt
 
 
 class AdmissionTests(unittest.TestCase):
+    def test_matching_old_candidates_cannot_pass_the_reviewed_candidate_gate(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            accepted = accepted_fixture()
+            helper, normal = root / 'helper', root / 'normal'
+            captures(helper, accepted, 'hidden-helper')
+            captures(normal, accepted, 'normal-game')
+            core = root / 'core-test'
+            core.write_bytes(b'designated core test')
+            with self.assertRaises(AssertionError):
+                proof.compare(helper, normal, root / 'comparison', expected_candidate='c' * 40, core_test=core)
+
+    def test_uniform_opaque_frames_cannot_count_as_a_composition(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / 'helper'
+            accepted = accepted_fixture()
+            receipt = captures(root, accepted, 'hidden-helper')
+            row = receipt['records'][0]
+            path = root / row['filename']
+            Image.new('RGBA', tuple(row['aspect']), '#273649').save(path)
+            row['imageSHA256'] = proof.digest(path.read_bytes())
+            (root / 'result.json').write_text(json.dumps(receipt), encoding='utf-8', newline='\n')
+            with self.assertRaises(AssertionError):
+                proof.validate_capture_set(root, accepted, 'hidden-helper')
+
     def test_preflight_requires_complete_exact_source_matrix_and_typed_asset_hashes(self):
         accepted = accepted_fixture()
         proof.validate_accepted(accepted)
@@ -93,8 +120,10 @@ class AdmissionTests(unittest.TestCase):
             helper, normal = root / 'helper', root / 'normal'
             original = captures(helper, accepted, 'hidden-helper')
             captures(normal, accepted, 'normal-game')
-            self.assertTrue(proof.compare(helper, normal, root / 'positive')['passed'])
-            for fault in ['missing', 'revision', 'state', 'asset', 'geometry', 'cleanup', 'scale', 'target', 'renderer', 'blank', 'pixel']:
+            core = root / 'core-test'
+            core.write_bytes(b'designated core test')
+            self.assertTrue(proof.compare(helper, normal, root / 'positive', expected_candidate='a' * 40, core_test=core)['passed'])
+            for fault in ['missing', 'revision', 'state', 'asset', 'geometry', 'cleanup', 'scale', 'target', 'renderer', 'blank', 'pixel', 'core-binary']:
                 with self.subTest(fault=fault):
                     receipt = copy.deepcopy(original)
                     row = receipt['records'][0]
@@ -116,6 +145,8 @@ class AdmissionTests(unittest.TestCase):
                         row['drawPerVirtual'] = 1
                     elif fault == 'target':
                         receipt['target'] = 'windows-x64'
+                    elif fault == 'core-binary':
+                        receipt['coreTestSHA256'] = '0' * 64
                     elif fault == 'renderer':
                         row['renderer'] = 'sw'
                     else:
@@ -127,11 +158,11 @@ class AdmissionTests(unittest.TestCase):
                             image.putpixel((20, 20), (255, 0, 0, 255))
                         image.save(image_path)
                         row['imageSHA256'] = proof.digest(image_path.read_bytes())
-                    (helper / 'result.json').write_text(json.dumps(receipt))
+                    (helper / 'result.json').write_text(json.dumps(receipt), encoding='utf-8', newline='\n')
                     with self.assertRaises((AssertionError, KeyError, ValueError)):
-                        proof.compare(helper, normal, root / fault)
+                        proof.compare(helper, normal, root / fault, expected_candidate='a' * 40, core_test=core)
                     image_path.write_bytes(image_bytes)
-                    (helper / 'result.json').write_text(json.dumps(original))
+                    (helper / 'result.json').write_text(json.dumps(original), encoding='utf-8', newline='\n')
 
 
 if __name__ == '__main__':

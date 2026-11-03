@@ -79,7 +79,7 @@ def inputs(accepted):
 
 def validate_capture_set(root, accepted, role):
     root = Path(root)
-    receipt = json.loads((root / 'result.json').read_text())
+    receipt = json.loads((root / 'result.json').read_text(encoding='utf-8'))
     assert receipt['outcome'] == OUTCOME and receipt['role'] == role
     assert receipt['acceptedSHA256'] == digest((root / 'accepted.json').read_bytes())
     assert receipt['passed'] is True and receipt['cleanupComplete'] is True
@@ -116,6 +116,7 @@ def validate_capture_set(root, accepted, role):
         with Image.open(root / row['filename']) as image:
             image = image.convert('RGBA')
             assert image.size == (width, height) and image.getbbox(), 'Blank or wrong-size capture'
+            assert any(low != high for low, high in image.getextrema()), 'Uniform frame is not composition evidence'
         # Both fixtures give IDs to every inner node, including their fixed/vbox group.
         source_nodes = cases[case_key]['plan']['nodes']
         expected_starts = {n['start'] for n in source_nodes[2:]}
@@ -125,14 +126,16 @@ def validate_capture_set(root, accepted, role):
     return receipt, by_key
 
 
-def compare(helper, normal, output):
+def compare(helper, normal, output, *, expected_candidate, core_test):
     helper, normal, output = Path(helper), Path(normal), Path(output)
     accepted_bytes = (helper / 'accepted.json').read_bytes()
     assert accepted_bytes == (normal / 'accepted.json').read_bytes(), 'Different source snapshots'
     accepted = validate_accepted(json.loads(accepted_bytes))
     h, helpers = validate_capture_set(helper, accepted, 'hidden-helper')
     r, references = validate_capture_set(normal, accepted, 'normal-game')
-    assert h['target'] == r['target'] and h['candidate'] == r['candidate']
+    assert h['target'] == r['target']
+    assert h['candidate'] == r['candidate'] == expected_candidate, 'Wrong reviewed candidate'
+    assert h['coreTestSHA256'] == digest(Path(core_test).read_bytes()), 'Wrong designated core executable'
     output.mkdir(parents=True, exist_ok=False)
     rows = []
     for case_key in MATRIX:
@@ -158,6 +161,6 @@ def compare(helper, normal, output):
                 assert captures[(screen, width, height, 'normal')]['imageSHA256'] != captures[(screen, width, height, 'hover')]['imageSHA256'], 'Hover did not change'
     result = dict(outcome=OUTCOME, target=h['target'], candidate=h['candidate'], tolerance=0,
                   passed=all(row['differingPixels'] == 0 and row['geometryMatches'] for row in rows), records=rows)
-    (output / 'comparison.json').write_text(json.dumps(result, indent=2) + '\n')
+    (output / 'comparison.json').write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8', newline='\n')
     assert result['passed'], 'Visible differences require diagnosis; no tolerance is accepted'
     return result
