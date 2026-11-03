@@ -43,7 +43,7 @@ impl AuthoringService {
         let image_path =
             serde_json::to_string(&image.path).map_err(|_| SceneError::ImageInvalid)?;
         let target = serde_json::to_string(name).map_err(|_| SceneError::InvalidPayload)?;
-        let [frame, column, heading, body, image, close] =
+        let [frame, column, content, heading, body, image, close] =
             std::array::from_fn(|_| uuid::Uuid::new_v4().to_string());
         let width = starter.width;
         let height = starter.height;
@@ -55,11 +55,12 @@ impl AuthoringService {
         xalign 0.5
         yalign 0.5
         vbox: # loomlight-element: {column}
-            text {title} # loomlight-element: {heading}
-            text {explanation} # loomlight-element: {body}
-            add {image_path}: # loomlight-element: {image}
-                xsize {width}
-                ysize {height}
+            vbox: # loomlight-element: {content}
+                text {title} # loomlight-element: {heading}
+                text {explanation} # loomlight-element: {body}
+                add {image_path}: # loomlight-element: {image}
+                    xsize {width}
+                    ysize {height}
             textbutton "Close": # loomlight-element: {close}
                 action Hide({target})
                 default_focus True

@@ -109,7 +109,7 @@ def command_argv(
     if command is Command.LINT:
         return (*prefix, project_arg, "lint", "--error-code")
     if command is Command.TEST:
-        if testcase and not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.-]*", testcase):
+        if testcase and not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.-]*(?:::[A-Za-z_][A-Za-z0-9_.-]*)?", testcase):
             raise AdapterError("testcase name is invalid")
         return (*prefix, project_arg, "test", *((testcase,) if testcase else ()))
     if command is Command.RUN:

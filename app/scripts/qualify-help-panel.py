@@ -362,7 +362,7 @@ def qualify_sdk(args):
     try:
         sys.path.insert(0, str(REPO / 'spikes/renpy-sdk'))
         from archive_safety import expected_sha256, install_verified_tar
-        from sdk_adapter import launcher_for
+        from sdk_adapter import Command, command_argv, parse_version
         require(expected_sha256(args.checksums.read_text(), args.archive.name) == SDK_SHA256, 'official archive checksum pin mismatch')
         shutil.copyfile(prepared / 'inputs.json', output / 'inputs.json')
         shutil.copyfile(prepared / 'accepted/manifest.json', output / 'accepted-manifest.json')
@@ -371,21 +371,19 @@ def qualify_sdk(args):
             archive_root = temporary / 'sdk'
             install_verified_tar(args.archive.resolve(), SDK_SHA256, archive_root)
             sdk = archive_root / 'renpy-8.5.3-sdk'
-            launcher = launcher_for(sdk)
             game = temporary / 'game-project'
             stage_game(prepared / 'accepted', manifest, game)
             env = dict(os.environ, RENPY_PATH_TO_SAVES=str(temporary / 'saves'), SDL_AUDIODRIVER='dummy',
                        PYTHONDONTWRITEBYTECODE='1', TMPDIR=str(temporary), TMP=str(temporary), TEMP=str(temporary))
-            version = run_logged(output, 'sdk-version', [*launcher, '--version'], sdk, env, result['checks'], 30)
-            require(re.search(r"Ren'Py 8\.5\.3(?:\.|\s|$)", version), 'wrong SDK version')
-            run_logged(output, 'sdk-compile', [*launcher, game, 'compile'], sdk, env, result['checks'], 90)
-            run_logged(output, 'sdk-lint', [*launcher, game, 'lint', '--error-code'], sdk, env, result['checks'], 90)
+            version = run_logged(output, 'sdk-version', command_argv(sdk, Command.VERSION), sdk, env, result['checks'], 30)
+            parse_version(version)
+            run_logged(output, 'sdk-compile', command_argv(sdk, Command.COMPILE, game, allow_project_execution=True), sdk, env, result['checks'], 90)
+            run_logged(output, 'sdk-lint', command_argv(sdk, Command.LINT, game, allow_project_execution=True), sdk, env, result['checks'], 90)
             hashes = {record['path']: record['sha256'] for record in manifest['files']}
             for case in CASES:
                 result['sdkTestProcessesStarted'] += 1
-                # Match qualify-screens-source's fixed suite::case selection. The
-                # adapter's general testcase argument does not admit this syntax.
-                text = run_logged(output, case, [*launcher, game, 'test', 'help_panel::' + case],
+                text = run_logged(output, case, command_argv(sdk, Command.TEST, game,
+                                  testcase='help_panel::' + case, allow_project_execution=True),
                                   sdk, env, result['checks'], 45)
                 result['runtimeObserved'].append(validate_runtime_output(text, case, result['manifestSHA256'], hashes))
                 require(all(digest(game / path) == sha for path, sha in hashes.items()), 'accepted source changed during engine test')

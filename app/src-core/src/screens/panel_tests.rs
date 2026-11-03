@@ -231,11 +231,22 @@ fn help_dismissal_cannot_be_extracted_into_a_component_with_another_panel_target
         .service
         .screens_resolve_target(&f.project, &f.project_id, &binding, None)
         .unwrap();
-    for group in document.screens[0]
+    let close = document.screens[0]
         .nodes
         .iter()
-        .filter(|node| matches!(node.kind.as_str(), "frame" | "vbox"))
-    {
+        .find(|node| node.kind == "textbutton")
+        .unwrap();
+    let groups = document.screens[0]
+        .nodes
+        .iter()
+        .filter(|node| {
+            matches!(node.kind.as_str(), "frame" | "vbox")
+                && node.span.start < close.span.start
+                && close.span.start < node.source_end
+        })
+        .collect::<Vec<_>>();
+    assert!(!groups.is_empty());
+    for group in groups {
         assert_eq!(
             f.service
                 .prepare_extract_group(
@@ -329,9 +340,11 @@ fn help_starter_nodes_edit_reorder_remove_and_reopen_with_qualified_dismissal_so
         .id
         .clone()
         .unwrap();
-    let close = nodes
+    let close_node = nodes.iter().find(|n| n.kind == "textbutton").unwrap();
+    let close = close_node.id.clone().unwrap();
+    let content = nodes
         .iter()
-        .find(|n| n.kind == "textbutton")
+        .find(|node| node.kind == "vbox" && node.parent_start == close_node.parent_start)
         .unwrap()
         .id
         .clone()
@@ -374,7 +387,7 @@ fn help_starter_nodes_edit_reorder_remove_and_reopen_with_qualified_dismissal_so
     compose(
         &f,
         owner,
-        json!({"type":"reorder","nodeId":close,"targetId":title,"after":false}),
+        json!({"type":"reorder","nodeId":close,"targetId":content,"after":false}),
     );
     let reordered = fs::read_to_string(&path).unwrap();
     assert!(

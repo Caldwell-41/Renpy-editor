@@ -316,6 +316,144 @@ fn dynamic_text_and_custom_actions_keep_screen_effects_unknown() {
 }
 
 #[test]
+fn unsupported_text_tags_keep_screen_effects_unknown() {
+    for statement in [
+        "text \"{a=jump:other}Open{/a}\"",
+        "textbutton \"{custom}Open{/custom}\":\n        action Null()",
+    ] {
+        let (_temporary, mut service, _root, owner) = composition_project();
+        let source = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+            .as_str()
+            .unwrap()
+            .to_owned();
+        save_composition_source(
+            &mut service,
+            &owner,
+            &source.replace("    pass", &format!("    {statement}")),
+        );
+        let target = ipc(
+            &mut service,
+            "screens.resolveTarget",
+            json!({
+                "binding":{"screenId":owner["id"],"sourceName":owner["name"]}
+            }),
+        );
+        assert_eq!(target["effects"]["unknown"], true, "{statement}: {target}");
+    }
+}
+
+#[test]
+fn help_starter_content_extracts_without_capturing_its_local_close_action() {
+    let (temporary, mut service, root, _) = composition_project();
+    fs::create_dir_all(root.join("game/images")).unwrap();
+    let chosen = temporary.path().join("seal.png");
+    fs::write(
+        &chosen,
+        include_bytes!("../../../../tests/fixtures/phase-3b-screens/ui-image/seal.png"),
+    )
+    .unwrap();
+    let choice = service.authoring_select_import(&chosen).unwrap();
+    let imported = ipc(
+        &mut service,
+        "asset.import",
+        json!({
+            "authorityId":choice.authority_id,"kind":"uiImage","technicalName":"seal","displayName":"Seal"
+        }),
+    );
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let created = ipc(
+        &mut service,
+        "screens.create",
+        json!({
+            "name":"help_panel","expectedProjectRevision":catalog["projectRevision"],
+            "expectedSourceMapRevision":catalog["sourceMapRevision"],"expectedInventoryRevision":catalog["inventoryRevision"],
+            "starter":{"title":"Help","explanation":"Continue reading.","assetId":imported["assets"][0]["id"],
+                "expectedAssetSha256":imported["assets"][0]["sha256"],"width":80,"height":40}
+        }),
+    );
+    let owner = created["owned"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|owner| owner["name"] == "help_panel")
+        .unwrap();
+    let source = fs::read(root.join(owner["path"].as_str().unwrap())).unwrap();
+    let document = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    let nodes = document["screens"][0]["nodes"].as_array().unwrap();
+    let heading = nodes.iter().find(|node| node["kind"] == "text").unwrap();
+    let content = nodes
+        .iter()
+        .find(|node| node["span"]["start"] == heading["parentStart"])
+        .unwrap();
+    ipc(
+        &mut service,
+        "screens.componentPrepareExtract",
+        json!({
+            "screenId":owner["id"],"nodeId":content["id"],"expectedRevision":document["revision"]
+        }),
+    );
+    let target = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":{"screenId":owner["id"],"sourceName":owner["name"]}}),
+    );
+    let result = ipc(
+        &mut service,
+        "screens.componentExtract",
+        json!({
+            "target":target["binding"],"expected":target["revisions"],"expectedProjectRevision":created["projectRevision"],
+            "nodeId":content["id"],"name":"help_content"
+        }),
+    );
+    let component = ipc(
+        &mut service,
+        "source.open",
+        json!({"path":"game/ui/help_content.rpy"}),
+    );
+    let component_source = component["text"].as_str().unwrap();
+    assert!(component_source.contains("Continue reading."));
+    assert!(component_source.contains("images/ui seal.png"));
+    assert!(!component_source.contains("Hide("));
+    let panel = ipc(&mut service, "source.open", json!({"path":owner["path"]}));
+    assert!(panel["text"]
+        .as_str()
+        .unwrap()
+        .contains("action Hide(\"help_panel\")"));
+    assert!(panel["text"].as_str().unwrap().contains("use help_content"));
+    let model = ipc(&mut service, "scene.list", json!({}));
+    ipc(
+        &mut service,
+        "scene.apply",
+        json!({"expectedProjectRevision":model["projectRevision"],
+        "expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"undo"}}),
+    );
+    assert_eq!(
+        fs::read(root.join(owner["path"].as_str().unwrap())).unwrap(),
+        source
+    );
+    let model = ipc(&mut service, "scene.list", json!({}));
+    ipc(
+        &mut service,
+        "scene.apply",
+        json!({"expectedProjectRevision":model["projectRevision"],
+        "expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"redo"}}),
+    );
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    let review = ipc(
+        &mut service,
+        "screens.componentReview",
+        json!({"componentId":result["componentId"]}),
+    );
+    assert_eq!(review["complete"], true);
+    assert_eq!(review["uses"][0]["nodeId"], result["useId"]);
+}
+
+#[test]
 fn help_starter_creation_is_one_source_and_metadata_history_transaction() {
     let (temporary, mut service, root, _) = composition_project();
     fs::create_dir_all(root.join("game/images")).unwrap();
@@ -382,13 +520,16 @@ fn help_starter_creation_is_one_source_and_metadata_history_transaction() {
     assert_eq!(plan["available"], true, "{plan}");
     let nodes = document["screens"][0]["nodes"].as_array().unwrap();
     let close = nodes.iter().find(|n| n["kind"] == "textbutton").unwrap();
-    let heading = nodes.iter().find(|n| n["kind"] == "text").unwrap();
+    let content = nodes
+        .iter()
+        .find(|n| n["kind"] == "vbox" && n["parentStart"] == close["parentStart"])
+        .unwrap();
     ipc(
         &mut service,
         "screens.compose",
         json!({
             "screenId":owner["id"],"expectedRevision":document["revision"],
-            "command":{"type":"reorder","nodeId":close["id"],"targetId":heading["id"],"after":false}
+            "command":{"type":"reorder","nodeId":close["id"],"targetId":content["id"],"after":false}
         }),
     );
     let moved = fs::read_to_string(&path).unwrap();
@@ -431,7 +572,7 @@ fn help_starter_creation_is_one_source_and_metadata_history_transaction() {
                 "screens.compose",
                 json!({
                     "screenId":owner["id"],"expectedRevision":current["revision"],
-                    "command":{"type":"reorder","nodeId":close["id"],"targetId":heading["id"],"after":false}
+                    "command":{"type":"reorder","nodeId":close["id"],"targetId":content["id"],"after":false}
                 })
             )["error"]["code"],
             "OPAQUE_BOUNDARY"

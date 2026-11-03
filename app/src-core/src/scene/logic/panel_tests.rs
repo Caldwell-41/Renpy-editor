@@ -46,6 +46,133 @@ fn insert(f: &mut Fixture, payload: Value) -> Value {
 }
 
 #[test]
+fn source_changes_to_multiple_screen_names_retain_each_beats_target_intent() {
+    for name in ["other_panel", "missing_panel"] {
+        let mut f = Fixture::new();
+        let owner = panel(&mut f, "help_panel");
+        panel(&mut f, "other_panel");
+        for _ in 0..2 {
+            let target = resolved(&mut f, &owner);
+            insert(
+                &mut f,
+                json!({"type":"showScreen","target":target["binding"],"revisions":target["revisions"]}),
+            );
+        }
+        let scene = f.model()["scenes"][0].clone();
+        let before = scene["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|beat| beat["payload"]["type"] == "showScreen")
+            .cloned()
+            .collect::<Vec<_>>();
+        let original = ipc(
+            &mut f.service,
+            "source.open",
+            json!({"path":scene["sourcePath"]}),
+        )["text"]
+            .as_str()
+            .unwrap()
+            .to_owned();
+        let changed = original.replace("show screen help_panel", &format!("show screen {name}"));
+        f.save(&scene, &changed);
+        let after = f.model()["scenes"][0]["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|beat| beat["payload"]["type"] == "showScreen")
+            .cloned()
+            .collect::<Vec<_>>();
+        assert_eq!(after.len(), 2, "{name}: {after:?}");
+        for (old, new) in before.iter().zip(&after) {
+            assert_eq!(new["id"], old["id"], "{name}");
+            assert_eq!(new["payload"]["target"], old["payload"]["target"]);
+            assert_eq!(new["protected"], true);
+            assert!(new["payload"]["revisions"].is_null());
+        }
+        f.command(json!({"type":"undo"}));
+        assert_eq!(
+            ipc(
+                &mut f.service,
+                "source.open",
+                json!({"path":scene["sourcePath"]})
+            )["text"],
+            original
+        );
+        f.command(json!({"type":"redo"}));
+        f.service.close().unwrap();
+        f.service.open_path(&f.root).unwrap();
+        let reopened = f.model()["scenes"][0]["beats"].clone();
+        for old in &before {
+            let new = reopened
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|beat| beat["id"] == old["id"])
+                .unwrap();
+            assert_eq!(new["payload"]["target"], old["payload"]["target"]);
+            assert_eq!(new["protected"], true);
+        }
+        assert_eq!(
+            ipc(
+                &mut f.service,
+                "source.open",
+                json!({"path":scene["sourcePath"]})
+            )["text"],
+            changed
+        );
+    }
+}
+
+#[test]
+fn ambiguous_screen_source_replacements_stay_custom_after_reopen() {
+    let mut f = Fixture::new();
+    let owner = panel(&mut f, "help_panel");
+    panel(&mut f, "other_panel");
+    for _ in 0..2 {
+        let target = resolved(&mut f, &owner);
+        insert(
+            &mut f,
+            json!({"type":"showScreen","target":target["binding"],"revisions":target["revisions"]}),
+        );
+    }
+    let scene = f.model()["scenes"][0].clone();
+    let original = ipc(
+        &mut f.service,
+        "source.open",
+        json!({"path":scene["sourcePath"]}),
+    )["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let changed = original
+        .replacen(
+            "show screen help_panel",
+            "show screen other_panel\n    show screen other_panel",
+            1,
+        )
+        .replace("show screen help_panel", "show screen other_panel");
+    f.save(&scene, &changed);
+    let before_reopen = f.model()["scenes"][0]["beats"].clone();
+    assert!(!before_reopen
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|beat| beat["payload"]["type"] == "showScreen"));
+    f.service.close().unwrap();
+    f.service.open_path(&f.root).unwrap();
+    assert_eq!(f.model()["scenes"][0]["beats"], before_reopen);
+    assert_eq!(
+        ipc(
+            &mut f.service,
+            "source.open",
+            json!({"path":scene["sourcePath"]})
+        )["text"],
+        changed
+    );
+}
+
+#[test]
 fn screen_beat_admission_requires_current_resolved_target_revisions() {
     let mut f = Fixture::new();
     let owner = panel(&mut f, "help_panel");

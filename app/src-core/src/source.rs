@@ -1197,6 +1197,19 @@ impl AuthoringService {
     }
 }
 
+fn reconciliation_kind<'a>(beat: &'a crate::metadata::BeatSourceMapping, bytes: &[u8]) -> &'a str {
+    if beat.kind == "customCode" {
+        if let Some((show, _)) = bytes
+            .get(beat.byte_start as usize..beat.byte_end as usize)
+            .and_then(|source| std::str::from_utf8(source).ok())
+            .and_then(|source| crate::scene::screen_statement(source.trim()))
+        {
+            return if show { "showScreen" } else { "hideScreen" };
+        }
+    }
+    &beat.kind
+}
+
 fn build_reconciled_mapping(
     scene: &SceneMetadata,
     bytes: &[u8],
@@ -1219,6 +1232,17 @@ fn build_reconciled_mapping(
         .iter()
         .map(|beat| beat.id.as_str())
         .collect::<HashSet<_>>();
+    let same_structure = previous.beats.len() == candidate.beats.len()
+        && previous
+            .beats
+            .iter()
+            .zip(&candidate.beats)
+            .all(|(before, after)| {
+                before.kind == reconciliation_kind(after, bytes)
+                    && before.owner == after.owner
+                    && before.conditional_branch == after.conditional_branch
+                    && (!previous_ids.contains(after.id.as_str()) || before.id == after.id)
+            });
     let mut unmatched_before: HashMap<&str, Vec<&crate::metadata::BeatSourceMapping>> =
         HashMap::new();
     for beat in &previous.beats {
@@ -1234,7 +1258,7 @@ fn build_reconciled_mapping(
     for beat in &candidate.beats {
         if !previous_ids.contains(beat.id.as_str()) {
             unmatched_after
-                .entry(beat.kind.as_str())
+                .entry(reconciliation_kind(beat, bytes))
                 .or_default()
                 .push(beat);
         }
@@ -1244,13 +1268,28 @@ fn build_reconciled_mapping(
         let Some(after) = unmatched_after.get(kind) else {
             continue;
         };
-        if before.len() == 1 && after.len() == 1 {
-            forced.push((
-                kind.to_owned(),
-                after[0].source_sha256.clone(),
-                before[0].id.clone(),
-                Some(after[0].byte_start as usize),
-            ));
+        let screen = matches!(kind, "showScreen" | "hideScreen");
+        if before.len() == 1 && after.len() == 1
+            || screen && same_structure && before.len() == after.len()
+        {
+            for (before, after) in before.iter().zip(after) {
+                forced.push((
+                    kind.to_owned(),
+                    after.source_sha256.clone(),
+                    before.id.clone(),
+                    Some(after.byte_start as usize),
+                ));
+            }
+        } else if screen {
+            // Changed structure cannot establish which old screen intent owns a new statement.
+            for after in after {
+                forced.push((
+                    "customCode".into(),
+                    after.source_sha256.clone(),
+                    after.id.clone(),
+                    Some(after.byte_start as usize),
+                ));
+            }
         }
     }
     if forced.is_empty() {

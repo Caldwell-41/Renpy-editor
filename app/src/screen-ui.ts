@@ -110,7 +110,7 @@ export class ScreensWorkspace {
     this.gameResolution = {...actions.resolution};
     this.components = new ScreenComponents({view:()=>this.compositionView(),catalog:()=>this.catalog,current:()=>this.current() && this.panel.isConnected,request:actions.request,coordinate:task=>this.coordinateComponent(task),
       accepted:(change,selection)=>this.componentAccepted(change,selection),
-      openDefinition:(id,nodeId)=>this.openOwnedScreen(id,nodeId,"component"),openScreen:(id,nodeId)=>this.openOwnedScreen(id,nodeId,"panel"),
+      openDefinition:(id,nodeId)=>this.openOwnedScreen(id,nodeId,"component"),inspectScreen:id=>this.inspectOwnedPanel(id),
       structureBlocked:()=>this.busy || !!this.creation || !!this.resize || !!this.move || this.composer.hasAddition() || this.composer.hasRemoval() || this.images.hasAddition() || this.images.isSaving() || this.text.isSaving(),
       captureDrafts:(view,trackNewDrafts=false)=>[...this.text.captureComponentDrafts(view,trackNewDrafts),this.layout.captureCopyDraft(view,trackNewDrafts),this.images.captureCopyDraft(view,trackNewDrafts),this.captureGeometryDraft(view,trackNewDrafts)].filter((value):value is CopyDraftParticipant=>!!value),
       source:actions.source,note:(text,error)=>this.note(text,error),redraw:()=>this.render(),
@@ -264,6 +264,15 @@ export class ScreensWorkspace {
   private async openOwnedScreen(id: string, nodeId?: string, kind?: "panel"|"component"): Promise<CompositionView> {
     if (!await this.reload(false)) throw Error("Screen refresh failed. Input retained.");
     return this.selectOwnedScreen(id,nodeId,kind);
+  }
+  private async inspectOwnedPanel(id: string): Promise<CompositionView> {
+    const owner=this.catalog?.owned.find(owner=>owner.id===id && owner.kind==="panel" && owner.resolved);
+    if(!owner)throw Error("The selected screen is unavailable. Input retained.");
+    const document=await this.actions.request<ScreenDocument>("screens.inspect",{path:owner.path});
+    const nodes=document.screens.find(screen=>screen.name===owner.name)?.nodes;
+    const selected=nodes?.find(node=>node.id===owner.rootId);
+    if(!nodes || !selected)throw Error("The selected screen changed. Input retained.");
+    return {document,screenId:owner.id,screenName:owner.name,nodes,selected,step:"design",busy:false};
   }
   private async componentAccepted(change: ComponentChange, selection: {screenId:string;nodeId:string}): Promise<CompositionView> {
     const key = JSON.stringify([change.componentId,change.screenId,change.useId]);

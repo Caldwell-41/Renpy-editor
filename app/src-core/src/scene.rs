@@ -3593,7 +3593,7 @@ fn parse_line_version(
     parse_line(body, loaded)
 }
 
-fn screen_statement(line: &str) -> Option<(bool, &str)> {
+pub(crate) fn screen_statement(line: &str) -> Option<(bool, &str)> {
     if line.contains(['\r', '\n']) {
         return None;
     }
@@ -3896,13 +3896,25 @@ pub(crate) fn build_mapping(
                     .map_err(|_| SceneError::UnsupportedSource)?;
                 if let Some((show, _)) = screen_statement(source.trim()) {
                     let kind = if show { "showScreen" } else { "hideScreen" };
-                    let retained = previous
-                        .beats
+                    let retained = forced
                         .iter()
-                        .find(|beat| {
-                            beat.source_sha256 == hash
-                                && beat.kind == kind
-                                && beat.screen_target.is_some()
+                        .find(|(forced_kind, source_hash, _, anchor)| {
+                            forced_kind == kind
+                                && source_hash == &hash
+                                && anchor.is_none_or(|start| start == parsed.start)
+                        })
+                        .and_then(|(_, _, id, _)| {
+                            previous
+                                .beats
+                                .iter()
+                                .find(|beat| &beat.id == id && beat.screen_target.is_some())
+                        })
+                        .or_else(|| {
+                            previous.beats.iter().find(|beat| {
+                                beat.source_sha256 == hash
+                                    && beat.kind == kind
+                                    && beat.screen_target.is_some()
+                            })
                         })
                         .or_else(|| {
                             unmatched_targets

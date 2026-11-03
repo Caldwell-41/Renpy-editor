@@ -422,7 +422,10 @@ impl Effects<'_> {
                 self.unknown = true;
             }
             if matches!(node.kind.as_str(), "text" | "textbutton")
-                && node.literal.as_ref().is_some_and(|text| text.contains('['))
+                && node
+                    .literal
+                    .as_ref()
+                    .is_some_and(|text| text.contains(['[', '{']))
             {
                 self.unknown = true;
             }

@@ -35,6 +35,21 @@ class AdapterTests(unittest.TestCase):
         argv = command_argv(self.sdk, Command.LINT, self.project, allow_project_execution=True)
         self.assertEqual(argv[-3:], (str(self.project), "lint", "--error-code"))
 
+    def test_suite_case_selection_is_one_bounded_trusted_argument(self) -> None:
+        argv = command_argv(
+            self.sdk, Command.TEST, self.project, testcase="help_panel::keyboard_close",
+            allow_project_execution=True, platform="posix",
+        )
+        self.assertEqual(argv[-3:], (str(self.project), "test", "help_panel::keyboard_close"))
+        with self.assertRaisesRegex(AdapterError, "explicit trust"):
+            command_argv(self.sdk, Command.TEST, self.project,
+                         testcase="help_panel::keyboard_close", platform="posix")
+        for selector in ("help_panel::", "::keyboard_close", "help_panel::::keyboard_close",
+                         "help_panel::close now", "help_panel::close\n", "--help", "help_panel::close;run"):
+            with self.subTest(selector=selector), self.assertRaisesRegex(AdapterError, "testcase name"):
+                command_argv(self.sdk, Command.TEST, self.project, testcase=selector,
+                             allow_project_execution=True, platform="posix")
+
     def test_distribute_uses_absolute_launcher_project(self) -> None:
         (self.sdk / "launcher").mkdir()
         argv = command_argv(

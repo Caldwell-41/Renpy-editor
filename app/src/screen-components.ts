@@ -15,7 +15,7 @@ export interface ScreenComponentsHost {
   coordinate<T>(task: () => Promise<T>): Promise<T>;
   accepted(change: ComponentChange, selection: {screenId:string;nodeId:string}): Promise<CompositionView>;
   openDefinition(componentId: string, nodeId?: string): Promise<CompositionView>;
-  openScreen?(screenId: string, nodeId?: string): Promise<CompositionView>;
+  inspectScreen?(screenId: string): Promise<CompositionView>;
   captureDrafts?(view: CompositionView, trackNewDrafts?: boolean): readonly CopyDraftParticipant[];
   structureBlocked?(): boolean;
   source(target: SourceTarget): void;
@@ -90,16 +90,15 @@ export class ScreenComponents {
     if(current.screenId!==base.screenId || current.document.path!==base.document.path || current.document.revision!==base.document.revision)
       throw Error("Source changed. Your input is kept. Inspect Source before continuing.");
   }
-  private async resolve(view:CompositionView):Promise<ResolvedScreenTarget> {
+  private async resolve(view:CompositionView,current=view):Promise<ResolvedScreenTarget> {
     const owner=this.host.catalog()?.owned.find(owner=>owner.id===view.screenId);
     if(!owner?.resolved || owner.path!==view.document.path || owner.name!==view.screenName)throw Error("This owned screen is unavailable. Inspect Source.");
     const target=await this.host.request<ResolvedScreenTarget>("screens.resolveTarget",{binding:{screenId:owner.id,sourceName:owner.name}});
-    this.assertCurrent(view);
+    this.assertCurrent(current);
     if(target.revisions.source!==view.document.revision)throw Error("Source changed. Your input is kept. Inspect Source before continuing.");
     return target;
   }
-  private structuralView():CompositionView {
-    const view=this.view();
+  private structuralView(view=this.view()):CompositionView {
     if(this.host.structureBlocked?.() || this.host.captureDrafts?.(view).length)throw Error("Apply or cancel unfinished edits before changing component structure. Your input is kept.");
     return view;
   }
@@ -134,17 +133,17 @@ export class ScreenComponents {
     } finally {this.working=false;}
   }
   cancelExtraction():void { if(!this.working)this.extraction=undefined; }
-  async place(componentId:string,parentId:string):Promise<ComponentChange> {
+  async place(componentId:string,parentId:string,destination?:CompositionView):Promise<ComponentChange> {
     if(this.working)throw Error("Finish the current operation first.");
-    const view=this.structuralView(), owner=this.host.catalog()?.owned.find(owner=>owner.id===componentId && owner.kind==="component" && owner.resolved);
+    const base=this.view(), view=this.structuralView(destination??base), owner=this.host.catalog()?.owned.find(owner=>owner.id===componentId && owner.kind==="component" && owner.resolved);
     if(!view.nodes.some(node=>node.id===parentId && ["screen","fixed","frame","window","vbox","hbox","grid","viewport"].includes(node.kind)))
       throw Error("Choose the parent group for this component.");
     if(!owner)throw Error("This component is unavailable. Its saved identity is kept.");
     this.working=true;
     try {
-      const target=await this.resolve(view);
+      const target=await this.resolve(view,base);
       const component=await this.host.request<ResolvedScreenTarget>("screens.resolveTarget",{binding:{screenId:owner.id,sourceName:owner.name}});
-      this.assertCurrent(view);
+      this.assertCurrent(base);
       if(component.kind!=="component" || component.binding.screenId!==componentId)throw Error("The component reference changed. Inspect Source.");
       const change=await this.host.coordinate(()=>this.host.request<ComponentChange>("screens.componentPlace",{
         component:component.binding,expectedComponent:component.revisions,target:target.binding,expectedTarget:target.revisions,parentId,
@@ -389,12 +388,13 @@ export class ScreenComponents {
   private scopeContent(section:HTMLElement,view:CompositionView,id:string,state:{review?:ComponentReview;error?:string}):void {
     if(!state.review){section.append(el("p",state.error?"screen-component-error":"",state.error??"Loading affected screens…"));return;}
     const review=state.review,names=review.affectedScreens.map(owner=>displayName(owner.name));
+    const shared=names.length>1 || review.uses.filter(use=>use.componentId===id).length>1;
     section.dataset.componentId=id;section.dataset.componentRevision=review.component.revisions.source;
-    section.dataset.shared=String(names.length>1 || review.uses.filter(use=>use.componentId===id).length>1);
+    section.dataset.shared=String(shared);
     section.append(el("p","screen-component-scope-line",names.length>1?`Shared by ${names.join(" and ")}`:names.length?`Only ${names[0]}`:"This component is not used in a screen."));
     const tools=el("div","screen-component-actions");tools.append(action(`Used on ${names.length} ${names.length===1?"screen":"screens"}`,()=>this.run(()=>this.showUses(id))));
-    if(this.origin?.componentId===id && names.length>1)tools.append(action(`Make a copy for ${displayName(this.origin.view.screenName)}`,()=>this.nameDialog(true)));
-    else if(this.host.openScreen)tools.append(action("Add to another screen…",()=>this.run(()=>this.insertDialog(id))));
+    if(this.origin?.componentId===id && shared)tools.append(action(`Make a copy for ${displayName(this.origin.view.screenName)}`,()=>this.nameDialog(true)));
+    else if(this.host.inspectScreen)tools.append(action("Add to another screen…",()=>this.run(()=>this.insertDialog(id))));
     tools.append(action("Open Source",()=>this.run(()=>this.componentSource(id))));section.append(tools);
     section.dataset.sourceRevision=view.document.revision;
   }
@@ -414,15 +414,15 @@ export class ScreenComponents {
     const component=select("Component",components);if(preselected)component.value=preselected;
     const screen=select("Screen",panels),parent=select("Parent group",[]);
     if(panels.some(panel=>panel.id===base.screenId))screen.value=base.screenId;
-    let target:CompositionView|undefined,navigated=false;
+    let target:CompositionView|undefined;
     const submit=action("Insert component",()=>{},true);submit.type="submit";submit.onclick=null;submit.disabled=true;
     let sequence=0;
     const load=async()=>{
       const capture=++sequence;submit.disabled=true;target=undefined;parent.replaceChildren();
       try {
         let view:CompositionView|undefined;
-        if(screen.value===base.screenId && !navigated)view=base;
-        else {navigated=true;view=await this.host.openScreen?.(screen.value);}
+        if(screen.value===base.screenId)view=base;
+        else view=await this.host.inspectScreen?.(screen.value);
         if(capture!==sequence || this.dialog!==dialog)return;
         if(!view || view.screenId!==screen.value)throw Error("The selected screen could not be refreshed.");target=view;
         for(const node of view.nodes.filter(node=>node.id && ["screen","fixed","frame","window","vbox","hbox","grid","viewport"].includes(node.kind))){const option=el("option","",node.kind==="screen"?"Screen root":`${displayName(node.kind)} · byte ${node.span.start}`);option.value=node.id!;parent.append(option);}
@@ -431,10 +431,10 @@ export class ScreenComponents {
       }catch(failure){error.textContent=(failure as Error).message;}
     };
     screen.onchange=()=>{void load();};
-    const actions=el("div","screen-component-actions");actions.append(submit,action("Cancel",()=>close(navigated)));form.append(error,actions);dialog.append(form);
-    dialog.oncancel=event=>{event.preventDefault();close(navigated);};
+    const actions=el("div","screen-component-actions");actions.append(submit,action("Cancel",()=>close()));form.append(error,actions);dialog.append(form);
+    dialog.oncancel=event=>{event.preventDefault();close();};
     form.onsubmit=event=>{event.preventDefault();if(this.working || !target || !parent.value)return;submit.disabled=true;
-      void this.place(component.value,parent.value).then(()=>close(true)).catch(failure=>{error.textContent=(failure as Error).message;}).finally(()=>{submit.disabled=false;});};
+      void this.place(component.value,parent.value,target).then(()=>close(true)).catch(failure=>{error.textContent=(failure as Error).message;}).finally(()=>{submit.disabled=false;});};
     dialog.showModal();component.focus();await load();
   }
 }
