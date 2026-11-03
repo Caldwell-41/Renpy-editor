@@ -59,6 +59,22 @@ test compilation, production typechecking/build and whitespace pass. The
 coordinator self-reviewed the bounded correction; no duplicate review pair or
 new SDK campaign was started. Product/reference visual comparison remains open.
 
+Terra's completed production browser/core inspection at lane `7a41751` passes
+20 check groups, including both real-main Assets and dirty-appearance/insertion
+handoffs. It retains 29 viewport captures, zero page errors, four expected core
+refusals, driver exit zero and complete cleanup. That source predates `7207c8f`
+and the coordinator's deleted-Scene correction. It does not cover those fixes.
+The report identifies two further defects: Assets becomes unreachable after a
+captured image disappears, and no pending marker shows the selected insertion
+anchor. The coordinator restores the Assets action, disables creation after a
+known missing-image refusal without replacing the captured ID, and places an
+inert pending marker at the selected root/branch anchor with Cancel/Escape cleanup.
+Screen-Beat Cancel also uses the approved outlined treatment. Focused tests cover
+the refusal and marker location/cleanup. Creation's modal placement and small
+preview still differ materially from approved A4 and remain integration work.
+No whole-page visual match, engine canvas, native/package/CI or new runtime result
+is claimed by this browser run. Its engine boundary was intercepted deliberately.
+
 ## Selection and ownership, 2026-11-03
 
 Kris approved the coordinator's read-only plan for

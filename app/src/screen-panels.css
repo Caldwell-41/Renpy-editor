@@ -38,3 +38,4 @@
 .story-screen-secondary > details > summary, details.story-screen-secondary > summary { color:var(--accent-primary); text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
 .story-screen-secondary summary:focus-visible { outline:2px solid var(--accent-primary); outline-offset:3px; }
 .story-screen-secondary pre { white-space:pre-wrap; overflow-wrap:anywhere; }
+.story-screen-pending { border:1px dashed var(--accent-primary); color:var(--accent-primary); padding:10px 14px; margin:8px 0; font-size:12px; }

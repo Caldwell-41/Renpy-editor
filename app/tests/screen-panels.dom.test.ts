@@ -6,6 +6,16 @@ import type { UiImageAsset } from "../src/screen-images.js";
 
 const image: UiImageAsset = { id: "image", kind: "uiImage", displayName: "Tram emblem", relativePath: "game/images/emblem.png", sha256: "a".repeat(64), status: "available", naturalWidth: 80, naturalHeight: 40 };
 const tick = async () => { await new Promise(resolve => setTimeout(resolve, 0)); };
+
+test("a missing-image create refusal keeps Assets reachable and the original image identity",async()=>{
+ const browser=setup();let handed:unknown;
+ const initial={name:"route_help",kind:"dialog" as const,starter:"help" as const,assetId:image.id};
+ const view=buildPanelCreationForm({assets:[image],initialDraft:initial,openAssets:draft=>{handed=draft;},create:async()=>{throw Object.assign(Error("Image disappeared"),{code:"UI_IMAGE_MISSING"});},cancel:()=>{}});
+ try{document.body.append(view.element);submit();await tick();
+  assert.equal(view.element.querySelector<HTMLButtonElement>('[type="submit"]')!.disabled,true);
+  const assets=[...view.element.querySelectorAll<HTMLButtonElement>("button")].find(button=>button.textContent==="Open Assets")!;assert.equal(assets.hidden,false);assets.click();assert.deepEqual(handed,initial);
+ }finally{view.dispose();await browser.happyDOM.close();}
+});
 function setup() {
   const browser = new Window();
   Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, HTMLInputElement: browser.HTMLInputElement, HTMLSelectElement: browser.HTMLSelectElement, Event: browser.Event, KeyboardEvent: browser.KeyboardEvent });

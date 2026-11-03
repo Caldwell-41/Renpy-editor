@@ -82,6 +82,7 @@ export function buildPanelCreationForm(options: PanelCreationOptions) {
     if (!/^[A-Za-z_][A-Za-z_0-9]{0,63}$/.test(name.value)) throw Error("Use letters, numbers and underscores. Start with a letter or underscore.");
   });
   let disposed = false, busy = false, dirty = false, composing = false;
+  let unavailableImage: string | undefined;
   const active = () => !disposed && options.current?.() !== false;
   const media = options.presentImage ? new ScreenImageMedia(active,options.presentImage) : undefined;
   let previewGeneration = 0;
@@ -96,7 +97,7 @@ export function buildPanelCreationForm(options: PanelCreationOptions) {
   };
   const isHelp = () => [...starters.querySelectorAll<HTMLInputElement>("input")].find(control => control.checked)?.value === "help";
   const readDraft = (): PanelCreationDraft => ({name:name.value, kind:kind(), starter:isHelp() ? "help" : "blank", assetId:image.value});
-  const refresh = () => { summary.querySelector("p")!.textContent=kind()==="dialog"?"Close Help to continue the story.":defaults.explanation;purpose.textContent = kind() === "dialog" ? "Dialog · Close and Escape finish the interaction. Outside clicks keep it open." : "Panel · stays open while dialogue continues."; help.hidden = !isHelp(); const eligible=images.some(asset=>asset.id===image.value);create.disabled = busy || (isHelp() && !eligible);blocked.hidden=eligible;if(assets)assets.hidden=eligible;refreshPreview(); };
+  const refresh = () => { summary.querySelector("p")!.textContent=kind()==="dialog"?"Close Help to continue the story.":defaults.explanation;purpose.textContent = kind() === "dialog" ? "Dialog · Close and Escape finish the interaction. Outside clicks keep it open." : "Panel · stays open while dialogue continues."; help.hidden = !isHelp(); const eligible=images.some(asset=>asset.id===image.value)&&image.value!==unavailableImage;create.disabled = busy || (isHelp() && !eligible);blocked.hidden=eligible;refreshPreview(); };
   form.addEventListener("change", () => { dirty = true; refresh(); });
   form.addEventListener("input", () => { dirty = true; });
   form.addEventListener("compositionstart", () => { composing = true; });
@@ -115,7 +116,7 @@ export function buildPanelCreationForm(options: PanelCreationOptions) {
       if (isHelp()) {
         invalid = image;
         const asset = images.find(asset => asset.id === image.value);
-        if (!asset) throw Error("Help needs an available project UI image. Your name and starter choice are retained.");
+        if (!asset || asset.id===unavailableImage) throw Error("Help needs an available project UI image. Your name and starter choice are retained.");
         value.starter = { ...defaults, ...(kind()==="dialog"?{explanation:"Close Help to continue the story."}:{}), assetId: asset.id, expectedAssetSha256: asset.sha256 };
       }
       busy = true;
@@ -125,6 +126,7 @@ export function buildPanelCreationForm(options: PanelCreationOptions) {
       finally { busy = false; if (active()) { controls.forEach(({ control, disabled }) => { control.disabled = disabled; }); refresh(); } }
     } catch (failure) {
       if (!active()) return;
+      if ((failure as {code?:string})?.code === "UI_IMAGE_MISSING") { unavailableImage = image.value; refresh(); }
       dirty = true; error.textContent = `${failure instanceof Error ? failure.message : "Screen could not be created."} Input retained.`; invalid.focus();
     }
   });

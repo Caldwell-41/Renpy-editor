@@ -53,7 +53,7 @@ test("Story Show picker resolves only owned Panels and retains captured revision
 test("editor Escape cancels a new Hide operation without sending a game action or Beat write", async () => {
   const s = setup(); const panel = openNew(s.host, "hideScreen"); await tick();
   panel.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
-  assert.equal(panel.isConnected, false); assert.equal(s.commands.length, 0);
+  assert.equal(panel.isConnected, false); assert.equal(s.commands.length, 0);assert.equal(s.host.querySelector(".story-screen-pending"),null);
   await s.close();
 });
 
@@ -150,6 +150,7 @@ test("Call screen chooses only dialogs and retains the selected insertion anchor
   const picker=draft.querySelector<HTMLSelectElement>('[aria-label="Dialog screen"]');assert.ok(picker);assert.deepEqual([...picker.options].map(o=>o.value),[dialogBinding.screenId]);
   const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]');assert.ok(position);assert(![...position.options].some(o=>o.textContent==="End of body"));
   position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));
+  const marker=s.host.querySelector(".story-screen-pending");assert.ok(marker);assert.equal(marker.nextElementSibling?.getAttribute("data-beat-id"),"line");assert.match(marker.textContent!,/Pending Call screen/);
   button(draft,"Add Beat").click();await tick();
   assert.deepEqual(s.commands[0]!.body,{type:"root"});assert.deepEqual(s.commands[0]!.position,{type:"before",anchor:{type:"beat",beatId:"line"}});
   assert.deepEqual(s.commands[0]!.beat,{type:"callScreen",target:dialogBinding,revisions});
@@ -188,7 +189,7 @@ test("screen insertion keeps existing nested body ownership",async()=>{
  ]}]};const s=setup({},model);const draft=openNew(s.host,"showScreen");await tick();
  const body=draft.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;body.value="branch";body.dispatchEvent(new Event("change",{bubbles:true}));
  const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));button(draft,"Add Beat").click();await tick();
- assert.deepEqual(s.commands[0]!.body,{type:"branch",groupId:"group",branchId:"branch"});assert.deepEqual(s.commands[0]!.position,{type:"before",anchor:{type:"beat",beatId:"line"}});await s.close();
+ assert.deepEqual(s.commands[0]!.body,{type:"branch",groupId:"group",branchId:"branch"});assert.deepEqual(s.commands[0]!.position,{type:"before",anchor:{type:"beat",beatId:"line"}});assert.equal(s.host.querySelector(".story-screen-pending")!.parentElement?.getAttribute("data-branch-id"),"branch");button(draft,"Cancel").click();assert.equal(s.host.querySelector(".story-screen-pending"),null);await s.close();
 });
 
 test("a deleted insertion Scene retains intent and allows an explicit replacement position",async()=>{

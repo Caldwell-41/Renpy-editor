@@ -1148,7 +1148,7 @@ export function renderSceneAuthoring(
       if ((event.ctrlKey || event.metaKey) && event.key === "Enter") { event.preventDefault(); if(!event.isComposing&&!settling)settling=save(event.shiftKey).finally(()=>{settling=undefined;}); }
     });
     const screenBeat=["showScreen","hideScreen","callScreen"].includes(beat.payload.type);
-    if(screenBeat)panel.classList.add("story-screen-editor");
+    if(screenBeat){panel.classList.add("story-screen-editor");cancel.className="button secondary";}
     actionsRow.append(...(screenBeat?[commit,cancel]:[cancel,commit]));
     const secondary=panel.querySelector("details.story-screen-secondary");panel.append(actionsRow);if(secondary)panel.append(secondary);
     dirtyDraft(panel, editor.controls); card.append(panel);
@@ -1172,19 +1172,33 @@ export function renderSceneAuthoring(
     let locationConfirmed=!insertion || (!unavailableScene && insertion.expectedSourceRevision===scene.sourceRevision);
     const placementError=document.createElement("p");placementError.role="status";placementError.textContent=locationConfirmed?"":unavailableScene?"The original insertion Scene is unavailable. Choose a replacement position explicitly. Input retained.":"The original insertion Scene changed. Choose its position explicitly. Input retained.";
     const readLocation=()=>{if(!locationConfirmed)throw Error(placementError.textContent!);return placement.read();};
+    const pendingMarker=document.createElement("div");pendingMarker.className="story-screen-pending";pendingMarker.role="status";
+    const updatePendingMarker=()=>{
+      pendingMarker.remove();if(!screenType())return;
+      let location;try{location=readLocation();}catch{return;}
+      const body=location.body;
+      const bodyHost=body.type==="root"?host.querySelector<HTMLElement>(".beats-list"):[...host.querySelectorAll<HTMLElement>(".story-branch-body")].find(node=>node.dataset.branchId===body.branchId);
+      if(!bodyHost)return;
+      const anchor=location.position.type==="before"?location.position.anchor:undefined;
+      const before=anchor?.type==="beat"?[...bodyHost.querySelectorAll<HTMLElement>(".beat-card")].find(node=>node.dataset.beatId===anchor.beatId):anchor?.type==="condition"?[...bodyHost.querySelectorAll<HTMLElement>(".story-condition-group")].find(node=>node.dataset.conditionGroupId===anchor.groupId):undefined;
+      pendingMarker.textContent=`Pending ${beatLabels[type.value as BeatPayload["type"]]}`;
+      if(before)before.before(pendingMarker);else bodyHost.append(pendingMarker);
+    };
     const remember=()=>{if(screenType())try{actions.rememberScreenInsertion?.({sceneId:scene.id,...readLocation(),expectedSourceRevision:scene.sourceRevision});}catch{/* Retain the unavailable original position until an explicit choice. */}};
-    placement.host.addEventListener("change",()=>{locationConfirmed=true;placementError.textContent="";remember();});
+    placement.host.addEventListener("change",()=>{locationConfirmed=true;placementError.textContent="";remember();updatePendingMarker();});
     const editorHost = document.createElement("div"),secondaryHost=document.createElement("div");secondaryHost.className="story-screen-secondary";
     let editor = buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, actions);
     const typeDrafts = new Map<string, BeatEditor>([[type.value, editor]]);
     const replaceEditor = (): void => { placement.host.hidden=!screenType();destination.hidden=screenType();remember();editor = typeDrafts.get(type.value) ?? buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, actions); typeDrafts.set(type.value, editor); editorHost.replaceChildren(editor.host);secondaryHost.replaceChildren(...(editor.secondary?[editor.secondary]:[]));panel.classList.toggle("story-screen-editor",screenType());dirtyDraft(panel, editor.controls); };
     type.addEventListener("change", replaceEditor); replaceEditor();
     const actionsRow = document.createElement("div"); actionsRow.className = "row-actions";
-    const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => panel.remove());
+    const cancel = button("Cancel", screenType()?"button secondary":"text-button");
+    const cancelDraft=()=>{pendingMarker.remove();panel.remove();};cancel.addEventListener("click",cancelDraft);
+    type.addEventListener("change",()=>{cancel.className=screenType()?"button secondary":"text-button";updatePendingMarker();});
     let pending=false;
     panel.addEventListener("keydown", event => {
       if (event.key !== "Escape" || event.isComposing || composing || !["showScreen", "hideScreen", "callScreen"].includes(type.value)) return;
-      event.preventDefault(); event.stopPropagation(); if (!pending) panel.remove();
+      event.preventDefault(); event.stopPropagation(); if (!pending) cancelDraft();
     });
     const commit = button("Add Beat", "button primary"); commit.addEventListener("click", async () => {
       if(pending || composing)return;
@@ -1209,7 +1223,7 @@ export function renderSceneAuthoring(
       }finally{pending=false;}
     });
     const orderActions=()=>actionsRow.replaceChildren(...(screenType()?[commit,cancel]:[cancel,commit]));orderActions();type.addEventListener("change",orderActions);
-    dirtyDraft(panel,[type,...placement.host.querySelectorAll("select")]);panel.append(heading,destination,labelled("Beat type",type),placement.host,placementError,editorHost,actionsRow,secondaryHost);list.prepend(panel);type.focus();
+    dirtyDraft(panel,[type,...placement.host.querySelectorAll("select")]);panel.append(heading,destination,labelled("Beat type",type),placement.host,placementError,editorHost,actionsRow,secondaryHost);list.prepend(panel);updatePendingMarker();type.focus();
   };
 
   draw();
