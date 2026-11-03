@@ -100,14 +100,21 @@ try{
  await page.getByRole('button',{name:'Screens',exact:true}).click();await ui.getByRole('treeitem',{name:'Text button · Pending close',exact:true}).press('Enter');await ui.locator('.screen-dismissal select').selectOption('finishInteraction');
  const base=await call('source.open',{path:owner.path}),renamed=await call('source.updateDraft',{path:owner.path,expectedBaseRevision:base.baseRevision,text:base.text.replace('screen a4_dialog():','screen renamed_a4_dialog():'),selectionStart:0,selectionEnd:0});
  await call('source.save',{path:owner.path,expectedBaseRevision:renamed.baseRevision,expectedDraftVersion:renamed.draftVersion});
+ assert.equal((await call('screens.list')).owned.find(item=>item.id===owner.id).resolved,false);
  await ui.getByRole('button',{name:/^1\s+Choose$/}).click();await ui.getByRole('button',{name:'Refresh Source',exact:true}).click();
- const retained=ui.locator('.screen-dismissal-retained');await retained.getByText(/Pending close/).waitFor();await capture('unresolved-action-draft');await retained.getByRole('button',{name:'Cancel action draft'}).click();await retained.waitFor({state:'detached'});
+ const retained=ui.locator('.screen-dismissal-retained');await retained.getByText(/Pending close/).waitFor();await capture('unresolved-action-draft');
+ const closes=count('project.close');await page.getByRole('button',{name:'Close Project',exact:true}).click();assert.equal(count('project.close'),closes);assert(await retained.isVisible());
+ await retained.getByRole('button',{name:'Cancel action draft'}).click();await retained.waitFor({state:'detached'});
  await page.getByRole('button',{name:'Close Project',exact:true}).click();await page.locator('.recent-open').waitFor();result.checks.push('an unresolved screen keeps its original Finish draft cancellable and does not trap project close');
  assert.equal(result.checks.length,5);assert.deepEqual(result.pageErrors,[]);result.passed=true;
 }catch(error){result.failure={message:error.message,stack:error.stack};if(page){await writeFile(join(output,'failure.txt'),await page.locator('body').innerText());await page.screenshot({path:join(output,'failure.png'),fullPage:true});}throw error;}
 finally{
- await browser?.close();await server?.close();
- try{await child.stop();await assert.rejects(access(scratch));result.cleanupComplete=true;}catch(error){result.passed=false;result.cleanupFailure=error.message;throw error;}
- finally{result.driver=child.exitStatus();result.requests=requests;await writeFile(join(output,'result.json'),JSON.stringify(result,null,2)+'\n');}
+ const cleanupFailures=[];
+ try{await browser?.close();}catch(error){cleanupFailures.push(`browser: ${error.message}`);}
+ try{await server?.close();}catch(error){cleanupFailures.push(`server: ${error.message}`);}
+ try{await child.stop();await assert.rejects(access(scratch));}catch(error){cleanupFailures.push(`driver: ${error.message}`);}
+ result.cleanupComplete=cleanupFailures.length===0;if(cleanupFailures.length){result.passed=false;result.cleanupFailures=cleanupFailures;}
+ result.driver=child.exitStatus();result.requests=requests;await writeFile(join(output,'result.json'),JSON.stringify(result,null,2)+'\n');
+ if(cleanupFailures.length)throw Error(`Cleanup incomplete: ${cleanupFailures.join('; ')}`);
 }
 console.log(`PASS A4 recovery: ${result.checks.length} production-main/core groups; no SDK/helper.`);
