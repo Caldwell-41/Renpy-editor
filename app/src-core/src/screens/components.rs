@@ -712,8 +712,8 @@ impl AuthoringService {
                 .find(|screen| screen.name == owner.screen.name)
                 .ok_or(SceneError::ReferenceBlocked)?;
             if references::qualified_interaction(&owner.screen, raw_screen, &bytes)
-                .spans
-                .keys()
+                .contextual
+                .iter()
                 .any(|start| *start >= node.span.start && *start < node.source_end)
             {
                 return Err(SceneError::OpaqueBoundary);

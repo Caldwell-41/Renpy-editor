@@ -290,6 +290,7 @@ fn component_height<'a>(
 #[derive(Default)]
 pub(super) struct InteractionQualification {
     pub(super) spans: BTreeMap<usize, bool>,
+    pub(super) contextual: BTreeSet<usize>,
     pub(super) blocking: bool,
 }
 
@@ -300,9 +301,6 @@ pub(super) fn qualified_interaction(
     bytes: &[u8],
 ) -> InteractionQualification {
     let mut qualified = InteractionQualification::default();
-    if owner.kind == OwnedScreenKind::Component {
-        return qualified;
-    }
     for node in &screen.nodes {
         let mut statements = Vec::new();
         let mut counts = BTreeMap::<&str, usize>::new();
@@ -321,6 +319,13 @@ pub(super) fn qualified_interaction(
             if !single || counts[key] != 1 {
                 continue;
             }
+            if node.kind == "textbutton" && code == "action Null()" {
+                qualified.spans.insert(start, false);
+                continue;
+            }
+            if owner.kind == OwnedScreenKind::Component {
+                continue;
+            }
             let modal = match owner.kind {
                 OwnedScreenKind::Panel => "modal False",
                 OwnedScreenKind::Dialog => "modal True",
@@ -332,6 +337,7 @@ pub(super) fn qualified_interaction(
                 qualified.blocking |=
                     node.kind == "screen" && owner.kind == OwnedScreenKind::Dialog;
                 qualified.spans.insert(start, false);
+                qualified.contextual.insert(start);
                 continue;
             }
             if owner.kind == OwnedScreenKind::Dialog {
@@ -339,6 +345,7 @@ pub(super) fn qualified_interaction(
                     || (node.kind == "textbutton" && code == "action Return()")
                 {
                     qualified.spans.insert(start, true);
+                    qualified.contextual.insert(start);
                 }
                 continue;
             }
@@ -353,6 +360,7 @@ pub(super) fn qualified_interaction(
             .and_then(|s| serde_json::from_str::<String>(s).ok());
             if hide.as_deref() == Some(owner.name.as_str()) {
                 qualified.spans.insert(start, true);
+                qualified.contextual.insert(start);
             }
         }
     }

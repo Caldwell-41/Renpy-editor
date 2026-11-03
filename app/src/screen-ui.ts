@@ -353,6 +353,8 @@ export class ScreensWorkspace {
         ...this.layoutChanges(node ?? this.nodes()[this.selected]!,command.layout ?? {}),
       ];
     }
+    // Context-bound dismissal is local; reusable components cannot own this edit.
+    if (command.type === "dismissal") return [];
     if (command.type === "remove") return [{label:"Element",before:node?.literal ?? names[node?.kind ?? ""] ?? "Element",after:"Removed"}];
     if (command.type === "add") return [{label:"Element",before:"None",after:`${names[command.kind] ?? command.kind}${command.text ? `: ${command.text}` : ""}`}];
     const siblings = this.nodes().filter(item => item.parentStart === node?.parentStart), before = siblings.indexOf(node!), target = siblings.findIndex(item => item.id === command.targetId);

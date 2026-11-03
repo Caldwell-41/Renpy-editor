@@ -666,7 +666,10 @@ subtree containing contextual dismissal statements from either screen kind.
 The resolved target exposes `blocking`, derived once from a single exact root
 `modal True` declaration. Missing, false, calculated or duplicate modality makes
 an owned dialog nonblocking and its effects unknown. Authored Call admission uses
-this captured result rather than reparsing source in Story.
+this captured result rather than reparsing source in Story. Exact standalone
+`action Null()` is inert and remains editable and extractable for every owned
+screen kind. It is separate from the contextual modality, focus, Return and Hide
+spans that cannot move into a reusable component.
 
 `screens.create` accepts an optional `kind`, defaulting to panel. A dialog Help
 starter shares the panel content builder and emits `modal True`, game-menu Return

@@ -8,13 +8,18 @@ Continue on local integration branch `codex/help-dialog-canvas`, based on
 integration, verification and final review. The source-map v8 dialog/Finish and
 creation/blocking checkpoints have focused passing evidence. The Dialog builder is
 integrated, and blank/Help dialog creation uses the existing transaction. Call
-runtime, affected UI and full base-canvas qualification remain pending.
+runtime proof, affected UI and full base-canvas qualification remain pending. The
+Call/Finish backend is integrated as `3a7664c`; its eight public-core cases pass.
+The shared Null editability correction preserves component extraction and context
+refusal. Transfer its checkpoint to the lanes before their final portable handoff.
 
 [The coordination/evidence record](../tasks/evidence/help-dialog-and-canvas.md)
 owns file boundaries, test results and next actions. Dialog/Story and Canvas work on
 `t3/help-dialog-story-call` and `t3/help-canvas-rendering-fidelity`. The sole prototype
-chat uses `t3/help-dialog-design-prototype`. Transfer the shared creation/resolver
-checkpoint to the lanes, then continue independent backend and comparison work.
+chat uses `t3/help-dialog-design-prototype`, with unapproved A1/B1/C1 choices.
+Both lanes consumed the shared creation/resolver checkpoint. Canvas is correcting
+four offline gate/proof findings and checking actual draft/saved button parity;
+Dialog/Story is finishing its frozen normal-entry exporter and qualifier.
 The Dialog/Story agent must receive the approved source/design/evidence directly
 from that prototype before changing affected production UI. Browser and
 desktop work goes to Terra Max. Workers follow the implement skill and commit.

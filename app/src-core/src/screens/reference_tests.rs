@@ -1,6 +1,70 @@
 use super::*;
 
 #[test]
+fn inert_button_action_stays_editable_and_extractable() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let group = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"vbox","text":""}),
+    );
+    let button = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":group["selectedId"],"kind":"textbutton","text":"Optional"}),
+    );
+    let source = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .replace("action Null()", "action Null() # keep inert");
+    save_composition_source(&mut service, &owner, &source);
+    let document = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    ipc(
+        &mut service,
+        "screens.componentPrepareExtract",
+        json!({
+        "screenId":owner["id"],"nodeId":group["selectedId"],"expectedRevision":document["revision"]}),
+    );
+    let target = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":{
+        "screenId":owner["id"],"sourceName":owner["name"]}}),
+    );
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    ipc(
+        &mut service,
+        "screens.componentExtract",
+        json!({
+        "target":target["binding"],"expected":target["revisions"],
+        "expectedProjectRevision":catalog["projectRevision"],"nodeId":group["selectedId"],"name":"inert_content"}),
+    );
+    let copied = fs::read_to_string(root.join("game/ui/inert_content.rpy")).unwrap();
+    assert!(copied.contains("action Null() # keep inert"));
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        fs::read_to_string(root.join(owner["path"].as_str().unwrap())).unwrap(),
+        source
+    );
+    compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"remove","nodeId":button["selectedId"]}),
+    );
+    let removed = fs::read_to_string(root.join(owner["path"].as_str().unwrap())).unwrap();
+    assert!(!removed.contains("Optional") && !removed.contains("Null()"));
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        fs::read_to_string(root.join(owner["path"].as_str().unwrap())).unwrap(),
+        source
+    );
+}
+
+#[test]
 fn blank_dialog_creation_uses_one_transaction_and_rejects_component_kind() {
     let (_temporary, mut service, root, _) = composition_project();
     let catalog = ipc(&mut service, "screens.list", json!({}));

@@ -197,3 +197,41 @@ to provision the assigned fresh checkout without an origin fetch or setup-script
 execution. Preserve the primary checkout and existing worktrees. Execution paths
 and process identities remain in the private T3 preflight receipt. Transfer and
 qualification have not started. Both ticket SDK counters remain zero.
+
+## Call/Finish backend integration and inert button correction
+
+Dialog/Story committed backend `576ae2999700cb48ef5f32785af087064a4ac03f`, integrated
+as `3a7664c`. The coordinator inspected the Call parser/reconciliation, current
+blocking/effect admission and bounded dismissal implementation before integration.
+Call uses the existing transactional Story path, separate from Scene Call/Story
+Return. The new dismissal command edits only a qualified expression range through
+composition. New textbuttons contain a standalone inert `action Null()`.
+
+The new shape exposed an existing shared qualification limit: Null remained
+protected, blocking ordinary removal and component extraction. The public-core
+regression first failed with `OPAQUE_BOUNDARY`. The coordinator now qualifies exact
+single Null as inert for all owned kinds and records contextual spans separately;
+extraction still refuses modality, focus, Return and Hide. The regression uses
+actual Add, retains an inline action comment through extraction/Undo, then proves
+remove/Undo preserves the same source. It passes after correction. Eight dialog
+public-core tests and five Help builder tests also pass on the integrated backend.
+Production/test typechecking, formatting and whitespace checks pass.
+
+The existing TypeScript `CompositionCommand` union now accepts the bounded
+`dismissal` command. Its shared component-change mapping treats dismissal as local;
+no new control or copy is exposed before prototype approval. The lane receives this
+shared checkpoint and owns its held direct Add/remove case. Canvas receives the
+actual backend producer for a focused saved/draft plan parity check; no renderer
+change is yet justified by its data-only projection.
+
+The prototype displays unapproved inspector/steps/Story-split choices in its sole
+user-iterable chat. Its current candidate is `8dfd15f`, with source and final browser/
+Design Lab checks still underway; no approval is inferred from display or earlier
+checks. The direct approved source/control-map handoff remains mandatory.
+
+Canvas's initial independent reviews found four unique proof/gate issues: explicit
+UTF8, retained helper failure/count/shutdown receipts, opaque uniform-frame refusal,
+and binding to expected reviewed candidate and designated binary. The lane is
+correcting them with offline rejection checks. These were not production-renderer
+findings. Both lanes' runtime exporters/gates and all new SDK proof remain pending;
+no SDK/helper/native/package/CI process has started.
