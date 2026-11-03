@@ -165,3 +165,35 @@ The 15 existing Story panel tests also pass. An initial wrong Story module filte
 ran zero tests and establishes no proof; the corrected named filter ran all 15.
 A TypeScript fixture missing the new blocking field was corrected, then test
 compilation passed. Normal-play, matched-target, UI and final review remain pending.
+
+## Windows read-only preflight
+
+The SUNDOWN preflight completed with no file, checkout, stash or process changes,
+and no SDK/helper/native/package/test/build/CI start. The registered project and
+origin match Loomlight. Windows 11 x64 reports build `10.0.26200.9711`; WMI access
+was refused, while Python corroborates the OS. Node 24.19.0, npm 11.9.0,
+Rust/Cargo 1.90.0 and Python 3.12.14 with Pillow 12.3.0 are available. Existing MSVC
+and Windows SDK library files are present; no compilation ran.
+
+The official Ren'Py 8.5.3 archive hashes to
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`.
+The staged SDK exists, but its entire tree was not compared to the archive. No
+SDK version, discovery or adapter validation ran. Prior #41/#44 normal-game ANGLE2
+and #36 private-desktop/helper cleanup receipts establish earlier capability only.
+They do not qualify the current source, current private-desktop/display readiness
+or either selected ticket.
+
+The primary checkout stays clean on `codex/phase3b-audit-fixes` at
+`039f22ce3c118f408145573ccedfeac0e93b7b70`, with its protected stash unchanged.
+The new local-only shared commits are absent there. Existing secondary worktrees
+remain reserved; sandbox ownership checks refused their status without changing
+Git safety configuration. Their cleanliness and live ownership are unproved.
+No Loomlight/Ren'Py process was observed. Existing unrelated Python processes were
+left alone, and protected draft/credential contents were not read.
+
+After the integrated candidate is fixed, use a private hashed Git bundle through
+the existing authenticated Taildrop route, verify/import to a new ref, and ask T3
+to provision the assigned fresh checkout without an origin fetch or setup-script
+execution. Preserve the primary checkout and existing worktrees. Execution paths
+and process identities remain in the private T3 preflight receipt. Transfer and
+qualification have not started. Both ticket SDK counters remain zero.

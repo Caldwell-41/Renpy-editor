@@ -19,8 +19,11 @@ The Dialog/Story agent must receive the approved source/design/evidence directly
 from that prototype before changing affected production UI. Browser and
 desktop work goes to Terra Max. Workers follow the implement skill and commit.
 
-Mac is the development host. SUNDOWN was reachable; Windows capability and active
-ownership need preflight. No SDK/helper/package/native/CI campaign has started.
+Mac is the development host. SUNDOWN's read-only preflight confirms pinned tools,
+verified SDK archive and prior ANGLE2/helper capability. The new candidate is absent
+there; transfer only the fixed candidate into a fresh assigned checkout. Preserve
+its clean primary checkout, protected stash and reserved worktrees. No
+SDK/helper/package/native/CI campaign has started.
 The evidence owner records #45/#46 SDK matrices and ceilings; frozen producers and
 offline gates need audit before starts. Prior allowances
 remain closed. No push/PR/merge/issue closure/release is selected, and required
