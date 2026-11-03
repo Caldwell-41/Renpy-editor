@@ -4,11 +4,14 @@
 
 The selected local implementation is delivered on `codex/help-dialog-canvas`,
 from `e32ded4`; final code candidate is `cbe5bb3`. Both implementation lanes are
-complete and frozen, with shared contracts, integration, review and finding fixes
-owned by the coordinator. [The evidence owner](../tasks/evidence/help-dialog-and-canvas.md)
+preserved, with shared contracts, integration, review and finding fixes owned by
+the coordinator. [The evidence owner](../tasks/evidence/help-dialog-and-canvas.md)
 records exact scopes and [final UI captures](../tasks/evidence/help-dialog-and-canvas-ui/verification.json).
-Next action is Kris's review of the local delivery and remaining acceptance limits.
-No push, PR, merge, issue closure or release is selected.
+Kris then requested continued subagent implementation until both tickets are
+complete before CI. Hold publication and CI. Reconcile the live bounded criteria,
+complete any remaining A4 functionality and visual corrections, integrate committed
+lane work and review the result before resuming the draft PR. No new SDK/package/native
+qualification matrix, merge, issue closure or release is selected.
 
 Blocking Dialog creation/resolution, Call/Finish, conservative source/history and
 inert Null editing are implemented. Kris approved A4, `inspector-v4`, at source
@@ -60,8 +63,10 @@ to the same linked PC through Taildrop, recording payload/hash and excluding pri
 game content/build output. Synchronize only the assigned test checkout.
 
 Stop SDK failures for coordinator review; reviewed corrections may proceed within
-the approved ceilings. No native editor/package/CI launch, push/PR/merge/issue closure
-or release is selected. Preserve the unrelated untracked audit, ignored evidence,
+the approved ceilings. Draft publication and ordinary CI remain deferred pending
+the completion pass. No native editor, package, new SDK matrix, merge, issue closure
+or release is selected.
+Preserve the unrelated untracked audit, ignored evidence,
 SDK archives and protected recovery state. No selected qualification process is
 running. Preserve the local delivery for Kris's review and keep its evidence scope
 separate from unselected native/package/CI or wider editor acceptance.

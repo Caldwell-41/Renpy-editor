@@ -1,5 +1,40 @@
 # Help dialog and base canvas delivery evidence
 
+## Completion pass before publication and CI, 2026-11-04
+
+After asking whether both tickets were fully implemented, Kris requested continued
+subagent implementation until completion before CI. No PR, push or CI run had
+started. Prepared workflow changes remain local and deferred. The coordinator
+reread #45/#46 and their parent/group scopes. Assess completion against the leaves'
+bounded criteria; wider native/package, physical-input and aggregate 3B acceptance
+remain separate unless a required leaf behavior depends on them.
+
+Ownership for the continuation is split by dependency: Sol owns approved A4 control
+and controller corrections in `screen-panels.ts`, `screen-panels.css`, `scene-ui.ts`
+and focused lane tests. Terra owns browser diagnosis and evidence only, including
+the unexplained compact capture; it makes no production edits. Each receives a
+separate T3 worktree at the current committed integration head. The coordinator
+owns shared `screen-ui.ts`/`main.ts`, Rust/contracts, integration, canonical evidence,
+CI and final review. Existing approved source and all earlier failures are preserved.
+Neither lane may start SDK/helper/native/package/CI processes or publish. A concrete
+need for those operations returns to the coordinator with scope and accounting.
+
+## Draft PR and routine CI selected, 2026-11-04
+
+Kris selected draft publication and CI updates. The validation plan now names
+`codex/help-dialog-canvas` against `codex/phase3b-screen-designer`, with no manual
+qualification matrix. Ordinary quality adds the nine Dialog and six Canvas offline
+admission cases, five focused core selections and the actual Dialog controller/core
+journey. Each core selection must report positive passes with zero failures and
+ignores. Failure evidence retains the producing executables and source receipts,
+then passes the existing privacy scan before upload.
+
+Local checks for this CI change pass: 18 validation-controller cases, nine Dialog
+gates, six Canvas gates and 27 tests across the five core selections. Workflow YAML
+parsing and whitespace checks pass. These checks start no Ren'Py SDK or helper.
+The implementation and acceptance limits below still apply. Draft publication
+does not close either ticket or select merge, package or release acceptance.
+
 ## Local delivery, 2026-11-04
 
 The selected implementation is committed on `codex/help-dialog-canvas`; final

@@ -11,7 +11,7 @@ the coordinator owns shared contracts, review findings, integration and final re
 | --- | --- | --- |
 | Help dialog and Story Call/Finish | A4 UI is integrated; final controller/core and five production-main recovery groups pass; eight normal-entry cases pass per target at recorded candidates | Whole-page/compact visual limits and final user acceptance |
 | Base Help canvas | Eight matched cases per target have exact pixels and geometry at `4c084a4`; lossless geometry transport is tested | Wider canvas/native/physical acceptance stays separate |
-| Combined implementation | Independent Standards zero; Spec P2 and Terra findings resolved; 361 frontend routine passes, 34 final focused passes and final production build pass | No known functional finding; publication is unselected |
+| Combined implementation | Independent Standards zero; Spec P2 and Terra findings resolved; 361 frontend routine passes, 34 final focused passes and final production build pass | Completion pass reopened with subagents before publication or CI |
 
 Kris approved A4 (`inspector-v4`) at source `8851689`; B4/C4 remain drafts.
 Final code is `cbe5bb3`, with the exact approved reference and retained product
@@ -19,15 +19,17 @@ captures committed separately from the production renderer. Help still requires
 a typed UI image; insertion remains client-only existing Scene/body/Position
 context. Missing images, deleted placement Scenes and unresolved action drafts
 retain intent and expose explicit recovery. No implicit Apply, Beat or Blank
-fallback is introduced. Both implementation lanes are complete and frozen.
+fallback is introduced. Kris requested another subagent completion pass against
+both live tickets before publication or CI. The earlier implementation is preserved.
 The final main/core probe records zero page errors and complete cleanup. It
 intercepts engine rendering before dispatch. Whole-page pixel identity is not
 claimed; a compact PNG repetition also present in the earlier Terra capture
 remains unexplained. Native/physical and broader editor acceptance remain separate.
 [Delivery evidence](../tasks/evidence/help-dialog-and-canvas.md) owns candidates,
 checks, earlier failures, operation counts and exact scope. Physical/human and
-published package/CI acceptance remain separate. Neither ticket is closed; this
-work remains local, with no publication, merge or release selected.
+package/native acceptance remain separate. Neither ticket is closed. The draft PR
+and CI are held until this completion pass is integrated and reviewed. No new
+SDK/package qualification matrix, merge or release is selected.
 
 ## Components and Help panel merged and accepted
 
