@@ -156,7 +156,7 @@ export class ScreenDismissal {
     const view=this.host.view(),kind=this.host.kind();
     for(const [key,draft] of this.drafts){
       const selected=view?.selected as (ScreenNode & {dismissal?:string|null})|undefined;
-      if(view?.screenId===draft.screenId && selected?.id===draft.nodeId && selected.dismissal!=null && (kind==="panel"||kind==="dialog"))continue;
+      if(view?.step==="design" && view.screenId===draft.screenId && selected?.id===draft.nodeId && selected.dismissal!=null && (kind==="panel"||kind==="dialog"))continue;
       const notice=element("section","screen-dismissal-retained");notice.role="status";
       notice.append(element("p","",`${draft.screenName} / ${draft.nodeName}: ${draft.action==="finishInteraction"?"Finish interaction":"Hide this panel"} draft retained.`),element("p","",`Original source: ${draft.base.path}. Select the original button to continue editing, or cancel this draft.`));
       const cancel=element("button","button secondary","Cancel action draft");cancel.type="button";cancel.disabled=this.saving;

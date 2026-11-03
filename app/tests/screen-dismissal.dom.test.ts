@@ -29,10 +29,10 @@ test("removed or custom-action targets keep a reachable source-bound Cancel",asy
  let view:CompositionView|undefined={document:base,screenId:"original-screen",screenName:"help",selected:node,nodes:[node],step:"design",busy:false};
  const helper=new ScreenDismissal({view:()=>view,kind:()=>"dialog",current:()=>true,commit:async()=>{throw Error("Must not write");},redraw:()=>{},note:()=>{}});
  const host=document.createElement("main");document.body.append(host);
- for(const mode of ["missing","custom"]){
+ for(const mode of ["missing","custom","choose"]){
    view={document:base,screenId:"original-screen",screenName:"help",selected:{...node,dismissal:"none"} as typeof node,nodes:[node],step:"design",busy:false};host.replaceChildren();helper.render(host);
    host.querySelector("select")!.value="finishInteraction";host.querySelector("select")!.dispatchEvent(new Event("change",{bubbles:true}));
-   if(mode==="missing")view=undefined;else view={...view,selected:{...node,dismissal:null} as typeof node,document:{...base,path:"game/ui/changed.rpy",revision:"new"}};
+   if(mode==="missing")view=undefined;else if(mode==="choose")view={...view,step:"choose"};else view={...view,selected:{...node,dismissal:null} as typeof node,document:{...base,path:"game/ui/changed.rpy",revision:"new"}};
    host.replaceChildren();helper.renderRetained(host);assert.match(host.textContent!,/original_help.rpy/);assert.match(host.textContent!,/Close/);
    assert.equal(helper.hasDraft(),true);[...host.querySelectorAll("button")].find(b=>b.textContent==="Cancel action draft")!.click();assert.equal(helper.hasDraft(),false);
  }
