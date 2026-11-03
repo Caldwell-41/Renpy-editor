@@ -1177,9 +1177,10 @@ diff remain under ignored `.toolchains/pr77-review/core-failed-01`. A passing fo
 run does not convert that failed broad run into a pass.
 
 The Help template change invalidates reuse of earlier exact-source Help SDK proof.
-The existing #44 count remains 26/27, zero reserved and zero new starts. A user
-decision is pending for one nine-start campaign per target, with a cumulative cap
-of 44 if approved. Component SDK evidence retains its original candidate and scope.
+At this checkpoint #44 remained 26/27, zero reserved and zero new starts, pending
+the user's decision on one nine-start campaign per target and a cumulative cap of
+44. The fresh SDK closeout below records that later approval and execution.
+Component SDK evidence retains its original candidate and scope.
 The existing executable PR plan still requires automatic quality and paired
 Windows/macOS harness jobs at the eventual PR head. PR #77 owns subsequent exact-head
 core/CI and cleanup receipts; #44 owns live SDK selection and cumulative counts.
@@ -1218,3 +1219,69 @@ browser authoring against the real core, not SDK, native canvas or physical inpu
 Existing no-image starter selector/preview/colour differences from A2 remain outside
 the six fixes, with full visual conformance unclaimed. Historical prototype source
 and captures stay pinned.
+
+## Fresh Help SDK proof and review closeout, 2026-11-03
+
+The parent audits all six original findings with no remaining actionable instance.
+At `1cc4f656ce2f10a19e74d47d10d13a919f35f551`, the final coherent ordinary core run
+passes 556 tests, zero failures, 54 intentional ignores and three documented
+exclusions in 532.05 seconds. Its log SHA-256 is
+`b29360ed4385c9e1f735e5b90e423e00bdbfdfe4ce0f302933bb9f24aa697781`.
+The original failed run and unexplained descendant assertion remain preserved;
+the later pass does not establish a runtime fix.
+
+Automatic runs `41614002459` and `41614392273`, and selected paired harness run
+`41614389267`, all attempt 1, pass at that exact head. The parent audits every
+executed step, both ZIP digests/manifests and all 784 declared input hashes per
+host against Git checkout filters. The [CI and cleanup receipt](https://github.com/Caldwell-41/Renpy-editor/pull/77#issuecomment-6600581437)
+and [final core audit](https://github.com/Caldwell-41/Renpy-editor/pull/77#issuecomment-6600595992)
+retain their terminal scope. Both review worker checkouts are removed; verifier
+evidence is hash-preserved, and cancelled draft recovery commit `fcb5098` remains
+local. Existing feature/prototype/recovery worktrees are protected.
+
+Kris explicitly approves one fresh nine-start Help campaign on macOS ARM64 and one
+on Windows x64, raising [#44](https://github.com/Caldwell-41/Renpy-editor/issues/44)'s
+cumulative ceiling from 27 to 44. Both use fresh public-core exports at `1cc4f65`
+and the checksum-pinned official Ren'Py 8.5.3 archive. Each campaign runs version,
+compile, lint and six separate normal-entry cases with unchanged 30/90/90/45-second
+bounds, the two-million-byte output limit and no SDK retries.
+
+Both campaigns pass. The parent independently verifies all 18 observed launcher
+starts, exit codes, bounds, source hashes and process/scratch cleanup, then
+re-admits all twelve raw logs with the existing validator. Both sets prove Show
+through dialogue, authored Hide, re-show/Close, outside-click persistence, default
+Escape and observed-focus keyboard Close. The 191 input hashes per host agree
+with Git's checkout bytes, including declared CRLF transformations.
+
+| Identity | macOS ARM64 | Windows x64 |
+| --- | --- | --- |
+| Accepted manifest SHA-256 | `3a7213dc564709d946937f2a86c4f55aae54de4bb197a43a37d0e76c8574f04f` | `b5c0b8889fd862cb295a05d41f72825c43a587191ff6df6293a08dfef342d96d` |
+| Exporter binary SHA-256 | `bb321204bb41a6c063bc2ffc3517637afeeb2182b608724c6247d59c642d57e9` | `64dcfaf148ae41e67104fc64e364b0ce9c82bcde33d2b3e46a3e26df7d8f9634` |
+| Actual launcher starts | 9 | 9 |
+| SDK command duration, excluding setup/extraction | 10.784 seconds | 29.532 seconds |
+
+The returned Windows ZIP is 11,056,216 bytes with 65 safe entries and SHA-256
+`f72b139e5efeb9c30bf09f7875ec4795f814ef070ddba13a05e603aaaa8c9637`.
+The parent verifies its 64-file inventory, SHA-256
+`220681226bba01eca9902aeb4832d36801bbde45d122fc2f40fcbea3ad87df93`,
+fresh producer, retained binary and all raw case logs. Local copies remain ignored
+under `.toolchains/pr77-review/windows-help-return`; Mac evidence and inventories
+remain under this worktree's ignored `app/target` and `.toolchains/pr77-review`.
+No private logs, absolute host paths or binaries are committed.
+
+One Mac output-path refusal and three Windows setup refusals start zero SDK
+processes. Windows failures concern nested PowerShell quoting, outer Python
+command quoting and a rustup-shim path differing from the retained concrete
+toolchain path. Disposable script files and the previously qualified toolchain
+PATH correct setup only; no source, driver, admission or command semantics change.
+The first returned refusal log is reconstructed and labelled; the parent separately
+retains the actual T3 command/output record. All failed setup evidence stays failed.
+
+Final #44 consumption is **44/44 confirmed, zero uncertain/reserved starts**;
+#41 stays 16/24. The selection is complete and no further campaign is selected.
+Engine events do not prove OS/physical input, native canvas, editor packaging,
+human or broader milestone acceptance. Both issues stay open and PR #77 stays
+draft/unmerged. This documentation-only successor does not become the SDK-tested
+candidate; PR #77 owns its terminal automatic/paired CI receipt. Historical status
+sections remain intact because restructuring those recovery records is outside
+this correction's scope.

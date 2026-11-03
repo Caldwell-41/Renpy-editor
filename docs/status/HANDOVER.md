@@ -2,36 +2,44 @@
 
 ## PR 77 review correction delivery
 
-Continue the selected six fixes for [PR #77](https://github.com/Caldwell-41/Renpy-editor/pull/77).
-The parent integration branch is `codex/pr77-review-fixes`, implementation checkpoint
-`8f6b40644c30898e3e54ceed73fa0c8c9837832d`, with contract/evidence updates in progress.
-Publish to the existing `codex/components-and-help-panel` PR branch after the final
-audit. The parent owns all coding and final review; Terra 6.1 max owns browser
-verification only and has returned passing real-core journeys for both original UI
-bugs. The parent preserves its 58 evidence files and owns safe worker retirement. Keep the primary checkout's
-unrelated audit, all protected recovery and the approved prototype intact.
+All six selected fixes for [PR #77](https://github.com/Caldwell-41/Renpy-editor/pull/77)
+are implemented and parent-audited. The integration branch is
+`codex/pr77-review-fixes`; delivery stays on the existing
+`codex/components-and-help-panel` PR branch. Implementation checkpoint `8f6b406`
+and tested source/evidence head `1cc4f656ce2f10a19e74d47d10d13a919f35f551` retain
+their exact scopes. This successor records terminal results without changing
+production or test inputs. The parent owns final audit; Terra 6.1 max returned
+passing browser/core journeys. Both new review worker checkouts are removed after
+evidence preservation; cancelled draft recovery commit `fcb5098` remains local.
+Keep the unrelated primary audit, protected recovery, original feature evidence
+worktrees and approved prototype intact.
 
 The user confirmed core IPC, real ScreensWorkspace/controlled IPC, and public
 Python adapter/qualifier boundaries before TDD. All six original failures have
 passing focused tests. All 344 app tests, production build and four cheap harness
-groups pass. The first broad core run remains failed; its three obsolete Help
-fixture assumptions are migrated and pass, while the runtime descendant failure's
-cause is unproven despite passing exact baseline and candidate runs. Preserve
+groups pass. The final coherent core run passes 556 tests, zero failures, 54
+intentional ignores and three documented exclusions. The first failed run remains
+failed; its runtime descendant assertion's cause is unproven. Preserve
 `.toolchains/pr77-review/core-failed-01` and the linked [review evidence](../tasks/evidence/components-and-help-panel.md#pr-77-review-corrections-2026-11-03).
 
-For continuation, read PR #77's latest audit for terminal coherent-core, exact-head
-automatic/paired CI and cleanup receipts. The parent verifies Terra's reports,
-harness, driver hash and captures; all six original findings are addressed. Any
-nonterminal CI run uses the T3 PR watch after its identity is captured. Audit all
-executed steps and artifact digests before reporting success, and retire completed
-worker worktrees after preserving unique work and evidence. Both tickets stay open;
-merge/release and broader native/human acceptance remain unselected.
+Automatic quality and both selected harness jobs pass at `1cc4f65`; the parent
+audits all executed steps, ZIP/manifests and 784 input hashes per target. Read
+PR #77's latest receipt for CI on this documentation-only successor. If it is
+nonterminal, use the T3 PR watch after capturing its identity, then audit results
+and artifact digests before final handback. No further implementation or SDK run
+is selected. Both tickets stay open; merge/release and broader native/human
+acceptance remain unselected.
 
-A user response is pending for fresh Help SDK proof after the template change.
-#44 remains 26/27, zero reserved/new starts; the proposed nine starts per target
-would require a cumulative cap of 44. Start that operation only after its explicit
-selection. #41 remains 16/24. Earlier exact-source Help SDK proof retains its old
-candidate, and cannot qualify the new template.
+Kris approved one nine-start fresh Help campaign per target and raised #44's cap
+to 44. Both campaigns pass at `1cc4f65`. The parent verifies all 18 starts,
+re-admits six raw logs per host and confirms unchanged source/cleanup. Three
+Windows setup refusals and one Mac output-path refusal consumed zero SDK starts;
+their failures remain preserved. [#44](https://github.com/Caldwell-41/Renpy-editor/issues/44)
+owns the final cumulative ledger: 44/44 confirmed, zero uncertain/reserved, with
+the selection complete. #41 remains 16/24. See the
+[fresh SDK closeout](../tasks/evidence/components-and-help-panel.md#fresh-help-sdk-proof-and-review-closeout-2026-11-03)
+for candidate, producer hashes, returned evidence and limitations. Continue in this
+thread; no SDK allowance remains and no new campaign follows from a passing result.
 
 ## Earlier component and Help qualification
 

@@ -10,21 +10,25 @@ panel, inspects insertion destinations without navigation, and shares SDK comman
 arguments/version parsing. The parent owns coding, integration and final audit;
 Terra 6.1 max owns browser verification under the replacement agent instructions.
 
-All 344 frontend tests and the production build pass. Four cheap harness groups
-pass, including 300 Python methods with three named host exclusions. Focused
-red/green tests cover all six defects and ambiguous Source replacement. The first
-broad core run fails 552/4 with 54 intentional ignores and three documented
-exclusions. Three old Help fixture assumptions are corrected; four panel and eight
-reference cases pass. The runtime descendant assertion passes in exact baseline
-and candidate runs, while its broad-run cause remains unproven and retained.
+All 344 frontend tests and the production build pass. Focused red/green tests cover
+all six defects and ambiguous Source replacement. The final coherent core run at
+`1cc4f65` passes 556 tests, with zero failures, 54 intentional ignores and three
+documented exclusions. The first failed run remains preserved; its runtime
+descendant assertion's cause is unproven. Both automatic quality and selected
+Windows/macOS harness CI pass at that head, with all executed steps and returned
+artifact/input hashes audited.
 
 The parent audits all six original fixes. Browser proof passes ten component
 groups, four Help/Story groups and three focused real-core cases plus preflight.
-PR #77 owns terminal coherent-core, exact-head automatic/paired CI and worker
-retirement receipts. Prior CI does not qualify the changed head.
-The Help template changed, so earlier exact-source Help SDK proof cannot be reused.
-The user is deciding whether to raise #44's cap for fresh both-target campaigns;
-current use stays 26/27, zero reserved, zero new starts. #41 stays 16/24.
+The two review worker checkouts are retired after evidence preservation; the
+cancelled draft has a local recovery commit. PR #77 owns terminal CI/cleanup
+receipts, including validation of this documentation-only successor.
+Kris approved fresh Help SDK campaigns and raised #44's cumulative cap to 44.
+Both macOS ARM64 and Windows x64 pass nine commands and six normal-entry cases at
+`1cc4f65`. The parent re-admits all raw logs and verifies source, launcher counts
+and cleanup. [#44](https://github.com/Caldwell-41/Renpy-editor/issues/44) owns the
+final count, 44/44 confirmed with zero uncertain starts. No further campaign is
+selected. #41 stays 16/24.
 
 [Review evidence](../tasks/evidence/components-and-help-panel.md#pr-77-review-corrections-2026-11-03)
 owns failures, tested candidates and remaining proof. Approved A2, source-map v7,
