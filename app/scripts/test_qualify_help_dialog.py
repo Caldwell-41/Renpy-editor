@@ -98,11 +98,15 @@ class RuntimeEvidenceTests(unittest.TestCase):
             with self.assertRaises(FileNotFoundError):
                 gate.run_sdk_logged(row, root, 'preflight', ['unused'], root/'missing', dict(os.environ), 1, runner=refused)
             self.assertEqual((row['sdkLaunchAttempts'],row['sdkProcessesStarted'],row['sdkUncertainReservations'],row['sdkRefusedLaunches']), (1,0,0,1))
+            scratch = root/'known-preflight'; scratch.mkdir(); gate.finish_cleanup(row, scratch)
+            self.assertTrue(row['cleanupComplete']); self.assertFalse(scratch.exists())
             row = result()
             with self.assertRaisesRegex(OSError, 'spawn refused'):
                 gate.run_sdk_logged(row, root, 'unknown', ['unused'], root, dict(os.environ), 1, runner=refused)
             self.assertEqual((row['sdkProcessesStarted'],row['sdkUncertainReservations']), (0,1))
             self.assertEqual(row['checks'][0]['failure']['message'], 'spawn refused without receipt')
+            scratch = root/'uncertain'; scratch.mkdir(); gate.finish_cleanup(row, scratch)
+            self.assertFalse(row['cleanupComplete']); self.assertTrue(scratch.exists())
             receipt = SimpleNamespace(exit_code=0,duration_seconds=0.1,timed_out=False,output_limited=False,output='done')
             row = result()
             with patch.object(Path, 'write_text', side_effect=OSError('post-process log I/O')):

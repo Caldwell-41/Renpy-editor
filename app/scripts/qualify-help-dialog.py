@@ -249,7 +249,8 @@ def validate_core_output(text, manifest_sha):
 
 
 def finish_cleanup(result, temporary):
-    result['processCleanupComplete'] = all(c.get('processReaped') is True and c.get('cleanupComplete') is True for c in result['checks'])
+    result['processCleanupComplete'] = all(c.get('startState') == 'notStarted'
+        or (c.get('processReaped') is True and c.get('cleanupComplete') is True) for c in result['checks'])
     try:
         if temporary is not None and temporary.exists() and result['processCleanupComplete']:
             shutil.rmtree(temporary)
