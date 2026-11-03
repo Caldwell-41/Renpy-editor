@@ -3,7 +3,7 @@
 ## Help dialog and base Help canvas implementation
 
 The selected local implementation is delivered on `codex/help-dialog-canvas`,
-from `e32ded4`; completion code candidate is `02c0167`. Both implementation lanes are
+from `e32ded4`; completion code candidate is `31c4afa`. Both implementation lanes are
 preserved, with shared contracts, integration, review and finding fixes owned by
 the coordinator. [The evidence owner](../tasks/evidence/help-dialog-and-canvas.md)
 records exact scopes and [final UI captures](../tasks/evidence/help-dialog-and-canvas-ui/verification.json).
@@ -15,7 +15,13 @@ integrated as `282cc28`; it restores captured placement on Cancel/Escape without
 rebasing unavailable context. Coordinator `02c0167` restores focus to the recreated
 Story opener and orders the creation fields as approved. All 364 frontend tests,
 29 focused cases, production build and the actual controller/core journey pass.
-One combined Standards/Spec review and final visual assessment remain. No new SDK/package/native
+The one combined review pair at `5b0ab97` found two P3 Standards findings and one
+P2 Spec defect. `31c4afa` resolves them: current controller/session insertion context
+stays synchronized after acceptance, Call admission shares one predicate, and the
+older handover review is explicitly scoped. Thirty focused UI tests, 24 affected
+core tests and the six-stage actual controller/core journey pass, with a separately
+built current driver and complete cleanup. The final visual assessment and final
+frontend check remain before publication/CI. No new SDK/package/native
 qualification matrix, merge, issue closure or release is selected.
 
 Blocking Dialog creation/resolution, Call/Finish, conservative source/history and

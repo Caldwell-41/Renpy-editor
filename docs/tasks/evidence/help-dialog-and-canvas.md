@@ -1,5 +1,48 @@
 # Help dialog and base canvas delivery evidence
 
+## Final combined review and corrections, 2026-11-04
+
+The one independent pair reviewed `e32ded4...5b0ab97`. The coordinator resolved
+its findings in `31c4afaa71c69c051afb72ec99b21037e8fbb68b` and self-reviewed the
+small corrections; no duplicate review pair was started.
+
+### Standards
+
+- P3 documented-rule finding: HANDOVER contradicted its current pending review
+  with an unqualified earlier completion statement. The older result now names
+  `9de4f25` and points to the live completion status.
+- P3 heuristic finding, possible duplicated code: Call capability listing and
+  write admission independently expressed the same context policy. Both now use
+  `ScreenStatement::accepts_target`. The separate capture owner-kind filter remains
+  to preserve existing unknown-effect/protected-source reporting. No admission
+  behavior changes; the source-defined unknown Call case remains covered.
+
+No hard production-code violation was reported. Both findings are resolved.
+
+### Spec
+
+One P2 was reproduced: after a successful screen-Beat Add, the session remembered
+the accepted placement, but the mounted Story controller reread its original
+`actions.screenInsertion`. A subsequent draft opened at obsolete placement/revision
+and Cancel overwrote the accepted handoff. The red test reports `end` instead of
+accepted `line`. The controller now keeps its current context through one local
+helper that also updates the existing session callback. No IPC/persistence changes.
+
+The fix passes for Show, Hide and Call through Cancel and Escape. All 30 focused
+creation/Story/dismissal tests and typecheck pass. All 12 public-core Dialog and
+12 reference cases pass; formatting passes after applying the pinned formatter.
+The actual controller/core journey adds accepted-Call placement followed by later
+Cancel/Escape, checking retained callback context and unchanged Source. All six
+stages pass with driver exit zero and complete scratch cleanup.
+
+Core compilation used a separate target, preserving the prior read-only driver
+used by Terra. New core tree is `b5900744393056afb757a7711ba6a2bccd1b1df5`;
+its actual driver SHA256 is `fb6e2c88e2442e8d5e8c83f9944d1a38511d71034fb0ada9e3824951b44fc2d4`.
+The earlier 364-test frontend pass remains scoped to `02c0167`. After Terra's
+targeted final assessment, run the final frontend check for the corrected controller.
+No CI, SDK/helper, native editor, package or publication occurred. Original review
+and test failures remain retained. No unresolved finding from either axis remains.
+
 ## Completion corrections and local verification, 2026-11-04
 
 Sol's `cb0ac5c74f910ab7f0609e85a6479ef9ced0883f` is integrated as `282cc28`.
