@@ -22,6 +22,26 @@ SDK_SHA = 'eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45'
 PROOF = REPO / 'tests/fixtures/phase-3b-screens/base-help-fidelity-proof.rpy'
 
 
+def run_reference_command(argv, row, execute=run_bounded):
+    row.update(charged=1, started=None, uncertainStart=True, cleanupComplete=False)
+    try:
+        command = execute(argv, timeout_seconds=60, output_limit=2_000_000)
+    except BaseException as error:
+        observed = hasattr(error, 'command_output')
+        row.update(started=True if observed else None, uncertainStart=not observed,
+                   exitCode=getattr(error, 'command_exit_code', None),
+                   cleanupComplete=getattr(error, 'command_cleanup_complete', False),
+                   processReaped=getattr(error, 'command_process_reaped', None),
+                   durationSeconds=getattr(error, 'command_duration_seconds', None),
+                   partialOutput=getattr(error, 'command_output', ''),
+                   timedOut=getattr(error, 'command_timed_out', False),
+                   outputLimited=getattr(error, 'command_output_limited', False))
+        raise
+    row.update(started=True, uncertainStart=False, cleanupComplete=True,
+               exitCode=command.exit_code, timedOut=command.timed_out, outputLimited=command.output_limited)
+    return command
+
+
 def target():
     current = (platform.system(), platform.machine().lower())
     assert current in [('Darwin', 'arm64'), ('Windows', 'amd64'), ('Windows', 'x86_64')], current
@@ -79,18 +99,18 @@ def reference(args):
                 commands = [('compile', ['compile']), ('lint', ['lint', '--error-code'])] if (width, height) == ASPECTS[0] else []
                 commands.append(('run', ['run']))
                 for operation, arguments in commands:
-                    # Retain intent before each process attempt. Actual OSError refusal
-                    # starts no SDK; failed/cancelled starts remain charged.
+                    # Reserve every attempt. An unannotated adapter exception
+                    # cannot establish that the process never started.
                     row = dict(name=operation, aspect=[width, height], started=False)
                     receipt['commands'].append(row)
                     (output / 'launch-manifest.json').write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8', newline='\n')
                     previous = dict(os.environ)
                     try:
                         os.environ.clear(); os.environ.update(env)
-                        receipt['sdkProcesses'] += 1; row['started'] = True
-                        command = run_bounded(tuple(map(str, [*launcher, project, *arguments])), timeout_seconds=60, output_limit=2_000_000)
-                    except OSError:
-                        receipt['sdkProcesses'] -= 1; row['started'] = False
+                        receipt['sdkProcesses'] += 1
+                        command = run_reference_command(tuple(map(str, [*launcher, project, *arguments])), row)
+                    except BaseException:
+                        (output / f'{width}x{height}-{operation}.log').write_text(row.get('partialOutput', ''), encoding='utf-8', newline='\n')
                         raise
                     finally:
                         os.environ.clear(); os.environ.update(previous)
@@ -105,7 +125,10 @@ def reference(args):
             assert receipt['sourceUnchanged'] and len(receipt['records']) == 8
             receipt['passed'] = True
     finally:
-        receipt['cleanupComplete'] = scratch is not None and not scratch.exists()
+        receipt['scratchRemoved'] = scratch is not None and not scratch.exists()
+        receipt['uncertainSDKProcesses'] = sum(bool(row.get('uncertainStart', True)) for row in receipt['commands'])
+        receipt['confirmedSDKProcesses'] = sum(row.get('started') is True for row in receipt['commands'])
+        receipt['cleanupComplete'] = receipt['scratchRemoved'] and all(row.get('cleanupComplete') is True for row in receipt['commands'])
         (output / 'result.json').write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8', newline='\n')
     assert receipt['passed'] and receipt['cleanupComplete']
 

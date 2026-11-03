@@ -11,6 +11,9 @@ from PIL import Image
 SPEC = importlib.util.spec_from_file_location('base_help_fidelity', Path(__file__).with_name('base_help_fidelity.py'))
 proof = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(proof)
+RUNNER_SPEC = importlib.util.spec_from_file_location('base_help_runner', Path(__file__).with_name('qualify-base-help-fidelity.py'))
+runner = importlib.util.module_from_spec(RUNNER_SPEC)
+RUNNER_SPEC.loader.exec_module(runner)
 
 
 def accepted_fixture():
@@ -53,14 +56,37 @@ def captures(root, accepted, role):
                    acceptedSHA256=proof.digest((root / 'accepted.json').read_bytes()), target='macos-arm64',
                    candidate='a' * 40, rendererSHA256=proof.digest((proof.REPO / 'app/src-core/src/screens/canvas-renderer.rpy').read_bytes()),
                    coreTestSHA256=proof.digest(b'designated core test'),
-                   inputs=proof.inputs(accepted), sdkProcesses=4, sdkCliProcesses=3, helperSessions=1,
+                   inputs=proof.inputs(accepted), sdkProcesses=4, confirmedSDKProcesses=4, uncertainSDKProcesses=0, sdkCliProcesses=3, helperSessions=1,
+                   helperStartAccounting=dict(ownerStarts=1, ownerReturns=1, confirmed=1, charged=1, unconfirmed=0, uncertain=False),
+                   caseStatuses=[dict(status='passed') for case in proof.MATRIX],
                    shutdown=dict(cooperative=True, cleanupComplete=True, exitCode=0), records=records,
-                   commands=[dict(name=name, exitCode=0, timedOut=False, outputLimited=False) for name in ['compile', 'lint', 'run', 'run']])
+                   commands=[dict(name=name, exitCode=0, timedOut=False, outputLimited=False, started=True, charged=1, uncertainStart=False, cleanupComplete=True) for name in ['compile', 'lint', 'run', 'run']])
     (root / 'result.json').write_text(json.dumps(receipt), encoding='utf-8', newline='\n')
     return receipt
 
 
 class AdmissionTests(unittest.TestCase):
+    def test_reference_errors_retain_started_or_uncertain_attempts_and_partial_cleanup(self):
+        for observed in [False, True]:
+            error = OSError('controlled adapter failure')
+            if observed:
+                error.command_output = 'retained output'
+                error.command_exit_code = 61
+                error.command_cleanup_complete = True
+            def fail(*args, **kwargs):
+                raise error
+            row = {}
+            with self.assertRaises(OSError) as caught:
+                runner.run_reference_command(('unused',), row, execute=fail)
+            self.assertIs(caught.exception, error)
+            self.assertEqual(row['charged'], 1)
+            self.assertEqual(row['started'], True if observed else None)
+            self.assertEqual(row['uncertainStart'], not observed)
+            self.assertEqual(row['cleanupComplete'], observed)
+            if observed:
+                self.assertEqual(row['partialOutput'], 'retained output')
+                self.assertEqual(row['exitCode'], 61)
+
     def test_matching_old_candidates_cannot_pass_the_reviewed_candidate_gate(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

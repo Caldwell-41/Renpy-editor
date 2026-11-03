@@ -94,9 +94,15 @@ def validate_capture_set(root, accepted, role):
         assert [command['name'] for command in commands] == ['compile', 'lint', 'run', 'run']
         assert all(command['exitCode'] == 0 and not command['timedOut'] and not command['outputLimited'] for command in commands)
         assert receipt['sdkProcesses'] == 4
+        assert receipt['confirmedSDKProcesses'] == 4 and receipt['uncertainSDKProcesses'] == 0
+        assert all(command['started'] is True and command['charged'] == 1 and command['uncertainStart'] is False and command['cleanupComplete'] is True for command in commands)
     else:
         assert receipt['sdkCliProcesses'] == 3 and receipt['helperSessions'] == 1
         assert len(receipt['coreTestSHA256']) == 64
+        accounting = receipt['helperStartAccounting']
+        assert accounting['ownerStarts'] == accounting['ownerReturns'] == accounting['confirmed'] == accounting['charged'] == 1
+        assert accounting['unconfirmed'] == 0 and accounting['uncertain'] is False
+        assert len(receipt['caseStatuses']) == len(MATRIX) and all(case['status'] == 'passed' for case in receipt['caseStatuses'])
         shutdown = receipt['shutdown']
         assert shutdown['cooperative'] and shutdown['cleanupComplete'] and shutdown['exitCode'] == 0
     records = receipt['records']

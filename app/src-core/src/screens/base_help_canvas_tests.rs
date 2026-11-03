@@ -171,6 +171,11 @@ fn base_help_fidelity_exports_typed_assets_styles_and_exact_source_without_execu
     }
 }
 
+fn helper_start_accounting(attempts: usize, owner_returns: usize, confirmed: usize) -> Value {
+    json!({"ownerStarts":attempts,"ownerReturns":owner_returns,"confirmed":confirmed,
+        "unconfirmed":attempts.saturating_sub(confirmed),"uncertain":attempts > confirmed,"charged":attempts})
+}
+
 #[test]
 #[ignore = "L18 selected proof: three SDK validation/discovery processes and one hidden helper"]
 fn base_help_fidelity_hidden_helper_captures_exact_exported_cases() {
@@ -188,6 +193,7 @@ fn base_help_fidelity_hidden_helper_captures_exact_exported_cases() {
     );
     let cli_before = crate::renpy::process_spawn_count_for_test();
     let helpers_before = super::super::canvas_session::helper_start_attempts_for_test();
+    let returns_before = super::super::canvas_session::helper_owner_returns_for_test();
     let temporary = tempfile::tempdir().unwrap();
     let profile = temporary.path().join("profile");
     let input = PathBuf::from(
@@ -221,7 +227,7 @@ fn base_help_fidelity_hidden_helper_captures_exact_exported_cases() {
     let mut records = vec![];
     let mut active_case = None;
     let mut helper_requested = false;
-    let mut helper_confirmed = false;
+    let mut confirmed_helpers = std::collections::BTreeSet::new();
     let mut source_unchanged = false;
     let mut case_statuses = accepted["cases"]
         .as_array()
@@ -303,7 +309,9 @@ fn base_help_fidelity_hidden_helper_captures_exact_exported_cases() {
                 );
                 std::thread::sleep(std::time::Duration::from_millis(16));
             };
-            helper_confirmed = true;
+            confirmed_helpers.insert(
+                super::super::canvas_session::helper_start_attempts_for_test() - helpers_before,
+            );
             let image = base64::engine::general_purpose::STANDARD
                 .decode(
                     frame["image"]
@@ -379,9 +387,6 @@ fn base_help_fidelity_hidden_helper_captures_exact_exported_cases() {
         .as_ref()
         .and_then(|service| service.canvas_shutdown_report())
         .cloned();
-    helper_confirmed |= shutdown
-        .as_ref()
-        .is_some_and(|report| report.exit_code.is_some());
     let failure = attempt.as_ref().err().map(|error| {
         error
             .downcast_ref::<String>()
@@ -396,6 +401,20 @@ fn base_help_fidelity_hidden_helper_captures_exact_exported_cases() {
     let sdk_cli_processes = crate::renpy::process_spawn_count_for_test() - cli_before;
     let helper_attempts =
         super::super::canvas_session::helper_start_attempts_for_test() - helpers_before;
+    let owner_returns =
+        super::super::canvas_session::helper_owner_returns_for_test() - returns_before;
+    // A previous owner's shutdown receipt cannot confirm a replacement whose
+    // constructor failed. Such an attempt remains reserved as uncertain.
+    if helper_attempts == owner_returns
+        && shutdown
+            .as_ref()
+            .is_some_and(|report| report.exit_code.is_some())
+    {
+        confirmed_helpers.insert(helper_attempts);
+    }
+    let confirmed = confirmed_helpers.len();
+    let mut accounting = helper_start_accounting(helper_attempts, owner_returns, confirmed);
+    accounting["requested"] = json!(helper_requested);
     let candidate = std::process::Command::new("git")
         .args(["rev-parse", "HEAD"])
         .output()
@@ -404,11 +423,11 @@ fn base_help_fidelity_hidden_helper_captures_exact_exported_cases() {
         "coreTestSHA256":hex::encode(Sha256::digest(fs::read(std::env::current_exe().unwrap()).unwrap())),
         "candidate":std::str::from_utf8(&candidate.stdout).unwrap().trim(),"acceptedSHA256":hex::encode(Sha256::digest(&accepted_bytes)),
         "inputs":input_hashes,"rendererSHA256":hex::encode(Sha256::digest(include_bytes!("canvas-renderer.rpy"))),
-        "sdkCliProcesses":sdk_cli_processes,"helperSessions":if helper_confirmed {json!(helper_attempts)} else if helper_attempts > 0 {Value::Null} else {json!(0)},
-        "helperStartAccounting":{"requested":helper_requested,"confirmed":helper_confirmed,"ownerStarts":helper_attempts,"uncertain":helper_attempts > 0 && !helper_confirmed,"charged":helper_attempts},
+        "sdkCliProcesses":sdk_cli_processes,"helperSessions":if confirmed == helper_attempts {json!(confirmed)} else {Value::Null},
+        "helperStartAccounting":accounting,
         "failure":failure,"caseStatuses":case_statuses,"records":records,"shutdown":shutdown,
-        "cleanupComplete":closed && shutdown.as_ref().is_none_or(|s| s.cleanup_complete),"sourceUnchanged":source_unchanged,
-        "passed":attempt.is_ok() && source_unchanged && closed && shutdown.as_ref().is_some_and(|s| s.cleanup_complete && s.cooperative && s.exit_code==Some(0)) && sdk_cli_processes==3 && helper_attempts==1});
+        "cleanupComplete":closed && helper_attempts == confirmed && shutdown.as_ref().is_none_or(|s| s.cleanup_complete),"sourceUnchanged":source_unchanged,
+        "passed":attempt.is_ok() && source_unchanged && closed && shutdown.as_ref().is_some_and(|s| s.cleanup_complete && s.cooperative && s.exit_code==Some(0)) && sdk_cli_processes==3 && helper_attempts==1 && owner_returns==1 && confirmed==1});
     fs::write(
         output.join("result.json"),
         serde_json::to_vec_pretty(&result).unwrap(),
@@ -492,4 +511,46 @@ fn added_textbutton_draft_matches_the_saved_null_action_button_without_execution
     );
     assert!(text.contains("action Null()"), "{text}");
     service.close().unwrap();
+}
+
+#[test]
+fn helper_accounting_reserves_failed_initial_and_replacement_owner_attempts_offline() {
+    use super::super::canvas_session::{
+        helper_owner_returns_for_test, helper_start_attempts_for_test, record_helper_start_for_test,
+    };
+    let attempts = helper_start_attempts_for_test();
+    let returns = helper_owner_returns_for_test();
+    assert!(record_helper_start_for_test(|| Err::<(), _>(
+        crate::scene::SceneError::InvariantBlocked
+    ))
+    .is_err());
+    let initial = helper_start_accounting(
+        helper_start_attempts_for_test() - attempts,
+        helper_owner_returns_for_test() - returns,
+        0,
+    );
+    assert_eq!(initial["charged"], 1);
+    assert_eq!(initial["ownerReturns"], 0);
+    assert_eq!(initial["unconfirmed"], 1);
+    assert_eq!(initial["uncertain"], true);
+
+    let attempts = helper_start_attempts_for_test();
+    let returns = helper_owner_returns_for_test();
+    record_helper_start_for_test(|| Ok::<_, crate::scene::SceneError>(())).unwrap();
+    assert!(record_helper_start_for_test(|| Err::<(), _>(
+        crate::scene::SceneError::InvariantBlocked
+    ))
+    .is_err());
+    // The first owner's ready receipt is a qualification fixture; the second
+    // owner fails without starting an SDK or any child process in this test.
+    let replacement = helper_start_accounting(
+        helper_start_attempts_for_test() - attempts,
+        helper_owner_returns_for_test() - returns,
+        1,
+    );
+    assert_eq!(replacement["charged"], 2);
+    assert_eq!(replacement["ownerReturns"], 1);
+    assert_eq!(replacement["confirmed"], 1);
+    assert_eq!(replacement["unconfirmed"], 1);
+    assert_eq!(replacement["uncertain"], true);
 }
