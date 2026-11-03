@@ -84,3 +84,12 @@ test("Dialog creation retains required image, kind and name across an Assets han
   assert.equal(calls[0]?.kind,"dialog");assert.equal(calls[0]?.name,"quick_help");assert.equal(calls[0]?.starter?.assetId,image.id);
   restored.dispose();await browser.happyDOM.close();
 });
+
+test("unavailable retained Help image keeps Create blocked even when another image exists",async()=>{
+ const browser=setup();let handoff:unknown;
+ const draft={name:"guide",kind:"dialog" as const,starter:"help" as const,assetId:"original-missing"};
+ const view=buildPanelCreationForm({assets:[image],initialDraft:draft,create:async()=>{throw Error("Must not create");},cancel:()=>{},openAssets:value=>{handoff=value;}});document.body.append(view.element);
+ assert.equal(view.element.querySelector<HTMLButtonElement>('[type="submit"]')!.disabled,true);
+ [...view.element.querySelectorAll("button")].find(b=>b.textContent==="Open Assets")!.click();assert.deepEqual(handoff,draft);
+ assert.equal(view.readDraft().assetId,"original-missing");view.dispose();await browser.happyDOM.close();
+});
