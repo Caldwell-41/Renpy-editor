@@ -3,11 +3,11 @@ import type { StyleCatalog } from "./screen-text.ts";
 export interface ScreenTargetBinding { screenId: string; sourceName: string }
 export interface ScreenRevisions { source: string; sourceMap: string; inventory: string; effects: string }
 export interface ScreenEffects {
-  revision: string; unknown: boolean; hiddenScreens: string[];
+  revision: string; unknown: boolean; hiddenScreens: string[]; finishesInteraction: boolean;
   dependencies: { id: string; revision: string }[];
 }
 export interface OwnedScreen {
-  id: string; rootId: string; path: string; name: string; kind: "panel" | "component";
+  id: string; rootId: string; path: string; name: string; kind: "panel" | "dialog" | "component";
   resolved: boolean; sourceRevision: string | null;
 }
 export interface ScreenCatalog {
@@ -15,7 +15,7 @@ export interface ScreenCatalog {
   owned: OwnedScreen[]; styles?: StyleCatalog;
 }
 export interface ResolvedScreenTarget {
-  binding: ScreenTargetBinding; kind: "panel" | "component"; path: string; rootId: string;
+  binding: ScreenTargetBinding; kind: "panel" | "dialog" | "component"; path: string; rootId: string;
   revisions: ScreenRevisions; effects: ScreenEffects;
 }
 export interface ComponentChange { componentId: string; screenId: string; useId: string }

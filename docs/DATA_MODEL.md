@@ -653,6 +653,20 @@ custom behavior. A known inclusion alone does not make an unknown child passive.
 Text interpolation and unqualified text tags keep effects unknown without changing
 or filtering the authoritative text.
 
+Source-map v8 adds an explicit `dialog` owned-screen kind and reserves `callScreen`
+Beat mappings with the same stable `screenTarget` binding. Earlier maps retain
+their recognition rules and migrate through the existing transaction owner without
+rewriting scripts. Dialogs and Call mappings are invalid in pre-v8 metadata.
+Exact local `Return()` actions and game-menu dismissal qualify only for an owned
+dialog, with `modal True`; panel Hide qualification remains unchanged. Effect
+summaries expose `finishesInteraction` separately from `hiddenScreens`, bind action
+and source dependencies into their revisions, and retain unknown effects for
+unsupported actions or captured return values. Component extraction refuses a
+subtree containing contextual dismissal statements from either screen kind.
+The v8 contract checkpoint does not yet implement dialog creation or Story Call;
+[#45](https://github.com/Caldwell-41/Renpy-editor/issues/45) owns those operations
+and their normal-play acceptance.
+
 Schema v7 also recognizes bounded `show screen name` and `hide screen name` Story
 Beats. Their mapping stores `screenTarget` with stable screen UUID and source name;
 well-formed missing targets retain unresolved intent. Read-derived payload revisions

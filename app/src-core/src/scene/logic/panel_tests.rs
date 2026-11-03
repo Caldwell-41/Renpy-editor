@@ -762,7 +762,10 @@ fn v6_panel_beats_migrate_on_open_without_source_or_identity_changes_and_reopen_
     assert_eq!(fs::read(&path).unwrap(), before);
     let accepted = fs::read(&map_path).unwrap();
     let mapped: Value = serde_json::from_slice(&accepted).unwrap();
-    assert_eq!(mapped["schemaVersion"], 7);
+    assert_eq!(
+        mapped["schemaVersion"],
+        crate::metadata::SOURCE_MAP_SCHEMA_VERSION
+    );
     assert_eq!(
         mapped["sceneMappings"][0]["beats"][0]["futurePanelData"],
         json!({"keep":true})

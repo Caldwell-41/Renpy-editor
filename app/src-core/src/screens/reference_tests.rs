@@ -1,6 +1,72 @@
 use super::*;
 
 #[test]
+fn dialog_target_reports_revision_bound_finish_without_hiding_a_panel() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    service.close().unwrap();
+    let map_path = root.join(".renpy-editor/source-map.json");
+    let mut map: Value = serde_json::from_slice(&fs::read(&map_path).unwrap()).unwrap();
+    map["schemaVersion"] = json!(8);
+    let entry = map["ownedScreens"]
+        .as_array_mut()
+        .unwrap()
+        .iter_mut()
+        .find(|screen| screen["id"] == owner["id"])
+        .unwrap();
+    entry["kind"] = json!("dialog");
+    fs::write(&map_path, serde_json::to_vec_pretty(&map).unwrap()).unwrap();
+    service.open_path(&root).unwrap();
+    let source = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    save_composition_source(&mut service, &owner, &source.replace("    pass",
+        "    modal True\n    key \"game_menu\" action Return()\n    textbutton \"Close\":\n        action Return()\n        default_focus True"));
+    let target = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({
+            "binding":{"screenId":owner["id"],"sourceName":owner["name"]}
+        }),
+    );
+    assert_eq!(target["kind"], "dialog");
+    assert_eq!(target["effects"]["unknown"], false);
+    assert_eq!(target["effects"]["finishesInteraction"], true);
+    assert_eq!(target["effects"]["hiddenScreens"], json!([]));
+    assert!(target["effects"]["dependencies"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|dependency| dependency["id"].as_str().unwrap().ends_with(":action")));
+    let revised = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .replace("action Return()", "action Return(1)");
+    save_composition_source(&mut service, &owner, &revised);
+    let unresolved = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":target["binding"]}),
+    );
+    assert_eq!(unresolved["effects"]["unknown"], true);
+    assert_eq!(unresolved["effects"]["finishesInteraction"], false);
+    assert_ne!(
+        unresolved["revisions"]["effects"],
+        target["revisions"]["effects"]
+    );
+    assert_eq!(
+        reject(
+            &mut service,
+            "screens.resolveTarget",
+            json!({
+                "binding":target["binding"],"expected":target["revisions"]
+            })
+        )["error"]["code"],
+        "SOURCE_CONFLICT"
+    );
+}
+
+#[test]
 fn component_ipc_prepares_extracts_places_reviews_and_copies_with_typed_requests() {
     let (_temporary, mut service, root, panel) = composition_project();
     let group = compose_command(
@@ -320,6 +386,7 @@ fn unsupported_text_tags_keep_screen_effects_unknown() {
     for statement in [
         "text \"{a=jump:other}Open{/a}\"",
         "textbutton \"{custom}Open{/custom}\":\n        action Null()",
+        "textbutton \"Close\":\n        action Return()",
     ] {
         let (_temporary, mut service, _root, owner) = composition_project();
         let source = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]

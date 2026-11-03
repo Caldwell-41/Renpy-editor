@@ -20,13 +20,14 @@ pub struct ScreenDependencyRevision {
     pub revision: String,
 }
 
-/// With no unknown effects or hidden screens, this supported inventory is passive.
+/// Summarizes only qualified local actions; custom interactions remain unknown.
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ScreenEffects {
     pub revision: String,
     pub unknown: bool,
     pub hidden_screens: Vec<String>,
+    pub finishes_interaction: bool,
     pub dependencies: Vec<ScreenDependencyRevision>,
 }
 
@@ -285,14 +286,14 @@ fn component_height<'a>(
     Some(height)
 }
 
-/// Exact single statements remain editable only in their owned Panel context.
-pub(super) fn qualified_panel_spans(
+/// Exact single statements remain editable only in their owned interaction context.
+pub(super) fn qualified_interaction_spans(
     owner: &OwnedScreen,
     screen: &Screen,
     bytes: &[u8],
 ) -> BTreeMap<usize, bool> {
     let mut qualified = BTreeMap::new();
-    if owner.kind != OwnedScreenKind::Panel {
+    if owner.kind == OwnedScreenKind::Component {
         return qualified;
     }
     for node in &screen.nodes {
@@ -313,10 +314,23 @@ pub(super) fn qualified_panel_spans(
             if !single || counts[key] != 1 {
                 continue;
             }
-            if (node.kind == "screen" && code == "modal False")
+            let modal = match owner.kind {
+                OwnedScreenKind::Panel => "modal False",
+                OwnedScreenKind::Dialog => "modal True",
+                OwnedScreenKind::Component => unreachable!(),
+            };
+            if (node.kind == "screen" && code == modal)
                 || (node.kind == "textbutton" && code == "default_focus True")
             {
                 qualified.insert(start, false);
+                continue;
+            }
+            if owner.kind == OwnedScreenKind::Dialog {
+                if (node.kind == "screen" && code == "key \"game_menu\" action Return()")
+                    || (node.kind == "textbutton" && code == "action Return()")
+                {
+                    qualified.insert(start, true);
+                }
                 continue;
             }
             let hide = (if node.kind == "screen" {
@@ -344,6 +358,7 @@ struct Effects<'a> {
     remaining: usize,
     unknown: bool,
     hidden: BTreeSet<String>,
+    finishes_interaction: bool,
     dependencies: BTreeMap<String, String>,
 }
 
@@ -388,7 +403,7 @@ impl Effects<'_> {
             .iter()
             .find(|s| s.name == owner.name)
             .unwrap();
-        let qualified = qualified_panel_spans(owner, screen, bytes);
+        let qualified = qualified_interaction_spans(owner, screen, bytes);
         for node in &screen.nodes {
             if self.remaining == 0 {
                 self.unknown = true;
@@ -430,9 +445,13 @@ impl Effects<'_> {
                 self.unknown = true;
             }
             for span in &node.protected {
-                if let Some(hides) = qualified.get(&span.start) {
-                    if *hides {
-                        self.hidden.insert(owner.id.clone());
+                if let Some(action) = qualified.get(&span.start) {
+                    if *action {
+                        if owner.kind == OwnedScreenKind::Dialog {
+                            self.finishes_interaction = true;
+                        } else {
+                            self.hidden.insert(owner.id.clone());
+                        }
                         self.dependencies.insert(
                             format!("{}:action", node.id.as_deref().unwrap_or(&owner.root_id)),
                             digest(&bytes[span.start..span.end]),
@@ -498,12 +517,20 @@ impl Effects<'_> {
             .map(|(id, revision)| ScreenDependencyRevision { id, revision })
             .collect::<Vec<_>>();
         let hidden_screens = self.hidden.into_iter().collect::<Vec<_>>();
-        let revision =
-            digest(&serde_json::to_vec(&(self.unknown, &hidden_screens, &dependencies)).unwrap());
+        let revision = digest(
+            &serde_json::to_vec(&(
+                self.unknown,
+                &hidden_screens,
+                self.finishes_interaction,
+                &dependencies,
+            ))
+            .unwrap(),
+        );
         ScreenEffects {
             revision,
             unknown: self.unknown,
             hidden_screens,
+            finishes_interaction: self.finishes_interaction,
             dependencies,
         }
     }
@@ -602,6 +629,7 @@ impl AuthoringService {
             remaining: MAX_NODES,
             unknown: false,
             hidden: BTreeSet::new(),
+            finishes_interaction: false,
             dependencies: BTreeMap::new(),
         };
         effects.read(&owner.id, 0);

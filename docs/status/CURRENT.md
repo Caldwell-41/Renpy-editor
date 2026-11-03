@@ -1,5 +1,18 @@
 # Current status
 
+## Help dialog and base Help canvas selected
+
+Kris approved implementation of [#45](https://github.com/Caldwell-41/Renpy-editor/issues/45)
+and [#46](https://github.com/Caldwell-41/Renpy-editor/issues/46) on the new local
+`codex/help-dialog-canvas` integration branch from `e32ded4`. The coordinator owns
+shared contracts, integration, combined checks and final review. Two isolated Sol
+High implementation lanes are planned, with fast mode permitted. Dialog/Story UI
+waits for a separately approved prototype; Canvas work can continue independently.
+[Delivery evidence](../tasks/evidence/help-dialog-and-canvas.md) owns assignments,
+contract-checkpoint results, test seams and operation accounting. Implementation
+and both tickets' acceptance remain pending. No publication, merge or release is
+selected; historical closed allowances and protected recovery remain intact.
+
 ## Components and Help panel merged and accepted
 
 [PR #77](https://github.com/Caldwell-41/Renpy-editor/pull/77) squash-merged as

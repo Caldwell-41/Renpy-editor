@@ -1,5 +1,29 @@
 # Current outcome handover
 
+## Help dialog and base Help canvas implementation
+
+Kris approved the plan for #45/#46 and allowed Sol High fast mode for subagents.
+Continue on local integration branch `codex/help-dialog-canvas`, based on
+`e32ded49f2c4212cd78efc748cdf9b59cdcc0c48`. The coordinator owns shared files,
+integration, verification and final review. The source-map v8 dialog/Finish contract
+checkpoint has focused passing evidence; creation, Call runtime and full base-canvas
+qualification are not implemented or accepted by it.
+
+[The coordination/evidence record](../tasks/evidence/help-dialog-and-canvas.md)
+owns file boundaries, test results and next actions. Next allocate the Dialog/Story
+and Canvas implementation agents in T3-managed isolated worktrees. The Dialog/Story
+agent must create the requested separate prototype chat and receive the approved
+source/design/evidence directly before changing affected production UI. Browser and
+desktop work goes to Terra Max. Workers follow the implement skill and commit.
+
+Mac is the development host. SUNDOWN was reachable; Windows capability and active
+ownership need preflight. No SDK/helper/package/native/CI campaign has started;
+record a concrete matrix and limits before costly operations. Prior allowances
+remain closed. No push/PR/merge/issue closure/release is selected, and required
+published qualification must remain an explicit gap. Keep the unrelated audit,
+ignored archives, protected native state and earlier unique recovery evidence.
+This is local-only continuation; no external wait is pending at this checkpoint.
+
 ## PR 77 merge and workspace closeout
 
 Kris selected squash merge, all associated ticket updates and safe retirement of
