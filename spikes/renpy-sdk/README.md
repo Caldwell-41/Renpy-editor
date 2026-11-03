@@ -10,6 +10,11 @@ synthetic archives. A real SDK probe must use a disposable directory outside the
 repository and requires an explicit `--allow-project-execution` flag for commands
 that load project code.
 
+The adapter supports bounded `suite::case` test selection. Help and screen-source
+qualification share `command_argv` and `parse_version` rather than constructing
+their own CLI arguments or version checks. Named selection remains one argument
+and requires the same explicit project-execution grant as other project commands.
+
 ## Commands
 
 ```bash

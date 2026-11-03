@@ -1,46 +1,35 @@
 # Current status
 
-## Components and Help panel in draft PR review
+## PR 77 review corrections
 
-Kris selected [L08 #41](https://github.com/Caldwell-41/Renpy-editor/issues/41) and
-[L09 #44](https://github.com/Caldwell-41/Renpy-editor/issues/44) on
-`codex/components-and-help-panel`, from `8a1fc419`. Both isolated workers are done;
-the coordinator owns integration and final review. Exact approved A2 `refined-v1`
-remains pinned to `c0ded415`, with approval evidence `eb1f8f61`. Screens edits
-appearance; Use in Story opens the existing Story editor without inserting a Beat.
+Kris selected all six audited fixes, updating [PR #77](https://github.com/Caldwell-41/Renpy-editor/pull/77),
+selected CI and worker cleanup. Implementation checkpoint `8f6b406` preserves Story
+screen intent across multiple Source edits, marks unqualified text tags unknown,
+separates reusable Help content from Close, allows selected-use Copy within one
+panel, inspects insertion destinations without navigation, and shares SDK command
+arguments/version parsing. The parent owns coding, integration and final audit;
+Terra 6.1 max owns browser verification under the replacement agent instructions.
 
-Both features are implemented. Full Standards/Spec reviews through `ebcd374` have
-zero remaining actionable findings; later scoped fidelity/test changes are
-coordinator-reviewed. Real main/component-to-core and Help/Story journeys pass ten
-and four groups. All 342 app tests pass. The corrected Design Lab passes 1,216
-cases, 29 groups and nine approval/source guards. macOS ordinary core passes 552,
-with 54 intentional ignores and three documented exclusions. One earlier initial
-open failure remains unexplained and retained; its focused/peer checks and later
-full run pass without weakening recovery protections.
+All 344 frontend tests and the production build pass. Four cheap harness groups
+pass, including 300 Python methods with three named host exclusions. Focused
+red/green tests cover all six defects and ambiguous Source replacement. The first
+broad core run fails 552/4 with 54 intentional ignores and three documented
+exclusions. Three old Help fixture assumptions are corrected; four panel and eight
+reference cases pass. The runtime descendant assertion passes in exact baseline
+and candidate runs, while its broad-run cause remains unproven and retained.
 
-Both targets have pinned-SDK proof. Each component campaign passes four exact image
-pairs at two sizes; Help passes six normal-entry persistence/dismissal/focus cases.
-Windows candidate `50188c2` also passes 21 component tests, four panel tests, fresh
-exporters and artifact admission. Earlier fixture/cache/BOM setup failures remain
-separate. All 120 returned evidence files verify locally. SDK consumption is #41
-16/24 and #44 26/27, zero reserved; no further campaign is selected.
+The parent audits all six original fixes. Browser proof passes ten component
+groups, four Help/Story groups and three focused real-core cases plus preflight.
+PR #77 owns terminal coherent-core, exact-head automatic/paired CI and worker
+retirement receipts. Prior CI does not qualify the changed head.
+The Help template changed, so earlier exact-source Help SDK proof cannot be reused.
+The user is deciding whether to raise #44's cap for fresh both-target campaigns;
+current use stays 26/27, zero reserved, zero new starts. #41 stays 16/24.
 
-Kris authorized publication on 2026-11-03. Draft
-[PR #77](https://github.com/Caldwell-41/Renpy-editor/pull/77) targets
-`codex/phase3b-screen-designer`. Its automatic quality and selected paired
-Windows/macOS harness jobs pass at `ee17b94`; every executed step and both
-digest-verified artifacts are audited. The final documentation head still requires
-its own exact-head status, owned by the PR and selected GitHub leaves. Local prepublication checks pass all four
-harness groups, including 300 Python methods with three named host skips, plus
-reporter tests and actionlint. The initial paired CI passed Windows but failed the Mac system-Python install
-before tests; the isolated-environment correction now passes on both targets. This CI
-selection adds no SDK/native/package run
-and does not waive later milestone package/native/human acceptance. Neither ticket
-is accepted or closed; merging or releasing is not authorized.
-
-[Assignments, evidence and limits](../tasks/evidence/components-and-help-panel.md)
-retain exact candidates, review corrections and failed attempts. Historical sections
-below preserve unique accepted-baseline and protected-recovery records.
+[Review evidence](../tasks/evidence/components-and-help-panel.md#pr-77-review-corrections-2026-11-03)
+owns failures, tested candidates and remaining proof. Approved A2, source-map v7,
+protected recovery and broader native/human/Phase 3B limits remain. Both tickets
+stay open; PR #77 stays draft, with merge and release unselected.
 
 ## Phase 3B audit corrections merged
 

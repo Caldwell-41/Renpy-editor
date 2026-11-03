@@ -1,6 +1,40 @@
 # Current outcome handover
 
-## Components and Help panel publication and CI
+## PR 77 review correction delivery
+
+Continue the selected six fixes for [PR #77](https://github.com/Caldwell-41/Renpy-editor/pull/77).
+The parent integration branch is `codex/pr77-review-fixes`, implementation checkpoint
+`8f6b40644c30898e3e54ceed73fa0c8c9837832d`, with contract/evidence updates in progress.
+Publish to the existing `codex/components-and-help-panel` PR branch after the final
+audit. The parent owns all coding and final review; Terra 6.1 max owns browser
+verification only and has returned passing real-core journeys for both original UI
+bugs. The parent preserves its 58 evidence files and owns safe worker retirement. Keep the primary checkout's
+unrelated audit, all protected recovery and the approved prototype intact.
+
+The user confirmed core IPC, real ScreensWorkspace/controlled IPC, and public
+Python adapter/qualifier boundaries before TDD. All six original failures have
+passing focused tests. All 344 app tests, production build and four cheap harness
+groups pass. The first broad core run remains failed; its three obsolete Help
+fixture assumptions are migrated and pass, while the runtime descendant failure's
+cause is unproven despite passing exact baseline and candidate runs. Preserve
+`.toolchains/pr77-review/core-failed-01` and the linked [review evidence](../tasks/evidence/components-and-help-panel.md#pr-77-review-corrections-2026-11-03).
+
+For continuation, read PR #77's latest audit for terminal coherent-core, exact-head
+automatic/paired CI and cleanup receipts. The parent verifies Terra's reports,
+harness, driver hash and captures; all six original findings are addressed. Any
+nonterminal CI run uses the T3 PR watch after its identity is captured. Audit all
+executed steps and artifact digests before reporting success, and retire completed
+worker worktrees after preserving unique work and evidence. Both tickets stay open;
+merge/release and broader native/human acceptance remain unselected.
+
+A user response is pending for fresh Help SDK proof after the template change.
+#44 remains 26/27, zero reserved/new starts; the proposed nine starts per target
+would require a cumulative cap of 44. Start that operation only after its explicit
+selection. #41 remains 16/24. Earlier exact-source Help SDK proof retains its old
+candidate, and cannot qualify the new template.
+
+## Earlier component and Help qualification
+
 
 Continue selected [L08 #41](https://github.com/Caldwell-41/Renpy-editor/issues/41)
 and [L09 #44](https://github.com/Caldwell-41/Renpy-editor/issues/44) on

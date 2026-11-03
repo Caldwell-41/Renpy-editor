@@ -650,6 +650,8 @@ Source buffers for transitive users. Composition and geometry share this admissi
 owner. Style indexing uses the same graph rather than maintaining a second graph.
 Effect summaries hash relevant dependencies and report unknown for unsupported or
 custom behavior. A known inclusion alone does not make an unknown child passive.
+Text interpolation and unqualified text tags keep effects unknown without changing
+or filtering the authoritative text.
 
 Schema v7 also recognizes bounded `show screen name` and `hide screen name` Story
 Beats. Their mapping stores `screenTarget` with stable screen UUID and source name;
@@ -659,6 +661,9 @@ authoring requires a current resolved Panel target. Source edits preserve the ol
 binding when a name changes, including to another known panel, and protect that
 Beat until the intent can be resolved. Bare names with inline comments and trailing
 whitespace retain their exact bytes; target edits patch only keyword/name tokens.
+Multiple renamed statements retain their IDs when the Beat structure and matched
+anchors still agree. Ambiguous replacements remain Custom Code rather than acquiring
+new targets by name. This applies to known and missing replacement names.
 Unsupported parameters and dynamic forms remain Custom Code.
 
 Older maps are validated with their own recognition rules before v7 refinement.
@@ -669,6 +674,8 @@ this recognition does not add AI operations or general screen-effect execution.
 
 Help starter creation uses the same single source/map transaction as blank creation.
 Its title, explanation, typed UI-image and Close button are ordinary marked nodes.
+The content-only group contains title, explanation and image; Close remains its
+sibling under the outer column so extraction cannot capture panel-local dismissal.
 Exact Panel self-Hide game-menu/Close actions, `modal False` and `default_focus True`
 are qualified for ordinary edits and subtree moves. Unsupported actions, duplicate
 properties and other target names stay protected. These contracts do not imply SDK,

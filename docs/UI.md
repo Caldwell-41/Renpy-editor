@@ -884,7 +884,10 @@ Unavailable stable targets remain unresolved rather than following a reused name
 
 Supported groups can become owned parameterless components and be inserted under
 an explicit parent in another screen. Shared Apply reviews only changed fields and
-lists affected screens. Make a copy accepts the saved definition first; pending
+lists affected screens. Multiple uses on one screen also expose Make a copy for
+the selected use. Destination inspection in Add component does not navigate the
+workspace; Cancel retains its screen, element and focus, and only accepted insertion
+selects the destination use. Make a copy accepts the saved definition first; pending
 edits move only after the new definition, revision and child IDs are verified.
 Apply is a second history entry. A failed refresh acknowledges the copy, retains
 input and blocks Apply until Reload copy succeeds. Cancel discards pending edits

@@ -1129,3 +1129,92 @@ by PR #77 and the selected leaves. No further source/runtime qualification is
 selected. SDK totals remain #41 16/24 and #44 26/27, zero reserved. Both issues stay
 open; the PR stays draft and no merge, release, or broader native/human acceptance
 is authorized by the CI result.
+
+## PR 77 review corrections, 2026-11-03
+
+Kris selected all six findings from the audited `8a1fc419...d9c4079` review, PR
+update, selected CI and worker cleanup. The parent owns the final comparison with
+the original failures. The user confirmed three public test boundaries before test
+work: core IPC, real ScreensWorkspace controls with controlled IPC, and public
+Python adapter/qualifier entry points with controlled subprocess execution.
+
+The replacement agent instructions reserve coding for the parent. Two implementation
+delegations were rejected by automatic approval review; the started UI worker was
+stopped. Its unfinished test was inspected and reproduced against the unfixed parent
+before the parent implemented the correction. Terra 6.1 max owns browser verification
+only. No worker publishes or changes the approved prototype.
+
+Implementation checkpoint is `8f6b40644c30898e3e54ceed73fa0c8c9837832d` on the
+isolated integration branch. Delivery remains PR #77's existing branch. No merge,
+release or ticket acceptance is selected.
+
+| Original failure | Correction and focused evidence |
+| --- | --- |
+| Two Show statements changed to another owned panel silently acquired new IDs/targets. | Source reconciliation retains each binding when structure and matched anchors agree. The public IPC test first failed on changed IDs, then passed for known and missing names, Undo/Redo and reopen. A separate unequal-replacement test first adopted new targets, then passed with protected Custom Code surviving reopen. |
+| Text tags produced a known effect summary. | Unqualified tags keep effects unknown. The IPC test first returned false for a hyperlink literal, then passed for text and textbutton without changing source. |
+| Help had no extractable content group. | Title, explanation and image now have a marked group separate from Close. The public create/extract test first refused with OPAQUE_BOUNDARY, then passed extraction, independent dismissal, history and reopen. |
+| Two component uses in one panel hid Copy. | Shared-use eligibility now includes repeated uses within one screen. The real Workspace test first lacked the Copy control, then passed selected-use dispatch, verified draft transfer and separate Apply. |
+| Cancel during destination loading navigated later. | Destination inspection is read-only. The real Workspace test first selected Help after Cancel, then retained the original screen, element and focus with zero writes. Selection occurs only after accepted insertion. |
+| Help assembled version-specific SDK arguments outside the adapter. | The existing adapter accepts one bounded suite/case selector and retains its trust requirement. Its test first rejected the valid selector, then passed it and malformed/untrusted refusals. Help and the related screen-proof caller now share argument construction and version parsing. |
+
+The initial focused checks pass: all 344 frontend cases and production build,
+14 SDK-adapter cases, ten Help admission cases, repository validation and all four
+cheap harness groups (300 Python methods, three named host exclusions). The first
+frontend attempt used unsupported Python 3.9; the qualified Python 3.12.14 run
+passes. Vite initially refused a write through the dependency symlink. An isolated
+clone of the existing pinned dependencies resolves that setup failure without an
+installation or shared cache write.
+
+The first ordinary release-core run is failed: 552 pass, four fail, 54 intentional
+ignores and three documented exclusions. Three Help tests assumed that title and
+Close were siblings or that every Help group contained dismissal. They now select
+the actual sibling content group and only ancestors containing Close; all four
+panel cases and eight reference cases pass after that fixture migration. No
+production safety check was weakened. The remaining runtime descendant-presence
+assertion passes in separate exact runs of both the original baseline and retained
+candidate. Its broad-run cause is unproven; the original log, binary, hash and source
+diff remain under ignored `.toolchains/pr77-review/core-failed-01`. A passing focused
+run does not convert that failed broad run into a pass.
+
+The Help template change invalidates reuse of earlier exact-source Help SDK proof.
+The existing #44 count remains 26/27, zero reserved and zero new starts. A user
+decision is pending for one nine-start campaign per target, with a cumulative cap
+of 44 if approved. Component SDK evidence retains its original candidate and scope.
+The existing executable PR plan still requires automatic quality and paired
+Windows/macOS harness jobs at the eventual PR head. PR #77 owns subsequent exact-head
+core/CI and cleanup receipts; #44 owns live SDK selection and cumulative counts.
+
+### Parent audit and real browser verification
+
+Terra 6.1 max verifies the exact `8f6b406` implementation with the actual dispatch
+driver, SHA-256 `701358cccd743198049727e34bfd600ee87e3b717cdbe3507237e097262db810`
+before and after the runs. The parent reads the reports and focused harness,
+verifies those hashes and inspects wide/compact production captures. Every original
+finding is addressed at its existing owner, with no remaining original code finding.
+The complete-graph restriction and duplicated-validation heuristic remain excluded
+as in the original parent audit.
+
+The component browser journey passes ten groups, and Help/Story passes four.
+A separate six-group browser probe includes three preflight groups and three focused
+cases: Cancel/Escape after a held destination read, accepted cross-panel insertion,
+and copying one of two uses on a single panel with a separate Apply. It verifies
+actual core Source, selection, history, unchanged other use and retained draft.
+Both controlled-IPC Workspace tests also pass. All three browser reports declare
+cleanup complete, and the worker leaves tracked source unchanged.
+
+The first component attempt refused the sandboxed local listener before Chrome;
+the second passes. The focused probe's first locator incorrectly waited for a
+hidden option to be visible; its second attempt waits for attachment and passes.
+Both original failures remain retained. This verification uses Node 26.8.1; selected
+CI supplies the declared Node 24.19.0 target. No dependency installation occurs.
+
+The parent preserves and verifies 58 evidence files under ignored
+`.toolchains/pr77-review/ui`, excluding disposable Vite caches. The 21-image hash
+list has SHA-256 `90fedcd27f079dc5a266b265956f06dea8165e4126fbd508c1c9961af993658e`;
+the focused browser harness is
+`3afb4458fe2a4ac490be8ed89ad6aa9c98b2d47a838fdb46eb7dc4694ed916e0`.
+The parent inventory binds every preserved file. Canvas is stubbed; this proves
+browser authoring against the real core, not SDK, native canvas or physical input.
+Existing no-image starter selector/preview/colour differences from A2 remain outside
+the six fixes, with full visual conformance unclaimed. Historical prototype source
+and captures stay pinned.
