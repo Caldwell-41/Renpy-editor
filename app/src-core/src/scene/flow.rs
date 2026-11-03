@@ -804,7 +804,9 @@ fn project_scene_legacy(
                     && !beat.protected
                     && !matches!(
                         beat.payload,
-                        BeatPayload::ShowScreen { .. } | BeatPayload::HideScreen { .. }
+                        BeatPayload::ShowScreen { .. }
+                            | BeatPayload::HideScreen { .. }
+                            | BeatPayload::CallScreen { .. }
                     )
             }) {
                 continue;

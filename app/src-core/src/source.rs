@@ -1199,12 +1199,12 @@ impl AuthoringService {
 
 fn reconciliation_kind<'a>(beat: &'a crate::metadata::BeatSourceMapping, bytes: &[u8]) -> &'a str {
     if beat.kind == "customCode" {
-        if let Some((show, _)) = bytes
+        if let Some((statement, _)) = bytes
             .get(beat.byte_start as usize..beat.byte_end as usize)
             .and_then(|source| std::str::from_utf8(source).ok())
             .and_then(|source| crate::scene::screen_statement(source.trim()))
         {
-            return if show { "showScreen" } else { "hideScreen" };
+            return statement.kind();
         }
     }
     &beat.kind
@@ -1268,7 +1268,7 @@ fn build_reconciled_mapping(
         let Some(after) = unmatched_after.get(kind) else {
             continue;
         };
-        let screen = matches!(kind, "showScreen" | "hideScreen");
+        let screen = matches!(kind, "showScreen" | "hideScreen" | "callScreen");
         if before.len() == 1 && after.len() == 1
             || screen && same_structure && before.len() == after.len()
         {

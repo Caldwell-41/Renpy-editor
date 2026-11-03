@@ -1649,3 +1649,7 @@ mod structural_tests;
 
 #[cfg(test)]
 mod panel_tests;
+
+#[cfg(test)]
+#[path = "logic/dialog_tests.rs"]
+mod dialog_tests;

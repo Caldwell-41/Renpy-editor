@@ -1,4 +1,6 @@
 use super::*;
+#[path = "dismissal.rs"]
+mod dismissal;
 use sha2::{Digest, Sha256};
 
 #[derive(Debug, Deserialize)]
@@ -56,6 +58,11 @@ pub enum Command {
         style: Option<styles::Edit>,
         #[serde(default)]
         layout: std::collections::BTreeMap<String, Option<layout::NumericValue>>,
+    },
+    #[serde(rename_all = "camelCase")]
+    Dismissal {
+        node_id: String,
+        action: dismissal::Action,
     },
     #[serde(rename_all = "camelCase")]
     Reorder {
@@ -220,13 +227,20 @@ impl AuthoringService {
                     + 4;
                 let spaces = " ".repeat(indent);
                 let header = if ["text", "textbutton"].contains(&kind.as_str()) {
-                    format!("{kind} {}", text_literal(&text)?)
+                    format!(
+                        "{kind} {}{}",
+                        text_literal(&text)?,
+                        if kind == "textbutton" { ":" } else { "" }
+                    )
                 } else if kind == "grid" {
                     "grid 2 2:".into()
                 } else {
                     format!("{kind}:")
                 };
                 let mut addition = format!("{spaces}{header} # loomlight-element: {id}{newline}");
+                if kind == "textbutton" {
+                    addition.push_str(&format!("{spaces}    action Null(){newline}"));
+                }
                 if !["text", "textbutton"].contains(&kind.as_str()) {
                     if kind == "grid" {
                         addition.push_str(&format!("{spaces}    allow_underfull True{newline}"));
@@ -238,6 +252,37 @@ impl AuthoringService {
                 }
                 proposed.splice(parent.source_end..parent.source_end, addition.bytes());
                 id
+            }
+            Command::Dismissal { node_id, action } => {
+                let resolved = self.screens_resolve_target(
+                    project,
+                    project_id,
+                    &crate::metadata::ScreenTargetBinding {
+                        screen_id: owner.screen.id.clone(),
+                        source_name: owner.screen.name.clone(),
+                    },
+                    None,
+                )?;
+                if resolved.revisions.source != revision.sha256
+                    || resolved.revisions.source_map != catalog.source_map_revision
+                {
+                    return Err(SceneError::SourceConflict);
+                }
+                let raw = inspect(&bytes, source_path.clone(), revision.sha256.clone())?;
+                let raw_screen = raw
+                    .screens
+                    .iter()
+                    .find(|s| s.name == owner.screen.name)
+                    .ok_or(SceneError::ReferenceBlocked)?;
+                proposed = dismissal::prepare(
+                    &owner.screen,
+                    raw_screen,
+                    &node_id,
+                    &bytes,
+                    action,
+                    resolved.blocking,
+                )?;
+                node_id
             }
             Command::AddImage {
                 parent_id,
