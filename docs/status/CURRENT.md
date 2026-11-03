@@ -18,7 +18,9 @@ The direct approved handoff is received. Production UI implementation is underwa
 with shared Assets/draft navigation and bounded Finish wiring committed at
 `faf9611`. Thirty focused DOM cases and twelve core reference cases pass.
 Help still requires a typed UI image; placement uses existing Story body/Position
-ownership. Production visual comparison and actual UI-to-core acceptance remain open.
+ownership. The actual creation/Call/Finish controller-to-core journey and all 357
+frontend tests pass at `548ed47`. Production-main handoff, visual comparison and
+final combined review remain open.
 [Delivery evidence](../tasks/evidence/help-dialog-and-canvas.md) owns candidates,
 checks, earlier failures, operation counts and exact scope. Physical/human and
 published package/CI acceptance remain separate. Neither ticket is closed; this

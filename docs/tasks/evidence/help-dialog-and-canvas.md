@@ -34,6 +34,19 @@ and refusal of custom, duplicate actions and duplicate node IDs. Inspection
 exposes this source-qualified capability to the UI; the UI does not parse actions.
 Typechecking and test compilation pass. These checks start no SDK or helper.
 
+At integrated `548ed47`, the full frontend run passes 357 tests with zero skips.
+A freshly built `help-controller-driver` passes the new actual-controller/core
+journey: Dialog Help creation with one-step Undo/Redo; Call before the selected
+following Beat with no-op/history; Cancel and stale-target location retention;
+minimal Null-to-Finish with Undo/Redo; and renamed-Dialog reopen preserving the
+original protected binding and opaque neighboring source. Its owned driver exits
+zero and removes its scratch. The retained result declares no SDK execution.
+These results are in ignored `app/target` outputs. Production-main handoff and
+approved-reference visual comparison are still being checked by the implementation
+owner's Terra review. The coordinator will run the combined Standards/Spec pair
+after the remaining committed corrections are integrated, rather than duplicate
+a lane-only review. SDK use and successful runtime candidates are unchanged.
+
 ## Selection and ownership, 2026-11-03
 
 Kris approved the coordinator's read-only plan for

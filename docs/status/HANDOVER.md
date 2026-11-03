@@ -17,8 +17,11 @@ inert Null editing are implemented. Kris approved A4, `inspector-v4`, at source
 drafts. Production implementation is underway on the original Dialog lane. Its
 three UI checkpoints are integrated; shared navigation, Assets retention and
 source-qualified Finish inspection/wiring pass 30 focused DOM cases and twelve
-core reference cases. The implementation owner is completing actual controller/core
-and Terra visual comparison. The coordinator retains final combined review.
+core reference cases. A fresh integrated controller/core journey and all 357
+frontend tests pass at `548ed47`, with zero skips and complete owned-driver cleanup.
+The implementation owner is completing production-main handoff and Terra visual
+comparison. Final small corrections and the coordinator's combined Standards/Spec
+review remain pending.
 Help still requires a typed UI image. Placement uses existing Story body/Position
 ownership, with no new IPC/persistence or general action builder. Preserve the
 approved reference checkout, earlier revisions, failures and proof limits.
