@@ -671,6 +671,13 @@ this captured result rather than reparsing source in Story. Exact standalone
 screen kind. It is separate from the contextual modality, focus, Return and Hide
 spans that cannot move into a reusable component.
 
+Owned screen inspection exposes a nullable per-button `dismissal` capability.
+It reports `none` for exact inert Null, `finishInteraction` for qualified local
+Return, and `hideScreen` for qualified local Hide. Unowned, duplicate-ID,
+component and custom-action nodes expose no capability. This uses the same raw
+action qualifier as bounded composition. The UI never infers action authority
+from a label or screen kind; acceptance still revalidates source and context.
+
 `screens.create` accepts an optional `kind`, defaulting to panel. A dialog Help
 starter shares the panel content builder and emits `modal True`, game-menu Return
 and a focused Close button with Return. A blank dialog contains modality, game-menu

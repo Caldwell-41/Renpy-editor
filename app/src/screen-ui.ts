@@ -1,5 +1,5 @@
 import { ScreenComponents, type ComponentFieldChange } from "./screen-components.ts";
-import { buildPanelCreationForm, type PanelCreation, type PanelCreationDraft } from "./screen-panels.ts";
+import { buildPanelCreationForm, ScreenDismissal, type PanelCreation, type PanelCreationDraft } from "./screen-panels.ts";
 import { ScreenImages, type UiImageAsset } from "./screen-images.ts";
 import { ScreenText, type TextProperties, type StyleCatalog } from "./screen-text.ts";
 import { ScreenCanvasFrames } from "./screen-canvas-frames.ts";
@@ -105,6 +105,7 @@ export class ScreensWorkspace {
   private readonly layout: ScreenLayoutEditor;
   private readonly images: ScreenImages;
   private readonly text: ScreenText;
+  private readonly dismissal: ScreenDismissal;
   private reviewingAppearance = false;
   // Core history has no entry cap within a session; keep its selection receipts for this workspace's lifetime.
   private readonly compositionHistory: { path: string; before: string; after: string; beforeId?: string | null; afterId: string; removal: boolean }[] = [];
@@ -113,7 +114,7 @@ export class ScreensWorkspace {
     this.components = new ScreenComponents({view:()=>this.compositionView(),catalog:()=>this.catalog,current:()=>this.current() && this.panel.isConnected,request:actions.request,coordinate:task=>this.coordinateComponent(task),
       accepted:(change,selection)=>this.componentAccepted(change,selection),
       openDefinition:(id,nodeId)=>this.openOwnedScreen(id,nodeId,"component"),inspectScreen:id=>this.inspectOwnedPanel(id),
-      structureBlocked:()=>this.busy || !!this.creation || !!this.resize || !!this.move || this.composer.hasAddition() || this.composer.hasRemoval() || this.images.hasAddition() || this.images.isSaving() || this.text.isSaving(),
+      structureBlocked:()=>this.busy || !!this.creation || !!this.resize || !!this.move || this.composer.hasAddition() || this.composer.hasRemoval() || this.images.hasAddition() || this.images.isSaving() || this.text.isSaving() || this.dismissal.hasDraft(),
       captureDrafts:(view,trackNewDrafts=false)=>[...this.text.captureComponentDrafts(view,trackNewDrafts),this.layout.captureCopyDraft(view,trackNewDrafts),this.images.captureCopyDraft(view,trackNewDrafts),this.captureGeometryDraft(view,trackNewDrafts)].filter((value):value is CopyDraftParticipant=>!!value),
       source:actions.source,note:(text,error)=>this.note(text,error),redraw:()=>this.render(),
     });
@@ -152,7 +153,7 @@ export class ScreensWorkspace {
       text: (card, view) => this.text.render(card, view),
       textDraft: (screenId,nodeId) => this.text.hasNodeDraft(screenId,nodeId),
       beginImage: (parentId, document) => this.images.begin(parentId, document),
-      otherDraft: () => this.images.hasDraft() || this.text.hasDraft() || this.layout.hasDraft() || !!this.drafts.size,
+      otherDraft: () => this.images.hasDraft() || this.text.hasDraft() || this.layout.hasDraft() || !!this.drafts.size || this.dismissal.hasDraft(),
       hover: id => this.canvas.querySelectorAll<HTMLElement>(".screen-node").forEach(target => { const node = this.nodes()[Number(target.dataset.index)]; target.dataset.hovered = String(!!node && screenNodeKey(node) === id); }),
     });
     this.images = new ScreenImages({
@@ -173,6 +174,10 @@ export class ScreensWorkspace {
       layoutTools:host => {const tools = el("div","screen-text-layout-tools");tools.append(button("Refresh Source",()=>void this.load()),button("Validate screen",()=>this.test(true)));host.append(tools);},
       order:host => this.composer.renderOrder(host),
     },this.layout);
+    this.dismissal = new ScreenDismissal({
+      view:()=>this.compositionView(),kind:()=>this.owned?.kind,current:()=>this.current(),
+      commit:(command,base)=>this.compose(command,base),redraw:()=>this.renderCard(),note:(message,error)=>this.note(message,error),
+    });
     const heading = el("header", "screen-heading"); heading.append(el("h1", "", "Screens"));
     const tools = el("div", "screen-tools");
     const addImageElement = button("Add element", () => this.composer.beginAddition()); addImageElement.dataset.imageAdd = ""; addImageElement.hidden = true;
@@ -246,8 +251,8 @@ export class ScreensWorkspace {
     if (this.creation?.suspended) { this.creation.suspended = false; this.creation.refreshBase = true; }
     this.frames.invalidate("Checking canvas source."); void this.load();
   }
-  dispose(): void { this.disposed = true; this.sourceSequence++; this.sourceDialog?.remove(); this.components.dispose(); this.composer.dispose(); this.images.dispose(); this.text.dispose(); this.frames.dispose(); this.observer.disconnect(); this.cancelMove(); this.cancelResize(); this.closeCreationDialog(); }
-  hasDraft(): boolean { return this.components.hasPendingCopy() || this.components.isSaving() || this.drafts.size > 0 || !!this.resize || !!this.creation || this.composer.hasAddition() || this.layout.hasDraft() || this.images.hasDraft() || this.text.hasDraft(); }
+  dispose(): void { this.disposed = true; this.sourceSequence++; this.sourceDialog?.remove(); this.components.dispose(); this.composer.dispose(); this.images.dispose(); this.text.dispose(); this.dismissal.dispose(); this.frames.dispose(); this.observer.disconnect(); this.cancelMove(); this.cancelResize(); this.closeCreationDialog(); }
+  hasDraft(): boolean { return this.components.hasPendingCopy() || this.components.isSaving() || this.drafts.size > 0 || !!this.resize || !!this.creation || this.composer.hasAddition() || this.layout.hasDraft() || this.images.hasDraft() || this.text.hasDraft() || this.dismissal.hasDraft(); }
   private current(): boolean { return !this.disposed && this.actions.current(); }
   private ownedSelection(): {screenId:string;nodeId:string} | undefined {
     const id = this.nodes()[this.selected]?.id;
@@ -470,7 +475,7 @@ export class ScreensWorkspace {
     [...this.rail.querySelectorAll("button")].forEach((b, i) => b.ariaPressed = String(["choose", "design", "connect"][i] === this.step));
     this.card.replaceChildren(); this.card.ariaLabel = "Selected properties";
     const componentView = this.compositionView();
-    if (componentView && this.components.renderUse(this.card,componentView)) { this.renderCanvas(); return; }
+    if (componentView && this.components.renderUse(this.card,componentView)) { this.dismissal.renderRetained(this.card); this.renderCanvas(); return; }
     if (this.composer.render(this.card)) {
       if (componentView) {
         if (!this.card.querySelector(".screen-component-scope")) this.components.renderScope(this.card,componentView);
@@ -480,6 +485,8 @@ export class ScreensWorkspace {
         }
       }
       this.panel.dataset.composition = "true";
+      if (this.step === "design") this.dismissal.render(this.card);
+      this.dismissal.renderRetained(this.card);
       [...this.rail.querySelectorAll("button")].forEach((b, i) => b.ariaPressed = String(["choose", "design", "connect"][i] === this.step));
       if (this.creation) this.renderCreation(); this.layout.renderRetained(this.card, this.documents); this.images.renderRetained(this.card,this.documents); this.text.renderRetained(this.card,this.documents); this.renderLayoutDraftMarkers(); this.card.scrollTop = scroll; return;
     }
@@ -512,9 +519,11 @@ export class ScreensWorkspace {
       if (!node.numericLayout) this.card.append(el("p", "muted", `${node.kind} · Edit existing literal dimensions, then apply your changes.`));
       this.renderTextSample(this.card);
       this.renderGeometry(this.card);
+      this.dismissal.render(this.card);
     }
     this.card.append(el("p", "muted screen-coverage", this.doc?.partial ? "Partial coverage. Custom Python, actions, styling and unsupported regions are preserved in Source." : "Numeric layout changes use the shared source history."));
     this.layout.renderRetained(this.card, this.documents); this.images.renderRetained(this.card,this.documents); this.text.renderRetained(this.card,this.documents);
+    this.dismissal.renderRetained(this.card);
     this.renderLayoutDraftMarkers();
     this.card.scrollTop = scroll;
   }
@@ -716,6 +725,7 @@ export class ScreensWorkspace {
       } else if (command.type === "image" || command.type === "addImage") this.note(sourceChanged ? "Image applied. Undo restores its reference, size and layout together." : "No change. No undo entry added.");
       else if (command.type === "add") this.note("Element added. Undo removes this addition.");
       else if (command.type === "formatText") this.note(!sourceChanged ? "No change. No history entry added." : "Text applied. Undo restores its typography and layout together.");
+      else if (command.type === "dismissal") this.note(!sourceChanged ? "No change. No history entry added." : "Button action applied. Undo restores its previous action.");
       else this.note(!sourceChanged ? "Order unchanged. No history entry added." : "Order changed. Groups keep their children; Undo restores the order.");
       this.render(); this.composer.focusSelection();
     }
