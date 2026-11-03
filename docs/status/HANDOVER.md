@@ -3,7 +3,7 @@
 ## Help dialog and base Help canvas implementation
 
 The selected local implementation is delivered on `codex/help-dialog-canvas`,
-from `e32ded4`; completion code candidate is `a3131b3`. Both implementation lanes are
+from `e32ded4`; completion code candidate is `b2a5694`. Both implementation lanes are
 preserved, with shared contracts, integration, review and finding fixes owned by
 the coordinator. [The evidence owner](../tasks/evidence/help-dialog-and-canvas.md)
 records exact scopes and [final UI captures](../tasks/evidence/help-dialog-and-canvas-ui/verification.json).
@@ -24,8 +24,13 @@ built current driver and complete cleanup. Terra's `5b0ab97` pass found six wide
 nested focus cases obscured by the sticky toolbar, despite correct opener/context
 restoration in all 36 cases. `a3131b3` reserves the toolbar's measured height in its
 scroll container and explicitly scrolls restored nested openers into view; 31 focused
-tests pass. Targeted browser geometry and the final frontend check remain before
-publication/CI. No new SDK/package/native
+tests pass. The follow-up passes all 18 wide cases but stops at compact case 20/36:
+its toolbar is 335px inside a 100px scrollport, and the skipped toolbar scroll leaves
+the opener above the viewport. `b2a5694` permits stickiness only when the toolbar,
+one control and its focus clearance fit, observes both toolbar and scrollport size,
+and explicitly scrolls every restored opener. The expanded constraint test passes
+with all 31 focused cases. Compact-first browser geometry and the final frontend
+check remain before publication/CI. No new SDK/package/native
 qualification matrix, merge, issue closure or release is selected.
 
 Blocking Dialog creation/resolution, Call/Finish, conservative source/history and

@@ -11,10 +11,10 @@ the coordinator owns shared contracts, review findings, integration and final re
 | --- | --- | --- |
 | Help dialog and Story Call/Finish | A4 UI is integrated; completion fixes restore cancellation context/focus and approved field order; actual controller/core and recorded eight normal-entry rows per target pass | Completion review pending; final user acceptance remains separate |
 | Base Help canvas | Eight matched cases per target have exact pixels and geometry at `4c084a4`; lossless geometry transport is tested | Wider canvas/native/physical acceptance stays separate |
-| Combined implementation | Review corrections pass 24 affected core tests and six-stage actual controller/core journey; `a3131b3` adds sticky-toolbar clearance with 31 focused UI passes | Standards/Spec findings resolved; targeted focus geometry and final frontend check before publication or CI |
+| Combined implementation | Review corrections pass 24 affected core tests and six-stage actual controller/core journey; `b2a5694` handles oversized toolbars with 31 focused UI passes | Standards/Spec findings resolved; compact focus geometry and final frontend check before publication or CI |
 
 Kris approved A4 (`inspector-v4`) at source `8851689`; B4/C4 remain drafts.
-Completion code is `a3131b3`, with the exact approved reference and retained product
+Completion code is `b2a5694`, with the exact approved reference and retained product
 captures committed separately from the production renderer. Help still requires
 a typed UI image; insertion remains client-only existing Scene/body/Position
 context. Missing images, deleted placement Scenes and unresolved action drafts

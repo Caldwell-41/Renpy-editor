@@ -53,6 +53,18 @@ toolbar reservation; 31 focused cases and typecheck pass after correction. Targe
 browser geometry verification remains pending; do not count the earlier scripted
 matrix's `passed: true` as a pass for its six visible occlusions.
 
+The `dc817e5` follow-up passes all 18 wide cases, including those six occlusions,
+then stops on compact screen/Show/Escape: the correct opener is above the viewport.
+Only 20/36 cases ran, 19 passed; no final Source-byte comparison ran after the stop.
+The 335px toolbar cannot reserve 339px inside its 100px scrollport, and the toolbar
+focus path skipped scrolling. Reassessment identified the invalid fit assumption.
+`b2a5694` allows sticky positioning only when toolbar, a control and its focus
+clearance fit; otherwise the existing toolbar scrolls normally. It observes the
+scrollport as well as wrapping, and explicitly scrolls every restored opener.
+The constraint test fails red with `194px` instead of `4px` for an undersized
+scrollport, then passes for shrink/enlarge transitions. All 31 focused cases and
+typecheck pass. A compact-first browser check remains selected; no CI has started.
+
 The new compact A/B also distinguishes capture paths: CDP returns a 560x553 PNG
 before/after paint while the DOM is 560x640; settled Playwright returns the full
 560x640 view with the footer. Their shared area differs only by a caret. Exact
