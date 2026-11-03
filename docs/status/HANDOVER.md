@@ -3,14 +3,19 @@
 ## Help dialog and base Help canvas implementation
 
 The selected local implementation is delivered on `codex/help-dialog-canvas`,
-from `e32ded4`; final code candidate is `cbe5bb3`. Both implementation lanes are
+from `e32ded4`; completion code candidate is `02c0167`. Both implementation lanes are
 preserved, with shared contracts, integration, review and finding fixes owned by
 the coordinator. [The evidence owner](../tasks/evidence/help-dialog-and-canvas.md)
 records exact scopes and [final UI captures](../tasks/evidence/help-dialog-and-canvas-ui/verification.json).
 Kris then requested continued subagent implementation until both tickets are
 complete before CI. Hold publication and CI. Reconcile the live bounded criteria,
 complete any remaining A4 functionality and visual corrections, integrate committed
-lane work and review the result before resuming the draft PR. No new SDK/package/native
+lane work and review the result before resuming the draft PR. Sol's `cb0ac5c` is
+integrated as `282cc28`; it restores captured placement on Cancel/Escape without
+rebasing unavailable context. Coordinator `02c0167` restores focus to the recreated
+Story opener and orders the creation fields as approved. All 364 frontend tests,
+29 focused cases, production build and the actual controller/core journey pass.
+One combined Standards/Spec review and final visual assessment remain. No new SDK/package/native
 qualification matrix, merge, issue closure or release is selected.
 
 Blocking Dialog creation/resolution, Call/Finish, conservative source/history and
@@ -30,8 +35,10 @@ groups with zero page errors and complete cleanup. The frontend routine passes
 The completed Terra worker was not replaced. The coordinator used a narrow
 automated probe after two continuation requests were rejected. Ten hashed final
 captures bind the implementation trees and actual driver. Whole-page pixel
-identity is not claimed; compact PNG repetition remains unexplained and is also
-present in the earlier Terra captures. It is not established as a native defect.
+identity is not claimed. Terra reproduced compact PNG repetition while the DOM and
+hit-testing remained correct. After two animation frames the capture has the correct
+footer. Exact resize/capture/compositor attribution remains open; no product CSS
+change is supported. It is not established as a native defect.
 Help still requires a typed UI image. Placement uses existing Story body/Position
 ownership, with no new IPC/persistence or general action builder. Preserve the
 approved reference checkout, earlier revisions, failures and proof limits.

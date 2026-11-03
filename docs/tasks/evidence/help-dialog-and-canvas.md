@@ -1,5 +1,59 @@
 # Help dialog and base canvas delivery evidence
 
+## Completion corrections and local verification, 2026-11-04
+
+Sol's `cb0ac5c74f910ab7f0609e85a6479ef9ced0883f` is integrated as `282cc28`.
+It reproduces and fixes cancelled placement leaking into the next screen-Beat
+operation. Cancel/Escape restore the opening context, including unavailable nested
+identities and old revisions; refusal retains the attempted placement; successful
+Add remembers accepted placement/revision. No shared contract or persistence changed.
+The initially reported `0b68ddf` did not exist and is disregarded. Git metadata
+escalation produced the verified commit without publication.
+
+Terra's current-source browser pass identified Story cancellation focus falling
+to BODY and observed the approved creation field-order difference. Coordinator
+`02c0167e163d005d05053ba2c7dff1c51618e65a` restores the recreated root, screen or
+branch opener, with visible root fallback, and places Starter before Screen name.
+Both corrections have red/green checks. An initial DOM-object equality failure
+produced no useful focus assertion report; boolean identity reproduces the actual
+root cancellation failure clearly. The failed runs remain retained.
+
+Final local checks at this code pass: 364 frontend tests with zero failures/skips,
+29 focused creation/Story/dismissal tests, typecheck and production build. The actual
+five-stage creation/Call/Finish controller/core journey passes minimal writes,
+no-op, Cancel/stale retention, Undo/Redo and renamed-reference reopen, with driver
+exit zero and scratch removed. The nonblocking existing Vite chunk warning remains.
+Core tree `1016869e4426032b8958aefc046d19eb36eb6104` is unchanged; the verified reused
+driver SHA256 remains `613e28ee232f20d9bc7492c690020def6b5574b7b3c8077fc9a9c2343ad3bbaa`.
+One combined Standards/Spec review and final visual assessment remain before CI.
+
+| Bounded leaf criterion | Current implementation and proof |
+| --- | --- |
+| #45 blocking, focus and dismissal | Editable Dialog defaults; recorded eight normal-entry rows per host qualify blocking, default focus, Close/Escape and outside retention at their stated candidates |
+| #45 Call waits and Finish resumes once | Distinct screen Call/Finish owners; both-host normal-entry counters and actual controller/core authoring pass |
+| #45 invalid actions and parameterless targets | Existing authoritative context/revision admission and retained-draft tests; dynamic/argument/captured interactions remain conservative |
+| #45 references, cancellation, Source/history/reopen | Actual controller/core journey plus focused shared tests; cancellation context/focus corrections pass locally |
+| #46 supported base composition | Accepted layout/font/image/Style export and lossless geometry transport; no production rendering-input change in this completion pass |
+| #46 matched source/state at both aspects/targets | Eight exact pixel/geometry rows per host at `4c084a4`, retaining their original identity and scope |
+| #46 visible differences and limits | Exact engine comparison has no pixel/geometry difference; custom content has a visible partial-coverage warning; no substitute asset/font is admitted |
+| #46 selection, inert controls and guides | Terra verifies real frontend selection both ways, no button action/source write, image/guide separation and visible custom limits with controlled installed image/geometry; this is not fresh engine proof |
+
+Terra also reproduced the compact PNG duplication at `88bb8e8`: the immediate
+headless image repeats its top rows near the footer while the DOM has one header
+and hit-testing finds the real footer. After two animation frames the same page
+captures correctly; direct CDP then agrees apart from a caret. This establishes a
+transient capture/DOM mismatch, not a production CSS defect. Exact resize, first-shot
+and compositor attribution is still open. Preserve the original images and failures;
+future static comparisons must wait for paint and verify their conditions. The
+report measures the approved 8px Add/Cancel gap, 14px Source separation and visible
+keyboard outline at both viewports. Whole-page identity across different fixture
+content/shells and a complete nine-state visual comparison are not claimed.
+
+No push, PR, CI, SDK/helper, native editor or package process ran in this pass.
+Previously qualified runtime/rendering evidence keeps its candidate scope and all
+operation counters are unchanged. Wider native/package/physical/whole-3B acceptance
+is not a substitute for, or an extra condition on, the bounded leaf map above.
+
 ## Completion pass before publication and CI, 2026-11-04
 
 After asking whether both tickets were fully implemented, Kris requested continued

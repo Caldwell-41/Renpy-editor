@@ -9,12 +9,12 @@ the coordinator owns shared contracts, review findings, integration and final re
 
 | Capability | Implemented and automated proof | Remaining acceptance |
 | --- | --- | --- |
-| Help dialog and Story Call/Finish | A4 UI is integrated; final controller/core and five production-main recovery groups pass; eight normal-entry cases pass per target at recorded candidates | Whole-page/compact visual limits and final user acceptance |
+| Help dialog and Story Call/Finish | A4 UI is integrated; completion fixes restore cancellation context/focus and approved field order; actual controller/core and recorded eight normal-entry rows per target pass | Completion review pending; final user acceptance remains separate |
 | Base Help canvas | Eight matched cases per target have exact pixels and geometry at `4c084a4`; lossless geometry transport is tested | Wider canvas/native/physical acceptance stays separate |
-| Combined implementation | Independent Standards zero; Spec P2 and Terra findings resolved; 361 frontend routine passes, 34 final focused passes and final production build pass | Completion pass reopened with subagents before publication or CI |
+| Combined implementation | Completion candidate `02c0167` passes 364 frontend tests, 29 focused tests, production build and actual controller/core journey | One combined Standards/Spec review and final visual assessment before publication or CI |
 
 Kris approved A4 (`inspector-v4`) at source `8851689`; B4/C4 remain drafts.
-Final code is `cbe5bb3`, with the exact approved reference and retained product
+Completion code is `02c0167`, with the exact approved reference and retained product
 captures committed separately from the production renderer. Help still requires
 a typed UI image; insertion remains client-only existing Scene/body/Position
 context. Missing images, deleted placement Scenes and unresolved action drafts
@@ -23,8 +23,10 @@ fallback is introduced. Kris requested another subagent completion pass against
 both live tickets before publication or CI. The earlier implementation is preserved.
 The final main/core probe records zero page errors and complete cleanup. It
 intercepts engine rendering before dispatch. Whole-page pixel identity is not
-claimed; a compact PNG repetition also present in the earlier Terra capture
-remains unexplained. Native/physical and broader editor acceptance remain separate.
+claimed. Terra reproduced the compact PNG repetition as a transient mismatch
+between headless capture and the DOM; a capture after two animation frames is correct.
+Its exact compositor/timing cause is not isolated, and it supports no production
+CSS correction. Native/physical and broader editor acceptance remain separate.
 [Delivery evidence](../tasks/evidence/help-dialog-and-canvas.md) owns candidates,
 checks, earlier failures, operation counts and exact scope. Physical/human and
 package/native acceptance remain separate. Neither ticket is closed. The draft PR
