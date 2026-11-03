@@ -8,6 +8,9 @@ import argparse
 import tempfile
 import shutil
 import re
+import os
+from types import SimpleNamespace
+from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location('help_dialog_gate', Path(__file__).with_name('qualify-help-dialog.py'))
 gate = importlib.util.module_from_spec(spec)
@@ -78,13 +81,53 @@ class RuntimeEvidenceTests(unittest.TestCase):
         with self.assertRaises(ValueError): self.validate(row)
 
     def test_process_results_require_complete_cleanup_and_named_positive_results(self):
-        good = [dict(name='core-export',passed=True,exitCode=0,timedOut=False,outputLimited=False,processReaped=True,cleanupComplete=True)]
+        good = [dict(name='core-export',startState='confirmed',passed=True,exitCode=0,timedOut=False,outputLimited=False,processReaped=True,cleanupComplete=True)]
         gate.validate_process_checks(good, ['core-export'])
-        for field in ('passed','exitCode','timedOut','outputLimited','processReaped','cleanupComplete'):
+        for field in ('passed','exitCode','timedOut','outputLimited','processReaped','cleanupComplete','startState'):
             bad = copy.deepcopy(good); del bad[0][field]
             with self.subTest(field=field), self.assertRaises(ValueError): gate.validate_process_checks(bad, ['core-export'])
         for bad in ([], good + good):
             with self.assertRaises(ValueError): gate.validate_process_checks(bad, ['core-export'])
+
+    def test_launch_accounting_distinguishes_preflight_uncertain_and_confirmed_io_failure(self):
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name)
+            def result(): return dict(checks=[],sdkLaunchAttempts=0,sdkProcessesStarted=0,sdkUncertainReservations=0,sdkRefusedLaunches=0)
+            def refused(*args, **kwargs): raise OSError('spawn refused without receipt')
+            row = result()
+            with self.assertRaises(FileNotFoundError):
+                gate.run_sdk_logged(row, root, 'preflight', ['unused'], root/'missing', dict(os.environ), 1, runner=refused)
+            self.assertEqual((row['sdkLaunchAttempts'],row['sdkProcessesStarted'],row['sdkUncertainReservations'],row['sdkRefusedLaunches']), (1,0,0,1))
+            row = result()
+            with self.assertRaisesRegex(OSError, 'spawn refused'):
+                gate.run_sdk_logged(row, root, 'unknown', ['unused'], root, dict(os.environ), 1, runner=refused)
+            self.assertEqual((row['sdkProcessesStarted'],row['sdkUncertainReservations']), (0,1))
+            self.assertEqual(row['checks'][0]['failure']['message'], 'spawn refused without receipt')
+            receipt = SimpleNamespace(exit_code=0,duration_seconds=0.1,timed_out=False,output_limited=False,output='done')
+            row = result()
+            with patch.object(Path, 'write_text', side_effect=OSError('post-process log I/O')):
+                with self.assertRaisesRegex(OSError, 'post-process log I/O'):
+                    gate.run_sdk_logged(row, root, 'finished', ['unused'], root, dict(os.environ), 1, runner=lambda *a, **k: receipt)
+            self.assertEqual((row['sdkProcessesStarted'],row['sdkUncertainReservations']), (1,0))
+            self.assertTrue(row['checks'][0]['cleanupComplete'])
+            self.assertEqual(row['checks'][0]['failure']['message'], 'post-process log I/O')
+
+    def test_partial_failure_receipt_confirms_start_and_preserves_original_failure(self):
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name); row = dict(checks=[],sdkLaunchAttempts=0,sdkProcessesStarted=0,sdkUncertainReservations=0,sdkRefusedLaunches=0)
+            error = RuntimeError('original adapter failure')
+            for key, value in dict(command_output='partial',command_exit_code=9,command_duration_seconds=0.1,
+                                   command_timed_out=False,command_output_limited=False,command_process_reaped=True,command_cleanup_complete=True).items(): setattr(error,key,value)
+            def partial(*a, **k): raise error
+            with patch.object(Path, 'write_text', side_effect=OSError('retention failed')):
+                with self.assertRaisesRegex(RuntimeError, 'original adapter failure'):
+                    gate.run_sdk_logged(row, root, 'partial', ['unused'], root, dict(os.environ), 1, runner=partial)
+            self.assertEqual((row['sdkLaunchAttempts'],row['sdkProcessesStarted'],row['sdkUncertainReservations']), (1,1,0))
+            self.assertEqual(row['checks'][0]['failure']['message'], 'original adapter failure')
+            self.assertEqual(row['checks'][0]['retentionFailure']['message'], 'retention failed')
+            gate.finish_cleanup(row, None); self.assertTrue(row['cleanupComplete'])
+            row['checks'][0]['cleanupComplete'] = False; gate.finish_cleanup(row, root/'owned')
+            self.assertFalse(row['cleanupComplete'])
 
     def test_binary_receipt_requires_expected_candidate_and_producing_inputs(self):
         record = dict(candidate='a'*40, producingInputsSHA256='b'*64, sha256='c'*64, bytes=10)
@@ -104,11 +147,10 @@ class RuntimeEvidenceTests(unittest.TestCase):
 
 
 
-class FrozenEvidenceChecks(unittest.TestCase):
+class FrozenEvidenceChecks:
     accepted = None
 
     def setUp(self):
-        if self.accepted is None: self.skipTest('Select --accepted for frozen producer mutation checks')
         self.temporary = tempfile.TemporaryDirectory(); self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name) / 'accepted'; shutil.copytree(self.accepted, self.root)
 
@@ -144,6 +186,8 @@ class FrozenEvidenceChecks(unittest.TestCase):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(); parser.add_argument('--accepted', type=Path)
     args, remaining = parser.parse_known_args()
-    if args.accepted is not None: FrozenEvidenceChecks.accepted = args.accepted.resolve()
+    if args.accepted is not None:
+        class FrozenEvidenceTests(FrozenEvidenceChecks, unittest.TestCase):
+            accepted = args.accepted.resolve()
     unittest.main(argv=[__file__, *remaining])
 

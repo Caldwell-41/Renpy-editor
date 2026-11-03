@@ -25,7 +25,61 @@ _spec = importlib.util.spec_from_file_location('frozen_help_file_utilities', Pat
 base = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(base)
 require, load_json, digest = base.require, base.load_json, base.digest
-portable_file, write_json, run_logged = base.portable_file, base.write_json, base.run_logged
+portable_file, write_json = base.portable_file, base.write_json
+
+
+def run_logged(output, name, argv, cwd, env, checks, timeout, retain_output=None, runner=None):
+    # #45 must retain the process receipt before any log/retention I/O can fail.
+    # The frozen #44 utility writes first, so this bounded process boundary has
+    # its own receipt/accounting owner while retaining the shared SDK adapter.
+    if runner is None:
+        sys.path.insert(0, str(REPO / 'spikes/renpy-sdk'))
+        from sdk_adapter import run_bounded
+        runner = run_bounded
+    previous_env, previous_cwd = dict(os.environ), Path.cwd()
+    record = dict(name=name, passed=False, startState='notStarted')
+    checks.append(record)
+    try:
+        os.chdir(cwd)
+        os.environ.clear(); os.environ.update(env)
+        record['startState'] = 'uncertainReserved'
+        try:
+            receipt = runner(tuple(map(str, argv)), timeout_seconds=timeout, output_limit=2_000_000)
+        except BaseException as error:
+            if all(hasattr(error, field) for field in ('command_output','command_exit_code','command_duration_seconds',
+                    'command_timed_out','command_output_limited','command_process_reaped','command_cleanup_complete')):
+                record.update(startState='confirmed', exitCode=error.command_exit_code,
+                              durationSeconds=error.command_duration_seconds, timedOut=error.command_timed_out,
+                              outputLimited=error.command_output_limited, processReaped=error.command_process_reaped,
+                              cleanupComplete=error.command_cleanup_complete)
+                try:
+                    (output / (name + '.log')).write_text(error.command_output, encoding='utf-8')
+                    if retain_output is not None: retain_output(error.command_output)
+                except BaseException as retention_error:
+                    record['retentionFailure'] = dict(type=type(retention_error).__name__, message=str(retention_error))
+            raise
+        record.update(startState='confirmed', exitCode=receipt.exit_code, durationSeconds=receipt.duration_seconds,
+                      timedOut=receipt.timed_out, outputLimited=receipt.output_limited, processReaped=True, cleanupComplete=True)
+        (output / (name + '.log')).write_text(receipt.output, encoding='utf-8')
+        if retain_output is not None: retain_output(receipt.output)
+        require(receipt.exit_code == 0 and not receipt.timed_out and not receipt.output_limited, name + ' failed; see retained log')
+        record['passed'] = True
+        return receipt.output
+    except BaseException as error:
+        record['failure'] = dict(type=type(error).__name__, message=str(error))
+        raise
+    finally:
+        os.environ.clear(); os.environ.update(previous_env); os.chdir(previous_cwd)
+
+
+def run_sdk_logged(result, output, name, command, cwd, env, timeout, runner=None):
+    result['sdkLaunchAttempts'] += 1
+    try:
+        return run_logged(output, name, command, cwd, env, result['checks'], timeout, runner=runner)
+    finally:
+        result['sdkProcessesStarted'] = sum(c['startState'] == 'confirmed' for c in result['checks'])
+        result['sdkUncertainReservations'] = sum(c['startState'] == 'uncertainReserved' for c in result['checks'])
+        result['sdkRefusedLaunches'] = sum(c['startState'] == 'notStarted' for c in result['checks'])
 
 
 def validate_runtime_output(text, case, manifest_sha, accepted_hashes, resolution):
@@ -86,7 +140,8 @@ def validate_process_checks(checks, expected):
     for check in checks:
         require(check.get('passed') is True and type(check.get('exitCode')) is int and check['exitCode'] == 0
                 and check.get('timedOut') is False and check.get('outputLimited') is False
-                and check.get('processReaped') is True and check.get('cleanupComplete') is True,
+                and check.get('processReaped') is True and check.get('cleanupComplete') is True
+                and check.get('startState') == 'confirmed',
                 'incomplete process/cleanup evidence')
 
 
@@ -272,7 +327,7 @@ def qualify_sdk(args):
     prepared = args.prepared.resolve(); manifest = validate_prepared(prepared, args.expected_candidate)
     output = base.fresh_output(args.output)
     result = dict(passed=False, checks=[], runtimeObserved=[], sdkVersion='8.5.3', sdkSHA256=base.SDK_SHA256,
-                  sdkProcessesStarted=0, nativeEditorLaunches=0, physicalInputProven=False,
+                  sdkLaunchAttempts=0, sdkProcessesStarted=0, sdkUncertainReservations=0, sdkRefusedLaunches=0, nativeEditorLaunches=0, physicalInputProven=False,
                   candidate=args.expected_candidate, producingBinary=load_json((prepared / 'result.json').read_text(encoding='utf-8'))['testBinary'],
                   os=platform.system(), architecture=platform.machine(), manifestSHA256=digest(prepared / 'accepted/manifest.json'))
     temporary = None
@@ -287,8 +342,7 @@ def qualify_sdk(args):
         sdk = temporary / 'sdk/renpy-8.5.3-sdk'; game = temporary / 'game-project'; stage_game(prepared / 'accepted', manifest, game)
         env = dict(os.environ, RENPY_PATH_TO_SAVES=str(temporary / 'saves'), SDL_AUDIODRIVER='dummy', PYTHONDONTWRITEBYTECODE='1', TMPDIR=str(temporary), TMP=str(temporary), TEMP=str(temporary))
         def run(name, command, timeout):
-            result['sdkProcessesStarted'] += 1
-            return run_logged(output, name, command, sdk, env, result['checks'], timeout)
+            return run_sdk_logged(result, output, name, command, sdk, env, timeout)
         parse_version(run('sdk-version', command_argv(sdk, Command.VERSION), 30))
         run('sdk-compile', command_argv(sdk, Command.COMPILE, game, allow_project_execution=True), 90)
         run('sdk-lint', command_argv(sdk, Command.LINT, game, allow_project_execution=True), 90)
@@ -303,7 +357,9 @@ def qualify_sdk(args):
         validate_case_set(result['runtimeObserved']); require(inputs() == load_json((prepared / 'inputs.json').read_text(encoding='utf-8')), 'inputs changed')
         result['acceptedSourceUnchanged'] = True
         validate_process_checks(result['checks'], ['sdk-version','sdk-compile','sdk-lint'] + [f'{r[0]}x{r[1]}-{c}' for r in RESOLUTIONS for c in CASES])
-        require(result['sdkProcessesStarted'] == 11 and result['acceptedSourceUnchanged'] is True, 'wrong launcher count/source preservation')
+        require(result['sdkLaunchAttempts'] == 11 and result['sdkProcessesStarted'] == 11
+                and result['sdkUncertainReservations'] == 0 and result['sdkRefusedLaunches'] == 0
+                and result['acceptedSourceUnchanged'] is True, 'wrong launcher count/source preservation')
         result['passed'] = True
     except BaseException as error:
         result['failure'] = dict(type=type(error).__name__, message=str(error))
