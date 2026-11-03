@@ -591,7 +591,11 @@ export function renderSceneAuthoring(
     });
   };
 
-  const openNewBeat = (scene: SceneDocument, initialType: BeatPayload["type"] = actions.screenHintKind === "dialog" ? "callScreen" : "dialogue", beforeBeatId: string | null = null): void => {
+  const focusBeatOpener = (key: string): void => {
+    const controls = [...host.querySelectorAll<HTMLButtonElement>("button[data-beat-opener]")].filter(control => !control.disabled && !control.closest("[hidden]"));
+    (controls.find(control => control.dataset.beatOpener === key) ?? controls.find(control => control.dataset.beatOpener === "root"))?.focus();
+  };
+  const openNewBeat = (scene: SceneDocument, initialType: BeatPayload["type"] = actions.screenHintKind === "dialog" ? "callScreen" : "dialogue", beforeBeatId: string | null = null, opener = "root"): void => {
     if (!draftGuard()) return;
     const anchor = beforeBeatId ? scene.beats.find(beat => beat.id === beforeBeatId) : undefined;
     if (anchor?.owner || (anchor?.conditionalBranch && (anchor.conditionalBranch.otherwise || anchor.conditionalBranch.ordinal))) {
@@ -606,7 +610,7 @@ export function renderSceneAuthoring(
       const remembered = actions.screenInsertion;
       const hint = !anchor && screenBeat && remembered && (remembered.sceneId === scene.id || !model.scenes.some(item=>item.id===remembered.sceneId)) ? structuredClone(remembered) : undefined;
       const body = hint?.body ?? {type:"root"} as BodyRef;
-      renderNewBeat(list, current, initialType, body, anchor ? {type:"before",anchor:nodeRef(anchor)} : hint?.position ?? defaultInsertion(current, body), hint);
+      renderNewBeat(list, current, initialType, body, anchor ? {type:"before",anchor:nodeRef(anchor)} : hint?.position ?? defaultInsertion(current, body), hint, opener);
     }
   };
 
@@ -699,7 +703,7 @@ export function renderSceneAuthoring(
     const contribution = (label: string, beatId: string | undefined, addType: BeatPayload["type"]): void => {
       const row = document.createElement("div"); row.className = "provenance-row"; const name = document.createElement("span"); name.textContent = label; row.append(name);
       if (beatId) { const index = scene.beats.findIndex((beat) => beat.id === beatId); const edit = button(`Edit Beat ${index + 1}`, "text-button"); edit.addEventListener("click", () => { if (draftGuard()) { selectedBeatId = beatId; draw(); host.querySelector<HTMLElement>(".beat-card.selected")?.scrollIntoView?.({ block: "nearest" }); } }); row.append(edit); }
-      const add = button("Add change here", "text-button"); add.disabled = rootInsertionIsNested(scene, selectedBeatId ?? null); add.addEventListener("click", () => openNewBeat(scene, addType, selectedBeatId ?? null)); row.append(add); provenance.append(row);
+      const add = button("Add change here", "text-button"); add.dataset.beatOpener = `change:${addType}`; add.disabled = rootInsertionIsNested(scene, selectedBeatId ?? null); add.addEventListener("click", () => openNewBeat(scene, addType, selectedBeatId ?? null, `change:${addType}`)); row.append(add); provenance.append(row);
     };
     contribution(state.backgroundUnknown ? "Background · unknown" : "Background", state.background?.beatId, "background");
     state.characters.forEach((character) => contribution(`${model.authoring.characters.find((item) => item.id === character.characterId)?.displayName ?? "Character"} · ${character.placement}`, character.appearanceBeatId, "changeAppearance"));
@@ -882,7 +886,7 @@ export function renderSceneAuthoring(
     stack.append(preview, beatsRegion); host.append(stack); renderPreview(preview, scene);
     const toolbar = document.createElement("div"); toolbar.className = "beats-toolbar";
     const heading = document.createElement("h2"); heading.textContent = "Beats";
-    const add = button("Add Beat", "button primary"); add.disabled = scene.sourceConflict;
+    const add = button("Add Beat", "button primary"); add.dataset.beatOpener = "root"; add.disabled = scene.sourceConflict;
     add.addEventListener("click", () => openNewBeat(scene));
     let allocation=actions.layoutKey ? layoutFor(actions.layoutKey).previewPercent ?? 34 : 34;
     const divider=document.createElement("div");divider.className="preview-divider";divider.role="separator";divider.tabIndex=0;divider.ariaLabel="Resize scene preview";divider.setAttribute("aria-orientation","horizontal");divider.setAttribute("aria-valuemin","20");divider.setAttribute("aria-valuemax","70");
@@ -892,8 +896,8 @@ export function renderSceneAuthoring(
     let dragging=false;divider.addEventListener("pointerdown",e=>{dragging=true;divider.setPointerCapture(e.pointerId);});divider.addEventListener("pointermove",e=>{if(dragging){const b=stack.getBoundingClientRect();adjust((e.clientY-b.top)/b.height*100);}});divider.addEventListener("pointerup",()=>{dragging=false;adjust(allocation,true);});divider.addEventListener("pointercancel",()=>{dragging=false;});stack.insertBefore(divider,beatsRegion);
     const tools = document.createElement("div"); tools.className = "beats-tools";tools.append(add);
     if (actions.screenCatalog && actions.resolveScreenTarget) {
-      const screenBeat = button("Add screen Beat"); screenBeat.disabled = scene.sourceConflict;
-      screenBeat.addEventListener("click", () => openNewBeat(scene,actions.screenHintKind === "dialog" ? "callScreen" : "showScreen"));
+      const screenBeat = button("Add screen Beat"); screenBeat.dataset.beatOpener = "screen"; screenBeat.disabled = scene.sourceConflict;
+      screenBeat.addEventListener("click", () => openNewBeat(scene,actions.screenHintKind === "dialog" ? "callScreen" : "showScreen",null,"screen"));
       if (actions.screenHint) screenBeat.title = `Use ${actions.screenHint.sourceName.replaceAll("_"," ")} in this Scene`;
       tools.append(screenBeat);
     }
@@ -1016,12 +1020,13 @@ export function renderSceneAuthoring(
         const body = document.createElement("section"); body.className = "story-branch-body"; body.dataset.branchId = beat.id;
         body.append(card); group.querySelector(".story-branches")!.append(body); branchHosts.set(beat.id, body);
         const addChild = button(`Add Beat to ${branch.otherwise ? "Otherwise" : branch.ordinal ? "Else If" : "If"}`);
+        addChild.dataset.beatOpener = `branch:${beat.id}`;
         addChild.disabled = scene.sourceConflict || branch.condition?.status === "unknown";
         addChild.addEventListener("click", () => {
           if (!draftGuard()) return;
           selectedBeatId = undefined; draw();
           const target = [...host.querySelectorAll<HTMLElement>(".story-branch-body")].find(node => node.dataset.branchId === beat.id);
-          if (target) { const parent: BodyRef = { type: "branch", groupId: branch.groupId, branchId: beat.id }; renderNewBeat(target, scene, "dialogue", parent, defaultInsertion(scene, parent)); }
+          if (target) { const parent: BodyRef = { type: "branch", groupId: branch.groupId, branchId: beat.id }; renderNewBeat(target, scene, "dialogue", parent, defaultInsertion(scene, parent), undefined, `branch:${beat.id}`); }
         });
         const addCondition = button(`Add Condition to ${branch.otherwise ? "Otherwise" : branch.ordinal ? "Else If" : "If"}`); addCondition.disabled = scene.sourceConflict;
         addCondition.addEventListener("click", () => { const parent: BodyRef = { type: "branch", groupId: branch.groupId, branchId: beat.id }; openConditionForm(scene, parent, defaultInsertion(scene, parent)); });
@@ -1154,7 +1159,7 @@ export function renderSceneAuthoring(
     dirtyDraft(panel, editor.controls); card.append(panel);
   };
 
-  const renderNewBeat = (list: HTMLElement, scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", body: BodyRef = { type: "root" }, position: Position = defaultInsertion(scene, body), insertion?: ScreenInsertion): void => {
+  const renderNewBeat = (list: HTMLElement, scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", body: BodyRef = { type: "root" }, position: Position = defaultInsertion(scene, body), insertion?: ScreenInsertion, opener = "root"): void => {
     if (host.querySelector(".new-beat")) return;
     const captured = { projectRevision: model.projectRevision, sourceMapRevision: model.sourceMapRevision };
     const openingInsertion = structuredClone(insertion ?? actions.screenInsertion ?? {sceneId:scene.id,body,position,expectedSourceRevision:scene.sourceRevision});
@@ -1200,7 +1205,7 @@ export function renderSceneAuthoring(
     type.addEventListener("change", replaceEditor); replaceEditor();
     const actionsRow = document.createElement("div"); actionsRow.className = "row-actions";
     const cancel = button("Cancel", screenType()?"button secondary":"text-button");
-    const cancelDraft=()=>{if(rememberedInsertion)actions.rememberScreenInsertion?.(structuredClone(openingInsertion));pendingMarker.remove();panel.remove();};cancel.addEventListener("click",cancelDraft);
+    const cancelDraft=()=>{if(rememberedInsertion)actions.rememberScreenInsertion?.(structuredClone(openingInsertion));pendingMarker.remove();panel.remove();focusBeatOpener(opener);};cancel.addEventListener("click",cancelDraft);
     type.addEventListener("change",()=>{cancel.className=screenType()?"button secondary":"text-button";updatePendingMarker();});
     let pending=false;
     panel.addEventListener("keydown", event => {

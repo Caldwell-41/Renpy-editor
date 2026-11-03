@@ -25,16 +25,17 @@ function setup() {
 function control<T extends HTMLElement>(name: string): T { return document.querySelector<T>(`[name="${name}"]`)!; }
 function submit() { document.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); }
 
-test("Help creation uses a typed project image and one ordinary editable starter request", async () => {
+test("Help creation uses a typed project image and one ordinary editable starter request", async t => {
   const browser = setup(); const calls: PanelCreation[] = [];
   const view = buildPanelCreationForm({ assets: [{ ...image, id: "background", kind: "background" }, { ...image, id: "missing", status: "missing" }, image], create: async value => { calls.push(value); }, cancel: () => {} });
+  t.after(async()=>{view.dispose();await browser.happyDOM.close();});
   document.body.append(view.element);
+  assert.deepEqual([...view.element.querySelectorAll<HTMLInputElement | HTMLSelectElement>("label > input, label > select")].map(control => control.name), ["starter", "screen-name", "screen-kind", "starter-image"]);
   assert.equal(control<HTMLSelectElement>("starter-image").value, "image");
   assert.equal(view.element.querySelector(".screen-panels-preview strong")?.textContent,"Help");
   control<HTMLInputElement>("screen-name").value = "travel_help";
   submit(); await tick();
   assert.deepEqual(calls, [{ name: "travel_help", starter: { title: "Help", explanation: "Read this guide while the story continues.", assetId: "image", expectedAssetSha256: image.sha256, width: 320, height: 180 } }]);
-  view.dispose(); await browser.happyDOM.close();
 });
 
 test("empty image inventory keeps Help and its name blocked until the author explicitly chooses Blank", async () => {

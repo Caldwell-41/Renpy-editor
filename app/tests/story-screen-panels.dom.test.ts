@@ -192,6 +192,22 @@ test("screen insertion keeps existing nested body ownership",async()=>{
  assert.deepEqual(s.commands[0]!.body,{type:"branch",groupId:"group",branchId:"branch"});assert.deepEqual(s.commands[0]!.position,{type:"before",anchor:{type:"beat",beatId:"line"}});assert.equal(s.host.querySelector(".story-screen-pending")!.parentElement?.getAttribute("data-branch-id"),"branch");button(draft,"Cancel").click();assert.equal(s.host.querySelector(".story-screen-pending"),null);await s.close();
 });
 
+test("Cancel and Escape return focus to the visible Story draft opener",async()=>{
+ for(const entry of ["root","screen","branch"])for(const exit of ["cancel","escape"]){
+  const s=setup({},entry==="branch"?storyFixture():fixture());
+  try{
+   const caption=entry==="branch"?"Add Beat to If":entry==="screen"?"Add screen Beat":"Add Beat";
+   const opener=button(s.host,caption);opener.focus();opener.click();await tick();
+   const draft=s.host.querySelector<HTMLElement>(".new-beat")!;
+   const type=draft.querySelector<HTMLSelectElement>("select")!;type.value="showScreen";type.dispatchEvent(new Event("change",{bubbles:true}));
+   if(exit==="cancel"){const cancel=button(draft,"Cancel");cancel.focus();cancel.click();}
+   else{const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.focus();position.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true,cancelable:true}));}
+   assert.ok(document.activeElement===button(s.host,caption),`${entry} ${exit} must restore the recreated opener`);
+   assert.equal(s.host.querySelector(".new-beat"),null);assert.equal(s.commands.length,0);
+  }finally{await s.close();}
+ }
+});
+
 test("Cancel and Escape restore the captured insertion context after a refused screen draft",async()=>{
  for(const cancel of ["button","escape"])for(const context of ["current","default","unavailable nested"]){
   const model=fixture(),scene=model.scenes[0]!;

@@ -77,7 +77,7 @@ export function buildPanelCreationForm(options: PanelCreationOptions) {
   const cancel = element("button", "button secondary", "Cancel"); cancel.type = "button";
   row.append(create, cancel);
   const purpose = element("p", "screen-panels-purpose");
-  form.append(field("Screen name", name), field("Start with",starters), field("Screen kind",kinds), purpose, help, error, row);
+  form.append(field("Start with",starters), field("Screen name", name), field("Screen kind",kinds), purpose, help, error, row);
   const validateName=validateField(name,()=>{
     if (!/^[A-Za-z_][A-Za-z_0-9]{0,63}$/.test(name.value)) throw Error("Use letters, numbers and underscores. Start with a letter or underscore.");
   });
