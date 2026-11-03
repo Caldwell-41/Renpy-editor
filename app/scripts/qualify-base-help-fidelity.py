@@ -101,13 +101,13 @@ def reference(args):
                 for operation, arguments in commands:
                     # Reserve every attempt. An unannotated adapter exception
                     # cannot establish that the process never started.
-                    row = dict(name=operation, aspect=[width, height], started=False)
+                    row = dict(name=operation, aspect=[width, height], charged=1, started=None, uncertainStart=True, cleanupComplete=False)
                     receipt['commands'].append(row)
+                    receipt['sdkProcesses'] += 1
                     (output / 'launch-manifest.json').write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8', newline='\n')
                     previous = dict(os.environ)
                     try:
                         os.environ.clear(); os.environ.update(env)
-                        receipt['sdkProcesses'] += 1
                         command = run_reference_command(tuple(map(str, [*launcher, project, *arguments])), row)
                     except BaseException:
                         (output / f'{width}x{height}-{operation}.log').write_text(row.get('partialOutput', ''), encoding='utf-8', newline='\n')
