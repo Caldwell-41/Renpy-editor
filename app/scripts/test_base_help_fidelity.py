@@ -2,9 +2,12 @@
 import copy
 import importlib.util
 import json
+import shutil
 from pathlib import Path
 import tempfile
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from PIL import Image
 
@@ -66,6 +69,46 @@ def captures(root, accepted, role):
 
 
 class AdmissionTests(unittest.TestCase):
+    def test_reference_retains_scratch_until_process_cleanup_is_proven(self):
+        execute = runner.run_reference_command
+        for cleanup in (None, False, True):
+            with self.subTest(cleanup=cleanup), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                accepted = accepted_fixture()
+                source = root / 'accepted.json'
+                source.write_text(json.dumps(accepted), encoding='utf-8')
+                output = root / 'normal'
+                scratch = []
+                def install(archive, checksum, destination):
+                    destination.mkdir(parents=True)
+                    scratch.append(destination.parent)
+                error = OSError('controlled SDK failure')
+                if cleanup is not None:
+                    error.command_output = 'partial output'
+                    error.command_exit_code = 61
+                    error.command_cleanup_complete = cleanup
+                    error.command_process_reaped = cleanup
+                def fail(*args, **kwargs): raise error
+                args = SimpleNamespace(accepted=source, archive=root/'unused', checksums=root/'unused',
+                                       candidate='a'*40, output=output)
+                manifest = dict(acceptedSHA256=proof.digest(source.read_bytes()))
+                with patch.object(runner, 'preflight', return_value=manifest), \
+                     patch.object(runner, 'install_verified_tar', side_effect=install), \
+                     patch.object(runner, 'launcher_for', return_value=('unused-sdk',)), \
+                     patch.object(runner, 'run_reference_command',
+                                  side_effect=lambda argv, row: execute(argv, row, execute=fail)):
+                    try:
+                        with self.assertRaises(OSError) as raised: runner.reference(args)
+                        self.assertIs(raised.exception, error)
+                        receipt = json.loads((output/'result.json').read_text(encoding='utf-8'))
+                        self.assertEqual(scratch[0].exists(), cleanup is not True)
+                        self.assertEqual(receipt['scratchRemoved'], cleanup is True)
+                        self.assertEqual(receipt['cleanupComplete'], cleanup is True)
+                        self.assertEqual(receipt['scratchPath'], str(scratch[0]))
+                        self.assertEqual(receipt['commands'][0]['argv'][0], 'unused-sdk')
+                    finally:
+                        shutil.rmtree(scratch[0], ignore_errors=True)
+
     def test_reference_errors_retain_started_or_uncertain_attempts_and_partial_cleanup(self):
         for observed in [False, True]:
             error = OSError('controlled adapter failure')

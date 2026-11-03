@@ -23,7 +23,8 @@ PROOF = REPO / 'tests/fixtures/phase-3b-screens/base-help-fidelity-proof.rpy'
 
 
 def run_reference_command(argv, row, execute=run_bounded):
-    row.update(charged=1, started=None, uncertainStart=True, cleanupComplete=False)
+    row.update(charged=1, started=None, uncertainStart=True, cleanupComplete=False,
+               argv=list(map(str, argv)), cwd=str(Path.cwd()))
     try:
         command = execute(argv, timeout_seconds=60, output_limit=2_000_000)
     except BaseException as error:
@@ -37,7 +38,7 @@ def run_reference_command(argv, row, execute=run_bounded):
                    timedOut=getattr(error, 'command_timed_out', False),
                    outputLimited=getattr(error, 'command_output_limited', False))
         raise
-    row.update(started=True, uncertainStart=False, cleanupComplete=True,
+    row.update(started=True, uncertainStart=False, cleanupComplete=True, processReaped=True,
                exitCode=command.exit_code, timedOut=command.timed_out, outputLimited=command.output_limited)
     return command
 
@@ -77,58 +78,70 @@ def reference(args):
                    commands=[], records=[], cleanupComplete=False, sourceUnchanged=False)
     scratch = None
     try:
-        with tempfile.TemporaryDirectory(prefix='loomlight-base-help-normal-') as temporary:
-            scratch = Path(temporary)
-            install_verified_tar(args.archive, SDK_SHA, scratch / 'sdk')
-            launcher = launcher_for(scratch / 'sdk/renpy-8.5.3-sdk')
-            project = scratch / 'project'; (project / 'game/ui').mkdir(parents=True)
-            (project / SOURCE_PATH).write_bytes(accepted['files'][SOURCE_PATH]['text'].encode())
-            for path, fixture in ASSETS.values():
-                destination = project / path; destination.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copyfile(fixture, destination)
-            env = dict(os.environ, SDL_AUDIODRIVER='dummy', RENPY_RENDERER='angle2' if target() == 'windows-x64' else 'gl2',
-                       RENPY_SCALE_FACTOR='1', RENPY_DISABLE_SOUND='1', RENPY_SKIP_MAIN_MENU='1', RENPY_SKIP_SPLASHSCREEN='1',
-                       RENPY_PATH_TO_SAVES=str(scratch / 'saves'))
-            env.pop('SDL_VIDEODRIVER', None); env.pop('SDL_RENDER_DRIVER', None)
-            for width, height in ASPECTS:
-                (project / 'game/options.rpy').write_text(f'define config.name = "Loomlight base Help fidelity"\ndefine config.screen_width = {width}\ndefine config.screen_height = {height}\ndefine config.sound = False\ndefine config.save_directory = None\n', encoding='utf-8', newline='\n')
-                cases = [case for case in accepted['cases'] if (case['request']['width'], case['request']['height']) == (width, height)]
-                data = dict(BASE_HELP_CASES=cases, BASE_HELP_INPUTS=inputs(accepted), BASE_HELP_OUTPUT=str(output))
-                initializer = 'init python:\n' + ''.join(f'    {key} = {value!r}\n' for key, value in data.items())
-                (project / 'game/base_help_proof.rpy').write_text(initializer + '\n' + PROOF.read_text(encoding='utf-8'), encoding='utf-8', newline='\n')
-                commands = [('compile', ['compile']), ('lint', ['lint', '--error-code'])] if (width, height) == ASPECTS[0] else []
-                commands.append(('run', ['run']))
-                for operation, arguments in commands:
-                    # Reserve every attempt. An unannotated adapter exception
-                    # cannot establish that the process never started.
-                    row = dict(name=operation, aspect=[width, height], charged=1, started=None, uncertainStart=True, cleanupComplete=False)
-                    receipt['commands'].append(row)
-                    receipt['sdkProcesses'] += 1
-                    (output / 'launch-manifest.json').write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8', newline='\n')
-                    previous = dict(os.environ)
-                    try:
-                        os.environ.clear(); os.environ.update(env)
-                        command = run_reference_command(tuple(map(str, [*launcher, project, *arguments])), row)
-                    except BaseException:
-                        (output / f'{width}x{height}-{operation}.log').write_text(row.get('partialOutput', ''), encoding='utf-8', newline='\n')
-                        raise
-                    finally:
-                        os.environ.clear(); os.environ.update(previous)
-                    row.update(exitCode=command.exit_code, timedOut=command.timed_out, outputLimited=command.output_limited)
-                    (output / f'{width}x{height}-{operation}.log').write_text(command.output, encoding='utf-8', newline='\n')
-                    assert not command.exit_code and not command.timed_out and not command.output_limited, row
-                    if operation == 'run':
-                        rows = [json.loads(line.removeprefix('BASE_HELP_FIDELITY ')) for line in command.output.splitlines() if line.startswith('BASE_HELP_FIDELITY ')]
-                        assert len(rows) == 1 and len(rows[0]) == 4, 'Incomplete normal-game captures'
-                        receipt['records'].extend(rows[0])
-            receipt['sourceUnchanged'] = all(digest((project / path).read_bytes()) == sha for path, sha in inputs(accepted).items())
-            assert receipt['sourceUnchanged'] and len(receipt['records']) == 8
-            receipt['passed'] = True
+        scratch = Path(tempfile.mkdtemp(prefix='loomlight-base-help-normal-'))
+        receipt['scratchPath'] = str(scratch)
+        install_verified_tar(args.archive, SDK_SHA, scratch / 'sdk')
+        launcher = launcher_for(scratch / 'sdk/renpy-8.5.3-sdk')
+        project = scratch / 'project'; (project / 'game/ui').mkdir(parents=True)
+        (project / SOURCE_PATH).write_bytes(accepted['files'][SOURCE_PATH]['text'].encode())
+        for path, fixture in ASSETS.values():
+            destination = project / path; destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(fixture, destination)
+        env = dict(os.environ, SDL_AUDIODRIVER='dummy', RENPY_RENDERER='angle2' if target() == 'windows-x64' else 'gl2',
+                   RENPY_SCALE_FACTOR='1', RENPY_DISABLE_SOUND='1', RENPY_SKIP_MAIN_MENU='1', RENPY_SKIP_SPLASHSCREEN='1',
+                   RENPY_PATH_TO_SAVES=str(scratch / 'saves'))
+        env.pop('SDL_VIDEODRIVER', None); env.pop('SDL_RENDER_DRIVER', None)
+        for width, height in ASPECTS:
+            (project / 'game/options.rpy').write_text(f'define config.name = "Loomlight base Help fidelity"\ndefine config.screen_width = {width}\ndefine config.screen_height = {height}\ndefine config.sound = False\ndefine config.save_directory = None\n', encoding='utf-8', newline='\n')
+            cases = [case for case in accepted['cases'] if (case['request']['width'], case['request']['height']) == (width, height)]
+            data = dict(BASE_HELP_CASES=cases, BASE_HELP_INPUTS=inputs(accepted), BASE_HELP_OUTPUT=str(output))
+            initializer = 'init python:\n' + ''.join(f'    {key} = {value!r}\n' for key, value in data.items())
+            (project / 'game/base_help_proof.rpy').write_text(initializer + '\n' + PROOF.read_text(encoding='utf-8'), encoding='utf-8', newline='\n')
+            commands = [('compile', ['compile']), ('lint', ['lint', '--error-code'])] if (width, height) == ASPECTS[0] else []
+            commands.append(('run', ['run']))
+            for operation, arguments in commands:
+                # Reserve every attempt. An unannotated adapter exception
+                # cannot establish that the process never started.
+                row = dict(name=operation, aspect=[width, height], charged=1, started=None, uncertainStart=True, cleanupComplete=False)
+                receipt['commands'].append(row)
+                receipt['sdkProcesses'] += 1
+                (output / 'launch-manifest.json').write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8', newline='\n')
+                previous = dict(os.environ)
+                try:
+                    os.environ.clear(); os.environ.update(env)
+                    command = run_reference_command(tuple(map(str, [*launcher, project, *arguments])), row)
+                except BaseException:
+                    (output / f'{width}x{height}-{operation}.log').write_text(row.get('partialOutput', ''), encoding='utf-8', newline='\n')
+                    raise
+                finally:
+                    os.environ.clear(); os.environ.update(previous)
+                row.update(exitCode=command.exit_code, timedOut=command.timed_out, outputLimited=command.output_limited)
+                (output / f'{width}x{height}-{operation}.log').write_text(command.output, encoding='utf-8', newline='\n')
+                assert not command.exit_code and not command.timed_out and not command.output_limited, row
+                if operation == 'run':
+                    rows = [json.loads(line.removeprefix('BASE_HELP_FIDELITY ')) for line in command.output.splitlines() if line.startswith('BASE_HELP_FIDELITY ')]
+                    assert len(rows) == 1 and len(rows[0]) == 4, 'Incomplete normal-game captures'
+                    receipt['records'].extend(rows[0])
+        receipt['sourceUnchanged'] = all(digest((project / path).read_bytes()) == sha for path, sha in inputs(accepted).items())
+        assert receipt['sourceUnchanged'] and len(receipt['records']) == 8
+        receipt['passed'] = True
+    except BaseException as error:
+        receipt['failure'] = dict(type=type(error).__name__, message=str(error))
+        raise
     finally:
-        receipt['scratchRemoved'] = scratch is not None and not scratch.exists()
         receipt['uncertainSDKProcesses'] = sum(bool(row.get('uncertainStart', True)) for row in receipt['commands'])
         receipt['confirmedSDKProcesses'] = sum(row.get('started') is True for row in receipt['commands'])
-        receipt['cleanupComplete'] = receipt['scratchRemoved'] and all(row.get('cleanupComplete') is True for row in receipt['commands'])
+        receipt['processCleanupComplete'] = all(row.get('cleanupComplete') is True
+            and row.get('processReaped') is True
+            and row.get('uncertainStart') is False for row in receipt['commands'])
+        try:
+            if scratch is not None and scratch.exists() and receipt['processCleanupComplete']:
+                shutil.rmtree(scratch)
+        except OSError as error:
+            receipt['cleanupFailure'] = dict(type=type(error).__name__, message=str(error))
+        receipt['scratchRemoved'] = scratch is None or not scratch.exists()
+        receipt['cleanupComplete'] = receipt['scratchRemoved'] and receipt['processCleanupComplete']
+        if not receipt['cleanupComplete']: receipt['passed'] = False
         (output / 'result.json').write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8', newline='\n')
     assert receipt['passed'] and receipt['cleanupComplete']
 
