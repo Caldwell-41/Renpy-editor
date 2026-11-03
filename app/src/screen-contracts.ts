@@ -15,7 +15,7 @@ export interface ScreenCatalog {
   owned: OwnedScreen[]; styles?: StyleCatalog;
 }
 export interface ResolvedScreenTarget {
-  binding: ScreenTargetBinding; kind: "panel" | "dialog" | "component"; path: string; rootId: string;
+  binding: ScreenTargetBinding; kind: "panel" | "dialog" | "component"; blocking: boolean; path: string; rootId: string;
   revisions: ScreenRevisions; effects: ScreenEffects;
 }
 export interface ComponentChange { componentId: string; screenId: string; useId: string }

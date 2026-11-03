@@ -663,9 +663,18 @@ summaries expose `finishesInteraction` separately from `hiddenScreens`, bind act
 and source dependencies into their revisions, and retain unknown effects for
 unsupported actions or captured return values. Component extraction refuses a
 subtree containing contextual dismissal statements from either screen kind.
-The v8 contract checkpoint does not yet implement dialog creation or Story Call;
-[#45](https://github.com/Caldwell-41/Renpy-editor/issues/45) owns those operations
-and their normal-play acceptance.
+The resolved target exposes `blocking`, derived once from a single exact root
+`modal True` declaration. Missing, false, calculated or duplicate modality makes
+an owned dialog nonblocking and its effects unknown. Authored Call admission uses
+this captured result rather than reparsing source in Story.
+
+`screens.create` accepts an optional `kind`, defaulting to panel. A dialog Help
+starter shares the panel content builder and emits `modal True`, game-menu Return
+and a focused Close button with Return. A blank dialog contains modality, game-menu
+Return and `pass`, with no invented content. Both reuse the same accepted
+source/map transaction and history. Component creation remains restricted to the
+existing component operations. [#45](https://github.com/Caldwell-41/Renpy-editor/issues/45)
+owns Story Call and normal-play acceptance, which remain pending.
 
 Schema v7 also recognizes bounded `show screen name` and `hide screen name` Story
 Beats. Their mapping stores `screenTarget` with stable screen UUID and source name;

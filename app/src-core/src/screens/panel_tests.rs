@@ -246,6 +246,7 @@ fn help_dismissal_cannot_be_extracted_into_a_component_with_another_panel_target
             &f.project,
             &f.project_id,
             super::CreateRequest {
+                kind: crate::metadata::OwnedScreenKind::Panel,
                 name: "help_panel".into(),
                 expected_project_revision: catalog.project_revision,
                 expected_source_map_revision: catalog.source_map_revision,
@@ -348,6 +349,7 @@ fn help_starter_nodes_edit_reorder_remove_and_reopen_with_qualified_dismissal_so
             &f.project,
             &f.project_id,
             super::CreateRequest {
+                kind: crate::metadata::OwnedScreenKind::Panel,
                 name: "help_panel".into(),
                 expected_project_revision: catalog.project_revision,
                 expected_source_map_revision: catalog.source_map_revision,

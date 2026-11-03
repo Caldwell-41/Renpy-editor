@@ -1,6 +1,62 @@
 use super::*;
 
 #[test]
+fn blank_dialog_creation_uses_one_transaction_and_rejects_component_kind() {
+    let (_temporary, mut service, root, _) = composition_project();
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let before = fs::read(root.join(".renpy-editor/source-map.json")).unwrap();
+    let mut request = json!({"name":"blank_dialog","kind":"component",
+        "expectedProjectRevision":catalog["projectRevision"],
+        "expectedSourceMapRevision":catalog["sourceMapRevision"],
+        "expectedInventoryRevision":catalog["inventoryRevision"]});
+    assert_eq!(
+        reject(&mut service, "screens.create", request.clone())["error"]["code"],
+        "INVALID_PAYLOAD"
+    );
+    assert_eq!(
+        fs::read(root.join(".renpy-editor/source-map.json")).unwrap(),
+        before
+    );
+    request["kind"] = json!("dialog");
+    let created = ipc(&mut service, "screens.create", request);
+    let owner = created["owned"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|owner| owner["name"] == "blank_dialog")
+        .unwrap();
+    assert_eq!(owner["kind"], "dialog");
+    let accepted = fs::read_to_string(root.join(owner["path"].as_str().unwrap())).unwrap();
+    assert!(accepted.contains("    modal True\n    key \"game_menu\" action Return()\n    pass\n"));
+    let after = fs::read(root.join(".renpy-editor/source-map.json")).unwrap();
+    composition_history(&mut service, "undo");
+    assert!(!root.join(owner["path"].as_str().unwrap()).exists());
+    assert_eq!(
+        fs::read(root.join(".renpy-editor/source-map.json")).unwrap(),
+        before
+    );
+    composition_history(&mut service, "redo");
+    assert_eq!(
+        fs::read(root.join(".renpy-editor/source-map.json")).unwrap(),
+        after
+    );
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    let target = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":{
+        "screenId":owner["id"],"sourceName":owner["name"]}}),
+    );
+    assert_eq!(target["blocking"], true);
+    assert_eq!(target["effects"]["unknown"], false);
+    assert_eq!(
+        fs::read_to_string(root.join(owner["path"].as_str().unwrap())).unwrap(),
+        accepted
+    );
+}
+
+#[test]
 fn dialog_target_reports_revision_bound_finish_without_hiding_a_panel() {
     let (_temporary, mut service, root, owner) = composition_project();
     service.close().unwrap();
@@ -30,6 +86,7 @@ fn dialog_target_reports_revision_bound_finish_without_hiding_a_panel() {
         }),
     );
     assert_eq!(target["kind"], "dialog");
+    assert_eq!(target["blocking"], true);
     assert_eq!(target["effects"]["unknown"], false);
     assert_eq!(target["effects"]["finishesInteraction"], true);
     assert_eq!(target["effects"]["hiddenScreens"], json!([]));
@@ -38,6 +95,26 @@ fn dialog_target_reports_revision_bound_finish_without_hiding_a_panel() {
         .unwrap()
         .iter()
         .any(|dependency| dependency["id"].as_str().unwrap().ends_with(":action")));
+    let accepted = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    for modal in [
+        "",
+        "modal False",
+        "modal flag",
+        "modal True\n    modal True",
+    ] {
+        save_composition_source(&mut service, &owner, &accepted.replace("modal True", modal));
+        let invalid = ipc(
+            &mut service,
+            "screens.resolveTarget",
+            json!({"binding":target["binding"]}),
+        );
+        assert_eq!(invalid["blocking"], false, "{modal}");
+        assert_eq!(invalid["effects"]["unknown"], true, "{modal}");
+    }
+    save_composition_source(&mut service, &owner, &accepted);
     let revised = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
         .as_str()
         .unwrap()

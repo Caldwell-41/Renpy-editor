@@ -18,11 +18,18 @@ The unrelated untracked codebase-design audit and protected recovery stay intact
 | Owner | Assignment and files | Integration dependency |
 | --- | --- | --- |
 | Coordinator, Sol High | Metadata/schema compatibility, shared screen references/effects, shared parsing and request contracts, `screen-contracts.ts`, `screen-ui.ts`, `main.ts`, shared fixtures, canonical/status/evidence docs and workflows | Owns integration branch and reviews each checkpoint |
-| Dialog/Story implementation, Sol High fast | `screens/panels.rs`, bounded dialog/Finish authoring, `scene.rs`, affected `scene/`, `screen-panels.ts`, `scene-ui.ts`, focused tests and normal-entry qualifier | Starts from reviewed shared checkpoint; production UI waits for approved prototype |
+| Dialog/Story implementation, Sol High fast | `screens/panels.rs`, `screens/composition.rs` and bounded dismissal module/tests, `scene.rs`, affected `scene/` and minimal exhaustive callers including `source.rs`, `screen-panels.ts`, `scene-ui.ts`, focused tests and normal-entry qualifier | Starts from reviewed shared checkpoint; production UI waits for approved prototype |
 | Canvas implementation, Sol High fast | `screens/canvas.rs`, `canvas-renderer.rpy`, canvas session/frame delivery where needed, matched-render cases and qualification | Starts from shared checkpoint; combines with dialog after reviewed commits |
 
-T3 provisions isolated worker worktrees and branches. Record actual paths and refs
-after allocation. One writer owns each file. Agents request shared changes from the
+T3 provisioned isolated worktrees at shared base `00eda362fe33696936461b49a2c9c4f76593309a`:
+Dialog/Story on `t3/help-dialog-story-call` in checkout `t3-1995c4aa`, Canvas on
+`t3/help-canvas-rendering-fidelity` in checkout `t3-4fbe8c4a`. The generated initial
+branch names were renamed by T3 after startup. Prototype launch first refused the
+obsolete branch ref without creating a chat; retry from the exact committed base
+created the sole design chat on `t3/help-dialog-design-prototype`, checkout
+`t3-3d879ac4`. Its owner confirms direct return to implementation and coordinator.
+The actual private checkout roots stay in T3 metadata rather than committed docs.
+One writer owns each file. Agents request shared changes from the
 coordinator rather than editing shared files. Shared contracts transfer through
 reviewed commits. Mutable fixtures, profiles and outputs stay isolated.
 
@@ -95,13 +102,66 @@ The coordinator will record their concrete case matrix, counting unit and ceilin
 before execution. Historical closed allowances remain closed. Routine local
 checks, review and commits need no numerical allowance.
 
+### Selected operation limits
+
+| Outcome | Planned SDK starts per target | Ceiling per target | Current use |
+| --- | --- | --- | --- |
+| #45 dialog normal entry | 11: version, compile, lint, eight normal-entry cases | 16 | Mac 0; Windows 0 |
+| #46 base Help fidelity | 8: compile, lint, two normal-entry runs, two adapter validations, discovery, persistent helper | 12 | Mac 0; Windows 0 |
+
+Targets are Mac ARM64 and Windows x64. The #45 matrix runs pointer Close,
+default-focus keyboard Close, Escape and outside-click/underlying-blocking cases
+at both aspects. Every case proves the following-Beat counter remains zero while
+Call waits and reaches one after Finish. The #46 matrix compares two base screens,
+both aspects and normal/hover for eight matched frames per target. Its helper is
+one persistent SDK process for all frames. New namespaces are `base_help_fidelity`
+and `base_help_anchors`, separate from #45 and historical proof fixtures.
+
+The ceilings include five focused correction starts for #45 and four for #46 per
+target. Every actual SDK process start counts, including version/validation,
+failed/cancelled attempts and helpers. Uncertain starts reserve capacity until
+resolved. Shared setup starts are charged once to their producing outcome and
+linked when reused. No native-editor/package/CI starts are selected by these limits.
+Execution remains gated on a committed coherent producer/fixture, audited offline
+admission checks and host preflight. A limit is not a launch instruction. The
+coordinator controls reservations and resolves all pending starts before a retry.
+
 No publication is selected. Required published CI/package qualification remains
 an acceptance gap until authorized; connected-host evidence retains its exact
 candidate and scope. Agents must not independently start an expensive campaign.
 
-Next: allocate two isolated implementation lanes at this shared checkpoint. The
-Dialog/Story owner starts the prototype handoff while Canvas traces existing
-qualified mappings and extends focused production-path cases. Each follows the
+Both implementation lanes and the user-iterable prototype chat are active. The
+Dialog/Story owner proceeds with backend work while the prototype seeks approval.
+Canvas confirms the current mappings already cover native base displayables,
+numeric coordinates, typography/Styles and verified assets, with no demonstrated
+production deficiency yet. It is preparing a coherent expanded comparison fixture
+and offline gate. Its proposed five SDK starts per target remain provisional until
+driver/discovery side effects are counted; no campaign is authorized or started.
+SUNDOWN is reachable and its registered Loomlight project is identified, but checkout
+and toolchain capability preflight remains pending. Each implementation lane follows the
 implement skill, commits its assignment, and returns its reviewed result. The
 coordinator integrates Dialog/Story before Canvas, runs combined checks and separate
 Standards/Spec review, resolves findings and records criterion-to-evidence results.
+
+## Dialog builder and shared creation checkpoint
+
+Worker builder commit `994c9b1014d0be3ce6c7e67d560a648646356832` was inspected and
+integrated as `3adc75d`. It extends the existing Help builder, keeping a single
+content implementation, with five focused tests and typechecking passing. No
+production UI changed and no costly operation ran.
+
+The coordinator wires panel/dialog creation through the existing source/map
+transaction, removes the redundant internal create-kind argument, and migrates
+component callers to the authoritative request kind. A resolver-owned `blocking`
+flag qualifies exact single root modality; unsupported/missing declarations keep
+effects unknown. `editable_dismissal_action` supplies an expression-only range
+using the shared lexer and local action qualifications for the lane's bounded
+composition command. Its public-command behavioral proof remains with that lane.
+
+Public-core tests first fail on missing blocking and refused dialog-create payload,
+then pass. Ten reference tests, five Help builder tests, 21 component tests and
+27 affected DOM tests pass; production/test typechecking and formatting pass.
+The 15 existing Story panel tests also pass. An initial wrong Story module filter
+ran zero tests and establishes no proof; the corrected named filter ran all 15.
+A TypeScript fixture missing the new blocking field was corrected, then test
+compilation passed. Normal-play, matched-target, UI and final review remain pending.

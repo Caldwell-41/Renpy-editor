@@ -5,20 +5,24 @@
 Kris approved the plan for #45/#46 and allowed Sol High fast mode for subagents.
 Continue on local integration branch `codex/help-dialog-canvas`, based on
 `e32ded49f2c4212cd78efc748cdf9b59cdcc0c48`. The coordinator owns shared files,
-integration, verification and final review. The source-map v8 dialog/Finish contract
-checkpoint has focused passing evidence; creation, Call runtime and full base-canvas
-qualification are not implemented or accepted by it.
+integration, verification and final review. The source-map v8 dialog/Finish and
+creation/blocking checkpoints have focused passing evidence. The Dialog builder is
+integrated, and blank/Help dialog creation uses the existing transaction. Call
+runtime, affected UI and full base-canvas qualification remain pending.
 
 [The coordination/evidence record](../tasks/evidence/help-dialog-and-canvas.md)
-owns file boundaries, test results and next actions. Next allocate the Dialog/Story
-and Canvas implementation agents in T3-managed isolated worktrees. The Dialog/Story
-agent must create the requested separate prototype chat and receive the approved
-source/design/evidence directly before changing affected production UI. Browser and
+owns file boundaries, test results and next actions. Dialog/Story and Canvas work on
+`t3/help-dialog-story-call` and `t3/help-canvas-rendering-fidelity`. The sole prototype
+chat uses `t3/help-dialog-design-prototype`. Transfer the shared creation/resolver
+checkpoint to the lanes, then continue independent backend and comparison work.
+The Dialog/Story agent must receive the approved source/design/evidence directly
+from that prototype before changing affected production UI. Browser and
 desktop work goes to Terra Max. Workers follow the implement skill and commit.
 
 Mac is the development host. SUNDOWN was reachable; Windows capability and active
-ownership need preflight. No SDK/helper/package/native/CI campaign has started;
-record a concrete matrix and limits before costly operations. Prior allowances
+ownership need preflight. No SDK/helper/package/native/CI campaign has started.
+The evidence owner records #45/#46 SDK matrices and ceilings; frozen producers and
+offline gates need audit before starts. Prior allowances
 remain closed. No push/PR/merge/issue closure/release is selected, and required
 published qualification must remain an explicit gap. Keep the unrelated audit,
 ignored archives, protected native state and earlier unique recovery evidence.
