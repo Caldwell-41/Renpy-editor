@@ -10,6 +10,8 @@ testsuite help_dialog:
         assert eval (_hd_underlying_count == 1)
         $ _hd_baseline_count = _hd_underlying_count
         $ _hd_underlying_count = 0
+        move pos (config.screen_width - 1, config.screen_height - 1)
+        pause 0.1
         advance until screen "help_dialog"
         assert screen "help_dialog" timeout 10
         pause 0.2
