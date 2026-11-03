@@ -132,39 +132,48 @@ fn supported_text_fields_preserve_expression_neighbors_and_refuse_expression_rep
 
 #[test]
 fn resetting_last_text_property_preserves_comment_and_leaves_a_valid_block() {
-    let (_temporary, mut service, _root, owner) = composition_project();
-    let leaf = compose_command(
-        &mut service,
-        &owner,
-        json!({"type":"add","parentId":owner["rootId"],"kind":"textbutton","text":"Close"}),
-    );
-    let original = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
-        .as_str()
-        .unwrap()
-        .to_owned();
-    let before = format!(
-        "{}        text_color \"#fff\" # keep\n",
-        original.replace("textbutton \"Close\" #", "textbutton \"Close\": #")
-    );
-    save_composition_source(&mut service, &owner, &before);
-    compose_command(
-        &mut service,
-        &owner,
-        json!({"type":"formatText","nodeId":leaf["selectedId"],"values":{"color":null}}),
-    );
-    let expected = before.replace(
-        "        text_color \"#fff\" # keep\n",
-        "        pass\n         # keep\n",
-    );
-    assert_eq!(
-        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
-        expected
-    );
-    composition_history(&mut service, "undo");
-    assert_eq!(
-        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
-        before
-    );
+    for with_action in [false, true] {
+        let (_temporary, mut service, _root, owner) = composition_project();
+        let leaf = compose_command(
+            &mut service,
+            &owner,
+            json!({"type":"add","parentId":owner["rootId"],"kind":"textbutton","text":"Close"}),
+        );
+        let original = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+            .as_str()
+            .unwrap()
+            .to_owned();
+        // Source-authored blocks can have no action; generated buttons retain Null.
+        let original = if with_action {
+            original
+        } else {
+            original.replace("        action Null()\n", "")
+        };
+        let before = format!("{original}        text_color \"#fff\" # keep\n");
+        save_composition_source(&mut service, &owner, &before);
+        compose_command(
+            &mut service,
+            &owner,
+            json!({"type":"formatText","nodeId":leaf["selectedId"],"values":{"color":null}}),
+        );
+        let expected = before.replace(
+            "        text_color \"#fff\" # keep\n",
+            if with_action {
+                "         # keep\n"
+            } else {
+                "        pass\n         # keep\n"
+            },
+        );
+        assert_eq!(
+            ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+            expected
+        );
+        composition_history(&mut service, "undo");
+        assert_eq!(
+            ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+            before
+        );
+    }
 }
 
 #[test]
