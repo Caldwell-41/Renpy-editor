@@ -507,7 +507,8 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
       openAssets: () => requestProjectNavigation(project,"assets"),
       useInStory: async (screenHint, screenHintKind) => {
         const scenes = await projectValue<SceneWorkspace>(project,"scene.list");
-        if (currentProject?.sessionId === project.sessionId) await requestProjectNavigation(project,"story",{sceneId:screenInsertion?.sceneId ?? scenes.lastOpen.sceneId,screenHint,screenHintKind,screenInsertion});
+        const sceneId = scenes.scenes.find(scene=>scene.id===screenInsertion?.sceneId)?.id ?? scenes.lastOpen.sceneId;
+        if (currentProject?.sessionId === project.sessionId) await requestProjectNavigation(project,"story",{sceneId,screenHint,screenHintKind,screenInsertion});
       },
     });
     screensWorkspace.mount(workspace);

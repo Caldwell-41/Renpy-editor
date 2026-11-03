@@ -190,3 +190,28 @@ test("screen insertion keeps existing nested body ownership",async()=>{
  const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));button(draft,"Add Beat").click();await tick();
  assert.deepEqual(s.commands[0]!.body,{type:"branch",groupId:"group",branchId:"branch"});assert.deepEqual(s.commands[0]!.position,{type:"before",anchor:{type:"beat",beatId:"line"}});await s.close();
 });
+
+test("a deleted insertion Scene retains intent and allows an explicit replacement position",async()=>{
+ const model=fixture(),scene=model.scenes[0]!,remembered:unknown[]=[];
+ const insertion={sceneId:"deleted-scene",body:{type:"root" as const},position:{type:"before" as const,anchor:{type:"beat" as const,beatId:"line"}},expectedSourceRevision:scene.sourceRevision};
+ const s=setup({screenInsertion:insertion,rememberScreenInsertion:value=>remembered.push(value)},model);
+ try{
+  button(s.host,"Add screen Beat").click();await tick();
+  const draft=s.host.querySelector<HTMLElement>(".new-beat");assert.ok(draft,"A missing original Scene must expose location recovery");
+  button(draft,"Add Beat").click();await tick();assert.equal(s.commands.length,0);assert.equal(remembered.length,0);assert.match(draft.textContent!,/original insertion Scene is unavailable/i);
+  const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));
+  button(draft,"Add Beat").click();await tick();assert.equal(s.commands.length,1);assert.equal(s.commands[0]!.sceneId,scene.id);assert.deepEqual(s.commands[0]!.position,insertion.position);assert.equal((remembered.at(-1) as {sceneId:string}).sceneId,scene.id);assert.equal(insertion.sceneId,"deleted-scene");
+ }finally{await s.close();}
+});
+
+test("a deleted screen insertion Scene does not block ordinary Add Beat",async()=>{
+ for(const screenHintKind of [undefined,"dialog"] as const){
+ const scene=fixture().scenes[0]!;
+ const s=setup({screenHintKind,screenInsertion:{sceneId:"deleted-scene",body:{type:"branch",groupId:"deleted-group",branchId:"deleted-branch"},position:{type:"before",anchor:{type:"beat",beatId:"deleted-beat"}},expectedSourceRevision:scene.sourceRevision}});
+ try{
+  const draft=openNew(s.host,"narration");assert.ok(draft,"An unavailable screen hint must not block ordinary authoring");
+  const text=draft.querySelector<HTMLTextAreaElement>("textarea")!;text.value="A replacement line.";text.dispatchEvent(new Event("input",{bubbles:true}));
+  button(draft,"Add Beat").click();await tick();assert.equal(s.commands.length,1);assert.deepEqual(s.commands[0]!.beat,{type:"narration",text:"A replacement line."});assert.deepEqual(s.commands[0]!.body,{type:"root"});assert.deepEqual(s.commands[0]!.position,{type:"before",anchor:{type:"beat",beatId:"end"}});
+ }finally{await s.close();}
+ }
+});

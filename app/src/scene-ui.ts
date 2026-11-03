@@ -593,7 +593,6 @@ export function renderSceneAuthoring(
 
   const openNewBeat = (scene: SceneDocument, initialType: BeatPayload["type"] = actions.screenHintKind === "dialog" ? "callScreen" : "dialogue", beforeBeatId: string | null = null): void => {
     if (!draftGuard()) return;
-    if(actions.screenInsertion && !model.scenes.some(item=>item.id===actions.screenInsertion!.sceneId)){actions.status("The original insertion Scene is unavailable. Input retained.","error");return;}
     const anchor = beforeBeatId ? scene.beats.find(beat => beat.id === beforeBeatId) : undefined;
     if (anchor?.owner || (anchor?.conditionalBranch && (anchor.conditionalBranch.otherwise || anchor.conditionalBranch.ordinal))) {
       actions.status("Add a root Beat before or after the whole condition group.", "error"); return;
@@ -603,9 +602,11 @@ export function renderSceneAuthoring(
     const current = model.scenes.find((item) => item.id === scene.id);
     const list = host.querySelector<HTMLElement>(".beats-list");
     if (current && list) {
-      const hint = !anchor && actions.screenInsertion?.sceneId === scene.id ? structuredClone(actions.screenInsertion) : undefined;
+      const screenBeat = ["showScreen", "hideScreen", "callScreen"].includes(initialType);
+      const remembered = actions.screenInsertion;
+      const hint = !anchor && screenBeat && remembered && (remembered.sceneId === scene.id || !model.scenes.some(item=>item.id===remembered.sceneId)) ? structuredClone(remembered) : undefined;
       const body = hint?.body ?? {type:"root"} as BodyRef;
-      renderNewBeat(list, current, initialType, body, anchor ? {type:"before",anchor:nodeRef(anchor)} : hint?.position ?? defaultInsertion(current, body), hint?.expectedSourceRevision);
+      renderNewBeat(list, current, initialType, body, anchor ? {type:"before",anchor:nodeRef(anchor)} : hint?.position ?? defaultInsertion(current, body), hint);
     }
   };
 
@@ -1153,7 +1154,7 @@ export function renderSceneAuthoring(
     dirtyDraft(panel, editor.controls); card.append(panel);
   };
 
-  const renderNewBeat = (list: HTMLElement, scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", body: BodyRef = { type: "root" }, position: Position = defaultInsertion(scene, body), expectedInsertionRevision?: string): void => {
+  const renderNewBeat = (list: HTMLElement, scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", body: BodyRef = { type: "root" }, position: Position = defaultInsertion(scene, body), insertion?: ScreenInsertion): void => {
     if (host.querySelector(".new-beat")) return;
     const captured = { projectRevision: model.projectRevision, sourceMapRevision: model.sourceMapRevision };
     const panel = document.createElement("section"); panel.className = "new-beat scene-draft";
@@ -1167,8 +1168,9 @@ export function renderSceneAuthoring(
     destination.textContent = `Insert in ${bodyCaption(scene, body, model)} · ${anchor ? `Before ${anchor.conditionalBranch ? "Condition" : beatLabels[anchor.payload.type]}` : "End of body"}`;
     const placement=destinations(scene,body,undefined,position,true);
     const screenType=()=>["showScreen","hideScreen","callScreen"].includes(type.value);
-    let locationConfirmed=!expectedInsertionRevision || expectedInsertionRevision===scene.sourceRevision;
-    const placementError=document.createElement("p");placementError.role="status";placementError.textContent=locationConfirmed?"":"The original insertion Scene changed. Choose its position explicitly. Input retained.";
+    const unavailableScene = !!insertion && insertion.sceneId !== scene.id;
+    let locationConfirmed=!insertion || (!unavailableScene && insertion.expectedSourceRevision===scene.sourceRevision);
+    const placementError=document.createElement("p");placementError.role="status";placementError.textContent=locationConfirmed?"":unavailableScene?"The original insertion Scene is unavailable. Choose a replacement position explicitly. Input retained.":"The original insertion Scene changed. Choose its position explicitly. Input retained.";
     const readLocation=()=>{if(!locationConfirmed)throw Error(placementError.textContent!);return placement.read();};
     const remember=()=>{if(screenType())try{actions.rememberScreenInsertion?.({sceneId:scene.id,...readLocation(),expectedSourceRevision:scene.sourceRevision});}catch{/* Retain the unavailable original position until an explicit choice. */}};
     placement.host.addEventListener("change",()=>{locationConfirmed=true;placementError.textContent="";remember();});
@@ -1188,7 +1190,7 @@ export function renderSceneAuthoring(
       if(pending || composing)return;
       try {
         const payload = editor.read();
-        const location=screenType()?readLocation():{body,position};
+        const location=screenType()?readLocation():unavailableScene?{body:{type:"root"} as BodyRef,position:defaultInsertion(scene,{type:"root"})}:{body,position};
         pending=true;panel.dataset.unsubmitted="true";
         const controls=[...panel.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement|HTMLButtonElement>("input,select,textarea,button")];
         const locks = controls.map(control => ({ control, disabled: control.disabled }));

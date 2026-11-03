@@ -20,8 +20,11 @@ source-qualified Finish inspection/wiring pass 30 focused DOM cases and twelve
 core reference cases. A fresh integrated controller/core journey and all 357
 frontend tests pass at `548ed47`, with zero skips and complete owned-driver cleanup.
 The implementation owner is completing production-main handoff and Terra visual
-comparison. Final small corrections and the coordinator's combined Standards/Spec
-review remain pending.
+comparison. The final owned corrections are integrated as `9de4f25`. Combined
+review reports Standards zero and one P2 Spec finding, corrected by the coordinator
+with two red/green recovery tests and 33 affected DOM passes. The fix retains a
+deleted insertion Scene's intent while allowing explicit replacement placement;
+it also restores ordinary Add Beat. Product visual/main-handoff proof remains open.
 Help still requires a typed UI image. Placement uses existing Story body/Position
 ownership, with no new IPC/persistence or general action builder. Preserve the
 approved reference checkout, earlier revisions, failures and proof limits.

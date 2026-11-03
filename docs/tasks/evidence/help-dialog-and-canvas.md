@@ -43,9 +43,21 @@ original protected binding and opaque neighboring source. Its owned driver exits
 zero and removes its scratch. The retained result declares no SDK execution.
 These results are in ignored `app/target` outputs. Production-main handoff and
 approved-reference visual comparison are still being checked by the implementation
-owner's Terra review. The coordinator will run the combined Standards/Spec pair
-after the remaining committed corrections are integrated, rather than duplicate
-a lane-only review. SDK use and successful runtime candidates are unchanged.
+owner's Terra review. SDK use and successful runtime candidates are unchanged.
+
+The final independent combined review against `e32ded4` at `9de4f25` reports zero
+Standards findings and one P2 Spec finding. A deleted remembered insertion Scene
+could make Use in Story select a missing Scene before rendering recovery controls;
+the same old hint also blocked ordinary Add Beat. Two focused tests reproduce
+the failure. The coordinator corrected the existing navigation/insertion owners:
+render the current available Scene, retain the unavailable original context, and
+require an explicit replacement location before screen-Beat acceptance. Ordinary
+authoring keeps its existing location rules. The original captured context is not
+mutated or silently accepted. Both red tests now pass, including a deleted nested
+body and a Dialog hint switched to ordinary Narration. All 33 affected DOM cases,
+test compilation, production typechecking/build and whitespace pass. The
+coordinator self-reviewed the bounded correction; no duplicate review pair or
+new SDK campaign was started. Product/reference visual comparison remains open.
 
 ## Selection and ownership, 2026-11-03
 
