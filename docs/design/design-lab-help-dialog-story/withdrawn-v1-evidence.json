@@ -1,0 +1,74 @@
+{
+  "status": "failed",
+  "source": {
+    "commit": "8dfd15f12e7e6acc1b2e7c842558cc9eba987195",
+    "fingerprint": "28ffb9633ebffdb80b1fffca78f335423b005b27e447b7c969485ddd28360bca"
+  },
+  "command": "npm run design:check",
+  "exitCode": 1,
+  "renderCases": 448,
+  "completedChecks": [
+    "character-notes: interactions",
+    "characters-writing: interactions",
+    "story: interactions",
+    "source: interactions",
+    "branches: interactions",
+    "lorebook: interactions",
+    "assets: interactions",
+    "variables: interactions",
+    "welcome: interactions",
+    "new-project: interactions",
+    "settings: interactions",
+    "runtime: interactions"
+  ],
+  "error": "page.waitForFunction: Timeout 8000ms exceeded.",
+  "location": "app/design-lab/screens/studio-request/check.mjs:66",
+  "helpScreenReached": false,
+  "retried": false,
+  "rawEvidence": ".toolchains/help-dialog-story/browser-final/design-check.{stdout,stderr,exit}",
+  "failureCaptures": [
+    {
+      "path": "docs/design/design-lab-help-dialog-story/captures/withdrawn-v1/browser-steps-design-1100x720.png",
+      "sha256": "6b3bb8413ca5f5cc4ed8e1feb30e551eec6ecbf937e43255d62962152a1cf455",
+      "sourceCommit": "208c9a57b7a160df31e939f5d36929065ee7ef62",
+      "pixelWidth": 1100,
+      "pixelHeight": 808,
+      "fullPage": true
+    },
+    {
+      "path": "docs/design/design-lab-help-dialog-story/captures/withdrawn-v1/browser-steps-design-560x640.png",
+      "sha256": "e19b7526f7ceb727fa6dd7249ac0a0f74aff15d86b66f76d5f3d0e1258f8b307",
+      "sourceCommit": "208c9a57b7a160df31e939f5d36929065ee7ef62",
+      "pixelWidth": 728,
+      "pixelHeight": 2139,
+      "fullPage": true
+    },
+    {
+      "path": "docs/design/design-lab-help-dialog-story/captures/withdrawn-v1/browser-final-inspector-panel-help-tips-1100x720-picker.png",
+      "sha256": "4fa83ddb133bd031d07398889ba80005515368b42655060e088a24f85938efec",
+      "sourceCommit": "8dfd15f12e7e6acc1b2e7c842558cc9eba987195",
+      "pixelWidth": 1100,
+      "pixelHeight": 720,
+      "fullPage": true
+    },
+    {
+      "path": "docs/design/design-lab-help-dialog-story/captures/withdrawn-v1/browser-final-inspector-panel-help-tips-560x640-picker.png",
+      "sha256": "7fe2284fa25975683f503a2c4771975c4fa6a510d29f56c04cd6333c2e43bc77",
+      "sourceCommit": "8dfd15f12e7e6acc1b2e7c842558cc9eba987195",
+      "pixelWidth": 560,
+      "pixelHeight": 1105,
+      "fullPage": true
+    },
+    {
+      "path": "docs/design/design-lab-help-dialog-story/captures/withdrawn-v1/browser-final-inspector-no-images-1100x720.png",
+      "sha256": "4004834591b9c49e449bb9bfee19404ad1027e82366f6182bbb411c9214b600b",
+      "sourceCommit": "8dfd15f12e7e6acc1b2e7c842558cc9eba987195",
+      "pixelWidth": 1100,
+      "pixelHeight": 1048,
+      "fullPage": true
+    }
+  ],
+  "scope": "The gate did not reach Help. Scoped Help results cannot replace this failed full gate.",
+  "cause": "Unresolved. The Studio request waitState timeout does not establish a production defect. No timeout or harness was changed, and the failed gate is not a passing promotion result.",
+  "newSourceCoverage": "This result belongs only to 8dfd15f12e7e6acc1b2e7c842558cc9eba987195. It is not a full-gate result for version two."
+}

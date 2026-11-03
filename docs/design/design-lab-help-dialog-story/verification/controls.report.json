@@ -1,0 +1,538 @@
+{
+  "input": ".toolchains/help-dialog-story/comparison.html",
+  "inputSha256": "6191ebedcfcdd4ebf0e3d6f4fe922006bfc1da80c21a97a51a8e364c0f8a638e",
+  "cases": [
+    {
+      "variant": "inspector-v2",
+      "size": "1100x720",
+      "state": "create",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 7.006097325721178
+        },
+        "hover": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "disabled": false,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 9.00102391257362
+        },
+        "focus": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": true,
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "outlineColor": "rgb(211, 154, 116)",
+          "outlineOffset": "2px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "size": "1100x720",
+      "state": "no-images",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        },
+        "hover": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "size": "1100x720",
+      "state": "create",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 7.006097325721178
+        },
+        "hover": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "disabled": false,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 9.00102391257362
+        },
+        "focus": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": true,
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "outlineColor": "rgb(211, 154, 116)",
+          "outlineOffset": "2px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "size": "1100x720",
+      "state": "no-images",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        },
+        "hover": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "1100x720",
+      "state": "create",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 7.006097325721178
+        },
+        "hover": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "disabled": false,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 9.00102391257362
+        },
+        "focus": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": true,
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "outlineColor": "rgb(211, 154, 116)",
+          "outlineOffset": "2px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "1100x720",
+      "state": "no-images",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        },
+        "hover": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "size": "560x640",
+      "state": "create",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 7.006097325721178
+        },
+        "hover": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "disabled": false,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 9.00102391257362
+        },
+        "focus": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": true,
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "outlineColor": "rgb(211, 154, 116)",
+          "outlineOffset": "2px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "size": "560x640",
+      "state": "no-images",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        },
+        "hover": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "size": "560x640",
+      "state": "create",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 7.006097325721178
+        },
+        "hover": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "disabled": false,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 9.00102391257362
+        },
+        "focus": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": true,
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "outlineColor": "rgb(211, 154, 116)",
+          "outlineOffset": "2px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "size": "560x640",
+      "state": "no-images",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        },
+        "hover": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "560x640",
+      "state": "create",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 7.006097325721178
+        },
+        "hover": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "disabled": false,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 9.00102391257362
+        },
+        "focus": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": true,
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "outlineColor": "rgb(211, 154, 116)",
+          "outlineOffset": "2px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "560x640",
+      "state": "no-images",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        },
+        "hover": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    }
+  ],
+  "captures": [
+    "control-standalone-inspector-v2-1100x720-hover.png",
+    "control-standalone-inspector-v2-1100x720-focus.png",
+    "control-standalone-inspector-v2-1100x720-disabled-hover.png",
+    "control-standalone-steps-v2-1100x720-hover.png",
+    "control-standalone-steps-v2-1100x720-focus.png",
+    "control-standalone-steps-v2-1100x720-disabled-hover.png",
+    "control-standalone-story-split-v2-1100x720-hover.png",
+    "control-standalone-story-split-v2-1100x720-focus.png",
+    "control-standalone-story-split-v2-1100x720-disabled-hover.png",
+    "control-standalone-inspector-v2-560x640-hover.png",
+    "control-standalone-inspector-v2-560x640-focus.png",
+    "control-standalone-inspector-v2-560x640-disabled-hover.png",
+    "control-standalone-steps-v2-560x640-hover.png",
+    "control-standalone-steps-v2-560x640-focus.png",
+    "control-standalone-steps-v2-560x640-disabled-hover.png",
+    "control-standalone-story-split-v2-560x640-hover.png",
+    "control-standalone-story-split-v2-560x640-focus.png",
+    "control-standalone-story-split-v2-560x640-disabled-hover.png"
+  ],
+  "errors": [],
+  "failures": [],
+  "browser": {
+    "version": "153.0.8010.12",
+    "node": "v24.19.0",
+    "playwright": "1.63.0"
+  },
+  "summary": {
+    "cases": 12,
+    "passed": 12,
+    "captures": 18,
+    "errors": 0,
+    "failures": 0
+  }
+}

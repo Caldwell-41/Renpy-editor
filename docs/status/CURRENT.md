@@ -9,13 +9,16 @@ the coordinator owns shared contracts, review findings, integration and final re
 
 | Capability | Implemented and automated proof | Remaining acceptance |
 | --- | --- | --- |
-| Blocking Help dialog and Story Call/Finish backend | Eight normal-entry cases pass on both targets; source/history/refusal checks pass | Approved production UI and actual UI-to-core journeys |
+| Blocking Help dialog and Story Call/Finish backend | Eight normal-entry cases pass on both targets; source/history/refusal checks pass | A4 production UI integration and actual UI-to-core journeys |
 | Base Help canvas | Eight matched cases per target have exact pixels and geometry at `4c084a4`; lossless geometry transport is tested | Final combined integration review; wider canvas acceptance stays separate |
 | Combined backend | 575 routine core passes at `4c084a4`; two backend Standards findings fixed with focused red/green checks | UI integration and final combined review |
 
-The prototype's A4/B4/C4 revision is under review, not approved. Help still requires
-a typed UI image; placement uses existing Story body/Position ownership. No
-production UI is promoted before the direct approved handoff.
+Kris approved A4 (`inspector-v4`) at source `8851689`; B4/C4 remain drafts.
+The direct approved handoff is received. Production UI implementation is underway,
+with shared Assets/draft navigation and bounded Finish wiring committed at
+`faf9611`. Thirty focused DOM cases and twelve core reference cases pass.
+Help still requires a typed UI image; placement uses existing Story body/Position
+ownership. Production visual comparison and actual UI-to-core acceptance remain open.
 [Delivery evidence](../tasks/evidence/help-dialog-and-canvas.md) owns candidates,
 checks, earlier failures, operation counts and exact scope. Physical/human and
 published package/CI acceptance remain separate. Neither ticket is closed; this

@@ -1,0 +1,641 @@
+{
+  "input": ".toolchains/help-dialog-story/comparison.html",
+  "scope": "Offline browser memory simulation only. No Ren'Py qualification.",
+  "startedAt": "2026-11-03T14:14:07.989Z",
+  "browser": {
+    "version": "153.0.8010.12",
+    "playwright": "1.63.0",
+    "node": "v24.19.0"
+  },
+  "matrix": [],
+  "flows": [
+    {
+      "variant": "inspector-v2",
+      "size": "1100x720",
+      "flow": "custom-name-and-picker",
+      "state": "create",
+      "status": "passed",
+      "observations": [
+        {
+          "key": "Screens header",
+          "value": "Screens\nStory\nScreens / help_tips \u00b7 dialog\nUse in Story"
+        },
+        {
+          "key": "Screens source",
+          "value": "screen help_tips():\n    modal True\n    key \"game_menu\" action Return()\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Return() default_focus True\n\nlabel first_steps:\n    call screen help_tips\n    \"Ready? Let's go.\""
+        },
+        {
+          "key": "Use in Story",
+          "value": {
+            "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nInsert a Beat here\n\nAfter the introduction, before the next line.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+            "options": [
+              "help_tips \u00b7 Dialog",
+              "map_help \u00b7 Dialog"
+            ],
+            "status": "Story opened with help_tips selected. Add a Beat to use it.",
+            "target": "help_tips"
+          }
+        },
+        {
+          "key": "Story source",
+          "value": "screen help_tips():\n    modal True\n    key \"game_menu\" action Return()\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Return() default_focus True\n\nlabel first_steps:\n    call screen help_tips\n    \"Ready? Let's go.\""
+        }
+      ]
+    },
+    {
+      "variant": "inspector-v2",
+      "size": "1100x720",
+      "flow": "cancel-draft-target",
+      "state": "design",
+      "status": "passed",
+      "observations": [
+        {
+          "key": "accepted while target draft is help",
+          "value": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nCall screen \u00b7 map_help\n\nWait for Finish interaction.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller."
+        },
+        {
+          "key": "after Cancel",
+          "value": {
+            "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nCall screen \u00b7 map_help\n\nWait for Finish interaction.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+            "target": "map_help"
+          }
+        },
+        {
+          "key": "accepted Source",
+          "value": "screen help():\n    modal True\n    key \"game_menu\" action Return()\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Return() default_focus True\n\nlabel first_steps:\n    call screen map_help\n    \"Ready? Let's go.\""
+        }
+      ]
+    },
+    {
+      "variant": "inspector-v2",
+      "size": "1100x720",
+      "flow": "editor-escape-and-select-focus",
+      "state": "design",
+      "status": "passed",
+      "observations": [
+        {
+          "key": "keyboard select focus",
+          "value": {
+            "tag": "SELECT",
+            "field": "action",
+            "value": "hide"
+          }
+        },
+        {
+          "key": "Tab after action",
+          "value": "apply"
+        },
+        {
+          "key": "editor Escape",
+          "value": {
+            "title": "Accepted title",
+            "action": "finish",
+            "alerts": 0,
+            "status": "Unsaved appearance changes discarded. Accepted screen retained."
+          }
+        },
+        {
+          "key": "target select focus",
+          "value": {
+            "tag": "SELECT",
+            "field": "target",
+            "value": "map_help"
+          }
+        },
+        {
+          "key": "Tab after target",
+          "value": "add-beat"
+        }
+      ]
+    },
+    {
+      "variant": "steps-v2",
+      "size": "1100x720",
+      "flow": "custom-name-and-picker",
+      "state": "create",
+      "status": "passed",
+      "observations": [
+        {
+          "key": "Screens header",
+          "value": "Screens\nStory\nScreens / help_tips \u00b7 dialog\nUse in Story"
+        },
+        {
+          "key": "Screens source",
+          "value": "screen help_tips():\n    modal True\n    key \"game_menu\" action Return()\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Return() default_focus True\n\nlabel first_steps:\n    call screen help_tips\n    \"Ready? Let's go.\""
+        },
+        {
+          "key": "Use in Story",
+          "value": {
+            "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nInsert a Beat here\n\nAfter the introduction, before the next line.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+            "options": [
+              "help_tips \u00b7 Dialog",
+              "map_help \u00b7 Dialog"
+            ],
+            "status": "Story opened with help_tips selected. Add a Beat to use it.",
+            "target": "help_tips"
+          }
+        },
+        {
+          "key": "Story source",
+          "value": "screen help_tips():\n    modal True\n    key \"game_menu\" action Return()\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Return() default_focus True\n\nlabel first_steps:\n    call screen help_tips\n    \"Ready? Let's go.\""
+        }
+      ]
+    },
+    {
+      "variant": "steps-v2",
+      "size": "1100x720",
+      "flow": "cancel-draft-target",
+      "state": "design",
+      "status": "passed",
+      "observations": [
+        {
+          "key": "accepted while target draft is help",
+          "value": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nCall screen \u00b7 map_help\n\nWait for Finish interaction.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller."
+        },
+        {
+          "key": "after Cancel",
+          "value": {
+            "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nCall screen \u00b7 map_help\n\nWait for Finish interaction.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+            "target": "map_help"
+          }
+        },
+        {
+          "key": "accepted Source",
+          "value": "screen help():\n    modal True\n    key \"game_menu\" action Return()\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Return() default_focus True\n\nlabel first_steps:\n    call screen map_help\n    \"Ready? Let's go.\""
+        }
+      ]
+    },
+    {
+      "variant": "steps-v2",
+      "size": "1100x720",
+      "flow": "editor-escape-and-select-focus",
+      "state": "design",
+      "status": "passed",
+      "observations": [
+        {
+          "key": "keyboard select focus",
+          "value": {
+            "tag": "SELECT",
+            "field": "action",
+            "value": "hide"
+          }
+        },
+        {
+          "key": "Tab after action",
+          "value": "apply"
+        },
+        {
+          "key": "editor Escape",
+          "value": {
+            "title": "Accepted title",
+            "action": "finish",
+            "alerts": 0,
+            "status": "Unsaved appearance changes discarded. Accepted screen retained."
+          }
+        },
+        {
+          "key": "target select focus",
+          "value": {
+            "tag": "SELECT",
+            "field": "target",
+            "value": "map_help"
+          }
+        },
+        {
+          "key": "Tab after target",
+          "value": "add-beat"
+        }
+      ]
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "1100x720",
+      "flow": "custom-name-and-picker",
+      "state": "create",
+      "status": "passed",
+      "observations": [
+        {
+          "key": "Screens header",
+          "value": "Screens\nStory\nScreens / help_tips \u00b7 dialog\nUse in Story"
+        },
+        {
+          "key": "Screens source",
+          "value": "screen help_tips():\n    modal True\n    key \"game_menu\" action Return()\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Return() default_focus True\n\nlabel first_steps:\n    call screen help_tips\n    \"Ready? Let's go.\""
+        },
+        {
+          "key": "Use in Story",
+          "value": {
+            "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nInsert a Beat here\n\nAfter the introduction, before the next line.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+            "options": [
+              "help_tips \u00b7 Dialog",
+              "map_help \u00b7 Dialog"
+            ],
+            "status": "Story opened with help_tips selected. Add a Beat to use it.",
+            "target": "help_tips"
+          }
+        },
+        {
+          "key": "Story source",
+          "value": "screen help_tips():\n    modal True\n    key \"game_menu\" action Return()\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Return() default_focus True\n\nlabel first_steps:\n    call screen help_tips\n    \"Ready? Let's go.\""
+        }
+      ]
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "1100x720",
+      "flow": "cancel-draft-target",
+      "state": "design",
+      "status": "passed",
+      "observations": [
+        {
+          "key": "accepted while target draft is help",
+          "value": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nCall screen \u00b7 map_help\n\nWait for Finish interaction.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller."
+        },
+        {
+          "key": "after Cancel",
+          "value": {
+            "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nCall screen \u00b7 map_help\n\nWait for Finish interaction.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+            "target": "map_help"
+          }
+        },
+        {
+          "key": "accepted Source",
+          "value": "screen help():\n    modal True\n    key \"game_menu\" action Return()\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Return() default_focus True\n\nlabel first_steps:\n    call screen map_help\n    \"Ready? Let's go.\""
+        }
+      ]
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "1100x720",
+      "flow": "editor-escape-and-select-focus",
+      "state": "design",
+      "status": "passed",
+      "observations": [
+        {
+          "key": "keyboard select focus",
+          "value": {
+            "tag": "SELECT",
+            "field": "action",
+            "value": "hide"
+          }
+        },
+        {
+          "key": "Tab after action",
+          "value": "apply"
+        },
+        {
+          "key": "editor Escape",
+          "value": {
+            "title": "Accepted title",
+            "action": "finish",
+            "alerts": 0,
+            "status": "Unsaved appearance changes discarded. Accepted screen retained."
+          }
+        },
+        {
+          "key": "target select focus",
+          "value": {
+            "tag": "SELECT",
+            "field": "target",
+            "value": "map_help"
+          }
+        },
+        {
+          "key": "Tab after target",
+          "value": "add-beat"
+        }
+      ]
+    },
+    {
+      "variant": "inspector-v2",
+      "size": "560x640",
+      "flow": "custom-name-and-picker",
+      "state": "create",
+      "status": "passed",
+      "observations": [
+        {
+          "key": "Screens header",
+          "value": "Screens\nStory\nScreens / help_tips \u00b7 dialog\nUse in Story"
+        },
+        {
+          "key": "Screens source",
+          "value": "screen help_tips():\n    modal True\n    key \"game_menu\" action Return()\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Return() default_focus True\n\nlabel first_steps:\n    call screen help_tips\n    \"Ready? Let's go.\""
+        },
+        {
+          "key": "Use in Story",
+          "value": {
+            "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nInsert a Beat here\n\nAfter the introduction, before the next line.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+            "options": [
+              "help_tips \u00b7 Dialog",
+              "map_help \u00b7 Dialog"
+            ],
+            "status": "Story opened with help_tips selected. Add a Beat to use it.",
+            "target": "help_tips"
+          }
+        },
+        {
+          "key": "Story source",
+          "value": "screen help_tips():\n    modal True\n    key \"game_menu\" action Return()\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Return() default_focus True\n\nlabel first_steps:\n    call screen help_tips\n    \"Ready? Let's go.\""
+        }
+      ]
+    },
+    {
+      "variant": "inspector-v2",
+      "size": "560x640",
+      "flow": "cancel-draft-target",
+      "state": "design",
+      "status": "passed",
+      "observations": [
+        {
+          "key": "accepted while target draft is help",
+          "value": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nCall screen \u00b7 map_help\n\nWait for Finish interaction.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller."
+        },
+        {
+          "key": "after Cancel",
+          "value": {
+            "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nCall screen \u00b7 map_help\n\nWait for Finish interaction.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+            "target": "map_help"
+          }
+        },
+        {
+          "key": "accepted Source",
+          "value": "screen help():\n    modal True\n    key \"game_menu\" action Return()\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Return() default_focus True\n\nlabel first_steps:\n    call screen map_help\n    \"Ready? Let's go.\""
+        }
+      ]
+    },
+    {
+      "variant": "inspector-v2",
+      "size": "560x640",
+      "flow": "editor-escape-and-select-focus",
+      "state": "design",
+      "status": "passed",
+      "observations": [
+        {
+          "key": "keyboard select focus",
+          "value": {
+            "tag": "SELECT",
+            "field": "action",
+            "value": "hide"
+          }
+        },
+        {
+          "key": "Tab after action",
+          "value": "apply"
+        },
+        {
+          "key": "editor Escape",
+          "value": {
+            "title": "Accepted title",
+            "action": "finish",
+            "alerts": 0,
+            "status": "Unsaved appearance changes discarded. Accepted screen retained."
+          }
+        },
+        {
+          "key": "target select focus",
+          "value": {
+            "tag": "SELECT",
+            "field": "target",
+            "value": "map_help"
+          }
+        },
+        {
+          "key": "Tab after target",
+          "value": "add-beat"
+        }
+      ]
+    },
+    {
+      "variant": "steps-v2",
+      "size": "560x640",
+      "flow": "custom-name-and-picker",
+      "state": "create",
+      "status": "passed",
+      "observations": [
+        {
+          "key": "Screens header",
+          "value": "Screens\nStory\nScreens / help_tips \u00b7 dialog\nUse in Story"
+        },
+        {
+          "key": "Screens source",
+          "value": "screen help_tips():\n    modal True\n    key \"game_menu\" action Return()\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Return() default_focus True\n\nlabel first_steps:\n    call screen help_tips\n    \"Ready? Let's go.\""
+        },
+        {
+          "key": "Use in Story",
+          "value": {
+            "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nInsert a Beat here\n\nAfter the introduction, before the next line.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+            "options": [
+              "help_tips \u00b7 Dialog",
+              "map_help \u00b7 Dialog"
+            ],
+            "status": "Story opened with help_tips selected. Add a Beat to use it.",
+            "target": "help_tips"
+          }
+        },
+        {
+          "key": "Story source",
+          "value": "screen help_tips():\n    modal True\n    key \"game_menu\" action Return()\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Return() default_focus True\n\nlabel first_steps:\n    call screen help_tips\n    \"Ready? Let's go.\""
+        }
+      ]
+    },
+    {
+      "variant": "steps-v2",
+      "size": "560x640",
+      "flow": "cancel-draft-target",
+      "state": "design",
+      "status": "passed",
+      "observations": [
+        {
+          "key": "accepted while target draft is help",
+          "value": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nCall screen \u00b7 map_help\n\nWait for Finish interaction.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller."
+        },
+        {
+          "key": "after Cancel",
+          "value": {
+            "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nCall screen \u00b7 map_help\n\nWait for Finish interaction.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+            "target": "map_help"
+          }
+        },
+        {
+          "key": "accepted Source",
+          "value": "screen help():\n    modal True\n    key \"game_menu\" action Return()\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Return() default_focus True\n\nlabel first_steps:\n    call screen map_help\n    \"Ready? Let's go.\""
+        }
+      ]
+    },
+    {
+      "variant": "steps-v2",
+      "size": "560x640",
+      "flow": "editor-escape-and-select-focus",
+      "state": "design",
+      "status": "passed",
+      "observations": [
+        {
+          "key": "keyboard select focus",
+          "value": {
+            "tag": "SELECT",
+            "field": "action",
+            "value": "hide"
+          }
+        },
+        {
+          "key": "Tab after action",
+          "value": "apply"
+        },
+        {
+          "key": "editor Escape",
+          "value": {
+            "title": "Accepted title",
+            "action": "finish",
+            "alerts": 0,
+            "status": "Unsaved appearance changes discarded. Accepted screen retained."
+          }
+        },
+        {
+          "key": "target select focus",
+          "value": {
+            "tag": "SELECT",
+            "field": "target",
+            "value": "map_help"
+          }
+        },
+        {
+          "key": "Tab after target",
+          "value": "add-beat"
+        }
+      ]
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "560x640",
+      "flow": "custom-name-and-picker",
+      "state": "create",
+      "status": "passed",
+      "observations": [
+        {
+          "key": "Screens header",
+          "value": "Screens\nStory\nScreens / help_tips \u00b7 dialog\nUse in Story"
+        },
+        {
+          "key": "Screens source",
+          "value": "screen help_tips():\n    modal True\n    key \"game_menu\" action Return()\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Return() default_focus True\n\nlabel first_steps:\n    call screen help_tips\n    \"Ready? Let's go.\""
+        },
+        {
+          "key": "Use in Story",
+          "value": {
+            "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nInsert a Beat here\n\nAfter the introduction, before the next line.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+            "options": [
+              "help_tips \u00b7 Dialog",
+              "map_help \u00b7 Dialog"
+            ],
+            "status": "Story opened with help_tips selected. Add a Beat to use it.",
+            "target": "help_tips"
+          }
+        },
+        {
+          "key": "Story source",
+          "value": "screen help_tips():\n    modal True\n    key \"game_menu\" action Return()\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Return() default_focus True\n\nlabel first_steps:\n    call screen help_tips\n    \"Ready? Let's go.\""
+        }
+      ]
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "560x640",
+      "flow": "cancel-draft-target",
+      "state": "design",
+      "status": "passed",
+      "observations": [
+        {
+          "key": "accepted while target draft is help",
+          "value": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nCall screen \u00b7 map_help\n\nWait for Finish interaction.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller."
+        },
+        {
+          "key": "after Cancel",
+          "value": {
+            "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nCall screen \u00b7 map_help\n\nWait for Finish interaction.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+            "target": "map_help"
+          }
+        },
+        {
+          "key": "accepted Source",
+          "value": "screen help():\n    modal True\n    key \"game_menu\" action Return()\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Return() default_focus True\n\nlabel first_steps:\n    call screen map_help\n    \"Ready? Let's go.\""
+        }
+      ]
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "560x640",
+      "flow": "editor-escape-and-select-focus",
+      "state": "design",
+      "status": "passed",
+      "observations": [
+        {
+          "key": "keyboard select focus",
+          "value": {
+            "tag": "SELECT",
+            "field": "action",
+            "value": "hide"
+          }
+        },
+        {
+          "key": "Tab after action",
+          "value": "apply"
+        },
+        {
+          "key": "editor Escape",
+          "value": {
+            "title": "Accepted title",
+            "action": "finish",
+            "alerts": 0,
+            "status": "Unsaved appearance changes discarded. Accepted screen retained."
+          }
+        },
+        {
+          "key": "target select focus",
+          "value": {
+            "tag": "SELECT",
+            "field": "target",
+            "value": "map_help"
+          }
+        },
+        {
+          "key": "Tab after target",
+          "value": "add-beat"
+        }
+      ]
+    }
+  ],
+  "captures": [
+    "inspector-v2-create-1100x720-custom-source.png",
+    "inspector-v2-story-1100x720-custom-picker.png",
+    "inspector-v2-story-1100x720-accepted-target.png",
+    "steps-v2-create-1100x720-custom-source.png",
+    "steps-v2-story-1100x720-custom-picker.png",
+    "steps-v2-story-1100x720-accepted-target.png",
+    "story-split-v2-create-1100x720-custom-source.png",
+    "story-split-v2-story-1100x720-custom-picker.png",
+    "story-split-v2-story-1100x720-accepted-target.png",
+    "inspector-v2-create-560x640-custom-source.png",
+    "inspector-v2-story-560x640-custom-picker.png",
+    "inspector-v2-story-560x640-accepted-target.png",
+    "steps-v2-create-560x640-custom-source.png",
+    "steps-v2-story-560x640-custom-picker.png",
+    "steps-v2-story-560x640-accepted-target.png",
+    "story-split-v2-create-560x640-custom-source.png",
+    "story-split-v2-story-560x640-custom-picker.png",
+    "story-split-v2-story-560x640-accepted-target.png"
+  ],
+  "errors": [],
+  "failures": [],
+  "inputSha256": "6191ebedcfcdd4ebf0e3d6f4fe922006bfc1da80c21a97a51a8e364c0f8a638e",
+  "finishedAt": "2026-11-03T14:14:12.948Z",
+  "summary": {
+    "matrix": 0,
+    "matrixPassed": 0,
+    "flows": 18,
+    "flowsPassed": 18,
+    "captures": 18,
+    "errors": 0,
+    "failures": 0
+  },
+  "findings": []
+}

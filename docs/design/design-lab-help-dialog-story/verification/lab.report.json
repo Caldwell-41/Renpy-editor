@@ -1,0 +1,972 @@
+{
+  "scope": "Scoped Design Lab source and native-stub checks only. This is not design:check.",
+  "inputSha256": "6191ebedcfcdd4ebf0e3d6f4fe922006bfc1da80c21a97a51a8e364c0f8a638e",
+  "matrix": [
+    {
+      "variant": "inspector-v2",
+      "state": "create",
+      "size": "wide",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyScrollWidth": 1100
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "state": "design",
+      "size": "wide",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyScrollWidth": 1100
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "state": "story",
+      "size": "wide",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyScrollWidth": 1100
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "state": "no-images",
+      "size": "wide",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyScrollWidth": 1100
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "create",
+      "size": "wide",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyScrollWidth": 1100
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "design",
+      "size": "wide",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyScrollWidth": 1100
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "story",
+      "size": "wide",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyScrollWidth": 1100
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "no-images",
+      "size": "wide",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyScrollWidth": 1100
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "create",
+      "size": "wide",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyScrollWidth": 1100
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "design",
+      "size": "wide",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyScrollWidth": 1100
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "story",
+      "size": "wide",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyScrollWidth": 1100
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "no-images",
+      "size": "wide",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyScrollWidth": 1100
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "state": "create",
+      "size": "compact",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyScrollWidth": 560
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "state": "design",
+      "size": "compact",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyScrollWidth": 560
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "state": "story",
+      "size": "compact",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyScrollWidth": 560
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "state": "no-images",
+      "size": "compact",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyScrollWidth": 560
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "create",
+      "size": "compact",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyScrollWidth": 560
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "design",
+      "size": "compact",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyScrollWidth": 560
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "story",
+      "size": "compact",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyScrollWidth": 560
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "no-images",
+      "size": "compact",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyScrollWidth": 560
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "create",
+      "size": "compact",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyScrollWidth": 560
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "design",
+      "size": "compact",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyScrollWidth": 560
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "story",
+      "size": "compact",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyScrollWidth": 560
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "no-images",
+      "size": "compact",
+      "status": "passed",
+      "dimensions": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyScrollWidth": 560
+      }
+    }
+  ],
+  "interactions": [
+    {
+      "variant": "inspector-v2",
+      "size": "wide",
+      "status": "passed",
+      "source": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+      "callOptions": [
+        "help_dialog \u00b7 Dialog",
+        "map_help \u00b7 Dialog"
+      ]
+    },
+    {
+      "variant": "steps-v2",
+      "size": "wide",
+      "status": "passed",
+      "source": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+      "callOptions": [
+        "help_dialog \u00b7 Dialog",
+        "map_help \u00b7 Dialog"
+      ]
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "wide",
+      "status": "passed",
+      "source": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+      "callOptions": [
+        "help_dialog \u00b7 Dialog",
+        "map_help \u00b7 Dialog"
+      ]
+    },
+    {
+      "variant": "inspector-v2",
+      "size": "compact",
+      "status": "passed",
+      "source": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+      "callOptions": [
+        "help_dialog \u00b7 Dialog",
+        "map_help \u00b7 Dialog"
+      ]
+    },
+    {
+      "variant": "steps-v2",
+      "size": "compact",
+      "status": "passed",
+      "source": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+      "callOptions": [
+        "help_dialog \u00b7 Dialog",
+        "map_help \u00b7 Dialog"
+      ]
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "compact",
+      "status": "passed",
+      "source": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+      "callOptions": [
+        "help_dialog \u00b7 Dialog",
+        "map_help \u00b7 Dialog"
+      ]
+    }
+  ],
+  "controlChecks": [
+    {
+      "variant": "inspector-v2",
+      "size": "wide",
+      "state": "create",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 7.006097325721178
+        },
+        "hover": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "disabled": false,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 9.00102391257362
+        },
+        "focus": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": true,
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "outlineColor": "rgb(211, 154, 116)",
+          "outlineOffset": "2px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "size": "wide",
+      "state": "no-images",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        },
+        "hover": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "size": "wide",
+      "state": "create",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 7.006097325721178
+        },
+        "hover": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "disabled": false,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 9.00102391257362
+        },
+        "focus": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": true,
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "outlineColor": "rgb(211, 154, 116)",
+          "outlineOffset": "2px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "size": "wide",
+      "state": "no-images",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        },
+        "hover": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "wide",
+      "state": "create",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 7.006097325721178
+        },
+        "hover": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "disabled": false,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 9.00102391257362
+        },
+        "focus": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": true,
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "outlineColor": "rgb(211, 154, 116)",
+          "outlineOffset": "2px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "wide",
+      "state": "no-images",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        },
+        "hover": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "size": "compact",
+      "state": "create",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 7.006097325721178
+        },
+        "hover": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "disabled": false,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 9.00102391257362
+        },
+        "focus": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": true,
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "outlineColor": "rgb(211, 154, 116)",
+          "outlineOffset": "2px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "size": "compact",
+      "state": "no-images",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        },
+        "hover": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "size": "compact",
+      "state": "create",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 7.006097325721178
+        },
+        "hover": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "disabled": false,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 9.00102391257362
+        },
+        "focus": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": true,
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "outlineColor": "rgb(211, 154, 116)",
+          "outlineOffset": "2px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "size": "compact",
+      "state": "no-images",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        },
+        "hover": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "compact",
+      "state": "create",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 7.006097325721178
+        },
+        "hover": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "disabled": false,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(33, 27, 23)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74",
+          "contrast": 9.00102391257362
+        },
+        "focus": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "disabled": false,
+          "hover": false,
+          "focusVisible": true,
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "outlineColor": "rgb(211, 154, 116)",
+          "outlineOffset": "2px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "compact",
+      "state": "no-images",
+      "status": "passed",
+      "observed": {
+        "idle": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": false,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        },
+        "hover": {
+          "color": "rgb(200, 197, 187)",
+          "background": "rgb(40, 40, 37)",
+          "disabled": true,
+          "hover": true,
+          "focusVisible": false,
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "outlineColor": "rgb(200, 197, 187)",
+          "outlineOffset": "0px",
+          "accentHover": "#e6b28b",
+          "accentPrimary": "#d39a74"
+        }
+      }
+    }
+  ],
+  "errors": [],
+  "failures": [],
+  "captures": [
+    "lab-inspector-v2-wide-create.png",
+    "control-lab-inspector-v2-wide-hover.png",
+    "control-lab-inspector-v2-wide-focus.png",
+    "lab-inspector-v2-wide-design.png",
+    "lab-inspector-v2-wide-story.png",
+    "lab-inspector-v2-wide-no-images.png",
+    "control-lab-inspector-v2-wide-disabled-hover.png",
+    "lab-steps-v2-wide-create.png",
+    "control-lab-steps-v2-wide-hover.png",
+    "control-lab-steps-v2-wide-focus.png",
+    "lab-steps-v2-wide-design.png",
+    "lab-steps-v2-wide-story.png",
+    "lab-steps-v2-wide-no-images.png",
+    "control-lab-steps-v2-wide-disabled-hover.png",
+    "lab-story-split-v2-wide-create.png",
+    "control-lab-story-split-v2-wide-hover.png",
+    "control-lab-story-split-v2-wide-focus.png",
+    "lab-story-split-v2-wide-design.png",
+    "lab-story-split-v2-wide-story.png",
+    "lab-story-split-v2-wide-no-images.png",
+    "control-lab-story-split-v2-wide-disabled-hover.png",
+    "lab-inspector-v2-compact-create.png",
+    "control-lab-inspector-v2-compact-hover.png",
+    "control-lab-inspector-v2-compact-focus.png",
+    "lab-inspector-v2-compact-design.png",
+    "lab-inspector-v2-compact-story.png",
+    "lab-inspector-v2-compact-no-images.png",
+    "control-lab-inspector-v2-compact-disabled-hover.png",
+    "lab-steps-v2-compact-create.png",
+    "control-lab-steps-v2-compact-hover.png",
+    "control-lab-steps-v2-compact-focus.png",
+    "lab-steps-v2-compact-design.png",
+    "lab-steps-v2-compact-story.png",
+    "lab-steps-v2-compact-no-images.png",
+    "control-lab-steps-v2-compact-disabled-hover.png",
+    "lab-story-split-v2-compact-create.png",
+    "control-lab-story-split-v2-compact-hover.png",
+    "control-lab-story-split-v2-compact-focus.png",
+    "lab-story-split-v2-compact-design.png",
+    "lab-story-split-v2-compact-story.png",
+    "lab-story-split-v2-compact-no-images.png",
+    "control-lab-story-split-v2-compact-disabled-hover.png",
+    "lab-inspector-v2-wide-panel-source.png",
+    "lab-steps-v2-wide-panel-source.png",
+    "lab-story-split-v2-wide-panel-source.png",
+    "lab-inspector-v2-compact-panel-source.png",
+    "lab-steps-v2-compact-panel-source.png",
+    "lab-story-split-v2-compact-panel-source.png"
+  ],
+  "server": {
+    "origin": "http://127.0.0.1:56547",
+    "cacheDir": ".toolchains/help-dialog-story/browser-approved-candidate/vite-cache"
+  },
+  "browser": {
+    "version": "153.0.8010.12",
+    "node": "v24.19.0"
+  },
+  "registration": {
+    "id": "help-dialog-story",
+    "variants": [
+      {
+        "id": "inspector-v2",
+        "title": "Help A2 \u00b7 Inspector extension"
+      },
+      {
+        "id": "steps-v2",
+        "title": "Help B2 \u00b7 Guided setup"
+      },
+      {
+        "id": "story-split-v2",
+        "title": "Help C2 \u00b7 Story first"
+      }
+    ],
+    "states": [
+      "create",
+      "design",
+      "story",
+      "no-images",
+      "invalid",
+      "unknown",
+      "missing"
+    ]
+  },
+  "native": {
+    "before": [],
+    "prefs": {
+      "ok": true,
+      "protocolVersion": 1,
+      "requestId": "probe",
+      "value": {
+        "schemaVersion": 1,
+        "theme": "dark",
+        "density": "default",
+        "sourceFontSize": 14,
+        "rememberLayout": false,
+        "layouts": {}
+      }
+    },
+    "after": [
+      "project.flush"
+    ],
+    "refusal": "Design Lab refuses native operation: project.flush. Supply an explicit sample callback."
+  },
+  "serverStopped": true,
+  "summary": {
+    "matrix": 24,
+    "matrixPassed": 24,
+    "interactions": 6,
+    "interactionsPassed": 6,
+    "controlChecks": 12,
+    "errors": 0,
+    "failures": 0
+  }
+}

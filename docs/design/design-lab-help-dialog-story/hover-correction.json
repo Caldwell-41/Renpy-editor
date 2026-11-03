@@ -1,0 +1,22 @@
+{
+  "source": {
+    "commit": "ffe5cadcd1e20cb481cfbb21e823b8a5a41f9e26",
+    "fingerprint": "b1bddfeee798504f1fbf66c526e2f6efa9da8e9bff1690d3cd4024a47dacb891"
+  },
+  "finding": "Primary hover changed the background to dark while retaining dark text; measured contrast 1.4:1.",
+  "capture": {
+    "path": "docs/design/design-lab-help-dialog-story/captures/intermediate-v2-hover/primary-hover.png",
+    "sha256": "a4c5e56c59f3ea8fab85e0cf5a6adba4166a822c9daf345e2eb1dde417530a3a"
+  },
+  "correctionSource": "35e9eaa9c3ffde4092328a97551a60f8e74c3247",
+  "correction": "Apply accent-hover background and on-accent text only to enabled primary buttons.",
+  "verification": {
+    "sourceCommit": "35e9eaa9c3ffde4092328a97551a60f8e74c3247",
+    "idleContrast": 7.006,
+    "hoverContrast": 9.001,
+    "standaloneCasesPassed": 12,
+    "labCasesPassed": 12,
+    "disabledHoverUnchanged": true,
+    "keyboardFocusVisible": true
+  }
+}

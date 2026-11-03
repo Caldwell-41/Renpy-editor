@@ -1,0 +1,232 @@
+{
+  "status": "approved-a4",
+  "screenId": "help-dialog-story",
+  "source": {
+    "commit": "8851689b62eda03127c199ca0276a776b0d623ab",
+    "fingerprint": "bd1742a2ae2576cb6fb8fce032e19f70a66d06e177b17ce3377fafa96a0f6762"
+  },
+  "variants": [
+    "inspector-v4",
+    "steps-v4",
+    "story-split-v4"
+  ],
+  "approval": {
+    "revisionId": "inspector-v4",
+    "variantId": "inspector-v4",
+    "date": "2026-11-04",
+    "quotes": [
+      "Approved",
+      "Sorry a4"
+    ],
+    "decisionEvidence": "approval-decision.json",
+    "receipt": "approval-receipt.json"
+  },
+  "predecessor": "review-v3.json",
+  "request": "okay, make the changes for 2 and 3, dont change the agreement for 1",
+  "requestedChanges": [
+    "Choose a valid insertion point when adding a screen Beat.",
+    "Keep Add/Cancel on one row with Source and effects as a separated secondary text action."
+  ],
+  "preservedAgreement": "Help starter still requires an available typed project UI image; no optional-image or fallback change.",
+  "localBrowser": {
+    "artifact": ".toolchains/help-dialog-story/comparison-v4.html",
+    "query": "variant=inspector-v4&state=story",
+    "osOpenSucceeded": true,
+    "serverRunning": false,
+    "htmlSha256": "1137b4a18bbe5c7805ea9b8848d0bf5b01a29c41c4ad74bce0ad4ea13034670a"
+  },
+  "display": {
+    "htmlRender": {
+      "attachmentId": "mcp-launch-8e6fd0b543455be611a52db6f60a7e7c7ca4c8fc6fc480ea70097ed44c6f3108-f9063da8-b256-41b4-9406-c27fee8a1009-html",
+      "title": "Help A4 / B4 / C4 \u00b7 insertion and action spacing",
+      "height": 1087,
+      "heights": [
+        [
+          320,
+          1182
+        ],
+        [
+          375,
+          1144
+        ],
+        [
+          430,
+          1087
+        ],
+        [
+          520,
+          1087
+        ],
+        [
+          640,
+          1087
+        ],
+        [
+          728,
+          1087
+        ],
+        [
+          860,
+          675
+        ],
+        [
+          1000,
+          675
+        ],
+        [
+          1144,
+          675
+        ]
+      ]
+    },
+    "message": "Shown to the reader above your reply. Don't mention or describe the page; reply with only what it doesn't already say."
+  },
+  "insertionContract": {
+    "fixtureAnchors": [
+      "before-intro",
+      "before-following",
+      "before-return"
+    ],
+    "afterTerminalReturn": false,
+    "productionOwner": "Existing Story Scene/body/Position-before-anchor owner; placement is draft operation context, not Beat payload data or a new IPC contract.",
+    "afterAcceptance": "Position is read-only in this bounded insertion form. Existing Story Move owns movement of accepted Beats.",
+    "cancel": "Restore captured insertion context for a new operation or the accepted target and position when editing."
+  },
+  "browserPass": {
+    "sourceCommit": "1d710f26fbab903848133e98ed2b8961f10cb512",
+    "fingerprint": "2d20318473e8d811e945864b59e7eed8522df18681fade4650fa6c505de89ef2",
+    "cases": 162,
+    "passed": 156,
+    "failed": 6,
+    "consoleOrPageErrors": 0,
+    "groups": {
+      "layoutAndKeyboard": "6/6",
+      "threePositionsByThreeScreenOperations": "54/54",
+      "unacceptedCancel": "6/6",
+      "missingUnknownRefusals": "36/36",
+      "storyFirstCreationAndCancel": "12/12",
+      "closeFocusedPlaybackAtEachPosition": "36/36",
+      "outsideThenEscape": "0/6",
+      "noImageRequirementAndReturn": "6/6"
+    },
+    "spacingGapCssPixels": 14,
+    "sourceAndPlacementChecks": "passed",
+    "failure": "Outside click could focus BODY, bypassing the host-only Escape listener. This is not established as a v4 regression; earlier code had the same handler arrangement.",
+    "report": "verification/v4-browser/report.json"
+  },
+  "focusCorrection": {
+    "sourceCommit": "8851689b62eda03127c199ca0276a776b0d623ab",
+    "change": "Restore Close focus for clicks outside the game dialog; handle modal keyboard events from outside the host; dispose the capture listener.",
+    "domCasesPassed": 12,
+    "domCasesFailed": 0,
+    "report": "verification/v4-focus-fix.json",
+    "browserRerun": true,
+    "browserRerunScope": "A4 only: 10 successful sequences on the approved source; B4/C4 not promoted."
+  },
+  "sourceChecks": {
+    "typeScript": "passed",
+    "approvalRecords": "passed",
+    "whitespace": "passed"
+  },
+  "fullGate": {
+    "status": "failed-at-earlier-source-not-rerun",
+    "sourceCommit": "8dfd15f12e7e6acc1b2e7c842558cc9eba987195",
+    "renderCases": 448,
+    "location": "app/design-lab/screens/studio-request/check.mjs:66",
+    "error": "waitState / page.waitForFunction: Timeout 8000ms exceeded.",
+    "cause": "Unresolved; not a production defect finding or a passing promotion gate.",
+    "helpReached": false,
+    "currentSourceResult": "See approval-receipt.json: current-source full gate passed; the earlier failed attempt and cause uncertainty remain unchanged."
+  },
+  "captures": [
+    {
+      "path": "docs/design/design-lab-help-dialog-story/captures/v4-inline/inspector-v4-story-1100.png",
+      "variantId": "inspector-v4",
+      "state": "story",
+      "theme": "dark",
+      "width": 1100,
+      "height": 675,
+      "scale": 1,
+      "method": "html_preview full-document capture",
+      "consoleMessages": [],
+      "sha256": "40bef2a97de3f08671f7672c2014167ac9db931e33678903d350b711353f7ab8"
+    },
+    {
+      "path": "docs/design/design-lab-help-dialog-story/captures/v4-inline/inspector-v4-story-560.png",
+      "variantId": "inspector-v4",
+      "state": "story",
+      "theme": "dark",
+      "width": 560,
+      "height": 1087,
+      "scale": 1,
+      "method": "html_preview full-document capture",
+      "consoleMessages": [],
+      "sha256": "bc4cb326166db4cb217d4e1b59275d27aeabe9064bf6e4e7589ee00731081332"
+    },
+    {
+      "path": "docs/design/design-lab-help-dialog-story/captures/v4-inline/steps-v4-story-1100.png",
+      "variantId": "steps-v4",
+      "state": "story",
+      "theme": "dark",
+      "width": 1100,
+      "height": 733,
+      "scale": 1,
+      "method": "html_preview full-document capture",
+      "consoleMessages": [],
+      "sha256": "344cbfa5a7bbca4c528ef653237d04c33ac047d825e6b792f670934c3acd0310"
+    },
+    {
+      "path": "docs/design/design-lab-help-dialog-story/captures/v4-inline/steps-v4-story-560.png",
+      "variantId": "steps-v4",
+      "state": "story",
+      "theme": "dark",
+      "width": 560,
+      "height": 1138,
+      "scale": 1,
+      "method": "html_preview full-document capture",
+      "consoleMessages": [],
+      "sha256": "7dc099944ed1fed94f53e29cf9419085c0ae350d317bf40e72bf81f116d27a61"
+    },
+    {
+      "path": "docs/design/design-lab-help-dialog-story/captures/v4-inline/story-split-v4-story-1100.png",
+      "variantId": "story-split-v4",
+      "state": "story",
+      "theme": "dark",
+      "width": 1100,
+      "height": 1018,
+      "scale": 1,
+      "method": "html_preview full-document capture",
+      "consoleMessages": [],
+      "sha256": "6e7477f8b2abf4f2730bece927a7b77f2fb866eb76c5890dae46c5417823772e"
+    },
+    {
+      "path": "docs/design/design-lab-help-dialog-story/captures/v4-inline/story-split-v4-story-560.png",
+      "variantId": "story-split-v4",
+      "state": "story",
+      "theme": "dark",
+      "width": 560,
+      "height": 1087,
+      "scale": 1,
+      "method": "html_preview full-document capture",
+      "consoleMessages": [],
+      "sha256": "3c4ee57aeee0a9bd9ad75d58b33cc0b11104a8c33c9b3459d211f342ae51c609"
+    }
+  ],
+  "limits": [
+    "Current captures are full-document static renders; their heights are document heights, not the earlier 720/640 browser viewport.",
+    "Requested insertion, Source, spacing and image-requirement cases passed at 1d710f2; the only later runtime source change is the modal focus/keyboard correction.",
+    "The corrected outside-click/Escape sequence has focused DOM proof, not a real-browser rerun.",
+    "No production UI, actual core/history/reopen/recovery, SDK/RenPy/helper/native Loomlight/package/CI proof or publication.",
+    "No version approval inferred from the request to make changes."
+  ],
+  "promotion": {
+    "currentSource": {
+      "commit": "8851689b62eda03127c199ca0276a776b0d623ab",
+      "fingerprint": "bd1742a2ae2576cb6fb8fce032e19f70a66d06e177b17ce3377fafa96a0f6762"
+    },
+    "fullDesignCheck": "passed: 1324 renders, 29 check groups, 10 approval checks",
+    "offlineBrowser": "36/36 A4 cases; ten corrected outside/Escape sequences pass",
+    "registeredLab": "18/18 A4 cases; A4 source matches, B4/C4 Draft",
+    "captures": "approval-receipt.json"
+  }
+}

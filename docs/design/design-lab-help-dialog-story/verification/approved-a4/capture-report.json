@@ -1,0 +1,1338 @@
+{
+  "scope": "Headless offline browser memory only. No native app, project write, SDK, helper or Ren'Py execution.",
+  "approvedSource": {
+    "commit": "8851689b62eda03127c199ca0276a776b0d623ab",
+    "fingerprint": "bd1742a2ae2576cb6fb8fce032e19f70a66d06e177b17ce3377fafa96a0f6762"
+  },
+  "currentHead": "80cee6e98410f5841849d81315ce708a2c9a2a6e",
+  "html": {
+    "path": ".toolchains/help-dialog-story/comparison-v4.html",
+    "sha256": "1137b4a18bbe5c7805ea9b8848d0bf5b01a29c41c4ad74bce0ad4ea13034670a",
+    "rebuiltSha256": "1137b4a18bbe5c7805ea9b8848d0bf5b01a29c41c4ad74bce0ad4ea13034670a"
+  },
+  "sourceFiles": [
+    {
+      "file": "app/design-lab/screens/help-dialog-story/workspace.ts",
+      "sha256": "7644120e73817cd884d6db16e2d16ff5b22592a8472d893ac5cf87f1546d5825"
+    },
+    {
+      "file": "app/design-lab/screens/help-dialog-story/style.css",
+      "sha256": "2c3296f907ad4a77fe124e635ab262ca58eaf88348b075f0526d2dd73fbe6d78"
+    },
+    {
+      "file": "app/design-lab/screens/help-dialog-story/definition.ts",
+      "sha256": "c306e667b7a119b5e0563ed6720818f360456d1e07019dba453d1ab377694393"
+    },
+    {
+      "file": "app/design-lab/screens/help-dialog-story/standalone.ts",
+      "sha256": "7fbc9fd2d43fa6c988bc475fc72f58d20959f8911e2f037112c4e0fa93af3a9f"
+    }
+  ],
+  "startedAt": "2026-11-03T21:03:42.687Z",
+  "cases": [
+    {
+      "name": "registered-start",
+      "state": "start",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "status": "passed"
+    },
+    {
+      "name": "registered-create",
+      "state": "create",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "status": "passed"
+    },
+    {
+      "name": "registered-panel",
+      "state": "panel",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "status": "passed"
+    },
+    {
+      "name": "registered-design",
+      "state": "design",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "status": "passed"
+    },
+    {
+      "name": "registered-story",
+      "state": "story",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "status": "passed"
+    },
+    {
+      "name": "registered-no-images",
+      "state": "no-images",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "status": "passed"
+    },
+    {
+      "name": "registered-invalid",
+      "state": "invalid",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "status": "passed"
+    },
+    {
+      "name": "registered-unknown",
+      "state": "unknown",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "status": "passed"
+    },
+    {
+      "name": "registered-missing",
+      "state": "missing",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "status": "passed"
+    },
+    {
+      "name": "placement-before-intro",
+      "state": "story",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "status": "passed",
+      "source": "label first_steps:\n    call screen help\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    return"
+    },
+    {
+      "name": "placement-before-return",
+      "state": "story",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "status": "passed",
+      "source": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    call screen help\n    return"
+    },
+    {
+      "name": "actions-and-focus",
+      "state": "story",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "status": "passed",
+      "geometry": {
+        "add": {
+          "left": 810,
+          "right": 926.859375,
+          "top": 529,
+          "bottom": 565.84375
+        },
+        "cancel": {
+          "left": 934.859375,
+          "right": 998.46875,
+          "top": 529,
+          "bottom": 565.84375
+        },
+        "source": {
+          "left": 810,
+          "right": 924.484375,
+          "top": 579.84375,
+          "bottom": 603.84375
+        },
+        "decoration": "underline",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px"
+      },
+      "focus": {
+        "style": "solid",
+        "width": "2px"
+      }
+    },
+    {
+      "name": "no-image-retention",
+      "state": "no-images",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "status": "passed"
+    },
+    {
+      "name": "outside-escape-before-intro-stage",
+      "state": "story",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "status": "passed",
+      "focusAfterOutside": {
+        "tag": "BUTTON",
+        "action": "finish"
+      },
+      "followingBeat": "\"Before we leave, take a look at the controls.\"",
+      "followingBeatRuns": 1,
+      "phase": "finished"
+    },
+    {
+      "name": "outside-escape-before-following-stage",
+      "state": "story",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "status": "passed",
+      "focusAfterOutside": {
+        "tag": "BUTTON",
+        "action": "finish"
+      },
+      "followingBeat": "\"Ready? Let's go.\"",
+      "followingBeatRuns": 1,
+      "phase": "finished"
+    },
+    {
+      "name": "outside-escape-before-following-child",
+      "state": "story",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "status": "passed",
+      "focusAfterOutside": {
+        "tag": "BUTTON",
+        "action": "finish"
+      },
+      "followingBeat": "\"Ready? Let's go.\"",
+      "followingBeatRuns": 1,
+      "phase": "finished"
+    },
+    {
+      "name": "outside-escape-before-following-body",
+      "state": "story",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "status": "passed",
+      "focusAfterOutside": {
+        "tag": "BUTTON",
+        "action": "finish"
+      },
+      "followingBeat": "\"Ready? Let's go.\"",
+      "followingBeatRuns": 1,
+      "phase": "finished"
+    },
+    {
+      "name": "outside-escape-before-return-stage",
+      "state": "story",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "status": "passed",
+      "focusAfterOutside": {
+        "tag": "BUTTON",
+        "action": "finish"
+      },
+      "followingBeat": "Return / end",
+      "followingBeatRuns": 1,
+      "phase": "finished"
+    },
+    {
+      "name": "registered-start",
+      "state": "start",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "status": "passed"
+    },
+    {
+      "name": "registered-create",
+      "state": "create",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "status": "passed"
+    },
+    {
+      "name": "registered-panel",
+      "state": "panel",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "status": "passed"
+    },
+    {
+      "name": "registered-design",
+      "state": "design",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "status": "passed"
+    },
+    {
+      "name": "registered-story",
+      "state": "story",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "status": "passed"
+    },
+    {
+      "name": "registered-no-images",
+      "state": "no-images",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "status": "passed"
+    },
+    {
+      "name": "registered-invalid",
+      "state": "invalid",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "status": "passed"
+    },
+    {
+      "name": "registered-unknown",
+      "state": "unknown",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "status": "passed"
+    },
+    {
+      "name": "registered-missing",
+      "state": "missing",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "status": "passed"
+    },
+    {
+      "name": "placement-before-intro",
+      "state": "story",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "status": "passed",
+      "source": "label first_steps:\n    call screen help\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    return"
+    },
+    {
+      "name": "placement-before-return",
+      "state": "story",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "status": "passed",
+      "source": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    call screen help\n    return"
+    },
+    {
+      "name": "actions-and-focus",
+      "state": "story",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "status": "passed",
+      "geometry": {
+        "add": {
+          "left": 19,
+          "right": 135.859375,
+          "top": 946.65625,
+          "bottom": 983.5
+        },
+        "cancel": {
+          "left": 143.859375,
+          "right": 207.46875,
+          "top": 946.65625,
+          "bottom": 983.5
+        },
+        "source": {
+          "left": 19,
+          "right": 133.484375,
+          "top": 997.5,
+          "bottom": 1021.5
+        },
+        "decoration": "underline",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px"
+      },
+      "focus": {
+        "style": "solid",
+        "width": "2px"
+      }
+    },
+    {
+      "name": "no-image-retention",
+      "state": "no-images",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "status": "passed"
+    },
+    {
+      "name": "outside-escape-before-intro-stage",
+      "state": "story",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "status": "passed",
+      "focusAfterOutside": {
+        "tag": "BUTTON",
+        "action": "finish"
+      },
+      "followingBeat": "\"Before we leave, take a look at the controls.\"",
+      "followingBeatRuns": 1,
+      "phase": "finished"
+    },
+    {
+      "name": "outside-escape-before-following-stage",
+      "state": "story",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "status": "passed",
+      "focusAfterOutside": {
+        "tag": "BUTTON",
+        "action": "finish"
+      },
+      "followingBeat": "\"Ready? Let's go.\"",
+      "followingBeatRuns": 1,
+      "phase": "finished"
+    },
+    {
+      "name": "outside-escape-before-following-child",
+      "state": "story",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "status": "passed",
+      "focusAfterOutside": {
+        "tag": "BUTTON",
+        "action": "finish"
+      },
+      "followingBeat": "\"Ready? Let's go.\"",
+      "followingBeatRuns": 1,
+      "phase": "finished"
+    },
+    {
+      "name": "outside-escape-before-following-body",
+      "state": "story",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "status": "passed",
+      "focusAfterOutside": {
+        "tag": "BUTTON",
+        "action": "finish"
+      },
+      "followingBeat": "\"Ready? Let's go.\"",
+      "followingBeatRuns": 1,
+      "phase": "finished"
+    },
+    {
+      "name": "outside-escape-before-return-stage",
+      "state": "story",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "status": "passed",
+      "focusAfterOutside": {
+        "tag": "BUTTON",
+        "action": "finish"
+      },
+      "followingBeat": "Return / end",
+      "followingBeatRuns": 1,
+      "phase": "finished"
+    }
+  ],
+  "captures": [
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-start-1100x720-initial.png",
+      "sha256": "5a8adff959a30df9612dcfb642aa391cf9e050073e85d63c6fecbc53786a2325",
+      "variant": "inspector-v4",
+      "state": "start",
+      "condition": "initial",
+      "theme": "dark",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 1100,
+        "height": 860
+      },
+      "pixels": {
+        "width": 1100,
+        "height": 860
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-create-1100x720-initial.png",
+      "sha256": "784c0494a7250cb445f3cec57ca071492285c8b995a88b3d4a928c9e857afece",
+      "variant": "inspector-v4",
+      "state": "create",
+      "condition": "initial",
+      "theme": "dark",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 1100,
+        "height": 860
+      },
+      "pixels": {
+        "width": 1100,
+        "height": 860
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-panel-1100x720-initial.png",
+      "sha256": "7c8023f0336a9892916035a6fbce061b9cdf5ac76ece8f1411e38d9fa60d83f0",
+      "variant": "inspector-v4",
+      "state": "panel",
+      "condition": "initial",
+      "theme": "dark",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 1100,
+        "height": 773
+      },
+      "pixels": {
+        "width": 1100,
+        "height": 773
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-design-1100x720-initial.png",
+      "sha256": "9ec7c8f652634064ae25ccc191d902efb91aeb72b1a5a3b66317010e6ddaaede",
+      "variant": "inspector-v4",
+      "state": "design",
+      "condition": "initial",
+      "theme": "dark",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 1100,
+        "height": 773
+      },
+      "pixels": {
+        "width": 1100,
+        "height": 773
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-story-1100x720-initial.png",
+      "sha256": "e195864c3818975d8ac9d7268e2e832b1929e8f8a3e952a16322e54bf0380568",
+      "variant": "inspector-v4",
+      "state": "story",
+      "condition": "initial",
+      "theme": "dark",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 1100,
+        "height": 720
+      },
+      "pixels": {
+        "width": 1100,
+        "height": 720
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-no-images-1100x720-initial.png",
+      "sha256": "f2f4ed0158f71294c56b98cf201271dab7447c99e197dcfb779c3b8ff4e7865a",
+      "variant": "inspector-v4",
+      "state": "no-images",
+      "condition": "initial",
+      "theme": "dark",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 1100,
+        "height": 947
+      },
+      "pixels": {
+        "width": 1100,
+        "height": 947
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-invalid-1100x720-initial.png",
+      "sha256": "a38bbee35179f4f3608ed6289e25b80570c019ab5779a119bf9d46061620f0e4",
+      "variant": "inspector-v4",
+      "state": "invalid",
+      "condition": "initial",
+      "theme": "dark",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 1100,
+        "height": 896
+      },
+      "pixels": {
+        "width": 1100,
+        "height": 896
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-unknown-1100x720-initial.png",
+      "sha256": "59c147228fcb479493af947d4821766de9efbefbe5c248ef5fffc8cc6b2a001c",
+      "variant": "inspector-v4",
+      "state": "unknown",
+      "condition": "initial",
+      "theme": "dark",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 1100,
+        "height": 791
+      },
+      "pixels": {
+        "width": 1100,
+        "height": 791
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-missing-1100x720-initial.png",
+      "sha256": "2d4aa8965be6802bcdf7a7b9f88d98b4cc765caddeba2bad3a929148ada8288b",
+      "variant": "inspector-v4",
+      "state": "missing",
+      "condition": "initial",
+      "theme": "dark",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 1100,
+        "height": 772
+      },
+      "pixels": {
+        "width": 1100,
+        "height": 772
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-story-1100x720-pending-before-intro.png",
+      "sha256": "4258c980983e34a5afa482864dc295dd07b180d14bd97387e226b758fdffd715",
+      "variant": "inspector-v4",
+      "state": "story",
+      "condition": "pending-before-intro",
+      "theme": "dark",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 1100,
+        "height": 720
+      },
+      "pixels": {
+        "width": 1100,
+        "height": 720
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-story-1100x720-accepted-source-before-intro.png",
+      "sha256": "f5e09c0cb92fa0b9891e843d5fdd83959e4d22e40411619a7b5321eb4b75f623",
+      "variant": "inspector-v4",
+      "state": "story",
+      "condition": "accepted-source-before-intro",
+      "theme": "dark",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 1100,
+        "height": 1368
+      },
+      "pixels": {
+        "width": 1100,
+        "height": 1368
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-story-1100x720-pending-before-return.png",
+      "sha256": "87e211c513fd59c8bf8b562dc66737dbe5e1a9642b2b57ba49c8c9d477a21d66",
+      "variant": "inspector-v4",
+      "state": "story",
+      "condition": "pending-before-return",
+      "theme": "dark",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 1100,
+        "height": 720
+      },
+      "pixels": {
+        "width": 1100,
+        "height": 720
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-story-1100x720-accepted-source-before-return.png",
+      "sha256": "5cffa8099a9683a554e564bf715e363702b46aef94a1714b1b2cfe938ac8077a",
+      "variant": "inspector-v4",
+      "state": "story",
+      "condition": "accepted-source-before-return",
+      "theme": "dark",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 1100,
+        "height": 1368
+      },
+      "pixels": {
+        "width": 1100,
+        "height": 1368
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-story-1100x720-action-focus.png",
+      "sha256": "2be31a0a4d3962f0dd2a0f21418ba28fff0f5f8c118ead31991340cb158a691f",
+      "variant": "inspector-v4",
+      "state": "story",
+      "condition": "action-focus",
+      "theme": "dark",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 1100,
+        "height": 720
+      },
+      "pixels": {
+        "width": 1100,
+        "height": 720
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-no-images-1100x720-blocked-with-draft.png",
+      "sha256": "905dfb7f0fae9417de28f0a849700f890b824db85f93da8f3c8333279c78dd15",
+      "variant": "inspector-v4",
+      "state": "no-images",
+      "condition": "blocked-with-draft",
+      "theme": "dark",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 1100,
+        "height": 947
+      },
+      "pixels": {
+        "width": 1100,
+        "height": 947
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-no-images-1100x720-returned-with-draft.png",
+      "sha256": "2f7171f847020004221f851a9812930594656cdd753a4966f2f0384cb1946508",
+      "variant": "inspector-v4",
+      "state": "no-images",
+      "condition": "returned-with-draft",
+      "theme": "dark",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 1100,
+        "height": 947
+      },
+      "pixels": {
+        "width": 1100,
+        "height": 947
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-story-1100x720-playback-waiting.png",
+      "sha256": "0a953763e95293b52d595dada8f8952fcaf3a4212d529af9c7532e48aec3f020",
+      "variant": "inspector-v4",
+      "state": "story",
+      "condition": "playback-waiting",
+      "theme": "dark",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 1100,
+        "height": 828
+      },
+      "pixels": {
+        "width": 1100,
+        "height": 828
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-story-1100x720-outside-click-waiting.png",
+      "sha256": "74b9c4a85b1bb8596d1d8eeda1c5adb7c9f43ddabb2dac42232c8755554ce0c7",
+      "variant": "inspector-v4",
+      "state": "story",
+      "condition": "outside-click-waiting",
+      "theme": "dark",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 1100,
+        "height": 828
+      },
+      "pixels": {
+        "width": 1100,
+        "height": 828
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-story-1100x720-playback-finished-after-escape.png",
+      "sha256": "4aa069ba8ce563eff9d8ee1542fb1f273552a339530eef69b550f99f4d2265e8",
+      "variant": "inspector-v4",
+      "state": "story",
+      "condition": "playback-finished-after-escape",
+      "theme": "dark",
+      "viewport": {
+        "width": 1100,
+        "height": 720
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 1100,
+        "height": 828
+      },
+      "pixels": {
+        "width": 1100,
+        "height": 828
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-start-560x640-initial.png",
+      "sha256": "5f0ecda6eeed4722889f740506851a0fa40ef8838325429660801d68cbabc1a7",
+      "variant": "inspector-v4",
+      "state": "start",
+      "condition": "initial",
+      "theme": "dark",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 560,
+        "height": 837
+      },
+      "pixels": {
+        "width": 560,
+        "height": 837
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-create-560x640-initial.png",
+      "sha256": "7f25f90f3ad35ff675b18b9416b759cb0f51f5d8eb1ddb5e806cc307e6a9de89",
+      "variant": "inspector-v4",
+      "state": "create",
+      "condition": "initial",
+      "theme": "dark",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 560,
+        "height": 837
+      },
+      "pixels": {
+        "width": 560,
+        "height": 837
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-panel-560x640-initial.png",
+      "sha256": "093e6535547f8121f2a98403835d78026353dfaeba7dc69883702d61812eae9b",
+      "variant": "inspector-v4",
+      "state": "panel",
+      "condition": "initial",
+      "theme": "dark",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 560,
+        "height": 1126
+      },
+      "pixels": {
+        "width": 560,
+        "height": 1126
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-design-560x640-initial.png",
+      "sha256": "ebe062bd483ad04409bd6848bf18a0281763d5fd2a03ccd98d5a618adc37bdb5",
+      "variant": "inspector-v4",
+      "state": "design",
+      "condition": "initial",
+      "theme": "dark",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 560,
+        "height": 1126
+      },
+      "pixels": {
+        "width": 560,
+        "height": 1126
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-story-560x640-initial.png",
+      "sha256": "99cb37f5dba59f18bd2f6ece45bb426e0c30162e8f583242eb47cd38772ebfc4",
+      "variant": "inspector-v4",
+      "state": "story",
+      "condition": "initial",
+      "theme": "dark",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 560,
+        "height": 1089
+      },
+      "pixels": {
+        "width": 560,
+        "height": 1089
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-no-images-560x640-initial.png",
+      "sha256": "2bd050f53a06df84d2de54ed1eed779d5faf57a72c4d439fce43ec362536f320",
+      "variant": "inspector-v4",
+      "state": "no-images",
+      "condition": "initial",
+      "theme": "dark",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 560,
+        "height": 923
+      },
+      "pixels": {
+        "width": 560,
+        "height": 923
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-invalid-560x640-initial.png",
+      "sha256": "c2a67f32eb56be1a451c3b9be567462daff4d55a35a482e133364d107c00029a",
+      "variant": "inspector-v4",
+      "state": "invalid",
+      "condition": "initial",
+      "theme": "dark",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 560,
+        "height": 1425
+      },
+      "pixels": {
+        "width": 560,
+        "height": 1425
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-unknown-560x640-initial.png",
+      "sha256": "fe23d75366813c066d2dea032a8b8847d82893dab19a27f2b0b34acaadccd166",
+      "variant": "inspector-v4",
+      "state": "unknown",
+      "condition": "initial",
+      "theme": "dark",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 560,
+        "height": 1167
+      },
+      "pixels": {
+        "width": 560,
+        "height": 1167
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-missing-560x640-initial.png",
+      "sha256": "380eeaf295eea2fa70c0b93edbf4bbc9c09f3e57bd719daeeaba2b6349088c28",
+      "variant": "inspector-v4",
+      "state": "missing",
+      "condition": "initial",
+      "theme": "dark",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 560,
+        "height": 1167
+      },
+      "pixels": {
+        "width": 560,
+        "height": 1167
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-story-560x640-pending-before-intro.png",
+      "sha256": "3bfaf84a1432f9f3107750aefc3b1bd1023cb2279d932d59621a53e3b02f2e6c",
+      "variant": "inspector-v4",
+      "state": "story",
+      "condition": "pending-before-intro",
+      "theme": "dark",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 560,
+        "height": 1089
+      },
+      "pixels": {
+        "width": 560,
+        "height": 1089
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-story-560x640-accepted-source-before-intro.png",
+      "sha256": "d03631e01068a848156d44a0581bdb911f77f7630f5698bd91fcb94b945fc0a1",
+      "variant": "inspector-v4",
+      "state": "story",
+      "condition": "accepted-source-before-intro",
+      "theme": "dark",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 560,
+        "height": 1797
+      },
+      "pixels": {
+        "width": 560,
+        "height": 1797
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-story-560x640-pending-before-return.png",
+      "sha256": "5ac1d0a9c0e284fc0df30762587fffa7a8e444f71c0d096818c24bfb3b8cdd94",
+      "variant": "inspector-v4",
+      "state": "story",
+      "condition": "pending-before-return",
+      "theme": "dark",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 560,
+        "height": 1089
+      },
+      "pixels": {
+        "width": 560,
+        "height": 1089
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-story-560x640-accepted-source-before-return.png",
+      "sha256": "af5dd6e1b3dd232ec66c3f4b72e8bfe37148c87d56837e31d3b43f29de3d75e7",
+      "variant": "inspector-v4",
+      "state": "story",
+      "condition": "accepted-source-before-return",
+      "theme": "dark",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 560,
+        "height": 1797
+      },
+      "pixels": {
+        "width": 560,
+        "height": 1797
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-story-560x640-action-focus.png",
+      "sha256": "f1f4a7353ff87d132ede9dc57d617e4a34e293e28b8f7ec0e344fa6579275014",
+      "variant": "inspector-v4",
+      "state": "story",
+      "condition": "action-focus",
+      "theme": "dark",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 560,
+        "height": 1089
+      },
+      "pixels": {
+        "width": 560,
+        "height": 1089
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-no-images-560x640-blocked-with-draft.png",
+      "sha256": "a33cdbc083b198ebf69ceb9f17f5ab5745cd638ec39f5ed3d34881d279a6f859",
+      "variant": "inspector-v4",
+      "state": "no-images",
+      "condition": "blocked-with-draft",
+      "theme": "dark",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 560,
+        "height": 923
+      },
+      "pixels": {
+        "width": 560,
+        "height": 923
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-no-images-560x640-returned-with-draft.png",
+      "sha256": "6a0065d07036140a47592c916a6e7e019c1e625e0e53c37d593116b054b8f834",
+      "variant": "inspector-v4",
+      "state": "no-images",
+      "condition": "returned-with-draft",
+      "theme": "dark",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 560,
+        "height": 923
+      },
+      "pixels": {
+        "width": 560,
+        "height": 923
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-story-560x640-playback-waiting.png",
+      "sha256": "e746ce60944c7f102060bf587ff812e9732be47490c0a32d3150f9e739de819c",
+      "variant": "inspector-v4",
+      "state": "story",
+      "condition": "playback-waiting",
+      "theme": "dark",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 560,
+        "height": 1170
+      },
+      "pixels": {
+        "width": 560,
+        "height": 1170
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-story-560x640-outside-click-waiting.png",
+      "sha256": "47b4544e1a5a2ad157c3f764e4f71be4320203cddbf8ec4f80b0c3282e367f26",
+      "variant": "inspector-v4",
+      "state": "story",
+      "condition": "outside-click-waiting",
+      "theme": "dark",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 560,
+        "height": 1170
+      },
+      "pixels": {
+        "width": 560,
+        "height": 1170
+      }
+    },
+    {
+      "path": ".toolchains/help-dialog-story/promotion-a4/inspector-v4-story-560x640-playback-finished-after-escape.png",
+      "sha256": "b1c5fe207571237dfaca5e35f9c4ef6463aad923b3bf1a7fa57b5dc8393489e4",
+      "variant": "inspector-v4",
+      "state": "story",
+      "condition": "playback-finished-after-escape",
+      "theme": "dark",
+      "viewport": {
+        "width": 560,
+        "height": 640
+      },
+      "scale": 1,
+      "fullPage": true,
+      "document": {
+        "width": 560,
+        "height": 1170
+      },
+      "pixels": {
+        "width": 560,
+        "height": 1170
+      }
+    }
+  ],
+  "errors": [],
+  "browser": {
+    "version": "153.0.8010.12",
+    "playwright": "1.63.0",
+    "node": "v24.19.0"
+  },
+  "finishedAt": "2026-11-03T21:03:48.465Z",
+  "summary": {
+    "cases": 36,
+    "passed": 36,
+    "failed": 0,
+    "consoleOrPageErrors": 0,
+    "captures": 38
+  }
+}

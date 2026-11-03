@@ -3,20 +3,25 @@
 ## Help dialog and base Help canvas implementation
 
 Continue approved #45/#46 on local integration branch `codex/help-dialog-canvas`,
-from `e32ded4`. Current backend code checkpoint is `d9107a5`. Both portable lanes
+from `e32ded4`. Shared UI/inspection checkpoint is `faf9611`, after the reviewed
+backend checkpoint `d9107a5`. Both portable lanes
 are integrated. The coordinator owns shared contracts, findings, integration and
 final review. [The evidence owner](../tasks/evidence/help-dialog-and-canvas.md)
 records assignments, exact candidates, tests, failures and cumulative operation use.
 
 Blocking Dialog creation/resolution, Call/Finish, conservative source/history and
-inert Null editing are implemented. Production UI still waits for exact approval.
-Current prototype A4/B4/C4 source is `8851689b62eda03127c199ca0276a776b0d623ab`.
-Kris requested only insertion placement and Add/Cancel/secondary-action spacing.
+inert Null editing are implemented. Kris approved A4, `inspector-v4`, at source
+`8851689b62eda03127c199ca0276a776b0d623ab`; evidence commit `2443e72` records
+"Approved" and the clarification "Sorry a4". The prototype owner delivered
+`HANDOFF.md` directly to implementation and copied the coordinator. B4/C4 remain
+drafts. Production implementation is underway on the original Dialog lane. Its
+three UI checkpoints are integrated; shared navigation, Assets retention and
+source-qualified Finish inspection/wiring pass 30 focused DOM cases and twelve
+core reference cases. The implementation owner is completing actual controller/core
+and Terra visual comparison. The coordinator retains final combined review.
 Help still requires a typed UI image. Placement uses existing Story body/Position
-ownership, with no new IPC/persistence or general action builder. These requests
-are not approval. Preserve earlier revisions, failures and proof limits. The
-prototype must deliver the exact approved source/control map/evidence directly to
-the Dialog implementation owner and copy the coordinator before production edits.
+ownership, with no new IPC/persistence or general action builder. Preserve the
+approved reference checkout, earlier revisions, failures and proof limits.
 
 Mac Dialog passes all eight normal-entry cases at `dff0c64`; Windows passes all
 eight at `4c084a4`. Both targets pass eight exact Canvas pixel/geometry comparisons

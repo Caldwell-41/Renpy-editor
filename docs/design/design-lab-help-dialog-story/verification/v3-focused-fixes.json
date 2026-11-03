@@ -1,0 +1,167 @@
+{
+  "scope": "Focused DOM/state and CSS declaration checks. No browser geometry or native/RenPy claim.",
+  "htmlSha256": "67aade2098faeba4da37de77810401c81c20f384c16e438b84f10a77b9ede2cf",
+  "cases": [
+    {
+      "variant": "inspector-v3",
+      "width": 1100,
+      "name": "new-screen-after-panel",
+      "status": "passed"
+    },
+    {
+      "variant": "inspector-v3",
+      "width": 1100,
+      "name": "new-screen-after-dialog",
+      "status": "passed"
+    },
+    {
+      "variant": "inspector-v3",
+      "width": 1100,
+      "name": "unresolved-appearance-and-playback",
+      "status": "passed"
+    },
+    {
+      "variant": "inspector-v3",
+      "width": 1100,
+      "name": "footer-stays-in-document-flow",
+      "status": "passed"
+    },
+    {
+      "variant": "inspector-v3",
+      "width": 560,
+      "name": "new-screen-after-panel",
+      "status": "passed"
+    },
+    {
+      "variant": "inspector-v3",
+      "width": 560,
+      "name": "new-screen-after-dialog",
+      "status": "passed"
+    },
+    {
+      "variant": "inspector-v3",
+      "width": 560,
+      "name": "unresolved-appearance-and-playback",
+      "status": "passed"
+    },
+    {
+      "variant": "inspector-v3",
+      "width": 560,
+      "name": "footer-stays-in-document-flow",
+      "status": "passed"
+    },
+    {
+      "variant": "steps-v3",
+      "width": 1100,
+      "name": "new-screen-after-panel",
+      "status": "passed"
+    },
+    {
+      "variant": "steps-v3",
+      "width": 1100,
+      "name": "new-screen-after-dialog",
+      "status": "passed"
+    },
+    {
+      "variant": "steps-v3",
+      "width": 1100,
+      "name": "unresolved-appearance-and-playback",
+      "status": "passed"
+    },
+    {
+      "variant": "steps-v3",
+      "width": 1100,
+      "name": "footer-stays-in-document-flow",
+      "status": "passed"
+    },
+    {
+      "variant": "steps-v3",
+      "width": 560,
+      "name": "new-screen-after-panel",
+      "status": "passed"
+    },
+    {
+      "variant": "steps-v3",
+      "width": 560,
+      "name": "new-screen-after-dialog",
+      "status": "passed"
+    },
+    {
+      "variant": "steps-v3",
+      "width": 560,
+      "name": "unresolved-appearance-and-playback",
+      "status": "passed"
+    },
+    {
+      "variant": "steps-v3",
+      "width": 560,
+      "name": "footer-stays-in-document-flow",
+      "status": "passed"
+    },
+    {
+      "variant": "story-split-v3",
+      "width": 1100,
+      "name": "new-screen-after-panel",
+      "status": "passed"
+    },
+    {
+      "variant": "story-split-v3",
+      "width": 1100,
+      "name": "new-screen-after-dialog",
+      "status": "passed"
+    },
+    {
+      "variant": "story-split-v3",
+      "width": 1100,
+      "name": "unresolved-appearance-and-playback",
+      "status": "passed"
+    },
+    {
+      "variant": "story-split-v3",
+      "width": 1100,
+      "name": "footer-stays-in-document-flow",
+      "status": "passed"
+    },
+    {
+      "variant": "story-split-v3",
+      "width": 560,
+      "name": "new-screen-after-panel",
+      "status": "passed"
+    },
+    {
+      "variant": "story-split-v3",
+      "width": 560,
+      "name": "new-screen-after-dialog",
+      "status": "passed"
+    },
+    {
+      "variant": "story-split-v3",
+      "width": 560,
+      "name": "unresolved-appearance-and-playback",
+      "status": "passed"
+    },
+    {
+      "variant": "story-split-v3",
+      "width": 560,
+      "name": "footer-stays-in-document-flow",
+      "status": "passed"
+    },
+    {
+      "variant": "story-split-v3",
+      "width": 1100,
+      "name": "story-shortcut-spacing-and-cancel-origin",
+      "status": "passed"
+    },
+    {
+      "variant": "story-split-v3",
+      "width": 560,
+      "name": "story-shortcut-spacing-and-cancel-origin",
+      "status": "passed"
+    }
+  ],
+  "errors": [],
+  "summary": {
+    "passed": 26,
+    "failed": 0
+  }
+}
