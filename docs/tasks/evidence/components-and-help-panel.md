@@ -1314,3 +1314,86 @@ current-head automatic/paired-harness CI identities and final audit.
 The validation plan remains unchanged. This renderer-only correction starts no
 SDK, helper, package or native session and changes no generated Ren'Py or core.
 Earlier source-specific qualification, failures and operation limits retain scope.
+
+
+## Merge, acceptance and workspace retirement, 2026-11-03
+
+Kris selected squash merge, all associated ticket updates and retirement after
+confirmation. PR #77 merged as `966c437fa659883491e44a793093f881e8a2d4c1`
+into `codex/phase3b-screen-designer`. The merge and audited head
+`cc5718f148bc80c3b6228aa7b0f7a0922ba640d9` have identical tree
+`10cff92fa64e781b39cd31b5f88e998a2217631e`. The primary checkout fast-forwards
+without a product difference. The [terminal audit](https://github.com/Caldwell-41/Renpy-editor/pull/77#issuecomment-6604465101)
+verifies automatic runs 41639643168 and 41639590724 and paired run 41639642651,
+all attempt 1, successful with every executed step passing. All 344 frontend cases
+pass without failures/skips, alongside typechecking, repository checks and Rust
+formatting. Both targets pass all four harness groups. Their archives verify ten
+manifest files and 784 declared checkout input hashes per host.
+
+### Ticket acceptance and coverage
+
+#41 and #44 are accepted and closed for four bounded criteria each. Their checked
+maps retain exact Source/transaction/history/reopen, shared-use review, independent
+Copy and separate draft Apply, conservative revisions and deliberate SDK output.
+The final P3 naming finding is corrected and parent-verified; the Spec axis has no
+findings. SDK totals close at #41 16/24 and #44 44/44, zero uncertain/reserved;
+unused #41 capacity is closed. Earlier failures and qualified candidates stay
+recorded above, including historical core assertions with unproven causes.
+
+All thirteen updated issue bodies/states are read back:
+
+- #22 updates sixteen rows of the live requirement map for component/Help coverage.
+- #23/#24/#25/#26/#27/#28/#30/#33 retain bounded evidence only. Aggregate Phase 3B,
+  editor/canvas/native/physical-input/human acceptance stays open.
+- #45's #44 prerequisite is satisfied. It is dependency-ready but unselected.
+- #50's #41 prerequisite is satisfied alongside #42; #46 remains its actual blocker.
+
+Native dependency edges remain provenance. No successor, SDK/helper, package,
+native editor session or release is selected by closeout.
+
+### Source and evidence preservation
+
+Before retirement, all five worktrees are clean and have no untracked work or owned
+process. The feature/review heads have ancestor/tree proof against the audited
+candidate; the approved prototype is its ancestor. Completed worker handoffs are
+integrated with subsequent reviewed corrections. A verified bundle preserves their
+original merge/cherry-pick histories. Cancelled draft `fcb5098` is superseded; its
+original extra assertions remain available for recovery.
+
+The ignored `.toolchains/retired-worktrees/pr77/` archive preserves all six
+original branch heads and both recovery tags. Source bundle SHA256 is
+`ea62b897556c47b9ff4a55c80845713acc59be870a30cb3c2a30cfd07343a14d`. Its manifest preserves 3,876 evidence
+paths as 2,817 unique blobs, 940,448,319 bytes. Every copied blob is verified before
+retirement. Retained material includes source fixtures, producer receipts, exact
+test/exporter binaries, failed logs, approved captures, raw SDK results and returned
+Windows artifacts. Reproducible dependencies/build objects/caches are omitted;
+duplicate evidence is stored once. Private artifacts and the archive remain local
+and ignored.
+
+Five worktrees are retired: `codex-components-and-help-panel`,
+`codex-components-help-panel-prototypes`, `codex-pr77-review-fixes`,
+`t3-0eb6a9be` and `t3-c53f7b0e`.
+
+Six local branches are retired: `codex/components-and-help-panel`,
+`codex/components-help-panel-prototypes`, `codex/pr77-review-fixes`,
+`t3/reuse-owned-component`, `t3/help-panel-show-hide` and
+`t3/fix-screen-component-copy-navigation`. The merged remote
+`codex/components-and-help-panel` is deleted after confirming its head was audited
+`cc5718f`.
+
+Recovery tags preserve the approved prototype and cancelled draft. Every existing
+archive/recovery tag, local `main`, the integration branch, remote `main` and open
+Dependabot PR #69 remain. Protected refs and the unrelated audit's SHA256 are
+unchanged. No history rewrite, forced push or protected draft action occurs.
+The primary checkout is the only remaining local worktree.
+
+
+### Documentation publication rule
+
+The validated documentation closeout commit `f147d3e` is initially local. GitHub
+rejects its direct integration push with GH013 because `Loomlight validation` is
+required; no remote ref changes. The records move to a dedicated documentation
+PR branch, `codex/pr77-merge-closeout`, selecting automatic Repository quality and
+no manual qualification. This selects no product/core, SDK, helper, native or
+package work. PR #77 owns the follow-up link and final publication/retirement
+receipt. Existing source/evidence retirement is already complete.

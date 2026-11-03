@@ -1,165 +1,50 @@
 # Current outcome handover
 
-## PR 77 review correction delivery
+## PR 77 merge and workspace closeout
 
-Kris selected the later component-name validation correction and PR/CI update.
-The shared naming form now lets the existing validator handle normal submission;
-the corrected existing test demonstrates failure before the fix and success after.
-See [the naming correction](../tasks/evidence/components-and-help-panel.md#component-name-submission-correction-2026-11-03).
-The current integration work remains on `codex/pr77-review-fixes`, published to the
-existing PR branch. After publication, audit the automatic and selected paired
-harness runs recorded in PR #77. No SDK/native/package operation is selected.
+Kris selected squash merge, all associated ticket updates and safe retirement of
+unused branches/worktrees. [PR #77](https://github.com/Caldwell-41/Renpy-editor/pull/77)
+merged as `966c437fa659883491e44a793093f881e8a2d4c1` into `codex/phase3b-screen-designer`.
+Its tree exactly matches audited `cc5718f148bc80c3b6228aa7b0f7a0922ba640d9`.
+The merged baseline is on that branch. #41 and #44 are accepted and
+closed for their four bounded criteria each; thirteen ticket records are updated.
 
-All six selected fixes for [PR #77](https://github.com/Caldwell-41/Renpy-editor/pull/77)
-are implemented and parent-audited. The integration branch is
-`codex/pr77-review-fixes`; delivery stays on the existing
-`codex/components-and-help-panel` PR branch. Implementation checkpoint `8f6b406`
-and tested source/evidence head `1cc4f656ce2f10a19e74d47d10d13a919f35f551` retain
-their exact scopes. This successor records terminal results without changing
-production or test inputs. The parent owns final audit; Terra 6.1 max returned
-passing browser/core journeys. Both new review worker checkouts are removed after
-evidence preservation; cancelled draft recovery commit `fcb5098` remains local.
-Keep the unrelated primary audit, protected recovery, original feature evidence
-worktrees and approved prototype intact.
+[The terminal audit](https://github.com/Caldwell-41/Renpy-editor/pull/77#issuecomment-6604465101)
+owns exact-head automatic/paired CI, all 344 frontend passes and source/artifact
+verification. Earlier core, browser and SDK proof retains its candidate and limits.
+Fresh both-target Help SDK proof stays at `1cc4f65`; the later form fix changes no
+generated source/runtime behavior. SDK counts close at #41 16/24 and #44 44/44,
+zero uncertain/reserved. Original failures remain failed. No package, native
+session or new SDK operation remains selected.
 
-The user confirmed core IPC, real ScreensWorkspace/controlled IPC, and public
-Python adapter/qualifier boundaries before TDD. All six original failures have
-passing focused tests. All 344 app tests, production build and four cheap harness
-groups pass. The final coherent core run passes 556 tests, zero failures, 54
-intentional ignores and three documented exclusions. The first failed run remains
-failed; its runtime descendant assertion's cause is unproven. Preserve
-`.toolchains/pr77-review/core-failed-01` and the linked [review evidence](../tasks/evidence/components-and-help-panel.md#pr-77-review-corrections-2026-11-03).
+[Merge and retirement evidence](../tasks/evidence/components-and-help-panel.md#merge-acceptance-and-workspace-retirement-2026-11-03) records five retired worktrees,
+six local branches and one remote branch. The ignored
+`.toolchains/retired-worktrees/pr77/` archive has a verified source bundle and
+hash-indexed manifest preserving 3,876 evidence paths as 2,817 unique files.
+Retained material includes failed binaries/logs, approved captures and SDK returns.
+Recovery tags `recovery/pr77-approved-prototype-2026-11-03` and
+`recovery/pr77-cancelled-draft-2026-11-03` keep those source commits reachable.
+Local `main` and the integration branch remain; Dependabot PR #69 stays open.
+The unrelated untracked audit and every earlier protected ref are unchanged.
 
-Automatic quality and both selected harness jobs pass at `1cc4f65`; the parent
-audits all executed steps, ZIP/manifests and 784 input hashes per target. Read
-PR #77's latest receipt for CI on this documentation-only successor. If it is
-nonterminal, use the T3 PR watch after capturing its identity, then audit results
-and artifact digests before final handback. No further SDK run is selected. Both
-tickets stay open; merge/release and broader native/human acceptance remain unselected.
+#45 is dependency-ready but unselected. #50 still waits on #46 after #42/#41.
+Aggregate B03/B05 and wider editor/canvas/native/human/Phase 3B acceptance stay
+open; no successor is selected. The
+[prior qualification checkpoint](https://github.com/Caldwell-41/Renpy-editor/blob/966c437fa659883491e44a793093f881e8a2d4c1/docs/status/HANDOVER.md)
+retains original producing candidates and linked Windows primary/stash recovery.
+Its pending PR instructions are superseded here. Historical sections below retain
+unique recovery/evidence; their existing size exception renews no selection.
 
-Kris approved one nine-start fresh Help campaign per target and raised #44's cap
-to 44. Both campaigns pass at `1cc4f65`. The parent verifies all 18 starts,
-re-admits six raw logs per host and confirms unchanged source/cleanup. Three
-Windows setup refusals and one Mac output-path refusal consumed zero SDK starts;
-their failures remain preserved. [#44](https://github.com/Caldwell-41/Renpy-editor/issues/44)
-owns the final cumulative ledger: 44/44 confirmed, zero uncertain/reserved, with
-the selection complete. #41 remains 16/24. See the
-[fresh SDK closeout](../tasks/evidence/components-and-help-panel.md#fresh-help-sdk-proof-and-review-closeout-2026-11-03)
-for candidate, producer hashes, returned evidence and limitations. Continue in this
-thread; no SDK allowance remains and no new campaign follows from a passing result.
+### Documentation publication
 
-## Earlier component and Help qualification
-
-
-Continue selected [L08 #41](https://github.com/Caldwell-41/Renpy-editor/issues/41)
-and [L09 #44](https://github.com/Caldwell-41/Renpy-editor/issues/44) on
-`codex/components-and-help-panel`. Original full-review base is
-`8a1fc41959d363e600d739868bb0b37e270e9bdd`; product core/UI is last changed at
-`0e5aff8c04d997c804051053f346c57b49808681`. Windows proof uses corrected candidate
-`50188c2d15aee8f7838037c9057bf42101a6965e`, whose two later Python test fixes do
-not change production. All implementation/Windows workers are finished. The
-coordinator owns every tracked file, integration, issues and final audit. Preserve
-the primary checkout's unrelated audit, stashes and protected recovery below.
-
-Kris approved exact A2 `components-and-help-panel` / `refined-v1` / `refined`, source
-`c0ded415aba484633ac68981c48910afb82a959c`, fingerprint
-`1d99e9d4ce1a0b450881753f19c10234ca95541043733bc1710989e6aee9fd08`.
-Approval/evidence `eb1f8f61` and all 25 reference captures remain intact. The
-[handoff](../design/design-lab-components-and-help-panel/HANDOFF.md) controls copy
-recovery and the written Use in Story clarification. Appearance stays in Screens;
-Story handoff writes no Beat. Copy accepts saved source first, verifies new owner,
-revision, topology and fresh child IDs, then transfers retained fields. Apply is a
-separate ordinary history entry. Cancel keeps the accepted copy and drops edits.
-
-Source-map v7, the canonical bounded inclusion graph, conservative effects/revisions,
-typed component operations and Help/Story are integrated. Full independent Standards
-and Spec reviews cover `8a1fc419...ebcd374` with zero remaining actionable findings.
-That correction keeps Panel-local Close/focus spans out of extraction, reviews Style
-binding, validates associated New screen name errors, captures fields first edited
-during failed Copy refresh, and refuses late Source navigation after leaving Screens.
-Ordinary same-Panel edits/reorder remain qualified. Keep Close local and extract a
-content-only group. Subsequent scoped fidelity and test-portability changes are
-coordinator-reviewed. Components canvas expansion, Call/Finish and wider 3B remain
-outside these leaves.
-
-Portable proof: 342 app tests; ten real main/component-to-core groups and four main
-Help/Story groups; corrected Design Lab 1,216 cases/29 groups/nine actual source
-protection guards. The Lab matrix renders current drafts and refuses mismatched
-historical sources; it is not a historical pixel-match or native acceptance claim.
-Current component captures load all five production stylesheets at matched sizes.
-The scoped visual finding follows A2 while preserving ordinary production editors
-and honest canvas unavailability. All original Lab/browser/environment failures stay
-in [detailed evidence](../tasks/evidence/components-and-help-panel.md).
-
-macOS ordinary release core passes 552, with 54 default ignores, three documented
-exclusions and zero doctests, at `1a6690c`; that core tree is unchanged. Receipt
-`.toolchains/components-help-core-final-receipt.json` binds all 606 selected terminal
-names. One prior broad run returned 551 pass/one initial `Scene(RecoveryRequired)`
-open failure. Cause remains unproven; identical focused/22 peer checks and the later
-full run pass. Failed binary/logs remain in `.toolchains/core-open-recovery-failure`.
-Only test failure retention changed; no recovery protection or exclusion was relaxed.
-
-Windows T3 binding is corrected. Private Taildrop delivery/import preserved its
-primary `039f22ce` and stash `5dfd4b9a`. The T3-managed isolated branch
-`codex/windows-components-help-qualification` stays clean at `50188c2`. Existing
-Python 3.12.14/Pillow 12.3.0, Node 24.19.0 and Rust/Cargo 1.90.0/MSVC are used.
-Its corrected preflight passes 27 Python checks normally and under `-O`, app 342,
-component 21, panel four, both exporters and Help's three actual-artifact checks.
-Earlier mocked launcher/Cargo-shim failures, wrong-cache refusal and BOM-reader
-zero-start refusal are retained separately. No runtime pass is inferred from input
-admission.
-
-Both targets' SDK slices pass at their recorded producers. Windows at `50188c2`
-uses eight component commands and nine Help commands, all PID-observed, exit 0,
-within unchanged bounds, no retry/uncertainty. Four actual/literal image pairs match
-exactly at both sizes under angle2. All six Help normal-entry cases and raw-log
-readmission pass. Cumulative SDK use is #41 16/24 and #44 26/27, zero reserved;
-no further SDK campaign is selected. Browser/engine events are not physical input.
-
-The Windows receipt is
-`fcbf3a3744182fbc38dff89ca834564407770dcc9ffb4ea61837af943babc442`; its 120-file
-inventory is `4e8951919fe9c47112fa2d4b57f2657e46815971c0ce418528fdf6dd9f7ba750`.
-The coordinator verifies all hashes, safe archive entries, four image pairs and six
-Help raw logs locally, with zero new SDK starts. Returned ZIP is
-`.toolchains/windows-return/windows-components-help-50188c2-evidence.zip`,
-26,858,829 bytes, SHA-256
-`f4e1f965e59f8f6dfbb1d74d9f0a1ccbecef1a13c93df42708cbf0c76e035707`.
-Audit receipt is `.toolchains/windows-return/coordinator-audit.json`. SDK process,
-extraction/profile cleanup passes; retained ordinary test scratch remains recorded.
-No owned SDK/test process remains. Keep ignored artifacts and the pinned prototype
-server; the temporary coordinator dependency symlink is removed.
-
-Kris explicitly authorized source push and PR creation on 2026-11-03. Draft [PR #77](https://github.com/Caldwell-41/Renpy-editor/pull/77) is open against
-`codex/phase3b-screen-designer`; do not merge or release. The local
-body is `.toolchains/delivery/pr-body.md`. `.github/validation-plan.json` selects
-both automatic Repository quality jobs plus `quality.yml` workflow_dispatch jobs
-`Harness regressions — windows-2025` and `Harness regressions — macos-26`.
-The paired selector is `harness_regressions=true`, all other selectors false. It
-runs cheap harness checks only, no SDK/helper/native/package. CI uses a job-local Python virtual environment for pinned Pillow. The initial
-paired run passed Windows but failed the Mac system-Python install before tests;
-its partial artifact is retained and the corrected run is required. Local prepublication proof passes
-all four groups, 300 Python methods with three named host skips, 18 reporter tests
-and actionlint. Do not substitute this for milestone package/native/human acceptance.
-
-Original automatic quality at `376dd79` passes both jobs. Paired CI1 `41548020288`
-fails only the Mac dependency setup; Windows groups pass. The original failed logs and
-both digest-verified artifacts remain under `.toolchains/pr-77-ci1-artifacts`.
-No SDK starts are added. Corrected automatic run `41548708772` and paired run
-`41548765954`, both attempt 1 at `ee17b94`, pass all executed steps. Required job
-sets are complete. Both paired ZIP digests, ten-file manifests, run/attempt identity
-and all 783 tracked checkout input hashes verify. Four PowerShell inputs use the
-repository-declared CRLF checkout filters, not raw blob bytes; the audit verifies
-Git's exact filtered representation. Windows Python runs 304 methods with four
-named host exclusions; Mac runs 300 with three. All four independent groups pass.
-Terminal audit is `.toolchains/pr-77-ci2-terminal-audit.json`; CI1 remains retained.
-The final documentation head needs its own automatic/paired status. The owning
-leaves and draft PR own the live exact-head CI run/attempt/state. After dispatch, audit both automatic and selected manual jobs and
-all executed steps/artifacts. Required failures/skips are not passes. Register the
-T3 PR watch and yield instead of polling; resolve old comments first. The watch wakes
-this coordinator. On completion, audit the final head and update issue/PR receipts;
-keep both leaves open pending acceptance. No additional costly operation or broader
-milestone scope is selected. Historical sections below exceed size targets to
-preserve unique accepted-baseline/protected-recovery state.
+The initial direct closeout push was refused by GitHub rule GH013 because
+`Loomlight validation` is required. Commit `f147d3e` preserves those local records;
+no remote change or rule bypass occurred. Publish the documentation-only follow-up
+on `codex/pr77-merge-closeout` with an empty qualification list, selecting ordinary
+Repository quality only. No product, test, SDK or workflow implementation changes.
+PR #77 links the follow-up and owns its final publication receipt. After that PR
+passes checks and merges, return the primary checkout to the integration branch
+and retire only the follow-up branch. No successor work is selected.
 
 ## Audit correction merge and workspace closeout
 
@@ -183,9 +68,9 @@ branch remain; the remote Dependabot branch remains with open PR #69. The
 unrelated untracked audit and protected recovery below are intact. Existing
 status-file size exceptions preserve unique historical recovery.
 
-The successor selection is recorded above. L02 #37 and L06 #40 prerequisites are
-accepted; parent/group aggregate acceptance remains separate. Broader canvas work
-remains deferred. Historical SDK/helper, package, native and CI allowances stay closed.
+L08 #41 and L09 #44 are now accepted through PR #77 above. Parent/group aggregate
+acceptance remains separate; no successor is selected. Broader canvas work remains
+deferred. Historical SDK/helper, package, native and CI allowances stay closed.
 
 ## Connected native testing policy closeout
 
