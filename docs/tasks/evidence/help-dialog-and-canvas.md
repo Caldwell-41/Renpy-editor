@@ -1,5 +1,33 @@
 # Help dialog and base canvas delivery evidence
 
+## Successful ordinary CI audit, 2026-11-04
+
+[Repository quality 41741915132, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41741915132/attempts/1)
+is independently audited successful at `28efd6c3325537a92bd3b82212f5bb5948ee7fbf`.
+PR #79 was verified open/draft on that exact head and expected base, with no comments
+or reviews. Both required jobs and the combined `Loomlight validation` status pass.
+Every executed step in the selected quality jobs passes. The nine unselected
+specialist jobs and dummy qualification are skipped, not accepted qualifications.
+
+The complete log verifies 366 frontend tests, zero failures/cancellations/skips/todo;
+production build and pinned Rust formatting; nine Dialog and six Canvas offline
+cases; five core selections with 12, 12, 1, 1 and 1 passes, zero failures/ignores;
+and the actual creation/Call/Finish controller/core source/history/reopen journey.
+Repository validation, 13 section-link cases, 18 CI-controller cases and ten bounded
+Q1 gate cases also pass. The corrected Linux fixture now runs successfully in CI.
+
+Failure-only sealing/upload steps are correctly skipped on this green run, with
+zero artifacts expected and reported. Their corrected caller and actual-binary
+retention/privacy path have the separate local proof above. No SDK, helper,
+native editor or package qualification is selected or inferred. The full retained
+CI log SHA256 is `c3ff9188fe8958b09bd742a874d3cfba8dc2a7354c39ad4ac834a3cb4f06a315`.
+The original failed runs/uploads retain their original status and limits.
+
+Publishing this audit changes documentation only. Production frontend/core and CI
+inputs stay identical to the audited head. The PR's combined status owns any later
+documentation-head validation; it must be green before handback or a future merge.
+Next is user review of the draft, not merge, issue closure, retirement or release.
+
 ## Linux offline CI fixture correction, 2026-11-04
 
 The initial ordinary runs at `bd2e365` and `52d92a8` expose CI plumbing faults,

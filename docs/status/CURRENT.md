@@ -9,9 +9,9 @@ the coordinator owns shared contracts, review findings, integration and final re
 
 | Capability | Implemented and automated proof | Remaining acceptance |
 | --- | --- | --- |
-| Help dialog and Story Call/Finish | A4 UI, cancellation/recovery and actual controller/core pass; 36 final browser cases and recorded eight normal-entry rows per target pass | Ordinary CI and final user acceptance |
+| Help dialog and Story Call/Finish | A4 UI, cancellation/recovery and actual controller/core pass; 36 final browser cases and recorded eight normal-entry rows per target pass | Final user acceptance; current-head CI on PR #79 |
 | Base Help canvas | Eight matched cases per target have exact pixels and geometry at `4c084a4`; lossless geometry transport is tested | Wider canvas/native/physical acceptance stays separate |
-| Combined implementation | 366 frontend, 31 focused UI and 24 affected core cases pass; six-stage controller/core journey, final browser matrix and production build pass; review findings resolved | Draft PR #79; ordinary CI tracked there; no merge/release |
+| Combined implementation | Local verification and independent review corrections complete; ordinary CI at `28efd6c` passes 366 frontend, 15 offline Help and 27 core cases plus actual controllers/build | Draft PR #79 for user review; current-head CI tracked there; no merge/release |
 
 Kris approved A4 (`inspector-v4`) at source `8851689`; B4/C4 remain drafts.
 Completion code is `b2a5694`, with the exact approved reference and retained product

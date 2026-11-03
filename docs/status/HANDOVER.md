@@ -13,17 +13,16 @@ Kris selected a draft PR and CI updates, then required completion before CI. Tha
 completion condition is satisfied. [Draft PR #79](https://github.com/Caldwell-41/Renpy-editor/pull/79)
 is published against `codex/phase3b-screen-designer`; implementation remains `b2a5694`.
 Its current-head gate is the PR's `Loomlight validation` status.
-The [first ordinary run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41740136714)
-at `bd2e365` was observed in progress: repository validation passed and code checks
-were running, run updated at 2026-11-03 23:34:02 UTC. The subsequent CI audit found
-two plumbing faults: an offline fixture leaked the real SDK host check on Linux,
-and the inline failure wrapper omitted its sibling import directory. Both are
-corrected without production changes. Six Canvas gates pass with simulated Linux
-and on Mac; actual executable retention/sealing/privacy checks pass locally.
-Original failed runs and unavailable uploads retain their scope. Audit current-head
-quality and complete validation before handback. The plan selects no manual
-qualification matrix. No merge,
-issue closure, release, new SDK campaign or native/package execution is selected.
+[Ordinary run 41741915132, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41741915132/attempts/1)
+is audited successful at `28efd6c`: both required jobs and combined validation pass,
+with 366 frontend, 15 offline Help and 27 selected core passes, production build and
+the real controller/core journey. Earlier CI plumbing faults are corrected without
+production changes; failed runs and unavailable uploads retain their scope.
+The audit publication changes documentation only. Production/CI inputs remain the
+same; use the PR's current-head combined status for later documentation validation.
+Next is Kris's review of the draft once that status is green. The plan selects no
+manual qualification matrix. No merge, issue closure, retirement, release, new SDK
+campaign or native/package execution is selected.
 
 Final local proof passes 366 frontend cases without failures/skips, 31 focused UI
 cases, 24 affected core cases, production build, formatting and the six-stage
