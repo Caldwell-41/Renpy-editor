@@ -401,3 +401,89 @@ fn dismissal_refuses_wrong_context_and_unqualified_actions_without_replacing_sou
         "INCOMING_REFERENCE"
     );
 }
+
+#[test]
+fn added_null_button_remains_an_ordinary_removable_element() {
+    let mut f = Fixture::new();
+    let owner = dialog(&mut f, "help_dialog");
+    let added = compose(
+        &mut f,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"textbutton","text":"Done"}),
+    );
+    compose(
+        &mut f,
+        &owner,
+        json!({"type":"remove","nodeId":added["selectedId"]}),
+    );
+    assert!(!source(&mut f, &json!({"sourcePath":owner["path"]})).contains("textbutton \"Done\""));
+}
+
+#[test]
+fn call_draft_refuses_missing_stale_or_dirty_target_revisions_and_retains_source_input() {
+    let mut f = Fixture::new();
+    let owner = dialog(&mut f, "help_dialog");
+    let target = resolved(&mut f, &owner);
+    let mut command = insertion(&mut f, &target);
+    command["beat"].as_object_mut().unwrap().remove("revisions");
+    assert_eq!(f.reject(command)["error"]["code"], "INVALID_PAYLOAD");
+    let mut stale = target.clone();
+    stale["revisions"]["effects"] = json!("0".repeat(64));
+    let command = insertion(&mut f, &stale);
+    assert_eq!(f.reject(command)["error"]["code"], "SOURCE_CONFLICT");
+    let opened = ipc(&mut f.service, "source.open", json!({"path":owner["path"]}));
+    let draft = format!(
+        "{}# retained Source input\n",
+        opened["text"].as_str().unwrap()
+    );
+    ipc(
+        &mut f.service,
+        "source.updateDraft",
+        json!({"path":owner["path"],"expectedBaseRevision":opened["baseRevision"],"text":draft,"selectionStart":0,"selectionEnd":0}),
+    );
+    let command = insertion(&mut f, &target);
+    assert_eq!(f.reject(command)["error"]["code"], "DIRTY_SOURCE");
+    let retained = ipc(&mut f.service, "source.open", json!({"path":owner["path"]}));
+    assert_eq!(retained["text"], draft);
+}
+
+#[test]
+fn source_defined_call_keeps_its_identity_and_unknown_effects_after_dialog_changes() {
+    let mut f = Fixture::new();
+    let owner = dialog(&mut f, "help_dialog");
+    let target = resolved(&mut f, &owner);
+    let accepted = insert(&mut f, &target);
+    let call = accepted["scenes"][0]["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["payload"]["type"] == "callScreen")
+        .unwrap()
+        .clone();
+    let scene = accepted["scenes"][0].clone();
+    let original = source(&mut f, &scene);
+    let path = json!({"sourcePath":owner["path"]});
+    let changed = source(&mut f, &path).replace("action Return()", "action Return(1)");
+    f.save(&path, &changed);
+    let model = f.model();
+    let same = model["scenes"][0]["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["id"] == call["id"])
+        .unwrap();
+    assert_eq!(same["payload"]["target"], call["payload"]["target"]);
+    assert_eq!(same["protected"], true);
+    assert!(same["payload"]["revisions"].is_null());
+    assert_eq!(same["screenEffects"]["unknown"], true);
+    assert_eq!(same["screenEffects"]["finishesInteraction"], false);
+    assert_eq!(source(&mut f, &scene), original);
+    f.service.close().unwrap();
+    f.service.open_path(&f.root).unwrap();
+    let reopened = f.model();
+    assert!(reopened["scenes"][0]["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|b| b["id"] == call["id"] && b["protected"] == true));
+}
