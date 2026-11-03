@@ -2,6 +2,10 @@
 use super::*;
 use serde_json::{Map, Value};
 
+#[cfg(test)]
+#[path = "base_help_canvas_tests.rs"]
+mod tests;
+
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Request {
