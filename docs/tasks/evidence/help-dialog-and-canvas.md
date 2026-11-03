@@ -1,5 +1,21 @@
 # Help dialog and base canvas delivery evidence
 
+## Draft publication and ordinary CI, 2026-11-04
+
+[Draft PR #79](https://github.com/Caldwell-41/Renpy-editor/pull/79) publishes the
+completed implementation and routine CI update at `bd2e36571d9ee24737a725bffc0b71f8050130ab`
+against `codex/phase3b-screen-designer`. It is open and draft; no review comments or
+reviews existed at the first status read. Both tickets remain open.
+
+The first automatic [Repository quality run 41740136714](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41740136714)
+is bound to that head and was observed in progress, run updated at 2026-11-03
+23:34:02 UTC. `Validate repository` passed; code checks and the combined
+`Loomlight validation` status remained pending. Unselected specialist jobs are
+skipped, not qualified passes. The publication-note commit changes documentation
+only; source/CI inputs and all recorded code proof stay unchanged. Current-head
+validation remains authoritative on the PR and must be audited after this update.
+No manual workflow, SDK, helper, native editor or package launch is selected.
+
 ## Implementation complete before CI, 2026-11-04
 
 Final production code is `b2a5694`, with identical inputs at `7fe2577`. All bounded

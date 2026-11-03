@@ -11,7 +11,7 @@ the coordinator owns shared contracts, review findings, integration and final re
 | --- | --- | --- |
 | Help dialog and Story Call/Finish | A4 UI, cancellation/recovery and actual controller/core pass; 36 final browser cases and recorded eight normal-entry rows per target pass | Ordinary CI and final user acceptance |
 | Base Help canvas | Eight matched cases per target have exact pixels and geometry at `4c084a4`; lossless geometry transport is tested | Wider canvas/native/physical acceptance stays separate |
-| Combined implementation | 366 frontend, 31 focused UI and 24 affected core cases pass; six-stage controller/core journey, final browser matrix and production build pass; review findings resolved | Draft PR and ordinary CI selected; no merge/release |
+| Combined implementation | 366 frontend, 31 focused UI and 24 affected core cases pass; six-stage controller/core journey, final browser matrix and production build pass; review findings resolved | Draft PR #79; ordinary CI tracked there; no merge/release |
 
 Kris approved A4 (`inspector-v4`) at source `8851689`; B4/C4 remain drafts.
 Completion code is `b2a5694`, with the exact approved reference and retained product
@@ -30,7 +30,8 @@ CSS correction. Native/physical and broader editor acceptance remain separate.
 [Delivery evidence](../tasks/evidence/help-dialog-and-canvas.md) owns candidates,
 checks, earlier failures, operation counts and exact scope. Physical/human and
 package/native acceptance remain separate. Neither ticket is closed. The completion
-condition for the selected draft PR and ordinary CI is satisfied. No new SDK/package
+condition for [draft PR #79](https://github.com/Caldwell-41/Renpy-editor/pull/79) and
+ordinary CI is satisfied. The PR's combined status owns current-head CI. No new SDK/package
 qualification matrix, merge or release is selected.
 
 ## Components and Help panel merged and accepted
