@@ -192,6 +192,25 @@ test("screen insertion keeps existing nested body ownership",async()=>{
  assert.deepEqual(s.commands[0]!.body,{type:"branch",groupId:"group",branchId:"branch"});assert.deepEqual(s.commands[0]!.position,{type:"before",anchor:{type:"beat",beatId:"line"}});assert.equal(s.host.querySelector(".story-screen-pending")!.parentElement?.getAttribute("data-branch-id"),"branch");button(draft,"Cancel").click();assert.equal(s.host.querySelector(".story-screen-pending"),null);await s.close();
 });
 
+test("Story reserves the wrapped sticky toolbar height when scrolling to focused controls",async()=>{
+ const original=globalThis.ResizeObserver;
+ const observed:{target?:Element;callback:ResizeObserverCallback;observer:ResizeObserver}[]=[];
+ class Observer {
+  private entry:{target?:Element;callback:ResizeObserverCallback;observer:ResizeObserver};
+  constructor(callback:ResizeObserverCallback){this.entry={callback,observer:this as unknown as ResizeObserver};observed.push(this.entry);}
+  observe(target:Element){this.entry.target=target;}unobserve(){}disconnect(){}
+ }
+ globalThis.ResizeObserver=Observer as unknown as typeof ResizeObserver;
+ const s=setup();
+ try{
+  const toolbar=s.host.querySelector<HTMLElement>(".beats-toolbar")!,region=toolbar.closest<HTMLElement>(".beats-region")!;
+  const rect=toolbar.getBoundingClientRect();let height=148;Object.defineProperty(rect,"height",{get:()=>height});toolbar.getBoundingClientRect=()=>rect;
+  const entry=observed.find(entry=>entry.target===toolbar);assert.ok(entry,"The sticky toolbar must be observed as its tools wrap");
+  entry.callback([],entry.observer);assert.equal(region.style.scrollPaddingTop,"152px");
+  height=190;entry.callback([],entry.observer);assert.equal(region.style.scrollPaddingTop,"194px");
+ }finally{await s.close();if(original)globalThis.ResizeObserver=original;else Reflect.deleteProperty(globalThis,"ResizeObserver");}
+});
+
 test("Cancel and Escape return focus to the visible Story draft opener",async()=>{
  for(const entry of ["root","screen","branch"])for(const exit of ["cancel","escape"]){
   const s=setup({},entry==="branch"?storyFixture():fixture());

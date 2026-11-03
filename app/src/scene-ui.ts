@@ -464,7 +464,7 @@ export function renderSceneAuthoring(
   const collapsedConditions = new Set<string>();
   const manualBranches = new Map<string, string>();
   let focusedBranch: string | undefined;
-  const previewObservers:ResizeObserver[]=[];
+  const layoutObservers:ResizeObserver[]=[];
   let resetPreviewAllocation:(()=>void)|undefined;
   let cancelBeatDrag:(()=>void)|undefined;
   const resetLayout=():void=>resetPreviewAllocation?.();
@@ -519,7 +519,7 @@ export function renderSceneAuthoring(
 
   const draw = (): void => {
     cancelBeatDrag?.();
-    saveDialogue = undefined;previewObservers.splice(0).forEach(o=>o.disconnect());
+    saveDialogue = undefined;layoutObservers.splice(0).forEach(o=>o.disconnect());
     mediaGeneration += 1;
     for (const url of audioUrls) URL.revokeObjectURL?.(url);
     audioUrls.clear();
@@ -598,7 +598,9 @@ export function renderSceneAuthoring(
 
   const focusBeatOpener = (key: string): void => {
     const controls = [...host.querySelectorAll<HTMLButtonElement>("button[data-beat-opener]")].filter(control => !control.disabled && !control.closest("[hidden]"));
-    (controls.find(control => control.dataset.beatOpener === key) ?? controls.find(control => control.dataset.beatOpener === "root"))?.focus();
+    const opener=controls.find(control => control.dataset.beatOpener === key) ?? controls.find(control => control.dataset.beatOpener === "root");
+    opener?.focus({preventScroll:true});
+    if(opener&&!opener.closest(".beats-toolbar"))opener.scrollIntoView?.({block:"nearest",inline:"nearest"});
   };
   const openNewBeat = (scene: SceneDocument, initialType: BeatPayload["type"] = actions.screenHintKind === "dialog" ? "callScreen" : "dialogue", beforeBeatId: string | null = null, opener = "root"): void => {
     if (!draftGuard()) return;
@@ -698,7 +700,7 @@ export function renderSceneAuthoring(
     if (state.charactersUnknown) { const unknown = document.createElement("span"); unknown.className = "preview-unknown-layer"; unknown.textContent = "Other character state may be unknown"; canvas.append(unknown); }
     if (state.overlay) { const overlay = document.createElement("div"); overlay.className = `preview-overlay ${state.overlay.kind}`; overlay.textContent = state.overlay.text || (state.overlay.kind === "dialogue" ? "Empty dialogue" : state.overlay.kind);if(state.overlay.kind==="dialogue"){const beat=scene.beats.find(b=>b.id===state.overlay?.beatId);if(beat?.payload.type==="dialogue"){const character=model.authoring.characters.find(c=>c.id===(beat.payload as {characterId:string}).characterId);const name=document.createElement("strong");name.textContent=character?.displayName??"";name.className="preview-speaker";overlay.prepend(name);}} canvas.append(overlay); }
     surround.append(canvas); preview.append(header, surround);
-    if(typeof ResizeObserver!=="undefined"){const observer=new ResizeObserver(()=>{const b=surround.getBoundingClientRect();const ratio=actions.resolution.width/actions.resolution.height;const width=Math.max(1,Math.min(b.width,b.height*ratio));canvas.style.width=`${width}px`;canvas.style.height=`${width/ratio}px`;});observer.observe(surround);previewObservers.push(observer);}
+    if(typeof ResizeObserver!=="undefined"){const observer=new ResizeObserver(()=>{const b=surround.getBoundingClientRect();const ratio=actions.resolution.width/actions.resolution.height;const width=Math.max(1,Math.min(b.width,b.height*ratio));canvas.style.width=`${width}px`;canvas.style.height=`${width/ratio}px`;});observer.observe(surround);layoutObservers.push(observer);}
 
     const details = document.createElement("div"); details.className = "preview-details scene-context-inspector";details.hidden=!(actions.layoutKey&&layoutFor(actions.layoutKey).inspectorOpen);
     const toggle=button("Scene details");toggle.ariaExpanded=String(!details.hidden);toggle.addEventListener("click",()=>{details.hidden=!details.hidden;toggle.ariaExpanded=String(!details.hidden);if(actions.layoutKey)saveLayout(actions.layoutKey,{inspectorOpen:!details.hidden});});header.append(toggle);
@@ -927,6 +929,8 @@ export function renderSceneAuthoring(
       tools.append(assist,edits,continuation,card,lore);
     }
     toolbar.append(heading, tools); beatsRegion.append(toolbar);
+    const reserveToolbar=():void=>{beatsRegion.style.scrollPaddingTop=`${toolbar.getBoundingClientRect().height+4}px`;};reserveToolbar();
+    if(typeof ResizeObserver!=="undefined"){const observer=new ResizeObserver(reserveToolbar);observer.observe(toolbar);layoutObservers.push(observer);}
     const list = document.createElement("div"); list.className = "beats-list"; list.setAttribute("role", "list"); beatsRegion.append(list);
     let drag:{id:string;from:number;pointerId:number;startX:number;startY:number;x:number;y:number;active:boolean;target?:number;grip:HTMLButtonElement;ghost?:HTMLElement}|undefined;
     let scrollFrame:number|undefined;
@@ -1247,7 +1251,7 @@ export function renderSceneAuthoring(
   return () => {
     disposed = true;
     cancelBeatDrag?.();window.removeEventListener("loomlight-reset-layout",resetLayout);
-    draftSettlers.delete(host);previewObservers.splice(0).forEach(o=>o.disconnect());
+    draftSettlers.delete(host);layoutObservers.splice(0).forEach(o=>o.disconnect());
     mediaGeneration += 1;
     pendingImages.clear();
     for (const image of imageCache.values()) URL.revokeObjectURL(image.url);
