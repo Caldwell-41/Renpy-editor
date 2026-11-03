@@ -117,6 +117,49 @@ fn help_panel_preparation_uses_real_ui_image_and_does_not_accept_source_or_histo
 }
 
 #[test]
+fn help_dialog_preparation_is_editable_modal_and_finishes_without_accepting() {
+    let f = Fixture::new();
+    let map_before = fs::read(f.root.join(".renpy-editor/source-map.json")).unwrap();
+    let workspace_before = f
+        .service
+        .scene_workspace(&f.project, &f.project_id)
+        .unwrap();
+    let source = f
+        .service
+        .prepare_help_dialog(&f.project, &f.project_id, "help_dialog", f.starter())
+        .unwrap();
+    let text = String::from_utf8(source.clone()).unwrap();
+    assert!(text.starts_with("screen help_dialog():\n    modal True\n"));
+    assert!(text.contains("key \"game_menu\" action Return()\n"));
+    assert!(text.contains("action Return()\n                default_focus True\n"));
+    assert!(!text.contains("Hide("));
+    assert!(!text.contains("dismiss"));
+    let document = inspect(&source, "game/ui/help_dialog.rpy".into(), "prepared".into()).unwrap();
+    let nodes = &document.screens[0].nodes;
+    assert_eq!(nodes.iter().filter(|n| n.kind == "text").count(), 2);
+    assert_eq!(nodes.iter().filter(|n| n.kind == "image").count(), 1);
+    assert_eq!(nodes.iter().filter(|n| n.kind == "textbutton").count(), 1);
+    assert!(nodes
+        .iter()
+        .filter(|n| matches!(
+            n.kind.as_str(),
+            "frame" | "vbox" | "text" | "image" | "textbutton"
+        ))
+        .all(|n| n.id.is_some()));
+    assert!(!f.root.join("game/ui/help_dialog.rpy").exists());
+    assert_eq!(
+        fs::read(f.root.join(".renpy-editor/source-map.json")).unwrap(),
+        map_before
+    );
+    let after = f
+        .service
+        .scene_workspace(&f.project, &f.project_id)
+        .unwrap();
+    assert_eq!(after.can_undo, workspace_before.can_undo);
+    assert_eq!(after.can_redo, workspace_before.can_redo);
+}
+
+#[test]
 fn help_panel_preparation_refuses_invalid_names_text_and_dimensions() {
     let f = Fixture::new();
     let before = fs::read(f.root.join(".renpy-editor/source-map.json")).unwrap();

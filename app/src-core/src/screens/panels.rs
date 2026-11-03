@@ -1,4 +1,4 @@
-//! Editable owned Help panels and their bounded runtime behavior.
+//! Editable owned Help panels and dialogs with bounded dismissal behavior.
 
 use super::*;
 
@@ -23,6 +23,28 @@ impl AuthoringService {
         name: &str,
         starter: HelpStarter,
     ) -> Result<Vec<u8>, SceneError> {
+        self.prepare_help(project, project_id, name, starter, false)
+    }
+
+    /// Prepare a blocking Help starter. Creation owns acceptance and history.
+    pub fn prepare_help_dialog(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        name: &str,
+        starter: HelpStarter,
+    ) -> Result<Vec<u8>, SceneError> {
+        self.prepare_help(project, project_id, name, starter, true)
+    }
+
+    fn prepare_help(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        name: &str,
+        starter: HelpStarter,
+        dialog: bool,
+    ) -> Result<Vec<u8>, SceneError> {
         if !valid_name(name)
             || starter.width == 0
             || starter.height == 0
@@ -43,14 +65,20 @@ impl AuthoringService {
         let image_path =
             serde_json::to_string(&image.path).map_err(|_| SceneError::ImageInvalid)?;
         let target = serde_json::to_string(name).map_err(|_| SceneError::InvalidPayload)?;
+        let modal = if dialog { "True" } else { "False" };
+        let dismissal = if dialog {
+            "Return()".to_owned()
+        } else {
+            format!("Hide({target})")
+        };
         let [frame, column, content, heading, body, image, close] =
             std::array::from_fn(|_| uuid::Uuid::new_v4().to_string());
         let width = starter.width;
         let height = starter.height;
         Ok(format!(
             r#"screen {name}():
-    modal False
-    key "game_menu" action Hide({target})
+    modal {modal}
+    key "game_menu" action {dismissal}
     frame: # loomlight-element: {frame}
         xalign 0.5
         yalign 0.5
@@ -62,7 +90,7 @@ impl AuthoringService {
                     xsize {width}
                     ysize {height}
             textbutton "Close": # loomlight-element: {close}
-                action Hide({target})
+                action {dismissal}
                 default_focus True
 "#,
         )
