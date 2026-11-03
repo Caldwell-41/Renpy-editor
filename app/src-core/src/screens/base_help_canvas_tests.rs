@@ -72,6 +72,19 @@ fn base_help_fidelity_exports_typed_assets_styles_and_exact_source_without_execu
                 assert_eq!(plan["available"], true, "{plan}");
                 assert_eq!(plan["limits"], json!([]));
                 assert_eq!(plan["nodes"].as_array().unwrap().len(), 7);
+                let panel = &plan["nodes"][2]["properties"];
+                if screen == "base_help_fidelity" {
+                    assert_eq!(panel["padding"], json!([17, 23, 31, 29]));
+                    assert_eq!(panel["xanchor"], 0.5);
+                    assert_eq!(plan["nodes"][3]["properties"]["spacing"], 13);
+                    assert_eq!(plan["nodes"][5]["properties"]["xsize"], 113);
+                    assert_eq!(plan["nodes"][5]["properties"]["ysize"], 57);
+                } else {
+                    assert_eq!(panel["left_padding"], 11);
+                    assert_eq!(panel["right_padding"], 27);
+                    assert_eq!(panel["xanchor"], 250);
+                    assert_eq!(panel["xpos"], 0.75);
+                }
                 let body = plan["nodes"]
                     .as_array()
                     .unwrap()

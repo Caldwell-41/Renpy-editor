@@ -39,7 +39,9 @@ init python:
                         geometry.append(dict(start=identities[identity], x=x, y=y, width=width, height=height))
                     for child, offset in zip(getattr(displayable, "children", []), getattr(displayable, "offsets", [])):
                         locate(child, x + offset[0], y + offset[1])
-                locate(screen, 0, 0)
+                # ScreenDisplayable blits its child at (0, 0) without populating
+                # Container.offsets. Begin there; lower layout offsets are real.
+                locate(screen.child, 0, 0)
                 assert len(geometry) == 5
                 filename = "%s-%sx%s-%s.png" % (screen_name, config.screen_width, config.screen_height, state)
                 path = BASE_HELP_OUTPUT + "/" + filename
