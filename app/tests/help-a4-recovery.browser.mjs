@@ -13,13 +13,14 @@ const output=resolve(process.env.A4_RECOVERY_OUTPUT??`target/help-a4-recovery-${
 await mkdir(output,{recursive:true});
 const scratch=join(output,`loomlight-help-controller-${randomUUID()}`);
 const executable=resolve(process.env.CARGO_TARGET_DIR??'target',`debug/examples/help-controller-driver${process.platform==='win32'?'.exe':''}`);
-const child=driverProcess(executable,[scratch]);
-const result={passed:false,sdkExecuted:false,engineBoundary:'intercepted before dispatch',checks:[],captures:[],pageErrors:[],refusals:[],driverSha256:createHash('sha256').update(await readFile(executable)).digest('hex')};
-const requests=[];let session,server,browser,page;
 const candidate=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 if(process.env.A4_EXPECTED_CANDIDATE)assert.equal(candidate,process.env.A4_EXPECTED_CANDIDATE);
 execFileSync('git',['diff','--quiet','HEAD','--','src','src-core','Cargo.toml','Cargo.lock']);
-Object.assign(result,{candidate,frontendTree:execFileSync('git',['rev-parse','HEAD:app/src'],{encoding:'utf8'}).trim(),coreTree:execFileSync('git',['rev-parse','HEAD:app/src-core'],{encoding:'utf8'}).trim()});
+const frontendTree=execFileSync('git',['rev-parse','HEAD:app/src'],{encoding:'utf8'}).trim(),coreTree=execFileSync('git',['rev-parse','HEAD:app/src-core'],{encoding:'utf8'}).trim();
+const driverSha256=createHash('sha256').update(await readFile(executable)).digest('hex');
+const child=driverProcess(executable,[scratch]);
+const result={passed:false,candidate,frontendTree,coreTree,driverSha256,sdkExecuted:false,engineBoundary:'intercepted before dispatch',checks:[],captures:[],pageErrors:[],refusals:[]};
+const requests=[];let session,server,browser,page;
 async function rpc(request){
  if(['screens.canvasRender','screens.canvasStatus'].includes(request.operation))return {ok:true,value:{phase:'unavailable',reason:'Engine rendering is outside this focused authoring check.'}};
  assert(!/^(runtime\.|sdk\.|renpy\.)/.test(request.operation),'No execution operation is selected');
