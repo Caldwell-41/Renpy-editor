@@ -41,6 +41,6 @@
 .screen-starter-canvas .screen-panels-preview-content { display:flex;flex-direction:column;gap:12px; }
 .screen-starter-canvas .screen-panels-preview strong { font-size:23px;font-weight:600; }
 .screen-starter-canvas .screen-panels-preview p { margin:0;font-size:13px;line-height:1.6; }
-.screen-starter-canvas .screen-panels-preview img { align-self:center;width:100%;max-width:400px;height:180px;object-fit:contain; }
+.screen-starter-canvas .screen-panels-preview img { align-self:center;width:320px;max-width:100%;height:auto;object-fit:fill; }
 .screen-starter-canvas .screen-panels-preview span { align-self:flex-end;min-width:82px;margin-top:8px;padding:8px 14px;border:1px solid var(--border-strong);text-align:center;font-size:12px; }
 @media(max-width:759px) { .screens-editor[data-creating=true] .screen-stage { display:none; } }

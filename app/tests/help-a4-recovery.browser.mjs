@@ -63,6 +63,7 @@ try{
  await ui.locator('.screen-starter-canvas img').waitFor({state:'visible'});
  const geometry=await page.evaluate(()=>{const card=document.querySelector('.screen-card').getBoundingClientRect(),preview=document.querySelector('.screen-starter-canvas .screen-panels-preview').getBoundingClientRect(),form=document.querySelector('section.screen-create');return {cardLeft:card.left,previewRight:preview.right,previewWidth:preview.width,previewHeight:preview.height,formScrollWidth:form.scrollWidth,formWidth:form.clientWidth};});
  assert(geometry.previewWidth>200&&geometry.previewRight<=geometry.cardLeft);assert(geometry.formScrollWidth<=geometry.formWidth);result.previewGeometry=geometry;
+ const imageGeometry=await ui.locator('.screen-starter-canvas img').evaluate(image=>{const rect=image.getBoundingClientRect();return {width:rect.width,height:rect.height,fit:getComputedStyle(image).objectFit};});assert.deepEqual(imageGeometry,{width:320,height:180,fit:'fill'});result.imageGeometry=imageGeometry;
  await capture('typed-starter-inspector');await page.setViewportSize({width:560,height:640});assert(await ui.locator('.screen-stage').isHidden());await page.setViewportSize({width:1100,height:720});
  const assetPath=join(scratch,'synthetic-project',asset.relativePath),withheld=`${assetPath}.withheld`;await rename(assetPath,withheld);
  try{

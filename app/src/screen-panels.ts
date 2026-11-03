@@ -61,6 +61,7 @@ export function buildPanelCreationForm(options: PanelCreationOptions) {
   }
   const preview = element("section","screen-panels-preview");
   const thumbnail = element("img"); thumbnail.alt = ""; thumbnail.hidden = true;
+  thumbnail.style.aspectRatio = `${defaults.width} / ${defaults.height}`;
   const summary = element("div","screen-panels-preview-content"); summary.append(element("strong","",defaults.title),element("p","",defaults.explanation),thumbnail,element("span","","Close"));
   const previewStatus = element("p","screen-panels-preview-status"); previewStatus.role = "status";
   preview.append(summary); help.append(field("Project image",image),preview,previewStatus);
@@ -96,7 +97,14 @@ export function buildPanelCreationForm(options: PanelCreationOptions) {
   };
   const isHelp = () => starters.value === "help";
   const readDraft = (): PanelCreationDraft => ({name:name.value, kind:kind(), starter:isHelp() ? "help" : "blank", assetId:image.value});
-  const refresh = () => { summary.querySelector("p")!.textContent=kind()==="dialog"?"Close Help to continue the story.":defaults.explanation;purpose.textContent = kind() === "dialog" ? "Dialog · Close and Escape finish the interaction. Outside clicks keep it open." : "Panel · stays open while dialogue continues."; help.hidden = !isHelp(); const eligible=images.some(asset=>asset.id===image.value)&&image.value!==unavailableImage;create.disabled = busy || (isHelp() && !eligible);blocked.hidden=eligible;refreshPreview(); };
+  const refresh = () => {
+    const dialog=kind()==="dialog";
+    summary.querySelector("p")!.textContent=dialog?"Close Help to continue the story.":defaults.explanation;
+    purpose.textContent=dialog?"Dialog · Call waits for Finish interaction. Escape finishes it; outside clicks keep it open.":"Panel · stays open while dialogue continues.";
+    help.hidden=!isHelp();
+    const eligible=images.some(asset=>asset.id===image.value)&&image.value!==unavailableImage;
+    create.disabled=busy||(isHelp()&&!eligible);blocked.hidden=eligible;refreshPreview();
+  };
   form.addEventListener("change", () => { dirty = true; refresh(); });
   form.addEventListener("input", () => { dirty = true; });
   form.addEventListener("compositionstart", () => { composing = true; });
