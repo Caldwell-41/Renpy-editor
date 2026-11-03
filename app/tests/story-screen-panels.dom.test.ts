@@ -196,18 +196,22 @@ test("Story reserves the wrapped sticky toolbar height when scrolling to focused
  const original=globalThis.ResizeObserver;
  const observed:{target?:Element;callback:ResizeObserverCallback;observer:ResizeObserver}[]=[];
  class Observer {
-  private entry:{target?:Element;callback:ResizeObserverCallback;observer:ResizeObserver};
-  constructor(callback:ResizeObserverCallback){this.entry={callback,observer:this as unknown as ResizeObserver};observed.push(this.entry);}
-  observe(target:Element){this.entry.target=target;}unobserve(){}disconnect(){}
+  constructor(private callback:ResizeObserverCallback){}
+  observe(target:Element){observed.push({target,callback:this.callback,observer:this as unknown as ResizeObserver});}unobserve(){}disconnect(){}
  }
  globalThis.ResizeObserver=Observer as unknown as typeof ResizeObserver;
  const s=setup();
  try{
   const toolbar=s.host.querySelector<HTMLElement>(".beats-toolbar")!,region=toolbar.closest<HTMLElement>(".beats-region")!;
   const rect=toolbar.getBoundingClientRect();let height=148;Object.defineProperty(rect,"height",{get:()=>height});toolbar.getBoundingClientRect=()=>rect;
+  let available=400;Object.defineProperty(region,"clientHeight",{get:()=>available});
+  const controlRect=toolbar.querySelector("button")!.getBoundingClientRect();Object.defineProperty(controlRect,"height",{value:36});toolbar.querySelector("button")!.getBoundingClientRect=()=>controlRect;
   const entry=observed.find(entry=>entry.target===toolbar);assert.ok(entry,"The sticky toolbar must be observed as its tools wrap");
   entry.callback([],entry.observer);assert.equal(region.style.scrollPaddingTop,"152px");
   height=190;entry.callback([],entry.observer);assert.equal(region.style.scrollPaddingTop,"194px");
+  available=100;entry.callback([],entry.observer);assert.equal(region.style.scrollPaddingTop,"4px","An oversized toolbar must not consume the focus viewport");assert.equal(toolbar.style.position,"static");
+  const resized=observed.find(entry=>entry.target===region);assert.ok(resized,"Changing the preview allocation must recheck toolbar fit");
+  available=400;resized.callback([],resized.observer);assert.equal(region.style.scrollPaddingTop,"194px");assert.equal(toolbar.style.position,"sticky");
  }finally{await s.close();if(original)globalThis.ResizeObserver=original;else Reflect.deleteProperty(globalThis,"ResizeObserver");}
 });
 

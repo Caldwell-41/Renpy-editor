@@ -600,7 +600,7 @@ export function renderSceneAuthoring(
     const controls = [...host.querySelectorAll<HTMLButtonElement>("button[data-beat-opener]")].filter(control => !control.disabled && !control.closest("[hidden]"));
     const opener=controls.find(control => control.dataset.beatOpener === key) ?? controls.find(control => control.dataset.beatOpener === "root");
     opener?.focus({preventScroll:true});
-    if(opener&&!opener.closest(".beats-toolbar"))opener.scrollIntoView?.({block:"nearest",inline:"nearest"});
+    opener?.scrollIntoView?.({block:"nearest",inline:"nearest"});
   };
   const openNewBeat = (scene: SceneDocument, initialType: BeatPayload["type"] = actions.screenHintKind === "dialog" ? "callScreen" : "dialogue", beforeBeatId: string | null = null, opener = "root"): void => {
     if (!draftGuard()) return;
@@ -929,8 +929,15 @@ export function renderSceneAuthoring(
       tools.append(assist,edits,continuation,card,lore);
     }
     toolbar.append(heading, tools); beatsRegion.append(toolbar);
-    const reserveToolbar=():void=>{beatsRegion.style.scrollPaddingTop=`${toolbar.getBoundingClientRect().height+4}px`;};reserveToolbar();
-    if(typeof ResizeObserver!=="undefined"){const observer=new ResizeObserver(reserveToolbar);observer.observe(toolbar);layoutObservers.push(observer);}
+    const reserveToolbar=():void=>{
+      const height=toolbar.getBoundingClientRect().height;
+      const controlHeight=Math.max(0,...[...toolbar.querySelectorAll("button")].map(control=>control.getBoundingClientRect().height));
+      const focusClearance=4;
+      const sticky=height+controlHeight+focusClearance*2<=beatsRegion.clientHeight;
+      toolbar.style.position=sticky?"sticky":"static";
+      beatsRegion.style.scrollPaddingTop=`${sticky?height+focusClearance:focusClearance}px`;
+    };reserveToolbar();
+    if(typeof ResizeObserver!=="undefined"){const observer=new ResizeObserver(reserveToolbar);observer.observe(toolbar);observer.observe(beatsRegion);layoutObservers.push(observer);}
     const list = document.createElement("div"); list.className = "beats-list"; list.setAttribute("role", "list"); beatsRegion.append(list);
     let drag:{id:string;from:number;pointerId:number;startX:number;startY:number;x:number;y:number;active:boolean;target?:number;grip:HTMLButtonElement;ghost?:HTMLElement}|undefined;
     let scrollFrame:number|undefined;
