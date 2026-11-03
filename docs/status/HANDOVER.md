@@ -58,9 +58,10 @@ two P2 Standards findings and no actionable Spec findings, with known UI gaps. B
 Canvas reference scratch until process cleanup is proven. Their red/green checks,
 12 Dialog cases, six Canvas gates, production compilation and formatting pass.
 No SDK rerun was selected for the later failure-path/UI corrections. Preserve
-successful proof scope and all original failures. Final combined review and
-in-scope finding corrections are complete; user/native/physical acceptance and
-the stated visual limits remain.
+successful proof scope and all original failures. The earlier combined review
+through `9de4f25` and its finding corrections are complete. The completion pass
+above owns the current review status; user/native/physical acceptance and the
+stated visual limits remain.
 
 SUNDOWN's assigned qualification worktree is clean at `4c084a4`; primary checkout,
 protected stash and unrelated processes remain intact. Prior path/PowerShell

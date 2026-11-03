@@ -733,10 +733,9 @@ impl AuthoringService {
                             .ok()
                             .filter(|resolved| resolved.kind == statement.unwrap().owner_kind())
                     });
-                let context_valid = captured.as_ref().is_some_and(|resolved| {
-                    statement != Some(ScreenStatement::Call)
-                        || (resolved.blocking && !resolved.effects.unknown)
-                });
+                let context_valid = captured
+                    .as_ref()
+                    .is_some_and(|resolved| statement.unwrap().accepts_target(resolved));
                 *revisions = captured
                     .as_ref()
                     .filter(|_| context_valid)
@@ -838,9 +837,10 @@ impl AuthoringService {
         };
         let expected = revisions.as_ref().ok_or(SceneError::InvalidPayload)?;
         let resolved = self.screens_resolve_target(project, project_id, target, Some(expected))?;
-        if resolved.kind != payload.screen_statement().unwrap().owner_kind()
-            || (matches!(payload, BeatPayload::CallScreen { .. })
-                && (!resolved.blocking || resolved.effects.unknown))
+        if !payload
+            .screen_statement()
+            .unwrap()
+            .accepts_target(&resolved)
         {
             return Err(SceneError::ReferenceBlocked);
         }

@@ -448,6 +448,11 @@ export function renderSceneAuthoring(
   initialBeatId?: string,
 ): () => void {
   let model = initial;
+  let screenInsertion = actions.screenInsertion ? structuredClone(actions.screenInsertion) : undefined;
+  const rememberScreenInsertion = (insertion: ScreenInsertion): void => {
+    screenInsertion = structuredClone(insertion);
+    actions.rememberScreenInsertion?.(structuredClone(insertion));
+  };
   let selectedBeatId: string | undefined = initialBeatId;
   let mediaGeneration = 0;
   const imageCache = new Map<string, { readonly key: string; readonly url: string }>();
@@ -607,7 +612,7 @@ export function renderSceneAuthoring(
     const list = host.querySelector<HTMLElement>(".beats-list");
     if (current && list) {
       const screenBeat = ["showScreen", "hideScreen", "callScreen"].includes(initialType);
-      const remembered = actions.screenInsertion;
+      const remembered = screenInsertion;
       const hint = !anchor && screenBeat && remembered && (remembered.sceneId === scene.id || !model.scenes.some(item=>item.id===remembered.sceneId)) ? structuredClone(remembered) : undefined;
       const body = hint?.body ?? {type:"root"} as BodyRef;
       renderNewBeat(list, current, initialType, body, anchor ? {type:"before",anchor:nodeRef(anchor)} : hint?.position ?? defaultInsertion(current, body), hint, opener);
@@ -1162,7 +1167,7 @@ export function renderSceneAuthoring(
   const renderNewBeat = (list: HTMLElement, scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", body: BodyRef = { type: "root" }, position: Position = defaultInsertion(scene, body), insertion?: ScreenInsertion, opener = "root"): void => {
     if (host.querySelector(".new-beat")) return;
     const captured = { projectRevision: model.projectRevision, sourceMapRevision: model.sourceMapRevision };
-    const openingInsertion = structuredClone(insertion ?? actions.screenInsertion ?? {sceneId:scene.id,body,position,expectedSourceRevision:scene.sourceRevision});
+    const openingInsertion = structuredClone(insertion ?? screenInsertion ?? {sceneId:scene.id,body,position,expectedSourceRevision:scene.sourceRevision});
     let rememberedInsertion = false;
     const panel = document.createElement("section"); panel.className = "new-beat scene-draft";
     panel.addEventListener("compositionstart", () => { composing = true; }); panel.addEventListener("compositionend", () => { composing = false; }); panel.setAttribute("aria-labelledby", "new-beat-title");
@@ -1196,7 +1201,7 @@ export function renderSceneAuthoring(
       pendingMarker.textContent=`Pending ${beatLabels[type.value as BeatPayload["type"]]}`;
       if(before)before.before(pendingMarker);else bodyHost.append(pendingMarker);
     };
-    const remember=()=>{if(screenType())try{actions.rememberScreenInsertion?.({sceneId:scene.id,...readLocation(),expectedSourceRevision:scene.sourceRevision});rememberedInsertion=true;}catch{/* Retain the unavailable original position until an explicit choice. */}};
+    const remember=()=>{if(screenType())try{rememberScreenInsertion({sceneId:scene.id,...readLocation(),expectedSourceRevision:scene.sourceRevision});rememberedInsertion=true;}catch{/* Retain the unavailable original position until an explicit choice. */}};
     placement.host.addEventListener("change",()=>{locationConfirmed=true;placementError.textContent="";remember();updatePendingMarker();});
     const editorHost = document.createElement("div"),secondaryHost=document.createElement("div");secondaryHost.className="story-screen-secondary";
     let editor = buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, actions);
@@ -1205,7 +1210,7 @@ export function renderSceneAuthoring(
     type.addEventListener("change", replaceEditor); replaceEditor();
     const actionsRow = document.createElement("div"); actionsRow.className = "row-actions";
     const cancel = button("Cancel", screenType()?"button secondary":"text-button");
-    const cancelDraft=()=>{if(rememberedInsertion)actions.rememberScreenInsertion?.(structuredClone(openingInsertion));pendingMarker.remove();panel.remove();focusBeatOpener(opener);};cancel.addEventListener("click",cancelDraft);
+    const cancelDraft=()=>{if(rememberedInsertion)rememberScreenInsertion(openingInsertion);pendingMarker.remove();panel.remove();focusBeatOpener(opener);};cancel.addEventListener("click",cancelDraft);
     type.addEventListener("change",()=>{cancel.className=screenType()?"button secondary":"text-button";updatePendingMarker();});
     let pending=false;
     panel.addEventListener("keydown", event => {
@@ -1224,7 +1229,7 @@ export function renderSceneAuthoring(
         let insertedId:string|undefined;
         const saved=await mutate({ type: "insertBodyBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, ...location, beat: payload }, (before,next) => {
           selectedBeatId = undefined;
-          const acceptedScene=next.scenes.find(s=>s.id===scene.id);if(screenType()&&acceptedScene)actions.rememberScreenInsertion?.({sceneId:scene.id,...location,expectedSourceRevision:acceptedScene.sourceRevision});
+          const acceptedScene=next.scenes.find(s=>s.id===scene.id);if(screenType()&&acceptedScene)rememberScreenInsertion({sceneId:scene.id,...location,expectedSourceRevision:acceptedScene.sourceRevision});
           const previousIds=new Set(before.scenes.find(s=>s.id===scene.id)?.beats.map(b=>b.id));
           insertedId=next.scenes.find(s=>s.id===scene.id)?.beats.find(b=>!previousIds.has(b.id))?.id;
         }, captured, panel);

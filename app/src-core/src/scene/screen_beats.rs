@@ -1,5 +1,6 @@
 //! Static parameterless screen statements shared by authoring and reconciliation.
 use super::*;
+use crate::screens::references::ResolvedScreenTarget;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum ScreenStatement {
@@ -28,6 +29,10 @@ impl ScreenStatement {
         } else {
             OwnedScreenKind::Panel
         }
+    }
+    pub(super) fn accepts_target(self, target: &ResolvedScreenTarget) -> bool {
+        target.kind == self.owner_kind()
+            && (self != Self::Call || (target.blocking && !target.effects.unknown))
     }
     pub(super) fn payload(self, target: ScreenTargetBinding) -> BeatPayload {
         match self {

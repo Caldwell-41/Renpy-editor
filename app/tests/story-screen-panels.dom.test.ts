@@ -250,6 +250,27 @@ test("accepted screen insertion remembers its nested location at the accepted re
  }finally{await s.close();}
 });
 
+test("later screen drafts and cancellation retain the last accepted placement and revision",async()=>{
+ for(const type of ["showScreen","hideScreen","callScreen"])for(const exit of ["cancel","escape"]){
+  const model=fixture(),scene=model.scenes[0]!;
+  const original:ScreenInsertion={sceneId:scene.id,body:{type:"root"},position:{type:"before",anchor:{type:"beat",beatId:"end"}},expectedSourceRevision:scene.sourceRevision};
+  const dialogBinding={screenId:"dialog-id",sourceName:"help_dialog"};
+  const dialogTarget:ResolvedScreenTarget={...target,binding:dialogBinding,kind:"dialog",blocking:true,effects:{...target.effects,unknown:false,hiddenScreens:[],finishesInteraction:true}};
+  let remembered=structuredClone(original),writes=0;
+  const s=setup({screenInsertion:original,rememberScreenInsertion:value=>{remembered=structuredClone(value);},screenCatalog:async()=>({...catalog,owned:[...catalog.owned,{...catalog.owned[2]!,id:dialogBinding.screenId,name:dialogBinding.sourceName,kind:"dialog"}]}),resolveScreenTarget:async value=>value.screenId===dialogBinding.screenId?dialogTarget:target,apply:async()=>{writes++;return {...model,scenes:[{...scene,sourceRevision:"accepted-source"}]};}},model);
+  const open=async()=>{button(s.host,"Add screen Beat").click();await tick();const draft=s.host.querySelector<HTMLElement>(".new-beat")!;const select=draft.querySelector<HTMLSelectElement>("select")!;select.value=type;select.dispatchEvent(new Event("change",{bubbles:true}));await tick();return draft;};
+  try{
+   const first=await open(),position=first.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));button(first,"Add Beat").click();await tick();
+   assert.equal(first.isConnected,false);const accepted=structuredClone(remembered);assert.equal(accepted.expectedSourceRevision,"accepted-source");
+   const second=await open(),nextPosition=second.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;
+   assert.equal(nextPosition.value,"line","The next draft must open at the accepted placement");assert.doesNotMatch(second.textContent!,/original insertion Scene changed/);
+   nextPosition.value="end";nextPosition.dispatchEvent(new Event("change",{bubbles:true}));
+   if(exit==="cancel")button(second,"Cancel").click();else nextPosition.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true,cancelable:true}));
+   assert.deepEqual(remembered,accepted,"Cancellation must preserve the latest accepted context for Screens handoff");assert.equal(writes,1);assert.deepEqual(original.position,{type:"before",anchor:{type:"beat",beatId:"end"}});
+  }finally{await s.close();}
+ }
+});
+
 test("a deleted insertion Scene retains intent and allows an explicit replacement position",async()=>{
  const model=fixture(),scene=model.scenes[0]!,remembered:unknown[]=[];
  const insertion={sceneId:"deleted-scene",body:{type:"root" as const},position:{type:"before" as const,anchor:{type:"beat" as const,beatId:"line"}},expectedSourceRevision:scene.sourceRevision};
