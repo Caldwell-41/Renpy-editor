@@ -10,7 +10,7 @@ testsuite help_dialog:
         assert eval (_hd_underlying_count == 1)
         $ _hd_baseline_count = _hd_underlying_count
         $ _hd_underlying_count = 0
-        advance
+        advance until screen "help_dialog"
         assert screen "help_dialog" timeout 10
         pause 0.2
         $ _hd_frame_rect, _hd_outside = _hd_measure_outside()
