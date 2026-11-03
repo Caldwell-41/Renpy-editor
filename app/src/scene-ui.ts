@@ -26,7 +26,7 @@ export type BeatPayload =
   | { readonly type: "background"; readonly assetId: string; readonly transition: TransitionRef }
   | { readonly type: "showCharacter"; readonly characterId: string; readonly appearanceId: string; readonly placement: PlacementRef; readonly transition: TransitionRef }
   | { readonly type: "hideCharacter"; readonly characterId: string; readonly transition: TransitionRef }
-  | { readonly type: "showScreen" | "hideScreen"; readonly target: ScreenTargetBinding; readonly revisions?: ScreenRevisions | null }
+  | { readonly type: "showScreen" | "hideScreen" | "callScreen"; readonly target: ScreenTargetBinding; readonly revisions?: ScreenRevisions | null }
   | { readonly type: "changeAppearance"; readonly characterId: string; readonly appearanceId: string; readonly transition: TransitionRef }
   | { readonly type: "placement"; readonly characterId: string; readonly placement: PlacementRef }
   | { readonly type: "dialogue"; readonly characterId: string; readonly text: string }
@@ -117,7 +117,8 @@ function insideCondition(scene: SceneDocument, body: BodyRef, groupId: string): 
   }
   return false;
 }
-export interface StoryTarget { readonly sceneId: string; readonly beatId?: string; readonly expectedSourceRevision?: string; readonly body?: BodyRef; readonly caller?: StoryTarget; readonly screenHint?: ScreenTargetBinding }
+export interface ScreenInsertion { readonly sceneId:string; readonly body:BodyRef; readonly position:Position; readonly expectedSourceRevision:string }
+export interface StoryTarget { readonly sceneId: string; readonly beatId?: string; readonly expectedSourceRevision?: string; readonly body?: BodyRef; readonly caller?: StoryTarget; readonly screenHint?: ScreenTargetBinding; readonly screenHintKind?: "panel" | "dialog"; readonly screenInsertion?: ScreenInsertion }
 
 export interface SceneDocument {
   readonly id: string;
@@ -190,7 +191,7 @@ function readOnlyLogic(beat: SceneBeat): boolean {
   return beat.payload.type === "choice" && beat.payload.options.some(option => option.condition?.status === "unknown");
 }
 function previewLogicBoundary(beat: SceneBeat): boolean {
-  return beat.payload.type === "call" || beat.payload.type === "showScreen" || beat.payload.type === "hideScreen" || (beat.payload.type === "choice" && beat.payload.options.some(option => option.condition !== undefined));
+  return beat.payload.type === "call" || beat.payload.type === "showScreen" || beat.payload.type === "hideScreen" || beat.payload.type === "callScreen" || (beat.payload.type === "choice" && beat.payload.options.some(option => option.condition !== undefined));
 }
 
 export interface MediaPresentation {
@@ -288,7 +289,7 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string,
       case "call": overlay = { kind: "call", text: "Call Scene · preview state unknown", beatId: beat.id }; break;
       case "return": overlay = { kind: "return", text: "Return / End", beatId: beat.id }; break;
       case "playSfx": case "transition": break;
-      case "showScreen": case "hideScreen": break;
+      case "showScreen": case "hideScreen": case "callScreen": break;
     }
     if (payload.type === "choice") { if (!unknownBeatIds.includes(beat.id)) unknownBeatIds.push(beat.id); break; }
     if (payload.type === "jump" || payload.type === "return") break;
@@ -313,6 +314,9 @@ export interface SceneActions {
   readonly screenCatalog?: () => Promise<ScreenCatalog>;
   readonly resolveScreenTarget?: (binding: ScreenTargetBinding) => Promise<ResolvedScreenTarget>;
   readonly screenHint?: ScreenTargetBinding;
+  readonly screenHintKind?: "panel" | "dialog";
+  readonly screenInsertion?: ScreenInsertion;
+  readonly rememberScreenInsertion?: (target:ScreenInsertion) => void;
   readonly current?: () => boolean;
   readonly caller?: StoryTarget;
   readonly viewScene?: (target: StoryTarget) => void;
@@ -337,6 +341,7 @@ const beatLabels: Record<BeatPayload["type"], string> = {
   showCharacter: "Show Character",
   hideCharacter: "Hide Character",
   showScreen: "Show screen",
+  callScreen: "Call screen",
   hideScreen: "Hide screen",
   changeAppearance: "Change Appearance",
   placement: "Placement",
@@ -586,7 +591,7 @@ export function renderSceneAuthoring(
     });
   };
 
-  const openNewBeat = (scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", beforeBeatId: string | null = null): void => {
+  const openNewBeat = (scene: SceneDocument, initialType: BeatPayload["type"] = actions.screenHintKind === "dialog" ? "callScreen" : "dialogue", beforeBeatId: string | null = null): void => {
     if (!draftGuard()) return;
     const anchor = beforeBeatId ? scene.beats.find(beat => beat.id === beforeBeatId) : undefined;
     if (anchor?.owner || (anchor?.conditionalBranch && (anchor.conditionalBranch.otherwise || anchor.conditionalBranch.ordinal))) {
@@ -596,7 +601,11 @@ export function renderSceneAuthoring(
     draw();
     const current = model.scenes.find((item) => item.id === scene.id);
     const list = host.querySelector<HTMLElement>(".beats-list");
-    if (current && list) renderNewBeat(list, current, initialType, { type: "root" }, anchor ? { type: "before", anchor: nodeRef(anchor) } : defaultInsertion(current, { type: "root" }));
+    if (current && list) {
+      const hint = !anchor && actions.screenInsertion?.sceneId === scene.id ? structuredClone(actions.screenInsertion) : undefined;
+      const body = hint?.body ?? {type:"root"} as BodyRef;
+      renderNewBeat(list, current, initialType, body, anchor ? {type:"before",anchor:nodeRef(anchor)} : hint?.position ?? defaultInsertion(current, body), hint?.expectedSourceRevision);
+    }
   };
 
   const loadImage = async (assetId: string, purpose: "thumbnail" | "imagePreview", image: HTMLImageElement, errorHost: HTMLElement): Promise<void> => {
@@ -744,7 +753,7 @@ export function renderSceneAuthoring(
     draw();
     return beat ? [...host.querySelectorAll<HTMLElement>(".beat-card")].find(item => item.dataset.beatId === beat.id) : host.querySelector<HTMLElement>(".beats-list") ?? undefined;
   };
-  const destinations = (scene: SceneDocument, initialBody: BodyRef, exclude?: SceneBeat): { host: HTMLElement; read: () => { body: BodyRef; position: Position } } => {
+  const destinations = (scene: SceneDocument, initialBody: BodyRef, exclude?: SceneBeat, initialPosition?: Position, insertion = false): { host: HTMLElement; read: () => { body: BodyRef; position: Position } } => {
     const panel = document.createElement("div"); panel.className = "story-destination";
     const parents: { key: string; body: BodyRef; label: string }[] = [{ key: "root", body: { type: "root" }, label: bodyCaption(scene, { type: "root" }, model) }];
     for (const branch of scene.beats.filter(beat => beat.conditionalBranch)) {
@@ -752,20 +761,28 @@ export function renderSceneAuthoring(
       if (exclude?.conditionalBranch && insideCondition(scene, body, exclude.conditionalBranch.groupId)) continue;
       parents.push({ key: branch.id, body, label: bodyCaption(scene, body, model) });
     }
-    const parent = selectOf(parents.map(item => ({ value: item.key, label: item.label })), initialBody.type === "root" ? "root" : initialBody.branchId); parent.setAttribute("aria-label", "Destination body");
-    const position = document.createElement("select"); position.setAttribute("aria-label", "Destination position");
+    const parent = selectOf(parents.map(item => ({ value: item.key, label: item.label })), initialBody.type === "root" ? "root" : initialBody.branchId); parent.setAttribute("aria-label", insertion ? "Insert in" : "Destination body");
+    if(insertion && !parent.value){const missing=document.createElement("option");missing.value="unavailable-body";missing.textContent="Original body unavailable";parent.prepend(missing);parent.value="unavailable-body";}
+    const position = document.createElement("select"); position.setAttribute("aria-label", insertion ? "Insert before" : "Destination position");
     const summary = document.createElement("p"); summary.className = "story-insertion";
     let placements: { key: string; position: Position; label: string }[] = [];
-    const show = (): void => { summary.textContent = `Move to ${parents.find(item => item.key === parent.value)?.label ?? "Missing body"} · ${placements.find(item => item.key === position.value)?.label ?? "Choose a position"}`; };
+    const show = (): void => { summary.textContent = `${insertion ? "Insert in" : "Move to"} ${parents.find(item => item.key === parent.value)?.label ?? "Missing body"} · ${placements.find(item => item.key === position.value)?.label ?? "Choose a position"}`; };
     const rebuild = (): void => {
-      const body = parents.find(item => item.key === parent.value)!.body;
-      const siblings = bodyNodes(scene, body).filter(beat => beat.id !== exclude?.id);
+      const selectedBody=parents.find(item=>item.key===parent.value);
+      if(!selectedBody){placements=[];position.replaceChildren();summary.textContent="Original body unavailable. Choose a body explicitly. Input retained.";return;}
+      const body = selectedBody.body;
+      let siblings = bodyNodes(scene, body).filter(beat => beat.id !== exclude?.id);
+      const terminal = siblings.findIndex(beat => terminates(beat, scene));
+      if (insertion && terminal >= 0) siblings = siblings.slice(0, terminal + 1);
       placements = siblings.filter(beat => (!beat.protected || !!beat.conditionalBranch) && (!exclude || !terminates(exclude, scene))).map(beat => ({ key: beat.id, position: { type: "before", anchor: nodeRef(beat) } as Position, label: `Before ${beat.conditionalBranch ? "Condition" : beatLabels[beat.payload.type]} · ${beatSummary(beat.payload, model)}` }));
       if (!siblings.some(beat => terminates(beat, scene))) placements.push({ key: "end", position: { type: "end" }, label: "End of body" });
       position.replaceChildren(...placements.map(item => { const option = document.createElement("option"); option.value = item.key; option.textContent = item.label; return option; }));
-      const preferred = defaultInsertion(scene, body); const match = placements.find(item => JSON.stringify(item.position) === JSON.stringify(preferred)); position.value = match?.key ?? placements[0]?.key ?? ""; show();
+      const preferred = initialPosition ?? defaultInsertion(scene, body); const match = placements.find(item => JSON.stringify(item.position) === JSON.stringify(preferred));
+      if (insertion && initialPosition && !match) { const unavailable=document.createElement("option"); unavailable.value="unavailable";unavailable.textContent="Original position unavailable";position.prepend(unavailable);position.value="unavailable"; }
+      else position.value = match?.key ?? placements[0]?.key ?? "";
+      initialPosition=undefined; show();
     };
-    parent.addEventListener("change", rebuild); position.addEventListener("change", show); rebuild(); panel.append(labelled("Destination body", parent), labelled("Destination position", position), summary);
+    parent.addEventListener("change", rebuild); position.addEventListener("change", show); rebuild(); panel.append(labelled(insertion ? "Insert in" : "Destination body", parent), labelled(insertion ? "Insert before" : "Destination position", position), summary);
     const validate = validateField(position, () => { if (!placements.some(item => item.key === position.value)) throw Error("Choose an available position in this body."); });
     return { host: panel, read: () => { validate(); return { body: parents.find(item => item.key === parent.value)!.body, position: placements.find(item => item.key === position.value)!.position }; } };
   };
@@ -874,7 +891,7 @@ export function renderSceneAuthoring(
     const tools = document.createElement("div"); tools.className = "beats-tools";tools.append(add);
     if (actions.screenCatalog && actions.resolveScreenTarget) {
       const screenBeat = button("Add screen Beat"); screenBeat.disabled = scene.sourceConflict;
-      screenBeat.addEventListener("click", () => openNewBeat(scene,"showScreen"));
+      screenBeat.addEventListener("click", () => openNewBeat(scene,actions.screenHintKind === "dialog" ? "callScreen" : "showScreen"));
       if (actions.screenHint) screenBeat.title = `Use ${actions.screenHint.sourceName.replaceAll("_"," ")} in this Scene`;
       tools.append(screenBeat);
     }
@@ -1046,7 +1063,7 @@ export function renderSceneAuthoring(
     const expectedBody = beatBody(beat);
     const editor = buildBeatEditor(model, beat.payload, true, actions);
     const panel = editor.host; panel.classList.add("expanded-beat");panel.dataset.beatType=beat.payload.type;
-    if (beat.payload.type === "showScreen" || beat.payload.type === "hideScreen") {
+    if (beat.payload.type === "showScreen" || beat.payload.type === "hideScreen" || beat.payload.type === "callScreen") {
       const details = document.createElement("details"), summary = document.createElement("summary"); summary.textContent = "Source and effects";
       const effect = document.createElement("p"); effect.textContent = !beat.screenEffects || beat.screenEffects.unknown
         ? "Effects unknown. Custom or unresolved actions may change play state."
@@ -1091,7 +1108,7 @@ export function renderSceneAuthoring(
     }
     const actionsRow = document.createElement("div"); actionsRow.className = "row-actions";
     const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => { selectedBeatId = undefined; draw(); });
-    if (beat.payload.type === "showScreen" || beat.payload.type === "hideScreen") panel.addEventListener("keydown", event => {
+    if (beat.payload.type === "showScreen" || beat.payload.type === "hideScreen" || beat.payload.type === "callScreen") panel.addEventListener("keydown", event => {
       if (event.key !== "Escape" || event.isComposing || composing) return;
       event.preventDefault(); event.stopPropagation(); if (!pendingWrites && !settling) { selectedBeatId = undefined; draw(); }
     });
@@ -1130,7 +1147,7 @@ export function renderSceneAuthoring(
     actionsRow.append(cancel, commit); panel.append(actionsRow); dirtyDraft(panel, editor.controls); card.append(panel);
   };
 
-  const renderNewBeat = (list: HTMLElement, scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", body: BodyRef = { type: "root" }, position: Position = defaultInsertion(scene, body)): void => {
+  const renderNewBeat = (list: HTMLElement, scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", body: BodyRef = { type: "root" }, position: Position = defaultInsertion(scene, body), expectedInsertionRevision?: string): void => {
     if (host.querySelector(".new-beat")) return;
     const captured = { projectRevision: model.projectRevision, sourceMapRevision: model.sourceMapRevision };
     const panel = document.createElement("section"); panel.className = "new-beat scene-draft";
@@ -1142,16 +1159,23 @@ export function renderSceneAuthoring(
     const insertionAnchor = position.type === "before" ? position.anchor : undefined;
     const anchor = insertionAnchor ? bodyNodes(scene, body).find(beat => JSON.stringify(nodeRef(beat)) === JSON.stringify(insertionAnchor)) : undefined;
     destination.textContent = `Insert in ${bodyCaption(scene, body, model)} · ${anchor ? `Before ${anchor.conditionalBranch ? "Condition" : beatLabels[anchor.payload.type]}` : "End of body"}`;
+    const placement=destinations(scene,body,undefined,position,true);
+    const screenType=()=>["showScreen","hideScreen","callScreen"].includes(type.value);
+    let locationConfirmed=!expectedInsertionRevision || expectedInsertionRevision===scene.sourceRevision;
+    const placementError=document.createElement("p");placementError.role="status";placementError.textContent=locationConfirmed?"":"The original insertion Scene changed. Choose its position explicitly. Input retained.";
+    const readLocation=()=>{if(!locationConfirmed)throw Error(placementError.textContent!);return placement.read();};
+    const remember=()=>{if(screenType())try{actions.rememberScreenInsertion?.({sceneId:scene.id,...readLocation(),expectedSourceRevision:scene.sourceRevision});}catch{/* Retain the unavailable original position until an explicit choice. */}};
+    placement.host.addEventListener("change",()=>{locationConfirmed=true;placementError.textContent="";remember();});
     const editorHost = document.createElement("div");
     let editor = buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, actions);
     const typeDrafts = new Map<string, BeatEditor>([[type.value, editor]]);
-    const replaceEditor = (): void => { editor = typeDrafts.get(type.value) ?? buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, actions); typeDrafts.set(type.value, editor); editorHost.replaceChildren(editor.host); dirtyDraft(panel, editor.controls); };
+    const replaceEditor = (): void => { placement.host.hidden=!screenType();destination.hidden=screenType();remember();editor = typeDrafts.get(type.value) ?? buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, actions); typeDrafts.set(type.value, editor); editorHost.replaceChildren(editor.host); dirtyDraft(panel, editor.controls); };
     type.addEventListener("change", replaceEditor); replaceEditor();
     const actionsRow = document.createElement("div"); actionsRow.className = "row-actions";
     const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => panel.remove());
     let pending=false;
     panel.addEventListener("keydown", event => {
-      if (event.key !== "Escape" || event.isComposing || composing || !["showScreen", "hideScreen"].includes(type.value)) return;
+      if (event.key !== "Escape" || event.isComposing || composing || !["showScreen", "hideScreen", "callScreen"].includes(type.value)) return;
       event.preventDefault(); event.stopPropagation(); if (!pending) panel.remove();
     });
     const commit = button("Add Beat", "button primary"); commit.addEventListener("click", async () => {
@@ -1163,7 +1187,8 @@ export function renderSceneAuthoring(
         const locks = controls.map(control => ({ control, disabled: control.disabled }));
         controls.forEach(control=>control.disabled=true);
         let insertedId:string|undefined;
-        const saved=await mutate({ type: "insertBodyBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, body, position, beat: payload }, (before,next) => {
+        const location=screenType()?readLocation():{body,position};
+        const saved=await mutate({ type: "insertBodyBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, ...location, beat: payload }, (before,next) => {
           selectedBeatId = undefined;
           const previousIds=new Set(before.scenes.find(s=>s.id===scene.id)?.beats.map(b=>b.id));
           insertedId=next.scenes.find(s=>s.id===scene.id)?.beats.find(b=>!previousIds.has(b.id))?.id;
@@ -1174,7 +1199,7 @@ export function renderSceneAuthoring(
         actions.status(friendlyError(error, "Beat is invalid"), "error"); editor.focus();
       }finally{pending=false;}
     });
-    actionsRow.append(cancel, commit); dirtyDraft(panel, [type]); panel.append(heading, destination, labelled("Beat type", type), editorHost, actionsRow); list.prepend(panel); type.focus();
+    actionsRow.append(cancel, commit); dirtyDraft(panel, [type]); panel.append(heading, destination, labelled("Beat type", type), placement.host, placementError, editorHost, actionsRow); list.prepend(panel); type.focus();
   };
 
   draw();
@@ -1215,6 +1240,7 @@ function beatSummary(payload: BeatPayload, model: SceneWorkspace): string {
     case "hideCharacter": return character(payload.characterId);
     case "showScreen": return `${payload.target.sourceName} · Dialogue continues`;
     case "hideScreen": return `${payload.target.sourceName} · Removes the panel`;
+    case "callScreen": return `${payload.target.sourceName} · Waits for Finish interaction`;
     case "changeAppearance": return character(payload.characterId);
     case "placement": return `${character(payload.characterId)} · ${payload.placement}`;
     case "dialogue": return `${character(payload.characterId)}: ${payload.text || "Empty dialogue"}`;
@@ -1233,41 +1259,43 @@ function beatSummary(payload: BeatPayload, model: SceneWorkspace): string {
 
 interface BeatEditor { readonly host: HTMLElement; readonly controls: readonly HTMLElement[]; readonly primary: HTMLElement; readonly read: () => BeatPayload; readonly focus: () => void }
 
-function buildScreenBeatEditor(payload: Extract<BeatPayload, { type: "showScreen" | "hideScreen" }>, existing: boolean, actions?: SceneActions): BeatEditor {
+function buildScreenBeatEditor(payload: Extract<BeatPayload, { type: "showScreen" | "hideScreen" | "callScreen" }>, existing: boolean, actions?: SceneActions): BeatEditor {
+  const calling=payload.type==="callScreen",kind=calling?"dialog":"panel",caption=calling?"Dialog":"Panel";
   const intent = { ...payload.target }, originalRevisions = payload.revisions ? { ...payload.revisions } : undefined;
   const host = document.createElement("div"); host.className = "beat-fields story-screen-fields";
-  const picker = document.createElement("select"); picker.setAttribute("aria-label", "Panel screen"); picker.disabled = true;
-  const purpose = document.createElement("p"); purpose.textContent = payload.type === "showScreen"
+  const picker = document.createElement("select"); picker.setAttribute("aria-label", `${caption} screen`); picker.disabled = true;
+  const purpose = document.createElement("p"); purpose.textContent = calling ? "Call waits for Finish interaction. Close and Escape finish the dialog; outside clicks keep it open. Scene Call and Story Return are separate operations." : payload.type === "showScreen"
     ? "Show keeps the panel open while dialogue continues. Hide, Close and game Escape dismiss it. Outside clicks keep it open."
     : "Hide removes the panel at this point in the story. Dialogue continues.";
-  const message = document.createElement("p"); message.role = "status"; message.ariaLive = "polite"; message.textContent = "Loading panel screens…";
-  host.append(labelled("Panel screen", picker), purpose, message);
+  const message = document.createElement("p"); message.role = "status"; message.ariaLive = "polite"; message.textContent = `Loading ${kind} screens…`;
+  host.append(labelled(`${caption} screen`, picker), purpose, message);
   let captured: { target: ScreenTargetBinding; revisions: ScreenRevisions } | undefined;
   let generation = 0;
   const panels = new Map<string, ScreenTargetBinding>();
   const placeholder = (label: string) => { const option = document.createElement("option"); option.value = intent.screenId; option.textContent = label; option.dataset.unavailable = "true"; picker.replaceChildren(option); };
-  placeholder(intent.sourceName || "Loading panels…");
-  const fail = (error: unknown) => { captured = undefined; message.textContent = `${friendlyError(error, "Panel target unavailable.")} Choose an available panel explicitly. Input retained.`; };
+  placeholder(intent.sourceName || `Loading ${kind}s…`);
+  const fail = (error: unknown) => { captured = undefined; message.textContent = `${friendlyError(error, `${caption} target unavailable.`)} Choose an available ${kind} explicitly. Input retained.`; };
   const resolve = async () => {
     const run = ++generation; captured = undefined;
     const binding = panels.get(picker.value);
-    if (!binding || !actions?.resolveScreenTarget) { fail(Error("Panel target unavailable.")); return; }
-    message.textContent = "Checking panel…";
+    if (!binding || !actions?.resolveScreenTarget) { fail(Error(`${caption} target unavailable.`)); return; }
+    message.textContent = `Checking ${kind}…`;
     try {
       const resolved = await actions.resolveScreenTarget({ ...binding });
       if (run !== generation || actions.current?.() === false) return;
-      if (resolved.kind !== "panel" || resolved.binding.screenId !== binding.screenId || resolved.binding.sourceName !== binding.sourceName) throw Error("Panel identity changed.");
+      if (resolved.kind !== kind || resolved.binding.screenId !== binding.screenId || resolved.binding.sourceName !== binding.sourceName) throw Error(`${caption} identity changed.`);
+      if(calling && (!resolved.blocking || resolved.effects.unknown)) throw Error("Call needs a blocking Dialog with known interaction effects.");
       captured = { target: { ...resolved.binding }, revisions: { ...resolved.revisions } };
-      message.textContent = resolved.effects.unknown ? "Some screen effects are unknown. Review Source and effects before play." : "Panel ready.";
+      message.textContent = resolved.effects.unknown ? "Some screen effects are unknown. Review Source and effects before play." : `${caption} ready.`;
     } catch (error) { if (run === generation) fail(error); }
   };
   picker.addEventListener("change", () => { void resolve(); });
   void (async () => {
     try {
-      if (!actions?.screenCatalog || !actions.resolveScreenTarget) throw Error("Panel screens are unavailable in this workspace.");
+      if (!actions?.screenCatalog || !actions.resolveScreenTarget) throw Error(`${caption} screens are unavailable in this workspace.`);
       const catalog = await actions.screenCatalog();
       if (actions.current?.() === false) return;
-      const owned = catalog.owned.filter(screen => screen.kind === "panel" && screen.resolved);
+      const owned = catalog.owned.filter(screen => screen.kind === kind && screen.resolved);
       picker.replaceChildren();
       for (const screen of owned) {
         const option = document.createElement("option"); option.value = screen.id; option.textContent = screen.name; picker.append(option);
@@ -1276,25 +1304,25 @@ function buildScreenBeatEditor(payload: Extract<BeatPayload, { type: "showScreen
       const match = owned.find(screen => screen.id === intent.screenId && screen.name === intent.sourceName);
       if (intent.screenId && !match) {
         const option = document.createElement("option"); option.value = ""; option.textContent = `${intent.sourceName} · Unavailable`; option.dataset.unavailable = "true"; picker.prepend(option); picker.value = "";
-        fail(Error("The original panel is missing or renamed."));
-      } else if (!owned.length) { placeholder("No available Panel screens"); fail(Error("Create a Panel in Screens first.")); }
+        fail(Error(`The original ${kind} is missing or renamed.`));
+      } else if (!owned.length) { placeholder(`No available ${caption} screens`); fail(Error(`Create a ${caption} in Screens first.`)); }
       else if (existing) {
         picker.value = intent.screenId;
         if (!originalRevisions) fail(Error("The original target is unresolved."));
-        else if (match?.sourceRevision !== originalRevisions.source) fail(Error("The panel changed after this Beat was loaded."));
-        else { captured = { target: { ...intent }, revisions: originalRevisions }; message.textContent = "Panel ready."; }
+        else if (match?.sourceRevision !== originalRevisions.source) fail(Error(`The ${kind} changed after this Beat was loaded.`));
+        else { captured = { target: { ...intent }, revisions: originalRevisions }; message.textContent = `${caption} ready.`; }
       } else { if (match) picker.value = match.id; await resolve(); }
       picker.disabled = !owned.length;
     } catch (error) { fail(error); }
   })();
   return { host, controls: [picker], primary: picker, focus: () => picker.focus(), read: () => {
-    if (!captured || picker.selectedOptions[0]?.dataset.unavailable === "true") throw Error(message.textContent || "Select an available Panel first.");
+    if (!captured || picker.selectedOptions[0]?.dataset.unavailable === "true") throw Error(message.textContent || `Select an available ${caption} first.`);
     return { type: payload.type, target: { ...captured.target }, revisions: { ...captured.revisions } };
   } };
 }
 
 function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload, existing = false, actions?: SceneActions): BeatEditor {
-  if (payload.type === "showScreen" || payload.type === "hideScreen") return buildScreenBeatEditor(payload, existing, actions);
+  if (payload.type === "showScreen" || payload.type === "hideScreen" || payload.type === "callScreen") return buildScreenBeatEditor(payload, existing, actions);
   const host = document.createElement("div"); host.className = "beat-fields"; const controls: HTMLElement[] = [];
   const add = (label: string, control: HTMLElement): void => { controls.push(control); host.append(labelled(label, control)); };
   const transitions = (includeNone = true) => selectOf(([...(includeNone ? [{ value: "none" as const, label: "None" }] : []), { value: "dissolve" as const, label: "Dissolve" }, { value: "fade" as const, label: "Fade" }]), "transition" in payload ? payload.transition : "none");
@@ -1367,7 +1395,7 @@ function defaultPayload(type: BeatPayload["type"], model: SceneWorkspace, screen
     case "background": return { type, assetId: model.authoring.assets.find((item) => item.kind === "background")?.id ?? "", transition: "none" };
     case "showCharacter": return { type, characterId, appearanceId, placement: "centre", transition: "none" };
     case "hideCharacter": return { type, characterId, transition: "none" };
-    case "showScreen": case "hideScreen": return { type, target: screenHint ? { ...screenHint } : { screenId: "", sourceName: "" } };
+    case "showScreen": case "hideScreen": case "callScreen": return { type, target: screenHint ? { ...screenHint } : { screenId: "", sourceName: "" } };
     case "changeAppearance": return { type, characterId, appearanceId, transition: "none" };
     case "placement": return { type, characterId, placement: "centre" };
     case "dialogue": return { type, characterId, text: "" };

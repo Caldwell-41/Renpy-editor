@@ -141,3 +141,18 @@ test("Use in Story offers an explicit screen Beat action with the selected panel
     assert.deepEqual(s.commands,[]);
   } finally {await s.close();}
 });
+
+test("Call screen chooses only dialogs and retains the selected insertion anchor after refusal", async () => {
+  const dialogBinding={screenId:"dialog-id",sourceName:"help_dialog"};
+  const dialogTarget:ResolvedScreenTarget={...target,binding:dialogBinding,kind:"dialog",blocking:true,effects:{...target.effects,unknown:false,hiddenScreens:[],finishesInteraction:true}};
+  const s=setup({screenCatalog:async()=>({...catalog,owned:[...catalog.owned,{...catalog.owned[2]!,id:dialogBinding.screenId,name:dialogBinding.sourceName,kind:"dialog"}]}),resolveScreenTarget:async()=>dialogTarget});
+  const draft=openNew(s.host,"callScreen");await tick();
+  const picker=draft.querySelector<HTMLSelectElement>('[aria-label="Dialog screen"]');assert.ok(picker);assert.deepEqual([...picker.options].map(o=>o.value),[dialogBinding.screenId]);
+  const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]');assert.ok(position);assert(![...position.options].some(o=>o.textContent==="End of body"));
+  position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));
+  button(draft,"Add Beat").click();await tick();
+  assert.deepEqual(s.commands[0]!.body,{type:"root"});assert.deepEqual(s.commands[0]!.position,{type:"before",anchor:{type:"beat",beatId:"line"}});
+  assert.deepEqual(s.commands[0]!.beat,{type:"callScreen",target:dialogBinding,revisions});
+  assert.equal(position.value,"line");assert.ok(draft.isConnected);assert.match(s.messages.at(-1)!,/Input retained/);
+  await s.close();
+});

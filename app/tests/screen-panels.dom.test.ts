@@ -70,3 +70,17 @@ test("screen name validates on completion, associates its error and allows incom
   name.value="valid_name";name.dispatchEvent(new Event("input",{bubbles:true}));assert.equal(name.hasAttribute("aria-invalid"),false);assert.equal(error.hidden,true);
   view.dispose();await browser.happyDOM.close();
 });
+
+test("Dialog creation retains required image, kind and name across an Assets handoff", async () => {
+  const browser=setup();const calls:PanelCreation[]=[];let retained:unknown;
+  const view=buildPanelCreationForm({assets:[],create:async value=>{calls.push(value);},cancel:()=>{}});
+  document.body.append(view.element);
+  const kind=view.element.querySelector<HTMLInputElement>('[name="screen-kind"][value="dialog"]');assert.ok(kind);kind.click();
+  control<HTMLInputElement>("screen-name").value="quick_help";
+  submit();await tick();assert.equal(calls.length,0);assert.equal(view.element.querySelector<HTMLButtonElement>('[type="submit"]')!.disabled,true);
+  retained=view.readDraft();view.dispose();view.element.remove();
+  const restored=buildPanelCreationForm({assets:[image],initialDraft:retained as ReturnType<typeof view.readDraft>,create:async value=>{calls.push(value);},cancel:()=>{}});
+  document.body.append(restored.element);submit();await tick();
+  assert.equal(calls[0]?.kind,"dialog");assert.equal(calls[0]?.name,"quick_help");assert.equal(calls[0]?.starter?.assetId,image.id);
+  restored.dispose();await browser.happyDOM.close();
+});
