@@ -70,8 +70,14 @@ anchor. The coordinator restores the Assets action, disables creation after a
 known missing-image refusal without replacing the captured ID, and places an
 inert pending marker at the selected root/branch anchor with Cancel/Escape cleanup.
 Screen-Beat Cancel also uses the approved outlined treatment. Focused tests cover
-the refusal and marker location/cleanup. Creation's modal placement and small
-preview still differ materially from approved A4 and remain integration work.
+the refusal and marker location/cleanup. The coordinator subsequently replaces
+the creation modal with the existing inspector, uses A4's compact starter/kind
+selects and moves the same passive typed-media preview into the canvas area at
+the larger approved scale. Compact creation hides that preview as A4 does.
+Panel defaults, required images, source acceptance and per-session drafts retain
+their existing owners. Superseded radio/modal CSS is removed. Thirty-four affected
+DOM cases pass, including inspector placement and Assets return; real-browser
+visual verification of this correction remains open.
 No whole-page visual match, engine canvas, native/package/CI or new runtime result
 is claimed by this browser run. Its engine boundary was intercepted deliberately.
 

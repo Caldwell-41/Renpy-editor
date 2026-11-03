@@ -1179,6 +1179,11 @@ export function renderSceneAuthoring(
       const body=location.body;
       const bodyHost=body.type==="root"?host.querySelector<HTMLElement>(".beats-list"):[...host.querySelectorAll<HTMLElement>(".story-branch-body")].find(node=>node.dataset.branchId===body.branchId);
       if(!bodyHost)return;
+      for(let parent=bodyHost.parentElement;parent&&parent!==host;parent=parent.parentElement){
+        if(!parent.classList.contains("story-branches"))continue;
+        parent.hidden=false;const group=parent.parentElement,id=group?.dataset.conditionGroupId;
+        if(id)collapsedConditions.delete(id);group?.querySelector("[data-collapse-group-id]")?.setAttribute("aria-expanded","true");
+      }
       const anchor=location.position.type==="before"?location.position.anchor:undefined;
       const before=anchor?.type==="beat"?[...bodyHost.querySelectorAll<HTMLElement>(".beat-card")].find(node=>node.dataset.beatId===anchor.beatId):anchor?.type==="condition"?[...bodyHost.querySelectorAll<HTMLElement>(".story-condition-group")].find(node=>node.dataset.conditionGroupId===anchor.groupId):undefined;
       pendingMarker.textContent=`Pending ${beatLabels[type.value as BeatPayload["type"]]}`;

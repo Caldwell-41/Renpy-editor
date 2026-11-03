@@ -13,6 +13,7 @@ test("a missing-image create refusal keeps Assets reachable and the original ima
  const view=buildPanelCreationForm({assets:[image],initialDraft:initial,openAssets:draft=>{handed=draft;},create:async()=>{throw Object.assign(Error("Image disappeared"),{code:"UI_IMAGE_MISSING"});},cancel:()=>{}});
  try{document.body.append(view.element);submit();await tick();
   assert.equal(view.element.querySelector<HTMLButtonElement>('[type="submit"]')!.disabled,true);
+  assert.equal(view.preview.hidden,true);
   const assets=[...view.element.querySelectorAll<HTMLButtonElement>("button")].find(button=>button.textContent==="Open Assets")!;assert.equal(assets.hidden,false);assets.click();assert.deepEqual(handed,initial);
  }finally{view.dispose();await browser.happyDOM.close();}
 });
@@ -42,10 +43,9 @@ test("empty image inventory keeps Help and its name blocked until the author exp
   const name = control<HTMLInputElement>("screen-name"); name.value = "help_without_image";
   const create = document.querySelector<HTMLButtonElement>('[type="submit"]')!;
   assert.equal(create.disabled, true); submit(); await tick(); assert.deepEqual(calls, []);
-  assert.equal(name.value, "help_without_image"); assert.equal(document.querySelector<HTMLInputElement>('[name="starter"]:checked')!.value, "help");
+  assert.equal(name.value, "help_without_image"); assert.equal(control<HTMLSelectElement>("starter").value, "help");
   assert.match(view.element.textContent!, /import an image in Assets with the UI image role/);
-  const blank = document.querySelector<HTMLInputElement>('[name="starter"][value="blank"]')!;
-  blank.click();
+  const blank = control<HTMLSelectElement>("starter"); blank.value="blank";blank.dispatchEvent(new Event("change",{bubbles:true}));
   assert.equal(create.disabled, false); submit(); await tick(); assert.deepEqual(calls, [{ name: "help_without_image" }]);
   view.dispose(); await browser.happyDOM.close();
 });
@@ -85,7 +85,7 @@ test("Dialog creation retains required image, kind and name across an Assets han
   const browser=setup();const calls:PanelCreation[]=[];let retained:unknown;
   const view=buildPanelCreationForm({assets:[],create:async value=>{calls.push(value);},cancel:()=>{}});
   document.body.append(view.element);
-  const kind=view.element.querySelector<HTMLInputElement>('[name="screen-kind"][value="dialog"]');assert.ok(kind);kind.click();
+  const kind=control<HTMLSelectElement>("screen-kind");kind.value="dialog";kind.dispatchEvent(new Event("change",{bubbles:true}));
   control<HTMLInputElement>("screen-name").value="quick_help";
   submit();await tick();assert.equal(calls.length,0);assert.equal(view.element.querySelector<HTMLButtonElement>('[type="submit"]')!.disabled,true);
   retained=view.readDraft();view.dispose();view.element.remove();

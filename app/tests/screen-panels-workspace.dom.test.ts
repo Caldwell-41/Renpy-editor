@@ -29,7 +29,8 @@ function fixture(kind: OwnedScreen["kind"] = "panel", availableImage = true, dis
 
 test("New screen mounts the real Help form and retains its fields after a refused create",async()=>{
  const f=fixture();try{await flush();f.click("New screen");await flush();
- const dialog=document.querySelector("dialog.screen-create")!;assert.ok(dialog.querySelector('.screen-panels-help'),dialog.outerHTML);
+ const dialog=document.querySelector("section.screen-create")!;assert.ok(dialog.querySelector('.screen-panels-help'),dialog.outerHTML);
+ assert.equal(dialog.parentElement?.classList.contains("screen-card"),true);assert.equal(document.querySelector("dialog.screen-create"),null);assert.ok(document.querySelector(".screen-starter-canvas .screen-panels-preview"));
  const name=dialog.querySelector<HTMLInputElement>('[name="screen-name"]')!;name.value="route_help";name.dispatchEvent(new window.Event("input",{bubbles:true}));
  f.fail();dialog.querySelector("form")!.dispatchEvent(new window.Event("submit",{bubbles:true,cancelable:true}));await flush();
  assert.equal(f.writes.length,1);assert.equal(f.writes[0]!.name,"route_help");assert.equal((f.writes[0]!.starter as Record<string,unknown>).assetId,"image");
@@ -61,11 +62,11 @@ test("Use in Story retains an unfinished appearance draft across workspace remou
 test("Assets return retains Dialog Help creation inputs and refreshes its acceptance catalog",async()=>{
  const f=fixture("panel",false);try{await flush();f.click("New screen");await flush();
  const name=document.querySelector<HTMLInputElement>('[name="screen-name"]')!;name.value="route_dialog";name.dispatchEvent(new window.Event("input",{bubbles:true}));
- const kind=document.querySelector<HTMLInputElement>('[name="screen-kind"][value="dialog"]')!;assert.ok(kind);kind.checked=true;kind.dispatchEvent(new window.Event("change",{bubbles:true}));
+ const kind=document.querySelector<HTMLSelectElement>('[name="screen-kind"]')!;assert.ok(kind);kind.value="dialog";kind.dispatchEvent(new window.Event("change",{bubbles:true}));
  f.click("Open Assets");await flush();assert.equal(f.workspace.panel.isConnected,false);assert.equal(f.writes.length,0);
  f.importImage();f.workspace.mount(document.body);await flush();
- assert.equal(document.querySelector<HTMLInputElement>('[name="screen-name"]')!.value,"route_dialog");assert.equal(document.querySelector<HTMLInputElement>('[name="screen-kind"][value="dialog"]')!.checked,true);
- document.querySelector("dialog.screen-create form")!.dispatchEvent(new window.Event("submit",{bubbles:true,cancelable:true}));await flush();
+ assert.equal(document.querySelector<HTMLInputElement>('[name="screen-name"]')!.value,"route_dialog");assert.equal(document.querySelector<HTMLSelectElement>('[name="screen-kind"]')!.value,"dialog");
+ document.querySelector("section.screen-create form")!.dispatchEvent(new window.Event("submit",{bubbles:true,cancelable:true}));await flush();
  assert.equal(f.writes.length,1);assert.equal(f.writes[0]!.kind,"dialog");assert.equal((f.writes[0]!.starter as Record<string,unknown>).assetId,"image");assert.equal(f.writes[0]!.expectedProjectRevision,"project-1");assert.equal(f.writes[0]!.expectedInventoryRevision,"inventory-1");
  }finally{await f.close();}
 });
@@ -95,7 +96,7 @@ test("creation Cancel and Escape restore focus to New screen without writing",as
  const f=fixture();try{await flush();
  for(const action of ["Cancel","Escape"]){
   f.click("New screen");await flush();
-  const dialog=document.querySelector("dialog.screen-create")!,name=dialog.querySelector<HTMLInputElement>('[name="screen-name"]')!;name.focus();
+  const dialog=document.querySelector("section.screen-create")!,name=dialog.querySelector<HTMLInputElement>('[name="screen-name"]')!;name.focus();
   if(action==="Cancel")([...dialog.querySelectorAll<HTMLButtonElement>('button[type="button"]')].find(button=>button.textContent==="Cancel"))!.click();
   else name.dispatchEvent(new window.KeyboardEvent("keydown",{key:"Escape",bubbles:true,cancelable:true}));
   assert.equal(dialog.isConnected,false);assert.equal(document.activeElement?.textContent,"New screen");assert.deepEqual(f.writes,[]);

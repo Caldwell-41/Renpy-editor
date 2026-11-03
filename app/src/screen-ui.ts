@@ -65,6 +65,7 @@ export class ScreensWorkspace {
   private readonly card = el("section", "screen-card");
   private readonly canvas = el("div", "screen-game");
   private readonly stage = el("section", "screen-stage");
+  private readonly starterPreview = el("div", "screen-starter-canvas");
   private readonly canvasStatus = el("p", "muted screen-canvas-status");
   private readonly selectionPath = el("nav", "screen-selection-path");
   private readonly selectionCaption = el("p", "screen-selection-caption");
@@ -85,7 +86,7 @@ export class ScreensWorkspace {
   private owned?: OwnedScreen;
   private creation?: { base: ScreenCatalog; draft?: PanelCreationDraft; suspended?: boolean; refreshBase?: boolean };
   private creationForm?: ReturnType<typeof buildPanelCreationForm>;
-  private creationDialog?: HTMLDialogElement;
+  private creationHost?: HTMLElement;
   private doc?: ScreenDocument;
   private screen = "";
   private selected = 0;
@@ -228,7 +229,8 @@ export class ScreensWorkspace {
     const viewport = el("div", "screen-viewport"); viewport.append(this.canvas);
     this.canvasStatus.role = "status";
     this.selectionPath.ariaLabel = "Selection path";
-    this.stage.ariaLabel = "Screen canvas"; this.stage.append(caption, viewport, this.selectionPath, this.selectionCaption, this.canvasStatus,
+    this.starterPreview.hidden = true;
+    this.stage.ariaLabel = "Screen canvas"; this.stage.append(caption, this.starterPreview, viewport, this.selectionPath, this.selectionCaption, this.canvasStatus,
       el("p", "muted", "Canvas controls select elements. Editing never runs game scripts or actions. Test in Ren'Py runs accepted source."));
     const canvasJump = button("Show canvas", () => { this.stage.scrollIntoView({block:"start"}); caption.tabIndex = -1; caption.focus({preventScroll:true}); }, "button secondary screen-compose-jump");
     caption.append(button("Back to editing", () => { this.card.scrollIntoView({block:"start"}); (this.card.querySelector<HTMLElement>("textarea") ?? this.card.querySelector<HTMLElement>('[aria-selected="true"]') ?? this.card.querySelector<HTMLElement>("button"))?.focus({preventScroll:true}); }, "button secondary screen-compose-jump"));
@@ -248,10 +250,10 @@ export class ScreensWorkspace {
   }
   mount(host: HTMLElement): void {
     host.append(this.panel);
-    if (this.creation?.suspended) { this.creation.suspended = false; this.creation.refreshBase = true; }
+    if (this.creation) { this.creation.suspended = false; this.creation.refreshBase = true; this.closeCreationHost(); }
     this.frames.invalidate("Checking canvas source."); void this.load();
   }
-  dispose(): void { this.disposed = true; this.sourceSequence++; this.sourceDialog?.remove(); this.components.dispose(); this.composer.dispose(); this.images.dispose(); this.text.dispose(); this.dismissal.dispose(); this.frames.dispose(); this.observer.disconnect(); this.cancelMove(); this.cancelResize(); this.closeCreationDialog(); }
+  dispose(): void { this.disposed = true; this.sourceSequence++; this.sourceDialog?.remove(); this.components.dispose(); this.composer.dispose(); this.images.dispose(); this.text.dispose(); this.dismissal.dispose(); this.frames.dispose(); this.observer.disconnect(); this.cancelMove(); this.cancelResize(); this.closeCreationHost(); }
   hasDraft(): boolean { return this.components.hasPendingCopy() || this.components.isSaving() || this.drafts.size > 0 || !!this.resize || !!this.creation || this.composer.hasAddition() || this.layout.hasDraft() || this.images.hasDraft() || this.text.hasDraft() || this.dismissal.hasDraft(); }
   private current(): boolean { return !this.disposed && this.actions.current(); }
   private ownedSelection(): {screenId:string;nodeId:string} | undefined {
@@ -388,7 +390,7 @@ export class ScreensWorkspace {
   private draft(): Draft | undefined { return this.drafts.get(this.key()); }
   private note(text: string, error = false): void {
     this.message.textContent = text; this.message.dataset.error = String(error);
-    const status = this.creationDialog?.querySelector<HTMLElement>('[role="status"]');
+    const status = this.creationHost?.querySelector<HTMLElement>('[role="status"]');
     if (status) { status.textContent = text; status.dataset.error = String(error); }
   }
   private saved(sourceChanged: boolean): void {
@@ -473,6 +475,11 @@ export class ScreensWorkspace {
     this.images.unmountCard(); this.text.unmount(); this.card.classList.remove("screen-image","screen-text","screen-component-use"); this.card.onkeydown = null;
     this.panel.dataset.numericLayout = String(numeric); this.card.classList.toggle("screen-numeric", numeric);
     [...this.rail.querySelectorAll("button")].forEach((b, i) => b.ariaPressed = String(["choose", "design", "connect"][i] === this.step));
+    this.panel.dataset.creating = String(!!this.creation && !this.creation.suspended);
+    if (this.creation && !this.creation.suspended) {
+      if (!this.creationHost?.isConnected) { this.card.replaceChildren(); this.renderCreation(); }
+      return;
+    }
     this.card.replaceChildren(); this.card.ariaLabel = "Selected properties";
     const componentView = this.compositionView();
     if (componentView && this.components.renderUse(this.card,componentView)) { this.dismissal.renderRetained(this.card); this.renderCanvas(); return; }
@@ -565,39 +572,42 @@ export class ScreensWorkspace {
   }
   private beginCreation(): void {
     if (this.busy || this.hasDraft() || !this.catalog) { this.note("Finish or cancel unfinished changes before creating a screen. Input retained.", true); return; }
-    this.creation = { base: this.catalog }; this.renderCard(); this.creationDialog?.querySelector<HTMLInputElement>('[aria-label="Screen name"]')?.focus();
+    this.creation = { base: this.catalog }; this.renderCard(); this.creationHost?.querySelector<HTMLInputElement>('[aria-label="Screen name"]')?.focus();
   }
   private renderCreation(): void {
-    if (this.creationDialog?.isConnected || !this.creation || this.creation.suspended) return;
+    if (this.creationHost?.isConnected || !this.creation || this.creation.suspended) return;
+    this.panel.dataset.creating = "true";
     const draft = this.creation;
-    const dialog = el("dialog", "screen-create"); dialog.ariaLabel = "New screen";
+    const formHost = el("section", "screen-create"); formHost.ariaLabel = "New screen";
     const status = el("p", "", "Loading project images…"); status.role = "status";
     const cancel = () => { if (!this.busy) {
-      this.creation = undefined; this.closeCreationDialog(); this.renderCard();
+      this.creation = undefined; this.closeCreationHost(); this.renderCard();
       [...this.card.querySelectorAll<HTMLButtonElement>("button")].find(button=>button.textContent==="New screen")?.focus({preventScroll:true});
       this.note("Creation cancelled. No source was written.");
     } };
-    dialog.append(el("h2", "", "New screen"),status,button("Cancel",cancel));
-    dialog.oncancel = event => { event.preventDefault(); cancel(); };
-    this.creationDialog = dialog; this.panel.append(dialog); dialog.showModal();
+    formHost.append(el("h2", "", "New screen"),status,button("Cancel",cancel));
+    this.creationHost = formHost; this.card.append(formHost);
     void this.actions.request<{assets:UiImageAsset[]}>("authoring.list").then(model => {
-      if (!this.current() || this.creation !== draft || this.creationDialog !== dialog) return;
+      if (!this.current() || this.creation !== draft || this.creationHost !== formHost) return;
       this.creationForm = buildPanelCreationForm({assets:model.assets,initialDraft:draft.draft,presentImage:assetId=>this.actions.request("media.present",{assetId,purpose:"imagePreview"}),current:()=>this.current() && this.creation === draft,
         openAssets:this.actions.openAssets ? value=>{void this.openCreationAssets(value);} : undefined,create:value=>this.create(value),cancel});
-      dialog.replaceChildren(el("h2", "", "New screen"),this.creationForm.element); this.creationForm.focus();
+      formHost.replaceChildren(el("h2", "", "New screen"),this.creationForm.element);
+      this.starterPreview.replaceChildren(el("h2", "", "Starter preview"),this.creationForm.preview);
+      this.starterPreview.hidden = false; this.creationForm.focus();
     }).catch(error => {
-      if (this.creation === draft && dialog.isConnected) status.textContent = `${(error as Error).message} Cancel and reopen New screen to reload images.`;
+      if (this.creation === draft && formHost.isConnected) status.textContent = `${(error as Error).message} Cancel and reopen New screen to reload images.`;
     });
   }
-  private closeCreationDialog(): void {
+  private closeCreationHost(): void {
     if (this.creation && this.creationForm) this.creation.draft = this.creationForm.readDraft();
     this.creationForm?.dispose(); this.creationForm = undefined;
-    this.creationDialog?.close(); this.creationDialog?.remove(); this.creationDialog = undefined;
+    this.creationHost?.remove(); this.creationHost = undefined;
+    this.starterPreview.replaceChildren(); this.starterPreview.hidden = true; this.panel.dataset.creating = "false";
   }
   private async openCreationAssets(value: PanelCreationDraft): Promise<void> {
     const draft = this.creation;
     if (!draft || this.busy || !this.actions.openAssets) return;
-    draft.draft = value; draft.suspended = true; this.closeCreationDialog();
+    draft.draft = value; draft.suspended = true; this.closeCreationHost();
     try { await this.actions.openAssets(); }
     catch (error) { if (this.current()) this.note(`${(error as Error).message} Creation input retained.`,true); }
     finally {
@@ -615,7 +625,7 @@ export class ScreensWorkspace {
       }));
       if (!this.current()) return;
       this.owned = catalog.owned.find(s => !draft.base.owned.some(old => old.id === s.id));
-      this.creation = undefined; this.closeCreationDialog(); this.selected = 0; this.saved(true);
+      this.creation = undefined; this.closeCreationHost(); this.selected = 0; this.saved(true);
     } finally {
       this.busy = false;
       if (this.current() && !this.creation) { await this.load(); this.card.querySelector<HTMLElement>('[aria-selected="true"]')?.focus(); }
@@ -740,7 +750,7 @@ export class ScreensWorkspace {
     if (this.busy) { this.note("The edit is being accepted. Input retained until its result arrives."); return; }
     if (this.move) {this.cancelMove();return;}
     if (this.resize) {this.cancelResize();return;}
-    if (this.creation) { this.creation = undefined; this.closeCreationDialog(); this.renderCard(); this.card.querySelector<HTMLButtonElement>("button")?.focus(); }
+    if (this.creation) { this.creation = undefined; this.closeCreationHost(); this.renderCard(); this.card.querySelector<HTMLButtonElement>("button")?.focus(); }
     this.provisionalMove = undefined; this.drafts.delete(this.key()); this.updateSizeControls(); this.renderCanvas(); this.note("Changes cancelled. No source was written.");
   }
   private async apply(): Promise<void> {
