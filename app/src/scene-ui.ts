@@ -593,6 +593,7 @@ export function renderSceneAuthoring(
 
   const openNewBeat = (scene: SceneDocument, initialType: BeatPayload["type"] = actions.screenHintKind === "dialog" ? "callScreen" : "dialogue", beforeBeatId: string | null = null): void => {
     if (!draftGuard()) return;
+    if(actions.screenInsertion && !model.scenes.some(item=>item.id===actions.screenInsertion!.sceneId)){actions.status("The original insertion Scene is unavailable. Input retained.","error");return;}
     const anchor = beforeBeatId ? scene.beats.find(beat => beat.id === beforeBeatId) : undefined;
     if (anchor?.owner || (anchor?.conditionalBranch && (anchor.conditionalBranch.otherwise || anchor.conditionalBranch.ordinal))) {
       actions.status("Add a root Beat before or after the whole condition group.", "error"); return;
@@ -1067,8 +1068,9 @@ export function renderSceneAuthoring(
       const details = document.createElement("details"), summary = document.createElement("summary"); summary.textContent = "Source and effects";
       const effect = document.createElement("p"); effect.textContent = !beat.screenEffects || beat.screenEffects.unknown
         ? "Effects unknown. Custom or unresolved actions may change play state."
-        : "Known Hide actions are recorded. This editor does not execute the panel.";
-      const context = document.createElement("pre"); context.textContent = JSON.stringify({ target: beat.payload.target, revisions: beat.payload.revisions, effects: beat.screenEffects ?? null }, null, 2);
+        : beat.screenEffects.finishesInteraction ? "Qualified Return() finishes this dialog interaction. Normal play owns continuation." : "Qualified panel actions are recorded. This editor does not execute them.";
+      details.className="story-screen-secondary";
+      const context = document.createElement("pre");context.textContent=`${beat.payload.type === "callScreen" ? "call" : beat.payload.type === "showScreen" ? "show" : "hide"} screen ${beat.payload.target.sourceName}`;
       details.append(summary, effect, context); panel.append(details);
     }
     const parent = document.createElement("p"); parent.className = "story-breadcrumb"; parent.textContent = bodyCaption(scene, expectedBody, model); panel.prepend(parent);
@@ -1144,7 +1146,11 @@ export function renderSceneAuthoring(
     if (beat.payload.type === "dialogue") editor.primary.addEventListener("keydown", (event) => {
       if ((event.ctrlKey || event.metaKey) && event.key === "Enter") { event.preventDefault(); if(!event.isComposing&&!settling)settling=save(event.shiftKey).finally(()=>{settling=undefined;}); }
     });
-    actionsRow.append(cancel, commit); panel.append(actionsRow); dirtyDraft(panel, editor.controls); card.append(panel);
+    const screenBeat=["showScreen","hideScreen","callScreen"].includes(beat.payload.type);
+    if(screenBeat)panel.classList.add("story-screen-editor");
+    actionsRow.append(...(screenBeat?[commit,cancel]:[cancel,commit]));
+    const secondary=panel.querySelector("details.story-screen-secondary");panel.append(actionsRow);if(secondary)panel.append(secondary);
+    dirtyDraft(panel, editor.controls); card.append(panel);
   };
 
   const renderNewBeat = (list: HTMLElement, scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", body: BodyRef = { type: "root" }, position: Position = defaultInsertion(scene, body), expectedInsertionRevision?: string): void => {
@@ -1166,10 +1172,10 @@ export function renderSceneAuthoring(
     const readLocation=()=>{if(!locationConfirmed)throw Error(placementError.textContent!);return placement.read();};
     const remember=()=>{if(screenType())try{actions.rememberScreenInsertion?.({sceneId:scene.id,...readLocation(),expectedSourceRevision:scene.sourceRevision});}catch{/* Retain the unavailable original position until an explicit choice. */}};
     placement.host.addEventListener("change",()=>{locationConfirmed=true;placementError.textContent="";remember();});
-    const editorHost = document.createElement("div");
+    const editorHost = document.createElement("div"),secondaryHost=document.createElement("div");secondaryHost.className="story-screen-secondary";
     let editor = buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, actions);
     const typeDrafts = new Map<string, BeatEditor>([[type.value, editor]]);
-    const replaceEditor = (): void => { placement.host.hidden=!screenType();destination.hidden=screenType();remember();editor = typeDrafts.get(type.value) ?? buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, actions); typeDrafts.set(type.value, editor); editorHost.replaceChildren(editor.host); dirtyDraft(panel, editor.controls); };
+    const replaceEditor = (): void => { placement.host.hidden=!screenType();destination.hidden=screenType();remember();editor = typeDrafts.get(type.value) ?? buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, actions); typeDrafts.set(type.value, editor); editorHost.replaceChildren(editor.host);secondaryHost.replaceChildren(...(editor.secondary?[editor.secondary]:[]));panel.classList.toggle("story-screen-editor",screenType());dirtyDraft(panel, editor.controls); };
     type.addEventListener("change", replaceEditor); replaceEditor();
     const actionsRow = document.createElement("div"); actionsRow.className = "row-actions";
     const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => panel.remove());
@@ -1182,12 +1188,12 @@ export function renderSceneAuthoring(
       if(pending || composing)return;
       try {
         const payload = editor.read();
+        const location=screenType()?readLocation():{body,position};
         pending=true;panel.dataset.unsubmitted="true";
         const controls=[...panel.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement|HTMLButtonElement>("input,select,textarea,button")];
         const locks = controls.map(control => ({ control, disabled: control.disabled }));
         controls.forEach(control=>control.disabled=true);
         let insertedId:string|undefined;
-        const location=screenType()?readLocation():{body,position};
         const saved=await mutate({ type: "insertBodyBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, ...location, beat: payload }, (before,next) => {
           selectedBeatId = undefined;
           const previousIds=new Set(before.scenes.find(s=>s.id===scene.id)?.beats.map(b=>b.id));
@@ -1199,7 +1205,8 @@ export function renderSceneAuthoring(
         actions.status(friendlyError(error, "Beat is invalid"), "error"); editor.focus();
       }finally{pending=false;}
     });
-    actionsRow.append(cancel, commit); dirtyDraft(panel, [type]); panel.append(heading, destination, labelled("Beat type", type), placement.host, placementError, editorHost, actionsRow); list.prepend(panel); type.focus();
+    const orderActions=()=>actionsRow.replaceChildren(...(screenType()?[commit,cancel]:[cancel,commit]));orderActions();type.addEventListener("change",orderActions);
+    dirtyDraft(panel,[type,...placement.host.querySelectorAll("select")]);panel.append(heading,destination,labelled("Beat type",type),placement.host,placementError,editorHost,actionsRow,secondaryHost);list.prepend(panel);type.focus();
   };
 
   draw();
@@ -1257,18 +1264,21 @@ function beatSummary(payload: BeatPayload, model: SceneWorkspace): string {
   }
 }
 
-interface BeatEditor { readonly host: HTMLElement; readonly controls: readonly HTMLElement[]; readonly primary: HTMLElement; readonly read: () => BeatPayload; readonly focus: () => void }
+interface BeatEditor { readonly host: HTMLElement; readonly controls: readonly HTMLElement[]; readonly primary: HTMLElement; readonly secondary?: HTMLElement; readonly read: () => BeatPayload; readonly focus: () => void }
 
 function buildScreenBeatEditor(payload: Extract<BeatPayload, { type: "showScreen" | "hideScreen" | "callScreen" }>, existing: boolean, actions?: SceneActions): BeatEditor {
   const calling=payload.type==="callScreen",kind=calling?"dialog":"panel",caption=calling?"Dialog":"Panel";
   const intent = { ...payload.target }, originalRevisions = payload.revisions ? { ...payload.revisions } : undefined;
   const host = document.createElement("div"); host.className = "beat-fields story-screen-fields";
   const picker = document.createElement("select"); picker.setAttribute("aria-label", `${caption} screen`); picker.disabled = true;
-  const purpose = document.createElement("p"); purpose.textContent = calling ? "Call waits for Finish interaction. Close and Escape finish the dialog; outside clicks keep it open. Scene Call and Story Return are separate operations." : payload.type === "showScreen"
+  const purpose = document.createElement("p"); purpose.textContent = calling ? "Call waits for Finish interaction. Dialog defaults use Close and Escape; outside clicks keep it open. Scene Call and Story Return are separate operations." : payload.type === "showScreen"
     ? "Show keeps the panel open while dialogue continues. Hide, Close and game Escape dismiss it. Outside clicks keep it open."
     : "Hide removes the panel at this point in the story. Dialogue continues.";
   const message = document.createElement("p"); message.role = "status"; message.ariaLive = "polite"; message.textContent = `Loading ${kind} screens…`;
   host.append(labelled(`${caption} screen`, picker), purpose, message);
+  const secondary=document.createElement("details"),summary=document.createElement("summary");summary.textContent="Source and effects";
+  const effects=document.createElement("p");effects.textContent="No screen Beat has been added. Source shows accepted appearance.";
+  const source=button("View screen in Source","text-button");source.disabled=true;secondary.append(summary,effects,source);
   let captured: { target: ScreenTargetBinding; revisions: ScreenRevisions } | undefined;
   let generation = 0;
   const panels = new Map<string, ScreenTargetBinding>();
@@ -1285,6 +1295,8 @@ function buildScreenBeatEditor(payload: Extract<BeatPayload, { type: "showScreen
       if (run !== generation || actions.current?.() === false) return;
       if (resolved.kind !== kind || resolved.binding.screenId !== binding.screenId || resolved.binding.sourceName !== binding.sourceName) throw Error(`${caption} identity changed.`);
       if(calling && (!resolved.blocking || resolved.effects.unknown)) throw Error("Call needs a blocking Dialog with known interaction effects.");
+      effects.textContent=resolved.effects.unknown ? "Effects unknown. Review accepted Source before play." : resolved.effects.finishesInteraction ? "Accepted Return() can finish this dialog. Normal play owns continuation." : "Accepted panel effects are qualified.";
+      source.disabled=!actions.viewSource;source.onclick=()=>actions.viewSource?.(resolved.path,undefined,undefined,resolved.revisions.source);
       captured = { target: { ...resolved.binding }, revisions: { ...resolved.revisions } };
       message.textContent = resolved.effects.unknown ? "Some screen effects are unknown. Review Source and effects before play." : `${caption} ready.`;
     } catch (error) { if (run === generation) fail(error); }
@@ -1315,7 +1327,7 @@ function buildScreenBeatEditor(payload: Extract<BeatPayload, { type: "showScreen
       picker.disabled = !owned.length;
     } catch (error) { fail(error); }
   })();
-  return { host, controls: [picker], primary: picker, focus: () => picker.focus(), read: () => {
+  return { host, secondary:existing?undefined:secondary, controls: [picker], primary: picker, focus: () => picker.focus(), read: () => {
     if (!captured || picker.selectedOptions[0]?.dataset.unavailable === "true") throw Error(message.textContent || `Select an available ${caption} first.`);
     return { type: payload.type, target: { ...captured.target }, revisions: { ...captured.revisions } };
   } };

@@ -1,5 +1,5 @@
 import type { CompositionCommand, CompositionView } from "./screen-composition.ts";
-import type { ScreenDocument } from "./screen-ui.ts";
+import type { ScreenDocument, ScreenNode } from "./screen-ui.ts";
 import type { OwnedScreen } from "./screen-contracts.ts";
 import type { HelpStarter } from "./screen-contracts.ts";
 import { ScreenImageMedia } from "./screen-image-media.ts";
@@ -141,7 +141,7 @@ interface DismissalHost {
   redraw: () => void;
   note: (message:string,error?:boolean) => void;
 }
-interface DismissalDraft { base: ScreenDocument; action:string }
+interface DismissalDraft { base: ScreenDocument; action:string; screenId:string; nodeId:string; screenName:string; nodeName:string }
 
 /** Owns only local action drafts. ScreensWorkspace/core own accepted composition. */
 export class ScreenDismissal {
@@ -152,6 +152,18 @@ export class ScreenDismissal {
   hasDraft():boolean{return this.drafts.size>0;}
   isSaving():boolean{return this.saving;}
   dispose():void{this.disposed=true;this.drafts.clear();}
+  renderRetained(card:HTMLElement):void {
+    const view=this.host.view(),kind=this.host.kind();
+    for(const [key,draft] of this.drafts){
+      const selected=view?.selected as (ScreenNode & {dismissal?:string|null})|undefined;
+      if(view?.screenId===draft.screenId && selected?.id===draft.nodeId && selected.dismissal!=null && (kind==="panel"||kind==="dialog"))continue;
+      const notice=element("section","screen-dismissal-retained");notice.role="status";
+      notice.append(element("p","",`${draft.screenName} / ${draft.nodeName}: ${draft.action==="finishInteraction"?"Finish interaction":"Hide this panel"} draft retained.`),element("p","",`Original source: ${draft.base.path}. Select the original button to continue editing, or cancel this draft.`));
+      const cancel=element("button","button secondary","Cancel action draft");cancel.type="button";cancel.disabled=this.saving;
+      cancel.onclick=()=>{if(!this.disposed&&this.host.current()&&!this.saving){this.drafts.delete(key);this.host.redraw();}};
+      notice.append(cancel);card.append(notice);
+    }
+  }
   render(card:HTMLElement):boolean {
     const view=this.host.view(),kind=this.host.kind();
     if(!view || view.selected.kind!=="textbutton" || !view.selected.id || (kind!=="panel"&&kind!=="dialog"))return false;
@@ -169,7 +181,7 @@ export class ScreenDismissal {
     const apply=element("button","button primary","Apply"),cancel=element("button","button secondary","Cancel");apply.type=cancel.type="button";
     const active=()=>!this.disposed&&this.host.current();
     const refresh=()=>{apply.disabled=view.busy||this.saving||select.value===initial||select.value!==action;cancel.disabled=this.saving||!this.drafts.has(key);select.disabled=view.busy||this.saving;};
-    select.onchange=()=>{if(select.value===initial)this.drafts.delete(key);else this.drafts.set(key,{base:this.drafts.get(key)?.base??view.document,action:select.value});refresh();};
+    select.onchange=()=>{if(select.value===initial)this.drafts.delete(key);else this.drafts.set(key,{...(this.drafts.get(key)??{base:view.document,screenId:view.screenId,nodeId:node.id!,screenName:view.screenName,nodeName:node.literal??"Button"}),action:select.value});refresh();};
     const discard=()=>{if(active()&&!this.saving){this.drafts.delete(key);this.host.redraw();}};
     cancel.onclick=discard;
     section.addEventListener("keydown",event=>{if(event.key==="Escape"&&!event.isComposing){event.preventDefault();event.stopPropagation();discard();}});

@@ -156,3 +156,27 @@ test("Call screen chooses only dialogs and retains the selected insertion anchor
   assert.equal(position.value,"line");assert.ok(draft.isConnected);assert.match(s.messages.at(-1)!,/Input retained/);
   await s.close();
 });
+
+test("screen draft Source and effects follows Add and Cancel and navigates only accepted screen source",async()=>{
+ const sourceCalls:unknown[][]=[];const s=setup({viewSource:(...args)=>sourceCalls.push(args)});const draft=openNew(s.host,"showScreen");await tick();
+ const secondary=draft.querySelector<HTMLElement>(".story-screen-secondary");assert.ok(secondary);assert.equal(secondary.querySelector("summary")?.textContent,"Source and effects");
+ const row=draft.querySelector<HTMLElement>(".row-actions")!;assert.equal(row.nextElementSibling,secondary);assert.deepEqual([...row.querySelectorAll("button")].map(b=>b.textContent),["Add Beat","Cancel"]);
+ button(secondary,"View screen in Source").click();assert.deepEqual(sourceCalls,[[target.path,undefined,undefined,revisions.source]]);assert.equal(s.commands.length,0);await s.close();
+});
+
+test("retained screen insertion refuses a changed Scene or missing anchor until an explicit location choice",async()=>{
+ for(const mode of ["changed","missing"]){
+  const model=fixture(),scene=model.scenes[0]!,remembered:unknown[]=[];
+  const dialogBinding={screenId:"dialog-id",sourceName:"help_dialog"};const dialogTarget:ResolvedScreenTarget={...target,binding:dialogBinding,kind:"dialog",blocking:true,effects:{...target.effects,unknown:false}};
+  const s=setup({screenHint:dialogBinding,screenHintKind:"dialog",screenInsertion:{sceneId:scene.id,body:{type:"root"},position:{type:"before",anchor:{type:"beat",beatId:mode==="missing"?"removed":"line"}},expectedSourceRevision:mode==="changed"?"old":scene.sourceRevision},rememberScreenInsertion:value=>remembered.push(value),screenCatalog:async()=>({...catalog,owned:[{...catalog.owned[2]!,id:dialogBinding.screenId,name:dialogBinding.sourceName,kind:"dialog"}]}),resolveScreenTarget:async()=>dialogTarget},model);
+  const draft=openNew(s.host,"callScreen");await tick();button(draft,"Add Beat").click();await tick();assert.equal(s.commands.length,0);assert.equal(remembered.length,0);assert.ok(draft.isConnected);
+  const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));button(draft,"Add Beat").click();await tick();assert.equal(s.commands.length,1);assert.equal((remembered.at(-1) as {expectedSourceRevision:string}).expectedSourceRevision,scene.sourceRevision);await s.close();
+ }
+});
+
+test("unknown or nonblocking Dialog is refused before a new Call write",async()=>{
+ for(const state of ["unknown","nonblocking"]){const b={screenId:"dialog-id",sourceName:"help_dialog"};
+  const s=setup({screenCatalog:async()=>({...catalog,owned:[{...catalog.owned[2]!,id:b.screenId,name:b.sourceName,kind:"dialog"}]}),resolveScreenTarget:async()=>({...target,binding:b,kind:"dialog",blocking:state!=="nonblocking",effects:{...target.effects,unknown:state==="unknown"}})});
+  const draft=openNew(s.host,"callScreen");await tick();button(draft,"Add Beat").click();await tick();assert.equal(s.commands.length,0);assert.ok(draft.isConnected);assert.match(draft.textContent!,/blocking Dialog with known/);await s.close();
+ }
+});
