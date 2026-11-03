@@ -1,5 +1,5 @@
 import { ScreenComponents, type ComponentFieldChange } from "./screen-components.ts";
-import { buildPanelCreationForm, type PanelCreation } from "./screen-panels.ts";
+import { buildPanelCreationForm, type PanelCreation, type PanelCreationDraft } from "./screen-panels.ts";
 import { ScreenImages, type UiImageAsset } from "./screen-images.ts";
 import { ScreenText, type TextProperties, type StyleCatalog } from "./screen-text.ts";
 import { ScreenCanvasFrames } from "./screen-canvas-frames.ts";
@@ -10,7 +10,7 @@ import { layoutFor, saveLayout } from "./preferences.ts";
 import type { CoreOperation } from "./protocol.ts";
 import type { SourceDocument, SourceInventory, SourceTarget } from "./source-ui.ts";
 import type { ScreenPreview } from "./runtime-preparation.ts";
-import type { OwnedScreen, ScreenCatalog, ScreenTargetBinding, ComponentChange, ScreenRevisions } from "./screen-contracts.ts";
+import type { OwnedScreen, ScreenCatalog, ScreenTargetBinding, ResolvedScreenTarget, ComponentChange, ScreenRevisions } from "./screen-contracts.ts";
 
 export interface ScreenNode {
   id?: string | null;
@@ -22,6 +22,7 @@ export interface ScreenNode {
   textProperties?: TextProperties | null;
   style?: {name:string; error:string|null} | null;
   component?: { componentId: string; resolved: boolean; sourceRevision: string | null } | null;
+  dismissal?: "none" | "finishInteraction" | "hideScreen" | null;
   protected: { start: number; end: number }[];
 }
 export interface ScreenDocument {
@@ -44,7 +45,8 @@ interface Actions {
   source: (target: SourceTarget) => void;
   preview: (target: ScreenPreview, validate: boolean) => void;
   saved: () => void;
-  useInStory?: (binding: ScreenTargetBinding) => Promise<void>;
+  openAssets?: () => Promise<void>;
+  useInStory?: (binding: ScreenTargetBinding, kind: "panel" | "dialog") => Promise<void>;
 }
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, className = "", text = ""): HTMLElementTagNameMap[K] => {
   const element = document.createElement(tag); element.className = className; element.textContent = text; return element;
@@ -81,7 +83,7 @@ export class ScreensWorkspace {
   private documents: ScreenDocument[] = [];
   private catalog?: ScreenCatalog;
   private owned?: OwnedScreen;
-  private creation?: { base: ScreenCatalog };
+  private creation?: { base: ScreenCatalog; draft?: PanelCreationDraft; suspended?: boolean; refreshBase?: boolean };
   private creationForm?: ReturnType<typeof buildPanelCreationForm>;
   private creationDialog?: HTMLDialogElement;
   private doc?: ScreenDocument;
@@ -239,7 +241,11 @@ export class ScreensWorkspace {
     });
     this.observer = new ResizeObserver(() => this.renderCanvas()); this.observer.observe(viewport);
   }
-  mount(host: HTMLElement): void { host.append(this.panel); this.frames.invalidate("Checking canvas source."); void this.load(); }
+  mount(host: HTMLElement): void {
+    host.append(this.panel);
+    if (this.creation?.suspended) { this.creation.suspended = false; this.creation.refreshBase = true; }
+    this.frames.invalidate("Checking canvas source."); void this.load();
+  }
   dispose(): void { this.disposed = true; this.sourceSequence++; this.sourceDialog?.remove(); this.components.dispose(); this.composer.dispose(); this.images.dispose(); this.text.dispose(); this.frames.dispose(); this.observer.disconnect(); this.cancelMove(); this.cancelResize(); this.closeCreationDialog(); }
   hasDraft(): boolean { return this.components.hasPendingCopy() || this.components.isSaving() || this.drafts.size > 0 || !!this.resize || !!this.creation || this.composer.hasAddition() || this.layout.hasDraft() || this.images.hasDraft() || this.text.hasDraft(); }
   private current(): boolean { return !this.disposed && this.actions.current(); }
@@ -411,6 +417,7 @@ export class ScreensWorkspace {
         if (!document || document.revision !== owned.sourceRevision || !document.screens.some(s => s.name === owned.name)) owned.resolved = false;
       });
       const path = this.doc?.path, selectedId = this.nodes()[this.selected]?.id; this.documents = documents; this.catalog = catalog;
+      if (this.creation?.refreshBase) { this.creation.base = catalog; this.creation.refreshBase = false; }
       const supported = documents.filter(d => d.screens.length > 0);
       if (this.owned) this.owned = catalog.owned.find(s => s.id === this.owned!.id) ?? { ...this.owned, resolved: false };
       else if (!path) this.owned = catalog.owned.find(s => s.id === layoutFor(this.preferenceKey()).screenSelection?.screenId) ?? catalog.owned[0];
@@ -423,7 +430,7 @@ export class ScreensWorkspace {
       this.selection.replaceChildren();
       const owned = [...catalog.owned];
       if (this.owned && !owned.some(s => s.id === this.owned!.id)) owned.push(this.owned);
-      owned.forEach(s => { const option = el("option", "", `${s.name.replaceAll("_"," ")} · ${s.kind === "component" ? "Component" : "Panel"}${s.resolved ? "" : " · unavailable"}`); option.value = JSON.stringify(["owned", s.id]); this.selection.append(option); });
+      owned.forEach(s => { const option = el("option", "", `${s.name.replaceAll("_"," ")} · ${s.kind === "component" ? "Component" : s.kind === "dialog" ? "Dialog" : "Panel"}${s.resolved ? "" : " · unavailable"}`); option.value = JSON.stringify(["owned", s.id]); this.selection.append(option); });
       documents.forEach(d => d.screens.forEach(s => { if (catalog.owned.some(o => o.path === d.path && o.name === s.name)) return; const option = el("option", "", `${s.name} · ${d.path}`); option.value = JSON.stringify([d.path, s.name]); this.selection.append(option); }));
       this.selection.value = this.owned ? JSON.stringify(["owned", this.owned.id]) : JSON.stringify([this.doc?.path, this.screen]);
       this.images.invalidate(); this.text.invalidate();
@@ -552,7 +559,7 @@ export class ScreensWorkspace {
     this.creation = { base: this.catalog }; this.renderCard(); this.creationDialog?.querySelector<HTMLInputElement>('[aria-label="Screen name"]')?.focus();
   }
   private renderCreation(): void {
-    if (this.creationDialog?.isConnected || !this.creation) return;
+    if (this.creationDialog?.isConnected || !this.creation || this.creation.suspended) return;
     const draft = this.creation;
     const dialog = el("dialog", "screen-create"); dialog.ariaLabel = "New screen";
     const status = el("p", "", "Loading project images…"); status.role = "status";
@@ -566,16 +573,29 @@ export class ScreensWorkspace {
     this.creationDialog = dialog; this.panel.append(dialog); dialog.showModal();
     void this.actions.request<{assets:UiImageAsset[]}>("authoring.list").then(model => {
       if (!this.current() || this.creation !== draft || this.creationDialog !== dialog) return;
-      this.creationForm = buildPanelCreationForm({assets:model.assets,presentImage:assetId=>this.actions.request("media.present",{assetId,purpose:"imagePreview"}),current:()=>this.current() && this.creation === draft,
-        create:value=>this.create(value),cancel});
+      this.creationForm = buildPanelCreationForm({assets:model.assets,initialDraft:draft.draft,presentImage:assetId=>this.actions.request("media.present",{assetId,purpose:"imagePreview"}),current:()=>this.current() && this.creation === draft,
+        openAssets:this.actions.openAssets ? value=>{void this.openCreationAssets(value);} : undefined,create:value=>this.create(value),cancel});
       dialog.replaceChildren(el("h2", "", "New screen"),this.creationForm.element); this.creationForm.focus();
     }).catch(error => {
       if (this.creation === draft && dialog.isConnected) status.textContent = `${(error as Error).message} Cancel and reopen New screen to reload images.`;
     });
   }
   private closeCreationDialog(): void {
+    if (this.creation && this.creationForm) this.creation.draft = this.creationForm.readDraft();
     this.creationForm?.dispose(); this.creationForm = undefined;
     this.creationDialog?.close(); this.creationDialog?.remove(); this.creationDialog = undefined;
+  }
+  private async openCreationAssets(value: PanelCreationDraft): Promise<void> {
+    const draft = this.creation;
+    if (!draft || this.busy || !this.actions.openAssets) return;
+    draft.draft = value; draft.suspended = true; this.closeCreationDialog();
+    try { await this.actions.openAssets(); }
+    catch (error) { if (this.current()) this.note(`${(error as Error).message} Creation input retained.`,true); }
+    finally {
+      if (this.current() && this.creation === draft && this.panel.isConnected) {
+        draft.suspended = false; this.renderCreation();
+      }
+    }
   }
   private async create(value: PanelCreation): Promise<void> {
     const draft = this.creation; if (!draft || this.busy) throw Error("Another operation is in progress");
@@ -593,15 +613,16 @@ export class ScreensWorkspace {
     }
   }
   private async useInStory(): Promise<void> {
-    if (this.busy || this.hasDraft()) { this.note("Apply or cancel unfinished changes before using this panel in Story. Input retained.",true); return; }
+    if (this.busy || this.components.isSaving() || this.images.isSaving() || this.text.isSaving()) { this.note("Finish the current operation before using this screen in Story. Input retained.",true); return; }
     const owned = this.owned;
-    if (!owned?.resolved || owned.kind !== "panel" || !this.actions.useInStory) { this.note("Choose an available Panel screen to use in Story.",true); return; }
+    if (!owned?.resolved || (owned.kind !== "panel" && owned.kind !== "dialog") || !this.actions.useInStory) { this.note("Choose an available Panel or Dialog screen to use in Story.",true); return; }
     this.busy = true;
     try {
       const binding = {screenId:owned.id,sourceName:owned.name};
-      await this.actions.request("screens.resolveTarget",{binding});
-      if (this.current()) await this.actions.useInStory(binding);
-    } catch (error) { if (this.current()) this.note(`${(error as Error).message} Refresh Source before choosing this panel again.`,true); }
+      const resolved = await this.actions.request<ResolvedScreenTarget>("screens.resolveTarget",{binding});
+      if (resolved.kind !== owned.kind || resolved.binding.screenId !== binding.screenId || resolved.binding.sourceName !== binding.sourceName) throw Error("The selected screen changed. Input retained.");
+      if (this.current()) await this.actions.useInStory(binding, resolved.kind);
+    } catch (error) { if (this.current()) this.note(`${(error as Error).message} Refresh Source before choosing this screen again.`,true); }
     finally { this.busy = false; }
   }
   private updateSizeControls(): void {

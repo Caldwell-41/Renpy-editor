@@ -85,6 +85,7 @@ let activeSourceController: { readonly token: number; readonly project: OpenProj
 let statusRequestSequence = 0;
 let runtimeWorkspace: RuntimeWorkspace | undefined;
 let screensWorkspace: ScreensWorkspace | undefined;
+let screenInsertion: import("./scene-ui.ts").ScreenInsertion | undefined;
 let lifecycleBusy = false;
 let stageDroppedAssets: ((batch:ImportBatch)=>void)|undefined;
 
@@ -131,7 +132,7 @@ interface CompletionToken { view: number; operation: number; scope: object; sess
 function beginView(project?: OpenProject): number {
   activeReferenceController?.dispose(); activeReferenceController=undefined;
   disposeCatalogue?.();disposeCatalogue=undefined;
-  if (currentProject?.sessionId !== project?.sessionId) { runtimeWorkspace?.dispose(); runtimeWorkspace = undefined; screensWorkspace?.dispose(); screensWorkspace = undefined; }
+  if (currentProject?.sessionId !== project?.sessionId) { runtimeWorkspace?.dispose(); runtimeWorkspace = undefined; screensWorkspace?.dispose(); screensWorkspace = undefined; screenInsertion = undefined; }
   disposeBranchesView?.();
   disposeBranchesView = undefined;
   disposeSceneView?.();
@@ -503,9 +504,10 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
       source: target => { void requestProjectNavigation(project, "source", target); },
       preview: (target, validate) => runtimeWorkspace?.previewScreen(target, validate),
       saved: () => { void refreshPersistenceStatus(project, viewGeneration); },
-      useInStory: async screenHint => {
+      openAssets: () => requestProjectNavigation(project,"assets"),
+      useInStory: async (screenHint, screenHintKind) => {
         const scenes = await projectValue<SceneWorkspace>(project,"scene.list");
-        if (currentProject?.sessionId === project.sessionId) await requestProjectNavigation(project,"story",{sceneId:scenes.lastOpen.sceneId,screenHint});
+        if (currentProject?.sessionId === project.sessionId) await requestProjectNavigation(project,"story",{sceneId:screenInsertion?.sceneId ?? scenes.lastOpen.sceneId,screenHint,screenHintKind,screenInsertion});
       },
     });
     screensWorkspace.mount(workspace);
@@ -632,6 +634,9 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
       current: () => generation === viewGeneration && currentProject?.sessionId === project.sessionId,
       caller: target?.caller,
       screenHint: target?.screenHint,
+      screenHintKind: target?.screenHintKind,
+      screenInsertion: target?.screenInsertion,
+      rememberScreenInsertion: insertion => { if (currentProject?.sessionId === project.sessionId) screenInsertion = structuredClone(insertion); },
       screenCatalog: () => projectValue<ScreenCatalog>(project,"screens.list"),
       resolveScreenTarget: binding => projectValue<ResolvedScreenTarget>(project,"screens.resolveTarget",{binding}),
       viewScene: next => { void requestProjectNavigation(project, "story", next); },

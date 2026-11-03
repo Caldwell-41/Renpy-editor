@@ -1,5 +1,39 @@
 # Help dialog and base canvas delivery evidence
 
+## A4 approval and shared UI continuation, 2026-11-04
+
+Kris approved Help A4, `inspector-v4`, and clarified "Sorry a4" in the sole
+prototype chat. The prototype owner delivered the approved handoff directly to
+the Dialog/Story implementation owner and copied the coordinator. The approved
+code reference is `8851689b62eda03127c199ca0276a776b0d623ab`, fingerprint
+`bd1742a2ae2576cb6fb8fce032e19f70a66d06e177b17ce3377fafa96a0f6762`.
+Approval/evidence commit `2443e72a60e958e7ced6b598c8ec46b235a5d0f5`
+retains the exact user decisions and `HANDOFF.md`. B4/C4 remain drafts.
+The typed UI image requirement is unchanged. This approval authorizes the
+affected production UI within the existing selected outcome.
+
+The current prototype promotion gate passes 1,324 render cases, 29 check groups
+and ten approval checks. Its retained A4 evidence includes 40 hashed captures,
+36 focused offline browser cases, actual Lab state checks and corrected
+outside-click/Escape sequences. These prove the approved prototype only.
+Historical failures retain their original status and inputs. Production visual
+comparison, actual UI-to-core acceptance and final combined review remain open.
+
+The coordinator owns `screen-ui.ts`, `main.ts` and the workspace integration tests.
+The implementation owner owns `screen-panels.ts`, its styles, `scene-ui.ts` and
+other focused UI tests. Shared client state retains the creation name, kind,
+starter and image ID through Assets navigation. Story insertion retains the
+existing Scene/body/position and Scene source revision per project session. No
+new IPC or persisted placement fields are introduced. Use in Story retains
+appearance drafts and does not apply them.
+
+Shared focused checks pass six workspace navigation/creation cases and twelve
+core reference cases. A new public-core inspection test first failed because
+the dismissal capability was absent, then passed for qualified Null/Return/Hide
+and refusal of custom, duplicate actions and duplicate node IDs. Inspection
+exposes this source-qualified capability to the UI; the UI does not parse actions.
+Typechecking and test compilation pass. These checks start no SDK or helper.
+
 ## Selection and ownership, 2026-11-03
 
 Kris approved the coordinator's read-only plan for

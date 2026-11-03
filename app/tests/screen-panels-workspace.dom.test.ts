@@ -5,24 +5,25 @@ import { ScreensWorkspace, type ScreenDocument } from "../src/screen-ui.js";
 import type { CoreOperation } from "../src/protocol.js";
 import type { OwnedScreen, ScreenCatalog } from "../src/screen-contracts.js";
 const flush=async()=>{for(let i=0;i<8;i++)await new Promise(r=>setTimeout(r,0));};
-function fixture() {
+function fixture(kind: OwnedScreen["kind"] = "panel", availableImage = true) {
  const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement,HTMLInputElement:browser.HTMLInputElement,HTMLSelectElement:browser.HTMLSelectElement,HTMLTextAreaElement:browser.HTMLTextAreaElement,HTMLDetailsElement:browser.HTMLDetailsElement,ResizeObserver:browser.ResizeObserver});
- let owned:OwnedScreen[]=[{id:"existing",rootId:"root",path:"game/ui/existing.rpy",name:"existing",kind:"panel",resolved:true,sourceRevision:"accepted"}];
- const catalog=():ScreenCatalog=>({projectRevision:"project",sourceMapRevision:"map",inventoryRevision:"inventory",owned});
- const documents=():ScreenDocument[]=>owned.map(s=>({path:s.path,revision:s.sourceRevision!,partial:false,screens:[{name:s.name,nodes:[{id:s.rootId,kind:"screen",literal:null,layout:{},span:{start:0,end:20},parentStart:null,properties:[],protected:[]}]}]}));
- const writes:Record<string,unknown>[]=[];const story:unknown[]=[];let fail=false;
- const workspace=new ScreensWorkspace({projectId:"project",resolution:{width:1280,height:720},current:()=>true,coordinate:task=>task(),source:()=>{},preview:()=>{},saved:()=>{},useInStory:async binding=>{story.push(binding);},request:async<T>(operation:CoreOperation,payload?:Record<string,unknown>):Promise<T>=>{
+ let owned:OwnedScreen[]=[{id:"existing",rootId:"root",path:"game/ui/existing.rpy",name:"existing",kind,resolved:true,sourceRevision:"accepted"}];
+ let assetRevision=0;
+ const catalog=():ScreenCatalog=>({projectRevision:`project-${assetRevision}`,sourceMapRevision:"map",inventoryRevision:`inventory-${assetRevision}`,owned});
+ const documents=():ScreenDocument[]=>owned.map(s=>({path:s.path,revision:s.sourceRevision!,partial:false,screens:[{name:s.name,nodes:[{id:s.rootId,kind:"screen",literal:null,layout:{},span:{start:0,end:20},parentStart:null,properties:[{property:"xsize",value:200},{property:"ysize",value:100}],protected:[]}]}]}));
+ const writes:Record<string,unknown>[]=[];const story:unknown[]=[];const storyKinds:unknown[]=[];let fail=false, renamed=false;
+ const workspace=new ScreensWorkspace({projectId:"project",resolution:{width:1280,height:720},current:()=>true,coordinate:task=>task(),source:()=>{},preview:()=>{},saved:()=>{},openAssets:async()=>{workspace.panel.remove();},useInStory:async (binding,kind)=>{story.push(binding);storyKinds.push(kind);},request:async<T>(operation:CoreOperation,payload?:Record<string,unknown>):Promise<T>=>{
   if(operation==="source.list")return {files:documents().map(d=>({path:d.path}))} as T;
   if(operation==="screens.list")return catalog() as T;
   if(operation==="screens.inspect")return documents().find(d=>d.path===payload?.path) as T;
-  if(operation==="authoring.list")return {assets:[{id:"image",kind:"uiImage",displayName:"Route",relativePath:"game/images/route.png",sha256:"a".repeat(64),status:"available"}]} as T;
+  if(operation==="authoring.list")return {assets:availableImage?[{id:"image",kind:"uiImage",displayName:"Route",relativePath:"game/images/route.png",sha256:"a".repeat(64),status:"available"}]:[]} as T;
   if(operation==="screens.create"){writes.push(payload!);if(fail)throw Error("Source changed");owned=[...owned,{id:"new",rootId:"new-root",path:`game/ui/${payload!.name}.rpy`,name:String(payload!.name),kind:"panel",resolved:true,sourceRevision:"created"}];return catalog() as T;}
-  if(operation==="screens.resolveTarget")return {binding:payload!.binding,kind:"panel"} as T;
+  if(operation==="screens.resolveTarget")return {binding:renamed?{screenId:"existing",sourceName:"renamed"}:payload!.binding,kind} as T;
   if(operation==="screens.canvasStatus")return {phase:"unavailable",reason:"No renderer in DOM test"} as T;
   throw Error(`Unexpected ${operation}`);
  }});
  workspace.mount(document.body);const click=(label:string)=>{const b=[...document.querySelectorAll<HTMLButtonElement>("button")].find(b=>b.textContent===label);assert.ok(b,`Missing ${label}`);b.click();};
- return {workspace,click,writes,story,fail:()=>{fail=true;},close:async()=>{workspace.dispose();await browser.happyDOM.abort();}};
+ return {workspace,click,writes,story,storyKinds,importImage:()=>{availableImage=true;assetRevision++;},fail:()=>{fail=true;},rename:()=>{renamed=true;},close:async()=>{workspace.dispose();await browser.happyDOM.abort();}};
 }
 
 test("New screen mounts the real Help form and retains its fields after a refused create",async()=>{
@@ -39,12 +40,41 @@ test("Use in Story passes a stable panel hint without creating a Beat",async()=>
  const f=fixture();try{await flush();f.click("3  Use in Story");await flush();assert.deepEqual(f.story,[{screenId:"existing",sourceName:"existing"}]);assert.deepEqual(f.writes,[]);}finally{await f.close();}
 });
 
+test("Use in Story passes Dialog kind and refuses a changed identity without writing",async()=>{
+ const f=fixture("dialog");try{await flush();f.click("3  Use in Story");await flush();
+ assert.deepEqual(f.story,[{screenId:"existing",sourceName:"existing"}]);assert.deepEqual(f.storyKinds,["dialog"]);
+ f.rename();f.click("3  Use in Story");await flush();assert.equal(f.story.length,1);assert.match(document.querySelector(".screen-message")!.textContent!,/selected screen changed/);assert.deepEqual(f.writes,[]);
+ }finally{await f.close();}
+});
+
+test("Use in Story retains an unfinished appearance draft across workspace remount",async()=>{
+ const f=fixture("dialog");try{await flush();f.click("2  Design");
+ const width=document.querySelector<HTMLInputElement>('[data-size="width"]');assert.ok(width);
+ width.value="317";width.dispatchEvent(new window.Event("input",{bubbles:true}));assert.equal(f.workspace.hasDraft(),true);
+ f.click("3  Use in Story");await flush();assert.equal(f.story.length,1);assert.deepEqual(f.writes,[]);
+ f.workspace.panel.remove();f.workspace.mount(document.body);await flush();
+ assert.equal(f.workspace.hasDraft(),true);assert.equal(document.querySelector<HTMLInputElement>('[data-size="width"]')?.value,"317");assert.deepEqual(f.writes,[]);
+ }finally{await f.close();}
+});
+
+test("Assets return retains Dialog Help creation inputs and refreshes its acceptance catalog",async()=>{
+ const f=fixture("panel",false);try{await flush();f.click("New screen");await flush();
+ const name=document.querySelector<HTMLInputElement>('[name="screen-name"]')!;name.value="route_dialog";name.dispatchEvent(new window.Event("input",{bubbles:true}));
+ const kind=document.querySelector<HTMLInputElement>('[name="screen-kind"][value="dialog"]')!;assert.ok(kind);kind.checked=true;kind.dispatchEvent(new window.Event("change",{bubbles:true}));
+ f.click("Open Assets");await flush();assert.equal(f.workspace.panel.isConnected,false);assert.equal(f.writes.length,0);
+ f.importImage();f.workspace.mount(document.body);await flush();
+ assert.equal(document.querySelector<HTMLInputElement>('[name="screen-name"]')!.value,"route_dialog");assert.equal(document.querySelector<HTMLInputElement>('[name="screen-kind"][value="dialog"]')!.checked,true);
+ document.querySelector("dialog.screen-create form")!.dispatchEvent(new window.Event("submit",{bubbles:true,cancelable:true}));await flush();
+ assert.equal(f.writes.length,1);assert.equal(f.writes[0]!.kind,"dialog");assert.equal((f.writes[0]!.starter as Record<string,unknown>).assetId,"image");assert.equal(f.writes[0]!.expectedProjectRevision,"project-1");assert.equal(f.writes[0]!.expectedInventoryRevision,"inventory-1");
+ }finally{await f.close();}
+});
+
 test("creation Cancel and Escape restore focus to New screen without writing",async()=>{
  const f=fixture();try{await flush();
  for(const action of ["Cancel","Escape"]){
   f.click("New screen");await flush();
   const dialog=document.querySelector("dialog.screen-create")!,name=dialog.querySelector<HTMLInputElement>('[name="screen-name"]')!;name.focus();
-  if(action==="Cancel")(dialog.querySelector<HTMLButtonElement>('button[type="button"]'))!.click();
+  if(action==="Cancel")([...dialog.querySelectorAll<HTMLButtonElement>('button[type="button"]')].find(button=>button.textContent==="Cancel"))!.click();
   else name.dispatchEvent(new window.KeyboardEvent("keydown",{key:"Escape",bubbles:true,cancelable:true}));
   assert.equal(dialog.isConnected,false);assert.equal(document.activeElement?.textContent,"New screen");assert.deepEqual(f.writes,[]);
  }

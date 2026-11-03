@@ -1,6 +1,102 @@
 use super::*;
 
 #[test]
+fn inspection_exposes_only_owned_unique_qualified_dismissal_capabilities() {
+    for kind in ["panel", "dialog"] {
+        let (_temporary, mut service, _, _) = composition_project();
+        let catalog = ipc(&mut service, "screens.list", json!({}));
+        let name = format!("inspection_{kind}");
+        let created = ipc(
+            &mut service,
+            "screens.create",
+            json!({
+                "name":name,"kind":kind,"expectedProjectRevision":catalog["projectRevision"],
+                "expectedSourceMapRevision":catalog["sourceMapRevision"],"expectedInventoryRevision":catalog["inventoryRevision"]
+            }),
+        );
+        let owner = created["owned"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|item| item["name"] == name)
+            .unwrap();
+        let added = compose_command(
+            &mut service,
+            owner,
+            json!({"type":"add","parentId":owner["rootId"],"kind":"textbutton","text":"Done"}),
+        );
+        let original = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+            .as_str()
+            .unwrap()
+            .to_owned();
+        let hide = format!("Hide({})", serde_json::to_string(&name).unwrap());
+        for (expression, expected) in [
+            ("Null()", json!("none")),
+            (
+                "Return()",
+                if kind == "dialog" {
+                    json!("finishInteraction")
+                } else {
+                    Value::Null
+                },
+            ),
+            (
+                hide.as_str(),
+                if kind == "panel" {
+                    json!("hideScreen")
+                } else {
+                    Value::Null
+                },
+            ),
+            ("Function(custom)", Value::Null),
+            ("[Null(), Return()]", Value::Null),
+            ("Null()\n        action Null()", Value::Null),
+        ] {
+            save_composition_source(
+                &mut service,
+                owner,
+                &original.replace("action Null()", &format!("action {expression} # retained")),
+            );
+            let document = ipc(
+                &mut service,
+                "screens.inspect",
+                json!({"path":owner["path"]}),
+            );
+            let node = document["screens"][0]["nodes"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|node| node["id"] == added["selectedId"])
+                .unwrap();
+            assert_eq!(node["dismissal"], expected, "{kind}: {expression}");
+        }
+        let duplicate = original
+            .lines()
+            .find(|line| line.contains("textbutton"))
+            .unwrap();
+        save_composition_source(
+            &mut service,
+            owner,
+            &format!("{original}{duplicate}\n        action Null()\n"),
+        );
+        let document = ipc(
+            &mut service,
+            "screens.inspect",
+            json!({"path":owner["path"]}),
+        );
+        for node in document["screens"][0]["nodes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|node| node["kind"] == "textbutton")
+        {
+            assert!(node["id"].is_null());
+            assert!(node["dismissal"].is_null());
+        }
+    }
+}
+
+#[test]
 fn inert_button_action_stays_editable_and_extractable() {
     let (_temporary, mut service, root, owner) = composition_project();
     let group = compose_command(

@@ -313,6 +313,7 @@ impl AuthoringService {
                             text_properties: None,
                             style: None,
                             component: None,
+                            dismissal: None,
                             span: span.clone(),
                             parent_start: Some(parent.span.start),
                             properties: vec![],
@@ -380,8 +381,28 @@ impl AuthoringService {
                 }
             }
             if let Some(owner) = owned {
+                // Qualify against raw action spans before removing supported protected details.
+                // Duplicate markers have already lost their IDs and cannot expose edit authority.
+                let dismissals: Vec<_> = screen
+                    .nodes
+                    .iter()
+                    .map(|node| {
+                        node.id.as_ref()?;
+                        let span =
+                            references::editable_dismissal_action(owner, screen, node, bytes)?;
+                        match &bytes[span.start..span.end] {
+                            b"Null()" => Some(ButtonDismissal::None),
+                            b"Return()" => Some(ButtonDismissal::FinishInteraction),
+                            _ if owner.kind == crate::metadata::OwnedScreenKind::Panel => {
+                                Some(ButtonDismissal::HideScreen)
+                            }
+                            _ => None,
+                        }
+                    })
+                    .collect();
                 let qualified = references::qualified_interaction(owner, screen, bytes).spans;
-                for node in &mut screen.nodes {
+                for (node, dismissal) in screen.nodes.iter_mut().zip(dismissals) {
+                    node.dismissal = dismissal;
                     node.protected
                         .retain(|span| !qualified.contains_key(&span.start));
                 }
