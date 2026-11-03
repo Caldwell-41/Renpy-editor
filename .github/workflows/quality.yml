@@ -109,6 +109,7 @@ jobs:
         working-directory: app
     env:
       HARNESS_PYTHON: python3
+      CARGO_TERM_COLOR: never
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
@@ -124,11 +125,69 @@ jobs:
         run: npm ci --ignore-scripts
       - name: Typecheck and test the frontend
         run: npm run check
+      - name: Build the production frontend
+        if: ${{ !cancelled() }}
+        run: npm run build
       - name: Check Rust formatting independently of frontend results
         if: ${{ !cancelled() }}
         run: |
           rustup toolchain install 1.90.0 --profile minimal --component rustfmt
           cargo +1.90.0 fmt --check --all
+      - name: Run offline Help evidence admission gates
+        if: ${{ !cancelled() }}
+        run: |
+          python3 -m venv "$RUNNER_TEMP/help-offline-python"
+          "$RUNNER_TEMP/help-offline-python/bin/python" -m pip install Pillow==12.3.0
+          "$RUNNER_TEMP/help-offline-python/bin/python" -m unittest discover -s scripts -p test_qualify_help_dialog.py -v
+          "$RUNNER_TEMP/help-offline-python/bin/python" -m unittest discover -s scripts -p test_base_help_fidelity.py -v
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        if: ${{ !cancelled() }}
+        with:
+          key: help-offline-core
+          workspaces: app -> target
+          cache-bin: 'false'
+      - name: Check Help creation, references and fractional geometry without SDK execution
+        if: ${{ !cancelled() }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/help-offline"
+          for filter in scene::logic::dialog_tests screens::tests::references screens::canvas::tests::base_help_fidelity_exports_typed_assets_styles_and_exact_source_without_execution screens::canvas::tests::helper_accounting_reserves_failed_initial_and_replacement_owner_attempts_offline lifecycle::canvas_tests::canvas_status_preserves_helper_fractional_geometry; do
+            cargo +1.90.0 test -p loomlight-core --locked --message-format=json-render-diagnostics --lib "$filter" -- --nocapture 2>&1 | tee -a "$RUNNER_TEMP/help-offline/core-artifacts.jsonl" | tee "$RUNNER_TEMP/help-offline/${filter//::/-}.log"
+            grep -Eq '^test result: ok\. [1-9][0-9]* passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/help-offline/${filter//::/-}.log"
+          done
+      - name: Exercise Dialog controllers through production core
+        if: ${{ !cancelled() }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/help-offline"
+          cargo +1.90.0 build -p loomlight-core --locked --example help-controller-driver --message-format=json-render-diagnostics 2>&1 | tee "$RUNNER_TEMP/help-offline/controller-artifacts.jsonl"
+          DIALOG_CORE_UI_OUTPUT="$RUNNER_TEMP/help-offline/controller" node tests/screen-dialog-core.dispatch.mjs
+      - name: Seal and scan failed Help diagnostics and producing executables
+        id: help_privacy
+        if: ${{ failure() }}
+        run: |
+          python3 - <<'PY'
+          import os, runpy
+          from pathlib import Path
+          folder = Path(os.environ['RUNNER_TEMP']) / 'help-offline'
+          folder.mkdir(parents=True, exist_ok=True)
+          utilities = runpy.run_path('scripts/check-thinking-evidence.py')
+          utilities['retain_binaries'](folder, Path('target'), artifacts={
+              'core': ('core-artifacts.jsonl', 'loomlight_core', True),
+              'controller': ('controller-artifacts.jsonl', 'help-controller-driver', False),
+          })
+          utilities['seal'](folder, Path('..'), 'help-offline-ci')
+          PY
+          node scripts/scan-artifacts.mjs "$RUNNER_TEMP/help-offline"
+      - name: Upload privacy-checked Help failure evidence
+        if: ${{ failure() && steps.help_privacy.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: help-offline-failure-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/help-offline
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 7
 
   studio-connection-native:
     if: ${{ !inputs.validation_dummy && (github.event_name == 'workflow_dispatch' && inputs.studio_connection_native) }}

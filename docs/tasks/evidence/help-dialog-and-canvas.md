@@ -1,5 +1,57 @@
 # Help dialog and base canvas delivery evidence
 
+## Implementation complete before CI, 2026-11-04
+
+Final production code is `b2a5694`, with identical inputs at `7fe2577`. All bounded
+leaf implementation and selected verification are complete; the coordinator
+resolved every actionable independent/Terra finding and reviewed the combined
+result. The user's completion-before-CI condition is satisfied. Draft publication
+and ordinary automatic CI may now proceed; no merge, issue closure or new
+SDK/native/package matrix is selected.
+
+Final local frontend passes 366 cases, zero failures/skips, with no stale or missing
+compiled test files. Typecheck, production build and the six-stage actual
+controller/core journey pass on current inputs. The 31 focused UI and 24 affected
+core passes retain their exact prior commands; the existing Vite chunk warning
+remains nonblocking. Source/renderer fixtures are unchanged from their qualified
+SDK inputs; operation counters below are unchanged.
+
+After two incomplete UI checks, the coordinator used the repository's parent
+fallback for the remaining browser work. The last stop was a harness defect: it
+treated an `overflow: visible` region as a clipping rectangle. The corrected gate
+intersects the viewport with actual clipping ancestors while preserving visibility,
+full control-rectangle, hit-test and keyboard-outline checks. No production change
+was made for that false failure. The original 30/36 and partial row remain unpassed
+in their own receipts.
+
+The final actual production-main/core run passes all 36 exact cancellation
+conditions, both keyboard action rows and sticky/static/resize transitions. It
+also accepts one Call, then proves subsequent Enter/Cancel and Escape retain the
+accepted location/revision without another write. Cancel-only source hashes are
+unchanged, with zero `scene.apply`/`screens.compose`. The accepted follow-up has
+exactly one `scene.apply`, zero `screens.compose`, and unchanged accepted Source
+after later cancellations. Page errors/refusals are zero; browser/server/driver
+cleanup and scratch removal pass, driver exit zero.
+
+[Completion verification and six retained captures](help-dialog-and-canvas-ui/completion-verification.json)
+bind candidate `7fe2577`, frontend tree `a45d011c6b7c31eae9a7479b55c6813c064ec952`,
+core tree `b5900744393056afb757a7711ba6a2bccd1b1df5`, actual driver
+`fb6e2c88e2442e8d5e8c83f9944d1a38511d71034fb0ada9e3824951b44fc2d4` and harness
+`505762ab5e9aeecfe313a51d615cd793371db31bc9da8bb6b3126345322da66d`.
+All PNG dimensions match their CSS viewports after paint. The 18-file retained UI
+evidence directory passes the existing privacy scan. These are browser/core
+authoring results, not fresh engine, native WebView, physical or package results.
+Control hierarchy matches A4 within the existing shell; exact whole-page identity
+across differing fixture content is not claimed.
+
+The routine CI update selects this branch/base, production frontend build, nine
+Dialog and six Canvas offline gates, five focused core selections and the actual
+controller/core journey. Required core selections must have positive passes with
+zero failures/ignores. Failure evidence retains producing binaries/source receipts
+and uploads only after the existing privacy scan. No manual qualification matrix
+or SDK execution is selected. Local CI-controller tests pass 18/18, Dialog gates
+9/9 and Canvas gates 6/6; workflow YAML parses. External CI has not started yet.
+
 ## Final combined review and corrections, 2026-11-04
 
 The one independent pair reviewed `e32ded4...5b0ab97`. The coordinator resolved

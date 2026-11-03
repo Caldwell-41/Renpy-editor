@@ -2,97 +2,70 @@
 
 ## Help dialog and base Help canvas implementation
 
-The selected local implementation is delivered on `codex/help-dialog-canvas`,
-from `e32ded4`; completion code candidate is `b2a5694`. Both implementation lanes are
-preserved, with shared contracts, integration, review and finding fixes owned by
-the coordinator. [The evidence owner](../tasks/evidence/help-dialog-and-canvas.md)
-records exact scopes and [final UI captures](../tasks/evidence/help-dialog-and-canvas-ui/verification.json).
-Kris then requested continued subagent implementation until both tickets are
-complete before CI. Hold publication and CI. Reconcile the live bounded criteria,
-complete any remaining A4 functionality and visual corrections, integrate committed
-lane work and review the result before resuming the draft PR. Sol's `cb0ac5c` is
-integrated as `282cc28`; it restores captured placement on Cancel/Escape without
-rebasing unavailable context. Coordinator `02c0167` restores focus to the recreated
-Story opener and orders the creation fields as approved. All 364 frontend tests,
-29 focused cases, production build and the actual controller/core journey pass.
-The one combined review pair at `5b0ab97` found two P3 Standards findings and one
-P2 Spec defect. `31c4afa` resolves them: current controller/session insertion context
-stays synchronized after acceptance, Call admission shares one predicate, and the
-older handover review is explicitly scoped. Thirty focused UI tests, 24 affected
-core tests and the six-stage actual controller/core journey pass, with a separately
-built current driver and complete cleanup. Terra's `5b0ab97` pass found six wide
-nested focus cases obscured by the sticky toolbar, despite correct opener/context
-restoration in all 36 cases. `a3131b3` reserves the toolbar's measured height in its
-scroll container and explicitly scrolls restored nested openers into view; 31 focused
-tests pass. The follow-up passes all 18 wide cases but stops at compact case 20/36:
-its toolbar is 335px inside a 100px scrollport, and the skipped toolbar scroll leaves
-the opener above the viewport. `b2a5694` permits stickiness only when the toolbar,
-one control and its focus clearance fit, observes both toolbar and scrollport size,
-and explicitly scrolls every restored opener. The expanded constraint test passes
-with all 31 focused cases. Compact-first browser geometry and the final frontend
-check remain before publication/CI. No new SDK/package/native
-qualification matrix, merge, issue closure or release is selected.
+The selected #45/#46 implementation is complete and reviewed on
+`codex/help-dialog-canvas` from `e32ded4`. Final production code is `b2a5694`;
+`7fe2577` has identical frontend/core inputs. [Delivery evidence](../tasks/evidence/help-dialog-and-canvas.md)
+owns the bounded criterion map, corrections, original failures and operation counts.
+[Completion verification](../tasks/evidence/help-dialog-and-canvas-ui/completion-verification.json)
+binds the actual source/driver, 36 browser conditions and six hashed captures.
 
-Blocking Dialog creation/resolution, Call/Finish, conservative source/history and
-inert Null editing are implemented. Kris approved A4, `inspector-v4`, at source
-`8851689b62eda03127c199ca0276a776b0d623ab`; evidence commit `2443e72` records
-"Approved" and the clarification "Sorry a4". The prototype owner delivered
-`HANDOFF.md` directly to implementation and copied the coordinator. B4/C4 remain
-drafts. A4's inspector, larger passive preview, compact selectors, outlined Cancel
-and pending insertion markers are implemented. Combined independent review reports
-Standards zero and one P2 Spec finding, now fixed: a deleted remembered Scene
-retains intent while allowing explicit replacement, without blocking ordinary
-authoring. Terra's disappeared-image Assets and pending-marker findings are fixed.
-The final code passes 34 focused DOM cases, production build, the actual
-creation/Call/Finish/history/reopen journey, and five production-main/core recovery
-groups with zero page errors and complete cleanup. The frontend routine passes
-361 cases at `1b1fde7`; later display/copy corrections have focused final coverage.
-The completed Terra worker was not replaced. The coordinator used a narrow
-automated probe after two continuation requests were rejected. Ten hashed final
-captures bind the implementation trees and actual driver. Whole-page pixel
-identity is not claimed. Terra reproduced compact PNG repetition while the DOM and
-hit-testing remained correct. After two animation frames the capture has the correct
-footer. Exact resize/capture/compositor attribution remains open; no product CSS
-change is supported. It is not established as a native defect.
-Help still requires a typed UI image. Placement uses existing Story body/Position
-ownership, with no new IPC/persistence or general action builder. Preserve the
-approved reference checkout, earlier revisions, failures and proof limits.
+Kris selected a draft PR and CI updates, then required completion before CI. That
+completion condition is satisfied. Next publish the draft against
+`codex/phase3b-screen-designer` and audit ordinary automatic quality and complete
+validation. The prepared plan selects no manual qualification matrix. No merge,
+issue closure, release, new SDK campaign or native/package execution is selected.
 
-Mac Dialog passes all eight normal-entry cases at `dff0c64`; Windows passes all
-eight at `4c084a4`. Both targets pass eight exact Canvas pixel/geometry comparisons
-at `4c084a4`. Accepted sources remain unchanged, with complete process/scratch
-cleanup, one persistent Canvas owner per campaign and Windows private-desktop
-closure. This is backend/synthetic-input evidence, not production UI or physical
-acceptance. Use is 20/24 Dialog and 16/20 Canvas on Mac, and 11/16 Dialog and 8/12 Canvas on Windows.
-There are no uncertain or reserved starts.
+Final local proof passes 366 frontend cases without failures/skips, 31 focused UI
+cases, 24 affected core cases, production build, formatting and the six-stage
+actual controller/core journey. The final real-main browser check passes all 36
+cancellations, two keyboard action rows, sticky/static/resize transitions and an
+accepted Call followed by later Cancel/Escape. Cancel-only Source bytes remain
+unchanged with zero Beat/appearance writes; accepted placement/revision survives
+the next operation. All owned processes and scratch cleaned up, with driver exit
+zero. Canvas execution was intercepted before dispatch in these authoring probes.
 
-The `4c084a4` routine core run passes 575 cases with zero failures, 55 declared
-ignores and three selected exclusions. Staged independent backend review reports
-two P2 Standards findings and no actionable Spec findings, with known UI gaps. Both findings are fixed:
-`218f116` restores qualified duplicate-ID authority for dismissal; `d9107a5` retains
-Canvas reference scratch until process cleanup is proven. Their red/green checks,
-12 Dialog cases, six Canvas gates, production compilation and formatting pass.
-No SDK rerun was selected for the later failure-path/UI corrections. Preserve
-successful proof scope and all original failures. The earlier combined review
-through `9de4f25` and its finding corrections are complete. The completion pass
-above owns the current review status; user/native/physical acceptance and the
-stated visual limits remain.
+The single final independent pair covers `e32ded4...5b0ab97`. Standards found one
+P3 handover contradiction and one P3 duplicated-policy heuristic; Spec found one
+P2 stale accepted-insertion snapshot. `31c4afa` resolves all three. The coordinator
+self-reviewed those corrections and the responsive focus fixes through `b2a5694`.
+Earlier independent/Terra findings are also resolved. No known bounded functional
+finding remains. After two incomplete UI verification attempts the coordinator
+used the repository fallback, correcting a harness assertion that mistook
+`overflow: visible` for clipping. Viewport, actual clipping-ancestor, hit-test and
+focus checks remain enforced. Earlier failures/incomplete matrices stay distinct.
 
-SUNDOWN's assigned qualification worktree is clean at `4c084a4`; primary checkout,
-protected stash and unrelated processes remain intact. Prior path/PowerShell
-failures are retained. Use Python-captured native exit codes, the recorded Downloads
-route and literal `-File` PowerShell setup. Kris permits later reviewed task bundles
-to the same linked PC through Taildrop, recording payload/hash and excluding private
-game content/build output. Synchronize only the assigned test checkout.
+Approved UI is only A4 `inspector-v4`, source `8851689`, approval evidence `2443e72`.
+B4/C4 remain drafts. [The direct handoff](../design/design-lab-help-dialog-story/HANDOFF.md)
+owns the exact decision, fingerprint and control map. Help still requires a typed
+UI image; public New screen defaults Panel. Existing Source, history, layout,
+Style, font, image and component owners remain. Insertion context is client-only;
+there is no implicit Apply, Beat, Blank fallback or general action builder.
 
-Stop SDK failures for coordinator review; reviewed corrections may proceed within
-the approved ceilings. Draft publication and ordinary CI remain deferred pending
-the completion pass. No native editor, package, new SDK matrix, merge, issue closure
-or release is selected.
-Preserve the unrelated untracked audit, ignored evidence,
-SDK archives and protected recovery state. No selected qualification process is
-running. Preserve the local delivery for Kris's review and keep its evidence scope
-separate from unselected native/package/CI or wider editor acceptance.
+Normal-entry Dialog proof passes eight rows per host, Mac at `dff0c64`, Windows at
+`4c084a4`. Base Help passes eight exact pixel/geometry comparisons per host at
+`4c084a4`, with identical accepted source/assets/fonts/state and no tolerance.
+Reuse retains those candidates and unchanged rendering/runtime-input scope; later
+UI/failure-path corrections do not claim fresh SDK or native proof. SDK use remains
+Mac Dialog 20/24 and Canvas 16/20; Windows Dialog 11/16 and Canvas 8/12, with no
+uncertain/reserved starts. The earlier 575-pass core run and exclusions retain their
+scope. No new SDK/helper process ran during completion.
+
+A4 control hierarchy and responsive behavior are verified within the existing
+production shell. Whole-page pixel identity across different fixture art/text/shells
+is not claimed. Compact CDP and immediate headless-capture quirks remain scoped to
+the recorded capture paths; settled Playwright captures match DOM dimensions.
+Native WebView/package/signing, physical/human, broader editor/canvas/3B and final
+user acceptance remain separate. Neither issue is closed.
+
+SUNDOWN's assigned worktree remains at its qualified `4c084a4`; primary checkout,
+protected stash and unrelated processes are preserved. No remote operation runs.
+For a later selected transfer, retain the approved Taildrop payload/hash protocol,
+Downloads route and Python-captured native exits; sync only the assigned checkout.
+Preserve local ignored evidence, SDK archives, protected recovery and worktrees.
+Do not stage the unrelated Design Lab guide edits or untracked audit. CI changes,
+completion evidence and status records are coordinator-owned. No agent is awaiting
+implementation work; the completed implementation lane receives the coherent review
+and final validation handoff for skill closure.
 
 ## PR 77 merge and workspace closeout
 
