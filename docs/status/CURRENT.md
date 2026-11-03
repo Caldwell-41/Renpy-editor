@@ -2,6 +2,11 @@
 
 ## PR 77 review corrections
 
+The later P3 review finding is fixed in the shared component-name form. The
+existing naming test now exercises normal form submission and checks the associated
+error, retained input/focus and no write. [The correction record](../tasks/evidence/components-and-help-panel.md#component-name-submission-correction-2026-11-03)
+owns the red/green result; PR #77 owns the pending CI update.
+
 Kris selected all six audited fixes, updating [PR #77](https://github.com/Caldwell-41/Renpy-editor/pull/77),
 selected CI and worker cleanup. Implementation checkpoint `8f6b406` preserves Story
 screen intent across multiple Source edits, marks unqualified text tags unknown,

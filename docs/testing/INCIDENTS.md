@@ -907,3 +907,15 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   passes all four harness groups on both hosts; exact-head artifacts and declared
   checkout filters verify. Original failed Mac preflight remains failed.
 - **Evidence:** [CI1 diagnosis](../tasks/evidence/components-and-help-panel.md#ci1-macos-dependency-failure-and-isolated-environment-correction).
+
+
+## H65: Native form validation bypasses component-name errors
+
+- **Class/search:** product/test; Enter, component name, pattern, requestSubmit, aria-invalid.
+- **Cause/correction:** the shared naming form left native pattern validation enabled,
+  so invalid submission stopped before the shared field validator. Disable native
+  form validation there; keep the existing validator as the submission owner.
+- **Regression:** use `requestSubmit()` in the existing naming test. Directly dispatching
+  `submit` bypassed the browser gate. Assert associated error, retained input/focus
+  and no write. The case fails before the fix and passes afterward.
+- **Evidence:** [Naming correction](../tasks/evidence/components-and-help-panel.md#component-name-submission-correction-2026-11-03).

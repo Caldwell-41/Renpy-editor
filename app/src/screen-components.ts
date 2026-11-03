@@ -325,6 +325,7 @@ export class ScreenComponents {
   private nameDialog(copy:boolean):void {
     const {dialog,close}=this.mountDialog(copy?`Make a copy for ${displayName(this.origin?.view.screenName??"this screen")}`:"Make component");
     const form=el("form"),label=el("label","screen-component-field","Component name"),input=el("input");
+    form.noValidate=true;
     input.ariaLabel="Component name";technicalNameInput(input);label.append(input);form.append(label,el("p","screen-component-help",technicalNameHelp));
     const error=el("p","screen-component-error");error.role="alert";
     const validate=validateField(input,()=>{

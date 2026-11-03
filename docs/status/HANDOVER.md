@@ -2,6 +2,14 @@
 
 ## PR 77 review correction delivery
 
+Kris selected the later component-name validation correction and PR/CI update.
+The shared naming form now lets the existing validator handle normal submission;
+the corrected existing test demonstrates failure before the fix and success after.
+See [the naming correction](../tasks/evidence/components-and-help-panel.md#component-name-submission-correction-2026-11-03).
+The current integration work remains on `codex/pr77-review-fixes`, published to the
+existing PR branch. After publication, audit the automatic and selected paired
+harness runs recorded in PR #77. No SDK/native/package operation is selected.
+
 All six selected fixes for [PR #77](https://github.com/Caldwell-41/Renpy-editor/pull/77)
 are implemented and parent-audited. The integration branch is
 `codex/pr77-review-fixes`; delivery stays on the existing
@@ -26,9 +34,8 @@ Automatic quality and both selected harness jobs pass at `1cc4f65`; the parent
 audits all executed steps, ZIP/manifests and 784 input hashes per target. Read
 PR #77's latest receipt for CI on this documentation-only successor. If it is
 nonterminal, use the T3 PR watch after capturing its identity, then audit results
-and artifact digests before final handback. No further implementation or SDK run
-is selected. Both tickets stay open; merge/release and broader native/human
-acceptance remain unselected.
+and artifact digests before final handback. No further SDK run is selected. Both
+tickets stay open; merge/release and broader native/human acceptance remain unselected.
 
 Kris approved one nine-start fresh Help campaign per target and raised #44's cap
 to 44. Both campaigns pass at `1cc4f65`. The parent verifies all 18 starts,

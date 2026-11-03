@@ -193,8 +193,11 @@ test("Make component keeps the entered name on refusal and Cancel writes nothing
     await new Promise(resolve=>setTimeout(resolve,0));
     const dialog=document.querySelector("dialog")!;assert.ok(dialog);
     const field=dialog.querySelector("input")!;field.value="bad.name";
-    dialog.querySelector("form")!.dispatchEvent(new window.Event("submit",{bubbles:true,cancelable:true}));
+    dialog.querySelector("form")!.requestSubmit();
     await new Promise(resolve=>setTimeout(resolve,0));assert.equal(field.value,"bad.name");assert.equal(field.getAttribute("aria-invalid"),"true");
+    const error=document.getElementById(field.getAttribute("aria-describedby")!);
+    assert.ok(error && !error.hidden);assert.match(error.textContent!,/Component name must begin with a letter/);
+    assert.equal(document.activeElement,field);
     assert.equal(h.saved(),0);
     [...dialog.querySelectorAll("button")].find(button=>button.textContent==="Cancel")!.click();
     assert.equal(document.querySelector("dialog"),null);assert.equal(h.calls.some(call=>call.operation==="screens.componentExtract"),false);

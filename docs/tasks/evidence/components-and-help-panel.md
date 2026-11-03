@@ -1285,3 +1285,32 @@ draft/unmerged. This documentation-only successor does not become the SDK-tested
 candidate; PR #77 owns its terminal automatic/paired CI receipt. Historical status
 sections remain intact because restructuring those recovery records is outside
 this correction's scope.
+
+
+## Component-name submission correction, 2026-11-03
+
+Kris selected fixing the final P3 review finding, updating PR #77 and running CI.
+The shared Make component/Create copy form kept native pattern validation enabled.
+A focused invalid name submitted with Enter was rejected before the existing
+`validateField` handler could show its associated error and invalid state.
+
+The existing test dispatched `submit` directly and bypassed that failure. Changing
+it to `requestSubmit()` reproduces the missing `aria-invalid` value (`null` rather
+than `true`). Setting `form.noValidate = true` in the shared naming-form owner makes
+the test pass. It also checks the visible associated error, retained name/focus,
+no accepted write and Cancel. The insertion dialog has no constrained name field;
+Help creation already uses the same explicit form-validation policy.
+
+Pinned Node 24.19.0/TypeScript 7.0.2 compile and production typechecking pass.
+The focused case passes after the recorded red result. An attempted full suite
+from temporary compiler output fails because several tests resolve source/fixture
+paths relative to that output; its 317 passes/20 failures remain a failed run.
+The normal `npm run check` passes typechecking and 343/344 frontend tests. Its one
+failure uses shell Python 3.9.6, which cannot import `tomllib`. With the installed
+Python 3.12.14, all 13 selected producer/validator cases pass, including that case.
+No product or assertion change was made to address either environment failure.
+Local logs remain under the temporary review output. PR #77 owns the exact
+current-head automatic/paired-harness CI identities and final audit.
+The validation plan remains unchanged. This renderer-only correction starts no
+SDK, helper, package or native session and changes no generated Ren'Py or core.
+Earlier source-specific qualification, failures and operation limits retain scope.
