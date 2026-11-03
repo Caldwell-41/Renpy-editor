@@ -180,3 +180,13 @@ test("unknown or nonblocking Dialog is refused before a new Call write",async()=
   const draft=openNew(s.host,"callScreen");await tick();button(draft,"Add Beat").click();await tick();assert.equal(s.commands.length,0);assert.ok(draft.isConnected);assert.match(draft.textContent!,/blocking Dialog with known/);await s.close();
  }
 });
+
+test("screen insertion keeps existing nested body ownership",async()=>{
+ const base=fixture(),scene=base.scenes[0]!;const model:SceneWorkspace={...base,scenes:[{...scene,beats:[
+  {id:"branch",byteStart:10,byteEnd:20,protected:false,conditionalBranch:{groupId:"group",otherwise:false,condition:{status:"supported",expression:{type:"bool",value:true}}},payload:{type:"customCode",source:"if True:",reason:"Condition"}},
+  {...scene.beats[0]!,owner:{groupId:"group",branchId:"branch"}},scene.beats[1]!
+ ]}]};const s=setup({},model);const draft=openNew(s.host,"showScreen");await tick();
+ const body=draft.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;body.value="branch";body.dispatchEvent(new Event("change",{bubbles:true}));
+ const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));button(draft,"Add Beat").click();await tick();
+ assert.deepEqual(s.commands[0]!.body,{type:"branch",groupId:"group",branchId:"branch"});assert.deepEqual(s.commands[0]!.position,{type:"before",anchor:{type:"beat",beatId:"line"}});await s.close();
+});

@@ -1196,6 +1196,7 @@ export function renderSceneAuthoring(
         let insertedId:string|undefined;
         const saved=await mutate({ type: "insertBodyBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, ...location, beat: payload }, (before,next) => {
           selectedBeatId = undefined;
+          const acceptedScene=next.scenes.find(s=>s.id===scene.id);if(screenType()&&acceptedScene)actions.rememberScreenInsertion?.({sceneId:scene.id,...location,expectedSourceRevision:acceptedScene.sourceRevision});
           const previousIds=new Set(before.scenes.find(s=>s.id===scene.id)?.beats.map(b=>b.id));
           insertedId=next.scenes.find(s=>s.id===scene.id)?.beats.find(b=>!previousIds.has(b.id))?.id;
         }, captured, panel);
@@ -1284,9 +1285,9 @@ function buildScreenBeatEditor(payload: Extract<BeatPayload, { type: "showScreen
   const panels = new Map<string, ScreenTargetBinding>();
   const placeholder = (label: string) => { const option = document.createElement("option"); option.value = intent.screenId; option.textContent = label; option.dataset.unavailable = "true"; picker.replaceChildren(option); };
   placeholder(intent.sourceName || `Loading ${kind}s…`);
-  const fail = (error: unknown) => { captured = undefined; message.textContent = `${friendlyError(error, `${caption} target unavailable.`)} Choose an available ${kind} explicitly. Input retained.`; };
+  const fail = (error: unknown) => { captured = undefined;source.disabled=true;source.onclick=null;effects.textContent="No available accepted screen source for this selection."; message.textContent = `${friendlyError(error, `${caption} target unavailable.`)} Choose an available ${kind} explicitly. Input retained.`; };
   const resolve = async () => {
-    const run = ++generation; captured = undefined;
+    const run = ++generation; captured = undefined;source.disabled=true;source.onclick=null;
     const binding = panels.get(picker.value);
     if (!binding || !actions?.resolveScreenTarget) { fail(Error(`${caption} target unavailable.`)); return; }
     message.textContent = `Checking ${kind}…`;

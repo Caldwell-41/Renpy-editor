@@ -96,7 +96,7 @@ export function buildPanelCreationForm(options: PanelCreationOptions) {
   };
   const isHelp = () => [...starters.querySelectorAll<HTMLInputElement>("input")].find(control => control.checked)?.value === "help";
   const readDraft = (): PanelCreationDraft => ({name:name.value, kind:kind(), starter:isHelp() ? "help" : "blank", assetId:image.value});
-  const refresh = () => { purpose.textContent = kind() === "dialog" ? "Dialog · Close and Escape finish the interaction. Outside clicks keep it open." : "Panel · stays open while dialogue continues."; help.hidden = !isHelp(); const eligible=images.some(asset=>asset.id===image.value);create.disabled = busy || (isHelp() && !eligible);blocked.hidden=eligible;if(assets)assets.hidden=eligible;refreshPreview(); };
+  const refresh = () => { summary.querySelector("p")!.textContent=kind()==="dialog"?"Close Help to continue the story.":defaults.explanation;purpose.textContent = kind() === "dialog" ? "Dialog · Close and Escape finish the interaction. Outside clicks keep it open." : "Panel · stays open while dialogue continues."; help.hidden = !isHelp(); const eligible=images.some(asset=>asset.id===image.value);create.disabled = busy || (isHelp() && !eligible);blocked.hidden=eligible;if(assets)assets.hidden=eligible;refreshPreview(); };
   form.addEventListener("change", () => { dirty = true; refresh(); });
   form.addEventListener("input", () => { dirty = true; });
   form.addEventListener("compositionstart", () => { composing = true; });
@@ -116,7 +116,7 @@ export function buildPanelCreationForm(options: PanelCreationOptions) {
         invalid = image;
         const asset = images.find(asset => asset.id === image.value);
         if (!asset) throw Error("Help needs an available project UI image. Your name and starter choice are retained.");
-        value.starter = { ...defaults, assetId: asset.id, expectedAssetSha256: asset.sha256 };
+        value.starter = { ...defaults, ...(kind()==="dialog"?{explanation:"Close Help to continue the story."}:{}), assetId: asset.id, expectedAssetSha256: asset.sha256 };
       }
       busy = true;
       const controls = [...form.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLButtonElement>("input,select,textarea,button")].map(control => ({ control, disabled: control.disabled }));
