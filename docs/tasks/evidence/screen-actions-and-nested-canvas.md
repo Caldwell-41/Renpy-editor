@@ -139,3 +139,63 @@ fixture resolves those environment/setup failures; they are not engine proof.
 The canvas sample consumer and its fresh reviews are pending integration. Prototype
 approval, production authoring controls, runtime/matched rendering, required platform
 qualification and final combined review remain pending. No capped operation started.
+
+## Frozen backend and first engine reservation
+
+Shared effects commit `72d92f0` is followed by canvas/sample `cd17d86` as `a16f1dc`,
+normal-default correction `bba4997` as `713dc95`, runtime tooling `d82fc4e` as
+`e4a7f57` and its provenance correction `0dab587` as `afe95ce`. Backend candidate
+`afe95ce8e206eb44cde340e2fc23ee4e7d1230af` has tree
+`787bbf549193b35b2fe78e9477df9ed8253cced5`, exactly equal to source worker merge
+`b8dfcf9920093c12f9c51ace5a5f3aeba8bee20d`. The earlier pending sample-integration
+statement above is superseded. Canvas handed back its clean branch and all files.
+Both canvas review axes have no actionable findings at `cd17d86`; its small normal
+proof correction has an explicit red/green gate. The runtime tooling's independent
+Standards review found missing toolchain provenance, corrected in `0dab587`; its
+Spec axis had no findings. These are scoped reviews, not the final combined review.
+
+On the integration branch, seven nested public-core cases and four nested Python
+gates pass with fresh accepted source and dangerous-looking string samples. One
+initial Cargo filter matched zero tests and is not a runtime-export pass. The exact
+runtime producer is invoked by `qualify-ordered-actions.py prepare`; at `afe95ce`
+its prepare and validate both pass with retained binary/toolchain provenance,
+`runtimeReady:true`, known final effects and actual public Story Call admission.
+All five runtime evidence gates pass. An initial prepare output outside `app/target`
+was refused before any producer/SDK start; corrected worktree-local output passes.
+
+The coordinator records engine campaign 1 in #47 before execution. Mac reserves
+15 SDK starts including one helper: seven ordered-action starts first, followed
+only on success by eight nested-reference/helper starts. Package/native-editor/CI
+starts are zero. Stop at the host's first failure; charge all actual failed/cancelled
+starts and retain uncertain starts until resolved. Windows remains unreserved and
+will follow the first Mac real-path proof within this initial campaign.
+
+Terra Max owns isolated test worktree `t3-26013bcc`, branch
+`t3/macos-engine-qualification`, pinned to the frozen `afe95ce` tree. Its kickoff
+confirms the exact HEAD/tree and zero SDK starts; preflight is underway. No source
+edits or retry authority are delegated. Logs/profiles/results stay in its ignored
+qualification directory. Required receipt audit, remaining targets, prototype/UI,
+native/package and final criterion review remain pending.
+
+## Mac desktop preflight refusal
+
+The test owner stopped before SDK execution. Repository `MacPower.state()` returned
+null console/display fields and `require_desktop` refused. A separate system query
+reported the console session locked; a contradictory global lock flag did not
+establish an unlocked desktop. Current GL2 availability was not proved. Host and
+archive preflight established macOS 26.6.2 ARM64, Rust/Cargo 1.90, Node 24.19/npm
+11.9, Python 3.12.16/Pillow 12.3 and the pinned official SDK archive hash.
+
+The coordinator read and verified the ignored `t3-26013bcc` receipt
+`app/target/qualification/mac-engine-1/preflight-refusal.txt`, SHA256
+`18a0a85a3e173c0ed59d096cebfac0ca928ed8167b735b0eab6d11205f95d155`.
+Its tracked source remains clean at `afe95ce`. No preparation tests, source producer
+or engine case ran in this test worktree. The earlier integration-branch offline
+results keep their own producing candidate and scope.
+
+Actual SDK/helper/uncertain/package/native-editor/CI/campaign counts are all zero.
+All 15 reserved Mac SDK starts, including the helper, are released unused in #47;
+there are no owned SDK PIDs or descendants to reap. No retry or weaker desktop
+admission is selected. Mac proof waits for an unlocked/awake desktop confirmation
+and positive admission, then a fresh reservation. Windows readiness and independent
+design/integration work can continue. No ticket acceptance follows from preflight.

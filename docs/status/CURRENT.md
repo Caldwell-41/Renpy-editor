@@ -4,13 +4,24 @@
 
 Kris approved combined implementation of [L11 #47](https://github.com/Caldwell-41/Renpy-editor/issues/47)
 and [L19 #50](https://github.com/Caldwell-41/Renpy-editor/issues/50) on 2026-11-05.
-`codex/47-50-integration` starts from `e2a02bc`; two isolated Sol High lanes own
-source/actions and data-only canvas rendering. The coordinator owns shared
-contracts, integration and final review. #47 owns combined operation accounting;
-both leaves retain pending acceptance. The source/action lane must obtain the
-separate approved prototype handoff before production UI changes. No costly
-execution has started. [Evidence](../tasks/evidence/screen-actions-and-nested-canvas.md)
-records the contract checkpoint and verification. Prior closeout sections below
+`codex/47-50-integration` starts from `e2a02bc`. Combined backend `afe95ce` includes
+typed actions/bindings, revisioned effects/Story admission, nested component expansion,
+inert samples and independent qualification tooling. The canvas lane has handed
+back its files. Source/actions awaits the separate approved prototype handoff for
+production UI. The coordinator owns integration, combined verification and review.
+#47 owns operation accounting and the released Mac engine reservation.
+
+| Selected behavior | Implementation and offline proof | Engine/native/human acceptance |
+| --- | --- | --- |
+| Typed writes and effects | Source/history/refusal and Story admission cases pass | Ordered normal-play proof pending |
+| Nested canvas and inert samples | Seven public-core and four comparison gates pass | Both-target/aspect captures pending |
+| Authoring controls | Prototype iteration; production integration pending | User design decision pending |
+
+Neither ticket is accepted. Mac desktop preflight refused before execution; its
+15 SDK starts and one helper reservation are released, with all actual counters zero.
+Mac proof waits for an unlocked, awake desktop and verified admission. Windows
+readiness is the next independent host check. [Evidence](../tasks/evidence/screen-actions-and-nested-canvas.md)
+records checkpoints, producing candidates and limits. Prior closeout sections below
 retain their historical candidates and recovery; their unselected-next-work text
 is superseded by this selection.
 

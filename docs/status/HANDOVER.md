@@ -15,12 +15,29 @@ The source/action worker creates the separately requested prototype chat and rec
 the approved source and user decision directly. Terra Max owns browser/desktop work;
 Sol owns coding. Independent nested rendering can proceed during design iteration.
 
-Shared contracts are committed at `6d027be`; both implementation lanes and the
-separate prototype are running. Next: review the source/action core checkpoint,
-then integrate its shared effect/caller consumers and hand the binding API to the
-canvas lane. The contract check passes locked offline core compilation and frontend typechecking.
-Required implementation, prototype, both-target/aspect rendering, normal-play action
-proof and independent final review remain pending. No costly operation has started.
+The combined backend is frozen at `afe95ce8e206eb44cde340e2fc23ee4e7d1230af`, tree
+`787bbf549193b35b2fe78e9477df9ed8253cced5`. Its tree equals source worker merge
+`b8dfcf9`. Both reviewed source checkpoints, revisioned effects, canvas/sample
+consumer and runtime tooling are integrated. The canvas lane is complete and
+returned all implementation files; its branch remains preserved. Source/actions
+retains its dedicated modules/controls and awaits the prototype's direct approved
+handoff before production UI. The coordinator owns the other integrated files.
+
+Next: inspect Windows readiness and integrate the approved authoring UI. Terra Max test worktree
+`t3-26013bcc`, branch `t3/macos-engine-qualification`, is pinned to `afe95ce`.
+Mac desktop admission refused before any SDK start. The coordinator verified the
+retained receipt hash, released all Mac 15 SDK/helper-one reservations in #47, and
+requested an unlocked/awake desktop confirmation. Actual/uncertain SDK/helper,
+package/native/CI/campaign counts all remain zero. No SDK PID or cleanup arose.
+Do not resume Mac execution until admission can establish a usable desktop and
+#47 records a fresh reservation. Windows is linked as SUNDOWN; its checkout/display
+prerequisites and reservation remain pending. Later documentation commits do not
+move the frozen test worktree.
+
+Offline preparation/validation at the combined candidate passes with known effects,
+`runtimeReady:true`, and actual public Story Call admission. Seven nested core cases,
+four nested gates and five runtime evidence gates pass. The complete UI, both-target
+engine/native/package proof, final full-suite checks and combined review remain pending.
 [Evidence](../tasks/evidence/screen-actions-and-nested-canvas.md) retains details.
 Preserve the unrelated three Design Lab guide edits, untracked Phase 1 audit,
 protected stashes/native recovery and historical allowances below. Earlier no-successor
