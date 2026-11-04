@@ -137,7 +137,7 @@ init python:
                 while len(d.children) < d.cols * d.rows:
                     d.add(renpy.display.layout.Null())
             tracked = _CanvasNode(d, node["start"], clips=kind == "viewport")
-            objects[id(tracked)] = node["start"]
+            objects[id(tracked)] = node.get("selectionStart", node["start"])
             return tracked
         root = build(by_parent[None][0])
         return root, objects
