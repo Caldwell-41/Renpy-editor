@@ -359,12 +359,21 @@ fn inert_button_action_stays_editable_and_extractable() {
         .find(|node| node["kind"] == "textbutton")
         .unwrap();
     assert!(inert["dismissal"].is_null());
+    assert_eq!(inert["actions"], json!([]));
     assert!(inert["protected"].as_array().unwrap().is_empty());
     let target = ipc(
         &mut service,
         "screens.resolveTarget",
         json!({"binding":{
         "screenId":component["id"],"sourceName":component["name"]}}),
+    );
+    assert_eq!(target["effects"]["unknown"], false);
+    reject(
+        &mut service,
+        "screens.compose",
+        json!({"screenId":component["id"],"expectedRevision":document["revision"],
+        "componentRevisions":target["revisions"],"command":{"type":"actions","nodeId":inert["id"],"actions":[],
+        "expectedAuthoringRevision":document["authoringRevision"],"expectedTargetRevisions":[]}}),
     );
     ipc(
         &mut service,

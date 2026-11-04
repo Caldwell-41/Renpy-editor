@@ -403,11 +403,18 @@ impl AuthoringService {
                     .iter()
                     .map(|node| {
                         node.id.as_ref()?;
-                        let span = qualified.dismissals.get(&node.span.start)?;
-                        match &bytes[span.start..span.end] {
-                            b"Null()" => Some(ButtonDismissal::None),
-                            b"Return()" => Some(ButtonDismissal::FinishInteraction),
-                            _ if owner.kind == crate::metadata::OwnedScreenKind::Panel => {
+                        if owner.kind == crate::metadata::OwnedScreenKind::Component {
+                            return None;
+                        }
+                        let button = actions.buttons.get(&node.span.start)?;
+                        match button.actions.as_slice() {
+                            [] => Some(ButtonDismissal::None),
+                            [interaction::ScreenAction::FinishInteraction] => {
+                                Some(ButtonDismissal::FinishInteraction)
+                            }
+                            [interaction::ScreenAction::HideScreen { target }]
+                                if target.screen_id == owner.id =>
+                            {
                                 Some(ButtonDismissal::HideScreen)
                             }
                             _ => None,

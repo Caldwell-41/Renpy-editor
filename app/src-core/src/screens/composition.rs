@@ -253,6 +253,9 @@ impl AuthoringService {
                 expected_authoring_revision,
                 expected_target_revisions,
             } => {
+                if owner.screen.kind == crate::metadata::OwnedScreenKind::Component {
+                    return Err(SceneError::ReferenceBlocked);
+                }
                 let authoring = self.require_action_authoring(
                     project,
                     project_id,
@@ -417,12 +420,12 @@ impl AuthoringService {
                     .get(&node.span.start)
                     .filter(|b| {
                         b.actions.len() <= 1
-                            && b.actions.iter().all(|a| {
-                                !matches!(
-                                    a,
-                                    interaction::ScreenAction::SetVariable { .. }
-                                        | interaction::ScreenAction::ShowScreen { .. }
-                                )
+                            && b.actions.iter().all(|a| match a {
+                                interaction::ScreenAction::FinishInteraction => true,
+                                interaction::ScreenAction::HideScreen { target } => {
+                                    target.screen_id == owner.screen.id
+                                }
+                                _ => false,
                             })
                     })
                     .ok_or(SceneError::OpaqueBoundary)?;

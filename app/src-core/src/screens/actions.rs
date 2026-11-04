@@ -129,7 +129,9 @@ pub(super) fn qualified_panel_targets(inventory: &ownership::Inventory) -> Vec<P
             let lines = source_lines(bytes).ok()?;
             let modals = modal_statements(screen, &lines);
             if !(modals.is_empty()
-                || modals.len() == 1 && modals[0].single && modals[0].code == "modal False")
+                || modals.len() == 1
+                    && standalone(modals[0], &lines)
+                    && modals[0].code == "modal False")
             {
                 return None;
             }
@@ -158,6 +160,18 @@ fn modal_statements<'a>(screen: &Screen, lines: &'a [Line<'a>]) -> Vec<&'a Line<
                 && line.code.split_whitespace().next() == Some("modal")
         })
         .collect()
+}
+
+fn standalone(line: &Line<'_>, lines: &[Line<'_>]) -> bool {
+    line.single
+        && lines
+            .binary_search_by_key(&line.start, |line| line.start)
+            .ok()
+            .is_some_and(|index| {
+                lines
+                    .get(index + 1)
+                    .is_none_or(|next| next.indent <= line.indent)
+            })
 }
 
 /// Split only at top-level commas. The shared lexer already bounded the statement.
@@ -286,13 +300,10 @@ pub fn inspect_actions(
     let modals = modal_statements(screen, &lines);
     result.blocking = owner.kind == OwnedScreenKind::Dialog
         && modals.len() == 1
-        && modals[0].single
+        && standalone(modals[0], &lines)
         && modals[0].code == "modal True";
     for node in screen.nodes.iter().filter(|n| n.kind == "textbutton") {
         let read = || -> Option<ButtonActions> {
-            if owner.kind == OwnedScreenKind::Component {
-                return None;
-            }
             let header_index = lines
                 .binary_search_by_key(&node.span.start, |line| line.start)
                 .ok()?;
@@ -319,6 +330,9 @@ pub fn inspect_actions(
             }
             let raw = statement.code.strip_prefix("action")?.trim_start();
             let actions = parse(raw, variables, panels, result.blocking)?;
+            if owner.kind == OwnedScreenKind::Component && !actions.is_empty() {
+                return None;
+            }
             let start = statement.start + statement.indent + statement.code.len() - raw.len();
             let mut dependencies: Vec<_> = actions
                 .iter()

@@ -490,3 +490,46 @@ fn screen_actions_retain_source_when_target_review_is_stale_dirty_or_unqualified
         doc["revision"]
     );
 }
+
+#[test]
+fn nested_modal_statements_never_grant_finish_or_panel_target_authority() {
+    let (_temporary, mut service, _root, panel) = composition_project();
+    let dialog = create_action_screen(&mut service, "confirmation", "dialog");
+    let button = compose_command(
+        &mut service,
+        &dialog,
+        json!({"type":"add","parentId":dialog["rootId"],"kind":"textbutton","text":"Finish"}),
+    );
+    let original = ipc(&mut service, "source.open", json!({"path":dialog["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .replace("modal True", "modal True\n        pass");
+    save_composition_source(&mut service, &dialog, &original);
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":dialog["path"]}),
+    );
+    reject(
+        &mut service,
+        "screens.compose",
+        json!({"screenId":dialog["id"],"expectedRevision":doc["revision"],"command":{
+        "type":"actions","nodeId":button["selectedId"],"actions":[{"type":"finishInteraction"}],"expectedAuthoringRevision":doc["authoringRevision"],"expectedTargetRevisions":[]}}),
+    );
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":dialog["path"]}))["text"],
+        original
+    );
+    let panel_source = ipc(&mut service, "source.open", json!({"path":panel["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .replace("    pass", "    modal False\n        pass\n    pass");
+    save_composition_source(&mut service, &panel, &panel_source);
+    let review = reviewed_target(&mut service, &panel);
+    reject(
+        &mut service,
+        "screens.compose",
+        json!({"screenId":dialog["id"],"expectedRevision":doc["revision"],"command":{
+        "type":"actions","nodeId":button["selectedId"],"actions":[{"type":"showScreen","target":review["target"]}],"expectedAuthoringRevision":doc["authoringRevision"],"expectedTargetRevisions":[review]}}),
+    );
+}
