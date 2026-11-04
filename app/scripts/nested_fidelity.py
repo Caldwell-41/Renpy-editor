@@ -32,7 +32,7 @@ def validate_accepted(accepted):
     assert accepted['sourceMapSchemaVersion'] == 8
     assert accepted['exporterSourceSHA256'] == digest((REPO / 'app/src-core/src/screens/nested_canvas_tests.rs').read_bytes())
     files = accepted['files']
-    assert set(files) == set(FIXTURES) | {'.renpy-editor/project.json', '.renpy-editor/source-map.json', '.renpy-editor/authoring.json'}
+    assert set(files) == set(FIXTURES) | {'.renpy-editor/project.json', '.renpy-editor/source-map.json', '.renpy-editor/authoring.json', 'game/definitions/variables.rpy'}
     for row in files.values():
         assert digest(row['text'].encode()) == row['sha256'], 'Accepted file hash differs'
     metadata = json.loads(files['.renpy-editor/source-map.json']['text'])
@@ -49,6 +49,13 @@ def validate_accepted(accepted):
         rows = [row for row in accepted['assets'] if row['kind'] == kind]
         assert len(rows) == 1 and rows[0]['relativePath'] == path
         assert rows[0]['sha256'] == digest((FIXTURE_ROOT / fixture).read_bytes())
+    variables = json.loads(files['.renpy-editor/authoring.json']['text'])['variables']
+    assert {variable['technicalName'] for variable in variables} == {'flag', 'nested_caption'}
+    variable = next(variable for variable in variables if variable['technicalName'] == 'nested_caption')
+    assert files['game/definitions/variables.rpy']['text'] == '# Variable definitions are added by Loomlight.\ndefault flag = True\ndefault nested_caption = "Nested café"\n'
+    assert variable['variableType'] == 'string' and variable['defaultValue'] == 'Nested café'
+    assert variable['source']['path'] == 'game/definitions/variables.rpy'
+    assert variable['source']['sourceRevision'] == files[variable['source']['path']]['sha256']
     assert len(accepted['cases']) == 2
     assert {tuple(row['request'][key] for key in ('width', 'height')) for row in accepted['cases']} == set(ASPECTS)
     for case in accepted['cases']:
@@ -58,6 +65,8 @@ def validate_accepted(accepted):
         assert plan['available'] is True and plan['limits'] == []
         assert [plan['width'], plan['height'], plan['buttonState']] == [request['width'], request['height'], 'normal']
         assert case['viewportState'] == dict(x=0, y=0)
+        assert request['variableSamples'] == [dict(variableId=variable['id'], expectedSourceRevision=variable['source']['sourceRevision'], value="[__import__('os').system('never')] {b}literal{/b}")]
+        assert all(node['literal'] == "[__import__('os').system('never')] {{b}literal{{/b}" for node in plan['nodes'] if node['kind'] == 'text' and node.get('selectionStart') is not None and node['literal'].startswith('['))
         nodes = plan['nodes']
         assert len(nodes) == 32 and len({node['start'] for node in nodes}) == 32
         assert len(case['widgets']) == 31

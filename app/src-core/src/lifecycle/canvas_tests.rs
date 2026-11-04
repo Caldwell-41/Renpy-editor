@@ -503,6 +503,19 @@ fn canvas_shared_definition_and_metadata_changes_invalidate_an_unchanged_root() 
         project.service.screens_canvas_status(fresh, false).unwrap()["phase"],
         "stale"
     );
+    let refreshed = project.render();
+    project.wait_phase(&refreshed, "ready", Duration::from_secs(5));
+    let authoring = project.root.join(".renpy-editor/authoring.json");
+    let mut metadata: Value = serde_json::from_slice(&fs::read(&authoring).unwrap()).unwrap();
+    metadata["externalRevisionNote"] = json!("new variable metadata");
+    fs::write(&authoring, serde_json::to_vec_pretty(&metadata).unwrap()).unwrap();
+    assert_eq!(
+        project
+            .service
+            .screens_canvas_status(refreshed, false)
+            .unwrap()["phase"],
+        "stale"
+    );
     assert_eq!(fs::read_to_string(project.root.join(PATH)).unwrap(), SOURCE);
     project.service.close().unwrap();
     assert!(!project.helper_root_exists());

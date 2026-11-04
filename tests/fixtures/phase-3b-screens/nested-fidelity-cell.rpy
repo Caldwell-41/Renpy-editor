@@ -13,7 +13,7 @@ screen nested_component_1():
                 id "seal"
                 xsize 49
                 ysize 63
-            text "Nested café":
+            text "[nested_caption!q]":
                 id "title"
                 style "nested_body"
                 xsize 78

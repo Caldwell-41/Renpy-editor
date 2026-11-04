@@ -305,6 +305,18 @@ fn nested_fidelity_exports_accepted_source_assets_and_matched_plans_without_exec
                 .clone(),
         );
     }
+    let model = ipc(
+        &mut service,
+        "variable.create",
+        json!({"technicalName":"nested_caption","variableType":"string","defaultValue":"Nested café"}),
+    );
+    let variable = model["variables"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["technicalName"] == "nested_caption")
+        .unwrap()
+        .clone();
     let map_path = root.join(".renpy-editor/source-map.json");
     let mut map: Value = serde_json::from_slice(&fs::read(&map_path).unwrap()).unwrap();
     let second_use = uuid::Uuid::new_v4().to_string();
@@ -358,6 +370,7 @@ fn nested_fidelity_exports_accepted_source_assets_and_matched_plans_without_exec
         payload["width"] = json!(width);
         payload["height"] = json!(height);
         payload["buttonState"] = json!("normal");
+        payload["variableSamples"] = json!([{"variableId":variable["id"],"expectedSourceRevision":variable["source"]["sourceRevision"],"value":"[__import__('os').system('never')] {b}literal{/b}"}]);
         let plan = ipc(&mut service, "screens.canvasPlan", payload.clone());
         assert_eq!(plan["available"], true, "{plan}");
         assert!(plan["nodes"]
@@ -415,6 +428,7 @@ fn nested_fidelity_exports_accepted_source_assets_and_matched_plans_without_exec
         ".renpy-editor/project.json",
         ".renpy-editor/source-map.json",
         ".renpy-editor/authoring.json",
+        "game/definitions/variables.rpy",
     ] {
         let bytes = fs::read(root.join(path)).unwrap();
         files.insert(path.to_owned(), json!({"text":String::from_utf8(bytes.clone()).unwrap(),"sha256":hex::encode(Sha256::digest(bytes))}));
@@ -484,5 +498,122 @@ fn component_canvas_counts_inlined_grid_children_and_handles_an_empty_use() {
         .unwrap()
         .iter()
         .all(|node| node.get("selectionStart").is_none()));
+    service.close().unwrap();
+}
+
+#[test]
+fn variable_canvas_samples_are_literal_typed_revision_bound_and_reach_nested_uses() {
+    let (_temporary, mut service, root, target) = external_graph(1, 2, false);
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    let variables = ipc(
+        &mut service,
+        "variable.create",
+        json!({"technicalName":"caption","variableType":"string","defaultValue":"Default caption"}),
+    );
+    let variable = variables["variables"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["technicalName"] == "caption")
+        .unwrap()
+        .clone();
+    let path = root.join("game/ui/nested_component_0.rpy");
+    let source = fs::read_to_string(&path)
+        .unwrap()
+        .replace("text \"Leaf\"", "text \"[caption!q]\"");
+    fs::write(&path, &source).unwrap();
+    let mut payload = request(&mut service, &target);
+    let default = ipc(&mut service, "screens.canvasPlan", payload.clone());
+    assert_eq!(default["available"], true, "{default}");
+    assert_eq!(default["nodes"][1]["literal"], "Default caption");
+    let dangerous = "[__import__('os').system('never')] {b}literal{/b}";
+    payload["variableSamples"] = json!([{"variableId":variable["id"],"expectedSourceRevision":variable["source"]["sourceRevision"],"value":dangerous}]);
+    let sampled = ipc(&mut service, "screens.canvasPlan", payload.clone());
+    assert_eq!(sampled["available"], true, "{sampled}");
+    for node in &sampled["nodes"].as_array().unwrap()[1..] {
+        assert_eq!(
+            node["literal"],
+            "[__import__('os').system('never')] {{b}literal{{/b}"
+        );
+    }
+    assert_eq!(fs::read_to_string(&path).unwrap(), source);
+    payload["variableSamples"][0]["expectedSourceRevision"] = json!("stale");
+    assert!(matches!(
+        service.screens_canvas_plan(serde_json::from_value(payload).unwrap()),
+        Err(crate::lifecycle::LifecycleError::Scene(
+            crate::scene::SceneError::SourceConflict
+        ))
+    ));
+    service.close().unwrap();
+}
+
+#[test]
+fn variable_canvas_preserves_bool_and_large_integer_spelling_and_custom_expression_limits() {
+    let (_temporary, mut service, root, target) = external_graph(1, 1, false);
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    ipc(
+        &mut service,
+        "variable.create",
+        json!({"technicalName":"ready","variableType":"bool","defaultValue":false}),
+    );
+    let model = ipc(
+        &mut service,
+        "variable.create",
+        json!({"technicalName":"score","variableType":"int","defaultValue":"0"}),
+    );
+    let variables = model["variables"].as_array().unwrap();
+    let ready = variables
+        .iter()
+        .find(|v| v["technicalName"] == "ready")
+        .unwrap();
+    let score = variables
+        .iter()
+        .find(|v| v["technicalName"] == "score")
+        .unwrap();
+    let path = root.join("game/ui/nested_component_0.rpy");
+    let original = fs::read_to_string(&path).unwrap();
+    let source = original.replace(
+        "text \"Leaf\"",
+        "text \"[ready!q]\"\n    text \"[score!q]\"",
+    );
+    fs::write(&path, &source).unwrap();
+    let mut payload = request(&mut service, &target);
+    payload["variableSamples"] = json!([
+        {"variableId":ready["id"],"expectedSourceRevision":ready["source"]["sourceRevision"],"value":true},
+        {"variableId":score["id"],"expectedSourceRevision":score["source"]["sourceRevision"],"value":"9007199254740993"}]);
+    let plan = ipc(&mut service, "screens.canvasPlan", payload.clone());
+    assert_eq!(plan["available"], true, "{plan}");
+    assert_eq!(plan["nodes"][1]["literal"], "True");
+    assert_eq!(plan["nodes"][2]["literal"], "9007199254740993");
+    let mut invalid = payload.clone();
+    invalid["variableSamples"][0]["value"] = json!("True");
+    assert!(service
+        .screens_canvas_plan(serde_json::from_value(invalid).unwrap())
+        .is_err());
+    let mut duplicate = payload.clone();
+    let sample = duplicate["variableSamples"][0].clone();
+    duplicate["variableSamples"]
+        .as_array_mut()
+        .unwrap()
+        .push(sample);
+    assert!(service
+        .screens_canvas_plan(serde_json::from_value(duplicate).unwrap())
+        .is_err());
+    fs::write(&path, format!("{source}    text \"[score + 1]\"\n")).unwrap();
+    let partial = ipc(&mut service, "screens.canvasPlan", payload.clone());
+    assert_eq!(partial["available"], false);
+    assert_eq!(partial["nodes"][1]["literal"], "True");
+    assert_eq!(partial["nodes"][3]["literal"], "[score + 1]");
+    let definitions = root.join(score["source"]["path"].as_str().unwrap());
+    let bytes = fs::read_to_string(&definitions).unwrap();
+    fs::write(&definitions, format!("{bytes}# external definition edit\n")).unwrap();
+    assert!(matches!(
+        service.screens_canvas_plan(serde_json::from_value(payload).unwrap()),
+        Err(crate::lifecycle::LifecycleError::Scene(
+            crate::scene::SceneError::SourceConflict
+        ))
+    ));
     service.close().unwrap();
 }

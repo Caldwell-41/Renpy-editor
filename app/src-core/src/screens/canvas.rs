@@ -27,6 +27,8 @@ pub struct Request {
     #[serde(default)]
     pub text_samples: Vec<TextSample>,
     #[serde(default)]
+    pub variable_samples: Vec<interaction::VariableSample>,
+    #[serde(default)]
     pub button_state: ButtonState,
     #[serde(default)]
     pub addition: Option<Addition>,
@@ -138,6 +140,14 @@ pub struct CanvasNode {
     pub properties: Map<String, Value>,
 }
 
+struct Expansion<'a> {
+    inventory: &'a ownership::Inventory,
+    variables: &'a [crate::authoring::Variable],
+    samples: &'a [interaction::VariableSample],
+    remaining: usize,
+    components: std::collections::BTreeMap<(String, usize), Plan>,
+}
+
 impl AuthoringService {
     pub fn screens_canvas_plan(
         &self,
@@ -145,15 +155,72 @@ impl AuthoringService {
         request: Request,
     ) -> Result<Plan, SceneError> {
         let inventory = self.screen_inventory(project)?;
-        let mut remaining = MAX_NODES;
-        let plan = self.canvas_plan(
-            project,
-            request,
-            &inventory,
-            &[],
-            &mut remaining,
-            &mut std::collections::BTreeMap::new(),
-        )?;
+        let (_, authoring_revision) = self
+            .transactions
+            .snapshot(
+                project,
+                RelativePath::new(".renpy-editor/authoring.json").unwrap(),
+            )
+            .map_err(|_| SceneError::SourceConflict)?;
+        let authoring = self
+            .screen_action_authoring(project, &inventory.source_map.project_id)
+            .ok();
+        let variables = authoring
+            .as_ref()
+            .map(|snapshot| snapshot.variables.as_slice())
+            .unwrap_or(&[]);
+        if request.variable_samples.len() > MAX_NODES {
+            return Err(SceneError::InvalidPayload);
+        }
+        let mut sampled = HashSet::new();
+        for sample in &request.variable_samples {
+            if !sampled.insert(&sample.variable_id) {
+                return Err(SceneError::InvalidPayload);
+            }
+            bindings::resolve_sample(
+                &interaction::VariableBinding {
+                    variable_id: sample.variable_id.clone(),
+                },
+                variables,
+                Some(sample),
+            )?;
+        }
+        let samples = request.variable_samples.clone();
+        let mut expansion = Expansion {
+            inventory: &inventory,
+            variables,
+            samples: &samples,
+            remaining: MAX_NODES,
+            components: std::collections::BTreeMap::new(),
+        };
+        let mut plan = self.canvas_plan(project, request, &[], &mut expansion)?;
+        plan.dependencies.push((
+            ".renpy-editor/authoring.json".into(),
+            authoring_revision.sha256.clone(),
+        ));
+        for variable in variables {
+            if plan.dependencies.iter().any(|(path, hash)| {
+                path == &variable.source.path && hash != &variable.source.source_revision
+            }) {
+                return Err(SceneError::SourceConflict);
+            }
+            plan.dependencies.push((
+                variable.source.path.clone(),
+                variable.source.source_revision.clone(),
+            ));
+        }
+        let (_, current_authoring) = self
+            .transactions
+            .snapshot(
+                project,
+                RelativePath::new(".renpy-editor/authoring.json").unwrap(),
+            )
+            .map_err(|_| SceneError::SourceConflict)?;
+        if current_authoring.sha256 != authoring_revision.sha256 {
+            return Err(SceneError::SourceConflict);
+        }
+        plan.dependencies.sort();
+        plan.dependencies.dedup();
         let (_, metadata_revision) = self
             .transactions
             .snapshot(
@@ -171,11 +238,10 @@ impl AuthoringService {
         &self,
         project: &ProjectId,
         request: Request,
-        style_inventory: &ownership::Inventory,
         active_components: &[String],
-        remaining: &mut usize,
-        components: &mut std::collections::BTreeMap<(String, usize), Plan>,
+        expansion: &mut Expansion<'_>,
     ) -> Result<Plan, SceneError> {
+        let style_inventory = expansion.inventory;
         if request.width == 0
             || request.height == 0
             || request.width > 1920
@@ -234,11 +300,11 @@ impl AuthoringService {
         };
         let source = source_lines(&bytes)?;
         for node in &screen.nodes {
-            if *remaining == 0 {
+            if expansion.remaining == 0 {
                 plan.limits.push("Expanded component node limit".into());
                 break;
             }
-            *remaining -= 1;
+            expansion.remaining -= 1;
             let mut properties = Map::new();
             // Read only direct, single-line properties. The shared source parser owns
             // node boundaries; unsupported blocks are never flattened into children.
@@ -413,7 +479,21 @@ impl AuthoringService {
                         .push(format!("Unresolved {fields} at {}", node.span.start)),
                 }
             }
-            if matches!(node.kind.as_str(), "text" | "textbutton")
+            let binding = bindings::inspect_binding(node, expansion.variables);
+            let literal = if let Some(binding) = &binding {
+                Some(bindings::resolve_sample(
+                    binding,
+                    expansion.variables,
+                    expansion
+                        .samples
+                        .iter()
+                        .find(|sample| sample.variable_id == binding.variable_id),
+                )?)
+            } else {
+                node.literal.clone()
+            };
+            if binding.is_none()
+                && matches!(node.kind.as_str(), "text" | "textbutton")
                 && node
                     .literal
                     .as_ref()
@@ -429,7 +509,7 @@ impl AuthoringService {
                 parent: node.parent_start,
                 selection_start: None,
                 kind: node.kind.clone(),
-                literal: node.literal.clone(),
+                literal,
                 properties,
             });
         }
@@ -789,7 +869,7 @@ impl AuthoringService {
                     .push(format!("Missing or ambiguous component at {}", node.start));
                 continue;
             };
-            if *remaining == 0 {
+            if expansion.remaining == 0 {
                 plan.limits
                     .push(format!("Expanded component node limit at {}", node.start));
                 continue;
@@ -801,14 +881,15 @@ impl AuthoringService {
             }
             let mut active = active_components.to_vec();
             active.push(target.id.clone());
-            let mut child = if let Some(cached) = components.get(&(target.id.clone(), active.len()))
+            let mut child = if let Some(cached) =
+                expansion.components.get(&(target.id.clone(), active.len()))
             {
-                if cached.nodes.len() > *remaining {
+                if cached.nodes.len() > expansion.remaining {
                     plan.limits
                         .push(format!("Expanded component node limit at {}", node.start));
                     continue;
                 }
-                *remaining -= cached.nodes.len();
+                expansion.remaining -= cached.nodes.len();
                 cached.clone()
             } else {
                 let child = self.canvas_plan(
@@ -828,18 +909,19 @@ impl AuthoringService {
                         positions: vec![],
                         layouts: vec![],
                         text_samples: vec![],
+                        variable_samples: request.variable_samples.clone(),
                         addition: None,
                         image_samples: vec![],
                         image_addition: None,
                         text_styles: vec![],
                     },
-                    style_inventory,
                     &active,
-                    remaining,
-                    components,
+                    expansion,
                 )?;
                 if child.available {
-                    components.insert((target.id.clone(), active.len()), child.clone());
+                    expansion
+                        .components
+                        .insert((target.id.clone(), active.len()), child.clone());
                 }
                 child
             };

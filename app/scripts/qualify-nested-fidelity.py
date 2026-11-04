@@ -64,6 +64,11 @@ def reference(args):
             (project / 'game/options.rpy').write_text(f'define config.name = "Loomlight nested fidelity"\ndefine config.screen_width = {width}\ndefine config.screen_height = {height}\ndefine config.sound = False\ndefine config.save_directory = None\n')
             case = next(case for case in accepted['cases'] if (case['request']['width'], case['request']['height']) == (width, height))
             data = dict(NESTED_CASE=case, NESTED_INPUTS=inputs(accepted), NESTED_OUTPUT=str(output))
+            variables = json.loads(accepted['files']['.renpy-editor/authoring.json']['text'])['variables']
+            for sample in case['request']['variableSamples']:
+                variable = next(variable for variable in variables if variable['id'] == sample['variableId'])
+                assert variable['technicalName'] == 'nested_caption' and isinstance(sample['value'], str)
+                data[variable['technicalName']] = sample['value']
             initializer = 'init python:\n' + ''.join(f'    {key} = {value!r}\n' for key, value in data.items())
             (project / 'game/nested_proof.rpy').write_text(initializer + '\n' + PROOF.read_text())
             commands = [('compile', ['compile']), ('lint', ['lint', '--error-code'])] if (width, height) == ASPECTS[0] else []
