@@ -1,5 +1,8 @@
 use super::*;
 
+#[path = "action_runtime_tests.rs"]
+mod runtime;
+
 fn create_action_screen(service: &mut LifecycleService, name: &str, kind: &str) -> Value {
     let catalog = ipc(service, "screens.list", json!({}));
     let created = ipc(
