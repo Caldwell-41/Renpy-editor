@@ -922,12 +922,18 @@ export class ScreensWorkspace {
     const composition = this.composer.canvasDraft();
     this.canvasStatus.textContent = composition.addition ? "Draft addition. Not applied to Source." : "Ren'Py canvas. Selection guides are editor overlays.";
     this.canvas.querySelector(".screen-pending-addition")?.remove();
-    const present = new Set((installedGeometry ?? []).map(g => this.nodes().findIndex(n => n.span.start === g.start)));
-    this.canvas.querySelectorAll<HTMLElement>(".screen-node").forEach(target => {
-      if (!present.has(Number(target.dataset.index))) target.remove();
+    const counts = new Map<number, number>();
+    const regions = (installedGeometry ?? []).map(geometry => {
+      const index = this.nodes().findIndex(node => node.span.start === geometry.start);
+      const region = counts.get(index) ?? 0;
+      counts.set(index, region + 1);
+      return { geometry, index, region };
     });
-    for (const geometry of installedGeometry ?? []) {
-      const index = this.nodes().findIndex(n => n.span.start === geometry.start);
+    const present = new Set(regions.map(({ index, region }) => `${index}:${region}`));
+    this.canvas.querySelectorAll<HTMLElement>(".screen-node").forEach(target => {
+      if (!present.has(`${target.dataset.index}:${target.dataset.region ?? "0"}`)) target.remove();
+    });
+    for (const { geometry, index, region } of regions) {
       const node = this.nodes()[index];
       if (!node && geometry.start === composition.additionStart) {
         const guide = el("div", "screen-pending-addition"); guide.ariaLabel = "Draft addition (not applied)";
@@ -935,7 +941,7 @@ export class ScreensWorkspace {
         this.canvas.append(guide); continue;
       }
       if (!node || node.kind === "screen") continue;
-      let target = this.canvas.querySelector<HTMLButtonElement>(`[data-index="${index}"]`);
+      let target = this.canvas.querySelector<HTMLButtonElement>(`.screen-node[data-index="${index}"][data-region="${region}"]`);
       if (!target) {
         target = button("",() => this.choose(index,!this.owned),`screen-node screen-node-${node.kind}`);
         target.addEventListener("keydown", event => {
@@ -944,14 +950,15 @@ export class ScreensWorkspace {
       }
       target.ondblclick = () => this.choose(index,true);
       target.ariaLabel = `Select ${node.literal ?? names[node.kind] ?? node.kind}`;
-      target.dataset.index = String(index); target.ariaPressed = String(index === this.selected);
+      target.dataset.index = String(index); target.dataset.region = String(region);
+      target.tabIndex = region === 0 ? 0 : -1; target.ariaPressed = String(index === this.selected);
       if (!this.move) this.bindMovement(target, index, false);
       for (const [key,value] of Object.entries({left:geometry.x,top:geometry.y,width:geometry.width,height:geometry.height})) target.style.setProperty(key,`${value*this.scale}px`);
-      // Reattaching a captured target makes the browser cancel the gesture.
-      if (target.parentElement !== this.canvas) this.canvas.append(target);
+      // Preserve captured targets during movement; otherwise follow draw order for hit testing.
+      if (target.parentElement !== this.canvas || !this.move) this.canvas.append(target);
     }
     if(this.resize || this.move) {
-      const outline=this.canvas.querySelector<HTMLElement>(".screen-selection"), target=this.canvas.querySelector<HTMLElement>(`[data-index="${this.selected}"]`);
+      const outline=this.canvas.querySelector<HTMLElement>(".screen-selection"), target=this.canvas.querySelector<HTMLElement>(`.screen-node[data-index="${this.selected}"]`);
       if(outline && target) for(const key of ["left","top","width","height"] as const) outline.style[key]=target.style[key];
     } else {
       this.positionSelection();
@@ -1057,7 +1064,7 @@ export class ScreensWorkspace {
     this.releaseMove();this.provisionalMove=undefined;this.drafts.delete(this.key());this.render();this.note("Move cancelled. No source was written.");
   }
   private positionSelection(): void {
-    const node = this.nodes()[this.selected], target = this.canvas.querySelector<HTMLElement>(`[data-index="${this.selected}"]`);
+    const node = this.nodes()[this.selected], target = this.canvas.querySelector<HTMLElement>(`.screen-node[data-index="${this.selected}"]`);
     if (!this.frames.ready || !node || !target || size(node, "xsize") === undefined || size(node, "ysize") === undefined) { this.canvas.querySelector(".screen-selection")?.remove(); return; }
     let outline = this.canvas.querySelector<HTMLElement>(".screen-selection");
     if (outline?.dataset.index !== String(this.selected)) { outline?.remove(); outline = null; }

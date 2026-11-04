@@ -87,3 +87,22 @@ the current local prototype-review policy, and direct handoff instructions. Its
 owner confirms existing media delivery verification and cleanup readiness. Design
 approval is pending. Core TDD continues independently; no production UI is approved
 by this assignment receipt.
+
+## Component selection caller correction
+
+The canvas owner proposed multiple clipped rectangles for each root component use,
+which avoids a bounding hit rectangle over gaps. The coordinator traced the caller
+and found `renderCanvasGuides` reused one button per node index, overwriting every
+earlier rectangle. A focused workspace DOM case reproduced that failure with two
+disjoint component regions and an overlapping later sibling.
+
+The caller now keys regions by node and occurrence, preserves each visible region,
+removes regions absent from the replacement frame and orders hit targets by helper
+draw order. Each node retains one keyboard stop. Selection and resize lookup target
+the actual node button explicitly; reordering must not match a selection overlay.
+Captured move targets stay attached during a gesture. All 28 workspace DOM cases
+and frontend typechecking pass, including movement, resize, retained drafts and
+replacement geometry. A test setup initially used an unsupported zoom option;
+the corrected replacement case changes a supported sample state at 100% zoom.
+These results establish caller behavior with controlled helper output, not engine
+rendering or native input acceptance. No capped operation started.
