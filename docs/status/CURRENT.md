@@ -2,6 +2,15 @@
 
 ## Variable actions and nested canvas selected
 
+Kris resumed delivery on 2026-11-05. Prototype work now has a new agent chat bound
+to the preserved design worktree. Independent offline verification will use a fresh
+T3 worktree; the coordinator retains integration and combined records. Finish with
+verification against both original specs and a draft PR. CI is explicitly deferred.
+The cancelled corrected Mac assignment started no SDK process; its unused reservation
+is released in #47. No capped operation is currently assigned. See the
+[resumption record](../tasks/evidence/screen-actions-and-nested-canvas.md#resumed-delivery-2026-11-05)
+for current ownership and continuation.
+
 Kris approved combined implementation of [L11 #47](https://github.com/Caldwell-41/Renpy-editor/issues/47)
 and [L19 #50](https://github.com/Caldwell-41/Renpy-editor/issues/50) on 2026-11-05.
 `codex/47-50-integration` starts from `e2a02bc`. Combined backend `afe95ce` includes

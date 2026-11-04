@@ -5,6 +5,39 @@
 acceptance, authorization and operation accounting. This file retains implementation
 checkpoints and detailed verification. No criterion is accepted by this entry.
 
+## Resumed delivery, 2026-11-05
+
+Kris resumed #47/#50 using the stopped-work handoff, requested independent agents
+and worktrees, and required all prototype/mockup work in a new agent chat. The final
+sequence is combined verification against both original tickets, independent review
+and a draft PR. CI is deferred by explicit instruction.
+
+Recovery verified integration HEAD `8ed4608`, two commits ahead of its published
+branch, with only the previously unrelated three Design Lab guide edits and Phase 1
+audit outside the selected work. All original lane commits are already integrated.
+The corrected Mac worker made no producing call before cancellation. #47 releases
+its unused SDK/helper/campaign reservation and retains the original failed campaign.
+No capped operation is currently assigned. Windows provisioning remains unresolved.
+
+| Owner | Checkout and scope | Integration destination |
+| --- | --- | --- |
+| Coordinator | Existing `codex/47-50-integration`; shared contracts/callers, UI integration, status/evidence, final combined verification and review | Current integration branch |
+| New design chat | Preserved `t3-229694d0`, `t3/screen-actions-design-prototype`; new Lab screen, registry and owning approval/captures only | Approved source/decision handoff to coordinator before production controls |
+| Offline verifier | Fresh T3-created worktree from the resumption checkpoint; existing backend/consumer checks and criterion gaps, no production UI or shared-record edits | Findings and exact candidate-bound results to coordinator |
+
+The new design chat is
+`mcp:launch:1cfb6bf46a0041886ac32e12c402b00234555e85a307f2870447e7cf0a015545`
+in the current T3 environment. It must preserve existing draft variants, establish
+actual user approval and return reproducible source/capture/approval evidence.
+Its scope includes no SDK, helper, native, package or CI execution. Sol owns coding;
+Terra Max owns delegated browser/desktop work. The coordinator reads the approved
+handoff directly before implementing controls. No prototype edits occur here.
+
+No ticket criterion is newly accepted by resumption. Production controls, real
+UI-to-core proof, both-target/aspect runtime/render comparisons, required platform
+checks and final two-axis review remain pending. Unchanged offline evidence may be
+reused only with its original candidate and scope stated.
+
 ## Approved entry, 2026-11-05
 
 Kris approved the coordinator's plan in this conversation. The integration branch

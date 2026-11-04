@@ -2,6 +2,16 @@
 
 ## Active #47/#50 implementation
 
+Kris resumed delivery on 2026-11-05 and selected a draft PR after combined spec
+verification, with CI deferred. Earlier workers remain stopped. The new design
+chat uses the preserved prototype worktree; a fresh isolated offline-verification
+assignment proceeds independently. The coordinator owns integration and records.
+The cancelled corrected Mac task at `8ed4608` performed reads only. Its unused
+reservation is released in #47; no capped operation is currently assigned.
+[Current ownership and continuation](../tasks/evidence/screen-actions-and-nested-canvas.md#resumed-delivery-2026-11-05)
+supersede older next-action instructions below. Preserve all prior worktrees,
+receipts and unrelated local changes.
+
 Kris approved the combined plan on 2026-11-05. The branch is
 `codex/47-50-integration`, based on `e2a02bc9f6d0f91639c47e35d49f1befff058c60`
 from `codex/phase3b-screen-designer`. [#47](https://github.com/Caldwell-41/Renpy-editor/issues/47)
