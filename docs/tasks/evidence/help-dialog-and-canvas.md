@@ -1,5 +1,50 @@
 # Help dialog and base canvas delivery evidence
 
+## Pending placement handoff correction, 2026-11-04
+
+Kris selected the independently verified P2 from the Terra 6.1 Max review of
+`e32ded4...77b1187`, its correction under `principle-fix-root-causes`, publication
+to draft PR #79 and ordinary CI. The review reported no Standards findings.
+
+The product defect began at draft ownership: the new Beat form marked placement
+changes as unsubmitted Beat content even though the shared client insertion
+context already retained them. The navigation guard then correctly refused the
+dirty form; Cancel correctly restored its opening placement. Bypassing navigation
+or changing Cancel would have left the ownership error in place.
+
+The focused test first failed with `true !== false` at the assertion that a valid
+retained placement may leave Story. Placement now owns its own draft boundary.
+Valid input/change events update the existing insertion context without dirtying
+the Beat payload. Incomplete recovery remains dirty until a valid choice is
+retained. Payload edits and refused Add operations keep their independent guards.
+Cancel/Escape still restore the opening or last accepted placement. Switching to
+an ordinary Beat removes the inactive placement guard without changing payload
+protection. There is no new IPC, source metadata or persisted placement owner.
+
+Self-review caught an overly broad first correction that also allowed incomplete
+recovery to leave. Its focused test failed with `false !== true`; the final separate
+placement owner passes both navigation and incomplete-input assertions. The first
+test compilation also rejected a mutation of a readonly fixture array; the fixture
+now constructs the nested Scene without mutation. Neither failure is a pass.
+
+Final local verification with Node 24.19.0 and Python 3.12.16 passes 369 frontend
+tests with zero failures/skips, including 24 Story screen cases, and the production
+build. The eight-stage actual controller/core journey passes valid placement,
+navigation settlement, Screens inspection and Story remount with identical source,
+project revision and source-map revision. It then accepts the selected Call with
+the existing one-step history, no-op, stale-target, Cancel/Escape and reopen checks.
+Root/nested bodies and input/change events have focused component coverage.
+The unchanged main navigation gate was traced to the same tested draft/settlement
+functions. This is DOM/controller/core evidence, not a fresh browser, SDK, helper,
+native, physical-input or package claim. Existing rendering/runtime evidence keeps
+its recorded candidate scope.
+
+Logs and the controller receipt remain ignored under
+`.toolchains/pr79-review-fixes/placement-*`. Final self-review covers the shared
+draft callers, nested draft ownership, ordinary Beat transition and explicit
+cancellation; no remaining finding is identified. PR #79 owns the published head
+and current-head ordinary CI result. No merge or issue closure is selected.
+
 ## PR 79 root-cause corrections and parent review, 2026-11-04
 
 Kris selected fixes for the three independently verified findings at `60be930`,

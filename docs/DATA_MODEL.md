@@ -671,6 +671,14 @@ this captured result rather than reparsing source in Story. Exact standalone
 screen kind. It is separate from the contextual modality, focus, Return and Hide
 spans that cannot move into a reusable component.
 
+Pending Story screen placement is client-only Scene/body/Position context. Valid
+placement choices are retained before navigation and survive a Screens round trip
+without a Beat, source write or history entry. Incomplete placement recovery owns
+its own unsubmitted input until a valid choice is retained. Beat type, target and
+content edits, and refused Add operations, keep their separate draft guards.
+Explicit Cancel/Escape restores the placement captured when the Beat form opened;
+accepted insertion updates the retained context to its accepted source revision.
+
 Owned screen inspection exposes a nullable per-button `dismissal` capability.
 It reports `none` for exact inert Null, `finishInteraction` for qualified local
 Return, and `hideScreen` for qualified local Hide. Unowned, duplicate-ID,

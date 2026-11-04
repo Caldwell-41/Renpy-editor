@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
-import { renderSceneAuthoring, type SceneActions, type SceneCommand, type SceneWorkspace, type ScreenInsertion } from "../src/scene-ui.js";
+import { hasSceneDraft, renderSceneAuthoring, settleSceneDraft, type SceneActions, type SceneCommand, type SceneWorkspace, type ScreenInsertion } from "../src/scene-ui.js";
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenTargetBinding } from "../src/screen-contracts.js";
 import { storyFixture } from "./story-controls-fixture.js";
 
@@ -253,6 +253,75 @@ test("Cancel and Escape restore the captured insertion context after a refused s
    assert.deepEqual(remembered,original,"Cancellation must restore the location captured before this draft");
    assert.equal(s.host.querySelector(".story-screen-pending"),null);
   }finally{await s.close();}
+ }
+});
+
+test("pending screen placement survives workspace navigation without becoming unsubmitted Beat content",async()=>{
+ for(const nested of [false,true]){
+  const base=fixture(),original=base.scenes[0]!;
+  const model:SceneWorkspace=nested?{...base,scenes:[{...original,beats:[
+   {id:"branch",byteStart:10,byteEnd:20,protected:false,conditionalBranch:{groupId:"group",otherwise:false,condition:{status:"supported",expression:{type:"bool",value:true}}},payload:{type:"customCode",source:"if True:",reason:"Condition"}},
+   {...original.beats[0]!,owner:{groupId:"group",branchId:"branch"}},original.beats[1]!
+  ]}]}:base;
+  const scene=model.scenes[0]!;
+  let insertion:ScreenInsertion={sceneId:scene.id,body:{type:"root"},position:{type:"before",anchor:{type:"beat",beatId:"end"}},expectedSourceRevision:scene.sourceRevision};
+  const actions:Partial<SceneActions>={screenHintKind:"dialog",rememberScreenInsertion:value=>{insertion=structuredClone(value);}};
+  const first=setup({...actions,screenInsertion:insertion},model);first.host.classList.add("scene-workspace");
+  try{
+   button(first.host,"Add screen Beat").click();await tick();const draft=first.host.querySelector<HTMLElement>(".new-beat")!;
+   if(nested){const body=draft.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;body.value="branch";body.dispatchEvent(new Event("change",{bubbles:true}));}
+   const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";
+   for(const event of ["input","change"])position.dispatchEvent(new Event(event,{bubbles:true}));
+   assert.equal(hasSceneDraft(first.host),false,"Already retained navigation context must not block leaving Story");
+   assert.equal(await settleSceneDraft(first.host),true);
+   assert.deepEqual(insertion.body,nested?{type:"branch",groupId:"group",branchId:"branch"}:{type:"root"});
+   assert.deepEqual(insertion.position,{type:"before",anchor:{type:"beat",beatId:"line"}});assert.equal(first.commands.length,0);
+  }finally{await first.close();}
+  const returned=setup({...actions,screenInsertion:insertion},model);returned.host.classList.add("scene-workspace");
+  try{
+   button(returned.host,"Add screen Beat").click();await tick();const draft=returned.host.querySelector<HTMLElement>(".new-beat")!;
+   assert.equal(draft.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!.value,nested?"branch":"root");
+   assert.equal(draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!.value,"line");
+   assert.equal(hasSceneDraft(returned.host),false);assert.equal(returned.commands.length,0);
+  }finally{await returned.close();}
+ }
+});
+
+test("retained placement does not clear payload edits or a refused Add",async()=>{
+ for(const edited of ["payload","refused Add"]){
+  const s=setup({screenHintKind:edited==="payload"?"dialog":"panel"});s.host.classList.add("scene-workspace");
+  try{
+   button(s.host,"Add screen Beat").click();await tick();const draft=s.host.querySelector<HTMLElement>(".new-beat")!;
+   if(edited==="payload"){const type=draft.querySelector<HTMLSelectElement>("select")!;type.value="showScreen";type.dispatchEvent(new Event("change",{bubbles:true}));await tick();}
+   else{button(draft,"Add Beat").click();await tick();}
+   const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));
+   assert.equal(hasSceneDraft(s.host),true);assert.equal(await settleSceneDraft(s.host),false);
+   button(draft,"Cancel").click();assert.equal(hasSceneDraft(s.host),false);
+  }finally{await s.close();}
+ }
+});
+
+test("incomplete placement recovery still blocks navigation until it can be retained",async()=>{
+ for(const next of ["confirm placement","ordinary Beat"]){
+ const model=fixture(),scene=model.scenes[0]!;
+ const original:ScreenInsertion={sceneId:scene.id,body:{type:"root"},position:{type:"before",anchor:{type:"beat",beatId:"end"}},expectedSourceRevision:"old-source"};
+ let insertion=structuredClone(original);
+ const s=setup({screenHintKind:"dialog",screenInsertion:original,rememberScreenInsertion:value=>{insertion=structuredClone(value);}},model);s.host.classList.add("scene-workspace");
+ try{
+  button(s.host,"Add screen Beat").click();await tick();const draft=s.host.querySelector<HTMLElement>(".new-beat")!;
+  const body=draft.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;body.dispatchEvent(new Event("change",{bubbles:true}));
+  assert.equal(draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!.value,"");
+  assert.deepEqual(insertion,original);assert.equal(hasSceneDraft(s.host),true);assert.equal(await settleSceneDraft(s.host),false);
+  if(next==="confirm placement"){
+   const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));
+   assert.equal(hasSceneDraft(s.host),false);assert.equal(await settleSceneDraft(s.host),true);assert.equal(insertion.expectedSourceRevision,scene.sourceRevision);
+  }else{
+   const type=draft.querySelector<HTMLSelectElement>("select")!;type.value="narration";type.dispatchEvent(new Event("change",{bubbles:true}));
+   draft.querySelector<HTMLTextAreaElement>("textarea")!.value="Ordinary Beat";button(draft,"Add Beat").click();await tick();
+   assert.equal(s.commands.length,1,"A hidden incomplete screen placement must not block an ordinary Beat write");
+  }
+  button(draft,"Cancel").click();assert.deepEqual(insertion,original);assert.equal(s.commands.length,next==="confirm placement"?0:1);
+ }finally{await s.close();}
  }
 });
 

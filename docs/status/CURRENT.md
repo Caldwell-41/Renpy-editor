@@ -2,15 +2,15 @@
 
 ## Help dialog and base Help canvas implementation complete
 
-The three findings from the PR #79 review at `60be930` are corrected locally by
-Sol 6.1 High and independently verified by the parent. Invalid Dialog Return
-actions retain source protection, inspection shares one analysis, and stale
-single-position insertion has an explicit recovery choice. Final local checks
-pass 366 frontend, 123 ordinary Screens and 12 Dialog core cases, production build
-and actual controller/core history/recovery. Five existing SDK/helper cases remain
-ignored. [Correction evidence](../tasks/evidence/help-dialog-and-canvas.md#pr-79-root-cause-corrections-and-parent-review-2026-11-04)
-owns red/green results and review. Publication and current-head ordinary CI are
-selected; no merge or broader qualification is selected.
+The verified P2 from the Terra review at `77b1187` is corrected. Pending placement
+has its own draft owner, so valid choices survive Screens navigation while
+incomplete recovery and Beat content retain their guards. Final local checks pass
+369 frontend tests, production build and the eight-stage actual controller/core
+journey. [Handoff correction evidence](../tasks/evidence/help-dialog-and-canvas.md#pending-placement-handoff-correction-2026-11-04)
+owns the root cause, red/green results and self-review. The earlier three fixes and
+their core evidence remain qualified within their recorded scope. Publication to
+draft PR #79 and current-head ordinary CI are selected; no merge or broader
+qualification is selected.
 
 Kris approved [#45](https://github.com/Caldwell-41/Renpy-editor/issues/45) and
 [#46](https://github.com/Caldwell-41/Renpy-editor/issues/46) on local integration
