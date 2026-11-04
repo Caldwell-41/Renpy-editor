@@ -11,6 +11,7 @@ import platform
 from pathlib import Path
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 
@@ -24,6 +25,23 @@ process = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(process)
 base = process.base
 require, digest, load_json, portable_file, write_json = base.require, base.digest, base.load_json, base.portable_file, base.write_json
+
+
+def record_environment(result):
+    # Fixed local version commands never inspect or execute a game project.
+    result.update(os=platform.system(),architecture=platform.machine(),
+                  toolchains=dict(python=platform.python_version(),pythonImplementation=platform.python_implementation()))
+    for name,command in [('cargo',['cargo','--version']),('rustc',['rustc','-Vv'])]:
+        version = subprocess.run(command,check=True,capture_output=True,text=True,timeout=10)
+        result['toolchains'][name] = version.stdout.strip()
+
+
+def validate_environment(result):
+    require(isinstance(result.get('os'),str) and bool(result['os'])
+            and isinstance(result.get('architecture'),str) and bool(result['architecture']),'missing producer target')
+    toolchains = result.get('toolchains',{})
+    require(all(isinstance(toolchains.get(name),str) and bool(toolchains[name])
+                for name in ('python','pythonImplementation','cargo','rustc')),'missing producer toolchains')
 
 
 def validate_runtime_output(text, case, manifest_sha, manifest, resolution):
@@ -139,6 +157,7 @@ def prepare(output, expected_candidate):
     result = dict(passed=False, engineStarted=False, sdkProcessesStarted=0, checks=[], candidate=expected_candidate)
     temporary = None
     try:
+        record_environment(result)
         material = inputs(); process.require_candidate(expected_candidate, material)
         result['inputsSHA256'] = process.inputs_fingerprint(material)
         write_json(output / 'inputs.json',material)
@@ -171,6 +190,7 @@ def prepare(output, expected_candidate):
 
 def validate_prepared(prepared, expected_candidate):
     result = load_json(portable_file(prepared,'result.json').read_text(encoding='utf-8'))
+    validate_environment(result)
     material = inputs(); process.require_candidate(expected_candidate,material)
     fingerprint = process.inputs_fingerprint(material)
     require(result.get('candidate') == expected_candidate and result.get('inputsSHA256') == fingerprint,'wrong source candidate/fingerprint')
@@ -209,6 +229,7 @@ def qualify_sdk(args):
                   os=platform.system(),architecture=platform.machine(),manifestSHA256=digest(prepared / 'accepted/manifest.json'))
     temporary = None
     try:
+        record_environment(result)
         sys.path.insert(0,str(REPO / 'spikes/renpy-sdk'))
         from archive_safety import expected_sha256, install_verified_tar
         from sdk_adapter import Command, command_argv, parse_version
