@@ -28,6 +28,7 @@ export interface ScreenCatalog {
 }
 export interface ResolvedScreenTarget {
   binding: ScreenTargetBinding; kind: "panel" | "dialog" | "component"; blocking: boolean; path: string; rootId: string;
+  canShowHide: boolean;
   revisions: ScreenRevisions; effects: ScreenEffects;
 }
 export interface ComponentChange { componentId: string; screenId: string; useId: string }

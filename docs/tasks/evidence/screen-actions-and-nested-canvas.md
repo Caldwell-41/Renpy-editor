@@ -23,7 +23,8 @@ No capped operation is currently assigned. Windows provisioning remains unresolv
 | --- | --- | --- |
 | Coordinator | Existing `codex/47-50-integration`; shared contracts/callers, UI integration, status/evidence, final combined verification and review | Current integration branch |
 | New design chat | Preserved `t3-229694d0`, `t3/screen-actions-design-prototype`; new Lab screen, registry and owning approval/captures only | Approved source/decision handoff to coordinator before production controls |
-| Offline verifier | Fresh T3-created worktree from the resumption checkpoint; existing backend/consumer checks and criterion gaps, no production UI or shared-record edits | Findings and exact candidate-bound results to coordinator |
+| Source/actions verifier | `t3-b82d48e1`, `t3/screen-actions-backend-verification`, from `0b64e54`; dedicated source checks and caller integration map, no UI or shared-record edits | Findings and exact candidate-bound results to coordinator |
+| Nested-canvas verifier | Fresh T3-created worktree from `0b64e54`; focused planner/consumer checks and criterion gaps, no production UI or shared-record edits | Findings and exact candidate-bound results to coordinator |
 
 The new design chat is
 `mcp:launch:1cfb6bf46a0041886ac32e12c402b00234555e85a307f2870447e7cf0a015545`
@@ -37,6 +38,38 @@ No ticket criterion is newly accepted by resumption. Production controls, real
 UI-to-core proof, both-target/aspect runtime/render comparisons, required platform
 checks and final two-axis review remain pending. Unchanged offline evidence may be
 reused only with its original candidate and scope stated.
+
+### Source/actions verification and target eligibility
+
+The source/actions verifier returned a clean checkout at
+`0b64e54beaf7a8026eb74420bbd712a90975ad60`, tree
+`9c88e7df630a3a2081b97456b94b0e3cf931314f`. Its release/offline/locked public-core
+selection passed nine action, fourteen reference and two effect/Story cases, with
+zero failures or ignored cases. The action exporter reported `runtimeReady:true`
+without engine execution. No dedicated-module defect required a change or commit.
+Exact commands, logs and the caller/migration map remain in that worktree's ignored
+`app/target/verification-47-backend/handoff.json` and `logs/`.
+
+The worker found a shared contract gap. A resolved Panel with `blocking:false` is
+not necessarily an eligible Show/Hide target. The coordinator reproduced the
+missing capability through `screens.resolveTarget`, then exposed `canShowHide`
+from the existing `qualified_panel_targets` owner. There is no second qualifier or
+renderer parser. The field describes accepted source eligibility; the existing
+action writer still revalidates revisions and clean dependencies. The focused case
+covers absent/false modality, unknown custom effects, modal/calculated/duplicate or
+nested modality refusal, and stale revision rejection. Existing Dialog/component
+cases also check their ineligibility. Production controls remain unassigned pending
+explicit approval and the reproducible design handoff.
+
+The correction is based on `0b64e54`. Its retained product patch SHA256 is
+`32a7b36414fb9f6ad5563c8316b8a435de550ff15cbd312fc3ea479184266f10`;
+ignored `.toolchains/47-50/resume-contract/` retains the patch, initial red,
+focused green and affected frontend logs. Typechecking and test compilation pass.
+All 15 public reference cases and 42 affected component/Story DOM cases pass with
+no skips. Rust formatting, repository validation and whitespace checks pass.
+Final combined suites,
+UI-to-core proof and normal-play evidence remain pending. No engine, helper, native,
+package or CI process started for this correction.
 
 ## Approved entry, 2026-11-05
 

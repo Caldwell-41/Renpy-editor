@@ -39,6 +39,7 @@ pub struct ResolvedScreenTarget {
     pub binding: ScreenTargetBinding,
     pub kind: OwnedScreenKind,
     pub blocking: bool,
+    pub can_show_hide: bool,
     pub path: String,
     pub root_id: String,
     pub revisions: ScreenRevisions,
@@ -711,6 +712,7 @@ impl AuthoringService {
         let style_index = styles::Index::read(&inventory)?;
         let authoring = self.screen_action_authoring(project, project_id).ok();
         let panels = actions::qualified_panel_targets(&inventory);
+        let can_show_hide = panels.iter().any(|panel| &panel.binding == binding);
         let mut effects = Effects {
             map: &map,
             inventory: &inventory,
@@ -755,6 +757,7 @@ impl AuthoringService {
             binding: binding.clone(),
             kind: owner.kind,
             blocking,
+            can_show_hide,
             path: owner.path.clone(),
             root_id: owner.root_id.clone(),
             revisions,

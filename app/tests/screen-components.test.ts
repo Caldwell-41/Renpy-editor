@@ -13,7 +13,7 @@ function fixture() {
   const nodes = [node("root","screen",0,null),node("group","vbox",20,0)];
   const view:CompositionView = {document:{path:"game/ui/help.rpy",revision:"source",partial:false,screens:[{name:"help",nodes}]},screenId:"panel",screenName:"help",nodes,selected:nodes[1]!,step:"design",busy:false};
   const catalog:ScreenCatalog = {projectRevision:"project",sourceMapRevision:"map",inventoryRevision:"inventory",owned:[{id:"panel",rootId:"root",path:view.document.path,name:"help",kind:"panel",resolved:true,sourceRevision:"source"}]};
-  const resolved:ResolvedScreenTarget = {binding:{screenId:"panel",sourceName:"help"},kind:"panel",blocking:false,path:view.document.path,rootId:"root",revisions,effects:{revision:"effects",unknown:false,shownScreens:[],assignedVariables:[],hiddenScreens:[],finishesInteraction:false,dependencies:[]}};
+  const resolved:ResolvedScreenTarget = {binding:{screenId:"panel",sourceName:"help"},kind:"panel",blocking:false,canShowHide:true,path:view.document.path,rootId:"root",revisions,effects:{revision:"effects",unknown:false,shownScreens:[],assignedVariables:[],hiddenScreens:[],finishesInteraction:false,dependencies:[]}};
   const calls:{operation:string;payload?:Record<string,unknown>}[] = [];
   let saved = 0;
   const host:ScreenComponentsHost = {view:()=>view,catalog:()=>catalog,current:()=>true,
@@ -45,7 +45,7 @@ test("placement requires an explicit current parent and preserves typed componen
   h.catalog.owned.push({id:"component",rootId:"component-root",name:"route_guide",path:"game/ui/route_guide.rpy",kind:"component",resolved:true,sourceRevision:"component-source"});
   const request=h.host.request;
   h.host.request=async<T>(operation:CoreOperation,payload?:Record<string,unknown>):Promise<T> => {
-    if(operation==="screens.resolveTarget" && (payload?.binding as {screenId:string}).screenId==="component")return {binding:{screenId:"component",sourceName:"route_guide"},kind:"component",blocking:false,path:"game/ui/route_guide.rpy",rootId:"component-root",revisions:{...revisions,source:"component-source"},effects:{revision:"effects",unknown:false,shownScreens:[],assignedVariables:[],hiddenScreens:[],finishesInteraction:false,dependencies:[]}} as T;
+    if(operation==="screens.resolveTarget" && (payload?.binding as {screenId:string}).screenId==="component")return {binding:{screenId:"component",sourceName:"route_guide"},kind:"component",blocking:false,canShowHide:false,path:"game/ui/route_guide.rpy",rootId:"component-root",revisions:{...revisions,source:"component-source"},effects:{revision:"effects",unknown:false,shownScreens:[],assignedVariables:[],hiddenScreens:[],finishesInteraction:false,dependencies:[]}} as T;
     return request<T>(operation,payload);
   };
   await assert.rejects(h.controller.place("component","missing"),/parent/);
@@ -66,7 +66,7 @@ function copyFixture() {
   };
   const original=definition("component","route_guide","component-source"), fresh=definition("copy","help_guide","copy-source");
   h.catalog.owned.push({id:"component",rootId:"component-root",name:"route_guide",path:original.document.path,kind:"component",resolved:true,sourceRevision:"component-source"});
-  const review=(view:CompositionView):ComponentReview=>({component:{binding:{screenId:view.screenId,sourceName:view.screenName},kind:"component",blocking:false,path:view.document.path,rootId:view.nodes[0]!.id!,revisions:{...revisions,source:view.document.revision},effects:{revision:"effects",unknown:false,shownScreens:[],assignedVariables:[],hiddenScreens:[],finishesInteraction:false,dependencies:[]}},affectedScreens:[h.catalog.owned[0]!],uses:[{screenId:"panel",componentId:view.screenId,nodeId:"use",path:panel.document.path,screenName:"help",span:{start:20,end:30},sourceRevision:"source",resolved:true}],complete:true});
+  const review=(view:CompositionView):ComponentReview=>({component:{binding:{screenId:view.screenId,sourceName:view.screenName},kind:"component",blocking:false,canShowHide:false,path:view.document.path,rootId:view.nodes[0]!.id!,revisions:{...revisions,source:view.document.revision},effects:{revision:"effects",unknown:false,shownScreens:[],assignedVariables:[],hiddenScreens:[],finishesInteraction:false,dependencies:[]}},affectedScreens:[h.catalog.owned[0]!],uses:[{screenId:"panel",componentId:view.screenId,nodeId:"use",path:panel.document.path,screenName:"help",span:{start:20,end:30},sourceRevision:"source",resolved:true}],complete:true});
   let current=panel, failRefresh=true, accepted=0, transferred=0, draft="Pending";
   const events:string[]=[];
   const participant:CopyDraftParticipant={validate:()=>{events.push("validate");},prepare:(view,ids)=>{
@@ -76,7 +76,7 @@ function copyFixture() {
   h.host.request=async<T>(operation:CoreOperation,payload?:Record<string,unknown>):Promise<T>=>{
     h.calls.push({operation,payload});
     if(operation==="screens.componentReview")return review(payload?.componentId==="copy"?fresh:original) as T;
-    if(operation==="screens.resolveTarget")return ((payload?.binding as {screenId:string}).screenId==="panel"?{...review(original).component,binding:{screenId:"panel",sourceName:"help"},kind:"panel",blocking:false,path:panel.document.path,revisions}:review(fresh).component) as T;
+    if(operation==="screens.resolveTarget")return ((payload?.binding as {screenId:string}).screenId==="panel"?{...review(original).component,binding:{screenId:"panel",sourceName:"help"},kind:"panel",blocking:false,canShowHide:true,path:panel.document.path,revisions}:review(fresh).component) as T;
     if(operation==="screens.componentCopy")return {componentId:"copy",screenId:"panel",useId:"use"} as T;
     throw Error(operation);
   };

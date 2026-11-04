@@ -1,6 +1,55 @@
 use super::*;
 
 #[test]
+fn resolved_panel_reports_exact_revision_bound_show_hide_eligibility() {
+    let (_temporary, mut service, _, owner) = composition_project();
+    let original = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let binding = json!({"screenId":owner["id"],"sourceName":owner["name"]});
+    let initial = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":binding}),
+    );
+    for (properties, eligible) in [
+        ("", true),
+        ("    modal False\n", true),
+        ("    $ custom = 17\n", true),
+        ("    modal True\n", false),
+        ("    modal flag\n", false),
+        ("    modal False\n    modal False\n", false),
+        ("    modal False:\n        pass\n", false),
+    ] {
+        save_composition_source(
+            &mut service,
+            &owner,
+            &original.replace("    pass\n", &format!("{properties}    pass\n")),
+        );
+        let target = ipc(
+            &mut service,
+            "screens.resolveTarget",
+            json!({"binding":binding}),
+        );
+        assert_eq!(target["kind"], "panel");
+        assert_eq!(target["blocking"], false);
+        assert_eq!(target["canShowHide"], eligible, "{properties}");
+        if properties.contains("custom") {
+            assert_eq!(target["effects"]["unknown"], true);
+        }
+    }
+    assert_eq!(
+        reject(
+            &mut service,
+            "screens.resolveTarget",
+            json!({"binding":binding,"expected":initial["revisions"]}),
+        )["error"]["code"],
+        "SOURCE_CONFLICT"
+    );
+}
+
+#[test]
 fn large_marked_screen_retains_per_button_action_authority() {
     let (_temporary, mut service, _, owner) = composition_project();
     let original = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
@@ -496,6 +545,7 @@ fn dialog_target_reports_revision_bound_finish_without_hiding_a_panel() {
     );
     assert_eq!(target["kind"], "dialog");
     assert_eq!(target["blocking"], true);
+    assert_eq!(target["canShowHide"], false);
     assert_eq!(target["effects"]["unknown"], false);
     assert_eq!(target["effects"]["finishesInteraction"], true);
     assert_eq!(target["effects"]["hiddenScreens"], json!([]));
@@ -620,6 +670,8 @@ fn component_ipc_prepares_extracts_places_reviews_and_copies_with_typed_requests
         .clone();
     let component_target = resolve(&mut service, &component);
     let other_target = resolve(&mut service, &other);
+    assert_eq!(component_target["canShowHide"], false);
+    assert_eq!(other_target["canShowHide"], true);
     let placed = ipc(
         &mut service,
         "screens.componentPlace",

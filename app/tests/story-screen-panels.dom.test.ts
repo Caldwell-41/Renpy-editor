@@ -7,7 +7,7 @@ import { storyFixture } from "./story-controls-fixture.js";
 
 const binding: ScreenTargetBinding = { screenId: "panel-id", sourceName: "help_panel" };
 const revisions = { source: "panel-source", sourceMap: "map", inventory: "inventory", effects: "effect" };
-const target: ResolvedScreenTarget = { binding, kind: "panel", blocking: false, path: "game/ui/help.rpy", rootId: "root", revisions, effects: { revision: "effect", unknown: true, shownScreens:[],assignedVariables:[],hiddenScreens: ["panel-id"], finishesInteraction: false, dependencies: [] } };
+const target: ResolvedScreenTarget = { binding, kind: "panel", blocking: false, canShowHide: true, path: "game/ui/help.rpy", rootId: "root", revisions, effects: { revision: "effect", unknown: true, shownScreens:[],assignedVariables:[],hiddenScreens: ["panel-id"], finishesInteraction: false, dependencies: [] } };
 const catalog: ScreenCatalog = { projectRevision: "project", sourceMapRevision: "map", inventoryRevision: "inventory", owned: [
   { id: "component-id", name: "guide", path: "game/ui/guide.rpy", rootId: "component-root", kind: "component", resolved: true, sourceRevision: "component-source" },
   { id: "missing-id", name: "missing", path: "game/ui/missing.rpy", rootId: "missing-root", kind: "panel", resolved: false, sourceRevision: null },

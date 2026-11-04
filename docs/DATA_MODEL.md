@@ -676,7 +676,11 @@ An action list has at most eight typed entries. Assignments refer to existing
 variable IDs and compatible bool/int/string literals; frontend integers use canonical
 decimal strings to preserve signed 64-bit precision. Show/Hide refer to qualified
 owned nonmodal Panels. Finish is available only for a blocking Dialog and must be
-last. Custom actions remain in Source. The draft captures the authoring metadata
+last. Resolved targets expose `canShowHide` from the same Panel qualifier used by
+the action writer. Panel kind and `blocking: false` alone do not establish this
+capability; unknown effects do not necessarily remove it. This describes accepted
+source eligibility, and writes still revalidate revisions and clean dependencies.
+Custom actions remain in Source. The draft captures the authoring metadata
 and verified variable-source revision, plus every distinct target's screen revisions.
 Missing references, incompatible values and changed/dirty dependencies refuse the
 write. Semantic no-ops preserve existing source trivia and create no history entry.
