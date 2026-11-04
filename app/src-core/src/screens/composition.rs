@@ -1,6 +1,4 @@
 use super::*;
-#[path = "dismissal.rs"]
-mod dismissal;
 use sha2::{Digest, Sha256};
 
 #[derive(Debug, Deserialize)]
@@ -62,7 +60,21 @@ pub enum Command {
     #[serde(rename_all = "camelCase")]
     Dismissal {
         node_id: String,
-        action: dismissal::Action,
+        action: actions::LegacyDismissal,
+    },
+    #[serde(rename_all = "camelCase")]
+    Actions {
+        node_id: String,
+        actions: Vec<interaction::ScreenAction>,
+        expected_authoring_revision: String,
+        expected_target_revisions: Vec<ActionTargetRevision>,
+    },
+    #[serde(rename_all = "camelCase")]
+    VariableText {
+        node_id: String,
+        binding: Option<interaction::VariableBinding>,
+        text: Option<String>,
+        expected_authoring_revision: String,
     },
     #[serde(rename_all = "camelCase")]
     Reorder {
@@ -72,6 +84,13 @@ pub enum Command {
     },
     #[serde(rename_all = "camelCase")]
     Remove { node_id: String },
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ActionTargetRevision {
+    pub target: crate::metadata::ScreenTargetBinding,
+    pub revisions: references::ScreenRevisions,
 }
 
 #[derive(Serialize)]
@@ -200,7 +219,110 @@ impl AuthoringService {
             .ok_or(SceneError::ReferenceBlocked)?;
         let mut proposed = bytes.clone();
         let mut companions = Vec::new();
+        let mut interaction_review: Option<(String, Vec<ActionTargetRevision>)> = None;
         let selected_id = match request.command {
+            Command::VariableText {
+                node_id,
+                binding,
+                text,
+                expected_authoring_revision,
+            } => {
+                let authoring = self.require_action_authoring(
+                    project,
+                    project_id,
+                    &expected_authoring_revision,
+                )?;
+                let node = screen
+                    .nodes
+                    .iter()
+                    .find(|n| n.id.as_ref() == Some(&node_id))
+                    .ok_or(SceneError::UnknownEntity)?;
+                proposed = bindings::prepare(
+                    &bytes,
+                    node,
+                    binding.as_ref(),
+                    text.as_deref(),
+                    &authoring.variables,
+                )?;
+                interaction_review = Some((expected_authoring_revision, vec![]));
+                node_id
+            }
+            Command::Actions {
+                node_id,
+                actions,
+                expected_authoring_revision,
+                expected_target_revisions,
+            } => {
+                let authoring = self.require_action_authoring(
+                    project,
+                    project_id,
+                    &expected_authoring_revision,
+                )?;
+                let inventory = self.screen_inventory(project)?;
+                let panels = super::actions::qualified_panel_targets(&inventory);
+                let wanted: std::collections::BTreeSet<_> = actions
+                    .iter()
+                    .filter_map(|a| match a {
+                        interaction::ScreenAction::ShowScreen { target }
+                        | interaction::ScreenAction::HideScreen { target } => {
+                            Some(target.screen_id.as_str())
+                        }
+                        _ => None,
+                    })
+                    .collect();
+                let reviewed: std::collections::BTreeSet<_> = expected_target_revisions
+                    .iter()
+                    .map(|r| r.target.screen_id.as_str())
+                    .collect();
+                if wanted != reviewed || reviewed.len() != expected_target_revisions.len() {
+                    return Err(SceneError::InvalidPayload);
+                }
+                for review in &expected_target_revisions {
+                    let resolved = self.screens_resolve_target(
+                        project,
+                        project_id,
+                        &review.target,
+                        Some(&review.revisions),
+                    )?;
+                    if !panels.iter().any(|p| p.binding == review.target) {
+                        return Err(SceneError::ReferenceBlocked);
+                    }
+                    self.ensure_source_paths_clean(project, [resolved.path.as_str()])
+                        .map_err(|_| SceneError::DirtySource)?;
+                }
+                let node = screen
+                    .nodes
+                    .iter()
+                    .find(|n| n.id.as_ref() == Some(&node_id))
+                    .ok_or(SceneError::UnknownEntity)?;
+                let raw = inspect(&bytes, source_path.clone(), revision.sha256.clone())?;
+                let raw_screen = raw
+                    .screens
+                    .iter()
+                    .find(|s| s.name == owner.screen.name)
+                    .ok_or(SceneError::ReferenceBlocked)?;
+                let inspection = super::actions::inspect_actions(
+                    &owner.screen,
+                    raw_screen,
+                    &bytes,
+                    &authoring.variables,
+                    &panels,
+                );
+                let button = inspection
+                    .buttons
+                    .get(&node.span.start)
+                    .ok_or(SceneError::OpaqueBoundary)?;
+                proposed = super::actions::prepare(
+                    &bytes,
+                    button,
+                    &actions,
+                    &authoring.variables,
+                    &panels,
+                    inspection.blocking,
+                )?;
+                interaction_review = Some((expected_authoring_revision, expected_target_revisions));
+                node_id
+            }
             Command::Add {
                 parent_id,
                 kind,
@@ -280,13 +402,53 @@ impl AuthoringService {
                     .iter()
                     .find(|s| s.name == owner.screen.name)
                     .ok_or(SceneError::ReferenceBlocked)?;
-                proposed = dismissal::prepare(
+                let inventory = self.screen_inventory(project)?;
+                let panels = super::actions::qualified_panel_targets(&inventory);
+                let authoring = self.screen_action_authoring(project, project_id)?;
+                let inspection = super::actions::inspect_actions(
                     &owner.screen,
                     raw_screen,
-                    node.span.start,
                     &bytes,
-                    action,
-                    resolved.blocking,
+                    &authoring.variables,
+                    &panels,
+                );
+                let button = inspection
+                    .buttons
+                    .get(&node.span.start)
+                    .filter(|b| {
+                        b.actions.len() <= 1
+                            && b.actions.iter().all(|a| {
+                                !matches!(
+                                    a,
+                                    interaction::ScreenAction::SetVariable { .. }
+                                        | interaction::ScreenAction::ShowScreen { .. }
+                                )
+                            })
+                    })
+                    .ok_or(SceneError::OpaqueBoundary)?;
+                let action = match action {
+                    actions::LegacyDismissal::FinishInteraction
+                        if owner.screen.kind == crate::metadata::OwnedScreenKind::Dialog
+                            && resolved.blocking =>
+                    {
+                        interaction::ScreenAction::FinishInteraction
+                    }
+                    actions::LegacyDismissal::HideScreen
+                        if owner.screen.kind == crate::metadata::OwnedScreenKind::Panel =>
+                    {
+                        interaction::ScreenAction::HideScreen {
+                            target: resolved.binding,
+                        }
+                    }
+                    _ => return Err(SceneError::ReferenceBlocked),
+                };
+                proposed = super::actions::prepare(
+                    &bytes,
+                    button,
+                    &[action],
+                    &authoring.variables,
+                    &panels,
+                    inspection.blocking,
                 )?;
                 node_id
             }
@@ -657,6 +819,19 @@ impl AuthoringService {
             }
         };
         companions.retain(|m| m.proposed != m.expected_bytes);
+        if let Some((authoring, targets)) = &interaction_review {
+            self.require_action_authoring(project, project_id, authoring)?;
+            for review in targets {
+                let resolved = self.screens_resolve_target(
+                    project,
+                    project_id,
+                    &review.target,
+                    Some(&review.revisions),
+                )?;
+                self.ensure_source_paths_clean(project, [resolved.path.as_str()])
+                    .map_err(|_| SceneError::DirtySource)?;
+            }
+        }
         if proposed == bytes && companions.is_empty() {
             return Ok(ComposeResult {
                 document,

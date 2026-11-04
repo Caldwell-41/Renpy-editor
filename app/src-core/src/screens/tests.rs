@@ -28,6 +28,9 @@ mod audit;
 #[path = "reference_tests.rs"]
 mod references;
 
+#[path = "action_tests.rs"]
+mod actions;
+
 #[path = "panel_fixture_tests.rs"]
 mod panel_fixture;
 
