@@ -2,45 +2,40 @@
 
 ## Variable actions and nested canvas selected
 
-Kris resumed delivery on 2026-11-05. Prototype work now has a new agent chat bound
-to the preserved design worktree. Independent offline verification will use a fresh
-T3 worktree; the coordinator retains integration and combined records. Finish with
-verification against both original specs and a draft PR. CI is explicitly deferred.
-The cancelled corrected Mac assignment started no SDK process; its unused reservation
-is released in #47. No capped operation is currently assigned. See the
-[resumption record](../tasks/evidence/screen-actions-and-nested-canvas.md#resumed-delivery-2026-11-05)
-for current ownership and continuation.
+Kris resumed [L11 #47](https://github.com/Caldwell-41/Renpy-editor/issues/47) and
+[L19 #50](https://github.com/Caldwell-41/Renpy-editor/issues/50) on 2026-11-05.
+The selected finish is verified implementation, final review and a draft PR.
+CI is explicitly deferred. Neither ticket is accepted.
 
-Kris approved combined implementation of [L11 #47](https://github.com/Caldwell-41/Renpy-editor/issues/47)
-and [L19 #50](https://github.com/Caldwell-41/Renpy-editor/issues/50) on 2026-11-05.
-`codex/47-50-integration` starts from `e2a02bc`. Combined backend `afe95ce` includes
-typed actions/bindings, revisioned effects/Story admission, nested component expansion,
-inert samples and independent qualification tooling. The canvas lane has handed
-back its files. Source/actions awaits the separate approved prototype handoff for
-production UI. The coordinator owns integration, combined verification and review.
-#47 owns combined operation accounting and the next engine reservation.
+Implementation checkpoint `23fc113` on `codex/47-50-integration` includes the prior backend
+and a new `canShowHide` target capability from the existing source qualifier.
+It remains local-only after the prior source-transfer publication. The unrelated Design Lab guide
+edits and Phase 1 audit remain outside selected commits.
 
-| Selected behavior | Implementation and offline proof | Engine/native/human acceptance |
+Both fresh offline workers completed without source changes. Source/actions passed
+25 public cases. Canvas passed 12 core cases, 34 DOM cases and four comparison gates;
+two explicit SDK cases remain ignored. The coordinator's eligibility correction
+passed 15 reference and 42 affected frontend cases, typechecking, formatting and
+repository checks. These results retain their candidate and offline scope.
+
+| Selected behavior | Current evidence | Required completion |
 | --- | --- | --- |
-| Typed writes and effects | Source/history/refusal and Story admission cases pass | Ordered normal-play proof pending |
-| Nested canvas and inert samples | Seven public-core and four comparison gates pass | Both-target/aspect captures pending |
-| Authoring controls | Prototype iteration; production integration pending | User design decision pending |
+| Typed writes and effects | Public source/history/refusal and Story admission | Approved controls and ordered normal-play proof |
+| Nested canvas and inert samples | Public plans, freshness and exact comparison gates | Both-target/aspect normal/helper captures |
+| Authoring controls | Three unapproved mocks in the new design chat | Explicit variant approval, reproducible handoff and real UI-to-core proof |
 
-Neither ticket is accepted. After Kris confirmed the Mac was unlocked and awake,
-positive desktop admission allowed four SDK starts in campaign 1. The first click
-case exited zero but the qualifier rejected the reporter's trailing whitespace
-(H61). The campaign remains failed; all four processes and desktop assertions were
-cleaned up. The coordinator reproduced and corrected admission offline. All six
-gate tests and the unchanged retained click log pass the corrected validator.
-The remaining cases require fresh qualification at the corrected candidate.
+Production UI remains unassigned. The new design chat is bound to the preserved
+prototype worktree; all mockup work and approval happen there. Final combined
+suites and independent Standards/Spec review follow approved control integration.
+[Current evidence and criterion gaps](../tasks/evidence/screen-actions-and-nested-canvas.md#resumed-delivery-2026-11-05)
+own exact assignments, receipts and remaining work.
 
-Kris requested the Windows test thread. T3 failed worktree provisioning before
-agent startup; read-only diagnosis could not recover Git arguments or stderr.
-No Windows SDK process started. Its first reservation is released pending a usable
-T3-bound worktree and corrected source transfer. The original Mac refusal remains
-preserved. [Evidence](../tasks/evidence/screen-actions-and-nested-canvas.md) owns
-candidate/receipt details; #47 owns counters and reservations. Prior sections below
-retain historical evidence and are superseded for the current selection.
+#47 alone owns cumulative operation counts. The cancelled corrected Mac task
+started nothing and its reservation is released. No capped operation is assigned.
+The original Mac campaign remains failed after four SDK starts, with complete
+cleanup; its whitespace harness correction has offline proof. Windows provisioning
+remains unresolved with zero SDK starts. Required engine/native/package proof and
+wider acceptance remain pending. Earlier sections below retain historical scope.
 
 ## Help dialog and base Help canvas merged and accepted
 

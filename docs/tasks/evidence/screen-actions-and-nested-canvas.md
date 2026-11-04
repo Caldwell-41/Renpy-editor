@@ -24,7 +24,7 @@ No capped operation is currently assigned. Windows provisioning remains unresolv
 | Coordinator | Existing `codex/47-50-integration`; shared contracts/callers, UI integration, status/evidence, final combined verification and review | Current integration branch |
 | New design chat | Preserved `t3-229694d0`, `t3/screen-actions-design-prototype`; new Lab screen, registry and owning approval/captures only | Approved source/decision handoff to coordinator before production controls |
 | Source/actions verifier | `t3-b82d48e1`, `t3/screen-actions-backend-verification`, from `0b64e54`; dedicated source checks and caller integration map, no UI or shared-record edits | Findings and exact candidate-bound results to coordinator |
-| Nested-canvas verifier | Fresh T3-created worktree from `0b64e54`; focused planner/consumer checks and criterion gaps, no production UI or shared-record edits | Findings and exact candidate-bound results to coordinator |
+| Nested-canvas verifier | `t3-baaf7178`, `t3/verify-nested-canvas-coverage`, from `0b64e54`; focused planner/consumer checks and criterion gaps, no production UI or shared-record edits | Findings and exact candidate-bound results to coordinator |
 
 The new design chat is
 `mcp:launch:1cfb6bf46a0041886ac32e12c402b00234555e85a307f2870447e7cf0a015545`
@@ -70,6 +70,48 @@ no skips. Rust formatting, repository validation and whitespace checks pass.
 Final combined suites,
 UI-to-core proof and normal-play evidence remain pending. No engine, helper, native,
 package or CI process started for this correction.
+
+### Nested-canvas verification and remaining criteria
+
+The nested verifier returned a clean checkout at the same `0b64e54` candidate/tree
+as the source verifier, with no defect, tracked change or new commit. Twelve public
+core cases passed. Two named SDK cases were explicitly ignored and remain unproved.
+Six frame and twenty-eight workspace DOM cases, four exact-comparison gates and
+offline preflight passed. Seven controlled negative receipt probes refused invalid
+evidence. Named-result auditing also refused zero-test results. Typechecking passed.
+No engine, helper, game, native, package or CI process started.
+
+Exact commands, ignored selectors, criterion details and final qualifier inputs
+remain under that worktree's ignored
+`app/target/qualification/offline-nested-0b64e54/verification.txt`.
+`results-audit.json` owns counts and `producer-identity.json` owns input/tool hashes.
+The coordinator independently verified its retained producer executable, accepted
+export, clean checkout and all sixteen listed source/asset hashes against current
+integration `23fc113`. These offline slices retain their original candidate; they
+are not engine evidence or a final combined suite. The public export must be
+regenerated at the final integrated producing candidate.
+
+Both offline workers are complete. The following coordinator check against the
+original #47/#50 criteria records gaps, not acceptance. Production UI remains
+unassigned until Kris explicitly approves a variant and its exact source/capture
+handoff arrives from the new design chat.
+
+| Original criterion | Established offline | Required completion |
+| --- | --- | --- |
+| #47 compatible assignments and retained invalid drafts | Typed source writes/refusals and shared authoring admission | Approved controls and real UI-to-core draft retention |
+| #47 qualified actions, Finish last, ordered exactly once | Shared action grammar/writer, eight-entry limit and explicit target eligibility | Action builder, click/keyboard normal-play proof at both aspects/targets |
+| #47 separate marked samples and inert selection | Revision-bound typed samples and literal helper inputs | Visible sample controls/marking and real selection/sample journey |
+| #47 mappings, history/reopen and revisioned effects | Public source/history/effect/Story cases | Final integrated UI-to-core/history/reopen and legacy dismissal migration |
+| #50 nested comparison and sibling layering | Public expansion/plans, selection regions and exact comparison gates | Actual matched normal/helper PNG and clipped geometry pairs |
+| #50 spacing, clipping, constraints and reuse | Source/planner/history cases with shared styles/components | Both targets at 1280x720 and 1024x768, initial tolerance zero |
+| #50 invalidation and explicit partial coverage | Shared-definition freshness, stale geometry withdrawal and bounded refusal | Integrated UI-to-core/current native-view proof |
+| #50 residual differences and no project execution | Literal data-only inputs and unsupported-region refusal | Measure and record every engine difference without a supported-node waiver |
+
+Final combined suites and independent Standards/Spec review follow approved control
+integration. Windows still needs supported isolated provisioning and corrected
+source transfer. The sole operation counter/reservation owner remains #47. CI stays
+deferred. No PR is opened from this preparation checkpoint; the selected draft PR
+follows completion and final spec verification.
 
 ## Approved entry, 2026-11-05
 

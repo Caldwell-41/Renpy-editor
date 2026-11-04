@@ -2,60 +2,54 @@
 
 ## Active #47/#50 implementation
 
-Kris resumed delivery on 2026-11-05 and selected a draft PR after combined spec
-verification, with CI deferred. Earlier workers remain stopped. The new design
-chat uses the preserved prototype worktree; a fresh isolated offline-verification
-assignment proceeds independently. The coordinator owns integration and records.
-The cancelled corrected Mac task at `8ed4608` performed reads only. Its unused
-reservation is released in #47; no capped operation is currently assigned.
-[Current ownership and continuation](../tasks/evidence/screen-actions-and-nested-canvas.md#resumed-delivery-2026-11-05)
-supersede older next-action instructions below. Preserve all prior worktrees,
-receipts and unrelated local changes.
+Kris resumed #47/#50 on 2026-11-05 and selected a draft PR after combined spec
+verification and final review. CI is explicitly deferred. Production UI remains
+unassigned pending explicit variant approval and its reproducible handoff in the
+new separate design chat. Both tickets are in progress and unaccepted.
 
-Kris approved the combined plan on 2026-11-05. The branch is
-`codex/47-50-integration`, based on `e2a02bc9f6d0f91639c47e35d49f1befff058c60`
-from `codex/phase3b-screen-designer`. [#47](https://github.com/Caldwell-41/Renpy-editor/issues/47)
-and [#50](https://github.com/Caldwell-41/Renpy-editor/issues/50) own current delivery;
-#47 alone owns combined operation accounting. Both are in progress, not accepted.
-The coordinator owns shared contracts/callers, effects, integration, combined
-verification and final review. Source/actions and canvas use separate Sol High
-implementation worktrees. The [assignment receipt](../tasks/evidence/screen-actions-and-nested-canvas.md#isolated-assignments-and-interface-decisions)
-records exact T3 worktree/branch identities and temporary source-glue ownership.
-The source/action worker creates the separately requested prototype chat and receives
-the approved source and user decision directly. Terra Max owns browser/desktop work;
-Sol owns coding. Independent nested rendering can proceed during design iteration.
+Continue on `codex/47-50-integration`, based on
+`e2a02bc9f6d0f91639c47e35d49f1befff058c60` from
+`codex/phase3b-screen-designer`. Local implementation head `23fc113` is four commits
+ahead of the published ref. It includes all original source/canvas lane commits,
+the H61 harness correction and the coordinator's new source-qualified
+`canShowHide` target capability. Do not replay old lane histories. Preserve the
+unrelated three Design Lab guide edits, Phase 1 audit, worktrees and receipts.
 
-The combined backend is frozen at `afe95ce8e206eb44cde340e2fc23ee4e7d1230af`, tree
-`787bbf549193b35b2fe78e9477df9ed8253cced5`. Its tree equals source worker merge
-`b8dfcf9`. Both reviewed source checkpoints, revisioned effects, canvas/sample
-consumer and runtime tooling are integrated. The canvas lane is complete and
-returned all implementation files; its branch remains preserved. Source/actions
-retains its dedicated modules/controls and awaits the prototype's direct approved
-handoff before production UI. The coordinator owns the other integrated files.
+Both fresh offline workers returned clean at `0b64e54` with no fixes or commits.
+Source/actions passed 25 public cases and returned a caller/migration map. Canvas
+passed 12 core cases, 34 DOM cases and four comparison gates; two SDK cases remain
+explicitly ignored. The coordinator verified retained producer/input hashes and
+unchanged canvas sources. The eligibility correction passed 15 reference and
+42 affected frontend cases, typechecking, formatting and repository checks.
+These are bounded offline results, not final combined, engine or native evidence.
 
-Next: integrate the approved authoring UI when its direct prototype handoff arrives,
-and qualify the corrected engine harness. Kris confirmed the Mac unlocked/awake
-and explicitly requested the Windows test thread. Mac checkout `t3-84efa12a` at
-`bad5067` passed desktop admission, then stopped after four SDK starts because
-its first click log contains the pinned reporter's trailing space. This is H61,
-a harness defect. The original campaign remains failed. Six offline gate tests
-and the unmodified retained click log pass after the coordinator's whitespace fix;
-all case/source/order/continuation requirements remain. PIDs, process groups,
-scratch and desktop assertions have complete cleanup receipts.
+The coordinator owns shared contracts/callers, integration, combined records and
+final verification. No original stopped worker has been resumed. New prototype
+work uses preserved `t3-229694d0` in the separately requested new chat. Its three
+variants remain unapproved. Sol owns coding; Terra Max owns browser/desktop work.
+Standing computer-use authority remains valid. Exact current chat/worker identities,
+commands, hashes and original-criterion gaps are in the
+[resumption evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#resumed-delivery-2026-11-05).
 
-#47 owns reconciled cumulative counters and any next reservation. No worker may
-continue from the old reservation. The old Mac desktop refusal is preserved
-separately. Windows source-transfer head `db99cbb` remains in its Git object store,
-but the requested top-level thread failed T3 worktree provisioning before agent
-startup. Read-only diagnosis found no Git arguments, destination, exit code or
-stderr and established no root cause. No Windows SDK start occurred. Do not create
-a child checkout in shell or reuse another owner's worktree. A supported isolated
-T3 binding and corrected source transfer are prerequisites for Windows execution.
+Next, receive the explicit design decision and exact approved source/capture
+handoff. Then implement the approved controls, migrate legacy dismissal callers,
+wire typed samples, and verify actual UI-to-core retention, history and reopen.
+Run final combined suites, candidate-bound engine/platform proof and independent
+Standards/Spec review before final spec reconciliation and draft PR creation.
+Do not run CI yet or infer approval from prototype preparation.
 
-The [evidence record](../tasks/evidence/screen-actions-and-nested-canvas.md#mac-campaign-1-harness-failure-and-correction)
-retains producing hashes, cleanup and the Windows provisioning failure. Neither
-ticket is accepted; UI, both-target engine proof, native/package and final review
-remain pending.
+#47 alone owns operation accounting. The cancelled corrected Mac worker at
+`8ed4608` performed reads only; its unused reservation is released. No capped
+operation is currently assigned. Mac campaign 1 remains failed after four SDK
+starts despite offline diagnostic success after the H61 correction. Cleanup and
+the earlier desktop refusal remain preserved in
+[engine evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#mac-campaign-1-harness-failure-and-correction).
+Windows source-transfer head `db99cbb` is retained in its object store, but T3
+worktree provisioning failed before agent startup. No Git root cause or supported
+isolated execution binding is established. Do not blind-retry, create a child
+checkout in shell or take over another worktree. Corrected source transfer and
+supported isolation precede Windows execution. Neither target's pending proof
+is waived. No PR, merge, release or ticket closure has occurred for this work.
 
 ## PR 79 merge and workspace closeout
 
