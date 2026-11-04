@@ -1,97 +1,42 @@
 # Current outcome handover
 
-## Help dialog and base Help canvas implementation
+## PR 79 merge and workspace closeout
 
-Kris selected the independently verified P2 from Terra's full PR #79 review at
-`77b1187`, its root-cause correction, draft PR update and ordinary CI. The pending
-placement now owns its retained navigation state and incomplete recovery input,
-separate from Beat content. Valid placement survives a Screens round trip; dirty
-payloads, failed Add and incomplete recovery retain navigation protection. Explicit
-Cancel/Escape restores the opening or last accepted placement. Local checks pass
-369 frontend cases, production build and eight actual controller/core stages,
-including no-write navigation/remount and existing one-step history/reopen.
-[Handoff correction evidence](../tasks/evidence/help-dialog-and-canvas.md#pending-placement-handoff-correction-2026-11-04)
-owns red/green results, self-review and ignored `placement-*` receipts under
-`.toolchains/pr79-review-fixes/`. PR #79 owns the published candidate/run and pending
-terminal ordinary CI audit. Earlier corrections and rendering/runtime/core results
-retain their recorded candidate scope. No merge, issue closure, SDK/helper/native/
-package execution or broader acceptance is selected. Preserve the unrelated Design
-Lab guide edits, untracked audit and protected recovery below. Status files remain
-over their soft length targets to preserve pending acceptance and unique recovery.
+Kris selected ticket reconciliation, merge and safe workspace retirement.
+[PR #79](https://github.com/Caldwell-41/Renpy-editor/pull/79) is merged as
+`dfd6c5cf09f8d5540b69c98c1fb6c31c006d4e70` into `codex/phase3b-screen-designer`.
+Its tree `fc895106115cdb7ffabc493a5b51bf6142e8f746` exactly matches audited
+`cef296e15917b14c7909f8a9b1eea730ca4fc6d6`. Both automatic runs and the combined
+validation status pass; the [terminal audit](https://github.com/Caldwell-41/Renpy-editor/pull/79#issuecomment-6631120522)
+verifies 369 frontend tests, 15 offline Help gates, 29 selected core cases,
+production build and the eight-stage controller/core journey.
 
-The selected #45/#46 implementation is complete and reviewed on
-`codex/help-dialog-canvas` from `e32ded4`. Final production code is `b2a5694`;
-`7fe2577` has identical frontend/core inputs. [Delivery evidence](../tasks/evidence/help-dialog-and-canvas.md)
-owns the bounded criterion map, corrections, original failures and operation counts.
-[Completion verification](../tasks/evidence/help-dialog-and-canvas-ui/completion-verification.json)
-binds the actual source/driver, 36 browser conditions and six hashed captures.
+#45/#46 are accepted and closed for all four bounded criteria each. Sixteen ticket
+bodies/states are read back; the parent map credits 20 rows. #47/#48/#49/#50 are
+dependency-ready but unselected; #54 still needs #51/#52. Groups and full Phase 3B
+remain open. Dialog normal-entry proof stays scoped to Mac `dff0c64`/Windows
+`4c084a4`; exact base Help pixel/geometry proof stays scoped to `4c084a4` on both
+targets/aspects. No new SDK/helper/native/package campaign occurred. Final SDK
+counts and all earlier failures remain in [closeout evidence](../tasks/evidence/help-dialog-and-canvas.md#merge-acceptance-and-workspace-retirement-2026-11-04).
+Broader editor/canvas/native/physical and human acceptance remain separate.
 
-Kris selected a draft PR and CI updates, then required completion before CI. That
-completion condition is satisfied. [Draft PR #79](https://github.com/Caldwell-41/Renpy-editor/pull/79)
-is published against `codex/phase3b-screen-designer`; implementation remains `b2a5694`.
-Its current-head gate is the PR's `Loomlight validation` status.
-[Ordinary run 41741915132, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41741915132/attempts/1)
-is audited successful at `28efd6c`: both required jobs and combined validation pass,
-with 366 frontend, 15 offline Help and 27 selected core passes, production build and
-the real controller/core journey. Earlier CI plumbing faults are corrected without
-production changes; failed runs and unavailable uploads retain their scope.
-The audit publication changes documentation only. Production/CI inputs remain the
-same; use the PR's current-head combined status for later documentation validation.
-Next is Kris's review of the draft once that status is green. The plan selects no
-manual qualification matrix. No merge, issue closure, retirement, release, new SDK
-campaign or native/package execution is selected.
+Thirteen completed worktrees and fourteen local branches are retired. The merged
+remote feature branch is deleted. Source histories, 2,502 evidence paths and their
+hash manifest are preserved under ignored `.toolchains/retired-worktrees/pr79/`.
+Recovery tag `recovery/pr79-approved-prototype-2026-11-04` retains the exact approved
+A4 source/history. The primary checkout is the only local worktree. The qualified
+Windows checkout was not changed by local cleanup.
 
-Final local proof passes 366 frontend cases without failures/skips, 31 focused UI
-cases, 24 affected core cases, production build, formatting and the six-stage
-actual controller/core journey. The final real-main browser check passes all 36
-cancellations, two keyboard action rows, sticky/static/resize transitions and an
-accepted Call followed by later Cancel/Escape. Cancel-only Source bytes remain
-unchanged with zero Beat/appearance writes; accepted placement/revision survives
-the next operation. All owned processes and scratch cleaned up, with driver exit
-zero. Canvas execution was intercepted before dispatch in these authoring probes.
-
-The single final independent pair covers `e32ded4...5b0ab97`. Standards found one
-P3 handover contradiction and one P3 duplicated-policy heuristic; Spec found one
-P2 stale accepted-insertion snapshot. `31c4afa` resolves all three. The coordinator
-self-reviewed those corrections and the responsive focus fixes through `b2a5694`.
-Earlier independent/Terra findings are also resolved. No known bounded functional
-finding remains. After two incomplete UI verification attempts the coordinator
-used the repository fallback, correcting a harness assertion that mistook
-`overflow: visible` for clipping. Viewport, actual clipping-ancestor, hit-test and
-focus checks remain enforced. Earlier failures/incomplete matrices stay distinct.
-
-Approved UI is only A4 `inspector-v4`, source `8851689`, approval evidence `2443e72`.
-B4/C4 remain drafts. [The direct handoff](../design/design-lab-help-dialog-story/HANDOFF.md)
-owns the exact decision, fingerprint and control map. Help still requires a typed
-UI image; public New screen defaults Panel. Existing Source, history, layout,
-Style, font, image and component owners remain. Insertion context is client-only;
-there is no implicit Apply, Beat, Blank fallback or general action builder.
-
-Normal-entry Dialog proof passes eight rows per host, Mac at `dff0c64`, Windows at
-`4c084a4`. Base Help passes eight exact pixel/geometry comparisons per host at
-`4c084a4`, with identical accepted source/assets/fonts/state and no tolerance.
-Reuse retains those candidates and unchanged rendering/runtime-input scope; later
-UI/failure-path corrections do not claim fresh SDK or native proof. SDK use remains
-Mac Dialog 20/24 and Canvas 16/20; Windows Dialog 11/16 and Canvas 8/12, with no
-uncertain/reserved starts. The earlier 575-pass core run and exclusions retain their
-scope. No new SDK/helper process ran during completion.
-
-A4 control hierarchy and responsive behavior are verified within the existing
-production shell. Whole-page pixel identity across different fixture art/text/shells
-is not claimed. Compact CDP and immediate headless-capture quirks remain scoped to
-the recorded capture paths; settled Playwright captures match DOM dimensions.
-Native WebView/package/signing, physical/human, broader editor/canvas/3B and final
-user acceptance remain separate. Neither issue is closed.
-
-SUNDOWN's assigned worktree remains at its qualified `4c084a4`; primary checkout,
-protected stash and unrelated processes are preserved. No remote operation runs.
-For a later selected transfer, retain the approved Taildrop payload/hash protocol,
-Downloads route and Python-captured native exits; sync only the assigned checkout.
-Preserve local ignored evidence, SDK archives, protected recovery and worktrees.
-Do not stage the unrelated Design Lab guide edits or untracked audit. CI changes,
-completion evidence and status records are coordinator-owned. No agent is awaiting
-implementation work; the completed implementation lane receives the coherent review
-and final validation handoff for skill closure.
+Preserve the unrelated three Design Lab guide edits and untracked Phase 1 audit.
+Both existing stashes are unchanged, including `c16ddcc` for the earlier base Help
+proof corrections and `23c69ff` for protected Mac access/Actions assessment.
+Do not apply either automatically. Existing archive/recovery tags, local `main`,
+remote `main`, open Dependabot PR #69 and native recovery below are unchanged.
+No product work or release is selected. The only continuation is the required
+ordinary validation and merge of the documentation-only closeout PR; PR #79 owns
+its exact final publication receipt. No product checks need repeating for these
+records. This file and CURRENT retain older recovery/evidence sections beyond
+their soft word targets; they do not select historical continuation prompts.
 
 ## PR 77 merge and workspace closeout
 

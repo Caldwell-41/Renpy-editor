@@ -1,48 +1,30 @@
 # Current status
 
-## Help dialog and base Help canvas implementation complete
+## Help dialog and base Help canvas merged and accepted
 
-The verified P2 from the Terra review at `77b1187` is corrected. Pending placement
-has its own draft owner, so valid choices survive Screens navigation while
-incomplete recovery and Beat content retain their guards. Final local checks pass
-369 frontend tests, production build and the eight-stage actual controller/core
-journey. [Handoff correction evidence](../tasks/evidence/help-dialog-and-canvas.md#pending-placement-handoff-correction-2026-11-04)
-owns the root cause, red/green results and self-review. The earlier three fixes and
-their core evidence remain qualified within their recorded scope. Publication to
-draft PR #79 and current-head ordinary CI are selected; no merge or broader
-qualification is selected.
+[PR #79](https://github.com/Caldwell-41/Renpy-editor/pull/79) squash-merged as
+`dfd6c5c` into `codex/phase3b-screen-designer`. Its tree exactly matches audited
+head `cef296e`. [L10 #45](https://github.com/Caldwell-41/Renpy-editor/issues/45)
+and [L18 #46](https://github.com/Caldwell-41/Renpy-editor/issues/46) are accepted
+and closed for their four bounded criteria each. The [terminal audit](https://github.com/Caldwell-41/Renpy-editor/pull/79#issuecomment-6631120522)
+verifies 369 frontend tests, 15 offline Help gates, 29 selected core cases,
+production build and the actual controller/core journey. All four verified review
+findings are corrected, including pending placement through Screens navigation.
 
-Kris approved [#45](https://github.com/Caldwell-41/Renpy-editor/issues/45) and
-[#46](https://github.com/Caldwell-41/Renpy-editor/issues/46) on local integration
-branch `codex/help-dialog-canvas` from `e32ded4`. Both portable lanes are integrated;
-the coordinator owns shared contracts, review findings, integration and final review.
+[Merge and retirement evidence](../tasks/evidence/help-dialog-and-canvas.md#merge-acceptance-and-workspace-retirement-2026-11-04)
+owns identities, scoped rendering/runtime reuse, the 16 reconciled tickets and
+closed operation counts. #47/#48/#49/#50 are dependency-ready but unselected;
+#54 still waits on #51/#52. Group/Phase 3B, broader editor/canvas/native/physical
+and human acceptance remain open. Approved A4 and the existing typed UI-image
+requirement remain unchanged. No successor or execution campaign is selected.
 
-| Capability | Implemented and automated proof | Remaining acceptance |
-| --- | --- | --- |
-| Help dialog and Story Call/Finish | A4 UI, cancellation/recovery and actual controller/core pass; 36 final browser cases and recorded eight normal-entry rows per target pass | Final user acceptance; current-head CI on PR #79 |
-| Base Help canvas | Eight matched cases per target have exact pixels and geometry at `4c084a4`; lossless geometry transport is tested | Wider canvas/native/physical acceptance stays separate |
-| Combined implementation | Local verification and independent review corrections complete; ordinary CI at `28efd6c` passes 366 frontend, 15 offline Help and 27 core cases plus actual controllers/build | Draft PR #79 for user review; current-head CI tracked there; no merge/release |
-
-Kris approved A4 (`inspector-v4`) at source `8851689`; B4/C4 remain drafts.
-Completion code is `b2a5694`, with the exact approved reference and retained product
-captures committed separately from the production renderer. Help still requires
-a typed UI image; insertion remains client-only existing Scene/body/Position
-context. Missing images, deleted placement Scenes and unresolved action drafts
-retain intent and expose explicit recovery. No implicit Apply, Beat or Blank
-fallback is introduced. The requested subagent completion pass is finished, and
-the coordinator resolved its review and responsive-focus findings.
-The final main/core probe records zero page errors and complete cleanup. It
-intercepts engine rendering before dispatch. Whole-page pixel identity is not
-claimed. Terra reproduced the compact PNG repetition as a transient mismatch
-between headless capture and the DOM; a capture after two animation frames is correct.
-Its exact compositor/timing cause is not isolated, and it supports no production
-CSS correction. Native/physical and broader editor acceptance remain separate.
-[Delivery evidence](../tasks/evidence/help-dialog-and-canvas.md) owns candidates,
-checks, earlier failures, operation counts and exact scope. Physical/human and
-package/native acceptance remain separate. Neither ticket is closed. The completion
-condition for [draft PR #79](https://github.com/Caldwell-41/Renpy-editor/pull/79) and
-ordinary CI is satisfied. The PR's combined status owns current-head CI. No new SDK/package
-qualification matrix, merge or release is selected.
+Thirteen completed worktrees, fourteen local branches and the merged remote branch
+are retired after source/evidence preservation. Only the primary worktree remains.
+Original commits and 2,502 evidence paths are retained in the ignored archive;
+the approved prototype has a recovery tag. The unrelated Design Lab guide edits,
+audit, protected stashes/native recovery and open Dependabot work are unchanged.
+The closeout records publish through a documentation-only follow-up PR under the
+required validation rule; PR #79 owns its terminal publication receipt.
 
 ## Components and Help panel merged and accepted
 
@@ -57,8 +39,8 @@ success, with source/artifact hashes verified. The six original corrections and
 final component-name validation finding are fixed.
 
 [Merge and retirement evidence](../tasks/evidence/components-and-help-panel.md#merge-acceptance-and-workspace-retirement-2026-11-03) owns final identities and ticket coverage.
-Thirteen tickets are reconciled. #45 is dependency-ready but unselected; #50 has
-#42/#41 satisfied and still waits on #46. Aggregate editor/canvas/native/human and
+Thirteen tickets were reconciled at that closeout. #45/#46 are now accepted through
+PR #79 above, and #50 has all prerequisites satisfied but remains unselected. Aggregate editor/canvas/native/human and
 Phase 3B acceptance remain open. SDK totals are closed at #41 16/24 and #44 44/44,
 with zero uncertain/reserved starts. No successor or new execution is selected.
 
