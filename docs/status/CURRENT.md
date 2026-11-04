@@ -9,8 +9,8 @@ CI is explicitly deferred. Neither ticket is accepted.
 
 Implementation checkpoint `23fc113` on `codex/47-50-integration` includes the prior backend
 and a new `canShowHide` target capability from the existing source qualifier.
-It remains local-only after the prior source-transfer publication. The unrelated Design Lab guide
-edits and Phase 1 audit remain outside selected commits.
+It remains local-only after the prior source-transfer publication. Preserve the
+user's committed Design Lab guide updates and the untracked Phase 1 audit.
 
 Both fresh offline workers completed without source changes. Source/actions passed
 25 public cases. Canvas passed 12 core cases, 34 DOM cases and four comparison gates;
@@ -22,10 +22,14 @@ repository checks. These results retain their candidate and offline scope.
 | --- | --- | --- |
 | Typed writes and effects | Public source/history/refusal and Story admission | Approved controls and ordered normal-play proof |
 | Nested canvas and inert samples | Public plans, freshness and exact comparison gates | Both-target/aspect normal/helper captures |
-| Authoring controls | Three unapproved mocks in the new design chat | Explicit variant approval, reproducible handoff and real UI-to-core proof |
+| Authoring controls | V1 rejected; three v2 drafts in the new design chat | Explicit variant approval, reproducible handoff and real UI-to-core proof |
 
 Production UI remains unassigned. The new design chat is bound to the preserved
-prototype worktree; all mockup work and approval happen there. Final combined
+prototype worktree; all mockup work and approval happen there. Kris rejected v1
+for departing from the existing Screens design language. The v2 redo uses the real
+ScreensWorkspace, Lab shell and production styles, with fictional inert services.
+Use principle-experience-first and Tailscale-only delivery; prototype-review is
+explicitly excluded. No v2 approval exists. Final combined
 suites and independent Standards/Spec review follow approved control integration.
 [Current evidence and criterion gaps](../tasks/evidence/screen-actions-and-nested-canvas.md#resumed-delivery-2026-11-05)
 own exact assignments, receipts and remaining work.

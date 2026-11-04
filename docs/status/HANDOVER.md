@@ -13,7 +13,7 @@ Continue on `codex/47-50-integration`, based on
 ahead of the published ref. It includes all original source/canvas lane commits,
 the H61 harness correction and the coordinator's new source-qualified
 `canShowHide` target capability. Do not replay old lane histories. Preserve the
-unrelated three Design Lab guide edits, Phase 1 audit, worktrees and receipts.
+user's committed Design Lab guide updates, untracked Phase 1 audit, worktrees and receipts.
 
 Both fresh offline workers returned clean at `0b64e54` with no fixes or commits.
 Source/actions passed 25 public cases and returned a caller/migration map. Canvas
@@ -25,8 +25,14 @@ These are bounded offline results, not final combined, engine or native evidence
 
 The coordinator owns shared contracts/callers, integration, combined records and
 final verification. No original stopped worker has been resumed. New prototype
-work uses preserved `t3-229694d0` in the separately requested new chat. Its three
-variants remain unapproved. Sol owns coding; Terra Max owns browser/desktop work.
+work uses preserved `t3-229694d0` in the separately requested new chat. Kris rejected
+all v1 variants for departing from the existing Screens design language. The redo
+uses principle-experience-first, explicitly excludes prototype-review and delivers
+only through Tailscale. `inspector-v2`, `worksheet-v2` and `workspace-v2` mount the
+actual ScreensWorkspace, Lab shell and production styles with fictional inert
+services. They change only action editing inside the inspector and remain
+unapproved. Rejected source/notes are preserved ignored. Sol owns coding;
+Terra Max owns browser/desktop work.
 Standing computer-use authority remains valid. Exact current chat/worker identities,
 commands, hashes and original-criterion gaps are in the
 [resumption evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#resumed-delivery-2026-11-05).

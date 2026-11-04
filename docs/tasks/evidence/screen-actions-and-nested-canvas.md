@@ -39,6 +39,28 @@ UI-to-core proof, both-target/aspect runtime/render comparisons, required platfo
 checks and final two-axis review remain pending. Unchanged offline evidence may be
 reused only with its original candidate and scope stated.
 
+### Design rejection and v2 redo
+
+Kris explicitly rejected `inspector-v1`, `worksheet-v1` and `workspace-v1` as
+inconsistent with the existing Screens design language. None is approved or a
+production reference. The rejected source/notes remain preserved in ignored
+prototype storage. Earlier v1 preparation/media records establish no approval.
+
+Kris ordered a full redo using principle-experience-first, excluded prototype-review
+and selected Tailscale-only delivery. These directions supersede the earlier
+prototype-review workflow for this design. All replacement work stays in the new
+bound prototype chat/worktree. No production UI owner is assigned.
+
+The reported replacements `inspector-v2`, `worksheet-v2` and `workspace-v2` mount
+actual ScreensWorkspace, the existing Lab shell and production styles. Their
+differences are confined to ordered-action editing inside the real inspector,
+with an existing Screens reference toggle and fictional inert controls/services.
+All approval entries remain null. Terra Max browser verification is in progress;
+this is a preparation update, not an approved reproducible handoff. The core
+`canShowHide`/`qualified_panel_targets` and Finish/`blocking` requirements remain.
+No rebase, production edit, SDK/helper/native/package/CI or publication occurred
+in this reported redo. Await the actual explicit decision and exact source handoff.
+
 ### Source/actions verification and target eligibility
 
 The source/actions verifier returned a clean checkout at
