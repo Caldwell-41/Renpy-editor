@@ -9,7 +9,7 @@ typed actions/bindings, revisioned effects/Story admission, nested component exp
 inert samples and independent qualification tooling. The canvas lane has handed
 back its files. Source/actions awaits the separate approved prototype handoff for
 production UI. The coordinator owns integration, combined verification and review.
-#47 owns operation accounting and the released Mac engine reservation.
+#47 owns combined operation accounting and the next engine reservation.
 
 | Selected behavior | Implementation and offline proof | Engine/native/human acceptance |
 | --- | --- | --- |
@@ -17,16 +17,21 @@ production UI. The coordinator owns integration, combined verification and revie
 | Nested canvas and inert samples | Seven public-core and four comparison gates pass | Both-target/aspect captures pending |
 | Authoring controls | Prototype iteration; production integration pending | User design decision pending |
 
-Neither ticket is accepted. Mac desktop preflight refused before execution; its
-15 SDK starts and one helper reservation are released, with all actual counters zero.
-Mac proof waits for an unlocked, awake desktop and verified admission. Windows
-source/tools and the supported fixture launch route are verified prerequisites;
-its isolated execution waits for the requested explicit new-thread decision after
-T3 refused remote worktree delegation. Windows 15 SDK/helper-one reservation is
-held, with actual use zero. [Evidence](../tasks/evidence/screen-actions-and-nested-canvas.md)
-records checkpoints, producing candidates and limits. Prior closeout sections below
-retain their historical candidates and recovery; their unselected-next-work text
-is superseded by this selection.
+Neither ticket is accepted. After Kris confirmed the Mac was unlocked and awake,
+positive desktop admission allowed four SDK starts in campaign 1. The first click
+case exited zero but the qualifier rejected the reporter's trailing whitespace
+(H61). The campaign remains failed; all four processes and desktop assertions were
+cleaned up. The coordinator reproduced and corrected admission offline. All six
+gate tests and the unchanged retained click log pass the corrected validator.
+The remaining cases require fresh qualification at the corrected candidate.
+
+Kris requested the Windows test thread. T3 failed worktree provisioning before
+agent startup; read-only diagnosis could not recover Git arguments or stderr.
+No Windows SDK process started. Its first reservation is released pending a usable
+T3-bound worktree and corrected source transfer. The original Mac refusal remains
+preserved. [Evidence](../tasks/evidence/screen-actions-and-nested-canvas.md) owns
+candidate/receipt details; #47 owns counters and reservations. Prior sections below
+retain historical evidence and are superseded for the current selection.
 
 ## Help dialog and base Help canvas merged and accepted
 

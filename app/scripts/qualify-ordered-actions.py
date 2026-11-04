@@ -46,7 +46,7 @@ def validate_environment(result):
 
 def validate_runtime_output(text, case, manifest_sha, manifest, resolution):
     require(case in CASES and resolution in RESOLUTIONS, 'unknown case/resolution')
-    lines = text.splitlines()
+    lines = [line.rstrip() for line in text.splitlines()]
     require(lines.count('[rpytest] Status: PASSED') == 1, 'missing/duplicate engine completion')
     require(any(re.search(r'\bglobal\.ordered_actions::' + re.escape(case) + r'\b', line) for line in lines), 'missing named engine case')
     summaries = [line for line in lines if line.startswith('[rpytest] Test cases :')]

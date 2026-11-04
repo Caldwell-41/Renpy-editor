@@ -23,37 +23,29 @@ returned all implementation files; its branch remains preserved. Source/actions
 retains its dedicated modules/controls and awaits the prototype's direct approved
 handoff before production UI. The coordinator owns the other integrated files.
 
-Next: resolve the explicit Windows test-thread request and integrate the approved
-authoring UI. Terra Max Mac test worktree
-`t3-26013bcc`, branch `t3/macos-engine-qualification`, is pinned to `afe95ce`.
-Mac desktop admission refused before any SDK start. The coordinator verified the
-retained receipt hash, released all Mac 15 SDK/helper-one reservations in #47, and
-requested an unlocked/awake desktop confirmation. Actual/uncertain SDK/helper,
-package/native/CI/campaign counts all remain zero. No SDK PID or cleanup arose.
-Do not resume Mac execution until admission can establish a usable desktop and
-#47 records a fresh reservation. Windows is linked as SUNDOWN; a single normal
-fetch preserved its primary/worktrees/stash and supplied all published candidate
-objects. Source-transfer head `db99cbb6f23c3f032d32b08d1784bbee6ba8f459` is selected
-for the Windows producer; its delta from `afe95ce` is docs/validation metadata only.
-Windows has pinned tools/archive and a supported engine-owned fixture route.
-Its 15 SDK starts including one helper are reserved, with actual use zero.
+Next: integrate the approved authoring UI when its direct prototype handoff arrives,
+and qualify the corrected engine harness. Kris confirmed the Mac unlocked/awake
+and explicitly requested the Windows test thread. Mac checkout `t3-84efa12a` at
+`bad5067` passed desktop admission, then stopped after four SDK starts because
+its first click log contains the pinned reporter's trailing space. This is H61,
+a harness defect. The original campaign remains failed. Six offline gate tests
+and the unmodified retained click log pass after the coordinator's whitespace fix;
+all case/source/order/continuation requirements remain. PIDs, process groups,
+scratch and desktop assertions have complete cleanup receipts.
 
-Remote `delegate_task` refused `isolation:worktree` before agent creation. The
-supported alternative is a new `t3_thread_launch` bound to a worktree at `db99cbb`.
-T3 rules require Kris's explicit request for that top-level thread, which the
-coordinator has asked through the current conversation. Do not create a child's
-checkout in shell, run in a protected existing checkout, or treat the failed
-allocation as an SDK start. The prepared Windows brief remains in this thread's
-tool state. Later documentation commits do not move selected producing candidates.
+#47 owns reconciled cumulative counters and any next reservation. No worker may
+continue from the old reservation. The old Mac desktop refusal is preserved
+separately. Windows source-transfer head `db99cbb` remains in its Git object store,
+but the requested top-level thread failed T3 worktree provisioning before agent
+startup. Read-only diagnosis found no Git arguments, destination, exit code or
+stderr and established no root cause. No Windows SDK start occurred. Do not create
+a child checkout in shell or reuse another owner's worktree. A supported isolated
+T3 binding and corrected source transfer are prerequisites for Windows execution.
 
-Offline preparation/validation at the combined candidate passes with known effects,
-`runtimeReady:true`, and actual public Story Call admission. Seven nested core cases,
-four nested gates and five runtime evidence gates pass. The complete UI, both-target
-engine/native/package proof, final full-suite checks and combined review remain pending.
-[Evidence](../tasks/evidence/screen-actions-and-nested-canvas.md) retains details.
-Preserve the unrelated three Design Lab guide edits, untracked Phase 1 audit,
-protected stashes/native recovery and historical allowances below. Earlier no-successor
-statements describe completed outcomes and do not cancel this selection.
+The [evidence record](../tasks/evidence/screen-actions-and-nested-canvas.md#mac-campaign-1-harness-failure-and-correction)
+retains producing hashes, cleanup and the Windows provisioning failure. Neither
+ticket is accepted; UI, both-target engine proof, native/package and final review
+remain pending.
 
 ## PR 79 merge and workspace closeout
 

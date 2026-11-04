@@ -229,3 +229,62 @@ All actual/uncertain SDK/helper/package/native/CI/campaign counts remain zero. T
 Windows reservation is held for the pending route, not assigned execution authority.
 No child task/PID or cleanup arose from the API refusal. Mac desktop confirmation,
 prototype/UI, both-target engine proof and final review remain pending.
+
+## Mac campaign 1 harness failure and correction
+
+Kris confirmed the Mac unlocked/awake and explicitly requested the Windows test
+thread. Mac checkout `t3-84efa12a` stayed clean at
+`bad5067c0a6a9e76da06b96398505c3ef5759c84`, tree
+`fbd2b951b01836280d67990a8d6bab66a7cea4c8`. An authorized unsandboxed read-only
+query established positive desktop admission after the ordinary sandbox query
+returned null fields. The existing desktop owner held and released both temporary
+assertions. The original preflight refusal remains separate and unchanged.
+
+The first campaign started version, compile, lint and 1280x720 click, then stopped.
+All processes exited zero, but runtime admission rejected `[rpytest] Status: PASSED `
+with trailing whitespace. This matches [H61](../../testing/INCIDENTS.md#h61-exact-completion-line-comparison-rejects-reporter-whitespace).
+It is a harness admission defect, not a product failure or qualified runtime pass.
+Three ordered cases and the entire nested phase remain unrun. Campaign 1 is charged;
+#47 owns the reconciled process totals and released unused reservations.
+
+Ignored receipts under that checkout's `app/target/qualification/engine-1`:
+
+| Receipt | SHA256 |
+| --- | --- |
+| `audit.json` | `97a1c2ba004cc9d5fbf9a12a8d92eeaccceb3a90e6972beefab70196d938bc24` |
+| `ordered-sdk/result.json` | `f5b06ceaf201b9b9d3fe89193ee0cc7ee2413894a29b15255d8b1db18d7ea56f` |
+| `ordered-sdk/1280x720-click.log` | `cf9f459813c843aca394ad154315da9c18e25b4b1db34fe2a062c4a27199d867` |
+| `ordered-processes.jsonl` | `85f36ebc899bd898bb3514655c20335b94d924b0476178b029da29cf4099f542` |
+| `ordered-desktop.json` | `7e5be6a2850be89ed64f2c3d5b31e78fb28da0a994b9173ba6d40d23cf429434` |
+
+The coordinator read the receipts and independently verified those hashes. Four
+owned launcher PIDs exited, process groups were empty, and scratch was removed.
+Both desktop assertions were released. Producer inputs and source stayed unchanged.
+Fresh prepare/validate reported runtimeReady and public Story Call admission true.
+The accepted manifest hash is
+`9453f92cc9441bda8d0fb9bbd0fb130da23665eade8052f70b7ba921444f2d0c`;
+retained ARM64 producer binary hash is
+`2e737751f12be1d67c393b2dcbf1848ca78c6fee02f36c7257829b2ca5c36248`.
+
+A focused offline test reproduced the reporter rejection before correction. Runtime
+admission now removes trailing line whitespace before exact status and uniqueness
+checks, as the existing Help qualifier does. All six gate tests pass, including
+missing/duplicate statuses and malformed suffix refusal. The unchanged retained
+click log passes the corrected validator against its original manifest, eight
+ordered built-in calls, visibility and exactly-once continuation. This is diagnostic
+only; the original qualification remains failed. The primary ignored receipt is
+`.toolchains/47-50/reporter-admission-diagnostic.json`. No SDK ran for the correction.
+
+## Windows worktree provisioning failure
+
+The requested top-level Windows thread at published `db99cbb` failed before model
+startup in T3 `GitVcsDriver.createWorktree`: `git worktree add failed`. Its worktree
+path is null. Read-only diagnosis verified the candidate/tree exist, the selected
+branch name is valid, no failed branch/worktree remains registered, and the primary
+checkout is clean. A T3 trace shows branch creation, attempted worktree add and
+branch cleanup, but retains no command arguments, destination, exit code or stderr.
+No Git root cause is established. No retry, shell-created checkout or existing
+worktree takeover is selected. Windows execution remains blocked on T3 provisioning;
+all its unused reservations are released. No Windows SDK/helper/native/package/CI
+process started. Ordinary corrected source transfer remains authorized once a
+supported isolated test binding is available.

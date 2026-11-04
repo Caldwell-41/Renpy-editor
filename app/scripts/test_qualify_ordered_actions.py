@@ -44,6 +44,10 @@ class OrderedActionsEvidence(unittest.TestCase):
     def test_complete_observed_order_is_admitted(self):
         self.assertEqual(self.validate(self.row), self.row)
 
+    def test_reporter_trailing_whitespace_is_admitted(self):
+        text = self.log(self.row).replace('Status: PASSED\n', 'Status: PASSED \t\r\n')
+        self.assertEqual(self.validate(self.row, text), self.row)
+
     def test_duplicate_reordered_missing_or_wrong_visibility_action_refuses(self):
         for mutate in [lambda r: r['calls'].append(copy.deepcopy(r['calls'][0])),
                        lambda r: r['calls'].reverse(), lambda r: r['calls'].pop(),
@@ -64,7 +68,10 @@ class OrderedActionsEvidence(unittest.TestCase):
         text=self.log(self.row)
         for bad in [text.replace('1 passed','0 passed'),text.replace('0 failed','1 failed'),
                     text.replace('1 skipped','0 skipped'),text.replace('Status: PASSED','Status: FAILED'),
-                    text.replace('0.5 s','0.0 s'),text+'\nORDERED_ACTIONS_OBSERVED '+json.dumps(self.row)]:
+                    text.replace('0.5 s','0.0 s'),text+'\nORDERED_ACTIONS_OBSERVED '+json.dumps(self.row),
+                    text.replace('[rpytest] Status: PASSED\n',''),
+                    text+'\n[rpytest] Status: PASSED \t',
+                    text.replace('Status: PASSED','Status: PASSED extra')]:
             with self.assertRaises(ValueError): self.validate(self.row,bad)
 
     def test_preintegration_export_cannot_qualify_as_runtime_ready(self):
