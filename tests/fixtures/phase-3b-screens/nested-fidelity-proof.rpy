@@ -6,6 +6,7 @@ init python:
     def _nested_capture():
         try:
             case = NESTED_CASE
+            assert nested_caption == NESTED_SAMPLE
             screen = renpy.get_screen("nested_fidelity")
             widgets, seen = {}, set()
             def discover(displayable):
@@ -91,6 +92,8 @@ screen nested_fidelity_capture():
     timer 0.5 action Function(_nested_capture)
 
 label start:
+    # Ren'Py applies default statements on entry. Set the comparison sample after them.
+    $ nested_caption = NESTED_SAMPLE
     $ renpy.set_physical_size((config.screen_width, config.screen_height))
     $ renpy.display.interface.set_mode()
     show screen nested_fidelity

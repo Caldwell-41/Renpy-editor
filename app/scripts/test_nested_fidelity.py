@@ -38,6 +38,17 @@ class NestedFidelityGates(unittest.TestCase):
         self.assertNotIn('_canvas_build', python)
         self.assertNotIn('renpy.display.layout.', python)
 
+    def test_normal_sample_is_applied_after_game_start_defaults(self):
+        source = (fidelity.FIXTURE_ROOT / 'nested-fidelity-proof.rpy').read_text()
+        start = source.split('label start:', 1)[1].split('show screen nested_fidelity', 1)[0]
+        assignments = [line.strip()[2:] for line in start.splitlines() if line.strip().startswith('$ nested_caption =')]
+        self.assertEqual(len(assignments), 1, "Apply the sample after Ren'Py start defaults, before showing its screen")
+        # Execute only this repository-owned literal assignment, with a controlled
+        # namespace. No SDK or project initializer is imported or executed.
+        namespace = dict(nested_caption='Nested café', NESTED_SAMPLE="[never()] {b}literal{/b}")
+        exec(compile(assignments[0], '<trusted normal fixture assignment>', 'exec'), {}, namespace)
+        self.assertEqual(namespace['nested_caption'], namespace['NESTED_SAMPLE'])
+
     def captures(self, root, role):
         (root / 'accepted.json').write_bytes(self.raw)
         records = []

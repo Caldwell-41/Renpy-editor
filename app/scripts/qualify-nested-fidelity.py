@@ -68,7 +68,7 @@ def reference(args):
             for sample in case['request']['variableSamples']:
                 variable = next(variable for variable in variables if variable['id'] == sample['variableId'])
                 assert variable['technicalName'] == 'nested_caption' and isinstance(sample['value'], str)
-                data[variable['technicalName']] = sample['value']
+                data['NESTED_SAMPLE'] = sample['value']
             initializer = 'init python:\n' + ''.join(f'    {key} = {value!r}\n' for key, value in data.items())
             (project / 'game/nested_proof.rpy').write_text(initializer + '\n' + PROOF.read_text())
             commands = [('compile', ['compile']), ('lint', ['lint', '--error-code'])] if (width, height) == ASPECTS[0] else []
