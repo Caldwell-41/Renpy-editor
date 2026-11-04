@@ -190,7 +190,9 @@ pub(super) fn project(
             continue;
         }
         match &beat.payload {
-            BeatPayload::ShowScreen { .. } | BeatPayload::HideScreen { .. } => unknown = true,
+            BeatPayload::ShowScreen { .. }
+            | BeatPayload::HideScreen { .. }
+            | BeatPayload::CallScreen { .. } => unknown = true,
             BeatPayload::Call {
                 scene_id,
                 return_label,

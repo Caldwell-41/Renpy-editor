@@ -359,13 +359,13 @@ impl AuthoringService {
             project,
             project_id,
             CreateRequest {
+                kind: OwnedScreenKind::Component,
                 name: request.name,
                 expected_project_revision: request.expected_project_revision,
                 expected_source_map_revision: request.expected_target.source_map,
                 expected_inventory_revision: request.expected_target.inventory,
                 starter: None,
             },
-            OwnedScreenKind::Component,
             |owner| {
                 let mut source = format!("screen {}():{newline}", owner.name).into_bytes();
                 source.extend(&body);
@@ -605,13 +605,13 @@ impl AuthoringService {
             project,
             project_id,
             CreateRequest {
+                kind: OwnedScreenKind::Component,
                 name: request.name,
                 expected_project_revision: request.expected_project_revision,
                 expected_source_map_revision: request.expected.source_map,
                 expected_inventory_revision: request.expected.inventory,
                 starter: None,
             },
-            OwnedScreenKind::Component,
             |owner| Ok(format!("screen {}():{newline}{body}", owner.name).into_bytes()),
         )?;
         if graph.would_cycle(&prepared.owner.id, &group.screen_id)? {
@@ -702,8 +702,8 @@ impl AuthoringService {
             .iter()
             .find(|node| node.id.as_ref() == Some(&request.node_id))
             .ok_or(SceneError::UnknownEntity)?;
-        if owner.screen.kind == OwnedScreenKind::Panel {
-            // Same-Panel moves qualify these statements, but extraction changes
+        if owner.screen.kind != OwnedScreenKind::Component {
+            // Same-screen moves qualify these statements, but extraction changes
             // their owner. A reusable component must not capture that dismissal.
             let raw = inspect(&bytes, owner.screen.path.clone(), revision.sha256.clone())?;
             let raw_screen = raw
@@ -711,8 +711,9 @@ impl AuthoringService {
                 .iter()
                 .find(|screen| screen.name == owner.screen.name)
                 .ok_or(SceneError::ReferenceBlocked)?;
-            if references::qualified_panel_spans(&owner.screen, raw_screen, &bytes)
-                .keys()
+            if references::qualified_interaction(&owner.screen, raw_screen, &bytes)
+                .contextual
+                .iter()
                 .any(|start| *start >= node.span.start && *start < node.source_end)
             {
                 return Err(SceneError::OpaqueBoundary);

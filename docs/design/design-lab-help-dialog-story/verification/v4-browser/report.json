@@ -1,0 +1,1993 @@
+{
+  "sourceCommit": "1d710f26fbab903848133e98ed2b8961f10cb512",
+  "html": {
+    "path": ".toolchains/help-dialog-story/comparison-v4.html",
+    "sha256": "b01235b819aa06d92512610e8dcffcce85352de328866d868054c446607a5efa"
+  },
+  "sources": [
+    {
+      "file": "app/design-lab/screens/help-dialog-story/workspace.ts",
+      "sha256": "525a7dc45f49a02fcbe48741ca9717bb85cb6ffcf23db492233f3b61c5977f85"
+    },
+    {
+      "file": "app/design-lab/screens/help-dialog-story/style.css",
+      "sha256": "2c3296f907ad4a77fe124e635ab262ca58eaf88348b075f0526d2dd73fbe6d78"
+    },
+    {
+      "file": "app/design-lab/screens/help-dialog-story/definition.ts",
+      "sha256": "c306e667b7a119b5e0563ed6720818f360456d1e07019dba453d1ab377694393"
+    },
+    {
+      "file": "app/design-lab/screens/help-dialog-story/standalone.ts",
+      "sha256": "7fbc9fd2d43fa6c988bc475fc72f58d20959f8911e2f037112c4e0fa93af3a9f"
+    }
+  ],
+  "scope": "Offline local-file browser prototype only. No Design Lab promotion gate, native app, SDK or Ren'Py execution.",
+  "startedAt": "2026-11-03T20:38:46.156Z",
+  "cases": [
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "layout-and-keyboard",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "geometry": {
+          "add": {
+            "left": 810,
+            "right": 926.859375,
+            "top": 529,
+            "bottom": 565.84375
+          },
+          "cancel": {
+            "left": 934.859375,
+            "right": 998.46875,
+            "top": 529,
+            "bottom": 565.84375
+          },
+          "source": {
+            "left": 810,
+            "right": 924.484375,
+            "top": 579.84375,
+            "bottom": 603.84375
+          },
+          "decoration": "underline",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px"
+        },
+        "focus": {
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "outlineColor": "rgb(211, 154, 116)"
+        }
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "callScreen-before-intro",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    call screen help\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "callScreen-before-following",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    call screen help\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "callScreen-before-return",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    call screen help\n    return"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "showScreen-before-intro",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    show screen help\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "showScreen-before-following",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    show screen help\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "showScreen-before-return",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    show screen help\n    return"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "hideScreen-before-intro",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    hide screen help\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "hideScreen-before-following",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    hide screen help\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "hideScreen-before-return",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    hide screen help\n    return"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "unaccepted-cancel",
+      "state": "story",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "missing-before-intro",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "missing-before-following",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "missing-before-return",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "unknown-before-intro",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "unknown-before-following",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "unknown-before-return",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "play-before-intro-close",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Before we leave, take a look at the controls.\""
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "play-before-intro-escape",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Before we leave, take a look at the controls.\""
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "play-before-following-close",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Ready? Let's go.\""
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "play-before-following-escape",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Ready? Let's go.\""
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "play-before-return-close",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "Return / end"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "play-before-return-escape",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "Return / end"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "outside-then-escape",
+      "state": "story",
+      "status": "failed",
+      "observations": {
+        "focusAfterOutside": {
+          "tag": "BODY",
+          "withinStudy": false
+        },
+        "phase": "waiting",
+        "followingBeatRuns": 0
+      },
+      "error": "Escape after an outside click did not finish the dialog {\"focusAfterOutside\":{\"tag\":\"BODY\",\"withinStudy\":false},\"phase\":\"waiting\",\"followingBeatRuns\":0}"
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "name": "no-image-assets-return",
+      "state": "no-images",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "layout-and-keyboard",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "geometry": {
+          "add": {
+            "left": 760,
+            "right": 876.859375,
+            "top": 586.84375,
+            "bottom": 623.6875
+          },
+          "cancel": {
+            "left": 884.859375,
+            "right": 948.46875,
+            "top": 586.84375,
+            "bottom": 623.6875
+          },
+          "source": {
+            "left": 760,
+            "right": 874.484375,
+            "top": 637.6875,
+            "bottom": 661.6875
+          },
+          "decoration": "underline",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px"
+        },
+        "focus": {
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "outlineColor": "rgb(211, 154, 116)"
+        }
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "callScreen-before-intro",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    call screen help\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "callScreen-before-following",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    call screen help\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "callScreen-before-return",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    call screen help\n    return"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "showScreen-before-intro",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    show screen help\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "showScreen-before-following",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    show screen help\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "showScreen-before-return",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    show screen help\n    return"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "hideScreen-before-intro",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    hide screen help\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "hideScreen-before-following",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    hide screen help\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "hideScreen-before-return",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    hide screen help\n    return"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "unaccepted-cancel",
+      "state": "story",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "missing-before-intro",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "missing-before-following",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "missing-before-return",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "unknown-before-intro",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "unknown-before-following",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "unknown-before-return",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "play-before-intro-close",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Before we leave, take a look at the controls.\""
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "play-before-intro-escape",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Before we leave, take a look at the controls.\""
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "play-before-following-close",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Ready? Let's go.\""
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "play-before-following-escape",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Ready? Let's go.\""
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "play-before-return-close",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "Return / end"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "play-before-return-escape",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "Return / end"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "outside-then-escape",
+      "state": "story",
+      "status": "failed",
+      "observations": {
+        "focusAfterOutside": {
+          "tag": "BODY",
+          "withinStudy": false
+        },
+        "phase": "waiting",
+        "followingBeatRuns": 0
+      },
+      "error": "Escape after an outside click did not finish the dialog {\"focusAfterOutside\":{\"tag\":\"BODY\",\"withinStudy\":false},\"phase\":\"waiting\",\"followingBeatRuns\":0}"
+    },
+    {
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "name": "no-image-assets-return",
+      "state": "no-images",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "layout-and-keyboard",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "geometry": {
+          "add": {
+            "left": 79.203125,
+            "right": 196.0625,
+            "top": 560.4375,
+            "bottom": 597.28125
+          },
+          "cancel": {
+            "left": 204.0625,
+            "right": 267.671875,
+            "top": 560.4375,
+            "bottom": 597.28125
+          },
+          "source": {
+            "left": 79.203125,
+            "right": 193.6875,
+            "top": 611.28125,
+            "bottom": 635.28125
+          },
+          "decoration": "underline",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px"
+        },
+        "focus": {
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "outlineColor": "rgb(211, 154, 116)"
+        }
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "callScreen-before-intro",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    call screen help\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "callScreen-before-following",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    call screen help\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "callScreen-before-return",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    call screen help\n    return"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "showScreen-before-intro",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    show screen help\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "showScreen-before-following",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    show screen help\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "showScreen-before-return",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    show screen help\n    return"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "hideScreen-before-intro",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    hide screen help\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "hideScreen-before-following",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    hide screen help\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "hideScreen-before-return",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    hide screen help\n    return"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "unaccepted-cancel",
+      "state": "story",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "missing-before-intro",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "missing-before-following",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "missing-before-return",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "unknown-before-intro",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "unknown-before-following",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "unknown-before-return",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "play-before-intro-close",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Before we leave, take a look at the controls.\""
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "play-before-intro-escape",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Before we leave, take a look at the controls.\""
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "play-before-following-close",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Ready? Let's go.\""
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "play-before-following-escape",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Ready? Let's go.\""
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "play-before-return-close",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "Return / end"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "play-before-return-escape",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "Return / end"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "outside-then-escape",
+      "state": "story",
+      "status": "failed",
+      "observations": {
+        "focusAfterOutside": {
+          "tag": "BODY",
+          "withinStudy": false
+        },
+        "phase": "waiting",
+        "followingBeatRuns": 0
+      },
+      "error": "Escape after an outside click did not finish the dialog {\"focusAfterOutside\":{\"tag\":\"BODY\",\"withinStudy\":false},\"phase\":\"waiting\",\"followingBeatRuns\":0}"
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "no-image-assets-return",
+      "state": "no-images",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "story-first-before-intro-create",
+      "state": "start",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "story-first-before-intro-cancel",
+      "state": "start",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "story-first-before-following-create",
+      "state": "start",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "story-first-before-following-cancel",
+      "state": "start",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "story-first-before-return-create",
+      "state": "start",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "name": "story-first-before-return-cancel",
+      "state": "start",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "layout-and-keyboard",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "geometry": {
+          "add": {
+            "left": 19,
+            "right": 135.859375,
+            "top": 946.65625,
+            "bottom": 983.5
+          },
+          "cancel": {
+            "left": 143.859375,
+            "right": 207.46875,
+            "top": 946.65625,
+            "bottom": 983.5
+          },
+          "source": {
+            "left": 19,
+            "right": 133.484375,
+            "top": 997.5,
+            "bottom": 1021.5
+          },
+          "decoration": "underline",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px"
+        },
+        "focus": {
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "outlineColor": "rgb(211, 154, 116)"
+        }
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "callScreen-before-intro",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    call screen help\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "callScreen-before-following",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    call screen help\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "callScreen-before-return",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    call screen help\n    return"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "showScreen-before-intro",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    show screen help\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "showScreen-before-following",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    show screen help\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "showScreen-before-return",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    show screen help\n    return"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "hideScreen-before-intro",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    hide screen help\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "hideScreen-before-following",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    hide screen help\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "hideScreen-before-return",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    hide screen help\n    return"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "unaccepted-cancel",
+      "state": "story",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "missing-before-intro",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "missing-before-following",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "missing-before-return",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "unknown-before-intro",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "unknown-before-following",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "unknown-before-return",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "play-before-intro-close",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Before we leave, take a look at the controls.\""
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "play-before-intro-escape",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Before we leave, take a look at the controls.\""
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "play-before-following-close",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Ready? Let's go.\""
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "play-before-following-escape",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Ready? Let's go.\""
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "play-before-return-close",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "Return / end"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "play-before-return-escape",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "Return / end"
+      }
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "outside-then-escape",
+      "state": "story",
+      "status": "failed",
+      "observations": {
+        "focusAfterOutside": {
+          "tag": "BODY",
+          "withinStudy": false
+        },
+        "phase": "waiting",
+        "followingBeatRuns": 0
+      },
+      "error": "Escape after an outside click did not finish the dialog {\"focusAfterOutside\":{\"tag\":\"BODY\",\"withinStudy\":false},\"phase\":\"waiting\",\"followingBeatRuns\":0}"
+    },
+    {
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "name": "no-image-assets-return",
+      "state": "no-images",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "layout-and-keyboard",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "geometry": {
+          "add": {
+            "left": 19,
+            "right": 135.859375,
+            "top": 997.046875,
+            "bottom": 1033.890625
+          },
+          "cancel": {
+            "left": 143.859375,
+            "right": 207.46875,
+            "top": 997.046875,
+            "bottom": 1033.890625
+          },
+          "source": {
+            "left": 19,
+            "right": 133.484375,
+            "top": 1047.890625,
+            "bottom": 1071.890625
+          },
+          "decoration": "underline",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px"
+        },
+        "focus": {
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "outlineColor": "rgb(211, 154, 116)"
+        }
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "callScreen-before-intro",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    call screen help\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "callScreen-before-following",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    call screen help\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "callScreen-before-return",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    call screen help\n    return"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "showScreen-before-intro",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    show screen help\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "showScreen-before-following",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    show screen help\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "showScreen-before-return",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    show screen help\n    return"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "hideScreen-before-intro",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    hide screen help\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "hideScreen-before-following",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    hide screen help\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "hideScreen-before-return",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    hide screen help\n    return"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "unaccepted-cancel",
+      "state": "story",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "missing-before-intro",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "missing-before-following",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "missing-before-return",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "unknown-before-intro",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "unknown-before-following",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "unknown-before-return",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "play-before-intro-close",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Before we leave, take a look at the controls.\""
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "play-before-intro-escape",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Before we leave, take a look at the controls.\""
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "play-before-following-close",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Ready? Let's go.\""
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "play-before-following-escape",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Ready? Let's go.\""
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "play-before-return-close",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "Return / end"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "play-before-return-escape",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "Return / end"
+      }
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "outside-then-escape",
+      "state": "story",
+      "status": "failed",
+      "observations": {
+        "focusAfterOutside": {
+          "tag": "BODY",
+          "withinStudy": false
+        },
+        "phase": "waiting",
+        "followingBeatRuns": 0
+      },
+      "error": "Escape after an outside click did not finish the dialog {\"focusAfterOutside\":{\"tag\":\"BODY\",\"withinStudy\":false},\"phase\":\"waiting\",\"followingBeatRuns\":0}"
+    },
+    {
+      "variant": "steps-v4",
+      "size": "560x640",
+      "name": "no-image-assets-return",
+      "state": "no-images",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "layout-and-keyboard",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "geometry": {
+          "add": {
+            "left": 53.203125,
+            "right": 170.0625,
+            "top": 484.28125,
+            "bottom": 521.125
+          },
+          "cancel": {
+            "left": 178.0625,
+            "right": 241.671875,
+            "top": 484.28125,
+            "bottom": 521.125
+          },
+          "source": {
+            "left": 53.203125,
+            "right": 167.6875,
+            "top": 535.125,
+            "bottom": 559.125
+          },
+          "decoration": "underline",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px"
+        },
+        "focus": {
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "outlineColor": "rgb(211, 154, 116)"
+        }
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "callScreen-before-intro",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    call screen help\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "callScreen-before-following",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    call screen help\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "callScreen-before-return",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    call screen help\n    return"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "showScreen-before-intro",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    show screen help\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "showScreen-before-following",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    show screen help\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "showScreen-before-return",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    show screen help\n    return"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "hideScreen-before-intro",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    hide screen help\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "hideScreen-before-following",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    hide screen help\n    \"Ready? Let's go.\"\n    return"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "hideScreen-before-return",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "storySource": "label first_steps:\n    \"Before we leave, take a look at the controls.\"\n    \"Ready? Let's go.\"\n    hide screen help\n    return"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "unaccepted-cancel",
+      "state": "story",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "missing-before-intro",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "missing-before-following",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "missing-before-return",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "unknown-before-intro",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "unknown-before-following",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "unknown-before-return",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "play-before-intro-close",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Before we leave, take a look at the controls.\""
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "play-before-intro-escape",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Before we leave, take a look at the controls.\""
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "play-before-following-close",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Ready? Let's go.\""
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "play-before-following-escape",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "\"Ready? Let's go.\""
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "play-before-return-close",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "Return / end"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "play-before-return-escape",
+      "state": "story",
+      "status": "passed",
+      "observations": {
+        "next": "Return / end"
+      }
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "outside-then-escape",
+      "state": "story",
+      "status": "failed",
+      "observations": {
+        "focusAfterOutside": {
+          "tag": "BODY",
+          "withinStudy": false
+        },
+        "phase": "waiting",
+        "followingBeatRuns": 0
+      },
+      "error": "Escape after an outside click did not finish the dialog {\"focusAfterOutside\":{\"tag\":\"BODY\",\"withinStudy\":false},\"phase\":\"waiting\",\"followingBeatRuns\":0}"
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "no-image-assets-return",
+      "state": "no-images",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "story-first-before-intro-create",
+      "state": "start",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "story-first-before-intro-cancel",
+      "state": "start",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "story-first-before-following-create",
+      "state": "start",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "story-first-before-following-cancel",
+      "state": "start",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "story-first-before-return-create",
+      "state": "start",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "name": "story-first-before-return-cancel",
+      "state": "start",
+      "status": "passed",
+      "observations": {}
+    }
+  ],
+  "errors": [],
+  "captures": [
+    {
+      "file": "inspector-v4-1100x720-layout-and-keyboard-insertion-actions-focus.png",
+      "sha256": "2be31a0a4d3962f0dd2a0f21418ba28fff0f5f8c118ead31991340cb158a691f",
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "case": "layout-and-keyboard",
+      "label": "insertion-actions-focus"
+    },
+    {
+      "file": "inspector-v4-1100x720-callScreen-before-return-accepted-source.png",
+      "sha256": "5cffa8099a9683a554e564bf715e363702b46aef94a1714b1b2cfe938ac8077a",
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "case": "callScreen-before-return",
+      "label": "accepted-source"
+    },
+    {
+      "file": "inspector-v4-1100x720-play-before-return-escape-return-after-escape.png",
+      "sha256": "117fade01c1fdbd4c75f817b88c5366ec84855db62534d0e3083916f4c0a5182",
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "case": "play-before-return-escape",
+      "label": "return-after-escape"
+    },
+    {
+      "file": "inspector-v4-1100x720-outside-then-escape-failure.png",
+      "sha256": "74b9c4a85b1bb8596d1d8eeda1c5adb7c9f43ddabb2dac42232c8755554ce0c7",
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "case": "outside-then-escape",
+      "label": "failure"
+    },
+    {
+      "file": "inspector-v4-1100x720-no-image-assets-return-before-import.png",
+      "sha256": "905dfb7f0fae9417de28f0a849700f890b824db85f93da8f3c8333279c78dd15",
+      "variant": "inspector-v4",
+      "size": "1100x720",
+      "case": "no-image-assets-return",
+      "label": "before-import"
+    },
+    {
+      "file": "steps-v4-1100x720-layout-and-keyboard-insertion-actions-focus.png",
+      "sha256": "c5ca645a99ce347d5f04f4ddda5a32694f192614b5a94c083ee135027c59603d",
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "case": "layout-and-keyboard",
+      "label": "insertion-actions-focus"
+    },
+    {
+      "file": "steps-v4-1100x720-callScreen-before-return-accepted-source.png",
+      "sha256": "f0e08d925b9c84c25af8ffa72d2b370b1d7ed5a408ca8055ae2fbdf7fd238594",
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "case": "callScreen-before-return",
+      "label": "accepted-source"
+    },
+    {
+      "file": "steps-v4-1100x720-play-before-return-escape-return-after-escape.png",
+      "sha256": "bf469c8e724b546429322dde3201a6377be31cb901d6fcce66e4125f4c54a69d",
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "case": "play-before-return-escape",
+      "label": "return-after-escape"
+    },
+    {
+      "file": "steps-v4-1100x720-outside-then-escape-failure.png",
+      "sha256": "6a07dbba473ef4fed0d6008ea61f25a4e3c6a7682503c7438c413cbbb181c620",
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "case": "outside-then-escape",
+      "label": "failure"
+    },
+    {
+      "file": "steps-v4-1100x720-no-image-assets-return-before-import.png",
+      "sha256": "cae5a7086a437f9090fc08dfa1663c1b619f87931e650ba3db41f2d563307100",
+      "variant": "steps-v4",
+      "size": "1100x720",
+      "case": "no-image-assets-return",
+      "label": "before-import"
+    },
+    {
+      "file": "story-split-v4-1100x720-layout-and-keyboard-insertion-actions-focus.png",
+      "sha256": "4c072d51c14f9e866a43f51f766bd0a12a806945af517ce7cf496c7c3b462327",
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "case": "layout-and-keyboard",
+      "label": "insertion-actions-focus"
+    },
+    {
+      "file": "story-split-v4-1100x720-callScreen-before-return-accepted-source.png",
+      "sha256": "68f6921c7dee5c208f538b3193a9479f645998851fa43a7516b84188e743d6dd",
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "case": "callScreen-before-return",
+      "label": "accepted-source"
+    },
+    {
+      "file": "story-split-v4-1100x720-play-before-return-escape-return-after-escape.png",
+      "sha256": "27f8b98af380e29de5115c75171efbbd7609b04bcb0651cbaff85bdd4ce27c3c",
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "case": "play-before-return-escape",
+      "label": "return-after-escape"
+    },
+    {
+      "file": "story-split-v4-1100x720-outside-then-escape-failure.png",
+      "sha256": "e21ab6e289cebe0cf4a6fc1d21f588ddcdabcdd8252ebcb47406f7b97a70d5d2",
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "case": "outside-then-escape",
+      "label": "failure"
+    },
+    {
+      "file": "story-split-v4-1100x720-no-image-assets-return-before-import.png",
+      "sha256": "9e4070fb7cff3033e62ab691573df22d3814a272a05bcc63a8ac49f23f79d898",
+      "variant": "story-split-v4",
+      "size": "1100x720",
+      "case": "no-image-assets-return",
+      "label": "before-import"
+    },
+    {
+      "file": "inspector-v4-560x640-layout-and-keyboard-insertion-actions-focus.png",
+      "sha256": "b820f4d8662e26f109e2e5c1cedf2d321f15202be6dcf6bed46e33fc8d24a497",
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "case": "layout-and-keyboard",
+      "label": "insertion-actions-focus"
+    },
+    {
+      "file": "inspector-v4-560x640-callScreen-before-return-accepted-source.png",
+      "sha256": "5136f68a1321031f4916c2ed67a0f900144a573a2e5c5a340d0164ec69c4df3a",
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "case": "callScreen-before-return",
+      "label": "accepted-source"
+    },
+    {
+      "file": "inspector-v4-560x640-play-before-return-escape-return-after-escape.png",
+      "sha256": "fff5064a7a3fbf530da04d3285d60dae6bbf1cf2c716eb1952787f7536c92158",
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "case": "play-before-return-escape",
+      "label": "return-after-escape"
+    },
+    {
+      "file": "inspector-v4-560x640-outside-then-escape-failure.png",
+      "sha256": "47b4544e1a5a2ad157c3f764e4f71be4320203cddbf8ec4f80b0c3282e367f26",
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "case": "outside-then-escape",
+      "label": "failure"
+    },
+    {
+      "file": "inspector-v4-560x640-no-image-assets-return-before-import.png",
+      "sha256": "a33cdbc083b198ebf69ceb9f17f5ab5745cd638ec39f5ed3d34881d279a6f859",
+      "variant": "inspector-v4",
+      "size": "560x640",
+      "case": "no-image-assets-return",
+      "label": "before-import"
+    },
+    {
+      "file": "steps-v4-560x640-layout-and-keyboard-insertion-actions-focus.png",
+      "sha256": "ba9ea4499176d2e7f469ba47428b21e1328b3b5c82abbf20f3a7d56831f4a693",
+      "variant": "steps-v4",
+      "size": "560x640",
+      "case": "layout-and-keyboard",
+      "label": "insertion-actions-focus"
+    },
+    {
+      "file": "steps-v4-560x640-callScreen-before-return-accepted-source.png",
+      "sha256": "0a05f0c37b58114b6367ee5c7db2b8c127363feb1807c8568822fd6700d53b75",
+      "variant": "steps-v4",
+      "size": "560x640",
+      "case": "callScreen-before-return",
+      "label": "accepted-source"
+    },
+    {
+      "file": "steps-v4-560x640-play-before-return-escape-return-after-escape.png",
+      "sha256": "74fe9a545f4f1340482c515e67453bded6498d1783f65449aa987ffccf6c2bde",
+      "variant": "steps-v4",
+      "size": "560x640",
+      "case": "play-before-return-escape",
+      "label": "return-after-escape"
+    },
+    {
+      "file": "steps-v4-560x640-outside-then-escape-failure.png",
+      "sha256": "8705a7cce0e89748767d1da04fd3b0a74a4f47a619065cba30378c287f0bc3b2",
+      "variant": "steps-v4",
+      "size": "560x640",
+      "case": "outside-then-escape",
+      "label": "failure"
+    },
+    {
+      "file": "steps-v4-560x640-no-image-assets-return-before-import.png",
+      "sha256": "7acf93090cd88900b23221fef91331c02484f67e1753ca73ddff901e6705ce1b",
+      "variant": "steps-v4",
+      "size": "560x640",
+      "case": "no-image-assets-return",
+      "label": "before-import"
+    },
+    {
+      "file": "story-split-v4-560x640-layout-and-keyboard-insertion-actions-focus.png",
+      "sha256": "9e503ce4756405bd976ae32a4e7f45c5e31898dff0bf8c94116257644413fd77",
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "case": "layout-and-keyboard",
+      "label": "insertion-actions-focus"
+    },
+    {
+      "file": "story-split-v4-560x640-callScreen-before-return-accepted-source.png",
+      "sha256": "926006d836c148651cb8a5791e4f334fdd8aca096ffba2df7be6ffec5f3e2298",
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "case": "callScreen-before-return",
+      "label": "accepted-source"
+    },
+    {
+      "file": "story-split-v4-560x640-play-before-return-escape-return-after-escape.png",
+      "sha256": "99ab5415555ba57a7f9cacfd047f00568f3a32de622a592e7447aa679886de84",
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "case": "play-before-return-escape",
+      "label": "return-after-escape"
+    },
+    {
+      "file": "story-split-v4-560x640-outside-then-escape-failure.png",
+      "sha256": "ff1e48dc3daf104d8968bad82863df684271278bbcd4ac8a65a4cc617e0abd0d",
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "case": "outside-then-escape",
+      "label": "failure"
+    },
+    {
+      "file": "story-split-v4-560x640-no-image-assets-return-before-import.png",
+      "sha256": "b3bbbeaf605f8bb892cb03868898cdb6c05c3a098726f224a927db4f5e7b3c60",
+      "variant": "story-split-v4",
+      "size": "560x640",
+      "case": "no-image-assets-return",
+      "label": "before-import"
+    }
+  ],
+  "assertions": {
+    "passed": 1698,
+    "failed": 6
+  },
+  "browser": {
+    "version": "153.0.8010.12",
+    "playwright": "1.63.0",
+    "node": "v24.19.0"
+  },
+  "finishedAt": "2026-11-03T20:39:18.815Z",
+  "summary": {
+    "cases": 162,
+    "passed": 156,
+    "failed": 6,
+    "assertionsPassed": 1698,
+    "assertionsFailed": 6,
+    "consoleOrPageErrors": 0,
+    "captures": 30
+  },
+  "script": {
+    "file": "check.cjs",
+    "sha256": "8421a54b0aa0aa902cfe897c053ebe9f4ce5c1c85e5aeeb7f1974678a45b1972"
+  }
+}

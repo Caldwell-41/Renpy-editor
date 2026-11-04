@@ -1,0 +1,235 @@
+{
+  "schemaVersion": 1,
+  "screenId": "help-dialog-story",
+  "currentApproved": "inspector-v4",
+  "revisions": [
+    {
+      "id": "inspector-v4",
+      "variantId": "inspector-v4",
+      "approval": {
+        "date": "2026-11-04",
+        "decision": "Kris said \"Approved\". Asked which layout to pin for implementation (A4, B4 or C4), Kris clarified \"Sorry a4\". This approves only Help A4 / help-dialog-story / inspector-v4 at the pinned source. B4 and C4 remain drafts. The earlier Components and Help panel A2 and Screens flow-v1 approvals retain their existing authority and scope.",
+        "reason": null,
+        "supersedes": null,
+        "source": {
+          "commit": "8851689b62eda03127c199ca0276a776b0d623ab",
+          "fingerprint": "bd1742a2ae2576cb6fb8fce032e19f70a66d06e177b17ce3377fafa96a0f6762"
+        },
+        "captures": [
+          {
+            "path": "docs/design/design-lab-help-dialog-story/captures/v4-inline/inspector-v4-story-1100.png",
+            "sha256": "40bef2a97de3f08671f7672c2014167ac9db931e33678903d350b711353f7ab8",
+            "state": "story",
+            "theme": "dark",
+            "width": 1100,
+            "height": 675,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-dialog-story/captures/v4-inline/inspector-v4-story-560.png",
+            "sha256": "bc4cb326166db4cb217d4e1b59275d27aeabe9064bf6e4e7589ee00731081332",
+            "state": "story",
+            "theme": "dark",
+            "width": 560,
+            "height": 1087,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-dialog-story/captures/approved-a4/inspector-v4-start-1100x720-initial.png",
+            "sha256": "5a8adff959a30df9612dcfb642aa391cf9e050073e85d63c6fecbc53786a2325",
+            "state": "start",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-dialog-story/captures/approved-a4/inspector-v4-create-1100x720-initial.png",
+            "sha256": "784c0494a7250cb445f3cec57ca071492285c8b995a88b3d4a928c9e857afece",
+            "state": "create",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-dialog-story/captures/approved-a4/inspector-v4-panel-1100x720-initial.png",
+            "sha256": "7c8023f0336a9892916035a6fbce061b9cdf5ac76ece8f1411e38d9fa60d83f0",
+            "state": "panel",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-dialog-story/captures/approved-a4/inspector-v4-design-1100x720-initial.png",
+            "sha256": "9ec7c8f652634064ae25ccc191d902efb91aeb72b1a5a3b66317010e6ddaaede",
+            "state": "design",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-dialog-story/captures/approved-a4/inspector-v4-story-1100x720-initial.png",
+            "sha256": "e195864c3818975d8ac9d7268e2e832b1929e8f8a3e952a16322e54bf0380568",
+            "state": "story",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-dialog-story/captures/approved-a4/inspector-v4-no-images-1100x720-initial.png",
+            "sha256": "f2f4ed0158f71294c56b98cf201271dab7447c99e197dcfb779c3b8ff4e7865a",
+            "state": "no-images",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-dialog-story/captures/approved-a4/inspector-v4-invalid-1100x720-initial.png",
+            "sha256": "a38bbee35179f4f3608ed6289e25b80570c019ab5779a119bf9d46061620f0e4",
+            "state": "invalid",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-dialog-story/captures/approved-a4/inspector-v4-unknown-1100x720-initial.png",
+            "sha256": "59c147228fcb479493af947d4821766de9efbefbe5c248ef5fffc8cc6b2a001c",
+            "state": "unknown",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-dialog-story/captures/approved-a4/inspector-v4-missing-1100x720-initial.png",
+            "sha256": "2d4aa8965be6802bcdf7a7b9f88d98b4cc765caddeba2bad3a929148ada8288b",
+            "state": "missing",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-dialog-story/captures/approved-a4/inspector-v4-start-560x640-initial.png",
+            "sha256": "5f0ecda6eeed4722889f740506851a0fa40ef8838325429660801d68cbabc1a7",
+            "state": "start",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-dialog-story/captures/approved-a4/inspector-v4-create-560x640-initial.png",
+            "sha256": "7f25f90f3ad35ff675b18b9416b759cb0f51f5d8eb1ddb5e806cc307e6a9de89",
+            "state": "create",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-dialog-story/captures/approved-a4/inspector-v4-panel-560x640-initial.png",
+            "sha256": "093e6535547f8121f2a98403835d78026353dfaeba7dc69883702d61812eae9b",
+            "state": "panel",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-dialog-story/captures/approved-a4/inspector-v4-design-560x640-initial.png",
+            "sha256": "ebe062bd483ad04409bd6848bf18a0281763d5fd2a03ccd98d5a618adc37bdb5",
+            "state": "design",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-dialog-story/captures/approved-a4/inspector-v4-story-560x640-initial.png",
+            "sha256": "99cb37f5dba59f18bd2f6ece45bb426e0c30162e8f583242eb47cd38772ebfc4",
+            "state": "story",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-dialog-story/captures/approved-a4/inspector-v4-no-images-560x640-initial.png",
+            "sha256": "2bd050f53a06df84d2de54ed1eed779d5faf57a72c4d439fce43ec362536f320",
+            "state": "no-images",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-dialog-story/captures/approved-a4/inspector-v4-invalid-560x640-initial.png",
+            "sha256": "c2a67f32eb56be1a451c3b9be567462daff4d55a35a482e133364d107c00029a",
+            "state": "invalid",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-dialog-story/captures/approved-a4/inspector-v4-unknown-560x640-initial.png",
+            "sha256": "fe23d75366813c066d2dea032a8b8847d82893dab19a27f2b0b34acaadccd166",
+            "state": "unknown",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-help-dialog-story/captures/approved-a4/inspector-v4-missing-560x640-initial.png",
+            "sha256": "380eeaf295eea2fa70c0b93edbf4bbc9c09f3e57bd719daeeaba2b6349088c28",
+            "state": "missing",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "Use A4 Inspector extension in the existing Screens and Story workspaces. Keep Choose, the inert canvas and the selected-element inspector; preserve existing layout, Style, font, image, structure, components, Source and history capabilities through their owners.",
+          "Screens owns appearance. New screen offers Blank/Help and Panel/Dialog; public new-screen kind defaults to Panel. Components remain separate and use only existing component operations.",
+          "The Help starter still requires an available typed UI image. No image disables Help creation while retaining name, Help selection and kind through the Assets handoff. Do not invent an asset, silently create Blank or make the image optional.",
+          "Create ordinary editable title, explanation, image and Close nodes. The canvas shows retained draft appearance; Source, Story and playback use accepted appearance. Apply and Cancel reuse existing transactional/draft owners without implicit Apply on navigation.",
+          "A Help dialog is modal True, has game_menu Return(), Close Return(), default_focus True and no outside-click dismissal. Finish interaction is distinct from Hide. Wrong-context actions refuse and retain input; ordinary options contain only qualified actions.",
+          "Use in Story transfers the selected target without adding a Beat. Call screen picks owned parameterless Dialogs; Show/Hide pick Panels. Keep screen Call/Finish distinct from Scene Call/Story Return. No dynamic names, arguments, return capture, general action builder or #47 behavior.",
+          "Choose a valid insertion point before adding a screen Beat. Preview a pending marker, not an accepted Beat. Use the existing Story Scene/body/Position-before-anchor owner and all its supported bodies/positions. Do not add unreachable flow after terminal Return. Existing Story Move owns movement after acceptance.",
+          "Retain chosen placement through the Screens handoff. Cancel restores the captured operation context or accepted target/position. Missing/renamed/deleted targets and unknown active interactions refuse conservatively with retained drafts, without silent retargeting.",
+          "Keep Add/Apply and Cancel in one action row with an 8px gap. Put Source and effects below as an underlined secondary text action with a 14px gap and visible keyboard focus.",
+          "Accepted Source reflects the selected statement at its chosen anchor. The normal-entry game must wait at Call and continue at the actual following Beat exactly once after Close/Escape finishes. Browser simulation does not establish this runtime qualification.",
+          "Use the existing dark palette, fonts and icons, dense layouts and ordinary focus. No decorative card/pill chrome, gray section subtitle lines or continuously repainting animations."
+        ],
+        "deviations": [
+          "This is a browser-memory prototype with fictional fixtures, illustrated UI art and simulated Source/Apply/Assets/playback. It proves no real project writes, source preservation, transactions, history/reopen/recovery, SDK/helper/native runtime or ticket acceptance.",
+          "The fixture has one editable Help screen and three root-body insertion anchors. Production retains other screens/drafts and all insertion bodies/positions and existing Move capabilities; fixture simplifications are not new product restrictions.",
+          "Blank and broader layout, Style, font, structural, component and asset-import workflows retain existing production owners. Their full operations are outside the sample.",
+          "Review controls, static prototype version labels and raw state are retained in the pinned source but are not product features. B4/C4 remain unapproved alternatives.",
+          "The two originally displayed A4 captures are full-document inline renders with document heights 675 and 1087. Additional source-derived browser references and promotion observations are recorded separately with their viewport conditions.",
+          "Earlier source 1d710f2 remains 156/162 with six outside-click/Escape failures. At the approved source, A4 promotion checks now pass 36/36 browser cases, including ten outside-click/Escape sequences and exactly-once following-Beat checks. B4/C4 remain unapproved; the earlier failed run is not rewritten.",
+          "The full current-source Design Lab gate passes: 1324 rendered cases, 29 check groups, 10 approval checks, zero errors. The earlier Studio waitState failure at 8dfd15f after 448 renders remains failed with unresolved cause, not a production-defect finding. Browser promotion does not qualify real app transactions, native or RenPy behavior."
+        ]
+      }
+    },
+    {
+      "id": "steps-v4",
+      "variantId": "steps-v4",
+      "approval": null
+    },
+    {
+      "id": "story-split-v4",
+      "variantId": "story-split-v4",
+      "approval": null
+    }
+  ]
+}

@@ -1,0 +1,3536 @@
+{
+  "sourceCommit": "8beca9a0b6ba5c1fa8ef8f5dd50dcaf41237a05f",
+  "html": ".toolchains/help-dialog-story/comparison-v3.html",
+  "htmlSha256": "b16aeec80389a89aed5aa6e19f4f75b6aa8ac1b05bce7ad39ec0d35a9d7abfe8",
+  "scope": "Offline local-file browser-memory prototype only; no native or Ren'Py behavior.",
+  "startedAt": "2026-11-03T20:02:27.620Z",
+  "matrix": [
+    {
+      "variant": "inspector-v3",
+      "state": "start",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 860,
+        "selected": "inspector-v3",
+        "sample": "start",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "state": "create",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 860,
+        "selected": "inspector-v3",
+        "sample": "create",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "state": "panel",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 773,
+        "selected": "inspector-v3",
+        "sample": "panel",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "state": "design",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 773,
+        "selected": "inspector-v3",
+        "sample": "design",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "state": "story",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 720,
+        "selected": "inspector-v3",
+        "sample": "story",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "state": "no-images",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 947,
+        "selected": "inspector-v3",
+        "sample": "no-images",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "state": "invalid",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 896,
+        "selected": "inspector-v3",
+        "sample": "invalid",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "state": "unknown",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 720,
+        "selected": "inspector-v3",
+        "sample": "unknown",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "state": "missing",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 720,
+        "selected": "inspector-v3",
+        "sample": "missing",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "state": "start",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 881,
+        "selected": "steps-v3",
+        "sample": "start",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "state": "create",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 881,
+        "selected": "steps-v3",
+        "sample": "create",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "state": "panel",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 1103,
+        "selected": "steps-v3",
+        "sample": "panel",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "state": "design",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 1103,
+        "selected": "steps-v3",
+        "sample": "design",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "state": "story",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 720,
+        "selected": "steps-v3",
+        "sample": "story",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "state": "no-images",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 967,
+        "selected": "steps-v3",
+        "sample": "no-images",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "state": "invalid",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 1271,
+        "selected": "steps-v3",
+        "sample": "invalid",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "state": "unknown",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 750,
+        "selected": "steps-v3",
+        "sample": "unknown",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "state": "missing",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 731,
+        "selected": "steps-v3",
+        "sample": "missing",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "state": "start",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 1002,
+        "selected": "story-split-v3",
+        "sample": "start",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "state": "create",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 895,
+        "selected": "story-split-v3",
+        "sample": "create",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "state": "panel",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 987,
+        "selected": "story-split-v3",
+        "sample": "panel",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "state": "design",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 987,
+        "selected": "story-split-v3",
+        "sample": "design",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "state": "story",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 939,
+        "selected": "story-split-v3",
+        "sample": "story",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "state": "no-images",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 982,
+        "selected": "story-split-v3",
+        "sample": "no-images",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "state": "invalid",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 1340,
+        "selected": "story-split-v3",
+        "sample": "invalid",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "state": "unknown",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 984,
+        "selected": "story-split-v3",
+        "sample": "unknown",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "state": "missing",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 1100,
+        "scrollWidth": 1100,
+        "bodyWidth": 1100,
+        "height": 984,
+        "selected": "story-split-v3",
+        "sample": "missing",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "state": "start",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 837,
+        "selected": "inspector-v3",
+        "sample": "start",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "state": "create",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 837,
+        "selected": "inspector-v3",
+        "sample": "create",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "state": "panel",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 1126,
+        "selected": "inspector-v3",
+        "sample": "panel",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "state": "design",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 1126,
+        "selected": "inspector-v3",
+        "sample": "design",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "state": "story",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 1009,
+        "selected": "inspector-v3",
+        "sample": "story",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "state": "no-images",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 923,
+        "selected": "inspector-v3",
+        "sample": "no-images",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "state": "invalid",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 1425,
+        "selected": "inspector-v3",
+        "sample": "invalid",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "state": "unknown",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 1087,
+        "selected": "inspector-v3",
+        "sample": "unknown",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "state": "missing",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 1087,
+        "selected": "inspector-v3",
+        "sample": "missing",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "state": "start",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 887,
+        "selected": "steps-v3",
+        "sample": "start",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "state": "create",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 887,
+        "selected": "steps-v3",
+        "sample": "create",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "state": "panel",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 1629,
+        "selected": "steps-v3",
+        "sample": "panel",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "state": "design",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 1629,
+        "selected": "steps-v3",
+        "sample": "design",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "state": "story",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 1059,
+        "selected": "steps-v3",
+        "sample": "story",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "state": "no-images",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 973,
+        "selected": "steps-v3",
+        "sample": "no-images",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "state": "invalid",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 1777,
+        "selected": "steps-v3",
+        "sample": "invalid",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "state": "unknown",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 1137,
+        "selected": "steps-v3",
+        "sample": "unknown",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "state": "missing",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 1137,
+        "selected": "steps-v3",
+        "sample": "missing",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "state": "start",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 1084,
+        "selected": "story-split-v3",
+        "sample": "start",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "state": "create",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 889,
+        "selected": "story-split-v3",
+        "sample": "create",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "state": "panel",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 1104,
+        "selected": "story-split-v3",
+        "sample": "panel",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "state": "design",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 1104,
+        "selected": "story-split-v3",
+        "sample": "design",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "state": "story",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 1021,
+        "selected": "story-split-v3",
+        "sample": "story",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "state": "no-images",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 975,
+        "selected": "story-split-v3",
+        "sample": "no-images",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "state": "invalid",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 1403,
+        "selected": "story-split-v3",
+        "sample": "invalid",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "state": "unknown",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 1097,
+        "selected": "story-split-v3",
+        "sample": "unknown",
+        "layout": 1
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "state": "missing",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "clientWidth": 560,
+        "scrollWidth": 560,
+        "bodyWidth": 560,
+        "height": 1097,
+        "selected": "story-split-v3",
+        "sample": "missing",
+        "layout": 1
+      }
+    }
+  ],
+  "flows": [
+    {
+      "variant": "inspector-v3",
+      "size": "1100x720",
+      "name": "new-screen-and-errors",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "nodes": [
+          "title",
+          "explanation",
+          "image",
+          "close"
+        ]
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "1100x720",
+      "name": "public-new-screen",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "kind": "panel"
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "1100x720",
+      "name": "no-image-assets-return",
+      "state": "no-images",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "1100x720",
+      "name": "fields-live-caret",
+      "state": "design",
+      "status": "passed",
+      "observations": {
+        "edit": {
+          "value": "OrigXinal title",
+          "caret": 5,
+          "focused": true
+        }
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "1100x720",
+      "name": "wrong-dismissal-panel",
+      "state": "panel",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "1100x720",
+      "name": "wrong-dismissal-design",
+      "state": "design",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "1100x720",
+      "name": "dirty-story-saved-source-playback",
+      "state": "design",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "1100x720",
+      "name": "dialog-picker-call-cancel",
+      "state": "create",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "1100x720",
+      "name": "panel-picker-show-hide",
+      "state": "panel",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "1100x720",
+      "name": "missing-target",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "1100x720",
+      "name": "unknown-beat-and-existing-ops",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "1100x720",
+      "name": "playback-dismissal",
+      "state": "design",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "1100x720",
+      "name": "reset-arrows-share",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "url": "file://.toolchains/help-dialog-story/comparison-v3.html?variant=inspector-v3&state=create"
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "1100x720",
+      "name": "controls-contrast",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "idle": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": false,
+          "contrast": 7.006097325721178
+        },
+        "hover": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": false,
+          "contrast": 9.00102391257362
+        },
+        "focus": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "disabled": false
+        }
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "1100x720",
+      "name": "disabled-control",
+      "state": "no-images",
+      "status": "passed",
+      "observations": {
+        "before": {
+          "color": "rgb(147, 144, 135)",
+          "background": "rgb(40, 40, 37)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": true
+        },
+        "after": {
+          "color": "rgb(147, 144, 135)",
+          "background": "rgb(40, 40, 37)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": true
+        }
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "size": "1100x720",
+      "name": "new-screen-and-errors",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "nodes": [
+          "title",
+          "explanation",
+          "image",
+          "close"
+        ]
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "size": "1100x720",
+      "name": "public-new-screen",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "kind": "panel"
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "size": "1100x720",
+      "name": "no-image-assets-return",
+      "state": "no-images",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v3",
+      "size": "1100x720",
+      "name": "fields-live-caret",
+      "state": "design",
+      "status": "passed",
+      "observations": {
+        "edit": {
+          "value": "OrigXinal title",
+          "caret": 5,
+          "focused": true
+        }
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "size": "1100x720",
+      "name": "wrong-dismissal-panel",
+      "state": "panel",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v3",
+      "size": "1100x720",
+      "name": "wrong-dismissal-design",
+      "state": "design",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v3",
+      "size": "1100x720",
+      "name": "dirty-story-saved-source-playback",
+      "state": "design",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v3",
+      "size": "1100x720",
+      "name": "dialog-picker-call-cancel",
+      "state": "create",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v3",
+      "size": "1100x720",
+      "name": "panel-picker-show-hide",
+      "state": "panel",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v3",
+      "size": "1100x720",
+      "name": "missing-target",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v3",
+      "size": "1100x720",
+      "name": "unknown-beat-and-existing-ops",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v3",
+      "size": "1100x720",
+      "name": "playback-dismissal",
+      "state": "design",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v3",
+      "size": "1100x720",
+      "name": "reset-arrows-share",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "url": "file://.toolchains/help-dialog-story/comparison-v3.html?variant=steps-v3&state=create"
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "size": "1100x720",
+      "name": "controls-contrast",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "idle": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": false,
+          "contrast": 7.006097325721178
+        },
+        "hover": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": false,
+          "contrast": 9.00102391257362
+        },
+        "focus": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "disabled": false
+        }
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "size": "1100x720",
+      "name": "disabled-control",
+      "state": "no-images",
+      "status": "passed",
+      "observations": {
+        "before": {
+          "color": "rgb(147, 144, 135)",
+          "background": "rgb(40, 40, 37)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": true
+        },
+        "after": {
+          "color": "rgb(147, 144, 135)",
+          "background": "rgb(40, 40, 37)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": true
+        }
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "1100x720",
+      "name": "new-screen-and-errors",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "nodes": [
+          "title",
+          "explanation",
+          "image",
+          "close"
+        ]
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "1100x720",
+      "name": "public-new-screen",
+      "state": "panel",
+      "status": "failed",
+      "observations": {},
+      "error": "locator.click: Timeout 3500ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-do=\"new\"]').first()\u001b[22m\n"
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "1100x720",
+      "name": "story-first-create-dialog",
+      "state": "start",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "1100x720",
+      "name": "no-image-assets-return",
+      "state": "no-images",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "1100x720",
+      "name": "fields-live-caret",
+      "state": "design",
+      "status": "passed",
+      "observations": {
+        "edit": {
+          "value": "OrigXinal title",
+          "caret": 5,
+          "focused": true
+        }
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "1100x720",
+      "name": "wrong-dismissal-panel",
+      "state": "panel",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "1100x720",
+      "name": "wrong-dismissal-design",
+      "state": "design",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "1100x720",
+      "name": "dirty-story-saved-source-playback",
+      "state": "design",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "1100x720",
+      "name": "dialog-picker-call-cancel",
+      "state": "create",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "1100x720",
+      "name": "panel-picker-show-hide",
+      "state": "panel",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "1100x720",
+      "name": "missing-target",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "1100x720",
+      "name": "unknown-beat-and-existing-ops",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "1100x720",
+      "name": "playback-dismissal",
+      "state": "design",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "1100x720",
+      "name": "reset-arrows-share",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "url": "file://.toolchains/help-dialog-story/comparison-v3.html?variant=story-split-v3&state=create"
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "1100x720",
+      "name": "controls-contrast",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "idle": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": false,
+          "contrast": 7.006097325721178
+        },
+        "hover": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": false,
+          "contrast": 9.00102391257362
+        },
+        "focus": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "disabled": false
+        }
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "1100x720",
+      "name": "disabled-control",
+      "state": "no-images",
+      "status": "passed",
+      "observations": {
+        "before": {
+          "color": "rgb(147, 144, 135)",
+          "background": "rgb(40, 40, 37)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": true
+        },
+        "after": {
+          "color": "rgb(147, 144, 135)",
+          "background": "rgb(40, 40, 37)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": true
+        }
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "560x640",
+      "name": "new-screen-and-errors",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "nodes": [
+          "title",
+          "explanation",
+          "image",
+          "close"
+        ]
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "560x640",
+      "name": "public-new-screen",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "kind": "panel"
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "560x640",
+      "name": "no-image-assets-return",
+      "state": "no-images",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "560x640",
+      "name": "fields-live-caret",
+      "state": "design",
+      "status": "passed",
+      "observations": {
+        "edit": {
+          "value": "OrigXinal title",
+          "caret": 5,
+          "focused": true
+        }
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "560x640",
+      "name": "wrong-dismissal-panel",
+      "state": "panel",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "560x640",
+      "name": "wrong-dismissal-design",
+      "state": "design",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "560x640",
+      "name": "dirty-story-saved-source-playback",
+      "state": "design",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "560x640",
+      "name": "dialog-picker-call-cancel",
+      "state": "create",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "560x640",
+      "name": "panel-picker-show-hide",
+      "state": "panel",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "560x640",
+      "name": "missing-target",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "560x640",
+      "name": "unknown-beat-and-existing-ops",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "560x640",
+      "name": "playback-dismissal",
+      "state": "design",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "560x640",
+      "name": "reset-arrows-share",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "url": "file://.toolchains/help-dialog-story/comparison-v3.html?variant=inspector-v3&state=create"
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "560x640",
+      "name": "controls-contrast",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "idle": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": false,
+          "contrast": 7.006097325721178
+        },
+        "hover": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": false,
+          "contrast": 9.00102391257362
+        },
+        "focus": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "disabled": false
+        }
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "560x640",
+      "name": "disabled-control",
+      "state": "no-images",
+      "status": "passed",
+      "observations": {
+        "before": {
+          "color": "rgb(147, 144, 135)",
+          "background": "rgb(40, 40, 37)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": true
+        },
+        "after": {
+          "color": "rgb(147, 144, 135)",
+          "background": "rgb(40, 40, 37)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": true
+        }
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "size": "560x640",
+      "name": "new-screen-and-errors",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "nodes": [
+          "title",
+          "explanation",
+          "image",
+          "close"
+        ]
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "size": "560x640",
+      "name": "public-new-screen",
+      "state": "panel",
+      "status": "passed",
+      "observations": {
+        "kind": "panel"
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "size": "560x640",
+      "name": "no-image-assets-return",
+      "state": "no-images",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v3",
+      "size": "560x640",
+      "name": "fields-live-caret",
+      "state": "design",
+      "status": "passed",
+      "observations": {
+        "edit": {
+          "value": "OrigXinal title",
+          "caret": 5,
+          "focused": true
+        }
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "size": "560x640",
+      "name": "wrong-dismissal-panel",
+      "state": "panel",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v3",
+      "size": "560x640",
+      "name": "wrong-dismissal-design",
+      "state": "design",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v3",
+      "size": "560x640",
+      "name": "dirty-story-saved-source-playback",
+      "state": "design",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v3",
+      "size": "560x640",
+      "name": "dialog-picker-call-cancel",
+      "state": "create",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v3",
+      "size": "560x640",
+      "name": "panel-picker-show-hide",
+      "state": "panel",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v3",
+      "size": "560x640",
+      "name": "missing-target",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v3",
+      "size": "560x640",
+      "name": "unknown-beat-and-existing-ops",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v3",
+      "size": "560x640",
+      "name": "playback-dismissal",
+      "state": "design",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "steps-v3",
+      "size": "560x640",
+      "name": "reset-arrows-share",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "url": "file://.toolchains/help-dialog-story/comparison-v3.html?variant=steps-v3&state=create"
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "size": "560x640",
+      "name": "controls-contrast",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "idle": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": false,
+          "contrast": 7.006097325721178
+        },
+        "hover": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": false,
+          "contrast": 9.00102391257362
+        },
+        "focus": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "disabled": false
+        }
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "size": "560x640",
+      "name": "disabled-control",
+      "state": "no-images",
+      "status": "passed",
+      "observations": {
+        "before": {
+          "color": "rgb(147, 144, 135)",
+          "background": "rgb(40, 40, 37)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": true
+        },
+        "after": {
+          "color": "rgb(147, 144, 135)",
+          "background": "rgb(40, 40, 37)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": true
+        }
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "560x640",
+      "name": "new-screen-and-errors",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "nodes": [
+          "title",
+          "explanation",
+          "image",
+          "close"
+        ]
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "560x640",
+      "name": "public-new-screen",
+      "state": "panel",
+      "status": "failed",
+      "observations": {},
+      "error": "locator.click: Timeout 3500ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-do=\"new\"]').first()\u001b[22m\n"
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "560x640",
+      "name": "story-first-create-dialog",
+      "state": "start",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "560x640",
+      "name": "no-image-assets-return",
+      "state": "no-images",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "560x640",
+      "name": "fields-live-caret",
+      "state": "design",
+      "status": "passed",
+      "observations": {
+        "edit": {
+          "value": "OrigXinal title",
+          "caret": 5,
+          "focused": true
+        }
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "560x640",
+      "name": "wrong-dismissal-panel",
+      "state": "panel",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "560x640",
+      "name": "wrong-dismissal-design",
+      "state": "design",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "560x640",
+      "name": "dirty-story-saved-source-playback",
+      "state": "design",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "560x640",
+      "name": "dialog-picker-call-cancel",
+      "state": "create",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "560x640",
+      "name": "panel-picker-show-hide",
+      "state": "panel",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "560x640",
+      "name": "missing-target",
+      "state": "missing",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "560x640",
+      "name": "unknown-beat-and-existing-ops",
+      "state": "unknown",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "560x640",
+      "name": "playback-dismissal",
+      "state": "design",
+      "status": "passed",
+      "observations": {}
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "560x640",
+      "name": "reset-arrows-share",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "url": "file://.toolchains/help-dialog-story/comparison-v3.html?variant=story-split-v3&state=create"
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "560x640",
+      "name": "controls-contrast",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "idle": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(211, 154, 116)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": false,
+          "contrast": 7.006097325721178
+        },
+        "hover": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": false,
+          "contrast": 9.00102391257362
+        },
+        "focus": {
+          "color": "rgb(33, 27, 23)",
+          "background": "rgb(230, 178, 139)",
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "disabled": false
+        }
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "560x640",
+      "name": "disabled-control",
+      "state": "no-images",
+      "status": "passed",
+      "observations": {
+        "before": {
+          "color": "rgb(147, 144, 135)",
+          "background": "rgb(40, 40, 37)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": true
+        },
+        "after": {
+          "color": "rgb(147, 144, 135)",
+          "background": "rgb(40, 40, 37)",
+          "outlineStyle": "none",
+          "outlineWidth": "3px",
+          "disabled": true
+        }
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "1100x720",
+      "name": "created-panel-defaults",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "kind": "panel",
+        "nodes": [
+          "title",
+          "explanation",
+          "image",
+          "close"
+        ],
+        "source": "screen help():\n    modal False\n    key \"game_menu\" action Hide(\"help\")\n    frame:\n        vbox:\n            text \"How to play\"\n            text \"Choose a reply to continue the story. Press Escape or Close to return.\"\n            add \"ui/controls_guide.png\" xysize (480, 240)\n            textbutton \"Close\":\n                action Hide(\"help\")\n                default_focus True"
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "size": "1100x720",
+      "name": "created-panel-defaults",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "kind": "panel",
+        "nodes": [
+          "title",
+          "explanation",
+          "image",
+          "close"
+        ],
+        "source": "screen help():\n    modal False\n    key \"game_menu\" action Hide(\"help\")\n    frame:\n        vbox:\n            text \"How to play\"\n            text \"Choose a reply to continue the story. Press Escape or Close to return.\"\n            add \"ui/controls_guide.png\" xysize (480, 240)\n            textbutton \"Close\":\n                action Hide(\"help\")\n                default_focus True"
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "1100x720",
+      "name": "created-panel-defaults",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "kind": "panel",
+        "nodes": [
+          "title",
+          "explanation",
+          "image",
+          "close"
+        ],
+        "source": "screen help():\n    modal False\n    key \"game_menu\" action Hide(\"help\")\n    frame:\n        vbox:\n            text \"How to play\"\n            text \"Choose a reply to continue the story. Press Escape or Close to return.\"\n            add \"ui/controls_guide.png\" xysize (480, 240)\n            textbutton \"Close\":\n                action Hide(\"help\")\n                default_focus True"
+      }
+    },
+    {
+      "variant": "inspector-v3",
+      "size": "560x640",
+      "name": "created-panel-defaults",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "kind": "panel",
+        "nodes": [
+          "title",
+          "explanation",
+          "image",
+          "close"
+        ],
+        "source": "screen help():\n    modal False\n    key \"game_menu\" action Hide(\"help\")\n    frame:\n        vbox:\n            text \"How to play\"\n            text \"Choose a reply to continue the story. Press Escape or Close to return.\"\n            add \"ui/controls_guide.png\" xysize (480, 240)\n            textbutton \"Close\":\n                action Hide(\"help\")\n                default_focus True"
+      }
+    },
+    {
+      "variant": "steps-v3",
+      "size": "560x640",
+      "name": "created-panel-defaults",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "kind": "panel",
+        "nodes": [
+          "title",
+          "explanation",
+          "image",
+          "close"
+        ],
+        "source": "screen help():\n    modal False\n    key \"game_menu\" action Hide(\"help\")\n    frame:\n        vbox:\n            text \"How to play\"\n            text \"Choose a reply to continue the story. Press Escape or Close to return.\"\n            add \"ui/controls_guide.png\" xysize (480, 240)\n            textbutton \"Close\":\n                action Hide(\"help\")\n                default_focus True"
+      }
+    },
+    {
+      "variant": "story-split-v3",
+      "size": "560x640",
+      "name": "created-panel-defaults",
+      "state": "create",
+      "status": "passed",
+      "observations": {
+        "kind": "panel",
+        "nodes": [
+          "title",
+          "explanation",
+          "image",
+          "close"
+        ],
+        "source": "screen help():\n    modal False\n    key \"game_menu\" action Hide(\"help\")\n    frame:\n        vbox:\n            text \"How to play\"\n            text \"Choose a reply to continue the story. Press Escape or Close to return.\"\n            add \"ui/controls_guide.png\" xysize (480, 240)\n            textbutton \"Close\":\n                action Hide(\"help\")\n                default_focus True"
+      }
+    }
+  ],
+  "errors": [],
+  "captures": [
+    {
+      "file": "inspector-v3-start-1100x720-matrix.png",
+      "sha256": "1c247867205d0e468d34fd9d4cd8535e6615f5edd8238ec31bde6c0f5520aeab",
+      "variant": "inspector-v3",
+      "state": "start",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "inspector-v3-create-1100x720-matrix.png",
+      "sha256": "10a8d9226dbef041c52c7e446e1195124677f6b8e539683125b24854bee1d427",
+      "variant": "inspector-v3",
+      "state": "create",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "inspector-v3-panel-1100x720-matrix.png",
+      "sha256": "9392fd17726173a89cf48e1fb97186b2d146120f55e8dc35609b68fc7312bebe",
+      "variant": "inspector-v3",
+      "state": "panel",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "inspector-v3-design-1100x720-matrix.png",
+      "sha256": "d0275bbf9ebff08449edb2929b828d738a70fdcc7dbaaf9070c507599748b57f",
+      "variant": "inspector-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "inspector-v3-story-1100x720-matrix.png",
+      "sha256": "b78db0456d8781d62a669fa14f3e1d9d24fdff496dc273fa0fa0557d4785439e",
+      "variant": "inspector-v3",
+      "state": "story",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "inspector-v3-no-images-1100x720-matrix.png",
+      "sha256": "62f12b2c8a46f6069f4d38467f4dd6451544032bc551b0b7d449ad4d8dce0390",
+      "variant": "inspector-v3",
+      "state": "no-images",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "inspector-v3-invalid-1100x720-matrix.png",
+      "sha256": "50663535c82344e779a8442586bdc3416f0782cf748dfd0cded32f44112b410d",
+      "variant": "inspector-v3",
+      "state": "invalid",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "inspector-v3-unknown-1100x720-matrix.png",
+      "sha256": "d31f9901ecf9ed8c935ce115d358a81d1eb63c9defb707e09d7f61bac4ec4d46",
+      "variant": "inspector-v3",
+      "state": "unknown",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "inspector-v3-missing-1100x720-matrix.png",
+      "sha256": "dfca47cfca60d5b2995386d4dafbb81f4dc673c23b03f658b4aca218e683475e",
+      "variant": "inspector-v3",
+      "state": "missing",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "inspector-v3-create-1100x720-new-screen-and-errors-collision.png",
+      "sha256": "078981dccbb9414d60e251307d36604b62733e70ddadd56ea7865cb2e27d903f",
+      "variant": "inspector-v3",
+      "state": "create",
+      "size": "1100x720",
+      "label": "new-screen-and-errors-collision"
+    },
+    {
+      "file": "inspector-v3-create-1100x720-new-screen-and-errors-created-source.png",
+      "sha256": "42f74d5fd800713c0bb68c1b54c6894c0be7f79705e1544ada4d69580ec288d2",
+      "variant": "inspector-v3",
+      "state": "create",
+      "size": "1100x720",
+      "label": "new-screen-and-errors-created-source"
+    },
+    {
+      "file": "inspector-v3-no-images-1100x720-no-image-assets-return-before.png",
+      "sha256": "468191645e12d31c4a786327140f26a4ed1a211d592cae808ed2a3e5750d9747",
+      "variant": "inspector-v3",
+      "state": "no-images",
+      "size": "1100x720",
+      "label": "no-image-assets-return-before"
+    },
+    {
+      "file": "inspector-v3-no-images-1100x720-no-image-assets-return-after-import.png",
+      "sha256": "78f6c76f2fcee0844d05fbb1e1a03c9ca6ed5a9b363d8ef40121c3297cfc2656",
+      "variant": "inspector-v3",
+      "state": "no-images",
+      "size": "1100x720",
+      "label": "no-image-assets-return-after-import"
+    },
+    {
+      "file": "inspector-v3-design-1100x720-fields-live-caret-live-title.png",
+      "sha256": "0f87469ed1800661a92be2d6d0cd5a53196af28ce0e32e78507c73f99c1cf6cd",
+      "variant": "inspector-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "fields-live-caret-live-title"
+    },
+    {
+      "file": "inspector-v3-panel-1100x720-wrong-dismissal-panel-refusal.png",
+      "sha256": "be22cc4a9e30ccc7f62e1d4e87b4fb86415fbcd98f471ca9b769c4ba7c778bbb",
+      "variant": "inspector-v3",
+      "state": "panel",
+      "size": "1100x720",
+      "label": "wrong-dismissal-panel-refusal"
+    },
+    {
+      "file": "inspector-v3-design-1100x720-wrong-dismissal-design-refusal.png",
+      "sha256": "dc455eef521d3faae66a26ace8254aeec93b2de9f9c29ce8544730662f405110",
+      "variant": "inspector-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "wrong-dismissal-design-refusal"
+    },
+    {
+      "file": "inspector-v3-design-1100x720-dirty-story-saved-source-playback-story-source.png",
+      "sha256": "27ef1b5a9a823e8d6a4670579f89228080845f9000f49ac5b525c1ef2195a1e2",
+      "variant": "inspector-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "dirty-story-saved-source-playback-story-source"
+    },
+    {
+      "file": "inspector-v3-design-1100x720-dirty-story-saved-source-playback-playback-accepted.png",
+      "sha256": "f23f6a1279f89c9be296c55e2a0a2e96d93df65912d1565bd89718229bd65075",
+      "variant": "inspector-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "dirty-story-saved-source-playback-playback-accepted"
+    },
+    {
+      "file": "inspector-v3-create-1100x720-dialog-picker-call-cancel-call-source.png",
+      "sha256": "42ebb71d4fa10b88f857c393b073313a3228055488890f7f22e6b5d9bfe049fc",
+      "variant": "inspector-v3",
+      "state": "create",
+      "size": "1100x720",
+      "label": "dialog-picker-call-cancel-call-source"
+    },
+    {
+      "file": "inspector-v3-panel-1100x720-panel-picker-show-hide-show-source.png",
+      "sha256": "9a0aa3405efdcb94656ae78edcd07b638e5ecc8aa5fd4dd968134080bd8354dc",
+      "variant": "inspector-v3",
+      "state": "panel",
+      "size": "1100x720",
+      "label": "panel-picker-show-hide-show-source"
+    },
+    {
+      "file": "inspector-v3-panel-1100x720-panel-picker-show-hide-hide-source.png",
+      "sha256": "91f84e463787044591ee4300538ae64076d007c76c87cce77e9b1a8cee0975e3",
+      "variant": "inspector-v3",
+      "state": "panel",
+      "size": "1100x720",
+      "label": "panel-picker-show-hide-hide-source"
+    },
+    {
+      "file": "inspector-v3-missing-1100x720-missing-target-refused.png",
+      "sha256": "afa7fb1eb2def296d6f71f1e9a217ec53caf104f349e6ba37462085027b3d38b",
+      "variant": "inspector-v3",
+      "state": "missing",
+      "size": "1100x720",
+      "label": "missing-target-refused"
+    },
+    {
+      "file": "inspector-v3-unknown-1100x720-unknown-beat-and-existing-ops-refused.png",
+      "sha256": "bbac36747f3c47d6b7cde8180a1b53c91c36975a2ed8620a5a42a5925af9199c",
+      "variant": "inspector-v3",
+      "state": "unknown",
+      "size": "1100x720",
+      "label": "unknown-beat-and-existing-ops-refused"
+    },
+    {
+      "file": "inspector-v3-design-1100x720-playback-dismissal-waiting.png",
+      "sha256": "2b75e588e0eeb60e8e7033296c271952840574282aa97eba4baf12bc4e08b150",
+      "variant": "inspector-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "playback-dismissal-waiting"
+    },
+    {
+      "file": "inspector-v3-design-1100x720-playback-dismissal-closed.png",
+      "sha256": "92b60cbb96029289d7e2e78edf839bc8c2603091cc80a170b0e6096650928d1a",
+      "variant": "inspector-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "playback-dismissal-closed"
+    },
+    {
+      "file": "inspector-v3-design-1100x720-playback-dismissal-unknown-refusal.png",
+      "sha256": "d4caaeef696840713848afeadf14b7c3a1737183696a30882eb66507a51b133d",
+      "variant": "inspector-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "playback-dismissal-unknown-refusal"
+    },
+    {
+      "file": "inspector-v3-create-1100x720-controls-contrast-hover-focus.png",
+      "sha256": "72c291b642330f95ae727b78c2f16e0e96e9308a6b3a18f27bc9539f90257d5e",
+      "variant": "inspector-v3",
+      "state": "create",
+      "size": "1100x720",
+      "label": "controls-contrast-hover-focus"
+    },
+    {
+      "file": "inspector-v3-no-images-1100x720-disabled-control-disabled-hover.png",
+      "sha256": "62f12b2c8a46f6069f4d38467f4dd6451544032bc551b0b7d449ad4d8dce0390",
+      "variant": "inspector-v3",
+      "state": "no-images",
+      "size": "1100x720",
+      "label": "disabled-control-disabled-hover"
+    },
+    {
+      "file": "steps-v3-start-1100x720-matrix.png",
+      "sha256": "9589a35c2cf739240f562d5b731d7886b9e4d7c7f448e75e8f86de6524fb932a",
+      "variant": "steps-v3",
+      "state": "start",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "steps-v3-create-1100x720-matrix.png",
+      "sha256": "ca7a42a51d23fce593498e39c93d8de12902730788044f85198f57d6d108d1ca",
+      "variant": "steps-v3",
+      "state": "create",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "steps-v3-panel-1100x720-matrix.png",
+      "sha256": "862cf7f27af06695a074b2fb1254d7cdd0819dd92f1b2a7e4f083eb5e3b8a193",
+      "variant": "steps-v3",
+      "state": "panel",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "steps-v3-design-1100x720-matrix.png",
+      "sha256": "8bc47c2b0f1456c62d5f5e1ece7af07d27244aade9c8ec52823d29a9faea398c",
+      "variant": "steps-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "steps-v3-story-1100x720-matrix.png",
+      "sha256": "75be070ef58de901d64de11f0c8c06eafc5ef829ae95d275ea461cc161f34bd4",
+      "variant": "steps-v3",
+      "state": "story",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "steps-v3-no-images-1100x720-matrix.png",
+      "sha256": "4379d43aea9a62d0bea404e8b9171c4a1ab4eb5d5e8cb1278faba47de03c5ee8",
+      "variant": "steps-v3",
+      "state": "no-images",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "steps-v3-invalid-1100x720-matrix.png",
+      "sha256": "7f23a3d1cf72eb721cb93670a466ba7faffcf9e863481a2e0afb8f670ddf377e",
+      "variant": "steps-v3",
+      "state": "invalid",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "steps-v3-unknown-1100x720-matrix.png",
+      "sha256": "7bb8e9455cc0da66b1f6a359b1d5fa46408040dc2a666c7746f7fc6d444c583a",
+      "variant": "steps-v3",
+      "state": "unknown",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "steps-v3-missing-1100x720-matrix.png",
+      "sha256": "7d77b08941c3c8d3466fede9110e65dbb7cb4dced7a251e6aef935eed445922d",
+      "variant": "steps-v3",
+      "state": "missing",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "steps-v3-create-1100x720-new-screen-and-errors-collision.png",
+      "sha256": "a6e05573f711a8bdda2940c4e854a6618a1bbb341aebd45f026ca1395e8aaf11",
+      "variant": "steps-v3",
+      "state": "create",
+      "size": "1100x720",
+      "label": "new-screen-and-errors-collision"
+    },
+    {
+      "file": "steps-v3-create-1100x720-new-screen-and-errors-created-source.png",
+      "sha256": "6d554ec65fce5931cb3c7d5fcd3cd028c7a3f8907459f71c5bcc0b1a4034da8a",
+      "variant": "steps-v3",
+      "state": "create",
+      "size": "1100x720",
+      "label": "new-screen-and-errors-created-source"
+    },
+    {
+      "file": "steps-v3-no-images-1100x720-no-image-assets-return-before.png",
+      "sha256": "f6088fbcef7d2aa77ad7864905fef8c241b46a127e95766df3fc56c064dfe071",
+      "variant": "steps-v3",
+      "state": "no-images",
+      "size": "1100x720",
+      "label": "no-image-assets-return-before"
+    },
+    {
+      "file": "steps-v3-no-images-1100x720-no-image-assets-return-after-import.png",
+      "sha256": "7141d39f9d01e3ad59bd78178675ead4b7f715b808f7b69560faf8fb38fe5f3f",
+      "variant": "steps-v3",
+      "state": "no-images",
+      "size": "1100x720",
+      "label": "no-image-assets-return-after-import"
+    },
+    {
+      "file": "steps-v3-design-1100x720-fields-live-caret-live-title.png",
+      "sha256": "a54d9a76c200d740318700a5a3a614c79fadf4acd662af672c704fab3cf5f6c6",
+      "variant": "steps-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "fields-live-caret-live-title"
+    },
+    {
+      "file": "steps-v3-panel-1100x720-wrong-dismissal-panel-refusal.png",
+      "sha256": "0b241cb9cd13d2ea9282365af92bfcc7ec6019936e013c06902f922256ec63b3",
+      "variant": "steps-v3",
+      "state": "panel",
+      "size": "1100x720",
+      "label": "wrong-dismissal-panel-refusal"
+    },
+    {
+      "file": "steps-v3-design-1100x720-wrong-dismissal-design-refusal.png",
+      "sha256": "b4f4c8b85a81d8a13fdc20b71a5ac4b7b5b68482195c96dddb2e8720d6900e1e",
+      "variant": "steps-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "wrong-dismissal-design-refusal"
+    },
+    {
+      "file": "steps-v3-design-1100x720-dirty-story-saved-source-playback-story-source.png",
+      "sha256": "2b51f59f947ef58a693d69d9304d626724ac335a4ae3cd40c9a95a3f00a27c6e",
+      "variant": "steps-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "dirty-story-saved-source-playback-story-source"
+    },
+    {
+      "file": "steps-v3-design-1100x720-dirty-story-saved-source-playback-playback-accepted.png",
+      "sha256": "18a3028544df3f58143af295a47570b101469cb6acdac890c92af06695beba07",
+      "variant": "steps-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "dirty-story-saved-source-playback-playback-accepted"
+    },
+    {
+      "file": "steps-v3-create-1100x720-dialog-picker-call-cancel-call-source.png",
+      "sha256": "183d182fe7ff6d15a8640ff72cca6f264be95654201b0a62ba61d47e862b7c31",
+      "variant": "steps-v3",
+      "state": "create",
+      "size": "1100x720",
+      "label": "dialog-picker-call-cancel-call-source"
+    },
+    {
+      "file": "steps-v3-panel-1100x720-panel-picker-show-hide-show-source.png",
+      "sha256": "85a2ba81d4dfc227e36f0359949f90a775dbdef50d14d80f8817656b9a6bd32d",
+      "variant": "steps-v3",
+      "state": "panel",
+      "size": "1100x720",
+      "label": "panel-picker-show-hide-show-source"
+    },
+    {
+      "file": "steps-v3-panel-1100x720-panel-picker-show-hide-hide-source.png",
+      "sha256": "99b7434e971856258a6132449ac1e529f6b837093e9a18aa588913b124ac0410",
+      "variant": "steps-v3",
+      "state": "panel",
+      "size": "1100x720",
+      "label": "panel-picker-show-hide-hide-source"
+    },
+    {
+      "file": "steps-v3-missing-1100x720-missing-target-refused.png",
+      "sha256": "d2ee5ec27f92b66ba07756fab11c0e424ec4620b9dcae6c303034c339a8a89fe",
+      "variant": "steps-v3",
+      "state": "missing",
+      "size": "1100x720",
+      "label": "missing-target-refused"
+    },
+    {
+      "file": "steps-v3-unknown-1100x720-unknown-beat-and-existing-ops-refused.png",
+      "sha256": "17e2a8c11cbd464c9cd88a9716b86951de7afefccdf510fb29000d139da75507",
+      "variant": "steps-v3",
+      "state": "unknown",
+      "size": "1100x720",
+      "label": "unknown-beat-and-existing-ops-refused"
+    },
+    {
+      "file": "steps-v3-design-1100x720-playback-dismissal-waiting.png",
+      "sha256": "7d90fcbc93a513f34333dbfd70468f9e76dadb9b1820f367b5b62809d644505e",
+      "variant": "steps-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "playback-dismissal-waiting"
+    },
+    {
+      "file": "steps-v3-design-1100x720-playback-dismissal-closed.png",
+      "sha256": "93aa7b5b685c8514c5fc4a78ad3ffd9b96aca1c240b07a7d9ae2be480e5fea8b",
+      "variant": "steps-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "playback-dismissal-closed"
+    },
+    {
+      "file": "steps-v3-design-1100x720-playback-dismissal-unknown-refusal.png",
+      "sha256": "7708b3a72a911e07809d4b76759fcca4b000ec8f47f80f49f1230515f5fec34f",
+      "variant": "steps-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "playback-dismissal-unknown-refusal"
+    },
+    {
+      "file": "steps-v3-create-1100x720-controls-contrast-hover-focus.png",
+      "sha256": "c106b2e2b0ac0e358c1c4bd666833072ef17d5ad0a1582484307aaa2f5d7965d",
+      "variant": "steps-v3",
+      "state": "create",
+      "size": "1100x720",
+      "label": "controls-contrast-hover-focus"
+    },
+    {
+      "file": "steps-v3-no-images-1100x720-disabled-control-disabled-hover.png",
+      "sha256": "4379d43aea9a62d0bea404e8b9171c4a1ab4eb5d5e8cb1278faba47de03c5ee8",
+      "variant": "steps-v3",
+      "state": "no-images",
+      "size": "1100x720",
+      "label": "disabled-control-disabled-hover"
+    },
+    {
+      "file": "story-split-v3-start-1100x720-matrix.png",
+      "sha256": "137abe7008adc185b24dd79ff399b377133cd85c6528dd577139bd4664791fbf",
+      "variant": "story-split-v3",
+      "state": "start",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "story-split-v3-create-1100x720-matrix.png",
+      "sha256": "243665b51812f19ad2cb9111c72285e338c163056ef8b3ce0ed3d896f5685c56",
+      "variant": "story-split-v3",
+      "state": "create",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "story-split-v3-panel-1100x720-matrix.png",
+      "sha256": "ef0cc62a66a4889b5091509a5b130999b60bc7108b76135c96a7e0cf6d0aab57",
+      "variant": "story-split-v3",
+      "state": "panel",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "story-split-v3-design-1100x720-matrix.png",
+      "sha256": "234b3e8458aa8109b30055399ce6f8ef73cfe026d9283414dfa3bd2b32274f1f",
+      "variant": "story-split-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "story-split-v3-story-1100x720-matrix.png",
+      "sha256": "0d65bb337c4c1c43cd7685654c39828c43187b05f7e332d9cad8799e01dd7c56",
+      "variant": "story-split-v3",
+      "state": "story",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "story-split-v3-no-images-1100x720-matrix.png",
+      "sha256": "32449d9477ea94e1390a44dc4d5b44323bb7a4d3303efe8d466ccae02d8b4a53",
+      "variant": "story-split-v3",
+      "state": "no-images",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "story-split-v3-invalid-1100x720-matrix.png",
+      "sha256": "ecfdc2e8b5afffb11b677eb28476439b80c707f59d99e3a3b28c109ec27ffbe5",
+      "variant": "story-split-v3",
+      "state": "invalid",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "story-split-v3-unknown-1100x720-matrix.png",
+      "sha256": "675df0e1f4ed5516d67a9c5480fa8b0ef496762e49744a2ac5afe98439d10d54",
+      "variant": "story-split-v3",
+      "state": "unknown",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "story-split-v3-missing-1100x720-matrix.png",
+      "sha256": "28ff7be9b8d89382c9270321e7e51df6f653364d946fed1ba19787c731795486",
+      "variant": "story-split-v3",
+      "state": "missing",
+      "size": "1100x720",
+      "label": "matrix"
+    },
+    {
+      "file": "story-split-v3-create-1100x720-new-screen-and-errors-collision.png",
+      "sha256": "fb2e344cbbb76d8985e70a1e1a6599d6537476b6daa66f9d65436014f6fde24c",
+      "variant": "story-split-v3",
+      "state": "create",
+      "size": "1100x720",
+      "label": "new-screen-and-errors-collision"
+    },
+    {
+      "file": "story-split-v3-create-1100x720-new-screen-and-errors-created-source.png",
+      "sha256": "07b719c2b4a4bacdb3930c8cb913b9f3a7c37b9d3758c6006c0af7e7c8e02bc8",
+      "variant": "story-split-v3",
+      "state": "create",
+      "size": "1100x720",
+      "label": "new-screen-and-errors-created-source"
+    },
+    {
+      "file": "story-split-v3-panel-1100x720-public-new-screen-failure.png",
+      "sha256": "ef0cc62a66a4889b5091509a5b130999b60bc7108b76135c96a7e0cf6d0aab57",
+      "variant": "story-split-v3",
+      "state": "panel",
+      "size": "1100x720",
+      "label": "public-new-screen-failure"
+    },
+    {
+      "file": "story-split-v3-start-1100x720-story-first-create-dialog-empty-target.png",
+      "sha256": "137abe7008adc185b24dd79ff399b377133cd85c6528dd577139bd4664791fbf",
+      "variant": "story-split-v3",
+      "state": "start",
+      "size": "1100x720",
+      "label": "story-first-create-dialog-empty-target"
+    },
+    {
+      "file": "story-split-v3-start-1100x720-story-first-create-dialog-returned.png",
+      "sha256": "b8176356a15282e790bef9c3a18a740633b16bbef33554a4e574a1759d83f3d1",
+      "variant": "story-split-v3",
+      "state": "start",
+      "size": "1100x720",
+      "label": "story-first-create-dialog-returned"
+    },
+    {
+      "file": "story-split-v3-no-images-1100x720-no-image-assets-return-before.png",
+      "sha256": "72bdcae0815c8567a2ac8137e1f97ed3c0cb0680b6d70696ae3070e3fc8a6996",
+      "variant": "story-split-v3",
+      "state": "no-images",
+      "size": "1100x720",
+      "label": "no-image-assets-return-before"
+    },
+    {
+      "file": "story-split-v3-no-images-1100x720-no-image-assets-return-after-import.png",
+      "sha256": "225ddf12a0742d42636d2d1528fa028b6d4c534fe2e5520e641823499c2747ff",
+      "variant": "story-split-v3",
+      "state": "no-images",
+      "size": "1100x720",
+      "label": "no-image-assets-return-after-import"
+    },
+    {
+      "file": "story-split-v3-design-1100x720-fields-live-caret-live-title.png",
+      "sha256": "0ffb26cac4311b8a9992767a36b122cc444fd0e80daaaae305577284786d38a6",
+      "variant": "story-split-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "fields-live-caret-live-title"
+    },
+    {
+      "file": "story-split-v3-panel-1100x720-wrong-dismissal-panel-refusal.png",
+      "sha256": "9cfb22b6a39041f3fd2ac596e76b7ff840c820c7b8a97fd698787f136df21bb7",
+      "variant": "story-split-v3",
+      "state": "panel",
+      "size": "1100x720",
+      "label": "wrong-dismissal-panel-refusal"
+    },
+    {
+      "file": "story-split-v3-design-1100x720-wrong-dismissal-design-refusal.png",
+      "sha256": "22210008ad1542869353cbbacf333facc48c3f3d1774f2888ad686f3f22cc2a2",
+      "variant": "story-split-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "wrong-dismissal-design-refusal"
+    },
+    {
+      "file": "story-split-v3-design-1100x720-dirty-story-saved-source-playback-story-source.png",
+      "sha256": "eb563bae5540c4d32d5eac32eef195abc40a1fdf3e3dc06084ca7a0a74105b1b",
+      "variant": "story-split-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "dirty-story-saved-source-playback-story-source"
+    },
+    {
+      "file": "story-split-v3-design-1100x720-dirty-story-saved-source-playback-playback-accepted.png",
+      "sha256": "3f5291f9ba3ec2783be1fee904dea0b2013741a5962bee1027c3392729064e50",
+      "variant": "story-split-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "dirty-story-saved-source-playback-playback-accepted"
+    },
+    {
+      "file": "story-split-v3-create-1100x720-dialog-picker-call-cancel-call-source.png",
+      "sha256": "25c47b4c76b21ba053f87c60c2de70682407f5e84276d31fd1947ca0e754759a",
+      "variant": "story-split-v3",
+      "state": "create",
+      "size": "1100x720",
+      "label": "dialog-picker-call-cancel-call-source"
+    },
+    {
+      "file": "story-split-v3-panel-1100x720-panel-picker-show-hide-show-source.png",
+      "sha256": "088bc039aac8ce2cff5ca6be49a7052b1f826905517157e0991bc5927a35a42a",
+      "variant": "story-split-v3",
+      "state": "panel",
+      "size": "1100x720",
+      "label": "panel-picker-show-hide-show-source"
+    },
+    {
+      "file": "story-split-v3-panel-1100x720-panel-picker-show-hide-hide-source.png",
+      "sha256": "e4ff202fc56a8eba887722f8b55061a9f1bc050d24cd75c7af6c21b7506df035",
+      "variant": "story-split-v3",
+      "state": "panel",
+      "size": "1100x720",
+      "label": "panel-picker-show-hide-hide-source"
+    },
+    {
+      "file": "story-split-v3-missing-1100x720-missing-target-refused.png",
+      "sha256": "b02ce5f10bc6b402ae73b44a6bcb40b3dacc79bd51313cc786879af990f40a78",
+      "variant": "story-split-v3",
+      "state": "missing",
+      "size": "1100x720",
+      "label": "missing-target-refused"
+    },
+    {
+      "file": "story-split-v3-unknown-1100x720-unknown-beat-and-existing-ops-refused.png",
+      "sha256": "2ecd5600a6ff9e1efef3bd01c33318c926ae6c36fba6a1bee529662f88ff661b",
+      "variant": "story-split-v3",
+      "state": "unknown",
+      "size": "1100x720",
+      "label": "unknown-beat-and-existing-ops-refused"
+    },
+    {
+      "file": "story-split-v3-design-1100x720-playback-dismissal-waiting.png",
+      "sha256": "4fe23cfec2fd2d3a8a3ac3cfc2765014004770e873f230393c3bb999d90bf67f",
+      "variant": "story-split-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "playback-dismissal-waiting"
+    },
+    {
+      "file": "story-split-v3-design-1100x720-playback-dismissal-closed.png",
+      "sha256": "27d6c34a14a5153f78e0781467e0b6d01084b4cdfa2820d23eae15e46514bd7a",
+      "variant": "story-split-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "playback-dismissal-closed"
+    },
+    {
+      "file": "story-split-v3-design-1100x720-playback-dismissal-unknown-refusal.png",
+      "sha256": "251703f3934de135d6905ea380f8428a2dd12e4a8890e1af42c8939ff838a856",
+      "variant": "story-split-v3",
+      "state": "design",
+      "size": "1100x720",
+      "label": "playback-dismissal-unknown-refusal"
+    },
+    {
+      "file": "story-split-v3-create-1100x720-controls-contrast-hover-focus.png",
+      "sha256": "60ea9edec8338017044cc867726b1e32ecb62fc9231f9ebaca403e65e977fc54",
+      "variant": "story-split-v3",
+      "state": "create",
+      "size": "1100x720",
+      "label": "controls-contrast-hover-focus"
+    },
+    {
+      "file": "story-split-v3-no-images-1100x720-disabled-control-disabled-hover.png",
+      "sha256": "32449d9477ea94e1390a44dc4d5b44323bb7a4d3303efe8d466ccae02d8b4a53",
+      "variant": "story-split-v3",
+      "state": "no-images",
+      "size": "1100x720",
+      "label": "disabled-control-disabled-hover"
+    },
+    {
+      "file": "inspector-v3-start-560x640-matrix.png",
+      "sha256": "1ee2ac6fa4199cfcfe396218bc75f06ab7898664274125830b944af897bc14b1",
+      "variant": "inspector-v3",
+      "state": "start",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "inspector-v3-create-560x640-matrix.png",
+      "sha256": "ac9dea3d6c569d8e3a90e7490f6a3fd6c7472fbf2255b0639b037680be4d7b73",
+      "variant": "inspector-v3",
+      "state": "create",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "inspector-v3-panel-560x640-matrix.png",
+      "sha256": "cd925bc52ad81f8efc0965520f0d7b972f1a18642bb39d5c40a93e0a11be8cef",
+      "variant": "inspector-v3",
+      "state": "panel",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "inspector-v3-design-560x640-matrix.png",
+      "sha256": "efc2781bb8ac68bbf93febb9ec53a65d78cfb0dd531ab77362c57bbe586bab96",
+      "variant": "inspector-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "inspector-v3-story-560x640-matrix.png",
+      "sha256": "7717006e5421d55b422a8e37a0e0d81335ea42a8c7609130a803c807f95594a1",
+      "variant": "inspector-v3",
+      "state": "story",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "inspector-v3-no-images-560x640-matrix.png",
+      "sha256": "b69e02d4bfebc970c433e2460c361d0f9d70957268b9d7e65f2b65f1116fa346",
+      "variant": "inspector-v3",
+      "state": "no-images",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "inspector-v3-invalid-560x640-matrix.png",
+      "sha256": "84c6493ddec42c4acddc9c4229dfabc5920aac00e99d5a381dd720faae768189",
+      "variant": "inspector-v3",
+      "state": "invalid",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "inspector-v3-unknown-560x640-matrix.png",
+      "sha256": "e5b5cbad37d6bb8c97b58e5c97f5102e4118423592b1f05e8040760354b2e26a",
+      "variant": "inspector-v3",
+      "state": "unknown",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "inspector-v3-missing-560x640-matrix.png",
+      "sha256": "c199996f59387ef3057770cb1673fd42f5264c7e29581c654f64723a33c5bb09",
+      "variant": "inspector-v3",
+      "state": "missing",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "inspector-v3-create-560x640-new-screen-and-errors-collision.png",
+      "sha256": "0ead8c9902e7d35d956054a7b958de3754645347ca1dc4b9f7fbb399a298ad44",
+      "variant": "inspector-v3",
+      "state": "create",
+      "size": "560x640",
+      "label": "new-screen-and-errors-collision"
+    },
+    {
+      "file": "inspector-v3-create-560x640-new-screen-and-errors-created-source.png",
+      "sha256": "b3461edc279e790a956501008a1b8612b2ab8bddf959c2f1b594f4cfeeb8eaea",
+      "variant": "inspector-v3",
+      "state": "create",
+      "size": "560x640",
+      "label": "new-screen-and-errors-created-source"
+    },
+    {
+      "file": "inspector-v3-no-images-560x640-no-image-assets-return-before.png",
+      "sha256": "7f46848a90ffbfd013f1fe3080a73a5327ae99e4455dc15ce53747357ca90976",
+      "variant": "inspector-v3",
+      "state": "no-images",
+      "size": "560x640",
+      "label": "no-image-assets-return-before"
+    },
+    {
+      "file": "inspector-v3-no-images-560x640-no-image-assets-return-after-import.png",
+      "sha256": "541b7078e57d5f9b5ba4f159ded3208d5801fe367b5d586fc05d03356ec60a04",
+      "variant": "inspector-v3",
+      "state": "no-images",
+      "size": "560x640",
+      "label": "no-image-assets-return-after-import"
+    },
+    {
+      "file": "inspector-v3-design-560x640-fields-live-caret-live-title.png",
+      "sha256": "c2cc382a568c8e1f8437e7995b9562035ad48ffbe062ca1cd082ebf273fcf2d9",
+      "variant": "inspector-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "fields-live-caret-live-title"
+    },
+    {
+      "file": "inspector-v3-panel-560x640-wrong-dismissal-panel-refusal.png",
+      "sha256": "b96a58f84aaad6a4eb4721aa9888c1c9f390aa39325cf13b9b83a1e933a08dd6",
+      "variant": "inspector-v3",
+      "state": "panel",
+      "size": "560x640",
+      "label": "wrong-dismissal-panel-refusal"
+    },
+    {
+      "file": "inspector-v3-design-560x640-wrong-dismissal-design-refusal.png",
+      "sha256": "c55489ee45f60a2922ac19c6d68b12f68933f8b492a13ef76d5924efcbe882e1",
+      "variant": "inspector-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "wrong-dismissal-design-refusal"
+    },
+    {
+      "file": "inspector-v3-design-560x640-dirty-story-saved-source-playback-story-source.png",
+      "sha256": "a855f8b554eb8501dead6ae29a307eacef5678e50bab40e61129606210e21372",
+      "variant": "inspector-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "dirty-story-saved-source-playback-story-source"
+    },
+    {
+      "file": "inspector-v3-design-560x640-dirty-story-saved-source-playback-playback-accepted.png",
+      "sha256": "07973724910b259af951f82cdc3dde11e7cc04ff025fad12f3152bad19401528",
+      "variant": "inspector-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "dirty-story-saved-source-playback-playback-accepted"
+    },
+    {
+      "file": "inspector-v3-create-560x640-dialog-picker-call-cancel-call-source.png",
+      "sha256": "ae1f88837581e5be08c47a9bf0d9782ff85596f647f70f235f1c7da0a1e28af0",
+      "variant": "inspector-v3",
+      "state": "create",
+      "size": "560x640",
+      "label": "dialog-picker-call-cancel-call-source"
+    },
+    {
+      "file": "inspector-v3-panel-560x640-panel-picker-show-hide-show-source.png",
+      "sha256": "89930fc08e772f65541b4b50a52c60fc33421f1dd7dd4fd1fa9584f46894b8aa",
+      "variant": "inspector-v3",
+      "state": "panel",
+      "size": "560x640",
+      "label": "panel-picker-show-hide-show-source"
+    },
+    {
+      "file": "inspector-v3-panel-560x640-panel-picker-show-hide-hide-source.png",
+      "sha256": "01cb9e9c0a76291d5666998106f483c0e993b816280206b63eed91874598a0ca",
+      "variant": "inspector-v3",
+      "state": "panel",
+      "size": "560x640",
+      "label": "panel-picker-show-hide-hide-source"
+    },
+    {
+      "file": "inspector-v3-missing-560x640-missing-target-refused.png",
+      "sha256": "1e628b4be72bf2c6f24a256257ff64bf15d24d9bbcbb78be0c90726a84fcd73f",
+      "variant": "inspector-v3",
+      "state": "missing",
+      "size": "560x640",
+      "label": "missing-target-refused"
+    },
+    {
+      "file": "inspector-v3-unknown-560x640-unknown-beat-and-existing-ops-refused.png",
+      "sha256": "1e1ed98b1ddf11d35da9ccf6c224a3a55f4082ceba243a929a67a92d045f87c0",
+      "variant": "inspector-v3",
+      "state": "unknown",
+      "size": "560x640",
+      "label": "unknown-beat-and-existing-ops-refused"
+    },
+    {
+      "file": "inspector-v3-design-560x640-playback-dismissal-waiting.png",
+      "sha256": "717c2de1e9265bd7060b521a16a12ecd6355079a0851aa8ff513f0b415feb76b",
+      "variant": "inspector-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "playback-dismissal-waiting"
+    },
+    {
+      "file": "inspector-v3-design-560x640-playback-dismissal-closed.png",
+      "sha256": "70b7394d3808dda11cf7e3a1e02f6fa2621a10a082dda051e686d8fc4a633fa9",
+      "variant": "inspector-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "playback-dismissal-closed"
+    },
+    {
+      "file": "inspector-v3-design-560x640-playback-dismissal-unknown-refusal.png",
+      "sha256": "e8f92d7381f5926b251ab23d9ff35235ab813fa97728f5571ecf3a9378e5d6fc",
+      "variant": "inspector-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "playback-dismissal-unknown-refusal"
+    },
+    {
+      "file": "inspector-v3-create-560x640-controls-contrast-hover-focus.png",
+      "sha256": "d1e3be1d90a7689ae38c6343e2c91840d6d51971432ea203b91f17b39d62f117",
+      "variant": "inspector-v3",
+      "state": "create",
+      "size": "560x640",
+      "label": "controls-contrast-hover-focus"
+    },
+    {
+      "file": "inspector-v3-no-images-560x640-disabled-control-disabled-hover.png",
+      "sha256": "b69e02d4bfebc970c433e2460c361d0f9d70957268b9d7e65f2b65f1116fa346",
+      "variant": "inspector-v3",
+      "state": "no-images",
+      "size": "560x640",
+      "label": "disabled-control-disabled-hover"
+    },
+    {
+      "file": "steps-v3-start-560x640-matrix.png",
+      "sha256": "c5df0fccb1d0a2596de146cad6081b5e389c836318c2b810d2d0bbc84f2da13b",
+      "variant": "steps-v3",
+      "state": "start",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "steps-v3-create-560x640-matrix.png",
+      "sha256": "b3aa3ecb6e7fe9dd2fef8c38e0f9eed9ea81b69e02c579261eaf0db2e4c9d391",
+      "variant": "steps-v3",
+      "state": "create",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "steps-v3-panel-560x640-matrix.png",
+      "sha256": "ef01acf15c53f30b0a0db92ce3f5052401f12cbadf55dd13fa63edc6ff951a2b",
+      "variant": "steps-v3",
+      "state": "panel",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "steps-v3-design-560x640-matrix.png",
+      "sha256": "ad8b19a75f4690672c5004558e4a373f1ec24dac6c4ece0d89fe53015044a8c1",
+      "variant": "steps-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "steps-v3-story-560x640-matrix.png",
+      "sha256": "35ae6eb806be67ccf07d1aee81158afb7b5309bd67282150a9ce06e55cdb0b0f",
+      "variant": "steps-v3",
+      "state": "story",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "steps-v3-no-images-560x640-matrix.png",
+      "sha256": "95f906148178bb11d6f34f2d041f2c8d657810aeff67ebb8bad568f57b20adb7",
+      "variant": "steps-v3",
+      "state": "no-images",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "steps-v3-invalid-560x640-matrix.png",
+      "sha256": "3b433f44a0b977340eae722dc65f6d6f0720e08e8484141755cb92cb869d88d4",
+      "variant": "steps-v3",
+      "state": "invalid",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "steps-v3-unknown-560x640-matrix.png",
+      "sha256": "626bed7be0b1f534b9693e0672f3b468b5914faced1eee884f3ddc1cbde91e14",
+      "variant": "steps-v3",
+      "state": "unknown",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "steps-v3-missing-560x640-matrix.png",
+      "sha256": "3cefcfed8f183bde016f28b45f47e0d61cf0d58da87a30ea1cc539abc672395c",
+      "variant": "steps-v3",
+      "state": "missing",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "steps-v3-create-560x640-new-screen-and-errors-collision.png",
+      "sha256": "4d96021bd1332df56f860f45cb7768a2915c667306bf0dc1b24ed37ecf4ca5a8",
+      "variant": "steps-v3",
+      "state": "create",
+      "size": "560x640",
+      "label": "new-screen-and-errors-collision"
+    },
+    {
+      "file": "steps-v3-create-560x640-new-screen-and-errors-created-source.png",
+      "sha256": "b43cfa0e53fb38c5194089a5b795de441d21375fd45323d7df6eff656b674cb2",
+      "variant": "steps-v3",
+      "state": "create",
+      "size": "560x640",
+      "label": "new-screen-and-errors-created-source"
+    },
+    {
+      "file": "steps-v3-no-images-560x640-no-image-assets-return-before.png",
+      "sha256": "33b53ca91e518e23516db3ebb9912b8a21b2b81bb5962e95e7e8095b9d636473",
+      "variant": "steps-v3",
+      "state": "no-images",
+      "size": "560x640",
+      "label": "no-image-assets-return-before"
+    },
+    {
+      "file": "steps-v3-no-images-560x640-no-image-assets-return-after-import.png",
+      "sha256": "a79bcc38e9d79c1fa4881785fcde15140e766ce2ca92fbeb44b218ff4d2d6ace",
+      "variant": "steps-v3",
+      "state": "no-images",
+      "size": "560x640",
+      "label": "no-image-assets-return-after-import"
+    },
+    {
+      "file": "steps-v3-design-560x640-fields-live-caret-live-title.png",
+      "sha256": "8ffbc471d18bc031ce65927784eba0903c1ce46ae54806dcc449970fb5dec251",
+      "variant": "steps-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "fields-live-caret-live-title"
+    },
+    {
+      "file": "steps-v3-panel-560x640-wrong-dismissal-panel-refusal.png",
+      "sha256": "f1614896bb3392bdc8f8d936ee7b9bd351a7f5a3769d9af764716c89b905532e",
+      "variant": "steps-v3",
+      "state": "panel",
+      "size": "560x640",
+      "label": "wrong-dismissal-panel-refusal"
+    },
+    {
+      "file": "steps-v3-design-560x640-wrong-dismissal-design-refusal.png",
+      "sha256": "51c363711d9dbe0840cfa6b862bfd451750e02bb93d227cffbc30d0d12c56f85",
+      "variant": "steps-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "wrong-dismissal-design-refusal"
+    },
+    {
+      "file": "steps-v3-design-560x640-dirty-story-saved-source-playback-story-source.png",
+      "sha256": "ab11ea27a2c7064dd0596f40e2d25c41665950972cfa9d0915908f47a23abbcd",
+      "variant": "steps-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "dirty-story-saved-source-playback-story-source"
+    },
+    {
+      "file": "steps-v3-design-560x640-dirty-story-saved-source-playback-playback-accepted.png",
+      "sha256": "1c7311b4f776db0e6f3d2fac3f1aaa9f02ce35c450094e97c41bc156b9a56975",
+      "variant": "steps-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "dirty-story-saved-source-playback-playback-accepted"
+    },
+    {
+      "file": "steps-v3-create-560x640-dialog-picker-call-cancel-call-source.png",
+      "sha256": "31e084fa7433aaba7fa0a81fdb0ed0309a7c9f54159771dbf3fee022d86da726",
+      "variant": "steps-v3",
+      "state": "create",
+      "size": "560x640",
+      "label": "dialog-picker-call-cancel-call-source"
+    },
+    {
+      "file": "steps-v3-panel-560x640-panel-picker-show-hide-show-source.png",
+      "sha256": "1a8a92f5c3cfa2fce37aef85b12aece9d4bd06eb27fcbf2ef146addd6bddcec2",
+      "variant": "steps-v3",
+      "state": "panel",
+      "size": "560x640",
+      "label": "panel-picker-show-hide-show-source"
+    },
+    {
+      "file": "steps-v3-panel-560x640-panel-picker-show-hide-hide-source.png",
+      "sha256": "e2a2487e2a2e19a877fd32f83aec59c5bd0d0a085b15994bc8f9a6dc146740a1",
+      "variant": "steps-v3",
+      "state": "panel",
+      "size": "560x640",
+      "label": "panel-picker-show-hide-hide-source"
+    },
+    {
+      "file": "steps-v3-missing-560x640-missing-target-refused.png",
+      "sha256": "1e757435fd9f199599a5f114ec76aa696d98b4d1866daf9f543d0d3336d63f88",
+      "variant": "steps-v3",
+      "state": "missing",
+      "size": "560x640",
+      "label": "missing-target-refused"
+    },
+    {
+      "file": "steps-v3-unknown-560x640-unknown-beat-and-existing-ops-refused.png",
+      "sha256": "f22731de7d465e46ab0ff4a730847e378370b462f933d2b3d1bcc6c2b82f901c",
+      "variant": "steps-v3",
+      "state": "unknown",
+      "size": "560x640",
+      "label": "unknown-beat-and-existing-ops-refused"
+    },
+    {
+      "file": "steps-v3-design-560x640-playback-dismissal-waiting.png",
+      "sha256": "cb71bc05e10798aca212abcd9374fb7ee33762037aefca8b754b534da6619e49",
+      "variant": "steps-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "playback-dismissal-waiting"
+    },
+    {
+      "file": "steps-v3-design-560x640-playback-dismissal-closed.png",
+      "sha256": "bd761671fafa6ec9bd941826a6d9b7c1491dd0eb50d850da34a26314773a85ac",
+      "variant": "steps-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "playback-dismissal-closed"
+    },
+    {
+      "file": "steps-v3-design-560x640-playback-dismissal-unknown-refusal.png",
+      "sha256": "3876d1f3ce6bf5318effb0cab01c1d846fb57f3370fb0dc9f3b06bfbcb8bf51d",
+      "variant": "steps-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "playback-dismissal-unknown-refusal"
+    },
+    {
+      "file": "steps-v3-create-560x640-controls-contrast-hover-focus.png",
+      "sha256": "635f2051d0ce3dfb159e9face871154f7715305b026f215092372a8c28c74fca",
+      "variant": "steps-v3",
+      "state": "create",
+      "size": "560x640",
+      "label": "controls-contrast-hover-focus"
+    },
+    {
+      "file": "steps-v3-no-images-560x640-disabled-control-disabled-hover.png",
+      "sha256": "95f906148178bb11d6f34f2d041f2c8d657810aeff67ebb8bad568f57b20adb7",
+      "variant": "steps-v3",
+      "state": "no-images",
+      "size": "560x640",
+      "label": "disabled-control-disabled-hover"
+    },
+    {
+      "file": "story-split-v3-start-560x640-matrix.png",
+      "sha256": "ad08759546874911d9752f6328215f11a21631fa401bc2be0e07cbfcad1d2421",
+      "variant": "story-split-v3",
+      "state": "start",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "story-split-v3-create-560x640-matrix.png",
+      "sha256": "832810528a74ed915d040e7626b7d3f7f9d5f6a2a74088b88ae35a30f36a9558",
+      "variant": "story-split-v3",
+      "state": "create",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "story-split-v3-panel-560x640-matrix.png",
+      "sha256": "e4b5080ef61c7d6d23a714b1c620187d3de9f5ca4bf82095554e2d462cb157aa",
+      "variant": "story-split-v3",
+      "state": "panel",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "story-split-v3-design-560x640-matrix.png",
+      "sha256": "2166221629a78dc8923a315eb6a4d05655e5b50f4b6ae155489766a6208e4245",
+      "variant": "story-split-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "story-split-v3-story-560x640-matrix.png",
+      "sha256": "ff426faa78fa8eee81ced7a5bc1076c6cc9898dd48a3cdc1a44997fedaba5342",
+      "variant": "story-split-v3",
+      "state": "story",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "story-split-v3-no-images-560x640-matrix.png",
+      "sha256": "25369dc9e6fdafd05c1a4b25bba9ae9a9a764570ad67e2e890019779fdffa4fb",
+      "variant": "story-split-v3",
+      "state": "no-images",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "story-split-v3-invalid-560x640-matrix.png",
+      "sha256": "2b8de07856511392b40aaaeb4a51460a8f86dcf33a36ff856fc489c2b72921b1",
+      "variant": "story-split-v3",
+      "state": "invalid",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "story-split-v3-unknown-560x640-matrix.png",
+      "sha256": "a00f801f989f855574846f2fe4769515aca401dc24154b1e07be64c64c6ecde3",
+      "variant": "story-split-v3",
+      "state": "unknown",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "story-split-v3-missing-560x640-matrix.png",
+      "sha256": "78a63f0b35d92e2b63c266c2e070eb9a2d02dfee5741710418e1314a8a1aa7d6",
+      "variant": "story-split-v3",
+      "state": "missing",
+      "size": "560x640",
+      "label": "matrix"
+    },
+    {
+      "file": "story-split-v3-create-560x640-new-screen-and-errors-collision.png",
+      "sha256": "c5ae4bb64fd8cf82c97d380e6b7084bf3c522b4797bf2e1653c4dfdfa556602e",
+      "variant": "story-split-v3",
+      "state": "create",
+      "size": "560x640",
+      "label": "new-screen-and-errors-collision"
+    },
+    {
+      "file": "story-split-v3-create-560x640-new-screen-and-errors-created-source.png",
+      "sha256": "ced14e4f0b512e0bd078da8090cf571af2a4213fa78e9f4f36a5aa27755103db",
+      "variant": "story-split-v3",
+      "state": "create",
+      "size": "560x640",
+      "label": "new-screen-and-errors-created-source"
+    },
+    {
+      "file": "story-split-v3-panel-560x640-public-new-screen-failure.png",
+      "sha256": "e4b5080ef61c7d6d23a714b1c620187d3de9f5ca4bf82095554e2d462cb157aa",
+      "variant": "story-split-v3",
+      "state": "panel",
+      "size": "560x640",
+      "label": "public-new-screen-failure"
+    },
+    {
+      "file": "story-split-v3-start-560x640-story-first-create-dialog-empty-target.png",
+      "sha256": "ad08759546874911d9752f6328215f11a21631fa401bc2be0e07cbfcad1d2421",
+      "variant": "story-split-v3",
+      "state": "start",
+      "size": "560x640",
+      "label": "story-first-create-dialog-empty-target"
+    },
+    {
+      "file": "story-split-v3-start-560x640-story-first-create-dialog-returned.png",
+      "sha256": "b095cfaa70876a44e668113a1001eae53793b66f4bae9cfb5e2f68edd426d7a5",
+      "variant": "story-split-v3",
+      "state": "start",
+      "size": "560x640",
+      "label": "story-first-create-dialog-returned"
+    },
+    {
+      "file": "story-split-v3-no-images-560x640-no-image-assets-return-before.png",
+      "sha256": "62a7ea62c6aae4ac5082a622501d22d53571ec139a9207fbb1a5748cbbe74a74",
+      "variant": "story-split-v3",
+      "state": "no-images",
+      "size": "560x640",
+      "label": "no-image-assets-return-before"
+    },
+    {
+      "file": "story-split-v3-no-images-560x640-no-image-assets-return-after-import.png",
+      "sha256": "e59097989005c9515502b4210f9292249232a21e8bac09b1afc114e244e3e76d",
+      "variant": "story-split-v3",
+      "state": "no-images",
+      "size": "560x640",
+      "label": "no-image-assets-return-after-import"
+    },
+    {
+      "file": "story-split-v3-design-560x640-fields-live-caret-live-title.png",
+      "sha256": "f8c4bae5e0e3cfe4275f03eacfe9365b168f59e3311a84e9f581de6c2419bea3",
+      "variant": "story-split-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "fields-live-caret-live-title"
+    },
+    {
+      "file": "story-split-v3-panel-560x640-wrong-dismissal-panel-refusal.png",
+      "sha256": "46914a3bef3dcafae1c496a59513686c56de3ef1fa3c0c9a192fe48e67f9a670",
+      "variant": "story-split-v3",
+      "state": "panel",
+      "size": "560x640",
+      "label": "wrong-dismissal-panel-refusal"
+    },
+    {
+      "file": "story-split-v3-design-560x640-wrong-dismissal-design-refusal.png",
+      "sha256": "341d6e96329047ed34f0f5c8b15c075ca714e1ee844c8ab9b21d428d3dee6fcb",
+      "variant": "story-split-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "wrong-dismissal-design-refusal"
+    },
+    {
+      "file": "story-split-v3-design-560x640-dirty-story-saved-source-playback-story-source.png",
+      "sha256": "3a975ae59e1e8851877640145914ef0bf8288bdd2cbdff5b9f921ee11c92505b",
+      "variant": "story-split-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "dirty-story-saved-source-playback-story-source"
+    },
+    {
+      "file": "story-split-v3-design-560x640-dirty-story-saved-source-playback-playback-accepted.png",
+      "sha256": "e7a5dfd64f13c72884d332ddd7aab5da5e3ddfcff20e5ca67af0661147b99b40",
+      "variant": "story-split-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "dirty-story-saved-source-playback-playback-accepted"
+    },
+    {
+      "file": "story-split-v3-create-560x640-dialog-picker-call-cancel-call-source.png",
+      "sha256": "f100d7497c8ec3e9a5d28f27037f7cfe6b4990ad72e49e82c13ffdf49ac7023f",
+      "variant": "story-split-v3",
+      "state": "create",
+      "size": "560x640",
+      "label": "dialog-picker-call-cancel-call-source"
+    },
+    {
+      "file": "story-split-v3-panel-560x640-panel-picker-show-hide-show-source.png",
+      "sha256": "640ced27a6b4e728bd0dd2f79e79f2567506ff5edd574105977409ae6ae306e0",
+      "variant": "story-split-v3",
+      "state": "panel",
+      "size": "560x640",
+      "label": "panel-picker-show-hide-show-source"
+    },
+    {
+      "file": "story-split-v3-panel-560x640-panel-picker-show-hide-hide-source.png",
+      "sha256": "c0db94e7ddbbda90d99d59a5ba47af7796f8bdd6d4b873f91739c8fa0f2d3f35",
+      "variant": "story-split-v3",
+      "state": "panel",
+      "size": "560x640",
+      "label": "panel-picker-show-hide-hide-source"
+    },
+    {
+      "file": "story-split-v3-missing-560x640-missing-target-refused.png",
+      "sha256": "d7de390eed21729c72c881dfcfa5166a4ea5158f0e6bf1044cb6c7514506d8ce",
+      "variant": "story-split-v3",
+      "state": "missing",
+      "size": "560x640",
+      "label": "missing-target-refused"
+    },
+    {
+      "file": "story-split-v3-unknown-560x640-unknown-beat-and-existing-ops-refused.png",
+      "sha256": "dc826b27d70bf523deaeec8275c16b3cc5c7226c35f081b81b555e4785902a74",
+      "variant": "story-split-v3",
+      "state": "unknown",
+      "size": "560x640",
+      "label": "unknown-beat-and-existing-ops-refused"
+    },
+    {
+      "file": "story-split-v3-design-560x640-playback-dismissal-waiting.png",
+      "sha256": "f23aa50f1d1ecbfcd32d94584b0d746814810594fff97270b4fc510f1e3e822b",
+      "variant": "story-split-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "playback-dismissal-waiting"
+    },
+    {
+      "file": "story-split-v3-design-560x640-playback-dismissal-closed.png",
+      "sha256": "4bfde973e5b54750c27729478e5dec77c5a4b66570df94ec96b91d0f50ce52da",
+      "variant": "story-split-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "playback-dismissal-closed"
+    },
+    {
+      "file": "story-split-v3-design-560x640-playback-dismissal-unknown-refusal.png",
+      "sha256": "25f556dfc2b25d4392e589f7c21489091da823ccde0f44dcc06fae68a875a039",
+      "variant": "story-split-v3",
+      "state": "design",
+      "size": "560x640",
+      "label": "playback-dismissal-unknown-refusal"
+    },
+    {
+      "file": "story-split-v3-create-560x640-controls-contrast-hover-focus.png",
+      "sha256": "abb9056d3774bd39b86725e42f7e8089d4e92fce009384d0c2f92dbeefc610b1",
+      "variant": "story-split-v3",
+      "state": "create",
+      "size": "560x640",
+      "label": "controls-contrast-hover-focus"
+    },
+    {
+      "file": "story-split-v3-no-images-560x640-disabled-control-disabled-hover.png",
+      "sha256": "25369dc9e6fdafd05c1a4b25bba9ae9a9a764570ad67e2e890019779fdffa4fb",
+      "variant": "story-split-v3",
+      "state": "no-images",
+      "size": "560x640",
+      "label": "disabled-control-disabled-hover"
+    },
+    {
+      "file": "inspector-v3-1100x720-created-panel-source.png",
+      "sha256": "7126f5739013746bec4a6c25dee27956b33ccf02a65748e16624582bd751b472",
+      "variant": "inspector-v3",
+      "size": "1100x720",
+      "label": "created-panel-source"
+    },
+    {
+      "file": "steps-v3-1100x720-created-panel-source.png",
+      "sha256": "4bc60468f6a3afb5e7d4b86d3e14089b2cac14377b32a322acb1f939d618dd63",
+      "variant": "steps-v3",
+      "size": "1100x720",
+      "label": "created-panel-source"
+    },
+    {
+      "file": "story-split-v3-1100x720-created-panel-source.png",
+      "sha256": "ee09e0d796a9d16e40bdd2ee11c86679a883bdfb74e34dcab5826b20fdf6ddcf",
+      "variant": "story-split-v3",
+      "size": "1100x720",
+      "label": "created-panel-source"
+    },
+    {
+      "file": "inspector-v3-560x640-created-panel-source.png",
+      "sha256": "ff2118d47a007e31f9b583ad320233610b5ae8a0b755ad21fe545ab400ead932",
+      "variant": "inspector-v3",
+      "size": "560x640",
+      "label": "created-panel-source"
+    },
+    {
+      "file": "steps-v3-560x640-created-panel-source.png",
+      "sha256": "71d113b4f53afc9897a9b1ff18851f5862c92af58620c90577cc200458f595ab",
+      "variant": "steps-v3",
+      "size": "560x640",
+      "label": "created-panel-source"
+    },
+    {
+      "file": "story-split-v3-560x640-created-panel-source.png",
+      "sha256": "e38cc16a1c7774788010e68bd187234a8354a2f06864948cb7b252370b91bb25",
+      "variant": "story-split-v3",
+      "size": "560x640",
+      "label": "created-panel-source"
+    }
+  ],
+  "browser": {
+    "version": "153.0.8010.12",
+    "playwright": "1.63.0",
+    "node": "v24.19.0"
+  },
+  "finishedAt": "2026-11-03T20:03:01.839Z",
+  "summary": {
+    "matrixTotal": 54,
+    "matrixPassed": 54,
+    "flowTotal": 98,
+    "flowPassed": 96,
+    "failures": 2,
+    "consoleOrPageErrors": 0,
+    "captures": 180
+  },
+  "visualFindings": [
+    {
+      "id": "appearance-footer-obscures-fields",
+      "description": "The sticky appearance footer overlays input fields as they enter the viewport. At 1100x720 B3 hides the entire Close label input at initial scroll. At 560x640 A3 and C3 hide the entire Title input during scroll, and B3 hides the Close label input.",
+      "evidence": "visual-probe.json",
+      "captures": [
+        "steps-v3-1100x720-sticky-overlap.png",
+        "inspector-v3-560x640-sticky-overlap.png",
+        "steps-v3-560x640-sticky-overlap.png",
+        "story-split-v3-560x640-sticky-overlap.png"
+      ]
+    },
+    {
+      "id": "c3-story-help-overlap",
+      "description": "The Create a dialog button and its insertion-point helper text overlap vertically by 9 CSS pixels at both sizes.",
+      "evidence": "visual-probe.json",
+      "captures": [
+        "story-split-v3-1100x720-help-spacing.png",
+        "story-split-v3-560x640-help-spacing.png"
+      ]
+    }
+  ],
+  "interactionFinding": {
+    "id": "c3-new-screen-missing",
+    "description": "In the existing panel state C3 provides no New screen control. The public-new-screen case failed at both sizes, so the Panel default cannot be reached from an existing screen in this layout.",
+    "captures": [
+      "story-split-v3-panel-1100x720-public-new-screen-failure.png",
+      "story-split-v3-panel-560x640-public-new-screen-failure.png"
+    ]
+  },
+  "scopeNotes": [
+    "All checks used offline Playwright contexts against a file URL. Browser memory simulation only.",
+    "The full design:check was not rerun. Earlier run failed in Studio waitState after 448 renders; cause unresolved.",
+    "The partial first run used a faulty async lookup in the test script and is retained as report-incomplete.json; it is excluded from these results.",
+    "Source commit records HEAD at the start of the completed run.",
+    "The created-panel-defaults cases ran as a separate focused six-case follow-up against the same local HTML."
+  ]
+}

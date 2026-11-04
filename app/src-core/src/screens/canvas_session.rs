@@ -15,6 +15,36 @@ use std::{
     time::{Duration, Instant},
 };
 
+#[cfg(test)]
+static HELPER_START_ATTEMPTS: std::sync::atomic::AtomicUsize =
+    std::sync::atomic::AtomicUsize::new(0);
+
+#[cfg(test)]
+static HELPER_OWNER_RETURNS: std::sync::atomic::AtomicUsize =
+    std::sync::atomic::AtomicUsize::new(0);
+
+#[cfg(test)]
+pub(crate) fn helper_start_attempts_for_test() -> usize {
+    HELPER_START_ATTEMPTS.load(std::sync::atomic::Ordering::SeqCst)
+}
+
+#[cfg(test)]
+pub(crate) fn helper_owner_returns_for_test() -> usize {
+    HELPER_OWNER_RETURNS.load(std::sync::atomic::Ordering::SeqCst)
+}
+
+#[cfg(test)]
+pub(crate) fn record_helper_start_for_test<T>(
+    start: impl FnOnce() -> Result<T, SceneError>,
+) -> Result<T, SceneError> {
+    HELPER_START_ATTEMPTS.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+    let result = start();
+    if result.is_ok() {
+        HELPER_OWNER_RETURNS.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+    }
+    result
+}
+
 pub(crate) struct Session {
     root: PathBuf,
     anchor: Option<DirectoryAnchor>,
@@ -29,10 +59,15 @@ pub(crate) struct Session {
 impl Session {
     pub(crate) fn new(data: &Path, sdk: ValidatedSdk) -> Result<Self, SceneError> {
         let mut session = Self::prepare(data)?;
-        session.worker = Some(
+        let start = || {
             HelperProcess::start(sdk, session.anchor().clone())
-                .map_err(|_| SceneError::InvariantBlocked)?,
-        );
+                .map_err(|_| SceneError::InvariantBlocked)
+        };
+        #[cfg(test)]
+        let worker = record_helper_start_for_test(start)?;
+        #[cfg(not(test))]
+        let worker = start()?;
+        session.worker = Some(worker);
         Ok(session)
     }
     #[cfg(test)]

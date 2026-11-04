@@ -1,0 +1,39 @@
+{
+  "date": "2026-11-04",
+  "dateTimeZone": "Australia/Brisbane",
+  "threadLink": "<t3-thread://v2/c95d26c7-af8c-4ab0-8c95-a45fdca2dfe6/mcp:launch:8e6fd0b543455be611a52db6f60a7e7c7ca4c8fc6fc480ea70097ed44c6f3108>",
+  "approval": {
+    "position": 720,
+    "messageId": "32e6d6da-5bf4-4f57-a0a4-7a9a98093219",
+    "itemId": "turn-item:message:32e6d6da-5bf4-4f57-a0a4-7a9a98093219",
+    "text": "Approved",
+    "timestampUtc": "2026-11-03T20:50:30.759Z",
+    "createdBy": "user",
+    "creationSource": "mobile"
+  },
+  "clarification": {
+    "position": 725,
+    "messageId": "message:provider:codex:native-item:msg_04fe4f97d478c7c1016aea4931122c81919644d93c705b8b28",
+    "text": "Approval received. Which layout should I pin for implementation: **A4 \u2014 Inspector extension**, **B4 \u2014 Guided setup**, or **C4 \u2014 Story first**?"
+  },
+  "exactSelection": {
+    "position": 727,
+    "messageId": "9c865c28-a31c-4803-9934-f45d9951f3fb",
+    "itemId": "turn-item:message:9c865c28-a31c-4803-9934-f45d9951f3fb",
+    "text": "Sorry a4",
+    "timestampUtc": "2026-11-03T20:53:05.327Z",
+    "createdBy": "user",
+    "creationSource": "mobile"
+  },
+  "source": {
+    "commit": "8851689b62eda03127c199ca0276a776b0d623ab",
+    "fingerprint": "bd1742a2ae2576cb6fb8fce032e19f70a66d06e177b17ce3377fafa96a0f6762"
+  },
+  "screenId": "help-dialog-story",
+  "revisionId": "inspector-v4",
+  "variantId": "inspector-v4",
+  "layout": "Help A4 \u00b7 Inspector extension",
+  "scope": "Approve only A4 at the pinned source. B4/C4 remain drafts. No production implementation, publication or ticket acceptance is performed by this design-only approval.",
+  "preservedAgreement": "Help starter still requires an available typed project UI image; no optional-image or fallback change.",
+  "checkLimits": "review.json and the forthcoming HANDOFF.md retain full validation and simulation limits."
+}

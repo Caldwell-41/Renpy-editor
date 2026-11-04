@@ -166,12 +166,21 @@ pub struct Node {
     pub text_properties: Option<text::TextProperties>,
     pub style: Option<styles::StyleReference>,
     pub component: Option<ComponentReference>,
+    pub dismissal: Option<ButtonDismissal>,
     pub span: Span,
     pub parent_start: Option<usize>,
     pub properties: Vec<Property>,
     pub protected: Vec<Span>,
     #[serde(skip)]
     source_end: usize,
+}
+
+#[derive(Clone, Copy, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ButtonDismissal {
+    None,
+    FinishInteraction,
+    HideScreen,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -371,6 +380,7 @@ fn parse_body(
         text_properties: None,
         style: None,
         component: None,
+        dismissal: None,
         span: Span {
             start: line.start,
             end,

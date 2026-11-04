@@ -1,0 +1,215 @@
+{
+  "scope": "Actual approval metadata and A4 browser-memory Lab previews only; no native operation or Ren'Py execution.",
+  "startedAt": "2026-11-03T21:03:53.257Z",
+  "checks": [
+    "Registry metadata: A4 approved with matching source; B4 and C4 draft; nine registered states.",
+    "Current label, three layout labels and approval history agree with decision.",
+    "steps-v4 displays Draft while current pointer remains A4.",
+    "story-split-v4 displays Draft while current pointer remains A4.",
+    "All nine registered A4 states loaded dark at both registered sizes and were labelled outside recorded comparison states.",
+    "Lab substitute refused project.flush without native transport."
+  ],
+  "cases": [
+    {
+      "state": "start",
+      "viewport": "wide",
+      "width": 1100,
+      "height": 720,
+      "approval": "Approved \u00b7 outside recorded comparison states",
+      "status": "passed"
+    },
+    {
+      "state": "create",
+      "viewport": "wide",
+      "width": 1100,
+      "height": 720,
+      "approval": "Approved \u00b7 outside recorded comparison states",
+      "status": "passed"
+    },
+    {
+      "state": "panel",
+      "viewport": "wide",
+      "width": 1100,
+      "height": 720,
+      "approval": "Approved \u00b7 outside recorded comparison states",
+      "status": "passed"
+    },
+    {
+      "state": "design",
+      "viewport": "wide",
+      "width": 1100,
+      "height": 720,
+      "approval": "Approved \u00b7 outside recorded comparison states",
+      "status": "passed"
+    },
+    {
+      "state": "story",
+      "viewport": "wide",
+      "width": 1100,
+      "height": 720,
+      "approval": "Approved \u00b7 outside recorded comparison states",
+      "status": "passed"
+    },
+    {
+      "state": "no-images",
+      "viewport": "wide",
+      "width": 1100,
+      "height": 720,
+      "approval": "Approved \u00b7 outside recorded comparison states",
+      "status": "passed"
+    },
+    {
+      "state": "invalid",
+      "viewport": "wide",
+      "width": 1100,
+      "height": 720,
+      "approval": "Approved \u00b7 outside recorded comparison states",
+      "status": "passed"
+    },
+    {
+      "state": "unknown",
+      "viewport": "wide",
+      "width": 1100,
+      "height": 720,
+      "approval": "Approved \u00b7 outside recorded comparison states",
+      "status": "passed"
+    },
+    {
+      "state": "missing",
+      "viewport": "wide",
+      "width": 1100,
+      "height": 720,
+      "approval": "Approved \u00b7 outside recorded comparison states",
+      "status": "passed"
+    },
+    {
+      "state": "start",
+      "viewport": "compact",
+      "width": 560,
+      "height": 640,
+      "approval": "Approved \u00b7 outside recorded comparison states",
+      "status": "passed"
+    },
+    {
+      "state": "create",
+      "viewport": "compact",
+      "width": 560,
+      "height": 640,
+      "approval": "Approved \u00b7 outside recorded comparison states",
+      "status": "passed"
+    },
+    {
+      "state": "panel",
+      "viewport": "compact",
+      "width": 560,
+      "height": 640,
+      "approval": "Approved \u00b7 outside recorded comparison states",
+      "status": "passed"
+    },
+    {
+      "state": "design",
+      "viewport": "compact",
+      "width": 560,
+      "height": 640,
+      "approval": "Approved \u00b7 outside recorded comparison states",
+      "status": "passed"
+    },
+    {
+      "state": "story",
+      "viewport": "compact",
+      "width": 560,
+      "height": 640,
+      "approval": "Approved \u00b7 outside recorded comparison states",
+      "status": "passed"
+    },
+    {
+      "state": "no-images",
+      "viewport": "compact",
+      "width": 560,
+      "height": 640,
+      "approval": "Approved \u00b7 outside recorded comparison states",
+      "status": "passed"
+    },
+    {
+      "state": "invalid",
+      "viewport": "compact",
+      "width": 560,
+      "height": 640,
+      "approval": "Approved \u00b7 outside recorded comparison states",
+      "status": "passed"
+    },
+    {
+      "state": "unknown",
+      "viewport": "compact",
+      "width": 560,
+      "height": 640,
+      "approval": "Approved \u00b7 outside recorded comparison states",
+      "status": "passed"
+    },
+    {
+      "state": "missing",
+      "viewport": "compact",
+      "width": 560,
+      "height": 640,
+      "approval": "Approved \u00b7 outside recorded comparison states",
+      "status": "passed"
+    }
+  ],
+  "errors": [],
+  "browser": "153.0.8010.12",
+  "metadata": {
+    "currentApproved": "inspector-v4",
+    "sourceMatches": {
+      "inspector-v4": true
+    },
+    "states": [
+      "start",
+      "create",
+      "panel",
+      "design",
+      "story",
+      "no-images",
+      "invalid",
+      "unknown",
+      "missing"
+    ],
+    "variants": [
+      "inspector-v4",
+      "steps-v4",
+      "story-split-v4"
+    ],
+    "viewports": [
+      {
+        "id": "wide",
+        "title": "Wide \u00b7 1100 \u00d7 720",
+        "width": 1100,
+        "height": 720
+      },
+      {
+        "id": "compact",
+        "title": "Compact \u00b7 560 \u00d7 640",
+        "width": 560,
+        "height": 640
+      }
+    ]
+  },
+  "history": [
+    "inspector-v4 \u00b7 Approved \u00b7 Approved 2026-11-04 \u00b7 Kris said \"Approved\". Asked which layout to pin for implementation (A4, B4 or C4), Kris clarified \"Sorry a4\". This approves only Help A4 / help-dialog-story / inspector-v4 at the pinned source. B4 and C4 remain drafts. The earlier Components and Help panel A2 and Screens flow-v1 approvals retain their existing authority and scope. \u00b7 Source 8851689b62eda03127c199ca0276a776b0d623ab",
+    "steps-v4 \u00b7 Draft",
+    "story-split-v4 \u00b7 Draft"
+  ],
+  "refusal": {
+    "before": [],
+    "after": [
+      "project.flush"
+    ],
+    "message": "Design Lab refuses native operation: project.flush. Supply an explicit sample callback."
+  },
+  "finishedAt": "2026-11-03T21:03:54.389Z",
+  "summary": {
+    "renderCases": 18,
+    "checkGroups": 6,
+    "errors": 0,
+    "passed": true
+  }
+}

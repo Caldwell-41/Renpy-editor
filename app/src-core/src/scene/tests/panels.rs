@@ -11,6 +11,7 @@ fn panel_beats_remain_a_boundary_for_existing_continue_preparation() {
             &f.project,
             &f.project_id,
             crate::screens::CreateRequest {
+                kind: crate::metadata::OwnedScreenKind::Panel,
                 name: "help_panel".into(),
                 expected_project_revision: catalog.project_revision,
                 expected_source_map_revision: catalog.source_map_revision,

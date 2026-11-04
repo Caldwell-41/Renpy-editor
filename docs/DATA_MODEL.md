@@ -653,6 +653,47 @@ custom behavior. A known inclusion alone does not make an unknown child passive.
 Text interpolation and unqualified text tags keep effects unknown without changing
 or filtering the authoritative text.
 
+Source-map v8 adds an explicit `dialog` owned-screen kind and reserves `callScreen`
+Beat mappings with the same stable `screenTarget` binding. Earlier maps retain
+their recognition rules and migrate through the existing transaction owner without
+rewriting scripts. Dialogs and Call mappings are invalid in pre-v8 metadata.
+Exact local `Return()` actions and game-menu dismissal qualify only for an owned
+dialog, with `modal True`; panel Hide qualification remains unchanged. Effect
+summaries expose `finishesInteraction` separately from `hiddenScreens`, bind action
+and source dependencies into their revisions, and retain unknown effects for
+unsupported actions or captured return values. Component extraction refuses a
+subtree containing contextual dismissal statements from either screen kind.
+The resolved target exposes `blocking`, derived once from a single exact root
+`modal True` declaration. Missing, false, calculated or duplicate modality makes
+an owned dialog nonblocking and its effects unknown. Authored Call admission uses
+this captured result rather than reparsing source in Story. Exact standalone
+`action Null()` is inert and remains editable and extractable for every owned
+screen kind. It is separate from the contextual modality, focus, Return and Hide
+spans that cannot move into a reusable component.
+
+Pending Story screen placement is client-only Scene/body/Position context. Valid
+placement choices are retained before navigation and survive a Screens round trip
+without a Beat, source write or history entry. Incomplete placement recovery owns
+its own unsubmitted input until a valid choice is retained. Beat type, target and
+content edits, and refused Add operations, keep their separate draft guards.
+Explicit Cancel/Escape restores the placement captured when the Beat form opened;
+accepted insertion updates the retained context to its accepted source revision.
+
+Owned screen inspection exposes a nullable per-button `dismissal` capability.
+It reports `none` for exact inert Null, `finishInteraction` for qualified local
+Return, and `hideScreen` for qualified local Hide. Unowned, duplicate-ID,
+component and custom-action nodes expose no capability. This uses the same raw
+action qualifier as bounded composition. The UI never infers action authority
+from a label or screen kind; acceptance still revalidates source and context.
+
+`screens.create` accepts an optional `kind`, defaulting to panel. A dialog Help
+starter shares the panel content builder and emits `modal True`, game-menu Return
+and a focused Close button with Return. A blank dialog contains modality, game-menu
+Return and `pass`, with no invented content. Both reuse the same accepted
+source/map transaction and history. Component creation remains restricted to the
+existing component operations. [#45](https://github.com/Caldwell-41/Renpy-editor/issues/45)
+owns Story Call and normal-play acceptance, which remain pending.
+
 Schema v7 also recognizes bounded `show screen name` and `hide screen name` Story
 Beats. Their mapping stores `screenTarget` with stable screen UUID and source name;
 well-formed missing targets retain unresolved intent. Read-derived payload revisions

@@ -20,6 +20,7 @@ export type CompositionCommand =
   | ({ type: "image"; nodeId: string; parentId?: string } & ImageSelection)
   | { type: "add"; parentId: string; kind: string; text: string }
   | { type: "formatText"; nodeId: string; values: TextEdits; style?: StyleEdit; layout?: LayoutEdits }
+  | { type: "dismissal"; nodeId: string; action: "finishInteraction" | "hideScreen" }
   | { type: "reorder"; nodeId: string; targetId: string; after: boolean }
   | { type: "remove"; nodeId: string };
 interface Host {

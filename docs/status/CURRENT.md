@@ -1,5 +1,49 @@
 # Current status
 
+## Help dialog and base Help canvas implementation complete
+
+The verified P2 from the Terra review at `77b1187` is corrected. Pending placement
+has its own draft owner, so valid choices survive Screens navigation while
+incomplete recovery and Beat content retain their guards. Final local checks pass
+369 frontend tests, production build and the eight-stage actual controller/core
+journey. [Handoff correction evidence](../tasks/evidence/help-dialog-and-canvas.md#pending-placement-handoff-correction-2026-11-04)
+owns the root cause, red/green results and self-review. The earlier three fixes and
+their core evidence remain qualified within their recorded scope. Publication to
+draft PR #79 and current-head ordinary CI are selected; no merge or broader
+qualification is selected.
+
+Kris approved [#45](https://github.com/Caldwell-41/Renpy-editor/issues/45) and
+[#46](https://github.com/Caldwell-41/Renpy-editor/issues/46) on local integration
+branch `codex/help-dialog-canvas` from `e32ded4`. Both portable lanes are integrated;
+the coordinator owns shared contracts, review findings, integration and final review.
+
+| Capability | Implemented and automated proof | Remaining acceptance |
+| --- | --- | --- |
+| Help dialog and Story Call/Finish | A4 UI, cancellation/recovery and actual controller/core pass; 36 final browser cases and recorded eight normal-entry rows per target pass | Final user acceptance; current-head CI on PR #79 |
+| Base Help canvas | Eight matched cases per target have exact pixels and geometry at `4c084a4`; lossless geometry transport is tested | Wider canvas/native/physical acceptance stays separate |
+| Combined implementation | Local verification and independent review corrections complete; ordinary CI at `28efd6c` passes 366 frontend, 15 offline Help and 27 core cases plus actual controllers/build | Draft PR #79 for user review; current-head CI tracked there; no merge/release |
+
+Kris approved A4 (`inspector-v4`) at source `8851689`; B4/C4 remain drafts.
+Completion code is `b2a5694`, with the exact approved reference and retained product
+captures committed separately from the production renderer. Help still requires
+a typed UI image; insertion remains client-only existing Scene/body/Position
+context. Missing images, deleted placement Scenes and unresolved action drafts
+retain intent and expose explicit recovery. No implicit Apply, Beat or Blank
+fallback is introduced. The requested subagent completion pass is finished, and
+the coordinator resolved its review and responsive-focus findings.
+The final main/core probe records zero page errors and complete cleanup. It
+intercepts engine rendering before dispatch. Whole-page pixel identity is not
+claimed. Terra reproduced the compact PNG repetition as a transient mismatch
+between headless capture and the DOM; a capture after two animation frames is correct.
+Its exact compositor/timing cause is not isolated, and it supports no production
+CSS correction. Native/physical and broader editor acceptance remain separate.
+[Delivery evidence](../tasks/evidence/help-dialog-and-canvas.md) owns candidates,
+checks, earlier failures, operation counts and exact scope. Physical/human and
+package/native acceptance remain separate. Neither ticket is closed. The completion
+condition for [draft PR #79](https://github.com/Caldwell-41/Renpy-editor/pull/79) and
+ordinary CI is satisfied. The PR's combined status owns current-head CI. No new SDK/package
+qualification matrix, merge or release is selected.
+
 ## Components and Help panel merged and accepted
 
 [PR #77](https://github.com/Caldwell-41/Renpy-editor/pull/77) squash-merged as

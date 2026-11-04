@@ -1,0 +1,592 @@
+{
+  "input": ".toolchains/help-dialog-story/comparison.html",
+  "inputSha256": "6191ebedcfcdd4ebf0e3d6f4fe922006bfc1da80c21a97a51a8e364c0f8a638e",
+  "cases": [
+    {
+      "variant": "inspector-v2",
+      "size": "1100x720",
+      "name": "panel-story",
+      "status": "passed",
+      "observations": {
+        "created": "Created help_tips as a panel in memory. All Help nodes remain editable.",
+        "creationSource": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+        "picker": {
+          "beat": "showScreen",
+          "target": "help_tips",
+          "options": [
+            "help_tips \u00b7 Panel",
+            "hud \u00b7 Panel"
+          ],
+          "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nInsert a Beat here\n\nAfter the introduction, before the next line.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller."
+        },
+        "acceptedShow": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nShow screen \u00b7 help_tips\n\nStory continues at the following Beat.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+        "showSource": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+        "callPicker": {
+          "target": "map_help",
+          "options": [
+            "help_dialog \u00b7 Dialog",
+            "map_help \u00b7 Dialog"
+          ],
+          "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nShow screen \u00b7 help_tips\n\nStory continues at the following Beat.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller."
+        },
+        "showWithCallDraft": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+        "hideWithShowDraft": {
+          "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nHide screen \u00b7 help_tips\n\nStory continues at the following Beat.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+          "target": "hud"
+        },
+        "hideSource": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    hide screen help_tips\n    \"Ready? Let's go.\"",
+        "cancel": {
+          "beat": "hideScreen",
+          "target": "help_tips"
+        }
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "size": "1100x720",
+      "name": "no-image-preview",
+      "status": "passed",
+      "observations": {
+        "before": {
+          "text": "ChooseNew screenhelp \u00b7 panelElementstitleexplanationimageCloseHelp preview unavailableImport a UI image in Assets to preview Help. Your creation draft stays here.New screenSource nameStarterBlankHelpKindPanelDialogPanel stays open while Story continues. Show or Hide it in Story.TitleExplanationChoose a reply to continue the story. Press Escape or Close to return.UI imageNo UI images availableHelp needs a UI image. Import one in Assets, then return. Your name and Help selection stay here.Open AssetsSimulate return with a UI imageImage size: 480 \u00d7 240. Title, explanation, image and Close stay editable in Screens.Create panelCancel",
+          "art": 0,
+          "imageValue": "",
+          "canvases": 1
+        },
+        "after": {
+          "text": "ChooseNew screenhelp \u00b7 panelElementstitleexplanationimageCloseScreens preview \u00b7 inertHow to playChoose a reply to continue the story. Press Escape or Close to return.controls_guide \u00b7 480 \u00d7 240CloseSelect a node to edit it. Preview buttons never run game actions.New screenSource nameStarterBlankHelpKindPanelDialogPanel stays open while Story continues. Show or Hide it in Story.TitleExplanationChoose a reply to continue the story. Press Escape or Close to return.UI imagecontrols_guide \u00b7 UI imagemap_legend \u00b7 UI imageImage size: 480 \u00d7 240. Title, explanation, image and Close stay editable in Screens.Create panelCancel",
+          "art": 1,
+          "imageValue": "controls_guide"
+        }
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "size": "1100x720",
+      "name": "blank-outside-simulation",
+      "status": "passed",
+      "observations": {
+        "status": "Blank uses the existing creation workflow. This Help prototype does not simulate its result.",
+        "sample": {
+          "view": "create",
+          "kind": "panel",
+          "starter": "blank",
+          "created": false,
+          "action": "finish",
+          "beat": "callScreen",
+          "target": "help",
+          "committedBeat": false,
+          "simulation": "known",
+          "followingBeatRuns": 0,
+          "draft": {
+            "name": "blank_example",
+            "title": "How to play",
+            "explanation": "Choose a reply to continue the story. Press Escape or Close to return.",
+            "image": "controls_guide",
+            "closeLabel": "Close"
+          }
+        },
+        "useStoryCount": 0
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "size": "1100x720",
+      "name": "panel-story",
+      "status": "passed",
+      "observations": {
+        "created": "Created help_tips as a panel in memory. All Help nodes remain editable.",
+        "creationSource": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+        "picker": {
+          "beat": "showScreen",
+          "target": "help_tips",
+          "options": [
+            "help_tips \u00b7 Panel",
+            "hud \u00b7 Panel"
+          ],
+          "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nInsert a Beat here\n\nAfter the introduction, before the next line.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller."
+        },
+        "acceptedShow": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nShow screen \u00b7 help_tips\n\nStory continues at the following Beat.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+        "showSource": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+        "callPicker": {
+          "target": "map_help",
+          "options": [
+            "help_dialog \u00b7 Dialog",
+            "map_help \u00b7 Dialog"
+          ],
+          "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nShow screen \u00b7 help_tips\n\nStory continues at the following Beat.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller."
+        },
+        "showWithCallDraft": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+        "hideWithShowDraft": {
+          "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nHide screen \u00b7 help_tips\n\nStory continues at the following Beat.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+          "target": "hud"
+        },
+        "hideSource": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    hide screen help_tips\n    \"Ready? Let's go.\"",
+        "cancel": {
+          "beat": "hideScreen",
+          "target": "help_tips"
+        }
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "size": "1100x720",
+      "name": "no-image-preview",
+      "status": "passed",
+      "observations": {
+        "before": {
+          "text": "Help preview unavailableImport a UI image in Assets to preview Help. Your creation draft stays here.New screenSource nameStarterBlankHelpKindPanelDialogPanel stays open while Story continues. Show or Hide it in Story.TitleExplanationChoose a reply to continue the story. Press Escape or Close to return.UI imageNo UI images availableHelp needs a UI image. Import one in Assets, then return. Your name and Help selection stay here.Open AssetsSimulate return with a UI imageImage size: 480 \u00d7 240. Title, explanation, image and Close stay editable in Screens.Create panelCancel",
+          "art": 0,
+          "imageValue": "",
+          "canvases": 1
+        },
+        "after": {
+          "text": "Screens preview \u00b7 inertHow to playChoose a reply to continue the story. Press Escape or Close to return.controls_guide \u00b7 480 \u00d7 240CloseSelect a node to edit it. Preview buttons never run game actions.New screenSource nameStarterBlankHelpKindPanelDialogPanel stays open while Story continues. Show or Hide it in Story.TitleExplanationChoose a reply to continue the story. Press Escape or Close to return.UI imagecontrols_guide \u00b7 UI imagemap_legend \u00b7 UI imageImage size: 480 \u00d7 240. Title, explanation, image and Close stay editable in Screens.Create panelCancel",
+          "art": 1,
+          "imageValue": "controls_guide"
+        }
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "size": "1100x720",
+      "name": "blank-outside-simulation",
+      "status": "passed",
+      "observations": {
+        "status": "Blank uses the existing creation workflow. This Help prototype does not simulate its result.",
+        "sample": {
+          "view": "create",
+          "kind": "panel",
+          "starter": "blank",
+          "created": false,
+          "action": "finish",
+          "beat": "callScreen",
+          "target": "help",
+          "committedBeat": false,
+          "simulation": "known",
+          "followingBeatRuns": 0,
+          "draft": {
+            "name": "blank_example",
+            "title": "How to play",
+            "explanation": "Choose a reply to continue the story. Press Escape or Close to return.",
+            "image": "controls_guide",
+            "closeLabel": "Close"
+          }
+        },
+        "useStoryCount": 0
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "1100x720",
+      "name": "panel-story",
+      "status": "passed",
+      "observations": {
+        "created": "Created help_tips as a panel in memory. All Help nodes remain editable.",
+        "creationSource": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+        "picker": {
+          "beat": "showScreen",
+          "target": "help_tips",
+          "options": [
+            "help_tips \u00b7 Panel",
+            "hud \u00b7 Panel"
+          ],
+          "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nInsert a Beat here\n\nAfter the introduction, before the next line.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller."
+        },
+        "acceptedShow": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nShow screen \u00b7 help_tips\n\nStory continues at the following Beat.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+        "showSource": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+        "callPicker": {
+          "target": "map_help",
+          "options": [
+            "help_dialog \u00b7 Dialog",
+            "map_help \u00b7 Dialog"
+          ],
+          "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nShow screen \u00b7 help_tips\n\nStory continues at the following Beat.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller."
+        },
+        "showWithCallDraft": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+        "hideWithShowDraft": {
+          "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nHide screen \u00b7 help_tips\n\nStory continues at the following Beat.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+          "target": "hud"
+        },
+        "hideSource": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    hide screen help_tips\n    \"Ready? Let's go.\"",
+        "cancel": {
+          "beat": "hideScreen",
+          "target": "help_tips"
+        }
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "1100x720",
+      "name": "no-image-preview",
+      "status": "passed",
+      "observations": {
+        "before": {
+          "text": "Story \u00b7 First steps01Dialogue\"Before we leave, take a look at the controls.\"02Insert a Beat hereAfter the introduction, before the next line.03Dialogue\"Ready? Let's go.\"04Return / endEnds this Story body or returns to its Scene caller.New screenSource nameStarterBlankHelpKindPanelDialogPanel stays open while Story continues. Show or Hide it in Story.TitleExplanationChoose a reply to continue the story. Press Escape or Close to return.UI imageNo UI images availableHelp needs a UI image. Import one in Assets, then return. Your name and Help selection stay here.Open AssetsSimulate return with a UI imageImage size: 480 \u00d7 240. Title, explanation, image and Close stay editable in Screens.Create panelCancel",
+          "art": 0,
+          "imageValue": "",
+          "canvases": 0
+        },
+        "after": {
+          "text": "Story \u00b7 First steps01Dialogue\"Before we leave, take a look at the controls.\"02Insert a Beat hereAfter the introduction, before the next line.03Dialogue\"Ready? Let's go.\"04Return / endEnds this Story body or returns to its Scene caller.New screenSource nameStarterBlankHelpKindPanelDialogPanel stays open while Story continues. Show or Hide it in Story.TitleExplanationChoose a reply to continue the story. Press Escape or Close to return.UI imagecontrols_guide \u00b7 UI imagemap_legend \u00b7 UI imageImage size: 480 \u00d7 240. Title, explanation, image and Close stay editable in Screens.Create panelCancel",
+          "art": 0,
+          "imageValue": "controls_guide"
+        }
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "1100x720",
+      "name": "blank-outside-simulation",
+      "status": "passed",
+      "observations": {
+        "status": "Blank uses the existing creation workflow. This Help prototype does not simulate its result.",
+        "sample": {
+          "view": "create",
+          "kind": "panel",
+          "starter": "blank",
+          "created": false,
+          "action": "finish",
+          "beat": "callScreen",
+          "target": "help",
+          "committedBeat": false,
+          "simulation": "known",
+          "followingBeatRuns": 0,
+          "draft": {
+            "name": "blank_example",
+            "title": "How to play",
+            "explanation": "Choose a reply to continue the story. Press Escape or Close to return.",
+            "image": "controls_guide",
+            "closeLabel": "Close"
+          }
+        },
+        "useStoryCount": 0
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "size": "560x640",
+      "name": "panel-story",
+      "status": "passed",
+      "observations": {
+        "created": "Created help_tips as a panel in memory. All Help nodes remain editable.",
+        "creationSource": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+        "picker": {
+          "beat": "showScreen",
+          "target": "help_tips",
+          "options": [
+            "help_tips \u00b7 Panel",
+            "hud \u00b7 Panel"
+          ],
+          "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nInsert a Beat here\n\nAfter the introduction, before the next line.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller."
+        },
+        "acceptedShow": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nShow screen \u00b7 help_tips\n\nStory continues at the following Beat.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+        "showSource": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+        "callPicker": {
+          "target": "map_help",
+          "options": [
+            "help_dialog \u00b7 Dialog",
+            "map_help \u00b7 Dialog"
+          ],
+          "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nShow screen \u00b7 help_tips\n\nStory continues at the following Beat.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller."
+        },
+        "showWithCallDraft": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+        "hideWithShowDraft": {
+          "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nHide screen \u00b7 help_tips\n\nStory continues at the following Beat.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+          "target": "hud"
+        },
+        "hideSource": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    hide screen help_tips\n    \"Ready? Let's go.\"",
+        "cancel": {
+          "beat": "hideScreen",
+          "target": "help_tips"
+        }
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "size": "560x640",
+      "name": "no-image-preview",
+      "status": "passed",
+      "observations": {
+        "before": {
+          "text": "ChooseNew screenhelp \u00b7 panelElementstitleexplanationimageCloseHelp preview unavailableImport a UI image in Assets to preview Help. Your creation draft stays here.New screenSource nameStarterBlankHelpKindPanelDialogPanel stays open while Story continues. Show or Hide it in Story.TitleExplanationChoose a reply to continue the story. Press Escape or Close to return.UI imageNo UI images availableHelp needs a UI image. Import one in Assets, then return. Your name and Help selection stay here.Open AssetsSimulate return with a UI imageImage size: 480 \u00d7 240. Title, explanation, image and Close stay editable in Screens.Create panelCancel",
+          "art": 0,
+          "imageValue": "",
+          "canvases": 1
+        },
+        "after": {
+          "text": "ChooseNew screenhelp \u00b7 panelElementstitleexplanationimageCloseScreens preview \u00b7 inertHow to playChoose a reply to continue the story. Press Escape or Close to return.controls_guide \u00b7 480 \u00d7 240CloseSelect a node to edit it. Preview buttons never run game actions.New screenSource nameStarterBlankHelpKindPanelDialogPanel stays open while Story continues. Show or Hide it in Story.TitleExplanationChoose a reply to continue the story. Press Escape or Close to return.UI imagecontrols_guide \u00b7 UI imagemap_legend \u00b7 UI imageImage size: 480 \u00d7 240. Title, explanation, image and Close stay editable in Screens.Create panelCancel",
+          "art": 1,
+          "imageValue": "controls_guide"
+        }
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "size": "560x640",
+      "name": "blank-outside-simulation",
+      "status": "passed",
+      "observations": {
+        "status": "Blank uses the existing creation workflow. This Help prototype does not simulate its result.",
+        "sample": {
+          "view": "create",
+          "kind": "panel",
+          "starter": "blank",
+          "created": false,
+          "action": "finish",
+          "beat": "callScreen",
+          "target": "help",
+          "committedBeat": false,
+          "simulation": "known",
+          "followingBeatRuns": 0,
+          "draft": {
+            "name": "blank_example",
+            "title": "How to play",
+            "explanation": "Choose a reply to continue the story. Press Escape or Close to return.",
+            "image": "controls_guide",
+            "closeLabel": "Close"
+          }
+        },
+        "useStoryCount": 0
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "size": "560x640",
+      "name": "panel-story",
+      "status": "passed",
+      "observations": {
+        "created": "Created help_tips as a panel in memory. All Help nodes remain editable.",
+        "creationSource": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+        "picker": {
+          "beat": "showScreen",
+          "target": "help_tips",
+          "options": [
+            "help_tips \u00b7 Panel",
+            "hud \u00b7 Panel"
+          ],
+          "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nInsert a Beat here\n\nAfter the introduction, before the next line.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller."
+        },
+        "acceptedShow": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nShow screen \u00b7 help_tips\n\nStory continues at the following Beat.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+        "showSource": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+        "callPicker": {
+          "target": "map_help",
+          "options": [
+            "help_dialog \u00b7 Dialog",
+            "map_help \u00b7 Dialog"
+          ],
+          "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nShow screen \u00b7 help_tips\n\nStory continues at the following Beat.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller."
+        },
+        "showWithCallDraft": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+        "hideWithShowDraft": {
+          "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nHide screen \u00b7 help_tips\n\nStory continues at the following Beat.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+          "target": "hud"
+        },
+        "hideSource": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    hide screen help_tips\n    \"Ready? Let's go.\"",
+        "cancel": {
+          "beat": "hideScreen",
+          "target": "help_tips"
+        }
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "size": "560x640",
+      "name": "no-image-preview",
+      "status": "passed",
+      "observations": {
+        "before": {
+          "text": "Help preview unavailableImport a UI image in Assets to preview Help. Your creation draft stays here.New screenSource nameStarterBlankHelpKindPanelDialogPanel stays open while Story continues. Show or Hide it in Story.TitleExplanationChoose a reply to continue the story. Press Escape or Close to return.UI imageNo UI images availableHelp needs a UI image. Import one in Assets, then return. Your name and Help selection stay here.Open AssetsSimulate return with a UI imageImage size: 480 \u00d7 240. Title, explanation, image and Close stay editable in Screens.Create panelCancel",
+          "art": 0,
+          "imageValue": "",
+          "canvases": 1
+        },
+        "after": {
+          "text": "Screens preview \u00b7 inertHow to playChoose a reply to continue the story. Press Escape or Close to return.controls_guide \u00b7 480 \u00d7 240CloseSelect a node to edit it. Preview buttons never run game actions.New screenSource nameStarterBlankHelpKindPanelDialogPanel stays open while Story continues. Show or Hide it in Story.TitleExplanationChoose a reply to continue the story. Press Escape or Close to return.UI imagecontrols_guide \u00b7 UI imagemap_legend \u00b7 UI imageImage size: 480 \u00d7 240. Title, explanation, image and Close stay editable in Screens.Create panelCancel",
+          "art": 1,
+          "imageValue": "controls_guide"
+        }
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "size": "560x640",
+      "name": "blank-outside-simulation",
+      "status": "passed",
+      "observations": {
+        "status": "Blank uses the existing creation workflow. This Help prototype does not simulate its result.",
+        "sample": {
+          "view": "create",
+          "kind": "panel",
+          "starter": "blank",
+          "created": false,
+          "action": "finish",
+          "beat": "callScreen",
+          "target": "help",
+          "committedBeat": false,
+          "simulation": "known",
+          "followingBeatRuns": 0,
+          "draft": {
+            "name": "blank_example",
+            "title": "How to play",
+            "explanation": "Choose a reply to continue the story. Press Escape or Close to return.",
+            "image": "controls_guide",
+            "closeLabel": "Close"
+          }
+        },
+        "useStoryCount": 0
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "560x640",
+      "name": "panel-story",
+      "status": "passed",
+      "observations": {
+        "created": "Created help_tips as a panel in memory. All Help nodes remain editable.",
+        "creationSource": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+        "picker": {
+          "beat": "showScreen",
+          "target": "help_tips",
+          "options": [
+            "help_tips \u00b7 Panel",
+            "hud \u00b7 Panel"
+          ],
+          "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nInsert a Beat here\n\nAfter the introduction, before the next line.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller."
+        },
+        "acceptedShow": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nShow screen \u00b7 help_tips\n\nStory continues at the following Beat.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+        "showSource": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+        "callPicker": {
+          "target": "map_help",
+          "options": [
+            "help_dialog \u00b7 Dialog",
+            "map_help \u00b7 Dialog"
+          ],
+          "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nShow screen \u00b7 help_tips\n\nStory continues at the following Beat.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller."
+        },
+        "showWithCallDraft": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    show screen help_tips\n    \"Ready? Let's go.\"",
+        "hideWithShowDraft": {
+          "timeline": "Story \u00b7 First steps\n01\nDialogue\n\n\"Before we leave, take a look at the controls.\"\n\n02\nHide screen \u00b7 help_tips\n\nStory continues at the following Beat.\n\n03\nDialogue\n\n\"Ready? Let's go.\"\n\n04\nReturn / end\n\nEnds this Story body or returns to its Scene caller.",
+          "target": "hud"
+        },
+        "hideSource": "screen help_tips():\n    modal False\n    key \"game_menu\" action Hide(\"help_tips\")\n    # Ordinary title, explanation, image and Close nodes\n    textbutton \"Close\" action Hide(\"help_tips\") default_focus True\n\nlabel first_steps:\n    hide screen help_tips\n    \"Ready? Let's go.\"",
+        "cancel": {
+          "beat": "hideScreen",
+          "target": "help_tips"
+        }
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "560x640",
+      "name": "no-image-preview",
+      "status": "passed",
+      "observations": {
+        "before": {
+          "text": "Story \u00b7 First steps01Dialogue\"Before we leave, take a look at the controls.\"02Insert a Beat hereAfter the introduction, before the next line.03Dialogue\"Ready? Let's go.\"04Return / endEnds this Story body or returns to its Scene caller.New screenSource nameStarterBlankHelpKindPanelDialogPanel stays open while Story continues. Show or Hide it in Story.TitleExplanationChoose a reply to continue the story. Press Escape or Close to return.UI imageNo UI images availableHelp needs a UI image. Import one in Assets, then return. Your name and Help selection stay here.Open AssetsSimulate return with a UI imageImage size: 480 \u00d7 240. Title, explanation, image and Close stay editable in Screens.Create panelCancel",
+          "art": 0,
+          "imageValue": "",
+          "canvases": 0
+        },
+        "after": {
+          "text": "Story \u00b7 First steps01Dialogue\"Before we leave, take a look at the controls.\"02Insert a Beat hereAfter the introduction, before the next line.03Dialogue\"Ready? Let's go.\"04Return / endEnds this Story body or returns to its Scene caller.New screenSource nameStarterBlankHelpKindPanelDialogPanel stays open while Story continues. Show or Hide it in Story.TitleExplanationChoose a reply to continue the story. Press Escape or Close to return.UI imagecontrols_guide \u00b7 UI imagemap_legend \u00b7 UI imageImage size: 480 \u00d7 240. Title, explanation, image and Close stay editable in Screens.Create panelCancel",
+          "art": 0,
+          "imageValue": "controls_guide"
+        }
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "size": "560x640",
+      "name": "blank-outside-simulation",
+      "status": "passed",
+      "observations": {
+        "status": "Blank uses the existing creation workflow. This Help prototype does not simulate its result.",
+        "sample": {
+          "view": "create",
+          "kind": "panel",
+          "starter": "blank",
+          "created": false,
+          "action": "finish",
+          "beat": "callScreen",
+          "target": "help",
+          "committedBeat": false,
+          "simulation": "known",
+          "followingBeatRuns": 0,
+          "draft": {
+            "name": "blank_example",
+            "title": "How to play",
+            "explanation": "Choose a reply to continue the story. Press Escape or Close to return.",
+            "image": "controls_guide",
+            "closeLabel": "Close"
+          }
+        },
+        "useStoryCount": 0
+      }
+    }
+  ],
+  "captures": [
+    "inspector-v2-1100x720-panel-picker.png",
+    "inspector-v2-1100x720-panel-show-timeline.png",
+    "inspector-v2-1100x720-panel-show-source.png",
+    "inspector-v2-1100x720-panel-call-picker.png",
+    "inspector-v2-1100x720-panel-hide-accepted-source.png",
+    "inspector-v2-1100x720-no-image-before-return.png",
+    "inspector-v2-1100x720-no-image-after-return.png",
+    "inspector-v2-1100x720-blank-outside.png",
+    "steps-v2-1100x720-panel-picker.png",
+    "steps-v2-1100x720-panel-show-timeline.png",
+    "steps-v2-1100x720-panel-show-source.png",
+    "steps-v2-1100x720-panel-call-picker.png",
+    "steps-v2-1100x720-panel-hide-accepted-source.png",
+    "steps-v2-1100x720-no-image-before-return.png",
+    "steps-v2-1100x720-no-image-after-return.png",
+    "steps-v2-1100x720-blank-outside.png",
+    "story-split-v2-1100x720-panel-picker.png",
+    "story-split-v2-1100x720-panel-show-timeline.png",
+    "story-split-v2-1100x720-panel-show-source.png",
+    "story-split-v2-1100x720-panel-call-picker.png",
+    "story-split-v2-1100x720-panel-hide-accepted-source.png",
+    "story-split-v2-1100x720-no-image-before-return.png",
+    "story-split-v2-1100x720-no-image-after-return.png",
+    "story-split-v2-1100x720-blank-outside.png",
+    "inspector-v2-560x640-panel-picker.png",
+    "inspector-v2-560x640-panel-show-timeline.png",
+    "inspector-v2-560x640-panel-show-source.png",
+    "inspector-v2-560x640-panel-call-picker.png",
+    "inspector-v2-560x640-panel-hide-accepted-source.png",
+    "inspector-v2-560x640-no-image-before-return.png",
+    "inspector-v2-560x640-no-image-after-return.png",
+    "inspector-v2-560x640-blank-outside.png",
+    "steps-v2-560x640-panel-picker.png",
+    "steps-v2-560x640-panel-show-timeline.png",
+    "steps-v2-560x640-panel-show-source.png",
+    "steps-v2-560x640-panel-call-picker.png",
+    "steps-v2-560x640-panel-hide-accepted-source.png",
+    "steps-v2-560x640-no-image-before-return.png",
+    "steps-v2-560x640-no-image-after-return.png",
+    "steps-v2-560x640-blank-outside.png",
+    "story-split-v2-560x640-panel-picker.png",
+    "story-split-v2-560x640-panel-show-timeline.png",
+    "story-split-v2-560x640-panel-show-source.png",
+    "story-split-v2-560x640-panel-call-picker.png",
+    "story-split-v2-560x640-panel-hide-accepted-source.png",
+    "story-split-v2-560x640-no-image-before-return.png",
+    "story-split-v2-560x640-no-image-after-return.png",
+    "story-split-v2-560x640-blank-outside.png"
+  ],
+  "errors": [],
+  "failures": [],
+  "browser": {
+    "version": "153.0.8010.12",
+    "node": "v24.19.0",
+    "playwright": "1.63.0"
+  },
+  "summary": {
+    "cases": 18,
+    "passed": 18,
+    "captures": 48,
+    "errors": 0,
+    "failures": 0
+  }
+}

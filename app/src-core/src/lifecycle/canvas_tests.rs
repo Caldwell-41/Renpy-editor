@@ -37,14 +37,17 @@ fn controlled_canvas_child() {
                 if mode == "exit" {
                     return;
                 }
-                if mode == "ready" && request["frameId"] != last_frame {
+                if matches!(mode.as_str(), "ready" | "fractional")
+                    && request["frameId"] != last_frame
+                {
                     let frame = &request["plan"]["nodes"][1];
                     let result = json!({
                         "frameId":request["frameId"],
                         "renderer":crate::renpy::runtime::canvas::RENDERER,
                         "width":request["plan"]["width"],
                         "height":request["plan"]["height"],
-                        "geometry":[{"start":frame["start"],"x":0,"y":0,
+                        "geometry":[{"start":frame["start"],"x":0,
+                            "y":if mode == "fractional" {448.20000000000005} else {0.0},
                             "width":frame["properties"]["xsize"],
                             "height":frame["properties"]["ysize"]}]
                     });
@@ -163,6 +166,17 @@ impl Project {
                 .starts_with("canvas-helper-")
         })
     }
+}
+
+#[test]
+fn canvas_status_preserves_helper_fractional_geometry() {
+    let mut project = Project::new(&["fractional"]);
+    let frame = project.render();
+    let ready = project.wait_phase(&frame, "ready", Duration::from_secs(5));
+    let actual = ready["geometry"][0]["y"].as_f64().unwrap();
+    project.service.close().unwrap();
+    assert!(!project.helper_root_exists());
+    assert_eq!(actual.to_bits(), 448.20000000000005_f64.to_bits());
 }
 
 #[test]

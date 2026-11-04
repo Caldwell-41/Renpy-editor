@@ -28,6 +28,9 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   Unix process absence. Route only named host cases; inject absence for portable logic.
 - **Regression:** `test_macos_development_credentials`, cleanup live/unknown-state refusal,
   and exact named Python exclusions in `check-thinking-evidence.py`.
+- **Related Linux case:** a portable Help cleanup fixture mocked SDK execution but
+  leaked the real target lookup. Supply the mocked target explicitly; keep actual
+  SDK host admission strict. [Diagnosis and correction](../tasks/evidence/help-dialog-and-canvas.md#linux-offline-ci-fixture-correction-2026-11-04).
 - **Evidence:** [CI2 diagnosis and correction](../tasks/evidence/phase-2-execution.md#ci2-terminal-diagnosis-and-proposed-correction--2026-10-16),
   [failed run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38850950449).
 
@@ -919,3 +922,64 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   `submit` bypassed the browser gate. Assert associated error, retained input/focus
   and no write. The case fails before the fix and passes afterward.
 - **Evidence:** [Naming correction](../tasks/evidence/components-and-help-panel.md#component-name-submission-correction-2026-11-03).
+
+## H66: Inline script loading loses sibling imports
+
+- **Class/search:** CI caller; `runpy`, `ModuleNotFoundError`, `runtime_probe_cases`,
+  failure-artifact sealing.
+- **Cause/correction:** the utility normally runs with its script directory on
+  Python's import path. An inline caller used `runpy` without that directory, so
+  nested sibling imports failed. The caller now supplies the directory; the
+  established utility stays unchanged.
+- **Verification:** the import error reproduces locally. Corrected invocation
+  retains both actual executables, verifies hashes, emits the source/manifest
+  receipts and passes the artifact privacy scan.
+- **Evidence:** [Offline CI correction](../tasks/evidence/help-dialog-and-canvas.md#linux-offline-ci-fixture-correction-2026-11-04).
+
+## P06. Canvas JSON decoding changes fractional geometry
+
+- **Class/search:** product; fractional geometry, exact comparison, one ULP,
+  `448.20000000000005`, `float_roundtrip`, Canvas status.
+- **Cause/correction:** the pinned JSON decoder's default floating-point path changes
+  this helper coordinate to `448.2000000000001`. Enable its lossless round-trip
+  feature. Keep the renderer and exact pixel/geometry comparison unchanged.
+- **Regression:** the production Canvas status path with the existing controlled
+  child reproduces the changed coordinate before the fix and preserves its exact
+  floating-point bits afterward. The child exits and its scratch is removed.
+- **Evidence:** [Matched captures and geometry diagnosis](../tasks/evidence/help-dialog-and-canvas.md#mac-matrix-and-exact-geometry-diagnosis).
+
+## H67. Nonblocking Dialog actions lose source protection
+
+- **Class/search:** product; Dialog, Return, Finish, modal False, duplicate modality,
+  protected source, button removal.
+- **Cause/correction:** interaction qualification admitted Return by owned-screen
+  kind without proving blocking state. The shared owner now proves a single exact
+  root `modal True` before qualifying local Return and game-menu dismissal.
+- **Regression:** public inspection/composition retains protected actions and
+  refuses removal in missing, false, calculated and duplicate modality, while
+  valid Dialog Finish and inert Null edits remain available.
+- **Evidence:** [PR 79 corrections and parent review](../tasks/evidence/help-dialog-and-canvas.md#pr-79-root-cause-corrections-and-parent-review-2026-11-04).
+
+## H68. Stale sole-position insertion cannot be confirmed
+
+- **Class/search:** product and insufficient test; stale insertion, Return-only
+  Scene, single select option, synthetic change, retained location.
+- **Cause/correction:** confirmation depended on changing an already-selected sole
+  option. A test dispatched `change` without a possible user value transition.
+  Destination selection now starts stale locations on an explicit placeholder.
+- **Regression:** actual Story controls through core refuse before selection,
+  accept the sole legal position after a real value change, preserve Cancel/Escape
+  and source comments, and retain one-step Undo/Redo and accepted revision.
+- **Evidence:** [PR 79 corrections and parent review](../tasks/evidence/help-dialog-and-canvas.md#pr-79-root-cause-corrections-and-parent-review-2026-11-04).
+
+## P07. Screen inspection repeats whole-source analysis per button
+
+- **Class/search:** product; slow inspection, marked buttons, quadratic work,
+  dismissal capability, source parsing.
+- **Cause/correction:** each button reparsed the file and requalified every action.
+  One screen qualification now owns reusable action ranges for inspection and
+  dismissal. The former per-button parsing path is removed.
+- **Regression:** optimized public-service diagnostics reproduce the overhead and
+  verify its removal; a large-screen public test preserves per-button authority
+  and exact source edits without a permanent timing threshold.
+- **Evidence:** [PR 79 corrections and parent review](../tasks/evidence/help-dialog-and-canvas.md#pr-79-root-cause-corrections-and-parent-review-2026-11-04).

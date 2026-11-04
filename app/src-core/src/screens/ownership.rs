@@ -32,6 +32,8 @@ pub struct Catalog {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct CreateRequest {
     pub name: String,
+    #[serde(default)]
+    pub kind: crate::metadata::OwnedScreenKind,
     pub expected_project_revision: String,
     pub expected_source_map_revision: String,
     pub expected_inventory_revision: String,
@@ -311,6 +313,7 @@ impl AuthoringService {
                             text_properties: None,
                             style: None,
                             component: None,
+                            dismissal: None,
                             span: span.clone(),
                             parent_start: Some(parent.span.start),
                             properties: vec![],
@@ -378,10 +381,29 @@ impl AuthoringService {
                 }
             }
             if let Some(owner) = owned {
-                let qualified = references::qualified_panel_spans(owner, screen, bytes);
-                for node in &mut screen.nodes {
+                // Qualify against raw action spans before removing supported protected details.
+                // Duplicate markers have already lost their IDs and cannot expose edit authority.
+                let qualified = references::qualified_interaction(owner, screen, bytes);
+                let dismissals: Vec<_> = screen
+                    .nodes
+                    .iter()
+                    .map(|node| {
+                        node.id.as_ref()?;
+                        let span = qualified.dismissals.get(&node.span.start)?;
+                        match &bytes[span.start..span.end] {
+                            b"Null()" => Some(ButtonDismissal::None),
+                            b"Return()" => Some(ButtonDismissal::FinishInteraction),
+                            _ if owner.kind == crate::metadata::OwnedScreenKind::Panel => {
+                                Some(ButtonDismissal::HideScreen)
+                            }
+                            _ => None,
+                        }
+                    })
+                    .collect();
+                for (node, dismissal) in screen.nodes.iter_mut().zip(dismissals) {
+                    node.dismissal = dismissal;
                     node.protected
-                        .retain(|span| !qualified.contains_key(&span.start));
+                        .retain(|span| !qualified.spans.contains_key(&span.start));
                 }
             }
         }
@@ -560,14 +582,20 @@ impl AuthoringService {
         mut request: CreateRequest,
     ) -> Result<Catalog, SceneError> {
         let starter = request.starter.take();
+        let kind = request.kind;
+        if kind == crate::metadata::OwnedScreenKind::Component {
+            return Err(SceneError::InvalidPayload);
+        }
         let prepared = self.prepare_owned_screen_create(
             project,
             project_id,
             request,
-            crate::metadata::OwnedScreenKind::Panel,
-            |owner| match starter {
-                Some(starter) => self.prepare_help_panel(project, project_id, &owner.name, starter),
-                None => Ok(format!("screen {}():\n    pass\n", owner.name).into_bytes()),
+            |owner| match (kind, starter) {
+                (crate::metadata::OwnedScreenKind::Panel, Some(starter)) => self.prepare_help_panel(project, project_id, &owner.name, starter),
+                (crate::metadata::OwnedScreenKind::Dialog, Some(starter)) => self.prepare_help_dialog(project, project_id, &owner.name, starter),
+                (crate::metadata::OwnedScreenKind::Panel, None) => Ok(format!("screen {}():\n    pass\n", owner.name).into_bytes()),
+                (crate::metadata::OwnedScreenKind::Dialog, None) => Ok(format!("screen {}():\n    modal True\n    key \"game_menu\" action Return()\n    pass\n", owner.name).into_bytes()),
+                (crate::metadata::OwnedScreenKind::Component, _) => unreachable!(),
             },
         )?;
         self.commit_owned_screen_create(project, project_id, prepared, Vec::new())
@@ -578,7 +606,6 @@ impl AuthoringService {
         project: &ProjectId,
         project_id: &str,
         request: CreateRequest,
-        kind: crate::metadata::OwnedScreenKind,
         source_builder: impl FnOnce(&OwnedScreen) -> Result<Vec<u8>, SceneError>,
     ) -> Result<PreparedOwnedScreenCreate, SceneError> {
         if request.starter.is_some() {
@@ -634,7 +661,7 @@ impl AuthoringService {
             root_id: uuid::Uuid::new_v4().to_string(),
             name: request.name,
             path: destination.clone(),
-            kind,
+            kind: request.kind,
             extra: Default::default(),
         };
         let mut source = format!("{}\n", marker(&screen.id)).into_bytes();

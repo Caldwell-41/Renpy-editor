@@ -1,0 +1,83 @@
+{
+  "scope": "Focused DOM event/focus correction, not a real-browser rerun.",
+  "htmlSha256": "1137b4a18bbe5c7805ea9b8848d0bf5b01a29c41c4ad74bce0ad4ea13034670a",
+  "cases": [
+    {
+      "variant": "inspector-v4",
+      "unknown": false,
+      "outsideChild": false,
+      "status": "passed"
+    },
+    {
+      "variant": "inspector-v4",
+      "unknown": false,
+      "outsideChild": true,
+      "status": "passed"
+    },
+    {
+      "variant": "inspector-v4",
+      "unknown": true,
+      "outsideChild": false,
+      "status": "passed"
+    },
+    {
+      "variant": "inspector-v4",
+      "unknown": true,
+      "outsideChild": true,
+      "status": "passed"
+    },
+    {
+      "variant": "steps-v4",
+      "unknown": false,
+      "outsideChild": false,
+      "status": "passed"
+    },
+    {
+      "variant": "steps-v4",
+      "unknown": false,
+      "outsideChild": true,
+      "status": "passed"
+    },
+    {
+      "variant": "steps-v4",
+      "unknown": true,
+      "outsideChild": false,
+      "status": "passed"
+    },
+    {
+      "variant": "steps-v4",
+      "unknown": true,
+      "outsideChild": true,
+      "status": "passed"
+    },
+    {
+      "variant": "story-split-v4",
+      "unknown": false,
+      "outsideChild": false,
+      "status": "passed"
+    },
+    {
+      "variant": "story-split-v4",
+      "unknown": false,
+      "outsideChild": true,
+      "status": "passed"
+    },
+    {
+      "variant": "story-split-v4",
+      "unknown": true,
+      "outsideChild": false,
+      "status": "passed"
+    },
+    {
+      "variant": "story-split-v4",
+      "unknown": true,
+      "outsideChild": true,
+      "status": "passed"
+    }
+  ],
+  "errors": [],
+  "summary": {
+    "passed": 12,
+    "failed": 0
+  }
+}

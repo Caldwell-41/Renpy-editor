@@ -3,7 +3,7 @@ use serde_json::{Map, Value};
 use std::{collections::HashSet, fs, io, path::Path};
 
 pub const PROJECT_SCHEMA_VERSION: u32 = 2;
-pub const SOURCE_MAP_SCHEMA_VERSION: u32 = 7;
+pub const SOURCE_MAP_SCHEMA_VERSION: u32 = 8;
 pub(crate) const MAX_SOURCE_MAP_BYTES: usize = 1_000_000;
 pub const LEGACY_PROJECT_SCHEMA_VERSION: u32 = 1;
 pub const LEGACY_SOURCE_MAP_SCHEMA_VERSION: u32 = 1;
@@ -120,6 +120,7 @@ pub struct OwnedScreen {
 pub enum OwnedScreenKind {
     #[default]
     Panel,
+    Dialog,
     Component,
 }
 
@@ -362,7 +363,7 @@ impl SourceMapMetadata {
     pub fn validate(&self, project_id: &str) -> Result<(), MetadataError> {
         if !matches!(
             self.schema_version,
-            LEGACY_SOURCE_MAP_SCHEMA_VERSION | 2 | 3 | 4 | 5 | 6 | SOURCE_MAP_SCHEMA_VERSION
+            LEGACY_SOURCE_MAP_SCHEMA_VERSION | 2 | 3 | 4 | 5 | 6 | 7 | SOURCE_MAP_SCHEMA_VERSION
         ) || !valid_id(&self.project_id)
             || self.project_id != project_id
             || self.sources.len() > 4096
@@ -394,6 +395,7 @@ impl SourceMapMetadata {
                 || !owned_names.insert(screen.name.to_ascii_lowercase())
                 || !sources.contains(&screen.path.to_ascii_lowercase())
                 || (self.schema_version < 7 && screen.kind == OwnedScreenKind::Component)
+                || (self.schema_version < 8 && screen.kind == OwnedScreenKind::Dialog)
             {
                 return Err(MetadataError::InvalidStructure);
             }
@@ -449,9 +451,17 @@ impl SourceMapMetadata {
                 {
                     return Err(MetadataError::InvalidStructure);
                 }
+                if beat.kind == "callScreen"
+                    && (self.schema_version < 8 || beat.screen_target.is_none())
+                {
+                    return Err(MetadataError::InvalidStructure);
+                }
                 if let Some(target) = &beat.screen_target {
                     if self.schema_version < 7
-                        || !matches!(beat.kind.as_str(), "showScreen" | "hideScreen")
+                        || !matches!(
+                            beat.kind.as_str(),
+                            "showScreen" | "hideScreen" | "callScreen"
+                        )
                         || !valid_id(&target.screen_id)
                         || !crate::screens::valid_name(&target.source_name)
                     {
@@ -701,6 +711,12 @@ mod tests {
             round_trip["sceneMappings"][0]["beats"][0]["screenTarget"],
             value["sceneMappings"][0]["beats"][0]["screenTarget"]
         );
+        value["sceneMappings"][0]["beats"][0]["kind"] = Value::String("callScreen".into());
+        assert!(read(&value).is_ok());
+        value["schemaVersion"] = Value::from(7);
+        assert_eq!(read(&value), Err(MetadataError::InvalidStructure));
+        value["schemaVersion"] = Value::from(SOURCE_MAP_SCHEMA_VERSION);
+        value["sceneMappings"][0]["beats"][0]["kind"] = Value::String("showScreen".into());
         let binding = value["sceneMappings"][0]["beats"][0]["screenTarget"].take();
         assert_eq!(read(&value), Err(MetadataError::InvalidStructure));
         value["sceneMappings"][0]["beats"][0]["screenTarget"] = binding;

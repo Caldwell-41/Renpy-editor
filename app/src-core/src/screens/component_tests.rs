@@ -50,6 +50,7 @@ impl Fixture {
                 &project,
                 &project_id,
                 CreateRequest {
+                    kind: crate::metadata::OwnedScreenKind::Panel,
                     starter: None,
                     name: "notes".into(),
                     expected_project_revision: catalog.project_revision,
@@ -138,6 +139,7 @@ impl Fixture {
                 &self.project,
                 &self.project_id,
                 CreateRequest {
+                    kind: crate::metadata::OwnedScreenKind::Panel,
                     name: name.into(),
                     starter: None,
                     expected_project_revision: catalog.project_revision,

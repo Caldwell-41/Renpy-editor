@@ -7,6 +7,8 @@
 
 pub mod flow;
 mod logic;
+mod screen_beats;
+use screen_beats::ScreenStatement;
 mod structure;
 
 use crate::{
@@ -89,6 +91,11 @@ pub enum BeatPayload {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         revisions: Option<ScreenRevisions>,
     },
+    CallScreen {
+        target: ScreenTargetBinding,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        revisions: Option<ScreenRevisions>,
+    },
     ChangeAppearance {
         character_id: String,
         appearance_id: String,
@@ -140,7 +147,9 @@ pub enum BeatPayload {
 impl BeatPayload {
     fn screen_target(&self) -> Option<&ScreenTargetBinding> {
         match self {
-            Self::ShowScreen { target, .. } | Self::HideScreen { target, .. } => Some(target),
+            Self::ShowScreen { target, .. }
+            | Self::HideScreen { target, .. }
+            | Self::CallScreen { target, .. } => Some(target),
             _ => None,
         }
     }
@@ -152,6 +161,7 @@ impl BeatPayload {
             Self::HideCharacter { .. } => "hideCharacter",
             Self::ShowScreen { .. } => "showScreen",
             Self::HideScreen { .. } => "hideScreen",
+            Self::CallScreen { .. } => "callScreen",
             Self::ChangeAppearance { .. } => "changeAppearance",
             Self::Placement { .. } => "placement",
             Self::Dialogue { .. } => "dialogue",
@@ -173,7 +183,10 @@ impl BeatPayload {
 pub(crate) fn logic_boundary(payload: &BeatPayload) -> bool {
     matches!(
         payload,
-        BeatPayload::Call { .. } | BeatPayload::ShowScreen { .. } | BeatPayload::HideScreen { .. }
+        BeatPayload::Call { .. }
+            | BeatPayload::ShowScreen { .. }
+            | BeatPayload::HideScreen { .. }
+            | BeatPayload::CallScreen { .. }
     ) || matches!(payload, BeatPayload::Choice { options } if options.iter().any(|o| o.condition.is_some()))
 }
 
@@ -699,8 +712,10 @@ impl AuthoringService {
                 .1
             };
             for beat in &mut beats {
+                let statement = beat.payload.screen_statement();
                 let (BeatPayload::ShowScreen { target, revisions }
-                | BeatPayload::HideScreen { target, revisions }) = &mut beat.payload
+                | BeatPayload::HideScreen { target, revisions }
+                | BeatPayload::CallScreen { target, revisions }) = &mut beat.payload
                 else {
                     continue;
                 };
@@ -708,15 +723,25 @@ impl AuthoringService {
                     continue;
                 }
                 let captured = screen_targets
-                    .entry((target.screen_id.clone(), target.source_name.clone()))
+                    .entry((
+                        target.screen_id.clone(),
+                        target.source_name.clone(),
+                        statement.unwrap().kind(),
+                    ))
                     .or_insert_with(|| {
                         self.screens_resolve_target(project, project_id, target, None)
                             .ok()
-                            .filter(|resolved| resolved.kind == OwnedScreenKind::Panel)
+                            .filter(|resolved| resolved.kind == statement.unwrap().owner_kind())
                     });
-                *revisions = captured.as_ref().map(|resolved| resolved.revisions.clone());
+                let context_valid = captured
+                    .as_ref()
+                    .is_some_and(|resolved| statement.unwrap().accepts_target(resolved));
+                *revisions = captured
+                    .as_ref()
+                    .filter(|_| context_valid)
+                    .map(|resolved| resolved.revisions.clone());
                 beat.screen_effects = captured.as_ref().map(|resolved| resolved.effects.clone());
-                beat.protected = captured.is_none();
+                beat.protected = !context_valid;
             }
             scenes.push(SceneDocument {
                 id: scene.id.clone(),
@@ -805,13 +830,18 @@ impl AuthoringService {
             _ => return Ok(()),
         };
         let (BeatPayload::ShowScreen { target, revisions }
-        | BeatPayload::HideScreen { target, revisions }) = payload
+        | BeatPayload::HideScreen { target, revisions }
+        | BeatPayload::CallScreen { target, revisions }) = payload
         else {
             return Ok(());
         };
         let expected = revisions.as_ref().ok_or(SceneError::InvalidPayload)?;
         let resolved = self.screens_resolve_target(project, project_id, target, Some(expected))?;
-        if resolved.kind != OwnedScreenKind::Panel {
+        if !payload
+            .screen_statement()
+            .unwrap()
+            .accepts_target(&resolved)
+        {
             return Err(SceneError::ReferenceBlocked);
         }
         self.ensure_source_paths_clean(project, [resolved.path.as_str()])
@@ -2623,7 +2653,9 @@ fn apply_beat_edit(
             let id = uuid::Uuid::new_v4().to_string();
             let anchor = matches!(
                 payload,
-                BeatPayload::ShowScreen { .. } | BeatPayload::HideScreen { .. }
+                BeatPayload::ShowScreen { .. }
+                    | BeatPayload::HideScreen { .. }
+                    | BeatPayload::CallScreen { .. }
             )
             .then_some(
                 insertion
@@ -2744,7 +2776,9 @@ fn apply_beat_edit(
                     id,
                     matches!(
                         payload,
-                        BeatPayload::ShowScreen { .. } | BeatPayload::HideScreen { .. }
+                        BeatPayload::ShowScreen { .. }
+                            | BeatPayload::HideScreen { .. }
+                            | BeatPayload::CallScreen { .. }
                     )
                     .then_some(beat.byte_start as usize),
                 )],
@@ -3054,6 +3088,7 @@ fn render_payload(
         }
         BeatPayload::ShowScreen { target, .. } => format!("    show screen {}", target.source_name),
         BeatPayload::HideScreen { target, .. } => format!("    hide screen {}", target.source_name),
+        BeatPayload::CallScreen { target, .. } => format!("    call screen {}", target.source_name),
         BeatPayload::Return => "    return".into(),
         BeatPayload::CustomCode { .. } => return Err(SceneError::InvalidPayload),
     };
@@ -3123,11 +3158,13 @@ fn validate_payload(payload: &BeatPayload, loaded: &Loaded) -> Result<(), SceneE
         | BeatPayload::Placement { character_id, .. } => {
             character(loaded, character_id)?;
         }
-        BeatPayload::ShowScreen { target, .. } | BeatPayload::HideScreen { target, .. } => {
+        BeatPayload::ShowScreen { target, .. }
+        | BeatPayload::HideScreen { target, .. }
+        | BeatPayload::CallScreen { target, .. } => {
             if !loaded.source_map.owned_screens.iter().any(|owner| {
                 owner.id == target.screen_id
                     && owner.name == target.source_name
-                    && owner.kind == OwnedScreenKind::Panel
+                    && owner.kind == payload.screen_statement().unwrap().owner_kind()
             }) {
                 return Err(SceneError::ReferenceBlocked);
             }
@@ -3593,16 +3630,23 @@ fn parse_line_version(
     parse_line(body, loaded)
 }
 
-pub(crate) fn screen_statement(line: &str) -> Option<(bool, &str)> {
+pub(crate) fn screen_statement(line: &str) -> Option<(ScreenStatement, &str)> {
     if line.contains(['\r', '\n']) {
         return None;
     }
     let line = logic::without_comment(line).trim_end_matches([' ', '\t']);
-    let (show, name) = line
-        .strip_prefix("show screen ")
-        .map(|name| (true, name))
-        .or_else(|| line.strip_prefix("hide screen ").map(|name| (false, name)))?;
-    crate::screens::valid_name(name).then_some((show, name))
+    [
+        ScreenStatement::Show,
+        ScreenStatement::Hide,
+        ScreenStatement::Call,
+    ]
+    .into_iter()
+    .find_map(|statement| {
+        let name = line
+            .strip_prefix(statement.verb())?
+            .strip_prefix(" screen ")?;
+        crate::screens::valid_name(name).then_some((statement, name))
+    })
 }
 
 fn patch_screen_beat(
@@ -3615,51 +3659,36 @@ fn patch_screen_beat(
     };
     let text = std::str::from_utf8(bytes).map_err(|_| SceneError::UnsupportedSource)?;
     let indent = text.len() - text.trim_start_matches(' ').len();
-    let (show, name) = screen_statement(text[indent..].trim_end_matches(['\r', '\n']))
+    let (statement, name) = screen_statement(text[indent..].trim_end_matches(['\r', '\n']))
         .ok_or(SceneError::OpaqueBoundary)?;
-    if name != old.source_name || show != matches!(previous, BeatPayload::ShowScreen { .. }) {
+    if name != old.source_name || Some(statement) != previous.screen_statement() {
         return Err(SceneError::OpaqueBoundary);
     }
-    let start = indent + "show screen ".len();
+    let start = indent + statement.verb().len() + " screen ".len();
     let mut patched = text.to_owned();
     patched.replace_range(start..start + name.len(), &target.source_name);
     patched.replace_range(
-        indent..indent + 4,
-        if matches!(next, BeatPayload::ShowScreen { .. }) {
-            "show"
-        } else {
-            "hide"
-        },
+        indent..indent + statement.verb().len(),
+        next.screen_statement().unwrap().verb(),
     );
     Ok(Some(patched))
 }
 
 fn parse_line(body: &str, loaded: Option<SceneParseContext<'_>>) -> Option<BeatPayload> {
     let line = body.strip_prefix("    ")?;
-    if let Some((show, name)) = screen_statement(line) {
+    if let Some((statement, name)) = screen_statement(line) {
         let mut owners = loaded?
             .2
             .iter()
-            .filter(|owner| owner.name == name && owner.kind == OwnedScreenKind::Panel);
+            .filter(|owner| owner.name == name && owner.kind == statement.owner_kind());
         let owner = owners.next()?;
         if owners.next().is_some() {
             return None;
         }
-        let target = ScreenTargetBinding {
+        return Some(statement.payload(ScreenTargetBinding {
             screen_id: owner.id.clone(),
             source_name: name.into(),
-        };
-        return Some(if show {
-            BeatPayload::ShowScreen {
-                target,
-                revisions: None,
-            }
-        } else {
-            BeatPayload::HideScreen {
-                target,
-                revisions: None,
-            }
-        });
+        }));
     }
     if line == "return" {
         return Some(BeatPayload::Return);
@@ -3835,7 +3864,13 @@ fn set_prepared_screen_target(
         let beat = mapping
             .beats
             .iter_mut()
-            .find(|beat| beat.id == id && matches!(beat.kind.as_str(), "showScreen" | "hideScreen"))
+            .find(|beat| {
+                beat.id == id
+                    && matches!(
+                        beat.kind.as_str(),
+                        "showScreen" | "hideScreen" | "callScreen"
+                    )
+            })
             .ok_or(SceneError::InvariantBlocked)?;
         beat.screen_target = Some(target);
     }
@@ -3879,13 +3914,11 @@ pub(crate) fn build_mapping(
         let mut unknown_statements = HashMap::<&str, usize>::new();
         for beat in &parsed {
             if matches!(beat.payload, BeatPayload::CustomCode { .. }) {
-                if let Some((show, _)) = std::str::from_utf8(&bytes[beat.start..beat.end])
+                if let Some((statement, _)) = std::str::from_utf8(&bytes[beat.start..beat.end])
                     .ok()
                     .and_then(|source| screen_statement(source.trim()))
                 {
-                    *unknown_statements
-                        .entry(if show { "showScreen" } else { "hideScreen" })
-                        .or_default() += 1;
+                    *unknown_statements.entry(statement.kind()).or_default() += 1;
                 }
             }
         }
@@ -3894,8 +3927,8 @@ pub(crate) fn build_mapping(
             if matches!(parsed.payload, BeatPayload::CustomCode { .. }) {
                 let source = std::str::from_utf8(&bytes[parsed.start..parsed.end])
                     .map_err(|_| SceneError::UnsupportedSource)?;
-                if let Some((show, _)) = screen_statement(source.trim()) {
-                    let kind = if show { "showScreen" } else { "hideScreen" };
+                if let Some((statement, _)) = screen_statement(source.trim()) {
+                    let kind = statement.kind();
                     let retained = forced
                         .iter()
                         .find(|(forced_kind, source_hash, _, anchor)| {
@@ -3926,17 +3959,7 @@ pub(crate) fn build_mapping(
                         });
                     if let Some(retained) = retained {
                         let target = retained.screen_target.clone().unwrap();
-                        parsed.payload = if show {
-                            BeatPayload::ShowScreen {
-                                target,
-                                revisions: None,
-                            }
-                        } else {
-                            BeatPayload::HideScreen {
-                                target,
-                                revisions: None,
-                            }
-                        };
+                        parsed.payload = statement.payload(target);
                         unresolved_screens.insert(parsed.start);
                     }
                 }
@@ -3955,7 +3978,9 @@ pub(crate) fn build_mapping(
             if retained_kind == Some("customCode")
                 && matches!(
                     parsed.payload,
-                    BeatPayload::ShowScreen { .. } | BeatPayload::HideScreen { .. }
+                    BeatPayload::ShowScreen { .. }
+                        | BeatPayload::HideScreen { .. }
+                        | BeatPayload::CallScreen { .. }
                 )
             {
                 let source = std::str::from_utf8(&bytes[parsed.start..parsed.end])
@@ -4030,7 +4055,9 @@ pub(crate) fn build_mapping(
             })
             .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
         let screen_target = match &mut parsed.payload {
-            BeatPayload::ShowScreen { target, .. } | BeatPayload::HideScreen { target, .. } => {
+            BeatPayload::ShowScreen { target, .. }
+            | BeatPayload::HideScreen { target, .. }
+            | BeatPayload::CallScreen { target, .. } => {
                 if let Some(retained) = previous
                     .and_then(|mapping| mapping.beats.iter().find(|beat| beat.id == id))
                     .and_then(|beat| beat.screen_target.as_ref())
@@ -4045,14 +4072,14 @@ pub(crate) fn build_mapping(
             let statement = std::str::from_utf8(&bytes[parsed.start..parsed.end])
                 .ok()
                 .and_then(|source| screen_statement(source.trim()));
-            let show = matches!(parsed.payload, BeatPayload::ShowScreen { .. });
+            let statement_kind = parsed.payload.screen_statement().unwrap();
             unresolved_screens.contains(&parsed.start)
-                || statement != Some((show, target.source_name.as_str()))
+                || statement != Some((statement_kind, target.source_name.as_str()))
                 || context.is_none_or(|(_, _, owners)| {
                     !owners.iter().any(|owner| {
                         owner.id == target.screen_id
                             && owner.name == target.source_name
-                            && owner.kind == OwnedScreenKind::Panel
+                            && owner.kind == statement_kind.owner_kind()
                     })
                 })
         } else {

@@ -1,0 +1,785 @@
+{
+  "input": ".toolchains/help-dialog-story/comparison.html",
+  "scope": "Offline browser memory simulation only. No Ren'Py qualification.",
+  "startedAt": "2026-11-03T14:15:07.305Z",
+  "browser": {
+    "version": "153.0.8010.12",
+    "playwright": "1.63.0",
+    "node": "v24.19.0"
+  },
+  "matrix": [
+    {
+      "variant": "inspector-v2",
+      "state": "create",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 1100,
+        "documentClientWidth": 1100,
+        "documentScrollWidth": 1100,
+        "bodyScrollWidth": 1100,
+        "documentScrollHeight": 880,
+        "selectedVariant": "inspector-v2",
+        "selectedState": "create",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "state": "design",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 1100,
+        "documentClientWidth": 1100,
+        "documentScrollWidth": 1100,
+        "bodyScrollWidth": 1100,
+        "documentScrollHeight": 994,
+        "selectedVariant": "inspector-v2",
+        "selectedState": "design",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "state": "story",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 1100,
+        "documentClientWidth": 1100,
+        "documentScrollWidth": 1100,
+        "bodyScrollWidth": 1100,
+        "documentScrollHeight": 720,
+        "selectedVariant": "inspector-v2",
+        "selectedState": "story",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "state": "no-images",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 1100,
+        "documentClientWidth": 1100,
+        "documentScrollWidth": 1100,
+        "bodyScrollWidth": 1100,
+        "documentScrollHeight": 1048,
+        "selectedVariant": "inspector-v2",
+        "selectedState": "no-images",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "state": "invalid",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 1100,
+        "documentClientWidth": 1100,
+        "documentScrollWidth": 1100,
+        "bodyScrollWidth": 1100,
+        "documentScrollHeight": 1034,
+        "selectedVariant": "inspector-v2",
+        "selectedState": "invalid",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "state": "unknown",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 1100,
+        "documentClientWidth": 1100,
+        "documentScrollWidth": 1100,
+        "bodyScrollWidth": 1100,
+        "documentScrollHeight": 844,
+        "selectedVariant": "inspector-v2",
+        "selectedState": "unknown",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "state": "missing",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 1100,
+        "documentClientWidth": 1100,
+        "documentScrollWidth": 1100,
+        "bodyScrollWidth": 1100,
+        "documentScrollHeight": 806,
+        "selectedVariant": "inspector-v2",
+        "selectedState": "missing",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "create",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 1100,
+        "documentClientWidth": 1100,
+        "documentScrollWidth": 1100,
+        "bodyScrollWidth": 1100,
+        "documentScrollHeight": 940,
+        "selectedVariant": "steps-v2",
+        "selectedState": "create",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "design",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 1100,
+        "documentClientWidth": 1100,
+        "documentScrollWidth": 1100,
+        "bodyScrollWidth": 1100,
+        "documentScrollHeight": 1035,
+        "selectedVariant": "steps-v2",
+        "selectedState": "design",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "story",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 1100,
+        "documentClientWidth": 1100,
+        "documentScrollWidth": 1100,
+        "bodyScrollWidth": 1100,
+        "documentScrollHeight": 742,
+        "selectedVariant": "steps-v2",
+        "selectedState": "story",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "no-images",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 1100,
+        "documentClientWidth": 1100,
+        "documentScrollWidth": 1100,
+        "bodyScrollWidth": 1100,
+        "documentScrollHeight": 1054,
+        "selectedVariant": "steps-v2",
+        "selectedState": "no-images",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "invalid",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 1100,
+        "documentClientWidth": 1100,
+        "documentScrollWidth": 1100,
+        "bodyScrollWidth": 1100,
+        "documentScrollHeight": 1075,
+        "selectedVariant": "steps-v2",
+        "selectedState": "invalid",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "unknown",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 1100,
+        "documentClientWidth": 1100,
+        "documentScrollWidth": 1100,
+        "bodyScrollWidth": 1100,
+        "documentScrollHeight": 809,
+        "selectedVariant": "steps-v2",
+        "selectedState": "unknown",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "missing",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 1100,
+        "documentClientWidth": 1100,
+        "documentScrollWidth": 1100,
+        "bodyScrollWidth": 1100,
+        "documentScrollHeight": 809,
+        "selectedVariant": "steps-v2",
+        "selectedState": "missing",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "create",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 1100,
+        "documentClientWidth": 1100,
+        "documentScrollWidth": 1100,
+        "bodyScrollWidth": 1100,
+        "documentScrollHeight": 880,
+        "selectedVariant": "story-split-v2",
+        "selectedState": "create",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "design",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 1100,
+        "documentClientWidth": 1100,
+        "documentScrollWidth": 1100,
+        "bodyScrollWidth": 1100,
+        "documentScrollHeight": 975,
+        "selectedVariant": "story-split-v2",
+        "selectedState": "design",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "story",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 1100,
+        "documentClientWidth": 1100,
+        "documentScrollWidth": 1100,
+        "bodyScrollWidth": 1100,
+        "documentScrollHeight": 720,
+        "selectedVariant": "story-split-v2",
+        "selectedState": "story",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "no-images",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 1100,
+        "documentClientWidth": 1100,
+        "documentScrollWidth": 1100,
+        "bodyScrollWidth": 1100,
+        "documentScrollHeight": 994,
+        "selectedVariant": "story-split-v2",
+        "selectedState": "no-images",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "invalid",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 1100,
+        "documentClientWidth": 1100,
+        "documentScrollWidth": 1100,
+        "bodyScrollWidth": 1100,
+        "documentScrollHeight": 1015,
+        "selectedVariant": "story-split-v2",
+        "selectedState": "invalid",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "unknown",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 1100,
+        "documentClientWidth": 1100,
+        "documentScrollWidth": 1100,
+        "bodyScrollWidth": 1100,
+        "documentScrollHeight": 825,
+        "selectedVariant": "story-split-v2",
+        "selectedState": "unknown",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "missing",
+      "size": "1100x720",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 1100,
+        "documentClientWidth": 1100,
+        "documentScrollWidth": 1100,
+        "bodyScrollWidth": 1100,
+        "documentScrollHeight": 806,
+        "selectedVariant": "story-split-v2",
+        "selectedState": "missing",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "state": "create",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 560,
+        "documentClientWidth": 560,
+        "documentScrollWidth": 560,
+        "bodyScrollWidth": 560,
+        "documentScrollHeight": 866,
+        "selectedVariant": "inspector-v2",
+        "selectedState": "create",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "state": "design",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 560,
+        "documentClientWidth": 560,
+        "documentScrollWidth": 560,
+        "bodyScrollWidth": 560,
+        "documentScrollHeight": 1460,
+        "selectedVariant": "inspector-v2",
+        "selectedState": "design",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "state": "story",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 560,
+        "documentClientWidth": 560,
+        "documentScrollWidth": 560,
+        "bodyScrollWidth": 560,
+        "documentScrollHeight": 1124,
+        "selectedVariant": "inspector-v2",
+        "selectedState": "story",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "state": "no-images",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 560,
+        "documentClientWidth": 560,
+        "documentScrollWidth": 560,
+        "bodyScrollWidth": 560,
+        "documentScrollHeight": 981,
+        "selectedVariant": "inspector-v2",
+        "selectedState": "no-images",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "state": "invalid",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 560,
+        "documentClientWidth": 560,
+        "documentScrollWidth": 560,
+        "bodyScrollWidth": 560,
+        "documentScrollHeight": 1500,
+        "selectedVariant": "inspector-v2",
+        "selectedState": "invalid",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "state": "unknown",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 560,
+        "documentClientWidth": 560,
+        "documentScrollWidth": 560,
+        "bodyScrollWidth": 560,
+        "documentScrollHeight": 1196,
+        "selectedVariant": "inspector-v2",
+        "selectedState": "unknown",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "inspector-v2",
+      "state": "missing",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 560,
+        "documentClientWidth": 560,
+        "documentScrollWidth": 560,
+        "bodyScrollWidth": 560,
+        "documentScrollHeight": 1196,
+        "selectedVariant": "inspector-v2",
+        "selectedState": "missing",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "create",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 560,
+        "documentClientWidth": 560,
+        "documentScrollWidth": 560,
+        "bodyScrollWidth": 560,
+        "documentScrollHeight": 922,
+        "selectedVariant": "steps-v2",
+        "selectedState": "create",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "design",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 560,
+        "documentClientWidth": 560,
+        "documentScrollWidth": 560,
+        "bodyScrollWidth": 560,
+        "documentScrollHeight": 1516,
+        "selectedVariant": "steps-v2",
+        "selectedState": "design",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "story",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 560,
+        "documentClientWidth": 560,
+        "documentScrollWidth": 560,
+        "bodyScrollWidth": 560,
+        "documentScrollHeight": 1180,
+        "selectedVariant": "steps-v2",
+        "selectedState": "story",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "no-images",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 560,
+        "documentClientWidth": 560,
+        "documentScrollWidth": 560,
+        "bodyScrollWidth": 560,
+        "documentScrollHeight": 1036,
+        "selectedVariant": "steps-v2",
+        "selectedState": "no-images",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "invalid",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 560,
+        "documentClientWidth": 560,
+        "documentScrollWidth": 560,
+        "bodyScrollWidth": 560,
+        "documentScrollHeight": 1556,
+        "selectedVariant": "steps-v2",
+        "selectedState": "invalid",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "unknown",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 560,
+        "documentClientWidth": 560,
+        "documentScrollWidth": 560,
+        "bodyScrollWidth": 560,
+        "documentScrollHeight": 1252,
+        "selectedVariant": "steps-v2",
+        "selectedState": "unknown",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "steps-v2",
+      "state": "missing",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 560,
+        "documentClientWidth": 560,
+        "documentScrollWidth": 560,
+        "bodyScrollWidth": 560,
+        "documentScrollHeight": 1252,
+        "selectedVariant": "steps-v2",
+        "selectedState": "missing",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "create",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 560,
+        "documentClientWidth": 560,
+        "documentScrollWidth": 560,
+        "bodyScrollWidth": 560,
+        "documentScrollHeight": 866,
+        "selectedVariant": "story-split-v2",
+        "selectedState": "create",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "design",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 560,
+        "documentClientWidth": 560,
+        "documentScrollWidth": 560,
+        "bodyScrollWidth": 560,
+        "documentScrollHeight": 1460,
+        "selectedVariant": "story-split-v2",
+        "selectedState": "design",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "story",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 560,
+        "documentClientWidth": 560,
+        "documentScrollWidth": 560,
+        "bodyScrollWidth": 560,
+        "documentScrollHeight": 1112,
+        "selectedVariant": "story-split-v2",
+        "selectedState": "story",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "no-images",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 560,
+        "documentClientWidth": 560,
+        "documentScrollWidth": 560,
+        "bodyScrollWidth": 560,
+        "documentScrollHeight": 981,
+        "selectedVariant": "story-split-v2",
+        "selectedState": "no-images",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "invalid",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 560,
+        "documentClientWidth": 560,
+        "documentScrollWidth": 560,
+        "bodyScrollWidth": 560,
+        "documentScrollHeight": 1500,
+        "selectedVariant": "story-split-v2",
+        "selectedState": "invalid",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "unknown",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 560,
+        "documentClientWidth": 560,
+        "documentScrollWidth": 560,
+        "bodyScrollWidth": 560,
+        "documentScrollHeight": 1184,
+        "selectedVariant": "story-split-v2",
+        "selectedState": "unknown",
+        "layoutCount": 1
+      }
+    },
+    {
+      "variant": "story-split-v2",
+      "state": "missing",
+      "size": "560x640",
+      "status": "passed",
+      "measures": {
+        "theme": "dark",
+        "innerWidth": 560,
+        "documentClientWidth": 560,
+        "documentScrollWidth": 560,
+        "bodyScrollWidth": 560,
+        "documentScrollHeight": 1184,
+        "selectedVariant": "story-split-v2",
+        "selectedState": "missing",
+        "layoutCount": 1
+      }
+    }
+  ],
+  "flows": [],
+  "captures": [
+    "inspector-v2-create-1100x720.png",
+    "inspector-v2-design-1100x720.png",
+    "inspector-v2-story-1100x720.png",
+    "inspector-v2-no-images-1100x720.png",
+    "inspector-v2-invalid-1100x720.png",
+    "inspector-v2-unknown-1100x720.png",
+    "inspector-v2-missing-1100x720.png",
+    "steps-v2-create-1100x720.png",
+    "steps-v2-design-1100x720.png",
+    "steps-v2-story-1100x720.png",
+    "steps-v2-no-images-1100x720.png",
+    "steps-v2-invalid-1100x720.png",
+    "steps-v2-unknown-1100x720.png",
+    "steps-v2-missing-1100x720.png",
+    "story-split-v2-create-1100x720.png",
+    "story-split-v2-design-1100x720.png",
+    "story-split-v2-story-1100x720.png",
+    "story-split-v2-no-images-1100x720.png",
+    "story-split-v2-invalid-1100x720.png",
+    "story-split-v2-unknown-1100x720.png",
+    "story-split-v2-missing-1100x720.png",
+    "inspector-v2-create-560x640.png",
+    "inspector-v2-design-560x640.png",
+    "inspector-v2-story-560x640.png",
+    "inspector-v2-no-images-560x640.png",
+    "inspector-v2-invalid-560x640.png",
+    "inspector-v2-unknown-560x640.png",
+    "inspector-v2-missing-560x640.png",
+    "steps-v2-create-560x640.png",
+    "steps-v2-design-560x640.png",
+    "steps-v2-story-560x640.png",
+    "steps-v2-no-images-560x640.png",
+    "steps-v2-invalid-560x640.png",
+    "steps-v2-unknown-560x640.png",
+    "steps-v2-missing-560x640.png",
+    "story-split-v2-create-560x640.png",
+    "story-split-v2-design-560x640.png",
+    "story-split-v2-story-560x640.png",
+    "story-split-v2-no-images-560x640.png",
+    "story-split-v2-invalid-560x640.png",
+    "story-split-v2-unknown-560x640.png",
+    "story-split-v2-missing-560x640.png"
+  ],
+  "errors": [],
+  "failures": [],
+  "inputSha256": "6191ebedcfcdd4ebf0e3d6f4fe922006bfc1da80c21a97a51a8e364c0f8a638e",
+  "finishedAt": "2026-11-03T14:15:12.728Z",
+  "summary": {
+    "matrix": 42,
+    "matrixPassed": 42,
+    "flows": 0,
+    "flowsPassed": 0,
+    "captures": 42,
+    "errors": 0,
+    "failures": 0
+  },
+  "findings": []
+}

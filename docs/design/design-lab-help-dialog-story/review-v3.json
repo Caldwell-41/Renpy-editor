@@ -1,0 +1,170 @@
+{
+  "status": "refined-drafts-open-in-local-browser",
+  "screenId": "help-dialog-story",
+  "source": {
+    "commit": "1e82b1cb130951ce3f7622635bf323816b27395a",
+    "fingerprint": "652c4d8d3e9325c18980c9d40270409ab27e7e164ed207fddac4e577ad006f43"
+  },
+  "variants": [
+    "inspector-v3",
+    "steps-v3",
+    "story-split-v3"
+  ],
+  "approval": null,
+  "refinementRequest": "Also refine all three with $principle-experience-first",
+  "predecessor": "review-v2.json",
+  "display": {
+    "attachmentId": "mcp-launch-8e6fd0b543455be611a52db6f60a7e7c7ca4c8fc6fc480ea70097ed44c6f3108-2eefea20-ba61-4122-a34a-4addad4e3a97-html",
+    "title": "Help A3 / B3 / C3 \u00b7 experience-first refinements",
+    "chat": "<t3-thread://v2/c95d26c7-af8c-4ab0-8c95-a45fdca2dfe6/mcp:launch:8e6fd0b543455be611a52db6f60a7e7c7ca4c8fc6fc480ea70097ed44c6f3108>"
+  },
+  "localBrowser": {
+    "artifact": ".toolchains/help-dialog-story/comparison-v3.html",
+    "method": "macOS open request succeeded through the requested Terra browser worker",
+    "serverRunning": false,
+    "externalAssets": false,
+    "htmlSha256": "67aade2098faeba4da37de77810401c81c20f384c16e438b84f10a77b9ede2cf"
+  },
+  "firstBrowserPass": {
+    "sourceCommit": "8beca9a0b6ba5c1fa8ef8f5dd50dcaf41237a05f",
+    "fingerprint": "c7098550ee5c4a85e46f9ef984bc7418dc136aa63532e56c7a8071c1c600266a",
+    "renderCases": 54,
+    "renderPasses": 54,
+    "interactionCases": 98,
+    "interactionPasses": 96,
+    "interactionFailures": 2,
+    "findings": [
+      "C3 lacked New screen after an existing screen; failed at both sizes.",
+      "Sticky appearance footers covered fields.",
+      "C3 helper text overlapped its shortcut by nine CSS pixels."
+    ],
+    "report": "verification/v3-first-pass/report.json",
+    "resultBasis": "Before the correction, not a claim that all current-source browser interactions passed."
+  },
+  "corrections": {
+    "sourceCommit": "1e82b1cb130951ce3f7622635bf323816b27395a",
+    "changes": [
+      "C3 New screen entry",
+      "Normal-flow appearance footer",
+      "Helper margin only tightened after a label",
+      "Creation Cancel returns to its launch workspace",
+      "Public new-draft kind defaults to Panel",
+      "Unresolved appearance Apply and Try refuse with retained input",
+      "Source effect explanation remains neutral across selected screens and Story targets"
+    ]
+  },
+  "currentChecks": {
+    "typeScript": "passed",
+    "approvalRecords": "passed",
+    "whitespace": "passed",
+    "focusedDomCasesPassed": 26,
+    "focusedDomCasesFailed": 0,
+    "domReport": "verification/v3-focused-fixes.json",
+    "staticHtmlRenders": 7,
+    "staticConsoleErrors": 0,
+    "fullBrowserInteractionRerun": false,
+    "limits": "Focused DOM/state and static render checks are not an interactive browser rerun, actual core transactions, native app or RenPy proof."
+  },
+  "fullGate": {
+    "status": "failed-at-earlier-source-not-rerun",
+    "sourceCommit": "8dfd15f12e7e6acc1b2e7c842558cc9eba987195",
+    "renderCases": 448,
+    "location": "app/design-lab/screens/studio-request/check.mjs:66",
+    "error": "waitState / page.waitForFunction: Timeout 8000ms exceeded.",
+    "cause": "Unresolved; not a production defect finding or a passing promotion gate.",
+    "helpReached": false
+  },
+  "captures": [
+    {
+      "path": "docs/design/design-lab-help-dialog-story/captures/v3-inline/inspector-v3-start-1100.png",
+      "variantId": "inspector-v3",
+      "state": "start",
+      "theme": "dark",
+      "width": 1100,
+      "height": 840,
+      "scale": 1,
+      "method": "html_preview full-document capture",
+      "consoleMessages": [],
+      "sha256": "1d30505908f54b91273458bd51580da5bded60ddc2ba735ce914289dc727f678"
+    },
+    {
+      "path": "docs/design/design-lab-help-dialog-story/captures/v3-inline/inspector-v3-design-560.png",
+      "variantId": "inspector-v3",
+      "state": "design",
+      "theme": "dark",
+      "width": 560,
+      "height": 1127,
+      "scale": 1,
+      "method": "html_preview full-document capture",
+      "consoleMessages": [],
+      "sha256": "77bfe60c965c6a3cd18a45d01d13962b64331575cad66e2f2c064d06484ddc5e"
+    },
+    {
+      "path": "docs/design/design-lab-help-dialog-story/captures/v3-inline/steps-v3-design-1100.png",
+      "variantId": "steps-v3",
+      "state": "design",
+      "theme": "dark",
+      "width": 1100,
+      "height": 1104,
+      "scale": 1,
+      "method": "html_preview full-document capture",
+      "consoleMessages": [],
+      "sha256": "5d0a61cab3b293aeaae171debe20e06d386e5117bd8668b6ad005182b0629bcf"
+    },
+    {
+      "path": "docs/design/design-lab-help-dialog-story/captures/v3-inline/steps-v3-design-560.png",
+      "variantId": "steps-v3",
+      "state": "design",
+      "theme": "dark",
+      "width": 560,
+      "height": 1629,
+      "scale": 1,
+      "method": "html_preview full-document capture",
+      "consoleMessages": [],
+      "sha256": "d3dd84562280fb011418580765b17918ebc411b924c41d6189c574f9673a9983"
+    },
+    {
+      "path": "docs/design/design-lab-help-dialog-story/captures/v3-inline/story-split-v3-start-1100.png",
+      "variantId": "story-split-v3",
+      "state": "start",
+      "theme": "dark",
+      "width": 1100,
+      "height": 1021,
+      "scale": 1,
+      "method": "html_preview full-document capture",
+      "consoleMessages": [],
+      "sha256": "4b8c13c4ef3c637941569a998d73eb85f8f6a0a55411268d429819796526ca55"
+    },
+    {
+      "path": "docs/design/design-lab-help-dialog-story/captures/v3-inline/story-split-v3-start-560.png",
+      "variantId": "story-split-v3",
+      "state": "start",
+      "theme": "dark",
+      "width": 560,
+      "height": 1101,
+      "scale": 1,
+      "method": "html_preview full-document capture",
+      "consoleMessages": [],
+      "sha256": "a72e50877debd6fa808727761fb6b30012b6262b0487b9e0cfb11364b63e7c57"
+    },
+    {
+      "path": "docs/design/design-lab-help-dialog-story/captures/v3-inline/story-split-v3-design-1100.png",
+      "variantId": "story-split-v3",
+      "state": "design",
+      "theme": "dark",
+      "width": 1100,
+      "height": 989,
+      "scale": 1,
+      "method": "html_preview full-document capture",
+      "consoleMessages": [],
+      "sha256": "b642c730256607ce6719f129736049b4ce0afc9676e97a7c6b0c2fe741269b2d"
+    }
+  ],
+  "simulationLimits": [
+    "One editable Help fixture plus fictional catalog targets; production retains all other screens and their drafts.",
+    "No project writes, source roundtrip/history/reopen/recovery or runtime qualification.",
+    "No SDK, helper, Loomlight native app, package, CI or publication operation.",
+    "Current retained captures are full-document html_preview renders. Their heights are document heights, not the first browser pass viewport heights.",
+    "Formal approval remains null until Kris gives an exact current-version decision."
+  ]
+}

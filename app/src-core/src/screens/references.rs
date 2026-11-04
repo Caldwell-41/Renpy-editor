@@ -20,13 +20,14 @@ pub struct ScreenDependencyRevision {
     pub revision: String,
 }
 
-/// With no unknown effects or hidden screens, this supported inventory is passive.
+/// Summarizes only qualified local actions; custom interactions remain unknown.
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ScreenEffects {
     pub revision: String,
     pub unknown: bool,
     pub hidden_screens: Vec<String>,
+    pub finishes_interaction: bool,
     pub dependencies: Vec<ScreenDependencyRevision>,
 }
 
@@ -35,6 +36,7 @@ pub struct ScreenEffects {
 pub struct ResolvedScreenTarget {
     pub binding: ScreenTargetBinding,
     pub kind: OwnedScreenKind,
+    pub blocking: bool,
     pub path: String,
     pub root_id: String,
     pub revisions: ScreenRevisions,
@@ -285,23 +287,49 @@ fn component_height<'a>(
     Some(height)
 }
 
-/// Exact single statements remain editable only in their owned Panel context.
-pub(super) fn qualified_panel_spans(
+#[derive(Default)]
+pub(super) struct InteractionQualification {
+    pub(super) spans: BTreeMap<usize, bool>,
+    pub(super) contextual: BTreeSet<usize>,
+    pub(super) blocking: bool,
+    pub(super) dismissals: BTreeMap<usize, Span>,
+}
+
+/// Exact single statements remain editable only in their owned interaction context.
+pub(super) fn qualified_interaction(
     owner: &OwnedScreen,
     screen: &Screen,
     bytes: &[u8],
-) -> BTreeMap<usize, bool> {
-    let mut qualified = BTreeMap::new();
-    if owner.kind != OwnedScreenKind::Panel {
+) -> InteractionQualification {
+    let mut qualified = InteractionQualification::default();
+    let Ok(lines) = source_lines(bytes) else {
         return qualified;
+    };
+    let span_lines = |span: &Span| {
+        let start = lines.partition_point(|line| line.start < span.start);
+        let end = lines.partition_point(|line| line.start < span.end);
+        &lines[start..end]
+    };
+    if owner.kind == OwnedScreenKind::Dialog {
+        if let Some(root) = screen.nodes.iter().find(|node| node.kind == "screen") {
+            let modal: Vec<_> = root
+                .protected
+                .iter()
+                .filter_map(|span| {
+                    let lines = span_lines(span);
+                    (lines.first()?.code.split_whitespace().next() == Some("modal"))
+                        .then_some(lines)
+                })
+                .collect();
+            qualified.blocking =
+                modal.len() == 1 && modal[0].len() == 1 && modal[0][0].code == "modal True";
+        }
     }
     for node in &screen.nodes {
         let mut statements = Vec::new();
         let mut counts = BTreeMap::<&str, usize>::new();
         for span in &node.protected {
-            let Ok(lines) = source_lines(&bytes[span.start..span.end]) else {
-                continue;
-            };
+            let lines = span_lines(span);
             let Some(line) = lines.first() else {
                 continue;
             };
@@ -313,10 +341,33 @@ pub(super) fn qualified_panel_spans(
             if !single || counts[key] != 1 {
                 continue;
             }
-            if (node.kind == "screen" && code == "modal False")
+            if node.kind == "textbutton" && code == "action Null()" {
+                qualified.spans.insert(start, false);
+                continue;
+            }
+            if owner.kind == OwnedScreenKind::Component {
+                continue;
+            }
+            let modal = match owner.kind {
+                OwnedScreenKind::Panel => "modal False",
+                OwnedScreenKind::Dialog => "modal True",
+                OwnedScreenKind::Component => unreachable!(),
+            };
+            if (node.kind == "screen" && code == modal)
                 || (node.kind == "textbutton" && code == "default_focus True")
             {
-                qualified.insert(start, false);
+                qualified.spans.insert(start, false);
+                qualified.contextual.insert(start);
+                continue;
+            }
+            if owner.kind == OwnedScreenKind::Dialog {
+                if qualified.blocking
+                    && ((node.kind == "screen" && code == "key \"game_menu\" action Return()")
+                        || (node.kind == "textbutton" && code == "action Return()"))
+                {
+                    qualified.spans.insert(start, true);
+                    qualified.contextual.insert(start);
+                }
                 continue;
             }
             let hide = (if node.kind == "screen" {
@@ -329,11 +380,62 @@ pub(super) fn qualified_panel_spans(
             .and_then(|s| s.strip_suffix(')'))
             .and_then(|s| serde_json::from_str::<String>(s).ok());
             if hide.as_deref() == Some(owner.name.as_str()) {
-                qualified.insert(start, true);
+                qualified.spans.insert(start, true);
+                qualified.contextual.insert(start);
+            }
+        }
+        if owner.kind != OwnedScreenKind::Component {
+            if let Some(span) = dismissal_action(node, &lines, &qualified) {
+                qualified.dismissals.insert(node.span.start, span);
             }
         }
     }
     qualified
+}
+
+/// The expression range preserves comments and trivia. Only this node's lines
+/// are visited; source parsing and interaction qualification belong to the caller.
+fn dismissal_action(
+    node: &Node,
+    lines: &[Line<'_>],
+    qualified: &InteractionQualification,
+) -> Option<Span> {
+    if node.kind != "textbutton" {
+        return None;
+    }
+    let header_index = lines
+        .binary_search_by_key(&node.span.start, |line| line.start)
+        .ok()?;
+    let header = &lines[header_index];
+    let literal = header.code.strip_prefix("textbutton ")?.strip_suffix(':')?;
+    serde_json::from_str::<String>(literal).ok()?;
+    let mut actions = lines
+        .iter()
+        .enumerate()
+        .skip(header_index + 1)
+        .take_while(|(_, line)| line.start < node.source_end)
+        .filter(|(_, line)| {
+            line.indent == header.indent + 4
+                && line.code.split_whitespace().next() == Some("action")
+        });
+    let (index, action) = actions.next()?;
+    if actions.next().is_some()
+        || !action.single
+        || lines
+            .get(index + 1)
+            .is_some_and(|next| next.indent > action.indent)
+    {
+        return None;
+    }
+    let expression = action.code.strip_prefix("action")?.trim_start();
+    if expression != "Null()" && qualified.spans.get(&action.start) != Some(&true) {
+        return None;
+    }
+    let start = action.start + action.indent + action.code.len() - expression.len();
+    Some(Span {
+        start,
+        end: start + expression.len(),
+    })
 }
 
 struct Effects<'a> {
@@ -344,6 +446,8 @@ struct Effects<'a> {
     remaining: usize,
     unknown: bool,
     hidden: BTreeSet<String>,
+    finishes_interaction: bool,
+    blocking: bool,
     dependencies: BTreeMap<String, String>,
 }
 
@@ -388,7 +492,11 @@ impl Effects<'_> {
             .iter()
             .find(|s| s.name == owner.name)
             .unwrap();
-        let qualified = qualified_panel_spans(owner, screen, bytes);
+        let qualified = qualified_interaction(owner, screen, bytes);
+        if depth == 0 {
+            self.blocking = qualified.blocking;
+        }
+        self.unknown |= owner.kind == OwnedScreenKind::Dialog && !qualified.blocking;
         for node in &screen.nodes {
             if self.remaining == 0 {
                 self.unknown = true;
@@ -430,9 +538,13 @@ impl Effects<'_> {
                 self.unknown = true;
             }
             for span in &node.protected {
-                if let Some(hides) = qualified.get(&span.start) {
-                    if *hides {
-                        self.hidden.insert(owner.id.clone());
+                if let Some(action) = qualified.spans.get(&span.start) {
+                    if *action {
+                        if owner.kind == OwnedScreenKind::Dialog {
+                            self.finishes_interaction = true;
+                        } else {
+                            self.hidden.insert(owner.id.clone());
+                        }
                         self.dependencies.insert(
                             format!("{}:action", node.id.as_deref().unwrap_or(&owner.root_id)),
                             digest(&bytes[span.start..span.end]),
@@ -498,12 +610,21 @@ impl Effects<'_> {
             .map(|(id, revision)| ScreenDependencyRevision { id, revision })
             .collect::<Vec<_>>();
         let hidden_screens = self.hidden.into_iter().collect::<Vec<_>>();
-        let revision =
-            digest(&serde_json::to_vec(&(self.unknown, &hidden_screens, &dependencies)).unwrap());
+        let revision = digest(
+            &serde_json::to_vec(&(
+                self.unknown,
+                &hidden_screens,
+                self.finishes_interaction,
+                self.blocking,
+                &dependencies,
+            ))
+            .unwrap(),
+        );
         ScreenEffects {
             revision,
             unknown: self.unknown,
             hidden_screens,
+            finishes_interaction: self.finishes_interaction,
             dependencies,
         }
     }
@@ -602,9 +723,12 @@ impl AuthoringService {
             remaining: MAX_NODES,
             unknown: false,
             hidden: BTreeSet::new(),
+            finishes_interaction: false,
+            blocking: false,
             dependencies: BTreeMap::new(),
         };
         effects.read(&owner.id, 0);
+        let blocking = effects.blocking;
         let effects = effects.finish();
         let source = &inventory
             .files
@@ -624,6 +748,7 @@ impl AuthoringService {
         Ok(ResolvedScreenTarget {
             binding: binding.clone(),
             kind: owner.kind,
+            blocking,
             path: owner.path.clone(),
             root_id: owner.root_id.clone(),
             revisions,
