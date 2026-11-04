@@ -1,5 +1,28 @@
 # Current outcome handover
 
+## Active #47/#50 implementation
+
+Kris approved the combined plan on 2026-11-05. The branch is
+`codex/47-50-integration`, based on `e2a02bc9f6d0f91639c47e35d49f1befff058c60`
+from `codex/phase3b-screen-designer`. [#47](https://github.com/Caldwell-41/Renpy-editor/issues/47)
+and [#50](https://github.com/Caldwell-41/Renpy-editor/issues/50) own current delivery;
+#47 alone owns combined operation accounting. Both are in progress, not accepted.
+The coordinator owns shared contracts/callers, effects, integration, combined
+verification and final review. Source/actions and canvas use separate Sol High
+implementation worktrees. Their exact allocation follows the shared contract commit.
+The source/action worker creates the separately requested prototype chat and receives
+the approved source and user decision directly. Terra Max owns browser/desktop work;
+Sol owns coding. Independent nested rendering can proceed during design iteration.
+
+Next: commit the shared contracts and launch the two isolated assignments. The
+contract check passes locked offline core compilation and frontend typechecking.
+Required implementation, prototype, both-target/aspect rendering, normal-play action
+proof and independent final review remain pending. No costly operation has started.
+[Evidence](../tasks/evidence/screen-actions-and-nested-canvas.md) retains details.
+Preserve the unrelated three Design Lab guide edits, untracked Phase 1 audit,
+protected stashes/native recovery and historical allowances below. Earlier no-successor
+statements describe completed outcomes and do not cancel this selection.
+
 ## PR 79 merge and workspace closeout
 
 Kris selected ticket reconciliation, merge and safe workspace retirement.

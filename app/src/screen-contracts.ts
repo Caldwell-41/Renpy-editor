@@ -1,6 +1,17 @@
 import type { StyleCatalog } from "./screen-text.ts";
 
 export interface ScreenTargetBinding { screenId: string; sourceName: string }
+// Integer values use canonical decimal strings, as in existing Story authoring.
+export type ScreenVariableValue = boolean | string;
+export type ScreenAction =
+  | { type: "setVariable"; variableId: string; value: ScreenVariableValue }
+  | { type: "showScreen"; target: ScreenTargetBinding }
+  | { type: "hideScreen"; target: ScreenTargetBinding }
+  | { type: "finishInteraction" };
+export interface VariableBinding { variableId: string }
+export interface VariableSample {
+  variableId: string; expectedSourceRevision: string; value: ScreenVariableValue;
+}
 export interface ScreenRevisions { source: string; sourceMap: string; inventory: string; effects: string }
 export interface ScreenEffects {
   revision: string; unknown: boolean; hiddenScreens: string[]; finishesInteraction: boolean;

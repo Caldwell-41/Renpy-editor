@@ -1,5 +1,19 @@
 # Current status
 
+## Variable actions and nested canvas selected
+
+Kris approved combined implementation of [L11 #47](https://github.com/Caldwell-41/Renpy-editor/issues/47)
+and [L19 #50](https://github.com/Caldwell-41/Renpy-editor/issues/50) on 2026-11-05.
+`codex/47-50-integration` starts from `e2a02bc`; two isolated Sol High lanes own
+source/actions and data-only canvas rendering. The coordinator owns shared
+contracts, integration and final review. #47 owns combined operation accounting;
+both leaves retain pending acceptance. The source/action lane must obtain the
+separate approved prototype handoff before production UI changes. No costly
+execution has started. [Evidence](../tasks/evidence/screen-actions-and-nested-canvas.md)
+records the contract checkpoint and verification. Prior closeout sections below
+retain their historical candidates and recovery; their unselected-next-work text
+is superseded by this selection.
+
 ## Help dialog and base Help canvas merged and accepted
 
 [PR #79](https://github.com/Caldwell-41/Renpy-editor/pull/79) squash-merged as
