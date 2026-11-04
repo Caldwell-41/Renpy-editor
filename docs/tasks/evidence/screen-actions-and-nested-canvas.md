@@ -46,3 +46,44 @@ No SDK, helper, package, native session or costly CI operation has started.
 The initial shared Rust contracts pass locked offline core compilation. Frontend
 typechecking and scoped whitespace checks pass. Both ticket selection bodies and
 the single operation-accounting owner in #47 were published and read back exactly.
+
+## Isolated assignments and interface decisions
+
+All three prepared worktrees start from `6d027be4b473a1f9f60e755e7f1e3ce6d21a8aba`.
+T3 assigned the branch names below instead of the plan's logical lane names.
+Worktree identifiers are relative to T3's managed Loomlight worktree directory.
+
+| Assignment | T3 worktree | Branch | Exclusive implementation files |
+| --- | --- | --- | --- |
+| Source/actions | `t3-fe18dd76` | `t3/variable-display-button-actions` | Dedicated actions/binding modules and controls, dismissal migration, focused source/action fixtures/tests |
+| Nested canvas | `t3-b12957a0` | `t3/nested-canvas-rendering` | `screens/canvas.rs`, `canvas_session.rs`, `canvas-renderer.rpy`, `screen-canvas-frames.ts`, focused comparison fixtures/tooling/tests |
+| Separate prototype | `t3-229694d0` | `t3/screen-actions-design-prototype` | New Design Lab screen/registry entry and owning design approval/captures |
+
+The coordinator transferred `screens.rs`, `screens/composition.rs` and
+`screens/ownership.rs` parser/inspection/composition glue to the source/action lane
+through its first reviewed core checkpoint. The lane may change exact text mapping
+in `screens/text.rs` as required. No other writer edits these files during that
+assignment. Shared interaction types and TypeScript contracts, reference/effect
+summaries, dispatch, workspace caller wiring, CI and combined records remain with
+the coordinator. A worker must request a transfer before expanding its file scope.
+
+The planned composition commands are `actions` and `variableText`. They retain
+existing source/component guards and capture authoring and target revisions. The
+authoring revision covers metadata and verified variable definition source.
+Inspection exposes the captured revision for callers. Unknown grammar remains
+source-only. The shared parser supplies qualified actions/spans and safe variable
+text resolution to effects and canvas; neither consumer adds another expression
+parser.
+
+The canvas trace found `use` nodes were not expanded at the starting checkpoint.
+Its owner will extend the existing source/style pipeline with bounded recursive
+expansion. Selection must not introduce a wrapper that changes layout. Expanded
+nodes may carry a root-use selection start while keeping unique internal IDs;
+selection geometry includes only visible clipped content. Source-map metadata joins
+the session dependencies so changed component bindings invalidate old output.
+
+The prototype received task scope, existing controls and approved design references,
+the current local prototype-review policy, and direct handoff instructions. Its
+owner confirms existing media delivery verification and cleanup readiness. Design
+approval is pending. Core TDD continues independently; no production UI is approved
+by this assignment receipt.

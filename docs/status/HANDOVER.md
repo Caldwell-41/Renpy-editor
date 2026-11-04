@@ -9,13 +9,16 @@ and [#50](https://github.com/Caldwell-41/Renpy-editor/issues/50) own current del
 #47 alone owns combined operation accounting. Both are in progress, not accepted.
 The coordinator owns shared contracts/callers, effects, integration, combined
 verification and final review. Source/actions and canvas use separate Sol High
-implementation worktrees. Their exact allocation follows the shared contract commit.
+implementation worktrees. The [assignment receipt](../tasks/evidence/screen-actions-and-nested-canvas.md#isolated-assignments-and-interface-decisions)
+records exact T3 worktree/branch identities and temporary source-glue ownership.
 The source/action worker creates the separately requested prototype chat and receives
 the approved source and user decision directly. Terra Max owns browser/desktop work;
 Sol owns coding. Independent nested rendering can proceed during design iteration.
 
-Next: commit the shared contracts and launch the two isolated assignments. The
-contract check passes locked offline core compilation and frontend typechecking.
+Shared contracts are committed at `6d027be`; both implementation lanes and the
+separate prototype are running. Next: review the source/action core checkpoint,
+then integrate its shared effect/caller consumers and hand the binding API to the
+canvas lane. The contract check passes locked offline core compilation and frontend typechecking.
 Required implementation, prototype, both-target/aspect rendering, normal-play action
 proof and independent final review remain pending. No costly operation has started.
 [Evidence](../tasks/evidence/screen-actions-and-nested-canvas.md) retains details.
