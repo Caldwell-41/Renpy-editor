@@ -2,6 +2,16 @@
 
 ## Help dialog and base Help canvas implementation complete
 
+The three findings from the PR #79 review at `60be930` are corrected locally by
+Sol 6.1 High and independently verified by the parent. Invalid Dialog Return
+actions retain source protection, inspection shares one analysis, and stale
+single-position insertion has an explicit recovery choice. Final local checks
+pass 366 frontend, 123 ordinary Screens and 12 Dialog core cases, production build
+and actual controller/core history/recovery. Five existing SDK/helper cases remain
+ignored. [Correction evidence](../tasks/evidence/help-dialog-and-canvas.md#pr-79-root-cause-corrections-and-parent-review-2026-11-04)
+owns red/green results and review. Publication and current-head ordinary CI are
+selected; no merge or broader qualification is selected.
+
 Kris approved [#45](https://github.com/Caldwell-41/Renpy-editor/issues/45) and
 [#46](https://github.com/Caldwell-41/Renpy-editor/issues/46) on local integration
 branch `codex/help-dialog-canvas` from `e32ded4`. Both portable lanes are integrated;

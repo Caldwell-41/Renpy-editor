@@ -1,5 +1,60 @@
 # Help dialog and base canvas delivery evidence
 
+## PR 79 root-cause corrections and parent review, 2026-11-04
+
+Kris selected fixes for the three independently verified findings at `60be930`,
+with one Sol 6.1 High implementation subagent and parent-owned final review,
+publication and ordinary CI. The existing public authoring boundaries were
+confirmed again: Story controls through core, screen inspection/composition and
+optimized public inspection. Native input, engine runtime and package proof remain
+separate. No SDK/helper/native/package campaign or manual CI matrix is selected.
+
+The subagent used one red-to-green slice per root cause:
+
+- Invalid Dialog contexts qualified Return without first proving blocking state.
+  Shared qualification now requires one exact root `modal True`. Missing, false,
+  calculated and duplicate modality retain protected Return/game-menu spans and
+  expose no Finish capability. Composition refuses removal without changing source;
+  valid Dialog actions and inert Null edits remain available, including components.
+- Inspection reparsed the complete source and requalified all actions per marked
+  button. One qualification now owns the action ranges consumed by inspection and
+  dismissal; the former per-button parser is removed. The optimized diagnostic
+  failed before correction and passed afterward. Permanent tests cover authority
+  and exact edits on 2,048 buttons without a timing threshold or production counter.
+- Stale insertion required a select-change event while its sole legal option was
+  already selected. The destination owner now presents a distinct position
+  placeholder. The real controller/core regression failed before correction and
+  passes explicit selection, refusal before selection, Cancel and one-step history.
+  Missing bodies/anchors and deleted Scenes retain explicit recovery.
+
+The parent reviewed all changed owners/callers and independently reran the original
+sequences with the optimized current core. All four invalid modality forms retain
+both Return and Escape protection and refuse removal with `OPAQUE_BOUNDARY`, leaving
+source unchanged. A comment-only Source edit in a Return-only Scene permits a real
+position-value change; Cancel and Escape restore the original retained intent,
+and acceptance writes exactly one Call before Return with the comment preserved.
+Undo/Redo and the accepted source revision pass. At 2,048 marked buttons, parent
+inspection measures 178 ms; the original producing build measured 2,355 ms. This is
+a local public-service diagnostic, not a new whole-app timing qualification.
+
+Parent verification passes 366 frontend tests with Node 24.19.0/Python 3.12.16,
+123 ordinary Screens core cases, 12 Dialog core cases, the seven-stage production
+controller/core journey, production build and the separate original-bug recheck.
+The broader Screens selection leaves five existing SDK/helper cases explicitly
+ignored, not passed. Worker verification also passes 14 reference and five Panel
+core cases, 74 affected DOM cases and pinned Rust formatting. One new component
+test initially omitted its required revision envelope; its fixture was corrected.
+The parent's first broad frontend run used system Python 3.9 and failed importing
+`tomllib` in an unrelated Studio validator. The intended tool selection passes all
+366 cases without changing that validator. Both original failures remain retained.
+
+The parent finds no remaining issue against the three original bugs. Raw red/green
+receipts, source/driver hashes, original executable and parent logs remain in the
+ignored `.toolchains/pr79-review-fixes/` archive. Source/renderer/runtime acceptance
+from earlier candidates retains its exact scope. Draft PR #79 owns the published
+correction candidate and exact current-head ordinary CI identity; its terminal
+audit remains pending. No merge, issue closure or release is selected.
+
 ## Successful ordinary CI audit, 2026-11-04
 
 [Repository quality 41741915132, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41741915132/attempts/1)

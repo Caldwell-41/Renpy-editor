@@ -27,7 +27,10 @@ pub(super) fn prepare(
         .iter()
         .find(|n| n.span.start == node_start)
         .ok_or(SceneError::UnknownEntity)?;
-    let span = references::editable_dismissal_action(owner, screen, node, bytes)
+    let qualified = references::qualified_interaction(owner, screen, bytes);
+    let span = qualified
+        .dismissals
+        .get(&node.span.start)
         .ok_or(SceneError::OpaqueBoundary)?;
     let expression = match action {
         Action::FinishInteraction => "Return()".to_owned(),

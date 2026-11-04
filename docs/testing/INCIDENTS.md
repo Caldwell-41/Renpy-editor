@@ -947,3 +947,39 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   child reproduces the changed coordinate before the fix and preserves its exact
   floating-point bits afterward. The child exits and its scratch is removed.
 - **Evidence:** [Matched captures and geometry diagnosis](../tasks/evidence/help-dialog-and-canvas.md#mac-matrix-and-exact-geometry-diagnosis).
+
+## H67. Nonblocking Dialog actions lose source protection
+
+- **Class/search:** product; Dialog, Return, Finish, modal False, duplicate modality,
+  protected source, button removal.
+- **Cause/correction:** interaction qualification admitted Return by owned-screen
+  kind without proving blocking state. The shared owner now proves a single exact
+  root `modal True` before qualifying local Return and game-menu dismissal.
+- **Regression:** public inspection/composition retains protected actions and
+  refuses removal in missing, false, calculated and duplicate modality, while
+  valid Dialog Finish and inert Null edits remain available.
+- **Evidence:** [PR 79 corrections and parent review](../tasks/evidence/help-dialog-and-canvas.md#pr-79-root-cause-corrections-and-parent-review-2026-11-04).
+
+## H68. Stale sole-position insertion cannot be confirmed
+
+- **Class/search:** product and insufficient test; stale insertion, Return-only
+  Scene, single select option, synthetic change, retained location.
+- **Cause/correction:** confirmation depended on changing an already-selected sole
+  option. A test dispatched `change` without a possible user value transition.
+  Destination selection now starts stale locations on an explicit placeholder.
+- **Regression:** actual Story controls through core refuse before selection,
+  accept the sole legal position after a real value change, preserve Cancel/Escape
+  and source comments, and retain one-step Undo/Redo and accepted revision.
+- **Evidence:** [PR 79 corrections and parent review](../tasks/evidence/help-dialog-and-canvas.md#pr-79-root-cause-corrections-and-parent-review-2026-11-04).
+
+## P07. Screen inspection repeats whole-source analysis per button
+
+- **Class/search:** product; slow inspection, marked buttons, quadratic work,
+  dismissal capability, source parsing.
+- **Cause/correction:** each button reparsed the file and requalified every action.
+  One screen qualification now owns reusable action ranges for inspection and
+  dismissal. The former per-button parsing path is removed.
+- **Regression:** optimized public-service diagnostics reproduce the overhead and
+  verify its removal; a large-screen public test preserves per-button authority
+  and exact source edits without a permanent timing threshold.
+- **Evidence:** [PR 79 corrections and parent review](../tasks/evidence/help-dialog-and-canvas.md#pr-79-root-cause-corrections-and-parent-review-2026-11-04).

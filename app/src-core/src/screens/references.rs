@@ -292,6 +292,7 @@ pub(super) struct InteractionQualification {
     pub(super) spans: BTreeMap<usize, bool>,
     pub(super) contextual: BTreeSet<usize>,
     pub(super) blocking: bool,
+    pub(super) dismissals: BTreeMap<usize, Span>,
 }
 
 /// Exact single statements remain editable only in their owned interaction context.
@@ -301,13 +302,34 @@ pub(super) fn qualified_interaction(
     bytes: &[u8],
 ) -> InteractionQualification {
     let mut qualified = InteractionQualification::default();
+    let Ok(lines) = source_lines(bytes) else {
+        return qualified;
+    };
+    let span_lines = |span: &Span| {
+        let start = lines.partition_point(|line| line.start < span.start);
+        let end = lines.partition_point(|line| line.start < span.end);
+        &lines[start..end]
+    };
+    if owner.kind == OwnedScreenKind::Dialog {
+        if let Some(root) = screen.nodes.iter().find(|node| node.kind == "screen") {
+            let modal: Vec<_> = root
+                .protected
+                .iter()
+                .filter_map(|span| {
+                    let lines = span_lines(span);
+                    (lines.first()?.code.split_whitespace().next() == Some("modal"))
+                        .then_some(lines)
+                })
+                .collect();
+            qualified.blocking =
+                modal.len() == 1 && modal[0].len() == 1 && modal[0][0].code == "modal True";
+        }
+    }
     for node in &screen.nodes {
         let mut statements = Vec::new();
         let mut counts = BTreeMap::<&str, usize>::new();
         for span in &node.protected {
-            let Ok(lines) = source_lines(&bytes[span.start..span.end]) else {
-                continue;
-            };
+            let lines = span_lines(span);
             let Some(line) = lines.first() else {
                 continue;
             };
@@ -334,15 +356,14 @@ pub(super) fn qualified_interaction(
             if (node.kind == "screen" && code == modal)
                 || (node.kind == "textbutton" && code == "default_focus True")
             {
-                qualified.blocking |=
-                    node.kind == "screen" && owner.kind == OwnedScreenKind::Dialog;
                 qualified.spans.insert(start, false);
                 qualified.contextual.insert(start);
                 continue;
             }
             if owner.kind == OwnedScreenKind::Dialog {
-                if (node.kind == "screen" && code == "key \"game_menu\" action Return()")
-                    || (node.kind == "textbutton" && code == "action Return()")
+                if qualified.blocking
+                    && ((node.kind == "screen" && code == "key \"game_menu\" action Return()")
+                        || (node.kind == "textbutton" && code == "action Return()"))
                 {
                     qualified.spans.insert(start, true);
                     qualified.contextual.insert(start);
@@ -363,31 +384,40 @@ pub(super) fn qualified_interaction(
                 qualified.contextual.insert(start);
             }
         }
+        if owner.kind != OwnedScreenKind::Component {
+            if let Some(span) = dismissal_action(node, &lines, &qualified) {
+                qualified.dismissals.insert(node.span.start, span);
+            }
+        }
     }
     qualified
 }
 
-/// Use the raw inspected screen, before owner qualification removes protected spans.
-/// The returned range covers only the expression, preserving comments and trivia.
-pub(super) fn editable_dismissal_action(
-    owner: &OwnedScreen,
-    screen: &Screen,
+/// The expression range preserves comments and trivia. Only this node's lines
+/// are visited; source parsing and interaction qualification belong to the caller.
+fn dismissal_action(
     node: &Node,
-    bytes: &[u8],
+    lines: &[Line<'_>],
+    qualified: &InteractionQualification,
 ) -> Option<Span> {
-    if node.kind != "textbutton" || owner.kind == OwnedScreenKind::Component {
+    if node.kind != "textbutton" {
         return None;
     }
-    let lines = source_lines(bytes).ok()?;
-    let header = lines.iter().find(|line| line.start == node.span.start)?;
+    let header_index = lines
+        .binary_search_by_key(&node.span.start, |line| line.start)
+        .ok()?;
+    let header = &lines[header_index];
     let literal = header.code.strip_prefix("textbutton ")?.strip_suffix(':')?;
     serde_json::from_str::<String>(literal).ok()?;
-    let mut actions = lines.iter().enumerate().filter(|(_, line)| {
-        line.start > node.span.start
-            && line.start < node.source_end
-            && line.indent == header.indent + 4
-            && line.code.split_whitespace().next() == Some("action")
-    });
+    let mut actions = lines
+        .iter()
+        .enumerate()
+        .skip(header_index + 1)
+        .take_while(|(_, line)| line.start < node.source_end)
+        .filter(|(_, line)| {
+            line.indent == header.indent + 4
+                && line.code.split_whitespace().next() == Some("action")
+        });
     let (index, action) = actions.next()?;
     if actions.next().is_some()
         || !action.single
@@ -398,7 +428,6 @@ pub(super) fn editable_dismissal_action(
         return None;
     }
     let expression = action.code.strip_prefix("action")?.trim_start();
-    let qualified = qualified_interaction(owner, screen, bytes);
     if expression != "Null()" && qualified.spans.get(&action.start) != Some(&true) {
         return None;
     }

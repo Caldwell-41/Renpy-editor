@@ -1,6 +1,205 @@
 use super::*;
 
 #[test]
+fn large_marked_screen_retains_per_button_action_authority() {
+    let (_temporary, mut service, _, owner) = composition_project();
+    let original = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let mut buttons = String::new();
+    let mut last_id = String::new();
+    for index in 0..2048 {
+        let id = uuid::Uuid::new_v4().to_string();
+        let action = match index {
+            0 => "Return()",
+            1 => "Function(custom)",
+            2 => "Null()\n        action Null()",
+            _ => "Null()",
+        };
+        buttons.push_str(&format!("    textbutton \"Button {index}\": # loomlight-element: {id}\n        action {action} # keep {index}\n"));
+        last_id = id;
+    }
+    let source = original.replace("    pass\n", &buttons);
+    save_composition_source(&mut service, &owner, &source);
+    let document = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    let nodes = document["screens"][0]["nodes"].as_array().unwrap();
+    assert_eq!(nodes.len(), 2049);
+    assert_eq!(
+        nodes
+            .iter()
+            .filter(|node| node["dismissal"] == "none")
+            .count(),
+        2045
+    );
+    for node in nodes
+        .iter()
+        .filter(|node| node["kind"] == "textbutton")
+        .take(3)
+    {
+        assert!(node["dismissal"].is_null());
+        assert!(!node["protected"].as_array().unwrap().is_empty());
+    }
+    compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"dismissal","nodeId":last_id,"action":"hideScreen"}),
+    );
+    let expected = source.replace(
+        "action Null() # keep 2047",
+        "action Hide(\"notes\") # keep 2047",
+    );
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        expected
+    );
+}
+
+#[test]
+fn nonblocking_dialog_keeps_return_source_protected_but_null_editable() {
+    let (_temporary, mut service, _, _) = composition_project();
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let created = ipc(
+        &mut service,
+        "screens.create",
+        json!({
+            "name":"modal_guard", "kind":"dialog",
+            "expectedProjectRevision":catalog["projectRevision"],
+            "expectedSourceMapRevision":catalog["sourceMapRevision"],
+            "expectedInventoryRevision":catalog["inventoryRevision"]
+        }),
+    );
+    let owner = created["owned"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|owner| owner["name"] == "modal_guard")
+        .unwrap();
+    let finish = compose_command(
+        &mut service,
+        owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"textbutton","text":"Finish"}),
+    );
+    let inert = compose_command(
+        &mut service,
+        owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"textbutton","text":"Optional"}),
+    );
+    let original = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .replacen("action Null()", "action Return() # keep finish", 1)
+        + "    $ custom = ['untouched', 17] # keep custom\n";
+    for modal in [
+        "",
+        "modal False",
+        "modal flag",
+        "modal True\n    modal True",
+    ] {
+        let source = original.replace("modal True", modal);
+        save_composition_source(&mut service, owner, &source);
+        let target = ipc(
+            &mut service,
+            "screens.resolveTarget",
+            json!({"binding":{
+            "screenId":owner["id"],"sourceName":owner["name"]}}),
+        );
+        assert_eq!(target["blocking"], false, "{modal}");
+        assert_eq!(target["effects"]["unknown"], true, "{modal}");
+        assert_eq!(target["effects"]["finishesInteraction"], false, "{modal}");
+        let document = ipc(
+            &mut service,
+            "screens.inspect",
+            json!({"path":owner["path"]}),
+        );
+        let nodes = document["screens"][0]["nodes"].as_array().unwrap();
+        let button = nodes
+            .iter()
+            .find(|node| node["id"] == finish["selectedId"])
+            .unwrap();
+        assert!(button["dismissal"].is_null(), "{modal}");
+        assert!(
+            !button["protected"].as_array().unwrap().is_empty(),
+            "{modal}"
+        );
+        let root = nodes
+            .iter()
+            .find(|node| node["id"] == owner["rootId"])
+            .unwrap();
+        assert!(
+            root["protected"].as_array().unwrap().iter().any(|span| {
+                source[span["start"].as_u64().unwrap() as usize
+                    ..span["end"].as_u64().unwrap() as usize]
+                    .contains("key \"game_menu\" action Return()")
+            }),
+            "{modal}"
+        );
+        for command in [
+            json!({"type":"remove","nodeId":finish["selectedId"]}),
+            json!({"type":"dismissal","nodeId":inert["selectedId"],"action":"finishInteraction"}),
+        ] {
+            reject(
+                &mut service,
+                "screens.compose",
+                json!({"screenId":owner["id"],
+                "expectedRevision":document["revision"],"command":command}),
+            );
+            assert_eq!(
+                ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+                source
+            );
+        }
+        assert_eq!(
+            nodes
+                .iter()
+                .find(|node| node["id"] == inert["selectedId"])
+                .unwrap()["dismissal"],
+            "none"
+        );
+        compose_command(
+            &mut service,
+            owner,
+            json!({"type":"remove","nodeId":inert["selectedId"]}),
+        );
+        let removed = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+            .as_str()
+            .unwrap()
+            .to_owned();
+        assert!(removed.contains("action Return() # keep finish"));
+        assert!(removed.contains("    $ custom = ['untouched', 17] # keep custom\n"));
+        composition_history(&mut service, "undo");
+        assert_eq!(
+            ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+            source
+        );
+    }
+    save_composition_source(&mut service, owner, &original);
+    let document = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    assert_eq!(
+        document["screens"][0]["nodes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|node| node["id"] == finish["selectedId"])
+            .unwrap()["dismissal"],
+        "finishInteraction"
+    );
+    compose_command(
+        &mut service,
+        owner,
+        json!({"type":"remove","nodeId":finish["selectedId"]}),
+    );
+}
+
+#[test]
 fn inspection_exposes_only_owned_unique_qualified_dismissal_capabilities() {
     for kind in ["panel", "dialog"] {
         let (_temporary, mut service, _, _) = composition_project();
@@ -141,6 +340,47 @@ fn inert_button_action_stays_editable_and_extractable() {
     );
     let copied = fs::read_to_string(root.join("game/ui/inert_content.rpy")).unwrap();
     assert!(copied.contains("action Null() # keep inert"));
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let component = catalog["owned"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|owner| owner["name"] == "inert_content")
+        .unwrap();
+    let document = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":component["path"]}),
+    );
+    let inert = document["screens"][0]["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|node| node["kind"] == "textbutton")
+        .unwrap();
+    assert!(inert["dismissal"].is_null());
+    assert!(inert["protected"].as_array().unwrap().is_empty());
+    let target = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":{
+        "screenId":component["id"],"sourceName":component["name"]}}),
+    );
+    ipc(
+        &mut service,
+        "screens.compose",
+        json!({"screenId":component["id"],"expectedRevision":document["revision"],
+            "componentRevisions":target["revisions"],"command":{"type":"remove","nodeId":inert["id"]}}),
+    );
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        ipc(
+            &mut service,
+            "source.open",
+            json!({"path":component["path"]})
+        )["text"],
+        copied
+    );
     composition_history(&mut service, "undo");
     assert_eq!(
         fs::read_to_string(root.join(owner["path"].as_str().unwrap())).unwrap(),

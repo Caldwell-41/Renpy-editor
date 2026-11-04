@@ -165,13 +165,14 @@ test("screen draft Source and effects follows Add and Cancel and navigates only 
  button(secondary,"View screen in Source").click();assert.deepEqual(sourceCalls,[[target.path,undefined,undefined,revisions.source]]);assert.equal(s.commands.length,0);await s.close();
 });
 
-test("retained screen insertion refuses a changed Scene or missing anchor until an explicit location choice",async()=>{
- for(const mode of ["changed","missing"]){
+test("retained screen insertion offers a selectable recovery from a changed Scene, missing body or missing anchor",async()=>{
+ for(const mode of ["changed","missing","body"]){
   const model=fixture(),scene=model.scenes[0]!,remembered:unknown[]=[];
   const dialogBinding={screenId:"dialog-id",sourceName:"help_dialog"};const dialogTarget:ResolvedScreenTarget={...target,binding:dialogBinding,kind:"dialog",blocking:true,effects:{...target.effects,unknown:false}};
-  const s=setup({screenHint:dialogBinding,screenHintKind:"dialog",screenInsertion:{sceneId:scene.id,body:{type:"root"},position:{type:"before",anchor:{type:"beat",beatId:mode==="missing"?"removed":"line"}},expectedSourceRevision:mode==="changed"?"old":scene.sourceRevision},rememberScreenInsertion:value=>remembered.push(value),screenCatalog:async()=>({...catalog,owned:[{...catalog.owned[2]!,id:dialogBinding.screenId,name:dialogBinding.sourceName,kind:"dialog"}]}),resolveScreenTarget:async()=>dialogTarget},model);
+  const s=setup({screenHint:dialogBinding,screenHintKind:"dialog",screenInsertion:{sceneId:scene.id,body:mode==="body"?{type:"branch",groupId:"removed-group",branchId:"removed-branch"}:{type:"root"},position:{type:"before",anchor:{type:"beat",beatId:mode==="missing"?"removed":"line"}},expectedSourceRevision:mode==="changed"?"old":scene.sourceRevision},rememberScreenInsertion:value=>remembered.push(value),screenCatalog:async()=>({...catalog,owned:[{...catalog.owned[2]!,id:dialogBinding.screenId,name:dialogBinding.sourceName,kind:"dialog"}]}),resolveScreenTarget:async()=>dialogTarget},model);
   const draft=openNew(s.host,"callScreen");await tick();button(draft,"Add Beat").click();await tick();assert.equal(s.commands.length,0);assert.equal(remembered.length,0);assert.ok(draft.isConnected);
-  const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));button(draft,"Add Beat").click();await tick();assert.equal(s.commands.length,1);assert.equal((remembered.at(-1) as {expectedSourceRevision:string}).expectedSourceRevision,scene.sourceRevision);await s.close();
+  if(mode==="body"){const body=draft.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;assert.notEqual(body.value,"root");body.value="root";body.dispatchEvent(new Event("change",{bubbles:true}));}
+  const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;if(mode!=="body")assert.notEqual(position.value,"line","Recovery must offer a real selection change");position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));button(draft,"Add Beat").click();await tick();assert.equal(s.commands.length,1);assert.equal((remembered.at(-1) as {expectedSourceRevision:string}).expectedSourceRevision,scene.sourceRevision);await s.close();
  }
 });
 

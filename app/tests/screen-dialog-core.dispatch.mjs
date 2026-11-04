@@ -48,6 +48,29 @@ try{
  const doc=await call('screens.inspect',{path:owner.path});const added=await call('screens.compose',{screenId:owner.id,expectedRevision:doc.revision,command:{type:'add',parentId:owner.rootId,kind:'textbutton',text:'Finish'}});const node=added.document.screens[0].nodes.find(n=>n.id===added.selectedId);assert.equal(node.dismissal,'none');const base=await source(owner.path);
  const card=document.createElement('section');document.body.append(card);const view={document:added.document,screenId:owner.id,screenName:owner.name,nodes:added.document.screens[0].nodes,selected:node,step:'design',busy:false};
  dismissal=new ScreenDismissal({view:()=>view,kind:()=>owner.kind,current:()=>true,commit:(command,base)=>call('screens.compose',{screenId:owner.id,expectedRevision:base.revision,command}),redraw:()=>{},note:m=>messages.push(m)});dismissal.render(card);card.querySelector('select').value='finishInteraction';card.querySelector('select').dispatchEvent(new Event('change',{bubbles:true}));button(card,'Apply').click();await wait(()=>!dismissal.isSaving(),'Finish accepted');assert.equal(dismissal.hasDraft(),false);const finished=base.replace('action Null()','action Return()');assert.equal(await source(owner.path),finished);await history('undo');assert.equal(await source(owner.path),base);await history('redo');assert.equal(await source(owner.path),finished);result.stages.push('actual bounded Finish controller -> minimal expression -> one-step Undo/Redo');
+ // A retained location must offer a real selection even when Return is the only position.
+ let singleModel=await call('scene.list');
+ singleModel=await call('scene.apply',{expectedProjectRevision:singleModel.projectRevision,expectedSourceMapRevision:singleModel.sourceMapRevision,command:{type:'createScene',chapterId:singleModel.chapters[0].id,displayName:'Single position recovery'}});
+ const singleScene=singleModel.scenes.find(s=>s.displayName==='Single position recovery');
+ await saveSource(singleScene.sourcePath,`label ${singleScene.technicalLabel}:\n    return\n`);
+ insertion=undefined;let singleHost=await mountStory(singleScene.id),singleDraft=await newCall(singleHost);button(singleDraft,'Cancel').click();
+ const retained=structuredClone(insertion),singleBefore=await source(singleScene.sourcePath);
+ await saveSource(singleScene.sourcePath,singleBefore+'# accepted comment-only Source edit\n');
+ const commented=await source(singleScene.sourcePath);
+ singleHost=await mountStory(singleScene.id);singleDraft=await newCall(singleHost);
+ let singlePosition=singleDraft.querySelector('[aria-label="Insert before"]');
+ const terminalOption=[...singlePosition.options].find(option=>option.textContent.startsWith('Before Return'));assert(terminalOption);
+ assert.notEqual(singlePosition.value,terminalOption.value,'Stale insertion must require an actual selectable position change');
+ const refusedAt=messages.length;button(singleDraft,'Add Beat').click();await wait(()=>messages.length>refusedAt,'stale sole-position refusal');
+ assert(singleDraft.isConnected);assert.equal(await source(singleScene.sourcePath),commented);assert.deepEqual(insertion,retained);
+ singlePosition.value=terminalOption.value;singlePosition.dispatchEvent(new Event('change',{bubbles:true}));button(singleDraft,'Cancel').click();
+ assert.deepEqual(insertion,retained);assert.equal(await source(singleScene.sourcePath),commented);
+ singleDraft=await newCall(singleHost);singlePosition=singleDraft.querySelector('[aria-label="Insert before"]');assert.notEqual(singlePosition.value,terminalOption.value);
+ singlePosition.value=terminalOption.value;singlePosition.dispatchEvent(new Event('change',{bubbles:true}));button(singleDraft,'Add Beat').click();await wait(()=>!singleDraft.isConnected,'confirmed sole-position Call');
+ const singleAccepted=commented.replace('    return','    call screen guide_dialog\n    return');assert.equal(await source(singleScene.sourcePath),singleAccepted);
+ const singleAcceptedScene=(await call('scene.list')).scenes.find(s=>s.id===singleScene.id);assert.equal(insertion.expectedSourceRevision,singleAcceptedScene.sourceRevision);assert.deepEqual(insertion.position,{type:'before',anchor:{type:'beat',beatId:terminalOption.value}});
+ await history('undo');assert.equal(await source(singleScene.sourcePath),commented);await history('redo');assert.equal(await source(singleScene.sourcePath),singleAccepted);
+ insertion=acceptedInsertion;result.stages.push('stale sole-position recovery requires real selection, Cancel restores intent, accepted Call has one-step Undo/Redo');
  await saveSource(owner.path,finished.replace('screen guide_dialog():','screen renamed_dialog():'));await call('project.close');session=undefined;const currentRecent=(await call('project.listRecent')).find(r=>r.projectId===projectId);assert(currentRecent);session=(await call('project.openRecent',{recentId:currentRecent.id})).sessionId;model=await call('scene.list');const reopened=model.scenes.find(s=>s.id===scene.id).beats.find(b=>b.id===callBeat.id);assert.equal(reopened.protected,true);assert.equal(reopened.payload.target.screenId,owner.id);assert.equal(reopened.payload.target.sourceName,'guide_dialog');assert.equal(await source(scene.sourcePath),accepted);assert.equal(await source(entry.sourcePath),opaque);result.stages.push('renamed Dialog -> reopen keeps protected Call identity and opaque neighbor bytes');result.passed=true;
 }catch(error){result.failure={message:error.message,stack:error.stack};throw error;}
 finally{creation?.dispose();dismissal?.dispose();disposeStory?.();await browser.happyDOM.close();result.messages=messages;try{await child.stop();await assert.rejects(access(scratch));result.cleanupComplete=true;}catch(error){result.passed=false;result.cleanupFailure=error.message;throw error;}finally{result.driver=child.exitStatus();await writeFile(join(output,'result.json'),JSON.stringify(result,null,2)+'\n');}}

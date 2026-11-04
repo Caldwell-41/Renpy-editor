@@ -2,6 +2,24 @@
 
 ## Help dialog and base Help canvas implementation
 
+Kris selected fixes for the three PR #79 findings at `60be930`, then PR update and
+ordinary CI after parent verification. Sol 6.1 High completed the implementation
+with public-boundary TDD. Parent final review and independent original-bug checks
+pass: invalid modality retains Return/Escape protection; optimized inspection
+reuses one analysis; stale sole-position recovery requires a real selection and
+preserves Cancel/Escape, source and one-step history. Local results are 366 frontend,
+123 ordinary Screens and 12 Dialog core passes, production build and seven actual
+controller/core stages. Five existing SDK/helper cases remain ignored.
+[Correction evidence](../tasks/evidence/help-dialog-and-canvas.md#pr-79-root-cause-corrections-and-parent-review-2026-11-04)
+owns exact red/green scope, the initial Python-version failure and ignored raw
+receipts under `.toolchains/pr79-review-fixes/`. Publication and current-head
+ordinary CI are selected; PR #79 owns the exact candidate/run and pending terminal
+audit. The earlier completion and
+CI candidates below retain their historical identities; they do not qualify these
+new product inputs. No merge, issue closure, SDK/helper/native/package execution
+or broader acceptance is selected. Preserve the unrelated Design Lab guide edits
+and untracked audit.
+
 The selected #45/#46 implementation is complete and reviewed on
 `codex/help-dialog-canvas` from `e32ded4`. Final production code is `b2a5694`;
 `7fe2577` has identical frontend/core inputs. [Delivery evidence](../tasks/evidence/help-dialog-and-canvas.md)

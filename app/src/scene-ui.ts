@@ -766,7 +766,7 @@ export function renderSceneAuthoring(
     draw();
     return beat ? [...host.querySelectorAll<HTMLElement>(".beat-card")].find(item => item.dataset.beatId === beat.id) : host.querySelector<HTMLElement>(".beats-list") ?? undefined;
   };
-  const destinations = (scene: SceneDocument, initialBody: BodyRef, exclude?: SceneBeat, initialPosition?: Position, insertion = false): { host: HTMLElement; read: () => { body: BodyRef; position: Position } } => {
+  const destinations = (scene: SceneDocument, initialBody: BodyRef, exclude?: SceneBeat, initialPosition?: Position, insertion = false, retained?: ScreenInsertion): { host: HTMLElement; read: () => { body: BodyRef; position: Position } } => {
     const panel = document.createElement("div"); panel.className = "story-destination";
     const parents: { key: string; body: BodyRef; label: string }[] = [{ key: "root", body: { type: "root" }, label: bodyCaption(scene, { type: "root" }, model) }];
     for (const branch of scene.beats.filter(beat => beat.conditionalBranch)) {
@@ -774,12 +774,15 @@ export function renderSceneAuthoring(
       if (exclude?.conditionalBranch && insideCondition(scene, body, exclude.conditionalBranch.groupId)) continue;
       parents.push({ key: branch.id, body, label: bodyCaption(scene, body, model) });
     }
-    const parent = selectOf(parents.map(item => ({ value: item.key, label: item.label })), initialBody.type === "root" ? "root" : initialBody.branchId); parent.setAttribute("aria-label", insertion ? "Insert in" : "Destination body");
+    const initialParent = parents.find(item => item.body.type === initialBody.type && (item.body.type === "root" || initialBody.type === "branch" && item.body.groupId === initialBody.groupId && item.body.branchId === initialBody.branchId));
+    const parent = selectOf(parents.map(item => ({ value: item.key, label: item.label })), initialParent?.key ?? ""); parent.setAttribute("aria-label", insertion ? "Insert in" : "Destination body");
     if(insertion && !parent.value){const missing=document.createElement("option");missing.value="unavailable-body";missing.textContent="Original body unavailable";parent.prepend(missing);parent.value="unavailable-body";}
     const position = document.createElement("select"); position.setAttribute("aria-label", insertion ? "Insert before" : "Destination position");
-    const summary = document.createElement("p"); summary.className = "story-insertion";
+    const summary = document.createElement("p"); summary.className = "story-insertion"; if (insertion) summary.role = "status";
     let placements: { key: string; position: Position; label: string }[] = [];
-    const show = (): void => { summary.textContent = `${insertion ? "Insert in" : "Move to"} ${parents.find(item => item.key === parent.value)?.label ?? "Missing body"} · ${placements.find(item => item.key === position.value)?.label ?? "Choose a position"}`; };
+    let confirmationRequired = !!retained && (retained.sceneId !== scene.id || retained.expectedSourceRevision !== scene.sourceRevision);
+    const confirmationMessage = retained?.sceneId !== scene.id ? "The original insertion Scene is unavailable. Choose a replacement position explicitly. Input retained." : "The original insertion Scene changed. Choose its position explicitly. Input retained.";
+    const show = (): void => { summary.textContent = confirmationRequired && !position.value ? confirmationMessage : `${insertion ? "Insert in" : "Move to"} ${parents.find(item => item.key === parent.value)?.label ?? "Missing body"} · ${placements.find(item => item.key === position.value)?.label ?? "Choose a position"}`; };
     const rebuild = (): void => {
       const selectedBody=parents.find(item=>item.key===parent.value);
       if(!selectedBody){placements=[];position.replaceChildren();summary.textContent="Original body unavailable. Choose a body explicitly. Input retained.";return;}
@@ -791,12 +794,13 @@ export function renderSceneAuthoring(
       if (!siblings.some(beat => terminates(beat, scene))) placements.push({ key: "end", position: { type: "end" }, label: "End of body" });
       position.replaceChildren(...placements.map(item => { const option = document.createElement("option"); option.value = item.key; option.textContent = item.label; return option; }));
       const preferred = initialPosition ?? defaultInsertion(scene, body); const match = placements.find(item => JSON.stringify(item.position) === JSON.stringify(preferred));
-      if (insertion && initialPosition && !match) { const unavailable=document.createElement("option"); unavailable.value="unavailable";unavailable.textContent="Original position unavailable";position.prepend(unavailable);position.value="unavailable"; }
+      if (confirmationRequired) { const choose=document.createElement("option");choose.value="";choose.textContent="Choose a position";choose.disabled=true;position.prepend(choose);position.value=""; }
+      else if (insertion && initialPosition && !match) { const unavailable=document.createElement("option"); unavailable.value="unavailable";unavailable.textContent="Original position unavailable";position.prepend(unavailable);position.value="unavailable"; }
       else position.value = match?.key ?? placements[0]?.key ?? "";
       initialPosition=undefined; show();
     };
-    parent.addEventListener("change", rebuild); position.addEventListener("change", show); rebuild(); panel.append(labelled(insertion ? "Insert in" : "Destination body", parent), labelled(insertion ? "Insert before" : "Destination position", position), summary);
-    const validate = validateField(position, () => { if (!placements.some(item => item.key === position.value)) throw Error("Choose an available position in this body."); });
+    parent.addEventListener("change", rebuild); position.addEventListener("change", () => { if (placements.some(item => item.key === position.value)) confirmationRequired = false; show(); }); rebuild(); panel.append(labelled(insertion ? "Insert in" : "Destination body", parent), labelled(insertion ? "Insert before" : "Destination position", position), summary);
+    const validate = validateField(position, () => { if (!placements.some(item => item.key === position.value)) throw Error(confirmationRequired ? confirmationMessage : "Choose an available position in this body."); });
     return { host: panel, read: () => { validate(); return { body: parents.find(item => item.key === parent.value)!.body, position: placements.find(item => item.key === position.value)!.position }; } };
   };
   const openConditionForm = (scene: SceneDocument, body: BodyRef, position: Position): void => {
@@ -1189,12 +1193,10 @@ export function renderSceneAuthoring(
     const insertionAnchor = position.type === "before" ? position.anchor : undefined;
     const anchor = insertionAnchor ? bodyNodes(scene, body).find(beat => JSON.stringify(nodeRef(beat)) === JSON.stringify(insertionAnchor)) : undefined;
     destination.textContent = `Insert in ${bodyCaption(scene, body, model)} · ${anchor ? `Before ${anchor.conditionalBranch ? "Condition" : beatLabels[anchor.payload.type]}` : "End of body"}`;
-    const placement=destinations(scene,body,undefined,position,true);
+    const placement=destinations(scene,body,undefined,position,true,insertion);
     const screenType=()=>["showScreen","hideScreen","callScreen"].includes(type.value);
     const unavailableScene = !!insertion && insertion.sceneId !== scene.id;
-    let locationConfirmed=!insertion || (!unavailableScene && insertion.expectedSourceRevision===scene.sourceRevision);
-    const placementError=document.createElement("p");placementError.role="status";placementError.textContent=locationConfirmed?"":unavailableScene?"The original insertion Scene is unavailable. Choose a replacement position explicitly. Input retained.":"The original insertion Scene changed. Choose its position explicitly. Input retained.";
-    const readLocation=()=>{if(!locationConfirmed)throw Error(placementError.textContent!);return placement.read();};
+    const readLocation=placement.read;
     const pendingMarker=document.createElement("div");pendingMarker.className="story-screen-pending";pendingMarker.role="status";
     const updatePendingMarker=()=>{
       pendingMarker.remove();if(!screenType())return;
@@ -1213,7 +1215,7 @@ export function renderSceneAuthoring(
       if(before)before.before(pendingMarker);else bodyHost.append(pendingMarker);
     };
     const remember=()=>{if(screenType())try{rememberScreenInsertion({sceneId:scene.id,...readLocation(),expectedSourceRevision:scene.sourceRevision});rememberedInsertion=true;}catch{/* Retain the unavailable original position until an explicit choice. */}};
-    placement.host.addEventListener("change",()=>{locationConfirmed=true;placementError.textContent="";remember();updatePendingMarker();});
+    placement.host.addEventListener("change",()=>{remember();updatePendingMarker();});
     const editorHost = document.createElement("div"),secondaryHost=document.createElement("div");secondaryHost.className="story-screen-secondary";
     let editor = buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, actions);
     const typeDrafts = new Map<string, BeatEditor>([[type.value, editor]]);
@@ -1251,7 +1253,7 @@ export function renderSceneAuthoring(
       }finally{pending=false;}
     });
     const orderActions=()=>actionsRow.replaceChildren(...(screenType()?[commit,cancel]:[cancel,commit]));orderActions();type.addEventListener("change",orderActions);
-    dirtyDraft(panel,[type,...placement.host.querySelectorAll("select")]);panel.append(heading,destination,labelled("Beat type",type),placement.host,placementError,editorHost,actionsRow,secondaryHost);list.prepend(panel);updatePendingMarker();type.focus();
+    dirtyDraft(panel,[type,...placement.host.querySelectorAll("select")]);panel.append(heading,destination,labelled("Beat type",type),placement.host,editorHost,actionsRow,secondaryHost);list.prepend(panel);updatePendingMarker();type.focus();
   };
 
   draw();

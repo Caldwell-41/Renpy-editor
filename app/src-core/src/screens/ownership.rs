@@ -383,13 +383,13 @@ impl AuthoringService {
             if let Some(owner) = owned {
                 // Qualify against raw action spans before removing supported protected details.
                 // Duplicate markers have already lost their IDs and cannot expose edit authority.
+                let qualified = references::qualified_interaction(owner, screen, bytes);
                 let dismissals: Vec<_> = screen
                     .nodes
                     .iter()
                     .map(|node| {
                         node.id.as_ref()?;
-                        let span =
-                            references::editable_dismissal_action(owner, screen, node, bytes)?;
+                        let span = qualified.dismissals.get(&node.span.start)?;
                         match &bytes[span.start..span.end] {
                             b"Null()" => Some(ButtonDismissal::None),
                             b"Return()" => Some(ButtonDismissal::FinishInteraction),
@@ -400,11 +400,10 @@ impl AuthoringService {
                         }
                     })
                     .collect();
-                let qualified = references::qualified_interaction(owner, screen, bytes).spans;
                 for (node, dismissal) in screen.nodes.iter_mut().zip(dismissals) {
                     node.dismissal = dismissal;
                     node.protected
-                        .retain(|span| !qualified.contains_key(&span.start));
+                        .retain(|span| !qualified.spans.contains_key(&span.start));
                 }
             }
         }
