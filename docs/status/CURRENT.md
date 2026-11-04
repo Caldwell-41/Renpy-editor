@@ -20,7 +20,10 @@ production UI. The coordinator owns integration, combined verification and revie
 Neither ticket is accepted. Mac desktop preflight refused before execution; its
 15 SDK starts and one helper reservation are released, with all actual counters zero.
 Mac proof waits for an unlocked, awake desktop and verified admission. Windows
-readiness is the next independent host check. [Evidence](../tasks/evidence/screen-actions-and-nested-canvas.md)
+source/tools and the supported fixture launch route are verified prerequisites;
+its isolated execution waits for the requested explicit new-thread decision after
+T3 refused remote worktree delegation. Windows 15 SDK/helper-one reservation is
+held, with actual use zero. [Evidence](../tasks/evidence/screen-actions-and-nested-canvas.md)
 records checkpoints, producing candidates and limits. Prior closeout sections below
 retain their historical candidates and recovery; their unselected-next-work text
 is superseded by this selection.

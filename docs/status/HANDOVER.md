@@ -23,16 +23,28 @@ returned all implementation files; its branch remains preserved. Source/actions
 retains its dedicated modules/controls and awaits the prototype's direct approved
 handoff before production UI. The coordinator owns the other integrated files.
 
-Next: inspect Windows readiness and integrate the approved authoring UI. Terra Max test worktree
+Next: resolve the explicit Windows test-thread request and integrate the approved
+authoring UI. Terra Max Mac test worktree
 `t3-26013bcc`, branch `t3/macos-engine-qualification`, is pinned to `afe95ce`.
 Mac desktop admission refused before any SDK start. The coordinator verified the
 retained receipt hash, released all Mac 15 SDK/helper-one reservations in #47, and
 requested an unlocked/awake desktop confirmation. Actual/uncertain SDK/helper,
 package/native/CI/campaign counts all remain zero. No SDK PID or cleanup arose.
 Do not resume Mac execution until admission can establish a usable desktop and
-#47 records a fresh reservation. Windows is linked as SUNDOWN; its checkout/display
-prerequisites and reservation remain pending. Later documentation commits do not
-move the frozen test worktree.
+#47 records a fresh reservation. Windows is linked as SUNDOWN; a single normal
+fetch preserved its primary/worktrees/stash and supplied all published candidate
+objects. Source-transfer head `db99cbb6f23c3f032d32b08d1784bbee6ba8f459` is selected
+for the Windows producer; its delta from `afe95ce` is docs/validation metadata only.
+Windows has pinned tools/archive and a supported engine-owned fixture route.
+Its 15 SDK starts including one helper are reserved, with actual use zero.
+
+Remote `delegate_task` refused `isolation:worktree` before agent creation. The
+supported alternative is a new `t3_thread_launch` bound to a worktree at `db99cbb`.
+T3 rules require Kris's explicit request for that top-level thread, which the
+coordinator has asked through the current conversation. Do not create a child's
+checkout in shell, run in a protected existing checkout, or treat the failed
+allocation as an SDK start. The prepared Windows brief remains in this thread's
+tool state. Later documentation commits do not move selected producing candidates.
 
 Offline preparation/validation at the combined candidate passes with known effects,
 `runtimeReady:true`, and actual public Story Call admission. Seven nested core cases,

@@ -199,3 +199,33 @@ there are no owned SDK PIDs or descendants to reap. No retry or weaker desktop
 admission is selected. Mac proof waits for an unlocked/awake desktop confirmation
 and positive admission, then a fresh reservation. Windows readiness and independent
 design/integration work can continue. No ticket acceptance follows from preflight.
+
+## Windows source readiness and isolated execution limit
+
+SUNDOWN verified pinned tools and official SDK archive, then performed the one
+authorized ordinary fetch. Its primary branch/HEAD, stash and all existing worktrees
+were preserved. Published `db99cbb6f23c3f032d32b08d1784bbee6ba8f459`, tree
+`c171d0ae26589cf95f95abb7977e2e52d77ac23d`, and backend `afe95ce` are present with
+verified ancestry. The scoped diff of product/core/helper/runtime/fixture inputs is
+empty between those candidates; only docs and validation branch metadata differ.
+No PR, merge, release or costly CI was started by publication.
+
+The existing subprocess route serves the selected Ren'Py-owned click/keyboard and
+PNG/geometry fixtures. The hidden helper retains its existing private-desktop/job
+owner. An agent's separate sandbox desktop alone is not a demonstrated blocker for
+those engine-owned fixtures. Current ANGLE2 and private-desktop behavior remain
+unproved until reserved execution; no physical-input/native-editor result is claimed.
+
+#47 reserves Windows 15 SDK starts including one helper for the initial campaign,
+starting with ordered actions and stopping at first failure. The attempted remote
+worktree delegate was then refused by T3 before creating an agent. Its API does not
+support `isolation:worktree` in linked environments. Tool discovery confirms a new
+worktree-bound thread is the supported alternative, and orchestration requires an
+explicit user request for that top-level thread. The coordinator requested the
+bounded test thread at `db99cbb`. The full brief is prepared; no shell-created
+worktree or shared-checkout execution substitutes for the selected isolation.
+
+All actual/uncertain SDK/helper/package/native/CI/campaign counts remain zero. The
+Windows reservation is held for the pending route, not assigned execution authority.
+No child task/PID or cleanup arose from the API refusal. Mac desktop confirmation,
+prototype/UI, both-target engine proof and final review remain pending.
