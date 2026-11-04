@@ -80,6 +80,7 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Public licence and attribution | [../LICENSE](../LICENSE) and [../NOTICE](../NOTICE) |
 | Contribution and inbound licensing | [../CONTRIBUTING.md](../CONTRIBUTING.md) |
 | Complete PR CI status, selected qualification and monitoring | [Complete PR validation](testing/CI-VALIDATION.md), [delivery task](tasks/active/ci-validation.md) |
+| Accepted Help Dialog/Call/Finish, exact base Help canvas and PR #79 retirement | [Evidence](tasks/evidence/help-dialog-and-canvas.md#merge-acceptance-and-workspace-retirement-2026-11-04), [L10](https://github.com/Caldwell-41/Renpy-editor/issues/45), [L18](https://github.com/Caldwell-41/Renpy-editor/issues/46) |
 | Accepted components, editable Help/Story and PR #77 retirement | [Evidence](tasks/evidence/components-and-help-panel.md#merge-acceptance-and-workspace-retirement-2026-11-03), [L08](https://github.com/Caldwell-41/Renpy-editor/issues/41), [L09](https://github.com/Caldwell-41/Renpy-editor/issues/44) |
 | Completed Screens audit corrections and workspace retirement | [Maintenance brief](tasks/archive/2026-11-01-phase-3b-audit-fixes.md), [evidence](tasks/evidence/phase-3b-audit-fixes.md) |
 | Test strategy and quality gates | [TESTING.md](TESTING.md) |

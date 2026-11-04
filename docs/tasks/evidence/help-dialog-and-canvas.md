@@ -1,5 +1,95 @@
 # Help dialog and base canvas delivery evidence
 
+## Merge, acceptance and workspace retirement, 2026-11-04
+
+Kris selected all relevant ticket updates, merge and workspace cleanup.
+[PR #79](https://github.com/Caldwell-41/Renpy-editor/pull/79) squash-merged as
+`dfd6c5cf09f8d5540b69c98c1fb6c31c006d4e70` into `codex/phase3b-screen-designer`.
+The merge and audited head `cef296e15917b14c7909f8a9b1eea730ca4fc6d6` share tree
+`fc895106115cdb7ffabc493a5b51bf6142e8f746`. The primary checkout fast-forwarded
+without a product difference. [Terminal CI audit](https://github.com/Caldwell-41/Renpy-editor/pull/79#issuecomment-6631120522)
+verifies successful ordinary runs 41832379397 and 41832419872, both attempt 1.
+Both required jobs, every executed step and `Loomlight validation` pass, with
+369 frontend tests, 15 offline Help gates, 29 selected core cases, production
+build and the eight-stage actual controller/core journey. Repository validation,
+13 section-link tests, 18 reporting cases and ten Q1 rejection fixtures also pass.
+The second run was triggered by the authorized PR-description update. Unselected
+specialist jobs remain skips, and no SDK/helper/native/package campaign occurred.
+
+### Ticket acceptance and coverage
+
+L10 #45 and L18 #46 are accepted and closed for four bounded criteria each.
+All four verified PR findings are corrected. Both-target normal-entry Dialog
+proof remains scoped to Mac `dff0c64` and Windows `4c084a4`; eight exact base Help
+comparisons per target at both aspects remain scoped to `4c084a4`. Every comparison
+has zero differing pixels and exact geometry. Reuse covers unchanged accepted
+source/assets/fonts/state and runtime inputs only. No later UI correction inherits
+a fresh SDK or native pass.
+
+Final cumulative SDK use closes at Mac Dialog 20/24 and Canvas 16/20, Windows
+Dialog 11/16 and Canvas 8/12. Zero starts are uncertain/reserved; unused capacity
+is closed. Earlier failures, candidate limits and broader editor/canvas/native/
+physical/human and Phase 3B acceptance remain separate.
+
+All sixteen issue bodies and states are published and read back:
+
+- #22 updates twenty live-map rows for Dialog/Call/Finish, retained placement,
+  source protection and exact base Help rendering.
+- #23/#24/#25/#26/#27/#28/#30/#33 receive only their bounded evidence; group
+  aggregate acceptance stays open, including B05 after both primary leaves close.
+- #47 has #45 satisfied. #48/#49/#50 have #46 satisfied. All four are
+  dependency-ready but remain not_started and unselected.
+- #54 has #46 satisfied and still waits on #51/#52. It remains unselected.
+
+Native parent/dependency edges, labels and assignments are unchanged. No successor
+or new execution allowance is selected by closeout.
+
+### Source and evidence preservation
+
+Before retirement, all thirteen worktrees have clean tracked files and no active
+agent or process using them. The only untracked entry is the prototype's generated
+node_modules symlink to the retained primary dependency directory. Its target is
+recorded without dereferencing it. Worker code is integrated or patch-equivalent;
+the two Null-authoring patch-ID exceptions differ only in retained evidence.
+Their production/contract patch IDs equal integrated `35efe2c`. The entire approved
+prototype source/evidence directories exactly match their merged copies.
+
+A verified Git bundle retains all original histories and refs. Recovery tag
+`recovery/pr79-approved-prototype-2026-11-04` preserves approved `2443e72`, including
+pinned source `8851689`. The ignored `.toolchains/retired-worktrees/pr79/` archive
+preserves 2,502 paths, comprising 2,498 files and four recorded symlinks as 1,917
+unique blobs, 353,263,236 bytes. Every copied blob is hash-verified. Source bundle
+SHA-256 is `bca8ae96f9b6b99c45935bd5da64644a1a1322c6c967ddea25678e4def032433`;
+manifest SHA-256 is `f5939fe0260db5e4686e8268510d9439aca9a1fed88f230e39c76d3b9d3a182f`.
+Fixtures, producing binaries, source/driver receipts, captures and failed logs are
+retained. Reproducible dependency caches, compiled JS/Python, build objects,
+libraries and debug symbols are omitted; duplicate evidence is stored once.
+Private artifacts remain local and ignored.
+
+Thirteen completed worktrees and their branches are retired: the Dialog and Canvas
+implementation lanes, approved prototype, completion/validation lanes, both backend
+reviews, both full reviews and the authoring/control/toolbar verification lanes.
+Their exact names and heads are retained in the private manifest and source bundle.
+The primary `codex/help-dialog-canvas` branch is also retired, for fourteen local
+branches total. Its merged remote ref is deleted after verifying audited `cef296e`.
+The primary checkout is the only local worktree. No remote Windows checkout is
+changed by this local retirement.
+
+The three unrelated Design Lab guide edits and the untracked Phase 1 audit are
+byte-identical before/after. Both protected stashes remain at `c16ddcc` and
+`23c69ff`; no recovery draft/profile is read, saved, reloaded or discarded. Existing
+archive/recovery tags, local/remote `main`, the integration branch, open Dependabot
+PR #69, SDK archives and primary evidence remain intact.
+
+### Closeout publication
+
+The merge and retirement records publish through a separate documentation-only
+PR because the integration branch requires `Loomlight validation`. Its validation
+plan selects automatic Repository quality and no manual qualification. PR #79 owns
+the follow-up PR link and final publication/retirement receipt. This selects no
+product, SDK/helper, native, package or release operation. Earlier closeouts in
+CURRENT/HANDOVER remain historical context rather than pending work.
+
 ## Pending placement handoff correction, 2026-11-04
 
 Kris selected the independently verified P2 from the Terra 6.1 Max review of
