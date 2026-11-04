@@ -7,7 +7,7 @@ import { storyFixture } from "./story-controls-fixture.js";
 
 const binding: ScreenTargetBinding = { screenId: "panel-id", sourceName: "help_panel" };
 const revisions = { source: "panel-source", sourceMap: "map", inventory: "inventory", effects: "effect" };
-const target: ResolvedScreenTarget = { binding, kind: "panel", blocking: false, path: "game/ui/help.rpy", rootId: "root", revisions, effects: { revision: "effect", unknown: true, hiddenScreens: ["panel-id"], finishesInteraction: false, dependencies: [] } };
+const target: ResolvedScreenTarget = { binding, kind: "panel", blocking: false, path: "game/ui/help.rpy", rootId: "root", revisions, effects: { revision: "effect", unknown: true, shownScreens:[],assignedVariables:[],hiddenScreens: ["panel-id"], finishesInteraction: false, dependencies: [] } };
 const catalog: ScreenCatalog = { projectRevision: "project", sourceMapRevision: "map", inventoryRevision: "inventory", owned: [
   { id: "component-id", name: "guide", path: "game/ui/guide.rpy", rootId: "component-root", kind: "component", resolved: true, sourceRevision: "component-source" },
   { id: "missing-id", name: "missing", path: "game/ui/missing.rpy", rootId: "missing-root", kind: "panel", resolved: false, sourceRevision: null },
@@ -144,7 +144,7 @@ test("Use in Story offers an explicit screen Beat action with the selected panel
 
 test("Call screen chooses only dialogs and retains the selected insertion anchor after refusal", async () => {
   const dialogBinding={screenId:"dialog-id",sourceName:"help_dialog"};
-  const dialogTarget:ResolvedScreenTarget={...target,binding:dialogBinding,kind:"dialog",blocking:true,effects:{...target.effects,unknown:false,hiddenScreens:[],finishesInteraction:true}};
+  const dialogTarget:ResolvedScreenTarget={...target,binding:dialogBinding,kind:"dialog",blocking:true,effects:{...target.effects,unknown:false,shownScreens:[],assignedVariables:[],hiddenScreens:[],finishesInteraction:true}};
   const s=setup({screenCatalog:async()=>({...catalog,owned:[...catalog.owned,{...catalog.owned[2]!,id:dialogBinding.screenId,name:dialogBinding.sourceName,kind:"dialog"}]}),resolveScreenTarget:async()=>dialogTarget});
   const draft=openNew(s.host,"callScreen");await tick();
   const picker=draft.querySelector<HTMLSelectElement>('[aria-label="Dialog screen"]');assert.ok(picker);assert.deepEqual([...picker.options].map(o=>o.value),[dialogBinding.screenId]);
@@ -348,7 +348,7 @@ test("later screen drafts and cancellation retain the last accepted placement an
   const model=fixture(),scene=model.scenes[0]!;
   const original:ScreenInsertion={sceneId:scene.id,body:{type:"root"},position:{type:"before",anchor:{type:"beat",beatId:"end"}},expectedSourceRevision:scene.sourceRevision};
   const dialogBinding={screenId:"dialog-id",sourceName:"help_dialog"};
-  const dialogTarget:ResolvedScreenTarget={...target,binding:dialogBinding,kind:"dialog",blocking:true,effects:{...target.effects,unknown:false,hiddenScreens:[],finishesInteraction:true}};
+  const dialogTarget:ResolvedScreenTarget={...target,binding:dialogBinding,kind:"dialog",blocking:true,effects:{...target.effects,unknown:false,shownScreens:[],assignedVariables:[],hiddenScreens:[],finishesInteraction:true}};
   let remembered=structuredClone(original),writes=0;
   const s=setup({screenInsertion:original,rememberScreenInsertion:value=>{remembered=structuredClone(value);},screenCatalog:async()=>({...catalog,owned:[...catalog.owned,{...catalog.owned[2]!,id:dialogBinding.screenId,name:dialogBinding.sourceName,kind:"dialog"}]}),resolveScreenTarget:async value=>value.screenId===dialogBinding.screenId?dialogTarget:target,apply:async()=>{writes++;return {...model,scenes:[{...scene,sourceRevision:"accepted-source"}]};}},model);
   const open=async()=>{button(s.host,"Add screen Beat").click();await tick();const draft=s.host.querySelector<HTMLElement>(".new-beat")!;const select=draft.querySelector<HTMLSelectElement>("select")!;select.value=type;select.dispatchEvent(new Event("change",{bubbles:true}));await tick();return draft;};

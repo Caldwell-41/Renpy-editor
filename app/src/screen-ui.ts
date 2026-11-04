@@ -10,7 +10,7 @@ import { layoutFor, saveLayout } from "./preferences.ts";
 import type { CoreOperation } from "./protocol.ts";
 import type { SourceDocument, SourceInventory, SourceTarget } from "./source-ui.ts";
 import type { ScreenPreview } from "./runtime-preparation.ts";
-import type { OwnedScreen, ScreenCatalog, ScreenTargetBinding, ResolvedScreenTarget, ComponentChange, ScreenRevisions } from "./screen-contracts.ts";
+import type { OwnedScreen, ScreenCatalog, ScreenTargetBinding, ResolvedScreenTarget, ComponentChange, ScreenRevisions, ScreenAction, VariableBinding } from "./screen-contracts.ts";
 
 export interface ScreenNode {
   id?: string | null;
@@ -23,9 +23,12 @@ export interface ScreenNode {
   style?: {name:string; error:string|null} | null;
   component?: { componentId: string; resolved: boolean; sourceRevision: string | null } | null;
   dismissal?: "none" | "finishInteraction" | "hideScreen" | null;
+  actions?: ScreenAction[] | null;
+  variableBinding?: VariableBinding | null;
   protected: { start: number; end: number }[];
 }
 export interface ScreenDocument {
+  authoringRevision?: string | null;
   path: string; revision: string; partial: boolean;
   screens: { name: string; nodes: ScreenNode[] }[];
 }

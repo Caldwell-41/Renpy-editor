@@ -650,8 +650,8 @@ Source buffers for transitive users. Composition and geometry share this admissi
 owner. Style indexing uses the same graph rather than maintaining a second graph.
 Effect summaries hash relevant dependencies and report unknown for unsupported or
 custom behavior. A known inclusion alone does not make an unknown child passive.
-Text interpolation and unqualified text tags keep effects unknown without changing
-or filtering the authoritative text.
+Except for the direct known-variable binding below, text interpolation and
+unqualified text tags keep effects unknown without changing or filtering source.
 
 Source-map v8 adds an explicit `dialog` owned-screen kind and reserves `callScreen`
 Beat mappings with the same stable `screenTarget` binding. Earlier maps retain
@@ -670,6 +670,30 @@ this captured result rather than reparsing source in Story. Exact standalone
 `action Null()` is inert and remains editable and extractable for every owned
 screen kind. It is separate from the contextual modality, focus, Return and Hide
 spans that cannot move into a reusable component.
+
+L11 extends the existing composition transaction with `actions` and `variableText`.
+An action list has at most eight typed entries. Assignments refer to existing
+variable IDs and compatible bool/int/string literals; frontend integers use canonical
+decimal strings to preserve signed 64-bit precision. Show/Hide refer to qualified
+owned nonmodal Panels. Finish is available only for a blocking Dialog and must be
+last. Custom actions remain in Source. The draft captures the authoring metadata
+and verified variable-source revision, plus every distinct target's screen revisions.
+Missing references, incompatible values and changed/dirty dependencies refuse the
+write. Semantic no-ops preserve existing source trivia and create no history entry.
+
+Variable text uses the exact source placeholder `[technical_name!q]` for a known
+variable. Core resolves its default or an explicit editor-only sample to literal text
+with Ren'Py's quote conversion, then keeps helper substitution disabled. A sample
+captures the variable definition's source revision. Brackets in its value stay
+literal, and braces cannot introduce text tags. Samples never alter source or runtime
+state. Other expressions and unsupported placeholders remain source-only.
+
+`ScreenEffects` adds known `assignedVariables` and `shownScreens` IDs alongside
+`hiddenScreens` and `finishesInteraction`. These describe possible qualified button
+effects, not observed execution or reconstructed runtime values. The shared action
+grammar supplies their spans and revisions. Effects include variable/binding,
+authoring, target identity, component and source dependencies; a changed definition
+invalidates the captured effect revision even when screen source is unchanged.
 
 Pending Story screen placement is client-only Scene/body/Position context. Valid
 placement choices are retained before navigation and survive a Screens round trip

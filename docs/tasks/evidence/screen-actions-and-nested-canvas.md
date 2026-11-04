@@ -106,3 +106,36 @@ replacement geometry. A test setup initially used an unsupported zoom option;
 the corrected replacement case changes a supported sample state at 100% zoom.
 These results establish caller behavior with controlled helper output, not engine
 rendering or native input acceptance. No capped operation started.
+
+## Reviewed backend integration and effect owner
+
+Canvas checkpoint `e432251` integrates as `78406bd`. Its independent Standards and
+Spec axes report no actionable findings. Source/action `3005569` and correction
+`5ee855e` integrate as `aa91873` and `2edd41b`. That worker returned source parser,
+composition and ownership glue to the coordinator. Its initial independent axes
+reported no significant findings; the modal-nesting observation was reproduced and
+corrected. Component `Null()` stays known passive, and nonempty component actions
+remain unsupported. The dedicated actions/binding modules stay with their worker.
+
+The coordinator added public effect/Story acceptance proof before changing the
+shared effect owner. A typed assignment/display sequence reproduced the existing
+unknown summary. The integrated owner now consumes the shared action and binding
+helpers, exposes assigned-variable and shown/hidden screen IDs, and hashes their
+relevant revisions. It removes the superseded button-dismissal parser while retaining
+separate root modality/key/focus qualification. Component extraction still refuses
+contextual actions. Both new public cases pass, including changed-definition
+invalidation, reopen, normal Call admission after assignment/Finish, rejection of
+stale Call preparation, and conservative custom behavior. The 14 reference and eight
+action cases also pass on their stated intermediate effect candidate.
+
+Combined frontend typechecking and 76 focused canvas/workspace/component/Story DOM
+cases pass. The sibling-movement status assertion now reflects withdrawn pending
+geometry; the image still stays stationary. Five nested public-core cases and three
+offline comparison gates pass after a real public-core export. Initial Python gate
+attempts failed because system Python 3.9 lacked Pillow, then because the required
+export had not been supplied. Python 3.12 with pinned Pillow 12.3 and the exported
+fixture resolves those environment/setup failures; they are not engine proof.
+
+The canvas sample consumer and its fresh reviews are pending integration. Prototype
+approval, production authoring controls, runtime/matched rendering, required platform
+qualification and final combined review remain pending. No capped operation started.

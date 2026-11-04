@@ -1,0 +1,235 @@
+use super::*;
+
+#[test]
+fn typed_screen_effects_capture_known_ids_bindings_and_definition_revisions() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let authoring = ipc(
+        &mut service,
+        "variable.create",
+        json!({
+            "technicalName":"score", "variableType":"int", "defaultValue":"0"
+        }),
+    );
+    let variable = authoring["variables"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|variable| variable["technicalName"] == "score")
+        .unwrap()
+        .clone();
+    let label = compose_command(
+        &mut service,
+        &owner,
+        json!({
+            "type":"add", "parentId":owner["rootId"], "kind":"text", "text":"Score"
+        }),
+    );
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    compose_command(
+        &mut service,
+        &owner,
+        json!({
+            "type":"variableText", "nodeId":label["selectedId"],
+            "binding":{"variableId":variable["id"]}, "expectedAuthoringRevision":doc["authoringRevision"]
+        }),
+    );
+    let button = compose_command(
+        &mut service,
+        &owner,
+        json!({
+            "type":"add", "parentId":owner["rootId"], "kind":"textbutton", "text":"Record"
+        }),
+    );
+    let binding = json!({"screenId":owner["id"],"sourceName":owner["name"]});
+    let reviewed = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":binding}),
+    );
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    compose_command(
+        &mut service,
+        &owner,
+        json!({
+            "type":"actions", "nodeId":button["selectedId"],
+            "actions":[{"type":"setVariable","variableId":variable["id"],"value":"5"},
+                       {"type":"showScreen","target":binding}, {"type":"hideScreen","target":binding}],
+            "expectedAuthoringRevision":doc["authoringRevision"],
+            "expectedTargetRevisions":[{"target":binding,"revisions":reviewed["revisions"]}]
+        }),
+    );
+    let before = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":binding}),
+    );
+    assert_eq!(before["effects"]["unknown"], false);
+    assert_eq!(
+        before["effects"]["assignedVariables"],
+        json!([variable["id"]])
+    );
+    assert_eq!(before["effects"]["shownScreens"], json!([owner["id"]]));
+    assert_eq!(before["effects"]["hiddenScreens"], json!([owner["id"]]));
+    let dependencies = before["effects"]["dependencies"].as_array().unwrap();
+    assert!(dependencies.iter().any(|row| row["id"] == variable["id"]));
+    assert!(dependencies
+        .iter()
+        .any(|row| row["id"] == format!("{}:action", button["selectedId"].as_str().unwrap())));
+    ipc(
+        &mut service,
+        "variable.update",
+        json!({
+            "id":variable["id"], "expectedSourceRevision":variable["source"]["sourceRevision"], "defaultValue":"7"
+        }),
+    );
+    let after = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":binding}),
+    );
+    assert_eq!(before["revisions"]["source"], after["revisions"]["source"]);
+    assert_ne!(before["effects"]["revision"], after["effects"]["revision"]);
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    assert_eq!(
+        ipc(
+            &mut service,
+            "screens.resolveTarget",
+            json!({"binding":binding})
+        )["effects"],
+        after["effects"]
+    );
+    let source = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    save_composition_source(
+        &mut service,
+        &owner,
+        &source.replace(
+            "action [SetVariable",
+            "hovered Function(custom)\n        action [SetVariable",
+        ),
+    );
+    assert_eq!(
+        ipc(
+            &mut service,
+            "screens.resolveTarget",
+            json!({"binding":binding})
+        )["effects"]["unknown"],
+        true
+    );
+}
+
+#[test]
+fn story_call_accepts_known_assignment_then_finish_and_rejects_changed_effect_revisions() {
+    let (_temporary, mut service, _root, _) = composition_project();
+    let authoring = ipc(
+        &mut service,
+        "variable.create",
+        json!({
+            "technicalName":"confirmed", "variableType":"bool", "defaultValue":false
+        }),
+    );
+    let variable = authoring["variables"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|variable| variable["technicalName"] == "confirmed")
+        .unwrap()
+        .clone();
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let created = ipc(
+        &mut service,
+        "screens.create",
+        json!({
+            "name":"confirm_actions", "kind":"dialog", "expectedProjectRevision":catalog["projectRevision"],
+            "expectedSourceMapRevision":catalog["sourceMapRevision"], "expectedInventoryRevision":catalog["inventoryRevision"]
+        }),
+    );
+    let owner = created["owned"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|owner| owner["name"] == "confirm_actions")
+        .unwrap()
+        .clone();
+    let button = compose_command(
+        &mut service,
+        &owner,
+        json!({
+            "type":"add", "parentId":owner["rootId"], "kind":"textbutton", "text":"Confirm"
+        }),
+    );
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    compose_command(
+        &mut service,
+        &owner,
+        json!({
+            "type":"actions", "nodeId":button["selectedId"], "expectedAuthoringRevision":doc["authoringRevision"],
+            "expectedTargetRevisions":[], "actions":[{"type":"setVariable","variableId":variable["id"],"value":true}, {"type":"finishInteraction"}]
+        }),
+    );
+    let binding = json!({"screenId":owner["id"],"sourceName":owner["name"]});
+    let target = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":binding}),
+    );
+    assert_eq!(target["effects"]["unknown"], false);
+    assert_eq!(target["effects"]["finishesInteraction"], true);
+    let model = ipc(&mut service, "scene.list", json!({}));
+    let scene = model["scenes"][0].clone();
+    let command = json!({"type":"insertBodyBeat", "sceneId":scene["id"], "expectedSourceRevision":scene["sourceRevision"],
+        "body":{"type":"root"}, "position":{"type":"before","anchor":{"type":"beat","beatId":scene["beats"].as_array().unwrap().last().unwrap()["id"]}},
+        "beat":{"type":"callScreen","target":binding,"revisions":target["revisions"]}});
+    let applied = ipc(
+        &mut service,
+        "scene.apply",
+        json!({
+            "expectedProjectRevision":model["projectRevision"], "expectedSourceMapRevision":model["sourceMapRevision"], "command":command
+        }),
+    );
+    let call = applied["scenes"][0]["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|beat| beat["payload"]["type"] == "callScreen")
+        .unwrap();
+    assert_eq!(call["screenEffects"], target["effects"]);
+    composition_history(&mut service, "undo");
+    ipc(
+        &mut service,
+        "variable.update",
+        json!({
+            "id":variable["id"],"expectedSourceRevision":variable["source"]["sourceRevision"],"defaultValue":true
+        }),
+    );
+    let model = ipc(&mut service, "scene.list", json!({}));
+    reject(
+        &mut service,
+        "scene.apply",
+        json!({
+            "expectedProjectRevision":model["projectRevision"], "expectedSourceMapRevision":model["sourceMapRevision"], "command":command
+        }),
+    );
+    assert!(
+        !ipc(&mut service, "scene.list", json!({}))["scenes"][0]["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|beat| beat["payload"]["type"] == "callScreen")
+    );
+}

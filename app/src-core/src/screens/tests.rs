@@ -31,6 +31,9 @@ mod references;
 #[path = "action_tests.rs"]
 mod actions;
 
+#[path = "interaction_effect_tests.rs"]
+mod interaction_effects;
+
 #[path = "panel_fixture_tests.rs"]
 mod panel_fixture;
 

@@ -27,6 +27,8 @@ pub struct ScreenEffects {
     pub revision: String,
     pub unknown: bool,
     pub hidden_screens: Vec<String>,
+    pub shown_screens: Vec<String>,
+    pub assigned_variables: Vec<String>,
     pub finishes_interaction: bool,
     pub dependencies: Vec<ScreenDependencyRevision>,
 }
@@ -292,7 +294,6 @@ pub(super) struct InteractionQualification {
     pub(super) spans: BTreeMap<usize, bool>,
     pub(super) contextual: BTreeSet<usize>,
     pub(super) blocking: bool,
-    pub(super) dismissals: BTreeMap<usize, Span>,
 }
 
 /// Exact single statements remain editable only in their owned interaction context.
@@ -305,26 +306,13 @@ pub(super) fn qualified_interaction(
     let Ok(lines) = source_lines(bytes) else {
         return qualified;
     };
+    let interaction = actions::inspect_actions(owner, screen, bytes, &[], &[]);
+    qualified.blocking = interaction.blocking;
     let span_lines = |span: &Span| {
         let start = lines.partition_point(|line| line.start < span.start);
         let end = lines.partition_point(|line| line.start < span.end);
         &lines[start..end]
     };
-    if owner.kind == OwnedScreenKind::Dialog {
-        if let Some(root) = screen.nodes.iter().find(|node| node.kind == "screen") {
-            let modal: Vec<_> = root
-                .protected
-                .iter()
-                .filter_map(|span| {
-                    let lines = span_lines(span);
-                    (lines.first()?.code.split_whitespace().next() == Some("modal"))
-                        .then_some(lines)
-                })
-                .collect();
-            qualified.blocking =
-                modal.len() == 1 && modal[0].len() == 1 && modal[0][0].code == "modal True";
-        }
-    }
     for node in &screen.nodes {
         let mut statements = Vec::new();
         let mut counts = BTreeMap::<&str, usize>::new();
@@ -341,8 +329,16 @@ pub(super) fn qualified_interaction(
             if !single || counts[key] != 1 {
                 continue;
             }
-            if node.kind == "textbutton" && code == "action Null()" {
-                qualified.spans.insert(start, false);
+            if node.kind == "textbutton" && key == "action" {
+                // Extraction must not move a contextual or custom action into a
+                // component. The shared grammar alone qualifies button actions.
+                if interaction
+                    .buttons
+                    .get(&node.span.start)
+                    .is_none_or(|button| !button.actions.is_empty())
+                {
+                    qualified.contextual.insert(start);
+                }
                 continue;
             }
             if owner.kind == OwnedScreenKind::Component {
@@ -362,90 +358,41 @@ pub(super) fn qualified_interaction(
             }
             if owner.kind == OwnedScreenKind::Dialog {
                 if qualified.blocking
-                    && ((node.kind == "screen" && code == "key \"game_menu\" action Return()")
-                        || (node.kind == "textbutton" && code == "action Return()"))
+                    && node.kind == "screen"
+                    && code == "key \"game_menu\" action Return()"
                 {
                     qualified.spans.insert(start, true);
                     qualified.contextual.insert(start);
                 }
                 continue;
             }
-            let hide = (if node.kind == "screen" {
-                code.strip_prefix("key \"game_menu\" action Hide(")
-            } else if node.kind == "textbutton" {
-                code.strip_prefix("action Hide(")
-            } else {
-                None
-            })
-            .and_then(|s| s.strip_suffix(')'))
-            .and_then(|s| serde_json::from_str::<String>(s).ok());
+            let hide = code
+                .strip_prefix("key \"game_menu\" action Hide(")
+                .filter(|_| node.kind == "screen")
+                .and_then(|s| s.strip_suffix(')'))
+                .and_then(|s| serde_json::from_str::<String>(s).ok());
             if hide.as_deref() == Some(owner.name.as_str()) {
                 qualified.spans.insert(start, true);
                 qualified.contextual.insert(start);
-            }
-        }
-        if owner.kind != OwnedScreenKind::Component {
-            if let Some(span) = dismissal_action(node, &lines, &qualified) {
-                qualified.dismissals.insert(node.span.start, span);
             }
         }
     }
     qualified
 }
 
-/// The expression range preserves comments and trivia. Only this node's lines
-/// are visited; source parsing and interaction qualification belong to the caller.
-fn dismissal_action(
-    node: &Node,
-    lines: &[Line<'_>],
-    qualified: &InteractionQualification,
-) -> Option<Span> {
-    if node.kind != "textbutton" {
-        return None;
-    }
-    let header_index = lines
-        .binary_search_by_key(&node.span.start, |line| line.start)
-        .ok()?;
-    let header = &lines[header_index];
-    let literal = header.code.strip_prefix("textbutton ")?.strip_suffix(':')?;
-    serde_json::from_str::<String>(literal).ok()?;
-    let mut actions = lines
-        .iter()
-        .enumerate()
-        .skip(header_index + 1)
-        .take_while(|(_, line)| line.start < node.source_end)
-        .filter(|(_, line)| {
-            line.indent == header.indent + 4
-                && line.code.split_whitespace().next() == Some("action")
-        });
-    let (index, action) = actions.next()?;
-    if actions.next().is_some()
-        || !action.single
-        || lines
-            .get(index + 1)
-            .is_some_and(|next| next.indent > action.indent)
-    {
-        return None;
-    }
-    let expression = action.code.strip_prefix("action")?.trim_start();
-    if expression != "Null()" && qualified.spans.get(&action.start) != Some(&true) {
-        return None;
-    }
-    let start = action.start + action.indent + action.code.len() - expression.len();
-    Some(Span {
-        start,
-        end: start + expression.len(),
-    })
-}
-
 struct Effects<'a> {
     map: &'a SourceMapMetadata,
     inventory: &'a ownership::Inventory,
     styles: &'a styles::Index,
+    variables: &'a [crate::authoring::Variable],
+    panels: &'a [actions::PanelTarget],
+    authoring_revision: Option<&'a str>,
     active: HashSet<String>,
     remaining: usize,
     unknown: bool,
     hidden: BTreeSet<String>,
+    shown: BTreeSet<String>,
+    assigned: BTreeSet<String>,
     finishes_interaction: bool,
     blocking: bool,
     dependencies: BTreeMap<String, String>,
@@ -493,16 +440,60 @@ impl Effects<'_> {
             .find(|s| s.name == owner.name)
             .unwrap();
         let qualified = qualified_interaction(owner, screen, bytes);
+        let interaction =
+            actions::inspect_actions(owner, screen, bytes, self.variables, self.panels);
+        self.unknown |= !interaction.unsupported.is_empty();
         if depth == 0 {
-            self.blocking = qualified.blocking;
+            self.blocking = interaction.blocking;
         }
-        self.unknown |= owner.kind == OwnedScreenKind::Dialog && !qualified.blocking;
+        self.unknown |= owner.kind == OwnedScreenKind::Dialog && !interaction.blocking;
         for node in &screen.nodes {
             if self.remaining == 0 {
                 self.unknown = true;
                 break;
             }
             self.remaining -= 1;
+            if let Some(button) = interaction.buttons.get(&node.span.start) {
+                for dependency in &button.dependencies {
+                    self.dependencies
+                        .insert(dependency.id.clone(), dependency.revision.clone());
+                }
+                for action in &button.actions {
+                    match action {
+                        interaction::ScreenAction::SetVariable { variable_id, .. } => {
+                            self.assigned.insert(variable_id.clone());
+                            if let Some(revision) = self.authoring_revision {
+                                self.dependencies
+                                    .insert("authoring".into(), revision.into());
+                            }
+                        }
+                        interaction::ScreenAction::ShowScreen { target } => {
+                            self.shown.insert(target.screen_id.clone());
+                        }
+                        interaction::ScreenAction::HideScreen { target } => {
+                            self.hidden.insert(target.screen_id.clone());
+                        }
+                        interaction::ScreenAction::FinishInteraction => {
+                            self.finishes_interaction = true
+                        }
+                    }
+                }
+            }
+            let binding = bindings::inspect_binding(node, self.variables);
+            if let Some(binding) = &binding {
+                match bindings::binding_dependencies(binding, self.variables) {
+                    Ok(dependencies) => {
+                        for dependency in dependencies {
+                            self.dependencies.insert(dependency.id, dependency.revision);
+                        }
+                        if let Some(revision) = self.authoring_revision {
+                            self.dependencies
+                                .insert("authoring".into(), revision.into());
+                        }
+                    }
+                    Err(_) => self.unknown = true,
+                }
+            }
             if let Some(reference) = &node.style {
                 if let Ok(definition) = self.styles.definition(&reference.name) {
                     if let Some((_, bytes)) =
@@ -530,6 +521,7 @@ impl Effects<'_> {
                 self.unknown = true;
             }
             if matches!(node.kind.as_str(), "text" | "textbutton")
+                && binding.is_none()
                 && node
                     .literal
                     .as_ref()
@@ -538,6 +530,13 @@ impl Effects<'_> {
                 self.unknown = true;
             }
             for span in &node.protected {
+                if interaction
+                    .buttons
+                    .get(&node.span.start)
+                    .is_some_and(|button| button.statement_span.start == span.start)
+                {
+                    continue;
+                }
                 if let Some(action) = qualified.spans.get(&span.start) {
                     if *action {
                         if owner.kind == OwnedScreenKind::Dialog {
@@ -552,18 +551,7 @@ impl Effects<'_> {
                     }
                     continue;
                 }
-                let Ok(lines) = source_lines(&bytes[span.start..span.end]) else {
-                    self.unknown = true;
-                    continue;
-                };
-                if lines.len() != 1 {
-                    self.unknown = true;
-                    continue;
-                }
-                let code = lines[0].code;
-                if code != "action Null()" || node.kind != "textbutton" {
-                    self.unknown = true;
-                }
+                self.unknown = true;
             }
         }
         // Until the marked use is verified against its typed binding, its effects are unknown.
@@ -610,10 +598,14 @@ impl Effects<'_> {
             .map(|(id, revision)| ScreenDependencyRevision { id, revision })
             .collect::<Vec<_>>();
         let hidden_screens = self.hidden.into_iter().collect::<Vec<_>>();
+        let shown_screens = self.shown.into_iter().collect::<Vec<_>>();
+        let assigned_variables = self.assigned.into_iter().collect::<Vec<_>>();
         let revision = digest(
             &serde_json::to_vec(&(
                 self.unknown,
                 &hidden_screens,
+                &shown_screens,
+                &assigned_variables,
                 self.finishes_interaction,
                 self.blocking,
                 &dependencies,
@@ -624,6 +616,8 @@ impl Effects<'_> {
             revision,
             unknown: self.unknown,
             hidden_screens,
+            shown_screens,
+            assigned_variables,
             finishes_interaction: self.finishes_interaction,
             dependencies,
         }
@@ -715,14 +709,26 @@ impl AuthoringService {
             .filter(|s| ownership::resolves(s, &inventory))
             .ok_or(SceneError::ReferenceBlocked)?;
         let style_index = styles::Index::read(&inventory)?;
+        let authoring = self.screen_action_authoring(project, project_id).ok();
+        let panels = actions::qualified_panel_targets(&inventory);
         let mut effects = Effects {
             map: &map,
             inventory: &inventory,
             styles: &style_index,
+            variables: authoring
+                .as_ref()
+                .map(|snapshot| snapshot.variables.as_slice())
+                .unwrap_or(&[]),
+            panels: &panels,
+            authoring_revision: authoring
+                .as_ref()
+                .map(|snapshot| snapshot.revision.as_str()),
             active: HashSet::new(),
             remaining: MAX_NODES,
             unknown: false,
             hidden: BTreeSet::new(),
+            shown: BTreeSet::new(),
+            assigned: BTreeSet::new(),
             finishes_interaction: false,
             blocking: false,
             dependencies: BTreeMap::new(),

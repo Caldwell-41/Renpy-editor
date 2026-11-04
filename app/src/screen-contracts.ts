@@ -15,6 +15,7 @@ export interface VariableSample {
 export interface ScreenRevisions { source: string; sourceMap: string; inventory: string; effects: string }
 export interface ScreenEffects {
   revision: string; unknown: boolean; hiddenScreens: string[]; finishesInteraction: boolean;
+  shownScreens: string[]; assignedVariables: string[];
   dependencies: { id: string; revision: string }[];
 }
 export interface OwnedScreen {

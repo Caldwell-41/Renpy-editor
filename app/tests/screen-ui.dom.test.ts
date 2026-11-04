@@ -381,7 +381,7 @@ test("moving a frame with sibling content keeps the composite image stationary",
     handle.dispatchEvent(new window.PointerEvent('pointermove',{pointerId:1,clientX:36,clientY:36,bubbles:true}));
     assert.equal(document.querySelector<HTMLImageElement>('.screen-render')!.style.transform,'');
     assert.equal(document.querySelector<HTMLElement>('.screen-game')!.dataset.provisional,'guides');
-    assert.match(document.querySelector('.screen-canvas-status')!.textContent!,/Panel rendering is pending/);
+    assert.match(document.querySelector('.screen-canvas-status')!.textContent!,/Updating canvas\. Previous image is out of date\./);
   } finally {h.dispose();}
 });
 
