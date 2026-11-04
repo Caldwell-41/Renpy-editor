@@ -61,10 +61,11 @@ review. Those actions also stay in browser memory. The starter remains available
    themes. It checks native-operation refusal, reset, invalid selections and production
    build exclusion. Register an optional `check.mjs` for screen-specific interactions;
    the example shows the interface. Keep automatic checks focused on user behaviour.
-5. Present the working URLs, observed checks and known simulated parts. Follow
-   INTEGRATION when the user approves a particular version. The screen is ready for
-   review when it renders without browser errors
-   and its stated interactions work at the selected sizes.
+5. Present the working prototype URLs, observed checks and known simulated parts.
+   Obtain the user's approval before production implementation. Follow INTEGRATION
+   when the user approves a particular version. The screen is ready for review when
+   it renders without browser errors and its stated interactions work at the selected
+   sizes.
 
 The layout picker labels Draft, Approved and Superseded versions. Approval history
 shows the current record and replacement reasons. Promotion happens through an explicit
