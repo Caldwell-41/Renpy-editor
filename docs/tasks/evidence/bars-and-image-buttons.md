@@ -520,3 +520,29 @@ synthetic fixture/archive SHA256 receipts as a private transfer route. Existing
 Windows-to-Mac messages can carry base64 chunks; direct binary attachment transfer
 was not established. No candidate has been sent or synchronized yet. All Mac capped
 counts remain zero. The complete report is retained in ignored local evidence.
+
+The targeted follow-up found the existing project-root harness environment at
+`.toolchains/l07-shared-look/final-review-python/bin/python3`, confirming Python
+3.12.16 and Pillow 12.3.0 through version/import checks only. It also found the
+Codex runtime with Python 3.12.14/Pillow 13.0.0, which stays distinct. The original
+missing-in-checked-locations result is preserved; no provisioning is needed.
+
+The exact approved Loomlight Local Development identity exists in the default
+login Keychain, already in the search list and reported unlocked/readable. The
+valid-only query excluded it with `CSSMERR_TP_NOT_TRUSTED`, explaining the initial
+zero-valid-identities result. Parent inspection confirms that `macos-package.py`
+enumerates identities without the valid-only filter and selects the pinned
+fingerprint. Actual signing/private-key access remains untested. No trust, ACL,
+search-list, Keychain or certificate change was made or authorized.
+
+A private incremental bundle is staged locally at candidate `3b67b426`, with
+accepted-baseline prerequisite `ab19b786`. Git bundle verification passes; it is
+81990 bytes with SHA256
+`ba4eda299c284db4bbdadbe8fde9cc9a8f7558dbc0c1dee916cd22ee3cb3629c`.
+The first raw-SHA bundle command refused an empty bundle before producing usable
+output; using the named HEAD ref produced the verified bundle. No SDK started.
+The bundle has not been sent or imported. This preparation does not grant source
+synchronization or qualification to the readiness chat; a later coordinator handoff
+must name the exact candidate, hashes, safe checkout transition and reservation.
+All Mac capped counts stay zero. No additional provisioning decision is pending
+from readiness; final platform qualification remains unrun.

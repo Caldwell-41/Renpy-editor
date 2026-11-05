@@ -25,9 +25,11 @@ records contracts and ownership. #54 and broader Phase 3B acceptance remain sepa
 Issue-state/limit updates to #51/#52 are authorized; code publication/PR/merge are not.
 The authorized Mac qualification chat is created on isolated branch
 `t3/mac-bars-imagebuttons-qualification`. Initial readiness confirms the pinned
-ordinary tools and SDK archive. Existing harness Python and signing access need
-targeted follow-up; no provisioning is selected. No capped Mac operation is requested
-or reserved. The chat owns readiness until exact inputs and a reservation arrive.
+ordinary tools, SDK archive and existing Python 3.12.16/Pillow 12.3.0 environment.
+The exact approved signing identity is present in the unlocked login Keychain;
+actual signing is untested. No provisioning or trust change is needed for readiness.
+No capped Mac operation is requested or reserved. Qualification waits for exact
+inputs and a coordinator reservation.
 
 ## Variable text, ordered actions and nested canvas accepted
 

@@ -42,10 +42,14 @@ by that designer's direct handoff to the editor. The Mac readiness chat is
 Read its completed report through the linked environment; the reverse report send
 to Windows was denied, so do not rely on an automatic parent notification.
 It owns only read-only readiness until an exact candidate handoff/reservation.
-The SDK archive and pinned ordinary tools are ready. The initial report found
-only Python 3.9.6 without Pillow and no visible signing identity. A narrow continuation
-is locating the previously qualified Python 3.12.16/Pillow environment and checking
-read-only access to the approved identity before proposing any provisioning.
+The SDK archive and pinned ordinary tools are ready. The follow-up located existing
+Python 3.12.16/Pillow 12.3.0 under the project root's
+`.toolchains/l07-shared-look/final-review-python/bin/python3`; select it explicitly
+as `HARNESS_PYTHON` for later checks. No Python provisioning is needed. The exact
+approved signing identity exists in the unlocked login Keychain. A valid-only query
+excluded it with `CSSMERR_TP_NOT_TRUSTED`; the package script deliberately enumerates
+without that filter. Actual signing/private-key access remains untested. Do not
+change trust, replace the identity or infer deletion from the earlier listing.
 Do not create another chat or use the shared Mac root. The original request and
 failed/successful receipts remain in ignored `.toolchains/51-52` output.
 
