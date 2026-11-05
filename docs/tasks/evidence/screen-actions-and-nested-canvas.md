@@ -5,6 +5,49 @@
 acceptance, authorization and operation accounting. This file retains implementation
 checkpoints and detailed verification. No criterion is accepted by this entry.
 
+## Verified review corrections, 2026-11-05
+
+Kris selected both independently verified PR #81 findings for correction and
+requested publication plus CI. The original actual controller/core reproduction
+proved that a new Show draft after an accepted text edit carried the previous
+inventory revision and failed with `SOURCE_CONFLICT`. Refresh retained that stale
+capture; Cancel/recreate succeeded. A collapsed sample control also hid all evidence
+of configured overrides. Both focused DOM tests failed before the fixes.
+
+The first fault was the workspace metadata lifetime. Accepted source changes now
+resolve current action-target metadata before controls can capture another draft.
+Composition, numeric layout and geometry share this completion path; component
+changes and history already reload. Existing drafts keep their original captured
+metadata and still refuse genuinely stale source. Core conflict checks remain
+unchanged. The existing resolver also owns reload, without a parallel cache owner.
+
+The sample control derives its visible override count from retained sample state,
+including collapsed/remounted controls and invalid raw input retaining the last
+valid sample. Reset clears that state and the marker. Updating the label leaves
+input nodes and focus in place. This is a bounded missing-status correction;
+no approved layout, reference capture, helper, source writer or runtime action changed.
+
+Fresh local verification passes 378 frontend tests with no failures/skips, TypeScript
+and production build, repository validation, and the extended actual
+ScreensWorkspace-to-core journey. That journey now accepts text followed directly
+by ordered Show/Hide edits without a reload, verifies the collapsed sample marker,
+and retains source/history/reopen, stale refusal, opaque neighbors and cleanup.
+The driver exited 0 and its disposable fixture was removed. Self-review checked
+all accepted-edit callers and original draft preservation. No SDK/helper/native/
+package campaign or new independent review ran for these bounded corrections.
+
+The initial full frontend run passed 377/378 because macOS system Python 3.9 lacks
+`tomllib` in an unrelated validator. The supported `HARNESS_PYTHON` setting selected
+the existing Python 3.12.16 interpreter; all 378 then passed without a test/code
+workaround. Both logs and the real-core receipt remain ignored under
+`.toolchains/47-50/pr81-review-fixes/`.
+
+Automatic quality and the already-selected both-target harness must pass and be
+audited at the published correction head. #47 owns their exact run/attempt/SHA
+and terminal audit. Previous Mac/Windows rendering/runtime proof retains its
+producing scope; these frontend corrections do not change qualified engine inputs.
+PR #81 stays draft and #47/#50 stay open. No merge or release is selected.
+
 ## Windows proof and original-criterion audit, 2026-11-05
 
 Kris authorized the clean Windows primary checkout directly, superseding the

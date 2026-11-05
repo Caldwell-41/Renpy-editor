@@ -4,13 +4,17 @@
 
 [Draft PR #81](https://github.com/Caldwell-41/Renpy-editor/pull/81) implements the
 approved A variable-text/action controls and nested component canvas. Windows
-qualification now passes at `f7b9f61772545e51664b6b9b720087f217ca2774`.
+qualification passes at `f7b9f61772545e51664b6b9b720087f217ca2774`.
+Both new verified review findings are fixed: accepted edits refresh target metadata
+for new drafts, and collapsed sample controls show their override count.
+[Correction evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#verified-review-corrections-2026-11-05)
+records red/green checks, frontend 378, build and the actual UI/core journey.
 
 | Capability | Automated proof | Remaining acceptance |
 | --- | --- | --- |
-| Variable text and ordered actions | Core 604/frontend 376, actual UI/core/history/reopen; Mac and Windows click/keyboard ordered play at both aspects | Physical-input, native-editor and human acceptance remain separate |
+| Variable text and ordered actions | Prior core 604; fresh frontend 378 and UI/core/history/reopen; Mac and Windows click/keyboard ordered play at both aspects | Physical-input, native-editor and human acceptance remain separate |
 | Nested component canvas | Windows `f7b9f617` and Mac `b5155f69`: zero differing pixels and all 29 ordered/clipped geometry records match at both aspects | Wider editor/canvas/Phase 3B acceptance remains separate |
-| Required baseline CI | Prior publication head `f7b9f617` quality 41986683594 and both-target harness 41986717868 audited in #47 | New documentation publication requires current-head quality/harness audit; #47 owns the live receipt |
+| Required baseline CI | Prior `60c5c71c` quality 41993273308 and harness 41993271983 audited in #47 | Correction head needs automatic quality/both-target harness; #47 owns exact runs and audit |
 
 [Windows proof and all eight original criteria](../tasks/evidence/screen-actions-and-nested-canvas.md#windows-proof-and-original-criterion-audit-2026-11-05)
 record exact inputs, strict comparator replay, cleanup and preserved failures.

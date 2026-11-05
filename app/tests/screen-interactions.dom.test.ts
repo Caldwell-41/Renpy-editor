@@ -6,7 +6,7 @@ import type { CoreOperation } from "../src/protocol.js";
 const flush=async()=>{for(let i=0;i<10;i++)await new Promise(r=>setTimeout(r,0));};
 function fixture(kind:"dialog"|"panel"|"component"="dialog",bound=false) {
  const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement,HTMLInputElement:browser.HTMLInputElement,HTMLSelectElement:browser.HTMLSelectElement,HTMLTextAreaElement:browser.HTMLTextAreaElement,HTMLDetailsElement:browser.HTMLDetailsElement,ResizeObserver:browser.ResizeObserver});
- let revision="original",authoringRevision="authoring-original",refuse=true;
+ let revision="original",authoringRevision="authoring-original",refuse=true,advanceWrites=false;
  const nodes=()=>[{id:"root",kind:"screen",literal:null,span:{start:0,end:200},parentStart:null,layout:{},properties:[],protected:[]},{id:"close",kind:"textbutton",literal:"Close",actions:[],span:{start:20,end:90},parentStart:0,layout:{},properties:[],protected:[],textProperties:{values:{},blocked:{}}},{id:"body",kind:"text",literal:bound?"Coins: [coins!q]":"Coins: 12",variableBindings:bound?[{variableId:"coins"}]:[],span:{start:100,end:150},parentStart:0,layout:{},properties:[],protected:[],textProperties:{values:{},blocked:{}}}];
  const doc=():ScreenDocument=>({path:"game/ui/help.rpy",revision,authoringRevision,partial:false,screens:[{name:"help",nodes:nodes()}]});
  const owner={id:"help",rootId:"root",path:doc().path,name:"help",kind,resolved:true,sourceRevision:revision};
@@ -18,7 +18,12 @@ function fixture(kind:"dialog"|"panel"|"component"="dialog",bound=false) {
   if(op==="screens.inspect")return doc() as T;
   if(op==="authoring.list")return {assets:[],variables} as T;
   if(op==="screens.resolveTarget"){const binding=payload.binding as {screenId:string};return {binding:{screenId:binding.screenId,sourceName:binding.screenId},kind:binding.screenId==="help"?kind:"panel",blocking:binding.screenId==="help"&&kind==="dialog",canShowHide:binding.screenId==="about"||binding.screenId==="help"&&kind==="panel",revisions:{source:`${binding.screenId}-source-${revision}`,sourceMap:revision,inventory:revision,effects:revision},effects:{unknown:false}} as T;}
-  if(op==="screens.compose"){writes.push(payload);if(refuse)throw Error("SOURCE_CONFLICT");return {document:doc(),selectedId:(payload.command as {nodeId:string}).nodeId,changed:false} as T;}
+  if(op==="screens.compose"){
+   writes.push(payload);const command=payload.command as {nodeId:string;interaction?:{expectedTargetRevisions:{revisions:{inventory:string}}[]}};
+   if(refuse||payload.expectedRevision!==revision||command.interaction?.expectedTargetRevisions.some(target=>target.revisions.inventory!==revision))throw Error("SOURCE_CONFLICT");
+   if(advanceWrites)revision=`accepted-${writes.length}`;
+   return {document:doc(),selectedId:command.nodeId,changed:advanceWrites} as T;
+  }
   if(op==="screens.canvasRender"){renders.push(payload);throw Error("No helper in controller test");}
   throw Error(`Unexpected ${op}`);
  }});
@@ -26,8 +31,32 @@ function fixture(kind:"dialog"|"panel"|"component"="dialog",bound=false) {
  const change=(label:string,value:string)=>{const e=find(label);e.value=value;e.dispatchEvent(new window.Event(e.tagName==="SELECT"?"change":"input",{bubbles:true}));};
  const button=(label:string)=>{const e=[...workspace.panel.querySelectorAll("button")].find(e=>e.textContent===label);assert.ok(e,label);e.click();};
  const select=(id:string)=>{if(!workspace.panel.querySelector(`[data-node-id="${id}"]`))button("1  Choose");workspace.panel.querySelector<HTMLElement>(`[data-node-id="${id}"]`)!.dispatchEvent(new window.MouseEvent("dblclick",{bubbles:true}));};
- return {browser,workspace,writes,renders,messages,find,change,button,select,refresh:async()=>{revision="newer";authoringRevision="authoring-newer";await workspace.load();},allow:()=>{refuse=false;},dispose:async()=>{workspace.dispose();await browser.happyDOM.abort();}};
+ return {browser,workspace,writes,renders,messages,find,change,button,select,refresh:async()=>{revision="newer";authoringRevision="authoring-newer";await workspace.load();},allow:()=>{refuse=false;},acceptChanges:()=>{refuse=false;advanceWrites=true;},dispose:async()=>{workspace.dispose();await browser.happyDOM.abort();}};
 }
+
+test("new Show and Hide drafts use target revisions from the last accepted edit",async()=>{
+ const f=fixture("panel");try{f.workspace.mount(document.body);await flush();f.acceptChanges();f.select("close");f.change("Text","Continue");f.button("Apply");await flush();assert.equal(f.workspace.hasDraft(),false);
+ for(const [index,type]of ["showScreen","hideScreen"].entries()){
+  f.change("Add action",type);f.button("Apply");await flush();
+  const write=f.writes.at(-1)!;assert.equal(write.expectedRevision,`accepted-${index+1}`);
+  const command=write.command as {interaction:{expectedTargetRevisions:{revisions:{inventory:string}}[]}};
+  assert.equal(command.interaction.expectedTargetRevisions[0]!.revisions.inventory,write.expectedRevision);
+  assert.equal(f.workspace.hasDraft(),false);
+ }
+ }finally{await f.dispose();}
+});
+
+test("collapsed sample controls mark retained overrides and reset clears the marker",async()=>{
+ const f=fixture();try{f.workspace.mount(document.body);await flush();
+ const toggle=()=>f.workspace.panel.querySelector<HTMLButtonElement>(".siv-sample-toggle")!;
+ f.button("Sample values");f.change("Sample coins","42");assert.equal(toggle().textContent,"Sample values (1 override)");
+ f.change("Sample help_seen","True");assert.equal(toggle().textContent,"Sample values (2 overrides)");
+ toggle().click();assert.equal(toggle().getAttribute("aria-expanded"),"false");assert.equal(toggle().textContent,"Sample values (2 overrides)");
+ f.workspace.panel.remove();f.workspace.mount(document.body);await flush();assert.equal(toggle().textContent,"Sample values (2 overrides)");
+ toggle().click();f.change("Sample coins","bad");assert.equal(toggle().textContent,"Sample values (2 overrides)");
+ f.button("Reset samples");assert.equal(toggle().textContent,"Sample values");assert.equal(f.writes.length,0);
+ }finally{await f.dispose();}
+});
 test("actions and text share one original-base Apply and retain refused input across refresh and remount",async()=>{
  const f=fixture();try{f.workspace.mount(document.body);await flush();f.select("close");await flush();
  f.change("Add action","setVariable");assert.equal((document.activeElement as HTMLElement)?.dataset.part,"variable");f.change("Action 1 variable","coins");f.change("Action 1 value","42");

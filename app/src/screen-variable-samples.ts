@@ -16,6 +16,7 @@ export class ScreenVariableSamples {
  private render():void {
   this.element.replaceChildren();if(!this.variables.length&&!this.samples.size)return;
   const toggle=el("button","button secondary siv-sample-toggle","Sample values");toggle.type="button";toggle.setAttribute("aria-expanded",String(this.open));
+  const markOverrides=()=>{const count=this.samples.size;toggle.textContent=`Sample values${count?` (${count} override${count===1?"":"s"})`:""}`;};markOverrides();
   const panel=el("section","siv-samples");panel.hidden=!this.open;panel.setAttribute("aria-label","Editor-only samples");panel.append(el("h3","","Editor-only samples"),el("p","siv-help","Only the canvas changes. Source and game values stay separate."));
   toggle.onclick=()=>{this.open=!this.open;panel.hidden=!this.open;toggle.setAttribute("aria-expanded",String(this.open));};
   for(const variable of this.variables){
@@ -30,6 +31,7 @@ export class ScreenVariableSamples {
     const previous=this.samples.get(variable.id);
     try{const value=variableValue(variable,input.value);this.samples.set(variable.id,{raw:input.value,valid:{variableId:variable.id,expectedSourceRevision:variable.source.sourceRevision,value}});feedback();this.changed();}
     catch{this.samples.set(variable.id,{raw:input.value,valid:previous?.valid??{variableId:variable.id,expectedSourceRevision:variable.source.sourceRevision,value:variable.defaultValue},error:"Use a whole number in the signed 64-bit range. The canvas keeps the last valid sample."});feedback();}
+    markOverrides();
    });feedback();label.append(input,error);panel.append(label);
   }
   for(const [id,sample]of this.samples)if(!this.variables.some(v=>v.id===id))panel.append(el("p","siv-sample-error",`Sample variable unavailable. Input retained: ${sample.raw}`));

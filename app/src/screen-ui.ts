@@ -138,7 +138,7 @@ export class ScreensWorkspace {
         this.busy = true; this.loadSequence++;
         try {
           const document = await this.actions.coordinate(() => this.actions.request<ScreenDocument>("screens.setLayout", {path:draft.document.path,screenName:draft.screen,expectedRevision:draft.document.revision,nodeStart:draft.node.span.start,values:edits,...(componentRevisions?{componentRevisions}:{})}));
-          this.finishAcceptedEdit({type:"layout", document, base:draft.document, key:draft.key});
+          await this.finishAcceptedEdit({type:"layout", document, base:draft.document, key:draft.key});
         } finally { this.busy = false; }
       },
       preview: () => { this.images.sync(); this.text?.sync(); this.renderLayoutDraftMarkers(); this.renderCanvas(); }, note: (text, error) => this.note(text,error), select: node => this.choose(this.nodes().indexOf(node),true),
@@ -410,6 +410,10 @@ export class ScreensWorkspace {
     if (this.components.hasPendingCopy() || this.components.isSaving() || this.busy || this.resize || this.move || this.composer.hasRemoval()) { this.note("Finish the current operation first. Input retained.", true); return; }
     this.components.invalidate(); await this.reload();
   }
+  private async resolveInteractionTargets(catalog: ScreenCatalog): Promise<ResolvedScreenTarget[]> {
+    const targets = await Promise.all(catalog.owned.filter(owner=>owner.resolved).map(owner=>this.actions.request<ResolvedScreenTarget>("screens.resolveTarget",{binding:{screenId:owner.id,sourceName:owner.name}}).catch(()=>undefined)));
+    return targets.filter((target):target is ResolvedScreenTarget=>!!target);
+  }
   private async reload(render = true): Promise<boolean> {
     this.composer.clearNotice();
     const sequence = ++this.loadSequence;
@@ -429,12 +433,12 @@ export class ScreensWorkspace {
       }
       const [authoring, targets] = await Promise.all([
         this.actions.request<{variables?:ScreenVariable[]}>("authoring.list").catch(()=>undefined),
-        Promise.all(catalog.owned.filter(owner=>owner.resolved).map(owner=>this.actions.request<ResolvedScreenTarget>("screens.resolveTarget",{binding:{screenId:owner.id,sourceName:owner.name}}).catch(()=>undefined))),
+        this.resolveInteractionTargets(catalog),
       ]);
       if (!this.current() || sequence !== this.loadSequence) return false;
       this.interactionVariables=authoring?.variables??[];
       this.variableSamples.update(this.interactionVariables);
-      this.interactionTargets=targets.filter((target):target is ResolvedScreenTarget=>!!target);
+      this.interactionTargets=targets;
       catalog.owned.forEach(owned => {
         const document = documents.find(d => d.path === owned.path);
         if (!document || document.revision !== owned.sourceRevision || !document.screens.some(s => s.name === owned.name)) owned.resolved = false;
@@ -691,7 +695,7 @@ export class ScreensWorkspace {
     this.updateSizeControls(); this.renderCanvas();
     if (resizeFocused) this.canvas.querySelector<HTMLElement>(".screen-resize")?.focus();
   }
-  private finishAcceptedEdit(edit: AcceptedEdit): void {
+  private async finishAcceptedEdit(edit: AcceptedEdit): Promise<void> {
     if (!this.current()) return;
     if (edit.type === "history") {
       const { direction, before, selectedId } = edit;
@@ -729,6 +733,12 @@ export class ScreensWorkspace {
         this.compositionHistory.push({ path: base.path, before: base.revision, after: document.revision, beforeId: edit.beforeId, afterId: edit.result.selectedId, removal: edit.command.type === "remove" });
       }
       if (edit.command.type === "remove") this.step = "choose";
+    }
+    if (sourceChanged && this.catalog) {
+      const sequence = this.loadSequence;
+      const targets = await this.resolveInteractionTargets(this.catalog);
+      if (!this.current() || sequence !== this.loadSequence) return;
+      this.interactionTargets = targets;
     }
     this.rememberSelection(); this.saved(sourceChanged); this.busy = false;
 
@@ -789,7 +799,7 @@ export class ScreensWorkspace {
         ...(draft.position ?? {width: Number(draft.width), height: Number(draft.height)}), ...(componentRevisions?{componentRevisions}:{}),
       }));
       if (!this.current()) return;
-      this.finishAcceptedEdit({ type: "geometry", document, draft, key }); accepted = true;
+      await this.finishAcceptedEdit({ type: "geometry", document, draft, key }); accepted = true;
     } catch (error) { if (this.current()) this.note(`${(error as Error).message} Input retained. Review Source, or cancel this draft and refresh.`, true); }
     finally {
       this.busy = false;
@@ -807,7 +817,7 @@ export class ScreensWorkspace {
       const result = await this.actions.coordinate(() => this.actions.request<CompositionResult>("screens.compose", {
         screenId: owner.id, expectedRevision: base.revision, command, ...(componentRevisions?{componentRevisions}:{}),
       }));
-      this.finishAcceptedEdit({ type: "composition", command, base, result, beforeId });
+      await this.finishAcceptedEdit({ type: "composition", command, base, result, beforeId });
     } finally { this.busy = false; }
   }
   private async history(type: "undo" | "redo"): Promise<void> {
@@ -838,7 +848,7 @@ export class ScreensWorkspace {
         if (selection) {
           try { this.selectOwnedScreen(selection.screenId,selection.nodeId); } catch { /* Retain unresolved selection instead of resolving by name. */ }
         }
-        this.finishAcceptedEdit({ type: "history", direction: type, before, selectedId, sourceChanged: accepted });
+        await this.finishAcceptedEdit({ type: "history", direction: type, before, selectedId, sourceChanged: accepted });
       }
       this.busy = false;
     }

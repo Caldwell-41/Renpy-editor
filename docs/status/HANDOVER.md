@@ -11,6 +11,17 @@ remain intact. Coordinator owns source and publication; both test assignments
 are finished. Keep the PR draft and #47/#50 open. No merge, release, package or
 native-editor session is selected.
 
+Kris selected fixing both verified review findings, updating PR #81/#47/#50 and
+running CI. Target metadata now refreshes at accepted-edit completion for new
+drafts; retained drafts keep their original review. Sample controls show configured
+overrides while collapsed. Fresh frontend 378, build, repository checks and the
+extended actual UI/core/history/reopen journey pass; its driver/fixture cleanup
+passes. The first full frontend run's Python 3.9 `tomllib` failure is preserved;
+Python 3.12.16 through `HARNESS_PYTHON` passes all cases. No engine/native/package
+operation started. [Correction evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#verified-review-corrections-2026-11-05)
+owns details and ignored receipts. Next: audit current correction-head automatic
+quality and selected both-target harness. #47 owns exact run/attempt/SHA identities.
+
 Windows producing candidate is `f7b9f61772545e51664b6b9b720087f217ca2774`, tree
 `d68dcdfdd3b27267c0720a87ccd29cbcf2856ec9`, exactly equal to the live PR head at
 freeze. Ordered play passes click and keyboard at 1280x720 and 1024x768, with
@@ -46,7 +57,7 @@ are reused with an explicit empty implementation/test-input diff through the
 Windows candidate. No prior failure is relabelled. Approved A source `7090a03`,
 fingerprint and ten captures remain pinned.
 
-The next action is terminal audit of this documentation publication's required
+The next action is terminal audit of the correction publication's required
 automatic quality and manual both-target harness runs. `.github/validation-plan.json`
 retains that selection. #47 owns exact publication SHA, run/attempt identities,
 combined status and final artifact/job audit; do not commit another receipt merely
