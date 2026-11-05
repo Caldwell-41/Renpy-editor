@@ -22,15 +22,17 @@ repository checks. These results retain their candidate and offline scope.
 | --- | --- | --- |
 | Typed writes and effects | Public source/history/refusal and Story admission | Approved controls and ordered normal-play proof |
 | Nested canvas and inert samples | Public plans, freshness and exact comparison gates | Both-target/aspect normal/helper captures |
-| Authoring controls | V1 rejected; three v2 drafts in the new design chat | Explicit variant approval, reproducible handoff and real UI-to-core proof |
+| Authoring controls | A `inspector-v2` explicitly approved; pinned source/captures verified | Complete Lab verification, integrate controls and prove real UI-to-core behavior |
 
-Production UI remains unassigned. The new design chat is bound to the preserved
-prototype worktree; all mockup work and approval happen there. Kris rejected v1
-for departing from the existing Screens design language. The v2 redo uses the real
-ScreensWorkspace, Lab shell and production styles, with fictional inert services.
-Use principle-experience-first and Tailscale-only delivery; prototype-review is
-explicitly excluded. No v2 approval exists. Final combined
-suites and independent Standards/Spec review follow approved control integration.
+Kris approved A on 2026-11-05 with "A is approved". Source `7090a03` and its full
+fingerprint remain pinned; approval/capture evidence is `a0535ae`. Both are now
+integrated without altering the reference worktree. This approves design only.
+The required full Lab check remains open after an ambiguous error locator and
+earlier environment/output failures. A separate harness lane corrects and verifies
+it; a core lane migrates the legacy dismissal adapter independently. Production
+controls follow the Lab gate. Preserve the approved source and all rejected/draft
+variants. Tailscale-only delivery and exclusion of prototype-review remain binding.
+Final combined suites and independent Standards/Spec review follow integration.
 [Current evidence and criterion gaps](../tasks/evidence/screen-actions-and-nested-canvas.md#resumed-delivery-2026-11-05)
 own exact assignments, receipts and remaining work.
 

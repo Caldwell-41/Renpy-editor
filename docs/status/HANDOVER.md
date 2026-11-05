@@ -4,8 +4,9 @@
 
 Kris resumed #47/#50 on 2026-11-05 and selected a draft PR after combined spec
 verification and final review. CI is explicitly deferred. Production UI remains
-unassigned pending explicit variant approval and its reproducible handoff in the
-new separate design chat. Both tickets are in progress and unaccepted.
+unassigned until the remaining Lab verification gate passes. Kris explicitly
+approved A (`inspector-v2`) and its direct handoff has arrived. Both tickets remain
+in progress and unaccepted.
 
 Continue on `codex/47-50-integration`, based on
 `e2a02bc9f6d0f91639c47e35d49f1befff058c60` from
@@ -31,14 +32,21 @@ uses principle-experience-first, explicitly excludes prototype-review and delive
 only through Tailscale. `inspector-v2`, `worksheet-v2` and `workspace-v2` mount the
 actual ScreensWorkspace, Lab shell and production styles with fictional inert
 services. They change only action editing inside the inspector and remain
-unapproved. Rejected source/notes are preserved ignored. Sol owns coding;
+approved only for A with the exact decision "A is approved". Source `7090a03`
+and fingerprint `a976830817d848d1263bbbc7f8a101c92c322ce2e369eb4c79c9ce7805bbb85e`
+are pinned; evidence `a0535ae` retains ten verified captures. These commits are
+integrated as `3f4fb10` and `507c77b`; never replace the original source pointer
+with the evidence commit or rebase the reference. Rejected source/notes remain
+preserved ignored. Sol owns coding;
 Terra Max owns browser/desktop work.
 Standing computer-use authority remains valid. Exact current chat/worker identities,
 commands, hashes and original-criterion gaps are in the
 [resumption evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#resumed-delivery-2026-11-05).
 
-Next, receive the explicit design decision and exact approved source/capture
-handoff. Then implement the approved controls, migrate legacy dismissal callers,
+Next, finish the failed/incomplete full Design Lab check in a separate candidate
+while preserving the approved source. The ambiguous visible/hidden error locator
+is a harness defect; prior failures remain recorded. Core dismissal migration can
+proceed independently. After that Lab gate, assign approved production controls,
 wire typed samples, and verify actual UI-to-core retention, history and reopen.
 Run final combined suites, candidate-bound engine/platform proof and independent
 Standards/Spec review before final spec reconciliation and draft PR creation.

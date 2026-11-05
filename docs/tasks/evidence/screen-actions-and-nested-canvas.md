@@ -61,6 +61,39 @@ this is a preparation update, not an approved reproducible handoff. The core
 No rebase, production edit, SDK/helper/native/package/CI or publication occurred
 in this reported redo. Await the actual explicit decision and exact source handoff.
 
+### Approved A handoff and completion lanes
+
+Kris's actual decision on 2026-11-05 is "A is approved", selecting `inspector-v2`
+(Expandable actions). No reason or acceptance waiver was stated. The approved
+source is `7090a036032ce3f225a857b30259a9c91716ac60`, fingerprint
+`a976830817d848d1263bbbc7f8a101c92c322ce2e369eb4c79c9ce7805bbb85e`.
+Evidence commit `a0535aedf7631857f3204cc62e4c98c603576f36` adds the approval record,
+ten retained dark captures and direct handoff. Integration copies are `3f4fb10`
+and `507c77b`. The coordinator verified the exact decision, source pointer and all
+ten capture hashes. The original prototype branch/worktree stays pinned and intact.
+Other variants remain unapproved; rejected v1 is not a production reference.
+
+[HANDOFF](../../design/design-lab-screen-interactions/HANDOFF.md) maps every control
+to real owners. [VERIFICATION](../../design/design-lab-screen-interactions/VERIFICATION.md)
+retains the failed/incomplete full Lab check. The visible-field/hidden-general-error
+selector ambiguity is not a product defect or a completed promotion check.
+The approved source remains untouched while a separate candidate fixes the harness.
+The three-round score goal was not reached, and recorded findings waive no recovery,
+functional or fidelity requirement. Tailscale-only delivery and no prototype-review
+remain binding.
+
+Two fresh T3 worktree lanes start from the approved-handoff integration checkpoint.
+The Lab lane owns the interaction check and necessary Lab harness corrections,
+with Terra Max browser verification. It must complete the actual full check and
+return exact evidence without changing the approved reference. The core lane owns
+removal of `Compose::Dismissal`, `LegacyDismissal` and the dismissal inspection
+projection, migrating all existing Rust callers/tests to typed `Actions`. Neither
+lane owns production frontend controls or shared status/acceptance records.
+The coordinator retains integration, shared contracts and final verification.
+Production control assignment follows the Lab gate. No SDK/helper/native/package
+or CI operation is delegated. Full combined suites and final two-axis review remain
+pending; the final draft PR still follows original-spec reconciliation.
+
 ### Source/actions verification and target eligibility
 
 The source/actions verifier returned a clean checkout at
