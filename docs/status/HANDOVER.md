@@ -33,7 +33,7 @@ was refused before task creation because T3 does not support linked-environment
 worktree isolation for delegates. Kris has now authorized the separate top-level Mac
 qualification chat. The same saved request succeeded after the host returned,
 creating isolated branch `t3/mac-bars-imagebuttons-qualification` at `1c6ed025`.
-Readiness is running with verified Sol 6.1 xhigh settings. No capped operation was
+Initial readiness completed with verified Sol 6.1 xhigh settings. No capped operation was
 requested. The Windows SDK archive matches its published pin.
 
 Next action is Kris's exact design approval in the separate design chat, followed
@@ -42,6 +42,10 @@ by that designer's direct handoff to the editor. The Mac readiness chat is
 Read its completed report through the linked environment; the reverse report send
 to Windows was denied, so do not rely on an automatic parent notification.
 It owns only read-only readiness until an exact candidate handoff/reservation.
+The SDK archive and pinned ordinary tools are ready. The initial report found
+only Python 3.9.6 without Pillow and no visible signing identity. A narrow continuation
+is locating the previously qualified Python 3.12.16/Pillow environment and checking
+read-only access to the approved identity before proposing any provisioning.
 Do not create another chat or use the shared Mac root. The original request and
 failed/successful receipts remain in ignored `.toolchains/51-52` output.
 

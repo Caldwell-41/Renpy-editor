@@ -498,3 +498,25 @@ need the exact committed candidate and a coordinator reservation in #51. The Mac
 session reported that its reverse T3 message to Windows is denied; it may finish
 its report in the same chat for the coordinator to read through the linked
 environment. Full readiness and transfer feasibility remain pending that report.
+
+The completed initial report confirms native ARM64 macOS 26.6.2, Rust/Cargo 1.90.0,
+Node 24.19.0/npm 11.9.0 and Apple Command Line Tools/macOS SDK availability.
+The retained official SDK archive freshly matches the pinned SHA256; the extracted
+version source and Mac launcher/executable match the archive without execution.
+Accepted baseline `ab19b786` exists locally and is an ancestor of the isolated
+readiness base, which adds an unrelated Story prototype commit.
+
+Only external Python 3.9.6 without Pillow was found in the initial checked locations;
+host-level identity inspection also reported no valid signing identity. Neither
+finding establishes absence/deletion or authorizes installation, certificate
+replacement or Keychain changes. Earlier accepted Mac evidence records Python
+3.12.16/Pillow 12.3.0. The same chat is now locating that existing harness environment
+through targeted tooling/receipt paths and checking read-only access to the approved
+identity. Preserve the initial scope and wait for this clarification before treating
+the findings as provisioning needs.
+
+The report identifies an incremental Git bundle from the accepted baseline plus
+synthetic fixture/archive SHA256 receipts as a private transfer route. Existing
+Windows-to-Mac messages can carry base64 chunks; direct binary attachment transfer
+was not established. No candidate has been sent or synchronized yet. All Mac capped
+counts remain zero. The complete report is retained in ignored local evidence.

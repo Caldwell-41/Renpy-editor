@@ -24,9 +24,10 @@ combined review and all original criteria remain pending. [Evidence](../tasks/ev
 records contracts and ownership. #54 and broader Phase 3B acceptance remain separate.
 Issue-state/limit updates to #51/#52 are authorized; code publication/PR/merge are not.
 The authorized Mac qualification chat is created on isolated branch
-`t3/mac-bars-imagebuttons-qualification`. Sol 6.1 xhigh readiness is running after
-the host returned. No capped Mac operation is requested or reserved. The chat owns
-readiness only until the coordinator supplies exact inputs and a reservation.
+`t3/mac-bars-imagebuttons-qualification`. Initial readiness confirms the pinned
+ordinary tools and SDK archive. Existing harness Python and signing access need
+targeted follow-up; no provisioning is selected. No capped Mac operation is requested
+or reserved. The chat owns readiness until exact inputs and a reservation arrive.
 
 ## Variable text, ordered actions and nested canvas accepted
 
