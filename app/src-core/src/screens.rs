@@ -169,7 +169,6 @@ pub struct Node {
     pub text_properties: Option<text::TextProperties>,
     pub style: Option<styles::StyleReference>,
     pub component: Option<ComponentReference>,
-    pub dismissal: Option<ButtonDismissal>,
     pub actions: Option<Vec<interaction::ScreenAction>>,
     pub variable_binding: Option<interaction::VariableBinding>,
     pub span: Span,
@@ -178,14 +177,6 @@ pub struct Node {
     pub protected: Vec<Span>,
     #[serde(skip)]
     source_end: usize,
-}
-
-#[derive(Clone, Copy, Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub enum ButtonDismissal {
-    None,
-    FinishInteraction,
-    HideScreen,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -386,7 +377,6 @@ fn parse_body(
         text_properties: None,
         style: None,
         component: None,
-        dismissal: None,
         actions: None,
         variable_binding: None,
         span: Span {

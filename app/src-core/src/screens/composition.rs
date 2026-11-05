@@ -58,11 +58,6 @@ pub enum Command {
         layout: std::collections::BTreeMap<String, Option<layout::NumericValue>>,
     },
     #[serde(rename_all = "camelCase")]
-    Dismissal {
-        node_id: String,
-        action: actions::LegacyDismissal,
-    },
-    #[serde(rename_all = "camelCase")]
     Actions {
         node_id: String,
         actions: Vec<interaction::ScreenAction>,
@@ -377,83 +372,6 @@ impl AuthoringService {
                 }
                 proposed.splice(parent.source_end..parent.source_end, addition.bytes());
                 id
-            }
-            Command::Dismissal { node_id, action } => {
-                // Only the qualified document grants element identity authority.
-                let node = screen
-                    .nodes
-                    .iter()
-                    .find(|node| node.id.as_ref() == Some(&node_id))
-                    .ok_or(SceneError::UnknownEntity)?;
-                let resolved = self.screens_resolve_target(
-                    project,
-                    project_id,
-                    &crate::metadata::ScreenTargetBinding {
-                        screen_id: owner.screen.id.clone(),
-                        source_name: owner.screen.name.clone(),
-                    },
-                    None,
-                )?;
-                if resolved.revisions.source != revision.sha256
-                    || resolved.revisions.source_map != catalog.source_map_revision
-                {
-                    return Err(SceneError::SourceConflict);
-                }
-                let raw = inspect(&bytes, source_path.clone(), revision.sha256.clone())?;
-                let raw_screen = raw
-                    .screens
-                    .iter()
-                    .find(|s| s.name == owner.screen.name)
-                    .ok_or(SceneError::ReferenceBlocked)?;
-                let inventory = self.screen_inventory(project)?;
-                let panels = super::actions::qualified_panel_targets(&inventory);
-                let authoring = self.screen_action_authoring(project, project_id)?;
-                let inspection = super::actions::inspect_actions(
-                    &owner.screen,
-                    raw_screen,
-                    &bytes,
-                    &authoring.variables,
-                    &panels,
-                );
-                let button = inspection
-                    .buttons
-                    .get(&node.span.start)
-                    .filter(|b| {
-                        b.actions.len() <= 1
-                            && b.actions.iter().all(|a| match a {
-                                interaction::ScreenAction::FinishInteraction => true,
-                                interaction::ScreenAction::HideScreen { target } => {
-                                    target.screen_id == owner.screen.id
-                                }
-                                _ => false,
-                            })
-                    })
-                    .ok_or(SceneError::OpaqueBoundary)?;
-                let action = match action {
-                    actions::LegacyDismissal::FinishInteraction
-                        if owner.screen.kind == crate::metadata::OwnedScreenKind::Dialog
-                            && resolved.blocking =>
-                    {
-                        interaction::ScreenAction::FinishInteraction
-                    }
-                    actions::LegacyDismissal::HideScreen
-                        if owner.screen.kind == crate::metadata::OwnedScreenKind::Panel =>
-                    {
-                        interaction::ScreenAction::HideScreen {
-                            target: resolved.binding,
-                        }
-                    }
-                    _ => return Err(SceneError::ReferenceBlocked),
-                };
-                proposed = super::actions::prepare(
-                    &bytes,
-                    button,
-                    &[action],
-                    &authoring.variables,
-                    &panels,
-                    inspection.blocking,
-                )?;
-                node_id
             }
             Command::AddImage {
                 parent_id,

@@ -315,7 +315,6 @@ impl AuthoringService {
                             text_properties: None,
                             style: None,
                             component: None,
-                            dismissal: None,
                             actions: None,
                             variable_binding: None,
                             span: span.clone(),
@@ -398,34 +397,11 @@ impl AuthoringService {
                         .unwrap_or(&[]),
                     &panel_targets,
                 );
-                let dismissals: Vec<_> = screen
-                    .nodes
-                    .iter()
-                    .map(|node| {
-                        node.id.as_ref()?;
-                        if owner.kind == crate::metadata::OwnedScreenKind::Component {
-                            return None;
-                        }
-                        let button = actions.buttons.get(&node.span.start)?;
-                        match button.actions.as_slice() {
-                            [] => Some(ButtonDismissal::None),
-                            [interaction::ScreenAction::FinishInteraction] => {
-                                Some(ButtonDismissal::FinishInteraction)
-                            }
-                            [interaction::ScreenAction::HideScreen { target }]
-                                if target.screen_id == owner.id =>
-                            {
-                                Some(ButtonDismissal::HideScreen)
-                            }
-                            _ => None,
-                        }
-                    })
-                    .collect();
-                for (node, dismissal) in screen.nodes.iter_mut().zip(dismissals) {
-                    node.dismissal = dismissal;
-                    node.actions = actions
-                        .buttons
-                        .get(&node.span.start)
+                for node in &mut screen.nodes {
+                    node.actions = node
+                        .id
+                        .as_ref()
+                        .and_then(|_| actions.buttons.get(&node.span.start))
                         .map(|b| b.actions.clone());
                     node.variable_binding = bindings::inspect_binding(
                         node,

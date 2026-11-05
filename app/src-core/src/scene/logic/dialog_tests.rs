@@ -248,7 +248,8 @@ fn added_inert_button_can_finish_dialog_in_one_exact_transaction_and_undo_redo()
     let changed = compose(
         &mut f,
         &owner,
-        json!({"type":"dismissal","nodeId":id,"action":"finishInteraction"}),
+        json!({"type":"actions","nodeId":id,"actions":[{"type":"finishInteraction"}],
+            "expectedAuthoringRevision":added["document"]["authoringRevision"],"expectedTargetRevisions":[]}),
     );
     assert_eq!(changed["changed"], true);
     let expected = before.replace("action Null()", "action Return()");
@@ -257,7 +258,8 @@ fn added_inert_button_can_finish_dialog_in_one_exact_transaction_and_undo_redo()
         compose(
             &mut f,
             &owner,
-            json!({"type":"dismissal","nodeId":id,"action":"finishInteraction"})
+            json!({"type":"actions","nodeId":id,"actions":[{"type":"finishInteraction"}],
+                "expectedAuthoringRevision":changed["document"]["authoringRevision"],"expectedTargetRevisions":[]})
         )["changed"],
         false
     );
@@ -303,7 +305,7 @@ fn reject_compose(
 }
 
 #[test]
-fn dismissal_refuses_duplicate_element_ids_without_retargeting_or_writes() {
+fn actions_refuse_duplicate_element_ids_without_retargeting_or_writes() {
     let mut f = Fixture::new();
     let owner = dialog(&mut f, "help_dialog");
     let first = compose(
@@ -328,13 +330,14 @@ fn dismissal_refuses_duplicate_element_ids_without_retargeting_or_writes() {
     reject_compose(
         &mut f,
         &owner,
-        json!({"type":"dismissal","nodeId":first["selectedId"],"action":"finishInteraction"}),
+        json!({"type":"actions","nodeId":first["selectedId"],"actions":[{"type":"finishInteraction"}],
+            "expectedAuthoringRevision":second["document"]["authoringRevision"],"expectedTargetRevisions":[]}),
         None,
     );
 }
 
 #[test]
-fn dismissal_changes_only_expression_preserving_crlf_comments_and_opaque_neighbors() {
+fn actions_change_only_expression_preserving_crlf_comments_and_opaque_neighbors() {
     let mut f = Fixture::new();
     let owner = dialog(&mut f, "help_dialog");
     let added = compose(
@@ -357,14 +360,16 @@ fn dismissal_changes_only_expression_preserving_crlf_comments_and_opaque_neighbo
     compose(
         &mut f,
         &owner,
-        json!({"type":"dismissal","nodeId":id,"action":"finishInteraction"}),
+        json!({"type":"actions","nodeId":id,"actions":[{"type":"finishInteraction"}],
+            "expectedAuthoringRevision":document["authoringRevision"],"expectedTargetRevisions":[]}),
     );
     let expected = before.replace("action    Null()", "action    Return()");
     assert_eq!(source(&mut f, &path), expected);
     reject_compose(
         &mut f,
         &owner,
-        json!({"type":"dismissal","nodeId":id,"action":"finishInteraction"}),
+        json!({"type":"actions","nodeId":id,"actions":[{"type":"finishInteraction"}],
+            "expectedAuthoringRevision":document["authoringRevision"],"expectedTargetRevisions":[]}),
         Some(document["revision"].clone()),
     );
     f.command(json!({"type":"undo"}));
@@ -374,7 +379,7 @@ fn dismissal_changes_only_expression_preserving_crlf_comments_and_opaque_neighbo
 }
 
 #[test]
-fn dismissal_refuses_wrong_context_and_unqualified_actions_without_replacing_source() {
+fn actions_refuse_wrong_context_and_unqualified_actions_without_replacing_source() {
     for action in [
         "[Return(), Null()]",
         "Return(1)",
@@ -397,7 +402,8 @@ fn dismissal_refuses_wrong_context_and_unqualified_actions_without_replacing_sou
         reject_compose(
             &mut f,
             &owner,
-            json!({"type":"dismissal","nodeId":id,"action":"finishInteraction"}),
+            json!({"type":"actions","nodeId":id,"actions":[{"type":"finishInteraction"}],
+                "expectedAuthoringRevision":added["document"]["authoringRevision"],"expectedTargetRevisions":[]}),
             None,
         );
         assert_eq!(source(&mut f, &path), text);
@@ -410,11 +416,14 @@ fn dismissal_refuses_wrong_context_and_unqualified_actions_without_replacing_sou
         json!({"type":"add","parentId":owner["rootId"],"kind":"textbutton","text":"Done"}),
     );
     let id = added["selectedId"].clone();
+    let target = resolved(&mut f, &owner);
     assert_eq!(
         reject_compose(
             &mut f,
             &owner,
-            json!({"type":"dismissal","nodeId":id,"action":"hideScreen"}),
+            json!({"type":"actions","nodeId":id,"actions":[{"type":"hideScreen","target":target["binding"]}],
+                "expectedAuthoringRevision":added["document"]["authoringRevision"],
+                "expectedTargetRevisions":[{"target":target["binding"],"revisions":target["revisions"]}]}),
             None
         )["error"]["code"],
         "INCOMING_REFERENCE"
@@ -426,7 +435,8 @@ fn dismissal_refuses_wrong_context_and_unqualified_actions_without_replacing_sou
         reject_compose(
             &mut f,
             &owner,
-            json!({"type":"dismissal","nodeId":id,"action":"finishInteraction"}),
+            json!({"type":"actions","nodeId":id,"actions":[{"type":"finishInteraction"}],
+                "expectedAuthoringRevision":added["document"]["authoringRevision"],"expectedTargetRevisions":[]}),
             None
         )["error"]["code"],
         "INCOMING_REFERENCE"

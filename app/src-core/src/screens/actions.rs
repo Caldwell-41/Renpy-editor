@@ -8,14 +8,6 @@ use std::collections::{BTreeMap, BTreeSet};
 
 pub const MAX_ACTIONS: usize = 8;
 
-/// Compatibility command for the existing dedicated dismissal caller.
-#[derive(Clone, Copy, Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub enum LegacyDismissal {
-    FinishInteraction,
-    HideScreen,
-}
-
 /// One captured authoring view, including the actual variable definition files.
 pub(crate) struct AuthoringSnapshot {
     pub revision: String,

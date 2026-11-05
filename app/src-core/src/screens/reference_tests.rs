@@ -81,7 +81,7 @@ fn large_marked_screen_retains_per_button_action_authority() {
     assert_eq!(
         nodes
             .iter()
-            .filter(|node| node["dismissal"] == "none")
+            .filter(|node| node["actions"] == json!([]))
             .count(),
         2045
     );
@@ -90,13 +90,21 @@ fn large_marked_screen_retains_per_button_action_authority() {
         .filter(|node| node["kind"] == "textbutton")
         .take(3)
     {
-        assert!(node["dismissal"].is_null());
+        assert!(node["actions"].is_null());
         assert!(!node["protected"].as_array().unwrap().is_empty());
     }
+    let target = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":{"screenId":owner["id"],"sourceName":owner["name"]}}),
+    );
     compose_command(
         &mut service,
         &owner,
-        json!({"type":"dismissal","nodeId":last_id,"action":"hideScreen"}),
+        json!({"type":"actions","nodeId":last_id,
+            "actions":[{"type":"hideScreen","target":target["binding"]}],
+            "expectedAuthoringRevision":document["authoringRevision"],
+            "expectedTargetRevisions":[{"target":target["binding"],"revisions":target["revisions"]}]}),
     );
     let expected = source.replace(
         "action Null() # keep 2047",
@@ -170,7 +178,7 @@ fn nonblocking_dialog_keeps_return_source_protected_but_null_editable() {
             .iter()
             .find(|node| node["id"] == finish["selectedId"])
             .unwrap();
-        assert!(button["dismissal"].is_null(), "{modal}");
+        assert!(button["actions"].is_null(), "{modal}");
         assert!(
             !button["protected"].as_array().unwrap().is_empty(),
             "{modal}"
@@ -189,7 +197,9 @@ fn nonblocking_dialog_keeps_return_source_protected_but_null_editable() {
         );
         for command in [
             json!({"type":"remove","nodeId":finish["selectedId"]}),
-            json!({"type":"dismissal","nodeId":inert["selectedId"],"action":"finishInteraction"}),
+            json!({"type":"actions","nodeId":inert["selectedId"],
+                "actions":[{"type":"finishInteraction"}],
+                "expectedAuthoringRevision":document["authoringRevision"],"expectedTargetRevisions":[]}),
         ] {
             reject(
                 &mut service,
@@ -206,8 +216,8 @@ fn nonblocking_dialog_keeps_return_source_protected_but_null_editable() {
             nodes
                 .iter()
                 .find(|node| node["id"] == inert["selectedId"])
-                .unwrap()["dismissal"],
-            "none"
+                .unwrap()["actions"],
+            json!([])
         );
         compose_command(
             &mut service,
@@ -238,8 +248,8 @@ fn nonblocking_dialog_keeps_return_source_protected_but_null_editable() {
             .unwrap()
             .iter()
             .find(|node| node["id"] == finish["selectedId"])
-            .unwrap()["dismissal"],
-        "finishInteraction"
+            .unwrap()["actions"],
+        json!([{"type":"finishInteraction"}])
     );
     compose_command(
         &mut service,
@@ -249,7 +259,7 @@ fn nonblocking_dialog_keeps_return_source_protected_but_null_editable() {
 }
 
 #[test]
-fn inspection_exposes_only_owned_unique_qualified_dismissal_capabilities() {
+fn inspection_exposes_only_owned_unique_qualified_actions() {
     for kind in ["panel", "dialog"] {
         let (_temporary, mut service, _, _) = composition_project();
         let catalog = ipc(&mut service, "screens.list", json!({}));
@@ -279,11 +289,11 @@ fn inspection_exposes_only_owned_unique_qualified_dismissal_capabilities() {
             .to_owned();
         let hide = format!("Hide({})", serde_json::to_string(&name).unwrap());
         for (expression, expected) in [
-            ("Null()", json!("none")),
+            ("Null()", json!([])),
             (
                 "Return()",
                 if kind == "dialog" {
-                    json!("finishInteraction")
+                    json!([{"type":"finishInteraction"}])
                 } else {
                     Value::Null
                 },
@@ -291,7 +301,7 @@ fn inspection_exposes_only_owned_unique_qualified_dismissal_capabilities() {
             (
                 hide.as_str(),
                 if kind == "panel" {
-                    json!("hideScreen")
+                    json!([{"type":"hideScreen","target":{"screenId":owner["id"],"sourceName":owner["name"]}}])
                 } else {
                     Value::Null
                 },
@@ -316,7 +326,7 @@ fn inspection_exposes_only_owned_unique_qualified_dismissal_capabilities() {
                 .iter()
                 .find(|node| node["id"] == added["selectedId"])
                 .unwrap();
-            assert_eq!(node["dismissal"], expected, "{kind}: {expression}");
+            assert_eq!(node["actions"], expected, "{kind}: {expression}");
         }
         let duplicate = original
             .lines()
@@ -339,7 +349,7 @@ fn inspection_exposes_only_owned_unique_qualified_dismissal_capabilities() {
             .filter(|node| node["kind"] == "textbutton")
         {
             assert!(node["id"].is_null());
-            assert!(node["dismissal"].is_null());
+            assert!(node["actions"].is_null());
         }
     }
 }
@@ -407,7 +417,6 @@ fn inert_button_action_stays_editable_and_extractable() {
         .iter()
         .find(|node| node["kind"] == "textbutton")
         .unwrap();
-    assert!(inert["dismissal"].is_null());
     assert_eq!(inert["actions"], json!([]));
     assert!(inert["protected"].as_array().unwrap().is_empty());
     let target = ipc(
