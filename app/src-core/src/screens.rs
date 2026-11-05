@@ -20,6 +20,7 @@ pub mod canvas;
 pub(crate) mod canvas_session;
 pub mod components;
 mod composition;
+mod control_source;
 pub mod controls;
 mod images;
 pub mod interaction;
@@ -172,6 +173,9 @@ pub struct Node {
     pub component: Option<ComponentReference>,
     pub actions: Option<Vec<interaction::ScreenAction>>,
     pub variable_bindings: Option<Vec<interaction::VariableBinding>>,
+    pub bar_binding: Option<controls::IntegerBarBinding>,
+    pub bar_appearance: Option<controls::BarAppearance>,
+    pub image_button_appearances: Option<controls::ImageButtonAppearances>,
     pub span: Span,
     pub parent_start: Option<usize>,
     pub properties: Vec<Property>,
@@ -289,6 +293,8 @@ fn kind(line: &Line<'_>) -> Option<&'static str> {
         "hbox:" => return Some("hbox"),
         "window:" => return Some("window"),
         "viewport:" => return Some("viewport"),
+        "bar:" => return Some("bar"),
+        "imagebutton:" => return Some("imagebutton"),
         _ => {}
     }
     if grid_header(line.code).is_some() {
@@ -380,6 +386,9 @@ fn parse_body(
         component: None,
         actions: None,
         variable_bindings: None,
+        bar_binding: None,
+        bar_appearance: None,
+        image_button_appearances: None,
         span: Span {
             start: line.start,
             end,
@@ -928,6 +937,11 @@ impl AuthoringService {
             .find(|s| s.name == screen_name)
             .and_then(|s| s.nodes.iter().find(|n| n.span.start == node_start))
             .ok_or(SceneError::UnknownEntity)?;
+        // Image-button dimensions also size each native appearance. Only the
+        // combined imageButton transaction owns those coupled source changes.
+        if node.kind == "imagebutton" {
+            return Err(SceneError::OpaqueBoundary);
+        }
         let mut patches = vec![];
         for (key, value) in values {
             let properties = node

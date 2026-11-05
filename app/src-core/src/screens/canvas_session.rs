@@ -154,14 +154,19 @@ impl Session {
             for key in node
                 .properties
                 .keys()
-                .filter(|key| key.as_str() == "font" || key.ends_with("_font"))
+                .filter(|key| {
+                    key.as_str() == "font"
+                        || key.ends_with("_font")
+                        || node.kind == "imagebutton"
+                            && super::control_source::IMAGE_KEYS.contains(&key.as_str())
+                })
                 .cloned()
                 .collect::<Vec<_>>()
             {
                 if let Some(Value::String(name)) = node.properties.get_mut(&key) {
                     *name = copy_asset(
                         name,
-                        true,
+                        key == "font" || key.ends_with("_font"),
                         &assets,
                         authoring,
                         project,

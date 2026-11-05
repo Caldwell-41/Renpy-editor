@@ -306,6 +306,9 @@ impl AuthoringService {
                         digest.update(index.to_le_bytes());
                         digest.update(header);
                         source_only.push(Node {
+                            bar_binding: None,
+                            bar_appearance: None,
+                            image_button_appearances: None,
                             id: Some(format!("source-{}", hex::encode(digest.finalize()))),
                             kind: "custom".into(),
                             literal: Some(header.into()),
@@ -398,6 +401,26 @@ impl AuthoringService {
                     &panel_targets,
                 );
                 for node in &mut screen.nodes {
+                    if node.id.is_some() {
+                        if let Some((appearances, starts)) =
+                            self.inspect_imagebutton(project, &metadata.project_id, bytes, node)
+                        {
+                            node.image_button_appearances = Some(appearances);
+                            node.protected.retain(|s| !starts.contains(&s.start));
+                        }
+                        if let Some((binding, appearance, starts)) = control_source::inspect_bar(
+                            bytes,
+                            node,
+                            authoring
+                                .as_ref()
+                                .map(|a| a.variables.as_slice())
+                                .unwrap_or(&[]),
+                        ) {
+                            node.bar_binding = Some(binding);
+                            node.bar_appearance = Some(appearance);
+                            node.protected.retain(|s| !starts.contains(&s.start));
+                        }
+                    }
                     node.actions = node
                         .id
                         .as_ref()

@@ -123,9 +123,18 @@ init python:
                 d = renpy.text.text.Text(node["literal"], substitute=False, **p)
             elif kind == "image":
                 d = renpy.display.transform.Transform(renpy.display.im.Image(node["literal"]), **p)
+            elif kind == "bar":
+                d = renpy.display.behavior.Bar(style="bar", **p)
+            elif kind == "imagebutton":
+                appearances = {}
+                for state in ("idle", "hover", "selected_idle", "selected_hover", "insensitive", "selected_insensitive"):
+                    if state in p:
+                        appearances[state] = Transform(renpy.display.im.Image(p.pop(state)), xysize=(p["xsize"], p["ysize"]))
+                d = renpy.ui._imagebutton(style="image_button", **appearances, **p)
+                d.set_style_prefix({"normal":"idle_", "hover":"hover_", "selected":"selected_idle_", "selectedHover":"selected_hover_", "disabled":"insensitive_", "selectedDisabled":"selected_insensitive_"}[plan["buttonState"]], True)
             elif kind == "textbutton":
                 d = renpy.ui._textbutton(node["literal"], substitute=False, **p)
-                d.set_style_prefix({"normal":"idle_", "hover":"hover_", "selected":"selected_idle_", "disabled":"insensitive_"}[plan["buttonState"]], True)
+                d.set_style_prefix({"normal":"idle_", "hover":"hover_", "selected":"selected_idle_", "selectedHover":"selected_hover_", "disabled":"insensitive_", "selectedDisabled":"selected_insensitive_"}[plan["buttonState"]], True)
             else:
                 raise ValueError("Unsupported canvas kind")
             for child in by_parent.get(node["start"], []):

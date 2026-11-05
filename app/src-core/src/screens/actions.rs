@@ -294,14 +294,22 @@ pub fn inspect_actions(
         && modals.len() == 1
         && standalone(modals[0], &lines)
         && modals[0].code == "modal True";
-    for node in screen.nodes.iter().filter(|n| n.kind == "textbutton") {
+    for node in screen
+        .nodes
+        .iter()
+        .filter(|n| matches!(n.kind.as_str(), "textbutton" | "imagebutton"))
+    {
         let read = || -> Option<ButtonActions> {
             let header_index = lines
                 .binary_search_by_key(&node.span.start, |line| line.start)
                 .ok()?;
             let header = &lines[header_index];
-            let literal = header.code.strip_prefix("textbutton ")?.strip_suffix(':')?;
-            serde_json::from_str::<String>(literal).ok()?;
+            if node.kind == "textbutton" {
+                let literal = header.code.strip_prefix("textbutton ")?.strip_suffix(':')?;
+                serde_json::from_str::<String>(literal).ok()?;
+            } else if header.code != "imagebutton:" {
+                return None;
+            }
             let mut statements = lines
                 .iter()
                 .enumerate()
