@@ -45,8 +45,10 @@ commands, hashes and original-criterion gaps are in the
 
 Next, finish the failed/incomplete full Design Lab check in a separate candidate
 while preserving the approved source. The ambiguous visible/hidden error locator
-is a harness defect; prior failures remain recorded. Core dismissal migration can
-proceed independently. After that Lab gate, assign approved production controls,
+is a harness defect; prior failures remain recorded. Core migration `a811c26` is
+complete in `t3-4dbbc9c4`, with 43 focused passes and no remaining scoped finding
+after coordinator audit. Hold it for combined frontend integration; applying it
+alone breaks legacy controls and their tests. After the Lab gate, assign approved controls,
 wire typed samples, and verify actual UI-to-core retention, history and reopen.
 Run final combined suites, candidate-bound engine/platform proof and independent
 Standards/Spec review before final spec reconciliation and draft PR creation.

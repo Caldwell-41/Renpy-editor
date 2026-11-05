@@ -94,6 +94,39 @@ Production control assignment follows the Lab gate. No SDK/helper/native/package
 or CI operation is delegated. Full combined suites and final two-axis review remain
 pending; the final draft PR still follows original-spec reconciliation.
 
+### Core migration ready for combined integration
+
+The core lane completed locally as
+`a811c26bee285e45a33413e582f0927234d15c65`, tree
+`6844dcd8c8a905adee3535d417fe09a719f7deec`, in `t3-4dbbc9c4` on
+`t3/migrate-canonical-screen-actions`, based on `ad36af1`. Its six-file change
+removes the legacy dismissal command, enum, inspection field/projection and writer.
+Rust callers/tests now exercise canonical `Actions` with captured authoring and
+distinct target revisions. No compatibility translator or second action writer
+remains in that candidate.
+
+Migrating an existing public inspection case exposed action authority on nodes
+whose duplicate IDs had been withdrawn. The lane retained a failing result, then
+required the existing qualified unique node ID before projecting actions. Raw
+action/effect parsers and eligibility rules remain unchanged. Component Null
+inspection stays passive; component action writes remain refused.
+
+All 43 focused cases pass (9 actions, 15 references, 2 effects, 12 Story dialogs,
+5 Help panels), with zero failures or ignores. Locked offline test compilation,
+formatting and whitespace pass. The coordinator audited the production/test diff,
+clean checkout and retained log hashes. Exact commands, environment, initial red,
+final results and frontend guidance remain in that worktree's ignored
+`.toolchains/canonical-actions/handoff.json` and `logs/`.
+
+The commit is held for integration with its frontend counterpart. Current legacy
+frontend commands/fields and dismissal DOM/dispatch tests would be incompatible
+with the core removal alone. The forthcoming controls must preserve original-base
+drafts, authoring revisions and exactly one review per distinct Show/Hide target,
+including self-Hide. Finish alone sends no target reviews. No frontend, Lab,
+shared-record, engine/native/package/CI or publication work occurred in this lane.
+The Lab promotion gate, production integration, final combined checks and review
+remain pending. This is neither an integrated pass nor ticket acceptance.
+
 ### Source/actions verification and target eligibility
 
 The source/actions verifier returned a clean checkout at

@@ -33,6 +33,8 @@ it; a core lane migrates the legacy dismissal adapter independently. Production
 controls follow the Lab gate. Preserve the approved source and all rejected/draft
 variants. Tailscale-only delivery and exclusion of prototype-review remain binding.
 Final combined suites and independent Standards/Spec review follow integration.
+Core migration `a811c26` is ready with 43 focused passes and remains in its lane
+until the frontend counterpart is ready for combined integration.
 [Current evidence and criterion gaps](../tasks/evidence/screen-actions-and-nested-canvas.md#resumed-delivery-2026-11-05)
 own exact assignments, receipts and remaining work.
 
