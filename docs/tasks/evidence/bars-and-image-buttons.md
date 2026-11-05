@@ -667,3 +667,29 @@ trusted/native input and real core/runtime proof remain separate. After the exac
 decision, any approved successor handoff must go directly from the designer to the
 editor and copy the coordinator. Original source/proof remains intact. No capped
 operation, server or additional review round is selected by this checkpoint.
+
+## One final additional council round authorized, 2026-11-06
+
+Kris explicitly authorized one additional final round, R3, aimed at 9/10, plus an
+annotated screenshot showing changes from original A. This supersedes the earlier
+two-round ceiling for this one round only. Earlier scores and source bindings stay
+unchanged; no fourth round is selected.
+
+Frozen candidate remains `0263728d9e07e951d25060d635d58094eac20c28`, fingerprint
+`1d6424ed32ef37e6dc9e8d31fe63ee8cf7ce5308d6139de3bcc35fc6a564034d`.
+Sol R3 now reports 9/10, satisfied, with no must-fix findings. Its review verified
+source/capture hashes and inspected static PNGs; it did not rerun synthetic checks.
+The only reported optional note concerns `actions.touched` allowing an Unsaved
+footer after restoring values. It is not a selected source change or scope expansion.
+The earlier fifteen-group synthetic result keeps its own producing basis.
+
+Opus R3 remains pending, with no polling or replacement. The designer has prepared
+and inspected a 1600px annotation board using the unchanged actual final screenshot,
+six callouts, an original-A inset and error-recovery detail. Its final PNG will be
+delivered after both reviews. No final annotation artifact identity is inferred yet.
+
+No user approval or production handoff is implied by Sol's score or the annotation.
+After the final review and exact decision, any approved handoff still goes directly
+from the designer to the editor and copies the coordinator. Frozen source, original
+reference/proof and separate lab/native/core/runtime gates remain intact. No capped
+operation or new reservation is selected by this review checkpoint.

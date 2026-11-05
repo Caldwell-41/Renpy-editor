@@ -23,20 +23,28 @@ The editor opened the required separate design chat on
 Kris's exact approved design/source/fingerprint/captures and approval evidence directly
 to the editor agent, copying the coordinator. Production UI cannot begin beforehand.
 Browser/desktop operation uses Terra 6.1 max. Core work may continue during design.
-Kris now selected refining A through exactly two council rounds toward 9/10.
+Kris initially selected two council rounds toward 9/10 and has now explicitly
+authorized one final additional round, bringing the total to three.
 The designer alone owns the new unapproved A2 lab revision; each round requests
 read-only Opus 5.5 xhigh and Sol 6.1 xhigh feedback under the council skill.
 Source `0a6e571e` / `inspector-v1` remains pinned, with its synthetic proof scoped
 to that source. The editor received this gate directly and is waiting for the
 approved successor handoff. No additional coordinator council is selected.
-Both selected council rounds are complete, with no third selected. Original A
+The initial two council rounds are complete. Original A
 received Opus 6.5/10 and Sol 7/10; R2 reviewed `fb147c89` received Opus 8/10 and
 Sol 8.5/10. Corrected `inspector-v2` source is `0263728d`, with receipt/captures
 at `f8198c6f` and reported fifteen-group synthetic proof at both widths. The
-corrections were not independently rescored; no 9/10 claim or approval is inferred.
+corrections were not independently rescored at that checkpoint.
 The evidence owner records full identities and the parent check of all seven final
 capture hashes/dimensions. Kris's exact decision and the approved direct handoff
 remain pending. Full lab, native, core and runtime gates retain their separate scope.
+Final R3 is now authorized on the frozen `0263728d` source/fingerprint. Sol R3
+reports 9/10, satisfied, with no must-fix findings, based on source/capture hashes
+and static PNG inspection; it did not rerun synthetic checks. Opus R3 is pending
+without polling or replacement. The optional `actions.touched` footer wording
+observation remains optional; no source change or fourth round is selected.
+The designer owns the requested 1600px annotated PNG with six callouts, original-A
+inset and error-recovery detail, and will deliver it after both reviews.
 
 [#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) owns the shared limits
 and [detailed evidence](../tasks/evidence/bars-and-image-buttons.md) records contracts,
@@ -50,10 +58,10 @@ creating isolated branch `t3/mac-bars-imagebuttons-qualification` at `1c6ed025`.
 Initial readiness completed with verified Sol 6.1 xhigh settings. No capped operation was
 requested. The Windows SDK archive matches its published pin.
 
-Next action is Kris's exact decision on corrected A2 source `0263728d`, then the
-designer's approved direct successor handoff to the editor. Council scores are
-feedback, not production approval; no extra round or rescore is selected. Promotion
-records/checks must retain their actual status. The Mac readiness chat is
+Next action is completion of Opus R3 and delivery of the annotated screenshot,
+then Kris's exact decision on source `0263728d` and the approved direct handoff.
+Council scores are feedback, not production approval. No fourth round is selected;
+promotion records/checks must retain their actual status. The Mac readiness chat is
 <t3-thread://v2/c95d26c7-af8c-4ab0-8c95-a45fdca2dfe6/mcp:launch:aed218e73e07211906bdf413f41978e96efe3ae09756ac17e0c6842d8b443ee7>.
 Read its completed report through the linked environment; the reverse report send
 to Windows was denied, so do not rely on an automatic parent notification.
