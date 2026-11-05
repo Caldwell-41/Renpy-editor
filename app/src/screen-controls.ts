@@ -54,8 +54,14 @@ export type ScreenControlCommand =
   | ({ type: "addImageButton"; parentId: string } & ImageButtonChange)
   | ({ type: "imageButton"; nodeId: string } & ImageButtonChange);
 
-export interface BarSample extends BarValues { nodeStart: number }
-export interface BarAddition extends BarValues { parentStart: number }
+export interface BarSample extends BarValues {
+  nodeStart: number;
+  expectedAuthoringRevision: string;
+}
+export interface BarAddition extends BarValues {
+  parentStart: number;
+  expectedAuthoringRevision: string;
+}
 export interface ImageButtonSample extends ImageButtonValues { nodeStart: number }
 export interface ImageButtonAddition extends ImageButtonValues { parentStart: number }
 export type ControlButtonState =

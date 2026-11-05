@@ -51,6 +51,7 @@ pub struct ImageButtonAppearances {
 pub struct BarDraft {
     pub node_start: Option<usize>,
     pub parent_start: Option<usize>,
+    pub expected_authoring_revision: String,
     pub binding: IntegerBarBinding,
     pub appearance: BarAppearance,
     pub width: u32,

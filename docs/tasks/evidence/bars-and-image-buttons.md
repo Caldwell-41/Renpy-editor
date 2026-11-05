@@ -122,8 +122,10 @@ Canvas requests add `barSamples`, `barAddition`, `imageButtonSamples` and
 each addition carries `parentStart`. Bars carry binding, appearance and dimensions;
 image buttons carry appearances and dimensions. Existing `layouts` supplies numeric
 placement edits, `variableSamples` supplies inert variable values, and `buttonState`
-selects normal/hover/selected/selectedHover/disabled/selectedDisabled. No action or
-runtime state assignment enters those draft records.
+selects normal/hover/selected/selectedHover/disabled/selectedDisabled. Bar sample and
+addition records also require `expectedAuthoringRevision`, captured with the draft's
+variable catalog. Stale variable-catalog drafts must not silently rebind for preview.
+No action or runtime state assignment enters those draft records.
 
 Shared Rust `BarDraft`/`ImageButtonDraft` use the existing image-draft pattern of
 optional target fields; request validation must enforce exactly the target appropriate
@@ -137,6 +139,14 @@ The coordinator reviewed these shapes against the existing composition, action,
 image-draft and layout owners. A concrete implementation conflict still returns to
 the coordinator before any schema change. This checkpoint authorizes schema-dependent
 tests; production frontend still requires the exact approved design handoff.
+
+The core owner confirmed the composition envelopes and proposed revision binding
+for provisional bars. Coordinator review accepted that guard before frontend
+consumption and added mandatory `expectedAuthoringRevision` to bar canvas records.
+The frozen array/addition shape and existing separate layout edits remain unchanged.
+Image-button edits may omit actions to retain the accepted statement; additions must
+provide an explicit empty or typed action list. Canonical integer endpoints and their
+positive range must remain exactly representable in the qualified engine domain.
 
 ### Initial checks and retained environment failure
 
