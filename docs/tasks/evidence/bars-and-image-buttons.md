@@ -257,7 +257,15 @@ focus, one Apply/Undo/Redo, no-op/Cancel/invalid retention, Source/navigation,
 remount/revision retention, image selection/aspect and missing-asset/stale-source
 retention. Prototype source remains `0a6e571eb4c65ea60ce1fa446cd27d2a12985884`,
 fingerprint `ecd02f2dfb490297d89c1b05e5fb2787cb166868e8ea77a7d1dee72093785373`.
-Parent test SHA256 is `c04a174acbff2592dc6fb9aa4490382030f7b750beadeca3bee7eece2e53b012`.
+Actual tool-payload SHA256 is
+`0f2c60560176c287c9162eb0d5b35800e281b37d7e74ddb095c31d6be50c1ff8`.
+The payload has 404,936 characters and 87 CRLF pairs. The initial preparation
+receipt reported LF-normalized hash
+`c04a174acbff2592dc6fb9aa4490382030f7b750beadeca3bee7eece2e53b012`
+before Windows newline conversion; that is an equivalent preparation hash, not the
+actual tool-input hash. The coordinator checked the retained argument string and
+raw file, corrected this distinction, and informed the designer. Assertions and
+prototype source are unchanged.
 Ignored `prototype-dom-review` material retains exact input preparation, hashes and
 tool console receipts. These are synthetic DOM callbacks in a browser, not approval
 captures, native/trusted input, actual core/source/runtime or full Design Lab proof.
