@@ -93,5 +93,39 @@ class AcceptedFileTests(unittest.TestCase):
             gate.validate_files(self.root, [])
 
 
+class CanvasAdmissionTests(unittest.TestCase):
+    def setUp(self):
+        self.document = dict(path='game/ui/controls.rpy', revision='c' * 64, screens=[
+            dict(name='controls', nodes=[dict(kind='bar', span=dict(start=1)),
+                                         dict(kind='imagebutton', span=dict(start=2))])])
+        self.entries = []
+        for width, height in gate.RESOLUTIONS:
+            for state in gate.STATES:
+                request = dict(path=self.document['path'], screenName='controls',
+                               expectedRevision=self.document['revision'], width=width,
+                               height=height, buttonState=state)
+                plan = dict(revision=self.document['revision'], width=width, height=height,
+                            buttonState=state, available=True, limits=[],
+                            nodes=[dict(kind='bar', start=1), dict(kind='imagebutton', start=2)])
+                self.entries.append(dict(request=request, plan=plan))
+
+    def test_six_states_at_both_aspects_bind_the_accepted_document(self):
+        gate.validate_canvas_matrix(self.entries, self.document, 'controls')
+
+    def test_missing_duplicate_stale_partial_or_wrong_state_plan_refuses(self):
+        variants = [self.entries[:-1], self.entries + [self.entries[0]]]
+        for section, field, value in [('request', 'expectedRevision', 'd' * 64),
+                                      ('plan', 'available', False),
+                                      ('plan', 'limits', ['Unsupported control']),
+                                      ('plan', 'buttonState', 'hover'),
+                                      ('plan', 'nodes', [dict(kind='bar', start=1)])]:
+            bad = copy.deepcopy(self.entries)
+            bad[0][section][field] = value
+            variants.append(bad)
+        for bad in variants:
+            with self.subTest(bad=bad[0]), self.assertRaises(ValueError):
+                gate.validate_canvas_matrix(bad, self.document, 'controls')
+
+
 if __name__ == '__main__':
     unittest.main()

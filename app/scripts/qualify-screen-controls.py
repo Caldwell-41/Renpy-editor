@@ -68,3 +68,36 @@ def validate_files(root, records):
             actual.add(path.relative_to(root).as_posix())
     require(actual == set(hashes), 'missing/undeclared accepted game input')
     return hashes
+
+
+def validate_canvas_matrix(entries, document, screen_name):
+    """Admit source-derived plans, without claiming that a helper rendered them."""
+    expected = {(width, height, state) for width, height in RESOLUTIONS for state in STATES}
+    require(type(entries) is list and len(entries) == len(expected),
+            'incomplete/duplicate controls canvas matrix')
+    screens = [screen for screen in document['screens'] if screen['name'] == screen_name]
+    require(len(screens) == 1, 'missing/ambiguous controls screen')
+    controls = {(node['span']['start'], node['kind']) for node in screens[0]['nodes']
+                if node['kind'] in ('bar', 'imagebutton')}
+    require({kind for _, kind in controls} == {'bar', 'imagebutton'},
+            'accepted document lacks required controls')
+    seen = set()
+    for entry in entries:
+        request, plan = entry['request'], entry['plan']
+        key = (request['width'], request['height'], request.get('buttonState', 'normal'))
+        require(key in expected and key not in seen, 'wrong/duplicate canvas aspect/state')
+        seen.add(key)
+        require(request['path'] == document['path'] and request['screenName'] == screen_name
+                and request['expectedRevision'] == document['revision'],
+                'canvas request uses a different accepted document')
+        require(plan.get('available') is True and plan.get('limits') == []
+                and plan.get('revision') == document['revision']
+                and (plan.get('width'), plan.get('height'), plan.get('buttonState')) == key,
+                'partial/stale/wrong-state controls canvas plan')
+        nodes = plan.get('nodes')
+        require(type(nodes) is list and 1 <= len(nodes) <= 4096,
+                'missing/unbounded canvas nodes')
+        planned = [(node.get('start'), node.get('kind')) for node in nodes]
+        require(all(planned.count(control) == 1 for control in controls),
+                'missing/duplicate accepted control in canvas plan')
+    require(seen == expected, 'incomplete controls canvas matrix')

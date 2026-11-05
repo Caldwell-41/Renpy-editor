@@ -35,6 +35,11 @@ reviewed checkpoint before dependent work continues. Mutable outputs and fixture
 stay isolated per checkout. No worker starts SDK/helper/package/native operations
 without a coordinator reservation.
 
+The coordinator subsequently expanded the core writer's ownership to
+`screens/canvas_session.rs` for the six image-button asset properties. That change
+must reuse `copy_asset` and existing containment/hash/dependency checks, with no
+process/lifecycle change. The shared controller driver remains coordinator-owned.
+
 ### Initial interface agreement
 
 - `IntegerBarBinding` names an existing integer variable by stable ID with canonical
@@ -194,3 +199,9 @@ ordinary bad paths, and changed/missing/duplicate/undeclared game inputs. Existi
 frozen file/path/JSON utilities are reused. These synthetic admission tests are not
 public-core export, SDK, native, canvas-rendering or ticket acceptance evidence.
 The actual exporter, semantic manifest admission and runtime qualification remain pending.
+
+The next red/green admission slice adds the exact twelve-plan matrix: six states at
+1280x720 and 1024x768, matched to the accepted document and control byte offsets.
+The seven focused tests now pass, including refusal of incomplete/duplicate matrices,
+stale requests, partial plans, wrong states and missing controls. This still proves
+only admission behavior, not actual producer output or rendered pixels.
