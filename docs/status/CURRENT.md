@@ -17,6 +17,9 @@ are integrated at `b23bbcc9`; the editor worktree is at that checkpoint.
 
 The editor agent opened the requested separate Sol 6.1 xhigh design chat. Production
 UI waits for exact design approval and a direct handoff to that implementer.
+Kris selected refinement of A into a new unapproved A2 lab revision through exactly
+two council rounds, aiming for 9/10. The designer owns those rounds and all lab
+changes; source `0a6e571e` and its earlier proof remain pinned separately.
 The corrected Windows observer passes; both earlier failed campaigns stay recorded.
 #51 owns combined capped-operation accounting; Windows SDK use is 12/16 and all
 other counts are zero, with no reservation pending. Remaining Windows/macOS proof,

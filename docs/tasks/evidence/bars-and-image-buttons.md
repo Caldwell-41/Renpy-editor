@@ -546,3 +546,30 @@ synchronization or qualification to the readiness chat; a later coordinator hand
 must name the exact candidate, hashes, safe checkout transition and reservation.
 All Mac capped counts stay zero. No additional provisioning decision is pending
 from readiness; final platform qualification remains unrun.
+
+## A2 refinement selected, 2026-11-06
+
+Kris instructed the designer to refine A with two council rounds, aiming for a more
+pleasing UI/UX and scores of 9/10. The designer owns all code in a new unapproved
+A2 lab revision and requests read-only Opus 5.5 xhigh plus Sol 6.1 xhigh feedback
+each round under the council skill. No duplicate coordinator panel is selected.
+Two rounds are the current selection; a target score is not an invented result
+or authorization for extra rounds.
+
+Original source `0a6e571eb4c65ea60ce1fa446cd27d2a12985884` / `inspector-v1`
+stays pinned. Its earlier synthetic DOM evidence does not transfer to A2. Production
+UI is still unapproved. The editor received the designer's direct update and
+acknowledged the gate. After Kris's decision, the designer must send the exact
+approved successor source/fingerprint/captures and approval evidence directly to
+the editor, copying the coordinator. Frozen DTOs, one combined Apply, no reparent
+UI and native fallback rules remain unchanged. No native retry, server or capped
+process start is selected by this design refinement.
+
+Execution-state updates to #51/#52 record A2 as unapproved. Automatic approval
+review rejected the first #51 write and its retry because a whole-body replacement
+would republish detailed Mac signing/Keychain and private-transfer observations
+outside the authorized status/limit scope. A narrower replacement removed that
+detailed readiness section from the outward body, retained the existing ticket
+requirements/accounting and added only design execution state plus generic Mac
+readiness status. That write succeeded. Detailed host observations remain local;
+no broader publication authorization was requested or inferred.

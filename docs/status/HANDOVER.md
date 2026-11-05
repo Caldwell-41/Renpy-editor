@@ -23,6 +23,12 @@ The editor opened the required separate design chat on
 Kris's exact approved design/source/fingerprint/captures and approval evidence directly
 to the editor agent, copying the coordinator. Production UI cannot begin beforehand.
 Browser/desktop operation uses Terra 6.1 max. Core work may continue during design.
+Kris now selected refining A through exactly two council rounds toward 9/10.
+The designer alone owns the new unapproved A2 lab revision; each round requests
+read-only Opus 5.5 xhigh and Sol 6.1 xhigh feedback under the council skill.
+Source `0a6e571e` / `inspector-v1` remains pinned, with its synthetic proof scoped
+to that source. The editor received this gate directly and is waiting for the
+approved successor handoff. No additional coordinator council is selected.
 
 [#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) owns the shared limits
 and [detailed evidence](../tasks/evidence/bars-and-image-buttons.md) records contracts,
@@ -36,8 +42,10 @@ creating isolated branch `t3/mac-bars-imagebuttons-qualification` at `1c6ed025`.
 Initial readiness completed with verified Sol 6.1 xhigh settings. No capped operation was
 requested. The Windows SDK archive matches its published pin.
 
-Next action is Kris's exact design approval in the separate design chat, followed
-by that designer's direct handoff to the editor. The Mac readiness chat is
+Next action is the designer's two-round A2 refinement, then Kris's exact design
+decision and the designer's direct successor handoff to the editor. Council scores
+are feedback, not production approval; report any unmet target after round two
+without silently adding rounds. The Mac readiness chat is
 <t3-thread://v2/c95d26c7-af8c-4ab0-8c95-a45fdca2dfe6/mcp:launch:aed218e73e07211906bdf413f41978e96efe3ae09756ac17e0c6842d8b443ee7>.
 Read its completed report through the linked environment; the reverse report send
 to Windows was denied, so do not rely on an automatic parent notification.
