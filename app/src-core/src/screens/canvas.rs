@@ -539,6 +539,7 @@ impl AuthoringService {
                         &mut properties,
                         &mut plan.dependencies,
                     )?;
+                    imagebutton_dimensions(node, &mut properties)?;
                 } else {
                     plan.limits.push(format!(
                         "Unresolved image-button appearances at {}",
@@ -585,6 +586,9 @@ impl AuthoringService {
                 .iter_mut()
                 .find(|n| n.start == draft.node_start && n.kind != "screen")
                 .ok_or(SceneError::InvalidPayload)?;
+            if node.kind == "imagebutton" {
+                return Err(SceneError::OpaqueBoundary);
+            }
             node.properties.insert("xsize".into(), draft.width.into());
             node.properties.insert("ysize".into(), draft.height.into());
         }
@@ -606,9 +610,6 @@ impl AuthoringService {
                 .iter_mut()
                 .find(|n| n.start == draft.node_start)
                 .ok_or(SceneError::InvalidPayload)?;
-            if node.kind == "imagebutton" {
-                return Err(SceneError::OpaqueBoundary);
-            }
             node.properties.insert("xalign".into(), draft.xalign.into());
             node.properties.insert("yalign".into(), draft.yalign.into());
         }
@@ -1325,6 +1326,33 @@ fn control_numeric(
             .canvas_properties()
             .map_err(|_| SceneError::OpaqueBoundary)?,
     );
+    if node.kind == "imagebutton" {
+        imagebutton_dimensions(node, properties)?;
+    }
+    Ok(())
+}
+
+/// The renderer sizes state images with two explicit dimensions. Resolve the
+/// accepted numeric alias here without changing its authoritative source bytes.
+fn imagebutton_dimensions(
+    node: &Node,
+    properties: &mut Map<String, Value>,
+) -> Result<(), SceneError> {
+    let numeric = node
+        .numeric_layout
+        .as_ref()
+        .ok_or(SceneError::OpaqueBoundary)?;
+    properties.remove("xysize");
+    for key in ["xsize", "ysize"] {
+        properties.insert(
+            key.into(),
+            numeric
+                .values
+                .get(key)
+                .ok_or(SceneError::OpaqueBoundary)?
+                .json(),
+        );
+    }
     Ok(())
 }
 

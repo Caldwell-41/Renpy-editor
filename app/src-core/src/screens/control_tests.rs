@@ -910,6 +910,14 @@ fn imagebutton_dimensions_use_combined_owner_and_plain_paths_remain_source_only(
             .extend(extra.as_object().unwrap().clone());
         reject(&mut service, operation, request);
     }
+    let request = json!({"path":owner["path"],"screenName":owner["name"],"expectedRevision":doc["revision"],"width":1280,"height":720});
+    let mut generic = request.clone();
+    generic["drafts"] = json!([{"nodeStart":start,"width":200,"height":100}]);
+    reject(&mut service, "screens.canvasPlan", generic);
+    let mut generic = request.clone();
+    generic["layouts"] =
+        json!([{"nodeStart":start,"values":{"xsize":{"unit":"pixels","value":200}}}]);
+    reject(&mut service, "screens.canvasPlan", generic);
     assert_eq!(
         fs::read_to_string(root.join(owner["path"].as_str().unwrap())).unwrap(),
         source
@@ -940,5 +948,46 @@ fn imagebutton_dimensions_use_combined_owner_and_plain_paths_remain_source_only(
             json!({"binding":{"screenId":owner["id"],"sourceName":owner["name"]}})
         )["effects"]["unknown"],
         true
+    );
+}
+
+#[test]
+fn imagebutton_dimensions_alias_prepares_explicit_renderer_dimensions() {
+    let (temporary, mut service, root, owner) = composition_project();
+    let asset = import_image(&temporary, &mut service, &root, "alias_button");
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"addImageButton","parentId":owner["rootId"],"appearances":{"normal":asset,"hover":asset},"width":160,"height":80,"interaction":{"actions":[],"expectedAuthoringRevision":doc["authoringRevision"],"expectedTargetRevisions":[]}}),
+    );
+    let source = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .replace("xsize 160\n        ysize 80", "xysize (160, 80)");
+    save_composition_source(&mut service, &owner, &source);
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    assert!(!doc["screens"][0]["nodes"][1]["imageButtonAppearances"].is_null());
+    let plan = ipc(
+        &mut service,
+        "screens.canvasPlan",
+        json!({"path":owner["path"],"screenName":owner["name"],"expectedRevision":doc["revision"],"width":1280,"height":720}),
+    );
+    assert_eq!(plan["available"], true, "{plan}");
+    let properties = &plan["nodes"][1]["properties"];
+    assert_eq!(properties["xsize"], 160);
+    assert_eq!(properties["ysize"], 80);
+    assert!(properties.get("xysize").is_none());
+    assert_eq!(
+        fs::read_to_string(root.join(owner["path"].as_str().unwrap())).unwrap(),
+        source
     );
 }
