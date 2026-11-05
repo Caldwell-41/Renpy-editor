@@ -828,11 +828,15 @@ impl AuthoringService {
                     }
                 }
                 if let Some(text) = sample.values.text {
-                    if text.contains(['{', '[']) {
+                    let mut draft = original.clone();
+                    draft.literal = Some(text.clone());
+                    let literal =
+                        bindings::resolve_template(&draft, expansion.variables, expansion.values)?;
+                    if literal.is_none() && text.contains(['{', '[']) {
                         plan.limits
                             .push("Draft text requires supported literal text mapping.".into());
                     }
-                    node.literal = Some(text);
+                    node.literal = Some(literal.unwrap_or(text));
                 }
                 if let Some(Some(reference)) = sample.values.font {
                     let path = node

@@ -426,6 +426,50 @@ fn mixed_variable_templates_preserve_source_samples_dependencies_history_and_reo
 }
 
 #[test]
+fn mixed_variable_text_drafts_use_literal_samples_without_writing_source() {
+    let (_temporary, mut service, _, owner) = composition_project();
+    let model = ipc(
+        &mut service,
+        "variable.create",
+        json!({"technicalName":"draft_name","variableType":"string","defaultValue":"Nova"}),
+    );
+    let variable = model["variables"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["technicalName"] == "draft_name")
+        .unwrap();
+    let added = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"text","text":"Accepted"}),
+    );
+    let original = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"].clone();
+    let mut request = json!({
+        "path":owner["path"],"screenName":owner["name"],
+        "expectedRevision":added["document"]["revision"],"width":1280,"height":720,
+        "textStyles":[{"nodeStart":added["document"]["screens"][0]["nodes"][1]["span"]["start"],
+            "values":{"text":"Draft [draft_name!q] / [draft_name!q]"}}],
+        "variableSamples":[{"variableId":variable["id"],
+            "expectedSourceRevision":variable["source"]["sourceRevision"],"value":"{b}[unknown]"}]
+    });
+    let plan = ipc(&mut service, "screens.canvasPlan", request.clone());
+    assert_eq!(plan["available"], true, "{plan}");
+    assert_eq!(
+        plan["nodes"][1]["literal"],
+        "Draft {{b}[unknown] / {{b}[unknown]"
+    );
+    request["textStyles"][0]["values"]["text"] = json!("Draft [missing!q]");
+    let unsupported = ipc(&mut service, "screens.canvasPlan", request);
+    assert_eq!(unsupported["available"], false);
+    assert!(!unsupported["limits"].as_array().unwrap().is_empty());
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        original
+    );
+}
+
+#[test]
 fn typed_action_values_keep_noncanonical_trivia_on_semantic_noop() {
     let (_temporary, mut service, _root, owner) = composition_project();
     let model = ipc(
