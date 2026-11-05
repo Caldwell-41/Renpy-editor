@@ -27,7 +27,9 @@ task owns implementation scope, progress and acceptance.
    filenames. Capture the important states, themes and dimensions, including compact
    layouts where supported. Record each image's SHA-256, state ID, theme, CSS width and
    height, and display scale. The runner's ignored screenshots are temporary outputs;
-   preserve the chosen captures before another run replaces them.
+   preserve the chosen captures before another run replaces them. If selected captures
+   are in temporary review storage, copy them into the owning design directory before
+   that storage is cleaned up.
 4. Fill the candidate revision's `approval` in the owning JSON record. Use the
    [typed record](approval.ts) for fields. Record the date, precise user decision,
    stated reason or null, source identity, captures, agreed behaviour and known agreed

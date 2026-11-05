@@ -1,9 +1,21 @@
 import type { StyleCatalog } from "./screen-text.ts";
 
 export interface ScreenTargetBinding { screenId: string; sourceName: string }
+// Integer values use canonical decimal strings, as in existing Story authoring.
+export type ScreenVariableValue = boolean | string;
+export type ScreenAction =
+  | { type: "setVariable"; variableId: string; value: ScreenVariableValue }
+  | { type: "showScreen"; target: ScreenTargetBinding }
+  | { type: "hideScreen"; target: ScreenTargetBinding }
+  | { type: "finishInteraction" };
+export interface VariableBinding { variableId: string }
+export interface VariableSample {
+  variableId: string; expectedSourceRevision: string; value: ScreenVariableValue;
+}
 export interface ScreenRevisions { source: string; sourceMap: string; inventory: string; effects: string }
 export interface ScreenEffects {
   revision: string; unknown: boolean; hiddenScreens: string[]; finishesInteraction: boolean;
+  shownScreens: string[]; assignedVariables: string[];
   dependencies: { id: string; revision: string }[];
 }
 export interface OwnedScreen {
@@ -16,6 +28,7 @@ export interface ScreenCatalog {
 }
 export interface ResolvedScreenTarget {
   binding: ScreenTargetBinding; kind: "panel" | "dialog" | "component"; blocking: boolean; path: string; rootId: string;
+  canShowHide: boolean;
   revisions: ScreenRevisions; effects: ScreenEffects;
 }
 export interface ComponentChange { componentId: string; screenId: string; useId: string }

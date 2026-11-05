@@ -56,6 +56,9 @@ WINDOWS_NATIVE_TESTS = frozenset('test_rewrite_windows_reuse.RetainedEvidenceGat
     'test_native_window_placement_preserves_layout_and_rejects_unobservable_states',
 )) | {'test_studio_connection_native.CurrentConnectionTests.test_actual_current_driver_fits_small_desktop_and_closes_without_geometry_gate'}
 PYTHON_REQUIRED = MAC_SNAPSHOT_TESTS | WINDOWS_NATIVE_TESTS | {
+    'test_nested_fidelity.NestedFidelityGates.test_normal_instrumentation_parses_without_importing_helper_construction',
+    'test_nested_fidelity.NestedFidelityGates.test_normal_sample_is_applied_after_game_start_defaults',
+    'test_nested_fidelity.NestedFidelityGates.test_normal_observer_measures_the_sized_add_instead_of_its_named_image',
     'test_macos_identity_probe.IdentityProbeTests.test_current_report_requires_exact_contract_case_assertions_identity_and_cleanup',
     'test_studio_connection_native.CurrentConnectionTests.test_current_report_requires_complete_case_contract_requests_timings_and_cleanup',
     'test_studio_connection_native.CurrentConnectionTests.test_current_publication_requires_exact_settings_revision_ownership_and_unrelated_profiles',

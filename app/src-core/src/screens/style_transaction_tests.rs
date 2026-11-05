@@ -37,17 +37,46 @@ fn style_edit_keeps_owning_screen(scope: &str, kind: &str) {
     owned.push_str("        text_size 30 # selected override\n        background \"#123456\" # selected decoration\n");
     if scope != "create" {
         owned.push_str("        style \"ll_old\"\n        text_style \"ll_old\"\n\nstyle ll_old is button:\n    size 22\n\n");
-        owned.push_str(&format!("style ll_target is {kind}:\n    size 35\n"));
+        let definition =
+            format!("style ll_target is {kind}:\n    size 35 # retain definition comment\n");
+        if scope == "shared" {
+            fs::write(root.join("game/ui/action_styles.rpy"), definition).unwrap();
+        } else {
+            owned.push_str(&definition);
+        }
     }
     let before = format!("{unowned}{owned}");
     save_composition_source(&mut service, &owner, &before);
     let catalog = ipc(&mut service, "screens.list", json!({}));
     assert_eq!(catalog["owned"][0]["resolved"], true);
-    let result = compose_command(
+    let doc = ipc(
         &mut service,
-        &owner,
-        json!({"type":"formatText","nodeId":id,"values":{"size":40,"text":"Edited","appearance":{"background":"#abcdef"}},"style":{"scope":scope,"name":"ll_target","expectedRevision":catalog["styles"]["revision"]}}),
+        "screens.inspect",
+        json!({"path":owner["path"]}),
     );
+    let authoring = ipc(&mut service, "authoring.list", json!({}));
+    let flag = authoring["variables"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["technicalName"] == "flag")
+        .unwrap();
+    let actions = json!([{"type":"setVariable","variableId":flag["id"],"value":false}]);
+    let companion = json!({"path":"game/ui/action_styles.rpy"});
+    let companion_before = (scope == "shared").then(|| source(&mut service, &companion));
+    let command = json!({"type":"formatText","nodeId":id,"values":{"size":40,"text":"Edited","appearance":{"background":"#abcdef"}},"style":{"scope":scope,"name":"ll_target","expectedRevision":catalog["styles"]["revision"]},"interaction":{"expectedAuthoringRevision":doc["authoringRevision"],"expectedTargetRevisions":[],"actions":actions}});
+    let mut invalid = command.clone();
+    invalid["interaction"]["actions"] = json!([{"type":"finishInteraction"}]);
+    reject(
+        &mut service,
+        "screens.compose",
+        json!({"screenId":owner["id"],"expectedRevision":doc["revision"],"command":invalid}),
+    );
+    assert_eq!(source(&mut service, &owner), before);
+    if let Some(companion_before) = &companion_before {
+        assert_eq!(source(&mut service, &companion), *companion_before);
+    }
+    let result = compose_command(&mut service, &owner, command);
     let saved = source(&mut service, &owner);
     assert!(
         saved.starts_with(&unowned),
@@ -56,6 +85,7 @@ fn style_edit_keeps_owning_screen(scope: &str, kind: &str) {
     let node = selected(&result, &owner, id);
     assert_eq!(result["selectedId"], id);
     assert_eq!(node["literal"], "Edited");
+    assert_eq!(node["actions"], actions);
     assert_eq!(node["textProperties"]["values"]["size"], 40);
     assert_eq!(node["textProperties"]["values"]["background"], "#abcdef");
     assert!(node["style"]["error"].is_null(), "{node}");
@@ -83,10 +113,25 @@ fn style_edit_keeps_owning_screen(scope: &str, kind: &str) {
         selected(&result, &owner, owner["rootId"].as_str().unwrap())["id"],
         owner["rootId"]
     );
+    let companion_saved = companion_before.as_ref().map(|before| {
+        let saved = source(&mut service, &companion);
+        let mut expected = before.replace("size 35 #", "size 40 #");
+        if kind == "button" {
+            expected = expected.replace("    size", "    background \"#abcdef\"\n    size");
+        }
+        assert_eq!(saved, expected);
+        saved
+    });
     composition_history(&mut service, "undo");
     assert_eq!(source(&mut service, &owner), before);
+    if let Some(before) = &companion_before {
+        assert_eq!(source(&mut service, &companion), *before);
+    }
     composition_history(&mut service, "redo");
     assert_eq!(source(&mut service, &owner), saved);
+    if let Some(saved) = &companion_saved {
+        assert_eq!(source(&mut service, &companion), *saved);
+    }
     service.close().unwrap();
     service.open_path(&root).unwrap();
     assert_eq!(source(&mut service, &owner), saved);

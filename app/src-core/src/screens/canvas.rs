@@ -6,6 +6,10 @@ use serde_json::{Map, Value};
 #[path = "base_help_canvas_tests.rs"]
 mod tests;
 
+#[cfg(test)]
+#[path = "nested_canvas_tests.rs"]
+mod nested_tests;
+
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Request {
@@ -22,6 +26,8 @@ pub struct Request {
     pub layouts: Vec<LayoutDraft>,
     #[serde(default)]
     pub text_samples: Vec<TextSample>,
+    #[serde(default)]
+    pub variable_samples: Vec<interaction::VariableSample>,
     #[serde(default)]
     pub button_state: ButtonState,
     #[serde(default)]
@@ -106,7 +112,7 @@ pub struct LayoutDraft {
     pub values: std::collections::BTreeMap<String, Option<layout::NumericValue>>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Plan {
     pub revision: String,
@@ -122,14 +128,24 @@ pub struct Plan {
     pub(crate) script_files: Vec<String>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CanvasNode {
     pub start: usize,
     pub parent: Option<usize>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub selection_start: Option<usize>,
     pub kind: String,
     pub literal: Option<String>,
     pub properties: Map<String, Value>,
+}
+
+struct Expansion<'a> {
+    inventory: &'a ownership::Inventory,
+    variables: &'a [crate::authoring::Variable],
+    values: &'a std::collections::BTreeMap<String, String>,
+    remaining: usize,
+    components: std::collections::BTreeMap<(String, usize), Plan>,
 }
 
 impl AuthoringService {
@@ -138,6 +154,108 @@ impl AuthoringService {
         project: &ProjectId,
         request: Request,
     ) -> Result<Plan, SceneError> {
+        let inventory = self.screen_inventory(project)?;
+        let (_, authoring_revision) = self
+            .transactions
+            .snapshot(
+                project,
+                RelativePath::new(".renpy-editor/authoring.json").unwrap(),
+            )
+            .map_err(|_| SceneError::SourceConflict)?;
+        let authoring = self
+            .screen_action_authoring(project, &inventory.source_map.project_id)
+            .ok();
+        let variables = authoring
+            .as_ref()
+            .map(|snapshot| snapshot.variables.as_slice())
+            .unwrap_or(&[]);
+        if request.variable_samples.len() > MAX_NODES {
+            return Err(SceneError::InvalidPayload);
+        }
+        let mut values = std::collections::BTreeMap::new();
+        for sample in &request.variable_samples {
+            if values.contains_key(&sample.variable_id) {
+                return Err(SceneError::InvalidPayload);
+            }
+            let value = bindings::resolve_sample(
+                &interaction::VariableBinding {
+                    variable_id: sample.variable_id.clone(),
+                },
+                variables,
+                Some(sample),
+            )?;
+            values.insert(sample.variable_id.clone(), value);
+        }
+        for variable in variables {
+            if !values.contains_key(&variable.id) {
+                values.insert(
+                    variable.id.clone(),
+                    bindings::resolve_sample(
+                        &interaction::VariableBinding {
+                            variable_id: variable.id.clone(),
+                        },
+                        variables,
+                        None,
+                    )?,
+                );
+            }
+        }
+        let mut expansion = Expansion {
+            inventory: &inventory,
+            variables,
+            values: &values,
+            remaining: MAX_NODES,
+            components: std::collections::BTreeMap::new(),
+        };
+        let mut plan = self.canvas_plan(project, request, &[], &mut expansion)?;
+        plan.dependencies.push((
+            ".renpy-editor/authoring.json".into(),
+            authoring_revision.sha256.clone(),
+        ));
+        for variable in variables {
+            if plan.dependencies.iter().any(|(path, hash)| {
+                path == &variable.source.path && hash != &variable.source.source_revision
+            }) {
+                return Err(SceneError::SourceConflict);
+            }
+            plan.dependencies.push((
+                variable.source.path.clone(),
+                variable.source.source_revision.clone(),
+            ));
+        }
+        let (_, current_authoring) = self
+            .transactions
+            .snapshot(
+                project,
+                RelativePath::new(".renpy-editor/authoring.json").unwrap(),
+            )
+            .map_err(|_| SceneError::SourceConflict)?;
+        if current_authoring.sha256 != authoring_revision.sha256 {
+            return Err(SceneError::SourceConflict);
+        }
+        plan.dependencies.sort();
+        plan.dependencies.dedup();
+        let (_, metadata_revision) = self
+            .transactions
+            .snapshot(
+                project,
+                RelativePath::new(".renpy-editor/source-map.json").unwrap(),
+            )
+            .map_err(|_| SceneError::SourceConflict)?;
+        if metadata_revision.sha256 != inventory.source_map_revision {
+            return Err(SceneError::SourceConflict);
+        }
+        Ok(plan)
+    }
+
+    fn canvas_plan(
+        &self,
+        project: &ProjectId,
+        request: Request,
+        active_components: &[String],
+        expansion: &mut Expansion<'_>,
+    ) -> Result<Plan, SceneError> {
+        let style_inventory = expansion.inventory;
         if request.width == 0
             || request.height == 0
             || request.width > 1920
@@ -160,7 +278,6 @@ impl AuthoringService {
             return Err(SceneError::SourceConflict);
         }
         let source_path = request.path.clone();
-        let style_inventory = self.screen_inventory(project)?;
         if style_inventory
             .files
             .iter()
@@ -197,6 +314,11 @@ impl AuthoringService {
         };
         let source = source_lines(&bytes)?;
         for node in &screen.nodes {
+            if expansion.remaining == 0 {
+                plan.limits.push("Expanded component node limit".into());
+                break;
+            }
+            expansion.remaining -= 1;
             let mut properties = Map::new();
             // Read only direct, single-line properties. The shared source parser owns
             // node boundaries; unsupported blocks are never flattened into children.
@@ -227,6 +349,13 @@ impl AuthoringService {
                 let line = code(line.trim_start());
                 if line.is_empty()
                     || line == "pass"
+                    || screen.nodes.iter().any(|child| {
+                        child.kind == "use"
+                            && child.parent_start == Some(node.span.start)
+                            && source
+                                .iter()
+                                .any(|entry| entry.start == child.span.start && entry.code == line)
+                    })
                     || kind(&Line {
                         end: 0,
                         element_id: None,
@@ -364,7 +493,11 @@ impl AuthoringService {
                         .push(format!("Unresolved {fields} at {}", node.span.start)),
                 }
             }
-            if matches!(node.kind.as_str(), "text" | "textbutton")
+            let binding = bindings::inspect_bindings(node, expansion.variables);
+            let literal = bindings::resolve_template(node, expansion.variables, expansion.values)?
+                .or_else(|| node.literal.clone());
+            if binding.is_none()
+                && matches!(node.kind.as_str(), "text" | "textbutton")
                 && node
                     .literal
                     .as_ref()
@@ -378,8 +511,9 @@ impl AuthoringService {
             plan.nodes.push(CanvasNode {
                 start: node.span.start,
                 parent: node.parent_start,
+                selection_start: None,
                 kind: node.kind.clone(),
-                literal: node.literal.clone(),
+                literal,
                 properties,
             });
         }
@@ -505,6 +639,7 @@ impl AuthoringService {
             plan.nodes.push(CanvasNode {
                 start: screen.nodes.iter().map(|n| n.span.end).max().unwrap_or(0) + 1,
                 parent: Some(parent.span.start),
+                selection_start: None,
                 kind: addition.kind,
                 literal,
                 properties,
@@ -576,6 +711,7 @@ impl AuthoringService {
                     plan.nodes.push(CanvasNode {
                         start: screen.nodes.iter().map(|n| n.span.end).max().unwrap_or(0) + 1,
                         parent: Some(parent_start),
+                        selection_start: None,
                         kind: "image".into(),
                         literal: None,
                         properties: Map::new(),
@@ -692,11 +828,15 @@ impl AuthoringService {
                     }
                 }
                 if let Some(text) = sample.values.text {
-                    if text.contains(['{', '[']) {
+                    let mut draft = original.clone();
+                    draft.literal = Some(text.clone());
+                    let literal =
+                        bindings::resolve_template(&draft, expansion.variables, expansion.values)?;
+                    if literal.is_none() && text.contains(['{', '[']) {
                         plan.limits
                             .push("Draft text requires supported literal text mapping.".into());
                     }
-                    node.literal = Some(text);
+                    node.literal = Some(literal.unwrap_or(text));
                 }
                 if let Some(Some(reference)) = sample.values.font {
                     let path = node
@@ -709,6 +849,129 @@ impl AuthoringService {
                 }
             }
         }
+        let mut next_start = bytes
+            .len()
+            .max(plan.nodes.iter().map(|node| node.start).max().unwrap_or(0))
+            + 1;
+        let mut expanded = Vec::new();
+        for node in std::mem::take(&mut plan.nodes) {
+            if node.kind != "use" {
+                expanded.push(node);
+                continue;
+            }
+            let reference = screen
+                .nodes
+                .iter()
+                .find(|source| source.span.start == node.start)
+                .and_then(|source| source.component.as_ref())
+                .filter(|reference| reference.resolved);
+            let target = reference.and_then(|reference| {
+                style_inventory
+                    .source_map
+                    .owned_screens
+                    .iter()
+                    .find(|owner| owner.id == reference.component_id)
+            });
+            let Some(target) = target else {
+                plan.limits
+                    .push(format!("Missing or ambiguous component at {}", node.start));
+                continue;
+            };
+            if expansion.remaining == 0 {
+                plan.limits
+                    .push(format!("Expanded component node limit at {}", node.start));
+                continue;
+            }
+            if active_components.len() >= MAX_DEPTH || active_components.contains(&target.id) {
+                plan.limits
+                    .push(format!("Component cycle or depth limit at {}", node.start));
+                continue;
+            }
+            let mut active = active_components.to_vec();
+            active.push(target.id.clone());
+            let mut child = if let Some(cached) =
+                expansion.components.get(&(target.id.clone(), active.len()))
+            {
+                if cached.nodes.len() > expansion.remaining {
+                    plan.limits
+                        .push(format!("Expanded component node limit at {}", node.start));
+                    continue;
+                }
+                expansion.remaining -= cached.nodes.len();
+                cached.clone()
+            } else {
+                let child = self.canvas_plan(
+                    project,
+                    Request {
+                        path: target.path.clone(),
+                        screen_name: target.name.clone(),
+                        expected_revision: reference
+                            .unwrap()
+                            .source_revision
+                            .clone()
+                            .ok_or(SceneError::SourceConflict)?,
+                        width: request.width,
+                        height: request.height,
+                        button_state: request.button_state,
+                        drafts: vec![],
+                        positions: vec![],
+                        layouts: vec![],
+                        text_samples: vec![],
+                        variable_samples: request.variable_samples.clone(),
+                        addition: None,
+                        image_samples: vec![],
+                        image_addition: None,
+                        text_styles: vec![],
+                    },
+                    &active,
+                    expansion,
+                )?;
+                if child.available {
+                    expansion
+                        .components
+                        .insert((target.id.clone(), active.len()), child.clone());
+                }
+                child
+            };
+            if expanded.len() + child.nodes.len().saturating_sub(1) > MAX_NODES {
+                plan.limits
+                    .push(format!("Expanded component node limit at {}", node.start));
+                continue;
+            }
+            let root = child
+                .nodes
+                .iter()
+                .find(|child| child.parent.is_none())
+                .ok_or(SceneError::InvariantBlocked)?
+                .start;
+            let mut starts = std::collections::BTreeMap::new();
+            for child in child.nodes.iter().filter(|child| child.start != root) {
+                starts.insert(child.start, next_start);
+                next_start += 1;
+            }
+            for mut child in child.nodes.drain(..).filter(|child| child.start != root) {
+                child.start = starts[&child.start];
+                child.parent = match child.parent {
+                    Some(parent) if parent == root => node.parent,
+                    Some(parent) => Some(starts[&parent]),
+                    None => return Err(SceneError::InvariantBlocked),
+                };
+                child.selection_start = Some(node.start);
+                expanded.push(child);
+            }
+            plan.limits.extend(
+                child
+                    .limits
+                    .into_iter()
+                    .map(|limit| format!("Component {}: {limit}", target.name)),
+            );
+            plan.dependencies.extend(child.dependencies);
+        }
+        plan.nodes = expanded;
+        plan.dependencies.push((
+            ".renpy-editor/source-map.json".into(),
+            style_inventory.source_map_revision.clone(),
+        ));
         for node in &plan.nodes {
             let count = plan
                 .nodes
@@ -790,6 +1053,21 @@ impl AuthoringService {
                 ));
             }
         }
+        if plan.nodes.len() > MAX_NODES {
+            plan.limits.push("Expanded component node limit".into());
+        }
+        // Recursive plans must describe the same captured source and ownership.
+        let mut revisions = std::collections::BTreeMap::new();
+        for (path, revision) in &plan.dependencies {
+            if revisions
+                .insert(path, revision)
+                .is_some_and(|previous| previous != revision)
+            {
+                return Err(SceneError::SourceConflict);
+            }
+        }
+        plan.dependencies.sort();
+        plan.dependencies.dedup();
         plan.available = plan.limits.is_empty();
         Ok(plan)
     }

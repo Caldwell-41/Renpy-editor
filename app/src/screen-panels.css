@@ -22,9 +22,7 @@
 @media(max-width:680px) { .screen-create { padding:16px; } }
 
 .screen-panels-preview[hidden], .story-destination[hidden], .story-screen-secondary:empty { display:none; }
-.screen-panels-form .screen-create-actions, .screen-dismissal-actions { display:flex; flex-wrap:wrap; gap:8px; }
-.screen-dismissal { border-top:1px solid var(--border-normal); margin-top:16px; padding-top:16px; }
-.screen-dismissal p { margin:8px 0 14px; }
+.screen-panels-form .screen-create-actions { display:flex; flex-wrap:wrap; gap:8px; }
 .scene-draft.story-screen-editor > .row-actions, .expanded-beat.story-screen-editor > .row-actions { justify-content:flex-start; gap:8px; margin-top:20px; }
 .story-screen-editor > .story-screen-secondary { margin-top:14px; }
 .story-screen-secondary > details > summary, details.story-screen-secondary > summary { color:var(--accent-primary); text-decoration:underline; text-underline-offset:3px; cursor:pointer; }

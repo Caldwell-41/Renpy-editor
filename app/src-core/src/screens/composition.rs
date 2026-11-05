@@ -1,6 +1,4 @@
 use super::*;
-#[path = "dismissal.rs"]
-mod dismissal;
 use sha2::{Digest, Sha256};
 
 #[derive(Debug, Deserialize)]
@@ -58,11 +56,22 @@ pub enum Command {
         style: Option<styles::Edit>,
         #[serde(default)]
         layout: std::collections::BTreeMap<String, Option<layout::NumericValue>>,
+        #[serde(default)]
+        interaction: Option<InteractionEdit>,
     },
     #[serde(rename_all = "camelCase")]
-    Dismissal {
+    Actions {
         node_id: String,
-        action: dismissal::Action,
+        actions: Vec<interaction::ScreenAction>,
+        expected_authoring_revision: String,
+        expected_target_revisions: Vec<ActionTargetRevision>,
+    },
+    #[serde(rename_all = "camelCase")]
+    VariableText {
+        node_id: String,
+        binding: Option<interaction::VariableBinding>,
+        text: Option<String>,
+        expected_authoring_revision: String,
     },
     #[serde(rename_all = "camelCase")]
     Reorder {
@@ -72,6 +81,24 @@ pub enum Command {
     },
     #[serde(rename_all = "camelCase")]
     Remove { node_id: String },
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ActionTargetRevision {
+    pub target: crate::metadata::ScreenTargetBinding,
+    pub revisions: references::ScreenRevisions,
+}
+
+/// Captured interaction review for one existing composition transaction.
+/// Absent actions leave the action statement untouched; an empty list writes Null.
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct InteractionEdit {
+    pub expected_authoring_revision: String,
+    pub expected_target_revisions: Vec<ActionTargetRevision>,
+    #[serde(default)]
+    pub actions: Option<Vec<interaction::ScreenAction>>,
 }
 
 #[derive(Serialize)]
@@ -149,6 +176,87 @@ pub(super) fn movable(screen: &Screen, node: &Node) -> bool {
 }
 
 impl AuthoringService {
+    fn prepare_interaction(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        owner: &crate::metadata::OwnedScreen,
+        bytes: &[u8],
+        node_id: &str,
+        review: &InteractionEdit,
+    ) -> Result<Vec<u8>, SceneError> {
+        let authoring = self.require_action_authoring(
+            project,
+            project_id,
+            &review.expected_authoring_revision,
+        )?;
+        let actions = review.actions.as_deref().unwrap_or(&[]);
+        let wanted: std::collections::BTreeSet<_> = actions
+            .iter()
+            .filter_map(|action| match action {
+                interaction::ScreenAction::ShowScreen { target }
+                | interaction::ScreenAction::HideScreen { target } => {
+                    Some(target.screen_id.as_str())
+                }
+                _ => None,
+            })
+            .collect();
+        let reviewed: std::collections::BTreeSet<_> = review
+            .expected_target_revisions
+            .iter()
+            .map(|r| r.target.screen_id.as_str())
+            .collect();
+        if wanted != reviewed || reviewed.len() != review.expected_target_revisions.len() {
+            return Err(SceneError::InvalidPayload);
+        }
+        let Some(actions) = &review.actions else {
+            return Ok(bytes.to_vec());
+        };
+        if owner.kind == crate::metadata::OwnedScreenKind::Component {
+            return Err(SceneError::ReferenceBlocked);
+        }
+        let inventory = self.screen_inventory(project)?;
+        let panels = super::actions::qualified_panel_targets(&inventory);
+        for target_review in &review.expected_target_revisions {
+            let resolved = self.screens_resolve_target(
+                project,
+                project_id,
+                &target_review.target,
+                Some(&target_review.revisions),
+            )?;
+            if !panels.iter().any(|p| p.binding == target_review.target) {
+                return Err(SceneError::ReferenceBlocked);
+            }
+            self.ensure_source_paths_clean(project, [resolved.path.as_str()])
+                .map_err(|_| SceneError::DirtySource)?;
+        }
+        let raw = inspect(bytes, owner.path.clone(), String::new())?;
+        let screen = raw
+            .screens
+            .iter()
+            .find(|s| s.name == owner.name)
+            .ok_or(SceneError::ReferenceBlocked)?;
+        let node = screen
+            .nodes
+            .iter()
+            .find(|n| n.id.as_deref() == Some(node_id))
+            .ok_or(SceneError::UnknownEntity)?;
+        let inspection =
+            super::actions::inspect_actions(owner, screen, bytes, &authoring.variables, &panels);
+        let button = inspection
+            .buttons
+            .get(&node.span.start)
+            .ok_or(SceneError::OpaqueBoundary)?;
+        super::actions::prepare(
+            bytes,
+            button,
+            actions,
+            &authoring.variables,
+            &panels,
+            inspection.blocking,
+        )
+    }
+
     pub fn screens_compose(
         &self,
         project: &ProjectId,
@@ -200,7 +308,67 @@ impl AuthoringService {
             .ok_or(SceneError::ReferenceBlocked)?;
         let mut proposed = bytes.clone();
         let mut companions = Vec::new();
+        let mut interaction_review: Option<(String, Vec<ActionTargetRevision>)> = None;
         let selected_id = match request.command {
+            Command::VariableText {
+                node_id,
+                binding,
+                text,
+                expected_authoring_revision,
+            } => {
+                let authoring = self.require_action_authoring(
+                    project,
+                    project_id,
+                    &expected_authoring_revision,
+                )?;
+                let node = screen
+                    .nodes
+                    .iter()
+                    .find(|n| n.id.as_ref() == Some(&node_id))
+                    .ok_or(SceneError::UnknownEntity)?;
+                proposed = bindings::prepare(
+                    &bytes,
+                    node,
+                    binding.as_ref(),
+                    text.as_deref(),
+                    &authoring.variables,
+                )?;
+                interaction_review = Some((expected_authoring_revision, vec![]));
+                node_id
+            }
+            Command::Actions {
+                node_id,
+                actions,
+                expected_authoring_revision,
+                expected_target_revisions,
+            } => {
+                if !screen
+                    .nodes
+                    .iter()
+                    .any(|node| node.id.as_ref() == Some(&node_id))
+                {
+                    return Err(SceneError::UnknownEntity);
+                }
+                let review = InteractionEdit {
+                    expected_authoring_revision,
+                    expected_target_revisions,
+                    actions: Some(actions),
+                };
+                // The existing writer resolves its spans against these bytes for both APIs.
+                proposed = self.prepare_interaction(
+                    project,
+                    project_id,
+                    &owner.screen,
+                    &bytes,
+                    &node_id,
+                    &review,
+                )?;
+                interaction_review = Some((
+                    review.expected_authoring_revision,
+                    review.expected_target_revisions,
+                ));
+                node_id
+            }
             Command::Add {
                 parent_id,
                 kind,
@@ -252,43 +420,6 @@ impl AuthoringService {
                 }
                 proposed.splice(parent.source_end..parent.source_end, addition.bytes());
                 id
-            }
-            Command::Dismissal { node_id, action } => {
-                // Only the qualified document grants element identity authority.
-                let node = screen
-                    .nodes
-                    .iter()
-                    .find(|node| node.id.as_ref() == Some(&node_id))
-                    .ok_or(SceneError::UnknownEntity)?;
-                let resolved = self.screens_resolve_target(
-                    project,
-                    project_id,
-                    &crate::metadata::ScreenTargetBinding {
-                        screen_id: owner.screen.id.clone(),
-                        source_name: owner.screen.name.clone(),
-                    },
-                    None,
-                )?;
-                if resolved.revisions.source != revision.sha256
-                    || resolved.revisions.source_map != catalog.source_map_revision
-                {
-                    return Err(SceneError::SourceConflict);
-                }
-                let raw = inspect(&bytes, source_path.clone(), revision.sha256.clone())?;
-                let raw_screen = raw
-                    .screens
-                    .iter()
-                    .find(|s| s.name == owner.screen.name)
-                    .ok_or(SceneError::ReferenceBlocked)?;
-                proposed = dismissal::prepare(
-                    &owner.screen,
-                    raw_screen,
-                    node.span.start,
-                    &bytes,
-                    action,
-                    resolved.blocking,
-                )?;
-                node_id
             }
             Command::AddImage {
                 parent_id,
@@ -388,20 +519,23 @@ impl AuthoringService {
                     node,
                     &text::TextEdits::default(),
                 )?;
-                let header = std::str::from_utf8(&bytes[node.span.start..node.source_end])
-                    .map_err(|_| SceneError::UnsupportedSource)?
-                    .lines()
-                    .next()
-                    .unwrap();
-                let indent = header.len() - header.trim_start_matches(' ').len();
-                let statement = code(&header[indent..]);
-                let remaining = statement[node.kind.len()..].trim_start();
-                let literal = remaining.strip_suffix(':').unwrap_or(remaining).trim_end();
-                let start = node.span.start + indent + statement.len() - remaining.len();
-                let value = text_literal(&text)?;
-                if node.literal.as_ref() != Some(&text) {
-                    proposed.splice(start..start + literal.len(), value.bytes());
+                if node.kind == "text" {
+                    // Plain text writes cannot bypass revision-bound template editing.
+                    bindings::validate_edit(node, &text, &[])?;
                 }
+                proposed = node
+                    .text_properties
+                    .as_ref()
+                    .ok_or(SceneError::OpaqueBoundary)?
+                    .patch(
+                        &bytes,
+                        node,
+                        &text::TextEdits {
+                            text: Some(text),
+                            ..Default::default()
+                        },
+                        Default::default(),
+                    )?;
                 node_id
             }
             Command::FormatText {
@@ -409,12 +543,36 @@ impl AuthoringService {
                 values,
                 style,
                 layout,
+                interaction,
             } => {
                 let node = screen
                     .nodes
                     .iter()
                     .find(|n| n.id.as_ref() == Some(&node_id))
                     .ok_or(SceneError::UnknownEntity)?;
+                if let Some(review) = &interaction {
+                    let authoring = self.require_action_authoring(
+                        project,
+                        project_id,
+                        &review.expected_authoring_revision,
+                    )?;
+                    if let Some(text) = &values.text {
+                        if node.kind == "text" {
+                            bindings::validate_edit(node, text, &authoring.variables)?;
+                        }
+                    }
+                } else if node.kind == "text"
+                    && values.text.as_ref().is_some_and(|text| {
+                        text.contains(['[', '{'])
+                            || node
+                                .literal
+                                .as_ref()
+                                .is_some_and(|old| old.contains(['[', '{']))
+                    })
+                {
+                    // Template edits need the original authoring view, including no-ops.
+                    return Err(SceneError::InvalidPayload);
+                }
                 self.verify_accepted_text_font(project, project_id, node, &values)?;
                 let changes = self.resolve_text_edits(project, project_id, &values)?;
                 if let Some(edit) = &style {
@@ -470,6 +628,20 @@ impl AuthoringService {
                         .as_ref()
                         .ok_or(SceneError::OpaqueBoundary)?
                         .patch(&proposed, &layout)?;
+                }
+                if let Some(review) = interaction {
+                    proposed = self.prepare_interaction(
+                        project,
+                        project_id,
+                        &owner.screen,
+                        &proposed,
+                        &node_id,
+                        &review,
+                    )?;
+                    interaction_review = Some((
+                        review.expected_authoring_revision,
+                        review.expected_target_revisions,
+                    ));
                 }
                 node_id
             }
@@ -657,6 +829,19 @@ impl AuthoringService {
             }
         };
         companions.retain(|m| m.proposed != m.expected_bytes);
+        if let Some((authoring, targets)) = &interaction_review {
+            self.require_action_authoring(project, project_id, authoring)?;
+            for review in targets {
+                let resolved = self.screens_resolve_target(
+                    project,
+                    project_id,
+                    &review.target,
+                    Some(&review.revisions),
+                )?;
+                self.ensure_source_paths_clean(project, [resolved.path.as_str()])
+                    .map_err(|_| SceneError::DirtySource)?;
+            }
+        }
         if proposed == bytes && companions.is_empty() {
             return Ok(ComposeResult {
                 document,

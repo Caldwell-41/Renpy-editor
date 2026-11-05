@@ -476,3 +476,47 @@ fn canvas_sdk_retries_refused_helper_before_project_close() {
         .unwrap();
     }
 }
+
+#[test]
+fn canvas_shared_definition_and_metadata_changes_invalidate_an_unchanged_root() {
+    let mut project = Project::new(&["ready"]);
+    let shared = project.root.join("game/shared.rpy");
+    fs::write(&shared, "style shared_body is text:\n    size 24\n").unwrap();
+    let frame = project.render();
+    project.wait_phase(&frame, "ready", Duration::from_secs(5));
+    // An external editor may replace a shared file without touching the root screen.
+    let replacement = project.root.join("game/shared-next.tmp");
+    fs::write(&replacement, "style shared_body is text:\n    size 27\n").unwrap();
+    fs::remove_file(&shared).unwrap();
+    fs::rename(&replacement, &shared).unwrap();
+    assert_eq!(
+        project.service.screens_canvas_status(frame, false).unwrap()["phase"],
+        "stale"
+    );
+    let fresh = project.render();
+    project.wait_phase(&fresh, "ready", Duration::from_secs(5));
+    let metadata = project.root.join(".renpy-editor/source-map.json");
+    let mut map: Value = serde_json::from_slice(&fs::read(&metadata).unwrap()).unwrap();
+    map["externalRevisionNote"] = json!("new component bindings");
+    fs::write(&metadata, serde_json::to_vec_pretty(&map).unwrap()).unwrap();
+    assert_eq!(
+        project.service.screens_canvas_status(fresh, false).unwrap()["phase"],
+        "stale"
+    );
+    let refreshed = project.render();
+    project.wait_phase(&refreshed, "ready", Duration::from_secs(5));
+    let authoring = project.root.join(".renpy-editor/authoring.json");
+    let mut metadata: Value = serde_json::from_slice(&fs::read(&authoring).unwrap()).unwrap();
+    metadata["externalRevisionNote"] = json!("new variable metadata");
+    fs::write(&authoring, serde_json::to_vec_pretty(&metadata).unwrap()).unwrap();
+    assert_eq!(
+        project
+            .service
+            .screens_canvas_status(refreshed, false)
+            .unwrap()["phase"],
+        "stale"
+    );
+    assert_eq!(fs::read_to_string(project.root.join(PATH)).unwrap(), SOURCE);
+    project.service.close().unwrap();
+    assert!(!project.helper_root_exists());
+}

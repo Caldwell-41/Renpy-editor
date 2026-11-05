@@ -30,7 +30,7 @@ export class ScreenCanvasFrames {
   constructor(private readonly host: Host) {}
 
   get ready(): boolean { return this.usable && this.active() && this.frame?.revision === this.host.currentRevision(); }
-  get geometry(): readonly CanvasGeometry[] | undefined { return this.frame?.geometry; }
+  get geometry(): readonly CanvasGeometry[] | undefined { return this.ready ? this.frame?.geometry : undefined; }
 
   render(payload: Record<string, unknown>): void {
     if (!this.active()) return;

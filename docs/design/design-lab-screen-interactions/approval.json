@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "screenId": "screen-interactions",
+  "currentApproved": "inspector-v2",
+  "revisions": [
+    {
+      "id": "inspector-v1",
+      "variantId": "inspector-v1",
+      "approval": null
+    },
+    {
+      "id": "worksheet-v1",
+      "variantId": "worksheet-v1",
+      "approval": null
+    },
+    {
+      "id": "workspace-v1",
+      "variantId": "workspace-v1",
+      "approval": null
+    },
+    {
+      "id": "inspector-v2",
+      "variantId": "inspector-v2",
+      "approval": {
+        "date": "2026-11-05",
+        "decision": "A is approved",
+        "reason": null,
+        "supersedes": null,
+        "source": {
+          "commit": "7090a036032ce3f225a857b30259a9c91716ac60",
+          "fingerprint": "a976830817d848d1263bbbc7f8a101c92c322ce2e369eb4c79c9ce7805bbb85e"
+        },
+        "captures": [
+          {
+            "path": "docs/design/design-lab-screen-interactions/captures/inspector-v2/button-1280.png",
+            "sha256": "2a012f22c149b3d3ca9f20911a18c0bbab3f16e4f8aba1721ea8453eb47bd80e",
+            "state": "button",
+            "theme": "dark",
+            "width": 1280,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-screen-interactions/captures/inspector-v2/button-1024.png",
+            "sha256": "570ea4202e29cdee3cd82f070a5063ead3e3f54b22a167d7494c7797989e0ee6",
+            "state": "button",
+            "theme": "dark",
+            "width": 1024,
+            "height": 768,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-screen-interactions/captures/inspector-v2/button-390.png",
+            "sha256": "49065acae0ac4f35c5a9b1245721e2fe7fe02bfb63747b21237ed665db1cf1cb",
+            "state": "button",
+            "theme": "dark",
+            "width": 390,
+            "height": 844,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-screen-interactions/captures/inspector-v2/eight-1280.png",
+            "sha256": "b7d868943173242f2085a1bf6e0e155ae8dfb0458bf1e65339919497e39194bc",
+            "state": "limit",
+            "theme": "dark",
+            "width": 1280,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-screen-interactions/captures/inspector-v2/eight-390.png",
+            "sha256": "474144766541ca3b2d6d3fe657b20ce4dfa8993cd8c801aaddbe6c87c204e888",
+            "state": "limit",
+            "theme": "dark",
+            "width": 390,
+            "height": 844,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-screen-interactions/captures/inspector-v2/invalid-1280.png",
+            "sha256": "9ed27c32bf361d3523c45f64e721d193d8ba6ec50197064d16bd7834a0dd61cd",
+            "state": "invalid",
+            "theme": "dark",
+            "width": 1280,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-screen-interactions/captures/inspector-v2/invalid-390.png",
+            "sha256": "f9a7966411948867db5d88687209eb774690064a3c004e7ac2e0dcfd1690c7ff",
+            "state": "invalid",
+            "theme": "dark",
+            "width": 390,
+            "height": 844,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-screen-interactions/captures/inspector-v2/text-samples-1280.png",
+            "sha256": "d4c3fc815826cca602b4b20dacbb495b2ca7b857b51237155860e5ac16d5ba94",
+            "state": "text",
+            "theme": "dark",
+            "width": 1280,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-screen-interactions/captures/inspector-v2/text-samples-390.png",
+            "sha256": "31d87c742540f40d24b35f5118660a106e0573e476c2d712fcb9479f6840b2bc",
+            "state": "text",
+            "theme": "dark",
+            "width": 390,
+            "height": 844,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-screen-interactions/captures/inspector-v2/button-draft-coins-1440.png",
+            "sha256": "1b7fd54d5b2a0a2d384ef6af410e342da8d085b7a4e55cdfaf3c62d0c31388c8",
+            "state": "button-draft-coins",
+            "theme": "dark",
+            "width": 1440,
+            "height": 900,
+            "scale": 2
+          }
+        ],
+        "behaviour": [
+          "Use the existing Screens workspace and selected-element inspector, with expandable action rows and one action editor open at a time.",
+          "Place Add action above the sequence; retain stable action identity, draft values and keyboard focus while adding or reordering. Keep Finish last and the sequence limited to eight actions.",
+          "Show current action summaries and field-associated validation that reveals and focuses invalid input. Retain drafts across element selection and errors.",
+          "Use the existing Apply and Cancel workflow for selected changes. Keep sample values beneath the canvas, separate from source values and runtime execution.",
+          "Insert variable tokens into the current Text selection and leave the caret after the token. All prototype operations remain inert and memory-only."
+        ],
+        "deviations": []
+      }
+    },
+    {
+      "id": "worksheet-v2",
+      "variantId": "worksheet-v2",
+      "approval": null
+    },
+    {
+      "id": "workspace-v2",
+      "variantId": "workspace-v2",
+      "approval": null
+    }
+  ]
+}

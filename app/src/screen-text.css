@@ -1,3 +1,4 @@
+@import "./screen-interactions.css";
 .screen-card.screen-text { padding:0 0 0 16px; border:0; border-left:1px solid var(--border-normal); border-radius:0; background:transparent; display:flex; flex-direction:column; max-height:min(680px,calc(100vh - 220px)); overflow:hidden; }
 .screen-text .button { border-radius:0; font-size:11px; min-height:28px; }
 .screen-text-heading { display:flex; align-items:center; gap:10px; margin-bottom:10px; flex:none; }

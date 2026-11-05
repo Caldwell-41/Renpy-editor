@@ -2,7 +2,7 @@
 use super::*;
 use std::path::{Path, PathBuf};
 
-fn apply(service: &mut LifecycleService, command: Value) -> Value {
+pub(super) fn apply(service: &mut LifecycleService, command: Value) -> Value {
     let model = ipc(service, "scene.list", json!({}));
     ipc(
         service,
@@ -12,7 +12,7 @@ fn apply(service: &mut LifecycleService, command: Value) -> Value {
     )
 }
 
-fn append(service: &mut LifecycleService, scene_id: &Value, payload: Value) {
+pub(super) fn append(service: &mut LifecycleService, scene_id: &Value, payload: Value) {
     let model = ipc(service, "scene.list", json!({}));
     let scene = model["scenes"]
         .as_array()
@@ -28,7 +28,7 @@ fn append(service: &mut LifecycleService, scene_id: &Value, payload: Value) {
     );
 }
 
-fn collect_files(root: &Path, directory: &Path, files: &mut Vec<String>) {
+pub(super) fn collect_files(root: &Path, directory: &Path, files: &mut Vec<String>) {
     let mut entries = fs::read_dir(directory)
         .unwrap()
         .map(|entry| entry.unwrap().path())

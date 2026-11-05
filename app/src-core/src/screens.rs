@@ -14,11 +14,14 @@ const MAX_NODES: usize = 4096;
 const MAX_DEPTH: usize = 32;
 const MAX_PIXELS: u32 = 16384;
 
+pub mod actions;
+pub mod bindings;
 pub mod canvas;
 pub(crate) mod canvas_session;
 pub mod components;
 mod composition;
 mod images;
+pub mod interaction;
 pub mod layout;
 mod ownership;
 pub mod panels;
@@ -166,21 +169,14 @@ pub struct Node {
     pub text_properties: Option<text::TextProperties>,
     pub style: Option<styles::StyleReference>,
     pub component: Option<ComponentReference>,
-    pub dismissal: Option<ButtonDismissal>,
+    pub actions: Option<Vec<interaction::ScreenAction>>,
+    pub variable_bindings: Option<Vec<interaction::VariableBinding>>,
     pub span: Span,
     pub parent_start: Option<usize>,
     pub properties: Vec<Property>,
     pub protected: Vec<Span>,
     #[serde(skip)]
     source_end: usize,
-}
-
-#[derive(Clone, Copy, Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub enum ButtonDismissal {
-    None,
-    FinishInteraction,
-    HideScreen,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -201,6 +197,7 @@ pub struct Screen {
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Document {
+    pub authoring_revision: Option<String>,
     pub path: String,
     pub revision: String,
     pub screens: Vec<Screen>,
@@ -380,7 +377,8 @@ fn parse_body(
         text_properties: None,
         style: None,
         component: None,
-        dismissal: None,
+        actions: None,
+        variable_bindings: None,
         span: Span {
             start: line.start,
             end,
@@ -625,6 +623,7 @@ fn source_lines(bytes: &[u8]) -> Result<Vec<Line<'_>>, SceneError> {
 fn inspect(bytes: &[u8], path: String, revision: String) -> Result<Document, SceneError> {
     let lines = source_lines(bytes)?;
     let mut result = Document {
+        authoring_revision: None,
         path,
         revision,
         screens: vec![],

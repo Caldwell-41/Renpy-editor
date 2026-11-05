@@ -84,7 +84,7 @@ test("canvas image errors and helper health failure disable geometry and stop th
   h.calls[1]!.resolve(h.ready("replacement")); await h.advance();
   h.image.dispatchEvent(new h.image.ownerDocument.defaultView!.Event("error"));
   assert.equal(h.frames.ready, false);
-  assert.deepEqual(h.frames.geometry, h.geometry, "The last installed image remains the movement reference");
+  assert.equal(h.frames.geometry, undefined, "The out-of-date image has no movement geometry");
   assert.equal(h.status.textContent, "Canvas image unavailable. Drafts retained.");
   assert.equal(h.invalidations.at(-1), true);
   await h.advance(1000); assert.equal(h.calls.length, 2);
@@ -133,4 +133,22 @@ test("source revision changes and disposal prevent a pending PNG from restoring 
   h.frames.render(h.payload); await h.advance(1000);
   assert.equal(h.calls.length, 1);
   assert.equal(h.installed(), 1);
+});
+
+test("a shared definition change with unchanged root revision retains the image but withdraws hit geometry", async t => {
+  const h = fixture(t);
+  h.frames.render(h.payload); await h.advance(); h.calls[0]!.resolve(h.ready()); await h.advance(); h.load();
+  assert.equal(h.frames.ready, true);
+  await h.advance(500);
+  h.calls[1]!.resolve({ phase: "stale", frameId: "first", message: "Canvas source or assets changed. Refresh Source; drafts are retained." });
+  await h.advance();
+  assert.equal(h.frames.ready, false);
+  assert.equal(h.frames.geometry, undefined);
+  assert.equal(h.image.src, "data:image/png;base64,first");
+  assert.equal(h.canvas.dataset.stale, "true");
+  h.frames.render(h.payload); await h.advance();
+  h.calls[2]!.resolve(h.ready("fresh")); await h.advance();
+  assert.equal(h.frames.geometry, undefined, "A pending replacement PNG has no current hit regions");
+  h.load();
+  assert.deepEqual(h.frames.geometry, h.geometry);
 });

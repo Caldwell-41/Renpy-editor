@@ -17,9 +17,9 @@ const node = (id: string, kind: string, start: number, parentStart: number | nul
   id, kind, literal: null, layout: {}, span: {start, end: start + 15}, parentStart, properties: [], protected: [],
 });
 const target = (item: OwnedScreen): ResolvedScreenTarget => ({
-  binding: {screenId: item.id, sourceName: item.name}, kind: item.kind, blocking: false, path: item.path, rootId: item.rootId,
+  binding: {screenId: item.id, sourceName: item.name}, kind: item.kind, blocking: false, canShowHide: item.kind === "panel", path: item.path, rootId: item.rootId,
   revisions: {source: item.sourceRevision!, sourceMap: "map", inventory: "inventory", effects: "effects"},
-  effects: {revision: "effects", unknown: false, hiddenScreens: [], finishesInteraction: false, dependencies: []},
+  effects: {revision: "effects", unknown: false, shownScreens:[],assignedVariables:[],hiddenScreens: [], finishesInteraction: false, dependencies: []},
 });
 const installDOM = () => {
   const browser = new Window();

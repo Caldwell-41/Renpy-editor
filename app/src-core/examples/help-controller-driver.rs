@@ -339,6 +339,7 @@ fn main() {
                 | "source.saveAll"
                 | "source.discardAll"
                 | "authoring.list"
+                | "variable.create"
                 | "asset.import"
                 | "asset.previewImport"
                 | "asset.reviewUiImage"

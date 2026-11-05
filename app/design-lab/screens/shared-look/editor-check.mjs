@@ -48,10 +48,10 @@ export default async function check({ page, open }) {
   result = await state(); assert.notEqual(result.accepted.uses["Help/body"], result.accepted.uses["About/body"]); assert.equal(result.accepted.looks.body.values.color, "#f1e9d6"); assert.equal(result.accepted.looks[result.accepted.uses["Help/body"]].values.color, "#e8a87c");
   await field("size").fill("40"); await cancel().click(); assert.equal(await field("size").inputValue(), "32"); assert.equal((await state()).history, 2);
   await page.getByRole("button", { name: "1 Choose", exact: true }).click(); await body().dblclick(); assert.match(await page.locator(".sle-look").innerText(), /Editing this element only/);
-  // This legacy component preview supplies no Panel/Story callback. The current
+  // This legacy component preview supplies no Story callback. The current
   // app must keep its appearance editor and refuse the handoff without writing.
   await page.getByRole("button", { name: "3 Use in Story", exact: true }).click();
-  await page.getByText("Choose an available Panel screen to use in Story.", { exact: true }).waitFor();
+  await page.getByText("Choose an available Panel or Dialog screen to use in Story.", { exact: true }).waitFor();
   assert.equal(await page.locator(".sle-look").count(), 1); assert.equal((await state()).history, 2);
   await page.getByRole("button", { name: "2 Design", exact: true }).click(); await page.locator(".sle-look").waitFor();
   await design(); await field("text").fill("Only the Help content changes."); await apply().click(); await page.waitForFunction(() => JSON.parse(document.querySelector(".sle-state pre").textContent).history === 1);

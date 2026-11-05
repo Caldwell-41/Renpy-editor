@@ -1,5 +1,36 @@
 # Current status
 
+## Variable text, ordered actions and nested canvas accepted
+
+Kris selected [PR #81](https://github.com/Caldwell-41/Renpy-editor/pull/81)
+for merge into `codex/phase3b-screen-designer` and reconciliation of related
+tickets. [L11 #47](https://github.com/Caldwell-41/Renpy-editor/issues/47) and
+[L19 #50](https://github.com/Caldwell-41/Renpy-editor/issues/50) have evidence
+for all four bounded criteria each. The PR owns actual merge state; #47 owns the
+final head/tree/merge receipt and exact publication-head CI audit. No separate
+documentation PR is selected or needed.
+
+Implementation `24dd4fa0` fixes both verified review findings: accepted edits
+refresh target metadata for new drafts while existing drafts retain their captured
+revision, and collapsed sample controls show the configured override count.
+Frontend 378, build and the actual UI/core/history/reopen journey pass. Its audited
+quality 42009835333 and both-target harness 42009857395 pass, with all required
+jobs/steps, artifact identities and 842 source hashes per target verified. The final
+status-only publication stays in PR #81 and requires its own selected CI audit.
+
+[Original-criterion evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#windows-proof-and-original-criterion-audit-2026-11-05)
+and [review corrections](../tasks/evidence/screen-actions-and-nested-canvas.md#verified-review-corrections-2026-11-05)
+retain both-target ordered play, exact nested pixels and all 29 clipped geometry
+records at both aspects, source/history/reopen and preserved failures. Engine
+producing candidates remain Windows `f7b9f617`, Mac ordered `92b3a20` and Mac nested
+`b5155f69`; approved A source/captures stay pinned. No engine/native/package operation
+or reservation is pending. #47 alone owns closed cumulative accounting.
+
+B04/B08 and Phase 3B retain broader binding/control-state, editor, native, physical
+input and human acceptance. Satisfying #51/#52/#53's prerequisites does not select
+those tasks. No successor product work, release or branch cleanup is selected.
+Historical recovery below retains its existing size exception.
+
 ## Help dialog and base Help canvas merged and accepted
 
 [PR #79](https://github.com/Caldwell-41/Renpy-editor/pull/79) squash-merged as

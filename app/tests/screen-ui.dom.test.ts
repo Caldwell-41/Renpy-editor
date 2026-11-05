@@ -66,6 +66,40 @@ function harness(mixed = false, ownedRace?: "rename" | "revision" | "unavailable
     refuse: () => settle!.reject(new Error("Draft conflict")), dispose: () => workspace.dispose() };
 }
 
+test("component selection keeps separate visible regions and removes regions missing from a replacement frame", async () => {
+  const fixture: ScreenDocument = { path: "game/ui/help.rpy", revision: "before", partial: false, screens: [{ name: "help", nodes: [
+    {kind:"screen",literal:null,layout:{},span:{start:10,end:160},parentStart:null,properties:[],protected:[]},
+    {kind:"use",literal:"badge",layout:{},span:{start:30,end:50},parentStart:10,properties:[],protected:[]},
+    {kind:"text",literal:"Front",layout:{},span:{start:60,end:80},parentStart:10,properties:[],protected:[]},
+  ] }] };
+  const h = harness(false, undefined, true, false, false, fixture);
+  const regions = () => [...document.querySelectorAll<HTMLButtonElement>('.screen-node[data-index="1"]')];
+  try {
+    h.setCanvasFrame({geometry:[
+      {start:30,x:10,y:20,width:30,height:40},
+      {start:30,x:100,y:20,width:25,height:40},
+      {start:60,x:110,y:20,width:20,height:40},
+    ]});
+    await tick(); await tick();
+    const zoom = [...document.querySelectorAll("select")].find(input => input.ariaLabel === "Canvas zoom")!;
+    zoom.value = "100"; zoom.dispatchEvent(new window.Event("change"));
+    document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+    assert.deepEqual(regions().map(target => [target.style.left,target.style.width]), [["10px","30px"],["100px","25px"]], "The gap between component content must not become a hit region");
+    assert.deepEqual(regions().map(target => target.tabIndex), [0,-1], "A component has one keyboard stop across its visible regions");
+    assert.deepEqual([...document.querySelectorAll<HTMLElement>(".screen-node")].map(target => target.dataset.index), ["1","1","2"], "The later sibling stays in front of every component region");
+    regions()[0]!.click(); document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+    assert.ok(regions().every(target => target.ariaPressed === "true"));
+    assert.equal(document.querySelector(".screen-resize"), null, "Component occurrence regions do not acquire direct resizing");
+    h.setCanvasFrame({geometry:[{start:30,x:12,y:20,width:30,height:40},{start:60,x:110,y:20,width:20,height:40}]});
+    const state = [...document.querySelectorAll("select")].find(input => input.ariaLabel === "Button state (sample)")!;
+    state.value = "hover"; state.dispatchEvent(new window.Event("change"));
+    await tick(); await tick(); document.querySelector("img")!.dispatchEvent(new window.Event("load"));
+    assert.equal(regions().length, 1, "An obsolete region must not remain clickable");
+    assert.equal(regions()[0]!.style.left, "12px");
+    assert.equal(h.calls.includes("screens.compose"), false, "Selecting component content never writes source or runs its actions");
+  } finally { h.dispose(); }
+});
+
 for (const [kind, fieldName, spelling, invalid] of [
     ["frame", "Width", "0x280", true],
     ["grid", "Columns", "2.0", true],
@@ -347,7 +381,7 @@ test("moving a frame with sibling content keeps the composite image stationary",
     handle.dispatchEvent(new window.PointerEvent('pointermove',{pointerId:1,clientX:36,clientY:36,bubbles:true}));
     assert.equal(document.querySelector<HTMLImageElement>('.screen-render')!.style.transform,'');
     assert.equal(document.querySelector<HTMLElement>('.screen-game')!.dataset.provisional,'guides');
-    assert.match(document.querySelector('.screen-canvas-status')!.textContent!,/Panel rendering is pending/);
+    assert.match(document.querySelector('.screen-canvas-status')!.textContent!,/Updating canvas\. Previous image is out of date\./);
   } finally {h.dispose();}
 });
 

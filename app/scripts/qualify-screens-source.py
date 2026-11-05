@@ -78,7 +78,7 @@ def retain_test_binary(text, output):
         binary = Path(row['executable'])
         destination = output / 'test-binary' / binary.name
         destination.parent.mkdir(exist_ok=True)
-        shutil.copyfile(binary, destination)
+        shutil.copy2(binary, destination)
         return {'name': binary.name, 'path': destination.relative_to(output).as_posix(),
                 'sha256': hashlib.sha256(destination.read_bytes()).hexdigest(), 'bytes': destination.stat().st_size}
     return None
@@ -162,7 +162,7 @@ def main():
             assert hashlib.sha256(binary.read_bytes()).hexdigest() == result['testBinary']['sha256']
             destination = output / result['testBinary']['path']
             destination.parent.mkdir(parents=True)
-            shutil.copyfile(binary, destination)
+            shutil.copy2(binary, destination)
         else:
             env = dict(os.environ, LOOMLIGHT_SCREEN_EVIDENCE=str(output / 'accepted-source.json'))
             text = run('core-dispatch', ['cargo', 'test', '-p', 'loomlight-core', '--locked', '--message-format=json',

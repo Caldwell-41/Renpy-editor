@@ -1,0 +1,13 @@
+/* Shared controls come from the production CSS imported by study.ts. */
+.screen-interactions-study .lp-main{padding:0}
+.screen-interactions-study .lp-content{display:flex;min-height:0;overflow:hidden}
+.screen-interactions-study .screens-editor{width:100%;min-width:0}
+
+/* Unapproved B/C disclosure experiments over the production controls. */
+.siv-worksheet .siv-step.button{display:flex;align-items:flex-start;justify-content:flex-start;text-align:left;border:0;border-left:2px solid transparent;background:transparent;padding:4px;min-height:28px;min-width:0;line-height:1.5}
+.siv-worksheet .siv-step[aria-pressed=true]{border-left-color:var(--accent-primary);background:var(--accent-subtle)}
+.siv-worksheet .siv-step>span:last-child{overflow-wrap:anywhere}
+.siv-worksheet .siv-step .siv-summary{flex:1;min-width:0}
+.siv-worksheet .siv-single-editor{grid-column:1/-1;padding:6px 0 2px 8px;border-left:2px solid var(--accent-primary)}
+.siv-workspace .siv-direct .siv-row-title{font-size:11px;line-height:1.4;margin:3px 0 7px;overflow-wrap:anywhere}
+.siv-workspace .siv-direct>.screen-text-field>select{font-weight:600}

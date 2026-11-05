@@ -248,17 +248,19 @@ impl AuthoringService {
         let metadata = ProjectMetadata::read_bytes(&project_bytes, None)
             .map_err(|_| SceneError::InvalidMetadata)?;
         let (map, _, _, _) = self.screen_metadata(project, &metadata.project_id)?;
-        let captured_inventory = if inventory.is_none()
-            && document
-                .screens
-                .iter()
-                .any(|s| s.nodes.iter().any(|n| n.kind == "use"))
-        {
+        let authoring = self
+            .screen_action_authoring(project, &metadata.project_id)
+            .ok();
+        document.authoring_revision = authoring.as_ref().map(|a| a.revision.clone());
+        let captured_inventory = if inventory.is_none() {
             Some(self.screen_inventory(project)?)
         } else {
             None
         };
         let inventory = inventory.or(captured_inventory.as_ref());
+        let panel_targets = inventory
+            .map(actions::qualified_panel_targets)
+            .unwrap_or_default();
         for screen in &mut document.screens {
             let owner = map
                 .owned_screens
@@ -313,7 +315,8 @@ impl AuthoringService {
                             text_properties: None,
                             style: None,
                             component: None,
-                            dismissal: None,
+                            actions: None,
+                            variable_bindings: None,
                             span: span.clone(),
                             parent_start: Some(parent.span.start),
                             properties: vec![],
@@ -384,26 +387,36 @@ impl AuthoringService {
                 // Qualify against raw action spans before removing supported protected details.
                 // Duplicate markers have already lost their IDs and cannot expose edit authority.
                 let qualified = references::qualified_interaction(owner, screen, bytes);
-                let dismissals: Vec<_> = screen
-                    .nodes
-                    .iter()
-                    .map(|node| {
-                        node.id.as_ref()?;
-                        let span = qualified.dismissals.get(&node.span.start)?;
-                        match &bytes[span.start..span.end] {
-                            b"Null()" => Some(ButtonDismissal::None),
-                            b"Return()" => Some(ButtonDismissal::FinishInteraction),
-                            _ if owner.kind == crate::metadata::OwnedScreenKind::Panel => {
-                                Some(ButtonDismissal::HideScreen)
-                            }
-                            _ => None,
-                        }
-                    })
-                    .collect();
-                for (node, dismissal) in screen.nodes.iter_mut().zip(dismissals) {
-                    node.dismissal = dismissal;
-                    node.protected
-                        .retain(|span| !qualified.spans.contains_key(&span.start));
+                let actions = actions::inspect_actions(
+                    owner,
+                    screen,
+                    bytes,
+                    authoring
+                        .as_ref()
+                        .map(|a| a.variables.as_slice())
+                        .unwrap_or(&[]),
+                    &panel_targets,
+                );
+                for node in &mut screen.nodes {
+                    node.actions = node
+                        .id
+                        .as_ref()
+                        .and_then(|_| actions.buttons.get(&node.span.start))
+                        .map(|b| b.actions.clone());
+                    node.variable_bindings = bindings::inspect_bindings(
+                        node,
+                        authoring
+                            .as_ref()
+                            .map(|a| a.variables.as_slice())
+                            .unwrap_or(&[]),
+                    );
+                    node.protected.retain(|span| {
+                        !qualified.spans.contains_key(&span.start)
+                            && actions
+                                .buttons
+                                .get(&node.span.start)
+                                .is_none_or(|b| b.statement_span.start != span.start)
+                    });
                 }
             }
         }

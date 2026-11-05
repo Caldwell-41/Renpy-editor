@@ -59,8 +59,10 @@ class ScreenEvidenceTests(unittest.TestCase):
             root = Path(temporary)
             binary = root / 'compiled-test'
             binary.write_bytes(b'fictional compiled binary')
+            binary.chmod(0o755)
             row = dict(reason='compiler-artifact', profile={'test': True}, executable=str(binary), target={'name': 'loomlight_core'})
             retained = gate.retain_test_binary(json.dumps(row) + '\ntest result: FAILED', root)
+            self.assertEqual((root / retained['path']).stat().st_mode & 0o111, binary.stat().st_mode & 0o111)
             self.assertEqual((root / retained['path']).read_bytes(), binary.read_bytes())
             self.assertEqual(retained['sha256'], hashlib.sha256(binary.read_bytes()).hexdigest())
 
