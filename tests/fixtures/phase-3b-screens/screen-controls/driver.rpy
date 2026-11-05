@@ -33,6 +33,7 @@ init python:
     import json as _sc_json
     import os as _sc_os
     import sys as _sc_sys
+    import pygame_sdl2 as _sc_pygame
 
     with open(_sc_os.path.join(config.basedir, "accepted-runtime.json"), "rb") as _sc_file:
         _sc_manifest_bytes = _sc_file.read()
@@ -128,6 +129,9 @@ init python:
         _sc_bar_range, _sc_bar_offset, _sc_bar_step = bar.value.range, bar.value.offset, bar.value.step
         button = _sc_control(renpy.display.behavior.ImageButton)
         saved_prefix = button.style.prefix
+        image_node = next(node for screen in _sc_manifest["document"]["screens"] for node in screen["nodes"]
+                          if node["id"] == _sc_manifest["imageButtonId"])
+        assets = {asset["id"]: asset for asset in _sc_manifest["sidecars"]["authoring"]["assets"]}
         # Exercise native six-state rendering without inventing selection/sensitivity actions.
         # These are engine appearance samples, separate from actual idle/hover input below.
         try:
@@ -136,10 +140,29 @@ init python:
                                   ("disabled", "insensitive_"), ("selectedDisabled", "selected_insensitive_")):
                 button.set_style_prefix(prefix, True)
                 renpy.display.render.invalidate(button)
+                # Match the established canvas-reference capture path. Invalidation
+                # schedules redraw; free_memory removes renders cached within this callback.
+                renpy.free_memory()
                 rendered = renpy.render(button, 160, 80, 0, 0)
                 pixels = renpy.render_to_surface(rendered, resize=True)
+                asset = assets[image_node["imageButtonAppearances"][state]["assetId"]]
+                relative = asset["relativePath"].removeprefix("game/")
+                reference = renpy.display.behavior.ImageButton(
+                    Transform(relative, xysize=(160, 80)), action=Null(), xsize=160, ysize=80)
+                reference.per_interact()
+                reference.set_style_prefix(prefix, True)
+                renpy.free_memory()
+                reference_pixels = renpy.render_to_surface(reference, 160, 80, resize=True)
+                raw_image = _sc_pygame.image.load(_sc_os.path.join(config.gamedir, relative))
+                name = "%dx%d-%s-%s" % (config.screen_width, config.screen_height, _sc_case, state)
+                captures = _sc_os.environ["LOOMLIGHT_CONTROLS_CAPTURE_DIR"]
+                _sc_pygame.image.save(pixels, _sc_os.path.join(captures, name + "-actual.png"))
+                _sc_pygame.image.save(reference_pixels, _sc_os.path.join(captures, name + "-reference.png"))
                 _sc_appearances.append(dict(state=state, renderedSize=list(rendered.get_size()),
-                                           rgba=list(pixels.get_at((80, 40)))))
+                    rgba=list(pixels.get_at((80, 40))), referenceRGBA=list(reference_pixels.get_at((80, 40))),
+                    sourceRGBA=list(raw_image.get_at((40, 20))),
+                    pixelsSHA256=_sc_hashlib.sha256(_sc_pygame.image.tostring(pixels, "RGBA")).hexdigest(),
+                    referenceSHA256=_sc_hashlib.sha256(_sc_pygame.image.tostring(reference_pixels, "RGBA")).hexdigest()))
         finally:
             button.set_style_prefix(saved_prefix, True)
             renpy.display.render.invalidate(button)

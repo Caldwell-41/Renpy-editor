@@ -341,3 +341,39 @@ scopes under Kris's explicit publication authorization. Both issues remain open.
 Production frontend work still waits for exact design approval and the designer's
 direct handoff. Runtime-observer preparation continues independently, through the
 already approved deliberate pinned-SDK and normal-play seams.
+
+## Runtime qualification preparation and first rejection, 2026-11-06
+
+Parent qualification driver `4894868f` adds an offline committed-source producer,
+retained-binary admission and a reserved seven-process SDK matrix. Nine initial
+admission tests and four explicit retained-export checks passed. The first producer
+attempt failed because the process PATH put Git's Unix `link.exe` before MSVC.
+Appending that existing directory after the development environment fixed the
+environment error. No SDK started in either producer attempt.
+
+The integrated producer then passed in 162.875s, retaining its binary and fifteen
+accepted files. Candidate is `4894868face68a6635a41a0c561eeb934eaf9b7f`;
+manifest SHA256 is `3dc54f9315da5712cd51117388fcbe28a87fb97dfdce6a3c13bd24b31f632b05`.
+Preparation and validation are retained under the ignored `controls-51-52` output.
+
+The first SDK selection consumed four starts. Version, compile, lint and 1280x720
+normal play exited 0. All ten engine assertions passed: initial value 0, lower -5,
+upper 15, keyboard step 14, and exactly one accepted SetVariable/Hide/Return chain
+ending with value 7 and one Story continuation. The parent evidence gate failed.
+It incorrectly rejected exact float-valued geometry (320.0x24.0). Inspection also
+showed the six appearance samples reading the first state's cached pixels. None
+of this run is promoted to completed runtime qualification.
+
+The observer correction accepts numerically exact geometry while still rejecting
+booleans, uses the established `free_memory` capture boundary, and compares each
+full state image to an independent native reference using its accepted asset.
+PNG source colors remain independently bound; native readback must match exactly
+and all six rendered hashes/colors must remain distinct. Captures are retained and
+rehashed from their decoded RGBA bytes. No pixel tolerance is introduced. New
+red/green gate tests cover valid float geometry and matched native readback while
+rejecting wrong/aliased source, state, geometry and pixel evidence. Ten gate tests
+pass. The next SDK run must establish whether the capture correction works.
+
+#51 records cumulative Windows SDK use 4/16, all other target/type counts zero,
+no uncertain starts and complete process/scratch cleanup. The unused three-start
+reservation was released. Original logs and failed result stay retained.

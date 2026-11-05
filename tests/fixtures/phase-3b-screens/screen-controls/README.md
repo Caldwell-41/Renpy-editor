@@ -12,8 +12,10 @@ input reaches the bar's lower and upper limits, changes it by one keyboard step,
 then activates the image button once. The action must set the bound variable to
 7, hide the Panel and finish the Dialog once.
 
-Six native state-prefix renders must produce the accepted PNG colors at the
-authored 160x80 displayed size. These are engine appearance samples. Actual
+Six native state-prefix renders must match independent native references using
+the accepted PNG for each state at the authored 160x80 size. Full RGBA pixel
+hashes must agree exactly; six distinct source colors and distinct rendered
+states are required. Captures are retained. These are engine appearance samples. Actual
 pointer input separately checks idle and hover. Sampling must leave variables
 and action-call counts unchanged. This does not claim naturally selected or
 disabled runtime conditions, physical input, or native editor preview routing.

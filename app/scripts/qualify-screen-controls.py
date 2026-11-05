@@ -289,14 +289,40 @@ def validate_runtime_output(text, case, manifest_sha, manifest, resolution, colo
                     bar=[dict(step=step, value=value) for step, value in
                          [('initial', '0'), ('minimum', '-5'), ('maximum', '15'), ('keyboard', '14')]],
                     barSize=[320, 24], barRange=20, barOffset=-5, barStep=1,
-                    appearances=[dict(state=state, renderedSize=[160, 80], rgba=colors[state])
-                                 for state in STATES],
                     actualPrefixes=['idle_', 'hover_'], finalValue='7', followingCount=1,
                     doneCount=0, panelVisible=False, dialogVisible=False)
-    # JSON comparison distinguishes booleans from numeric evidence.
+
+    def same(actual, wanted):
+        if type(wanted) is int:
+            return type(actual) in (int, float) and actual == wanted
+        if type(wanted) is list:
+            return type(actual) is list and len(actual) == len(wanted) and all(
+                same(left, right) for left, right in zip(actual, wanted))
+        if type(wanted) is dict:
+            return type(actual) is dict and set(actual) == set(wanted) and all(
+                same(actual[key], value) for key, value in wanted.items())
+        return type(actual) is type(wanted) and actual == wanted
+
     for key, value in expected.items():
-        require(key in row and json.dumps(row[key], sort_keys=True) == json.dumps(value, sort_keys=True),
+        require(key in row and same(row[key], value),
                 'wrong observed controls runtime field: ' + key)
+    appearances = row.get('appearances')
+    require(type(appearances) is list and len(appearances) == 6, 'missing native state appearances')
+    rendered_hashes = set()
+    rendered_colors = set()
+    for state, appearance in zip(STATES, appearances):
+        require(appearance.get('state') == state and same(appearance.get('renderedSize'), [160, 80])
+                and same(appearance.get('sourceRGBA'), colors[state]), 'wrong state source/size')
+        rgba = appearance.get('rgba')
+        require(type(rgba) is list and len(rgba) == 4 and all(type(channel) is int and 0 <= channel <= 255
+                for channel in rgba) and rgba[3] > 0 and rgba == appearance.get('referenceRGBA'),
+                'native state color differs from independent native reference')
+        sha = appearance.get('pixelsSHA256')
+        require(isinstance(sha, str) and re.fullmatch('[a-f0-9]{64}', sha)
+                and sha == appearance.get('referenceSHA256'), 'native state pixels differ from reference')
+        rendered_hashes.add(sha)
+        rendered_colors.add(tuple(rgba))
+    require(len(rendered_hashes) == len(rendered_colors) == 6, 'cached/aliased native state appearances')
     return row
 
 
@@ -441,8 +467,14 @@ def qualify_sdk(args):
         sdk = temporary / 'sdk/renpy-8.5.3-sdk'
         game = temporary / 'game-project'
         stage_game(prepared / 'accepted', manifest, game)
+        captures = output / 'captures'
+        captures.mkdir()
         env = dict(os.environ, RENPY_PATH_TO_SAVES=str(temporary / 'saves'), SDL_AUDIODRIVER='dummy',
+                   RENPY_RENDERER='angle2' if sys.platform == 'win32' else 'gl2', RENPY_SCALE_FACTOR='1',
+                   LOOMLIGHT_CONTROLS_CAPTURE_DIR=str(captures),
                    PYTHONDONTWRITEBYTECODE='1', TMPDIR=str(temporary), TMP=str(temporary), TEMP=str(temporary))
+        env.pop('SDL_VIDEODRIVER', None)
+        env.pop('SDL_RENDER_DRIVER', None)
 
         def run(name, command, timeout):
             return process.run_sdk_logged(result, output, name, command, sdk, env, timeout)
@@ -457,8 +489,15 @@ def qualify_sdk(args):
                 name = f'{resolution[0]}x{resolution[1]}-{case}'
                 text = run(name, command_argv(sdk, Command.TEST, game,
                            testcase='screen_controls::' + case, allow_project_execution=True), 75)
-                result['runtimeObserved'].append(validate_runtime_output(
-                    text, case, result['manifestSHA256'], manifest, resolution, colors))
+                observed = validate_runtime_output(text, case, result['manifestSHA256'], manifest, resolution, colors)
+                from PIL import Image
+                for appearance in observed['appearances']:
+                    for kind, field in (('actual', 'pixelsSHA256'), ('reference', 'referenceSHA256')):
+                        path = portable_file(captures, f'{name}-{appearance["state"]}-{kind}.png')
+                        with Image.open(path) as image:
+                            require(image.size == (160, 80) and hashlib.sha256(image.convert('RGBA').tobytes()).hexdigest()
+                                    == appearance[field], 'retained state capture differs from observation')
+                result['runtimeObserved'].append(observed)
                 require(all(digest(game / path) == sha for path, sha in hashes.items()), 'accepted controls source changed')
         process.validate_process_checks(result['checks'], ['sdk-version', 'sdk-compile', 'sdk-lint']
             + [f'{width}x{height}-{case}' for width, height in RESOLUTIONS for case in CASES])

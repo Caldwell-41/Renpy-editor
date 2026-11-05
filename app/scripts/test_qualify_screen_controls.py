@@ -146,8 +146,10 @@ class RuntimeAdmissionTests(unittest.TestCase):
                         bar=[dict(step=step, value=value) for step, value in
                              [('initial', '0'), ('minimum', '-5'), ('maximum', '15'), ('keyboard', '14')]],
                         barSize=[320, 24], barRange=20, barOffset=-5, barStep=1,
-                        appearances=[dict(state=state, renderedSize=[160, 80], rgba=self.colors[state])
-                                     for state in gate.STATES],
+                        appearances=[dict(state=state, renderedSize=[160, 80], rgba=self.colors[state],
+                                          referenceRGBA=self.colors[state], sourceRGBA=self.colors[state],
+                                          pixelsSHA256=str(index) * 64, referenceSHA256=str(index) * 64)
+                                     for index, state in enumerate(gate.STATES)],
                         actualPrefixes=['idle_', 'hover_'], finalValue='7',
                         followingCount=1, doneCount=0, panelVisible=False, dialogVisible=False)
 
@@ -160,6 +162,16 @@ class RuntimeAdmissionTests(unittest.TestCase):
     def test_runtime_requires_bound_engine_results_limits_state_pixels_and_real_action_calls(self):
         self.assertEqual(gate.validate_runtime_output(
             self.output(), 'normal', self.sha, self.manifest, [1280, 720], self.colors), self.row)
+
+    def test_exact_float_geometry_and_matched_native_readback_colors_are_valid(self):
+        self.row['barSize'] = [320.0, 24.0]
+        for appearance in self.row['appearances']:
+            appearance['renderedSize'] = [160.0, 80.0]
+            # Readback can differ from PNG channels. The independent native
+            # reference must agree exactly, with no tolerance or state aliasing.
+            appearance['rgba'] = [value - 1 if value > 0 else 0 for value in appearance['rgba']]
+            appearance['referenceRGBA'] = appearance['rgba'][:]
+        gate.validate_runtime_output(self.output(), 'normal', self.sha, self.manifest, [1280, 720], self.colors)
 
     def test_missing_skipped_or_incomplete_runtime_proof_refuses(self):
         variants = [self.output().replace('1 passed', '0 passed'),
@@ -174,6 +186,10 @@ class RuntimeAdmissionTests(unittest.TestCase):
             lambda row: row['bar'][1].update(value='-4'),
             lambda row: row['appearances'][0].update(renderedSize=[80, 40]),
             lambda row: row['appearances'][1].update(rgba=self.colors['normal']),
+            lambda row: row['appearances'][1].update(pixelsSHA256='f' * 64),
+            lambda row: row['appearances'][1].update(sourceRGBA=self.colors['normal']),
+            lambda row: row['appearances'][1].update(referenceRGBA=self.colors['normal']),
+            lambda row: row['appearances'][1].update(pixelsSHA256='0' * 64, referenceSHA256='0' * 64),
             lambda row: row.update(followingCount=0),
             lambda row: row.update(finalValue='0'),
             lambda row: row.update(builtinsUnmodified=False),

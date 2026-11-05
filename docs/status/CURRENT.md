@@ -16,8 +16,10 @@ are integrated at `b23bbcc9`; the editor worktree is at that checkpoint.
 
 The editor agent opened the requested separate Sol 6.1 xhigh design chat. Production
 UI waits for exact design approval and a direct handoff to that implementer.
-Coordinator runtime qualification preparation continues independently. #51 owns
-combined capped-operation accounting; all counts are zero. Windows/macOS proof,
+Coordinator runtime qualification continues independently. The first Windows
+case passes engine assertions but fails the capture evidence gate; its observer
+correction is awaiting a new run. #51 owns combined capped-operation accounting;
+Windows SDK use is 4/16 and all other counts are zero. Windows/macOS proof,
 combined review and all original criteria remain pending. [Evidence](../tasks/evidence/bars-and-image-buttons.md)
 records contracts and ownership. #54 and broader Phase 3B acceptance remain separate.
 Issue-state/limit updates to #51/#52 are authorized; code publication/PR/merge are not.
