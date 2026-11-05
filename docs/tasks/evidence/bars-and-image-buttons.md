@@ -140,6 +140,27 @@ single alias in the canvas implementation. The old enum must be removed, not ret
 as a parallel state contract. Existing text-button sample mappings also gain the
 two explicit selected states. Node fields remain nullable as agreed above.
 
+For the sole prospective control addition, separate numeric `layouts` entries target
+the existing synthetic start convention: one plus the maximum node `span.end` in
+the selected accepted screen. This is not the whole file's byte length. Core defers
+that layout entry until preparing the addition against its final parent, rejects
+competing dimension edits, and refuses duplicate/synthetic targets without the
+matching sole addition. The editor retains placement preview before Apply. Existing
+ordinary image/composition additions use the same selected-screen byte-span convention.
+
+Pinned-SDK source inspection shows that image-button bounds do not scale its child
+images. The qualified writer therefore uses a bounded literal
+`Transform(path, xysize=(width, height))` for each explicit appearance, mirrored as
+validated data by the helper. Every supported size-write path must update those
+state dimensions through the same owner or refuse without writes; a bounds-only
+success is invalid. Plain paths must retain their native unscaled semantics or
+remain outside the editable mapping rather than receive a scaled canvas substitute.
+
+Native optional fallbacks are hover/disabled/selected to normal, selected-hover to
+hover then normal, and selected-disabled to disabled then normal. Selected-hover
+does not fall back to selected. The coordinator sent these mappings to core, editor
+and designer before approval. No DTO or process behavior changes are needed.
+
 The coordinator reviewed these shapes against the existing composition, action,
 image-draft and layout owners. A concrete implementation conflict still returns to
 the coordinator before any schema change. This checkpoint authorizes schema-dependent
@@ -205,3 +226,19 @@ The next red/green admission slice adds the exact twelve-plan matrix: six states
 The seven focused tests now pass, including refusal of incomplete/duplicate matrices,
 stale requests, partial plans, wrong states and missing controls. This still proves
 only admission behavior, not actual producer output or rendered pixels.
+
+### Prototype browser capability failure
+
+The designer reports one Terra review attempt, not two. It opened no prototype and
+performed no interactions or viewport checks. The shared preview tool refused a
+`file:` URL; the in-app browser was unavailable; native app selection then timed out
+waiting for Computer Use approval. Module/export/fallback checks and successful
+inline HTML rendering remain separate from that failed review.
+
+The coordinator's attempt to cancel the replaced Terra task was refused because only
+the owning design thread can cancel it. That owner was instructed to retire its old
+task/approval wait and preserve the failure receipt. A separately scoped second
+Terra attempt may operate a bounded temporary DOM-test HTML copy through
+`html_preview`, without a server or native-browser retry. Any successful result is
+synthetic DOM/inline-browser evidence, not trusted native input or a whole Design Lab
+pass. No user design approval or production UI implementation is inferred.
