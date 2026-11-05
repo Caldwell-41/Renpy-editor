@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "screenId": "screen-interactions",
+  "currentApproved": null,
+  "revisions": [
+    {
+      "id": "inspector-v1",
+      "variantId": "inspector-v1",
+      "approval": null
+    },
+    {
+      "id": "worksheet-v1",
+      "variantId": "worksheet-v1",
+      "approval": null
+    },
+    {
+      "id": "workspace-v1",
+      "variantId": "workspace-v1",
+      "approval": null
+    },
+    {
+      "id": "inspector-v2",
+      "variantId": "inspector-v2",
+      "approval": null
+    },
+    {
+      "id": "worksheet-v2",
+      "variantId": "worksheet-v2",
+      "approval": null
+    },
+    {
+      "id": "workspace-v2",
+      "variantId": "workspace-v2",
+      "approval": null
+    }
+  ]
+}
