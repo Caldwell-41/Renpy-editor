@@ -800,3 +800,36 @@ A hung DOM-object assertion-formatting run was canceled; the owner reports drive
 exit and fixture cleanup. It is not a pass. A boolean focus assertion exposed a
 happy-dom property/attribute mismatch under correction; no native behavior is
 inferred from that harness issue. No SDK/helper/native start was made.
+
+## Authorized private recovery and source catalog restored, 2026-11-06
+
+Kris explicitly authorized task-scoped private, hash-verified T3 transfers after
+the recorded automatic-review refusal. This covers the existing recovery bundle
+and committed #51/#52 qualification candidates between the linked Mac and Windows,
+with no public upload or server. The earlier refusal remains historical evidence;
+it no longer blocks this exact authorized route.
+
+The first 4096-byte probe passed byte and SHA256 verification. The Mac then emitted
+28 machine-readable chunks through existing T3 command-execution results. The
+coordinator parsed the results directly, verified every chunk hash and contiguous
+offset, and reassembled exactly 909568 bytes. The complete bundle SHA256 matches
+the previously recorded source receipt and `git bundle verify` passes. All 28
+activity results were complete, with no truncation. Ignored transfer receipts
+retain the exact machine payload identities and full hash.
+
+The five bundle refs were fetched only into the new owned namespace
+`refs/recovery/51-52-design-catalog/`. Existing refs, approval records and checkout
+files were preserved. All five previously absent commits now resolve. The actual
+`loadApprovalRecords` gate passes all 25 records and 12 approved revisions, checking
+historical source fingerprints and retained captures. This clears the missing-object
+blocker. The full lab browser gate, current production fidelity and functional
+acceptance remain separate and pending. No capped operation was started.
+
+The frontend owner subsequently reports real UI/core coverage for canonical bar
+bounds, real picker references, six-state Transform/action/layout writes, action
+focus, missing assets, layout-only revision capture, no-op/history, keyboard sizing
+and reopen. A five-second UI settle expired while real compose took 4.811 seconds
+plus target refresh; it is not a passing run or a performance qualification.
+The owner aligned the bound with the existing fifteen-second transport and then
+found a delayed-authoring admission lock defect. Preparation reservation is under
+focused verification. Draft-copy/recovery, visual checks and final review remain.

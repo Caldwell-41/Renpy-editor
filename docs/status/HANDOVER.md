@@ -60,13 +60,16 @@ Initial readiness completed with verified Sol 6.1 xhigh settings. No capped oper
 requested. The Windows SDK archive matches its published pin.
 
 Next actions are the frontend owner's real UI/core slices and coordinator-owned
-recovery of five exact historical design sources. The approved reference remains
-pinned in the designer worktree. Mac prepared a verified 909568-byte recovery
-bundle containing all five exact sources. Automatic approval review rejected a
-private-byte transfer probe and its retry because payload/destination were not
-explicitly authorized. No payload moved. A transfer-authorization question is
-pending; do not retry/export through another route until answered. Continue the
-frontend work independently. The coordinator alone imports the new lab/records
+global lab browser gate. The approved reference remains pinned in the designer
+worktree. After the recorded automatic-review refusal, Kris explicitly authorized
+task-scoped private, hash-verified T3 transfers for recovery and qualification.
+The 909568-byte recovery bundle arrived in 28 checked chunks; its complete SHA256
+and Git verification pass. All five missing source objects are imported under
+`refs/recovery/51-52-design-catalog/`, preserving existing refs and checkout files.
+The actual catalog loader passes 25 records and 12 approved revisions, including
+historical source fingerprints and retained capture hashes. The browser gate is
+still pending. Continue the frontend work independently.
+The coordinator alone imports the new lab/records
 and registry registration; the frontend worker owns production files/tests and must
 not duplicate that import. Do not copy older shared DTOs from the design branch.
 Council scores do not substitute for the verified human decision. No fourth round is selected;
@@ -74,7 +77,8 @@ promotion records/checks must retain their actual status. The Mac readiness chat
 <t3-thread://v2/c95d26c7-af8c-4ab0-8c95-a45fdca2dfe6/mcp:launch:aed218e73e07211906bdf413f41978e96efe3ae09756ac17e0c6842d8b443ee7>.
 Read its completed report through the linked environment; the reverse report send
 to Windows was denied, so do not rely on an automatic parent notification.
-It owns only read-only readiness until an exact candidate handoff/reservation.
+Its completed recovery export changed no source or existing refs. Actual Mac
+qualification still waits for an exact candidate handoff and capped reservation.
 The SDK archive and pinned ordinary tools are ready. The follow-up located existing
 Python 3.12.16/Pillow 12.3.0 under the project root's
 `.toolchains/l07-shared-look/final-review-python/bin/python3`; select it explicitly

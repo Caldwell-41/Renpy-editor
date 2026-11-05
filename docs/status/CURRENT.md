@@ -23,10 +23,11 @@ All three authorized council rounds are complete. R3 on `0263728d` scored Sol 9/
 and Opus 8.5/10; the latter's conditional 9 is not a rescore. Corrected source
 `37d29ca1` was not rescored after correction; its approval does not invent a score.
 No fourth council is selected. Source `0a6e571e` and its earlier proof stay pinned.
-The global catalog gate is blocked by five missing historical source objects;
-all five are available in a verified Mac recovery bundle. Export to Windows awaits
-explicit private-transfer authorization after automatic approval review rejected
-the payload transfer. Frontend implementation proceeds independently.
+Kris authorized task-scoped private T3 transfers. The verified recovery bundle is
+imported under a dedicated local Git namespace, preserving the checkout and existing
+refs. All five missing source objects are recovered; the catalog loader now passes
+all 25 records and 12 approved revisions, including fingerprints and capture hashes.
+The global browser gate remains pending. Frontend implementation proceeds independently.
 The corrected Windows observer passes; both earlier failed campaigns stay recorded.
 #51 owns combined capped-operation accounting; Windows SDK use is 12/16 and all
 other counts are zero, with no reservation pending. Remaining Windows/macOS proof,
