@@ -6,7 +6,8 @@ Continue in this thread on `codex/47-50-integration`,
 [draft PR #81](https://github.com/Caldwell-41/Renpy-editor/pull/81), targeting
 `codex/phase3b-screen-designer`. Kris selected completing the remaining work and
 reconciling #47/#50, then updating the draft. Both tickets remain open/unaccepted.
-CI stays deferred; no merge or closure is selected. Preserve the unrelated audit,
+Kris approved one extra eight-start Mac campaign and planned quality/harness CI.
+No merge or closure is selected. Preserve the unrelated audit,
 committed guide updates, all worktrees and unique receipts.
 
 Published implementation `159a8c036002939ee40b682b1ce3241a99c680aa` corrects the
@@ -37,12 +38,14 @@ and suppresses its inner duplicate. Full capture-entry red/green reproduces the
 No product renderer/core/UI change occurred. No old geometry was normalized and
 no fresh engine pass is claimed for this correction.
 
-#47 alone owns cumulative operation accounting. The campaign ceiling is exhausted,
-all actual starts are resolved, and no reservation or worker/process is pending.
-A coherent fresh Mac normal/helper comparison needs eight SDK starts and an
-explicit extension of that ceiling before execution. Recheck desktop admission
-through the established unsandboxed route; retain the existing desktop/process
-owners and zero pixel/geometry tolerance. No package/native-editor/CI is assigned.
+#47 alone owns cumulative operation accounting. Kris approved extending the
+campaign ceiling by one and selecting the fresh eight-start Mac normal/helper
+comparison plus planned quality/harness CI. All earlier starts are resolved.
+Freeze the approval-record candidate after `9797e522`, record its exact identity
+and reservation in #47, then assign a fresh T3-isolated Terra Max test owner.
+Recheck desktop admission through the established unsandboxed route; retain the
+existing desktop/process owners and zero pixel/geometry tolerance. No Windows
+SDK/package/native-editor operation is assigned by this increment.
 
 Windows remains blocked on isolated T3 provisioning. The failed thread and its
 read-only diagnostic retain no actual Git arguments/destination/exit/stderr.
@@ -50,8 +53,10 @@ No blind retry, shell-created child checkout or existing-worktree takeover is
 selected. Corrected source transfer is authorized after a supported binding.
 Original approved A source `7090a03`, fingerprint and ten captures remain pinned;
 never replace or rebase that reference. Broader native/package/human and CI proof
-remain separate. Next action is the user's campaign-extension/CI decision after
-reviewing the updated draft. Older unique recovery retains its size exception.
+remain separate. Next, record exact CI runs/attempt/head and the Mac delegate,
+register the T3 PR watcher and audit callbacks in this thread. The
+[approved execution record](../tasks/evidence/screen-actions-and-nested-canvas.md#approved-campaign-4-and-ci-2026-11-05)
+supersedes the earlier approval blocker. Older unique recovery retains its size exception.
 
 ## PR 79 merge and workspace closeout
 

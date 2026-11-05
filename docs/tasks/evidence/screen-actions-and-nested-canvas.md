@@ -5,6 +5,31 @@
 acceptance, authorization and operation accounting. This file retains implementation
 checkpoints and detailed verification. No criterion is accepted by this entry.
 
+## Approved campaign 4 and CI, 2026-11-05
+
+Kris approved one additional Mac qualification campaign with eight SDK starts and
+the planned Repository quality plus both-target harness CI checks. This supersedes
+the prior CI deferral and exhausted-three-campaign next action. #47 owns the
+extended cumulative ceiling and reservation; per-target limits are unchanged.
+No Windows SDK, package or native-editor operation is assigned by this increment.
+
+The producing candidate is the approval-record commit after qualification fix
+`9797e522`; its executable inputs are unchanged from that fix. A fresh T3-isolated
+Terra Max test owner must verify exact HEAD, export/replay corrected accepted
+source, pass five offline gates and positive unsandboxed desktop admission, then
+run four normal SDK starts and three adapter starts plus one helper. Compare both
+aspects at zero pixel/geometry tolerance. Stop at the first execution failure;
+retain all residuals and complete source/process/profile/desktop cleanup receipts.
+No failed earlier result is relabelled.
+
+The existing validation plan selects automatic Repository quality and the exact
+Windows/macOS harness jobs from manual `quality.yml` with
+`harness_regressions=true`. Publish this candidate without a skip marker, dispatch
+that isolated selector once, record exact run/attempt/head identities and audit
+all required jobs/artifacts and `Loomlight validation`. These baseline CI checks
+do not replace Windows runtime/nested or native/package acceptance. Use the T3
+watcher for CI and the delegate completion callback for Mac; no model polling.
+
 ## Campaign 3 comparison and recorder correction, 2026-11-05
 
 Mac producing candidate `392d049bf2114b73a33fa3e384b70dac39e582c5`, tree

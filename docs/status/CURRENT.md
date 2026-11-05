@@ -14,10 +14,12 @@ reference and renderer remain unchanged. Both tickets remain open/unaccepted.
 | Nested component canvas | Mac normal/helper captures at `392d049b` match every pixel at both aspects | Geometry comparison failed; recorder correction passes five offline gates, needs fresh engine proof; Windows remains unrun |
 
 Mac residuals exposed a normal-recorder sizing-wrapper defect, now corrected
-without product changes. The original comparison remains failed. #47 owns the
-exhausted campaign ceiling; no further SDK starts or reservations are selected.
+without product changes. The original comparison remains failed. Kris approved one extra eight-start Mac
+campaign and the planned quality/harness CI; #47 owns the extended ceiling and
+reservation.
 Windows still lacks supported isolated provisioning and useful Git diagnostics.
-CI remains deferred. [Current comparison and diagnosis](../tasks/evidence/screen-actions-and-nested-canvas.md#campaign-3-comparison-and-recorder-correction-2026-11-05)
+[Current approval and execution](../tasks/evidence/screen-actions-and-nested-canvas.md#approved-campaign-4-and-ci-2026-11-05)
+supersedes the CI deferral. [Current comparison and diagnosis](../tasks/evidence/screen-actions-and-nested-canvas.md#campaign-3-comparison-and-recorder-correction-2026-11-05)
 owns exact candidates, residuals, cleanup and the required next decision. Preserve
 unrelated work and unique receipts. Historical recovery below retains this file's
 existing size exception.
