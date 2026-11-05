@@ -25,8 +25,11 @@ Browser/desktop operation uses Terra 6.1 max. Core work may continue during desi
 and [detailed evidence](../tasks/evidence/bars-and-image-buttons.md) records contracts,
 worker checkout identities and readiness. All SDK/helper/package/native counts are
 zero; no reservation is pending. Windows x64 and macOS ARM64 qualification remain
-required. The linked Mac project was identified; its actual checkout/toolchain must
-be checked before execution. The Windows SDK archive matches its published pin.
+required. The linked Mac project was identified, but its isolated readiness delegation
+was refused before task creation because T3 does not support linked-environment
+worktree isolation for delegates. A separately authorized top-level Mac qualification
+chat is required for that isolated checkout; the coordinator has requested it. No
+remote/capped operation started. The Windows SDK archive matches its published pin.
 
 The user separately authorized execution-state/limit updates to #51/#52 after the
 initial automatic review rejection. Those updates succeeded. Code and evidence are

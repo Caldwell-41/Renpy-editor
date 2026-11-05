@@ -162,3 +162,14 @@ pre-existing untracked recovery receipts, `source-import-receipt.json` and
 artifact failure, not a pass or a product defect. Tracked-source validation is
 selected separately for this checkpoint; clean-candidate validation remains required
 at integration. The new wire types pass TypeScript checking and Rust formatting.
+
+### Linked Mac preparation refusal
+
+The linked Mac reports macOS ARM64 and a matching registered repository. An attempted
+read-only readiness delegation with `isolation: worktree` was refused by T3 before
+creating a task: linked-environment delegation runs in the project's checkout and
+does not support that isolation. T3 requires a separate top-level chat with a worktree
+workspace strategy. No remote process, source edit or capped operation started.
+The coordinator requested authorization for that separate Mac qualification chat;
+local core/design work continues independently. No shared-checkout substitute or
+shell-created child worktree was used.
