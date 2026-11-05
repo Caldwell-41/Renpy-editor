@@ -127,6 +127,39 @@ shared-record, engine/native/package/CI or publication work occurred in this lan
 The Lab promotion gate, production integration, final combined checks and review
 remain pending. This is neither an integrated pass nor ticket acceptance.
 
+### Lab gate passed and production completion assigned
+
+The full offline Lab check at `19dd16b`, tree
+`3317e75913d333750941809e21d6f2779b6ab2d5`, passed all 1,456 registered cases
+across 24 screens, all 23 interaction modules, 11 actual approval/source refusals
+and seven post-matrix groups. There were no errors or skipped checks. The two
+harness-only fixes require visible alerts and update an obsolete Shared Look
+refusal message. No presentation/fixture/source pointer changed. Original locator
+and full-check failures remain retained in `t3-09c0ef62` under ignored
+`.toolchains/47-50-lab-harness/`. The coordinator audited both patches, exact
+complete report counts and clean producing checkout. Report SHA256 is
+`502543e825d3413c05471fc684069114c43ebd65b354dfc0f7a4097cf57504e2`;
+identity/results receipt SHA256 is
+`2ee1eae313b1047516f8a3676f7ada6736dfd63a86a9ee119966582405590dce`.
+Pinned Node/npm/Chrome ran offline with no registry requests. Owned browser/server
+processes exited while preexisting servers survived.
+
+The harness fixes integrate as `eea25ba`/`86bccfc`. Core removal `a811c26` integrates
+as `ff98d4d` to prepare the shared canonical-action base. The current frontend is
+temporarily incompatible until its paired migration returns; this is an internal
+checkpoint, not a usable/accepted combined result.
+
+Tracing the approved controls identified two remaining backend gaps. Insert
+variable replaces the selected range inside ordinary text, while the current
+binding owner supports only a whole-text placeholder. The selected Apply footer
+also owns text/appearance and action edits together. Their implementation must use
+the same composition transaction and create one history entry. A backend lane
+extends those existing owners; a frontend lane owns approved A controls and all
+affected frontend callers/tests. No second text parser, action writer or history
+owner is introduced. Exact shared contract and exclusive file scopes are supplied
+in both assignments. Production fidelity, real UI-to-core proof, final suites,
+candidate-bound engine/platform checks and final review remain pending. CI stays off.
+
 ### Source/actions verification and target eligibility
 
 The source/actions verifier returned a clean checkout at

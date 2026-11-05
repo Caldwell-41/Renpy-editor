@@ -3,7 +3,8 @@
 Kris approved A on 2026-11-05 with the exact decision "A is approved". No reason
 or acceptance waiver was stated. `inspector-v2` is the current approved design;
 B, C and all v1 revisions remain drafts. This records design authority, not ticket
-acceptance. Promotion verification remains blocked as described below.
+acceptance. The original promotion verification blocker described below was later
+cleared by a separate harness candidate; see [VERIFICATION](VERIFICATION.md).
 
 ## Reproducible reference
 

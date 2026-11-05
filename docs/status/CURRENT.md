@@ -27,14 +27,14 @@ repository checks. These results retain their candidate and offline scope.
 Kris approved A on 2026-11-05 with "A is approved". Source `7090a03` and its full
 fingerprint remain pinned; approval/capture evidence is `a0535ae`. Both are now
 integrated without altering the reference worktree. This approves design only.
-The required full Lab check remains open after an ambiguous error locator and
-earlier environment/output failures. A separate harness lane corrects and verifies
-it; a core lane migrates the legacy dismissal adapter independently. Production
-controls follow the Lab gate. Preserve the approved source and all rejected/draft
+The full offline Lab check passed at harness candidate `19dd16b`: 1,456 cases,
+23 interaction modules and all approval/source protections. Earlier failures remain
+recorded. Harness fixes integrate as `eea25ba`/`86bccfc`; core migration `a811c26`
+integrates as `ff98d4d`. Production control migration is now assigned together with
+the required mixed-text and atomic Apply backend completion. This is an incomplete
+integration checkpoint until those lanes return. Preserve the approved source and all rejected/draft
 variants. Tailscale-only delivery and exclusion of prototype-review remain binding.
 Final combined suites and independent Standards/Spec review follow integration.
-Core migration `a811c26` is ready with 43 focused passes and remains in its lane
-until the frontend counterpart is ready for combined integration.
 [Current evidence and criterion gaps](../tasks/evidence/screen-actions-and-nested-canvas.md#resumed-delivery-2026-11-05)
 own exact assignments, receipts and remaining work.
 

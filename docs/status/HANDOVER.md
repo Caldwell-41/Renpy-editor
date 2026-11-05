@@ -4,7 +4,7 @@
 
 Kris resumed #47/#50 on 2026-11-05 and selected a draft PR after combined spec
 verification and final review. CI is explicitly deferred. Production UI remains
-unassigned until the remaining Lab verification gate passes. Kris explicitly
+selected for integration after the Lab verification gate passed. Kris explicitly
 approved A (`inspector-v2`) and its direct handoff has arrived. Both tickets remain
 in progress and unaccepted.
 
@@ -43,13 +43,15 @@ Standing computer-use authority remains valid. Exact current chat/worker identit
 commands, hashes and original-criterion gaps are in the
 [resumption evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#resumed-delivery-2026-11-05).
 
-Next, finish the failed/incomplete full Design Lab check in a separate candidate
-while preserving the approved source. The ambiguous visible/hidden error locator
-is a harness defect; prior failures remain recorded. Core migration `a811c26` is
-complete in `t3-4dbbc9c4`, with 43 focused passes and no remaining scoped finding
-after coordinator audit. Hold it for combined frontend integration; applying it
-alone breaks legacy controls and their tests. After the Lab gate, assign approved controls,
-wire typed samples, and verify actual UI-to-core retention, history and reopen.
+The full Lab gate passed at `19dd16b` after two harness-only corrections, now
+integrated as `eea25ba`/`86bccfc`. All 1,456 cases and complete interaction/approval
+groups passed. Original failed runs remain recorded. Core migration `a811c26`
+is integrated as `ff98d4d`, with 43 focused passes. This shared checkpoint is
+temporarily incompatible with legacy frontend controls. Two new isolated lanes
+complete the production frontend and the mixed-text/atomic Apply backend needed
+by the approved controls. Keep their file ownership separate and integrate both
+before claiming a usable combined candidate. Then verify actual UI-to-core
+retention, history and reopen.
 Run final combined suites, candidate-bound engine/platform proof and independent
 Standards/Spec review before final spec reconciliation and draft PR creation.
 Do not run CI yet or infer approval from prototype preparation.

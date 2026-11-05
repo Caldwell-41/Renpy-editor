@@ -1,7 +1,23 @@
 # Approval verification
 
-The user decision is recorded and reproducible. Full promotion verification is
-blocked; the required `npm run design:check` has not passed.
+The user decision is recorded and reproducible. The separate harness candidate
+`19dd16b03a223dda74dd8431adc0e27f1bae661e` completed the required offline
+`npm run design:check` with exit 0. All 1,456 cases across 24 screens, 23 interaction
+modules, 11 approval/source refusals and seven post-matrix groups passed, with no
+errors or skipped checks. This clears that candidate's Lab gate and preserves the
+approved source pointer. Production integration and fidelity remain separate.
+
+The table and failure details below retain the original handoff state. The passing
+successor corrected only the two visible-alert locators and an obsolete Shared Look
+Panel-only refusal expectation. It changed no presentation, fixture or approval.
+Integration copies are `eea25ba` and `86bccfc`. The coordinator audited the diff,
+complete report counts and clean producing checkout. Node 24.19.0, npm 11.9.0 and
+Chrome 156.0.8078.80 ran offline; owned browser/server processes exited and existing
+servers survived. The retained report SHA256 is
+`502543e825d3413c05471fc684069114c43ebd65b354dfc0f7a4097cf57504e2`.
+Exact commands, reports, prior failures and cleanup receipts remain in worktree
+`t3-09c0ef62` under ignored `.toolchains/47-50-lab-harness/`. Later production input
+changes require affected integrated verification and do not inherit this pass.
 
 | Check | Result |
 | --- | --- |
