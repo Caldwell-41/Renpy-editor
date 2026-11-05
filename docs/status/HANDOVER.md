@@ -56,9 +56,15 @@ a usable combined candidate. Its five frontend commits are now integrated throug
 `2eb17ee`; dependency copies were excluded. Parent live-draft correction `836034d`
 also passes focused red/green proof. The full combined frontend suite has 376
 passes after removing one stale generated deleted-test artifact; the production
-build passes. Broad core and three combined controller/core journeys are running.
-The current Lab fixture migration and final visual delta remain with a fresh
-Lab-only verification lane; preserve original approved source and all failures.
+build and three combined controller/core journeys pass. Broad core completed with
+602 passes, 56 explicit ignores and three documented exclusions, all names audited.
+Lab compatibility `728697c` integrates as `9868e19` and its full 1,456-case gate
+passed. Final control comparison passed within scope; identical reference/candidate
+outline clipping and marker/wording differences remain disclosed. Independent
+review found one P3 duplicate Lab CSS owner, corrected pending its affected browser
+check, and no actionable Spec code defect. Required both-target/aspect engine proof
+and measured residuals remain pending. Fresh Mac qualification follows within the
+existing allowance, with exact reservation/candidate in #47. Preserve all failures.
 Run final combined suites, candidate-bound engine/platform proof and independent
 Standards/Spec review before final spec reconciliation and draft PR creation.
 Do not run CI yet or infer approval from prototype preparation.

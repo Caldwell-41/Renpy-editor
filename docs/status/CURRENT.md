@@ -35,9 +35,12 @@ integrates as `ff98d4d`. Mixed-text/atomic Apply completion `5aba12c` is now aud
 and integrated as `ce2d4c1`, with 45 focused core passes and four comparison gates;
 one SDK case remains explicitly unrun. The frontend owner has both reviewed
 backend/driver dependencies for actual integration checks. Its control migration
-is now integrated; 376 combined frontend cases and the production build pass.
-Broad core/controller verification is running. Current Lab compatibility and the
-last presentation delta need their own combined checks. Preserve the approved source and all rejected/draft
+is now integrated; 376 combined frontend cases, 602 routine core cases, the build
+and three actual controller/core journeys pass. Core's 56 explicit ignores and
+three documented exclusions remain separate. Current Lab's full 1,456-case gate
+and final control comparison pass within their recorded scopes. Independent review
+found one P3 Lab CSS duplication, now corrected pending its affected browser check;
+Spec found no code defect but required engine proof remains missing. Preserve the approved source and all rejected/draft
 variants. Tailscale-only delivery and exclusion of prototype-review remain binding.
 Final combined suites and independent Standards/Spec review follow integration.
 [Current evidence and criterion gaps](../tasks/evidence/screen-actions-and-nested-canvas.md#resumed-delivery-2026-11-05)

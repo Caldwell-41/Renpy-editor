@@ -250,6 +250,70 @@ the original approved reference or any approval/capture pointer. Parent owns the
 core/live-draft correction, combined suites, final spec review and operation
 accounting. No SDK/helper/native/package/CI operation is assigned.
 
+### Combined local results and independent review
+
+The broad routine core run completed with 602 passes, zero failures, 56 explicit
+ignored cases and the three documented exclusions. All 661 inventory names were
+reconciled with unique named results; nothing was missing or duplicated. One
+fixture diagnostic omitted a final newline, so the audit matches exact named
+results independently of line starts while still requiring the full inventory and
+counts. Explicit SDK and specialist ignores are not passes or acceptance waivers.
+All 376 current frontend cases and the production build pass. Three combined real
+UI-to-core journeys pass with clean driver exits and fixture removal. Detailed
+counts, exclusions, report hashes and stages are in ignored
+`.toolchains/47-50/final-combined/results-audit.json` and adjacent logs/reports.
+
+Current Lab compatibility `728697c`, tree
+`6dc315939ddcdd6d5588d1f031081b67ec6ab543`, integrates as `9868e19`. Its full
+gate passed all 24 screens, 1,456 unique cases, 23 interaction modules, 11 actual
+approval/source protections and seven other groups. Live registry auditing matched
+the exact case set. Source fingerprint is
+`076d59f060c9d45d54d2d4a61ae1b5e8142caae941c597d2ca46a6f9cfd40abb`.
+The coordinator verified the complete report, producing checkout and matching
+integration fingerprint. Worktree `t3-60c4436f` retains its ignored
+`.toolchains/lab-47-50/handoff.json`, SHA256
+`fb0ec77b0c20bf7859e306e38a9923c9d3c2b3265bdbfd1f1ca9841458770659`.
+Only two Lab files changed; production now owns the fixture's controls/drafts and
+one fictional memory service owns simulated history. Original approval/reference
+and all ten captures remain intact. Changed-source refusal is expected.
+
+Final control comparison passed 24 matched states and 20 interaction checks.
+Ten of twelve extra focus-clearance probes pass. Direct Add Hide at 1280x720 clips
+the bottom outline identically in reference and candidate; field/focus stay visible.
+The candidate retains its original review context and draft marker after add/remove
+where the mock clears it. Wording, sample-status and comparison-toolbar differences
+are recorded in the retained Terra report. There is no unconditional native/helper
+fidelity claim or accepted pixel tolerance. This browser fixture is inert.
+
+The following independent reviews used fixed `e2a02bc...9868e19` and the complete
+commit list, with fresh read-only contexts. The coordinator remains the sole writer.
+
+#### Standards
+
+One P3 finding: current Lab CSS copied shared production control rules after
+importing them, violating Lab's reuse-by-import rule and allowing divergence.
+The same issue is a possible Duplicated Code smell; there were no other actionable
+findings. The coordinator removed shared copies from the current candidate,
+retaining only shell and unapproved B/C disclosure rules. The pinned approved
+checkout is untouched. TypeScript, approval/history/capture and whitespace checks
+pass; the affected browser check follows at the frozen qualification candidate.
+
+#### Spec
+
+No actionable implementation defect or scope creep was found. The reviewer traced
+typed writes, qualified actions, template parsing, atomic Apply, retained drafts,
+history/reopen/effects, expansion, freshness and clipped ordering. Original proof
+criteria remain unsatisfied: #47 normal-play displayed order exactly once; #50
+matched actual normal/helper example; both-target/aspect spacing/clipping/reuse;
+and measured residual differences. Native/package proof remains pending and CI is
+explicitly deferred. Offline/controller/browser results do not satisfy these gates.
+
+Review totals: Standards one P3, corrected in current candidate with browser proof
+pending; Spec zero code defects and four required engine-proof gaps. Neither ticket
+is accepted. Fresh Mac qualification is selected within the existing cumulative
+allowance; #47 owns the exact candidate/reservation before any SDK start. Windows
+remains blocked on supported isolated T3 provisioning and corrected source transfer.
+
 ### Source/actions verification and target eligibility
 
 The source/actions verifier returned a clean checkout at
