@@ -996,3 +996,76 @@ fn imagebutton_dimensions_alias_prepares_explicit_renderer_dimensions() {
         source
     );
 }
+
+#[test]
+fn bar_groups_do_not_gain_component_binding_permission_through_extraction() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let variable = int_variable(&mut service);
+    let group = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"vbox","text":""}),
+    );
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    let bar = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"addBar","parentId":group["selectedId"],"binding":{"variableId":variable["id"],"minimum":"-5","maximum":"15"},"appearance":{},"width":300,"height":24,"expectedAuthoringRevision":doc["authoringRevision"]}),
+    );
+    let peer = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"text","text":"Neighbor"}),
+    );
+    assert_eq!(
+        compose_command(
+            &mut service,
+            &owner,
+            json!({"type":"reorder","nodeId":group["selectedId"],"targetId":peer["selectedId"],"after":true})
+        )["changed"],
+        true
+    );
+    let resolved = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":{"screenId":owner["id"],"sourceName":owner["name"]}}),
+    );
+    assert_eq!(resolved["effects"]["unknown"], false);
+    assert_eq!(
+        resolved["effects"]["assignedVariables"],
+        json!([variable["id"]])
+    );
+    assert_eq!(resolved["effects"]["finishesInteraction"], false);
+    assert_eq!(resolved["effects"]["hiddenScreens"], json!([]));
+    assert!(resolved["effects"]["dependencies"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|d| d["id"] == format!("{}:binding", bar["selectedId"].as_str().unwrap())));
+    assert!(resolved["effects"]["dependencies"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(
+            |d| d["id"] == variable["id"] && d["revision"] == variable["source"]["sourceRevision"]
+        ));
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    let source = fs::read(root.join(owner["path"].as_str().unwrap())).unwrap();
+    reject(
+        &mut service,
+        "screens.componentPrepareExtract",
+        json!({"screenId":owner["id"],"nodeId":group["selectedId"],"expectedRevision":doc["revision"]}),
+    );
+    assert_eq!(
+        fs::read(root.join(owner["path"].as_str().unwrap())).unwrap(),
+        source
+    );
+}

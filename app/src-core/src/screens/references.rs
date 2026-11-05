@@ -330,6 +330,12 @@ pub(super) fn qualified_interaction(
             if !single || counts[key] != 1 {
                 continue;
             }
+            if node.kind == "bar" && key == "value" {
+                // Extraction changes the owner. It must not introduce an active
+                // binding into a Component through an otherwise movable group.
+                qualified.contextual.insert(start);
+                continue;
+            }
             if matches!(node.kind.as_str(), "textbutton" | "imagebutton") && key == "action" {
                 // Extraction must not move a contextual or custom action into a
                 // component. The shared grammar alone qualifies button actions.
