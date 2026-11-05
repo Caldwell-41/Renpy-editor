@@ -31,16 +31,19 @@ zero and no reservation is pending. Windows x64 and macOS ARM64 qualification re
 required. The linked Mac project was identified, but its isolated readiness delegation
 was refused before task creation because T3 does not support linked-environment
 worktree isolation for delegates. Kris has now authorized the separate top-level Mac
-qualification chat. Its creation request lost contact with the Mac; a fresh link check
-reports unreachable and creation remains unconfirmed. No capped operation was
+qualification chat. The same saved request succeeded after the host returned,
+creating isolated branch `t3/mac-bars-imagebuttons-qualification` at `1c6ed025`.
+Readiness is running with verified Sol 6.1 xhigh settings. No capped operation was
 requested. The Windows SDK archive matches its published pin.
 
 Next action is Kris's exact design approval in the separate design chat, followed
-by that designer's direct handoff to the editor. When the Mac becomes reachable,
-retry saved request `51-52-mac-qualification-chat-20261106-01` with the same client
-request ID. The exact launch arguments and failed response are retained in ignored
-`.toolchains/51-52/mac-qualification-launch*.json`. Do not create a second request
-or fall back to its shared root. Creation is unconfirmed; no capped run is pending.
+by that designer's direct handoff to the editor. The Mac readiness chat is
+<t3-thread://v2/c95d26c7-af8c-4ab0-8c95-a45fdca2dfe6/mcp:launch:aed218e73e07211906bdf413f41978e96efe3ae09756ac17e0c6842d8b443ee7>.
+Read its completed report through the linked environment; the reverse report send
+to Windows was denied, so do not rely on an automatic parent notification.
+It owns only read-only readiness until an exact candidate handoff/reservation.
+Do not create another chat or use the shared Mac root. The original request and
+failed/successful receipts remain in ignored `.toolchains/51-52` output.
 
 Windows runtime proof passes all four cases at observer `7d199aa9`, reusing the
 exact `fe78025f` producer and completed setup after all four explicit rejecting

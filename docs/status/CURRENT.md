@@ -23,10 +23,10 @@ other counts are zero, with no reservation pending. Remaining Windows/macOS proo
 combined review and all original criteria remain pending. [Evidence](../tasks/evidence/bars-and-image-buttons.md)
 records contracts and ownership. #54 and broader Phase 3B acceptance remain separate.
 Issue-state/limit updates to #51/#52 are authorized; code publication/PR/merge are not.
-Kris authorized the separate Mac qualification chat. T3's creation request lost
-contact with the linked Mac, which now reports unreachable. Creation is unconfirmed;
-retry the same saved request when the host is available. No capped Mac operation
-was requested.
+The authorized Mac qualification chat is created on isolated branch
+`t3/mac-bars-imagebuttons-qualification`. Sol 6.1 xhigh readiness is running after
+the host returned. No capped Mac operation is requested or reserved. The chat owns
+readiness only until the coordinator supplies exact inputs and a reservation.
 
 ## Variable text, ordered actions and nested canvas accepted
 

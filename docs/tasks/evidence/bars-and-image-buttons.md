@@ -475,3 +475,26 @@ Retry the exact saved request with client ID
 arguments and failure response are retained in ignored local output so a retry can
 recover an already-created request without duplication. Do not create a new request
 ID, mutate the shared Mac root or claim readiness before its report arrives.
+
+## Mac qualification chat created, 2026-11-06
+
+After Kris reported the host was back on, the link reported reachable. Retrying the
+same saved client request succeeded and returned one top-level qualification chat:
+<t3-thread://v2/c95d26c7-af8c-4ab0-8c95-a45fdca2dfe6/mcp:launch:aed218e73e07211906bdf413f41978e96efe3ae09756ac17e0c6842d8b443ee7>.
+T3 bound isolated branch `t3/mac-bars-imagebuttons-qualification`; initial inspection
+reports a clean checkout at `1c6ed02539071377ef6ec2aa5e262fe5313a625b`. The primary
+Mac checkout has separate active work and stays untouched.
+
+The launch inherited Sol 6.1 high rather than the planned xhigh setting. The
+coordinator corrected the same chat to verified Sol 6.1 xhigh. Configuration
+interrupted the first read-only turn; an attempted restart found no active run,
+so a normal send resumed readiness with corrected settings and preserved prior
+observations. No second chat or checkout was created.
+
+The assignment permits ordinary tool/version and archive/provenance reads only.
+No production edits, dependency installs, builds, SDK/helper/package/native starts,
+publication or further agents are authorized by this readiness handoff. Later tests
+need the exact committed candidate and a coordinator reservation in #51. The Mac
+session reported that its reverse T3 message to Windows is denied; it may finish
+its report in the same chat for the coordinator to read through the linked
+environment. Full readiness and transfer feasibility remain pending that report.
