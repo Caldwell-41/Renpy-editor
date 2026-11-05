@@ -1,71 +1,55 @@
 # Current outcome handover
 
-## Active #47/#50 draft delivery
+## PR 81 integration and ticket closeout
 
-Continue on `codex/47-50-integration`,
-[draft PR #81](https://github.com/Caldwell-41/Renpy-editor/pull/81), targeting
-`codex/phase3b-screen-designer`. Kris authorized the clean Windows primary
-checkout directly and superseded the earlier isolated-worktree requirement.
-The previous branch, worktrees, stash, ignored evidence and unrelated services
-remain intact. Coordinator owns source and publication; both test assignments
-are finished. Keep the PR draft and #47/#50 open. No merge, release, package or
-native-editor session is selected.
+Kris selected merging [PR #81](https://github.com/Caldwell-41/Renpy-editor/pull/81)
+into `codex/phase3b-screen-designer`, reconciling related tickets, and explicitly
+prohibited a separate documentation PR. All status changes are included in this
+existing PR. The PR records actual merge state; [#47](https://github.com/Caldwell-41/Renpy-editor/issues/47)
+owns the final candidate/tree/merge SHA, current-head CI runs/attempts and terminal
+audit. Do not add another commit or PR merely to record those final identities.
 
-Kris selected fixing both verified review findings, updating PR #81/#47/#50 and
-running CI. Target metadata now refreshes at accepted-edit completion for new
-drafts; retained drafts keep their original review. Sample controls show configured
-overrides while collapsed. Fresh frontend 378, build, repository checks and the
-extended actual UI/core/history/reopen journey pass; its driver/fixture cleanup
-passes. The first full frontend run's Python 3.9 `tomllib` failure is preserved;
-Python 3.12.16 through `HARNESS_PYTHON` passes all cases. No engine/native/package
-operation started. [Correction evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#verified-review-corrections-2026-11-05)
-owns details and ignored receipts. Next: audit current correction-head automatic
-quality and selected both-target harness. #47 owns exact run/attempt/SHA identities.
+L11 #47 and L19 #50 have proof for all four bounded criteria each and are selected
+for acceptance/closure with this integration. B04 #26, B08 #30 and P3B #22 receive
+bounded coverage only. L12 #51 and L13 #52 have their #47 prerequisite satisfied;
+L21 #53 has its #50 prerequisite satisfied. They remain unselected. Aggregate
+binding/control-state/editor/canvas/native/physical-input/human/full-3B acceptance
+stays separate. No release, successor implementation or branch retirement is selected.
 
-Windows producing candidate is `f7b9f61772545e51664b6b9b720087f217ca2774`, tree
-`d68dcdfdd3b27267c0720a87ccd29cbcf2856ec9`, exactly equal to the live PR head at
-freeze. Ordered play passes click and keyboard at 1280x720 and 1024x768, with
-all eight built-in actions exactly once in displayed order, correct visibility
-and exactly-once Story continuation. Fresh nested normal/helper comparison
-passes at both aspects with zero differing pixels, zero channel delta and all
-29 ordered/clipped geometry records equal. ANGLE2, accepted source/assets/font,
-literal samples, stationary viewport and guides-excluded state match.
+Implementation `24dd4fa0ab3d3403d762c359f622a493af465c25` passes fresh frontend 378,
+production build, repository checks and the extended actual UI/core/history/reopen
+journey with driver exit 0 and fixture cleanup. Accepted-edit completion refreshes
+action-target metadata for new drafts across composition/layout/geometry; retained
+drafts keep their original revisions. Sample controls derive a visible override
+count from retained state. [Correction evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#verified-review-corrections-2026-11-05)
+preserves red/green proof and the original Python 3.9 `tomllib` environment failure;
+Python 3.12.16 through `HARNESS_PYTHON` passes all 378 cases.
 
-All 1,731 frozen hashes remain unchanged. SDK children were reaped, the helper
-shut down cooperatively with exit 0, no matching process remains and disposable
-scratch/profiles were removed. Engine-internal input is runtime evidence, not
-physical-input or human acceptance. The first invocation failed in shell quoting
-before any SDK start; its evidence remains immutable. The corrected file-based
-invocation completed the initial campaign once without a runtime retry.
+Audited automatic quality 42009835333 attempt 1 and both-target harness 42009857395
+attempt 1 pass at `24dd4fa0`, including 25/24 required executed steps, original
+ZIP digests, 842 source hashes per target and named host exclusions. Ignored
+`.toolchains/47-50/pr81-review-fixes/` retains API metadata, logs, ZIPs, local core
+receipt and `terminal-audit.json`. The final status-only publication needs its own
+quality/harness audit under the unchanged validation plan; #47 owns its live receipt.
 
-Ignored `app/target/p81/` owns the exact producer, accepted inputs, raw logs,
-four PNG captures, ordered/normal/helper receipts, phase audits, process/cleanup
-receipts and handoffs. The coordinator independently verified the original
-41-file and continued 88-file manifests and replayed strict runtime/comparison
-validators. Its ignored `.toolchains/pr81-windows-20261105/proof-audit.json`
-and `comparison-replay-final/` retain that audit.
-[Owning evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#windows-proof-and-original-criterion-audit-2026-11-05)
-reconciles every original criterion and exact producing scope. #47 alone owns
-cumulative limits, actual counts and released capacity. No SDK reservation,
-process or test worker remains.
+[Original-criterion evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#windows-proof-and-original-criterion-audit-2026-11-05)
+retains Windows `f7b9f617` exact ordered/nested proof, Mac ordered `92b3a20` and Mac
+nested `b5155f69`, matched both-target/aspect inputs, zero pixel residuals and all
+29 clipped geometry records. No proof is relabelled for newer candidates. Approved
+A source `7090a03`, fingerprint and ten captures stay pinned. Windows raw receipts
+remain under ignored `app/target/p81/` and `.toolchains/pr81-windows-20261105/` on
+the producing host; prior Mac receipts remain in `.toolchains/47-50/`. Preserve all
+original failures, unique archives, stashes/native recovery and the unrelated audit.
+All SDK/helper processes are reaped, owned scratch/profiles cleaned and reservations
+resolved; #47 alone owns final cumulative counts and closed unused capacity.
 
-Mac ordered play at `92b3a20` and exact nested parity at `b5155f69` remain valid
-within their original producing scopes. Source milestones are effect correction
-`159a8c03`, recorder correction `9797e522` and CI selection correction `4538297b`.
-Core 604/frontend 376, three actual controller/core journeys and prior reviews
-are reused with an explicit empty implementation/test-input diff through the
-Windows candidate. No prior failure is relabelled. Approved A source `7090a03`,
-fingerprint and ten captures remain pinned.
-
-The next action is terminal audit of the correction publication's required
-automatic quality and manual both-target harness runs. `.github/validation-plan.json`
-retains that selection. #47 owns exact publication SHA, run/attempt identities,
-combined status and final artifact/job audit; do not commit another receipt merely
-to chase this file's SHA. Register the T3 PR watcher after dispatch and release it
-at final handback. If still pending, retain this outcome in the same thread. All
-eight bounded automated criteria now have evidence; native-editor, package,
-physical-input, human and full Phase 3B acceptance remain separate. Older unique
-recovery retains its existing size exception.
+If PR #81 remains open, resume the final publication-head CI audit, then the selected
+squash merge and ticket closeout in this same thread. Any repository-capable host is
+sufficient; no SDK/native/package campaign is needed. In T3, keep the PR watcher
+only while waiting and release it at final handback. If PR #81 is merged, consult
+its merge receipt and #47, use `codex/phase3b-screen-designer` for later selected work,
+and do not reopen this outcome or start a documentation follow-up. Existing older
+recovery sections retain their size exception.
 
 ## PR 79 merge and workspace closeout
 

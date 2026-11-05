@@ -5,6 +5,32 @@
 acceptance, authorization and operation accounting. This file retains implementation
 checkpoints and detailed verification. No criterion is accepted by this entry.
 
+## Integration selection without a documentation follow-up, 2026-11-05
+
+Kris requested merge of PR #81 and updates to relevant tickets, with no separate
+documentation PR. The existing PR includes the final CURRENT/HANDOVER correction
+before integration. All four bounded criteria each for #47/#50 are selected for
+acceptance/closure after the exact final candidate passes CI and the squash merge
+is verified. #47 owns final head/tree/merge identities, run/attempt/job/artifact
+audit and ticket reconciliation; PR comments retain the terminal integration receipt.
+Do not create a post-merge receipt-only commit or documentation PR.
+
+Implementation `24dd4fa0` already passes the independent terminal audit of quality
+42009835333 attempt 1 and both-target harness 42009857395 attempt 1. Both required
+quality jobs/all 25 executed steps and both target jobs/all 24 executed steps pass.
+Original artifact digests and all ten entries per internal manifest match; each
+target has 842 verified source hashes. Frontend 378, five positive core groups,
+actual controller/core proof and named host exclusions are checked. The local
+extended interaction journey also passes. Its earlier full-run Python 3.9 failure
+remains preserved. Final documentation publication must pass its own selected CI;
+product/renderer/runtime inputs remain identical to the reviewed implementation.
+
+Reconcile P3B #22 and B04 #26/B08 #30 with bounded credit, and satisfy #51/#52's #47
+and #53's #50 prerequisites without selecting successor work. Broader group,
+bar/imagebutton/control-state, editor/native/physical-input/human/full-3B acceptance
+stays open. No SDK/helper/native/package execution, new reservation, release or
+branch cleanup is selected. Existing operation accounting stays closed in #47.
+
 ## Verified review corrections, 2026-11-05
 
 Kris selected both independently verified PR #81 findings for correction and
