@@ -10,10 +10,10 @@ in progress and unaccepted.
 
 Continue on `codex/47-50-integration`, based on
 `e2a02bc9f6d0f91639c47e35d49f1befff058c60` from
-`codex/phase3b-screen-designer`. Local implementation head `23fc113` is four commits
-ahead of the published ref. It includes all original source/canvas lane commits,
-the H61 harness correction and the coordinator's new source-qualified
-`canShowHide` target capability. Do not replay old lane histories. Preserve the
+`codex/phase3b-screen-designer`. Local implementation checkpoint `ce2d4c1` and
+test-driver dependency `367c5de` are unpublished. They include all original
+source/canvas lane commits, the H61 correction, source-qualified target capability,
+mixed variable text and atomic Apply. Do not replay old lane histories. Preserve the
 user's committed Design Lab guide updates, untracked Phase 1 audit, worktrees and receipts.
 
 Both fresh offline workers returned clean at `0b64e54` with no fixes or commits.
@@ -47,10 +47,12 @@ The full Lab gate passed at `19dd16b` after two harness-only corrections, now
 integrated as `eea25ba`/`86bccfc`. All 1,456 cases and complete interaction/approval
 groups passed. Original failed runs remain recorded. Core migration `a811c26`
 is integrated as `ff98d4d`, with 43 focused passes. This shared checkpoint is
-temporarily incompatible with legacy frontend controls. Two new isolated lanes
-complete the production frontend and the mixed-text/atomic Apply backend needed
-by the approved controls. Keep their file ownership separate and integrate both
-before claiming a usable combined candidate. Then verify actual UI-to-core
+temporarily incompatible with legacy frontend controls. Backend completion
+`5aba12c` is audited and integrated as `ce2d4c1`, with 45 focused passes and four
+comparison gates; one SDK case remains unrun. The active frontend owner received
+that exact dependency and driver allowlist commit `367c5de` for its actual
+UI-to-core journeys. Complete and integrate its control migration before claiming
+a usable combined candidate. Then verify actual UI-to-core
 retention, history and reopen.
 Run final combined suites, candidate-bound engine/platform proof and independent
 Standards/Spec review before final spec reconciliation and draft PR creation.

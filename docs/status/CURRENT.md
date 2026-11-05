@@ -7,8 +7,9 @@ Kris resumed [L11 #47](https://github.com/Caldwell-41/Renpy-editor/issues/47) an
 The selected finish is verified implementation, final review and a draft PR.
 CI is explicitly deferred. Neither ticket is accepted.
 
-Implementation checkpoint `23fc113` on `codex/47-50-integration` includes the prior backend
-and a new `canShowHide` target capability from the existing source qualifier.
+Implementation checkpoint `ce2d4c1` on `codex/47-50-integration` includes the prior
+backend, source-qualified target capabilities, mixed variable text and atomic Apply.
+Test-driver dependency `367c5de` enables actual typed-variable controller setup.
 It remains local-only after the prior source-transfer publication. Preserve the
 user's committed Design Lab guide updates and the untracked Phase 1 audit.
 
@@ -30,9 +31,11 @@ integrated without altering the reference worktree. This approves design only.
 The full offline Lab check passed at harness candidate `19dd16b`: 1,456 cases,
 23 interaction modules and all approval/source protections. Earlier failures remain
 recorded. Harness fixes integrate as `eea25ba`/`86bccfc`; core migration `a811c26`
-integrates as `ff98d4d`. Production control migration is now assigned together with
-the required mixed-text and atomic Apply backend completion. This is an incomplete
-integration checkpoint until those lanes return. Preserve the approved source and all rejected/draft
+integrates as `ff98d4d`. Mixed-text/atomic Apply completion `5aba12c` is now audited
+and integrated as `ce2d4c1`, with 45 focused core passes and four comparison gates;
+one SDK case remains explicitly unrun. The frontend owner has both reviewed
+backend/driver dependencies for actual integration checks. This remains incomplete
+until its control migration returns. Preserve the approved source and all rejected/draft
 variants. Tailscale-only delivery and exclusion of prototype-review remain binding.
 Final combined suites and independent Standards/Spec review follow integration.
 [Current evidence and criterion gaps](../tasks/evidence/screen-actions-and-nested-canvas.md#resumed-delivery-2026-11-05)

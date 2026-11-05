@@ -160,6 +160,48 @@ owner is introduced. Exact shared contract and exclusive file scopes are supplie
 in both assignments. Production fidelity, real UI-to-core proof, final suites,
 candidate-bound engine/platform checks and final review remain pending. CI stays off.
 
+### Mixed templates and atomic Apply backend integrated
+
+Core completion `5aba12cbee285e45a33413e582f0927234d15c65`, tree
+`bf0a396127144e392fad85ff12504352c9261b4a`, integrates as `ce2d4c1`. Worktree
+`t3-f5465e91` on `t3/screen-actions-variable-templates` retains its clean candidate
+and ignored `.toolchains/core-apply/handoff.json`, logs and exports. The coordinator
+audited production changes, all 55 retained log hashes, actual commit/tree and
+positive final counts: 45 focused core passes, one explicit unrun SDK helper case
+and four comparison gates. Locked offline compilation, formatting, repository and
+whitespace checks pass. Original test-fixture/compiler/filter mistakes and valid
+TDD failures remain classified in the handoff rather than counted as passes.
+Handoff SHA256 is
+`b022b9ba0be58f3e351cf23ff55c84ad13f8f6b410db4bb437333c975c20dd63`.
+
+One conservative template owner now supplies mixed known-variable/literal text,
+deduplicated `variableBindings`, definition dependencies and literal canvas values.
+Active static tags and custom/calculated/missing placeholders remain source-only.
+Integer samples require canonical signed-64 strings. The existing composition
+transaction stages text/Style/layout and optional interaction actions, resolving
+action spans after staged edits and revalidating original revisions even for
+no-ops. Combined edits retain one history entry and one-step Undo/Redo. The old
+plain Text path also cannot bypass source-only admission. Exact request/response
+contracts are recorded in [DATA_MODEL](../../DATA_MODEL.md).
+
+The accepted ordered exporter includes an actual mixed-template text node and
+matching plans at both aspects. Its `textNodes` records are now heterogeneous;
+template records carry `template`/`variableBindings` rather than scalar `variableId`.
+The nested fixture/comparator are unchanged. Exports remain offline evidence at
+their producing candidate and must be regenerated for final engine qualification.
+
+The active frontend owner received the exact reviewed backend dependency and
+contract directly. A test-driver gap then blocked its typed-variable journey.
+Parent commit `367c5de` adds only existing public `variable.create` to the narrow
+Help controller-driver allowlist; production dispatch is unchanged. Locked offline
+example build and formatting pass. A headless driver check created actual bool,
+large-int-string and literal-string variables through production dispatch, then
+closed the session, exited zero and removed its disposable fixture. Retained logs
+are under ignored `.toolchains/47-50/driver-variables/`. The frontend owner received
+that exact dependency too. No SDK/helper/game/native/package/CI operation occurred.
+The integrated frontend journey, production fidelity, final combined suites,
+engine/platform proof and independent review remain pending.
+
 ### Source/actions verification and target eligibility
 
 The source/actions verifier returned a clean checkout at

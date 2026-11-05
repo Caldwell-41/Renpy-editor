@@ -685,12 +685,36 @@ and verified variable-source revision, plus every distinct target's screen revis
 Missing references, incompatible values and changed/dirty dependencies refuse the
 write. Semantic no-ops preserve existing source trivia and create no history entry.
 
-Variable text uses the exact source placeholder `[technical_name!q]` for a known
-variable. Core resolves its default or an explicit editor-only sample to literal text
-with Ren'Py's quote conversion, then keeps helper substitution disabled. A sample
-captures the variable definition's source revision. Brackets in its value stay
-literal, and braces cannot introduce text tags. Samples never alter source or runtime
-state. Other expressions and unsupported placeholders remain source-only.
+The existing `formatText` transaction also accepts optional `interaction` containing
+`expectedAuthoringRevision`, `expectedTargetRevisions` and optional `actions`.
+Omitted actions preserve the current action statement; an empty list writes Null.
+Text, typography, Style companions, layout and actions stage through the existing
+owners and commit together with one history entry. Action spans resolve against
+the staged source after text/property edits. Original authoring and distinct target
+revisions are checked again before acceptance, including no-ops. A failed review
+leaves all source and companion files unchanged.
+
+Variable text combines literal text with known `[technical_name!q]` placeholders,
+including repeated references, Unicode and newlines. One bounded parser owns
+inspection, text-write admission, effects and canvas resolution. `variableText`
+accepts either a direct `{variableId}` binding or `binding:null` with a template in
+`text`. `formatText.values.text` uses the same template owner with captured
+interaction authoring context. Existing plain Text writes cannot bypass source-only
+admission. Unsupported expressions, missing variables and active static tags remain
+source-only. Escaped `[[` and `{{` retain their Ren'Py literal semantics.
+
+Text inspection exposes `variableBindings`: an empty list for supported literal-only
+Text, deduplicated stable-ID bindings in first-reference order for a supported
+template, and null for unsupported text or non-Text nodes. This replaces scalar
+`variableBinding`. Every referenced variable contributes its definition revision
+to effects and freshness.
+
+Core resolves typed defaults or explicit editor-only samples once per variable
+into literal text with Ren'Py's quote conversion, keeping helper substitution
+disabled. A sample captures the variable definition's source revision. Integer
+samples use canonical signed-64 decimal strings, booleans use real JSON booleans
+and strings remain literal. Brackets in sample values stay literal, and braces
+cannot introduce text tags. Samples never alter source or runtime state.
 
 `ScreenEffects` adds known `assignedVariables` and `shownScreens` IDs alongside
 `hiddenScreens` and `finishesInteraction`. These describe possible qualified button
@@ -707,12 +731,13 @@ content edits, and refused Add operations, keep their separate draft guards.
 Explicit Cancel/Escape restores the placement captured when the Beat form opened;
 accepted insertion updates the retained context to its accepted source revision.
 
-Owned screen inspection exposes a nullable per-button `dismissal` capability.
-It reports `none` for exact inert Null, `finishInteraction` for qualified local
-Return, and `hideScreen` for qualified local Hide. Unowned, duplicate-ID,
-component and custom-action nodes expose no capability. This uses the same raw
-action qualifier as bounded composition. The UI never infers action authority
-from a label or screen kind; acceptance still revalidates source and context.
+Owned screen inspection exposes nullable per-button `actions`: an empty list for
+qualified inert Null or the typed ordered sequence. Unowned, duplicate-ID and
+custom-action nodes expose no action-edit authority. Component Null inspection is
+passive, but all component action writes remain refused. This replaces the legacy
+`dismissal` inspection and composition command. Both `actions` and `formatText`
+interaction use the same action admission and source writer. The UI never infers
+authority from a label or screen kind; acceptance revalidates source and context.
 
 `screens.create` accepts an optional `kind`, defaulting to panel. A dialog Help
 starter shares the panel content builder and emits `modal True`, game-menu Return
