@@ -17,10 +17,10 @@ are integrated at `b23bbcc9`; the editor worktree is at that checkpoint.
 
 The editor agent opened the requested separate Sol 6.1 xhigh design chat. Production
 UI waits for exact design approval and a direct handoff to that implementer.
-The initial two council rounds are complete. Kris authorized one final third round
-and an annotated screenshot. Sol R3 scores frozen A2 source `0263728d` at 9/10;
-Opus R3 is pending. This is static source/capture review, not a new synthetic pass
-or production approval. The designer owns the annotation; no fourth round is selected.
+All three authorized council rounds are complete. R3 on `0263728d` scored Sol 9/10
+and Opus 8.5/10; the latter's conditional 9 is not a rescore. Corrected source
+`37d29ca1` is unapproved and unscored, with thirteen capture receipts and a separate
+explanatory annotation. No fourth round or production handoff is selected.
 Source `0a6e571e` and its earlier proof remain pinned separately. Production still
 waits for the approved direct successor handoff.
 The corrected Windows observer passes; both earlier failed campaigns stay recorded.

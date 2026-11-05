@@ -693,3 +693,44 @@ After the final review and exact decision, any approved handoff still goes direc
 from the designer to the editor and copies the coordinator. Frozen source, original
 reference/proof and separate lab/native/core/runtime gates remain intact. No capped
 operation or new reservation is selected by this review checkpoint.
+
+## R3 complete; corrected source awaiting exact decision, 2026-11-06
+
+All three authorized rounds are complete, with no fourth review/rescore selected.
+R3 reviewed `0263728d`: Sol reports 9/10 with no must-fix; Opus reports 8.5/10,
+describes the captured UI as 9-level and conditions a 9 on fixing inline-error
+placement outside plain fields. That conditional result is not an actual score
+for the subsequent correction. Prior scores keep their original source bindings.
+
+The designer applied the small placement correction and checked action-message
+scrolling and compact stale-title scrolling. Current unapproved source is
+`37d29ca180dc81cb350ff8ff99bfaee90e65cea9`, fingerprint
+`fadc5fa2591ac31edec149b871505fcfa20c54b26e622d44e60a74b0b8ee0c80`.
+It is not independently rescored. The designer reports clean TypeScript/standalone
+compilation, sixteen synthetic groups at both 1280/560 dark with innerHeight 800,
+and thirteen fresh renders with empty console messages. These are not native,
+trusted-input, real core/runtime or full design:check passes.
+
+The designer's FINAL-REFINEMENT record and `a2-final-source-receipt.json` own the
+exact capture/input receipts in its worktree. Parent read-only inspection confirms
+the source commit exists and production/shared source paths are unchanged from
+original `0a6e571e`. An independent artifact audit matched all thirteen PNG hashes
+and dimensions, eleven distinct recorded input hashes, and the annotation hash and
+1600x1296 dimensions. The audited receipt snapshot hashes to
+`c706435571c6235cad8118e3cfd317c9a82750c3a80ae6d3dba7e0b27e315562`.
+Its approval remains null. This audit did not rerun the synthetic checks, recompute
+the source fingerprint or judge the design.
+
+The explanatory `annotated-a2-final.png` hashes to
+`2e94b5051dedb302dfbd0227533b340ea9aa51754f272c830b73c0a8494c2d14`.
+It is explicitly not an approval capture. Known capture limitation: compact stale
+footer commit buttons are partly clipped at the captured scroll position while the
+page remains scrollable. Restored action values can also retain Unsaved wording
+until a no-op Apply, with no history entry. Keep these facts visible to Kris and
+the implementation handoff; do not silently infer acceptance or a new fix scope.
+
+The designer is presenting exact `inspector-v2` / `37d29ca1` to Kris. There is no
+approved production handoff. After exact approval, the designer must deliver the
+approved source/fingerprint/captures and decision evidence directly to the editor,
+copying the coordinator. Original source, shared contracts and production stay
+unchanged. No additional council, server or capped start is selected.
