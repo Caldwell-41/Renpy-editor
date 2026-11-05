@@ -271,3 +271,55 @@ tool console receipts. These are synthetic DOM callbacks in a browser, not appro
 captures, native/trusted input, actual core/source/runtime or full Design Lab proof.
 The designer received the exact receipt and must still obtain Kris's explicit
 design decision and send its approved handoff directly to the editor agent.
+
+## Core handoff and retained source admission, 2026-11-06
+
+The core writer returned clean head `76dfe030b4fab078350297b6f90499857c81483f`.
+Its implementation sequence is `42ee7e58`, `931e8173`, `718b3af5`, `59e97d7b`
+and `76dfe030`. Shared checkpoint picks `804f3279`/`f5c6f458` are counterparts of
+the coordinator's existing `461f388b`/`83f02742`; integration must not duplicate them.
+The writer touched only its thirteen assigned Rust/helper-renderer files.
+
+Independent Standards review at `42ee7e58` found no-op source-spacing churn and a
+duplicated renderer state-prefix mapping. Spec review found a dimension guard in
+the wrong canvas loop and unresolved xysize aliases in the helper data plan. The
+four findings have focused red/green fixes in the committed sequence. The separately
+approved contextual bar guard refuses extraction into Components while preserving
+same-screen reorder, known variable-mutation effects and binding/variable revisions.
+Parent combined review remains pending.
+
+The final corrected-controls selection passes 13/13, zero ignored, at `59e97d7b`
+in 485.89s under broad-suite contention. The four bar cases covering the final
+extraction guard pass on the tree committed as `76dfe030` in 10.02s. Final formatting,
+whitespace, clean-tree and repository checks pass at that worker head. The retained
+`59e97d7b` manifest hashes to
+`33d536bd4d5cc8e006e5bac70fc53b7f3870a4b2c427ef02a0783e0ad521314a`.
+It has fifteen accepted files, six distinct PNGs and twelve plans, with no engine
+execution. The final extraction-only guard does not change those source/render
+inputs; that earlier result keeps its exact producing candidate.
+
+Parent admission now checks the actual retained export's metadata, source hashes,
+owned contexts, integer defaults/limits, six asset references, ordered actions,
+effect/binding/variable/asset revisions, normal Story entry and exact inert data
+plans. Three explicit retained-export checks and seven ordinary admission tests pass.
+Negative variants reject changed limits/assets/actions/effects/context/revisions,
+false provenance and altered plan sizes/values. Initial red admission exposed a
+wrong harness assumption that authoring revision was the raw metadata hash. It is
+the existing public aggregate over metadata plus variable-source path/hash inputs;
+the gate now independently derives that aggregate. No product change was made for
+that harness defect. Initial shell-policy/argument-quoting preflight failures were
+corrected with the prescribed fresh PowerShell wrapper and stop-on-error invocation.
+
+The worker's broad release run at `42ee7e58` failed with 600 passed, seven failed,
+53 ignored and three documented filtered cases in 2273.46s. Four TLS fixture failures
+were missing literal `python` on PATH. The same release binary's subsequent exact
+`ai_request::tls_tests` selection passes all seven tests in 2.13s with process-local
+existing Python/Git paths. The original broad run stays failed. Three Windows
+symlink-creation cases remain failed/unqualified with OS error 1314 (privilege not
+held): two lifecycle cases and one managed-SDK reparse case. No security setting,
+permission, specialist exclusion or product protection changed. Original full/TLS
+logs and both retained exports remain in the worker's ignored `core-51-52` output.
+
+All SDK/helper/package/native operation counts remain zero. Source admission does
+not qualify real frontend/core interaction, deliberate preview/play, helper rendering,
+native packaging, Mac behavior or ticket acceptance.
