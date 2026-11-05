@@ -29,6 +29,12 @@ read-only Opus 5.5 xhigh and Sol 6.1 xhigh feedback under the council skill.
 Source `0a6e571e` / `inspector-v1` remains pinned, with its synthetic proof scoped
 to that source. The editor received this gate directly and is waiting for the
 approved successor handoff. No additional coordinator council is selected.
+Current unapproved A2 pin is `99f983ff` / `inspector-v2`; the evidence owner records
+its full source/fingerprint and the reported eleven-group synthetic proof. Sol's
+round-one 7/10 applies to original A. Opus round one is pending, with no polling or
+replacement selected. Incorporate that feedback before fresh round-two reviewers
+assess the then-current exact successor. This intermediate pin is not an approved
+production handoff and may change after feedback.
 
 [#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) owns the shared limits
 and [detailed evidence](../tasks/evidence/bars-and-image-buttons.md) records contracts,

@@ -573,3 +573,30 @@ detailed readiness section from the outward body, retained the existing ticket
 requirements/accounting and added only design execution state plus generic Mac
 readiness status. That write succeeded. Detailed host observations remain local;
 no broader publication authorization was requested or inferred.
+
+## Unapproved A2 source pin, 2026-11-06
+
+The designer pins variant `inspector-v2` at source
+`99f983ff546f0324abf969cf9c5c984d59f97685`, fingerprint
+`3c76cf993ef5dffcc810e5223ba06b6bb7d02ea0490b11a1fb37ec866303a3fc`.
+This is an intermediate unapproved successor, with no production handoff.
+
+The designer reports TypeScript/export and eleven focused synthetic DOM groups
+passing at 560/1280. Changes cover section navigation and remembered disclosures,
+asset/picker/clear controls, inert state preview and resolution label, opt-in aspect
+linking, parent-relative vertical placement, matching horizontal sample/selection
+geometry, field-associated revealed errors and compact scrolling. Duplicate remount
+DOM was corrected. These reported checks belong to A2; they do not replace real
+frontend/core, native input or human approval evidence.
+
+Parent read-only Git inspection confirms the source commit exists and its changed
+paths from pinned `0a6e571e` are limited to the owned lab/record files. Original
+study/style/appearances and production files are absent from that diff. The parent
+has not rerun the designer's checks or independently recomputed this fingerprint.
+
+Sol round one's 7/10 rates original A, not this A2 pin. Opus round one remains
+pending; no polling or replacement is selected. The designer will incorporate that
+feedback, then launch the second and final selected round with fresh read-only
+reviewers on the exact resulting revision. No score, final successor identity or
+Kris approval is inferred. The direct approved designer-to-editor handoff remains
+required after Kris's decision, copying the coordinator.
