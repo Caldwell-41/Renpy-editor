@@ -32,8 +32,13 @@ Pinned checks pass 376 frontend cases, typechecking and production build. The
 three actual controller/core journeys pass with confirmed fixture cleanup at the
 corrected source. A broad pre-correction core run passes 602 cases with 56 explicit
 ignores and three documented exclusions. The final corrected full routine core
-run is pending. Logs/results are retained under primary ignored
-`.toolchains/47-50/pr81-continuation/`.
+run passes 604 cases, with 56 explicit ignores and three documented exclusions.
+All 663 named cases reconcile without missing or duplicate results. Repository
+validation passes for 1,738 files; formatting and whitespace checks pass. All
+three real-controller receipts independently confirm success and fixture cleanup.
+Logs/results are retained under primary ignored
+`.toolchains/47-50/pr81-continuation/`; `checks-audit.json` has SHA256
+`8eb65822d8412349a3f46fd721baa38ce82ca45b755a1fb500337b54d89039df`.
 
 The first campaign-3 delegate at `ff1924d` refused its sandbox desktop query with
 all admission fields null. It started no SDK/helper, created no temporary profile

@@ -20,9 +20,11 @@ pinned; never replace or rebase that reference.
 Pinned frontend 376/376, typechecking/build and three actual controller/core
 journeys pass at the corrected source. The broad pre-correction core run passes
 602 with 56 explicit ignores and three documented exclusions. The corrected final
-routine core run is pending in coordinator exec session `1487`, logging to primary
-ignored `.toolchains/47-50/pr81-continuation/core-final.log`. That directory owns
-other current logs and real-controller receipts. A failed sandbox core run was
+routine core run passes 604, with the same 56 ignores and three exclusions. All
+663 named cases reconcile, all three controller/core receipts confirm cleanup,
+and repository validation passes for 1,738 files. Logs and the hash-bound
+`checks-audit.json` are retained under primary ignored
+`.toolchains/47-50/pr81-continuation/`; no core test process remains pending. A failed sandbox core run was
 stopped/reaped; a frontend Python-3.9 failure was corrected by selecting pinned
 Python. Preserve those logs rather than count them as passes.
 
@@ -44,8 +46,7 @@ selected. Corrected source transfer remains authorized after a supported binding
 Do not infer a pass from an unavailable capability.
 
 [Continuation evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#pr-81-continuation-and-effect-correction-2026-11-05)
-owns detailed checks and the original-criterion gap map. Next, audit the final
-routine run and fresh Mac producer, fix any in-scope findings offline, reconcile
+owns detailed checks and the original-criterion gap map. Next, audit the fresh Mac producer, fix any in-scope findings offline, reconcile
 all eight criteria and update the draft PR with exact remaining blockers. No
 rendering tolerance is accepted. Windows/helper/native/package/CI proof remains
 pending. Older unique recovery below retains its existing size exception.

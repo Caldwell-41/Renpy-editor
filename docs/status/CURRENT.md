@@ -11,7 +11,7 @@ unaccepted; CI stays deferred.
 | Capability | Automated proof | Remaining acceptance |
 | --- | --- | --- |
 | Variable text and ordered actions | 376 frontend passes; actual UI/core/history/reopen journeys; Mac ordered play at `92b3a20` | Windows normal play and native/package/CI |
-| Target effects and revisions | Public red/green; four focused effects cases including cycles and shared changes | Final corrected routine core run |
+| Target effects and revisions | Public red/green; four focused effects cases; final core 604/604 with disclosed exclusions | Windows/native/CI qualification |
 | Nested component canvas | Data-only plans, freshness and source checks; earlier Mac normal reference captures | Fresh helper comparison, both-target parity and measured residuals |
 
 The first renewed Mac assignment refused only its sandbox admission query, with
