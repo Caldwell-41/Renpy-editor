@@ -1,6 +1,212 @@
 use super::*;
 
 #[test]
+fn screen_action_targets_preserve_custom_effect_uncertainty() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let created = ipc(
+        &mut service,
+        "screens.create",
+        json!({"name":"custom_target", "expectedProjectRevision":catalog["projectRevision"],
+            "expectedSourceMapRevision":catalog["sourceMapRevision"], "expectedInventoryRevision":catalog["inventoryRevision"]}),
+    );
+    let target = created["owned"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|screen| screen["name"] == "custom_target")
+        .unwrap()
+        .clone();
+    let binding = json!({"screenId":target["id"],"sourceName":target["name"]});
+    let owner_binding = json!({"screenId":owner["id"],"sourceName":owner["name"]});
+    let original = ipc(&mut service, "source.open", json!({"path":target["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let button = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"textbutton","text":"Target"}),
+    );
+    for (event, action) in [("show", "showScreen"), ("hide", "hideScreen")] {
+        save_composition_source(
+            &mut service,
+            &target,
+            &format!("{original}    on \"{event}\" action Function(custom)\n"),
+        );
+        let review = ipc(
+            &mut service,
+            "screens.resolveTarget",
+            json!({"binding":binding}),
+        );
+        assert_eq!(review["canShowHide"], true);
+        assert_eq!(review["effects"]["unknown"], true);
+        let document = ipc(
+            &mut service,
+            "screens.inspect",
+            json!({"path":owner["path"]}),
+        );
+        compose_command(
+            &mut service,
+            &owner,
+            json!({"type":"actions","nodeId":button["selectedId"],
+                "actions":[{"type":action,"target":binding}],
+                "expectedAuthoringRevision":document["authoringRevision"],
+                "expectedTargetRevisions":[{"target":binding,"revisions":review["revisions"]}]}),
+        );
+        let resolved = ipc(
+            &mut service,
+            "screens.resolveTarget",
+            json!({"binding":owner_binding}),
+        );
+        assert_eq!(resolved["effects"]["unknown"], true, "{event}");
+        service.close().unwrap();
+        service.open_path(&root).unwrap();
+        assert_eq!(
+            ipc(
+                &mut service,
+                "screens.resolveTarget",
+                json!({"binding":owner_binding})
+            )["effects"],
+            resolved["effects"]
+        );
+    }
+}
+
+#[test]
+fn screen_action_targets_track_shared_components_and_finite_action_cycles() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let created = ipc(
+        &mut service,
+        "screens.create",
+        json!({"name":"shared_target",
+        "expectedProjectRevision":catalog["projectRevision"], "expectedSourceMapRevision":catalog["sourceMapRevision"],
+        "expectedInventoryRevision":catalog["inventoryRevision"]}),
+    );
+    let target = created["owned"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|screen| screen["name"] == "shared_target")
+        .unwrap()
+        .clone();
+    let binding = json!({"screenId":target["id"],"sourceName":target["name"]});
+    let owner_binding = json!({"screenId":owner["id"],"sourceName":owner["name"]});
+    let group = compose_command(
+        &mut service,
+        &target,
+        json!({"type":"add","parentId":target["rootId"],"kind":"vbox","text":""}),
+    );
+    compose_command(
+        &mut service,
+        &target,
+        json!({"type":"add","parentId":group["selectedId"],"kind":"text","text":"Shared"}),
+    );
+    let review = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":binding}),
+    );
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let extracted = ipc(
+        &mut service,
+        "screens.componentExtract",
+        json!({
+        "target":binding,"expected":review["revisions"],"expectedProjectRevision":catalog["projectRevision"],
+        "nodeId":group["selectedId"],"name":"action_details"}),
+    );
+    let catalog = ipc(&mut service, "screens.list", json!({}));
+    let component = catalog["owned"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|screen| screen["id"] == extracted["componentId"])
+        .unwrap()
+        .clone();
+    // A -> B -> A is an action cycle, not recursive component inclusion.
+    for (from, to, action) in [
+        (&target, &owner, "hideScreen"),
+        (&owner, &target, "showScreen"),
+    ] {
+        let button = compose_command(
+            &mut service,
+            from,
+            json!({"type":"add","parentId":from["rootId"],"kind":"textbutton","text":"Target"}),
+        );
+        let review = ipc(
+            &mut service,
+            "screens.resolveTarget",
+            json!({"binding":{"screenId":to["id"],"sourceName":to["name"]}}),
+        );
+        let document = ipc(
+            &mut service,
+            "screens.inspect",
+            json!({"path":from["path"]}),
+        );
+        compose_command(
+            &mut service,
+            from,
+            json!({"type":"actions","nodeId":button["selectedId"],
+            "actions":[{"type":action,"target":review["binding"]}],"expectedAuthoringRevision":document["authoringRevision"],
+            "expectedTargetRevisions":[{"target":review["binding"],"revisions":review["revisions"]}]}),
+        );
+    }
+    let before = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":owner_binding}),
+    );
+    assert_eq!(before["effects"]["unknown"], false);
+    assert_eq!(before["effects"]["shownScreens"], json!([target["id"]]));
+    assert_eq!(before["effects"]["hiddenScreens"], json!([owner["id"]]));
+    assert!(before["effects"]["dependencies"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|dependency| dependency["id"] == component["id"]));
+    let source = ipc(
+        &mut service,
+        "source.open",
+        json!({"path":component["path"]}),
+    )["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    save_composition_source(
+        &mut service,
+        &component,
+        &source.replace("Shared", "Updated"),
+    );
+    let after = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":owner_binding}),
+    );
+    assert_eq!(after["effects"]["unknown"], false);
+    assert_eq!(before["revisions"]["source"], after["revisions"]["source"]);
+    assert_ne!(before["effects"]["revision"], after["effects"]["revision"]);
+    assert_eq!(
+        reject(
+            &mut service,
+            "screens.resolveTarget",
+            json!({"binding":owner_binding,"expected":before["revisions"]})
+        )["error"]["code"],
+        "SOURCE_CONFLICT"
+    );
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    assert_eq!(
+        ipc(
+            &mut service,
+            "screens.resolveTarget",
+            json!({"binding":owner_binding})
+        )["effects"],
+        after["effects"]
+    );
+}
+
+#[test]
 fn typed_screen_effects_capture_known_ids_bindings_and_definition_revisions() {
     let (_temporary, mut service, root, owner) = composition_project();
     let authoring = ipc(

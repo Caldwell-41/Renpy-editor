@@ -722,6 +722,9 @@ effects, not observed execution or reconstructed runtime values. The shared acti
 grammar supplies their spans and revisions. Effects include variable/binding,
 authoring, target identity, component and source dependencies; a changed definition
 invalidates the captured effect revision even when screen source is unchanged.
+Show/Hide summaries also include the target's component and action dependencies
+and retain uncertainty from custom target behavior. Action-reference cycles are
+visited once; recursive component inclusion remains unknown.
 
 Pending Story screen placement is client-only Scene/body/Position context. Valid
 placement choices are retained before navigation and survive a Screens round trip

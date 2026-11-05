@@ -389,6 +389,7 @@ struct Effects<'a> {
     panels: &'a [actions::PanelTarget],
     authoring_revision: Option<&'a str>,
     active: HashSet<String>,
+    visited_screens: HashSet<String>,
     remaining: usize,
     unknown: bool,
     hidden: BTreeSet<String>,
@@ -406,6 +407,8 @@ impl Effects<'_> {
             return;
         }
         self.remaining -= 1;
+        self.visited_screens.insert(id.to_owned());
+        let mut action_targets = BTreeSet::new();
         let map = self.map;
         let inventory = self.inventory;
         let Some(owner) = map
@@ -470,9 +473,11 @@ impl Effects<'_> {
                         }
                         interaction::ScreenAction::ShowScreen { target } => {
                             self.shown.insert(target.screen_id.clone());
+                            action_targets.insert(target.screen_id.clone());
                         }
                         interaction::ScreenAction::HideScreen { target } => {
                             self.hidden.insert(target.screen_id.clone());
+                            action_targets.insert(target.screen_id.clone());
                         }
                         interaction::ScreenAction::FinishInteraction => {
                             self.finishes_interaction = true
@@ -587,6 +592,13 @@ impl Effects<'_> {
                     self.read(&component.id, depth + 1);
                 }
                 _ => self.unknown = true,
+            }
+        }
+        // Action references may return to this screen without recursively including
+        // its displayables. Keep those cycles finite while retaining component-cycle refusal.
+        for target in action_targets {
+            if !self.visited_screens.contains(&target) {
+                self.read(&target, depth + 1);
             }
         }
         self.active.remove(id);
@@ -726,6 +738,7 @@ impl AuthoringService {
                 .as_ref()
                 .map(|snapshot| snapshot.revision.as_str()),
             active: HashSet::new(),
+            visited_screens: HashSet::new(),
             remaining: MAX_NODES,
             unknown: false,
             hidden: BTreeSet::new(),
