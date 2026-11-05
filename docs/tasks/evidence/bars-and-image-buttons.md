@@ -323,3 +323,21 @@ logs and both retained exports remain in the worker's ignored `core-51-52` outpu
 All SDK/helper/package/native operation counts remain zero. Source admission does
 not qualify real frontend/core interaction, deliberate preview/play, helper rendering,
 native packaging, Mac behavior or ticket acceptance.
+
+## Integrated core checkpoint, 2026-11-06
+
+The coordinator cherry-picked the five implementation commits in order:
+`42ee7e58` to `781a5007`, `931e8173` to `0117da44`, `718b3af5` to `3fa81ded`,
+`59e97d7b` to `5e26f9c3`, and `76dfe030` to `b23bbcc9`. Shared checkpoint picks
+were not duplicated. The integrated `app/src-core/src` tree equals the final
+worker tree byte-for-byte under `git diff --exit-code`; no conflicts occurred.
+The root and editor worktrees are clean at `b23bbcc9`. These facts establish
+integration identity, not a fresh run of the worker's tests on the combined branch.
+
+Canonical DATA_MODEL now describes the combined controls, six total image states,
+captured bar revision, dimension ownership, inert samples and contextual extraction
+refusal. Issue bodies #51/#52 record the integrated checkpoint and actual failure
+scopes under Kris's explicit publication authorization. Both issues remain open.
+Production frontend work still waits for exact design approval and the designer's
+direct handoff. Runtime-observer preparation continues independently, through the
+already approved deliberate pinned-SDK and normal-play seams.

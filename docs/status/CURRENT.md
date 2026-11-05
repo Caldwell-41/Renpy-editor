@@ -5,13 +5,18 @@
 Kris approved implementing [#51](https://github.com/Caldwell-41/Renpy-editor/issues/51)
 and [#52](https://github.com/Caldwell-41/Renpy-editor/issues/52) with separate-worktree
 core/editor agents and coordinator-owned integration/review. Local integration branch
-is `codex/51-52-integration`, based on accepted `ab19b786`; shared types and ownership
-checkpoint `062c429f` passes TypeScript checking and Rust formatting. Production
-behavior is not yet implemented or accepted.
+is `codex/51-52-integration`, based on accepted `ab19b786`. Reviewed core changes
+are integrated at `b23bbcc9`; the editor worktree is at that checkpoint.
+
+| Capability | Implementation and automated proof | Remaining acceptance |
+| --- | --- | --- |
+| Integer bars and six-state image buttons | Core committed; 13 focused control/export cases and four final bar cases pass on their recorded worker candidates. Parent admits fifteen source files and twelve inert plans. | Actual frontend/core workflow, runtime, helper and native/package proof; final combined review. |
+| Editor controls | Existing baseline passes 56 focused cases. No production UI changes yet. | Exact design approval and direct handoff to the editor implementer. |
+| Broad core selection | Original run failed. Seven TLS tests pass after correcting process PATH. | Three Windows symlink checks remain failed/unqualified with OS1314. |
 
 The editor agent opened the requested separate Sol 6.1 xhigh design chat. Production
-UI waits for exact design approval and a direct handoff to that implementer. Core
-work and coordinator qualification preparation continue independently. #51 owns
+UI waits for exact design approval and a direct handoff to that implementer.
+Coordinator runtime qualification preparation continues independently. #51 owns
 combined capped-operation accounting; all counts are zero. Windows/macOS proof,
 combined review and all original criteria remain pending. [Evidence](../tasks/evidence/bars-and-image-buttons.md)
 records contracts and ownership. #54 and broader Phase 3B acceptance remain separate.

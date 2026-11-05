@@ -4,14 +4,16 @@
 
 The selected outcome is local committed delivery of #51 and #52, reviewed and
 verified against their original criteria. Coordinator branch is
-`codex/51-52-integration` at shared checkpoint `062c429f`, based on accepted merge
-`ab19b786`. TypeScript checking and Rust formatting pass for that checkpoint.
+`codex/51-52-integration` at `b23bbcc9`, based on accepted merge `ab19b786`.
+The five reviewed core implementation commits are integrated; the editor worktree
+fast-forwarded cleanly to the same checkpoint. No frontend production edits exist.
 
-The core implementation agent owns both controls' Rust behavior on
-`t3/bar-imagebutton-core`; the editor implementation agent owns both controls' UI
+The core implementation agent completed both controls' Rust behavior on
+`t3/bar-imagebutton-core` at `76dfe030`; the editor implementation agent owns both controls' UI
 on `t3/screens-bars-imagebuttons`. Both have separate prepared worktrees and must
 follow the implement skill, commit their work and resolve independent Standards/Spec
-review findings. Shared types remain coordinator-owned. The frozen command/canvas
+review findings. Core findings are fixed; parent combined review remains pending.
+Shared types remain coordinator-owned. The frozen command/canvas
 types in `screen-controls.ts` and `screens/controls.rs` are the frontend contract;
 implementation conflicts must return to the coordinator before changing them.
 
@@ -30,6 +32,14 @@ was refused before task creation because T3 does not support linked-environment
 worktree isolation for delegates. A separately authorized top-level Mac qualification
 chat is required for that isolated checkout; the coordinator has requested it. No
 remote/capped operation started. The Windows SDK archive matches its published pin.
+
+Next independent work is the parent-owned runtime observer and qualification driver
+for the admitted accepted-source export. Keep the producing `59e97d7b` export and
+its exact hash distinct from integrated `b23bbcc9`. The extraction-only final core
+guard does not change that fixture's runtime inputs. The broad `42ee7e58` run failed;
+its seven TLS rechecks pass after a process-PATH fix, while three Windows symlink
+checks remain failed/unqualified with OS1314. Preserve those results and the worker's
+logs. Do not rerun the broad suite or change security policy merely to erase them.
 
 The user separately authorized execution-state/limit updates to #51/#52 after the
 initial automatic review rejection. Those updates succeeded. Code and evidence are
