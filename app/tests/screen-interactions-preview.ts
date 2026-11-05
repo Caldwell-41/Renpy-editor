@@ -30,8 +30,10 @@ const workspace=new ScreensWorkspace({projectId:"production-interactions-compari
  if(operation==="screens.canvasRender"){
   const doc=clone(sample.documents.find(d=>d.path===payload.path)!);
   const values=new Map(variables.map(v=>[v.technicalName,v.defaultValue]));for(const value of payload.variableSamples as VariableSample[]??[]){const variable=variables.find(v=>v.id===value.variableId);if(variable)values.set(variable.technicalName,value.value);}
-  for(const node of doc.screens[0]!.nodes)if(node.kind==="text")node.literal=node.literal?.replace(/\[([A-Za-z_][A-Za-z_0-9]*)!q\]/g,(token,name:string)=>String(values.get(name)??token))??null;
-  return render(doc,payload) as T;
+  const substitute=(text:string)=>text.replace(/\[([A-Za-z_][A-Za-z_0-9]*)!q\]/g,(token,name:string)=>String(values.get(name)??token));
+  for(const node of doc.screens[0]!.nodes)if(node.kind==="text")node.literal=node.literal==null?null:substitute(node.literal);
+  const textStyles=(payload.textStyles as {nodeStart:number;values:{text?:string}}[]??[]).map(sample=>({...sample,values:{...sample.values,...(sample.values.text===undefined?{}:{text:substitute(sample.values.text)})}}));
+  return render(doc,{...payload,textStyles}) as T;
  }
  throw Error(`Test-only comparison refuses ${operation}.`);
 }});
