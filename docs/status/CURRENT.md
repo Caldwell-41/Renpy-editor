@@ -3,23 +3,23 @@
 ## Active #47/#50 draft delivery
 
 [Draft PR #81](https://github.com/Caldwell-41/Renpy-editor/pull/81) implements the
-approved A variable-text/action controls and nested component canvas. The reviewed
-effect and recorder defects are fixed; references/captures and renderer remain
-unchanged. #47/#50 stay open/unaccepted because required Windows proof is missing.
+approved A variable-text/action controls and nested component canvas. Windows
+qualification now passes at `f7b9f61772545e51664b6b9b720087f217ca2774`.
 
 | Capability | Automated proof | Remaining acceptance |
 | --- | --- | --- |
-| Variable text and ordered actions | Core 604/frontend 376, actual UI/core/history/reopen; Mac ordered play | Windows click/keyboard normal play |
-| Nested component canvas | Mac `b5155f69`: zero pixel residuals and all 29 clipped geometry records match at both aspects | Windows matched normal/helper proof at both aspects |
-| Required baseline CI | Audited quality 41985108361 + both-target harness 41985106408 at `4538297b` | Current publication-head audit lives in #47; wider native/package/human gates remain separate |
+| Variable text and ordered actions | Core 604/frontend 376, actual UI/core/history/reopen; Mac and Windows click/keyboard ordered play at both aspects | Physical-input, native-editor and human acceptance remain separate |
+| Nested component canvas | Windows `f7b9f617` and Mac `b5155f69`: zero differing pixels and all 29 ordered/clipped geometry records match at both aspects | Wider editor/canvas/Phase 3B acceptance remains separate |
+| Required baseline CI | Prior publication head `f7b9f617` quality 41986683594 and both-target harness 41986717868 audited in #47 | New documentation publication requires current-head quality/harness audit; #47 owns the live receipt |
 
-[Terminal audit](../tasks/evidence/screen-actions-and-nested-canvas.md#ci-terminal-audit-and-remaining-windows-gate-2026-11-05)
-owns exact candidates, counts, exclusions and preserved failures. Windows T3
-isolated provisioning remains unavailable without decisive Git diagnostics.
-No SDK reservation/process or worker remains. Resolve that capability/route before
-further engine execution; no failed or missing proof is waived. Keep the PR draft.
-Preserve unrelated work and all unique receipts. Historical recovery below retains
-its existing size exception.
+[Windows proof and all eight original criteria](../tasks/evidence/screen-actions-and-nested-canvas.md#windows-proof-and-original-criterion-audit-2026-11-05)
+record exact inputs, strict comparator replay, cleanup and preserved failures.
+Kris authorized the clean primary checkout directly; the earlier T3 isolation
+obstruction no longer blocks this proof. All 1,731 frozen hashes match. No SDK
+process, worker or reservation remains; #47 alone owns cumulative accounting.
+The approved A source/captures and all Mac proof remain pinned. Keep PR #81 draft
+and both tickets open as directed. No package, native-editor, merge or release
+was selected. Historical recovery below retains its existing size exception.
 
 ## Help dialog and base Help canvas merged and accepted
 

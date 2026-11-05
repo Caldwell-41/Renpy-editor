@@ -4,53 +4,57 @@
 
 Continue on `codex/47-50-integration`,
 [draft PR #81](https://github.com/Caldwell-41/Renpy-editor/pull/81), targeting
-`codex/phase3b-screen-designer`. Implementation and available Mac/baseline CI
-qualification are complete within recorded scopes. Both tickets remain
-open/unaccepted; Windows original-criterion proof is still unavailable. No merge,
-release or ticket closure is selected. Preserve the unrelated audit, committed
-guide updates, every worktree and unique receipt.
+`codex/phase3b-screen-designer`. Kris authorized the clean Windows primary
+checkout directly and superseded the earlier isolated-worktree requirement.
+The previous branch, worktrees, stash, ignored evidence and unrelated services
+remain intact. Coordinator owns source and publication; both test assignments
+are finished. Keep the PR draft and #47/#50 open. No merge, release, package or
+native-editor session is selected.
 
-Source milestones are effect correction `159a8c03`, recorder correction `9797e522`
-and CI discovery correction `4538297b`. Standards found zero actionable issues;
-the one P2 Spec defect is corrected. Local core 604 (56 ignores, three exclusions,
-all 663 names reconciled), frontend 376, build/typechecking and three actual
-controller/core journeys pass. Export-dependent checks now have explicit selection;
-all original assertions are preserved, with three observer tests required in
-ordinary discovery and two real-export admission checks run after preparation.
+Windows producing candidate is `f7b9f61772545e51664b6b9b720087f217ca2774`, tree
+`d68dcdfdd3b27267c0720a87ccd29cbcf2856ec9`, exactly equal to the live PR head at
+freeze. Ordered play passes click and keyboard at 1280x720 and 1024x768, with
+all eight built-in actions exactly once in displayed order, correct visibility
+and exactly-once Story continuation. Fresh nested normal/helper comparison
+passes at both aspects with zero differing pixels, zero channel delta and all
+29 ordered/clipped geometry records equal. ANGLE2, accepted source/assets/font,
+literal samples, stationary viewport and guides-excluded state match.
 
-Mac campaign 4 at `b5155f697bc53ae4887f1fff5df74051b84ddda9` passes exact
-normal/helper comparison at both aspects: zero pixel residuals, all 29 ordered/clipped
-geometry records match. All 70 retained artifacts and source/binary/process/profile/
-desktop cleanup are independently audited. Its producing source/capture inputs
-are unchanged by later test-selection/documentation updates. No result is relabelled
-for a newer candidate. Original approved A source `7090a03`, fingerprint and ten
-captures remain pinned; never replace or rebase that reference.
+All 1,731 frozen hashes remain unchanged. SDK children were reaped, the helper
+shut down cooperatively with exit 0, no matching process remains and disposable
+scratch/profiles were removed. Engine-internal input is runtime evidence, not
+physical-input or human acceptance. The first invocation failed in shell quoting
+before any SDK start; its evidence remains immutable. The corrected file-based
+invocation completed the initial campaign once without a runtime retry.
 
-At `4538297b30a26b2ef2f23df5028c3fbe8b1ef45c`, combined validation, automatic
-quality 41985108361 attempt 1 (both jobs/all 25 executed steps) and manual harness
-41985106408 attempt 1 (both targets/all groups) pass terminal audit. Both ZIP digests,
-all 842 source hashes per target, exact case names/exclusions, frontend/core/controller
-and cleanup assertions are checked. Original CI and earlier SDK failures remain
-preserved. Primary ignored `.toolchains/47-50/pr81-continuation/` owns logs,
-ZIPs/API receipts, `ci-terminal-audit.json` and independent Mac comparator replay.
-The [terminal evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#ci-terminal-audit-and-remaining-windows-gate-2026-11-05)
-owns exact candidates and limitations.
+Ignored `app/target/p81/` owns the exact producer, accepted inputs, raw logs,
+four PNG captures, ordered/normal/helper receipts, phase audits, process/cleanup
+receipts and handoffs. The coordinator independently verified the original
+41-file and continued 88-file manifests and replayed strict runtime/comparison
+validators. Its ignored `.toolchains/pr81-windows-20261105/proof-audit.json`
+and `comparison-replay-final/` retain that audit.
+[Owning evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#windows-proof-and-original-criterion-audit-2026-11-05)
+reconciles every original criterion and exact producing scope. #47 alone owns
+cumulative limits, actual counts and released capacity. No SDK reservation,
+process or test worker remains.
 
-This documentation publication needs its ordinary current-head quality/harness
-checks. #47 owns their live run/attempt/head and final audit after publication;
-do not commit another receipt solely to chase this document's SHA. Keep the existing
-T3 watcher during that audit, then unwatch at final handback. No SDK process/worker
-or engine reservation remains; #47 alone owns cumulative operation accounting.
+Mac ordered play at `92b3a20` and exact nested parity at `b5155f69` remain valid
+within their original producing scopes. Source milestones are effect correction
+`159a8c03`, recorder correction `9797e522` and CI selection correction `4538297b`.
+Core 604/frontend 376, three actual controller/core journeys and prior reviews
+are reused with an explicit empty implementation/test-input diff through the
+Windows candidate. No prior failure is relabelled. Approved A source `7090a03`,
+fingerprint and ten captures remain pinned.
 
-The next substantive work is Windows #47 ordered normal play and #50 matched
-nested normal/helper rendering at both aspects. Supported T3 isolated provisioning
-is blocked before model startup; its retained trace lacks actual Git arguments,
-destination, exit and stderr. No root cause or safe correction is established.
-No blind retry, shell-created child checkout or existing-worktree takeover is
-selected. Source transfer remains authorized once a supported binding exists.
-Further engine execution requires that capability and an applicable recorded
-reservation/selection. Broader native/package/human/full 3B acceptance stays separate.
-Keep the draft and tickets open. Older unique recovery retains its size exception.
+The next action is terminal audit of this documentation publication's required
+automatic quality and manual both-target harness runs. `.github/validation-plan.json`
+retains that selection. #47 owns exact publication SHA, run/attempt identities,
+combined status and final artifact/job audit; do not commit another receipt merely
+to chase this file's SHA. Register the T3 PR watcher after dispatch and release it
+at final handback. If still pending, retain this outcome in the same thread. All
+eight bounded automated criteria now have evidence; native-editor, package,
+physical-input, human and full Phase 3B acceptance remain separate. Older unique
+recovery retains its existing size exception.
 
 ## PR 79 merge and workspace closeout
 

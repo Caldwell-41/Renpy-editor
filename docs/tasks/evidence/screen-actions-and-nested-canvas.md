@@ -5,6 +5,136 @@
 acceptance, authorization and operation accounting. This file retains implementation
 checkpoints and detailed verification. No criterion is accepted by this entry.
 
+## Windows proof and original-criterion audit, 2026-11-05
+
+Kris authorized the clean Windows primary checkout directly, superseding the
+earlier isolated-worktree requirement. The verified root was the registered
+primary checkout; origin was `https://github.com/Caldwell-41/Renpy-editor.git`.
+Branch `codex/47-50-integration` matched the live draft PR head exactly at
+`f7b9f61772545e51664b6b9b720087f217ca2774`, tree
+`d68dcdfdd3b27267c0720a87ccd29cbcf2856ec9`. Source was clean and exclusively
+assigned. The previous `codex/phase3b-audit-fixes` branch remains at
+`039f22ce3c118f408145573ccedfeac0e93b7b70`. Existing worktrees, stash, ignored
+evidence, recovery and unrelated Python services were preserved.
+
+The coordinator retained source ownership; Terra Max executed read-only against
+frozen source. The first assignment stopped before any SDK start because nested
+PowerShell quoting turned the temporary path into a command. The original failure,
+cleanup and 41-file manifest remain unchanged. An ignored `.ps1` invoked with
+`-File` passed an SDK-free argument/source check, then completed the initial
+campaign once. This zero-start setup failure consumed no campaign or corrected
+runtime retry. No production or tracked harness change was necessary.
+
+### Preparation and producing identities
+
+Windows x64 used Rust/Cargo 1.90.0 MSVC, Node 24.19.0/npm 11.9.0 and CPython
+3.12.14/Pillow 12.3.0. The official Ren'Py 8.5.3 archive matched the published and
+pinned SHA256 `eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`.
+Ordered `prepare`/`validate` passed with `runtimeReady:true` and
+`normalStoryCallAdmitted:true`. The exact public-core nested export/replay test
+passed without engine execution. Both Python selections passed, with three ordinary
+observer tests and two explicit checks using `LOOMLIGHT_NESTED_FIDELITY_INPUTS`.
+Existing process ownership and private-desktop capability passed offline, with
+the capability desktop closed. No desktop, ACL, signing or security policy changed.
+
+| Retained input | SHA256 |
+| --- | --- |
+| Producing `loomlight_core-a273143cc9760f96.exe`, 40,870,400 bytes | `83c7f834cc1754423ae4680f724ede3267e676d8b98fa394d78f279a6cb90d75` |
+| Ordered accepted manifest | `8d33ebb774f5a138661191cddcb4306305d2cc6f10f74e473333dd19a23a81e1` |
+| Nested accepted export | `2a3b515a91e3bbeaf6e963e59d389a02248816d340b6bd4c67e51a514e67723c` |
+| Continued 88-file size/hash manifest | `1d2d8b58620aa539f4280d7f6e7be9d2d21f79242289abd691eb2916fd3449e1` |
+| Original zero-start 41-file manifest | `a7ac36e6230b32024b940bbe62e2a44fe48cf7d50fb6752127343687c8478362` |
+
+The nested producer was selected exactly as
+`screens::canvas::nested_tests::nested_fidelity_exports_accepted_source_assets_and_matched_plans_without_execution`.
+The helper used that same retained executable with exact ignored selection
+`screens::canvas::nested_tests::sdk::nested_fidelity_hidden_helper_captures_exported_cases`.
+Its environment bound the full candidate, fresh accepted-input directory, fresh
+helper-output directory and verified archive. No replacement executable or
+reconstructed geometry entered the comparison.
+
+### Runtime, comparison and cleanup
+
+Ordered qualification passed seven starts: version, compile, lint, then click and
+keyboard at both aspects. Every case observed all eight unmodified built-in
+actions exactly once in displayed order, correct Show/Hide visibility and
+exactly-once Story continuation. Nested normal qualification passed compile,
+lint and both captures. Three adapter validation/discovery starts and one hidden
+helper then passed both matched cases.
+
+| Windows aspect | Differing pixels | Maximum channel delta | Ordered/clipped geometry |
+| --- | --- | --- | --- |
+| 1280x720 | 0 | 0 | All 29 records match exactly |
+| 1024x768 | 0 | 0 | All 29 records match exactly |
+
+The existing comparator and the coordinator's offline replay both pass at zero
+tolerance. Accepted source, assets, font, literal samples and stationary viewport
+state match. Both paths report ANGLE2 and exclude editor guides. Matching PNG
+SHA256 values are `60f6a3add95dfbfe04d6d26ebec8a62dea52b3fb3b1142ff845771c5fd45a051`
+and `7c7084ae915225806d10bd90ed0de5410e7fe47af46e700e9ab905bfcd999886`, respectively.
+
+All 1,731 frozen file hashes and clean tracked status match before/after the
+phases and at final audit. All seven ordered and four normal commands exited
+zero and were reaped. The helper's shutdown was cooperative with exit 0 and
+complete cleanup. Three process monitors report no survivors; the independent
+final process query also finds no matching process. Their 50 ms sampling can miss
+short-lived children, so runner counters own actual start accounting. Scratch
+profiles and normal scratch were removed; the empty owned temporary root was
+removed after containment/reparse checks. No package or native-editor session ran.
+
+Raw evidence remains ignored under `app/target/p81/`: `o/`, `n/`, `h/`, `c/`,
+phase audits, process receipts, `cleanup-continued.json`, `handoff-continued.md`
+and both immutable manifests. The coordinator independently verified every
+manifest hash/size, replayed all four ordered logs and the exact comparator,
+and checked source/process/profile cleanup. Its ignored
+`.toolchains/pr81-windows-20261105/proof-audit.json` and
+`comparison-replay-final/` retain that audit. A local audit-script filename
+assumption failed after comparison, was corrected offline, and the complete audit
+then passed; no SDK was restarted and no original result was modified.
+
+#47 remains the sole accounting owner. It records the campaign-ceiling extension,
+actual consumption and release of unused capacity. The initial Windows campaign
+completed without a runtime retry. No SDK process, test worker or reservation
+remains. The source tested above remains the producing candidate; later evidence
+publication changes documentation only.
+
+### All original criteria
+
+The implementation/test inputs have an empty diff from audited `4538297b` through
+the Windows producing candidate. Existing core 604/frontend 376, three actual
+controller/core journeys, history/reopen and approved A evidence retain their
+original producing candidates and scopes. They are reused on that explicit
+unchanged-input basis, not relabelled as fresh native execution. Mac ordered play
+at `92b3a20` and exact nested comparison at `b5155f69` remain unchanged.
+
+| Original criterion | Result and exact evidence | Remaining boundary |
+| --- | --- | --- |
+| #47 compatible bool/int/string assignments; invalid/missing/unsupported drafts retained | Public `action_tests.rs` assignment, mixed-template, refusal and semantic-no-op cases; real controller/core source/history/reopen journeys. Fresh `f7b9f617` ordered export and runtime observe bool, large integer, negative integer and literal string writes. | No missing bounded automated proof identified. Native-editor/human acceptance is separate. |
+| #47 qualified Show/Hide/Finish; Finish last; displayed order exactly once | Public action/target eligibility cases and `qualified_panel_targets`; Finish requires blocking Dialog. Fresh Windows `o/result.json` and four logs pass all eight actions, visibility and continuation. Retained Mac four-case ordered proof passes. | Engine-internal click/keyboard events establish runtime behavior, not physical input. |
+| #47 marked separate samples; passive selection/sample changes execute no actions/Python | Revision-bound literal sample tests in `nested_canvas_tests.rs`, mixed-text draft cases, production-control DOM and actual controller/core checks. Fresh accepted samples remain literal in both Windows capture paths. | No physical-input or wider human acceptance inferred. |
+| #47 source mappings/history/reopen; complete revisioned effects; custom effects unknown | Public action history/reopen/refusal/atomic-Apply cases and four effects cases at `159a8c03` cover Show/Hide target uncertainty, shared-component revisions, finite action cycles and stale Call refusal. Final 604-core run and all three controller/core journeys pass at unchanged inputs. | No general native/package acceptance inferred. |
+| #50 actual nested component/grid/viewport comparison and later-sibling layering | Exact public export/replay plus fresh Windows normal/helper pair at `f7b9f617`; source-ordered geometry includes later siblings. Mac `b5155f69` matched pair is retained. | No remaining example/comparison gap. |
+| #50 spacing/clipping/size limits/component/style reuse at both aspects and targets | Windows zero pixels/channel delta and all 29 geometry records equal at each aspect; Mac `b5155f69` has the same exact metrics. Source/assets/font/samples/viewport state match; guides excluded. | Tolerance remains zero; no supported-node waiver. |
+| #50 shared-definition invalidation; explicit partial missing/custom coverage | Public nested planner missing/ambiguous/custom/cycle/bounds cases and frontend freshness/withdrawal cases pass; shared-definition/effect revisions reject stale comparisons. Their inputs are unchanged at `f7b9f617`. | Fresh pixel captures supplement these invalidation/refusal checks; they do not replace them. |
+| #50 residual accounting and no arbitrary project Python/displayable execution in editor | Both-target residuals are zero after the recorded recorder correction. Data-only planning, literal dangerous-looking samples, helper admission and strict single-pixel/geometry/order refusal checks pass. Original failed campaigns remain preserved. | Deliberate normal-game SDK execution is separate from the editor's data-only helper. |
+
+All eight bounded automated criteria now have evidence; neither ticket is closed
+or marked accepted by this campaign. Keep PR #81 draft and #47/#50 open as directed.
+Native-editor, package, physical-input, human and full Phase 3B acceptance remain
+separate and were not selected. The approved A source `7090a03`, fingerprint and
+ten captures remain pinned. Current-head required quality and both-target harness
+CI must complete and pass terminal audit after publication. #47 owns their live
+run/attempt/head receipt, so no extra commit is needed merely to chase this
+document's publication SHA. No merge or release is selected.
+
+Documentation review passes whitespace and the unchanged repository validator's
+required-file, text/privacy, section-link and staged-diff checks for all 1,731
+tracked files. The full-checkout invocation fails only on missing final newlines
+in two pre-existing ignored `.tmp` recovery receipts; those bytes are preserved.
+Fresh-checkout CI remains required. CURRENT has 3,410 words and HANDOVER 6,365;
+their existing size exception remains necessary for unique older recovery and
+pending acceptance. Only their active #47/#50 sections changed.
+
 ## CI terminal audit and remaining Windows gate, 2026-11-05
 
 `Loomlight validation` passes for implementation/test candidate
