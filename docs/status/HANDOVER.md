@@ -25,7 +25,7 @@ Browser/desktop operation uses Terra 6.1 max. Core work may continue during desi
 
 [#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) owns the shared limits
 and [detailed evidence](../tasks/evidence/bars-and-image-buttons.md) records contracts,
-worker checkout identities and readiness. Windows SDK use is 4/16; other counts are
+worker checkout identities and readiness. Windows SDK use is 8/16; other counts are
 zero and no reservation is pending. Windows x64 and macOS ARM64 qualification remain
 required. The linked Mac project was identified, but its isolated readiness delegation
 was refused before task creation because T3 does not support linked-environment
@@ -35,8 +35,12 @@ remote/capped operation started. The Windows SDK archive matches its published p
 
 Next independent work is rerunning the corrected parent runtime observer. The
 integrated `4894868f` source producer passed; its first SDK normal-play case passed
-engine assertions but failed the appearance-capture gate. The failed result and
-all four actual starts are retained. Keep the producing `59e97d7b` export and
+engine assertions but failed the appearance-capture gate. A second run at `fe78025f`
+failed on the observer's unavailable pygame serialization API; its two saved native
+captures match exactly offline. Both failed results and eight actual starts remain
+retained. The correction uses the proven pixel-read API. Its next runtime cases may
+reuse completed setup on the identical accepted source only after the explicit
+producer/setup rejecting gates pass. Keep the producing `59e97d7b` export and
 its exact hash distinct from later integrated exports. The extraction-only final core
 guard does not change that fixture's runtime inputs. The broad `42ee7e58` run failed;
 its seven TLS rechecks pass after a process-PATH fix, while three Windows symlink

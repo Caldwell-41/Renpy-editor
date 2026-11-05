@@ -24,5 +24,12 @@ Run the admission unit tests and explicit retained-export checks before the SDK
 stage. The latter require `LOOMLIGHT_SCREEN_CONTROLS_ACCEPTED` and
 `LOOMLIGHT_SCREEN_CONTROLS_MANIFEST_SHA256`; absent inputs fail rather than skip.
 The SDK command requires an exact committed candidate, checksum files and
-`--allow-fixture-execution`. Reserve its seven process starts in #51 first.
+`--allow-fixture-execution`. A fresh run needs seven starts. An observer-only
+correction may use `--source-candidate` and `--setup-from` to reuse the original
+producer and three completed setup checks on exactly the same accepted files.
+Every core/SDK dependency must remain unchanged; original input and binary hashes
+are checked against the producing commit. The current observer stays bound to
+its own commit. The four runtime cases load that current instrumentation anew.
+Run the explicit `screen_controls_prepared_checks.py` admission/rejection checks
+before trusting reuse. Reserve the selected starts in #51 first.
 The result retains actual starts, failures, process cleanup and source identities.

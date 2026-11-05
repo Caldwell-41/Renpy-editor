@@ -377,3 +377,33 @@ pass. The next SDK run must establish whether the capture correction works.
 #51 records cumulative Windows SDK use 4/16, all other target/type counts zero,
 no uncertain starts and complete process/scratch cleanup. The unused three-start
 reservation was released. Original logs and failed result stay retained.
+
+The second producer at `fe78025fcf66652c072c9f7e64c4c98162ddb019` passed in
+128.391s, with manifest SHA256
+`04ee4aebdc198bf877bf429bbe602fbd28bc6f5f592852e55dbe16fd4c398b16`.
+Its second SDK matrix stopped after four starts because the pinned Ren'Py pygame
+module lacks the observer's assumed `image.tostring` API. Version/compile/lint
+passed; the normal case failed in its observation hook. Two PNG captures saved
+before that error independently have identical full decoded RGBA hash
+`884fcddfef4b188bd506a7c9f97203fee4ea91f6f7310f5e80bdaf7acdb54360`
+and 160x80 size. This confirms the normal reference/readback pair only, not the
+other states or the matrix. The replacement hashes row-major pixels through the
+already-working Surface `get_at` API.
+
+Reassessment before another run separates those harness failures from production
+behavior. Core and accepted source are unchanged; neither failure demonstrates a
+product defect. Repeating the producer and SDK setup for this observer-only edit
+would not exercise changed production inputs. A narrow reuse admission therefore
+binds the original producer's inputs and binary to its commit, requires every
+non-observer dependency unchanged, and separately binds current instrumentation
+to its committed candidate. Reuse of the first three SDK checks requires the exact
+same accepted manifest, prior inputs, SDK pin, successful checks and cleanup.
+The failed campaign stays failed. Four fresh runtime cases remain required.
+Explicit rejecting checks must pass before this route is used. No numerical pixel
+tolerance or source/runtime acceptance waiver is introduced.
+
+Current cumulative Windows SDK consumption is 8/16. The second unused three-start
+reservation is released; other operation/target counts remain zero and no process
+or reservation is pending. Tracked-source validation passes 1742 files. Full
+validation still fails only the two previously recorded untracked recovery-receipt
+newlines; those files remain untouched.

@@ -121,6 +121,12 @@ init python:
     def _sc_prefix_observe():
         _sc_prefixes.append(_sc_control(renpy.display.behavior.ImageButton).style.prefix)
 
+    def _sc_pixels_sha(surface):
+        width, height = surface.get_size()
+        rgba = bytes(channel for y in range(height) for x in range(width)
+                     for channel in surface.get_at((x, y)))
+        return _sc_hashlib.sha256(rgba).hexdigest()
+
     def _sc_sample_appearances():
         global _sc_samples_inert, _sc_bar_size, _sc_bar_range, _sc_bar_offset, _sc_bar_step
         before = (control_score, len(_sc_calls))
@@ -161,8 +167,7 @@ init python:
                 _sc_appearances.append(dict(state=state, renderedSize=list(rendered.get_size()),
                     rgba=list(pixels.get_at((80, 40))), referenceRGBA=list(reference_pixels.get_at((80, 40))),
                     sourceRGBA=list(raw_image.get_at((40, 20))),
-                    pixelsSHA256=_sc_hashlib.sha256(_sc_pygame.image.tostring(pixels, "RGBA")).hexdigest(),
-                    referenceSHA256=_sc_hashlib.sha256(_sc_pygame.image.tostring(reference_pixels, "RGBA")).hexdigest()))
+                    pixelsSHA256=_sc_pixels_sha(pixels), referenceSHA256=_sc_pixels_sha(reference_pixels)))
         finally:
             button.set_style_prefix(saved_prefix, True)
             renpy.display.render.invalidate(button)
