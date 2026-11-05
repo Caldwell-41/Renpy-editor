@@ -30,7 +30,7 @@ function fixture(kind:"dialog"|"panel"|"component"="dialog",bound=false) {
 }
 test("actions and text share one original-base Apply and retain refused input across refresh and remount",async()=>{
  const f=fixture();try{f.workspace.mount(document.body);await flush();f.select("close");await flush();
- f.change("Add action","setVariable");f.change("Action 1 variable","coins");f.change("Action 1 value","42");
+ f.change("Add action","setVariable");assert.equal((document.activeElement as HTMLElement)?.dataset.part,"variable");f.change("Action 1 variable","coins");f.change("Action 1 value","42");
  f.change("Add action","showScreen");assert(![...f.find("Action 2 screen").options].some(o=>o.value.includes("unsafe")));
  f.change("Add action","finishInteraction");f.change("Text","Done");f.button("Apply");await flush();
  assert.equal(f.workspace.hasDraft(),true);const first=f.writes[0]!;assert.equal(first.expectedRevision,"original");
@@ -59,7 +59,7 @@ test("typed assignments validate without losing input, preserve text-first edits
  f.change("Action 3 value","-9223372036854775808");const earlier=f.workspace.panel.querySelector<HTMLButtonElement>('[aria-label="Move action 3 earlier"]')!;earlier.click();assert.equal(f.find("Action 2 value").value,"-9223372036854775808");assert.equal(document.activeElement?.tagName,"SUMMARY");assert.equal(f.find("Action 4 type").value,"finishInteraction");
  f.button("Apply");await flush();const command=f.writes[0]!.command as {values:unknown;interaction:{actions:unknown[]}};assert.deepEqual(command.values,{text:"Proceed"});assert.deepEqual(command.interaction.actions,[{type:"setVariable",variableId:"seen",value:true},{type:"setVariable",variableId:"coins",value:"-9223372036854775808"},{type:"setVariable",variableId:"name",value:"[opaque_python()] {literal}"},{type:"finishInteraction"}]);
  for(let i=0;i<4;i++)f.change("Add action","setVariable");assert.equal(f.find("Add action").disabled,true);assert.equal(f.find("Action 8 type").value,"finishInteraction");
- f.workspace.panel.querySelector<HTMLButtonElement>('[aria-label="Remove action 1"]')!.click();assert.equal(f.find("Add action").disabled,false);
+ f.workspace.panel.querySelector<HTMLButtonElement>('[aria-label="Remove action 1"]')!.click();assert.equal(document.activeElement?.tagName,"SUMMARY");assert.equal(f.find("Add action").disabled,false);
  f.find("Action 1 value").dispatchEvent(new window.KeyboardEvent("keydown",{key:"Escape",bubbles:true,cancelable:true}));assert.equal(f.workspace.hasDraft(),false);assert.equal(f.writes.length,1);
  }finally{await f.dispose();}
 });

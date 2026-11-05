@@ -13,11 +13,12 @@ import type {ScreenVariable} from "../src/screen-interactions.ts";
 await loadPreferences();
 const state=new URLSearchParams(location.search).get("state")??"button";
 const host=document.querySelector<HTMLElement>("#preview")!;
+const stateTitle=document.querySelector<HTMLOptionElement>('[aria-label="Review state"] option');if(stateTitle)stateTitle.textContent=({button:"Button actions",text:"Text and samples",limit:"Eight actions",invalid:"Invalid integer"} as Record<string,string>)[state]??state;
 const sample=fixture("");
 const variables:ScreenVariable[]=[{id:"coins",technicalName:"coins",variableType:"int",defaultValue:"12",source:{sourceRevision:"coins-source"}},{id:"help_seen",technicalName:"help_seen",variableType:"bool",defaultValue:false,source:{sourceRevision:"seen-source"}},{id:"player_name",technicalName:"player_name",variableType:"string",defaultValue:"Mara",source:{sourceRevision:"name-source"}}];
 for(const doc of sample.documents){doc.authoringRevision="fictional-authoring";for(const node of doc.screens[0]!.nodes){if(node.kind==="text")node.variableBindings=[];if(node.id==="close")node.actions=[{type:"setVariable",variableId:"help_seen",value:true},{type:"showScreen",target:{screenId:"About",sourceName:"About"}},{type:"finishInteraction"}];}}
 const body=sample.documents[0]!.screens[0]!.nodes.find(n=>n.id==="body")!;body.literal="Coins: [coins!q]\nPlayer: [player_name!q]";body.variableBindings=[{variableId:"coins"},{variableId:"player_name"}];
-if(state==="limit"){const button=sample.documents[0]!.screens[0]!.nodes.find(n=>n.id==="close")!;while(button.actions!.length<8)button.actions!.splice(button.actions!.length-1,0,{type:"setVariable",variableId:"coins",value:"12"});}
+
 const owners=sample.documents.map(doc=>({id:doc.screens[0]!.name,rootId:"root",name:doc.screens[0]!.name,path:doc.path,kind:doc===sample.documents[0]?"dialog" as const:"panel" as const,resolved:true,sourceRevision:doc.revision}));
 const frame=labPage(host,{state,theme:"dark"},{screen:"screens",title:"Screens",subtitle:""});frame.heading.remove();frame.shell.classList.add("screen-interactions-study");frame.shell.querySelector(".lp-sample")!.textContent="A · Expandable actions · Draft";frame.shell.querySelector(".lp-fiction")!.textContent="Browser mock · All changes stay in memory";
 const nav=action("Screens",()=>{});nav.className="tree-item selected";nav.ariaLabel=nav.title="Screens";nav.ariaCurrent="page";nav.prepend(icon("panel"));frame.shell.querySelector('[aria-label="Source"]')!.after(nav);
@@ -41,7 +42,12 @@ workspace.mount(frame.content);
 const observer=new MutationObserver(()=>{
  const row=workspace.panel.querySelector<HTMLElement>(`[data-node-id="${state==="text"?"body":"close"}"]`);if(!row)return;observer.disconnect();row.dispatchEvent(new MouseEvent("dblclick",{bubbles:true}));
  if(state==="text")[...workspace.panel.querySelectorAll("button")].find(b=>b.textContent==="Sample values")?.click();
- if(state==="invalid"){const variable=workspace.panel.querySelector<HTMLSelectElement>('[aria-label="Action 1 variable"]')!;variable.value="coins";variable.dispatchEvent(new Event("change",{bubbles:true}));const value=workspace.panel.querySelector<HTMLInputElement>('[aria-label="Action 1 value"]')!;value.value="12 + 1";value.dispatchEvent(new Event("input",{bubbles:true}));workspace.panel.querySelector<HTMLButtonElement>("[data-text-apply]")!.click();}
+ if(state==="limit") {
+  for(let index=0;index<5;index++){const add=workspace.panel.querySelector<HTMLSelectElement>('[aria-label="Add action"]')!;add.value="setVariable";add.dispatchEvent(new Event("change",{bubbles:true}));}
+  const details=[...workspace.panel.querySelectorAll<HTMLDetailsElement>(".siv-sequence details")];for(const [index,detail]of details.entries())detail.open=index===0;
+  workspace.panel.querySelector<HTMLElement>(".siv-sequence summary")?.focus({preventScroll:true});workspace.panel.querySelector<HTMLElement>(".screen-text-body")!.scrollTop=0;
+ }
+ if(state==="invalid"){const variable=workspace.panel.querySelector<HTMLSelectElement>('[aria-label="Action 1 variable"]')!;variable.value="coins";variable.dispatchEvent(new Event("change",{bubbles:true}));const value=workspace.panel.querySelector<HTMLInputElement>('[aria-label="Action 1 value"]')!;value.value="12 + 1";value.dispatchEvent(new Event("input",{bubbles:true}));}
  host.dataset.ready="true";
 });observer.observe(workspace.panel,{childList:true,subtree:true});
 Object.assign(window,{productionComparison:workspace});

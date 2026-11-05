@@ -281,6 +281,7 @@ export class ScreenText {
       const field=this.fieldControl(focus.field);
       if(focus.start!==null && focus.end!==null && (field instanceof HTMLTextAreaElement || field instanceof HTMLInputElement && ["text","search","tel","url","password"].includes(field.type)))field.setSelectionRange(focus.start,focus.end);
     }
+    if(!retainedFocus&&!draft.actions?.focus&&view.selected.kind==="textbutton")card.querySelector<HTMLElement>(".siv-sequence summary")?.focus({preventScroll:true});
     return true;
   }
   sync(): void {
@@ -308,8 +309,10 @@ export class ScreenText {
     const general = card.querySelector<HTMLElement>(".screen-text-error")!;general.textContent = error && !["text","size","color"].includes(error.field) ? error.text : "";general.hidden = !general.textContent;
     card.querySelector<HTMLElement>("[data-text-review]")!.hidden = error?.field !== "source";
     const style=this.styleAction(draft,this.values(draft,false)),uses=this.uses(draft),screens=new Set(uses.map(u=>JSON.stringify([u.path,u.screenName]))).size,shared=style?.scope==="shared"&&Object.keys(this.sharedValues(draft,this.values(draft,false))).length>0;
+    const actionOnly=draft.actions?.touched&&!Object.keys(this.values(draft,false)).length&&!this.styleAction(draft,this.values(draft,false))&&!this.layout.hasNodeDraft(view.document,view.screenName,view.selected);
+    if(actionOnly)card.querySelector<HTMLElement>(".screen-text-draft")!.textContent="Action draft";
     const component=card.dataset.componentScope==="true",componentShared=card.querySelector<HTMLElement>(".screen-component-scope")?.dataset.shared!=="false",blockedWrite=!!this.host.writeBlocked?.();
-    card.querySelector<HTMLElement>(".screen-text-state")!.textContent = blockedWrite ? "Edits retained · reload needed" : busy ? "Applying changes…" : dirty ? component ? "Changes update this component wherever it is used." : shared ? `Shared appearance changes apply to ${screens} screens and ${uses.length} elements. Text content and Layout change this element only.` : "Changes apply to this element only." : "";
+    card.querySelector<HTMLElement>(".screen-text-state")!.textContent = blockedWrite ? "Edits retained · reload needed" : busy ? "Applying changes…" : dirty&&!actionOnly ? component ? "Changes update this component wherever it is used." : shared ? `Shared appearance changes apply to ${screens} screens and ${uses.length} elements. Text content and Layout change this element only.` : "Changes apply to this element only." : "";
     card.querySelector<HTMLButtonElement>("[data-text-apply]")!.textContent=component ? componentShared?"Review changes…":"Apply changes" : style ? shared ? `Apply to ${screens} ${screens===1?"screen":"screens"}…` : "Apply to this element…" : "Apply";
     card.querySelector<HTMLButtonElement>("[data-text-apply]")!.disabled = busy || !dirty || !!this.host.writeBlocked?.();
     card.querySelector<HTMLButtonElement>("[data-text-cancel]")!.disabled = busy || !dirty && !blockedWrite;
@@ -631,7 +634,7 @@ export class ScreenText {
     if(draft.actions?.touched || values.text!==undefined&&draft.node.kind==="text"&&draft.node.variableBindings!=null) {
       if(!draft.interaction){reservation.release();this.fail("source","Variable and action metadata are unavailable. Your edits are kept.");return;}
       try{interaction=prepareInteraction(draft.interaction,draft.actions?.touched?draft.actions:undefined);}
-      catch(error){reservation.release();if(draft.actions){const section=this.card?.querySelector<HTMLElement>(".siv-actions");if(section){renderActions(section,draft.actions,draft.interaction,false,()=>{this.drafts.set(draft.key,draft);this.sync();});section.querySelector<HTMLElement>("[aria-invalid]")?.focus({preventScroll:true});}}this.host.note((error as Error).message,true);return;}
+      catch(error){reservation.release();if(draft.actions){const section=this.card?.querySelector<HTMLElement>(".siv-actions");if(section){renderActions(section,draft.actions,draft.interaction,false,()=>{this.drafts.set(draft.key,draft);this.sync();});const invalid=section.querySelector<HTMLElement>("[aria-invalid]");invalid?.focus({preventScroll:true});(invalid?.closest(".siv-payload")??invalid?.parentElement)?.scrollIntoView({block:"nearest"});}}this.host.note((error as Error).message,true);return;}
     }
     const command: CompositionCommand = {type:"formatText",nodeId:view.selected.id!,values,...(interaction?{interaction}:{}),...(style ? {style} : {}),...(layout ? {layout:layout.values} : {})};
     if (style && !(await this.reviewStyle(draft, true))) {reservation.release();return;}
