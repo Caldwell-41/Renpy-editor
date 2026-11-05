@@ -600,3 +600,32 @@ feedback, then launch the second and final selected round with fresh read-only
 reviewers on the exact resulting revision. No score, final successor identity or
 Kris approval is inferred. The direct approved designer-to-editor handoff remains
 required after Kris's decision, copying the coordinator.
+
+## Sol round-two findings and corrected A2 pin, 2026-11-06
+
+Sol round two reviewed source `fb147c895898b2f24ce30d75261302157dc7279b`, scored
+8.5/10 and accepted the visual direction. It reported two must-fix source issues:
+shared error state leaking across control drafts or remaining after action
+correction, and Horizontal position accepting `abc`. That score applies to the
+reviewed source only; no score is assigned to the later correction.
+
+The designer reports a focused synthetic red reproduction of the error leak,
+draft-owned error/clear paths, signed whole-pixel validation within -16384..16384
+and aligned picker rows. Corrected source is
+`b9eb9ad6208a8b8e00ccee0dd27ba5091fdfbbf4`, fingerprint
+`e99a95704f1f1665e03755b9b812619d6c948b6c5a486617b7be7b9f4352a9f5`.
+Fourteen focused synthetic DOM groups reportedly pass at both 1280/560. They make
+no real core, native or physical-input claim.
+
+Parent read-only Git inspection confirms both source identities exist. The fix
+changes only `refined-study.ts`, `refined.css` and the owning REFINEMENT record;
+the complete diff from original `0a6e571e` remains within lab/record ownership.
+Production and original study/style/appearance files are unchanged in that diff.
+The parent has not independently rerun the synthetic checks or recomputed this
+fingerprint, and this scope check is not another council review or rescore.
+
+Opus round two remains pending. No third council task, user approval or production
+handoff is selected. After the remaining review, the designer will finalize the
+exact successor and captures, request Kris's approval, then deliver any approved
+handoff directly to the editor and copy the coordinator. A later correction may
+change this intermediate source identity without changing the recorded Sol score.

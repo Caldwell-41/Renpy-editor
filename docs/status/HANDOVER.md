@@ -29,12 +29,15 @@ read-only Opus 5.5 xhigh and Sol 6.1 xhigh feedback under the council skill.
 Source `0a6e571e` / `inspector-v1` remains pinned, with its synthetic proof scoped
 to that source. The editor received this gate directly and is waiting for the
 approved successor handoff. No additional coordinator council is selected.
-Current unapproved A2 pin is `99f983ff` / `inspector-v2`; the evidence owner records
-its full source/fingerprint and the reported eleven-group synthetic proof. Sol's
-round-one 7/10 applies to original A. Opus round one is pending, with no polling or
-replacement selected. Incorporate that feedback before fresh round-two reviewers
-assess the then-current exact successor. This intermediate pin is not an approved
-production handoff and may change after feedback.
+Current corrected but unapproved A2 pin is `b9eb9ad6` / `inspector-v2`; the evidence
+owner records its full source/fingerprint and the reported fourteen-group synthetic
+proof. Sol round two scored reviewed `fb147c89` at 8.5/10 and accepted the visual
+direction while finding two source issues. The designer reports both corrected in
+`b9eb9ad6`; the score remains attached to `fb147c89`, with no rescore inferred.
+Opus round two is pending. No third council task is selected. The designer must
+finalize the exact successor/captures after that review, then request Kris's decision.
+There is no production approval or implementation handoff yet. Earlier pins/proof
+and Sol round one's 7/10 on original A retain their historical scope.
 
 [#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) owns the shared limits
 and [detailed evidence](../tasks/evidence/bars-and-image-buttons.md) records contracts,
