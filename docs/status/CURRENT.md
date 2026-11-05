@@ -2,36 +2,25 @@
 
 ## Active #47/#50 draft delivery
 
-Kris selected implementation of [#47](https://github.com/Caldwell-41/Renpy-editor/issues/47)
-and [#50](https://github.com/Caldwell-41/Renpy-editor/issues/50), final verification
-and a draft PR. CI is explicitly deferred. Both tickets remain open and unaccepted.
+Kris selected completing [draft PR #81](https://github.com/Caldwell-41/Renpy-editor/pull/81)
+and checking both original tickets. The published correction `159a8c03` propagates
+Show/Hide target uncertainty and shared-component/action revisions. The approved
+A controls/reference and renderer remain unchanged. Both tickets remain open and
+unaccepted; CI stays deferred.
 
-The integrated controls use approved A (`inspector-v2`), canonical ordered actions,
-mixed variable text, one atomic Apply transaction and separate inert samples.
-Nested planning supports component expansion, clipping, layering and freshness.
-The approved source `7090a03`, fingerprint and ten captures remain unchanged.
-Unrelated user guide changes and the untracked Phase 1 audit are preserved.
+| Capability | Automated proof | Remaining acceptance |
+| --- | --- | --- |
+| Variable text and ordered actions | 376 frontend passes; actual UI/core/history/reopen journeys; Mac ordered play at `92b3a20` | Windows normal play and native/package/CI |
+| Target effects and revisions | Public red/green; four focused effects cases including cycles and shared changes | Final corrected routine core run |
+| Nested component canvas | Data-only plans, freshness and source checks; earlier Mac normal reference captures | Fresh helper comparison, both-target parity and measured residuals |
 
-Combined verification passed 376 frontend tests, 602 routine core tests, the build
-and three real UI-to-core journeys. Core's 56 explicit ignores and three documented
-exclusions remain separate. Current Lab passed 1,456 cases after the shared CSS
-ownership correction. Final review found one P3 Standards issue, now corrected,
-and no actionable Spec implementation defect.
-
-Mac candidate `92b3a20` passed ordered normal play for click/keyboard at both aspects
-and both nested normal-game reference captures. The helper comparison remains
-unrun after a pre-launch permission refusal and a synthetic-project reopen conflict.
-An offline replay reproduced the conflict and verified correction of the
-export's omitted identity-bound files. This changes qualification setup only.
-Windows remains blocked by unsupported isolated T3 provisioning. Both-target
-rendering parity, measured residuals, native/package proof and CI remain pending.
-
-[The current evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#draft-pr-reconciliation-2026-11-05)
-owns original-criterion results, candidates, failures and recovery. #47 alone owns
-cumulative operation accounting. All unused reservations are released; no capped
-operation is assigned. The selected draft publication carries these limits; #47
-owns its publication receipt. Neither ticket is accepted or closed. Preserve all
-worktrees and unique receipts.
+The first renewed Mac assignment refused only its sandbox admission query, with
+zero starts. An unsandboxed read-only query confirms the desktop unlocked/awake.
+#47 owns the unused final-campaign reservation and exact next candidate. Windows
+still lacks supported isolated provisioning and useful Git failure diagnostics.
+[Continuation evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#pr-81-continuation-and-effect-correction-2026-11-05)
+owns checks, candidates and retained failures. Preserve unrelated work and unique
+receipts. Historical recovery below justifies this file's existing size exception.
 
 ## Help dialog and base Help canvas merged and accepted
 

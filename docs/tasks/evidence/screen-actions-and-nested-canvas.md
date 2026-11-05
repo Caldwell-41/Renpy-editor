@@ -5,6 +5,61 @@
 acceptance, authorization and operation accounting. This file retains implementation
 checkpoints and detailed verification. No criterion is accepted by this entry.
 
+## PR 81 continuation and effect correction, 2026-11-05
+
+Kris selected completing the remaining #47/#50 work and updating draft PR #81.
+CI remains deferred. Both original tickets remain open and unaccepted. The
+coordinator owns code, status and publication; test delegates own only their
+isolated checkouts and ignored outputs.
+
+Fresh review against `e2a02bc...ff1924d` found zero actionable Standards findings
+and one P2 Spec defect. Public IPC reproduced A's typed Show(B) reporting
+`effects.unknown:false` when B's custom on-show action correctly reported unknown.
+Hide had the same omission. Commit `159a8c036002939ee40b682b1ce3241a99c680aa`
+fixes the existing effect resolver to visit action targets and their component
+closure. It propagates uncertainty and definition/action revisions. A visited set
+keeps action-reference cycles finite; recursive component inclusion still refuses.
+No renderer, controls or approved reference changed.
+
+The public effects test failed before the fix and passes afterward for Show and
+Hide, including reopen. All four focused effects cases pass, covering shared
+component changes, finite A/B action cycles, stale review refusal and existing
+self-actions/Story effects. A second test's initial setup omitted the required
+container `text` field; its INVALID_PAYLOAD failure is retained separately from the
+product red/green result. The corrected setup passes.
+
+Pinned checks pass 376 frontend cases, typechecking and production build. The
+three actual controller/core journeys pass with confirmed fixture cleanup at the
+corrected source. A broad pre-correction core run passes 602 cases with 56 explicit
+ignores and three documented exclusions. The final corrected full routine core
+run is pending. Logs/results are retained under primary ignored
+`.toolchains/47-50/pr81-continuation/`.
+
+The first campaign-3 delegate at `ff1924d` refused its sandbox desktop query with
+all admission fields null. It started no SDK/helper, created no temporary profile
+and acquired no assertions. Its eight slots are unused; campaign 3 is uncharged.
+Test checkout `t3-1fe2d0f8` retains the preflight and handoff, with manifest SHA256
+`82c794a87866645b934b886d1d63ac774d098d57e5681757f1e3c205e3b3e6f0`.
+The coordinator's established unsandboxed read-only query positively reports
+onConsole/loginDone/displayActive true and screenLocked/displayAsleep false.
+Null sandbox fields establish a query capability failure, not a locked desktop.
+
+#47 owns retargeting the same unused Mac eight-SDK/one-helper reservation to the
+corrected candidate in a fresh isolated Terra Max test checkout. The assignment
+must recheck positive admission through the established unsandboxed route, use
+the existing desktop/process owners, export/replay fresh source, run both normal
+captures and helper cases, compare at zero tolerance and stop at the first
+execution failure. No package/native-editor or CI starts are assigned yet.
+Windows remains unreserved. Readback confirms the original provisioning failure
+still has no retained Git arguments, destination, exit code or stderr; no safe
+tool-level correction or blind retry is established.
+
+Original criteria retain the map below. #47's effects implementation defect is
+corrected, but Windows normal play remains unrun. #50 still needs actual matched
+helper captures, both-target/aspect parity and measured residuals. Native/package,
+CI and broader acceptance remain distinct and pending. The approved A reference
+and all historical failures/recovery material remain unchanged.
+
 ## Draft PR reconciliation, 2026-11-05
 
 The selected outcome is a draft PR for #47/#50. Both issues remain open and

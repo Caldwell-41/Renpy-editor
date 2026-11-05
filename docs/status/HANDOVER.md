@@ -2,50 +2,53 @@
 
 ## Active #47/#50 draft delivery
 
-Continue on `codex/47-50-integration`, based on `e2a02bc` from
-`codex/phase3b-screen-designer`. Kris selected a draft PR after combined verification
-and final review; CI stays off. Both tickets remain unaccepted. Preserve the user's
-committed guide updates, untracked Phase 1 audit, worktrees and all unique receipts.
-Do not replay already integrated worker commits or reset to an old handoff SHA.
+Continue in this thread on `codex/47-50-integration`,
+[draft PR #81](https://github.com/Caldwell-41/Renpy-editor/pull/81), targeting
+`codex/phase3b-screen-designer`. Kris selected completing the remaining work and
+reconciling #47/#50 before updating the draft. Both tickets stay open/unaccepted.
+CI remains deferred; no merge or closure is selected. Preserve the unrelated audit,
+committed guide changes, all worktrees and unique receipts.
 
-Implementation and final local verification are complete. Approved A controls,
-canonical typed actions, mixed templates, atomic Apply, retained drafts, inert
-samples and nested canvas are integrated. The original approved source `7090a03`
-and fingerprint `a976830817d848d1263bbbc7f8a101c92c322ce2e369eb4c79c9ce7805bbb85e`
-remain pinned; evidence `a0535ae` retains ten captures. Never rebase that reference
-or replace its source pointer. V1 is rejected and B/C remain unapproved.
+Published implementation `159a8c036002939ee40b682b1ce3241a99c680aa` corrects the
+fresh Spec review's one P2 defect: Show/Hide callers must inherit custom target
+uncertainty and component/action revisions. Four public effects cases pass,
+including both actions, reopen, stale review and finite action cycles. Standards
+found zero actionable issues. The existing renderer and approved A controls are
+unchanged. Original approved source `7090a03`, fingerprint and ten captures remain
+pinned; never replace or rebase that reference.
 
-Combined results are 376 frontend passes, 602 routine core passes, production build
-and three actual UI-to-core journeys. The 56 core ignores and three documented
-exclusions are audited separately. Current full Lab passes 1,456 cases. Independent
-review found one P3 duplicate Lab CSS owner, corrected and browser-verified at
-`92b3a20`; Spec found no actionable code defect. Control fidelity retains its
-recorded scope and disclosed reference/candidate outline clipping and marker differences.
+Pinned frontend 376/376, typechecking/build and three actual controller/core
+journeys pass at the corrected source. The broad pre-correction core run passes
+602 with 56 explicit ignores and three documented exclusions. The corrected final
+routine core run is pending in coordinator exec session `1487`, logging to primary
+ignored `.toolchains/47-50/pr81-continuation/core-final.log`. That directory owns
+other current logs and real-controller receipts. A failed sandbox core run was
+stopped/reaped; a frontend Python-3.9 failure was corrected by selecting pinned
+Python. Preserve those logs rather than count them as passes.
 
-At `92b3a20`, Mac ordered normal play passed all four click/keyboard cases and
-nested normal-game captures passed at both aspects. The helper/comparison is
-unrun. The first invocation was refused before launch because a retained byte copy
-was not executable. A fresh continuation invoked the byte-identical original
-executable, then failed reopening the synthetic project with `Scene(SourceConflict)`
-before captures/helper startup. All retained hashes and cleanup receipts were audited.
-The coordinator corrected omitted identity-bound export files and verified fresh
-project replay offline. No later engine pass is implied. No further SDK campaign is selected.
+The first campaign-3 test delegate at `ff1924d` refused unreadable sandbox desktop
+admission with zero actual/uncertain starts and no profile/assertion owner. It is
+complete; its checkout `t3-1fe2d0f8` retains the hash-audited refusal. The established
+unsandboxed coordinator query positively verifies the desktop unlocked/awake.
+#47 alone owns retargeting the unused final-campaign eight-SDK/one-helper
+reservation to the corrected candidate in a fresh T3-isolated Terra Max checkout.
+No SDK start has charged campaign 3. Recheck admission through the established
+unsandboxed route, then run only affected nested normal/helper comparison at both
+aspects with zero tolerance, preserving residuals and cleanup. Stop at first
+execution failure. No package/native-editor/CI is assigned yet.
 
-#47 alone owns cumulative limits and actual/reserved counts. Unused reservations
-are released. Windows source transfer at `db99cbb` exists in its object store, but
-T3 isolated worktree provisioning failed before startup without diagnostic Git
-arguments/stderr. Do not blind-retry, create a child checkout in shell or take over
-another worktree. Supported isolation and corrected source transfer precede Windows
-execution. Neither pending proof nor native/package/CI qualification is waived.
+Windows remains blocked on isolated T3 provisioning. The failed thread and its
+read-only diagnostic still lack the actual Git arguments/destination/exit/stderr.
+No blind retry, shell-created child checkout or existing-worktree takeover is
+selected. Corrected source transfer remains authorized after a supported binding.
+Do not infer a pass from an unavailable capability.
 
-The selected draft PR targets `codex/phase3b-screen-designer` with a `[skip ci]`
-publication commit. #47 owns its exact publication receipt and remaining work.
-After publication, continue only from reconciled live issue state. Do not dispatch
-CI, merge or close tickets without the corresponding selection.
-The branch validation plan selects quality and both-target harness jobs for later
-CI, while task-specific engine/native requirements remain explicit blockers.
-[Draft reconciliation](../tasks/evidence/screen-actions-and-nested-canvas.md#draft-pr-reconciliation-2026-11-05)
-owns the original criterion map, producing candidates and receipt locations.
+[Continuation evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#pr-81-continuation-and-effect-correction-2026-11-05)
+owns detailed checks and the original-criterion gap map. Next, audit the final
+routine run and fresh Mac producer, fix any in-scope findings offline, reconcile
+all eight criteria and update the draft PR with exact remaining blockers. No
+rendering tolerance is accepted. Windows/helper/native/package/CI proof remains
+pending. Older unique recovery below retains its existing size exception.
 
 ## PR 79 merge and workspace closeout
 
