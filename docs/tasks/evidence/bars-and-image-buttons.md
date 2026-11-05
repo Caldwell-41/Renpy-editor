@@ -453,3 +453,25 @@ native editor launches 0/3. All Mac counts remain zero. The remaining four Windo
 SDK starts must not be spent on duplicate setup or unreserved helper/native work.
 Issue bodies #51/#52 record this scoped checkpoint; both remain open and code stays
 local-only.
+
+## Authorized Mac chat creation interrupted, 2026-11-06
+
+Kris explicitly selected "Create the Mac qualification chat". The coordinator
+requested one top-level chat with T3 `workspaceStrategy: worktree`, branch
+`t3/mac-bars-imagebuttons-qualification`, based on the Mac project's actual HEAD.
+Its bounded first task is read-only readiness; source synchronization and capped
+qualification still require a later exact candidate handoff and reservation.
+
+The link initially reported reachable and the project read succeeded. Chat creation
+then returned an orchestration error that the Mac did not answer. A fresh link check
+reports unreachable. No thread link or worktree identity was returned, so creation
+is unconfirmed. One idempotent retry with the same request ID returned the same
+host-unavailable error. No capped operation was requested and no allowance was consumed
+by this coordinator. This is a host-availability blocker, not a need for renewed
+permission or another checkout strategy.
+
+Retry the exact saved request with client ID
+`51-52-mac-qualification-chat-20261106-01` after the host is reachable. The original
+arguments and failure response are retained in ignored local output so a retry can
+recover an already-created request without duplication. Do not create a new request
+ID, mutate the shared Mac root or claim readiness before its report arrives.

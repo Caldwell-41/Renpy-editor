@@ -30,13 +30,17 @@ worker checkout identities and readiness. Windows SDK use is 12/16; other counts
 zero and no reservation is pending. Windows x64 and macOS ARM64 qualification remain
 required. The linked Mac project was identified, but its isolated readiness delegation
 was refused before task creation because T3 does not support linked-environment
-worktree isolation for delegates. A separately authorized top-level Mac qualification
-chat is required for that isolated checkout; the coordinator has requested it. No
-remote/capped operation started. The Windows SDK archive matches its published pin.
+worktree isolation for delegates. Kris has now authorized the separate top-level Mac
+qualification chat. Its creation request lost contact with the Mac; a fresh link check
+reports unreachable and creation remains unconfirmed. No capped operation was
+requested. The Windows SDK archive matches its published pin.
 
 Next action is Kris's exact design approval in the separate design chat, followed
-by that designer's direct handoff to the editor. Mac isolation still needs the
-separately requested top-level qualification chat. No operation is running.
+by that designer's direct handoff to the editor. When the Mac becomes reachable,
+retry saved request `51-52-mac-qualification-chat-20261106-01` with the same client
+request ID. The exact launch arguments and failed response are retained in ignored
+`.toolchains/51-52/mac-qualification-launch*.json`. Do not create a second request
+or fall back to its shared root. Creation is unconfirmed; no capped run is pending.
 
 Windows runtime proof passes all four cases at observer `7d199aa9`, reusing the
 exact `fe78025f` producer and completed setup after all four explicit rejecting
