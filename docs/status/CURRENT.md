@@ -1,5 +1,19 @@
 # Current status
 
+## Story revamp prototypes awaiting selection
+
+[Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82) owns three new
+Design Lab drafts on `codex/story-screen-prototypes`: Cue sheet, Branch lanes and
+Shot reel. All include focused writing, explicit beat insertion and fictional,
+memory-only edits. Production Story and future engine features are unchanged.
+
+The [design notes](../design/story-revamp/README.md) record two council rounds,
+corrections, 48 browser render cases, core interaction journeys and six final visual
+cases. Local type/approval/repository and in-memory production-build checks pass.
+The designs remain unapproved; Kris will choose one for iteration. Source and
+self-contained review files are local only. No PR, push or implementation approval
+is implied. Earlier acceptance and protected recovery records remain below.
+
 ## Variable text, ordered actions and nested canvas accepted
 
 Kris selected [PR #81](https://github.com/Caldwell-41/Renpy-editor/pull/81)

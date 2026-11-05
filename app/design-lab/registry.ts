@@ -2,6 +2,7 @@ import type { LabScreen } from "./contracts.ts";
 import { approvalRecords } from "virtual:design-lab-approvals";
 import { revisionFor } from "./approval.ts";
 import { definition as story } from "./screens/story/definition.ts";
+import { definition as storyRevamp } from "./screens/story-revamp/definition.ts";
 import { definition as source } from "./screens/source/definition.ts";
 import { definition as branches } from "./screens/branches/definition.ts";
 import { definition as lorebook } from "./screens/lorebook/definition.ts";
@@ -69,7 +70,7 @@ export const screens: readonly LabScreen[] = [{
     { id: "board", title: "Writing board", load: () => import("./screens/characters-writing/board.ts") },
   ],
   check: "./screens/characters-writing/check.mjs",
-}, ...[story, source, branches, lorebook, assets, variables, welcome, newProject, settings, runtime, studioRequest, screenDesigner, canvasDrag, helpComposition, numericLayout, nestedLayout, uiImage, projectFont, sharedLook, componentsAndHelpPanel, helpDialogStory, screenInteractions].map(definition => ({ ...definition, approval: approvalFor(definition.id) }))];
+}, ...[story, storyRevamp, source, branches, lorebook, assets, variables, welcome, newProject, settings, runtime, studioRequest, screenDesigner, canvasDrag, helpComposition, numericLayout, nestedLayout, uiImage, projectFont, sharedLook, componentsAndHelpPanel, helpDialogStory, screenInteractions].map(definition => ({ ...definition, approval: approvalFor(definition.id) }))];
 
 for (const screen of screens) {
   for (const variant of screen.variants) revisionFor(screen.approval, variant.id);

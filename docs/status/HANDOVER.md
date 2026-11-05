@@ -1,5 +1,37 @@
 # Current outcome handover
 
+## Story revamp prototype selection
+
+Kris selected [issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82):
+three bold, distinct Story mocks using council, prototype, experience-first and the
+Design Lab. Branch `codex/story-screen-prototypes` starts from merged `ab19b786`.
+The [prototype notes](../design/story-revamp/README.md) own the question, reference
+choices, simulation limits, review and verification. All three remain unapproved.
+
+Source is under `app/design-lab/screens/story-revamp/`, registered as `story-revamp`.
+Cue sheet favors continuous writing, Branch lanes compares alternatives, and Shot
+reel composes against an illustrative stage. Writing focus preserves structured
+editing in each. Source and review artifacts are local only; no PR or push is
+selected. Only the shared browser-launch guard is included as a verification
+prerequisite. Other browser-maintenance edits and the untracked Phase 1 audit are
+unrelated and must remain untouched.
+
+The local export command in the notes regenerates three self-contained HTML files
+and inline-viewer versions under ignored `.toolchains/story-revamp/`. The same
+directory retains captures, the 48-case report, final reel evidence and six-case
+visual closure. Both council members reviewed twice; their final scores are Opus
+8/10 and Sol 9/10. Opus's final bounded condition was fixed and browser-verified.
+Typechecking, approval validation, repository validation and in-memory production
+build exclusion pass. Earlier clipping, scroll and capture-script failures remain
+preserved rather than relabelled as passes.
+
+Next, wait for Kris to choose one mock and describe the next iteration. Do not
+promote these drafts or implement Timeline, animation, drag/resize, state simulation
+or Run From Here. Those remain design connections only. No native app, SDK, provider
+or protected recovery operation was performed. No special test host or costly
+operation is needed for the next prototype iteration. Earlier recovery records
+retain their existing size exception and remain below.
+
 ## PR 81 integration and ticket closeout
 
 Kris selected merging [PR #81](https://github.com/Caldwell-41/Renpy-editor/pull/81)

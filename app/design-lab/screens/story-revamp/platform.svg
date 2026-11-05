@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+<defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#132b39"/><stop offset="1" stop-color="#677a80"/></linearGradient><linearGradient id="ground" x2="0" y2="1"><stop stop-color="#566467"/><stop offset="1" stop-color="#1e333f"/></linearGradient><pattern id="rain" width="47" height="59" patternUnits="userSpaceOnUse"><path d="M12 0L2 30M40 29L30 59" stroke="#bccbd0" stroke-opacity=".12"/></pattern></defs>
+<path fill="url(#sky)" d="M0 0h960v540H0z"/><path fill="#334b54" d="M0 205l75-55 64 28 90-47 60 30 100-70 70 63 55-20 110 60 55-27 75 55 100-25 106 50v130H0z"/>
+<path fill="#203742" d="M0 267h960v67H0z"/><path fill="url(#ground)" d="M0 327h960v213H0z"/>
+<path fill="#152b34" d="M0 0h960v84L0 145z"/><path fill="#60747b" d="M0 142L960 80v10L0 155z"/>
+<g stroke="#263e47" stroke-width="10"><path d="M122 127v257M422 109v236M752 89v254"/></g>
+<g fill="#d8bd89"><path d="M104 135h38v7h-38zM405 116h35v7h-35zM737 97h32v7h-32z"/></g>
+<path fill="#293e43" d="M29 240h205v54H29z"/><text x="132" y="261" fill="#ead8ae" font-family="sans-serif" font-size="12" text-anchor="middle" letter-spacing="3">LAST SERVICE</text><text x="132" y="281" fill="#cad0ca" font-family="sans-serif" font-size="14" text-anchor="middle">23:47 · PLATFORM 2</text>
+<g fill="#283e44"><path d="M260 301h129v16H260zM271 314h8v40h-8zM369 314h8v40h-8z"/><path d="M800 280h106v14H800zM810 290h7v34h-7zM886 290h7v34h-7z"/></g>
+<path d="M0 419L960 338M0 443L960 343M190 540L960 348M285 540L960 353" stroke="#a8b0a2" stroke-opacity=".45" stroke-width="3"/><path d="M0 400L960 333" stroke="#d0b889" stroke-width="8"/><path fill="url(#rain)" d="M0 0h960v540H0z"/>
+</svg>

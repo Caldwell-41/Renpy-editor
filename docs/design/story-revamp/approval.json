@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "screenId": "story-revamp",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "cue-sheet-v1", "variantId": "cue-sheet", "approval": null },
+    { "id": "branch-lanes-v1", "variantId": "branch-lanes", "approval": null },
+    { "id": "shot-reel-v1", "variantId": "shot-reel", "approval": null }
+  ]
+}
