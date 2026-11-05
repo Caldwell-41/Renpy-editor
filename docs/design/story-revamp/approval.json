@@ -3,8 +3,8 @@
   "screenId": "story-revamp",
   "currentApproved": null,
   "revisions": [
-    { "id": "cue-sheet-v1", "variantId": "cue-sheet", "approval": null },
-    { "id": "branch-lanes-v1", "variantId": "branch-lanes", "approval": null },
-    { "id": "shot-reel-v1", "variantId": "shot-reel", "approval": null }
+    { "id": "cue-sheet-v2", "variantId": "cue-sheet", "approval": null },
+    { "id": "stage-tracks-v1", "variantId": "stage-tracks", "approval": null },
+    { "id": "shot-reel-v2", "variantId": "shot-reel", "approval": null }
   ]
 }

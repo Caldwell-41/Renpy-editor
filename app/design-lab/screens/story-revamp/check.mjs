@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 
 export default async function check({ page, open }) {
-  for (const variant of ['cue-sheet', 'branch-lanes', 'shot-reel']) {
+  for (const variant of ['cue-sheet', 'shot-reel', 'stage-tracks']) {
     await open({ variant, state: 'empty', theme: 'dark', viewport: 'wide' });
+    await page.getByRole('button', { name: 'Scenes', exact: true }).click();
     await page.getByRole('button', { name: '+ New scene', exact: true }).click();
     await page.getByRole('textbox', { name: 'Scene name', exact: true }).fill('A light in the distance');
     await page.getByRole('button', { name: 'Create scene', exact: true }).click();
@@ -37,14 +38,17 @@ export default async function check({ page, open }) {
     await page.keyboard.press('ArrowRight');
     await page.getByRole('dialog', { name: 'Switch prototype layout?', exact: true }).waitFor();
     await page.getByRole('button', { name: 'Keep editing', exact: true }).click();
-    assert.equal(await page.locator('#preview').getAttribute('data-variant'), variant);
+    assert.equal(await page.locator('[data-ready="true"]').getAttribute('data-variant'), variant);
 
     await open({ variant, state: 'branching', theme: 'dark', viewport: 'wide' });
     if (variant === 'shot-reel') {
       await page.locator('.sr-reel-beat').filter({ hasText: 'Condition' }).first().click();
       await page.locator('.sr-reel-branches button').filter({ hasText: 'Otherwise' }).click();
       await page.getByRole('button', { name: '+ Add beat', exact: true }).click();
-    } else await page.getByRole('button', { name: '+ Add beat to Otherwise', exact: true }).first().click();
+    } else {
+      if (variant === 'stage-tracks') await page.locator('.sr-track-band button').filter({ hasText: /^Otherwise$/ }).first().click();
+      await page.getByRole('button', { name: '+ Add beat to Otherwise', exact: true }).first().click();
+    }
     assert.match(await page.locator('.sr-insertion-target').innerText(), /Otherwise/);
     await page.getByRole('searchbox', { name: 'Find a beat' }).fill('narration');
     await page.getByRole('button', { name: 'Narration', exact: true }).click();
@@ -56,7 +60,7 @@ export default async function check({ page, open }) {
     assert(!group.branches.find(b => b.name === 'If').beats.some(b => b.text === 'This belongs only to Otherwise.'));
     await page.getByRole('button', { name: 'Undo', exact: true }).click();
     if (variant === 'shot-reel') assert.match(await page.locator('.sr-reel-target').innerText(), /Otherwise/);
-    if (variant === 'branch-lanes') await page.getByRole('button', { name: '← Whole scene', exact: true }).waitFor();
+    if (variant === 'stage-tracks') assert.match(await page.locator('.sr-current-body').innerText(), /Otherwise/);
     if (variant === 'cue-sheet') {
       await page.locator('.sr-cue').filter({ hasText: 'If trust is at least 5' }).click();
       assert(await page.locator('.sr-prose').evaluateAll(areas => areas.some(area => area.value === 'There is something I should tell you.')), 'Nested Cue sheet body is editable');
