@@ -11,18 +11,20 @@ are integrated at `b23bbcc9`; the editor worktree is at that checkpoint.
 | Capability | Implementation and automated proof | Remaining acceptance |
 | --- | --- | --- |
 | Integer bars and six-state image buttons | Core committed; 13 focused control/export cases and four final bar cases pass on their recorded worker candidates. Parent admits fifteen source files and twelve inert plans. | Actual frontend/core workflow, runtime, helper and native/package proof; final combined review. |
-| Editor controls | Existing baseline passes 56 focused cases. No production UI changes yet. | Exact design approval and direct handoff to the editor implementer. |
+| Editor controls | A2 approved at source `37d29ca1`; direct handoff received. Implementation and real UI/core slices are active in the assigned frontend worktree. | Reviewed frontend integration, visual/functional proof and remaining platform gates. |
 | Broad core selection | Original run failed. Seven TLS tests pass after correcting process PATH. | Three Windows symlink checks remain failed/unqualified with OS1314. |
 | Windows control runtime | Four pinned-SDK cases pass at observer `7d199aa9`, using accepted-source producer `fe78025f`. Bar limits/step, six exact appearance comparisons and one action sequence pass at both aspects. | Native editor preview, helper rendering, Mac proof and combined acceptance. |
 
-The editor agent opened the requested separate Sol 6.1 xhigh design chat. Production
-UI waits for exact design approval and a direct handoff to that implementer.
+Kris approved exact A2 `inspector-v2`, source `37d29ca1`, in the separate design
+chat. The designer sent the approved handoff directly to the editor, copying the
+coordinator. Scoped lab/approval files are imported on integration; source and all
+thirteen approved capture hashes independently verify, and lab TypeScript passes.
 All three authorized council rounds are complete. R3 on `0263728d` scored Sol 9/10
 and Opus 8.5/10; the latter's conditional 9 is not a rescore. Corrected source
-`37d29ca1` is unapproved and unscored, with thirteen capture receipts and a separate
-explanatory annotation. No fourth round or production handoff is selected.
-Source `0a6e571e` and its earlier proof remain pinned separately. Production still
-waits for the approved direct successor handoff.
+`37d29ca1` was not rescored after correction; its approval does not invent a score.
+No fourth council is selected. Source `0a6e571e` and its earlier proof stay pinned.
+The global catalog gate is blocked by five missing historical source objects;
+the coordinator is recovering exact objects while frontend implementation proceeds.
 The corrected Windows observer passes; both earlier failed campaigns stay recorded.
 #51 owns combined capped-operation accounting; Windows SDK use is 12/16 and all
 other counts are zero, with no reservation pending. Remaining Windows/macOS proof,

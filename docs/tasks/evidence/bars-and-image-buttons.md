@@ -734,3 +734,42 @@ approved production handoff. After exact approval, the designer must deliver the
 approved source/fingerprint/captures and decision evidence directly to the editor,
 copying the coordinator. Original source, shared contracts and production stay
 unchanged. No additional council, server or capped start is selected.
+
+## Exact A2 approval and implementation handoff, 2026-11-06
+
+Parent verified Kris's explicit "Approved" message
+`961cbbd1-c3ac-4195-908a-8c320598fc66`, design-chat position 978, immediately after
+the runnable `inspector-v2` / `37d29ca1` candidate and annotated comparison. The
+designer recorded approval in `9e656759f048addd582d3a8669990400a15907f9` and sent
+the approved handoff directly to the frontend owner before copying the coordinator.
+The frontend owner confirmed receipt and began approved UI/core red-green slices
+from clean `b23bbcc9`. No new implementation authorization was requested.
+
+Parent imported only the new bars-imagebuttons lab directory, its new design
+records/captures and the two-hunk registry registration from that record commit.
+Production and shared contracts were not copied from the old design base. A direct
+approval-schema/source audit recomputed the source fingerprint at
+`37d29ca180dc81cb350ff8ff99bfaee90e65cea9` as
+`fadc5fa2591ac31edec149b871505fcfa20c54b26e622d44e60a74b0b8ee0c80`, verified the
+canonical approved pointer and rehashed all thirteen approved captures. The imported
+lab passes TypeScript module checking with the current coordinator DTOs.
+
+The coordinator owns this scoped import, shared contracts, combined evidence/harness,
+integration and final review. The frontend worker owns its assigned production
+files/tests, uses the implement skill and commits its changes. It was told not to
+duplicate lab/registry/record imports. Approved source stays pinned in the designer
+worktree; visual comparisons preserve innerHeight 800 versus captureHeight 820,
+widths 1280/560, dark mode, scale 1 and the disclosed compact-stale scroll state.
+
+Approval does not establish product acceptance or waive the global gate. Catalog
+inventory finds five exact approved source objects missing locally: Help A4
+`8851689b62eda03127c199ca0276a776b0d623ab`, nested layout
+`b2fffee2a3983ff309c27502fdfc215f56b1ccd0`, project font
+`79d958d5c45dfd12073c2192de05128d6ed19a91`, screen interactions
+`7090a036032ce3f225a857b30259a9c91716ac60` and UI image
+`8b960282255834972c81ff7d1d13f09293fb366e`. Existing approval records are preserved.
+The Mac qualification chat owns a bounded read/export of existing source/recovery
+refs, with no SDK, build, installation or source synchronization. The documented
+PR79 recovery bundle is the first exact-source lead. A read-only legacy Windows
+repository check found neither Help nor interaction object and preserved its
+unrelated active changes. Full catalog/browser verification remains pending.

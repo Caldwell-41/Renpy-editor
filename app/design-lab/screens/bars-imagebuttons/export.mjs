@@ -1,0 +1,13 @@
+import { build } from 'vite';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+const app = fileURLToPath(new URL('../../../', import.meta.url));
+const stub = fileURLToPath(new URL('../../native.ts', import.meta.url));
+const result = await build({ configFile: false, root: app, publicDir: false, logLevel: 'warn', plugins: [{ name: 'inert-native', enforce: 'pre', resolveId(id) { if (id === '@tauri-apps/api/core') return stub; if (id.startsWith('@tauri-apps/')) throw Error('Native APIs are unavailable in this prototype.'); } }], build: { write: false, minify: true, lib: { entry: fileURLToPath(new URL('./standalone.ts', import.meta.url)), formats: ['iife'], name: 'BarsImagebuttons' } } });
+const outputs = Array.isArray(result) ? result.flatMap(r => r.output) : result.output;
+const js = outputs.filter(x => x.type === 'chunk').map(x => x.code).join('\n');
+// The inline renderer sizes itself to content. Freeze app viewport rules for this export.
+const css = outputs.filter(x => x.type === 'asset' && x.fileName.endsWith('.css')).map(x => x.source).join('\n').replace(/([\d.]+)(?:d|s|l)?vh\b/g, (_, value) => `${Number(value) * 8.2}px`);
+const html = `<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Screens · Bars and image buttons</title><style>${css}\nhtml,body{margin:0;padding:0;background:transparent;color:var(--text-primary);font-family:var(--font-ui)}#preview{height:820px;position:relative}#preview>.app-shell{height:820px}*{animation:none!important;transition:none!important}</style></head><body><div id="preview"></div><script>${js.replaceAll('</script','<\\/script')}</script></body></html>`;
+const out = new URL('../../../../.toolchains/bars-imagebuttons/', import.meta.url); mkdirSync(out, { recursive: true });
+writeFileSync(new URL('comparison.html', out), html); console.log(fileURLToPath(new URL('comparison.html', out)));

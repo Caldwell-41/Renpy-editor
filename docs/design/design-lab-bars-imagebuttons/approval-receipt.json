@@ -1,0 +1,55 @@
+{
+  "status": "explicit-design-approval-recorded-full-promotion-check-pending",
+  "approvalDate": "2026-11-06",
+  "decision": "Approved",
+  "decisionMessageId": "961cbbd1-c3ac-4195-908a-8c320598fc66",
+  "decisionPosition": 978,
+  "precedingCandidateMessageId": "message:provider:codex:native-item:msg_0f7dab2b97307571016aed0c05d18c87d0b88962b722a13d40",
+  "threadLink": "<t3-thread://v2/88c3ca41-b202-47bf-8d09-09bd3411e945/mcp:launch:5f05660eff093dcb7e20eadcdf24c42d8b3e58d50b2a87c2cc1b5ed72037bc61>",
+  "screenId": "bars-imagebuttons",
+  "currentApproved": "inspector-v2",
+  "source": {
+    "commit": "37d29ca180dc81cb350ff8ff99bfaee90e65cea9",
+    "fingerprint": "fadc5fa2591ac31edec149b871505fcfa20c54b26e622d44e60a74b0b8ee0c80"
+  },
+  "focusedVerification": {
+    "schemaAndPointer": "pass",
+    "workingSourceMatchesPinnedCommit": "pass",
+    "captureHashes": "pass",
+    "captureCount": 13,
+    "typeScriptModuleCheck": "pass",
+    "approvalSchemaFixtureCheck": "pass",
+    "approvalSchemaFixtureOutput": "Design approvals passed: history, invalid promotion, capture identity and real Git/shared-source checks."
+  },
+  "globalApprovalCatalog": {
+    "status": "failed",
+    "actualCommand": "node .toolchains/bars-imagebuttons/record-approval.mjs",
+    "boundary": "loadApprovalRecords after selected approval was written and its source/captures verified",
+    "missingReferenceOwner": "docs/design/design-lab-help-dialog-story/approval.json",
+    "error": "Command failed: git ls-tree -rz 8851689b62eda03127c199ca0276a776b0d623ab -- app/src app/design-lab app/public app/package.json app/package-lock.json app/tsconfig.json app/vite.config.ts\nfatal: not a tree object",
+    "existingRecordPreserved": true
+  },
+  "fullDesignCheck": {
+    "command": "npm run design:check",
+    "status": "not-run; pending global historical-source availability and supported browser gate",
+    "waived": false
+  },
+  "existingEvidence": {
+    "syntheticCallbackGroupsEachWidth": 16,
+    "widths": [
+      1280,
+      560
+    ],
+    "appearance": "dark",
+    "innerHeight": 800,
+    "captureHeight": 820,
+    "receipt": "docs/design/design-lab-bars-imagebuttons/a2-final-source-receipt.json"
+  },
+  "notProved": [
+    "trusted keyboard/Escape",
+    "native pointer/file-picker",
+    "real core/source/runtime",
+    "full design:check"
+  ],
+  "productionFilesChanged": false
+}

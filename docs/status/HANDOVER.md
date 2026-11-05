@@ -7,7 +7,8 @@ verified against their original criteria. Coordinator branch is
 `codex/51-52-integration`, based on accepted merge `ab19b786`. Core checkpoint is
 `b23bbcc9`; current qualification code is `7d199aa9`.
 The five reviewed core implementation commits are integrated; the editor worktree
-fast-forwarded cleanly to the same checkpoint. No frontend production edits exist.
+started approved production UI/core slices from clean `b23bbcc9`. Those frontend
+changes are not integrated yet.
 
 The core implementation agent completed both controls' Rust behavior on
 `t3/bar-imagebutton-core` at `76dfe030`; the editor implementation agent owns both controls' UI
@@ -21,18 +22,19 @@ implementation conflicts must return to the coordinator before changing them.
 The editor opened the required separate design chat on
 `t3/design-bars-imagebuttons`. It owns only new lab/approval files and must send
 Kris's exact approved design/source/fingerprint/captures and approval evidence directly
-to the editor agent, copying the coordinator. Production UI cannot begin beforehand.
+to the editor agent, copying the coordinator. That handoff is now received: source
+`37d29ca1`, record commit `9e656759`, approval message `961cbbd1-c3ac-4195-908a-8c320598fc66`.
 Browser/desktop operation uses Terra 6.1 max. Core work may continue during design.
 Kris initially selected two council rounds toward 9/10 and has now explicitly
 authorized one final additional round, bringing the total to three.
-The designer alone owns the new unapproved A2 lab revision; each round requests
+The designer owns the pinned A2 reference; each completed round requested
 read-only Opus 5.5 xhigh and Sol 6.1 xhigh feedback under the council skill.
 Source `0a6e571e` / `inspector-v1` remains pinned, with its synthetic proof scoped
 to that source. The editor received this gate directly and is waiting for the
-approved successor handoff. No additional coordinator council is selected.
+approved successor handoff, which has now arrived. No additional council is selected.
 All three authorized rounds are complete. R3 reviewed `0263728d`: Sol 9/10, Opus
 8.5/10. Opus's conditional 9 after an inline-error placement correction is not an
-actual rescore. Current unapproved `inspector-v2` source is `37d29ca1`, with full
+actual rescore. Current approved `inspector-v2` source is `37d29ca1`, with full
 source/fingerprint in the evidence owner and designer's `a2-final-source-receipt.json`.
 The correction and scrolling checks have no independent rescore or fourth review.
 Sixteen focused synthetic groups reportedly pass at 1280/560; thirteen fresh renders
@@ -42,7 +44,8 @@ The annotation is explanatory, not an approval capture. Compact stale commit
 buttons are partly clipped at the captured scroll position; page scrolling is
 available. Keep that limitation explicit in any approval/handoff. The optional
 Unsaved wording after restoring action values also remains recorded.
-Full lab/native/trusted/core/runtime gates and Kris's exact approval remain unproved.
+Human approval is verified; full lab/native/trusted and actual UI/core/runtime
+promotion/implementation checks retain their pending status.
 
 [#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) owns the shared limits
 and [detailed evidence](../tasks/evidence/bars-and-image-buttons.md) records contracts,
@@ -56,9 +59,12 @@ creating isolated branch `t3/mac-bars-imagebuttons-qualification` at `1c6ed025`.
 Initial readiness completed with verified Sol 6.1 xhigh settings. No capped operation was
 requested. The Windows SDK archive matches its published pin.
 
-Next action is Kris's exact decision on source `37d29ca1` and the approved direct
-designer-to-editor handoff, copying the coordinator.
-Council scores are feedback, not production approval. No fourth round is selected;
+Next actions are the frontend owner's real UI/core slices and coordinator-owned
+recovery of five exact historical design sources. The approved reference remains
+pinned in the designer worktree. The coordinator alone imports the new lab/records
+and registry registration; the frontend worker owns production files/tests and must
+not duplicate that import. Do not copy older shared DTOs from the design branch.
+Council scores do not substitute for the verified human decision. No fourth round is selected;
 promotion records/checks must retain their actual status. The Mac readiness chat is
 <t3-thread://v2/c95d26c7-af8c-4ab0-8c95-a45fdca2dfe6/mcp:launch:aed218e73e07211906bdf413f41978e96efe3ae09756ac17e0c6842d8b443ee7>.
 Read its completed report through the linked environment; the reverse report send
