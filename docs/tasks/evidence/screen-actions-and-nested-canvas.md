@@ -5,6 +5,61 @@
 acceptance, authorization and operation accounting. This file retains implementation
 checkpoints and detailed verification. No criterion is accepted by this entry.
 
+## Mac campaign 4 audited and CI discovery correction, 2026-11-05
+
+The coordinator audited campaign 4 at producing candidate
+`b5155f697bc53ae4887f1fff5df74051b84ddda9`, tree
+`6be9b6ba348eadf15c71e957f0af75134ff70588`. The exact comparison passes at both
+1280x720 and 1024x768: zero differing pixels, zero maximum channel delta and all
+29 ordered/clipped geometry records match. No tolerance was introduced. The fresh
+accepted source/assets/font/samples/viewport match, guides are excluded and GL2 is
+confirmed. Export/reopen/replay, the original five offline gates and preflight pass.
+
+Test checkout `t3-eddd6345` retains ignored
+`.toolchains/qualification-47-50-campaign4/handoff.md` and a 70-entry manifest,
+SHA256 `e02ab7838f271344a20c929b1fe8a838dbfe1662b7b9762ddd58769cc9eb3c3c`.
+Every artifact hash, byte length and mode is independently verified. The producer
+is executable mode 0755, SHA256
+`d9175fdc1a779f98d3bc914c4bfdff038402a4979f99f4646e1e5dc8410e3e27`;
+accepted JSON is
+`df1e42286fb0f6bb44e90923574aeb1cbdc83e6413811c2450f7dfa020488eec`.
+The coordinator replayed the exact comparator against immutable receipts/binary;
+it passes without launching an SDK. Both source-unchanged/cleanup receipts and
+every source/process/profile/desktop audit predicate pass. Four normal starts,
+three adapter starts and one helper are confirmed, with zero uncertain/unused.
+Helper exit is cooperative with code 0; observed process groups are absent and assertions
+released. The observer's 30 ms limitation remains disclosed; producer counters own
+start accounting. #47 owns cumulative totals and closed reservations.
+
+Manual harness CI [41983380016, attempt1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41983380016/attempts/1)
+failed on both targets at that same candidate. Each Python group failed only
+because `test_nested_fidelity` required an unprepared public-core export during
+ordinary discovery. Q1 rejection, source audit and retention groups passed. Both
+failure ZIPs pass GitHub digest verification, and all 841 source hashes per target
+match the recorded Git candidate. ZIP digests are Windows
+`29badce896a7350806a71f8d048c7057f2b231852bb51e4ae4aeb8db3d08eda1` and Mac
+`d67ec03f6bb298a84ec5bf5c8fcbf2741045ebcb04b1f86460911f15201cc94d`.
+Logs, ZIPs and source/check audits remain under primary ignored
+`.toolchains/47-50/pr81-continuation/`. The failed run remains failed.
+
+Local discovery with the export environment unset reproduced the same error.
+The correction keeps three ordinary observer tests in `test_nested_fidelity.py`
+and moves the two export-dependent admission checks unchanged into explicit
+`nested_fidelity_export_checks.py`. Missing export still fails that explicit
+selection; no optional skip or fabricated export is added. The shared result gate
+now requires all three ordinary observer names. The automated runbook owns both
+commands. Self-review confirms each assertion has one owner and no SDK/build enters
+the inexpensive harness.
+
+All four local harness groups pass: Python 324 with its three named Mac exclusions,
+Q1 rejection/source and retention 10. The explicit real-export checks pass 2 and the
+shared Python-admission tests pass 22. Product/core/UI, recorder, renderer, fixtures
+and runtime qualifier inputs have an empty diff from `b5155f69`; its Mac evidence
+retains that exact producing candidate and scope. No further SDK run is needed for
+this test-selection correction. Publish the correction and run fresh automatic
+quality/manual both-target harness CI at the new head. Windows runtime/nested and
+native/package proof remain pending; neither ticket is accepted/closed.
+
 ## Approved campaign 4 and CI, 2026-11-05
 
 Kris approved one additional Mac qualification campaign with eight SDK starts and

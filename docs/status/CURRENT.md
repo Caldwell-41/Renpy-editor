@@ -3,26 +3,26 @@
 ## Active #47/#50 draft delivery
 
 Kris selected completing [draft PR #81](https://github.com/Caldwell-41/Renpy-editor/pull/81)
-and checking both original tickets. Published `159a8c03` corrects Show/Hide target
-uncertainty and shared-component/action revisions. The approved A controls,
-reference and renderer remain unchanged. Both tickets remain open/unaccepted.
+and checking both original tickets. `159a8c03` corrects Show/Hide target uncertainty
+and shared-component/action revisions. `9797e522` corrects the reference recorder.
+Approved A controls/reference and the renderer remain unchanged. Both tickets stay
+open/unaccepted.
 
 | Capability | Automated proof | Remaining acceptance |
 | --- | --- | --- |
-| Variable text and ordered actions | 376 frontend passes; actual UI/core/history/reopen journeys; Mac ordered play at `92b3a20` | Windows normal play and native/package/CI |
-| Target effects and revisions | Public red/green; four effects cases; final core 604/604 with disclosed exclusions | Windows/native/CI qualification |
-| Nested component canvas | Mac normal/helper captures at `392d049b` match every pixel at both aspects | Geometry comparison failed; recorder correction passes five offline gates, needs fresh engine proof; Windows remains unrun |
+| Variable text and ordered actions | 376 frontend passes; actual UI/core/history/reopen; Mac ordered play at `92b3a20` | Windows normal play and native/package/CI |
+| Target effects and revisions | Public red/green; four effects cases; core 604 with disclosed exclusions | Windows/native/CI qualification |
+| Nested component canvas | Mac normal/helper at `b5155f69`: zero pixel differences and all 29 geometry records match at both aspects | Windows matching and wider native/package proof |
 
-Mac residuals exposed a normal-recorder sizing-wrapper defect, now corrected
-without product changes. The original comparison remains failed. Kris approved one extra eight-start Mac
-campaign and the planned quality/harness CI; #47 owns the extended ceiling and
-reservation.
-Windows still lacks supported isolated provisioning and useful Git diagnostics.
-[Current approval and execution](../tasks/evidence/screen-actions-and-nested-canvas.md#approved-campaign-4-and-ci-2026-11-05)
-supersedes the CI deferral. [Current comparison and diagnosis](../tasks/evidence/screen-actions-and-nested-canvas.md#campaign-3-comparison-and-recorder-correction-2026-11-05)
-owns exact candidates, residuals, cleanup and the required next decision. Preserve
-unrelated work and unique receipts. Historical recovery below retains this file's
-existing size exception.
+Kris approved campaign 4 and quality/harness CI. Mac proof and all 70 artifact hashes,
+lengths/modes/cleanup are audited. Both harness CI targets failed because ordinary
+Python discovery required an unprepared core export. The corrected split retains
+three ordinary observers and two explicit export checks; all four local harness
+groups pass without adding skips or SDK starts. Fresh CI is required at the next
+head; the existing watcher remains active. #47 owns cumulative accounting and run
+identities. Windows isolation remains blocked. [Current audit and correction](../tasks/evidence/screen-actions-and-nested-canvas.md#mac-campaign-4-audited-and-ci-discovery-correction-2026-11-05)
+owns exact scope and failed-run recovery. Preserve unrelated work and receipts;
+older unique recovery retains the size exception.
 
 ## Help dialog and base Help canvas merged and accepted
 

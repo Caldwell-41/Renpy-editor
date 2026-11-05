@@ -46,6 +46,18 @@ recorder checks use a separate explicit selection in
 [the native runbook](NATIVE.md#standalone-mac-canvas-recorder); they require a binary
 and fail if it is missing.
 
+The three nested-fidelity observer checks also run in ordinary discovery. The two
+export-admission checks require the public-core accepted export and run explicitly
+after that exporter, without building or starting anything themselves:
+
+```bash
+LOOMLIGHT_NESTED_FIDELITY_INPUTS=<prepared-export-directory> \
+  python3 -m unittest discover -s scripts -p nested_fidelity_export_checks.py -v
+```
+
+An absent or invalid export fails this explicit selection; it is not an optional
+skip in the inexpensive harness. Run both selections for nested qualification.
+
 `Repository quality` → `harness_regressions=true` runs only these checks on
 Windows x64 and macOS ARM64, with every other boolean selector false. This is an
 optional focused verification route, not an extra mandatory dispatch per feature.
