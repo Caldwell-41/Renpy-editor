@@ -914,10 +914,15 @@ fn imagebutton_dimensions_use_combined_owner_and_plain_paths_remain_source_only(
     let mut generic = request.clone();
     generic["drafts"] = json!([{"nodeStart":start,"width":200,"height":100}]);
     reject(&mut service, "screens.canvasPlan", generic);
-    let mut generic = request.clone();
-    generic["layouts"] =
-        json!([{"nodeStart":start,"values":{"xsize":{"unit":"pixels","value":200}}}]);
-    reject(&mut service, "screens.canvasPlan", generic);
+    for key in [
+        "xsize", "ysize", "xminimum", "yminimum", "xmaximum", "ymaximum", "xysize", "minimum",
+        "maximum",
+    ] {
+        let mut generic = request.clone();
+        generic["layouts"] =
+            json!([{"nodeStart":start,"values":{key:{"unit":"pixels","value":200}}}]);
+        reject(&mut service, "screens.canvasPlan", generic);
+    }
     assert_eq!(
         fs::read_to_string(root.join(owner["path"].as_str().unwrap())).unwrap(),
         source
