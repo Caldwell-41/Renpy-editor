@@ -629,3 +629,41 @@ handoff is selected. After the remaining review, the designer will finalize the
 exact successor and captures, request Kris's approval, then deliver any approved
 handoff directly to the editor and copy the coordinator. A later correction may
 change this intermediate source identity without changing the recorded Sol score.
+
+## Two council rounds complete; corrected candidate awaiting approval, 2026-11-06
+
+Both requested council rounds are complete. The designer reports these scores:
+
+| Reviewer | Original A | R2 source `fb147c89` |
+| --- | --- | --- |
+| Claude Opus 5.5 xhigh | 6.5/10 | 8/10 |
+| GPT-6.1 Sol xhigh | 7/10 | 8.5/10 |
+
+No third round was requested or run. All local must-fix and should-fix findings are
+reported addressed, including draft feedback ownership/action clearing, signed
+pixel validation, picker alignment, redraw focus, visible field errors/red focus
+borders, compact sticky offsets, footer feedback and accepted-size preview while
+raw input is invalid. Corrected source has not been independently rescored; the
+9/10 target is not claimed as achieved.
+
+The corrected runnable `inspector-v2` candidate is source
+`0263728d9e07e951d25060d635d58094eac20c28`, fingerprint
+`1d6424ed32ef37e6dc9e8d31fe63ee8cf7ce5308d6139de3bcc35fc6a564034d`.
+Receipt/capture documentation is committed at
+`f8198c6fdd5ddb4e95c9105864648b38c4770fdc`. Its owning
+`docs/design/design-lab-bars-imagebuttons/a2-source-receipt.json` retains reviewed
+source `fb147c89` separately and marks the final candidate unapproved.
+
+The designer reports fifteen focused synthetic DOM groups at both 1280/560 and
+clean TypeScript/export. Parent read-only Git inspection confirms the candidate
+and receipt commits and the lab/record-only changed paths from original `0a6e571e`.
+An independent metadata audit rehashed all seven final PNGs directly from the
+receipt commit and matched every SHA256 and declared width/height. It did not view
+or rescore the design, rerun the synthetic checks or recompute the source fingerprint.
+
+The designer rendered the corrected runnable candidate for Kris's exact decision.
+There is no user approval or authorized production handoff yet. Full design:check,
+trusted/native input and real core/runtime proof remain separate. After the exact
+decision, any approved successor handoff must go directly from the designer to the
+editor and copy the coordinator. Original source/proof remains intact. No capped
+operation, server or additional review round is selected by this checkpoint.

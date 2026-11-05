@@ -29,15 +29,14 @@ read-only Opus 5.5 xhigh and Sol 6.1 xhigh feedback under the council skill.
 Source `0a6e571e` / `inspector-v1` remains pinned, with its synthetic proof scoped
 to that source. The editor received this gate directly and is waiting for the
 approved successor handoff. No additional coordinator council is selected.
-Current corrected but unapproved A2 pin is `b9eb9ad6` / `inspector-v2`; the evidence
-owner records its full source/fingerprint and the reported fourteen-group synthetic
-proof. Sol round two scored reviewed `fb147c89` at 8.5/10 and accepted the visual
-direction while finding two source issues. The designer reports both corrected in
-`b9eb9ad6`; the score remains attached to `fb147c89`, with no rescore inferred.
-Opus round two is pending. No third council task is selected. The designer must
-finalize the exact successor/captures after that review, then request Kris's decision.
-There is no production approval or implementation handoff yet. Earlier pins/proof
-and Sol round one's 7/10 on original A retain their historical scope.
+Both selected council rounds are complete, with no third selected. Original A
+received Opus 6.5/10 and Sol 7/10; R2 reviewed `fb147c89` received Opus 8/10 and
+Sol 8.5/10. Corrected `inspector-v2` source is `0263728d`, with receipt/captures
+at `f8198c6f` and reported fifteen-group synthetic proof at both widths. The
+corrections were not independently rescored; no 9/10 claim or approval is inferred.
+The evidence owner records full identities and the parent check of all seven final
+capture hashes/dimensions. Kris's exact decision and the approved direct handoff
+remain pending. Full lab, native, core and runtime gates retain their separate scope.
 
 [#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) owns the shared limits
 and [detailed evidence](../tasks/evidence/bars-and-image-buttons.md) records contracts,
@@ -51,10 +50,10 @@ creating isolated branch `t3/mac-bars-imagebuttons-qualification` at `1c6ed025`.
 Initial readiness completed with verified Sol 6.1 xhigh settings. No capped operation was
 requested. The Windows SDK archive matches its published pin.
 
-Next action is the designer's two-round A2 refinement, then Kris's exact design
-decision and the designer's direct successor handoff to the editor. Council scores
-are feedback, not production approval; report any unmet target after round two
-without silently adding rounds. The Mac readiness chat is
+Next action is Kris's exact decision on corrected A2 source `0263728d`, then the
+designer's approved direct successor handoff to the editor. Council scores are
+feedback, not production approval; no extra round or rescore is selected. Promotion
+records/checks must retain their actual status. The Mac readiness chat is
 <t3-thread://v2/c95d26c7-af8c-4ab0-8c95-a45fdca2dfe6/mcp:launch:aed218e73e07211906bdf413f41978e96efe3ae09756ac17e0c6842d8b443ee7>.
 Read its completed report through the linked environment; the reverse report send
 to Windows was denied, so do not rely on an automatic parent notification.
