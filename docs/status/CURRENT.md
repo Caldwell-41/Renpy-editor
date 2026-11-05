@@ -7,8 +7,8 @@ Kris resumed [L11 #47](https://github.com/Caldwell-41/Renpy-editor/issues/47) an
 The selected finish is verified implementation, final review and a draft PR.
 CI is explicitly deferred. Neither ticket is accepted.
 
-Implementation checkpoint `ce2d4c1` on `codex/47-50-integration` includes the prior
-backend, source-qualified target capabilities, mixed variable text and atomic Apply.
+Implementation checkpoint `836034d` on `codex/47-50-integration` includes approved
+A controls, typed actions, mixed text, atomic Apply and inert live draft resolution.
 Test-driver dependency `367c5de` enables actual typed-variable controller setup.
 It remains local-only after the prior source-transfer publication. Preserve the
 user's committed Design Lab guide updates and the untracked Phase 1 audit.
@@ -34,8 +34,10 @@ recorded. Harness fixes integrate as `eea25ba`/`86bccfc`; core migration `a811c2
 integrates as `ff98d4d`. Mixed-text/atomic Apply completion `5aba12c` is now audited
 and integrated as `ce2d4c1`, with 45 focused core passes and four comparison gates;
 one SDK case remains explicitly unrun. The frontend owner has both reviewed
-backend/driver dependencies for actual integration checks. This remains incomplete
-until its control migration returns. Preserve the approved source and all rejected/draft
+backend/driver dependencies for actual integration checks. Its control migration
+is now integrated; 376 combined frontend cases and the production build pass.
+Broad core/controller verification is running. Current Lab compatibility and the
+last presentation delta need their own combined checks. Preserve the approved source and all rejected/draft
 variants. Tailscale-only delivery and exclusion of prototype-review remain binding.
 Final combined suites and independent Standards/Spec review follow integration.
 [Current evidence and criterion gaps](../tasks/evidence/screen-actions-and-nested-canvas.md#resumed-delivery-2026-11-05)

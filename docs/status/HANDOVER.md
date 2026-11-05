@@ -52,8 +52,13 @@ temporarily incompatible with legacy frontend controls. Backend completion
 comparison gates; one SDK case remains unrun. The active frontend owner received
 that exact dependency and driver allowlist commit `367c5de` for its actual
 UI-to-core journeys. Complete and integrate its control migration before claiming
-a usable combined candidate. Then verify actual UI-to-core
-retention, history and reopen.
+a usable combined candidate. Its five frontend commits are now integrated through
+`2eb17ee`; dependency copies were excluded. Parent live-draft correction `836034d`
+also passes focused red/green proof. The full combined frontend suite has 376
+passes after removing one stale generated deleted-test artifact; the production
+build passes. Broad core and three combined controller/core journeys are running.
+The current Lab fixture migration and final visual delta remain with a fresh
+Lab-only verification lane; preserve original approved source and all failures.
 Run final combined suites, candidate-bound engine/platform proof and independent
 Standards/Spec review before final spec reconciliation and draft PR creation.
 Do not run CI yet or infer approval from prototype preparation.

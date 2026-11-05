@@ -202,6 +202,54 @@ that exact dependency too. No SDK/helper/game/native/package/CI operation occurr
 The integrated frontend journey, production fidelity, final combined suites,
 engine/platform proof and independent review remain pending.
 
+### Frontend integrated and combined verification started
+
+Frontend lane `e0b99bbc48182d9f6e3b7681899ef69f782839a0`, tree
+`019a9714771ed71a68966ef649c42b58efb90d7d`, returned clean from `t3-d26e5b53`
+on `t3/screen-interactions-frontend`. The coordinator verified all 57 retained log
+hashes and audited the control/operation map and source changes. Only its five
+frontend commits were replayed, as `8fd51a1`, `7516388`, `b228e55`, `496dc9d` and
+`2eb17ee`; its copies of backend/driver dependencies were not replayed.
+The lane passed 78 focused cases and three real controller/core journeys, with
+source/history/reopen, atomic Apply, samples and recovery. Drivers exited zero and
+disposable fixtures were removed. Exact commands, failures, hashes and remaining
+consumer issues are in ignored `.toolchains/frontend-47-50/handoff.json` there.
+Handoff SHA256 is
+`16af1a35c340efb73a868940adb407c6c83c6c04f0080ede24d5f8f760162428`.
+
+Terra's control comparison passed 20 interaction checks across 24 matched states
+at lane `5fc1761`. The two final reveal/marker presentation corrections are covered
+by typechecking and seven focused tests but still require the combined visual
+recheck. Original reference/captures remain unchanged. These browser fixtures prove
+controls only; their canvas and services are inert and establish no helper/native
+pixels. Retained report/artifacts remain in that lane's ignored `terra-final/`.
+
+The parent reproduced one named integration gap through public `screens.canvasPlan`.
+Live `textStyles` drafts rejected known mixed placeholders even though accepted
+templates resolved correctly. Commit `836034d` routes those drafts through the
+same binding resolver, with no additional parser. Its focused test was red before
+correction and green afterward, proving repeated variable samples remain literal,
+unknown placeholders keep explicit partial coverage and source stays unchanged.
+Retained red/green logs are in ignored
+`.toolchains/47-50/final-combined/draft-template/`.
+
+The combined production build passes. The full frontend run passed all 376 current
+tests but initially also discovered the obsolete generated
+`dist-tests/tests/screen-dismissal.dom.test.js`. That stale artifact, whose source
+was deliberately migrated/deleted, failed to import the removed class. The failed
+run is retained as `frontend-stale-output-failed.log`. Removing that one generated
+file and rerunning gives 376 passes, zero failures/skips. No compatibility API or
+deletion-only test was restored. Broad routine core and the three combined real
+controller journeys are running; their final results are not yet claimed.
+
+Current Lab compatibility compilation identifies the expected removed `dismissal`
+field in `study.ts`. A fresh Lab-only lane adapts current fixtures/handlers and
+checks to the production contract, then completes the current full Lab check and
+final control comparison through Terra Max. It cannot change production source,
+the original approved reference or any approval/capture pointer. Parent owns the
+core/live-draft correction, combined suites, final spec review and operation
+accounting. No SDK/helper/native/package/CI operation is assigned.
+
 ### Source/actions verification and target eligibility
 
 The source/actions verifier returned a clean checkout at
