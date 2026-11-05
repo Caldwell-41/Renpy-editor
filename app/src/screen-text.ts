@@ -310,7 +310,8 @@ export class ScreenText {
     card.querySelector<HTMLElement>("[data-text-review]")!.hidden = error?.field !== "source";
     const style=this.styleAction(draft,this.values(draft,false)),uses=this.uses(draft),screens=new Set(uses.map(u=>JSON.stringify([u.path,u.screenName]))).size,shared=style?.scope==="shared"&&Object.keys(this.sharedValues(draft,this.values(draft,false))).length>0;
     const actionOnly=draft.actions?.touched&&!Object.keys(this.values(draft,false)).length&&!this.styleAction(draft,this.values(draft,false))&&!this.layout.hasNodeDraft(view.document,view.screenName,view.selected);
-    if(actionOnly)card.querySelector<HTMLElement>(".screen-text-draft")!.textContent="Action draft";
+    const marker=card.querySelector<HTMLElement>(".screen-text-draft")!,heading=card.querySelector<HTMLElement>(".screen-text-heading")!,preview=heading.querySelector<HTMLElement>(".screen-text-compact")!;
+    if(actionOnly){marker.textContent="Action draft";heading.append(marker);}else if(marker.nextElementSibling!==preview)heading.insertBefore(marker,preview);
     const component=card.dataset.componentScope==="true",componentShared=card.querySelector<HTMLElement>(".screen-component-scope")?.dataset.shared!=="false",blockedWrite=!!this.host.writeBlocked?.();
     card.querySelector<HTMLElement>(".screen-text-state")!.textContent = blockedWrite ? "Edits retained · reload needed" : busy ? "Applying changes…" : dirty&&!actionOnly ? component ? "Changes update this component wherever it is used." : shared ? `Shared appearance changes apply to ${screens} screens and ${uses.length} elements. Text content and Layout change this element only.` : "Changes apply to this element only." : "";
     card.querySelector<HTMLButtonElement>("[data-text-apply]")!.textContent=component ? componentShared?"Review changes…":"Apply changes" : style ? shared ? `Apply to ${screens} ${screens===1?"screen":"screens"}…` : "Apply to this element…" : "Apply";
