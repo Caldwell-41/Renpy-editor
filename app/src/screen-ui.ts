@@ -1,6 +1,8 @@
 import { ScreenComponents, type ComponentFieldChange } from "./screen-components.ts";
-import { buildPanelCreationForm, ScreenDismissal, type PanelCreation, type PanelCreationDraft } from "./screen-panels.ts";
+import { buildPanelCreationForm, type PanelCreation, type PanelCreationDraft } from "./screen-panels.ts";
 import { ScreenImages, type UiImageAsset } from "./screen-images.ts";
+import { ScreenVariableSamples } from "./screen-variable-samples.ts";
+import type { InteractionContext, ScreenVariable } from "./screen-interactions.ts";
 import { ScreenText, type TextProperties, type StyleCatalog } from "./screen-text.ts";
 import { ScreenCanvasFrames } from "./screen-canvas-frames.ts";
 import { ScreenLayoutEditor, layoutFieldLabels, type NumericLayout, type LayoutEdits } from "./screen-layout.ts";
@@ -22,9 +24,8 @@ export interface ScreenNode {
   textProperties?: TextProperties | null;
   style?: {name:string; error:string|null} | null;
   component?: { componentId: string; resolved: boolean; sourceRevision: string | null } | null;
-  dismissal?: "none" | "finishInteraction" | "hideScreen" | null;
   actions?: ScreenAction[] | null;
-  variableBinding?: VariableBinding | null;
+  variableBindings?: VariableBinding[] | null;
   protected: { start: number; end: number }[];
 }
 export interface ScreenDocument {
@@ -109,7 +110,9 @@ export class ScreensWorkspace {
   private readonly layout: ScreenLayoutEditor;
   private readonly images: ScreenImages;
   private readonly text: ScreenText;
-  private readonly dismissal: ScreenDismissal;
+  private readonly variableSamples = new ScreenVariableSamples(()=>this.renderCanvas());
+  private interactionVariables:ScreenVariable[] = [];
+  private interactionTargets:ResolvedScreenTarget[] = [];
   private reviewingAppearance = false;
   // Core history has no entry cap within a session; keep its selection receipts for this workspace's lifetime.
   private readonly compositionHistory: { path: string; before: string; after: string; beforeId?: string | null; afterId: string; removal: boolean }[] = [];
@@ -118,7 +121,7 @@ export class ScreensWorkspace {
     this.components = new ScreenComponents({view:()=>this.compositionView(),catalog:()=>this.catalog,current:()=>this.current() && this.panel.isConnected,request:actions.request,coordinate:task=>this.coordinateComponent(task),
       accepted:(change,selection)=>this.componentAccepted(change,selection),
       openDefinition:(id,nodeId)=>this.openOwnedScreen(id,nodeId,"component"),inspectScreen:id=>this.inspectOwnedPanel(id),
-      structureBlocked:()=>this.busy || !!this.creation || !!this.resize || !!this.move || this.composer.hasAddition() || this.composer.hasRemoval() || this.images.hasAddition() || this.images.isSaving() || this.text.isSaving() || this.dismissal.hasDraft(),
+      structureBlocked:()=>this.busy || !!this.creation || !!this.resize || !!this.move || this.composer.hasAddition() || this.composer.hasRemoval() || this.images.hasAddition() || this.images.isSaving() || this.text.isSaving() || this.text.hasActionDraft(),
       captureDrafts:(view,trackNewDrafts=false)=>[...this.text.captureComponentDrafts(view,trackNewDrafts),this.layout.captureCopyDraft(view,trackNewDrafts),this.images.captureCopyDraft(view,trackNewDrafts),this.captureGeometryDraft(view,trackNewDrafts)].filter((value):value is CopyDraftParticipant=>!!value),
       source:actions.source,note:(text,error)=>this.note(text,error),redraw:()=>this.render(),
     });
@@ -157,7 +160,7 @@ export class ScreensWorkspace {
       text: (card, view) => this.text.render(card, view),
       textDraft: (screenId,nodeId) => this.text.hasNodeDraft(screenId,nodeId),
       beginImage: (parentId, document) => this.images.begin(parentId, document),
-      otherDraft: () => this.images.hasDraft() || this.text.hasDraft() || this.layout.hasDraft() || !!this.drafts.size || this.dismissal.hasDraft(),
+      otherDraft: () => this.images.hasDraft() || this.text.hasDraft() || this.layout.hasDraft() || !!this.drafts.size,
       hover: id => this.canvas.querySelectorAll<HTMLElement>(".screen-node").forEach(target => { const node = this.nodes()[Number(target.dataset.index)]; target.dataset.hovered = String(!!node && screenNodeKey(node) === id); }),
     });
     this.images = new ScreenImages({
@@ -170,6 +173,7 @@ export class ScreensWorkspace {
       layoutTools: host => { const tools = el("div","screen-image-order"); tools.append(button("Refresh Source",()=>void this.load()),button("Validate screen",()=>this.test(true))); host.append(tools); }, order: host => this.composer.renderOrder(host),
     }, this.layout);
     this.text = new ScreenText({
+      interaction:()=>this.interactionContext(),
       writeBlocked:()=>this.components.hasPendingCopy(),cancelComponentCopy:()=>this.components.cancelCopy(),
       componentScope:(host,view)=>this.components.renderScope(host,view),
       view: () => this.compositionView(),styles: () => this.catalog?.styles,documents:()=>this.documents,inspect:async path=>this.documents.find(d=>d.path===path)??await actions.request<ScreenDocument>("screens.inspect",{path}),resolution:this.gameResolution,reviewing:active=>{this.reviewingAppearance=active;this.frames.invalidate("Return from style review to update this canvas.");if(!active)this.renderCanvas();},buttonSample: state => {this.buttonState=state;const select=this.stage.querySelector<HTMLSelectElement>('[aria-label="Button state (sample)"]');if(select)select.value=state;this.renderCanvas();},current: () => this.current(),request:actions.request,coordinate:actions.coordinate,
@@ -178,10 +182,6 @@ export class ScreensWorkspace {
       layoutTools:host => {const tools = el("div","screen-text-layout-tools");tools.append(button("Refresh Source",()=>void this.load()),button("Validate screen",()=>this.test(true)));host.append(tools);},
       order:host => this.composer.renderOrder(host),
     },this.layout);
-    this.dismissal = new ScreenDismissal({
-      view:()=>this.compositionView(),kind:()=>this.owned?.kind,current:()=>this.current(),
-      commit:(command,base)=>this.compose(command,base),redraw:()=>this.renderCard(),note:(message,error)=>this.note(message,error),
-    });
     const heading = el("header", "screen-heading"); heading.append(el("h1", "", "Screens"));
     const tools = el("div", "screen-tools");
     const addImageElement = button("Add element", () => this.composer.beginAddition()); addImageElement.dataset.imageAdd = ""; addImageElement.hidden = true;
@@ -256,8 +256,8 @@ export class ScreensWorkspace {
     if (this.creation) { this.creation.suspended = false; this.creation.refreshBase = true; this.closeCreationHost(); }
     this.frames.invalidate("Checking canvas source."); void this.load();
   }
-  dispose(): void { this.disposed = true; this.sourceSequence++; this.sourceDialog?.remove(); this.components.dispose(); this.composer.dispose(); this.images.dispose(); this.text.dispose(); this.dismissal.dispose(); this.frames.dispose(); this.observer.disconnect(); this.cancelMove(); this.cancelResize(); this.closeCreationHost(); }
-  hasDraft(): boolean { return this.components.hasPendingCopy() || this.components.isSaving() || this.drafts.size > 0 || !!this.resize || !!this.creation || this.composer.hasAddition() || this.layout.hasDraft() || this.images.hasDraft() || this.text.hasDraft() || this.dismissal.hasDraft(); }
+  dispose(): void { this.disposed = true; this.sourceSequence++; this.sourceDialog?.remove(); this.components.dispose(); this.composer.dispose(); this.images.dispose(); this.text.dispose(); this.frames.dispose(); this.observer.disconnect(); this.cancelMove(); this.cancelResize(); this.closeCreationHost(); }
+  hasDraft(): boolean { return this.components.hasPendingCopy() || this.components.isSaving() || this.drafts.size > 0 || !!this.resize || !!this.creation || this.composer.hasAddition() || this.layout.hasDraft() || this.images.hasDraft() || this.text.hasDraft(); }
   private current(): boolean { return !this.disposed && this.actions.current(); }
   private ownedSelection(): {screenId:string;nodeId:string} | undefined {
     const id = this.nodes()[this.selected]?.id;
@@ -358,6 +358,7 @@ export class ScreensWorkspace {
         ...fields.map(([key,value])=>({label:String(key).replaceAll("_"," "),before:text(key === "text" ? node?.literal : node?.textProperties?.values[String(key)]),after:text(value)})),
         ...(command.style ? [{label:"Style",before:node?.style?.name ?? "Inherited",after:command.style.scope==="local" ? `Independent copy of ${command.style.name}` : command.style.name}] : []),
         ...this.layoutChanges(node!,command.layout ?? {}),
+        ...(command.interaction?.actions ? [{label:"Actions",before:text(node?.actions),after:text(command.interaction.actions)}] : []),
       ];
     }
     if (command.type === "image" || command.type === "addImage") {
@@ -369,12 +370,16 @@ export class ScreensWorkspace {
         ...this.layoutChanges(node ?? this.nodes()[this.selected]!,command.layout ?? {}),
       ];
     }
-    // Context-bound dismissal is local; reusable components cannot own this edit.
-    if (command.type === "dismissal") return [];
+    if (command.type === "actions") return [{label:"Actions",before:text(node?.actions),after:text(command.actions)}];
+    if (command.type === "variableText") return [{label:"Text",before:text(node?.literal),after:command.text ?? `Variable ${command.binding?.variableId}`}];
     if (command.type === "remove") return [{label:"Element",before:node?.literal ?? names[node?.kind ?? ""] ?? "Element",after:"Removed"}];
     if (command.type === "add") return [{label:"Element",before:"None",after:`${names[command.kind] ?? command.kind}${command.text ? `: ${command.text}` : ""}`}];
     const siblings = this.nodes().filter(item => item.parentStart === node?.parentStart), before = siblings.indexOf(node!), target = siblings.findIndex(item => item.id === command.targetId);
     return [{label:`Order of ${node?.literal ?? names[node?.kind ?? ""] ?? "element"}`,before:String(before+1),after:String(target+1+(command.after ? before > target ? 1 : 0 : before < target ? -1 : 0))}];
+  }
+  private interactionContext():InteractionContext|undefined {
+    if(!this.doc?.authoringRevision)return undefined;
+    return {authoringRevision:this.doc.authoringRevision,variables:this.interactionVariables,targets:this.interactionTargets,owner:this.owned};
   }
   private compositionView(): CompositionView | undefined {
     return this.current() && this.owned?.resolved && this.doc && this.nodes()[this.selected] ? {
@@ -421,7 +426,14 @@ export class ScreensWorkspace {
           owned.resolved = false;
         }
       }
+      const [authoring, targets] = await Promise.all([
+        this.actions.request<{variables?:ScreenVariable[]}>("authoring.list").catch(()=>undefined),
+        Promise.all(catalog.owned.filter(owner=>owner.resolved).map(owner=>this.actions.request<ResolvedScreenTarget>("screens.resolveTarget",{binding:{screenId:owner.id,sourceName:owner.name}}).catch(()=>undefined))),
+      ]);
       if (!this.current() || sequence !== this.loadSequence) return false;
+      this.interactionVariables=authoring?.variables??[];
+      this.variableSamples.update(this.interactionVariables);
+      this.interactionTargets=targets.filter((target):target is ResolvedScreenTarget=>!!target);
       catalog.owned.forEach(owned => {
         const document = documents.find(d => d.path === owned.path);
         if (!document || document.revision !== owned.sourceRevision || !document.screens.some(s => s.name === owned.name)) owned.resolved = false;
@@ -464,7 +476,7 @@ export class ScreensWorkspace {
     this.rememberSelection();
     if (this.owned && !design && this.step === "choose" && this.composer.canKeepTree()) { this.composer.refreshSelection(); this.renderCanvas(); }
     else this.render();
-    if (design) this.card.querySelector<HTMLElement>('input[data-image-field="width"],textarea')?.focus({ preventScroll: true });
+    if (design && !this.card.contains(document.activeElement)) this.card.querySelector<HTMLElement>('input[data-image-field="width"],textarea')?.focus({ preventScroll: true });
   }
   private renderCard(): void {
     const scroll = this.card.scrollTop;
@@ -485,7 +497,7 @@ export class ScreensWorkspace {
     }
     this.card.replaceChildren(); this.card.ariaLabel = "Selected properties";
     const componentView = this.compositionView();
-    if (componentView && this.components.renderUse(this.card,componentView)) { this.dismissal.renderRetained(this.card); this.renderCanvas(); return; }
+    if (componentView && this.components.renderUse(this.card,componentView)) { this.text.renderRetained(this.card,this.documents); this.renderCanvas(); return; }
     if (this.composer.render(this.card)) {
       if (componentView) {
         if (!this.card.querySelector(".screen-component-scope")) this.components.renderScope(this.card,componentView);
@@ -495,8 +507,6 @@ export class ScreensWorkspace {
         }
       }
       this.panel.dataset.composition = "true";
-      if (this.step === "design") this.dismissal.render(this.card);
-      this.dismissal.renderRetained(this.card);
       [...this.rail.querySelectorAll("button")].forEach((b, i) => b.ariaPressed = String(["choose", "design", "connect"][i] === this.step));
       if (this.creation) this.renderCreation(); this.layout.renderRetained(this.card, this.documents); this.images.renderRetained(this.card,this.documents); this.text.renderRetained(this.card,this.documents); this.renderLayoutDraftMarkers(); this.card.scrollTop = scroll; return;
     }
@@ -529,17 +539,15 @@ export class ScreensWorkspace {
       if (!node.numericLayout) this.card.append(el("p", "muted", `${node.kind} · Edit existing literal dimensions, then apply your changes.`));
       this.renderTextSample(this.card);
       this.renderGeometry(this.card);
-      this.dismissal.render(this.card);
     }
     this.card.append(el("p", "muted screen-coverage", this.doc?.partial ? "Partial coverage. Custom Python, actions, styling and unsupported regions are preserved in Source." : "Numeric layout changes use the shared source history."));
     this.layout.renderRetained(this.card, this.documents); this.images.renderRetained(this.card,this.documents); this.text.renderRetained(this.card,this.documents);
-    this.dismissal.renderRetained(this.card);
     this.renderLayoutDraftMarkers();
     this.card.scrollTop = scroll;
   }
   private renderTextSample(host: HTMLElement): void {
     const node = this.nodes()[this.selected];
-      if(node && (node.kind==="text" || node.kind==="textbutton")) {
+      if(node && !node.variableBindings?.length && (node.kind==="text" || node.kind==="textbutton")) {
         const label=el("label","screen-text-sample","Canvas text sample");
         const input=el("textarea"); input.ariaLabel="Canvas text sample";input.maxLength=8192;
         input.value=this.textSamples.get(this.key())?.value ?? node.literal ?? "";
@@ -737,8 +745,9 @@ export class ScreensWorkspace {
         this.note("Element removed. Undo restores its exact source and identity.");
       } else if (command.type === "image" || command.type === "addImage") this.note(sourceChanged ? "Image applied. Undo restores its reference, size and layout together." : "No change. No undo entry added.");
       else if (command.type === "add") this.note("Element added. Undo removes this addition.");
-      else if (command.type === "formatText") this.note(!sourceChanged ? "No change. No history entry added." : "Text applied. Undo restores its typography and layout together.");
-      else if (command.type === "dismissal") this.note(!sourceChanged ? "No change. No history entry added." : "Button action applied. Undo restores its previous action.");
+      else if (command.type === "formatText") this.note(!sourceChanged ? "No change. No history entry added." : "Selected changes applied. Undo restores text, appearance, layout and actions together.");
+      else if (command.type === "variableText") this.note(!sourceChanged ? "No change. No history entry added." : "Text binding applied. Undo restores its previous text.");
+      else if (command.type === "actions") this.note(!sourceChanged ? "No change. No history entry added." : "Button action applied. Undo restores its previous action.");
       else this.note(!sourceChanged ? "Order unchanged. No history entry added." : "Order changed. Groups keep their children; Undo restores the order.");
       this.render(); this.composer.focusSelection();
     }
@@ -880,6 +889,7 @@ export class ScreensWorkspace {
     }
     const selectedNode = this.nodes()[this.selected];
     this.selectionCaption.textContent = selectedNode ? `${selectedNode.kind} · Nesting level ${Math.max(0, ancestors.length - 1)}` : "";
+    if(!this.variableSamples.element.isConnected)this.stage.append(this.variableSamples.element);
     const { width, height } = this.gameResolution;
     const available = this.canvas.parentElement?.clientWidth ?? 600;
     this.scale = this.zoom === "100" ? 1 : Math.max(0.05, Math.min((available - (this.owned ? 0 : 32)) / width, 360 / height, 1));
@@ -901,11 +911,13 @@ export class ScreensWorkspace {
     if (drafts.some(d => d.document.revision !== this.doc!.revision || ![d.width,d.height].every(v => /^[1-9]\d*$/.test(v) && Number(v) <= 16384))) {
       this.frames.invalidate("Canvas unavailable for this invalid or stale draft. Input retained."); return;
     }
-    const textSamples = samples.map(s => ({ nodeStart: this.nodes()[s.index]!.span.start, value: s.value }));
+    const variableSamples=this.variableSamples.payload();
+    if(variableSamples.stale){this.frames.invalidate("Variable samples use an earlier Source revision. Input retained; edit or reset samples.");return;}
+    const textSamples = samples.filter(s=>!this.nodes()[s.index]?.variableBindings?.length).map(s => ({ nodeStart: this.nodes()[s.index]!.span.start, value: s.value }));
     const payload = { path:this.doc.path, screenName:this.screen, expectedRevision:this.doc.revision, width, height,
       drafts:drafts.filter(d=>!d.position).map(d => ({ nodeStart:d.document.screens.find(s => s.name === d.screen)!.nodes[d.index]!.span.start, width:Number(d.width), height:Number(d.height) })),
       positions:drafts.filter(d=>d.position).map(d=>({nodeStart:d.document.screens.find(s=>s.name===d.screen)!.nodes[d.index]!.span.start,...d.position!})),
-      layouts:numeric.layouts.filter(l => l.nodeStart !== virtual?.span.start), imageSamples:images.samples, textStyles:text.samples, ...(images.addition ? {imageAddition:images.addition} : {}), textSamples,buttonState:this.buttonState, ...(composition.addition ? { addition: composition.addition } : {}) };
+      layouts:numeric.layouts.filter(l => l.nodeStart !== virtual?.span.start), imageSamples:images.samples, textStyles:text.samples, ...(images.addition ? {imageAddition:images.addition} : {}), textSamples,variableSamples:variableSamples.values,buttonState:this.buttonState, ...(composition.addition ? { addition: composition.addition } : {}) };
     this.frames.render(payload);
   }
   private invalidateGeometry(discardProvisional: boolean): void {

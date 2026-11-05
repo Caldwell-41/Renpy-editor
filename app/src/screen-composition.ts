@@ -1,3 +1,5 @@
+import type { InteractionEdit } from "./screen-interactions.ts";
+import type { ScreenAction, VariableBinding } from "./screen-contracts.ts";
 import { icon } from "./icons.ts";
 import { validateField } from "./authoring-input.ts";
 import { screenTextByteError } from "./screen-text-validation.ts";
@@ -19,8 +21,9 @@ export type CompositionCommand =
   | ({ type: "addImage"; parentId: string } & ImageSelection)
   | ({ type: "image"; nodeId: string; parentId?: string } & ImageSelection)
   | { type: "add"; parentId: string; kind: string; text: string }
-  | { type: "formatText"; nodeId: string; values: TextEdits; style?: StyleEdit; layout?: LayoutEdits }
-  | { type: "dismissal"; nodeId: string; action: "finishInteraction" | "hideScreen" }
+  | { type: "formatText"; nodeId: string; values: TextEdits; style?: StyleEdit; layout?: LayoutEdits; interaction?: InteractionEdit }
+  | { type: "actions"; nodeId:string; actions:ScreenAction[]; expectedAuthoringRevision:string; expectedTargetRevisions:InteractionEdit["expectedTargetRevisions"] }
+  | { type: "variableText"; nodeId:string; binding:VariableBinding|null; text?:string; expectedAuthoringRevision:string }
   | { type: "reorder"; nodeId: string; targetId: string; after: boolean }
   | { type: "remove"; nodeId: string };
 interface Host {

@@ -6,6 +6,8 @@ import {randomUUID, createHash} from 'node:crypto';
 import {Window} from 'happy-dom';
 import {driverProcess} from './phase2-driver-process.mjs';
 import {buildPanelCreationForm} from '../dist-tests/src/screen-panels.js';
+import {ScreenText} from '../dist-tests/src/screen-text.js';
+import {ScreenLayoutEditor} from '../dist-tests/src/screen-layout.js';
 import {renderSceneAuthoring} from '../dist-tests/src/scene-ui.js';
 
 const output = resolve(process.env.PANEL_CORE_UI_OUTPUT ?? `target/screen-panels-core-ui-${randomUUID()}`);
@@ -13,8 +15,8 @@ await mkdir(dirname(output), {recursive: true}); await mkdir(output);
 const scratch = join(await realpath(output), `loomlight-help-controller-${randomUUID()}`);
 const child = driverProcess(resolve(process.env.CARGO_TARGET_DIR ?? 'target', `debug/examples/help-controller-driver${process.platform === 'win32' ? '.exe' : ''}`), [scratch]);
 const browser = new Window();
-Object.assign(globalThis, {window: browser, document: browser.document, HTMLElement: browser.HTMLElement, HTMLInputElement: browser.HTMLInputElement, HTMLSelectElement: browser.HTMLSelectElement, Event: browser.Event, KeyboardEvent: browser.KeyboardEvent});
-let session, disposeStory, form;
+Object.assign(globalThis, {window: browser, document: browser.document, HTMLElement: browser.HTMLElement, HTMLInputElement: browser.HTMLInputElement, HTMLSelectElement: browser.HTMLSelectElement, HTMLTextAreaElement:browser.HTMLTextAreaElement, HTMLDetailsElement:browser.HTMLDetailsElement, Event: browser.Event, KeyboardEvent: browser.KeyboardEvent});
+let session, disposeStory, form, textEditor;
 const result = {passed: false, controllerToCore: true, sdkExecuted: false, nativeWebView: false, physicalInput: false, stages: [], operations: {}};
 const messages = [];
 const hash = text => createHash('sha256').update(text).digest('hex');
@@ -78,6 +80,16 @@ try {
   await history('undo'); assert(!(await call('screens.list')).owned.some(screen => screen.id === panel.id));
   await history('redo'); assert.equal(await source(panel.path), acceptedPanel);
   result.stages.push('Help form -> one accepted create -> one-step Undo/Redo');
+  const panelDocument=await call('screens.inspect',{path:panel.path}),panelNodes=panelDocument.screens.find(s=>s.name===panel.name).nodes;
+  const panelButton=panelNodes.find(node=>node.kind==='textbutton'&&node.actions?.some(action=>action.type==='hideScreen'));assert(panelButton);
+  const panelTarget=await call('screens.resolveTarget',{binding:{screenId:panel.id,sourceName:panel.name}});assert.equal(panelTarget.canShowHide,true);
+  const panelView={document:panelDocument,screenId:panel.id,screenName:panel.name,nodes:panelNodes,selected:panelButton,step:'design',busy:false},panelCard=document.createElement('section');document.body.append(panelCard);
+  const panelLayout=new ScreenLayoutEditor({view:()=>undefined,commit:async()=>{throw Error('No separate layout writer');},preview:()=>{},note:()=>{},select:()=>{}});
+  const panelWrites=[];
+  textEditor=new ScreenText({view:()=>panelView,interaction:()=>({authoringRevision:panelDocument.authoringRevision,variables:[],targets:[panelTarget],owner:panel}),current:()=>true,request:call,coordinate:task=>task(),inspect:async()=>panelDocument,commit:async(command,base)=>{panelWrites.push(command);const accepted=await call('screens.compose',{screenId:panel.id,expectedRevision:base.revision,command});textEditor.accept(command,base,accepted.document);},redraw:()=>{},preview:()=>{},source:()=>{},saved:()=>{},layoutTools:()=>{},order:()=>{},note:m=>messages.push(m)},panelLayout);
+  textEditor.render(panelCard,panelView);const target=panelCard.querySelector('[aria-label="Action 1 screen"]');target.dispatchEvent(new Event('change',{bubbles:true}));button(panelCard,'Apply').click();await wait(()=>!textEditor.isSaving(),'self-Hide no-op accepted');assert.equal(await source(panel.path),acceptedPanel);assert.deepEqual(panelWrites[0].interaction.expectedTargetRevisions,[{target:panelTarget.binding,revisions:panelTarget.revisions}]);
+  textEditor.unmount();panelCard.replaceChildren();textEditor.render(panelCard,panelView);panelCard.querySelector('[aria-label="Remove action 1"]').click();button(panelCard,'Apply').click();await wait(()=>!textEditor.isSaving(),'Null accepted');const nullSource=acceptedPanel.replace(`Hide("${panel.name}")`,'Null()');assert.equal(await source(panel.path),nullSource);await history('undo');assert.equal(await source(panel.path),acceptedPanel);await history('redo');assert.equal(await source(panel.path),nullSource);await history('undo');assert.equal(await source(panel.path),acceptedPanel);textEditor.dispose();textEditor=undefined;panelCard.remove();result.stages.push('canonical self-Hide UI no-op revalidates self review; empty sequence writes Null with one-step Undo/Redo');
+
 
   let model = await call('scene.list');
   model = await call('scene.apply', {expectedProjectRevision: model.projectRevision, expectedSourceMapRevision: model.sourceMapRevision, command: {type: 'createScene', chapterId: model.chapters[0].id, displayName: 'Panel UI proof'}});
@@ -129,7 +141,7 @@ try {
   result.failure = {message: error.message, stack: error.stack}; throw error;
 } finally {
   result.messages = messages;
-  form?.dispose(); disposeStory?.(); await browser.happyDOM.close();
+  form?.dispose(); textEditor?.dispose(); disposeStory?.(); await browser.happyDOM.close();
   try { await child.stop(); await assert.rejects(access(scratch)); result.cleanupComplete = true; }
   catch (error) { result.passed = false; result.cleanupFailure = error.message; throw error; }
   finally { result.driver = child.exitStatus(); await writeFile(join(output, 'result.json'), JSON.stringify(result, null, 2) + '\n'); }

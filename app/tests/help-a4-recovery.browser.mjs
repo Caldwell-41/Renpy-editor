@@ -98,14 +98,14 @@ try{
  model=await call('scene.list');const beats=model.scenes.find(item=>item.id===current.id).beats,callIndex=beats.findIndex(item=>item.payload.type==='callScreen');assert(callIndex>=0&&beats[callIndex+1]?.id===anchor.id);result.checks.push('deleted remembered Scene recovers through production main and accepts only explicitly selected placement');result.checks.push('pending marker matches the accepted anchor, Cancel is outlined and successful acceptance removes the marker');
  const document=await call('screens.inspect',{path:owner.path});
  await call('screens.compose',{screenId:owner.id,expectedRevision:document.revision,command:{type:'add',parentId:owner.rootId,kind:'textbutton',text:'Pending close'}});
- await page.getByRole('button',{name:'Screens',exact:true}).click();await ui.getByRole('treeitem',{name:'Text button · Pending close',exact:true}).press('Enter');await ui.locator('.screen-dismissal select').selectOption('finishInteraction');
+ await page.getByRole('button',{name:'Screens',exact:true}).click();await ui.getByRole('treeitem',{name:'Text button · Pending close',exact:true}).press('Enter');await ui.getByLabel('Add action',{exact:true}).selectOption('finishInteraction');
  const base=await call('source.open',{path:owner.path}),renamed=await call('source.updateDraft',{path:owner.path,expectedBaseRevision:base.baseRevision,text:base.text.replace('screen a4_dialog():','screen renamed_a4_dialog():'),selectionStart:0,selectionEnd:0});
  await call('source.save',{path:owner.path,expectedBaseRevision:renamed.baseRevision,expectedDraftVersion:renamed.draftVersion});
  assert.equal((await call('screens.list')).owned.find(item=>item.id===owner.id).resolved,false);
  await ui.getByRole('button',{name:/^1\s+Choose$/}).click();await ui.getByRole('button',{name:'Refresh Source',exact:true}).click();
- const retained=ui.locator('.screen-dismissal-retained');await retained.getByText(/Pending close/).waitFor();await capture('unresolved-action-draft');
+ const retained=ui.locator('.screen-retained-draft');await retained.getByText(/Pending close/).waitFor();await capture('unresolved-action-draft');
  const closes=count('project.close');await page.getByRole('button',{name:'Close Project',exact:true}).click();assert.equal(count('project.close'),closes);assert(await retained.isVisible());
- await retained.getByRole('button',{name:'Cancel action draft'}).click();await retained.waitFor({state:'detached'});
+ await retained.getByRole('button',{name:'Cancel retained draft'}).click();await retained.waitFor({state:'detached'});
  await page.getByRole('button',{name:'Close Project',exact:true}).click();await page.locator('.recent-open').waitFor();result.checks.push('an unresolved screen keeps its original Finish draft cancellable and does not trap project close');
  assert.equal(result.checks.length,5);assert.deepEqual(result.pageErrors,[]);result.passed=true;
 }catch(error){result.failure={message:error.message,stack:error.stack};if(page){await writeFile(join(output,'failure.txt'),await page.locator('body').innerText());await page.screenshot({path:join(output,'failure.png'),fullPage:true});}throw error;}

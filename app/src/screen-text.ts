@@ -1,3 +1,4 @@
+import { actionDraft, captureActionFocus, prepareInteraction, renderActions, restoreActionFocus, variableLabel, type ActionDraft, type InteractionContext } from "./screen-interactions.ts";
 import { ScreenCanvasFrames } from "./screen-canvas-frames.ts";
 import type { CompositionCommand, CompositionView, CopyDraftParticipant } from "./screen-composition.ts";
 import type { ScreenDocument, ScreenNode } from "./screen-ui.ts";
@@ -21,8 +22,9 @@ export interface StyleEdit {scope:"shared"|"local"|"create"; name:string; expect
 type Field = "text" | "font" | "size" | "color" | "align" | "bold" | "italic";
 type Fields = Record<Field, string>;
 type TextField = "text" | "size" | "color";
-interface Draft { key: string; document: ScreenDocument; screenId: string; node: ScreenNode; fields: Fields; appearance:Record<string,string>; edited:Set<string>; font?: FontReference | null; style?: StyleEdit }
+interface Draft { interaction?:InteractionContext; actions?:ActionDraft; key: string; document: ScreenDocument; screenId: string; node: ScreenNode; fields: Fields; appearance:Record<string,string>; edited:Set<string>; font?: FontReference | null; style?: StyleEdit }
 interface Host {
+  interaction?:()=>InteractionContext|undefined;
   view: () => CompositionView | undefined;
   styles?: () => StyleCatalog | undefined;
   buttonSample?: (state:string) => void;
@@ -67,6 +69,7 @@ export class ScreenText {
   private generation = 0;
   private card?: HTMLElement;
   private cardKey?: string;
+  private mountedDraft?:Draft;
   private keys?: AbortController;
   private submitted?: {draft: Draft; command: CompositionCommand; layout: LayoutReservation};
   private dialog?: HTMLDialogElement;
@@ -102,9 +105,10 @@ export class ScreenText {
       bold:v?.bold === undefined ? "" : v.bold ? "True" : "False",italic:v?.italic === undefined ? "" : v.italic ? "True" : "False"};
   }
   private value(view: CompositionView): Draft {
-    return this.drafts.get(this.key(view)) ?? {key:this.key(view),document:view.document,screenId:view.screenId,node:view.selected,fields:this.fields(view.selected),appearance:this.extraFields(view.selected.textProperties?.values??{}),edited:new Set(), ...(view.selected.style && this.host.styles?.() ? {style:{scope:"shared",name:view.selected.style.name,expectedRevision:this.host.styles()!.revision}} : {})};
+    return this.drafts.get(this.key(view)) ?? (this.mountedDraft?.key===this.key(view)?this.mountedDraft:undefined) ?? {key:this.key(view),document:view.document,screenId:view.screenId,node:view.selected,interaction:structuredClone(this.host.interaction?.()),...(view.selected.actions ? {actions:actionDraft(view.selected.actions)} : {}),fields:this.fields(view.selected),appearance:this.extraFields(view.selected.textProperties?.values??{}),edited:new Set(), ...(view.selected.style && this.host.styles?.() ? {style:{scope:"shared",name:view.selected.style.name,expectedRevision:this.host.styles()!.revision}} : {})};
   }
   hasDraft(): boolean { return this.drafts.size > 0; }
+  hasActionDraft():boolean {return [...this.drafts.values()].some(d=>d.actions?.touched);}
   hasNodeDraft(screenId: string, nodeId: string): boolean { return this.drafts.has(`${screenId}:${nodeId}`); }
   captureComponentDrafts(view:CompositionView,trackNewDrafts=false):readonly CopyDraftParticipant[] {
     const currentKeys=()=>[...this.drafts.values()].filter(draft=>draft.screenId===view.screenId && draft.document.path===view.document.path).map(draft=>draft.key);
@@ -157,12 +161,13 @@ export class ScreenText {
   invalidate(): void { this.loaded = false; this.generation++; this.loading = undefined; }
   unmount(): void {
     if (this.card && this.cardKey) {
+      const section=this.card.querySelector<HTMLElement>(".siv-actions");if(section&&this.mountedDraft?.actions)captureActionFocus(section,this.mountedDraft.actions);
       this.carets.set(this.cardKey,this.caret());
       this.scrolls.set(this.cardKey,this.card.querySelector(".screen-text-body")?.scrollTop ?? 0);
       const layout = this.card.querySelector<HTMLDetailsElement>(".screen-text-layout");
       if (layout) this.expanded.set(this.cardKey,layout.open);
     }
-    this.keys?.abort(); this.fieldValidators.clear(); this.card = undefined; this.cardKey = undefined;
+    this.keys?.abort(); this.fieldValidators.clear(); this.card = undefined; this.cardKey = undefined;this.mountedDraft=undefined;
   }
   private caret():{field:string;start:number|null;end:number|null} {
     const field=this.lastField??"text",control=this.fieldControl(field);
@@ -180,8 +185,9 @@ export class ScreenText {
     this.loading = loading; return loading;
   }
   private store(draft: Draft, view: CompositionView): void {
-    if (same(this.fields(view.selected),draft.fields) && same(this.extraFields(view.selected.textProperties?.values??{}),draft.appearance) && (!draft.style || draft.style.scope === "shared" && draft.style.name === view.selected.style?.name)) {
+    if (!draft.actions?.touched && same(this.fields(view.selected),draft.fields) && same(this.extraFields(view.selected.textProperties?.values??{}),draft.appearance) && (!draft.style || draft.style.scope === "shared" && draft.style.name === view.selected.style?.name)) {
       this.drafts.delete(draft.key);this.errors.delete(draft.key);this.fieldErrors.delete(draft.key);
+      draft.document=view.document;draft.node=view.selected;draft.interaction=structuredClone(this.host.interaction?.());
     } else this.drafts.set(draft.key,draft);
     this.sync(); this.host.preview();
   }
@@ -196,10 +202,10 @@ export class ScreenText {
     this.card = card; this.cardKey = this.key(view); card.classList.add("screen-text"); card.ariaLabel = "Text editor";
     const heading = el("header", "screen-text-heading"); heading.append(el("h2", "", view.selected.kind === "textbutton" ? "Button appearance" : view.selected.kind === "frame" || view.selected.kind === "window" ? "Frame appearance" : "Help text"),el("span","screen-text-draft"));
     const preview = action("Show preview",() => {const stage = card.closest(".screens-editor")?.querySelector<HTMLElement>(".screen-stage");stage?.scrollIntoView({block:"start"});stage?.querySelector<HTMLElement>("button")?.focus();}); preview.classList.add("screen-text-compact"); heading.append(preview);
-    const body = el("div", "screen-text-body"), draft = this.value(view);
+    const body = el("div", "screen-text-body"), draft = this.value(view);this.mountedDraft=draft;
     const input = (field: TextField, name: string) => {
       const label = el("label", "screen-text-field", field === "text" ? "" : name), control = field === "text" ? el("textarea") : el("input");
-      control.ariaLabel = name; control.dataset.textField = field; control.value = draft.fields[field]; control.placeholder = "Default";
+      control.ariaLabel=name;control.setAttribute("aria-label",name); control.dataset.textField = field; control.value = draft.fields[field]; control.placeholder = "Default";
       if (control instanceof HTMLTextAreaElement) {control.rows = 3;control.maxLength = 8192;} else if (field === "size") control.inputMode = "numeric";
       control.readOnly = !!view.selected.textProperties?.blocked[field];
       if (control.readOnly && view.selected.textProperties?.expressions?.[field]) control.value = view.selected.textProperties.expressions[field]!;
@@ -236,6 +242,22 @@ export class ScreenText {
     typography.append(fields,row);
     if(["frame","window"].includes(view.selected.kind)){trigger.hidden=true;warning.hidden=true;fields.hidden=true;row.hidden=true;}
     if(["frame","window","textbutton"].includes(view.selected.kind)) {const extra=el("div","screen-appearance-fields");this.renderAppearance(extra,view);typography.append(extra);}
+    if(view.selected.kind==="textbutton") {
+      const actions=el("section");body.append(actions);
+      const original=draft.actions??actionDraft([]);
+      renderActions(actions,original,draft.interaction,view.busy||view.selected.actions==null||draft.interaction?.owner?.kind==="component",()=>{draft.actions=original;this.drafts.set(draft.key,draft);this.sync();this.host.preview();});
+      heading.querySelector("h2")!.textContent=`${view.selected.literal??"Selected"} button`;
+    }
+    if(view.selected.kind==="text" && view.selected.variableBindings!=null) {
+      const insert=el("div","siv-insert"),choice=el("select");choice.setAttribute("aria-label","Existing variable");
+      for(const variable of draft.interaction?.variables??[]) {const option=el("option","",`${variableLabel(variable)} · ${variable.variableType}`);option.value=variable.id;choice.append(option);}
+      const add=action("Insert variable",()=>{
+        const variable=draft.interaction?.variables.find(v=>v.id===choice.value),control=content.querySelector("textarea");
+        if(!variable||!control||control.readOnly)return;
+        const start=control.selectionStart,end=control.selectionEnd,token=`[${variable.technicalName}!q]`;
+        control.setRangeText(token,start,end,"end");this.edit("text",control.value);control.focus({preventScroll:true});
+      });add.disabled=!choice.options.length;insert.append(choice,add);content.append(insert);
+    }
     body.append(content,typography);
     const disclosure = el("details","screen-text-layout");disclosure.open = this.expanded.get(this.cardKey) ?? false;const layoutSummary = el("summary","","Layout"), local = el("span","screen-text-local-scope",component?"Within this component":"This element only");layoutSummary.append(local);disclosure.append(layoutSummary);
     const layoutHost = el("div");disclosure.append(layoutHost);this.layout.render(layoutHost,{sharedCommit:true});this.host.layoutTools(disclosure);this.host.order(disclosure);body.append(disclosure);
@@ -251,8 +273,10 @@ export class ScreenText {
     },{signal:this.keys.signal});
     void this.refreshAssets().catch(error => {if (this.active()) this.host.note((error as Error).message,true);});this.sync();
     for (const field of this.fieldErrors.get(this.key(view)) ?? []) {try {this.fieldValidators.get(field)?.();} catch { /* Restore this element's field error after navigation. */ }}
-    if(this.copyFocus?.key===this.cardKey && !view.busy && !this.isSaving()) {
-      const focus=this.copyFocus;this.copyFocus=undefined;this.focus(focus.field);
+    if(draft.actions?.focus){const section=card.querySelector<HTMLElement>(".siv-actions");if(section)restoreActionFocus(section,draft.actions);}
+    const retainedFocus=this.copyFocus?.key===this.cardKey?this.copyFocus:this.drafts.has(draft.key)&&!draft.actions?.focus?this.carets.get(draft.key):undefined;
+    if(retainedFocus && !view.busy && !this.isSaving()) {
+      const focus=retainedFocus;this.copyFocus=undefined;this.focus(focus.field);
       const field=this.fieldControl(focus.field);
       if(focus.start!==null && focus.end!==null && (field instanceof HTMLTextAreaElement || field instanceof HTMLInputElement && ["text","search","tel","url","password"].includes(field.type)))field.setSelectionRange(focus.start,focus.end);
     }
@@ -272,6 +296,11 @@ export class ScreenText {
       const control = card.querySelector<HTMLInputElement|HTMLTextAreaElement>(`[data-text-field="${field}"]`)!;
       control.readOnly = busy || !!view.selected.textProperties?.blocked[field];
     }
+    const actionFields=card.querySelector<HTMLFieldSetElement>(".siv-actions fieldset"),actionAdd=card.querySelector<HTMLSelectElement>(".siv-add");
+    const actionsBlocked=busy||view.selected.actions==null||!draft.interaction||draft.interaction.owner?.kind==="component";
+    if(actionFields)actionFields.disabled=actionsBlocked;
+    if(actionAdd)actionAdd.disabled=actionsBlocked||(draft.actions?.rows.length??0)>=8;
+    const insert=card.querySelector<HTMLButtonElement>(".siv-insert button");if(insert)insert.disabled=busy||!draft.interaction?.variables.length||!!view.selected.textProperties?.blocked.text;
     for(const control of card.querySelectorAll<HTMLInputElement|HTMLSelectElement>("[data-appearance-field]"))control.disabled=busy;
     const color = draft.fields.color;card.querySelector<HTMLElement>(".screen-text-swatch")!.style.backgroundColor = hex(color) ? color : "transparent";
     for (const select of card.querySelectorAll<HTMLSelectElement>("select[data-text-field]")) select.disabled = busy || !!view.selected.textProperties?.blocked[select.dataset.textField!];
@@ -586,7 +615,7 @@ export class ScreenText {
     if(this.host.writeBlocked?.()){this.host.note("Reload the copy or cancel its unsaved edits before applying.",true);return;}
     const draft = this.value(view);let values: TextEdits, layout: ReturnType<ScreenLayoutEditor["currentDraft"]>;
     try {values = this.values(draft,true);layout = this.layout.currentDraft(true);} catch {return;}
-    if (!Object.keys(values).length && !layout && (!draft.style || draft.style.scope === "shared" && draft.style.name === view.selected.style?.name)) return;
+    if (!draft.actions?.touched && !Object.keys(values).length && !layout && (!draft.style || draft.style.scope === "shared" && draft.style.name === view.selected.style?.name)) return;
     if (layout && layout.document.revision !== draft.document.revision) {this.fail("source","Text and layout use different Source revisions. Your edits are kept.");return;}
     const reservation = this.layout.reserveForComposition(draft.document);
     if (!draft.node.textProperties?.blocked.font && draft.fields.font) {
@@ -597,10 +626,26 @@ export class ScreenText {
     }
     const active = (document.activeElement as HTMLElement | null)?.dataset, field = this.lastField ?? active?.textField ?? (active?.layoutField ? `layout:${active.layoutField}` : "text");
     const style=this.styleAction(draft,values);
-    const command: CompositionCommand = {type:"formatText",nodeId:view.selected.id!,values,...(style ? {style} : {}),...(layout ? {layout:layout.values} : {})};
+    let interaction;
+    if(draft.actions?.touched || values.text!==undefined&&draft.node.kind==="text"&&draft.node.variableBindings!=null) {
+      if(!draft.interaction){reservation.release();this.fail("source","Variable and action metadata are unavailable. Your edits are kept.");return;}
+      try{interaction=prepareInteraction(draft.interaction,draft.actions?.touched?draft.actions:undefined);}
+      catch(error){reservation.release();if(draft.actions){const section=this.card?.querySelector<HTMLElement>(".siv-actions");if(section){renderActions(section,draft.actions,draft.interaction,false,()=>{this.drafts.set(draft.key,draft);this.sync();});section.querySelector<HTMLElement>("[aria-invalid]")?.focus({preventScroll:true});}}this.host.note((error as Error).message,true);return;}
+    }
+    const command: CompositionCommand = {type:"formatText",nodeId:view.selected.id!,values,...(interaction?{interaction}:{}),...(style ? {style} : {}),...(layout ? {layout:layout.values} : {})};
     if (style && !(await this.reviewStyle(draft, true))) {reservation.release();return;}
+    const caret=this.caret(),actionFocus=draft.actions?.focus,actionIndex=draft.actions?.rows.findIndex(row=>row.id===actionFocus?.id);
     const submitted = {draft,command,layout:reservation};this.submitted = submitted;this.sync();
-    try {await this.host.commit(command,draft.document);if (this.active()) this.focus(field);}
+    try {
+      await this.host.commit(command,draft.document);
+      if(this.active()) {
+        const actionRow=actionFocus&&actionIndex!==undefined&&actionIndex>=0?this.card?.querySelector<HTMLElement>(`.siv-sequence>li:nth-child(${actionIndex+1})`):undefined;
+        const control=actionRow?(actionFocus?.part?actionRow.querySelector<HTMLElement>(`[data-part="${actionFocus.part}"]`):actionRow.querySelector<HTMLElement>("summary")):this.fieldControl(field);
+        control?.focus({preventScroll:true});
+        const start=actionRow?actionFocus?.start:caret.start,end=actionRow?actionFocus?.end:caret.end;
+        if(start!=null&&end!=null&&(control instanceof HTMLTextAreaElement||control instanceof HTMLInputElement&&control.type==="text"))control.setSelectionRange(start,end);
+      }
+    }
     catch (error) {if (this.active()) this.fail("source",`${(error as Error).message} Your edits are kept.`);}
     finally {if (this.submitted === submitted) this.submitted = undefined;submitted.layout.release();if (this.active()) this.sync();}
   }
@@ -610,7 +655,7 @@ export class ScreenText {
     for (const draft of this.drafts.values()) {
       if (draft.document.path !== base.path || draft.document.revision !== base.revision) continue;
       const after = accepted.screens.flatMap(s => s.nodes).find(n => n.id === draft.node.id);
-      if (after && same(this.fields(after),this.fields(draft.node))) {draft.node = after;draft.document = accepted;}
+      if (!draft.interaction && after && same(this.fields(after),this.fields(draft.node))) {draft.node = after;draft.document = accepted;}
     }
   }
   canvasDraft(): {stale: boolean; samples: {nodeStart: number; values: TextEdits}[]} {
@@ -620,21 +665,22 @@ export class ScreenText {
       const own=draft.screenId===view.screenId,shared=draft.style?.scope==="shared"&&Object.keys(this.sharedValues(draft,this.values(draft,false))).length>0;
       if(!own&&!shared)continue;
       const source=this.host.documents?.().find(d=>d.path===draft.document.path)??(own?view.document:undefined);
-      if(!source||source.revision!==draft.document.revision||draft.style&&this.host.styles?.()?.revision!==draft.style.expectedRevision){stale=true;continue;}
+      if(!source||source.revision!==draft.document.revision||draft.interaction&&this.host.interaction?.()?.authoringRevision!==draft.interaction.authoringRevision||draft.style&&this.host.styles?.()?.revision!==draft.style.expectedRevision){stale=true;continue;}
       const targets=view.nodes.filter(n=>own&&n.id===draft.node.id||shared&&n.style?.name===draft.style?.name);
       if(own&&!targets.some(n=>n.id===draft.node.id)){stale=true;continue;}
       for(const node of targets){const selected=own&&node.id===draft.node.id,values=selected?this.previewValues(draft):this.sharedValues(draft,this.values(draft,false));
+        if(node.variableBindings?.length)delete values.text;
         const existing=samples.get(node.span.start);if(existing&&!same(existing,values))stale=true;else samples.set(node.span.start,values);
       }
     }
     return {stale,samples:[...samples].map(([nodeStart,values])=>({nodeStart,values}))};
   }
-  renderRetained(host: HTMLElement, documents: ScreenDocument[]): void {
+  renderRetained(host: HTMLElement, _documents: ScreenDocument[]): void {
     for (const draft of this.drafts.values()) {
-      if (documents.some(d => d.path === draft.document.path && d.screens.some(s => s.nodes.some(n => n.id === draft.node.id)))) continue;
-      const section = el("section","screen-retained-draft");section.append(el("p","","This text is no longer available in Source. Your draft is retained."));
-      const value = el("textarea");value.readOnly = true;value.ariaLabel = "Retained text draft";value.value = Object.entries(draft.fields).map(([k,v]) => `${k}: ${v}`).join("\n");
-      section.append(value,action("Discard retained text draft",()=>{this.drafts.delete(draft.key);this.errors.delete(draft.key);this.fieldErrors.delete(draft.key);section.remove();this.host.preview();}));host.append(section);
+      if (this.host.view()?.step==="design" && this.host.view()?.screenId===draft.screenId && this.host.view()?.selected.id===draft.node.id && this.host.view()?.selected.textProperties && (!draft.actions?.touched || this.host.view()?.selected.actions!=null)) continue;
+      const section = el("section","screen-retained-draft");section.append(el("p","",`Draft retained on ${draft.node.literal??draft.node.kind} in ${draft.document.path}.`));
+      const value = el("textarea");value.readOnly = true;value.ariaLabel = "Retained text draft";value.value = Object.entries(draft.fields).map(([k,v]) => `${k}: ${v}`).join("\n")+(draft.actions?.touched ? `\nActions: ${JSON.stringify(draft.actions.rows)}` : "");
+      section.append(value,action(draft.actions?.touched ? "Cancel retained draft" : "Discard retained text draft",()=>{this.drafts.delete(draft.key);this.errors.delete(draft.key);this.fieldErrors.delete(draft.key);section.remove();this.host.redraw();this.host.preview();}));host.append(section);
     }
   }
   private closePicker(focus = true): void {

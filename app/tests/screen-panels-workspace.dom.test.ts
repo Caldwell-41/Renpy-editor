@@ -3,14 +3,14 @@ import test from "node:test";
 import { Window } from "happy-dom";
 import { ScreensWorkspace, type ScreenDocument } from "../src/screen-ui.js";
 import type { CoreOperation } from "../src/protocol.js";
-import type { OwnedScreen, ScreenCatalog } from "../src/screen-contracts.js";
+import type { ScreenAction, OwnedScreen, ScreenCatalog } from "../src/screen-contracts.js";
 const flush=async()=>{for(let i=0;i<8;i++)await new Promise(r=>setTimeout(r,0));};
-function fixture(kind: OwnedScreen["kind"] = "panel", availableImage = true, dismissal?: "none" | "finishInteraction" | "hideScreen" | null) {
+function fixture(kind: OwnedScreen["kind"] = "panel", availableImage = true, actions?: ScreenAction[] | null) {
  const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement,HTMLInputElement:browser.HTMLInputElement,HTMLSelectElement:browser.HTMLSelectElement,HTMLTextAreaElement:browser.HTMLTextAreaElement,HTMLDetailsElement:browser.HTMLDetailsElement,ResizeObserver:browser.ResizeObserver});
  let owned:OwnedScreen[]=[{id:"existing",rootId:"root",path:"game/ui/existing.rpy",name:"existing",kind,resolved:true,sourceRevision:"accepted"}];
  let assetRevision=0;
  const catalog=():ScreenCatalog=>({projectRevision:`project-${assetRevision}`,sourceMapRevision:"map",inventoryRevision:`inventory-${assetRevision}`,owned});
- const documents=():ScreenDocument[]=>owned.map(s=>({path:s.path,revision:s.sourceRevision!,partial:false,screens:[{name:s.name,nodes:[{id:s.rootId,kind:"screen",literal:null,layout:{},span:{start:0,end:20},parentStart:null,properties:[{property:"xsize",value:200},{property:"ysize",value:100}],protected:[]},...(dismissal===undefined?[]:[{id:"button",kind:"textbutton",literal:"Done",layout:{},span:{start:21,end:50},parentStart:0,properties:[],protected:[],dismissal}])]}]}));
+ const documents=():ScreenDocument[]=>owned.map(s=>({path:s.path,revision:s.sourceRevision!,authoringRevision:"authoring-original",partial:false,screens:[{name:s.name,nodes:[{id:s.rootId,kind:"screen",literal:null,layout:{},span:{start:0,end:20},parentStart:null,properties:[{property:"xsize",value:200},{property:"ysize",value:100}],protected:[]},...(actions===undefined?[]:[{id:"button",kind:"textbutton",literal:"Done",layout:{},span:{start:21,end:50},parentStart:0,properties:[],protected:[],actions,textProperties:{values:{},blocked:{}}}])]}]}));
  const writes:Record<string,unknown>[]=[];const story:unknown[]=[];const storyKinds:unknown[]=[];let fail=false, renamed=false;
  const workspace=new ScreensWorkspace({projectId:"project",resolution:{width:1280,height:720},current:()=>true,coordinate:task=>task(),source:()=>{},preview:()=>{},saved:()=>{},openAssets:async()=>{workspace.panel.remove();},useInStory:async (binding,kind)=>{story.push(binding);storyKinds.push(kind);},request:async<T>(operation:CoreOperation,payload?:Record<string,unknown>):Promise<T>=>{
   if(operation==="source.list")return {files:documents().map(d=>({path:d.path}))} as T;
@@ -18,13 +18,13 @@ function fixture(kind: OwnedScreen["kind"] = "panel", availableImage = true, dis
   if(operation==="screens.inspect")return documents().find(d=>d.path===payload?.path) as T;
   if(operation==="authoring.list")return {assets:availableImage?[{id:"image",kind:"uiImage",displayName:"Route",relativePath:"game/images/route.png",sha256:"a".repeat(64),status:"available"}]:[]} as T;
   if(operation==="screens.create"){writes.push(payload!);if(fail)throw Error("Source changed");owned=[...owned,{id:"new",rootId:"new-root",path:`game/ui/${payload!.name}.rpy`,name:String(payload!.name),kind:"panel",resolved:true,sourceRevision:"created"}];return catalog() as T;}
-  if(operation==="screens.compose"){writes.push(payload!);if(fail)throw Error("Source changed");dismissal="finishInteraction";owned[0]!.sourceRevision="changed";return {document:documents()[0],selectedId:"button",changed:true} as T;}
-  if(operation==="screens.resolveTarget")return {binding:renamed?{screenId:"existing",sourceName:"renamed"}:payload!.binding,kind} as T;
+  if(operation==="screens.compose"){writes.push(payload!);if(fail)throw Error("Source changed");actions=[{type:"finishInteraction"}];owned[0]!.sourceRevision="changed";return {document:documents()[0],selectedId:"button",changed:true} as T;}
+  if(operation==="screens.resolveTarget")return {binding:renamed?{screenId:"existing",sourceName:"renamed"}:payload!.binding,kind,blocking:kind==="dialog",canShowHide:kind==="panel",revisions:{source:"accepted",sourceMap:"map",inventory:"inventory",effects:"effects"}} as T;
   if(operation==="screens.canvasStatus")return {phase:"unavailable",reason:"No renderer in DOM test"} as T;
   throw Error(`Unexpected ${operation}`);
  }});
  workspace.mount(document.body);const click=(label:string)=>{const b=[...document.querySelectorAll<HTMLButtonElement>("button")].find(b=>b.textContent===label);assert.ok(b,`Missing ${label}`);b.click();};
- return {workspace,click,writes,story,storyKinds,customAction:()=>{dismissal=null;},importImage:()=>{availableImage=true;assetRevision++;},fail:()=>{fail=true;},allow:()=>{fail=false;},rename:()=>{renamed=true;},close:async()=>{workspace.dispose();await browser.happyDOM.abort();}};
+ return {workspace,click,writes,story,storyKinds,customAction:()=>{actions=null;},importImage:()=>{availableImage=true;assetRevision++;},fail:()=>{fail=true;},allow:()=>{fail=false;},rename:()=>{renamed=true;},close:async()=>{workspace.dispose();await browser.happyDOM.abort();}};
 }
 
 test("New screen mounts the real Help form and retains its fields after a refused create",async()=>{
@@ -72,23 +72,23 @@ test("Assets return retains Dialog Help creation inputs and refreshes its accept
 });
 
 test("the selected button inspector routes a retained Finish draft through revision-bound composition",async()=>{
- const f=fixture("dialog",true,"none");try{await flush();
+ const f=fixture("dialog",true,[]);try{await flush();
  document.querySelector<HTMLElement>('[data-node-id="button"]')!.dispatchEvent(new window.MouseEvent("dblclick",{bubbles:true}));
- const action=document.querySelector<HTMLSelectElement>('.screen-dismissal select')!;assert.ok(action);action.value="finishInteraction";action.dispatchEvent(new window.Event("change"));
- assert.equal(f.workspace.hasDraft(),true);f.fail();document.querySelector<HTMLButtonElement>(".screen-dismissal .button.primary")!.click();await flush();
- assert.equal(f.workspace.hasDraft(),true);assert.equal(f.writes[0]!.expectedRevision,"accepted");assert.deepEqual(f.writes[0]!.command,{type:"dismissal",nodeId:"button",action:"finishInteraction"});
- f.workspace.panel.remove();f.workspace.mount(document.body);await flush();assert.equal(document.querySelector<HTMLSelectElement>('.screen-dismissal select')!.value,"finishInteraction");
- f.allow();document.querySelector<HTMLButtonElement>(".screen-dismissal .button.primary")!.click();await flush();
- assert.equal(f.workspace.hasDraft(),false);assert.equal(f.writes.length,2);assert.equal(f.writes[1]!.expectedRevision,"accepted");assert.match(document.querySelector(".screen-message")!.textContent!,/Button action applied/);
+ const action=document.querySelector<HTMLSelectElement>('[aria-label="Add action"]')!;assert.ok(action);action.value="finishInteraction";action.dispatchEvent(new window.Event("change"));
+ assert.equal(f.workspace.hasDraft(),true);f.fail();document.querySelector<HTMLButtonElement>("[data-text-apply]")!.click();await flush();
+ assert.equal(f.workspace.hasDraft(),true);assert.equal(f.writes[0]!.expectedRevision,"accepted");assert.deepEqual(f.writes[0]!.command,{type:"formatText",nodeId:"button",values:{},interaction:{expectedAuthoringRevision:"authoring-original",expectedTargetRevisions:[],actions:[{type:"finishInteraction"}]}});
+ f.workspace.panel.remove();f.workspace.mount(document.body);await flush();assert.equal(document.querySelector<HTMLSelectElement>('[aria-label="Action 1 type"]')!.value,"finishInteraction");
+ f.allow();document.querySelector<HTMLButtonElement>("[data-text-apply]")!.click();await flush();
+ assert.equal(f.workspace.hasDraft(),false);assert.equal(f.writes.length,2);assert.equal(f.writes[1]!.expectedRevision,"accepted");assert.match(document.querySelector(".screen-message")!.textContent!,/Selected changes applied/);
  }finally{await f.close();}
 });
 
 test("a refreshed custom button action keeps Cancel reachable for the original Finish draft",async()=>{
- const f=fixture("dialog",true,"none");try{await flush();
+ const f=fixture("dialog",true,[]);try{await flush();
  document.querySelector<HTMLElement>('[data-node-id="button"]')!.dispatchEvent(new window.MouseEvent("dblclick",{bubbles:true}));
- const action=document.querySelector<HTMLSelectElement>('.screen-dismissal select')!;action.value="finishInteraction";action.dispatchEvent(new window.Event("change"));
- f.customAction();await f.workspace.load();assert.equal(f.workspace.hasDraft(),true);assert.match(document.querySelector(".screen-dismissal-retained")!.textContent!,/Finish interaction draft retained/);
- f.click("Cancel action draft");assert.equal(f.workspace.hasDraft(),false);assert.equal(f.writes.length,0);
+ const action=document.querySelector<HTMLSelectElement>('[aria-label="Add action"]')!;action.value="finishInteraction";action.dispatchEvent(new window.Event("change"));
+ f.customAction();await f.workspace.load();assert.equal(f.workspace.hasDraft(),true);assert.match(document.querySelector(".screen-retained-draft")!.textContent!,/Draft retained on Done/);
+ f.click("Cancel retained draft");assert.equal(f.workspace.hasDraft(),false);assert.equal(f.writes.length,0);
  }finally{await f.close();}
 });
 
