@@ -592,6 +592,18 @@ fn variable_canvas_preserves_bool_and_large_integer_spelling_and_custom_expressi
     assert!(service
         .screens_canvas_plan(serde_json::from_value(invalid).unwrap())
         .is_err());
+    for value in [
+        json!(1),
+        json!("01"),
+        json!("-0"),
+        json!("9223372036854775808"),
+    ] {
+        let mut invalid = payload.clone();
+        invalid["variableSamples"][1]["value"] = value;
+        assert!(service
+            .screens_canvas_plan(serde_json::from_value(invalid).unwrap())
+            .is_err());
+    }
     let mut duplicate = payload.clone();
     let sample = duplicate["variableSamples"][0].clone();
     duplicate["variableSamples"]

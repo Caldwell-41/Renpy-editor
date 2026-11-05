@@ -316,7 +316,7 @@ impl AuthoringService {
                             style: None,
                             component: None,
                             actions: None,
-                            variable_binding: None,
+                            variable_bindings: None,
                             span: span.clone(),
                             parent_start: Some(parent.span.start),
                             properties: vec![],
@@ -403,7 +403,7 @@ impl AuthoringService {
                         .as_ref()
                         .and_then(|_| actions.buttons.get(&node.span.start))
                         .map(|b| b.actions.clone());
-                    node.variable_binding = bindings::inspect_binding(
+                    node.variable_bindings = bindings::inspect_bindings(
                         node,
                         authoring
                             .as_ref()

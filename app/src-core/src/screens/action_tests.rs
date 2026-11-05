@@ -179,8 +179,8 @@ fn existing_variable_text_preserves_neighbors_and_reconciles_history_and_reopen(
     let command = json!({"type":"variableText","nodeId":added["selectedId"],"binding":binding,"expectedAuthoringRevision":doc["authoringRevision"]});
     let changed = compose_command(&mut service, &owner, command.clone());
     assert_eq!(
-        changed["document"]["screens"][0]["nodes"][1]["variableBinding"],
-        binding
+        changed["document"]["screens"][0]["nodes"][1]["variableBindings"],
+        json!([binding])
     );
     let expected = original.replace("text \"Title\"", "text \"[caption!q]\"");
     assert_eq!(
@@ -204,8 +204,8 @@ fn existing_variable_text_preserves_neighbors_and_reconciles_history_and_reopen(
             &mut service,
             "screens.inspect",
             json!({"path":owner["path"]})
-        )["screens"][0]["nodes"][1]["variableBinding"],
-        binding
+        )["screens"][0]["nodes"][1]["variableBindings"],
+        json!([binding])
     );
     let doc = ipc(
         &mut service,
@@ -217,7 +217,212 @@ fn existing_variable_text_preserves_neighbors_and_reconciles_history_and_reopen(
         &owner,
         json!({"type":"variableText","nodeId":added["selectedId"],"binding":null,"text":"Title","expectedAuthoringRevision":doc["authoringRevision"]}),
     );
-    assert!(cleared["document"]["screens"][0]["nodes"][1]["variableBinding"].is_null());
+    assert_eq!(
+        cleared["document"]["screens"][0]["nodes"][1]["variableBindings"],
+        json!([])
+    );
+}
+
+#[test]
+fn mixed_variable_templates_preserve_source_samples_dependencies_history_and_reopen() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    ipc(
+        &mut service,
+        "variable.create",
+        json!({"technicalName":"caption","variableType":"string","defaultValue":"café"}),
+    );
+    let model = ipc(
+        &mut service,
+        "variable.create",
+        json!({"technicalName":"score","variableType":"int","defaultValue":"12"}),
+    );
+    let variables = model["variables"].as_array().unwrap();
+    let caption = variables
+        .iter()
+        .find(|v| v["technicalName"] == "caption")
+        .unwrap()
+        .clone();
+    let score = variables
+        .iter()
+        .find(|v| v["technicalName"] == "score")
+        .unwrap()
+        .clone();
+    let added = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"text","text":"Title"}),
+    );
+    let original = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned()
+        + "    $ custom = ['untouched', 17] # opaque neighbor\n";
+    save_composition_source(&mut service, &owner, &original);
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    let template = "Préfix [[literal] {{b} [caption!q] / [score!q]\n[caption!q] suffix";
+    let command = json!({"type":"variableText","nodeId":added["selectedId"],"binding":null,"text":template,"expectedAuthoringRevision":doc["authoringRevision"]});
+    let applied = compose_command(&mut service, &owner, command.clone());
+    let bindings = json!([{"variableId":caption["id"]},{"variableId":score["id"]}]);
+    assert_eq!(
+        applied["document"]["screens"][0]["nodes"][1]["variableBindings"],
+        bindings
+    );
+    let expected = original.replace("\"Title\"", &serde_json::to_string(template).unwrap());
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        expected
+    );
+    assert_eq!(
+        compose_command(&mut service, &owner, command)["changed"],
+        false
+    );
+    let target = json!({"screenId":owner["id"],"sourceName":owner["name"]});
+    let resolved = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":target}),
+    );
+    let dependencies = resolved["effects"]["dependencies"].as_array().unwrap();
+    for variable in [&caption, &score] {
+        assert_eq!(
+            dependencies
+                .iter()
+                .filter(|d| d["id"] == variable["id"])
+                .count(),
+            1
+        );
+    }
+    let plan = ipc(
+        &mut service,
+        "screens.canvasPlan",
+        json!({"path":owner["path"],"screenName":owner["name"],"expectedRevision":applied["document"]["revision"],"width":1280,"height":720,"drafts":[],"variableSamples":[{"variableId":caption["id"],"expectedSourceRevision":caption["source"]["sourceRevision"],"value":"[literal] {b}safe{/b}"}]}),
+    );
+    assert_eq!(
+        plan["nodes"][1]["literal"],
+        "Préfix [literal] {{b} [literal] {{b}safe{{/b} / 12\n[literal] {{b}safe{{/b} suffix"
+    );
+    for unsupported in [
+        "Unknown [missing!q]",
+        "[score + 1!q]",
+        "[score]",
+        "{custom} [score!q]",
+    ] {
+        reject(
+            &mut service,
+            "screens.compose",
+            json!({"screenId":owner["id"],"expectedRevision":applied["document"]["revision"],"command":{"type":"variableText","nodeId":added["selectedId"],"binding":null,"text":unsupported,"expectedAuthoringRevision":doc["authoringRevision"]}}),
+        );
+        assert_eq!(
+            ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+            expected
+        );
+    }
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        original
+    );
+    composition_history(&mut service, "redo");
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    let reopened = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    assert_eq!(
+        reopened["screens"][0]["nodes"][1]["variableBindings"],
+        bindings
+    );
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        expected
+    );
+    let formatted_command = json!({"type":"formatText","nodeId":added["selectedId"],"values":{"text":template,"size":31},"interaction":{"expectedAuthoringRevision":reopened["authoringRevision"],"expectedTargetRevisions":[]}});
+    for fault in [
+        "missingAuthoring",
+        "staleAuthoring",
+        "unknownTemplate",
+        "extraReview",
+    ] {
+        let mut invalid = formatted_command.clone();
+        match fault {
+            "missingAuthoring" => {
+                invalid.as_object_mut().unwrap().remove("interaction");
+            }
+            "staleAuthoring" => {
+                invalid["interaction"]["expectedAuthoringRevision"] = json!("stale")
+            }
+            "unknownTemplate" => invalid["values"]["text"] = json!("[missing!q]"),
+            _ => {
+                invalid["interaction"]["expectedTargetRevisions"] =
+                    json!([reviewed_target(&mut service, &owner)])
+            }
+        }
+        reject(
+            &mut service,
+            "screens.compose",
+            json!({"screenId":owner["id"],"expectedRevision":reopened["revision"],"command":invalid}),
+        );
+        assert_eq!(
+            ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+            expected
+        );
+    }
+    let formatted = compose_command(&mut service, &owner, formatted_command.clone());
+    assert_eq!(
+        formatted["document"]["screens"][0]["nodes"][1]["variableBindings"],
+        bindings
+    );
+    assert_eq!(
+        formatted["document"]["screens"][0]["nodes"][1]["textProperties"]["values"]["size"],
+        31
+    );
+    assert_eq!(
+        compose_command(&mut service, &owner, formatted_command)["changed"],
+        false
+    );
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        expected
+    );
+    composition_history(&mut service, "redo");
+    let before = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":target}),
+    );
+    ipc(
+        &mut service,
+        "variable.update",
+        json!({"id":score["id"],"expectedSourceRevision":score["source"]["sourceRevision"],"defaultValue":"14"}),
+    );
+    let after = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":target}),
+    );
+    assert_eq!(before["revisions"]["source"], after["revisions"]["source"]);
+    assert_ne!(before["effects"]["revision"], after["effects"]["revision"]);
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    let plan = ipc(
+        &mut service,
+        "screens.canvasPlan",
+        json!({"path":owner["path"],"screenName":owner["name"],"expectedRevision":doc["revision"],"width":1280,"height":720}),
+    );
+    assert_eq!(
+        plan["nodes"][1]["literal"],
+        "Préfix [literal] {{b} café / 14\ncafé suffix"
+    );
 }
 
 #[test]
@@ -397,28 +602,33 @@ fn custom_action_and_text_expression_stay_source_only() {
     let original = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
         .as_str()
         .unwrap()
-        .replace("Null()", "Function(custom)")
-        .replace("\"Custom text\"", "\"[score + 1]\"");
-    save_composition_source(&mut service, &owner, &original);
-    let doc = ipc(
-        &mut service,
-        "screens.inspect",
-        json!({"path":owner["path"]}),
-    );
-    assert!(doc["screens"][0]["nodes"][1]["actions"].is_null());
-    for command in [
-        json!({"type":"actions","nodeId":button["selectedId"],"actions":[],"expectedAuthoringRevision":doc["authoringRevision"],"expectedTargetRevisions":[]}),
-        json!({"type":"variableText","nodeId":text["selectedId"],"binding":null,"text":"Replace","expectedAuthoringRevision":doc["authoringRevision"]}),
-    ] {
-        reject(
+        .replace("Null()", "Function(custom)");
+    for literal in ["[score + 1]", "{b}Title{/b} [flag!q]", "[missing!q]"] {
+        let source = original.replace("\"Custom text\"", &serde_json::to_string(literal).unwrap());
+        save_composition_source(&mut service, &owner, &source);
+        let doc = ipc(
             &mut service,
-            "screens.compose",
-            json!({"screenId":owner["id"],"expectedRevision":doc["revision"],"command":command}),
+            "screens.inspect",
+            json!({"path":owner["path"]}),
         );
-        assert_eq!(
-            ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
-            original
-        );
+        assert!(doc["screens"][0]["nodes"][1]["actions"].is_null());
+        assert!(doc["screens"][0]["nodes"][2]["variableBindings"].is_null());
+        for command in [
+            json!({"type":"actions","nodeId":button["selectedId"],"actions":[],"expectedAuthoringRevision":doc["authoringRevision"],"expectedTargetRevisions":[]}),
+            json!({"type":"text","nodeId":text["selectedId"],"text":"Replace"}),
+            json!({"type":"variableText","nodeId":text["selectedId"],"binding":null,"text":"Replace","expectedAuthoringRevision":doc["authoringRevision"]}),
+            json!({"type":"formatText","nodeId":text["selectedId"],"values":{"text":"Replace","size":29},"interaction":{"expectedAuthoringRevision":doc["authoringRevision"],"expectedTargetRevisions":[]}}),
+        ] {
+            reject(
+                &mut service,
+                "screens.compose",
+                json!({"screenId":owner["id"],"expectedRevision":doc["revision"],"command":command}),
+            );
+            assert_eq!(
+                ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+                source
+            );
+        }
     }
 }
 
@@ -534,5 +744,146 @@ fn nested_modal_statements_never_grant_finish_or_panel_target_authority() {
         "screens.compose",
         json!({"screenId":dialog["id"],"expectedRevision":doc["revision"],"command":{
         "type":"actions","nodeId":button["selectedId"],"actions":[{"type":"showScreen","target":review["target"]}],"expectedAuthoringRevision":doc["authoringRevision"],"expectedTargetRevisions":[review]}}),
+    );
+}
+
+#[test]
+fn combined_apply_preserves_trivia_and_commits_text_appearance_layout_actions_in_one_history_step()
+{
+    let (_temporary, mut service, root, owner) = composition_project();
+    let added = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"textbutton","text":"Go"}),
+    );
+    let original = (ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .replace("action Null()", "action  Null() # keep action comment")
+        + "    $ opaque = ['retain', 17] # neighbor\n")
+        .replace('\n', "\r\n");
+    save_composition_source(&mut service, &owner, &original);
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    let review = reviewed_target(&mut service, &owner);
+    let actions = json!([{"type":"hideScreen","target":review["target"]}]);
+    let mut command = json!({"type":"formatText","nodeId":added["selectedId"],"values":{"text":"A much longer café caption","size":29,"appearance":{"hover_color":"#abcdef"}},"layout":{"xsize":{"unit":"pixels","value":240}},"interaction":{"expectedAuthoringRevision":doc["authoringRevision"],"expectedTargetRevisions":[review],"actions":actions}});
+    let applied = compose_command(&mut service, &owner, command.clone());
+    assert_eq!(applied["changed"], true);
+    let saved = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let expected = original.replace("\"Go\"", "\"A much longer café caption\"").replace("action  Null()", "action  Hide(\"notes\")").replace("        action", "        xsize 240\r\n        text_size 29\r\n        text_hover_color \"#abcdef\"\r\n        action");
+    assert_eq!(saved, expected);
+    assert_eq!(
+        applied["document"]["screens"][0]["nodes"][1]["actions"],
+        actions
+    );
+    // The self target review is captured from accepted bytes, not staged bytes.
+    command["interaction"]["expectedTargetRevisions"] =
+        json!([reviewed_target(&mut service, &owner)]);
+    assert_eq!(
+        compose_command(&mut service, &owner, command.clone())["changed"],
+        false
+    );
+    let mut preserve = command.clone();
+    preserve["interaction"]
+        .as_object_mut()
+        .unwrap()
+        .remove("actions");
+    preserve["interaction"]["expectedTargetRevisions"] = json!([]);
+    assert_eq!(
+        compose_command(&mut service, &owner, preserve)["changed"],
+        false
+    );
+    for fault in [
+        "missing",
+        "duplicate",
+        "stale",
+        "wrongName",
+        "invalidActions",
+        "staleAuthoring",
+    ] {
+        let mut invalid = command.clone();
+        if !matches!(fault, "stale" | "staleAuthoring") {
+            invalid["values"]["text"] = json!("Must not leak");
+        }
+        match fault {
+            "missing" => invalid["interaction"]["expectedTargetRevisions"] = json!([]),
+            "duplicate" => {
+                let row = invalid["interaction"]["expectedTargetRevisions"][0].clone();
+                invalid["interaction"]["expectedTargetRevisions"]
+                    .as_array_mut()
+                    .unwrap()
+                    .push(row);
+            }
+            "stale" => {
+                invalid["interaction"]["expectedTargetRevisions"][0]["revisions"]["source"] =
+                    json!("stale")
+            }
+            "wrongName" => {
+                invalid["interaction"]["expectedTargetRevisions"][0]["target"]["sourceName"] =
+                    json!("other")
+            }
+            "invalidActions" => {
+                invalid["interaction"]["actions"] = json!([{"type":"finishInteraction"}])
+            }
+            _ => invalid["interaction"]["expectedAuthoringRevision"] = json!("stale"),
+        }
+        reject(
+            &mut service,
+            "screens.compose",
+            json!({"screenId":owner["id"],"expectedRevision":applied["document"]["revision"],"command":invalid}),
+        );
+        assert_eq!(
+            ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+            saved
+        );
+    }
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        original
+    );
+    composition_history(&mut service, "redo");
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        saved
+    );
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    assert_eq!(
+        ipc(
+            &mut service,
+            "screens.inspect",
+            json!({"path":owner["path"]})
+        )["screens"][0]["nodes"][1]["actions"],
+        actions
+    );
+    command["interaction"]["actions"] = json!([]);
+    command["interaction"]["expectedTargetRevisions"] = json!([]);
+    let cleared = compose_command(&mut service, &owner, command);
+    assert_eq!(
+        cleared["document"]["screens"][0]["nodes"][1]["actions"],
+        json!([])
+    );
+    let null_source = saved.replace("Hide(\"notes\")", "Null()");
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        null_source
+    );
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        saved
+    );
+    composition_history(&mut service, "redo");
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        null_source
     );
 }

@@ -480,8 +480,8 @@ impl Effects<'_> {
                     }
                 }
             }
-            let binding = bindings::inspect_binding(node, self.variables);
-            if let Some(binding) = &binding {
+            let binding = bindings::inspect_bindings(node, self.variables);
+            if let Some(binding) = binding.as_ref().filter(|bindings| !bindings.is_empty()) {
                 match bindings::binding_dependencies(binding, self.variables) {
                     Ok(dependencies) => {
                         for dependency in dependencies {

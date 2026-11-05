@@ -351,6 +351,11 @@ fn inspection_exposes_only_owned_unique_qualified_actions() {
             assert!(node["id"].is_null());
             assert!(node["actions"].is_null());
         }
+        reject(
+            &mut service,
+            "screens.compose",
+            json!({"screenId":owner["id"],"expectedRevision":document["revision"],"command":{"type":"actions","nodeId":added["selectedId"],"actions":[],"expectedAuthoringRevision":document["authoringRevision"],"expectedTargetRevisions":[]}}),
+        );
     }
 }
 
@@ -432,6 +437,19 @@ fn inert_button_action_stays_editable_and_extractable() {
         json!({"screenId":component["id"],"expectedRevision":document["revision"],
         "componentRevisions":target["revisions"],"command":{"type":"actions","nodeId":inert["id"],"actions":[],
         "expectedAuthoringRevision":document["authoringRevision"],"expectedTargetRevisions":[]}}),
+    );
+    reject(
+        &mut service,
+        "screens.compose",
+        json!({"screenId":component["id"],"expectedRevision":document["revision"],"componentRevisions":target["revisions"],"command":{"type":"formatText","nodeId":inert["id"],"values":{"text":"Must not leak","size":29},"interaction":{"actions":[],"expectedAuthoringRevision":document["authoringRevision"],"expectedTargetRevisions":[]}}}),
+    );
+    assert_eq!(
+        ipc(
+            &mut service,
+            "source.open",
+            json!({"path":component["path"]})
+        )["text"],
+        copied
     );
     ipc(
         &mut service,

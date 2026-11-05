@@ -59,6 +59,11 @@ fn ordered_actions_export_public_core_normal_entry_without_engine_execution() {
         );
         text_nodes.push(json!({"nodeId":added["selectedId"],"variableId":variable["id"]}));
     }
+    let mixed = compose_command(
+        &mut service,
+        &dialog,
+        json!({"type":"add","parentId":column["selectedId"],"kind":"text","text":"Template"}),
+    );
     let button = compose_command(
         &mut service,
         &dialog,
@@ -115,6 +120,31 @@ fn ordered_actions_export_public_core_normal_entry_without_engine_execution() {
             json!({"type":"variableText","nodeId":node["nodeId"],"binding":{"variableId":node["variableId"]},"expectedAuthoringRevision":doc["authoringRevision"]}),
         );
     }
+    let template = "Values: [action_caption!q] / [action_score!q]\nAgain [action_caption!q]";
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":dialog["path"]}),
+    );
+    let formatted = compose_command(
+        &mut service,
+        &dialog,
+        json!({
+            "type":"formatText", "nodeId":mixed["selectedId"], "values":{"text":template},
+            "interaction":{"expectedAuthoringRevision":doc["authoringRevision"],"expectedTargetRevisions":[]}
+        }),
+    );
+    let mixed_node = formatted["document"]["screens"][0]["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|n| n["id"] == mixed["selectedId"])
+        .unwrap();
+    assert_eq!(
+        mixed_node["variableBindings"],
+        json!([{"variableId":caption["id"]},{"variableId":score["id"]}])
+    );
+    text_nodes.push(json!({"nodeId":mixed["selectedId"],"template":template,"variableBindings":mixed_node["variableBindings"]}));
     let target = reviewed_target(&mut service, &panel);
     let dangerous = "Brackets [action_score] {b}text{/b} and __import__('os')";
     let actions = json!([
@@ -184,6 +214,27 @@ fn ordered_actions_export_public_core_normal_entry_without_engine_execution() {
         .find(|n| n["id"] == button["selectedId"])
         .unwrap();
     assert_eq!(authored["actions"], actions);
+    let mixed_node = document["screens"][0]["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|n| n["id"] == mixed["selectedId"])
+        .unwrap();
+    let mut canvas_plans = vec![];
+    for (width, height) in [(1280, 720), (1024, 768)] {
+        let request = json!({"path":dialog["path"],"screenName":dialog["name"],"expectedRevision":document["revision"],"width":width,"height":height});
+        let plan = ipc(&mut service, "screens.canvasPlan", request.clone());
+        assert_eq!(plan["available"], true, "{plan}");
+        assert!(plan["limits"].as_array().unwrap().is_empty());
+        let literal = &plan["nodes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|n| n["start"] == mixed_node["span"]["start"])
+            .unwrap()["literal"];
+        assert_eq!(literal, "Values: Initial / 0\nAgain Initial");
+        canvas_plans.push(json!({"request":request,"plan":plan}));
+    }
     let mut paths = vec![];
     panel_fixture::collect_files(&root, &root.join("game"), &mut paths);
     let files = paths
@@ -208,7 +259,7 @@ fn ordered_actions_export_public_core_normal_entry_without_engine_execution() {
     fs::remove_dir(output.join(".renpy-editor")).unwrap();
     let manifest = json!({"schemaVersion":1,"sdkVersion":"8.5.3","publicCoreRequests":true,"engineStarted":false,
         "files":files,"metadata":metadata,"entry":entry,"panel":panel,"dialog":dialog,"document":document,
-        "buttonId":button["selectedId"],"textNodes":text_nodes,"variables":[ready,score,caption],"actions":actions,
+        "buttonId":button["selectedId"],"textNodes":text_nodes,"canvasPlans":canvas_plans,"variables":[ready,score,caption],"actions":actions,
         "runtimeReady":runtime_ready,"normalStoryCallAdmitted":runtime_ready,"finalTarget":final_target,
         "expected":{"ready":false,"score":"-7","caption":dangerous,"panelVisible":false,"followingCount":1}});
     fs::write(

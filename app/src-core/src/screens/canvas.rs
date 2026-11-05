@@ -143,7 +143,7 @@ pub struct CanvasNode {
 struct Expansion<'a> {
     inventory: &'a ownership::Inventory,
     variables: &'a [crate::authoring::Variable],
-    samples: &'a [interaction::VariableSample],
+    values: &'a std::collections::BTreeMap<String, String>,
     remaining: usize,
     components: std::collections::BTreeMap<(String, usize), Plan>,
 }
@@ -172,24 +172,38 @@ impl AuthoringService {
         if request.variable_samples.len() > MAX_NODES {
             return Err(SceneError::InvalidPayload);
         }
-        let mut sampled = HashSet::new();
+        let mut values = std::collections::BTreeMap::new();
         for sample in &request.variable_samples {
-            if !sampled.insert(&sample.variable_id) {
+            if values.contains_key(&sample.variable_id) {
                 return Err(SceneError::InvalidPayload);
             }
-            bindings::resolve_sample(
+            let value = bindings::resolve_sample(
                 &interaction::VariableBinding {
                     variable_id: sample.variable_id.clone(),
                 },
                 variables,
                 Some(sample),
             )?;
+            values.insert(sample.variable_id.clone(), value);
         }
-        let samples = request.variable_samples.clone();
+        for variable in variables {
+            if !values.contains_key(&variable.id) {
+                values.insert(
+                    variable.id.clone(),
+                    bindings::resolve_sample(
+                        &interaction::VariableBinding {
+                            variable_id: variable.id.clone(),
+                        },
+                        variables,
+                        None,
+                    )?,
+                );
+            }
+        }
         let mut expansion = Expansion {
             inventory: &inventory,
             variables,
-            samples: &samples,
+            values: &values,
             remaining: MAX_NODES,
             components: std::collections::BTreeMap::new(),
         };
@@ -479,19 +493,9 @@ impl AuthoringService {
                         .push(format!("Unresolved {fields} at {}", node.span.start)),
                 }
             }
-            let binding = bindings::inspect_binding(node, expansion.variables);
-            let literal = if let Some(binding) = &binding {
-                Some(bindings::resolve_sample(
-                    binding,
-                    expansion.variables,
-                    expansion
-                        .samples
-                        .iter()
-                        .find(|sample| sample.variable_id == binding.variable_id),
-                )?)
-            } else {
-                node.literal.clone()
-            };
+            let binding = bindings::inspect_bindings(node, expansion.variables);
+            let literal = bindings::resolve_template(node, expansion.variables, expansion.values)?
+                .or_else(|| node.literal.clone());
             if binding.is_none()
                 && matches!(node.kind.as_str(), "text" | "textbutton")
                 && node

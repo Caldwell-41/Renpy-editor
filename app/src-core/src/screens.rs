@@ -170,7 +170,7 @@ pub struct Node {
     pub style: Option<styles::StyleReference>,
     pub component: Option<ComponentReference>,
     pub actions: Option<Vec<interaction::ScreenAction>>,
-    pub variable_binding: Option<interaction::VariableBinding>,
+    pub variable_bindings: Option<Vec<interaction::VariableBinding>>,
     pub span: Span,
     pub parent_start: Option<usize>,
     pub properties: Vec<Property>,
@@ -378,7 +378,7 @@ fn parse_body(
         style: None,
         component: None,
         actions: None,
-        variable_binding: None,
+        variable_bindings: None,
         span: Span {
             start: line.start,
             end,
