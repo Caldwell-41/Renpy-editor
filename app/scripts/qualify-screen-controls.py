@@ -6,20 +6,29 @@ import importlib.util
 import hashlib
 import argparse
 import json
+import os
 from pathlib import Path
 import re
+import shutil
+import sys
+import tempfile
 
 
 EXPORT_TEST = 'screens::tests::controls::export_screen_controls_public_core_fixture'
 STATES = ('normal', 'hover', 'selected', 'selectedHover', 'disabled', 'selectedDisabled')
 RESOLUTIONS = ((1280, 720), (1024, 768))
+CASES = ('normal', 'preview')
+REPO = Path(__file__).resolve().parents[2]
+FIXTURE = REPO / 'tests/fixtures/phase-3b-screens/screen-controls'
 
 _spec = importlib.util.spec_from_file_location(
-    'screen_controls_file_utilities', Path(__file__).with_name('qualify-help-panel.py'))
-files = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(files)
+    'screen_controls_shared_qualification', Path(__file__).with_name('qualify-ordered-actions.py'))
+shared = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(shared)
+process, files = shared.process, shared.base
 require, load_json, digest = files.require, files.load_json, files.digest
 portable_file = files.portable_file
+write_json = files.write_json
 
 
 def validate_core_output(text, manifest_sha):
@@ -255,13 +264,246 @@ def validate_manifest(root, manifest):
     return manifest
 
 
+def validate_runtime_output(text, case, manifest_sha, manifest, resolution, colors):
+    """Require observed SDK input, rendering and built-in actions on accepted bytes."""
+    require(case in CASES and tuple(resolution) in RESOLUTIONS, 'unknown controls runtime case/aspect')
+    lines = [line.rstrip() for line in text.splitlines()]
+    require(lines.count('[rpytest] Status: PASSED') == 1, 'missing/duplicate engine completion')
+    require(any(re.search(r'\bglobal\.screen_controls::' + case + r'\b', line) for line in lines),
+            'missing named controls engine case')
+    summaries = [line for line in lines if line.startswith('[rpytest] Test cases :')]
+    require(len(summaries) == 1 and list(map(int, re.findall(r'\d+', summaries[0])))
+            == [2, 1, 0, 0, 0, 1, 0], 'wrong controls engine case selection')
+    durations = re.findall(r'\[rpytest\] Time: ([0-9.]+) s', text)
+    require(len(durations) == 1 and float(durations[0]) > 0, 'missing engine duration')
+    rows = [load_json(line.removeprefix('SCREEN_CONTROLS_OBSERVED ')) for line in lines
+            if line.startswith('SCREEN_CONTROLS_OBSERVED ')]
+    require(len(rows) == 1, 'missing/duplicate controls runtime receipt')
+    row = rows[0]
+    expected = dict(schemaVersion=1, sdkVersion='8.5.3', case=case,
+                    manifestSHA256=manifest_sha, resolution=list(resolution),
+                    acceptedHashes={value['path']: value['sha256'] for value in manifest['files']},
+                    startedFromMenu=True, normalEntry=case == 'normal', previewEntry=case == 'preview',
+                    observer='sys.setprofile built-in action calls', builtinsUnmodified=True,
+                    calls=manifest['actions'], stateSamplesInert=True,
+                    bar=[dict(step=step, value=value) for step, value in
+                         [('initial', '0'), ('minimum', '-5'), ('maximum', '15'), ('keyboard', '14')]],
+                    barSize=[320, 24], barRange=20, barOffset=-5, barStep=1,
+                    appearances=[dict(state=state, renderedSize=[160, 80], rgba=colors[state])
+                                 for state in STATES],
+                    actualPrefixes=['idle_', 'hover_'], finalValue='7', followingCount=1,
+                    doneCount=0, panelVisible=False, dialogVisible=False)
+    # JSON comparison distinguishes booleans from numeric evidence.
+    for key, value in expected.items():
+        require(key in row and json.dumps(row[key], sort_keys=True) == json.dumps(value, sort_keys=True),
+                'wrong observed controls runtime field: ' + key)
+    return row
+
+
+def inputs():
+    material = shared.inputs()
+    for name in ('app/scripts/qualify-screen-controls.py',
+                 'app/scripts/test_qualify_screen_controls.py',
+                 'app/scripts/screen_controls_export_checks.py'):
+        material[name] = digest(REPO / name)
+    return material
+
+
+def prepare(output, expected_candidate):
+    """Export through public core requests at a committed candidate, without an SDK."""
+    output = files.fresh_output(output)
+    result = dict(passed=False, engineStarted=False, sdkProcessesStarted=0, checks=[], candidate=expected_candidate)
+    temporary = None
+    try:
+        shared.record_environment(result)
+        material = inputs()
+        process.require_candidate(expected_candidate, material)
+        result['inputsSHA256'] = process.inputs_fingerprint(material)
+        write_json(output / 'inputs.json', material)
+        temporary = output / 'tmp'
+        temporary.mkdir()
+        build = Path(os.environ.get('CARGO_TARGET_DIR', REPO / 'app/target')).resolve()
+        require(build.is_relative_to(REPO), 'build output must stay in this worktree')
+        env = dict(os.environ, CARGO_TARGET_DIR=str(build), PYTHONDONTWRITEBYTECODE='1',
+                   TMPDIR=str(temporary), TMP=str(temporary), TEMP=str(temporary),
+                   LOOMLIGHT_SCREEN_CONTROLS_EXPORT=str(output / 'accepted'))
+        spec = importlib.util.spec_from_file_location(
+            'screen_controls_source_binary', REPO / 'app/scripts/qualify-screens-source.py')
+        source_gate = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(source_gate)
+
+        def retain(text):
+            binary = source_gate.retain_test_binary(text, output)
+            if binary is not None:
+                binary.update(candidate=expected_candidate, producingInputsSHA256=result['inputsSHA256'])
+            result['testBinary'] = binary
+
+        text = process.run_logged(output, 'core-export', [
+            'cargo', 'test', '-p', 'loomlight-core', '--locked', '--offline', '--lib',
+            '--message-format=json', EXPORT_TEST, '--', '--exact', '--nocapture'],
+            REPO / 'app', env, result['checks'], 300, retain_output=retain)
+        require(result.get('testBinary') is not None, 'missing retained controls producer binary')
+        manifest = validate_bundle(output / 'accepted')
+        result['manifestSHA256'] = digest(output / 'accepted/manifest.json')
+        validate_core_output(text, result['manifestSHA256'])
+        process.validate_process_checks(result['checks'], ['core-export'])
+        require(inputs() == material, 'controls producer inputs changed')
+        process.require_candidate(expected_candidate, material)
+        result.update(passed=True, acceptedFileCount=len(manifest['files']))
+    except BaseException as error:
+        result['failure'] = dict(type=type(error).__name__, message=str(error))
+        raise
+    finally:
+        process.finish_cleanup(result, temporary)
+        write_json(output / 'result.json', result)
+        require(result['cleanupComplete'], 'controls producer cleanup incomplete')
+
+
+def validate_prepared(prepared, expected_candidate):
+    result = load_json(portable_file(prepared, 'result.json').read_text(encoding='utf-8'))
+    shared.validate_environment(result)
+    material = inputs()
+    process.require_candidate(expected_candidate, material)
+    fingerprint = process.inputs_fingerprint(material)
+    require(result.get('candidate') == expected_candidate and result.get('inputsSHA256') == fingerprint,
+            'wrong controls producer candidate/inputs')
+    require(result.get('passed') is True and result.get('engineStarted') is False
+            and result.get('sdkProcessesStarted') == 0 and result.get('cleanupComplete') is True,
+            'incomplete controls source producer')
+    require(load_json(portable_file(prepared, 'inputs.json').read_text(encoding='utf-8')) == material,
+            'changed controls producer inputs')
+    process.validate_process_checks(result.get('checks', []), ['core-export'])
+    manifest = validate_bundle(prepared / 'accepted')
+    require(digest(prepared / 'accepted/manifest.json') == result['manifestSHA256'], 'changed controls manifest')
+    validate_core_output(portable_file(prepared, 'core-export.log').read_text(encoding='utf-8'), result['manifestSHA256'])
+    binary = result['testBinary']
+    process.validate_binary_binding(binary, expected_candidate, fingerprint)
+    retained = portable_file(prepared, binary['path'])
+    require(digest(retained) == binary['sha256'] and retained.stat().st_size == binary['bytes'],
+            'changed controls source producer binary')
+    return manifest
+
+
+def stage_game(accepted, manifest, game):
+    game.mkdir(parents=True, exist_ok=False)
+    for record in manifest['files']:
+        target = game / record['path']
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(portable_file(accepted, record['path']), target)
+    shutil.copyfile(accepted / 'manifest.json', game / 'accepted-runtime.json')
+    for name in ('driver', 'tests'):
+        target = game / 'game' / ('zz_screen_controls_' + name + '.rpy')
+        require(not target.exists(), 'controls runtime fixture collision')
+        shutil.copyfile(FIXTURE / (name + '.rpy'), target)
+
+
+def expected_colors(accepted, manifest):
+    from PIL import Image
+    assets = {asset['id']: asset for asset in manifest['sidecars']['authoring']['assets']}
+    button = next(node for screen in manifest['document']['screens'] for node in screen['nodes']
+                  if node['id'] == manifest['imageButtonId'])
+    result = {}
+    for state in STATES:
+        asset = assets[button['imageButtonAppearances'][state]['assetId']]
+        with Image.open(portable_file(accepted, asset['relativePath'])) as image:
+            require(image.size == (80, 40), 'wrong controls source bitmap dimensions')
+            rgba = image.convert('RGBA')
+            colors = rgba.getcolors(maxcolors=2)
+            require(colors is not None and len(colors) == 1 and colors[0][0] == 3200,
+                    'controls image fixture must have one independently known color')
+            result[state] = list(colors[0][1])
+    require(len({tuple(color) for color in result.values()}) == 6, 'controls state colors are not distinct')
+    return result
+
+
+def qualify_sdk(args):
+    require(args.allow_fixture_execution is True, 'explicit reserved fixture execution required')
+    prepared = args.prepared.resolve()
+    manifest = validate_prepared(prepared, args.expected_candidate)
+    colors = expected_colors(prepared / 'accepted', manifest)
+    output = files.fresh_output(args.output)
+    result = dict(passed=False, checks=[], runtimeObserved=[], sdkVersion='8.5.3', sdkSHA256=files.SDK_SHA256,
+                  sdkLaunchAttempts=0, sdkProcessesStarted=0, sdkUncertainReservations=0, sdkRefusedLaunches=0,
+                  helperStarts=0, nativeEditorLaunches=0, physicalInputProven=False,
+                  candidate=args.expected_candidate, manifestSHA256=digest(prepared / 'accepted/manifest.json'))
+    temporary = None
+    try:
+        shared.record_environment(result)
+        sys.path.insert(0, str(REPO / 'spikes/renpy-sdk'))
+        from archive_safety import expected_sha256, install_verified_tar
+        from sdk_adapter import Command, command_argv, parse_version
+        require(expected_sha256(args.checksums.read_text(encoding='utf-8'), args.archive.name)
+                == files.SDK_SHA256, 'SDK checksum pin mismatch')
+        shutil.copyfile(prepared / 'inputs.json', output / 'inputs.json')
+        shutil.copyfile(prepared / 'accepted/manifest.json', output / 'accepted-manifest.json')
+        temporary = Path(tempfile.mkdtemp(prefix='screen-controls-', dir=output))
+        install_verified_tar(args.archive.resolve(), files.SDK_SHA256, temporary / 'sdk')
+        sdk = temporary / 'sdk/renpy-8.5.3-sdk'
+        game = temporary / 'game-project'
+        stage_game(prepared / 'accepted', manifest, game)
+        env = dict(os.environ, RENPY_PATH_TO_SAVES=str(temporary / 'saves'), SDL_AUDIODRIVER='dummy',
+                   PYTHONDONTWRITEBYTECODE='1', TMPDIR=str(temporary), TMP=str(temporary), TEMP=str(temporary))
+
+        def run(name, command, timeout):
+            return process.run_sdk_logged(result, output, name, command, sdk, env, timeout)
+
+        parse_version(run('sdk-version', command_argv(sdk, Command.VERSION), 30))
+        run('sdk-compile', command_argv(sdk, Command.COMPILE, game, allow_project_execution=True), 90)
+        run('sdk-lint', command_argv(sdk, Command.LINT, game, allow_project_execution=True), 90)
+        hashes = {record['path']: record['sha256'] for record in manifest['files']}
+        for resolution in RESOLUTIONS:
+            env.update(LOOMLIGHT_CONTROLS_WIDTH=str(resolution[0]), LOOMLIGHT_CONTROLS_HEIGHT=str(resolution[1]))
+            for case in CASES:
+                name = f'{resolution[0]}x{resolution[1]}-{case}'
+                text = run(name, command_argv(sdk, Command.TEST, game,
+                           testcase='screen_controls::' + case, allow_project_execution=True), 75)
+                result['runtimeObserved'].append(validate_runtime_output(
+                    text, case, result['manifestSHA256'], manifest, resolution, colors))
+                require(all(digest(game / path) == sha for path, sha in hashes.items()), 'accepted controls source changed')
+        process.validate_process_checks(result['checks'], ['sdk-version', 'sdk-compile', 'sdk-lint']
+            + [f'{width}x{height}-{case}' for width, height in RESOLUTIONS for case in CASES])
+        require(result['sdkProcessesStarted'] == 7 and result['sdkLaunchAttempts'] == 7
+                and result['sdkUncertainReservations'] == 0 and result['sdkRefusedLaunches'] == 0,
+                'wrong controls SDK accounting')
+        require(inputs() == load_json((prepared / 'inputs.json').read_text(encoding='utf-8')),
+                'controls inputs changed during qualification')
+        result.update(passed=True, acceptedSourceUnchanged=True,
+                      stateEvidence='engine appearance samples; actual idle/hover input',
+                      previewEvidence='deliberate fixture entry; native editor preview remains separate')
+    except BaseException as error:
+        result['failure'] = dict(type=type(error).__name__, message=str(error))
+        raise
+    finally:
+        process.finish_cleanup(result, temporary)
+        write_json(output / 'result.json', result)
+        require(result['cleanupComplete'], 'controls SDK process/scratch cleanup incomplete')
+
+
+def main(argv=None):
+    require(sys.version_info >= (3, 11), 'Python 3.11 or later required')
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='command', required=True)
     validation = commands.add_parser('validate-export', help='Check source export; never start an SDK.')
     validation.add_argument('--accepted', type=Path, required=True)
     validation.add_argument('--manifest-sha256', required=True)
+    preparation = commands.add_parser('prepare', help='Export committed source; never start an SDK.')
+    preparation.add_argument('--output', type=Path, required=True)
+    prepared = commands.add_parser('validate', help='Check a retained producer; never start an SDK.')
+    prepared.add_argument('--prepared', type=Path, required=True)
+    sdk = commands.add_parser('sdk', help='Run the reserved deliberate execution matrix.')
+    for name in ('prepared', 'output', 'archive', 'checksums'):
+        sdk.add_argument('--' + name, type=Path, required=True)
+    sdk.add_argument('--allow-fixture-execution', action='store_true', required=True)
+    for command in (preparation, prepared, sdk):
+        command.add_argument('--expected-candidate', required=True)
     args = parser.parse_args(argv)
+    if args.command == 'prepare':
+        return prepare(args.output, args.expected_candidate)
+    if args.command == 'validate':
+        return validate_prepared(args.prepared.resolve(), args.expected_candidate)
+    if args.command == 'sdk':
+        return qualify_sdk(args)
     require(digest(portable_file(args.accepted, 'manifest.json')) == args.manifest_sha256,
             'wrong controls manifest hash')
     manifest = validate_bundle(args.accepted)

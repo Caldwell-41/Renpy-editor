@@ -3,6 +3,7 @@ import importlib.util
 import base64
 import copy
 import hashlib
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -125,6 +126,68 @@ class CanvasAdmissionTests(unittest.TestCase):
         for bad in variants:
             with self.subTest(bad=bad[0]), self.assertRaises(ValueError):
                 gate.validate_canvas_matrix(bad, self.document, 'controls')
+
+
+class RuntimeAdmissionTests(unittest.TestCase):
+    def setUp(self):
+        self.sha = 'a' * 64
+        self.manifest = dict(files=[dict(path='game/script.rpy', sha256='b' * 64)],
+                             actions=[dict(type='setVariable', variableId='score', value='7'),
+                                      dict(type='hideScreen', target=dict(screenId='notes', sourceName='notes')),
+                                      dict(type='finishInteraction')])
+        self.colors = {state: [index * 30, 20, 90, 255]
+                       for index, state in enumerate(gate.STATES)}
+        self.row = dict(schemaVersion=1, sdkVersion='8.5.3', case='normal',
+                        manifestSHA256=self.sha, resolution=[1280, 720],
+                        acceptedHashes={'game/script.rpy': 'b' * 64},
+                        startedFromMenu=True, normalEntry=True, previewEntry=False,
+                        observer='sys.setprofile built-in action calls', builtinsUnmodified=True,
+                        calls=self.manifest['actions'], stateSamplesInert=True,
+                        bar=[dict(step=step, value=value) for step, value in
+                             [('initial', '0'), ('minimum', '-5'), ('maximum', '15'), ('keyboard', '14')]],
+                        barSize=[320, 24], barRange=20, barOffset=-5, barStep=1,
+                        appearances=[dict(state=state, renderedSize=[160, 80], rgba=self.colors[state])
+                                     for state in gate.STATES],
+                        actualPrefixes=['idle_', 'hover_'], finalValue='7',
+                        followingCount=1, doneCount=0, panelVisible=False, dialogVisible=False)
+
+    def output(self, row=None):
+        return ('[rpytest] global.screen_controls::normal\n'
+                '[rpytest] Test cases : 2 in total, 1 passed, 0 failed, 0 skipped, 0 xfailed, 1 not run, 0 not implemented\n'
+                '[rpytest] Status: PASSED\n[rpytest] Time: 1.5 s\n'
+                'SCREEN_CONTROLS_OBSERVED ' + json.dumps(self.row if row is None else row))
+
+    def test_runtime_requires_bound_engine_results_limits_state_pixels_and_real_action_calls(self):
+        self.assertEqual(gate.validate_runtime_output(
+            self.output(), 'normal', self.sha, self.manifest, [1280, 720], self.colors), self.row)
+
+    def test_missing_skipped_or_incomplete_runtime_proof_refuses(self):
+        variants = [self.output().replace('1 passed', '0 passed'),
+                    self.output().replace('0 skipped', '1 skipped'),
+                    self.output().replace('Status: PASSED', 'Status: FAILED'),
+                    self.output() + '\n' + self.output(),
+                    self.output().split('SCREEN_CONTROLS_OBSERVED')[0]]
+        for mutate in (
+            lambda row: row.update(stateSamplesInert=False),
+            lambda row: row.update(startedFromMenu=False),
+            lambda row: row.update(calls=row['calls'] * 2),
+            lambda row: row['bar'][1].update(value='-4'),
+            lambda row: row['appearances'][0].update(renderedSize=[80, 40]),
+            lambda row: row['appearances'][1].update(rgba=self.colors['normal']),
+            lambda row: row.update(followingCount=0),
+            lambda row: row.update(finalValue='0'),
+            lambda row: row.update(builtinsUnmodified=False),
+            lambda row: row.update(normalEntry=False),
+            lambda row: row.update(resolution=[1024, 768]),
+            lambda row: row.update(barStep=True),
+        ):
+            row = copy.deepcopy(self.row)
+            mutate(row)
+            variants.append(self.output(row))
+        for output in variants:
+            with self.subTest(output=output), self.assertRaises(ValueError):
+                gate.validate_runtime_output(output, 'normal', self.sha, self.manifest,
+                                             [1280, 720], self.colors)
 
 
 if __name__ == '__main__':

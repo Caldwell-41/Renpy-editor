@@ -7,6 +7,7 @@ import copy
 import importlib.util
 import os
 from pathlib import Path
+import tempfile
 import unittest
 
 
@@ -29,6 +30,21 @@ class RetainedExportChecks(unittest.TestCase):
 
     def test_actual_public_export_metadata_source_assets_effects_and_plans_are_admitted(self):
         self.assertEqual(gate.validate_bundle(self.root), self.manifest)
+
+    def test_runtime_stage_preserves_all_accepted_bytes_and_distinct_source_colors(self):
+        colors = gate.expected_colors(self.root, self.manifest)
+        self.assertEqual(set(colors), set(gate.STATES))
+        self.assertEqual(len({tuple(value) for value in colors.values()}), 6)
+        with tempfile.TemporaryDirectory() as directory:
+            game = Path(directory) / 'project'
+            gate.stage_game(self.root, self.manifest, game)
+            for record in self.manifest['files']:
+                self.assertEqual((game / record['path']).read_bytes(),
+                                 (self.root / record['path']).read_bytes())
+            self.assertEqual(gate.load_json((game / 'accepted-runtime.json').read_text(encoding='utf-8')),
+                             self.manifest)
+            self.assertEqual({path.name for path in (game / 'game').glob('zz_screen_controls_*.rpy')},
+                             {'zz_screen_controls_driver.rpy', 'zz_screen_controls_tests.rpy'})
 
     def test_false_or_mistyped_provenance_and_wrong_limits_refuse(self):
         variants = []
