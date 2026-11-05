@@ -20,6 +20,7 @@ pub mod canvas;
 pub(crate) mod canvas_session;
 pub mod components;
 mod composition;
+pub mod controls;
 mod images;
 pub mod interaction;
 pub mod layout;
