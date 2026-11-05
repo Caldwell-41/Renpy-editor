@@ -173,3 +173,24 @@ workspace strategy. No remote process, source edit or capped operation started.
 The coordinator requested authorization for that separate Mac qualification chat;
 local core/design work continues independently. No shared-checkout substitute or
 shell-created child worktree was used.
+
+### Export and qualification admission preparation
+
+The core owner reserved ordinary test
+`screens::tests::controls::export_screen_controls_public_core_fixture`, with
+`LOOMLIGHT_SCREEN_CONTROLS_EXPORT` selecting an optional retained copy. It must
+export accepted `.rpy` files and six distinct imported public PNGs with path/hash/size
+receipts. The manifest binds owner/dialog/entry/document, bar/image-button IDs,
+variable/actions/resolved effects, parsed project/source-map/authoring sidecars and
+the two-aspect six-state canvas-plan matrix. It must declare no engine execution.
+Parent-owned runtime observers and SDK qualification remain separate.
+
+The coordinator added `qualify-screen-controls.py` admission functions and five
+focused rejecting tests. Red cases first exposed absent admission functions and then
+the distinction between JSON booleans and numeric flags/duplicate JSON keys. Green
+verification passes all five tests, including one selected successful exporter bound
+to the manifest hash, exact accepted source/image bytes, bounded file receipts,
+ordinary bad paths, and changed/missing/duplicate/undeclared game inputs. Existing
+frozen file/path/JSON utilities are reused. These synthetic admission tests are not
+public-core export, SDK, native, canvas-rendering or ticket acceptance evidence.
+The actual exporter, semantic manifest admission and runtime qualification remain pending.
