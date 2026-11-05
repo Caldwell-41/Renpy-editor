@@ -19,7 +19,7 @@ export default async function check({page,open}){
     await page.locator('[data-text-cancel]').click();await page.locator('.siv-actions').waitFor();assert.equal(await rows.count(),3);
 
     await open({variant,state:'invalid',theme:'dark',viewport:'wide'});await page.locator('.siv-actions').waitFor();
-    await page.locator('[data-text-apply]').click();assert.match(await page.locator('.siv-error[role="alert"]').innerText(),/whole number/);
+    await page.locator('[data-text-apply]').click();assert.match(await page.locator('.siv-error[role="alert"]:visible').innerText(),/whole number/);
     await page.locator('.screen-node[data-index="4"]').click();await page.locator('.siv-retained').waitFor();
     await page.getByRole('button',{name:'Return to Close',exact:true}).click();await page.locator('.siv-actions').waitFor();
     if(variant==='inspector-v2')await page.locator('[data-row-open="0"]').evaluate(d=>d.open=true);
@@ -37,7 +37,7 @@ export default async function check({page,open}){
     for(const state of ['stale','conflict','missing']){
       await open({variant,state,theme:'dark',viewport:'wide'});await page.locator('.siv-actions').waitFor();
       if(state!=='missing')await page.getByLabel('Add action',{exact:true}).selectOption('setVariable');
-      await page.locator('[data-text-apply]').click();assert.match(await page.locator('.siv-error[role="alert"]').innerText(),/retained/);
+      await page.locator('[data-text-apply]').click();assert.match(await page.locator('.siv-error[role="alert"]:visible').innerText(),/retained/);
     }
     for(const state of ['component','custom']){
       await open({variant,state,theme:'dark',viewport:'wide'});await page.locator('.siv-actions').waitFor();assert(await page.getByLabel('Add action',{exact:true}).isDisabled());
