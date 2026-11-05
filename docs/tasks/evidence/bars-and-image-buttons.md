@@ -407,3 +407,49 @@ reservation is released; other operation/target counts remain zero and no proces
 or reservation is pending. Tracked-source validation passes 1742 files. Full
 validation still fails only the two previously recorded untracked recovery-receipt
 newlines; those files remain untouched.
+
+## Windows runtime proof, 2026-11-06
+
+All four selected cases pass at observer candidate
+`7d199aa901d720cab1f34a1c1c619b2b321ed9c9`: normal Story entry and deliberate
+fixture preview, each at 1280x720 and 1024x768. Their SDK processes exit 0 in
+5.953s, 3.844s, 3.781s and 3.843s. Ten ordinary gate tests and all four explicit
+producer/setup admission checks pass. The latter demonstrate rejection of changed
+core dependencies, changed binaries and failed/wrong/unclean setup before reuse.
+
+The exact accepted-source producer stays `fe78025f`, with manifest SHA256
+`04ee4aebdc198bf877bf429bbe602fbd28bc6f5f592852e55dbe16fd4c398b16`.
+All non-observer dependencies match its commit; the original input fingerprint and
+binary identity remain unchanged. Version/compile/lint keep that earlier producing
+basis. Four fresh SDK tests load the corrected committed instrumentation. Both
+earlier failed SDK campaigns remain failed and retained.
+
+Each case observes the real bound variable at 0 initially, -5 at the lower limit,
+15 at the upper limit and 14 after one keyboard step. Native bar size is 320x24,
+range 20, offset -5 and step 1. The accepted image-button action executes its
+SetVariable(7), Hide and Return exactly once in order, leaves the Panel hidden,
+finishes the Dialog and reaches one following line without reaching the done line.
+Built-in methods are observed with `sys.setprofile`, not replaced.
+
+All six native image-state renders match independent accepted-asset references in
+their full decoded RGBA pixel hashes at 160x80. Every state has a distinct hash and
+color; source PNG colors remain independently checked. Forty-eight actual/reference
+PNGs are retained across the four cases and rehashed after decoding. Actual pointer
+input separately reaches idle and hover. Sampling changes neither the variable nor
+the action-call count. Accepted game-file hashes remain unchanged in every case.
+
+These are engine appearance samples, not proof of naturally selected/disabled
+runtime conditions or physical input. The deliberate preview is a fixture entry
+using the accepted screen, not evidence for the native editor's preview route.
+Helper rendering, the actual frontend/core editing journey, native/package proof,
+Mac qualification and parent combined review remain pending. Exact design approval
+and direct handoff still gate production UI. No ticket acceptance is inferred.
+
+Local output is `app/target/controls-51-52/runtime-7d199aa9`. Its result SHA256 is
+`bd946c12d12a86a3f922ba72476784f26c3b942ba4e8f1f8e4d8a79ba905a045`.
+Process/scratch cleanup passes, with no uncertain starts or remaining reservation.
+#51 records cumulative Windows SDK starts 12/16, helpers 0/4, packages 0/2 and
+native editor launches 0/3. All Mac counts remain zero. The remaining four Windows
+SDK starts must not be spent on duplicate setup or unreserved helper/native work.
+Issue bodies #51/#52 record this scoped checkpoint; both remain open and code stays
+local-only.

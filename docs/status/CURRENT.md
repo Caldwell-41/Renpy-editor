@@ -13,13 +13,13 @@ are integrated at `b23bbcc9`; the editor worktree is at that checkpoint.
 | Integer bars and six-state image buttons | Core committed; 13 focused control/export cases and four final bar cases pass on their recorded worker candidates. Parent admits fifteen source files and twelve inert plans. | Actual frontend/core workflow, runtime, helper and native/package proof; final combined review. |
 | Editor controls | Existing baseline passes 56 focused cases. No production UI changes yet. | Exact design approval and direct handoff to the editor implementer. |
 | Broad core selection | Original run failed. Seven TLS tests pass after correcting process PATH. | Three Windows symlink checks remain failed/unqualified with OS1314. |
+| Windows control runtime | Four pinned-SDK cases pass at observer `7d199aa9`, using accepted-source producer `fe78025f`. Bar limits/step, six exact appearance comparisons and one action sequence pass at both aspects. | Native editor preview, helper rendering, Mac proof and combined acceptance. |
 
 The editor agent opened the requested separate Sol 6.1 xhigh design chat. Production
 UI waits for exact design approval and a direct handoff to that implementer.
-Coordinator runtime qualification continues independently. The first Windows
-case passes engine assertions but fails the capture evidence gate; its observer
-correction is awaiting a new run. #51 owns combined capped-operation accounting;
-Windows SDK use is 8/16 and all other counts are zero. Windows/macOS proof,
+The corrected Windows observer passes; both earlier failed campaigns stay recorded.
+#51 owns combined capped-operation accounting; Windows SDK use is 12/16 and all
+other counts are zero, with no reservation pending. Remaining Windows/macOS proof,
 combined review and all original criteria remain pending. [Evidence](../tasks/evidence/bars-and-image-buttons.md)
 records contracts and ownership. #54 and broader Phase 3B acceptance remain separate.
 Issue-state/limit updates to #51/#52 are authorized; code publication/PR/merge are not.

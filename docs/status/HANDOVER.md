@@ -4,7 +4,8 @@
 
 The selected outcome is local committed delivery of #51 and #52, reviewed and
 verified against their original criteria. Coordinator branch is
-`codex/51-52-integration` at `b23bbcc9`, based on accepted merge `ab19b786`.
+`codex/51-52-integration`, based on accepted merge `ab19b786`. Core checkpoint is
+`b23bbcc9`; current qualification code is `7d199aa9`.
 The five reviewed core implementation commits are integrated; the editor worktree
 fast-forwarded cleanly to the same checkpoint. No frontend production edits exist.
 
@@ -25,7 +26,7 @@ Browser/desktop operation uses Terra 6.1 max. Core work may continue during desi
 
 [#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) owns the shared limits
 and [detailed evidence](../tasks/evidence/bars-and-image-buttons.md) records contracts,
-worker checkout identities and readiness. Windows SDK use is 8/16; other counts are
+worker checkout identities and readiness. Windows SDK use is 12/16; other counts are
 zero and no reservation is pending. Windows x64 and macOS ARM64 qualification remain
 required. The linked Mac project was identified, but its isolated readiness delegation
 was refused before task creation because T3 does not support linked-environment
@@ -33,15 +34,20 @@ worktree isolation for delegates. A separately authorized top-level Mac qualific
 chat is required for that isolated checkout; the coordinator has requested it. No
 remote/capped operation started. The Windows SDK archive matches its published pin.
 
-Next independent work is rerunning the corrected parent runtime observer. The
-integrated `4894868f` source producer passed; its first SDK normal-play case passed
-engine assertions but failed the appearance-capture gate. A second run at `fe78025f`
-failed on the observer's unavailable pygame serialization API; its two saved native
-captures match exactly offline. Both failed results and eight actual starts remain
-retained. The correction uses the proven pixel-read API. Its next runtime cases may
-reuse completed setup on the identical accepted source only after the explicit
-producer/setup rejecting gates pass. Keep the producing `59e97d7b` export and
-its exact hash distinct from later integrated exports. The extraction-only final core
+Next action is Kris's exact design approval in the separate design chat, followed
+by that designer's direct handoff to the editor. Mac isolation still needs the
+separately requested top-level qualification chat. No operation is running.
+
+Windows runtime proof passes all four cases at observer `7d199aa9`, reusing the
+exact `fe78025f` producer and completed setup after all four explicit rejecting
+checks passed. Normal Story entry and deliberate fixture preview each cover both
+aspects, bar limits and keyboard step, six exact native appearance/reference pairs,
+and one accepted action sequence. Forty-eight PNG captures and the full result are
+retained; their identities and limitations are in the evidence owner. Earlier failed
+campaigns remain failed, with their eight consumed starts. This does not establish
+native editor preview routing, helper rendering, physical input or Mac behavior.
+Keep the producing `59e97d7b` export and its exact hash distinct from later integrated
+exports. The extraction-only final core
 guard does not change that fixture's runtime inputs. The broad `42ee7e58` run failed;
 its seven TLS rechecks pass after a process-PATH fix, while three Windows symlink
 checks remain failed/unqualified with OS1314. Preserve those results and the worker's
