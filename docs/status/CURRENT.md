@@ -24,7 +24,9 @@ and Opus 8.5/10; the latter's conditional 9 is not a rescore. Corrected source
 `37d29ca1` was not rescored after correction; its approval does not invent a score.
 No fourth council is selected. Source `0a6e571e` and its earlier proof stay pinned.
 The global catalog gate is blocked by five missing historical source objects;
-the coordinator is recovering exact objects while frontend implementation proceeds.
+all five are available in a verified Mac recovery bundle. Export to Windows awaits
+explicit private-transfer authorization after automatic approval review rejected
+the payload transfer. Frontend implementation proceeds independently.
 The corrected Windows observer passes; both earlier failed campaigns stay recorded.
 #51 owns combined capped-operation accounting; Windows SDK use is 12/16 and all
 other counts are zero, with no reservation pending. Remaining Windows/macOS proof,

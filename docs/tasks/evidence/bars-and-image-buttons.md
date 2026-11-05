@@ -773,3 +773,30 @@ refs, with no SDK, build, installation or source synchronization. The documented
 PR79 recovery bundle is the first exact-source lead. A read-only legacy Windows
 repository check found neither Help nor interaction object and preserved its
 unrelated active changes. Full catalog/browser verification remains pending.
+
+The Mac recovery inventory confirms all five source objects. Its combined bundle
+contains 29 commits across five existing refs, is 909568 bytes and hashes to
+`20d77bcd3eb2cd4d78632262cabc173443d13c4a9928c54042db9ba2d889e5ce`.
+Git bundle verification passes. The first Help-only bundle is retained separately;
+the combined bundle excludes the accepted baseline's history and has five known
+prerequisites, all ancestors of `ab19b786`. Source/approval records, existing refs
+and Mac worktree remain unchanged. No payload has been transferred.
+
+Automatic approval review rejected the proposed small private-bundle byte export
+through T3 and its retry because that exact sensitive payload/destination lacked
+explicit authorization. The linked host is reachable; this is a transfer-permission
+block, not host failure. The coordinator stopped the transfer operation, retained
+the rejection locally and asked Kris to authorize task-scoped private transfers,
+this recovery bundle only, or keep transfers blocked. No alternative export,
+server, public upload or policy bypass is selected while that answer is pending.
+Frontend implementation and unaffected local checks continue. Tracked-source
+repository validation passes 1795 files after the scoped lab import.
+
+The frontend owner reports real UI-to-core creation slices green for both controls:
+canonical bar strings, actual image asset/hash selection, Transform displayed size
+and Finish, one Apply/Undo/Redo transaction and an unchanged opaque neighbor.
+Refused size-edit focus/draft retention and remount coverage remain in progress.
+A hung DOM-object assertion-formatting run was canceled; the owner reports driver
+exit and fixture cleanup. It is not a pass. A boolean focus assertion exposed a
+happy-dom property/attribute mismatch under correction; no native behavior is
+inferred from that harness issue. No SDK/helper/native start was made.

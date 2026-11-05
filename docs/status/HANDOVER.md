@@ -61,7 +61,12 @@ requested. The Windows SDK archive matches its published pin.
 
 Next actions are the frontend owner's real UI/core slices and coordinator-owned
 recovery of five exact historical design sources. The approved reference remains
-pinned in the designer worktree. The coordinator alone imports the new lab/records
+pinned in the designer worktree. Mac prepared a verified 909568-byte recovery
+bundle containing all five exact sources. Automatic approval review rejected a
+private-byte transfer probe and its retry because payload/destination were not
+explicitly authorized. No payload moved. A transfer-authorization question is
+pending; do not retry/export through another route until answered. Continue the
+frontend work independently. The coordinator alone imports the new lab/records
 and registry registration; the frontend worker owns production files/tests and must
 not duplicate that import. Do not copy older shared DTOs from the design branch.
 Council scores do not substitute for the verified human decision. No fourth round is selected;
