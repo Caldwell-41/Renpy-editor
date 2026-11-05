@@ -377,6 +377,42 @@ fn bar_edits_preserve_opaque_neighbors_comments_and_refuse_stale_or_unsafe_reque
 }
 
 #[test]
+fn control_noops_and_unrelated_edits_preserve_recognized_expression_bytes() {
+    let (_temporary, mut service, _root, owner) = composition_project();
+    let variable = int_variable(&mut service);
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    let binding = json!({"variableId":variable["id"],"minimum":"-5","maximum":"15"});
+    let bar = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"addBar","parentId":owner["rootId"],"binding":binding,"appearance":{"thumb":"#123"},"width":300,"height":24,"expectedAuthoringRevision":doc["authoringRevision"]}),
+    );
+    let source = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .replace(
+            "VariableValue(\"score\", min=-5, max=15, step=1, force_step=True)",
+            "VariableValue(\"score\",min=-5,max=15,step=1,force_step=True)",
+        );
+    save_composition_source(&mut service, &owner, &source);
+    let mut command = json!({"type":"bar","nodeId":bar["selectedId"],"binding":binding,"appearance":{"thumb":"#123"},"width":300,"height":24,"expectedAuthoringRevision":doc["authoringRevision"]});
+    assert_eq!(
+        compose_command(&mut service, &owner, command.clone())["changed"],
+        false
+    );
+    command["appearance"]["thumb"] = json!("#456");
+    compose_command(&mut service, &owner, command);
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        source.replace("#123", "#456")
+    );
+}
+
+#[test]
 fn imagebutton_custom_actions_assets_and_context_keep_conservative_effects() {
     let (temporary, mut service, root, owner) = composition_project();
     let asset = import_image(&temporary, &mut service, &root, "state_button");

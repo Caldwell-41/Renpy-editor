@@ -321,23 +321,14 @@ pub(super) fn inspect_bar(
         return None;
     }
     let p = properties(bytes, node, BAR_KEYS).ok()?;
-    let expression = p
-        .get("value")?
-        .raw
-        .strip_prefix("VariableValue(")?
-        .strip_suffix(')')?;
-    let args: Vec<_> = expression.split(',').map(str::trim).collect();
-    if args.len() != 5 || args[3] != "step=1" || args[4] != "force_step=True" {
-        return None;
-    }
-    let name: String = serde_json::from_str(args[0]).ok()?;
+    let expression = BarExpression::parse(&p.get("value")?.raw)?;
     let variable = variables
         .iter()
-        .find(|v| v.technical_name == name && v.variable_type == VariableType::Int)?;
+        .find(|v| v.technical_name == expression.name && v.variable_type == VariableType::Int)?;
     let binding = IntegerBarBinding {
         variable_id: variable.id.clone(),
-        minimum: args[1].strip_prefix("min=")?.into(),
-        maximum: args[2].strip_prefix("max=")?.into(),
+        minimum: expression.minimum,
+        maximum: expression.maximum,
     };
     let read = |key| -> Option<Option<String>> {
         match p.get(key) {
@@ -372,24 +363,14 @@ pub(super) fn image_paths(
     let values = p
         .iter()
         .map(|(k, v)| {
-            let path = {
-                let expression = v.raw.strip_prefix("Transform(")?.strip_suffix(')')?;
-                let (path, size) = expression.rsplit_once(", xysize=(")?;
-                let (width, height) = size.strip_suffix(')')?.split_once(',')?;
-                let width = width.trim().parse::<u32>().ok()?;
-                let height = height.trim().parse::<u32>().ok()?;
-                if width == 0 || height == 0 || width > MAX_PIXELS || height > MAX_PIXELS {
-                    return None;
-                }
-                let numeric = node.numeric_layout.as_ref()?;
-                if numeric.values.get("xsize")?.value != width as f64
-                    || numeric.values.get("ysize")?.value != height as f64
-                {
-                    return None;
-                }
-                serde_json::from_str::<String>(path).ok()?
-            };
-            Some((k.clone(), path))
+            let expression = ImageExpression::parse(&v.raw)?;
+            let numeric = node.numeric_layout.as_ref()?;
+            if numeric.values.get("xsize")?.value != expression.width as f64
+                || numeric.values.get("ysize")?.value != expression.height as f64
+            {
+                return None;
+            }
+            Some((k.clone(), expression.path))
         })
         .collect::<Option<_>>()?;
     Some((values, p.values().map(|v| v.statement.start).collect()))
@@ -416,7 +397,7 @@ pub(super) fn patch(
     let mut edits = vec![];
     for (key, value) in values {
         match (current.get(key), value) {
-            (Some(old), Some(value)) if &old.raw != value => {
+            (Some(old), Some(value)) if !same_expression(key, &old.raw, value) => {
                 edits.push((old.expression.start, old.expression.end, value.clone()))
             }
             (Some(old), None) => {
@@ -440,6 +421,73 @@ pub(super) fn patch(
         source.splice(start..end, value.bytes());
     }
     Ok(source)
+}
+
+#[derive(PartialEq)]
+struct BarExpression {
+    name: String,
+    minimum: String,
+    maximum: String,
+}
+
+impl BarExpression {
+    fn parse(raw: &str) -> Option<Self> {
+        let expression = raw.strip_prefix("VariableValue(")?.strip_suffix(')')?;
+        let args = expression.split(',').map(str::trim).collect::<Vec<_>>();
+        if args.len() != 5 || args[3] != "step=1" || args[4] != "force_step=True" {
+            return None;
+        }
+        Some(Self {
+            name: serde_json::from_str(args[0]).ok()?,
+            minimum: args[1].strip_prefix("min=")?.into(),
+            maximum: args[2].strip_prefix("max=")?.into(),
+        })
+    }
+}
+
+#[derive(PartialEq)]
+struct ImageExpression {
+    path: String,
+    width: u32,
+    height: u32,
+}
+
+impl ImageExpression {
+    fn parse(raw: &str) -> Option<Self> {
+        let expression = raw.strip_prefix("Transform(")?.strip_suffix(')')?;
+        let (path, size) = expression.rsplit_once(", xysize=(")?;
+        let (width, height) = size.strip_suffix(')')?.split_once(',')?;
+        let dimension = |raw: &str| {
+            let raw = raw.trim();
+            let n = raw.parse::<u32>().ok()?;
+            (n > 0 && n <= MAX_PIXELS && n.to_string() == raw).then_some(n)
+        };
+        Some(Self {
+            path: serde_json::from_str(path).ok()?,
+            width: dimension(width)?,
+            height: dimension(height)?,
+        })
+    }
+}
+
+fn same_expression(key: &str, before: &str, after: &str) -> bool {
+    if before == after {
+        return true;
+    }
+    if key == "value" {
+        BarExpression::parse(before)
+            .zip(BarExpression::parse(after))
+            .is_some_and(|(a, b)| a == b)
+    } else if IMAGE_KEYS.contains(&key) {
+        ImageExpression::parse(before)
+            .zip(ImageExpression::parse(after))
+            .is_some_and(|(a, b)| a == b)
+    } else {
+        serde_json::from_str::<String>(before)
+            .ok()
+            .zip(serde_json::from_str::<String>(after).ok())
+            .is_some_and(|(a, b)| a == b)
+    }
 }
 
 pub(super) fn prepare(
