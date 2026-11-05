@@ -242,3 +242,24 @@ Terra attempt may operate a bounded temporary DOM-test HTML copy through
 `html_preview`, without a server or native-browser retry. Any successful result is
 synthetic DOM/inline-browser evidence, not trusted native input or a whole Design Lab
 pass. No user design approval or production UI implementation is inferred.
+
+After exactly two inconclusive Terra tasks, the coordinator took over the focused
+browser check under Kris's standing exception. A small inline diagnostic proved
+script execution and completed prototype mounting. The missing receipt came from
+capturing before the original chained timer-based test completed. An ignored test
+copy uses event-based mount/dialog-close waits and microtask flushes for synchronous
+sample callbacks, retaining the original 1500ms mount bound and all nine checks.
+
+Both dark-mode `html_preview` calls, at 560px and 1280px widths with an 800px browser
+viewport height, returned `BAR_IMAGEBUTTON_DOM_COMPLETION` with `passedCount:9` and
+`failed:null`. Groups cover samples/fallback hints, three variants, picker Cancel
+focus, one Apply/Undo/Redo, no-op/Cancel/invalid retention, Source/navigation,
+remount/revision retention, image selection/aspect and missing-asset/stale-source
+retention. Prototype source remains `0a6e571eb4c65ea60ce1fa446cd27d2a12985884`,
+fingerprint `ecd02f2dfb490297d89c1b05e5fb2787cb166868e8ea77a7d1dee72093785373`.
+Parent test SHA256 is `c04a174acbff2592dc6fb9aa4490382030f7b750beadeca3bee7eece2e53b012`.
+Ignored `prototype-dom-review` material retains exact input preparation, hashes and
+tool console receipts. These are synthetic DOM callbacks in a browser, not approval
+captures, native/trusted input, actual core/source/runtime or full Design Lab proof.
+The designer received the exact receipt and must still obtain Kris's explicit
+design decision and send its approved handoff directly to the editor agent.
