@@ -25,6 +25,10 @@ export function variableValue(variable:ScreenVariable,raw:string):ScreenVariable
 }
 export const variableLabel=(variable:ScreenVariable)=>variable.technicalName.replaceAll("_"," ").replace(/^./,letter=>letter.toUpperCase());
 export const variableRaw=(value:ScreenVariableValue)=>typeof value==="boolean"?value?"True":"False":value;
+export function actionSummary(row:ActionDraft["rows"][number],variables:readonly ScreenVariable[]):string {
+ const variable=variables.find(v=>v.id===row.variableId);
+ return row.type==="setVariable"?`Set ${variable?variableLabel(variable):"missing variable"} to ${row.value}`:row.type==="finishInteraction"?"Finish interaction":`${row.type==="showScreen"?"Show":"Hide"} ${row.target.sourceName||"missing screen"}`;
+}
 export function actionDraft(actions:ScreenAction[]):ActionDraft {
  const rows=actions.map(action=>({id:`screen-action-${++sequence}`,type:action.type,variableId:action.type==="setVariable"?action.variableId:"",value:action.type==="setVariable"?variableRaw(action.value):"",target:action.type==="showScreen"||action.type==="hideScreen"?{...action.target}:{screenId:"",sourceName:""}}));
  return {rows,touched:false,expanded:rows[0]?.id};
@@ -67,10 +71,7 @@ export function renderActions(section:HTMLElement,draft:ActionDraft,context:Inte
  const variables=context?.variables??[],targets=context?.targets.filter(t=>t.canShowHide)??[];
  const finish=context?.targets.some(t=>t.binding.screenId===context.owner?.id&&t.kind==="dialog"&&t.blocking)??false;
  const types:[string,string][]=[["setVariable","Set variable"],["showScreen","Show screen"],["hideScreen","Hide screen"],...(finish?[["finishInteraction","Finish interaction"] as [string,string]]:[])];
- const summary=(row:Row)=>{
-  const variable=variables.find(v=>v.id===row.variableId);
-  return row.type==="setVariable"?`Set ${variable?variableLabel(variable):"missing variable"} to ${row.value}`:row.type==="finishInteraction"?"Finish interaction":`${row.type==="showScreen"?"Show":"Hide"} ${row.target.sourceName||"missing screen"}`;
- };
+ const summary=(row:Row)=>actionSummary(row,variables);
  const select=(choices:[string,string][],value:string)=>{const control=el("select");if(!choices.some(([id])=>id===value)){const option=el("option","",value?"Original selection unavailable":"Choose…");option.value=value;control.append(option);}for(const [id,label]of choices){const option=el("option","",label);option.value=id;control.append(option);}control.value=value;return control;};
  section.replaceChildren();section.className="siv-actions siv-inspector";section.setAttribute("aria-label","Ordered button actions");
  const heading=el("div","siv-section-heading");heading.append(el("h3","","When clicked"),el("span","",`${draft.rows.length} / 8 actions`));

@@ -1,4 +1,4 @@
-import { actionDraft, captureActionFocus, prepareInteraction, renderActions, restoreActionFocus, variableLabel, type ActionDraft, type InteractionContext } from "./screen-interactions.ts";
+import { actionDraft, actionSummary, captureActionFocus, prepareInteraction, renderActions, restoreActionFocus, variableLabel, type ActionDraft, type InteractionContext } from "./screen-interactions.ts";
 import { ScreenCanvasFrames } from "./screen-canvas-frames.ts";
 import type { CompositionCommand, CompositionView, CopyDraftParticipant } from "./screen-composition.ts";
 import type { ScreenDocument, ScreenNode } from "./screen-ui.ts";
@@ -25,6 +25,7 @@ type TextField = "text" | "size" | "color";
 interface Draft { interaction?:InteractionContext; actions?:ActionDraft; key: string; document: ScreenDocument; screenId: string; node: ScreenNode; fields: Fields; appearance:Record<string,string>; edited:Set<string>; font?: FontReference | null; style?: StyleEdit }
 interface Host {
   interaction?:()=>InteractionContext|undefined;
+  selectDraft?:(screenId:string,nodeId:string)=>void;
   view: () => CompositionView | undefined;
   styles?: () => StyleCatalog | undefined;
   buttonSample?: (state:string) => void;
@@ -669,18 +670,24 @@ export class ScreenText {
       const targets=view.nodes.filter(n=>own&&n.id===draft.node.id||shared&&n.style?.name===draft.style?.name);
       if(own&&!targets.some(n=>n.id===draft.node.id)){stale=true;continue;}
       for(const node of targets){const selected=own&&node.id===draft.node.id,values=selected?this.previewValues(draft):this.sharedValues(draft,this.values(draft,false));
-        if(node.variableBindings?.length)delete values.text;
         const existing=samples.get(node.span.start);if(existing&&!same(existing,values))stale=true;else samples.set(node.span.start,values);
       }
     }
     return {stale,samples:[...samples].map(([nodeStart,values])=>({nodeStart,values}))};
   }
-  renderRetained(host: HTMLElement, _documents: ScreenDocument[]): void {
+  renderRetained(host: HTMLElement, documents: ScreenDocument[]): void {
     for (const draft of this.drafts.values()) {
-      if (this.host.view()?.step==="design" && this.host.view()?.screenId===draft.screenId && this.host.view()?.selected.id===draft.node.id && this.host.view()?.selected.textProperties && (!draft.actions?.touched || this.host.view()?.selected.actions!=null)) continue;
-      const section = el("section","screen-retained-draft");section.append(el("p","",`Draft retained on ${draft.node.literal??draft.node.kind} in ${draft.document.path}.`));
-      const value = el("textarea");value.readOnly = true;value.ariaLabel = "Retained text draft";value.value = Object.entries(draft.fields).map(([k,v]) => `${k}: ${v}`).join("\n")+(draft.actions?.touched ? `\nActions: ${JSON.stringify(draft.actions.rows)}` : "");
-      section.append(value,action(draft.actions?.touched ? "Cancel retained draft" : "Discard retained text draft",()=>{this.drafts.delete(draft.key);this.errors.delete(draft.key);this.fieldErrors.delete(draft.key);section.remove();this.host.redraw();this.host.preview();}));host.append(section);
+      const view=this.host.view(),available=documents.some(document=>document.path===draft.document.path&&document.screens.some(screen=>screen.nodes.some(node=>node.id===draft.node.id&&node.textProperties&&(!draft.actions?.touched||node.actions!=null))));
+      if(view?.step==="design"&&view.screenId===draft.screenId&&view.selected.id===draft.node.id&&view.selected.textProperties&&(!draft.actions?.touched||view.selected.actions!=null))continue;
+      if(available&&!draft.actions?.touched)continue;
+      const section=el("section",available?"screen-retained-draft siv-retained":"screen-retained-draft");section.role="status";
+      section.append(el("p","",available?`Action draft retained on ${draft.node.literal??"this button"}.`:`Draft retained on ${draft.node.literal??draft.node.kind} in ${draft.document.path}.`));
+      if(available&&this.host.selectDraft)section.append(action(`Return to ${draft.node.literal??"button"}`,()=>this.host.selectDraft?.(draft.screenId,draft.node.id!)));
+      if(!available) {
+        const value=el("textarea");value.readOnly=true;value.ariaLabel="Retained text draft";
+        value.value=Object.entries(draft.fields).map(([key,value])=>`${key}: ${value}`).join("\n")+(draft.actions?.touched?"\n"+draft.actions.rows.map((row,index)=>`${index+1}. ${actionSummary(row,draft.interaction?.variables??[])}`).join("\n"):"");section.append(value);
+      }
+      section.append(action(draft.actions?.touched?"Cancel retained draft":"Discard retained text draft",()=>{this.drafts.delete(draft.key);this.errors.delete(draft.key);this.fieldErrors.delete(draft.key);section.remove();this.host.redraw();this.host.preview();}));host.append(section);
     }
   }
   private closePicker(focus = true): void {

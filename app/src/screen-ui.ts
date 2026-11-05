@@ -174,6 +174,7 @@ export class ScreensWorkspace {
     }, this.layout);
     this.text = new ScreenText({
       interaction:()=>this.interactionContext(),
+      selectDraft:(screenId,nodeId)=>{try{this.selectOwnedScreen(screenId,nodeId);}catch(error){this.note((error as Error).message,true);}},
       writeBlocked:()=>this.components.hasPendingCopy(),cancelComponentCopy:()=>this.components.cancelCopy(),
       componentScope:(host,view)=>this.components.renderScope(host,view),
       view: () => this.compositionView(),styles: () => this.catalog?.styles,documents:()=>this.documents,inspect:async path=>this.documents.find(d=>d.path===path)??await actions.request<ScreenDocument>("screens.inspect",{path}),resolution:this.gameResolution,reviewing:active=>{this.reviewingAppearance=active;this.frames.invalidate("Return from style review to update this canvas.");if(!active)this.renderCanvas();},buttonSample: state => {this.buttonState=state;const select=this.stage.querySelector<HTMLSelectElement>('[aria-label="Button state (sample)"]');if(select)select.value=state;this.renderCanvas();},current: () => this.current(),request:actions.request,coordinate:actions.coordinate,

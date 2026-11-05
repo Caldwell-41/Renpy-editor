@@ -4,10 +4,10 @@ import { Window } from "happy-dom";
 import { ScreensWorkspace, type ScreenDocument } from "../src/screen-ui.js";
 import type { CoreOperation } from "../src/protocol.js";
 const flush=async()=>{for(let i=0;i<10;i++)await new Promise(r=>setTimeout(r,0));};
-function fixture(kind:"dialog"|"panel"|"component"="dialog") {
+function fixture(kind:"dialog"|"panel"|"component"="dialog",bound=false) {
  const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement,HTMLInputElement:browser.HTMLInputElement,HTMLSelectElement:browser.HTMLSelectElement,HTMLTextAreaElement:browser.HTMLTextAreaElement,HTMLDetailsElement:browser.HTMLDetailsElement,ResizeObserver:browser.ResizeObserver});
  let revision="original",authoringRevision="authoring-original",refuse=true;
- const nodes=()=>[{id:"root",kind:"screen",literal:null,span:{start:0,end:200},parentStart:null,layout:{},properties:[],protected:[]},{id:"close",kind:"textbutton",literal:"Close",actions:[],span:{start:20,end:90},parentStart:0,layout:{},properties:[],protected:[],textProperties:{values:{},blocked:{}}},{id:"body",kind:"text",literal:"Coins: 12",variableBindings:[],span:{start:100,end:150},parentStart:0,layout:{},properties:[],protected:[],textProperties:{values:{},blocked:{}}}];
+ const nodes=()=>[{id:"root",kind:"screen",literal:null,span:{start:0,end:200},parentStart:null,layout:{},properties:[],protected:[]},{id:"close",kind:"textbutton",literal:"Close",actions:[],span:{start:20,end:90},parentStart:0,layout:{},properties:[],protected:[],textProperties:{values:{},blocked:{}}},{id:"body",kind:"text",literal:bound?"Coins: [coins!q]":"Coins: 12",variableBindings:bound?[{variableId:"coins"}]:[],span:{start:100,end:150},parentStart:0,layout:{},properties:[],protected:[],textProperties:{values:{},blocked:{}}}];
  const doc=():ScreenDocument=>({path:"game/ui/help.rpy",revision,authoringRevision,partial:false,screens:[{name:"help",nodes:nodes()}]});
  const owner={id:"help",rootId:"root",path:doc().path,name:"help",kind,resolved:true,sourceRevision:revision};
  const writes:Record<string,unknown>[]=[],renders:Record<string,unknown>[]=[],messages:string[]=[];
@@ -66,7 +66,7 @@ test("typed assignments validate without losing input, preserve text-first edits
 
 test("pending Text and action fields restore selection and focus after navigating away and remounting",async()=>{
  const f=fixture();try{f.workspace.mount(document.body);await flush();f.select("body");await flush();f.change("Text","Pending text");let input=f.find("Text") as unknown as HTMLTextAreaElement;input.focus();input.setSelectionRange(2,7);f.select("close");f.select("body");input=f.find("Text") as unknown as HTMLTextAreaElement;assert.equal(input.value,"Pending text");assert.equal(document.activeElement===input,true);assert.deepEqual([input.selectionStart,input.selectionEnd],[2,7]);
- f.select("close");f.change("Add action","setVariable");f.change("Action 1 variable","coins");f.change("Action 1 value","12345");const value=f.find("Action 1 value") as unknown as HTMLInputElement;value.focus();value.setSelectionRange(1,3);await flush();f.workspace.panel.remove();f.workspace.mount(document.body);await flush();const restored=f.find("Action 1 value") as unknown as HTMLInputElement;assert.equal(document.activeElement===restored,true);assert.deepEqual([restored.selectionStart,restored.selectionEnd],[1,3]);
+ f.select("close");f.change("Add action","setVariable");f.change("Action 1 variable","coins");f.change("Action 1 value","12345");const value=f.find("Action 1 value") as unknown as HTMLInputElement;value.focus();value.setSelectionRange(1,3);await flush();f.select("body");f.button("Return to Close");assert.equal(f.find("Action 1 value").value,"12345");f.workspace.panel.remove();f.workspace.mount(document.body);await flush();const restored=f.find("Action 1 value") as unknown as HTMLInputElement;assert.equal(document.activeElement===restored,true);assert.deepEqual([restored.selectionStart,restored.selectionEnd],[1,3]);
  }finally{await f.dispose();}
 });
 
@@ -80,5 +80,11 @@ test("a Panel reviews distinct qualified targets including self and keeps empty 
 
 test("component text keeps variable insertion and review controls while its button actions stay read-only",async()=>{
  const f=fixture("component");try{f.workspace.mount(document.body);await flush();f.select("close");await flush();assert.equal(f.find("Add action").disabled,true);assert.equal(f.workspace.panel.querySelector<HTMLFieldSetElement>(".siv-actions fieldset")!.disabled,true);assert.equal(f.workspace.panel.querySelector(".siv-insert"),null);f.select("body");assert.ok(f.find("Existing variable"));assert.equal(f.writes.length,0);
+ }finally{await f.dispose();}
+});
+
+test("bound Text sends pending templates through the existing core draft-render owner and never an old text-sample override",async()=>{
+ const f=fixture("dialog",true);try{f.workspace.mount(document.body);await flush();f.select("body");await flush();f.change("Text","Current balance: [coins!q]");await flush();
+ const request=f.renders.at(-1)!;assert.deepEqual(request.textSamples,[]);assert.deepEqual(request.textStyles,[{nodeStart:100,values:{text:"Current balance: [coins!q]"}}]);assert.equal(f.writes.length,0);
  }finally{await f.dispose();}
 });
