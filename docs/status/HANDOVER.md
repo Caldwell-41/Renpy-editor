@@ -2,54 +2,55 @@
 
 ## Active #47/#50 draft delivery
 
-Continue in this thread on `codex/47-50-integration`,
+Continue on `codex/47-50-integration`,
 [draft PR #81](https://github.com/Caldwell-41/Renpy-editor/pull/81), targeting
-`codex/phase3b-screen-designer`. Both tickets remain open/unaccepted. Kris approved
-one extra eight-start Mac campaign and planned quality/harness CI. No merge or
-closure is selected. Preserve the unrelated audit, committed guide updates,
-all worktrees and unique receipts.
+`codex/phase3b-screen-designer`. Implementation and available Mac/baseline CI
+qualification are complete within recorded scopes. Both tickets remain
+open/unaccepted; Windows original-criterion proof is still unavailable. No merge,
+release or ticket closure is selected. Preserve the unrelated audit, committed
+guide updates, every worktree and unique receipt.
 
-`159a8c03` corrects the fresh Spec review's one P2 target-effect defect;
-`9797e522` corrects the normal image recorder. Standards found zero actionable
-issues. Routine core 604 (56 ignores, three exclusions, all 663 names reconciled),
-frontend 376, typechecking/build and three actual controller/core journeys pass at
-their recorded source. The approved A reference remains pinned at `7090a03` with
-its original fingerprint/ten captures. Production core/UI/renderer and runtime
-inputs have not changed during the current test-selection correction.
+Source milestones are effect correction `159a8c03`, recorder correction `9797e522`
+and CI discovery correction `4538297b`. Standards found zero actionable issues;
+the one P2 Spec defect is corrected. Local core 604 (56 ignores, three exclusions,
+all 663 names reconciled), frontend 376, build/typechecking and three actual
+controller/core journeys pass. Export-dependent checks now have explicit selection;
+all original assertions are preserved, with three observer tests required in
+ordinary discovery and two real-export admission checks run after preparation.
 
-Campaign 4 PASSES at exact producing `b5155f697bc53ae4887f1fff5df74051b84ddda9`,
-tree `6be9b6ba348eadf15c71e957f0af75134ff70588`. Both aspects have zero pixel
-residuals and all 29 geometry records match. Test checkout `t3-eddd6345` retains
-all 70 independently hash/size/mode-verified artifacts and full source/binary,
-process/desktop/profile cleanup. The coordinator's offline comparator replay passes.
-#47 owns cumulative SDK/helper/campaign counts, all starts resolved and reservations
-closed. No worker or SDK process remains pending; no new SDK/package/native start
-is assigned. Earlier failed comparisons and preflight failures remain preserved.
+Mac campaign 4 at `b5155f697bc53ae4887f1fff5df74051b84ddda9` passes exact
+normal/helper comparison at both aspects: zero pixel residuals, all 29 ordered/clipped
+geometry records match. All 70 retained artifacts and source/binary/process/profile/
+desktop cleanup are independently audited. Its producing source/capture inputs
+are unchanged by later test-selection/documentation updates. No result is relabelled
+for a newer candidate. Original approved A source `7090a03`, fingerprint and ten
+captures remain pinned; never replace or rebase that reference.
 
-Manual both-target harness CI 41983380016 attempt 1 at `b5155f69` failed only in
-Python discovery: the nested-fidelity class required an unprepared core export.
-Both failed ZIP digests and all 841 source hashes per host are independently
-verified. The correction keeps three ordinary observer tests and moves two
-export-admission checks unchanged to `nested_fidelity_export_checks.py`, with a
-missing export still failing that explicit selection. Required ordinary names and
-the automated runbook are updated. All four local harness groups pass, including
-Python 324 with three named Mac exclusions; explicit export 2 and admission 22 pass.
-No assertions were skipped and no SDK/build was added to the inexpensive route.
+At `4538297b30a26b2ef2f23df5028c3fbe8b1ef45c`, combined validation, automatic
+quality 41985108361 attempt 1 (both jobs/all 25 executed steps) and manual harness
+41985106408 attempt 1 (both targets/all groups) pass terminal audit. Both ZIP digests,
+all 842 source hashes per target, exact case names/exclusions, frontend/core/controller
+and cleanup assertions are checked. Original CI and earlier SDK failures remain
+preserved. Primary ignored `.toolchains/47-50/pr81-continuation/` owns logs,
+ZIPs/API receipts, `ci-terminal-audit.json` and independent Mac comparator replay.
+The [terminal evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#ci-terminal-audit-and-remaining-windows-gate-2026-11-05)
+owns exact candidates and limitations.
 
-Publish this correction without a skip marker, dispatch the existing isolated
-both-target harness selector once at the new head, record exact automatic/manual
-run/attempt identities in #47, and continue the existing T3 watch. Do not register
-another watch. The earlier automatic quality 41983364544 belongs to `b5155f69`;
-its result does not qualify a later head. Audit each new callback and current
-`Loomlight validation`, then update the draft/ticket criteria without relabelling
-old engine evidence. Primary ignored `.toolchains/47-50/pr81-continuation/`
-retains current logs, ZIPs and audits. [Current detailed audit](../tasks/evidence/screen-actions-and-nested-canvas.md#mac-campaign-4-audited-and-ci-discovery-correction-2026-11-05)
-owns exact identities and correction commands.
+This documentation publication needs its ordinary current-head quality/harness
+checks. #47 owns their live run/attempt/head and final audit after publication;
+do not commit another receipt solely to chase this document's SHA. Keep the existing
+T3 watcher during that audit, then unwatch at final handback. No SDK process/worker
+or engine reservation remains; #47 alone owns cumulative operation accounting.
 
-Windows runtime/nested proof remains blocked on supported T3 isolation and useful
-Git failure diagnostics; no blind retry/shared-checkout substitute is selected.
-Native/package/human acceptance remains separate and pending. Older unique recovery
-retains its size exception. Use the same thread; unwatch PR #81 only at final handback.
+The next substantive work is Windows #47 ordered normal play and #50 matched
+nested normal/helper rendering at both aspects. Supported T3 isolated provisioning
+is blocked before model startup; its retained trace lacks actual Git arguments,
+destination, exit and stderr. No root cause or safe correction is established.
+No blind retry, shell-created child checkout or existing-worktree takeover is
+selected. Source transfer remains authorized once a supported binding exists.
+Further engine execution requires that capability and an applicable recorded
+reservation/selection. Broader native/package/human/full 3B acceptance stays separate.
+Keep the draft and tickets open. Older unique recovery retains its size exception.
 
 ## PR 79 merge and workspace closeout
 

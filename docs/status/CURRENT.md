@@ -2,27 +2,24 @@
 
 ## Active #47/#50 draft delivery
 
-Kris selected completing [draft PR #81](https://github.com/Caldwell-41/Renpy-editor/pull/81)
-and checking both original tickets. `159a8c03` corrects Show/Hide target uncertainty
-and shared-component/action revisions. `9797e522` corrects the reference recorder.
-Approved A controls/reference and the renderer remain unchanged. Both tickets stay
-open/unaccepted.
+[Draft PR #81](https://github.com/Caldwell-41/Renpy-editor/pull/81) implements the
+approved A variable-text/action controls and nested component canvas. The reviewed
+effect and recorder defects are fixed; references/captures and renderer remain
+unchanged. #47/#50 stay open/unaccepted because required Windows proof is missing.
 
 | Capability | Automated proof | Remaining acceptance |
 | --- | --- | --- |
-| Variable text and ordered actions | 376 frontend passes; actual UI/core/history/reopen; Mac ordered play at `92b3a20` | Windows normal play and native/package/CI |
-| Target effects and revisions | Public red/green; four effects cases; core 604 with disclosed exclusions | Windows/native/CI qualification |
-| Nested component canvas | Mac normal/helper at `b5155f69`: zero pixel differences and all 29 geometry records match at both aspects | Windows matching and wider native/package proof |
+| Variable text and ordered actions | Core 604/frontend 376, actual UI/core/history/reopen; Mac ordered play | Windows click/keyboard normal play |
+| Nested component canvas | Mac `b5155f69`: zero pixel residuals and all 29 clipped geometry records match at both aspects | Windows matched normal/helper proof at both aspects |
+| Required baseline CI | Audited quality 41985108361 + both-target harness 41985106408 at `4538297b` | Current publication-head audit lives in #47; wider native/package/human gates remain separate |
 
-Kris approved campaign 4 and quality/harness CI. Mac proof and all 70 artifact hashes,
-lengths/modes/cleanup are audited. Both harness CI targets failed because ordinary
-Python discovery required an unprepared core export. The corrected split retains
-three ordinary observers and two explicit export checks; all four local harness
-groups pass without adding skips or SDK starts. Fresh CI is required at the next
-head; the existing watcher remains active. #47 owns cumulative accounting and run
-identities. Windows isolation remains blocked. [Current audit and correction](../tasks/evidence/screen-actions-and-nested-canvas.md#mac-campaign-4-audited-and-ci-discovery-correction-2026-11-05)
-owns exact scope and failed-run recovery. Preserve unrelated work and receipts;
-older unique recovery retains the size exception.
+[Terminal audit](../tasks/evidence/screen-actions-and-nested-canvas.md#ci-terminal-audit-and-remaining-windows-gate-2026-11-05)
+owns exact candidates, counts, exclusions and preserved failures. Windows T3
+isolated provisioning remains unavailable without decisive Git diagnostics.
+No SDK reservation/process or worker remains. Resolve that capability/route before
+further engine execution; no failed or missing proof is waived. Keep the PR draft.
+Preserve unrelated work and all unique receipts. Historical recovery below retains
+its existing size exception.
 
 ## Help dialog and base Help canvas merged and accepted
 

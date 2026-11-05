@@ -5,6 +5,54 @@
 acceptance, authorization and operation accounting. This file retains implementation
 checkpoints and detailed verification. No criterion is accepted by this entry.
 
+## CI terminal audit and remaining Windows gate, 2026-11-05
+
+`Loomlight validation` passes for implementation/test candidate
+`4538297b30a26b2ef2f23df5028c3fbe8b1ef45c`.
+[Automatic quality 41985108361, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41985108361/attempts/1)
+is terminal success. Both required jobs and all 25 executed steps pass: frontend 376,
+build/formatting, five core groups (12/15/1/1/1, zero failures/ignores), actual
+Dialog controller/core, repository validation and rejecting gate fixtures.
+The prior same-head automatic run 41984990960 also finished success; the combined
+status selects the newer 41985108361, not an earlier passing run.
+
+[Manual harness 41985106408, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/41985106408/attempts/1)
+is terminal success. Both required Windows/macOS jobs and every executed step pass.
+Independent ZIP digest/source/case auditing verifies all 842 source hashes per host
+against this exact Git candidate and all four groups. Windows 328 cases include 324
+passes and four named POSIX exclusions; Mac 324 include 321 passes and three named
+PowerShell exclusions. Both execute the three required observer tests. ZIP SHA256
+is Windows `cae70523d35994b6578935eb5828a18d603e852b887462c14c108ca17269afcb`,
+Mac `ef034474f0d5038481ef025f8a5ba529121e64bf2c7d508b4d33c64ff0d5fba1`.
+Original failed run 41983380016 and its audited artifacts remain failed/preserved.
+
+Primary ignored `.toolchains/47-50/pr81-continuation/ci-terminal-audit.json` and
+adjacent API/log/ZIP receipts own this audit. Quality log SHA256 is
+`3791accc074ca27392218adb5d0df6a0b4f82a8da32bb342ea3e939fd8b1f027`;
+the harness audit hash is
+`7aeaf9abead21bf1a4aa50a2e1c797798113404d5f183a8be4ef4fa85bdf5f4f`.
+The documentation-only publication of this receipt retains those exact producing
+candidates. Its required current-head CI identities and final audit belong in the
+live #47 record; do not create a new receipt commit to chase its own SHA.
+
+All eight original criteria are reconciled in #47/#50. The demonstrated effect
+and recorder defects are fixed. Mac exact normal/helper parity, local source/UI
+and current implementation CI proof pass within their recorded scopes. Two
+required Windows slices remain unrun: #47 click/keyboard exactly-once ordered
+normal play, and #50 matched normal/helper pixels and clipped geometry at both
+aspects. T3 cannot provision the required isolated Windows checkout and its
+retained Git trace lacks arguments/destination/exit/stderr. No blind retry or
+shared-checkout substitute is selected. Existing historical worktrees, source
+objects and recovery remain intact.
+
+Neither ticket is accepted/closed and PR #81 remains draft. Broader native/package,
+physical-input/human and Phase 3B acceptance remain separate; passing baseline CI
+waives none of them. #47 alone owns cumulative operation accounting, with no
+remaining reservation or active SDK process. Further engine execution requires
+a supported isolated binding and an applicable recorded reservation/selection.
+No merge/release is authorized. The next substantive action is resolving that
+Windows capability/route, not repeating already-passed Mac or routine tests.
+
 ## Mac campaign 4 audited and CI discovery correction, 2026-11-05
 
 The coordinator audited campaign 4 at producing candidate
