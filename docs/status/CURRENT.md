@@ -1,57 +1,37 @@
 # Current status
 
-## Variable actions and nested canvas selected
+## Active #47/#50 draft delivery
 
-Kris resumed [L11 #47](https://github.com/Caldwell-41/Renpy-editor/issues/47) and
-[L19 #50](https://github.com/Caldwell-41/Renpy-editor/issues/50) on 2026-11-05.
-The selected finish is verified implementation, final review and a draft PR.
-CI is explicitly deferred. Neither ticket is accepted.
+Kris selected implementation of [#47](https://github.com/Caldwell-41/Renpy-editor/issues/47)
+and [#50](https://github.com/Caldwell-41/Renpy-editor/issues/50), final verification
+and a draft PR. CI is explicitly deferred. Both tickets remain open and unaccepted.
 
-Implementation checkpoint `836034d` on `codex/47-50-integration` includes approved
-A controls, typed actions, mixed text, atomic Apply and inert live draft resolution.
-Test-driver dependency `367c5de` enables actual typed-variable controller setup.
-It remains local-only after the prior source-transfer publication. Preserve the
-user's committed Design Lab guide updates and the untracked Phase 1 audit.
+The integrated controls use approved A (`inspector-v2`), canonical ordered actions,
+mixed variable text, one atomic Apply transaction and separate inert samples.
+Nested planning supports component expansion, clipping, layering and freshness.
+The approved source `7090a03`, fingerprint and ten captures remain unchanged.
+Unrelated user guide changes and the untracked Phase 1 audit are preserved.
 
-Both fresh offline workers completed without source changes. Source/actions passed
-25 public cases. Canvas passed 12 core cases, 34 DOM cases and four comparison gates;
-two explicit SDK cases remain ignored. The coordinator's eligibility correction
-passed 15 reference and 42 affected frontend cases, typechecking, formatting and
-repository checks. These results retain their candidate and offline scope.
+Combined verification passed 376 frontend tests, 602 routine core tests, the build
+and three real UI-to-core journeys. Core's 56 explicit ignores and three documented
+exclusions remain separate. Current Lab passed 1,456 cases after the shared CSS
+ownership correction. Final review found one P3 Standards issue, now corrected,
+and no actionable Spec implementation defect.
 
-| Selected behavior | Current evidence | Required completion |
-| --- | --- | --- |
-| Typed writes and effects | Public source/history/refusal and Story admission | Approved controls and ordered normal-play proof |
-| Nested canvas and inert samples | Public plans, freshness and exact comparison gates | Both-target/aspect normal/helper captures |
-| Authoring controls | A `inspector-v2` explicitly approved; pinned source/captures verified | Complete Lab verification, integrate controls and prove real UI-to-core behavior |
+Mac candidate `92b3a20` passed ordered normal play for click/keyboard at both aspects
+and both nested normal-game reference captures. The helper comparison remains
+unrun after a pre-launch permission refusal and a synthetic-project reopen conflict.
+An offline replay reproduced the conflict and verified correction of the
+export's omitted identity-bound files. This changes qualification setup only.
+Windows remains blocked by unsupported isolated T3 provisioning. Both-target
+rendering parity, measured residuals, native/package proof and CI remain pending.
 
-Kris approved A on 2026-11-05 with "A is approved". Source `7090a03` and its full
-fingerprint remain pinned; approval/capture evidence is `a0535ae`. Both are now
-integrated without altering the reference worktree. This approves design only.
-The full offline Lab check passed at harness candidate `19dd16b`: 1,456 cases,
-23 interaction modules and all approval/source protections. Earlier failures remain
-recorded. Harness fixes integrate as `eea25ba`/`86bccfc`; core migration `a811c26`
-integrates as `ff98d4d`. Mixed-text/atomic Apply completion `5aba12c` is now audited
-and integrated as `ce2d4c1`, with 45 focused core passes and four comparison gates;
-one SDK case remains explicitly unrun. The frontend owner has both reviewed
-backend/driver dependencies for actual integration checks. Its control migration
-is now integrated; 376 combined frontend cases, 602 routine core cases, the build
-and three actual controller/core journeys pass. Core's 56 explicit ignores and
-three documented exclusions remain separate. Current Lab's full 1,456-case gate
-and final control comparison pass within their recorded scopes. Independent review
-found one P3 Lab CSS duplication, now corrected pending its affected browser check;
-Spec found no code defect but required engine proof remains missing. Preserve the approved source and all rejected/draft
-variants. Tailscale-only delivery and exclusion of prototype-review remain binding.
-Final combined suites and independent Standards/Spec review follow integration.
-[Current evidence and criterion gaps](../tasks/evidence/screen-actions-and-nested-canvas.md#resumed-delivery-2026-11-05)
-own exact assignments, receipts and remaining work.
-
-#47 alone owns cumulative operation counts. The cancelled corrected Mac task
-started nothing and its reservation is released. No capped operation is assigned.
-The original Mac campaign remains failed after four SDK starts, with complete
-cleanup; its whitespace harness correction has offline proof. Windows provisioning
-remains unresolved with zero SDK starts. Required engine/native/package proof and
-wider acceptance remain pending. Earlier sections below retain historical scope.
+[The current evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#draft-pr-reconciliation-2026-11-05)
+owns original-criterion results, candidates, failures and recovery. #47 alone owns
+cumulative operation accounting. All unused reservations are released; no capped
+operation is assigned. The selected draft publication carries these limits; #47
+owns its publication receipt. Neither ticket is accepted or closed. Preserve all
+worktrees and unique receipts.
 
 ## Help dialog and base Help canvas merged and accepted
 

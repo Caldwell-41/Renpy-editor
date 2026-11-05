@@ -1,86 +1,51 @@
 # Current outcome handover
 
-## Active #47/#50 implementation
+## Active #47/#50 draft delivery
 
-Kris resumed #47/#50 on 2026-11-05 and selected a draft PR after combined spec
-verification and final review. CI is explicitly deferred. Production UI remains
-selected for integration after the Lab verification gate passed. Kris explicitly
-approved A (`inspector-v2`) and its direct handoff has arrived. Both tickets remain
-in progress and unaccepted.
+Continue on `codex/47-50-integration`, based on `e2a02bc` from
+`codex/phase3b-screen-designer`. Kris selected a draft PR after combined verification
+and final review; CI stays off. Both tickets remain unaccepted. Preserve the user's
+committed guide updates, untracked Phase 1 audit, worktrees and all unique receipts.
+Do not replay already integrated worker commits or reset to an old handoff SHA.
 
-Continue on `codex/47-50-integration`, based on
-`e2a02bc9f6d0f91639c47e35d49f1befff058c60` from
-`codex/phase3b-screen-designer`. Local implementation checkpoint `ce2d4c1` and
-test-driver dependency `367c5de` are unpublished. They include all original
-source/canvas lane commits, the H61 correction, source-qualified target capability,
-mixed variable text and atomic Apply. Do not replay old lane histories. Preserve the
-user's committed Design Lab guide updates, untracked Phase 1 audit, worktrees and receipts.
-
-Both fresh offline workers returned clean at `0b64e54` with no fixes or commits.
-Source/actions passed 25 public cases and returned a caller/migration map. Canvas
-passed 12 core cases, 34 DOM cases and four comparison gates; two SDK cases remain
-explicitly ignored. The coordinator verified retained producer/input hashes and
-unchanged canvas sources. The eligibility correction passed 15 reference and
-42 affected frontend cases, typechecking, formatting and repository checks.
-These are bounded offline results, not final combined, engine or native evidence.
-
-The coordinator owns shared contracts/callers, integration, combined records and
-final verification. No original stopped worker has been resumed. New prototype
-work uses preserved `t3-229694d0` in the separately requested new chat. Kris rejected
-all v1 variants for departing from the existing Screens design language. The redo
-uses principle-experience-first, explicitly excludes prototype-review and delivers
-only through Tailscale. `inspector-v2`, `worksheet-v2` and `workspace-v2` mount the
-actual ScreensWorkspace, Lab shell and production styles with fictional inert
-services. They change only action editing inside the inspector and remain
-approved only for A with the exact decision "A is approved". Source `7090a03`
+Implementation and final local verification are complete. Approved A controls,
+canonical typed actions, mixed templates, atomic Apply, retained drafts, inert
+samples and nested canvas are integrated. The original approved source `7090a03`
 and fingerprint `a976830817d848d1263bbbc7f8a101c92c322ce2e369eb4c79c9ce7805bbb85e`
-are pinned; evidence `a0535ae` retains ten verified captures. These commits are
-integrated as `3f4fb10` and `507c77b`; never replace the original source pointer
-with the evidence commit or rebase the reference. Rejected source/notes remain
-preserved ignored. Sol owns coding;
-Terra Max owns browser/desktop work.
-Standing computer-use authority remains valid. Exact current chat/worker identities,
-commands, hashes and original-criterion gaps are in the
-[resumption evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#resumed-delivery-2026-11-05).
+remain pinned; evidence `a0535ae` retains ten captures. Never rebase that reference
+or replace its source pointer. V1 is rejected and B/C remain unapproved.
 
-The full Lab gate passed at `19dd16b` after two harness-only corrections, now
-integrated as `eea25ba`/`86bccfc`. All 1,456 cases and complete interaction/approval
-groups passed. Original failed runs remain recorded. Core migration `a811c26`
-is integrated as `ff98d4d`, with 43 focused passes. This shared checkpoint is
-temporarily incompatible with legacy frontend controls. Backend completion
-`5aba12c` is audited and integrated as `ce2d4c1`, with 45 focused passes and four
-comparison gates; one SDK case remains unrun. The active frontend owner received
-that exact dependency and driver allowlist commit `367c5de` for its actual
-UI-to-core journeys. Complete and integrate its control migration before claiming
-a usable combined candidate. Its five frontend commits are now integrated through
-`2eb17ee`; dependency copies were excluded. Parent live-draft correction `836034d`
-also passes focused red/green proof. The full combined frontend suite has 376
-passes after removing one stale generated deleted-test artifact; the production
-build and three combined controller/core journeys pass. Broad core completed with
-602 passes, 56 explicit ignores and three documented exclusions, all names audited.
-Lab compatibility `728697c` integrates as `9868e19` and its full 1,456-case gate
-passed. Final control comparison passed within scope; identical reference/candidate
-outline clipping and marker/wording differences remain disclosed. Independent
-review found one P3 duplicate Lab CSS owner, corrected pending its affected browser
-check, and no actionable Spec code defect. Required both-target/aspect engine proof
-and measured residuals remain pending. Fresh Mac qualification follows within the
-existing allowance, with exact reservation/candidate in #47. Preserve all failures.
-Run final combined suites, candidate-bound engine/platform proof and independent
-Standards/Spec review before final spec reconciliation and draft PR creation.
-Do not run CI yet or infer approval from prototype preparation.
+Combined results are 376 frontend passes, 602 routine core passes, production build
+and three actual UI-to-core journeys. The 56 core ignores and three documented
+exclusions are audited separately. Current full Lab passes 1,456 cases. Independent
+review found one P3 duplicate Lab CSS owner, corrected and browser-verified at
+`92b3a20`; Spec found no actionable code defect. Control fidelity retains its
+recorded scope and disclosed reference/candidate outline clipping and marker differences.
 
-#47 alone owns operation accounting. The cancelled corrected Mac worker at
-`8ed4608` performed reads only; its unused reservation is released. No capped
-operation is currently assigned. Mac campaign 1 remains failed after four SDK
-starts despite offline diagnostic success after the H61 correction. Cleanup and
-the earlier desktop refusal remain preserved in
-[engine evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#mac-campaign-1-harness-failure-and-correction).
-Windows source-transfer head `db99cbb` is retained in its object store, but T3
-worktree provisioning failed before agent startup. No Git root cause or supported
-isolated execution binding is established. Do not blind-retry, create a child
-checkout in shell or take over another worktree. Corrected source transfer and
-supported isolation precede Windows execution. Neither target's pending proof
-is waived. No PR, merge, release or ticket closure has occurred for this work.
+At `92b3a20`, Mac ordered normal play passed all four click/keyboard cases and
+nested normal-game captures passed at both aspects. The helper/comparison is
+unrun. The first invocation was refused before launch because a retained byte copy
+was not executable. A fresh continuation invoked the byte-identical original
+executable, then failed reopening the synthetic project with `Scene(SourceConflict)`
+before captures/helper startup. All retained hashes and cleanup receipts were audited.
+The coordinator corrected omitted identity-bound export files and verified fresh
+project replay offline. No later engine pass is implied. No further SDK campaign is selected.
+
+#47 alone owns cumulative limits and actual/reserved counts. Unused reservations
+are released. Windows source transfer at `db99cbb` exists in its object store, but
+T3 isolated worktree provisioning failed before startup without diagnostic Git
+arguments/stderr. Do not blind-retry, create a child checkout in shell or take over
+another worktree. Supported isolation and corrected source transfer precede Windows
+execution. Neither pending proof nor native/package/CI qualification is waived.
+
+The selected draft PR targets `codex/phase3b-screen-designer` with a `[skip ci]`
+publication commit. #47 owns its exact publication receipt and remaining work.
+After publication, continue only from reconciled live issue state. Do not dispatch
+CI, merge or close tickets without the corresponding selection.
+The branch validation plan selects quality and both-target harness jobs for later
+CI, while task-specific engine/native requirements remain explicit blockers.
+[Draft reconciliation](../tasks/evidence/screen-actions-and-nested-canvas.md#draft-pr-reconciliation-2026-11-05)
+owns the original criterion map, producing candidates and receipt locations.
 
 ## PR 79 merge and workspace closeout
 

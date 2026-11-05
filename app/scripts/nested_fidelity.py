@@ -32,7 +32,9 @@ def validate_accepted(accepted):
     assert accepted['sourceMapSchemaVersion'] == 8
     assert accepted['exporterSourceSHA256'] == digest((REPO / 'app/src-core/src/screens/nested_canvas_tests.rs').read_bytes())
     files = accepted['files']
-    assert set(files) == set(FIXTURES) | {'.renpy-editor/project.json', '.renpy-editor/source-map.json', '.renpy-editor/authoring.json', 'game/definitions/variables.rpy'}
+    project = json.loads(files['.renpy-editor/project.json']['text'])
+    scenes = {scene['sourcePath'] for scene in project['scenes']}
+    assert set(files) == set(FIXTURES) | scenes | {'.renpy-editor/project.json', '.renpy-editor/source-map.json', '.renpy-editor/authoring.json', 'game/definitions/variables.rpy', 'game/definitions/characters.rpy'}
     for row in files.values():
         assert digest(row['text'].encode()) == row['sha256'], 'Accepted file hash differs'
     metadata = json.loads(files['.renpy-editor/source-map.json']['text'])

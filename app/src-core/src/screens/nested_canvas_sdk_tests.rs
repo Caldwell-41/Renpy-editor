@@ -64,30 +64,7 @@ fn nested_fidelity_hidden_helper_captures_exported_cases() {
         service = Some(LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap());
         let service = service.as_mut().unwrap();
         let root = profile.join("synthetic-project");
-        for (path, file) in accepted["files"].as_object().unwrap() {
-            let relative = crate::transaction::RelativePath::new(path.clone()).unwrap();
-            let bytes = file["text"].as_str().unwrap().as_bytes();
-            assert_eq!(hex::encode(Sha256::digest(bytes)), file["sha256"]);
-            let destination = root.join(relative.as_str());
-            fs::create_dir_all(destination.parent().unwrap()).unwrap();
-            fs::write(destination, bytes).unwrap();
-        }
-        for (kind, bytes) in [("font", FONT), ("uiImage", IMAGE)] {
-            let asset = accepted["assets"]
-                .as_array()
-                .unwrap()
-                .iter()
-                .find(|asset| asset["kind"] == kind)
-                .unwrap();
-            assert_eq!(hex::encode(Sha256::digest(bytes)), asset["sha256"]);
-            let relative = crate::transaction::RelativePath::new(
-                asset["relativePath"].as_str().unwrap().to_owned(),
-            )
-            .unwrap();
-            let destination = root.join(relative.as_str());
-            fs::create_dir_all(destination.parent().unwrap()).unwrap();
-            fs::write(destination, bytes).unwrap();
-        }
+        restore_fidelity_files(&root, &accepted);
         service.open_path(&root).unwrap();
         for (index, case) in accepted["cases"].as_array().unwrap().iter().enumerate() {
             statuses[index]["status"] = json!("running");

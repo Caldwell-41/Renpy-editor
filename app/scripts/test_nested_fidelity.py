@@ -23,6 +23,7 @@ class NestedFidelityGates(unittest.TestCase):
 
     def test_acceptance_rejects_missing_matrix_stale_metadata_and_executable_nodes(self):
         for mutate in (lambda data: data['cases'].pop(),
+                       lambda data: data['files'].pop(json.loads(data['files']['.renpy-editor/project.json']['text'])['scenes'][0]['sourcePath']),
                        lambda data: data['files']['.renpy-editor/source-map.json'].update(sha256='0'*64),
                        lambda data: data['cases'][0]['plan']['nodes'][1].update(kind='python')):
             with self.subTest(mutate=mutate):

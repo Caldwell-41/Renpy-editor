@@ -5,6 +5,116 @@
 acceptance, authorization and operation accounting. This file retains implementation
 checkpoints and detailed verification. No criterion is accepted by this entry.
 
+## Draft PR reconciliation, 2026-11-05
+
+The selected outcome is a draft PR for #47/#50. Both issues remain open and
+unaccepted. CI is explicitly deferred; no workflow, package or native editor was
+started during this final verification. The approved A source/reference/captures
+remain unchanged. All worker implementations are integrated.
+
+Local verification passed 376 frontend tests, 602 routine core tests, production
+build and three actual UI-to-core journeys. The core inventory reconciles all 661
+names: 602 passed, 56 explicit ignores and three documented exclusions. Generated
+stale dismissal-test output was removed only after retaining its failed log; no
+legacy production path was restored. Current Lab passed 1,456 unique cases across
+24 screens, 23 interaction modules, 11 approval protections and seven other groups.
+The P3 Standards finding about duplicated Lab CSS was corrected and the affected
+full Lab gate passed at `92b3a20d6d6578d64206922a75f8635f4e322335`.
+
+### Original ticket criteria
+
+| Original criterion | Verified evidence | Remaining proof |
+| --- | --- | --- |
+| #47 compatible bool/int/string assignments and retained invalid drafts | Focused public-core tests, 376 frontend tests and real controller/core journeys cover typed writes, missing/stale variables and recovery | Required target/native qualification remains pending |
+| #47 qualified Show/Hide/Finish, Finish last and exactly-once displayed order | `canShowHide` comes from `qualified_panel_targets`; Finish requires blocking Dialog. Mac normal play observed all eight built-in actions once, in order, with correct state and continuation for click/keyboard at both aspects | Windows normal play is unrun |
+| #47 marked separate inert samples and passive selection | Typed revision-bound samples, literal template rendering and actual UI-to-core draft/source/history checks pass; Lab uses production controls with inert fictional services | Native/platform qualification remains pending |
+| #47 minimal source changes, history/reopen and complete known effects | Public source/refusal/history/reopen/effect tests and all three UI-to-core journeys pass; opaque neighbors and original revisions retained | No acceptance waiver or complete native proof |
+| #50 nested component/grid/viewport actual matched example and sibling layering | Public plans, clipping/selection/order tests and both Mac normal-game reference captures pass | Hidden-helper captures and actual comparison are unrun |
+| #50 spacing/clipping/size constraints and reuse on both targets/aspects | Planner/DOM checks and exact comparison refusal gates pass | Both-target helper parity and measured differences are missing; no tolerance accepted |
+| #50 shared-definition invalidation and explicit partial coverage | Shared freshness/withdrawal and missing/custom refusal tests pass | Integrated native/platform evidence remains pending |
+| #50 residual differences and no arbitrary project execution in editor | Data-only planning, literal samples and zero-tolerance gates pass; existing trust boundary preserved | No actual helper comparison or residual measurement exists |
+
+### Mac qualification and failure receipts
+
+Producing candidate `92b3a20d6d6578d64206922a75f8635f4e322335`, tree
+`76ad62d48ea1f536e4205a7162f555871a6dcf19`, was clean. macOS 26.6.2 ARM64 used
+Rust/Cargo 1.90.0, Node 24.19.0/npm 11.9.0, Python 3.12.16/Pillow 12.3.0 and the
+official Ren'Py 8.5.3 archive verified against its published checksum. Mac native
+desktop admission was positive and temporary assertions were released.
+
+The first assignment used seven ordered-action SDK starts and four nested normal
+reference starts, all passed. Both reference captures report GL2 at the matched
+1280x720 and 1024x768 dimensions with 29 ordered geometry records and unchanged
+accepted source. All 11 owned SDK launchers were reaped and process groups empty.
+These are passed slices at their exact candidate, not hidden-helper parity.
+
+The retained test-binary copy was mode0644, causing a kernel refusal before any
+child started. Its original Cargo binary was executable and byte-identical,
+SHA256 `96d7c200365888d35ce84b14d64475afa6bf60fe26ab4154aca78158cb7f0971`.
+A fresh isolated continuation invoked that original binary read-only, installed
+the official SDK with two validation/discovery starts, then failed reopening the
+synthetic project with `Scene(SourceConflict)`. Both aspect cases stayed unrun;
+no helper started and no comparison ran. The producer reports `cleanupComplete:false`
+and `sourceUnchanged:false` because its required shutdown/post-capture checks were
+not reached. Separate desktop/process receipts establish released assertions,
+exited observed processes/groups and removal of the temporary profile. Preserve
+those distinctions. All 67 first-assignment and 35 continuation artifact hashes
+were verified. Unused reservations are released in the sole accounting owner #47.
+
+Retained test-only worktrees:
+
+- `t3-90187276/.toolchains/qualification-47-50/` owns the first handoff, complete
+  commands, 67-file hash manifest, full Lab report, normal-play and reference results.
+- `t3-52f1725c/.toolchains/qualification-47-50-continuation/` owns the failure,
+  process/desktop receipts, 35-file manifest and provisional diagnosis.
+- Primary `.toolchains/47-50/final-combined/` owns broad local results, named-result
+  audits, real UI-to-core receipts and offline corrections below.
+
+### Offline corrections after the engine stop
+
+A fresh-profile replay added to the existing exporter test reproduced the exact
+`Scene(SourceConflict)` without an SDK. Exported metadata bound the old scene's
+revision but omitted its source file. The corrected export includes mapped scene
+files and character definitions; both the offline replay and SDK producer now use
+one fixture-restoration helper. The independent fresh profile reopens and returns
+identical public canvas plans at both aspects. The existing four comparison-gate
+tests pass, including refusal of a missing mapped scene. A transient compile error
+while moving hash validation into the shared helper is retained in
+`nested-replay-green.log`; corrected `nested-replay-green-02.log` passes the one
+exact exporter/replay test with zero ignored cases.
+
+A focused retention assertion also reproduced loss of executable mode. Retained
+binary creation and reuse now preserve metadata with `copy2`; all five existing
+source-evidence tests pass. `binary-mode-red.log` and `binary-mode-green.log` retain
+that red/green result. No SDK was launched for either correction. These changes
+are qualification code/tests only; production renderer/core/UI and runtime fixture
+inputs are unchanged. The expanded accepted export is new qualification material,
+so old normal captures are not relabelled as a pass for it. A fresh producing
+candidate/export and selected affected engine proof are required before acceptance.
+
+### Review, CI and publication boundary
+
+Independent Standards review found one P3 issue, corrected with full current Lab
+proof; no other actionable finding remains from that review. Independent Spec
+review found zero implementation defects and four engine-proof gaps at its reviewed
+candidate. Mac normal-play now closes its Mac slice; helper parity, both-target
+matching and measured residuals remain open. The coordinator self-reviewed the
+small qualification-only corrections and their public replay/refusal checks.
+
+Windows remains blocked by T3 isolated worktree provisioning before startup. Its
+previous source transfer is retained, but no supported isolated execution binding
+or current qualification exists. Do not blind-retry or use another worker's checkout.
+Native/package proof and wider acceptance remain pending on both targets.
+
+The branch validation plan selects Repository quality plus the existing manual
+both-target harness jobs for later CI. No dispatch is authorized now. Those jobs
+are baseline harness checks, not #47/#50 engine/native acceptance; task-specific
+qualification setup and the remaining proof must be reconciled before marking the
+PR ready. Historical Help/L04 selectors and exhausted allowances are not selected.
+The draft publication commit uses `[skip ci]`. No merge, release or ticket closure
+is selected. The unrelated Phase 1 audit and all unique failure/recovery material
+remain untouched.
+
 ## Resumed delivery, 2026-11-05
 
 Kris resumed #47/#50 using the stopped-work handoff, requested independent agents

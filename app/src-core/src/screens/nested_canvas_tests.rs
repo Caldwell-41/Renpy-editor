@@ -1,6 +1,7 @@
 //! Public-core nested canvas admission. These tests never start the SDK/helper.
 use crate::lifecycle::{acceptance::ipc, LifecycleService};
 use serde_json::{json, Value};
+use sha2::{Digest, Sha256};
 use std::fs;
 
 #[path = "nested_canvas_sdk_tests.rs"]
@@ -275,9 +276,35 @@ const FONT: &[u8] =
 const IMAGE: &[u8] =
     include_bytes!("../../../../tests/fixtures/phase-3b-screens/ui-image/seal.png");
 
+fn restore_fidelity_files(root: &std::path::Path, accepted: &Value) {
+    for (path, file) in accepted["files"].as_object().unwrap() {
+        let relative = crate::transaction::RelativePath::new(path.clone()).unwrap();
+        let bytes = file["text"].as_str().unwrap().as_bytes();
+        assert_eq!(hex::encode(Sha256::digest(bytes)), file["sha256"]);
+        let destination = root.join(relative.as_str());
+        fs::create_dir_all(destination.parent().unwrap()).unwrap();
+        fs::write(destination, bytes).unwrap();
+    }
+    for (kind, bytes) in [("font", FONT), ("uiImage", IMAGE)] {
+        let asset = accepted["assets"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|asset| asset["kind"] == kind)
+            .unwrap();
+        assert_eq!(hex::encode(Sha256::digest(bytes)), asset["sha256"]);
+        let relative = crate::transaction::RelativePath::new(
+            asset["relativePath"].as_str().unwrap().to_owned(),
+        )
+        .unwrap();
+        let destination = root.join(relative.as_str());
+        fs::create_dir_all(destination.parent().unwrap()).unwrap();
+        fs::write(destination, bytes).unwrap();
+    }
+}
+
 #[test]
 fn nested_fidelity_exports_accepted_source_assets_and_matched_plans_without_execution() {
-    use sha2::{Digest, Sha256};
     let (temporary, mut service, root, target) = external_graph(2, 1, false);
     service.close().unwrap();
     service.open_path(&root).unwrap();
@@ -429,7 +456,16 @@ fn nested_fidelity_exports_accepted_source_assets_and_matched_plans_without_exec
         ".renpy-editor/source-map.json",
         ".renpy-editor/authoring.json",
         "game/definitions/variables.rpy",
+        "game/definitions/characters.rpy",
     ] {
+        let bytes = fs::read(root.join(path)).unwrap();
+        files.insert(path.to_owned(), json!({"text":String::from_utf8(bytes.clone()).unwrap(),"sha256":hex::encode(Sha256::digest(bytes))}));
+    }
+    let project: Value =
+        serde_json::from_slice(&fs::read(root.join(".renpy-editor/project.json")).unwrap())
+            .unwrap();
+    for scene in project["scenes"].as_array().unwrap() {
+        let path = scene["sourcePath"].as_str().unwrap();
         let bytes = fs::read(root.join(path)).unwrap();
         files.insert(path.to_owned(), json!({"text":String::from_utf8(bytes.clone()).unwrap(),"sha256":hex::encode(Sha256::digest(bytes))}));
     }
@@ -444,6 +480,23 @@ fn nested_fidelity_exports_accepted_source_assets_and_matched_plans_without_exec
     service.close().unwrap();
     let accepted = json!({"outcome":"L19-nested-fidelity","publicCoreRequests":true,"sourceMapSchemaVersion":8,
         "exporterSourceSHA256":hex::encode(Sha256::digest(include_bytes!("nested_canvas_tests.rs"))),"files":files,"assets":assets,"cases":cases});
+    // Replay the exported files into an independently generated project, just as
+    // the SDK producer does. Reopening the original root cannot catch missing
+    // identity-bound files in the export.
+    let replay_profile = temporary.path().join("replay-profile");
+    let mut replay =
+        LifecycleService::prepare_source_foundation_probe(replay_profile.clone()).unwrap();
+    replay.close().unwrap();
+    let replay_root = replay_profile.join("synthetic-project");
+    restore_fidelity_files(&replay_root, &accepted);
+    replay.open_path(&replay_root).unwrap();
+    for case in &cases {
+        assert_eq!(
+            ipc(&mut replay, "screens.canvasPlan", case["request"].clone()),
+            case["plan"]
+        );
+    }
+    replay.close().unwrap();
     if let Some(output) = std::env::var_os("LOOMLIGHT_NESTED_FIDELITY_INPUTS") {
         fs::create_dir_all(&output).unwrap();
         fs::write(
