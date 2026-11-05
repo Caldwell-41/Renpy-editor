@@ -43,3 +43,39 @@ pub struct ImageButtonAppearances {
     pub disabled: Option<ControlImageReference>,
     pub selected_disabled: Option<ControlImageReference>,
 }
+
+/// A canvas draft identifies one existing node or one qualified insertion parent.
+/// Request validation must reject missing, competing or misplaced target fields.
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BarDraft {
+    pub node_start: Option<usize>,
+    pub parent_start: Option<usize>,
+    pub binding: IntegerBarBinding,
+    pub appearance: BarAppearance,
+    pub width: u32,
+    pub height: u32,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ImageButtonDraft {
+    pub node_start: Option<usize>,
+    pub parent_start: Option<usize>,
+    pub appearances: ImageButtonAppearances,
+    pub width: u32,
+    pub height: u32,
+}
+
+/// Sample state is rendering data, never an action or a persisted runtime flag.
+#[derive(Clone, Copy, Debug, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ControlButtonState {
+    #[default]
+    Normal,
+    Hover,
+    Selected,
+    SelectedHover,
+    Disabled,
+    SelectedDisabled,
+}

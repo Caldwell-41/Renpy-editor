@@ -1,5 +1,38 @@
 # Current outcome handover
 
+## Integer bars and image buttons in progress
+
+The selected outcome is local committed delivery of #51 and #52, reviewed and
+verified against their original criteria. Coordinator branch is
+`codex/51-52-integration` at shared checkpoint `062c429f`, based on accepted merge
+`ab19b786`. TypeScript checking and Rust formatting pass for that checkpoint.
+
+The core implementation agent owns both controls' Rust behavior on
+`t3/bar-imagebutton-core`; the editor implementation agent owns both controls' UI
+on `t3/screens-bars-imagebuttons`. Both have separate prepared worktrees and must
+follow the implement skill, commit their work and resolve independent Standards/Spec
+review findings. Shared types remain coordinator-owned. The frozen command/canvas
+types in `screen-controls.ts` and `screens/controls.rs` are the frontend contract;
+implementation conflicts must return to the coordinator before changing them.
+
+The editor opened the required separate design chat on
+`t3/design-bars-imagebuttons`. It owns only new lab/approval files and must send
+Kris's exact approved design/source/fingerprint/captures and approval evidence directly
+to the editor agent, copying the coordinator. Production UI cannot begin beforehand.
+Browser/desktop operation uses Terra 6.1 max. Core work may continue during design.
+
+[#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) owns the shared limits
+and [detailed evidence](../tasks/evidence/bars-and-image-buttons.md) records contracts,
+worker checkout identities and readiness. All SDK/helper/package/native counts are
+zero; no reservation is pending. Windows x64 and macOS ARM64 qualification remain
+required. The linked Mac project was identified; its actual checkout/toolchain must
+be checked before execution. The Windows SDK archive matches its published pin.
+
+The user separately authorized execution-state/limit updates to #51/#52 after the
+initial automatic review rejection. Those updates succeeded. Code and evidence are
+local-only; no push, PR or merge is selected. #54, aggregate groups and full Phase 3B
+acceptance remain separate. Preserve all earlier evidence and recovery below.
+
 ## PR 81 integration and ticket closeout
 
 Kris selected merging [PR #81](https://github.com/Caldwell-41/Renpy-editor/pull/81)

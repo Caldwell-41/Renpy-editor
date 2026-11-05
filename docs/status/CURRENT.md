@@ -1,5 +1,22 @@
 # Current status
 
+## Integer bars and image buttons selected
+
+Kris approved implementing [#51](https://github.com/Caldwell-41/Renpy-editor/issues/51)
+and [#52](https://github.com/Caldwell-41/Renpy-editor/issues/52) with separate-worktree
+core/editor agents and coordinator-owned integration/review. Local integration branch
+is `codex/51-52-integration`, based on accepted `ab19b786`; shared types and ownership
+checkpoint `062c429f` passes TypeScript checking and Rust formatting. Production
+behavior is not yet implemented or accepted.
+
+The editor agent opened the requested separate Sol 6.1 xhigh design chat. Production
+UI waits for exact design approval and a direct handoff to that implementer. Core
+work and coordinator qualification preparation continue independently. #51 owns
+combined capped-operation accounting; all counts are zero. Windows/macOS proof,
+combined review and all original criteria remain pending. [Evidence](../tasks/evidence/bars-and-image-buttons.md)
+records contracts and ownership. #54 and broader Phase 3B acceptance remain separate.
+Issue-state/limit updates to #51/#52 are authorized; code publication/PR/merge are not.
+
 ## Variable text, ordered actions and nested canvas accepted
 
 Kris selected [PR #81](https://github.com/Caldwell-41/Renpy-editor/pull/81)
