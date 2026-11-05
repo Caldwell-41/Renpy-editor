@@ -3,24 +3,24 @@
 ## Active #47/#50 draft delivery
 
 Kris selected completing [draft PR #81](https://github.com/Caldwell-41/Renpy-editor/pull/81)
-and checking both original tickets. The published correction `159a8c03` propagates
-Show/Hide target uncertainty and shared-component/action revisions. The approved
-A controls/reference and renderer remain unchanged. Both tickets remain open and
-unaccepted; CI stays deferred.
+and checking both original tickets. Published `159a8c03` corrects Show/Hide target
+uncertainty and shared-component/action revisions. The approved A controls,
+reference and renderer remain unchanged. Both tickets remain open/unaccepted.
 
 | Capability | Automated proof | Remaining acceptance |
 | --- | --- | --- |
 | Variable text and ordered actions | 376 frontend passes; actual UI/core/history/reopen journeys; Mac ordered play at `92b3a20` | Windows normal play and native/package/CI |
-| Target effects and revisions | Public red/green; four focused effects cases; final core 604/604 with disclosed exclusions | Windows/native/CI qualification |
-| Nested component canvas | Data-only plans, freshness and source checks; earlier Mac normal reference captures | Fresh helper comparison, both-target parity and measured residuals |
+| Target effects and revisions | Public red/green; four effects cases; final core 604/604 with disclosed exclusions | Windows/native/CI qualification |
+| Nested component canvas | Mac normal/helper captures at `392d049b` match every pixel at both aspects | Geometry comparison failed; recorder correction passes five offline gates, needs fresh engine proof; Windows remains unrun |
 
-The first renewed Mac assignment refused only its sandbox admission query, with
-zero starts. An unsandboxed read-only query confirms the desktop unlocked/awake.
-#47 owns the unused final-campaign reservation and exact next candidate. Windows
-still lacks supported isolated provisioning and useful Git failure diagnostics.
-[Continuation evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#pr-81-continuation-and-effect-correction-2026-11-05)
-owns checks, candidates and retained failures. Preserve unrelated work and unique
-receipts. Historical recovery below justifies this file's existing size exception.
+Mac residuals exposed a normal-recorder sizing-wrapper defect, now corrected
+without product changes. The original comparison remains failed. #47 owns the
+exhausted campaign ceiling; no further SDK starts or reservations are selected.
+Windows still lacks supported isolated provisioning and useful Git diagnostics.
+CI remains deferred. [Current comparison and diagnosis](../tasks/evidence/screen-actions-and-nested-canvas.md#campaign-3-comparison-and-recorder-correction-2026-11-05)
+owns exact candidates, residuals, cleanup and the required next decision. Preserve
+unrelated work and unique receipts. Historical recovery below retains this file's
+existing size exception.
 
 ## Help dialog and base Help canvas merged and accepted
 

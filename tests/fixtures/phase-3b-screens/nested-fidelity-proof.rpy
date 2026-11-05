@@ -8,14 +8,20 @@ init python:
             case = NESTED_CASE
             assert nested_caption == NESTED_SAMPLE
             screen = renpy.get_screen("nested_fidelity")
-            widgets, seen = {}, set()
+            widgets, seen, wrapped = {}, set(), set()
+            names = {row["widgetId"] for row in case["widgets"]}
             def discover(displayable):
                 if id(displayable) in seen:
                     return
                 seen.add(id(displayable))
-                name = getattr(displayable, "id", None)
-                if name in {row["widgetId"] for row in case["widgets"]}:
+                # Screen Language names the inner image, but sl2add's _main wrapper
+                # owns its authored sizing. Measure that actual SDK wrapper once.
+                main = getattr(displayable, "_main", None)
+                name = getattr(main if main is not None else displayable, "id", None)
+                if name in names and id(displayable) not in wrapped:
                     widgets.setdefault(name, []).append(displayable)
+                    if main is not None:
+                        wrapped.add(id(main))
                 for child in displayable.visit():
                     discover(child)
             discover(screen.child)

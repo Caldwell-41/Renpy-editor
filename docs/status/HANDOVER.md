@@ -5,51 +5,53 @@
 Continue in this thread on `codex/47-50-integration`,
 [draft PR #81](https://github.com/Caldwell-41/Renpy-editor/pull/81), targeting
 `codex/phase3b-screen-designer`. Kris selected completing the remaining work and
-reconciling #47/#50 before updating the draft. Both tickets stay open/unaccepted.
-CI remains deferred; no merge or closure is selected. Preserve the unrelated audit,
-committed guide changes, all worktrees and unique receipts.
+reconciling #47/#50, then updating the draft. Both tickets remain open/unaccepted.
+CI stays deferred; no merge or closure is selected. Preserve the unrelated audit,
+committed guide updates, all worktrees and unique receipts.
 
 Published implementation `159a8c036002939ee40b682b1ce3241a99c680aa` corrects the
-fresh Spec review's one P2 defect: Show/Hide callers must inherit custom target
-uncertainty and component/action revisions. Four public effects cases pass,
-including both actions, reopen, stale review and finite action cycles. Standards
-found zero actionable issues. The existing renderer and approved A controls are
-unchanged. Original approved source `7090a03`, fingerprint and ten captures remain
-pinned; never replace or rebase that reference.
+fresh Spec review's one P2 defect in Show/Hide target uncertainty and transitive
+definition/action revisions. Four public effects cases pass. Standards found zero
+actionable issues. The final routine suite passes 604 with 56 explicit ignores
+and three documented exclusions; all 663 names reconcile. Frontend 376/376,
+typechecking/build, three actual controller/core journeys and repository validation
+pass. Logs/hash-bound audit are in primary ignored
+`.toolchains/47-50/pr81-continuation/`. No routine test process remains pending.
 
-Pinned frontend 376/376, typechecking/build and three actual controller/core
-journeys pass at the corrected source. The broad pre-correction core run passes
-602 with 56 explicit ignores and three documented exclusions. The corrected final
-routine core run passes 604, with the same 56 ignores and three exclusions. All
-663 named cases reconcile, all three controller/core receipts confirm cleanup,
-and repository validation passes for 1,738 files. Logs and the hash-bound
-`checks-audit.json` are retained under primary ignored
-`.toolchains/47-50/pr81-continuation/`; no core test process remains pending. A failed sandbox core run was
-stopped/reaped; a frontend Python-3.9 failure was corrected by selecting pinned
-Python. Preserve those logs rather than count them as passes.
+The final selected Mac campaign completed at producing candidate
+`392d049bf2114b73a33fa3e384b70dac39e582c5`, tree
+`2a4d389fe0d1a64a793ce46fdf186196126a61ff`. Normal/helper captures and cleanup
+pass. Pixels match exactly at both aspects, but two of 29 geometry records differ
+at each aspect. The two repeated seal images measure helper 49x63 versus normal 80x40
+at identical positions. The exact comparison remains failed. Test checkout
+`t3-3a28c160` retains source/binary/capture/process/desktop artifacts and a 56-entry
+hash/size/mode-verified manifest. Its ignored handoff and the
+[current diagnosis](../tasks/evidence/screen-actions-and-nested-canvas.md#campaign-3-comparison-and-recorder-correction-2026-11-05)
+own exact identities, residuals and cleanup. Both prior desktop/setup failures remain.
 
-The first campaign-3 test delegate at `ff1924d` refused unreadable sandbox desktop
-admission with zero actual/uncertain starts and no profile/assertion owner. It is
-complete; its checkout `t3-1fe2d0f8` retains the hash-audited refusal. The established
-unsandboxed coordinator query positively verifies the desktop unlocked/awake.
-#47 alone owns retargeting the unused final-campaign eight-SDK/one-helper
-reservation to the corrected candidate in a fresh T3-isolated Terra Max checkout.
-No SDK start has charged campaign 3. Recheck admission through the established
-unsandboxed route, then run only affected nested normal/helper comparison at both
-aspects with zero tolerance, preserving residuals and cleanup. Stop at first
-execution failure. No package/native-editor/CI is assigned yet.
+Offline diagnosis against pinned SDK source proves that Screen Language assigns
+the image ID below its sizing Transform. The old normal recorder measured that
+inner image. The current qualification-only correction observes the actual wrapper
+and suppresses its inner duplicate. Full capture-entry red/green reproduces the
+80x40 error and verifies 49x63, including repeated IDs; all five offline gates pass.
+No product renderer/core/UI change occurred. No old geometry was normalized and
+no fresh engine pass is claimed for this correction.
+
+#47 alone owns cumulative operation accounting. The campaign ceiling is exhausted,
+all actual starts are resolved, and no reservation or worker/process is pending.
+A coherent fresh Mac normal/helper comparison needs eight SDK starts and an
+explicit extension of that ceiling before execution. Recheck desktop admission
+through the established unsandboxed route; retain the existing desktop/process
+owners and zero pixel/geometry tolerance. No package/native-editor/CI is assigned.
 
 Windows remains blocked on isolated T3 provisioning. The failed thread and its
-read-only diagnostic still lack the actual Git arguments/destination/exit/stderr.
+read-only diagnostic retain no actual Git arguments/destination/exit/stderr.
 No blind retry, shell-created child checkout or existing-worktree takeover is
-selected. Corrected source transfer remains authorized after a supported binding.
-Do not infer a pass from an unavailable capability.
-
-[Continuation evidence](../tasks/evidence/screen-actions-and-nested-canvas.md#pr-81-continuation-and-effect-correction-2026-11-05)
-owns detailed checks and the original-criterion gap map. Next, audit the fresh Mac producer, fix any in-scope findings offline, reconcile
-all eight criteria and update the draft PR with exact remaining blockers. No
-rendering tolerance is accepted. Windows/helper/native/package/CI proof remains
-pending. Older unique recovery below retains its existing size exception.
+selected. Corrected source transfer is authorized after a supported binding.
+Original approved A source `7090a03`, fingerprint and ten captures remain pinned;
+never replace or rebase that reference. Broader native/package/human and CI proof
+remain separate. Next action is the user's campaign-extension/CI decision after
+reviewing the updated draft. Older unique recovery retains its size exception.
 
 ## PR 79 merge and workspace closeout
 

@@ -5,6 +5,65 @@
 acceptance, authorization and operation accounting. This file retains implementation
 checkpoints and detailed verification. No criterion is accepted by this entry.
 
+## Campaign 3 comparison and recorder correction, 2026-11-05
+
+Mac producing candidate `392d049bf2114b73a33fa3e384b70dac39e582c5`, tree
+`2a4d389fe0d1a64a793ce46fdf186196126a61ff`, completed both normal and helper
+capture paths. The exact comparison failed on geometry. No tolerance was applied.
+
+| Aspect | Differing pixels / maximum channel delta | Geometry result |
+| --- | --- | --- |
+| 1280x720 | 0 / 0 | Two of 29 records differ |
+| 1024x768 | 0 / 0 | Two of 29 records differ |
+
+All four residuals are the two repeated `seal` images. Positions match. The helper
+reports 49x63; the normal recorder reports native image size 80x40. Both accepted
+source and the sample/viewport/assets/font matrix match. The exact executable is
+mode 0755, SHA256
+`90ca6f0165e1df40a0674f094bbe90c65f7900b3fe40d5093f66bc4f78fb2973`.
+The accepted JSON hash is
+`83e5d141233c590dbdf37cc35075227806e9c3545093b6383b022b99cbdce88c`.
+
+Test checkout `t3-3a28c160` retains ignored
+`.toolchains/qualification-47-50-corrected/handoff.md` and the artifact manifest,
+SHA256 `1600125b4ffae9faac2a35e691f13f4b608bc74e719dc269475f1d77b62fe360`.
+The coordinator verified all 56 artifact hashes, byte lengths and modes, plus
+normal/helper public receipt admission. Normal starts four SDK processes; helper
+starts three SDK CLI children and one helper. Every start is confirmed, with zero
+uncertain or unused slots. Both source-unchanged and cleanup receipts pass;
+observed process groups are absent, assertions are released and runtime profiles
+are removed. No package/native-editor/CI starts occurred. #47 owns the cumulative
+combined process count and exhausted campaign ceiling; no reservation remains.
+
+The coordinator replayed the original comparison offline and reproduced the same
+failure. Diagnosis checked three alternatives: measuring the inner image rather
+than its sizing wrapper, incorrect helper bounds, and mismatched repeated-instance
+pairing. The pinned Ren'Py 8.5.3 source establishes the recorder defect:
+`renpy/sl2/sldisplayables.py::sl2add` constructs the sizing Transform and sets its
+`_main` to the image. `renpy/sl2/slast.py::SLDisplayable.execute` assigns the widget
+ID to that inner main displayable. The old normal observer searched only directly
+named displayables, so it measured native image dimensions below the Transform.
+Matching positions/order and the other 27 geometry rows rule out instance pairing.
+
+The normal fixture now observes the actual SDK sizing wrapper and suppresses its
+inner duplicate. It derives no geometry from helper output or expected dimensions.
+A controlled test invokes the complete trusted capture entry point with the SDK's
+wrapper/main structure and repeated image IDs. The original observer reports two
+80x40 boxes and fails; the correction reports two 49x63 boxes and passes. All five
+offline gates pass, including unchanged single-pixel/geometry/order/cleanup refusal.
+`geometry-capture-red.log`, `geometry-capture-green.log` and
+`geometry-original-replay/` are retained under primary
+`.toolchains/47-50/pr81-continuation/`.
+
+This correction changes qualification code only. Production renderer/core/UI and
+the approved design/reference remain unchanged. The retained 604-core/376-frontend,
+controller/core and build evidence keeps its producing implementation and
+scope. The old comparison remains failed; no recorded geometry was normalized and
+no fresh engine geometry pass is claimed. A fresh coherent normal/helper run needs
+eight starts and an explicit campaign-ceiling extension before execution. Windows
+runtime/nested qualification, native/package proof and deferred CI also remain
+pending. Both original tickets stay open and unaccepted; the draft stays draft.
+
 ## PR 81 continuation and effect correction, 2026-11-05
 
 Kris selected completing the remaining #47/#50 work and updating draft PR #81.
