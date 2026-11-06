@@ -1,21 +1,24 @@
 # Story authoring experiments
 
-[Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82) compares three
-unapproved Story workspaces. Kris asked for a large WYSIWYG game window with room
-for future character dragging, alongside low-friction writing and beat creation.
-The current set refines Cue sheet and Shot reel and replaces the rejected third
-layout with Stage tracks. Production Story is unchanged.
+[Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82) owns the selected
+fourth combined Story mock. Cue sheet, Shot reel and Stage tracks remain unapproved
+reference workspaces. Production Story is unchanged.
 
-Kris has since approved independent refinement of all three, with one Opus 5.5 lead
-at high per mock and each lead's own Opus/Sol council at xhigh. The current target
-is 9.5/10 from both reviewers for each implemented mock. Main, Writing focus,
-properties, dialogs and secondary states all count. The requested Rounds 3 and 4
-and later extra Round 5 are complete, each with a separate Opus/Sol xhigh council
-per mock. None reached 9.5 from both reviewers. The parent applied and verified the
-remaining bounded fixes after Round 5; those fixes have no new council score. All
-three mocks await Kris's choice, and none is approved for product implementation.
+The earlier three-mock study used independent Opus/Sol councils. Its requested
+Rounds 3 and 4 and later Round 5 are complete; a subsequent score-only rescore of
+fixed source `bbd5a4dd` is recorded in chat. Those grades do not qualify the new
+fourth mock. Historical evidence remains available locally.
 
-## Current comparison
+## Selected next iteration
+
+Kris selected a fourth combined mock, owned by the current section of
+[Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82). It keeps Stage
+tracks' game window/sidebar and switches its bottom panel between Tracks and Reel.
+The new Astra high chat owns that iteration, its grill-me clarification and the
+three-member council with the revised rubric. The earlier three mocks remain
+unapproved references; their completed comparison below is historical.
+
+## Three-mock reference
 
 Claude Opus 5.5 at high reasoning designed this revision after inspecting the
 existing mocks, Story and 3C/3D requirements, and seven selected reference images.

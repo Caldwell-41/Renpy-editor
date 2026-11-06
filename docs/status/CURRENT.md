@@ -1,23 +1,26 @@
 # Current status
 
-## Story revamp comparison ready
+## Combined fourth Story mock selected
 
-[Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82) owns Cue sheet,
-Shot reel and Stage tracks on local `codex/story-screen-prototypes`. The requested
-Rounds 3 and 4 and the later extra Round 5 are complete. Every mock had its own
-Opus 5.5/GPT-6.1 Sol xhigh council in each round. All eighteen terminal reviews
-are retained. None reached 9.5 from both reviewers. Actual scores are reported to
-Kris; the verified fixes after Round 5 have no new council score.
+Kris authorised a fourth Design Lab mock in
+[Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82). Its current
+selected section owns the requirements, revised weighted rubric and five-round
+cap. The design combines Stage tracks' stage/sidebar with a Tracks/Reel bottom
+switch. Conditions, Writing focus, Add a beat, copy and interaction quality are
+priorities. The existing three mocks remain references.
 
-Current evidence is ignored `council-v3/round-5-fixes/`. The final corrections
-cover creation from enlargement, Choice scroll/legibility, focus fallback, blank
-Else-if tests, command ranking, safe stage changes and control/keyboard clarity.
-The manifest owns checks, source fingerprints, screenshots and diagnostic limits.
+A new GPT-6 Astra high chat owns implementation on isolated
+`codex/story-combined-fourth-mock`, based on local `codex/story-screen-prototypes`
+(prototype code `bbd5a4dd`). Its councils have Opus 5.5 xhigh, GPT-6.1 Sol xhigh
+and a separate Astra high reviewer. All three aim for 9.5 on actual artifacts.
+Use grill-me for genuine further questions. The source chat owns this handoff;
+the new chat owns its branch, checks and review iterations. No push, PR, merge,
+production promotion or future engine implementation is selected.
 
-[Design notes](../design/story-revamp/README.md) own scope. The three mocks await
-Kris's choice. No design is promoted; production UI and future engine implementation
-remain outside scope. No PR, push or successor implementation is selected. Earlier
-acceptance and protected recovery remain below.
+The three-mock comparison and score-only rescore are complete. Current reference
+code is `app/design-lab/screens/story-revamp/`; images and browser evidence remain
+under ignored `council-v3/round-5-fixes/` in the primary checkout. Keep the existing
+LAN review available. Earlier acceptance and protected recovery remain below.
 
 ## Variable text, ordered actions and nested canvas accepted
 

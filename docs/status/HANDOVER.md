@@ -1,6 +1,44 @@
 # Current outcome handover
 
-## Story revamp comparison handoff
+## Combined fourth Story mock handoff
+
+Kris authorised building the combined fourth mock. The current selected section of
+[Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82) owns full scope,
+acceptance, the revised weights and the new maximum of five council rounds.
+Historical three-mock instructions below are evidence, not current selection.
+
+The new top-level chat is GPT-6 Astra at high. It owns implementation, local
+checkpoints, verification and councils on isolated
+`codex/story-combined-fourth-mock`. Its base is local `codex/story-screen-prototypes`
+with prototype code `bbd5a4dd` plus this handoff. The integration destination is
+the Story prototype branch after review; integration/publication remains unselected.
+Keep the existing three mocks and unrelated edits intact. The new chat owns its
+worktree; council members are read-only. No production/native/SDK work is selected.
+
+The council skill has Kris's explicit third-member addition for this work: Opus
+5.5 xhigh, GPT-6.1 Sol xhigh and an independent Astra high reviewer. Build the first
+mock before Round 1; stop at success or five rounds. Scores belong to actual reviewed
+candidates. The lead uses grill-me, which invokes grilling, for unresolved questions;
+the already approved requirements in #82 are settled.
+
+Current source and design notes are `app/design-lab/screens/story-revamp/` and
+`docs/design/story-revamp/README.md`. The primary checkout holds ignored reference
+images and reports in `.toolchains/story-revamp/council-v3/round-5-fixes/`, plus the
+review ZIP and final HTMLs. Those ignored files are not copied by worktree creation;
+read them from the primary checkout. Original app-reference screenshots remain outside Git; the new chat prompt
+identifies their temporary host directory.
+
+The three standalone mocks are currently served on LAN port 5175 from the primary
+checkout's ignored `.toolchains/story-lan/`. Preserve that server
+and its three files. Deliver a LAN-accessible review for the fourth mock too.
+Follow current browser-launch guidance and keep evidence/builds isolated to the new
+worktree. Its next action is to inspect #82 and the current stage/sidebar/reel,
+resolve genuine design questions with grill-me, then build the initial mock.
+
+## Previous three-mock comparison
+
+Historical closeout state follows; the fourth-mock assignment above supersedes
+its statements that no successor or council round was selected.
 
 Kris's requested Rounds 3 and 4 and later extra Round 5 are complete. Each mock had
 its own Opus 5.5/GPT-6.1 Sol xhigh council in each round. All eighteen terminal
