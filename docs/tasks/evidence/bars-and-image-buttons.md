@@ -919,3 +919,16 @@ exit 0 and cleanup complete. The full 378-test pass retains the original `87586e
 basis. Exactly three Standards findings are corrected and self-verified, with no
 independent clearance inferred. Original Spec/Terra reviews remain pending at
 `87586e7c`; their pinned export artifacts and approved source remain unchanged.
+
+The original Spec review completed at `87586e7c` with three P2 findings: Normal
+replacement dimensions later reverting to the old catalog ratio; pending additions
+becoming unrecoverable when their screen disappears; and changed-image Escape
+retaining the reference picker/focus. The frontend owner accepted all three, notes
+that the last overlaps its existing cleanup correction, and owns explicit focused
+regressions and fixes. Original Terra review at `87586e7c` also identified three
+material inspector differences: hidden invalid-field feedback, missing active-state
+visual/ARIA indication, and less dense navigation/row spacing than approved A2.
+The owner will correct these against the pinned reference, then start exactly one
+new read-only Terra 6.1 max visual recheck on committed fixes. No Standards/Spec
+redo or council is selected. Counts stay three Standards plus three Spec findings;
+corrections remain self-verified unless actual independent evidence says otherwise.

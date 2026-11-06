@@ -20,7 +20,13 @@ actual-core mode first red then green. Status is corrected/self-verified, not an
 independent re-review clearance. The full eight-stage actual UI/core journey also
 passes at `c3755e8c`, with driver exit 0 and cleanup complete; 57 affected tests and
 build/typecheck pass there. The full 378-test pass retains its `87586e7c` basis.
-Spec and visual results remain pending at their original `87586e7c` candidate.
+Spec completed at `87586e7c` with three P2s: replacement aspect ratio reverting to
+the old catalog, unrecoverable additions after screen removal, and changed-image
+Escape retaining picker/focus state. Visual review at the same source found hidden
+error feedback, absent active-state row indication and spacing differences from A2.
+The frontend owner is correcting these and owns one subsequent Terra 6.1 max
+visual recheck on committed fixes. Standards/Spec counts remain three each, with
+self-verified correction status and no independent clearance inferred.
 Await its final corrected receipt before integrating its assigned files.
 
 The core implementation agent completed both controls' Rust behavior on

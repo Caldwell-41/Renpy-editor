@@ -12,7 +12,7 @@ awaiting its remaining reviews and integration.
 | Capability | Implementation and automated proof | Remaining acceptance |
 | --- | --- | --- |
 | Integer bars and six-state image buttons | Core committed; 13 focused control/export cases and four final bar cases pass on their recorded worker candidates. Parent admits fifteen source files and twelve inert plans. | Actual frontend/core workflow, runtime, helper and native/package proof; final combined review. |
-| Editor controls | A2 approved at source `37d29ca1`; frontend fixes committed at `c3755e8c`. All three Standards findings corrected and self-verified; current actual UI/core journey passes. Full 378-test pass retains its `87586e7c` basis. | Spec/visual work, reviewed integration and remaining platform gates. |
+| Editor controls | A2 approved at source `37d29ca1`; frontend fixes committed at `c3755e8c`. All three Standards findings corrected and self-verified; current actual UI/core journey passes. Full 378-test pass retains its `87586e7c` basis. | Three Spec findings and three visual differences under correction; one subsequent visual recheck, integration and platform gates. |
 | Broad core selection | Original run failed. Seven TLS tests pass after correcting process PATH. | Three Windows symlink checks remain failed/unqualified with OS1314. |
 | Windows control runtime | Four pinned-SDK cases pass at observer `7d199aa9`, using accepted-source producer `fe78025f`. Bar limits/step, six exact appearance comparisons and one action sequence pass at both aspects. | Native editor preview, helper rendering, Mac proof and combined acceptance. |
 
