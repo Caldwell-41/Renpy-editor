@@ -1,6 +1,6 @@
 # Current status
 
-## Story revamp council refinement in progress
+## Story revamp paused for screenshot review
 
 [Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82) owns Cue sheet,
 Shot reel and Stage tracks on `codex/story-screen-prototypes`. Kris approved further
@@ -9,12 +9,10 @@ own Opus/Sol council. The target is 9.5/10 from both reviewers for each implemen
 mock, including Writing focus, dialogs and secondary states. The large WYSIWYG
 stage and three distinct authoring methods remain required.
 
-All three leads completed their initial councils. The parent implemented their
-bounded changes and fixed the browser findings. The 72-render matrix, full
-interaction journey and final active-writing checks pass. Fresh council scores
-remain pending. The parent
-owns code/shared controls and integration; leads own separate ignored reports.
-Detailed scope remains in
+All three leads completed Round 2. Their findings are fixed; the updated 72-render
+matrix, full interaction journey and 21 focused checks pass. Kris requested a pause
+here to review a screenshot of each mock before a final council. No delegated work
+remains active, and these fixes have no new council scores. Detailed scope remains in
 [design notes](../design/story-revamp/README.md). No design is promoted, and production
 UI/future engine implementation remain outside scope. Local only; no PR or push.
 Earlier acceptance and protected recovery records remain below.

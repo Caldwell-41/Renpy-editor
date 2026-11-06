@@ -39,11 +39,12 @@ export function makeSample(state: string) {
   return { scenes, beat, newId: () => `sample-${++sequence}` };
 }
 export function label(kind: Kind) { return kind === 'customCode' ? 'Protected source' : kinds.find(k => k[0] === kind)![1]; }
+export function count(n: number, word: string) { return `${n} ${word}${n === 1 ? '' : word === 'branch' ? 'es' : 's'}`; }
 export function brief(b: Beat, scenes: Scene[] = []): string {
   if (b.kind === 'dialogue') return `${b.speaker}: ${b.text || 'Write dialogue…'}`;
   if (b.kind === 'narration') return b.text || 'Write narration…';
   if (b.kind === 'condition') return `If ${b.branches[0]?.condition ?? 'has_ticket is true'}`;
-  if (b.kind === 'choice') return `${b.options.length} choices`;
+  if (b.kind === 'choice') return count(b.options.length, 'option');
   if (b.kind === 'call') return `${scenes.find(s => s.id === b.target)?.name ?? b.target} · returns to the next beat`;
   if (b.kind === 'jump') return `${scenes.find(s => s.id === b.target)?.name ?? b.target} · does not return`;
   if (b.kind === 'return') return 'Return to caller / end story';
@@ -82,14 +83,19 @@ export function ancestry(scene: Scene, id: string, body = scene.beats, parents: 
   return undefined;
 }
 export function beatNumber(scene: Scene, id: string) {
-  const parents = ancestry(scene, id) ?? [];
-  const values = [...parents.map(p => locate(scene, p.beat.id)!.index + 1), (locate(scene, id)?.index ?? 0) + 1];
+  function find(body: Beat[], prefix: number[], offset = 0): number[] | undefined {
+    for (const [index, beat] of body.entries()) {
+      const path = [...prefix, offset + index + 1]; if (beat.id === id) return path;
+      let branchOffset = 0;
+      for (const branch of beat.branches) { const result = find(branch.beats, path, branchOffset); if (result) return result; branchOffset += branch.beats.length; }
+    }
+  }
+  const values = find(scene.beats, []) ?? [1];
   return values.map((n, i) => i === 0 ? String(n).padStart(2, '0') : String(n)).join('.');
 }
 export function beatName(scene: Scene, id: string) {
   const beat = flatten(scene.beats).find(b => b.id === id);
-  const parents = ancestry(scene, id) ?? [];
-  return `${beatNumber(scene, id)} ${beat?.kind === 'dialogue' ? beat.speaker : beat ? label(beat.kind) : 'Beat'}${parents.length ? ' in ' + parents.map(p => p.branch.name).join(' / ') : ''}`;
+  return `${beatNumber(scene, id)} ${beat?.kind === 'dialogue' ? `${beat.speaker}'s line` : beat ? label(beat.kind) : 'Beat'}`;
 }
 export interface Column { beat: Beat; body: Beat[]; trail: string[]; index: number; depth: number }
 export function columns(scene: Scene, branches: Map<string, string>, body = scene.beats, trail = [scene.name], depth = 0): Column[] {

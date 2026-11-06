@@ -1,58 +1,46 @@
 # Current outcome handover
 
-## Story revamp council refinement
+## Story revamp paused for screenshot review
 
-Kris approved refinement of all three mocks under
-[issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82), raising the target
-to 9.5/10 from both council members for each implemented design. Each mock has a
-new Opus 5.5 lead at high; each lead must call its own read-only Opus 5.5 and
-GPT-6.1 Sol council at xhigh. Preserve Cue sheet, Shot reel and Stage tracks as
-separate concepts, with a large WYSIWYG stage and full Writing focus parity.
-Review all Story-owned dialogs and secondary surfaces, not just the main screen.
+Kris asked to finish the Round 2 fixes, present a screenshot of each mock, then
+pause before the final council. Wait after that handoff. Do not start another
+council or promote a design until Kris resumes. No delegate remains active.
 
-Work remains on `codex/story-screen-prototypes`, baseline `9f33c4d3`. Source is under
-`app/design-lab/screens/story-revamp/`, with the same three variant IDs. The parent
-owns all tracked code, shared presentation, tests, docs/issue and integration.
-Leads own only ignored reports under `.toolchains/story-revamp/council-v3/<variant>/`;
-reviewers are read-only. All initial lead councils completed; reports are in each
-variant's `round-1.md`. The parent implemented one coherent revision. Terra captured
-52 baseline and 92 revised images under `council-v3/baseline/` and `revised/`.
-The criteria are in `council-v3/criteria.md`; manifests record capture limits.
+[Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82) owns Cue sheet,
+Shot reel and Stage tracks on `codex/story-screen-prototypes`. The prior scored
+candidate is `3a802e0a`. Each mock had an independent Opus 5.5 high lead with its
+own Opus/Sol xhigh council. All three Round 2 reports are complete under ignored
+`.toolchains/story-revamp/council-v3/<variant>/round-2.md`; none met the 9.5 target.
+Shot reel's first launch failed with `parent_not_active`; a fresh recovery lead
+completed it. The parent integrated the remaining findings. These changes have
+not received final council scores.
 
-The fresh Terra pass under `council-v3/candidate/` passes the 72-render matrix and
-full tracked interaction journey. Parent closure under `council-v3/closure/` fixes
-the remaining text-field clipping and a keyboard Next dialogue focus regression.
-It passes the tracked journey and active-writing checks for all three variants at
-wide and compact sizes. Original failures remain preserved. Fresh actual-artifact
-council scores are next; do not claim 9.5 from the initial planning reviews.
+Current source is `app/design-lab/screens/story-revamp/`. The toolbar follows the
+active row, disclosures/history/option removal retain focus, Cue sheet is denser,
+branch outline numbers are unique, and the picker announces its selected type and
+replacement warning. Shot reel opens Writing focus at the editor, navigates to the
+correct parent branch, and uses ordinary current-beat buttons. Stage tracks names
+non-text beats in laptop focus, removes its empty header band and fixes nested
+bands and text truncation. Options, counts and delete targets use consistent copy.
 
-Implemented changes include inline Cue sheet logic editors, explicit insertion
-and replacement targets, labelled/removable choices, scene Back navigation,
-meaningful history messages, persistent dialog actions and focus restoration.
-Shot reel has keyboard navigation and one compact/focused scroller. Stage tracks
-shows all six rows, uses source outline numbers and shares one illustrative cue
-calculation with the stage. Original sample character variants make appearance
-and actor controls visible. No runtime state evaluation or future tools were added.
+Current evidence is `council-v3/round-2-fixes/`: 72 renders, the full tracked journey
+and 21 focused checks pass. Its manifest records source fingerprints, captures and
+limits. The first focused attempt used an invalid laptop URL and checked scheduled
+focus before its animation frame; that original report is retained separately.
+Earlier `baseline/`, `revised/`, `candidate/` and `closure/` evidence preserves the
+original browser findings. Do not reuse earlier scores for the changed source.
 
-The accepted rubric is stage/design 25%, authoring ease 25%, text/control clarity
-20%, complete Story experience 15%, feedback/accessibility 15%. Scores must apply
-to actual artifacts, not hypothetical fixes. The parent will implement agreed
-bounded changes, then verify and request fresh council review. A broken core
-journey, hidden stage, lost draft or destructive ambiguity blocks readiness.
-
-The local Design Lab is intentionally running on port 5174. Baseline checks and
-geometry are in the [design notes](../design/story-revamp/README.md). Preserve earlier
-reports/failures and the `revision-1/` and `revision-2/` review archives. All design
-approval pointers remain null. No production, native, SDK, provider or future
-engine implementation is selected; edits stay in browser memory. No PR or push
+The [design notes](../design/story-revamp/README.md) own scope and limits. All
+approval pointers remain null. Production, native, SDK, provider and future engine
+implementation remain outside scope. Edits stay in browser memory. No PR or push
 is selected. Preserve unrelated browser maintenance, the Phase 1 audit and all
 older recovery below, including their existing size exception.
 
-Continue the active refinement in this thread. Use the returned lead reports to
-make one coherent prototype revision, qualify main/focus/dialog behavior, obtain
-fresh scores and present all three to Kris. Do not stop at a design plan or claim
-the 9.5 target before both reviewers score each implemented mock. Browser work
-belongs to Terra at max; launches require scoped permission outside the Mac sandbox.
+Kris's replacement AGENTS instructions removed the former browser-delegation rule.
+Managed snapshots timed out twice; parent checks used scoped launches outside the
+macOS sandbox and closed only check-owned browsers. Keep the hosted Design Lab
+running on port 5174 for review. Fresh screenshots and standalone exports are in
+ignored `.toolchains/story-revamp/`; wait for Kris after presenting them.
 
 ## PR 81 integration and ticket closeout
 

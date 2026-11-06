@@ -9,9 +9,9 @@ layout with Stage tracks. Production Story is unchanged.
 Kris has since approved independent refinement of all three, with one Opus 5.5 lead
 at high per mock and each lead's own Opus/Sol council at xhigh. The current target
 is 9.5/10 from both reviewers for each implemented mock. Main, Writing focus,
-properties, dialogs and secondary states all count. All initial councils finished;
-their bounded changes are implemented. Browser verification and fresh scoring are
-in progress. The historical evidence below does not qualify the current changes.
+properties, dialogs and secondary states all count. All Round 2 councils finished;
+their remaining fixes are implemented and verified. Kris requested screenshots and
+a pause here before the final council. These fixes have no new council scores.
 
 ## Current comparison
 
@@ -104,8 +104,14 @@ Its measured stages meet all three size requirements, with Stage tracks measurin
 `closure/` fixes remaining text-field clipping and keyboard new-line focus. Its
 tracked journey and active-writing checks pass for all variants at wide and compact
 sizes. Fresh main/focus screenshots accompany both passes.
-Do not treat diagnostic copies with altered assertions as passing the original
-journey. Fresh council scores and final selection remain pending.
+The later `round-2-fixes/` evidence qualifies the current revision: 72 renders, the
+full tracked journey and 21 focused checks pass. It contains visual/focused captures
+at desktop, laptop and compact sizes, plus changed branch, picker and keyboard
+flows. The first focused attempt used an invalid laptop URL and checked scheduled
+focus before its animation frame; those failures are retained separately. All
+three Round 2 reports remain beside the evidence. No final council ran after these
+fixes. Do not treat diagnostic copies with altered assertions as passing an
+original check. Kris has paused the work for screenshot review.
 
 ### Historical baseline
 

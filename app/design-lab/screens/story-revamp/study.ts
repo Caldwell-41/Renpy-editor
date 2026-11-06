@@ -1,7 +1,7 @@
 import type { LabContext } from '../../contracts.ts';
 import { action as makeAction, element as el, labelled, labPage } from '../../page.ts';
 import { prototypeSwitcher } from '../../prototype-switcher.ts';
-import { kinds, label, brief as modelBrief, locate, ancestry, flatten, beatNumber, beatName, columns, illustrate, makeSample, type Beat, type Branch, type Kind, type Scene, type Illustration } from './model.ts';
+import { kinds, label, count, brief as modelBrief, locate, ancestry, flatten, beatNumber, beatName, columns, illustrate, makeSample, type Beat, type Branch, type Kind, type Scene, type Illustration } from './model.ts';
 import platform from './platform.svg';
 import mara from './mara.svg';
 import maraConcerned from './mara-concerned.svg';
@@ -28,6 +28,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   type Step = { data: string; name: string };
   const undo: Step[] = [], redo: Step[] = [];
   let changes = 0, elementId = 0, focusRequest = 0;
+  let renderedSelection = '', renderedFocused = focused, chromeKey = '';
   const mod = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl';
   const frame = labPage(host, context, { screen: 'story', title: 'Story', subtitle: '', dirty: hasChanges });
   frame.shell.classList.add('sr-shell'); frame.content.classList.add('sr-content'); frame.heading.hidden = true;
@@ -42,10 +43,11 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   function action(text: string, fn: () => void, primary = false, key = text) {
     const button = makeAction(text, fn, primary); button.title = text; button.ariaLabel = text; button.dataset.action = key; return button;
   }
+  function nameControl(node: HTMLElement, text: string) { node.textContent = text; node.ariaLabel = text; node.title = text; }
   function status(message: string) {
     frame.content.dataset.edits = hasChanges() ? String(changes || 1) : '0'; frame.status.textContent = message;
-    if (undoButton) { undoButton.disabled = !undo.length; undoButton.title = undo.length ? `Undo: ${undo.at(-1)!.name}` : 'Nothing to undo'; }
-    if (redoButton) { redoButton.disabled = !redo.length; redoButton.title = redo.length ? `Redo: ${redo.at(-1)!.name}` : 'Nothing to redo'; }
+    if (undoButton) { undoButton.disabled = !undo.length; undoButton.ariaLabel = undoButton.title = undo.length ? `Undo: ${undo.at(-1)!.name}` : 'Nothing to undo'; }
+    if (redoButton) { redoButton.disabled = !redo.length; redoButton.ariaLabel = redoButton.title = redo.length ? `Redo: ${redo.at(-1)!.name}` : 'Nothing to redo'; }
   }
   function remember(title: string, data = snapshot()) { undo.push({ data, name: title }); redo.length = 0; changes++; }
   function change(fn: () => void, title: string) {
@@ -54,11 +56,12 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     remember(title, before); draw(); status(title);
   }
   function history(from: Step[], to: Step[], verb: string) {
+    const hadFocus = host.contains(document.activeElement);
     const previous = from.pop(); if (!previous) return;
     to.push({ data: snapshot(), name: previous.name });
     const data = JSON.parse(previous.data) as { scenes: Scene[]; sceneId: string; selected: string };
     scenes = data.scenes; sceneId = data.sceneId; selected = data.selected; stageObject = ''; manual = '';
-    draw(); status(`${verb}: ${previous.name}`);
+    draw(); status(`${verb}: ${previous.name}`); if (hadFocus && document.activeElement === document.body) focusSelected();
   }
   function syncSelection() {
     if (caller && !scenes.some(s => s.id === caller!.scene)) caller = undefined;
@@ -100,11 +103,12 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const anchor = body[index], previous = body[index - 1];
     return `Adds to ${trail.join(' › ')}${anchor ? `, before ${name(anchor.id)}` : previous ? `, after ${name(previous.id)}` : ', as its first beat'}`;
   }
-  type Bookmark = { owner?: string; action?: string; label?: string; start?: number | null; end?: number | null };
+  type Bookmark = { owner?: string; action?: string; label?: string; choice?: number; start?: number | null; end?: number | null };
   function bookmark(node = document.activeElement): Bookmark | undefined {
     if (!(node instanceof HTMLElement) || !host.contains(node)) return;
     const owner = node.closest<HTMLElement>('[data-beat],[data-editor-for],[data-reel-beat],[data-track-beat]');
-    return { owner: owner?.dataset.beat ?? owner?.dataset.editorFor ?? owner?.dataset.reelBeat ?? owner?.dataset.trackBeat, action: node.dataset.action, label: node.getAttribute('aria-label') ?? undefined, start: node instanceof HTMLTextAreaElement || node instanceof HTMLInputElement ? node.selectionStart : undefined, end: node instanceof HTMLTextAreaElement || node instanceof HTMLInputElement ? node.selectionEnd : undefined };
+    const option = node.closest<HTMLElement>('[data-choice-index]');
+    return { owner: owner?.dataset.beat ?? owner?.dataset.editorFor ?? owner?.dataset.reelBeat ?? owner?.dataset.trackBeat, action: node.dataset.action, label: node.getAttribute('aria-label') ?? undefined, choice: option ? Number(option.dataset.choiceIndex) : undefined, start: node instanceof HTMLTextAreaElement || node instanceof HTMLInputElement ? node.selectionStart : undefined, end: node instanceof HTMLTextAreaElement || node instanceof HTMLInputElement ? node.selectionEnd : undefined };
   }
   function restore(mark?: Bookmark) {
     if (!mark) return;
@@ -112,16 +116,27 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const root = owner || host;
     const query = mark.action ? `[data-action="${CSS.escape(mark.action)}"]` : mark.label ? `[aria-label="${CSS.escape(mark.label)}"]` : '';
     let node = query ? root.querySelector<HTMLElement>(query) : undefined;
+    const usable = (item?: HTMLElement | null) => item?.getClientRects().length && !item.matches(':disabled');
+    if (!usable(node)) node = undefined;
+    if (!node && mark.choice != null) { const options = [...root.querySelectorAll<HTMLElement>('[data-choice-index]')]; node = options[Math.min(mark.choice, options.length - 1)]?.querySelector<HTMLElement>('input'); }
+    if (!node && ['undo', 'redo'].includes(mark.action ?? '')) node = host.querySelector<HTMLElement>(`[data-action="${mark.action === 'undo' ? 'redo' : 'undo'}"]:not(:disabled)`) ?? host.querySelector<HTMLElement>('[data-action="add-beat"]') ?? undefined;
     if (!node && owner instanceof HTMLButtonElement) node = owner;
-    if (!node?.getClientRects().length) node = owner?.querySelector<HTMLElement>('.sr-number,summary,button') ?? undefined;
+    if (!usable(node)) node = owner?.querySelector<HTMLElement>('input:not(:disabled),textarea:not(:disabled),select:not(:disabled),.sr-number,summary,button:not(:disabled)') ?? undefined;
     if (!node && query && !mark.owner) node = host.querySelector<HTMLElement>(query) ?? undefined;
-    if (node?.getClientRects().length) { node.focus({ preventScroll: true }); if ((node instanceof HTMLTextAreaElement || node instanceof HTMLInputElement) && mark.start != null && mark.end != null && ['textarea', 'input'].includes(node.tagName.toLowerCase())) { try { node.setSelectionRange(mark.start, mark.end); } catch { /* Non-text input. */ } } }
+    if (usable(node)) { node!.focus({ preventScroll: true }); if ((node instanceof HTMLTextAreaElement || node instanceof HTMLInputElement) && mark.start != null && mark.end != null && ['textarea', 'input'].includes(node.tagName.toLowerCase())) { try { node.setSelectionRange(mark.start, mark.end); } catch { /* Non-text input. */ } } }
+  }
+  function activateBeat(id: string) {
+    if (selected === id) return;
+    selected = id; stageObject = ''; renderedSelection = id;
+    for (const row of host.querySelectorAll<HTMLElement>('[data-beat]')) row.dataset.selected = String(row.dataset.beat === id);
+    if (variant === 'cue-sheet') host.querySelector('.sr-cue-stage>.sr-inspector')?.replaceWith(inspector(true));
+    refresh(); for (const text of host.querySelectorAll<HTMLTextAreaElement>('.sr-prose')) fit(text);
   }
   function bind(control: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement, update: (value: string) => void) {
     let before = snapshot(), recorded = false;
     control.onfocus = () => {
       const owner = control.closest<HTMLElement>('[data-editor-for],[data-beat]'); const id = owner?.dataset.editorFor ?? owner?.dataset.beat;
-      if (id && selected !== id) { selected = id; stageObject = ''; for (const row of host.querySelectorAll<HTMLElement>('[data-beat]')) row.dataset.selected = String(row.dataset.beat === id); if (variant === 'cue-sheet') host.querySelector('.sr-cue-stage>.sr-inspector')?.replaceWith(inspector(true)); refresh(); }
+      if (id) activateBeat(id);
       before = snapshot(); recorded = false;
     };
     control.addEventListener('keydown', eventValue => {
@@ -141,14 +156,11 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     for (const v of [...new Set([value, ...values])]) control.append(new Option(v, v));
     control.value = value; bind(control, update); return control;
   }
-  function fit(area: HTMLTextAreaElement) { area.style.height = 'auto'; area.style.height = `${Math.max(48, area.scrollHeight)}px`; }
+  function fit(area: HTMLTextAreaElement) { const row = area.closest<HTMLElement>('[data-beat]'); const active = !row || row.dataset.selected === 'true'; area.style.height = 'auto'; area.style.height = `${Math.max(active ? 52 : 24, area.scrollHeight)}px`; }
   function prose(b: Beat) {
-    const text = el('textarea', 'sr-prose'); text.value = b.text; text.rows = 2;
+    const text = el('textarea', 'sr-prose'); text.value = b.text; text.rows = 1;
     text.placeholder = b.kind === 'dialogue' ? `Type ${b.speaker}'s line` : 'Type narration'; text.ariaLabel = `${label(b.kind)} text`; text.dataset.beatText = b.id;
     bind(text, value => b.text = value);
-    text.addEventListener('focus', () => {
-      if (selected !== b.id) { selected = b.id; stageObject = ''; for (const row of host.querySelectorAll<HTMLElement>('[data-beat]')) row.dataset.selected = String(row.dataset.beat === selected); host.querySelector('.sr-cue-stage>.sr-inspector')?.replaceWith(inspector(true)); refresh(); }
-    });
     text.addEventListener('keydown', event => {
       if (event.isComposing) return;
       if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'Enter') { event.preventDefault(); const owner = locate(scene(), b.id)!; insert('dialogue', owner.body, owner.trail, owner.index + 1, nextSpeaker(b.id)); }
@@ -159,6 +171,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const field = el('select'); field.ariaLabel = title; field.dataset.action = 'line-speaker';
     for (const speaker of ['Mara', 'Eli', 'Narration (no speaker)']) field.append(new Option(speaker, speaker));
     field.value = b.kind === 'narration' ? 'Narration (no speaker)' : b.speaker;
+    field.onfocus = () => activateBeat(b.id);
     field.onchange = () => change(() => { b.kind = field.value === 'Narration (no speaker)' ? 'narration' : 'dialogue'; if (b.kind === 'dialogue') b.speaker = field.value; }, `Change ${name(b.id)} to ${field.value}`); return field;
   }
   function closeMenus() { for (const menu of host.querySelectorAll<HTMLDetailsElement>('.sr-more[open],.sr-row-menu[open]')) menu.open = false; }
@@ -191,23 +204,24 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     draw(); status(`Opened ${scene().name}`);
   }
   function createScene(done?: (newScene: Scene) => void, choiceIndex?: number, choiceText?: string) {
-    const title = done ? `New scene for choice ${(choiceIndex ?? 0) + 1}` : 'New scene'; const dialog = modal(title, 'new-scene');
+    const title = done ? `New scene for option ${(choiceIndex ?? 0) + 1}` : 'New scene'; const dialog = modal(title, 'new-scene');
     const chapter = el('select'); chapter.ariaLabel = 'Chapter'; for (const title of new Set(scenes.map(s => s.chapter))) chapter.append(new Option(title, title)); chapter.value = scene().chapter;
     const extra = labelled('Chapter', chapter);
-    dialog.append(el('p', 'sr-dialog-context', done ? `Choice ${(choiceIndex ?? 0) + 1} "${choiceText ?? ''}" will lead here. You stay in this scene.` : 'Opens with an empty narration line.'));
+    const replaces = done ? scenes.find(s => s.id === current()?.options[choiceIndex ?? 0]?.target)?.name : undefined;
+    dialog.append(el('p', 'sr-dialog-context', done ? `Option ${(choiceIndex ?? 0) + 1} "${choiceText ?? ''}" will lead here.${replaces ? ' Replaces ' + replaces + '.' : ''} You stay in this scene.` : 'Opens with an empty narration line.'));
     nameForm(dialog, '', value => {
       if (!done) { sceneSelections.set(sceneId, selected); caller = undefined; }
       const next: Scene = { id: sample.newId(), name: value, chapter: chapter.value, beats: [sample.beat('narration'), sample.beat('return')] };
       change(() => { scenes.push(next); treeOpen = false; if (done) done(next); else { sceneId = next.id; selected = next.beats[0]!.id; reelBranch = ''; manual = ''; } }, `Create scene ${value}`);
       dialog.close(); focusText();
-    }, done ? `Create scene and link choice ${(choiceIndex ?? 0) + 1}` : 'Create and open scene', extra);
+    }, done ? `Create scene and link option ${(choiceIndex ?? 0) + 1}` : 'Create and open scene', extra);
   }
   function renameScene() {
     const dialog = modal('Rename scene', 'rename-scene'); nameForm(dialog, scene().name, value => { change(() => scene().name = value, `Rename scene to ${value}`); dialog.close(); }, 'Rename scene');
   }
   function insert(kind: Kind, body: Beat[], trail: string[], requested: number, speaker = 'Mara', replaceEmpty?: Beat, initial?: Partial<Beat>) {
     const before = Math.min(requested, defaultIndex(body)); const oldEnding = ['choice', 'jump', 'return'].includes(kind) && ending(body) >= 0 ? body[ending(body)] : undefined;
-    const where = oldEnding ? `Replace ${name(oldEnding.id)}${oldEnding.kind === 'choice' ? ` and its ${oldEnding.options.length} choices` : ''} with ${label(kind)}` : `${label(kind)} ${targetText(body, trail, before).replace('Adds to ', 'added to ')}`;
+    const where = oldEnding ? `Replace ${name(oldEnding.id)}${oldEnding.kind === 'choice' ? ` and its ${count(oldEnding.options.length, 'option')}` : ''} with ${label(kind)}` : `${label(kind)} ${targetText(body, trail, before).replace('Adds to ', 'added to ')}`;
     const b = sample.beat(kind); b.speaker = speaker === 'Narration (no speaker)' ? 'Mara' : speaker; Object.assign(b, initial);
     if (kind === 'condition') b.branches = [{ id: sample.newId(), name: 'If', condition: 'has_ticket is true', beats: [] }, { id: sample.newId(), name: 'Otherwise', condition: '', beats: [] }];
     change(() => {
@@ -221,22 +235,23 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const index = Math.min(requested, defaultIndex(body)); const dialog = modal('Add a beat', 'beat-picker'); dialog.classList.add('sr-picker-dialog');
     dialog.append(el('p', 'sr-insertion-target', replaceEmpty ? `Replaces empty line ${number(replaceEmpty.id)} in ${trail.join(' › ')}` : targetText(body, trail, index)));
     const query = el('input'); query.type = 'search'; query.placeholder = 'Find dialogue, background, music, choices…'; query.ariaLabel = 'Find a beat'; query.dataset.pickerSearch = '';
-    const results = el('div', 'sr-picker-results'); let active = 0;
-    function highlight() { const buttons = [...results.querySelectorAll<HTMLButtonElement>('button[data-insert-kind]')]; buttons.forEach((button, i) => { button.dataset.highlighted = String(i === active); }); }
+    const results = el('div', 'sr-picker-results'); results.id = `sr-results-${++elementId}`; results.role = 'listbox'; results.ariaLabel = 'Matching beat types'; query.role = 'combobox'; query.setAttribute('aria-autocomplete', 'list'); query.setAttribute('aria-expanded', 'true'); query.setAttribute('aria-controls', results.id); let active = 0;
+    function highlight() { const buttons = [...results.querySelectorAll<HTMLButtonElement>('button[data-insert-kind]')]; buttons.forEach((button, i) => { button.dataset.highlighted = String(i === active); button.ariaSelected = String(i === active); }); if (buttons[active]) query.setAttribute('aria-activedescendant', buttons[active]!.id); else query.removeAttribute('aria-activedescendant'); }
     function filter() {
       results.replaceChildren(); active = 0;
       const search = query.value.toLowerCase().trim();
       const aliases: Partial<Record<Kind, string>> = { condition: 'if else branch test', placement: 'placement move position', call: 'shared conversation returns', choice: 'menu options decision', setVariable: 'flag counter value', showScreen: 'panel', callScreen: 'dialog' };
       const matched = kinds.filter(([kind, title, category]) => `${kind} ${title} ${category} ${aliases[kind] ?? ''}`.toLowerCase().includes(search));
       for (const category of new Set(matched.map(k => k[2]))) {
-        const section = el('section'); section.append(el('h3', '', category === 'Flow' ? 'Choices and logic' : category));
+        const section = el('section'); section.role = 'group'; section.ariaLabel = category === 'Flow' ? 'Choices and logic' : category; section.append(el('h3', '', section.ariaLabel));
         for (const [kind, title] of matched.filter(k => k[2] === category)) {
-          const button = action(title, () => { dialog.close(); insert(kind, body, trail, index, current()?.speaker, replaceEmpty); }, false, `insert-${kind}`); button.dataset.insertKind = kind;
+          const button = action(title, () => { dialog.close(); insert(kind, body, trail, index, current()?.speaker, replaceEmpty); }, false, `insert-${kind}`); button.dataset.insertKind = kind; button.role = 'option'; button.tabIndex = -1; button.id = `sr-result-${++elementId}`;
           const end = ending(body) >= 0 ? body[ending(body)]! : undefined;
-          if (end && ['choice', 'jump', 'return'].includes(kind)) button.append(el('small', '', `Replaces ${name(end.id)}${end.kind === 'choice' ? ` and its ${end.options.length} choices` : ''}. Undo restores it.`));
+          if (end && ['choice', 'jump', 'return'].includes(kind)) { const warning = el('small', '', `Replaces ${name(end.id)}${end.kind === 'choice' ? ` and its ${count(end.options.length, 'option')}` : ''}. Undo restores it.`); warning.id = `sr-warning-${++elementId}`; button.setAttribute('aria-describedby', warning.id); button.append(warning); }
           section.append(button);
         } results.append(section);
       }
+      results.role = matched.length ? 'listbox' : 'region';
       if (!matched.length) { const empty = el('div', 'sr-picker-empty'); empty.append(el('p', '', 'No matching beat.'), action('Clear search', () => { query.value = ''; filter(); query.focus(); })); results.append(empty); }
       highlight();
     }
@@ -245,7 +260,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     filter(); dialog.append(labelled('Beat type', query), results, el('p', 'sr-picker-hint', '↑ ↓ choose a type · Enter adds it · Escape cancels')); query.focus();
   }
   function gap(body: Beat[], trail: string[], index: number) {
-    const clamped = Math.min(index, defaultIndex(body)); const button = action('+', () => picker(body, trail, clamped), false, `insert-gap-${trail.join('/')}-${clamped}`); button.className = 'sr-gap'; button.ariaLabel = targetText(body, trail, clamped); button.title = button.ariaLabel; button.tabIndex = variant === 'cue-sheet' ? 0 : -1; return button;
+    const clamped = Math.min(index, defaultIndex(body)); const button = action('+', () => picker(body, trail, clamped), false, `insert-gap-${trail.join('/')}-${clamped}`); button.className = 'sr-gap'; button.ariaLabel = targetText(body, trail, clamped); button.title = button.ariaLabel; button.tabIndex = variant === 'cue-sheet' && body[index - 1]?.id === selected ? 0 : -1; return button;
   }
   function moveTo(b: Beat) {
     const owner = locate(scene(), b.id)!; const dialog = modal(`Move ${name(b.id)}`, 'move-beat');
@@ -255,26 +270,26 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     visit(scene().beats, [scene().name]); const destination = el('select'); destination.ariaLabel = 'Move to'; choices.forEach((c, i) => destination.append(new Option(c.trail.join(' › '), String(i))));
     dialog.append(el('blockquote', '', brief(b)), el('p', '', `It goes last, before any Choice, Jump or Return.${b.kind === 'condition' ? ' Its branches move with it.' : ''}`), labelled('Move to', destination));
     const move = action(`Move ${name(b.id)}`, () => { const to = choices[Number(destination.value)]!; change(() => { owner.body.splice(owner.index, 1); to.body.splice(defaultIndex(to.body), 0, b); selected = b.id; reelBranch = ''; }, `Move ${name(b.id)} to ${to.trail.join(' › ')}`); dialog.close(); selectBeat(b.id, true); }, true, 'confirm-move');
-    move.disabled = !choices.length; if (!choices.length) dialog.append(el('p', '', 'There is no other branch in this scene. Use Move up or Move down instead.'));
+    move.disabled = !choices.length; if (!choices.length) dialog.append(el('p', '', 'There is no other branch in this scene. Use Move earlier or Move later instead.'));
     actions(dialog, [action('Cancel', () => dialog.close(), false, 'cancel-dialog'), move]); destination.focus();
   }
   function removeBeat(b: Beat) {
     const owner = locate(scene(), b.id)!; const parents = ancestry(scene(), b.id) ?? []; const title = name(b.id);
     const remove = () => { change(() => { owner.body.splice(owner.index, 1); selected = owner.body[Math.max(0, owner.index - 1)]?.id ?? parents.at(-1)?.beat.id ?? scene().beats[0]?.id ?? ''; stageObject = ''; }, `Delete ${title}`); focusSelected(); };
     if (b.kind !== 'condition') { remove(); return; }
-    const count = flatten(b.branches.flatMap(branch => branch.beats)).length;
-    const dialog = modal(`Delete condition ${number(b.id)} and ${count} beats?`, 'delete-condition', true);
-    dialog.append(el('p', '', `Deletes ${b.branches.map(branch => `${branch.name} ${branch.condition}`.trim()).join(', ')} and the ${count} beats inside them. Undo restores them.`));
-    const cancel = action('Cancel', () => dialog.close(), false, 'cancel-dialog'); actions(dialog, [cancel, danger(action(`Delete condition and ${count} beats`, () => { remove(); dialog.close(); }, false, 'confirm-delete'))]); cancel.focus();
+    const total = flatten(b.branches.flatMap(branch => branch.beats)).length;
+    const dialog = modal(`Delete condition ${number(b.id)} and ${count(total, 'beat')}?`, 'delete-condition', true);
+    dialog.append(el('p', '', `Deletes ${b.branches.map(branch => `${branch.name} ${branch.condition}`.trim()).join(', ')} and the ${count(total, 'beat')} inside them. Undo restores them.`));
+    const cancel = action('Cancel', () => dialog.close(), false, 'cancel-dialog'); actions(dialog, [cancel, danger(action(`Delete condition and ${count(total, 'beat')}`, () => { remove(); dialog.close(); }, false, 'confirm-delete'))]); cancel.focus();
   }
   function rowMenu(b: Beat) {
     const menu = el('details', 'sr-row-menu'); menu.dataset.owner = b.id; const summary = el('summary', '', '⋯'); summary.ariaLabel = `Actions for ${name(b.id)}`; summary.title = summary.ariaLabel; summary.dataset.action = 'beat-menu'; menu.append(summary);
     const controls = el('div', 'sr-row-popover'); const owner = locate(scene(), b.id)!; const locked = ['choice', 'jump', 'return', 'customCode'].includes(b.kind);
-    for (const [delta, title] of [[-1, 'Move up'], [1, 'Move down']] as const) { const neighbour = owner.body[owner.index + delta]; const button = action(title, () => { change(() => { owner.body.splice(owner.index, 1); owner.body.splice(owner.index + delta, 0, b); selected = b.id; }, `${title}: ${name(b.id)}`); focusSelected(); }, false, `move-${delta}`); button.disabled = locked || !neighbour || ['choice', 'jump', 'return', 'customCode'].includes(neighbour.kind); if (button.disabled) button.title = locked ? 'This beat stays at its source position.' : !neighbour ? 'There is no beat in that direction.' : 'Cannot move past a scene ending or protected source.'; controls.append(button); }
+    for (const [delta, title] of [[-1, 'Move earlier'], [1, 'Move later']] as const) { const neighbour = owner.body[owner.index + delta]; const button = action(title, () => { change(() => { owner.body.splice(owner.index, 1); owner.body.splice(owner.index + delta, 0, b); selected = b.id; }, `${title}: ${name(b.id)}`); focusSelected(); }, false, `move-${delta}`); button.disabled = locked || !neighbour || ['choice', 'jump', 'return', 'customCode'].includes(neighbour.kind); if (button.disabled) button.title = locked ? 'This beat stays at its source position.' : !neighbour ? 'There is no beat in that direction.' : 'Cannot move past a scene ending or protected source.'; controls.append(button); }
     const move = action('Move to another branch…', () => moveTo(b)); move.disabled = locked; if (locked) move.title = 'This beat stays at its source position.';
     const remove = action(`Delete ${name(b.id)}`, () => removeBeat(b)); remove.disabled = locked; if (locked) remove.title = b.kind === 'customCode' ? 'Protected source is read-only in this mock.' : 'Replace this ending through Add a beat.';
     controls.append(move, remove, action('View source', () => source(b)));
-    if (b.kind === 'condition') controls.append(action('Add Else if', () => change(() => b.branches.splice(Math.max(1, b.branches.length - 1), 0, { id: sample.newId(), name: 'Else if', condition: 'trust is at least 5', beats: [] }), `Add Else if to ${name(b.id)}`)));
+    if (b.kind === 'condition') controls.append(action('Add Else if', () => addElseIf(b)));
     menu.append(controls); menu.ontoggle = () => { if (!menu.open) return; for (const other of host.querySelectorAll<HTMLDetailsElement>('.sr-row-menu[open],.sr-more[open]')) if (other !== menu) other.open = false; const r = summary.getBoundingClientRect(); const height = controls.scrollHeight; controls.style.left = `${Math.max(8, Math.min(innerWidth - 225, r.right - 215))}px`; controls.style.top = `${Math.max(8, Math.min(innerHeight - height - 10, r.bottom + 4))}px`; }; return menu;
   }
   function destination(value: string, title: string, update: (value: string) => void) { const control = el('select'); control.ariaLabel = title; for (const s of scenes) control.append(new Option(s.name, s.id)); control.value = value; bind(control, update); return control; }
@@ -284,16 +299,16 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       form.append(labelled('Speaker', lineSpeaker(b)), prose(b));
     } else if (b.kind === 'choice') {
       b.options.forEach((option, i) => {
-        const row = el('fieldset', 'sr-option'); row.append(el('legend', '', `Choice ${i + 1}`));
-        row.append(labelled('Choice text', input(option.text, `Choice ${i + 1} text`, value => option.text = value)), labelled('Goes to', destination(option.target, `Choice ${i + 1} destination`, value => option.target = value)), labelled('Available when (optional)', input(option.guard, `Choice ${i + 1} availability`, value => option.guard = value)));
+        const row = el('fieldset', 'sr-option'); row.dataset.choiceIndex = String(i); row.append(el('legend', '', `Option ${i + 1}`));
+        row.append(labelled('Option text', input(option.text, `Option ${i + 1} text`, value => option.text = value)), labelled('Goes to', destination(option.target, `Option ${i + 1} destination`, value => option.target = value)), labelled('Available when (optional)', input(option.guard, `Option ${i + 1} availability`, value => option.guard = value)));
         const buttons = el('div', 'sr-option-actions');
-        buttons.append(action(`Open ${scenes.find(s => s.id === option.target)?.name ?? 'destination'}`, () => go(option.target, true), false, `open-choice-${i}`), action(`New scene for choice ${i + 1}…`, () => createScene(s => option.target = s.id, i, option.text), false, `new-choice-${i}`));
-        const remove = action(`Remove choice ${i + 1}`, () => change(() => b.options.splice(i, 1), `Remove choice ${i + 1} from ${name(b.id)}`), false, `remove-choice-${i}`); remove.disabled = b.options.length === 1; if (remove.disabled) remove.title = 'A choice menu needs at least one option.'; buttons.append(remove); row.append(buttons); form.append(row);
+        buttons.append(action(`Open ${scenes.find(s => s.id === option.target)?.name ?? 'destination'}`, () => go(option.target, true), false, `open-choice-${i}`), action(`New scene for option ${i + 1}…`, () => createScene(s => option.target = s.id, i, option.text), false, `new-choice-${i}`));
+        const remove = action(`Remove option ${i + 1}`, () => { change(() => b.options.splice(i, 1), `Remove option ${i + 1} from ${name(b.id)}`); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${Math.min(i, b.options.length - 1) + 1} text"]`); }, false, `remove-choice-${i}`); remove.disabled = b.options.length === 1; if (remove.disabled) remove.title = 'A choice menu needs at least one option.'; buttons.append(remove); row.append(buttons); form.append(row);
       });
-      form.append(action('+ Add choice', () => change(() => b.options.push({ text: '', target: scenes.find(s => s.id !== sceneId)?.id ?? sceneId, guard: '' }), `Add choice to ${name(b.id)}`)), el('p', 'sr-explanation', 'Leave availability empty for an unconditional choice. Conditions are not evaluated here. If no choices are available, the game continues to the next beat.'));
+      form.append(action('+ Add option', () => change(() => b.options.push({ text: '', target: scenes.find(s => s.id !== sceneId)?.id ?? sceneId, guard: '' }), `Add option to ${name(b.id)}`)), el('p', 'sr-explanation', 'Leave availability empty for an unconditional choice. Conditions are not evaluated here. If no choices are available, the game continues to the next beat.'));
     } else if (b.kind === 'condition') {
       form.append(el('p', 'sr-explanation', 'The first branch whose test is true runs. This illustration does not evaluate tests.'));
-      for (const branch of b.branches) { const row = el('div', 'sr-branch-control'); row.append(el('strong', '', branch.name)); if (branch.name !== 'Otherwise') row.append(labelled('Test', input(branch.condition, `${name(b.id)} ${branch.name} condition`, value => branch.condition = value))); row.append(action(`${variant === 'stage-tracks' ? 'Show in tracks' : 'Open branch'}: ${branch.name}`, () => openBranch(b, branch), false, `open-branch-${branch.id}`)); form.append(row); }
+      for (const branch of b.branches) { const row = el('div', 'sr-branch-control'); row.dataset.branch = branch.id; row.append(el('strong', '', branch.name)); if (branch.name !== 'Otherwise') row.append(labelled('Test', input(branch.condition, `${name(b.id)} ${branch.name} condition`, value => branch.condition = value))); row.append(action(`${variant === 'stage-tracks' ? 'Show in tracks' : 'Open branch'}: ${branch.name}`, () => openBranch(b, branch), false, `open-branch-${branch.id}`)); if (branch.name.toLowerCase() === 'else if') row.append(action('Remove this Else if', () => removeBranch(b, branch))); form.append(row); }
     } else if (b.kind === 'call' || b.kind === 'jump') {
       form.append(labelled('Destination scene', destination(b.target, 'Destination scene', value => b.target = value)), el('p', 'sr-explanation', b.kind === 'call' ? 'Returns to the next beat after the destination scene finishes.' : 'Leaves this scene and does not return.'), action(`Open ${scenes.find(s => s.id === b.target)?.name ?? 'destination'}`, () => go(b.target, true), false, 'open-destination'));
     } else if (b.kind === 'return') form.append(el('p', 'sr-explanation', 'Returns to the calling scene, or ends the story. Use Add a beat to replace this ending.'));
@@ -314,7 +329,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     } return form;
   }
   function source(b = current()) {
-    const dialog = modal(`Illustrative source · ${b ? name(b.id) : 'No selected beat'}`, 'source');
+    const dialog = modal(`Illustrative source · ${b ? name(b.id) : 'No selected beat'}`, 'source', true);
     const speech = b?.kind === 'dialogue' ? `${b.speaker === 'Eli' ? 'e' : 'm'} ${JSON.stringify(b.text)}` : b?.kind === 'narration' ? JSON.stringify(b.text) : undefined;
     const targetId = b?.target ?? 'scene_name';
     const samples: Partial<Record<Kind, string>> = { background: `scene ${b?.asset === 'Station at dawn' ? 'bg_station_dawn' : 'bg_platform'}${b?.transition === 'None' ? '' : ' with ' + (b?.transition ?? 'dissolve').toLowerCase()}`, showCharacter: `show ${b?.speaker.toLowerCase()} ${b?.asset.toLowerCase()} at ${(b?.placement ?? 'Centre').toLowerCase().replace('centre', 'center')}`, hideCharacter: `hide ${b?.speaker.toLowerCase()}`, changeAppearance: `show ${b?.speaker.toLowerCase()} ${b?.asset.toLowerCase()}`, placement: `show ${b?.speaker.toLowerCase()} at ${(b?.placement ?? 'Centre').toLowerCase().replace('centre', 'center')}`, transition: `with ${(b?.transition ?? 'dissolve').toLowerCase()}`, playMusic: `play music "audio/${b?.text === 'Last departure' ? 'last_departure' : 'night_service'}.ogg"`, stopMusic: 'stop music', playSfx: `play sound "audio/${b?.asset === 'Footsteps' ? 'footsteps' : 'tram_bell'}.ogg"`, call: `call ${targetId}`, jump: `jump ${targetId}`, return: 'return', showScreen: `show screen ${(b?.asset === 'Neutral' ? 'help' : b?.asset ?? 'help').toLowerCase()}`, hideScreen: `hide screen ${(b?.asset === 'Neutral' ? 'help' : b?.asset ?? 'help').toLowerCase()}`, callScreen: `call screen ${(b?.asset === 'Neutral' ? 'help' : b?.asset ?? 'help').toLowerCase()}`, setVariable: `$ ${b?.text || 'has_ticket'} = ${b?.value === 'true' ? 'True' : b?.value === 'false' ? 'False' : b?.value}`, choice: `menu:\n${b?.options.map(o => `    ${JSON.stringify(o.text)}:\n        jump ${o.target}`).join('\n')}`, condition: '# Conditions in this sample use readable tests.\nif has_ticket:\n    e "Keep your ticket. Some doors only open once."' };
@@ -339,21 +354,28 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       actions(dialog, [action('Back to instructions', prepare, false, 'assist-back'), action('Discard proposal', () => dialog.close(), false, 'assist-discard'), action(`Replace ${number(b!.id)} text`, () => { change(() => b!.text = proposed, `Rewrite ${name(b!.id)}`); dialog.close(); focusText(); }, true, 'assist-apply')]);
     } prepare();
   }
-  function notes() { const dialog = modal('Design notes · future tools', 'design-notes'); dialog.append(el('p', '', 'These tools are not implemented in this mock.')); for (const [title, copy] of [['Stage', 'Character dragging and resizing belong on this large game window, with numeric and keyboard alternatives.'], ['Appearances', 'Animation and idle settings extend the character fields.'], ['Timeline', 'Open timing tools for a selected beat. The reel and tracks currently show statement order, without elapsed time or keyframes.'], ['State and Run From Here', 'A future inspection step must show route, provenance and unknown state before a deliberate launch. This illustration evaluates no conditions and follows no Calls.']]) dialog.append(el('h3', '', title), el('p', '', copy)); actions(dialog, [action('Close', () => dialog.close())]); }
+  function notes() { const dialog = modal('Design notes · future tools', 'design-notes', true); dialog.append(el('p', '', 'These tools are not implemented in this mock.')); for (const [title, copy] of [['Stage', 'Character dragging and resizing belong on this large game window, with numeric and keyboard alternatives.'], ['Appearances', 'Animation and idle settings extend the character fields.'], ['Timeline', `Open timing tools for a selected beat. ${variant === 'cue-sheet' ? 'The cue sheet shows' : variant === 'shot-reel' ? 'The reel shows' : 'The tracks show'} statement order, without elapsed time or keyframes.`], ['State and Run From Here', 'A future inspection step must show route, provenance and unknown state before a deliberate launch. This illustration evaluates no conditions and follows no Calls.']]) dialog.append(el('h3', '', title), el('p', '', copy)); actions(dialog, [action('Close', () => dialog.close())]); }
   function header() {
-    const bar = el('header', 'sr-topbar'); const choose = action(`${scene().name} ▾`, () => { treeOpen = !treeOpen; draw(); }, false, 'scenes'); choose.ariaLabel = 'Scenes'; choose.title = `Choose a scene · ${scene().name}`; choose.ariaExpanded = String(treeOpen); bar.append(choose);
+    const bar = el('header', 'sr-topbar'); const choose = action(`${scene().name} ▾`, () => { treeOpen = !treeOpen; draw(); }, false, 'scenes'); choose.ariaLabel = `Scenes · ${scene().name}`; choose.title = `Choose a scene · ${scene().name}`; choose.ariaExpanded = String(treeOpen); bar.append(choose);
     if (caller) { const origin = scenes.find(s => s.id === caller!.scene); const back = action(`← Back to ${origin?.name ?? 'previous scene'}`, () => { const previous = caller!; caller = undefined; sceneSelections.set(previous.scene, previous.selected); go(previous.scene); reelBranch = previous.branch; draw(); focusSelected(); }, false, 'back-scene'); back.classList.add('sr-back-scene'); back.title = `${back.textContent} · ${origin ? beatName(origin, caller.selected) : ''}`; bar.append(back); }
     const trail = ancestry(scene(), selected) ?? []; bar.append(el('span', 'sr-current-body', trail.length ? trail.map(p => `${number(p.beat.id)} ${p.branch.name} ${p.branch.condition}`).join(' › ') : ''));
     const tools = el('div', 'sr-top-tools');
     const focus = action(focused ? 'Show game window' : 'Writing focus', () => { focused = !focused; draw(); status(focused ? 'Writing focus · all beat tools remain available' : 'Game window shown'); }, false, 'toggle-focus'); focus.dataset.focusToggle = '';
     undoButton = action('Undo', () => history(undo, redo, 'Undid'), false, 'undo'); redoButton = action('Redo', () => history(redo, undo, 'Redid'), false, 'redo'); undoButton.disabled = !undo.length; redoButton.disabled = !redo.length;
-    const t = target(); const add = action(innerWidth < 900 ? '+ Add beat' : `+ Add beat ${t.body[t.index] ? 'before ' + number(t.body[t.index]!.id) + ' ' + label(t.body[t.index]!.kind) : t.body[t.index - 1] ? 'after ' + number(t.body[t.index - 1]!.id) : 'to branch'}`, () => picker(t.body, t.trail, t.index), true, 'add-beat'); add.title = targetText(t.body, t.trail, t.index);
+    const t = target(); const add = action(innerWidth < 900 ? '+ Add beat' : `+ Add beat ${t.body[t.index] ? 'before ' + name(t.body[t.index]!.id) : t.body[t.index - 1] ? 'after ' + name(t.body[t.index - 1]!.id) : 'to ' + (reelContext()?.branch.name ?? 'scene')}`, () => { const here = target(); picker(here.body, here.trail, here.index); }, true, 'add-beat'); add.title = targetText(t.body, t.trail, t.index);
     const more = el('details', 'sr-more'); const summary = el('summary', '', 'More'); summary.ariaLabel = 'More scene actions'; summary.dataset.action = 'more'; more.append(summary);
     const menu = el('div', 'sr-top-menu'); menu.append(action(`Assist with ${name()}…`, assist), action(`View source for ${name()}`, () => source()), action('Rename this scene…', renameScene), action('Design notes (future tools)', notes)); more.append(menu);
     tools.append(focus, undoButton, redoButton, add, more); bar.append(tools); return bar;
   }
+  function syncSelectionChrome() {
+    frame.content.dataset.selected = selected;
+    const t = target(); const key = `${sceneId}|${selected}|${name()}|${t.trail.join('/')}|${t.index}|${focused}`;
+    if (chromeKey !== key) { host.querySelector('.sr-topbar')?.replaceWith(header()); chromeKey = key; }
+    for (const [key, title] of [['add-background', `+ Background before ${number()}`], ['add-character', `+ Character before ${number()}`]]) for (const button of host.querySelectorAll<HTMLElement>(`[data-action="${key}"]`)) nameControl(button, title!);
+    status(frame.status.textContent ?? '');
+  }
   function tree() { const aside = el('aside', 'sr-scenes'); aside.ariaLabel = 'Scenes'; aside.append(action('+ New scene', () => createScene(), true, 'new-scene')); for (const chapter of new Set(scenes.map(s => s.chapter))) { aside.append(el('h2', '', chapter)); for (const s of scenes.filter(s => s.chapter === chapter)) { const button = action(s.name, () => { caller = undefined; go(s.id); }, false, `scene-${s.id}`); button.className = 'sr-scene-link'; button.ariaCurrent = s.id === sceneId ? 'page' : null; aside.append(button); } } return aside; }
-  function openBranch(owner: Beat, branch: Branch) { visibleBranches.set(owner.id, branch.id); reelBranch = branch.id; selected = branch.beats[0]?.id ?? owner.id; expanded.add(owner.id); stageObject = ''; manual = ''; draw(); status(`Editing ${branch.name} ${branch.condition}`.trim()); focusSelected(); }
+  function openBranch(owner: Beat, branch: Branch, child = branch.beats[0]?.id) { visibleBranches.set(owner.id, branch.id); reelBranch = branch.id; selected = child ?? owner.id; expanded.add(owner.id); stageObject = ''; manual = ''; draw(); status(`Editing ${number(owner.id)} Condition › ${branch.name} ${branch.condition}`.trim()); focusSelected(); }
   function stageInsert(kind: Kind, actor?: string) {
     const t = locate(scene(), selected); const state = stateAt(); const currentActor = actor && state.characters.get(actor);
     insert(kind, t?.body ?? scene().beats, t?.trail ?? [scene().name], t?.index ?? defaultIndex(), actor ?? current()?.speaker, undefined, currentActor ? { speaker: actor, asset: currentActor.asset, placement: currentActor.placement } : undefined);
@@ -384,9 +406,9 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     if (!b || scene().beats.length === 1 && b.kind === 'return') { if (variant !== 'cue-sheet') panel.append(empty(scene().beats, [scene().name])); else panel.append(el('p', 'sr-editor-hint', 'Add a background or write the first line in the cue sheet.')); return panel; }
     if (variant === 'cue-sheet' && stageObject) {
       const state = stateAt(); const owner = stageObject === 'background' ? state.background : state.characters.get(stageObject)?.from;
-      if (owner) { panel.append(el('h3', '', `${stageObject === 'background' ? 'Background' : stageObject} · last changed by ${name(owner.id)}`), action(`Edit ${name(owner.id)}`, () => { stageObject = ''; selectBeat(owner.id, true); focusText(); }, false, 'edit-stage-owner'), action(`Change ${stageObject} before ${number()}`, () => { stageInsert(stageObject === 'background' ? 'background' : 'changeAppearance', stageObject === 'background' ? undefined : stageObject); stageObject = ''; }, true, 'stage-change'), action(`Back to ${number()}`, () => { stageObject = ''; draw(); }, false, 'close-stage-object')); return panel; }
+      if (owner) { panel.append(el('h3', '', `${stageObject === 'background' ? 'Background' : stageObject} · last changed by ${name(owner.id)}`), action(`Edit ${name(owner.id)}`, () => { stageObject = ''; selectBeat(owner.id, true); focusText(); }, false, 'edit-stage-owner'), action(`Change ${stageObject} before ${number()}`, () => { stageInsert(stageObject === 'background' ? 'background' : 'changeAppearance', stageObject === 'background' ? undefined : stageObject); stageObject = ''; }, true, 'stage-change'), action(`Back to ${number()}`, () => { stageObject = ''; selectBeat(selected, true); }, false, 'close-stage-object')); return panel; }
     }
-    const heading = el('div', 'sr-inspector-heading'); heading.append(typeSelector(b));
+    const heading = el('div', 'sr-inspector-heading'); const type = typeSelector(b); if (type instanceof HTMLSelectElement) heading.append(el('strong', '', `${number(b.id)} ·`)); heading.append(type);
     if (['dialogue', 'narration'].includes(b.kind) && variant !== 'cue-sheet') { const next = action('+ Add dialogue', () => { const t = locate(scene(), b.id)!; insert('dialogue', t.body, t.trail, t.index + 1, nextSpeaker(b.id)); }, true, 'next-dialogue'); next.title = `Add dialogue after ${name(b.id)} (Shift+${mod}+Enter)`; heading.append(next); }
     heading.append(rowMenu(b)); panel.append(heading);
     if ((ancestry(scene(), b.id) ?? []).length) panel.append(el('p', 'sr-editor-location', locate(scene(), b.id)!.trail.join(' › ')));
@@ -415,7 +437,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const slot = el('div', 'sr-stage-slot'); const stage = el('div', 'sr-stage'); stage.dataset.stage = '';
     const bgButton = action('', () => { stageObject = 'background'; stageExpanded = false; draw(); host.querySelector<HTMLElement>('[data-effect-object="background"] button')?.focus(); }, false, 'stage-background'); bgButton.className = 'sr-backdrop-control'; bgButton.ariaLabel = 'Select background on stage';
     const image = el('img', 'sr-backdrop'); image.src = platform; image.alt = 'Fictional rain-soaked tram platform'; bgButton.append(image); stage.append(bgButton);
-    const placeholder = el('div', 'sr-stage-empty'); placeholder.append(action('Add background', () => stageInsert('background'), true, 'empty-stage-background')); stage.append(placeholder);
+    const placeholder = el('div', 'sr-stage-empty'); if (variant !== 'shot-reel' || scene().beats.some(b => !['return'].includes(b.kind))) placeholder.append(action('Add background', () => stageInsert('background'), true, 'empty-stage-background')); stage.append(placeholder);
     const b = current(); const editable = variant === 'shot-reel' && !hideSaybox && innerWidth >= 900 && b && ['dialogue', 'narration'].includes(b.kind);
     const caption = el('div', 'sr-saybox'); caption.dataset.saybox = '';
     if (editable) { const speaker = lineSpeaker(b); speaker.classList.toggle('sr-narration-speaker', b.kind === 'narration'); caption.append(speaker, prose(b)); }
@@ -424,7 +446,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       const edit = () => { const line = previewLine(); if (line) { manual = ''; selectBeat(line.id); focusText(); } }; caption.onclick = edit; caption.onkeydown = event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); edit(); } };
     }
     stage.append(caption); stageCharacters(stage, previewState());
-    if (b?.kind === 'choice') { const choices = el('div', 'sr-game-choices'); b.options.forEach((option, i) => { const button = action(option.text || 'New choice', () => host.querySelector<HTMLInputElement>(`input[aria-label="Choice ${i + 1} text"]`)?.focus(), false, `stage-choice-${i}`); button.ariaLabel = `Edit choice ${i + 1}: ${option.text || 'New choice'}`; button.dataset.stageChoice = String(i); choices.append(button); }); stage.append(choices); }
+    if (b?.kind === 'choice') { const choices = el('div', 'sr-game-choices'); b.options.forEach((option, i) => { const button = action(option.text || 'New choice', () => host.querySelector<HTMLInputElement>(`input[aria-label="Option ${i + 1} text"]`)?.focus(), false, `stage-choice-${i}`); button.ariaLabel = `Edit option ${i + 1}: ${option.text || 'New choice'}`; button.dataset.stageChoice = String(i); choices.append(button); }); stage.append(choices); }
     slot.append(stage); wrap.append(slot);
     const bottom = el('div', 'sr-stage-footer'); bottom.append(el('span', 'sr-stage-status'));
     if (variant === 'cue-sheet') {
@@ -436,22 +458,23 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       }
     }
     const add = el('div', 'sr-stage-actions'); add.append(action(`+ Background before ${number()}`, () => stageInsert('background'), false, 'add-background'), action(`+ Character before ${number()}`, () => stageInsert('showCharacter'), false, 'add-character'));
-    if (variant === 'shot-reel') add.append(action(hideSaybox ? 'Show text box' : 'Hide text box', () => { hideSaybox = !hideSaybox; draw(); focusText(); }, false, 'hide-text-box'));
+    if (variant === 'shot-reel' && previewLine()) add.append(action(hideSaybox ? 'Show text box' : 'Hide text box', () => { hideSaybox = !hideSaybox; draw(); focusText(); }, false, 'hide-text-box'));
     bottom.append(add); wrap.append(bottom); return wrap;
   }
   function refresh() {
+    syncSelectionChrome();
     const state = previewState(); const line = previewLine();
     for (const stage of host.querySelectorAll<HTMLElement>('[data-stage]')) {
       stage.classList.toggle('sr-dawn', state.background?.asset === 'Station at dawn'); stage.classList.toggle('sr-no-background', !state.background); stage.querySelector<HTMLElement>('.sr-stage-empty')!.hidden = !!state.background;
       stageCharacters(stage, state); const caption = stage.querySelector<HTMLElement>('.sr-saybox')!; caption.hidden = !line || hideSaybox;
       const paragraph = caption.querySelector('p'); if (paragraph) paragraph.textContent = line?.text ?? ''; const speaker = caption.querySelector('strong'); if (speaker) speaker.textContent = line?.kind === 'dialogue' ? line.speaker : '';
     }
-    for (const item of host.querySelectorAll<HTMLElement>('[data-summary]')) { const b = flatten(scene().beats).find(b => b.id === item.dataset.summary); if (b) item.textContent = brief(b); }
+    for (const item of host.querySelectorAll<HTMLElement>('[data-summary]')) { const b = flatten(scene().beats).find(b => b.id === item.dataset.summary); if (b) { item.textContent = brief(b); const control = item.closest<HTMLElement>('[data-reel-beat],.sr-cue'); if (control) control.ariaLabel = `${control.classList.contains('sr-cue') ? 'Select ' : ''}${name(b.id)}: ${brief(b)}`; } }
     for (const item of host.querySelectorAll<HTMLElement>('[data-stage-choice]')) { const option = current()?.options[Number(item.dataset.stageChoice)]; if (option) item.textContent = option.text || 'New choice'; }
-    for (const note of host.querySelectorAll('.sr-stage-status')) note.textContent = manual ? `Manual selection · editing ${number()}` : `${number()} · ${state.unknown.length ? 'Partial illustration' : 'Sample illustration'}`;
+    for (const note of host.querySelectorAll('.sr-stage-status')) note.textContent = manual ? `Manual selection · editing ${number()}` : innerWidth < 900 ? number() : `${number()} · ${state.unknown.length ? 'Partial illustration' : 'Sample illustration'}`;
     for (const effect of host.querySelectorAll('.sr-effects')) effect.replaceWith(effects());
     for (const owner of flatten(scene().beats)) for (const branch of owner.branches) {
-      for (const button of host.querySelectorAll<HTMLElement>(`[data-action="open-branch-${branch.id}"]`)) { const prefix = button.closest('.sr-branch-control') ? (variant === 'stage-tracks' ? 'Show in tracks: ' : 'Open branch: ') : button.closest('.sr-reel-target') ? 'Open ' : ''; button.textContent = `${prefix}${branch.name} ${branch.condition}`.trim(); }
+      for (const button of host.querySelectorAll<HTMLElement>(`[data-action="open-branch-${branch.id}"]`)) { const prefix = button.closest('.sr-branch-control') ? (variant === 'stage-tracks' ? 'Show in tracks: ' : 'Open branch: ') : button.closest('.sr-reel-target') ? 'Open ' : ''; nameControl(button, `${prefix}${branch.name} ${branch.condition}${button.closest('.sr-reel-target') ? ' · ' + count(branch.beats.length, 'beat') : ''}`.trim()); }
       const option = host.querySelector<HTMLOptionElement>(`.sr-preview-route option[value="${branch.id}"]`); if (option) option.textContent = `${number(owner.id)} ${branch.name} ${branch.condition}`.trim();
     }
     const selectedBeat = current();
@@ -460,10 +483,15 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     if (variant === 'stage-tracks') updateTrackCells();
   }
   function removeBranch(owner: Beat, branch: Branch) {
-    const count = flatten(branch.beats).length;
+    const total = flatten(branch.beats).length;
     const remove = () => change(() => { owner.branches.splice(owner.branches.indexOf(branch), 1); selected = owner.id; if (manual === branch.id) manual = ''; }, `Remove ${branch.name} from ${name(owner.id)}`);
-    if (!count) { remove(); return; }
-    const dialog = modal(`Remove ${branch.name} and ${count} beats?`, 'delete-branch', true); const cancel = action('Cancel', () => dialog.close()); dialog.append(el('p', '', 'Undo restores this branch and its contents.')); actions(dialog, [cancel, danger(action(`Remove branch and ${count} beats`, () => { remove(); dialog.close(); }))]); cancel.focus();
+    if (!total) { remove(); focusSelected(); return; }
+    const dialog = modal(`Remove ${branch.name} ${branch.condition} from ${number(owner.id)} Condition?`, 'delete-branch', true); const cancel = action('Cancel', () => dialog.close()); dialog.append(el('p', '', `Removes this branch and its ${count(total, 'beat')}. Undo restores them.`)); actions(dialog, [cancel, danger(action(`Remove branch and ${count(total, 'beat')}`, () => { remove(); dialog.close(); focusSelected(); }))]); cancel.focus();
+  }
+  function addElseIf(owner: Beat) {
+    const branch: Branch = { id: sample.newId(), name: 'Else if', condition: 'trust is at least 5', beats: [] };
+    change(() => { owner.branches.splice(Math.max(1, owner.branches.length - 1), 0, branch); expanded.add(owner.id); selected = owner.id; }, `Add Else if to ${name(owner.id)}`);
+    focusField(`[data-branch="${branch.id}"] input`);
   }
   function branchBody(owner: Beat, branch: Branch, trail: string[]) {
     const section = el('section', 'sr-inline-branch'); section.dataset.branch = branch.id; section.ariaLabel = `${number(owner.id)} ${branch.name} ${branch.condition}`.trim();
@@ -473,23 +501,23 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   }
   function row(b: Beat, body: Beat[], trail: string[], index: number) {
     const result = el('article', `sr-row sr-${b.kind}`); result.dataset.beat = b.id; result.dataset.beatKind = b.kind; result.dataset.selected = String(b.id === selected);
-    const top = el('div', 'sr-row-line'); const selectNumber = action(number(b.id), () => selectBeat(b.id), false, 'select-beat'); selectNumber.className = 'sr-number'; selectNumber.ariaLabel = `Select ${name(b.id)}`; top.append(selectNumber);
+    const top = el('div', 'sr-row-line'); const selectNumber = action(number(b.id), () => selectBeat(b.id), false, 'select-beat'); selectNumber.className = 'sr-number'; selectNumber.tabIndex = -1; selectNumber.ariaLabel = `Select ${name(b.id)}`; top.append(selectNumber);
     if (['dialogue', 'narration'].includes(b.kind)) {
-      if (b.kind === 'dialogue') top.append(select(['Mara', 'Eli'], b.speaker, `Speaker for ${name(b.id)}`, value => b.speaker = value)); else top.append(el('span', 'sr-narrator', 'Narration'));
+      const speaker = lineSpeaker(b, `Speaker for ${name(b.id)}`); speaker.classList.toggle('sr-narrator', b.kind === 'narration'); top.append(speaker);
       top.append(prose(b));
     } else {
-      const button = action('', () => selectBeat(b.id), false, 'select-beat-content'); button.className = 'sr-cue'; button.ariaLabel = `Select ${name(b.id)}`; button.append(el('span', 'sr-kind', label(b.kind)), el('span', 'sr-cue-value', brief(b))); button.querySelector<HTMLElement>('.sr-cue-value')!.dataset.summary = b.id; top.append(button);
+      const button = action('', () => selectBeat(b.id), false, 'select-beat-content'); button.className = 'sr-cue'; button.ariaLabel = `Select ${name(b.id)}: ${brief(b)}`; button.append(el('span', 'sr-kind', label(b.kind)), el('span', 'sr-cue-value', brief(b))); button.querySelector<HTMLElement>('.sr-cue-value')!.dataset.summary = b.id; top.append(button);
     }
     top.append(rowMenu(b)); result.append(top);
     if (b.kind === 'condition') {
-      const count = flatten(b.branches.flatMap(branch => branch.beats)).length; const toggle = action(`${expanded.has(b.id) ? '▾ Hide' : '▸ Show'} ${b.branches.length} branches · ${count} beats`, () => { if (expanded.has(b.id)) expanded.delete(b.id); else expanded.add(b.id); draw(); }, false, 'toggle-condition'); toggle.ariaExpanded = String(expanded.has(b.id)); result.append(toggle);
+      const total = flatten(b.branches.flatMap(branch => branch.beats)).length; const toggle = action(`${expanded.has(b.id) ? '▾ Hide' : '▸ Show'} ${count(b.branches.length, 'branch')} · ${count(total, 'beat')}`, () => { if (expanded.has(b.id)) expanded.delete(b.id); else expanded.add(b.id); draw(); }, false, 'toggle-condition'); toggle.ariaExpanded = String(expanded.has(b.id)); result.append(toggle);
       if (expanded.has(b.id)) {
         result.append(el('p', 'sr-branch-explanation', 'The first branch whose test is true runs.'));
         for (const branch of b.branches) result.append(branchBody(b, branch, [...trail, `${branch.name} ${branch.condition}`.trim()]));
-        result.append(action('+ Add Else if', () => change(() => b.branches.splice(Math.max(1, b.branches.length - 1), 0, { id: sample.newId(), name: 'Else if', condition: 'trust is at least 5', beats: [] }), `Add Else if to ${name(b.id)}`)), el('div', 'sr-rejoin', 'Continue after condition · Jump and Return leave this path. A skipped menu can continue here.'));
+        result.append(action('+ Add Else if', () => addElseIf(b)), el('div', 'sr-rejoin', 'Continue after condition · Jump and Return leave this path. A skipped menu can continue here.'));
       }
     } else if (selected === b.id && !['dialogue', 'narration'].includes(b.kind)) {
-      if (focused || innerWidth < 900 || !mediaKinds.includes(b.kind)) result.append(fields(b)); else result.append(el('p', 'sr-editor-location', 'Editing below the game window'));
+      if (focused || innerWidth < 900 || !mediaKinds.includes(b.kind)) result.append(fields(b)); else { const edit = action(`Edit ${name(b.id)} below the game window`, focusText, false, 'edit-media-fields'); edit.classList.add('sr-editor-location'); result.append(edit); }
     }
     if (b.kind === 'choice' && selected !== b.id) { const choices = el('div', 'sr-choice-summary'); b.options.forEach((option, i) => choices.append(el('p', '', `${i + 1}  ${option.text || 'New choice'} → ${scenes.find(s => s.id === option.target)?.name ?? option.target}${option.guard ? ' · only when ' + option.guard : ''}`))); result.append(choices); }
     if (selected === b.id && ['dialogue', 'narration'].includes(b.kind)) { const next = action(`+ Next ${b.kind === 'dialogue' ? b.speaker : 'dialogue'} line`, () => { const t = locate(scene(), b.id)!; insert('dialogue', t.body, t.trail, t.index + 1, nextSpeaker(b.id)); }, false, 'next-dialogue'); next.title = `Shift+${mod}+Enter`; next.classList.add('sr-inline-next'); result.append(next); }
@@ -503,9 +531,11 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const sheet = el('section', 'sr-sheet'); sheet.ariaLabel = 'Cue sheet writing'; const heading = el('header', 'sr-sheet-heading'); heading.append(el('strong', '', 'Cue sheet'), el('span', '', `Shift+${mod}+Enter · next line`)); sheet.append(heading);
     if (scene().beats.length === 1 && scene().beats[0]!.kind === 'return') sheet.append(empty(scene().beats, [scene().name])); scene().beats.forEach((b, i) => sheet.append(row(b, scene().beats, [scene().name], i))); layout.append(sheet); parent.append(layout);
   }
-  function selectBeat(id: string, focus = false) { selected = id; stageObject = ''; manual = ''; reelBranch = ''; draw(); if (focus) focusSelected(); }
+  function selectBeat(id: string, focus = false) { selected = id; stageObject = ''; manual = ''; reelBranch = ''; draw(); status(`Selected ${name()}`); if (focus) focusSelected(); }
   function focusSelected() { const request = ++focusRequest; requestAnimationFrame(() => { if (request !== focusRequest) return; const item = host.querySelector<HTMLElement>(`[data-reel-beat="${selected}"],[data-track-beat="${selected}"]`) ?? host.querySelector<HTMLElement>(`[data-beat="${selected}"] .sr-number`) ?? host.querySelector<HTMLElement>('[data-action="add-beat"]'); item?.focus(); revealSelection(); }); }
-  function focusText() { const request = ++focusRequest; requestAnimationFrame(() => { if (request !== focusRequest) return; revealSelection(); const area = host.querySelector<HTMLTextAreaElement>(`textarea[data-beat-text="${selected}"]`); const fields = host.querySelector<HTMLElement>(`[data-editor-for="${selected}"]`); const control = area ?? fields?.querySelector<HTMLElement>('input,select,button') ?? host.querySelector<HTMLElement>(`[data-beat="${selected}"] .sr-cue`); control?.focus(); control?.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }); }
+  function focusVisible(control?: HTMLElement | null) { control?.focus(); const panel = focused && variant === 'shot-reel' ? control?.closest<HTMLElement>('.sr-inspector') : undefined; const work = host.querySelector<HTMLElement>('.sr-workarea'); const anchor = panel && work && panel.getBoundingClientRect().height < work.clientHeight ? panel : control; anchor?.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
+  function focusField(selector: string) { const request = ++focusRequest; requestAnimationFrame(() => { if (request === focusRequest) focusVisible(host.querySelector<HTMLElement>(selector)); }); }
+  function focusText() { const request = ++focusRequest; requestAnimationFrame(() => { if (request !== focusRequest) return; revealSelection(); const area = host.querySelector<HTMLTextAreaElement>(`textarea[data-beat-text="${selected}"]`); const fields = host.querySelector<HTMLElement>(`[data-editor-for="${selected}"]`); focusVisible(area ?? fields?.querySelector<HTMLElement>('input,select,button') ?? host.querySelector<HTMLElement>(`[data-beat="${selected}"] .sr-cue`)); }); }
   function revealSelection() {
     for (const [itemSelector, scrollSelector] of [[`[data-reel-beat="${selected}"]`, '.sr-reel-strip'], [`[data-track-beat="${selected}"]`, '.sr-tracks-scroll'], [`[data-beat="${selected}"]`, '.sr-sheet']]) {
       const item = host.querySelector<HTMLElement>(itemSelector!), area = host.querySelector<HTMLElement>(focused && scrollSelector === '.sr-reel-strip' ? '.sr-workarea' : scrollSelector!); if (!item || !area) continue;
@@ -521,14 +551,16 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   }
   function branchBreadcrumb(reel: HTMLElement) {
     const breadcrumb = el('nav', 'sr-reel-target'); breadcrumb.ariaLabel = 'Branch path'; breadcrumb.append(action(scene().name, () => { const root = scene().beats.find(b => flatten([b]).some(item => item.id === selected)); reelBranch = ''; selected = root?.id ?? scene().beats[0]!.id; draw(); focusSelected(); }, false, 'scene-path'));
-    const context = reelContext(); if (context) { const parents = ancestry(scene(), context.owner.id) ?? []; for (const parent of parents) breadcrumb.append(action(`${parent.branch.name} ${parent.branch.condition}`.trim(), () => { selected = parent.beat.id; reelBranch = ''; draw(); focusSelected(); }, false, `path-${parent.beat.id}`)); breadcrumb.append(el('strong', '', `${context.branch.name} ${context.branch.condition}`.trim())); }
-    const b = current(); if (b?.kind === 'condition') for (const branch of b.branches) breadcrumb.append(action(`Open ${branch.name} ${branch.condition} · ${branch.beats.length} beats`.replace(/\s+/g, ' ').trim(), () => openBranch(b, branch), false, `open-branch-${branch.id}`)); reel.append(breadcrumb);
+    const separator = () => { const text = el('span', 'sr-path-separator', '›'); text.ariaHidden = 'true'; breadcrumb.append(text); };
+    const context = reelContext(); if (context) { const parents = ancestry(scene(), context.owner.id) ?? []; for (const [index, parent] of parents.entries()) { separator(); breadcrumb.append(action(`${parent.branch.name} ${parent.branch.condition}`.trim(), () => openBranch(parent.beat, parent.branch, parents[index + 1]?.beat.id ?? context.owner.id), false, `path-${parent.beat.id}`)); } separator(); breadcrumb.append(el('strong', '', `${context.branch.name} ${context.branch.condition}`.trim())); }
+    const b = current(); if (b?.kind === 'condition') for (const branch of b.branches) breadcrumb.append(action(`Open ${branch.name} ${branch.condition} · ${count(branch.beats.length, 'beat')}`.replace(/\s+/g, ' ').trim(), () => openBranch(b, branch), false, `open-branch-${branch.id}`)); reel.append(breadcrumb);
   }
   function orderedReel() {
     const reel = el('section', 'sr-reel'); reel.ariaLabel = 'Ordered beat reel'; branchBreadcrumb(reel); const context = reelContext(), body = context?.branch.beats ?? scene().beats, trail = context?.trail ?? [scene().name];
-    const strip = el('div', 'sr-reel-strip'); strip.role = 'listbox'; strip.ariaLabel = 'Beats in story order';
+    const total = el('span', 'sr-reel-count', count(body.length, 'beat')); total.title = 'Use the arrow keys on a beat, or scroll the reel, to reach every beat.'; reel.querySelector('.sr-reel-target')!.append(total);
+    const strip = el('div', 'sr-reel-strip'); strip.role = 'group'; strip.ariaLabel = 'Beats in story order';
     if (!body.length) strip.append(el('p', 'sr-empty-branch', `${context?.branch.name ?? 'This branch'} has no beats yet.`));
-    body.forEach((b, i) => { strip.append(gap(body, trail, i)); const button = action('', () => { selectBeat(b.id); if (['dialogue', 'narration'].includes(b.kind)) focusText(); else focusSelected(); }, false, 'reel-beat'); button.className = 'sr-reel-beat'; button.dataset.reelBeat = b.id; button.dataset.beatKind = b.kind; button.dataset.selected = String(b.id === selected); button.role = 'option'; button.ariaSelected = String(b.id === selected); button.ariaLabel = `${name(b.id)}: ${brief(b)}`; button.tabIndex = b.id === selected || !body.some(b => b.id === selected) && i === 0 ? 0 : -1; button.append(el('span', '', `${number(b.id)} · ${label(b.kind)}`), el('p', '', brief(b))); button.querySelector('p')!.dataset.summary = b.id; button.onkeydown = e => navigateBeat(e, body, i); strip.append(button); });
+    body.forEach((b, i) => { strip.append(gap(body, trail, i)); const button = action('', () => { selectBeat(b.id); if (['dialogue', 'narration'].includes(b.kind)) focusText(); else focusSelected(); }, false, 'reel-beat'); button.className = 'sr-reel-beat'; button.dataset.reelBeat = b.id; button.dataset.beatKind = b.kind; button.dataset.selected = String(b.id === selected); button.ariaCurrent = b.id === selected ? 'true' : null; button.ariaLabel = `${name(b.id)}: ${brief(b)}`; button.tabIndex = b.id === selected || !body.some(b => b.id === selected) && i === 0 ? 0 : -1; button.append(el('span', '', `${number(b.id)} · ${label(b.kind)}`), el('p', '', brief(b))); button.querySelector('p')!.dataset.summary = b.id; button.onkeydown = e => navigateBeat(e, body, i); strip.append(button); });
     if (ending(body) < 0) strip.append(gap(body, trail, body.length)); reel.append(strip); return reel;
   }
   function shotReel(parent: HTMLElement) { const layout = el('div', 'sr-reel-layout'); const top = el('div', 'sr-shot-workspace'); if (!focused) top.append(preview()); top.append(inspector(!focused && !hideSaybox && innerWidth >= 900)); layout.append(top, orderedReel()); parent.append(layout); }
@@ -536,14 +568,14 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     if (track === 0) return number(b.id);
     if (track === 1) return b.kind === 'background' ? b.asset : '';
     if (track === 2) return ['showCharacter', 'changeAppearance', 'placement', 'hideCharacter'].includes(b.kind) ? b.kind === 'hideCharacter' ? `${b.speaker} hidden` : brief(b) : '';
-    if (track === 3) return ['dialogue', 'narration'].includes(b.kind) || innerWidth < 900 ? brief(b) : '';
+    if (track === 3) return ['dialogue', 'narration'].includes(b.kind) ? brief(b) : innerWidth < 900 || focused && innerWidth <= 1200 ? `${label(b.kind)} · ${brief(b)}` : '';
     if (track === 4) return ['playMusic', 'stopMusic', 'playSfx'].includes(b.kind) ? brief(b) : '';
     return !['dialogue', 'narration', ...mediaKinds].includes(b.kind) ? `${label(b.kind)} · ${brief(b)}` : '';
   }
   function updateTrackCells() {
     const route = columns(scene(), visibleBranches);
     for (const button of host.querySelectorAll<HTMLElement>('[data-track-beat]')) { const i = route.findIndex(c => c.beat.id === button.dataset.trackBeat); if (i < 0) continue; const b = route[i]!.beat, state = illustrate(route, i); button.ariaLabel = `${name(b.id)}: ${brief(b)}`;
-      for (const cell of button.querySelectorAll<HTMLElement>('[data-track]')) { const track = Number(cell.dataset.track); cell.textContent = trackText(b, track); cell.classList.toggle('sr-track-present', track === 1 && !!state.background || track === 2 && !!state.characters.size || track === 4 && !!state.music); cell.classList.toggle('sr-track-unknown', !!state.unknown.length); cell.title = state.unknown.length ? 'Illustrative source path. Conditions, Calls and custom source are not evaluated.' : cell.textContent ?? ''; }
+      for (const cell of button.querySelectorAll<HTMLElement>('[data-track]')) { const track = Number(cell.dataset.track); (cell.querySelector('.sr-track-copy') ?? cell).textContent = trackText(b, track); cell.classList.toggle('sr-track-present', track === 1 && !!state.background || track === 2 && !!state.characters.size || track === 4 && !!state.music); cell.classList.toggle('sr-track-unknown', !!state.unknown.length); cell.title = `${cell.textContent ?? ''}${state.unknown.length ? ' · Uncertain after a Condition, Call or custom source; these are not evaluated.' : ''}`; }
     }
   }
   function stageTracks(parent: HTMLElement) {
@@ -553,19 +585,21 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     for (const { beat: b } of route.filter(c => c.beat.kind === 'condition')) {
       const band = el('div', 'sr-track-band'); band.append(el('span', '', `${number(b.id)} Condition:`));
       for (const branch of b.branches) { const button = action(`${branch.name} ${branch.condition}`.trim(), () => openBranch(b, branch), false, `open-branch-${branch.id}`); button.ariaPressed = String(visibleBranches.get(b.id) === branch.id); band.append(button); }
-      if (visibleBranches.has(b.id)) band.append(action('Hide branches', () => { visibleBranches.delete(b.id); selected = b.id; reelBranch = ''; draw(); }, false, `hide-branches-${b.id}`));
+      if (visibleBranches.has(b.id)) band.append(action('Hide branches', () => { visibleBranches.delete(b.id); selected = b.id; reelBranch = ''; draw(); focusSelected(); }, false, `hide-branches-${b.id}`));
       const branch = b.branches.find(branch => branch.id === visibleBranches.get(b.id)); if (branch && !branch.beats.length) band.append(action(`+ Add beat to ${branch.name}`, () => picker(branch.beats, [...locate(scene(), b.id)!.trail, `${branch.name} ${branch.condition}`.trim()], 0))); bands.append(band);
     }
     heading.append(bands, el('span', 'sr-track-legend', 'Fill: shown · Dashed: uncertain'), action(allTracks ? 'Show 2 tracks' : 'Show all tracks', () => { allTracks = !allTracks; draw(); }, false, 'all-tracks')); dock.append(heading);
     const scroll = el('div', 'sr-tracks-scroll'); const grid = el('div', 'sr-track-grid'); grid.role = 'listbox'; grid.ariaLabel = 'Beats in story order'; grid.dataset.orientation = focused ? 'vertical' : 'horizontal'; grid.setAttribute('aria-orientation', focused ? 'vertical' : 'horizontal');
     const labels = el('div', 'sr-track-labels'); labels.ariaHidden = 'true'; const titles = ['Beat', 'Background', 'Characters', 'Words', 'Sound', 'Flow / state']; titles.forEach((title, i) => labels.append(el('span', `sr-track-label sr-track-${i}`, title))); grid.append(labels);
+    const wrappers = new Map<string, HTMLElement>(), inserts: { owner: Beat; after: string; control: HTMLElement }[] = [];
     for (const [i, column] of route.entries()) {
       const { beat: b, body, trail, index } = column; const wrapper = el('div', 'sr-track-column'); wrapper.role = 'presentation';
       const button = action('', () => selectBeat(b.id, true), false, 'track-beat'); button.className = 'sr-track-beat'; button.role = 'option'; button.ariaSelected = String(b.id === selected); button.dataset.selected = String(b.id === selected); button.dataset.trackBeat = b.id; button.dataset.beatKind = b.kind; button.tabIndex = b.id === selected ? 0 : -1;
-      titles.forEach((_title, track) => { const cell = el('span', `sr-track-cell sr-track-${track}`); cell.dataset.track = String(track); button.append(cell); }); button.onkeydown = e => navigateBeat(e, route.map(c => c.beat), i); wrapper.append(button);
-      if (!['choice', 'jump', 'return'].includes(b.kind)) { const add = gap(body, trail, index + 1); add.classList.add('sr-track-insert'); add.ariaLabel = `Add after ${name(b.id)}${b.kind === 'condition' ? ' and its branches' : ''}`; add.title = add.ariaLabel; wrapper.append(add); }
-      grid.append(wrapper);
+      titles.forEach((_title, track) => { const cell = el('span', `sr-track-cell sr-track-${track}`); cell.dataset.track = String(track); if (track === 3) cell.append(el('span', 'sr-track-copy')); button.append(cell); }); button.onkeydown = e => navigateBeat(e, route.map(c => c.beat), i); wrapper.append(button);
+      if (!['choice', 'jump', 'return'].includes(b.kind)) { const add = gap(body, trail, index + 1); add.classList.add('sr-track-insert'); add.ariaLabel = `Add after ${name(b.id)}${b.kind === 'condition' ? ' and its branches' : ''}`; add.title = add.ariaLabel; let last = i; if (b.kind === 'condition') while (route[last + 1] && route[last + 1]!.depth > column.depth) last++; inserts.push({ owner: b, after: route[last]!.beat.id, control: add }); }
+      wrappers.set(b.id, wrapper); grid.append(wrapper);
     }
+    for (const { owner, after, control } of inserts) { const wrapper = wrappers.get(after)!; if (owner.id !== after) control.style.top = `${24 * (1 + wrapper.querySelectorAll('.sr-track-insert').length)}px`; wrapper.append(control); }
     scroll.append(grid); dock.append(scroll); layout.append(dock); parent.append(layout);
   }
   function compareBar() {
@@ -578,13 +612,16 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   }
   function draw() {
     const mark = bookmark(); const selectors = ['.sr-workarea', '.sr-sheet', '.sr-reel-strip', '.sr-tracks-scroll', '.sr-inspector']; const scrolls = selectors.map(selector => { const node = frame.content.querySelector<HTMLElement>(selector); return { selector, top: node?.scrollTop ?? 0, left: node?.scrollLeft ?? 0 }; });
-    syncSelection(); frame.content.replaceChildren(); Object.assign(frame.content.dataset, { variant, focused: String(focused), treeOpen: String(treeOpen), stageExpanded: String(stageExpanded), allTracks: String(allTracks), edits: hasChanges() ? String(changes || 1) : '0', selected }); frame.shell.dataset.writingFocus = String(focused);
+    syncSelection(); const selectionChanged = renderedSelection !== selected, focusChanged = renderedFocused !== focused; frame.content.replaceChildren(); Object.assign(frame.content.dataset, { variant, focused: String(focused), treeOpen: String(treeOpen), stageExpanded: String(stageExpanded), allTracks: String(allTracks), edits: hasChanges() ? String(changes || 1) : '0', selected }); frame.shell.dataset.writingFocus = String(focused);
     const workspace = el('div', 'sr-workspace'); workspace.append(tree()); const main = el('main', 'sr-writing'); main.append(header()); const area = el('div', 'sr-workarea');
     if (variant === 'cue-sheet') cueSheet(area); else if (variant === 'shot-reel') shotReel(area); else stageTracks(area); main.append(area); workspace.append(main); frame.content.append(workspace);
     frame.shell.querySelector('.sr-state')?.remove(); const state = el('details', 'sr-state'); state.append(el('summary', '', 'Prototype state · memory only')); state.ontoggle = () => { if (state.open) { state.querySelector('pre')?.remove(); state.append(el('pre', '', JSON.stringify({ variant, focused, scene: sceneId, selected, manualPreviewBranch: manual, changes, scenes }, null, 2))); } }; frame.shell.querySelector('.app-footer')!.append(state);
     for (const area of host.querySelectorAll<HTMLTextAreaElement>('.sr-prose')) fit(area);
     for (const position of scrolls) { const node = frame.content.querySelector<HTMLElement>(position.selector); if (node) { node.scrollTop = position.top; node.scrollLeft = position.left; } }
-    refresh(); if (!mark?.owner || mark.owner === selected) restore(mark); revealSelection();
+    refresh(); if (!selectionChanged || !mark?.owner || mark.owner === selected) restore(mark);
+    if (focusChanged && focused && variant === 'shot-reel') area.scrollTop = 0;
+    else if (selectionChanged || focusChanged) revealSelection();
+    renderedSelection = selected; renderedFocused = focused;
   }
   for (const b of scene().beats) if (b.kind === 'condition' && (variant === 'cue-sheet' || context.state === 'branching')) expanded.add(b.id);
   draw(); status('Fictional sample · changes stay in this preview'); const cleanup = compareBar();
