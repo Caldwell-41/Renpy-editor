@@ -9,9 +9,11 @@ layout with Stage tracks. Production Story is unchanged.
 Kris has since approved independent refinement of all three, with one Opus 5.5 lead
 at high per mock and each lead's own Opus/Sol council at xhigh. The current target
 is 9.5/10 from both reviewers for each implemented mock. Main, Writing focus,
-properties, dialogs and secondary states all count. All Round 2 councils finished;
-their remaining fixes are implemented and verified. Kris requested screenshots and
-a pause here before the final council. These fixes have no new council scores.
+properties, dialogs and secondary states all count. Kris resumed the screenshot
+handoff and requested two more rounds, numbered 3 and 4. Round 3 is complete on
+`223c16ec`; its bounded fixes are implemented and verified. Round 4 now reviews the
+updated candidate with a separate read-only Opus/Sol xhigh council per mock. The
+parent owns implementation. Scores apply only to the artifact each council saw.
 
 ## Current comparison
 
@@ -104,14 +106,14 @@ Its measured stages meet all three size requirements, with Stage tracks measurin
 `closure/` fixes remaining text-field clipping and keyboard new-line focus. Its
 tracked journey and active-writing checks pass for all variants at wide and compact
 sizes. Fresh main/focus screenshots accompany both passes.
-The later `round-2-fixes/` evidence qualifies the current revision: 72 renders, the
-full tracked journey and 21 focused checks pass. It contains visual/focused captures
-at desktop, laptop and compact sizes, plus changed branch, picker and keyboard
-flows. The first focused attempt used an invalid laptop URL and checked scheduled
-focus before its animation frame; those failures are retained separately. All
-three Round 2 reports remain beside the evidence. No final council ran after these
-fixes. Do not treat diagnostic copies with altered assertions as passing an
-original check. Kris has paused the work for screenshot review.
+`round-2-fixes/` retains the earlier 72-render/full-journey/21-check pass and its
+initial test configuration failures. Round 3 reports are beside each variant's
+older reports. Current `round-3-fixes/` evidence passes 72 renders, the full tracked
+journey, 21 retained focused checks, 11 selection/navigation checks and 17 detail
+checks. Main/focus captures cover wide, laptop and compact sizes; `round-4-input/`
+has 72 secondary/dialog captures. The first detail attempt used nonexistent test
+selectors, and its report remains separate. Do not treat altered diagnostic copies
+as passing an original check. Round 4 uses fresh screenshots and source hashes.
 
 ### Historical baseline
 

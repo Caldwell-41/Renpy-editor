@@ -1,6 +1,6 @@
 # Current status
 
-## Story revamp paused for screenshot review
+## Story revamp additional council rounds
 
 [Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82) owns Cue sheet,
 Shot reel and Stage tracks on `codex/story-screen-prototypes`. Kris approved further
@@ -9,13 +9,19 @@ own Opus/Sol council. The target is 9.5/10 from both reviewers for each implemen
 mock, including Writing focus, dialogs and secondary states. The large WYSIWYG
 stage and three distinct authoring methods remain required.
 
-All three leads completed Round 2. Their findings are fixed; the updated 72-render
-matrix, full interaction journey and 21 focused checks pass. Kris requested a pause
-here to review a screenshot of each mock before a final council. No delegated work
-remains active, and these fixes have no new council scores. Detailed scope remains in
-[design notes](../design/story-revamp/README.md). No design is promoted, and production
-UI/future engine implementation remain outside scope. Local only; no PR or push.
-Earlier acceptance and protected recovery records remain below.
+Kris requested two further rounds, each mock with its own Opus/Sol council.
+Round 3 on `223c16ec` is complete; every score remains below 9.5. The parent has
+integrated its bounded findings. Current browser evidence in
+`council-v3/round-3-fixes/` passes 72 renders, the full authoring journey, 21 retained
+focused checks, 11 selection/navigation checks and 17 detail checks. Fresh main,
+Writing focus and 72 secondary/dialog captures support Round 4. The first detail
+attempt used nonexistent test selectors; its report is preserved separately.
+
+Round 4 reviews the updated candidate. The parent owns implementation and each
+mock has a separate read-only Opus 5.5/GPT-6.1 Sol xhigh pair. Detailed scope remains
+in [design notes](../design/story-revamp/README.md). No design is promoted;
+production UI and future engine implementation remain outside scope. Local only;
+no PR or push. Earlier acceptance and protected recovery records remain below.
 
 ## Variable text, ordered actions and nested canvas accepted
 
