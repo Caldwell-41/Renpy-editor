@@ -59,8 +59,8 @@ creating isolated branch `t3/mac-bars-imagebuttons-qualification` at `1c6ed025`.
 Initial readiness completed with verified Sol 6.1 xhigh settings. No capped operation was
 requested. The Windows SDK archive matches its published pin.
 
-Next actions are the frontend owner's real UI/core slices and coordinator-owned
-global lab browser gate. The approved reference remains pinned in the designer
+Next actions are the frontend owner's scoped review/fixes and coordinator-owned
+diagnosis of the global lab gate's compact Help popup failure. The approved reference remains pinned in the designer
 worktree. After the recorded automatic-review refusal, Kris explicitly authorized
 task-scoped private, hash-verified T3 transfers for recovery and qualification.
 The 909568-byte recovery bundle arrived in 28 checked chunks; its complete SHA256
@@ -68,7 +68,11 @@ and Git verification pass. All five missing source objects are imported under
 `refs/recovery/51-52-design-catalog/`, preserving existing refs and checkout files.
 The actual catalog loader passes 25 records and 12 approved revisions, including
 historical source fingerprints and retained capture hashes. The browser gate is
-still pending. Continue the frontend work independently.
+failed after 616 render cases and 15 groups: at 560x640, opening removal confirmation
+narrowed the measured content container from 463 to 448 px, with other recorded
+geometry/scroll unchanged. Cause is not established and later browser approval
+protection checks were not reached. The test worktree and full artifacts are retained.
+Continue the frontend work independently.
 The coordinator alone imports the new lab/records
 and registry registration; the frontend worker owns production files/tests and must
 not duplicate that import. Do not copy older shared DTOs from the design branch.

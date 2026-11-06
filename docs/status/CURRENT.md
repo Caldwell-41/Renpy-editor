@@ -27,7 +27,10 @@ Kris authorized task-scoped private T3 transfers. The verified recovery bundle i
 imported under a dedicated local Git namespace, preserving the checkout and existing
 refs. All five missing source objects are recovered; the catalog loader now passes
 all 25 records and 12 approved revisions, including fingerprints and capture hashes.
-The global browser gate remains pending. Frontend implementation proceeds independently.
+The global browser gate failed at compact Help removal confirmation: one measured
+container narrowed by 15 px. It completed 616 render cases and 15 groups before
+failure; later browser approval-protection checks were not reached. Diagnosis is
+focused on that exact layout assertion. Frontend implementation proceeds independently.
 The corrected Windows observer passes; both earlier failed campaigns stay recorded.
 #51 owns combined capped-operation accounting; Windows SDK use is 12/16 and all
 other counts are zero, with no reservation pending. Remaining Windows/macOS proof,

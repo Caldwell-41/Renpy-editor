@@ -833,3 +833,27 @@ plus target refresh; it is not a passing run or a performance qualification.
 The owner aligned the bound with the existing fifteen-second transport and then
 found a delayed-authoring admission lock defect. Preparation reservation is under
 focused verification. Draft-copy/recovery, visual checks and final review remain.
+
+## Global lab gate failed at compact removal confirmation, 2026-11-06
+
+Terra 6.1 max ran `npm run design:check` at exact integration head
+`195fcd831fd0a8202428e255be9a46a08589fa10` in its isolated clean test worktree.
+Pinned Node 24.19.0/npm 11.9.0 and Chrome 157.0.8103.38 were used; offline dependency
+installation passed. Synthetic approval tests passed. The browser run completed
+616 render cases and 15 groups, then failed the existing Help composition popup
+assertion at a 560x640 viewport. Opening removal confirmation changed one measured
+content width from 463 to 448 px; other reported geometry and scroll values were
+unchanged. Cause remains unestablished. Browser approval-protection checks later
+in the runner were not reached and are not passes.
+
+The retained report SHA256 is
+`9aa6ac7e1bdedceab9f4004380fa32363c7534e5d38b32598b26a5f78a69636e`;
+the full log hashes to
+`d360ebf446d66f56232fdf9f066c5131a7370f3c4fd3ae7871ce75914cce5c9b`.
+The screenshot manifest contains 278 images and hashes to
+`a013d9f367328335a4e47f0e8f7e148ee969b9e387d8d52cb3919c3676b76b3a`.
+The compact confirmation capture occurs after the failed assertion and was not
+produced. Exact ignored artifacts remain in the test worktree. Its Git status is
+clean, observed runner/Chrome processes exited and no listener remained owned by
+their process IDs. No SDK/helper/package/native start occurred. The coordinator
+owns the focused reproduction and any correction; approved sources remain pinned.
