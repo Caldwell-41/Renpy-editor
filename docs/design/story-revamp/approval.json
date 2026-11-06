@@ -3,6 +3,7 @@
   "screenId": "story-revamp",
   "currentApproved": null,
   "revisions": [
+    { "id": "combined-v1", "variantId": "combined", "approval": null },
     { "id": "cue-sheet-v2", "variantId": "cue-sheet", "approval": null },
     { "id": "stage-tracks-v1", "variantId": "stage-tracks", "approval": null },
     { "id": "shot-reel-v2", "variantId": "shot-reel", "approval": null }

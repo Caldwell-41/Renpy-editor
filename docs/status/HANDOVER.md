@@ -32,8 +32,27 @@ The three standalone mocks are currently served on LAN port 5175 from the primar
 checkout's ignored `.toolchains/story-lan/`. Preserve that server
 and its three files. Deliver a LAN-accessible review for the fourth mock too.
 Follow current browser-launch guidance and keep evidence/builds isolated to the new
-worktree. Its next action is to inspect #82 and the current stage/sidebar/reel,
-resolve genuine design questions with grill-me, then build the initial mock.
+worktree. The initial fourth mock is built in the `combined` variant. Kris confirmed
+Tracks first, equal panel height across modes, and branches expanded in scene
+context. These decisions are settled. The initial focused browser journey passes,
+including both bottom modes, Writing focus and nested drafts at all three sizes,
+all 20 beat editors, scene creation, branch moves, Choice/Call navigation and Undo.
+Typechecking, approval metadata and repository validation pass. Evidence lives in
+ignored `.toolchains/story-combined/initial/`; numbered `diagnosis-` folders retain
+failed checks and corrections. The design notes describe behavior and limitations.
+
+The new isolated Design Lab is running on port 5176. The existing 5175 server is
+untouched. Use pinned Node 24.19.0 and the copied worktree dependencies. Managed
+preview snapshots timed out twice; browser verification uses the shared Chrome
+launcher outside the sandbox and closes only its own browser. The managed check tab
+is closed. The work remains local; production code and native operations are outside
+scope.
+
+All requested council models/settings are available. Kris changed speed to Standard;
+use Codex `serviceTier: default` and Claude `fastMode: false`, retaining Opus/Sol
+xhigh and independent Astra high. The 48-case sample/theme/mode matrix, all three reference journeys and in-memory
+production-build exclusion pass. Round 1 is next against the frozen initial
+candidate. No review score exists yet. The current issue retains the five-round cap and actual task selection.
 
 ## Previous three-mock comparison
 

@@ -15,7 +15,7 @@ const inlineCss = css.replace(/(\d+(?:\.\d+)?)(?:d|s|l)?vh\b/g, (_, value) => `$
     return `${selectors}{${declarations.replace(/(^|;)\s*height:\s*100%\s*;?/g, '$1height:auto;')}}`;
   });
 const output = new URL('../../../../.toolchains/story-revamp/', import.meta.url); mkdirSync(output, { recursive: true });
-for (const variant of ['cue-sheet', 'shot-reel', 'stage-tracks']) {
+for (const variant of ['cue-sheet', 'shot-reel', 'stage-tracks', 'combined']) {
   const html = `<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Story prototype · ${variant}</title><style>${css}
 html,body{margin:0!important;height:auto!important;min-height:0!important;background:transparent!important;font-family:var(--font-ui);color:var(--text-primary)}#comparison{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px;padding:8px 0;font-size:11px;min-height:38px;box-sizing:border-box}#comparison label{display:flex;gap:7px;align-items:center;min-width:0}#comparison select{font:inherit;padding:4px 6px;min-height:26px;border-radius:0;max-width:160px}#comparison>span{margin-left:auto;color:var(--text-secondary);font-size:10px}#preview{height:calc(100dvh - 42px);background:var(--surface-app);position:relative;overflow:hidden}#preview .sr-shell{height:100%}@media(max-width:700px){#comparison>span{width:100%;margin:0}#preview{height:calc(100dvh - 65px)}#comparison{gap:6px 10px}#comparison select{max-width:140px}}
 </style></head><body data-variant="${variant}"><div id="comparison"></div><div id="preview"></div><script>${js.replaceAll('</script', '<\\/script')}</script></body></html>`;

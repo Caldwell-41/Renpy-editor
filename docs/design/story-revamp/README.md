@@ -18,6 +18,45 @@ The new Astra high chat owns that iteration, its grill-me clarification and the
 three-member council with the revised rubric. The earlier three mocks remain
 unapproved references; their completed comparison below is historical.
 
+## Fourth mock, initial candidate
+
+The `combined` variant keeps the Stage tracks game window and selected-beat editor.
+Tracks and Reel share the same model, selected beat, expanded branches and insertion
+target. Kris chose Tracks as the initial view, equal panel heights, and branches
+expanded within the surrounding scene. Only the bottom-view preference uses session
+storage; all story edits remain in memory.
+
+Conditions sit above the bottom panel and at the top of Writing focus. Branch
+controls open the selected body; entry and exit markers distinguish insertion
+inside a branch from insertion after its condition. The Reel retains surrounding
+scene beats. Writing focus hides the stage and retains the selected-beat editor.
+Add a beat has common actions, a searchable list, descriptions, explicit insertion
+ownership and ending-replacement warnings. Choice is nonterminal in this variant:
+authors can add a following beat for the no-available-options path. Jump and Return
+retain their ending behavior. The three reference variants keep their behavior.
+
+Run `npm run design:dev -- --port 5176` in `app/`, then open
+`/preview.html?screen=story-revamp&variant=combined&state=populated&theme=dark&viewport=wide`.
+The selected preview is also available on LAN port 5176. Port 5175's three-reference
+server is unchanged. Standalone exports include `combined.html`.
+
+Run the focused check from the repository root with
+`node app/design-lab/screens/story-revamp/combined-check.mjs`. It expects port
+5176 and uses the shared Chrome launcher. On macOS it requires scoped execution
+outside the agent sandbox. Current evidence is under ignored
+`.toolchains/story-combined/initial/`. The initial pass covers both bottom modes,
+Writing focus, nested draft/context retention at three sizes, every beat editor,
+scene validation/creation, branch moves, Choice/Call destination navigation,
+enlargement, dialogs and Undo. The normal stage measures 974 x 548 at 1600 x 1000,
+633 x 356 at 1100 x 720 and 486 x 273 at 560 x 640.
+
+The 48-case sample/theme/mode matrix, all three reference authoring journeys and
+in-memory production-build exclusion also pass. The initial candidate awaits its
+first three-member council. No score or approval
+is implied by browser checks. Earlier failed runs are retained under numbered
+`diagnosis-` directories, including the corrected focus-grid and compact-menu
+positioning defects, search-field Escape behavior, and source-dialog selector error.
+
 ## Three-mock reference
 
 Claude Opus 5.5 at high reasoning designed this revision after inspecting the

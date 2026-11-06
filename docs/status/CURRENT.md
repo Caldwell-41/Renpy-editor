@@ -17,6 +17,12 @@ Use grill-me for genuine further questions. The source chat owns this handoff;
 the new chat owns its branch, checks and review iterations. No push, PR, merge,
 production promotion or future engine implementation is selected.
 
+The initial fourth mock is built as `combined`. Its focused browser journey and
+48-case matrix pass, including the preserved reference journeys and production
+build exclusion. Kris confirmed Tracks first, equal bottom-panel height and
+branches in scene context. The new LAN preview uses port 5176. Its first council
+is next; there are no new scores or production approvals.
+
 The three-mock comparison and score-only rescore are complete. Current reference
 code is `app/design-lab/screens/story-revamp/`; images and browser evidence remain
 under ignored `council-v3/round-5-fixes/` in the primary checkout. Keep the existing
