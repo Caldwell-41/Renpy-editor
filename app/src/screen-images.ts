@@ -932,7 +932,7 @@ export class ScreenImages {
     try {
       if (!replacement) await this.media.load(asset);
       if (!this.active() || generation !== this.pickerGeneration || current.key !== this.value()?.key) return;
-      if(this.referencePicker){const picker=this.referencePicker;picker.choose({assetId:asset.id,expectedAssetSha256:asset.sha256,...(replacement?{replacementSha256:replacement.sha256}:{})},replacement?{...asset,naturalWidth:replacement.width??undefined,naturalHeight:replacement.height??undefined}:asset);this.closePicker();return;}
+      if(this.referencePicker){const picker=this.referencePicker;this.closePicker();picker.choose({assetId:asset.id,expectedAssetSha256:asset.sha256,...(replacement?{replacementSha256:replacement.sha256}:{})},replacement?{...asset,naturalWidth:replacement.width??undefined,naturalHeight:replacement.height??undefined}:asset);return;}
       const draft = { ...current, assetId: asset.id, expectedSha: asset.sha256, replacement };
       const natural = replacement ?? this.media.get(asset.id, asset.sha256)?.media;
       if (this.locked(draft) && natural?.width && natural.height && valid(draft.width))
@@ -1141,6 +1141,7 @@ export class ScreenImages {
         if (this.dialog === dialog) {
           this.dialog = undefined;
           this.pickerGeneration++;
+          if(this.referencePicker){const picker=this.referencePicker;this.referencePicker=undefined;picker.trigger.focus({preventScroll:true});}
         }
         this.focus("asset");
       };

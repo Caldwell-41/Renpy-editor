@@ -4,11 +4,12 @@ import type { IntegerBarBinding, BarAppearance, ScreenControlCommand, BarSample,
 import { actionDraft, prepareInteraction, renderActions, captureActionFocus, restoreActionFocus, type ActionDraft, type InteractionContext } from './screen-interactions.ts';
 import type { ScreenLayoutEditor, LayoutReservation } from './screen-layout.ts';
 import type { ScreenImages } from './screen-images.ts';
+import { validateField } from './authoring-input.ts';
 
 interface Draft {
   key:string; document:ScreenDocument; screenId:string; node?:ScreenNode; parentId:string;
   binding:IntegerBarBinding; appearance:BarAppearance; width:string; height:string;
-  context?:InteractionContext; problem?:{text:string;field?:string}; focus?:string;
+  context?:InteractionContext; problem?:{text:string;field?:string;validation?:boolean}; invalidFields?:Set<string>; focus?:string;
   caret?:{start:number|null;end:number|null};
   kind:'bar'|'imagebutton'; appearances?:Partial<ImageButtonAppearances>; actions?:ActionDraft; keepRatio?:boolean;
 }
@@ -36,6 +37,7 @@ export class ScreenControlEditor {
   private preparing=false;
   private disposed=false;
   private submitted?:{draft:Draft;command:ScreenControlCommand;layout:LayoutReservation};
+  private readonly validators=new Map<string,()=>void>();
   private readonly expanded=new Map<string,boolean>();
   constructor(private readonly host:Host,private readonly layout:ScreenLayoutEditor,private readonly images:ScreenImages){}
   private key(view:CompositionView){return `${view.screenId}:${view.selected.id}`;}
@@ -74,7 +76,7 @@ export class ScreenControlEditor {
       ...(view.selected.kind==='imagebutton'?{appearances:structuredClone(view.selected.imageButtonAppearances??{}),...(view.selected.actions?{actions:actionDraft(view.selected.actions)}:{})}:{}),
       binding:structuredClone(view.selected.barBinding??{variableId:'',minimum:'0',maximum:'100'}),appearance:structuredClone(view.selected.barAppearance??{leftBar:null,rightBar:null,thumb:null}),width:size(view.selected,'xsize',360),height:size(view.selected,'ysize',24),context:structuredClone(this.host.interaction())};
   }
-  private store(draft:Draft){if(!draft.node)this.addition=draft;else this.drafts.set(draft.key,draft);draft.problem=undefined;this.showProblem(draft);this.sync();this.host.preview();}
+  private store(draft:Draft){if(!draft.node)this.addition=draft;else this.drafts.set(draft.key,draft);if(draft.problem?.validation){if(draft.problem.field){try{this.validate(draft,draft.problem.field);draft.problem=undefined;}catch(error){if(draft.problem)draft.problem.text=(error as {text:string}).text;}}else if(!draft.actions?.error)draft.problem=undefined;}this.showProblem(draft);this.sync();this.host.preview();}
   synthetic(view:CompositionView):ScreenNode|undefined {
     const d=this.addition;if(!d||d.screenId!==view.screenId)return;
     const parent=view.nodes.find(n=>n.id===d.parentId),start=1+Math.max(...view.nodes.map(n=>n.span.end));
@@ -84,7 +86,7 @@ export class ScreenControlEditor {
   layoutNodes(view:CompositionView){const node=this.synthetic(view);return node?[...view.nodes,node]:view.nodes;}
   render(card:HTMLElement,view:CompositionView):boolean {
     if(!this.addition&&!['bar','imagebutton'].includes(view.selected.kind))return false;
-    this.card=card;const d=this.value(view);this.mounted=d;
+    this.card=card;this.validators.clear();const d=this.value(view);this.mounted=d;
     const oldScroll=card.querySelector('.sce-body')?.scrollTop??0;
     card.replaceChildren();card.classList.add('screen-control-card');
     const title=el('h2','sce-title',`${d.node?'':'Add '}${d.kind==='bar'?'Value bar':'Image button'}`);title.tabIndex=-1;
@@ -99,13 +101,14 @@ export class ScreenControlEditor {
       body.append(container);const jump=button(name,()=>{if(container instanceof HTMLDetailsElement)container.open=true;container.scrollIntoView({block:'nearest'});container.querySelector<HTMLElement>('input,select,button')?.focus({preventScroll:true});});nav.append(jump);return section;
     };
     const field=(parent:HTMLElement,name:string,raw:string,edit:(raw:string)=>void)=>{
-      const label=el('label','sce-field',name),input=el('input');input.type='text';input.setAttribute('aria-label',name);input.value=raw;input.inputMode='numeric';input.onfocus=()=>{d.focus=name;};input.oninput=()=>{edit(input.value);this.store(d);};label.append(input);parent.append(label);return input;
+      const label=el('label','sce-field',name),input=el('input');input.type='text';input.setAttribute('aria-label',name);input.value=raw;input.inputMode='numeric';input.onfocus=()=>{d.focus=name;};input.addEventListener('input',()=>{edit(input.value);this.store(d);});label.append(input);parent.append(label);this.registerField(input,d,name);return input;
     };
     if(d.kind==='bar'){
     const binding=group('Binding'),choose=el('select');choose.setAttribute('aria-label','Choose integer variable');choose.onfocus=()=>{d.focus='Choose integer variable';};
     const variables=d.context?.variables.filter(v=>v.variableType==='int')??[];
     if(!variables.some(v=>v.id===d.binding.variableId)){const option=el('option','',d.binding.variableId?'Original integer unavailable':'Choose an existing integer');option.value=d.binding.variableId;choose.append(option);}
-    for(const variable of variables){const option=el('option','',variable.technicalName);option.value=variable.id;choose.append(option);}choose.value=d.binding.variableId;choose.onchange=()=>{d.binding.variableId=choose.value;this.store(d);};
+    for(const variable of variables){const option=el('option','',variable.technicalName);option.value=variable.id;choose.append(option);}choose.value=d.binding.variableId;choose.addEventListener('change',()=>{d.binding.variableId=choose.value;this.store(d);});
+    this.registerField(choose,d,'Choose integer variable');
     const label=el('label','sce-field','Integer variable');label.append(choose);binding.append(label);
     const bounds=el('div','sce-pair');field(bounds,'Minimum',d.binding.minimum,raw=>d.binding.minimum=raw);field(bounds,'Maximum',d.binding.maximum,raw=>d.binding.maximum=raw);binding.append(bounds);
     const appearance=group('Appearance');
@@ -128,37 +131,39 @@ export class ScreenControlEditor {
     const footer=el('footer','sce-apply'),state=el('p','sce-state');state.ariaLive='polite';footer.append(state,button('Cancel',()=>this.cancelCurrent()),button('Apply changes',()=>void this.apply(),true));card.append(footer);
     const tools=el('div','sce-tools');tools.append(button('View in Source',this.host.source));this.host.order(tools);body.append(tools);
     card.onkeydown=event=>{if(event.isComposing||event.keyCode===229)return;if(event.key==='Escape'){event.preventDefault();event.stopPropagation();this.cancelCurrent();}else if(event.key==='Enter'&&(event.ctrlKey||event.metaKey||event.target instanceof HTMLInputElement)){event.preventDefault();event.stopPropagation();void this.apply();}};
-    body.scrollTop=oldScroll;this.sync();this.showProblem(d);
+    body.scrollTop=oldScroll;this.sync();this.showProblem(d);for(const name of [...d.invalidFields??[]]){try{this.validators.get(name)?.();}catch{ /* Restore the reported field error. */ }}
     if(this.drafts.has(d.key)||this.addition===d){if(d.focus){this.focus(d.focus);const input=card.querySelector<HTMLInputElement>(`input[aria-label="${d.focus}"]`);if(input&&d.caret?.start!=null&&d.caret.end!=null)input.setSelectionRange(d.caret.start,d.caret.end);}else if(d.actions){const section=card.querySelector<HTMLElement>('.siv-actions');if(section)restoreActionFocus(section,d.actions);}}
     return true;
   }
+  private registerField(input:HTMLInputElement|HTMLSelectElement,d:Draft,name:string){const validate=validateField(input,()=>{try{this.validate(d,name);d.invalidFields?.delete(name);}catch(error){(d.invalidFields??=new Set()).add(name);throw Error((error as {text:string}).text);}});this.validators.set(name,validate);}
   private updateAssetNames(){const view=this.host.view();if(!view)return;const d=this.value(view);for(const [key,name]of states){const reference=d.appearances?.[key],row=this.card?.querySelector<HTMLElement>(`[aria-label="Choose ${name.toLowerCase()} image"]`);const text=row?.querySelector('.sce-asset-words>span');if(text&&reference){const asset=this.images.assetForReference(reference.assetId);text.textContent=asset?.status==='available'?asset.displayName:asset?.status==='changed'?'Changed image':'Missing image';}const fallback=chains[key].find(state=>d.appearances?.[state]),resolved=fallback&&d.appearances?.[fallback];if(row&&resolved&&!row.querySelector('img')){const image=this.images.referenceThumbnail(resolved);if(image){image.classList.toggle('sce-fallback',!reference);row.prepend(image);}}}}
   private dimension(d:Draft,key:'width'|'height',raw:string){d[key]=raw;if(d.kind==='imagebutton'&&d.keepRatio&&validSize(raw)){const asset=d.appearances?.normal&&this.images.assetForReference(d.appearances.normal.assetId);if(asset?.naturalWidth&&asset.naturalHeight){const peer=key==='width'?'height':'width';d[peer]=String(Math.max(1,Math.round(Number(raw)*(key==='width'?asset.naturalHeight/asset.naturalWidth:asset.naturalWidth/asset.naturalHeight))));const input=this.card?.querySelector<HTMLInputElement>(`[aria-label="${peer==='width'?'Width':'Height'}"]`);if(input)input.value=d[peer];}}}
   sync(){if(!this.card||this.disposed)return;const view=this.host.view();if(!view)return;const current=this.value(view);const ownLayout=this.layout.currentDraft();if(ownLayout&&current.node&&!this.drafts.has(current.key))this.drafts.set(current.key,current);const dirty=this.addition===current||this.drafts.has(current.key)||!!ownLayout;const state=this.card.querySelector('.sce-state');if(state)state.textContent=this.isSaving()?'Applying changes':dirty?'Unsaved changes':'No pending changes';for(const b of this.card.querySelectorAll<HTMLButtonElement>('.sce-apply button'))b.disabled=this.isSaving()||!dirty;for(const input of this.card.querySelectorAll<HTMLInputElement>('.sce-field input'))input.readOnly=this.isSaving();for(const select of this.card.querySelectorAll<HTMLSelectElement>('.sce-field select'))select.disabled=this.isSaving();for(const b of this.card.querySelectorAll<HTMLButtonElement>('.sce-image-state button,.sce-color button,.sce-nav button'))b.disabled=this.isSaving();const actions=this.card.querySelector<HTMLFieldSetElement>('.siv-actions fieldset');if(actions)actions.disabled=this.isSaving()||this.host.writeBlocked()||current.context?.owner?.kind==='component'||!current.context;const add=this.card.querySelector<HTMLSelectElement>('.siv-add');if(add)add.disabled=this.isSaving()||this.host.writeBlocked()||current.context?.owner?.kind==='component'||!current.context||(current.actions?.rows.length??0)>=8;}
   private focus(name?:string){const control=name?[...this.card?.querySelectorAll<HTMLElement>('[aria-label]')??[]].find(n=>(n.getAttribute('aria-label')??n.ariaLabel)===name):this.card?.querySelector<HTMLElement>('.sce-title');if(!control)return;for(let p=control.parentElement;p&&p!==this.card;p=p.parentElement)if(p instanceof HTMLDetailsElement)p.open=true;control.scrollIntoView({block:'nearest'});control.focus({preventScroll:true});}
   private showProblem(d:Draft){this.card?.querySelectorAll('.sce-error').forEach(n=>n.remove());this.card?.querySelectorAll('[data-control-invalid]').forEach(n=>{n.removeAttribute('aria-invalid');n.removeAttribute('aria-describedby');n.removeAttribute('data-control-invalid');});if(!d.problem)return;
     const p=el('p','sce-error',d.problem.text);p.role='alert';p.id='sce-current-error';const target=[...this.card?.querySelectorAll<HTMLElement>('[aria-label]')??[]].find(n=>(n.getAttribute('aria-label')??n.ariaLabel)===d.problem?.field);
-    if(target){target.setAttribute('aria-invalid','true');target.setAttribute('data-control-invalid','');target.setAttribute('aria-describedby',p.id);(target.closest('label')??target).append(p);}else this.card?.querySelector('.sce-apply')?.prepend(p);
+    if(d.problem.validation&&d.problem.field){try{this.validators.get(d.problem.field)?.();}catch{ /* Shared field feedback owns the inline error. */ }this.card?.querySelector('.sce-apply')?.prepend(p);}
+    else if(target){target.setAttribute('aria-invalid','true');target.setAttribute('data-control-invalid','');target.setAttribute('aria-describedby',p.id);(target.closest('label')??target).append(p);}else this.card?.querySelector('.sce-apply')?.prepend(p);
   }
-  private fail(d:Draft,text:string,field?:string){d.problem={text,field};this.showProblem(d);const nativeError=!field&&this.card?.querySelector<HTMLElement>('.siv-actions [aria-invalid],.screen-layout [aria-invalid]');if(nativeError){nativeError.scrollIntoView({block:'nearest'});nativeError.focus({preventScroll:true});}else this.focus(field??d.focus);this.host.note(text,true);}
+  private fail(d:Draft,text:string,field?:string,validation=false){d.problem={text,field,validation};this.showProblem(d);const nativeError=!field&&this.card?.querySelector<HTMLElement>('.siv-actions [aria-invalid],.screen-layout [aria-invalid]');if(nativeError){nativeError.scrollIntoView({block:'nearest'});nativeError.focus({preventScroll:true});}else this.focus(field??d.focus);this.host.note(text,true);}
   cancelCurrent():boolean {
     const view=this.host.view();if(!view||this.isSaving())return false;if(this.host.writeBlocked()){this.host.cancelCopy();return true;}
     const d=this.value(view);if(!this.addition&&!this.drafts.has(d.key)&&!this.layout.hasNodeDraft(view.document,view.screenName,view.selected))return false;
     this.layout.cancelCurrent();this.drafts.delete(d.key);this.addition=undefined;this.mounted=undefined;this.host.redraw();this.focus(d.focus);this.host.preview();this.host.note('Changes cancelled. No source was written.');return true;
   }
-  private validate(d:Draft){
+  private validate(d:Draft,completed?:string){
     if(d.kind==='bar'){
-    if(!d.context?.variables.some(v=>v.id===d.binding.variableId&&v.variableType==='int'))throw {text:'Choose an existing integer. Your draft is retained.',field:'Choose integer variable'};
-    for(const [key,label]of [['minimum','Minimum'],['maximum','Maximum']]as const)if(!/^(0|-[1-9]\d*|[1-9]\d*)$/.test(d.binding[key])||BigInt(d.binding[key])< -9007199254740991n||BigInt(d.binding[key])>9007199254740991n)throw {text:'Use a whole decimal number from -9007199254740991 to 9007199254740991.',field:label};
-    const span=BigInt(d.binding.maximum)-BigInt(d.binding.minimum);if(span<=0n||span>9007199254740991n)throw {text:'Maximum must exceed Minimum with an exactly representable range.',field:'Maximum'};
-    for(const [key,label]of [['leftBar','Filled'],['rightBar','Empty'],['thumb','Thumb']]as const)if(d.appearance[key]&&!/^#(?:[\da-f]{3,4}|[\da-f]{6}|[\da-f]{8})$/i.test(d.appearance[key]!))throw {text:'Use a literal hex color or leave it blank.',field:`${label} color`};
-    }else if(!d.appearances?.normal)throw {text:'Choose a normal UI image. Your draft is retained.',field:'Choose normal image'};
-    for(const key of ['width','height']as const)if(!validSize(d[key]))throw {text:'Use a whole pixel size from 1 to 16384. Your draft is retained.',field:key==='width'?'Width':'Height'};
+    if((!completed||completed==='Choose integer variable')&&!d.context?.variables.some(v=>v.id===d.binding.variableId&&v.variableType==='int'))throw {text:'Choose an existing integer. Your draft is retained.',field:'Choose integer variable'};
+    for(const [key,label]of [['minimum','Minimum'],['maximum','Maximum']]as const)if((!completed||completed===label)&&(!/^(0|-[1-9]\d*|[1-9]\d*)$/.test(d.binding[key])||BigInt(d.binding[key])< -9007199254740991n||BigInt(d.binding[key])>9007199254740991n))throw {text:'Use a whole decimal number from -9007199254740991 to 9007199254740991.',field:label};
+    if((!completed||['Minimum','Maximum'].includes(completed))&&[d.binding.minimum,d.binding.maximum].every(raw=>/^(0|-[1-9]\d*|[1-9]\d*)$/.test(raw))){const span=BigInt(d.binding.maximum)-BigInt(d.binding.minimum);if(span<=0n||span>9007199254740991n)throw {text:'Maximum must exceed Minimum with an exactly representable range.',field:completed??'Maximum'};}
+    for(const [key,label]of [['leftBar','Filled'],['rightBar','Empty'],['thumb','Thumb']]as const)if((!completed||completed===`${label} color`)&&d.appearance[key]&&!/^#(?:[\da-f]{3,4}|[\da-f]{6}|[\da-f]{8})$/i.test(d.appearance[key]!))throw {text:'Use a literal hex color or leave it blank.',field:`${label} color`};
+    }else if((!completed||completed==='Choose normal image')&&!d.appearances?.normal)throw {text:'Choose a normal UI image. Your draft is retained.',field:'Choose normal image'};
+    for(const key of ['width','height']as const)if((!completed||completed===(key==='width'?'Width':'Height'))&&!validSize(d[key]))throw {text:'Use a whole pixel size from 1 to 16384. Your draft is retained.',field:key==='width'?'Width':'Height'};
   }
   async apply(){
     const view=this.host.view();if(!view||view.busy||this.isSaving())return;const d=this.value(view);if(this.host.writeBlocked()){this.fail(d,'Reload or cancel the copy before applying.');return;}
     let layout:ReturnType<ScreenLayoutEditor['currentDraft']>;
-    try{this.validate(d);layout=this.layout.currentDraft(true);}catch(error){const e=error as {text?:string;field?:string;message?:string};this.fail(d,e.text??e.message??'Invalid values.',e.field);return;}
+    try{this.validate(d);layout=this.layout.currentDraft(true);}catch(error){const e=error as {text?:string;field?:string;message?:string};this.fail(d,e.text??e.message??'Invalid values.',e.field,true);return;}
     if(layout&&layout.document.revision!==d.document.revision){this.fail(d,'Control and layout use different Source revisions. Input retained.');return;}
     if(d.document.revision!==view.document.revision||d.context?.authoringRevision!==this.host.interaction()?.authoringRevision){this.fail(d,'Source or variables changed after this draft started. Input retained.');return;}
     const common={width:Number(d.width),height:Number(d.height),...(layout?{layout:layout.values}:{})};
@@ -170,7 +175,7 @@ export class ScreenControlEditor {
     else {
       try{await this.images.refreshAssets();for(const [key,name]of states){const ref=d.appearances?.[key];if(!ref)continue;const asset=this.images.assetForReference(ref.assetId);if(!asset||asset.status!=='available'&&!ref.replacementSha256){this.fail(d,`${name} image is missing or changed. Choose an available UI image.`,`Choose ${name.toLowerCase()} image`);return;}}
         const values={...common,appearances:d.appearances as ImageButtonAppearances,interaction:prepareInteraction(d.context!,d.actions)};command=d.node?{type:'imageButton',nodeId:d.node.id!,...values}:{type:'addImageButton',parentId:d.parentId,...values};
-      }catch(error){const section=this.card?.querySelector<HTMLElement>('.siv-actions');if(section&&d.actions){renderActions(section,d.actions,d.context,false,()=>this.store(d));restoreActionFocus(section,d.actions);const target=section.querySelector<HTMLElement>('[aria-invalid]');target?.focus({preventScroll:true});target?.scrollIntoView({block:'nearest'});}this.fail(d,(error as Error).message);return;}
+      }catch(error){const section=this.card?.querySelector<HTMLElement>('.siv-actions');if(section&&d.actions){renderActions(section,d.actions,d.context,false,()=>this.store(d));restoreActionFocus(section,d.actions);const target=section.querySelector<HTMLElement>('[aria-invalid]');target?.focus({preventScroll:true});target?.scrollIntoView({block:'nearest'});}this.fail(d,(error as Error).message,undefined,true);return;}
     }
     if(this.disposed||!this.host.current())return;
     const submitted={draft:d,command,layout:reservation};this.submitted=submitted;this.sync();

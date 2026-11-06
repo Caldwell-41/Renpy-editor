@@ -51,6 +51,39 @@ try{
  const catalog=await call('screens.list');
  const created=await call('screens.create',{name:'controls_dialog',kind:'dialog',expectedProjectRevision:catalog.projectRevision,expectedSourceMapRevision:catalog.sourceMapRevision,expectedInventoryRevision:catalog.inventoryRevision});
  const owner=created.owned.find(o=>o.name==='controls_dialog'),before=await source(owner.path);
+ if(process.argv.includes('--field-review')){
+  await mount(owner);button('Add element');workspace.panel.querySelector('[data-kind="bar"]').click();change('Choose integer variable',coins.id);
+  const width=control('Width');change('Width','bad');assert.notEqual(width.getAttribute('aria-invalid'),'true','unfinished input stays unmarked');width.dispatchEvent(new Event('blur'));assert.equal(width.getAttribute('aria-invalid'),'true','blur reports invalid width');
+  change('Width','still bad');assert.equal(width.getAttribute('aria-invalid'),'true','an invalid correction keeps its error');change('Height','30');assert.equal(width.getAttribute('aria-invalid'),'true','unrelated edit retains width error');change('Width','360');assert.notEqual(width.getAttribute('aria-invalid'),'true');
+  change('Minimum','-');control('Minimum').dispatchEvent(new Event('blur'));assert.equal(control('Minimum').getAttribute('aria-invalid'),'true');change('Minimum','0');
+  change('Filled color','#wrong');control('Filled color').dispatchEvent(new Event('blur'));assert.equal(control('Filled color').getAttribute('aria-invalid'),'true');
+  change('Width','');button('Apply changes');assert.equal(control('Width').value,'');assert.equal(writes.length,0);button('Cancel');assert.equal(workspace.hasDraft(),false);assert.equal(await source(owner.path),before);
+  stage('field-completion errors retain invalid corrections and survive unrelated edits; valid input clears them; no write');result.passed=true;
+ }else if(process.argv.includes('--component-review')){
+  const choice=await child.request({driver:'chooseImage'});await call('asset.import',{authorityId:choice.authorityId,kind:'uiImage',technicalName:'station_seal',displayName:'Station seal',characterId:null,expression:null});browser.HTMLImageElement.prototype.decode=async()=>{};
+  const asset=(await call('authoring.list')).assets.find(a=>a.relativePath==='game/images/ui station_seal.png');
+  const makePanel=async name=>{const list=await call('screens.list');const made=await call('screens.create',{name,kind:'panel',expectedProjectRevision:list.projectRevision,expectedSourceMapRevision:list.sourceMapRevision,expectedInventoryRevision:list.inventoryRevision});return made.owned.find(o=>o.name===name);};
+  const first=await makePanel('first_control_use');let doc=await call('screens.inspect',{path:first.path});let added=await call('screens.compose',{screenId:first.id,expectedRevision:doc.revision,command:{type:'add',parentId:first.rootId,kind:'fixed',text:''}});const groupId=added.selectedId;
+  const appearances={normal:{assetId:asset.id,expectedAssetSha256:asset.sha256},hover:null,selected:null,selectedHover:null,disabled:null,selectedDisabled:null};
+  added=await call('screens.compose',{screenId:first.id,expectedRevision:added.document.revision,command:{type:'addImageButton',parentId:groupId,appearances,width:240,height:64,interaction:{expectedAuthoringRevision:added.document.authoringRevision,expectedTargetRevisions:[],actions:[]}}});
+  await call('screens.componentPrepareExtract',{screenId:first.id,nodeId:groupId,expectedRevision:added.document.revision});const target=await call('screens.resolveTarget',{binding:{screenId:first.id,sourceName:first.name}});
+  const extracted=await call('screens.componentExtract',{target:target.binding,expected:target.revisions,expectedProjectRevision:(await call('screens.list')).projectRevision,nodeId:groupId,name:'image_control_component'});
+  const second=await makePanel('second_control_use'),comp=(await call('screens.list')).owned.find(o=>o.id===extracted.componentId);
+  const componentTarget=await call('screens.resolveTarget',{binding:{screenId:comp.id,sourceName:comp.name}}),secondTarget=await call('screens.resolveTarget',{binding:{screenId:second.id,sourceName:second.name}});
+  await call('screens.componentPlace',{component:componentTarget.binding,expectedComponent:componentTarget.revisions,target:secondTarget.binding,expectedTarget:secondTarget.revisions,parentId:second.rootId});
+  await mount(comp);const image=(await call('screens.inspect',{path:comp.path})).screens[0].nodes.find(n=>n.kind==='imagebutton');button('1  Choose');workspace.panel.querySelector(`[data-node-id="${image.id}"]`).dispatchEvent(new browser.MouseEvent('dblclick',{bubbles:true}));
+  const componentSource=await source(comp.path),writeCount=writes.length;change('Width','300');button('Apply changes');
+  const review=()=>[...document.querySelectorAll('dialog')].find(d=>d.ariaLabel==='Review component changes');await settle(()=>review()||writes.length>writeCount,'shared dimension review');assert(review(),'size-only imagebutton changes require the shared-component review');
+  assert.match(review().textContent,/First Control Use/i);assert.match(review().textContent,/Second Control Use/i);const cells=[...review().querySelectorAll('.screen-component-changes tbody td')].map(n=>n.textContent);assert.deepEqual(cells,['Width','240','300']);assert.equal(await source(comp.path),componentSource);
+  [...review().querySelectorAll('button')].find(b=>b.textContent==='Keep editing').click();await settle(()=>idle(),'component review cancelled');assert.equal(writes.length,writeCount);assert.equal(control('Width').value,'300');assert.equal(workspace.hasDraft(),true);
+  stage('shared component imagebutton width-only edit lists both affected screens and dimensions before any write; Keep editing retains draft');result.passed=true;
+ }else if(process.argv.includes('--picker-review')){
+  const choice=await child.request({driver:'chooseImage'});await call('asset.import',{authorityId:choice.authorityId,kind:'uiImage',technicalName:'station_seal',displayName:'Station seal',characterId:null,expression:null});browser.HTMLImageElement.prototype.decode=async()=>{};
+  await mount(owner);button('Add element');workspace.panel.querySelector('[data-kind="imagebutton"]').click();
+  const nativeFocus=browser.HTMLElement.prototype.focus;browser.HTMLElement.prototype.focus=function(...args){const modal=document.querySelector('dialog[open]');if(modal&&!modal.contains(this))return;return nativeFocus.apply(this,args);};
+  try{control('Choose normal image').click();await settle(()=>[...document.querySelectorAll('button')].some(b=>b.ariaLabel==='Use Station seal'),'reference picker');[...document.querySelectorAll('button')].find(b=>b.ariaLabel==='Use Station seal').click();await settle(()=>!document.querySelector('dialog.screen-image-dialog'),'reference picker closes');assert.equal(document.activeElement===control('Choose normal image'),true,'native modal rules permit replacement trigger focus only after close');assert.equal(writes.length,0);}finally{browser.HTMLElement.prototype.focus=nativeFocus;}
+  stage('reference picker closes before replacement-trigger focus under native modal-inert focus rules (synthetic DOM)');result.passed=true;
+ }else{
  await mount(owner);button('Add element');
  const addBar=workspace.panel.querySelector('[data-kind="bar"]');assert(addBar,'Bar available in the actual Add element palette');addBar.click();
  change('Choose integer variable',coins.id);change('Minimum','-10');change('Maximum','90');change('Width','360');change('Height','24');
@@ -135,6 +168,7 @@ try{
  const sourceBase=await call('source.open',{path:owner.path}),sourceDraft=await call('source.updateDraft',{path:owner.path,expectedBaseRevision:sourceBase.baseRevision,text:removed,selectionStart:0,selectionEnd:0});await call('source.save',{path:owner.path,expectedBaseRevision:sourceDraft.baseRevision,expectedDraftVersion:sourceDraft.draftVersion});await workspace.load();
  const recovered=control('Retained control draft');assert.equal(recovered.readOnly,true);assert(recovered.value.includes('455'));assert.equal(await source(owner.path),removed);button('Discard retained control draft');assert.equal(workspace.hasDraft(),false);
  stage('Source-removed control retains recoverable raw draft without restoring or overwriting source');result.passed=true;
+ }
 }catch(error){result.failure={message:error.message,stack:error.stack,html:workspace?.panel.outerHTML};throw error;}
 finally{workspace?.dispose();await browser.happyDOM.close();try{await child.stop();await assert.rejects(access(scratch));result.cleanupComplete=true;}finally{result.driver=child.exitStatus();if(previewData)await writeFile(join(output,'preview-data.json'),JSON.stringify(previewData,null,2)+'\n');await writeFile(join(output,'result.json'),JSON.stringify(result,null,2)+'\n');}}
 console.log('PASS actual control UI -> core source/history. No SDK/helper/native claim.');
