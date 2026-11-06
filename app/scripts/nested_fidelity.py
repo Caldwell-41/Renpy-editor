@@ -3,7 +3,8 @@ import json
 import math
 from pathlib import Path
 
-from PIL import Image, ImageChops
+from PIL import Image
+from fidelity_comparison import compare_frame
 from base_help_fidelity import digest
 
 REPO = Path(__file__).resolve().parents[2]
@@ -141,15 +142,9 @@ def compare(helper, normal, output, *, expected_candidate, core_test):
         a = next(row for row in h['records'] if tuple(row['aspect']) == aspect)
         b = next(row for row in n['records'] if tuple(row['aspect']) == aspect)
         assert a['drawPerVirtual'] == b['drawPerVirtual']
-        with Image.open(helper / a['filename']) as left, Image.open(normal / b['filename']) as right:
-            difference = ImageChops.difference(left.convert('RGBA'), right.convert('RGBA'))
-        maximum = difference.getchannel('R')
-        for channel in 'GBA':
-            maximum = ImageChops.lighter(maximum, difference.getchannel(channel))
-        maximum.save(output / ('difference-' + a['filename']))
-        rows.append(dict(aspect=list(aspect), differingPixels=sum(maximum.histogram()[1:]), bounds=maximum.getbbox(),
-                         maxChannelDelta=maximum.getextrema()[1], geometryMatches=a['geometry'] == b['geometry'],
-                         helperGeometry=a['geometry'], referenceGeometry=b['geometry']))
+        rows.append(dict(aspect=list(aspect), **compare_frame(
+            helper / a['filename'], normal / b['filename'], a['geometry'], b['geometry'],
+            output / ('difference-' + a['filename']))))
     result = dict(outcome=OUTCOME, candidate=expected_candidate, target=h['target'], tolerance=0, records=rows,
                   passed=all(row['differingPixels'] == 0 and row['geometryMatches'] for row in rows))
     (output / 'comparison.json').write_text(json.dumps(result, indent=2) + '\n')

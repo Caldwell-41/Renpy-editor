@@ -1,5 +1,18 @@
 # Current status
 
+## Variable and control-state sample qualification in progress
+
+Kris selected [L20 #54](https://github.com/Caldwell-41/Renpy-editor/issues/54) on
+`codex/54-canvas-samples`, based on accepted #51/#52 merge `46fdbc1b`. The existing
+sample renderer remains the owner. Local work adds state-selector synchronization
+and accepted-source qualification for typed samples, six button states and bar
+boundaries. [Evidence](../tasks/evidence/sample-fidelity.md) records checks,
+failures and the pending both-target rendering matrix. Automatic approval review
+rejected publishing the required issue operation-limit record without user
+authorization; no L20 SDK/helper/native/package/CI process has started. No push,
+PR, merge or acceptance is selected. Earlier prerequisite status below retains
+historical context; GitHub #51/#52 now record acceptance through PR #83.
+
 ## Integer bars and image buttons review corrections
 
 The combined #51/#52 implementation is published in

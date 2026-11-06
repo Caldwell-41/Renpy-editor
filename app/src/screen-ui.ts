@@ -237,7 +237,7 @@ export class ScreensWorkspace {
     zoom.onchange=() => {this.zoom=zoom.value; this.renderCanvas();};
     const state=el("select"); state.ariaLabel="Button state (sample)";state.setAttribute("aria-label","Button state (sample)");
     for(const [value,label]of controlSampleStates) {const option=el("option","",`Sample: ${label}`);option.value=value;state.append(option);}
-    state.onchange=()=>{this.buttonState=state.value;this.controls.setSampleState(state.value as ControlButtonState);this.renderCanvas();};
+    state.onchange=()=>{this.buttonState=state.value;this.controls.setSampleState(state.value as ControlButtonState);this.text.setSampleState(state.value);this.renderCanvas();};
     caption.append(el("h2", "", "Screen canvas"),aspects,zoom,state,button("Test in Ren'Py", () => this.test(false), "button primary screen-image-test"));
     const viewport = el("div", "screen-viewport"); viewport.append(this.canvas);
     this.canvasStatus.role = "status";

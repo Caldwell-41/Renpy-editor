@@ -58,6 +58,15 @@ LOOMLIGHT_NESTED_FIDELITY_INPUTS=<prepared-export-directory> \
 An absent or invalid export fails this explicit selection; it is not an optional
 skip in the inexpensive harness. Run both selections for nested qualification.
 
+L20 follows the same split. `test_sample_fidelity.py` runs ordinary offline
+pixel/geometry and matrix-refusal checks. After running the public-core
+`sample_fidelity_exports_all_states_and_typed_boundaries_without_execution`
+exporter with `LOOMLIGHT_SAMPLE_FIDELITY_INPUTS` set to a fresh ignored directory,
+run `sample_fidelity_export_checks.py` with that same environment variable.
+Missing, stale or altered exports fail the explicit admission selection. The
+ignored `sample_fidelity_hidden_helper_captures_exported_cases` producer and
+`qualify-sample-fidelity.py reference` require the selected ticket's SDK reservation.
+
 `Repository quality` → `harness_regressions=true` runs only these checks on
 Windows x64 and macOS ARM64, with every other boolean selector false. This is an
 optional focused verification route, not an extra mandatory dispatch per feature.

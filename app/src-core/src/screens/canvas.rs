@@ -11,6 +11,10 @@ mod tests;
 #[path = "nested_canvas_tests.rs"]
 mod nested_tests;
 
+#[cfg(test)]
+#[path = "sample_fidelity_tests.rs"]
+mod sample_tests;
+
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Request {

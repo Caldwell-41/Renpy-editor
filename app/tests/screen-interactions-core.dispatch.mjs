@@ -9,13 +9,15 @@ import {driverProcess} from './phase2-driver-process.mjs';
 import {ScreensWorkspace} from '../dist-tests/src/screen-ui.js';
 const output=resolve(process.env.SCREEN_INTERACTIONS_CORE_OUTPUT??`target/screen-interactions-core-${randomUUID()}`);await mkdir(output,{recursive:true});
 const scratch=join(await realpath(output),`loomlight-help-controller-interactions-${randomUUID()}`);
-const child=driverProcess(resolve(process.env.CARGO_TARGET_DIR??'target',`debug/examples/help-controller-driver${process.platform==='win32'?'.exe':''}`),[scratch]);
+const child=driverProcess(process.env.SCREEN_INTERACTIONS_CORE_DRIVER??resolve(process.env.CARGO_TARGET_DIR??'target',`debug/examples/help-controller-driver${process.platform==='win32'?'.exe':''}`),[scratch]);
 const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement,HTMLInputElement:browser.HTMLInputElement,HTMLSelectElement:browser.HTMLSelectElement,HTMLTextAreaElement:browser.HTMLTextAreaElement,HTMLDetailsElement:browser.HTMLDetailsElement,ResizeObserver:browser.ResizeObserver,Event:browser.Event,KeyboardEvent:browser.KeyboardEvent});
 let session,workspace,refuse=false;
-const result={passed:false,controllerToCore:true,sdkExecuted:false,helperExecuted:false,stages:[],refusals:[],canvasPlans:[]};
+const result={passed:false,controllerToCore:true,sdkExecuted:false,helperExecuted:false,stages:[],refusals:[],canvasPlans:[],timings:[]};
 async function call(operation,payload={}) {
+ const started=performance.now();
  assert(!operation.startsWith('runtime.')&&!['screens.canvasRender','screens.canvasStatus'].includes(operation));
  const response=await child.request({protocolVersion:1,requestId:randomUUID().replaceAll('-',''),operation,payload:{...payload,...(session&&!['project.listRecent','project.openRecent'].includes(operation)?{sessionId:session}:{})}});
+ result.timings.push({operation,elapsedMs:performance.now()-started});
  if(!response.ok){result.refusals.push({operation,code:response.error.code});throw Object.assign(Error(response.error.message),{code:response.error.code});}return response.value;
 }
 const source=async path=>(await call('source.open',{path})).text;
@@ -62,6 +64,14 @@ try{
  const sampled=result.canvasPlans.at(-1);assert.equal(sampled.payload.textSamples.length,0);assert(sampled.plan.nodes.some(n=>n.literal==='Balance: 9007199254740993'));assert.deepEqual(sampled.payload.variableSamples.map(s=>s.value),['9007199254740993',true,'[opaque_python()] {literal}']);assert.equal(await source(owner.path),afterActions);assert.equal(workspace.hasDraft(),false);
  const sampleToggle=workspace.panel.querySelector('.siv-sample-toggle');assert.equal(sampleToggle.textContent,'Sample values (3 overrides)');sampleToggle.click();assert.equal(sampleToggle.getAttribute('aria-expanded'),'false');assert.equal(sampleToggle.textContent,'Sample values (3 overrides)');sampleToggle.click();
  change('Sample coins','bad');assert.equal(control('Sample coins').value,'bad');assert.equal(control('Sample coins').getAttribute('aria-invalid'),'true');assert.equal(result.canvasPlans.at(-1).payload.variableSamples[0].value,'9007199254740993');result.stages.push('typed editor-only samples -> real data-only planner; invalid raw input retains last valid value and source');
+ select(buttonId);change('Text','Retained state draft');
+ for(const [state,prefix]of [['hover','hover_'],['selected','selected_'],['disabled','insensitive_'],['normal','']]){
+  change('Button state (sample)',state);await wait(()=>result.canvasPlans.at(-1)?.payload.buttonState===state,'sample state to real planner');
+  assert.equal(workspace.panel.querySelector('[data-appearance-field="state"]').value,prefix);
+  assert.equal(control('Text').value,'Retained state draft');
+  assert.equal(result.canvasPlans.at(-1).plan.buttonState,state);assert.equal(result.canvasPlans.at(-1).payload.variableSamples.length,3);
+ }
+ button('Cancel');button('Reset samples');await wait(()=>result.canvasPlans.at(-1)?.payload.variableSamples.length===0,'reset samples to real planner');assert.equal(await source(owner.path),afterActions);assert.equal(workspace.hasDraft(),false);result.stages.push('canvas state and inspector synchronize through real planner; mixed samples, retained draft, Cancel and Reset leave accepted Source unchanged');
  select(bodyId);change('Text','Coins: [missing_name!q]');await apply();assert.equal(workspace.hasDraft(),true);assert.equal(control('Text').value,'Coins: [missing_name!q]');button('Cancel');assert.equal(await source(owner.path),afterActions);
  select(buttonId);change('Action 2 value','8');await saveSource(owner.path,afterActions+'# competing accepted Source\n');await workspace.load();await apply();assert.equal(workspace.hasDraft(),true);assert.equal(control('Action 2 value').value,'8');button('Cancel');assert.equal(await source(owner.path),afterActions+'# competing accepted Source\n');result.stages.push('unknown binding and stale original Source refuse while retaining drafts; whole-draft Cancel restores accepted Source');
  workspace.dispose();workspace=undefined;await call('project.close');session=undefined;const reopened=(await call('project.listRecent')).find(p=>p.projectId===projectId);session=(await call('project.openRecent',{recentId:reopened.id})).sessionId;

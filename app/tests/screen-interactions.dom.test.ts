@@ -34,6 +34,20 @@ function fixture(kind:"dialog"|"panel"|"component"="dialog",bound=false) {
  return {browser,workspace,writes,renders,messages,find,change,button,select,refresh:async()=>{revision="newer";authoringRevision="authoring-newer";await workspace.load();},allow:()=>{refuse=false;},acceptChanges:()=>{refuse=false;advanceWrites=true;},dispose:async()=>{workspace.dispose();await browser.happyDOM.abort();}};
 }
 
+test("canvas state follows the open button appearance fields without changing the draft or samples",async()=>{
+ const f=fixture();try{f.workspace.mount(document.body);await flush();f.select("close");
+ f.change("Text","Retained label");f.button("Sample values");f.change("Sample coins","7");await flush();
+ for(const [state,prefix]of [["hover","hover_"],["selected","selected_"],["disabled","insensitive_"],["normal",""]]){
+  f.change("Button state (sample)",state!);await flush();
+  assert.equal(f.workspace.panel.querySelector<HTMLSelectElement>('[data-appearance-field="state"]')!.value,prefix);assert.equal(f.find("Text").value,"Retained label");
+  assert.equal(f.renders.at(-1)!.buttonState,state);assert.deepEqual(f.renders.at(-1)!.variableSamples,[{variableId:"coins",expectedSourceRevision:"coins-v1",value:"7"}]);
+ }
+ const appearance=f.workspace.panel.querySelector<HTMLSelectElement>('[data-appearance-field="state"]')!;appearance.value="hover_";appearance.dispatchEvent(new window.Event("change"));await flush();assert.equal(f.find("Button state (sample)").value,"hover");
+ f.change("Button state (sample)","selectedHover");await flush();assert.equal(f.workspace.panel.querySelector<HTMLSelectElement>('[data-appearance-field="state"]')!.value,"hover_", "Combined states keep the explicitly chosen editing prefix");
+ f.button("Cancel");assert.equal(f.find("Text").value,"Close");assert.equal(f.writes.length,0);
+ }finally{await f.dispose();}
+});
+
 test("new Show and Hide drafts use target revisions from the last accepted edit",async()=>{
  const f=fixture("panel");try{f.workspace.mount(document.body);await flush();f.acceptChanges();f.select("close");f.change("Text","Continue");f.button("Apply");await flush();assert.equal(f.workspace.hasDraft(),false);
  for(const [index,type]of ["showScreen","hideScreen"].entries()){

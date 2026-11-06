@@ -716,6 +716,14 @@ samples use canonical signed-64 decimal strings, booleans use real JSON booleans
 and strings remain literal. Brackets in sample values stay literal, and braces
 cannot introduce text tags. Samples never alter source or runtime state.
 
+Canvas button state is an explicit editor sample: normal, hover, selected,
+selected-hover, disabled or selected-disabled. It is never inferred by evaluating
+actions or variable values. The helper applies Ren'Py's matching style prefix to
+text buttons and image buttons. Bars use their sampled integer value and unprefixed
+appearance; they have no separate state sample. Textbutton interpolation, unquoted
+`[name]` text interpolation and custom control expressions remain source-only.
+Unresolved mappings make the canvas unavailable and return explicit plan limits.
+
 `ScreenEffects` adds known `assignedVariables` and `shownScreens` IDs alongside
 `hiddenScreens` and `finishesInteraction`. These describe possible qualified button
 effects, not observed execution or reconstructed runtime values. The shared action

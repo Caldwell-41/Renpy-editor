@@ -1,5 +1,25 @@
 # Current outcome handover
 
+## L20 variable and control-state sample qualification
+
+Continue on `codex/54-canvas-samples`, based at accepted prerequisite `46fdbc1b`.
+[#54](https://github.com/Caldwell-41/Renpy-editor/issues/54) is selected. Kris
+confirmed public canvasPlan IPC, actual Screens UI/core and matched helper/normal
+capture test seams, with review against that base. The requested Opus 5.5 high
+design advice is complete; the parent owns all edits. The
+[evidence record](../tasks/evidence/sample-fidelity.md) owns current preparation
+and failures. Production changes synchronize the open textbutton state fields.
+The new exporter/observers cover 22 cases, both aspects, with exact pixels and
+geometry. Both-target SDK qualification remains pending and cannot inherit prior
+control-crop or nested-composition results.
+
+Automatic approval review refused the required progress/limit publication to #54.
+Ask for approval of that prepared external issue comment before dependent SDK
+execution. Proposed ceiling is 16 SDK processes per target, all use zero and no
+reservations. Historical allowances stay closed. No push, PR, merge or issue
+closure is selected. Preserve all unrelated recovery below. Existing long-form
+recovery remains under its retained size exception.
+
 ## Integer bars and image buttons draft publication
 
 The combined #51/#52 implementation is published on `codex/51-52-integration` in

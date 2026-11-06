@@ -105,6 +105,13 @@ Canvas controls remain inert. Authors can set sample variable values and select
 normal/hover/selected/disabled appearances. Mark active sample data and keep it
 separate from game source and runtime values.
 
+Button samples include selected + hover and selected + disabled. These explicit
+appearances do not infer action selection or sensitivity from sample variables.
+Bars sample their integer binding and unprefixed appearance, without a separate
+state appearance. Qualified variable templates are Text `[name!q]` bindings;
+Textbutton interpolation, `[name]` without quote conversion and custom control
+expressions remain source-only with explicit coverage limits.
+
 #### Canvas agreement with Ren'Py
 
 The user required a 1:1, or as-close-as-possible, canvas on 2026-10-22. For the
