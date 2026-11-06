@@ -78,8 +78,11 @@ The actual catalog loader passes 25 records and 12 approved revisions, including
 historical source fingerprints and retained capture hashes. The browser gate is
 failed after 616 render cases and 15 groups: at 560x640, opening removal confirmation
 narrowed the measured content container from 463 to 448 px, with other recorded
-geometry/scroll unchanged. Cause is not established and later browser approval
-protection checks were not reached. The test worktree and full artifacts are retained.
+geometry/scroll unchanged. Three focused probes establish that the compact editor's
+visible-to-hidden overflow transition adds a stable 15 px gutter. A compact-only
+gutter correction is ready for focused and global verification, with the exact
+assertion preserved. Later browser approval-protection checks were not reached by
+the original run. The test worktree and full artifacts are retained.
 Continue the frontend work independently.
 The coordinator alone imports the new lab/records
 and registry registration; the frontend worker owns production files/tests and must

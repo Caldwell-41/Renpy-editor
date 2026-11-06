@@ -29,8 +29,9 @@ refs. All five missing source objects are recovered; the catalog loader now pass
 all 25 records and 12 approved revisions, including fingerprints and capture hashes.
 The global browser gate failed at compact Help removal confirmation: one measured
 container narrowed by 15 px. It completed 616 render cases and 15 groups before
-failure; later browser approval-protection checks were not reached. Diagnosis is
-focused on that exact layout assertion. Frontend implementation proceeds independently.
+failure; later browser approval-protection checks were not reached. Focused probes
+identify the compact editor's newly reserved scrollbar gutter; a scoped correction
+is ready for focused and global verification. Frontend implementation proceeds independently.
 The corrected Windows observer passes; both earlier failed campaigns stay recorded.
 #51 owns combined capped-operation accounting; Windows SDK use is 12/16 and all
 other counts are zero, with no reservation pending. Remaining Windows/macOS proof,

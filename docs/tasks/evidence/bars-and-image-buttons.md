@@ -878,3 +878,31 @@ focused actual UI/core regressions and corrections, using the existing input
 validation owner. No replacement review was started. Spec and Terra visual work
 remain pending. This is a worker-candidate receipt, not combined integration or
 final acceptance; await corrected commits and the final handoff before integration.
+
+## Compact popup gutter diagnosed; correction awaiting verification, 2026-11-06
+
+The focused compact reproduction failed twice with identical geometry at
+`c8f707c441d50ba8dcd4511526050ea2b7cf72ca`. The editor retained a 463 px outer
+width, but its client width and child content narrowed to 448 px. Three subsequent
+controlled probes used the same Node and Chrome versions. Baseline failed and
+remained narrowed after two animation frames. Adding only `has-removal-dialog`
+without opening a dialog also failed identically. Changing only the editor's
+scrollbar gutter to `auto` in the disposable page preserved all geometry and passed.
+The helper reported zero page errors; browser console errors were not collected.
+
+Computed styles establish the cause in this browser: compact layout has
+`overflow: visible`, so its stable gutter reserves no space. Confirmation changes
+overflow to `hidden`, reserving a new 15 px gutter inside the same outer width.
+The already-scrolling outer content has a stable gutter before and after and does
+not move. This excludes dialog placement and transient focus timing for this repro.
+Parent correction sets the compact editor's gutter to `auto` at the existing 759 px
+compact breakpoint. The existing exact popup geometry assertions remain unchanged.
+Approved historical source stays pinned; this corrects the current lab renderer.
+
+Baseline, class-only and gutter-auto helpers took 46652, 45944 and 45957 ms and
+exited 1, 1 and 0 respectively. The initial missing-Vite preflight stopped before
+browser launch and was resolved by the authorized offline dependency install.
+Independent process-command-line inspection was denied; the helper requests browser
+and server closure in `finally`, but this probe does not establish independently
+verified cleanup. No capped operations were started. Focused and full global checks
+on the committed correction remain pending; the earlier full-gate result stays failed.
