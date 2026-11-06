@@ -91,9 +91,14 @@ failed after 616 render cases and 15 groups: at 560x640, opening removal confirm
 narrowed the measured content container from 463 to 448 px, with other recorded
 geometry/scroll unchanged. Three focused probes establish that the compact editor's
 visible-to-hidden overflow transition adds a stable 15 px gutter. A compact-only
-gutter correction is ready for focused and global verification, with the exact
-assertion preserved. Later browser approval-protection checks were not reached by
-the original run. The test worktree and full artifacts are retained.
+gutter correction at `d2c909ff` passes the focused baseline with no injected style.
+The full runner reports 1568 cases, 30 groups and 12 approval checks passing, with
+zero report errors. The PowerShell wrapper lost the npm exit code; do not infer it.
+The original failure and this command-receipt limitation remain recorded. Parent's
+ignored direct-process wrapper now preserves stdout/stderr and actual exit status,
+verified using deliberate exits 0 and 7. Use it for the later combined-candidate
+global check rather than repeating the unchanged pre-frontend matrix solely to
+repair a receipt. The test worktree and full artifacts are retained.
 Continue the frontend work independently.
 The coordinator alone imports the new lab/records
 and registry registration; the frontend worker owns production files/tests and must

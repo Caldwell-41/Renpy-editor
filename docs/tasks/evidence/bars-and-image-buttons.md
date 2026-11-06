@@ -932,3 +932,36 @@ The owner will correct these against the pinned reference, then start exactly on
 new read-only Terra 6.1 max visual recheck on committed fixes. No Standards/Spec
 redo or council is selected. Counts stay three Standards plus three Spec findings;
 corrections remain self-verified unless actual independent evidence says otherwise.
+
+## Gutter fix passes; full lab runner complete with exit-receipt limit, 2026-11-06
+
+At `d2c909ff40413671569233ff8d98e17e22d45ccf`, the focused baseline exits 0 without
+injected corrective style. Geometry remains identical before, immediately after
+confirmation and after two animation frames; editor/client/content width stays
+463 px. The existing global runner then reports 1568 render cases, 30 groups and
+12 approval checks complete, with zero report errors. Parent independently reread
+the report and matched SHA256
+`ef20d781cd6909c00a8326fc77f72af6094fb2d8df0d8076c5b69c3f852969ba`.
+All 12 approved references correctly refuse changed-source rendering. This proves
+the current-source draft matrix and approval protections; it does not establish
+historical visual fidelity, real saves or native/trusted input.
+
+The PowerShell wrapper did not retain the npm exit code. Do not invent exit 0 or
+erase that command-receipt gap despite the completed runner output. The npm stderr
+contains an update notice. Parent's new ignored direct-process wrapper captures
+separate stdout/stderr plus the actual exit code without PowerShell stderr handling;
+its deliberate exit-0 and exit-7 checks both pass with stderr retained. Use that
+wrapper on the changed combined candidate. No duplicate unchanged full matrix is
+selected solely to repair this receipt.
+
+The focused stdout hashes to
+`4bd16b0050131c8b92d1de945e30f942257ab529f7cd75dbe72afe03037c2bba`;
+full stdout hashes to
+`043b06af0d9b039c6c3cf8c9f12d4b5f4c77542553d3a0875ddd0c06c8856bf2`;
+stderr hashes to
+`509db3e3576a5ddeede99380db64011156c8602eb204903675e7cb44eae64ef7`.
+The 303-image screenshot manifest hashes to
+`1da6ae3a7fdc03b34630ca46154524090fa5c4a63ea871474efb8a0290bc14cb`.
+Exact artifacts remain ignored in the verification worktree. The worker reports
+observed browser/server PIDs and the loopback listener gone; parent reread its
+cleanup receipt. Tracked source is clean, with no capped operation started.

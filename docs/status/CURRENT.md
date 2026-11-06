@@ -28,11 +28,12 @@ Kris authorized task-scoped private T3 transfers. The verified recovery bundle i
 imported under a dedicated local Git namespace, preserving the checkout and existing
 refs. All five missing source objects are recovered; the catalog loader now passes
 all 25 records and 12 approved revisions, including fingerprints and capture hashes.
-The global browser gate failed at compact Help removal confirmation: one measured
-container narrowed by 15 px. It completed 616 render cases and 15 groups before
-failure; later browser approval-protection checks were not reached. Focused probes
-identify the compact editor's newly reserved scrollbar gutter; a scoped correction
-is ready for focused and global verification. Frontend implementation proceeds independently.
+The compact Help gutter fix at `d2c909ff` passes the unchanged focused assertion.
+Its full lab runner reports 1568 cases, 30 groups and all 12 approval checks passing
+with no report errors. The wrapper missed the npm exit code, so command completion
+retains that qualification gap. Exit capture is corrected and checked with both
+zero and nonzero exits for the later combined-candidate run. The original failed
+run remains recorded. Frontend implementation proceeds independently.
 The corrected Windows observer passes; both earlier failed campaigns stay recorded.
 #51 owns combined capped-operation accounting; Windows SDK use is 12/16 and all
 other counts are zero, with no reservation pending. Remaining Windows/macOS proof,
