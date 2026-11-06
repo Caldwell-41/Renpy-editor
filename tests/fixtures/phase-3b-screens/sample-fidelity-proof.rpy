@@ -49,7 +49,7 @@ init python:
             assert sum(len(values) for values in widgets.values()) == len(tracked)
             prefix = {"normal":"idle_", "hover":"hover_", "selected":"selected_idle_", "selectedHover":"selected_hover_", "disabled":"insensitive_", "selectedDisabled":"selected_insensitive_"}[case["state"]]
             for widget, row in tracked.values():
-                if row["widgetId"] in ("local_button", "shared_button", "image_button"):
+                if row["widgetId"] in ("local_button", "shared_button", "image_button", "score_bar"):
                     widget.set_style_prefix(prefix, True)
             measured, originals = {}, []
             for widget, row in tracked.values():

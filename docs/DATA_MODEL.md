@@ -719,10 +719,18 @@ cannot introduce text tags. Samples never alter source or runtime state.
 Canvas button state is an explicit editor sample: normal, hover, selected,
 selected-hover, disabled or selected-disabled. It is never inferred by evaluating
 actions or variable values. The helper applies Ren'Py's matching style prefix to
-text buttons and image buttons. Bars use their sampled integer value and unprefixed
-appearance; they have no separate state sample. Textbutton interpolation, unquoted
-`[name]` text interpolation and custom control expressions remain source-only.
-Unresolved mappings make the canvas unavailable and return explicit plan limits.
+text buttons, image buttons and bars. A typed bar also renders literal `hover_`,
+`selected_` and `insensitive_` `left_bar`, `right_bar` and `thumb` colors; bar
+edits change only the unprefixed colors and keep these statements as Source. Ren'Py
+resets a bar's `insensitive_` prefix to idle while its range is positive, so a
+qualified bar shows its normal appearance in the disabled samples. The inspector's
+appearance prefix follows the sample; both combined samples open `selected_`, which
+Ren'Py ranks above `hover_` and `insensitive_`.
+
+Text and textbutton labels share the `[name!q]` template grammar for canvas samples.
+Bound-text writes remain Text-only. Unquoted `[name]` interpolation, non-literal bar
+state colors and custom control expressions remain source-only. Unresolved mappings
+make the canvas unavailable and return explicit plan limits.
 
 `ScreenEffects` adds known `assignedVariables` and `shownScreens` IDs alongside
 `hiddenScreens` and `finishesInteraction`. These describe possible qualified button

@@ -135,7 +135,8 @@ init python:
                 d = renpy.ui._textbutton(node["literal"], substitute=False, **p)
             else:
                 raise ValueError("Unsupported canvas kind")
-            if kind in ("imagebutton", "textbutton"):
+            # Bars take the same prefix; Ren'Py's Bar.render resets insensitive_ while range > 0.
+            if kind in ("imagebutton", "textbutton", "bar"):
                 d.set_style_prefix({"normal":"idle_", "hover":"hover_", "selected":"selected_idle_", "selectedHover":"selected_hover_", "disabled":"insensitive_", "selectedDisabled":"selected_insensitive_"}[plan["buttonState"]], True)
             for child in by_parent.get(node["start"], []):
                 d.add(build(child))

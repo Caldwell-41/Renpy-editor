@@ -1,6 +1,5 @@
 //! L20 public IPC admission and fixture export. No SDK or helper starts here.
 use crate::lifecycle::{acceptance::ipc, LifecycleService};
-use base64::Engine;
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use std::{collections::BTreeMap, fs};
@@ -8,8 +7,51 @@ use std::{collections::BTreeMap, fs};
 const PATH: &str = "game/ui/sample_fidelity.rpy";
 const SOURCE: &str =
     include_str!("../../../../tests/fixtures/phase-3b-screens/sample-fidelity.rpy");
-const FONT: &[u8] =
-    include_bytes!("../../../../tests/fixtures/phase-3b-screens/fonts/SourceSans3-Regular.ttf");
+/// Imported assets: (technical name, kind, extension, bytes).
+const ASSETS: [(&str, &str, &str, &[u8]); 7] = [
+    (
+        "sample_font",
+        "font",
+        "ttf",
+        include_bytes!("../../../../tests/fixtures/phase-3b-screens/fonts/SourceSans3-Regular.ttf"),
+    ),
+    (
+        "sample_state_0",
+        "uiImage",
+        "png",
+        include_bytes!("../../../../tests/fixtures/phase-3b-screens/control-states/state_0.png"),
+    ),
+    (
+        "sample_state_1",
+        "uiImage",
+        "png",
+        include_bytes!("../../../../tests/fixtures/phase-3b-screens/control-states/state_1.png"),
+    ),
+    (
+        "sample_state_2",
+        "uiImage",
+        "png",
+        include_bytes!("../../../../tests/fixtures/phase-3b-screens/control-states/state_2.png"),
+    ),
+    (
+        "sample_state_3",
+        "uiImage",
+        "png",
+        include_bytes!("../../../../tests/fixtures/phase-3b-screens/control-states/state_3.png"),
+    ),
+    (
+        "sample_state_4",
+        "uiImage",
+        "png",
+        include_bytes!("../../../../tests/fixtures/phase-3b-screens/control-states/state_4.png"),
+    ),
+    (
+        "sample_state_5",
+        "uiImage",
+        "png",
+        include_bytes!("../../../../tests/fixtures/phase-3b-screens/control-states/state_5.png"),
+    ),
+];
 const STATES: [&str; 6] = [
     "normal",
     "hover",
@@ -22,14 +64,18 @@ const STATES: [&str; 6] = [
 #[path = "sample_fidelity_sdk_tests.rs"]
 mod sdk;
 
-fn asset_bytes(index: usize) -> Vec<u8> {
-    if index == 0 {
-        FONT.to_vec()
-    } else {
-        base64::engine::general_purpose::STANDARD
-            .decode(crate::screens::tests::controls::STATE_PNGS[index - 1])
-            .unwrap()
-    }
+fn asset_bytes(asset: &Value) -> Vec<u8> {
+    // Imported paths are "game/fonts/<name>.<ext>" and "game/images/ui <name>.<ext>".
+    let file = asset["relativePath"]
+        .as_str()
+        .unwrap()
+        .rsplit(['/', ' '])
+        .next();
+    let (.., bytes) = ASSETS
+        .iter()
+        .find(|(name, _, ext, _)| file == Some(format!("{name}.{ext}").as_str()))
+        .unwrap();
+    bytes.to_vec()
 }
 
 fn fixture() -> (
@@ -45,14 +91,9 @@ fn fixture() -> (
     service.open_path(&root).unwrap();
     fs::create_dir_all(root.join("game/images")).unwrap();
     let mut assets = vec![];
-    for index in 0..7 {
-        let (name, kind, ext) = if index == 0 {
-            ("sample_font".to_owned(), "font", "ttf")
-        } else {
-            (format!("sample_state_{}", index - 1), "uiImage", "png")
-        };
+    for (name, kind, ext, bytes) in ASSETS {
         let chosen = temporary.path().join(format!("{name}.{ext}"));
-        fs::write(&chosen, asset_bytes(index)).unwrap();
+        fs::write(&chosen, bytes).unwrap();
         let choice = service.authoring_select_import(&chosen).unwrap();
         let model = ipc(
             &mut service,
@@ -151,6 +192,13 @@ fn sample_fidelity_exports_all_states_and_typed_boundaries_without_execution() {
             let nodes = plan["nodes"].as_array().unwrap();
             let bar = nodes.iter().find(|n| n["kind"] == "bar").unwrap();
             assert_eq!(bar["properties"]["range"], 20);
+            assert_eq!(bar["properties"]["hover_left_bar"], "#3c9c58");
+            assert_eq!(bar["properties"]["selected_thumb"], "#ffd060");
+            let local = nodes.iter().find(|n| n["kind"] == "textbutton").unwrap();
+            assert_eq!(
+                local["literal"],
+                format!("Local {} coins", score.unwrap_or("0"))
+            );
             assert_eq!(
                 bar["properties"]["value"],
                 score.unwrap_or("0").parse::<i64>().unwrap().clamp(-5, 15) + 5
@@ -172,6 +220,10 @@ fn sample_fidelity_exports_all_states_and_typed_boundaries_without_execution() {
     assert_eq!(fs::read(root.join(PATH)).unwrap(), source);
     assert_eq!(ipc(&mut service, "authoring.list", json!({})), model);
     assert_eq!(crate::renpy::process_spawn_count_for_test(), before);
+    let project: Value =
+        serde_json::from_slice(&fs::read(root.join(".renpy-editor/project.json")).unwrap())
+            .unwrap();
+    let scenes = project["scenes"].as_array().unwrap();
     let mut files = BTreeMap::new();
     for path in [
         PATH,
@@ -180,18 +232,13 @@ fn sample_fidelity_exports_all_states_and_typed_boundaries_without_execution() {
         ".renpy-editor/authoring.json",
         "game/definitions/variables.rpy",
         "game/definitions/characters.rpy",
-    ] {
-        let bytes = fs::read(root.join(path)).unwrap();
-        files.insert(path.to_owned(),json!({"sha256":hex::encode(Sha256::digest(&bytes)),"text":String::from_utf8(bytes).unwrap()}));
-    }
-    let project: Value = serde_json::from_str(
-        files[".renpy-editor/project.json"]["text"]
-            .as_str()
-            .unwrap(),
-    )
-    .unwrap();
-    for scene in project["scenes"].as_array().unwrap() {
-        let path = scene["sourcePath"].as_str().unwrap();
+    ]
+    .into_iter()
+    .chain(
+        scenes
+            .iter()
+            .map(|scene| scene["sourcePath"].as_str().unwrap()),
+    ) {
         let bytes = fs::read(root.join(path)).unwrap();
         files.insert(path.to_owned(),json!({"sha256":hex::encode(Sha256::digest(&bytes)),"text":String::from_utf8(bytes).unwrap()}));
     }
@@ -215,44 +262,42 @@ fn sample_fidelity_exports_all_states_and_typed_boundaries_without_execution() {
     }
 }
 
-fn restore_fidelity_files(root: &std::path::Path, accepted: &Value) {
-    for (path, row) in accepted["files"].as_object().unwrap() {
-        let path = crate::transaction::RelativePath::new(path.clone()).unwrap();
-        let bytes = row["text"].as_str().unwrap().as_bytes();
-        assert_eq!(hex::encode(Sha256::digest(bytes)), row["sha256"]);
-        let destination = root.join(path.as_str());
-        fs::create_dir_all(destination.parent().unwrap()).unwrap();
-        fs::write(destination, bytes).unwrap();
-    }
-    for (index, asset) in accepted["assets"].as_array().unwrap().iter().enumerate() {
-        let bytes = asset_bytes(index);
-        assert_eq!(hex::encode(Sha256::digest(&bytes)), asset["sha256"]);
-        let path =
-            crate::transaction::RelativePath::new(asset["relativePath"].as_str().unwrap()).unwrap();
-        let destination = root.join(path.as_str());
-        fs::create_dir_all(destination.parent().unwrap()).unwrap();
-        fs::write(destination, bytes).unwrap();
-    }
-}
-
 #[test]
 fn sample_fidelity_refuses_unqualified_expressions_and_stale_values_without_execution() {
     let before = crate::renpy::process_spawn_count_for_test();
     let (_temporary, mut service, root, _) = fixture();
     let original = fs::read_to_string(root.join(PATH)).unwrap();
-    for (old, new) in [
+    let interpolation = "Text tags or interpolation need a supported sample mapping";
+    for (old, new, kind, limit) in [
         (
             "Score [sample_score!q] / [flag!q]",
             "Score [sample_score] / [flag!q]",
+            "text",
+            interpolation,
         ),
-        ("Local appearance", "[sample_score!q]"),
+        (
+            "Local [sample_score!q] coins",
+            "Local [sample_score] coins",
+            "textbutton",
+            interpolation,
+        ),
         (
             "VariableValue(\"sample_score\", min=-5, max=15, step=1, force_step=True)",
             "custom_bar_value()",
+            "bar",
+            "Unresolved bar binding",
+        ),
+        (
+            "hover_thumb \"#ffffff\"",
+            "hover_thumb gui.accent",
+            "bar",
+            "Unresolved hover_thumb",
         ),
         (
             "Transform(\"images/ui sample_state_0.png\", xysize=(80, 40))",
             "custom_image()",
+            "imagebutton",
+            "Unresolved image-button appearances",
         ),
     ] {
         let source = original.replace(old, new);
@@ -265,7 +310,21 @@ fn sample_fidelity_refuses_unqualified_expressions_and_stale_values_without_exec
             json!({"path":PATH,"screenName":"sample_fidelity","expectedRevision":doc["revision"],"width":1280,"height":720,"buttonState":"selectedDisabled"}),
         );
         assert_eq!(plan["available"], false, "{plan}");
-        assert!(!plan["limits"].as_array().unwrap().is_empty());
+        let node = doc["screens"][0]["nodes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|n| n["kind"] == kind)
+            .unwrap();
+        let expected = format!("{limit} at {}", node["span"]["start"]);
+        assert!(
+            plan["limits"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|l| l == &json!(expected)),
+            "{expected} missing from {plan}"
+        );
         assert_eq!(fs::read_to_string(root.join(PATH)).unwrap(), source);
     }
     fs::write(root.join(PATH), &original).unwrap();

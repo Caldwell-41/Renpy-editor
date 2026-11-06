@@ -5,6 +5,18 @@ use controls::{BarAppearance, IntegerBarBinding};
 use std::collections::BTreeMap;
 
 pub(super) const BAR_KEYS: &[&str] = &["value", "left_bar", "right_bar", "thumb"];
+/// Literal state colors for a typed bar. The canvas renders them; edits leave them as Source.
+pub(super) const BAR_STATE_KEYS: &[&str] = &[
+    "hover_left_bar",
+    "hover_right_bar",
+    "hover_thumb",
+    "selected_left_bar",
+    "selected_right_bar",
+    "selected_thumb",
+    "insensitive_left_bar",
+    "insensitive_right_bar",
+    "insensitive_thumb",
+];
 pub(super) const IMAGE_KEYS: &[&str] = &[
     "idle",
     "hover",

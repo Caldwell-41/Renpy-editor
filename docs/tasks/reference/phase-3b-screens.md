@@ -107,10 +107,11 @@ separate from game source and runtime values.
 
 Button samples include selected + hover and selected + disabled. These explicit
 appearances do not infer action selection or sensitivity from sample variables.
-Bars sample their integer binding and unprefixed appearance, without a separate
-state appearance. Qualified variable templates are Text `[name!q]` bindings;
-Textbutton interpolation, `[name]` without quote conversion and custom control
-expressions remain source-only with explicit coverage limits.
+Bars sample their integer binding and take the same state prefix, with literal
+state colors rendered but not edited. Qualified variable templates are Text and
+textbutton `[name!q]` labels. `[name]` without quote conversion, non-literal bar
+state colors and custom control expressions remain source-only with explicit
+coverage limits.
 
 #### Canvas agreement with Ren'Py
 

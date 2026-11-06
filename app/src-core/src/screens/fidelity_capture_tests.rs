@@ -8,7 +8,7 @@ pub(super) fn capture_cases(
     prefix: &str,
     outcome: &str,
     exporter: &[u8],
-    restore: fn(&std::path::Path, &Value),
+    asset_bytes: fn(&Value) -> Vec<u8>,
 ) {
     use base64::Engine;
     use std::path::PathBuf;
@@ -66,7 +66,7 @@ pub(super) fn capture_cases(
         service = Some(LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap());
         let service = service.as_mut().unwrap();
         let root = profile.join("synthetic-project");
-        restore(&root, &accepted);
+        restore_accepted(&root, &accepted, asset_bytes);
         service.open_path(&root).unwrap();
         for (index, case) in accepted["cases"].as_array().unwrap().iter().enumerate() {
             statuses[index]["status"] = json!("running");
@@ -220,4 +220,37 @@ pub(super) fn capture_cases(
         std::panic::resume_unwind(error);
     }
     assert!(passed, "{result}");
+}
+
+/// Writes the accepted files and fixture assets after checking each recorded hash.
+pub(crate) fn restore_accepted(
+    root: &std::path::Path,
+    accepted: &Value,
+    asset_bytes: fn(&Value) -> Vec<u8>,
+) {
+    let files = accepted["files"]
+        .as_object()
+        .unwrap()
+        .iter()
+        .map(|(path, file)| {
+            (
+                path.as_str(),
+                file["text"].as_str().unwrap().as_bytes().to_vec(),
+                &file["sha256"],
+            )
+        });
+    let assets = accepted["assets"].as_array().unwrap().iter().map(|asset| {
+        (
+            asset["relativePath"].as_str().unwrap(),
+            asset_bytes(asset),
+            &asset["sha256"],
+        )
+    });
+    for (path, bytes, sha256) in files.chain(assets) {
+        assert_eq!(&hex::encode(Sha256::digest(&bytes)), sha256);
+        let path = crate::transaction::RelativePath::new(path.to_owned()).unwrap();
+        let destination = root.join(path.as_str());
+        fs::create_dir_all(destination.parent().unwrap()).unwrap();
+        fs::write(destination, bytes).unwrap();
+    }
 }

@@ -9,6 +9,6 @@ fn sample_fidelity_hidden_helper_captures_exported_cases() {
         "LOOMLIGHT_SAMPLE_FIDELITY",
         "L20-sample-fidelity",
         include_bytes!("sample_fidelity_tests.rs"),
-        super::restore_fidelity_files,
+        super::asset_bytes,
     );
 }

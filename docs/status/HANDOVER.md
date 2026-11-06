@@ -1,153 +1,40 @@
 # Current outcome handover
 
-## L20 draft publication and CI
+## L20 review corrections
 
-Continue on `codex/54-canvas-samples`, based at accepted prerequisite `46fdbc1b`.
-[#54](https://github.com/Caldwell-41/Renpy-editor/issues/54) is selected. Kris
-confirmed public canvasPlan IPC, actual Screens UI/core and matched helper/normal
-capture test seams, with review against that base. The requested Opus 5.5 high
-design advice is complete; the parent owns all edits. The
-[evidence record](../tasks/evidence/sample-fidelity.md) owns current preparation
-and failures. Production changes synchronize textbutton state fields, including
-reselection, while frames/windows keep unprefixed appearance editing. All review
-findings are corrected. Both targets qualify the identical `76d2cf12` source and
-accepted JSON: 22 full-frame cases per target, both aspects, zero RGBA differences,
-all 154 geometry records exact, matched scale and cooperative cleanup. The first
-Windows failed shutdown stays preserved and charged. Broader editor/native/human
-and Phase 3B acceptance remain separate.
+Continue on `codex/54-canvas-samples` in [draft PR #84](https://github.com/Caldwell-41/Renpy-editor/pull/84),
+based at accepted prerequisite `46fdbc1b`. [#54](https://github.com/Caldwell-41/Renpy-editor/issues/54)
+is selected and owns scope, PR/head/run receipts and SDK accounting. Inspect the
+actual head before resuming; later status commits do not replace the candidate.
 
-Kris explicitly approved both-target SDK campaigns, necessary corrections and
-ongoing #54 reservation/result updates after two publication/execution refusals.
-The issue owns the 16-start-per-target ceiling and cumulative accounting: Windows
-12/16 and Mac 8/16, no reservations, uncertain starts or pending processes. Unused
-capacity selects no more execution. Mac artifacts remain in its clean
-`codex/54-mac-sample-qualification` worktree; the occupied main checkout was untouched.
-Parent owns all code and final evidence. All 380 frontend tests, build and actual
-UI/core journey pass; original broad core/harness failures remain in the evidence
-record. Local implementation/qualification is `review_ready`. Kris then selected
-publishing this branch as a draft PR and running CI. Publication is `awaiting_ci`;
-#54 owns the live PR URL, exact head and automatic quality/both-target harness
-run/attempt receipts. Follow the branch validation plan, use T3's PR watcher and
-audit required jobs/artifacts plus `Loomlight validation` before reporting CI
-complete. Existing rendering evidence retains its `76d2cf12` producer. No new
-SDK/helper/package/native-editor run, ready-for-review transition, merge or issue
-closure is selected. Historical allowances stay closed. Preserve all unrelated
-recovery below. Existing long-form
-recovery remains under its retained size exception.
+Kris asked for the PR #84 Standards/Spec findings to be fixed, the PR updated and
+CI run, and chose to implement bar state samples and textbutton variable samples
+now. [The evidence record](../tasks/evidence/sample-fidelity.md#review-corrections-and-expanded-scope-2026-11-07)
+lists the changes, local checks and criterion state.
 
-## Integer bars and image buttons draft publication
+Pending work:
 
-The combined #51/#52 implementation is published on `codex/51-52-integration` in
-[draft PR #83](https://github.com/Caldwell-41/Renpy-editor/pull/83), targeting
-`codex/phase3b-screen-designer`. Baseline `a78de562` passes its exact-head CI audit.
-Kris then requested a Terra Standards/Spec review, parent validation of its findings,
-and one Sol 6.1 xhigh fast agent to fix all five verified issues using root-cause
-diagnosis and TDD. Kris confirmed the existing public core IPC/source/history and
-actual Screens UI/core seams. Implementation and parent audit are complete; the
-parent owns final publication. The verified base remains
-`ab19b7869843445dba291ee8b9ef7ea4bef5ffd8`.
-Production candidate remains
-`3b66300218955e9f7337a29a0a407e8ce689bc1d`; final Windows reference/consumer candidate
-is `e21c5331e2df7df1ab3e57a36ee5495da78c8158`. Later status commits do not replace
-those producing identities. Inspect actual HEAD and changes before resuming; do
-not reset or re-import completed workers.
+1. Audit the PR's Repository quality and both-target harness runs for the current
+   head, plus `Loomlight validation`, before reporting CI complete. Use T3's PR
+   watcher for the wait.
+2. Run a new both-target SDK campaign at the current candidate. One campaign costs
+   eight starts per target. Mac has 8 of 16 left. Windows has 4 of 16 left and
+   needs Kris to raise its ceiling before it starts. Reserve each start on #54.
+3. Rendering criteria 1 and 2 stay open until both targets pass. The `76d2cf12`
+   proof and its retained Windows/Mac outputs remain historical evidence only.
 
-The latest instruction selects updating this same draft without running CI. Use
-`[skip ci]` on the publication commit to suppress automatic PR quality; do not
-dispatch CI or alter the validation plan. Report the new head as unvalidated by CI.
-The parent independently reproduced the corrected original cases and protected
-refusal paths, including the deterministic durable-commit regression, all six
-unavailable image states, cleared canvas overrides, unrelated variable edits and
-effectful Component actions. Local checks pass: 31 focused core and 103 frontend
-tests, five new UI/core modes and the existing journey; the parent separately ran
-17 control tests and five isolated core/UI probes. [Correction audit](../tasks/evidence/bars-and-image-buttons.md#five-review-corrections-and-parent-audit-complete-2026-11-06)
-owns exact scope, local receipts and binary identity. No further review panel or
-SDK/helper/package/native start is selected. Do not mistake prior terminal receipts
-for current-source validation or the no-CI direction for a passing check.
+Mac artifacts for `76d2cf12` stay in the clean `codex/54-mac-sample-qualification`
+worktree. The occupied main checkout stays untouched. Ready-for-review, merge and
+issue closure are unselected.
 
-The original publication authorization superseded historical local-only directions.
-The terminal publication-head audit at `40d42a22` passes automatic quality
-42172803338 and both-target harness 42172832106, both attempt 1, all required
-executed jobs/steps, both artifact digests/manifests and 834 source hashes per
-target. Combined validation passes; no CI findings need a correction. The
-[publication evidence](../tasks/evidence/bars-and-image-buttons.md#draft-pr-83-publication-head-audit-2026-11-06)
-retains exact identities. This status-only publication needs its own selected CI
-audit. Do not add another repository commit solely to record its final SHA;
-the owning issue records that terminal receipt.
-[#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) owns live publication
-and CI receipts, including the exact PR/head/tree, runs/attempts, required jobs,
-artifact digests and terminal audit. The branch validation plan selects automatic
-quality and the exact Windows/macOS harness jobs from `quality.yml`. Those harness
-jobs run no SDK, helper, package or native editor. Audit their actual inputs and
-artifacts alongside `Loomlight validation`; green ordinary checks alone are
-insufficient. Fix CI findings at their owner using `principle-fix-root-causes`,
-with no skips, swallowed errors, weakened comparisons or blind retries.
+## Integer bars and image buttons closeout
 
-Keep the PR draft and both issues open. No merge, ready-for-review transition,
-issue closure, separate documentation PR or replacement review panel is selected.
-Use the T3 PR watcher for external waits, confirm registration and yield. On its
-event audit the exact current-head results and continue; stop watching at final
-handback. Existing detailed recovery below retains its size exception.
-
-[The final evidence](../tasks/evidence/bars-and-image-buttons.md#root-cause-correction-and-both-target-local-verification-complete-2026-11-06)
-records the root-cause correction and both-target results. The old helper consumer
-compared native readback to raw source PNG bytes. The corrected consumer requires
-independent native whole-frame references and exact crop equality, including
-alpha. The next Windows attempt exposed a separate launch fault: the reference
-inherited150% desktop DPI while production explicitly pins `RENPY_HIGHDPI=1.0`.
-Correction4ec19526 supplies the same per-process setting; e21c5331 adds actual
-dimensions/scales to failure diagnostics. Six focused checks pass, including the
-reproduced launch-boundary omission and strict mismatch refusals. No production
-renderer, system DPI or comparison requirement changed.
-
-Windows SDK start18 passes the reference matrix and passive helper admission.
-All twelve crops match exactly, 614400 RGBA bytes with zero residual. Physical
-dimensions and drawPerVirtual1 match under angle2. The retained3b helper frames,
-source/default invariance and cooperative shutdown remain on their original
-producer/binary basis. The new result and comparison audit are under
-`app/target/controls-51-52/reference-windows-e21c5331/`; their SHA256 values are
-e7eeea563590a9f70d1c66a5f3b8afbae93891909c39f05792074a89ca50ba20 and
-621bf3d8d5d178195e5d3ecadf59f792e5619e53fd551d42c0c0a80f1fd78b6b.
-The original failed wrapper and start17 scale-mismatch evidence are unchanged.
-No helper restart or package/native build was needed for the final reference.
-
-#51 alone owns cumulative accounting. Kris raised the Windows SDK ceiling to20;
-actual use is18/20, helper1/4, package2/2, native2/3. Mac remains SDK13/16,
-helper1/4, package1/2, native1/3. All reservations are resolved, uncertain starts
-are zero and all owned checks/apps are stopped. The unused two Windows SDK starts
-are not selected. Package2 remains exhausted. Reserve any later justified capped
-operation before execution; no historical count or closed allowance resets.
-
-The existing Mac qualification thread is
-<t3-thread://v2/c95d26c7-af8c-4ab0-8c95-a45fdca2dfe6/mcp:launch:aed218e73e07211906bdf413f41978e96efe3ae09756ac17e0c6842d8b443ee7>.
-It stays stopped and clean at ed44c624 on its existing candidate branch, with
-original1c6 preserved. Exact5190 SDK runtime, signed3b package/native proof and
-retained3b helper proof remain distinct. Mac's twelve crops compare exactly at
-matching physical dimensions and drawPerVirtual2 under gl2. Source/defaults stay
-unchanged and cooperative process/scratch/desktop cleanup passes. Its terminal
-receipt `.toolchains/qualification-ed44c624/result.json` has SHA256
-e47d39537fb1071f7756f998c868067b0bb4487f8fe5d28588e57acbbf7479b1. No signing,
-Keychain or trust policy changed. No new chat, shared-root edit or reverse-link retry.
-
-The selected A2 approval check passes at3d8d2411. Source37d29ca1, fingerprint
-fadc5fa2591ac31edec149b871505fcfa20c54b26e622d44e60a74b0b8ee0c80 and thirteen
-captures stay pinned. The full-gallery gate and its historical rerun requests are
-retired. No prototype changed, so no new sample matrix, shared-tooling or build
-isolation check is selected. All council rounds, Standards/Spec reviews and the
-authorized Terra recheck are finished; do not start replacement panels.
-
-[The coordinator criterion audit](../tasks/evidence/bars-and-image-buttons.md#combined-coordinator-review-and-criterion-reconciliation-2026-11-06)
-has all remaining selected proof supplied. Standards3/Spec3 findings retain their
-corrected/self-verified scope; footer clearance remains parent rendering proof.
-Visual proof covers inspector structure and footer behavior with disclosed fixture,
-canvas and toolbar differences, not whole-screen pixel fidelity. The actual
-UI/core journey, five review modes and378 frontend tests retain their recorded
-bases; both-target package/native proof stays at3b. Do not repeat broad suites
-for documentation or qualification-only changes. Tracked-file validation passes.
-The full validator retains two unrelated untracked recovery-newline failures;
-three Windows OS1314 symlink cases remain unqualified. Wider #54/Phase3B, physical
-input, native editor Test-in-Ren'Py routing and human acceptance remain separate.
-Detailed history below retains its existing size exception and selects no work.
+#51/#52 are accepted through [PR #83](https://github.com/Caldwell-41/Renpy-editor/pull/83).
+[The bars evidence](../tasks/evidence/bars-and-image-buttons.md) and
+[#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) keep the publication
+and CI receipts, root-cause corrections, Windows DPI launch fault, both-target
+crop results and cumulative accounting. None of that section's publication
+instructions remain live.
 
 ## PR 81 integration and ticket closeout
 

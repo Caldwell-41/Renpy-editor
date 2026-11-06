@@ -59,7 +59,8 @@ An absent or invalid export fails this explicit selection; it is not an optional
 skip in the inexpensive harness. Run both selections for nested qualification.
 
 L20 follows the same split. `test_sample_fidelity.py` runs ordinary offline
-pixel/geometry and matrix-refusal checks. After running the public-core
+observer and matrix-refusal checks; `test_fidelity_comparison.py` covers the
+exact pixel/geometry comparison shared with L19. After running the public-core
 `sample_fidelity_exports_all_states_and_typed_boundaries_without_execution`
 exporter with `LOOMLIGHT_SAMPLE_FIDELITY_INPUTS` set to a fresh ignored directory,
 run `sample_fidelity_export_checks.py` with that same environment variable.

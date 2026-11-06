@@ -1,22 +1,52 @@
 # Variable and control-state canvas samples
 
-## Draft publication and CI selected, 2026-11-07
+## Review corrections and expanded scope, 2026-11-07
 
-Kris selected publishing `codex/54-canvas-samples` as a draft PR targeting
-`codex/phase3b-screen-designer` and running CI. The branch validation plan selects
-automatic Repository quality plus the inexpensive `quality.yml` harness matrix,
-with required jobs `Harness regressions — windows-2025` and
-`Harness regressions — macos-26`. This covers the new offline comparison checks
-and shared qualification tooling on both targets. The automatic quality run also
-owns the frontend, build, formatting, repository and existing offline core gates.
+Kris asked for the Standards and Spec findings on draft PR #84 to be fixed, the PR
+updated and CI run. Kris chose three outcomes:
 
-The selected publication outcome is `awaiting_ci` until the exact publication
-head's combined `Loomlight validation`, required jobs and retained harness artifacts
-are audited. #54 owns the live draft PR, head and run/attempt receipts. The
-qualified rendering source remains `76d2cf12`; publication preparation changes
-only the validation plan and status/evidence records. No new SDK/helper, package,
-native-editor campaign, ready-for-review transition, merge or issue closure is
-selected. Historical failed checks and SDK consumption remain unchanged.
+- Remove the duplicated qualification code and keep the earlier proof bound to its
+  own candidate.
+- Make combined canvas samples open the inspector's `selected_` fields. Ren'Py's
+  `scripts/generate_styles.py` gives `selected_` priority 2, above `hover_` and
+  `insensitive_` at 1, and applies it to selected-hover and selected-insensitive.
+- Implement bar state samples and variable samples on textbutton labels now.
+
+Changes at this candidate:
+
+- Bars take the canvas state prefix in the helper and the normal-game observer.
+  Typed bars render literal `hover_`, `selected_` and `insensitive_` bar colors,
+  which stay Source for bar edits. Ren'Py's `Bar.render` resets `insensitive_` to
+  idle while the range is positive, so disabled samples show the normal bar.
+- Text and textbutton labels share the `[name!q]` template grammar. Bound-text
+  writes stay Text-only.
+- The inspector and canvas share one prefix table. One workspace method applies
+  every sample-state change.
+- `fidelity_reference.py` now owns preflight, normal-game reference, cleanup and
+  the command line for both L19 and L20. `fidelity_comparison.py` owns receipt
+  admission and exact comparison. Each proof keeps its fixture preparation,
+  case admission and environment (L20 still sets `RENPY_HIGHDPI=1.0`; L19 never
+  did). The shared Rust capture restores accepted files and looks up asset bytes
+  by asset row. The six state PNGs are now fixture files read by Rust and Python.
+- The L20 refusal test checks each named limit, including a non-literal bar state
+  color. The unused journey driver override and timings are removed.
+
+The `76d2cf12` rendering proof no longer covers this head. The renderer, fixture,
+exporter and admission changed, so criteria 1 and 2 need a new both-target
+campaign. A campaign costs eight SDK starts per target. Mac has 8 of 16 left;
+Windows has 4 of 16 left, so Windows needs a raised ceiling before it can run.
+No SDK, helper, package or native-editor start has happened for this candidate.
+
+| #54 criterion | State at this candidate |
+| --- | --- |
+| Actual assets/styles and samples for every applicable state; no source/runtime/action change | Implemented for Text, textbutton labels and styles, six imagebutton states and bar values plus bar states. Public-core export and the actual UI/core journey keep Source, defaults and actions unchanged. Both-target rendering proof pending. |
+| Same accepted source/sample/state, both aspects and targets | Pending a new both-target campaign at this candidate. |
+| Differences/causes and explicit limits | Stated in [DATA_MODEL](../../DATA_MODEL.md): unquoted `[name]`, non-literal bar state colors and custom control expressions refuse with named plan limits, which the refusal test checks. |
+| Clear samples/drafts/stale state; inert opening/selecting/editing | Actual ScreensWorkspace/core journey covers all six states, including both combined states, with retained drafts, Cancel and Reset. DOM tests cover combined-state prefixes and cross-button selection. |
+
+Draft PR #84 carries this candidate. Its Repository quality and both-target harness
+runs are recorded on #54 when audited. The PR stays draft; acceptance, merge and
+issue closure stay unselected.
 
 ## Local implementation preparation, 2026-11-06
 
@@ -29,7 +59,7 @@ helper-versus-normal-Ren'Py comparison. That base owns final review.
 
 The existing renderer remains the production owner. Canvas state changes now
 synchronize open textbutton appearance fields while retaining drafts and
-variable samples. Combined states retain the chosen editing prefix. The approved
+variable samples. Combined states retained the chosen editing prefix until the review corrections above. The approved
 layout and status copy remain unchanged.
 
 The L20 exporter supplies accepted source, assets, typed samples and plans for
@@ -137,9 +167,9 @@ and renderer SHA256
 | Differences/causes and explicit limits | No visible differences remain in the qualified matrix. Bare interpolation, textbutton interpolation and custom control expressions refuse with plan limits; contracts state explicit state selection and unprefixed bar appearances. No action-based inference or unsupported-state claim is added. |
 | Clear samples/drafts/saved-stale state; inert opening/selecting/editing | Actual ScreensWorkspace/core journey and focused DOM tests cover mixed sample/state requests, selector/reselection synchronization, retained drafts, Cancel/Reset, history/reopen and unchanged Source. Revision-bound stale samples and unsupported expressions refuse without execution. |
 
-The selected implementation and local qualification are `review_ready`.
-Publication/CI is selected above and remains `awaiting_ci` until audited. Leaf
-closure, user acceptance, merge and wider B08/Phase 3B acceptance remain separate.
+This audit covers candidate `76d2cf12` only; the review corrections above
+supersede it. Leaf closure, user acceptance, merge and wider B08/Phase 3B
+acceptance remain separate.
 
 ### Local checks and retained failures
 

@@ -16,7 +16,7 @@ screen sample_fidelity():
             font "fonts/sample_font.ttf"
             size 20
             color "#c8d8e8"
-        textbutton "Local appearance": # loomlight-element: a1111111-1111-4111-8111-111111111111
+        textbutton "Local [sample_score!q] coins": # loomlight-element: a1111111-1111-4111-8111-111111111111
             id "local_button"
             xpos 40
             ypos 140
@@ -65,6 +65,11 @@ screen sample_fidelity():
             left_bar "#28783c"
             right_bar "#202830"
             thumb "#e0e0e0"
+            hover_left_bar "#3c9c58"
+            hover_thumb "#ffffff"
+            selected_left_bar "#a07828"
+            selected_thumb "#ffd060"
+            insensitive_left_bar "#555555"
 
 style sample_button is button:
     font "fonts/sample_font.ttf"

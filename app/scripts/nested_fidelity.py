@@ -4,12 +4,10 @@ import math
 from pathlib import Path
 
 from PIL import Image
-from fidelity_comparison import compare_frame
 from base_help_fidelity import digest
+from fidelity_comparison import ASPECTS, FIXTURE_ROOT, REPO, compare_receipts, inputs, validate_receipt
 
-REPO = Path(__file__).resolve().parents[2]
 OUTCOME = 'L19-nested-fidelity'
-ASPECTS = ((1280, 720), (1024, 768))
 SOURCE = 'game/ui/nested_fidelity.rpy'
 FIXTURES = {
     SOURCE: 'nested-fidelity.rpy',
@@ -20,12 +18,6 @@ ASSETS = {
     'font': ('game/fonts/nested_font.ttf', 'fonts/SourceSans3-Regular.ttf'),
     'uiImage': ('game/images/ui nested_seal.png', 'ui-image/seal.png'),
 }
-FIXTURE_ROOT = REPO / 'tests/fixtures/phase-3b-screens'
-
-
-def inputs(accepted):
-    return {**{path: row['sha256'] for path, row in accepted['files'].items()},
-            **{row['relativePath']: row['sha256'] for row in accepted['assets']}}
 
 
 def validate_accepted(accepted):
@@ -84,23 +76,7 @@ def validate_accepted(accepted):
 
 def validate_captures(root, accepted, role):
     root = Path(root)
-    receipt = json.loads((root / 'result.json').read_text())
-    assert receipt['outcome'] == OUTCOME and receipt['role'] == role
-    assert receipt['passed'] is True and receipt['sourceUnchanged'] is True and receipt['cleanupComplete'] is True
-    assert receipt['acceptedSHA256'] == digest((root / 'accepted.json').read_bytes())
-    assert receipt['inputs'] == inputs(accepted)
-    assert receipt['target'] in ('macos-arm64', 'windows-x64')
-    assert receipt['rendererSHA256'] == digest((REPO / 'app/src-core/src/screens/canvas-renderer.rpy').read_bytes())
-    if role == 'normal-game':
-        assert [row['name'] for row in receipt['commands']] == ['compile', 'lint', 'run', 'run']
-        assert receipt['sdkProcesses'] == receipt['confirmedSDKProcesses'] == 4 and receipt['uncertainSDKProcesses'] == 0
-        assert all(row['started'] is True and row['exitCode'] == 0 and row['cleanupComplete'] is True and not row['uncertainStart'] and not row['timedOut'] and not row['outputLimited'] for row in receipt['commands'])
-    else:
-        assert receipt['sdkCliProcesses'] == 3 and receipt['helperSessions'] == 1
-        assert len(receipt['caseStatuses']) == 2 and all(row['status'] == 'passed' for row in receipt['caseStatuses'])
-        assert receipt['helperStartAccounting'] == dict(ownerStarts=1, ownerReturns=1, confirmed=1, charged=1, uncertain=False)
-        shutdown = receipt['shutdown']
-        assert shutdown['cooperative'] is True and shutdown['cleanupComplete'] is True and shutdown['exitCode'] == 0
+    receipt = validate_receipt(root, accepted, role, OUTCOME)
     records = receipt['records']
     assert len(records) == 2 and {tuple(row['aspect']) for row in records} == set(ASPECTS)
     backend = 'gl2' if receipt['target'] == 'macos-arm64' else 'angle2'
@@ -128,25 +104,7 @@ def validate_captures(root, accepted, role):
     return receipt
 
 
+
 def compare(helper, normal, output, *, expected_candidate, core_test):
-    helper, normal, output = Path(helper), Path(normal), Path(output)
-    raw = (helper / 'accepted.json').read_bytes()
-    assert raw == (normal / 'accepted.json').read_bytes(), 'Different accepted sources'
-    accepted = validate_accepted(json.loads(raw))
-    h, n = validate_captures(helper, accepted, 'hidden-helper'), validate_captures(normal, accepted, 'normal-game')
-    assert h['candidate'] == n['candidate'] == expected_candidate and h['target'] == n['target']
-    assert h['coreTestSHA256'] == digest(Path(core_test).read_bytes())
-    output.mkdir(parents=True, exist_ok=False)
-    rows = []
-    for aspect in ASPECTS:
-        a = next(row for row in h['records'] if tuple(row['aspect']) == aspect)
-        b = next(row for row in n['records'] if tuple(row['aspect']) == aspect)
-        assert a['drawPerVirtual'] == b['drawPerVirtual']
-        rows.append(dict(aspect=list(aspect), **compare_frame(
-            helper / a['filename'], normal / b['filename'], a['geometry'], b['geometry'],
-            output / ('difference-' + a['filename']))))
-    result = dict(outcome=OUTCOME, candidate=expected_candidate, target=h['target'], tolerance=0, records=rows,
-                  passed=all(row['differingPixels'] == 0 and row['geometryMatches'] for row in rows))
-    (output / 'comparison.json').write_text(json.dumps(result, indent=2) + '\n')
-    assert result['passed'], 'Rendering differences require diagnosis; no tolerance is accepted'
-    return result
+    return compare_receipts(helper, normal, output, outcome=OUTCOME, admit=validate_accepted, captures=validate_captures,
+                            label=lambda row: {}, expected_candidate=expected_candidate, core_test=core_test)

@@ -1,13 +1,10 @@
 """Offline L20 admission and exact-frame rejection checks. No SDK starts."""
 import ast
 import copy
-from pathlib import Path
-import tempfile
 import textwrap
 from types import SimpleNamespace
 import unittest
 
-from PIL import Image
 import sample_fidelity as fidelity
 
 
@@ -30,18 +27,6 @@ class SampleFidelityGates(unittest.TestCase):
         self.assertEqual(vars(store), namespace['SAMPLE_CASES'][1]['values'])
         namespace['_sample_advance']()
         self.assertEqual(calls, ['sample_fidelity', 'restart', 'sample_fidelity', 'restart', dict(status=0, save=False)])
-
-    def test_exact_comparison_rejects_alpha_only_and_geometry_differences(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            Image.new('RGBA', (4, 3), (20, 30, 40, 255)).save(root / 'a.png')
-            Image.new('RGBA', (4, 3), (20, 30, 40, 254)).save(root / 'b.png')
-            row = fidelity.compare_frame(root / 'a.png', root / 'b.png', [], [], root / 'diff.png')
-            self.assertEqual(row['differingPixels'], 12)
-            self.assertEqual(row['maxChannelDelta'], 1)
-            row = fidelity.compare_frame(root / 'a.png', root / 'a.png', [dict(x=2)], [dict(x=3)], root / 'geometry.png')
-            self.assertEqual(row['differingPixels'], 0)
-            self.assertFalse(row['geometryMatches'])
 
     def test_case_matrix_rejects_missing_duplicate_or_wrong_samples(self):
         cases = [dict(id=name, state=state, request=dict(width=w, height=h, buttonState=state))

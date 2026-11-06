@@ -1,38 +1,28 @@
 """L20 accepted-source admission and exact comparison. Starts no processes."""
-import base64
 import json
 import math
 from pathlib import Path
-import re
 
 from PIL import Image
 from base_help_fidelity import digest
-from fidelity_comparison import compare_frame
+from fidelity_comparison import ASPECTS, FIXTURE_ROOT, REPO, compare_receipts, inputs, validate_receipt
 
-REPO = Path(__file__).resolve().parents[2]
-FIXTURE_ROOT = REPO / 'tests/fixtures/phase-3b-screens'
 SOURCE = 'game/ui/sample_fidelity.rpy'
 OUTCOME = 'L20-sample-fidelity'
-ASPECTS = ((1280, 720), (1024, 768))
 STATES = ('normal', 'hover', 'selected', 'selectedHover', 'disabled', 'selectedDisabled')
 CASES = tuple((state, state, '7') for state in STATES) + (
     ('defaults', 'normal', None), ('minimum', 'normal', '-5'), ('maximum', 'normal', '15'),
     ('above', 'normal', '99'), ('below', 'normal', '-9223372036854775808'))
+BAR_STATE_COLORS = {'hover_left_bar': '#3c9c58', 'hover_thumb': '#ffffff', 'selected_left_bar': '#a07828',
+                    'selected_thumb': '#ffd060', 'insensitive_left_bar': '#555555'}
 SAMPLE_STRING = "[__import__('os').system('never')] {b}literal{/b}"
 
 
 def assets():
-    # Reuse the existing synthetic six-state images, independent of exported plans.
-    declaration = (REPO / 'app/src-core/src/screens/control_tests.rs').read_text(encoding='utf-8').split('STATE_PNGS:', 1)[1].split('];', 1)[0]
-    images = re.findall(r'"([A-Za-z0-9+/=]+)"', declaration)
-    assert len(images) == 6
+    # The same synthetic six-state images the core exporter imports, read independently of exported plans.
+    states = FIXTURE_ROOT / 'control-states'
     return {'game/fonts/sample_font.ttf': (FIXTURE_ROOT / 'fonts/SourceSans3-Regular.ttf').read_bytes(),
-            **{f'game/images/ui sample_state_{i}.png': base64.b64decode(raw, validate=True) for i, raw in enumerate(images)}}
-
-
-def inputs(accepted):
-    return {**{path: row['sha256'] for path, row in accepted['files'].items()},
-            **{row['relativePath']: row['sha256'] for row in accepted['assets']}}
+            **{f'game/images/ui sample_state_{i}.png': (states / f'state_{i}.png').read_bytes() for i in range(6)}}
 
 
 def validate_matrix(cases):
@@ -79,7 +69,9 @@ def validate_accepted(accepted):
         assert [n['kind'] for n in nodes] == ['screen', 'fixed', 'text', 'text', 'textbutton', 'textbutton', 'imagebutton', 'bar']
         assert nodes[2]['literal'] == f"Score {score or '0'} / {'True' if score is None else 'False'}"
         assert nodes[3]['literal'] == ('Default café' if score is None else SAMPLE_STRING.replace('{', '{{'))
+        assert nodes[4]['literal'] == f"Local {score or '0'} coins"
         assert nodes[7]['properties']['value'] == max(-5, min(15, int(score or '0'))) + 5
+        assert {k: v for k, v in nodes[7]['properties'].items() if k.startswith(('hover_', 'selected_', 'insensitive_'))} == BAR_STATE_COLORS
         assert nodes[7]['properties']['range'] == 20
         assert not any({'action', 'hovered', 'unhovered'} & n['properties'].keys() for n in nodes)
         assert [w['start'] for w in case['widgets']] == [n['start'] for n in nodes[1:]]
@@ -89,22 +81,7 @@ def validate_accepted(accepted):
 
 def validate_captures(root, accepted, role):
     root = Path(root)
-    receipt = json.loads((root / 'result.json').read_text(encoding='utf-8'))
-    assert receipt['outcome'] == OUTCOME and receipt['role'] == role
-    assert receipt['passed'] is True and receipt['sourceUnchanged'] is True and receipt['cleanupComplete'] is True
-    assert receipt['acceptedSHA256'] == digest((root / 'accepted.json').read_bytes())
-    assert receipt['inputs'] == inputs(accepted)
-    assert receipt['target'] in ('macos-arm64', 'windows-x64')
-    assert receipt['rendererSHA256'] == digest((REPO / 'app/src-core/src/screens/canvas-renderer.rpy').read_bytes())
-    if role == 'normal-game':
-        assert [r['name'] for r in receipt['commands']] == ['compile', 'lint', 'run', 'run']
-        assert receipt['sdkProcesses'] == receipt['confirmedSDKProcesses'] == 4 and receipt['uncertainSDKProcesses'] == 0
-        assert all(r['started'] is True and r['exitCode'] == 0 and r['cleanupComplete'] is True and not r['uncertainStart'] and not r['timedOut'] and not r['outputLimited'] for r in receipt['commands'])
-    else:
-        assert receipt['sdkCliProcesses'] == 3 and receipt['helperSessions'] == 1
-        assert len(receipt['caseStatuses']) == len(accepted['cases']) and all(r['status'] == 'passed' for r in receipt['caseStatuses'])
-        assert receipt['helperStartAccounting'] == dict(ownerStarts=1, ownerReturns=1, confirmed=1, charged=1, uncertain=False)
-        assert receipt['shutdown']['cooperative'] is True and receipt['shutdown']['cleanupComplete'] is True and receipt['shutdown']['exitCode'] == 0
+    receipt = validate_receipt(root, accepted, role, OUTCOME)
     records = receipt['records']
     assert len(records) == len(accepted['cases'])
     keyed = {(tuple(r['aspect']), r['id']): r for r in records}
@@ -132,24 +109,8 @@ def validate_captures(root, accepted, role):
     return receipt
 
 
+
 def compare(helper, normal, output, *, expected_candidate, core_test):
-    helper, normal, output = Path(helper), Path(normal), Path(output)
-    raw = (helper / 'accepted.json').read_bytes()
-    assert raw == (normal / 'accepted.json').read_bytes(), 'Different accepted sources'
-    accepted = validate_accepted(json.loads(raw))
-    h, n = validate_captures(helper, accepted, 'hidden-helper'), validate_captures(normal, accepted, 'normal-game')
-    assert h['candidate'] == n['candidate'] == expected_candidate and h['target'] == n['target']
-    assert h['coreTestSHA256'] == digest(Path(core_test).read_bytes())
-    output.mkdir(parents=True, exist_ok=False)
-    reference = {(tuple(r['aspect']), r['id']): r for r in n['records']}
-    rows = []
-    for a in h['records']:
-        b = reference[(tuple(a['aspect']), a['id'])]
-        assert a['drawPerVirtual'] == b['drawPerVirtual']
-        rows.append(dict(aspect=a['aspect'], id=a['id'], state=a['state'], **compare_frame(
-            helper / a['filename'], normal / b['filename'], a['geometry'], b['geometry'], output / ('difference-' + a['filename']))))
-    result = dict(outcome=OUTCOME, candidate=expected_candidate, target=h['target'], tolerance=0, records=rows,
-                  passed=all(r['differingPixels'] == 0 and r['geometryMatches'] for r in rows))
-    (output / 'comparison.json').write_text(json.dumps(result, indent=2) + '\n')
-    assert result['passed'], 'Rendering differences require diagnosis; no tolerance is accepted'
-    return result
+    return compare_receipts(helper, normal, output, outcome=OUTCOME, admit=validate_accepted, captures=validate_captures,
+                            label=lambda row: dict(id=row['id'], state=row['state']),
+                            expected_candidate=expected_candidate, core_test=core_test)
