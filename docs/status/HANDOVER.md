@@ -1,91 +1,81 @@
 # Current outcome handover
 
-## Integer bars and image buttons in final verification
+## Integer bars and image buttons locally verified
 
-Continue in the existing Windows checkout on `codex/51-52-integration`. Kris
-authorized continuation of #51/#52, local commits, their issue execution-state/limit
-updates and private hash-verified T3 message transfers. No push, code publication,
-PR, merge or public/server upload is authorized. Both worker implementations are
-integrated. Production candidate remains `3b66300218955e9f7337a29a0a407e8ce689bc1d`;
-qualification-only correction is `ed44c624643aa67bbf75f58ecb5664c8a2f3069a`.
-Inspect actual HEAD and changes; do not reset or re-import workers.
+The selected local implementation, combined review and automated qualification of
+#51/#52 are complete on `codex/51-52-integration`. No further implementation or
+qualification is selected. Production candidate remains
+`3b66300218955e9f7337a29a0a407e8ce689bc1d`; final Windows reference/consumer candidate
+is `e21c5331e2df7df1ab3e57a36ee5495da78c8158`. Later status commits do not replace
+those producing identities. Inspect actual HEAD and changes before resuming; do
+not reset or re-import completed workers.
 
-Read live #51/#52 and [the continuation evidence](../tasks/evidence/bars-and-image-buttons.md#continuation-and-passive-helper-diagnosis-2026-11-06).
-#51 alone owns cumulative accounting and active reservations. Windows SDK17/17 and
-package2/2 ceilings remain closed. Native attempt2 now passes at the retained 3b
-package, all six stages, exact source/disk comparison and complete cleanup. No
-Windows reservation remains. The prior failure and pre-launch launcher refusals
-remain recorded. Do not run old SDK/helper/package launchers or exceed ceilings.
+Kris authorized local commits, issue execution-state/limit updates and private
+hash-verified T3 message transfers. Code publication, push, PR, merge, ticket
+closure and public/server upload remain unselected. Both issues stay open. Next
+work requires a new instruction; historical pending-gate requests do not restart
+finished checks or select publication. Any later publication must follow its own
+applicable validation contract.
 
-The original Windows helper wrapper is still FAILED. Passive inspection shows all
-twelve correctly placed crops are source-minus-one in every RGBA channel. Native
-runtime references also show that readback. All six 1280 references match exactly;
-1024 native references have 239 partially covered edge/corner pixels. Their old
-observer lacks physical/scale metadata, so they cannot clear the second aspect.
-No product-renderer defect is established. Preserve original frames and wrapper.
+[The final evidence](../tasks/evidence/bars-and-image-buttons.md#root-cause-correction-and-both-target-local-verification-complete-2026-11-06)
+records the root-cause correction and both-target results. The old helper consumer
+compared native readback to raw source PNG bytes. The corrected consumer requires
+independent native whole-frame references and exact crop equality, including
+alpha. The next Windows attempt exposed a separate launch fault: the reference
+inherited150% desktop DPI while production explicitly pins `RENPY_HIGHDPI=1.0`.
+Correction4ec19526 supplies the same per-process setting; e21c5331 adds actual
+dimensions/scales to failure diagnostics. Six focused checks pass, including the
+reproduced launch-boundary omission and strict mismatch refusals. No production
+renderer, system DPI or comparison requirement changed.
 
-The new `reference-helper` command starts one explicitly reserved SDK process for
-twelve independent whole-frame literal references using only admitted images. It
-imports no game scripts, product renderer or canvas plan. `validate-helper` now
-requires these references and their result hash, matching actual physical size and
-drawing scale, and exact full-RGBA crops. Fifteen focused admission tests pass.
-Its corrected engine reference and twelve-frame helper comparison pass on Mac.
-The approved Windows reference process at2331b44b passes and all twelve crops
-match exactly, but strict admission fails: reference drawPerVirtual1.5 differs
-from the retained helper's1.0. Physical dimensions match. Passive source diagnosis
-finds production `renpy/runtime/canvas.rs` pins `RENPY_HIGHDPI=1.0`; the reference
-producer omitted it. The producer now uses the same per-process setting. A new
-CLI-to-launch-boundary regression reproduces the omission and passes after the
-fix, including inherited DPI override and admitted-images-only staging. Six
-helper checks pass without engine execution. No system DPI setting changed.
-The consumed reference remains failed for combined helper admission. Do not normalize pixels,
-drop alpha, compare only interiors or weaken matching to clear the gate.
+Windows SDK start18 passes the reference matrix and passive helper admission.
+All twelve crops match exactly, 614400 RGBA bytes with zero residual. Physical
+dimensions and drawPerVirtual1 match under angle2. The retained3b helper frames,
+source/default invariance and cooperative shutdown remain on their original
+producer/binary basis. The new result and comparison audit are under
+`app/target/controls-51-52/reference-windows-e21c5331/`; their SHA256 values are
+e7eeea563590a9f70d1c66a5f3b8afbae93891909c39f05792074a89ca50ba20 and
+621bf3d8d5d178195e5d3ecadf59f792e5619e53fd551d42c0c0a80f1fd78b6b.
+The original failed wrapper and start17 scale-mismatch evidence are unchanged.
+No helper restart or package/native build was needed for the final reference.
 
-The same existing Mac qualification thread is
+#51 alone owns cumulative accounting. Kris raised the Windows SDK ceiling to20;
+actual use is18/20, helper1/4, package2/2, native2/3. Mac remains SDK13/16,
+helper1/4, package1/2, native1/3. All reservations are resolved, uncertain starts
+are zero and all owned checks/apps are stopped. The unused two Windows SDK starts
+are not selected. Package2 remains exhausted. Reserve any later justified capped
+operation before execution; no historical count or closed allowance resets.
+
+The existing Mac qualification thread is
 <t3-thread://v2/c95d26c7-af8c-4ab0-8c95-a45fdca2dfe6/mcp:launch:aed218e73e07211906bdf413f41978e96efe3ae09756ac17e0c6842d8b443ee7>.
-It is stopped and clean at ed44c624 on its existing candidate branch. Original1c6,
-exact5190 SDK evidence and passing signed3b package/native proof are preserved.
-The first reference failed before frames because its fixture lacked a start label.
-The corrected reference passes with twelve frames; the retained3b helper binary
-passes twelve exact crop comparisons, 614400 RGBA bytes, zero residual. Physical
-dimensions and drawPerVirtual2 match, using gl2. Source is unchanged; shutdown is
-cooperative and process, scratch and desktop assertion cleanup pass. No signing,
-Keychain or trust changes. Mac cumulative actuals are SDK13/helper1/package1/native1;
-zero reservations or uncertain starts remain on either host. The coordinator read
-the terminal receipt, SHA256e47d39537fb1071f7756f998c868067b0bb4487f8fe5d28588e57acbbf7479b1,
-at `.toolchains/qualification-ed44c624/result.json` in that isolated worktree.
-Component/source/frame hashes are retained there and summarized in
-[the final helper receipt](../tasks/evidence/bars-and-image-buttons.md#mac-matched-helper-qualification-and-remaining-windows-decision).
-Preserve each producing candidate. No new chat, shared-root edit or reverse-link retry.
+It stays stopped and clean at ed44c624 on its existing candidate branch, with
+original1c6 preserved. Exact5190 SDK runtime, signed3b package/native proof and
+retained3b helper proof remain distinct. Mac's twelve crops compare exactly at
+matching physical dimensions and drawPerVirtual2 under gl2. Source/defaults stay
+unchanged and cooperative process/scratch/desktop cleanup passes. Its terminal
+receipt `.toolchains/qualification-ed44c624/result.json` has SHA256
+e47d39537fb1071f7756f998c868067b0bb4487f8fe5d28588e57acbbf7479b1. No signing,
+Keychain or trust policy changed. No new chat, shared-root edit or reverse-link retry.
 
-The selected A2 approval check passes at3d8d2411, verifying real source/capture
-identity and changed-source refusal. The full-gallery gate is retired, including
-older pending requests for an uncancelled global run. Historical failures and
-cancellation remain recorded. No prototype changed, so no new sample matrix,
-shared-tooling or build-isolation check is selected. Approved inspector-v2 source
-37d29ca1, fingerprint fadc5fa2591ac31edec149b871505fcfa20c54b26e622d44e60a74b0b8ee0c80
-and thirteen captures stay pinned. No additional council, Standards/Spec redo,
-Terra recheck or replacement review is selected.
+The selected A2 approval check passes at3d8d2411. Source37d29ca1, fingerprint
+fadc5fa2591ac31edec149b871505fcfa20c54b26e622d44e60a74b0b8ee0c80 and thirteen
+captures stay pinned. The full-gallery gate and its historical rerun requests are
+retired. No prototype changed, so no new sample matrix, shared-tooling or build
+isolation check is selected. All council rounds, Standards/Spec reviews and the
+authorized Terra recheck are finished; do not start replacement panels.
 
-[The final coordinator review](../tasks/evidence/bars-and-image-buttons.md#combined-coordinator-review-and-criterion-reconciliation-2026-11-06)
-found no new production defect and maps every original criterion to retained
-UI/core, engine and both-target packaged evidence. Standards3/Spec3 findings stay
-corrected/self-verified; the footer finding has parent-only rendering proof.
+[The coordinator criterion audit](../tasks/evidence/bars-and-image-buttons.md#combined-coordinator-review-and-criterion-reconciliation-2026-11-06)
+has all remaining selected proof supplied. Standards3/Spec3 findings retain their
+corrected/self-verified scope; footer clearance remains parent rendering proof.
 Visual proof covers inspector structure and footer behavior with disclosed fixture,
-canvas and toolbar differences, not whole-screen pixel fidelity. The full repository
-validator retains two unrelated untracked recovery-newline failures; all1762 tracked
-files pass. Do not rerun all378 frontend tests or broad core suites for docs or
-qualification-only changes. Three Windows OS1314 symlink checks remain unqualified.
-
-Next obtain Kris's explicit approval to raise the Windows SDK ceiling from17 to18
-for one reference-only process, then record a #51 reservation before running the
-prepared `.toolchains/51-52/reference-windows-resume.ps1 -RunReserved` as owner.
-Its read-only preflight passes on the corrected committed candidate. It replays the original twelve helper frames after
-the reference; it starts no helper and builds no package. Preserve the original
-failed wrapper and record new admission separately. Required Windows helper
-proof still prevents ticket acceptance. Wider #54/Phase3B, physical input, native
-editor Test-in-Ren'Py routing and human acceptance remain separate. Detailed history
-below retains its existing size exception; it selects no additional work.
+canvas and toolbar differences, not whole-screen pixel fidelity. The actual
+UI/core journey, five review modes and378 frontend tests retain their recorded
+bases; both-target package/native proof stays at3b. Do not repeat broad suites
+for documentation or qualification-only changes. Tracked-file validation passes.
+The full validator retains two unrelated untracked recovery-newline failures;
+three Windows OS1314 symlink cases remain unqualified. Wider #54/Phase3B, physical
+input, native editor Test-in-Ren'Py routing and human acceptance remain separate.
+Detailed history below retains its existing size exception and selects no work.
 
 ## PR 81 integration and ticket closeout
 

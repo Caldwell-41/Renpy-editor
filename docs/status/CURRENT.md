@@ -1,30 +1,26 @@
 # Current status
 
-## Integer bars and image buttons in final verification
+## Integer bars and image buttons locally verified
 
-Kris selected continuation on `codex/51-52-integration`. Both implementations are
-integrated locally at `3b663002`; qualification correction `ed44c624` adds matched
-native references without changing production code. A later reference-only Windows
-run at2331b44b matched all pixels but failed strict drawing-scale admission. Its
-per-process DPI setting is corrected locally. No code publication, PR, merge
-or ticket closure is selected. #51/#52 remain incomplete.
+The selected local implementation of #51/#52 is complete on
+`codex/51-52-integration`. Production candidate is `3b663002`; final reference
+qualification passes at `e21c5331`. Both tickets remain open because closure and
+code publication were not selected. Nothing was pushed; no PR or merge occurred.
 
-| Capability | Completed evidence | Remaining acceptance |
+| Capability | Verified evidence | Scope retained |
 | --- | --- | --- |
-| Controls and approved design | Actual UI/core journey, five review regressions and 378 frontend tests pass on recorded candidates. Both packaged control journeys pass at 3b. Final coordinator product review and original-criterion reconciliation are recorded. | Required helper qualification; broader native/human gates stay separate. |
-| Runtime | Windows four cases pass at observer7d199aa9/source fe78025f. Mac seven starts/four cases pass at exact5190, with 48 captures and cleanup. | No broad rerun selected. |
-| Packages and native app | Windows corrected native attempt2 passes. Mac signed package1 and native attempt1 pass strict identity, all six control stages and cleanup. | Physical input and native editor preview routing are separate claims. |
-| Control helper | Mac's twelve frames pass exact native-reference RGBA, physical-size/scale, source invariance and cooperative shutdown checks. All twelve Windows reference/helper crops now match exactly. | Windows strict admission still fails because reference drawing scale1.5 differs from helper1.0. The reference DPI correction passes six offline checks. SDK17/17 is exhausted; another reference-only start needs approval. |
-| Design Lab | Selected A2 approval/source/capture and changed-source-refusal check passes. Source37d29ca1 and thirteen captures stay pinned. | Historical failed/cancelled full runs remain evidence. The full-gallery gate is retired. |
+| Control editing | Actual UI/core journey, five review regressions, 378 frontend tests and both packaged control journeys pass on recorded candidates. Final coordinator review maps every original criterion. | Original Standards3/Spec3 corrections remain self-verified; footer correction has parent rendering proof. No new review panel. |
+| Runtime and packages | Windows and Mac normal/fixture-preview matrices pass at both aspects. Windows corrected package/native and Mac signed package/native journeys pass. | Producing candidates remain distinct. Physical input and native editor preview routing are separate claims. |
+| Helper rendering | Both targets pass all twelve control crops, each 614400 RGBA bytes with zero residual, matching physical dimensions and drawing scale, source invariance and cooperative cleanup. | Windows DPI omission is fixed at the reference launch boundary. Failed historical wrappers remain preserved. |
+| Approved design | A2 source37d29ca1 and thirteen captures stay pinned. The selected approval/source/capture and changed-source-refusal check passes. | The full-gallery gate is retired. Broader canvas and human acceptance remain separate. |
 
-The corrected reference is qualified on Mac at ed44c624; the first missing-entry
-fixture failure remains recorded. All owned checks/apps are stopped; no reservation
-remains. Three Windows symlink checks remain failed/unqualified with OS1314. Original
-Standards3/Spec3 corrections and the parent-only footer finding keep their actual
-review scope; no panels restarted. #51 owns cumulative counts and reservations.
-[Handover](HANDOVER.md#integer-bars-and-image-buttons-in-final-verification) owns
-continuation; [the combined review](../tasks/evidence/bars-and-image-buttons.md#combined-coordinator-review-and-criterion-reconciliation-2026-11-06)
-maps each original criterion. Wider #54/Phase3B acceptance remains separate.
+Windows SDK use ends at18/20; no further start is selected. #51 owns all cumulative
+counts. All owned checks/apps are stopped, with zero reservations or uncertain
+starts. Three Windows OS1314 symlink cases remain unqualified, and two unrelated
+untracked recovery receipts retain newline failures; tracked-file validation passes.
+[Handover](HANDOVER.md#integer-bars-and-image-buttons-locally-verified) owns recovery.
+[Final proof and boundaries](../tasks/evidence/bars-and-image-buttons.md#root-cause-correction-and-both-target-local-verification-complete-2026-11-06)
+retain exact identities and prior failures. Wider #54/Phase3B acceptance remains separate.
 
 ## Variable text, ordered actions and nested canvas accepted
 

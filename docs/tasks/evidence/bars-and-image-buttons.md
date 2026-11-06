@@ -1451,3 +1451,66 @@ approval to raise Windows SDK17 to18 and a new #51 reservation. The existing
 launcher chooses a fresh result directory from the corrected committed candidate.
 Both tickets remain open. Previous allowance-decision directions are historical;
 publication and wider acceptance boundaries remain unchanged.
+
+## Root-cause correction and both-target local verification complete, 2026-11-06
+
+Kris raised the cumulative Windows SDK ceiling to20 and explicitly selected
+`principle-fix-root-causes`. The coordinator reserved one reference-only start
+in#51 at e21c5331e2df7df1ab3e57a36ee5495da78c8158. The launch-boundary fault is
+fixed in4ec19526: the reference now supplies the same `RENPY_HIGHDPI=1.0` setting
+as the production helper. No product renderer, system setting, pixel tolerance
+or capture-condition check changed. The later e21c5331 correction prints actual
+helper/reference dimensions and scales on refusal, so the deciding fact appears
+in the first error. Six focused checks pass, including the reproduced environment
+override failure, image-only staging and mismatch diagnostics.
+
+The pattern review found one independent whole-frame control reference producer,
+used by the `reference-helper` CLI. Both aspects and every state use that same
+corrected environment. The normal/fixture-preview controls observer compares its
+appearance and independent reference within one engine process; it does not have
+this cross-process DPI mismatch. The production helper already has one explicit
+DPI owner for all canvas controls. No extra implementation or broad campaign was
+needed to fix this fault.
+
+Windows SDK start18 PASSES. Its one reference matrix exits0 in5.156s, with all
+twelve PNGs, process reaped and scratch cleanup complete. The passive helper
+consumer exits0 and emits `SCREEN_CONTROLS_HELPER_ADMITTED`. Every160x80 crop,
+614400 RGBA bytes in total, matches exactly with zero residual. Both aspects
+have matching physical dimensions and drawPerVirtual1.0 under angle2. Six states
+remain distinct. The changed DPI setting removes the prior1.5-versus1.0 mismatch;
+no failed artifact was rewritten or relabelled.
+
+| Windows retained result | SHA256 |
+| --- | --- |
+| Reference result at e21c5331 | e7eeea563590a9f70d1c66a5f3b8afbae93891909c39f05792074a89ca50ba20 |
+| Combined comparison/admission audit | 621bf3d8d5d178195e5d3ecadf59f792e5619e53fd551d42c0c0a80f1fd78b6b |
+| Reference SDK log | f4e0165b8b17538948e36fe85c05954bf2dac4683ea2d37d3059e3488943e359 |
+| Passive consumer source at e21c5331 | 6ee3bc378941e956bae3bf2b31bfe653c92a1694ae57b669880ee9cfbc7bdec7 |
+| Original helper result at3b | fecd7fe891b59a10704403ac1d2e8e78d79a76b54d373e33421651fa219f65d5 |
+
+New reference PNGs, input snapshot, accepted manifest, log and audit are retained
+under `app/target/controls-51-52/reference-windows-e21c5331/`. The audit binds the
+new reference candidate to the original3b helper result, binary and frame hashes.
+It records the successful launcher exit and admission receipt. The helper was not
+restarted. Original helper source/default metadata and cooperative cleanup remain
+on their3b producing basis; accepted source remains fe78025f/manifest04ee4aeb.
+Product source and renderer match3b unchanged. The selected3d policy changes only
+Design Lab commands in package.json. Windows package/native proof retains3b;
+runtime retains observer7d199aa9/source fe78025f. Mac proof retains5190 runtime,
+3b package/native/helper producer and ed44c624 literal reference/consumer basis.
+
+Final cumulative actuals, owned by#51: Windows SDK18/20, helper1/4, package2/2,
+native2/3; Mac SDK13/16, helper1/4, package1/2, native1/3. Zero uncertain starts and
+zero reservations remain. The two unused Windows SDK starts are not selected.
+All owned checks/apps are stopped. No package build, native-editor launch or
+helper restart occurred during this final reference run.
+
+The combined review and original-criterion table above now have their remaining
+Windows helper gate satisfied. Both tickets' local implementation and selected
+automated qualification are complete. Prior failures remain historical failures;
+the new successful admission is separate. No extra council, Standards/Spec panel,
+Terra recheck, full-gallery sweep or broad frontend/core rerun occurred. The A2
+approval and its thirteen captures remain unchanged. Wider #54/Phase3B, physical
+input, native editor preview routing and human acceptance retain separate scopes.
+Tickets stay open because closure/publication was not selected. No code was
+pushed or published, and no PR or merge occurred.

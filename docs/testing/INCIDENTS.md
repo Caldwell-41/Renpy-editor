@@ -680,8 +680,9 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   references. Corrected Mac admission passes all twelve crops with zero residual;
   Windows pixels also match exactly, but reference scale1.5 differs from helper1.0.
   Production pins `RENPY_HIGHDPI=1.0`; the reference launcher omitted it. The
-  corrected launcher and offline launch-boundary regression now pass. Native
-  requalification remains pending at SDK17/17. See
+  corrected launcher and offline launch-boundary regression now pass. Windows
+  start18 also passes exact native/helper admission with matching scale1.0;
+  errors now print both actual capture conditions. See
   [the control diagnosis](../tasks/evidence/bars-and-image-buttons.md#continuation-and-passive-helper-diagnosis-2026-11-06).
 
 ## H47. Shared Apply hides text dimensions
