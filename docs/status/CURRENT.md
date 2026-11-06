@@ -17,11 +17,14 @@ Use grill-me for genuine further questions. The source chat owns this handoff;
 the new chat owns its branch, checks and review iterations. No push, PR, merge,
 production promotion or future engine implementation is selected.
 
-The initial fourth mock is built as `combined`. Its focused browser journey and
-48-case matrix pass, including the preserved reference journeys and production
-build exclusion. Kris confirmed Tracks first, equal bottom-panel height and
-branches in scene context. The new LAN preview uses port 5176. Its first council
-is next; there are no new scores or production approvals.
+The fourth mock is built as `combined`. Round 1 reviewed local `45390124`; all
+three reviewers requested fixes. The lead corrected navigator scrolling, compact
+Writing focus entry, condition-label synchronization and ending destinations.
+Writing focus now has a larger editor, and controls/copy have a second polish pass.
+The Round 2 candidate passes 22 focused groups, 48 state/theme/view renders,
+the three reference journeys, standalone reset guards and production exclusion.
+Kris confirmed Tracks first, equal bottom-panel height and branches in scene
+context. The LAN preview uses port 5176. No production approval is implied.
 
 The three-mock comparison and score-only rescore are complete. Current reference
 code is `app/design-lab/screens/story-revamp/`; images and browser evidence remain

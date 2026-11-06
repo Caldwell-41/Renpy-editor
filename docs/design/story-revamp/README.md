@@ -18,7 +18,7 @@ The new Astra high chat owns that iteration, its grill-me clarification and the
 three-member council with the revised rubric. The earlier three mocks remain
 unapproved references; their completed comparison below is historical.
 
-## Fourth mock, initial candidate
+## Fourth combined mock
 
 The `combined` variant keeps the Stage tracks game window and selected-beat editor.
 Tracks and Reel share the same model, selected beat, expanded branches and insertion
@@ -51,11 +51,32 @@ enlargement, dialogs and Undo. The normal stage measures 974 x 548 at 1600 x 100
 633 x 356 at 1100 x 720 and 486 x 273 at 560 x 640.
 
 The 48-case sample/theme/mode matrix, all three reference authoring journeys and
-in-memory production-build exclusion also pass. The initial candidate awaits its
-first three-member council. No score or approval
-is implied by browser checks. Earlier failed runs are retained under numbered
+in-memory production-build exclusion also pass. Round 1 reviewed `45390124` and
+requested changes; its immutable candidate and reports live under
+`.toolchains/story-combined/round-1/`. No approval is implied by browser checks.
+Earlier failed runs are retained under numbered
 `diagnosis-` directories, including the corrected focus-grid and compact-menu
 positioning defects, search-field Escape behavior, and source-dialog selector error.
+
+The next candidate fixes Tracks selection hidden by sticky lane labels and Reel
+Writing focus scrolling the wrong container. Redraws preserve Reel and Conditions
+scroll positions; compact Writing focus opens with the editor below Conditions.
+Condition edits update every displayed branch label. The picker describes the
+actual ending destination or replacement, and ordinary insertion names the
+preceding beat. Writing focus uses a wider editor and taller prose field. The
+header Add button stays fixed, Next line has secondary emphasis, and Delete sits
+last in beat menus. Branch-entry markers also name the continuation.
+
+The combined check accepts `STORY_CHECK_OUTPUT=round-2-captures`. Its 22 groups
+pass and produce 107 PNGs. It adds direct
+visibility assertions before any helper scroll, condition-edit focus checks,
+ending replacement/empty-search checks and matching property-field heights.
+The 48 boundary renders, three reference journeys, exported fourth-mock draft and
+reset guards, production exclusion and static checks also pass.
+Per-condition Reel branch selectors remain because the selected brief asks for
+direct branch switching in the bottom presentation. They and the Conditions strip
+share the same branch IDs and updates. Compact remains a stacked workspace; the
+editor comes first in Writing focus, with Conditions at the top.
 
 ## Three-mock reference
 

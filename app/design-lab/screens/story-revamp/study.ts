@@ -108,7 +108,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   function targetText(body: Beat[], trail: string[], requested: number) {
     const index = Math.min(requested, defaultIndex(body));
     const anchor = body[index], previous = body[index - 1];
-    return `Adds to ${trail.join(' › ')}${anchor ? `, before ${name(anchor.id)}` : previous ? `, after ${name(previous.id)}` : ', as its first beat'}`;
+    return `Adds to ${trail.join(' › ')}${combined && previous ? `, after ${name(previous.id)}` : anchor ? `, before ${name(anchor.id)}` : previous ? `, after ${name(previous.id)}` : ', as its first beat'}`;
   }
   type Bookmark = { owner?: string; action?: string; label?: string; choice?: number; start?: number | null; end?: number | null };
   function bookmark(node = document.activeElement): Bookmark | undefined {
@@ -238,7 +238,9 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       if (oldEnding) body.splice(ending(body), 1, b); else body.splice(Math.min(before, defaultIndex(body)), 0, b);
       selected = b.id; stageObject = ''; manual = ''; stageExpanded = false;
       if (kind === 'condition') expanded.add(b.id);
-    }, kind === 'background' ? `${where} · Characters shown earlier are cleared.` : where); focusText();
+    }, kind === 'background' ? `${where} · Characters shown earlier are cleared.` : where);
+    if (combined) status(`${oldEnding ? 'Replaced ending with' : 'Added'} ${name(b.id)} in ${trail.join(' › ')}${kind === 'background' ? '. Characters shown earlier are cleared.' : ''}`);
+    focusText();
   }
   function picker(body = scene().beats, trail = [scene().name], requested = defaultIndex(body), replaceEmpty?: Beat) {
     if (combined) { combinedPicker(body, trail, requested, replaceEmpty); return; }
@@ -303,6 +305,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const remove = action(`Delete ${name(b.id)}${b.kind === 'choice' ? ' and its ' + count(b.options.length, 'option') : ''}`, () => removeBeat(b)); remove.disabled = b.kind === 'customCode' || locked && owner.trail.length === 1; if (remove.disabled) remove.title = b.kind === 'customCode' ? 'Protected source is read-only in this mock.' : 'Replace this ending through Add a beat.';
     controls.prepend(action(`Add beat before ${number(b.id)}`, () => picker(owner.body, owner.trail, owner.index))); controls.append(move, remove, action('View source', () => source(b)));
     if (b.kind === 'condition') controls.append(action('Add Else if', () => addElseIf(b)));
+    if (combined) { remove.classList.add('sc-menu-delete'); controls.append(remove); }
     menu.append(controls);
     const place = () => { if (!menu.open) { delete menu.dataset.placed; return; } const r = summary.getBoundingClientRect(), box = controls.getBoundingClientRect(); controls.style.left = `${Math.max(8, Math.min(innerWidth - box.width - 8, r.right - box.width))}px`; controls.style.top = `${Math.max(8, Math.min(innerHeight - box.height - 8, r.bottom + 4))}px`; menu.dataset.placed = 'true'; };
     summary.onclick = event => { event.preventDefault(); const open = !menu.open; closeMenus(); menu.open = open; place(); };
@@ -381,11 +384,11 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   function header() {
     const bar = el('header', 'sr-topbar'); const choose = action(`${scene().name} ▾`, () => { treeOpen = !treeOpen; draw(); }, false, 'scenes'); choose.ariaLabel = `Scenes · ${scene().name}`; choose.title = `Choose a scene · ${scene().name}`; choose.ariaExpanded = String(treeOpen); bar.append(choose);
     if (caller) { const origin = scenes.find(s => s.id === caller!.scene); const back = action(`← Back to ${origin?.name ?? 'previous scene'}`, () => { const previous = caller!; caller = undefined; sceneSelections.set(previous.scene, previous.selected); go(previous.scene); reelBranch = previous.branch; draw(); focusSelected(); }, false, 'back-scene'); back.classList.add('sr-back-scene'); back.title = `${back.textContent} · ${origin ? beatName(origin, caller.selected) : ''}`; bar.append(back); }
-    const trail = ancestry(scene(), selected) ?? []; bar.append(el('span', 'sr-current-body', trail.length ? trail.map(p => `${number(p.beat.id)} ${p.branch.name} ${p.branch.condition}`).join(' › ') : ''));
+    const trail = ancestry(scene(), selected) ?? []; bar.append(el('span', 'sr-current-body', !combined && trail.length ? trail.map(p => `${number(p.beat.id)} ${p.branch.name} ${p.branch.condition}`).join(' › ') : ''));
     const tools = el('div', 'sr-top-tools');
     const focus = action(focused ? 'Show game window' : 'Writing focus', () => { focused = !focused; draw(); status(focused ? 'Writing focus · all beat tools remain available' : 'Game window shown'); }, false, 'toggle-focus'); focus.dataset.focusToggle = '';
     undoButton = action('Undo', () => history(undo, redo, 'Undid'), false, 'undo'); redoButton = action('Redo', () => history(redo, undo, 'Redid'), false, 'redo'); undoButton.disabled = !undo.length; redoButton.disabled = !redo.length;
-    const t = target(); const add = action(innerWidth < 900 ? '+ Add beat' : `+ Add beat ${t.body[t.index] ? 'before ' + name(t.body[t.index]!.id) : t.body[t.index - 1] ? 'after ' + name(t.body[t.index - 1]!.id) : 'to ' + (reelContext()?.branch.name ?? 'scene')}`, () => { const here = target(); picker(here.body, here.trail, here.index); }, true, 'add-beat'); add.title = targetText(t.body, t.trail, t.index);
+    const t = target(); const add = action(combined || innerWidth < 900 ? '+ Add beat' : `+ Add beat ${t.body[t.index] ? 'before ' + name(t.body[t.index]!.id) : t.body[t.index - 1] ? 'after ' + name(t.body[t.index - 1]!.id) : 'to ' + (reelContext()?.branch.name ?? 'scene')}`, () => { const here = target(); picker(here.body, here.trail, here.index); }, true, 'add-beat'); add.title = targetText(t.body, t.trail, t.index);
     const more = el('details', 'sr-more'); const summary = el('summary', '', 'More'); summary.ariaLabel = 'More scene actions'; summary.dataset.action = 'more'; more.append(summary);
     const menu = el('div', 'sr-top-menu'); const rewrite = action(`Assist with ${name()}…`, assist); rewrite.disabled = !current() || !['dialogue', 'narration'].includes(current()!.kind); if (rewrite.disabled) rewrite.title = 'Select a dialogue or narration line to rewrite.'; menu.append(rewrite, action(`View source for ${name()}`, () => source()), action('Rename this scene…', renameScene), action('Design notes (future tools)', notes)); more.append(menu);
     tools.append(focus, undoButton, redoButton, add, more); bar.append(tools); return bar;
@@ -431,7 +434,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       if (owner) { const { route, index } = pathFor(); const before = illustrate(route, index - 1); const canChange = owner.id !== selected && (stageObject === 'background' ? !!before.background : before.characters.has(stageObject)); panel.append(el('h3', '', `${stageObject === 'background' ? 'Background' : stageObject} on stage · set by ${name(owner.id)}`), action(`Edit ${name(owner.id)}`, () => { stageObject = ''; selectBeat(owner.id, true); focusText(); }, !canChange, 'edit-stage-owner')); if (canChange) panel.append(action(`${stageObject === 'background' ? 'Change background' : `Change ${stageObject}'s appearance`} before ${number()}`, () => { stageInsert(stageObject === 'background' ? 'background' : 'changeAppearance', stageObject === 'background' ? undefined : stageObject); stageObject = ''; }, true, 'stage-change')); panel.append(action(`Back to ${number()}`, () => { stageObject = ''; selectBeat(selected, true); }, false, 'close-stage-object')); return panel; }
     }
     const heading = el('div', 'sr-inspector-heading'); const type = typeSelector(b); if (type instanceof HTMLSelectElement) heading.append(el('strong', '', `${number(b.id)} ·`)); heading.append(type);
-    if (['dialogue', 'narration'].includes(b.kind) && variant !== 'cue-sheet') { const next = action(`+ Next ${nextSpeaker(b.id)} line`, () => { const t = locate(scene(), b.id)!; insert('dialogue', t.body, t.trail, t.index + 1, nextSpeaker(b.id)); }, true, 'next-dialogue'); next.title = `Add dialogue after ${name(b.id)} (Shift+${mod}+Enter)`; heading.append(next); }
+    if (['dialogue', 'narration'].includes(b.kind) && variant !== 'cue-sheet') { const next = action(combined ? '+ Next line' : `+ Next ${nextSpeaker(b.id)} line`, () => { const t = locate(scene(), b.id)!; insert('dialogue', t.body, t.trail, t.index + 1, nextSpeaker(b.id)); }, true, 'next-dialogue'); if (combined) next.classList.add('sc-next-line'); next.title = `Add dialogue after ${name(b.id)} (Shift+${mod}+Enter)`; heading.append(next); }
     heading.append(rowMenu(b)); panel.append(heading);
     if ((ancestry(scene(), b.id) ?? []).length) panel.append(el('p', 'sr-editor-location', locate(scene(), b.id)!.trail.join(' › ')));
     if (variant === 'cue-sheet') { if (mediaKinds.includes(b.kind)) panel.append(fields(b)); else panel.append(effects()); }
@@ -505,7 +508,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     revealGameOption(document.activeElement instanceof HTMLElement ? document.activeElement : null);
     const manualOwner = manual ? flatten(scene().beats).find(b => b.branches.some(branch => branch.id === manual)) : undefined, manualBranch = manualOwner?.branches.find(branch => branch.id === manual);
     const routes = state.unknown.filter(b => b.kind === 'condition').map(b => { const branch = b.branches.find(branch => branch.id === visibleBranches.get(b.id)); return branch ? `${number(b.id)} ${branch.name}` : ''; }).filter(Boolean).join(', ');
-    for (const note of host.querySelectorAll<HTMLElement>('.sr-stage-status')) { const title = manual ? `Previewing ${manualOwner ? number(manualOwner.id) : ''} ${manualBranch?.name ?? 'branch'} · editing ${number()}` : `${number()} · ${state.unknown.length ? 'Partial illustration' : 'Sample illustration'}${routes ? ' · via ' + routes : ''}`; note.textContent = innerWidth < 900 ? `${number()}${manual ? ' · Preview' : state.unknown.length ? ' · Partial' : ''}` : title; note.title = title; note.ariaLabel = title; }
+    for (const note of host.querySelectorAll<HTMLElement>('.sr-stage-status')) { const title = manual ? `Previewing ${manualOwner ? number(manualOwner.id) : ''} ${manualBranch?.name ?? 'branch'} · editing ${number()}` : `${number()} · ${state.unknown.length ? 'Partial illustration' : 'Sample illustration'}${routes && !combined ? ' · via ' + routes : ''}`; note.textContent = innerWidth < 900 ? `${number()}${manual ? ' · Preview' : state.unknown.length ? ' · Partial' : ''}` : title; note.title = title; note.ariaLabel = title; }
     for (const effect of host.querySelectorAll('.sr-effects')) effect.replaceWith(effects());
     for (const owner of flatten(scene().beats)) for (const branch of owner.branches) {
       for (const button of host.querySelectorAll<HTMLElement>(`[data-action="open-branch-${branch.id}"]`)) { const prefix = button.closest('.sr-branch-control') ? (variant === 'stage-tracks' ? 'Show in tracks: ' : 'Open branch: ') : button.closest('.sr-reel-target') ? 'Open ' : ''; const fullName = `${prefix}${branch.name} ${branch.condition}${button.closest('.sr-reel-target') ? ' · ' + count(branch.beats.length, 'beat') : ''}`.trim(); if (button.closest('.sr-branch-control')) { button.textContent = variant === 'stage-tracks' ? 'Show in tracks' : 'Open branch'; button.ariaLabel = button.title = fullName; } else nameControl(button, fullName); if (button.closest('.sr-track-band')) button.title = `Show ${branch.name} ${branch.condition} in tracks`.trim(); }
@@ -562,7 +565,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const summary = el('div', 'sr-choice-summary'); b.options.forEach((option, i) => summary.append(el('p', '', `${i + 1}  ${option.text || 'New choice'} → ${scenes.find(s => s.id === option.target)?.name ?? option.target}${option.guard ? ' · only when ' + option.guard : ''}`))); return summary;
   }
   function nextLine(b: Beat) {
-    const next = action(`+ Next ${b.kind === 'dialogue' ? b.speaker : 'dialogue'} line`, () => { const t = locate(scene(), b.id)!; insert('dialogue', t.body, t.trail, t.index + 1, nextSpeaker(b.id)); }, false, 'next-dialogue'); next.title = `Shift+${mod}+Enter`; next.classList.add('sr-inline-next'); return next;
+    const next = action(`+ Next ${b.kind === 'dialogue' ? b.speaker : 'dialogue'} line`, () => { const t = locate(scene(), b.id)!; insert('dialogue', t.body, t.trail, t.index + 1, nextSpeaker(b.id)); }, false, 'next-dialogue'); if (combined) next.classList.add('sc-next-line'); next.title = `Shift+${mod}+Enter`; next.classList.add('sr-inline-next'); return next;
   }
   function reconcileCueRows() {
     for (const row of host.querySelectorAll<HTMLElement>('[data-beat]')) {
@@ -599,11 +602,29 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   function focusField(selector: string) { const request = ++focusRequest; requestAnimationFrame(() => { if (request === focusRequest) focusVisible(host.querySelector<HTMLElement>(selector)); }); }
   function focusText() { const request = ++focusRequest; requestAnimationFrame(() => { if (request !== focusRequest) return; revealSelection(); const area = host.querySelector<HTMLTextAreaElement>(`textarea[data-beat-text="${selected}"]`); const fields = host.querySelector<HTMLElement>(`[data-editor-for="${selected}"]`); const control = area ?? fields?.querySelector<HTMLElement>('input,select,button') ?? host.querySelector<HTMLElement>(`[data-beat="${selected}"] .sr-cue`); if (control) focusVisible(control); else focusSelected(); }); }
   function revealSelection() {
+    // Compact focus puts the editor above the list. Programmatic selection must
+    // not scroll the editor away; keyboard focus reveals the list when requested.
+    if (combined && focused && innerWidth < 900) return;
     for (const [itemSelector, scrollSelector] of [[`[data-reel-beat="${selected}"]`, '.sr-reel-strip'], [`[data-track-beat="${selected}"]`, '.sr-tracks-scroll'], [`[data-beat="${selected}"]`, '.sr-sheet']]) {
-      const item = host.querySelector<HTMLElement>(itemSelector!), area = host.querySelector<HTMLElement>(focused && scrollSelector === '.sr-reel-strip' ? '.sr-workarea' : scrollSelector!); if (!item || !area) continue;
-      const r = item.getBoundingClientRect(), rect = area.getBoundingClientRect(), main = host.querySelector<HTMLElement>('.sr-workarea')!.getBoundingClientRect(); const sticky = focused && variant === 'shot-reel' ? host.querySelector<HTMLElement>('.sr-shot-workspace[data-prose=true]')?.getBoundingClientRect().height ?? 0 : 0; const a = { left: rect.left, right: rect.right, top: focused ? Math.max(rect.top, main.top + sticky) : rect.top, bottom: focused ? Math.min(rect.bottom, main.bottom) : rect.bottom }; if (r.left < a.left) area.scrollLeft -= a.left - r.left; if (r.right > a.right) area.scrollLeft += r.right - a.right;
-      if (r.top < a.top) area.scrollTop -= a.top - r.top; if (r.bottom > a.bottom) area.scrollTop += Math.min(r.bottom - a.bottom, Math.max(0, r.top - a.top));
+      const scroller = focused && scrollSelector === '.sr-reel-strip' ? combined ? '.sc-reel' : '.sr-workarea' : scrollSelector!;
+      const item = host.querySelector<HTMLElement>(itemSelector!), area = host.querySelector<HTMLElement>(scroller); if (!item || !area) continue;
+      const r = item.getBoundingClientRect(), rect = area.getBoundingClientRect(), main = host.querySelector<HTMLElement>('.sr-workarea')!.getBoundingClientRect();
+      const labels = combined && scrollSelector === '.sr-tracks-scroll' ? area.querySelector<HTMLElement>('.sr-track-labels')?.getBoundingClientRect() : undefined;
+      const sticky = focused && variant === 'shot-reel' ? host.querySelector<HTMLElement>('.sr-shot-workspace[data-prose=true]')?.getBoundingClientRect().height ?? 0 : focused ? labels?.height ?? 0 : 0;
+      const bounds = { left: rect.left + (!focused ? labels?.width ?? 0 : 0), right: rect.right, top: Math.max(rect.top + sticky, main.top), bottom: Math.min(rect.bottom, main.bottom) };
+      if (r.left < bounds.left) area.scrollLeft -= bounds.left - r.left;
+      else if (r.right > bounds.right) area.scrollLeft += r.right - bounds.right;
+      if (r.top < bounds.top) area.scrollTop -= bounds.top - r.top;
+      else if (r.bottom > bounds.bottom) area.scrollTop += Math.min(r.bottom - bounds.bottom, Math.max(0, r.top - bounds.top));
     }
+  }
+  function revealActiveBranch() {
+    const strip = host.querySelector<HTMLElement>('.sc-condition-groups');
+    const active = strip?.querySelector<HTMLElement>(`[data-branch-label="${reelBranch}"]`);
+    if (!strip || !active) return;
+    const r = active.getBoundingClientRect(), bounds = strip.getBoundingClientRect();
+    if (r.left < bounds.left) strip.scrollLeft -= bounds.left - r.left;
+    else if (r.right > bounds.right) strip.scrollLeft += r.right - bounds.right;
   }
   function navigateBeat(event: KeyboardEvent, beats: Beat[], index: number) {
     if (event.altKey || event.ctrlKey || event.metaKey || event.isComposing) return;
@@ -705,8 +726,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       const branch = flatten(scene().beats).flatMap(b => b.branches).find(b => b.id === node.dataset.branchLabel);
       if (branch) { node.textContent = branchLabel(branch); node.title = branchLabel(branch); if (node instanceof HTMLButtonElement) node.ariaLabel = branchLabel(branch); }
     }
-    const route = host.querySelector<HTMLElement>('.sc-editing-context');
-    if (route) { const t = target(); route.textContent = t.trail.length > 1 ? t.trail.slice(1).join(' › ') : 'Scene'; route.title = targetText(t.body, t.trail, t.index); }
+    for (const option of host.querySelectorAll<HTMLOptionElement>('.sc-reel-branch option[value]')) { const branch = flatten(scene().beats).flatMap(b => b.branches).find(b => b.id === option.value); if (branch) option.textContent = branchLabel(branch); }
   }
   function bottomToolbar() {
     const bar = el('div', 'sc-bottom-toolbar');
@@ -719,9 +739,9 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
         status(`${mode === 'tracks' ? 'Tracks' : 'Reel'} view · editing ${contextName()}`);
       }, false, `bottom-${mode}`); button.ariaPressed = String(bottomMode === mode); modes.append(button);
     }
-    bar.append(modes, el('span', 'sc-context-label', 'Editing'), el('span', 'sc-editing-context'));
+    bar.append(modes);
     const t = target(); const add = action('+ Beat', () => { const point = target(); picker(point.body, point.trail, point.index); }, false, 'bottom-add'); add.title = targetText(t.body, t.trail, t.index); add.ariaLabel = add.title;
-    if (bottomMode === 'tracks' && !focused) bar.append(el('span', 'sc-track-legend', 'Shading: shown · dashes: uncertain'));
+    if (bottomMode === 'tracks' && !focused) bar.append(el('span', 'sc-track-legend', 'Shaded: carried forward · Dashed: state may differ'));
     bar.append(add); return bar;
   }
   function routeMarker(owner: Beat, branch: Branch, exit = false) {
@@ -729,6 +749,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     if (!exit) {
       marker.append(el('span', 'sc-boundary-label', `Inside ${number(owner.id)}`));
       const label = el('strong', '', branchLabel(branch)); label.dataset.branchLabel = branch.id; marker.append(label);
+      const next = continuation(owner); if (next) marker.append(el('span', 'sc-entry-continuation', `Then ${number(next.id)}, unless this path exits`));
       const path = [...locate(scene(), owner.id)!.trail, branchLabel(branch)];
       marker.append(action('+ Beat inside', () => picker(branch.beats, path, defaultIndex(branch.beats)), false, `inside-${branch.id}`));
     } else {
@@ -793,7 +814,8 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   function combinedPicker(body: Beat[], trail: string[], requested: number, replaceEmpty?: Beat) {
     const index = Math.min(requested, defaultIndex(body));
     const dialog = modal('Add a beat', 'beat-picker'); dialog.classList.add('sr-picker-dialog', 'sc-picker');
-    const destination = el('div', 'sc-picker-target'); destination.append(el('strong', '', 'Insert into'), el('span', 'sr-insertion-target', replaceEmpty ? `Replace empty line ${number(replaceEmpty.id)} in ${trail.join(' › ')}` : targetText(body, trail, index).replace('Adds to ', ''))); dialog.append(destination);
+    const destination = el('div', 'sc-picker-target'); const targetLabel = el('span', 'sr-insertion-target'); destination.append(el('strong', '', 'Destination'), targetLabel); dialog.append(destination);
+    dialog.querySelector('[data-action=close-dialog]')?.remove();
     const query = el('input'); query.type = 'search'; query.placeholder = 'Search beats…'; query.ariaLabel = 'Find a beat'; query.dataset.pickerSearch = '';
     const layout = el('div', 'sc-picker-body'), results = el('div', 'sr-picker-results'), details = el('aside', 'sc-picker-details');
     results.id = `sr-results-${++elementId}`; results.role = 'listbox'; results.ariaLabel = 'Beat types';
@@ -805,10 +827,11 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     function highlight() {
       const button = items[active]; details.replaceChildren(); apply.disabled = !button;
       items.forEach((item, i) => { item.dataset.highlighted = String(i === active); item.ariaSelected = String(i === active); });
-      if (!button) { query.removeAttribute('aria-activedescendant'); return; }
+      if (!button) { query.removeAttribute('aria-activedescendant'); nameControl(apply, 'Add beat'); targetLabel.textContent = targetText(body, trail, index).replace('Adds to ', ''); return; }
       query.setAttribute('aria-activedescendant', button.id); const kind = button.dataset.insertKind as Kind;
       details.append(el('h3', '', label(kind)), el('p', '', descriptions[kind]));
       const end = isEnding(kind) && ending(body) >= 0 ? body[ending(body)] : undefined;
+      targetLabel.textContent = end ? `Replace ${name(end.id)} in ${trail.join(' › ')}` : isEnding(kind) ? `End of ${trail.join(' › ')}` : replaceEmpty ? `Replace empty line ${number(replaceEmpty.id)} in ${trail.join(' › ')}` : targetText(body, trail, index).replace('Adds to ', '');
       nameControl(apply, end ? `Replace ${label(end.kind)}` : `Add ${label(kind).toLowerCase()}`);
       if (end) details.append(el('p', 'sc-picker-warning', `Replaces ${name(end.id)} in ${trail.join(' › ')}. Undo restores it.`));
       else if (isEnding(kind)) details.append(el('p', 'sc-picker-warning', `Goes at the end of ${trail.join(' › ')}.`));
@@ -849,7 +872,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     frame.shell.querySelector('.app-footer')!.prepend(frame.shell.querySelector('.sc-prototype-switcher')!); return cleanup;
   }
   function draw() {
-    const mark = bookmark(); const selectors = ['.sr-workarea', '.sr-sheet', '.sr-reel-strip', '.sr-tracks-scroll', '.sr-inspector', '.sr-game-choices']; const scrolls = selectors.map(selector => { const node = frame.content.querySelector<HTMLElement>(selector); return { selector, top: node?.scrollTop ?? 0, left: node?.scrollLeft ?? 0 }; });
+    const mark = bookmark(); const selectors = ['.sr-workarea', '.sr-sheet', '.sr-reel-strip', '.sr-tracks-scroll', '.sr-inspector', '.sr-game-choices', '.sc-reel', '.sc-condition-groups']; const scrolls = selectors.map(selector => { const node = frame.content.querySelector<HTMLElement>(selector); return { selector, top: node?.scrollTop ?? 0, left: node?.scrollLeft ?? 0 }; });
     syncSelection(); const selectionChanged = renderedSelection !== selected, focusChanged = renderedFocused !== focused; frame.content.replaceChildren(); Object.assign(frame.content.dataset, { variant, focused: String(focused), treeOpen: String(treeOpen), stageExpanded: String(stageExpanded), allTracks: String(allTracks), bottomMode, edits: hasChanges() ? String(changes || 1) : '0', selected }); frame.shell.dataset.writingFocus = String(focused);
     const workspace = el('div', 'sr-workspace'); workspace.append(tree()); const main = el('main', 'sr-writing'); main.append(header()); const area = el('div', 'sr-workarea');
     if (variant === 'cue-sheet') cueSheet(area); else if (variant === 'shot-reel') shotReel(area); else if (combined) combinedStory(area); else stageTracks(area); main.append(area); workspace.append(main); frame.content.append(workspace);
@@ -857,8 +880,10 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     for (const area of host.querySelectorAll<HTMLTextAreaElement>('.sr-prose')) fit(area);
     for (const position of scrolls) { const node = frame.content.querySelector<HTMLElement>(position.selector); if (node) { node.scrollTop = position.top; node.scrollLeft = position.left; } }
     refresh(); if (!selectionChanged || !mark?.owner || mark.owner === selected) restore(mark);
-    if (focusChanged && focused && variant === 'shot-reel') area.scrollTop = 0;
+    if (combined && focusChanged && innerWidth < 900) area.scrollTop = 0;
+    else if (focusChanged && focused && variant === 'shot-reel') area.scrollTop = 0;
     else if (selectionChanged || focusChanged) revealSelection();
+    if (combined && (selectionChanged || focusChanged)) revealActiveBranch();
     renderedSelection = selected; renderedFocused = focused;
   }
   for (const b of scene().beats) if (b.kind === 'condition' && (variant === 'cue-sheet' || context.state === 'branching')) expanded.add(b.id);

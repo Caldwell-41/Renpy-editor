@@ -50,9 +50,28 @@ scope.
 
 All requested council models/settings are available. Kris changed speed to Standard;
 use Codex `serviceTier: default` and Claude `fastMode: false`, retaining Opus/Sol
-xhigh and independent Astra high. The 48-case sample/theme/mode matrix, all three reference journeys and in-memory
-production-build exclusion pass. Round 1 is next against the frozen initial
-candidate. No review score exists yet. The current issue retains the five-round cap and actual task selection.
+xhigh and independent Astra high. Round 1 reviewed `45390124`; all three reviewers
+requested changes. Its immutable captures, candidate metadata and terminal reviews
+are under `.toolchains/story-combined/round-1/`. The lead fixed sticky-label
+occlusion in Tracks, the Reel focus scroller and scroll preservation, compact
+Writing focus entry, ending insertion labels and live condition dropdown labels.
+Conditions retain horizontal position and reveal the chosen branch. Writing focus
+has a wider editor and taller prose field. Add/next-line hierarchy, menu order,
+branch continuation hints and copy received bounded polish.
+
+The tracked combined check now measures these visibility outcomes before any
+helper scrolls the target. Set `STORY_CHECK_OUTPUT` to choose a separate evidence
+folder. Round 2 captures are in `.toolchains/story-combined/round-2-captures/`
+during preparation; the numbered round folder owns the frozen review candidate.
+`diagnosis-6-field-height` retains a failed form-height check caused by imported
+input CSS specificity. The fix scopes the override to combined property fields.
+The final candidate passes 22 focused groups with 107 PNGs, 48 boundary renders,
+all three reference journeys, combined standalone draft/reset guards and in-memory
+production exclusion. Typechecking, approval metadata, repository validation and
+whitespace checks pass. Standalone-check failures are retained separately: the
+check now waits for the dialog close event and expects the empty sample to have
+no prose field. Neither required a source behavior change. Round 2 is next against
+this verified candidate. The issue retains the five-round cap and task selection.
 
 ## Previous three-mock comparison
 

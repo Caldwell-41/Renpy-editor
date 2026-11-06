@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { launchBrowser } from '../../launch-browser.mjs';
-const output = new URL('../../../../.toolchains/story-combined/initial/', import.meta.url);
+const output = new URL(`../../../../.toolchains/story-combined/${process.env.STORY_CHECK_OUTPUT ?? 'initial'}/`, import.meta.url);
 await mkdir(output, {recursive:true});
 const report={renders:[],checks:[],errors:[]};
 const browser=await launchBrowser({channel:'chrome',headless:true});
@@ -19,8 +19,71 @@ async function open(state='populated',mode='tracks'){
 async function capture(name){await page.screenshot({path:fileURLToPath(new URL(name+'.png',output))});}
 async function state(){await page.locator('.sr-state').evaluate(n=>n.open=true);const value=JSON.parse(await page.locator('.sr-state pre').innerText());await page.locator('.sr-state').evaluate(n=>n.open=false);return value;}
 async function pick(kind){await page.locator('[data-action=add-beat]').click();await page.locator('[data-picker-search]').fill(kind);await page.locator(`[data-insert-kind=${kind}]`).click();}
+async function settled(){await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));}
+async function selectedVisible(mode){
+ await settled();
+ return page.evaluate(mode=>{
+  const item=document.querySelector(`[data-${mode==='tracks'?'track':'reel'}-beat][data-selected=true]`);
+  const area=document.querySelector(mode==='tracks'?'.sr-tracks-scroll':'.sc-reel');
+  const r=item.getBoundingClientRect(), a=area.getBoundingClientRect();
+  return {visible:r.top>=a.top-1&&r.bottom<=a.bottom+1,top:r.top,bottom:r.bottom,areaTop:a.top,areaBottom:a.bottom};
+ },mode);
+}
 try{
  if(!process.argv.includes('--compact')) {
+ // Measure outcomes without scrollIntoView: helpers must not repair navigation.
+ for(const [width,height] of [[1600,1000],[1100,720]]){
+  await page.setViewportSize({width,height});await open('populated','reel');
+  await page.locator('[data-action=toggle-focus]').click();
+  await page.locator('.sc-conditions [data-action=open-branch-ticket-if]').click();
+  await page.locator('.sc-conditions [data-action=open-branch-inner-if]').click();
+  assert.equal((await selectedVisible('reel')).visible,true,'Nested Reel selection must reveal itself');
+  await page.locator('[data-action=next-dialogue]').click();
+  assert.equal((await selectedVisible('reel')).visible,true,'New Reel line must reveal itself');
+  await page.locator('.sr-prose:focus').fill('Visible while writing.');
+  await page.locator('[data-action=bottom-tracks]').click();
+  await page.locator('[data-action=bottom-reel]').click();
+  assert.equal((await selectedVisible('reel')).visible,true,'Mode switch reveals selected Reel row');
+  assert.equal(await page.locator('.sr-prose').inputValue(),'Visible while writing.');
+  await capture(`${width}-reel-writing-position`);
+  await open();await page.locator('.sc-conditions [data-action=open-branch-ticket-if]').click();
+  await page.locator('.sc-conditions [data-action=open-branch-inner-if]').click();
+  await page.locator('[data-track-beat][data-selected=true]').press('Home');await settled();
+  const left=await page.evaluate(()=>({beat:document.querySelector('[data-track-beat][data-selected=true]').getBoundingClientRect().left,labels:document.querySelector('.sr-track-labels').getBoundingClientRect().right}));
+  assert(left.beat>=left.labels-1,`Selected Home column behind labels: ${JSON.stringify(left)}`);
+  await capture(`${width}-tracks-home`);
+ }
+ report.checks.push('Wide/laptop Reel branch/next-line/mode-switch visibility and Tracks Home clears sticky labels');
+ await page.setViewportSize({width:560,height:640});
+ for(const mode of ['tracks','reel']){
+  await open('populated',mode);await page.locator('[data-action=toggle-focus]').click();await settled();
+  const boxes=await page.evaluate(()=>Object.fromEntries(['.sc-conditions','.sr-inspector-heading','.sr-prose'].map(s=>{const r=document.querySelector(s).getBoundingClientRect();return [s,{top:r.top,bottom:r.bottom}]})));
+  assert(boxes['.sr-inspector-heading'].top>=boxes['.sc-conditions'].bottom-1,'Compact focus editor heading must start below Conditions');
+  assert(boxes['.sr-prose'].bottom<=640-28,'Compact focus prose must be visible on entry');
+  await capture(`compact-${mode}-focus-entry`);
+  await page.locator('.sc-conditions [data-action=open-branch-ticket-if]').click();
+  await page.locator('.sc-conditions [data-action=open-branch-inner-if]').click();
+  await page.locator('.sc-conditions [data-action=open-branch-inner-else]').click();await settled();
+  const visible=await page.locator('.sc-condition-groups').evaluate(n=>{const a=n.getBoundingClientRect(),r=n.querySelector('[data-action=open-branch-inner-else]').getBoundingClientRect();return r.left>=a.left-1&&r.right<=a.right+1;});
+  assert(visible,'Selected nested Otherwise must remain visible after redraw');
+ }
+ report.checks.push('Compact focus enters with editor visible; nested branch controls remain visible after navigation');
+ await page.setViewportSize({width:1600,height:1000});await open('populated','reel');
+ await page.locator('.sc-conditions [data-action=open-branch-ticket-if]').click();
+ await page.locator('.sc-conditions [data-action=edit-condition-beat-1]').click();
+ const condition=page.getByRole('textbox',{name:'06 Condition If condition',exact:true});
+ await condition.fill('has_ticket is false');
+ assert.equal(await page.locator('.sc-reel-branch option[value=ticket-if]').innerText(),'If has_ticket is false');
+ assert.equal(await condition.evaluate(n=>document.activeElement===n),true);
+ await capture('condition-label-sync');
+ await page.locator('[data-action=add-beat]').click();await page.locator('[data-picker-search]').fill('return');
+ assert.match(await page.locator('.sr-insertion-target').innerText(),/^End of /);
+ await page.keyboard.press('Enter');await page.locator('[data-action=add-beat]').click();await page.locator('[data-picker-search]').fill('jump');
+ assert.match(await page.locator('.sr-insertion-target').innerText(),/^Replace .*Return/);
+ await capture('picker-replace-ending');await page.locator('[data-picker-search]').fill('nothing matches this');
+ assert.equal(await page.locator('[data-action=picker-confirm]').innerText(),'Add beat');
+ assert.equal(await page.locator('[data-action=picker-confirm]').isDisabled(),true);await page.keyboard.press('Escape');
+ report.checks.push('Condition text synchronizes without losing focus; ending destinations and empty-search action are accurate');
  for(const [size,width,height] of [['wide',1600,1000],['laptop',1100,720],['compact',560,640]]){
   await page.setViewportSize({width,height});
   for(const mode of ['tracks','reel']){
@@ -67,6 +130,7 @@ try{
    assert.equal((await state()).scenes[0].beats.some(b=>b.kind===kind),true);
    await page.locator('.sr-inspector').scrollIntoViewIfNeeded();await capture(`${size}-editor-${kind}`);
    assert(await page.locator('.sr-inspector:visible').count());
+   if(kind==='setVariable') assert.equal((await page.getByRole('combobox',{name:'Variable',exact:true}).boundingBox()).height,(await page.getByRole('textbox',{name:'Variable value',exact:true}).boundingBox()).height);
   }
   report.checks.push(`${size}: all 20 beat types insert and expose their editor`);
   await open();await page.locator('[data-action=more]').click();await capture(`${size}-more-menu`);await page.getByRole('button',{name:/^Assist with/}).click();await capture(`${size}-assist-instructions`);await page.locator('[data-action=assist-review]').click();await capture(`${size}-assist-review`);await page.locator('[data-action=assist-apply]').click();assert.match(await page.locator('.sr-prose').inputValue(),/Tell me you heard/);await page.locator('[data-action=undo]').click();assert.match(await page.locator('.sr-prose').inputValue(),/I thought I was/);
