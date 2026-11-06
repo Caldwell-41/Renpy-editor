@@ -6,6 +6,7 @@ import { screenTextByteError } from "./screen-text-validation.ts";
 import type { LayoutEdits } from "./screen-layout.ts";
 import type { TextEdits, StyleEdit } from "./screen-text.ts";
 import type { ScreenDocument, ScreenNode } from "./screen-ui.ts";
+import type { ScreenControlCommand } from "./screen-controls.ts";
 
 export interface CompositionView {
   document: ScreenDocument; screenId: string; screenName: string; nodes: ScreenNode[];
@@ -18,6 +19,7 @@ export interface CopyDraftParticipant {
 }
 interface ImageSelection { assetId: string; expectedAssetSha256: string; replacementSha256?: string; width: number; height: number; layout?: LayoutEdits }
 export type CompositionCommand =
+  | ScreenControlCommand
   | ({ type: "addImage"; parentId: string } & ImageSelection)
   | ({ type: "image"; nodeId: string; parentId?: string } & ImageSelection)
   | { type: "add"; parentId: string; kind: string; text: string }
@@ -41,10 +43,12 @@ interface Host {
   text: (card: HTMLElement, view: CompositionView) => boolean;
   textDraft: (screenId: string, nodeId: string) => boolean;
   beginImage?: (parentId: string, document: ScreenDocument) => void;
+  control?: (card:HTMLElement,view:CompositionView)=>boolean;
+  beginControl?: (parentId:string,document:ScreenDocument,kind:'bar'|'imagebutton')=>void;
   otherDraft?: () => boolean;
 }
 interface Addition { parentId: string; kind: string; text: string; document: ScreenDocument }
-const names: Record<string, string> = { screen: "Screen root", fixed: "Free layout group", frame: "Frame", window: "Window", vbox: "Vertical group", hbox: "Horizontal group", grid: "Grid", viewport: "Viewport", text: "Text", textbutton: "Text button", custom: "Source-only element", image: "Image" };
+const names: Record<string, string> = { screen: "Screen root", fixed: "Free layout group", frame: "Frame", window: "Window", vbox: "Vertical group", hbox: "Horizontal group", grid: "Grid", viewport: "Viewport", text: "Text", textbutton: "Text button", custom: "Source-only element", image: "Image", bar:"Value bar", imagebutton:"Image button" };
 const help: Record<string, string> = {
   screen: "The screen contains every element. Its order cannot change.",
   fixed: "Places children freely. Later siblings appear in front.",
@@ -176,6 +180,7 @@ export class ScreenComposer {
     const actions = el("div", "screen-edit-actions");
     if (["text", "textbutton"].includes(view.selected.kind) && view.selected.id) actions.append(action(this.host.textDraft(view.screenId,view.selected.id) ? "Resume edit" : "Edit text", () => this.host.select(screenNodeKey(view.selected), true), true));
     else if (view.selected.kind === "image" && view.selected.id) actions.append(action("Edit image", () => this.host.select(screenNodeKey(view.selected), true), true));
+    else if (["bar","imagebutton"].includes(view.selected.kind) && view.selected.id) actions.append(action("Edit control", () => this.host.select(screenNodeKey(view.selected),true),true));
     else if (containers.has(view.selected.kind) && view.selected.id) actions.append(action("Add inside", () => this.beginAddition(), true));
     else actions.append(action("View in Source", () => this.host.source(view.selected)));
     const parent = this.parent(view, view.selected);
@@ -202,6 +207,8 @@ export class ScreenComposer {
     }
     this.card = card; const scroll = card.scrollTop;
     card.replaceChildren(); card.classList.add("screen-composer"); card.ariaLabel = "Element editor";
+    card.classList.remove('screen-control-card');card.onkeydown=null;
+    if (view.step === "design" && this.host.control?.(card,view)) return true;
     if (view.step === "design" && this.host.image?.(card, view)) return true;
     if (view.step === "design" && this.host.text(card, view)) return true;
     if (view.step === "choose") {
@@ -312,8 +319,8 @@ export class ScreenComposer {
     const draft = this.addition!;
     const form = el("section", "screen-addition"); form.ariaLabel = "Add element";
     const palette = el("div", "screen-element-palette"); palette.ariaLabel = "Element types";
-    for (const kind of ["text", "textbutton", "image", "fixed", "frame", "window", "vbox", "hbox", "grid", "viewport"]) {
-      const choice = action(names[kind]!, () => { if (kind === "image" && this.host.beginImage) { this.addition = undefined; this.host.beginImage(draft.parentId, draft.document); return; } draft.kind = kind; this.error = ""; this.render(); this.card?.querySelector<HTMLElement>(`[data-kind="${kind}"]`)?.focus({ preventScroll: true }); this.host.preview(); });
+    for (const kind of ["text", "textbutton", "image", "bar", "imagebutton", "fixed", "frame", "window", "vbox", "hbox", "grid", "viewport"]) {
+      const choice = action(names[kind]!, () => { if ((kind === "bar" || kind === "imagebutton") && this.host.beginControl) { this.addition = undefined; this.host.beginControl(draft.parentId,draft.document,kind); return; } if (kind === "image" && this.host.beginImage) { this.addition = undefined; this.host.beginImage(draft.parentId, draft.document); return; } draft.kind = kind; this.error = ""; this.render(); this.card?.querySelector<HTMLElement>(`[data-kind="${kind}"]`)?.focus({ preventScroll: true }); this.host.preview(); });
       choice.dataset.kind = kind;
       choice.prepend(elementIcon(kind)); choice.ariaPressed = String(draft.kind === kind); choice.disabled = this.saving; palette.append(choice);
     }
