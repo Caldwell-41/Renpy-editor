@@ -857,3 +857,24 @@ produced. Exact ignored artifacts remain in the test worktree. Its Git status is
 clean, observed runner/Chrome processes exited and no listener remained owned by
 their process IDs. No SDK/helper/package/native start occurred. The coordinator
 owns the focused reproduction and any correction; approved sources remain pinned.
+
+## Frontend implementation and review corrections underway, 2026-11-06
+
+The frontend owner committed nine assigned files at
+`87586e7cbe21bc56fc486115ff355dac72e99c35`, without shared DTO, Rust or document
+changes. It reports typecheck and production build passing, all 378 frontend tests
+passing with zero skips, and an actual ScreensWorkspace-to-core journey covering
+both control writes, picker references, six Transform appearances/actions/layout,
+history/no-op, keyboard edits, validation/focus, missing assets, captured catalog
+revision, delayed admission reservation, reopen and Source-removed draft recovery.
+The first full wrapper failed while handling an npm stderr notice; the corrected
+wrapper preserved stderr/exit status and passed. Earlier failed runs remain failed.
+
+Its independent Standards reviewer found three P2 documented breaches: shared
+image-button component review omitted dimensions; picker callback redrew/focused
+before closing its modal; new numeric/bound/color fields lacked blur validation
+and cleared errors on unrelated typing. The owner accepted all three and owns the
+focused actual UI/core regressions and corrections, using the existing input
+validation owner. No replacement review was started. Spec and Terra visual work
+remain pending. This is a worker-candidate receipt, not combined integration or
+final acceptance; await corrected commits and the final handoff before integration.

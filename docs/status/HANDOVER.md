@@ -10,6 +10,14 @@ The five reviewed core implementation commits are integrated; the editor worktre
 started approved production UI/core slices from clean `b23bbcc9`. Those frontend
 changes are not integrated yet.
 
+Frontend implementation is committed at `87586e7cbe21bc56fc486115ff355dac72e99c35`.
+Its owner reports typecheck/build, all 378 frontend tests and the actual UI/core
+journey passing. Standards review identified three P2s: missing image-button
+dimensions in shared-component review, picker callback focus before modal close,
+and missing blur validation with error clearing on unrelated input. The owner is
+fixing these with focused real UI/core regressions; Spec and visual results remain
+pending. Await its final corrected receipt before integrating its assigned files.
+
 The core implementation agent completed both controls' Rust behavior on
 `t3/bar-imagebutton-core` at `76dfe030`; the editor implementation agent owns both controls' UI
 on `t3/screens-bars-imagebuttons`. Both have separate prepared worktrees and must
