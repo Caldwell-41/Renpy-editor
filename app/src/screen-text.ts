@@ -86,6 +86,7 @@ export class ScreenText {
     const prefix=({normal:"",hover:"hover_",selected:"selected_",disabled:"insensitive_"} as Record<string,string>)[state];
     if(prefix===undefined)return;
     this.sampleAppearance=prefix;
+    for(const key of this.appearanceStates.keys())this.appearanceStates.set(key,prefix);
     const view=this.host.view();
     if(view?.selected.kind!=="textbutton")return;
     this.appearanceStates.set(this.key(view),prefix);
@@ -464,7 +465,7 @@ export class ScreenText {
   private appearanceBlocked(node:ScreenNode,key:string):string|undefined {return node.textProperties?.blocked[this.appearanceProperty(key)];}
   private renderAppearance(host:HTMLElement,view:CompositionView):void {
     for(const key of this.fieldValidators.keys())if(key.startsWith("appearance:"))this.fieldValidators.delete(key);
-    host.replaceChildren();const draft=this.value(view),state=this.appearanceStates.get(draft.key)??this.sampleAppearance,frame=["frame","window"].includes(view.selected.kind);
+    host.replaceChildren();const draft=this.value(view),frame=["frame","window"].includes(view.selected.kind),state=frame?"":this.appearanceStates.get(draft.key)??this.sampleAppearance;
     if(!frame){const label=el("label","screen-text-field","Appearance state"),stateControl=el("select");stateControl.ariaLabel="Appearance state";stateControl.dataset.appearanceField="state";
       for(const [value,name] of [["","Normal"],["hover_","Hover"],["selected_","Selected"],["insensitive_","Disabled"]]){const option=el("option","",name);option.value=value!;stateControl.append(option);}stateControl.value=state;
       stateControl.onchange=()=>{this.appearanceStates.set(draft.key,stateControl.value);this.host.buttonSample?.(stateControl.value==="insensitive_"?"disabled":stateControl.value.replace("_","")||"normal");this.renderAppearance(host,view);host.querySelector<HTMLElement>("select")?.focus({preventScroll:true});};label.append(stateControl);host.append(label);

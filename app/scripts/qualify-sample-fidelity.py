@@ -1,7 +1,6 @@
 """Explicit L20 normal-game proof, offline preflight or exact comparison."""
 import argparse
 import ast
-import importlib.util
 import json
 import os
 from pathlib import Path
@@ -13,11 +12,7 @@ import textwrap
 from sample_fidelity import (ASPECTS, FIXTURE_ROOT, OUTCOME, REPO, assets,
                              compare, digest, inputs, validate_accepted)
 
-# Preserve the historical L18 runner and its accounting. Reuse its bounded SDK
-# command adapter without selecting or executing any historical proof branch.
-_spec = importlib.util.spec_from_file_location('base_help_qualification', REPO / 'app/scripts/qualify-base-help-fidelity.py')
-_base = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(_base)
+from fidelity_reference import sdk as _base, run_command, finalize
 PROOF = FIXTURE_ROOT / 'sample-fidelity-proof.rpy'
 
 
@@ -29,7 +24,7 @@ def preflight(accepted_path, archive, checksums, candidate):
     ast.parse(textwrap.dedent(source))
     actual = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO, text=True).strip()
     assert actual == candidate, 'Different candidate'
-    subprocess.run(['git', 'diff', '--quiet', 'HEAD', '--', 'app/src-core', 'app/scripts/sample_fidelity.py', 'app/scripts/qualify-sample-fidelity.py', str(FIXTURE_ROOT / 'sample-fidelity.rpy'), 'app/src', 'app/scripts/fidelity_comparison.py', str(PROOF)], cwd=REPO, check=True)
+    subprocess.run(['git', 'diff', '--quiet', 'HEAD', '--', 'app/src-core', 'app/scripts/sample_fidelity.py', 'app/scripts/qualify-sample-fidelity.py', 'app/scripts/fidelity_reference.py', 'app/scripts/fidelity_comparison.py', str(FIXTURE_ROOT / 'sample-fidelity.rpy'), 'app/src', str(PROOF)], cwd=REPO, check=True)
     return dict(outcome=OUTCOME, candidate=candidate, target=_base.target(), acceptedSHA256=digest(accepted_path.read_bytes()),
                 inputs=inputs(accepted), proofSHA256=digest(PROOF.read_bytes()), startedSDKProcesses=0,
                 plannedSDKProcesses=dict(compile=1, lint=1, normalGame=2, adapterValidationAndDiscovery=3, hiddenHelper=1), totalSDKProcesses=8)
@@ -47,7 +42,7 @@ def reference(args):
                    commands=[], records=[], sdkProcesses=0, sourceUnchanged=False, cleanupComplete=False)
     scratch = None
     try:
-        scratch = Path(tempfile.mkdtemp(prefix='loomlight-nested-normal-'))
+        scratch = Path(tempfile.mkdtemp(prefix='loomlight-sample-normal-'))
         receipt['scratchPath'] = str(scratch)
         _base.install_verified_tar(args.archive, _base.SDK_SHA, scratch / 'sdk')
         launcher = _base.launcher_for(scratch / 'sdk/renpy-8.5.3-sdk')
@@ -84,20 +79,7 @@ def reference(args):
             (project / 'game/sample_proof.rpy').write_text(initializer + '\n' + PROOF.read_text(encoding='utf-8'), encoding='utf-8')
             commands = [('compile', ['compile']), ('lint', ['lint', '--error-code'])] if (width, height) == ASPECTS[0] else []
             for operation, arguments in [*commands, ('run', ['run'])]:
-                row = dict(name=operation, aspect=[width,height], charged=1, started=None, uncertainStart=True, cleanupComplete=False)
-                receipt['commands'].append(row); receipt['sdkProcesses'] += 1
-                (output / 'launch-manifest.json').write_text(json.dumps(receipt, indent=2) + '\n')
-                previous = dict(os.environ)
-                try:
-                    os.environ.clear(); os.environ.update(env)
-                    result = _base.run_reference_command(tuple(map(str, [*launcher, project, *arguments])), row)
-                except BaseException:
-                    (output / f'{width}x{height}-{operation}.log').write_text(row.get('partialOutput', ''))
-                    raise
-                finally:
-                    os.environ.clear(); os.environ.update(previous)
-                (output / f'{width}x{height}-{operation}.log').write_text(result.output)
-                assert result.exit_code == 0 and not result.timed_out and not result.output_limited
+                result = run_command(launcher, project, arguments, operation, (width, height), env, output, receipt)
                 if operation == 'run':
                     records = [json.loads(line.removeprefix('SAMPLE_FIDELITY ')) for line in result.output.splitlines() if line.startswith('SAMPLE_FIDELITY ')]
                     assert len(records) == len(cases) and all(row['aspect'] == [width, height] for row in records)
@@ -109,17 +91,7 @@ def reference(args):
         receipt['failure'] = dict(type=type(error).__name__, message=str(error))
         raise
     finally:
-        receipt['confirmedSDKProcesses'] = sum(row.get('started') is True for row in receipt['commands'])
-        receipt['uncertainSDKProcesses'] = sum(row.get('uncertainStart', True) for row in receipt['commands'])
-        reaped = all(row.get('cleanupComplete') is True and row.get('processReaped') is True and row.get('uncertainStart') is False for row in receipt['commands'])
-        try:
-            if scratch is not None and scratch.exists() and reaped:
-                shutil.rmtree(scratch)
-        except OSError as error:
-            receipt['cleanupFailure'] = str(error)
-        receipt['cleanupComplete'] = reaped and (scratch is None or not scratch.exists())
-        receipt['passed'] = receipt['passed'] and receipt['cleanupComplete']
-        (output / 'result.json').write_text(json.dumps(receipt, indent=2) + '\n')
+        finalize(receipt, scratch, output)
     assert receipt['passed']
 
 

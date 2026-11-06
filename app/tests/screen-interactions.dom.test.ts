@@ -4,10 +4,10 @@ import { Window } from "happy-dom";
 import { ScreensWorkspace, type ScreenDocument } from "../src/screen-ui.js";
 import type { CoreOperation } from "../src/protocol.js";
 const flush=async()=>{for(let i=0;i<10;i++)await new Promise(r=>setTimeout(r,0));};
-function fixture(kind:"dialog"|"panel"|"component"="dialog",bound=false) {
+function fixture(kind:"dialog"|"panel"|"component"="dialog",bound=false,extraKind?:"frame"|"window"|"textbutton") {
  const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement,HTMLInputElement:browser.HTMLInputElement,HTMLSelectElement:browser.HTMLSelectElement,HTMLTextAreaElement:browser.HTMLTextAreaElement,HTMLDetailsElement:browser.HTMLDetailsElement,ResizeObserver:browser.ResizeObserver});
  let revision="original",authoringRevision="authoring-original",refuse=true,advanceWrites=false;
- const nodes=()=>[{id:"root",kind:"screen",literal:null,span:{start:0,end:200},parentStart:null,layout:{},properties:[],protected:[]},{id:"close",kind:"textbutton",literal:"Close",actions:[],span:{start:20,end:90},parentStart:0,layout:{},properties:[],protected:[],textProperties:{values:{},blocked:{}}},{id:"body",kind:"text",literal:bound?"Coins: [coins!q]":"Coins: 12",variableBindings:bound?[{variableId:"coins"}]:[],span:{start:100,end:150},parentStart:0,layout:{},properties:[],protected:[],textProperties:{values:{},blocked:{}}}];
+ const nodes=()=>[{id:"root",kind:"screen",literal:null,span:{start:0,end:200},parentStart:null,layout:{},properties:[],protected:[]},{id:"close",kind:"textbutton",literal:"Close",actions:[],span:{start:20,end:90},parentStart:0,layout:{},properties:[],protected:[],textProperties:{values:{},blocked:{}}},{id:"body",kind:"text",literal:bound?"Coins: [coins!q]":"Coins: 12",variableBindings:bound?[{variableId:"coins"}]:[],span:{start:100,end:150},parentStart:0,layout:{},properties:[],protected:[],textProperties:{values:{},blocked:{}}},...(extraKind?[{id:"extra",kind:extraKind,literal:"Extra",actions:[],span:{start:160,end:195},parentStart:0,layout:{},properties:[],protected:[],textProperties:{values:{background:"#123456"},blocked:{}}}]:[])];
  const doc=():ScreenDocument=>({path:"game/ui/help.rpy",revision,authoringRevision,partial:false,screens:[{name:"help",nodes:nodes()}]});
  const owner={id:"help",rootId:"root",path:doc().path,name:"help",kind,resolved:true,sourceRevision:revision};
  const writes:Record<string,unknown>[]=[],renders:Record<string,unknown>[]=[],messages:string[]=[];
@@ -46,6 +46,22 @@ test("canvas state follows the open button appearance fields without changing th
  f.change("Button state (sample)","selectedHover");await flush();assert.equal(f.workspace.panel.querySelector<HTMLSelectElement>('[data-appearance-field="state"]')!.value,"hover_", "Combined states keep the explicitly chosen editing prefix");
  f.button("Cancel");assert.equal(f.find("Text").value,"Close");assert.equal(f.writes.length,0);
  }finally{await f.dispose();}
+});
+
+test("button samples follow selection while frame and window appearance stay unprefixed",async()=>{
+ for(const kind of ["frame","window","textbutton"] as const){
+  const f=fixture("dialog",false,kind);try{f.workspace.mount(document.body);await flush();f.select("close");f.change("Button state (sample)","hover");f.select("extra");
+   const field=()=>f.workspace.panel.querySelector<HTMLInputElement>('[data-appearance-field$="background"]')!;
+   if(kind==="textbutton"){
+    f.change("Button state (sample)","disabled");f.select("close");
+    assert.equal(f.workspace.panel.querySelector<HTMLSelectElement>('[data-appearance-field="state"]')!.value,"insensitive_");
+   }else{
+    assert.equal(field().dataset.appearanceField,"background");assert.equal(field().value,"#123456");
+    field().value="#abcdef";field().dispatchEvent(new window.Event("input"));f.button("Apply");await flush();
+    assert.deepEqual((f.writes.at(-1)!.command as {values:{appearance:unknown}}).values.appearance,{background:"#abcdef"});
+   }
+  }finally{await f.dispose();}
+ }
 });
 
 test("new Show and Hide drafts use target revisions from the last accepted edit",async()=>{
