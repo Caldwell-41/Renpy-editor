@@ -1,6 +1,6 @@
 # Current status
 
-## Variable and control-state samples implemented and qualified
+## Variable and control-state samples awaiting draft PR CI
 
 Kris selected [L20 #54](https://github.com/Caldwell-41/Renpy-editor/issues/54) on
 `codex/54-canvas-samples`, based on accepted #51/#52 merge `46fdbc1b`. The existing
@@ -12,9 +12,11 @@ source/helper comparisons at both aspects, with exact geometry and cooperative
 cleanup. The first Windows shutdown failure remains preserved and charged.
 All 380 frontend tests, build and actual UI/core journey pass. Both review axes'
 findings are corrected. Implementation and selected qualification are
-`review_ready`; [#54](https://github.com/Caldwell-41/Renpy-editor/issues/54) owns final
-counts, criterion mapping and the pending acceptance decision. No run is pending.
-No package/native-editor/CI run, push, PR, merge or acceptance is selected.
+`review_ready`. Kris selected draft publication and CI; that outcome is
+`awaiting_ci`. [#54](https://github.com/Caldwell-41/Renpy-editor/issues/54) owns the
+live PR/head/run receipts, operation counts and criterion mapping. The branch plan
+requires automatic quality and both-target harness jobs. No new SDK, package,
+native-editor run, merge or acceptance is selected.
 Earlier prerequisite status below retains
 historical context; GitHub #51/#52 now record acceptance through PR #83.
 

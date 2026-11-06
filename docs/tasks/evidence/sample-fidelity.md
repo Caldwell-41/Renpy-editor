@@ -1,5 +1,23 @@
 # Variable and control-state canvas samples
 
+## Draft publication and CI selected, 2026-11-07
+
+Kris selected publishing `codex/54-canvas-samples` as a draft PR targeting
+`codex/phase3b-screen-designer` and running CI. The branch validation plan selects
+automatic Repository quality plus the inexpensive `quality.yml` harness matrix,
+with required jobs `Harness regressions — windows-2025` and
+`Harness regressions — macos-26`. This covers the new offline comparison checks
+and shared qualification tooling on both targets. The automatic quality run also
+owns the frontend, build, formatting, repository and existing offline core gates.
+
+The selected publication outcome is `awaiting_ci` until the exact publication
+head's combined `Loomlight validation`, required jobs and retained harness artifacts
+are audited. #54 owns the live draft PR, head and run/attempt receipts. The
+qualified rendering source remains `76d2cf12`; publication preparation changes
+only the validation plan and status/evidence records. No new SDK/helper, package,
+native-editor campaign, ready-for-review transition, merge or issue closure is
+selected. Historical failed checks and SDK consumption remain unchanged.
+
 ## Local implementation preparation, 2026-11-06
 
 [#54](https://github.com/Caldwell-41/Renpy-editor/issues/54) owns L20 scope and
@@ -119,9 +137,9 @@ and renderer SHA256
 | Differences/causes and explicit limits | No visible differences remain in the qualified matrix. Bare interpolation, textbutton interpolation and custom control expressions refuse with plan limits; contracts state explicit state selection and unprefixed bar appearances. No action-based inference or unsupported-state claim is added. |
 | Clear samples/drafts/saved-stale state; inert opening/selecting/editing | Actual ScreensWorkspace/core journey and focused DOM tests cover mixed sample/state requests, selector/reselection synchronization, retained drafts, Cancel/Reset, history/reopen and unchanged Source. Revision-bound stale samples and unsupported expressions refuse without execution. |
 
-The selected implementation and qualification are `review_ready`. Leaf closure,
-user acceptance, code publication, CI qualification and wider B08/Phase 3B
-acceptance remain separate. No additional execution is pending or selected.
+The selected implementation and local qualification are `review_ready`.
+Publication/CI is selected above and remains `awaiting_ci` until audited. Leaf
+closure, user acceptance, merge and wider B08/Phase 3B acceptance remain separate.
 
 ### Local checks and retained failures
 

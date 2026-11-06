@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## L20 implementation and qualification complete
+## L20 draft publication and CI
 
 Continue on `codex/54-canvas-samples`, based at accepted prerequisite `46fdbc1b`.
 [#54](https://github.com/Caldwell-41/Renpy-editor/issues/54) is selected. Kris
@@ -24,10 +24,15 @@ capacity selects no more execution. Mac artifacts remain in its clean
 `codex/54-mac-sample-qualification` worktree; the occupied main checkout was untouched.
 Parent owns all code and final evidence. All 380 frontend tests, build and actual
 UI/core journey pass; original broad core/harness failures remain in the evidence
-record. The selected outcome is `review_ready`. Next action is Kris's review of
-the local branch; no successor work or further qualification is selected.
-Historical allowances stay closed. No push, PR, merge or issue
-closure is selected. Preserve all unrelated recovery below. Existing long-form
+record. Local implementation/qualification is `review_ready`. Kris then selected
+publishing this branch as a draft PR and running CI. Publication is `awaiting_ci`;
+#54 owns the live PR URL, exact head and automatic quality/both-target harness
+run/attempt receipts. Follow the branch validation plan, use T3's PR watcher and
+audit required jobs/artifacts plus `Loomlight validation` before reporting CI
+complete. Existing rendering evidence retains its `76d2cf12` producer. No new
+SDK/helper/package/native-editor run, ready-for-review transition, merge or issue
+closure is selected. Historical allowances stay closed. Preserve all unrelated
+recovery below. Existing long-form
 recovery remains under its retained size exception.
 
 ## Integer bars and image buttons draft publication
