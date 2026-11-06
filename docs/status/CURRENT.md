@@ -1,11 +1,14 @@
 # Current status
 
-## Integer bars and image buttons selected for draft publication
+## Integer bars and image buttons published as a draft
 
 The selected local implementation of #51/#52 is complete on
 `codex/51-52-integration`. Production candidate is `3b663002`; final reference
-qualification passes at `e21c5331`. Kris selected publication as a draft PR into
-`codex/phase3b-screen-designer`, current-head CI audit and in-scope corrections.
+qualification passes at `e21c5331`. [Draft PR #83](https://github.com/Caldwell-41/Renpy-editor/pull/83)
+targets `codex/phase3b-screen-designer`. Its publication-head audit at `40d42a22`
+passes automatic quality, both-target harness jobs, all 834 source hashes per target
+and combined validation, with no CI findings. Final status publication needs its
+own current-head audit under the unchanged plan.
 [#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) owns the live PR,
 run/attempt/head/tree and terminal audit receipts. Both tickets stay open; merge
 and ready-for-review transition remain unselected. The branch validation plan
@@ -15,7 +18,7 @@ requires automatic quality and both-target harness jobs.
 | --- | --- | --- |
 | Control editing | Actual UI/core journey, five review regressions, 378 frontend tests and both packaged control journeys pass on recorded candidates. Final coordinator review maps every original criterion. | Original Standards3/Spec3 corrections remain self-verified; footer correction has parent rendering proof. No new review panel. |
 | Runtime and packages | Windows and Mac normal/fixture-preview matrices pass at both aspects. Windows corrected package/native and Mac signed package/native journeys pass. | Producing candidates remain distinct. Physical input and native editor preview routing are separate claims. |
-| Helper rendering | Both targets pass all twelve control crops, each 614400 RGBA bytes with zero residual, matching physical dimensions and drawing scale, source invariance and cooperative cleanup. | Windows DPI omission is fixed at the reference launch boundary. Failed historical wrappers remain preserved. |
+| Helper rendering | Both targets pass all twelve control crops, 614400 RGBA bytes per target with zero residual, matching physical dimensions and drawing scale, source invariance and cooperative cleanup. | Windows DPI omission is fixed at the reference launch boundary. Failed historical wrappers remain preserved. |
 | Approved design | A2 source37d29ca1 and thirteen captures stay pinned. The selected approval/source/capture and changed-source-refusal check passes. | The full-gallery gate is retired. Broader canvas and human acceptance remain separate. |
 
 Windows SDK use ends at18/20; no further start is selected. #51 owns all cumulative

@@ -4,7 +4,8 @@
 
 The selected local implementation, combined review and automated qualification of
 #51/#52 are complete on `codex/51-52-integration`. Kris selected pushing this
-branch, a draft PR into `codex/phase3b-screen-designer`, current-head CI audit and
+branch, [draft PR #83](https://github.com/Caldwell-41/Renpy-editor/pull/83) into
+`codex/phase3b-screen-designer`, current-head CI audit and
 in-scope fixes. The verified remote base is `ab19b7869843445dba291ee8b9ef7ea4bef5ffd8`.
 Production candidate remains
 `3b66300218955e9f7337a29a0a407e8ce689bc1d`; final Windows reference/consumer candidate
@@ -13,6 +14,14 @@ those producing identities. Inspect actual HEAD and changes before resuming; do
 not reset or re-import completed workers.
 
 The publication authorization supersedes historical local-only directions.
+The terminal publication-head audit at `40d42a22` passes automatic quality
+42172803338 and both-target harness 42172832106, both attempt 1, all required
+executed jobs/steps, both artifact digests/manifests and 834 source hashes per
+target. Combined validation passes; no CI findings need a correction. The
+[publication evidence](../tasks/evidence/bars-and-image-buttons.md#draft-pr-83-publication-head-audit-2026-11-06)
+retains exact identities. This status-only publication needs its own selected CI
+audit. Do not add another repository commit solely to record its final SHA;
+the owning issue records that terminal receipt.
 [#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) owns live publication
 and CI receipts, including the exact PR/head/tree, runs/attempts, required jobs,
 artifact digests and terminal audit. The branch validation plan selects automatic

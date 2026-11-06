@@ -1548,3 +1548,59 @@ checks and validation of all 1762 tracked files. The first direct helper-check
 invocation omitted its required accepted-export environment and ran zero tests;
 the existing owner-context launcher supplies the manifest and passes all six.
 This was a local invocation error, with no SDK start or source correction.
+
+## Draft PR 83 publication-head audit, 2026-11-06
+
+[Draft PR #83](https://github.com/Caldwell-41/Renpy-editor/pull/83) publishes head
+`40d42a22e603840a69c2495c88955b6db8cadfe3`, tree
+`40e56297511f08fcfea71afb0dedecaf291be6f7`, into the verified base above. T3 linking
+and PR watcher registration succeeded. Its same-thread green event resumed the
+audit; the event alone was not treated as proof. No CI findings were found.
+
+Automatic [quality 42172803338, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/42172803338/attempts/1)
+and manual [harness 42172832106, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/42172832106/attempts/1)
+are terminal successful at that exact head. The required jobs are:
+
+| Job | GitHub job ID | Executed successful steps |
+| --- | --- | --- |
+| Frontend tests and Rust formatting | 127744317622 | 16 |
+| Validate repository | 127744317893 | 9 |
+| Harness regressions — windows-2025 | 127744410283 | 12 |
+| Harness regressions — macos-26 | 127744409910 | 12 |
+
+All required jobs execute; no required job is skipped, cancelled or failed.
+Only unselected specialist jobs and failure-only upload steps are skipped.
+Both runs' reporting jobs succeed. `Loomlight validation` is successful and links
+to terminal successful quality42172803338. Quality confirms 378 frontend tests,
+production build, Rust formatting, 15 offline Help admission tests, 30 selected
+core cases, the real Dialog UI/core/history/reopen journey, 1762 repository files,
+13 section-link tests and 18 coordinator tests.
+
+Both harness artifacts are available and downloaded. Their ZIP sizes/digests,
+eleven-file manifests, candidate/tree/run/attempt/outcome, unchanged source
+receipts and every one of 834 source hashes per target independently verify.
+All four Python/Q1-rejection/Q1-source/retention groups pass on both targets.
+Windows Python runs341 with337 passes and only four named Mac exclusions; Mac
+runs337 with334 passes and only three named Windows exclusions. The existing
+retention gate independently admits its exact host-specific cases.
+
+| Retained CI input/output | SHA256 |
+| --- | --- |
+| Windows artifact13482240158, 51748 bytes | 1afeb0fa3180f250ec05e8e9dcb8fb0fcb6696a4ac25ef1c18ab51ebeb587cd6 |
+| Mac artifact13481228542, 51542 bytes | 85d49210046341bc19b5514469f60637560d6aca2f1de221b424b3f4ccffa42e |
+| Quality run log | b1fe6a6a1a534bdace304aa56d0d01d70de854a29ad38e83031cd2bd8559679a |
+| Harness run log | 2c15651f53d752ac0136bc4c24f4d28010b7a9ad2d031fb64f7aba3f8e72693c |
+
+Raw API metadata, logs, original ZIPs, source identities, group results and
+`audit.json` remain in ignored `.toolchains/51-52/publication/ci-terminal-audit/`.
+Successful quality does not upload its compiled test binaries; the harness jobs
+compile none. No new binary/package/native identity is inferred. Existing 3b
+binary hashes and Windows/Mac runtime/reference/helper receipts remain unchanged.
+No SDK, helper, package or editor launch occurred; #51's cumulative counts stay
+unchanged with zero uncertain/reserved starts.
+
+The final status-only commit stays in this draft and requires its own exact-head
+quality/harness/combined-status audit. #51 owns that terminal receipt, and #52
+links to it; no further repository commit is needed solely to record its SHA.
+The PR stays draft and both issues stay open. Merge, ready-for-review, wider
+acceptance and new execution remain unselected.
