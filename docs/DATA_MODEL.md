@@ -770,13 +770,30 @@ grammar, alongside the same dimensions on the control. Plain paths or custom
 expressions do not acquire typed size-edit authority. The required `interaction`
 uses the existing typed action owner. Edits may preserve actions with null;
 additions require an explicit typed list, including an empty list for Null.
+Known typed references remain inspectable when their files are changed or missing;
+media admission still refuses rendering or Apply until the reference is resolved,
+and conservative effects remain unknown. Component image-button edits preserve
+read-only actions; a new passive Component button may use the empty action list,
+while effectful lists remain forbidden.
+
+For a control picker's own UI-image import, `asset.import` may receive the captured
+`expectedAuthoringRevision`. A successful response includes the transaction-derived
+`authoringRevisionChange` with `before` and `after`. This transition projects only
+the accepted asset metadata and retains captured variable-file revisions. Only the
+initiating draft and a workspace document still on the same base may advance.
+Unrelated changes and Refresh Source do not rebase a retained draft. The receipt
+is response data, not persisted authoring metadata. Reviewed replacement Apply
+prepares its accepted document projection before committing; a later failed disk
+refresh cannot change a committed operation into a refusal.
 
 Canvas drafts use `barSamples`/`barAddition` and
 `imageButtonSamples`/`imageButtonAddition`. Existing controls identify `nodeStart`;
 additions identify `parentStart`. Numeric layout for the sole prospective addition
 uses one plus the selected accepted screen's maximum node span end. Samples never
 write source or runtime variables. The six-state canvas enum shares the control
-contract. Native fallback is hover/disabled/selected to normal, selected-hover to
+contract. A control draft preserves unrelated accepted style properties and replaces
+only its owned control/numeric fields; clearing an override removes the old value.
+The native fallback is hover/disabled/selected to normal, selected-hover to
 hover then normal, and selected-disabled to disabled then normal. No fallback
 passes through selected-idle for selected-hover. Helper data contains validated
 assets and values, with no executable binding or action expressions.

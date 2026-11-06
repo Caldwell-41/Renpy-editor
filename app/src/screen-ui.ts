@@ -14,7 +14,7 @@ import { layoutFor, saveLayout } from "./preferences.ts";
 import type { CoreOperation } from "./protocol.ts";
 import type { SourceDocument, SourceInventory, SourceTarget } from "./source-ui.ts";
 import type { ScreenPreview } from "./runtime-preparation.ts";
-import type { OwnedScreen, ScreenCatalog, ScreenTargetBinding, ResolvedScreenTarget, ComponentChange, ScreenRevisions, ScreenAction, VariableBinding } from "./screen-contracts.ts";
+import type { AuthoringRevisionChange, OwnedScreen, ScreenCatalog, ScreenTargetBinding, ResolvedScreenTarget, ComponentChange, ScreenRevisions, ScreenAction, VariableBinding } from "./screen-contracts.ts";
 
 export interface ScreenNode {
   barBinding?:IntegerBarBinding|null;
@@ -191,7 +191,7 @@ export class ScreensWorkspace {
       layoutTools:host => {const tools = el("div","screen-text-layout-tools");tools.append(button("Refresh Source",()=>void this.load()),button("Validate screen",()=>this.test(true)));host.append(tools);},
       order:host => this.composer.renderOrder(host),
     },this.layout);
-    this.controls=new ScreenControlEditor({view:()=>this.compositionView(),interaction:()=>this.interactionContext(),commit:(command,base)=>this.compose(command,base),redraw:()=>{if(this.controls.hasAddition())this.step="design";this.renderCard();},preview:()=>this.renderCanvas(),note:(text,error)=>this.note(text,error),select:(id,design)=>{const index=this.nodes().findIndex(n=>n.id===id);if(index>=0)this.choose(index,design);},source:()=>{void this.openSource();},writeBlocked:()=>this.components.hasPendingCopy(),cancelCopy:()=>this.components.cancelCopy(),order:host=>this.composer.renderOrder(host),layoutTools:host=>{host.append(button("Refresh Source",()=>void this.load()),button("Validate screen",()=>this.test(true)));},current:()=>this.current(),sample:state=>{this.buttonState=state;const select=this.stage.querySelector<HTMLSelectElement>('[aria-label="Button state (sample)"]');if(select)select.value=state;this.renderCanvas();}},this.layout,this.images);
+    this.controls=new ScreenControlEditor({imported:(change,base)=>this.acceptControlImport(change,base),view:()=>this.compositionView(),interaction:()=>this.interactionContext(),commit:(command,base)=>this.compose(command,base),redraw:()=>{if(this.controls.hasAddition())this.step="design";this.renderCard();},preview:()=>this.renderCanvas(),note:(text,error)=>this.note(text,error),select:(id,design)=>{const index=this.nodes().findIndex(n=>n.id===id);if(index>=0)this.choose(index,design);},source:()=>{void this.openSource();},writeBlocked:()=>this.components.hasPendingCopy(),cancelCopy:()=>this.components.cancelCopy(),order:host=>this.composer.renderOrder(host),layoutTools:host=>{host.append(button("Refresh Source",()=>void this.load()),button("Validate screen",()=>this.test(true)));},current:()=>this.current(),sample:state=>{this.buttonState=state;const select=this.stage.querySelector<HTMLSelectElement>('[aria-label="Button state (sample)"]');if(select)select.value=state;this.renderCanvas();}},this.layout,this.images);
     const heading = el("header", "screen-heading"); heading.append(el("h1", "", "Screens"));
     const tools = el("div", "screen-tools");
     const addImageElement = button("Add element", () => this.composer.beginAddition()); addImageElement.dataset.imageAdd = ""; addImageElement.hidden = true;
@@ -381,7 +381,7 @@ export class ScreensWorkspace {
       ];
     }
     if (command.type === "bar" || command.type === "addBar") return [{label:"Bar",before:text(node?.barBinding),after:text(command.binding)}, {label:"Appearance",before:text(node?.barAppearance),after:text(command.appearance)}, {label:"Size",before:node?`${size(node,"xsize")} x ${size(node,"ysize")}`:"None",after:`${command.width} x ${command.height}`},...this.layoutChanges(node ?? this.nodes()[this.selected]!,command.layout??{})];
-    if (command.type === "imageButton" || command.type === "addImageButton") return [{label:"Image button",before:text(node?.imageButtonAppearances),after:text(command.appearances)}, {label:"Actions",before:text(node?.actions),after:text(command.interaction.actions)}, {label:"Width",before:node?String(size(node,"xsize")):"None",after:String(command.width)}, {label:"Height",before:node?String(size(node,"ysize")):"None",after:String(command.height)},...this.layoutChanges(node ?? this.nodes()[this.selected]!,command.layout??{})];
+    if (command.type === "imageButton" || command.type === "addImageButton") return [{label:"Image button",before:text(node?.imageButtonAppearances),after:text(command.appearances)}, ...(command.interaction.actions?[{label:"Actions",before:text(node?.actions),after:text(command.interaction.actions)}]:[]), {label:"Width",before:node?String(size(node,"xsize")):"None",after:String(command.width)}, {label:"Height",before:node?String(size(node,"ysize")):"None",after:String(command.height)},...this.layoutChanges(node ?? this.nodes()[this.selected]!,command.layout??{})];
     if (command.type === "actions") return [{label:"Actions",before:text(node?.actions),after:text(command.actions)}];
     if (command.type === "variableText") return [{label:"Text",before:text(node?.literal),after:command.text ?? `Variable ${command.binding?.variableId}`}];
     if (command.type === "remove") return [{label:"Element",before:node?.literal ?? names[node?.kind ?? ""] ?? "Element",after:"Removed"}];
@@ -392,6 +392,13 @@ export class ScreensWorkspace {
   private interactionContext():InteractionContext|undefined {
     if(!this.doc?.authoringRevision)return undefined;
     return {authoringRevision:this.doc.authoringRevision,variables:this.interactionVariables,targets:this.interactionTargets,owner:this.owned};
+  }
+  private acceptControlImport(change:AuthoringRevisionChange,base:ScreenDocument):boolean {
+    if(this.doc?.path!==base.path||this.doc.revision!==base.revision||this.doc.authoringRevision!==change.before)return false;
+    const advance=(document:ScreenDocument)=>document.authoringRevision===change.before?{...document,authoringRevision:change.after}:document;
+    this.doc=advance(this.doc);
+    this.documents=this.documents.map(advance);
+    return true;
   }
   private compositionView(): CompositionView | undefined {
     return this.current() && this.owned?.resolved && this.doc && this.nodes()[this.selected] ? {

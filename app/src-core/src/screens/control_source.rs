@@ -35,41 +35,49 @@ impl AuthoringService {
         bytes: &[u8],
         node: &Node,
     ) -> Option<(controls::ImageButtonAppearances, Vec<usize>)> {
-        let (paths, starts) = image_paths(bytes, node)?;
         let model = self.list(project, project_id).ok()?;
-        let read = |key: &str| -> Option<Option<controls::ControlImageReference>> {
-            let Some(path) = paths.get(key) else {
-                return Some(None);
-            };
-            let mut candidates = model.assets.iter().filter(|a| {
-                a.kind == crate::authoring::AssetKind::UiImage
-                    && a.relative_path == format!("game/{path}")
-            });
-            let asset = candidates.next()?;
-            if candidates.next().is_some() {
-                return None;
-            }
-            self.prepare_ui_image_reference(project, project_id, &asset.id, &asset.sha256, None)
-                .ok()?;
-            Some(Some(controls::ControlImageReference {
-                asset_id: asset.id.clone(),
-                expected_asset_sha256: asset.sha256.clone(),
-                replacement_sha256: None,
-            }))
-        };
-        Some((
-            controls::ImageButtonAppearances {
-                normal: read("idle")??,
-                hover: read("hover")?,
-                selected: read("selected_idle")?,
-                selected_hover: read("selected_hover")?,
-                disabled: read("insensitive")?,
-                selected_disabled: read("selected_insensitive")?,
-            },
-            starts,
-        ))
+        inspect_imagebutton(bytes, node, &model.assets)
     }
+}
 
+pub(super) fn inspect_imagebutton(
+    bytes: &[u8],
+    node: &Node,
+    assets: &[crate::authoring::Asset],
+) -> Option<(controls::ImageButtonAppearances, Vec<usize>)> {
+    let (paths, starts) = image_paths(bytes, node)?;
+    let read = |key: &str| -> Option<Option<controls::ControlImageReference>> {
+        let Some(path) = paths.get(key) else {
+            return Some(None);
+        };
+        let mut candidates = assets.iter().filter(|a| {
+            a.kind == crate::authoring::AssetKind::UiImage
+                && a.relative_path == format!("game/{path}")
+        });
+        let asset = candidates.next()?;
+        if candidates.next().is_some() {
+            return None;
+        }
+        Some(Some(controls::ControlImageReference {
+            asset_id: asset.id.clone(),
+            expected_asset_sha256: asset.sha256.clone(),
+            replacement_sha256: None,
+        }))
+    };
+    Some((
+        controls::ImageButtonAppearances {
+            normal: read("idle")??,
+            hover: read("hover")?,
+            selected: read("selected_idle")?,
+            selected_hover: read("selected_hover")?,
+            disabled: read("insensitive")?,
+            selected_disabled: read("selected_insensitive")?,
+        },
+        starts,
+    ))
+}
+
+impl AuthoringService {
     pub(super) fn imagebutton_values(
         &self,
         project: &ProjectId,

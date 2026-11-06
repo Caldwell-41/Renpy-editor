@@ -2,18 +2,35 @@
 
 ## Integer bars and image buttons draft publication
 
-The selected local implementation, combined review and automated qualification of
-#51/#52 are complete on `codex/51-52-integration`. Kris selected pushing this
-branch, [draft PR #83](https://github.com/Caldwell-41/Renpy-editor/pull/83) into
-`codex/phase3b-screen-designer`, current-head CI audit and
-in-scope fixes. The verified remote base is `ab19b7869843445dba291ee8b9ef7ea4bef5ffd8`.
+The combined #51/#52 implementation is published on `codex/51-52-integration` in
+[draft PR #83](https://github.com/Caldwell-41/Renpy-editor/pull/83), targeting
+`codex/phase3b-screen-designer`. Baseline `a78de562` passes its exact-head CI audit.
+Kris then requested a Terra Standards/Spec review, parent validation of its findings,
+and one Sol 6.1 xhigh fast agent to fix all five verified issues using root-cause
+diagnosis and TDD. Kris confirmed the existing public core IPC/source/history and
+actual Screens UI/core seams. Implementation and parent audit are complete; the
+parent owns final publication. The verified base remains
+`ab19b7869843445dba291ee8b9ef7ea4bef5ffd8`.
 Production candidate remains
 `3b66300218955e9f7337a29a0a407e8ce689bc1d`; final Windows reference/consumer candidate
 is `e21c5331e2df7df1ab3e57a36ee5495da78c8158`. Later status commits do not replace
 those producing identities. Inspect actual HEAD and changes before resuming; do
 not reset or re-import completed workers.
 
-The publication authorization supersedes historical local-only directions.
+The latest instruction selects updating this same draft without running CI. Use
+`[skip ci]` on the publication commit to suppress automatic PR quality; do not
+dispatch CI or alter the validation plan. Report the new head as unvalidated by CI.
+The parent independently reproduced the corrected original cases and protected
+refusal paths, including the deterministic durable-commit regression, all six
+unavailable image states, cleared canvas overrides, unrelated variable edits and
+effectful Component actions. Local checks pass: 31 focused core and 103 frontend
+tests, five new UI/core modes and the existing journey; the parent separately ran
+17 control tests and five isolated core/UI probes. [Correction audit](../tasks/evidence/bars-and-image-buttons.md#five-review-corrections-and-parent-audit-complete-2026-11-06)
+owns exact scope, local receipts and binary identity. No further review panel or
+SDK/helper/package/native start is selected. Do not mistake prior terminal receipts
+for current-source validation or the no-CI direction for a passing check.
+
+The original publication authorization superseded historical local-only directions.
 The terminal publication-head audit at `40d42a22` passes automatic quality
 42172803338 and both-target harness 42172832106, both attempt 1, all required
 executed jobs/steps, both artifact digests/manifests and 834 source hashes per

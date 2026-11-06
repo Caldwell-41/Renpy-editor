@@ -33,6 +33,7 @@ const button=label=>{const node=[...workspace.panel.querySelectorAll('button')].
 async function mount(owner){
  workspace?.dispose();document.body.replaceChildren();
  workspace=new ScreensWorkspace({resolution:{width:1280,height:720},current:()=>true,coordinate:task=>task(),source:()=>{},preview:()=>{throw Error('No deliberate execution');},saved:()=>{saves++;},request:async(operation,payload)=>{
+  if(operation==='asset.chooseUiImage')return child.request({driver:'chooseImage',alternate:process.argv.includes('--import-stale-review')});
   if(operation==='authoring.list'&&catalogGate){catalogBlocked=true;await catalogGate;}
   if(operation==='screens.canvasStatus')return {phase:'unavailable',message:'Offline UI/core journey. No helper.'};
   if(operation==='screens.canvasRender'){renders.push(structuredClone(payload));return {phase:'unavailable',message:'Offline UI/core journey. No helper.'};}
@@ -51,7 +52,37 @@ try{
  const catalog=await call('screens.list');
  const created=await call('screens.create',{name:'controls_dialog',kind:'dialog',expectedProjectRevision:catalog.projectRevision,expectedSourceMapRevision:catalog.sourceMapRevision,expectedInventoryRevision:catalog.inventoryRevision});
  const owner=created.owned.find(o=>o.name==='controls_dialog'),before=await source(owner.path);
- if(process.argv.includes('--field-review')){
+ if(process.argv.includes('--import-review')||process.argv.includes('--import-stale-review')||process.argv.includes('--import-after-edit-review')){
+  browser.HTMLImageElement.prototype.decode=async()=>{};
+  const stale=process.argv.includes('--import-stale-review'),afterEdit=process.argv.includes('--import-after-edit-review');
+  if(stale){const choice=await child.request({driver:'chooseImage'});await call('asset.import',{authorityId:choice.authorityId,kind:'uiImage',technicalName:'original_image',displayName:'Original image'});}
+  await mount(owner);button('Add element');workspace.panel.querySelector('[data-kind="imagebutton"]').click();change('Width','280');
+  const original=await source(owner.path);
+  const globalButton=label=>{const found=[...document.querySelectorAll('button')].find(b=>b.textContent===label);assert(found,label);found.click();};
+  if(stale){control('Choose normal image').click();await settle(()=>[...document.querySelectorAll('button')].some(b=>b.ariaLabel==='Use Original image'),'original picker');[...document.querySelectorAll('button')].find(b=>b.ariaLabel==='Use Original image').click();await settle(()=>!document.querySelector('dialog.screen-image-dialog'),'original chosen');}
+  control(stale?'Choose hover image':'Choose normal image').click();await settle(()=>document.querySelector('dialog.screen-image-dialog'),'normal picker');
+  globalButton('Import image…');globalButton('Browse files…');
+  await settle(()=>[...document.querySelectorAll('button')].some(b=>b.textContent==='Import and use'),'staged image');
+  if(stale)await call('variable.create',{technicalName:'unrelated_import_edit',variableType:'int',defaultValue:'3'});
+  globalButton('Import and use');
+  if(stale||afterEdit){
+   if(afterEdit){await settle(()=>!document.querySelector('dialog.screen-image-dialog'),'own import selected');const variableSource=await source(coins.source.path);await writeFile(join(scratch,'synthetic-project',coins.source.path),variableSource+'# ordinary external variable-file edit\n');}
+   await settle(()=>document.querySelector('dialog.screen-image-dialog')?.textContent.includes('retained')||!document.querySelector('dialog.screen-image-dialog'),'stale import outcome');
+   if(document.querySelector('dialog.screen-image-dialog'))document.querySelector('dialog.screen-image-dialog').dispatchEvent(new Event('cancel',{cancelable:true}));
+   const writesBefore=writes.length;button('Apply changes');await settle(()=>writes.length>writesBefore&&idle(),'stale Apply');
+   assert(result.refusals.some(r=>r.operation==='screens.compose'&&r.code==='SOURCE_CONFLICT'));
+   assert.equal(workspace.hasDraft(),true);assert.equal(control('Width').value,'280');assert.equal(await source(owner.path),original);
+   await workspace.load();const writesAfter=writes.length;button('Apply changes');assert.equal(writes.length,writesAfter);assert.equal(workspace.hasDraft(),true);assert.equal(control('Width').value,'280');assert.equal(await source(owner.path),original);
+   stage('unrelated variable edit around import refuses the retained control draft before and after Refresh Source');
+  }else{
+   await settle(()=>!document.querySelector('dialog.screen-image-dialog'),'import and select');
+   const savedBefore=saves;button('Apply changes');await settle(()=>saves>savedBefore&&!workspace.hasDraft()&&idle(),'imported imagebutton Apply');
+   assert.equal(writes.at(-1).command.width,280);assert.match(await source(owner.path),/idle Transform\(/);
+   const accepted=await source(owner.path),undoSaves=saves;button('Undo');await settle(async()=>saves>undoSaves&&await source(owner.path)===original,'imported control Undo');const redoSaves=saves;button('Redo');await settle(async()=>saves>redoSaves&&await source(owner.path)===accepted,'imported control Redo');
+   stage('actual Import and use followed by imagebutton Apply succeeds and control history remains grouped');
+  }
+  result.passed=true;
+ }else if(process.argv.includes('--field-review')){
   await mount(owner);button('Add element');workspace.panel.querySelector('[data-kind="bar"]').click();change('Choose integer variable',coins.id);
   const width=control('Width');change('Width','bad');assert.notEqual(width.getAttribute('aria-invalid'),'true','unfinished input stays unmarked');width.dispatchEvent(new Event('blur'));assert.equal(width.getAttribute('aria-invalid'),'true','blur reports invalid width');
   change('Width','still bad');assert.equal(width.getAttribute('aria-invalid'),'true','an invalid correction keeps its error');change('Height','30');assert.equal(width.getAttribute('aria-invalid'),'true','unrelated edit retains width error');change('Width','360');assert.notEqual(width.getAttribute('aria-invalid'),'true');
@@ -73,7 +104,7 @@ try{
   await pickNormal();await settle(()=>review(),'changed image review reopened');[...review().querySelectorAll('button')].find(b=>b.textContent==='Use changed image').click();await settle(()=>!review(),'replacement chosen');assert.equal(control('Height').value,'80');change('Width','300');assert.equal(control('Height').value,'120','subsequent edits preserve the reviewed 80x32 ratio, not old 80x40');
   const beforeApply=saves;button('Apply changes');await settle(()=>saves>beforeApply&&!workspace.hasDraft()&&idle(),'replacement Apply');assert.equal(writes.at(-1).command.height,120);assert(writes.at(-1).command.appearances.normal.replacementSha256);
   stage('changed-image Escape restores picker focus; reviewed Normal dimensions govern later aspect edits and combined Apply');result.passed=true;
- }else if(process.argv.includes('--component-review')){
+ }else if(process.argv.includes('--component-review')||process.argv.includes('--component-apply-review')||process.argv.includes('--component-add-review')){
   const choice=await child.request({driver:'chooseImage'});await call('asset.import',{authorityId:choice.authorityId,kind:'uiImage',technicalName:'station_seal',displayName:'Station seal',characterId:null,expression:null});browser.HTMLImageElement.prototype.decode=async()=>{};
   const asset=(await call('authoring.list')).assets.find(a=>a.relativePath==='game/images/ui station_seal.png');
   const makePanel=async name=>{const list=await call('screens.list');const made=await call('screens.create',{name,kind:'panel',expectedProjectRevision:list.projectRevision,expectedSourceMapRevision:list.sourceMapRevision,expectedInventoryRevision:list.inventoryRevision});return made.owned.find(o=>o.name===name);};
@@ -85,12 +116,36 @@ try{
   const second=await makePanel('second_control_use'),comp=(await call('screens.list')).owned.find(o=>o.id===extracted.componentId);
   const componentTarget=await call('screens.resolveTarget',{binding:{screenId:comp.id,sourceName:comp.name}}),secondTarget=await call('screens.resolveTarget',{binding:{screenId:second.id,sourceName:second.name}});
   await call('screens.componentPlace',{component:componentTarget.binding,expectedComponent:componentTarget.revisions,target:secondTarget.binding,expectedTarget:secondTarget.revisions,parentId:second.rootId});
+  if(process.argv.includes('--component-add-review')){
+   const before=await source(comp.path),document=await call('screens.inspect',{path:comp.path}),target=await call('screens.resolveTarget',{binding:{screenId:comp.id,sourceName:comp.name}});
+   const request={screenId:comp.id,expectedRevision:document.revision,componentRevisions:target.revisions,command:{type:'addImageButton',parentId:comp.rootId,appearances,width:160,height:80,interaction:{expectedAuthoringRevision:document.authoringRevision,expectedTargetRevisions:[],actions:[]}}};
+   const accepted=await call('screens.compose',request);assert.equal(accepted.changed,true);const added=accepted.document.screens[0].nodes.find(n=>n.id===accepted.selectedId);assert.deepEqual(added.actions,[]);assert.equal(added.numericLayout.values.xsize.value,160);
+   const after=await source(comp.path);assert.notEqual(after,before);assert.equal((await call('screens.resolveTarget',{binding:{screenId:comp.id,sourceName:comp.name}})).effects.unknown,false);
+   const refreshed=await call('screens.resolveTarget',{binding:{screenId:comp.id,sourceName:comp.name}});
+   for(const actions of [[{type:'setVariable',variableId:coins.id,value:'8'}],[{type:'finishInteraction'}]]){
+    await assert.rejects(call('screens.compose',{...request,expectedRevision:accepted.document.revision,componentRevisions:refreshed.revisions,command:{...request.command,interaction:{...request.command.interaction,actions}}}),error=>error.code==='INCOMING_REFERENCE');assert.equal(await source(comp.path),after);
+   }
+   const history=async type=>{const state=await call('scene.list');await call('scene.apply',{expectedProjectRevision:state.projectRevision,expectedSourceMapRevision:state.sourceMapRevision,command:{type}});};
+   await history('undo');assert.equal(await source(comp.path),before);await history('redo');assert.equal(await source(comp.path),after);
+   stage('passive component imagebutton addition is one history change and effectful actions remain blocked');
+  }else{
   await mount(comp);const image=(await call('screens.inspect',{path:comp.path})).screens[0].nodes.find(n=>n.kind==='imagebutton');button('1  Choose');workspace.panel.querySelector(`[data-node-id="${image.id}"]`).dispatchEvent(new browser.MouseEvent('dblclick',{bubbles:true}));
   const componentSource=await source(comp.path),writeCount=writes.length;change('Width','300');button('Apply changes');
   const review=()=>[...document.querySelectorAll('dialog')].find(d=>d.ariaLabel==='Review component changes');await settle(()=>review()||writes.length>writeCount,'shared dimension review');assert(review(),'size-only imagebutton changes require the shared-component review');
   assert.match(review().textContent,/First Control Use/i);assert.match(review().textContent,/Second Control Use/i);const cells=[...review().querySelectorAll('.screen-component-changes tbody td')].map(n=>n.textContent);assert.deepEqual(cells,['Width','240','300']);assert.equal(await source(comp.path),componentSource);
-  [...review().querySelectorAll('button')].find(b=>b.textContent==='Keep editing').click();await settle(()=>idle(),'component review cancelled');assert.equal(writes.length,writeCount);assert.equal(control('Width').value,'300');assert.equal(workspace.hasDraft(),true);
-  stage('shared component imagebutton width-only edit lists both affected screens and dimensions before any write; Keep editing retains draft');result.passed=true;
+  if(process.argv.includes('--component-apply-review')){
+   const beforeSaves=saves;[...review().querySelectorAll('button')].find(b=>b.textContent.startsWith('Apply to ')).click();
+   await settle(()=>saves>beforeSaves&&!workspace.hasDraft()&&idle(),'shared component Apply');
+   assert.equal(writes.at(-1).command.interaction.actions,undefined,'read-only actions are preserved');
+   const edited=await source(comp.path);assert.notEqual(edited,componentSource);assert.match(edited,/action Null\(\)/);
+   assert.equal((await call('screens.inspect',{path:comp.path})).screens[0].nodes.find(n=>n.id===image.id).numericLayout.values.xsize.value,300);
+   stage('shared component width edit applies after review and preserves read-only actions');
+  }else{
+   [...review().querySelectorAll('button')].find(b=>b.textContent==='Keep editing').click();await settle(()=>idle(),'component review cancelled');assert.equal(writes.length,writeCount);assert.equal(control('Width').value,'300');assert.equal(workspace.hasDraft(),true);
+   stage('shared component imagebutton width-only edit lists both affected screens and dimensions before any write; Keep editing retains draft');
+  }
+  }
+  result.passed=true;
  }else if(process.argv.includes('--picker-review')){
   const choice=await child.request({driver:'chooseImage'});await call('asset.import',{authorityId:choice.authorityId,kind:'uiImage',technicalName:'station_seal',displayName:'Station seal',characterId:null,expression:null});browser.HTMLImageElement.prototype.decode=async()=>{};
   await mount(owner);button('Add element');workspace.panel.querySelector('[data-kind="imagebutton"]').click();

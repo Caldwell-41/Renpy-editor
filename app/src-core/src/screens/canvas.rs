@@ -304,6 +304,7 @@ impl AuthoringService {
             request.path,
             revision.sha256.clone(),
             Some(&style_inventory),
+            None,
         )?;
         style_index.resolve(&mut document, &bytes)?;
         let screen = document
@@ -1386,7 +1387,23 @@ fn put_control(
             .iter_mut()
             .find(|n| n.start == start)
             .ok_or(SceneError::InvalidPayload)?;
-        node.properties = properties;
+        let numeric = target
+            .numeric_layout
+            .as_ref()
+            .ok_or(SceneError::OpaqueBoundary)?
+            .canvas_properties()
+            .map_err(|_| SceneError::OpaqueBoundary)?;
+        let control_keys = if kind == "bar" {
+            control_source::BAR_KEYS
+        } else {
+            control_source::IMAGE_KEYS
+        };
+        node.properties.retain(|key, _| {
+            !control_keys.contains(&key.as_str())
+                && !(kind == "bar" && key == "range")
+                && !numeric.contains_key(key)
+        });
+        node.properties.extend(properties);
     }
     Ok(())
 }

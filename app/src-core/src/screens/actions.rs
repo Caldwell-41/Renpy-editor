@@ -1,6 +1,6 @@
 //! Bounded action grammar. Inspection never evaluates screen code.
 use super::*;
-use crate::authoring::{variable_literal, Variable, VariableType};
+use crate::authoring::{variable_literal, Asset, AuthoringMetadata, Variable, VariableType};
 use crate::metadata::{OwnedScreen, OwnedScreenKind, ScreenTargetBinding};
 use interaction::ScreenAction;
 use sha2::{Digest, Sha256};
@@ -12,6 +12,47 @@ pub const MAX_ACTIONS: usize = 8;
 pub(crate) struct AuthoringSnapshot {
     pub revision: String,
     pub variables: Vec<Variable>,
+    metadata: AuthoringMetadata,
+    revisions: BTreeMap<String, String>,
+}
+
+impl AuthoringSnapshot {
+    pub(super) fn assets(&self) -> &[Asset] {
+        &self.metadata.assets
+    }
+
+    pub(crate) fn project_asset_metadata(
+        &mut self,
+        mutation: &FileMutation,
+    ) -> Result<(), SceneError> {
+        if self.revisions.get(".renpy-editor/authoring.json") != Some(&mutation.base.sha256) {
+            return Err(SceneError::SourceConflict);
+        }
+        let proposed: AuthoringMetadata =
+            serde_json::from_slice(&mutation.proposed).map_err(|_| SceneError::InvalidMetadata)?;
+        let mut expected = self.metadata.clone();
+        expected.assets = proposed.assets.clone();
+        if expected != proposed {
+            return Err(SceneError::InvalidMetadata);
+        }
+        self.metadata = proposed;
+        self.revisions.insert(
+            ".renpy-editor/authoring.json".into(),
+            hex::encode(Sha256::digest(&mutation.proposed)),
+        );
+        self.revision = authoring_revision(&self.revisions);
+        Ok(())
+    }
+}
+
+fn authoring_revision(revisions: &BTreeMap<String, String>) -> String {
+    let mut digest = Sha256::new();
+    for (path, revision) in revisions {
+        digest.update((path.len() as u64).to_le_bytes());
+        digest.update(path);
+        digest.update(revision);
+    }
+    hex::encode(digest.finalize())
 }
 
 impl AuthoringService {
@@ -20,7 +61,7 @@ impl AuthoringService {
         project: &ProjectId,
         project_id: &str,
     ) -> Result<AuthoringSnapshot, SceneError> {
-        let (_, metadata_revision) = self
+        let (metadata_bytes, metadata_revision) = self
             .transactions
             .snapshot(
                 project,
@@ -32,7 +73,7 @@ impl AuthoringService {
             .map_err(|_| SceneError::ReferenceBlocked)?;
         let mut paths = BTreeSet::from([".renpy-editor/authoring.json"]);
         paths.extend(metadata.variables.iter().map(|v| v.source.path.as_str()));
-        let mut digest = Sha256::new();
+        let mut revisions = BTreeMap::new();
         for path in paths {
             let (_, revision) = self
                 .transactions
@@ -52,17 +93,18 @@ impl AuthoringService {
             {
                 return Err(SceneError::SourceConflict);
             }
-            digest.update((path.len() as u64).to_le_bytes());
-            digest.update(path);
-            digest.update(revision.sha256);
+            revisions.insert(path.to_owned(), revision.sha256);
         }
         Ok(AuthoringSnapshot {
-            revision: hex::encode(digest.finalize()),
+            revision: authoring_revision(&revisions),
             variables: metadata.variables,
+            metadata: serde_json::from_slice(&metadata_bytes)
+                .map_err(|_| SceneError::InvalidMetadata)?,
+            revisions,
         })
     }
 
-    pub(super) fn require_action_authoring(
+    pub(crate) fn require_action_authoring(
         &self,
         project: &ProjectId,
         project_id: &str,

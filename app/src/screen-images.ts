@@ -5,6 +5,7 @@ import type { MediaPresentation } from "./scene-ui.ts";
 import { ScreenImageMedia } from "./screen-image-media.ts";
 import type { LayoutReservation, NumericLayout, ScreenLayoutEditor } from "./screen-layout.ts";
 import type { ControlImageReference } from './screen-controls.ts';
+import type { AuthoringRevisionChange } from './screen-contracts.ts';
 
 export interface UiImageAsset {
   id: string;
@@ -72,7 +73,7 @@ let sequence = 0;
 
 /** Owns image drafts and the picker; accepted writes remain with ScreensWorkspace/core. */
 export class ScreenImages {
-  private referencePicker?:{draft:Draft;current:()=>boolean;choose:(reference:ControlImageReference,asset:UiImageAsset)=>void;trigger:HTMLElement};
+  private referencePicker?:{draft:Draft;current:()=>boolean;choose:(reference:ControlImageReference,asset:UiImageAsset,change?:AuthoringRevisionChange)=>void;trigger:HTMLElement;authoringRevision?:string};
   private readonly drafts = new Map<string, Draft>();
   private readonly locks = new Map<string, boolean>();
   private readonly errors = new Map<string, { field: string; text: string }>();
@@ -186,9 +187,9 @@ export class ScreenImages {
   assetName(id: string): string { return this.asset(id)?.displayName ?? "Unavailable image"; }
   assetForReference(id:string){return this.asset(id);}
   referenceThumbnail(reference:ControlImageReference){const asset=this.asset(reference.assetId);const media=this.media.get(reference.assetId,reference.replacementSha256??reference.expectedAssetSha256)?.media;return asset?this.thumbnail(asset,media):undefined;}
-  async chooseReference(reference:ControlImageReference|undefined,key:string,trigger:HTMLElement,current:()=>boolean,choose:(reference:ControlImageReference,asset:UiImageAsset)=>void):Promise<void>{
+  async chooseReference(reference:ControlImageReference|undefined,key:string,trigger:HTMLElement,current:()=>boolean,choose:(reference:ControlImageReference,asset:UiImageAsset,change?:AuthoringRevisionChange)=>void,authoringRevision?:string):Promise<void>{
     const view=this.host.view();if(!view||this.saving)return;
-    this.referencePicker={draft:{key,document:view.document,screenId:view.screenId,parentId:'',assetId:reference?.assetId,expectedSha:reference?.expectedAssetSha256,width:'1',height:'1'},trigger,current,choose};
+    this.referencePicker={draft:{key,document:view.document,screenId:view.screenId,parentId:'',assetId:reference?.assetId,expectedSha:reference?.expectedAssetSha256,width:'1',height:'1'},trigger,current,choose,authoringRevision};
     await this.openPicker();
   }
   assetIdForLiteral(literal: string | null | undefined): string | undefined { return this.assets.find(asset => asset.relativePath === `game/${literal}`)?.id; }
@@ -925,14 +926,14 @@ export class ScreenImages {
       el("p", "screen-image-boundary", "Selection reads image data. It runs no project scripts or actions."),
     );
   }
-  private async use(asset: UiImageAsset, replacement?: MediaPresentation): Promise<void> {
+  private async use(asset: UiImageAsset, replacement?: MediaPresentation, change?:AuthoringRevisionChange): Promise<void> {
     const current = this.value(),
       generation = this.pickerGeneration;
     if (!current) return;
     try {
       if (!replacement) await this.media.load(asset);
       if (!this.active() || generation !== this.pickerGeneration || current.key !== this.value()?.key) return;
-      if(this.referencePicker){const picker=this.referencePicker;this.closePicker();picker.choose({assetId:asset.id,expectedAssetSha256:asset.sha256,...(replacement?{replacementSha256:replacement.sha256}:{})},replacement?{...asset,naturalWidth:replacement.width??undefined,naturalHeight:replacement.height??undefined}:asset);return;}
+      if(this.referencePicker){const picker=this.referencePicker;this.closePicker();picker.choose({assetId:asset.id,expectedAssetSha256:asset.sha256,...(replacement?{replacementSha256:replacement.sha256}:{})},replacement?{...asset,naturalWidth:replacement.width??undefined,naturalHeight:replacement.height??undefined}:asset,change);return;}
       const draft = { ...current, assetId: asset.id, expectedSha: asset.sha256, replacement };
       const natural = replacement ?? this.media.get(asset.id, asset.sha256)?.media;
       if (this.locked(draft) && natural?.width && natural.height && valid(draft.width))
@@ -1041,14 +1042,15 @@ export class ScreenImages {
                 .querySelectorAll<HTMLInputElement | HTMLButtonElement>("input,button")
                 .forEach((control) => (control.disabled = true));
               try {
-                await this.host.coordinate(() =>
-                  this.host.request("asset.import", {
+                const imported = await this.host.coordinate(() =>
+                  this.host.request<{authoringRevisionChange?:AuthoringRevisionChange}>("asset.import", {
                     authorityId: choice.authorityId,
                     kind: "uiImage",
                     technicalName: technical(),
                     displayName: name.value.trim(),
                     characterId: null,
                     expression: null,
+                    ...(this.referencePicker?.authoringRevision ? {expectedAuthoringRevision:this.referencePicker.authoringRevision} : {}),
                   }),
                 );
                 if (!this.active()) return;
@@ -1062,7 +1064,7 @@ export class ScreenImages {
                 );
                 if (!asset) throw Error("The imported UI image is unavailable.");
                 this.importing = false;
-                await this.use(asset);
+                await this.use(asset, undefined, imported.authoringRevisionChange);
               } catch (error) {
                 if (current()) {
                   status.textContent = `${(error as Error).message} Your draft and display name are retained. Browse again to retry.`;

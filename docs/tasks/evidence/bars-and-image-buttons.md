@@ -1604,3 +1604,106 @@ quality/harness/combined-status audit. #51 owns that terminal receipt, and #52
 links to it; no further repository commit is needed solely to record its SHA.
 The PR stays draft and both issues stay open. Merge, ready-for-review, wider
 acceptance and new execution remain unselected.
+
+## Five review corrections selected without CI, 2026-11-06
+
+After baseline `a78de562ca02e45e5e977a75365565aaf07dc70d` passed the final
+publication audit recorded in #51 and the PR, Kris explicitly requested another
+two-axis review using Terra 6.1 max. The parent independently verified all five
+findings. Four reproduced through actual core/UI probes; the postcommit failure
+was confirmed by tracing commit completion followed by fallible inspections.
+
+| Axis | Verified finding | Original failure |
+| --- | --- | --- |
+| Standards | Changed/missing image recovery | Inspection drops known typed references and the UI hides every appearance picker. |
+| Standards | Committed Apply result | Reviewed replacement commits source/history, then a failed refresh can report the operation as refused. |
+| Standards | Canvas property retention | A size-only control draft replaces the complete property map, dropping an accepted literal background. |
+| Spec | Import revision coordination | Actual Import and use changes metadata but Apply submits the old authoring revision; Refresh retains the stale draft. |
+| Spec | Passive component controls | Actual reviewed width edits and passive additions submit an empty action list that core rejects for a Component. |
+
+Kris selected one Sol 6.1 xhigh priority agent to apply
+`principle-fix-root-causes` and `mattpocock-skills:tdd`. The public core IPC
+(`screens.inspect`, `screens.compose`, `screens.canvasPlan`, source/history) and
+actual Screens UI connected to core are explicitly confirmed seams. Each slice
+must reproduce its failure before its smallest owner correction and passing test.
+The existing durable filesystem hook can reproduce the postcommit error at the
+public operation boundary. Keep unrelated changes, stale requests, unavailable
+render/apply media, deliberate clears and effectful Component actions protected.
+
+The agent owns implementation/tests only. The parent independently audits the
+fixes against the original bugs and then updates this same draft. Kris explicitly
+said not to run CI. The publication commit will use `[skip ci]`; no manual CI,
+workflow/plan change or successful status is selected. The changed head has no
+current CI qualification. Prior exact-head runs and native/package/runtime/helper
+evidence remain on their recorded sources and binaries. Routine local compilation
+and focused tests are selected; no SDK/helper/package/native start is selected,
+and #51's cumulative counts and zero reservations remain unchanged.
+
+The original reproduction receipts remain in ignored
+`.toolchains/51-52/publication/`: `review-proof-9089c81f361c4892a941bb6f4573493b/`,
+`review-import-proof/` and `review-component-proof/`. Their green scripts assert
+the original bugs and are not evidence of corrections. Independent fixed-behavior
+parent probes are prepared separately; their results remain pending.
+
+## Five review corrections and parent audit complete, 2026-11-06
+
+All five findings are corrected in the existing owners. The sole Sol 6.1 xhigh
+priority implementation agent completed one red/green slice before the next and
+left its changes uncommitted for parent review. The parent inspected the complete
+diff and independently checked each original failure; no additional correction
+was needed during that audit. The selected scope restores approved behavior and
+does not change the design, signing policy or execution boundary.
+
+| Original bug | Root correction | Parent verification |
+| --- | --- | --- |
+| Unavailable image hides pickers | Inspection resolves known IDs/hashes from metadata; render/Apply still validate current media, and unresolved effects remain unknown. | Original changed/missing-image IPC sequence now retains the reference. Fresh core coverage checks all six states, both failure conditions and refused writes/rendering. |
+| Apply fails after committing | Accepted asset metadata and authoring revisions project into the returned documents before the transaction; postcommit disk inspection is removed. | Fresh deterministic durable-hook test passes after the recorded original SOURCE_CONFLICT red. Returned documents equal later inspection, and one Undo/Redo restores source and metadata together. |
+| Draft drops accepted properties | The existing control owner replaces only control/numeric fields, retaining unrelated accepted properties and removing deliberate clears. | Original literal background remains in the provisional plan with source unchanged. Fresh core tests cover both control kinds, padding and cleared color/state/position overrides. |
+| Own import stales the draft | Optional captured import revision yields a transaction-derived assets-only before/after receipt. Only the initiating matching draft/workspace advances. | Independent actual Import and use, Apply and reload pass. Unrelated variable creation before import and external variable-file edits afterward still refuse and retain the draft through Refresh Source. |
+| Passive Component controls refuse | Existing control edits preserve read-only actions. Core admits an empty action list only for a new passive Component imagebutton. | Independent shared-component review through Apply succeeds, followed by passive addition; effectful addition still refuses without writing source. |
+
+`asset.import` accepts optional `expectedAuthoringRevision` only for UI-image
+imports and returns optional `authoringRevisionChange { before, after }` after
+success. The projection verifies the metadata base and allows only asset-record
+changes, retaining captured variable-file hashes. Legacy Rust import methods use
+the same import owner. The response receipt is not persisted. The DATA_MODEL
+control contract records this behavior. Existing stale source, target-review and
+variable guards remain active; no blanket revision refresh was introduced.
+
+Implementation verification passes 17 control tests, 12 action tests, the existing
+passive-action policy test and UI-image replacement test: 31 focused core cases.
+It also passes 103 affected frontend tests, typechecking, test compilation, Rust
+formatting, five new actual UI/core modes and the existing full controls journey.
+The ignored `app/target/five-fixes/implementation-receipt.md` owns commands and
+per-slice red/green results. It retains initial fixture-name/null-field mistakes,
+the Undo/Redo timing assertion and the misleading component Actions review row
+exposed and corrected before final green results. These remain failed attempts.
+
+The parent independently runs all 17 control tests, with zero failed or ignored,
+including `reviewed_image_apply_returns_committed_documents_when_later_inventory_fails`.
+Its separate probes use the original reproduction sequences with fixed-behavior
+expectations. Core asset/canvas receipt:
+`.toolchains/51-52/publication/parent-fixed-core-51d65d826ecf4af6ae4b44c49345982d/result.json`.
+Independent actual UI/core receipts under `app/target/five-fixes/` are
+`parent-import`, `parent-component`, `parent-stale-before` and `parent-stale-after`.
+All pass, retain source on refusal, observe driver exit0 and remove fixture scratch.
+The rebuilt offline driver SHA256 is
+`5de8553feed56ba52c0381ff522794af767fd4200ea13bd15c8622892292e18e`.
+These receipts describe the uncommitted correction delta against baseline
+`a78de562`; their publication receipt in #51 binds the resulting final head.
+The offline core-test binary SHA256 is
+`2ac859aeb2d38593d5227443b678733bb90234d1a45440b77ec66698d81651b6`.
+The application correction diff SHA256 is
+`8627e749545a8d8cf868ecceb7b4a0ef908a01fd4fb4db18c17f044dc830d7fe`.
+Ignored `app/target/five-fixes/parent-audit.json` binds the changed application
+source hashes, five probe receipts and both binaries; its SHA256 is
+`a8cdb8d04fc10c75a0bd027d61c055888b948759a2dbe0af1eb9e105a0a04189`.
+
+This is local Windows core and synthetic-DOM proof through real production IPC.
+No CI, SDK/helper, native editor or package operation ran. There is no fresh
+pixel, physical-input, native, package or Mac claim for the changed code. Original
+producer identities and binary hashes above remain historical evidence on their
+original inputs. #51's cumulative counts and zero reservations are unchanged.
+The same draft will publish with `[skip ci]` at Kris's explicit request; its
+current head is unvalidated by CI. The existing validation plan stays unchanged.
+No merge, ready-for-review transition, issue closure or separate PR is selected.

@@ -377,6 +377,22 @@ pub struct ImportAssetRequest {
     pub expression: Option<String>,
 }
 
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AuthoringRevisionChange {
+    pub before: String,
+    pub after: String,
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ImportedAsset {
+    #[serde(flatten)]
+    pub metadata: AuthoringMetadata,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub authoring_revision_change: Option<AuthoringRevisionChange>,
+}
+
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct UpdateAppearanceRequest {
@@ -890,11 +906,32 @@ impl AuthoringService {
         project_uuid: &str,
         request: ImportAssetRequest,
     ) -> Result<AuthoringMetadata, AuthoringError> {
+        self.import_asset_with_screen_revision(project, project_uuid, request, None)
+            .map(|result| result.metadata)
+    }
+
+    pub(crate) fn import_asset_with_screen_revision(
+        &mut self,
+        project: &ProjectId,
+        project_uuid: &str,
+        request: ImportAssetRequest,
+        expected_authoring_revision: Option<String>,
+    ) -> Result<ImportedAsset, AuthoringError> {
         self.ensure_ready(project)?;
         self.ensure_source_paths_clean(project, [ASSETS_PATH])
             .map_err(|_| AuthoringError::DirtySource)?;
         validate_identifier(&request.technical_name)?;
         validate_display(&request.display_name)?;
+        if expected_authoring_revision.is_some() && request.kind != AssetKind::UiImage {
+            return Err(AuthoringError::InvalidPayload);
+        }
+        let mut authoring = expected_authoring_revision
+            .as_ref()
+            .map(|revision| {
+                self.require_action_authoring(project, project_uuid, revision)
+                    .map_err(|_| AuthoringError::SourceConflict)
+            })
+            .transpose()?;
         let mut authority = self
             .imports
             .remove(&request.authority_id)
@@ -1031,7 +1068,20 @@ impl AuthoringService {
             } else {
                 fonts::validate(&bytes).map_err(|_| AuthoringError::UnsupportedFormat)?;
             }
-            companions.push(metadata_file_mutation(metadata_snapshot, &metadata)?);
+            let mutation = metadata_file_mutation(metadata_snapshot, &metadata)?;
+            let authoring_revision_change = if let Some(authoring) = &mut authoring {
+                let before = authoring.revision.clone();
+                authoring
+                    .project_asset_metadata(&mutation)
+                    .map_err(|_| AuthoringError::SourceConflict)?;
+                Some(AuthoringRevisionChange {
+                    before,
+                    after: authoring.revision.clone(),
+                })
+            } else {
+                None
+            };
+            companions.push(mutation);
             companions.insert(
                 0,
                 FileMutation {
@@ -1056,7 +1106,10 @@ impl AuthoringService {
                 crate::scene::SceneError::DirtySource => AuthoringError::DirtySource,
                 _ => AuthoringError::SourceConflict,
             })?;
-            return Ok(metadata);
+            return Ok(ImportedAsset {
+                metadata,
+                authoring_revision_change,
+            });
         }
         companions.push(metadata_file_mutation(metadata_snapshot, &metadata)?);
         let outcome = self.transactions.commit_streaming_import(
@@ -1069,7 +1122,10 @@ impl AuthoringService {
         );
         self.clear_observed_flow(project);
         committed(outcome)?;
-        Ok(metadata)
+        Ok(ImportedAsset {
+            metadata,
+            authoring_revision_change: None,
+        })
     }
 
     pub fn update_appearance(

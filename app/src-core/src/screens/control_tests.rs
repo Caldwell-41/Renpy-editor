@@ -67,6 +67,102 @@ fn import_image_bytes(
 }
 
 #[test]
+fn imagebutton_unavailable_states_keep_recoverable_references_without_accepting_media() {
+    let (temporary, mut service, root, owner) = composition_project();
+    let states = [
+        "normal",
+        "hover",
+        "selected",
+        "selectedHover",
+        "disabled",
+        "selectedDisabled",
+    ];
+    let mut appearances = json!({});
+    for (i, state) in states.iter().enumerate() {
+        appearances[*state] = import_image_bytes(
+            &temporary,
+            &mut service,
+            &root,
+            &state.to_lowercase(),
+            &base64::engine::general_purpose::STANDARD
+                .decode(STATE_PNGS[i])
+                .unwrap(),
+        );
+        appearances[*state]["replacementSha256"] = Value::Null;
+    }
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    let added = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"addImageButton","parentId":owner["rootId"],"appearances":appearances,"width":160,"height":80,"interaction":{"actions":[],"expectedAuthoringRevision":doc["authoringRevision"],"expectedTargetRevisions":[]}}),
+    );
+    let source = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"].clone();
+    for (i, state) in states.iter().enumerate() {
+        let file = root.join(format!("game/images/ui {}.png", state.to_lowercase()));
+        let original = fs::read(&file).unwrap();
+        for missing in [false, true] {
+            if missing {
+                fs::remove_file(&file).unwrap();
+            } else {
+                fs::write(
+                    &file,
+                    base64::engine::general_purpose::STANDARD
+                        .decode(STATE_PNGS[(i + 1) % 6])
+                        .unwrap(),
+                )
+                .unwrap();
+            }
+            let inspected = ipc(
+                &mut service,
+                "screens.inspect",
+                json!({"path":owner["path"]}),
+            );
+            let node = &inspected["screens"][0]["nodes"][1];
+            assert_eq!(
+                node["imageButtonAppearances"], appearances,
+                "{state}, missing={missing}"
+            );
+            assert_eq!(node["id"], added["selectedId"]);
+            assert_eq!(
+                ipc(
+                    &mut service,
+                    "screens.resolveTarget",
+                    json!({"binding":{"screenId":owner["id"],"sourceName":owner["name"]}})
+                )["effects"]["unknown"],
+                true
+            );
+            reject(
+                &mut service,
+                "screens.canvasPlan",
+                json!({"path":owner["path"],"screenName":owner["name"],"expectedRevision":inspected["revision"],"width":1280,"height":720}),
+            );
+            reject(
+                &mut service,
+                "screens.compose",
+                json!({"screenId":owner["id"],"expectedRevision":inspected["revision"],"command":{"type":"imageButton","nodeId":added["selectedId"],"appearances":appearances,"width":180,"height":80,"interaction":{"expectedAuthoringRevision":inspected["authoringRevision"],"expectedTargetRevisions":[]}}}),
+            );
+            assert_eq!(
+                ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+                source
+            );
+            fs::write(&file, &original).unwrap();
+        }
+    }
+    assert_eq!(
+        ipc(
+            &mut service,
+            "screens.inspect",
+            json!({"path":owner["path"]})
+        )["screens"][0]["nodes"][1]["imageButtonAppearances"],
+        appearances
+    );
+}
+
+#[test]
 fn imagebutton_asset_action_roundtrip_is_one_transaction() {
     let (temporary, mut service, root, owner) = composition_project();
     let variable = int_variable(&mut service);
@@ -230,6 +326,72 @@ fn control_canvas_samples_are_validated_data_and_never_write_source() {
         .contains("VariableValue"));
     assert_eq!(
         fs::read(root.join(owner["path"].as_str().unwrap())).unwrap(),
+        source
+    );
+}
+
+#[test]
+fn control_canvas_drafts_preserve_unrelated_properties_and_clear_owned_overrides() {
+    let (temporary, mut service, root, owner) = composition_project();
+    let variable = int_variable(&mut service);
+    let asset = import_image(&temporary, &mut service, &root, "styled_control");
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    let binding = json!({"variableId":variable["id"],"minimum":"0","maximum":"100"});
+    let bar = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"addBar","parentId":owner["rootId"],"binding":binding,"appearance":{"leftBar":"#f00","thumb":"#0f0"},"width":300,"height":24,"expectedAuthoringRevision":doc["authoringRevision"]}),
+    );
+    let image = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"addImageButton","parentId":owner["rootId"],"appearances":{"normal":asset,"hover":asset},"width":160,"height":80,"interaction":{"actions":[],"expectedAuthoringRevision":bar["document"]["authoringRevision"],"expectedTargetRevisions":[]}}),
+    );
+    let source = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"].as_str().unwrap().replace("        xsize", "        background \"#123456\"\n        padding (4, 5)\n        xalign 0.5\n        xsize");
+    save_composition_source(&mut service, &owner, &source);
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    let nodes = doc["screens"][0]["nodes"].as_array().unwrap();
+    let bar_start =
+        nodes.iter().find(|n| n["id"] == bar["selectedId"]).unwrap()["span"]["start"].clone();
+    let image_start = nodes
+        .iter()
+        .find(|n| n["id"] == image["selectedId"])
+        .unwrap()["span"]["start"]
+        .clone();
+    let base = json!({"path":owner["path"],"screenName":owner["name"],"expectedRevision":doc["revision"],"width":1280,"height":720});
+    let accepted = ipc(&mut service, "screens.canvasPlan", base.clone());
+    assert_eq!(accepted["available"], true, "{accepted}");
+    let mut draft = base;
+    draft["barSamples"] = json!([{"nodeStart":bar_start,"binding":binding,"appearance":{},"width":180,"height":30,"expectedAuthoringRevision":doc["authoringRevision"]}]);
+    draft["imageButtonSamples"] =
+        json!([{"nodeStart":image_start,"appearances":{"normal":asset},"width":180,"height":90}]);
+    draft["layouts"] = json!([{"nodeStart":bar_start,"values":{"xpos":null,"xanchor":null}},{"nodeStart":image_start,"values":{"xpos":null,"xanchor":null}}]);
+    let plan = ipc(&mut service, "screens.canvasPlan", draft);
+    assert_eq!(plan["available"], true, "{plan}");
+    for start in [&bar_start, &image_start] {
+        let properties = &plan["nodes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|n| &n["start"] == start)
+            .unwrap()["properties"];
+        assert_eq!(properties["background"], "#123456");
+        assert_eq!(properties["padding"], json!([4, 5]));
+        assert_eq!(properties["xsize"], 180);
+        for key in ["xalign", "xpos", "xanchor", "left_bar", "thumb", "hover"] {
+            assert!(properties.get(key).is_none(), "{key}: {properties}");
+        }
+    }
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         source
     );
 }
@@ -769,6 +931,98 @@ fn imagebutton_reviewed_replacements_update_both_assets_and_return_current_inspe
             json!({"path":owner["path"]})
         )["screens"][0]["nodes"][1]["imageButtonAppearances"],
         *inspected
+    );
+}
+
+#[test]
+fn reviewed_image_apply_returns_committed_documents_when_later_inventory_fails() {
+    let (temporary, mut service, root, owner) = composition_project();
+    let asset = import_image(&temporary, &mut service, &root, "committed_image");
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    let added = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"addImageButton","parentId":owner["rootId"],"appearances":{"normal":asset},"width":160,"height":80,"interaction":{"actions":[],"expectedAuthoringRevision":doc["authoringRevision"],"expectedTargetRevisions":[]}}),
+    );
+    let before = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"].clone();
+    fs::write(
+        root.join("game/images/ui committed_image.png"),
+        base64::engine::general_purpose::STANDARD
+            .decode(STATE_PNGS[0])
+            .unwrap(),
+    )
+    .unwrap();
+    let review = ipc(
+        &mut service,
+        "asset.reviewUiImage",
+        json!({"assetId":asset["assetId"],"expectedAssetSha256":asset["expectedAssetSha256"]}),
+    );
+    let mut reference = asset.clone();
+    reference["replacementSha256"] = review["sha256"].clone();
+    let result = crate::transaction::with_durable_commit_hook(
+        |root| fs::write(root.join("game/late.rpy"), vec![b'#'; 16 * 1024 * 1024 + 1]).unwrap(),
+        || {
+            ipc(
+                &mut service,
+                "screens.compose",
+                json!({"screenId":owner["id"],"expectedRevision":added["document"]["revision"],"command":{"type":"imageButton","nodeId":added["selectedId"],"appearances":{"normal":reference},"width":180,"height":90,"interaction":{"expectedAuthoringRevision":added["document"]["authoringRevision"],"expectedTargetRevisions":[]}}}),
+            )
+        },
+    );
+    assert_eq!(result["changed"], true);
+    assert_eq!(
+        result["document"]["screens"][0]["nodes"][1]["imageButtonAppearances"]["normal"]
+            ["expectedAssetSha256"],
+        review["sha256"]
+    );
+    assert_ne!(
+        result["document"]["authoringRevision"],
+        added["document"]["authoringRevision"]
+    );
+    assert_eq!(
+        reject(&mut service, "screens.list", json!({}))["error"]["code"],
+        "SOURCE_CONFLICT"
+    );
+    fs::remove_file(root.join("game/late.rpy")).unwrap();
+    for document in result["documents"].as_array().unwrap() {
+        assert_eq!(
+            *document,
+            ipc(
+                &mut service,
+                "screens.inspect",
+                json!({"path":document["path"]})
+            )
+        );
+    }
+    assert_eq!(
+        result["document"],
+        ipc(
+            &mut service,
+            "screens.inspect",
+            json!({"path":owner["path"]})
+        )
+    );
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        before
+    );
+    assert_eq!(
+        ipc(&mut service, "authoring.list", json!({}))["assets"][0]["sha256"],
+        asset["expectedAssetSha256"]
+    );
+    composition_history(&mut service, "redo");
+    assert_eq!(
+        result["document"],
+        ipc(
+            &mut service,
+            "screens.inspect",
+            json!({"path":owner["path"]})
+        )
     );
 }
 

@@ -502,6 +502,10 @@ impl Effects<'_> {
                     self.service
                         .inspect_imagebutton(self.project, &map.project_id, bytes, node)
                 {
+                    self.unknown |= self
+                        .service
+                        .imagebutton_values(self.project, &map.project_id, &appearances)
+                        .is_err();
                     for reference in control_source::image_references(&appearances)
                         .into_iter()
                         .flatten()

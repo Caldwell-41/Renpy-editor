@@ -228,6 +228,7 @@ impl AuthoringService {
         bytes: &[u8],
         node_id: &str,
         review: &InteractionEdit,
+        passive_component_addition: bool,
     ) -> Result<Vec<u8>, SceneError> {
         let authoring = self.require_action_authoring(
             project,
@@ -256,7 +257,9 @@ impl AuthoringService {
         let Some(actions) = &review.actions else {
             return Ok(bytes.to_vec());
         };
-        if owner.kind == crate::metadata::OwnedScreenKind::Component {
+        if owner.kind == crate::metadata::OwnedScreenKind::Component
+            && !(passive_component_addition && actions.is_empty())
+        {
             return Err(SceneError::ReferenceBlocked);
         }
         let inventory = self.screen_inventory(project)?;
@@ -407,6 +410,7 @@ impl AuthoringService {
                     &source,
                     &id,
                     &interaction,
+                    control_addition,
                 )?;
                 interaction_review = Some((
                     interaction.expected_authoring_revision,
@@ -520,6 +524,7 @@ impl AuthoringService {
                     &bytes,
                     &node_id,
                     &review,
+                    false,
                 )?;
                 interaction_review = Some((
                     review.expected_authoring_revision,
@@ -797,6 +802,7 @@ impl AuthoringService {
                         &proposed,
                         &node_id,
                         &review,
+                        false,
                     )?;
                     interaction_review = Some((
                         review.expected_authoring_revision,
@@ -1034,12 +1040,23 @@ impl AuthoringService {
             }
         }
         accepted_inventory.refresh_revision();
+        let accepted_authoring = if let Some(mutation) = companions
+            .iter()
+            .find(|m| m.path.as_str() == ".renpy-editor/authoring.json")
+        {
+            let mut authoring = self.screen_action_authoring(project, project_id)?;
+            authoring.project_asset_metadata(mutation)?;
+            Some(authoring)
+        } else {
+            None
+        };
         let mut accepted = self.owned_screen_document_with_inventory(
             project,
             &proposed,
             source_path.clone(),
             hex::encode(Sha256::digest(&proposed)),
             Some(&accepted_inventory),
+            accepted_authoring.as_ref(),
         )?;
         let index = styles::Index::read(&accepted_inventory)?;
         index.resolve(&mut accepted, &proposed)?;
@@ -1056,6 +1073,7 @@ impl AuthoringService {
                 p.clone(),
                 hex::encode(Sha256::digest(b)),
                 Some(&accepted_inventory),
+                accepted_authoring.as_ref(),
             ) {
                 Ok(doc) => doc,
                 // Unrelated source-only files need not be inspectable to edit this owner.
@@ -1078,9 +1096,6 @@ impl AuthoringService {
                 },
             );
         }
-        let refresh_assets = companions
-            .iter()
-            .any(|m| m.path.as_str() == ".renpy-editor/authoring.json");
         self.commit_history(
             project,
             TransactionProposal {
@@ -1088,22 +1103,6 @@ impl AuthoringService {
                 intent: TransactionIntent::Edit,
             },
         )?;
-        if refresh_assets {
-            accepted = self.screens_inspect_owned(
-                project,
-                InspectRequest {
-                    path: source_path.clone(),
-                },
-            )?;
-            for document in &mut documents {
-                *document = self.screens_inspect_owned(
-                    project,
-                    InspectRequest {
-                        path: document.path.clone(),
-                    },
-                )?;
-            }
-        }
         Ok(ComposeResult {
             document: accepted,
             selected_id,

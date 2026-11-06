@@ -5,6 +5,7 @@ import { actionDraft, prepareInteraction, renderActions, captureActionFocus, res
 import type { ScreenLayoutEditor, LayoutReservation } from './screen-layout.ts';
 import type { ScreenImages } from './screen-images.ts';
 import { validateField } from './authoring-input.ts';
+import type { AuthoringRevisionChange } from './screen-contracts.ts';
 
 interface Draft {
   key:string; document:ScreenDocument; screenId:string; node?:ScreenNode; parentId:string;
@@ -21,6 +22,7 @@ interface Host {
   select:(id:string,design?:boolean)=>void; source:()=>void;
   writeBlocked:()=>boolean; cancelCopy:()=>void; order:(host:HTMLElement)=>void; layoutTools:(host:HTMLElement)=>void;
   sample:(state:ControlButtonState)=>void; current:()=>boolean;
+  imported:(change:AuthoringRevisionChange,base:ScreenDocument)=>boolean;
 }
 const el=<K extends keyof HTMLElementTagNameMap>(tag:K,cls='',text='')=>{const n=document.createElement(tag);n.className=cls;n.textContent=text;return n;};
 const button=(text:string,run:()=>void,primary=false)=>{const b=el('button',`button ${primary?'primary':'secondary'}`,text);b.type='button';b.onclick=run;return b;};
@@ -119,7 +121,7 @@ export class ScreenControlEditor {
     for(const [key,name]of [['leftBar','Filled'],['rightBar','Empty'],['thumb','Thumb']]as const){const row=el('div','sce-color'),swatch=el('span','sce-swatch');swatch.style.background=d.appearance[key]??'';const input=field(row,`${name} color`,d.appearance[key]??'',raw=>{d.appearance[key]=raw||null;swatch.style.background=raw;});input.inputMode='text';input.placeholder='Default';row.prepend(swatch);const reset=button('Default',()=>{d.appearance[key]=null;this.store(d);this.host.redraw();this.focus(`${name} color`);});reset.ariaLabel=`Reset ${name.toLowerCase()} color to default`;row.append(reset);appearance.append(row);}
     }else{
       const appearance=group('Appearance');appearance.classList.add('sce-image-appearance');appearance.querySelector('h3')!.hidden=true;
-      for(const [key,name]of controlSampleStates){const row=el('div','sce-image-state'),sample=button(name,()=>{this.setSampleState(key);this.host.sample(key);}),choose=button('',()=>{d.focus=`Choose ${name.toLowerCase()} image`;this.setSampleState(key);this.host.sample(key);void this.images.chooseReference(d.appearances?.[key]??undefined,`${d.key}:${key}`,choose,()=>{const current=this.host.view();return !!current&&this.value(current).key===d.key;},(reference,asset)=>{d.appearances![key]=reference;if(key==='normal'&&asset.naturalWidth&&asset.naturalHeight)d.normalSize={assetId:reference.assetId,sha256:reference.replacementSha256??reference.expectedAssetSha256,width:asset.naturalWidth,height:asset.naturalHeight};if(key==='normal'&&d.keepRatio&&asset.naturalWidth&&asset.naturalHeight&&validSize(d.width))d.height=String(Math.max(1,Math.round(Number(d.width)*asset.naturalHeight/asset.naturalWidth)));this.store(d);this.host.redraw();this.focus(d.focus);});});
+      for(const [key,name]of controlSampleStates){const row=el('div','sce-image-state'),sample=button(name,()=>{this.setSampleState(key);this.host.sample(key);}),choose=button('',()=>{d.focus=`Choose ${name.toLowerCase()} image`;this.setSampleState(key);this.host.sample(key);void this.images.chooseReference(d.appearances?.[key]??undefined,`${d.key}:${key}`,choose,()=>{const current=this.host.view();return !!current&&this.value(current).key===d.key;},(reference,asset,change)=>{if(change&&d.context?.authoringRevision===change.before&&this.host.imported(change,d.document))d.context.authoringRevision=change.after;d.appearances![key]=reference;if(key==='normal'&&asset.naturalWidth&&asset.naturalHeight)d.normalSize={assetId:reference.assetId,sha256:reference.replacementSha256??reference.expectedAssetSha256,width:asset.naturalWidth,height:asset.naturalHeight};if(key==='normal'&&d.keepRatio&&asset.naturalWidth&&asset.naturalHeight&&validSize(d.width))d.height=String(Math.max(1,Math.round(Number(d.width)*asset.naturalHeight/asset.naturalWidth)));this.store(d);this.host.redraw();this.focus(d.focus);},d.context?.authoringRevision);});
         row.dataset.controlState=key;row.dataset.sampled=String(this.sampleState===key);sample.setAttribute('aria-pressed',String(this.sampleState===key));if(key==='normal')sample.append(el('small','','Required'));sample.setAttribute('aria-label',`Preview ${name.toLowerCase()} sample`);choose.setAttribute('aria-label',`Choose ${name.toLowerCase()} image`);choose.classList.add('sce-asset');
         const reference=d.appearances?.[key],fallback=chains[key].find(state=>d.appearances?.[state]),resolved=fallback&&d.appearances?.[fallback];
         if(resolved){const thumbnail=this.images.referenceThumbnail(resolved);if(thumbnail){thumbnail.classList.toggle('sce-fallback',!reference);choose.append(thumbnail);}}
@@ -181,7 +183,7 @@ export class ScreenControlEditor {
     if(d.kind==='bar'){const values={...common,binding:d.binding,appearance:d.appearance,expectedAuthoringRevision:d.context!.authoringRevision};command=d.node?{type:'bar',nodeId:d.node.id!,...values}:{type:'addBar',parentId:d.parentId,...values};}
     else {
       try{await this.images.refreshAssets();for(const [key,name]of controlSampleStates){const ref=d.appearances?.[key];if(!ref)continue;const asset=this.images.assetForReference(ref.assetId);if(!asset||asset.status!=='available'&&!ref.replacementSha256){this.fail(d,`${name} image is missing or changed. Choose an available UI image.`,`Choose ${name.toLowerCase()} image`);return;}}
-        const values={...common,appearances:d.appearances as ImageButtonAppearances,interaction:prepareInteraction(d.context!,d.actions)};command=d.node?{type:'imageButton',nodeId:d.node.id!,...values}:{type:'addImageButton',parentId:d.parentId,...values};
+        const values={...common,appearances:d.appearances as ImageButtonAppearances,interaction:prepareInteraction(d.context!,d.node&&d.context?.owner?.kind==='component'?undefined:d.actions)};command=d.node?{type:'imageButton',nodeId:d.node.id!,...values}:{type:'addImageButton',parentId:d.parentId,...values};
       }catch(error){const section=this.card?.querySelector<HTMLElement>('.siv-actions');if(section&&d.actions){renderActions(section,d.actions,d.context,false,()=>this.store(d));restoreActionFocus(section,d.actions);const target=section.querySelector<HTMLElement>('[aria-invalid]');target?.focus({preventScroll:true});target?.scrollIntoView({block:'nearest'});}this.fail(d,(error as Error).message,undefined,true);return;}
     }
     if(this.disposed||!this.host.current())return;
