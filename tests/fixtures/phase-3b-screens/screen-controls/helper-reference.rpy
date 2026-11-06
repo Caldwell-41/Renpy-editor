@@ -7,6 +7,10 @@ define config.save_directory = None
 screen main_menu():
     text "Control helper reference"
 
+label start:
+    pause
+    return
+
 init python:
     import hashlib as _ref_hashlib
     import json as _ref_json
