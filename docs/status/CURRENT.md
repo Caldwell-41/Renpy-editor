@@ -3,22 +3,21 @@
 ## Story revamp comparison ready
 
 [Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82) owns Cue sheet,
-Shot reel and Stage tracks on local `codex/story-screen-prototypes`. Kris's two
-additional council rounds are complete: Round 3 on `223c16ec`, Round 4 on
-`98c9cc9f`. Each mock had its own independent read-only Opus 5.5/GPT-6.1 Sol xhigh
-pair. None reached 9.5 from both reviewers. Actual scores are reported to Kris;
-the final bounded fixes are verified but have no further council score.
+Shot reel and Stage tracks on local `codex/story-screen-prototypes`. The requested
+Rounds 3 and 4 and the later extra Round 5 are complete. Every mock had its own
+Opus 5.5/GPT-6.1 Sol xhigh council in each round. All eighteen terminal reviews
+are retained. None reached 9.5 from both reviewers. Actual scores are reported to
+Kris; the verified fixes after Round 5 have no new council score.
 
-The fixes cover stage ownership during manual preview, editing from enlargement,
-scrollable Choices, new-option focus, branch-ending placement/deletion, explicit
-replacement/route copy and compact branch controls. Current evidence is ignored
-`council-v3/final/`; its manifest records browser checks, captures, source hashes
-and diagnostic limits. All work remains a fictional browser prototype.
+Current evidence is ignored `council-v3/round-5-fixes/`. The final corrections
+cover creation from enlargement, Choice scroll/legibility, focus fallback, blank
+Else-if tests, command ranking, safe stage changes and control/keyboard clarity.
+The manifest owns checks, source fingerprints, screenshots and diagnostic limits.
 
-[Design notes](../design/story-revamp/README.md) own scope and evidence. All three
-mocks are ready for Kris to compare and choose the next iteration. No design is
-promoted, and production UI/future engine implementation remain outside scope.
-No PR or push. Earlier acceptance and protected recovery remain below.
+[Design notes](../design/story-revamp/README.md) own scope. The three mocks await
+Kris's choice. No design is promoted; production UI and future engine implementation
+remain outside scope. No PR, push or successor implementation is selected. Earlier
+acceptance and protected recovery remain below.
 
 ## Variable text, ordered actions and nested canvas accepted
 

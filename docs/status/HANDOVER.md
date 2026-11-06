@@ -2,40 +2,43 @@
 
 ## Story revamp comparison handoff
 
-Kris's two additional council rounds are complete. Round 3 reviewed `223c16ec`;
-Round 4 reviewed `98c9cc9f`. Each of Cue sheet, Shot reel and Stage tracks had its
-own independent Opus 5.5/GPT-6.1 Sol xhigh pair. All twelve terminal reports are
-retained under ignored `council-v3/<variant>/round-{3,4}-{opus,sol}.md`. None reached
-9.5 from both reviewers. Do not infer a new score for the final fixes.
+Kris's requested Rounds 3 and 4 and later extra Round 5 are complete. Each mock had
+its own Opus 5.5/GPT-6.1 Sol xhigh council in each round. All eighteen terminal
+reports are retained under ignored `council-v3/<variant>/round-{3,4,5}-{opus,sol}.md`.
+Round 3 scored `223c16ec`, Round 4 scored `98c9cc9f`, and Round 5 scored `e7e7f216`.
+None reached 9.5 from both reviewers. Do not infer a new grade for the final fixes.
 
 [Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82) owns the local
-`codex/story-screen-prototypes` branch. The parent applied the remaining bounded
-findings after Round 4 and verified them. These include manual-preview ownership,
-editing from enlarged stage, scrolling long Choices, new-option focus, safe branch
-endings with removal/Undo, picker wording, route/partial disclosure, drawer dismissal,
-blank new tests, and compact tracks. Parent insertions now sit in their labelled
-condition bands, avoiding both media and beat-number obstruction. No production,
-native, SDK, provider or future engine implementation changed.
+`codex/story-screen-prototypes` branch. The parent applied and verified bounded
+findings after Round 5. Current evidence is `council-v3/round-5-fixes/`; its manifest
+owns exact checks, source hashes, captures and corrected diagnostic limits. The
+reviewed baseline stays intact in `final/`, with its handoff in `round-5-input/`.
 
-Current evidence is `council-v3/final/`; its manifest owns exact checks, source
-fingerprints, main/focus and secondary/dialog captures. Earlier round folders retain
-original failures and scored candidates. The old brief overstated the selection
-check count as eleven; its actual report contains ten cases. Two archived Round 3
-Opus files were progress snapshots; their full terminal results were recovered,
-with the progress retained separately. Some Round 4 reviewers saw the earlier
-progress files. Their actual current-artifact findings and scores remain unchanged.
+Final corrections reveal editors after creation from enlargement, preserve and
+reveal the edited long-Choice option, keep choices above the say box, rank visible
+command names ahead of aliases, start Else-if tests blank and restore focus for
+beats without fields. Safe stage-object actions, preview-only labels, row-number
+descriptions, band keyboard access, tracks wheel scrolling and shorter branch
+controls improve clarity. No engine behavior, production or native code changed.
 
-The [design notes](../design/story-revamp/README.md) own scope and simulation limits.
-Approval pointers remain null. All three mocks await Kris's choice. No production
-promotion, PR, push or successor implementation is selected. Preserve unrelated
-browser maintenance, the Phase 1 audit and all older recovery below, including the
-existing size exception.
+The [design notes](../design/story-revamp/README.md) own scope and limits. All three
+mocks await Kris's choice. Approval pointers remain null. No production promotion,
+PR, push, successor implementation or further council round is selected. Preserve
+unrelated browser maintenance, the Phase 1 audit and all older recovery below,
+including the existing size exception.
 
-Keep Design Lab on port 5174 for review. Final screenshots, three self-contained
-HTMLs, a comparison page and the review ZIP remain in `.toolchains/story-revamp/`.
-The parent used scoped Chrome outside the macOS sandbox after managed snapshots
-timed out twice, and closed only check-owned browsers. No screen reader or native
-acceptance follows from this prototype evidence.
+Keep the user-requested Design Lab on port 5174. Final screenshots, self-contained
+mock HTMLs, score/comparison pages and the ZIP are under `.toolchains/story-revamp/`.
+Parent checks used scoped Chrome outside the macOS sandbox after managed snapshots
+timed out twice, and closed only check-owned browsers. No screen reader, native
+rendering, durable-save or recovery acceptance follows from these browser samples.
+
+Earlier evidence corrections remain recorded: the Round 3 brief said eleven
+selection cases, while its report contains ten. Two archived Opus files contained
+progress snapshots; full terminal reports were recovered. Some Round 4 reviewers
+saw those older progress files. Round 5 Shot Opus disclosed accidentally seeing one
+Else-if finding line from Sol and excluded it from its own findings. Preserve the
+actual reviews and their stated limits; do not call every pass fully blind.
 
 ## PR 81 integration and ticket closeout
 

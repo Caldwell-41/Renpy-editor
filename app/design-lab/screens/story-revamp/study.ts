@@ -139,7 +139,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     let before = snapshot(), recorded = false;
     control.onfocus = () => {
       const owner = control.closest<HTMLElement>('[data-editor-for],[data-beat]'); const id = owner?.dataset.editorFor ?? owner?.dataset.beat;
-      if (id) activateBeat(id);
+      if (id) activateBeat(id); revealGameOption(control);
       before = snapshot(); recorded = false;
     };
     control.addEventListener('keydown', eventValue => {
@@ -162,7 +162,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   function fit(area: HTMLTextAreaElement) { const row = area.closest<HTMLElement>('[data-beat]'); const active = !row || row.dataset.selected === 'true'; area.style.height = 'auto'; area.style.height = `${Math.max(active ? 52 : 24, area.scrollHeight)}px`; }
   function prose(b: Beat) {
     const text = el('textarea', 'sr-prose'); text.value = b.text; text.rows = 1;
-    text.placeholder = b.kind === 'dialogue' ? `Type ${b.speaker}'s line` : 'Type narration'; text.ariaLabel = `${label(b.kind)} text`; text.dataset.beatText = b.id;
+    text.placeholder = b.kind === 'dialogue' ? `Type ${b.speaker}'s line` : 'Type narration'; text.ariaLabel = `${label(b.kind)} text`; text.dataset.beatText = b.id; if (variant === 'cue-sheet') text.setAttribute('aria-describedby', `sr-number-${b.id}`);
     bind(text, value => b.text = value);
     text.addEventListener('keydown', event => {
       if (event.isComposing) return;
@@ -216,7 +216,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     nameForm(dialog, '', value => {
       if (!done) { sceneSelections.set(sceneId, selected); caller = undefined; }
       const next: Scene = { id: sample.newId(), name: value, chapter: chapter.value, beats: [sample.beat('narration'), sample.beat('return')] };
-      change(() => { scenes.push(next); treeOpen = false; if (done) done(next); else { sceneId = next.id; selected = next.beats[0]!.id; reelBranch = ''; manual = ''; } }, `Create scene ${value}`);
+      change(() => { stageExpanded = false; scenes.push(next); treeOpen = false; if (done) done(next); else { sceneId = next.id; selected = next.beats[0]!.id; reelBranch = ''; manual = ''; } }, `Create scene ${value}`);
       dialog.close(); focusText();
     }, done ? `Create scene and link option ${(choiceIndex ?? 0) + 1}` : 'Create and open scene', extra);
   }
@@ -231,7 +231,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     change(() => {
       if (replaceEmpty && body[before] === replaceEmpty && !replaceEmpty.text.trim()) body.splice(before, 1);
       if (oldEnding) body.splice(ending(body), 1, b); else body.splice(Math.min(before, defaultIndex(body)), 0, b);
-      selected = b.id; stageObject = ''; manual = '';
+      selected = b.id; stageObject = ''; manual = ''; stageExpanded = false;
       if (kind === 'condition') expanded.add(b.id);
     }, kind === 'background' ? `${where} · Characters shown earlier are cleared.` : where); focusText();
   }
@@ -247,7 +247,8 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       results.replaceChildren(); active = 0;
       const search = query.value.toLowerCase().trim();
       const aliases: Partial<Record<Kind, string>> = { condition: 'if else branch test', placement: 'placement move position', call: 'shared conversation returns', choice: 'menu options decision', setVariable: 'flag counter value', showScreen: 'panel', callScreen: 'dialog' };
-      const matched = kinds.filter(([kind, title, category]) => `${kind} ${title} ${category} ${aliases[kind] ?? ''}`.toLowerCase().includes(search));
+      const rank = (title: string) => { const name = title.toLowerCase(); return name === search ? 0 : name.startsWith(search) ? 1 : name.includes(search) ? 2 : 3; };
+      const matched = kinds.filter(([kind, title, category]) => `${kind} ${title} ${category} ${aliases[kind] ?? ''}`.toLowerCase().includes(search)).sort((a, b) => rank(a[1]) - rank(b[1]));
       for (const category of new Set(matched.map(k => k[2]))) {
         const section = el('section'); section.role = 'group'; section.ariaLabel = category === 'Flow' ? 'Choices and logic' : category; section.append(el('h3', '', section.ariaLabel));
         for (const [kind, title] of matched.filter(k => k[2] === category)) {
@@ -421,7 +422,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     if (!b || scene().beats.length === 1 && b.kind === 'return') { if (variant !== 'cue-sheet') panel.append(empty(scene().beats, [scene().name]));  return panel; }
     if (stageObject) {
       const state = previewState(); const owner = stageObject === 'background' ? state.background : state.characters.get(stageObject)?.from;
-      if (owner) { panel.append(el('h3', '', `${stageObject === 'background' ? 'Background' : stageObject} on stage · set by ${name(owner.id)}`), action(`Edit ${name(owner.id)}`, () => { stageObject = ''; selectBeat(owner.id, true); focusText(); }, false, 'edit-stage-owner'), action(`${stageObject === 'background' ? 'Change background' : `Change ${stageObject}'s appearance`} before ${number()}`, () => { stageInsert(stageObject === 'background' ? 'background' : 'changeAppearance', stageObject === 'background' ? undefined : stageObject); stageObject = ''; }, true, 'stage-change'), action(`Back to ${number()}`, () => { stageObject = ''; selectBeat(selected, true); }, false, 'close-stage-object')); return panel; }
+      if (owner) { const { route, index } = pathFor(); const before = illustrate(route, index - 1); const canChange = owner.id !== selected && (stageObject === 'background' ? !!before.background : before.characters.has(stageObject)); panel.append(el('h3', '', `${stageObject === 'background' ? 'Background' : stageObject} on stage · set by ${name(owner.id)}`), action(`Edit ${name(owner.id)}`, () => { stageObject = ''; selectBeat(owner.id, true); focusText(); }, !canChange, 'edit-stage-owner')); if (canChange) panel.append(action(`${stageObject === 'background' ? 'Change background' : `Change ${stageObject}'s appearance`} before ${number()}`, () => { stageInsert(stageObject === 'background' ? 'background' : 'changeAppearance', stageObject === 'background' ? undefined : stageObject); stageObject = ''; }, true, 'stage-change')); panel.append(action(`Back to ${number()}`, () => { stageObject = ''; selectBeat(selected, true); }, false, 'close-stage-object')); return panel; }
     }
     const heading = el('div', 'sr-inspector-heading'); const type = typeSelector(b); if (type instanceof HTMLSelectElement) heading.append(el('strong', '', `${number(b.id)} ·`)); heading.append(type);
     if (['dialogue', 'narration'].includes(b.kind) && variant !== 'cue-sheet') { const next = action(`+ Next ${nextSpeaker(b.id)} line`, () => { const t = locate(scene(), b.id)!; insert('dialogue', t.body, t.trail, t.index + 1, nextSpeaker(b.id)); }, true, 'next-dialogue'); next.title = `Add dialogue after ${name(b.id)} (Shift+${mod}+Enter)`; heading.append(next); }
@@ -473,28 +474,35 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       }
     }
     const add = el('div', 'sr-stage-actions'); add.append(action(`+ Background before ${number()}`, () => stageInsert('background'), false, 'add-background'), action(`+ Character before ${number()}`, () => stageInsert('showCharacter'), false, 'add-character'));
-    if (variant === 'shot-reel' && previewLine()) add.append(action(hideSaybox ? 'Show text box' : 'Hide text box', () => { hideSaybox = !hideSaybox; draw(); focusText(); }, false, 'hide-text-box'));
+    if (variant === 'shot-reel' && previewLine()) { const toggle = action(hideSaybox ? 'Show text box' : 'Hide text box', () => { hideSaybox = !hideSaybox; draw(); focusText(); status(`${hideSaybox ? 'Text box hidden' : 'Text box shown'} in preview only. Edit dialogue ${innerWidth < 900 ? 'below the game window' : hideSaybox ? 'in the side panel' : 'in the game text box'}.`); }, false, 'hide-text-box'); toggle.ariaPressed = String(hideSaybox); toggle.title = 'Preview only. Adds nothing to the script.'; add.append(toggle); }
     bottom.append(add); wrap.append(bottom); return wrap;
   }
+  function revealGameOption(control: HTMLElement | null) {
+    const row = control?.closest<HTMLElement>('[data-choice-index]'), owner = row?.closest<HTMLElement>('[data-editor-for]')?.dataset.editorFor; if (!row || !owner) return;
+    for (const menu of host.querySelectorAll<HTMLElement>(`.sr-game-choices[data-choice-owner="${owner}"]`)) { const button = menu.querySelector<HTMLElement>(`[data-stage-choice="${row.dataset.choiceIndex}"]`); if (!button) continue; const r = button.getBoundingClientRect(), bounds = menu.getBoundingClientRect(); if (r.top < bounds.top) menu.scrollTop -= bounds.top - r.top; if (r.bottom > bounds.bottom) menu.scrollTop += r.bottom - bounds.bottom; }
+  }
   function gameChoices(b: Beat) {
-    const choices = el('div', 'sr-game-choices'); b.options.forEach((option, i) => { const button = action(option.text || 'New choice', () => { stageExpanded = false; draw(); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${i + 1} text"]`); }, false, `stage-choice-${i}`); button.ariaLabel = `Edit option ${i + 1}: ${option.text || 'New choice'}`; button.dataset.stageChoice = String(i); choices.append(button); }); return choices;
+    const choices = el('div', 'sr-game-choices'); choices.dataset.choiceOwner = b.id; b.options.forEach((option, i) => { const button = action(option.text || 'New choice', () => { stageExpanded = false; draw(); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${i + 1} text"]`); }, false, `stage-choice-${i}`); button.ariaLabel = `Edit option ${i + 1}: ${option.text || 'New choice'}`; button.dataset.stageChoice = String(i); choices.append(button); }); return choices;
   }
   function refresh() {
     syncSelectionChrome();
     const state = previewState(); const line = previewLine();
     for (const stage of host.querySelectorAll<HTMLElement>('[data-stage]')) {
-      stage.querySelector('.sr-game-choices')?.remove(); if (current()?.kind === 'choice') stage.append(gameChoices(current()!));
+      const choices = stage.querySelector<HTMLElement>('.sr-game-choices'), b = current();
+      if (b?.kind !== 'choice') choices?.remove(); else if (!choices || choices.dataset.choiceOwner !== b.id || choices.children.length !== b.options.length) { const menu = gameChoices(b), scroll = choices?.scrollTop ?? 0; if (choices) choices.replaceWith(menu); else stage.append(menu); menu.scrollTop = scroll; }
       stage.classList.toggle('sr-dawn', state.background?.asset === 'Station at dawn'); stage.classList.toggle('sr-no-background', !state.background); stage.querySelector<HTMLElement>('.sr-stage-empty')!.hidden = !!state.background;
       stageCharacters(stage, state); const caption = stage.querySelector<HTMLElement>('.sr-saybox')!; caption.hidden = !line || hideSaybox;
       const paragraph = caption.querySelector('p'); if (paragraph) paragraph.textContent = line?.text ?? ''; const speaker = caption.querySelector('strong'); if (speaker) speaker.textContent = line?.kind === 'dialogue' ? line.speaker : '';
     }
     for (const item of host.querySelectorAll<HTMLElement>('[data-summary]')) { const b = flatten(scene().beats).find(b => b.id === item.dataset.summary); if (b) { item.textContent = brief(b); const control = item.closest<HTMLElement>('[data-reel-beat],.sr-cue'); if (control) control.ariaLabel = `${control.classList.contains('sr-cue') ? 'Select ' : ''}${contextName(b.id)}: ${brief(b)}`; } }
-    for (const item of host.querySelectorAll<HTMLElement>('[data-stage-choice]')) { const option = current()?.options[Number(item.dataset.stageChoice)]; if (option) item.textContent = option.text || 'New choice'; }
+    for (const item of host.querySelectorAll<HTMLElement>('[data-stage-choice]')) { const option = current()?.options[Number(item.dataset.stageChoice)]; if (option) { item.textContent = option.text || 'New choice'; item.ariaLabel = `Edit option ${Number((item as HTMLElement).dataset.stageChoice) + 1}: ${option.text || 'New choice'}`; } }
+    revealGameOption(document.activeElement instanceof HTMLElement ? document.activeElement : null);
+    const manualOwner = manual ? flatten(scene().beats).find(b => b.branches.some(branch => branch.id === manual)) : undefined, manualBranch = manualOwner?.branches.find(branch => branch.id === manual);
     const routes = state.unknown.filter(b => b.kind === 'condition').map(b => { const branch = b.branches.find(branch => branch.id === visibleBranches.get(b.id)); return branch ? `${number(b.id)} ${branch.name}` : ''; }).filter(Boolean).join(', ');
-    for (const note of host.querySelectorAll<HTMLElement>('.sr-stage-status')) { const title = manual ? `Manual selection · editing ${number()}` : `${number()} · ${state.unknown.length ? 'Partial illustration' : 'Sample illustration'}${routes ? ' · via ' + routes : ''}`; note.textContent = innerWidth < 900 && !manual ? `${number()}${state.unknown.length ? ' · Partial' : ''}` : title; note.title = title; note.ariaLabel = title; }
+    for (const note of host.querySelectorAll<HTMLElement>('.sr-stage-status')) { const title = manual ? `Previewing ${manualOwner ? number(manualOwner.id) : ''} ${manualBranch?.name ?? 'branch'} · editing ${number()}` : `${number()} · ${state.unknown.length ? 'Partial illustration' : 'Sample illustration'}${routes ? ' · via ' + routes : ''}`; note.textContent = innerWidth < 900 ? `${number()}${manual ? ' · Preview' : state.unknown.length ? ' · Partial' : ''}` : title; note.title = title; note.ariaLabel = title; }
     for (const effect of host.querySelectorAll('.sr-effects')) effect.replaceWith(effects());
     for (const owner of flatten(scene().beats)) for (const branch of owner.branches) {
-      for (const button of host.querySelectorAll<HTMLElement>(`[data-action="open-branch-${branch.id}"]`)) { const prefix = button.closest('.sr-branch-control') ? (variant === 'stage-tracks' ? 'Show in tracks: ' : 'Open branch: ') : button.closest('.sr-reel-target') ? 'Open ' : ''; nameControl(button, `${prefix}${branch.name} ${branch.condition}${button.closest('.sr-reel-target') ? ' · ' + count(branch.beats.length, 'beat') : ''}`.trim()); if (button.closest('.sr-track-band')) button.title = `Show ${branch.name} ${branch.condition} in tracks`.trim(); }
+      for (const button of host.querySelectorAll<HTMLElement>(`[data-action="open-branch-${branch.id}"]`)) { const prefix = button.closest('.sr-branch-control') ? (variant === 'stage-tracks' ? 'Show in tracks: ' : 'Open branch: ') : button.closest('.sr-reel-target') ? 'Open ' : ''; const fullName = `${prefix}${branch.name} ${branch.condition}${button.closest('.sr-reel-target') ? ' · ' + count(branch.beats.length, 'beat') : ''}`.trim(); if (button.closest('.sr-branch-control')) { button.textContent = variant === 'stage-tracks' ? 'Show in tracks' : 'Open branch'; button.ariaLabel = button.title = fullName; } else nameControl(button, fullName); if (button.closest('.sr-track-band')) button.title = `Show ${branch.name} ${branch.condition} in tracks`.trim(); }
       const option = host.querySelector<HTMLOptionElement>(`.sr-preview-route option[value="${branch.id}"]`); if (option) option.textContent = `${number(owner.id)} ${branch.name} ${branch.condition}`.trim();
     }
     const selectedBeat = current();
@@ -509,7 +517,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const dialog = modal(`Remove ${branch.name} ${branch.condition} from ${number(owner.id)} Condition?`, 'delete-branch', true); const cancel = action('Cancel', () => dialog.close()); dialog.append(el('p', '', `Removes this branch and its ${count(total, 'beat')}. Undo restores them.`)); actions(dialog, [cancel, danger(action(`Remove branch and ${count(total, 'beat')}`, () => { remove(); dialog.close(); focusSelected(); }))]); cancel.focus();
   }
   function addElseIf(owner: Beat) {
-    const branch: Branch = { id: sample.newId(), name: 'Else if', condition: 'trust is at least 5', beats: [] };
+    const branch: Branch = { id: sample.newId(), name: 'Else if', condition: '', beats: [] };
     change(() => { owner.branches.splice(Math.max(1, owner.branches.length - 1), 0, branch); expanded.add(owner.id); selected = owner.id; }, `Add Else if to ${name(owner.id)}`);
     focusField(`[data-branch="${branch.id}"] input`);
   }
@@ -521,7 +529,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   }
   function row(b: Beat, body: Beat[], trail: string[], index: number) {
     const result = el('article', `sr-row sr-${b.kind}`); result.dataset.beat = b.id; result.dataset.beatKind = b.kind; result.dataset.selected = String(b.id === selected);
-    const top = el('div', 'sr-row-line'); const selectNumber = action(number(b.id), () => selectBeat(b.id), false, 'select-beat'); selectNumber.className = 'sr-number'; selectNumber.tabIndex = -1; selectNumber.ariaLabel = `Select ${name(b.id)}`; top.append(selectNumber);
+    const top = el('div', 'sr-row-line'); const selectNumber = action(number(b.id), () => selectBeat(b.id), false, 'select-beat'); selectNumber.className = 'sr-number'; selectNumber.id = `sr-number-${b.id}`; selectNumber.tabIndex = -1; selectNumber.ariaLabel = `Select ${name(b.id)}`; top.append(selectNumber);
     if (['dialogue', 'narration'].includes(b.kind)) {
       const speaker = lineSpeaker(b, `Speaker for ${name(b.id)}`); speaker.classList.toggle('sr-narrator', b.kind === 'narration'); top.append(speaker);
       top.append(prose(b));
@@ -582,7 +590,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     else { const anchor = focused && variant === 'shot-reel' && panel && panel.getBoundingClientRect().height < work.clientHeight ? panel : control; anchor.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
   }
   function focusField(selector: string) { const request = ++focusRequest; requestAnimationFrame(() => { if (request === focusRequest) focusVisible(host.querySelector<HTMLElement>(selector)); }); }
-  function focusText() { const request = ++focusRequest; requestAnimationFrame(() => { if (request !== focusRequest) return; revealSelection(); const area = host.querySelector<HTMLTextAreaElement>(`textarea[data-beat-text="${selected}"]`); const fields = host.querySelector<HTMLElement>(`[data-editor-for="${selected}"]`); focusVisible(area ?? fields?.querySelector<HTMLElement>('input,select,button') ?? host.querySelector<HTMLElement>(`[data-beat="${selected}"] .sr-cue`)); }); }
+  function focusText() { const request = ++focusRequest; requestAnimationFrame(() => { if (request !== focusRequest) return; revealSelection(); const area = host.querySelector<HTMLTextAreaElement>(`textarea[data-beat-text="${selected}"]`); const fields = host.querySelector<HTMLElement>(`[data-editor-for="${selected}"]`); const control = area ?? fields?.querySelector<HTMLElement>('input,select,button') ?? host.querySelector<HTMLElement>(`[data-beat="${selected}"] .sr-cue`); if (control) focusVisible(control); else focusSelected(); }); }
   function revealSelection() {
     for (const [itemSelector, scrollSelector] of [[`[data-reel-beat="${selected}"]`, '.sr-reel-strip'], [`[data-track-beat="${selected}"]`, '.sr-tracks-scroll'], [`[data-beat="${selected}"]`, '.sr-sheet']]) {
       const item = host.querySelector<HTMLElement>(itemSelector!), area = host.querySelector<HTMLElement>(focused && scrollSelector === '.sr-reel-strip' ? '.sr-workarea' : scrollSelector!); if (!item || !area) continue;
@@ -609,9 +617,10 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
 
     body.forEach((b, i) => { strip.append(gap(body, trail, i)); const button = action('', () => editBeat(b.id), false, 'reel-beat'); button.className = 'sr-reel-beat'; button.dataset.reelBeat = b.id; button.dataset.beatKind = b.kind; button.dataset.selected = String(b.id === selected); button.ariaCurrent = b.id === selected ? 'true' : null; button.ariaLabel = `${contextName(b.id)}: ${brief(b)}`; button.tabIndex = b.id === selected || !body.some(b => b.id === selected) && i === 0 ? 0 : -1; button.append(el('span', '', `${number(b.id)} · ${label(b.kind)}`), el('p', '', brief(b))); button.querySelector('p')!.dataset.summary = b.id; button.onkeydown = e => navigateBeat(e, body, i); strip.append(button); });
     if (ending(body) < 0) strip.append(gap(body, trail, body.length));
-    strip.addEventListener('wheel', event => { if (!focused && Math.abs(event.deltaY) > Math.abs(event.deltaX) && strip.scrollWidth > strip.clientWidth) { const before = strip.scrollLeft; strip.scrollLeft += event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? strip.clientWidth : 1); if (strip.scrollLeft !== before) event.preventDefault(); } }, { passive: false });
+    horizontalWheel(strip);
     reel.append(strip); return reel;
   }
+  function horizontalWheel(scroller: HTMLElement) { scroller.addEventListener('wheel', event => { if (!focused && Math.abs(event.deltaY) > Math.abs(event.deltaX) && scroller.scrollWidth > scroller.clientWidth) { const before = scroller.scrollLeft; scroller.scrollLeft += event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? scroller.clientWidth : 1); if (scroller.scrollLeft !== before) event.preventDefault(); } }, { passive: false }); }
   function shotReel(parent: HTMLElement) { const layout = el('div', 'sr-reel-layout'); const top = el('div', 'sr-shot-workspace'); top.dataset.prose = String(['dialogue', 'narration'].includes(current()?.kind ?? '')); if (!focused) top.append(preview()); top.append(inspector(!focused && !hideSaybox && innerWidth >= 900)); layout.append(top, orderedReel()); parent.append(layout); }
   const wordsOnly = () => focused ? innerWidth <= 1200 : innerWidth < 900 && !allTracks;
   function trackText(b: Beat, track: number) {
@@ -638,8 +647,8 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       if (visibleBranches.has(b.id)) band.append(action(`Hide ${number(b.id)} branches`, () => { visibleBranches.delete(b.id); selected = b.id; reelBranch = ''; draw(); focusSelected(); }, false, `hide-branches-${b.id}`));
       const branch = b.branches.find(branch => branch.id === visibleBranches.get(b.id)); if (branch && !branch.beats.length) band.append(action(`+ Add beat to ${branch.name}`, () => picker(branch.beats, [...locate(scene(), b.id)!.trail, `${branch.name} ${branch.condition}`.trim()], 0))); bands.append(band);
     }
-    heading.append(bands, el('span', 'sr-track-legend', wordsOnly() ? 'Dashed: uncertain' : 'Fill: shown · Dashed: uncertain'), action(allTracks ? 'Show 2 tracks' : 'Show all tracks', () => { allTracks = !allTracks; draw(); }, false, 'all-tracks')); dock.append(heading);
-    const scroll = el('div', 'sr-tracks-scroll'); const grid = el('div', 'sr-track-grid'); grid.role = 'group'; grid.ariaLabel = 'Beats in story order'; grid.dataset.orientation = focused ? 'vertical' : 'horizontal';
+    heading.append(bands, el('span', 'sr-track-legend', wordsOnly() ? 'Dashed: uncertain' : 'Fill: shown · Dashed: uncertain'), action(allTracks ? 'Show beat list' : 'Show all tracks', () => { allTracks = !allTracks; draw(); }, false, 'all-tracks')); dock.append(heading);
+    const scroll = el('div', 'sr-tracks-scroll'); horizontalWheel(scroll); const grid = el('div', 'sr-track-grid'); grid.role = 'group'; grid.ariaLabel = 'Beats in story order'; grid.dataset.orientation = focused ? 'vertical' : 'horizontal';
     const labels = el('div', 'sr-track-labels'); labels.ariaHidden = 'true'; const titles = ['Beat', 'Background', 'Characters', wordsOnly() ? 'Beat content' : 'Words', 'Sound', 'Flow / state']; titles.forEach((title, i) => labels.append(el('span', `sr-track-label sr-track-${i}`, title))); grid.append(labels);
     const wrappers = new Map<string, HTMLElement>(), inserts: { owner: Beat; after: string; control: HTMLElement }[] = [];
     for (const [i, column] of route.entries()) {
@@ -649,7 +658,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       if (!['choice', 'jump', 'return'].includes(b.kind)) { const add = gap(body, trail, index + 1); add.classList.add('sr-track-insert'); add.ariaLabel = `Add after ${name(b.id)}${b.kind === 'condition' ? ' and its branches' : ''}`; add.title = add.ariaLabel; let last = i; if (b.kind === 'condition') while (route[last + 1] && route[last + 1]!.depth > column.depth) last++; inserts.push({ owner: b, after: route[last]!.beat.id, control: add }); }
       wrappers.set(b.id, wrapper); grid.append(wrapper);
     }
-    for (const { owner, after, control } of inserts) { if (owner.id !== after) { control.textContent = `+ After ${number(owner.id)}`; control.className = 'button sr-track-group-add'; bands.querySelector(`[data-condition-owner="${owner.id}"]`)!.append(control); } else wrappers.get(after)!.append(control); }
+    for (const { owner, after, control } of inserts) { if (owner.id !== after) { control.textContent = `+ After ${number(owner.id)}`; control.className = 'button sr-track-group-add'; control.tabIndex = 0; bands.querySelector(`[data-condition-owner="${owner.id}"]`)!.append(control); } else wrappers.get(after)!.append(control); }
     scroll.append(grid); dock.append(scroll); layout.append(dock); parent.append(layout);
   }
   function compareBar() {
@@ -661,7 +670,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     frame.shell.querySelector('.app-footer')!.prepend(frame.shell.querySelector('.sc-prototype-switcher')!); return cleanup;
   }
   function draw() {
-    const mark = bookmark(); const selectors = ['.sr-workarea', '.sr-sheet', '.sr-reel-strip', '.sr-tracks-scroll', '.sr-inspector']; const scrolls = selectors.map(selector => { const node = frame.content.querySelector<HTMLElement>(selector); return { selector, top: node?.scrollTop ?? 0, left: node?.scrollLeft ?? 0 }; });
+    const mark = bookmark(); const selectors = ['.sr-workarea', '.sr-sheet', '.sr-reel-strip', '.sr-tracks-scroll', '.sr-inspector', '.sr-game-choices']; const scrolls = selectors.map(selector => { const node = frame.content.querySelector<HTMLElement>(selector); return { selector, top: node?.scrollTop ?? 0, left: node?.scrollLeft ?? 0 }; });
     syncSelection(); const selectionChanged = renderedSelection !== selected, focusChanged = renderedFocused !== focused; frame.content.replaceChildren(); Object.assign(frame.content.dataset, { variant, focused: String(focused), treeOpen: String(treeOpen), stageExpanded: String(stageExpanded), allTracks: String(allTracks), edits: hasChanges() ? String(changes || 1) : '0', selected }); frame.shell.dataset.writingFocus = String(focused);
     const workspace = el('div', 'sr-workspace'); workspace.append(tree()); const main = el('main', 'sr-writing'); main.append(header()); const area = el('div', 'sr-workarea');
     if (variant === 'cue-sheet') cueSheet(area); else if (variant === 'shot-reel') shotReel(area); else stageTracks(area); main.append(area); workspace.append(main); frame.content.append(workspace);
@@ -680,7 +689,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     if (event.key === 'Escape' && !host.querySelector('dialog[open]')) { const open = host.querySelector<HTMLDetailsElement>('.sr-more[open],.sr-row-menu[open]'); if (open) { open.open = false; open.querySelector<HTMLElement>('summary')?.focus(); event.preventDefault(); } else if (treeOpen) { treeOpen = false; draw(); host.querySelector<HTMLElement>('[data-action="scenes"]')?.focus(); event.preventDefault(); } else if (stageObject) { const object = stageObject; stageObject = ''; draw(); host.querySelector<HTMLElement>(object === 'background' ? '.sr-backdrop-control' : `[data-stage-character="${object}"]`)?.focus(); } }
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z' && !(event.target as Element).closest('input,textarea,select,dialog')) { event.preventDefault(); history(event.shiftKey ? redo : undo, event.shiftKey ? undo : redo, event.shiftKey ? 'Redid' : 'Undid'); }
   };
-  const outside = (event: MouseEvent) => { for (const menu of host.querySelectorAll<HTMLDetailsElement>('.sr-more[open],.sr-row-menu[open]')) if (!menu.contains(event.target as Node)) menu.open = false; if (treeOpen && !(event.target as Element).closest('.sr-scenes,[data-action="scenes"]')) { treeOpen = false; frame.content.dataset.treeOpen = 'false'; host.querySelector('.sr-scenes')?.remove(); } };
+  const outside = (event: MouseEvent) => { for (const menu of host.querySelectorAll<HTMLDetailsElement>('.sr-more[open],.sr-row-menu[open]')) if (!menu.contains(event.target as Node)) menu.open = false; if (treeOpen && !(event.target as Element).closest('.sr-scenes,[data-action="scenes"]')) { treeOpen = false; frame.content.dataset.treeOpen = 'false'; host.querySelector<HTMLElement>('[data-action="scenes"]')!.ariaExpanded = 'false'; host.querySelector('.sr-scenes')?.remove(); } };
   let resizeFrame = 0; const resize = () => { cancelAnimationFrame(resizeFrame); resizeFrame = requestAnimationFrame(draw); };
   document.addEventListener('keydown', key); document.addEventListener('click', outside); window.addEventListener('resize', resize);
   if (compare) for (const button of frame.shell.querySelectorAll<HTMLButtonElement>('.lp-navigation .tree-item,.brand,.lp-studio-link,.lp-runtime-link')) button.onclick = () => status('Other workspaces are outside this Story mock.');

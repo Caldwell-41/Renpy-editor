@@ -9,12 +9,11 @@ layout with Stage tracks. Production Story is unchanged.
 Kris has since approved independent refinement of all three, with one Opus 5.5 lead
 at high per mock and each lead's own Opus/Sol council at xhigh. The current target
 is 9.5/10 from both reviewers for each implemented mock. Main, Writing focus,
-properties, dialogs and secondary states all count. Kris requested two further
-rounds, numbered 3 and 4. Both are complete, with a separate read-only Opus/Sol
-xhigh pair per mock. None reached 9.5 from both reviewers. The parent applied and
-verified the remaining bounded fixes after Round 4. Those final fixes have no new
-council score. The three mocks now await Kris's choice; none is approved for product
-implementation.
+properties, dialogs and secondary states all count. The requested Rounds 3 and 4
+and later extra Round 5 are complete, each with a separate Opus/Sol xhigh council
+per mock. None reached 9.5 from both reviewers. The parent applied and verified the
+remaining bounded fixes after Round 5; those fixes have no new council score. All
+three mocks await Kris's choice, and none is approved for product implementation.
 
 ## Current comparison
 
@@ -107,22 +106,25 @@ Its measured stages meet all three size requirements, with Stage tracks measurin
 `closure/` fixes remaining text-field clipping and keyboard new-line focus. Its
 tracked journey and active-writing checks pass for all variants at wide and compact
 sizes. Fresh main/focus screenshots accompany both passes.
-`round-2-fixes/` and `round-3-fixes/` retain their candidate-specific checks and
-captures. Round 3 reviewed `223c16ec`; Round 4 reviewed `98c9cc9f`. Each variant's
-folder has all four terminal reports for those rounds. Current final source adds
-bounded corrections and is separately verified under `final/`; it is not rescored.
-That manifest owns current checks, fingerprints and captures. Initial failures and
-corrected diagnostic limits remain preserved. The old selection-check brief said
-eleven but its report contains ten. Two Round 3 Opus progress snapshots were
-replaced by recovered terminal results; the original snapshots remain separate.
+Earlier evidence remains in its original folders. Round 3 reviewed `223c16ec`,
+Round 4 reviewed `98c9cc9f`, and Round 5 reviewed `e7e7f216`. Each variant has six
+terminal reports for these rounds. The reviewed Round 5 source and evidence remain
+in `final/`; current post-review corrections are separately verified under
+`round-5-fixes/`. Its manifest owns checks, fingerprints, captures and diagnostic
+limits. Do not assign those changes a hypothetical council score.
 
-Final changes resolve stage ownership under manual preview and reveal fields when
-editing from enlargement. Long Choices scroll within the stage, and Add option
-focuses the new text. Branch endings go last and can be deleted within branches;
-scene endings keep their lock. Picker targets disclose replacements. Route and
-partial labels, scene drawer dismissal, blank new tests, media headings and compact
-branch bands are clearer. Parent-group insertion actions sit beside their own
-condition controls so they cannot cover track content or beat numbers.
+The last fixes reveal newly created editors from enlargement, preserve long-Choice
+scrolling and keep menus above dialogue, focus beats without fields, rank visible
+commands before aliases and start Else-if tests blank. Stage-object changes are
+offered only when valid before the insertion point; otherwise Edit is primary.
+Preview controls, compact routes, row-number descriptions, tracks keyboard/wheel
+access and branch-field width are clearer. No future engine features were added.
+
+The earlier selection-check brief said eleven cases, but its report has ten. Two
+Round 3 Opus progress snapshots were replaced by recovered terminal results; some
+Round 4 reviewers saw the progress files. Round 5 Shot Opus disclosed seeing one
+Else-if finding line from Sol and excluded it from its own findings. Original
+reports and limits remain retained.
 
 ### Historical baseline
 
