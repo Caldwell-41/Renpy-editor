@@ -40,7 +40,8 @@ The result retains actual starts, failures, process cleanup and source identitie
 independent literal image-button references. It copies only the admitted images
 into a fresh reference project, without loading accepted game scripts or the
 product canvas renderer. Whole-frame captures record backend, physical dimensions
-and drawing scale. A fitted window refuses admission; do not normalize its pixels.
+and drawing scale. These must match the helper's actual capture conditions;
+do not normalize pixels or assume that virtual dimensions establish physical size.
 
 `validate-helper` requires that reference directory and its retained result SHA256.
 It compares every RGBA byte in each 160x80 control crop, including alpha, at both

@@ -6,6 +6,7 @@ import importlib.util
 import hashlib
 import argparse
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -588,14 +589,17 @@ def validate_reference(accepted, output, manifest_sha, result_sha):
     for row in records:
         key = row['width'], row['height'], row['state']
         require(key in wanted and key not in references
-                and row['physical'] == list(key[:2]) and row['drawPerVirtual'] == 1
+                and isinstance(row.get('physical'), list) and len(row['physical']) == 2
+                and all(type(n) is int and n > 0 for n in row['physical'])
+                and type(row.get('drawPerVirtual')) in (int, float)
+                and math.isfinite(row['drawPerVirtual']) and row['drawPerVirtual'] > 0
                 and row['renderer'] == ('angle2' if sys.platform == 'win32' else 'gl2'),
                 'wrong reference identity or capture conditions')
         path = portable_file(output, row['filename'])
         require(digest(path) == row['sha256'], 'changed native reference image')
         with Image.open(path) as image:
             require(image.size == key[:2], 'wrong reference frame size')
-        references[key] = path
+        references[key] = dict(path=path, physical=row['physical'], drawPerVirtual=row['drawPerVirtual'])
     return references
 
 
@@ -716,13 +720,15 @@ def validate_helper(accepted, output, expected_candidate, manifest_sha, referenc
             controls[kind] = matches[0]
         image_path = portable_file(output, record['filename'])
         require(digest(image_path) == record['sha256'], 'changed helper image')
-        require(frame.get('diagnostics', {}).get('physical') == list(key[:2])
-                and frame['diagnostics'].get('drawPerVirtual') == 1, 'wrong helper capture conditions')
+        native = references[key]
+        require(frame.get('diagnostics', {}).get('physical') == native['physical']
+                and frame['diagnostics'].get('drawPerVirtual') == native['drawPerVirtual'],
+                'wrong helper capture conditions')
         rect = controls['imagebutton']
         require(all(type(rect[name]) in (int, float) and float(rect[name]).is_integer()
                     for name in ('x', 'y', 'width', 'height')), 'non-integral fixture control bounds')
         x, y = int(rect['x']), int(rect['y'])
-        with Image.open(image_path) as rendered, Image.open(references[key]) as original:
+        with Image.open(image_path) as rendered, Image.open(native['path']) as original:
             require(rendered.size == key[:2] and 0 <= x <= rendered.width-160 and 0 <= y <= rendered.height-80,
                     'helper image dimensions or crop bounds differ')
             crop = rendered.convert('RGBA').crop((x, y, x+160, y+80)).tobytes()
