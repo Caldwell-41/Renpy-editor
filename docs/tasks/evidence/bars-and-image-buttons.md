@@ -1271,3 +1271,133 @@ both aspects; all24 actual/reference pairs match, without physical/scale metadat
 One signed package and one subsequent native launch are reserved there at exact3b;
 terminal results will resolve actual counts. No new Mac thread, production writer,
 review panel, SDK/helper reservation or publication is selected at this checkpoint.
+
+## Combined coordinator review and criterion reconciliation, 2026-11-06
+
+The coordinator reviewed the integrated control contracts, source parser/patcher,
+composition and history owner, reference/effect dependencies, canvas data and asset
+copying, production draft lifecycle, picker/aspect behavior and packaged probe.
+No additional production defect was found. The review found the helper admission
+assumption described above; its correction is local at `2064460a`, with engine
+qualification still pending. Original frontend findings remain Standards3/Spec3,
+corrected and self-verified. The earlier Terra footer finding retains parent-only
+clearance. No panel, recheck, rescore or independent clearance was added.
+
+| Original criterion | Evidence and result |
+| --- | --- |
+| #51 typed integer, bounds and appearance/layout fields; missing/type-changed refusal | Public-core `control_tests.rs` covers canonical exact bounds, typed lookup, colors, stale authoring/source and missing/type-changed references without writes. Actual UI/core journey at db85ded8 covers fields, retained invalid input and combined layout. Both packaged journeys pass at 3b. |
+| #51 actual limits/binding and inert marked samples | Windows observer7d199aa9/source fe78025f and Mac5190 each pass normal/fixture preview at both aspects: initial0, minimum-5, maximum15, keyboard14, final7. Source/default invariance and inert samples pass. These are engine and editor samples, not physical input or naturally selected conditions. |
+| #51 Apply/Cancel, conflicts, history/reopen; unsupported values remain Source-only | Actual UI/core journey and five review modes cover one accepted transaction, no-op history, invalid/Cancel, refused/stale draft retention, keyboard, Undo/Redo and reopen. Core custom-value inspection and refusal preserve opaque regions. Packaged Windows/Mac journeys pass at 3b. |
+| #51 conservative binding/effect revisions | Core effect tests prove possible assigned variable plus variable, authoring and binding source dependencies. Custom/unresolved value expressions report unknown effects. Component extraction refuses contextual bar bindings. |
+| #52 all six typed appearances, shared dimensions/aspect, retained missing assets | Core reference/combined-size tests and actual UI/core journey cover six explicit states, one dimension owner, missing assets and acknowledged replacements. The replacement review verifies the chosen image's reviewed dimensions govern subsequent aspect edits. |
+| #52 deliberate appearances/actions and inert marked samples | Both-host runtime matrices compare six full native appearance/reference RGBA pairs per case, observe one SetVariable/Hide/Return chain and continuation, and preserve defaults/source. Packaged probes verify inert editor samples. Full helper comparison remains pending on matched references. |
+| #52 opaque neighbors and conservative state/action/reference effects | Public-core patch tests preserve inline comments/custom neighbors and no-op expression bytes. Reference/effect tests retain asset, authoring, action target and source dependencies; custom actions remain Source-only. Actual UI/core and both packaged probes preserve an opaque Source neighbor. |
+| #52 numeric/keyboard, focus, Cancel, conflicts, history/reopen | Actual production controller/core journey, field/picker/addition/replacement review modes and both packaged 3b journeys pass. Shared-component dimension review lists affected screens before writing. Stale raw drafts keep their captured revision and source. |
+
+These are bounded criterion findings, not ticket closure. Required helper proof
+still prevents final acceptance. Wider #54/Phase3B, native editor Test-in-Ren'Py
+routing, physical input and subjective human acceptance remain separate.
+
+Visual finding: the integrated inspector retains A2 `inspector-v2` source37d29ca1's
+continuous layout, section navigation, six appearance rows and fixed Apply/Cancel
+footer. Parent proof at2fd43b31 verifies the corrected desktop footer with27/27 hit
+samples. The coordinator inspected its retained button capture against the pinned
+approved capture. The public-core fixture uses different image art and an offline
+blank canvas; toolbar wrapping and real workspace spacing differ. This establishes
+the inspector structure and footer proof, not whole-screen pixel fidelity or a new
+design approval. Earlier compact coverage remains scoped to its recorded states.
+
+Functional finding: mapped editing operations pass the retained real UI/core and
+new both-target packaged journeys. The source/runtime/helper distinctions above
+remain explicit. The full current repository validator still fails only the two
+pre-existing untracked recovery receipts with missing final newlines. The same
+validator on all1762 tracked files passes; `git diff --check` passes. No broad
+frontend/core suite was repeated for this qualification-only correction.
+
+### Both-target package/native receipts
+
+The Mac thread's terminal 3b receipt confirms package PID70224 and native PID73460
+exited0. Strict signature, approved certificate, designated requirement and DMG
+contents pass. All six control stages, source/disk equality, desktop assertion
+release, fixture/process cleanup and installer detachment pass. No signing,
+Keychain, trust or naming policy changed. Actual starts are one package and one
+native editor; an earlier redirection refusal started neither operation.
+
+| Mac artifact at 3b663002 | SHA256 |
+| --- | --- |
+| Compiled helper test, not executed by this receipt | 8dfdec427f6a72de24d27b4fd06220e52c8113c01af0765865ad356c1465bd43 |
+| App executable | 187f430bee05c75138c7f22e6a495a1cb65d154c390d345c5214688ec4592242 |
+| App content inventory | 4f5121999d57defd471adda9e64df50c1389241cc039494af42b05ff472f5d1b |
+| Signed Loomlight.dmg | 2b68b6abc181105fc371ab19d249639def602be2b38e3551d7716e1a3c8a2362 |
+
+The remote ignored receipt is `.toolchains/qualification-3b663002/result.json` in
+the existing isolated worktree. The coordinator read its terminal report from the
+thread recorded in HANDOVER. SDK proof remains on exact5190; no cross-candidate
+runtime pass is inferred from the package.
+
+The selected A2 approval report is retained locally at
+`app/target/controls-51-52/approval-focused-3d8d2411/report.json`, SHA256
+`9ea01df8db8d0c4a197574187279a146ed492a6f3d4bdb1ed376c5c5a7b76612`.
+It matches the temporary report byte-for-byte. No new review-state capture was
+requested; the thirteen approved captures and earlier failures remain preserved.
+
+### Matched reference entry correction and Windows preflight
+
+The first Mac reference process at2064460a fails before frames with
+`LabelNotFound: could not find label 'start'`. PID76290 exits1 after3.716s; process,
+scratch and desktop assertion cleanup pass. No helper or retry ran under that
+reservation. The remote receipt `.toolchains/qualification-2064460a/result.json`
+has SHA256 `69664e27c8f43807fb998d80df742d3f03c4068f67f16046ea9cd218f6f308b1`.
+This is a qualification-fixture defect and consumes one Mac SDK start, reaching8.
+
+Correction `ed44c624643aa67bbf75f58ecb5664c8a2f3069a` adds the missing standalone
+start label only. The 753-byte private delta, SHA256
+`f56e2bdf2d8dcf9a7779e5ec4ec17fed3ed3c889019b632e8af0d8202fb34395`, verifies and
+fast-forwards cleanly on Mac. Five passive helper checks pass. #51 replaces the
+released four-start helper reservation with five SDK starts and one helper for
+one corrected reference attempt followed by the unchanged helper proof if it
+passes. No additional retry is selected. This remains within Mac's original limit.
+
+The ignored Windows launcher `.toolchains/51-52/reference-windows-resume.ps1`
+passes its read-only preflight without an SDK start. It verifies unchanged product
+files against3b, the selected3d lab-script-only package manifest, accepted source
+manifest04ee4aeb, retained frame receiptfecd7fe8 and test binary14226f38. It refuses
+an existing destination. Its execution path is one reference SDK process, then
+passive validation of the original twelve frames. No package build or helper
+restart is needed. The Windows SDK16 ceiling remains binding; execution still
+requires Kris's explicit ceiling increase and a #51 reservation.
+
+### Mac matched helper qualification and remaining Windows decision
+
+The Mac terminal audit PASSES at clean ed44c624 on the existing candidate branch.
+Reference PID77722 exits0 in4.416s. Retained3b test PID77909 exits0 in74.561s
+without recompilation. All twelve160x80 crops compare exactly, 614400 RGBA bytes
+with zero residual and no normalization. Physical dimensions match at both aspects;
+drawPerVirtual is2.0 and backend gl2. Source/default metadata remain unchanged.
+The helper records three SDK validations, one helper start/return, cooperative
+exit0 and complete cleanup. No owned processes or scratch remain; desktop
+assertions are released. The original branch, failed first reference,5190 runtime,
+3b signed package/native evidence and approved A2 source/captures are preserved.
+
+| Mac receipt | SHA256 |
+| --- | --- |
+| Terminal `.toolchains/qualification-ed44c624/result.json` | e47d39537fb1071f7756f998c868067b0bb4487f8fe5d28588e57acbbf7479b1 |
+| Corrected literal reference result | 52f36258aaec41aaa3e5c597efac431260bb279dd10743ed3b58efe64979ae64 |
+| Helper result, retained3b producer/binary | 7f938974ab04fde1bda869b69d5f3231a8a3a3d3531be03bc17862023938e996 |
+| Prior3b native result | 22f2c320875894de058dcef057612c0affe1b2d68467c600a41e459fb73e372c |
+| Prior3b package identity | c1c00379db4159a2a6750aaf0b3ccd463e70eb561e1038188c31c3d1e25a907e |
+
+#51 owns final cumulative actuals: Windows SDK16/16, helper1/4, package2/2,
+native2/3; Mac SDK13/16, helper1/4, package1/2, native1/3. Zero uncertain starts
+and zero reservations remain. The corrected Mac reservation consumed five SDK
+starts and one helper. The earlier failed reference remains charged separately.
+No Windows SDK/package start occurred in this continuation.
+
+The remaining required proof is one Windows reference-only SDK process followed
+by passive replay of the twelve original helper frames. Its prepared launcher
+passes read-only admission. The coordinator must obtain explicit approval to raise
+the exhausted Windows SDK ceiling from16 to17, then reserve that one start in#51
+before execution. No package build, new helper session, broad runtime matrix or
+review panel is needed for this step. Both tickets remain open. Broader native
+preview routing, physical input, #54/Phase3B and human acceptance remain separate.
+All code and detailed evidence are local-only; no push, PR or merge occurred.

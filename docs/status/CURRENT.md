@@ -1,29 +1,28 @@
 # Current status
 
-## Integer bars and image buttons paused for handoff
+## Integer bars and image buttons in final verification
 
-Kris requested a safe stop and continuation by a new agent. Both implementations
-are integrated locally on `codex/51-52-integration`; the implementation checkpoint
-is `3b66300218955e9f7337a29a0a407e8ce689bc1d`. All owned Windows/Mac checks and apps
-are stopped, and reservations are released. No push, PR, merge or ticket closure is
-selected. #51/#52 remain incomplete.
+Kris selected continuation on `codex/51-52-integration`. Both implementations are
+integrated locally at `3b663002`; qualification correction `ed44c624` adds matched
+native references without changing production code. No code publication, PR, merge
+or ticket closure is selected. #51/#52 remain incomplete.
 
 | Capability | Completed evidence | Remaining acceptance |
 | --- | --- | --- |
-| Controls and approved design | Core/frontend integrated; original review findings corrected and self-verified. Parent actual UI/core journey, five regressions and 378 frontend tests pass on recorded candidates. Desktop footer proof passes; A2 source 37d29ca1 stays pinned. | Final combined review and original-criterion reconciliation. |
-| Runtime | Windows four cases pass at observer7d199aa9/producerfe78025f. Mac seven starts/four cases pass at exact5190d29c, with 48 captures and cleanup. | Mac helper/package/native proof; broader native claims remain separate. |
-| Windows native/package | Both packages pass. First native launch failed after accepted bar creation. Corrected3b package has not launched natively. | Corrected native attempt; the attempted launcher failed before executable start. |
-| Control helper | Twelve frames rendered in one session; source and variable metadata unchanged; cooperative cleanup. | Full-RGBA state admission FAILED. Cause is unestablished; retained frames permit passive diagnosis. |
-| Design Lab | Historical catalog 25/12 validates; focused gutter and corrected font checks pass. | The full5190 failure and cancelled3b run remain historical results. The full-gallery gate is retired; select checks under [focused verification](../../app/design-lab/README.md#focused-verification). |
+| Controls and approved design | Actual UI/core journey, five review regressions and 378 frontend tests pass on recorded candidates. Both packaged control journeys pass at 3b. Final coordinator product review and original-criterion reconciliation are recorded. | Required helper qualification; broader native/human gates stay separate. |
+| Runtime | Windows four cases pass at observer7d199aa9/source fe78025f. Mac seven starts/four cases pass at exact5190, with 48 captures and cleanup. | No broad rerun selected. |
+| Packages and native app | Windows corrected native attempt2 passes. Mac signed package1 and native attempt1 pass strict identity, all six control stages and cleanup. | Physical input and native editor preview routing are separate claims. |
+| Control helper | Mac's twelve frames pass exact native-reference RGBA, physical-size/scale, source invariance and cooperative shutdown checks. Twelve Windows frames and lifecycle evidence remain retained. | Windows needs one reference-only SDK process and passive replay. Its exhausted SDK ceiling requires Kris's approval; no package/helper restart is needed. |
+| Design Lab | Selected A2 approval/source/capture and changed-source-refusal check passes. Source37d29ca1 and thirteen captures stay pinned. | Historical failed/cancelled full runs remain evidence. The full-gallery gate is retired. |
 
-Three Windows symlink checks remain failed/unqualified with OS1314. No security
-settings changed. The clean Mac checkout remains at 5190; its 3b delta verifies but is
-not imported. #51 owns final cumulative accounting: Windows SDK 16/16, helper 1/4,
-package 2/2, native 1/3; Mac SDK 7/16 and other counts zero. No reservations remain.
-Windows SDK/package ceilings require explicit permission before any further start.
-[Handover](HANDOVER.md#integer-bars-and-image-buttons-paused-for-handoff) owns the
-resume route; [evidence](../tasks/evidence/bars-and-image-buttons.md#safe-stop-and-continuation-checkpoint-2026-11-06)
-retains exact artifacts, failures and cleanup. Broader #54/Phase 3B acceptance remains separate.
+The corrected reference is qualified on Mac at ed44c624; the first missing-entry
+fixture failure remains recorded. All owned checks/apps are stopped; no reservation
+remains. Three Windows symlink checks remain failed/unqualified with OS1314. Original
+Standards3/Spec3 corrections and the parent-only footer finding keep their actual
+review scope; no panels restarted. #51 owns cumulative counts and reservations.
+[Handover](HANDOVER.md#integer-bars-and-image-buttons-in-final-verification) owns
+continuation; [the combined review](../tasks/evidence/bars-and-image-buttons.md#combined-coordinator-review-and-criterion-reconciliation-2026-11-06)
+maps each original criterion. Wider #54/Phase3B acceptance remains separate.
 
 ## Variable text, ordered actions and nested canvas accepted
 
