@@ -1,38 +1,58 @@
 # Current outcome handover
 
-## Story revamp prototype selection
+## Story revamp council refinement
 
-Kris selected [issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82) and
-then requested larger WYSIWYG game windows, refinement of Cue sheet and Shot reel,
-and a replacement third mock from Opus 5.5 at high. The current set is Cue sheet,
-Shot reel and Stage tracks. All remain unapproved, on `codex/story-screen-prototypes`.
-The [design notes](../design/story-revamp/README.md) own the current layouts, scope,
-limits, review and measured dimensions.
+Kris approved refinement of all three mocks under
+[issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82), raising the target
+to 9.5/10 from both council members for each implemented design. Each mock has a
+new Opus 5.5 lead at high; each lead must call its own read-only Opus 5.5 and
+GPT-6.1 Sol council at xhigh. Preserve Cue sheet, Shot reel and Stage tracks as
+separate concepts, with a large WYSIWYG stage and full Writing focus parity.
+Review all Story-owned dialogs and secondary surfaces, not just the main screen.
 
-Source is under `app/design-lab/screens/story-revamp/`, registered as `story-revamp`.
-The variants are `cue-sheet`, `shot-reel` and `stage-tracks`. The local Design Lab
-is served on port 5174. Stage selection names the contributing beat or an explicit
-new change. Writing focus retains structured editing. No production component,
-backend, source service, future dragging/animation/Timeline/state/run feature or
-native game behavior changed. Edits stay in browser memory.
+Work remains on `codex/story-screen-prototypes`, baseline `9f33c4d3`. Source is under
+`app/design-lab/screens/story-revamp/`, with the same three variant IDs. The parent
+owns all tracked code, shared presentation, tests, docs/issue and integration.
+Leads own only ignored reports under `.toolchains/story-revamp/council-v3/<variant>/`;
+reviewers are read-only. All initial lead councils completed; reports are in each
+variant's `round-1.md`. The parent implemented one coherent revision. Terra captured
+52 baseline and 92 revised images under `council-v3/baseline/` and `revised/`.
+The criteria are in `council-v3/criteria.md`; manifests record capture limits.
 
-The 72-case matrix/core journey and 15 final focused cases pass. Terra measured
-all stages and inspected visual/focused captures. The parent fixed compact Next
-dialogue and empty-state visibility/duplication findings, preserving original
-failures. Type/approval/repository/build-exclusion checks pass. Browser checks ran
-outside the macOS sandbox using scoped permission and only check-owned browsers.
-No native host or SDK qualification is needed for these fictional mocks.
+The fresh Terra pass under `council-v3/candidate/` passes the 72-render matrix and
+full tracked interaction journey. Parent closure under `council-v3/closure/` fixes
+the remaining text-field clipping and a keyboard Next dialogue focus regression.
+It passes the tracked journey and active-writing checks for all three variants at
+wide and compact sizes. Original failures remain preserved. Fresh actual-artifact
+council scores are next; do not claim 9.5 from the initial planning reviews.
 
-The export command in the notes regenerates standalone HTML files. Ignored
-`.toolchains/story-revamp/` retains current captures/reports/review files, while
-`revision-1/` and local commit `1c6ed025` preserve the earlier comparison. The earlier
-council scores apply only to that original revision. Source is local only; no PR or
-push is selected. Preserve unrelated browser-maintenance edits, the Phase 1 audit
-and all older recovery below. Their existing size exception remains in force.
+Implemented changes include inline Cue sheet logic editors, explicit insertion
+and replacement targets, labelled/removable choices, scene Back navigation,
+meaningful history messages, persistent dialog actions and focus restoration.
+Shot reel has keyboard navigation and one compact/focused scroller. Stage tracks
+shows all six rows, uses source outline numbers and shares one illustrative cue
+calculation with the stage. Original sample character variants make appearance
+and actor controls visible. No runtime state evaluation or future tools were added.
 
-Next, wait for Kris's choice and requested iteration. Do not promote a design or
-implement future engine capabilities without that selection. No delegated work or
-browser check remains pending; the review server intentionally remains available.
+The accepted rubric is stage/design 25%, authoring ease 25%, text/control clarity
+20%, complete Story experience 15%, feedback/accessibility 15%. Scores must apply
+to actual artifacts, not hypothetical fixes. The parent will implement agreed
+bounded changes, then verify and request fresh council review. A broken core
+journey, hidden stage, lost draft or destructive ambiguity blocks readiness.
+
+The local Design Lab is intentionally running on port 5174. Baseline checks and
+geometry are in the [design notes](../design/story-revamp/README.md). Preserve earlier
+reports/failures and the `revision-1/` and `revision-2/` review archives. All design
+approval pointers remain null. No production, native, SDK, provider or future
+engine implementation is selected; edits stay in browser memory. No PR or push
+is selected. Preserve unrelated browser maintenance, the Phase 1 audit and all
+older recovery below, including their existing size exception.
+
+Continue the active refinement in this thread. Use the returned lead reports to
+make one coherent prototype revision, qualify main/focus/dialog behavior, obtain
+fresh scores and present all three to Kris. Do not stop at a design plan or claim
+the 9.5 target before both reviewers score each implemented mock. Browser work
+belongs to Terra at max; launches require scoped permission outside the Mac sandbox.
 
 ## PR 81 integration and ticket closeout
 

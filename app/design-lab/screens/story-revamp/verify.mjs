@@ -25,14 +25,14 @@ try {
     await open({ variant, state, theme, viewport });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${variant}/${state}/${theme}/${viewport}: horizontal overflow`);
     if (state === 'populated') {
-      if (variant !== 'cue-sheet') assert(await page.getByRole('button', { name: 'Next dialogue', exact: true }).evaluate(button => {
+      if (variant !== 'cue-sheet') assert(await page.locator('[data-action="next-dialogue"]').evaluate(button => {
         const r = button.getBoundingClientRect(), area = button.closest('.sr-workarea').getBoundingClientRect();
         return r.top >= area.top && r.bottom <= area.bottom && document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)?.closest('button') === button;
       }), `Next dialogue must be visible and unobscured at ${viewport}`);
 
       await page.screenshot({ path: fileURLToPath(new URL(`captures/${variant}-${theme}-${viewport}.png`, output)), fullPage: true });
       if (theme === 'dark' && viewport === 'wide') {
-        await page.getByRole('button', { name: 'Writing focus', exact: true }).click();
+        await page.locator('[data-action="toggle-focus"]').click();
         await page.screenshot({ path: fileURLToPath(new URL(`captures/${variant}-focused.png`, output)), fullPage: true });
       }
     }

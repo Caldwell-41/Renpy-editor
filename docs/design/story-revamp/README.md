@@ -6,6 +6,13 @@ for future character dragging, alongside low-friction writing and beat creation.
 The current set refines Cue sheet and Shot reel and replaces the rejected third
 layout with Stage tracks. Production Story is unchanged.
 
+Kris has since approved independent refinement of all three, with one Opus 5.5 lead
+at high per mock and each lead's own Opus/Sol council at xhigh. The current target
+is 9.5/10 from both reviewers for each implemented mock. Main, Writing focus,
+properties, dialogs and secondary states all count. All initial councils finished;
+their bounded changes are implemented. Browser verification and fresh scoring are
+in progress. The historical evidence below does not qualify the current changes.
+
 ## Current comparison
 
 Claude Opus 5.5 at high reasoning designed this revision after inspecting the
@@ -14,9 +21,10 @@ Nongine's script beside a game window and Visual Novel Maker's stage/script
 relationship informed the layouts. The parent implemented the designs in the lab.
 
 - **Cue sheet** puts a large stage on the left and a complete editable script on
-  the right. Dialogue has a speaker above its text. Media cues stay compact;
-  their fields open below the stage. Compact windows and Writing focus place those
-  fields inline. This favors reading and revising surrounding lines.
+  the right. Speakers align with their lines. Choices, conditions, state and flow
+  edit directly in their script rows. Media fields open below the stage; compact
+  windows and Writing focus put those fields inline. This favors reading and
+  revising surrounding lines.
 - **Shot reel** uses the largest stage, a slim property dock and a short ordered
   beat reel. On desktop, dialogue is edited in the game's proportioned say box.
   Hide text box clears the composition and moves writing to the dock. Compact
@@ -56,11 +64,14 @@ Create or rename a scene, write dialogue/narration, search for and insert beats,
 edit media and screen statements, create guarded choices and destination scenes,
 write in nested bodies, move or delete eligible beats, and undo/redo. Every insert
 names its source body and position. Choice/Jump/Return replace that body's ending.
-Shift+Cmd/Ctrl+Enter adds dialogue with the current speaker. Cmd/Ctrl+Enter closes
+Shift+Cmd/Ctrl+Enter adds dialogue with the last dialogue speaker on the selected
+source path. Cmd/Ctrl+Enter closes
 the typing burst. Slash in an empty line replaces that line through the picker.
 
 Selecting a visible character or the background identifies its contributing beat.
 Edit that beat or explicitly add a change before the current beat in the same body.
+An "In effect" list links media to the beats that set it. Actor and appearance
+changes use distinct fictional vector samples. A new Background clears characters.
 A gesture does not silently rewrite an earlier beat. Free dragging and resizing
 are not implemented. Protected source stays read-only. The sample Assist flow
 prepares, reviews and accepts a fictional proposal and sends no model request.
@@ -83,6 +94,20 @@ provenance and supported Run From Here need deliberate inspection and launch flo
 These connections are notes, not working-looking future controls.
 
 ## Evidence and selection
+
+Current refinement evidence lives under ignored
+`.toolchains/story-revamp/council-v3/`. Each variant has an initial council report.
+`revised/MANIFEST.md` records 92 browser screenshots and the original failures.
+`candidate/` passes the 72-render matrix and full tracked interaction journey.
+Its measured stages meet all three size requirements, with Stage tracks measuring
+622 × 350 on laptop after expanding its dock to keep every track row visible.
+`closure/` fixes remaining text-field clipping and keyboard new-line focus. Its
+tracked journey and active-writing checks pass for all variants at wide and compact
+sizes. Fresh main/focus screenshots accompany both passes.
+Do not treat diagnostic copies with altered assertions as passing the original
+journey. Fresh council scores and final selection remain pending.
+
+### Historical baseline
 
 The original set at local commit `1c6ed025` received two council review rounds.
 Those scores and checks apply to that original set. Its review files and captures

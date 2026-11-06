@@ -1,19 +1,23 @@
 # Current status
 
-## Story revamp prototypes awaiting selection
+## Story revamp council refinement in progress
 
-[Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82) owns the revised
-Design Lab comparison on `codex/story-screen-prototypes`: Cue sheet, Shot reel and
-Stage tracks. Kris rejected the former third option and required a game window
-large enough for future character dragging. Opus 5.5 at high designed the revision.
-All three retain focused writing and fictional, memory-only structured editing.
+[Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82) owns Cue sheet,
+Shot reel and Stage tracks on `codex/story-screen-prototypes`. Kris approved further
+refinement of all three, with one new Opus 5.5 lead at high per mock and each lead's
+own Opus/Sol council. The target is 9.5/10 from both reviewers for each implemented
+mock, including Writing focus, dialogs and secondary states. The large WYSIWYG
+stage and three distinct authoring methods remain required.
 
-The [design notes](../design/story-revamp/README.md#evidence-and-selection) record
-72 browser render cases, the core journey, measured desktop/laptop/compact stages,
-and 15 final focused corrections. Local checks pass. All designs remain unapproved;
-Kris will choose the next iteration. Source and review files are local only. No PR,
-push, production UI or future engine implementation is selected. Earlier acceptance
-and protected recovery records remain below.
+All three leads completed their initial councils. The parent implemented their
+bounded changes and fixed the browser findings. The 72-render matrix, full
+interaction journey and final active-writing checks pass. Fresh council scores
+remain pending. The parent
+owns code/shared controls and integration; leads own separate ignored reports.
+Detailed scope remains in
+[design notes](../design/story-revamp/README.md). No design is promoted, and production
+UI/future engine implementation remain outside scope. Local only; no PR or push.
+Earlier acceptance and protected recovery records remain below.
 
 ## Variable text, ordered actions and nested canvas accepted
 

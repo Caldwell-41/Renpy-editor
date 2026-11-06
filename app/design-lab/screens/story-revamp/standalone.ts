@@ -24,10 +24,14 @@ function mount(next: Variant) {
 }
 function request(next: Variant, nextState = state) {
   if (!Number(host.querySelector<HTMLElement>('.sr-content')?.dataset.edits)) { state = nextState; mount(next); return; }
-  const dialog = el('dialog', 'lp-dialog sr-dialog'); dialog.ariaLabel = 'Switch prototype layout?';
-  dialog.append(el('h2', '', 'Reset this sample?'), el('p', '', 'Changing layout or sample resets your edits in this preview.'), action('Keep editing', () => dialog.close()), action('Switch and reset sample', () => { dialog.close(); state = nextState; mount(next); }));
-  dialog.onclose = () => { dialog.remove(); picker.value = variant; samples.value = state; };
-  host.append(dialog); dialog.showModal();
+  const target = next !== variant ? variants.find(v => v.id === next)!.title : samples.selectedOptions[0]!.textContent!;
+  const dialog = el('dialog', 'lp-dialog sr-dialog'); dialog.ariaLabel = `Open ${target} and reset edits?`;
+  const head = el('header', 'sr-dialog-head'); head.append(el('h2', '', dialog.ariaLabel));
+  const footer = el('footer', 'sr-dialog-actions'); const cancel = action('Keep editing', () => dialog.close());
+  footer.append(cancel, action(`Open ${target} and reset edits`, () => { dialog.close(); state = nextState; mount(next); }));
+  dialog.append(head, el('p', '', 'Your edits in this sample will be discarded. The next preview starts with fresh fictional data.'), footer);
+  dialog.onclose = () => { dialog.remove(); picker.value = variant; samples.value = state; (next !== variant ? picker : samples).focus(); };
+  host.append(dialog); dialog.showModal(); cancel.focus();
 }
 picker.onchange = () => request(picker.value as Variant);
 samples.onchange = () => request(variant, samples.value);
