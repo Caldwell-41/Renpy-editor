@@ -36,8 +36,9 @@ and Rust-only storage; the renderer receives redacted status through narrow type
 ## Browser UI design
 
 Use [Design Lab](design-lab/README.md) for browser mockups and individual component
-previews. Run `npm run design:dev` locally and `npm run design:check` for its focused
-checks. Product integration retains the selected task's normal acceptance gates.
+previews. Run `npm run design:dev` locally. Select prototype, shared-tooling and
+approval checks under [focused verification](design-lab/README.md#focused-verification).
+Product integration retains the selected task's normal acceptance gates.
 
 ## Synthetic Studio request
 

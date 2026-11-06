@@ -9,5 +9,4 @@ export const definition: Omit<LabScreen, "approval"> = {
     { id: "worksheet", title: "B · Hierarchy worksheet", load: () => import("./worksheet.ts") },
     { id: "source-led", title: "C · Source split", load: () => import("./source-led.ts") },
   ],
-  check: "./screens/nested-layout/check.mjs",
 };

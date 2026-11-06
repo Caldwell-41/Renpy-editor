@@ -49,7 +49,6 @@ export const screens: readonly LabScreen[] = [{
     { id: "save-error", title: "Simulated save failure" },
   ],
   variants: [{ id: "starter", title: "Starter", load: () => import("./screens/character-notes/index.ts") }],
-  check: "./screens/character-notes/check.mjs",
 }, {
   id: "characters-writing",
   title: "Characters",
@@ -69,7 +68,6 @@ export const screens: readonly LabScreen[] = [{
     { id: "dossier", title: "Continuous dossier", load: () => import("./screens/characters-writing/dossier.ts") },
     { id: "board", title: "Writing board", load: () => import("./screens/characters-writing/board.ts") },
   ],
-  check: "./screens/characters-writing/check.mjs",
 }, ...[story, source, branches, lorebook, assets, variables, welcome, newProject, settings, runtime, studioRequest, screenDesigner, canvasDrag, helpComposition, numericLayout, nestedLayout, uiImage, projectFont, sharedLook, componentsAndHelpPanel, helpDialogStory, screenInteractions, barsImagebuttons].map(definition => ({ ...definition, approval: approvalFor(definition.id) }))];
 
 for (const screen of screens) {

@@ -59,13 +59,13 @@ Both revisions and `currentApproved` remain null in [approval.json](approval.jso
 
 Selected verification host is the local Mac with the pinned repository toolchain.
 Allowance is one initial page verification cycle and up to two focused repair cycles.
-The focused check is `node design-lab/check-screen.mjs lorebook` from `app/`, after
-`source ../.toolchains/enter-macos.sh`, using the existing server at port 5174.
-The runner covers 32 rendering cases across two layouts, four states, two themes and
-two viewport sizes. Its interaction check covers editing, retained drafts, collapse,
+The former page runner covered 32 rendering cases across two layouts, four states,
+two themes and two viewport sizes. Its interaction check covered editing, retained drafts, collapse,
 history, source safeguards, omission, reload, navigation cancellation, save, Undo/Redo,
 confirmed discard, UTF-8 validation, refusal/retry, empty notes and long compact prose.
 Raw reports and captures stay ignored under `.toolchains/design-lab/pages/lorebook/`.
+For current reviews, use [focused verification](../../../app/design-lab/README.md#focused-verification)
+with the selected Lorebook layout. The historical page runner and interaction suite are retired.
 
 The initial focused run passed all 32 rendering cases and the shared interaction
 journey for both variants. Its sandbox-only invocation could not start Chromium's

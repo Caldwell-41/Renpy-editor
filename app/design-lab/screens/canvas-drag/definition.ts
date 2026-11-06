@@ -8,5 +8,4 @@ export const definition: Omit<LabScreen, "approval"> = {
     { id: "border", title: "Drag border", load: () => import("./border.ts") },
     { id: "body", title: "Drag selected frame", load: () => import("./body.ts") },
   ],
-  check: "./screens/canvas-drag/check.mjs",
 };

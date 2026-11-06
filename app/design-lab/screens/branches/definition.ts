@@ -9,5 +9,5 @@ export const definition: Omit<LabScreen, "approval"> = {
   variants: [
     { id: "atlas", title: "Story atlas", load: () => import("./atlas.ts") },
     { id: "desk", title: "Route desk", load: () => import("./desk.ts") },
-  ], check: "./screens/branches/check.mjs",
+  ],
 };

@@ -47,6 +47,7 @@ CI and external waits follow [client-specific waiting and manual fallback](WORKF
 | Files/SDK/process | Unit, ordinary path/archive/conflict/recovery and affected platform integration |
 | Scene/file lifecycle | References, transactions/history/recovery, `.rpyc` cleanup and SDK compile/lint/run |
 | UI workflow | Component/controller, keyboard/accessibility, affected desktop path and visual conformance |
+| Design Lab prototype or tooling | [Focused lab verification](../app/design-lab/README.md#focused-verification) |
 | Generated Ren'Py | Pinned official SDK compile/lint, named normal-entry runtime cases and standard-template smoke |
 | Package/release | Required target package/install/launch, identity and contents/privacy |
 | LLM adapter/action | Schema/bounds/refusals, consent/locality, real prepared body/transport, review/partial acceptance and no automatic network |

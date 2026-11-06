@@ -14,7 +14,7 @@ selected. #51/#52 remain incomplete.
 | Runtime | Windows four cases pass at observer7d199aa9/producerfe78025f. Mac seven starts/four cases pass at exact5190d29c, with 48 captures and cleanup. | Mac helper/package/native proof; broader native claims remain separate. |
 | Windows native/package | Both packages pass. First native launch failed after accepted bar creation. Corrected3b package has not launched natively. | Corrected native attempt; the attempted launcher failed before executable start. |
 | Control helper | Twelve frames rendered in one session; source and variable metadata unchanged; cooperative cleanup. | Full-RGBA state admission FAILED. Cause is unestablished; retained frames permit passive diagnosis. |
-| Global lab | Historical catalog 25/12 validates; focused gutter and corrected font checks pass. | Full5190 run failed at font Escape; corrected3b rerun was cancelled at the stop request. Neither is a global pass. |
+| Design Lab | Historical catalog 25/12 validates; focused gutter and corrected font checks pass. | The full5190 failure and cancelled3b run remain historical results. The full-gallery gate is retired; select checks under [focused verification](../../app/design-lab/README.md#focused-verification). |
 
 Three Windows symlink checks remain failed/unqualified with OS1314. No security
 settings changed. The clean Mac checkout remains at 5190; its 3b delta verifies but is

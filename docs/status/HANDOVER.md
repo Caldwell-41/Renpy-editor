@@ -46,6 +46,14 @@ still the earlier5190 failure; do not label it as3b evidence. All nine owned bro
 processes and listener owner are gone. Parent test/SDK/helper/native processes also
 exited. Tool REPL runtimes are unrelated to the stopped qualification.
 
+Kris subsequently selected retiring the full-gallery gate and historical prototype
+interaction suites. Future lab work follows
+[focused verification](../../app/design-lab/README.md#focused-verification);
+the failed/cancelled global runs require no replacement full sweep. Their original
+results remain historical evidence. The [completed lab maintenance](../tasks/active/browser-ui-design-lab.md#focused-verification-2026-11-06)
+owns the implementation and validation, including the ignored-receipt validator
+limitation. This policy selects no #51/#52 product operation.
+
 The approved A2 reference stays at exact37d29ca180dc81cb350ff8ff99bfaee90e65cea9,
 fingerprint fadc5fa2591ac31edec149b871505fcfa20c54b26e622d44e60a74b0b8ee0c80.
 Source and thirteen captures stay pinned. All three council rounds are finished.
