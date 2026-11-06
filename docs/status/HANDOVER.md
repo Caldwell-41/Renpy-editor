@@ -4,7 +4,7 @@
 
 Kris authorised building the combined fourth mock. The current selected section of
 [Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82) owns full scope,
-acceptance, the revised weights and the new maximum of five council rounds.
+acceptance, the revised weights and the new maximum of six council rounds.
 Historical three-mock instructions below are evidence, not current selection.
 
 The new top-level chat is GPT-6 Astra at high. It owns implementation, local
@@ -17,7 +17,7 @@ worktree; council members are read-only. No production/native/SDK work is select
 
 The council skill has Kris's explicit third-member addition for this work: Opus
 5.5 xhigh, GPT-6.1 Sol xhigh and an independent Astra high reviewer. Build the first
-mock before Round 1; stop at success or five rounds. Scores belong to actual reviewed
+mock before Round 1; stop at success or six rounds. Scores belong to actual reviewed
 candidates. The lead uses grill-me, which invokes grilling, for unresolved questions;
 the already approved requirements in #82 are settled.
 
@@ -70,8 +70,23 @@ all three reference journeys, combined standalone draft/reset guards and in-memo
 production exclusion. Typechecking, approval metadata, repository validation and
 whitespace checks pass. Standalone-check failures are retained separately: the
 check now waits for the dialog close event and expects the empty sample to have
-no prose field. Neither required a source behavior change. Round 2 is next against
-this verified candidate. The issue retains the five-round cap and task selection.
+no prose field. Neither required a source behavior change. Round 2 reviewed `8efc888c`; all
+three terminal reviews are preserved under `round-2/`. No reviewer found a blocker,
+but the full council target is unmet. Round 3 is next against the frozen candidate
+identified by `.toolchains/story-combined/round-3/candidate.json`.
+
+Kris then supplied three UI examples and added one review round: six total is now
+the cap. Ignored `.toolchains/story-combined/references/` holds the images and
+his six refinement notes. Every subsequent council must inspect them for useful
+elements and judging context, without copying their layouts or engine features.
+The current iteration groups branch switching in the shared Conditions strip,
+removes misleading open-condition gaps, derives insertion paths at action time,
+reduces repeated controls and gives compact Writing focus independent editor/list
+scrolling. The 25 focused groups pass with 123 PNGs. The 48-case boundary matrix, reference
+journeys, standalone guards and production exclusion pass. `SCROLL-DIAGNOSIS.md` and `diagnosis-7` through
+`diagnosis-9` under the ignored evidence folder retain the failed hypotheses and
+final scroll-anchoring diagnosis. Populate row content before restoring scroll;
+no pointer suppression remains. Keep stage sizes, memory model and scope unchanged.
 
 ## Previous three-mock comparison
 

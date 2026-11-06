@@ -37,6 +37,7 @@ try{
   await page.locator('[data-action=toggle-focus]').click();
   await page.locator('.sc-conditions [data-action=open-branch-ticket-if]').click();
   await page.locator('.sc-conditions [data-action=open-branch-inner-if]').click();
+  assert.match(await page.locator('.lp-status').innerText(),/editing 06\.2\.1 Mara/);
   assert.equal((await selectedVisible('reel')).visible,true,'Nested Reel selection must reveal itself');
   await page.locator('[data-action=next-dialogue]').click();
   assert.equal((await selectedVisible('reel')).visible,true,'New Reel line must reveal itself');
@@ -48,6 +49,8 @@ try{
   await capture(`${width}-reel-writing-position`);
   await open();await page.locator('.sc-conditions [data-action=open-branch-ticket-if]').click();
   await page.locator('.sc-conditions [data-action=open-branch-inner-if]').click();
+  const partial=await page.locator('.sr-tracks-scroll').evaluate(n=>{const edge=n.querySelector('.sr-track-labels').getBoundingClientRect().right;return [...n.querySelectorAll('.sr-track-column,.sc-route-marker')].some(c=>{const r=c.getBoundingClientRect();return r.left<edge-1&&r.right>edge+1;});});
+  assert.equal(partial,false,'Programmatic reveal aligns the first visible track column');
   await page.locator('[data-track-beat][data-selected=true]').press('Home');await settled();
   const left=await page.evaluate(()=>({beat:document.querySelector('[data-track-beat][data-selected=true]').getBoundingClientRect().left,labels:document.querySelector('.sr-track-labels').getBoundingClientRect().right}));
   assert(left.beat>=left.labels-1,`Selected Home column behind labels: ${JSON.stringify(left)}`);
@@ -57,6 +60,7 @@ try{
  await page.setViewportSize({width:560,height:640});
  for(const mode of ['tracks','reel']){
   await open('populated',mode);await page.locator('[data-action=toggle-focus]').click();await settled();
+  assert.equal((await selectedVisible(mode)).visible,true,'Compact focus reveals selected row on entry');
   const boxes=await page.evaluate(()=>Object.fromEntries(['.sc-conditions','.sr-inspector-heading','.sr-prose'].map(s=>{const r=document.querySelector(s).getBoundingClientRect();return [s,{top:r.top,bottom:r.bottom}]})));
   assert(boxes['.sr-inspector-heading'].top>=boxes['.sc-conditions'].bottom-1,'Compact focus editor heading must start below Conditions');
   assert(boxes['.sr-prose'].bottom<=640-28,'Compact focus prose must be visible on entry');
@@ -73,7 +77,7 @@ try{
  await page.locator('.sc-conditions [data-action=edit-condition-beat-1]').click();
  const condition=page.getByRole('textbox',{name:'06 Condition If condition',exact:true});
  await condition.fill('has_ticket is false');
- assert.equal(await page.locator('.sc-reel-branch option[value=ticket-if]').innerText(),'If has_ticket is false');
+ assert.equal(await page.locator('[data-reel-beat=beat-1] p').innerText(),'If has_ticket is false');
  assert.equal(await condition.evaluate(n=>document.activeElement===n),true);
  await capture('condition-label-sync');
  await page.locator('[data-action=add-beat]').click();await page.locator('[data-picker-search]').fill('return');
@@ -84,6 +88,51 @@ try{
  assert.equal(await page.locator('[data-action=picker-confirm]').innerText(),'Add beat');
  assert.equal(await page.locator('[data-action=picker-confirm]').isDisabled(),true);await page.keyboard.press('Escape');
  report.checks.push('Condition text synchronizes without losing focus; ending destinations and empty-search action are accurate');
+ for(const mode of ['tracks','reel']) for(const focused of [false,true]){
+  for(const source of ['entry','gap']){
+   await open('populated',mode);if(focused)await page.locator('[data-action=toggle-focus]').click();
+   await page.locator('.sc-conditions [data-action=open-branch-ticket-if]').click();
+   await page.locator('.sc-conditions [data-action=open-branch-inner-if]').click();
+   const owner=page.locator(mode==='tracks'?'.sr-track-column[data-column=beat-1]':'.sc-reel-column[data-column=beat-1]');
+   assert.equal(await owner.locator('.sr-gap').count(),0,'An open condition must not show a gap at its branch entry');
+   await page.locator('.sc-conditions [data-action=edit-condition-beat-1]').click();
+   await page.getByRole('textbox',{name:'06 Condition If condition',exact:true}).fill('has_ticket is false');
+   const control=source==='entry'?page.locator('[data-action=inside-inner-if]'):page.locator('[data-gap-before=beat-3]');
+   if(source==='gap')assert.match(await control.getAttribute('title'),/has_ticket is false/);
+   await control.click();
+   assert.match(await page.locator('.sr-insertion-target').innerText(),/If has_ticket is false.*If trust is at least 5/);
+   await capture(`${mode}-${focused?'focus':'main'}-${source}-live-destination`);
+   await page.locator('[data-picker-search]').fill('narration');await page.keyboard.press('Enter');await settled();
+   assert.match(await page.locator('.lp-status').innerText(),/has_ticket is false/);
+   assert.equal(await page.locator('.sr-prose:focus').count(),1);
+  }
+  await page.locator('.sc-conditions [data-action=after-condition-beat-1]').click();
+  assert.match(await page.locator('.sr-insertion-target').innerText(),/after 06 Condition and its branches/);
+  await page.keyboard.press('Escape');
+ }
+ report.checks.push('Both modes/focus states resolve live nested insertion paths; open conditions have no misleading gap; after-condition names branch ownership');
+ await page.setViewportSize({width:560,height:640});
+ for(const mode of ['tracks','reel']){
+  await open('populated',mode);await page.locator('[data-action=toggle-focus]').click();
+  await page.locator('.sc-conditions [data-action=open-branch-ticket-if]').click();
+  await page.locator('.sc-conditions [data-action=open-branch-inner-if]').click();await settled();
+  assert.equal((await selectedVisible(mode)).visible,true,'Compact focus selected row stays visible beside editor');
+  const container=mode==='tracks'?'.sr-tracks-scroll':'.sc-reel';
+  const beforeScroll=await page.locator(container).evaluate(n=>n.scrollTop);
+  const selectedBox=await page.locator(`[data-${mode==='tracks'?'track':'reel'}-beat][data-selected=true]`).boundingBox();
+  await page.mouse.click(selectedBox.x+selectedBox.width/2,selectedBox.y+selectedBox.height/2);await settled();
+  assert.equal(await page.locator(container).evaluate(n=>n.scrollTop),beforeScroll,'Click-to-edit preserves list position');
+  await page.locator('.sr-prose').fill('I kept the ticket because I thought you might come back. Every Thursday, I waited beneath the station clock until the last service left. Then the timetable changed, and your handwriting appeared beside the new stop. I know how that sounds. The stationmaster said it was a printing error, but he would not look me in the eye. Tonight I want to know where that tram goes, and I would rather not find out alone.');
+  assert.equal((await selectedVisible(mode)).visible,true);
+  await page.locator('[data-action=next-dialogue]').click();await settled();
+  assert.equal((await selectedVisible(mode)).visible,true,'Repeated compact writing reveals the new row');
+  await page.locator('.sr-prose:focus').fill('The next line stays beside the list.');
+  const row=page.locator(`[data-${mode==='tracks'?'track':'reel'}-beat][data-selected=true]`);await row.focus();await row.press('ArrowUp');await settled();
+  assert.equal((await selectedVisible(mode)).visible,true,'Keyboard selection is visible');
+  await page.keyboard.press('Enter');await settled();assert.equal(await page.locator('.sr-prose:focus').count(),1);
+  await capture(`compact-${mode}-repeat-writing`);
+ }
+ report.checks.push('Compact focus preserves list scroll through click-to-edit, long prose and repeated next-line creation');
  for(const [size,width,height] of [['wide',1600,1000],['laptop',1100,720],['compact',560,640]]){
   await page.setViewportSize({width,height});
   for(const mode of ['tracks','reel']){
@@ -131,6 +180,7 @@ try{
    await page.locator('.sr-inspector').scrollIntoViewIfNeeded();await capture(`${size}-editor-${kind}`);
    assert(await page.locator('.sr-inspector:visible').count());
    if(kind==='setVariable') assert.equal((await page.getByRole('combobox',{name:'Variable',exact:true}).boundingBox()).height,(await page.getByRole('textbox',{name:'Variable value',exact:true}).boundingBox()).height);
+   if(kind.endsWith('Screen')){const summary=await page.locator(`[data-track-beat][data-selected=true] [data-track="${size==='compact'?3:5}"]`).innerText();assert.match(summary,/screen · Help$/);assert.equal((summary.match(/screen/g)||[]).length,1);}
   }
   report.checks.push(`${size}: all 20 beat types insert and expose their editor`);
   await open();await page.locator('[data-action=more]').click();await capture(`${size}-more-menu`);await page.getByRole('button',{name:/^Assist with/}).click();await capture(`${size}-assist-instructions`);await page.locator('[data-action=assist-review]').click();await capture(`${size}-assist-review`);await page.locator('[data-action=assist-apply]').click();assert.match(await page.locator('.sr-prose').inputValue(),/Tell me you heard/);await page.locator('[data-action=undo]').click();assert.match(await page.locator('.sr-prose').inputValue(),/I thought I was/);
@@ -147,6 +197,20 @@ try{
   await page.locator('[data-action=more]').click();await page.getByRole('button',{name:'Design notes (future tools)',exact:true}).click();await capture(`${size}-future-notes`);await page.getByRole('button',{name:'Close',exact:true}).click();
  }
 
+ // The compact editor scrolls independently; its longer structured forms remain usable.
+ await page.setViewportSize({width:560,height:640});
+ for(const kind of ['choice','condition','showCharacter','setVariable']){
+  await open();await pick(kind);await page.locator('[data-action=toggle-focus]').click();
+  assert.equal((await selectedVisible('tracks')).visible,true,'Compact focus property editor keeps selected row visible');
+  const field=page.locator('.sr-inspector .sr-fields input,.sr-inspector .sr-fields select,.sr-inspector .sr-fields textarea,.sr-inspector .sr-fields button').last();
+  await field.focus();await settled();
+  assert(await field.evaluate(n=>{const r=n.getBoundingClientRect(),a=n.closest('.sr-inspector').getBoundingClientRect();return r.top>=a.top&&r.bottom<=a.bottom+1&&document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)===n;}),`${kind}: last compact focus field must be reachable and unobscured`);
+  await capture(`compact-focus-editor-${kind}`);
+ }
+ await open('empty');await page.locator('[data-action=toggle-focus]').click();await capture('compact-focus-empty');
+ await open('protected');await page.locator('[data-track-beat][data-beat-kind=customCode]').click();await page.locator('[data-action=toggle-focus]').click();
+ await page.locator('.sr-inspector [data-action=beat-menu]').click();assert.equal(await page.getByRole('button',{name:/^Delete .*Protected source/}).isDisabled(),true);await capture('compact-focus-protected-menu');await page.keyboard.press('Escape');
+ report.checks.push('Compact focus structured fields, empty state, protected disabled action and keyboard focus remain reachable');
  assert.deepEqual(report.errors,[]);report.passed=true;
 }catch(error){report.failure=String(error.stack);await capture('failure');throw error;}
 finally{await writeFile(new URL('report.json',output),JSON.stringify(report,null,2)+'\n');await browser.close();}

@@ -73,10 +73,34 @@ visibility assertions before any helper scroll, condition-edit focus checks,
 ending replacement/empty-search checks and matching property-field heights.
 The 48 boundary renders, three reference journeys, exported fourth-mock draft and
 reset guards, production exclusion and static checks also pass.
-Per-condition Reel branch selectors remain because the selected brief asks for
-direct branch switching in the bottom presentation. They and the Conditions strip
-share the same branch IDs and updates. Compact remains a stacked workspace; the
-editor comes first in Writing focus, with Conditions at the top.
+Round 2 reviewed `8efc888c`; its candidate and terminal reports remain immutable.
+Kris supplied three favorable UI examples after that review and increased the
+new-mock council cap to six rounds. The ignored `story-combined/references/` folder
+holds those images and his six notes for subsequent councils. They inform control
+grouping, emphasis, alignment, discoverability and interaction states, not layout
+or engine scope.
+
+The next iteration uses the Conditions strip above both bottom presentations as
+one branch-switching owner. Condition summaries show the chosen branch. Open
+conditions expose insertion through explicit Inside/After markers, rather than a
+misleading gap at branch entry. Insertion destinations derive from the live model
+when used, so editing a condition cannot leave an old path in a dialog or message.
+Screen summaries show their command once. One global Add action remains alongside
+contextual gaps and branch insertion actions. Dialogs use one cancellation control.
+
+Writing focus keeps Conditions at the top. Desktop prose fills its editor column;
+compact places independently scrolling editor and beat list together below the
+strip. Clicking a row edits it without losing list scroll. Neutral metadata and
+branch separators leave accent emphasis for selection and primary actions.
+This synchronous memory mock has no loading operation; no fake loading control is
+introduced. Empty, validation-error, selected, disabled and keyboard-focus states
+remain part of the browser evidence. The next candidate passes 25 focused groups,
+including live nested insertion labels in both presentations/focus states, exact
+compact pointer-scroll retention, longer prose, keyboard navigation, single screen
+labels and explicit branch ownership. Its normal stage dimensions are unchanged.
+The frozen Round 3 evidence includes 123 PNGs and passing boundary/reference/export
+reports. The diagnostic record in ignored `story-combined/SCROLL-DIAGNOSIS.md` explains the
+browser scroll-anchoring correction and retains unsuccessful hypotheses.
 
 ## Three-mock reference
 

@@ -4,7 +4,7 @@
 
 Kris authorised a fourth Design Lab mock in
 [Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82). Its current
-selected section owns the requirements, revised weighted rubric and five-round
+selected section owns the requirements, revised weighted rubric and six-round
 cap. The design combines Stage tracks' stage/sidebar with a Tracks/Reel bottom
 switch. Conditions, Writing focus, Add a beat, copy and interaction quality are
 priorities. The existing three mocks remain references.
@@ -23,6 +23,15 @@ Writing focus entry, condition-label synchronization and ending destinations.
 Writing focus now has a larger editor, and controls/copy have a second polish pass.
 The Round 2 candidate passes 22 focused groups, 48 state/theme/view renders,
 the three reference journeys, standalone reset guards and production exclusion.
+Round 2 reviewed `8efc888c`; no reviewer found a readiness blocker, but the
+council target is not met by all three members. Round 3 addresses live insertion
+paths, misleading open-condition gaps, repeated controls and compact list scrolling.
+Its 25 focused groups pass, with direct pointer/keyboard and long-prose checks.
+The frozen Round 3 evidence has 123 PNGs, passing boundary/reference/export
+checks and source fingerprints. The next three-member review is pending.
+Kris supplied three favorable UI examples and six authoring/polish principles;
+include them in every subsequent review brief without copying their layouts.
+Kris added one round, so the fourth-mock cap is now six total.
 Kris confirmed Tracks first, equal bottom-panel height and branches in scene
 context. The LAN preview uses port 5176. No production approval is implied.
 
