@@ -31,6 +31,50 @@ async function selectedVisible(mode){
 }
 try{
  if(!process.argv.includes('--compact')) {
+ // Opened branch removal must reconcile both the model and view history.
+ for(const mode of ['tracks','reel']) for(const focus of [false,true]){
+  await page.setViewportSize({width:1100,height:720});await open('populated',mode);
+  if(focus)await page.locator('[data-action=toggle-focus]').click();
+  await page.locator('.sc-conditions [data-action=edit-condition-beat-1]').click();
+  await page.getByRole('button',{name:'+ Add Else if',exact:true}).click();
+  const branch=(await state()).scenes[0].beats.find(b=>b.id==='beat-1').branches.find(b=>b.name==='Else if').id;
+  await page.locator(`.sc-conditions [data-action="open-branch-${branch}"]`).click();
+  await page.locator('[data-action=undo]').click();
+  assert.equal(await page.locator('.sr-inspector').count(),1,'Undo opened Else-if retains editor');
+  assert.equal((await state()).visibleBranches['beat-1'],undefined);
+  await page.locator('[data-action=redo]').click();
+  assert.equal((await state()).visibleBranches['beat-1'],branch,'Redo restores opened branch');
+  await page.locator('.sc-conditions [data-action=edit-condition-beat-1]').click();
+  await page.getByRole('button',{name:'Remove this Else if',exact:true}).click();
+  assert.equal(await page.locator('.sr-inspector').count(),1,'Removing opened Else-if retains editor');
+  assert.equal((await state()).visibleBranches['beat-1'],undefined);
+  await page.locator('[data-action=undo]').click();assert.equal((await state()).visibleBranches['beat-1'],branch);
+  await page.locator('[data-action=redo]').click();assert.equal((await state()).visibleBranches['beat-1'],undefined);
+  assert.deepEqual(report.errors,[]);await capture(`${mode}-${focus?'focus':'main'}-else-if-history`);
+ }
+ report.checks.push('Opened Else-if removal and Undo/Redo preserve a usable editor and valid branch state in both modes and focus states');
+ for(const mode of ['tracks','reel']){
+  await page.setViewportSize({width:1100,height:720});await open('populated',mode);await page.locator('[data-action=toggle-focus]').click();
+  await page.locator('.sc-conditions [data-action=open-branch-ticket-if]').click();await page.locator('.sc-conditions [data-action=open-branch-inner-if]').click();
+  await page.locator('[data-action=next-dialogue]').click();await page.locator('.sr-prose').fill('A draft kept through resizing.');await page.locator('.sr-prose').evaluate(n=>n.setSelectionRange(7,12));
+  await page.setViewportSize({width:560,height:640});await settled();
+  assert.equal((await selectedVisible(mode)).visible,true,'Responsive focus reveals selected nested line');
+  assert.equal(await page.locator('.sr-prose').inputValue(),'A draft kept through resizing.');
+  assert.deepEqual(await page.locator('.sr-prose').evaluate(n=>[n.selectionStart,n.selectionEnd]),[7,12]);await capture(`compact-${mode}-resized-focus`);
+  await page.setViewportSize({width:1600,height:1000});await open('populated',mode);await page.locator('.sc-conditions [data-action=open-branch-ticket-if]').click();
+  await page.locator('[data-action=inside-ticket-if]').click();assert.match(await page.locator('.sr-insertion-target').innerText(),/before 06\.1/);
+  await page.locator('[data-picker-search]').fill('narration');await page.keyboard.press('Enter');await page.locator('.sr-prose').fill('First in this branch.');
+  let branch=(await state()).scenes[0].beats.find(b=>b.id==='beat-1').branches[0];assert.equal(branch.beats[0].text,'First in this branch.');
+  await page.locator('[data-action=next-dialogue]').click();await page.locator('.sr-prose').fill('Still narration.');
+  branch=(await state()).scenes[0].beats.find(b=>b.id==='beat-1').branches[0];assert.equal(branch.beats[1].kind,'narration');
+  await page.locator('.sr-prose').press('Shift+Meta+Enter');await settled();branch=(await state()).scenes[0].beats.find(b=>b.id==='beat-1').branches[0];assert.equal(branch.beats[2].kind,'narration');
+  await page.locator('[data-action=append-ticket-if]').click();await page.locator('[data-picker-search]').fill('narration');await page.keyboard.press('Enter');await page.locator('.sr-prose').fill('Last in this branch.');
+  branch=(await state()).scenes[0].beats.find(b=>b.id==='beat-1').branches[0];assert.equal(branch.beats.at(-1).text,'Last in this branch.');
+  await capture(`${mode}-branch-first-last`);
+  await page.locator('.sc-conditions [data-action=open-branch-ticket-else]').press('Enter');await settled();
+  assert.equal(await page.locator('.sc-conditions [data-action=open-branch-ticket-else]').evaluate(n=>document.activeElement===n),true,'Keyboard branch switch retains strip focus');
+ }
+ report.checks.push('Responsive focus preserves visible selection, draft and caret; first/last branch insertion matches placement; repeated narration retains type; keyboard branch switching retains focus');
  // Measure outcomes without scrollIntoView: helpers must not repair navigation.
  for(const [width,height] of [[1600,1000],[1100,720]]){
   await page.setViewportSize({width,height});await open('populated','reel');

@@ -102,6 +102,25 @@ The frozen Round 3 evidence includes 123 PNGs and passing boundary/reference/exp
 reports. The diagnostic record in ignored `story-combined/SCROLL-DIAGNOSIS.md` explains the
 browser scroll-anchoring correction and retains unsuccessful hypotheses.
 
+Round 3 reviewed `f07cb4ed`. An opened Else-if could outlive its model branch after
+removal or Undo and crash rendering. The next candidate stores branch view state
+with history, validates it before rendering and tolerates missing summary branches.
+Responsive redraws now preserve the editing surface, caret and selected-row visibility.
+The new checks exercise removal and Undo/Redo in both presentations and focus modes.
+
+Branch entry now offers First beat at index zero. End markers offer Last beat inside
+the branch and After condition outside it. Continuation is one link, and selection
+reveal keeps following boundaries visible when they fit. Narration remains Narration
+through Next line and its visible keyboard shortcut. Compact Conditions expose edge
+scroll buttons, keyboard switching keeps focus there, and short editors leave more
+space for the list. Protected-menu restrictions have inline explanations. Choice
+buttons align consistently, with restrained destructive styling. Empty scenes offer
+background insertion once on the stage and writing actions in the editor.
+
+Round 4 evidence contains 27 passing focused groups plus two extra navigation cases,
+with the unchanged stage sizes, 48 boundary cases, three reference journeys, exported
+sample guards and production exclusion. These checks do not imply council approval.
+
 ## Three-mock reference
 
 Claude Opus 5.5 at high reasoning designed this revision after inspecting the

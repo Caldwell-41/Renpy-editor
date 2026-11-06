@@ -2,6 +2,25 @@
 
 ## Combined fourth Story mock handoff
 
+Round 3 is complete against `f07cb4ed`; all three terminal reviews are archived in
+ignored `.toolchains/story-combined/round-3/`. The opened Else-if removal/Undo crash
+blocks that candidate. The lead's Round 4 fixes restore branch view state with
+history and prune invalid branch IDs before drawing. A safe summary lookup also
+handles missing branches. Resize preserves selected-row visibility and the editor's
+caret. `diagnosis-10-resize-caret/` retains the failed check: the old bookmark found
+the navigator before the editor. Bookmarks now distinguish the editing surface.
+
+Entry markers insert the first beat; end markers offer the last beat and an action
+outside the condition. Selection reveal includes following end markers when they
+fit. Next line retains Narration, and the shortcut is visible below prose. Compact
+Conditions have edge buttons; keyboard branch comparison retains strip focus.
+Short compact editors give remaining space to the list. Neutral branch actions,
+aligned Choice actions, inline protected-menu reasons and fewer empty-state actions
+complete this bounded pass. The final 27-group journey and two extra navigation
+cases pass, alongside 48 boundary renders, reference journeys, standalone guards,
+production exclusion and static checks. Freeze in `round-4/` before starting fresh
+read-only Opus/Sol/Astra delegates. No Round 4 grade exists yet; the cap remains six.
+
 Kris authorised building the combined fourth mock. The current selected section of
 [Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82) owns full scope,
 acceptance, the revised weights and the new maximum of six council rounds.
@@ -72,7 +91,7 @@ whitespace checks pass. Standalone-check failures are retained separately: the
 check now waits for the dialog close event and expects the empty sample to have
 no prose field. Neither required a source behavior change. Round 2 reviewed `8efc888c`; all
 three terminal reviews are preserved under `round-2/`. No reviewer found a blocker,
-but the full council target is unmet. Round 3 is next against the frozen candidate
+but the full council target is unmet. Round 3 then reviewed the frozen candidate
 identified by `.toolchains/story-combined/round-3/candidate.json`.
 
 Kris then supplied three UI examples and added one review round: six total is now

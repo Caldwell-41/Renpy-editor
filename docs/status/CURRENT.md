@@ -28,7 +28,13 @@ council target is not met by all three members. Round 3 addresses live insertion
 paths, misleading open-condition gaps, repeated controls and compact list scrolling.
 Its 25 focused groups pass, with direct pointer/keyboard and long-prose checks.
 The frozen Round 3 evidence has 123 PNGs, passing boundary/reference/export
-checks and source fingerprints. The next three-member review is pending.
+checks and source fingerprints. Round 3 reviewed `f07cb4ed`. Astra found a crash
+when an opened Else-if is removed or undone; the candidate is not ready. All three
+terminal reports are preserved. The next candidate restores branch view state with
+history, reconciles removed branches, preserves focus/caret across resizing, and
+makes first/last/outside insertion explicit. Its 27 focused groups, 48 boundary
+cases, reference/export guards and static checks pass. Round 4 is the next review;
+its frozen source identity and evidence live in `story-combined/round-4/` locally.
 Kris supplied three favorable UI examples and six authoring/polish principles;
 include them in every subsequent review brief without copying their layouts.
 Kris added one round, so the fourth-mock cap is now six total.
