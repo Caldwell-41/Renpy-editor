@@ -519,7 +519,7 @@ export class ScreensWorkspace {
     if (this.composer.render(this.card)) {
       if (componentView) {
         if (!this.card.querySelector(".screen-component-scope")) this.components.renderScope(this.card,componentView);
-        this.components.renderGroupTools(this.card);
+        this.components.renderGroupTools(this.card.querySelector<HTMLElement>('.sce-tools')??this.card);
         if (this.components.hasPendingCopy() && this.card.querySelector("[data-image-cancel],[data-layout-cancel],[data-geometry-cancel]")) {
           const cancel = this.card.querySelector<HTMLButtonElement>("[data-component-cancel]"); if(cancel)cancel.hidden = true;
         }

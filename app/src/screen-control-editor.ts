@@ -97,7 +97,7 @@ export class ScreenControlEditor {
     const nav=el('nav','sce-nav');nav.ariaLabel='Control property sections';
     const body=el('div','sce-body');card.append(title,nav,body);
     if(!this.addition&&(d.kind==='bar'?(!d.node?.barBinding||!d.node?.barAppearance):!d.node?.imageButtonAppearances)){
-      body.append(el('p','','This value expression is edited in Source. Your project code is never evaluated here.'),button('View in Source',this.host.source));return true;
+      body.append(el('p','','This control is edited in Source. Your project code is never evaluated here.'),button('View in Source',this.host.source));this.host.layoutTools(body);return true;
     }
     const group=(name:string,disclosure=false)=>{
       const section=el('section','sce-group');section.append(el('h3','',name));section.dataset.section=name;let container:HTMLElement=section;
