@@ -1,17 +1,19 @@
 # Current status
 
-## Variable and control-state sample qualification in progress
+## Variable and control-state samples implemented and qualified
 
 Kris selected [L20 #54](https://github.com/Caldwell-41/Renpy-editor/issues/54) on
 `codex/54-canvas-samples`, based on accepted #51/#52 merge `46fdbc1b`. The existing
 sample renderer remains the owner. Local work adds state-selector synchronization
 and accepted-source qualification for typed samples, six button states and bar
 boundaries. [Evidence](../tasks/evidence/sample-fidelity.md) records checks,
-failures and the rendering matrix. Windows passes all 22 exact source/helper
-comparisons at both aspects, including cooperative cleanup after one retained
-failed shutdown attempt. All 380 frontend tests, build and actual UI/core journey
-pass. Mac rendering remains pending. Kris explicitly approved both-target SDK
-campaigns and #54 reservation/result updates; the issue owns cumulative counts.
+failures and the rendering matrix. Windows and Mac each pass all 22 exact
+source/helper comparisons at both aspects, with exact geometry and cooperative
+cleanup. The first Windows shutdown failure remains preserved and charged.
+All 380 frontend tests, build and actual UI/core journey pass. Both review axes'
+findings are corrected. Implementation and selected qualification are
+`review_ready`; [#54](https://github.com/Caldwell-41/Renpy-editor/issues/54) owns final
+counts, criterion mapping and the pending acceptance decision. No run is pending.
 No package/native-editor/CI run, push, PR, merge or acceptance is selected.
 Earlier prerequisite status below retains
 historical context; GitHub #51/#52 now record acceptance through PR #83.

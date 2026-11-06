@@ -27,23 +27,27 @@ displayables. It does not reconstruct the image from the helper plan. The hidden
 helper shares its capture owner with L19. Pixel/geometry comparison also shares
 one implementation and detects alpha differences.
 
-### Windows comparison complete; Mac pending
+### Both-target comparison complete, 2026-11-07
 
 The formal Windows comparison passes all 22 full-frame cases at both aspects:
 zero differing RGBA pixels, exact geometry, matching physical dimensions and
 drawing scale, unchanged accepted inputs and cooperative exit 0 with complete
 cleanup. The producing candidate is `76d2cf1290805fe40f81f406bf1e74c2c4d335d9`.
-Mac comparison remains required before L20 rendering acceptance. No tolerance or
-broad unsupported-content waiver is accepted. No package, native editor or CI
+Mac passes the identical 22-case comparison, with the same accepted-source bytes
+and candidate/tree. Both targets have zero differing RGBA pixels and all 154
+geometry records exact. No tolerance or broad unsupported-content waiver is
+accepted. No package, native editor or CI
 operation, issue closure, push, PR or merge is selected.
 
 The recorded ceiling is 16 SDK processes per target. A campaign costs eight:
 compile, lint, two normal-game runs, three adapter validation/discovery starts
 and one hidden helper. Failed/cancelled/uncertain starts count cumulatively.
 Windows SUNDOWN owns development; the linked Mac ARM64 is reachable. Historical
-allowances stay closed. [#54's result update](https://github.com/Caldwell-41/Renpy-editor/issues/54#issuecomment-6686513561)
-owns cumulative accounting: Windows 12/16 after its helper retry, Mac 0/16 before
-its campaign, no reservations or uncertain starts at this checkpoint.
+allowances stay closed. [Windows result](https://github.com/Caldwell-41/Renpy-editor/issues/54#issuecomment-6686571276)
+and [Mac result](https://github.com/Caldwell-41/Renpy-editor/issues/54#issuecomment-6686874006)
+retain target receipts under #54's sole accounting ownership. Final use is
+Windows 12/16 and Mac 8/16, zero reservations and uncertain starts. The selected
+qualification is complete; unused capacity selects no further run.
 
 Kris approved the prepared progress/limit comment, now
 [published on #54](https://github.com/Caldwell-41/Renpy-editor/issues/54#issuecomment-6686107986).
@@ -78,6 +82,47 @@ proved causal finding. Outputs remain under ignored `app/target/l20/normal-76d2c
 `helper-76d2cf12-1`, `diagnostic-76d2cf12-1`, `helper-76d2cf12-2` and
 `comparison-76d2cf12-2`, with the exact `core-test-76d2cf12.exe` retained.
 
+The first Mac admission stopped at the occupied main checkout, consuming no SDK
+start. T3's own handoff moved the replacement worker into an isolated checkout;
+the dirty main checkout and active work stayed untouched. Mac completed one
+eight-start campaign without retries. The parent audited actual command outputs,
+formal comparator results, source/binary/receipt hashes and postflight metadata.
+The clean source tree is `19fc1aa6c2266cbea09b11902dfc919363fc5e5b`. Mac records
+GL2 at drawing scale 2.0; Windows records ANGLE2 at scale 1.0. Each target matches
+its own native reference conditions. Both helpers exit cooperatively with code 0,
+sources stay unchanged, scratch cleanup completes and no owned SDK process remains.
+
+Mac host is macOS 26.6.2 ARM64, Python 3.12.16, Pillow 12.3.0 and Rust/Cargo 1.90.0.
+Original Mac frames, receipts and retained binary stay under ignored
+`app/target/l20-mac/` in its clean `codex/54-mac-sample-qualification` worktree.
+JSON-only transfer SHA256 is
+`eb2b37a2e214ed50383c1f5d39b71794e130bf5679189809e1c407b7b58c3650`.
+
+| Receipt | Windows SHA256 | Mac SHA256 |
+| --- | --- | --- |
+| Retained core test | `9150b2fee0bc67e157a25443b7c4fece7e065435193c068455a57d8f68e60bcc` | `d81836701bd869b4e8c03438d6a349b91632a6ad40fac44b3f9fe9c63751f321` |
+| Normal result | `8fc0cc0b99faf85da08b3987c89590c81d4b6214d0b373d2a19758b5553fb9c5` | `5c3b627119a1aacff6c67f0ee810bd2a1bc24b689fa250b24441eaab401dd455` |
+| Passing helper result | `d2036b046102887c50104352f4a49f0a2a6ba2c96ea2abf6ebd89c097754efc4` | `aa07c6c1b8506e05e5b1a8be44e66317739bfa5555426ebb353a9dcbca102928` |
+| Formal comparison | `b631bc83e63a44bf0dfdd456ca1da3702de1e156a18fae831e7952c6fde64ae1` | `d3743beb2c0252a7b829d57ab33d337817c5e970d7d6324e6410daef06227a61` |
+
+Both use SDK archive SHA256
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`
+and renderer SHA256
+`73fecc708717f8836d1b89a6c437e95d44814ca92c0be569c8500f2f132e64c7`.
+
+### Original criterion audit
+
+| #54 criterion | Result and bounded evidence |
+| --- | --- |
+| Actual assets/styles and qualified samples; no source/runtime/action mutation | Both-target exact frames cover int/bool/string Text, local/shared textbutton styles, six imagebutton assets and bar defaults/bounds/out-of-range samples. Public-core and actual UI/core checks retain source/default values and keep actions inert. |
+| Same accepted source/sample/state, both aspects and targets | Identical accepted JSON and source candidate/tree feed 22 cases per target at 1280x720 and 1024x768. Formal whole-frame RGBA and geometry comparisons pass with matched native capture conditions. |
+| Differences/causes and explicit limits | No visible differences remain in the qualified matrix. Bare interpolation, textbutton interpolation and custom control expressions refuse with plan limits; contracts state explicit state selection and unprefixed bar appearances. No action-based inference or unsupported-state claim is added. |
+| Clear samples/drafts/saved-stale state; inert opening/selecting/editing | Actual ScreensWorkspace/core journey and focused DOM tests cover mixed sample/state requests, selector/reselection synchronization, retained drafts, Cancel/Reset, history/reopen and unchanged Source. Revision-bound stale samples and unsupported expressions refuse without execution. |
+
+The selected implementation and qualification are `review_ready`. Leaf closure,
+user acceptance, code publication, CI qualification and wider B08/Phase 3B
+acceptance remain separate. No additional execution is pending or selected.
+
 ### Local checks and retained failures
 
 Typecheck, all 380 frontend tests and the production build pass after review
@@ -85,7 +130,8 @@ corrections. The focused
 state-sync test failed on the old selector mismatch and passed after correction.
 The exporter passes all 22 cases and reopen replay without an SDK start. Two
 offline comparison gates, the normal observer's typed-sample advancement and all
-three existing L19 observer tests pass. The actual SDK observers remain unrun.
+three existing L19 observer tests pass. Both-target SDK observers and the formal
+comparison subsequently passed as recorded above.
 
 Standards and Spec reviewed `46fdbc1b...c23129f1` in separate read-only agents.
 Each reported one production defect: button sample prefixes leaked into frame

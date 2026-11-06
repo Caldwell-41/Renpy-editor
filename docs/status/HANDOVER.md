@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## L20 variable and control-state sample qualification
+## L20 implementation and qualification complete
 
 Continue on `codex/54-canvas-samples`, based at accepted prerequisite `46fdbc1b`.
 [#54](https://github.com/Caldwell-41/Renpy-editor/issues/54) is selected. Kris
@@ -8,22 +8,24 @@ confirmed public canvasPlan IPC, actual Screens UI/core and matched helper/norma
 capture test seams, with review against that base. The requested Opus 5.5 high
 design advice is complete; the parent owns all edits. The
 [evidence record](../tasks/evidence/sample-fidelity.md) owns current preparation
-and failures. Production changes synchronize the open textbutton state fields.
-The new exporter/observers cover 22 cases, both aspects, with exact pixels and
-geometry. Windows is qualified at `76d2cf12`, with identical accepted source and
-sample data, zero differing pixels, exact geometry and cooperative cleanup after
-one retained failed shutdown attempt. Mac remains required and cannot inherit
-Windows, earlier control-crop or nested-composition results.
+and failures. Production changes synchronize textbutton state fields, including
+reselection, while frames/windows keep unprefixed appearance editing. All review
+findings are corrected. Both targets qualify the identical `76d2cf12` source and
+accepted JSON: 22 full-frame cases per target, both aspects, zero RGBA differences,
+all 154 geometry records exact, matched scale and cooperative cleanup. The first
+Windows failed shutdown stays preserved and charged. Broader editor/native/human
+and Phase 3B acceptance remain separate.
 
 Kris explicitly approved both-target SDK campaigns, necessary corrections and
 ongoing #54 reservation/result updates after two publication/execution refusals.
-The issue owns the 16-start-per-target ceiling and cumulative accounting. At this
-handoff Windows has used 12, Mac zero, no reservations or uncertain starts. The
-Mac assignment must synchronize the supplied `76d2cf12` bundle and identical
-accepted export, pass offline preflight, then record/reserve its eight starts.
-Parent owns all code; the remote worker owns test-only ignored outputs in its
-assigned checkout. All 380 frontend tests, build and actual UI/core journey pass;
-the original broad core/harness failures remain in the evidence record.
+The issue owns the 16-start-per-target ceiling and cumulative accounting: Windows
+12/16 and Mac 8/16, no reservations, uncertain starts or pending processes. Unused
+capacity selects no more execution. Mac artifacts remain in its clean
+`codex/54-mac-sample-qualification` worktree; the occupied main checkout was untouched.
+Parent owns all code and final evidence. All 380 frontend tests, build and actual
+UI/core journey pass; original broad core/harness failures remain in the evidence
+record. The selected outcome is `review_ready`. Next action is Kris's review of
+the local branch; no successor work or further qualification is selected.
 Historical allowances stay closed. No push, PR, merge or issue
 closure is selected. Preserve all unrelated recovery below. Existing long-form
 recovery remains under its retained size exception.
