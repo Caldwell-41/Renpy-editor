@@ -2,51 +2,37 @@
 
 ## Integer bars and image buttons selected
 
-Kris approved implementing [#51](https://github.com/Caldwell-41/Renpy-editor/issues/51)
-and [#52](https://github.com/Caldwell-41/Renpy-editor/issues/52) with separate-worktree
-core/editor agents and coordinator-owned integration/review. Local integration branch
-is `codex/51-52-integration`, based on accepted `ab19b786`. Reviewed core changes
-are integrated at `b23bbcc9`; the editor's corrected candidate is `c3755e8c`,
-awaiting its remaining reviews and integration.
+Kris approved local implementation of [#51](https://github.com/Caldwell-41/Renpy-editor/issues/51)
+and [#52](https://github.com/Caldwell-41/Renpy-editor/issues/52). Both workers' changes
+are integrated on `codex/51-52-integration` through `2fd43b31`. The coordinator owns
+the remaining qualification, combined review and fixes. No push, PR or merge is selected.
 
 | Capability | Implementation and automated proof | Remaining acceptance |
 | --- | --- | --- |
-| Integer bars and six-state image buttons | Core committed; 13 focused control/export cases and four final bar cases pass on their recorded worker candidates. Parent admits fifteen source files and twelve inert plans. | Actual frontend/core workflow, runtime, helper and native/package proof; final combined review. |
-| Editor controls | A2 approved at source `37d29ca1`; frontend fixes committed at `c3755e8c`. All three Standards findings corrected and self-verified; current actual UI/core journey passes. Full 378-test pass retains its `87586e7c` basis. | Three Spec findings and three visual differences under correction; one subsequent visual recheck, integration and platform gates. |
-| Broad core selection | Original run failed. Seven TLS tests pass after correcting process PATH. | Three Windows symlink checks remain failed/unqualified with OS1314. |
-| Windows control runtime | Four pinned-SDK cases pass at observer `7d199aa9`, using accepted-source producer `fe78025f`. Bar limits/step, six exact appearance comparisons and one action sequence pass at both aspects. | Native editor preview, helper rendering, Mac proof and combined acceptance. |
+| Bars and six-state image buttons | Reviewed core and frontend integrated. Parent's actual UI/core journey and five review regressions pass; 378 frontend tests, build and typecheck pass on their recorded candidate. | Combined final review and remaining platform proof. |
+| Approved editor design | A2 stays pinned to `37d29ca1`. Original Standards/Spec findings are corrected and self-verified. Parent rendered checks close the final desktop footer finding at `2fd43b31`. | Native packaged-WebView proof; no independent post-fix clearance is claimed. |
+| Windows control runtime | Four pinned-SDK cases pass at observer `7d199aa9`, producer `fe78025f`, covering both aspects, bar limits/step, six exact appearance comparisons and one action sequence. | Helper rendering, native editor and Mac qualification. |
+| Broad core selection | Seven TLS tests pass after process PATH correction. | Three Windows symlink cases remain failed/unqualified with OS1314. |
 
-Kris approved exact A2 `inspector-v2`, source `37d29ca1`, in the separate design
-chat. The designer sent the approved handoff directly to the editor, copying the
-coordinator. Scoped lab/approval files are imported on integration; source and all
-thirteen approved capture hashes independently verify, and lab TypeScript passes.
-All three authorized council rounds are complete. R3 on `0263728d` scored Sol 9/10
-and Opus 8.5/10; the latter's conditional 9 is not a rescore. Corrected source
-`37d29ca1` was not rescored after correction; its approval does not invent a score.
-No fourth council is selected. Source `0a6e571e` and its earlier proof stay pinned.
-Kris authorized task-scoped private T3 transfers. The verified recovery bundle is
-imported under a dedicated local Git namespace, preserving the checkout and existing
-refs. All five missing source objects are recovered; the catalog loader now passes
-all 25 records and 12 approved revisions, including fingerprints and capture hashes.
-The compact Help gutter fix at `d2c909ff` passes the unchanged focused assertion.
-Its full lab runner reports 1568 cases, 30 groups and all 12 approval checks passing
-with no report errors. The wrapper missed the npm exit code, so command completion
-retains that qualification gap. Exit capture is corrected and checked with both
-zero and nonzero exits for the later combined-candidate run. The original failed
-run remains recorded. Frontend implementation proceeds independently.
-The corrected Windows observer passes; both earlier failed campaigns stay recorded.
-#51 owns combined capped-operation accounting; Windows SDK use is 12/16 and all
-other counts are zero, with no reservation pending. Remaining Windows/macOS proof,
-combined review and all original criteria remain pending. [Evidence](../tasks/evidence/bars-and-image-buttons.md)
-records contracts and ownership. #54 and broader Phase 3B acceptance remain separate.
-Issue-state/limit updates to #51/#52 are authorized; code publication/PR/merge are not.
-The authorized Mac qualification chat is created on isolated branch
-`t3/mac-bars-imagebuttons-qualification`. Initial readiness confirms the pinned
-ordinary tools, SDK archive and existing Python 3.12.16/Pillow 12.3.0 environment.
-The exact approved signing identity is present in the unlocked login Keychain;
-actual signing is untested. No provisioning or trust change is needed for readiness.
-No capped Mac operation is requested or reserved. Qualification waits for exact
-inputs and a coordinator reservation.
+The historical approval catalog is recovered: 25 records and 12 approved revisions
+validate. The compact Help gutter fix passes its unchanged focused assertion. Its
+full lab runner reports 1568 cases and 30 groups passing, but the wrapper missed the
+npm exit code. A final combined-candidate check will use the corrected exit recorder;
+the original failure and receipt gap remain recorded.
+
+The exact packaged control probe now passes a full-app Chromium rehearsal against
+the real core, including history, Source preservation and reopen. This is synthetic
+browser input, with SDK rendering intercepted, and does not establish native behavior.
+Native evidence admission, existing runner regressions, desktop compilation and build
+pass. Earlier failed rehearsals remain in the evidence owner.
+
+The authorized isolated Mac chat is reachable. Pinned tools, SDK archive, Python and
+the approved signing identity are ready; actual signing is untested. The task-scoped
+private transfer route is verified, but no final candidate has been imported there.
+#51 owns cumulative limits: Windows SDK 12/16, other Windows and all Mac counts zero;
+no reservation is pending. [Detailed evidence](../tasks/evidence/bars-and-image-buttons.md)
+retains exact candidates, failures and remaining gates. Code and evidence remain local.
+#54 and aggregate Phase 3B acceptance remain separate.
 
 ## Variable text, ordered actions and nested canvas accepted
 

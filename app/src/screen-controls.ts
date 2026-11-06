@@ -15,7 +15,7 @@ export interface BarAppearance {
 export interface ControlImageReference {
   assetId: string;
   expectedAssetSha256: string;
-  replacementSha256?: string;
+  replacementSha256?: string | null;
 }
 // Ren'Py owns fallbacks for null optional states. Normal always has an asset.
 export interface ImageButtonAppearances {

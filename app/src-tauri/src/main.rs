@@ -1018,8 +1018,16 @@ fn main() {
                     if !data.starts_with(std::env::temp_dir()) || !data.file_name().is_some_and(|n|n.to_string_lossy().starts_with("loomlight-reference-")){return Err("Reference probe root refused".into());}
                     if std::env::var("LOOMLIGHT_REFERENCE_PROBE_PHASE").as_deref()==Ok("2"){LifecycleService::new(data).map_err(|_|"Reference reopen failed")?}
                     else {if data.exists(){return Err("Reference fixture already exists".into());}LifecycleService::prepare_source_foundation_probe(data).map_err(std::io::Error::other)?}
-                } else if data.exists() { return Err("probe destination already exists".into()); } else if case == "ui-image" {
-                    LifecycleService::prepare_ui_image_probe(data).map_err(std::io::Error::other)?
+                } else if data.exists() { return Err("probe destination already exists".into()); } else if matches!(case.as_str(), "ui-image" | "screen-controls") {
+                    let project = data.join("synthetic-project");
+                    let mut fixture = LifecycleService::prepare_ui_image_probe(data).map_err(std::io::Error::other)?;
+                    if case == "screen-controls" {
+                        fixture.open_path(&project).map_err(|error| std::io::Error::other(format!("{error:?}")))?;
+                        fixture.authoring_create_variable(serde_json::from_value(json!({"technicalName":"coins","variableType":"int","defaultValue":"12"}))?)
+                            .map_err(|error| std::io::Error::other(format!("{error:?}")))?;
+                        fixture.close().map_err(|error| std::io::Error::other(format!("{error:?}")))?;
+                    }
+                    fixture
                 } else if case == "project-font" {
                     LifecycleService::prepare_project_font_probe(data).map_err(std::io::Error::other)?
                 } else if matches!(case.as_str(), "source-foundation" | "owned-screen" | "screen-composition" | "nested-layout" | "shared-style") {
@@ -1166,6 +1174,9 @@ fn main() {
                     } else if case == "project-font" {
                         main.show().expect("Project font probe show"); main.set_focus().expect("Project font probe focus");
                         main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("project_font_probe.js"))).expect("Project font probe injection");
+                    } else if case == "screen-controls" {
+                        main.show().expect("Control probe show"); main.set_focus().expect("Control probe focus");
+                        main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("screen_controls_probe.js"))).expect("Control probe injection");
                     } else if case == "ui-image" {
                         main.show().expect("UI image probe show"); main.set_focus().expect("UI image probe focus");
                         main.eval(&format!("{}\n{}",include_str!("native_editor_probe.js"),include_str!("ui_image_probe.js"))).expect("UI image probe injection");

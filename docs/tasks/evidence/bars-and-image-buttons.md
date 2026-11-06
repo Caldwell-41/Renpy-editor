@@ -965,3 +965,91 @@ The 303-image screenshot manifest hashes to
 Exact artifacts remain ignored in the verification worktree. The worker reports
 observed browser/server PIDs and the loopback listener gone; parent reread its
 cleanup receipt. Tracked source is clean, with no capped operation started.
+
+## Frontend integration and combined proof, 2026-11-06
+
+All five frontend worker commits are integrated in order: `87586e7c` to `088ee93d`,
+`c3755e8c` to `ece39723`, `ce2fecb0` to `e86feac4`, `4d02bfa6` to `db85ded8`, and
+`c0bd7df3` to `2fd43b31`. Worker checkout is clean at `c0bd7df3`; ownership returns
+to the coordinator. Ten assigned production/test/export files changed, with no
+worker changes to shared DTOs, Rust, lab, registry or documentation.
+
+Original frontend Standards review has three P2 findings, corrected at `c3755e8c`:
+component dimension summaries include affected screens; pickers close before redraw
+and focus; numeric/bound/color fields use blur/IME validation and retain owning errors.
+Original Spec review has three P2 findings: replacement-image aspect uses captured
+reviewed dimensions; additions recover when their screen disappears; changed-image
+Escape closes the picker and restores focus. Corrections are self-verified through
+the five actual-core review modes. No independent clearance or rescore is claimed.
+No further Standards/Spec or council task is selected.
+
+At parent candidate `db85ded8ad49df9c09bb6041190c6fbe4184f08f`, full `npm test`
+passes 378/378 with zero skips and exit 0. Build and typecheck pass. An initial
+typecheck attempt failed writing owner-created ignored output as the sandbox user;
+the owner-context rerun passes without ACL or system-policy changes. The real-core
+driver builds with locked/offline dependencies; binary SHA256 is
+`b064532e683868b5e82f037fa485fa1dd6136e85c4c4e2a21da232ff537f3c6c`.
+The actual ScreensWorkspace/core journey passes all eight groups, plus field,
+picker, component, addition and replacement review modes. All six driver exits are
+0 and cleanup is complete. Frame/status calls are intercepted; actual canvasPlan,
+transactions, source, history and reopen cross the real core. Aggregate receipt:
+`app/target/controls-51-52/combined-ui-core-db85ded8/result.json`, SHA256
+`e16ac6df068f307165dd0e67c1657eb2b0765085a113a8e2be26c2914fa35b2a`.
+Rust formatting and tracked-source validation pass on that candidate. Two pre-existing
+untracked recovery-receipt newline failures remain outside the tracked-source result.
+
+The one authorized Terra recheck at `4d02bfa6` verifies all thirteen approved hashes,
+first-error visibility, active sample ARIA/visual feedback and compact section access.
+It finds desktop Apply y764-800 against an editor clip ending at774. Worker correction
+`c0bd7df3` uses available flex/grid height, bounded card rows and independent canvas
+scrolling. Parent rendered the integrated correction at `2fd43b31` against the pinned
+A2 conditions: dark, width1280, innerHeight800, content/PNG820, scale1. Button and bar
+dirty Apply bounds are y690-726 with clip732. Invalid Apply bounds are y670-706 with
+clip712. All three controls are enabled and fully visible; 27/27 hit samples pass.
+Exact HTML, three PNGs and receipts are retained under ignored
+`.toolchains/51-52/footer-proof-2fd43b31/`; receipt SHA256
+`3fe57d68b79a0e77b247b02404c1862290134e75daded6a009ebd4d937f17cb8`.
+This is parent verification, not an independent re-review or historical pixel-fidelity
+claim. The art/canvas fixture differs from the mock and its helper is offline. C0's
+desktop-only CSS leaves the earlier compact proof's scope unchanged.
+
+## Packaged control probe preparation and review corrections, 2026-11-06
+
+Coordinator review found two small contract/harness corrections: actual core inspection
+serializes `replacementSha256:null`, so the optional TypeScript field now also admits
+null; and duplicate `main` headers in `qualify-screen-controls.py` shadowed its Python
+version guard. The guard now executes. Typecheck and the ten ordinary/four retained
+source-admission checks pass, as does the real export-admission CLI. No SDK rerun is
+claimed or needed for the CLI guard correction alone.
+
+The existing optional packaged runner now accepts `screen-controls`, reusing its
+disposable UI-image fixture, normal authoring-variable operation and source/disk/cleanup
+checks. It adds no IPC operation or general renderer authority. The exact injected
+probe creates a bar and six-state image button, uses real picker references, checks
+invalid raw input and Cancel, keyboard combined sizing, one-step history, a protected
+Source neighbor, inert state samples and stable identities/references after reopen.
+Native report admission requires all six stages and the accepted source/reference
+details. Fifteen focused evidence/runner tests pass; desktop `cargo check` passes
+with three existing unused-code warnings. Build and Rust formatting pass.
+
+Before any package/native start, the exact probe is rehearsed in full production UI
+against the actual core. SDK frame/status requests are intercepted. Failed
+control rehearsals remain failed: the first obsolete-creation caption failure is
+archived separately; subsequent runs exposed premature history and Source-navigation
+acknowledgements in the probe. The source-conflict gate correctly refused a compose
+issued before fresh inspection. The corrected probe waits for the new DOM instance,
+then `native-probe-rehearsal-06` passes all six stages plus complete, with zero page
+errors, driver exit0 and cleanup complete. Its receipt SHA256 is
+`15edaf35d70567ccf723fe861942a7cd9a9bfd25bd4258510cfeec65534e0e6d`.
+The existing image probe also passes after migrating its obsolete screen-creation
+control; receipt SHA256
+`d9c54c32135fcb517747adaafe5e44842f298187a2f6d138f6bdb173410c3967`.
+These are Chromium rehearsals, not packaged-WebView or trusted-input results.
+
+No SDK/helper/package/native start or reservation is added. Windows remains SDK12/16,
+helpers0/4, packages0/2, native0/3; Mac all zero. Mac is reachable and its private
+incoming-message transfer route is byte-verified, but the final candidate still needs
+delivery and a coordinator reservation. The old partial `db85ded8` transfer probe is
+not a final-candidate import. Next: freeze these corrections, run the combined global
+lab check with actual exit capture, then complete selected platform proof and final
+criterion review. No extra review delegate, council or code publication is selected.

@@ -2,144 +2,67 @@
 
 ## Integer bars and image buttons in progress
 
-The selected outcome is local committed delivery of #51 and #52, reviewed and
-verified against their original criteria. Coordinator branch is
-`codex/51-52-integration`, based on accepted merge `ab19b786`. Core checkpoint is
-`b23bbcc9`; current qualification code is `7d199aa9`.
-The five reviewed core implementation commits are integrated; the editor worktree
-started approved production UI/core slices from clean `b23bbcc9`. Those frontend
-changes are not integrated yet.
+Kris selected reviewed, verified implementation of #51/#52 committed locally on
+`codex/51-52-integration`, based on `ab19b786`. All core and frontend worker commits
+are integrated through `2fd43b311972f6268c11195dfbbc5f2e9706864a`. Worker ownership
+has returned to the coordinator for shared changes, final review and findings.
+Code publication, PR creation and merge are not authorized. Issue execution-state
+updates and task-scoped private, hash-verified transfers are explicitly authorized.
 
-Frontend implementation is committed at `87586e7cbe21bc56fc486115ff355dac72e99c35`.
-Its owner reports typecheck/build, all 378 frontend tests and the actual UI/core
-journey passing. Standards review identified three P2s: missing image-button
-dimensions in shared-component review, picker callback focus before modal close,
-and missing blur validation with error clearing on unrelated input. The owner
-corrected all three in `c3755e8c4689c3945ddfad0882f1a676560a40a8`, with each focused
-actual-core mode first red then green. Status is corrected/self-verified, not an
-independent re-review clearance. The full eight-stage actual UI/core journey also
-passes at `c3755e8c`, with driver exit 0 and cleanup complete; 57 affected tests and
-build/typecheck pass there. The full 378-test pass retains its `87586e7c` basis.
-Spec completed at `87586e7c` with three P2s: replacement aspect ratio reverting to
-the old catalog, unrecoverable additions after screen removal, and changed-image
-Escape retaining picker/focus state. Visual review at the same source found hidden
-error feedback, absent active-state row indication and spacing differences from A2.
-The frontend owner is correcting these and owns one subsequent Terra 6.1 max
-visual recheck on committed fixes. Standards/Spec counts remain three each, with
-self-verified correction status and no independent clearance inferred.
-Await its final corrected receipt before integrating its assigned files.
+The approved A2 reference stays pinned to source `37d29ca1`, fingerprint
+`fadc5fa2591ac31edec149b871505fcfa20c54b26e622d44e60a74b0b8ee0c80`.
+The designer delivered the approved handoff directly to the frontend owner.
+Do not change the approved source or its thirteen captures. All three council rounds
+are complete; no further council or Standards/Spec redo is selected. Original frontend
+Standards three and Spec three findings are corrected and self-verified, without
+invented independent clearance. The one authorized Terra recheck found a clipped
+desktop footer; parent rendering at `2fd43b31` closes that finding with all three
+states visible and 27/27 hit samples. Compact proof retains its earlier scoped basis.
 
-The core implementation agent completed both controls' Rust behavior on
-`t3/bar-imagebutton-core` at `76dfe030`; the editor implementation agent owns both controls' UI
-on `t3/screens-bars-imagebuttons`. Both have separate prepared worktrees and must
-follow the implement skill, commit their work and resolve independent Standards/Spec
-review findings. Core findings are fixed; parent combined review remains pending.
-Shared types remain coordinator-owned. The frozen command/canvas
-types in `screen-controls.ts` and `screens/controls.rs` are the frontend contract;
-implementation conflicts must return to the coordinator before changing them.
+Parent checks at `db85ded8` pass all 378 frontend tests, build/typecheck, the actual
+ScreensWorkspace/core eight-stage journey and all five review regressions. The final
+worker change is CSS only. Nullable replacement-hash typing now matches actual core
+inspection. The qualifier's duplicated main header is removed so its Python-version
+guard executes. The new packaged control probe passes its exact full-app Chromium
+rehearsal; legacy image-probe rehearsal also passes after updating the creation flow.
+Fifteen native evidence/runner tests, desktop compilation, build and formatting pass.
+These checks start no SDK, helper or native editor and do not claim native input.
 
-The editor opened the required separate design chat on
-`t3/design-bars-imagebuttons`. It owns only new lab/approval files and must send
-Kris's exact approved design/source/fingerprint/captures and approval evidence directly
-to the editor agent, copying the coordinator. That handoff is now received: source
-`37d29ca1`, record commit `9e656759`, approval message `961cbbd1-c3ac-4195-908a-8c320598fc66`.
-Browser/desktop operation uses Terra 6.1 max. Core work may continue during design.
-Kris initially selected two council rounds toward 9/10 and has now explicitly
-authorized one final additional round, bringing the total to three.
-The designer owns the pinned A2 reference; each completed round requested
-read-only Opus 5.5 xhigh and Sol 6.1 xhigh feedback under the council skill.
-Source `0a6e571e` / `inspector-v1` remains pinned, with its synthetic proof scoped
-to that source. The editor received this gate directly and is waiting for the
-approved successor handoff, which has now arrived. No additional council is selected.
-All three authorized rounds are complete. R3 reviewed `0263728d`: Sol 9/10, Opus
-8.5/10. Opus's conditional 9 after an inline-error placement correction is not an
-actual rescore. Current approved `inspector-v2` source is `37d29ca1`, with full
-source/fingerprint in the evidence owner and designer's `a2-final-source-receipt.json`.
-The correction and scrolling checks have no independent rescore or fourth review.
-Sixteen focused synthetic groups reportedly pass at 1280/560; thirteen fresh renders
-cover missing assets, stale drafts and action errors. Parent metadata checks match
-all thirteen PNGs, their input hashes and the separate 1600x1296 annotation.
-The annotation is explanatory, not an approval capture. Compact stale commit
-buttons are partly clipped at the captured scroll position; page scrolling is
-available. Keep that limitation explicit in any approval/handoff. The optional
-Unsaved wording after restoring action values also remains recorded.
-Human approval is verified; full lab/native/trusted and actual UI/core/runtime
-promotion/implementation checks retain their pending status.
+Next, freeze the coordinator corrections, run the combined global Design Lab gate
+with the checked direct-process exit recorder, then transfer that committed candidate
+to the existing Mac qualification chat. Complete selected helper/native/package proof
+and the final criterion-to-evidence review. The prior global runner reported 1568 cases,
+30 groups and 12 approval checks passing at `d2c909ff`, but its npm exit was not captured.
+Preserve that receipt limitation and the original compact-gutter failure. The recovered
+catalog validates all 25 records and 12 approved revisions under dedicated recovery
+refs. Existing refs, historical approvals and unrelated work are preserved.
 
-[#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) owns the shared limits
-and [detailed evidence](../tasks/evidence/bars-and-image-buttons.md) records contracts,
-worker checkout identities and readiness. Windows SDK use is 12/16; other counts are
-zero and no reservation is pending. Windows x64 and macOS ARM64 qualification remain
-required. The linked Mac project was identified, but its isolated readiness delegation
-was refused before task creation because T3 does not support linked-environment
-worktree isolation for delegates. Kris has now authorized the separate top-level Mac
-qualification chat. The same saved request succeeded after the host returned,
-creating isolated branch `t3/mac-bars-imagebuttons-qualification` at `1c6ed025`.
-Initial readiness completed with verified Sol 6.1 xhigh settings. No capped operation was
-requested. The Windows SDK archive matches its published pin.
+The Mac chat is <t3-thread://v2/c95d26c7-af8c-4ab0-8c95-a45fdca2dfe6/mcp:launch:aed218e73e07211906bdf413f41978e96efe3ae09756ac17e0c6842d8b443ee7>.
+Its isolated `t3/mac-bars-imagebuttons-qualification` checkout remains clean at
+`1c6ed025`; do not use the shared Mac root. Pinned tools, SDK archive and existing
+Python 3.12.16/Pillow environment are ready. The exact approved signing identity is
+present; actual signing is untested. Do not change trust, ACLs or identity policy.
+Mac-to-Windows link reads/sends are denied by T3 policy. Windows-to-Mac incoming
+machine-generated packet delivery is verified with byte and SHA256 checks. The old
+`db85ded8` bundle is not the final candidate. No complete candidate import or capped
+Mac operation has started. Do not create another chat or broaden access.
 
-Next actions are the frontend owner's scoped review/fixes and coordinator-owned
-diagnosis of the global lab gate's compact Help popup failure. The approved reference remains pinned in the designer
-worktree. After the recorded automatic-review refusal, Kris explicitly authorized
-task-scoped private, hash-verified T3 transfers for recovery and qualification.
-The 909568-byte recovery bundle arrived in 28 checked chunks; its complete SHA256
-and Git verification pass. All five missing source objects are imported under
-`refs/recovery/51-52-design-catalog/`, preserving existing refs and checkout files.
-The actual catalog loader passes 25 records and 12 approved revisions, including
-historical source fingerprints and retained capture hashes. The browser gate is
-failed after 616 render cases and 15 groups: at 560x640, opening removal confirmation
-narrowed the measured content container from 463 to 448 px, with other recorded
-geometry/scroll unchanged. Three focused probes establish that the compact editor's
-visible-to-hidden overflow transition adds a stable 15 px gutter. A compact-only
-gutter correction at `d2c909ff` passes the focused baseline with no injected style.
-The full runner reports 1568 cases, 30 groups and 12 approval checks passing, with
-zero report errors. The PowerShell wrapper lost the npm exit code; do not infer it.
-The original failure and this command-receipt limitation remain recorded. Parent's
-ignored direct-process wrapper now preserves stdout/stderr and actual exit status,
-verified using deliberate exits 0 and 7. Use it for the later combined-candidate
-global check rather than repeating the unchanged pre-frontend matrix solely to
-repair a receipt. The test worktree and full artifacts are retained.
-Continue the frontend work independently.
-The coordinator alone imports the new lab/records
-and registry registration; the frontend worker owns production files/tests and must
-not duplicate that import. Do not copy older shared DTOs from the design branch.
-Council scores do not substitute for the verified human decision. No fourth round is selected;
-promotion records/checks must retain their actual status. The Mac readiness chat is
-<t3-thread://v2/c95d26c7-af8c-4ab0-8c95-a45fdca2dfe6/mcp:launch:aed218e73e07211906bdf413f41978e96efe3ae09756ac17e0c6842d8b443ee7>.
-Read its completed report through the linked environment; the reverse report send
-to Windows was denied, so do not rely on an automatic parent notification.
-Its completed recovery export changed no source or existing refs. Actual Mac
-qualification still waits for an exact candidate handoff and capped reservation.
-The SDK archive and pinned ordinary tools are ready. The follow-up located existing
-Python 3.12.16/Pillow 12.3.0 under the project root's
-`.toolchains/l07-shared-look/final-review-python/bin/python3`; select it explicitly
-as `HARNESS_PYTHON` for later checks. No Python provisioning is needed. The exact
-approved signing identity exists in the unlocked login Keychain. A valid-only query
-excluded it with `CSSMERR_TP_NOT_TRUSTED`; the package script deliberately enumerates
-without that filter. Actual signing/private-key access remains untested. Do not
-change trust, replace the identity or infer deletion from the earlier listing.
-Do not create another chat or use the shared Mac root. The original request and
-failed/successful receipts remain in ignored `.toolchains/51-52` output.
+Windows runtime passes four normal/fixture-preview cases at observer `7d199aa9`,
+producer `fe78025f`. Forty-eight retained PNGs cover bar limits/step and exact six-state
+appearance/reference comparisons. Original failures retain their consumed starts.
+Three broad-core Windows symlink cases remain failed/unqualified with OS1314; the
+seven TLS rechecks pass after process PATH correction. No security settings changed.
+Native/trusted input, naturally selected/disabled runtime conditions and wider canvas,
+human or Phase 3B acceptance are not inferred from the bounded automated proof.
 
-Windows runtime proof passes all four cases at observer `7d199aa9`, reusing the
-exact `fe78025f` producer and completed setup after all four explicit rejecting
-checks passed. Normal Story entry and deliberate fixture preview each cover both
-aspects, bar limits and keyboard step, six exact native appearance/reference pairs,
-and one accepted action sequence. Forty-eight PNG captures and the full result are
-retained; their identities and limitations are in the evidence owner. Earlier failed
-campaigns remain failed, with their eight consumed starts. This does not establish
-native editor preview routing, helper rendering, physical input or Mac behavior.
-Keep the producing `59e97d7b` export and its exact hash distinct from later integrated
-exports. The extraction-only final core
-guard does not change that fixture's runtime inputs. The broad `42ee7e58` run failed;
-its seven TLS rechecks pass after a process-PATH fix, while three Windows symlink
-checks remain failed/unqualified with OS1314. Preserve those results and the worker's
-logs. Do not rerun the broad suite or change security policy merely to erase them.
-
-The user separately authorized execution-state/limit updates to #51/#52 after the
-initial automatic review rejection. Those updates succeeded. Code and evidence are
-local-only; no push, PR or merge is selected. #54, aggregate groups and full Phase 3B
-acceptance remain separate. Preserve all earlier evidence and recovery below.
+[#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) alone owns cumulative
+per-target ceilings. Windows SDK 12/16, helpers 0/4, packages 0/2, native launches 0/3;
+Mac all zero, no reservation pending. Reserve before any capped start, including
+implicit SDK validation. Continue in this thread; nothing is currently needed from
+Kris. [Evidence](../tasks/evidence/bars-and-image-buttons.md#frontend-integration-and-combined-proof-2026-11-06)
+owns commands, candidates, receipts, failed attempts and the remaining gates.
+Historical handover sections below retain unique recovery context and the existing
+size exception; they are not new work selections.
 
 ## PR 81 integration and ticket closeout
 

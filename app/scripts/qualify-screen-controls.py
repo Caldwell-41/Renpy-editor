@@ -567,7 +567,6 @@ def qualify_sdk(args):
 
 def main(argv=None):
     require(sys.version_info >= (3, 11), 'Python 3.11 or later required')
-def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='command', required=True)
     validation = commands.add_parser('validate-export', help='Check source export; never start an SDK.')
