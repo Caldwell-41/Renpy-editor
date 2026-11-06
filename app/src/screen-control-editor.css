@@ -49,6 +49,15 @@
 @media(max-width:1000px) {
   .screens-editor[data-ui-control=true] .screen-flow:has(.screen-control-card) { grid-template-columns:minmax(0,1fr) 386px; gap:14px; }
 }
+@media(min-width:851px) {
+  .screens-editor[data-ui-control=true] { display:flex; flex-direction:column; min-height:0; overflow:hidden; }
+  .screens-editor[data-ui-control=true] > .screen-heading,.screens-editor[data-ui-control=true] > .screen-picker,.screens-editor[data-ui-control=true] > .screen-message { flex:none; }
+  .screens-editor[data-ui-control=true] > .screen-limits { display:none; }
+  .screens-editor[data-ui-control=true] > .screen-message { margin:4px 0 0; min-height:18px; }
+  .screens-editor[data-ui-control=true] .screen-flow:has(.screen-control-card) { flex:1; min-height:0; grid-template-rows:auto minmax(0,1fr); align-items:stretch; }
+  .screens-editor[data-ui-control=true] .screen-card.screen-control-card { height:auto; min-height:0; align-self:stretch; }
+  .screens-editor[data-ui-control=true] .screen-stage { min-height:0; overflow:auto; }
+}
 @media(max-width:850px) {
   .screens-editor[data-ui-control=true] .screen-flow:has(.screen-control-card) { display:flex; flex-direction:column; gap:14px; }
   .screens-editor[data-ui-control=true] .screen-card.screen-control-card { display:block; width:100%; height:auto; min-height:0; max-height:none; overflow:visible; padding:0; border-left:0; border-top:1px solid var(--border-normal); }
