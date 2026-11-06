@@ -1,16 +1,16 @@
 # Current status
 
-## Variable and control-state samples in draft PR review
+## Variable and control-state samples accepted
 
-[L20 #54](https://github.com/Caldwell-41/Renpy-editor/issues/54) is on
-`codex/54-canvas-samples` in [draft PR #84](https://github.com/Caldwell-41/Renpy-editor/pull/84),
-based on accepted #51/#52 merge `46fdbc1b`. Review corrections add bar state
-samples, variable samples on textbutton labels, `selected_` inspector fields for
-combined samples and one shared qualification runner for L19 and L20. Candidate
-`bc357a31` passes all 22 exact comparisons on Windows and Mac. [Evidence](../tasks/evidence/sample-fidelity.md#review-corrections-and-expanded-scope-2026-11-07)
-owns the changes, checks and criterion state. #54 owns PR/head/run receipts and
-operation counts. Acceptance and merge are unselected. #51/#52 are accepted
-through PR #83.
+[L20 #54](https://github.com/Caldwell-41/Renpy-editor/issues/54) is accepted for
+its four bounded criteria and merged through [PR #84](https://github.com/Caldwell-41/Renpy-editor/pull/84)
+into `codex/phase3b-screen-designer`. The canvas renders typed Text and textbutton
+label samples, six button and imagebutton states, bar values and bar states. L19
+and L20 share one qualification runner. Rendering candidate `bc357a31` passes all
+22 exact comparisons on Windows and Mac. [Evidence](../tasks/evidence/sample-fidelity.md#review-corrections-and-expanded-scope-2026-11-07)
+owns the changes, checks and criteria; #54 owns the merge, CI receipts and closed
+SDK accounting (Mac 16/16, Windows 20/24). With #46/#50/#54 accepted, B08 #30 keeps
+only its aggregate visual acceptance open. No successor work is selected.
 
 ## Integer bars and image buttons accepted
 

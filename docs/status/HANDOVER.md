@@ -1,26 +1,20 @@
 # Current outcome handover
 
-## L20 review corrections
+## L20 merge closeout
 
-Continue on `codex/54-canvas-samples` in [draft PR #84](https://github.com/Caldwell-41/Renpy-editor/pull/84),
-based at accepted prerequisite `46fdbc1b`. [#54](https://github.com/Caldwell-41/Renpy-editor/issues/54)
-is selected and owns scope, PR/head/run receipts and SDK accounting. Inspect the
-actual head before resuming; later status commits do not replace the candidate.
+Kris accepted [#54](https://github.com/Caldwell-41/Renpy-editor/issues/54) and
+directed a squash merge of [PR #84](https://github.com/Caldwell-41/Renpy-editor/pull/84)
+into `codex/phase3b-screen-designer`, with related ticket updates. #54 owns the
+merge identity, CI receipts and closed SDK accounting: Mac 16/16 and Windows 20/24,
+no reservations or uncertain starts. [The evidence record](../tasks/evidence/sample-fidelity.md#both-target-comparison-at-bc357a31-2026-11-07)
+keeps the rendering candidate `bc357a31` and both-target receipts.
 
-Kris asked for the PR #84 Standards/Spec findings to be fixed, the PR updated and
-CI run, and chose to implement bar state samples and textbutton variable samples
-now. [The evidence record](../tasks/evidence/sample-fidelity.md#review-corrections-and-expanded-scope-2026-11-07)
-lists the changes, local checks and criterion state.
-
-Candidate `bc357a31` passes CI and the both-target campaign. Final SDK use is
-Mac 16/16 and Windows 20/24; no capped operation remains selected. The Windows
-outputs stay in SUNDOWN's `codex/54-windows-sample-qualification` worktree and the
-Mac outputs under `app/target/l20-mac-bc357a31/` here. Next action is Kris's
-review and acceptance of #54.
-
-Mac artifacts for `76d2cf12` stay in the clean `codex/54-mac-sample-qualification`
-worktree. The occupied main checkout stays untouched. Ready-for-review, merge and
-issue closure are unselected.
+Retained, not deleted: branch `codex/54-canvas-samples` and its worktree with Mac
+outputs under `app/target/l20-mac-bc357a31/`; the clean
+`codex/54-mac-sample-qualification` worktree with `76d2cf12` outputs; SUNDOWN's
+`codex/54-windows-sample-qualification` worktree with Windows outputs. The
+occupied main checkout stayed untouched. No successor implementation, capped
+operation or branch cleanup is selected.
 
 ## Integer bars and image buttons closeout
 

@@ -75,9 +75,9 @@ Windows 20/24, with no reservations or uncertain starts; #54 owns the accounting
 | Differences/causes and explicit limits | Stated in [DATA_MODEL](../../DATA_MODEL.md): unquoted `[name]`, non-literal bar state colors and custom control expressions refuse with named plan limits, which the refusal test checks. |
 | Clear samples/drafts/stale state; inert opening/selecting/editing | Actual ScreensWorkspace/core journey covers all six states, including both combined states, with retained drafts, Cancel and Reset. DOM tests cover combined-state prefixes and cross-button selection. |
 
-Draft PR #84 carries this candidate. Its Repository quality and both-target harness
-runs are recorded on #54 when audited. The PR stays draft; acceptance, merge and
-issue closure stay unselected.
+PR #84 carries this candidate. Its Repository quality and both-target harness runs
+pass and are recorded on #54. Kris accepted #54 on 2026-11-07 and directed the
+squash merge; #54 records the merge identity.
 
 ## Local implementation preparation, 2026-11-06
 
