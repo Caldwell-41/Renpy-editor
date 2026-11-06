@@ -5,14 +5,15 @@ import '../src/ui-refresh.css';
 import '../src/screen-ui.css';
 import { ScreensWorkspace, type ScreenDocument } from '../src/screen-ui.ts';
 import { loadPreferences } from '../src/preferences.ts';
+import { icon } from '../src/icons.ts';
 import { labPage } from '../design-lab/page.ts';
 import type { ScreenCatalog, ResolvedScreenTarget } from '../src/screen-contracts.ts';
 import type { MediaPresentation } from '../src/scene-ui.ts';
 interface Data { catalog:ScreenCatalog;documents:ScreenDocument[];authoring:unknown;targets:ResolvedScreenTarget[];media:MediaPresentation[] }
 const sample=(window as unknown as {controlComparison:{data:Data;state:string}}).controlComparison;
-await loadPreferences();
+await loadPreferences();document.documentElement.dataset.theme='dark';
 const frame=labPage(document.querySelector<HTMLElement>('#preview')!,{state:sample.state,theme:'dark'},{screen:'screens',title:'Screens',subtitle:''});
-frame.heading.remove();frame.shell.classList.add('control-production-comparison');
+frame.heading.remove();const navigation=document.createElement('button');navigation.className='tree-item selected';navigation.setAttribute('aria-label','Screens');navigation.append(icon('panel'),document.createTextNode('Screens'));frame.shell.querySelector('[aria-label=Source]')!.after(navigation);frame.shell.classList.add('control-production-comparison');
 frame.shell.querySelector('.lp-sample')!.textContent='Production controls · Disposable core fixture';
 frame.shell.querySelector('.lp-fiction')!.textContent='Read-only comparison · Canvas helper offline';
 const workspace=new ScreensWorkspace({projectId:'control-production-comparison',resolution:{width:1280,height:720},current:()=>true,coordinate:task=>task(),source:()=>{},saved:()=>{throw Error('Comparison refuses writes');},preview:()=>{throw Error('Comparison refuses project execution');},request:async<T>(operation:string,payload:Record<string,unknown>={}):Promise<T>=>{
