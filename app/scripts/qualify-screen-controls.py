@@ -565,6 +565,76 @@ def qualify_sdk(args):
         require(result['cleanupComplete'], 'controls SDK process/scratch cleanup incomplete')
 
 
+def validate_helper(accepted, output, expected_candidate, manifest_sha):
+    """Check retained helper pixels and lifecycle; never start an SDK."""
+    from PIL import Image
+    require(re.fullmatch('[a-f0-9]{40}', expected_candidate), 'full helper candidate required')
+    require(digest(portable_file(accepted, 'manifest.json')) == manifest_sha, 'wrong helper source manifest')
+    manifest = validate_bundle(accepted)
+    result = load_json(portable_file(output, 'result.json').read_text(encoding='utf-8'))
+    require(result.get('passed') is True and result.get('candidate') == expected_candidate
+            and result.get('manifestSHA256') == manifest_sha and result.get('sdkValidationProcesses') == 3
+            and all(type(result.get(name)) is int for name in ('helperStarts', 'helperReturns'))
+            and result.get('helperStarts') == result.get('helperReturns') == 1
+            and result.get('sourceUnchanged') is True and result.get('cleanupComplete') is True,
+            'incomplete helper lifecycle/source proof')
+    require(result.get('shutdown') == dict(cleanupComplete=True, cooperative=True, exitCode=0),
+            'helper did not stop cooperatively')
+    require(re.fullmatch('[a-f0-9]{64}', result.get('coreTestSHA256', ''))
+            and result.get('rendererSHA256') == digest(REPO / 'app/src-core/src/screens/canvas-renderer.rpy'),
+            'missing helper binary identity or changed renderer')
+    expected_inputs = {record['path']: record['sha256'] for record in manifest['files']}
+    expected_inputs.update({'.renpy-editor/' + name: digest(portable_file(accepted, name))
+                           for name in ('project.json', 'source-map.json', 'authoring.json')})
+    require(result.get('inputs') == expected_inputs, 'helper used different source or variable metadata')
+    records = result.get('records')
+    require(isinstance(records, list) and len(records) == 12, 'incomplete helper matrix')
+    document = manifest['document']
+    nodes = {node['kind']: node for screen in document['screens'] for node in screen['nodes']
+             if node['id'] in (manifest['barId'], manifest['imageButtonId'])}
+    wanted = {(row['request']['width'], row['request']['height'], row['request']['buttonState']): row
+              for row in manifest['canvas']}
+    prefixes = dict(zip(STATES, ('idle', 'hover', 'selected_idle', 'selected_hover', 'insensitive', 'selected_insensitive')))
+    seen, fingerprints = set(), {state: set() for state in STATES}
+    for record in records:
+        request, frame = record['request'], record['frame']
+        key = request['width'], request['height'], request['buttonState']
+        require(key in wanted and key not in seen and request == wanted[key]['request'], 'wrong/duplicate helper request')
+        seen.add(key)
+        require(frame.get('phase') == 'ready' and frame.get('revision') == document['revision']
+                and frame.get('renderer') == ('angle2' if sys.platform == 'win32' else 'gl2'),
+                'stale or non-native helper frame')
+        geometry = frame.get('geometry', [])
+        controls = {}
+        for kind, size in (('bar', (320, 24)), ('imagebutton', (160, 80))):
+            matches = [item for item in geometry if item['start'] == nodes[kind]['span']['start']]
+            require(len(matches) == 1 and (matches[0]['width'], matches[0]['height']) == size,
+                    'wrong helper control geometry')
+            controls[kind] = matches[0]
+        image_path = portable_file(output, record['filename'])
+        require(digest(image_path) == record['sha256'], 'changed helper image')
+        planned = next(node for node in wanted[key]['plan']['nodes'] if node['kind'] == 'imagebutton')
+        reference = portable_file(accepted, 'game/' + planned['properties'][prefixes[key[2]]])
+        rect = controls['imagebutton']
+        require(all(type(rect[name]) in (int, float) and float(rect[name]).is_integer()
+                    for name in ('x', 'y', 'width', 'height')), 'non-integral fixture control bounds')
+        x, y = int(rect['x']), int(rect['y'])
+        with Image.open(image_path) as rendered, Image.open(reference) as original:
+            require(rendered.size == key[:2] and 0 <= x <= rendered.width-160 and 0 <= y <= rendered.height-80,
+                    'helper image dimensions or crop bounds differ')
+            crop = rendered.convert('RGBA').crop((x, y, x+160, y+80)).tobytes()
+            expected = original.convert('RGBA').resize((160, 80), Image.Resampling.NEAREST).tobytes()
+            require(crop == expected, 'helper state pixels differ from the admitted bitmap at displayed size')
+        fingerprints[key[2]].add(hashlib.sha256(crop).hexdigest())
+    require(seen == set(wanted) and all(len(values) == 1 for values in fingerprints.values())
+            and len({next(iter(values)) for values in fingerprints.values()}) == 6,
+            'cached/aliased/incomplete helper appearances')
+    print('SCREEN_CONTROLS_HELPER_ADMITTED ' + json.dumps(dict(candidate=expected_candidate,
+          manifestSHA256=manifest_sha, frameCount=12, explicitStates=6, helperSessions=1,
+          sourceUnchanged=True, cleanupComplete=True, physicalInputProven=False)))
+    return result
+
+
 def main(argv=None):
     require(sys.version_info >= (3, 11), 'Python 3.11 or later required')
     parser = argparse.ArgumentParser(description=__doc__)
@@ -572,6 +642,11 @@ def main(argv=None):
     validation = commands.add_parser('validate-export', help='Check source export; never start an SDK.')
     validation.add_argument('--accepted', type=Path, required=True)
     validation.add_argument('--manifest-sha256', required=True)
+    helper = commands.add_parser('validate-helper', help='Check retained helper proof; never start an SDK.')
+    helper.add_argument('--accepted', type=Path, required=True)
+    helper.add_argument('--output', type=Path, required=True)
+    helper.add_argument('--expected-candidate', required=True)
+    helper.add_argument('--manifest-sha256', required=True)
     preparation = commands.add_parser('prepare', help='Export committed source; never start an SDK.')
     preparation.add_argument('--output', type=Path, required=True)
     prepared = commands.add_parser('validate', help='Check a retained producer; never start an SDK.')
@@ -586,6 +661,8 @@ def main(argv=None):
     for command in (preparation, prepared, sdk):
         command.add_argument('--expected-candidate', required=True)
     args = parser.parse_args(argv)
+    if args.command == 'validate-helper':
+        return validate_helper(args.accepted, args.output, args.expected_candidate, args.manifest_sha256)
     if args.command == 'prepare':
         return prepare(args.output, args.expected_candidate)
     if args.command == 'validate':

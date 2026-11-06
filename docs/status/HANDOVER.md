@@ -28,24 +28,31 @@ rehearsal; legacy image-probe rehearsal also passes after updating the creation 
 Fifteen native evidence/runner tests, desktop compilation, build and formatting pass.
 These checks start no SDK, helper or native editor and do not claim native input.
 
-Next, freeze the coordinator corrections, run the combined global Design Lab gate
-with the checked direct-process exit recorder, then transfer that committed candidate
-to the existing Mac qualification chat. Complete selected helper/native/package proof
-and the final criterion-to-evidence review. The prior global runner reported 1568 cases,
+Next, freeze the probe/lab corrections and compiled helper proof, then use the recorded
+reservations for remaining platform qualification. Complete the final criterion review.
+The combined global run at `5190d29c` failed after 968 cases/19 groups in the existing
+font-picker Escape check. Focused tracing establishes native search-field clearing;
+the corrected test target passes the entire focused font interaction check. Rerun the
+global gate with the checked exit recorder after committing. The prior runner reported 1568 cases,
 30 groups and 12 approval checks passing at `d2c909ff`, but its npm exit was not captured.
 Preserve that receipt limitation and the original compact-gutter failure. The recovered
 catalog validates all 25 records and 12 approved revisions under dedicated recovery
 refs. Existing refs, historical approvals and unrelated work are preserved.
 
 The Mac chat is <t3-thread://v2/c95d26c7-af8c-4ab0-8c95-a45fdca2dfe6/mcp:launch:aed218e73e07211906bdf413f41978e96efe3ae09756ac17e0c6842d8b443ee7>.
-Its isolated `t3/mac-bars-imagebuttons-qualification` checkout remains clean at
-`1c6ed025`; do not use the shared Mac root. Pinned tools, SDK archive and existing
+Its isolated checkout is clean on `t3/mac-bars-imagebuttons-candidate-5190` at exact
+`5190d29c`; the original branch remains at `1c6ed025`. Do not use the shared Mac root.
+Pinned tools, SDK archive and existing
 Python 3.12.16/Pillow environment are ready. The exact approved signing identity is
 present; actual signing is untested. Do not change trust, ACLs or identity policy.
 Mac-to-Windows link reads/sends are denied by T3 policy. Windows-to-Mac incoming
 machine-generated packet delivery is verified with byte and SHA256 checks. The old
-`db85ded8` bundle is not the final candidate. No complete candidate import or capped
-Mac operation has started. Do not create another chat or broaden access.
+`db85ded8` bundle is superseded. All forty final packets and the complete 1292845-byte
+bundle verify. Only two new qualification refs were imported. Mac typecheck/build,
+focused tests, exact approved source/thirteen captures, source export and validation
+pass. Seven Mac SDK starts are now reserved at `5190d29c`, with terminal receipt pending.
+Do not change its checkout during that run. Transfer subsequent corrections as a
+small private delta after completion. Do not create another chat or broaden access.
 
 Windows runtime passes four normal/fixture-preview cases at observer `7d199aa9`,
 producer `fe78025f`. Forty-eight retained PNGs cover bar limits/step and exact six-state
@@ -56,8 +63,14 @@ Native/trusted input, naturally selected/disabled runtime conditions and wider c
 human or Phase 3B acceptance are not inferred from the bounded automated proof.
 
 [#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) alone owns cumulative
-per-target ceilings. Windows SDK 12/16, helpers 0/4, packages 0/2, native launches 0/3;
-Mac all zero, no reservation pending. Reserve before any capped start, including
+per-target ceilings. Windows SDK12/16, helpers0/4, packages1/2, native launches1/3.
+The first Windows package passed; the first native launch failed after accepted bar
+creation while waiting for history. Source/scratch cleanup completed. The probe now
+waits for editable fields after Apply and retains history diagnostics; its delayed
+real UI/core rehearsal passes, without native clearance. The new helper test compiles
+without SDK execution and the 24 source/native/helper admission checks pass. Mac's
+seven-start SDK reservation remains pending; other Mac counts are zero.
+Reserve before any further capped start, including
 implicit SDK validation. Continue in this thread; nothing is currently needed from
 Kris. [Evidence](../tasks/evidence/bars-and-image-buttons.md#frontend-integration-and-combined-proof-2026-11-06)
 owns commands, candidates, receipts, failed attempts and the remaining gates.

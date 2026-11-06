@@ -17,20 +17,27 @@ the remaining qualification, combined review and fixes. No push, PR or merge is 
 The historical approval catalog is recovered: 25 records and 12 approved revisions
 validate. The compact Help gutter fix passes its unchanged focused assertion. Its
 full lab runner reports 1568 cases and 30 groups passing, but the wrapper missed the
-npm exit code. A final combined-candidate check will use the corrected exit recorder;
-the original failure and receipt gap remain recorded.
+npm exit code. The combined run at `5190d29c` failed at the existing font-picker
+Escape check. Focused tracing proves that Escape clears a populated search field;
+the corrected dismissal target passes the full focused font interaction check.
+The global rerun remains pending. All earlier failures and receipt gaps stay recorded.
 
 The exact packaged control probe now passes a full-app Chromium rehearsal against
 the real core, including history, Source preservation and reopen. This is synthetic
 browser input, with SDK rendering intercepted, and does not establish native behavior.
 Native evidence admission, existing runner regressions, desktop compilation and build
-pass. Earlier failed rehearsals remain in the evidence owner.
+pass. The Windows NSIS package passes at `5190d29c`; its first native attempt failed
+after bar acceptance while awaiting history. A stricter Apply-completion check passes
+the delayed browser rehearsal, but native clearance remains pending. The helper proof
+is compiled without execution; its synthetic evidence-admission checks pass.
 
 The authorized isolated Mac chat is reachable. Pinned tools, SDK archive, Python and
 the approved signing identity are ready; actual signing is untested. The task-scoped
-private transfer route is verified, but no final candidate has been imported there.
-#51 owns cumulative limits: Windows SDK 12/16, other Windows and all Mac counts zero;
-no reservation is pending. [Detailed evidence](../tasks/evidence/bars-and-image-buttons.md)
+private transfer delivered the complete `5190d29c` candidate. Mac source preparation,
+typecheck, build, focused tests and the exact approved reference checks pass.
+#51 owns cumulative limits: Windows SDK12/16, helper0/4, package1/2, native1/3.
+Seven Mac SDK starts are reserved; its terminal runtime receipt is pending.
+[Detailed evidence](../tasks/evidence/bars-and-image-buttons.md)
 retains exact candidates, failures and remaining gates. Code and evidence remain local.
 #54 and aggregate Phase 3B acceptance remain separate.
 

@@ -1053,3 +1053,84 @@ delivery and a coordinator reservation. The old partial `db85ded8` transfer prob
 not a final-candidate import. Next: freeze these corrections, run the combined global
 lab check with actual exit capture, then complete selected platform proof and final
 criterion review. No extra review delegate, council or code publication is selected.
+
+## Coherent package, Mac transfer and retained failures, 2026-11-06
+
+Coordinator preparation is committed at `5190d29c1e0a971d7a469a7d2dca4daeaad947fd`.
+Tracked-source validation passes 1803 files. The Windows NSIS package command exits0
+in352.141s. Retained executable SHA256 is
+`fb61dd08edb3806e66d059c294a357aeeb908b17a798001a6b87bd28c69d6649`;
+installer SHA256 is
+`6f2f149b0cb916ea17c5c12be8dfd0d32bcbfb16414fb8ffd1205628e1f1b5da`.
+Both artifacts and separate process logs remain under ignored
+`app/target/controls-51-52/package-5190d29c/`. This consumes package1/2.
+
+The exact control probe also passes at the packaged window's1100x720 size using
+an ignored copy differing only in viewport/import path. An unlocked Default input
+desktop, no unrelated Loomlight instance and the retained executable hash were
+verified before the reserved native launch. The actual packaged-WebView attempt
+FAILED in41.219s after bar acceptance while waiting for Undo. No image-button stage
+was reached. Result SHA256 is
+`444c96bbbb0486712346410ce2c713d97efc96b80ed1a575240cb7df55e71aed`.
+Its accepted source is retained; source disk comparison is false because the probe
+failed before producing its terminal expected source. Scratch, bytecode and saves
+checks are clean, and fixture/process cleanup completed. This consumes native1/3;
+it is not a native pass or evidence of image-button behavior.
+
+The probe's readiness condition is tightened to require editable Width after the
+No pending changes message, and failures now retain observed history source and
+toolbar state. A delayed-target-refresh full UI/core rehearsal passes, receipt
+SHA256 `2520217a4bd4f0362f611e0df4a1759b2e9d0354f689199d32e6e6dd3172b8f8`.
+The shorter-deadline diagnostic failed later, after its bar/history stage, and does
+not reproduce the exact first native failure. The timing diagnosis remains provisional
+until the corrected native attempt. No production guard was weakened.
+
+The final global lab command at5190 exits1 in701.375s, after968 rendering cases and
+19 interaction groups, with zero approval-protection cases reached. Its font refined
+check presses Escape from a populated native search field, which clears the query
+without dismissing the picker; the next outside click is correctly blocked by the
+modal. Event traces show no second cancel event when search owns focus, and show
+cancel/close after another Escape or after focusing Cancel. A focus-only animation
+acknowledgement does not fix it. The corrected check focuses the picker Cancel
+control before testing Escape dismissal and awaits closure. The complete existing
+refined-font interaction check then passes. Prototype/approved source is unchanged.
+Trace receipt SHA256:
+`de5920eac6900d4ddc2e331df33f1dedc005d69c8f13aa6202d22d4368146cc3`;
+focused corrected receipt SHA256:
+`9e8e7b1ca9c3f9df89889facbdf1f355add652a2a2925294bd28e17644729ad5`.
+The failed full report and actual exit/log receipts remain under
+`app/target/controls-51-52/design-check-5190d29c/`; its exit1 is not relabeled.
+
+The authorized message route delivered all40 machine-generated packets of the
+1292845-byte candidate/design-history bundle, full SHA256
+`18041e4ece2a858ca7fb66a7ced5600b784c740b25e6a34456a2d509b10fdb0e`.
+Each offset/length/chunk hash and complete bundle/Git verification pass on Mac.
+Only two absent refs in the qualification namespace were imported. The isolated
+checkout is clean on `t3/mac-bars-imagebuttons-candidate-5190`; the original branch
+stays at1c6ed025. Its offline dependency install,15 native evidence/runner tests,
+10 source-admission tests, typecheck/build and all13 approved reference hashes pass.
+Source preparation/validation binds15 files and12 plans, with cleanup and no engine.
+An initial output-path refusal before export is retained. A proposed upload-server
+route was rejected by automatic approval review; no upload occurred. The already
+authorized private message route completed instead, without broadening access.
+
+#51 reserves seven Mac SDK starts at5190: version/compile/lint plus normal Story
+and deliberate fixture preview at both aspects. The top-level Mac run owns execution
+and must return actual counts/failures/cleanup before another reservation. No Mac
+helper/package/native start is reserved. Windows remains SDK12/16, helper0/4,
+package1/2, native1/3 with no pending Windows reservation at this checkpoint.
+
+## Controls helper proof prepared, 2026-11-06
+
+The new ignored core test consumes a retained, hash-admitted public-core manifest,
+restores only its fresh disposable fixture, and requests all12 accepted plans from
+one helper owner. It retains PNGs/geometry, input/binary/renderer identities, actual
+SDK/helper counters and cooperative shutdown. A canonical-path assertion bounds
+the disposable game replacement before deletion. Compilation passes without SDK
+execution. The passive `validate-helper` command checks lifecycle/source bindings,
+both aspects,320x24 bar and160x80 image-button geometry, and full RGBA state crops
+against all six admitted bitmaps. It rejects cached pixels even when their file
+hash is updated. Twenty-four focused source/helper/native evidence tests pass;
+their synthetic PNGs establish admission behavior only. No helper or additional
+SDK start is consumed by preparation. The original accepted-source/runtime
+candidates retain their exact scopes; no current-head runtime pass is invented.

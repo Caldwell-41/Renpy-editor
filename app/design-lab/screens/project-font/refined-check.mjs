@@ -51,7 +51,11 @@ export default async function check({page, open}) {
   assert.match(await page.getByRole('button',{name:'Use Wayfarer Serif',exact:true}).innerText(),/Compare this sentence/);
   await page.getByRole('searchbox',{name:'Find project font'}).fill('signal');
   await page.getByRole('button',{name:'Import font…',exact:true}).click(); await page.keyboard.press('Escape');
-  assert.equal(await page.getByRole('searchbox',{name:'Find project font'}).inputValue(),'signal'); await page.keyboard.press('Escape');
+  assert.equal(await page.getByRole('searchbox',{name:'Find project font'}).inputValue(),'signal');
+  // Escape on a populated native search field clears the query. Focus the
+  // dialog's Cancel control when checking dismissal of the containing picker.
+  await page.getByRole('dialog').getByRole('button',{name:'Cancel',exact:true}).focus();
+  await page.keyboard.press('Escape'); await page.getByRole('dialog').waitFor({state:'hidden'});
   assert.equal(await content().inputValue(),'Compare this sentence'); await cancel().click();
   await size().fill('999'); await apply().click(); assert.equal(await size().getAttribute('aria-invalid'),'true');
   assert.match(await page.locator('[data-error=size]').innerText(),/whole size/); assert.equal(await size().evaluate(e=>e===document.activeElement),true);

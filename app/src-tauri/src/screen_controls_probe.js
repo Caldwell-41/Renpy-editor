@@ -1,6 +1,6 @@
 // Explicit packaged-WebView probe. UI input is synthetic; no SDK is started.
 (async () => {
-  const stages = []; let stage = 'open', awaitedControl = 'recent project', serial = 0, sessionId, identity, identities, binding, appearances, acceptedSource, imageDecoded = false;
+  const stages = []; let stage = 'open', awaitedControl = 'recent project', serial = 0, sessionId, identity, identities, binding, appearances, acceptedSource, historyObservation, imageDecoded = false;
   const assert = (value, message) => { if (!value) throw Error(message); };
   const until = async condition => { const end = performance.now() + 30000; while (!await condition()) { if (performance.now() > end) throw Error(`Timeout: ${stage} / ${awaitedControl}`); await new Promise(resolve => setTimeout(resolve, 30)); } };
   const request = async (operation, payload = {}) => {
@@ -22,11 +22,16 @@
   const field = label => document.querySelector(`[aria-label="${label}"]`);
   const change = (label, value) => { const element = reveal(field(label)); element.focus(); assert(document.activeElement === element, `Focus ${label}`); element.value = value; element.dispatchEvent(new Event(element.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true })); };
   const key = (label, value) => field(label).dispatchEvent(new KeyboardEvent('keydown', { key: value, bubbles: true, cancelable: true }));
-  const settled = () => until(() => document.querySelector('.sce-state')?.textContent === 'No pending changes');
+  const settled = () => until(() => document.querySelector('.sce-state')?.textContent === 'No pending changes' && !field('Width')?.readOnly);
   const checkpoint = value => { stage = value; stages.push({ stage }); };
   const source = async () => (await call('source.open', { path: identity.path })).text;
   const inspect = async () => (await call('screens.inspect', { path: identity.path })).screens[0].nodes;
-  const history = async (direction, expected) => { const previous = document.querySelector('.screen-card').firstChild; await click(direction); await until(async () => await source() === expected && !previous.isConnected); };
+  const history = async (direction, expected) => {
+    const previous = document.querySelector('.screen-card').firstChild;
+    historyObservation = { direction, expected, widthReadOnly: field('Width')?.readOnly };
+    await click(direction);
+    await until(async () => { historyObservation.actual = await source(); historyObservation.previousConnected = previous.isConnected; return historyObservation.actual === expected && !previous.isConnected; });
+  };
   try {
     await until(() => document.querySelector('.recent-open')); document.querySelector('.recent-open').click();
     await click('Screens'); sessionId = (await call('project.current')).sessionId;
@@ -77,6 +82,6 @@
     assert(JSON.stringify(fresh.find(node => node.kind === 'imagebutton').imageButtonAppearances) === JSON.stringify(appearances), 'Six typed references reopen'); checkpoint('controls-reopen-passed'); checkpoint('complete');
     await call('probe.runtimeUiReport', { scenario: 'screen-controls', passed: true, stage, stages, identity, identities, binding, appearances, acceptedSource, imageDecoded, nativeWebView: true, sdkExecuted: false });
   } catch (error) {
-    await call('probe.runtimeUiReport', { scenario: 'screen-controls', passed: false, stage, stages, identity, awaitedControl, error: String(error), feedback: document.querySelector('.screen-message')?.textContent, nativeWebView: true, sdkExecuted: false });
+    await call('probe.runtimeUiReport', { scenario: 'screen-controls', passed: false, stage, stages, identity, awaitedControl, historyObservation, widthReadOnly: field('Width')?.readOnly, historyButtons: [...document.querySelectorAll('.screen-tools button')].map(button => ({ label: button.textContent, disabled: button.disabled, hidden: button.hidden })), error: String(error), feedback: document.querySelector('.screen-message')?.textContent, nativeWebView: true, sdkExecuted: false });
   }
 })();
