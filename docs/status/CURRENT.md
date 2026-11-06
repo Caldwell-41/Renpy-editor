@@ -6,9 +6,8 @@
 `codex/54-canvas-samples` in [draft PR #84](https://github.com/Caldwell-41/Renpy-editor/pull/84),
 based on accepted #51/#52 merge `46fdbc1b`. Review corrections add bar state
 samples, variable samples on textbutton labels, `selected_` inspector fields for
-combined samples and one shared qualification runner for L19 and L20. The earlier
-both-target proof stays bound to `76d2cf12`; this head needs a new campaign, and
-Windows needs a raised SDK ceiling first. [Evidence](../tasks/evidence/sample-fidelity.md#review-corrections-and-expanded-scope-2026-11-07)
+combined samples and one shared qualification runner for L19 and L20. Candidate
+`bc357a31` passes all 22 exact comparisons on Windows and Mac. [Evidence](../tasks/evidence/sample-fidelity.md#review-corrections-and-expanded-scope-2026-11-07)
 owns the changes, checks and criterion state. #54 owns PR/head/run receipts and
 operation counts. Acceptance and merge are unselected. #51/#52 are accepted
 through PR #83.

@@ -12,16 +12,11 @@ CI run, and chose to implement bar state samples and textbutton variable samples
 now. [The evidence record](../tasks/evidence/sample-fidelity.md#review-corrections-and-expanded-scope-2026-11-07)
 lists the changes, local checks and criterion state.
 
-Pending work:
-
-1. Audit the PR's Repository quality and both-target harness runs for the current
-   head, plus `Loomlight validation`, before reporting CI complete. Use T3's PR
-   watcher for the wait.
-2. Run a new both-target SDK campaign at the current candidate. One campaign costs
-   eight starts per target. Mac has 8 of 16 left. Windows has 4 of 16 left and
-   needs Kris to raise its ceiling before it starts. Reserve each start on #54.
-3. Rendering criteria 1 and 2 stay open until both targets pass. The `76d2cf12`
-   proof and its retained Windows/Mac outputs remain historical evidence only.
+Candidate `bc357a31` passes CI and the both-target campaign. Final SDK use is
+Mac 16/16 and Windows 20/24; no capped operation remains selected. The Windows
+outputs stay in SUNDOWN's `codex/54-windows-sample-qualification` worktree and the
+Mac outputs under `app/target/l20-mac-bc357a31/` here. Next action is Kris's
+review and acceptance of #54.
 
 Mac artifacts for `76d2cf12` stay in the clean `codex/54-mac-sample-qualification`
 worktree. The occupied main checkout stays untouched. Ready-for-review, merge and

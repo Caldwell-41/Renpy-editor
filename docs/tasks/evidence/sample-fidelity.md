@@ -31,16 +31,47 @@ Changes at this candidate:
 - The L20 refusal test checks each named limit, including a non-literal bar state
   color. The unused journey driver override and timings are removed.
 
-The `76d2cf12` rendering proof no longer covers this head. The renderer, fixture,
-exporter and admission changed, so criteria 1 and 2 need a new both-target
-campaign. A campaign costs eight SDK starts per target. Mac has 8 of 16 left;
-Windows has 4 of 16 left, so Windows needs a raised ceiling before it can run.
-No SDK, helper, package or native-editor start has happened for this candidate.
+The `76d2cf12` rendering proof does not cover this head, because the renderer,
+fixture, exporter and admission changed. Kris then raised the Windows ceiling from
+16 to 24 and approved a new both-target campaign at `bc357a31`
+([reservation](https://github.com/Caldwell-41/Renpy-editor/issues/54#issuecomment-6696773609)).
+
+### Both-target comparison at `bc357a31`, 2026-11-07
+
+Candidate `bc357a3100b2a48d26136e9e78454deda3f25974`, tree
+`cf7a02d17f18d607000136dd589951958be9ee35`. Both targets used accepted export
+`c9495a15d1ecd1fa3d2036a596ee131e16be1ec64d293babbcedd3aa7753913f`, produced
+once on Mac and transferred as gzip/base64 text, plus SDK archive
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45` and renderer
+`1eec2d0ba5e703d90456c711a7a29002412630c1e85770310200c8e53867751e`.
+
+Each target passes all 22 full-frame cases at both aspects with zero differing
+RGBA pixels and all 154 geometry records exact. Source stays unchanged, the normal
+run cleans up, and the helper exits cooperatively with code 0 and complete cleanup.
+Each target used eight confirmed starts with none uncertain and no retry. Mac
+renders GL2 at drawing scale 2.0; Windows renders ANGLE2 at 1.0. In the helper
+frames the bar's left fill changes for hover and selected samples and matches
+normal for disabled samples, as Ren'Py's `Bar.render` requires.
+
+| Receipt | Windows SHA256 | Mac SHA256 |
+| --- | --- | --- |
+| Release core test | `9887a0cfc9479ecfbf30b236aee049a1731d369381f754972d9336dcc72b2100` | `73178b79b677d6ca98556df8b666b9ab5e32a26f286a859876ba954df4fd349b` |
+| Normal result | `e347c25c5f14cad444a719fa44e7e2d70def028d6580f1456b6c3e18220972ee` | `a58888b264ab24c99ebf75f6d69d133ef9da91f05234f4cb65ca2137216f2e1a` |
+| Helper result | `7f714b8afbf21eca03061f4910ec5dfc6c97a587e8be580c372380171bdf5f3f` | `538b7549b866b2bbf48919b09a20a736b63540f61168fdeace8d522bd1635dd1` |
+| Formal comparison | `f40a809872d2373928a4c8bc8b101c284999fc3eae8d02c0b409694b38bb08df` | `df147fcb92a93178b64766a5b45921d5ad33984141798005ddcb00dbe1eda94c` |
+
+Windows ran on Windows 11 Pro 10.0.26200 x64 with Python 3.13.15, Pillow 12.3.0
+and Rust/Cargo 1.90.0, in its own SUNDOWN worktree
+`codex/54-windows-sample-qualification` under `app/target/l20-win-bc357a31/`.
+Mac ran on macOS 26.6.2 ARM64 with Python 3.12.16, Pillow 12.3.0 and Rust/Cargo
+1.90.0, under `app/target/l20-mac-bc357a31/` in the `codex/54-canvas-samples`
+worktree. The main checkouts stayed untouched. Final SDK use is Mac 16/16 and
+Windows 20/24, with no reservations or uncertain starts; #54 owns the accounting.
 
 | #54 criterion | State at this candidate |
 | --- | --- |
-| Actual assets/styles and samples for every applicable state; no source/runtime/action change | Implemented for Text, textbutton labels and styles, six imagebutton states and bar values plus bar states. Public-core export and the actual UI/core journey keep Source, defaults and actions unchanged. Both-target rendering proof pending. |
-| Same accepted source/sample/state, both aspects and targets | Pending a new both-target campaign at this candidate. |
+| Actual assets/styles and samples for every applicable state; no source/runtime/action change | Both-target exact frames at `bc357a31` cover typed Text, textbutton labels and local/shared styles, six imagebutton states, bar values and bar states. Public-core export and the actual UI/core journey keep Source, defaults and actions unchanged. |
+| Same accepted source/sample/state, both aspects and targets | One accepted export feeds 22 cases per target at 1280x720 and 1024x768. Formal whole-frame RGBA and geometry comparisons pass with matched native capture conditions. |
 | Differences/causes and explicit limits | Stated in [DATA_MODEL](../../DATA_MODEL.md): unquoted `[name]`, non-literal bar state colors and custom control expressions refuse with named plan limits, which the refusal test checks. |
 | Clear samples/drafts/stale state; inert opening/selecting/editing | Actual ScreensWorkspace/core journey covers all six states, including both combined states, with retained drafts, Cancel and Reset. DOM tests cover combined-state prefixes and cross-button selection. |
 
