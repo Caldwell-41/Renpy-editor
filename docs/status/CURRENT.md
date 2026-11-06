@@ -1,45 +1,29 @@
 # Current status
 
-## Integer bars and image buttons selected
+## Integer bars and image buttons paused for handoff
 
-Kris approved local implementation of [#51](https://github.com/Caldwell-41/Renpy-editor/issues/51)
-and [#52](https://github.com/Caldwell-41/Renpy-editor/issues/52). Both workers' changes
-are integrated on `codex/51-52-integration` through `2fd43b31`. The coordinator owns
-the remaining qualification, combined review and fixes. No push, PR or merge is selected.
+Kris requested a safe stop and continuation by a new agent. Both implementations
+are integrated locally on `codex/51-52-integration`; the implementation checkpoint
+is `3b66300218955e9f7337a29a0a407e8ce689bc1d`. All owned Windows/Mac checks and apps
+are stopped, and reservations are released. No push, PR, merge or ticket closure is
+selected. #51/#52 remain incomplete.
 
-| Capability | Implementation and automated proof | Remaining acceptance |
+| Capability | Completed evidence | Remaining acceptance |
 | --- | --- | --- |
-| Bars and six-state image buttons | Reviewed core and frontend integrated. Parent's actual UI/core journey and five review regressions pass; 378 frontend tests, build and typecheck pass on their recorded candidate. | Combined final review and remaining platform proof. |
-| Approved editor design | A2 stays pinned to `37d29ca1`. Original Standards/Spec findings are corrected and self-verified. Parent rendered checks close the final desktop footer finding at `2fd43b31`. | Native packaged-WebView proof; no independent post-fix clearance is claimed. |
-| Windows control runtime | Four pinned-SDK cases pass at observer `7d199aa9`, producer `fe78025f`, covering both aspects, bar limits/step, six exact appearance comparisons and one action sequence. | Helper rendering, native editor and Mac qualification. |
-| Broad core selection | Seven TLS tests pass after process PATH correction. | Three Windows symlink cases remain failed/unqualified with OS1314. |
+| Controls and approved design | Core/frontend integrated; original review findings corrected and self-verified. Parent actual UI/core journey, five regressions and 378 frontend tests pass on recorded candidates. Desktop footer proof passes; A2 source 37d29ca1 stays pinned. | Final combined review and original-criterion reconciliation. |
+| Runtime | Windows four cases pass at observer7d199aa9/producerfe78025f. Mac seven starts/four cases pass at exact5190d29c, with 48 captures and cleanup. | Mac helper/package/native proof; broader native claims remain separate. |
+| Windows native/package | Both packages pass. First native launch failed after accepted bar creation. Corrected3b package has not launched natively. | Corrected native attempt; the attempted launcher failed before executable start. |
+| Control helper | Twelve frames rendered in one session; source and variable metadata unchanged; cooperative cleanup. | Full-RGBA state admission FAILED. Cause is unestablished; retained frames permit passive diagnosis. |
+| Global lab | Historical catalog 25/12 validates; focused gutter and corrected font checks pass. | Full5190 run failed at font Escape; corrected3b rerun was cancelled at the stop request. Neither is a global pass. |
 
-The historical approval catalog is recovered: 25 records and 12 approved revisions
-validate. The compact Help gutter fix passes its unchanged focused assertion. Its
-full lab runner reports 1568 cases and 30 groups passing, but the wrapper missed the
-npm exit code. The combined run at `5190d29c` failed at the existing font-picker
-Escape check. Focused tracing proves that Escape clears a populated search field;
-the corrected dismissal target passes the full focused font interaction check.
-The global rerun remains pending. All earlier failures and receipt gaps stay recorded.
-
-The exact packaged control probe now passes a full-app Chromium rehearsal against
-the real core, including history, Source preservation and reopen. This is synthetic
-browser input, with SDK rendering intercepted, and does not establish native behavior.
-Native evidence admission, existing runner regressions, desktop compilation and build
-pass. The Windows NSIS package passes at `5190d29c`; its first native attempt failed
-after bar acceptance while awaiting history. A stricter Apply-completion check passes
-the delayed browser rehearsal, but native clearance remains pending. The helper proof
-is compiled without execution; its synthetic evidence-admission checks pass.
-
-The authorized isolated Mac chat is reachable. Pinned tools, SDK archive, Python and
-the approved signing identity are ready; actual signing is untested. The task-scoped
-private transfer delivered the complete `5190d29c` candidate. Mac source preparation,
-typecheck, build, focused tests and the exact approved reference checks pass.
-#51 owns cumulative limits: Windows SDK12/16, helper0/4, package1/2, native1/3.
-Seven Mac SDK starts are reserved; its terminal runtime receipt is pending.
-[Detailed evidence](../tasks/evidence/bars-and-image-buttons.md)
-retains exact candidates, failures and remaining gates. Code and evidence remain local.
-#54 and aggregate Phase 3B acceptance remain separate.
+Three Windows symlink checks remain failed/unqualified with OS1314. No security
+settings changed. The clean Mac checkout remains at 5190; its 3b delta verifies but is
+not imported. #51 owns final cumulative accounting: Windows SDK 16/16, helper 1/4,
+package 2/2, native 1/3; Mac SDK 7/16 and other counts zero. No reservations remain.
+Windows SDK/package ceilings require explicit permission before any further start.
+[Handover](HANDOVER.md#integer-bars-and-image-buttons-paused-for-handoff) owns the
+resume route; [evidence](../tasks/evidence/bars-and-image-buttons.md#safe-stop-and-continuation-checkpoint-2026-11-06)
+retains exact artifacts, failures and cleanup. Broader #54/Phase 3B acceptance remains separate.
 
 ## Variable text, ordered actions and nested canvas accepted
 

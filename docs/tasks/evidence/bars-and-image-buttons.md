@@ -1134,3 +1134,85 @@ hash is updated. Twenty-four focused source/helper/native evidence tests pass;
 their synthetic PNGs establish admission behavior only. No helper or additional
 SDK start is consumed by preparation. The original accepted-source/runtime
 candidates retain their exact scopes; no current-head runtime pass is invented.
+
+## Safe stop and continuation checkpoint, 2026-11-06
+
+Kris explicitly requested safely stopping and a handoff prompt for a new agent.
+Implementation candidate is3b66300218955e9f7337a29a0a407e8ce689bc1d. No further
+implementation, test, SDK, helper, package or native start follows that request.
+Only receipt inspection, owned cleanup and status/handoff writing continued.
+
+Windows package2 PASSES at 3b in 97.109 s, exit 0. Executable SHA256:
+`d038cf220bdb7ca69fd4824f40ff7440a060b856899f80015f443ed78f3ab58e`;
+NSIS installer SHA256:
+`87ada15f81690525c15cb1398d9598aa6442b9f117e1f80515f006e4fbd69578`.
+Package receipt SHA256:
+`f1a1e1e2f1c7933b585ef415286ee202918707fc8f9b91a5fdb7b4d2700b42eb`.
+Its attempted native launcher was not created because the sandbox user could not
+write the owner-created ignored directory. PowerShell then refused the missing
+script before the executable started. This is a pre-launch environment refusal,
+not native attempt2. The corrected package has NOT been launched natively. The
+native reservation is released. No ACL/security change or stale-binary launch.
+
+The helper core test at 3b PASSES its production-render/lifecycle/source assertions:
+twelve frames, SDK validation processes3, helper start1/return1, source/authoring
+metadata unchanged, cooperative exit 0 and cleanup true. It completes in 214.75 s.
+The passive full-RGBA consumer FAILS with `helper state pixels differ from the
+admitted bitmap at displayed size`. Overall wrapper result is FAILED, exit 1;
+the Rust exit 0 does not qualify the combined evidence. Cause is unestablished and
+no correction was attempted after the stop request. Retained output is
+`app/target/controls-51-52/helper-3b663002/`, including all twelve PNGs and geometry.
+Wrapper result SHA256:
+`af74491376b5a2c4729dda23e68479eb9add1721ca125ab1375f6989a228d82b`;
+frame/source/lifecycle result SHA256:
+`fecd7fe891b59a10704403ac1d2e8e78d79a76b54d373e33421651fa219f65d5`.
+The retained test binary SHA256 is
+`14226f38625fd5e4ca33ee6b5b767e9ddd38a455cd88aa675b593826c626a91f`.
+Accepted-source producer remains fe78025f with manifest04ee4aeb...; direct core
+diff since that producer contains only the new helper test and module registration.
+The next useful action is passive inspection of these retained frames and their
+admitted bitmap/geometry references. Do not start another SDK for diagnosis first.
+
+The global lab3b rerun was CANCELLED at the user's request, after 511.188 s, with
+actual exit 1. Its last output had completed the Screens journey groups; there is
+no final current-run report or global pass. Stdout SHA256:
+`8d2cc8d3f45b1d3b53380bfefec1a934d3d725855684e367d6fd2f6705137626`.
+The verified checker PID41520 and its eight owned Chrome descendants were stopped;
+all nine PIDs were subsequently confirmed gone. The npm/wrapper exited and retained
+its cancellation receipt. Unrelated Node/tool runtimes were preserved. No Loomlight
+or Ren'Py process remains. Cleanup proof is
+`app/target/controls-51-52/stop-3b663002/lab-stop.json`. The shared
+`.toolchains/design-lab/report.json` still belongs to the5190 font-check failure;
+it must not be relabeled as3b proof.
+
+Mac SDK qualification PASSES at exact5190d29c1e0a971d7a469a7d2dca4daeaad947fd.
+Version, compile, lint and four normal/fixture-preview cases exit 0. Per-case bar
+observations are0/-5/15/keyboard14; six state comparisons, SetVariable/Hide/Return,
+final7, one continuation and inert samples pass. All forty-eight PNGs verify.
+Manifest SHA256:
+`105297a727a328f4a1380d46ddc2ca71122f56dcaa4e3c94c7ecec96194ab645`;
+result SHA256:
+`e46d545ef292b01f114f84fb731c8e4ef224f4c73c321fb3f637bcb2d05d796f`;
+capture receipt SHA256:
+`14c752be24b08e85a4caba4002447194b1d5dd9eaab1eeec35ffe7bf63e8edde`.
+All seven PIDs46010/46024/46033/46042/46062/46074/46092 exited0 and are gone;
+source/process/scratch cleanup passes. These results keep exact5190 basis and do
+not establish physical input or naturally selected/disabled conditions.
+
+Mac pause receipt confirms clean branch `t3/mac-bars-imagebuttons-candidate-5190`
+at 5190, original1c6ed025 branch preserved, no active owned checks/apps and no
+reservations. The13652-byte3b delta, SHA256
+`f0669b3a08d46543b04c1827269fe65a9f2e8fe305b38297dcc1f51e8e3cc079`,
+passes byte/hash/Git verification but is NOT imported or fast-forwarded. Delta
+helper compilation and passive checks are NOT started. Its local receipt is under
+`.toolchains/incoming-3b663002-delta/pause-receipt.json` in the existing isolated
+Mac worktree. The owning Mac chat is recorded in HANDOVER; no new chat is selected.
+
+Final cumulative counts, owned only by#51: Windows SDK 16/16, helper 1/4,
+package 2/2, native 1/3. SDK16 includes fifteen validation/game processes plus the
+one hidden helper. Mac SDK 7/16, helper 0/4, package 0/2, native 0/3. Zero uncertain
+starts and ZERO reservations. Unused Windows native reservation released; Mac's
+seven-start reservation is completely consumed/resolved. Do not exceed Windows
+SDK/package ceilings without explicit user permission. Both issue bodies now
+record the paused state and unresolved gates. No ticket closure, push, PR, merge,
+public upload, signing/trust change or code publication occurred.

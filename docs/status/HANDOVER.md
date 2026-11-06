@@ -1,81 +1,82 @@
 # Current outcome handover
 
-## Integer bars and image buttons in progress
+## Integer bars and image buttons paused for handoff
 
-Kris selected reviewed, verified implementation of #51/#52 committed locally on
-`codex/51-52-integration`, based on `ab19b786`. All core and frontend worker commits
-are integrated through `2fd43b311972f6268c11195dfbbc5f2e9706864a`. Worker ownership
-has returned to the coordinator for shared changes, final review and findings.
-Code publication, PR creation and merge are not authorized. Issue execution-state
-updates and task-scoped private, hash-verified transfers are explicitly authorized.
+Kris explicitly requested safely stopping and preparing a prompt for a new agent.
+No further implementation or qualification is selected in this session. All owned
+checks/apps are stopped on both hosts, and unused reservations are released.
 
-The approved A2 reference stays pinned to source `37d29ca1`, fingerprint
-`fadc5fa2591ac31edec149b871505fcfa20c54b26e622d44e60a74b0b8ee0c80`.
-The designer delivered the approved handoff directly to the frontend owner.
-Do not change the approved source or its thirteen captures. All three council rounds
-are complete; no further council or Standards/Spec redo is selected. Original frontend
-Standards three and Spec three findings are corrected and self-verified, without
-invented independent clearance. The one authorized Terra recheck found a clipped
-desktop footer; parent rendering at `2fd43b31` closes that finding with all three
-states visible and 27/27 hit samples. Compact proof retains its earlier scoped basis.
+Continue in the existing Windows checkout on `codex/51-52-integration`. Implementation
+candidate is `3b66300218955e9f7337a29a0a407e8ce689bc1d`; a subsequent status-only
+commit records this pause. Inspect actual HEAD and changes on resume. Do not reset
+to an earlier SHA. All core/frontend worker commits are integrated; the coordinator
+owns remaining shared changes, integration, qualification, final review and findings.
+Kris authorized local committed implementation, issue-state/limit updates to #51/#52,
+and task-scoped private hash-verified T3 message transfers. Code publication, push,
+PR, merge and public/server uploads are not authorized. Do not repeat the rejected
+upload-server route or broaden linked-machine access.
 
-Parent checks at `db85ded8` pass all 378 frontend tests, build/typecheck, the actual
-ScreensWorkspace/core eight-stage journey and all five review regressions. The final
-worker change is CSS only. Nullable replacement-hash typing now matches actual core
-inspection. The qualifier's duplicated main header is removed so its Python-version
-guard executes. The new packaged control probe passes its exact full-app Chromium
-rehearsal; legacy image-probe rehearsal also passes after updating the creation flow.
-Fifteen native evidence/runner tests, desktop compilation, build and formatting pass.
-These checks start no SDK, helper or native editor and do not claim native input.
+Read [the safe-stop evidence](../tasks/evidence/bars-and-image-buttons.md#safe-stop-and-continuation-checkpoint-2026-11-06)
+and live #51/#52 before resuming. #51 alone owns operation accounting. Windows actuals
+are SDK 16/16, helper 1/4, packages 2/2, native 1/3. SDK counts include fifteen validation/
+game processes and one hidden helper. Mac actuals are SDK 7/16, helper/package/native0.
+There are zero reservations and zero uncertain starts. Windows SDK and package
+ceilings are exhausted; ask before exceeding them. The second native launcher
+failed before executable start and consumes no native attempt. Remaining operations
+within their existing ceilings still need a coordinator reservation after continuation.
+Routine reading, passive artifact analysis, cheap checks and review remain uncapped.
 
-Next, freeze the probe/lab corrections and compiled helper proof, then use the recorded
-reservations for remaining platform qualification. Complete the final criterion review.
-The combined global run at `5190d29c` failed after 968 cases/19 groups in the existing
-font-picker Escape check. Focused tracing establishes native search-field clearing;
-the corrected test target passes the entire focused font interaction check. Rerun the
-global gate with the checked exit recorder after committing. The prior runner reported 1568 cases,
-30 groups and 12 approval checks passing at `d2c909ff`, but its npm exit was not captured.
-Preserve that receipt limitation and the original compact-gutter failure. The recovered
-catalog validates all 25 records and 12 approved revisions under dedicated recovery
-refs. Existing refs, historical approvals and unrelated work are preserved.
+First resume with passive diagnosis of the retained helper state pixels, not another
+engine run. The exact helper Rust test rendered all twelve frames, preserved source
+and variable metadata, and stopped cooperatively in 214.75 s. Its passive full-RGBA
+admission failed; the overall wrapper is FAILED. The cause is unestablished. Preserve
+all frames, geometry, hashes and strict comparisons while distinguishing a renderer
+defect from a measurement/admission defect. The second Windows package passes at 3b
+and is retained. Its corrected native probe has not run; the first native launch at
+5190 failed after accepted bar creation while awaiting Undo. A stricter readiness
+condition and failure diagnostics pass the delayed UI/core rehearsal, but that does
+not establish native clearance. Recreate the missing launcher as the checkout owner
+when that case is resumed; do not change ACLs or run a stale binary.
 
-The Mac chat is <t3-thread://v2/c95d26c7-af8c-4ab0-8c95-a45fdca2dfe6/mcp:launch:aed218e73e07211906bdf413f41978e96efe3ae09756ac17e0c6842d8b443ee7>.
-Its isolated checkout is clean on `t3/mac-bars-imagebuttons-candidate-5190` at exact
-`5190d29c`; the original branch remains at `1c6ed025`. Do not use the shared Mac root.
-Pinned tools, SDK archive and existing
-Python 3.12.16/Pillow environment are ready. The exact approved signing identity is
-present; actual signing is untested. Do not change trust, ACLs or identity policy.
-Mac-to-Windows link reads/sends are denied by T3 policy. Windows-to-Mac incoming
-machine-generated packet delivery is verified with byte and SHA256 checks. The old
-`db85ded8` bundle is superseded. All forty final packets and the complete 1292845-byte
-bundle verify. Only two new qualification refs were imported. Mac typecheck/build,
-focused tests, exact approved source/thirteen captures, source export and validation
-pass. Seven Mac SDK starts are now reserved at `5190d29c`, with terminal receipt pending.
-Do not change its checkout during that run. Transfer subsequent corrections as a
-small private delta after completion. Do not create another chat or broaden access.
+The global lab5190 run failed at the existing populated-search Escape sequence.
+Focused tracing proves search clearing consumes Escape; the corrected dismissal
+target passes the entire refined-font check. The global 3b rerun was cancelled by
+the user after 511.188 s and exits1, with no final report. The shared lab report is
+still the earlier5190 failure; do not label it as3b evidence. All nine owned browser
+processes and listener owner are gone. Parent test/SDK/helper/native processes also
+exited. Tool REPL runtimes are unrelated to the stopped qualification.
 
-Windows runtime passes four normal/fixture-preview cases at observer `7d199aa9`,
-producer `fe78025f`. Forty-eight retained PNGs cover bar limits/step and exact six-state
-appearance/reference comparisons. Original failures retain their consumed starts.
-Three broad-core Windows symlink cases remain failed/unqualified with OS1314; the
-seven TLS rechecks pass after process PATH correction. No security settings changed.
-Native/trusted input, naturally selected/disabled runtime conditions and wider canvas,
-human or Phase 3B acceptance are not inferred from the bounded automated proof.
+The approved A2 reference stays at exact37d29ca180dc81cb350ff8ff99bfaee90e65cea9,
+fingerprint fadc5fa2591ac31edec149b871505fcfa20c54b26e622d44e60a74b0b8ee0c80.
+Source and thirteen captures stay pinned. All three council rounds are finished.
+Do not start another council, Standards/Spec redo, Terra recheck or replacement
+review task. Original frontend Standards3 and Spec3 findings are corrected and
+self-verified, without independent clearance. The one authorized Terra recheck's
+footer finding is closed by parent rendering at 2fd43b31. Perform the final combined
+review yourself and resolve findings. Preserve existing capabilities and frozen DTOs.
 
-[#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) alone owns cumulative
-per-target ceilings. Windows SDK12/16, helpers0/4, packages1/2, native launches1/3.
-The first Windows package passed; the first native launch failed after accepted bar
-creation while waiting for history. Source/scratch cleanup completed. The probe now
-waits for editable fields after Apply and retains history diagnostics; its delayed
-real UI/core rehearsal passes, without native clearance. The new helper test compiles
-without SDK execution and the 24 source/native/helper admission checks pass. Mac's
-seven-start SDK reservation remains pending; other Mac counts are zero.
-Reserve before any further capped start, including
-implicit SDK validation. Continue in this thread; nothing is currently needed from
-Kris. [Evidence](../tasks/evidence/bars-and-image-buttons.md#frontend-integration-and-combined-proof-2026-11-06)
-owns commands, candidates, receipts, failed attempts and the remaining gates.
-Historical handover sections below retain unique recovery context and the existing
-size exception; they are not new work selections.
+The existing Mac chat is
+<t3-thread://v2/c95d26c7-af8c-4ab0-8c95-a45fdca2dfe6/mcp:launch:aed218e73e07211906bdf413f41978e96efe3ae09756ac17e0c6842d8b443ee7>.
+It is completed/idle, clean on `t3/mac-bars-imagebuttons-candidate-5190` at exact5190.
+Its original branch at 1c6ed025 is preserved. SDK qualification passed all seven
+starts and four runtime cases, forty-eight captures and complete cleanup. The3b
+private delta passed byte/SHA/Git verification but is NOT imported or fast-forwarded;
+helper compilation/admission after that delta is NOT started. On continuation,
+read its pause receipt before sending work; use its isolated checkout only and
+preserve the5190 evidence basis. No new chat or shared-root edits. The pinned tools,
+existing Python/Pillow and approved signing identity are ready; signing is untested.
+Keep signing/Keychain/trust policy unchanged. Reverse Mac-to-Windows link access is
+denied; the verified incoming-message route is authorized. No new Mac capped start
+is reserved. The coordinator reads results from that chat.
+
+Windows/Mac runtime, frontend and source evidence retain their recorded producing
+candidates in the linked evidence. Do not rerun all378 tests or the broad core suite
+without a relevant change. Three Windows OS1314 symlink cases remain unqualified;
+the TLS rechecks pass. Complete helper/native/platform proof, an uncancelled global
+lab gate, final combined review and a criterion-to-evidence audit before claiming
+delivery. #54, aggregate Phase 3B, physical input and wider human acceptance remain
+separate. Historical sections below retain unique recovery context and their
+existing size exception; they are not new selections.
 
 ## PR 81 integration and ticket closeout
 
