@@ -1,56 +1,37 @@
 # Current status
 
-## Combined fourth Story mock selected
+## Combined fourth Story mock delivered
 
-Kris authorised a fourth Design Lab mock in
-[Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82). Its current
-selected section owns the requirements, revised weighted rubric and six-round
-cap. The design combines Stage tracks' stage/sidebar with a Tracks/Reel bottom
-switch. Conditions, Writing focus, Add a beat, copy and interaction quality are
-priorities. The existing three mocks remain references.
+[Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82)'s selected fourth
+Design Lab mock is complete at reviewed code `214186ab`. All three final council
+members meet the target and all readiness gates pass. Six rounds ran against six
+frozen candidates. The final chat owns the actual score table. No code changed after
+the final review. Production approval, integration, push, PR and merge remain unselected.
 
-A new GPT-6 Astra high chat owns implementation on isolated
-`codex/story-combined-fourth-mock`, based on local `codex/story-screen-prototypes`
-(prototype code `bbd5a4dd`). Its councils have Opus 5.5 xhigh, GPT-6.1 Sol xhigh
-and a separate Astra high reviewer. All three aim for 9.5 on actual artifacts.
-Use grill-me for genuine further questions. The source chat owns this handoff;
-the new chat owns its branch, checks and review iterations. No push, PR, merge,
-production promotion or future engine implementation is selected.
+The `combined` variant uses Stage tracks' large game window/right editor, an internal
+Tracks/Reel switch, Conditions above the panel and full structured Writing focus.
+Kris chose Tracks first, equal panel height and branches expanded in scene context.
+The mock retains one story's drafts, selection, branch and insertion context through
+view changes. The supplied UI examples informed polish without changing the layout.
 
-The fourth mock is built as `combined`. Round 1 reviewed local `45390124`; all
-three reviewers requested fixes. The lead corrected navigator scrolling, compact
-Writing focus entry, condition-label synchronization and ending destinations.
-Writing focus now has a larger editor, and controls/copy have a second polish pass.
-The Round 2 candidate passes 22 focused groups, 48 state/theme/view renders,
-the three reference journeys, standalone reset guards and production exclusion.
-Round 2 reviewed `8efc888c`; no reviewer found a readiness blocker, but the
-council target is not met by all three members. Round 3 addresses live insertion
-paths, misleading open-condition gaps, repeated controls and compact list scrolling.
-Its 25 focused groups pass, with direct pointer/keyboard and long-prose checks.
-The frozen Round 3 evidence has 123 PNGs, passing boundary/reference/export
-checks and source fingerprints. Round 3 reviewed `f07cb4ed`. Astra found a crash
-when an opened Else-if is removed or undone; the candidate is not ready. All three
-terminal reports are preserved. The next candidate restores branch view state with
-history, reconciles removed branches, preserves focus/caret across resizing, and
-makes first/last/outside insertion explicit. Its 27 focused groups, 48 boundary
-cases, reference/export guards and static checks pass. Round 4 reviewed
-`2eb1f37d`. Astra and Opus found compact focus menus covered by the bottom toolbar;
-that candidate is blocked despite Sol meeting target. All terminal reports are
-archived in `story-combined/round-4/`. The Round 5 candidate fixes that stacking
-order, disabled states, Reel overlap/alignment and bounded label inconsistencies.
-Its 29 focused groups and boundary/reference/export checks pass. Round 5 reviewed
-`c221977c`; all readiness gates pass, but one reviewer remains below target.
-All terminal reports are preserved. The sixth and final authorised candidate fixes
-laptop prose clipping, normal-view menu layering, strip-end alignment and remaining
-branch/empty-state labels. Its 31 focused groups and eight ending cases pass.
-Round 6 is next; no further review round is authorised.
-The old reference server was found offline and restored from its existing files on
-port 5175; the fourth mock remains on 5176.
-Kris supplied three favorable UI examples and six authoring/polish principles;
-include them in every subsequent review brief without copying their layouts.
-Kris added one round, so the fourth-mock cap is now six total.
-Kris confirmed Tracks first, equal bottom-panel height and branches in scene
-context. The LAN preview uses port 5176. No production approval is implied.
+Verification passes: 31 focused browser groups, eight direct/nested ending cases,
+48 state/theme/view renders, three reference journeys, standalone guards, production
+exclusion and static checks. Final evidence has 169 PNGs and source/reference hashes
+in ignored `.toolchains/story-combined/round-6/`. Earlier candidates, terminal reviews
+and failure/recovery evidence remain preserved. A standalone review package is in
+`.toolchains/story-combined/story-combined-reviewed.zip`.
+
+Seven nonblocking findings remain, detailed in the Story design notes and #82:
+outer-exit qualification for nested endings, Reel hover/Return-card consistency,
+repeated outside-action wording, long game-text clipping, Otherwise context and
+partial top rows in focus lists. The six-round cap is exhausted; do not start another
+round or transfer these scores to later edits without a new user selection.
+
+Work remains local on `codex/story-combined-fourth-mock`, stacked on the local
+Story prototype branch. The fourth mock is on LAN port 5176; the original three
+are on port 5175, restored from their unchanged files after that server was found
+offline. Preserve both. This is fictional browser-memory behavior, not engine,
+native, durable-save or production acceptance. See HANDOVER for continuation.
 
 The three-mock comparison and score-only rescore are complete. Current reference
 code is `app/design-lab/screens/story-revamp/`; images and browser evidence remain

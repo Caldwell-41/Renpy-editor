@@ -9,7 +9,7 @@ Rounds 3 and 4 and later Round 5 are complete; a subsequent score-only rescore o
 fixed source `bbd5a4dd` is recorded in chat. Those grades do not qualify the new
 fourth mock. Historical evidence remains available locally.
 
-## Selected next iteration
+## Selected direction
 
 Kris selected a fourth combined mock, owned by the current section of
 [Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82). It keeps Stage
@@ -143,6 +143,31 @@ hit tests in both compact views, long-prose vertical fit, all-size strip-end geo
 and empty-ending access. Eight direct/nested Jump/Return cases pass. Stage size,
 common panel height and simulation scope remain unchanged. Round 6 is the last
 review authorised by the current six-round cap.
+
+## Final council outcome
+
+The fourth mock is delivered at reviewed code `214186ab`. All three final members
+meet the target and all readiness gates pass. Six rounds completed, with immutable
+candidate/source hashes and terminal reviews. The delivery chat records the actual
+round table. No source edits follow the final review. The round cap is exhausted;
+production approval and integration remain unselected.
+
+The final reports retain these nonblocking items:
+
+- An outer exit can say Continue at 07 without repeating a nested Jump/Return exception.
+- Reel insertion controls have no hover response.
+- Return Reel cards put the summary in their small label slot and leave the body empty.
+- Jump/Return exits repeat After wording for outside navigation and insertion.
+- Long game-window text can clip at laptop size; full text remains editable in the sidebar.
+- Otherwise condition cards omit their If test, though the Conditions strip shows it.
+- Writing focus lists can show a partial top row under the header.
+
+Final evidence is in ignored `story-combined/round-6/`, with 169 PNGs, the 31-group
+journey, eight ending cases and the 48-render boundary/reference/export report.
+The reviewed standalone package is `story-combined/story-combined-reviewed.zip`.
+The fourth mock remains on port 5176 and the original three on 5175. Reload/reset
+loses fictional story edits; only the view preference uses session storage. Real
+project saves, engine execution and native acceptance were not exercised.
 
 ## Three-mock reference
 
