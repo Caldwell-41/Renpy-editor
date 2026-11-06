@@ -332,7 +332,8 @@ def inputs():
     for name in ('app/scripts/qualify-screen-controls.py',
                  'app/scripts/test_qualify_screen_controls.py',
                  'app/scripts/screen_controls_export_checks.py',
-                 'app/scripts/screen_controls_prepared_checks.py'):
+                 'app/scripts/screen_controls_prepared_checks.py',
+                 'tests/fixtures/phase-3b-screens/screen-controls/helper-reference.rpy'):
         material[name] = digest(REPO / name)
     return material
 
@@ -565,12 +566,115 @@ def qualify_sdk(args):
         require(result['cleanupComplete'], 'controls SDK process/scratch cleanup incomplete')
 
 
-def validate_helper(accepted, output, expected_candidate, manifest_sha):
+def validate_reference(accepted, output, manifest_sha, result_sha):
+    """Admit independent native frames, with exact source and capture bindings."""
+    require(digest(portable_file(output, 'result.json')) == result_sha, 'changed reference receipt')
+    result = load_json((output / 'result.json').read_text(encoding='utf-8'))
+    require(result.get('passed') is True and result.get('cleanupComplete') is True
+            and type(result.get('sdkProcessesStarted')) is int and result['sdkProcessesStarted'] == 1
+            and result.get('sdkUncertainReservations') == 0
+            and result.get('sdkSHA256') == files.SDK_SHA256
+            and result.get('manifestSHA256') == manifest_sha, 'incomplete reference proof')
+    require(result.get('referenceSourceSHA256') == digest(FIXTURE / 'helper-reference.rpy'),
+            'changed literal reference source')
+    require(digest(portable_file(output, 'accepted-manifest.json')) == manifest_sha,
+            'reference used different accepted source')
+    process.validate_process_checks(result.get('checks', []), ['reference-matrix'])
+    records = result.get('records', [])
+    require(len(records) == 12, 'incomplete reference matrix')
+    wanted = {(w, h, state) for w, h in RESOLUTIONS for state in STATES}
+    references = {}
+    from PIL import Image
+    for row in records:
+        key = row['width'], row['height'], row['state']
+        require(key in wanted and key not in references
+                and row['physical'] == list(key[:2]) and row['drawPerVirtual'] == 1
+                and row['renderer'] == ('angle2' if sys.platform == 'win32' else 'gl2'),
+                'wrong reference identity or capture conditions')
+        path = portable_file(output, row['filename'])
+        require(digest(path) == row['sha256'], 'changed native reference image')
+        with Image.open(path) as image:
+            require(image.size == key[:2], 'wrong reference frame size')
+        references[key] = path
+    return references
+
+
+def reference_helper(args):
+    """One explicitly reserved SDK process; no product helper or game scripts."""
+    require(args.allow_fixture_execution, 'explicit reserved reference execution required')
+    accepted = args.accepted.resolve()
+    manifest = validate_bundle(accepted)
+    output = files.fresh_output(args.output)
+    result = dict(passed=False, checks=[], candidate=args.expected_candidate,
+                  manifestSHA256=digest(accepted / 'manifest.json'), sdkSHA256=files.SDK_SHA256,
+                  referenceSourceSHA256=digest(FIXTURE / 'helper-reference.rpy'),
+                  sdkLaunchAttempts=0, sdkProcessesStarted=0, sdkUncertainReservations=0,
+                  sdkRefusedLaunches=0, helperStarts=0, nativeEditorLaunches=0)
+    temporary = None
+    try:
+        process.require_candidate(args.expected_candidate, inputs())
+        write_json(output / 'inputs.json', inputs())
+        shared.record_environment(result)
+        sys.path.insert(0, str(REPO / 'spikes/renpy-sdk'))
+        from archive_safety import expected_sha256, install_verified_tar
+        from sdk_adapter import Command, command_argv
+        require(expected_sha256(args.checksums.read_text(encoding='utf-8'), args.archive.name)
+                == files.SDK_SHA256, 'SDK checksum pin mismatch')
+        shutil.copyfile(accepted / 'manifest.json', output / 'accepted-manifest.json')
+        temporary = Path(tempfile.mkdtemp(prefix='control-reference-', dir=output))
+        install_verified_tar(args.archive.resolve(), files.SDK_SHA256, temporary / 'sdk')
+        sdk, game = temporary / 'sdk/renpy-8.5.3-sdk', temporary / 'reference'
+        (game / 'game').mkdir(parents=True)
+        shutil.copyfile(FIXTURE / 'helper-reference.rpy', game / 'game/reference.rpy')
+        node = next(n for screen in manifest['document']['screens'] for n in screen['nodes']
+                    if n['id'] == manifest['imageButtonId'])
+        assets = {a['id']: a for a in manifest['sidecars']['authoring']['assets']}
+        appearances = {}
+        for state in STATES:
+            asset = assets[node['imageButtonAppearances'][state]['assetId']]
+            relative = asset['relativePath']
+            target = game / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(portable_file(accepted, relative), target)
+            appearances[state] = relative.removeprefix('game/')
+        write_json(game / 'reference-input.json', dict(manifestSHA256=result['manifestSHA256'], appearances=appearances))
+        env = dict(os.environ, RENPY_PATH_TO_SAVES=str(temporary / 'saves'), SDL_AUDIODRIVER='dummy',
+                   RENPY_RENDERER='angle2' if sys.platform == 'win32' else 'gl2', RENPY_SCALE_FACTOR='1',
+                   LOOMLIGHT_CONTROL_REFERENCE_OUTPUT=str(output), PYTHONDONTWRITEBYTECODE='1',
+                   TMPDIR=str(temporary), TMP=str(temporary), TEMP=str(temporary))
+        env.pop('SDL_VIDEODRIVER', None)
+        env.pop('SDL_RENDER_DRIVER', None)
+        text = process.run_sdk_logged(result, output, 'reference-matrix',
+            command_argv(sdk, Command.TEST, game, testcase='control_helper_reference::matrix',
+                         allow_project_execution=True), sdk, env, 90)
+        rows = [load_json(line.removeprefix('CONTROL_HELPER_REFERENCE ')) for line in text.splitlines()
+                if line.startswith('CONTROL_HELPER_REFERENCE ')]
+        require(len(rows) == 1 and rows[0]['manifestSHA256'] == result['manifestSHA256']
+                and text.count('[rpytest] Status: PASSED') == 1, 'missing native reference completion')
+        summaries = [line for line in text.splitlines() if line.startswith('[rpytest] Test cases :')]
+        require(len(summaries) == 1 and list(map(int, re.findall(r'\d+', summaries[0])))
+                == [1, 1, 0, 0, 0, 0, 0], 'wrong native reference test selection')
+        result['records'] = rows[0]['records']
+        result['passed'] = True
+    finally:
+        process.finish_cleanup(result, temporary)
+        write_json(output / 'result.json', result)
+    try:
+        validate_reference(accepted, output, result['manifestSHA256'], digest(output / 'result.json'))
+    except Exception as error:
+        result.update(passed=False, admissionError=str(error))
+        write_json(output / 'result.json', result)
+        raise
+    return result
+
+
+def validate_helper(accepted, output, expected_candidate, manifest_sha, reference, reference_sha):
     """Check retained helper pixels and lifecycle; never start an SDK."""
     from PIL import Image
     require(re.fullmatch('[a-f0-9]{40}', expected_candidate), 'full helper candidate required')
     require(digest(portable_file(accepted, 'manifest.json')) == manifest_sha, 'wrong helper source manifest')
     manifest = validate_bundle(accepted)
+    references = validate_reference(accepted, reference, manifest_sha, reference_sha)
     result = load_json(portable_file(output, 'result.json').read_text(encoding='utf-8'))
     require(result.get('passed') is True and result.get('candidate') == expected_candidate
             and result.get('manifestSHA256') == manifest_sha and result.get('sdkValidationProcesses') == 3
@@ -594,7 +698,6 @@ def validate_helper(accepted, output, expected_candidate, manifest_sha):
              if node['id'] in (manifest['barId'], manifest['imageButtonId'])}
     wanted = {(row['request']['width'], row['request']['height'], row['request']['buttonState']): row
               for row in manifest['canvas']}
-    prefixes = dict(zip(STATES, ('idle', 'hover', 'selected_idle', 'selected_hover', 'insensitive', 'selected_insensitive')))
     seen, fingerprints = set(), {state: set() for state in STATES}
     for record in records:
         request, frame = record['request'], record['frame']
@@ -613,18 +716,18 @@ def validate_helper(accepted, output, expected_candidate, manifest_sha):
             controls[kind] = matches[0]
         image_path = portable_file(output, record['filename'])
         require(digest(image_path) == record['sha256'], 'changed helper image')
-        planned = next(node for node in wanted[key]['plan']['nodes'] if node['kind'] == 'imagebutton')
-        reference = portable_file(accepted, 'game/' + planned['properties'][prefixes[key[2]]])
+        require(frame.get('diagnostics', {}).get('physical') == list(key[:2])
+                and frame['diagnostics'].get('drawPerVirtual') == 1, 'wrong helper capture conditions')
         rect = controls['imagebutton']
         require(all(type(rect[name]) in (int, float) and float(rect[name]).is_integer()
                     for name in ('x', 'y', 'width', 'height')), 'non-integral fixture control bounds')
         x, y = int(rect['x']), int(rect['y'])
-        with Image.open(image_path) as rendered, Image.open(reference) as original:
+        with Image.open(image_path) as rendered, Image.open(references[key]) as original:
             require(rendered.size == key[:2] and 0 <= x <= rendered.width-160 and 0 <= y <= rendered.height-80,
                     'helper image dimensions or crop bounds differ')
             crop = rendered.convert('RGBA').crop((x, y, x+160, y+80)).tobytes()
-            expected = original.convert('RGBA').resize((160, 80), Image.Resampling.NEAREST).tobytes()
-            require(crop == expected, 'helper state pixels differ from the admitted bitmap at displayed size')
+            expected = original.convert('RGBA').crop((100, 180, 260, 260)).tobytes()
+            require(crop == expected, 'helper state pixels differ from the independent native reference')
         fingerprints[key[2]].add(hashlib.sha256(crop).hexdigest())
     require(seen == set(wanted) and all(len(values) == 1 for values in fingerprints.values())
             and len({next(iter(values)) for values in fingerprints.values()}) == 6,
@@ -647,6 +750,13 @@ def main(argv=None):
     helper.add_argument('--output', type=Path, required=True)
     helper.add_argument('--expected-candidate', required=True)
     helper.add_argument('--manifest-sha256', required=True)
+    helper.add_argument('--reference', type=Path, required=True)
+    helper.add_argument('--reference-result-sha256', required=True)
+    reference = commands.add_parser('reference-helper', help='One reserved SDK start for independent literal frames.')
+    for name in ('accepted', 'output', 'archive', 'checksums'):
+        reference.add_argument('--' + name, type=Path, required=True)
+    reference.add_argument('--expected-candidate', required=True)
+    reference.add_argument('--allow-fixture-execution', action='store_true', required=True)
     preparation = commands.add_parser('prepare', help='Export committed source; never start an SDK.')
     preparation.add_argument('--output', type=Path, required=True)
     prepared = commands.add_parser('validate', help='Check a retained producer; never start an SDK.')
@@ -662,7 +772,10 @@ def main(argv=None):
         command.add_argument('--expected-candidate', required=True)
     args = parser.parse_args(argv)
     if args.command == 'validate-helper':
-        return validate_helper(args.accepted, args.output, args.expected_candidate, args.manifest_sha256)
+        return validate_helper(args.accepted, args.output, args.expected_candidate, args.manifest_sha256,
+                               args.reference, args.reference_result_sha256)
+    if args.command == 'reference-helper':
+        return reference_helper(args)
     if args.command == 'prepare':
         return prepare(args.output, args.expected_candidate)
     if args.command == 'validate':

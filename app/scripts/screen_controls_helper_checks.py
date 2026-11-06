@@ -8,6 +8,7 @@ import importlib.util
 import io
 import json
 import os
+import shutil
 from pathlib import Path
 import sys
 import tempfile
@@ -31,6 +32,8 @@ class HelperAdmissionChecks(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.output = Path(self.temporary.name)
+        self.reference = self.output / 'reference'
+        self.reference.mkdir()
         self.candidate = 'a' * 40
         manifest = self.manifest
         nodes = {node['kind']: node for screen in manifest['document']['screens'] for node in screen['nodes']
@@ -48,6 +51,7 @@ class HelperAdmissionChecks(unittest.TestCase):
             records.append(dict(request=request, filename=filename, sha256=gate.digest(self.output/filename),
                                 frame=dict(phase='ready', revision=manifest['document']['revision'],
                                            renderer='angle2' if sys.platform == 'win32' else 'gl2',
+                                           diagnostics=dict(physical=[request['width'], request['height']], drawPerVirtual=1),
                                            geometry=[dict(start=nodes[kind]['span']['start'], x=100, y=y, width=w, height=h)
                                                      for kind, y, w, h in [('bar', 100, 320, 24), ('imagebutton', 180, 160, 80)]])))
         inputs = {record['path']: record['sha256'] for record in manifest['files']}
@@ -59,10 +63,31 @@ class HelperAdmissionChecks(unittest.TestCase):
                            sdkValidationProcesses=3, helperStarts=1, helperReturns=1,
                            sourceUnchanged=True, cleanupComplete=True, inputs=inputs,
                            shutdown=dict(cleanupComplete=True, cooperative=True, exitCode=0), records=records)
+        shutil.copyfile(self.accepted / 'manifest.json', self.reference / 'accepted-manifest.json')
+        reference_records = []
+        for record in records:
+            request = record['request']
+            shutil.copyfile(self.output / record['filename'], self.reference / record['filename'])
+            reference_records.append(dict(width=request['width'], height=request['height'],
+                state=request['buttonState'], filename=record['filename'], sha256=record['sha256'],
+                physical=[request['width'], request['height']], drawPerVirtual=1,
+                renderer='angle2' if sys.platform == 'win32' else 'gl2'))
+        self.reference_result = dict(passed=True, cleanupComplete=True, sdkProcessesStarted=1,
+            referenceSourceSHA256=gate.digest(gate.FIXTURE / 'helper-reference.rpy'),
+            sdkUncertainReservations=0, sdkSHA256=gate.files.SDK_SHA256, manifestSHA256=self.manifest_sha,
+            records=reference_records, checks=[dict(name='reference-matrix', passed=True,
+                startState='confirmed', exitCode=0, durationSeconds=1, timedOut=False,
+                outputLimited=False, processReaped=True, cleanupComplete=True)])
+        self.write_reference()
+
+    def write_reference(self):
+        (self.reference / 'result.json').write_text(json.dumps(self.reference_result), encoding='utf-8')
+        self.reference_sha = gate.digest(self.reference / 'result.json')
 
     def check(self, result):
         (self.output/'result.json').write_text(json.dumps(result), encoding='utf-8')
-        return gate.validate_helper(self.accepted, self.output, self.candidate, self.manifest_sha)
+        return gate.validate_helper(self.accepted, self.output, self.candidate, self.manifest_sha,
+                                    self.reference, self.reference_sha)
 
     def test_complete_synthetic_pixel_matrix_is_admitted(self):
         with contextlib.redirect_stdout(io.StringIO()):
@@ -72,6 +97,47 @@ class HelperAdmissionChecks(unittest.TestCase):
         first, second = self.result['records'][:2]
         (self.output/second['filename']).write_bytes((self.output/first['filename']).read_bytes())
         second['sha256'] = gate.digest(self.output/second['filename'])
+        with self.assertRaisesRegex(ValueError, 'state pixels'):
+            self.check(self.result)
+
+    def test_reference_capture_conditions_and_source_identity_refuse(self):
+        original = copy.deepcopy(self.reference_result)
+        for mutate in (lambda row: row.update(manifestSHA256='c'*64),
+                       lambda row: row['records'][0].update(physical=[1000, 700]),
+                       lambda row: row['records'][0].update(drawPerVirtual=0.9),
+                       lambda row: row['records'][0].update(renderer='sw'),
+                       lambda row: row['records'].pop(),
+                       lambda row: row.update(cleanupComplete=False)):
+            self.reference_result = copy.deepcopy(original)
+            mutate(self.reference_result)
+            self.write_reference()
+            with self.subTest(mutation=mutate), self.assertRaises(ValueError):
+                self.check(self.result)
+
+    def test_native_readback_is_not_required_to_equal_raw_asset_bytes(self):
+        # Exact helper/reference equality remains mandatory, including alpha.
+        for record in self.result['records']:
+            for folder in (self.output, self.reference):
+                path = folder / record['filename']
+                with Image.open(path) as image:
+                    image = image.convert('RGBA')
+                    color = image.getpixel((100, 180))
+                    image.paste(tuple(channel-1 for channel in color), (100, 180, 260, 260))
+                    image.save(path)
+            record['sha256'] = gate.digest(self.output / record['filename'])
+        for record in self.reference_result['records']:
+            record['sha256'] = gate.digest(self.reference / record['filename'])
+        self.write_reference()
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.check(self.result)
+        record = self.result['records'][0]
+        path = self.output / record['filename']
+        with Image.open(path) as image:
+            image = image.convert('RGBA')
+            r, g, b, a = image.getpixel((100, 180))
+            image.putpixel((100, 180), (r, g, b, a-1))
+            image.save(path)
+        record['sha256'] = gate.digest(path)
         with self.assertRaisesRegex(ValueError, 'state pixels'):
             self.check(self.result)
 

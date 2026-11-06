@@ -1216,3 +1216,58 @@ seven-start reservation is completely consumed/resolved. Do not exceed Windows
 SDK/package ceilings without explicit user permission. Both issue bodies now
 record the paused state and unresolved gates. No ticket closure, push, PR, merge,
 public upload, signing/trust change or code publication occurred.
+
+## Continuation and passive helper diagnosis, 2026-11-06
+
+Kris selected continuation on the existing clean integration branch at3d8d2411.
+That commit retires the full-gallery gate. The historical failures and cancellation
+above remain recorded; no replacement sweep or completed review panel is selected.
+Live #51/#52 requirements and cumulative counts were read through the GitHub
+connector after the CLI returned HTTP401. #51 owns the resumed reservations.
+
+The corrected retained Windows3b package PASSES native attempt2 in65.437s, exit0.
+All six control stages pass, including picker focus, invalid input/Cancel, numeric
+keyboard sizing, one-step history, opaque Source neighbors and reopen. Source/disk
+equality and fixture/process cleanup pass. The executable keeps SHA256
+`d038cf220bdb7ca69fd4824f40ff7440a060b856899f80015f443ed78f3ab58e`.
+Result `app/target/controls-51-52/native-3b663002-resume/runtime-ui-screen-controls.json`
+has SHA256 `8ebdb889585b876bb49f825d40f0a976c5637dadb90861a340ddd392d22553cc`.
+The initial launcher write was refused before executable start; the owner-context
+write/run succeeded without ACL changes. This consumes only native2, with no new
+SDK or package start. Input is synthetic in the packaged WebView, not physical.
+
+The original passive helper command reproduces its state-pixel failure without
+an SDK. All twelve retained160x80 crops have correct geometry and distinct states.
+Every RGBA channel is one byte lower than the raw PNG: normal220/40/40/255 becomes
+219/39/39/254. Both helper aspects have identical state pixels. All six1280x720
+independent native runtime references match the helper exactly. The1024x768 native
+references have12561 matching interior pixels,238 partially covered edge pixels
+and one corner pixel, while the helper is uniform at recorded physical1024x768,
+drawPerVirtual1. The old runtime observer records no physical/scale metadata.
+This demonstrates an invalid raw-asset comparison and an unmatched capture basis;
+it does not establish a product-renderer defect or qualify the full helper matrix.
+The failed wrapper and all original artifacts remain unchanged.
+
+The corrected passive consumer requires independent whole-frame native references,
+their result hash, accepted manifest, backend, physical dimensions and drawing
+scale. It still compares every RGBA byte without tolerance. A new reference-only
+fixture copies only admitted images into a disposable project; it imports no game
+scripts, canvas plan or product renderer. Its explicit command uses one reserved
+SDK process for both aspects and all six literal images. Offline admission tests
+pass5/5, including source-minus-one native readback, a single changed alpha byte,
+wrong scale/backend/source and incomplete lifecycle. SDK execution of this new
+reference remains pending. Windows SDK/package ceilings stay closed.
+
+Selected `npm run design:check -- --approval bars-imagebuttons` PASSES at3d8d2411.
+It validates actual A2 metadata/source/captures and changed-source refusal, with
+zero sample sweeps, one selected approval and no errors. Temporary report:
+`loomlight-design-check-cY1tNy/report.json`. The approved source37d29ca1 and thirteen
+capture hashes remain pinned. No new prototype or approval is selected.
+
+The existing Mac thread imported the verified3b delta and compiled the helper test
+without execution. Its24 passive checks and20 native/runner/package checks pass.
+Mac's retained native references also have uniform source-minus-one RGBA across
+both aspects; all24 actual/reference pairs match, without physical/scale metadata.
+One signed package and one subsequent native launch are reserved there at exact3b;
+terminal results will resolve actual counts. No new Mac thread, production writer,
+review panel, SDK/helper reservation or publication is selected at this checkpoint.

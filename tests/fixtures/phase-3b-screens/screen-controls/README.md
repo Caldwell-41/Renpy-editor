@@ -33,3 +33,17 @@ its own commit. The four runtime cases load that current instrumentation anew.
 Run the explicit `screen_controls_prepared_checks.py` admission/rejection checks
 before trusting reuse. Reserve the selected starts in #51 first.
 The result retains actual starts, failures, process cleanup and source identities.
+
+## Helper reference comparison
+
+`reference-helper` uses one separately reserved SDK process to render twelve
+independent literal image-button references. It copies only the admitted images
+into a fresh reference project, without loading accepted game scripts or the
+product canvas renderer. Whole-frame captures record backend, physical dimensions
+and drawing scale. A fitted window refuses admission; do not normalize its pixels.
+
+`validate-helper` requires that reference directory and its retained result SHA256.
+It compares every RGBA byte in each 160x80 control crop, including alpha, at both
+aspects. Source PNG bytes are not native render readback. The comparison accepts
+no pixel tolerance. These references establish rendering only, not game actions,
+physical input or native editor preview routing.
