@@ -1,5 +1,40 @@
 # Current status
 
+## Integer bars and image buttons review corrections
+
+The combined #51/#52 implementation is published in
+[draft PR #83](https://github.com/Caldwell-41/Renpy-editor/pull/83) on
+`codex/51-52-integration`, targeting `codex/phase3b-screen-designer`.
+Baseline `a78de562` passes its exact-head CI/artifact audit. The five verified
+findings from the requested Terra review are corrected using root-cause diagnosis
+and TDD at the confirmed public core IPC and actual Screens UI/core seams. The
+parent audit passes all five original cases and protected refusal paths. Local
+evidence includes 31 focused core and 103 frontend tests, the existing controls
+journey, independent parent probes and a fresh 17-test control run.
+[#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) owns the live PR,
+run/attempt/head/tree and terminal audit receipts. Both tickets stay open; merge
+and ready-for-review transition remain unselected. The branch validation plan
+still requires automatic quality and both-target harness jobs. Kris selected
+publication of the corrections without CI; the changed head has no CI qualification
+and cannot inherit the baseline's passing status. [Correction audit](../tasks/evidence/bars-and-image-buttons.md#five-review-corrections-and-parent-audit-complete-2026-11-06)
+records results. Recorded runtime/package/helper evidence below retains its original
+producing candidates and does not qualify the changed code.
+
+| Capability | Verified evidence | Scope retained |
+| --- | --- | --- |
+| Control editing | Actual UI/core journey, five review regressions, 378 frontend tests and both packaged control journeys pass on recorded candidates. Final coordinator review maps every original criterion. | Original Standards3/Spec3 corrections remain self-verified; footer correction has parent rendering proof. No new review panel. |
+| Runtime and packages | Windows and Mac normal/fixture-preview matrices pass at both aspects. Windows corrected package/native and Mac signed package/native journeys pass. | Producing candidates remain distinct. Physical input and native editor preview routing are separate claims. |
+| Helper rendering | Both targets pass all twelve control crops, 614400 RGBA bytes per target with zero residual, matching physical dimensions and drawing scale, source invariance and cooperative cleanup. | Windows DPI omission is fixed at the reference launch boundary. Failed historical wrappers remain preserved. |
+| Approved design | A2 source37d29ca1 and thirteen captures stay pinned. The selected approval/source/capture and changed-source-refusal check passes. | The full-gallery gate is retired. Broader canvas and human acceptance remain separate. |
+
+Windows SDK use ends at18/20; no further start is selected. #51 owns all cumulative
+counts. No additional capped operation is selected, with zero reservations or
+uncertain starts. Three Windows OS1314 symlink cases remain unqualified, and two unrelated
+untracked recovery receipts retain newline failures; tracked-file validation passes.
+[Handover](HANDOVER.md#integer-bars-and-image-buttons-draft-publication) owns recovery.
+[Final proof and boundaries](../tasks/evidence/bars-and-image-buttons.md#root-cause-correction-and-both-target-local-verification-complete-2026-11-06)
+retain exact identities and prior failures. Wider #54/Phase3B acceptance remains separate.
+
 ## Variable text, ordered actions and nested canvas accepted
 
 Kris selected [PR #81](https://github.com/Caldwell-41/Renpy-editor/pull/81)

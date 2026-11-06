@@ -10,5 +10,4 @@ export const definition: Omit<LabScreen, "approval"> = {
     { id: "book", title: "Settings book", load: () => import("./book.ts") },
     { id: "desk", title: "Control desk", load: () => import("./desk.ts") },
   ],
-  check: "./screens/settings/check.mjs",
 };

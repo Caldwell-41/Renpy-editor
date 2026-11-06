@@ -3,7 +3,11 @@ use super::*;
 #[path = "action_runtime_tests.rs"]
 mod runtime;
 
-fn create_action_screen(service: &mut LifecycleService, name: &str, kind: &str) -> Value {
+pub(super) fn create_action_screen(
+    service: &mut LifecycleService,
+    name: &str,
+    kind: &str,
+) -> Value {
     let catalog = ipc(service, "screens.list", json!({}));
     let created = ipc(
         service,
@@ -20,7 +24,7 @@ fn create_action_screen(service: &mut LifecycleService, name: &str, kind: &str) 
         .clone()
 }
 
-fn reviewed_target(service: &mut LifecycleService, owner: &Value) -> Value {
+pub(super) fn reviewed_target(service: &mut LifecycleService, owner: &Value) -> Value {
     let target = json!({"screenId":owner["id"],"sourceName":owner["name"]});
     let resolved = ipc(service, "screens.resolveTarget", json!({"binding":target}));
     json!({"target":target,"revisions":resolved["revisions"]})

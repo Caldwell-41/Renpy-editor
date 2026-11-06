@@ -64,14 +64,15 @@ icon family. They do not promote or replace an approved reference.
 ## Verification
 
 The chosen evidence host is the local Mac with the pinned repository toolchain.
-Run `node design-lab/check-screen.mjs new-project` from `app/` after sourcing
-`../.toolchains/enter-macos.sh`. The focused module exercises both layouts through
+The former focused module exercised both layouts through
 independent folder edits, naming errors, fictional location cancellation, SDK
 incompatibility/cancellation/checksum failure/retry, portrait and 4:3 previews,
 invalid/empty dimensions, retained review edits, the Git default, leaving-draft
-guard, creation failure, created-but-not-opened and success. The runner covers
+guard, creation failure, created-but-not-opened and success. The runner covered
 40 rendering cases across both themes and sizes. Reports and temporary captures
 belong under ignored `.toolchains/design-lab/pages/new-project/`.
+For current reviews, use [focused verification](../../../app/design-lab/README.md#focused-verification)
+with the selected New project layout. The historical page runner and interaction suite are retired.
 
 Initial typing passes. The sandbox launch failed at Chromium's macOS Mach-port
 registration, before browser cases ran; the authorised local retry reached all

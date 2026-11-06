@@ -1,0 +1,167 @@
+{
+  "status": "unapproved-candidate-awaiting-exact-user-decision",
+  "screenId": "bars-imagebuttons",
+  "revisionId": "inspector-v2",
+  "variantId": "inspector-v2",
+  "source": {
+    "commit": "0263728d9e07e951d25060d635d58094eac20c28",
+    "fingerprint": "1d6424ed32ef37e6dc9e8d31fe63ee8cf7ce5308d6139de3bcc35fc6a564034d",
+    "command": "npm run design:source"
+  },
+  "originalReference": {
+    "commit": "0a6e571eb4c65ea60ce1fa446cd27d2a12985884",
+    "variantId": "inspector-v1",
+    "studyStylesAndAppearanceResolverUnchanged": true,
+    "productionFilesChanged": false
+  },
+  "export": {
+    "path": ".toolchains/bars-imagebuttons/refined-a2.html",
+    "sha256": "75728efd321dff3c689d0639734a4736f861a985182c201ef53545214e564e0a"
+  },
+  "focusedSyntheticCheck": {
+    "input": ".toolchains/bars-imagebuttons/a2-dom-test.html",
+    "sha256": "5052eb195aa1670ab0dfde5c62862655bf97f359c42fb79766d9b1263806c44b",
+    "result": ".toolchains/bars-imagebuttons/a2-dom-result.json",
+    "completions": [
+      {
+        "width": 1280,
+        "height": 800,
+        "passedCount": 15,
+        "failed": null,
+        "evidence": "synthetic DOM callbacks only"
+      },
+      {
+        "width": 560,
+        "height": 800,
+        "passedCount": 15,
+        "failed": null,
+        "evidence": "synthetic DOM callbacks only"
+      }
+    ],
+    "appearance": "dark",
+    "contentHeight": 820,
+    "testCapturesAreApprovalCaptures": false,
+    "unproved": [
+      "trusted keyboard/Escape",
+      "native pointer and file picker",
+      "real core/source/runtime",
+      "full design:check",
+      "human approval"
+    ]
+  },
+  "draftCaptureDirectory": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-final",
+  "captureConditions": {
+    "appearance": "dark",
+    "height": 820,
+    "scale": 1,
+    "widths": [
+      1280,
+      560
+    ],
+    "states": [
+      "button",
+      "bar",
+      "compact-overview",
+      "compact-editing",
+      "actions",
+      "picker",
+      "invalid-size"
+    ],
+    "setup": "Exact exported source with real prototype controls selecting runtime presentation states; no test assertions",
+    "consoleMessages": [],
+    "approved": false
+  },
+  "council": {
+    "requestedRounds": 2,
+    "round1Complete": true,
+    "round2Pending": false,
+    "models": [
+      "Claude Opus 5.5 xhigh",
+      "GPT-6.1 Sol xhigh"
+    ],
+    "scope": "read-only source and static rendered-image review; parent alone edits",
+    "roundsCompleted": 2,
+    "reviewedSource": "fb147c895898b2f24ce30d75261302157dc7279b",
+    "thirdRound": false
+  },
+  "reviewedSource": {
+    "commit": "fb147c895898b2f24ce30d75261302157dc7279b",
+    "fingerprint": "906f26afa2abed728e850b93aeb0f308a585fef4774893e9bab4ee889c097ecd",
+    "command": "npm run design:source"
+  },
+  "postReviewCorrections": [
+    "draft-owned feedback and action correction cleanup",
+    "signed whole-pixel position validation and preserved accepted preview",
+    "redraw focus restoration with title fallback",
+    "visible field-associated errors with red focus border",
+    "compact sticky-bar scroll offsets",
+    "consistent picker alignment and changed-value footer wording"
+  ],
+  "postReviewCorrectionsIndependentlyRescored": false,
+  "reviewCaptureDirectory": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-draft",
+  "captures": [
+    {
+      "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-final/button-1280.png",
+      "sha256": "e6a4f268fd3693d7fb8a31b9b62eeb06c0ea02101a0f884d2acbd18ee87352d7",
+      "state": "button",
+      "theme": "dark",
+      "width": 1280,
+      "height": 820,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-final/bar-1280.png",
+      "sha256": "72f2acef98a82d4c4a08f5a1470954f267432197a8b4e2c616a475a43893ef92",
+      "state": "bar",
+      "theme": "dark",
+      "width": 1280,
+      "height": 820,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-final/compact-overview-560.png",
+      "sha256": "7ce752d24352757fa6e279302855256e674b3706cade899fffdb932b71a19771",
+      "state": "compact-overview",
+      "theme": "dark",
+      "width": 560,
+      "height": 820,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-final/compact-editing-560.png",
+      "sha256": "5b84d17c214fdfab53df19c1597bc6af2f0ae9ef39c412644fd3529a2f3b125a",
+      "state": "compact-editing",
+      "theme": "dark",
+      "width": 560,
+      "height": 820,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-final/actions-1280.png",
+      "sha256": "2c3db1ae2bfbf7412ea41240007476dc9f1a85a6b23377cbef134ec07340fc62",
+      "state": "actions",
+      "theme": "dark",
+      "width": 1280,
+      "height": 820,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-final/picker-1280.png",
+      "sha256": "a1c38ee05e8b70938438a79c843dc688d940783e80d1086670a6c82a1a4c50b0",
+      "state": "picker",
+      "theme": "dark",
+      "width": 1280,
+      "height": 820,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-final/invalid-size-1280.png",
+      "sha256": "efbd78e41b6758646cec9693f560188b6cc977a9e07ec1c38c2605b715bbe76d",
+      "state": "invalid-size",
+      "theme": "dark",
+      "width": 1280,
+      "height": 820,
+      "scale": 1
+    }
+  ]
+}

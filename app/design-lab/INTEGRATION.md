@@ -36,8 +36,9 @@ task owns implementation scope, progress and acceptance.
    deviations. `supersedes` names the previous current revision, or null for the first
    lab approval. For a legacy predecessor, identify its owning record in the decision.
    Set `currentApproved` to this revision. Keep previous approval entries unchanged.
-5. Run `npm run design:check`. Inspect the selected version in the lab. The current
-   approved pointer, labels, history, captures and source identity must agree. An
+5. Follow the [promotion checks](README.md#focused-verification) for the selected
+   screen and inspect that version in the lab. The current approved pointer, labels,
+   history, captures and source identity must agree. An
    unapproved starter remains a draft. A new experiment gets its own revision and
    variant ID; approved source is preserved rather than edited to match later work.
 

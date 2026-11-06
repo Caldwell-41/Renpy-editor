@@ -673,6 +673,18 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Evidence:** [L05 CI2 audit](../tasks/evidence/project-fonts.md#ci2-audit-and-corrections),
   [L07 correction](../tasks/evidence/shared-look.md#root-cause-correction-and-bounded-ci2-2026-10-31).
 
+- **Controls follow-up:** raw source PNG bytes also differ from native render
+  readback. Both targets produce source-minus-one RGBA for the six-state fixture.
+  Windows fitted reference edges differ while helper crops are uniform. Preserve
+  exact pixels and capture conditions; use independent whole-frame native
+  references. Corrected Mac admission passes all twelve crops with zero residual;
+  Windows pixels also match exactly, but reference scale1.5 differs from helper1.0.
+  Production pins `RENPY_HIGHDPI=1.0`; the reference launcher omitted it. The
+  corrected launcher and offline launch-boundary regression now pass. Windows
+  start18 also passes exact native/helper admission with matching scale1.0;
+  errors now print both actual capture conditions. See
+  [the control diagnosis](../tasks/evidence/bars-and-image-buttons.md#continuation-and-passive-helper-diagnosis-2026-11-06).
+
 ## H47. Shared Apply hides text dimensions
 
 - **Class/search:** product; text Width/Height, wrapping width, `sharedCommit`.

@@ -21,10 +21,10 @@ prototype behaviour; product acceptance remains under [TESTING](../../docs/TESTI
   Use real editable controls and enough interaction to review the selected task.
   Preserve existing capabilities; identify additions, removals and changed behaviour
   in the screen's review notes.
-- Before review, run the local module check and try the changed interaction at the
-  relevant sizes and themes. Add a focused screen check when the interaction needs
-  repeatable proof. Repair failed checks at their actual layer. Browser evidence
-  establishes sample rendering and interaction, not real saves or native acceptance.
+- Before review, follow [focused verification](README.md#focused-verification).
+  Select the prototype and layout under review, then exercise its changed interaction.
+  Browser evidence establishes sample rendering and interaction; product acceptance
+  remains separate.
 - Approval, promotion or app integration: read [INTEGRATION](INTEGRATION.md) before
   changing approval records or product code. It defines the source/approval checks,
   real-operation mapping, comparison loop and completion criteria.

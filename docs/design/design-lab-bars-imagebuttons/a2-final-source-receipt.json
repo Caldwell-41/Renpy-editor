@@ -1,0 +1,319 @@
+{
+  "status": "unapproved-candidate-awaiting-exact-user-decision",
+  "screenId": "bars-imagebuttons",
+  "variantId": "inspector-v2",
+  "source": {
+    "commit": "37d29ca180dc81cb350ff8ff99bfaee90e65cea9",
+    "fingerprint": "fadc5fa2591ac31edec149b871505fcfa20c54b26e622d44e60a74b0b8ee0c80",
+    "command": "node app/design-lab/approval-source.mjs"
+  },
+  "reviewedSource": {
+    "commit": "0263728d9e07e951d25060d635d58094eac20c28",
+    "fingerprint": "1d6424ed32ef37e6dc9e8d31fe63ee8cf7ce5308d6139de3bcc35fc6a564034d"
+  },
+  "originalReference": {
+    "commit": "0a6e571eb4c65ea60ce1fa446cd27d2a12985884",
+    "variantId": "inspector-v1",
+    "studyStylesAndAppearanceResolverUnchanged": true,
+    "productionFilesChanged": false
+  },
+  "council": {
+    "roundsCompleted": 3,
+    "thirdRoundExplicitlyRequested": true,
+    "fourthRound": false,
+    "finalLocalCorrectionsIndependentlyRescored": false,
+    "scope": "read-only source and static rendered-image review"
+  },
+  "export": {
+    "path": ".toolchains/bars-imagebuttons/refined-a2.html",
+    "sha256": "a2eaa31b2a719f478bfefa03d977d5200ccda6daf57ac933eedcae8027486e3e"
+  },
+  "focusedSyntheticCheck": {
+    "input": ".toolchains/bars-imagebuttons/final-dom-test.html",
+    "sha256": "dbd6c6e7a1eb8cf577d223789c6277eccfae4725348d5e2aa2eb5a4dbf2dcc91",
+    "result": ".toolchains/bars-imagebuttons/final-dom-results-37d29.json",
+    "outputs": [
+      {
+        "width": 1280,
+        "output": [
+          {
+            "type": "text",
+            "text": "{\"width\":1280,\"contentHeight\":820,\"capturedHeight\":820,\"consoleMessages\":[{\"level\":\"log\",\"text\":\"A2_DOM_RECEIPT {\\\"name\\\":\\\"A2_DOM_RECEIPT\\\",\\\"evidence\\\":\\\"synthetic DOM callbacks only\\\",\\\"width\\\":1280,\\\"height\\\":800,\\\"passed\\\":[\\\"six inert states and native fallback hints\\\",\\\"continuous section navigation exposes size and actions\\\",\\\"integer picker cancel restores focus\\\",\\\"one Apply includes bounds and dimensions; Undo/Redo restore both\\\",\\\"no-op and Cancel preserve history; invalid bounds retain input and focus\\\",\\\"Source and navigation retain draft\\\",\\\"unrelated edit and workspace remount retain draft revisions\\\",…\"},{\"level\":\"log\",\"text\":\"A2_DOM_COMPLETION {\\\"width\\\":1280,\\\"height\\\":800,\\\"passedCount\\\":16,\\\"failed\\\":null,\\\"evidence\\\":\\\"synthetic DOM callbacks only\\\"}\"}],\"screenshot\":{\"mimeType\":\"image/png\",\"width\":1280,\"height\":820}}"
+          }
+        ]
+      },
+      {
+        "width": 560,
+        "output": [
+          {
+            "type": "text",
+            "text": "{\"width\":560,\"contentHeight\":820,\"capturedHeight\":820,\"consoleMessages\":[{\"level\":\"log\",\"text\":\"A2_DOM_RECEIPT {\\\"name\\\":\\\"A2_DOM_RECEIPT\\\",\\\"evidence\\\":\\\"synthetic DOM callbacks only\\\",\\\"width\\\":560,\\\"height\\\":800,\\\"passed\\\":[\\\"six inert states and native fallback hints\\\",\\\"continuous section navigation exposes size and actions\\\",\\\"integer picker cancel restores focus\\\",\\\"one Apply includes bounds and dimensions; Undo/Redo restore both\\\",\\\"no-op and Cancel preserve history; invalid bounds retain input and focus\\\",\\\"Source and navigation retain draft\\\",\\\"unrelated edit and workspace remount retain draft revisions\\\",\\\"…\"},{\"level\":\"log\",\"text\":\"A2_DOM_COMPLETION {\\\"width\\\":560,\\\"height\\\":800,\\\"passedCount\\\":16,\\\"failed\\\":null,\\\"evidence\\\":\\\"synthetic DOM callbacks only\\\"}\"}],\"screenshot\":{\"mimeType\":\"image/png\",\"width\":560,\"height\":820}}"
+          }
+        ]
+      }
+    ],
+    "evidence": "synthetic DOM callbacks only",
+    "passedCountEachWidth": 16,
+    "widths": [
+      1280,
+      560
+    ],
+    "innerHeight": 800,
+    "appearance": "dark",
+    "testCapturesAreApprovalCaptures": false,
+    "unproved": [
+      "trusted keyboard/Escape",
+      "native pointer and file picker",
+      "real core/source/runtime",
+      "full design:check",
+      "human approval"
+    ]
+  },
+  "captures": [
+    {
+      "state": "button",
+      "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/button-1280.png",
+      "sha256": "e6a4f268fd3693d7fb8a31b9b62eeb06c0ea02101a0f884d2acbd18ee87352d7",
+      "width": 1280,
+      "height": 820,
+      "appearance": "dark",
+      "scale": 1,
+      "input": ".toolchains/bars-imagebuttons/refined-a2.html",
+      "inputSha256": "a2eaa31b2a719f478bfefa03d977d5200ccda6daf57ac933eedcae8027486e3e",
+      "toolOutput": [
+        {
+          "type": "text",
+          "text": "{\"width\":1280,\"contentHeight\":820,\"capturedHeight\":820,\"consoleMessages\":[],\"screenshot\":{\"mimeType\":\"image/png\",\"width\":1280,\"height\":820}}"
+        }
+      ]
+    },
+    {
+      "state": "bar",
+      "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/bar-1280.png",
+      "sha256": "72f2acef98a82d4c4a08f5a1470954f267432197a8b4e2c616a475a43893ef92",
+      "width": 1280,
+      "height": 820,
+      "appearance": "dark",
+      "scale": 1,
+      "input": ".toolchains/bars-imagebuttons/capture-bar.html",
+      "inputSha256": "f238150879aec0cea9d6b44f94b029dc80821b71de4b4d8be481d8475fc77fd7",
+      "toolOutput": [
+        {
+          "type": "text",
+          "text": "{\"width\":1280,\"contentHeight\":820,\"capturedHeight\":820,\"consoleMessages\":[],\"screenshot\":{\"mimeType\":\"image/png\",\"width\":1280,\"height\":820}}"
+        }
+      ]
+    },
+    {
+      "state": "compact-overview",
+      "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/compact-overview-560.png",
+      "sha256": "7ce752d24352757fa6e279302855256e674b3706cade899fffdb932b71a19771",
+      "width": 560,
+      "height": 820,
+      "appearance": "dark",
+      "scale": 1,
+      "input": ".toolchains/bars-imagebuttons/refined-a2.html",
+      "inputSha256": "a2eaa31b2a719f478bfefa03d977d5200ccda6daf57ac933eedcae8027486e3e",
+      "toolOutput": [
+        {
+          "type": "text",
+          "text": "{\"width\":560,\"contentHeight\":820,\"capturedHeight\":820,\"consoleMessages\":[],\"screenshot\":{\"mimeType\":\"image/png\",\"width\":560,\"height\":820}}"
+        }
+      ]
+    },
+    {
+      "state": "compact-editing",
+      "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/compact-editing-560.png",
+      "sha256": "5b84d17c214fdfab53df19c1597bc6af2f0ae9ef39c412644fd3529a2f3b125a",
+      "width": 560,
+      "height": 820,
+      "appearance": "dark",
+      "scale": 1,
+      "input": ".toolchains/bars-imagebuttons/capture-compact.html",
+      "inputSha256": "7e601cca8ed052b3e7d2e65410d6362c96103b4b1383879bf41b107f5ef74393",
+      "toolOutput": [
+        {
+          "type": "text",
+          "text": "{\"width\":560,\"contentHeight\":820,\"capturedHeight\":820,\"consoleMessages\":[],\"screenshot\":{\"mimeType\":\"image/png\",\"width\":560,\"height\":820}}"
+        }
+      ]
+    },
+    {
+      "state": "actions",
+      "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/actions-1280.png",
+      "sha256": "2c3db1ae2bfbf7412ea41240007476dc9f1a85a6b23377cbef134ec07340fc62",
+      "width": 1280,
+      "height": 820,
+      "appearance": "dark",
+      "scale": 1,
+      "input": ".toolchains/bars-imagebuttons/capture-actions.html",
+      "inputSha256": "b575da27b95688eeca31c300f9388518bc94d6c848a2aefe4ad5dd74c6dfa406",
+      "toolOutput": [
+        {
+          "type": "text",
+          "text": "{\"width\":1280,\"contentHeight\":820,\"capturedHeight\":820,\"consoleMessages\":[],\"screenshot\":{\"mimeType\":\"image/png\",\"width\":1280,\"height\":820}}"
+        }
+      ]
+    },
+    {
+      "state": "picker",
+      "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/picker-1280.png",
+      "sha256": "a1c38ee05e8b70938438a79c843dc688d940783e80d1086670a6c82a1a4c50b0",
+      "width": 1280,
+      "height": 820,
+      "appearance": "dark",
+      "scale": 1,
+      "input": ".toolchains/bars-imagebuttons/capture-picker.html",
+      "inputSha256": "5f48b5cc7352b5abd3307467c3e0e03a7dc5e554c8d5f27bbee6587f1a352b17",
+      "toolOutput": [
+        {
+          "type": "text",
+          "text": "{\"width\":1280,\"contentHeight\":820,\"capturedHeight\":820,\"consoleMessages\":[],\"screenshot\":{\"mimeType\":\"image/png\",\"width\":1280,\"height\":820}}"
+        }
+      ]
+    },
+    {
+      "state": "invalid-size",
+      "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/invalid-size-1280.png",
+      "sha256": "efbd78e41b6758646cec9693f560188b6cc977a9e07ec1c38c2605b715bbe76d",
+      "width": 1280,
+      "height": 820,
+      "appearance": "dark",
+      "scale": 1,
+      "input": ".toolchains/bars-imagebuttons/capture-error.html",
+      "inputSha256": "e5785b45ce95e383dde073036966a05f82fc93bfb7b86c6629bef68531aac7a0",
+      "toolOutput": [
+        {
+          "type": "text",
+          "text": "{\"width\":1280,\"contentHeight\":820,\"capturedHeight\":820,\"consoleMessages\":[],\"screenshot\":{\"mimeType\":\"image/png\",\"width\":1280,\"height\":820}}"
+        }
+      ]
+    },
+    {
+      "state": "missing-asset",
+      "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/missing-asset-1280.png",
+      "sha256": "c649623738e177478523dbb2e359cab517e63bd292b49a6ff087046b9fca4e8b",
+      "width": 1280,
+      "height": 820,
+      "appearance": "dark",
+      "scale": 1,
+      "input": ".toolchains/bars-imagebuttons/capture-missing-asset.html",
+      "inputSha256": "8781a2b642d032ef6e62f42cadd293c1c4eb9e9a8beee465e2d6b5645fd044b8",
+      "toolOutput": [
+        {
+          "type": "text",
+          "text": "{\"width\":1280,\"contentHeight\":820,\"capturedHeight\":820,\"consoleMessages\":[],\"screenshot\":{\"mimeType\":\"image/png\",\"width\":1280,\"height\":820}}"
+        }
+      ]
+    },
+    {
+      "state": "missing-asset",
+      "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/missing-asset-560.png",
+      "sha256": "851c3df3f9443b71cdb4361080b8ad9859becac332b3c51615db77d3cf1a02f2",
+      "width": 560,
+      "height": 820,
+      "appearance": "dark",
+      "scale": 1,
+      "input": ".toolchains/bars-imagebuttons/capture-missing-asset.html",
+      "inputSha256": "8781a2b642d032ef6e62f42cadd293c1c4eb9e9a8beee465e2d6b5645fd044b8",
+      "toolOutput": [
+        {
+          "type": "text",
+          "text": "{\"width\":560,\"contentHeight\":820,\"capturedHeight\":820,\"consoleMessages\":[],\"screenshot\":{\"mimeType\":\"image/png\",\"width\":560,\"height\":820}}"
+        }
+      ]
+    },
+    {
+      "state": "stale",
+      "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/stale-1280.png",
+      "sha256": "8361da81a91b726c9d003e434febc4fc425a83ba542736073790c3de65bcf9c3",
+      "width": 1280,
+      "height": 820,
+      "appearance": "dark",
+      "scale": 1,
+      "input": ".toolchains/bars-imagebuttons/capture-stale.html",
+      "inputSha256": "ff3e43fc28277cd8460d7e86464302cc3bd011da0bf4dad501407ff06970ec73",
+      "toolOutput": [
+        {
+          "type": "text",
+          "text": "{\"width\":1280,\"contentHeight\":820,\"capturedHeight\":820,\"consoleMessages\":[],\"screenshot\":{\"mimeType\":\"image/png\",\"width\":1280,\"height\":820}}"
+        }
+      ]
+    },
+    {
+      "state": "stale",
+      "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/stale-560.png",
+      "sha256": "96f301c60cd257a85462226852e092d788c925e4a3c667b83970fa6fb2934947",
+      "width": 560,
+      "height": 820,
+      "appearance": "dark",
+      "scale": 1,
+      "input": ".toolchains/bars-imagebuttons/capture-stale.html",
+      "inputSha256": "ff3e43fc28277cd8460d7e86464302cc3bd011da0bf4dad501407ff06970ec73",
+      "toolOutput": [
+        {
+          "type": "text",
+          "text": "{\"width\":560,\"contentHeight\":820,\"capturedHeight\":820,\"consoleMessages\":[],\"screenshot\":{\"mimeType\":\"image/png\",\"width\":560,\"height\":820}}"
+        }
+      ]
+    },
+    {
+      "state": "action-error",
+      "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/action-error-1280.png",
+      "sha256": "95db4d4d70a13fc0bbac463caf665efec4f1abcdeb6b86c4e88d686a4ced8a39",
+      "width": 1280,
+      "height": 820,
+      "appearance": "dark",
+      "scale": 1,
+      "input": ".toolchains/bars-imagebuttons/capture-action-error.html",
+      "inputSha256": "291e44aab489b5ed033470090cda5e4a085852add1e4667b5aeb7832276d72e3",
+      "toolOutput": [
+        {
+          "type": "text",
+          "text": "{\"width\":1280,\"contentHeight\":820,\"capturedHeight\":820,\"consoleMessages\":[],\"screenshot\":{\"mimeType\":\"image/png\",\"width\":1280,\"height\":820}}"
+        }
+      ]
+    },
+    {
+      "state": "action-error",
+      "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/action-error-560.png",
+      "sha256": "edf161f73804fdb83684e0946d6ecb273f9c92c1832d1728165385d7261ff6ec",
+      "width": 560,
+      "height": 820,
+      "appearance": "dark",
+      "scale": 1,
+      "input": ".toolchains/bars-imagebuttons/capture-action-error.html",
+      "inputSha256": "291e44aab489b5ed033470090cda5e4a085852add1e4667b5aeb7832276d72e3",
+      "toolOutput": [
+        {
+          "type": "text",
+          "text": "{\"width\":560,\"contentHeight\":820,\"capturedHeight\":820,\"consoleMessages\":[],\"screenshot\":{\"mimeType\":\"image/png\",\"width\":560,\"height\":820}}"
+        }
+      ]
+    }
+  ],
+  "annotation": {
+    "path": "docs/design/design-lab-bars-imagebuttons/annotated-a2-final.png",
+    "sha256": "2e94b5051dedb302dfbd0227533b340ea9aa51754f272c830b73c0a8494c2d14",
+    "width": 1600,
+    "height": 1296,
+    "input": ".toolchains/bars-imagebuttons/annotated-a2.html",
+    "inputSha256": "67d3c8703157e9832b791fc2859a6ba195b63f714f88cc42750ebffd68cb564b",
+    "toolOutput": {
+      "width": 1600,
+      "contentHeight": 1296,
+      "capturedHeight": 1296,
+      "consoleMessages": []
+    },
+    "approvalCapture": false,
+    "baseCapture": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/button-1280.png",
+    "errorDetail": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/invalid-size-1280.png",
+    "originalInset": ".toolchains/bars-imagebuttons/council-a-baseline-1280.png"
+  },
+  "knownLimitations": [
+    "Compact stale capture has partly clipped commit buttons at its captured scroll position; page remains scrollable.",
+    "Touched action restored to original can retain Unsaved: Actions wording until no-op Apply; no history is added.",
+    "No trusted/native input, real core/runtime, full lab gate or human approval is claimed."
+  ],
+  "approval": null
+}

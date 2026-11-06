@@ -14,5 +14,4 @@ export const definition: Omit<LabScreen, "approval"> = {
     { id: "paced", title: "Paced wizard", load: () => import("./paced.ts") },
     { id: "sheet", title: "Setup sheet", load: () => import("./sheet.ts") },
   ],
-  check: "./screens/new-project/check.mjs",
 };

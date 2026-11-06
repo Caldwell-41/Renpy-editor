@@ -15,7 +15,7 @@
  const settled=async()=>until(()=>document.querySelector('.screen-image-state')?.textContent==='No pending changes');
  try {
   await until(()=>document.querySelector('.recent-open'));document.querySelector('.recent-open').click();await click('Screens');sessionId=(await call('project.current')).sessionId;
-  await click('New blank screen');await until(()=>field('Screen name'));input('Screen name','travel_notes');key('Screen name','Enter');await until(()=>document.querySelector('.screen-tree [data-node-id]'));
+  await click('New screen');await until(()=>field('Screen name'));const starter=document.querySelector('select[aria-label="Start with"]');starter.value='blank';starter.dispatchEvent(new Event('change',{bubbles:true}));input('Screen name','travel_notes');await click('Create screen');await until(()=>document.querySelector('.screen-tree [data-node-id]'));
   identity=(await call('screens.list')).owned[0];assert(identity?.resolved,'Owned screen resolves');
   await click('Add element');await until(()=>document.querySelector('[data-kind=image]'));document.querySelector('[data-kind=image]').click();await until(()=>document.querySelector('[aria-label="Choose image"]'));document.querySelector('[aria-label="Choose image"]').click();await until(()=>document.querySelector('.screen-image-dialog[open]'));await click('Close');
   assert(!(await source()).includes('    add '),'Cancelling picker writes no image');await until(()=>document.querySelector('[aria-label="Choose image"]'));document.querySelector('[aria-label="Choose image"]').click();await until(()=>document.querySelector('[aria-label="Use Station seal"]'));

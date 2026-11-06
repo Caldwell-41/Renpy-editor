@@ -88,6 +88,9 @@ export class ScreenLayoutEditor {
     };
   }
   hasNodeDraft(document: ScreenDocument, screen: string, node: ScreenNode): boolean { return this.drafts.has(draftKey(document, screen, node)); }
+  discardNodeDraft(path:string,screen:string,nodeId:string):void {
+    for(const [key,draft]of this.drafts)if(draft.document.path===path&&draft.screen===screen&&draft.node.id===nodeId){this.drafts.delete(key);this.emptyUnits.delete(key);this.errors.delete(key);}
+  }
   renderRetained(host: HTMLElement, documents: ScreenDocument[]): void {
     for (const [key, draft] of this.drafts) {
       const nodes = documents.find(document => document.path === draft.document.path)?.screens.find(screen => screen.name === draft.screen)?.nodes;

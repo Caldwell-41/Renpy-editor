@@ -13,5 +13,4 @@ export const definition: Omit<LabScreen, "approval"> = {
     { id: "browser", title: "B · Asset browser", load: () => import("./browser.ts") },
     { id: "guided", title: "C · Guided image sheet", load: () => import("./guided.ts") },
   ],
-  check: "./screens/ui-image/check.mjs",
 };

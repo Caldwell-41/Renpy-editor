@@ -15,5 +15,4 @@ export const definition: Omit<LabScreen, "approval"> = {
     { id: "ledger", title: "Definition ledger", load: () => import("./ledger.ts") },
     { id: "notebook", title: "Definition notebook", load: () => import("./notebook.ts") },
   ],
-  check: "./screens/variables/check.mjs",
 };
