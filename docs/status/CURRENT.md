@@ -33,8 +33,14 @@ when an opened Else-if is removed or undone; the candidate is not ready. All thr
 terminal reports are preserved. The next candidate restores branch view state with
 history, reconciles removed branches, preserves focus/caret across resizing, and
 makes first/last/outside insertion explicit. Its 27 focused groups, 48 boundary
-cases, reference/export guards and static checks pass. Round 4 is the next review;
-its frozen source identity and evidence live in `story-combined/round-4/` locally.
+cases, reference/export guards and static checks pass. Round 4 reviewed
+`2eb1f37d`. Astra and Opus found compact focus menus covered by the bottom toolbar;
+that candidate is blocked despite Sol meeting target. All terminal reports are
+archived in `story-combined/round-4/`. The Round 5 candidate fixes that stacking
+order, disabled states, Reel overlap/alignment and bounded label inconsistencies.
+Its 29 focused groups and boundary/reference/export checks pass. Round 5 is next.
+The old reference server was found offline and restored from its existing files on
+port 5175; the fourth mock remains on 5176.
 Kris supplied three favorable UI examples and six authoring/polish principles;
 include them in every subsequent review brief without copying their layouts.
 Kris added one round, so the fourth-mock cap is now six total.

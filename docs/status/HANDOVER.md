@@ -2,6 +2,22 @@
 
 ## Combined fourth Story mock handoff
 
+Round 4 reviewed `2eb1f37d`; all three terminal reviews are preserved under
+`.toolchains/story-combined/round-4/`. Two reviewers found the compact focus toolbar
+painting over beat-menu actions. The lead removed its retained stacking priority.
+The next candidate checks every menu item by pointer hit-testing for Background,
+Call, Set variable and protected source in both modes, and exercises the affected
+commands. Disabled Delete uses the disabled colour and explicit restriction text.
+Reel text clears its insertion control; navigation aligns complete columns.
+Unopened empty-condition labels, branch-ending entry hints, writing help, Choice
+buttons, condition alignment and the scene-drawer action received bounded fixes.
+The 29-group check passes; boundary/reference/export and static checks pass.
+Freeze Round 5 evidence and request three fresh read-only reviews. The cap is six.
+
+The port 5175 reference server was found offline during Round 4 review. It is now
+restored using the existing primary `story-lan/` files without modifying them.
+The fourth mock remains on 5176. Preserve both servers and their outputs.
+
 Round 3 is complete against `f07cb4ed`; all three terminal reviews are archived in
 ignored `.toolchains/story-combined/round-3/`. The opened Else-if removal/Undo crash
 blocks that candidate. The lead's Round 4 fixes restore branch view state with
@@ -18,8 +34,8 @@ Short compact editors give remaining space to the list. Neutral branch actions,
 aligned Choice actions, inline protected-menu reasons and fewer empty-state actions
 complete this bounded pass. The final 27-group journey and two extra navigation
 cases pass, alongside 48 boundary renders, reference journeys, standalone guards,
-production exclusion and static checks. Freeze in `round-4/` before starting fresh
-read-only Opus/Sol/Astra delegates. No Round 4 grade exists yet; the cap remains six.
+production exclusion and static checks. The frozen `round-4/` candidate and all
+three terminal reviews remain available; the cap remains six.
 
 Kris authorised building the combined fourth mock. The current selected section of
 [Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82) owns full scope,

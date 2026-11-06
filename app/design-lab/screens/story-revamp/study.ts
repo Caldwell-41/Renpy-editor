@@ -42,7 +42,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   const number = (id = selected) => beatNumber(scene(), id);
   const name = (id = selected) => beatName(scene(), id);
   const contextName = (id = selected) => { const trail = (ancestry(scene(), id) ?? []).map(p => `${p.branch.name} ${p.branch.condition}`.trim()).join(' › '); return `${name(id)}${trail ? ' in ' + trail : ''}`; };
-  const brief = (b: Beat) => { const branch = combined && b.kind === 'condition' ? b.branches.find(branch => branch.id === visibleBranches.get(b.id)) : undefined; return branch ? branchLabel(branch) : modelBrief(b, scenes); };
+  const brief = (b: Beat) => { const branch = combined && b.kind === 'condition' ? b.branches.find(branch => branch.id === visibleBranches.get(b.id)) ?? b.branches[0] : undefined; return branch ? branchLabel(branch) : modelBrief(b, scenes); };
   const snapshot = () => JSON.stringify({ scenes, sceneId, selected, ...(combined ? { visibleBranches: [...visibleBranches], reelBranch } : {}) });
   let undoButton: HTMLButtonElement, redoButton: HTMLButtonElement;
   function action(text: string, fn: () => void, primary = false, key = text) {
@@ -321,7 +321,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const remove = action(`Delete ${name(b.id)}${b.kind === 'choice' ? ' and its ' + count(b.options.length, 'option') : ''}`, () => removeBeat(b)); remove.disabled = b.kind === 'customCode' || locked && owner.trail.length === 1; if (remove.disabled) remove.title = b.kind === 'customCode' ? 'Protected source is read-only in this mock.' : 'Replace this ending through Add a beat.';
     controls.prepend(action(`Add beat before ${number(b.id)}`, () => picker(owner.body, owner.trail, owner.index))); controls.append(move, remove, action('View source', () => source(b)));
     if (b.kind === 'condition' && !combined) controls.append(action('Add Else if', () => addElseIf(b)));
-    if (combined && locked) controls.prepend(el('p', 'sr-explanation', b.kind === 'customCode' ? 'Protected source is read-only. You can add beats around it or view its source.' : 'This ending stays last. Use Add a beat to replace it.'));
+    if (combined && locked) controls.prepend(el('p', 'sr-explanation', b.kind === 'customCode' ? 'Protected source cannot be moved or deleted here. You can add beats around it or view its source.' : 'This ending stays last. Use Add a beat to replace it.'));
     if (combined) { remove.classList.add('sc-menu-delete'); controls.append(remove); }
     menu.append(controls);
     const place = () => { if (!menu.open) { delete menu.dataset.placed; return; } const r = summary.getBoundingClientRect(), box = controls.getBoundingClientRect(); controls.style.left = `${Math.max(8, Math.min(innerWidth - box.width - 8, r.right - box.width))}px`; controls.style.top = `${Math.max(8, Math.min(innerHeight - box.height - 8, r.bottom + 4))}px`; menu.dataset.placed = 'true'; };
@@ -333,13 +333,13 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const form = el('div', 'sr-fields'); form.dataset.editorFor = b.id;
     if (b.kind === 'dialogue' || b.kind === 'narration') {
       form.append(labelled('Speaker', lineSpeaker(b)), prose(b));
-      if (combined) form.append(el('p', 'sc-writing-shortcut', `Shift+${mod}+Enter: next line · Enter: new paragraph`));
+      if (combined) form.append(el('p', 'sc-writing-shortcut', `Shift+${mod}+Enter: next line · Enter: line break in this text`));
     } else if (b.kind === 'choice') {
       b.options.forEach((option, i) => {
         const row = el('fieldset', 'sr-option'); row.dataset.choiceIndex = String(i); row.append(el('legend', '', `Option ${i + 1}`));
         row.append(labelled('Option text', input(option.text, `Option ${i + 1} text`, value => option.text = value)), labelled('Goes to', destination(option.target, `Option ${i + 1} destination`, value => option.target = value)), labelled('Available when (optional)', input(option.guard, `Option ${i + 1} availability`, value => option.guard = value)));
         const buttons = el('div', 'sr-option-actions');
-        buttons.append(action(`Open ${scenes.find(s => s.id === option.target)?.name ?? 'destination'}`, () => go(option.target, true), false, `open-choice-${i}`), action(`New scene for option ${i + 1}…`, () => createScene(s => option.target = s.id, i, option.text), false, `new-choice-${i}`));
+        buttons.append(action(`Open ${scenes.find(s => s.id === option.target)?.name ?? 'destination'}`, () => go(option.target, true), false, `open-choice-${i}`), action(combined ? 'New scene…' : `New scene for option ${i + 1}…`, () => createScene(s => option.target = s.id, i, option.text), false, `new-choice-${i}`));
         const remove = action(`Remove option ${i + 1}`, () => { change(() => b.options.splice(i, 1), `Remove option ${i + 1} from ${name(b.id)}`); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${Math.min(i, b.options.length - 1) + 1} text"]`); }, false, `remove-choice-${i}`); remove.disabled = b.options.length === 1; if (remove.disabled) remove.title = 'A choice menu needs at least one option.'; if (combined) danger(remove); buttons.append(remove); row.append(buttons); form.append(row);
       });
       form.append(action('+ Add option', () => { const index = b.options.length; change(() => b.options.push({ text: '', target: scenes.find(s => s.id !== sceneId)?.id ?? sceneId, guard: '' }), `Add option to ${name(b.id)}`); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${index + 1} text"]`); }), el('p', 'sr-explanation', 'Leave availability empty for an unconditional choice. Conditions are not evaluated here. If no choices are available, the game continues to the next beat.'));
@@ -418,7 +418,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     for (const [key, title] of [['add-background', `+ Background before ${number()}`], ['add-character', `+ Character before ${number()}`]]) for (const button of host.querySelectorAll<HTMLElement>(`[data-action="${key}"]`)) { nameControl(button, title!); if (key === 'add-background') button.title = `${title}. Characters shown earlier are cleared.`; }
     status(frame.status.textContent ?? '');
   }
-  function tree() { const aside = el('aside', 'sr-scenes'); aside.ariaLabel = 'Scenes'; aside.append(action('+ New scene', () => createScene(), true, 'new-scene')); for (const chapter of new Set(scenes.map(s => s.chapter))) { aside.append(el('h2', '', chapter)); for (const s of scenes.filter(s => s.chapter === chapter)) { const button = action(s.name, () => { caller = undefined; go(s.id); }, false, `scene-${s.id}`); button.className = 'sr-scene-link'; button.ariaCurrent = s.id === sceneId ? 'page' : null; aside.append(button); } } return aside; }
+  function tree() { const aside = el('aside', 'sr-scenes'); aside.ariaLabel = 'Scenes'; aside.append(action('+ New scene', () => createScene(), !combined, 'new-scene')); for (const chapter of new Set(scenes.map(s => s.chapter))) { aside.append(el('h2', '', chapter)); for (const s of scenes.filter(s => s.chapter === chapter)) { const button = action(s.name, () => { caller = undefined; go(s.id); }, false, `scene-${s.id}`); button.className = 'sr-scene-link'; button.ariaCurrent = s.id === sceneId ? 'page' : null; aside.append(button); } } return aside; }
   function openBranch(owner: Beat, branch: Branch, child = branch.beats[0]?.id) { visibleBranches.set(owner.id, branch.id); reelBranch = branch.id; selected = child ?? owner.id; expanded.add(owner.id); stageObject = ''; manual = ''; draw(); status(combined ? `Opened ${branchLabel(branch)} · ${child ? 'editing ' + name(selected) : 'ready for its first beat'}` : `Editing ${number(owner.id)} Condition › ${branch.name} ${branch.condition}`.trim()); if (combined) focusText(); else focusSelected(); }
   function stageInsert(kind: Kind, actor?: string) {
     const t = locate(scene(), selected); const state = stateAt(); const currentActor = actor && state.characters.get(actor);
@@ -526,7 +526,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     revealGameOption(document.activeElement instanceof HTMLElement ? document.activeElement : null);
     const manualOwner = manual ? flatten(scene().beats).find(b => b.branches.some(branch => branch.id === manual)) : undefined, manualBranch = manualOwner?.branches.find(branch => branch.id === manual);
     const routes = state.unknown.filter(b => b.kind === 'condition').map(b => { const branch = b.branches.find(branch => branch.id === visibleBranches.get(b.id)); return branch ? `${number(b.id)} ${branch.name}` : ''; }).filter(Boolean).join(', ');
-    for (const note of host.querySelectorAll<HTMLElement>('.sr-stage-status')) { const title = manual ? `Previewing ${manualOwner ? number(manualOwner.id) : ''} ${manualBranch?.name ?? 'branch'} · editing ${number()}` : `${number()} · ${state.unknown.length ? 'Partial illustration' : 'Sample illustration'}${routes && !combined ? ' · via ' + routes : ''}`; if (combined && !state.background && !state.characters.size && !state.line) { note.textContent = 'No stage content yet'; note.title = note.ariaLabel = 'Add a background or character to compose this scene.'; continue; } note.textContent = innerWidth < 900 ? `${number()}${manual ? ' · Preview' : state.unknown.length ? ' · Partial' : ''}` : title; note.title = title; note.ariaLabel = title; }
+    for (const note of host.querySelectorAll<HTMLElement>('.sr-stage-status')) { const title = manual ? `Previewing ${manualOwner ? number(manualOwner.id) : ''} ${manualBranch?.name ?? 'branch'} · editing ${number()}` : `${number()} · ${state.unknown.length ? 'Partial illustration' : 'Sample illustration'}${routes && !combined ? ' · via ' + routes : ''}`; if (combined && !state.background && !state.characters.size && !state.line) { note.textContent = ''; note.title = note.ariaLabel = ''; continue; } note.textContent = innerWidth < 900 ? `${number()}${manual ? ' · Preview' : state.unknown.length ? ' · Partial' : ''}` : title; note.title = title; note.ariaLabel = title; }
     for (const effect of host.querySelectorAll('.sr-effects')) effect.replaceWith(effects());
     for (const owner of flatten(scene().beats)) for (const branch of owner.branches) {
       for (const button of host.querySelectorAll<HTMLElement>(`[data-action="open-branch-${branch.id}"]`)) { const prefix = button.closest('.sr-branch-control') ? (variant === 'stage-tracks' ? 'Show in tracks: ' : 'Open branch: ') : button.closest('.sr-reel-target') ? 'Open ' : ''; const fullName = `${prefix}${branch.name} ${branch.condition}${button.closest('.sr-reel-target') ? ' · ' + count(branch.beats.length, 'beat') : ''}`.trim(); if (button.closest('.sr-branch-control')) { button.textContent = variant === 'stage-tracks' ? 'Show in tracks' : combined ? `${visibleBranches.get(owner.id) === branch.id ? 'Opened' : 'Open'} ${branch.name}` : 'Open branch'; if (combined) button.ariaPressed = String(visibleBranches.get(owner.id) === branch.id); button.ariaLabel = button.title = fullName; } else nameControl(button, fullName); if (button.closest('.sr-track-band')) button.title = `Show ${branch.name} ${branch.condition} in tracks`.trim(); }
@@ -642,10 +642,10 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       const right = Math.max(r.right, tail.right), bottom = Math.max(r.bottom, tail.bottom);
       if (r.left < bounds.left) area.scrollLeft -= bounds.left - r.left;
       else if (right > bounds.right) area.scrollLeft += right - bounds.right;
-      if (combined && !focused && scrollSelector === '.sr-tracks-scroll') {
+      if (combined && !focused && ['.sr-tracks-scroll', '.sr-reel-strip'].includes(scrollSelector!)) {
         const now = area.scrollLeft, itemRect = item.getBoundingClientRect();
         const min = now + itemRect.right + (right - r.right) - bounds.right, max = now + itemRect.left - bounds.left;
-        const starts = [...area.querySelectorAll<HTMLElement>('.sr-track-column,.sc-route-marker')].map(node => now + node.getBoundingClientRect().left - bounds.left);
+        const starts = [...area.querySelectorAll<HTMLElement>('.sr-track-column,.sc-reel-column,.sc-route-marker')].map(node => now + node.getBoundingClientRect().left - bounds.left);
         const candidates = starts.filter(value => value >= Math.max(0, min) - 1 && value <= Math.min(max, area.scrollWidth - area.clientWidth) + 1);
         if (candidates.length) area.scrollLeft = candidates.sort((a, b) => Math.abs(a - now) - Math.abs(b - now))[0]!;
       }
@@ -792,7 +792,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     if (!exit) {
       marker.append(el('span', 'sc-boundary-label', `Inside ${number(owner.id)}`));
       const label = el('strong', '', branchLabel(branch)); label.dataset.branchLabel = branch.id; marker.append(label);
-      const next = continuation(owner); if (next) marker.append(el('span', 'sc-entry-continuation', `Then ${number(next.id)}, unless this path exits`));
+      const next = continuation(owner), last = branch.beats.at(-1); const leaves = last && ['jump', 'return'].includes(last.kind); if (leaves || next) marker.append(el('span', 'sc-entry-continuation', leaves ? `${last.kind === 'jump' ? 'Jump' : 'Return'} leaves this path` : `Then ${number(next!.id)}, unless this path exits`));
       const path = [...locate(scene(), owner.id)!.trail, branchLabel(branch)];
       const first = action('+ First beat', () => picker(branch.beats, path, 0), false, `inside-${branch.id}`); first.title = `Insert the first beat in ${branchLabel(branch)}`; marker.append(first);
     } else {

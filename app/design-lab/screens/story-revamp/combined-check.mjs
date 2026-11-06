@@ -31,6 +31,30 @@ async function selectedVisible(mode){
 }
 try{
  if(!process.argv.includes('--compact')) {
+ // Pointer hit-testing catches menus covered by a neighbouring stacking context.
+ await page.setViewportSize({width:560,height:640});
+ for(const mode of ['tracks','reel']) for(const kind of ['background','call','setVariable','customCode']){
+  await open(kind==='customCode'?'protected':'populated',mode);await page.locator('[data-action=toggle-focus]').click();
+  if(kind==='setVariable')await pick(kind);else await page.locator(`[data-${mode==='tracks'?'track':'reel'}-beat][data-beat-kind=${kind}]`).click();
+  await page.locator('.sr-inspector [data-action=beat-menu]').click();
+  const hit=await page.locator('.sr-inspector .sr-row-popover button').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {text:n.textContent,visible:r.top>=0&&r.bottom<=innerHeight,hit:n.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))};}));
+  assert(hit.every(n=>n.visible&&n.hit),`${mode}/${kind}: menu actions must be visible and hit-testable: ${JSON.stringify(hit)}`);
+  await capture(`compact-${mode}-focus-menu-${kind}`);
+  if(kind==='background') { await page.getByRole('button',{name:'Move later',exact:true}).click();assert.equal((await state()).scenes[0].beats[1].kind,'background');await page.locator('[data-action=undo]').click(); }
+  else if(kind==='call') { await page.getByRole('button',{name:'View source',exact:true}).click();assert.equal(await page.locator('dialog[open]').count(),1);await page.keyboard.press('Escape'); }
+  else if(kind==='setVariable') { await page.getByRole('button',{name:'Move to another branch…',exact:true}).click();assert.equal(await page.locator('[data-action=confirm-move]').count(),1);await page.locator('[data-action=cancel-dialog]').click(); }
+  else { const colours=await page.locator('.sr-inspector .sr-row-popover button:disabled').evaluateAll(nodes=>nodes.map(n=>getComputedStyle(n).color));assert.equal(new Set(colours).size,1,'All disabled actions share the disabled colour');await page.keyboard.press('Escape'); }
+ }
+ report.checks.push('Compact focus menus hit-test every item in both modes; Background Move later, Call View source and Set variable Move open normally; protected Delete matches disabled states');
+ for(const width of [1600,1100]){
+  await page.setViewportSize({width,height:width===1600?1000:720});await open('populated','reel');
+  await page.locator('.sr-prose').fill('A realistic longer line with enough words to fill the entire card width and continue across several rows without running under its insertion control.');
+  const collision=await page.locator('.sc-reel-column').evaluateAll(nodes=>nodes.some(n=>{const p=n.querySelector('p'),button=n.querySelector('.sr-gap');if(!p||!button)return false;const r=p.getBoundingClientRect(),b=button.getBoundingClientRect();return r.left<b.right&&r.right>b.left&&r.top<b.bottom&&r.bottom>b.top;}));assert.equal(collision,false,'Reel prose and insertion controls must not overlap');
+  await page.locator('.sc-conditions [data-action=open-branch-ticket-if]').click();await page.locator('.sc-conditions [data-action=open-branch-inner-if]').click();
+  const partial=await page.locator('.sr-reel-strip').evaluate(n=>{const edge=n.getBoundingClientRect().left;return [...n.querySelectorAll('.sc-reel-column,.sc-route-marker')].some(c=>{const r=c.getBoundingClientRect();return r.left<edge-1&&r.right>edge+1;});});assert.equal(partial,false,'Reel reveal aligns a complete first card');
+  await capture(`${width}-reel-complete-columns`);
+ }
+ report.checks.push('Wide/laptop Reel long prose clears insertion buttons and nested selection snaps to a whole first column');
  // Opened branch removal must reconcile both the model and view history.
  for(const mode of ['tracks','reel']) for(const focus of [false,true]){
   await page.setViewportSize({width:1100,height:720});await open('populated',mode);

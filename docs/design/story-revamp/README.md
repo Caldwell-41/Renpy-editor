@@ -121,6 +121,17 @@ Round 4 evidence contains 27 passing focused groups plus two extra navigation ca
 with the unchanged stage sizes, 48 boundary cases, three reference journeys, exported
 sample guards and production exclusion. These checks do not imply council approval.
 
+Round 4 reviewed `2eb1f37d`. Compact Writing focus's toolbar retained a stacking
+priority above the beat-menu heading, covering enabled actions in short editors.
+The next candidate removes that priority and checks each menu item's pointer access
+in both modes. Protected Delete shares the other disabled states and its restriction
+is explicit. Reel text has room beside insertion controls; selection aligns whole
+columns. Empty-condition summaries and branch-ending hints agree across the strip,
+entry, exit and list. Writing help describes a line break, Choice actions fit their
+labels, condition controls align and the scene drawer uses a neutral New scene.
+The 29 focused groups pass, including actual affected menu commands, long Reel prose
+and column alignment. Stage dimensions and the common panel height are unchanged.
+
 ## Three-mock reference
 
 Claude Opus 5.5 at high reasoning designed this revision after inspecting the

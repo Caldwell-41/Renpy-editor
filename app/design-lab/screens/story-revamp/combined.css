@@ -167,12 +167,12 @@
   .sc-combined-shell [data-focused=true] .sr-inspector .sr-prose { flex:1 1 100%; min-height:96px!important; height:96px!important; max-height:160px; }
   .sc-combined-shell [data-focused=true] .sc-bottom-panel { grid-column:1; grid-row:3; min-height:0; grid-template-rows:32px minmax(0,1fr); border-top:1px solid var(--border-normal); }
   .sc-combined-shell [data-focused=true] .sc-tracks .sr-tracks-scroll { height:100%; overflow:auto; }
-  .sc-combined-shell [data-focused=true] .sc-bottom-toolbar { position:static; }
+  .sc-combined-shell [data-focused=true] .sc-bottom-toolbar { position:static; z-index:auto; }
   .sc-combined-shell [data-focused=true] .sc-reel>.sr-reel-strip { padding-left:0; }
 }
 
 /* Branch boundaries and repeated writing actions keep their meaning in both views. */
-.sc-writing-shortcut { flex:none; width:100%; margin:5px 0 0; font-size:10px; line-height:1.5; color:var(--text-secondary); }
+.sc-writing-shortcut { flex:none; width:100%; margin:5px 0 0; font-size:11px; line-height:1.5; color:var(--text-secondary); }
 .sc-combined-shell .sr-branch-control>.button { color:var(--text-secondary); border-color:var(--border-normal); }
 .sc-combined-shell .sr-branch-control>.button[aria-pressed=true] { color:var(--text-primary); border-color:var(--border-strong); }
 .sc-combined-shell .sc-scroll-branches { flex:none; font-size:18px; padding:2px 5px!important; }
@@ -181,7 +181,7 @@
 .sc-combined-shell .sr-option-actions>.button:last-child { grid-column:2; }
 .sc-combined-shell .sr-row-popover>.sr-explanation { max-width:230px; padding:6px 8px; margin:0; font-size:11px; }
 .sc-combined-shell [data-focused=false] .sc-reel-column>.sr-gap { position:absolute; right:2px; top:44%; z-index:2; width:24px; height:26px; background:var(--surface-panel); border:1px solid var(--border-normal); border-radius:2px; }
-.sc-combined-shell [data-focused=false] .sc-reel-column>.sr-reel-beat { padding-right:16px; }
+.sc-combined-shell [data-focused=false] .sc-reel-column>.sr-reel-beat { padding-right:32px; }
 .sc-combined-shell [data-focused=false] .sr-track-column[data-depth="1"],.sc-combined-shell [data-focused=false] .sc-route-marker[data-depth="1"] { box-shadow:inset 0 2px var(--border-strong); }
 .sc-combined-shell [data-focused=false] .sr-track-column[data-depth="2"],.sc-combined-shell [data-focused=false] .sc-route-marker[data-depth="2"] { box-shadow:inset 0 2px var(--border-strong),inset 0 6px var(--surface-panel),inset 0 8px var(--border-strong); }
 @media(max-width:899px) {
@@ -192,3 +192,10 @@
 
 .sc-combined-shell .sr-option-actions>.button.danger { background:transparent; color:var(--status-error); border-color:var(--border-normal); }
 .sc-combined-shell .sr-option-actions>.button.danger:hover:not(:disabled) { border-color:var(--status-error); }
+
+/* Keep secondary and unavailable actions distinct from active editing. */
+.sc-combined-shell .sc-menu-delete:disabled { color:var(--text-disabled); }
+.sc-combined-shell .sr-branch-control>strong { flex-basis:100%; }
+.sc-combined-shell [data-focused=false] .sc-route-marker[data-depth="2"]>.sc-boundary-label { padding-left:8px; }
+.sc-combined-shell [data-focused=false] .sr-track-column[data-depth="2"] .sr-track-0 { padding-left:16px; }
+.sc-combined-shell [data-focused=false] .sc-reel-column .sr-reel-beat p { -webkit-line-clamp:7; max-height:138px; }
