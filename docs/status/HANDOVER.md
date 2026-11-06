@@ -10,13 +10,21 @@ design advice is complete; the parent owns all edits. The
 [evidence record](../tasks/evidence/sample-fidelity.md) owns current preparation
 and failures. Production changes synchronize the open textbutton state fields.
 The new exporter/observers cover 22 cases, both aspects, with exact pixels and
-geometry. Both-target SDK qualification remains pending and cannot inherit prior
-control-crop or nested-composition results.
+geometry. Windows is qualified at `76d2cf12`, with identical accepted source and
+sample data, zero differing pixels, exact geometry and cooperative cleanup after
+one retained failed shutdown attempt. Mac remains required and cannot inherit
+Windows, earlier control-crop or nested-composition results.
 
-Automatic approval review refused the required progress/limit publication to #54.
-Ask for approval of that prepared external issue comment before dependent SDK
-execution. Proposed ceiling is 16 SDK processes per target, all use zero and no
-reservations. Historical allowances stay closed. No push, PR, merge or issue
+Kris explicitly approved both-target SDK campaigns, necessary corrections and
+ongoing #54 reservation/result updates after two publication/execution refusals.
+The issue owns the 16-start-per-target ceiling and cumulative accounting. At this
+handoff Windows has used 12, Mac zero, no reservations or uncertain starts. The
+Mac assignment must synchronize the supplied `76d2cf12` bundle and identical
+accepted export, pass offline preflight, then record/reserve its eight starts.
+Parent owns all code; the remote worker owns test-only ignored outputs in its
+assigned checkout. All 380 frontend tests, build and actual UI/core journey pass;
+the original broad core/harness failures remain in the evidence record.
+Historical allowances stay closed. No push, PR, merge or issue
 closure is selected. Preserve all unrelated recovery below. Existing long-form
 recovery remains under its retained size exception.
 

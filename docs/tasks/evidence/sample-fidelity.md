@@ -27,24 +27,56 @@ displayables. It does not reconstruct the image from the helper plan. The hidden
 helper shares its capture owner with L19. Pixel/geometry comparison also shares
 one implementation and detects alpha differences.
 
-### Acceptance and remaining execution
+### Windows comparison complete; Mac pending
 
-Preparation does not establish rendering agreement. Both-target, both-aspect
-normal/helper capture, exact pixel/geometry comparison and resulting corrections
-remain required. No tolerance or broad unsupported-content waiver is accepted.
-No L20 SDK/helper/native/package/CI process has started. No issue closure, push,
-PR or merge is selected.
+The formal Windows comparison passes all 22 full-frame cases at both aspects:
+zero differing RGBA pixels, exact geometry, matching physical dimensions and
+drawing scale, unchanged accepted inputs and cooperative exit 0 with complete
+cleanup. The producing candidate is `76d2cf1290805fe40f81f406bf1e74c2c4d335d9`.
+Mac comparison remains required before L20 rendering acceptance. No tolerance or
+broad unsupported-content waiver is accepted. No package, native editor or CI
+operation, issue closure, push, PR or merge is selected.
 
-The proposed ceiling is 16 SDK processes per target. A campaign costs eight:
+The recorded ceiling is 16 SDK processes per target. A campaign costs eight:
 compile, lint, two normal-game runs, three adapter validation/discovery starts
 and one hidden helper. Failed/cancelled/uncertain starts count cumulatively.
-Current use is zero, with no reservations. Windows SUNDOWN owns development;
-the linked Mac ARM64 is reachable. Historical allowances stay closed.
+Windows SUNDOWN owns development; the linked Mac ARM64 is reachable. Historical
+allowances stay closed. [#54's result update](https://github.com/Caldwell-41/Renpy-editor/issues/54#issuecomment-6686513561)
+owns cumulative accounting: Windows 12/16 after its helper retry, Mac 0/16 before
+its campaign, no reservations or uncertain starts at this checkpoint.
 
-Automatic approval review rejected the issue progress/limit comment as an external
-publication without user authorization. The required limit record has not been
-published to #54. Dependent SDK qualification remains pending that approval.
+Kris approved the prepared progress/limit comment, now
+[published on #54](https://github.com/Caldwell-41/Renpy-editor/issues/54#issuecomment-6686107986).
+Automatic approval review then refused a separate reservation comment and SDK
+launch, interpreting that approval as limited to the exact first comment. Those
+denied calls started no process. Kris subsequently explicitly approved both-target
+campaigns, necessary in-scope corrections and ongoing #54 reservation/result
+updates within the recorded ceiling. The reservation and execution then proceeded.
 This file records technical evidence and recovery, not a replacement task brief.
+
+Offline preflight passes at local `76d2cf1290805fe40f81f406bf1e74c2c4d335d9`.
+Official SDK archive/checksum, current accepted-source admission, observer syntax
+and clean implementation-input checks pass. Export SHA256
+`acbb300666b45457fc3108c2a24f4b2c6bf95b7f33d94cb4ac5e594210afdfaf`;
+observer SHA256 `71b3a7c9230a9769a609ac8c0fa751dd257233fccf6b76c1d07aebb0d9ca5af2`.
+The initial Windows campaign used eight starts. Normal compile/lint/two runs
+passed with 22 admitted records, unchanged source and complete cleanup. The helper
+produced 22 frames but FAILED its cooperative-shutdown gate: exit 0 and complete
+core cleanup, cooperative false. Passive comparison found zero pixel differences,
+exact geometry and equal scale in every row; its report explicitly remains
+diagnostic-only and does not override the failed receipt.
+
+After the concurrent broad-core load ended, the selected smallest retry reused
+the same candidate, accepted export, requests and retained core test binary.
+Only three adapter validation/discovery starts and one helper ran. All 22 cases,
+the unchanged three-second cooperative-shutdown gate and the formal comparison
+pass. The old normal-game reference was reused at the identical candidate and
+input hashes. The first failure stays charged and preserved. There was no
+production renderer or shutdown change and no deadline/tolerance relaxation.
+Host load is a provisional explanation for the first shutdown result, not a
+proved causal finding. Outputs remain under ignored `app/target/l20/normal-76d2cf12-1`,
+`helper-76d2cf12-1`, `diagnostic-76d2cf12-1`, `helper-76d2cf12-2` and
+`comparison-76d2cf12-2`, with the exact `core-test-76d2cf12.exe` retained.
 
 ### Local checks and retained failures
 
@@ -79,9 +111,18 @@ workspace load. Both failures remain retained. Operation timings and a serial
 run distinguish host contention from a product defect; the five-second deadline
 is unchanged. An additional unsandboxed optimized run reached later original
 Apply stages but also exceeded the same deadline while broad-core verification
-was active. This is not a passing actual UI/core journey. An older export
+was active. The final serial optimized journey PASSES after that load ended,
+including real source/history/planner/reopen and the new state/sample checks.
+All owned drivers exit 0 and remove their fixture scratch. An older export
 correctly failed Python source-hash admission
-after exporter edits. Current-export admission remains required.
+after exporter edits. The final current export passes explicit Python admission.
+
+The ordinary release-core suite ran once with the three documented exclusions:
+609 passed, seven failed and 55 ignored. Four TLS fixture failures pass in the
+focused seven-test loopback group outside sandbox network restrictions. Three
+Windows OS1314 symlink-privilege cases remain unqualified. The original broad run
+remains failed; no security setting or required-result gate changed. Both L20
+core cases passed, including stale/refusal and all-case export/reopen checks.
 
 The full inexpensive harness ran 344 Python cases, with 339 passes, four named
 Windows exclusions and one unrelated failure. The existing actual Win32 credential

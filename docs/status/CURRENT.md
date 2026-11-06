@@ -7,10 +7,13 @@ Kris selected [L20 #54](https://github.com/Caldwell-41/Renpy-editor/issues/54) o
 sample renderer remains the owner. Local work adds state-selector synchronization
 and accepted-source qualification for typed samples, six button states and bar
 boundaries. [Evidence](../tasks/evidence/sample-fidelity.md) records checks,
-failures and the pending both-target rendering matrix. Automatic approval review
-rejected publishing the required issue operation-limit record without user
-authorization; no L20 SDK/helper/native/package/CI process has started. No push,
-PR, merge or acceptance is selected. Earlier prerequisite status below retains
+failures and the rendering matrix. Windows passes all 22 exact source/helper
+comparisons at both aspects, including cooperative cleanup after one retained
+failed shutdown attempt. All 380 frontend tests, build and actual UI/core journey
+pass. Mac rendering remains pending. Kris explicitly approved both-target SDK
+campaigns and #54 reservation/result updates; the issue owns cumulative counts.
+No package/native-editor/CI run, push, PR, merge or acceptance is selected.
+Earlier prerequisite status below retains
 historical context; GitHub #51/#52 now record acceptance through PR #83.
 
 ## Integer bars and image buttons review corrections
