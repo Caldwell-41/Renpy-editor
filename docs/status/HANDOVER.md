@@ -2,6 +2,20 @@
 
 ## Combined fourth Story mock handoff
 
+Round 5 reviewed `c221977c`; all three terminal reports are archived under
+`.toolchains/story-combined/round-5/`. All readiness gates pass, but one reviewer
+remains below target. The lead's final authorised iteration clamps laptop Reel prose
+to complete lines, fixes normal compact menu layering, and pads strip ends to align
+whole columns. Branch entry hints name nested exits only when present. Outside
+continuation links identify their relation to the condition. Empty scenes retain
+the selected Return editor/menu below the writing actions. Return summaries are
+shorter; editor headings align and Reel insertion buttons lose repeated boxes.
+The 31-group browser journey and eight direct/nested ending cases pass. Boundary,
+reference/export, production-exclusion and static checks pass. Freeze `round-6/`,
+then start the sixth and final authorised Opus/Sol/Astra council. No seventh round
+is authorised. Report real scores/remaining issues and deliver the mock when those
+three reviews finish. Do not silently assign their scores to any later source edits.
+
 Round 4 reviewed `2eb1f37d`; all three terminal reviews are preserved under
 `.toolchains/story-combined/round-4/`. Two reviewers found the compact focus toolbar
 painting over beat-menu actions. The lead removed its retained stacking priority.
@@ -12,7 +26,7 @@ Reel text clears its insertion control; navigation aligns complete columns.
 Unopened empty-condition labels, branch-ending entry hints, writing help, Choice
 buttons, condition alignment and the scene-drawer action received bounded fixes.
 The 29-group check passes; boundary/reference/export and static checks pass.
-Freeze Round 5 evidence and request three fresh read-only reviews. The cap is six.
+Round 5 evidence and all three terminal reviews remain preserved. The cap is six.
 
 The port 5175 reference server was found offline during Round 4 review. It is now
 restored using the existing primary `story-lan/` files without modifying them.

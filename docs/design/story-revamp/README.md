@@ -132,6 +132,18 @@ labels, condition controls align and the scene drawer uses a neutral New scene.
 The 29 focused groups pass, including actual affected menu commands, long Reel prose
 and column alignment. Stage dimensions and the common panel height are unchanged.
 
+Round 5 reviewed `c221977c`. All gates pass, but the full council target remains
+unmet. The final authorised candidate fixes complete-line truncation at laptop size,
+normal compact menu layering and partial first columns at maximum strip scroll.
+Entry hints name nested exits only when present; outside continuation links name
+the condition. Empty scenes retain the selected Return explanation and menu below
+start-writing actions. Return summaries are shorter, editor headings align and Reel
+insertion controls use less chrome. Its 31 focused groups include three-point menu
+hit tests in both compact views, long-prose vertical fit, all-size strip-end geometry
+and empty-ending access. Eight direct/nested Jump/Return cases pass. Stage size,
+common panel height and simulation scope remain unchanged. Round 6 is the last
+review authorised by the current six-round cap.
+
 ## Three-mock reference
 
 Claude Opus 5.5 at high reasoning designed this revision after inspecting the

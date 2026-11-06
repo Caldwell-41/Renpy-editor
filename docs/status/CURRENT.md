@@ -38,7 +38,12 @@ cases, reference/export guards and static checks pass. Round 4 reviewed
 that candidate is blocked despite Sol meeting target. All terminal reports are
 archived in `story-combined/round-4/`. The Round 5 candidate fixes that stacking
 order, disabled states, Reel overlap/alignment and bounded label inconsistencies.
-Its 29 focused groups and boundary/reference/export checks pass. Round 5 is next.
+Its 29 focused groups and boundary/reference/export checks pass. Round 5 reviewed
+`c221977c`; all readiness gates pass, but one reviewer remains below target.
+All terminal reports are preserved. The sixth and final authorised candidate fixes
+laptop prose clipping, normal-view menu layering, strip-end alignment and remaining
+branch/empty-state labels. Its 31 focused groups and eight ending cases pass.
+Round 6 is next; no further review round is authorised.
 The old reference server was found offline and restored from its existing files on
 port 5175; the fourth mock remains on 5176.
 Kris supplied three favorable UI examples and six authoring/polish principles;
