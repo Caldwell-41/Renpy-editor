@@ -70,13 +70,14 @@ export default async function check({ page, open }) {
       await page.locator('[data-action="add-beat"]').click();
       await page.locator('[data-picker-search]').fill('condition');
       await page.locator('[data-insert-kind=condition]').click();
+      assert.equal(await page.locator('.sr-inspector input').first().inputValue(), '', 'New conditions start without a sample test');
       await page.locator('.sr-inspector [data-action^="open-branch-"]').first().click();
       await page.locator('[data-action="add-beat"]').click();
-      assert.match(await page.locator('.sr-insertion-target').innerText(), /› If has_ticket is true/);
+      assert.match(await page.locator('.sr-insertion-target').innerText(), /› If/);
       await page.locator('[data-picker-search]').fill('dialogue');
       await page.locator('[data-insert-kind=dialogue]').click();
       await page.locator('.sr-prose:focus').fill('The first line belongs inside If.');
-      assert.match(await page.locator('.sr-reel-target').innerText(), /If has_ticket is true/);
+      assert.match(await page.locator('.sr-reel-target').innerText(), /If/);
       await open({ variant, state: 'branching', theme: 'dark', viewport: 'wide' });
       await page.locator('.sr-reel-beat').filter({ hasText: 'Condition' }).click();
       await page.locator('.sr-inspector [data-action^="open-branch-"]').first().click();

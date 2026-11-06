@@ -1,39 +1,41 @@
 # Current outcome handover
 
-## Story revamp rounds 3 and 4
+## Story revamp comparison handoff
 
-Kris requested two further council rounds, aiming for 9.5 with a separate council
-for each mock. Round 3 on `223c16ec` is complete. All six read-only Opus 5.5/GPT-6.1
-Sol xhigh reviews are saved under ignored `council-v3/<variant>/round-3-*.md`.
-Every score remains below target. Do not inflate scores or expand future engine
-scope to obtain a number. The parent implemented the bounded findings and now
-starts Round 4 on the updated artifact. Record actual results and present all mocks.
+Kris's two additional council rounds are complete. Round 3 reviewed `223c16ec`;
+Round 4 reviewed `98c9cc9f`. Each of Cue sheet, Shot reel and Stage tracks had its
+own independent Opus 5.5/GPT-6.1 Sol xhigh pair. All twelve terminal reports are
+retained under ignored `council-v3/<variant>/round-{3,4}-{opus,sol}.md`. None reached
+9.5 from both reviewers. Do not infer a new score for the final fixes.
 
-[Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82) owns Cue sheet,
-Shot reel and Stage tracks on `codex/story-screen-prototypes`. Source remains in
-`app/design-lab/screens/story-revamp/`; no production or native changes. The current
-fixes preserve explicit empty nested branches, reconcile Cue sheet selection,
-retain navigation/Assist focus, position menus before display and clarify current
-source examples. Layout fixes cover Cue sheet's stage footer, Shot reel's laptop
-dock/long Writing focus and Stage tracks' content labels/insertion markers.
+[Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82) owns the local
+`codex/story-screen-prototypes` branch. The parent applied the remaining bounded
+findings after Round 4 and verified them. These include manual-preview ownership,
+editing from enlarged stage, scrolling long Choices, new-option focus, safe branch
+endings with removal/Undo, picker wording, route/partial disclosure, drawer dismissal,
+blank new tests, and compact tracks. Parent insertions now sit in their labelled
+condition bands, avoiding both media and beat-number obstruction. No production,
+native, SDK, provider or future engine implementation changed.
 
-`council-v3/round-3-fixes/` passes 72 renders, the full tracked journey, 21 retained
-focused checks, 11 selection/navigation checks and 17 detail checks. Fresh main and
-Writing focus captures cover wide, laptop and compact sizes. All stage minima
-pass. `round-4-input/` contains 72 current secondary/dialog captures. The initial
-detail attempt had nonexistent selectors; its original report is retained. Earlier
-`baseline/`, `revised/`, `candidate/`, `closure/`, `round-2-fixes/` and
-`round-3-input/` preserve historical source fingerprints and failure evidence.
+Current evidence is `council-v3/final/`; its manifest owns exact checks, source
+fingerprints, main/focus and secondary/dialog captures. Earlier round folders retain
+original failures and scored candidates. The old brief overstated the selection
+check count as eleven; its actual report contains ten cases. Two archived Round 3
+Opus files were progress snapshots; their full terminal results were recovered,
+with the progress retained separately. Some Round 4 reviewers saw the earlier
+progress files. Their actual current-artifact findings and scores remain unchanged.
 
-The [design notes](../design/story-revamp/README.md) own scope and limits. Approval
-pointers remain null. Edits stay in browser memory. No PR or push is selected.
-Preserve unrelated browser maintenance, the Phase 1 audit and all older recovery
-below, including their existing size exception. Kris's replacement AGENTS removed
-the former browser-delegation rule. Managed snapshots timed out twice; parent
-checks used scoped launches outside the macOS sandbox and closed only check-owned
-browsers. Keep the hosted Design Lab running on port 5174. Round 4 reviewers are
-read-only, with one independent Opus/Sol pair per mock. Do not change the frozen
-candidate while those reviews run.
+The [design notes](../design/story-revamp/README.md) own scope and simulation limits.
+Approval pointers remain null. All three mocks await Kris's choice. No production
+promotion, PR, push or successor implementation is selected. Preserve unrelated
+browser maintenance, the Phase 1 audit and all older recovery below, including the
+existing size exception.
+
+Keep Design Lab on port 5174 for review. Final screenshots, three self-contained
+HTMLs, a comparison page and the review ZIP remain in `.toolchains/story-revamp/`.
+The parent used scoped Chrome outside the macOS sandbox after managed snapshots
+timed out twice, and closed only check-owned browsers. No screen reader or native
+acceptance follows from this prototype evidence.
 
 ## PR 81 integration and ticket closeout
 

@@ -1,27 +1,24 @@
 # Current status
 
-## Story revamp additional council rounds
+## Story revamp comparison ready
 
 [Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82) owns Cue sheet,
-Shot reel and Stage tracks on `codex/story-screen-prototypes`. Kris approved further
-refinement of all three, with one new Opus 5.5 lead at high per mock and each lead's
-own Opus/Sol council. The target is 9.5/10 from both reviewers for each implemented
-mock, including Writing focus, dialogs and secondary states. The large WYSIWYG
-stage and three distinct authoring methods remain required.
+Shot reel and Stage tracks on local `codex/story-screen-prototypes`. Kris's two
+additional council rounds are complete: Round 3 on `223c16ec`, Round 4 on
+`98c9cc9f`. Each mock had its own independent read-only Opus 5.5/GPT-6.1 Sol xhigh
+pair. None reached 9.5 from both reviewers. Actual scores are reported to Kris;
+the final bounded fixes are verified but have no further council score.
 
-Kris requested two further rounds, each mock with its own Opus/Sol council.
-Round 3 on `223c16ec` is complete; every score remains below 9.5. The parent has
-integrated its bounded findings. Current browser evidence in
-`council-v3/round-3-fixes/` passes 72 renders, the full authoring journey, 21 retained
-focused checks, 11 selection/navigation checks and 17 detail checks. Fresh main,
-Writing focus and 72 secondary/dialog captures support Round 4. The first detail
-attempt used nonexistent test selectors; its report is preserved separately.
+The fixes cover stage ownership during manual preview, editing from enlargement,
+scrollable Choices, new-option focus, branch-ending placement/deletion, explicit
+replacement/route copy and compact branch controls. Current evidence is ignored
+`council-v3/final/`; its manifest records browser checks, captures, source hashes
+and diagnostic limits. All work remains a fictional browser prototype.
 
-Round 4 reviews the updated candidate. The parent owns implementation and each
-mock has a separate read-only Opus 5.5/GPT-6.1 Sol xhigh pair. Detailed scope remains
-in [design notes](../design/story-revamp/README.md). No design is promoted;
-production UI and future engine implementation remain outside scope. Local only;
-no PR or push. Earlier acceptance and protected recovery records remain below.
+[Design notes](../design/story-revamp/README.md) own scope and evidence. All three
+mocks are ready for Kris to compare and choose the next iteration. No design is
+promoted, and production UI/future engine implementation remain outside scope.
+No PR or push. Earlier acceptance and protected recovery remain below.
 
 ## Variable text, ordered actions and nested canvas accepted
 
