@@ -149,8 +149,11 @@ class HelperAdmissionChecks(unittest.TestCase):
             self.reference_result = copy.deepcopy(original)
             mutate(self.reference_result)
             self.write_reference()
-            with self.subTest(mutation=mutate), self.assertRaises(ValueError):
+            with self.subTest(mutation=mutate), self.assertRaises(ValueError) as caught:
                 self.check(self.result)
+            if self.reference_result['records'][0]['drawPerVirtual'] == 0.9:
+                self.assertIn('helper physical=[1280, 720], drawPerVirtual=1', str(caught.exception))
+                self.assertIn('reference physical=[1280, 720], drawPerVirtual=0.9', str(caught.exception))
 
     def test_native_readback_is_not_required_to_equal_raw_asset_bytes(self):
         # Exact helper/reference equality remains mandatory, including alpha.

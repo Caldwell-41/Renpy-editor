@@ -725,7 +725,10 @@ def validate_helper(accepted, output, expected_candidate, manifest_sha, referenc
         native = references[key]
         require(frame.get('diagnostics', {}).get('physical') == native['physical']
                 and frame['diagnostics'].get('drawPerVirtual') == native['drawPerVirtual'],
-                'wrong helper capture conditions')
+                f"wrong helper capture conditions for {key}: "
+                f"helper physical={frame.get('diagnostics', {}).get('physical')}, "
+                f"drawPerVirtual={frame.get('diagnostics', {}).get('drawPerVirtual')}; "
+                f"reference physical={native['physical']}, drawPerVirtual={native['drawPerVirtual']}")
         rect = controls['imagebutton']
         require(all(type(rect[name]) in (int, float) and float(rect[name]).is_integer()
                     for name in ('x', 'y', 'width', 'height')), 'non-integral fixture control bounds')
