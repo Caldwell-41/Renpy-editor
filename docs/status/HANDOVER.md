@@ -14,9 +14,14 @@ Frontend implementation is committed at `87586e7cbe21bc56fc486115ff355dac72e99c3
 Its owner reports typecheck/build, all 378 frontend tests and the actual UI/core
 journey passing. Standards review identified three P2s: missing image-button
 dimensions in shared-component review, picker callback focus before modal close,
-and missing blur validation with error clearing on unrelated input. The owner is
-fixing these with focused real UI/core regressions; Spec and visual results remain
-pending. Await its final corrected receipt before integrating its assigned files.
+and missing blur validation with error clearing on unrelated input. The owner
+corrected all three in `c3755e8c4689c3945ddfad0882f1a676560a40a8`, with each focused
+actual-core mode first red then green. Status is corrected/self-verified, not an
+independent re-review clearance. The full eight-stage actual UI/core journey also
+passes at `c3755e8c`, with driver exit 0 and cleanup complete; 57 affected tests and
+build/typecheck pass there. The full 378-test pass retains its `87586e7c` basis.
+Spec and visual results remain pending at their original `87586e7c` candidate.
+Await its final corrected receipt before integrating its assigned files.
 
 The core implementation agent completed both controls' Rust behavior on
 `t3/bar-imagebutton-core` at `76dfe030`; the editor implementation agent owns both controls' UI

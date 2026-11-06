@@ -906,3 +906,16 @@ Independent process-command-line inspection was denied; the helper requests brow
 and server closure in `finally`, but this probe does not establish independently
 verified cleanup. No capped operations were started. Focused and full global checks
 on the committed correction remain pending; the earlier full-gate result stays failed.
+
+The frontend owner committed the three Standards corrections at
+`c3755e8c4689c3945ddfad0882f1a676560a40a8`. Each actual-core review mode first
+reproduced its finding red, then passed. Typecheck/build and 57 affected tests pass.
+The eight-stage original actual UI/core journey also passes at this correction,
+including delayed admission, keyboard sizing and Source-removed recovery. Parent
+reread its retained result and matched SHA256
+`de04dfd21ce96d9c9bedcbe63916e51422a4d10f2e80fdc756e7598c20cdfe32`.
+It reports `passed: true`, real controller/core, no SDK/helper execution, driver
+exit 0 and cleanup complete. The full 378-test pass retains the original `87586e7c`
+basis. Exactly three Standards findings are corrected and self-verified, with no
+independent clearance inferred. Original Spec/Terra reviews remain pending at
+`87586e7c`; their pinned export artifacts and approved source remain unchanged.
