@@ -753,13 +753,10 @@ impl AuthoringService {
             .find(|s| s.name == request.screen_name)
             .and_then(|s| s.nodes.iter().find(|n| n.span.start == request.node_start))
             .ok_or(SceneError::OpaqueBoundary)?;
-        if node.kind == "imagebutton"
-            && request.values.keys().any(|k| {
-                matches!(
-                    k.as_str(),
-                    "xsize" | "ysize" | "xminimum" | "yminimum" | "xmaximum" | "ymaximum"
-                )
-            })
+        if request
+            .values
+            .keys()
+            .any(|k| control_source::image_button_size_field(&node.kind, k))
         {
             return Err(SceneError::OpaqueBoundary);
         }

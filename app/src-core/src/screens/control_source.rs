@@ -207,12 +207,10 @@ pub(super) fn bar_canvas(
     let sample = samples
         .get(&binding.variable_id)
         .ok_or(SceneError::ReferenceBlocked)?;
-    // Arbitrary integer defaults and samples can be clamped as decimal integers
-    // without converting them through JavaScript Number or floating point.
     let value = sample
-        .parse::<i128>()
-        .map(|v| v.clamp(lo as i128, hi as i128) as i64)
-        .unwrap_or_else(|_| if sample.starts_with('-') { lo } else { hi });
+        .parse::<i64>()
+        .map_err(|_| SceneError::InvalidPayload)?
+        .clamp(lo, hi);
     let mut p = serde_json::Map::new();
     p.insert("value".into(), (value - lo).into());
     p.insert("range".into(), (hi - lo).into());
@@ -402,16 +400,45 @@ pub(super) fn patch(
         "\n"
     };
     let mut insert = String::new();
+    let children = lines
+        .iter()
+        .filter(|l| {
+            l.start > header.start && l.start < node.source_end && l.indent == header.indent + 4
+        })
+        .count();
+    let removed = values
+        .iter()
+        .filter(|(key, value)| value.is_none() && current.contains_key(*key))
+        .count();
+    let inserts = values
+        .iter()
+        .any(|(key, value)| value.is_some() && !current.contains_key(key));
+    // Leave `pass` only when removal would otherwise empty the block.
+    let mut keep_pass = removed == children && !inserts;
     let mut edits = vec![];
     for (key, value) in values {
         match (current.get(key), value) {
             (Some(old), Some(value)) if !same_expression(key, &old.raw, value) => {
                 edits.push((old.expression.start, old.expression.end, value.clone()))
             }
-            (Some(old), None) => {
-                // Keep inline comments and their spacing when removing a property.
+            (Some(old), None) if std::mem::take(&mut keep_pass) => {
                 let start = old.statement.start + header.indent + 4;
                 edits.push((start, old.expression.end, "pass".into()));
+            }
+            (Some(old), None) => {
+                // Delete the statement; an inline comment stays on its own line.
+                let tail = &bytes[old.expression.end..old.statement.end];
+                let comment = tail.iter().take_while(|b| **b == b' ').count();
+                let kept = if tail.get(comment) == Some(&b'#') {
+                    format!(
+                        "{}{}",
+                        " ".repeat(header.indent + 4),
+                        String::from_utf8_lossy(&tail[comment..])
+                    )
+                } else {
+                    String::new()
+                };
+                edits.push((old.statement.start, old.statement.end, kept));
             }
             (None, Some(value)) => insert.push_str(&format!(
                 "{}{key} {value}{newline}",
@@ -496,6 +523,16 @@ fn same_expression(key: &str, before: &str, after: &str) -> bool {
             .zip(serde_json::from_str::<String>(after).ok())
             .is_some_and(|(a, b)| a == b)
     }
+}
+
+/// Image-button size fields also size every appearance, so only the combined
+/// imageButton command may change them.
+pub(super) fn image_button_size_field(kind: &str, key: &str) -> bool {
+    kind == "imagebutton"
+        && matches!(
+            key,
+            "xsize" | "ysize" | "xminimum" | "yminimum" | "xmaximum" | "ymaximum"
+        )
 }
 
 pub(super) fn prepare(

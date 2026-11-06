@@ -776,6 +776,10 @@ and conservative effects remain unknown. Component image-button edits preserve
 read-only actions; a new passive Component button may use the empty action list,
 while effectful lists remain forbidden.
 
+Clearing a bar color or image-button state property deletes its statement. An inline
+comment stays on its own line at the same indent. `pass` replaces the statement only
+when the block would otherwise be empty. Numeric layout keeps its own removal rule.
+
 For a control picker's own UI-image import, `asset.import` may receive the captured
 `expectedAuthoringRevision`. A successful response includes the transaction-derived
 `authoringRevisionChange` with `before` and `after`. This transition projects only

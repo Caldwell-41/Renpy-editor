@@ -656,18 +656,10 @@ impl AuthoringService {
                 .iter()
                 .find(|node| node.span.start == draft.node_start)
                 .filter(|node| {
-                    node.kind != "imagebutton"
-                        || !draft.values.keys().any(|k| {
-                            matches!(
-                                k.as_str(),
-                                "xsize"
-                                    | "ysize"
-                                    | "xminimum"
-                                    | "yminimum"
-                                    | "xmaximum"
-                                    | "ymaximum"
-                            )
-                        })
+                    !draft
+                        .values
+                        .keys()
+                        .any(|k| control_source::image_button_size_field(&node.kind, k))
                 })
                 .and_then(|node| node.numeric_layout.as_ref())
                 .ok_or(SceneError::InvalidPayload)?;

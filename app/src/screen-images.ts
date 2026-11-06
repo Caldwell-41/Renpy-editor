@@ -181,11 +181,10 @@ export class ScreenImages {
   private key(view: CompositionView): string {
     return JSON.stringify([view.document.path, view.screenId, view.selected.id]);
   }
-  private asset(id?: string): UiImageAsset | undefined {
+  asset(id?: string): UiImageAsset | undefined {
     return this.assets.find((a) => a.id === id);
   }
   assetName(id: string): string { return this.asset(id)?.displayName ?? "Unavailable image"; }
-  assetForReference(id:string){return this.asset(id);}
   referenceThumbnail(reference:ControlImageReference){const asset=this.asset(reference.assetId);const media=this.media.get(reference.assetId,reference.replacementSha256??reference.expectedAssetSha256)?.media;return asset?this.thumbnail(asset,media):undefined;}
   async chooseReference(reference:ControlImageReference|undefined,key:string,trigger:HTMLElement,current:()=>boolean,choose:(reference:ControlImageReference,asset:UiImageAsset,change?:AuthoringRevisionChange)=>void,authoringRevision?:string):Promise<void>{
     const view=this.host.view();if(!view||this.saving)return;

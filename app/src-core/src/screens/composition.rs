@@ -447,8 +447,9 @@ impl AuthoringService {
                     .iter()
                     .find(|n| n.id.as_ref() == Some(&parent_id))
                     .ok_or(SceneError::UnknownEntity)?;
-                let addition = control_addition;
-                if !addition && (target.bar_binding.is_none() || target.bar_appearance.is_none()) {
+                if !control_addition
+                    && (target.bar_binding.is_none() || target.bar_appearance.is_none())
+                {
                     return Err(SceneError::OpaqueBoundary);
                 }
                 if owner.screen.kind == crate::metadata::OwnedScreenKind::Component {
@@ -462,7 +463,7 @@ impl AuthoringService {
                     source_path,
                     "bar",
                     target,
-                    addition,
+                    control_addition,
                     values,
                     width,
                     height,

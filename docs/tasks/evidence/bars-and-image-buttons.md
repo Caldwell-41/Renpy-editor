@@ -1707,3 +1707,27 @@ original inputs. #51's cumulative counts and zero reservations are unchanged.
 The same draft will publish with `[skip ci]` at Kris's explicit request; its
 current head is unvalidated by CI. The existing validation plan stays unchanged.
 No merge, ready-for-review transition, issue closure or separate PR is selected.
+
+## Two-axis code review fixes, 2026-11-06
+
+Kris accepted the Standards/Spec review of draft PR #83 and selected these fixes,
+with CI. The gallery-gate retirement and the evidence basis (Spec a1/b1) were
+already approved and were not changed.
+
+- Clearing a bar color or image-button state deletes its statement. An inline
+  comment stays on its own line. `pass` is used only if the block would be empty.
+  Kris chose this for control properties only; numeric layout keeps its rule.
+  The bar edit test now also proves that set-then-clear returns identical source.
+- `bar_canvas` refuses an unparseable sample instead of clamping it. Samples are
+  already validated i64 decimals, so this removes unreachable code.
+- `control_source::image_button_size_field` replaces two copies of the size-field
+  list in layout and canvas.
+- New test: `selected`/`sensitive` expressions on an image button either record the
+  variable revision or mark effects unknown.
+- Removed a redundant alias and the `assetForReference` pass-through.
+
+Local macOS ARM64 checks: 625 core tests pass, 21 focused control tests pass, the
+actual controls UI-to-core journey passes all stages, and typecheck passes.
+377/378 frontend tests pass; the Windows probe validator needs Python 3.11 (`tomllib`)
+and this host has 3.9. CI runs on the pushed head; no SDK, helper, package or native
+operation ran.

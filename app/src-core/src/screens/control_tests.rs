@@ -479,7 +479,7 @@ fn bar_edits_preserve_opaque_neighbors_comments_and_refuse_stale_or_unsafe_reque
     assert_eq!(edited["changed"], true);
     let expected = original
         .replace("max=15", "max=25")
-        .replace("left_bar \"#123\"", "pass");
+        .replace("left_bar \"#123\" # keep", "# keep");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         expected
@@ -487,6 +487,15 @@ fn bar_edits_preserve_opaque_neighbors_comments_and_refuse_stale_or_unsafe_reque
     assert_eq!(
         compose_command(&mut service, &owner, command.clone())["changed"],
         false
+    );
+    // Setting and clearing again returns the same source, with no leftover lines.
+    let mut set = command.clone();
+    set["appearance"] = json!({"leftBar":"#456"});
+    compose_command(&mut service, &owner, set);
+    compose_command(&mut service, &owner, command.clone());
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        expected
     );
     let doc = ipc(
         &mut service,
@@ -572,6 +581,46 @@ fn control_noops_and_unrelated_edits_preserve_recognized_expression_bytes() {
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         source.replace("#123", "#456")
     );
+}
+
+#[test]
+fn imagebutton_state_expressions_are_tracked_or_unknown() {
+    let (temporary, mut service, root, owner) = composition_project();
+    let variable = int_variable(&mut service);
+    let asset = import_image(&temporary, &mut service, &root, "state_button");
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"addImageButton","parentId":owner["rootId"],"appearances":{"normal":asset},"width":160,"height":80,"interaction":{"actions":[],"expectedAuthoringRevision":doc["authoringRevision"],"expectedTargetRevisions":[]}}),
+    );
+    let resolve = json!({"binding":{"screenId":owner["id"],"sourceName":owner["name"]}});
+    for state in ["selected score > 0", "sensitive score > 0"] {
+        let source = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+            .as_str()
+            .unwrap()
+            .to_owned();
+        let line = source
+            .lines()
+            .find(|l| l.trim() == "action Null()")
+            .unwrap();
+        let indent = &line[..line.len() - line.trim_start().len()];
+        save_composition_source(
+            &mut service,
+            &owner,
+            &source.replacen(line, &format!("{line}\n{indent}{state}"), 1),
+        );
+        let effects = &ipc(&mut service, "screens.resolveTarget", resolve.clone())["effects"];
+        let tracked = effects["dependencies"].as_array().unwrap().iter().any(|d| {
+            d["id"] == variable["id"] && d["revision"] == variable["source"]["sourceRevision"]
+        });
+        assert!(effects["unknown"] == true || tracked, "{state}: {effects}");
+        save_composition_source(&mut service, &owner, &source);
+    }
 }
 
 #[test]
