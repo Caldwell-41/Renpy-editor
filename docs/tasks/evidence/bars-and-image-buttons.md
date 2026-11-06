@@ -1401,3 +1401,53 @@ before execution. No package build, new helper session, broad runtime matrix or
 review panel is needed for this step. Both tickets remain open. Broader native
 preview routing, physical input, #54/Phase3B and human acceptance remain separate.
 All code and detailed evidence are local-only; no push, PR or merge occurred.
+
+## Approved Windows start17 and DPI admission failure, 2026-11-06
+
+Kris explicitly replied "Yes approved" to raising the Windows SDK ceiling from16
+to17 for one reference capture and passive replay. The coordinator recorded that
+increase and reserved exactly one start in#51 before execution. No other ceiling
+changed. The checkout was clean at2331b44b3f5b9b95bfe665a864d0e97a0a0e3cfb.
+
+The prepared owner-context launcher ran one reference SDK process. Its single
+matrix passes in5.172s, exit0, with12 PNGs, process reaped and scratch cleanup
+complete. No package, helper or native editor started. Reference result:
+`app/target/controls-51-52/reference-windows-2331b44b/result.json`, SHA256
+`22ad5a848737240889be8e328ee9fb227a14f5319dadf4a0559a58e83ce811cd`.
+
+Overall launcher/helper admission FAILS with `wrong helper capture conditions`.
+Both physical frame dimensions match the retained helper, but the reference
+records drawPerVirtual1.5 while the helper records1.0. The check remains strict.
+Passive comparison independently verifies all twelve file hashes and every crop:
+614400 RGBA bytes match exactly, including alpha, with zero residual. All states
+retain their distinct uniform native source-minus-one colors at both aspects.
+That pixel equality does not waive the capture-condition requirement. Audit:
+`app/target/controls-51-52/reference-windows-2331b44b/comparison-audit.json`, SHA256
+`b51e14688ff8a2a9c6346f3f6ccf293a167d897bf304d433b95b1ed34985c44a`.
+The original3b helper result and failed wrapper are unchanged.
+
+Passive inspection establishes the source of the mismatch. Production helper
+launch in `app/src-core/src/renpy/runtime/canvas.rs` explicitly sets
+`RENPY_HIGHDPI=1.0`. The reference producer omitted it. The pinned SDK's
+`display/core.py::setup_dpi_scaling` uses that override when present; otherwise
+Windows derives its scale from desktop DPI. The reference therefore used1.5.
+This is a qualification-launcher omission, not a demonstrated renderer defect.
+
+The reference producer now supplies the same per-process override, with no
+production code, system DPI, security, renderer or comparison changes. A new
+test enters the real reference CLI, stages the admitted images and captures the
+SDK launch boundary without executing it. It fails before the fix with inherited
+`RENPY_HIGHDPI=9.0` instead of1.0, then passes after the correction. It also checks
+that the staged project contains only the trusted reference script and six
+admitted PNGs, and that a dummy video override is removed. Initial test setup
+errors at the temporary-output and input-snapshot boundaries were corrected
+before the reproduced DPI failure. All six helper checks pass; no SDK was used.
+
+#51 resolves the consumed reservation. Windows actuals are SDK17/17, helper1/4,
+package2/2, native2/3. Mac remains SDK13/16, helper1/4, package1/2, native1/3.
+Zero uncertain starts or reservations remain; all owned processes are stopped.
+No retry ran. A corrected reference-only retry plus passive replay needs explicit
+approval to raise Windows SDK17 to18 and a new #51 reservation. The existing
+launcher chooses a fresh result directory from the corrected committed candidate.
+Both tickets remain open. Previous allowance-decision directions are historical;
+publication and wider acceptance boundaries remain unchanged.

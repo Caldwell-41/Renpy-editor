@@ -678,7 +678,10 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   Windows fitted reference edges differ while helper crops are uniform. Preserve
   exact pixels and capture conditions; use independent whole-frame native
   references. Corrected Mac admission passes all twelve crops with zero residual;
-  Windows reference admission remains pending at its exhausted SDK limit. See
+  Windows pixels also match exactly, but reference scale1.5 differs from helper1.0.
+  Production pins `RENPY_HIGHDPI=1.0`; the reference launcher omitted it. The
+  corrected launcher and offline launch-boundary regression now pass. Native
+  requalification remains pending at SDK17/17. See
   [the control diagnosis](../tasks/evidence/bars-and-image-buttons.md#continuation-and-passive-helper-diagnosis-2026-11-06).
 
 ## H47. Shared Apply hides text dimensions

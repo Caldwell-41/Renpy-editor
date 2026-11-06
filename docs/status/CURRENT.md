@@ -4,7 +4,9 @@
 
 Kris selected continuation on `codex/51-52-integration`. Both implementations are
 integrated locally at `3b663002`; qualification correction `ed44c624` adds matched
-native references without changing production code. No code publication, PR, merge
+native references without changing production code. A later reference-only Windows
+run at2331b44b matched all pixels but failed strict drawing-scale admission. Its
+per-process DPI setting is corrected locally. No code publication, PR, merge
 or ticket closure is selected. #51/#52 remain incomplete.
 
 | Capability | Completed evidence | Remaining acceptance |
@@ -12,7 +14,7 @@ or ticket closure is selected. #51/#52 remain incomplete.
 | Controls and approved design | Actual UI/core journey, five review regressions and 378 frontend tests pass on recorded candidates. Both packaged control journeys pass at 3b. Final coordinator product review and original-criterion reconciliation are recorded. | Required helper qualification; broader native/human gates stay separate. |
 | Runtime | Windows four cases pass at observer7d199aa9/source fe78025f. Mac seven starts/four cases pass at exact5190, with 48 captures and cleanup. | No broad rerun selected. |
 | Packages and native app | Windows corrected native attempt2 passes. Mac signed package1 and native attempt1 pass strict identity, all six control stages and cleanup. | Physical input and native editor preview routing are separate claims. |
-| Control helper | Mac's twelve frames pass exact native-reference RGBA, physical-size/scale, source invariance and cooperative shutdown checks. Twelve Windows frames and lifecycle evidence remain retained. | Windows needs one reference-only SDK process and passive replay. Its exhausted SDK ceiling requires Kris's approval; no package/helper restart is needed. |
+| Control helper | Mac's twelve frames pass exact native-reference RGBA, physical-size/scale, source invariance and cooperative shutdown checks. All twelve Windows reference/helper crops now match exactly. | Windows strict admission still fails because reference drawing scale1.5 differs from helper1.0. The reference DPI correction passes six offline checks. SDK17/17 is exhausted; another reference-only start needs approval. |
 | Design Lab | Selected A2 approval/source/capture and changed-source-refusal check passes. Source37d29ca1 and thirteen captures stay pinned. | Historical failed/cancelled full runs remain evidence. The full-gallery gate is retired. |
 
 The corrected reference is qualified on Mac at ed44c624; the first missing-entry

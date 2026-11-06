@@ -13,6 +13,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from PIL import Image
 
 spec = importlib.util.spec_from_file_location('controls_helper_gate', Path(__file__).with_name('qualify-screen-controls.py'))
@@ -99,6 +100,43 @@ class HelperAdmissionChecks(unittest.TestCase):
         second['sha256'] = gate.digest(self.output/second['filename'])
         with self.assertRaisesRegex(ValueError, 'state pixels'):
             self.check(self.result)
+
+    def test_reference_launch_uses_helper_dpi_and_only_admitted_images(self):
+        sys.path.insert(0, str(gate.REPO / 'spikes/renpy-sdk'))
+        import archive_safety
+        import sdk_adapter
+        checksums = self.output / 'checksums.txt'
+        checksums.write_text('# sha256\n' + gate.files.SDK_SHA256 + '  sdk.tar.bz2\n')
+        observed = []
+        material = gate.inputs()
+
+        def capture_launch(result, output, name, argv, cwd, env, timeout):
+            observed.append(env)
+            self.assertEqual(env['RENPY_HIGHDPI'], '1.0')
+            self.assertNotIn('SDL_VIDEODRIVER', env)
+            game = Path(argv[-3]) / 'game'
+            staged = [p for p in game.rglob('*') if p.is_file()]
+            self.assertEqual([p.name for p in staged if p.suffix == '.rpy'], ['reference.rpy'])
+            images = [p for p in staged if p.suffix == '.png']
+            self.assertEqual(len(images), 6)
+            for image in images:
+                self.assertEqual(gate.digest(image), gate.digest(self.accepted / 'game' / image.relative_to(game)))
+            raise RuntimeError('captured launch boundary; no process started')
+
+        with patch.object(gate.process, 'require_candidate'), \
+             patch.object(gate, 'inputs', return_value=material), \
+             patch.object(gate.shared, 'record_environment'), \
+             patch.object(gate.files, 'REPO', self.output), \
+             patch.object(archive_safety, 'install_verified_tar'), \
+             patch.object(sdk_adapter, 'launcher_for', return_value=('not-launched',)), \
+             patch.object(gate.process, 'run_sdk_logged', side_effect=capture_launch), \
+             patch.dict(os.environ, {'RENPY_HIGHDPI': '9.0', 'SDL_VIDEODRIVER': 'dummy'}):
+            with self.assertRaisesRegex(RuntimeError, 'captured launch boundary'):
+                gate.main(['reference-helper', '--accepted', str(self.accepted),
+                           '--output', str(self.output / 'app/target/launch'), '--archive', str(self.output / 'sdk.tar.bz2'),
+                           '--checksums', str(checksums), '--expected-candidate', self.candidate,
+                           '--allow-fixture-execution'])
+        self.assertEqual(len(observed), 1)
 
     def test_reference_capture_conditions_and_source_identity_refuse(self):
         original = copy.deepcopy(self.reference_result)

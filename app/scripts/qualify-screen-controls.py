@@ -644,6 +644,8 @@ def reference_helper(args):
         write_json(game / 'reference-input.json', dict(manifestSHA256=result['manifestSHA256'], appearances=appearances))
         env = dict(os.environ, RENPY_PATH_TO_SAVES=str(temporary / 'saves'), SDL_AUDIODRIVER='dummy',
                    RENPY_RENDERER='angle2' if sys.platform == 'win32' else 'gl2', RENPY_SCALE_FACTOR='1',
+                   # Match runtime/canvas.rs; desktop DPI must not change the reference basis.
+                   RENPY_HIGHDPI='1.0',
                    LOOMLIGHT_CONTROL_REFERENCE_OUTPUT=str(output), PYTHONDONTWRITEBYTECODE='1',
                    TMPDIR=str(temporary), TMP=str(temporary), TEMP=str(temporary))
         env.pop('SDL_VIDEODRIVER', None)

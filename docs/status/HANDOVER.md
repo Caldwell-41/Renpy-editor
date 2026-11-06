@@ -11,7 +11,7 @@ qualification-only correction is `ed44c624643aa67bbf75f58ecb5664c8a2f3069a`.
 Inspect actual HEAD and changes; do not reset or re-import workers.
 
 Read live #51/#52 and [the continuation evidence](../tasks/evidence/bars-and-image-buttons.md#continuation-and-passive-helper-diagnosis-2026-11-06).
-#51 alone owns cumulative accounting and active reservations. Windows SDK16/16 and
+#51 alone owns cumulative accounting and active reservations. Windows SDK17/17 and
 package2/2 ceilings remain closed. Native attempt2 now passes at the retained 3b
 package, all six stages, exact source/disk comparison and complete cleanup. No
 Windows reservation remains. The prior failure and pre-launch launcher refusals
@@ -30,7 +30,15 @@ imports no game scripts, product renderer or canvas plan. `validate-helper` now
 requires these references and their result hash, matching actual physical size and
 drawing scale, and exact full-RGBA crops. Fifteen focused admission tests pass.
 Its corrected engine reference and twelve-frame helper comparison pass on Mac.
-Windows reference execution remains unselected. Do not normalize pixels,
+The approved Windows reference process at2331b44b passes and all twelve crops
+match exactly, but strict admission fails: reference drawPerVirtual1.5 differs
+from the retained helper's1.0. Physical dimensions match. Passive source diagnosis
+finds production `renpy/runtime/canvas.rs` pins `RENPY_HIGHDPI=1.0`; the reference
+producer omitted it. The producer now uses the same per-process setting. A new
+CLI-to-launch-boundary regression reproduces the omission and passes after the
+fix, including inherited DPI override and admitted-images-only staging. Six
+helper checks pass without engine execution. No system DPI setting changed.
+The consumed reference remains failed for combined helper admission. Do not normalize pixels,
 drop alpha, compare only interiors or weaken matching to clear the gate.
 
 The same existing Mac qualification thread is
@@ -69,10 +77,10 @@ validator retains two unrelated untracked recovery-newline failures; all1762 tra
 files pass. Do not rerun all378 frontend tests or broad core suites for docs or
 qualification-only changes. Three Windows OS1314 symlink checks remain unqualified.
 
-Next obtain Kris's explicit approval to raise the Windows SDK ceiling from16 to17
+Next obtain Kris's explicit approval to raise the Windows SDK ceiling from17 to18
 for one reference-only process, then record a #51 reservation before running the
 prepared `.toolchains/51-52/reference-windows-resume.ps1 -RunReserved` as owner.
-Its read-only preflight passes. It replays the original twelve helper frames after
+Its read-only preflight passes on the corrected committed candidate. It replays the original twelve helper frames after
 the reference; it starts no helper and builds no package. Preserve the original
 failed wrapper and record new admission separately. Required Windows helper
 proof still prevents ticket acceptance. Wider #54/Phase3B, physical input, native
