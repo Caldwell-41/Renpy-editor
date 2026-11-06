@@ -83,8 +83,13 @@ impl<'a> Template<'a> {
     }
 }
 
+/// Text and textbutton labels share one template grammar for canvas samples.
+fn templated(node: &Node) -> bool {
+    matches!(node.kind.as_str(), "text" | "textbutton")
+}
+
 pub fn inspect_bindings(node: &Node, variables: &[Variable]) -> Option<Vec<VariableBinding>> {
-    if node.kind != "text" {
+    if !templated(node) {
         return None;
     }
     Some(
@@ -151,7 +156,7 @@ pub fn resolve_template(
     variables: &[Variable],
     values: &BTreeMap<String, String>,
 ) -> Result<Option<String>, SceneError> {
-    if node.kind != "text" {
+    if !templated(node) {
         return Ok(None);
     }
     let Some(literal) = node.literal.as_deref() else {
@@ -168,7 +173,8 @@ pub(super) fn validate_edit(
     text: &str,
     variables: &[Variable],
 ) -> Result<(), SceneError> {
-    if node.id.is_none() || inspect_bindings(node, variables).is_none() {
+    // Bound-text writes stay on Text; textbutton templates are canvas-only.
+    if node.kind != "text" || node.id.is_none() || inspect_bindings(node, variables).is_none() {
         return Err(SceneError::OpaqueBoundary);
     }
     Template::parse(text, variables)?;

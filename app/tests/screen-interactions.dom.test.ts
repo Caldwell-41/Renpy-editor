@@ -4,10 +4,10 @@ import { Window } from "happy-dom";
 import { ScreensWorkspace, type ScreenDocument } from "../src/screen-ui.js";
 import type { CoreOperation } from "../src/protocol.js";
 const flush=async()=>{for(let i=0;i<10;i++)await new Promise(r=>setTimeout(r,0));};
-function fixture(kind:"dialog"|"panel"|"component"="dialog",bound=false) {
+function fixture(kind:"dialog"|"panel"|"component"="dialog",{bound=false,extraKind}:{bound?:boolean;extraKind?:"frame"|"window"|"textbutton"}={}) {
  const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement,HTMLInputElement:browser.HTMLInputElement,HTMLSelectElement:browser.HTMLSelectElement,HTMLTextAreaElement:browser.HTMLTextAreaElement,HTMLDetailsElement:browser.HTMLDetailsElement,ResizeObserver:browser.ResizeObserver});
  let revision="original",authoringRevision="authoring-original",refuse=true,advanceWrites=false;
- const nodes=()=>[{id:"root",kind:"screen",literal:null,span:{start:0,end:200},parentStart:null,layout:{},properties:[],protected:[]},{id:"close",kind:"textbutton",literal:"Close",actions:[],span:{start:20,end:90},parentStart:0,layout:{},properties:[],protected:[],textProperties:{values:{},blocked:{}}},{id:"body",kind:"text",literal:bound?"Coins: [coins!q]":"Coins: 12",variableBindings:bound?[{variableId:"coins"}]:[],span:{start:100,end:150},parentStart:0,layout:{},properties:[],protected:[],textProperties:{values:{},blocked:{}}}];
+ const nodes=()=>[{id:"root",kind:"screen",literal:null,span:{start:0,end:200},parentStart:null,layout:{},properties:[],protected:[]},{id:"close",kind:"textbutton",literal:"Close",actions:[],span:{start:20,end:90},parentStart:0,layout:{},properties:[],protected:[],textProperties:{values:{},blocked:{}}},{id:"body",kind:"text",literal:bound?"Coins: [coins!q]":"Coins: 12",variableBindings:bound?[{variableId:"coins"}]:[],span:{start:100,end:150},parentStart:0,layout:{},properties:[],protected:[],textProperties:{values:{},blocked:{}}},...(extraKind?[{id:"extra",kind:extraKind,literal:"Extra",actions:[],span:{start:160,end:195},parentStart:0,layout:{},properties:[],protected:[],textProperties:{values:{background:"#123456"},blocked:{}}}]:[])];
  const doc=():ScreenDocument=>({path:"game/ui/help.rpy",revision,authoringRevision,partial:false,screens:[{name:"help",nodes:nodes()}]});
  const owner={id:"help",rootId:"root",path:doc().path,name:"help",kind,resolved:true,sourceRevision:revision};
  const writes:Record<string,unknown>[]=[],renders:Record<string,unknown>[]=[],messages:string[]=[];
@@ -33,6 +33,38 @@ function fixture(kind:"dialog"|"panel"|"component"="dialog",bound=false) {
  const select=(id:string)=>{if(!workspace.panel.querySelector(`[data-node-id="${id}"]`))button("1  Choose");workspace.panel.querySelector<HTMLElement>(`[data-node-id="${id}"]`)!.dispatchEvent(new window.MouseEvent("dblclick",{bubbles:true}));};
  return {browser,workspace,writes,renders,messages,find,change,button,select,refresh:async()=>{revision="newer";authoringRevision="authoring-newer";await workspace.load();},allow:()=>{refuse=false;},acceptChanges:()=>{refuse=false;advanceWrites=true;},dispose:async()=>{workspace.dispose();await browser.happyDOM.abort();}};
 }
+
+test("canvas state follows the open button appearance fields without changing the draft or samples",async()=>{
+ const f=fixture();try{f.workspace.mount(document.body);await flush();f.select("close");
+ f.change("Text","Retained label");f.button("Sample values");f.change("Sample coins","7");await flush();
+ for(const [state,prefix]of [["hover","hover_"],["selected","selected_"],["disabled","insensitive_"],["normal",""]]){
+  f.change("Button state (sample)",state!);await flush();
+  assert.equal(f.workspace.panel.querySelector<HTMLSelectElement>('[data-appearance-field="state"]')!.value,prefix);assert.equal(f.find("Text").value,"Retained label");
+  assert.equal(f.renders.at(-1)!.buttonState,state);assert.deepEqual(f.renders.at(-1)!.variableSamples,[{variableId:"coins",expectedSourceRevision:"coins-v1",value:"7"}]);
+ }
+ const appearance=f.workspace.panel.querySelector<HTMLSelectElement>('[data-appearance-field="state"]')!;appearance.value="hover_";appearance.dispatchEvent(new window.Event("change"));await flush();assert.equal(f.find("Button state (sample)").value,"hover");
+ for(const state of ["selectedHover","selectedDisabled"]){f.change("Button state (sample)",state);await flush();assert.equal(f.workspace.panel.querySelector<HTMLSelectElement>('[data-appearance-field="state"]')!.value,"selected_","Combined states edit the selected_ prefix that wins in Ren'Py");assert.equal(f.renders.at(-1)!.buttonState,state);}
+ f.button("Cancel");assert.equal(f.find("Text").value,"Close");assert.equal(f.writes.length,0);
+ }finally{await f.dispose();}
+});
+
+test("frame and window appearance stay unprefixed under a button sample",async()=>{
+ for(const kind of ["frame","window"] as const){
+  const f=fixture("dialog",{extraKind:kind});try{f.workspace.mount(document.body);await flush();f.select("close");f.change("Button state (sample)","hover");f.select("extra");
+   const field=f.workspace.panel.querySelector<HTMLInputElement>('[data-appearance-field$="background"]')!;
+   assert.equal(field.dataset.appearanceField,"background");assert.equal(field.value,"#123456");
+   field.value="#abcdef";field.dispatchEvent(new window.Event("input"));f.button("Apply");await flush();
+   assert.deepEqual((f.writes.at(-1)!.command as {values:{appearance:unknown}}).values.appearance,{background:"#abcdef"});
+  }finally{await f.dispose();}
+ }
+});
+
+test("a sample chosen on one button opens the matching appearance on another",async()=>{
+ const f=fixture("dialog",{extraKind:"textbutton"});try{f.workspace.mount(document.body);await flush();f.select("close");f.change("Button state (sample)","hover");f.select("extra");
+  f.change("Button state (sample)","disabled");f.select("close");
+  assert.equal(f.workspace.panel.querySelector<HTMLSelectElement>('[data-appearance-field="state"]')!.value,"insensitive_");
+ }finally{await f.dispose();}
+});
 
 test("new Show and Hide drafts use target revisions from the last accepted edit",async()=>{
  const f=fixture("panel");try{f.workspace.mount(document.body);await flush();f.acceptChanges();f.select("close");f.change("Text","Continue");f.button("Apply");await flush();assert.equal(f.workspace.hasDraft(),false);
@@ -113,7 +145,7 @@ test("component text keeps variable insertion and review controls while its butt
 });
 
 test("bound Text sends pending templates through the existing core draft-render owner and never an old text-sample override",async()=>{
- const f=fixture("dialog",true);try{f.workspace.mount(document.body);await flush();f.select("body");await flush();f.change("Text","Current balance: [coins!q]");await flush();
+ const f=fixture("dialog",{bound:true});try{f.workspace.mount(document.body);await flush();f.select("body");await flush();f.change("Text","Current balance: [coins!q]");await flush();
  const request=f.renders.at(-1)!;assert.deepEqual(request.textSamples,[]);assert.deepEqual(request.textStyles,[{nodeStart:100,values:{text:"Current balance: [coins!q]"}}]);assert.equal(f.writes.length,0);
  }finally{await f.dispose();}
 });

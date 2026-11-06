@@ -86,6 +86,12 @@ export class ScreensWorkspace {
   private readonly gameResolution: {width:number; height:number};
   private zoom = "fit";
   private buttonState = "normal";
+  /** One canvas sample state drives the selector, both inspectors and the preview. */
+  private sampleButtonState(state:string):void {
+    this.buttonState=state;this.text.setSampleState(state);this.controls?.setSampleState(state as ControlButtonState);
+    const select=this.stage.querySelector<HTMLSelectElement>('[aria-label="Button state (sample)"]');if(select)select.value=state;
+    this.renderCanvas();
+  }
   private readonly textSamples = new Map<string,{revision:string; screen:string; path:string; index:number; value:string}>();
   private readonly rail = el("nav", "screen-steps");
   private sourceDialog?: HTMLDialogElement;
@@ -185,13 +191,13 @@ export class ScreensWorkspace {
       selectDraft:(screenId,nodeId)=>{try{this.selectOwnedScreen(screenId,nodeId);}catch(error){this.note((error as Error).message,true);}},
       writeBlocked:()=>this.components.hasPendingCopy(),cancelComponentCopy:()=>this.components.cancelCopy(),
       componentScope:(host,view)=>this.components.renderScope(host,view),
-      view: () => this.compositionView(),styles: () => this.catalog?.styles,documents:()=>this.documents,inspect:async path=>this.documents.find(d=>d.path===path)??await actions.request<ScreenDocument>("screens.inspect",{path}),resolution:this.gameResolution,reviewing:active=>{this.reviewingAppearance=active;this.frames.invalidate("Return from style review to update this canvas.");if(!active)this.renderCanvas();},buttonSample: state => {this.buttonState=state;this.controls?.setSampleState(state as ControlButtonState);const select=this.stage.querySelector<HTMLSelectElement>('[aria-label="Button state (sample)"]');if(select)select.value=state;this.renderCanvas();},current: () => this.current(),request:actions.request,coordinate:actions.coordinate,
+      view: () => this.compositionView(),styles: () => this.catalog?.styles,documents:()=>this.documents,inspect:async path=>this.documents.find(d=>d.path===path)??await actions.request<ScreenDocument>("screens.inspect",{path}),resolution:this.gameResolution,reviewing:active=>{this.reviewingAppearance=active;this.frames.invalidate("Return from style review to update this canvas.");if(!active)this.renderCanvas();},buttonSample: state => this.sampleButtonState(state),current: () => this.current(),request:actions.request,coordinate:actions.coordinate,
       commit:(command,base) => this.compose(command,base),redraw:() => this.renderCard(),preview:() => this.renderCanvas(),
       source:() => {void this.openSource();},saved:() => this.saved(false),note:(message,error) => this.note(message,error),
       layoutTools:host => {const tools = el("div","screen-text-layout-tools");tools.append(button("Refresh Source",()=>void this.load()),button("Validate screen",()=>this.test(true)));host.append(tools);},
       order:host => this.composer.renderOrder(host),
     },this.layout);
-    this.controls=new ScreenControlEditor({imported:(change,base)=>this.acceptControlImport(change,base),view:()=>this.compositionView(),interaction:()=>this.interactionContext(),commit:(command,base)=>this.compose(command,base),redraw:()=>{if(this.controls.hasAddition())this.step="design";this.renderCard();},preview:()=>this.renderCanvas(),note:(text,error)=>this.note(text,error),select:(id,design)=>{const index=this.nodes().findIndex(n=>n.id===id);if(index>=0)this.choose(index,design);},source:()=>{void this.openSource();},writeBlocked:()=>this.components.hasPendingCopy(),cancelCopy:()=>this.components.cancelCopy(),order:host=>this.composer.renderOrder(host),layoutTools:host=>{host.append(button("Refresh Source",()=>void this.load()),button("Validate screen",()=>this.test(true)));},current:()=>this.current(),sample:state=>{this.buttonState=state;const select=this.stage.querySelector<HTMLSelectElement>('[aria-label="Button state (sample)"]');if(select)select.value=state;this.renderCanvas();}},this.layout,this.images);
+    this.controls=new ScreenControlEditor({imported:(change,base)=>this.acceptControlImport(change,base),view:()=>this.compositionView(),interaction:()=>this.interactionContext(),commit:(command,base)=>this.compose(command,base),redraw:()=>{if(this.controls.hasAddition())this.step="design";this.renderCard();},preview:()=>this.renderCanvas(),note:(text,error)=>this.note(text,error),select:(id,design)=>{const index=this.nodes().findIndex(n=>n.id===id);if(index>=0)this.choose(index,design);},source:()=>{void this.openSource();},writeBlocked:()=>this.components.hasPendingCopy(),cancelCopy:()=>this.components.cancelCopy(),order:host=>this.composer.renderOrder(host),layoutTools:host=>{host.append(button("Refresh Source",()=>void this.load()),button("Validate screen",()=>this.test(true)));},current:()=>this.current(),sample:state=>this.sampleButtonState(state)},this.layout,this.images);
     const heading = el("header", "screen-heading"); heading.append(el("h1", "", "Screens"));
     const tools = el("div", "screen-tools");
     const addImageElement = button("Add element", () => this.composer.beginAddition()); addImageElement.dataset.imageAdd = ""; addImageElement.hidden = true;
@@ -237,7 +243,7 @@ export class ScreensWorkspace {
     zoom.onchange=() => {this.zoom=zoom.value; this.renderCanvas();};
     const state=el("select"); state.ariaLabel="Button state (sample)";state.setAttribute("aria-label","Button state (sample)");
     for(const [value,label]of controlSampleStates) {const option=el("option","",`Sample: ${label}`);option.value=value;state.append(option);}
-    state.onchange=()=>{this.buttonState=state.value;this.controls.setSampleState(state.value as ControlButtonState);this.renderCanvas();};
+    state.onchange=()=>this.sampleButtonState(state.value);
     caption.append(el("h2", "", "Screen canvas"),aspects,zoom,state,button("Test in Ren'Py", () => this.test(false), "button primary screen-image-test"));
     const viewport = el("div", "screen-viewport"); viewport.append(this.canvas);
     this.canvasStatus.role = "status";

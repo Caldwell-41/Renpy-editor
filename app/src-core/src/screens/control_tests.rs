@@ -1,14 +1,13 @@
 use super::*;
-use base64::Engine;
 
 // Public-domain solid-color 80x40 PNGs, created for this synthetic fixture.
-const STATE_PNGS: [&str;6] = [
-"iVBORw0KGgoAAAANSUhEUgAAAFAAAAAoCAIAAADmAupWAAAASklEQVR4nO3PAQkAMAzAsMmZfz0XcxmHPlABzZzdr5rnB8DAwMDAwMDfBFwPuB5wPeB6wPWA6wHXA64HXA+4HnA94HrA9YDrAde7kiKm08mSKtMAAAAASUVORK5CYII=",
-"iVBORw0KGgoAAAANSUhEUgAAAFAAAAAoCAIAAADmAupWAAAAS0lEQVR4nO3PAQkAIBDAQOMYwtgGNIawP1iA3dr3jGp9PwAGBgYGBgYeE3A94HrA9YDrAdcDrgdcD7gecD3gesD1gOsB1wOuB1zvAbGwrMT5CBtuAAAAAElFTkSuQmCC",
-"iVBORw0KGgoAAAANSUhEUgAAAFAAAAAoCAIAAADmAupWAAAAS0lEQVR4nO3PAQkAIBDAQOMYx/4YxhjC/mABdmufO6r1/QAYGBgYGBh4TMD1gOsB1wOuB1wPuB5wPeB6wPWA6wHXA64HXA+4HnC9BzTbmvG0AgROAAAAAElFTkSuQmCC",
-"iVBORw0KGgoAAAANSUhEUgAAAFAAAAAoCAIAAADmAupWAAAAS0lEQVR4nO3PAQkAIBDAQEMY22DGMoawP1iA3bpnj2p9PwAGBgYGBgYeE3A94HrA9YDrAdcDrgdcD7gecD3gesD1gOsB1wOuB1zvAeW2lQCJW7nLAAAAAElFTkSuQmCC",
-"iVBORw0KGgoAAAANSUhEUgAAAFAAAAAoCAIAAADmAupWAAAAS0lEQVR4nO3PAQkAIBDAQOMY1jgGNIawP1iA3Tr7jmp9PwAGBgYGBgYeE3A94HrA9YDrAdcDrgdcD7gecD3gesD1gOsB1wOuB1zvAScglQBGgILDAAAAAElFTkSuQmCC",
-"iVBORw0KGgoAAAANSUhEUgAAAFAAAAAoCAIAAADmAupWAAAATElEQVR4nO3PQQ0AIBDAMETgXwBvBCKDZNdkAta1zx3V+n4ADAwMDAwMPCbgesD1gOsB1wOuB1wPuB5wPeB6wPWA6wHXA64HXA+43gNYtBIPIZ3EFgAAAABJRU5ErkJggg==",
+const STATE_PNGS: [&[u8]; 6] = [
+    include_bytes!("../../../../tests/fixtures/phase-3b-screens/control-states/state_0.png"),
+    include_bytes!("../../../../tests/fixtures/phase-3b-screens/control-states/state_1.png"),
+    include_bytes!("../../../../tests/fixtures/phase-3b-screens/control-states/state_2.png"),
+    include_bytes!("../../../../tests/fixtures/phase-3b-screens/control-states/state_3.png"),
+    include_bytes!("../../../../tests/fixtures/phase-3b-screens/control-states/state_4.png"),
+    include_bytes!("../../../../tests/fixtures/phase-3b-screens/control-states/state_5.png"),
 ];
 
 fn int_variable(service: &mut LifecycleService) -> Value {
@@ -84,9 +83,7 @@ fn imagebutton_unavailable_states_keep_recoverable_references_without_accepting_
             &mut service,
             &root,
             &state.to_lowercase(),
-            &base64::engine::general_purpose::STANDARD
-                .decode(STATE_PNGS[i])
-                .unwrap(),
+            &STATE_PNGS[i].to_vec(),
         );
         appearances[*state]["replacementSha256"] = Value::Null;
     }
@@ -108,13 +105,7 @@ fn imagebutton_unavailable_states_keep_recoverable_references_without_accepting_
             if missing {
                 fs::remove_file(&file).unwrap();
             } else {
-                fs::write(
-                    &file,
-                    base64::engine::general_purpose::STANDARD
-                        .decode(STATE_PNGS[(i + 1) % 6])
-                        .unwrap(),
-                )
-                .unwrap();
+                fs::write(&file, STATE_PNGS[(i + 1) % 6].to_vec()).unwrap();
             }
             let inspected = ipc(
                 &mut service,
@@ -733,13 +724,7 @@ fn export_screen_controls_public_core_fixture() {
     .enumerate()
     {
         let selected = temporary.path().join(format!("control_state_{i}.png"));
-        fs::write(
-            &selected,
-            base64::engine::general_purpose::STANDARD
-                .decode(STATE_PNGS[i])
-                .unwrap(),
-        )
-        .unwrap();
+        fs::write(&selected, STATE_PNGS[i].to_vec()).unwrap();
         let choice = service.authoring_select_import(&selected).unwrap();
         let name = format!("control_state_{i}");
         let model = ipc(
@@ -918,9 +903,7 @@ fn imagebutton_reviewed_replacements_update_both_assets_and_return_current_inspe
         &mut service,
         &root,
         "replace_hover",
-        &base64::engine::general_purpose::STANDARD
-            .decode(STATE_PNGS[5])
-            .unwrap(),
+        &STATE_PNGS[5].to_vec(),
     );
     let doc = ipc(
         &mut service,
@@ -940,9 +923,7 @@ fn imagebutton_reviewed_replacements_update_both_assets_and_return_current_inspe
     {
         fs::write(
             root.join(format!("game/images/ui {name}.png")),
-            base64::engine::general_purpose::STANDARD
-                .decode(STATE_PNGS[i])
-                .unwrap(),
+            STATE_PNGS[i].to_vec(),
         )
         .unwrap();
         let review = ipc(
@@ -1000,9 +981,7 @@ fn reviewed_image_apply_returns_committed_documents_when_later_inventory_fails()
     let before = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"].clone();
     fs::write(
         root.join("game/images/ui committed_image.png"),
-        base64::engine::general_purpose::STANDARD
-            .decode(STATE_PNGS[0])
-            .unwrap(),
+        STATE_PNGS[0].to_vec(),
     )
     .unwrap();
     let review = ipc(

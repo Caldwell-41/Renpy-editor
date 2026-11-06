@@ -11,6 +11,10 @@ mod tests;
 #[path = "nested_canvas_tests.rs"]
 mod nested_tests;
 
+#[cfg(test)]
+#[path = "sample_fidelity_tests.rs"]
+mod sample_tests;
+
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Request {
@@ -466,11 +470,19 @@ impl AuthoringService {
                         .as_f64()
                         .is_some_and(|v| v.is_finite() && v >= 0.0 && v <= MAX_PIXELS as f64),
                     ("padding", Some(Value::Array(_))) => true,
-                    (
-                        "color" | "text_color" | "background" | "hover_background" | "hover_color"
-                        | "hover_text_color",
-                        Some(Value::String(s)),
-                    ) => {
+                    (key, Some(Value::String(s)))
+                        if matches!(
+                            key,
+                            "color"
+                                | "text_color"
+                                | "background"
+                                | "hover_background"
+                                | "hover_color"
+                                | "hover_text_color"
+                        ) || node.kind == "bar"
+                            && node.bar_binding.is_some()
+                            && control_source::BAR_STATE_KEYS.contains(&key) =>
+                    {
                         s.starts_with('#')
                             && matches!(s.len(), 4 | 5 | 7 | 9)
                             && s[1..].bytes().all(|c| c.is_ascii_hexdigit())

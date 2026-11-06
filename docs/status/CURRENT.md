@@ -1,24 +1,25 @@
 # Current status
 
-## Integer bars and image buttons review corrections
+## Variable and control-state samples accepted
 
-The combined #51/#52 implementation is published in
-[draft PR #83](https://github.com/Caldwell-41/Renpy-editor/pull/83) on
-`codex/51-52-integration`, targeting `codex/phase3b-screen-designer`.
-Baseline `a78de562` passes its exact-head CI/artifact audit. The five verified
-findings from the requested Terra review are corrected using root-cause diagnosis
-and TDD at the confirmed public core IPC and actual Screens UI/core seams. The
-parent audit passes all five original cases and protected refusal paths. Local
-evidence includes 31 focused core and 103 frontend tests, the existing controls
-journey, independent parent probes and a fresh 17-test control run.
-[#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) owns the live PR,
-run/attempt/head/tree and terminal audit receipts. Both tickets stay open; merge
-and ready-for-review transition remain unselected. The branch validation plan
-still requires automatic quality and both-target harness jobs. Kris selected
-publication of the corrections without CI; the changed head has no CI qualification
-and cannot inherit the baseline's passing status. [Correction audit](../tasks/evidence/bars-and-image-buttons.md#five-review-corrections-and-parent-audit-complete-2026-11-06)
-records results. Recorded runtime/package/helper evidence below retains its original
-producing candidates and does not qualify the changed code.
+[L20 #54](https://github.com/Caldwell-41/Renpy-editor/issues/54) is accepted for
+its four bounded criteria and merged through [PR #84](https://github.com/Caldwell-41/Renpy-editor/pull/84)
+into `codex/phase3b-screen-designer`. The canvas renders typed Text and textbutton
+label samples, six button and imagebutton states, bar values and bar states. L19
+and L20 share one qualification runner. Rendering candidate `bc357a31` passes all
+22 exact comparisons on Windows and Mac. [Evidence](../tasks/evidence/sample-fidelity.md#review-corrections-and-expanded-scope-2026-11-07)
+owns the changes, checks and criteria; #54 owns the merge, CI receipts and closed
+SDK accounting (Mac 16/16, Windows 20/24). With #46/#50/#54 accepted, B08 #30 keeps
+only its aggregate visual acceptance open. No successor work is selected.
+
+## Integer bars and image buttons accepted
+
+#51/#52 are accepted through [PR #83](https://github.com/Caldwell-41/Renpy-editor/pull/83),
+merged into `codex/phase3b-screen-designer` as `46fdbc1b`.
+[#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) owns the PR, run and
+audit receipts. [Correction audit](../tasks/evidence/bars-and-image-buttons.md#five-review-corrections-and-parent-audit-complete-2026-11-06)
+records the review corrections. Runtime, package and helper evidence below keeps
+its original producing candidates.
 
 | Capability | Verified evidence | Scope retained |
 | --- | --- | --- |
@@ -31,7 +32,7 @@ Windows SDK use ends at18/20; no further start is selected. #51 owns all cumulat
 counts. No additional capped operation is selected, with zero reservations or
 uncertain starts. Three Windows OS1314 symlink cases remain unqualified, and two unrelated
 untracked recovery receipts retain newline failures; tracked-file validation passes.
-[Handover](HANDOVER.md#integer-bars-and-image-buttons-draft-publication) owns recovery.
+[Handover](HANDOVER.md#integer-bars-and-image-buttons-closeout) owns recovery.
 [Final proof and boundaries](../tasks/evidence/bars-and-image-buttons.md#root-cause-correction-and-both-target-local-verification-complete-2026-11-06)
 retain exact identities and prior failures. Wider #54/Phase3B acceptance remains separate.
 
