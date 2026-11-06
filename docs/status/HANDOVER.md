@@ -1,21 +1,32 @@
 # Current outcome handover
 
-## Integer bars and image buttons locally verified
+## Integer bars and image buttons draft publication
 
 The selected local implementation, combined review and automated qualification of
-#51/#52 are complete on `codex/51-52-integration`. No further implementation or
-qualification is selected. Production candidate remains
+#51/#52 are complete on `codex/51-52-integration`. Kris selected pushing this
+branch, a draft PR into `codex/phase3b-screen-designer`, current-head CI audit and
+in-scope fixes. The verified remote base is `ab19b7869843445dba291ee8b9ef7ea4bef5ffd8`.
+Production candidate remains
 `3b66300218955e9f7337a29a0a407e8ce689bc1d`; final Windows reference/consumer candidate
 is `e21c5331e2df7df1ab3e57a36ee5495da78c8158`. Later status commits do not replace
 those producing identities. Inspect actual HEAD and changes before resuming; do
 not reset or re-import completed workers.
 
-Kris authorized local commits, issue execution-state/limit updates and private
-hash-verified T3 message transfers. Code publication, push, PR, merge, ticket
-closure and public/server upload remain unselected. Both issues stay open. Next
-work requires a new instruction; historical pending-gate requests do not restart
-finished checks or select publication. Any later publication must follow its own
-applicable validation contract.
+The publication authorization supersedes historical local-only directions.
+[#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) owns live publication
+and CI receipts, including the exact PR/head/tree, runs/attempts, required jobs,
+artifact digests and terminal audit. The branch validation plan selects automatic
+quality and the exact Windows/macOS harness jobs from `quality.yml`. Those harness
+jobs run no SDK, helper, package or native editor. Audit their actual inputs and
+artifacts alongside `Loomlight validation`; green ordinary checks alone are
+insufficient. Fix CI findings at their owner using `principle-fix-root-causes`,
+with no skips, swallowed errors, weakened comparisons or blind retries.
+
+Keep the PR draft and both issues open. No merge, ready-for-review transition,
+issue closure, separate documentation PR or replacement review panel is selected.
+Use the T3 PR watcher for external waits, confirm registration and yield. On its
+event audit the exact current-head results and continue; stop watching at final
+handback. Existing detailed recovery below retains its size exception.
 
 [The final evidence](../tasks/evidence/bars-and-image-buttons.md#root-cause-correction-and-both-target-local-verification-complete-2026-11-06)
 records the root-cause correction and both-target results. The old helper consumer

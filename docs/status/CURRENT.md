@@ -1,11 +1,15 @@
 # Current status
 
-## Integer bars and image buttons locally verified
+## Integer bars and image buttons selected for draft publication
 
 The selected local implementation of #51/#52 is complete on
 `codex/51-52-integration`. Production candidate is `3b663002`; final reference
-qualification passes at `e21c5331`. Both tickets remain open because closure and
-code publication were not selected. Nothing was pushed; no PR or merge occurred.
+qualification passes at `e21c5331`. Kris selected publication as a draft PR into
+`codex/phase3b-screen-designer`, current-head CI audit and in-scope corrections.
+[#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) owns the live PR,
+run/attempt/head/tree and terminal audit receipts. Both tickets stay open; merge
+and ready-for-review transition remain unselected. The branch validation plan
+requires automatic quality and both-target harness jobs.
 
 | Capability | Verified evidence | Scope retained |
 | --- | --- | --- |
@@ -18,7 +22,7 @@ Windows SDK use ends at18/20; no further start is selected. #51 owns all cumulat
 counts. All owned checks/apps are stopped, with zero reservations or uncertain
 starts. Three Windows OS1314 symlink cases remain unqualified, and two unrelated
 untracked recovery receipts retain newline failures; tracked-file validation passes.
-[Handover](HANDOVER.md#integer-bars-and-image-buttons-locally-verified) owns recovery.
+[Handover](HANDOVER.md#integer-bars-and-image-buttons-draft-publication) owns recovery.
 [Final proof and boundaries](../tasks/evidence/bars-and-image-buttons.md#root-cause-correction-and-both-target-local-verification-complete-2026-11-06)
 retain exact identities and prior failures. Wider #54/Phase3B acceptance remains separate.
 

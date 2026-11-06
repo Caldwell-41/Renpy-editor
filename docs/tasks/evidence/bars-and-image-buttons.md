@@ -1512,5 +1512,39 @@ the new successful admission is separate. No extra council, Standards/Spec panel
 Terra recheck, full-gallery sweep or broad frontend/core rerun occurred. The A2
 approval and its thirteen captures remain unchanged. Wider #54/Phase3B, physical
 input, native editor preview routing and human acceptance retain separate scopes.
-Tickets stay open because closure/publication was not selected. No code was
-pushed or published, and no PR or merge occurred.
+Tickets stayed open at this local checkpoint because closure/publication had not
+been selected. No code had been pushed or published, and no PR or merge occurred.
+
+## Draft publication and current-head CI selection, 2026-11-06
+
+Kris selected pushing the completed combined implementation on
+`codex/51-52-integration`, creating a draft PR into
+`codex/phase3b-screen-designer`, auditing current-head CI and correcting in-scope
+findings in that same draft. The clean entry checkpoint is
+`49f03a2fdb80dc4001e7b1c0b33772b1052d4954`. Remote base and merge-base both verify as
+`ab19b7869843445dba291ee8b9ef7ea4bef5ffd8`. No branch reset or replacement team is
+needed. Publication supersedes earlier local-only directions; no merge,
+ready-for-review transition, issue closure or separate documentation PR is selected.
+
+The updated `.github/validation-plan.json` selects this branch/base, ordinary
+PR quality and both exact manual `quality.yml` jobs:
+`Harness regressions — windows-2025` and `Harness regressions — macos-26`.
+Dispatch selects only `harness_regressions=true`; other selectors retain false.
+Workflow inspection confirms ordinary quality runs on PR open/synchronize/edit;
+branch push alone does not trigger it. Manual harness execution runs independent
+Python/Q1/source/retention groups, seals source identity and uploads both artifacts.
+It performs no SDK, helper, package or native-editor launch and is inexpensive;
+no new costly operation is selected. Existing cumulative counts and exhausted
+Windows package capacity remain binding, with zero uncertain/reserved starts.
+
+#51 owns the live PR and exact publication-head run/attempt/tree/job/artifact audit
+receipt; #52 links to that owner. Preserve all earlier producing identities,
+approved captures, ignored evidence and failed attempts. Current CI establishes
+its selected automated scope only. Original native/package/runtime/helper proof
+retains its recorded candidate, and broader acceptance limits remain unchanged.
+
+Publication preparation passes all 18 coordinator tests, six focused helper
+checks and validation of all 1762 tracked files. The first direct helper-check
+invocation omitted its required accepted-export environment and ran zero tests;
+the existing owner-context launcher supplies the manifest and passes all six.
+This was a local invocation error, with no SDK start or source correction.
