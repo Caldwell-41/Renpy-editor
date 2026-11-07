@@ -12,6 +12,8 @@ import eliSmile from './art/eli-smile.webp';
 import eliSurprised from './art/eli-surprised.webp';
 
 export const backgrounds: Record<string, string> = { 'Rainy platform': rainyPlatform, 'Station at dawn': stationDawn, 'Tram interior': tramInterior };
+/** Sample key art for scenes that open without their own background. The app would show the background in effect when the scene starts. */
+export const sceneArt: Record<string, string> = { stranger: 'Tram interior', departure: 'Station at dawn' };
 export const expressions = ['Neutral', 'Concerned', 'Smile', 'Surprised'] as const;
 export const characters = ['Mara', 'Eli'] as const;
 export const sprites: Record<string, Record<string, string>> = {

@@ -10,7 +10,7 @@ import eliConcerned from './eli-concerned.svg';
 import './style.css';
 import './combined.css';
 import './combined-revision.css';
-import { backgrounds as artBackgrounds, sprite, characterColour, characters, expressions, music, sounds } from './combined-art.ts';
+import { backgrounds as artBackgrounds, sceneArt, sprite, characterColour, characters, expressions, music, sounds } from './combined-art.ts';
 import { beatIcon } from './combined-icons.ts';
 
 export type Variant = 'cue-sheet' | 'shot-reel' | 'stage-tracks' | 'combined';
@@ -336,7 +336,8 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   }
   function destination(value: string, title: string, update: (value: string) => void) { const control = el('select'); control.ariaLabel = title; for (const s of scenes) control.append(new Option(s.name, s.id)); control.value = value; bind(control, update); return control; }
   // Combined beat editors: pictures for assets, switches for short choices and a picker sheet for long lists.
-  let assetSheet: { beat: string; kind: 'background' | 'expression' } | undefined, sheetHover = '';
+  type SheetKind = 'background' | 'expression' | 'destination';
+  let assetSheet: { beat: string; kind: SheetKind; option?: number } | undefined, sheetHover = '', openGuard = '';
   const slug = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-');
   function field(title: string, ...children: (Node | string)[]) { const node = el('div', 'sc-field'); node.role = 'group'; node.ariaLabel = title; node.append(el('span', 'sc-field-label', title), ...children); return node; }
   function avatar(person: string, expression = 'Neutral') { const node = el('span', 'sc-avatar'); node.ariaHidden = 'true'; if (person === 'Narration') node.append(beatIcon('narration')); else { node.style.backgroundImage = `url("${sprite(person, expression)}")`; } node.style.setProperty('--ring', characterColour(person)); return node; }
@@ -375,38 +376,54 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     row.append(picture, text, open); return field(kind === 'background' ? 'Background' : 'Expression', row);
   }
   function sheetValues(kind: 'background' | 'expression') { return kind === 'background' ? ['Black', ...Object.keys(artBackgrounds)] : [...expressions]; }
-  function assetPicker(b: Beat) {
-    const kind = assetSheet!.kind, title = kind === 'background' ? 'Choose a background' : `Choose ${b.speaker}'s expression`;
+  /** The sheet over the sidebar: search, a grid of picture tiles and arrow-key movement. */
+  function pickerSheet(kind: SheetKind, title: string, searchLabel: string, keep: string, tiles: HTMLButtonElement[], hint: string, ...extra: Node[]) {
     const sheet = el('section', 'sc-sheet'); sheet.role = 'dialog'; sheet.ariaLabel = title; sheet.dataset.sheet = kind;
-    const head = el('header', 'sc-sheet-head'); const close = action('', () => closeSheet(), false, 'close-sheet'); close.ariaLabel = close.title = `Close and keep ${b.asset}`; close.append(beatIcon('close')); head.append(el('h3', '', title), close);
-    const search = el('input', 'sc-sheet-search'); search.type = 'search'; search.placeholder = kind === 'background' ? 'Search backgrounds' : 'Search expressions'; search.ariaLabel = search.placeholder;
+    const head = el('header', 'sc-sheet-head'); const close = action('', () => closeSheet(), false, 'close-sheet'); close.ariaLabel = close.title = `Close and keep ${keep}`; close.append(beatIcon('close')); head.append(el('h3', '', title), close);
+    const search = el('input', 'sc-sheet-search'); search.type = 'search'; search.placeholder = searchLabel; search.ariaLabel = searchLabel;
     const grid = el('div', `sc-tiles sc-tiles-${kind}`); grid.role = 'listbox'; grid.ariaLabel = title;
-    const preview = (value: string) => { if (sheetHover !== value) { sheetHover = value; refresh(); } };
-    const tiles = sheetValues(kind).map(value => {
-      const tile = action('', () => { const before = b.asset; closeSheet(false); if (value !== before) change(() => b.asset = value, `${kind === 'background' ? 'Background' : `${b.speaker}'s expression`}: ${value} · ${name(b.id)}`); host.querySelector<HTMLElement>(`[data-editor-for="${b.id}"] [data-action="change-${kind}"]`)?.focus(); }, false, `sheet-${slug(value)}`);
-      tile.role = 'option'; tile.ariaSelected = String(value === b.asset); tile.dataset.value = value; tile.classList.add('sc-tile'); tile.tabIndex = value === b.asset ? 0 : -1;
-      const picture = el('span', 'sc-tile-image'); picture.ariaHidden = 'true';
-      if (kind === 'background') { if (artBackgrounds[value]) picture.style.backgroundImage = `url("${artBackgrounds[value]}")`; else picture.classList.add('sc-thumb-black'); }
-      else picture.style.backgroundImage = `url("${sprite(b.speaker, value)}")`;
-      tile.append(picture, el('span', 'sc-tile-name', value === 'Black' ? 'Black screen' : value)); tile.ariaLabel = `${value === 'Black' ? 'Black screen' : value}${value === b.asset ? ', current' : ''}`;
-      tile.onpointerenter = () => preview(value); tile.onfocus = () => preview(value); return tile;
-    });
-    grid.onpointerleave = () => { if (!grid.contains(document.activeElement)) { sheetHover = ''; refresh(); } };
     grid.onkeydown = event => { const visible = tiles.filter(t => !t.hidden), i = visible.indexOf(document.activeElement as HTMLButtonElement); const step = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: 2, ArrowUp: -2 }[event.key]; if (step === undefined || i < 0) return; event.preventDefault(); visible[Math.max(0, Math.min(visible.length - 1, i + step))]?.focus(); };
+    const empty = el('p', 'sc-sheet-empty', 'No matches. Clear the search to see everything.'); empty.hidden = true;
     search.oninput = () => { const q = search.value.trim().toLowerCase(); for (const tile of tiles) tile.hidden = !!q && !tile.textContent!.toLowerCase().includes(q); empty.hidden = tiles.some(t => !t.hidden); };
     search.onkeydown = event => { if (event.key === 'ArrowDown') { event.preventDefault(); tiles.find(t => !t.hidden)?.focus(); } };
-    const empty = el('p', 'sc-sheet-empty', 'No matches. Clear the search to see everything.'); empty.hidden = true;
     sheet.onkeydown = event => { if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); closeSheet(); } };
-    grid.append(...tiles); sheet.append(head, search, grid, empty, el('p', 'sc-sheet-hint', `Point at a picture to preview it on the stage. Click to use it. Esc keeps ${b.asset === 'Black' ? 'Black screen' : b.asset}.`));
-    requestAnimationFrame(() => (tiles.find(t => t.ariaSelected === 'true') ?? tiles[0])?.focus({ preventScroll: true })); return sheet;
+    grid.append(...tiles); sheet.append(head, search, grid, empty, ...extra, el('p', 'sc-sheet-hint', hint));
+    requestAnimationFrame(() => (tiles.find(t => t.ariaSelected === 'true') ?? tiles[0])?.focus({ preventScroll: true })); return { sheet, grid };
+  }
+  function sheetTile(value: string, label: string, image: string | undefined, selected: boolean, choose: () => void, detail?: string) {
+    const tile = action('', choose, false, `sheet-${slug(value)}`); tile.role = 'option'; tile.ariaSelected = String(selected); tile.dataset.value = value; tile.classList.add('sc-tile'); tile.tabIndex = selected ? 0 : -1;
+    const picture = el('span', 'sc-tile-image'); picture.ariaHidden = 'true'; if (image) picture.style.backgroundImage = `url("${image}")`; else picture.classList.add('sc-thumb-black');
+    tile.append(picture, el('span', 'sc-tile-name', label)); if (detail) tile.append(el('span', 'sc-tile-detail', detail));
+    tile.ariaLabel = `${label}${selected ? ', current' : ''}`; return tile;
+  }
+  function assetPicker(b: Beat) {
+    const kind = assetSheet!.kind as 'background' | 'expression', title = kind === 'background' ? 'Choose a background' : `Choose ${b.speaker}'s expression`, keep = b.asset === 'Black' ? 'Black screen' : b.asset;
+    const preview = (value: string) => { if (sheetHover !== value) { sheetHover = value; refresh(); } };
+    const tiles = sheetValues(kind).map(value => {
+      const tile = sheetTile(value, value === 'Black' ? 'Black screen' : value, kind === 'background' ? artBackgrounds[value] : sprite(b.speaker, value), value === b.asset, () => { const before = b.asset; closeSheet(false); if (value !== before) change(() => b.asset = value, `${kind === 'background' ? 'Background' : `${b.speaker}'s expression`}: ${value} · ${name(b.id)}`); host.querySelector<HTMLElement>(`[data-editor-for="${b.id}"] [data-action="change-${kind}"]`)?.focus(); });
+      tile.onpointerenter = () => preview(value); tile.onfocus = () => preview(value); return tile;
+    });
+    const { sheet, grid } = pickerSheet(kind, title, kind === 'background' ? 'Search backgrounds' : 'Search expressions', keep, tiles, `Point at a picture to preview it on the stage. Click to use it. Esc keeps ${keep}.`);
+    grid.onpointerleave = () => { if (!grid.contains(document.activeElement)) { sheetHover = ''; refresh(); } };
+    return sheet;
+  }
+  /** Scenes as pictures: the opening background, the name and the first line. */
+  function sceneImage(s?: Scene) { const asset = s?.beats.find(x => x.kind === 'background')?.asset ?? (s ? sceneArt[s.id] : undefined); return asset ? artBackgrounds[asset] : undefined; }
+  function openingLine(s?: Scene) { const line = s?.beats.find(x => ['dialogue', 'narration'].includes(x.kind) && x.text.trim())?.text; return line ? `“${line}”` : 'No lines yet'; }
+  function scenePicker(b: Beat) {
+    const i = assetSheet!.option ?? 0, option = b.options[i]!, keep = scenes.find(s => s.id === option.target)?.name ?? 'the current scene';
+    const trigger = () => host.querySelector<HTMLElement>(`[data-editor-for="${b.id}"] [data-action="change-destination-${i}"]`)?.focus();
+    const tiles = scenes.map(s => sheetTile(s.name, s.name, sceneImage(s), s.id === option.target, () => { closeSheet(false); if (s.id !== option.target) change(() => option.target = s.id, `Option ${i + 1} goes to ${s.name} · ${name(b.id)}`); trigger(); }, s.id === sceneId ? 'This scene' : s.chapter));
+    const create = action('+ New scene…', () => { closeSheet(false); createScene(s => option.target = s.id, i, option.text); }, false, `new-choice-${i}`); create.classList.add('sc-sheet-new');
+    return pickerSheet('destination', `Option ${i + 1} goes to`, 'Search scenes', keep, tiles, `Click a scene to send option ${i + 1} there. Esc keeps ${keep}.`, create).sheet;
   }
   function closeSheet(restoreFocus = true) {
     const sheet = assetSheet; assetSheet = undefined; sheetHover = ''; draw();
-    if (restoreFocus && sheet) host.querySelector<HTMLElement>(`[data-editor-for="${sheet.beat}"] [data-action="change-${sheet.kind}"]`)?.focus();
+    if (restoreFocus && sheet) host.querySelector<HTMLElement>(`[data-editor-for="${sheet.beat}"] [data-action="${sheet.kind === 'destination' ? `change-destination-${sheet.option}` : `change-${sheet.kind}`}"]`)?.focus();
   }
   /** Stage preview while the picker sheet is open. Copies state; the story is unchanged. */
   function withSheetPreview(state: Illustration): Illustration {
-    const b = current(); if (!combined || !assetSheet || !sheetHover || !b || b.id !== assetSheet.beat) return state;
+    const b = current(); if (!combined || !assetSheet || assetSheet.kind === 'destination' || !sheetHover || !b || b.id !== assetSheet.beat) return state;
     if (assetSheet.kind === 'background') return { ...state, background: { ...(state.background ?? b), asset: sheetHover }, characters: b.kind === 'background' ? new Map() : state.characters };
     const characters = new Map(state.characters), actor = characters.get(b.speaker);
     characters.set(b.speaker, { name: b.speaker, placement: actor?.placement ?? b.placement, from: actor?.from ?? b, asset: sheetHover }); return { ...state, characters };
@@ -511,6 +528,32 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const add = action(test.rules.length ? '+ Add rule' : '+ Add a rule', () => { const first = projectVariables[0]; if (first) { test.rules.push(defaultRule(first)); save('Add rule'); } }, false, `${key}-add-rule`); add.classList.add('sc-add-rule');
     drawCode(); node.append(add, code); return node;
   }
+  function destinationRow(b: Beat, i: number) {
+    const option = b.options[i]!, target = scenes.find(s => s.id === option.target);
+    const row = el('div', 'sc-asset-row sc-destination'); row.role = 'group'; row.ariaLabel = `Option ${i + 1} goes to`;
+    const picture = el('span', 'sc-thumb sc-thumb-scene'); picture.ariaHidden = 'true'; const image = sceneImage(target); if (image) picture.style.backgroundImage = `url("${image}")`; else picture.classList.add('sc-thumb-black');
+    const text = el('span', 'sc-asset-text'); text.append(el('strong', '', target?.name ?? 'Missing scene'), el('span', '', openingLine(target)));
+    const pick = action('', () => { assetSheet = { beat: b.id, kind: 'destination', option: i }; sheetHover = ''; draw(); }, false, `change-destination-${i}`); pick.classList.add('sc-destination-pick'); pick.ariaLabel = `Change where option ${i + 1} goes: ${target?.name ?? 'missing scene'}`; pick.title = 'Choose a scene';
+    pick.append(picture, text, el('span', 'sc-caret', '▾'));
+    const open = action('', () => go(option.target, true), false, `open-choice-${i}`); open.classList.add('sc-icon-button'); open.append(beatIcon('open')); open.ariaLabel = open.title = `Open ${target?.name ?? 'destination'}`;
+    row.append(pick, open); return row;
+  }
+  /** Availability reads as one line; the rule builder opens on request. */
+  function guardRow(b: Beat, i: number) {
+    const option = b.options[i]!, key = `guard-${i}`, id = `${b.id}:${i}`, firstRule = `[data-editor-for="${b.id}"] [data-action="${key}-rule-0-variable"]`;
+    if (openGuard === id) {
+      const wrap = el('div', 'sc-guard-open'); wrap.role = 'group'; wrap.ariaLabel = `Option ${i + 1} only when`; const head = el('div', 'sc-guard-head');
+      head.append(el('span', 'sc-field-label', 'Only when'), action('Done', () => { openGuard = ''; draw(); focusField(`[data-editor-for="${b.id}"] [data-choice-index="${i}"] .sc-guard>.button`); }, false, `${key}-done`));
+      wrap.append(head, testBuilder(b, key, `Option ${i + 1}`, 'if', () => option.guard, text => option.guard = text, 'Always available')); return wrap;
+    }
+    const row = el('div', 'sc-guard'), text = el('span', 'sc-guard-text'), has = !!option.guard.trim();
+    if (has) { text.append('Only when ', el('strong', '', option.guard)); text.title = `Only when ${option.guard}`; } else text.textContent = 'Always available';
+    const button = has ? action('Edit', () => { openGuard = id; draw(); focusField(firstRule); }, false, `${key}-edit`)
+      : action('+ Condition', () => { const first = projectVariables[0]; openGuard = id; if (first) change(() => option.guard = composeTest({ join: 'and', rules: [defaultRule(first)] }), `Add rule · ${name(b.id)}`); else draw(); focusField(firstRule); }, false, `${key}-add-rule`);
+    button.ariaLabel = has ? `Edit when option ${i + 1} is available` : `Add a condition to option ${i + 1}`;
+    row.append(beatIcon('condition'), text, button); return row;
+  }
+  function markGameOption(owner: string, index: number) { for (const button of host.querySelectorAll<HTMLElement>(`.sr-game-choices[data-choice-owner="${owner}"] [data-stage-choice]`)) button.dataset.active = String(Number(button.dataset.stageChoice) === index); }
   function combinedFields(b: Beat): HTMLDivElement {
     const form = el('div', 'sr-fields sc-fields'); form.dataset.editorFor = b.id; form.dataset.kind = b.kind;
     const transition = () => field('Transition', segmented(['None', 'Dissolve', 'Fade'], b.transition, 'Transition', value => b.transition = value));
@@ -555,15 +598,16 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     }
     else if (b.kind === 'choice') {
       b.options.forEach((option, i) => {
-        const block = el('fieldset', 'sr-option sc-option'); block.dataset.choiceIndex = String(i); block.append(el('legend', 'sc-visually-hidden', `Option ${i + 1}`));
+        const block = el('fieldset', 'sr-option sc-option'); block.dataset.choiceIndex = String(i); block.dataset.arm = String(i % 4 + 1); block.append(el('legend', 'sc-visually-hidden', `Option ${i + 1}`));
         const top = el('div', 'sc-option-top'); const text = input(option.text, `Option ${i + 1} text`, value => option.text = value); text.placeholder = 'What the player can choose';
         const remove = action('', () => { change(() => b.options.splice(i, 1), `Remove option ${i + 1} from ${name(b.id)}`); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${Math.min(i, b.options.length - 1) + 1} text"]`); }, false, `remove-choice-${i}`);
         remove.append(beatIcon('close')); remove.ariaLabel = `Remove option ${i + 1}`; remove.title = remove.ariaLabel; remove.disabled = b.options.length === 1; if (remove.disabled) remove.title = 'A choice menu needs at least one option.';
         top.append(el('span', 'sc-option-number', String(i + 1)), text, remove);
-        const goes = el('div', 'sc-option-goes'); goes.append(destination(option.target, `Option ${i + 1} destination`, value => option.target = value), action(`Open ${scenes.find(s => s.id === option.target)?.name ?? 'destination'}`, () => go(option.target, true), false, `open-choice-${i}`), action('New scene…', () => createScene(s => option.target = s.id, i, option.text), false, `new-choice-${i}`));
-        block.append(top, field('Goes to', goes), field('Only when', testBuilder(b, `guard-${i}`, `Option ${i + 1}`, 'if', () => option.guard, text => option.guard = text, 'Always available'))); form.append(block);
+        const mark = (on: boolean) => markGameOption(b.id, on ? i : Number(host.querySelector<HTMLElement>(`[data-editor-for="${b.id}"] [data-choice-index]:focus-within`)?.dataset.choiceIndex ?? -1));
+        block.onpointerenter = () => mark(true); block.onpointerleave = () => mark(false); block.addEventListener('focusin', () => mark(true)); block.addEventListener('focusout', event => { if (!block.contains(event.relatedTarget as Node)) markGameOption(b.id, -1); });
+        block.append(top, destinationRow(b, i), guardRow(b, i)); form.append(block);
       });
-      form.append(action('+ Add option', () => { const index = b.options.length; change(() => b.options.push({ text: '', target: scenes.find(s => s.id !== sceneId)?.id ?? sceneId, guard: '' }), `Add option to ${name(b.id)}`); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${index + 1} text"]`); }, false, 'add-choice-option'), note('Conditions are not evaluated here. If no option is available, the story continues to the next beat.'));
+      form.append(action('+ Add option', () => { const index = b.options.length; change(() => b.options.push({ text: '', target: scenes.find(s => s.id !== sceneId)?.id ?? sceneId, guard: '' }), `Add option to ${name(b.id)}`); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${index + 1} text"]`); }, false, 'add-choice-option'), note('If no option is available, the story continues to the next beat. Conditions are not run in this preview.'));
     }
     else return fields(b, true);
     return form;
@@ -701,7 +745,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     if (variant === 'cue-sheet') { if (mediaKinds.includes(b.kind)) panel.append(fields(b)); else panel.append(effects()); }
     else { if (!textInGame || !['dialogue', 'narration'].includes(b.kind)) panel.append(fields(b)); else panel.append(el('p', 'sr-editor-hint', `Type in the game's text box. Shift+${mod}+Enter adds the next dialogue.`)); if (!focused && !emptyScene) panel.append(effects()); }
     if (combined && assetSheet && assetSheet.beat !== b.id) assetSheet = undefined;
-    if (combined && assetSheet) { panel.classList.add('sc-has-sheet'); panel.append(assetPicker(b)); }
+    if (combined && assetSheet) { panel.classList.add('sc-has-sheet'); panel.append(assetSheet.kind === 'destination' ? scenePicker(b) : assetPicker(b)); }
     return panel;
   }
   const art: Record<string, Record<string, string>> = { Mara: { Neutral: mara, Concerned: maraConcerned }, Eli: { Neutral: eli, Concerned: eliConcerned } };
@@ -754,7 +798,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     for (const menu of host.querySelectorAll<HTMLElement>(`.sr-game-choices[data-choice-owner="${owner}"]`)) { const button = menu.querySelector<HTMLElement>(`[data-stage-choice="${row.dataset.choiceIndex}"]`); if (!button) continue; const r = button.getBoundingClientRect(), bounds = menu.getBoundingClientRect(); if (r.top < bounds.top) menu.scrollTop -= bounds.top - r.top; if (r.bottom > bounds.bottom) menu.scrollTop += r.bottom - bounds.bottom; }
   }
   function gameChoices(b: Beat) {
-    const choices = el('div', 'sr-game-choices'); choices.dataset.choiceOwner = b.id; b.options.forEach((option, i) => { const button = action(option.text || 'New choice', () => { stageExpanded = false; draw(); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${i + 1} text"]`); }, false, `stage-choice-${i}`); button.ariaLabel = `Edit option ${i + 1}: ${option.text || 'New choice'}`; button.dataset.stageChoice = String(i); choices.append(button); }); return choices;
+    const choices = el('div', 'sr-game-choices'); choices.dataset.choiceOwner = b.id; b.options.forEach((option, i) => { const button = action(option.text || 'New choice', () => { stageExpanded = false; draw(); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${i + 1} text"]`); }, false, `stage-choice-${i}`); button.ariaLabel = `Edit option ${i + 1}: ${option.text || 'New choice'}`; button.dataset.stageChoice = String(i); if (combined) button.dataset.arm = String(i % 4 + 1); choices.append(button); }); return choices;
   }
   function refresh() {
     syncSelectionChrome();
@@ -778,7 +822,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       const option = host.querySelector<HTMLOptionElement>(`.sr-preview-route option[value="${branch.id}"]`); if (option) option.textContent = `${number(owner.id)} ${branch.name} ${branch.condition}`.trim();
     }
     const selectedBeat = current();
-    if (selectedBeat?.kind === 'choice') selectedBeat.options.forEach((option, i) => { const button = host.querySelector<HTMLElement>(`[data-action="open-choice-${i}"]`); if (button) { const text = `Open ${scenes.find(s => s.id === option.target)?.name ?? 'destination'}`; button.textContent = text; button.ariaLabel = text; } });
+    if (selectedBeat?.kind === 'choice') selectedBeat.options.forEach((option, i) => { const button = host.querySelector<HTMLElement>(`[data-action="open-choice-${i}"]`); if (button) { const text = `Open ${scenes.find(s => s.id === option.target)?.name ?? 'destination'}`; if (!combined) button.textContent = text; button.ariaLabel = text; button.title = text; } });
     if (selectedBeat && ['call', 'jump'].includes(selectedBeat.kind)) { const button = host.querySelector<HTMLElement>('[data-action="open-destination"]'); if (button) { const text = `Open ${scenes.find(s => s.id === selectedBeat.target)?.name ?? 'destination'}`; button.textContent = text; button.ariaLabel = text; } }
     if (variant === 'stage-tracks' || combined) updateTrackCells();
     if (combined) refreshCombinedContext();
@@ -1211,7 +1255,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   draw(); status('Fictional sample · changes stay in this preview'); const cleanup = compareBar();
   const key = (event: KeyboardEvent) => {
     if (event.isComposing) return;
-    if (event.key === 'Escape' && !host.querySelector('dialog[open]')) { const open = host.querySelector<HTMLDetailsElement>('.sr-more[open],.sr-row-menu[open],.sc-dropdown[open]'); if (open) { open.open = false; open.querySelector<HTMLElement>('summary')?.focus(); event.preventDefault(); } else if (treeOpen) { treeOpen = false; draw(); host.querySelector<HTMLElement>('[data-action="scenes"]')?.focus(); event.preventDefault(); } else if (stageObject) { const object = stageObject; stageObject = ''; draw(); host.querySelector<HTMLElement>(object === 'background' ? '.sr-backdrop-control' : `[data-stage-character="${object}"]`)?.focus(); } }
+    if (event.key === 'Escape' && !host.querySelector('dialog[open]')) { const open = host.querySelector<HTMLDetailsElement>('.sr-more[open],.sr-row-menu[open],.sc-dropdown[open]'); if (open) { open.open = false; open.querySelector<HTMLElement>('summary')?.focus(); event.preventDefault(); } else if (combined && assetSheet) { event.preventDefault(); closeSheet(); } else if (treeOpen) { treeOpen = false; draw(); host.querySelector<HTMLElement>('[data-action="scenes"]')?.focus(); event.preventDefault(); } else if (stageObject) { const object = stageObject; stageObject = ''; draw(); host.querySelector<HTMLElement>(object === 'background' ? '.sr-backdrop-control' : `[data-stage-character="${object}"]`)?.focus(); } }
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z' && !(event.target as Element).closest('input,textarea,select,dialog')) { event.preventDefault(); history(event.shiftKey ? redo : undo, event.shiftKey ? undo : redo, event.shiftKey ? 'Redid' : 'Undid'); }
   };
   const outside = (event: MouseEvent) => { for (const menu of host.querySelectorAll<HTMLDetailsElement>('.sr-more[open],.sr-row-menu[open],.sc-dropdown[open]')) if (!menu.contains(event.target as Node)) menu.open = false; if (treeOpen && !(event.target as Element).closest('.sr-scenes,[data-action="scenes"]')) { treeOpen = false; frame.content.dataset.treeOpen = 'false'; host.querySelector<HTMLElement>('[data-action="scenes"]')!.ariaExpanded = 'false'; host.querySelector('.sr-scenes')?.remove(); } };

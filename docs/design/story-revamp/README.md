@@ -36,7 +36,11 @@ Issue #82 records the decisions. The three reference variants are unchanged.
 - Beat editors use pictures. Backgrounds and expressions show a thumbnail and Change,
   which opens a picker sheet over the sidebar. Pointing at a picture previews it on the
   stage; click applies it; Escape keeps the current value. Speakers and characters use a
-  portrait list. Short choices use switches. Choice options are numbered blocks.
+  portrait list. Short choices use switches.
+- Choice options are numbered blocks in their own colour. The destination is a scene card
+  (opening background, name and first line) that opens a scene sheet with New scene. The
+  condition reads as one line, "Always available" or "Only when ...", and the rule builder
+  opens on request. Focusing or pointing at an option marks its button on the stage.
 - Add a beat is one compact dialog. Click or Enter adds the highlighted beat; Escape or
   Close cancels. Replacing an ending is named in the destination line.
 - Writing focus Tracks shows all six lanes above 1200 px wide.
