@@ -1,3 +1,5 @@
+import copy
+from functools import lru_cache
 import importlib.util
 from pathlib import Path
 import unittest
@@ -5,12 +7,28 @@ import json
 import tempfile
 import subprocess
 import hashlib
+import struct
 import sys
+import zlib
 from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location('thinking_evidence', Path(__file__).with_name('check-thinking-evidence.py'))
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
+
+SHA = "0123456789abcdef0123456789abcdef01234567"
+
+
+@lru_cache(maxsize=4)
+def tiny_png(width=1440, height=900):
+    """A valid RGB PNG at the requested viewport, using only the standard library."""
+    def chunk(kind, data):
+        return (struct.pack(">I", len(data)) + kind + data
+                + struct.pack(">I", zlib.crc32(kind + data) & 0xffffffff))
+    return (b"\x89PNG\r\n\x1a\n"
+            + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0))
+            + chunk(b"IDAT", zlib.compress((b"\x00" + b"\x10\x20\x30" * width) * height))
+            + chunk(b"IEND", b""))
 
 
 class GateTests(unittest.TestCase):
@@ -128,8 +146,6 @@ class GateTests(unittest.TestCase):
             self.assertEqual(json.loads((folder/'identity.json').read_text())['outcome'],'harness-regressions')
             module.seal(folder,repo,'current-studio-connection')
             self.assertEqual(json.loads((folder/'identity.json').read_text())['outcome'],'current-studio-connection')
-            module.seal(folder,repo,'phase3b-audit-fixes')
-            self.assertEqual(json.loads((folder/'identity.json').read_text())['outcome'],'phase3b-audit-fixes')
             source.write_text('changed bytes');module.seal(folder,repo)
             identity=json.loads((folder/'identity.json').read_text());self.assertFalse(identity['sourceMatchesCandidate']);self.assertEqual(identity['mismatchedTrackedInputs'],['app/input.txt'])
 
@@ -154,119 +170,253 @@ class GateTests(unittest.TestCase):
             with self.assertRaises(ValueError):module.retain_binaries(root,build)
 
 
-class AuditRetentionTests(unittest.TestCase):
+class IdentityTests(unittest.TestCase):
+    def test_git_checkout_attributes_pass_but_changed_file_bytes_refuse(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / '.gitattributes').write_bytes(b'* text eol=lf\n*.ps1 text eol=crlf\n*.png binary\n')
+            (root / 'fixture.ps1').write_bytes(b'Write-Output "synthetic"\r\n')
+            (root / 'fixture.txt').write_bytes(b'synthetic\n')
+            (root / 'fixture.png').write_bytes(b'\x00\xff\r\n\n')
+            git = lambda *args: subprocess.check_output(['git', '-c', 'core.autocrlf=false', *args], cwd=root, stderr=subprocess.STDOUT)
+            git('init', '--quiet')
+            git('add', '--all')
+            git('-c', 'user.name=Synthetic fixture', '-c', 'user.email=fixture@example.com',
+                '-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=disabled-fixture-hooks',
+                'commit', '--quiet', '-m', 'Synthetic identity fixture')
+            inputs = {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+                      for path in root.iterdir() if path.is_file()}
+            self.assertNotEqual(hashlib.sha256(git('show', 'HEAD:fixture.ps1')).hexdigest(), inputs['fixture.ps1'])
+            self.assertEqual(module.candidate_mismatches(inputs, root), [])
+            (root / 'fixture.ps1').write_bytes(b'Write-Output "changed"\r\n')
+            inputs['fixture.ps1'] = hashlib.sha256((root / 'fixture.ps1').read_bytes()).hexdigest()
+            self.assertEqual(module.candidate_mismatches(inputs, root), ['fixture.ps1'])
+            (root / '.gitattributes').write_bytes(b'* text eol=lf\n')
+            inputs['.gitattributes'] = hashlib.sha256((root / '.gitattributes').read_bytes()).hexdigest()
+            self.assertIn('.gitattributes', module.candidate_mismatches(inputs, root))
+
+    def test_complete_identity_required_without_waiving_partial_evidence_retention(self):
+        report = {'candidate': SHA, 'tree': 'f' * 40, 'sourceMatchesCandidate': True,
+                  'missingTrackedInputs': [], 'mismatchedTrackedInputs': []}
+        self.assertTrue(module.identity_ok(report, SHA, 'f' * 40))
+        for field, values in {
+            'candidate': ['', 'e' * 40], 'tree': ['', 'e' * 40],
+            'sourceMatchesCandidate': [False, 'true', 1, None],
+            'missingTrackedInputs': [['fixture.txt'], None],
+            'mismatchedTrackedInputs': [['fixture.ps1'], None],
+        }.items():
+            for value in values:
+                with self.subTest(field=field, value=value):
+                    changed = copy.deepcopy(report)
+                    changed[field] = value
+                    self.assertFalse(module.identity_ok(changed, SHA, 'f' * 40))
+            changed = copy.deepcopy(report)
+            del changed[field]
+            self.assertFalse(module.identity_ok(changed, SHA, 'f' * 40))
+
+
+class BrowserTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.temp.cleanup)
-        self.root = Path(self.temp.name)
-        self.build = self.root / 'target'
-        self.build.mkdir()
-        self.output = self.root / 'evidence'
-        self.output.mkdir()
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.root = Path(self.temporary.name)
+        inputs = {
+            "app/src/reference-ui.ts": hashlib.sha256(b"synthetic frontend input").hexdigest(),
+            "app/src/ui-refresh.css": hashlib.sha256(b"synthetic theme input").hexdigest(),
+            "app/tests/walkthrough-redesign.browser.mjs": hashlib.sha256(b"synthetic fixture input").hexdigest(),
+        }
+        identity = {"checkoutHead": SHA, "files": inputs}
+        self.metrics = {"errors": [], "receipts": [],
+                        "cleanup": {"browser": "closed", "server": "closed"},
+                        "inputIdentity": {"unchanged": True, "before": copy.deepcopy(identity),
+                                          "after": copy.deepcopy(identity)}}
+        for surface in ["characters", "relationships", "knowledge", "history", "lorebook", "settings", "assist"]:
+            for theme in ["light", "dark"]:
+                for size in ["wide", "compact"]:
+                    image = f"{surface}-{theme}-{size}.png"
+                    width, height = (1440, 900) if size == "wide" else (600, 720)
+                    data = tiny_png(width, height)
+                    (self.root / image).write_bytes(data)
+                    self.metrics["receipts"].append({
+                        "surface": surface, "theme": theme, "size": size, "image": image,
+                        "imageSha256": hashlib.sha256(data).hexdigest(),
+                        "viewportOverflow": False, "actionsVisible": True,
+                    })
+        for receipt in self.metrics['receipts']:
+            if receipt['surface']!='settings':continue
+            receipt['captures']=[]
+            for view in ('connection','connect','response'):
+                image=f"settings-{view}-{receipt['theme']}-{receipt['size']}.png"
+                data=(self.root/receipt['image']).read_bytes();(self.root/image).write_bytes(data)
+                receipt['captures'].append({'view':view,'image':image,'imageSha256':hashlib.sha256(data).hexdigest(),'actionsVisible':True,'actions':[{'visible':True}]})
+        self.write_metrics(self.metrics)
 
-    def artifact(self, name='core', *, present=True):
-        binary = self.build / (name + '.exe')
-        if present:
-            binary.write_bytes((name + ' public executable fixture').encode())
-        row = {'reason': 'compiler-artifact', 'profile': {'test': name == 'core'},
-               'target': {'name': 'loomlight_core' if name == 'core' else 'help-controller-driver'},
-               'executable': str(binary)}
-        (self.output / (name + '-artifacts.jsonl')).write_text(json.dumps(row) + '\n')
-        return binary, row
+    def write_metrics(self, metrics):
+        (self.root / "metrics.json").write_text(json.dumps(metrics), encoding="utf-8")
 
-    def retain(self):
-        return module.retain_binaries(self.output, self.build, artifacts=module.AUDIT_ARTIFACTS)
+    def test_complete_surface_theme_size_matrix_with_visible_actions_passes(self):
+        self.assertTrue(module.browser_ok(self.root))
 
-    def test_compiled_core_and_controller_survive_failed_tests_with_exact_hashes(self):
-        for name in ('core', 'controller'):
-            binary, _ = self.artifact(name)
-            with (self.output / (name + '-artifacts.jsonl')).open('a') as stream:
-                stream.write('test scope::first ... FAILED\ntest result: FAILED\n')
-        receipt = self.retain()
-        for name in ('core', 'controller'):
-            row = receipt[name]
-            binary = self.build / (name + '.exe')
-            self.assertEqual(row['state'], 'compiled')
-            self.assertEqual(row['sha256'], hashlib.sha256(binary.read_bytes()).hexdigest())
-            self.assertEqual((self.output / row['file']).read_bytes(), binary.read_bytes())
-            self.assertEqual(row['source'], binary.relative_to(self.build).as_posix())
+    def test_changed_settings_controls_require_visible_complete_section_captures(self):
+        baseline=copy.deepcopy(self.metrics)
+        for failure in ('missing','hidden','duplicate'):
+            self.metrics=copy.deepcopy(baseline)
+            receipt=next(r for r in self.metrics['receipts'] if r['surface']=='settings')
+            if failure=='missing':receipt['captures'].pop()
+            elif failure=='hidden':receipt['captures'][0]['actions'][0]['visible']=False
+            else:receipt['captures'][1]=receipt['captures'][0]
+            self.write_metrics(self.metrics)
+            self.assertFalse(module.browser_ok(self.root),failure)
 
-    def test_first_artifact_survives_later_broken_compiler_record(self):
-        binary, _ = self.artifact()
-        with (self.output / 'core-artifacts.jsonl').open('a') as stream:
-            stream.write('{"reason":"compiler-artifact",\n')
-        with self.assertRaises(ValueError):
-            self.retain()
-        receipt = json.loads((self.output / 'test-binaries.json').read_text())
-        self.assertEqual(receipt['core']['state'], 'compiled')
-        self.assertTrue(receipt['core']['incompleteStream'])
-        self.assertEqual((self.output / receipt['core']['file']).read_bytes(), binary.read_bytes())
-        self.assertEqual(receipt['controller']['state'], 'not-compiled')
+    def test_missing_metrics_refuses(self):
+        (self.root / "metrics.json").unlink()
+        with self.assertRaises((OSError, ValueError)):
+            module.browser_ok(self.root)
 
-    def test_missing_stream_and_missing_announced_binary_never_use_stale_target(self):
-        (self.build / 'stale-core-tests').write_bytes(b'stale executable')
-        self.assertEqual(self.retain()['core']['state'], 'not-compiled')
-        self.artifact(present=False)
-        with self.assertRaises(ValueError):
-            self.retain()
-        receipt = json.loads((self.output / 'test-binaries.json').read_text())
-        self.assertEqual(receipt['core']['state'], 'unavailable')
-        self.assertFalse((self.output / 'core-tests.bin').exists())
+    def test_missing_or_wrong_named_capture_refuses(self):
+        image = self.root / self.metrics["receipts"][0]["image"]
+        image.unlink()
+        self.assertFalse(module.browser_ok(self.root))
+        # Correct count alone cannot substitute a different file for a named receipt.
+        (self.root / "unrelated.png").write_bytes(tiny_png())
+        self.assertFalse(module.browser_ok(self.root))
 
-    def test_repeated_test_runs_share_one_exact_binary_but_wrong_targets_are_ignored(self):
-        _, row = self.artifact()
-        unrelated = dict(row, target={'name': 'unrelated'})
-        stream = self.output / 'core-artifacts.jsonl'
-        stream.write_text(json.dumps(unrelated) + '\n' + (json.dumps(row) + '\n') * 3)
-        self.assertEqual(self.retain()['core']['state'], 'compiled')
-        stream.write_text(json.dumps(unrelated) + '\n')
-        self.assertEqual(self.retain()['core']['state'], 'not-compiled')
+    def test_missing_duplicate_or_wrong_surface_matrix_refuses(self):
+        variants = [[], self.metrics["receipts"][:-1],
+                    self.metrics["receipts"] + [self.metrics["receipts"][0]]]
+        wrong = copy.deepcopy(self.metrics["receipts"])
+        wrong[-1]["surface"] = "unselected-surface"
+        variants.append(wrong)
+        duplicate = copy.deepcopy(self.metrics["receipts"])
+        duplicate[-1] = duplicate[0]
+        variants.append(duplicate)
+        for receipts in variants:
+            with self.subTest(receipts=len(receipts)):
+                self.write_metrics({**self.metrics, "receipts": receipts})
+                self.assertFalse(module.browser_ok(self.root))
 
-    def test_copy_failure_keeps_other_binary_and_explicit_failed_receipt(self):
-        self.artifact()
-        self.artifact('controller')
-        original = module.shutil.copy2
+    def test_browser_errors_overflow_missing_or_hidden_actions_refuse(self):
+        bad_metrics = []
+        error = copy.deepcopy(self.metrics)
+        error["errors"] = ["synthetic page exception"]
+        bad_metrics.append(error)
+        for field, value in [("viewportOverflow", True), ("actionsVisible", False),
+                             ("viewportOverflow", None), ("actionsVisible", None)]:
+            metrics = copy.deepcopy(self.metrics)
+            metrics["receipts"][0][field] = value
+            bad_metrics.append(metrics)
+        for metrics in bad_metrics:
+            with self.subTest(metrics=metrics["receipts"][0], errors=metrics["errors"]):
+                self.write_metrics(metrics)
+                self.assertFalse(module.browser_ok(self.root))
 
-        def copy(source, target):
-            if source.name == 'core.exe':
-                target.write_bytes(b'partial')
-                raise OSError('controlled copy failure')
-            return original(source, target)
+    def test_missing_or_failed_browser_and_server_cleanup_refuse(self):
+        for cleanup in [None, {}, {"browser": "open", "server": "closed"},
+                        {"browser": "closed", "server": "open"},
+                        {"browser": "not-started", "server": "closed"}]:
+            with self.subTest(cleanup=cleanup):
+                metrics = copy.deepcopy(self.metrics)
+                if cleanup is None:
+                    del metrics["cleanup"]
+                else:
+                    metrics["cleanup"] = cleanup
+                self.write_metrics(metrics)
+                self.assertFalse(module.browser_ok(self.root))
 
-        with patch.object(module.shutil, 'copy2', side_effect=copy), self.assertRaises(ValueError):
-            self.retain()
-        receipt = json.loads((self.output / 'test-binaries.json').read_text())
-        self.assertEqual(receipt['core']['state'], 'retention-failed')
-        self.assertEqual(receipt['controller']['state'], 'compiled')
-        self.assertFalse((self.output / 'core-tests.bin').exists())
+    def test_modified_or_missing_image_hash_refuses(self):
+        original = self.root / self.metrics["receipts"][0]["image"]
+        original.write_bytes(tiny_png() + b"modified retained bytes")
+        self.assertFalse(module.browser_ok(self.root))
+        original.write_bytes(tiny_png())
+        for digest in [None, "", "f" * 64]:
+            with self.subTest(digest=digest):
+                metrics = copy.deepcopy(self.metrics)
+                if digest is None:
+                    del metrics["receipts"][0]["imageSha256"]
+                else:
+                    metrics["receipts"][0]["imageSha256"] = digest
+                self.write_metrics(metrics)
+                self.assertFalse(module.browser_ok(self.root))
 
-    def test_audit_cli_rejects_missing_executables_and_accepts_both_produced_artifacts(self):
-        command = [sys.executable, module.__file__, 'retain', str(self.output), str(self.build),
-                   '--outcome', 'phase3b-audit-fixes']
-        result = subprocess.run(command, capture_output=True, text=True)
-        self.assertNotEqual(result.returncode, 0)
-        receipt = json.loads((self.output / 'test-binaries.json').read_text())
-        self.assertEqual(receipt['core']['state'], 'not-compiled')
-        self.assertEqual(receipt['controller']['state'], 'not-compiled')
-        self.artifact()
-        self.artifact('controller')
-        result = subprocess.run(command, capture_output=True, text=True)
-        self.assertEqual(result.returncode, 0, result.stderr)
+    def test_wrong_viewport_dimensions_or_non_png_refuse_even_with_matching_hash(self):
+        for size, wrong_dimensions in [("wide", (600, 720)), ("compact", (1440, 900)),
+                                       ("wide", (1, 1))]:
+            with self.subTest(size=size, dimensions=wrong_dimensions):
+                metrics = copy.deepcopy(self.metrics)
+                receipt = next(receipt for receipt in metrics["receipts"] if receipt["size"] == size)
+                image = self.root / receipt["image"]
+                original = image.read_bytes()
+                data = tiny_png(*wrong_dimensions)
+                image.write_bytes(data)
+                receipt["imageSha256"] = hashlib.sha256(data).hexdigest()
+                self.write_metrics(metrics)
+                self.assertFalse(module.browser_ok(self.root))
+                image.write_bytes(original)
+        for data in [b"not a PNG", tiny_png().replace(b"IHDR", b"NOPE", 1),
+                     tiny_png().replace(b"\x00\x00\x00\rIHDR", b"\x00\x00\x00\x0cIHDR", 1)]:
+            with self.subTest(header=data[:24]):
+                metrics = copy.deepcopy(self.metrics)
+                receipt = metrics["receipts"][0]
+                image = self.root / receipt["image"]
+                original = image.read_bytes()
+                image.write_bytes(data)
+                receipt["imageSha256"] = hashlib.sha256(data).hexdigest()
+                self.write_metrics(metrics)
+                self.assertFalse(module.browser_ok(self.root))
+                image.write_bytes(original)
 
-    def test_outside_target_and_ambiguous_artifacts_fail_without_losing_controller(self):
-        _, row = self.artifact()
-        self.artifact('controller')
-        outside = self.root / 'outside.exe'
-        outside.write_bytes(b'outside fixture')
-        for bad in (dict(row, executable=str(outside)),
-                    dict(row, executable=str(self.build / 'different.exe'))):
-            with self.subTest(executable=bad['executable']):
-                (self.output / 'core-artifacts.jsonl').write_text(json.dumps(row) + '\n' + json.dumps(bad) + '\n')
-                with self.assertRaises(ValueError):
-                    self.retain()
-                receipt = json.loads((self.output / 'test-binaries.json').read_text())
-                self.assertEqual(receipt['core']['state'], 'retention-failed')
-                self.assertEqual(receipt['controller']['state'], 'compiled')
+    def test_missing_changed_or_invalid_input_identity_refuses(self):
+        variants = []
+        missing = copy.deepcopy(self.metrics)
+        del missing["inputIdentity"]
+        variants.append(missing)
+        unchanged = copy.deepcopy(self.metrics)
+        unchanged["inputIdentity"]["unchanged"] = False
+        variants.append(unchanged)
+        empty = copy.deepcopy(self.metrics)
+        empty["inputIdentity"]["before"]["files"] = {}
+        empty["inputIdentity"]["after"]["files"] = {}
+        variants.append(empty)
+        changed = copy.deepcopy(self.metrics)
+        changed["inputIdentity"]["after"]["files"]["app/src/ui-refresh.css"] = "f" * 64
+        variants.append(changed)
+        removed = copy.deepcopy(self.metrics)
+        del removed["inputIdentity"]["after"]["files"]["app/src/ui-refresh.css"]
+        variants.append(removed)
+        added = copy.deepcopy(self.metrics)
+        added["inputIdentity"]["after"]["files"]["app/src/new-module.ts"] = "f" * 64
+        variants.append(added)
+        changed_head = copy.deepcopy(self.metrics)
+        changed_head["inputIdentity"]["after"]["checkoutHead"] = "f" * 40
+        variants.append(changed_head)
+        for head in [None, "", "g" * 40, SHA.upper()]:
+            metrics = copy.deepcopy(self.metrics)
+            for phase in ["before", "after"]:
+                if head is None:
+                    del metrics["inputIdentity"][phase]["checkoutHead"]
+                else:
+                    metrics["inputIdentity"][phase]["checkoutHead"] = head
+            variants.append(metrics)
+        for invalid_digest in ["", "short", "g" * 64, "F" * 64]:
+            metrics = copy.deepcopy(self.metrics)
+            for phase in ["before", "after"]:
+                metrics["inputIdentity"][phase]["files"]["app/src/reference-ui.ts"] = invalid_digest
+            variants.append(metrics)
+        for metrics in variants:
+            with self.subTest(identity=metrics.get("inputIdentity")):
+                self.write_metrics(metrics)
+                self.assertFalse(module.browser_ok(self.root))
+
+    def test_each_receipt_requires_its_own_retained_image(self):
+        metrics = copy.deepcopy(self.metrics)
+        by_size = {size: next(receipt for receipt in self.metrics["receipts"] if receipt["size"] == size)
+                   for size in ["wide", "compact"]}
+        for receipt in metrics["receipts"]:
+            original = by_size[receipt["size"]]
+            receipt["image"] = original["image"]
+            receipt["imageSha256"] = original["imageSha256"]
+        self.write_metrics(metrics)
+        self.assertFalse(module.browser_ok(self.root))
 
 
 if __name__ == '__main__':

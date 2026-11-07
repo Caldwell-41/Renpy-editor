@@ -8,6 +8,7 @@ import platform
 from pathlib import Path
 import re
 import shutil
+import struct
 import subprocess
 
 
@@ -51,10 +52,9 @@ MAC_SNAPSHOT_TESTS = frozenset('test_macos_development_credentials.DevelopmentFi
     'test_steps_refuse_out_of_order_and_unconfirmed_save',
     'test_cancel_rejects_file_change_even_when_profiles_are_identical',
 ))
-WINDOWS_NATIVE_TESTS = frozenset('test_rewrite_windows_reuse.RetainedEvidenceGate.' + name for name in (
-    'test_native_polling_handles_transient_nodes_without_accepting_missing_proof',
-    'test_native_window_placement_preserves_layout_and_rejects_unobservable_states',
-)) | {'test_studio_connection_native.CurrentConnectionTests.test_actual_current_driver_fits_small_desktop_and_closes_without_geometry_gate'}
+WINDOWS_NATIVE_TESTS = frozenset({
+    'test_studio_connection_native.CurrentConnectionTests.test_actual_current_driver_fits_small_desktop_and_closes_without_geometry_gate',
+})
 PYTHON_REQUIRED = MAC_SNAPSHOT_TESTS | WINDOWS_NATIVE_TESTS | {
     'test_nested_fidelity.NestedFidelityGates.test_normal_instrumentation_parses_without_importing_helper_construction',
     'test_nested_fidelity.NestedFidelityGates.test_normal_sample_is_applied_after_game_start_defaults',
@@ -75,7 +75,6 @@ PYTHON_REQUIRED = MAC_SNAPSHOT_TESTS | WINDOWS_NATIVE_TESTS | {
     'test_harness_checks.HarnessChecks.test_failure_timeout_and_spawn_failure_keep_logs_and_do_not_hide_later_results',
     'test_harness_checks.HarnessChecks.test_zero_exit_cannot_override_rejected_evidence',
     'test_harness_checks.HarnessChecks.test_retention_gate_rejects_missing_duplicate_and_unexpected_skipped_cases',
-    'test_redesign_evidence.DomTests.test_nested_probe_checks_are_counted_and_cannot_hide_failure_or_missing_results',
 }
 
 
@@ -122,31 +121,80 @@ def verify_python(output, runner):
     return {'tests': int(runs[0]), 'passed': int(runs[0]) - len(skipped), 'hostExcluded': sorted(skipped)}
 
 
-def redesign_checker():
-    spec = importlib.util.spec_from_file_location('redesign_evidence', Path(__file__).with_name('check-redesign-evidence.py'))
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+def browser_ok(folder, surfaces=('characters', 'relationships', 'knowledge', 'history', 'lorebook', 'settings', 'assist')):
+    metrics = json.loads((folder / 'metrics.json').read_text(encoding='utf-8'))
+    receipts = metrics.get('receipts', [])
+    expected = {(surface, theme, size) for surface in surfaces
+                for theme in ('light', 'dark') for size in ('wide', 'compact')}
+    actual = {(r.get('surface'), r.get('theme'), r.get('size')) for r in receipts}
+    identity = metrics.get('inputIdentity', {})
+    before = identity.get('before', {})
+    after = identity.get('after', {})
+    files = before.get('files', {})
+    inputs_ok = (identity.get('unchanged') is True and bool(files) and files == after.get('files')
+                 and re.fullmatch(r'[0-9a-f]{40}', before.get('checkoutHead') or '') is not None
+                 and before.get('checkoutHead') == after.get('checkoutHead')
+                 and all(isinstance(name, str) and re.fullmatch(r'[0-9a-f]{64}', value or '') for name, value in files.items()))
+    images_ok = True
+    images=[]
+    for receipt in receipts:
+        images.append((receipt, f"{receipt.get('surface')}-{receipt.get('theme')}-{receipt.get('size')}.png"))
+        if receipt.get('surface') == 'settings':
+            captures=receipt.get('captures', [])
+            if (len(captures)!=3 or {c.get('view') for c in captures}!={'connection','connect','response'}
+                    or any(c.get('actionsVisible') is not True or not c.get('actions') or any(a.get('visible') is not True for a in c['actions']) for c in captures)):
+                return False
+            for capture in captures:
+                images.append(({**capture, 'size':receipt.get('size')}, f"settings-{capture['view']}-{receipt.get('theme')}-{receipt.get('size')}.png"))
+    for receipt, expected_name in images:
+        if receipt.get('image') != expected_name:
+            return False
+        image = folder / str(receipt.get('image', ''))
+        if not image.is_file():
+            images_ok = False; break
+        data = image.read_bytes()
+        dimensions = (1440, 900) if receipt.get('size') == 'wide' else (600, 720)
+        if (len(data) < 24 or data[:8] != b'\x89PNG\r\n\x1a\n'
+                or data[8:16] != b'\x00\x00\x00\x0dIHDR'
+                or struct.unpack('>II', data[16:24]) != dimensions
+                or hashlib.sha256(data).hexdigest() != receipt.get('imageSha256')):
+            images_ok = False; break
+    return (inputs_ok and images_ok and actual == expected and len(receipts) == len(expected) and metrics.get('errors') == []
+            and metrics.get('cleanup') == {'browser':'closed','server':'closed'}
+            and all(r.get('viewportOverflow') is False and r.get('actionsVisible') is True for r in receipts)
+            and metrics.get('prohibited', []) == []
+            and len(list(folder.glob('*.png'))) == len(images)
+            and len({r.get('image') for r in receipts}) == len(expected)
+            and all(r.get('image') == f"{r['surface']}-{r['theme']}-{r['size']}.png" and (folder / r['image']).is_file() for r in receipts))
 
 
-AUDIT_ARTIFACTS = {
-    'core': ('core-artifacts.jsonl', 'loomlight_core', True),
-    'controller': ('controller-artifacts.jsonl', 'help-controller-driver', False),
-}
+def candidate_mismatches(inputs, root):
+    # Checkout bytes include the repository's declared transformations (e.g. CRLF
+    # PowerShell files). Compare with Git's checkout representation, retaining raw
+    # file hashes in the receipt; never normalize or ignore an edited input here.
+    return [name for name, checksum in inputs.items()
+            if hashlib.sha256(subprocess.check_output(
+                ['git', 'cat-file', '--filters', 'HEAD:' + name], cwd=root)).hexdigest() != checksum]
 
 
-def retain_binaries(folder, build_root, *, artifacts=None):
+def identity_ok(report, head, tree):
+    return (report.get('candidate') == head and report.get('tree') == tree
+            and report.get('sourceMatchesCandidate') is True
+            and report.get('missingTrackedInputs') == []
+            and report.get('mismatchedTrackedInputs') == [])
+
+
+
+
+def retain_binaries(folder, build_root):
     """Always retain available compiler-artifact outputs, even if a later test fails."""
     folder = folder.resolve()
     build_root = build_root.resolve()
     receipt = {}
     errors = []
-    mixed_output = artifacts is not None
-    selected = artifacts if mixed_output else {
-        name: (name + '-artifacts.jsonl', None, True) for name in ('core', 'desktop')
-    }
-    for name, (stream_name, target_name, test_profile) in selected.items():
-        target = folder / (name + ('-tests.bin' if test_profile else '.bin'))
+    for name in ('core', 'desktop'):
+        stream_name = name + '-artifacts.jsonl'
+        target = folder / (name + '-tests.bin')
         incomplete = False
         try:
             target.unlink(missing_ok=True)
@@ -154,8 +202,6 @@ def retain_binaries(folder, build_root, *, artifacts=None):
             candidates = []
             if stream.exists():
                 for line in stream.read_text(encoding='utf-8').splitlines():
-                    if mixed_output and not line.startswith('{'):
-                        continue  # Cargo's test runner still emits ordinary result lines.
                     try:
                         row = json.loads(line)
                     except json.JSONDecodeError:
@@ -165,12 +211,9 @@ def retain_binaries(folder, build_root, *, artifacts=None):
                         incomplete = True
                         continue
                     if (row.get('reason') == 'compiler-artifact'
-                            and row.get('profile', {}).get('test') is test_profile
-                            and (target_name is None or row.get('target', {}).get('name') == target_name)
+                            and row.get('profile', {}).get('test') is True
                             and row.get('executable')):
-                        source = Path(row['executable']).resolve()
-                        if not mixed_output or source not in candidates:
-                            candidates.append(source)
+                        candidates.append(Path(row['executable']).resolve())
             if not candidates:
                 receipt[name] = {'state': 'not-compiled'}
             else:
@@ -209,13 +252,11 @@ def retain_binaries(folder, build_root, *, artifacts=None):
 
 def seal(folder, repo, outcome='thinking-and-harness-repair'):
     folder=folder.resolve();repo=repo.resolve();folder.mkdir(parents=True,exist_ok=True)
-    checker = redesign_checker()
-    checker.ROOT = repo
     git = lambda *args: subprocess.check_output(['git', *args], cwd=repo, text=True).strip()
     names = git('ls-files', '.gitattributes', 'app', 'tests/fixtures', '.github/workflows', 'scripts/validate.py', 'spikes/renpy-sdk').splitlines()
     missing = [name for name in names if not (repo / name).is_file()]
     inputs = {name:hashlib.sha256((repo / name).read_bytes()).hexdigest() for name in names if name not in missing}
-    mismatches = checker.candidate_mismatches(inputs)
+    mismatches = candidate_mismatches(inputs, repo)
     identity = {'candidate':git('rev-parse', 'HEAD'), 'tree':git('rev-parse', 'HEAD^{tree}'),
                 'outcome':outcome, 'runId':os.getenv('GITHUB_RUN_ID'), 'attempt':os.getenv('GITHUB_RUN_ATTEMPT'),
                 'workflow':os.getenv('GITHUB_WORKFLOW'), 'workflowRef':os.getenv('GITHUB_WORKFLOW_REF'),
@@ -246,7 +287,7 @@ if __name__ == '__main__':
     parser.add_argument('path', type=Path)
     parser.add_argument('other', nargs='?', type=Path)
     parser.add_argument('--runner', choices=('Windows', 'macOS'))
-    parser.add_argument('--outcome', choices=('thinking-and-harness-repair', 'harness-regressions', 'current-studio-connection', 'phase3b-audit-fixes'), default='thinking-and-harness-repair')
+    parser.add_argument('--outcome', choices=('thinking-and-harness-repair', 'harness-regressions', 'current-studio-connection'), default='thinking-and-harness-repair')
     args = parser.parse_args()
     if args.action == 'cargo':
         print(verify_cargo(args.path.read_text(encoding='utf-8'), args.other.read_text(encoding='utf-8')))
@@ -255,13 +296,10 @@ if __name__ == '__main__':
     elif args.action == 'python':
         print(json.dumps(verify_python(args.path.read_text(encoding='utf-8'), args.runner)))
     elif args.action == 'browser':
-        if not redesign_checker().browser_ok(args.path, ('settings',)):
+        if not browser_ok(args.path, ('settings',)):
             raise SystemExit('Required Thinking/connection browser evidence refused')
     elif args.action == 'retain':
-        audit = args.outcome == 'phase3b-audit-fixes'
-        receipt = retain_binaries(args.path, args.other, artifacts=AUDIT_ARTIFACTS if audit else None)
-        if audit and any(row['state'] != 'compiled' for row in receipt.values()):
-            raise SystemExit('Both selected audit executables must be available')
+        retain_binaries(args.path, args.other)
     elif args.action == 'seal':
         seal(args.path, args.other, args.outcome)
     else:
@@ -269,5 +307,5 @@ if __name__ == '__main__':
         head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
         tree = subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip()
         binaries = json.loads((args.path.parent / 'test-binaries.json').read_text(encoding='utf-8'))
-        if not redesign_checker().identity_ok(report, head, tree) or not verify_binaries(args.path.parent, binaries):
+        if not identity_ok(report, head, tree) or not verify_binaries(args.path.parent, binaries):
             raise SystemExit('Complete source and both compiled test binaries required')

@@ -38,9 +38,8 @@ Ordinary discovery does not open the Win32 credential dialog. For changes to
 `studio_setup_native_dialog_checks.py`, add `--native-dialog` on an interactive
 Windows desktop. This selects a fifth group with real focus/clicks. It fails on
 other hosts, missing desktop capability, zero cases, skips or failed assertions.
-The hosted harness dispatch also explicitly selects the dialog on Windows, as do
-the current connection and frozen Settings native workflows. Their existing
-candidate/attempt constraints remain unchanged. Local default runs stay offline.
+The hosted harness dispatch and the current connection workflow also select the
+dialog on Windows. Local default runs stay offline.
 Inventory fixtures must create their own controlled source and permission files;
 they must also pass from a clean checkout without ignored Tauri-generated files,
 installed dependencies or a prior build. Keep missing-permission refusal checks.
@@ -88,9 +87,8 @@ ignored `sample_fidelity_hidden_helper_captures_exported_cases` producer and
 both targets and the explicit dialog group on Windows, with every other boolean
 selector false. The Windows job requires its hosted interactive desktop. This is an
 optional focused verification route, not an extra mandatory dispatch per feature.
-The current walkthrough-redesign path runs the same helper inside its existing
-qualification job before expensive checks. The Thinking path already runs the same
-underlying fixtures and host gates independently; do not add a duplicate run there.
+The Thinking path already runs the same underlying fixtures and host gates
+independently; do not add a duplicate run there.
 Current results and consumed attempts belong in the selected task.
 
 ## Renderer and production-probe consumers
