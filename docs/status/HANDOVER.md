@@ -5,8 +5,10 @@
 Continue [#85](https://github.com/Caldwell-41/Renpy-editor/issues/85) on
 `codex/85-test-selection`, based on `021dd5d2`. Parent owns all edits; council
 reviewers are read-only. The [brief](../tasks/active/test-selection.md) owns the
-selected reductions, review decisions and local checks. Next: draft PR publication
-with automatic Repository quality and one both-target harness dispatch. The brief
+selected reductions, review decisions and local checks. A second pass deletes dead
+qualification stacks, shares result gates and runs all fixtures; it is committed
+locally and not pushed. Next: push to PR 86 when Kris approves, then automatic
+Repository quality and one both-target harness dispatch. The brief
 owns a two-dispatch ceiling; #85 owns live consumption. No SDK/package/native-app campaign is
 selected. The explicit Windows dialog fixture was attempted locally and retains the
 known foreground failure; ordinary harness groups pass. Preserve ignored logs

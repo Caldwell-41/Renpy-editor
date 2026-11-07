@@ -99,11 +99,17 @@ npm run check
 npm run build:tests && node --test dist-tests/tests/<name>.test.js
 # For affected browser/probe paths; this command builds its own inputs:
 npm run test:source-browser
+# Every browser and dispatch fixture that no other workflow owns:
+cargo build -p loomlight-core --locked --examples && npm run test:fixtures
 ```
 
 `npm test` compiles its own tests; do not run `build:tests` immediately before it.
-The final browser command builds and runs several browser fixtures; select it only
-for affected browser/probe paths. System Chrome or locked Playwright Chromium is
+`test:source-browser` builds and runs several browser fixtures; select it only
+for affected browser/probe paths. `test:fixtures` runs every `tests/*.browser.mjs`
+and `tests/*.dispatch.mjs` file in the PR frontend job, so a new fixture runs by
+default. A fixture opts out only with `// fixture: skip <reason>` in its first five
+lines, when it needs the SDK or another workflow already runs it. Delete a
+fixture that no longer matches the product; do not leave it unrun. System Chrome or locked Playwright Chromium is
 a renderer test surface, not native WebView or OS input evidence.
 
 | Changed contract | Include these existing consumers |
@@ -117,9 +123,8 @@ a renderer test surface, not native WebView or OS input evidence.
 Names above abbreviate existing files in `app/tests`. This is a selection map,
 not a dependency scanner. Inspect the changed consumer chain; a passing mock copied
 from another mock cannot establish compatibility with the production producer.
-Both Thinking and the current redesign selection require production-probe consumer
-cases. Redesign discovers expected names from all its selected files; Thinking
-requires its critical consumers plus complete successful renderer execution.
+Thinking requires production-probe consumer cases: its critical consumers plus
+complete successful renderer execution.
 Missing, duplicate, failed, cancelled or unexpectedly skipped cases cannot pass.
 The Mac identity and Windows current-connection DOM consumers also submit their
 actual production-probe reports to the Python admission validators. This checks
@@ -185,7 +190,7 @@ Independent checks may continue only after their actual prerequisites succeed;
 their original failure still blocks qualification. Summaries must show unrun or
 skipped prerequisites separately. Do not convert failures to successful conclusions.
 
-The current redesign path reports harness, typecheck, test compilation/consumers,
+The Thinking path reports harness, typecheck, test compilation/consumers,
 renderer build/browser, Rust/core, context and desktop outcomes separately. A failed
 core scope does not suppress the other scopes. Historical recipe branches retain
 their scoped meaning; this does not qualify them on current application contracts.

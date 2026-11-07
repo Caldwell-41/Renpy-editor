@@ -1,3 +1,4 @@
+// fixture: skip run by npm run test:source-browser.
 import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 import { createServer } from "vite";

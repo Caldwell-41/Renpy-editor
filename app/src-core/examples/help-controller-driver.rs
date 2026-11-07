@@ -10,67 +10,14 @@ fn emit(value: Value) {
     println!("{value}");
     io::stdout().flush().unwrap();
 }
-// Extend the public TTF with a checksummed private padding table. The browser
-// decodes a real font while each disposable asset consumes 15 MiB of the cache.
-fn cache_font(index: u32) -> Vec<u8> {
-    let original =
-        include_bytes!("../../../tests/fixtures/phase-3b-screens/fonts/SourceSans3-Regular.ttf");
-    let count = u16::from_be_bytes(original[4..6].try_into().unwrap()) as usize;
-    let mut bytes = original.to_vec();
-    bytes.splice(12 + count * 16..12 + count * 16, [0; 16]);
-    bytes[4..6].copy_from_slice(&((count + 1) as u16).to_be_bytes());
-    let power = (count + 1).next_power_of_two() / 2;
-    bytes[6..8].copy_from_slice(&((power * 16) as u16).to_be_bytes());
-    bytes[8..10].copy_from_slice(&(power.ilog2() as u16).to_be_bytes());
-    bytes[10..12].copy_from_slice(&(((count + 1) * 16 - power * 16) as u16).to_be_bytes());
-    let mut head = 0;
-    for i in 0..count {
-        let entry = 12 + i * 16;
-        let offset = u32::from_be_bytes(bytes[entry + 8..entry + 12].try_into().unwrap()) + 16;
-        bytes[entry + 8..entry + 12].copy_from_slice(&offset.to_be_bytes());
-        if &bytes[entry..entry + 4] == b"head" {
-            head = offset as usize;
-        }
-    }
-    bytes[head + 8..head + 12].fill(0);
-    let offset = bytes.len();
-    bytes.resize(15 * 1024 * 1024, 0);
-    let end = bytes.len();
-    bytes[end - 4..].copy_from_slice(&index.to_be_bytes());
-    let entry = 12 + count * 16;
-    bytes[entry..entry + 4].copy_from_slice(b"Loom");
-    bytes[entry + 4..entry + 8].copy_from_slice(&index.to_be_bytes());
-    bytes[entry + 8..entry + 12].copy_from_slice(&(offset as u32).to_be_bytes());
-    bytes[entry + 12..entry + 16].copy_from_slice(&((end - offset) as u32).to_be_bytes());
-    let mut entries: Vec<_> = bytes[12..12 + (count + 1) * 16]
-        .chunks_exact(16)
-        .map(|entry| entry.to_vec())
-        .collect();
-    entries.sort_by(|a, b| a[..4].cmp(&b[..4]));
-    for (i, entry) in entries.iter().enumerate() {
-        bytes[12 + i * 16..28 + i * 16].copy_from_slice(entry);
-    }
-    let sum = bytes.chunks_exact(4).fold(0u32, |sum, word| {
-        sum.wrapping_add(u32::from_be_bytes(word.try_into().unwrap()))
-    });
-    bytes[head + 8..head + 12].copy_from_slice(&0xB1B0_AFBAu32.wrapping_sub(sum).to_be_bytes());
-    bytes
-}
 fn main() {
     let preparation = std::time::Instant::now();
     eprintln!("HELP_FIXTURE phase=preparation-start elapsedMs=0");
     let mode = std::env::args().nth(2);
-    assert!(mode.as_deref().is_none_or(|mode| matches!(
-        mode,
-        "canvas-position"
-            | "composition-canvas"
-            | "ui-image"
-            | "ui-image-probe"
-            | "project-font"
-            | "project-font-probe"
-    )));
+    assert!(mode
+        .as_deref()
+        .is_none_or(|mode| matches!(mode, "canvas-position" | "ui-image" | "project-font")));
     let position_probe = mode.as_deref() == Some("canvas-position");
-    let composition_canvas = mode.as_deref() == Some("composition-canvas");
     let root = PathBuf::from(std::env::args().nth(1).expect("owned temporary root"));
     assert!(
         root.is_absolute()
@@ -82,47 +29,27 @@ fn main() {
                 .starts_with("loomlight-help-controller-")
     );
     assert!(!root.exists());
-    let mut service = if composition_canvas {
-        LifecycleService::prepare_canvas_screen_probe(
-            root.clone(),
-            &PathBuf::from(
-                std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE")
-                    .expect("explicit verified SDK archive"),
-            ),
-        )
-        .unwrap()
-    } else if mode.as_deref() == Some("ui-image-probe") {
-        LifecycleService::prepare_ui_image_probe(root.clone()).unwrap()
-    } else if mode.as_deref() == Some("project-font-probe") {
-        LifecycleService::prepare_project_font_probe(root.clone()).unwrap()
-    } else {
-        LifecycleService::prepare_source_foundation_probe(root.clone()).unwrap()
-    };
+    let mut service = LifecycleService::prepare_source_foundation_probe(root.clone()).unwrap();
     let game = root.join("synthetic-project");
     eprintln!(
         "HELP_FIXTURE phase=service-prepared elapsedMs={}",
         preparation.elapsed().as_millis()
     );
     fs::create_dir_all(game.join("game/ui")).unwrap();
-    if !composition_canvas {
-        fs::write(
-            game.join("game/ui/a_styles.rpy"),
-            "style help_label:\n    color \"#ffffff\"\n",
-        )
-        .unwrap();
-    }
+    fs::write(
+        game.join("game/ui/a_styles.rpy"),
+        "style help_label:\n    color \"#ffffff\"\n",
+    )
+    .unwrap();
     fs::write(game.join("game/ui/z_compare.rpy"), "screen flow_help():\n    frame:\n        xsize 720\n        ysize 360\n        xalign 0.5\n        yalign 0.5\n        text \"Your next stop\"\n").unwrap();
-    if !composition_canvas {
-        fs::write(
-            game.join("game/ui/help.rpy"),
-            format!(
-                "\u{feff}{}",
-                include_str!("../../../tests/fixtures/phase-3b-screens/help.rpy")
-                    .replace('\n', "\r\n")
-            ),
-        )
-        .unwrap();
-    }
+    fs::write(
+        game.join("game/ui/help.rpy"),
+        format!(
+            "\u{feff}{}",
+            include_str!("../../../tests/fixtures/phase-3b-screens/help.rpy").replace('\n', "\r\n")
+        ),
+    )
+    .unwrap();
     if position_probe {
         fs::write(
             game.join("game/ui/help.rpy"),
@@ -226,13 +153,7 @@ fn main() {
         }
         if request["driver"] == "chooseFont" {
             assert_eq!(mode.as_deref(), Some("project-font"));
-            let cache_name;
-            let name = if let Some(index) = request["cacheIndex"].as_u64() {
-                assert!(index < 5);
-                cache_name = format!("cache_{index}.ttf");
-                fs::write(root.join(&cache_name), cache_font(index as u32)).unwrap();
-                &cache_name
-            } else if request["broken"] == true {
+            let name = if request["broken"] == true {
                 "broken.ttf"
             } else if request["alternate"] == true {
                 "help.otf"

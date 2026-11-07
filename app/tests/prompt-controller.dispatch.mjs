@@ -5,7 +5,7 @@ import {createInterface} from 'node:readline';
 import {Window} from 'happy-dom';
 import {mountPromptPreparation} from '../dist-tests/src/prompt-ui.js';
 const process=spawn(processPath(),[],{stdio:['pipe','pipe','inherit']});
-function processPath(){const path=globalThis.process.argv[2];assert(path,'Pass the compiled production driver path');return path;}
+function processPath(){const env=globalThis.process.env;return globalThis.process.argv[2]??`${env.CARGO_TARGET_DIR??'target'}/debug/examples/prompt-controller-driver${globalThis.process.platform==='win32'?'.exe':''}`;}
 const lines=createInterface({input:process.stdout});const queued=[];const waiters=[];
 lines.on('line',line=>{const value=JSON.parse(line);if(waiters.length)waiters.shift()(value);else queued.push(value);});
 const next=()=>queued.length?Promise.resolve(queued.shift()):new Promise(resolve=>waiters.push(resolve));

@@ -1,3 +1,4 @@
+// fixture: skip needs the official Ren'Py SDK (LOOMLIGHT_RUNTIME_SDK_ARCHIVE); run it during ticket qualification.
 // Rehearse the exact native setup/readback against production UI/core. Chrome is not native evidence.
 import assert from 'node:assert/strict';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';

@@ -64,6 +64,36 @@ Count each accepted dispatch, including failures/cancellations. Preparation use 
 0/2; #85 owns live consumption and final run/attempt receipts after publication.
 No further local physical-dialog attempt is selected.
 
+## Second pass: dead stacks, shared gates and fixtures
+
+Kris reviewed PR 86 on 2026-11-07 and selected four further cuts. A fifth,
+trimming status records, was declined.
+
+1. Delete qualification stacks that can no longer run. Their workflows required
+   deleted branches or expired artifacts: nine workflows, their jobs and inputs in
+   `quality.yml`, `screens-source.yml` and `production-scaffold.yml`, and their
+   scripts and tests. About 9,200 lines. The Help failure step keeps its
+   mixed-artifact `retain_binaries` mode.
+2. Run every browser and dispatch fixture. Twenty fixtures had no runner. Fifteen
+   pass and now run in the PR frontend job through `npm run test:fixtures`. Five
+   broke after intended UI changes (#66, #77, #79, #81) and three never passed or
+   only rendered completed design approvals; all eight are deleted. The one check
+   no other test held, the disabled Create screen without a UI image, moved into
+   `screen-panels-workspace.dom`. Three canvas fixtures need the SDK and skip with
+   that reason. Fixtures that another workflow runs skip with its name.
+3. Merging the six older per-ticket qualification scripts was declined. They need
+   SDK and Windows runs, and the shared `fidelity_reference` runner already exists.
+   New qualifications use that runner; delete an old script when its feature
+   next changes.
+4. Gate unittest and cargo results with one shared check instead of per-gate name
+   lists. `verify_unittest` requires at least one test, unique rows, a matching
+   `Ran N` count and exactly the allowed host skips. Full cargo runs pass `--exact`
+   so each `--skip` removes one named test.
+
+Gap: `project-font-cache` was the only check that a font chosen after its specimen
+left the 64 MiB cache still applies. Nothing replaces it. It failed two different
+ways in two runs, so it was not a reliable check either.
+
 ## Acceptance and validation
 
 - Council challenges proposed cuts and reviews the implementation for coverage
@@ -106,6 +136,13 @@ Final publication-head run receipts belong on #85 rather than another status-onl
   published-file validation from the full working-tree result.
   Published-file validation passes for all 1,785 tracked and proposed files.
 
-No frontend or product code changed. Automatic PR quality will run the retained
+Second pass on macOS ARM64: the four harness groups pass, `npm run check` passes,
+the 15 default fixtures pass in about two minutes, workflow lint and repository
+validation pass. Listing the core tests with the three `--exact` skips removes
+exactly three of 685. The Windows half of the harness needs the hosted
+`harness_regressions` dispatch on the publication head.
+
+No product code changed; the Help test driver lost three unused modes and its font-cache hook.
+Automatic PR quality will run the retained
 frontend and Help/core checks on the publication head. No claimed live CI timing
 reduction is made before a documentation-only PR exercises the selected path.

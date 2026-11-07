@@ -1,3 +1,4 @@
+// fixture: skip run by production-scaffold.yml.
 import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 import { createServer } from "vite";
