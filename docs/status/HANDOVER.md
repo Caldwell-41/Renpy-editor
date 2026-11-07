@@ -1,5 +1,19 @@
 # Current outcome handover
 
+## Test selection reduction
+
+Continue [#85](https://github.com/Caldwell-41/Renpy-editor/issues/85) on
+`codex/85-test-selection`, based on `021dd5d2`. Parent owns all edits; council
+reviewers are read-only. The [brief](../tasks/active/test-selection.md) owns the
+selected reductions, review decisions and local checks. Next: draft PR publication
+with automatic Repository quality and one both-target harness dispatch. The brief
+owns a two-dispatch ceiling; #85 owns live consumption. No SDK/package/native-app campaign is
+selected. The explicit Windows dialog fixture was attempted locally and retains the
+known foreground failure; ordinary harness groups pass. Preserve ignored logs
+under `.toolchains/85-harness/` and unrelated recovery files. The default `gh`
+token is invalid; Git Credential Manager and the connected GitHub app have access. Final CI
+receipts belong on #85. Earlier closeout records below retain their own scope.
+
 ## L20 merge closeout
 
 Kris accepted [#54](https://github.com/Caldwell-41/Renpy-editor/issues/54) and

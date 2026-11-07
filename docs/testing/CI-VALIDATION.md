@@ -59,6 +59,13 @@ older results; the coordinator does not search backwards for a passing attempt.
 A new commit needs its own results. A PR that moves during evaluation receives no
 status from that outdated snapshot.
 
+The required frontend/Rust job may select documentation-only steps under
+[automatic check selection](AUTOMATED.md#automatic-pr-and-main-checks). The job
+still runs and explains its selection; this does not reuse a prior head's status
+or remove manual qualifications from the plan. Record final CI receipts on the
+owning issue rather than committing another receipt-only head. PR body/title
+edits also rerun Repository quality because `edited` must cover base retargets.
+
 Each update's job summary lists the required workflows, their states and links to
 exact attempts. The PR status links to that summary. Diagnose the original test
 job and its retained logs/artifacts; the coordinator preserves their ownership.

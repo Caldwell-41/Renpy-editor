@@ -51,8 +51,11 @@ jobs:
           import json, os, pathlib, re, subprocess
           output=pathlib.Path(os.environ['RUNNER_TEMP'])/'studio-settings-${{ runner.os }}'
           checks=[]
-          native_minimum = 11 if '${{ runner.os }}' == 'Windows' else 7
-          for name,minimum in [('test_studio_settings_evidence.py',18),('test_studio_setup_native.py',native_minimum)]:
+          native_minimum = 10 if '${{ runner.os }}' == 'Windows' else 7
+          selected = [('test_studio_settings_evidence.py',18),('test_studio_setup_native.py',native_minimum)]
+          if '${{ runner.os }}' == 'Windows':
+              selected.append(('studio_setup_native_dialog_checks.py',1))
+          for name,minimum in selected:
               r=subprocess.run(['python','harness/app/scripts/'+name],capture_output=True,text=True,timeout=120)
               text=r.stdout+r.stderr
               (output/(name+'.log')).write_text(text,encoding='utf-8')

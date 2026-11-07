@@ -97,7 +97,8 @@ or parallel task record.
 The [Screens contract](tasks/reference/phase-3b-screens.md) and pinned design
 approval retain approved product requirements and decisions. Canonical docs/ADRs
 own lasting behavior; repository task evidence owns detailed results, failed
-attempts, exact candidate/artifact identity and historical allowance use. CURRENT
+attempts and historical allowance use. Final publication-head CI receipts belong
+in the owning issue, including exact candidate/artifact identity. CURRENT
 and HANDOVER retain project state and live recovery, linking the selected issue.
 Keep the live requirement-ID-to-outcome/work-ticket and acceptance map in the parent,
 with direct evidence links. The repository migration table is a dated baseline. Delivery
@@ -403,14 +404,15 @@ Retain required Windows/macOS CI package qualification at the selected milestone
 the [complete PR validation contract](testing/CI-VALIDATION.md); connected-host results
 do not replace required CI jobs.
 
-During iteration run cheap affected local checks, including actual production-probe
-consumers for changed UI/request contracts. For a new platform-sensitive assumption,
-select an early representative real-path check on the affected connected host or CI.
-Reuse unchanged qualified slices. Put inexpensive harness checks before expensive
-work in the selected qualification run; a separate harness dispatch per feature or
-commit is unnecessary. Use the optional harness-only selector for focused platform
-proof when needed. Qualify a coherent candidate at the selected milestone, then
-repeat only affected or unresolved checks after a diagnosed correction.
+During iteration select affected local checks and actual production-probe consumers
+for changed contracts. Prove new platform-sensitive assumptions early on the affected
+host. Run inexpensive harness checks before expensive qualification; a separate
+dispatch per feature or commit is unnecessary. Qualify a coherent candidate at the
+selected milestone, then repeat only affected or unresolved checks after corrections.
+Run timed controller/core journeys, browser latency probes and native input separately
+from broad builds/tests on the same host; resource contention invalidates timing.
+Reuse unchanged qualified slices under their scope; every new PR head still needs
+the exact-head checks selected by its validation plan.
 
 For connected-target execution:
 
@@ -453,6 +455,10 @@ acceptance of pending platform checks.
 
 Record meaningful decisions, completed increments, defects and evidence as they arise.
 Do not rewrite the full handover or create receipt-only commits at each small step.
+Put final publication-head CI receipts on the owning issue, avoiding another commit
+solely to record that head. Link them in the next substantive documentation update.
+PR title/body edits trigger Repository quality again; use issue comments for progress
+and receipts, and edit the PR body when its scope or review information changes.
 Before a genuine pause, transfer or completion, update the brief and relevant evidence,
 then replace the live HANDOVER continuation once with sufficient recovery state.
 Update CURRENT when overall project state changes. Keep detailed history in linked task evidence;

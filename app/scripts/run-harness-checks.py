@@ -36,8 +36,17 @@ def retention_gate(output, host):
         raise ValueError('Retention cases did not execute exactly once with only their named host exclusion')
 
 
-def checks(host):
-    return (
+def native_dialog_gate(output):
+    expected = '__main__.NativeDialogChecks.test_actual_owned_dialog_api_uses_handle_pid_class_and_owner'
+    if (gate.python_results(output) != [(expected, 'ok')]
+            or re.findall(r'^Ran (\d+) tests? in [^\n]+$', output, re.M) != ['1']
+            or re.findall(r'^(OK)\s*$', output, re.M) != ['OK']
+            or re.search(r'^(?:FAILED|ERROR:|FAIL:|UNEXPECTED SUCCESS:)', output, re.M)):
+        raise ValueError('The selected native dialog case did not execute and pass exactly once')
+
+
+def checks(host, native_dialog=False):
+    groups = (
         ('python', [sys.executable, '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_*.py', '-v'],
          lambda text: gate.verify_python(text, host)),
         ('q1-rejection', [sys.executable, 'scripts/check-q1-prep-gates.py', 'self-test'], None),
@@ -45,6 +54,12 @@ def checks(host):
         ('retention', [sys.executable, 'scripts/test-q1-package-retention.py', '-v'],
          lambda text: retention_gate(text, host)),
     )
+    if native_dialog:
+        if host != 'Windows':
+            raise ValueError('The native dialog check requires an actual Windows desktop')
+        groups += (('native-dialog', [sys.executable, 'scripts/studio_setup_native_dialog_checks.py'],
+                    native_dialog_gate),)
+    return groups
 
 
 def run_checks(output, groups, execute=subprocess.run):
@@ -82,17 +97,20 @@ def run_checks(output, groups, execute=subprocess.run):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--native-dialog', action='store_true',
+                        help='Also exercise the owned Win32 dialog with physical focus/clicks')
     args = parser.parse_args()
     if sys.version_info < (3, 11):
         parser.error('Python 3.11 or later is required')
     host = {'Darwin': 'macOS', 'Windows': 'Windows'}.get(platform.system())
     if host is None:
         parser.error('Run on the actual supported Windows or macOS host')
+    groups = checks(host, args.native_dialog)
     args.output.mkdir(parents=True, exist_ok=False)
-    records = run_checks(args.output, checks(host))
+    records = run_checks(args.output, groups)
     result = {'schemaVersion': 1, 'host': host, 'architecture': platform.machine(),
               'python': platform.python_version(), 'checks': records,
-              'passed': len(records) == 4 and all(row['passed'] for row in records)}
+              'passed': len(records) == len(groups) and all(row['passed'] for row in records)}
     (args.output / 'result.json').write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
     summary = '\n'.join(f"- {row['name']}: {'PASS' if row['passed'] else 'FAIL'}" for row in records) + '\n'
     (args.output / 'summary.md').write_text(summary, encoding='utf-8')

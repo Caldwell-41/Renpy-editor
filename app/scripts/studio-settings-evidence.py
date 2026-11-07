@@ -21,7 +21,8 @@ ARTIFACTS = {
 }
 HARNESS = ('.github/workflows/production-scaffold.yml', '.github/workflows/studio-settings-native.yml',
  'app/scripts/studio-settings-evidence.py', 'app/scripts/test_studio_settings_evidence.py',
- 'app/scripts/studio-setup-native.py', 'app/scripts/studio-setup-windows.ps1', 'app/scripts/test_studio_setup_native.py')
+ 'app/scripts/studio-setup-native.py', 'app/scripts/studio-setup-windows.ps1',
+ 'app/scripts/test_studio_setup_native.py', 'app/scripts/studio_setup_native_dialog_checks.py')
 def digest(raw): return hashlib.sha256(raw).hexdigest()
 def load(path): return json.loads(path.read_text(encoding='utf-8-sig'))
 def write(path, value): path.write_text(json.dumps(value, indent=2)+'\n', encoding='utf-8')
@@ -112,7 +113,7 @@ def finish(output):
    module.validate_terminal(native)
    assert load(output/'native-privacy.json')['passed'] is True
    assert native['harnessRef']==report['harnessCandidate']
-   expected={Path(p).name:h for p,h in report['harnessInputs'].items() if Path(p).name in ('studio-setup-native.py','studio-setup-windows.ps1','test_studio_setup_native.py')}
+   expected={Path(p).name:h for p,h in report['harnessInputs'].items() if Path(p).name in ('studio-setup-native.py','studio-setup-windows.ps1','test_studio_setup_native.py','studio_setup_native_dialog_checks.py')}
    assert native['harnessFiles']==expected
    assert len(reservations)==2 and consumed==2 and native['launchOrdinals']==[8,9], 'Attempt reservations differ'
    pids={}

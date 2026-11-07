@@ -82,7 +82,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Cause/correction:** mocked helpers and outer dialog identity left actual controls
   untested. Observe owned child type/style/visibility, focus, physical action and
   dismissal/readback; cancel the owned modal before failure cleanup.
-- **Regression:** `test_studio_setup_native.py`, Windows focus fixtures and actual native
+- **Regression:** `test_studio_setup_native.py` logic, explicit
+  `studio_setup_native_dialog_checks.py`, Windows focus fixtures and actual native
   sequence. Mocks do not establish native proof; CI8's exact UIA provider cause remained unknown.
 - **Evidence:** [whole-sequence reassessment](../tasks/evidence/phase-2-execution.md#ci7-terminal-audit-and-whole-sequence-reassessment--2026-10-13),
   [child-control gap](../tasks/evidence/phase-2-execution.md#ci8-terminal-review--native-child-control-observation-gap--2026-10-13),
@@ -499,6 +500,9 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Verification:** actual discovery regression fails before the change and passes
   afterward; the general Mac runner passes all four groups without a recorder.
 - **Evidence:** [Automatic code checks](../tasks/active/automatic-code-checks.md#verification-and-review).
+  [Test selection reduction](../tasks/active/test-selection.md#local-validation)
+  applies the same split to the Windows dialog fixture. Its known foreground
+  failure remains a failed explicit native check, outside offline discovery.
 
 ## H35. Sleeping Mac display suspends a packaged WKWebView probe
 

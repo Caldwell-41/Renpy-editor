@@ -331,7 +331,7 @@ def run(args):
         transformed.append(native_helper)
     assert actual == inventory['inputs'] and len(actual) == 269 and hashlib.sha256(canonical(actual)).hexdigest() == INPUT_DIGEST
     output.mkdir(parents=True)
-    harness_paths = [Path(__file__), Path(__file__).with_name('studio-setup-windows.ps1'), Path(__file__).with_name('test_studio_setup_native.py')]
+    harness_paths = [Path(__file__), Path(__file__).with_name('studio-setup-windows.ps1'), Path(__file__).with_name('test_studio_setup_native.py'), Path(__file__).with_name('studio_setup_native_dialog_checks.py')]
     terminal = {'passed': False, 'candidate': CANDIDATE, 'tree': TREE, 'executableSHA256': EXE_SHA, 'artifact': ARTIFACT, 'materialInputCount': 269, 'materialInputDigest': INPUT_DIGEST, 'harnessRef': args.harness_ref, 'harnessFiles': {p.name: sha(p) for p in harness_paths}, 'launchOrdinals': [], 'packageAttempts': 0, 'completedStages': [], 'normalExits': [], 'noCredentialRead': True, 'noDiscovery': True, 'cleanupAttempted': False, 'inputTransforms': transformed, 'appLaunches': 0}
     fixture = Fixture(output)
     child = None

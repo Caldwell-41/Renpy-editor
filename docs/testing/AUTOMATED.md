@@ -6,11 +6,19 @@ not a run-all instruction. Run from `app/` unless stated otherwise.
 
 ## Automatic PR and main checks
 
-`Repository quality` runs `npm run check` and `cargo +1.90.0 fmt --check --all`
-on pull requests and main pushes in one Ubuntu job. It uses the repository's
-Node/npm versions and checks for Python 3.11 or later. Rust formatting still runs
-if a frontend step fails. This job builds no native application or package and
-starts no SDK. Manual qualification selectors keep their existing scope.
+`Repository quality` always runs repository validation and its gate tests. Its
+named frontend/Rust job selects code checks unless `scripts/pr_scope.py` proves
+the tested PR merge changes only root Markdown, Markdown under `docs/`, or the
+branch validation plan. Renames include both paths; missing/mismatched parents,
+unavailable comparisons, unknown paths and empty diffs select code checks. Main
+pushes always select them. The job summary records the selection; the job itself
+is never skipped. Required manual qualifications remain selected by the plan.
+
+Code checks run `npm run check`, production frontend build, Rust formatting,
+offline Help admission tests, five Help/core filters and the Dialog controller/core
+journey. They use pinned tooling, build no native application or package and start
+no SDK. Help remains selected for all code changes because it exercises shared
+controllers and core services. Failure diagnostics keep their existing ownership.
 
 ## Inexpensive harness checks
 
@@ -25,6 +33,14 @@ The output directory must be new. Four independent groups run: Python `test_*.py
 fixtures, Q1 rejecting self-tests, Q1 source audit and package-retention fixtures.
 They do not build or launch Loomlight, install an SDK or contact a provider. A few
 fixtures invoke Node or the host's PowerShell against public controlled inputs.
+Ordinary discovery does not open the Win32 credential dialog. For changes to
+`studio-setup-windows.ps1`, its `rewrite-windows-native.ps1` helpers, or
+`studio_setup_native_dialog_checks.py`, add `--native-dialog` on an interactive
+Windows desktop. This selects a fifth group with real focus/clicks. It fails on
+other hosts, missing desktop capability, zero cases, skips or failed assertions.
+The hosted harness dispatch also explicitly selects the dialog on Windows, as do
+the current connection and frozen Settings native workflows. Their existing
+candidate/attempt constraints remain unchanged. Local default runs stay offline.
 Inventory fixtures must create their own controlled source and permission files;
 they must also pass from a clean checkout without ignored Tauri-generated files,
 installed dependencies or a prior build. Keep missing-permission refusal checks.
@@ -68,8 +84,9 @@ Missing, stale or altered exports fail the explicit admission selection. The
 ignored `sample_fidelity_hidden_helper_captures_exported_cases` producer and
 `qualify-sample-fidelity.py reference` require the selected ticket's SDK reservation.
 
-`Repository quality` → `harness_regressions=true` runs only these checks on
-Windows x64 and macOS ARM64, with every other boolean selector false. This is an
+`Repository quality` → `harness_regressions=true` runs the four ordinary groups on
+both targets and the explicit dialog group on Windows, with every other boolean
+selector false. The Windows job requires its hosted interactive desktop. This is an
 optional focused verification route, not an extra mandatory dispatch per feature.
 The current walkthrough-redesign path runs the same helper inside its existing
 qualification job before expensive checks. The Thinking path already runs the same
@@ -79,13 +96,14 @@ Current results and consumed attempts belong in the selected task.
 ## Renderer and production-probe consumers
 
 ```bash
-npm run typecheck
-npm run build:tests
-npm test
-npm run build
+npm run check
+# For an affected compiled test instead of the full frontend suite:
+npm run build:tests && node --test dist-tests/tests/<name>.test.js
+# For affected browser/probe paths; this command builds its own inputs:
 npm run test:source-browser
 ```
 
+`npm test` compiles its own tests; do not run `build:tests` immediately before it.
 The final browser command builds and runs several browser fixtures; select it only
 for affected browser/probe paths. System Chrome or locked Playwright Chromium is
 a renderer test surface, not native WebView or OS input evidence.
