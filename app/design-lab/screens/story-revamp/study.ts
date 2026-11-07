@@ -9,6 +9,9 @@ import eli from './eli.svg';
 import eliConcerned from './eli-concerned.svg';
 import './style.css';
 import './combined.css';
+import './combined-revision.css';
+import { backgrounds as artBackgrounds, sprite, characterColour, characters, expressions, music, sounds } from './combined-art.ts';
+import { beatIcon } from './combined-icons.ts';
 
 export type Variant = 'cue-sheet' | 'shot-reel' | 'stage-tracks' | 'combined';
 export const variants = [{ id: 'cue-sheet', title: 'Cue sheet' }, { id: 'shot-reel', title: 'Shot reel' }, { id: 'stage-tracks', title: 'Stage tracks' }, { id: 'combined', title: 'Story combined' }] as const;
@@ -329,7 +332,123 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     menu.ontoggle = place; return menu;
   }
   function destination(value: string, title: string, update: (value: string) => void) { const control = el('select'); control.ariaLabel = title; for (const s of scenes) control.append(new Option(s.name, s.id)); control.value = value; bind(control, update); return control; }
-  function fields(b: Beat) {
+  // Combined beat editors: pictures for assets, switches for short choices and a picker sheet for long lists.
+  let assetSheet: { beat: string; kind: 'background' | 'expression' } | undefined, sheetHover = '';
+  const slug = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  function field(title: string, ...children: (Node | string)[]) { const node = el('div', 'sc-field'); node.role = 'group'; node.ariaLabel = title; node.append(el('span', 'sc-field-label', title), ...children); return node; }
+  function avatar(person: string, expression = 'Neutral') { const node = el('span', 'sc-avatar'); node.ariaHidden = 'true'; if (person === 'Narration') node.append(beatIcon('narration')); else { node.style.backgroundImage = `url("${sprite(person, expression)}")`; } node.style.setProperty('--ring', characterColour(person)); return node; }
+  function segmented(values: readonly string[], value: string, title: string, update: (value: string) => void) {
+    const node = el('div', 'sc-segmented'); node.role = 'radiogroup'; node.ariaLabel = title;
+    const buttons = values.map(v => { const button = action(v, () => { if (v !== value) change(() => update(v), `${title}: ${v} · ${name()}`); }, false, `${slug(title)}-${slug(v)}`); button.role = 'radio'; button.ariaChecked = String(v === value); button.tabIndex = v === value ? 0 : -1; return button; });
+    buttons.forEach((button, i) => button.onkeydown = event => { const step = ['ArrowRight', 'ArrowDown'].includes(event.key) ? 1 : ['ArrowLeft', 'ArrowUp'].includes(event.key) ? -1 : 0; if (!step) return; event.preventDefault(); buttons[(i + step + buttons.length) % buttons.length]!.click(); });
+    node.append(...buttons); return node;
+  }
+  /** A list menu with portraits, for speakers and characters. */
+  function personPicker(b: Beat, title: string, people: string[], value: string, choose: (person: string) => void) {
+    const menu = el('details', 'sc-dropdown'); const summary = el('summary', 'sc-person'); summary.dataset.action = slug(title); summary.ariaLabel = `${title}: ${value}`;
+    const person = value === 'Narration (no speaker)' ? 'Narration' : value;
+    summary.append(avatar(person), el('span', 'sc-person-name', person === 'Narration' ? 'Narration · no speaker' : person), el('span', 'sc-caret', '▾')); summary.style.setProperty('--person', characterColour(person));
+    const list = el('div', 'sc-dropdown-list'); list.role = 'listbox'; list.ariaLabel = title;
+    for (const option of people) {
+      const who = option === 'Narration (no speaker)' ? 'Narration' : option;
+      const item = action('', () => { menu.open = false; if (option !== value) change(() => choose(option), `${title}: ${who} · ${name(b.id)}`); else summary.focus(); }, false, `${slug(title)}-option-${slug(who)}`);
+      item.role = 'option'; item.ariaSelected = String(option === value); item.ariaLabel = who; item.style.setProperty('--person', characterColour(who));
+      item.append(avatar(who), el('span', 'sc-person-name', who === 'Narration' ? 'Narration · no speaker' : who)); list.append(item);
+    }
+    list.onkeydown = event => { const items = [...list.querySelectorAll<HTMLElement>('[role=option]')], i = items.indexOf(document.activeElement as HTMLElement); if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); items[(i + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length]?.focus(); } if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); menu.open = false; summary.focus(); } };
+    menu.ontoggle = () => { if (menu.open) (list.querySelector<HTMLElement>('[aria-selected=true]') ?? list.querySelector<HTMLElement>('[role=option]'))?.focus(); };
+    menu.append(summary, list); return field(title, menu);
+  }
+  function speakerPicker(b: Beat) {
+    return personPicker(b, 'Speaker', [...characters, 'Narration (no speaker)'], b.kind === 'narration' ? 'Narration (no speaker)' : b.speaker, value => { b.kind = value === 'Narration (no speaker)' ? 'narration' : 'dialogue'; if (b.kind === 'dialogue') b.speaker = value; });
+  }
+  function assetRow(b: Beat, kind: 'background' | 'expression') {
+    const row = el('div', 'sc-asset-row');
+    const picture = el('span', `sc-thumb sc-thumb-${kind}`); picture.ariaHidden = 'true';
+    if (kind === 'background') { if (artBackgrounds[b.asset]) picture.style.backgroundImage = `url("${artBackgrounds[b.asset]}")`; else picture.classList.add('sc-thumb-black'); }
+    else picture.style.backgroundImage = `url("${sprite(b.speaker, b.asset)}")`;
+    const text = el('span', 'sc-asset-text'); text.append(el('strong', '', b.asset === 'Black' ? 'Black screen' : b.asset), el('span', '', kind === 'background' ? 'Clears characters from the stage' : `${expressions.length} expressions for ${b.speaker}`));
+    const open = action('Change', () => { assetSheet = { beat: b.id, kind }; sheetHover = ''; draw(); }, false, `change-${kind}`); open.ariaLabel = `Change ${kind === 'background' ? 'background' : `${b.speaker}'s expression`}: ${b.asset}`;
+    row.append(picture, text, open); return field(kind === 'background' ? 'Background' : 'Expression', row);
+  }
+  function sheetValues(kind: 'background' | 'expression') { return kind === 'background' ? ['Black', ...Object.keys(artBackgrounds)] : [...expressions]; }
+  function assetPicker(b: Beat) {
+    const kind = assetSheet!.kind, title = kind === 'background' ? 'Choose a background' : `Choose ${b.speaker}'s expression`;
+    const sheet = el('section', 'sc-sheet'); sheet.role = 'dialog'; sheet.ariaLabel = title; sheet.dataset.sheet = kind;
+    const head = el('header', 'sc-sheet-head'); const close = action('', () => closeSheet(), false, 'close-sheet'); close.ariaLabel = close.title = `Close and keep ${b.asset}`; close.append(beatIcon('close')); head.append(el('h3', '', title), close);
+    const search = el('input', 'sc-sheet-search'); search.type = 'search'; search.placeholder = kind === 'background' ? 'Search backgrounds' : 'Search expressions'; search.ariaLabel = search.placeholder;
+    const grid = el('div', `sc-tiles sc-tiles-${kind}`); grid.role = 'listbox'; grid.ariaLabel = title;
+    const preview = (value: string) => { if (sheetHover !== value) { sheetHover = value; refresh(); } };
+    const tiles = sheetValues(kind).map(value => {
+      const tile = action('', () => { const before = b.asset; closeSheet(false); if (value !== before) change(() => b.asset = value, `${kind === 'background' ? 'Background' : `${b.speaker}'s expression`}: ${value} · ${name(b.id)}`); host.querySelector<HTMLElement>(`[data-editor-for="${b.id}"] [data-action="change-${kind}"]`)?.focus(); }, false, `sheet-${slug(value)}`);
+      tile.role = 'option'; tile.ariaSelected = String(value === b.asset); tile.dataset.value = value; tile.classList.add('sc-tile'); tile.tabIndex = value === b.asset ? 0 : -1;
+      const picture = el('span', 'sc-tile-image'); picture.ariaHidden = 'true';
+      if (kind === 'background') { if (artBackgrounds[value]) picture.style.backgroundImage = `url("${artBackgrounds[value]}")`; else picture.classList.add('sc-thumb-black'); }
+      else picture.style.backgroundImage = `url("${sprite(b.speaker, value)}")`;
+      tile.append(picture, el('span', 'sc-tile-name', value === 'Black' ? 'Black screen' : value)); tile.ariaLabel = `${value === 'Black' ? 'Black screen' : value}${value === b.asset ? ', current' : ''}`;
+      tile.onpointerenter = () => preview(value); tile.onfocus = () => preview(value); return tile;
+    });
+    grid.onpointerleave = () => { if (!grid.contains(document.activeElement)) { sheetHover = ''; refresh(); } };
+    grid.onkeydown = event => { const visible = tiles.filter(t => !t.hidden), i = visible.indexOf(document.activeElement as HTMLButtonElement); const step = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: 2, ArrowUp: -2 }[event.key]; if (step === undefined || i < 0) return; event.preventDefault(); visible[Math.max(0, Math.min(visible.length - 1, i + step))]?.focus(); };
+    search.oninput = () => { const q = search.value.trim().toLowerCase(); for (const tile of tiles) tile.hidden = !!q && !tile.textContent!.toLowerCase().includes(q); empty.hidden = tiles.some(t => !t.hidden); };
+    search.onkeydown = event => { if (event.key === 'ArrowDown') { event.preventDefault(); tiles.find(t => !t.hidden)?.focus(); } };
+    const empty = el('p', 'sc-sheet-empty', 'No matches. Clear the search to see everything.'); empty.hidden = true;
+    sheet.onkeydown = event => { if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); closeSheet(); } };
+    grid.append(...tiles); sheet.append(head, search, grid, empty, el('p', 'sc-sheet-hint', `Point at a picture to preview it on the stage. Click to use it. Esc keeps ${b.asset === 'Black' ? 'Black screen' : b.asset}.`));
+    requestAnimationFrame(() => (tiles.find(t => t.ariaSelected === 'true') ?? tiles[0])?.focus({ preventScroll: true })); return sheet;
+  }
+  function closeSheet(restoreFocus = true) {
+    const sheet = assetSheet; assetSheet = undefined; sheetHover = ''; draw();
+    if (restoreFocus && sheet) host.querySelector<HTMLElement>(`[data-editor-for="${sheet.beat}"] [data-action="change-${sheet.kind}"]`)?.focus();
+  }
+  /** Stage preview while the picker sheet is open. Copies state; the story is unchanged. */
+  function withSheetPreview(state: Illustration): Illustration {
+    const b = current(); if (!combined || !assetSheet || !sheetHover || !b || b.id !== assetSheet.beat) return state;
+    if (assetSheet.kind === 'background') return { ...state, background: { ...(state.background ?? b), asset: sheetHover }, characters: b.kind === 'background' ? new Map() : state.characters };
+    const characters = new Map(state.characters), actor = characters.get(b.speaker);
+    characters.set(b.speaker, { name: b.speaker, placement: actor?.placement ?? b.placement, from: actor?.from ?? b, asset: sheetHover }); return { ...state, characters };
+  }
+  function listChoice(values: readonly string[], value: string, title: string, icon: string, update: (value: string) => void) {
+    const list = el('div', 'sc-option-list'); list.role = 'radiogroup'; list.ariaLabel = title;
+    const buttons = values.map(v => { const button = action('', () => { if (v !== value) change(() => update(v), `${title}: ${v} · ${name()}`); }, false, `${slug(title)}-${slug(v)}`); button.role = 'radio'; button.ariaChecked = String(v === value); button.tabIndex = v === value ? 0 : -1; button.ariaLabel = v; button.append(beatIcon(icon), el('span', '', v)); return button; });
+    buttons.forEach((button, i) => button.onkeydown = event => { const step = ['ArrowDown', 'ArrowRight'].includes(event.key) ? 1 : ['ArrowUp', 'ArrowLeft'].includes(event.key) ? -1 : 0; if (!step) return; event.preventDefault(); buttons[(i + step + buttons.length) % buttons.length]!.click(); });
+    list.append(...buttons); return field(title, list);
+  }
+  function note(text: string) { return el('p', 'sr-explanation', text); }
+  function combinedFields(b: Beat): HTMLDivElement {
+    const form = el('div', 'sr-fields sc-fields'); form.dataset.editorFor = b.id; form.dataset.kind = b.kind;
+    const transition = () => field('Transition', segmented(['None', 'Dissolve', 'Fade'], b.transition, 'Transition', value => b.transition = value));
+    const who = () => personPicker(b, 'Character', [...characters], b.speaker, value => b.speaker = value);
+    if (b.kind === 'dialogue' || b.kind === 'narration') form.append(speakerPicker(b), prose(b), el('p', 'sc-writing-shortcut', `Shift+${mod}+Enter: next line · Enter: line break in this text`));
+    else if (b.kind === 'background') form.append(assetRow(b, 'background'), transition());
+    else if (b.kind === 'showCharacter') form.append(who(), assetRow(b, 'expression'), field('Position', segmented(['Left', 'Centre', 'Right'], b.placement, 'Position', value => b.placement = value)), transition());
+    else if (b.kind === 'changeAppearance') form.append(who(), assetRow(b, 'expression'), transition());
+    else if (b.kind === 'placement') form.append(who(), field('Position', segmented(['Left', 'Centre', 'Right'], b.placement, 'Position', value => b.placement = value)));
+    else if (b.kind === 'hideCharacter') form.append(who(), transition());
+    else if (b.kind === 'transition') form.append(transition(), note('Applies to the next visual change.'));
+    else if (b.kind === 'playMusic') form.append(listChoice(music, b.text || 'Night service', 'Music', 'playMusic', value => b.text = value), note('Loops until stopped or replaced. This sample does not play audio.'));
+    else if (b.kind === 'stopMusic') form.append(note('Stops the current music. This sample does not play audio.'));
+    else if (b.kind === 'playSfx') form.append(listChoice(sounds, b.asset, 'Sound effect', 'playSfx', value => b.asset = value), note('Plays once. This sample does not play audio.'));
+    else if (b.kind.endsWith('Screen')) form.append(field('Screen', segmented(['Help', 'Inventory'], b.asset === 'Neutral' ? 'Help' : b.asset, 'Screen', value => b.asset = value)), note(b.kind === 'callScreen' ? 'Opens the screen and waits for it to close before the next beat.' : b.kind === 'showScreen' ? 'Shows the screen while the story continues.' : 'Hides the screen while the story continues.'));
+    else if (b.kind === 'setVariable') { const row = el('div', 'sc-assign'); row.append(select(['has_ticket', 'trust'], b.text || 'has_ticket', 'Variable', value => b.text = value), el('span', 'sc-equals', '='), input(b.value, 'Variable value', value => b.value = value)); form.append(field('Set', row), note('Later conditions can test this value. Values are not evaluated in this mock.')); }
+    else if (b.kind === 'choice') {
+      b.options.forEach((option, i) => {
+        const block = el('fieldset', 'sr-option sc-option'); block.dataset.choiceIndex = String(i); block.append(el('legend', 'sc-visually-hidden', `Option ${i + 1}`));
+        const top = el('div', 'sc-option-top'); const text = input(option.text, `Option ${i + 1} text`, value => option.text = value); text.placeholder = 'What the player can choose';
+        const remove = action('', () => { change(() => b.options.splice(i, 1), `Remove option ${i + 1} from ${name(b.id)}`); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${Math.min(i, b.options.length - 1) + 1} text"]`); }, false, `remove-choice-${i}`);
+        remove.append(beatIcon('close')); remove.ariaLabel = `Remove option ${i + 1}`; remove.title = remove.ariaLabel; remove.disabled = b.options.length === 1; if (remove.disabled) remove.title = 'A choice menu needs at least one option.';
+        top.append(el('span', 'sc-option-number', String(i + 1)), text, remove);
+        const goes = el('div', 'sc-option-goes'); goes.append(destination(option.target, `Option ${i + 1} destination`, value => option.target = value), action(`Open ${scenes.find(s => s.id === option.target)?.name ?? 'destination'}`, () => go(option.target, true), false, `open-choice-${i}`), action('New scene…', () => createScene(s => option.target = s.id, i, option.text), false, `new-choice-${i}`));
+        const guard = input(option.guard, `Option ${i + 1} availability`, value => option.guard = value); guard.placeholder = 'Always available';
+        block.append(top, field('Goes to', goes), field('Only when', guard)); form.append(block);
+      });
+      form.append(action('+ Add option', () => { const index = b.options.length; change(() => b.options.push({ text: '', target: scenes.find(s => s.id !== sceneId)?.id ?? sceneId, guard: '' }), `Add option to ${name(b.id)}`); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${index + 1} text"]`); }, false, 'add-choice-option'), note('Conditions are not evaluated here. If no option is available, the story continues to the next beat.'));
+    }
+    else return fields(b, true);
+    return form;
+  }
+  function fields(b: Beat, plain = false): HTMLDivElement {
+    if (combined && !plain) return combinedFields(b);
     const form = el('div', 'sr-fields'); form.dataset.editorFor = b.id;
     if (b.kind === 'dialogue' || b.kind === 'narration') {
       form.append(labelled('Speaker', lineSpeaker(b)), prose(b));
@@ -345,7 +464,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       form.append(action('+ Add option', () => { const index = b.options.length; change(() => b.options.push({ text: '', target: scenes.find(s => s.id !== sceneId)?.id ?? sceneId, guard: '' }), `Add option to ${name(b.id)}`); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${index + 1} text"]`); }), el('p', 'sr-explanation', 'Leave availability empty for an unconditional choice. Conditions are not evaluated here. If no choices are available, the game continues to the next beat.'));
     } else if (b.kind === 'condition') {
       form.append(el('p', 'sr-explanation', 'The first branch whose test is true runs. This illustration does not evaluate tests.'));
-      for (const branch of b.branches) { const row = el('div', 'sr-branch-control'); row.dataset.branch = branch.id; if (branch.name !== 'Otherwise') row.append(labelled(`${branch.name} test`, input(branch.condition, `${name(b.id)} ${branch.name} condition`, value => branch.condition = value))); else row.append(el('strong', '', branch.name)); row.append(action(`${variant === 'stage-tracks' ? 'Show in tracks' : 'Open branch'}: ${branch.name}`, () => openBranch(b, branch), false, `open-branch-${branch.id}`)); if (branch.name.toLowerCase() === 'else if') row.append(action('Remove this Else if', () => removeBranch(b, branch))); form.append(row); }
+      for (const branch of b.branches) { const row = el('div', 'sr-branch-control'); row.dataset.branch = branch.id; if (combined) row.dataset.arm = String(armOf(branch)); if (branch.name !== 'Otherwise') row.append(labelled(`${branch.name} test`, input(branch.condition, `${name(b.id)} ${branch.name} condition`, value => branch.condition = value))); else row.append(el('strong', '', branch.name)); row.append(action(`${variant === 'stage-tracks' ? 'Show in tracks' : 'Open branch'}: ${branch.name}`, () => openBranch(b, branch), false, `open-branch-${branch.id}`)); if (branch.name.toLowerCase() === 'else if') row.append(action('Remove this Else if', () => removeBranch(b, branch))); form.append(row); }
     form.append(action('+ Add Else if', () => addElseIf(b)));
     } else if (b.kind === 'call' || b.kind === 'jump') {
       form.append(labelled('Destination scene', destination(b.target, 'Destination scene', value => b.target = value)), el('p', 'sr-explanation', b.kind === 'call' ? 'Returns to the next beat after the destination scene finishes.' : 'Leaves this scene and does not return.'), action(`Open ${scenes.find(s => s.id === b.target)?.name ?? 'destination'}`, () => go(b.target, true), false, 'open-destination'));
@@ -426,13 +545,15 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   }
   function effects() {
     const section = el('section', 'sr-effects'); const state = stateAt(); section.append(el('h3', '', `In effect at ${number()}`));
-    const row = (text: string, beat: Beat, object: string) => {
-      const line = el('div', 'sr-effect-row'); const link = action(`${text} · Edit ${number(beat.id)}`, () => selectBeat(beat.id, true), false, `effect-owner-${beat.id}`); link.replaceChildren(el('span', '', text), el('span', 'sr-edit-link', `Edit ${number(beat.id)}`)); line.append(link);
+    const row = (text: string, beat: Beat, object: string, thumb?: HTMLElement) => {
+      const line = el('div', 'sr-effect-row'); const link = action(`${text} · Edit ${number(beat.id)}`, () => selectBeat(beat.id, true), false, `effect-owner-${beat.id}`); link.replaceChildren(el('span', '', text), el('span', 'sr-edit-link', `Edit ${number(beat.id)}`)); if (combined && thumb) link.prepend(thumb); line.append(link);
       line.dataset.effectObject = object; section.append(line);
     };
-    if (state.background) row(`Background · ${state.background.asset}`, state.background, 'background');
-    for (const actor of state.characters.values()) row(`${actor.name} · ${actor.asset}, ${actor.placement}`, actor.from, actor.name);
-    if (state.music) row(`Music · ${state.music.text || 'Night service'}`, state.music, 'music');
+    const backdrop = (asset: string) => { const node = el('span', 'sc-thumb sc-thumb-mini'); node.ariaHidden = 'true'; if (artBackgrounds[asset]) node.style.backgroundImage = `url("${artBackgrounds[asset]}")`; else node.classList.add('sc-thumb-black'); return node; };
+    const tune = () => { const node = el('span', 'sc-thumb sc-thumb-mini sc-thumb-icon'); node.append(beatIcon('music')); return node; };
+    if (state.background) row(combined ? state.background.asset === 'Black' ? 'Black screen' : state.background.asset : `Background · ${state.background.asset}`, state.background, 'background', combined ? backdrop(state.background.asset) : undefined);
+    for (const actor of state.characters.values()) row(`${actor.name} · ${actor.asset}, ${actor.placement}`, actor.from, actor.name, combined ? avatar(actor.name, actor.asset) : undefined);
+    if (state.music) row(combined ? state.music.text || 'Night service' : `Music · ${state.music.text || 'Night service'}`, state.music, 'music', combined ? tune() : undefined);
     if (!state.background && !state.characters.size && !state.music) section.append(el('p', '', 'No scene-local media yet.'));
     if (state.unknown.length) section.append(el('p', 'sr-unknown-note', `Partial illustration after ${state.unknown.map(b => `${number(b.id)} ${label(b.kind)}`).join(', ')}. Conditions, Calls and protected source are not evaluated.`)); return section;
   }
@@ -453,10 +574,13 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     }
     const heading = el('div', 'sr-inspector-heading'); const type = typeSelector(b); if (type instanceof HTMLSelectElement) heading.append(el('strong', '', `${number(b.id)} ·`)); heading.append(type);
     if (['dialogue', 'narration'].includes(b.kind) && variant !== 'cue-sheet') { const next = action(combined ? '+ Next line' : `+ Next ${nextSpeaker(b.id)} line`, () => { const t = locate(scene(), b.id)!; insert(combined && b.kind === 'narration' ? 'narration' : 'dialogue', t.body, t.trail, t.index + 1, nextSpeaker(b.id)); }, !combined, 'next-dialogue'); if (combined) next.classList.add('sc-next-line'); next.title = `Add ${combined && b.kind === 'narration' ? 'narration' : 'dialogue'} after ${name(b.id)} (Shift+${mod}+Enter)`; heading.append(next); }
-    heading.append(rowMenu(b)); panel.append(heading);
-    if ((ancestry(scene(), b.id) ?? []).length) panel.append(el('p', 'sr-editor-location', locate(scene(), b.id)!.trail.join(' › ')));
+    heading.append(rowMenu(b)); if (combined) heading.prepend(beatIcon(b.kind)); panel.append(heading);
+    if (combined && (ancestry(scene(), b.id) ?? []).length) { const where = el('p', 'sr-editor-location'); where.append(scene().name); for (const branch of chainOf(b.id)) { const part = el('span', 'sc-crumb', branchLabel(branch)); part.dataset.arm = String(armOf(branch)); part.dataset.branchLabel = branch.id; where.append(' › ', part); } panel.append(where); }
+    else if ((ancestry(scene(), b.id) ?? []).length) panel.append(el('p', 'sr-editor-location', locate(scene(), b.id)!.trail.join(' › ')));
     if (variant === 'cue-sheet') { if (mediaKinds.includes(b.kind)) panel.append(fields(b)); else panel.append(effects()); }
     else { if (!textInGame || !['dialogue', 'narration'].includes(b.kind)) panel.append(fields(b)); else panel.append(el('p', 'sr-editor-hint', `Type in the game's text box. Shift+${mod}+Enter adds the next dialogue.`)); if (!focused && !emptyScene) panel.append(effects()); }
+    if (combined && assetSheet && assetSheet.beat !== b.id) assetSheet = undefined;
+    if (combined && assetSheet) { panel.classList.add('sc-has-sheet'); panel.append(assetPicker(b)); }
     return panel;
   }
   const art: Record<string, Record<string, string>> = { Mara: { Neutral: mara, Concerned: maraConcerned }, Eli: { Neutral: eli, Concerned: eliConcerned } };
@@ -470,7 +594,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       }
       button.ariaLabel = `Select ${actor.name} on stage`; button.title = `${actor.name} · ${actor.asset} · ${actor.placement}. Select to inspect its contributing beat.`; button.dataset.objectSelected = String(stageObject === actor.name);
       button.style.left = actor.placement === 'Left' ? '25%' : actor.placement === 'Right' ? '75%' : '52%';
-      const image = button.querySelector('img')!; image.src = art[actor.name]?.[actor.asset] ?? mara; image.alt = `${actor.name}, ${actor.asset.toLowerCase()}`;
+      const image = button.querySelector('img')!; image.src = combined ? sprite(actor.name, actor.asset) : art[actor.name]?.[actor.asset] ?? mara; image.alt = `${actor.name}, ${actor.asset.toLowerCase()}`;
       button.querySelector('span')!.textContent = `${actor.name} · ${actor.asset}`;
     }
   }
@@ -479,7 +603,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const top = el('div', 'sr-preview-title'); top.append(el('strong', '', 'Game window'), el('span', 'sr-stage-resolution', '1920 × 1080'), action(stageExpanded ? `Show ${variants.find(v => v.id === variant)!.title.toLowerCase()}` : 'Enlarge stage', () => { stageExpanded = !stageExpanded; draw(); }, false, 'enlarge-stage')); wrap.append(top);
     const slot = el('div', 'sr-stage-slot'); const stage = el('div', 'sr-stage'); stage.dataset.stage = '';
     const bgButton = action('', () => { stageObject = 'background'; stageExpanded = false; draw(); host.querySelector<HTMLElement>('[data-action="edit-stage-owner"]')?.focus(); }, false, 'stage-background'); bgButton.className = 'sr-backdrop-control'; bgButton.ariaLabel = 'Select background on stage';
-    const image = el('img', 'sr-backdrop'); image.src = platform; image.alt = 'Fictional rain-soaked tram platform'; bgButton.append(image); stage.append(bgButton);
+    const image = el('img', 'sr-backdrop'); image.src = combined ? artBackgrounds['Rainy platform']! : platform; image.alt = 'Fictional rain-soaked tram platform'; bgButton.append(image); stage.append(bgButton);
     const placeholder = el('div', 'sr-stage-empty'); placeholder.append(el('span', '', 'No background yet')); if ((variant === 'stage-tracks' || combined) || scene().beats.some(b => b.kind !== 'return')) placeholder.append(action('Add background', () => stageInsert('background'), false, 'empty-stage-background')); stage.append(placeholder);
     const b = current(); const editable = variant === 'shot-reel' && !hideSaybox && innerWidth >= 900 && b && ['dialogue', 'narration'].includes(b.kind);
     const caption = el('div', 'sr-saybox'); caption.dataset.saybox = '';
@@ -513,13 +637,13 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   }
   function refresh() {
     syncSelectionChrome();
-    const state = previewState(); const line = previewLine();
+    const state = withSheetPreview(previewState()); const line = previewLine();
     for (const stage of host.querySelectorAll<HTMLElement>('[data-stage]')) {
       const choices = stage.querySelector<HTMLElement>('.sr-game-choices'), b = current();
       if (b?.kind !== 'choice') choices?.remove(); else if (!choices || choices.dataset.choiceOwner !== b.id || choices.children.length !== b.options.length) { const menu = gameChoices(b), scroll = choices?.scrollTop ?? 0; if (choices) choices.replaceWith(menu); else stage.append(menu); menu.scrollTop = scroll; }
-      stage.classList.toggle('sr-dawn', state.background?.asset === 'Station at dawn'); stage.classList.toggle('sr-no-background', !state.background); stage.querySelector<HTMLElement>('.sr-stage-empty')!.hidden = !!state.background;
+      stage.classList.toggle('sr-dawn', !combined && state.background?.asset === 'Station at dawn'); if (combined) { const backdrop = stage.querySelector<HTMLImageElement>('.sr-backdrop')!, asset = state.background?.asset ?? 'Rainy platform', src = artBackgrounds[asset]; backdrop.hidden = !src; if (src && backdrop.getAttribute('src') !== src) backdrop.src = src; backdrop.alt = src ? `Fictional ${asset.toLowerCase()}` : 'Black screen'; const previewing = assetSheet && sheetHover && sheetHover !== current()?.asset ? sheetHover : ''; let tag = stage.querySelector<HTMLElement>('.sc-preview-tag'); if (previewing) { if (!tag) { tag = el('span', 'sc-preview-tag'); stage.append(tag); } tag.textContent = `Previewing ${previewing === 'Black' ? 'Black screen' : previewing} · click to use it`; } else tag?.remove(); } stage.classList.toggle('sr-no-background', !state.background); stage.querySelector<HTMLElement>('.sr-stage-empty')!.hidden = !!state.background;
       stageCharacters(stage, state); const caption = stage.querySelector<HTMLElement>('.sr-saybox')!; caption.hidden = !line || hideSaybox;
-      const paragraph = caption.querySelector('p'); if (paragraph) paragraph.textContent = line?.text ?? ''; const speaker = caption.querySelector('strong'); if (speaker) speaker.textContent = line?.kind === 'dialogue' ? line.speaker : '';
+      const paragraph = caption.querySelector('p'); if (paragraph) paragraph.textContent = line?.text ?? ''; const speaker = caption.querySelector('strong'); if (speaker) speaker.textContent = line?.kind === 'dialogue' ? line.speaker : ''; if (combined && line?.kind === 'dialogue') caption.style.setProperty('--sc-speaker', characterColour(line.speaker));
     }
     for (const item of host.querySelectorAll<HTMLElement>('[data-summary]')) { const b = flatten(scene().beats).find(b => b.id === item.dataset.summary); if (b) { item.textContent = brief(b); const control = item.closest<HTMLElement>('[data-reel-beat],.sr-cue'); if (control) control.ariaLabel = `${control.classList.contains('sr-cue') ? 'Select ' : ''}${contextName(b.id)}: ${brief(b)}`; } }
     for (const item of host.querySelectorAll<HTMLElement>('[data-stage-choice]')) { const option = current()?.options[Number(item.dataset.stageChoice)]; if (option) { item.textContent = option.text || 'New choice'; item.ariaLabel = `Edit option ${Number((item as HTMLElement).dataset.stageChoice) + 1}: ${option.text || 'New choice'}`; } }
@@ -529,7 +653,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     for (const note of host.querySelectorAll<HTMLElement>('.sr-stage-status')) { const title = manual ? `Previewing ${manualOwner ? number(manualOwner.id) : ''} ${manualBranch?.name ?? 'branch'} · editing ${number()}` : `${number()} · ${state.unknown.length ? 'Partial illustration' : 'Sample illustration'}${routes && !combined ? ' · via ' + routes : ''}`; if (combined && !state.background && !state.characters.size && !state.line) { note.textContent = ''; note.title = note.ariaLabel = ''; continue; } note.textContent = innerWidth < 900 ? `${number()}${manual ? ' · Preview' : state.unknown.length ? ' · Partial' : ''}` : title; note.title = title; note.ariaLabel = title; }
     for (const effect of host.querySelectorAll('.sr-effects')) effect.replaceWith(effects());
     for (const owner of flatten(scene().beats)) for (const branch of owner.branches) {
-      for (const button of host.querySelectorAll<HTMLElement>(`[data-action="open-branch-${branch.id}"]`)) { const prefix = button.closest('.sr-branch-control') ? (variant === 'stage-tracks' ? 'Show in tracks: ' : 'Open branch: ') : button.closest('.sr-reel-target') ? 'Open ' : ''; const fullName = `${prefix}${branch.name} ${branch.condition}${button.closest('.sr-reel-target') ? ' · ' + count(branch.beats.length, 'beat') : ''}`.trim(); if (button.closest('.sr-branch-control')) { button.textContent = variant === 'stage-tracks' ? 'Show in tracks' : combined ? `${visibleBranches.get(owner.id) === branch.id ? 'Opened' : 'Open'} ${branch.name}` : 'Open branch'; if (combined) button.ariaPressed = String(visibleBranches.get(owner.id) === branch.id); button.ariaLabel = button.title = fullName; } else nameControl(button, fullName); if (button.closest('.sr-track-band')) button.title = `Show ${branch.name} ${branch.condition} in tracks`.trim(); }
+      for (const button of host.querySelectorAll<HTMLElement>(`[data-action="open-branch-${branch.id}"]`)) { const prefix = button.closest('.sr-branch-control') ? (variant === 'stage-tracks' ? 'Show in tracks: ' : 'Open branch: ') : button.closest('.sr-reel-target') ? 'Open ' : ''; const fullName = `${prefix}${branch.name} ${branch.condition}${button.closest('.sr-reel-target') ? ' · ' + count(branch.beats.length, 'beat') : ''}`.trim(); if (button.closest('.sr-branch-control')) { button.textContent = variant === 'stage-tracks' ? 'Show in tracks' : combined ? `${visibleBranches.get(owner.id) === branch.id ? 'Opened' : 'Open'} ${branch.name}` : 'Open branch'; if (combined) button.ariaPressed = String(visibleBranches.get(owner.id) === branch.id); button.ariaLabel = button.title = fullName; } else if (!button.closest('.sc-branch-switch')) nameControl(button, fullName); if (button.closest('.sr-track-band')) button.title = `Show ${branch.name} ${branch.condition} in tracks`.trim(); }
       const option = host.querySelector<HTMLOptionElement>(`.sr-preview-route option[value="${branch.id}"]`); if (option) option.textContent = `${number(owner.id)} ${branch.name} ${branch.condition}`.trim();
     }
     const selectedBeat = current();
@@ -625,7 +749,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     for (const selector of ['.sr-tracks-scroll', '.sc-reel>.sr-reel-strip']) {
       const area = host.querySelector<HTMLElement>(selector); if (!area) continue;
       area.style.setProperty('--strip-end', '0px');
-      const nodes = [...area.querySelectorAll<HTMLElement>('.sr-track-column,.sc-reel-column,.sc-route-marker')];
+      const nodes = [...area.querySelectorAll<HTMLElement>('.sr-track-column,.sc-reel-column,.sc-track-mark')];
       const last = nodes.at(-1); if (!last) continue;
       const rect = area.getBoundingClientRect(), labels = area.querySelector<HTMLElement>('.sr-track-labels')?.getBoundingClientRect().width ?? 0;
       const end = last.getBoundingClientRect().right - rect.left + area.scrollLeft;
@@ -660,7 +784,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       if (combined && !focused && ['.sr-tracks-scroll', '.sr-reel-strip'].includes(scrollSelector!)) {
         const now = area.scrollLeft, itemRect = item.getBoundingClientRect();
         const min = now + itemRect.right + (right - r.right) - bounds.right, max = now + itemRect.left - bounds.left;
-        const starts = [...area.querySelectorAll<HTMLElement>('.sr-track-column,.sc-reel-column,.sc-route-marker')].map(node => now + node.getBoundingClientRect().left - bounds.left);
+        const starts = [...area.querySelectorAll<HTMLElement>('.sr-track-column,.sc-reel-column,.sc-track-mark')].map(node => now + node.getBoundingClientRect().left - bounds.left);
         const candidates = starts.filter(value => value >= Math.max(0, min) - 1 && value <= Math.min(max, area.scrollWidth - area.clientWidth) + 1);
         if (candidates.length) area.scrollLeft = candidates.sort((a, b) => Math.abs(a - now) - Math.abs(b - now))[0]!;
       }
@@ -670,7 +794,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   }
   function revealActiveBranch() {
     const strip = host.querySelector<HTMLElement>('.sc-condition-groups');
-    const active = strip?.querySelector<HTMLElement>(`[data-branch-label="${reelBranch}"]`);
+    const active = strip?.querySelector<HTMLElement>(`[data-branch-segment="${reelBranch}"]`);
     if (!strip || !active) return;
     const r = active.getBoundingClientRect(), bounds = strip.getBoundingClientRect();
     if (r.left < bounds.left) strip.scrollLeft -= bounds.left - r.left;
@@ -700,7 +824,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   }
   function horizontalWheel(scroller: HTMLElement) { scroller.addEventListener('wheel', event => { if (!focused && Math.abs(event.deltaY) > Math.abs(event.deltaX) && scroller.scrollWidth > scroller.clientWidth) { const before = scroller.scrollLeft; scroller.scrollLeft += event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? scroller.clientWidth : 1); if (scroller.scrollLeft !== before) event.preventDefault(); } }, { passive: false }); }
   function shotReel(parent: HTMLElement) { const layout = el('div', 'sr-reel-layout'); const top = el('div', 'sr-shot-workspace'); top.dataset.prose = String(['dialogue', 'narration'].includes(current()?.kind ?? '')); if (!focused) top.append(preview()); top.append(inspector(!focused && !hideSaybox && innerWidth >= 900)); layout.append(top, orderedReel()); parent.append(layout); }
-  const wordsOnly = () => focused ? combined || innerWidth <= 1200 : innerWidth < 900 && !allTracks;
+  const wordsOnly = () => focused ? innerWidth <= 1200 : innerWidth < 900 && !allTracks;
   function trackText(b: Beat, track: number) {
     const summary = combined && (b.kind.endsWith('Screen') || b.kind === 'return') ? brief(b) : `${label(b.kind)} · ${brief(b)}`;
     if (track === 0) return number(b.id);
@@ -752,32 +876,83 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const parent = ancestry(scene(), owner.id)?.at(-1);
     return parent ? continuation(parent.beat) : undefined;
   }
+  /** One colour per branch, in scene order, cycling through four. */
+  function armOf(branch: Branch) { const all = flatten(scene().beats).flatMap(b => b.branches); return (Math.max(0, all.indexOf(branch)) % 4) + 1; }
+  function segmentLabel(owner: Beat, branch: Branch) { return branch === owner.branches[0] ? 'true' : branch.name === 'Otherwise' ? 'otherwise' : branch.condition || 'else if'; }
   function conditionStrip() {
-    const strip = el('nav', 'sc-conditions'); strip.ariaLabel = 'Conditions and branches';
-    strip.append(el('strong', 'sc-conditions-title', 'Conditions'));
+    const strip = el('nav', 'sc-conditions'); strip.ariaLabel = 'Branch path';
+    strip.append(el('strong', 'sc-conditions-title', 'Branch path'));
     const groups = el('div', 'sc-condition-groups');
     const route = columns(scene(), visibleBranches);
-    for (const { beat: owner, depth } of route.filter(c => c.beat.kind === 'condition')) {
+    for (const { beat: owner } of route.filter(c => c.beat.kind === 'condition')) {
+      if (groups.children.length) { const arrow = el('span', 'sc-path-arrow', '›'); arrow.ariaHidden = 'true'; groups.append(arrow); }
       const group = el('div', 'sc-condition-group'); group.dataset.conditionOwner = owner.id;
-      const edit = action(`${depth ? '↳ ' : ''}${number(owner.id)}`, () => editBeat(owner.id), false, `edit-condition-${owner.id}`);
-      edit.ariaLabel = `Edit condition ${number(owner.id)}`; edit.title = `${name(owner.id)} · ${locate(scene(), owner.id)!.trail.join(' › ')}`; group.append(edit);
+      const edit = action(number(owner.id), () => editBeat(owner.id), false, `edit-condition-${owner.id}`); edit.classList.add('sc-condition-ref');
+      edit.ariaLabel = `Edit condition ${number(owner.id)}`; edit.title = `${name(owner.id)} · ${locate(scene(), owner.id)!.trail.join(' › ')}`;
+      const test = el('span', 'sc-condition-test'); test.dataset.conditionTest = owner.id;
+      const choices = el('div', 'sc-branch-switch'); choices.role = 'group'; choices.ariaLabel = `Branches of condition ${number(owner.id)}`;
       for (const branch of owner.branches) {
-        const button = action(branchLabel(branch), () => openBranch(owner, branch), false, `open-branch-${branch.id}`);
+        const button = action(segmentLabel(owner, branch), () => openBranch(owner, branch), false, `open-branch-${branch.id}`);
         button.onkeydown = event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openBranch(owner, branch); focusRequest++; host.querySelector<HTMLElement>(`.sc-conditions [data-action="open-branch-${branch.id}"]`)?.focus({ preventScroll: true }); } };
-        button.dataset.branchLabel = branch.id; button.ariaPressed = String(visibleBranches.get(owner.id) === branch.id); button.title = `Edit ${branchLabel(branch)} in condition ${number(owner.id)}`; group.append(button);
+        button.dataset.branchSegment = branch.id; button.dataset.arm = String(armOf(branch)); button.ariaPressed = String(visibleBranches.get(owner.id) === branch.id);
+        button.ariaLabel = button.title = `Show ${branchLabel(branch)}`; choices.append(button);
       }
-      const add = action(`+ After ${number(owner.id)}`, () => afterCondition(owner), false, `after-condition-${owner.id}`);
-      add.title = `Add a beat after condition ${number(owner.id)} and all its branches`; group.append(add);
-      groups.append(group);
+      group.append(edit, test, choices); groups.append(group);
     }
-    if (!groups.children.length) groups.append(action('+ Add condition', () => { const t = target(); insert('condition', t.body, t.trail, t.index); }, false, 'add-condition'));
+    if (!groups.children.length) groups.append(el('span', 'sc-conditions-empty', 'No conditions in this scene.'), action('+ Add condition', () => { const t = target(); insert('condition', t.body, t.trail, t.index); }, false, 'add-condition'));
     const earlier = action('‹', () => { groups.scrollLeft -= Math.max(120, groups.clientWidth * .7); }, false, 'conditions-earlier'); earlier.ariaLabel = earlier.title = 'Earlier condition branches';
     const later = action('›', () => { groups.scrollLeft += Math.max(120, groups.clientWidth * .7); }, false, 'conditions-later'); later.ariaLabel = later.title = 'More condition branches';
     const updateEdges = () => { const overflow = groups.scrollWidth > groups.clientWidth + 1; earlier.hidden = later.hidden = !overflow; earlier.disabled = groups.scrollLeft < 1; later.disabled = groups.scrollLeft + groups.clientWidth >= groups.scrollWidth - 1; };
     earlier.classList.add('sc-scroll-branches'); later.classList.add('sc-scroll-branches'); groups.onscroll = updateEdges;
     strip.append(earlier, groups, later); requestAnimationFrame(updateEdges); return strip;
   }
+  function chainOf(id: string) { return (ancestry(scene(), id) ?? []).map(p => p.branch); }
+  function thenText(owner: Beat, branch: Branch) {
+    const last = branch.beats.at(-1), next = continuation(owner);
+    if (last && ['jump', 'return'].includes(last.kind)) return last.kind === 'jump' ? 'jumps away' : 'returns';
+    return next ? `then ${number(next.id)} →` : 'then the scene ends';
+  }
+  /** Route rows above each Tracks column: one coloured line per open branch level. */
+  function rail(chain: Branch[], label?: { branch: Branch; end?: string }) {
+    const node = el('div', 'sc-rail'); node.ariaHidden = 'true';
+    const levels = chain.length > 2 ? [chain[0]!, chain.at(-1)!] : chain;
+    for (let r = 0; r < 2; r++) { const row = el('span', 'sc-rail-row'); const branch = levels[r]; if (branch) { row.dataset.arm = String(armOf(branch)); row.classList.add('sc-rail-on'); } node.append(row); }
+    if (label) {
+      const row = node.children[Math.min(chain.length, 2) - 1] as HTMLElement;
+      const text = el('span', label.end !== undefined ? 'sc-rail-end' : 'sc-rail-label', label.end ?? branchLabel(label.branch));
+      if (label.end === undefined) { text.dataset.branchLabel = label.branch.id; if (!label.branch.beats.length) text.dataset.empty = 'true'; } row.append(text);
+    }
+    return node;
+  }
+  function markTrackBranches(grid: HTMLElement) {
+    const route = columns(scene(), visibleBranches);
+    for (const column of route) {
+      const wrapper = grid.querySelector<HTMLElement>(`[data-column="${column.beat.id}"]`); if (!wrapper) continue;
+      const chain = chainOf(column.beat.id); wrapper.prepend(rail(chain)); wrapper.dataset.depth = String(column.depth);
+      if (chain.length) wrapper.dataset.arm = String(armOf(chain.at(-1)!));
+    }
+    for (const [i, column] of route.entries()) {
+      const owner = column.beat, branch = owner.branches.find(b => b.id === visibleBranches.get(owner.id)); if (!branch) continue;
+      const ownerWrap = grid.querySelector<HTMLElement>(`[data-column="${owner.id}"]`)!; ownerWrap.querySelector('.sr-track-insert')?.remove();
+      let last = i; while (route[last + 1] && route[last + 1]!.depth > column.depth) last++;
+      const end = grid.querySelector<HTMLElement>(`[data-column="${route[last]!.beat.id}"]`)!;
+      const place = locate(scene(), owner.id)!, parentChain = chainOf(owner.id), chain = [...parentChain, branch], path = [...place.trail, branchLabel(branch)];
+      const mark = (kind: string, arms: Branch[]) => { const node = el('div', `sc-track-mark sc-track-${kind}`); node.dataset.branchBoundary = kind; node.dataset.branchOwner = owner.id; if (arms.length) node.dataset.arm = String(armOf(arms.at(-1)!)); return node; };
+      const entry = mark('entry', chain); entry.append(rail(chain, { branch }));
+      const first = action(focused ? '+ First beat' : '+', () => picker(branch.beats, path, 0), false, `inside-${branch.id}`); first.ariaLabel = first.title = `Add the first beat in ${branchLabel(branch)}`; entry.append(first);
+      const exit = mark('exit', chain); exit.append(rail(chain, { branch, end: thenText(owner, branch) }));
+      const append = action(focused ? '+ Last beat' : '+', () => picker(branch.beats, path, defaultIndex(branch.beats)), false, `append-${branch.id}`); append.ariaLabel = append.title = `Add the last beat in ${branchLabel(branch)}${ending(branch.beats) >= 0 ? ', before its ending' : ''}`; exit.append(append);
+      const nodes = [exit];
+      if (!(parentChain.length && place.index === place.body.length - 1)) {
+        const after = mark('after', parentChain); after.append(rail(parentChain));
+        const add = action(focused ? `+ After ${number(owner.id)}` : '+', () => afterCondition(owner), false, `boundary-after-${owner.id}`); add.ariaLabel = add.title = `Add after condition ${number(owner.id)}, outside its branches`; after.append(add); nodes.push(after);
+      }
+      end.after(...nodes); ownerWrap.after(entry);
+    }
+  }
   function refreshCombinedContext() {
+    for (const node of host.querySelectorAll<HTMLElement>('[data-condition-test]')) { const owner = flatten(scene().beats).find(b => b.id === node.dataset.conditionTest), test = owner?.branches[0]?.condition; node.textContent = test || 'Add a test'; node.title = test ? `If ${test}` : 'This condition has no test yet'; node.classList.toggle('sc-missing', !test); }
+    for (const node of host.querySelectorAll<HTMLElement>('[data-branch-segment]')) { const owner = flatten(scene().beats).find(b => b.branches.some(x => x.id === node.dataset.branchSegment)), branch = owner?.branches.find(x => x.id === node.dataset.branchSegment); if (owner && branch) { node.textContent = segmentLabel(owner, branch); node.ariaLabel = node.title = `Show ${branchLabel(branch)}`; } }
     for (const node of host.querySelectorAll<HTMLElement>('[data-branch-label]')) {
       const branch = flatten(scene().beats).flatMap(b => b.branches).find(b => b.id === node.dataset.branchLabel);
       if (branch) { node.textContent = branchLabel(branch); node.title = branchLabel(branch); if (node instanceof HTMLButtonElement) node.ariaLabel = branchLabel(branch); }
@@ -802,42 +977,6 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     if (bottomMode === 'tracks' && !focused) bar.append(el('span', 'sc-track-legend', 'Shaded: carried forward · Dashed: state may differ'));
     return bar;
   }
-  function routeMarker(owner: Beat, branch: Branch, exit = false) {
-    const marker = el('div', `sc-route-marker${exit ? ' sc-route-exit' : ''}`); marker.dataset.branchBoundary = exit ? 'exit' : 'entry'; marker.dataset.branchOwner = owner.id; marker.dataset.depth = String((ancestry(scene(), owner.id)?.length ?? 0) + 1);
-    if (!exit) {
-      marker.append(el('span', 'sc-boundary-label', `Inside ${number(owner.id)}`));
-      const label = el('strong', '', branchLabel(branch)); label.dataset.branchLabel = branch.id; marker.append(label);
-      const next = continuation(owner), last = branch.beats.at(-1); const leaves = last && ['jump', 'return'].includes(last.kind);
-      const nestedExits = flatten(branch.beats).filter(b => ['jump', 'return'].includes(b.kind));
-      const exceptions = nestedExits.map(b => `${number(b.id)} ${b.kind === 'jump' ? 'jumps away' : 'returns'}`).join(' or ');
-      if (leaves || next) marker.append(el('span', 'sc-entry-continuation', leaves ? `${last.kind === 'jump' ? 'Jump' : 'Return'} leaves this path` : `Then ${number(next!.id)}${exceptions ? ' unless ' + exceptions : ''}`));
-      const path = [...locate(scene(), owner.id)!.trail, branchLabel(branch)];
-      const first = action('+ First beat', () => picker(branch.beats, path, 0), false, `inside-${branch.id}`); first.title = `Insert the first beat in ${branchLabel(branch)}`; marker.append(first);
-    } else {
-      const last = branch.beats.at(-1), next = continuation(owner);
-      const leaves = last && ['jump', 'return'].includes(last.kind);
-      marker.append(el('span', 'sc-boundary-label', `End of ${number(owner.id)}`));
-      if (leaves || !next) marker.append(el('strong', '', leaves ? last.kind === 'jump' ? 'Jump leaves this path' : 'Return leaves this path' : 'Continue after branch'));
-      if (next) { const jump = action(leaves ? `After ${number(owner.id)}: ${number(next.id)}` : `Continue at ${number(next.id)}`, () => editBeat(next.id), false, `continue-${owner.id}`); jump.title = leaves ? 'Inspect the beat after this condition. This branch does not run it.' : `Edit ${name(next.id)}`; marker.append(jump); }
-      const append = action('+ Last beat', () => picker(branch.beats, [...locate(scene(), owner.id)!.trail, branchLabel(branch)], defaultIndex(branch.beats)), false, `append-${branch.id}`); append.title = `Add at the end of ${branchLabel(branch)}, before any Jump or Return`; marker.append(append);
-      const after = action(`+ After ${number(owner.id)}`, () => afterCondition(owner), false, `boundary-after-${owner.id}`); after.title = `Add outside condition ${number(owner.id)}, after all its branches`; marker.append(after);
-    }
-    return marker;
-  }
-  function markBranches(container: HTMLElement, selector: string) {
-    const route = columns(scene(), visibleBranches);
-    for (const column of route) {
-      const node = container.querySelector<HTMLElement>(`${selector}[data-column="${column.beat.id}"]`);
-      if (node) { node.dataset.depth = String(column.depth); node.style.setProperty('--branch-depth', String(column.depth)); }
-    }
-    for (const [i, column] of route.entries()) {
-      const owner = column.beat, branch = owner.branches.find(b => b.id === visibleBranches.get(owner.id)); if (!branch) continue;
-      const start = container.querySelector<HTMLElement>(`[data-column="${owner.id}"]`)!;
-      let last = i; while (route[last + 1] && route[last + 1]!.depth > column.depth) last++;
-      const end = container.querySelector<HTMLElement>(`[data-column="${route[last]!.beat.id}"]`)!;
-      end.after(routeMarker(owner, branch, true)); start.after(routeMarker(owner, branch));
-    }
-  }
   function combinedReel() {
     const reel = el('section', 'sr-reel sc-reel'); reel.ariaLabel = 'Ordered beat reel';
     const strip = el('div', 'sr-reel-strip'); strip.role = 'group'; strip.ariaLabel = 'Scene beats and expanded branches';
@@ -850,7 +989,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       if (!isEnding(b.kind) && !(b.kind === 'condition' && visibleBranches.has(b.id))) { const add = gap(body, trail, index + 1); add.tabIndex = b.id === selected ? 0 : -1; column.append(add); }
       strip.append(column);
     });
-    markBranches(strip, '.sc-reel-column'); horizontalWheel(strip); reel.append(strip); return reel;
+    markTrackBranches(strip); horizontalWheel(strip); reel.append(strip); return reel;
   }
   function combinedStory(parent: HTMLElement) {
     // Reuse the reference's stage, property editor and track renderer.
@@ -860,7 +999,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const tracks = original.querySelector<HTMLElement>('.sr-tracks')!;
     tracks.querySelector('.sr-track-heading')!.remove(); tracks.classList.add('sc-tracks');
     for (const column of tracks.querySelectorAll<HTMLElement>('.sr-track-column')) column.dataset.column = column.querySelector<HTMLElement>('[data-track-beat]')!.dataset.trackBeat;
-    markBranches(tracks.querySelector<HTMLElement>('.sr-track-grid')!, '.sr-track-column');
+    markTrackBranches(tracks.querySelector<HTMLElement>('.sr-track-grid')!);
     const layout = el('div', 'sc-combined-layout sr-tracks-layout');
     const conditions = conditionStrip(), toolbar = bottomToolbar();
     const panel = el('div', 'sc-bottom-panel'); panel.append(toolbar, bottomMode === 'tracks' ? tracks : combinedReel());
@@ -868,32 +1007,30 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     else { const bottom = el('div', 'sc-bottom'); bottom.append(conditions, panel); layout.append(top, bottom); }
     parent.append(layout);
   }
+  /** Add a beat: one click or Enter adds the highlighted beat. Escape or Close cancels. */
   function combinedPicker(body: Beat[], trail: string[], requested: number, replaceEmpty?: Beat) {
     const index = Math.min(requested, defaultIndex(body));
     const dialog = modal('Add a beat', 'beat-picker'); dialog.classList.add('sr-picker-dialog', 'sc-picker');
-    const destination = el('div', 'sc-picker-target'); const targetLabel = el('span', 'sr-insertion-target'); destination.append(el('strong', '', 'Destination'), targetLabel); dialog.append(destination);
-    dialog.querySelector('[data-action=close-dialog]')?.remove();
-    const query = el('input'); query.type = 'search'; query.placeholder = 'Search beats…'; query.ariaLabel = 'Find a beat'; query.dataset.pickerSearch = '';
-    const layout = el('div', 'sc-picker-body'), results = el('div', 'sr-picker-results'), details = el('aside', 'sc-picker-details');
-    results.id = `sr-results-${++elementId}`; results.role = 'listbox'; results.ariaLabel = 'Beat types';
+    const close = dialog.querySelector<HTMLElement>('[data-action=close-dialog]'); if (close) { close.replaceChildren(beatIcon('close')); close.ariaLabel = close.title = 'Close without adding'; }
+    const destination = el('p', 'sc-picker-target'); const targetLabel = el('span', 'sr-insertion-target'); destination.append(targetLabel); dialog.append(destination);
+    const query = el('input'); query.type = 'search'; query.placeholder = 'Search beats'; query.ariaLabel = 'Find a beat'; query.dataset.pickerSearch = '';
+    const search = el('label', 'sc-picker-search'); search.append(beatIcon('search'), query);
+    const results = el('div', 'sr-picker-results'); results.id = `sr-results-${++elementId}`; results.role = 'listbox'; results.ariaLabel = 'Beat types';
     query.role = 'combobox'; query.setAttribute('aria-autocomplete', 'list'); query.setAttribute('aria-expanded', 'true'); query.setAttribute('aria-controls', results.id);
-    const descriptions: Record<string, string> = { dialogue: 'Write a spoken line and choose its speaker.', narration: 'Write story text without a speaker.', condition: 'Write an If test and alternative branches. The first matching branch runs, then the story continues after the condition.', choice: 'Offer choices that lead to scenes. If no options are available, continue to the next beat.', background: 'Set the background. This clears characters shown earlier.', showCharacter: 'Put a character on the stage.', hideCharacter: 'Remove a character from the stage.', changeAppearance: 'Change the expression or appearance of a character already shown.', placement: 'Set the position of a character already shown.', transition: 'Apply a transition to the visual change.', playMusic: 'Start a music track.', stopMusic: 'Stop the current music.', playSfx: 'Play a sound effect once.', call: 'Visit another scene, then return to the beat after this Call.', jump: 'Leave this path for another scene. A Jump does not return.', return: 'Return to the caller. If there is no caller, end the story.', setVariable: 'Set a story variable for later conditions.', showScreen: 'Show a screen while the story continues.', hideScreen: 'Hide a screen while the story continues.', callScreen: 'Open a screen and wait for it to finish.' };
+    const descriptions: Record<string, string> = { dialogue: 'A spoken line with a speaker.', narration: 'Story text with no speaker.', condition: 'Branches on a test, then the story continues.', choice: 'Options the player picks from.', background: 'Sets the scene and clears characters.', showCharacter: 'Puts a character on the stage.', hideCharacter: 'Takes a character off the stage.', changeAppearance: "Changes a shown character's expression.", placement: 'Moves a shown character.', transition: 'Animates the next visual change.', playMusic: 'Starts a music track.', stopMusic: 'Stops the current music.', playSfx: 'Plays a sound once.', call: 'Visits a scene, then comes back.', jump: 'Goes to a scene and does not return.', return: 'Returns to the caller or ends the story.', setVariable: 'Stores a value for later conditions.', showScreen: 'Shows a screen while the story continues.', hideScreen: 'Hides a screen while the story continues.', callScreen: 'Opens a screen and waits for it to close.' };
     const aliases: Record<string, string> = { condition: 'if else branch test', placement: 'position move', call: 'shared conversation returns', choice: 'menu options decision', setVariable: 'flag counter value', showScreen: 'panel', callScreen: 'dialog' };
+    const note = el('p', 'sc-picker-note'); note.ariaLive = 'polite';
     let active = 0, items: HTMLButtonElement[] = [];
-    const apply = action('Add dialogue', () => items[active]?.click(), true, 'picker-confirm');
     function highlight() {
-      const button = items[active]; details.replaceChildren(); apply.disabled = !button;
+      const button = items[active]; note.replaceChildren(); note.hidden = true;
       items.forEach((item, i) => { item.dataset.highlighted = String(i === active); item.ariaSelected = String(i === active); });
-      if (!button) { query.removeAttribute('aria-activedescendant'); nameControl(apply, 'Add beat'); targetLabel.textContent = targetText(body, trail, index).replace('Adds to ', ''); return; }
+      if (!button) { query.removeAttribute('aria-activedescendant'); targetLabel.textContent = targetText(body, trail, index).replace('Adds to ', ''); return; }
       query.setAttribute('aria-activedescendant', button.id); const kind = button.dataset.insertKind as Kind;
-      details.append(el('h3', '', label(kind)), el('p', '', descriptions[kind]));
       const end = isEnding(kind) && ending(body) >= 0 ? body[ending(body)] : undefined;
-      targetLabel.textContent = end ? `Replace ${name(end.id)} in ${trail.join(' › ')}` : isEnding(kind) ? `End of ${trail.join(' › ')}` : replaceEmpty ? `Replace empty line ${number(replaceEmpty.id)} in ${trail.join(' › ')}` : targetText(body, trail, index).replace('Adds to ', '');
-      nameControl(apply, end ? `Replace ${label(end.kind)}` : `Add ${label(kind).toLowerCase()}`);
-      if (end) details.append(el('p', 'sc-picker-warning', `Replaces ${name(end.id)} in ${trail.join(' › ')}. Undo restores it.`));
-      else if (isEnding(kind)) details.append(el('p', 'sc-picker-warning', `Goes at the end of ${trail.join(' › ')}.`));
-      else if (kind === 'background') details.append(el('p', 'sc-picker-warning', 'Characters must be shown again after this background.'));
-      details.append(el('p', 'sc-picker-simulation', 'Fictional sample. Nothing runs or saves to a project.'));
+      targetLabel.textContent = end ? `Replaces ${name(end.id)} in ${trail.join(' › ')}` : isEnding(kind) ? `Goes at the end of ${trail.join(' › ')}` : replaceEmpty ? `Replaces empty line ${number(replaceEmpty.id)} in ${trail.join(' › ')}` : targetText(body, trail, index).replace('Adds to ', '');
+      destination.dataset.replaces = String(!!end);
+      const message = end ? `${label(kind)} replaces ${name(end.id)}. Undo restores it.` : isEnding(kind) ? `${label(kind)} goes at the end of ${trail.at(-1)}.` : kind === 'background' ? 'A new background clears the characters on stage.' : '';
+      if (message) { note.textContent = message; note.hidden = false; }
     }
     function filter() {
       results.replaceChildren(); items = []; active = 0;
@@ -902,22 +1039,26 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       const matches = kinds.filter(([kind, title, category]) => `${kind} ${title} ${category} ${aliases[kind] ?? ''}`.toLowerCase().includes(search));
       const rank = (title: string) => title.toLowerCase() === search ? 0 : title.toLowerCase().startsWith(search) ? 1 : title.toLowerCase().includes(search) ? 2 : 3;
       const groups = search ? ['Results'] : ['Common', 'Stage', 'Audio', 'Flow', 'State', 'Screens'];
+      const columnsOf = search ? [results] : [el('div', 'sc-picker-column'), el('div', 'sc-picker-column')]; if (!search) results.append(...columnsOf);
       for (const group of groups) {
         const entries = search ? [...matches].sort((a, b) => rank(a[1]) - rank(b[1])) : group === 'Common' ? common.map(kind => kinds.find(k => k[0] === kind)!) : matches.filter(([kind, , category]) => category === group && !common.includes(kind));
         if (!entries.length) continue;
-        const section = el('section'); section.role = 'group'; section.ariaLabel = group; section.append(el('h3', '', group === 'Flow' ? 'Scene flow' : group));
+        const section = el('section'); section.role = 'group'; section.ariaLabel = group; section.dataset.group = group; section.append(el('h3', '', group === 'Flow' ? 'Scene flow' : group));
         for (const [kind, title] of entries) {
-          const button = action(title, () => { dialog.close(); insert(kind, body, trail, index, current()?.speaker, replaceEmpty); }, false, `insert-${kind}`);
-          button.dataset.insertKind = kind; button.role = 'option'; button.tabIndex = -1; button.id = `sr-result-${++elementId}`;
+          const button = action('', () => { dialog.close(); insert(kind, body, trail, index, current()?.speaker, replaceEmpty); }, false, `insert-${kind}`);
+          button.dataset.insertKind = kind; button.role = 'option'; button.tabIndex = -1; button.id = `sr-result-${++elementId}`; button.ariaLabel = title;
+          const text = el('span', 'sc-picker-text'); text.append(el('strong', '', title), el('small', '', descriptions[kind] ?? ''));
+          button.append(beatIcon(kind), text); button.title = descriptions[kind] ?? title;
           button.onpointerenter = () => { active = items.indexOf(button); highlight(); }; items.push(button); section.append(button);
-        } results.append(section);
+        } (search ? results : columnsOf[['Common', 'Stage'].includes(group) ? 0 : 1]!).append(section);
       }
-      if (!items.length) { results.append(el('p', '', 'No matching beats.'), action('Clear search', () => { query.value = ''; filter(); query.focus(); })); }
-      highlight(); results.scrollTop = 0;
+      if (!items.length) { const none = el('div', 'sr-picker-empty'); none.append(el('p', '', 'No beat matches that search.'), action('Clear search', () => { query.value = ''; filter(); query.focus(); })); results.append(none); }
+      results.dataset.layout = search ? 'list' : 'groups'; highlight(); results.scrollTop = 0;
     }
     query.oninput = filter;
     query.onkeydown = event => { if (event.isComposing) return; if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); dialog.close(); return; } if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); active = Math.max(0, Math.min(items.length - 1, active + (event.key === 'ArrowDown' ? 1 : -1))); highlight(); items[active]?.scrollIntoView({ block: 'nearest' }); } else if (event.key === 'Enter') { event.preventDefault(); items[active]?.click(); } };
-    layout.append(results, details); dialog.append(labelled('Find a beat', query), layout, el('p', 'sr-picker-hint', '↑ ↓ Choose · Enter Add · Escape Cancel')); actions(dialog, [action('Cancel', () => dialog.close(), false, 'cancel-dialog'), apply]); filter(); query.focus();
+    const foot = el('footer', 'sc-picker-foot'); foot.append(el('span', 'sr-picker-hint', '↑ ↓ choose · Enter adds · Esc cancels'), note);
+    dialog.append(search, results, foot); filter(); query.focus();
   }
 
   function compareBar() {
@@ -949,10 +1090,10 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   draw(); status('Fictional sample · changes stay in this preview'); const cleanup = compareBar();
   const key = (event: KeyboardEvent) => {
     if (event.isComposing) return;
-    if (event.key === 'Escape' && !host.querySelector('dialog[open]')) { const open = host.querySelector<HTMLDetailsElement>('.sr-more[open],.sr-row-menu[open]'); if (open) { open.open = false; open.querySelector<HTMLElement>('summary')?.focus(); event.preventDefault(); } else if (treeOpen) { treeOpen = false; draw(); host.querySelector<HTMLElement>('[data-action="scenes"]')?.focus(); event.preventDefault(); } else if (stageObject) { const object = stageObject; stageObject = ''; draw(); host.querySelector<HTMLElement>(object === 'background' ? '.sr-backdrop-control' : `[data-stage-character="${object}"]`)?.focus(); } }
+    if (event.key === 'Escape' && !host.querySelector('dialog[open]')) { const open = host.querySelector<HTMLDetailsElement>('.sr-more[open],.sr-row-menu[open],.sc-dropdown[open]'); if (open) { open.open = false; open.querySelector<HTMLElement>('summary')?.focus(); event.preventDefault(); } else if (treeOpen) { treeOpen = false; draw(); host.querySelector<HTMLElement>('[data-action="scenes"]')?.focus(); event.preventDefault(); } else if (stageObject) { const object = stageObject; stageObject = ''; draw(); host.querySelector<HTMLElement>(object === 'background' ? '.sr-backdrop-control' : `[data-stage-character="${object}"]`)?.focus(); } }
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z' && !(event.target as Element).closest('input,textarea,select,dialog')) { event.preventDefault(); history(event.shiftKey ? redo : undo, event.shiftKey ? undo : redo, event.shiftKey ? 'Redid' : 'Undid'); }
   };
-  const outside = (event: MouseEvent) => { for (const menu of host.querySelectorAll<HTMLDetailsElement>('.sr-more[open],.sr-row-menu[open]')) if (!menu.contains(event.target as Node)) menu.open = false; if (treeOpen && !(event.target as Element).closest('.sr-scenes,[data-action="scenes"]')) { treeOpen = false; frame.content.dataset.treeOpen = 'false'; host.querySelector<HTMLElement>('[data-action="scenes"]')!.ariaExpanded = 'false'; host.querySelector('.sr-scenes')?.remove(); } };
+  const outside = (event: MouseEvent) => { for (const menu of host.querySelectorAll<HTMLDetailsElement>('.sr-more[open],.sr-row-menu[open],.sc-dropdown[open]')) if (!menu.contains(event.target as Node)) menu.open = false; if (treeOpen && !(event.target as Element).closest('.sr-scenes,[data-action="scenes"]')) { treeOpen = false; frame.content.dataset.treeOpen = 'false'; host.querySelector<HTMLElement>('[data-action="scenes"]')!.ariaExpanded = 'false'; host.querySelector('.sr-scenes')?.remove(); } };
   let resizeFrame = 0; const resize = () => { cancelAnimationFrame(resizeFrame); resizeFrame = requestAnimationFrame(() => { draw(); if (combined) { revealSelection(); revealActiveBranch(); } }); };
   document.addEventListener('keydown', key); document.addEventListener('click', outside); window.addEventListener('resize', resize);
   if (compare) for (const button of frame.shell.querySelectorAll<HTMLButtonElement>('.lp-navigation .tree-item,.brand,.lp-studio-link,.lp-runtime-link')) button.onclick = () => status('Other workspaces are outside this Story mock.');

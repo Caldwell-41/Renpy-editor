@@ -18,6 +18,31 @@ The new Astra high chat owns that iteration, its grill-me clarification and the
 three-member council with the revised rubric. The earlier three mocks remain
 unapproved references; their completed comparison below is historical.
 
+## Post-delivery revision
+
+Kris's feedback on the delivered mock selected a revision of the combined variant only.
+Issue #82 records the decisions. The three reference variants are unchanged.
+
+- Colour carries meaning. Each mode has its own Brass and slate palette, scoped to the
+  combined shell in `combined-revision.css`. Each branch arm has one of four colours, in
+  scene order. Character names use their character colour. Copper and teal stay in the
+  shared tokens until Kris approves a `docs/UI.md` change.
+- The Branch path bar only switches branches. Each open condition shows its number, its
+  If test and a two-way switch. Insert actions moved to the branch boundaries.
+- Tracks and Reel draw a coloured route line above each open branch, with a light tint on
+  its columns. Slim `+` markers add the first beat, the last beat and a beat after the
+  condition. Writing focus turns the line vertical and labels the markers. Two route rows
+  fit inside the old panel height, so the stage sizes are unchanged.
+- Beat editors use pictures. Backgrounds and expressions show a thumbnail and Change,
+  which opens a picker sheet over the sidebar. Pointing at a picture previews it on the
+  stage; click applies it; Escape keeps the current value. Speakers and characters use a
+  portrait list. Short choices use switches. Choice options are numbered blocks.
+- Add a beat is one compact dialog. Click or Enter adds the highlighted beat; Escape or
+  Close cancels. Replacing an ending is named in the destination line.
+- Writing focus Tracks shows all six lanes above 1200 px wide.
+
+GPT-6.1 Sol generated the fictional art in `art/`; its README lists the files and checks.
+
 ## Fourth combined mock
 
 The `combined` variant keeps the Stage tracks game window and selected-beat editor.

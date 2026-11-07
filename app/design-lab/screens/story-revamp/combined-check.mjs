@@ -53,7 +53,7 @@ try{
   const fits=await page.locator('.sc-reel-column p').evaluateAll(nodes=>nodes.every(n=>{const r=n.getBoundingClientRect(),strip=n.closest('.sr-reel-strip').getBoundingClientRect(),line=parseFloat(getComputedStyle(n).lineHeight);return r.bottom<=strip.bottom+1&&Math.abs(r.height/line-Math.round(r.height/line))<.05;}));assert(fits,'Long Reel prose shows complete lines inside the strip');
   await capture(`${width}-reel-long-prose`);
   await page.locator('.sc-conditions [data-action=open-branch-ticket-if]').click();await page.locator('.sc-conditions [data-action=open-branch-inner-if]').click();
-  const partial=await page.locator('.sr-reel-strip').evaluate(n=>{const edge=n.getBoundingClientRect().left;return [...n.querySelectorAll('.sc-reel-column,.sc-route-marker')].some(c=>{const r=c.getBoundingClientRect();return r.left<edge-1&&r.right>edge+1;});});assert.equal(partial,false,'Reel reveal aligns a complete first card');
+  const partial=await page.locator('.sr-reel-strip').evaluate(n=>{const edge=n.getBoundingClientRect().left;return [...n.querySelectorAll('.sc-reel-column,.sc-track-mark')].some(c=>{const r=c.getBoundingClientRect();return r.left<edge-1&&r.right>edge+1;});});assert.equal(partial,false,'Reel reveal aligns a complete first card');
   await capture(`${width}-reel-complete-columns`);
  }
  report.checks.push('Wide/laptop Reel long prose clears insertion buttons and nested selection snaps to a whole first column');
@@ -61,7 +61,7 @@ try{
   await page.setViewportSize({width,height});await open('populated',mode);await pick('jump');await settled();
   const area=page.locator(mode==='tracks'?'.sr-tracks-scroll':'.sc-reel>.sr-reel-strip');
   await area.evaluate(n=>n.scrollLeft=n.scrollWidth);await settled();
-  const geometry=await area.evaluate(n=>{const bounds=n.getBoundingClientRect(),edge=n.querySelector('.sr-track-labels')?.getBoundingClientRect().right??bounds.left;const selected=n.querySelector('[data-selected=true]').getBoundingClientRect();return {partial:[...n.querySelectorAll('.sr-track-column,.sc-reel-column,.sc-route-marker')].some(c=>{const r=c.getBoundingClientRect();return r.left<edge-1&&r.right>edge+1;}),selected:selected.left>=edge-1&&selected.right<=bounds.right+1};});
+  const geometry=await area.evaluate(n=>{const bounds=n.getBoundingClientRect(),edge=n.querySelector('.sr-track-labels')?.getBoundingClientRect().right??bounds.left;const selected=n.querySelector('[data-selected=true]').getBoundingClientRect();return {partial:[...n.querySelectorAll('.sr-track-column,.sc-reel-column,.sc-track-mark')].some(c=>{const r=c.getBoundingClientRect();return r.left<edge-1&&r.right>edge+1;}),selected:selected.left>=edge-1&&selected.right<=bounds.right+1};});
   assert.equal(geometry.partial,false,`${width}/${mode}: end of strip must start with a complete column`);assert.equal(geometry.selected,true);
   await capture(`${width}-${mode}-strip-end`);
  }
@@ -135,7 +135,7 @@ try{
   await capture(`${width}-reel-writing-position`);
   await open();await page.locator('.sc-conditions [data-action=open-branch-ticket-if]').click();
   await page.locator('.sc-conditions [data-action=open-branch-inner-if]').click();
-  const partial=await page.locator('.sr-tracks-scroll').evaluate(n=>{const edge=n.querySelector('.sr-track-labels').getBoundingClientRect().right;return [...n.querySelectorAll('.sr-track-column,.sc-route-marker')].some(c=>{const r=c.getBoundingClientRect();return r.left<edge-1&&r.right>edge+1;});});
+  const partial=await page.locator('.sr-tracks-scroll').evaluate(n=>{const edge=n.querySelector('.sr-track-labels').getBoundingClientRect().right;return [...n.querySelectorAll('.sr-track-column,.sc-track-mark')].some(c=>{const r=c.getBoundingClientRect();return r.left<edge-1&&r.right>edge+1;});});
   assert.equal(partial,false,'Programmatic reveal aligns the first visible track column');
   await page.locator('[data-track-beat][data-selected=true]').press('Home');await settled();
   const left=await page.evaluate(()=>({beat:document.querySelector('[data-track-beat][data-selected=true]').getBoundingClientRect().left,labels:document.querySelector('.sr-track-labels').getBoundingClientRect().right}));
@@ -167,12 +167,12 @@ try{
  assert.equal(await condition.evaluate(n=>document.activeElement===n),true);
  await capture('condition-label-sync');
  await page.locator('[data-action=add-beat]').click();await page.locator('[data-picker-search]').fill('return');
- assert.match(await page.locator('.sr-insertion-target').innerText(),/^End of /);
+ assert.match(await page.locator('.sr-insertion-target').innerText(),/^Goes at the end of /);
  await page.keyboard.press('Enter');await page.locator('[data-action=add-beat]').click();await page.locator('[data-picker-search]').fill('jump');
- assert.match(await page.locator('.sr-insertion-target').innerText(),/^Replace .*Return/);
+ assert.match(await page.locator('.sr-insertion-target').innerText(),/^Replaces .*Return/);
  await capture('picker-replace-ending');await page.locator('[data-picker-search]').fill('nothing matches this');
- assert.equal(await page.locator('[data-action=picker-confirm]').innerText(),'Add beat');
- assert.equal(await page.locator('[data-action=picker-confirm]').isDisabled(),true);await page.keyboard.press('Escape');
+ assert.match(await page.locator('.sr-picker-empty').innerText(),/No beat matches/);assert.equal(await page.getByRole('button',{name:'Clear search',exact:true}).count(),1);
+ assert.equal(await page.locator('[data-action=picker-confirm]').count(),0,'Add a beat adds on click or Enter, with no confirm button');await page.keyboard.press('Escape');
  report.checks.push('Condition text synchronizes without losing focus; ending destinations and empty-search action are accurate');
  for(const mode of ['tracks','reel']) for(const focused of [false,true]){
   for(const source of ['entry','gap']){
@@ -192,7 +192,7 @@ try{
    assert.match(await page.locator('.lp-status').innerText(),/has_ticket is false/);
    assert.equal(await page.locator('.sr-prose:focus').count(),1);
   }
-  await page.locator('.sc-conditions [data-action=after-condition-beat-1]').click();
+  await page.locator('[data-action=boundary-after-beat-1]').click();
   assert.match(await page.locator('.sr-insertion-target').innerText(),/after 06 Condition and its branches/);
   await page.keyboard.press('Escape');
  }
@@ -252,7 +252,7 @@ try{
  await page.locator('.sc-conditions [data-action=open-branch-ticket-if]').click();await page.locator('.sc-conditions [data-action=open-branch-inner-else]').click();
  await page.locator('[data-action=add-beat]').click();assert.match(await page.locator('.sr-insertion-target').innerText(),/If has_ticket.*Otherwise/);await page.locator('[data-picker-search]').fill('narration');await page.keyboard.press('Enter');await page.locator('.sr-prose:focus').fill('Owned by inner Otherwise.');
  let sample=await state();assert(sample.scenes[0].beats.find(b=>b.kind==='condition').branches[0].beats.find(b=>b.kind==='condition').branches[1].beats.some(b=>b.text==='Owned by inner Otherwise.'));report.checks.push('Keyboard picker inserts into nested Otherwise');
- await page.locator('.sc-conditions [data-action=after-condition-beat-1]').click();await capture('picker-after-condition');assert.doesNotMatch(await page.locator('.sr-insertion-target').innerText(),/Otherwise/);await page.keyboard.press('Escape');
+ await page.locator('[data-action=boundary-after-beat-1]').click();await capture('picker-after-condition');assert.doesNotMatch(await page.locator('.sr-insertion-target').innerText(),/Otherwise/);await page.keyboard.press('Escape');
  await open('empty');await pick('condition');await page.locator('.sr-inspector [data-action^=open-branch-]').first().click();await page.locator('[data-action=bottom-reel]').click();await page.locator('[data-action=add-beat]').click();assert.match(await page.locator('.sr-insertion-target').innerText(),/If/);await page.locator('[data-picker-search]').fill('dialogue');await page.keyboard.press('Enter');await page.locator('.sr-prose:focus').fill('First line in an empty branch.');report.checks.push('Empty branch retains insertion target across modes');
  for(const sampleState of ['empty','protected']){await open(sampleState);await capture(sampleState);if(sampleState==='protected'){await page.locator('[data-track-beat][data-beat-kind=customCode]').click();await capture('protected-editor');}}
  }
@@ -279,7 +279,7 @@ try{
   await pick('narration');await page.locator('.sr-prose:focus').fill('No option was available.');let scene=(await state()).scenes[0];const choice=scene.beats.findIndex(b=>b.kind==='choice');assert.equal(scene.beats[choice+1].text,'No option was available.');report.checks.push(`${size}: Choice destination return retains draft; next beat follows unavailable options`);
   await open();await page.locator('[data-track-beat][data-beat-kind=call]').click();await page.locator('[data-action=open-destination]').click();await page.locator('[data-action=back-scene]').click();assert.equal((await state()).selected,'beat-12');
   await page.locator('[data-action=enlarge-stage]').click();await page.locator('[data-action=add-beat]').click();await page.locator('[data-picker-search]').fill('dialogue');await page.keyboard.press('Enter');assert.equal(await page.locator('.sr-content').getAttribute('data-stage-expanded'),'false');await page.locator('.sr-prose:focus').fill('The editor is visible.');report.checks.push(`${size}: Call return and insertion from enlarged stage`);
-  await open();await page.locator('[data-action=stage-Mara]').click();await capture(`${size}-stage-object`);await page.locator('[data-action=edit-stage-owner]').click();assert.equal(await page.getByRole('combobox',{name:'Character',exact:true}).inputValue(),'Mara');
+  await open();await page.locator('[data-action=stage-Mara]').click();await capture(`${size}-stage-object`);await page.locator('[data-action=edit-stage-owner]').click();assert.equal(await page.locator('.sr-inspector summary[data-action=character]').getAttribute('aria-label'),'Character: Mara');
   await page.locator('[data-action=more]').click();await page.getByRole('button',{name:'Design notes (future tools)',exact:true}).click();await capture(`${size}-future-notes`);await page.getByRole('button',{name:'Close',exact:true}).click();
  }
 
@@ -297,6 +297,28 @@ try{
  await open('protected');await page.locator('[data-track-beat][data-beat-kind=customCode]').click();await page.locator('[data-action=toggle-focus]').click();
  await page.locator('.sr-inspector [data-action=beat-menu]').click();assert.equal(await page.getByRole('button',{name:/^Delete .*Protected source/}).isDisabled(),true);await capture('compact-focus-protected-menu');await page.keyboard.press('Escape');
  report.checks.push('Compact focus structured fields, empty state, protected disabled action and keyboard focus remain reachable');
+ // Revision: visual pickers preview on the stage, keep the current value on Escape and apply with Undo.
+ await page.setViewportSize({width:1600,height:1000});await open('populated');
+ await page.locator('[data-track-beat][data-beat-kind=showCharacter]').click();await page.locator('[data-action=change-expression]').click();
+ await page.locator('[data-action=sheet-smile]').hover();
+ assert.match(await page.locator('[data-stage-character=Mara] img').getAttribute('src'),/mara-smile/);assert.match(await page.locator('.sc-preview-tag').innerText(),/Previewing Smile/);await capture('revision-expression-preview');
+ await page.keyboard.press('Escape');await settled();assert.equal(await page.locator('.sc-sheet').count(),0);
+ assert.equal(await page.locator('[data-action=change-expression]').evaluate(n=>document.activeElement===n),true,'Escape returns focus to Change');
+ assert.match(await page.locator('[data-stage-character=Mara] img').getAttribute('src'),/mara-neutral/);
+ await page.locator('[data-action=change-expression]').click();await page.locator('[data-action=sheet-smile]').click();
+ assert.equal((await state()).scenes[0].beats.find(b=>b.kind==='showCharacter').asset,'Smile');
+ await page.locator('[data-action=undo]').click();assert.equal((await state()).scenes[0].beats.find(b=>b.kind==='showCharacter').asset,'Neutral');
+ await page.locator('[data-track-beat][data-beat-kind=background]').click();await page.locator('[data-action=change-background]').click();await page.locator('[data-action=sheet-tram-interior]').click();
+ assert.equal((await state()).scenes[0].beats.find(b=>b.kind==='background').asset,'Tram interior');assert.match(await page.locator('.sr-backdrop').getAttribute('src'),/tram-interior/);
+ await page.locator('[data-track-beat][data-beat-kind=dialogue]').first().click();await page.locator('summary[data-action=speaker]').click();
+ await page.locator('[data-action=speaker-option-eli]').click();assert.equal((await state()).scenes[0].beats.find(b=>b.id==='beat-11').speaker,'Eli');
+ report.checks.push('Revision: expression and background sheets preview on the stage, Escape keeps the value, click applies with Undo; speaker list changes the speaker');
+ await page.locator('.sc-conditions [data-action=open-branch-ticket-if]').click();await page.locator('.sc-conditions [data-action=open-branch-inner-if]').click();
+ assert.equal(await page.locator('.sc-conditions [data-action=open-branch-inner-if]').getAttribute('aria-pressed'),'true');
+ assert.deepEqual(await page.locator('.sc-tracks .sc-track-mark').evaluateAll(n=>n.map(m=>m.dataset.branchBoundary)),['entry','entry','exit','exit','after'],'Nested branches get entry, exit and after markers in order');
+ await page.locator('[data-action=toggle-focus]').click();await settled();
+ assert.equal(await page.locator('.sc-tracks .sr-track-label:visible').count(),6,'Writing focus Tracks shows every lane');await capture('revision-focus-lanes');
+ report.checks.push('Revision: Branch path switches carry state; nested markers are ordered; writing focus Tracks shows all six lanes');
  assert.deepEqual(report.errors,[]);report.passed=true;
 }catch(error){report.failure=String(error.stack);await capture('failure');throw error;}
 finally{await writeFile(new URL('report.json',output),JSON.stringify(report,null,2)+'\n');await browser.close();}
