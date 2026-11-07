@@ -114,9 +114,8 @@ ways in two runs, so it was not a reliable check either.
 
 ## Current state
 
-Implementation preserves product cases and moves one physical desktop fixture.
-Council review and its bounded correction are complete. Publication and CI remain.
-Final publication-head run receipts belong on #85 rather than another status-only commit.
+Complete. #86 and #107 are squash-merged and #85 is closed. CI receipts, including
+the harness dispatch overrun (3 of 2, all passed), are on #85.
 
 ## Local validation
 
