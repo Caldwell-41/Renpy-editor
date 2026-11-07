@@ -37,7 +37,8 @@ IDs and acceptance caveats belong in CURRENT, the issue or task evidence. Regres
 lessons go to the [incident index](testing/INCIDENTS.md) or a test; exact pixel values
 stay in CSS. [UI.md](UI.md) owns the design system, shared UI rules and a few lines of
 intent per workspace; each feature's behavior lives in its own contract, which UI.md
-links. Review a canonical doc that passes roughly 600 lines, as for long briefs.
+links. Review the structure of a canonical doc that passes roughly 800 lines, as for long
+briefs. This is a prompt, not a cap: a doc may stay longer with a one-line reason.
 
 Prompts select one coherent approved outcome and point to the repo. They must not be the only
 location of requirements, test commands, unresolved risks or continuation state.
