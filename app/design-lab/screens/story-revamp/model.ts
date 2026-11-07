@@ -10,15 +10,14 @@ export const kinds = [
   ['showScreen', 'Show screen', 'Screens'], ['hideScreen', 'Hide screen', 'Screens'], ['callScreen', 'Call screen', 'Screens'],
 ] as const;
 export type Kind = typeof kinds[number][0] | 'customCode';
-/** What happens after an option's own beats. The combined mock explores all five; Loomlight writes only 'jump' today. */
-export type Outcome = 'continue' | 'jump' | 'call' | 'menu' | 'return';
-export interface Option { text: string; target: string; guard: string; outcome?: Outcome; body?: string }
+/** body is the option's Branch id and its stable identity. whenFalse applies when the guard is false. */
+export interface Option { text: string; target: string; guard: string; body?: string; whenFalse?: 'hide' | 'disable' }
 export interface Branch { id: string; name: string; condition: string; beats: Beat[] }
 export interface Beat {
   id: string; kind: Kind; text: string; speaker: string; asset: string; placement: string;
-  target: string; value: string; transition: string; options: Option[]; branches: Branch[]; hidePicked?: boolean;
+  target: string; value: string; transition: string; options: Option[]; branches: Branch[]; picked?: 'normal' | 'mark' | 'hide'; repeat?: boolean; protectedSource?: boolean;
   /** Set variable only: how the value applies. Add and subtract are planned Loomlight support. */
-  operation?: 'set' | 'add' | 'subtract';
+  operation?: 'set' | 'add' | 'subtract' | 'multiply' | 'divide' | 'floor' | 'remainder';
 }
 export interface Scene { id: string; name: string; chapter: string; beats: Beat[] }
 export interface Target { scene: Scene; body: Beat[]; trail: string[]; index: number }
@@ -53,7 +52,10 @@ export function brief(b: Beat, scenes: Scene[] = []): string {
   if (b.kind === 'jump') return `${scenes.find(s => s.id === b.target)?.name ?? b.target} · does not return`;
   if (b.kind === 'return') return 'Return to caller / end story';
   if (b.kind === 'customCode') return 'Custom Python · preview state unknown';
-  if (b.kind === 'setVariable') return b.operation === 'add' ? `Add ${b.value} to ${b.text}` : b.operation === 'subtract' ? `Subtract ${b.value} from ${b.text}` : `${b.text || 'has_ticket'} = ${b.value}`;
+  if (b.kind === 'setVariable') {
+    const v = b.text || 'has_ticket', x = b.value;
+    return b.operation === 'add' ? `Add ${x} to ${v}` : b.operation === 'subtract' ? `Subtract ${x} from ${v}` : b.operation === 'multiply' ? `Multiply ${v} by ${x}` : b.operation === 'divide' ? `Divide ${v} by ${x}` : b.operation === 'floor' ? `Floor divide ${v} by ${x}` : b.operation === 'remainder' ? `${v} remainder ${x}` : `${v} = ${x}`;
+  }
   if (b.kind.endsWith('Screen')) return `${label(b.kind)} · ${b.asset === 'Neutral' ? 'Help' : b.asset}`;
   if (b.kind === 'playMusic') return b.text || 'Night service';
   if (b.kind === 'stopMusic') return 'Stop current music';

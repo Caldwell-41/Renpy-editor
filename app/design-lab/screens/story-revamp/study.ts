@@ -1,7 +1,7 @@
 import type { LabContext } from '../../contracts.ts';
 import { action as makeAction, element as el, labelled, labPage } from '../../page.ts';
 import { prototypeSwitcher } from '../../prototype-switcher.ts';
-import { kinds, label, count, brief as modelBrief, locate, ancestry, flatten, beatNumber, beatName, columns, illustrate, makeSample, type Beat, type Branch, type Kind, type Scene, type Illustration, type Outcome } from './model.ts';
+import { kinds, label, count, brief as modelBrief, locate, ancestry, flatten, beatNumber, beatName, columns, illustrate, makeSample, type Beat, type Branch, type Kind, type Scene, type Illustration } from './model.ts';
 import platform from './platform.svg';
 import mara from './mara.svg';
 import maraConcerned from './mara-concerned.svg';
@@ -10,8 +10,9 @@ import eliConcerned from './eli-concerned.svg';
 import './style.css';
 import './combined.css';
 import './combined-revision.css';
-import { backgrounds as artBackgrounds, sceneArt, sprite, characterColour, characters, expressions, music, sounds } from './combined-art.ts';
+import { backgrounds as artBackgrounds, sprite, characterColour, characters, expressions, music, sounds } from './combined-art.ts';
 import { beatIcon } from './combined-icons.ts';
+import { operations, parseFormula, isProblem, check, after, show, python as formulaPython, type Operation, type NumberType } from './combined-arithmetic.ts';
 
 export type Variant = 'cue-sheet' | 'shot-reel' | 'stage-tracks' | 'combined';
 export const variants = [{ id: 'cue-sheet', title: 'Cue sheet' }, { id: 'shot-reel', title: 'Shot reel' }, { id: 'stage-tracks', title: 'Stage tracks' }, { id: 'combined', title: 'Story combined' }] as const;
@@ -24,16 +25,47 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   const sample = makeSample(context.state);
   let scenes = sample.scenes, sceneId = scenes[0]!.id;
   if (context.state === 'protected') scenes[0]!.beats.splice(5, 0, sample.beat('customCode', '$ tram_clock.advance()'));
+  /** Illustrative Choice preview, kept apart from the story and its Undo history. Keyed by option identity. */
+  const previewOptions = new Map<string, { truth?: 'true' | 'false'; picked?: boolean }>();
   if (combined) {
-    for (const s of scenes) for (const b of flatten(s.beats)) if (b.kind === 'choice') prepareChoice(b, `${b.id}-option`);
-    const menu = scenes[0]!.beats.find(b => b.kind === 'choice');
-    if (menu && menu.options.length === 2) {
-      const reply = sample.beat('dialogue', 'It only stops for people who missed the one before.'); reply.speaker = 'Eli';
-      menu.options[0]!.outcome = 'continue'; menu.branches[0]!.beats.push(reply);
-      menu.options.push({ text: 'Follow the stranger', target: 'stranger', guard: '', outcome: 'call' }); prepareChoice(menu, `${menu.id}-option`);
-      scenes[0]!.beats.push(sample.beat('narration', 'The doors close, and the tram pulls away into the rain.'));
+    const line = (speaker: string, text: string) => { const b = sample.beat(speaker === 'Narration' ? 'narration' : 'dialogue', text); if (speaker !== 'Narration') b.speaker = speaker; return b; };
+    const go = (kind: 'jump' | 'call', target: string, repeat = false) => { const b = sample.beat(kind); b.target = target; if (repeat) b.repeat = true; return b; };
+    const assign = (variable: string, operation: Operation, value: string, protectedSource = false) => { const b = sample.beat('setVariable'); b.text = variable; b.operation = operation; b.value = value; b.protectedSource = protectedSource; return b; };
+    const background = (asset: string) => { const b = sample.beat('background'); b.asset = asset; return b; };
+    const menu = (id: string, prompt: [string, string] | undefined, options: { text: string; guard?: string; whenFalse?: 'hide' | 'disable'; beats: Beat[] }[], picked?: 'mark' | 'hide') => {
+      const b = sample.beat('choice'); if (prompt) { b.speaker = prompt[0]; b.text = prompt[1]; } if (picked) b.picked = picked;
+      b.options = options.map((o, i) => ({ text: o.text, target: '', guard: o.guard ?? '', whenFalse: o.whenFalse, body: `${id}-${i + 1}` }));
+      b.branches = options.map((o, i) => ({ id: `${id}-${i + 1}`, name: `Option ${i + 1}`, condition: '', beats: o.beats })); return b;
+    };
+    const first = scenes[0]!, at = first.beats.findIndex(b => b.kind === 'choice');
+    if (at >= 0) {
+      first.beats[at] = menu('board', ['Eli', 'Last call. Are you getting on?'], [
+        { text: 'Get on', beats: [assign('boarded', 'set', 'true')] },
+        { text: 'Stay on the platform', beats: [] },
+        { text: 'Show the gold ticket', guard: 'has_ticket is true', whenFalse: 'disable', beats: [line('Eli', 'Gold. I have not seen one of those in years.'), go('call', 'stranger'), line('Narration', 'When you look down, the ticket has been punched.')] },
+        { text: 'Follow the lamplighter', guard: 'met_eli is true', whenFalse: 'hide', beats: [go('jump', 'departure')] },
+      ]);
+      first.beats.push(line('Narration', 'The doors close, and the tram pulls away into the rain.'));
+      previewOptions.set('board-3', { truth: 'false' }); previewOptions.set('board-4', { truth: 'false' });
     }
+    const stranger = scenes.find(s => s.id === 'stranger');
+    if (stranger) {
+      stranger.beats[0]!.speaker = 'Eli'; stranger.beats.unshift(background('Tram interior'));
+      const ticket = sample.beat('condition'); ticket.branches = [{ id: 'ask-ticket-if', name: 'If', condition: 'has_ticket is true', beats: [line('Eli', 'Keep it close. It only works once.')] }, { id: 'ask-ticket-else', name: 'Otherwise', condition: '', beats: [line('Eli', 'Then you will need another way on.')] }];
+      const goodbye = menu('goodbye', undefined, [{ text: 'Wave goodbye', beats: [line('Narration', 'He lifts his hat as the doors open.')] }, { text: 'Just go', beats: [] }]);
+      stranger.beats.splice(2, 0, menu('ask', ['Narration', 'What do you ask him?'], [
+        { text: 'Ask about the station', beats: [line('Eli', 'It was built for people who never left.'), go('jump', '', true)] },
+        { text: 'Ask about the ticket', beats: [ticket, go('jump', '', true)] },
+        { text: 'Ask about the station', beats: [line('Eli', 'Ask the driver. He remembers every stop.'), go('jump', '', true)] },
+        { text: 'Leave', beats: [goodbye] },
+      ], 'mark'));
+      previewOptions.set('ask-1', { picked: true });
+    }
+    const departure = scenes.find(s => s.id === 'departure');
+    if (departure) departure.beats.splice(0, departure.beats.length - 1, background('Station at dawn'), departure.beats[0]!, assign('trust', 'set', '2'), assign('trust', 'add', '1'), assign('coins', 'multiply', 'bonus'), assign('fare', 'divide', '2'), assign('trust', 'set', 'max(0, trust - 1)', true));
+    for (const s of scenes) for (const b of flatten(s.beats)) if (b.kind === 'choice') prepareChoice(b, `${b.id}-option`);
   }
+  const arithLayout = new URLSearchParams(location.search).get('arith') ?? 'c';
   let selected = scenes[0]!.beats.find(b => b.kind === 'dialogue')?.id ?? scenes[0]!.beats[0]!.id;
   let focused = false, treeOpen = false, stageExpanded = false, manual = '', reelBranch = '', stageObject = '', hideSaybox = false, allTracks = false;
   const initialData = JSON.stringify(scenes);
@@ -55,10 +87,11 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   const number = (id = selected) => beatNumber(scene(), id);
   const name = (id = selected) => beatName(scene(), id);
   const contextName = (id = selected) => { const trail = (ancestry(scene(), id) ?? []).map(p => `${p.branch.name} ${p.branch.condition}`.trim()).join(' › '); return `${name(id)}${trail ? ' in ' + trail : ''}`; };
-  const brief = (b: Beat) => { if (combined && b.kind === 'return') return 'Return to caller or end story'; const branch = combined && b.kind === 'condition' ? b.branches.find(branch => branch.id === visibleBranches.get(b.id)) ?? b.branches[0] : undefined; return branch ? branchLabel(branch) : modelBrief(b, scenes); };
-  type VariableType = 'flag' | 'number' | 'text';
+  const brief = (b: Beat) => { if (combined && b.kind === 'return') return 'Return to the caller, or the main menu'; if (combined && b.kind === 'jump' && b.repeat) return 'Repeat its Choice'; const branch = combined && b.kind === 'condition' ? b.branches.find(branch => branch.id === visibleBranches.get(b.id)) ?? b.branches[0] : undefined; return branch ? branchLabel(branch) : modelBrief(b, scenes); };
+  type VariableType = 'flag' | 'number' | 'decimal' | 'text';
+  const numeric = (type?: VariableType) => type === 'number' || type === 'decimal';
   interface StoryVariable { name: string; type: VariableType; initial: string }
-  let projectVariables: StoryVariable[] = [{ name: 'has_ticket', type: 'flag', initial: 'false' }, { name: 'met_eli', type: 'flag', initial: 'false' }, { name: 'trust', type: 'number', initial: '0' }, { name: 'route', type: 'text', initial: 'platform' }];
+  let projectVariables: StoryVariable[] = [{ name: 'has_ticket', type: 'flag', initial: 'false' }, { name: 'met_eli', type: 'flag', initial: 'false' }, { name: 'trust', type: 'number', initial: '0' }, { name: 'route', type: 'text', initial: 'platform' }, ...(combined ? [{ name: 'boarded', type: 'flag', initial: 'false' }, { name: 'coins', type: 'number', initial: '12' }, { name: 'bonus', type: 'number', initial: '2' }, { name: 'fare', type: 'decimal', initial: '2.5' }] as StoryVariable[] : [])];
   const snapshot = () => JSON.stringify({ scenes, sceneId, selected, ...(combined ? { visibleBranches: [...visibleBranches], reelBranch, variables: projectVariables } : {}) });
   let undoButton: HTMLButtonElement, redoButton: HTMLButtonElement;
   function action(text: string, fn: () => void, primary = false, key = text) {
@@ -421,13 +454,14 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     return sheet;
   }
   /** Scenes as pictures: the opening background, the name and the first line. */
-  function sceneImage(s?: Scene) { const asset = s?.beats.find(x => x.kind === 'background')?.asset ?? (s ? sceneArt[s.id] : undefined); return asset ? artBackgrounds[asset] : undefined; }
+  function sceneImage(s?: Scene) { const asset = s?.beats.find(x => x.kind === 'background')?.asset; return asset ? artBackgrounds[asset] : undefined; }
   function openingLine(s?: Scene) { const line = s?.beats.find(x => ['dialogue', 'narration'].includes(x.kind) && x.text.trim())?.text; return line ? `“${line}”` : 'No lines yet'; }
   function scenePicker(b: Beat) {
-    const i = assetSheet!.option ?? 0, option = b.options[i]!, keep = scenes.find(s => s.id === option.target)?.name ?? 'the current scene';
+    const i = assetSheet!.option ?? 0, option = b.options[i]!, jump = b.branches.find(x => x.id === option.body)?.beats.at(-1), keep = scenes.find(s => s.id === jump?.target)?.name ?? 'the current scene';
+    const retarget = (id: string) => { const last = b.branches.find(x => x.id === option.body)?.beats.at(-1); if (last?.kind === 'jump') last.target = id; };
     const trigger = () => host.querySelector<HTMLElement>(`[data-editor-for="${b.id}"] [data-action="change-destination-${i}"]`)?.focus();
-    const tiles = scenes.map(s => sheetTile(s.name, s.name, sceneImage(s), s.id === option.target, () => { closeSheet(false); if (s.id !== option.target) change(() => option.target = s.id, `Option ${i + 1} goes to ${s.name} · ${name(b.id)}`); trigger(); }, s.id === sceneId ? 'This scene' : s.chapter));
-    const create = action('+ New scene…', () => { closeSheet(false); createScene(s => option.target = s.id, i, option.text); }, false, `new-choice-${i}`); create.classList.add('sc-sheet-new');
+    const tiles = scenes.map(s => sheetTile(s.name, s.name, sceneImage(s), s.id === jump?.target, () => { closeSheet(false); if (s.id !== jump?.target) change(() => retarget(s.id), `Option ${i + 1} goes to ${s.name} · ${name(b.id)}`); trigger(); }, s.id === sceneId ? 'This scene' : s.chapter));
+    const create = action('+ New scene…', () => { closeSheet(false); createScene(s => retarget(s.id), i, option.text); }, false, `new-choice-${i}`); create.classList.add('sc-sheet-new');
     return pickerSheet('destination', `Option ${i + 1} goes to`, 'Search scenes', keep, tiles, `Click a scene to send option ${i + 1} there. Esc keeps ${keep}.`, create).sheet;
   }
   function closeSheet(restoreFocus = true) {
@@ -453,13 +487,13 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   const operators = [['=', 'is', '=='], ['≠', 'is not', '!='], ['<', 'is less than', '<'], ['≤', 'is at most', '<='], ['>', 'is greater than', '>'], ['≥', 'is at least', '>=']] as const;
   type Rule = { variable: string; op: string; value: string };
   type Test = { join: 'and' | 'or'; rules: Rule[] } | { advanced: string };
-  const typeName: Record<VariableType, string> = { flag: 'yes/no', number: 'number', text: 'text' };
+  const typeName: Record<VariableType, string> = { flag: 'yes/no', number: 'whole number', decimal: 'decimal', text: 'text' };
   const variableOf = (variableName: string) => projectVariables.find(v => v.name === variableName);
   function parseRule(text: string): Rule | undefined {
     const match = /^([a-z_][a-z0-9_]*) (is not|is less than|is at most|is greater than|is at least|is)(?: (.*))?$/.exec(text.trim()); if (!match) return;
     const variable = variableOf(match[1]!), op = operators.find(o => o[1] === match[2])![0], raw = match[3] ?? ''; if (!variable) return;
     if (variable.type === 'flag') return op === '=' && /^(true|false)$/.test(raw) ? { variable: variable.name, op, value: raw } : undefined;
-    if (variable.type === 'number') return /^(-?\d+)?$/.test(raw) ? { variable: variable.name, op, value: raw } : undefined;
+    if (numeric(variable.type)) return (variable.type === 'number' ? /^(-?\d+)?$/ : /^(-?\d+(\.\d+)?)?$/).test(raw) ? { variable: variable.name, op, value: raw } : undefined;
     const quoted = /^"(.*)"$/.exec(raw); return ['=', '≠'].includes(op) && quoted ? { variable: variable.name, op, value: quoted[1]! } : undefined;
   }
   function parseTest(text: string): Test {
@@ -472,8 +506,8 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   function rulePython(rule: Rule) { const variable = variableOf(rule.variable), py = operators.find(o => o[0] === rule.op)![2]; return variable?.type === 'flag' ? (rule.value === 'true' ? rule.variable : `not ${rule.variable}`) : variable?.type === 'text' ? `${rule.variable} ${py} ${JSON.stringify(rule.value)}` : `${rule.variable} ${py} ${rule.value || '?'}`; }
   function composeTest(test: { join: 'and' | 'or'; rules: Rule[] }) { return test.rules.map(ruleText).join(` ${test.join} `); }
   function pythonTest(test: { join: 'and' | 'or'; rules: Rule[] }) { return test.rules.map(rulePython).join(` ${test.join} `); }
-  function defaultRule(variable: StoryVariable): Rule { return variable.type === 'flag' ? { variable: variable.name, op: '=', value: 'true' } : variable.type === 'number' ? { variable: variable.name, op: '≥', value: '1' } : { variable: variable.name, op: '=', value: variable.initial }; }
-  function typeBadge(type: VariableType) { const badge = el('span', `sc-type sc-type-${type}`, type === 'flag' ? 'Y/N' : type === 'number' ? '#' : 'Aa'); badge.ariaHidden = 'true'; return badge; }
+  function defaultRule(variable: StoryVariable): Rule { return variable.type === 'flag' ? { variable: variable.name, op: '=', value: 'true' } : numeric(variable.type) ? { variable: variable.name, op: '≥', value: variable.type === 'decimal' ? '1.0' : '1' } : { variable: variable.name, op: '=', value: variable.initial }; }
+  function typeBadge(type: VariableType) { const badge = el('span', `sc-type sc-type-${type}`, type === 'flag' ? 'Y/N' : type === 'number' ? '#' : type === 'decimal' ? '#.#' : 'Aa'); badge.ariaHidden = 'true'; return badge; }
   /** Variable list with types, defaults and a way to create one in place. */
   function variablePicker(key: string, title: string, current: string, choose: (variable: StoryVariable) => void, filter: (v: StoryVariable) => boolean = () => true) {
     const menu = el('details', 'sc-dropdown sc-variable-picker'); const summary = el('summary', 'sc-person'); summary.dataset.action = key; summary.ariaLabel = `${title}: ${current || 'none chosen'}`;
@@ -497,14 +531,14 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     let type: VariableType = 'flag';
     const types = el('div', 'sc-segmented'); types.role = 'radiogroup'; types.ariaLabel = 'Variable type';
     const initial = el('div', 'sc-variable-initial');
-    const drawInitial = () => { initial.replaceChildren(); if (type === 'flag') { const s = el('select'); s.ariaLabel = 'Starts as'; s.append(new Option('false', 'false'), new Option('true', 'true')); initial.append(s); } else { const i = el('input'); i.ariaLabel = 'Starts as'; i.value = type === 'number' ? '0' : ''; if (type === 'number') i.inputMode = 'numeric'; initial.append(i); } };
-    for (const [value, labelText] of [['flag', 'Yes/no'], ['number', 'Whole number'], ['text', 'Text']] as const) { const button = action(labelText, () => { type = value; for (const b of types.children) (b as HTMLElement).ariaChecked = String(b === button); drawInitial(); }, false, `variable-type-${value}`); button.role = 'radio'; button.ariaChecked = String(value === type); types.append(button); }
+    const drawInitial = () => { initial.replaceChildren(); if (type === 'flag') { const s = el('select'); s.ariaLabel = 'Starts as'; s.append(new Option('false', 'false'), new Option('true', 'true')); initial.append(s); } else { const i = el('input'); i.ariaLabel = 'Starts as'; i.value = type === 'number' ? '0' : type === 'decimal' ? '0.0' : ''; if (numeric(type)) i.inputMode = 'decimal'; initial.append(i); } };
+    for (const [value, labelText] of [['flag', 'Yes/no'], ['number', 'Whole number'], ...(combined ? [['decimal', 'Decimal']] as const : []), ['text', 'Text']] as const) { const button = action(labelText, () => { type = value; for (const b of types.children) (b as HTMLElement).ariaChecked = String(b === button); drawInitial(); }, false, `variable-type-${value}`); button.role = 'radio'; button.ariaChecked = String(value === type); types.append(button); }
     drawInitial();
     const error = el('p', 'sc-field-error'); error.role = 'status';
     const reserved = ['and', 'or', 'not', 'if', 'elif', 'else', 'in', 'is', 'for', 'while', 'def', 'class', 'return', 'import', 'from', 'pass', 'true', 'false', 'none', 'mara', 'eli', 'narrator'];
     const create = action('Create variable', () => {
       const variableName = nameInput.value.trim(), start = (initial.querySelector('input,select') as HTMLInputElement).value.trim();
-      const problem = !/^[a-z][a-z0-9_]*$/.test(variableName) ? 'Use lowercase letters, numbers and underscores, starting with a letter.' : reserved.includes(variableName) ? 'That name is reserved in Ren\'Py or this project.' : variableOf(variableName) ? 'A variable with that name already exists.' : type === 'number' && !/^-?\d+$/.test(start) ? 'Enter a whole number for the starting value.' : '';
+      const problem = !/^[a-z][a-z0-9_]*$/.test(variableName) ? 'Use lowercase letters, numbers and underscores, starting with a letter.' : reserved.includes(variableName) ? 'That name is reserved in Ren\'Py or this project.' : variableOf(variableName) ? 'A variable with that name already exists.' : type === 'number' && !/^-?\d+$/.test(start) ? 'Enter a whole number for the starting value.' : type === 'decimal' && !/^-?\d+(\.\d+)?$/.test(start) ? 'Enter a number such as 2.5 for the starting value.' : '';
       error.textContent = problem; nameInput.ariaInvalid = String(!!problem && !problem.startsWith('Enter')); if (problem) { (problem.startsWith('Enter') ? initial.querySelector<HTMLElement>('input') : nameInput)?.focus(); return; }
       const variable = { name: variableName, type, initial: start }; dialog.close(); change(() => { projectVariables = [...projectVariables, variable]; done(variable); }, `Create variable ${variableName}`);
     }, true, 'create-variable');
@@ -529,11 +563,11 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       const how = el('div', 'sc-rule-how');
       if (variable.type === 'flag') how.append(segmented(['is true', 'is false'], `is ${rule.value}`, `${labelText} rule ${i + 1}`, value => { rule.value = value.slice(3); write(composeTest(test)); }));
       else {
-        const ops = variable.type === 'number' ? operators : operators.filter(o => ['=', '≠'].includes(o[0]));
+        const ops = numeric(variable.type) ? operators : operators.filter(o => ['=', '≠'].includes(o[0]));
         const switcher = segmented(ops.map(o => o[0]), rule.op, `${labelText} rule ${i + 1} operator`, value => { rule.op = value; write(composeTest(test)); }, ops.map(o => o[1]));
         switcher.classList.add('sc-operators'); ops.forEach((o, j) => { const b = switcher.children[j] as HTMLElement; b.title = o[1]; b.ariaLabel = o[1]; });
-        const value = input(rule.value, `${labelText} rule ${i + 1} value`, text => { rule.value = text; write(composeTest(test)); drawCode(); value.ariaInvalid = String(variable.type === 'number' && !/^-?\d+$/.test(text)); });
-        if (variable.type === 'number') { value.inputMode = 'numeric'; value.ariaInvalid = String(!/^-?\d+$/.test(rule.value)); } value.placeholder = variable.type === 'number' ? 'Number' : 'Text';
+        const value = input(rule.value, `${labelText} rule ${i + 1} value`, text => { rule.value = text; write(composeTest(test)); drawCode(); value.ariaInvalid = String(numeric(variable.type) && !(variable.type === 'number' ? /^-?\d+$/ : /^-?\d+(\.\d+)?$/).test(text)); });
+        if (numeric(variable.type)) { value.inputMode = 'decimal'; value.ariaInvalid = String(!(variable.type === 'number' ? /^-?\d+$/ : /^-?\d+(\.\d+)?$/).test(rule.value)); } value.placeholder = numeric(variable.type) ? 'Number' : 'Text';
         how.append(switcher, value);
       }
       row.append(top, how); node.append(row);
@@ -541,57 +575,71 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const add = action(test.rules.length ? '+ Add rule' : '+ Add a rule', () => { const first = projectVariables[0]; if (first) { test.rules.push(defaultRule(first)); save('Add rule'); } }, false, `${key}-add-rule`); add.classList.add('sc-add-rule');
     drawCode(); node.append(add, code); return node;
   }
-  const outcomes: { value: Outcome; label: string; icon: string; detail: (b: Beat) => string }[] = [
-    { value: 'continue', label: 'Continue after the menu', icon: 'continue', detail: b => { const next = continuation(b); return next ? `Goes on to ${number(next.id)}` : 'Goes on to the end of the scene'; } },
-    { value: 'jump', label: 'Go to a scene', icon: 'jump', detail: () => 'Does not come back' },
-    { value: 'call', label: 'Visit a scene', icon: 'call', detail: () => 'Comes back and continues after the menu' },
-    { value: 'menu', label: 'Show this menu again', icon: 'loop', detail: () => 'The player picks again' },
-    { value: 'return', label: 'End the story', icon: 'return', detail: () => 'Returns to the caller, or the main menu' },
+  type Ending = 'continue' | 'jump' | 'repeat' | 'return';
+  /** The option's ending is its last Beat. Continue means the body simply finishes. */
+  function endingOf(body?: Branch): Ending { const last = body?.beats.at(-1); return last?.kind === 'jump' ? (last.repeat ? 'repeat' : 'jump') : last?.kind === 'return' ? 'return' : 'continue'; }
+  const endings: { value: Ending; label: string; icon: string; detail: (b: Beat) => string }[] = [
+    { value: 'continue', label: 'Continue after the Choice', icon: 'continue', detail: b => { const next = continuation(b); return next ? `Goes on to ${number(next.id)}` : 'Goes on to the end of the scene'; } },
+    { value: 'jump', label: 'Go to a scene', icon: 'jump', detail: () => 'Jump. Does not come back' },
+    { value: 'repeat', label: 'Repeat this Choice', icon: 'loop', detail: () => 'Shows the menu and prompt again' },
+    { value: 'return', label: 'Return', icon: 'return', detail: () => 'To the scene that called this one, or the main menu' },
   ];
-  /** The line shown with the choices (a Ren'Py menu caption). Empty reads as one quiet row. */
+  /** Edits the body's last Beat only. Earlier Beats are never removed. */
+  function setEnding(b: Beat, body: Branch, i: number, value: Ending) {
+    const item = endings.find(e => e.value === value)!;
+    change(() => {
+      const last = body.beats.at(-1), target = last?.kind === 'jump' && !last.repeat ? last.target : undefined;
+      if (last && (last.kind === 'jump' || last.kind === 'return')) body.beats.pop();
+      if (value === 'jump') { const jump = sample.beat('jump'); jump.target = target ?? scenes.find(s => s.id !== sceneId)?.id ?? sceneId; body.beats.push(jump); }
+      if (value === 'repeat') { const jump = sample.beat('jump'); jump.target = ''; jump.repeat = true; body.beats.push(jump); }
+      if (value === 'return') body.beats.push(sample.beat('return'));
+    }, `Option ${i + 1}: ${item.label} · ${name(b.id)}`);
+  }
+  /** The prompt is narration or a Character's line shown with the options. Empty reads as one quiet row. */
   let openCaption = '';
   function captionRow(b: Beat) {
     if (!b.text.trim() && openCaption !== b.id) {
-      const row = el('div', 'sc-guard sc-caption-empty'); row.append(beatIcon('dialogue'), el('span', 'sc-guard-text', 'No line with the choices'));
-      const add = action('+ Line', () => { openCaption = b.id; draw(); focusField(`[data-editor-for="${b.id}"] input[aria-label="Line shown with the choices"]`); }, false, 'add-caption'); add.ariaLabel = 'Add a line shown with the choices'; row.append(add); return row;
+      const row = el('div', 'sc-guard sc-caption-empty'); row.append(beatIcon('dialogue'), el('span', 'sc-guard-text', 'No prompt with the options'));
+      const add = action('+ Prompt', () => { openCaption = b.id; draw(); focusField(`[data-editor-for="${b.id}"] input[aria-label="Prompt text"]`); }, false, 'add-prompt'); add.ariaLabel = 'Add a prompt shown with the options'; row.append(add); return row;
     }
     const people = [...characters, 'Narration (no speaker)'], who = b.speaker === 'Narration' ? 'Narration (no speaker)' : b.speaker;
-    const speaker = personPicker(b, 'Shown with the choices', people, who, value => b.speaker = value === 'Narration (no speaker)' ? 'Narration' : value);
-    const line = input(b.text, 'Line shown with the choices', value => b.text = value); line.placeholder = 'e.g. Where do you want to go?'; speaker.append(line); return speaker;
+    const speaker = personPicker(b, 'Prompt', people, who, value => b.speaker = value === 'Narration (no speaker)' ? 'Narration' : value);
+    const line = input(b.text, 'Prompt text', value => b.text = value); line.placeholder = 'e.g. Where do you want to go?'; speaker.append(line); return speaker;
   }
+  /** The option's own Beats, before its ending. Each row opens that Beat. */
   function optionBeats(b: Beat, body: Branch, i: number) {
-    const row = el('div', 'sc-guard sc-option-beats'), text = el('span', 'sc-guard-text');
-    text.append('Plays ', el('strong', '', count(flatten(body.beats).length, 'beat')), ' first'); text.title = brief(body.beats[0]!);
-    const button = action('Show', () => openBranch(b, body), false, `open-option-${i}`); button.ariaLabel = `Show option ${i + 1}'s beats in the story`;
-    row.append(beatIcon('dialogue'), text, button); return row;
+    const ending = endingOf(body), beats = ending === 'continue' ? body.beats : body.beats.slice(0, -1); if (!beats.length) return undefined;
+    const list = el('div', 'sc-option-body'); list.role = 'group'; list.ariaLabel = `Option ${i + 1} beats`;
+    beats.slice(0, 3).forEach((beat, n) => { const row = action('', () => editBeat(beat.id), false, `option-${i + 1}-beat-${n + 1}`); row.classList.add('sc-option-beat'); row.append(beatIcon(beat.kind), el('span', 'sc-option-beat-number', number(beat.id)), el('span', 'sc-option-beat-text', beat.kind === 'dialogue' ? `${beat.speaker}: ${beat.text}` : beat.kind === 'narration' ? beat.text : `${label(beat.kind)} · ${brief(beat)}`)); row.ariaLabel = `Edit ${number(beat.id)} ${label(beat.kind)}: ${brief(beat)}`; list.append(row); });
+    if (beats.length > 3) list.append(action(`+${beats.length - 3} more · Show`, () => openBranch(b, body), false, `open-option-${i}`));
+    return list;
   }
-  function outcomeRow(b: Beat, i: number, body?: Branch) {
-    const option = b.options[i]!, chosen = outcomes.find(o => o.value === (option.outcome ?? 'jump'))!, title = `Option ${i + 1} then`;
+  function endingRow(b: Beat, i: number, body: Branch) {
+    const chosen = endings.find(e => e.value === endingOf(body))!, title = `Option ${i + 1} then`;
     const menu = el('details', 'sc-dropdown sc-outcome'); const summary = el('summary', 'sc-person'); summary.dataset.action = slug(title); summary.ariaLabel = `${title}: ${chosen.label}`;
     summary.append(beatIcon(chosen.icon), el('span', 'sc-person-name', chosen.label), el('span', 'sc-caret', '▾'));
     const list = el('div', 'sc-dropdown-list'); list.role = 'listbox'; list.ariaLabel = title;
-    for (const item of outcomes) {
-      const button = action('', () => { menu.open = false; if (item.value !== chosen.value) change(() => option.outcome = item.value, `Option ${i + 1}: ${item.label} · ${name(b.id)}`); else summary.focus(); }, false, `${slug(title)}-${item.value}`);
+    for (const item of endings) {
+      const button = action('', () => { menu.open = false; if (item.value !== chosen.value) setEnding(b, body, i, item.value); else summary.focus(); }, false, `${slug(title)}-${item.value}`);
       button.role = 'option'; button.ariaSelected = String(item.value === chosen.value); button.ariaLabel = `${item.label}. ${item.detail(b)}`;
       const words = el('span', 'sc-outcome-words'); words.append(el('strong', '', item.label), el('span', '', item.detail(b))); button.append(beatIcon(item.icon), words); list.append(button);
     }
     list.onkeydown = event => { const items = [...list.querySelectorAll<HTMLElement>('[role=option]')], n = items.indexOf(document.activeElement as HTMLElement); if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); items[(n + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length]?.focus(); } if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); menu.open = false; summary.focus(); } };
     menu.ontoggle = () => { if (menu.open) list.querySelector<HTMLElement>('[aria-selected=true]')?.focus(); };
     menu.append(summary, list); const row = el('div', 'sc-option-then'); row.append(el('span', 'sc-option-then-label', 'Then'), menu);
-    if (body && !body.beats.length) { const add = action('+ Beat', () => picker(body.beats, [...locate(scene(), b.id)!.trail, branchLabel(body)], 0), false, `inside-option-${i}`); add.ariaLabel = add.title = `Add a beat that plays before option ${i + 1} moves on`; row.append(add); }
+    const add = action('+ Beat', () => picker(body.beats, [...locate(scene(), b.id)!.trail, branchLabel(body)], defaultIndex(body.beats)), false, `inside-option-${i}`); add.ariaLabel = add.title = `Add a beat to option ${i + 1}${chosen.value === 'continue' ? '' : ', before its ending'}`; row.append(add);
     return row;
   }
-  function destinationRow(b: Beat, i: number) {
-    const option = b.options[i]!, target = scenes.find(s => s.id === option.target);
+  function destinationRow(b: Beat, i: number, jump: Beat) {
+    const target = scenes.find(s => s.id === jump.target);
     const row = el('div', 'sc-asset-row sc-destination'); row.role = 'group'; row.ariaLabel = `Option ${i + 1} goes to`;
     const picture = el('span', 'sc-thumb sc-thumb-scene'); picture.ariaHidden = 'true'; const image = sceneImage(target); if (image) picture.style.backgroundImage = `url("${image}")`; else picture.classList.add('sc-thumb-black');
     const text = el('span', 'sc-asset-text'); text.append(el('strong', '', target?.name ?? 'Missing scene'), el('span', '', openingLine(target)));
     const pick = action('', () => { assetSheet = { beat: b.id, kind: 'destination', option: i }; sheetHover = ''; draw(); }, false, `change-destination-${i}`); pick.classList.add('sc-destination-pick'); pick.ariaLabel = `Change where option ${i + 1} goes: ${target?.name ?? 'missing scene'}`; pick.title = 'Choose a scene';
     pick.append(picture, text, el('span', 'sc-caret', '▾'));
-    const open = action('', () => go(option.target, true), false, `open-choice-${i}`); open.classList.add('sc-icon-button'); open.append(beatIcon('open')); open.ariaLabel = open.title = `Open ${target?.name ?? 'destination'}`;
+    const open = action('', () => go(jump.target, true), false, `open-choice-${i}`); open.classList.add('sc-icon-button'); open.append(beatIcon('open')); open.ariaLabel = open.title = `Open ${target?.name ?? 'destination'}`;
     row.append(pick, open); return row;
   }
-  /** Availability reads as one line; the rule builder opens on request. */
   function guardRow(b: Beat, i: number) {
     const option = b.options[i]!, key = `guard-${i}`, id = `${b.id}:${i}`, firstRule = `[data-editor-for="${b.id}"] [data-action="${key}-rule-0-variable"]`;
     if (openGuard === id) {
@@ -604,22 +652,105 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const button = has ? action('Edit', () => { openGuard = id; draw(); focusField(firstRule); }, false, `${key}-edit`)
       : action('+ Condition', () => { const first = projectVariables[0]; openGuard = id; if (first) change(() => option.guard = composeTest({ join: 'and', rules: [defaultRule(first)] }), `Add rule · ${name(b.id)}`); else draw(); focusField(firstRule); }, false, `${key}-add-rule`);
     button.ariaLabel = has ? `Edit when option ${i + 1} is available` : `Add a condition to option ${i + 1}`;
-    row.append(beatIcon('condition'), text, button); return row;
+    row.append(beatIcon('condition'), text, button);
+    if (!has || !combined) return row;
+    const wrap = el('div', 'sc-guard-group'); const whenFalse = el('div', 'sc-when-false'); whenFalse.append(el('span', 'sc-option-then-label', 'If false'), segmented(['Hide', 'Show disabled'], option.whenFalse === 'disable' ? 'Show disabled' : 'Hide', `Option ${i + 1} when false`, value => option.whenFalse = value === 'Hide' ? 'hide' : 'disable'));
+    wrap.append(row, whenFalse); return wrap;
   }
   function markGameOption(owner: string, index: number) { for (const button of host.querySelectorAll<HTMLElement>(`.sr-game-choices[data-choice-owner="${owner}"] [data-stage-choice]`)) button.dataset.active = String(Number(button.dataset.stageChoice) === index); }
   function choiceSource(b: Beat) {
-    const options = b.options, loops = combined && options.some(o => o.outcome === 'menu'), label = `choice_${number(b.id)}`;
-    const lines = [loops ? `menu ${label}:` : 'menu:'];
-    if (loops && b.hidePicked) lines.push(`    set picked_${number(b.id)}`);
-    if (combined && b.text.trim()) lines.push(`    ${b.speaker === 'Narration' ? '' : b.speaker.toLowerCase() + ' '}${JSON.stringify(b.text)}`);
-    for (const o of options) {
+    const repeats = b.branches.some(x => endingOf(x) === 'repeat'), menuLabel = `choice_${number(b.id).replace(/\./g, '_')}`;
+    const lines = [repeats ? `menu ${menuLabel}:` : 'menu:'];
+    if (b.picked && b.picked !== 'normal') lines.push(`    # Picked options: ${b.picked === 'mark' ? 'Mark picked' : 'Hide picked'} (Stage 2: saved per option identity)`);
+    if (b.text.trim()) lines.push(`    ${b.speaker === 'Narration' ? '' : b.speaker.toLowerCase() + ' '}${JSON.stringify(b.text)}`);
+    b.options.forEach(o => {
       const test = o.guard ? parseTest(o.guard) : undefined, guard = test ? ` if ${'advanced' in test ? test.advanced : pythonTest(test)}` : '';
-      lines.push(`    ${JSON.stringify(o.text)}${guard}:`);
-      const body = b.branches.find(x => x.id === o.body); if (body?.beats.length) lines.push(`        # ${count(body.beats.length, 'beat')} from this option`);
-      const outcome = combined ? o.outcome ?? 'jump' : 'jump';
-      lines.push(`        ${outcome === 'jump' ? `jump ${o.target}` : outcome === 'call' ? `call ${o.target}` : outcome === 'menu' ? `jump ${label}` : outcome === 'return' ? 'return' : body?.beats.length ? '# then continues after the menu' : 'pass'}`);
-    }
+      lines.push(`    ${JSON.stringify(o.text)}${guard}:${guard && o.whenFalse === 'disable' ? '  # shown disabled when false' : ''}`);
+      const beats = b.branches.find(x => x.id === o.body)?.beats ?? []; if (!beats.length) lines.push('        pass');
+      for (const x of beats) lines.push(`        ${x.kind === 'jump' ? `jump ${x.repeat ? menuLabel : x.target}` : x.kind === 'return' ? 'return' : x.kind === 'call' ? `call ${x.target}` : `# ${number(x.id)} ${label(x.kind)}: ${brief(x)}`}`);
+    });
     return lines.join('\n');
+  }
+  /** Values this route sets before the beat. Declaration defaults are never used as current values. */
+  function knownValues(id: string) {
+    const { route, index } = pathFor(id), known = new Map<string, number>();
+    for (const { beat } of route.slice(0, Math.max(0, index))) {
+      if (beat.kind !== 'setVariable' || beat.protectedSource || !numeric(variableOf(beat.text)?.type)) continue;
+      const node = parseFormula(beat.value); const value = isProblem(node) ? undefined : after(beat.operation ?? 'set', known.get(beat.text), node, n => known.get(n));
+      if (value === undefined) known.delete(beat.text); else known.set(beat.text, value);
+    }
+    return known;
+  }
+  const numberType = (name: string): NumberType | 'other' | undefined => { const v = variableOf(name); return !v ? undefined : v.type === 'number' ? 'whole' : v.type === 'decimal' ? 'decimal' : 'other'; };
+  function setVariableEditor(b: Beat): Node[] {
+    const variable = variableOf(b.text) ?? projectVariables[0]!;
+    if (b.protectedSource) {
+      const line = el('div', 'sc-protected-line'); line.append(typeBadge(variable.type), el('strong', '', variable.name));
+      return [field('Variable', line), el('code', 'sc-test-code', `$ ${variable.name} = ${formulaPython(b.value)}`), note('This calculation calls a function, which the visual editor cannot show. It stays exactly as written.'), action('Edit in Source', () => source(b), false, 'set-variable-source')];
+    }
+    const picker = field('Variable', variablePicker('set-variable', 'Variable', variable.name, chosen => change(() => { b.text = chosen.name; b.operation = 'set'; b.value = chosen.type === 'flag' ? 'true' : chosen.type === 'number' ? '1' : chosen.type === 'decimal' ? '1.0' : chosen.initial; }, `Set ${chosen.name} · ${name(b.id)}`)));
+    if (variable.type === 'flag') return [picker, field('Value', segmented(['true', 'false'], b.value === 'false' ? 'false' : 'true', 'Value', value => b.value = value)), el('code', 'sc-test-code', `$ ${variable.name} = ${b.value === 'false' ? 'False' : 'True'}`)];
+    if (variable.type === 'text') { const code = el('code', 'sc-test-code', `$ ${variable.name} = ${JSON.stringify(b.value)}`); const value = input(b.value, 'Variable value', text => { b.value = text; code.textContent = `$ ${variable.name} = ${JSON.stringify(text)}`; }); value.placeholder = 'Text'; return [picker, field('Value', value), code]; }
+    const target = { name: variable.name, type: (variable.type === 'decimal' ? 'decimal' : 'whole') as NumberType }, operation = b.operation ?? 'set', op = operations.find(o => o.key === operation)!;
+    const setOperation = (key: Operation) => { if (key !== operation) change(() => b.operation = key, `${operations.find(o => o.key === key)!.label} · ${name(b.id)}`); };
+    const formula = input(b.value, 'Formula', text => { b.value = text; update(); suggest(); }); formula.classList.add('sc-formula'); formula.autocomplete = 'off'; formula.spellcheck = false; formula.placeholder = operation === 'set' ? 'Number or formula, e.g. bonus × 2' : 'Number or formula, e.g. 1 or bonus';
+    const feedback = el('div', 'sc-formula-feedback'); feedback.role = 'status'; const code = el('code', 'sc-test-code');
+    const suggestions = el('div', 'sc-suggestions'); suggestions.role = 'listbox'; suggestions.ariaLabel = 'Variables'; suggestions.hidden = true; let active = 0;
+    const numericVariables = () => projectVariables.filter(v => numeric(v.type));
+    const fragment = () => /[A-Za-z_][A-Za-z0-9_]*$/.exec(formula.value.slice(0, formula.selectionStart ?? formula.value.length))?.[0] ?? '';
+    const insert = (text: string, replace = 0) => { formula.focus(); const end = formula.selectionStart ?? formula.value.length; formula.setRangeText(text, end - replace, formula.selectionEnd ?? end, 'end'); formula.dispatchEvent(new Event('input')); };
+    function suggest() {
+      const part = fragment(), matches = part ? numericVariables().filter(v => v.name.startsWith(part) && v.name !== part) : [];
+      suggestions.replaceChildren(); suggestions.hidden = !matches.length; active = Math.min(active, Math.max(0, matches.length - 1)); formula.setAttribute('aria-expanded', String(!!matches.length));
+      matches.forEach((v, i) => { const item = action('', () => { insert(v.name, part.length); suggestions.hidden = true; }, false, `formula-suggest-${v.name}`); item.role = 'option'; item.id = `sc-suggest-${b.id}-${i}`; item.ariaSelected = String(i === active); item.tabIndex = -1; item.append(typeBadge(v.type), el('span', 'sc-variable-name', v.name), el('small', '', typeName[v.type])); item.onmousedown = e => e.preventDefault(); suggestions.append(item); });
+      if (matches.length) formula.setAttribute('aria-activedescendant', `sc-suggest-${b.id}-${active}`); else formula.removeAttribute('aria-activedescendant');
+    }
+    formula.setAttribute('role', 'combobox'); formula.setAttribute('aria-autocomplete', 'list'); formula.setAttribute('aria-expanded', 'false');
+    formula.addEventListener('keydown', event => {
+      if (suggestions.hidden) return; const items = [...suggestions.children] as HTMLElement[];
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); active = (active + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length; items.forEach((n, i) => n.ariaSelected = String(i === active)); formula.setAttribute('aria-activedescendant', items[active]!.id); }
+      else if (event.key === 'Enter' || event.key === 'Tab') { event.preventDefault(); items[active]?.click(); }
+      else if (event.key === 'Escape') { event.preventDefault(); event.stopImmediatePropagation(); suggestions.hidden = true; formula.setAttribute('aria-expanded', 'false'); }
+    }, { capture: true });
+    formula.addEventListener('blur', () => { suggestions.hidden = true; formula.setAttribute('aria-expanded', 'false'); });
+    function update() {
+      const result = check(target, operation, b.value, numberType); feedback.replaceChildren(); formula.ariaInvalid = String(!!result.problem);
+      if (result.problem) { const line = el('p', `sc-formula-problem sc-problem-${result.problem.kind}`); line.append(el('strong', '', result.problem.kind === 'target' ? 'Decimal result' : result.problem.kind === 'zero' ? 'Divides by zero' : result.problem.kind === 'missing' ? 'Unknown variable' : result.problem.kind === 'type' ? 'Not a number' : result.problem.kind === 'unsupported' ? 'Not supported' : 'Check the formula'), ` ${result.problem.message}`); feedback.append(line); if (result.problem.kind === 'missing') feedback.append(action('+ New variable…', () => newVariable(() => draw()), false, 'formula-new-variable')); }
+      else {
+        feedback.append(el('p', 'sc-formula-type', `Gives a ${result.result === 'decimal' ? 'decimal' : 'whole number'}${target.type === 'decimal' && result.result === 'whole' ? ', stored as a decimal' : ''}.`));
+        const known = knownValues(b.id), before = known.get(target.name), value = after(operation, before, result.node!, n => known.get(n));
+        const route = el('p', 'sc-formula-route'); route.append(el('span', '', 'On this route '), el('strong', '', before === undefined ? (operation === 'set' ? 'not set yet' : 'unknown') : show(before, target.type)), ' → ', el('strong', '', value === undefined ? 'unknown' : show(value, target.type)));
+        route.title = 'Illustrative. Uses only values set earlier on this route, never the starting default.'; feedback.append(route);
+      }
+      code.textContent = `$ ${target.name} ${op.python} ${formulaPython(b.value) || '?'}`;
+    }
+    update();
+    const formulaField = field(operation === 'set' ? 'Value' : 'Amount', formula, suggestions); formulaField.classList.add('sc-formula-field');
+    const keys = () => { const bar = el('div', 'sc-formula-keys'); bar.role = 'group'; bar.ariaLabel = 'Insert into formula'; for (const v of numericVariables().filter(v => v.name !== target.name).slice(0, 4)) { const chip = action(v.name, () => insert(v.name), false, `formula-insert-${v.name}`); chip.classList.add('sc-key-variable'); chip.title = `Insert ${v.name} (${typeName[v.type]})`; chip.onmousedown = e => e.preventDefault(); bar.append(chip); } for (const [label, text, title] of [['(', '(', 'Open bracket'], [')', ')', 'Close bracket'], ['+', ' + ', 'Plus'], ['−', ' - ', 'Minus'], ['×', ' * ', 'Multiply'], ['÷', ' / ', 'Divide'], ['//', ' // ', 'Floor divide'], ['%', ' % ', 'Remainder']] as const) { const key = action(label, () => insert(text), false, `formula-key-${slug(title)}`); key.ariaLabel = key.title = `Insert ${title.toLowerCase()}`; key.onmousedown = e => e.preventDefault(); bar.append(key); } return bar; };
+    const planned = note('Planned (#87): Loomlight does not write arithmetic to source yet. This sample shows the intended editor.');
+    if (arithLayout === 'a') {
+      const strip = segmented(operations.map(o => o.symbol), op.symbol, 'Change', value => b.operation = operations.find(o => o.symbol === value)!.key, operations.map(o => o.label)); strip.classList.add('sc-operation-strip'); operations.forEach((o, i) => { const button = strip.children[i] as HTMLElement; button.title = `${o.label} · ${o.example}`; button.ariaLabel = o.label; });
+      return [picker, field('Change', strip, el('p', 'sc-operation-caption', `${op.label} · ${op.example}`)), formulaField, feedback, code, planned];
+    }
+    if (arithLayout === 'b') {
+      const menu = el('details', 'sc-dropdown sc-operation-menu'); const summary = el('summary', 'sc-person'); summary.dataset.action = 'change'; summary.ariaLabel = `Change: ${op.label}`; summary.append(el('span', 'sc-operation-symbol', op.python), el('span', 'sc-caret', '▾'));
+      const list = el('div', 'sc-dropdown-list'); list.role = 'listbox'; list.ariaLabel = 'Change';
+      for (const o of operations) { const item = action('', () => { menu.open = false; setOperation(o.key); }, false, `change-${slug(o.label)}`); item.role = 'option'; item.ariaSelected = String(o.key === operation); item.ariaLabel = o.label; const words = el('span', 'sc-outcome-words'); words.append(el('strong', '', o.label), el('span', '', o.example)); item.append(el('span', 'sc-operation-symbol', o.python), words); list.append(item); }
+      list.onkeydown = event => { const items = [...list.querySelectorAll<HTMLElement>('[role=option]')], n = items.indexOf(document.activeElement as HTMLElement); if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); items[(n + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length]?.focus(); } if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); menu.open = false; summary.focus(); } };
+      menu.ontoggle = () => { if (menu.open) list.querySelector<HTMLElement>('[aria-selected=true]')?.focus(); }; menu.append(summary, list);
+      const equation = el('div', 'sc-equation'); equation.role = 'group'; equation.ariaLabel = 'Calculation'; equation.append(el('span', 'sc-equation-target', target.name), menu, formula, suggestions);
+      return [picker, field('Calculation', equation), feedback, code, planned];
+    }
+    const common: Operation[] = ['set', 'add', 'subtract'], more = operations.filter(o => !common.includes(o.key));
+    const strip = segmented(['Set to', 'Add', 'Subtract'], common.includes(operation) ? op.label : '', 'Change', value => b.operation = operations.find(o => o.label === value)!.key);
+    const moreMenu = el('details', 'sc-dropdown sc-more-operations'); const moreSummary = el('summary', 'button'); moreSummary.dataset.action = 'change-more'; moreSummary.textContent = common.includes(operation) ? 'More ▾' : `${op.verb} ▾`; moreSummary.ariaLabel = `More calculations${common.includes(operation) ? '' : `: ${op.label}`}`; moreSummary.dataset.current = String(!common.includes(operation));
+    const moreList = el('div', 'sc-dropdown-list'); moreList.role = 'listbox'; moreList.ariaLabel = 'More calculations';
+    for (const o of more) { const item = action('', () => { moreMenu.open = false; setOperation(o.key); }, false, `change-${slug(o.label)}`); item.role = 'option'; item.ariaSelected = String(o.key === operation); item.ariaLabel = o.label; const words = el('span', 'sc-outcome-words'); words.append(el('strong', '', o.label), el('span', '', o.example)); item.append(el('span', 'sc-operation-symbol', o.symbol), words); moreList.append(item); }
+    moreList.onkeydown = event => { const items = [...moreList.querySelectorAll<HTMLElement>('[role=option]')], n = items.indexOf(document.activeElement as HTMLElement); if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); items[(n + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length]?.focus(); } if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); moreMenu.open = false; moreSummary.focus(); } };
+    moreMenu.ontoggle = () => { if (moreMenu.open) (moreList.querySelector<HTMLElement>('[aria-selected=true]') ?? moreList.querySelector<HTMLElement>('[role=option]'))?.focus(); }; moreMenu.append(moreSummary, moreList);
+    if (!common.includes(operation)) (strip.firstElementChild as HTMLElement).tabIndex = 0;
+    const row = el('div', 'sc-operation-row'); row.append(strip, moreMenu);
+    return [picker, field('Change', row), formulaField, keys(), feedback, code, planned];
   }
   function combinedFields(b: Beat): HTMLDivElement {
     const form = el('div', 'sr-fields sc-fields'); form.dataset.editorFor = b.id; form.dataset.kind = b.kind;
@@ -636,19 +767,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     else if (b.kind === 'stopMusic') form.append(note('Stops the current music. This sample does not play audio.'));
     else if (b.kind === 'playSfx') form.append(listChoice(sounds, b.asset, 'Sound effect', 'playSfx', value => b.asset = value), note('Plays once. This sample does not play audio.'));
     else if (b.kind.endsWith('Screen')) form.append(field('Screen', segmented(['Help', 'Inventory'], b.asset === 'Neutral' ? 'Help' : b.asset, 'Screen', value => b.asset = value)), note(b.kind === 'callScreen' ? 'Opens the screen and waits for it to close before the next beat.' : b.kind === 'showScreen' ? 'Shows the screen while the story continues.' : 'Hides the screen while the story continues.'));
-    else if (b.kind === 'setVariable') {
-      const variable = variableOf(b.text) ?? projectVariables[0]!, operation = variable.type === 'number' ? b.operation ?? 'set' : 'set';
-      const python = variable.type === 'flag' ? `$ ${variable.name} = ${b.value === 'true' ? 'True' : 'False'}` : variable.type === 'text' ? `$ ${variable.name} = ${JSON.stringify(b.value)}` : `$ ${variable.name} ${operation === 'add' ? '+=' : operation === 'subtract' ? '-=' : '='} ${b.value || '?'}`;
-      const code = el('code', 'sc-test-code', python);
-      form.append(field('Variable', variablePicker('set-variable', 'Variable', variable.name, chosen => change(() => { b.text = chosen.name; b.operation = 'set'; b.value = chosen.type === 'flag' ? 'true' : chosen.type === 'number' ? '1' : chosen.initial; }, `Set ${chosen.name} · ${name(b.id)}`))));
-      if (variable.type === 'flag') form.append(field('Value', segmented(['true', 'false'], b.value === 'false' ? 'false' : 'true', 'Value', value => b.value = value)));
-      else {
-        if (variable.type === 'number') form.append(field('Change', segmented(['Set to', 'Add', 'Subtract'], operation === 'add' ? 'Add' : operation === 'subtract' ? 'Subtract' : 'Set to', 'Change', value => b.operation = value === 'Add' ? 'add' : value === 'Subtract' ? 'subtract' : 'set')));
-        const value = input(b.value, 'Variable value', text => { b.value = text; code.textContent = variable.type === 'text' ? `$ ${variable.name} = ${JSON.stringify(text)}` : `$ ${variable.name} ${operation === 'add' ? '+=' : operation === 'subtract' ? '-=' : '='} ${text || '?'}`; }); value.placeholder = variable.type === 'number' ? 'Number' : 'Text'; if (variable.type === 'number') value.inputMode = 'numeric';
-        form.append(field(operation === 'set' ? 'Value' : 'Amount', value));
-      }
-      form.append(code); if (operation !== 'set') form.append(note('Planned: Loomlight does not write += or -= yet. This sample shows the intended editor.'));
-    }
+    else if (b.kind === 'setVariable') form.append(...setVariableEditor(b));
     else if (b.kind === 'condition') {
       form.append(note('The first branch whose test is true runs. Tests are not evaluated in this mock.'));
       b.branches.forEach((branch, index) => {
@@ -666,22 +785,26 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     else if (b.kind === 'choice') {
       form.append(captionRow(b));
       b.options.forEach((option, i) => {
-        const body = b.branches.find(x => x.id === option.body);
-        const block = el('fieldset', 'sr-option sc-option'); block.dataset.choiceIndex = String(i); if (body) block.dataset.arm = String(armOf(body)); block.append(el('legend', 'sc-visually-hidden', `Option ${i + 1}`));
+        const body = b.branches.find(x => x.id === option.body)!;
+        const block = el('fieldset', 'sr-option sc-option'); block.dataset.choiceIndex = String(i); block.dataset.option = body.id; block.dataset.arm = String(armOf(body)); block.append(el('legend', 'sc-visually-hidden', `Option ${i + 1}`));
         const top = el('div', 'sc-option-top'); const text = input(option.text, `Option ${i + 1} text`, value => option.text = value); text.placeholder = 'What the player can choose';
-        const inside = body ? flatten(body.beats).length : 0;
+        const inside = flatten(body.beats).length;
         const remove = action('', () => { change(() => { b.options.splice(i, 1); b.branches = b.branches.filter(x => x.id !== option.body); b.options.forEach((o, n) => { const br = b.branches.find(x => x.id === o.body); if (br) br.name = `Option ${n + 1}`; }); }, `Remove option ${i + 1}${inside ? ` and its ${count(inside, 'beat')}` : ''} from ${name(b.id)}`); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${Math.min(i, b.options.length - 1) + 1} text"]`); }, false, `remove-choice-${i}`);
         remove.append(beatIcon('close')); remove.ariaLabel = `Remove option ${i + 1}`; remove.title = remove.ariaLabel; remove.disabled = b.options.length === 1; if (remove.disabled) remove.title = 'A choice menu needs at least one option.';
-        top.append(el('span', 'sc-option-number', String(i + 1)), text, remove);
+        top.append(el('span', 'sc-option-number', String(i + 1)), text, remove); block.append(top);
+        const twin = b.options.findIndex((o, n) => n !== i && o.text.trim() && o.text.trim() === option.text.trim());
+        if (twin >= 0) block.append(el('p', 'sc-option-twin', `Same text as option ${twin + 1}. Still a separate option with its own picked history.`));
         const mark = (on: boolean) => markGameOption(b.id, on ? i : Number(host.querySelector<HTMLElement>(`[data-editor-for="${b.id}"] [data-choice-index]:focus-within`)?.dataset.choiceIndex ?? -1));
         block.onpointerenter = () => mark(true); block.onpointerleave = () => mark(false); block.addEventListener('focusin', () => mark(true)); block.addEventListener('focusout', event => { if (!block.contains(event.relatedTarget as Node)) markGameOption(b.id, -1); });
-        block.append(top); if (body?.beats.length) block.append(optionBeats(b, body, i)); block.append(outcomeRow(b, i, body));
-        if (option.outcome === 'jump' || option.outcome === 'call') block.append(destinationRow(b, i));
+        const beats = optionBeats(b, body, i); if (beats) block.append(beats);
+        block.append(endingRow(b, i, body)); const last = body.beats.at(-1);
+        if (last?.kind === 'jump' && !last.repeat) block.append(destinationRow(b, i, last));
         block.append(guardRow(b, i)); form.append(block);
       });
-      form.append(action('+ Add option', () => { const index = b.options.length; change(() => { b.options.push({ text: '', target: scenes.find(s => s.id !== sceneId)?.id ?? sceneId, guard: '', outcome: 'continue' }); prepareChoice(b); }, `Add option to ${name(b.id)}`); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${index + 1} text"]`); }, false, 'add-choice-option'));
-      if (b.options.some(o => o.outcome === 'menu')) form.append(field('When the menu shows again', segmented(['Show every option', 'Hide picked options'], b.hidePicked ? 'Hide picked options' : 'Show every option', 'Picked options', value => b.hidePicked = value === 'Hide picked options')));
-      form.append(note('If no option is available, the story continues after the menu. Conditions are not run in this preview. Menu arguments, NVL menus and nested menus stay in Source.'));
+      form.append(action('+ Add option', () => { const index = b.options.length; change(() => { b.options.push({ text: '', target: '', guard: '' }); prepareChoice(b); }, `Add option to ${name(b.id)}`); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${index + 1} text"]`); }, false, 'add-choice-option'));
+      form.append(field('Picked options', segmented(['Show normally', 'Mark picked', 'Hide picked'], b.picked === 'mark' ? 'Mark picked' : b.picked === 'hide' ? 'Hide picked' : 'Show normally', 'Picked options', value => b.picked = value === 'Mark picked' ? 'mark' : value === 'Hide picked' ? 'hide' : 'normal'), el('p', 'sc-field-hint', 'Uses what the player picked in this save. Marked options stay selectable.')));
+      const next = continuation(b);
+      form.append(note(`If no option can be picked, the story continues ${next ? `at ${number(next.id)}` : 'after the Choice'} and records no pick.`), note('Planned (#98): Loomlight writes Jump-only menus today. Option beats, the prompt and Hide or Show disabled are Stage 1; Repeat and Picked options are Stage 2.'));
     }
     else return fields(b, true);
     return form;
@@ -728,7 +851,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const dialog = modal(`Illustrative source · ${b ? name(b.id) : 'No selected beat'}`, 'source', true);
     const speech = b?.kind === 'dialogue' ? `${b.speaker === 'Eli' ? 'e' : 'm'} ${JSON.stringify(b.text)}` : b?.kind === 'narration' ? JSON.stringify(b.text) : undefined;
     const targetId = b?.target ?? 'scene_name';
-    const samples: Partial<Record<Kind, string>> = { background: `scene ${b?.asset === 'Station at dawn' ? 'bg_station_dawn' : 'bg_platform'}${b?.transition === 'None' ? '' : ' with ' + (b?.transition ?? 'dissolve').toLowerCase()}`, showCharacter: `show ${b?.speaker.toLowerCase()} ${b?.asset.toLowerCase()} at ${(b?.placement ?? 'Centre').toLowerCase().replace('centre', 'center')}`, hideCharacter: `hide ${b?.speaker.toLowerCase()}`, changeAppearance: `show ${b?.speaker.toLowerCase()} ${b?.asset.toLowerCase()}`, placement: `show ${b?.speaker.toLowerCase()} at ${(b?.placement ?? 'Centre').toLowerCase().replace('centre', 'center')}`, transition: `with ${(b?.transition ?? 'dissolve').toLowerCase()}`, playMusic: `play music "audio/${b?.text === 'Last departure' ? 'last_departure' : 'night_service'}.ogg"`, stopMusic: 'stop music', playSfx: `play sound "audio/${b?.asset === 'Footsteps' ? 'footsteps' : 'tram_bell'}.ogg"`, call: `call ${targetId}`, jump: `jump ${targetId}`, return: 'return', showScreen: `show screen ${(b?.asset === 'Neutral' ? 'help' : b?.asset ?? 'help').toLowerCase()}`, hideScreen: `hide screen ${(b?.asset === 'Neutral' ? 'help' : b?.asset ?? 'help').toLowerCase()}`, callScreen: `call screen ${(b?.asset === 'Neutral' ? 'help' : b?.asset ?? 'help').toLowerCase()}`, setVariable: `$ ${b?.text || 'has_ticket'} = ${b?.value === 'true' ? 'True' : b?.value === 'false' ? 'False' : b?.value}`, choice: combined && b ? choiceSource(b) : `menu:\n${b?.options.map(o => `    # Available when: ${o.guard || 'Always'}\n    ${JSON.stringify(o.text)}:\n        jump ${o.target}`).join('\n')}`, condition: b?.branches.map(branch => `# ${branch.name} ${branch.condition}`.trim() + '\n' + branch.beats.map(beat => `#   ${number(beat.id)} ${label(beat.kind)}: ${brief(beat)}`).join('\n')).join('\n') };
+    const samples: Partial<Record<Kind, string>> = { background: `scene ${b?.asset === 'Station at dawn' ? 'bg_station_dawn' : 'bg_platform'}${b?.transition === 'None' ? '' : ' with ' + (b?.transition ?? 'dissolve').toLowerCase()}`, showCharacter: `show ${b?.speaker.toLowerCase()} ${b?.asset.toLowerCase()} at ${(b?.placement ?? 'Centre').toLowerCase().replace('centre', 'center')}`, hideCharacter: `hide ${b?.speaker.toLowerCase()}`, changeAppearance: `show ${b?.speaker.toLowerCase()} ${b?.asset.toLowerCase()}`, placement: `show ${b?.speaker.toLowerCase()} at ${(b?.placement ?? 'Centre').toLowerCase().replace('centre', 'center')}`, transition: `with ${(b?.transition ?? 'dissolve').toLowerCase()}`, playMusic: `play music "audio/${b?.text === 'Last departure' ? 'last_departure' : 'night_service'}.ogg"`, stopMusic: 'stop music', playSfx: `play sound "audio/${b?.asset === 'Footsteps' ? 'footsteps' : 'tram_bell'}.ogg"`, call: `call ${targetId}`, jump: `jump ${targetId}`, return: 'return', showScreen: `show screen ${(b?.asset === 'Neutral' ? 'help' : b?.asset ?? 'help').toLowerCase()}`, hideScreen: `hide screen ${(b?.asset === 'Neutral' ? 'help' : b?.asset ?? 'help').toLowerCase()}`, callScreen: `call screen ${(b?.asset === 'Neutral' ? 'help' : b?.asset ?? 'help').toLowerCase()}`, setVariable: combined && b && numeric(variableOf(b.text)?.type) ? `$ ${b.text} ${operations.find(o => o.key === (b.operation ?? 'set'))!.python} ${formulaPython(b.value)}` : `$ ${b?.text || 'has_ticket'} = ${b?.value === 'true' ? 'True' : b?.value === 'false' ? 'False' : b?.value}`, choice: combined && b ? choiceSource(b) : `menu:\n${b?.options.map(o => `    # Available when: ${o.guard || 'Always'}\n    ${JSON.stringify(o.text)}:\n        jump ${o.target}`).join('\n')}`, condition: b?.branches.map(branch => `# ${branch.name} ${branch.condition}`.trim() + '\n' + branch.beats.map(beat => `#   ${number(beat.id)} ${label(beat.kind)}: ${brief(beat)}`).join('\n')).join('\n') };
     let example = b?.kind === 'customCode' ? b.text : speech ?? (b ? samples[b.kind] ?? `# ${brief(b)}` : '# Select a beat');
     if (b && ['showCharacter', 'hideCharacter', 'changeAppearance'].includes(b.kind)) example += `\n# Transition: ${b.transition}`;
     if (b?.kind === 'transition') example = `with ${b.transition === 'None' ? 'None' : b.transition.toLowerCase()}`;
@@ -855,6 +978,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     if (b?.kind === 'choice') stage.append(gameChoices(b));
     slot.append(stage); wrap.append(slot);
     const bottom = el('div', 'sr-stage-footer'); bottom.append(el('span', 'sr-stage-status'));
+    if (combined && current()?.kind === 'choice') bottom.append(choicePreview(current()!));
     if (variant === 'cue-sheet') {
       const routeOptions = flatten(scene().beats).filter(b => b.kind === 'condition');
       if (routeOptions.length) {
@@ -871,21 +995,66 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const row = control?.closest<HTMLElement>('[data-choice-index]'), owner = row?.closest<HTMLElement>('[data-editor-for]')?.dataset.editorFor; if (!row || !owner) return;
     for (const menu of host.querySelectorAll<HTMLElement>(`.sr-game-choices[data-choice-owner="${owner}"]`)) { const button = menu.querySelector<HTMLElement>(`[data-stage-choice="${row.dataset.choiceIndex}"]`); if (!button) continue; const r = button.getBoundingClientRect(), bounds = menu.getBoundingClientRect(); if (r.top < bounds.top) menu.scrollTop -= bounds.top - r.top; if (r.bottom > bounds.bottom) menu.scrollTop += r.bottom - bounds.bottom; }
   }
-  function gameChoices(b: Beat) {
+  function legacyGameChoices(b: Beat) {
     const choices = el('div', 'sr-game-choices'); choices.dataset.choiceOwner = b.id; b.options.forEach((option, i) => { const button = action(option.text || 'New choice', () => { stageExpanded = false; draw(); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${i + 1} text"]`); }, false, `stage-choice-${i}`); button.ariaLabel = `Edit option ${i + 1}: ${option.text || 'New choice'}`; button.dataset.stageChoice = String(i); if (combined) { const body = b.branches.find(x => x.id === option.body); if (body) button.dataset.arm = String(armOf(body)); } choices.append(button); }); return choices;
+  }
+  /** Illustrative availability of each option. Hide picked wins over Show disabled. */
+  type OptionState = 'available' | 'marked' | 'unknown' | 'disabled' | 'hidden' | 'hidden-picked';
+  function optionStates(b: Beat): OptionState[] {
+    return b.options.map(o => {
+      const preview = previewOptions.get(o.body ?? '') ?? {}, truth = o.guard.trim() ? preview.truth : 'true', picked = !!preview.picked && truth !== 'false';
+      if (picked && b.picked === 'hide') return 'hidden-picked';
+      if (truth === 'false') return o.whenFalse === 'disable' ? 'disabled' : 'hidden';
+      if (picked && b.picked === 'mark') return 'marked';
+      return truth === undefined ? 'unknown' : 'available';
+    });
+  }
+  function gameChoices(b: Beat) {
+    if (!combined) return legacyGameChoices(b);
+    const choices = el('div', 'sr-game-choices'); choices.dataset.choiceOwner = b.id; const states = optionStates(b);
+    b.options.forEach((option, i) => {
+      const state = states[i]!; if (state === 'hidden' || state === 'hidden-picked') return;
+      const button = action('', () => { stageExpanded = false; draw(); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${i + 1} text"]`); }, false, `stage-choice-${i}`);
+      if (state === 'marked') button.append(el('span', 'sc-stage-mark', '✓')); if (state === 'disabled') button.append(beatIcon('lock'));
+      button.append(el('span', '', option.text || 'New choice')); button.dataset.state = state; button.dataset.stageChoice = String(i);
+      const body = b.branches.find(x => x.id === option.body); if (body) button.dataset.arm = String(armOf(body));
+      button.ariaLabel = `Edit option ${i + 1}: ${option.text || 'New choice'}${state === 'disabled' ? ', shown disabled in the game' : state === 'marked' ? ', marked as picked' : state === 'unknown' ? ', availability unknown' : ''}`; choices.append(button);
+    });
+    const selectable = states.some(st => st === 'available' || st === 'marked' || st === 'unknown');
+    if (!selectable) { const next = continuation(b), where = next ? `at ${number(next.id)}` : 'after the Choice'; choices.append(el('p', 'sc-choice-none', states.includes('disabled') ? `Only disabled options are left. Ren'Py would wait here; Loomlight continues ${where} instead and records no pick.` : `No option can be picked here, so the story continues ${where} and records no pick.`)); }
+    return choices;
+  }
+  /** Stage footer control. Changes only the illustration, never the story or Undo. */
+  function choicePreview(b: Beat) {
+    const menu = el('details', 'sc-dropdown sc-choice-preview'); const summary = el('summary', 'button'); summary.dataset.action = 'preview-options'; summary.textContent = 'Preview options ▾'; summary.title = 'Illustrative: choose what to assume about conditions and picked history';
+    const panel = el('div', 'sc-choice-preview-panel'); panel.role = 'group'; panel.ariaLabel = 'Illustrative option preview';
+    panel.append(el('strong', '', 'Illustrative preview'), el('p', 'sc-field-hint', 'Not a playthrough or a save. Choose what to assume for each option.'));
+    const syncs: (() => void)[] = [];
+    b.options.forEach((option, i) => {
+      const key = option.body ?? '', current = () => previewOptions.get(key) ?? {};
+      const update = (patch: { truth?: 'true' | 'false'; picked?: boolean }) => { previewOptions.set(key, { ...current(), ...patch }); syncs.forEach(sync => sync()); refresh(); };
+      const row = el('div', 'sc-preview-row'); row.append(el('span', 'sc-option-number', String(i + 1)), el('span', 'sc-preview-name', option.text || 'New choice'));
+      const controls = el('div', 'sc-preview-controls'), truths: [HTMLButtonElement, 'true' | 'false' | undefined][] = [];
+      if (option.guard.trim()) for (const [value, text] of [[undefined, '?'], ['true', 'True'], ['false', 'False']] as const) { const button = action(text, () => update({ truth: value }), false, `preview-option-${i + 1}-${value ?? 'unknown'}`); button.title = button.ariaLabel = value ? `Assume ${option.guard} is ${value}` : 'Availability unknown'; truths.push([button, value]); controls.append(button); }
+      else controls.append(el('span', 'sc-preview-always', 'Always'));
+      const picked = action('Picked', () => update({ picked: !current().picked }), false, `preview-option-${i + 1}-picked`); picked.title = picked.ariaLabel = `Assume option ${i + 1} was picked earlier in this save`; controls.append(picked);
+      syncs.push(() => { for (const [button, value] of truths) button.ariaPressed = String(current().truth === value); picked.ariaPressed = String(!!current().picked); });
+      row.append(controls); panel.append(row);
+    });
+    syncs.forEach(sync => sync()); menu.append(summary, panel); return menu;
   }
   function refresh() {
     syncSelectionChrome();
     const state = withSheetPreview(previewState()); const line = previewLine();
     for (const stage of host.querySelectorAll<HTMLElement>('[data-stage]')) {
       const choices = stage.querySelector<HTMLElement>('.sr-game-choices'), b = current();
-      if (b?.kind !== 'choice') choices?.remove(); else if (!choices || choices.dataset.choiceOwner !== b.id || choices.children.length !== b.options.length) { const menu = gameChoices(b), scroll = choices?.scrollTop ?? 0; if (choices) choices.replaceWith(menu); else stage.append(menu); menu.scrollTop = scroll; }
+      if (b?.kind !== 'choice') choices?.remove(); else if (combined || !choices || choices.dataset.choiceOwner !== b.id || choices.children.length !== b.options.length) { const menu = gameChoices(b), scroll = choices?.scrollTop ?? 0; if (choices) choices.replaceWith(menu); else stage.append(menu); menu.scrollTop = scroll; }
       stage.classList.toggle('sr-dawn', !combined && state.background?.asset === 'Station at dawn'); if (combined) { const backdrop = stage.querySelector<HTMLImageElement>('.sr-backdrop')!, asset = state.background?.asset ?? 'Rainy platform', src = artBackgrounds[asset]; backdrop.hidden = !src; if (src && backdrop.getAttribute('src') !== src) backdrop.src = src; backdrop.alt = src ? `Fictional ${asset.toLowerCase()}` : 'Black screen'; const previewing = assetSheet && sheetHover && sheetHover !== current()?.asset ? sheetHover : ''; let tag = stage.querySelector<HTMLElement>('.sc-preview-tag'); if (previewing) { if (!tag) { tag = el('span', 'sc-preview-tag'); stage.append(tag); } tag.textContent = `Previewing ${previewing === 'Black' ? 'Black screen' : previewing} · click to use it`; } else tag?.remove(); } stage.classList.toggle('sr-no-background', !state.background); stage.querySelector<HTMLElement>('.sr-stage-empty')!.hidden = !!state.background;
       stageCharacters(stage, state); const caption = stage.querySelector<HTMLElement>('.sr-saybox')!; caption.hidden = !line || hideSaybox;
       const paragraph = caption.querySelector('p'); if (paragraph) paragraph.textContent = line?.text ?? ''; const speaker = caption.querySelector('strong'); if (speaker) speaker.textContent = line?.kind === 'dialogue' ? line.speaker : ''; if (combined && line?.kind === 'dialogue') caption.style.setProperty('--sc-speaker', characterColour(line.speaker));
     }
     for (const item of host.querySelectorAll<HTMLElement>('[data-summary]')) { const b = flatten(scene().beats).find(b => b.id === item.dataset.summary); if (b) { item.textContent = brief(b); const control = item.closest<HTMLElement>('[data-reel-beat],.sr-cue'); if (control) control.ariaLabel = `${control.classList.contains('sr-cue') ? 'Select ' : ''}${contextName(b.id)}: ${brief(b)}`; } }
-    for (const item of host.querySelectorAll<HTMLElement>('[data-stage-choice]')) { const option = current()?.options[Number(item.dataset.stageChoice)]; if (option) { item.textContent = option.text || 'New choice'; item.ariaLabel = `Edit option ${Number((item as HTMLElement).dataset.stageChoice) + 1}: ${option.text || 'New choice'}`; } }
+    if (!combined) for (const item of host.querySelectorAll<HTMLElement>('[data-stage-choice]')) { const option = current()?.options[Number(item.dataset.stageChoice)]; if (option) { item.textContent = option.text || 'New choice'; item.ariaLabel = `Edit option ${Number((item as HTMLElement).dataset.stageChoice) + 1}: ${option.text || 'New choice'}`; } }
     revealGameOption(document.activeElement instanceof HTMLElement ? document.activeElement : null);
     const manualOwner = manual ? flatten(scene().beats).find(b => b.branches.some(branch => branch.id === manual)) : undefined, manualBranch = manualOwner?.branches.find(branch => branch.id === manual);
     const routes = state.unknown.filter(b => b.kind === 'condition').map(b => { const branch = b.branches.find(branch => branch.id === visibleBranches.get(b.id)); return branch ? `${number(b.id)} ${branch.name}` : ''; }).filter(Boolean).join(', ');
@@ -1107,8 +1276,10 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   /** Combined mock: every option owns a body, stored like a condition branch, and an outcome. */
   function prepareChoice(b: Beat, prefix?: string) {
     b.options.forEach((option, i) => {
-      option.outcome ??= 'jump';
-      if (!b.branches.some(x => x.id === option.body)) { const branch: Branch = { id: prefix ? `${prefix}-${i + 1}` : sample.newId(), name: `Option ${i + 1}`, condition: '', beats: [] }; b.branches.push(branch); option.body = branch.id; }
+      if (b.branches.some(x => x.id === option.body)) return;
+      const branch: Branch = { id: prefix ? `${prefix}-${i + 1}` : sample.newId(), name: `Option ${i + 1}`, condition: '', beats: [] };
+      if (option.target) { const jump = sample.beat('jump'); jump.target = option.target; branch.beats.push(jump); option.target = ''; } // A simple destination option is a body holding one Jump.
+      b.branches.push(branch); option.body = branch.id;
     });
   }
   function choiceOf(branch: Branch) { const owner = flatten(scene().beats).find(b => b.kind === 'choice' && b.branches.some(x => x.id === branch.id)); const index = owner ? owner.options.findIndex(o => o.body === branch.id) : -1; return owner && index >= 0 ? { owner, option: owner.options[index]!, index } : undefined; }
@@ -1156,8 +1327,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   function chainOf(id: string) { return (ancestry(scene(), id) ?? []).map(p => p.branch); }
   function thenText(owner: Beat, branch: Branch) {
     const last = branch.beats.at(-1), next = continuation(owner), choice = owner.kind === 'choice' ? choiceOf(branch) : undefined;
-    if (choice) { const where = scenes.find(s => s.id === choice.option.target)?.name ?? 'a scene'; const outcome = choice.option.outcome;
-      if (outcome === 'jump') return `goes to ${where}`; if (outcome === 'call') return `visits ${where} →`; if (outcome === 'menu') return `back to ${number(owner.id)}`; if (outcome === 'return') return 'ends the story'; }
+    if (choice) { const ending = endingOf(branch); if (ending === 'jump') return `goes to ${scenes.find(s => s.id === last!.target)?.name ?? 'a scene'}`; if (ending === 'repeat') return `back to ${number(owner.id)}`; if (ending === 'return') return 'returns'; }
     if (last && ['jump', 'return'].includes(last.kind)) return last.kind === 'jump' ? 'jumps away' : 'returns';
     return next ? `then ${number(next.id)} →` : 'then the scene ends';
   }
