@@ -161,8 +161,8 @@ try{
  await page.setViewportSize({width:1600,height:1000});await open('populated','reel');
  await page.locator('.sc-conditions [data-action=open-branch-ticket-if]').click();
  await page.locator('.sc-conditions [data-action=edit-condition-beat-1]').click();
- const condition=page.getByRole('textbox',{name:'06 Condition If condition',exact:true});
- await condition.fill('has_ticket is false');
+ await page.locator('[data-action="06-if-rule-1-is-false"]').click();await settled();
+ const condition=page.locator('[data-action="06-if-rule-1-is-false"]');
  assert.equal(await page.locator('[data-reel-beat=beat-1] p').innerText(),'If has_ticket is false');
  assert.equal(await condition.evaluate(n=>document.activeElement===n),true);
  await capture('condition-label-sync');
@@ -182,7 +182,7 @@ try{
    const owner=page.locator(mode==='tracks'?'.sr-track-column[data-column=beat-1]':'.sc-reel-column[data-column=beat-1]');
    assert.equal(await owner.locator('.sr-gap').count(),0,'An open condition must not show a gap at its branch entry');
    await page.locator('.sc-conditions [data-action=edit-condition-beat-1]').click();
-   await page.getByRole('textbox',{name:'06 Condition If condition',exact:true}).fill('has_ticket is false');
+   await page.locator('[data-action="06-if-rule-1-is-false"]').click();
    const control=source==='entry'?page.locator('[data-action=inside-inner-if]'):page.locator('[data-gap-before=beat-3]');
    if(source==='gap')assert.match(await control.getAttribute('title'),/has_ticket is false/);
    await control.click();
@@ -265,7 +265,7 @@ try{
    assert.equal((await state()).scenes[0].beats.some(b=>b.kind===kind),true);
    await page.locator('.sr-inspector').scrollIntoViewIfNeeded();await capture(`${size}-editor-${kind}`);
    assert(await page.locator('.sr-inspector:visible').count());
-   if(kind==='setVariable') assert.equal((await page.getByRole('combobox',{name:'Variable',exact:true}).boundingBox()).height,(await page.getByRole('textbox',{name:'Variable value',exact:true}).boundingBox()).height);
+   if(kind==='setVariable') { assert.equal(await page.locator('.sr-inspector summary[data-action=set-variable]').getAttribute('aria-label'),'Variable: has_ticket');assert.equal(await page.locator('.sr-inspector [data-action=value-true]').getAttribute('aria-checked'),'true'); }
    if(kind.endsWith('Screen')){const summary=await page.locator(`[data-track-beat][data-selected=true] [data-track="${size==='compact'?3:5}"]`).innerText();assert.match(summary,/screen · Help$/);assert.equal((summary.match(/screen/g)||[]).length,1);}
   }
   report.checks.push(`${size}: all 20 beat types insert and expose their editor`);
@@ -275,7 +275,7 @@ try{
   await page.locator('[data-action=scenes]').click();await capture(`${size}-scenes`);await page.locator('[data-action=new-scene]').click();await page.locator('[data-action=submit-scene]').click();assert.equal(await page.locator('[aria-invalid=true]').count(),1);await capture(`${size}-new-scene-error`);await page.getByRole('textbox',{name:'Scene name',exact:true}).fill('The quiet platform');await page.locator('[data-action=submit-scene]').click();await page.locator('.sr-prose:focus').fill('The station is empty.');await page.locator('.sr-prose').press('Meta+Shift+Enter');await page.locator('.sr-prose:focus').fill('Except for us.');report.checks.push(`${size}: scene validation, creation, next-line focus and Assist Undo`);
   await open();await page.locator('.sc-conditions [data-action=edit-condition-beat-1]').click();await page.locator('.sr-inspector [data-action=beat-menu]').click();await capture(`${size}-beat-menu`);await page.getByRole('button',{name:/^Delete 06 Condition/}).click();await capture(`${size}-delete-condition`);await page.locator('[data-action=cancel-dialog]').click();assert((await state()).scenes[0].beats.some(b=>b.kind==='condition'));await page.locator('.sr-inspector [data-action=beat-menu]').click();await page.getByRole('button',{name:/^Delete 06 Condition/}).click();await page.locator('[data-action=confirm-delete]').click();await page.locator('[data-action=undo]').click();assert((await state()).scenes[0].beats.some(b=>b.kind==='condition'));
   await page.locator('.sc-conditions [data-action=open-branch-ticket-if]').click();await page.locator('.sr-inspector [data-action=beat-menu]').click();await page.getByRole('button',{name:'Move to another branch…',exact:true}).click();await capture(`${size}-move-branch`);await page.locator('[data-action=confirm-move]').click();await page.locator('[data-action=undo]').click();assert.equal((await state()).scenes[0].beats.find(b=>b.kind==='condition').branches[0].beats[0].text,'Keep your ticket. Some doors only open once.');report.checks.push(`${size}: condition deletion/cancel/Undo and moving between branches`);
-  await open();await page.locator('[data-track-beat][data-beat-kind=choice]').click();await page.getByRole('textbox',{name:'Option 1 availability',exact:true}).fill('has_ticket');await capture(`${size}-choice`);await page.locator('[data-action=new-choice-0]').click();await capture(`${size}-choice-new-destination`);await page.locator('[data-action=cancel-dialog]').click();await page.locator('[data-action=open-choice-0]').click();await page.locator('[data-action=back-scene]').click();assert.equal(await page.getByRole('textbox',{name:'Option 1 availability',exact:true}).inputValue(),'has_ticket');
+  await open();await page.locator('[data-track-beat][data-beat-kind=choice]').click();await page.locator('[data-action=guard-0-add-rule]').click();await capture(`${size}-choice`);await page.locator('[data-action=new-choice-0]').click();await capture(`${size}-choice-new-destination`);await page.locator('[data-action=cancel-dialog]').click();await page.locator('[data-action=open-choice-0]').click();await page.locator('[data-action=back-scene]').click();assert.equal((await state()).scenes[0].beats.find(b=>b.kind==='choice').options[0].guard,'has_ticket is true');
   await pick('narration');await page.locator('.sr-prose:focus').fill('No option was available.');let scene=(await state()).scenes[0];const choice=scene.beats.findIndex(b=>b.kind==='choice');assert.equal(scene.beats[choice+1].text,'No option was available.');report.checks.push(`${size}: Choice destination return retains draft; next beat follows unavailable options`);
   await open();await page.locator('[data-track-beat][data-beat-kind=call]').click();await page.locator('[data-action=open-destination]').click();await page.locator('[data-action=back-scene]').click();assert.equal((await state()).selected,'beat-12');
   await page.locator('[data-action=enlarge-stage]').click();await page.locator('[data-action=add-beat]').click();await page.locator('[data-picker-search]').fill('dialogue');await page.keyboard.press('Enter');assert.equal(await page.locator('.sr-content').getAttribute('data-stage-expanded'),'false');await page.locator('.sr-prose:focus').fill('The editor is visible.');report.checks.push(`${size}: Call return and insertion from enlarged stage`);
@@ -319,6 +319,25 @@ try{
  await page.locator('[data-action=toggle-focus]').click();await settled();
  assert.equal(await page.locator('.sc-tracks .sr-track-label:visible').count(),6,'Writing focus Tracks shows every lane');await capture('revision-focus-lanes');
  report.checks.push('Revision: Branch path switches carry state; nested markers are ordered; writing focus Tracks shows all six lanes');
+ // Revision: condition builder rules, All/Any, created variables with Undo, and planned Add/Subtract.
+ await page.setViewportSize({width:1600,height:1000});await open('populated');
+ await page.locator('.sc-conditions [data-action=edit-condition-beat-1]').click();
+ await page.locator('[data-action=test-ticket-if-add-rule]').click();await page.locator('summary[data-action=test-ticket-if-rule-1-variable]').click();await page.locator('[data-action=test-ticket-if-rule-1-variable-trust]').click();
+ await page.getByRole('textbox',{name:'06 If rule 2 value',exact:true}).fill('5');
+ let condition=()=>state().then(v=>v.scenes[0].beats.find(b=>b.id==='beat-1').branches[0].condition);
+ assert.equal(await condition(),'has_ticket is true and trust is at least 5');assert.match(await page.locator('.sc-branch[data-branch=ticket-if] .sc-test-code').innerText(),/^if has_ticket and trust >= 5:$/);
+ await page.locator('[data-action="06-if-match-any"]').click();assert.equal(await condition(),'has_ticket is true or trust is at least 5');
+ await page.locator('[data-action="06-if-rule-2-operator-is-less-than"]').click();assert.equal(await condition(),'has_ticket is true or trust is less than 5');
+ await page.locator('summary[data-action=test-ticket-if-rule-0-variable]').click();await page.locator('[data-action=test-ticket-if-rule-0-variable-new]').click();
+ await page.getByRole('textbox',{name:'Variable name',exact:true}).fill('Bad Name');await page.locator('[data-action=create-variable]').click();assert.match(await page.locator('.sc-field-error').innerText(),/lowercase/);
+ await page.getByRole('textbox',{name:'Variable name',exact:true}).fill('found_letter');await page.locator('[data-action=create-variable]').click();
+ assert.equal(await condition(),'found_letter is true or trust is less than 5');
+ await page.locator('[data-action=undo]').click();assert.equal(await condition(),'has_ticket is true or trust is less than 5');
+ await page.locator('summary[data-action=test-ticket-if-rule-0-variable]').click();assert.equal(await page.locator('[data-action=test-ticket-if-rule-0-variable-found_letter]').count(),0,'Undo removes the created variable');await page.keyboard.press('Escape');
+ await capture('revision-condition-builder');
+ await pick('setVariable');await page.locator('summary[data-action=set-variable]').click();await page.locator('[data-action=set-variable-trust]').click();await page.locator('[data-action=change-add]').click();
+ assert.match(await page.locator('.sr-inspector .sc-test-code').innerText(),/^\$ trust \+= 1$/);assert.match(await page.locator('.sr-inspector').innerText(),/Planned: Loomlight does not write/);
+ report.checks.push('Revision: condition rules build tests with presets, All/Any and the Ren\'Py line; new variables validate and undo; Set variable shows planned Add');
  assert.deepEqual(report.errors,[]);report.passed=true;
 }catch(error){report.failure=String(error.stack);await capture('failure');throw error;}
 finally{await writeFile(new URL('report.json',output),JSON.stringify(report,null,2)+'\n');await browser.close();}

@@ -10,8 +10,8 @@ council scores; the revision has none. No council runs until Kris asks for one.
 The revision changes only the combined variant. It adds a Brass and slate palette for
 each mode, generated visual-novel art under `art/`, a Branch path bar of two-way switches,
 a coloured route line over open branches in Tracks and Reel, visual beat editors with a
-picker sheet for backgrounds and expressions, a one-click Add a beat dialog and every lane
-in writing focus Tracks. The focused check passes 33 groups and `npm run design:check`
+picker sheet for backgrounds and expressions, a one-click Add a beat dialog, every lane
+in writing focus Tracks and a typed condition rule builder. The focused check passes 34 groups and `npm run design:check`
 passes. Evidence and review screenshots are in ignored `.toolchains/story-combined/revision/`.
 The preview server on port 5176 serves this worktree; port 5175 was found stopped.
 `docs/UI.md` changes wait for Kris's approval of the palette.

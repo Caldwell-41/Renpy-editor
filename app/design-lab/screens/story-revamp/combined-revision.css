@@ -232,3 +232,45 @@
 .sc-combined-shell .sc-option .sc-field input { height:30px; }
 .sc-combined-shell .sc-assign>select,.sc-combined-shell .sc-assign>input { font-size:13px; height:32px; }
 @media(min-width:900px) and (max-width:1200px) { .sc-combined-shell [data-focused=false] .sc-reel-column .sr-reel-beat p { -webkit-line-clamp:4; max-height:61.6px; } }
+
+/* Condition builder: variable, preset test, value; the Ren'Py line underneath. */
+.sc-combined-shell .sc-branch { display:flex; flex-direction:column; gap:10px; padding:8px 0 10px 12px; border-left:3px solid var(--arm); }
+.sc-branch-head { display:flex; align-items:center; gap:8px; }
+.sc-branch-head>strong { color:var(--arm); font-size:13px; font-weight:600; margin-right:auto; }
+.sc-combined-shell .sc-branch-head>.button { min-height:26px; padding:2px 9px; font-size:12px; background:transparent; color:var(--text-secondary); border-color:var(--border-normal); }
+.sc-combined-shell .sc-branch-head>.button[aria-pressed=true] { color:var(--arm); border-color:color-mix(in srgb,var(--arm) 55%,transparent); background:color-mix(in srgb,var(--arm) 12%,transparent); }
+.sc-combined-shell .sc-branch-head>.button:not([aria-pressed]) { border:0; padding:4px; }
+.sc-test { display:flex; flex-direction:column; gap:8px; min-width:0; }
+.sc-rule { display:flex; flex-direction:column; gap:6px; padding:8px; border-radius:4px; background:var(--surface-panel); }
+.sc-rule-top { display:flex; align-items:center; gap:6px; }
+.sc-rule-top>.sc-dropdown { flex:1; min-width:0; }
+.sc-combined-shell .sc-rule-top>.button { flex:none; border:0; background:transparent; padding:4px; min-height:28px; color:var(--text-muted); }
+.sc-combined-shell .sc-rule-top>.button:hover { color:var(--status-error); background:var(--surface-hover); }
+.sc-rule-how { display:flex; gap:6px; align-items:stretch; min-width:0; }
+.sc-rule-how>.sc-segmented { flex:1; }
+.sc-rule-how>.sc-operators { flex:none; }
+.sc-combined-shell .sc-operators>.button { flex:none; width:30px; padding:4px 0; font:13px var(--font-source); }
+.sc-combined-shell .sc-rule-how>input { flex:1; min-width:56px; height:30px; }
+.sc-combined-shell .sc-rule-how>input[aria-invalid=true] { border-color:var(--status-error)!important; }
+.sc-variable-picker .sc-person { min-height:32px; padding:3px 8px; }
+.sc-variable-name { font:12.5px var(--font-source); color:var(--text-primary); }
+.sc-variable-text { display:flex; flex-direction:column; min-width:0; }
+.sc-variable-text>small { font-size:11px; color:var(--text-muted); }
+.sc-type { flex:none; display:inline-grid; place-items:center; min-width:26px; height:18px; padding:0 3px; border-radius:3px; font:600 10px var(--font-source); color:var(--text-secondary); background:var(--surface-hover); }
+.sc-type-flag { color:var(--sc-arm-1); background:color-mix(in srgb,var(--sc-arm-1) 15%,transparent); }
+.sc-type-number { color:var(--sc-arm-3); background:color-mix(in srgb,var(--sc-arm-3) 15%,transparent); }
+.sc-type-text { color:var(--sc-arm-4); background:color-mix(in srgb,var(--sc-arm-4) 15%,transparent); }
+.sc-combined-shell .sc-dropdown-list>.sc-dropdown-create { margin-top:4px; border-top:1px solid var(--border-normal); border-radius:0; color:var(--accent-primary); min-height:34px; }
+.sc-combined-shell .sc-add-rule { align-self:flex-start; min-height:26px; padding:2px 8px; font-size:12px; background:transparent; border-color:var(--border-normal); color:var(--text-secondary); }
+.sc-combined-shell .sc-add-rule:hover { color:var(--text-primary); border-color:var(--border-strong); }
+.sc-test-code { display:block; font:11.5px/1.5 var(--font-source); color:var(--text-muted); white-space:pre-wrap; overflow-wrap:anywhere; }
+.sc-test-code.sc-test-empty { font:11.5px var(--font-ui); font-style:italic; }
+.sc-combined-shell .sc-variable-dialog { width:min(420px,calc(100vw - 32px)); background:var(--surface-raised); }
+.sc-combined-shell .sc-variable-dialog .sc-field { margin-bottom:12px; }
+.sc-variable-initial>input,.sc-variable-initial>select { width:100%; height:32px; }
+.sc-field-error { margin:0 0 8px; font-size:12px; color:var(--status-error); }
+.sc-field-error:empty { display:none; }
+.sc-combined-shell .sr-branch-control.sc-branch { align-items:stretch; flex-wrap:nowrap; }
+.sc-combined-shell .sc-branch>.sr-explanation { margin:0; text-align:left; }
+.sc-combined-shell .sc-fields>[data-action=add-else-if],.sc-combined-shell .sc-fields>[data-action=add-choice-option] { align-self:flex-start; }
+.sc-variable-picker .sc-dropdown-list { min-width:250px; }

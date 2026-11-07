@@ -40,6 +40,15 @@ Issue #82 records the decisions. The three reference variants are unchanged.
 - Add a beat is one compact dialog. Click or Enter adds the highlighted beat; Escape or
   Close cancels. Replacing an ending is named in the destination line.
 - Writing focus Tracks shows all six lanes above 1200 px wide.
+- Conditions use a rule builder that follows ADR 0014's typed model. Each rule picks a
+  project variable (yes/no, whole number or text), a preset test and a value. Numbers
+  offer `= ≠ < ≤ > ≥`; yes/no and text offer equality only. One All/Any switch joins
+  rules. Each branch shows its Ren'Py line. Mixed groups and unreadable Python stay
+  read-only with Edit in Source; the builder never writes raw Python. Choice "Only when"
+  uses the same builder. The variable list can create a variable in place, with Undo.
+- Set variable uses the same list. For numbers it offers Set to, Add and Subtract. Add and
+  Subtract (`+=`, `-=`) are planned: Loomlight does not write computed assignments yet,
+  and the editor says so. Kris is opening a separate issue for that support.
 
 GPT-6.1 Sol generated the fictional art in `art/`; its README lists the files and checks.
 

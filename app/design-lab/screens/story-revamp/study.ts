@@ -46,7 +46,10 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   const name = (id = selected) => beatName(scene(), id);
   const contextName = (id = selected) => { const trail = (ancestry(scene(), id) ?? []).map(p => `${p.branch.name} ${p.branch.condition}`.trim()).join(' › '); return `${name(id)}${trail ? ' in ' + trail : ''}`; };
   const brief = (b: Beat) => { if (combined && b.kind === 'return') return 'Return to caller or end story'; const branch = combined && b.kind === 'condition' ? b.branches.find(branch => branch.id === visibleBranches.get(b.id)) ?? b.branches[0] : undefined; return branch ? branchLabel(branch) : modelBrief(b, scenes); };
-  const snapshot = () => JSON.stringify({ scenes, sceneId, selected, ...(combined ? { visibleBranches: [...visibleBranches], reelBranch } : {}) });
+  type VariableType = 'flag' | 'number' | 'text';
+  interface StoryVariable { name: string; type: VariableType; initial: string }
+  let projectVariables: StoryVariable[] = [{ name: 'has_ticket', type: 'flag', initial: 'false' }, { name: 'met_eli', type: 'flag', initial: 'false' }, { name: 'trust', type: 'number', initial: '0' }, { name: 'route', type: 'text', initial: 'platform' }];
+  const snapshot = () => JSON.stringify({ scenes, sceneId, selected, ...(combined ? { visibleBranches: [...visibleBranches], reelBranch, variables: projectVariables } : {}) });
   let undoButton: HTMLButtonElement, redoButton: HTMLButtonElement;
   function action(text: string, fn: () => void, primary = false, key = text) {
     const button = makeAction(text, fn, primary); button.title = text; button.ariaLabel = text; button.dataset.action = key; return button;
@@ -67,9 +70,9 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const hadFocus = host.contains(document.activeElement);
     const previous = from.pop(); if (!previous) return;
     to.push({ data: snapshot(), name: previous.name });
-    const data = JSON.parse(previous.data) as { scenes: Scene[]; sceneId: string; selected: string; visibleBranches?: [string, string][]; reelBranch?: string };
+    const data = JSON.parse(previous.data) as { scenes: Scene[]; sceneId: string; selected: string; visibleBranches?: [string, string][]; reelBranch?: string; variables?: StoryVariable[] };
     scenes = data.scenes; sceneId = data.sceneId; selected = data.selected; stageObject = ''; manual = '';
-    if (combined) { visibleBranches.clear(); for (const [owner, branch] of data.visibleBranches ?? []) visibleBranches.set(owner, branch); reelBranch = data.reelBranch ?? ''; }
+    if (combined) { visibleBranches.clear(); for (const [owner, branch] of data.visibleBranches ?? []) visibleBranches.set(owner, branch); reelBranch = data.reelBranch ?? ''; if (data.variables) projectVariables = data.variables; }
     draw(); status(`${verb}: ${previous.name}`); if (hadFocus && document.activeElement === document.body) focusSelected();
   }
   function syncSelection() {
@@ -337,9 +340,9 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   const slug = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-');
   function field(title: string, ...children: (Node | string)[]) { const node = el('div', 'sc-field'); node.role = 'group'; node.ariaLabel = title; node.append(el('span', 'sc-field-label', title), ...children); return node; }
   function avatar(person: string, expression = 'Neutral') { const node = el('span', 'sc-avatar'); node.ariaHidden = 'true'; if (person === 'Narration') node.append(beatIcon('narration')); else { node.style.backgroundImage = `url("${sprite(person, expression)}")`; } node.style.setProperty('--ring', characterColour(person)); return node; }
-  function segmented(values: readonly string[], value: string, title: string, update: (value: string) => void) {
+  function segmented(values: readonly string[], value: string, title: string, update: (value: string) => void, keys: readonly string[] = values) {
     const node = el('div', 'sc-segmented'); node.role = 'radiogroup'; node.ariaLabel = title;
-    const buttons = values.map(v => { const button = action(v, () => { if (v !== value) change(() => update(v), `${title}: ${v} · ${name()}`); }, false, `${slug(title)}-${slug(v)}`); button.role = 'radio'; button.ariaChecked = String(v === value); button.tabIndex = v === value ? 0 : -1; return button; });
+    const buttons = values.map((v, i) => { const button = action(v, () => { if (v !== value) change(() => update(v), `${title}: ${keys[i]} · ${name()}`); }, false, `${slug(title)}-${slug(keys[i]!)}`); button.role = 'radio'; button.ariaChecked = String(v === value); button.tabIndex = v === value ? 0 : -1; return button; });
     buttons.forEach((button, i) => button.onkeydown = event => { const step = ['ArrowRight', 'ArrowDown'].includes(event.key) ? 1 : ['ArrowLeft', 'ArrowUp'].includes(event.key) ? -1 : 0; if (!step) return; event.preventDefault(); buttons[(i + step + buttons.length) % buttons.length]!.click(); });
     node.append(...buttons); return node;
   }
@@ -415,6 +418,99 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     list.append(...buttons); return field(title, list);
   }
   function note(text: string) { return el('p', 'sr-explanation', text); }
+  // Condition builder. Tests stay readable text in the story; rules are parsed from it and written back.
+  // Supported: yes/no, whole-number and text variables, same-type = and ≠, number ordering, one All/Any join.
+  const operators = [['=', 'is', '=='], ['≠', 'is not', '!='], ['<', 'is less than', '<'], ['≤', 'is at most', '<='], ['>', 'is greater than', '>'], ['≥', 'is at least', '>=']] as const;
+  type Rule = { variable: string; op: string; value: string };
+  type Test = { join: 'and' | 'or'; rules: Rule[] } | { advanced: string };
+  const typeName: Record<VariableType, string> = { flag: 'yes/no', number: 'number', text: 'text' };
+  const variableOf = (variableName: string) => projectVariables.find(v => v.name === variableName);
+  function parseRule(text: string): Rule | undefined {
+    const match = /^([a-z_][a-z0-9_]*) (is not|is less than|is at most|is greater than|is at least|is)(?: (.*))?$/.exec(text.trim()); if (!match) return;
+    const variable = variableOf(match[1]!), op = operators.find(o => o[1] === match[2])![0], raw = match[3] ?? ''; if (!variable) return;
+    if (variable.type === 'flag') return op === '=' && /^(true|false)$/.test(raw) ? { variable: variable.name, op, value: raw } : undefined;
+    if (variable.type === 'number') return /^(-?\d+)?$/.test(raw) ? { variable: variable.name, op, value: raw } : undefined;
+    const quoted = /^"(.*)"$/.exec(raw); return ['=', '≠'].includes(op) && quoted ? { variable: variable.name, op, value: quoted[1]! } : undefined;
+  }
+  function parseTest(text: string): Test {
+    const t = text.trim(); if (!t) return { join: 'and', rules: [] };
+    const hasAnd = / and /.test(t), hasOr = / or /.test(t); if (hasAnd && hasOr) return { advanced: t };
+    const join = hasOr ? 'or' : 'and', rules = t.split(` ${join} `).map(parseRule);
+    return rules.every(Boolean) ? { join, rules: rules as Rule[] } : { advanced: t };
+  }
+  function ruleText(rule: Rule) { const variable = variableOf(rule.variable), words = operators.find(o => o[0] === rule.op)![1]; return variable?.type === 'flag' ? `${rule.variable} is ${rule.value}` : variable?.type === 'text' ? `${rule.variable} ${words} "${rule.value}"` : `${rule.variable} ${words}${rule.value ? ' ' + rule.value : ''}`; }
+  function rulePython(rule: Rule) { const variable = variableOf(rule.variable), py = operators.find(o => o[0] === rule.op)![2]; return variable?.type === 'flag' ? (rule.value === 'true' ? rule.variable : `not ${rule.variable}`) : variable?.type === 'text' ? `${rule.variable} ${py} ${JSON.stringify(rule.value)}` : `${rule.variable} ${py} ${rule.value || '?'}`; }
+  function composeTest(test: { join: 'and' | 'or'; rules: Rule[] }) { return test.rules.map(ruleText).join(` ${test.join} `); }
+  function pythonTest(test: { join: 'and' | 'or'; rules: Rule[] }) { return test.rules.map(rulePython).join(` ${test.join} `); }
+  function defaultRule(variable: StoryVariable): Rule { return variable.type === 'flag' ? { variable: variable.name, op: '=', value: 'true' } : variable.type === 'number' ? { variable: variable.name, op: '≥', value: '1' } : { variable: variable.name, op: '=', value: variable.initial }; }
+  function typeBadge(type: VariableType) { const badge = el('span', `sc-type sc-type-${type}`, type === 'flag' ? 'Y/N' : type === 'number' ? '#' : 'Aa'); badge.ariaHidden = 'true'; return badge; }
+  /** Variable list with types, defaults and a way to create one in place. */
+  function variablePicker(key: string, title: string, current: string, choose: (variable: StoryVariable) => void, filter: (v: StoryVariable) => boolean = () => true) {
+    const menu = el('details', 'sc-dropdown sc-variable-picker'); const summary = el('summary', 'sc-person'); summary.dataset.action = key; summary.ariaLabel = `${title}: ${current || 'none chosen'}`;
+    const selectedVariable = variableOf(current);
+    summary.append(selectedVariable ? typeBadge(selectedVariable.type) : el('span', 'sc-type'), el('span', 'sc-variable-name', current || 'Choose a variable'), el('span', 'sc-caret', '▾'));
+    const list = el('div', 'sc-dropdown-list'); list.role = 'listbox'; list.ariaLabel = title;
+    for (const variable of projectVariables.filter(filter)) {
+      const item = action('', () => { menu.open = false; if (variable.name !== current) choose(variable); else summary.focus(); }, false, `${key}-${variable.name}`);
+      item.role = 'option'; item.ariaSelected = String(variable.name === current); item.ariaLabel = `${variable.name}, ${typeName[variable.type]}`;
+      const text = el('span', 'sc-variable-text'); text.append(el('span', 'sc-variable-name', variable.name), el('small', '', `${typeName[variable.type]} · starts ${variable.type === 'text' ? `"${variable.initial}"` : variable.initial}`));
+      item.append(typeBadge(variable.type), text); list.append(item);
+    }
+    const create = action('+ New variable…', () => { menu.open = false; newVariable(choose); }, false, `${key}-new`); create.classList.add('sc-dropdown-create'); list.append(create);
+    list.onkeydown = event => { const items = [...list.querySelectorAll<HTMLElement>('.button')], i = items.indexOf(document.activeElement as HTMLElement); if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); items[(i + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length]?.focus(); } if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); menu.open = false; summary.focus(); } };
+    menu.ontoggle = () => { if (menu.open) (list.querySelector<HTMLElement>('[aria-selected=true]') ?? list.querySelector<HTMLElement>('.button'))?.focus(); };
+    menu.append(summary, list); return menu;
+  }
+  function newVariable(done: (variable: StoryVariable) => void) {
+    const dialog = modal('New variable', 'new-variable'); dialog.classList.add('sc-variable-dialog');
+    const nameInput = el('input'); nameInput.ariaLabel = 'Variable name'; nameInput.placeholder = 'e.g. found_letter'; nameInput.autocomplete = 'off'; nameInput.spellcheck = false;
+    let type: VariableType = 'flag';
+    const types = el('div', 'sc-segmented'); types.role = 'radiogroup'; types.ariaLabel = 'Variable type';
+    const initial = el('div', 'sc-variable-initial');
+    const drawInitial = () => { initial.replaceChildren(); if (type === 'flag') { const s = el('select'); s.ariaLabel = 'Starts as'; s.append(new Option('false', 'false'), new Option('true', 'true')); initial.append(s); } else { const i = el('input'); i.ariaLabel = 'Starts as'; i.value = type === 'number' ? '0' : ''; if (type === 'number') i.inputMode = 'numeric'; initial.append(i); } };
+    for (const [value, labelText] of [['flag', 'Yes/no'], ['number', 'Whole number'], ['text', 'Text']] as const) { const button = action(labelText, () => { type = value; for (const b of types.children) (b as HTMLElement).ariaChecked = String(b === button); drawInitial(); }, false, `variable-type-${value}`); button.role = 'radio'; button.ariaChecked = String(value === type); types.append(button); }
+    drawInitial();
+    const error = el('p', 'sc-field-error'); error.role = 'status';
+    const reserved = ['and', 'or', 'not', 'if', 'elif', 'else', 'in', 'is', 'for', 'while', 'def', 'class', 'return', 'import', 'from', 'pass', 'true', 'false', 'none', 'mara', 'eli', 'narrator'];
+    const create = action('Create variable', () => {
+      const variableName = nameInput.value.trim(), start = (initial.querySelector('input,select') as HTMLInputElement).value.trim();
+      const problem = !/^[a-z][a-z0-9_]*$/.test(variableName) ? 'Use lowercase letters, numbers and underscores, starting with a letter.' : reserved.includes(variableName) ? 'That name is reserved in Ren\'Py or this project.' : variableOf(variableName) ? 'A variable with that name already exists.' : type === 'number' && !/^-?\d+$/.test(start) ? 'Enter a whole number for the starting value.' : '';
+      error.textContent = problem; nameInput.ariaInvalid = String(!!problem && !problem.startsWith('Enter')); if (problem) { (problem.startsWith('Enter') ? initial.querySelector<HTMLElement>('input') : nameInput)?.focus(); return; }
+      const variable = { name: variableName, type, initial: start }; dialog.close(); change(() => { projectVariables = [...projectVariables, variable]; done(variable); }, `Create variable ${variableName}`);
+    }, true, 'create-variable');
+    nameInput.onkeydown = event => { if (event.key === 'Enter') { event.preventDefault(); create.click(); } };
+    dialog.append(labelled('Name', nameInput), field('Type', types), field('Starts as', initial), error, el('p', 'sr-explanation', 'Written as a default statement in the project. Saves and loads with the game.'));
+    actions(dialog, [action('Cancel', () => dialog.close(), false, 'cancel-dialog'), create]); nameInput.focus();
+  }
+  /** Rules joined by All or Any. Anything else stays read-only with Edit in Source. */
+  function testBuilder(owner: Beat, key: string, labelText: string, keyword: string, read: () => string, write: (text: string) => void, empty: string) {
+    const node = el('div', 'sc-test'); const test = parseTest(read());
+    if ('advanced' in test) {
+      const code = el('code', 'sc-test-code', `${keyword} ${test.advanced}:`);
+      node.append(code, note('This test mixes All and Any, or uses Python the builder cannot show. It stays as written.'), action('Edit in Source', () => source(owner), false, `${key}-source`)); return node;
+    }
+    const code = el('code', 'sc-test-code'); const drawCode = () => { code.textContent = test.rules.length ? `${keyword} ${pythonTest(test)}:` : empty; code.classList.toggle('sc-test-empty', !test.rules.length); };
+    const save = (title: string) => change(() => write(composeTest(test)), `${title} · ${name(owner.id)}`);
+    if (test.rules.length > 1) node.append(field('Match', segmented(['All', 'Any'], test.join === 'and' ? 'All' : 'Any', `${labelText} match`, value => { test.join = value === 'All' ? 'and' : 'or'; write(composeTest(test)); })));
+    test.rules.forEach((rule, i) => {
+      const row = el('div', 'sc-rule'); row.dataset.rule = String(i); const variable = variableOf(rule.variable)!;
+      const top = el('div', 'sc-rule-top'); const remove = action('', () => { test.rules.splice(i, 1); save('Remove rule'); }, false, `${key}-rule-${i}-remove`); remove.append(beatIcon('close')); remove.ariaLabel = remove.title = `Remove rule ${i + 1}`;
+      top.append(variablePicker(`${key}-rule-${i}-variable`, `${labelText} rule ${i + 1} variable`, rule.variable, chosen => { test.rules[i] = defaultRule(chosen); save(`Test ${chosen.name}`); }), remove);
+      const how = el('div', 'sc-rule-how');
+      if (variable.type === 'flag') how.append(segmented(['is true', 'is false'], `is ${rule.value}`, `${labelText} rule ${i + 1}`, value => { rule.value = value.slice(3); write(composeTest(test)); }));
+      else {
+        const ops = variable.type === 'number' ? operators : operators.filter(o => ['=', '≠'].includes(o[0]));
+        const switcher = segmented(ops.map(o => o[0]), rule.op, `${labelText} rule ${i + 1} operator`, value => { rule.op = value; write(composeTest(test)); }, ops.map(o => o[1]));
+        switcher.classList.add('sc-operators'); ops.forEach((o, j) => { const b = switcher.children[j] as HTMLElement; b.title = o[1]; b.ariaLabel = o[1]; });
+        const value = input(rule.value, `${labelText} rule ${i + 1} value`, text => { rule.value = text; write(composeTest(test)); drawCode(); value.ariaInvalid = String(variable.type === 'number' && !/^-?\d+$/.test(text)); });
+        if (variable.type === 'number') { value.inputMode = 'numeric'; value.ariaInvalid = String(!/^-?\d+$/.test(rule.value)); } value.placeholder = variable.type === 'number' ? 'Number' : 'Text';
+        how.append(switcher, value);
+      }
+      row.append(top, how); node.append(row);
+    });
+    const add = action(test.rules.length ? '+ Add rule' : '+ Add a rule', () => { const first = projectVariables[0]; if (first) { test.rules.push(defaultRule(first)); save('Add rule'); } }, false, `${key}-add-rule`); add.classList.add('sc-add-rule');
+    drawCode(); node.append(add, code); return node;
+  }
   function combinedFields(b: Beat): HTMLDivElement {
     const form = el('div', 'sr-fields sc-fields'); form.dataset.editorFor = b.id; form.dataset.kind = b.kind;
     const transition = () => field('Transition', segmented(['None', 'Dissolve', 'Fade'], b.transition, 'Transition', value => b.transition = value));
@@ -430,7 +526,33 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     else if (b.kind === 'stopMusic') form.append(note('Stops the current music. This sample does not play audio.'));
     else if (b.kind === 'playSfx') form.append(listChoice(sounds, b.asset, 'Sound effect', 'playSfx', value => b.asset = value), note('Plays once. This sample does not play audio.'));
     else if (b.kind.endsWith('Screen')) form.append(field('Screen', segmented(['Help', 'Inventory'], b.asset === 'Neutral' ? 'Help' : b.asset, 'Screen', value => b.asset = value)), note(b.kind === 'callScreen' ? 'Opens the screen and waits for it to close before the next beat.' : b.kind === 'showScreen' ? 'Shows the screen while the story continues.' : 'Hides the screen while the story continues.'));
-    else if (b.kind === 'setVariable') { const row = el('div', 'sc-assign'); row.append(select(['has_ticket', 'trust'], b.text || 'has_ticket', 'Variable', value => b.text = value), el('span', 'sc-equals', '='), input(b.value, 'Variable value', value => b.value = value)); form.append(field('Set', row), note('Later conditions can test this value. Values are not evaluated in this mock.')); }
+    else if (b.kind === 'setVariable') {
+      const variable = variableOf(b.text) ?? projectVariables[0]!, operation = variable.type === 'number' ? b.operation ?? 'set' : 'set';
+      const python = variable.type === 'flag' ? `$ ${variable.name} = ${b.value === 'true' ? 'True' : 'False'}` : variable.type === 'text' ? `$ ${variable.name} = ${JSON.stringify(b.value)}` : `$ ${variable.name} ${operation === 'add' ? '+=' : operation === 'subtract' ? '-=' : '='} ${b.value || '?'}`;
+      const code = el('code', 'sc-test-code', python);
+      form.append(field('Variable', variablePicker('set-variable', 'Variable', variable.name, chosen => change(() => { b.text = chosen.name; b.operation = 'set'; b.value = chosen.type === 'flag' ? 'true' : chosen.type === 'number' ? '1' : chosen.initial; }, `Set ${chosen.name} · ${name(b.id)}`))));
+      if (variable.type === 'flag') form.append(field('Value', segmented(['true', 'false'], b.value === 'false' ? 'false' : 'true', 'Value', value => b.value = value)));
+      else {
+        if (variable.type === 'number') form.append(field('Change', segmented(['Set to', 'Add', 'Subtract'], operation === 'add' ? 'Add' : operation === 'subtract' ? 'Subtract' : 'Set to', 'Change', value => b.operation = value === 'Add' ? 'add' : value === 'Subtract' ? 'subtract' : 'set')));
+        const value = input(b.value, 'Variable value', text => { b.value = text; code.textContent = variable.type === 'text' ? `$ ${variable.name} = ${JSON.stringify(text)}` : `$ ${variable.name} ${operation === 'add' ? '+=' : operation === 'subtract' ? '-=' : '='} ${text || '?'}`; }); value.placeholder = variable.type === 'number' ? 'Number' : 'Text'; if (variable.type === 'number') value.inputMode = 'numeric';
+        form.append(field(operation === 'set' ? 'Value' : 'Amount', value));
+      }
+      form.append(code); if (operation !== 'set') form.append(note('Planned: Loomlight does not write += or -= yet. This sample shows the intended editor.'));
+    }
+    else if (b.kind === 'condition') {
+      form.append(note('The first branch whose test is true runs. Tests are not evaluated in this mock.'));
+      b.branches.forEach((branch, index) => {
+        const row = el('section', 'sr-branch-control sc-branch'); row.dataset.branch = branch.id; row.dataset.arm = String(armOf(branch)); row.ariaLabel = `${branch.name} branch`;
+        const head = el('div', 'sc-branch-head'); head.append(el('strong', '', branch.name));
+        const show = action(visibleBranches.get(b.id) === branch.id ? 'Showing' : 'Show', () => openBranch(b, branch), false, `open-branch-${branch.id}`); show.ariaPressed = String(visibleBranches.get(b.id) === branch.id); head.append(show);
+        if (branch.name.toLowerCase() === 'else if') { const remove = action('', () => removeBranch(b, branch), false, `remove-branch-${branch.id}`); remove.append(beatIcon('close')); remove.ariaLabel = remove.title = 'Remove this Else if'; head.append(remove); }
+        row.append(head);
+        if (branch.name === 'Otherwise') row.append(note('Runs when no test above is true.'));
+        else row.append(testBuilder(b, `test-${branch.id}`, `${number(b.id)} ${branch.name}`, index === 0 ? 'if' : 'elif', () => branch.condition, text => branch.condition = text, 'Add a rule to give this branch a test.'));
+        form.append(row);
+      });
+      form.append(action('+ Add Else if', () => addElseIf(b), false, 'add-else-if'));
+    }
     else if (b.kind === 'choice') {
       b.options.forEach((option, i) => {
         const block = el('fieldset', 'sr-option sc-option'); block.dataset.choiceIndex = String(i); block.append(el('legend', 'sc-visually-hidden', `Option ${i + 1}`));
@@ -439,8 +561,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
         remove.append(beatIcon('close')); remove.ariaLabel = `Remove option ${i + 1}`; remove.title = remove.ariaLabel; remove.disabled = b.options.length === 1; if (remove.disabled) remove.title = 'A choice menu needs at least one option.';
         top.append(el('span', 'sc-option-number', String(i + 1)), text, remove);
         const goes = el('div', 'sc-option-goes'); goes.append(destination(option.target, `Option ${i + 1} destination`, value => option.target = value), action(`Open ${scenes.find(s => s.id === option.target)?.name ?? 'destination'}`, () => go(option.target, true), false, `open-choice-${i}`), action('New scene…', () => createScene(s => option.target = s.id, i, option.text), false, `new-choice-${i}`));
-        const guard = input(option.guard, `Option ${i + 1} availability`, value => option.guard = value); guard.placeholder = 'Always available';
-        block.append(top, field('Goes to', goes), field('Only when', guard)); form.append(block);
+        block.append(top, field('Goes to', goes), field('Only when', testBuilder(b, `guard-${i}`, `Option ${i + 1}`, 'if', () => option.guard, text => option.guard = text, 'Always available'))); form.append(block);
       });
       form.append(action('+ Add option', () => { const index = b.options.length; change(() => b.options.push({ text: '', target: scenes.find(s => s.id !== sceneId)?.id ?? sceneId, guard: '' }), `Add option to ${name(b.id)}`); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${index + 1} text"]`); }, false, 'add-choice-option'), note('Conditions are not evaluated here. If no option is available, the story continues to the next beat.'));
     }
@@ -653,7 +774,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     for (const note of host.querySelectorAll<HTMLElement>('.sr-stage-status')) { const title = manual ? `Previewing ${manualOwner ? number(manualOwner.id) : ''} ${manualBranch?.name ?? 'branch'} · editing ${number()}` : `${number()} · ${state.unknown.length ? 'Partial illustration' : 'Sample illustration'}${routes && !combined ? ' · via ' + routes : ''}`; if (combined && !state.background && !state.characters.size && !state.line) { note.textContent = ''; note.title = note.ariaLabel = ''; continue; } note.textContent = innerWidth < 900 ? `${number()}${manual ? ' · Preview' : state.unknown.length ? ' · Partial' : ''}` : title; note.title = title; note.ariaLabel = title; }
     for (const effect of host.querySelectorAll('.sr-effects')) effect.replaceWith(effects());
     for (const owner of flatten(scene().beats)) for (const branch of owner.branches) {
-      for (const button of host.querySelectorAll<HTMLElement>(`[data-action="open-branch-${branch.id}"]`)) { const prefix = button.closest('.sr-branch-control') ? (variant === 'stage-tracks' ? 'Show in tracks: ' : 'Open branch: ') : button.closest('.sr-reel-target') ? 'Open ' : ''; const fullName = `${prefix}${branch.name} ${branch.condition}${button.closest('.sr-reel-target') ? ' · ' + count(branch.beats.length, 'beat') : ''}`.trim(); if (button.closest('.sr-branch-control')) { button.textContent = variant === 'stage-tracks' ? 'Show in tracks' : combined ? `${visibleBranches.get(owner.id) === branch.id ? 'Opened' : 'Open'} ${branch.name}` : 'Open branch'; if (combined) button.ariaPressed = String(visibleBranches.get(owner.id) === branch.id); button.ariaLabel = button.title = fullName; } else if (!button.closest('.sc-branch-switch')) nameControl(button, fullName); if (button.closest('.sr-track-band')) button.title = `Show ${branch.name} ${branch.condition} in tracks`.trim(); }
+      for (const button of host.querySelectorAll<HTMLElement>(`[data-action="open-branch-${branch.id}"]`)) { const prefix = button.closest('.sr-branch-control') ? (variant === 'stage-tracks' ? 'Show in tracks: ' : 'Open branch: ') : button.closest('.sr-reel-target') ? 'Open ' : ''; const fullName = `${prefix}${branch.name} ${branch.condition}${button.closest('.sr-reel-target') ? ' · ' + count(branch.beats.length, 'beat') : ''}`.trim(); if (button.closest('.sr-branch-control')) { button.textContent = variant === 'stage-tracks' ? 'Show in tracks' : combined ? (visibleBranches.get(owner.id) === branch.id ? 'Showing' : 'Show') : 'Open branch'; if (combined) button.ariaPressed = String(visibleBranches.get(owner.id) === branch.id); button.ariaLabel = button.title = fullName; } else if (!button.closest('.sc-branch-switch')) nameControl(button, fullName); if (button.closest('.sr-track-band')) button.title = `Show ${branch.name} ${branch.condition} in tracks`.trim(); }
       const option = host.querySelector<HTMLOptionElement>(`.sr-preview-route option[value="${branch.id}"]`); if (option) option.textContent = `${number(owner.id)} ${branch.name} ${branch.condition}`.trim();
     }
     const selectedBeat = current();
