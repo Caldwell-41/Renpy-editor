@@ -81,6 +81,10 @@ trimming status records, was declined.
    no other test held, the disabled Create screen without a UI image, moved into
    `screen-panels-workspace.dom`. Three canvas fixtures need the SDK and skip with
    that reason. Fixtures that another workflow runs skip with its name.
+   On Linux CI, `ui-image` stalls: Apply never sends `screens.compose`, twice in a
+   row (runs 42371963578 and 42372623332). It was only ever qualified on Windows
+   and passes on macOS, so it skips on Linux only. Its failure output now goes into
+   the uploaded Help failure evidence.
 3. Merging the six older per-ticket qualification scripts was declined. They need
    SDK and Windows runs, and the shared `fidelity_reference` runner already exists.
    New qualifications use that runner; delete an old script when its feature
