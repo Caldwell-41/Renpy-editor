@@ -1,16 +1,6 @@
 {
   "version": 1,
-  "branch": "codex/85-test-selection",
-  "qualifications": [
-    {
-      "name": "Both-target harness checks",
-      "workflow": "quality.yml",
-      "event": "workflow_dispatch",
-      "jobs": [
-        "Harness regressions — windows-2025",
-        "Harness regressions — macos-26"
-      ]
-    }
-  ],
-  "base": "codex/phase3b-screen-designer"
+  "branch": "codex/85-test-docs",
+  "qualifications": [],
+  "base": "codex/85-test-selection"
 }
