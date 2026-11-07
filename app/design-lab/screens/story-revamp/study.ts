@@ -1296,15 +1296,15 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   }
   /** One colour per branch, in scene order, cycling through four. */
   function armOf(branch: Branch) { const all = flatten(scene().beats).flatMap(b => b.branches); return (Math.max(0, all.indexOf(branch)) % 4) + 1; }
-  function segmentLabel(owner: Beat, branch: Branch) { if (owner.kind === 'choice') { const i = owner.options.findIndex(o => o.body === branch.id); return `${i + 1} ${owner.options[i]?.text || 'New choice'}`; } return branch === owner.branches[0] ? 'true' : branch.name === 'Otherwise' ? 'otherwise' : branch.condition || 'else if'; }
+  function segmentLabel(owner: Beat, branch: Branch) { if (owner.kind === 'choice') { const i = owner.options.findIndex(o => o.body === branch.id), open = visibleBranches.get(owner.id); return open === branch.id ? `${i + 1} ${owner.options[i]?.text || 'New choice'}` : String(i + 1); } return branch === owner.branches[0] ? 'true' : branch.name === 'Otherwise' ? 'otherwise' : branch.condition || 'else if'; }
   function conditionStrip() {
     const strip = el('nav', 'sc-conditions'); strip.ariaLabel = 'Branch path';
     strip.append(el('strong', 'sc-conditions-title', 'Branch path'));
     const groups = el('div', 'sc-condition-groups');
     const route = columns(scene(), visibleBranches);
     for (const { beat: owner } of route.filter(c => c.beat.branches.length)) {
-      if (groups.children.length) { const arrow = el('span', 'sc-path-arrow', '›'); arrow.ariaHidden = 'true'; groups.append(arrow); }
       const group = el('div', 'sc-condition-group'); group.dataset.conditionOwner = owner.id;
+      if (groups.children.length) { const arrow = el('span', 'sc-path-arrow', '›'); arrow.ariaHidden = 'true'; group.append(arrow); }
       const edit = action(number(owner.id), () => editBeat(owner.id), false, `edit-condition-${owner.id}`); edit.classList.add('sc-condition-ref');
       edit.ariaLabel = `Edit ${owner.kind === 'choice' ? 'choice' : 'condition'} ${number(owner.id)}`; edit.title = `${name(owner.id)} · ${locate(scene(), owner.id)!.trail.join(' › ')}`;
       const test = el('span', 'sc-condition-test'); test.dataset.conditionTest = owner.id;
@@ -1318,11 +1318,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       group.append(edit, test, choices); groups.append(group);
     }
     if (!groups.children.length) groups.append(el('span', 'sc-conditions-empty', 'No conditions or choices in this scene.'), action('+ Add condition', () => { const t = target(); insert('condition', t.body, t.trail, t.index); }, false, 'add-condition'));
-    const earlier = action('‹', () => { groups.scrollLeft -= Math.max(120, groups.clientWidth * .7); }, false, 'conditions-earlier'); earlier.ariaLabel = earlier.title = 'Earlier condition branches';
-    const later = action('›', () => { groups.scrollLeft += Math.max(120, groups.clientWidth * .7); }, false, 'conditions-later'); later.ariaLabel = later.title = 'More condition branches';
-    const updateEdges = () => { const overflow = groups.scrollWidth > groups.clientWidth + 1; earlier.hidden = later.hidden = !overflow; earlier.disabled = groups.scrollLeft < 1; later.disabled = groups.scrollLeft + groups.clientWidth >= groups.scrollWidth - 1; };
-    earlier.classList.add('sc-scroll-branches'); later.classList.add('sc-scroll-branches'); groups.onscroll = updateEdges;
-    strip.append(earlier, groups, later); requestAnimationFrame(updateEdges); return strip;
+    strip.append(groups); return strip;
   }
   function chainOf(id: string) { return (ancestry(scene(), id) ?? []).map(p => p.branch); }
   function thenText(owner: Beat, branch: Branch) {

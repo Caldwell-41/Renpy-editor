@@ -379,3 +379,20 @@
 .sc-combined-shell .sc-preview-controls>.button { min-height:24px; padding:1px 7px; font-size:11.5px; background:transparent; border-color:var(--border-normal); color:var(--text-secondary); }
 .sc-combined-shell .sc-preview-controls>.button[aria-pressed=true] { background:var(--accent-subtle); color:var(--accent-primary); border-color:var(--accent-primary); font-weight:600; }
 .sc-preview-always { font-size:11.5px; color:var(--text-muted); padding:0 6px; }
+/* Branch path wraps instead of scrolling sideways. Each condition or Choice stays one unit; the bottom
+   panel grows by the extra rows so Tracks keeps its height. Past three rows the path scrolls vertically. */
+.sc-combined-shell .sc-combined-layout { grid-template-rows:minmax(0,1fr) auto; }
+.sc-combined-shell .sc-bottom { grid-template-rows:auto 215px; }
+.sc-combined-shell .sc-conditions { align-items:flex-start; padding:2px 0 1px; }
+.sc-combined-shell .sc-conditions-title { line-height:30px; }
+.sc-combined-shell .sc-condition-groups { flex-wrap:wrap; row-gap:2px; overflow:hidden auto; max-height:98px; flex:1; }
+.sc-combined-shell .sc-condition-group { flex:none; max-width:100%; }
+.sc-combined-shell .sc-condition-test { max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sc-combined-shell .sc-path-arrow { line-height:30px; }
+.sc-combined-shell .sc-conditions .sc-branch-switch>.sc-option-segment:not([aria-pressed=true]) { min-width:28px; }
+@media(min-width:900px) { .sc-combined-shell [data-focused=true] .sc-combined-layout { grid-template-rows:auto minmax(0,1fr); } }
+@media(max-width:899px) { .sc-combined-shell [data-focused=true] .sc-combined-layout { grid-template-rows:auto minmax(210px,1.2fr) minmax(160px,1fr); } }
+@media(min-width:900px) and (max-width:1200px) { .sc-combined-shell .sc-bottom { grid-template-rows:auto 153px; } .sc-combined-shell .sc-conditions-title,.sc-combined-shell .sc-path-arrow { line-height:26px; } .sc-combined-shell .sc-condition-groups { max-height:86px; } }
+@media(max-width:899px) { .sc-combined-shell .sc-bottom { height:auto; grid-template-rows:auto 194px; } }
+.sc-combined-shell .sc-condition-groups>.button { min-height:26px; padding:2px 7px; }
+.sc-combined-shell .sc-conditions-empty { line-height:26px; }

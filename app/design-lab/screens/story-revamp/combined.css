@@ -158,8 +158,6 @@
 .sc-writing-shortcut { flex:none; width:100%; margin:5px 0 0; font-size:11px; line-height:1.5; color:var(--text-secondary); }
 .sc-combined-shell .sr-branch-control>.button { color:var(--text-secondary); border-color:var(--border-normal); }
 .sc-combined-shell .sr-branch-control>.button[aria-pressed=true] { color:var(--text-primary); border-color:var(--border-strong); }
-.sc-combined-shell .sc-scroll-branches { flex:none; font-size:18px; padding:2px 5px!important; }
-.sc-combined-shell .sc-scroll-branches[hidden] { display:none; }
 .sc-combined-shell .sr-option-actions { display:grid; grid-template-columns:1fr 1fr; align-items:stretch; }
 .sc-combined-shell .sr-option-actions>.button:last-child { grid-column:2; }
 .sc-combined-shell .sr-row-popover>.sr-explanation { max-width:230px; padding:6px 8px; margin:0; font-size:11px; }

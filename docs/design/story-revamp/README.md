@@ -41,15 +41,29 @@ Issue #82 records the decisions. The three reference variants are unchanged.
   (opening background, name and first line) that opens a scene sheet with New scene. The
   condition reads as one line, "Always available" or "Only when ...", and the rule builder
   opens on request. Focusing or pointing at an option marks its button on the stage.
-- Each option also has its own beats and an outcome: continue after the menu, go to a
-  scene (`jump`), visit a scene and come back (`call`), show the menu again (labelled
-  menu plus `jump`, with an optional "hide picked options" `set`) or end the story
-  (`return`). Option beats are stored like condition branches, so they appear in the
-  Branch path bar, Tracks and Reel. A menu can show a line with the choices (caption).
-  Menu arguments, NVL menus and nested menus stay in Source.
+- Choice options follow #98 (handoff #99). Each option owns ordered Beats, stored like a
+  condition branch, so option paths appear in the Branch path bar, Tracks, Reel and Writing
+  focus. "Then" edits only the body's last Beat: Continue after the Choice (no ending Beat),
+  Go to a scene (Jump), Repeat this Choice or Return (to the caller, or the main menu).
+  Call is an ordinary Beat inside the body. Earlier Beats are never removed.
+- The prompt is narration or a Character line shown with the options. Each guarded option
+  chooses Hide (default) or Show disabled when false. The whole Choice has Picked options:
+  Show normally, Mark picked or Hide picked. Options with the same text show a note and
+  keep separate identities (the option's body id), so picking one never marks the other.
+- "Preview options" in the stage footer sets illustrative assumptions per option
+  (condition unknown, true or false; picked earlier in this save). It is not a playthrough
+  or a save, and it never enters Undo. The game window then shows hidden, disabled (lock),
+  marked (✓) and unknown (dashed) options. When nothing can be picked, the stage explains
+  that the story continues after the Choice and records no pick.
+- Samples: "The last service" 08 shows a Character prompt, a boolean option and an empty
+  option meeting at 09, a dialogue/Call/narration body, a visible locked option and a
+  hidden secret option. "A familiar stranger" 03 shows repeatable questions with Leave,
+  Mark picked with two "Ask about the station" options, a nested condition and a nested
+  Choice.
 - Loomlight's Choice is jump-only today (`ChoiceOption` has no body; `parse_menu` refuses
-  other forms; DATA_MODEL treats Choice as terminal). Option beats and the other four
-  outcomes need a model decision before production work.
+  other forms; DATA_MODEL treats Choice as terminal). #98 Stage 1 (bodies, prompt,
+  Hide/Show disabled) and Stage 2 (Repeat, Picked options and saved per-option history)
+  are unbuilt; the editor says so.
 - Add a beat is one compact dialog. Click or Enter adds the highlighted beat; Escape or
   Close cancels. Replacing an ending is named in the destination line.
 - Writing focus Tracks shows all six lanes above 1200 px wide.
@@ -59,9 +73,26 @@ Issue #82 records the decisions. The three reference variants are unchanged.
   rules. Each branch shows its Ren'Py line. Mixed groups and unreadable Python stay
   read-only with Edit in Source; the builder never writes raw Python. Choice "Only when"
   uses the same builder. The variable list can create a variable in place, with Undo.
-- Set variable uses the same list. For numbers it offers Set to, Add and Subtract. Add and
-  Subtract (`+=`, `-=`) are planned: Loomlight does not write computed assignments yet,
-  and the editor says so. Kris is opening a separate issue for that support.
+- Set variable follows #87 (handoff #88): Set, Add, Subtract, Multiply, Divide, Floor
+  divide and Remainder, with a number or formula using declared numeric variables and
+  brackets. Suggestions appear while typing a name; insert keys add variables and
+  operators at the cursor. Feedback names the result type and refuses a decimal result for
+  a whole-number variable, unknown or non-number variables and zero divisors. "On this
+  route" uses only values set earlier on the route, never the starting default, so most
+  values read "unknown". Calculations the editor cannot show (such as `max()`) stay
+  read-only with Edit in Source. Decimal is a new variable type. `combined-arithmetic.ts`
+  holds the parser, type rules and Python division semantics.
+- Three arrangements are open for review with `?arith=`: `a` a symbol strip for all seven
+  operations, `b` an equation row (`trust [+= ▾] [formula]`), and `c` (default) Set to,
+  Add and Subtract with the rest under More, plus insert keys. Kris chooses one; the others
+  are then removed.
+- The Branch path wraps instead of scrolling sideways. Each condition or Choice stays one
+  unit and never overlaps another. Choice options show only their number unless open.
+  When the path needs more than one row, the bottom panel grows by those rows (up to
+  three, then the path scrolls) so Tracks keeps every lane. This deliberately breaks the
+  earlier rule that branch navigation never shrinks the stage: with deep nesting or at
+  compact width the stage loses about 30 px of height per extra row. One-row paths keep
+  the stage at 974 × 548 and 633 × 356.
 
 GPT-6.1 Sol generated the fictional art in `art/`; its README lists the files and checks.
 

@@ -240,7 +240,8 @@ try{
    assert.equal(await page.locator('.sr-prose').inputValue(),'A draft inside the nested branch.');
    await page.locator(`[data-action=bottom-${mode}]`).click();
    await page.locator('[data-action=toggle-focus]').click(); await page.locator('.sr-workarea').evaluate(n=>n.scrollTop=0); await capture(`${size}-${mode}-nested-main`);
-   const dimensions=await page.locator('[data-stage]').boundingBox(); assert.equal(dimensions.width,stage.width,'Branch navigation must not shrink stage');
+   const dimensions=await page.locator('[data-stage]').boundingBox(), pathRows=await page.locator('.sc-condition-groups').evaluate(n=>Math.round(n.scrollHeight/(n.firstElementChild?.getBoundingClientRect().height||30)));
+   if(size!=='compact'&&pathRows<=1) assert.equal(dimensions.width,stage.width,'A one-row Branch path must not shrink the stage'); else assert(stage.height-dimensions.height<=(pathRows-1)*34+1,'Stage shrinks only by the extra Branch path rows');
    report.checks.push(`${size}/${mode}: nested draft, selection, branch, target survive bottom/focus switches`);
   }
  }
@@ -375,9 +376,9 @@ try{
  assert.equal(await page.locator('.sr-stage [data-stage-choice="0"]').getAttribute('data-state'),'marked');assert.equal(await page.locator('.sr-stage [data-stage-choice="2"]').getAttribute('data-state'),'available','Duplicate caption keeps its own picked state');
  assert.match(await page.locator('[data-choice-index="0"]').innerText(),/Same text as option 3/);
  await page.locator('.sc-conditions [data-branch-segment=ask-2]').click();assert.equal(await page.locator('.sc-conditions [data-condition-owner]').count(),2,'Nested condition joins the Branch path');
- await page.locator('.sc-conditions [data-branch-segment=ask-4]').click();assert.match(await page.locator('.sc-conditions').innerText(),/Wave goodbye/);
+ await page.locator('.sc-conditions [data-branch-segment=ask-4]').click();assert.equal(await page.locator('.sc-conditions [data-branch-segment=goodbye-1]').getAttribute('title'),'Show Option 1 · Wave goodbye');
  await page.locator('[data-action=bottom-reel]').click();assert.equal(await page.locator('.sc-reel [data-reel-beat][data-selected=true]').getAttribute('data-beat-kind'),'choice');
- await page.locator('[data-action=toggle-focus]').click();await settled();assert.match(await page.locator('.sc-conditions').innerText(),/Wave goodbye/,'Writing focus keeps the open option path');
+ await page.locator('[data-action=toggle-focus]').click();await settled();assert.equal(await page.locator('.sc-conditions [data-branch-segment=goodbye-1]').count(),1,'Writing focus keeps the open option path');
  await capture('revision-choice-nested-focus');await page.locator('[data-action=toggle-focus]').click();await page.locator('[data-action=bottom-tracks]').click();
  report.checks.push('Revision #99: repeat endings, Mark picked with independent duplicate captions, nested condition and Choice paths in Tracks, Reel and Writing focus');
  // Revision (#88): arithmetic operations, formula suggestions, type and error feedback, unknown values, protected source and draft retention.
