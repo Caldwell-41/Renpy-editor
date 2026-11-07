@@ -54,8 +54,10 @@ CI and external waits follow [client-specific waiting and manual fallback](WORKF
 
 Use the narrowest real integration seam for changed asynchronous paths. Include
 relevant cancellation, held-owner contention, stale completion and retained input.
-Before trusting a gate, show it rejects wrong/missing results, zero tests and skipped
-required cases. Keep synthetic DOM, browser, real service, SDK, native input and human
+Gate results with the shared checks: `verify_unittest` for Python and `cargo-log`
+for Rust reject failures, zero tests and skips outside named host exclusions. Use
+`--exact` with Cargo filters and skips. Do not add per-gate test-name lists, or a new
+gate script with its own tests, for each qualification. Keep synthetic DOM, browser, real service, SDK, native input and human
 acceptance distinct. Do not fix production to satisfy an unvalidated fixture, raise
 thresholds, blanket-skip cases or retry until green.
 

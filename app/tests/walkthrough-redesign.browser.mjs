@@ -1,3 +1,4 @@
+// fixture: skip run by thinking-settings.yml.
 /** Current source components, passive public fixtures, and blocked persistence/network.
  * This driver coordinates UI actions; it never emulates a save, restore or source transaction.
  */

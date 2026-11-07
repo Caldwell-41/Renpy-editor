@@ -44,48 +44,8 @@ on:
         description: Cumulative thinking/connection paired attempt, 1 through 3
         type: string
         default: '1'
-      walkthrough_redesign:
-        description: Only approved current-candidate walkthrough redesign proof on Windows and Mac
-        type: boolean
-        default: false
-      walkthrough_redesign_ordinal:
-        description: Cumulative redesign paired attempt, 1 through 3
-        type: string
-        default: '1'
-      walkthrough_redesign_candidate:
-        description: Exact reviewed redesign commit SHA (required for redesign selection)
-        type: string
-        default: ''
-      story_logic_early:
-        description: Only focused Phase 3A conditions and calls; no package or older gates
-        type: boolean
-        default: false
-      story_logic_ordinal:
-        description: Cumulative Phase 3A paired attempt, 1 through 5
-        type: string
-        default: '1'
-      assistance_ui:
-        description: Only focused Studio UI refinement; no package or SDK matrix
-        required: false
-        type: boolean
-        default: false
-      assistance_ui_ordinal:
-        description: Selected UI refinement paired attempt, 1 or 2
-        required: false
-        type: string
-        default: '1'
-      source_foundation_macos:
-        description: One bounded Mac ARM64 source-foundation proof; reuse Windows evidence
-        required: false
-        type: boolean
-        default: false
       phase1g_flow_profile:
         description: Run bounded G1-OBS core, rendered interaction and three-sample budgets (no package)
-        required: false
-        type: boolean
-        default: false
-      phase1g_macos_browser_diagnostic:
-        description: One macOS-only traced Branches probe using the retained R2-P1 service fixture
         required: false
         type: boolean
         default: false
@@ -112,42 +72,52 @@ jobs:
       CARGO_TERM_COLOR: never
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 2
+      - name: Select checks from the tested PR merge
+        id: scope
+        working-directory: .
+        run: python3 scripts/pr_scope.py
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        if: ${{ steps.scope.outputs.code == 'true' }}
         with:
           node-version: 24.19.0
           cache: npm
           cache-dependency-path: app/package-lock.json
       - name: Select pinned npm and check Python
+        if: ${{ steps.scope.outputs.code == 'true' }}
         run: |
           npm install --global npm@11.9.0
           python3 -c "import sys; assert sys.version_info >= (3, 11)"
       - name: Install locked frontend dependencies
+        if: ${{ steps.scope.outputs.code == 'true' }}
         run: npm ci --ignore-scripts
       - name: Typecheck and test the frontend
+        if: ${{ steps.scope.outputs.code == 'true' }}
         run: npm run check
       - name: Build the production frontend
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.scope.outputs.code == 'true' }}
         run: npm run build
       - name: Check Rust formatting independently of frontend results
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.scope.outputs.code == 'true' }}
         run: |
           rustup toolchain install 1.90.0 --profile minimal --component rustfmt
           cargo +1.90.0 fmt --check --all
       - name: Run offline Help evidence admission gates
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.scope.outputs.code == 'true' }}
         run: |
           python3 -m venv "$RUNNER_TEMP/help-offline-python"
           "$RUNNER_TEMP/help-offline-python/bin/python" -m pip install Pillow==12.3.0
           "$RUNNER_TEMP/help-offline-python/bin/python" -m unittest discover -s scripts -p test_qualify_help_dialog.py -v
           "$RUNNER_TEMP/help-offline-python/bin/python" -m unittest discover -s scripts -p test_base_help_fidelity.py -v
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.scope.outputs.code == 'true' }}
         with:
           key: help-offline-core
           workspaces: app -> target
           cache-bin: 'false'
       - name: Check Help creation, references and fractional geometry without SDK execution
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.scope.outputs.code == 'true' }}
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/help-offline"
@@ -156,15 +126,22 @@ jobs:
             grep -Eq '^test result: ok\. [1-9][0-9]* passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/help-offline/${filter//::/-}.log"
           done
       - name: Exercise Dialog controllers through production core
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.scope.outputs.code == 'true' }}
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/help-offline"
           cargo +1.90.0 build -p loomlight-core --locked --example help-controller-driver --message-format=json-render-diagnostics 2>&1 | tee "$RUNNER_TEMP/help-offline/controller-artifacts.jsonl"
           DIALOG_CORE_UI_OUTPUT="$RUNNER_TEMP/help-offline/controller" node tests/screen-dialog-core.dispatch.mjs
+      - name: Run browser and dispatch fixtures
+        if: ${{ !cancelled() && steps.scope.outputs.code == 'true' }}
+        run: |
+          set -euo pipefail
+          cargo +1.90.0 build -p loomlight-core --locked --examples
+          # The Help failure step seals, scans and uploads this folder.
+          FIXTURE_OUTPUT="$RUNNER_TEMP/help-offline/fixtures" npm run test:fixtures
       - name: Seal and scan failed Help diagnostics and producing executables
         id: help_privacy
-        if: ${{ failure() }}
+        if: ${{ steps.scope.outputs.code == 'true' && failure() }}
         run: |
           python3 - <<'PY'
           import os, runpy, sys
@@ -173,15 +150,12 @@ jobs:
           folder = Path(os.environ['RUNNER_TEMP']) / 'help-offline'
           folder.mkdir(parents=True, exist_ok=True)
           utilities = runpy.run_path('scripts/check-thinking-evidence.py')
-          utilities['retain_binaries'](folder, Path('target'), artifacts={
-              'core': ('core-artifacts.jsonl', 'loomlight_core', True),
-              'controller': ('controller-artifacts.jsonl', 'help-controller-driver', False),
-          })
+          utilities['retain_binaries'](folder, Path('target'), artifacts=utilities['HELP_ARTIFACTS'])
           utilities['seal'](folder, Path('..'), 'help-offline-ci')
           PY
           node scripts/scan-artifacts.mjs "$RUNNER_TEMP/help-offline"
       - name: Upload privacy-checked Help failure evidence
-        if: ${{ failure() && steps.help_privacy.outcome == 'success' }}
+        if: ${{ steps.scope.outputs.code == 'true' && failure() && steps.help_privacy.outcome == 'success' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: help-offline-failure-${{ github.run_id }}-${{ github.run_attempt }}
@@ -196,7 +170,7 @@ jobs:
     with:
       candidate: ${{ inputs.studio_connection_candidate }}
       ordinal: ${{ inputs.studio_connection_ordinal }}
-      selector_conflict: ${{ inputs.harness_regressions || inputs.thinking_settings || inputs.walkthrough_redesign || inputs.story_logic_early || inputs.assistance_ui || inputs.source_foundation_macos || inputs.phase1g_flow_profile || inputs.phase1g_macos_browser_diagnostic || inputs.phase1g_candidate_proof }}
+      selector_conflict: ${{ inputs.harness_regressions || inputs.thinking_settings || inputs.phase1g_flow_profile || inputs.phase1g_candidate_proof }}
 
   harness-regressions:
     if: ${{ !inputs.validation_dummy && (!inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && inputs.harness_regressions)) }}
@@ -215,7 +189,7 @@ jobs:
       - name: Require isolated harness selection and actual target identity
         shell: bash
         env:
-          EXCLUDED_SELECTORS: ${{ inputs.thinking_settings || inputs.walkthrough_redesign || inputs.story_logic_early || inputs.assistance_ui || inputs.phase1g_flow_profile || inputs.phase1g_macos_browser_diagnostic || inputs.source_foundation_macos || inputs.phase1g_candidate_proof }}
+          EXCLUDED_SELECTORS: ${{ inputs.thinking_settings || inputs.phase1g_flow_profile || inputs.phase1g_candidate_proof }}
         run: |
           set -euo pipefail
           test "$EXCLUDED_SELECTORS" = false
@@ -239,7 +213,10 @@ jobs:
           printf 'HARNESS_PYTHON=%s\n' "$harness_python" >> "$GITHUB_ENV"
       - name: Run all independent harness groups and print failed assertions
         shell: bash
-        run: '"$HARNESS_PYTHON" app/scripts/run-harness-checks.py --output "$RUNNER_TEMP/harness-regressions"'
+        run: |
+          args=()
+          if test "$RUNNER_OS" = Windows; then args+=(--native-dialog); fi
+          "$HARNESS_PYTHON" app/scripts/run-harness-checks.py --output "$RUNNER_TEMP/harness-regressions" "${args[@]}"
       - name: Retain identity, summary and privacy-approved partial results
         id: harness_privacy
         if: always()
@@ -270,7 +247,7 @@ jobs:
           retention-days: 7
 
   validate:
-    if: ${{ !inputs.validation_dummy && (!inputs.studio_connection_native && (github.event_name != 'workflow_dispatch' || (!inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && !inputs.assistance_ui && !inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos))) }}
+    if: ${{ !inputs.validation_dummy && (!inputs.studio_connection_native && (github.event_name != 'workflow_dispatch' || (!inputs.harness_regressions && !inputs.thinking_settings && !inputs.phase1g_flow_profile))) }}
     name: Validate repository
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -281,6 +258,8 @@ jobs:
         run: python3 scripts/validate.py
       - name: Test repository section-link validation
         run: python3 -m unittest discover -s scripts -p test_validate.py -v
+      - name: Test documentation-only PR selection
+        run: python3 -m unittest discover -s scripts -p test_pr_scope.py -v
       - name: Test complete PR validation reporting
         run: python3 -m unittest discover -s scripts -p test_ci_validation.py -v
       - name: Exercise bounded Q1 gate rejection fixtures
@@ -290,9 +269,8 @@ jobs:
       - name: Audit Q1 selectors and retained cases
         run: python3 app/scripts/check-q1-prep-gates.py source-audit .
 
-
   phase1g-flow-profile:
-    if: ${{ !inputs.validation_dummy && (!inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && !inputs.assistance_ui && inputs.phase1g_flow_profile && !inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos)) }}
+    if: ${{ !inputs.validation_dummy && (!inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && inputs.phase1g_flow_profile)) }}
     name: Phase 1G flow profile — ${{ matrix.name }}
     strategy:
       fail-fast: false
@@ -342,26 +320,8 @@ jobs:
             --skip scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges \
             --skip lifecycle::tests::official_sdk_phase_1c_target_gate \
             --skip renpy::reconciliation_tests::official_sdk_download_handoff_target_gate \
-            --nocapture 2>&1 | tee "$RUNNER_TEMP/observed-core.log"
-          grep -E '^test result: ok\. [1-9][0-9]* passed; 0 failed;' "$RUNNER_TEMP/observed-core.log"
-          grep -E 'prepared_fault_state_can_be_safely_abandoned \.\.\. ok' "$RUNNER_TEMP/observed-core.log"
-          grep 'every_persistent_transition_has_bounded_recovery ... ok' "$RUNNER_TEMP/observed-core.log"
-          grep 'prepared_abandon_refuses_any_persisted_proposal_evidence ... ok' "$RUNNER_TEMP/observed-core.log"
-          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/observed-core.log" \
-            transaction::tests::prepared_fault_state_can_be_safely_abandoned \
-            transaction::tests::every_persistent_transition_has_bounded_recovery \
-            transaction::tests::interrupted_delete_is_recoverable_and_never_loses_the_displaced_source \
-            transaction::tests::interrupted_mixed_create_and_replace_blocks_follow_up \
-            transaction::tests::failed_stream_after_persisted_stage_is_recovery_required_not_rejected \
-            transaction::tests::explicit_recovery_resolves_only_proven_keep_or_accept_states \
-            transaction::tests::prepared_abandon_refuses_any_persisted_proposal_evidence \
-            transaction::tests::terminal_rejected_journal_does_not_block_flush_or_later_commit \
-            transaction::tests::final_window_external_writer_is_preserved_as_conflict \
-            lifecycle::tests::recent_precommit_failures_preserve_last_committed_store \
-            lifecycle::tests::recent_postcommit_failure_restarts_at_new_committed_store \
-            renpy::tests::sdk_hashes_match_multichunk_empty_and_missing_inputs \
-            renpy::tests::sdk_file_hash_retains_cancellation_and_deadline \
-            renpy::runtime::tests::runtime_natural_exit_and_crash_cleanup_descendant_pipes
+            --exact --nocapture 2>&1 | tee "$RUNNER_TEMP/observed-core.log"
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/observed-core.log"
       - name: Three isolated real-service observed-flow samples
         if: ${{ !inputs.phase1g_candidate_proof }}
         shell: bash
@@ -373,9 +333,7 @@ jobs:
           git rev-parse HEAD
           rustc -Vv
           cargo test -p loomlight-core --release --locked scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges -- --exact --nocapture 2>&1 | tee "$RUNNER_TEMP/runtime-flow-profile.log"
-          grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/runtime-flow-profile.log"
-          grep -E '^test scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges \.\.\. ok$' "$RUNNER_TEMP/runtime-flow-profile.log"
-          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-flow-profile.log" scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-flow-profile.log"
           grep 'phase-1g-observed-budget-gate: passed (3 samples)' "$RUNNER_TEMP/runtime-flow-profile.log"
       - name: Rendered interaction during refresh
         if: ${{ !inputs.phase1g_candidate_proof }}
@@ -435,239 +393,6 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-  phase1g-macos-browser-diagnostic:
-    if: ${{ !inputs.validation_dummy && (!inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && !inputs.assistance_ui && inputs.phase1g_macos_browser_diagnostic && !inputs.source_foundation_macos)) }}
-    name: R2-P1 macOS browser diagnostic
-    runs-on: macos-26
-    timeout-minutes: 10
-    permissions:
-      contents: read
-      actions: read
-    defaults:
-      run:
-        working-directory: app
-        shell: bash
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Require isolated diagnostic selection
-        env:
-          FLOW_PROFILE: ${{ inputs.phase1g_flow_profile }}
-          CANDIDATE_PROOF: ${{ inputs.phase1g_candidate_proof }}
-        run: |
-          test "$FLOW_PROFILE" = false
-          test "$CANDIDATE_PROOF" = false
-          command -v gh
-          command -v python3
-      - name: Set up existing pinned Node toolchain
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
-        with:
-          node-version: 24.19.0
-          cache: npm
-          cache-dependency-path: app/package-lock.json
-      - name: Select locked npm and dependencies
-        run: |
-          npm install --global npm@11.9.0
-          npm ci --ignore-scripts
-      - name: Verify retained real-service fixture
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          mkdir -p "$RUNNER_TEMP/macos-browser-diagnostic"
-          gh api repos/Caldwell-41/Renpy-editor/actions/artifacts/10923840024 > "$RUNNER_TEMP/macos-browser-diagnostic/input-artifact.json"
-          gh api repos/Caldwell-41/Renpy-editor/actions/artifacts/10923840024/zip > "$RUNNER_TEMP/retained-macos.zip"
-          python3 - <<'PYFIXTURE'
-          import hashlib, json, os, pathlib, zipfile
-          root = pathlib.Path(os.environ["RUNNER_TEMP"])
-          output = root / "macos-browser-diagnostic"
-          metadata = json.loads((output / "input-artifact.json").read_text())
-          archive = root / "retained-macos.zip"
-          digest = "82580f0178840ebc413767622ef7bdd7076de05f2bdcc95dfe756f826940961b"
-          assert metadata["id"] == 10923840024 and not metadata["expired"]
-          assert metadata["workflow_run"]["id"] == 36293797731
-          assert metadata["workflow_run"]["head_sha"] == "f1a0f148445f34f8af1a57d0f69e2d27eb543b11"
-          assert archive.stat().st_size == metadata["size_in_bytes"] == 224142
-          assert metadata["digest"] == "sha256:" + digest
-          assert hashlib.sha256(archive.read_bytes()).hexdigest() == digest
-          with zipfile.ZipFile(archive) as source:
-              assert source.namelist().count("runtime-flow.json") == 1
-              assert source.getinfo("runtime-flow.json").file_size < 8 * 1024 * 1024
-              fixture = source.read("runtime-flow.json")
-          assert hashlib.sha256(fixture).hexdigest() == "8f9e8deba12cf6bc2c1453b81515307308119113463f5c01e80de72982d30196"
-          model = json.loads(fixture)
-          assert len(model["nodes"]) == 500 and len(model["edges"]) == 2000
-          (output / "runtime-flow.json").write_bytes(fixture)
-          print("Verified retained service fixture; no core/SDK execution.")
-          PYFIXTURE
-      - name: Record diagnostic identity
-        run: |
-          {
-            git rev-parse HEAD
-            sw_vers
-            uname -m
-            node --version
-            npm --version
-            shasum -a 256 tests/branches.browser.mjs src/branches-ui.ts src/styles.css package-lock.json ../.github/workflows/quality.yml
-          } > "$RUNNER_TEMP/macos-browser-diagnostic/identity.log"
-      - name: One traced browser launch
-        timeout-minutes: 2
-        env:
-          LOOMLIGHT_FLOW_EVIDENCE: ${{ runner.temp }}/macos-browser-diagnostic/runtime-flow.json
-          LOOMLIGHT_BRANCHES_EVIDENCE_DIR: ${{ runner.temp }}/macos-browser-diagnostic
-          LOOMLIGHT_BRANCHES_TRACE: "1"
-        run: |
-          set -o pipefail
-          node tests/branches.browser.mjs 2>&1 | tee "$RUNNER_TEMP/macos-browser-diagnostic/probe.log"
-      - name: Inventory evidence and verify reported cleanup
-        if: always()
-        run: |
-          python3 - <<'PYAUDIT'
-          import hashlib, json, os, pathlib, socket, subprocess
-          output = pathlib.Path(os.environ["RUNNER_TEMP"]) / "macos-browser-diagnostic"
-          output.mkdir(exist_ok=True)
-          report_path = output / "report.json"
-          audit = {"reportPresent": report_path.exists()}
-          if report_path.exists():
-              report = json.loads(report_path.read_text())
-              audit["cleanup"] = report.get("cleanup")
-              audit["traceSaved"] = report.get("traceSaved", False)
-              pids = [str(process["id"]) for process in report.get("browserProcesses", [])]
-              if pids:
-                  result = subprocess.run(["ps", "-p", ",".join(pids), "-o", "pid=,comm="], capture_output=True, text=True)
-                  audit["browserPidsAbsent"] = result.returncode == 1 and not result.stdout.strip()
-              if "serverPort" in report:
-                  with socket.socket() as connection:
-                      audit["serverPortClosed"] = connection.connect_ex(("127.0.0.1", report["serverPort"])) != 0
-          (output / "cleanup-audit.json").write_text(json.dumps(audit, indent=2) + "\n")
-          inventory = {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in sorted(output.iterdir()) if path.is_file() and path.name != "manifest.json"}
-          (output / "manifest.json").write_text(json.dumps(inventory, indent=2) + "\n")
-          assert audit.get("cleanup") == {"browser": "closed", "server": "closed"}, audit
-          assert audit.get("browserPidsAbsent") and audit.get("serverPortClosed"), audit
-          assert audit.get("traceSaved") and (output / "trace.json").is_file(), audit
-          PYAUDIT
-      - name: Upload diagnostic evidence including failures
-        if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
-        with:
-          name: r2-p1-macos-browser-diagnostic
-          path: ${{ runner.temp }}/macos-browser-diagnostic/
-          if-no-files-found: error
-          retention-days: 7
-
-
-  source-foundation-macos:
-    if: ${{ !inputs.validation_dummy && (!inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && !inputs.assistance_ui && inputs.source_foundation_macos)) }}
-    name: Bounded source foundation — macOS ARM64
-    runs-on: macos-26
-    timeout-minutes: 70
-    concurrency:
-      group: source-foundation-macos-${{ github.ref }}
-      cancel-in-progress: false
-    env:
-      CARGO_TERM_COLOR: never
-      NO_COLOR: '1'
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - name: Check out exact workflow candidate
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Require isolated first-attempt selection and frozen inputs
-        env:
-          LOOMLIGHT_RUNTIME_SDK_ARCHIVE: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
-          FOUNDATION_EVIDENCE: ${{ runner.temp }}/source-foundation-macos
-          FLOW_PROFILE: ${{ inputs.phase1g_flow_profile }}
-          MAC_DIAGNOSTIC: ${{ inputs.phase1g_macos_browser_diagnostic }}
-          CANDIDATE_PROOF: ${{ inputs.phase1g_candidate_proof }}
-        run: |
-          python3 - <<'PYSELECT'
-          import os, pathlib, runpy
-          with open(os.environ['GITHUB_ENV'], 'a') as stream:
-              for key in ['LOOMLIGHT_RUNTIME_SDK_ARCHIVE', 'FOUNDATION_EVIDENCE']:
-                  stream.write(key + '=' + os.environ[key] + '\n')
-          assert os.environ['GITHUB_RUN_ATTEMPT'] == '1', 'No workflow retries authorized'
-          assert all(os.environ[k] == 'false' for k in ['FLOW_PROFILE', 'MAC_DIAGNOSTIC', 'CANDIDATE_PROOF'])
-          assert os.environ['GITHUB_REF'] == 'refs/heads/codex/nested-source-foundation'
-          namespace = runpy.run_path('scripts/qualify-source-foundation-macos.py')
-          namespace['inputs']()
-          pathlib.Path(os.environ['FOUNDATION_EVIDENCE']).mkdir(exist_ok=False)
-          PYSELECT
-      - name: Select pinned Node
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
-        with:
-          node-version: 24.19.0
-          cache: npm
-          cache-dependency-path: app/package-lock.json
-      - name: Select pinned npm and install locked dependencies
-        working-directory: app
-        run: |
-          npm install --global npm@11.9.0
-          npm ci --ignore-scripts
-      - name: Select repository-pinned Rust
-        working-directory: app
-        run: rustup show active-toolchain
-      - name: Restore Rust dependency cache
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
-        with:
-          key: phase-1b-macos-26
-          workspaces: app -> target
-          cache-bin: 'false'
-      - name: Restore official pinned SDK archive
-        id: foundation-sdk-cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
-        with:
-          path: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
-          key: phase-1c-renpy-macOS-8.5.3-eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45
-      - name: Download official SDK on cache miss
-        if: steps.foundation-sdk-cache.outputs.cache-hit != 'true'
-        run: |
-          curl --proto '=https' --tlsv1.2 --location --fail --show-error \
-            --max-time 300 --output "$LOOMLIGHT_RUNTIME_SDK_ARCHIVE.partial" \
-            https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2
-          mv "$LOOMLIGHT_RUNTIME_SDK_ARCHIVE.partial" "$LOOMLIGHT_RUNTIME_SDK_ARCHIVE"
-      - name: Cheap foundation and EOF fixture preflights
-        run: python3 scripts/qualify-source-foundation-macos.py prepare "$FOUNDATION_EVIDENCE"
-      - name: One no-bundle release build — hard cap 20 minutes
-        run: python3 scripts/qualify-source-foundation-macos.py build "$FOUNDATION_EVIDENCE"
-      - name: One source-foundation native launch — hard cap 5 minutes
-        run: python3 scripts/qualify-source-foundation-macos.py native "$FOUNDATION_EVIDENCE"
-      - name: One exact SDK foundation gate — hard cap 10 minutes
-        run: python3 scripts/qualify-source-foundation-macos.py sdk "$FOUNDATION_EVIDENCE"
-      - name: Retain terminal evidence and clean contained scratch
-        if: always()
-        run: python3 scripts/qualify-source-foundation-macos.py finish "$FOUNDATION_EVIDENCE"
-      - name: Upload source-foundation evidence including failures
-        if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
-        with:
-          name: source-foundation-macos-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/source-foundation-macos
-          if-no-files-found: error
-          include-hidden-files: true
-          retention-days: 7
-
-  assistance-ui:
-    if: ${{ !inputs.validation_dummy && (!inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && !inputs.story_logic_early && inputs.assistance_ui)) }}
-    uses: ./.github/workflows/assistance-ui.yml
-    with:
-      ordinal: ${{ inputs.assistance_ui_ordinal }}
-
-  story-logic:
-    if: ${{ !inputs.validation_dummy && (!inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && !inputs.walkthrough_redesign && inputs.story_logic_early)) }}
-    uses: ./.github/workflows/story-logic.yml
-    with:
-      ordinal: ${{ inputs.story_logic_ordinal }}
-      excluded_selectors: ${{ inputs.assistance_ui || inputs.phase1g_flow_profile || inputs.phase1g_macos_browser_diagnostic || inputs.source_foundation_macos || inputs.phase1g_candidate_proof }}
-
-  walkthrough-redesign:
-    if: ${{ !inputs.validation_dummy && (!inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && !inputs.thinking_settings && inputs.walkthrough_redesign)) }}
-    uses: ./.github/workflows/assistance-ui.yml
-    with:
-      outcome: walkthrough-redesign
-      ordinal: ${{ inputs.walkthrough_redesign_ordinal }}
-      expected_candidate: ${{ inputs.walkthrough_redesign_candidate }}
-      excluded_selectors: ${{ inputs.story_logic_early || inputs.assistance_ui || inputs.phase1g_flow_profile || inputs.phase1g_macos_browser_diagnostic || inputs.source_foundation_macos || inputs.phase1g_candidate_proof }}
-
   thinking-settings:
     if: ${{ !inputs.validation_dummy && (!inputs.studio_connection_native && (github.event_name == 'workflow_dispatch' && !inputs.harness_regressions && inputs.thinking_settings)) }}
     uses: ./.github/workflows/thinking-settings.yml
@@ -696,7 +421,7 @@ jobs:
   validation-finish:
     name: Validation status (finish)
     if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
-    needs: [code-checks, studio-connection-native, harness-regressions, validate, phase1g-flow-profile, phase1g-macos-browser-diagnostic, source-foundation-macos, assistance-ui, story-logic, walkthrough-redesign, thinking-settings, validation-dummy, validation-start]
+    needs: [code-checks, studio-connection-native, harness-regressions, validate, phase1g-flow-profile, thinking-settings, validation-dummy, validation-start]
     permissions:
       contents: read
       pull-requests: read

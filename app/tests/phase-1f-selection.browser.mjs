@@ -1,3 +1,4 @@
+// fixture: skip run by npm run test:source-browser.
 // Real-browser regression for settled selection and reviewed Apply Both availability.
 import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";

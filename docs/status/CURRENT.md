@@ -1,5 +1,17 @@
 # Current status
 
+## Test selection reduction in review
+
+[Issue #85](https://github.com/Caldwell-41/Renpy-editor/issues/85) selects reducing
+redundant test execution on `codex/85-test-selection`. The
+[maintenance brief](../tasks/active/test-selection.md) owns the cuts, council
+decisions and validation. Product coverage is retained. Ordinary Windows harness
+groups pass; the explicit physical dialog check retains its known foreground
+failure. Council review and its hosted-selection correction are complete. A second
+pass removes dead qualification stacks and runs every fixture in PR checks;
+publication and selected CI are pending. No SDK/package
+campaign, merge or product acceptance is selected.
+
 ## Variable and control-state samples accepted
 
 [L20 #54](https://github.com/Caldwell-41/Renpy-editor/issues/54) is accepted for

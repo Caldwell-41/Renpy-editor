@@ -8,6 +8,7 @@ import platform
 from pathlib import Path
 import re
 import shutil
+import struct
 import subprocess
 
 
@@ -22,13 +23,6 @@ def verify_cargo(listing, output):
     return len(selected)
 
 
-DOM_REQUIRED = ('the shell owns Save routing across Source, clean fallback, modifiers, remount, modal, and retention failure',
-                'prepared identity probe drives all four actual Settings DOM flows with no secret IPC',
-                'prepared Windows probe drives both actual Settings phases with exact secret-free operations',
-                'complete selectable native probe drives production shell/controller through delayed history, update, refusals and reopen',
-                'supporting authoring ignores stale completions and reports persistence truthfully')
-
-
 def verify_dom(output):
     counts = {}
     for key in ('tests', 'pass', 'fail', 'cancelled', 'skipped', 'todo'):
@@ -39,7 +33,6 @@ def verify_dom(output):
     names = re.findall(r'^\s*ok \d+ - (.+?)\s*$', output, re.M)
     if (counts['tests'] < 1 or counts['pass'] != counts['tests'] or len(names) != counts['tests']
             or any(counts[key] for key in ('fail', 'cancelled', 'skipped', 'todo'))
-            or any(name not in names for name in DOM_REQUIRED)
             or re.search(r'^\s*not ok |# (?:SKIP|TODO)\b', output, re.M)):
         raise ValueError('Full renderer selection did not execute and pass without skips')
     return counts['tests']
@@ -51,32 +44,9 @@ MAC_SNAPSHOT_TESTS = frozenset('test_macos_development_credentials.DevelopmentFi
     'test_steps_refuse_out_of_order_and_unconfirmed_save',
     'test_cancel_rejects_file_change_even_when_profiles_are_identical',
 ))
-WINDOWS_NATIVE_TESTS = frozenset('test_rewrite_windows_reuse.RetainedEvidenceGate.' + name for name in (
-    'test_native_polling_handles_transient_nodes_without_accepting_missing_proof',
-    'test_native_window_placement_preserves_layout_and_rejects_unobservable_states',
-)) | {'test_studio_connection_native.CurrentConnectionTests.test_actual_current_driver_fits_small_desktop_and_closes_without_geometry_gate'}
-PYTHON_REQUIRED = MAC_SNAPSHOT_TESTS | WINDOWS_NATIVE_TESTS | {
-    'test_nested_fidelity.NestedFidelityGates.test_normal_instrumentation_parses_without_importing_helper_construction',
-    'test_nested_fidelity.NestedFidelityGates.test_normal_sample_is_applied_after_game_start_defaults',
-    'test_nested_fidelity.NestedFidelityGates.test_normal_observer_measures_the_sized_add_instead_of_its_named_image',
-    'test_macos_identity_probe.IdentityProbeTests.test_current_report_requires_exact_contract_case_assertions_identity_and_cleanup',
-    'test_studio_connection_native.CurrentConnectionTests.test_current_report_requires_complete_case_contract_requests_timings_and_cleanup',
-    'test_studio_connection_native.CurrentConnectionTests.test_current_publication_requires_exact_settings_revision_ownership_and_unrelated_profiles',
-    'test_studio_connection_native.CurrentConnectionTests.test_native_receipt_rejects_unowned_focus_children_failed_retry_or_cleanup',
-    'test_studio_connection_native.CurrentConnectionTests.test_failed_build_retains_exclusive_attempt_and_never_creates_positive_package',
-    'test_studio_connection_native.CurrentConnectionTests.test_current_viewport_rejects_clipping_wrong_dpi_frame_placement_and_small_client',
-    'test_studio_connection_native.CurrentConnectionTests.test_state_retention_keeps_exact_partial_json_and_requires_complete_snapshots',
-    'test_studio_connection_native.CurrentConnectionTests.test_owned_credential_audit_checks_only_saved_synthetic_references',
-    'test_studio_connection_native.CurrentConnectionTests.test_close_receipt_rejects_key_delivery_without_settings_dismissal',
-    'test_studio_connection_native.CurrentConnectionTests.test_observation_failure_retains_original_error_and_independent_close_state',
-    'test_macos_studio_request.SyntheticRequestTests.test_known_unused_blocked_fixture_cleanup_requires_exact_seed_and_no_process',
-    'test_windows_studio_credentials.WindowsFixtureGate.test_failed_build_preserves_exclusive_terminal_and_cannot_redispatch',
-    'test_windows_studio_credentials.WindowsFixtureGate.test_source_inventory_requires_generated_permissions_without_prior_builds',
-    'test_harness_checks.HarnessChecks.test_failure_timeout_and_spawn_failure_keep_logs_and_do_not_hide_later_results',
-    'test_harness_checks.HarnessChecks.test_zero_exit_cannot_override_rejected_evidence',
-    'test_harness_checks.HarnessChecks.test_retention_gate_rejects_missing_duplicate_and_unexpected_skipped_cases',
-    'test_redesign_evidence.DomTests.test_nested_probe_checks_are_counted_and_cannot_hide_failure_or_missing_results',
-}
+WINDOWS_NATIVE_TESTS = frozenset({
+    'test_studio_connection_native.CurrentConnectionTests.test_actual_current_driver_fits_small_desktop_and_closes_without_geometry_gate',
+})
 
 
 def python_results(output):
@@ -101,35 +71,94 @@ def python_results(output):
     return rows
 
 
-def verify_python(output, runner):
-    """Allow only named host exclusions, never an unexpected skip or zero discovery."""
-    if runner not in ('Windows', 'macOS'):
-        raise ValueError('Explicit supported Python test host required')
-    expected_skips = MAC_SNAPSHOT_TESTS if runner == 'Windows' else WINDOWS_NATIVE_TESTS
+def verify_unittest(output, allowed_skips=frozenset()):
+    """Require at least one completed case, no failures and only the named skips."""
     runs = re.findall(r'^Ran (\d+) tests? in [^\n]+$', output, re.M)
     summaries = re.findall(r'^OK(?: \(skipped=(\d+)\))?\s*$', output, re.M)
     rows = python_results(output)
-    skipped = [name for name, status in rows if status.startswith('skipped ')]
-    completed = {name for name, status in rows if status == 'ok'}
-    if (len(runs) != 1 or int(runs[0]) < len(PYTHON_REQUIRED)
-            or summaries != [str(len(expected_skips))]
-            or len(rows) != int(runs[0])
+    skipped = {name for name, status in rows if status.startswith('skipped ')}
+    if (len(runs) != 1 or int(runs[0]) < 1 or len(rows) != int(runs[0])
             or len(rows) != len({name for name, _ in rows})
-            or len(skipped) != len(expected_skips) or set(skipped) != expected_skips
-            or not PYTHON_REQUIRED.difference(expected_skips).issubset(completed)
+            or summaries != [str(len(allowed_skips)) if allowed_skips else '']
+            or skipped != set(allowed_skips)
             or re.search(r'^(?:FAILED|ERROR:|FAIL:|UNEXPECTED SUCCESS:)', output, re.M)):
-        raise ValueError('Python harness failed, omitted required cases or skipped outside its host contract')
+        raise ValueError('Python cases failed, ran zero times or skipped outside the named host exclusions')
     return {'tests': int(runs[0]), 'passed': int(runs[0]) - len(skipped), 'hostExcluded': sorted(skipped)}
 
 
-def redesign_checker():
-    spec = importlib.util.spec_from_file_location('redesign_evidence', Path(__file__).with_name('check-redesign-evidence.py'))
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+def verify_python(output, runner):
+    """Discovery may skip only the other host's named cases."""
+    if runner not in ('Windows', 'macOS'):
+        raise ValueError('Explicit supported Python test host required')
+    return verify_unittest(output, MAC_SNAPSHOT_TESTS if runner == 'Windows' else WINDOWS_NATIVE_TESTS)
 
 
-AUDIT_ARTIFACTS = {
+def browser_ok(folder, surfaces=('characters', 'relationships', 'knowledge', 'history', 'lorebook', 'settings', 'assist')):
+    metrics = json.loads((folder / 'metrics.json').read_text(encoding='utf-8'))
+    receipts = metrics.get('receipts', [])
+    expected = {(surface, theme, size) for surface in surfaces
+                for theme in ('light', 'dark') for size in ('wide', 'compact')}
+    actual = {(r.get('surface'), r.get('theme'), r.get('size')) for r in receipts}
+    identity = metrics.get('inputIdentity', {})
+    before = identity.get('before', {})
+    after = identity.get('after', {})
+    files = before.get('files', {})
+    inputs_ok = (identity.get('unchanged') is True and bool(files) and files == after.get('files')
+                 and re.fullmatch(r'[0-9a-f]{40}', before.get('checkoutHead') or '') is not None
+                 and before.get('checkoutHead') == after.get('checkoutHead')
+                 and all(isinstance(name, str) and re.fullmatch(r'[0-9a-f]{64}', value or '') for name, value in files.items()))
+    images_ok = True
+    images=[]
+    for receipt in receipts:
+        images.append((receipt, f"{receipt.get('surface')}-{receipt.get('theme')}-{receipt.get('size')}.png"))
+        if receipt.get('surface') == 'settings':
+            captures=receipt.get('captures', [])
+            if (len(captures)!=3 or {c.get('view') for c in captures}!={'connection','connect','response'}
+                    or any(c.get('actionsVisible') is not True or not c.get('actions') or any(a.get('visible') is not True for a in c['actions']) for c in captures)):
+                return False
+            for capture in captures:
+                images.append(({**capture, 'size':receipt.get('size')}, f"settings-{capture['view']}-{receipt.get('theme')}-{receipt.get('size')}.png"))
+    for receipt, expected_name in images:
+        if receipt.get('image') != expected_name:
+            return False
+        image = folder / str(receipt.get('image', ''))
+        if not image.is_file():
+            images_ok = False; break
+        data = image.read_bytes()
+        dimensions = (1440, 900) if receipt.get('size') == 'wide' else (600, 720)
+        if (len(data) < 24 or data[:8] != b'\x89PNG\r\n\x1a\n'
+                or data[8:16] != b'\x00\x00\x00\x0dIHDR'
+                or struct.unpack('>II', data[16:24]) != dimensions
+                or hashlib.sha256(data).hexdigest() != receipt.get('imageSha256')):
+            images_ok = False; break
+    return (inputs_ok and images_ok and actual == expected and len(receipts) == len(expected) and metrics.get('errors') == []
+            and metrics.get('cleanup') == {'browser':'closed','server':'closed'}
+            and all(r.get('viewportOverflow') is False and r.get('actionsVisible') is True for r in receipts)
+            and metrics.get('prohibited', []) == []
+            and len(list(folder.glob('*.png'))) == len(images)
+            and len({r.get('image') for r in receipts}) == len(expected)
+            and all(r.get('image') == f"{r['surface']}-{r['theme']}-{r['size']}.png" and (folder / r['image']).is_file() for r in receipts))
+
+
+def candidate_mismatches(inputs, root):
+    # Checkout bytes include the repository's declared transformations (e.g. CRLF
+    # PowerShell files). Compare with Git's checkout representation, retaining raw
+    # file hashes in the receipt; never normalize or ignore an edited input here.
+    return [name for name, checksum in inputs.items()
+            if hashlib.sha256(subprocess.check_output(
+                ['git', 'cat-file', '--filters', 'HEAD:' + name], cwd=root)).hexdigest() != checksum]
+
+
+def identity_ok(report, head, tree):
+    return (report.get('candidate') == head and report.get('tree') == tree
+            and report.get('sourceMatchesCandidate') is True
+            and report.get('missingTrackedInputs') == []
+            and report.get('mismatchedTrackedInputs') == [])
+
+
+
+
+HELP_ARTIFACTS = {
     'core': ('core-artifacts.jsonl', 'loomlight_core', True),
     'controller': ('controller-artifacts.jsonl', 'help-controller-driver', False),
 }
@@ -209,13 +238,11 @@ def retain_binaries(folder, build_root, *, artifacts=None):
 
 def seal(folder, repo, outcome='thinking-and-harness-repair'):
     folder=folder.resolve();repo=repo.resolve();folder.mkdir(parents=True,exist_ok=True)
-    checker = redesign_checker()
-    checker.ROOT = repo
     git = lambda *args: subprocess.check_output(['git', *args], cwd=repo, text=True).strip()
     names = git('ls-files', '.gitattributes', 'app', 'tests/fixtures', '.github/workflows', 'scripts/validate.py', 'spikes/renpy-sdk').splitlines()
     missing = [name for name in names if not (repo / name).is_file()]
     inputs = {name:hashlib.sha256((repo / name).read_bytes()).hexdigest() for name in names if name not in missing}
-    mismatches = checker.candidate_mismatches(inputs)
+    mismatches = candidate_mismatches(inputs, repo)
     identity = {'candidate':git('rev-parse', 'HEAD'), 'tree':git('rev-parse', 'HEAD^{tree}'),
                 'outcome':outcome, 'runId':os.getenv('GITHUB_RUN_ID'), 'attempt':os.getenv('GITHUB_RUN_ATTEMPT'),
                 'workflow':os.getenv('GITHUB_WORKFLOW'), 'workflowRef':os.getenv('GITHUB_WORKFLOW_REF'),
@@ -246,7 +273,7 @@ if __name__ == '__main__':
     parser.add_argument('path', type=Path)
     parser.add_argument('other', nargs='?', type=Path)
     parser.add_argument('--runner', choices=('Windows', 'macOS'))
-    parser.add_argument('--outcome', choices=('thinking-and-harness-repair', 'harness-regressions', 'current-studio-connection', 'phase3b-audit-fixes'), default='thinking-and-harness-repair')
+    parser.add_argument('--outcome', choices=('thinking-and-harness-repair', 'harness-regressions', 'current-studio-connection'), default='thinking-and-harness-repair')
     args = parser.parse_args()
     if args.action == 'cargo':
         print(verify_cargo(args.path.read_text(encoding='utf-8'), args.other.read_text(encoding='utf-8')))
@@ -255,13 +282,10 @@ if __name__ == '__main__':
     elif args.action == 'python':
         print(json.dumps(verify_python(args.path.read_text(encoding='utf-8'), args.runner)))
     elif args.action == 'browser':
-        if not redesign_checker().browser_ok(args.path, ('settings',)):
+        if not browser_ok(args.path, ('settings',)):
             raise SystemExit('Required Thinking/connection browser evidence refused')
     elif args.action == 'retain':
-        audit = args.outcome == 'phase3b-audit-fixes'
-        receipt = retain_binaries(args.path, args.other, artifacts=AUDIT_ARTIFACTS if audit else None)
-        if audit and any(row['state'] != 'compiled' for row in receipt.values()):
-            raise SystemExit('Both selected audit executables must be available')
+        retain_binaries(args.path, args.other)
     elif args.action == 'seal':
         seal(args.path, args.other, args.outcome)
     else:
@@ -269,5 +293,5 @@ if __name__ == '__main__':
         head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
         tree = subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip()
         binaries = json.loads((args.path.parent / 'test-binaries.json').read_text(encoding='utf-8'))
-        if not redesign_checker().identity_ok(report, head, tree) or not verify_binaries(args.path.parent, binaries):
+        if not identity_ok(report, head, tree) or not verify_binaries(args.path.parent, binaries):
             raise SystemExit('Complete source and both compiled test binaries required')

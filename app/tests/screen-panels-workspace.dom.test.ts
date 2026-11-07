@@ -61,6 +61,8 @@ test("Use in Story retains an unfinished appearance draft across workspace remou
 
 test("Assets return retains Dialog Help creation inputs and refreshes its acceptance catalog",async()=>{
  const f=fixture("panel",false);try{await flush();f.click("New screen");await flush();
+ const create=[...document.querySelectorAll<HTMLButtonElement>("section.screen-create button")].find(b=>b.textContent==="Create screen")!;
+ assert.equal(create.disabled,true);assert.match(document.querySelector("section.screen-create")!.textContent!,/Add a UI image first/);
  const name=document.querySelector<HTMLInputElement>('[name="screen-name"]')!;name.value="route_dialog";name.dispatchEvent(new window.Event("input",{bubbles:true}));
  const kind=document.querySelector<HTMLSelectElement>('[name="screen-kind"]')!;assert.ok(kind);kind.value="dialog";kind.dispatchEvent(new window.Event("change",{bubbles:true}));
  f.click("Open Assets");await flush();assert.equal(f.workspace.panel.isConnected,false);assert.equal(f.writes.length,0);
