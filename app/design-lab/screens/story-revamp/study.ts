@@ -27,6 +27,9 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   if (context.state === 'protected') scenes[0]!.beats.splice(5, 0, sample.beat('customCode', '$ tram_clock.advance()'));
   /** Illustrative Choice preview, kept apart from the story and its Undo history. Keyed by option identity. */
   const previewOptions = new Map<string, { truth?: 'true' | 'false'; picked?: boolean }>();
+  // Review switch for the Tracks route band: two (current), one (second row only when nested) or merge (shares the Tracks/Reel row).
+  const railMode = new URLSearchParams(location.search).get('rail') ?? 'two';
+  const focusSizes: Record<string, number> = (() => { try { return JSON.parse(sessionStorage.getItem('story-combined-sizes') ?? '{}'); } catch { return {}; } })();
   if (combined) {
     const line = (speaker: string, text: string) => { const b = sample.beat(speaker === 'Narration' ? 'narration' : 'dialogue', text); if (speaker !== 'Narration') b.speaker = speaker; return b; };
     const go = (kind: 'jump' | 'call', target: string, repeat = false) => { const b = sample.beat(kind); b.target = target; if (repeat) b.repeat = true; return b; };
@@ -1380,7 +1383,8 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       }, false, `bottom-${mode}`); button.ariaPressed = String(bottomMode === mode); modes.append(button);
     }
     bar.append(modes);
-    if (bottomMode === 'tracks' && !focused) bar.append(el('span', 'sc-track-legend', 'Shaded: carried forward · Dashed: state may differ'));
+    if (bottomMode === 'tracks' && !focused && railMode !== 'merge') bar.append(el('span', 'sc-track-legend', 'Shaded: carried forward · Dashed: state may differ'));
+    if (bottomMode === 'tracks' && !focused && railMode === 'merge') { const key = el('details', 'sc-track-key'); const summary = el('summary', 'button', 'Key'); summary.dataset.action = 'track-key'; summary.ariaLabel = 'Tracks key'; const list = el('div', 'sc-track-key-list'); list.append(el('p', '', 'Shaded: carried forward from an earlier beat'), el('p', '', 'Dashed: state may differ on another route')); key.append(summary, list); bar.append(key); }
     return bar;
   }
   function combinedReel() {
@@ -1406,12 +1410,45 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     tracks.querySelector('.sr-track-heading')!.remove(); tracks.classList.add('sc-tracks');
     for (const column of tracks.querySelectorAll<HTMLElement>('.sr-track-column')) column.dataset.column = column.querySelector<HTMLElement>('[data-track-beat]')!.dataset.trackBeat;
     markTrackBranches(tracks.querySelector<HTMLElement>('.sr-track-grid')!);
-    const layout = el('div', 'sc-combined-layout sr-tracks-layout');
+    const layout = el('div', 'sc-combined-layout sr-tracks-layout'); layout.dataset.rail = railMode;
+    if (railMode === 'one') layout.style.setProperty('--rail-count', columns(scene(), visibleBranches).some(c => chainOf(c.beat.id).length >= 2) ? '2' : '1');
     const conditions = conditionStrip(), toolbar = bottomToolbar();
     const panel = el('div', 'sc-bottom-panel'); panel.append(toolbar, bottomMode === 'tracks' ? tracks : combinedReel());
-    if (focused) layout.append(conditions, panel, top);
+    if (focused) { layout.append(conditions, panel, top); focusResizers(layout, top, tracks); }
     else { const bottom = el('div', 'sc-bottom'); bottom.append(conditions, panel); layout.append(top, bottom); }
     parent.append(layout);
+  }
+  /** Writing focus: drag (or arrow-key) the sidebar edge and the Tracks lane edges. Widths are a view preference, kept for the session and outside Undo. */
+  function focusResizers(layout: HTMLElement, side: HTMLElement, tracks: HTMLElement) {
+    for (const [key, value] of Object.entries(focusSizes)) layout.style.setProperty(`--${key}`, `${value}px`);
+    const save = () => { try { sessionStorage.setItem('story-combined-sizes', JSON.stringify(focusSizes)); } catch { /* The preference is optional in file previews. */ } };
+    const resizer = (key: string, label: string, measure: () => number, min: number, max: () => number, grow: 1 | -1) => {
+      const handle = el('div', 'sc-resizer'); handle.role = 'separator'; handle.tabIndex = 0; handle.ariaLabel = label; handle.dataset.resize = key; handle.setAttribute('aria-orientation', 'vertical');
+      handle.title = `${label}. Drag or use the arrow keys; double-click resets.`;
+      const set = (width: number) => { const value = Math.round(Math.min(max(), Math.max(min, width))); focusSizes[key] = value; layout.style.setProperty(`--${key}`, `${value}px`); handle.setAttribute('aria-valuenow', String(value)); };
+      const reset = () => { delete focusSizes[key]; layout.style.removeProperty(`--${key}`); save(); requestAnimationFrame(() => handle.setAttribute('aria-valuenow', String(Math.round(measure())))); status(`${label}: back to the default width`); };
+      let start: number | undefined;
+      const finish = () => { start = undefined; handle.dataset.dragging = 'false'; handle.onpointermove = null; save(); };
+      handle.onpointerdown = event => { event.preventDefault(); handle.focus({ preventScroll: true }); handle.setPointerCapture(event.pointerId); const x = event.clientX; start = measure(); handle.dataset.dragging = 'true'; handle.onpointermove = move => set(start! + (move.clientX - x) * grow); };
+      handle.onpointerup = handle.onpointercancel = () => { if (start !== undefined) finish(); };
+      handle.ondblclick = reset;
+      handle.onkeydown = event => {
+        if (event.key === 'Escape' && start !== undefined) { event.preventDefault(); event.stopPropagation(); set(start); finish(); return; }
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); set(measure() + (event.key === 'ArrowRight' ? 1 : -1) * grow * (event.shiftKey ? 32 : 8)); save(); }
+        if (event.key === 'Enter') { event.preventDefault(); reset(); }
+      };
+      requestAnimationFrame(() => { handle.setAttribute('aria-valuemin', String(min)); handle.setAttribute('aria-valuemax', String(Math.round(max()))); handle.setAttribute('aria-valuenow', String(Math.round(measure()))); });
+      return handle;
+    };
+    side.append(resizer('focus-side', 'Sidebar width', () => side.getBoundingClientRect().width, 320, () => layout.getBoundingClientRect().width - 480, -1));
+    if (bottomMode !== 'tracks') return;
+    // Words fills the rest, so each edge resizes the lane on the side away from Words.
+    const labels = tracks.querySelector<HTMLElement>('.sr-track-labels'); if (!labels) return; labels.ariaHidden = null;
+    const lane = (i: number) => labels.querySelector<HTMLElement>(`.sr-track-${i}`)!, names = ['Beat', 'Background', 'Characters', 'Words', 'Sound', 'Flow'];
+    for (const i of [0, 1, 2, 4, 5]) {
+      const handle = resizer(`lane-${i}`, `${names[i]} lane width`, () => lane(i).getBoundingClientRect().width, 40, () => lane(i).getBoundingClientRect().width + lane(3).getBoundingClientRect().width - 220, i < 3 ? 1 : -1);
+      handle.classList.add('sc-lane-resizer', i < 3 ? 'sc-resizer-end' : 'sc-resizer-start'); lane(i).append(handle);
+    }
   }
   /** Add a beat: one click or Enter adds the highlighted beat. Escape or Close cancels. */
   function combinedPicker(body: Beat[], trail: string[], requested: number, replaceEmpty?: Beat) {

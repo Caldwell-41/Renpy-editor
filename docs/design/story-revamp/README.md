@@ -94,6 +94,12 @@ Issue #82 records the decisions. The three reference variants are unchanged.
   earlier rule that branch navigation never shrinks the stage: with deep nesting or at
   compact width the stage loses about 30 px of height per extra row. One-row paths keep
   the stage at 974 × 548 and 633 × 356. Kris accepted this on 2026-11-08.
+- Writing focus can resize the sidebar and each Tracks lane (Words fills the rest) by
+  dragging a grip or with the arrow keys. Escape cancels a drag and double-click resets.
+  Widths are a session view preference, outside Undo.
+- Under review: `?rail=one` keeps one route row above Tracks until a nested branch opens;
+  `?rail=merge` draws route lines in the Tracks/Reel row and moves the legend into Key.
+  Both give the freed height to the Words lane. The switch goes once Kris picks one.
 - Kris approved the #88 and #99 mock work on 2026-11-08, and both handoffs are closed.
   Source, runtime and backend acceptance stays with #87 and #98.
 

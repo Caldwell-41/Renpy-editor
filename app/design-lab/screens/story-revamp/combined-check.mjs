@@ -406,6 +406,22 @@ try{
  await page.locator(':nth-match([data-track-beat][data-beat-kind=setVariable], 5)').click();assert.equal(await page.locator('[data-action=set-variable-source]').count(),1);assert.equal(await page.getByRole('combobox',{name:'Formula'}).count(),0,'Protected source is read-only');
  await capture('revision-arithmetic');
  report.checks.push('Revision #88: seven operations in the equation row, suggestions, result type, decimal/missing/type/zero errors, unknown values, protected source and drafts across Reel and Writing focus');
+ // Revision: Writing focus resizes the sidebar and Tracks lanes as a session view preference outside Undo.
+ await page.setViewportSize({width:1600,height:1000});await open('populated');await page.locator('[data-action=toggle-focus]').click();await settled();
+ const wide=sel=>page.locator(sel).first().evaluate(n=>n.getBoundingClientRect().width), near=(a,b,m)=>assert.ok(Math.abs(a-b)<=1,`${m}: ${a} vs ${b}`);
+ const drag=async(sel,dx,end=true)=>{const b=await page.locator(sel).boundingBox();await page.mouse.move(b.x+b.width/2,b.y+b.height/2);await page.mouse.down();await page.mouse.move(b.x+b.width/2+dx,b.y+b.height/2,{steps:4});if(end)await page.mouse.up();};
+ const sideWidth=()=>wide('.sr-tracks-workspace'), bg=()=>wide('.sc-tracks .sr-track-labels .sr-track-1'), words=()=>wide('.sc-tracks .sr-track-labels .sr-track-3'), sound=()=>wide('.sc-tracks .sr-track-labels .sr-track-4');
+ const undoBefore=await page.locator('[data-action=undo]').getAttribute('aria-label');
+ const side0=await sideWidth();await drag('[data-resize=focus-side]',-100);near(await sideWidth(),side0+100,'Dragging the edge left widens the sidebar');
+ const bg0=await bg(), words0=await words();await drag('[data-resize=lane-1]',60);near(await bg(),bg0+60,'Background lane widens');near(await words(),words0-60,'Words gives up the space');
+ near(await wide('.sc-tracks .sr-track-beat .sr-track-1'),bg0+60,'Beat rows follow the header');
+ const sound0=await sound();await page.locator('[data-resize=lane-4]').focus();await page.keyboard.press('ArrowRight');near(await sound(),sound0-8,'Arrow keys resize, edge direction respected');
+ await drag('[data-resize=lane-4]',-80,false);await page.keyboard.press('Escape');await page.mouse.up();near(await sound(),sound0-8,'Escape cancels a drag');
+ await page.locator('[data-resize=lane-1]').dblclick();near(await bg(),bg0,'Double-click resets the lane');
+ await page.locator('[data-action=bottom-reel]').click();await page.locator('[data-action=bottom-tracks]').click();near(await sideWidth(),side0+100,'Widths survive a redraw');near(await sound(),sound0-8,'Lane widths survive a redraw');
+ assert.equal(await page.locator('[data-action=undo]').getAttribute('aria-label'),undoBefore,'Resizing is not an edit');await capture('revision-focus-resize');
+ await page.locator('[data-action=toggle-focus]').click();await settled();assert.equal(await page.locator('.sc-resizer').count(),0,'Resizing belongs to Writing focus');
+ report.checks.push('Revision: Writing focus resizes the sidebar and each Tracks lane by drag or arrow keys; Escape cancels, double-click resets, widths survive redraws and stay out of Undo');
  assert.deepEqual(report.errors,[]);report.passed=true;
 }catch(error){report.failure=String(error.stack);await capture('failure');throw error;}
 finally{await writeFile(new URL('report.json',output),JSON.stringify(report,null,2)+'\n');await browser.close();}
