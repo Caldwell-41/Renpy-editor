@@ -1,20 +1,12 @@
 # Current outcome handover
 
-## Test selection reduction
+## Test selection closeout
 
-Continue [#85](https://github.com/Caldwell-41/Renpy-editor/issues/85) on
-`codex/85-test-selection`, based on `021dd5d2`. Parent owns all edits; council
-reviewers are read-only. The [brief](../tasks/active/test-selection.md) owns the
-selected reductions, review decisions and local checks. A second pass deletes dead
-qualification stacks, shares result gates and runs all fixtures; it is committed
-locally and not pushed. Next: push to PR 86 when Kris approves, then automatic
-Repository quality and one both-target harness dispatch. The brief
-owns a two-dispatch ceiling; #85 owns live consumption. No SDK/package/native-app campaign is
-selected. The explicit Windows dialog fixture was attempted locally and retains the
-known foreground failure; ordinary harness groups pass. Preserve ignored logs
-under `.toolchains/85-harness/` and unrelated recovery files. The default `gh`
-token is invalid; Git Credential Manager and the connected GitHub app have access. Final CI
-receipts belong on #85. Earlier closeout records below retain their own scope.
+[#85](https://github.com/Caldwell-41/Renpy-editor/issues/85) is closed after #86 and
+#107 merged. The [brief](../tasks/active/test-selection.md) owns the cuts, review
+decisions and validation; #85 owns the CI receipts. Harness dispatches used 3 against
+a limit of 2, all passed. Known limits: `ui-image` skips on Linux CI, and no test
+covers project-font cache eviction. Nothing is pending.
 
 ## L20 merge closeout
 

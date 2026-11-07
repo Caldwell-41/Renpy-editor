@@ -1,16 +1,14 @@
 # Current status
 
-## Test selection reduction in review
+## Test selection reduction merged
 
-[Issue #85](https://github.com/Caldwell-41/Renpy-editor/issues/85) selects reducing
-redundant test execution on `codex/85-test-selection`. The
-[maintenance brief](../tasks/active/test-selection.md) owns the cuts, council
-decisions and validation. Product coverage is retained. Ordinary Windows harness
-groups pass; the explicit physical dialog check retains its known foreground
-failure. Council review and its hosted-selection correction are complete. A second
-pass removes dead qualification stacks and runs every fixture in PR checks;
-publication and selected CI are pending. No SDK/package
-campaign, merge or product acceptance is selected.
+[Issue #85](https://github.com/Caldwell-41/Renpy-editor/issues/85) is closed.
+[PR #86](https://github.com/Caldwell-41/Renpy-editor/pull/86) and
+[PR #107](https://github.com/Caldwell-41/Renpy-editor/pull/107) are squash-merged into
+`codex/phase3b-screen-designer`. Docs-only PRs skip code checks, dead qualification
+stacks are gone, result gates share one check, and every browser and dispatch fixture
+runs in the PR frontend job. The [maintenance brief](../tasks/active/test-selection.md)
+owns the cuts and validation. No SDK/package campaign or product acceptance was selected.
 
 ## Variable and control-state samples accepted
 
