@@ -239,6 +239,13 @@ cancellation, held-owner contention, stale completion and retained input. Two is
 unit tests are not automatically combined-path proof. Keep unit tests; do not copy
 every case into an expensive end-to-end suite. Use the narrowest real integration
 seam, with final native/package checks where their behavior matters.
+Add a check to an existing DOM or unit test file before creating a new file. Write a
+browser fixture only for a controller-to-core journey that a DOM test cannot reach.
+Every new test runs through a glob or npm script that CI already calls; a fixture
+that cannot run there declares `// fixture: skip <reason>` under the
+[fixture runner](testing/AUTOMATED.md#renderer-and-production-probe-consumers).
+Do not add tests that only prove deleted code stays deleted, or smoke tests that
+repeat existing coverage.
 Acceptance gates use the shared result checks in [TESTING](TESTING.md#minimum-gates-by-changed-behavior):
 a failure, zero intended tests, an unexpected skip or a violated blocking budget
 must not silently pass. Intentional specialist
@@ -336,6 +343,11 @@ collect their evidence without normalising a blocking failure to success. Respec
 prerequisites. Retain exact tested executables on failure where produced, separately
 from success-only installers, with run/attempt/SHA, source/binary hashes, logs and case
 results; verify availability. Use existing scripts/workflows, not a new CI controller.
+
+Per-ticket qualification workflows, inputs, scripts and fixtures are temporary. The
+PR that closes the ticket deletes them or moves lasting checks into routine suites;
+the task evidence keeps the result. A step that runs only for one branch name, or
+reads one ticket's expiring artifact, belongs to that ticket.
 
 ### 7. Justify blockers and keep status readable
 
@@ -638,7 +650,8 @@ Inventory branches and open PRs before cleanup. Delete a branch only after provi
 its work is integrated or safely redundant and no active task depends on it. Use
 ancestry where applicable; for squash/cherry-pick histories, review content/patch
 equivalence and PR merge evidence. Names and timestamps are not proof. Do not merge
-redundant old branches just to enable deletion.
+redundant old branches just to enable deletion. Deleting a branch also deletes the
+workflow jobs, steps and inputs that run only for it.
 
 Keep branches with unique/unreviewed changes and open dependency/application work;
 record why they remain. Do not delete main, protected refs, archive tags or local
