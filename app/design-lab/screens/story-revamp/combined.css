@@ -107,8 +107,6 @@
   .sc-picker-target>strong { display:block; margin-bottom:4px; }
 }
 
-.sc-track-legend { margin-left:auto; font-size:10px; color:var(--text-secondary); white-space:nowrap; }
-@media(max-width:899px) { .sc-track-legend { display:none; } }
 
 @media(max-width:899px) { .sc-combined-shell .sr-inspector-heading { position:relative; } }
 

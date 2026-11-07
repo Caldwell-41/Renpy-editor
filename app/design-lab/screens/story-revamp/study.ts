@@ -27,8 +27,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   if (context.state === 'protected') scenes[0]!.beats.splice(5, 0, sample.beat('customCode', '$ tram_clock.advance()'));
   /** Illustrative Choice preview, kept apart from the story and its Undo history. Keyed by option identity. */
   const previewOptions = new Map<string, { truth?: 'true' | 'false'; picked?: boolean }>();
-  // Review switch for the Tracks route band: two (current), one (second row only when nested) or merge (shares the Tracks/Reel row).
-  const railMode = new URLSearchParams(location.search).get('rail') ?? 'two';
+  let laneWatcher: ResizeObserver | undefined;
   const focusSizes: Record<string, number> = (() => { try { return JSON.parse(sessionStorage.getItem('story-combined-sizes') ?? '{}'); } catch { return {}; } })();
   if (combined) {
     const line = (speaker: string, text: string) => { const b = sample.beat(speaker === 'Narration' ? 'narration' : 'dialogue', text); if (speaker !== 'Narration') b.speaker = speaker; return b; };
@@ -1383,8 +1382,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       }, false, `bottom-${mode}`); button.ariaPressed = String(bottomMode === mode); modes.append(button);
     }
     bar.append(modes);
-    if (bottomMode === 'tracks' && !focused && railMode !== 'merge') bar.append(el('span', 'sc-track-legend', 'Shaded: carried forward · Dashed: state may differ'));
-    if (bottomMode === 'tracks' && !focused && railMode === 'merge') { const key = el('details', 'sc-track-key'); const summary = el('summary', 'button', 'Key'); summary.dataset.action = 'track-key'; summary.ariaLabel = 'Tracks key'; const list = el('div', 'sc-track-key-list'); list.append(el('p', '', 'Shaded: carried forward from an earlier beat'), el('p', '', 'Dashed: state may differ on another route')); key.append(summary, list); bar.append(key); }
+    if (bottomMode === 'tracks' && !focused) { const key = el('details', 'sc-track-key'); const summary = el('summary', 'button', 'Key'); summary.dataset.action = 'track-key'; summary.ariaLabel = 'Tracks key'; const list = el('div', 'sc-track-key-list'); list.append(el('p', '', 'Shaded: carried forward from an earlier beat'), el('p', '', 'Dashed: state may differ on another route')); key.append(summary, list); bar.append(key); }
     return bar;
   }
   function combinedReel() {
@@ -1410,8 +1408,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     tracks.querySelector('.sr-track-heading')!.remove(); tracks.classList.add('sc-tracks');
     for (const column of tracks.querySelectorAll<HTMLElement>('.sr-track-column')) column.dataset.column = column.querySelector<HTMLElement>('[data-track-beat]')!.dataset.trackBeat;
     markTrackBranches(tracks.querySelector<HTMLElement>('.sr-track-grid')!);
-    const layout = el('div', 'sc-combined-layout sr-tracks-layout'); layout.dataset.rail = railMode;
-    if (railMode === 'one') layout.style.setProperty('--rail-count', columns(scene(), visibleBranches).some(c => chainOf(c.beat.id).length >= 2) ? '2' : '1');
+    const layout = el('div', 'sc-combined-layout sr-tracks-layout');
     const conditions = conditionStrip(), toolbar = bottomToolbar();
     const panel = el('div', 'sc-bottom-panel'); panel.append(toolbar, bottomMode === 'tracks' ? tracks : combinedReel());
     if (focused) { layout.append(conditions, panel, top); focusResizers(layout, top, tracks); }
@@ -1449,6 +1446,23 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       const handle = resizer(`lane-${i}`, `${names[i]} lane width`, () => lane(i).getBoundingClientRect().width, 40, () => lane(i).getBoundingClientRect().width + lane(3).getBoundingClientRect().width - 220, i < 3 ? 1 : -1);
       handle.classList.add('sc-lane-resizer', i < 3 ? 'sc-resizer-end' : 'sc-resizer-start'); lane(i).append(handle);
     }
+    // Lanes cut off by a wide sidebar or a scroll are named at that edge; clicking scrolls them into view.
+    const scroller = tracks.querySelector<HTMLElement>('.sr-tracks-scroll'); if (!scroller) return;
+    const edge = (side: 'start' | 'end') => { const button = action('', () => scroller.scrollTo({ left: side === 'end' ? scroller.scrollWidth : 0 }), false, `hidden-lanes-${side}`); button.className = `sc-lane-edge sc-lane-edge-${side}`; button.hidden = true; tracks.append(button); return button; };
+    const before = edge('start'), after = edge('end');
+    const update = () => {
+      const box = scroller.getBoundingClientRect(), all = [0, 1, 2, 3, 4, 5].map(i => ({ name: names[i]!, rect: lane(i).getBoundingClientRect() })).filter(x => x.rect.width > 0);
+      const left = all.filter(x => x.rect.left < box.left - 1).map(x => x.name), right = all.filter(x => x.rect.right > box.left + scroller.clientWidth + 1).map(x => x.name);
+      for (const [button, hidden, side] of [[before, left, 'start'], [after, right, 'end']] as const) {
+        button.hidden = !hidden.length; if (!hidden.length) continue;
+        button.textContent = side === 'end' ? `${hidden.join(', ')} ›` : `‹ ${hidden.join(', ')}`;
+        button.ariaLabel = button.title = `${hidden.length === 1 ? `The ${hidden[0]} lane is` : `${hidden.join(' and ')} lanes are`} partly or fully hidden. Show ${hidden.length === 1 ? 'it' : 'them'}.`;
+        const head = labels.getBoundingClientRect(), frame = tracks.getBoundingClientRect(); button.style.top = `${Math.max(head.top, box.top) - frame.top}px`; button.style.height = `${head.height}px`;
+      }
+      tracks.dataset.hiddenStart = String(!!left.length); tracks.dataset.hiddenEnd = String(!!right.length);
+    };
+    laneWatcher?.disconnect(); laneWatcher = new ResizeObserver(update); laneWatcher.observe(scroller); laneWatcher.observe(labels);
+    scroller.addEventListener('scroll', update, { passive: true }); requestAnimationFrame(update);
   }
   /** Add a beat: one click or Enter adds the highlighted beat. Escape or Close cancels. */
   function combinedPicker(body: Beat[], trail: string[], requested: number, replaceEmpty?: Beat) {

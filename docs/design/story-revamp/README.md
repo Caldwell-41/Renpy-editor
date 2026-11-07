@@ -97,9 +97,11 @@ Issue #82 records the decisions. The three reference variants are unchanged.
 - Writing focus can resize the sidebar and each Tracks lane (Words fills the rest) by
   dragging a grip or with the arrow keys. Escape cancels a drag and double-click resets.
   Widths are a session view preference, outside Undo.
-- Under review: `?rail=one` keeps one route row above Tracks until a nested branch opens;
-  `?rail=merge` draws route lines in the Tracks/Reel row and moves the legend into Key.
-  Both give the freed height to the Words lane. The switch goes once Kris picks one.
+  When a wide sidebar or a scroll hides lanes, the cut edge gets an accent line and a
+  header button naming them ("Sound, Flow ›"); clicking it scrolls them into view.
+- Branch route lines share the Tracks/Reel row (Kris chose this over one or two reserved
+  rows), so a scene with no open branch loses no height and Words shows three lines. A
+  6 px gap keeps branch labels clear of the Branch path. The legend moved into Key.
 - Kris approved the #88 and #99 mock work on 2026-11-08, and both handoffs are closed.
   Source, runtime and backend acceptance stays with #87 and #98.
 

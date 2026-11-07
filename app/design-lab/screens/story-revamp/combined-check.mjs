@@ -420,8 +420,13 @@ try{
  await page.locator('[data-resize=lane-1]').dblclick();near(await bg(),bg0,'Double-click resets the lane');
  await page.locator('[data-action=bottom-reel]').click();await page.locator('[data-action=bottom-tracks]').click();near(await sideWidth(),side0+100,'Widths survive a redraw');near(await sound(),sound0-8,'Lane widths survive a redraw');
  assert.equal(await page.locator('[data-action=undo]').getAttribute('aria-label'),undoBefore,'Resizing is not an edit');await capture('revision-focus-resize');
+ assert.equal(await page.locator('[data-action=hidden-lanes-end]').isVisible(),false,'No marker while every lane fits');
+ await page.locator('[data-resize=focus-side]').focus();for(let i=0;i<12;i++)await page.keyboard.press('Shift+ArrowLeft');await settled();
+ assert.match(await page.locator('[data-action=hidden-lanes-end]').innerText(),/Flow ›/,'A wide sidebar names the lanes it hides');
+ await page.locator('[data-action=hidden-lanes-end]').click();await settled();assert.match(await page.locator('[data-action=hidden-lanes-start]').innerText(),/‹ Beat/,'Scrolling to them names the lanes now hidden on the left');
+ await capture('revision-focus-hidden-lanes');
  await page.locator('[data-action=toggle-focus]').click();await settled();assert.equal(await page.locator('.sc-resizer').count(),0,'Resizing belongs to Writing focus');
- report.checks.push('Revision: Writing focus resizes the sidebar and each Tracks lane by drag or arrow keys; Escape cancels, double-click resets, widths survive redraws and stay out of Undo');
+ report.checks.push('Revision: Writing focus resizes the sidebar and each Tracks lane by drag or arrow keys; Escape cancels, double-click resets, widths survive redraws and stay out of Undo; hidden lanes are named at the edge and one click shows them');
  assert.deepEqual(report.errors,[]);report.passed=true;
 }catch(error){report.failure=String(error.stack);await capture('failure');throw error;}
 finally{await writeFile(new URL('report.json',output),JSON.stringify(report,null,2)+'\n');await browser.close();}
