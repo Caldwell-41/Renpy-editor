@@ -21,6 +21,14 @@ globally unique Ren'Py label; Branch edges connect scenes explicitly. Display na
 technical labels, filenames, and stable UUIDs are distinct identities so a cosmetic
 rename does not create unnecessary source churn.
 
+New technical names (Character variables, Appearance expression tokens and Variable
+names) use lowercase ASCII letters, digits and underscores, start with a letter and
+are at most 64 characters. Their inputs turn off OS capitalisation, correction and
+spelling, and lowercase ASCII capitals and trim surrounding whitespace on blur and
+submission. Ren'Py names suggested from asset filenames follow the same rule.
+Display names, text values and imported filenames keep their case. Normalisation
+never renames existing source symbols or imported assets.
+
 ```mermaid
 erDiagram
     PROJECT ||--o{ CHAPTER : contains
@@ -1018,6 +1026,13 @@ The projection is limited to 256 records and at most 4 KiB per message; raw outp
 retains the existing 2 MiB limit with 32 KiB pages. Known pinned SDK compile/traceback
 and lint locations are recognised; all other text remains bounded fallback output.
 No diagnostic is independent document truth or authority to mutate/open arbitrary files.
+
+A diagnostic location button rechecks the current operation, source identity and
+revision through the core, then uses the existing Source navigation path. Dirty,
+deleted, replaced or stale files never select a nearby Beat. Locations outside the
+approved game `.rpy` Source scope are not navigable. Static Source/Branches findings
+stay separate from SDK validation, and an empty diagnostic list never turns a process
+failure into success.
 
 ## Project assistance prose and prepared context
 

@@ -25,8 +25,9 @@ Issue #82 records the decisions. The three reference variants are unchanged.
 
 - Colour carries meaning. Each mode has its own Brass and slate palette, scoped to the
   combined shell in `combined-revision.css`. Each branch arm has one of four colours, in
-  scene order. Character names use their character colour. Copper and teal stay in the
-  shared tokens until Kris approves a `docs/UI.md` change.
+  scene order. Character names use their character colour. `docs/UI.md` now names Brass
+  and slate as the app palette; the shared production tokens still hold copper and teal
+  until integration.
 - The Branch path bar only switches branches. Each open condition shows its number, its
   If test and a two-way switch. Insert actions moved to the branch boundaries.
 - Tracks and Reel draw a coloured route line above each open branch, with a light tint on

@@ -560,6 +560,20 @@ session generation. Late success, failure, cancellation, close/open, status, and
 mutation callbacks therefore cannot restore an obsolete project or overwrite newer
 persistence feedback.
 
+The shell reads persistence state from a read-only current-session status request;
+rendering a view never implies Saved. Unsubmitted form input stays distinct from
+accepted durable changes, so Flush cannot claim that pending controls were saved.
+Operation generations belong to their own flow, so an unrelated request in the same
+view cannot discard a still-relevant completion. Supporting-authoring operations and
+explicit Flush are serialized per project session. While one runs, the other starts
+no bridge request and the UI claims no persistence; the active operation owns reload,
+error, controls and focus. A late status response cannot overwrite an active
+authoring or Flush state. After navigation within the same project, an old callback
+cannot navigate back; its settlement starts a fresh status check for the current view.
+The shell combines fresh project status with newer local or unretained input, and
+conflict and recovery keep precedence. A status failure after acceptance reports
+accepted but unconfirmed. It never resubmits or claims Saved.
+
 ## Planned Phase 1G runtime boundary
 
 September 25 planning amendment, not implemented behaviour: 1G extends existing Scene,

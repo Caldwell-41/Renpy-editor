@@ -14,7 +14,7 @@ picker sheet for backgrounds and expressions, a one-click Add a beat dialog, eve
 in writing focus Tracks, a typed condition rule builder, arithmetic Set variable (#88), Choice option bodies with picked state and reordering (#99), empty-branch slots in Tracks and a wrapping Branch path. The focused check passes 37 groups and `npm run design:check`
 passes. Evidence and review screenshots are in ignored `.toolchains/story-combined/revision/`.
 The preview server on port 5176 serves this worktree; port 5175 was found stopped.
-`docs/UI.md` changes wait for Kris's approval of the palette.
+Kris approved updating `docs/UI.md` on 2026-11-08: it now names Brass and slate and the combined Story mock as the target design. Production still uses copper and teal until integration.
 
 ## Combined fourth Story mock delivered
 
