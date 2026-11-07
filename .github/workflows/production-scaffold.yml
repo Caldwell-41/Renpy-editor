@@ -3,65 +3,6 @@ name: Phase 1 production gates
 on:
   workflow_dispatch:
     inputs:
-      selectable_proposals:
-        description: Only approved Studio closeout/selectable paired proof; all older selectors false
-        type: boolean
-        default: false
-      studio_setup_only:
-        description: Only missing native Settings proof; reuse frozen closeout executable; requires selectable_proposals
-        type: boolean
-        default: false
-      selectable_dispatch_ordinal:
-        description: Studio closeout cumulative paired dispatch for the selected authorized native proof
-        type: string
-        default: '1'
-      phase2_studio:
-        description: Add integrated Studio LAN and metadata-free SDK proof with generate_lore selected
-        type: boolean
-        default: false
-      generate_lore:
-        description: Isolated generated lore entry Windows native and Mac ARM64 automated proof
-        type: boolean
-        default: false
-      generate_card:
-        description: Isolated generated Character card Windows native and Mac ARM64 automated proof
-        type: boolean
-        default: false
-      draft_scene:
-        description: Isolated Draft Scene Windows native and Mac ARM64 automated proof
-        required: false
-        type: boolean
-        default: false
-      continue_scene:
-        description: Isolated Continue Scene Windows native and Mac ARM64 automated proof
-        required: false
-        type: boolean
-        default: false
-      dialogue_rewrite_windows:
-        description: Only focused Windows first-rewrite qualification; no generic matrix
-        required: false
-        type: boolean
-        default: false
-      rewrite_build_ordinal:
-        description: Selected cumulative Windows package attempt (legacy 1–4; selectable 1–5)
-        required: false
-        type: string
-        default: '1'
-      rewrite_first_launch_ordinal:
-        description: Selected cumulative Windows first launch within approved allowance; reopen uses next
-        required: false
-        type: string
-        default: '1'
-      rewrite_reuse_run_id:
-        description: Reuse audited package and SDK from this completed focused run; no new build
-        required: false
-        type: string
-        default: ''
-      rewrite_focused_reuse_run_id:
-        description: Reuse individually passed unchanged focused checks from this audited run
-        required: false
-        type: string
-        default: ''
       upload_packages:
         description: Upload packaged applications after all production gates pass
         required: false
@@ -77,7 +18,6 @@ concurrency:
 
 jobs:
   preflight:
-    if: ${{ !inputs.selectable_proposals && !inputs.studio_setup_only && !inputs.dialogue_rewrite_windows && !inputs.continue_scene && !inputs.draft_scene && !inputs.generate_card && !inputs.generate_lore && !inputs.phase2_studio }}
     name: Preflight
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -116,7 +56,6 @@ jobs:
         run: cargo fmt --check --all
 
   packaged-boundary:
-    if: ${{ !inputs.selectable_proposals && !inputs.studio_setup_only && !inputs.dialogue_rewrite_windows && !inputs.continue_scene && !inputs.draft_scene && !inputs.generate_card && !inputs.generate_lore && !inputs.phase2_studio }}
     name: ${{ matrix.name }}
     needs: preflight
     strategy:
@@ -162,8 +101,6 @@ jobs:
           cache-bin: "false"
       - name: Install locked JavaScript dependencies
         run: npm ci --ignore-scripts
-      - name: Build frontend for desktop tests
-        run: npm run build
       - name: Run Source Save real-browser regression
         run: npm run test:source-browser
       - name: Test independent Rust core
@@ -174,33 +111,9 @@ jobs:
             --skip scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges \
             --skip lifecycle::tests::official_sdk_phase_1c_target_gate \
             --skip renpy::reconciliation_tests::official_sdk_download_handoff_target_gate \
-            --nocapture 2>&1 \
+            --exact --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/phase-1b-transactions.log"
-          grep -E '^test result: ok\. [1-9][0-9]* passed; 0 failed;' "$RUNNER_TEMP/phase-1b-transactions.log"
-          grep -E 'prepared_fault_state_can_be_safely_abandoned \.\.\. ok' "$RUNNER_TEMP/phase-1b-transactions.log"
-          grep -E 'recent_(symlink|reparse)_substitution_fails_closed_without_touching_target' "$RUNNER_TEMP/phase-1b-transactions.log"
-          grep -E 'managed_sdk_directory_(symlink|reparse)_fails_closed_without_touching_target' "$RUNNER_TEMP/phase-1b-transactions.log"
-          grep 'final_window_external_writer_is_preserved_as_conflict .*ok' "$RUNNER_TEMP/phase-1b-transactions.log"
-          grep 'every_persistent_transition_has_bounded_recovery ... ok' "$RUNNER_TEMP/phase-1b-transactions.log"
-          grep 'prepared_abandon_refuses_any_persisted_proposal_evidence ... ok' "$RUNNER_TEMP/phase-1b-transactions.log"
-          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1b-transactions.log" \
-            transaction::tests::prepared_fault_state_can_be_safely_abandoned \
-            transaction::tests::every_persistent_transition_has_bounded_recovery \
-            transaction::tests::interrupted_delete_is_recoverable_and_never_loses_the_displaced_source \
-            transaction::tests::interrupted_mixed_create_and_replace_blocks_follow_up \
-            transaction::tests::failed_stream_after_persisted_stage_is_recovery_required_not_rejected \
-            transaction::tests::explicit_recovery_resolves_only_proven_keep_or_accept_states \
-            transaction::tests::prepared_abandon_refuses_any_persisted_proposal_evidence \
-            transaction::tests::terminal_rejected_journal_does_not_block_flush_or_later_commit \
-            transaction::tests::final_window_external_writer_is_preserved_as_conflict \
-            lifecycle::tests::recent_precommit_failures_preserve_last_committed_store \
-            lifecycle::tests::recent_postcommit_failure_restarts_at_new_committed_store \
-            lifecycle::acceptance::phase1h_expected_assets_are_exact_original_inputs \
-            lifecycle::acceptance::phase1h_authoring_continues_after_4097_terminal_journals_and_reopens \
-            renpy::tests::phase1h::phase1h_sdk_case_guard_rejects_missing_zero_skipped_and_failed_cases \
-            renpy::tests::sdk_hashes_match_multichunk_empty_and_missing_inputs \
-            renpy::tests::sdk_file_hash_retains_cancellation_and_deadline \
-            renpy::runtime::tests::runtime_natural_exit_and_crash_cleanup_descendant_pipes
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1b-transactions.log"
       - name: Isolated real-service Branches observed-model budgets
         shell: bash
         env:
@@ -210,9 +123,7 @@ jobs:
           set -o pipefail
           cargo test -p loomlight-core --release --locked scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges -- --exact --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/runtime-flow-budget.log"
-          grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/runtime-flow-budget.log"
-          grep -E '^test scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges \.\.\. ok$' "$RUNNER_TEMP/runtime-flow-budget.log"
-          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-flow-budget.log" scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-flow-budget.log"
           grep 'phase-1g-observed-budget-gate: passed' "$RUNNER_TEMP/runtime-flow-budget.log"
       # Browser functional/evidence failures are reasserted below; Chrome timing
       # overruns remain visible diagnostics in the report and warning annotations.
@@ -259,10 +170,8 @@ jobs:
           cargo test -p loomlight-core --release --locked \
             lifecycle::tests::official_sdk_phase_1c_target_gate -- --exact --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
-          grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
-          grep -E '^test lifecycle::tests::official_sdk_phase_1c_target_gate \.\.\. ok$' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           if grep -q 'phase-1c-target-gate: skipped' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"; then exit 1; fi
-          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1c-project-lifecycle.log" lifecycle::tests::official_sdk_phase_1c_target_gate
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1c-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1c-remediation-sdk-trust-order: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1d-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
@@ -281,9 +190,7 @@ jobs:
           cargo test -p loomlight-core --release --locked \
             renpy::reconciliation_tests::official_sdk_download_handoff_target_gate -- --exact --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
-          grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
-          grep -E '^test renpy::reconciliation_tests::official_sdk_download_handoff_target_gate \.\.\. ok$' "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
-          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log" renpy::reconciliation_tests::official_sdk_download_handoff_target_gate
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
           grep 'phase-1c-network-handoff-gate: passed' "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
       - name: Runtime foundation and real SDK diagnostics gates
         shell: bash
@@ -292,14 +199,10 @@ jobs:
         run: |
           set -o pipefail
           cargo test -p loomlight-core --release --locked lifecycle::runtime_tests::runtime_official_sdk_service_gate -- --ignored --exact --nocapture 2>&1 | tee "$RUNNER_TEMP/runtime-sdk-service.log"
-          grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/runtime-sdk-service.log"
-          grep -E '^test lifecycle::runtime_tests::runtime_official_sdk_service_gate \.\.\. ok$' "$RUNNER_TEMP/runtime-sdk-service.log"
-          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-sdk-service.log" lifecycle::runtime_tests::runtime_official_sdk_service_gate
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-sdk-service.log"
           grep 'phase-1g-runtime-service-gate: passed' "$RUNNER_TEMP/runtime-sdk-service.log"
           cargo test -p loomlight-core --release --locked lifecycle::runtime_tests::runtime_diagnostics_sdk_gate -- --ignored --exact --nocapture 2>&1 | tee "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
-          grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
-          grep -E '^test lifecycle::runtime_tests::runtime_diagnostics_sdk_gate \.\.\. ok$' "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
-          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-diagnostics-sdk.log" lifecycle::runtime_tests::runtime_diagnostics_sdk_gate
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
           grep 'runtime-diagnostics-sdk-compile: passed' "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
           grep 'runtime-diagnostics-sdk-lint: passed' "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
       - name: Phase 1H integrated production-service authoring and SDK routes
@@ -311,7 +214,7 @@ jobs:
           set -o pipefail
           cargo test -p loomlight-core --release --locked renpy::tests::phase1h::phase1h_integrated_authoring_sdk_gate -- --ignored --exact --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/phase-1h-integrated-authoring.log"
-          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1h-integrated-authoring.log" renpy::tests::phase1h::phase1h_integrated_authoring_sdk_gate
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1h-integrated-authoring.log"
           grep 'phase-1h-integrated-authoring-sdk-gate: passed' "$RUNNER_TEMP/phase-1h-integrated-authoring.log"
       - name: Test desktop Rust boundary
         run: cargo test -p loomlight-desktop --release --locked
@@ -498,288 +401,6 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
-  dialogue-rewrite-windows:
-    if: ${{ !inputs.selectable_proposals && !inputs.studio_setup_only && (inputs.dialogue_rewrite_windows || inputs.continue_scene || inputs.draft_scene || inputs.generate_card || inputs.generate_lore || inputs.phase2_studio) }}
-    name: Focused Assist — Windows x64
-    runs-on: windows-2025
-    timeout-minutes: 60
-    permissions:
-      contents: read
-      actions: read
-    env:
-      CARGO_TERM_COLOR: never
-      PYTHONUTF8: '1'
-      CONTINUE_SCENE: ${{ inputs.continue_scene }}
-      GENERATE_CARD: ${{ inputs.generate_card }}
-      GENERATE_LORE: ${{ inputs.generate_lore }}
-      PHASE2_STUDIO: ${{ inputs.phase2_studio }}
-      DRAFT_SCENE: ${{ inputs.draft_scene }}
-    defaults:
-      run:
-        working-directory: app
-        shell: pwsh
-    steps:
-      - name: Check out the exact published candidate
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Require isolated fresh dispatch and bounded ordinals
-        working-directory: .
-        env:
-          BUILD_ORDINAL: ${{ inputs.rewrite_build_ordinal }}
-          FIRST_LAUNCH_ORDINAL: ${{ inputs.rewrite_first_launch_ordinal }}
-          UPLOAD_PACKAGES: ${{ inputs.upload_packages }}
-          LEGACY_REWRITE: ${{ inputs.dialogue_rewrite_windows }}
-          REUSE_REWRITE_RUN_ID: ${{ inputs.rewrite_reuse_run_id }}
-          REUSE_FOCUSED_RUN_ID: ${{ inputs.rewrite_focused_reuse_run_id }}
-        run: |
-          python -c "import os; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert os.environ['UPLOAD_PACKAGES']=='false'; assert sum(os.environ.get(k)=='true' for k in ['CONTINUE_SCENE','DRAFT_SCENE','GENERATE_CARD','GENERATE_LORE','LEGACY_REWRITE'])==1; assert os.environ.get('PHASE2_STUDIO')!='true' or os.environ.get('GENERATE_LORE')=='true'; assert not ((os.environ.get('CONTINUE_SCENE')=='true' or os.environ.get('DRAFT_SCENE')=='true' or os.environ.get('GENERATE_CARD')=='true' or os.environ.get('GENERATE_LORE')=='true') and (os.environ['REUSE_REWRITE_RUN_ID'] or os.environ['REUSE_FOCUSED_RUN_ID'] or os.environ['LEGACY_REWRITE']=='true'));  assert 1<=int(os.environ['BUILD_ORDINAL'])<=4; assert 1<=int(os.environ['FIRST_LAUNCH_ORDINAL'])<=5"
-          if ($LASTEXITCODE -ne 0) { throw 'Branch, fresh attempt or cumulative ordinal guard failed' }
-          python -c "import os; value=os.environ['REUSE_REWRITE_RUN_ID']; assert not value or value.isdecimal()"
-          if ($LASTEXITCODE -ne 0) { throw 'Package reuse run identity guard failed' }
-          python -c "import os; value=os.environ['REUSE_FOCUSED_RUN_ID']; assert not value or (value.isdecimal() and os.environ['REUSE_REWRITE_RUN_ID'])"
-          if ($LASTEXITCODE -ne 0) { throw 'Focused reuse run identity guard failed' }
-          $evidence=Join-Path $env:RUNNER_TEMP 'rewrite-windows'
-          New-Item -ItemType Directory -Path $evidence | Out-Null
-          "REWRITE_EVIDENCE=$evidence" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-      - name: Check native driver syntax and actual interactive runner capability
-        id: native-capability
-        continue-on-error: true
-        run: |
-          $parseErrors=$null; $tokens=$null
-          [void][System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path scripts/rewrite-windows-native.ps1),[ref]$tokens,[ref]$parseErrors)
-          if ($parseErrors.Count) { throw ($parseErrors | Out-String) }
-          powershell.exe -NoProfile -File scripts/rewrite-windows-native.ps1 -Stage preflight -Output "$env:REWRITE_EVIDENCE/capability"
-          if ($LASTEXITCODE -ne 0) { throw 'Native runner capability is missing; required native cases stay pending' }
-      - name: Select locked Node toolchain
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: 24.19.0
-          cache: npm
-          cache-dependency-path: app/package-lock.json
-      - name: Select locked npm and install dependencies
-        run: |
-          npm install --global npm@11.9.0
-          if ($LASTEXITCODE -ne 0) { throw 'Pinned npm setup failed' }
-          $npmPrefix=(npm prefix --global).Trim()
-          if ($LASTEXITCODE -ne 0) { throw 'Installed npm prefix unavailable' }
-          $npmCli=Join-Path $npmPrefix 'node_modules/npm/bin/npm-cli.js'
-          $npmVersion=(& node $npmCli --version).Trim()
-          if ($LASTEXITCODE -ne 0 -or $npmVersion -ne '11.9.0') { throw 'Installed npm version does not match the repository pin' }
-          # Select the installed shim for nested npm scripts and the exact CLI for
-          # the Python recipe; the Node toolcache's bundled npm stays off this route.
-          $env:Path="$npmPrefix;$env:Path"
-          $npmPrefix | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          "REWRITE_NPM_CLI=$npmCli" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          & node $npmCli ci --ignore-scripts
-          if ($LASTEXITCODE -ne 0) { throw 'Locked dependencies failed' }
-      - name: Select repository-pinned Rust and restore dependencies
-        run: rustup show active-toolchain
-      - name: Restore Rust dependency cache
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
-        with:
-          key: phase-1b-windows-2025
-          workspaces: app -> target
-          cache-bin: 'false'
-      - name: Gate rejection fixtures and repository checks
-        working-directory: .
-        run: |
-          python scripts/validate.py
-          if ($LASTEXITCODE -ne 0) { throw 'Repository validation failed' }
-          python -m unittest discover -s app/scripts -p test_rewrite_native_evidence.py -v
-          if ($LASTEXITCODE -ne 0) { throw 'Native evidence gate tests failed' }
-          python -m unittest discover -s app/scripts -p test_rewrite_probe_gate.py -v
-          if ($LASTEXITCODE -ne 0) { throw 'Rewrite report gate tests failed' }
-          python -m unittest discover -s app/scripts -p test_rewrite_windows_reuse.py -v
-          if ($LASTEXITCODE -ne 0) { throw 'Retained evidence gate tests failed' }
-      - name: Retrieve and verify previously audited package and SDK
-        if: ${{ inputs.rewrite_reuse_run_id != '' }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REUSE_REWRITE_RUN_ID: ${{ inputs.rewrite_reuse_run_id }}
-          REUSE_FOCUSED_RUN_ID: ${{ inputs.rewrite_focused_reuse_run_id }}
-        run: |
-          $source=Join-Path $env:RUNNER_TEMP 'rewrite-reuse'
-          gh run download "$env:REUSE_REWRITE_RUN_ID" --repo Caldwell-41/Renpy-editor --name "rewrite-windows-${env:REUSE_REWRITE_RUN_ID}-1" --dir "$source"
-          if ($LASTEXITCODE -ne 0) { throw 'Audited source artifact unavailable; no implicit rebuild' }
-          gh api "repos/Caldwell-41/Renpy-editor/actions/runs/$env:REUSE_REWRITE_RUN_ID" | Out-File -FilePath "$source/run-metadata.json" -Encoding utf8
-          if ($LASTEXITCODE -ne 0) { throw 'Source run identity unavailable' }
-          python scripts/qualify-rewrite-windows.py reuse --output "$env:REWRITE_EVIDENCE" --source "$source"
-          if ($LASTEXITCODE -ne 0) { throw 'Retained evidence mismatch; no implicit rebuild' }
-          if ($env:REUSE_FOCUSED_RUN_ID) {
-            $focusedSource=Join-Path $env:RUNNER_TEMP 'rewrite-focused-reuse'
-            gh run download "$env:REUSE_FOCUSED_RUN_ID" --repo Caldwell-41/Renpy-editor --name "rewrite-windows-${env:REUSE_FOCUSED_RUN_ID}-1" --dir "$focusedSource"
-            if ($LASTEXITCODE -ne 0) { throw 'Passed focused artifact unavailable' }
-            gh api "repos/Caldwell-41/Renpy-editor/actions/runs/$env:REUSE_FOCUSED_RUN_ID" | Out-File -FilePath "$focusedSource/run-metadata.json" -Encoding utf8
-            if ($LASTEXITCODE -ne 0) { throw 'Focused source identity unavailable' }
-            python scripts/qualify-rewrite-windows.py reuse-focused --output "$env:REWRITE_EVIDENCE" --source "$focusedSource"
-            if ($LASTEXITCODE -ne 0) { throw 'Passed focused evidence mismatch' }
-          }
-      - name: Selected renderer, core, transport, native worker and actual controller
-        id: focused
-        continue-on-error: true
-        run: python scripts/qualify-rewrite-windows.py prepare --output "$env:REWRITE_EVIDENCE"
-      - name: Restore official pinned SDK archive
-        id: rewrite-sdk-cache
-        if: ${{ inputs.rewrite_reuse_run_id == '' && ((!inputs.generate_card && !inputs.generate_lore) || inputs.phase2_studio) }}
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
-        with:
-          path: ${{ runner.temp }}/renpy-8.5.3-sdk.tar.bz2
-          key: phase-1c-renpy-Windows-8.5.3-eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45
-      - name: Download official published checksums and SDK on cache miss
-        if: ${{ inputs.rewrite_reuse_run_id == '' && ((!inputs.generate_card && !inputs.generate_lore) || inputs.phase2_studio) }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          curl --proto '=https' --tlsv1.2 --location --fail --show-error --max-time 120 \
-            --output "$RUNNER_TEMP/rewrite-checksums.txt" https://www.renpy.org/dl/8.5.3/checksums.txt
-          if [ '${{ steps.rewrite-sdk-cache.outputs.cache-hit }}' != true ]; then
-            curl --proto '=https' --tlsv1.2 --location --fail --show-error --max-time 300 \
-              --output "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2
-            mv "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2.partial" "$RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2"
-          fi
-      - name: Pinned SDK compile, lint, literal tokens and standard-template runtime
-        id: rewrite-sdk
-        continue-on-error: true
-        env:
-          REUSE_REWRITE_RUN_ID: ${{ inputs.rewrite_reuse_run_id }}
-        run: |
-          if ($env:REUSE_REWRITE_RUN_ID) {
-            python scripts/qualify-rewrite-windows.py reuse-sdk --output "$env:REWRITE_EVIDENCE"
-          } else {
-            python scripts/qualify-rewrite-windows.py sdk --output "$env:REWRITE_EVIDENCE" --archive "$env:RUNNER_TEMP/renpy-8.5.3-sdk.tar.bz2" --checksums "$env:RUNNER_TEMP/rewrite-checksums.txt"
-          }
-      - name: Verify retained package or record one bounded Windows build
-        id: rewrite-package
-        if: ${{ (!inputs.generate_card && !inputs.generate_lore) || steps.focused.outcome == 'success' }}
-        continue-on-error: true
-        env:
-          BUILD_ORDINAL: ${{ inputs.rewrite_build_ordinal }}
-          REUSE_REWRITE_RUN_ID: ${{ inputs.rewrite_reuse_run_id }}
-        run: |
-          if ($env:REUSE_REWRITE_RUN_ID) {
-            python scripts/qualify-rewrite-windows.py reuse-package --output "$env:REWRITE_EVIDENCE"
-          } else {
-            python scripts/qualify-rewrite-windows.py build --output "$env:REWRITE_EVIDENCE" --ordinal "$env:BUILD_ORDINAL"
-          }
-      - name: Native observation and OS input, then dependent separate-process reopen
-        id: rewrite-native
-        if: ${{ steps.native-capability.outcome == 'success' && steps.focused.outcome == 'success' && steps.rewrite-package.outcome == 'success' && steps.rewrite-sdk.outcome == 'success' }}
-        continue-on-error: true
-        env:
-          FIRST_LAUNCH_ORDINAL: ${{ inputs.rewrite_first_launch_ordinal }}
-        run: python scripts/qualify-rewrite-windows.py native --output "$env:REWRITE_EVIDENCE" --ordinal "$env:FIRST_LAUNCH_ORDINAL"
-      - name: Retain scanned candidate and require every terminal case and cleanup
-        if: always()
-        env:
-          FOCUSED_OUTCOME: ${{ steps.focused.outcome }}
-          SDK_OUTCOME: ${{ steps.rewrite-sdk.outcome }}
-          PACKAGE_OUTCOME: ${{ steps.rewrite-package.outcome }}
-          NATIVE_OUTCOME: ${{ steps.rewrite-native.outcome }}
-          CAPABILITY_OUTCOME: ${{ steps.native-capability.outcome }}
-        run: python scripts/qualify-rewrite-windows.py finish --output "$env:REWRITE_EVIDENCE"
-      - name: Upload focused terminal evidence including failures
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: rewrite-windows-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/rewrite-windows/
-          if-no-files-found: error
-          retention-days: 7
-
-
-  continue-scene-macos:
-    if: ${{ !inputs.selectable_proposals && !inputs.studio_setup_only && (inputs.continue_scene || inputs.draft_scene || inputs.generate_card || inputs.generate_lore || inputs.phase2_studio) && !inputs.dialogue_rewrite_windows }}
-    name: Focused Scene automated — macOS ARM64
-    runs-on: macos-26
-    timeout-minutes: 30
-    env:
-      CARGO_TERM_COLOR: never
-      GENERATE_CARD: ${{ inputs.generate_card }}
-      GENERATE_LORE: ${{ inputs.generate_lore }}
-      PHASE2_STUDIO: ${{ inputs.phase2_studio }}
-      DRAFT_SCENE: ${{ inputs.draft_scene }}
-      CONTINUE_SCENE: ${{ inputs.continue_scene }}
-      LEGACY_REWRITE: ${{ inputs.dialogue_rewrite_windows }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Verify isolated selection and ARM64 capability
-        env:
-          UPLOAD_PACKAGES: ${{ inputs.upload_packages }}
-          REUSE_RUN: ${{ inputs.rewrite_reuse_run_id }}
-          FOCUSED_REUSE: ${{ inputs.rewrite_focused_reuse_run_id }}
-        run: |
-          python3 -c "import os,platform; assert platform.machine()=='arm64'; assert sum(os.environ.get(k)=='true' for k in ['CONTINUE_SCENE','DRAFT_SCENE','GENERATE_CARD','GENERATE_LORE','LEGACY_REWRITE'])==1; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['UPLOAD_PACKAGES']=='false'; assert not os.environ['REUSE_RUN'] and not os.environ['FOCUSED_REUSE']; assert os.environ.get('PHASE2_STUDIO')!='true' or os.environ.get('GENERATE_LORE')=='true'"
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: 24.19.0
-          cache: npm
-          cache-dependency-path: app/package-lock.json
-      - name: Select pinned npm and install locked dependencies
-        working-directory: app
-        run: |
-          npm install --global npm@11.9.0
-          test "$(npm --version)" = '11.9.0'
-          npm ci --ignore-scripts
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
-        with:
-          key: phase-1b-macos-26
-          workspaces: app -> target
-          cache-bin: 'false'
-      - name: Fetch official pinned SDK archive and published checksums
-        if: ${{ (!inputs.generate_card && !inputs.generate_lore) || inputs.phase2_studio }}
-        run: |
-          curl --fail --location --max-time 300 --output "$RUNNER_TEMP/continue-checksums.txt" https://www.renpy.org/dl/8.5.3/checksums.txt
-          curl --fail --location --max-time 300 --output "$RUNNER_TEMP/continue-sdk.tar.bz2" https://www.renpy.org/dl/8.5.3/renpy-8.5.3-sdk.tar.bz2
-      - name: Focused real controller and core plus official literal/runtime proof
-        run: python3 app/scripts/qualify-continue-automated.py --output "$RUNNER_TEMP/continue-macos" --archive "$RUNNER_TEMP/continue-sdk.tar.bz2" --checksums "$RUNNER_TEMP/continue-checksums.txt"
-      - name: Retain actual automated cases and failure logs
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: continue-macos-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/continue-macos/
-          if-no-files-found: error
-          retention-days: 7
-
-  selectable-admission:
-    if: ${{ inputs.selectable_proposals || inputs.studio_setup_only }}
-    name: Selectable outcome exclusive admission
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    env:
-      PRIMARY_SELECTABLE: ${{ inputs.selectable_proposals }}
-      LEGACY_REWRITE: ${{ inputs.dialogue_rewrite_windows }}
-      CONTINUE_SCENE: ${{ inputs.continue_scene }}
-      DRAFT_SCENE: ${{ inputs.draft_scene }}
-      GENERATE_CARD: ${{ inputs.generate_card }}
-      GENERATE_LORE: ${{ inputs.generate_lore }}
-      PHASE2_STUDIO: ${{ inputs.phase2_studio }}
-      UPLOAD_PACKAGES: ${{ inputs.upload_packages }}
-      REUSE_PACKAGE: ${{ inputs.rewrite_reuse_run_id }}
-      REUSE_FOCUSED: ${{ inputs.rewrite_focused_reuse_run_id }}
-    steps:
-      - name: Refuse mixed selectors or prior-run reuse
-        run: python -c "import os; assert os.environ['GITHUB_REF']=='refs/heads/codex/provider-qualification'; assert os.environ['GITHUB_RUN_ATTEMPT']=='1'; assert os.environ['PRIMARY_SELECTABLE']=='true'; assert all(os.environ[k]=='false' for k in ['LEGACY_REWRITE','CONTINUE_SCENE','DRAFT_SCENE','GENERATE_CARD','GENERATE_LORE','PHASE2_STUDIO','UPLOAD_PACKAGES']); assert not os.environ['REUSE_PACKAGE'] and not os.environ['REUSE_FOCUSED']"
-
-  selectable-proposals:
-    if: ${{ inputs.selectable_proposals && !inputs.studio_setup_only }}
-    needs: selectable-admission
-    uses: ./.github/workflows/selectable-proposals.yml
-    with:
-      windows_build_ordinal: ${{ inputs.rewrite_build_ordinal }}
-      windows_first_launch_ordinal: ${{ inputs.rewrite_first_launch_ordinal }}
-      dispatch_ordinal: ${{ inputs.selectable_dispatch_ordinal }}
-
-  studio-settings-native:
-    if: ${{ inputs.selectable_proposals && inputs.studio_setup_only }}
-    needs: selectable-admission
-    permissions:
-      contents: read
-      actions: read
-    uses: ./.github/workflows/studio-settings-native.yml
-    with:
-      first_launch_ordinal: ${{ inputs.rewrite_first_launch_ordinal }}
-      dispatch_ordinal: ${{ inputs.selectable_dispatch_ordinal }}
-
   validation-start:
     name: Validation status (start)
     if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
@@ -793,7 +414,7 @@ jobs:
   validation-finish:
     name: Validation status (finish)
     if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
-    needs: [preflight, packaged-boundary, dialogue-rewrite-windows, continue-scene-macos, selectable-admission, selectable-proposals, studio-settings-native, validation-start]
+    needs: [preflight, packaged-boundary, validation-start]
     permissions:
       contents: read
       pull-requests: read

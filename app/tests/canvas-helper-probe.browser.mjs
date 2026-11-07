@@ -1,3 +1,4 @@
+// fixture: skip needs the official Ren'Py SDK (LOOMLIGHT_RUNTIME_SDK_ARCHIVE); run it during ticket qualification.
 // Exact packaged controller with real UI/core/SDK; Chrome supplies no native proof.
 import assert from 'node:assert/strict';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';

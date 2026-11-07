@@ -1,18 +1,48 @@
 import copy
+import hashlib
 import importlib.util
 import json
 import os
 from pathlib import Path
 import subprocess
+import struct
 import tempfile
 import unittest
 from unittest.mock import patch
+import zlib
 
 spec=importlib.util.spec_from_file_location('current_connection',Path(__file__).with_name('studio_connection_native.py'))
 probe=importlib.util.module_from_spec(spec);spec.loader.exec_module(probe)
 
 
+def png(width=200, height=100):
+    def chunk(kind, payload):
+        return struct.pack('>I', len(payload)) + kind + payload + struct.pack('>I', zlib.crc32(kind + payload) & 0xffffffff)
+    pixels = b''.join(b'\0' + bytes((x * 37 + y * 61) % 256 for x in range(width * 3)) for y in range(height))
+    return b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', width, height, 8, 2, 0, 0, 0)) + chunk(b'IDAT', zlib.compress(pixels)) + chunk(b'IEND', b'')
+
+
 class CurrentConnectionTests(unittest.TestCase):
+    def test_png_gate_rejects_fake_truncated_wrong_dimensions_changed_and_blank(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / 'native.png'
+            good = png()
+            capture = {'width': 200, 'height': 100, 'sampleRange': 40, 'sha256': hashlib.sha256(good).hexdigest()}
+            path.write_bytes(good)
+            probe.validate_capture(path, capture)
+            for kind in ['signature-only', 'padded-header', 'truncated', 'wrong-dimensions', 'changed', 'blank']:
+                data, metadata = good, copy.deepcopy(capture)
+                if kind == 'signature-only': data = b'\x89PNG\r\n\x1a\npublic test data'
+                elif kind == 'padded-header': data = good[:24] + b'junk' * 200
+                elif kind == 'truncated': data = good[:-4]
+                elif kind == 'wrong-dimensions': metadata['width'] += 1
+                elif kind == 'changed': data = good[:-1] + bytes([good[-1] ^ 1])
+                else: metadata['sampleRange'] = 0
+                # Give malformed files an honest digest: framing must reject them.
+                if kind != 'changed': metadata['sha256'] = hashlib.sha256(data).hexdigest()
+                path.write_bytes(data)
+                with self.subTest(kind=kind), self.assertRaises((ValueError, zlib.error)): probe.validate_capture(path, metadata)
+
     def viewport(self):
         return dict(before=[0,9,1044,759],clientBefore=[1024,720],workArea=[0,0,1024,728],dpi=96,
                     target=[8,8,1008,712],after=[8,8,1008,712],clientAfter=[988,673],minimumClient=[560,480],frame=[20,39],margin=8,verified=True)

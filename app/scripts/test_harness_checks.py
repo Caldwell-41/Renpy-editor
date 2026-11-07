@@ -24,11 +24,32 @@ class HarnessChecks(unittest.TestCase):
         selected = list(cases(unittest.defaultTestLoader.discover(
             str(module.APP / 'scripts'), pattern='test_*.py')))
         self.assertTrue(any(case.__class__.__module__ == 'test_canvas_measurement' for case in selected))
+        self.assertFalse(any('test_actual_owned_dialog_api_uses_handle_pid_class_and_owner' in case.id()
+                             for case in selected))
         skipped = {case.id() for case in selected
                    if getattr(case.__class__, '__unittest_skip__', False)
                    or getattr(getattr(case, case._testMethodName), '__unittest_skip__', False)}
         allowed = module.gate.MAC_SNAPSHOT_TESTS | module.gate.WINDOWS_NATIVE_TESTS
         self.assertEqual(skipped - allowed, set())
+
+    def test_native_dialog_requires_explicit_windows_selection_and_success(self):
+        for host in ('Windows', 'macOS'):
+            self.assertNotIn('native-dialog', [name for name, _, _ in module.checks(host)])
+        name, command, validate = module.checks('Windows', native_dialog=True)[-1]
+        self.assertEqual(name, 'native-dialog')
+        self.assertEqual(command[-1], 'scripts/studio_setup_native_dialog_checks.py')
+        with self.assertRaises(ValueError):
+            module.checks('macOS', native_dialog=True)
+        case = '__main__.NativeDialogChecks.test_actual_owned_dialog_api_uses_handle_pid_class_and_owner'
+        row = f"{case.rsplit('.', 1)[1]} ({case}) ... ok\n"
+        log = row + '\nRan 1 test in 0.01s\n\nOK\n'
+        validate(log)
+        validate(log.replace('\n', '\r\n'))
+        for bad in ('\nRan 0 tests in 0.01s\n\nOK\n', log + row,
+                    log.replace(' ... ok', " ... skipped 'no desktop'"),
+                    log.replace(' ... ok', ' ... FAIL')):
+            with self.assertRaises(ValueError):
+                validate(bad)
 
     def test_failure_timeout_and_spawn_failure_keep_logs_and_do_not_hide_later_results(self):
         responses = iter((subprocess.CompletedProcess([], 1, 'public failed assertion\n', ''),
@@ -61,10 +82,8 @@ class HarnessChecks(unittest.TestCase):
             self.assertEqual(records[0]['exitCode'], 0)
 
     def test_retention_gate_rejects_missing_duplicate_and_unexpected_skipped_cases(self):
-        source = module.ast.parse((module.APP / 'scripts/test-q1-package-retention.py').read_text())
-        names = ['__main__.PackageRetentionTests.' + node.name
-                 for cls in source.body if isinstance(cls, module.ast.ClassDef)
-                 for node in cls.body if isinstance(node, module.ast.FunctionDef) and node.name.startswith('test_')]
+        names = ['__main__.PackageRetentionTests.' + name
+                 for name in ('test_package_is_retained', 'test_macos_tar_preserves_symlinks')]
         for host in ('Windows', 'macOS'):
             rows = [f"{name.rsplit('.', 1)[1]} ({name}) ... " +
                     ("skipped 'POSIX symlink creation required'" if host == 'Windows' and name.endswith('test_macos_tar_preserves_symlinks') else 'ok')

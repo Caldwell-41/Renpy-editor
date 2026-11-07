@@ -1,3 +1,4 @@
+// fixture: skip needs the official Ren'Py SDK (LOOMLIGHT_RUNTIME_SDK_ARCHIVE); run it during ticket qualification.
 // Production Screens component, dispatch and pinned helper. Chrome is not native WebView proof.
 import assert from 'node:assert/strict';
 import {createServer} from 'vite';

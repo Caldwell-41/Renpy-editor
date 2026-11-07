@@ -1,3 +1,4 @@
+// fixture: skip run by screens-source.yml.
 // Production renderer, ApplicationHost, Source and transactions on a disposable project.
 import assert from 'node:assert/strict';
 import {createServer} from 'vite';

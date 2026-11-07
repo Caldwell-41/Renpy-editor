@@ -7,7 +7,7 @@ import {join,resolve,basename,dirname} from 'node:path';
 import {existsSync,rmSync,mkdirSync,writeFileSync,readdirSync,lstatSync,readFileSync} from 'node:fs';
 import {pathToFileURL,fileURLToPath} from 'node:url';
 import {Window} from 'happy-dom';
-import {driverProcess} from '../tests/phase2-driver-process.mjs';
+import {driverProcess} from './phase2-driver-process.mjs';
 import {createRequest,isCoreResponse} from '../dist-tests/src/protocol.js';
 import {sourceTextareaSnapshot} from '../dist-tests/src/source-textarea.js';
 
@@ -272,6 +272,8 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
  return evidence;
 }
 if(process.argv[1]&&resolve(process.argv[1])===resolve(fileURLToPath(import.meta.url))){
- const option=name=>{const index=process.argv.indexOf(name);assert(index>=0&&process.argv[index+1],`Missing ${name}`);return process.argv[index+1];};
- await qualifyStoryController(option('--driver'),{output:option('--output'),caseModule:option('--cases'),selection:process.argv.includes('--narrow')?'narrow':'full'});
+ const option=(name,fallback)=>{const index=process.argv.indexOf(name);return index>=0&&process.argv[index+1]?process.argv[index+1]:fallback;};
+ const driver=resolve(process.env.CARGO_TARGET_DIR??'target','debug/examples/story-controller-driver'+(process.platform==='win32'?'.exe':''));
+ await qualifyStoryController(option('--driver',driver),{output:option('--output',process.env.STORY_CONTROLLER_OUTPUT??join(tmpdir(),`story-controller-${randomUUID()}`)),
+  caseModule:option('--cases',fileURLToPath(new URL('./story-controller-cases.mjs',import.meta.url))),selection:process.argv.includes('--narrow')?'narrow':'full'});
 }
