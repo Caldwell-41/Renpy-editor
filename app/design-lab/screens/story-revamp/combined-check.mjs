@@ -336,7 +336,7 @@ try{
  await page.locator('[data-action=undo]').click();assert.equal(await condition(),'has_ticket is true or trust is less than 5');
  await page.locator('summary[data-action=test-ticket-if-rule-0-variable]').click();assert.equal(await page.locator('[data-action=test-ticket-if-rule-0-variable-found_letter]').count(),0,'Undo removes the created variable');await page.keyboard.press('Escape');
  await capture('revision-condition-builder');
- await pick('setVariable');await page.locator('summary[data-action=set-variable]').click();await page.locator('[data-action=set-variable-trust]').click();await page.locator('[data-action=change-add]').click();
+ await pick('setVariable');await page.locator('summary[data-action=set-variable]').click();await page.locator('[data-action=set-variable-trust]').click();await page.locator('summary[data-action=change]').click();await page.locator('[data-action=change-add]').click();
  assert.match(await page.locator('.sr-inspector .sc-test-code').innerText(),/^\$ trust \+= 1$/);assert.match(await page.locator('.sr-inspector').innerText(),/Planned \(#87\)/);
  report.checks.push('Revision: condition rules build tests with presets, All/Any and the Ren\'Py line; new variables validate and undo; Set variable shows planned Add');
  // Revision (#99): option bodies, endings that edit the last Beat, prompt, Hide/Show disabled and the no-selectable continuation.
@@ -367,20 +367,28 @@ try{
  await page.keyboard.press('Escape');await page.locator('[data-action=option-3-when-false-hide]').click();assert.match(await page.locator('.sr-stage .sc-choice-none').innerText(),/No option can be picked here/);
  await page.locator('[data-action=add-choice-option]').click();let m=await menu();assert.equal(m.options.length,5);assert.equal(m.branches.length,5,'New option gets its own empty body');assert.deepEqual(m.branches.at(-1).beats,[]);
  await page.locator('[data-action=remove-choice-2]').click();m=await menu();assert.equal(m.branches.some(b=>b.beats.some(x=>x.kind==='call')),false,'Removing an option removes its beats');
+ await page.locator('.sc-conditions [data-branch-segment=board-2]').click();await settled();const slot=page.locator('.sc-tracks .sc-track-slot');
+ assert.equal(await slot.count(),1,'An empty option is one slot');assert.equal(await page.locator('.sc-tracks [data-branch-boundary=exit]').count(),0);
+ const [named,next]=await slot.locator('.sc-rail-label,.sc-rail-end').evaluateAll(n=>n.map(x=>x.getBoundingClientRect().toJSON()));assert.ok(named.right<=next.left,'Empty option name and its next step do not overlap');
+ await capture('revision-choice-empty-slot');
  await page.locator('[data-action=undo]').click();await page.locator('[data-action=option-3-beat-2]').click();
  assert.equal(await page.locator('.sr-inspector .sc-crumb').first().innerText(),'Option 3 · Show the gold ticket');assert.match(await page.locator('.sc-tracks .sc-rail-end').first().innerText(),/then 09/);
  await capture('revision-choice-body');
- report.checks.push('Revision #99: option bodies with endings that edit the last Beat; prompt; Hide/Show disabled; illustrative preview outside Undo; no-selectable continuation; add/remove keeps bodies with Undo');
+ report.checks.push('Revision #99: option bodies with endings that edit the last Beat; prompt; Hide/Show disabled; illustrative preview outside Undo; no-selectable continuation; add/remove keeps bodies with Undo; an empty option is one slot whose labels do not overlap');
  // Revision (#99): repeatable questions, Mark picked with duplicate captions, nested condition and Choice bodies in Tracks, Reel and Writing focus.
  await page.locator('[data-action=open-call]').click().catch(()=>{});await page.locator('.sr-inspector [data-action=open-destination]').click();await page.locator('[data-track-beat][data-beat-kind=choice]').click();
  assert.equal(await page.locator('.sr-stage [data-stage-choice="0"]').getAttribute('data-state'),'marked');assert.equal(await page.locator('.sr-stage [data-stage-choice="2"]').getAttribute('data-state'),'available','Duplicate caption keeps its own picked state');
  assert.match(await page.locator('[data-choice-index="0"]').innerText(),/Same text as option 3/);
+ await page.locator('[data-action=move-option-0-down]').click();assert.equal(await page.getByRole('textbox',{name:'Option 2 text',exact:true}).inputValue(),'Ask about the station');
+ assert.equal(await page.locator('.sr-stage [data-stage-choice="1"]').getAttribute('data-state'),'marked','Picked state follows the moved option');assert.equal(await page.locator('.sr-stage [data-stage-choice="0"]').getAttribute('data-state'),'available');
+ await settled();assert.equal(await page.locator('[data-action=move-option-1-down]').evaluate(n=>document.activeElement===n),true,'Focus follows the moved option');
+ await page.locator('[data-action=undo]').click();assert.equal(await page.locator('.sr-stage [data-stage-choice="0"]').getAttribute('data-state'),'marked');
  await page.locator('.sc-conditions [data-branch-segment=ask-2]').click();assert.equal(await page.locator('.sc-conditions [data-condition-owner]').count(),2,'Nested condition joins the Branch path');
  await page.locator('.sc-conditions [data-branch-segment=ask-4]').click();assert.equal(await page.locator('.sc-conditions [data-branch-segment=goodbye-1]').getAttribute('title'),'Show Option 1 · Wave goodbye');
  await page.locator('[data-action=bottom-reel]').click();assert.equal(await page.locator('.sc-reel [data-reel-beat][data-selected=true]').getAttribute('data-beat-kind'),'choice');
  await page.locator('[data-action=toggle-focus]').click();await settled();assert.equal(await page.locator('.sc-conditions [data-branch-segment=goodbye-1]').count(),1,'Writing focus keeps the open option path');
  await capture('revision-choice-nested-focus');await page.locator('[data-action=toggle-focus]').click();await page.locator('[data-action=bottom-tracks]').click();
- report.checks.push('Revision #99: repeat endings, Mark picked with independent duplicate captions, nested condition and Choice paths in Tracks, Reel and Writing focus');
+ report.checks.push('Revision #99: repeat endings, Mark picked with independent duplicate captions, reorder keeps identity with Undo, nested condition and Choice paths in Tracks, Reel and Writing focus');
  // Revision (#88): arithmetic operations, formula suggestions, type and error feedback, unknown values, protected source and draft retention.
  await open('populated');await page.locator('[data-track-beat][data-beat-kind=choice]').click();await page.locator('[data-action=open-choice-3]').click();
  await page.locator(':nth-match([data-track-beat][data-beat-kind=setVariable], 2)').click();
@@ -389,15 +397,15 @@ try{
  await formula.fill('1 / 2');assert.match(await feedback(),/Decimal result/);await formula.fill('missing + 1');assert.match(await feedback(),/Unknown variable/);
  await formula.fill('route + 1');assert.match(await feedback(),/Not a number/);await formula.fill('trust // 0');assert.match(await feedback(),/Divides by zero/);
  await formula.fill('');await formula.pressSequentially('bo');assert.equal(await page.locator('[data-action=formula-suggest-bonus]').isVisible(),true);await page.keyboard.press('Enter');assert.equal(await formula.inputValue(),'bonus');
- await page.locator('[data-action=formula-key-multiply]').click();await page.locator('[data-action=formula-insert-coins]').click();assert.equal(await formula.inputValue(),'bonus * coins');
+ await formula.pressSequentially(' * co');await page.keyboard.press('Tab');assert.equal(await formula.inputValue(),'bonus * coins');
  assert.match(await page.locator('.sr-inspector .sc-test-code').innerText(),/^\$ trust \+= bonus \* coins$/);assert.match(await feedback(),/2 → unknown/,'Unknown operands stay unknown');
- await page.locator('[data-action=change-more]').click();await page.locator('[data-action=change-remainder-after-dividing-by]').click();assert.match(await page.locator('.sr-inspector .sc-test-code').innerText(),/%= bonus \* coins/);
+ await page.locator('summary[data-action=change]').click();await page.locator('[data-action=change-remainder-after-dividing-by]').click();assert.match(await page.locator('.sr-inspector .sc-test-code').innerText(),/%= bonus \* coins/);
  await formula.fill('1 /');await page.locator('[data-action=bottom-reel]').click();assert.equal(await page.getByRole('combobox',{name:'Formula'}).inputValue(),'1 /','Draft survives Reel');
  await page.locator('[data-action=toggle-focus]').click();assert.equal(await page.getByRole('combobox',{name:'Formula'}).inputValue(),'1 /','Draft survives Writing focus');await page.locator('[data-action=toggle-focus]').click();await page.locator('[data-action=bottom-tracks]').click();
  await page.locator(':nth-match([data-track-beat][data-beat-kind=setVariable], 4)').click();assert.match(await feedback(),/Gives a decimal/);
  await page.locator(':nth-match([data-track-beat][data-beat-kind=setVariable], 5)').click();assert.equal(await page.locator('[data-action=set-variable-source]').count(),1);assert.equal(await page.getByRole('combobox',{name:'Formula'}).count(),0,'Protected source is read-only');
  await capture('revision-arithmetic');
- report.checks.push('Revision #88: seven operations, suggestions and insert keys, result type, decimal/missing/type/zero errors, unknown values, protected source and drafts across Reel and Writing focus');
+ report.checks.push('Revision #88: seven operations in the equation row, suggestions, result type, decimal/missing/type/zero errors, unknown values, protected source and drafts across Reel and Writing focus');
  assert.deepEqual(report.errors,[]);report.passed=true;
 }catch(error){report.failure=String(error.stack);await capture('failure');throw error;}
 finally{await writeFile(new URL('report.json',output),JSON.stringify(report,null,2)+'\n');await browser.close();}

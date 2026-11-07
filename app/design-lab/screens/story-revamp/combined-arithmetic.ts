@@ -4,14 +4,14 @@
 
 export type NumberType = 'whole' | 'decimal';
 export type Operation = 'set' | 'add' | 'subtract' | 'multiply' | 'divide' | 'floor' | 'remainder';
-export const operations: { key: Operation; label: string; verb: string; symbol: string; python: string; example: string }[] = [
-  { key: 'set', label: 'Set to', verb: 'Set', symbol: '=', python: '=', example: 'trust = 5' },
-  { key: 'add', label: 'Add', verb: 'Add', symbol: '+', python: '+=', example: 'trust + 1' },
-  { key: 'subtract', label: 'Subtract', verb: 'Subtract', symbol: '−', python: '-=', example: 'coins − price' },
-  { key: 'multiply', label: 'Multiply by', verb: 'Multiply', symbol: '×', python: '*=', example: 'coins × 2' },
-  { key: 'divide', label: 'Divide by', verb: 'Divide', symbol: '÷', python: '/=', example: 'fare ÷ 2 → decimal' },
-  { key: 'floor', label: 'Floor divide by', verb: 'Floor divide', symbol: '⌊÷⌋', python: '//=', example: '7 ⌊÷⌋ 2 → 3' },
-  { key: 'remainder', label: 'Remainder after dividing by', verb: 'Remainder', symbol: '%', python: '%=', example: '7 % 3 → 1' },
+export const operations: { key: Operation; label: string; python: string; example: string }[] = [
+  { key: 'set', label: 'Set to', python: '=', example: 'trust = 5' },
+  { key: 'add', label: 'Add', python: '+=', example: 'trust + 1' },
+  { key: 'subtract', label: 'Subtract', python: '-=', example: 'coins − price' },
+  { key: 'multiply', label: 'Multiply by', python: '*=', example: 'coins × 2' },
+  { key: 'divide', label: 'Divide by', python: '/=', example: 'fare ÷ 2 → decimal' },
+  { key: 'floor', label: 'Floor divide by', python: '//=', example: '7 ⌊÷⌋ 2 → 3' },
+  { key: 'remainder', label: 'Remainder after dividing by', python: '%=', example: '7 % 3 → 1' },
 ];
 
 type Op = '+' | '-' | '*' | '/' | '//' | '%';

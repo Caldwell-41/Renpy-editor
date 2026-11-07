@@ -75,17 +75,17 @@ Issue #82 records the decisions. The three reference variants are unchanged.
   uses the same builder. The variable list can create a variable in place, with Undo.
 - Set variable follows #87 (handoff #88): Set, Add, Subtract, Multiply, Divide, Floor
   divide and Remainder, with a number or formula using declared numeric variables and
-  brackets. Suggestions appear while typing a name; insert keys add variables and
-  operators at the cursor. Feedback names the result type and refuses a decimal result for
+  brackets. Kris chose the equation row (`trust [+= ▾] [formula]`); the operation menu
+  lists all seven with an example each. Suggestions appear while typing a name. Feedback names the result type and refuses a decimal result for
   a whole-number variable, unknown or non-number variables and zero divisors. "On this
   route" uses only values set earlier on the route, never the starting default, so most
   values read "unknown". Calculations the editor cannot show (such as `max()`) stay
   read-only with Edit in Source. Decimal is a new variable type. `combined-arithmetic.ts`
   holds the parser, type rules and Python division semantics.
-- Three arrangements are open for review with `?arith=`: `a` a symbol strip for all seven
-  operations, `b` an equation row (`trust [+= ▾] [formula]`), and `c` (default) Set to,
-  Add and Subtract with the rest under More, plus insert keys. Kris chooses one; the others
-  are then removed.
+- Choice options move up and down in the editor. Moving keeps each option's body, which is
+  its identity, so preview picked state follows the option, and Undo restores the order.
+- In Tracks and Reel an empty option or branch is one beat-wide slot that holds its name,
+  where it goes next and "+ Add a beat", so the two labels no longer overlap.
 - The Branch path wraps instead of scrolling sideways. Each condition or Choice stays one
   unit and never overlaps another. Choice options show only their number unless open.
   When the path needs more than one row, the bottom panel grows by those rows (up to

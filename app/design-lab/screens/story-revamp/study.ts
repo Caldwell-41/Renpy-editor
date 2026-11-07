@@ -65,7 +65,6 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     if (departure) departure.beats.splice(0, departure.beats.length - 1, background('Station at dawn'), departure.beats[0]!, assign('trust', 'set', '2'), assign('trust', 'add', '1'), assign('coins', 'multiply', 'bonus'), assign('fare', 'divide', '2'), assign('trust', 'set', 'max(0, trust - 1)', true));
     for (const s of scenes) for (const b of flatten(s.beats)) if (b.kind === 'choice') prepareChoice(b, `${b.id}-option`);
   }
-  const arithLayout = new URLSearchParams(location.search).get('arith') ?? 'c';
   let selected = scenes[0]!.beats.find(b => b.kind === 'dialogue')?.id ?? scenes[0]!.beats[0]!.id;
   let focused = false, treeOpen = false, stageExpanded = false, manual = '', reelBranch = '', stageObject = '', hideSaybox = false, allTracks = false;
   const initialData = JSON.stringify(scenes);
@@ -725,32 +724,14 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       code.textContent = `$ ${target.name} ${op.python} ${formulaPython(b.value) || '?'}`;
     }
     update();
-    const formulaField = field(operation === 'set' ? 'Value' : 'Amount', formula, suggestions); formulaField.classList.add('sc-formula-field');
-    const keys = () => { const bar = el('div', 'sc-formula-keys'); bar.role = 'group'; bar.ariaLabel = 'Insert into formula'; for (const v of numericVariables().filter(v => v.name !== target.name).slice(0, 4)) { const chip = action(v.name, () => insert(v.name), false, `formula-insert-${v.name}`); chip.classList.add('sc-key-variable'); chip.title = `Insert ${v.name} (${typeName[v.type]})`; chip.onmousedown = e => e.preventDefault(); bar.append(chip); } for (const [label, text, title] of [['(', '(', 'Open bracket'], [')', ')', 'Close bracket'], ['+', ' + ', 'Plus'], ['−', ' - ', 'Minus'], ['×', ' * ', 'Multiply'], ['÷', ' / ', 'Divide'], ['//', ' // ', 'Floor divide'], ['%', ' % ', 'Remainder']] as const) { const key = action(label, () => insert(text), false, `formula-key-${slug(title)}`); key.ariaLabel = key.title = `Insert ${title.toLowerCase()}`; key.onmousedown = e => e.preventDefault(); bar.append(key); } return bar; };
     const planned = note('Planned (#87): Loomlight does not write arithmetic to source yet. This sample shows the intended editor.');
-    if (arithLayout === 'a') {
-      const strip = segmented(operations.map(o => o.symbol), op.symbol, 'Change', value => b.operation = operations.find(o => o.symbol === value)!.key, operations.map(o => o.label)); strip.classList.add('sc-operation-strip'); operations.forEach((o, i) => { const button = strip.children[i] as HTMLElement; button.title = `${o.label} · ${o.example}`; button.ariaLabel = o.label; });
-      return [picker, field('Change', strip, el('p', 'sc-operation-caption', `${op.label} · ${op.example}`)), formulaField, feedback, code, planned];
-    }
-    if (arithLayout === 'b') {
-      const menu = el('details', 'sc-dropdown sc-operation-menu'); const summary = el('summary', 'sc-person'); summary.dataset.action = 'change'; summary.ariaLabel = `Change: ${op.label}`; summary.append(el('span', 'sc-operation-symbol', op.python), el('span', 'sc-caret', '▾'));
-      const list = el('div', 'sc-dropdown-list'); list.role = 'listbox'; list.ariaLabel = 'Change';
-      for (const o of operations) { const item = action('', () => { menu.open = false; setOperation(o.key); }, false, `change-${slug(o.label)}`); item.role = 'option'; item.ariaSelected = String(o.key === operation); item.ariaLabel = o.label; const words = el('span', 'sc-outcome-words'); words.append(el('strong', '', o.label), el('span', '', o.example)); item.append(el('span', 'sc-operation-symbol', o.python), words); list.append(item); }
-      list.onkeydown = event => { const items = [...list.querySelectorAll<HTMLElement>('[role=option]')], n = items.indexOf(document.activeElement as HTMLElement); if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); items[(n + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length]?.focus(); } if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); menu.open = false; summary.focus(); } };
-      menu.ontoggle = () => { if (menu.open) list.querySelector<HTMLElement>('[aria-selected=true]')?.focus(); }; menu.append(summary, list);
-      const equation = el('div', 'sc-equation'); equation.role = 'group'; equation.ariaLabel = 'Calculation'; equation.append(el('span', 'sc-equation-target', target.name), menu, formula, suggestions);
-      return [picker, field('Calculation', equation), feedback, code, planned];
-    }
-    const common: Operation[] = ['set', 'add', 'subtract'], more = operations.filter(o => !common.includes(o.key));
-    const strip = segmented(['Set to', 'Add', 'Subtract'], common.includes(operation) ? op.label : '', 'Change', value => b.operation = operations.find(o => o.label === value)!.key);
-    const moreMenu = el('details', 'sc-dropdown sc-more-operations'); const moreSummary = el('summary', 'button'); moreSummary.dataset.action = 'change-more'; moreSummary.textContent = common.includes(operation) ? 'More ▾' : `${op.verb} ▾`; moreSummary.ariaLabel = `More calculations${common.includes(operation) ? '' : `: ${op.label}`}`; moreSummary.dataset.current = String(!common.includes(operation));
-    const moreList = el('div', 'sc-dropdown-list'); moreList.role = 'listbox'; moreList.ariaLabel = 'More calculations';
-    for (const o of more) { const item = action('', () => { moreMenu.open = false; setOperation(o.key); }, false, `change-${slug(o.label)}`); item.role = 'option'; item.ariaSelected = String(o.key === operation); item.ariaLabel = o.label; const words = el('span', 'sc-outcome-words'); words.append(el('strong', '', o.label), el('span', '', o.example)); item.append(el('span', 'sc-operation-symbol', o.symbol), words); moreList.append(item); }
-    moreList.onkeydown = event => { const items = [...moreList.querySelectorAll<HTMLElement>('[role=option]')], n = items.indexOf(document.activeElement as HTMLElement); if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); items[(n + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length]?.focus(); } if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); moreMenu.open = false; moreSummary.focus(); } };
-    moreMenu.ontoggle = () => { if (moreMenu.open) (moreList.querySelector<HTMLElement>('[aria-selected=true]') ?? moreList.querySelector<HTMLElement>('[role=option]'))?.focus(); }; moreMenu.append(moreSummary, moreList);
-    if (!common.includes(operation)) (strip.firstElementChild as HTMLElement).tabIndex = 0;
-    const row = el('div', 'sc-operation-row'); row.append(strip, moreMenu);
-    return [picker, field('Change', row), formulaField, keys(), feedback, code, planned];
+    const menu = el('details', 'sc-dropdown sc-operation-menu'); const summary = el('summary', 'sc-person'); summary.dataset.action = 'change'; summary.ariaLabel = `Change: ${op.label}`; summary.append(el('span', 'sc-operation-symbol', op.python), el('span', 'sc-caret', '▾'));
+    const list = el('div', 'sc-dropdown-list'); list.role = 'listbox'; list.ariaLabel = 'Change';
+    for (const o of operations) { const item = action('', () => { menu.open = false; setOperation(o.key); }, false, `change-${slug(o.label)}`); item.role = 'option'; item.ariaSelected = String(o.key === operation); item.ariaLabel = o.label; const words = el('span', 'sc-outcome-words'); words.append(el('strong', '', o.label), el('span', '', o.example)); item.append(el('span', 'sc-operation-symbol', o.python), words); list.append(item); }
+    list.onkeydown = event => { const items = [...list.querySelectorAll<HTMLElement>('[role=option]')], n = items.indexOf(document.activeElement as HTMLElement); if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); items[(n + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length]?.focus(); } if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); menu.open = false; summary.focus(); } };
+    menu.ontoggle = () => { if (menu.open) list.querySelector<HTMLElement>('[aria-selected=true]')?.focus(); }; menu.append(summary, list);
+    const equation = el('div', 'sc-equation'); equation.role = 'group'; equation.ariaLabel = 'Calculation'; equation.append(el('span', 'sc-equation-target', target.name), menu, formula, suggestions);
+    return [picker, field('Calculation', equation), feedback, code, planned];
   }
   function combinedFields(b: Beat): HTMLDivElement {
     const form = el('div', 'sr-fields sc-fields'); form.dataset.editorFor = b.id; form.dataset.kind = b.kind;
@@ -791,7 +772,10 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
         const inside = flatten(body.beats).length;
         const remove = action('', () => { change(() => { b.options.splice(i, 1); b.branches = b.branches.filter(x => x.id !== option.body); b.options.forEach((o, n) => { const br = b.branches.find(x => x.id === o.body); if (br) br.name = `Option ${n + 1}`; }); }, `Remove option ${i + 1}${inside ? ` and its ${count(inside, 'beat')}` : ''} from ${name(b.id)}`); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${Math.min(i, b.options.length - 1) + 1} text"]`); }, false, `remove-choice-${i}`);
         remove.append(beatIcon('close')); remove.ariaLabel = `Remove option ${i + 1}`; remove.title = remove.ariaLabel; remove.disabled = b.options.length === 1; if (remove.disabled) remove.title = 'A choice menu needs at least one option.';
-        top.append(el('span', 'sc-option-number', String(i + 1)), text, remove); block.append(top);
+        // Moving swaps positions only; each option keeps its body (its identity), so picked history follows it.
+        const move = (step: -1 | 1) => { const to = i + step; change(() => { const [moved] = b.options.splice(i, 1); b.options.splice(to, 0, moved!); b.branches = b.options.map(o => b.branches.find(x => x.id === o.body)!); b.branches.forEach((x, n) => x.name = `Option ${n + 1}`); }, `Move option ${i + 1} ${step < 0 ? 'up' : 'down'} in ${name(b.id)}`); const other = to === 0 ? 'down' : to === b.options.length - 1 ? 'up' : step < 0 ? 'up' : 'down'; focusField(`[data-action=move-option-${to}-${other}]`); };
+        const reorder = (step: -1 | 1) => { const button = action('', () => move(step), false, `move-option-${i}-${step < 0 ? 'up' : 'down'}`); button.append(beatIcon(step < 0 ? 'up' : 'down')); button.ariaLabel = button.title = `Move option ${i + 1} ${step < 0 ? 'up' : 'down'}`; button.disabled = step < 0 ? i === 0 : i === b.options.length - 1; button.classList.add('sc-option-move'); return button; };
+        top.append(el('span', 'sc-option-number', String(i + 1)), text, reorder(-1), reorder(1), remove); block.append(top);
         const twin = b.options.findIndex((o, n) => n !== i && o.text.trim() && o.text.trim() === option.text.trim());
         if (twin >= 0) block.append(el('p', 'sc-option-twin', `Same text as option ${twin + 1}. Still a separate option with its own picked history.`));
         const mark = (on: boolean) => markGameOption(b.id, on ? i : Number(host.querySelector<HTMLElement>(`[data-editor-for="${b.id}"] [data-choice-index]:focus-within`)?.dataset.choiceIndex ?? -1));
@@ -1353,17 +1337,22 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       const end = grid.querySelector<HTMLElement>(`[data-column="${route[last]!.beat.id}"]`)!;
       const place = locate(scene(), owner.id)!, parentChain = chainOf(owner.id), chain = [...parentChain, branch], path = [...place.trail, branchLabel(branch)];
       const mark = (kind: string, arms: Branch[]) => { const node = el('div', `sc-track-mark sc-track-${kind}`); node.dataset.branchBoundary = kind; node.dataset.branchOwner = owner.id; if (arms.length) node.dataset.arm = String(armOf(arms.at(-1)!)); return node; };
+      // An empty branch is one beat-wide slot holding its name and where it goes next, so the two labels never overlap.
+      const slot = !branch.beats.length && !focused;
       const entry = mark('entry', chain); entry.append(rail(chain, { branch }));
-      const first = action(focused ? '+ First beat' : '+', () => picker(branch.beats, path, 0), false, `inside-${branch.id}`); first.ariaLabel = first.title = `Add the first beat in ${branchLabel(branch)}`; entry.append(first);
-      const exit = mark('exit', chain); exit.append(rail(chain, { branch, end: thenText(owner, branch) }));
-      const append = action(focused ? '+ Last beat' : '+', () => picker(branch.beats, path, defaultIndex(branch.beats)), false, `append-${branch.id}`); append.ariaLabel = append.title = `Add the last beat in ${branchLabel(branch)}${ending(branch.beats) >= 0 ? ', before its ending' : ''}`; exit.append(append);
-      const nodes = [exit];
+      if (slot) { entry.classList.add('sc-track-slot'); entry.querySelector('.sc-rail-label')!.after(el('span', 'sc-rail-end', thenText(owner, branch))); }
+      const first = action(focused ? '+ First beat' : slot ? '+ Add a beat' : '+', () => picker(branch.beats, path, 0), false, `inside-${branch.id}`); first.ariaLabel = first.title = `Add the first beat in ${branchLabel(branch)}`; entry.append(first);
+      const nodes: HTMLElement[] = [];
+      if (!slot) {
+        const exit = mark('exit', chain); exit.append(rail(chain, { branch, end: thenText(owner, branch) }));
+        const append = action(focused ? '+ Last beat' : '+', () => picker(branch.beats, path, defaultIndex(branch.beats)), false, `append-${branch.id}`); append.ariaLabel = append.title = `Add the last beat in ${branchLabel(branch)}${ending(branch.beats) >= 0 ? ', before its ending' : ''}`; exit.append(append); nodes.push(exit);
+      }
       if (!(parentChain.length && place.index === place.body.length - 1)) {
         const after = mark('after', parentChain); after.append(rail(parentChain));
         const add = action(focused ? `+ After ${number(owner.id)}` : '+', () => afterCondition(owner), false, `boundary-after-${owner.id}`); add.ariaLabel = add.title = `Add after ${owner.kind === 'choice' ? 'choice' : 'condition'} ${number(owner.id)}, outside its ${owner.kind === 'choice' ? 'options' : 'branches'}`; after.append(add); nodes.push(after);
       }
       end.after(...nodes); ownerWrap.after(entry);
-      const label = entry.querySelector<HTMLElement>('.sc-rail-label'), endLabel = exit.querySelector<HTMLElement>('.sc-rail-end');
+      const label = entry.querySelector<HTMLElement>('.sc-rail-label'), endLabel = (slot ? entry : nodes[0])?.querySelector<HTMLElement>('.sc-rail-end');
       if (label && endLabel) requestAnimationFrame(() => { const room = endLabel.getBoundingClientRect().left - label.getBoundingClientRect().left - 10; if (room > 0) label.style.maxWidth = `${Math.min(260, room)}px`; });
     }
   }
