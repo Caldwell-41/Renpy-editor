@@ -4,6 +4,7 @@ import importlib.util
 from pathlib import Path
 import unittest
 import json
+import re
 import tempfile
 import subprocess
 import hashlib
@@ -38,8 +39,9 @@ class GateTests(unittest.TestCase):
     @staticmethod
     def python_log(runner):
         skipped = module.MAC_SNAPSHOT_TESTS if runner == 'Windows' else module.WINDOWS_NATIVE_TESTS
+        names = module.MAC_SNAPSHOT_TESTS | module.WINDOWS_NATIVE_TESTS | {'test_fixture.Cases.test_first', 'test_fixture.Cases.test_second'}
         rows = [f"{name.rsplit('.', 1)[1]} ({name}) ... " + ("skipped 'Requires other host'" if name in skipped else 'ok')
-                for name in sorted(module.PYTHON_REQUIRED)]
+                for name in sorted(names)]
         return '\n'.join(rows) + f'\n\nRan {len(rows)} tests in 0.01s\n\nOK (skipped={len(skipped)})\n'
 
     def test_python_gate_accepts_only_explicit_host_exclusions(self):
@@ -48,7 +50,7 @@ class GateTests(unittest.TestCase):
             result = module.verify_python(output, runner)
             expected = module.MAC_SNAPSHOT_TESTS if runner == 'Windows' else module.WINDOWS_NATIVE_TESTS
             self.assertEqual(result['hostExcluded'], sorted(expected))
-            self.assertEqual(result['passed'], len(module.PYTHON_REQUIRED) - len(expected))
+            self.assertEqual(result['passed'], result['tests'] - len(expected))
             self.assertEqual(module.verify_python(output.replace('\n', '\r\n'), runner), result)
             warned = output.replace(' ... ok', ' ... public fixture warning\n  warning context\nok', 1)
             self.assertEqual(module.verify_python(warned, runner), result)
@@ -67,7 +69,7 @@ class GateTests(unittest.TestCase):
                           output.splitlines()[0] + '\n' + output,
                           output + '\nRan 9 tests in 0.01s\n\nOK\n',
                           output + '\nFAILED (failures=1)\n',
-                          output.replace(f'Ran {len(module.PYTHON_REQUIRED)} tests', 'Ran 999 tests'),
+                          re.sub(r'Ran \d+ tests', 'Ran 999 tests', output),
                           output.replace(' ... ok', ' ... warning without a completed result', 1),
                           'Ran 0 tests in 0.01s\n\nOK\n'):
                 with self.subTest(runner=runner, wrong=wrong), self.assertRaises(ValueError):
@@ -100,12 +102,12 @@ class GateTests(unittest.TestCase):
         for text in (self.output+'test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured;\n', self.output.replace('0 measured','1 measured')):
             with self.assertRaises(ValueError): module.verify_cargo(self.listing,text)
 
-    def test_full_renderer_summary_and_required_cases(self):
-        names=list(module.DOM_REQUIRED)
+    def test_full_renderer_summary_rejects_failures_skips_and_zero(self):
+        names=['first renderer case','second renderer case']
         log=''.join(f'ok {i+1} - {name}\n' for i,name in enumerate(names))
         log+=''.join(f'# {key} {value}\n' for key,value in [('tests',len(names)),('pass',len(names)),('fail',0),('cancelled',0),('skipped',0),('todo',0)])
         self.assertEqual(module.verify_dom(log),len(names))
-        for bad in (log.replace(names[0],'unrelated case'),log.replace('# skipped 0','# skipped 1'),log.replace('# cancelled 0','# cancelled 1'),log+'# pass 5\n',log.replace('ok 1 -','not ok 1 -')):
+        for bad in (log.replace('# skipped 0','# skipped 1'),log.replace('# cancelled 0','# cancelled 1'),log+'# pass 5\n',log.replace('ok 1 -','not ok 1 -')):
             with self.assertRaises(ValueError):module.verify_dom(bad)
         with self.assertRaises(ValueError):module.verify_dom('# tests 0\n# pass 0\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n')
 

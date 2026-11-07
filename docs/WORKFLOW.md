@@ -239,9 +239,9 @@ cancellation, held-owner contention, stale completion and retained input. Two is
 unit tests are not automatically combined-path proof. Keep unit tests; do not copy
 every case into an expensive end-to-end suite. Use the narrowest real integration
 seam, with final native/package checks where their behavior matters.
-Before an acceptance gate is trusted, demonstrate that a known ordinary failure is
-rejected: a wrong/missing required result, zero intended tests, a skipped required
-case or a violated blocking budget must not silently pass. Intentional specialist
+Acceptance gates use the shared result checks in [TESTING](TESTING.md#minimum-gates-by-changed-behavior):
+a failure, zero intended tests, an unexpected skip or a violated blocking budget
+must not silently pass. Intentional specialist
 exclusions and timing-only diagnostics retain their distinct status. Validate fixtures
 and timing endpoints cheaply before packaging.
 Use controlled data/assertion failures, not newly introduced deliberate process

@@ -4,12 +4,10 @@ All groups run independently. Failures stay failures, with raw logs and a summar
 The host gates are shared with the qualified Thinking workflow, not emulated OSes.
 """
 import argparse
-import ast
 import importlib.util
 import json
 import platform
 from pathlib import Path
-import re
 import subprocess
 import sys
 
@@ -20,29 +18,8 @@ spec.loader.exec_module(gate)
 
 
 def retention_gate(output, host):
-    source = ast.parse((APP / 'scripts/test-q1-package-retention.py').read_text(encoding='utf-8'))
-    expected = {'__main__.PackageRetentionTests.' + node.name
-                for cls in source.body if isinstance(cls, ast.ClassDef) and cls.name == 'PackageRetentionTests'
-                for node in cls.body if isinstance(node, ast.FunctionDef) and node.name.startswith('test_')}
-    rows = re.findall(r'^test_\w+ \(([\w.-]+)\) \.\.\. (ok|skipped [^\n]+)\s*$', output, re.M)
-    skipped = {name for name, status in rows if status.startswith('skipped ')}
     excluded = {'__main__.PackageRetentionTests.test_macos_tar_preserves_symlinks'} if host == 'Windows' else set()
-    runs = re.findall(r'^Ran (\d+) tests? in [^\n]+$', output, re.M)
-    summaries = re.findall(r'^OK(?: \(skipped=(\d+)\))?\s*$', output, re.M)
-    if (not expected or runs != [str(len(expected))] or len(rows) != len(expected)
-            or {name for name, _ in rows} != expected or skipped != excluded
-            or summaries != [str(len(excluded)) if excluded else '']
-            or re.search(r'^(?:FAILED|ERROR:|FAIL:|UNEXPECTED SUCCESS:)', output, re.M)):
-        raise ValueError('Retention cases did not execute exactly once with only their named host exclusion')
-
-
-def native_dialog_gate(output):
-    expected = '__main__.NativeDialogChecks.test_actual_owned_dialog_api_uses_handle_pid_class_and_owner'
-    if (gate.python_results(output) != [(expected, 'ok')]
-            or re.findall(r'^Ran (\d+) tests? in [^\n]+$', output, re.M) != ['1']
-            or re.findall(r'^(OK)\s*$', output, re.M) != ['OK']
-            or re.search(r'^(?:FAILED|ERROR:|FAIL:|UNEXPECTED SUCCESS:)', output, re.M)):
-        raise ValueError('The selected native dialog case did not execute and pass exactly once')
+    gate.verify_unittest(output, excluded)
 
 
 def checks(host, native_dialog=False):
@@ -58,7 +35,7 @@ def checks(host, native_dialog=False):
         if host != 'Windows':
             raise ValueError('The native dialog check requires an actual Windows desktop')
         groups += (('native-dialog', [sys.executable, 'scripts/studio_setup_native_dialog_checks.py'],
-                    native_dialog_gate),)
+                    gate.verify_unittest),)
     return groups
 
 

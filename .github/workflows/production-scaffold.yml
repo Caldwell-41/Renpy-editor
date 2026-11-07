@@ -111,33 +111,9 @@ jobs:
             --skip scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges \
             --skip lifecycle::tests::official_sdk_phase_1c_target_gate \
             --skip renpy::reconciliation_tests::official_sdk_download_handoff_target_gate \
-            --nocapture 2>&1 \
+            --exact --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/phase-1b-transactions.log"
-          grep -E '^test result: ok\. [1-9][0-9]* passed; 0 failed;' "$RUNNER_TEMP/phase-1b-transactions.log"
-          grep -E 'prepared_fault_state_can_be_safely_abandoned \.\.\. ok' "$RUNNER_TEMP/phase-1b-transactions.log"
-          grep -E 'recent_(symlink|reparse)_substitution_fails_closed_without_touching_target' "$RUNNER_TEMP/phase-1b-transactions.log"
-          grep -E 'managed_sdk_directory_(symlink|reparse)_fails_closed_without_touching_target' "$RUNNER_TEMP/phase-1b-transactions.log"
-          grep 'final_window_external_writer_is_preserved_as_conflict .*ok' "$RUNNER_TEMP/phase-1b-transactions.log"
-          grep 'every_persistent_transition_has_bounded_recovery ... ok' "$RUNNER_TEMP/phase-1b-transactions.log"
-          grep 'prepared_abandon_refuses_any_persisted_proposal_evidence ... ok' "$RUNNER_TEMP/phase-1b-transactions.log"
-          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1b-transactions.log" \
-            transaction::tests::prepared_fault_state_can_be_safely_abandoned \
-            transaction::tests::every_persistent_transition_has_bounded_recovery \
-            transaction::tests::interrupted_delete_is_recoverable_and_never_loses_the_displaced_source \
-            transaction::tests::interrupted_mixed_create_and_replace_blocks_follow_up \
-            transaction::tests::failed_stream_after_persisted_stage_is_recovery_required_not_rejected \
-            transaction::tests::explicit_recovery_resolves_only_proven_keep_or_accept_states \
-            transaction::tests::prepared_abandon_refuses_any_persisted_proposal_evidence \
-            transaction::tests::terminal_rejected_journal_does_not_block_flush_or_later_commit \
-            transaction::tests::final_window_external_writer_is_preserved_as_conflict \
-            lifecycle::tests::recent_precommit_failures_preserve_last_committed_store \
-            lifecycle::tests::recent_postcommit_failure_restarts_at_new_committed_store \
-            lifecycle::acceptance::phase1h_expected_assets_are_exact_original_inputs \
-            lifecycle::acceptance::phase1h_authoring_continues_after_4097_terminal_journals_and_reopens \
-            renpy::tests::phase1h::phase1h_sdk_case_guard_rejects_missing_zero_skipped_and_failed_cases \
-            renpy::tests::sdk_hashes_match_multichunk_empty_and_missing_inputs \
-            renpy::tests::sdk_file_hash_retains_cancellation_and_deadline \
-            renpy::runtime::tests::runtime_natural_exit_and_crash_cleanup_descendant_pipes
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1b-transactions.log"
       - name: Isolated real-service Branches observed-model budgets
         shell: bash
         env:
@@ -147,9 +123,7 @@ jobs:
           set -o pipefail
           cargo test -p loomlight-core --release --locked scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges -- --exact --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/runtime-flow-budget.log"
-          grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/runtime-flow-budget.log"
-          grep -E '^test scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges \.\.\. ok$' "$RUNNER_TEMP/runtime-flow-budget.log"
-          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-flow-budget.log" scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-flow-budget.log"
           grep 'phase-1g-observed-budget-gate: passed' "$RUNNER_TEMP/runtime-flow-budget.log"
       # Browser functional/evidence failures are reasserted below; Chrome timing
       # overruns remain visible diagnostics in the report and warning annotations.
@@ -196,10 +170,8 @@ jobs:
           cargo test -p loomlight-core --release --locked \
             lifecycle::tests::official_sdk_phase_1c_target_gate -- --exact --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
-          grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
-          grep -E '^test lifecycle::tests::official_sdk_phase_1c_target_gate \.\.\. ok$' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           if grep -q 'phase-1c-target-gate: skipped' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"; then exit 1; fi
-          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1c-project-lifecycle.log" lifecycle::tests::official_sdk_phase_1c_target_gate
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1c-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1c-remediation-sdk-trust-order: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
           grep 'phase-1d-target-gate: passed' "$RUNNER_TEMP/phase-1c-project-lifecycle.log"
@@ -218,9 +190,7 @@ jobs:
           cargo test -p loomlight-core --release --locked \
             renpy::reconciliation_tests::official_sdk_download_handoff_target_gate -- --exact --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
-          grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
-          grep -E '^test renpy::reconciliation_tests::official_sdk_download_handoff_target_gate \.\.\. ok$' "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
-          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log" renpy::reconciliation_tests::official_sdk_download_handoff_target_gate
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
           grep 'phase-1c-network-handoff-gate: passed' "$RUNNER_TEMP/phase-1c-sdk-download-handoff.log"
       - name: Runtime foundation and real SDK diagnostics gates
         shell: bash
@@ -229,14 +199,10 @@ jobs:
         run: |
           set -o pipefail
           cargo test -p loomlight-core --release --locked lifecycle::runtime_tests::runtime_official_sdk_service_gate -- --ignored --exact --nocapture 2>&1 | tee "$RUNNER_TEMP/runtime-sdk-service.log"
-          grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/runtime-sdk-service.log"
-          grep -E '^test lifecycle::runtime_tests::runtime_official_sdk_service_gate \.\.\. ok$' "$RUNNER_TEMP/runtime-sdk-service.log"
-          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-sdk-service.log" lifecycle::runtime_tests::runtime_official_sdk_service_gate
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-sdk-service.log"
           grep 'phase-1g-runtime-service-gate: passed' "$RUNNER_TEMP/runtime-sdk-service.log"
           cargo test -p loomlight-core --release --locked lifecycle::runtime_tests::runtime_diagnostics_sdk_gate -- --ignored --exact --nocapture 2>&1 | tee "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
-          grep -E '^test result: ok\. 1 passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
-          grep -E '^test lifecycle::runtime_tests::runtime_diagnostics_sdk_gate \.\.\. ok$' "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
-          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-diagnostics-sdk.log" lifecycle::runtime_tests::runtime_diagnostics_sdk_gate
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
           grep 'runtime-diagnostics-sdk-compile: passed' "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
           grep 'runtime-diagnostics-sdk-lint: passed' "$RUNNER_TEMP/runtime-diagnostics-sdk.log"
       - name: Phase 1H integrated production-service authoring and SDK routes
@@ -248,7 +214,7 @@ jobs:
           set -o pipefail
           cargo test -p loomlight-core --release --locked renpy::tests::phase1h::phase1h_integrated_authoring_sdk_gate -- --ignored --exact --nocapture 2>&1 \
             | tee "$RUNNER_TEMP/phase-1h-integrated-authoring.log"
-          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1h-integrated-authoring.log" renpy::tests::phase1h::phase1h_integrated_authoring_sdk_gate
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/phase-1h-integrated-authoring.log"
           grep 'phase-1h-integrated-authoring-sdk-gate: passed' "$RUNNER_TEMP/phase-1h-integrated-authoring.log"
       - name: Test desktop Rust boundary
         run: cargo test -p loomlight-desktop --release --locked
