@@ -170,6 +170,108 @@ class GateTests(unittest.TestCase):
             with self.assertRaises(ValueError):module.retain_binaries(root,build)
 
 
+class HelpRetentionTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.build = self.root / 'target'
+        self.build.mkdir()
+        self.output = self.root / 'evidence'
+        self.output.mkdir()
+
+    def artifact(self, name='core', *, present=True):
+        binary = self.build / (name + '.exe')
+        if present:
+            binary.write_bytes((name + ' public executable fixture').encode())
+        row = {'reason': 'compiler-artifact', 'profile': {'test': name == 'core'},
+               'target': {'name': 'loomlight_core' if name == 'core' else 'help-controller-driver'},
+               'executable': str(binary)}
+        (self.output / (name + '-artifacts.jsonl')).write_text(json.dumps(row) + '\n')
+        return binary, row
+
+    def retain(self):
+        return module.retain_binaries(self.output, self.build, artifacts=module.HELP_ARTIFACTS)
+
+    def test_compiled_core_and_controller_survive_failed_tests_with_exact_hashes(self):
+        for name in ('core', 'controller'):
+            binary, _ = self.artifact(name)
+            with (self.output / (name + '-artifacts.jsonl')).open('a') as stream:
+                stream.write('test scope::first ... FAILED\ntest result: FAILED\n')
+        receipt = self.retain()
+        for name in ('core', 'controller'):
+            row = receipt[name]
+            binary = self.build / (name + '.exe')
+            self.assertEqual(row['state'], 'compiled')
+            self.assertEqual(row['sha256'], hashlib.sha256(binary.read_bytes()).hexdigest())
+            self.assertEqual((self.output / row['file']).read_bytes(), binary.read_bytes())
+            self.assertEqual(row['source'], binary.relative_to(self.build).as_posix())
+
+    def test_first_artifact_survives_later_broken_compiler_record(self):
+        binary, _ = self.artifact()
+        with (self.output / 'core-artifacts.jsonl').open('a') as stream:
+            stream.write('{"reason":"compiler-artifact",\n')
+        with self.assertRaises(ValueError):
+            self.retain()
+        receipt = json.loads((self.output / 'test-binaries.json').read_text())
+        self.assertEqual(receipt['core']['state'], 'compiled')
+        self.assertTrue(receipt['core']['incompleteStream'])
+        self.assertEqual((self.output / receipt['core']['file']).read_bytes(), binary.read_bytes())
+        self.assertEqual(receipt['controller']['state'], 'not-compiled')
+
+    def test_missing_stream_and_missing_announced_binary_never_use_stale_target(self):
+        (self.build / 'stale-core-tests').write_bytes(b'stale executable')
+        self.assertEqual(self.retain()['core']['state'], 'not-compiled')
+        self.artifact(present=False)
+        with self.assertRaises(ValueError):
+            self.retain()
+        receipt = json.loads((self.output / 'test-binaries.json').read_text())
+        self.assertEqual(receipt['core']['state'], 'unavailable')
+        self.assertFalse((self.output / 'core-tests.bin').exists())
+
+    def test_repeated_test_runs_share_one_exact_binary_but_wrong_targets_are_ignored(self):
+        _, row = self.artifact()
+        unrelated = dict(row, target={'name': 'unrelated'})
+        stream = self.output / 'core-artifacts.jsonl'
+        stream.write_text(json.dumps(unrelated) + '\n' + (json.dumps(row) + '\n') * 3)
+        self.assertEqual(self.retain()['core']['state'], 'compiled')
+        stream.write_text(json.dumps(unrelated) + '\n')
+        self.assertEqual(self.retain()['core']['state'], 'not-compiled')
+
+    def test_copy_failure_keeps_other_binary_and_explicit_failed_receipt(self):
+        self.artifact()
+        self.artifact('controller')
+        original = module.shutil.copy2
+
+        def copy(source, target):
+            if source.name == 'core.exe':
+                target.write_bytes(b'partial')
+                raise OSError('controlled copy failure')
+            return original(source, target)
+
+        with patch.object(module.shutil, 'copy2', side_effect=copy), self.assertRaises(ValueError):
+            self.retain()
+        receipt = json.loads((self.output / 'test-binaries.json').read_text())
+        self.assertEqual(receipt['core']['state'], 'retention-failed')
+        self.assertEqual(receipt['controller']['state'], 'compiled')
+        self.assertFalse((self.output / 'core-tests.bin').exists())
+
+    def test_outside_target_and_ambiguous_artifacts_fail_without_losing_controller(self):
+        _, row = self.artifact()
+        self.artifact('controller')
+        outside = self.root / 'outside.exe'
+        outside.write_bytes(b'outside fixture')
+        for bad in (dict(row, executable=str(outside)),
+                    dict(row, executable=str(self.build / 'different.exe'))):
+            with self.subTest(executable=bad['executable']):
+                (self.output / 'core-artifacts.jsonl').write_text(json.dumps(row) + '\n' + json.dumps(bad) + '\n')
+                with self.assertRaises(ValueError):
+                    self.retain()
+                receipt = json.loads((self.output / 'test-binaries.json').read_text())
+                self.assertEqual(receipt['core']['state'], 'retention-failed')
+                self.assertEqual(receipt['controller']['state'], 'compiled')
+
+
 class IdentityTests(unittest.TestCase):
     def test_git_checkout_attributes_pass_but_changed_file_bytes_refuse(self):
         with tempfile.TemporaryDirectory() as temporary:

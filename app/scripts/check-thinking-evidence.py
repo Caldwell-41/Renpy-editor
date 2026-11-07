@@ -186,15 +186,24 @@ def identity_ok(report, head, tree):
 
 
 
-def retain_binaries(folder, build_root):
+HELP_ARTIFACTS = {
+    'core': ('core-artifacts.jsonl', 'loomlight_core', True),
+    'controller': ('controller-artifacts.jsonl', 'help-controller-driver', False),
+}
+
+
+def retain_binaries(folder, build_root, *, artifacts=None):
     """Always retain available compiler-artifact outputs, even if a later test fails."""
     folder = folder.resolve()
     build_root = build_root.resolve()
     receipt = {}
     errors = []
-    for name in ('core', 'desktop'):
-        stream_name = name + '-artifacts.jsonl'
-        target = folder / (name + '-tests.bin')
+    mixed_output = artifacts is not None
+    selected = artifacts if mixed_output else {
+        name: (name + '-artifacts.jsonl', None, True) for name in ('core', 'desktop')
+    }
+    for name, (stream_name, target_name, test_profile) in selected.items():
+        target = folder / (name + ('-tests.bin' if test_profile else '.bin'))
         incomplete = False
         try:
             target.unlink(missing_ok=True)
@@ -202,6 +211,8 @@ def retain_binaries(folder, build_root):
             candidates = []
             if stream.exists():
                 for line in stream.read_text(encoding='utf-8').splitlines():
+                    if mixed_output and not line.startswith('{'):
+                        continue  # Cargo's test runner still emits ordinary result lines.
                     try:
                         row = json.loads(line)
                     except json.JSONDecodeError:
@@ -211,9 +222,12 @@ def retain_binaries(folder, build_root):
                         incomplete = True
                         continue
                     if (row.get('reason') == 'compiler-artifact'
-                            and row.get('profile', {}).get('test') is True
+                            and row.get('profile', {}).get('test') is test_profile
+                            and (target_name is None or row.get('target', {}).get('name') == target_name)
                             and row.get('executable')):
-                        candidates.append(Path(row['executable']).resolve())
+                        source = Path(row['executable']).resolve()
+                        if not mixed_output or source not in candidates:
+                            candidates.append(source)
             if not candidates:
                 receipt[name] = {'state': 'not-compiled'}
             else:

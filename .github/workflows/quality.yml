@@ -143,10 +143,7 @@ jobs:
           folder = Path(os.environ['RUNNER_TEMP']) / 'help-offline'
           folder.mkdir(parents=True, exist_ok=True)
           utilities = runpy.run_path('scripts/check-thinking-evidence.py')
-          utilities['retain_binaries'](folder, Path('target'), artifacts={
-              'core': ('core-artifacts.jsonl', 'loomlight_core', True),
-              'controller': ('controller-artifacts.jsonl', 'help-controller-driver', False),
-          })
+          utilities['retain_binaries'](folder, Path('target'), artifacts=utilities['HELP_ARTIFACTS'])
           utilities['seal'](folder, Path('..'), 'help-offline-ci')
           PY
           node scripts/scan-artifacts.mjs "$RUNNER_TEMP/help-offline"
