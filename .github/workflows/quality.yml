@@ -137,7 +137,8 @@ jobs:
         run: |
           set -euo pipefail
           cargo +1.90.0 build -p loomlight-core --locked --examples
-          FIXTURE_OUTPUT="$RUNNER_TEMP/fixtures" npm run test:fixtures
+          # The Help failure step seals, scans and uploads this folder.
+          FIXTURE_OUTPUT="$RUNNER_TEMP/help-offline/fixtures" npm run test:fixtures
       - name: Seal and scan failed Help diagnostics and producing executables
         id: help_privacy
         if: ${{ steps.scope.outputs.code == 'true' && failure() }}
