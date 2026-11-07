@@ -92,7 +92,9 @@ Issue #82 records the decisions. The three reference variants are unchanged.
   three, then the path scrolls) so Tracks keeps every lane. This deliberately breaks the
   earlier rule that branch navigation never shrinks the stage: with deep nesting or at
   compact width the stage loses about 30 px of height per extra row. One-row paths keep
-  the stage at 974 × 548 and 633 × 356.
+  the stage at 974 × 548 and 633 × 356. Kris accepted this on 2026-11-08.
+- Kris approved the #88 and #99 mock work on 2026-11-08, and both handoffs are closed.
+  Source, runtime and backend acceptance stays with #87 and #98.
 
 GPT-6.1 Sol generated the fictional art in `art/`; its README lists the files and checks.
 
