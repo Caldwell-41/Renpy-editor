@@ -239,11 +239,15 @@ cancellation, held-owner contention, stale completion and retained input. Two is
 unit tests are not automatically combined-path proof. Keep unit tests; do not copy
 every case into an expensive end-to-end suite. Use the narrowest real integration
 seam, with final native/package checks where their behavior matters.
-Add a check to an existing DOM or unit test file before creating a new file. Write a
-browser fixture only for a controller-to-core journey that a DOM test cannot reach.
-Every new test runs through a glob or npm script that CI already calls; a fixture
-that cannot run there declares `// fixture: skip <reason>` under the
-[fixture runner](testing/AUTOMATED.md#renderer-and-production-probe-consumers).
+Prefer the relevant existing DOM or unit test file; create one only when none fits.
+Write a browser fixture only for behavior a DOM test cannot reach, such as real
+layout, pointer input or a controller-to-core journey. Every new test is found by
+an existing selector: `npm test` and `test:fixtures` on every PR, `test_*.py`
+discovery in the harness checks, or `cargo test`. Do not add a test that only a
+hand-run command reaches. A fixture that `test:fixtures` cannot run declares
+`// fixture: skip <reason>` under the
+[fixture runner](testing/AUTOMATED.md#renderer-and-production-probe-consumers),
+and the reason names where it runs instead.
 Do not add tests that only prove deleted code stays deleted, or smoke tests that
 repeat existing coverage.
 Acceptance gates use the shared result checks in [TESTING](TESTING.md#minimum-gates-by-changed-behavior):
