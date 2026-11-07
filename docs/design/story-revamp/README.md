@@ -41,6 +41,15 @@ Issue #82 records the decisions. The three reference variants are unchanged.
   (opening background, name and first line) that opens a scene sheet with New scene. The
   condition reads as one line, "Always available" or "Only when ...", and the rule builder
   opens on request. Focusing or pointing at an option marks its button on the stage.
+- Each option also has its own beats and an outcome: continue after the menu, go to a
+  scene (`jump`), visit a scene and come back (`call`), show the menu again (labelled
+  menu plus `jump`, with an optional "hide picked options" `set`) or end the story
+  (`return`). Option beats are stored like condition branches, so they appear in the
+  Branch path bar, Tracks and Reel. A menu can show a line with the choices (caption).
+  Menu arguments, NVL menus and nested menus stay in Source.
+- Loomlight's Choice is jump-only today (`ChoiceOption` has no body; `parse_menu` refuses
+  other forms; DATA_MODEL treats Choice as terminal). Option beats and the other four
+  outcomes need a model decision before production work.
 - Add a beat is one compact dialog. Click or Enter adds the highlighted beat; Escape or
   Close cancels. Replacing an ending is named in the destination line.
 - Writing focus Tracks shows all six lanes above 1200 px wide.

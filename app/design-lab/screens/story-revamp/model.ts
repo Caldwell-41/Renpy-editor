@@ -10,11 +10,13 @@ export const kinds = [
   ['showScreen', 'Show screen', 'Screens'], ['hideScreen', 'Hide screen', 'Screens'], ['callScreen', 'Call screen', 'Screens'],
 ] as const;
 export type Kind = typeof kinds[number][0] | 'customCode';
-export interface Option { text: string; target: string; guard: string }
+/** What happens after an option's own beats. The combined mock explores all five; Loomlight writes only 'jump' today. */
+export type Outcome = 'continue' | 'jump' | 'call' | 'menu' | 'return';
+export interface Option { text: string; target: string; guard: string; outcome?: Outcome; body?: string }
 export interface Branch { id: string; name: string; condition: string; beats: Beat[] }
 export interface Beat {
   id: string; kind: Kind; text: string; speaker: string; asset: string; placement: string;
-  target: string; value: string; transition: string; options: Option[]; branches: Branch[];
+  target: string; value: string; transition: string; options: Option[]; branches: Branch[]; hidePicked?: boolean;
   /** Set variable only: how the value applies. Add and subtract are planned Loomlight support. */
   operation?: 'set' | 'add' | 'subtract';
 }

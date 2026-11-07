@@ -275,7 +275,7 @@ try{
   await page.locator('[data-action=scenes]').click();await capture(`${size}-scenes`);await page.locator('[data-action=new-scene]').click();await page.locator('[data-action=submit-scene]').click();assert.equal(await page.locator('[aria-invalid=true]').count(),1);await capture(`${size}-new-scene-error`);await page.getByRole('textbox',{name:'Scene name',exact:true}).fill('The quiet platform');await page.locator('[data-action=submit-scene]').click();await page.locator('.sr-prose:focus').fill('The station is empty.');await page.locator('.sr-prose').press('Meta+Shift+Enter');await page.locator('.sr-prose:focus').fill('Except for us.');report.checks.push(`${size}: scene validation, creation, next-line focus and Assist Undo`);
   await open();await page.locator('.sc-conditions [data-action=edit-condition-beat-1]').click();await page.locator('.sr-inspector [data-action=beat-menu]').click();await capture(`${size}-beat-menu`);await page.getByRole('button',{name:/^Delete 06 Condition/}).click();await capture(`${size}-delete-condition`);await page.locator('[data-action=cancel-dialog]').click();assert((await state()).scenes[0].beats.some(b=>b.kind==='condition'));await page.locator('.sr-inspector [data-action=beat-menu]').click();await page.getByRole('button',{name:/^Delete 06 Condition/}).click();await page.locator('[data-action=confirm-delete]').click();await page.locator('[data-action=undo]').click();assert((await state()).scenes[0].beats.some(b=>b.kind==='condition'));
   await page.locator('.sc-conditions [data-action=open-branch-ticket-if]').click();await page.locator('.sr-inspector [data-action=beat-menu]').click();await page.getByRole('button',{name:'Move to another branch…',exact:true}).click();await capture(`${size}-move-branch`);await page.locator('[data-action=confirm-move]').click();await page.locator('[data-action=undo]').click();assert.equal((await state()).scenes[0].beats.find(b=>b.kind==='condition').branches[0].beats[0].text,'Keep your ticket. Some doors only open once.');report.checks.push(`${size}: condition deletion/cancel/Undo and moving between branches`);
-  await open();await page.locator('[data-track-beat][data-beat-kind=choice]').click();await page.locator('[data-action=guard-0-add-rule]').click();await capture(`${size}-choice`);await page.locator('[data-action=change-destination-0]').click();await page.locator('[data-action=new-choice-0]').click();await capture(`${size}-choice-new-destination`);await page.locator('[data-action=cancel-dialog]').click();await page.locator('[data-action=open-choice-0]').click();await page.locator('[data-action=back-scene]').click();assert.equal((await state()).scenes[0].beats.find(b=>b.kind==='choice').options[0].guard,'has_ticket is true');
+  await open();await page.locator('[data-track-beat][data-beat-kind=choice]').click();await page.locator('[data-action=guard-0-add-rule]').click();await capture(`${size}-choice`);await page.locator('[data-action=change-destination-1]').click();await page.locator('[data-action=new-choice-1]').click();await capture(`${size}-choice-new-destination`);await page.locator('[data-action=cancel-dialog]').click();await page.locator('[data-action=open-choice-1]').click();await page.locator('[data-action=back-scene]').click();assert.equal((await state()).scenes[0].beats.find(b=>b.kind==='choice').options[0].guard,'has_ticket is true');
   await pick('narration');await page.locator('.sr-prose:focus').fill('No option was available.');let scene=(await state()).scenes[0];const choice=scene.beats.findIndex(b=>b.kind==='choice');assert.equal(scene.beats[choice+1].text,'No option was available.');report.checks.push(`${size}: Choice destination return retains draft; next beat follows unavailable options`);
   await open();await page.locator('[data-track-beat][data-beat-kind=call]').click();await page.locator('[data-action=open-destination]').click();await page.locator('[data-action=back-scene]').click();assert.equal((await state()).selected,'beat-12');
   await page.locator('[data-action=enlarge-stage]').click();await page.locator('[data-action=add-beat]').click();await page.locator('[data-picker-search]').fill('dialogue');await page.keyboard.press('Enter');assert.equal(await page.locator('.sr-content').getAttribute('data-stage-expanded'),'false');await page.locator('.sr-prose:focus').fill('The editor is visible.');report.checks.push(`${size}: Call return and insertion from enlarged stage`);
@@ -344,16 +344,34 @@ try{
  assert.match(await page.locator('[data-choice-index="1"] .sc-guard').innerText(),/Only when trust is at least 3/);
  await page.locator('[data-choice-index="1"] .sc-option-top input').focus();
  assert.equal(await page.locator('.sr-stage [data-stage-choice="1"]').first().getAttribute('data-active'),'true','Focused option marks its stage button');
- await page.locator('[data-action=change-destination-0]').click();
- assert.equal(await page.locator('[data-sheet=destination] [aria-selected=true]').getAttribute('data-value'),'A familiar stranger');
- await page.keyboard.press('Escape');assert.equal(await page.locator('[data-action=change-destination-0]').evaluate(n=>document.activeElement===n),true,'Escape returns focus to the destination');
- await page.locator('[data-action=change-destination-0]').click();await page.locator('[data-action=sheet-departure]').click();
- assert.equal((await options())[0].target,'departure');
- await page.locator('[data-action=undo]').click();assert.equal((await options())[0].target,'stranger');
+ await page.locator('[data-action=change-destination-1]').click();
+ assert.equal(await page.locator('[data-sheet=destination] [aria-selected=true]').getAttribute('data-value'),'Departure');
+ await page.keyboard.press('Escape');assert.equal(await page.locator('[data-action=change-destination-1]').evaluate(n=>document.activeElement===n),true,'Escape returns focus to the destination');
+ await page.locator('[data-action=change-destination-1]').click();await page.locator('[data-action=sheet-a-familiar-stranger]').click();
+ assert.equal((await options())[1].target,'stranger');
+ await page.locator('[data-action=undo]').click();assert.equal((await options())[1].target,'departure');
  await page.locator('[data-action=guard-1-edit]').click();await settled();assert.equal(await page.locator('[data-action=guard-1-rule-0-variable]').evaluate(n=>document.activeElement===n),true,'Edit opens the rule builder');
  await page.locator('[data-action=guard-1-done]').click();assert.equal(await page.locator('[data-action=guard-1-edit]').count(),1);
  await capture('revision-choice');
  report.checks.push('Revision: Choice destinations pick from scene pictures with Escape and Undo; availability collapses to one line; focused options mark their stage button');
+ // Revision: choice options have their own beats and an outcome; Tracks and Branch path show option paths.
+ await open('populated');await page.locator('[data-track-beat][data-beat-kind=choice]').click();
+ assert.deepEqual((await options()).map(o=>o.outcome),['continue','jump','call']);
+ assert.equal(await page.locator('.sc-conditions .sc-option-segment').count(),3,'Branch path lists choice options');
+ await page.locator('[data-action=option-2-then]').click();await page.locator('[data-action=option-2-then-continue]').click();
+ assert.equal((await options())[1].outcome,'continue');assert.equal(await page.locator('[data-action=change-destination-1]').count(),0,'Continue has no destination');
+ await page.locator('[data-action=undo]').click();assert.equal((await options())[1].outcome,'jump');
+ await page.locator('[data-action=add-caption]').click();await settled();await page.getByRole('textbox',{name:'Line shown with the choices',exact:true}).fill('Where to, then?');
+ assert.equal(await page.locator('.sr-stage .sr-saybox p').first().innerText(),'Where to, then?','Caption shows with the choices');
+ await page.locator('[data-action=add-choice-option]').click();let menu=(await state()).scenes[0].beats.find(b=>b.kind==='choice');
+ assert.equal(menu.options.length,4);assert.equal(menu.branches.length,4,'New option gets its own body');
+ await page.locator('[data-action=remove-choice-0]').click();menu=(await state()).scenes[0].beats.find(b=>b.kind==='choice');
+ assert.equal(menu.branches.some(b=>b.beats.length),false,'Removing an option removes its beats');
+ await page.locator('[data-action=undo]').click();await page.locator('[data-action=open-option-0]').click();
+ assert.equal(await page.locator('.sr-inspector .sc-crumb').first().innerText(),'Option 1 · Ask about the last tram');
+ assert.match(await page.locator('.sc-tracks .sc-rail-end').first().innerText(),/then 09/);
+ await capture('revision-choice-outcomes');
+ report.checks.push('Revision: choice options carry beats and an outcome (continue, scene, visit, menu again, end); caption shows on stage; option paths appear in Branch path and Tracks; add/remove keeps bodies with Undo');
  assert.deepEqual(report.errors,[]);report.passed=true;
 }catch(error){report.failure=String(error.stack);await capture('failure');throw error;}
 finally{await writeFile(new URL('report.json',output),JSON.stringify(report,null,2)+'\n');await browser.close();}
