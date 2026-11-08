@@ -311,7 +311,7 @@ async function selectedVisible(mode){
  done('Revision: expression and background sheets preview on the stage, Escape keeps the value, click applies with Undo; speaker list changes the speaker');
  await page.locator('.sc-conditions [data-action=open-branch-ticket-if]').click();await page.locator('.sc-conditions [data-action=open-branch-inner-if]').click();
  assert.equal(await page.locator('.sc-conditions [data-action=open-branch-inner-if]').getAttribute('aria-pressed'),'true');
- assert.deepEqual(await page.locator('.sc-tracks .sc-track-mark').evaluateAll(n=>n.map(m=>m.dataset.branchBoundary)),['entry','entry','exit','exit','after'],'Nested branches get entry, exit and after markers in order');
+ assert.deepEqual(await page.locator('.sc-tracks .sc-track-mark').evaluateAll(n=>n.map(m=>m.dataset.branchBoundary)),['entry','entry','exit','after','exit','after'],'Nested branches get entry, exit and after markers in order; the last nested condition keeps its after marker');
  await page.locator('[data-action=toggle-focus]').click();await settled();
  assert.equal(await page.locator('.sc-tracks .sr-track-label:visible').count(),6,'Writing focus Tracks shows every lane');await capture('revision-focus-lanes');
  done('Revision: Branch path switches carry state; nested markers are ordered; writing focus Tracks shows all six lanes');
@@ -324,6 +324,8 @@ async function selectedVisible(mode){
  assert.equal(await condition(),'has_ticket is true and trust is at least 5');assert.match(await page.locator('.sc-branch[data-branch=ticket-if] .sc-test-code').innerText(),/^if has_ticket and trust >= 5:$/);
  await page.locator('[data-action="06-if-match-any"]').click();assert.equal(await condition(),'has_ticket is true or trust is at least 5');
  await page.locator('[data-action="06-if-rule-2-operator-is-less-than"]').click();assert.equal(await condition(),'has_ticket is true or trust is less than 5');
+ const draft=page.locator('.sr-inspector [data-rule="1"] input');await draft.fill('-');await page.locator('[data-action=bottom-reel]').click();await page.locator('[data-action=bottom-tracks]').click();
+ assert.equal(await draft.getAttribute('aria-invalid'),'true','A half-typed number stays an editable, flagged draft');await draft.fill('5');assert.equal(await condition(),'has_ticket is true or trust is less than 5');
  await page.locator('summary[data-action=test-ticket-if-rule-0-variable]').click();await page.locator('[data-action=test-ticket-if-rule-0-variable-new]').click();
  await page.getByRole('textbox',{name:'Variable name',exact:true}).fill('Bad Name');await page.locator('[data-action=create-variable]').click();assert.match(await page.locator('.sc-field-error').innerText(),/lowercase/);
  await page.getByRole('textbox',{name:'Variable name',exact:true}).fill('found_letter');await page.locator('[data-action=create-variable]').click();

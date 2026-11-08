@@ -87,7 +87,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   const scene = () => scenes.find(s => s.id === sceneId)!;
   const current = () => flatten(scene().beats).find(b => b.id === selected);
   const number = (id = selected) => beatNumber(scene(), id);
-  const name = (id = selected) => beatName(scene(), id);
+  const name = (id = selected) => { const text = beatName(scene(), id); return combined ? text.replace(/ Return \/ end$/, ' Return') : text; };
   const contextName = (id = selected) => { const trail = (ancestry(scene(), id) ?? []).map(p => `${p.branch.name} ${p.branch.condition}`.trim()).join(' › '); return `${name(id)}${trail ? ' in ' + trail : ''}`; };
   const brief = (b: Beat) => { if (combined && b.kind === 'return') return 'Return to the caller, or the main menu'; if (combined && b.kind === 'jump' && b.repeat) return 'Repeat its Choice'; const branch = combined && b.kind === 'condition' ? b.branches.find(branch => branch.id === visibleBranches.get(b.id)) ?? b.branches[0] : undefined; return branch ? branchLabel(branch) : modelBrief(b, scenes); };
   type VariableType = 'flag' | 'number' | 'decimal' | 'text';
@@ -495,7 +495,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const match = /^([a-z_][a-z0-9_]*) (is not|is less than|is at most|is greater than|is at least|is)(?: (.*))?$/.exec(text.trim()); if (!match) return;
     const variable = variableOf(match[1]!), op = operators.find(o => o[1] === match[2])![0], raw = match[3] ?? ''; if (!variable) return;
     if (variable.type === 'flag') return op === '=' && /^(true|false)$/.test(raw) ? { variable: variable.name, op, value: raw } : undefined;
-    if (numeric(variable.type)) return (variable.type === 'number' ? /^(-?\d+)?$/ : /^(-?\d+(\.\d+)?)?$/).test(raw) ? { variable: variable.name, op, value: raw } : undefined;
+    if (numeric(variable.type)) return (variable.type === 'number' ? /^-?\d*$/ : /^-?\d*(\.\d*)?$/).test(raw) ? { variable: variable.name, op, value: raw } : undefined;
     const quoted = /^"(.*)"$/.exec(raw); return ['=', '≠'].includes(op) && quoted ? { variable: variable.name, op, value: quoted[1]! } : undefined;
   }
   function parseTest(text: string): Test {
@@ -590,7 +590,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     { value: 'continue', label: 'Continue after the Choice', icon: 'continue', detail: b => { const next = continuation(b); return next ? `Goes on to ${number(next.id)}` : 'Goes on to the end of the scene'; } },
     { value: 'jump', label: 'Go to a scene', icon: 'jump', detail: () => 'Jump. Does not come back' },
     { value: 'repeat', label: 'Repeat this Choice', icon: 'loop', detail: () => 'Shows the menu and prompt again' },
-    { value: 'return', label: 'Return', icon: 'return', detail: () => 'To the scene that called this one, or the main menu' },
+    { value: 'return', label: 'Return', icon: 'return', detail: () => 'To the caller, or the main menu' },
   ];
   /** Edits the body's last Beat only. Earlier Beats are never removed. */
   function setEnding(b: Beat, body: Branch, i: number, value: Ending) {
@@ -1070,7 +1070,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     for (const note of host.querySelectorAll<HTMLElement>('.sr-stage-status')) { const title = manual ? `Previewing ${manualOwner ? number(manualOwner.id) : ''} ${manualBranch?.name ?? 'branch'} · editing ${number()}` : `${number()} · ${state.unknown.length ? 'Partial illustration' : 'Sample illustration'}${routes && !combined ? ' · via ' + routes : ''}`; if (combined && !state.background && !state.characters.size && !state.line) { note.textContent = ''; note.title = note.ariaLabel = ''; continue; } note.textContent = innerWidth < 900 ? `${number()}${manual ? ' · Preview' : state.unknown.length ? ' · Partial' : ''}` : title; note.title = title; note.ariaLabel = title; }
     for (const effect of host.querySelectorAll('.sr-effects')) effect.replaceWith(effects());
     for (const owner of flatten(scene().beats)) for (const branch of owner.branches) {
-      for (const button of host.querySelectorAll<HTMLElement>(`[data-action="open-branch-${branch.id}"]`)) { const prefix = button.closest('.sr-branch-control') ? (variant === 'stage-tracks' ? 'Show in tracks: ' : 'Open branch: ') : button.closest('.sr-reel-target') ? 'Open ' : ''; const fullName = `${prefix}${branch.name} ${branch.condition}${button.closest('.sr-reel-target') ? ' · ' + count(branch.beats.length, 'beat') : ''}`.trim(); if (button.closest('.sr-branch-control')) { button.textContent = variant === 'stage-tracks' ? 'Show in tracks' : combined ? (visibleBranches.get(owner.id) === branch.id ? 'Showing' : 'Show') : 'Open branch'; if (combined) button.ariaPressed = String(visibleBranches.get(owner.id) === branch.id); button.ariaLabel = button.title = fullName; } else if (!button.closest('.sc-branch-switch')) nameControl(button, fullName); if (button.closest('.sr-track-band')) button.title = `Show ${branch.name} ${branch.condition} in tracks`.trim(); }
+      for (const button of host.querySelectorAll<HTMLElement>(`[data-action="open-branch-${branch.id}"]`)) { const prefix = button.closest('.sr-branch-control') ? (variant === 'stage-tracks' ? 'Show in tracks: ' : 'Open branch: ') : button.closest('.sr-reel-target') ? 'Open ' : ''; const fullName = `${prefix}${branch.name} ${branch.condition}${button.closest('.sr-reel-target') ? ' · ' + count(branch.beats.length, 'beat') : ''}`.trim(); if (button.closest('.sr-branch-control')) { button.textContent = variant === 'stage-tracks' ? 'Show in tracks' : combined ? 'Open' : 'Open branch'; if (combined) button.ariaPressed = String(visibleBranches.get(owner.id) === branch.id); button.ariaLabel = button.title = fullName; } else if (!button.closest('.sc-branch-switch')) nameControl(button, fullName); if (button.closest('.sr-track-band')) button.title = `Show ${branch.name} ${branch.condition} in tracks`.trim(); }
       const option = host.querySelector<HTMLOptionElement>(`.sr-preview-route option[value="${branch.id}"]`); if (option) option.textContent = `${number(owner.id)} ${branch.name} ${branch.condition}`.trim();
     }
     const selectedBeat = current();
@@ -1305,7 +1305,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   }
   /** One colour per branch, in scene order, cycling through four. */
   function armOf(branch: Branch) { const all = flatten(scene().beats).flatMap(b => b.branches); return (Math.max(0, all.indexOf(branch)) % 4) + 1; }
-  function segmentLabel(owner: Beat, branch: Branch) { if (owner.kind === 'choice') { const i = owner.options.findIndex(o => o.body === branch.id), open = visibleBranches.get(owner.id); return open === branch.id ? `${i + 1} ${owner.options[i]?.text || 'New choice'}` : String(i + 1); } return branch === owner.branches[0] ? 'If' : branch.name === 'Otherwise' ? 'Otherwise' : branch.condition || 'Else if'; }
+  function segmentLabel(owner: Beat, branch: Branch) { if (owner.kind === 'choice') { const i = owner.options.findIndex(o => o.body === branch.id), open = visibleBranches.get(owner.id); return open === branch.id ? `${i + 1} ${owner.options[i]?.text || 'New choice'}` : String(i + 1); } return branch === owner.branches[0] ? 'If' : branch.name === 'Otherwise' ? 'Otherwise' : 'Else if'; }
   function conditionStrip() {
     const strip = el('nav', 'sc-conditions'); strip.ariaLabel = 'Branch path';
     strip.append(el('strong', 'sc-conditions-title', 'Branch path'));
@@ -1372,7 +1372,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
         const exit = mark('exit', chain); exit.append(rail(chain, { branch, end: thenText(owner, branch) }));
         if (ending(branch.beats) >= 0) { const append = action(focused ? `+ Last beat in ${branchLabel(branch)}` : '+', () => picker(branch.beats, path, defaultIndex(branch.beats)), false, `append-${branch.id}`); append.ariaLabel = append.title = `Add the last beat in ${branchLabel(branch)}${ending(branch.beats) >= 0 ? ', before its ending' : ''}`; exit.append(append); } else exit.classList.add('sc-track-exit-bare'); nodes.push(exit);
       }
-      if (!(parentChain.length && place.index === place.body.length - 1)) {
+      {
         const after = mark('after', parentChain); after.append(rail(parentChain));
         const add = action(focused ? `+ After ${number(owner.id)}` : '+', () => afterCondition(owner), false, `boundary-after-${owner.id}`); add.ariaLabel = add.title = `Add after ${owner.kind === 'choice' ? 'choice' : 'condition'} ${number(owner.id)}, outside its ${owner.kind === 'choice' ? 'options' : 'branches'}`; after.append(add); nodes.push(after);
       }
