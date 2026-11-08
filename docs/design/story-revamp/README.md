@@ -82,6 +82,10 @@ branches. [Beat drafts](../../UI.md#beat-drafts) owns the interaction rules. The
 existing production navigation guard must change during integration; preserving
 drafts must not weaken source validation or the shared transaction layer.
 
+Kris also selected [one chronological Story Undo order](../../UI.md#story-undo)
+for draft and committed edits, with the same behaviour from the button and keyboard
+shortcut. The earlier proposal for separate field and project Undo was not accepted.
+
 ## Selected direction
 
 Kris selected a fourth combined mock, owned by the current section of

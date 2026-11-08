@@ -401,9 +401,9 @@ covers moving, unwrapping and deleting branches.
   Left/Centre/Right switch. Selecting an audio beat never plays it; only the labelled
   audition action plays audio.
 - Narration is its own mode, not a fake Character. In dialogue, Enter adds a line
-  break, Cmd/Ctrl+Enter commits the typing burst as one Undo step, and
+  break, Cmd/Ctrl+Enter commits the draft, and
   Shift+Cmd/Ctrl+Enter commits and starts the next line with the last speaker on the
-  current path.
+  current path. [Story Undo](#story-undo) defines the grouping of typing into steps.
 - Staging changes are explicit beats. A dialogue line never hides a `show` or
   appearance change.
 - Selecting a character or the background on the stage names the beat that set it, and
@@ -430,9 +430,33 @@ Navigation does not commit or discard a draft. Commit remains explicit, and
 incomplete or invalid input never reaches the source files. Ask before an action
 would discard a draft, including deleting its beat or closing the project.
 
-Undo behaviour and changes to the source beneath a retained draft still need
-decisions before implementation. This target replaces production's current rule
-that requires committing or cancelling the beat edit before navigation.
+Changes to the source beneath a retained draft still need decisions before
+implementation. This target replaces production's current rule that requires
+committing or cancelling the beat edit before navigation.
+
+### Story Undo
+
+Story has one chronological Undo order for edits, including unfinished beat drafts.
+The Undo button and Cmd/Ctrl+Z reverse the same most recent edit, regardless of the
+selected beat or focused Story field. Group continuous typing into useful steps.
+Selecting beats, switching branches or changing views adds no history entry and
+does not change the Undo order. Saving adds no extra Undo step and does not clear
+the history. Redo restores an undone edit.
+
+For example, type in beat A, change and commit beat B's background, then return to
+A without typing. The first Undo reverses B's background change. The next Undo
+reverses the earlier typing in A. Do not expose separate draft and saved-edit Undo
+commands within Story.
+
+Draft-only Undo changes the draft without writing incomplete source. Undo of saved
+source uses the existing shared transaction layer and its revision, conflict and
+recovery checks. This is target behaviour; production currently blocks project
+Undo while a beat draft exists. Behaviour across workspaces remains to be settled.
+
+Kris selected familiar Word-like editing behaviour. Microsoft's
+[Undo guidance](https://support.microsoft.com/en-us/office/foundations-experiences/undo-redo-or-repeat-an-action)
+describes keyboard and toolbar access to Undo and retaining Undo after saving.
+The Story rules above define Loomlight's application of that reference.
 
 ### Choices
 
