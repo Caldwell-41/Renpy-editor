@@ -7,6 +7,10 @@ The [release scope](../design/story-revamp/README.md#production-release-scope) r
 settled decisions. Documentation commits stay local. Production implementation and
 tracker publication are not selected; the approved mock remains unchanged.
 
+The draft-conflict interaction remains undecided. A separate Sol xhigh chat on
+`codex/story-draft-conflict-mock` is preparing Design Lab options for Kris to review.
+It owns only that isolated prototype and its registration/notes.
+
 ## Story Combined v1 approved
 
 Kris approved the combined Story layout on 2026-11-08 as **Story Combined v1**: Design Lab
