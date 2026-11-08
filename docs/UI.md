@@ -364,7 +364,10 @@ covers moving, unwrapping and deleting branches.
 
 ### Layout
 
-- A 16:9 game stage sits beside the selected-beat editor in a right-hand sidebar.
+- The game stage sits beside the selected-beat editor in a right-hand sidebar.
+  It keeps the project's width-to-height ratio and fits the complete image into the
+  available space, leaving unused space where needed. It never stretches or crops the
+  game image to match the mock's 16:9 sample.
   Authoring forms stay outside the stage; only the game's dialogue box and choice menu
   overlay it. The stage keeps room for future character dragging.
 - Below the stage, the Branch path sits above a bottom panel that switches between

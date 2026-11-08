@@ -1,9 +1,14 @@
 # Loomlight
 
 Loomlight authors Ren'Py projects while preserving their source. These terms
-distinguish screen editing from deliberate game execution.
+distinguish Story and screen editing from deliberate game execution.
 
 ## Language
+
+**Game stage**:
+The Story view of supported scene appearance through the selected beat, shown in
+the project's width-to-height ratio. It marks unknown state and does not run the game.
+_Avoid_: Screen canvas as a synonym
 
 **Screen canvas**:
 The inert editing view of a screen's supported appearance, including marked draft

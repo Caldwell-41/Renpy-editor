@@ -68,6 +68,13 @@ Completion of all Screens arithmetic work, or closure of #87, is not a prerequis
 Record these dependencies in the future Story integration task when Kris authorizes
 publication. This local decision does not create or change GitHub tasks.
 
+### Stage proportions in production
+
+Kris confirmed that the game stage keeps the project's actual width-to-height ratio.
+The approved mock's 16:9 stage represents its 1920 × 1080 sample, not a restriction
+on other project resolutions. [The Story layout contract](../../UI.md#layout) owns
+the fit rule. Keep the approved mock and its captures unchanged.
+
 ## Selected direction
 
 Kris selected a fourth combined mock, owned by the current section of
