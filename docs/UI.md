@@ -1,1404 +1,595 @@
-# UI checkpoint
+# UI and design system
 
-## First safe rewrite surface
+This document owns Loomlight's visual language, the rules every workspace shares and
+a short statement of each workspace's intent. Feature behaviour belongs to the
+contract linked from each section, and exact implemented values live in the code.
 
-Story's ordinary saved dialogue/narration selection exposes Assist → Rewrite
-dialogue. The session-owned nonmodal panel separates Review complete send, Generate
-proposal, passive semantic/exact Source review and Accept 1 change. It shows exact
-selected references, destination/locality, full body/digest, size and protected tokens,
-with wrapped disclosures and responsive field layout in the approved themes.
-Cancellation remains available during network work; failures retain input and stale
-comparisons. Dirty or changed author input requires fresh preparation. Project
-close/replacement confirms unfinished work. Shared Undo/Redo owns acceptance.
-[PROMPTS_CONTEXT](PROMPTS_CONTEXT.md#first-safe-dialogue-rewrite) owns the implemented
-contract; CURRENT and the selected ledger own host qualification.
+- Mockups and component previews: [Design Lab](../app/design-lab/README.md).
+- Approval and promotion into the app: [ADR 0017](adr/0017-design-approval-and-app-integration.md)
+  and [design integration](../app/design-lab/INTEGRATION.md).
+- Story redesign decisions: [issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82)
+  and the [Story authoring notes](design/story-revamp/README.md).
 
-## Accepted redesign direction — 2026-09-29
-
-The [UI design review and implementation plan](tasks/archive/2026-10-06-ui-design-review.md)
-records the user-accepted replacement designs for the workspace, Settings, Welcome
-and creation wizard. They supersede the initial dark/indigo palette below: Dark uses
-warm charcoal/copper, Light uses paper/deep teal, with Follow system as the default.
-Game preview colours remain independent. The redesign also requires optional
-inspectors, remembered panel layout, truthful operation progress and status feedback
-that does not move editing content. Settings is available without an open project.
-
-The user authorized implementation on 2026-09-30. The implementation now includes
-both palettes, a stable shell/footer, Settings, onboarding progress and the redesigned
-workspaces. Qualification status and exact tested inputs belong in CURRENT/HANDOVER
-and the archived task; both-platform acceptance and PR #17 integration are complete.
-
-### Implemented refresh behaviour
-
-- Settings separates Application from Current project. Wide windows use labelled
-  categories; narrow windows use a category dropdown. Theme, interface size, Source
-  size and remembered/reset layouts save in device-local preferences. Current project
-  shows pinned version/resolution and links to the existing SDK/trust controls.
-- The shell keeps Save, Validate, Run and Stop available. Longer runtime state and
-  diagnostics live in an optional drawer. Fixed footer and Source-warning regions
-  preserve editor geometry; routine saving/loading labels are coalesced. Dirty Source
-  says **Unsaved Source draft**, not that validation is repeatedly running.
-- Welcome includes recent-project search, last-opened dates and remove-from-recents.
-  The four-step wizard preserves folder name, custom resolution and optional Git's
-  existing default. SDK downloads show measured bytes/percentage only when total size
-  is known; creation shows actual stages. Failure retains inputs, and a created project
-  that could not open gets an Open action rather than another Create action.
-- Story uses a letterboxed preview above Beats, a keyboard/pointer divider, optional
-  context and writing-focus mode. Dialogue commits on Cmd/Ctrl+Enter; Shift with that
-  shortcut commits and continues. Navigation settles pending dialogue through the
-  existing transaction path; IME composition and failed commits preserve input.
-- Source uses bundled CodeMirror with tabs, Ren'Py highlighting and current-file
-  find/replace. Closing a tab retains its session draft. Selection, mixed newline bytes,
-  grouped undo/redo and explicit Save remain owned by the existing Source controller.
-- Characters and Assets provide filterable grid/list cards and optional details;
-  Variables provides a table and known Set Variable Beat assignments. No general
-  source-reference index or new variable type/rename semantics are implied.
-- Native multiple-file selection/drop stages each file's kind and metadata. Imports
-  use existing grants/transactions sequentially; failed rows remain and successful
-  files are not retried. Leaving unsubmitted catalogue forms/staging asks whether to
-  retain editing or discard those inputs. Already-started operations retain existing
-  session/generation completion rules. New Assets audio preview stays disabled;
-  existing explicit Story audition remains available.
-
-### Hands-on review corrections — 2026-10-02
-
-Implementation status: the [chat-to-implementation audit](tasks/archive/2026-10-06-ui-design-review.md#chat-to-implementation-audit--2026-10-02)
-identified nine gaps, corrected in the 2026-10-03 source continuation. Choice fields
-stack at compact widths with a separate grouped action row. Discard resets the full
-Variable form, its dependent controls and persistence status. Selected appearance
-identity survives edits, default changes and view restoration; previously generated
-aliases can be reused only while their exact owned declarations remain intact.
-Sidebar controls expose initial/updated panel state and transfer focus on hide/restore.
-The preview divider shares one allocation update for pointer, keyboard and reset.
-Beat creation disables duplicate submission/dismissal while pending, restores input
-after failure, and reveals/focuses the saved collapsed row. Media shows loading,
-bounded read-error detail and explicit retry. Beat grips use captured pointer gestures,
-with cancellation and protected-boundary checks, while native OS asset-drop ownership
-remains enabled. The subsequently completed native/human Windows review is retained in the
-[Windows checklist](tasks/archive/2026-10-06-ui-design-review.md#deferred-windows-review-checklist--2026-10-03).
-
-Source keyboard Save retains the typing caret/focus after its temporary write
-barrier is released, so typing can continue without clicking the editor again.
-
-The CONFIG-01 resolution select uses a rendered 48-pixel height and 16-pixel text,
-with a theme-aware chevron while retaining native option/keyboard semantics.
-The resolution block shows dimensions and their reduced aspect ratio with
-the caption “Game resolution, not editor size.” Valid previews preserve proportions
-within 100 × 64 logical pixels, including portrait resolutions. Empty or invalid
-Custom input shows guidance without a shape or ratio; preview and Continue share
-the existing even-dimension limits. Native/visual acceptance remains in the task ledger.
-
-- Welcome distinguishes the introduction from Recent Projects; available projects
-  have a hover/focus treatment. Settings has a cog and a button hover treatment.
-  Wizard steps fill the rail, SDK selection says **Select existing SDK…**, resolution
-  uses a readable 48-pixel picker with aspect preview, and Git has an inline checkbox.
-- Main navigation has its own top icon toggle and a 64-pixel collapsed rail. The
-  Scene/file list has independent hide/restore controls. Both header controls fit
-  their existing panel widths at 32px, with left arrows when expanded and right arrows
-  for reopening. The restore control has a reserved slot beside the editor heading/
-  Source tabs, and never covers their text. Collapsed Settings uses a labelled cog.
-  Expanded navigation keeps a 12px icon-to-label gap on every surface, including
-  compact Story/Source layouts; collapsed links and panel controls keep zero icon margin.
-  Chapter disclosure keeps
-  the selected Scene and its editing state. Writing focus hides both sidebars,
-  preview and context; exiting restores the previous panel choices.
-- New Beats save when confirmed once, returning a collapsed row. Choice creation
-  uses a compact action and fields below the editor. The redundant Preview size
-  slider is removed; the accessible preview divider and saved/reset allocation remain.
-  Beat grips reorder supported non-terminal rows in one transaction/Undo; keyboard
-  arrows remain available. Protected regions, pending drafts and stale source refuse.
-- Source groups filename, draft marker and Close in one tab. Overflow exposes scroll
-  controls and an Open files chooser; opening selects and reveals the active tab and
-  corresponding file row. Close continues to retain the session draft.
-- Branches ignores indented screen-language label controls when finding story labels.
-  Saved literal choices and project entry retain their actual routes. Custom/dynamic
-  source stays uncertain. The details popup has a Close X, Escape and focus return.
-- Runtime has a sticky header and visible Close X. Diagnostics, output, launch details
-  and advanced SDK/trust controls expand on demand. A reported runtime error remains
-  visible even when Ren’Py exits zero; closing the drawer does not stop the process.
-- Characters, Assets and Variables use whole-card/row selection, inspector Close X,
-  and consistent create/edit modals with guarded Cancel/Escape and focus return.
-  Character rows have thumbnails and direct Edit. Appearances can be selected for
-  preview and edited by expression and/or replacement image; preview selection does
-  not change the default. Ordered media reads, cache reuse and Retry preview address
-  the initial inspector/default-refresh failure.
-  Character grid and list layouts share a summary block; image and initial-letter
-  placeholders occupy the same list column. Variable names, types, initial values
-  and Edit actions share the table header's four columns, including compact windows.
-- Assets always shows All, Backgrounds, Character images, Music and Sound effects,
-  plus a visible Drop/Browse area. Native drag state highlights that area; Drop and
-  Browse enter the same staged import modal and require confirmation before writing.
-  Native file-drop acceptance is still separate from browser fixture checks.
-  After selection, the initial Choose files section is replaced by a preview of
-  each staged image, its dimensions/size and import fields. Add files remains a
-  smaller action; removing/discarding all staged files restores the empty chooser.
-  Preview loading/errors/Retry do not import anything. Audio shows file information;
-  passive raster limits apply. Closing/discarding releases preview URLs.
-- Technical-name inputs across all three libraries suppress OS capitalization,
-  correction and spelling, and canonicalize uppercase ASCII at blur/submission
-  without changing display names or text values. Focusable naming guidance explains
-  Loomlight's lowercase, letter-first, 64-character contract and descriptive names.
-
-Both-platform qualification/native/human acceptance and retained replacement-package
-identities are recorded in CURRENT/HANDOVER and the archived review ledger. PR #17
-integration is complete; recorded Chrome timing and signing/input limitations remain.
-
-## Accepted UI/UX guidelines for implementation agents
-
-The user accepted these cross-workspace guidelines and the plain-language/validation
-refinements on 2026-10-03. They extend Quiet Studio and the latest written interaction
-decisions; they do not select an application implementation or reopen Phase 1 acceptance.
-Read this section before designing Phase 2/3 controls. Use accepted decisions and
-corrections over illustrative generated details or older layout descriptions below.
-
-1. **Preserve the visual identity.** Use paper/teal and charcoal/copper, system fonts,
-   restrained borders and modest corners. Reuse shared semantic tokens and controls.
-   Story content, selected Beats and game artwork take priority over shell decoration.
-2. **Keep workspaces familiar.** Keep navigation on the left, authoring in the centre,
-   optional properties on the right and diagnostics below where appropriate. Preserve
-   selection, scroll position and remembered panel layout across tools. Expand advanced
-   details on demand; do not duplicate global Save/Run/status controls in every panel.
-3. **Make selection explicit.** Highlight the selected item and identify its name/type
-   in the inspector. Synchronize canvas/hierarchy selection for the same object; keep
-   keyboard focus distinct from selection. Previewing an appearance does not change
-   its default. An inspector must never silently edit a previously selected item.
-4. **Make commitment clear.** Use inline editing for frequent writing and bounded dialogs
-   for catalogue creation/editing. Distinguish draft, applied and saved states using the
-   existing editor contracts. Navigation and failed submissions preserve unfinished work.
-   Label fields, group related controls, show units and place errors beside their fields.
-5. **One meaningful action, one coherent Undo.** A character drag/resize, Beat move or
-   accepted proposal uses one transaction/history path. Name undo actions where useful
-   and reveal or identify the affected item. Escape cancels an unfinished gesture;
-   continuous feedback is not a separate source commit per pointer movement.
-6. **Provide alternatives to dragging.** Offer numeric position/scale/time fields,
-   clickable move commands and keyboard controls. Make grips and handles easy to hit.
-   The operation must work both with keyboard input and with clicks without dragging.
-7. **Keep Assist understandable.** Preserve preparation, explicit generation, review
-   and application. Show target, references, effective prompt and limits before sending;
-   show changes before acceptance. Generated references never approve themselves.
-   Applying a proposal is undoable and is not a validation pass. Use the existing
-   operation-group/editability rules rather than inventing an unrestricted patch editor.
-8. **Report factual state without disturbing authoring.** Distinguish saved work,
-   unsaved drafts, generation, validation failure and stale previews. Keep status regions
-   stable. Percentages require measured progress. Label partial embedded previews and
-   provide deliberate Ren'Py playback; a browser rendering is not native runtime proof.
-9. **Interrupt in proportion to loss.** Keep routine undoable editing quick. Confirm
-   actual draft loss or irreversible consequences with specific action labels. Dialogs
-   have a visible Close/Cancel route, guarded Escape and focus return. Respect in-flight
-   write ownership; cancellation must not imply a started write has been rolled back.
-10. **Adapt without shrinking everything.** Collapse secondary panels before squeezing
-    the main editor. Stack forms/comparisons at compact widths; keep actions reachable.
-    Maintain visible focus, readable text, both themes and user text/interface sizing.
-    Pair colour with text/shape, use keyboard-accessible semantics and respect reduced
-    motion. Keep horizontal scrolling local to content that needs it, such as Source.
-11. **Use straightforward language.** Write short, concrete labels and messages in
-    familiar authoring terms. Reduce implementation jargon; expose necessary Ren'Py
-    terms with plain explanations and optional deeper help. Keep terminology consistent.
-    Do not hide information needed to make a decision in a tooltip.
-12. **Validate after field completion and again on submission.** Check applicable
-    formats, names, required values, types and ranges when a user finishes a field;
-    recheck all submitted values before writing or sending. Explain the correction,
-    preserve input and avoid interrupting typing. The detailed contract below applies.
-
-### Interface language and help
-
-Use action labels that describe the result: **Move to scene**, **Apply changes** or
-**Discard changes**, rather than internal vocabulary or ambiguous Yes/No buttons.
-Explain failures as what went wrong and what the author can do next. For example,
-“Enter a whole number from 1 to 60” is preferable to “Invalid scalar”; “This preview
-cannot show this animation. Preview in Ren'Py” is clearer than a compositor error.
-
-Preserve precision where it matters. Technical-name fields still distinguish the name
-used in Ren'Py from a display name; dimensions show pixels, durations show seconds and
-LLM limits show tokens. A label such as **Maximum response length (tokens)** needs a
-short explanation of tokens. Keep **System prompt** with an explanation of its role.
-Do not relabel technical concepts so broadly that authors mistake scale for size,
-preview zoom for game resolution or applying changes for saving/validation.
-
-Tooltips or a labelled help affordance can explain anchors, ATL, Ren'Py naming
-conventions and other optional technical detail. Make help available on keyboard focus
-as well as hover, with a discoverable access route for icon-only controls. Longer or
-interactive explanations belong in expandable help. Required syntax, units, constraints
-and error recovery remain visible beside the field; placeholders are not labels.
-Keep credentials and raw internal exception dumps out of routine copy. Show relevant
-project/file paths where they help identify the target; keep unrelated machine detail
-in bounded diagnostics rather than requiring it to understand an ordinary error.
-
-### Input validation timing and recovery
-
-- **Before interaction:** show persistent labels, required/optional status, units and
-  useful examples/rules. Do not mark untouched empty fields erroneous on opening.
-- **While typing:** allow incomplete values. Do not show new format errors on every
-  keystroke, steal focus, rewrite user text or validate during IME composition. If an
-  error is already shown, update/clear it as the correction becomes valid. Cheap
-  nonintrusive feedback may update, but inactivity alone does not prove a complete
-  identifier, number or multiline statement.
-- **On field completion:** validate text/numeric fields on blur and on an explicit
-  field commit where the editor has one. Validate discrete selections/file choices
-  when selected. Enter only commits where it already does; ordinary Enter in multiline
-  text continues to insert a newline. Run normal name/format checks at these boundaries.
-- **On submission:** revalidate the whole form, including untouched fields and dependent
-  values, regardless of prior results. Invalid input performs no write/provider send;
-  preserve every field, identify the errors and focus the first invalid field. A summary
-  can link multiple errors. Do not rely only on a disabled button to explain invalidity.
-- **Error presentation:** use text beside the affected field with accessible association
-  and invalid state. Say the expected format/range and show a useful example. Announce
-  meaningful error transitions without repeatedly announcing each typed character.
-- **Shared rules:** use the existing authoritative validators and consistent UI checks,
-  not divergent per-workspace definitions. Submit still goes through core validation,
-  source/revision checks and the existing transaction contract. Client checks do not
-  establish current source ownership, file availability or runtime compatibility.
-- **Asynchronous checks:** bind any necessary result to the current value/session and
-  ignore stale replies. Show checking/unavailable separately from invalid. Routine
-  field validation never initiates LLM sends, model loading or project execution;
-  existing explicit connection/native test controls retain their own boundaries.
-- **Preserve meaning:** apply only established, documented normalization. Do not silently
-  truncate, change prose, repair source syntax or coerce an invalid number to a fallback.
-  Name checks apply to technical identifiers, not dialogue or lore prose. Source edits
-  retain the lossless-source and unsupported-region contract.
-
-### Shared ownership and proportionate review
-
-The owner maintains shared tokens and interaction conventions for buttons, fields,
-selection, inspectors, dialogs, draft handling, validation and status. Both lanes reuse
-those patterns; extend existing helpers when needed rather than creating independent
-forms/validation systems. Inspect the accepted baseline at implementation entry.
-
-For the changed surface, review representative content in both themes and wide/compact
-layouts; keyboard/focus, text scaling, selection retention and relevant empty, busy,
-error/stale states. Exercise one action through undo/cancel and failed submission.
-For field changes, check untouched/incomplete input, blur, invalid submission,
-correction/resubmission and applicable IME/dependent/asynchronous cases. Verify no
-mutation occurs on refusal and values survive. Canvas changes need actual Ren'Py
-comparison for their declared behavior. Use existing task-ledger and changed-scope
-gates; these guidelines add no blanket package matrix, certification or approval flow.
-
-Research supports the interaction recommendations; the specific Loomlight controls
-and commitments above are accepted product decisions. Useful primary references:
-[Microsoft forms](https://learn.microsoft.com/en-us/windows/apps/develop/ui/controls/forms),
-[WAI tree focus/selection](https://www.w3.org/WAI/ARIA/apg/patterns/treeview/),
-[Apple undo](https://developer.apple.com/design/human-interface-guidelines/undo-and-redo),
-[Apple alerts](https://developer.apple.com/design/human-interface-guidelines/alerts),
-[WCAG non-drag alternatives](https://www.w3.org/WAI/WCAG22/Understanding/dragging-movements.html),
-[HAX proposal correction](https://www.microsoft.com/en-us/haxtoolkit/guideline/support-efficient-correction/)
-and [accessible status](https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html).
+This is the target design. Production still ships the charcoal/copper and paper/teal
+palettes and the earlier Story layout until the Story redesign is integrated.
 
 ## Design intent
 
-Project Loomlight is a restrained, professional writing and game-authoring tool.
-Routine VN authoring should be faster in the Scene workspace than by opening modal
-property forms, while the generated source remains visible and ordinary. The editor follows system appearance by default; meaning never depends on colour alone.
-Panels are keyboard reachable, resizable, collapsible, and compatible with
-screen-reader semantics where the chosen desktop/webview stack permits them.
+Loomlight is a restrained writing and game-authoring tool. Routine visual-novel
+authoring should be faster in Story than through modal property forms, and the Ren'Py
+source it writes stays ordinary and visible. Story content, the game stage and the
+selected beat get the attention; shell furniture recedes once a project is open.
+Dark mode comes first, the app follows the system appearance by default, and layouts
+are information-dense.
 
-Phase 1 makes Scene, Source, and Branches the functional centre workspaces. Characters,
-Assets, Variables, project setup and Diagnostics/Runtime are supporting surfaces.
-Git status/diff/checkpoint is a deferred optional supporting surface, outside Phases
-1–3 and initial-release acceptance; GitHub/remotes remain deferred too.
-UI Designer and Timeline are later major workspaces and must not appear as functional
-Phase 1 features; they may be omitted or clearly labelled as future work.
+Story, Source, Branches and Screens are the main workspaces. Characters, Assets,
+Variables, Settings, project setup and Runtime support them. Timeline and Run From
+Here are later work and must not appear as working features before they exist. Git
+status, diff and checkpoints are deferred to [optional Git](tasks/active/optional-local-git.md).
 
-## Visual design language — Quiet Studio
+## Visual language
 
-Loomlight should look like a carefully designed native creative application, not a
-web dashboard, generic IDE skin, or stylised AI-product mockup. The working visual
-direction is **Quiet Studio**: warm charcoal/copper or paper/teal surfaces, a restrained
-accent, medium density, strong typography, subtle separation between regions, and very
-little decorative chrome. Narrative content, the game preview, and the selected Beat
-must dominate attention; branding and shell furniture recede once a project is open.
+Loomlight should look like a native creative application, not a web dashboard, a
+generic IDE skin or an AI product mockup. Borrow desktop conventions for tabs,
+navigation, keyboard access, inspectors and source editing. Identity comes from story
+structure, beat presentation, the stage, typography and interaction quality.
 
-Phase 1A establishes the design-system foundation. Phase 1E implements the first full
-visual polish pass around the real Scene authoring interactions. Source, Branches,
-Diagnostics, Git, and later workspaces extend the same system rather than introducing
-independent styling.
+### Palette: Brass and slate
 
-### Design tokens and theme architecture
+Each theme has its own palette. Dark uses slate surfaces with a brass accent; Light
+uses warm off-white surfaces with a slate-blue accent. Game preview colours stay
+independent of the app theme. Components use semantic tokens only, never literal
+colours. The status tokens (`--status-success`, `--status-warning`, `--status-error`,
+`--status-info`, `--status-partial`) keep their current values.
 
-Do not hard-code dark-theme colours directly into components. Use semantic tokens from
-the shared theme system so either palette works without rewriting components. The initial system should cover at least:
+| Token | Dark | Light |
+| --- | --- | --- |
+| `--surface-app` | `#161b20` | `#ecebe6` |
+| `--surface-panel` | `#1b2128` | `#f6f5f1` |
+| `--surface-raised` | `#222a32` | `#fffefb` |
+| `--surface-hover` | `#29323b` | `#e5e3dc` |
+| `--surface-selected` | `#342e22` | `#f3e7cb` |
+| `--text-primary` | `#e9ecef` | `#1d252c` |
+| `--text-secondary` | `#bcc4cc` | `#3d4853` |
+| `--text-muted` | `#949ea8` | `#5a6570` |
+| `--text-disabled` | `#66717b` | `#8b949c` |
+| `--border-normal` | `#2c353e` | `#d5d2ca` |
+| `--border-strong` | `#46525d` | `#a6a39a` |
+| `--accent-primary` | `#d6a84e` | `#2d4d78` |
+| `--accent-hover` | `#e6bc66` | `#203b60` |
+| `--accent-subtle` | `#3a3122` | `#dfe6f0` |
+| `--focus-ring` | `#e6bc66` | `#2d4d78` |
+| `--on-accent` | `#1b1508` | `#ffffff` |
+| Branch arm 1 to 4 | `#4fb3a5` `#e07a5f` `#6aa9d8` `#7fbf73` | `#1c7a6d` `#b24f2e` `#2b67a0` `#66771a` |
+| Stage edge | `#0d1114` | `#c9c6be` |
+| Thumbnail tile | `#10161b` | `#d9d6ce` |
 
-```text
-surface.app
-surface.panel
-surface.raised
-surface.hover
-surface.selected
+The values come from [`combined-revision.css`](../app/design-lab/screens/story-revamp/combined-revision.css),
+which scopes them to the Story mock. There the last three rows are `--sc-arm-1` to
+`--sc-arm-4`, `--sc-stage-edge` and `--sc-tile`; the `sc-` prefix belongs to the mock.
 
-text.primary
-text.secondary
-text.muted
-text.disabled
+### Colour carries meaning
 
-border.normal
-border.strong
+Colour marks three things and is never decoration:
 
-accent.primary
-accent.hover
-accent.subtle
+- **Branch arms.** Each condition branch and Choice option takes one of the four arm
+  colours, cycling in scene order. The same colour marks it in the Branch path, the
+  breadcrumb, the Tracks and Reel route line, the option block and the stage button.
+- **Characters.** A character's name uses its Ren'Py `Character(color=...)` colour
+  wherever it appears.
+- **Selection.** The accent marks the selected item and rare primary actions.
 
-status.success
-status.warning
-status.error
-status.info
-status.partial
-```
-
-The accent is copper in Dark and deep teal in Light, used sparingly for focus, selection,
-active tabs, links, and rare primary actions. Semantic status colours are reserved for
-meaning such as saved/success, warning/partial state, error/conflict, and information;
-every status also has text and/or an icon so colour is never the sole signal.
-
-Both accepted palettes are maintained together. The implementation must avoid assumptions such as
-literal white text on literal `#222` backgrounds.
-
-The Phase 1A implementation defines these semantics as CSS custom properties under an
-explicit `data-theme` selector. Both dark and light value sets exist;
-components consume semantic variables only. Shared primitives also define the system UI
-stack, `SFMono-Regular`/Consolas/Liberation Mono/Menlo Source stack, 4 px and 6 px
-radii, one restrained preview elevation, visible focus, and a reduced-motion override.
-The minimal boundary-status shell is scaffold evidence, not the Scene workspace or a
-visual-polish milestone.
+Beat types use line icons and text labels, not category colours. Colour never carries
+meaning alone; pair it with text, a number or a shape. No purple, neon, glow or
+gradients.
 
 ### Typography
 
-Use the platform/system UI font stack for application and narrative authoring surfaces,
-for example `system-ui`, `-apple-system`, and `Segoe UI`; do not bundle a decorative
-brand font merely to create visual identity. Source uses a reviewed monospace stack.
-Dialogue, Beat text, story hierarchy, and Character/Asset surfaces use the normal UI
-font so Loomlight continues to feel like a writing application outside Source.
+Use the system UI stack (`system-ui`, `-apple-system`, `Segoe UI`) for the app, story
+text, beats and catalogues. Use the monospace stack (`SFMono-Regular`, Consolas,
+Liberation Mono, Menlo) for Source and Ren'Py lines. Do not bundle a brand font.
+Size, weight and spacing carry hierarchy, not colour or effects. Secondary text stays
+readable; never shrink it to tiny low-contrast copy to look dense.
 
-Typography and spacing, not colour or effects, carry hierarchy. Secondary text must
-remain readable and must not be reduced to tiny low-contrast copy simply to make the
-interface look dense or premium.
+### Surfaces, rows and selection
 
-### Density and spacing
+Story content (dialogue, choices, appearances, media pickers) gets slightly more line
+height than technical surfaces such as Source navigation, diagnostics and property
+grids. Never squeeze dialogue into file-tree rows.
 
-Use medium density overall, with two deliberate density zones:
+Separate regions with surface steps, spacing and thin dividers. Text rows and sections
+stay flat, with no card or pill chrome, no box around every section and no rounded box
+inside another. Corners are 4 or 6 px (`--radius-small`, `--radius-medium`). Shadows
+belong only to floating layers such as menus, picker sheets and dialogs. The stage has
+a 1 px edge so it reads as a game window inside the tool.
 
-- **Narrative/content surfaces** such as Beats, choices, Character appearances, and
-  visual asset selection have slightly more vertical breathing room for scanning and
-  writing.
-- **Technical surfaces** such as Source navigation, Diagnostics, Git, compact
-  inspectors, and property grids may be denser.
+Image thumbnails may sit in tiles. A selected tile or row shows the accent as a fill,
+an underline bar or accent text, and needs no ring. Keyboard focus keeps its own
+outline in `--focus-ring`, so focus and selection never look the same.
 
-Dialogue Beats should never be compressed into file-tree-height rows. Staging Beats can
-be more compact, producing a visual rhythm where story content receives more space and
-structural commands recede.
-
-### Surfaces, borders, radius, and elevation
-
-Prefer subtle surface differences, spacing, and thin dividers to a collection of
-floating cards. Avoid boxing every section. Use modest corner radii, approximately the
-visual equivalent of 4–6 px, and minimal shadows. Stronger framing is appropriate for
-the Editor Preview so it reads as a game monitor embedded in the tool rather than just
-another panel.
-
-The Welcome/New Project experience may carry slightly more product identity than the
-working editor, but it must remain restrained. Once a project is open, large logos,
-marketing taglines, and ornamental brand elements should largely disappear.
-
-### Beat visual identity
-
-Beats are Loomlight's most distinctive recurring component. Do not render every Beat
-as a large independent rounded card. Use compact rows with a restrained type/status
-rail or icon, generous enough line height for dialogue, and stronger expansion only for
-the selected Beat. A selected Beat may use the primary accent rail/focus treatment;
-inactive Beats remain neutral.
-
-Different Beat types use consistent line icons and textual labels rather than a rainbow
-of category colours. Dialogue/narration receive more vertical space than structural
-staging commands. The visual treatment must reinforce the mental model `Scene → ordered
-Beats → resulting state` rather than resembling a generic task list.
+A section heading names its section. Do not put a light-gray subtitle or eyebrow line
+above it. Existing eyebrows (the `.eyebrow` class) go when their surface is redesigned,
+not in a separate cleanup; move any information they carry, such as a wizard step or
+a Chapter name, into the redesigned layout.
 
 ### Icons and controls
 
-Use one reviewed, coherent line-icon family at normal desktop scale (roughly 16–18 px
-for common controls). Icons supplement labels; important or unfamiliar actions must not
-be reduced to unexplained glyphs. Do not mix multiple icon families or use colourful
-illustrative icons simply to decorate navigation.
-
-Primary-button styling is intentionally rare. Creation, Run/Validate where appropriate,
-and conflict-resolution confirmation may receive stronger emphasis; ordinary editing
-controls remain neutral. Avoid making every toolbar action a bright accent button.
+Use one line-icon family at 16 to 18 px. Icons support labels; an important or
+unfamiliar action keeps a text label, or an accessible name with help on hover and
+focus. Primary button styling is rare: creation, Run or Validate, and confirming a
+conflict resolution. Ordinary editing controls stay neutral. A segmented switch suits
+two or three short exclusive values, such as Left, Centre and Right.
 
 ### Motion
 
-Motion is functional and restrained: Beat expand/collapse, panel transitions, focus
-movement, and short save-state feedback may animate subtly. Do not use bouncing,
-decorative parallax, animated gradients, or attention-seeking easing. Respect reduced
-motion and ensure disabling animation does not remove information.
+Motion is short and functional: expanding, collapsing, panel changes, focus movement
+and brief state feedback. Nothing repaints continuously, so no pulse, shimmer, blur,
+spinners, animated gradients, bouncing or parallax. Respect reduced motion; turning
+animation off removes no information. Show progress as text or a measured bar.
 
-### Explicit visual anti-patterns
+### Design failures
 
-The following are design failures unless a later reviewed requirement provides a
-specific functional reason:
+These are failures unless a reviewed requirement gives a functional reason:
 
-- glowing purple/blue or multicolour gradients;
-- gradient primary buttons or decorative gradient borders;
-- glassmorphism/frosted translucent working panels;
-- large soft-radius cards for every row, panel, or setting;
-- rounded rectangles nested repeatedly inside rounded rectangles;
-- excessive pills/chips for ordinary labels, state, or navigation;
-- arbitrary category colours for every icon/Beat type;
-- decorative sparkles, stars, "AI" motifs, or visual cues that imply intelligence
-  without communicating product state;
-- dashboard-style metric tiles on authoring surfaces;
-- heavy drop shadows or floating-card elevation throughout the desktop app;
-- huge empty marketing headers inside functional views;
-- every panel receiving an icon + title + bordered card treatment regardless of need;
-- microscopic low-contrast secondary text used as visual decoration;
-- over-branding the working editor or making Loomlight resemble a SaaS landing page;
-- copying VS Code, Unity, Godot, or the Ren'Py launcher closely enough that Loomlight
-  loses its narrative-authoring identity.
+- glow, neon or purple accents, and gradients anywhere, including buttons and borders;
+- frosted or translucent working panels;
+- cards or pills for ordinary rows, labels, state or navigation;
+- category colours for icons or beat types;
+- sparkles, stars or "AI" motifs that do not report product state;
+- dashboard metric tiles on authoring surfaces;
+- heavy shadows or floating-card elevation across the app;
+- large logos, taglines or marketing headers inside an open project;
+- an icon, title and bordered box on every panel regardless of need;
+- copying VS Code, Unity, Godot or the Ren'Py launcher closely enough to lose
+  Loomlight's own identity.
 
-Borrow established desktop conventions for tabs, command/navigation behavior,
-keyboard access, inspectors, and Source editing, but let Loomlight's identity come from
-story hierarchy, Beat presentation, preview treatment, typography, and interaction
-quality rather than decoration.
+<a id="accepted-uiux-guidelines-for-implementation-agents"></a>
 
-## Phase 1 application shell
+## Guidelines for implementation agents
 
-| Region | Phase 1 contents |
+Read this section before designing controls. Written decisions and recorded
+corrections take precedence over details in generated images or mockups.
+
+1. **Keep the visual language.** Use the shared tokens, system fonts, thin dividers and
+   small corners above. Story content, the selected beat and game art come before shell
+   decoration.
+2. **Keep workspaces familiar.** Navigation sits on the left, authoring in the centre,
+   optional properties on the right and diagnostics below. Keep selection, scroll
+   position and remembered panel layout across tools. Reveal advanced detail on demand,
+   and do not repeat global Save, Run or status controls in each panel.
+3. **Make selection explicit.** Highlight the selected item and name it in its editor.
+   Keep stage, list and track selection in sync for the same object. Previewing a value,
+   such as an appearance or background, never changes the saved value. An editor never
+   silently edits an earlier selection.
+4. **Make commitment clear.** Edit frequent writing inline; use bounded dialogs to
+   create and edit catalogue items. Distinguish draft, applied and saved states.
+   Navigation and failed submissions keep unfinished work. Label fields, group related
+   controls, show units and put errors beside their fields.
+5. **One action, one Undo.** A drag, resize, beat move or accepted proposal is one
+   transaction and one history entry. Name undo actions where useful and reveal the
+   affected item. Escape cancels an unfinished gesture, and pointer movement never
+   writes source.
+6. **Offer alternatives to dragging.** Provide numeric fields, move commands and
+   keyboard controls, with grips and handles that are easy to hit. Every operation
+   works by keyboard and by clicking.
+7. **Keep Assist understandable.** Preparation, generation, review and application are
+   separate steps. Show the target, references, effective prompt and limits before
+   sending, and the changes before acceptance. Generated references never approve
+   themselves. Applying a proposal is undoable and is not a validation pass.
+8. **Report facts without disturbing writing.** Distinguish saved work, unsaved drafts,
+   generation, validation failure and stale previews. Status regions keep their size,
+   so content never shifts. Percentages need measured progress. Label partial previews
+   and offer deliberate Ren'Py playback; a browser rendering is not runtime proof.
+9. **Interrupt in proportion to loss.** Routine undoable edits stay quick. Confirm draft
+   loss or irreversible effects with specific action labels. Every dialog has a visible
+   Close or Cancel, guarded Escape and focus return. Cancelling never implies that a
+   started write was rolled back.
+10. **Adapt without shrinking everything.** Collapse secondary panels before squeezing
+    the main editor. Stack forms and comparisons at compact widths and keep actions
+    reachable. Keep visible focus, readable text, both themes and the user's text and
+    interface sizes. Horizontal scrolling stays inside content that needs it, such as
+    Source.
+11. **Use plain language.** Write short, concrete labels in authoring terms. Explain the
+    Ren'Py terms authors need and keep terminology consistent. Never hide information
+    needed for a decision in a tooltip.
+12. **Validate when a field is finished and again on submission**, following
+    [input validation](#input-validation-timing-and-recovery).
+
+### Interface language and help
+
+Action labels describe the result, such as Move to scene, Apply changes or Discard
+changes, instead of internal vocabulary or Yes/No. An error says what went wrong and
+what to do next: "Enter a whole number from 1 to 60", not "Invalid scalar".
+
+Keep precision where it matters. Technical-name fields stay distinct from display
+names. Dimensions show pixels, durations seconds and LLM limits tokens, with a short
+explanation of tokens. Do not relabel concepts so broadly that authors confuse scale
+with size, preview zoom with game resolution, or applying changes with saving.
+
+Help for optional technical detail, such as anchors, ATL or naming rules, opens on
+keyboard focus as well as hover. Longer help expands in place. Required syntax, units,
+limits and recovery stay visible beside the field; a placeholder is not a label. Keep
+credentials and raw exceptions out of routine copy. Show a project path when it
+identifies the target, and keep other machine detail in diagnostics.
+
+### Input validation timing and recovery
+
+- **Before input.** Show labels, required or optional status, units and useful
+  examples. An untouched empty field is never an error when a form opens.
+- **While typing.** Allow incomplete values. Do not add format errors per keystroke,
+  steal focus, rewrite text or validate during IME composition. An error already shown
+  updates or clears as the value becomes valid.
+- **When a field is finished.** Validate text and number fields on blur and on an
+  explicit field commit. Validate a selection when it is chosen. Enter commits only
+  where it already does; in multiline text it inserts a newline.
+- **On submission.** Revalidate the whole form, including untouched and dependent
+  fields. Invalid input writes and sends nothing. Keep every field, mark the errors and
+  focus the first one. A disabled button alone never explains why.
+- **Showing errors.** Put the message beside the field with an accessible association
+  and invalid state. State the expected format or range with an example. Announce error
+  changes, not each typed character.
+- **Shared rules.** Use the existing validators. Submission still passes core
+  validation, revision checks and the transaction layer; client checks prove nothing
+  about source ownership, file availability or runtime compatibility.
+- **Asynchronous checks.** Bind each result to the current value and ignore stale
+  replies. Show checking or unavailable separately from invalid. Field validation never
+  sends to an LLM, loads a model or runs the project.
+- **Keep meaning.** Apply only documented normalisation, such as the
+  [technical-name rule](DATA_MODEL.md#authority-and-identity). Never truncate, change
+  prose, repair source syntax or replace a bad number with a fallback.
+
+### Reviewing a UI change
+
+Reuse the shared controls for buttons, fields, selection, inspectors, dialogs, drafts,
+validation and status, and extend an existing helper instead of adding a second one.
+Check representative content in both themes at wide and compact sizes: keyboard and
+focus, text scaling, selection retention, and the empty, busy, error and stale states.
+Take one action through Undo, Cancel and a failed submission, and confirm that a
+refusal changes nothing and keeps input. A canvas change needs comparison with real
+Ren'Py output. [TESTING](TESTING.md) owns the gates.
+
+## Shared controls
+
+These patterns come from the approved Story redesign and apply wherever the same need
+appears.
+
+### Media pickers
+
+A field that selects an image shows its thumbnail and Change. Change opens a picker
+sheet inside the sidebar with a grid of thumbnail tiles. Pointing at or focusing a
+tile previews it on the stage without saving. Click or Enter applies it; Escape closes
+the sheet and keeps the current value. Speakers and characters use a list with
+portrait and name colour. Sound and music show an icon and name, with no fake playback.
+
+### Pick-one dialogs
+
+A dialog that adds or picks one item from a list, such as Add a beat, is compact. It
+groups rows with an icon and a one-line description and offers search. Click or Enter
+adds the highlighted row; Escape or Close cancels. It has no separate confirm button.
+
+### Condition rule builder
+
+Conditions follow the typed model in [ADR 0014](adr/0014-typed-conditions-and-recursive-source-ownership.md).
+Each rule picks a project variable (yes/no, whole number or text), a preset test and a
+value. Numbers offer `= ≠ < ≤ > ≥`; yes/no and text offer equality only. One All/Any
+switch joins the rules, and each branch shows its Ren'Py line. Mixed groups and Python
+the editor cannot read stay read-only with Edit in Source; the builder never writes
+raw Python. The variable list can create a variable in place, with Undo. Story
+conditions and Choice "Only when" use the same builder.
+
+### Arithmetic equation row
+
+Set variable is one equation row, such as `trust [+= ▾] [formula]`. The operation menu
+lists Set to, Add, Subtract, Multiply by, Divide by, Floor divide by and Remainder
+after dividing by, each with a short example. The value is a number or a formula of
+declared numeric variables and brackets, with name suggestions while typing. Feedback
+names the result type and refuses a decimal result for a whole-number variable,
+unknown or non-number variables and division by zero. A value "on this route" uses
+only assignments earlier on the route, never the starting default, so most values
+read "unknown". Calculations the editor cannot show, such as `max()`, stay read-only
+with Edit in Source. [Issue #87](https://github.com/Caldwell-41/Renpy-editor/issues/87)
+owns the behaviour, the planned decimal type and the Screens actions.
+
+## Application shell
+
+| Region | Contents |
 | --- | --- |
-| Top toolbar | Project · persistence state · undo/redo · validate · run game |
-| Left sidebar | Story (chapters/scenes) · Characters · Variables · Assets |
-| Centre tabs | Scene · Source · Branches |
-| Right inspector | Selected-beat/staging properties and contextual asset/character information |
-| Bottom panel | Diagnostics · runtime |
+| Header | Project, save state, Save, Undo/Redo, Validate, Run and Stop |
+| Left | Collapsible main navigation, then the workspace's own list (scenes or files) |
+| Centre | The active workspace |
+| Right | The workspace's editor or optional inspector |
+| Bottom | Runtime and diagnostics drawer, opened on demand |
 
-The centre owns flexible space. Side and bottom panels collapse. When room becomes
-constrained, preserve a usable Beats editor first: collapse/shorten bottom diagnostics,
-shrink the aspect-ratio preview, then collapse inspector/sidebar before reducing Beats
-below its preferred minimum.
+Each panel has a visible collapse and restore control that moves focus and remembers
+its state. When space runs short, secondary panels collapse before the main editor
+shrinks. The footer and warning regions keep a fixed height so editing content never
+moves.
 
-The top toolbar always shows persistence truth such as `Saved`, `Saving`,
-`Unsaved Source draft`, `Conflict`, or `Recovery required`. The pending Source wire
-state remains `pendingValidation`; its visible caption is `Unsaved Source draft`.
-The shell owns one
-`Ctrl/Cmd+S` route: outside Source it flushes pending accepted work, while a focused
-Source editor settles and accepts its captured draft. A clean settled Source performs
-the ordinary Flush; a refused Source draft never falls through to a false Saved result.
+The header always shows the save state: Saved, Saving, Unsaved Source draft, Conflict
+or Recovery required. Cmd/Ctrl+S has one route. Outside Source it flushes accepted
+work; in Source it accepts the focused draft. A refused Source draft never reports
+Saved. [ADR 0007](adr/0007-shell-save-command-ownership.md) owns the route and the
+[session handoff](ARCHITECTURE.md#corrective-project-session-handoff) owns status
+ordering.
 
-## Welcome and project lifecycle
+## Settings
 
-The startup surface contains Recent Projects plus `New Project` and
-`Open Loomlight Project`. Recent entries show enough title/path context to identify a
-moved or missing project rather than silently disappearing. `Open Loomlight Project`
-selects a directory containing valid `.renpy-editor/project.json`; general import of an
-arbitrary Ren'Py project is not a Phase 1 flow.
+Settings opens with or without a project and separates Application from Current
+project. Wide windows list the categories; narrow windows use a category menu. Theme
+(Follow system by default), interface size, Source text size and remembered or reset
+layouts are device-local. Current project shows the pinned Ren'Py version and
+resolution, links to the SDK and trust controls, and holds project prompts. AI
+provider setup is described under [Assist and AI settings](#assist-and-ai-settings).
 
-The New Project workflow is:
+## Welcome and new project
 
-1. **Project details:** game title, auto-generated but editable project folder name,
-   parent directory, and exact final-path preview. Refuse unsafe overwrite/non-empty
-   destinations.
-2. **Ren'Py SDK:** choose a detected compatible installation, securely install the
-   supported Ren'Py 8.5.3 baseline, or browse for an existing SDK. Show incompatible
-   installations with an explanation rather than silently hiding them.
-3. **Game configuration:** default `1920×1080`, common resolution presets, or custom
-   width/height. Advanced GUI/theme configuration is not part of Phase 1.
-4. **Review & create:** show title/path, exact SDK/version, resolution, and an
-   `Initialize Git repository` checkbox enabled by default. An expandable section may
-   preview files/directories to be created.
-5. **Transactional creation:** generate the runnable scaffold and `.renpy-editor/`
-   metadata in staging, optionally initialise local Git, validate through the pinned
-   SDK, then finalise. Failure must not present a half-created project as successful.
-6. Open directly into `Chapter 1 → Scene 1`.
+Welcome lists recent projects with search, last-opened dates and Remove from recents.
+Missing or invalid entries stay visible with their path. Open Loomlight Project opens a
+folder containing `.renpy-editor/project.json`; importing an arbitrary Ren'Py project
+is later work.
 
-A created project can be persisted, closed, reopened from Recent Projects or Open
-Loomlight Project, and continued. If `.renpy-editor/` is deliberately deleted, the
-Ren'Py game still runs but Phase 1 does not reconstruct the metadata; that is future
-existing-project import.
+New Project is a four-step wizard:
 
-Phase 1C implements this lifecycle surface using the existing semantic tokens: a
-restrained two-column Welcome/Recent layout, a four-step wizard with native trusted
-folder selection and exact path preview, bounded creation progress, and a minimal
-Story shell with Chapter 1 / Scene 1 selected. Missing and invalid recent entries stay
-visible; removing one changes only application-local history. No Scene authoring,
-Preview, Beats, inspector, dashboard metrics, gradients, or card-heavy layout is
-introduced.
+1. Project details: game title, editable folder name, parent folder and the exact final
+   path. Unsafe or non-empty destinations are refused.
+2. Ren'Py SDK: pick a detected compatible SDK, install the pinned version or Select
+   existing SDK. An incompatible install shows the reason.
+3. Game configuration: 1920 × 1080 by default, presets or a custom size, with an aspect
+   preview captioned "Game resolution, not editor size".
+4. Review and create: title, path, SDK and resolution, with Initialize Git repository
+   checked by default.
 
-## Story hierarchy
+Creation shows its actual stages. Download progress shows bytes or a percentage only
+when the total size is known. Failure keeps every input, and a project that was created
+but could not open offers Open, not Create. A new project opens at Chapter 1, Scene 1.
 
-The Phase 1 Story tree is `Project → Chapter → Scene`. Chapters are organisational and
-map naturally to directories; each Loomlight-created Scene normally owns one `.rpy`
-file and a globally unique technical label. The sidebar supports create/rename/reorder
-chapters and scenes, move a Scene between chapters, and safe deletion with incoming
-reference checks.
+<a id="bounded-source-foundation-story-outline"></a>
 
-Display names are separate from stable technical names. Renaming `Trivia Night` does
-not silently rename `chapter_01_scene_002` or `scene_002.rpy`. A technical rename is a
-separate future/reference-aware operation.
+## Story workspace
 
-## Scene workspace — default and first polished surface
-
-The Scene workspace is built around the mental model:
-
-`Scene → ordered Beats → resulting supported visual state`
-
-The preview is a projection of explicit beats, never a hidden parallel document.
+Story is the author's main workspace. Its tree is `Project → Chapter → Scene`, and each
+Scene holds ordered beats. Display names are separate from technical labels and files,
+so renaming a Scene changes neither. The target is **Story Combined v1**, the approved
+Design Lab layout `story-revamp` / `combined` (revision `combined-v1`) from issue #82. The [revision notes](design/story-revamp/README.md#post-delivery-revision)
+hold its detailed decisions, samples and stage sizes, and the
+[3A interaction design](tasks/reference/phase-3a-story.md#story-interaction-design)
+covers moving, unwrapping and deleting branches.
 
 ### Layout
 
-The centre column uses a resizable vertical split between Editor Preview and Beats.
-The default is approximately **52% preview / 48% Beats**. Preserve the project's aspect
-ratio inside the preview allocation rather than allowing a 16:9 canvas to consume all
-available height. The default layout should keep both areas immediately useful;
-approximate Phase 1 minimums are 280–320 px for preview and about 300 px for Beats,
-subject to implementation/accessibility testing. Persist the split per project/
-workspace.
+- A 16:9 game stage sits beside the selected-beat editor in a right-hand sidebar.
+  Authoring forms stay outside the stage; only the game's dialogue box and choice menu
+  overlay it. The stage keeps room for future character dragging.
+- Below the stage, the Branch path sits above a bottom panel that switches between
+  Tracks (the default) and Reel. Both show the same story, selection, open branches and
+  insertion target, and switching keeps drafts.
+- Tracks has one column per beat and lanes for Beat, Background, Characters, Words,
+  Sound and Flow. Reel shows beat cards in order, including the beats around a branch.
+  Neither shows elapsed time, playback or keyframes.
+- Writing focus hides the stage and keeps the editor and Branch path. Its Tracks view
+  keeps every lane on wide windows, with a taller Words lane.
 
-| Area | Responsibility |
-| --- | --- |
-| Editor Preview | Scene-local supported state through the selected beat; selection and staging context |
-| Beats | Primary high-frequency authoring surface; ordered compact/expanded beat rows |
-| Inspector | Less-frequent beat/staging properties; never the only way to write normal dialogue |
+### Branches in a scene
 
-Writing- and staging-focused presets may be added later; the Phase 1 requirement is the
-resizable split and sensible sizing behavior.
+- The Branch path only switches branches. Each open condition shows its number, its
+  If test and a two-way switch in its arm colours. Choice options show only their
+  number unless open.
+- The path wraps instead of scrolling sideways, and each condition or Choice stays one
+  unit.
+  Each extra row takes about 30 px from the stage, up to three rows; beyond that the
+  path scrolls.
+- Tracks and Reel draw a route line in the arm colour above each open branch, with a
+  light tint on its columns. Slim `+` markers add the first beat, the last beat or a
+  beat after the condition. An empty branch or option is one beat-wide slot holding
+  its name, where it continues and Add a beat.
+- Every insertion names its body and position, and replacing an ending names what it
+  replaces.
 
-### Beats as the primary editor
+### Beat editors
 
-Unselected beats are compact. Selecting a beat expands it in place into the editor
-needed for its common properties. Normal dialogue/narration editing stays in the Beats
-area rather than opening a modal or forcing constant use of the right inspector.
-
-The bounded Phase 1 visual beat set is:
-
-- Background/scene
-- Show character
-- Hide character
-- Change character appearance
-- Placement/transform reference
-- Dialogue
-- Narration
-- Play music
-- Stop music
-- Play sound
-- Transition reference on the relevant visual change
-- Set simple variable
-- Choice
-- Jump
-- Return/end
-- Custom/unsupported source region
-
-Hovering between safe beats exposes a subtle insertion affordance; a permanent
-`Add Beat` action opens a grouped picker such as Write, Stage, Flow, State, and Audio.
-Normal supported beats have drag handles plus keyboard-accessible Move Up/Move Down.
-Moving across an opaque custom-code boundary is refused unless safety can be proven.
-
-Choice, Jump, and Return/end are terminal alternatives. Adding Choice or Jump to a
-Scene that ends in Return replaces that terminal Beat; it does not place flow after an
-unconditional transfer and does not leave an unreachable Return behind. The terminal
-Beat stays last and is not removable or reorderable through Scene authoring.
-
-### Dialogue workflow
-
-Dialogue is the highest-frequency action and must be efficient:
-
-- speaker is searchable/keyboard accessible;
-- narration is an explicit mode rather than a fake Character;
-- normal `Enter` creates a newline;
-- `Ctrl/Cmd+Enter` commits the current natural edit burst;
-- `Shift+Ctrl/Cmd+Enter` commits and creates the next Dialogue beat;
-- the current speaker may carry forward as a convenience and remains immediately
-  changeable;
-- typing is grouped into a short-lived edit buffer so one natural typing burst becomes
-  one semantic transaction/undo step rather than a disk write per character.
-
-Appearance/staging changes remain explicit beats. A Dialogue shortcut such as
-`Change appearance…` may insert a visible Change Appearance beat immediately before the
-dialogue; it must not secretly generate a `show`/appearance mutation as an invisible
-side effect of the line.
-
-### Editor Preview
-
-Selecting Beat N reconstructs deterministically supported scene-local state from the
-start of that Scene through Beat N. Phase 1 reconstruction includes current background,
-visible character appearances, placements, simple variable assignments, basic music
-state, and selected dialogue/menu where known. It does not attempt arbitrary
-branch-global state reconstruction.
-
-If Python, unsupported source, or runtime-only behavior makes the state uncertain, the
-preview preserves provenance for facts it can still prove, clears affected values that
-are no longer proven current, and displays an explicit `Partial preview` /
-`Runtime-dependent state required` indicator rather than guessing.
-
-Selecting a visible Character in the preview must distinguish current state from the
-beat that contributed it. Offer actions such as `Edit Beat 2` and `Add change here`;
-do not silently edit an earlier beat merely because the Character remains visible at
-the current playhead. `Add change here` inserts a new explicit staging beat before the
-current beat. The insertion form retains that Beat ID while selection changes; a stale
-anchor refuses through the existing revision/identity guards instead of appending.
-A Background Beat emits `scene` on the default layer, so Preview clears visible
-Characters and their layer uncertainty at that Beat. Music and variable uncertainty
-from Custom Code remains explicit.
-
-Phase 1 placement exposes Left, Centre, and Right preset references. Do not offer
-arbitrary drag positioning that implies a freeform transform editor. Preview navigation
-does not repeatedly start/stop audio; audio beats have explicit audition controls.
-
-### Backgrounds, appearances, placement, audio, and transitions
-
-Asset pickers should be visual where useful, including background/appearance thumbnails
-and an Import action. Character appearance and placement are references to extensible
-models, not raw filenames or hard-coded coordinates. Phase 1 appearance UI exposes
-expression with implicit default outfit/pose; future outfit/pose/layered-image support
-extends the same model.
-
-Initial placement presets are Left/Centre/Right. Initial transitions may be None,
-Dissolve, and Fade. Initial audio controls cover play/stop music and play SFX plus
-explicit audition. These are narrow Phase 1 UIs over extensible transform, transition,
-and audio references intended for later Timeline/advanced staging work.
-
-Phase 1E thumbnails and preview images are resolved by stable Asset ID through the
-current project session. The renderer never receives a project path or `file://` URL.
-It keeps only content-keyed memory/object-URL state, cancels obsolete view generations,
-and revokes every URL on invalidation or project/session switch. Selecting an audio
-Beat never plays it; only the labelled audition action requests and starts audio.
+- Backgrounds and expressions use the [media picker](#media-pickers). Position is a
+  Left/Centre/Right switch. Selecting an audio beat never plays it; only the labelled
+  audition action plays audio.
+- Narration is its own mode, not a fake Character. In dialogue, Enter adds a line
+  break, Cmd/Ctrl+Enter commits the typing burst as one Undo step, and
+  Shift+Cmd/Ctrl+Enter commits and starts the next line with the last speaker on the
+  current path.
+- Staging changes are explicit beats. A dialogue line never hides a `show` or
+  appearance change.
+- Selecting a character or the background on the stage names the beat that set it, and
+  offers to edit that beat or add a change before the current beat in the same body. It
+  never edits the earlier beat silently.
+- Source the editor cannot represent is a protected Custom Code beat with its reason
+  and Edit in Source. Moves never cross it unless the source layer proves the move safe.
+- A pending beat edit has Commit and Cancel and blocks navigation that would lose it.
+  Failed commits keep the text and focus.
+- Set variable uses the [equation row](#arithmetic-equation-row) and conditions use the
+  [rule builder](#condition-rule-builder).
+- Add a beat is a [pick-one dialog](#pick-one-dialogs). Its destination line names
+  where the beat lands and any ending it replaces.
 
 ### Choices
 
-Choice is visually first-class in Beats. Each option has text and a destination Scene.
-The acceptance fixture uses two options, but the data/UI should support an arbitrary
-list of unconditional options rather than hard-code exactly two. Conditions are later
-work.
+- Options are numbered blocks in their arm colours. Each option owns ordered beats,
+  stored like a condition branch, so its path appears in the Branch path, Tracks, Reel
+  and Writing focus. Options move up and down with their bodies, and Undo restores the
+  order.
+- Then edits only the body's last beat: Continue after the Choice, Go to a scene (Jump),
+  Repeat this Choice or Return. Call is an ordinary beat inside the body.
+- A destination is a scene card (opening background, name and first line) that opens a
+  scene sheet with New scene.
+- An option's condition reads as one line, "Always available" or "Only when ...", and
+  opens the rule builder on request. A guarded option is hidden when false by default,
+  or shown disabled. The Choice's Picked options setting is Show normally, Mark picked
+  or Hide picked. Options with the same text keep separate identities.
+- The prompt is narration or a Character line shown with the options. When no option
+  can be picked, the story continues after the Choice and records no pick.
+- Focusing or pointing at an option marks its button on the stage.
 
-The destination picker lists Scenes and includes `Create New Scene`; creating a Scene
-from a Choice both creates the destination and establishes the same semantic edge used
-by Branches. Scene and Branches must not maintain separate branch truths.
+### Stage preview
 
-### Variables
+Selecting a beat shows the scene-local state through that beat: background, visible
+characters and appearances, placement, music, simple variables and the current line or
+menu. A new Background clears characters. State the editor cannot prove is labelled
+partial or unknown, never guessed. Preview choices for branches and options are manual
+assumptions; they are separate from the editing target and never saved or added to
+Undo. The [preview boundary](ARCHITECTURE.md#preview-boundary) owns reconstruction and
+media rules.
 
-Phase 1 visually supports `bool`, `int`, and `string` definitions and simple assignment.
-The Set Variable beat accepts values the editor can represent. Arbitrary expressions
-such as computed Python assignments remain Source/custom code rather than being
-misrepresented visually.
+### Not yet in production
 
-### Custom/unsupported source
-
-Unsupported source appears in sequence as a protected Custom Code beat with a reason/
-warning. It can be selected and inspected, but Phase 1 does not freely drag/reorder it
-or allow safe-looking operations to cross its boundary unless the source transaction
-layer can prove the operation. Phase 1F makes `View in Source` select the exact current
-mapped range; a Source cursor maps back only when containing-Beat ownership is proved.
-
-### New Scene state
-
-A new Scene is immediately valid and explicit, normally ending with a visible
-Return/End beat. Empty-state helpers offer Background, Character, Dialogue, Narration,
-and other supported additions before the end. The generated first project is runnable
-before the user adds content.
+Production Story still has the earlier layout, with the preview above a beat list.
+Its Choice is jump-only and ends the scene, and options have no body. Option bodies,
+prompts, hidden or disabled options, Repeat and Picked options need the model and
+runtime work in [issue #98](https://github.com/Caldwell-41/Renpy-editor/issues/98).
+Arithmetic and the decimal type need [issue #87](https://github.com/Caldwell-41/Renpy-editor/issues/87).
+Until a capability exists, the editor says it is not built instead of showing a
+working-looking control.
 
 ## Source workspace
 
-Source is a proper centre tab rather than an embedded `Visual/Split/Source` toggle in
-the Scene workspace. It provides syntax-aware source, scene/beat anchors, mapped-range
-highlights, custom-code boundaries, staged/conflict information, and diagnostics.
+Source is its own centre tab, not a toggle inside Story. It uses CodeMirror with file
+tabs, Ren'Py highlighting and find and replace in the current file. A tab groups the
+filename, draft marker and Close; overflow adds scroll controls and an Open files list.
 
-Typing creates a bounded, session-local draft. It is accepted only by Save Source or
-Source-focused `Ctrl/Cmd+S`; tab/workspace navigation keeps the draft without writing.
-Both Save entry points use the same document-bound executor. During its short retention
-and acceptance barrier the editor and conflicting navigation/actions are disabled
-without replacing the text control, so selection and native draft undo survive a
-refusal. Failed retention preserves the newest local text for retry, copy, or an
-explicitly confirmed discard.
-Dirty drafts retain `pendingValidation` and show `Unsaved Source draft` with a
-crash/restart warning. Close, project switch, and normal exit offer Save All / Discard All / Cancel. Save All preflights every draft
-before its one recoverable multi-mutation transaction, so a refusal writes nothing.
-Text-focused undo/redo stays native to the draft; committed project history remains a
-separate revision-checked action.
-
-Selection is bidirectional: `View in Source` opens the exact mapped range; supported
-direct source edits update the Scene representation after the shared transaction/source
-path succeeds; Source can navigate back to the owning Scene/Beat. Source-only mode never
-hides whether a range is supported. External edits are parsed against the last
-revision; supported changes update visual views and overlapping/unsafe changes enter
-explicit reconciliation. A conflict keeps draft and external text. Apply Both appears
-only for proven non-overlapping exact patches and shows the combined result first;
-otherwise the user may copy the draft, explicitly reload/discard, or cancel.
+Typing makes a session-local draft. Only Save Source or Cmd/Ctrl+S in Source accepts
+it; changing tabs or workspaces, or closing a tab, keeps it. A dirty file shows
+Unsaved Source draft with a crash warning. Close, project switch and exit offer Save
+All, Discard All or Cancel. Saving keeps the caret, selection and native undo, including
+after a refusal. View in Source selects the exact mapped range, and Source goes back to
+the owning beat only when ownership is proven. An external change to a dirty file keeps
+both texts; Apply Both appears only for proven non-overlapping changes and shows the
+combined result first. [Source acceptance](TRANSACTIONS.md#phase-1f-source-acceptance-and-reconciliation)
+and [ADR 0007](adr/0007-shell-save-command-ownership.md) own the rules.
 
 ## Branches workspace
 
-Phase 1 Branches shows the basic Scene/label/choice graph using the same semantic edges
-created in Scene. Individual dialogue lines are excluded from the default graph. A
-Choice edge navigates back to its originating Choice beat and destination Scene.
+Branches draws the saved Scene graph from the same flow Story writes, without dialogue
+lines. The layout is deterministic and layered, with rounded orthogonal connectors,
+arrowheads and route captions that keep their full text in details. An entry badge
+appears only when the runnable `start` label proves it, and a missing or unknown
+destination never gets an invented arrow. Arrow keys pan, `+` and `-` zoom and Home
+fits the graph, with matching buttons.
 
-Large-story virtualization, stable layout, search, minimap, scoped subgraphs, advanced
-reachability/state diagnostics, and test/run-from-node remain architectural requirements
-for later maturity but must not be falsely presented as Phase 1-complete features.
+The graph shows the last observed saved state with a status: Checking disk, Checked at
+a time, Updated from saved edits or Could not refresh. A failed refresh keeps the last
+graph and says so. Edit Choice or Jump opens the Scene controls. A graph over the
+limits offers Source instead of truncating. [ADR 0010](adr/0010-local-project-safety-and-observed-flow.md),
+[observed flow](ARCHITECTURE.md#observed-flow-implementation-g1-obs) and the
+[flow projection](DATA_MODEL.md#shared-flow-projection-1g1) own the rules.
 
-## Character supporting surface
+## Characters, Assets and Variables
 
-The selected manual reference library follows the user's 2026-10-09 correction:
-select a Character card/lore entry, edit fields directly, Save changes or Discard
-changes. Creation is a clearly named workspace action (New character card / New lore
-entry); new forms use Create card / Create lore entry and Cancel. No Edit unlock or
-manual Approve/Reject/Supersede controls. Save is one undoable metadata operation.
-Optional source/link/knowledge fields expand on demand. The
-[revised A/B layouts](design/manual-reference-library/README.md) were approved;
-the implementation uses A, list beside directly editable fields;
-mockups do not establish native acceptance or change runnable Character definitions.
+These libraries share one pattern: a filterable grid or list, whole-row selection, an
+optional inspector with Close, and create or edit dialogs with guarded Cancel, Escape
+and focus return. Technical names follow the
+[technical-name rule](DATA_MODEL.md#authority-and-identity), are fixed after creation
+and are labelled that way.
 
-Phase 1 Character fields are deliberately small:
+- **Characters.** Rows show a thumbnail or initial. Fields are technical name, display
+  name, dialogue colour and default appearance. The image list is called Appearances;
+  Add Appearance imports an image and asks for an expression name. Previewing an
+  appearance never changes the default. Character cards and the project Lorebook are
+  edited directly with Save changes and Discard changes, as set out in the
+  [reference contract](REFERENCE_LIBRARY.md#walkthrough-redesign-contract--2026-10-15).
+- **Assets.** Categories are All, Backgrounds, Character images, Music and Sound
+  effects, with a visible drop or Browse area. Both open the same staged import dialog,
+  which previews each image with its size and fields and writes nothing until
+  confirmed. Failed rows stay; successful files are not retried. Assets does not play
+  audio.
+- **Variables.** A table shows name, type, initial value and Edit, plus the Set
+  variable beats that assign each variable. Types are yes/no, whole number and text.
 
-- technical variable/ID;
-- display name;
-- dialogue colour;
-- default appearance;
-- internal stable UUID/source definition mapping.
+## Assist and AI settings
 
-The user-facing visual list is named **Appearances**, not Expressions/Sprites. In
-Phase 1 `Add Appearance` imports/copies an image and asks for an expression name; outfit
-and pose are implicit defaults. Underlying appearance attributes are extensible so
-future outfit, pose, hairstyle/accessory, layered-image, animated, or other rendering
-support extends the model rather than replacing it.
+Assist is an action panel beside the writing, not a permanent chat. Story offers
+Rewrite dialogue, Continue Scene, Edit Scene, Draft Character card and Draft lore
+entry, and each Chapter offers Draft Scene. The nonmodal panel names its target and
+moves through Review complete send, Generate proposal and review. Before sending it
+shows the destination, model and locality, selected references and exclusions, the
+effective prompt and the token budget, with the full request in details. Review leads
+with plain prose and shows exact Source and metadata changes on request. Each action
+has its own accept label, and acceptance is one transaction with Undo. Generated cards
+and lore entries save as proposals, and approving one is a separate decision. Focus
+enters Assist and returns to the control that opened it.
 
-Phase 1D implements this as a restrained project-sidebar destination with a Character
-list, creation form, immutable-technical-name copy, dialogue colour, per-Character
-Appearances rows, native `Add Appearance` import, and default selection. Existing
-semantic tokens, border-separated rows, visible focus, labels, and reduced-motion
-behavior remain in force; no Scene staging controls are present.
+Settings → Application → AI providers sets up a profile in this order: name, endpoint
+(private-network HTTP needs a separate opt-in), API key through a native dialog,
+Connect, model, then Save profile. The key never returns to the web view. Opening or
+saving Settings sends nothing; Test response format is a separate explicit request.
+The header's Studio request panel sends only a fixed test message. Current project →
+System prompts edits each action's prompt, with Restore baseline and Undo.
 
-New Character technical names and Appearance expression tokens suppress automatic
-capitalisation/spelling correction and normalize surrounding whitespace and ASCII
-capitals before submission. The fixed technical token uses lowercase letters,
-numbers and underscores, begins with a letter and is limited to 64 characters;
-display names keep their case. Invalid input stays available with actionable feedback.
+[PROMPTS_CONTEXT](PROMPTS_CONTEXT.md) owns each action,
+[REFERENCE_LIBRARY](REFERENCE_LIBRARY.md) owns cards and lore,
+[ADR 0011](adr/0011-ai-settings-secrets-and-reference-storage.md) and
+[ADR 0013](adr/0013-provider-request-and-transport-contract.md) own keys, providers and
+model settings, and the [Phase 2 brief](tasks/active/phase-2-initial-llm-assistance.md)
+owns current Settings scope.
 
-## Asset supporting surface
+## Runtime and diagnostics
 
-Phase 1 imports by copying files into the project. Assets are grouped sufficiently for
-backgrounds, Character appearances, audio, and project/UI files, with visual pickers
-where useful. Missing/duplicate checks are required; external absolute asset references,
-advanced tagging/search, conversion/optimisation, and bulk management are later work.
+Validate, Run and Stop stay in the header. Validate compiles, then lints only if
+compilation succeeds; Run starts the normal entry point without an extra lint. Before
+either, unsaved Source offers Save All, Use saved revision or Cancel, and pending Scene
+input offers Return to Scene, Use saved revision or Cancel. Nothing commits silently.
+Inspecting or editing a project never runs it.
 
-Phase 1D groups Backgrounds, Character appearances, Music, and SFX. Each row exposes
-the safe project-relative filename, normalized Ren'Py discovery name, and status.
-Import is one explicit native-picker action; linking, generation, media editing, and
-bulk processing remain absent.
+The Runtime drawer shows status, output, launch details and SDK and trust controls on
+demand and survives workspace changes. Runtime state, launch revision, file
+freshness and save state have separate labels. A reported runtime error stays visible
+even when Ren'Py exits with 0, and closing the drawer does not stop the game. Scripts
+stay editable during play, asset changes need Stop first, and Stop then Run loads the
+latest saved scripts. Closing the project or app during play offers Stop and continue
+or Cancel. SDK output is inert text. A diagnostic location opens Source only after the
+checks in the [diagnostic projection](DATA_MODEL.md#runtime-diagnostic-projection-1g2b).
+[ADR 0008](adr/0008-controlled-runtime.md) and
+[runtime presentation](ARCHITECTURE.md#runtime-presentation-and-diagnostic-authority-1g2b)
+own the rules.
 
-Asset import suggestions derived from filenames use the same lowercase technical
-token contract. Edited Ren'Py names and expression tokens are normalized on submission;
-uppercase filenames and display labels are preserved. This does not rename existing
-authoritative source symbols or imported assets.
+<a id="screenui-designer"></a>
 
-## Variable supporting surface
+## Screens designer
 
-The Phase 1 Variable surface creates/edits `bool`, `int`, and `string` variables with a
-default value and source definition mapping. Reads/writes can be surfaced where already
-known, but advanced state simulation, constraint systems, and computed-expression
-builders are deferred.
+Screens is a hierarchy and constraint editor, not a freeform drawing canvas. Authors
+choose a screen, design it and connect its actions.
 
-Phase 1D provides the typed list/create flow for `bool`, `int`, and `string` defaults.
-Technical identifiers are labelled fixed after creation. Arbitrary expressions,
-computed defaults, conditions, and state simulation are absent.
+| Component hierarchy | Constraint canvas | Properties and source |
+| --- | --- | --- |
+| Frames, containers, text, images, buttons, bars, grids, viewports, components | The game resolution with layout guides and interaction states | Layout, style and action fields; synchronised screen language; protected custom regions |
 
-## Validation, run, Git, and persistence
-
-Loomlight performs cheap continuous checks it can know confidently, such as missing
-assets, invalid generated labels, missing choice destinations, and references to
-removed Characters/Variables. Explicit `Validate` invokes the pinned SDK for
-authoritative compile/lint diagnostics and navigation.
-
-Phase 1 provides normal `Run Game` from the project's standard entry point. Correct
-`Run From Here` is deferred until state simulation can establish effective prior state.
-A local Git repository may be initialised during project creation (checked by default),
-but new status/diff/checkpoint controls belong to the deferred
-[optional Git milestone](tasks/active/optional-local-git.md), not Phases 1–3. Do not add
-a required Git panel or checkpoint step to initial-release authoring or acceptance.
-
-Validate and Run use one input/revision preparation path: retain Source drafts and
-uncommitted Scene forms; explicitly save/commit through existing commands, use the
-saved revision with input retained, or cancel. Run does not add a hidden lint cycle.
-During play supported script editing/saving continues; saving does not automatically
-restart or reload the game. Show launch revision separately from persistence/diagnostic
-state. Changing script references to existing assets is allowed; importing, replacing,
-moving/renaming or deleting asset files requires Stop first, including asset-changing
-undo/redo or compound operations. Existing asset browsing/preview stays available.
-Do not offer live asset refresh. Stop then Run deliberately starts the latest saved
-script revision; external file changes do not become a promise of isolated runtime input. Conflicting file lifecycle/history operations offer
-Stop and retry; do not lock the entire editor for the duration of play. The detailed
-[1G.2a proof](tasks/archive/2026-10-06-phase-1g-branches-runtime-git.md#5-1g2a--runtime-and-trust-foundation)
-is required before claiming this behaviour works.
-
-If an external change affects one Scene file, block unsafe writes/reconciliation for
-that file/Scene rather than freezing unrelated project files when they can remain safe.
-Undo/redo spans the shared transaction stream across visual/source edits but stops at
-external revision boundaries rather than overwriting newer work.
+The canvas shows images from the pinned-SDK helper. Unsupported content shows an
+explicit unavailable state, and an older image is marked stale and gives no editing
+geometry. Number and resize drafts render before acceptance; canvas-only sample text
+and button states never change source. Fit and 100% scale the same composition.
+Unsupported code stays in place and marks only its region as partly visual. Story
+offers Show screen, Hide screen and Call screen for owned parameterless screens; Call
+waits for Finish interaction. The [Screens contract](tasks/reference/phase-3b-screens.md)
+owns requirements, including its
+[creation and reuse controls](tasks/reference/phase-3b-screens.md#implemented-creation-and-reuse-controls),
+and [ADR 0021](adr/0021-separate-renpy-canvas-helper.md) owns the canvas helper.
 
 ## Later workspaces
 
-### Proposed Phase 2–3 interaction direction — 2026-10-02
+- **Timeline** authors visual-novel staging, not video compositing, with tracks for
+  background, characters, camera, effects, music, ambience, sound, voice, dialogue and
+  movies. Static staging happens on the Story stage: drag, aspect-locked resize, and
+  position, anchor and scale fields, without keyframes. The
+  [3C contract](tasks/reference/phase-3c-timeline.md#selected-staging-native-media-and-idle-playback)
+  owns it.
+- **State and Run From Here** label reachable, saved, synthetic and contradictory
+  states distinctly and show the effective variables and facts before launch.
+  Development content never ships in a release. The
+  [3D contract](tasks/reference/phase-3d-state-run.md) owns it.
 
-The [Phase 2 interaction journey](tasks/evidence/phase-2-execution.md#18-proposed-llm-screen-and-interaction-design)
-places reviewed assistance next to writing, extends Characters with cards, introduces
-Lorebook, and exposes prompt/context/response controls. Its
-[four generated LLM screen concepts](design/phase-2-llm/README.md) illustrate preparation,
-semantic proposal review, reference editing and AI settings, with explicit schematic
-corrections. Approval and inclusion remain separate, context budget includes output
-and margin, and unaccepted proposals are transient. The
-[Phase 3 Story interaction design](tasks/reference/phase-3a-story.md#story-interaction-design)
-keeps the Beat list and adds expandable, labelled conditional bodies, explicit insertion
-parents and continuations, returning Call rows and an honest manual branch preview.
-Its [generated concept](design/phase-3-story/README.md) uses a saved actual Story UI
-screenshot. The same brief outlines Screens, Timeline and state-panel journeys.
-These are proposed later-phase designs, not accepted replacements for the existing
-Phase 1 shell or proof of implemented behavior. The task briefs own interaction details;
-the accepted theme, shared controls and pending Phase 1 corrections remain authoritative.
+## Accessibility and resolution checks
 
-
-### Screen/UI designer
-
-The selected [Help-screen outcome](tasks/active/help-screen-production.md) implements
-a limited production Choose/Design/Connect layout for existing custom screens.
-Existing literal width/height edits use Apply/Cancel and shared history. The selected
-[L17 proof](tasks/evidence/canvas-rendering.md) replaces the approximate canvas with
-pinned-SDK helper images for its bounded literal composition. Unsupported content
-shows an explicit unavailable state. An older image is marked stale and supplies no
-editing geometry. Numeric and resize drafts render before acceptance; canvas-only
-text and normal/hover button samples do not change source or runtime values. Fit and
-100% scale the same internal composition, with a separate resolution sample selector.
-Earlier Help Mac/Windows functional proof remains separate; helper fidelity and
-native presentation remain unaccepted. For implementation or acceptance
-of canvas rendering, follow [canvas agreement with Ren'Py](tasks/reference/phase-3b-screens.md#canvas-agreement-with-renpy)
-and [ADR 0021](adr/0021-separate-renpy-canvas-helper.md).
-The inventory below remains the full Screens direction.
-
-[L01](https://github.com/Caldwell-41/Renpy-editor/issues/34) adds New blank screen
-under Choose. Its named dialog accepts a source name, creates through the shared core
-transaction and selects the owned root. Cancel/Escape writes nothing; invalid,
-colliding or stale input remains in the dialog. View in Source selects the accepted
-declaration, while shared Undo/Redo and reopen preserve ownership. An unresolved
-owned selection names its original file and does not select a neighboring screen.
-The dialog follows the approved modal pattern; the existing limited editor layout
-still has the previously recorded flow-v1 differences.
-
-The selected [L08/L09 implementation](tasks/evidence/components-and-help-panel.md)
-extends New screen with explicit Blank and Help starters. Help requires an available
-project UI image; no image keeps the draft and blocks Help creation. Its title,
-explanation, image and Close remain ordinary editable nodes after creation.
-Use in Story hands the selected owned Panel to the existing Story workspace without
-writing a Beat. The author explicitly adds Show screen or Hide screen there.
-Unavailable stable targets remain unresolved rather than following a reused name.
-
-Supported groups can become owned parameterless components and be inserted under
-an explicit parent in another screen. Shared Apply reviews only changed fields and
-lists affected screens. Multiple uses on one screen also expose Make a copy for
-the selected use. Destination inspection in Add component does not navigate the
-workspace; Cancel retains its screen, element and focus, and only accepted insertion
-selects the destination use. Make a copy accepts the saved definition first; pending
-edits move only after the new definition, revision and child IDs are verified.
-Apply is a second history entry. A failed refresh acknowledges the copy, retains
-input and blocks Apply until Reload copy succeeds. Cancel discards pending edits
-while preserving the accepted copy. These controls follow approved A2 `refined-v1`;
-the linked evidence owns remaining visual, target and acceptance limits.
-Recovery includes fields first edited after Copy. Their existing draft owners track
-the original target until verification; Reload transfers those latest drafts and
-Cancel discards them without leaving edits attached to the shared definition.
-
-| Component hierarchy | Constraint canvas | Properties/source |
-| --- | --- | --- |
-| Frames, containers, text, images, buttons, bars, grids, viewports, components | Selected resolution/aspect preview with layout guides and interaction state | Layout/style/action fields; synchronized screen language; protected custom regions |
-
-This remains a hybrid hierarchy-and-constraint editor, not a freeform drawing canvas.
-Unsupported code stays at its source location and marks only the affected screen region
-partially visual.
-
-Selected Phase 3 Story integration exposes **Show screen**, **Hide screen** and
-**Call screen** with a picker for owned parameterless screens. Show leaves a panel
-visible while Story continues; Hide dismisses it. Call waits for **Finish interaction**
-before continuing at the following Beat. Keep screen calls distinct from Scene calls;
-show the selected target and preserve draft/history behavior. Dynamic arguments and
-captured return values are deferred. [3B.2a](tasks/reference/phase-3b-screens.md#4-3b--supported-screen-designer)
-owns source, action-context and normal-play proof. Show/Hide are implemented in the
-selected L09 branch and await its acceptance; Call/Finish remains later work.
-
-### Animation/audio timeline
-
-| Track list | Time canvas | Inspector/transport |
-| --- | --- | --- |
-| Background; character layers; camera/transforms; effects; music; ambience; SFX; voice; dialogue; movie | Clips/events, keyframes, transitions, synchronized selected beat | Time/value/easing/media; play, scrub, loop; generated Ren'Py preview |
-
-The Timeline authors VN staging, not arbitrary video compositing. Phase 1's appearance,
-placement, transition, audio, and Beat abstractions are intentionally designed to feed
-this workspace later.
-
-Selected 3C interaction: click a character in Story Preview, drag it and resize via
-aspect-preserving handles, or use position/anchor/scale fields and keyboard controls.
-Static staging does not require keyframes or Timeline setup. The saved transform uses
-game virtual coordinates, with editor zoom kept separate. The Appearance picker adds
-qualified native animation choices and explicit Play once/Loop/end controls. An idle
-continues while dialogue waits and stops on hide/replacement; base placement edits
-preserve its animation binding. Preview play/stop is deliberate, with native Preview
-in Ren'Py when the WebView cannot faithfully decode that profile. Import refusal lists
-supported exports; no GIF/video conversion action is offered. The
-[3C contract](tasks/reference/phase-3c-timeline.md#selected-staging-native-media-and-idle-playback)
-owns exact format, source/persistence and runtime proof requirements.
-
-The [agreed implementation sequence](tasks/reference/phase-3c-timeline.md#agreed-implementation-order-and-source-bindings)
-delivers static controls, PNG/ATL idles, native looping video, prepared transparency
-and play-once/end choices in order. Frame/video content shares the same placement
-controls. Play once exposes a declared end state: disappear, hold last frame or show
-a supplied still. An idle is shown once across dialogue; speak-only/text-reveal triggers
-remain later scope. Embedded playback is profile-dependent, with an explicit real
-Ren'Py preview when unavailable; it does not claim native parity from a browser alone.
-
-### State simulation and run from here
-
-Reachable, saved, synthetic, and contradictory states will use distinct labels/icons.
-Before a later run-from-here launch the user sees effective variables, decisions,
-day/time, and known facts. Development harness content is visibly non-release and
-cannot be packed into a game distribution.
-
-### LLM operation flow
-
-LLM remains an action surface rather than a dominant permanent chat. Before send, show
-provider, endpoint class, model, local/remote status, selected context/exclusions,
-estimated size, and private/adult remote-send warning. Output remains untrusted
-structured data reviewed through semantic/file diffs.
-
-Planned Phase 2 reference editors expose Character cards and a searchable/filterable
-lorebook, manual editing and Generate/Update actions, approval/stale state and explicit
-context inclusion. Settings exposes per-action system-prompt editing and Restore
-baseline, with customized/baseline version indicators. Context budget and maximum
-response tokens are editable per provider/model with visible request overrides.
-Before Send, show the effective prompt, selected card/lore entries and token breakdown;
-over-budget input requires a visible correction. Prompt reset is undoable and does
-not reset references, credentials or size settings. These controls are not Phase 1 UI.
-
-Planned AI Settings separates Application connections from Current project prompts.
-The user's 2026-10-12 Studio-only amendment offers one saved credential reused across
-sessions; session-only mode and generic provider setup are excluded. Native entry never returns key text
-to the WebView. Report incomplete removal and explain provider revocation separately.
-Private-network HTTP needs unencrypted-transport opt-in. Project prompts show saved/
-installed baseline versions, text comparison and undoable Restore baseline. No shared
-personal template library in v1. References show approved and proposed revisions,
-stale/missing citations, basic Scene/route scope and written knowledge/spoiler notes.
-Selected-route context and AI ending/connection changes are user-deferred beyond Phase2.
-Explicit Test setup, saved Temperature/Top-p and verified HTTPS now have local
-implementation; qualification and final human/UI acceptance remain separate. These
-are Phase 2 controls, not Phase 1 claims.
-
-The selected [project prompts/context surface](PROMPTS_CONTEXT.md) implements
-**Settings → Current project → System prompts / Context preparation** for Dialogue
-rewrite. It offers explicit project-local Save, current/installed baseline comparison,
-Cancel/confirmed restore and shared Undo/Redo. Unsaved prose survives tab changes and
-blocks leaving until Save/Discard. Save/refusal restores enabled editor focus, and an
-unsuccessful initial load offers explicit Reload project prompts with its diagnostic.
-Exact approved card/lore revisions, dependencies/exclusions, read revisions, component
-bytes and full serialized inert payload are inspectable. Task and input/output/capacity
-values are explicit preview overrides; stale/budget refusal retains author input.
-This selected preparation has no Send or proposal application and leaves the remaining
-Phase 2 screens planned.
-
-The first remembered Studio slice adds **Application → AI providers** within the
-existing Settings dialog. Choose a saved profile or New Studio profile, edit the
-name/base endpoint/exact model ID and token defaults, then **Save profile**.
-Configured capacity stays explicitly unverified. Private-network HTTP needs a
-separate unencrypted-transport opt-in; saving or opening Settings never discovers
-models. Native Enter/Replace credential returns status only; removal explains that
-it does not revoke the provider key. Failed cleanup has a visible explicit retry.
-The selected temporary Mac mode discloses encrypted local files plus a saved,
-unencrypted random unlock key; other software under the same login may decrypt it.
-Healthy compatible storage is intended to survive normal quit/reopen and app replacement
-without native re-entry. The bounded public synthetic packaged Mac fixture passed. Missing/damaged
-storage says **Your saved API key couldn't be read. Re-enter it to restore AI access.**
-Condition-specific detail explains key loss, uncertain authentication, access problems
-or newer-format incompatibility. **Re-enter API key** opens native entry; **Retry** only
-reloads saved state. Unsupported newer formats disable entry and retain data.
-Errors affect the relevant AI credential, preserving profile settings and game editing.
-
-Native persistence failure retains the same secure input for explicit **Retry save** or
-**Cancel**. Each retry reloads and checks the target/origin; uncertain publication is
-resolved before another write. Cancel clears native temporary input. **API key saved**
-means encryption, read/decrypt verification and profile publication succeeded, without
-claiming provider validity. Cleanup failure separately says **API key saved; cleanup
-pending**, preserving the new reference; reload failure after confirmed save keeps both
-success and the visible **cleanup pending** qualifier and requires read-only reload
-before another mutation. Deferred native cleanup
-has an explanatory retained-ownership message without a Keychain retry action.
-All old/native read/delete/import/cleanup remains deferred and performs zero Keychain
-calls. Mandatory biometric integration, Keychain recovery and Apple Development signing
-remain deferred; no automatic migration or OS trust/ACL changes.
-**Refresh models** performs one authenticated GET for the saved configuration;
-unsaved edits disable it and saved revision changes invalidate availability.
-The status says discovery only, without implying generation readiness or capacity.
-The temporary Mac file adapter/native entry are implemented locally; bounded synthetic
-packaged Mac qualification passed on its recorded inputs. Windows has an app-owned
-native password dialog and Credential Manager adapter; bounded packaged results belong
-in the Windows ledger. Its dialog discloses same-login storage, provider revocation and
-the OS 2560-character limit. Failed saves retain the field for Retry save/Cancel;
-stale profile/origin changes refuse switching. Cleanup pending remains saved, including
-reload-required responses. Both-target slice acceptance remains pending.
-Session/no-auth/generic/project prompts remain outside this slice. The
-[approved remembered-profile mockup](design/phase-2-llm/studio-remembered-profile-light-v1.png)
-is a visual reference, not native/provider evidence; shared theme tokens and the
-existing shell determine light/dark/compact behavior.
-
-## Resolution and accessibility checks
-
-- Author at project resolution (default `1920×1080`) while previewing alternative
-  window sizes/aspects without changing canonical project settings.
+- Author at the project resolution (1920 × 1080 by default) and preview other window
+  sizes without changing project settings.
 - Full keyboard traversal, visible focus, labelled controls, logical reading order,
-  resizable text/panels, and reduced-motion behavior are acceptance requirements.
-- Beat/status colour has an accompanying icon and label. Canvas-only information has
-  an equivalent hierarchy/list representation.
-- Beat reordering has keyboard alternatives to drag handles; asset/Scene/choice
-  selection remains keyboard searchable.
-- Narrow windows protect dialogue/Beats readability before preview size.
-
-## Corrective persistence and exact-value behavior
-
-The Phase 1D shell obtains persistence truth from a read-only current-session status
-request; rendering a view never implies Saved. `Ctrl/Cmd+S` invokes the separate
-current-session flush operation. Unsubmitted form input is explicitly distinguished
-from accepted durable changes, so Flush cannot claim that pending controls were saved.
-Conflict, recovery-required, validation, and stale-session failures remain visible.
-View/operation/session generations reject late success, error, cancellation, mutation,
-open, close, and navigation completions. Operation generations are scoped to their
-own flow so an unrelated same-view request cannot discard a still-relevant completion.
-Supporting-authoring operations and explicit Flush are mutually serialized per project
-session. If either is requested while the other is active, no competing bridge request
-begins and the UI does not claim persistence; the active operation's own success or
-failure remains responsible for reload, error, controls and focus. A late read-only
-status response cannot overwrite an active authoring or Flush state.
-If the user navigates within the same project while an operation is active, its old
-callback cannot navigate back; settlement triggers a fresh persistence check for the
-current view instead of leaving that surface indefinitely in a checking state.
-
-Create/edit boolean input is explicit and integer text is validated losslessly before
-IPC rather than coerced through JavaScript `Number`. Character, appearance, and
-variable editing use labelled in-application editors that preserve their inputs after
-failure; browser prompts are not part of the supporting authoring flow.
-
-Phase 1E applies the same ordering to Scene editors. A dirty inline Beat buffer has
-explicit Commit/Cancel actions, blocks navigation that would discard it, and makes
-Flush say that editor input remains unsubmitted. Ctrl/Cmd+Enter on Dialogue submits one
-natural semantic operation; adding Shift continues with the next Dialogue. Ordinary
-Enter remains a newline. Failed validation retains text and restores focus. Scene switching, workspace
-switching, and close cannot silently convert draft text into persisted work.
-
-Phase 1F Source drafts follow the same session/view generation rules but remain
-per-file across same-project navigation. A dirty file blocks Scene, definition, file
-lifecycle, and committed-history writes that touch it while unrelated files remain
-available when recovery scope permits. Invalid source retains its draft and accepted
-visual revision; missing/renamed source shows unavailable/stale state and is never
-recreated or retargeted. Recovery required retains project-wide precedence.
-The shell combines fresh project status with newer local/unretained input. Conflict and
-recovery retain precedence, delayed status reads cannot overwrite an active operation,
-and a post-acceptance status failure reports accepted-but-unconfirmed rather than
-resubmitting or claiming Saved.
-
-When transaction state blocks writing, the recovery surface remains available without
-executing the project. It lists affected paths and retained evidence, offers only
-core-proven resolutions, requires confirmation for destructive resolution, and
-revalidates the project before returning to Scene authoring. Ambiguous recovery stays
-blocked; acknowledging a warning or deleting a journal is not an available resolution.
-
-### 1G.1 Branches interaction contract
-
-Branches displays accepted core flow with an deterministic layered layout (with bounded placement for cycles and disconnected scenes), directed
-routes, an entry badge only when runnable `start` proves it, and separate partial/stale
-notices. Dialogue rows are omitted. Select a Scene and route using either graph nodes
-or labelled selectors; duplicate option text remains separate. The selected rounded
-orthogonal connector treatment uses 3px palette-accent lines, visible arrowheads and
-14px route text on opaque bordered pills. Pill widths, route channels and Fit bounds
-use the rendered caption's font metrics plus padding on each platform; captions retain
-full text in their tooltip/details. Adjacent forward links use row gaps;
-backward, long, same-layer and self links use distinct outside channels. Paths avoid
-Scene node interiors, reciprocal/parallel routes have distinct ports and lanes, and
-Fit includes route/label bounds. The accepted entry anchors cyclic components;
-missing/unknown/terminal destinations never acquire invented arrows. Fixed 200×60px
-nodes ellipsize long names with full name/label in the tooltip and existing details.
-The existing >100-edge label suppression/34-character label truncation and graph
-limits remain; details retain full route text. This is a saved-flow display, not graph
-editing or runtime certainty. Arrow keys pan the
-focused graph, +/- zoom, Home fits; equivalent buttons remain available. Pointer pan
-is optional. Under [ADR 0010](adr/0010-local-project-safety-and-observed-flow.md),
-Branches displays the last observed saved state, including accepted app edits.
-Open/focus/Refresh checks disk; coalesce triggers and avoid mandatory two-second
-full scans. Show Checking disk, Checked at <time>, Updated from saved edits, or
-Could not refresh/conflict. G1-OBS implements these statuses. Failed/incomplete
-refresh keeps the last usable graph, labelled as such; navigation still checks its
-captured target independently. Reopening a cached view shows it before checking disk.
-Preserve focus/selection/pan for valid targets; clear ambiguous deleted mappings.
-An enabled navigation click must be processed or visibly refused during refresh.
-
-Edit Choice / Jump opens the existing mapped Scene controls, including their existing
-Create New Scene action. Source navigation carries exact bytes/revision and retains
-an existing draft/caret rather than applying accepted offsets to dirty or stale text.
-Uncommitted Scene forms retain their existing commit/cancel navigation guard. No graph
-write path, layout metadata or new Save owner exists. Failed refresh retains the
-last usable graph with a visible failure/conflict status. Navigation independently
-checks current source and gives a clear changed-target message instead of guessing
-offsets. Over-limit graphs show an explicit Source escape without truncation.
-
-The current limits are 500 Scenes and 2,000 edges. Layout, pan and zoom live only in the
-view. Large-story layout/search/minimap and execution from graph nodes remain deferred.
-Supported-target and final human evidence remains in the active 1G ledger.
-
-
-### Runtime UI and safe diagnostic navigation (1G.2b)
-
-The session toolbar provides Validate, Run Game, Stop, inspect/revoke execution consent,
-Choose SDK, and a separate explicit controlled-play helper installation. Inspection and
-editing never execute the project. Validate compiles then lints only if compilation
-succeeds; Run invokes normal entry without an extra lint pass. The existing Source
-lease captures input; Save All / Use saved revision / Cancel remains explicit. Pending
-Scene input offers Return to Scene Commit / Use saved revision / Cancel. No implicit
-Scene commit or draft discard occurs. Choosing a browsed SDK is explicit executable
-validation; runtime preparation checks the pinned version and identities again.
-
-Runtime controls and the bottom Diagnostics / Runtime panel survive editor navigation.
-Runtime state, launch/test revision, filesystem freshness and persistence status have
-separate labels. Script edits remain available during play. Stop then Run selects new
-saved work. Close offers Stop and continue / Cancel and waits for confirmed cleanup
-before the ordinary Source leave dialog. Cleanup failure keeps the project open.
-
-SDK output is inert, bounded text; no output becomes HTML, a URL or a host file opener.
-Diagnostic location buttons recheck the current operation, source identity and revision
-through the core, then use the existing Source navigation path. Dirty, deleted, replaced
-or stale files do not select a nearby Beat. Locations outside approved game `.rpy`
-Source scope remain non-navigable. Static Source/Branches findings stay separate from
-SDK validation, and an empty diagnostic list cannot turn process failure into success.
-
-Diagnostic navigation also translates retained Source CRLF/UTF-16 offsets to the
-editor's normalized LF offsets. Selection-only observations preserve original text,
-including mixed line endings; rich-editor transactions patch only changed ranges and
-persistent raw-text history preserves exact bytes through grouped undo/redo. This uses the
-existing Source controller and does not silently accept or rewrite source on navigation.
-
-Native main-window close and application quit route into the same Runtime Stop/Cancel
-and existing Source draft leave flow as Close Project. The narrow desktop-only
-`complete_application_close` command accepts no payload, rejects other windows and
-requires the core service to have no open project plus confirmed process cleanup before
-exiting. It grants no filesystem/process-launch privilege. Explicit scaffold-smoke exits
-retain their existing independent harness behavior. OS termination still uses shutdown.
-Project closure is ordered behind shared-service saved-state observations and Source
-retention, so a passive read cannot race its single close request. Runtime Stop and
-other token-bound controls stay independent; ambiguous writes are never replayed.
-
-## Bounded source-foundation Story outline
-
-The accepted Phase 2 foundation below remains its historical qualified boundary.
-Phase 3A's reviewed narrow renderer now adds explicit root/branch Beat insertion and
-editing, Call pickers and supported Choice availability editors through captured
-body/revision envelopes. Unknown-guard Choices stay wholly read-only. Pending commits,
-navigation refusals and field validation retain draft values; caption whitespace is
-preserved. Full typed condition/branch, subtree move/delete/selected unwrap and
-hierarchy/collapse/focus controls are implemented and passed portable DOM/build checks.
-Their forms capture owner/revision envelopes, and tree/Story drafts protect each other.
-Illustrative preview keeps route selection separate from editing selection, stops at
-unresolved forks/Choices and terminal Return/Jump, and reports the actual visited Beat;
-view state never edits source. Branches opens the exact body/source and Call continuation.
-The condition preview reserves a scrollable manual-selector viewport of at least 5rem
-and a canvas region of at least 8rem; the header cannot shrink. The condition grid's
-minimum is `calc(13rem + 52px)`, with outer scrolling available at small sizes. The
-shared divider still advertises 20–70 percent; the pixel minimum can increase the actual
-preview allocation on small windows. Writing focus hides preview/divider and restores
-the single writing row. Portable round 11 verified 20 captures across both themes,
-default/scaled layouts and divider bounds, including readable unknown-state messages
-and selector focus/scroll. This closes the prior clipping finding by self-review under
-user approval. CI4 passes the full ten-case frontend/core journey and two separately
-reaped helpers on both hosts, plus actual pinned-SDK saved-callee/caller-edit/load-return
-qualification. Portable visual/controller proof does not claim packaged physical input
-or human acceptance. Phase3A remains incomplete; the [terminal audit](tasks/evidence/phase-3-history.md#ci4-terminal-audit-and-scoped-qualification--2026-10-14)
-owns exact evidence and limits.
-
-An existing declared-bool If/Otherwise group with direct dialogue children is displayed
-with read-only branch rows and indented selectable dialogue. Commit edits only the
-existing child text; Speaker, move, delete and continuation are disabled for that
-child. A refused revision/owner/session save retains the entered draft and focus.
-Root move/drop controls cannot cross a child, and Add change here is disabled inside
-the group, including Otherwise and intervening trivia. Root insertion before or after
-the complete group stays available.
-The preview remains partial and does not choose or execute a branch. Full condition
-authoring and group operations remain Phase 3 work. Local implementation and target
-evidence are tracked in [Phase 2 section 23](tasks/archive/2026-10-09-phase-2-execution-history.md#23-source-foundation-implementation-ledger--2026-10-07).
-
-## Studio synthetic request panel
-
-The header's **Studio request** opens a nonmodal panel alongside editing and Save.
-It shows an existing saved profile/destination/model, unverified capacity/context
-budget and response reserve. **Send synthetic request** sends only a fixed test
-message; profile load, project opening and Save do not send. The response deadline
-is explicit and bounded. Active requests disable another Send/profile/limit change
-and offer **Cancel request**; terminal text is literal and usage is reported or
-unknown. Safe completion/cancel/error status remains visible. Closing the panel
-first cancels active work; project/configuration/shutdown changes reject late results.
-Literal-loopback HTTP is the current supported subset, disclosed before sending.
-
-
-### Continue Scene authoring
-
-Story's **Assist · Continue Scene** captures insertion before the selected saved root
-Beat. Unsupported, adjacent custom/nested and invalid-terminal boundaries disable
-entry and core independently refuses them. The nonmodal Assist panel labels the
-anchor and preserved terminal, lets the author select exact saved references/task/
-limits, and requires **Review complete send** followed by **Generate proposal**.
-Static receipt changes no source. **Accept Beat group** applies the inseparable ordered
-group once; semantic review shows literal text/Character IDs/new Beat IDs and exact
-Source/source-map before/after. All content uses passive text. Ordinary Story Undo/Redo
-and reopened source/history use the shared transaction layer. Settings' assistance
-selector edits/restores each action's saved prompt with draft protection. Continue Scene
-is qualified on both supported targets; [PROMPTS_CONTEXT](PROMPTS_CONTEXT.md#continue-scene)
-owns bounds and source/lifetime rules. Generated lore remains unavailable. Draft Scene is qualified on both supported targets; its bounded contract is documented below.
-
-
-### Draft Scene authoring
-
-Each saved Chapter offers **Assist · Draft Scene**. The nonmodal panel labels that
-Chapter and requires an author-reviewed Scene title, task and explicit reference
-selection. Review the action prompt/full exact body, Generate, then inspect passive
-whole-Scene prose under **New Scene** and **Dialogue and narration**, with the
-reviewed title, Chapter and existing Character names. **Ends here. No connection is
-added.** describes the explicit Return. Internal IDs/anchor/terminal terminology do
-not appear in the main Draft summary. **Request details** retains complete exact
-outbound body and context disclosures; source/project/map details retain exact bytes
-and core-assigned IDs/path. Preview states that the game has not been run.
-**Accept Scene** creates it once; no incoming connection is added. Story Undo/Redo
-removes/restores the same Scene and normal reopen retains it. Title-only unfinished
-input receives the same discard protection as task/proposal input. Stale state and
-competing drafts refuse without writing. Settings edits/restores its project prompt.
-See [bounded contract](PROMPTS_CONTEXT.md#bounded-draft-scene); platform/native
-qualification is tracked in the active task rather than implied by UI availability.
-
-### Generated Character card review
-
-A saved ordinary Beat offers **Assist · Draft Character card**. Select a new or
-existing editor-only card, review its name, task, prompt, selected approved references
-and complete exact send, then **Generate proposal**. The passive review shows saved
-and proposed fields with plain names, provenance and expandable exact references.json
-changes. **Save proposed card** saves once as one project change; it does not approve
-the text. Current approved text remains available. No runnable Character, Appearance
-or source change occurs.
-
-In **Characters → Character cards**, the proposed form is frozen and **Review proposed
-card and approved text** shows both versions. **Approve this card revision** explicitly
-replaces approved text; **Reject proposed card** retains it. Supporting source and
-reference staleness prevents approval or later inclusion. Both Save and review decisions
-use shared Undo/Redo; reopen retains the exact saved revision. Settings edits/restores
-the action prompt. The [qualified task closure](tasks/evidence/phase-2-execution.md#generated-character-cards-qualified-closure--2026-10-11)
-records Windows and signed Mac native evidence; final human acceptance remains separate.
-
-### Generated lorebook entry review
-
-A saved ordinary Beat offers **Assist · Draft lore entry**. Choose a new/existing
-entry, title and **Applies to**, enter the task and select approved references. Review
-the complete send, then **Generate proposal**. Field changes, provenance, citations
-and applicability render as passive text; expandable **Exact metadata changes** shows
-the actual references.json mutation. **Save proposed lore entry** saves once without
-approving. Open **Lorebook** to inspect current approved and proposed text. The frozen
-proposed form requires separate **Approve this lore revision** or **Reject proposed
-lore entry**. Stale supporting material disables approval and inclusion; missing
-ordinary links remain visible. Save and review decisions use shared Undo/Redo and
-survive project/process reopen. Settings provides the Lorebook entry action prompt.
-
-
-### Selectable Scene proposal review
-
-**Assist · Edit Scene** lets the author bind selected saved text targets, insertion
-anchor, permitted speakers and optional runnable Character change before reviewing
-the complete send. New technical name is author-entered; existing Character updates
-allow only display name and dialogue colour. Review presents each text replacement,
-one inseparable insertion group and the separate Character change with dependencies,
-followed by expandable exact source/metadata patches.
-
-Operation checkboxes use native keyboard focus. Every selection change refreshes the
-core preview; Save waits while it is being prepared. Excluding a required Character
-explains the missing dependency and disables **Save selected changes**. No operation
-is silently added. Empty selection also disables Save. One successful Save consumes
-the proposal, freezes every remaining suggestion and leaves shared Undo available.
-A fresh preparation is required for another save. Prompt/task/permission changes,
-staleness, cancellation and refusals retain the author’s input and ordinary guards.
-Native/platform proof is tracked in the selected task; UI availability alone does not
-establish full Phase2 or human acceptance.
-
-## Studio assistance refinement — 2026-10-13, scoped portable proof passed
-
-The [2026-10-15 redesign contract](tasks/active/walkthrough-redesign-implementation.md)
-supersedes the earlier settings/reference presentation in this section for local code;
-its technical proof and human acceptance remain separate. Settings uses Connection,
-API Key, Response defaults, sampling disclosure and a named-profile Danger Zone.
-The selected2026-10-16 setup now follows Profile name → Endpoint/private-HTTP option →
-native API key → **Connect** → Model ID → **Save profile**. Key entry and Connect work
-before a profile or model exists. Connect authenticates and retrieves model choices;
-its progress/errors and Cancel stay beside that action. Failed/cancelled attempts
-retain entered details. Address/key changes invalidate old results and model choices;
-late responses cannot attach after a draft/profile switch. Save stores the completed
-profile/key locally. Leaving Settings discards staged native key state.
-
-Response defaults are context32768, maximum response16384 and **Thinking** checked.
-The helper explains that thinking uses response allowance and may take longer.
-Existing saved response limits and explicit thinking-off choices survive read/reload.
-**Test response format** remains a separate explicit synthetic generation for the
-saved model; Connect never loads a model or tests generation implicitly. Old off-only
-readiness requires a fresh response-format test. HTTP opt-in remains beside Endpoint
-and hidden for empty/HTTPS input. Read-only profile retry and draft protection remain.
-Actual model context is read-only status, with checking/loading stages and Cancel in
-generation panels; reasoning never becomes proposed/saved writing.
-
-Model loading adds editable Parallel slots, GPU memory mode and Automatic memory
-fitting, with suggested1/manual/off defaults. The existing Context length remains the
-single requested context control. Save profile stays local; explicit Read/Apply use
-the clean saved profile and its existing key. Legacy profiles require Save before
-Apply. A read-only comparison distinguishes requested, saved-in-Studio and actually
-loaded values; missing evidence is Unverified, and mismatches are visible warnings.
-Applying future-load preferences does not reload the active model or enable global
-auto-switch. An unconfirmed write says the update was sent and asks for read-back;
-it never claims no settings changed. Request/Assist warnings survive proposal review
-while a request that fits the actual context remains usable. The
-[configuration contract](adr/0013-provider-request-and-transport-contract.md#configurable-model-load-preferences--2026-10-15)
-owns exact scope, preservation and the unverified fitting limitation.
-
-Characters has one list, Writing/Game setup and horizontal writing topics; the shared
-Story panel icons collapse/restore the list and global navigation. Drafts, selection,
-topic and deliberate focus/scroll survive switching. Persistent helpers, compact
-relationship rows and starting-only knowledge replace the cluttered card controls.
-Hidden legacy fields remain stored. Version history is a compact readable dialog;
-Restore creates a new revision and refuses pending writing/game input. The project
-Lorebook has two growing world/tone areas, page-body scrolling and reachable fixed
-Save/Discard, plus read-only history. All surfaces use existing Paper/Teal and
-Charcoal/Copper tokens. Compact actions share a stable bottom row, with status above.
-Existing proposed lore remains reachable through an explicit review dialog that keeps
-global drafts. Native Game setup completion retains the Characters controller/drafts;
-its focused main-wiring regression passed as recorded in the owning task.
-[Reference contracts](REFERENCE_LIBRARY.md#walkthrough-redesign-contract--2026-10-15)
-own lifecycle/preservation; [context contracts](PROMPTS_CONTEXT.md#shared-project-world-and-tone--2026-10-15)
-own visible per-request inclusion/omission and exact preview. Static fixtures do not
-establish packaged WebView physical input, screen-reader behavior or phase acceptance.
-
-The user approved the [refinement direction](design/phase-2-llm/studio-refinement-2026-10-13/README.md).
-Settings groups Connection, Saved key and Response defaults, with advanced and
-maintenance controls disclosed on demand. Save stays reachable. Profile changes,
-reload, owned cleanup and Settings navigation/close preserve drafts unless the
-author confirms discard; active writes/setup tests retain ownership. Format/range
-feedback appears on completion and submission without silently coercing input.
-Native key entry/storage, saved-key reuse and exact configuration-bound readiness
-are unchanged. Saving/opening does not send. Test setup remains an explicit fixed
-synthetic send, and Refresh models is the existing explicit discovery action.
-
-Assist shows its captured target and Prepare/Inspect send/Review changes stage,
-with a scrolling body and reachable actions. Task has full width; additional limits
-are expandable. Prepared review exposes destination/model/locality, reference
-selection/exclusions and total/budget before Generate, plus the complete immutable
-request in explicit details. Review leads with plain saved/proposed prose and exact
-Source/metadata disclosure. Single rewrite **Apply and save 1 change** retains the
-existing transaction; other action-specific acceptance labels remain. Required
-operation dependencies are still explicit, never auto-selected. Keyboard focus
-enters Assist and returns to its invoker where valid. Async completion only moves
-focus while it still belongs to Assist; unfinished polls preserve it.
-
-Manual cards/lore retain direct Save/Discard. Generated saved proposals lead with
-readable comparisons and exact revision approval; the frozen form and full metadata
-remain inspectable. Missing/changed supporting material explains approval refusal.
-Selection has a visible highlight and status text. Comparisons stack at compact
-widths. Prompt/scope tabs have arrow/Home/End traversal and associated panels;
-prompt save/restore/Undo and draft protection retain their existing contract.
-
-The [owning task](tasks/evidence/phase-2-execution.md#studio-ui-refinement-selection-and-finite-allowance--2026-10-13)
-owns changed-input evidence and limits. [CI1run38324391511](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38324391511)
-passes both-target renderer/controller-service proof at462cf08 with independent audit.
-These contracts do not claim new packaged native interaction or human acceptance.
-Frozen929 technical proof remains valid for unchanged core/source/storage/SDK behavior.
+  resizable text and panels, and reduced motion are acceptance requirements.
+- Colour always has a text label, number or icon beside it. Information shown only on
+  a canvas or stage also has a list or hierarchy form.
+- Beat reordering has keyboard alternatives to dragging, and scene, asset and Choice
+  pickers are keyboard searchable.
+- Narrow windows protect dialogue and beat readability before stage size.

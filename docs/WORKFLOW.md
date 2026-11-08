@@ -25,11 +25,20 @@ instructions take precedence and must be recorded before conflicting work contin
 | `docs/tasks/evidence/` | Linked execution history, detailed validation receipts, failures and historical directions. |
 | [WORKFLOW.md](WORKFLOW.md) / [TESTING.md](TESTING.md) | Workflow owns test selection, operation limits and host routing; TESTING owns technical gates and evidence details. |
 | `docs/testing/` | Focused current technical runbooks; INCIDENTS is a compact lookup index linking to original task evidence. |
-| Canonical technical docs / `docs/adr/` | Durable behavior, decisions, lessons and operational contracts. |
+| Canonical technical docs / `docs/adr/` | Durable behavior, decisions and operational contracts, each rule in one owning doc. |
 | `docs/tasks/archive/` | Completed task evidence and historical decisions, not current instructions. |
 
 Remaining Phase 3B delivery uses the [GitHub task ownership exception](#phase-3b-github-task-ownership);
 the table continues to apply to other work and to 3B product contracts, evidence and status.
+
+Canonical docs describe current behavior, not how it got there. Replace superseded text
+instead of appending, and use no dated headings. Status, qualification results, CI run
+IDs and acceptance caveats belong in CURRENT, the issue or task evidence. Regression
+lessons go to the [incident index](testing/INCIDENTS.md) or a test; exact pixel values
+stay in CSS. [UI.md](UI.md) owns the design system, shared UI rules and a few lines of
+intent per workspace; each feature's behavior lives in its own contract, which UI.md
+links. Review the structure of a canonical doc that passes roughly 800 lines, as for long
+briefs. This is a prompt, not a cap: a doc may stay longer with a one-line reason.
 
 Prompts select one coherent approved outcome and point to the repo. They must not be the only
 location of requirements, test commands, unresolved risks or continuation state.
@@ -665,8 +674,9 @@ not premature deletion during feasibility/planning.
 
 ## Documentation cleanup
 
-Consolidate architecture decisions, operational recovery instructions and regression
-lessons before archiving a completed task. Preserve unique acceptance/failure evidence
+Consolidate architecture decisions and operational recovery instructions into their
+owning docs before archiving a completed task. Regression lessons go to the incident
+index or a test. Preserve unique acceptance/failure evidence
 and unresolved issues. Archive the completed brief with a final status, retain its
 linked evidence and update INDEX/CURRENT/HANDOVER links. Pure duplicate handovers can
 be removed once useful content is preserved; Git history retains earlier live HANDOVER revisions.

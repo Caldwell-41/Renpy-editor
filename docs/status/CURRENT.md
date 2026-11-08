@@ -1,5 +1,61 @@
 # Current status
 
+## Story Combined v1 approved
+
+Kris approved the combined Story layout on 2026-11-08 as **Story Combined v1**: Design Lab
+`story-revamp` / `combined`, approval revision `combined-v1` at source `6ecf6470`, recorded
+in [the approval record](../design/story-revamp/approval.json). Three council rounds ran
+(final Opus 9.1; Sol 9.2 before a gate cap); their remaining findings are fixed but unscored.
+Branch `codex/story-combined-fourth-mock` is pushed with a draft PR into
+`codex/phase3b-screen-designer`. Production implementation is not selected.
+
+The revision changes only the combined variant. It adds a Brass and slate palette for
+each mode, generated visual-novel art under `art/`, a Branch path bar of two-way switches,
+a coloured route line over open branches in Tracks and Reel, visual beat editors with a
+picker sheet for backgrounds and expressions, a one-click Add a beat dialog, every lane
+in writing focus Tracks, a typed condition rule builder, arithmetic Set variable (#88), Choice option bodies with picked state and reordering (#99), empty-branch slots in Tracks and a wrapping Branch path. The focused check passes 38 groups. After the #86 merge, `npm run design:check` checks one
+selected screen and layout. Evidence and review screenshots are in ignored `.toolchains/story-combined/revision/`.
+The preview server on port 5176 serves this worktree; port 5175 was found stopped.
+Kris approved updating `docs/UI.md` on 2026-11-08: it now names Brass and slate and the combined Story mock as the target design. Production still uses copper and teal until integration.
+
+## Combined fourth Story mock delivered
+
+[Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82)'s selected fourth
+Design Lab mock is complete at reviewed code `214186ab`. All three final council
+members meet the target and all readiness gates pass. Six rounds ran against six
+frozen candidates. The final chat owns the actual score table. No code changed after
+the final review. Production approval, integration, push, PR and merge remain unselected.
+
+The `combined` variant uses Stage tracks' large game window/right editor, an internal
+Tracks/Reel switch, Conditions above the panel and full structured Writing focus.
+Kris chose Tracks first, equal panel height and branches expanded in scene context.
+The mock retains one story's drafts, selection, branch and insertion context through
+view changes. The supplied UI examples informed polish without changing the layout.
+
+Verification passes: 31 focused browser groups, eight direct/nested ending cases,
+48 state/theme/view renders, three reference journeys, standalone guards, production
+exclusion and static checks. Final evidence has 169 PNGs and source/reference hashes
+in ignored `.toolchains/story-combined/round-6/`. Earlier candidates, terminal reviews
+and failure/recovery evidence remain preserved. A standalone review package is in
+`.toolchains/story-combined/story-combined-reviewed.zip`.
+
+Seven nonblocking findings remain, detailed in the Story design notes and #82:
+outer-exit qualification for nested endings, Reel hover/Return-card consistency,
+repeated outside-action wording, long game-text clipping, Otherwise context and
+partial top rows in focus lists. The six-round cap is exhausted; do not start another
+round or transfer these scores to later edits without a new user selection.
+
+Work remains local on `codex/story-combined-fourth-mock`, stacked on the local
+Story prototype branch. The fourth mock is on LAN port 5176; the original three
+are on port 5175, restored from their unchanged files after that server was found
+offline. Preserve both. This is fictional browser-memory behavior, not engine,
+native, durable-save or production acceptance. See HANDOVER for continuation.
+
+The three-mock comparison and score-only rescore are complete. Current reference
+code is `app/design-lab/screens/story-revamp/`; images and browser evidence remain
+under ignored `council-v3/round-5-fixes/` in the primary checkout. Keep the existing
+LAN review available. Earlier acceptance and protected recovery remain below.
+
 ## Test selection reduction merged
 
 [Issue #85](https://github.com/Caldwell-41/Renpy-editor/issues/85) is closed.

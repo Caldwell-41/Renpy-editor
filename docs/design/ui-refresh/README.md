@@ -12,8 +12,9 @@ original filenames and SHA-256 hashes of these unchanged copies.
 ## Which reference controls what
 
 Written decisions and recorded corrections take precedence over generated details.
-Use the layout images for structure, and the two palette images for colour. Earlier
-purple treatments are superseded. Follow system is the default theme setting.
+Use the layout images for structure. Colour comes from the Brass and slate palette in
+[UI](../../UI.md#palette-brass-and-slate); the two palette images below are superseded,
+as are earlier purple treatments. Follow system is the default theme setting.
 The preferred Settings layout applies to Settings, not every page.
 
 | Surface | Reference | Interpretation |
@@ -28,8 +29,8 @@ The preferred Settings layout applies to Settings, not every page.
 | Characters | [Layout](characters-layout.png) | Cast grid, appearances and optional inspector |
 | Assets | [Layout](assets-layout.png) | Grid/filter/details; new audio controls remain disabled |
 | Variables | [Layout](variables-layout.png) | Table/inspector and known assignments only |
-| Dark theme | [Charcoal and copper](palette-dark-charcoal-copper.png) | Application palette; game preview unaffected |
-| Light theme | [Paper and teal](palette-light-paper-teal.png) | Application palette; game preview unaffected |
+| Dark theme | [Charcoal and copper](palette-dark-charcoal-copper.png) | Superseded by Brass and slate in [UI](../../UI.md#palette-brass-and-slate); production still ships it |
+| Light theme | [Paper and teal](palette-light-paper-teal.png) | Superseded by Brass and slate in [UI](../../UI.md#palette-brass-and-slate); production still ships it |
 | Opening screen | [Both themes](welcome-light-dark.png) | Actions and searchable recent projects |
 | New project | [Four steps](new-project-four-steps.png) | Latest corrected Back labels |
 | Game configuration, resolution | [Accepted picker detail](game-configuration-resolution-picker.png) | Larger readable dropdown and small dynamic aspect-ratio preview; retains Custom fields |

@@ -194,6 +194,32 @@ variables and perform short, visibly ordered action sequences. An action that
 finishes interaction must be last. More complex dynamic logic and arbitrary Python
 actions remain in Source.
 
+#### Implemented creation and reuse controls
+
+New screen offers Blank and Help starters in a named dialog. It accepts a source
+name, creates the screen through the shared core transaction and selects the owned
+root. Cancel or Escape writes nothing; invalid, colliding or stale input stays in the
+dialog. Help needs an available project UI image. Without one, the draft stays and
+Help creation is blocked. Starter title, explanation, image and Close are ordinary
+editable nodes. View in Source selects the accepted declaration. An unresolved owned
+selection names its original file and never selects a neighbouring screen.
+
+Use in Story hands the selected owned Panel to Story without writing a Beat; the
+author adds Show screen or Hide screen there. Unavailable stable targets stay
+unresolved rather than following a reused name.
+
+Supported groups can become owned parameterless components and be inserted under an
+explicit parent in another screen. Inspecting a destination in Add component does not
+navigate; Cancel keeps the screen, element and focus, and only an accepted insertion
+selects the destination use. Shared Apply reviews only changed fields and lists the
+affected screens. A screen with several uses also offers Make a copy for the selected
+use. Make a copy accepts the saved definition first. Pending edits move only after the
+new definition, revision and child IDs verify, and Apply is a second history entry.
+If the refresh fails, the copy is acknowledged, input stays and Apply is blocked until
+Reload copy succeeds. Cancel discards pending edits and keeps the accepted copy. Fields
+first edited after Copy track the original target until verification; Reload moves
+those drafts to the copy and Cancel discards them.
+
 <a id="4-3b--supported-screen-designer"></a>
 
 ## 4. 3B — Supported screen designer

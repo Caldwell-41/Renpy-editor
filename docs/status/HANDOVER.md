@@ -1,5 +1,119 @@
 # Current outcome handover
 
+## Story Combined v1 approved
+
+Kris approved the combined Story layout on 2026-11-08 as **Story Combined v1**: Design Lab
+`story-revamp` / `combined`, approval revision `combined-v1` at source `6ecf6470`, recorded
+in [the approval record](../design/story-revamp/approval.json). Three council rounds ran
+(final Opus 9.1; Sol 9.2 before a gate cap); their remaining findings are fixed but unscored.
+Branch `codex/story-combined-fourth-mock` is pushed with a draft PR into
+`codex/phase3b-screen-designer`. Production implementation is not selected.
+
+The revision changes only the combined variant. It adds a Brass and slate palette for
+each mode, generated visual-novel art under `art/`, a Branch path bar of two-way switches,
+a coloured route line over open branches in Tracks and Reel, visual beat editors with a
+picker sheet for backgrounds and expressions, a one-click Add a beat dialog, every lane
+in writing focus Tracks, a typed condition rule builder, arithmetic Set variable (#88), Choice option bodies with picked state and reordering (#99), empty-branch slots in Tracks and a wrapping Branch path. The focused check passes 38 groups. After the #86 merge, `npm run design:check` checks one
+selected screen and layout. Evidence and review screenshots are in ignored `.toolchains/story-combined/revision/`.
+The preview server on port 5176 serves this worktree; port 5175 was found stopped.
+Kris approved updating `docs/UI.md` on 2026-11-08: it now names Brass and slate and the combined Story mock as the target design. Production still uses copper and teal until integration.
+
+## Combined fourth Story mock delivered
+
+The selected fourth mock in [#82](https://github.com/Caldwell-41/Renpy-editor/issues/82)
+is complete. Final reviewed code is `214186abb53c9c985e62f716712c4772f159dc2e`.
+All three final reviewers meet the target and all readiness gates pass. Six rounds
+ran; no seventh round is authorised. The delivery chat records the actual score table.
+Only documentation closeout follows the reviewed code; its 20 source hashes remain
+unchanged. No production approval, branch integration, push, PR or merge is selected.
+
+The lead owns local `codex/story-combined-fourth-mock`, stacked on
+`codex/story-screen-prototypes` with reference baseline `bbd5a4dd` and handoff
+`4b2e522d`. The primary checkout contains unrelated work; do not modify it. The three
+original variants remain references. Source is in
+`app/design-lab/screens/story-revamp/`; design notes describe behavior and limits.
+Kris's settled decisions are Tracks first, equal bottom heights and branches expanded
+in scene context. Use grill-me only for genuinely new design questions.
+
+Final evidence is ignored `.toolchains/story-combined/round-6/`: candidate/hash
+metadata, 169 PNGs, frozen HTMLs, three terminal reviews, 31 passing focused groups,
+eight direct/nested ending cases and the passing 48-render boundary/reference/export
+report. Static checks and in-memory production exclusion pass. The delivery folder
+and `story-combined-reviewed.zip` contain standalone HTML, selected screenshots,
+modal examples and known limits. The full evidence remains beside them.
+
+Preserve every `round-1/` through `round-6/` candidate and terminal review. Preserve
+numbered diagnosis folders, `SCROLL-DIAGNOSIS.md` and Round 4's `DIAGNOSIS.md`.
+The records retain early harness/field-height failures, the browser scroll-anchoring
+correction and the resize-caret bookmark defect. Round 3's opened Else-if crash and
+Round 4's compact menu obstruction were fixed and independently rechecked. Do not
+reset source to an earlier reviewed candidate. Old three-mock scores do not qualify
+this fourth mock.
+
+Seven nonblocking final findings remain: outer branch exit wording can omit a nested
+Jump/Return qualification; Reel + lacks hover feedback; Return Reel cards use the
+label slot for their summary; outside navigation/insertion repeat After wording;
+long stage text can clip at laptop size; Otherwise cards omit the If test; focused
+lists can show partial top rows. See the design notes and final terminal reports.
+No post-review source fixes were made, so scores still identify the delivered code.
+Further changes or reviews need a new selection.
+
+The fourth Design Lab preview is on port 5176. The original three standalone mocks
+are on port 5175 from the primary's ignored `story-lan/` directory. That server was
+found offline during Round 4 and restored from the same files without edits.
+Preserve both servers. Use the pinned Node 24.19.0 and worktree dependencies.
+Managed browser snapshots timed out twice; shell checks used the shared Chrome
+launcher outside the sandbox and closed only their own browsers. Browser evidence
+is not native/engine/real-save acceptance. No native matrix was run.
+
+Kris's three favorable UI images and six refinement notes remain in ignored
+`story-combined/references/`. Every later council inspected them without copying
+layouts or promising engine features. Opus and Sol used xhigh, independent Astra
+used high, and all used Standard speed. Approval pointers remain null.
+
+## Previous three-mock comparison
+
+Historical closeout state follows; the fourth-mock assignment above supersedes
+its statements that no successor or council round was selected.
+
+Kris's requested Rounds 3 and 4 and later extra Round 5 are complete. Each mock had
+its own Opus 5.5/GPT-6.1 Sol xhigh council in each round. All eighteen terminal
+reports are retained under ignored `council-v3/<variant>/round-{3,4,5}-{opus,sol}.md`.
+Round 3 scored `223c16ec`, Round 4 scored `98c9cc9f`, and Round 5 scored `e7e7f216`.
+None reached 9.5 from both reviewers. Do not infer a new grade for the final fixes.
+
+[Issue #82](https://github.com/Caldwell-41/Renpy-editor/issues/82) owns the local
+`codex/story-screen-prototypes` branch. The parent applied and verified bounded
+findings after Round 5. Current evidence is `council-v3/round-5-fixes/`; its manifest
+owns exact checks, source hashes, captures and corrected diagnostic limits. The
+reviewed baseline stays intact in `final/`, with its handoff in `round-5-input/`.
+
+Final corrections reveal editors after creation from enlargement, preserve and
+reveal the edited long-Choice option, keep choices above the say box, rank visible
+command names ahead of aliases, start Else-if tests blank and restore focus for
+beats without fields. Safe stage-object actions, preview-only labels, row-number
+descriptions, band keyboard access, tracks wheel scrolling and shorter branch
+controls improve clarity. No engine behavior, production or native code changed.
+
+The [design notes](../design/story-revamp/README.md) own scope and limits. All three
+mocks await Kris's choice. Approval pointers remain null. No production promotion,
+PR, push, successor implementation or further council round is selected. Preserve
+unrelated browser maintenance, the Phase 1 audit and all older recovery below,
+including the existing size exception.
+
+Keep the user-requested Design Lab on port 5174. Final screenshots, self-contained
+mock HTMLs, score/comparison pages and the ZIP are under `.toolchains/story-revamp/`.
+Parent checks used scoped Chrome outside the macOS sandbox after managed snapshots
+timed out twice, and closed only check-owned browsers. No screen reader, native
+rendering, durable-save or recovery acceptance follows from these browser samples.
+
+Earlier evidence corrections remain recorded: the Round 3 brief said eleven
+selection cases, while its report contains ten. Two archived Opus files contained
+progress snapshots; full terminal reports were recovered. Some Round 4 reviewers
+saw those older progress files. Round 5 Shot Opus disclosed accidentally seeing one
+Else-if finding line from Sol and excluded it from its own findings. Preserve the
+actual reviews and their stated limits; do not call every pass fully blind.
+
 ## Test selection closeout
 
 [#85](https://github.com/Caldwell-41/Renpy-editor/issues/85) is closed after #86 and

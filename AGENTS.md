@@ -87,7 +87,7 @@ Failed, cancelled or skipped required checks are not passes. No package matrix f
 - Meaningful pause, transfer or closure:
   [status maintenance](docs/WORKFLOW.md#status-document-maintenance).
   Record compact results in the owning task, keep one live handover and update
-  canonical contracts when behavior changes. Preserve unique failure/recovery evidence.
+  the one canonical contract that owns changed behavior. Preserve unique failure/recovery evidence.
 - Task documentation: follow [brief and evidence ownership](docs/WORKFLOW.md#task-briefs-and-supporting-files)
   when creating or updating briefs, requirements or validation records. For remaining
   3B delivery, apply the [GitHub ownership exception](docs/WORKFLOW.md#phase-3b-github-task-ownership).
