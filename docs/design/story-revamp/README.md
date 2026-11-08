@@ -39,10 +39,15 @@ Implementation can proceed in separately testable slices.
 
 [Choice #98](https://github.com/Caldwell-41/Renpy-editor/issues/98) and
 [arithmetic #87](https://github.com/Caldwell-41/Renpy-editor/issues/87) retain their
-feature requirements and acceptance ownership. The app-wide palette rollout,
-implementation order and the release's dependencies on work outside Story remain
-open decisions. This interview records decisions only; implementation and publication
-still need Kris's go-ahead.
+feature requirements and acceptance ownership. Story Combined v1 can ship when the
+shared arithmetic core and Story controls qualify, before the new Screens arithmetic
+controls are finished. Screens arithmetic retains its own acceptance work, and #87
+stays open until both Story and Screens meet its requirements. Shared-model changes
+must preserve existing Screens behaviour.
+
+The app-wide palette rollout and implementation order remain open decisions. This
+interview records decisions only; implementation and publication still need Kris's
+go-ahead.
 
 ## Selected direction
 
