@@ -1,3 +1,4 @@
+// fixture: skip run by the Help offline steps in quality.yml.
 // #45 production forms/Story/actions controllers -> real core. No SDK/helper.
 import assert from 'node:assert/strict';
 import {mkdir, realpath, writeFile, access} from 'node:fs/promises';

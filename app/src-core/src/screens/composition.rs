@@ -15,6 +15,48 @@ pub struct ComposeRequest {
 #[serde(tag = "type", rename_all = "camelCase", deny_unknown_fields)]
 pub enum Command {
     #[serde(rename_all = "camelCase")]
+    AddImageButton {
+        parent_id: String,
+        appearances: controls::ImageButtonAppearances,
+        width: u32,
+        height: u32,
+        #[serde(default)]
+        layout: std::collections::BTreeMap<String, Option<layout::NumericValue>>,
+        interaction: InteractionEdit,
+    },
+    #[serde(rename_all = "camelCase")]
+    ImageButton {
+        node_id: String,
+        appearances: controls::ImageButtonAppearances,
+        width: u32,
+        height: u32,
+        #[serde(default)]
+        layout: std::collections::BTreeMap<String, Option<layout::NumericValue>>,
+        interaction: InteractionEdit,
+    },
+    #[serde(rename_all = "camelCase")]
+    AddBar {
+        parent_id: String,
+        binding: controls::IntegerBarBinding,
+        appearance: controls::BarAppearance,
+        width: u32,
+        height: u32,
+        #[serde(default)]
+        layout: std::collections::BTreeMap<String, Option<layout::NumericValue>>,
+        expected_authoring_revision: String,
+    },
+    #[serde(rename_all = "camelCase")]
+    Bar {
+        node_id: String,
+        binding: controls::IntegerBarBinding,
+        appearance: controls::BarAppearance,
+        width: u32,
+        height: u32,
+        #[serde(default)]
+        layout: std::collections::BTreeMap<String, Option<layout::NumericValue>>,
+        expected_authoring_revision: String,
+    },
+    #[serde(rename_all = "camelCase")]
     Add {
         parent_id: String,
         kind: String,
@@ -134,6 +176,8 @@ pub(super) fn can_add(screen: &Screen, parent: &Node, kind: &str) -> bool {
             "text",
             "textbutton",
             "image",
+            "bar",
+            "imagebutton",
             "use",
         ]
         .contains(&kind)
@@ -184,6 +228,7 @@ impl AuthoringService {
         bytes: &[u8],
         node_id: &str,
         review: &InteractionEdit,
+        passive_component_addition: bool,
     ) -> Result<Vec<u8>, SceneError> {
         let authoring = self.require_action_authoring(
             project,
@@ -212,7 +257,9 @@ impl AuthoringService {
         let Some(actions) = &review.actions else {
             return Ok(bytes.to_vec());
         };
-        if owner.kind == crate::metadata::OwnedScreenKind::Component {
+        if owner.kind == crate::metadata::OwnedScreenKind::Component
+            && !(passive_component_addition && actions.is_empty())
+        {
             return Err(SceneError::ReferenceBlocked);
         }
         let inventory = self.screen_inventory(project)?;
@@ -309,7 +356,123 @@ impl AuthoringService {
         let mut proposed = bytes.clone();
         let mut companions = Vec::new();
         let mut interaction_review: Option<(String, Vec<ActionTargetRevision>)> = None;
+        let control_addition = matches!(
+            &request.command,
+            Command::AddBar { .. } | Command::AddImageButton { .. }
+        );
         let selected_id = match request.command {
+            Command::AddImageButton {
+                parent_id,
+                appearances,
+                width,
+                height,
+                layout,
+                interaction,
+            }
+            | Command::ImageButton {
+                node_id: parent_id,
+                appearances,
+                width,
+                height,
+                layout,
+                interaction,
+            } => {
+                let target = screen
+                    .nodes
+                    .iter()
+                    .find(|n| n.id.as_ref() == Some(&parent_id))
+                    .ok_or(SceneError::UnknownEntity)?;
+                if control_addition && interaction.actions.is_none() {
+                    return Err(SceneError::InvalidPayload);
+                }
+                if !control_addition && control_source::image_paths(&bytes, target).is_none() {
+                    return Err(SceneError::OpaqueBoundary);
+                }
+                let (values, metadata) =
+                    self.imagebutton_values(project, project_id, &appearances)?;
+                companions.extend(metadata);
+                let (source, id) = control_source::prepare(
+                    &bytes,
+                    screen,
+                    source_path,
+                    "imagebutton",
+                    target,
+                    control_addition,
+                    values,
+                    width,
+                    height,
+                    layout,
+                )?;
+                proposed = self.prepare_interaction(
+                    project,
+                    project_id,
+                    &owner.screen,
+                    &source,
+                    &id,
+                    &interaction,
+                    control_addition,
+                )?;
+                interaction_review = Some((
+                    interaction.expected_authoring_revision,
+                    interaction.expected_target_revisions,
+                ));
+                id
+            }
+            Command::AddBar {
+                parent_id,
+                binding,
+                appearance,
+                width,
+                height,
+                layout,
+                expected_authoring_revision,
+            }
+            | Command::Bar {
+                node_id: parent_id,
+                binding,
+                appearance,
+                width,
+                height,
+                layout,
+                expected_authoring_revision,
+            } => {
+                let authoring = self.require_action_authoring(
+                    project,
+                    project_id,
+                    &expected_authoring_revision,
+                )?;
+                // Roots receive their stable ID in the owned document projection.
+                let target = screen
+                    .nodes
+                    .iter()
+                    .find(|n| n.id.as_ref() == Some(&parent_id))
+                    .ok_or(SceneError::UnknownEntity)?;
+                if !control_addition
+                    && (target.bar_binding.is_none() || target.bar_appearance.is_none())
+                {
+                    return Err(SceneError::OpaqueBoundary);
+                }
+                if owner.screen.kind == crate::metadata::OwnedScreenKind::Component {
+                    return Err(SceneError::ReferenceBlocked);
+                }
+                let values =
+                    control_source::bar_values(&binding, &appearance, &authoring.variables)?;
+                let (source, id) = control_source::prepare(
+                    &bytes,
+                    screen,
+                    source_path,
+                    "bar",
+                    target,
+                    control_addition,
+                    values,
+                    width,
+                    height,
+                    layout,
+                )?;
+                proposed = source;
+                interaction_review = Some((expected_authoring_revision, vec![]));
+                id
+            }
             Command::VariableText {
                 node_id,
                 binding,
@@ -362,6 +525,7 @@ impl AuthoringService {
                     &bytes,
                     &node_id,
                     &review,
+                    false,
                 )?;
                 interaction_review = Some((
                     review.expected_authoring_revision,
@@ -379,7 +543,9 @@ impl AuthoringService {
                     .iter()
                     .find(|n| n.id.as_ref() == Some(&parent_id))
                     .ok_or(SceneError::UnknownEntity)?;
-                if matches!(kind.as_str(), "image" | "use") || !can_add(screen, parent, &kind) {
+                if matches!(kind.as_str(), "image" | "use" | "bar" | "imagebutton")
+                    || !can_add(screen, parent, &kind)
+                {
                     return Err(SceneError::OpaqueBoundary);
                 }
                 let id = uuid::Uuid::new_v4().to_string();
@@ -637,6 +803,7 @@ impl AuthoringService {
                         &proposed,
                         &node_id,
                         &review,
+                        false,
                     )?;
                     interaction_review = Some((
                         review.expected_authoring_revision,
@@ -874,12 +1041,23 @@ impl AuthoringService {
             }
         }
         accepted_inventory.refresh_revision();
+        let accepted_authoring = if let Some(mutation) = companions
+            .iter()
+            .find(|m| m.path.as_str() == ".renpy-editor/authoring.json")
+        {
+            let mut authoring = self.screen_action_authoring(project, project_id)?;
+            authoring.project_asset_metadata(mutation)?;
+            Some(authoring)
+        } else {
+            None
+        };
         let mut accepted = self.owned_screen_document_with_inventory(
             project,
             &proposed,
             source_path.clone(),
             hex::encode(Sha256::digest(&proposed)),
             Some(&accepted_inventory),
+            accepted_authoring.as_ref(),
         )?;
         let index = styles::Index::read(&accepted_inventory)?;
         index.resolve(&mut accepted, &proposed)?;
@@ -896,6 +1074,7 @@ impl AuthoringService {
                 p.clone(),
                 hex::encode(Sha256::digest(b)),
                 Some(&accepted_inventory),
+                accepted_authoring.as_ref(),
             ) {
                 Ok(doc) => doc,
                 // Unrelated source-only files need not be inspectable to edit this owner.

@@ -82,7 +82,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Cause/correction:** mocked helpers and outer dialog identity left actual controls
   untested. Observe owned child type/style/visibility, focus, physical action and
   dismissal/readback; cancel the owned modal before failure cleanup.
-- **Regression:** `test_studio_setup_native.py`, Windows focus fixtures and actual native
+- **Regression:** `test_studio_setup_native.py` logic, explicit
+  `studio_setup_native_dialog_checks.py`, Windows focus fixtures and actual native
   sequence. Mocks do not establish native proof; CI8's exact UIA provider cause remained unknown.
 - **Evidence:** [whole-sequence reassessment](../tasks/evidence/phase-2-execution.md#ci7-terminal-audit-and-whole-sequence-reassessment--2026-10-13),
   [child-control gap](../tasks/evidence/phase-2-execution.md#ci8-terminal-review--native-child-control-observation-gap--2026-10-13),
@@ -499,6 +500,9 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Verification:** actual discovery regression fails before the change and passes
   afterward; the general Mac runner passes all four groups without a recorder.
 - **Evidence:** [Automatic code checks](../tasks/active/automatic-code-checks.md#verification-and-review).
+  [Test selection reduction](../tasks/active/test-selection.md#local-validation)
+  applies the same split to the Windows dialog fixture. Its known foreground
+  failure remains a failed explicit native check, outside offline discovery.
 
 ## H35. Sleeping Mac display suspends a packaged WKWebView probe
 
@@ -672,6 +676,18 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   interior and even a one-unit literal RGB/alpha difference still fail.
 - **Evidence:** [L05 CI2 audit](../tasks/evidence/project-fonts.md#ci2-audit-and-corrections),
   [L07 correction](../tasks/evidence/shared-look.md#root-cause-correction-and-bounded-ci2-2026-10-31).
+
+- **Controls follow-up:** raw source PNG bytes also differ from native render
+  readback. Both targets produce source-minus-one RGBA for the six-state fixture.
+  Windows fitted reference edges differ while helper crops are uniform. Preserve
+  exact pixels and capture conditions; use independent whole-frame native
+  references. Corrected Mac admission passes all twelve crops with zero residual;
+  Windows pixels also match exactly, but reference scale1.5 differs from helper1.0.
+  Production pins `RENPY_HIGHDPI=1.0`; the reference launcher omitted it. The
+  corrected launcher and offline launch-boundary regression now pass. Windows
+  start18 also passes exact native/helper admission with matching scale1.0;
+  errors now print both actual capture conditions. See
+  [the control diagnosis](../tasks/evidence/bars-and-image-buttons.md#continuation-and-passive-helper-diagnosis-2026-11-06).
 
 ## H47. Shared Apply hides text dimensions
 

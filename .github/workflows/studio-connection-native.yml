@@ -54,10 +54,13 @@ jobs:
           node-version: 24.19.0
           cache: npm
           cache-dependency-path: app/package-lock.json
-      - name: Cold-checkout harness regressions
+      - name: Cold-checkout harness regressions and selected Windows dialog
         id: harness
         shell: bash
-        run: '"$HARNESS_PYTHON" app/scripts/run-harness-checks.py --output "$RUNNER_TEMP/studio-connection/harness"'
+        run: |
+          args=()
+          if test "$RUNNER_OS" = Windows; then args+=(--native-dialog); fi
+          "$HARNESS_PYTHON" app/scripts/run-harness-checks.py --output "$RUNNER_TEMP/studio-connection/harness" "${args[@]}"
       - name: Parse current native input script before expensive preparation
         if: runner.os == 'Windows'
         shell: powershell

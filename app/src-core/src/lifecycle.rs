@@ -649,9 +649,23 @@ impl LifecycleService {
         &mut self,
         request: ImportAssetRequest,
     ) -> Result<AuthoringMetadata, LifecycleError> {
+        self.authoring_import_asset_with_screen_revision(request, None)
+            .map(|result| result.metadata)
+    }
+
+    pub(crate) fn authoring_import_asset_with_screen_revision(
+        &mut self,
+        request: ImportAssetRequest,
+        expected_authoring_revision: Option<String>,
+    ) -> Result<crate::authoring::ImportedAsset, LifecycleError> {
         let (authority, project_id) = self.authoring_context()?;
         self.authoring
-            .import_asset(&authority, &project_id, request)
+            .import_asset_with_screen_revision(
+                &authority,
+                &project_id,
+                request,
+                expected_authoring_revision,
+            )
             .map_err(LifecycleError::Authoring)
     }
 

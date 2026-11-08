@@ -1,0 +1,69 @@
+{
+  "status": "unapproved-draft",
+  "screenId": "bars-imagebuttons",
+  "candidateVariants": ["inspector-v1", "focus-v1", "table-v1"],
+  "source": {
+    "commit": "0a6e571eb4c65ea60ce1fa446cd27d2a12985884",
+    "fingerprint": "ecd02f2dfb490297d89c1b05e5fb2787cb166868e8ea77a7d1dee72093785373",
+    "command": "npm run design:source"
+  },
+  "temporaryArtifacts": {
+    "exportPath": ".toolchains/bars-imagebuttons/comparison.html",
+    "exportSha256": "b1fac9484000ed8b8cad55d02d9ff11654a7c4415f95ad2ee59c0acf1ebd63fe",
+    "testPath": ".toolchains/bars-imagebuttons/dom-test.html",
+    "testSha256": "142ece253b45b0de530c824b26f8630c1e2a5faa9a2d9188398cff4421325e39",
+    "harnessPath": ".toolchains/bars-imagebuttons/dom-test.js",
+    "harnessSha256": "67ea25267a8fd1ef23b4ee8b3fa5233dc13a837c723a284a83d028b37fcc34b1",
+    "approvalCaptures": false,
+    "hashVerification": "Sol verified all three locally; Terra independently verified test HTML only"
+  },
+  "attempt2": {
+    "threadLink": "<t3-thread://v2/88c3ca41-b202-47bf-8d09-09bd3411e945/thread:delegated-task:command%3Amcp%3A22f3a769-ec3f-4d02-aa0e-15db9ae78d4f%3Adelegate-task%3Abars-imagebuttons-dom-review-02>",
+    "tool": "html_preview",
+    "htmlInput": "Exact temporary testPath bytes above; full calls retained in attempt thread timeline",
+    "calls": [
+      {
+        "width": 1280,
+        "appearance": "dark",
+        "isError": false,
+        "textOutput": {"width":1280,"contentHeight":820,"capturedHeight":820,"consoleMessages":[],"screenshot":{"mimeType":"image/png","width":1280,"height":820}}
+      },
+      {
+        "width": 560,
+        "appearance": "dark",
+        "isError": false,
+        "textOutput": {"width":560,"contentHeight":820,"capturedHeight":820,"consoleMessages":[],"screenshot":{"mimeType":"image/png","width":560,"height":820}}
+      }
+    ],
+    "receiptName": "BAR_IMAGEBUTTON_DOM_RECEIPT",
+    "receiptObserved": false,
+    "result": "inconclusive",
+    "firstUnverifiedBoundary": "Injected script completion was not observed",
+    "passedInteractionAssertions": []
+  },
+  "parentFocusedCheck": {
+    "evidence": "synthetic DOM callbacks only",
+    "prototypeSourceChanged": false,
+    "approvalCaptures": false,
+    "actualToolInputUtf8Sha256": "0f2c60560176c287c9162eb0d5b35800e281b37d7e74ddb095c31d6be50c1ff8",
+    "lfNormalizedPreparationSha256": "c04a174acbff2592dc6fb9aa4490382030f7b750beadeca3bee7eece2e53b012",
+    "payloadCharacters": 404936,
+    "crlfPairs": 87,
+    "metadataCorrection": "Initial parentTestSHA256 named the pre-write LF-normalized value. Both actual calls used ReadAllText unchanged; raw CRLF payload hash above is authoritative.",
+    "originalTestUnchanged": true,
+    "harnessChanges": ["MutationObserver mount wait with original 1500ms bound", "real dialog close-event waits", "microtask flush for synchronous callbacks", "progress and short completion receipts"],
+    "assertionsRemovedOrWeakened": false,
+    "completions": [
+      {"width":560,"height":800,"passedCount":9,"failed":null,"evidence":"synthetic DOM callbacks only"},
+      {"width":1280,"height":800,"passedCount":9,"failed":null,"evidence":"synthetic DOM callbacks only"}
+    ],
+    "appearance": "dark",
+    "contentHeight": 820,
+    "capturedHeight": 820,
+    "result": "passed-focused-synthetic-dom",
+    "originalArtifacts": ".toolchains/51-52/prototype-dom-review/ in coordinator checkout",
+    "retainedCopy": ".toolchains/bars-imagebuttons/parent-dom-review/ in design checkout",
+    "exactOutputsOwner": "result.json in those ignored directories and coordinator thread timeline"
+  },
+  "unproved": ["trusted keyboard/Escape", "native input and file picker", "real source/core/runtime", "full design:check", "human design approval"]
+}

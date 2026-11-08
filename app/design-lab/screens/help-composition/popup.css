@@ -11,6 +11,10 @@
 .compose-popup .workflow-removal-toast[hidden] { display:none; }
 .compose-popup .workflow-removal-toast span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
 .compose-popup .workflow-removal-toast .button { flex:none; }
+@media(max-width:759px) {
+  /* The compact editor is not a scroller until the dialog locks overflow. */
+  .compose-popup .compose-editor { scrollbar-gutter:auto; }
+}
 @media(max-width:599px) {
   .compose-popup .workflow-removal-dialog { padding:20px; }
   .compose-popup .workflow-removal-toast { flex-wrap:wrap; }

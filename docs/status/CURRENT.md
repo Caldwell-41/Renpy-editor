@@ -11,8 +11,8 @@ The revision changes only the combined variant. It adds a Brass and slate palett
 each mode, generated visual-novel art under `art/`, a Branch path bar of two-way switches,
 a coloured route line over open branches in Tracks and Reel, visual beat editors with a
 picker sheet for backgrounds and expressions, a one-click Add a beat dialog, every lane
-in writing focus Tracks, a typed condition rule builder, arithmetic Set variable (#88), Choice option bodies with picked state and reordering (#99), empty-branch slots in Tracks and a wrapping Branch path. The focused check passes 38 groups and `npm run design:check`
-passes. Evidence and review screenshots are in ignored `.toolchains/story-combined/revision/`.
+in writing focus Tracks, a typed condition rule builder, arithmetic Set variable (#88), Choice option bodies with picked state and reordering (#99), empty-branch slots in Tracks and a wrapping Branch path. The focused check passes 38 groups. After the #86 merge, `npm run design:check` checks one
+selected screen and layout. Evidence and review screenshots are in ignored `.toolchains/story-combined/revision/`.
 The preview server on port 5176 serves this worktree; port 5175 was found stopped.
 Kris approved updating `docs/UI.md` on 2026-11-08: it now names Brass and slate and the combined Story mock as the target design. Production still uses copper and teal until integration.
 
@@ -53,6 +53,52 @@ The three-mock comparison and score-only rescore are complete. Current reference
 code is `app/design-lab/screens/story-revamp/`; images and browser evidence remain
 under ignored `council-v3/round-5-fixes/` in the primary checkout. Keep the existing
 LAN review available. Earlier acceptance and protected recovery remain below.
+
+## Test selection reduction merged
+
+[Issue #85](https://github.com/Caldwell-41/Renpy-editor/issues/85) is closed.
+[PR #86](https://github.com/Caldwell-41/Renpy-editor/pull/86) and
+[PR #107](https://github.com/Caldwell-41/Renpy-editor/pull/107) are squash-merged into
+`codex/phase3b-screen-designer`. Docs-only PRs skip code checks, dead qualification
+stacks are gone, result gates share one check, and every browser and dispatch fixture
+runs in the PR frontend job. The [maintenance brief](../tasks/active/test-selection.md)
+owns the cuts and validation. No SDK/package campaign or product acceptance was selected.
+
+## Variable and control-state samples accepted
+
+[L20 #54](https://github.com/Caldwell-41/Renpy-editor/issues/54) is accepted for
+its four bounded criteria and merged through [PR #84](https://github.com/Caldwell-41/Renpy-editor/pull/84)
+into `codex/phase3b-screen-designer`. The canvas renders typed Text and textbutton
+label samples, six button and imagebutton states, bar values and bar states. L19
+and L20 share one qualification runner. Rendering candidate `bc357a31` passes all
+22 exact comparisons on Windows and Mac. [Evidence](../tasks/evidence/sample-fidelity.md#review-corrections-and-expanded-scope-2026-11-07)
+owns the changes, checks and criteria; #54 owns the merge, CI receipts and closed
+SDK accounting (Mac 16/16, Windows 20/24). With #46/#50/#54 accepted, B08 #30 keeps
+only its aggregate visual acceptance open. No successor work is selected.
+
+## Integer bars and image buttons accepted
+
+#51/#52 are accepted through [PR #83](https://github.com/Caldwell-41/Renpy-editor/pull/83),
+merged into `codex/phase3b-screen-designer` as `46fdbc1b`.
+[#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) owns the PR, run and
+audit receipts. [Correction audit](../tasks/evidence/bars-and-image-buttons.md#five-review-corrections-and-parent-audit-complete-2026-11-06)
+records the review corrections. Runtime, package and helper evidence below keeps
+its original producing candidates.
+
+| Capability | Verified evidence | Scope retained |
+| --- | --- | --- |
+| Control editing | Actual UI/core journey, five review regressions, 378 frontend tests and both packaged control journeys pass on recorded candidates. Final coordinator review maps every original criterion. | Original Standards3/Spec3 corrections remain self-verified; footer correction has parent rendering proof. No new review panel. |
+| Runtime and packages | Windows and Mac normal/fixture-preview matrices pass at both aspects. Windows corrected package/native and Mac signed package/native journeys pass. | Producing candidates remain distinct. Physical input and native editor preview routing are separate claims. |
+| Helper rendering | Both targets pass all twelve control crops, 614400 RGBA bytes per target with zero residual, matching physical dimensions and drawing scale, source invariance and cooperative cleanup. | Windows DPI omission is fixed at the reference launch boundary. Failed historical wrappers remain preserved. |
+| Approved design | A2 source37d29ca1 and thirteen captures stay pinned. The selected approval/source/capture and changed-source-refusal check passes. | The full-gallery gate is retired. Broader canvas and human acceptance remain separate. |
+
+Windows SDK use ends at18/20; no further start is selected. #51 owns all cumulative
+counts. No additional capped operation is selected, with zero reservations or
+uncertain starts. Three Windows OS1314 symlink cases remain unqualified, and two unrelated
+untracked recovery receipts retain newline failures; tracked-file validation passes.
+[Handover](HANDOVER.md#integer-bars-and-image-buttons-closeout) owns recovery.
+[Final proof and boundaries](../tasks/evidence/bars-and-image-buttons.md#root-cause-correction-and-both-target-local-verification-complete-2026-11-06)
+retain exact identities and prior failures. Wider #54/Phase3B acceptance remains separate.
 
 ## Variable text, ordered actions and nested canvas accepted
 

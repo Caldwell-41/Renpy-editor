@@ -276,30 +276,11 @@ const FONT: &[u8] =
 const IMAGE: &[u8] =
     include_bytes!("../../../../tests/fixtures/phase-3b-screens/ui-image/seal.png");
 
-fn restore_fidelity_files(root: &std::path::Path, accepted: &Value) {
-    for (path, file) in accepted["files"].as_object().unwrap() {
-        let relative = crate::transaction::RelativePath::new(path.clone()).unwrap();
-        let bytes = file["text"].as_str().unwrap().as_bytes();
-        assert_eq!(hex::encode(Sha256::digest(bytes)), file["sha256"]);
-        let destination = root.join(relative.as_str());
-        fs::create_dir_all(destination.parent().unwrap()).unwrap();
-        fs::write(destination, bytes).unwrap();
-    }
-    for (kind, bytes) in [("font", FONT), ("uiImage", IMAGE)] {
-        let asset = accepted["assets"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .find(|asset| asset["kind"] == kind)
-            .unwrap();
-        assert_eq!(hex::encode(Sha256::digest(bytes)), asset["sha256"]);
-        let relative = crate::transaction::RelativePath::new(
-            asset["relativePath"].as_str().unwrap().to_owned(),
-        )
-        .unwrap();
-        let destination = root.join(relative.as_str());
-        fs::create_dir_all(destination.parent().unwrap()).unwrap();
-        fs::write(destination, bytes).unwrap();
+fn fidelity_asset_bytes(asset: &Value) -> Vec<u8> {
+    match asset["kind"].as_str().unwrap() {
+        "font" => FONT.to_vec(),
+        "uiImage" => IMAGE.to_vec(),
+        kind => panic!("unexpected L19 asset kind {kind}"),
     }
 }
 
@@ -488,7 +469,7 @@ fn nested_fidelity_exports_accepted_source_assets_and_matched_plans_without_exec
         LifecycleService::prepare_source_foundation_probe(replay_profile.clone()).unwrap();
     replay.close().unwrap();
     let replay_root = replay_profile.join("synthetic-project");
-    restore_fidelity_files(&replay_root, &accepted);
+    sdk::capture::restore_accepted(&replay_root, &accepted, fidelity_asset_bytes);
     replay.open_path(&replay_root).unwrap();
     for case in &cases {
         assert_eq!(

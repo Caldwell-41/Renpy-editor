@@ -16,5 +16,4 @@ export const definition: Omit<LabScreen, "approval"> = {
     { id: "workbench", title: "Docked workbench", load: () => import("./workbench.ts") },
     { id: "focus", title: "Focus editor", load: () => import("./focus.ts") },
   ],
-  check: "./screens/source/check.mjs",
 };

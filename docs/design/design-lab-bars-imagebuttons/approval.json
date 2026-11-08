@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "screenId": "bars-imagebuttons",
+  "currentApproved": "inspector-v2",
+  "revisions": [
+    {
+      "id": "inspector-v2",
+      "variantId": "inspector-v2",
+      "approval": {
+        "date": "2026-11-06",
+        "decision": "Kris replied \"Approved\" (message 961cbbd1-c3ac-4195-908a-8c320598fc66, design-chat position 978) directly after the final annotated comparison and runnable candidate explicitly identified A2 inspector-v2, source 37d29ca1. The full approved source is 37d29ca180dc81cb350ff8ff99bfaee90e65cea9. Decision context and limitations are retained in APPROVED-HANDOFF.md.",
+        "reason": null,
+        "supersedes": null,
+        "source": {
+          "commit": "37d29ca180dc81cb350ff8ff99bfaee90e65cea9",
+          "fingerprint": "fadc5fa2591ac31edec149b871505fcfa20c54b26e622d44e60a74b0b8ee0c80"
+        },
+        "captures": [
+          {
+            "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/button-1280.png",
+            "sha256": "e6a4f268fd3693d7fb8a31b9b62eeb06c0ea02101a0f884d2acbd18ee87352d7",
+            "state": "button",
+            "theme": "dark",
+            "width": 1280,
+            "height": 820,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/bar-1280.png",
+            "sha256": "72f2acef98a82d4c4a08f5a1470954f267432197a8b4e2c616a475a43893ef92",
+            "state": "bar",
+            "theme": "dark",
+            "width": 1280,
+            "height": 820,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/compact-overview-560.png",
+            "sha256": "7ce752d24352757fa6e279302855256e674b3706cade899fffdb932b71a19771",
+            "state": "compact-overview",
+            "theme": "dark",
+            "width": 560,
+            "height": 820,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/compact-editing-560.png",
+            "sha256": "5b84d17c214fdfab53df19c1597bc6af2f0ae9ef39c412644fd3529a2f3b125a",
+            "state": "compact-editing",
+            "theme": "dark",
+            "width": 560,
+            "height": 820,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/actions-1280.png",
+            "sha256": "2c3db1ae2bfbf7412ea41240007476dc9f1a85a6b23377cbef134ec07340fc62",
+            "state": "actions",
+            "theme": "dark",
+            "width": 1280,
+            "height": 820,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/picker-1280.png",
+            "sha256": "a1c38ee05e8b70938438a79c843dc688d940783e80d1086670a6c82a1a4c50b0",
+            "state": "picker",
+            "theme": "dark",
+            "width": 1280,
+            "height": 820,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/invalid-size-1280.png",
+            "sha256": "efbd78e41b6758646cec9693f560188b6cc977a9e07ec1c38c2605b715bbe76d",
+            "state": "invalid-size",
+            "theme": "dark",
+            "width": 1280,
+            "height": 820,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/missing-asset-1280.png",
+            "sha256": "c649623738e177478523dbb2e359cab517e63bd292b49a6ff087046b9fca4e8b",
+            "state": "missing-asset",
+            "theme": "dark",
+            "width": 1280,
+            "height": 820,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/missing-asset-560.png",
+            "sha256": "851c3df3f9443b71cdb4361080b8ad9859becac332b3c51615db77d3cf1a02f2",
+            "state": "missing-asset",
+            "theme": "dark",
+            "width": 560,
+            "height": 820,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/stale-1280.png",
+            "sha256": "8361da81a91b726c9d003e434febc4fc425a83ba542736073790c3de65bcf9c3",
+            "state": "stale",
+            "theme": "dark",
+            "width": 1280,
+            "height": 820,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/stale-560.png",
+            "sha256": "96f301c60cd257a85462226852e092d788c925e4a3c667b83970fa6fb2934947",
+            "state": "stale",
+            "theme": "dark",
+            "width": 560,
+            "height": 820,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/action-error-1280.png",
+            "sha256": "95db4d4d70a13fc0bbac463caf665efec4f1abcdeb6b86c4e88d686a4ced8a39",
+            "state": "action-error",
+            "theme": "dark",
+            "width": 1280,
+            "height": 820,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/design-lab-bars-imagebuttons/captures/inspector-v2-corrected/action-error-560.png",
+            "sha256": "edf161f73804fdb83684e0946d6ecb273f9c92c1832d1728165385d7261ff6ec",
+            "state": "action-error",
+            "theme": "dark",
+            "width": 560,
+            "height": 820,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "Keep the existing Screens Choose / Design / Use in Story flow, production styles/icons and continuous A2 inspector with plain section links.",
+          "Add a control to the selected qualified parent; editing keeps its current parent. No reparent field or new API.",
+          "Bar binding chooses an existing integer by stable ID; retain canonical decimal bounds and use core validation for exact engine endpoints and positive span.",
+          "Bar filled/empty/thumb colors are nullable literal colors; clearing restores native defaults.",
+          "Image button uses six typed actual UI-image references with UUID/hash. Normal is required and other states are optional. Display-only fallback thumbnails never write references.",
+          "Native fallback is hover -> normal, disabled -> normal, selected -> normal, selectedHover -> hover -> normal, selectedDisabled -> disabled -> normal. selectedHover never falls back to selected.",
+          "One displayed width/height pair applies to every explicit image-state asset through bounded native Transform scaling. Aspect linking is opt-in per draft and uses the current Normal image dimensions. Preserve existing layout/order without duplicate xsize/ysize edits.",
+          "Reuse the existing context-valid ordered typed action owner, eight-action limit and Finish-last rule.",
+          "One combined Apply covers appearance, binding/actions, displayed size and layout. Cancel/no-op add no history. Invalid/stale/missing/type-changed input retains the owning draft and focus; no silent refresh or rebinding.",
+          "Keep drafts outside transient DOM with captured source/authoring revisions through navigation, remount and unrelated accepted edits. Restore picker and redraw focus; preserve ordinary numeric and keyboard edits.",
+          "Preserve real transactional Undo/Redo, Source and reopen behavior. The fictional prototype does not qualify persistence or runtime behavior.",
+          "Six marked inert editor states and sample values never execute game code/actions or persist runtime defaults. Compact editing uses one main scroll and reachable navigation/commit controls."
+        ],
+        "deviations": [
+          "The disclosed compact stale-error capture requires scrolling to expose the full commit footer. Production integration must keep commit controls reachable; this is not a waived product gate.",
+          "Touched actions restored to original values can retain Unsaved: Actions wording until no-op Apply; no history is added.",
+          "The mock uses fictional images, memory-only service callbacks and a schematic canvas. Preserve existing real numeric units/anchors/order, composition, catalog/import and Source owners during integration.",
+          "Comparison captures are dark at CSS content widths 1280 or 560, content/PNG height 820 and scale 1; html_preview inner viewport height was 800. Light and other conditions are outside recorded comparison coverage.",
+          "Sixteen focused synthetic callback groups and actual html_preview renders do not establish trusted keyboard/Escape, native pointer/file-picker, real core/source/runtime or the full repository design:check. These remain separate required verification."
+        ]
+      }
+    },
+    {
+      "id": "inspector-v1",
+      "variantId": "inspector-v1",
+      "approval": null
+    },
+    {
+      "id": "focus-v1",
+      "variantId": "focus-v1",
+      "approval": null
+    },
+    {
+      "id": "table-v1",
+      "variantId": "table-v1",
+      "approval": null
+    }
+  ]
+}

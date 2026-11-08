@@ -1,4 +1,5 @@
 //! A source-derived, data-only description. No project expressions enter the helper.
+pub use super::controls::ControlButtonState as ButtonState;
 use super::*;
 use serde_json::{Map, Value};
 
@@ -9,6 +10,10 @@ mod tests;
 #[cfg(test)]
 #[path = "nested_canvas_tests.rs"]
 mod nested_tests;
+
+#[cfg(test)]
+#[path = "sample_fidelity_tests.rs"]
+mod sample_tests;
 
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -38,6 +43,14 @@ pub struct Request {
     pub image_addition: Option<ImageDraft>,
     #[serde(default)]
     pub text_styles: Vec<TextStyleDraft>,
+    #[serde(default)]
+    pub bar_samples: Vec<controls::BarDraft>,
+    #[serde(default)]
+    pub bar_addition: Option<controls::BarDraft>,
+    #[serde(default)]
+    pub image_button_samples: Vec<controls::ImageButtonDraft>,
+    #[serde(default)]
+    pub image_button_addition: Option<controls::ImageButtonDraft>,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -70,16 +83,6 @@ pub struct Addition {
     pub parent_start: usize,
     pub kind: String,
     pub text: String,
-}
-
-#[derive(Clone, Copy, Debug, Default, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub enum ButtonState {
-    #[default]
-    Normal,
-    Hover,
-    Selected,
-    Disabled,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -266,7 +269,18 @@ impl AuthoringService {
             || request.text_samples.len() > MAX_NODES
             || request.image_samples.len() > MAX_NODES
             || request.text_styles.len() > MAX_NODES
-            || request.addition.is_some() && request.image_addition.is_some()
+            || request.bar_samples.len() > MAX_NODES
+            || request.image_button_samples.len() > MAX_NODES
+            || [
+                request.addition.is_some(),
+                request.image_addition.is_some(),
+                request.bar_addition.is_some(),
+                request.image_button_addition.is_some(),
+            ]
+            .into_iter()
+            .filter(|v| *v)
+            .count()
+                > 1
         {
             return Err(SceneError::InvalidPayload);
         }
@@ -294,6 +308,7 @@ impl AuthoringService {
             request.path,
             revision.sha256.clone(),
             Some(&style_inventory),
+            None,
         )?;
         style_index.resolve(&mut document, &bytes)?;
         let screen = document
@@ -314,6 +329,11 @@ impl AuthoringService {
         };
         let source = source_lines(&bytes)?;
         for node in &screen.nodes {
+            let image_draft = request
+                .image_button_samples
+                .iter()
+                .any(|s| s.node_start == Some(node.span.start))
+                && control_source::image_paths(&bytes, node).is_some();
             if expansion.remaining == 0 {
                 plan.limits.push("Expanded component node limit".into());
                 break;
@@ -395,6 +415,15 @@ impl AuthoringService {
                 if node.numeric_layout.is_some() && !layout::aliases(key).is_empty() {
                     continue;
                 }
+                if node.kind == "bar"
+                    && control_source::BAR_KEYS.contains(&key)
+                    && node.bar_binding.is_some()
+                    || node.kind == "imagebutton"
+                        && control_source::IMAGE_KEYS.contains(&key)
+                        && (node.image_button_appearances.is_some() || image_draft)
+                {
+                    continue;
+                }
                 if node.text_properties.is_some()
                     && super::text::FIELDS
                         .iter()
@@ -441,11 +470,19 @@ impl AuthoringService {
                         .as_f64()
                         .is_some_and(|v| v.is_finite() && v >= 0.0 && v <= MAX_PIXELS as f64),
                     ("padding", Some(Value::Array(_))) => true,
-                    (
-                        "color" | "text_color" | "background" | "hover_background" | "hover_color"
-                        | "hover_text_color",
-                        Some(Value::String(s)),
-                    ) => {
+                    (key, Some(Value::String(s)))
+                        if matches!(
+                            key,
+                            "color"
+                                | "text_color"
+                                | "background"
+                                | "hover_background"
+                                | "hover_color"
+                                | "hover_text_color"
+                        ) || node.kind == "bar"
+                            && node.bar_binding.is_some()
+                            && control_source::BAR_STATE_KEYS.contains(&key) =>
+                    {
                         s.starts_with('#')
                             && matches!(s.len(), 4 | 5 | 7 | 9)
                             && s[1..].bytes().all(|c| c.is_ascii_hexdigit())
@@ -493,6 +530,36 @@ impl AuthoringService {
                         .push(format!("Unresolved {fields} at {}", node.span.start)),
                 }
             }
+            if node.kind == "bar" {
+                if let Some(binding) = node.bar_binding.as_ref() {
+                    properties.extend(control_source::bar_canvas(
+                        binding,
+                        node.bar_appearance.as_ref().unwrap(),
+                        expansion.variables,
+                        expansion.values,
+                    )?);
+                } else {
+                    plan.limits
+                        .push(format!("Unresolved bar binding at {}", node.span.start));
+                }
+            }
+            if node.kind == "imagebutton" && !image_draft {
+                if let Some(appearances) = node.image_button_appearances.as_ref() {
+                    self.imagebutton_canvas(
+                        project,
+                        &style_inventory.source_map.project_id,
+                        appearances,
+                        &mut properties,
+                        &mut plan.dependencies,
+                    )?;
+                    imagebutton_dimensions(node, &mut properties)?;
+                } else {
+                    plan.limits.push(format!(
+                        "Unresolved image-button appearances at {}",
+                        node.span.start
+                    ));
+                }
+            }
             let binding = bindings::inspect_bindings(node, expansion.variables);
             let literal = bindings::resolve_template(node, expansion.variables, expansion.values)?
                 .or_else(|| node.literal.clone());
@@ -532,6 +599,9 @@ impl AuthoringService {
                 .iter_mut()
                 .find(|n| n.start == draft.node_start && n.kind != "screen")
                 .ok_or(SceneError::InvalidPayload)?;
+            if node.kind == "imagebutton" {
+                return Err(SceneError::OpaqueBoundary);
+            }
             node.properties.insert("xsize".into(), draft.width.into());
             node.properties.insert("ysize".into(), draft.height.into());
         }
@@ -559,12 +629,31 @@ impl AuthoringService {
         let mut sampled = HashSet::new();
         let mut layouts = HashSet::new();
         let mut image_layouts = std::collections::BTreeMap::new();
+        let mut control_layouts = std::collections::BTreeMap::new();
+        let control_start = screen.nodes.iter().map(|n| n.span.end).max().unwrap_or(0) + 1;
         for draft in request.layouts {
             if !layouts.insert(draft.node_start)
                 || seen.contains(&draft.node_start)
                 || positioned.contains(&draft.node_start)
             {
                 return Err(SceneError::InvalidPayload);
+            }
+            if request
+                .bar_samples
+                .iter()
+                .any(|s| s.node_start == Some(draft.node_start))
+                || request
+                    .image_button_samples
+                    .iter()
+                    .any(|s| s.node_start == Some(draft.node_start))
+                || (draft.node_start == control_start
+                    && (request.bar_addition.is_some() || request.image_button_addition.is_some()))
+            {
+                if draft.values.contains_key("xsize") || draft.values.contains_key("ysize") {
+                    return Err(SceneError::InvalidPayload);
+                }
+                control_layouts.insert(draft.node_start, draft.values);
+                continue;
             }
             if request
                 .image_samples
@@ -578,6 +667,12 @@ impl AuthoringService {
                 .nodes
                 .iter()
                 .find(|node| node.span.start == draft.node_start)
+                .filter(|node| {
+                    !draft
+                        .values
+                        .keys()
+                        .any(|k| control_source::image_button_size_field(&node.kind, k))
+                })
                 .and_then(|node| node.numeric_layout.as_ref())
                 .ok_or(SceneError::InvalidPayload)?;
             let values = numeric.changed(&draft.values)?;
@@ -849,6 +944,120 @@ impl AuthoringService {
                 }
             }
         }
+        let mut control_seen = HashSet::new();
+        for (addition, draft) in request
+            .bar_samples
+            .into_iter()
+            .map(|d| (false, d))
+            .chain(request.bar_addition.into_iter().map(|d| (true, d)))
+        {
+            let target = control_target(
+                &bytes,
+                &screen,
+                draft.node_start,
+                draft.parent_start,
+                addition,
+                "bar",
+            )?;
+            if !addition
+                && (seen.contains(&target.span.start)
+                    || positioned.contains(&target.span.start)
+                    || !control_seen.insert(target.span.start))
+            {
+                return Err(SceneError::InvalidPayload);
+            }
+            let authoring = self.require_action_authoring(
+                project,
+                &style_inventory.source_map.project_id,
+                &draft.expected_authoring_revision,
+            )?;
+            let values = control_source::bar_values(
+                &draft.binding,
+                &draft.appearance,
+                &authoring.variables,
+            )?;
+            let start = if addition {
+                control_start
+            } else {
+                target.span.start
+            };
+            let edits = control_layouts.remove(&start).unwrap_or_default();
+            let (source, id) = control_source::prepare(
+                &bytes,
+                &screen,
+                &source_path,
+                "bar",
+                target,
+                addition,
+                values,
+                draft.width,
+                draft.height,
+                edits,
+            )?;
+            let mut props = control_source::bar_canvas(
+                &draft.binding,
+                &draft.appearance,
+                &authoring.variables,
+                expansion.values,
+            )?;
+            control_numeric(&source, &screen.name, &id, &mut props)?;
+            put_control(&mut plan, start, target, addition, "bar", props)?;
+        }
+        for (addition, draft) in request
+            .image_button_samples
+            .into_iter()
+            .map(|d| (false, d))
+            .chain(request.image_button_addition.into_iter().map(|d| (true, d)))
+        {
+            let target = control_target(
+                &bytes,
+                &screen,
+                draft.node_start,
+                draft.parent_start,
+                addition,
+                "imagebutton",
+            )?;
+            if !addition
+                && (seen.contains(&target.span.start)
+                    || positioned.contains(&target.span.start)
+                    || !control_seen.insert(target.span.start))
+            {
+                return Err(SceneError::InvalidPayload);
+            }
+            let (values, _) = self.imagebutton_values(
+                project,
+                &style_inventory.source_map.project_id,
+                &draft.appearances,
+            )?;
+            let start = if addition {
+                control_start
+            } else {
+                target.span.start
+            };
+            let edits = control_layouts.remove(&start).unwrap_or_default();
+            let (source, id) = control_source::prepare(
+                &bytes,
+                &screen,
+                &source_path,
+                "imagebutton",
+                target,
+                addition,
+                values,
+                draft.width,
+                draft.height,
+                edits,
+            )?;
+            let mut props = Map::new();
+            self.imagebutton_canvas(
+                project,
+                &style_inventory.source_map.project_id,
+                &draft.appearances,
+                &mut props,
+                &mut plan.dependencies,
+            )?;
+            control_numeric(&source, &screen.name, &id, &mut props)?;
+            put_control(&mut plan, start, target, addition, "imagebutton", props)?;
+        }
         let mut next_start = bytes
             .len()
             .max(plan.nodes.iter().map(|node| node.start).max().unwrap_or(0))
@@ -922,6 +1131,10 @@ impl AuthoringService {
                         image_samples: vec![],
                         image_addition: None,
                         text_styles: vec![],
+                        bar_samples: vec![],
+                        bar_addition: None,
+                        image_button_samples: vec![],
+                        image_button_addition: None,
                     },
                     &active,
                     expansion,
@@ -1071,6 +1284,132 @@ impl AuthoringService {
         plan.available = plan.limits.is_empty();
         Ok(plan)
     }
+}
+
+fn control_target<'a>(
+    bytes: &[u8],
+    screen: &'a Screen,
+    node_start: Option<usize>,
+    parent_start: Option<usize>,
+    addition: bool,
+    kind: &str,
+) -> Result<&'a Node, SceneError> {
+    let start = match (addition, node_start, parent_start) {
+        (true, None, Some(p)) => p,
+        (false, Some(n), None) => n,
+        _ => return Err(SceneError::InvalidPayload),
+    };
+    let target = screen
+        .nodes
+        .iter()
+        .find(|n| n.span.start == start)
+        .ok_or(SceneError::InvalidPayload)?;
+    if addition {
+        if !composition::can_add(screen, target, kind) {
+            return Err(SceneError::OpaqueBoundary);
+        }
+    } else if target.kind != kind
+        || target.id.is_none()
+        || (kind == "bar" && target.bar_binding.is_none())
+        || (kind == "imagebutton" && control_source::image_paths(bytes, target).is_none())
+    {
+        return Err(SceneError::OpaqueBoundary);
+    }
+    Ok(target)
+}
+
+fn control_numeric(
+    bytes: &[u8],
+    screen_name: &str,
+    id: &str,
+    properties: &mut Map<String, Value>,
+) -> Result<(), SceneError> {
+    let document = inspect(bytes, String::new(), String::new())?;
+    let node = document
+        .screens
+        .iter()
+        .find(|s| s.name == screen_name)
+        .and_then(|s| s.nodes.iter().find(|n| n.id.as_deref() == Some(id)))
+        .ok_or(SceneError::InvariantBlocked)?;
+    properties.extend(
+        node.numeric_layout
+            .as_ref()
+            .ok_or(SceneError::OpaqueBoundary)?
+            .canvas_properties()
+            .map_err(|_| SceneError::OpaqueBoundary)?,
+    );
+    if node.kind == "imagebutton" {
+        imagebutton_dimensions(node, properties)?;
+    }
+    Ok(())
+}
+
+/// The renderer sizes state images with two explicit dimensions. Resolve the
+/// accepted numeric alias here without changing its authoritative source bytes.
+fn imagebutton_dimensions(
+    node: &Node,
+    properties: &mut Map<String, Value>,
+) -> Result<(), SceneError> {
+    let numeric = node
+        .numeric_layout
+        .as_ref()
+        .ok_or(SceneError::OpaqueBoundary)?;
+    properties.remove("xysize");
+    for key in ["xsize", "ysize"] {
+        properties.insert(
+            key.into(),
+            numeric
+                .values
+                .get(key)
+                .ok_or(SceneError::OpaqueBoundary)?
+                .json(),
+        );
+    }
+    Ok(())
+}
+
+fn put_control(
+    plan: &mut Plan,
+    start: usize,
+    target: &Node,
+    addition: bool,
+    kind: &str,
+    properties: Map<String, Value>,
+) -> Result<(), SceneError> {
+    if addition {
+        plan.nodes.push(CanvasNode {
+            start,
+            parent: Some(target.span.start),
+            selection_start: None,
+            kind: kind.into(),
+            literal: None,
+            properties,
+        });
+    } else {
+        let node = plan
+            .nodes
+            .iter_mut()
+            .find(|n| n.start == start)
+            .ok_or(SceneError::InvalidPayload)?;
+        let numeric = target
+            .numeric_layout
+            .as_ref()
+            .ok_or(SceneError::OpaqueBoundary)?
+            .canvas_properties()
+            .map_err(|_| SceneError::OpaqueBoundary)?;
+        let control_keys = if kind == "bar" {
+            control_source::BAR_KEYS
+        } else {
+            control_source::IMAGE_KEYS
+        };
+        node.properties.retain(|key, _| {
+            !control_keys.contains(&key.as_str())
+                && !(kind == "bar" && key == "range")
+                && !numeric.contains_key(key)
+        });
+        node.properties.extend(properties);
+    }
+    Ok(())
 }
 
 fn scalar(raw: &str) -> bool {

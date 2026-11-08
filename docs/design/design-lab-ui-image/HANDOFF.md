@@ -24,7 +24,8 @@ Production files and dependency lockfiles are unchanged.
 [Refinement notes](REFINEMENT.md) explain control choices, sample behavior and limits.
 [Retained captures](captures/inspector-v2/) cover both baseline themes/sizes, adding,
 reference failures, pending/conflicted drafts, invalid size, import, empty search,
-replacement review and compact editing. Dynamic states follow `refined-check.mjs`.
+replacement review and compact editing. The historical `refined-check.mjs` is retired;
+use [focused verification](../../../app/design-lab/README.md#focused-verification) for current reviews.
 
 [Approved wide preview](http://127.0.0.1:5176/preview.html?screen=ui-image&variant=refined&state=placed&theme=dark&viewport=wide).
 [Compact preview](http://127.0.0.1:5176/preview.html?screen=ui-image&variant=refined&state=placed&theme=dark&viewport=compact).

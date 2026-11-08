@@ -68,7 +68,8 @@ Failed, cancelled or skipped required checks are not passes. No package matrix f
 
 ## Read the relevant reference
 
-- Browser UI mockups or component previews: read [Design Lab](app/design-lab/README.md).
+- Browser UI mockups, component previews or lab check selection: read
+  [Design Lab](app/design-lab/README.md#focused-verification).
   For promotion or live app implementation of approved designs, read
   [Design integration](app/design-lab/INTEGRATION.md) before edits.
   For non-trivial UI, layout or copy changes, show prototypes and obtain the user's

@@ -18,5 +18,4 @@ export const definition: Omit<LabScreen, "approval"> = {
     { id: "library", title: "B · Style library & two previews", load: () => import("./library.ts") },
     { id: "inline", title: "C · Inline review worksheet", load: () => import("./inline.ts") },
   ],
-  check: "./screens/shared-look/check.mjs",
 };

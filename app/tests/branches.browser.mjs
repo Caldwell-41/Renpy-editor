@@ -1,3 +1,4 @@
+// fixture: skip run by quality.yml and production-scaffold.yml.
 // Real service fixture + unchanged production renderer. Synthetic Chromium input only.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";

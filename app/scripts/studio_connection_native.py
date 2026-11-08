@@ -12,11 +12,13 @@ import os
 from pathlib import Path
 import platform
 import shutil
+import struct
 import subprocess
 import tempfile
 import threading
 import time
 import uuid
+import zlib
 
 APP = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location('legacy_windows_credentials', APP / 'scripts/windows-studio-credentials.py')
@@ -42,6 +44,52 @@ CHECKS = {1: ['Fixed Windows phase selected', 'Shared v2 profiles and foreign cl
               'Recovery maintenance disclosure is available', 'Recovery Retry is rendered in an open maintenance section'] + legacy.RELOAD_CHECKS}
 for phase in CHECKS:
     CHECKS[phase] += ['Explicit authenticated discovery completed in this action', 'Discovery did not persist profile changes'] * len(SCHEDULE[phase])
+
+
+def validate_capture(path, capture):
+    # Check PNG framing, dimensions, digest and nonblank range without a decoder
+    # package. An apparent header followed by junk is rejected.
+    data = Path(path).read_bytes()
+    if data[:8] != b'\x89PNG\r\n\x1a\n' or data[12:16] != b'IHDR' or len(data) < 512:
+        raise ValueError('Native PNG missing or invalid')
+    dimensions = list(struct.unpack('>II', data[16:24]))
+    if dimensions != [capture.get('width'), capture.get('height')] or not 100 <= min(dimensions) or max(dimensions) > 4096:
+        raise ValueError('Native PNG actual dimensions mismatch')
+    if capture.get('sha256') != hashlib.sha256(data).hexdigest() or capture.get('sampleRange', 0) < 20:
+        raise ValueError('Native PNG changed or blank')
+    offset, compressed, ended = 8, bytearray(), False
+    depth = channels = None
+    while offset < len(data):
+        if offset + 12 > len(data):
+            raise ValueError('Truncated PNG chunk')
+        size = struct.unpack('>I', data[offset:offset+4])[0]
+        end = offset + 12 + size
+        if end > len(data):
+            raise ValueError('Truncated PNG data')
+        kind, payload = data[offset+4:offset+8], data[offset+8:offset+8+size]
+        if zlib.crc32(kind + payload) & 0xffffffff != struct.unpack('>I', data[offset+8+size:end])[0]:
+            raise ValueError('PNG CRC mismatch')
+        if kind == b'IHDR':
+            if offset != 8 or size != 13:
+                raise ValueError('Invalid PNG header')
+            width, height, depth, color, compression, filtering, interlace = struct.unpack('>IIBBBBB', payload)
+            channels = {2: 3, 6: 4}.get(color)
+            if depth != 8 or channels is None or (compression, filtering, interlace) != (0, 0, 0):
+                raise ValueError('Unsupported native PNG encoding')
+        elif kind == b'IDAT':
+            compressed.extend(payload)
+        elif kind == b'IEND':
+            if size != 0 or end != len(data):
+                raise ValueError('Invalid PNG end')
+            ended = True
+        offset = end
+    if not ended or not compressed or channels is None:
+        raise ValueError('PNG image/end missing')
+    expected = (dimensions[0] * channels + 1) * dimensions[1]
+    decoder = zlib.decompressobj()
+    pixels = decoder.decompress(compressed, expected + 1)
+    if len(pixels) != expected or not decoder.eof or decoder.unused_data or decoder.unconsumed_tail:
+        raise ValueError('PNG pixel stream incomplete')
 
 
 def read(path):
@@ -255,9 +303,7 @@ def validate_native(receipt, stage, step, phase, pid, executable_hash, directory
         if len(receipt.get('captures', [])) != 1: raise ValueError('Exact native capture missing')
         capture = receipt['captures'][0]
         if capture.get('file') != 'observed.png': raise ValueError('Unexpected native capture path')
-        spec=importlib.util.spec_from_file_location('native_capture', APP/'scripts/studio-setup-native.py')
-        module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
-        module.validate_capture(directory/'observed.png',capture)
+        validate_capture(directory/'observed.png',capture)
     elif stage == 'cleanup-after-failure':
         if not all(checks.get(k) is True for k in ('settingsDismissed','closeForeground','closeInput')):
             raise ValueError('Owned ordinary close input unproved')

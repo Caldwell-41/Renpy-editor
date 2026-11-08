@@ -330,7 +330,13 @@ pub(super) fn qualified_interaction(
             if !single || counts[key] != 1 {
                 continue;
             }
-            if node.kind == "textbutton" && key == "action" {
+            if node.kind == "bar" && key == "value" {
+                // Extraction changes the owner. It must not introduce an active
+                // binding into a Component through an otherwise movable group.
+                qualified.contextual.insert(start);
+                continue;
+            }
+            if matches!(node.kind.as_str(), "textbutton" | "imagebutton") && key == "action" {
                 // Extraction must not move a contextual or custom action into a
                 // component. The shared grammar alone qualifies button actions.
                 if interaction
@@ -351,7 +357,8 @@ pub(super) fn qualified_interaction(
                 OwnedScreenKind::Component => unreachable!(),
             };
             if (node.kind == "screen" && code == modal)
-                || (node.kind == "textbutton" && code == "default_focus True")
+                || (matches!(node.kind.as_str(), "textbutton" | "imagebutton")
+                    && code == "default_focus True")
             {
                 qualified.spans.insert(start, false);
                 qualified.contextual.insert(start);
@@ -382,6 +389,8 @@ pub(super) fn qualified_interaction(
 }
 
 struct Effects<'a> {
+    service: &'a AuthoringService,
+    project: &'a ProjectId,
     map: &'a SourceMapMetadata,
     inventory: &'a ownership::Inventory,
     styles: &'a styles::Index,
@@ -457,6 +466,71 @@ impl Effects<'_> {
                 break;
             }
             self.remaining -= 1;
+            let mut control_starts = vec![];
+            if node.kind == "bar" {
+                if let Some((binding, _, starts)) =
+                    control_source::inspect_bar(bytes, node, self.variables)
+                {
+                    self.assigned.insert(binding.variable_id.clone());
+                    if let Ok(deps) = bindings::binding_dependencies(
+                        &[interaction::VariableBinding {
+                            variable_id: binding.variable_id,
+                        }],
+                        self.variables,
+                    ) {
+                        for dependency in deps {
+                            self.dependencies.insert(dependency.id, dependency.revision);
+                        }
+                    } else {
+                        self.unknown = true;
+                    }
+                    if let Some(revision) = self.authoring_revision {
+                        self.dependencies
+                            .insert("authoring".into(), revision.into());
+                    }
+                    self.dependencies.insert(
+                        format!("{}:binding", node.id.as_deref().unwrap_or(&owner.root_id)),
+                        digest(&bytes[node.span.start..node.source_end]),
+                    );
+                    control_starts = starts;
+                } else {
+                    self.unknown = true;
+                }
+            }
+            if node.kind == "imagebutton" {
+                if let Some((appearances, starts)) =
+                    self.service
+                        .inspect_imagebutton(self.project, &map.project_id, bytes, node)
+                {
+                    self.unknown |= self
+                        .service
+                        .imagebutton_values(self.project, &map.project_id, &appearances)
+                        .is_err();
+                    for reference in control_source::image_references(&appearances)
+                        .into_iter()
+                        .flatten()
+                    {
+                        self.dependencies.insert(
+                            reference.asset_id.clone(),
+                            reference.expected_asset_sha256.clone(),
+                        );
+                    }
+                    if let Some(revision) = self.authoring_revision {
+                        self.dependencies
+                            .insert("authoring".into(), revision.into());
+                    }
+                    self.dependencies.insert(
+                        format!(
+                            "{}:appearances",
+                            node.id.as_deref().unwrap_or(&owner.root_id)
+                        ),
+                        digest(&bytes[node.span.start..node.source_end]),
+                    );
+                    control_starts = starts;
+                } else {
+                    self.unknown = true;
+                }
+            }
             if let Some(button) = interaction.buttons.get(&node.span.start) {
                 for dependency in &button.dependencies {
                     self.dependencies
@@ -536,6 +610,9 @@ impl Effects<'_> {
                 self.unknown = true;
             }
             for span in &node.protected {
+                if control_starts.contains(&span.start) {
+                    continue;
+                }
                 if interaction
                     .buttons
                     .get(&node.span.start)
@@ -726,6 +803,8 @@ impl AuthoringService {
         let panels = actions::qualified_panel_targets(&inventory);
         let can_show_hide = panels.iter().any(|panel| &panel.binding == binding);
         let mut effects = Effects {
+            service: self,
+            project,
             map: &map,
             inventory: &inventory,
             styles: &style_index,

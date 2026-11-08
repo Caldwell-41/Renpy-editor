@@ -11,8 +11,8 @@ The revision changes only the combined variant. It adds a Brass and slate palett
 each mode, generated visual-novel art under `art/`, a Branch path bar of two-way switches,
 a coloured route line over open branches in Tracks and Reel, visual beat editors with a
 picker sheet for backgrounds and expressions, a one-click Add a beat dialog, every lane
-in writing focus Tracks, a typed condition rule builder, arithmetic Set variable (#88), Choice option bodies with picked state and reordering (#99), empty-branch slots in Tracks and a wrapping Branch path. The focused check passes 38 groups and `npm run design:check`
-passes. Evidence and review screenshots are in ignored `.toolchains/story-combined/revision/`.
+in writing focus Tracks, a typed condition rule builder, arithmetic Set variable (#88), Choice option bodies with picked state and reordering (#99), empty-branch slots in Tracks and a wrapping Branch path. The focused check passes 38 groups. After the #86 merge, `npm run design:check` checks one
+selected screen and layout. Evidence and review screenshots are in ignored `.toolchains/story-combined/revision/`.
 The preview server on port 5176 serves this worktree; port 5175 was found stopped.
 Kris approved updating `docs/UI.md` on 2026-11-08: it now names Brass and slate and the combined Story mock as the target design. Production still uses copper and teal until integration.
 
@@ -111,6 +111,39 @@ progress snapshots; full terminal reports were recovered. Some Round 4 reviewers
 saw those older progress files. Round 5 Shot Opus disclosed accidentally seeing one
 Else-if finding line from Sol and excluded it from its own findings. Preserve the
 actual reviews and their stated limits; do not call every pass fully blind.
+
+## Test selection closeout
+
+[#85](https://github.com/Caldwell-41/Renpy-editor/issues/85) is closed after #86 and
+#107 merged. The [brief](../tasks/active/test-selection.md) owns the cuts, review
+decisions and validation; #85 owns the CI receipts. Harness dispatches used 3 against
+a limit of 2, all passed. Known limits: `ui-image` skips on Linux CI, and no test
+covers project-font cache eviction. Nothing is pending.
+
+## L20 merge closeout
+
+Kris accepted [#54](https://github.com/Caldwell-41/Renpy-editor/issues/54) and
+directed a squash merge of [PR #84](https://github.com/Caldwell-41/Renpy-editor/pull/84)
+into `codex/phase3b-screen-designer`, with related ticket updates. #54 owns the
+merge identity, CI receipts and closed SDK accounting: Mac 16/16 and Windows 20/24,
+no reservations or uncertain starts. [The evidence record](../tasks/evidence/sample-fidelity.md#both-target-comparison-at-bc357a31-2026-11-07)
+keeps the rendering candidate `bc357a31` and both-target receipts.
+
+Retained, not deleted: branch `codex/54-canvas-samples` and its worktree with Mac
+outputs under `app/target/l20-mac-bc357a31/`; the clean
+`codex/54-mac-sample-qualification` worktree with `76d2cf12` outputs; SUNDOWN's
+`codex/54-windows-sample-qualification` worktree with Windows outputs. The
+occupied main checkout stayed untouched. No successor implementation, capped
+operation or branch cleanup is selected.
+
+## Integer bars and image buttons closeout
+
+#51/#52 are accepted through [PR #83](https://github.com/Caldwell-41/Renpy-editor/pull/83).
+[The bars evidence](../tasks/evidence/bars-and-image-buttons.md) and
+[#51](https://github.com/Caldwell-41/Renpy-editor/issues/51) keep the publication
+and CI receipts, root-cause corrections, Windows DPI launch fault, both-target
+crop results and cumulative accounting. None of that section's publication
+instructions remain live.
 
 ## PR 81 integration and ticket closeout
 

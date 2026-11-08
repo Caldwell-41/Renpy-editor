@@ -1,9 +1,10 @@
 """Cases required by the ordinary packaged runtime gate and evidence manifest."""
 RUNTIME_CASES = ("compile", "lint", "route-a", "route-b", "runtime-error", "ui-refresh")
-OPTIONAL_CASES = ("branches-performance", "source-foundation", "help-screen", "owned-screen", "screen-composition", "nested-layout", "ui-image", "project-font", "shared-style", "canvas-helper", "canvas-input")
+OPTIONAL_CASES = ("branches-performance", "source-foundation", "help-screen", "owned-screen", "screen-composition", "nested-layout", "ui-image", "screen-controls", "project-font", "shared-style", "canvas-helper", "canvas-input")
 
 # Terminal production-probe observations required by each ordinary scenario.
 RUNTIME_STAGES = {
+    "screen-controls": ("controls-bar-passed", "controls-picker-passed", "controls-validation-passed", "controls-history-passed", "controls-source-passed", "controls-reopen-passed"),
     "shared-style": ("style-review-passed", "style-shared-passed", "style-copy-passed", "style-history-passed", "style-stale-passed", "style-source-passed", "style-reopen-passed"),
     "project-font": ("font-picker-passed", "font-draft-passed", "font-history-passed", "font-source-passed", "font-reopen-passed"),
     "ui-image": ("image-picker-passed", "image-draft-passed", "image-history-passed", "image-source-passed", "image-reopen-passed"),
@@ -45,6 +46,9 @@ def runtime_report_ok(case, report, target_os=None):
     if case=='canvas-helper':
         from canvas_evidence import canvas_details_ok
         return canvas_details_ok(details, target_os)
+    if case == 'screen-controls':
+        from screen_controls_native_evidence import controls_details_ok
+        return controls_details_ok(details)
     if case in ('owned-screen', 'screen-composition', 'nested-layout'):
         identity = details.get('identity')
         if (details.get('nativeWebView') is not True or details.get('sdkExecuted') is not False

@@ -13,5 +13,4 @@ export const definition: Omit<LabScreen, "approval"> = {
     { id: "console", title: "Request console", load: () => import("./console.ts") },
     { id: "desk", title: "Request desk", load: () => import("./desk.ts") },
   ],
-  check: "./screens/studio-request/check.mjs",
 };

@@ -163,6 +163,8 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node, nodes: &[Node]) -> Option<Nu
         "text",
         "textbutton",
         "image",
+        "bar",
+        "imagebutton",
     ]
     .contains(&node.kind.as_str())
     {
@@ -288,7 +290,8 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node, nodes: &[Node]) -> Option<Nu
                 .blocked
                 .insert((*key).into(), "Only grids have columns and rows.".into());
         }
-        if node.kind == "image" && matches!(*key, "xminimum" | "yminimum" | "xmaximum" | "ymaximum")
+        if matches!(node.kind.as_str(), "image" | "imagebutton")
+            && matches!(*key, "xminimum" | "yminimum" | "xmaximum" | "ymaximum")
         {
             result.blocked.insert((*key).into(), "Images use transformed width and height rather than layout bounds. Edit unsupported bounds in Source.".into());
         }
@@ -410,7 +413,7 @@ pub(super) fn read(lines: &[Line<'_>], node: &Node, nodes: &[Node]) -> Option<Nu
                 {
                     result.unresolved.insert(field.clone());
                 }
-                if node.kind == "image"
+                if matches!(node.kind.as_str(), "image" | "imagebutton")
                     && matches!(
                         field.as_str(),
                         "xminimum" | "yminimum" | "xmaximum" | "ymaximum"
@@ -744,12 +747,22 @@ impl AuthoringService {
             request.path.clone(),
             revision.sha256.clone(),
         )?;
-        let numeric = document
+        let node = document
             .screens
             .iter()
             .find(|s| s.name == request.screen_name)
             .and_then(|s| s.nodes.iter().find(|n| n.span.start == request.node_start))
-            .and_then(|n| n.numeric_layout.as_ref())
+            .ok_or(SceneError::OpaqueBoundary)?;
+        if request
+            .values
+            .keys()
+            .any(|k| control_source::image_button_size_field(&node.kind, k))
+        {
+            return Err(SceneError::OpaqueBoundary);
+        }
+        let numeric = node
+            .numeric_layout
+            .as_ref()
             .ok_or(SceneError::OpaqueBoundary)?;
         let expected = numeric.changed(&request.values)?;
         let proposed = numeric.patch(&bytes, &request.values)?;

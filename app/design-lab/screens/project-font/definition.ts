@@ -13,5 +13,4 @@ export const definition: Omit<LabScreen, "approval"> = {
     { id: "library", title: "B · Inline font browser", load: () => import("./library.ts") },
     { id: "strip", title: "C · Formatting strip", load: () => import("./strip.ts") },
   ],
-  check: "./screens/project-font/check.mjs",
 };

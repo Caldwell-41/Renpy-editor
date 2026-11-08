@@ -34,6 +34,12 @@ mod actions;
 #[path = "interaction_effect_tests.rs"]
 mod interaction_effects;
 
+#[path = "control_tests.rs"]
+mod controls;
+
+#[path = "control_canvas_sdk_tests.rs"]
+mod control_canvas_sdk;
+
 #[path = "panel_fixture_tests.rs"]
 mod panel_fixture;
 

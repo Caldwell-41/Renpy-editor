@@ -9,7 +9,6 @@ export const definition: Omit<LabScreen, "approval"> = {
     { id: "spacing", title: "Vertical group spacing" },
     { id: "conflict", title: "Source conflict" },
   ],
-  check: "./screens/numeric-layout/check.mjs",
   variants: [
     { id: "paired-refined", title: "A2 · Paired fields", load: () => import("./paired-refined.ts") },
     { id: "axes-refined", title: "B2 · Axis columns", load: () => import("./axes-refined.ts") },

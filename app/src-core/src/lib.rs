@@ -518,12 +518,23 @@ pub fn handle_application_request(
             .and_then(to_value),
         "asset.import" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
-            .and_then(|payload| {
-                serde_json::from_value::<ImportAssetRequest>(Value::Object(payload)).map_err(|_| {
-                    LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload)
-                })
+            .and_then(|mut payload| {
+                let revision = payload
+                    .remove("expectedAuthoringRevision")
+                    .map(serde_json::from_value::<String>)
+                    .transpose()
+                    .map_err(|_| {
+                        LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload)
+                    })?;
+                let request = serde_json::from_value::<ImportAssetRequest>(Value::Object(payload))
+                    .map_err(|_| {
+                        LifecycleError::Authoring(authoring::AuthoringError::InvalidPayload)
+                    })?;
+                Ok((request, revision))
             })
-            .and_then(|payload| lifecycle.authoring_import_asset(payload))
+            .and_then(|(request, revision)| {
+                lifecycle.authoring_import_asset_with_screen_revision(request, revision)
+            })
             .and_then(to_value),
         "asset.repairCompatibility" if has_exact_keys(validated.payload, &["sessionId"]) => {
             session_only(validated.payload)

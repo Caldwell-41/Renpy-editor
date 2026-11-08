@@ -724,6 +724,22 @@ samples use canonical signed-64 decimal strings, booleans use real JSON booleans
 and strings remain literal. Brackets in sample values stay literal, and braces
 cannot introduce text tags. Samples never alter source or runtime state.
 
+Canvas button state is an explicit editor sample: normal, hover, selected,
+selected-hover, disabled or selected-disabled. It is never inferred by evaluating
+actions or variable values. The helper applies Ren'Py's matching style prefix to
+text buttons, image buttons and bars. A typed bar also renders literal `hover_`,
+`selected_` and `insensitive_` `left_bar`, `right_bar` and `thumb` colors; bar
+edits change only the unprefixed colors and keep these statements as Source. Ren'Py
+resets a bar's `insensitive_` prefix to idle while its range is positive, so a
+qualified bar shows its normal appearance in the disabled samples. The inspector's
+appearance prefix follows the sample; both combined samples open `selected_`, which
+Ren'Py ranks above `hover_` and `insensitive_`.
+
+Text and textbutton labels share the `[name!q]` template grammar for canvas samples.
+Bound-text writes remain Text-only. Unquoted `[name]` interpolation, non-literal bar
+state colors and custom control expressions remain source-only. Unresolved mappings
+make the canvas unavailable and return explicit plan limits.
+
 `ScreenEffects` adds known `assignedVariables` and `shownScreens` IDs alongside
 `hiddenScreens` and `finishesInteraction`. These describe possible qualified button
 effects, not observed execution or reconstructed runtime values. The shared action
@@ -749,6 +765,66 @@ passive, but all component action writes remain refused. This replaces the legac
 `dismissal` inspection and composition command. Both `actions` and `formatText`
 interaction use the same action admission and source writer. The UI never infers
 authority from a label or screen kind; acceptance revalidates source and context.
+
+L12/L13 extend the same composition transaction with `addBar`/`bar` and
+`addImageButton`/`imageButton`. Additions capture `parentId`; edits retain the
+existing parent and capture `nodeId`. Width/height are positive displayed pixel
+sizes. Optional numeric layout belongs to the existing layout owner and cannot
+compete with those dimensions. Each combined edit commits once or retains the
+whole draft on refusal. Generic geometry paths refuse image-button dimension
+changes so state-image scaling cannot diverge from the displayed size.
+
+Bar bindings refer to an existing integer variable ID with canonical decimal
+`minimum`/`maximum` strings. Endpoints and their positive difference must fit the
+exact integer domain through 9007199254740991. The captured
+`expectedAuthoringRevision` guards writes and provisional bar canvas samples.
+Qualified source uses bounded `VariableValue` with integer step and forced steps.
+Supported literal bar colors are nullable `leftBar`, `rightBar` and `thumb`.
+Inspection exposes nullable `barBinding` and `barAppearance`; unsupported binding
+expressions remain Source-only. Binding/variable revisions and possible variable
+assignment contribute to conservative effects. Bar authoring and extraction of a
+contextual bar into a Component refuse; same-screen reorder remains available.
+
+Image-button appearances have six total states: required `normal`, plus optional
+`hover`, `selected`, `selectedHover`, `disabled` and `selectedDisabled`. Each typed
+reference captures asset ID and expected SHA256, with an optional acknowledged
+replacement hash. Inspection exposes nullable `imageButtonAppearances`. Explicit
+state source uses only the bounded literal `Transform(path, xysize=(width, height))`
+grammar, alongside the same dimensions on the control. Plain paths or custom
+expressions do not acquire typed size-edit authority. The required `interaction`
+uses the existing typed action owner. Edits may preserve actions with null;
+additions require an explicit typed list, including an empty list for Null.
+Known typed references remain inspectable when their files are changed or missing;
+media admission still refuses rendering or Apply until the reference is resolved,
+and conservative effects remain unknown. Component image-button edits preserve
+read-only actions; a new passive Component button may use the empty action list,
+while effectful lists remain forbidden.
+
+Clearing a bar color or image-button state property deletes its statement. An inline
+comment stays on its own line at the same indent. `pass` replaces the statement only
+when the block would otherwise be empty. Numeric layout keeps its own removal rule.
+
+For a control picker's own UI-image import, `asset.import` may receive the captured
+`expectedAuthoringRevision`. A successful response includes the transaction-derived
+`authoringRevisionChange` with `before` and `after`. This transition projects only
+the accepted asset metadata and retains captured variable-file revisions. Only the
+initiating draft and a workspace document still on the same base may advance.
+Unrelated changes and Refresh Source do not rebase a retained draft. The receipt
+is response data, not persisted authoring metadata. Reviewed replacement Apply
+prepares its accepted document projection before committing; a later failed disk
+refresh cannot change a committed operation into a refusal.
+
+Canvas drafts use `barSamples`/`barAddition` and
+`imageButtonSamples`/`imageButtonAddition`. Existing controls identify `nodeStart`;
+additions identify `parentStart`. Numeric layout for the sole prospective addition
+uses one plus the selected accepted screen's maximum node span end. Samples never
+write source or runtime variables. The six-state canvas enum shares the control
+contract. A control draft preserves unrelated accepted style properties and replaces
+only its owned control/numeric fields; clearing an override removes the old value.
+The native fallback is hover/disabled/selected to normal, selected-hover to
+hover then normal, and selected-disabled to disabled then normal. No fallback
+passes through selected-idle for selected-hover. Helper data contains validated
+assets and values, with no executable binding or action expressions.
 
 `screens.create` accepts an optional `kind`, defaulting to panel. A dialog Help
 starter shares the panel content builder and emits `modal True`, game-menu Return

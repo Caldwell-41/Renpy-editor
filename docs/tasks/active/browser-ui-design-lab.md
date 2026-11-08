@@ -1,5 +1,40 @@
 # Browser UI design lab
 
+## Focused verification, 2026-11-06
+
+Kris selected implementation and a local commit on `codex/51-52-integration`.
+The [lab README](../../../app/design-lab/README.md#focused-verification) owns the
+current selection rule. One runner now requires a selected screen/layout and checks
+one requested sample. Explicit interaction modules stay on that selection. Shared
+machinery, selected approval protection and production build exclusion are separate
+checks. Review captures are opt-in; failures retain an image. Reports and caches use
+unique OS temporary directories.
+
+The full-gallery matrix, duplicate page runner and 44 historical check/review/capture
+scripts are retired, including their registrations. Prototype implementations,
+approved source commits, approval JSON and retained captures are preserved. This
+changes lab verification selection, not product acceptance or approval authority.
+The root/scoped guides and promotion procedure point to the single selection rule.
+Historical results below retain their original scope and failures.
+
+Verification on SUNDOWN uses pinned Node 24.19.0/npm 11.9.0 and Chrome 157.0.8103.38.
+Lab typecheck, approval/source/capture tests, selected compact font render/capture,
+selected actual font-approval refusal, shared machinery and in-memory build exclusion
+pass. A temporary interaction probe passes two samples, including explicit light/
+compact overrides and refusal to leave the selected screen/layout. It writes no
+screenshots without opt-in. Missing selection, conflicting modes and an unknown state
+exit unsuccessfully; the failed state retains one image. Temporary probe source is
+removed. Review found no remaining screen-check registrations or duplicate runner.
+
+Git-visible repository validation passes for 1,761 files, including links/privacy;
+whitespace passes. The ordinary validator fails only on missing final newlines in
+two pre-existing ignored receipts under `.tmp/`; those files remain untouched.
+This is an existing local-artifact limitation, not a passing full-validator result.
+No SDK, native package, app launch, push, PR or merge is selected. Delivery is a
+local commit on the current branch; no product qualification is reopened.
+
+## Full-app prototype status
+
 State: full-app prototype comparison `review_ready`, 2026-10-21. Branch publication
 authorised on `codex/phase3a-story-logic`. Twelve app pages have two layouts
 each, including the final Characters Writing/Game setup refinement. All remain drafts.

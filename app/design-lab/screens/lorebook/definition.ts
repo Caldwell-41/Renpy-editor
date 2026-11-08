@@ -15,5 +15,4 @@ export const definition: Omit<LabScreen, "approval"> = {
     { id: "manuscript", title: "Project manuscript", load: () => import("./manuscript.ts") },
     { id: "parallel", title: "World & tone desk", load: () => import("./parallel.ts") },
   ],
-  check: "./screens/lorebook/check.mjs",
 };

@@ -1,3 +1,4 @@
+// fixture: skip on linux Apply never sends its compose in Linux headless Chrome; it was only qualified on Windows and passes on macOS.
 // Actual Screens controller and application dispatch, with a disposable native-picker fixture.
 // Canvas requests build real inert plans; this check starts no SDK or native editor.
 import assert from 'node:assert/strict';

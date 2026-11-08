@@ -47,14 +47,17 @@ CI and external waits follow [client-specific waiting and manual fallback](WORKF
 | Files/SDK/process | Unit, ordinary path/archive/conflict/recovery and affected platform integration |
 | Scene/file lifecycle | References, transactions/history/recovery, `.rpyc` cleanup and SDK compile/lint/run |
 | UI workflow | Component/controller, keyboard/accessibility, affected desktop path and visual conformance |
+| Design Lab prototype or tooling | [Focused lab verification](../app/design-lab/README.md#focused-verification) |
 | Generated Ren'Py | Pinned official SDK compile/lint, named normal-entry runtime cases and standard-template smoke |
 | Package/release | Required target package/install/launch, identity and contents/privacy |
 | LLM adapter/action | Schema/bounds/refusals, consent/locality, real prepared body/transport, review/partial acceptance and no automatic network |
 
 Use the narrowest real integration seam for changed asynchronous paths. Include
 relevant cancellation, held-owner contention, stale completion and retained input.
-Before trusting a gate, show it rejects wrong/missing results, zero tests and skipped
-required cases. Keep synthetic DOM, browser, real service, SDK, native input and human
+Gate results with the shared checks: `verify_unittest` for Python and `cargo-log`
+for Rust reject failures, zero tests and skips outside named host exclusions. Use
+`--exact` with Cargo filters and skips. Do not add per-gate test-name lists, or a new
+gate script with its own tests, for each qualification. Keep synthetic DOM, browser, real service, SDK, native input and human
 acceptance distinct. Do not fix production to satisfy an unvalidated fixture, raise
 thresholds, blanket-skip cases or retry until green.
 

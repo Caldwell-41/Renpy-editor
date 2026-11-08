@@ -9,5 +9,4 @@ export const definition: Omit<LabScreen, 'approval'> = {
     { id: 'combined', title: 'Story combined', load: () => import('./combined.ts') },
     { id: 'stage-tracks', title: 'Stage tracks', load: () => import('./stage-tracks.ts') },
   ],
-  check: './screens/story-revamp/check.mjs',
 };

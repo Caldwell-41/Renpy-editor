@@ -9,6 +9,12 @@ import { ScreenFontMedia, type ProjectFont, type FontReference, type FontPresent
 import type { ScreenLayoutEditor, LayoutReservation } from "./screen-layout.ts";
 import { screenTextByteError } from "./screen-text-validation.ts";
 
+// Editable appearance prefixes and the canvas sample state each one previews.
+const appearancePrefixes:[prefix:string,label:string,state:string][]=[["","Normal","normal"],["hover_","Hover","hover"],["selected_","Selected","selected"],["insensitive_","Disabled","disabled"]];
+const prefixState=(prefix:string)=>appearancePrefixes.find(([p])=>p===prefix)?.[2]??"normal";
+// Ren'Py gives selected_ priority over hover_ and insensitive_, so combined samples edit it.
+const statePrefix=(state:string)=>["selectedHover","selectedDisabled"].includes(state)?"selected_":appearancePrefixes.find(([,,s])=>s===state)?.[0];
+
 export interface TextProperties {
   values: { font?: string; size?: number; color?: string; align?: number; bold?: boolean; italic?: boolean; [key:string]:unknown };
   blocked: Record<string, string>;
@@ -80,6 +86,19 @@ export class ScreenText {
   private readonly carets=new Map<string,{field:string;start:number|null;end:number|null}>();
   private copyFocus?:{key:string;field:string;start:number|null;end:number|null};
   private readonly appearanceStates = new Map<string,string>();
+  private sampleAppearance = "";
+
+  setSampleState(state:string):void {
+    const prefix=statePrefix(state);
+    if(prefix===undefined)return;
+    this.sampleAppearance=prefix;
+    for(const key of this.appearanceStates.keys())this.appearanceStates.set(key,prefix);
+    const view=this.host.view();
+    if(view?.selected.kind!=="textbutton")return;
+    this.appearanceStates.set(this.key(view),prefix);
+    const host=this.card?.querySelector<HTMLElement>(".screen-appearance-fields");
+    if(host)this.renderAppearance(host,view);
+  }
   private pickerKey?: string;
   private search = "";
   private pickerGeneration = 0;
@@ -413,7 +432,7 @@ export class ScreenText {
         if(Object.keys(edits).length)samples.push({nodeStart:use.nodeStart,values:edits});
       }
       const layout=apply?this.layout.currentDraft(false):undefined;
-      frames.render({path:row.path,screenName:row.name,expectedRevision:currentDocument.revision,...this.host.resolution??{width:1280,height:720},buttonState:this.appearanceStates.get(draft.key)==="insensitive_"?"disabled":this.appearanceStates.get(draft.key)?.replace("_","")||"normal",textStyles:samples,...(layout&&row.path===draft.document.path&&row.name===current.screenName?{layouts:[{nodeStart:draft.node.span.start,values:layout.values}]}:{})});
+      frames.render({path:row.path,screenName:row.name,expectedRevision:currentDocument.revision,...this.host.resolution??{width:1280,height:720},buttonState:prefixState(this.appearanceStates.get(draft.key)??""),textStyles:samples,...(layout&&row.path===draft.document.path&&row.name===current.screenName?{layouts:[{nodeStart:draft.node.span.start,values:layout.values}]}:{})});
     };
     for(const row of grouped.values()){const li=el("li"),b=action("",()=>show(row));b.dataset.path=row.path;b.dataset.screen=row.name;b.append(el("strong","",row.name),el("span","",`${row.count} ${row.count===1?"element":"elements"}`),el("small","",row.path));li.append(b);list.append(li);}dialog.append(content);
     if(apply){
@@ -442,7 +461,7 @@ export class ScreenText {
     });
   }
   private extraFields(values:TextProperties["values"]):Record<string,string> {
-    const fields:Record<string,string>={};for(const prefix of ["","hover_","selected_","insensitive_"]) {
+    const fields:Record<string,string>={};for(const [prefix] of appearancePrefixes) {
       if(prefix)fields[prefix+"color"]=typeof values[prefix+"color"]==="string"?String(values[prefix+"color"]):"";
       fields[prefix+"background"]=typeof values[prefix+"background"]==="string"?String(values[prefix+"background"]):"";
       const border=values[prefix+"border"] as {color?:string;width?:number}|undefined;fields[prefix+"borderColor"]=border?.color??"";fields[prefix+"borderWidth"]=border?.width===undefined?"":String(border.width);
@@ -452,10 +471,10 @@ export class ScreenText {
   private appearanceBlocked(node:ScreenNode,key:string):string|undefined {return node.textProperties?.blocked[this.appearanceProperty(key)];}
   private renderAppearance(host:HTMLElement,view:CompositionView):void {
     for(const key of this.fieldValidators.keys())if(key.startsWith("appearance:"))this.fieldValidators.delete(key);
-    host.replaceChildren();const draft=this.value(view),state=this.appearanceStates.get(draft.key)??"",frame=["frame","window"].includes(view.selected.kind);
+    host.replaceChildren();const draft=this.value(view),frame=["frame","window"].includes(view.selected.kind),state=frame?"":this.appearanceStates.get(draft.key)??this.sampleAppearance;
     if(!frame){const label=el("label","screen-text-field","Appearance state"),stateControl=el("select");stateControl.ariaLabel="Appearance state";stateControl.dataset.appearanceField="state";
-      for(const [value,name] of [["","Normal"],["hover_","Hover"],["selected_","Selected"],["insensitive_","Disabled"]]){const option=el("option","",name);option.value=value!;stateControl.append(option);}stateControl.value=state;
-      stateControl.onchange=()=>{this.appearanceStates.set(draft.key,stateControl.value);this.host.buttonSample?.(stateControl.value==="insensitive_"?"disabled":stateControl.value.replace("_","")||"normal");this.renderAppearance(host,view);host.querySelector<HTMLElement>("select")?.focus({preventScroll:true});};label.append(stateControl);host.append(label);
+      for(const [value,name] of appearancePrefixes){const option=el("option","",name);option.value=value!;stateControl.append(option);}stateControl.value=state;
+      stateControl.onchange=()=>{this.appearanceStates.set(draft.key,stateControl.value);this.host.buttonSample?.(prefixState(stateControl.value));this.renderAppearance(host,view);host.querySelector<HTMLElement>("select")?.focus({preventScroll:true});};label.append(stateControl);host.append(label);
     }
     const input=(name:string,key:string)=>{const label=el("label","screen-text-field",name),control=el("input");control.ariaLabel=name;control.dataset.appearanceField=key;const blocked=this.appearanceBlocked(view.selected,key);
       control.readOnly=!!blocked;control.value=blocked?view.selected.textProperties?.expressions?.[this.appearanceProperty(key)]??"Source-only":draft.appearance[key]??"";control.placeholder=blocked?"Source-only":"Inherit";
@@ -546,9 +565,9 @@ export class ScreenText {
     for(const validate of this.fieldValidators.values()){try{validate();}catch{/* Report all visible field errors before focusing the first. */}}
     const first=problems.entries().next().value;if(!first)return;
     if(first[0].startsWith("appearance:")) {
-      const key=first[0].slice(11),state=["hover_","selected_","insensitive_"].find(prefix=>key.startsWith(prefix))??"";
+      const key=first[0].slice(11),state=appearancePrefixes.find(([prefix])=>prefix&&key.startsWith(prefix))?.[0]??"";
       this.appearanceStates.set(draft.key,state);
-      this.host.buttonSample?.(state==="insensitive_"?"disabled":state.replace("_","")||"normal");
+      this.host.buttonSample?.(prefixState(state));
       const host=this.card?.querySelector<HTMLElement>(".screen-appearance-fields"),view=this.host.view();if(host&&view)this.renderAppearance(host,view);
     }
     this.fail(...first);throw Error(first[1]);
@@ -575,7 +594,7 @@ export class ScreenText {
       else fail("font","Choose a project font. Your edits are kept.");
     }
     const base=this.extraFields(draft.style?.scope==="shared" ? this.styleValues(draft) : draft.node.textProperties?.values??{}),appearance:NonNullable<TextEdits["appearance"]>={};
-    for(const prefix of ["","hover_","selected_","insensitive_"]) {
+    for(const [prefix] of appearancePrefixes) {
       for(const suffix of ["color","background"]) {
         const key=prefix+suffix;if(key==="color"||blocked[key]||draft.appearance[key]===base[key])continue;
         const value=draft.appearance[key]??"",problem=this.appearanceError(key,draft.appearance);if(problem){fail(`appearance:${key}`,problem);continue;}appearance[key]=value||null;

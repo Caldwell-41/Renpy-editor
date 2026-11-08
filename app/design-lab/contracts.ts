@@ -17,7 +17,5 @@ export interface LabScreen {
     readonly title: string;
     readonly load: () => Promise<{ mount: LabMount }>;
   }[];
-  /** Optional screen-specific interaction check, relative to design-lab/. */
-  readonly check?: string;
 }
 import type { RecordedApproval } from "./approval.ts";
