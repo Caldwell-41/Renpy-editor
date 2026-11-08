@@ -84,7 +84,9 @@ drafts must not weaken source validation or the shared transaction layer.
 
 Kris also selected [one chronological Story Undo order](../../UI.md#story-undo)
 for draft and committed edits, with the same behaviour from the button and keyboard
-shortcut. The earlier proposal for separate field and project Undo was not accepted.
+shortcut. Switching authoring workspaces preserves the order of edits in shared
+project history. Undo names its action and reveals the affected item in its workspace.
+The earlier proposal for separate field and project Undo was not accepted.
 
 ## Selected direction
 
