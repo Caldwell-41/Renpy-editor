@@ -49,8 +49,24 @@ The app-wide Brass and slate palette is a separate implementation slice required
 before or with this release. [UI.md](../../UI.md#palette-brass-and-slate) owns its
 scope, including both themes and the known text-contrast fixes.
 
-Implementation order remains an open decision. This interview records decisions
-only; implementation and publication still need Kris's go-ahead.
+This interview records decisions only; implementation and publication still need
+Kris's go-ahead.
+
+### Implementation prerequisites
+
+Live Story layout integration is blocked until the required Choice and Story
+arithmetic operations are implemented and qualified. Complete #98 Stage 1 before
+Stage 2. Use #87's [backend handoff #89](https://github.com/Caldwell-41/Renpy-editor/issues/89)
+for the shared arithmetic core and Story operations. Their existing specifications
+remain the requirement owners; this dependency does not create a second feature spec.
+
+Before layout integration, verify source edits, saving, shared Undo/Redo, reopening
+and the required game behaviour through the existing tests. Then connect the approved
+Story layout to those tested operations. The palette remains a separate slice.
+Completion of all Screens arithmetic work, or closure of #87, is not a prerequisite.
+
+Record these dependencies in the future Story integration task when Kris authorizes
+publication. This local decision does not create or change GitHub tasks.
 
 ## Selected direction
 
