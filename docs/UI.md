@@ -448,8 +448,9 @@ A without typing. The first Undo reverses B's background change. The next Undo
 reverses the earlier typing in A. Do not expose separate draft and saved-edit Undo
 commands within Story.
 
-Switching authoring workspaces also preserves the order of edits in shared project
-history. If the author edits Story, changes a button in Screens and returns to Story
+Use one project edit history, not a separate queue for each page. Switching
+authoring workspaces preserves that order. If the author edits Story, changes a
+button in Screens and returns to Story
 without editing, Undo reverses the Screens change first. Reveal the affected item
 in its workspace so the author can see the result. Name the action in the command,
 for example "Undo button resize". Preserve retained beat drafts during this navigation.
@@ -457,8 +458,12 @@ for example "Undo button resize". Preserve retained beat drafts during this navi
 Draft-only Undo changes the draft without writing incomplete source. Undo of saved
 source uses the existing shared transaction layer and its revision, conflict and
 recovery checks. This is target behaviour; production currently blocks project
-Undo while a beat draft exists. Integration with the Source editor's unfinished
-text history remains to be settled.
+Undo while a beat draft exists.
+
+Source typing keeps the Source editor's existing per-file text history. Undo in
+Story does not change unfinished text in a Source tab. Accepted Source saves join
+the shared project history through the existing transaction layer. Temporary
+inputs, such as search text, keep local text Undo and add no project edit entries.
 
 Kris selected familiar Word-like editing behaviour. Microsoft's
 [Undo guidance](https://support.microsoft.com/en-us/office/foundations-experiences/undo-redo-or-repeat-an-action)
