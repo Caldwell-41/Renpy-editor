@@ -29,6 +29,21 @@ Rounds 3 and 4 and later Round 5 are complete; a subsequent score-only rescore o
 fixed source `bbd5a4dd` is recorded in chat. Those grades do not qualify the new
 fourth mock. Historical evidence remains available locally.
 
+## Production release scope
+
+In the implementation interview on 2026-11-08, Kris selected the complete approved
+Story Combined v1 experience as the release target. The approved Choice behaviour
+and arithmetic must work before that release. A layout-only build is an intermediate
+review checkpoint, not a separately shipped version with those features deferred.
+Implementation can proceed in separately testable slices.
+
+[Choice #98](https://github.com/Caldwell-41/Renpy-editor/issues/98) and
+[arithmetic #87](https://github.com/Caldwell-41/Renpy-editor/issues/87) retain their
+feature requirements and acceptance ownership. The app-wide palette rollout,
+implementation order and the release's dependencies on work outside Story remain
+open decisions. This interview records decisions only; implementation and publication
+still need Kris's go-ahead.
+
 ## Selected direction
 
 Kris selected a fourth combined mock, owned by the current section of

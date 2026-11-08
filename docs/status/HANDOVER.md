@@ -1,5 +1,16 @@
 # Current outcome handover
 
+## Story Combined v1 implementation interview
+
+Continue the one-decision-at-a-time interview on `codex/story-combined-v1-grill`,
+created from approved-design branch head `3f5a6de9`. The
+[release scope](../design/story-revamp/README.md#production-release-scope) owns settled
+scope decisions; record domain terms in the root glossary when resolved. The next
+decision concerns release dependencies outside Story. Commit documentation locally.
+Do not edit production code or publish issues, comments, PRs or pushes without Kris's
+request. The other chat owns `codex/story-combined-fourth-mock`; preserve its branch
+and preview. No build, test run or browser operation is pending for this interview.
+
 ## Story Combined v1 approved
 
 Kris approved the combined Story layout on 2026-11-08 as **Story Combined v1**: Design Lab

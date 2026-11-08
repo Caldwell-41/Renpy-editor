@@ -1,5 +1,12 @@
 # Current status
 
+## Story Combined v1 implementation interview
+
+The documentation-only interview is active on `codex/story-combined-v1-grill`.
+The [release scope](../design/story-revamp/README.md#production-release-scope) records
+settled decisions. Documentation commits stay local. Production implementation and
+tracker publication are not selected; the approved mock remains unchanged.
+
 ## Story Combined v1 approved
 
 Kris approved the combined Story layout on 2026-11-08 as **Story Combined v1**: Design Lab
