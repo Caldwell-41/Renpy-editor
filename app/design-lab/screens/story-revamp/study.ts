@@ -208,7 +208,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     if (variant === 'cue-sheet') reconcileCueRows();
     refresh(); for (const text of host.querySelectorAll<HTMLTextAreaElement>('.sr-prose')) fit(text);
   }
-  function bind(control: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement, update: (value: string) => void) {
+  function bind(control: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement, update: (value: string) => void, accept?: (value: string) => boolean, draft?: (value: string) => void) {
     let before = snapshot(), recorded = false;
     control.onfocus = () => {
       const owner = control.closest<HTMLElement>('[data-editor-for],[data-beat]'); const id = owner?.dataset.editorFor ?? owner?.dataset.beat;
@@ -221,13 +221,14 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       if (event.key === 'Escape' && !host.querySelector('dialog[open]')) { event.preventDefault(); selectBeat(selected, true); }
     });
     control.addEventListener('input', () => {
+      if (accept && !accept(control.value)) { draft?.(control.value); return; }
       if (!recorded) { remember(`Edit ${name()}`, before); recorded = true; }
       update(control.value); status(`Edited ${name()}`); refresh();
       if (control instanceof HTMLTextAreaElement) fit(control);
       if (combined && focused) revealSelection();
     });
   }
-  function input(value: string, title: string, update: (value: string) => void) { const control = el('input'); control.value = value; control.ariaLabel = title; if (title.endsWith(' condition')) control.placeholder = 'e.g. trust is at least 5'; bind(control, update); return control; }
+  function input(value: string, title: string, update: (value: string) => void, accept?: (value: string) => boolean, draft?: (value: string) => void) { const control = el('input'); control.value = value; control.ariaLabel = title; if (title.endsWith(' condition')) control.placeholder = 'e.g. trust is at least 5'; bind(control, update, accept, draft); return control; }
   function select(values: readonly string[], value: string, title: string, update: (value: string) => void) {
     const control = el('select'); control.ariaLabel = title;
     for (const v of [...new Set([value, ...values])]) control.append(new Option(v, v));
@@ -387,6 +388,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   // Combined beat editors: pictures for assets, switches for short choices and a picker sheet for long lists.
   type SheetKind = 'background' | 'expression' | 'destination';
   let assetSheet: { beat: string; kind: SheetKind; option?: number } | undefined, sheetHover = '', openGuard = '';
+  const ruleDrafts = new Map<string, string>(); // Half-typed rule numbers, kept in the field until they parse.
   const slug = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-');
   function field(title: string, ...children: (Node | string)[]) { const node = el('div', 'sc-field'); node.role = 'group'; node.ariaLabel = title; node.append(el('span', 'sc-field-label', title), ...children); return node; }
   function avatar(person: string, expression = 'Neutral') { const node = el('span', 'sc-avatar'); node.ariaHidden = 'true'; if (person === 'Narration') node.append(beatIcon('narration')); else { node.style.backgroundImage = `url("${sprite(person, expression)}")`; } node.style.setProperty('--ring', characterColour(person)); return node; }
@@ -567,17 +569,21 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     if (test.rules.length > 1) node.append(field('Match', segmented(['All', 'Any'], test.join === 'and' ? 'All' : 'Any', `${labelText} match`, value => { test.join = value === 'All' ? 'and' : 'or'; write(composeTest(test)); })));
     test.rules.forEach((rule, i) => {
       const row = el('div', 'sc-rule'); row.dataset.rule = String(i); const variable = variableOf(rule.variable)!;
-      const top = el('div', 'sc-rule-top'); const remove = action('', () => { test.rules.splice(i, 1); save('Remove rule'); }, false, `${key}-rule-${i}-remove`); remove.append(beatIcon('close')); remove.ariaLabel = remove.title = `Remove rule ${i + 1}`;
-      top.append(variablePicker(`${key}-rule-${i}-variable`, `${labelText} rule ${i + 1} variable`, rule.variable, chosen => { test.rules[i] = defaultRule(chosen); save(`Test ${chosen.name}`); }), remove);
+      const top = el('div', 'sc-rule-top'); const remove = action('', () => { for (const k of [...ruleDrafts.keys()]) if (k.startsWith(`${owner.id}:${key}:`)) ruleDrafts.delete(k); test.rules.splice(i, 1); save('Remove rule'); }, false, `${key}-rule-${i}-remove`); remove.append(beatIcon('close')); remove.ariaLabel = remove.title = `Remove rule ${i + 1}`;
+      top.append(variablePicker(`${key}-rule-${i}-variable`, `${labelText} rule ${i + 1} variable`, rule.variable, chosen => { ruleDrafts.delete(`${owner.id}:${key}:${i}`); test.rules[i] = defaultRule(chosen); save(`Test ${chosen.name}`); }), remove);
       const how = el('div', 'sc-rule-how');
       if (variable.type === 'flag') how.append(segmented(['is true', 'is false'], `is ${rule.value}`, `${labelText} rule ${i + 1}`, value => { rule.value = value.slice(3); write(composeTest(test)); }));
       else {
         const ops = numeric(variable.type) ? operators : operators.filter(o => ['=', '≠'].includes(o[0]));
         const switcher = segmented(ops.map(o => o[0]), rule.op, `${labelText} rule ${i + 1} operator`, value => { rule.op = value; write(composeTest(test)); }, ops.map(o => o[1]));
         switcher.classList.add('sc-operators'); ops.forEach((o, j) => { const b = switcher.children[j] as HTMLElement; b.title = o[1]; b.ariaLabel = o[1]; });
-        const value = input(rule.value, `${labelText} rule ${i + 1} value`, text => { rule.value = text; write(composeTest(test)); drawCode(); value.ariaInvalid = String(numeric(variable.type) && !(variable.type === 'number' ? /^-?\d+$/ : /^-?\d+(\.\d+)?$/).test(text)); });
-        if (numeric(variable.type)) { value.inputMode = 'decimal'; value.ariaInvalid = String(!(variable.type === 'number' ? /^-?\d+$/ : /^-?\d+(\.\d+)?$/).test(rule.value)); } value.placeholder = numeric(variable.type) ? 'Number' : 'Text';
-        how.append(switcher, value);
+        const draftKey = `${owner.id}:${key}:${i}`, whole = variable.type === 'number', shown = ruleDrafts.get(draftKey) ?? rule.value;
+        const complete = (text: string) => !numeric(variable.type) || (whole ? /^-?\d+$/ : /^-?\d+(\.\d+)?$/).test(text);
+        const problem = el('p', 'sc-field-error', whole ? 'Enter a whole number, such as 5 or -2.' : 'Enter a number, such as 2.5.'); problem.id = `sc-rule-problem-${++elementId}`;
+        const mark = (text: string) => { value.ariaInvalid = String(!complete(text)); problem.hidden = complete(text); };
+        const value = input(shown, `${labelText} rule ${i + 1} value`, text => { ruleDrafts.delete(draftKey); rule.value = text; write(composeTest(test)); drawCode(); mark(text); }, complete, text => { ruleDrafts.set(draftKey, text); mark(text); });
+        value.setAttribute('aria-describedby', problem.id); if (numeric(variable.type)) value.inputMode = 'decimal'; value.placeholder = numeric(variable.type) ? 'Number' : 'Text'; mark(shown);
+        how.append(switcher, value); row.append(top, how, problem); node.append(row); return;
       }
       row.append(top, how); node.append(row);
     });
@@ -946,7 +952,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     }
     const heading = el('div', 'sr-inspector-heading'); const type = typeSelector(b); if (type instanceof HTMLSelectElement) heading.append(el('strong', '', `${number(b.id)} ·`)); heading.append(type);
     if (['dialogue', 'narration'].includes(b.kind) && variant !== 'cue-sheet') { const next = action(combined ? '+ Next line' : `+ Next ${nextSpeaker(b.id)} line`, () => { const t = locate(scene(), b.id)!; insert(combined && b.kind === 'narration' ? 'narration' : 'dialogue', t.body, t.trail, t.index + 1, nextSpeaker(b.id)); }, !combined, 'next-dialogue'); if (combined) next.classList.add('sc-next-line'); next.title = `Add ${combined && b.kind === 'narration' ? 'narration' : 'dialogue'} after ${name(b.id)} (Shift+${mod}+Enter)`; heading.append(next); }
-    heading.append(rowMenu(b)); if (combined) heading.prepend(beatIcon(b.kind)); panel.append(heading);
+    heading.append(rowMenu(b)); if (combined) heading.prepend(beatIcon(b.kind === 'jump' && b.repeat ? 'loop' : b.kind)); panel.append(heading);
     if (combined && (ancestry(scene(), b.id) ?? []).length) { const where = el('p', 'sr-editor-location'); where.append(scene().name); for (const branch of chainOf(b.id)) { const part = el('span', 'sc-crumb', branchLabel(branch)); part.dataset.arm = String(armOf(branch)); part.dataset.branchLabel = branch.id; where.append(' › ', part); } panel.append(where); }
     else if ((ancestry(scene(), b.id) ?? []).length) panel.append(el('p', 'sr-editor-location', locate(scene(), b.id)!.trail.join(' › ')));
     if (variant === 'cue-sheet') { if (mediaKinds.includes(b.kind)) panel.append(fields(b)); else panel.append(effects()); }
@@ -1365,12 +1371,12 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       const mark = (kind: string, arms: Branch[]) => { const node = el('div', `sc-track-mark sc-track-${kind}`); node.dataset.branchBoundary = kind; node.dataset.branchOwner = owner.id; if (arms.length) node.dataset.arm = String(armOf(arms.at(-1)!)); return node; };
       // An empty branch is one beat-wide slot holding its name and where it goes next, so the two labels never overlap.
       const slot = !branch.beats.length && !focused;
-      const entry = mark('entry', chain); entry.append(rail(chain, { branch }));
+      const entry = mark('entry', chain); entry.dataset.branchId = branch.id; entry.append(rail(chain, { branch }));
       if (slot) { entry.classList.add('sc-track-slot'); entry.querySelector('.sc-rail-label')!.after(el('span', 'sc-rail-end', thenText(owner, branch))); if (reelBranch === branch.id && selected === owner.id) { entry.dataset.selected = 'true'; const ownerButton = ownerWrap.querySelector<HTMLElement>('[data-selected=true]'); if (ownerButton) { ownerButton.dataset.selected = 'false'; ownerButton.ariaCurrent = null; } } }
       const first = action(focused ? `+ First beat in ${branchLabel(branch)}` : slot ? '+ Add a beat' : '+', () => picker(branch.beats, path, 0), false, `inside-${branch.id}`); first.ariaLabel = first.title = `Add the first beat in ${branchLabel(branch)}`; if (slot) { const named = el('span', 'sc-slot-name', branchLabel(branch)); named.dataset.branchLabel = branch.id; first.prepend(named); } entry.append(first);
       const nodes: HTMLElement[] = [];
       if (!slot) {
-        const exit = mark('exit', chain); exit.append(rail(chain, { branch, end: thenText(owner, branch) }));
+        const exit = mark('exit', chain); exit.dataset.branchId = branch.id; exit.append(rail(chain, { branch, end: thenText(owner, branch) }));
         if (ending(branch.beats) >= 0) { const append = action(focused ? `+ Last beat in ${branchLabel(branch)}` : '+', () => picker(branch.beats, path, defaultIndex(branch.beats)), false, `append-${branch.id}`); append.ariaLabel = append.title = `Add the last beat in ${branchLabel(branch)}${ending(branch.beats) >= 0 ? ', before its ending' : ''}`; exit.append(append); } else exit.classList.add('sc-track-exit-bare'); nodes.push(exit);
       }
       {
@@ -1381,6 +1387,23 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       const label = entry.querySelector<HTMLElement>('.sc-rail-label'), endLabel = (slot ? entry : nodes[0])?.querySelector<HTMLElement>('.sc-rail-end');
       if (label && endLabel) requestAnimationFrame(() => { const room = endLabel.getBoundingClientRect().left - label.getBoundingClientRect().left - 10; if (room > 0) label.style.maxWidth = `${Math.min(260, room)}px`; });
     }
+  }
+  /** Keeps each branch name readable beside the Tracks/Reel controls while its route is on screen. */
+  function pinRouteLabels(grid: HTMLElement) {
+    if (focused) return;
+    const scroller = grid.closest<HTMLElement>('.sr-tracks-scroll') ?? grid;
+    const pin = () => {
+      const toolbar = scroller.closest('.sc-bottom-panel')?.querySelector<HTMLElement>('.sc-bottom-toolbar'); if (!toolbar) return;
+      const cover = Math.max(0, ...[...toolbar.querySelectorAll<HTMLElement>('.sc-mode-switch,.sc-track-key')].map(n => n.getBoundingClientRect().right)) + 8;
+      for (const entry of scroller.querySelectorAll<HTMLElement>('.sc-track-entry[data-branch-id]')) {
+        const label = entry.querySelector<HTMLElement>('.sc-rail-label'); if (!label) continue;
+        label.style.translate = '';
+        const own = label.getBoundingClientRect(), exit = scroller.querySelector<HTMLElement>(`.sc-track-exit[data-branch-id="${entry.dataset.branchId}"] .sc-rail-end`) ?? entry.querySelector<HTMLElement>('.sc-rail-end');
+        const limit = (exit?.getBoundingClientRect().left ?? own.right) - 8 - own.right, shift = Math.max(0, Math.min(cover - own.left, limit));
+        if (shift > 0) label.style.translate = `${shift}px 0`;
+      }
+    };
+    scroller.addEventListener('scroll', pin, { passive: true }); requestAnimationFrame(pin);
   }
   function refreshCombinedContext() {
     for (const node of host.querySelectorAll<HTMLElement>('[data-condition-test]')) { const owner = flatten(scene().beats).find(b => b.id === node.dataset.conditionTest), test = owner?.branches[0]?.condition; if (owner?.kind === 'choice') { node.textContent = 'Choice'; node.title = count(owner.options.length, 'option'); node.classList.remove('sc-missing'); continue; } node.textContent = test || 'Add a test'; node.title = test ? `If ${test}` : 'This condition has no test yet'; node.classList.toggle('sc-missing', !test); }
@@ -1421,7 +1444,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       if (!isEnding(b.kind) && !(b.branches.length && visibleBranches.has(b.id))) { const add = gap(body, trail, index + 1); add.tabIndex = b.id === selected ? 0 : -1; column.append(add); }
       strip.append(column);
     });
-    markTrackBranches(strip); horizontalWheel(strip); reel.append(strip); return reel;
+    markTrackBranches(strip); pinRouteLabels(strip); horizontalWheel(strip); reel.append(strip); return reel;
   }
   function combinedStory(parent: HTMLElement) {
     // Reuse the reference's stage, property editor and track renderer.
@@ -1431,7 +1454,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const tracks = original.querySelector<HTMLElement>('.sr-tracks')!;
     tracks.querySelector('.sr-track-heading')!.remove(); tracks.classList.add('sc-tracks');
     for (const column of tracks.querySelectorAll<HTMLElement>('.sr-track-column')) column.dataset.column = column.querySelector<HTMLElement>('[data-track-beat]')!.dataset.trackBeat;
-    markTrackBranches(tracks.querySelector<HTMLElement>('.sr-track-grid')!);
+    const trackGrid = tracks.querySelector<HTMLElement>('.sr-track-grid')!; markTrackBranches(trackGrid); pinRouteLabels(trackGrid);
     const layout = el('div', 'sc-combined-layout sr-tracks-layout');
     const conditions = conditionStrip(), toolbar = bottomToolbar();
     const panel = el('div', 'sc-bottom-panel'); panel.append(toolbar, bottomMode === 'tracks' ? tracks : combinedReel());

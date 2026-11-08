@@ -461,3 +461,12 @@
 .sc-combined-shell [data-focused=true] .sc-tracks .sr-track-column { min-width:min-content; }
 /* Laptop: a thinner, lower route line leaves its label clear. */
 @media(min-width:900px) and (max-width:1200px) { .sc-combined-shell [data-focused=false] .sc-rail-on::after { bottom:0; height:2px; } .sc-combined-shell [data-focused=false] .sc-rail-label,.sc-combined-shell [data-focused=false] .sc-rail-end { bottom:3px; } }
+/* Writing focus: the sticky lane header stays above route labels as rows scroll under it. */
+.sc-combined-shell [data-focused=true] .sc-tracks .sr-track-labels { z-index:4; }
+/* Writing focus with lanes cut off: the Beat lane sticks to the left and each row's + to the right,
+   so every row keeps its number and its add control. Backgrounds are solid so nothing shows through. */
+.sc-combined-shell [data-focused=true] .sc-tracks .sr-track-beat>.sr-track-0,.sc-combined-shell [data-focused=true] .sc-tracks .sr-track-labels>.sr-track-0 { position:sticky; left:0; z-index:1; background:var(--surface-panel); }
+.sc-combined-shell [data-focused=true] .sc-tracks .sr-track-column[data-arm] .sr-track-beat>.sr-track-0 { background:color-mix(in srgb,var(--arm) 8%,var(--surface-panel)); }
+.sc-combined-shell [data-focused=true] .sc-tracks .sr-track-beat[data-selected=true]>.sr-track-0 { background:var(--accent-subtle); }
+:root[data-theme="light"] .sc-combined-shell [data-focused=true] .sc-tracks .sr-track-beat[data-selected=true]>.sr-track-0 { background:var(--surface-selected); }
+.sc-combined-shell [data-focused=true] .sc-tracks .sr-track-column>.sr-track-insert { position:sticky; right:0; top:auto; flex:none; align-self:flex-end; margin:0 0 4px -26px; background:var(--surface-raised); }

@@ -325,9 +325,9 @@ async function selectedVisible(mode){
  await page.locator('[data-action="06-if-match-any"]').click();assert.equal(await condition(),'has_ticket is true or trust is at least 5');
  await page.locator('[data-action="06-if-rule-2-operator-is-less-than"]').click();assert.equal(await condition(),'has_ticket is true or trust is less than 5');
  const draft=page.locator('.sr-inspector [data-rule="1"] input');await draft.fill('-');await page.locator('[data-action=bottom-reel]').click();await page.locator('[data-action=bottom-tracks]').click();
- assert.equal(await draft.getAttribute('aria-invalid'),'true','A half-typed number stays an editable, flagged draft');await draft.fill('5');assert.equal(await condition(),'has_ticket is true or trust is less than 5');
+ assert.equal(await draft.getAttribute('aria-invalid'),'true','A half-typed number stays an editable, flagged draft');assert.equal(await condition(),'has_ticket is true or trust is less than 5','A draft never reaches the story');assert.match(await page.locator('.sr-inspector [data-rule="1"] .sc-field-error').innerText(),/Enter a whole number/);await draft.fill('5');assert.equal(await condition(),'has_ticket is true or trust is less than 5');
  await page.locator('summary[data-action=test-ticket-if-rule-0-variable]').click();await page.locator('[data-action=test-ticket-if-rule-0-variable-new]').click();
- await page.getByRole('textbox',{name:'Variable name',exact:true}).fill('Bad Name');await page.locator('[data-action=create-variable]').click();assert.match(await page.locator('.sc-field-error').innerText(),/lowercase/);
+ await page.getByRole('textbox',{name:'Variable name',exact:true}).fill('Bad Name');await page.locator('[data-action=create-variable]').click();assert.match(await page.locator('dialog[open] .sc-field-error').innerText(),/lowercase/);
  await page.getByRole('textbox',{name:'Variable name',exact:true}).fill('found_letter');await page.locator('[data-action=create-variable]').click();
  assert.equal(await condition(),'found_letter is true or trust is less than 5');
  await page.locator('[data-action=undo]').click();assert.equal(await condition(),'has_ticket is true or trust is less than 5');
@@ -433,7 +433,7 @@ async function selectedVisible(mode){
  assert.equal(await page.locator('[data-action=hidden-lanes-end]').isVisible(),false,'No marker while every lane fits');
  await page.locator('[data-resize=focus-side]').focus();for(let i=0;i<12;i++)await page.keyboard.press('Shift+ArrowLeft');await settled();
  assert.match(await page.locator('[data-action=hidden-lanes-end]').innerText(),/Flow ›/,'A wide sidebar names the lanes it hides');
- await page.locator('[data-action=hidden-lanes-end]').click();await settled();assert.match(await page.locator('[data-action=hidden-lanes-start]').innerText(),/‹ Beat/,'Scrolling to them names the lanes now hidden on the left');
+ await page.locator('[data-action=hidden-lanes-end]').click();await settled();assert.match(await page.locator('[data-action=hidden-lanes-start]').innerText(),/‹ Background/,'Scrolling to them names the lanes now hidden on the left; Beat stays visible');
  await capture('revision-focus-hidden-lanes');
  await page.locator('[data-action=toggle-focus]').click();await settled();assert.equal(await page.locator('.sc-resizer').count(),0,'Resizing belongs to Writing focus');
  await resize({width:1100,height:720});await open('populated');await page.locator('[data-action=toggle-focus]').click();await settled();
