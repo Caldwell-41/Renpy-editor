@@ -312,10 +312,13 @@ its state. When space runs short, secondary panels collapse before the main edit
 shrinks. The footer and warning regions keep a fixed height so editing content never
 moves.
 
-The header always shows the save state: Saved, Saving, Unsaved Source draft, Conflict
-or Recovery required. Cmd/Ctrl+S has one route. Outside Source it flushes accepted
-work; in Source it accepts the focused draft. A refused Source draft never reports
-Saved. [ADR 0007](adr/0007-shell-save-command-ownership.md) owns the route and the
+The header shows pending beat drafts as well as Saved, Saving, Unsaved Source draft,
+Conflict or Recovery required. Cmd/Ctrl+S has one shell-owned route. In Story it
+accepts all pending beat drafts under [Saving Story drafts](#saving-story-drafts);
+in Source it accepts the focused Source draft. Other contexts retain their existing
+Save behaviour. Pending or refused drafts never report the whole project as Saved.
+[ADR 0007](adr/0007-shell-save-command-ownership.md), extended for Story by
+[ADR 0022](adr/0022-saving-retained-story-drafts.md), owns the route and the
 [session handoff](ARCHITECTURE.md#corrective-project-session-handoff) owns status
 ordering.
 
@@ -433,6 +436,20 @@ would discard a draft, including deleting its beat or closing the project.
 Changes to the source beneath a retained draft still need decisions before
 implementation. This target replaces production's current rule that requires
 committing or cancelling the beat edit before navigation.
+
+### Saving Story drafts
+
+In Story, the main Save button and Cmd/Ctrl+S save all pending beat drafts in the
+open project, including beats outside the current selection or scene. Check every
+draft before writing any of them. If any draft is incomplete or invalid, retain all
+drafts and reveal the failing draft with its error. No draft is saved by that request
+until all pass validation. Commit remains available to save one beat on its own.
+
+Story Save does not accept unfinished Source text. The shell coordinates acceptance
+through the existing transaction layer, with current-source validation and ordinary
+conflict/recovery handling. [ADR 0022](adr/0022-saving-retained-story-drafts.md) records
+the change from production's current Flush-only Story Save. Saving follows the
+[Story Undo rules](#story-undo) and does not add a separate user-visible history step.
 
 ### Story Undo
 

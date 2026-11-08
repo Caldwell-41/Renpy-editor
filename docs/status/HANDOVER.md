@@ -6,7 +6,7 @@ Continue the one-decision-at-a-time interview on `codex/story-combined-v1-grill`
 created from approved-design branch head `3f5a6de9`. The
 [release scope](../design/story-revamp/README.md#production-release-scope) owns settled
 scope decisions; record domain terms in the root glossary when resolved. The next
-decision concerns the main Save command with multiple beat drafts. Other open
+decision concerns showing uncommitted beat drafts in the game stage. Other open
 decisions include source changes beneath retained beat drafts, and implementation
 acceptance and task ownership.
 Commit documentation locally.

@@ -90,6 +90,11 @@ Pages do not get separate project Undo queues. Source retains its existing per-f
 typing history; accepted Source saves join the shared project history. The earlier
 proposal for separate field and project Undo within Story was not accepted.
 
+Save in Story accepts all pending beat drafts in the open project after validating
+the whole set. [ADR 0022](../../adr/0022-saving-retained-story-drafts.md) records
+the scoped change to Save ownership; [UI.md](../../UI.md#saving-story-drafts) owns
+the interaction, including refusal and single-beat Commit.
+
 ## Selected direction
 
 Kris selected a fourth combined mock, owned by the current section of

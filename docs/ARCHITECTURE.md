@@ -273,6 +273,11 @@ accepts that exact draft once. A clean settled Source falls through to normal Fl
 without an ownership gap; refusal never falls through. Successful Source acceptance is
 already durable through the shared transaction and does not append another Flush.
 
+[ADR 0022](adr/0022-saving-retained-story-drafts.md) defines the selected Story
+extension, not yet implemented: Save accepts all retained beat drafts after
+validating the whole set. It replaces the Flush-only route in Story when drafts
+are pending and preserves the existing shell, Source and transaction ownership.
+
 Undo/redo records semantic intent and exact patches across visual and source edits.
 External filesystem revisions are safety boundaries: undo/redo must not silently
 replace a newer external revision. Conflicts should block writes to the affected
