@@ -31,8 +31,9 @@ Issue #82 records the decisions. The three reference variants are unchanged.
 - The Branch path bar only switches branches. Each open condition shows its number, its
   If test and a two-way switch. Insert actions moved to the branch boundaries.
 - Tracks and Reel draw a coloured route line above each open branch, with a light tint on
-  its columns. Slim `+` markers add the first beat, the last beat and a beat after the
-  condition. Writing focus turns the line vertical and labels the markers. Two route rows
+  its columns. Slim `+` markers add the first beat and a beat after the condition; a
+  branch end keeps its `+` only before a Jump or Return, since the last beat's own `+`
+  adds the last beat. Writing focus turns the line vertical and labels the markers. Two route rows
   fit inside the old panel height, so the stage sizes are unchanged.
 - Beat editors use pictures. Backgrounds and expressions show a thumbnail and Change,
   which opens a picker sheet over the sidebar. Pointing at a picture previews it on the
@@ -67,7 +68,8 @@ Issue #82 records the decisions. The three reference variants are unchanged.
   are unbuilt; the editor says so.
 - Add a beat is one compact dialog. Click or Enter adds the highlighted beat; Escape or
   Close cancels. Replacing an ending is named in the destination line.
-- Writing focus Tracks shows all six lanes above 1200 px wide.
+- Writing focus Tracks shows all six lanes from 900 px wide. Dark branch colour 4 is
+  `#7fbf73`, so it no longer reads as the brass selection.
 - Conditions use a rule builder that follows ADR 0014's typed model. Each rule picks a
   project variable (yes/no, whole number or text), a preset test and a value. Numbers
   offer `= ≠ < ≤ > ≥`; yes/no and text offer equality only. One All/Any switch joins

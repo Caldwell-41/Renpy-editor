@@ -424,9 +424,9 @@
 @media(max-width:899px) { .sr-tracks-workspace>.sc-resizer { display:none; } }
 /* A lane cut off at either edge of focus Tracks: a solid edge line plus a header button naming it. */
 .sc-combined-shell [data-focused=true] .sc-tracks { position:relative; }
-.sc-combined-shell [data-focused=true] .sc-tracks[data-hidden-end=true] .sr-tracks-scroll { box-shadow:inset -2px 0 var(--accent-primary); }
-.sc-combined-shell [data-focused=true] .sc-tracks[data-hidden-start=true] .sr-tracks-scroll { box-shadow:inset 2px 0 var(--accent-primary); }
-.sc-combined-shell [data-focused=true] .sc-tracks[data-hidden-start=true][data-hidden-end=true] .sr-tracks-scroll { box-shadow:inset 2px 0 var(--accent-primary),inset -2px 0 var(--accent-primary); }
+.sc-combined-shell [data-focused=true] .sc-tracks[data-hidden-end=true] .sr-tracks-scroll { box-shadow:inset -2px 0 var(--border-strong); }
+.sc-combined-shell [data-focused=true] .sc-tracks[data-hidden-start=true] .sr-tracks-scroll { box-shadow:inset 2px 0 var(--border-strong); }
+.sc-combined-shell [data-focused=true] .sc-tracks[data-hidden-start=true][data-hidden-end=true] .sr-tracks-scroll { box-shadow:inset 2px 0 var(--border-strong),inset -2px 0 var(--border-strong); }
 .sc-combined-shell .sc-lane-edge { position:absolute; z-index:7; display:flex; align-items:center; min-height:0; padding:0 10px; border:0; border-radius:0; background:var(--surface-raised); color:var(--accent-primary); font-size:11.5px; font-weight:600; white-space:nowrap; }
 .sc-combined-shell .sc-lane-edge:hover { background:var(--accent-subtle); color:var(--text-primary); }
 .sc-combined-shell .sc-lane-edge[hidden] { display:none; }
@@ -446,14 +446,18 @@
 .sc-combined-shell .sc-track-slot .sc-rail-label { visibility:hidden; }
 .sc-combined-shell .sc-track-slot[data-selected=true] { background:var(--surface-selected); box-shadow:inset 2px 0 var(--accent-primary),inset -2px 0 var(--accent-primary); }
 .sc-combined-shell .sr-inspector .sr-empty h2 { font-size:14px; font-weight:600; }
-.sc-combined-shell .sr-editor-location>[data-action=edit-owner] { margin-left:8px; min-height:24px; padding:1px 8px; font-size:12px; }
+.sc-combined-shell .sr-editor-location>[data-action=edit-owner] { display:table; margin:6px 0 0; min-height:24px; padding:1px 8px; font-size:12px; }
 /* Light mode: the selected column uses the cream selection fill so it stands apart from blue branch tints. */
 :root[data-theme="light"] .sc-combined-shell .sr-track-beat[data-selected=true],:root[data-theme="light"] .sc-combined-shell .sr-track-beat[data-selected=true] .sr-track-present,:root[data-theme="light"] .sc-combined-shell .sr-reel-beat[data-selected=true] { background:var(--surface-selected); }
 /* Laptop Writing focus: a narrower sidebar and staging lanes leave Words room; grips adjust the rest. */
 @media(min-width:900px) and (max-width:1200px) {
   .sc-combined-shell [data-focused=true] .sc-combined-layout { grid-template-columns:minmax(0,1fr) var(--focus-side,400px); }
-  .sc-combined-shell [data-focused=true] .sr-track-labels,.sc-combined-shell [data-focused=true] .sr-track-beat { grid-template-columns:var(--lane-0,44px) var(--lane-1,96px) var(--lane-2,96px) minmax(200px,1fr) var(--lane-4,88px) var(--lane-5,112px); }
+  .sc-combined-shell [data-focused=true] .sr-track-labels,.sc-combined-shell [data-focused=true] .sr-track-beat { grid-template-columns:var(--lane-0,52px) var(--lane-1,96px) var(--lane-2,96px) minmax(192px,1fr) var(--lane-4,88px) var(--lane-5,112px); }
 }
 /* An end marker with no + only carries the route line and where the branch goes next. */
 .sc-combined-shell [data-focused=false] .sc-track-mark.sc-track-exit-bare { flex-basis:8px; }
 .sc-combined-shell [data-focused=true] .sc-track-mark.sc-track-exit-bare { height:22px; }
+/* Writing focus: columns grow with their rows so each row's + stays after the Flow lane. */
+.sc-combined-shell [data-focused=true] .sc-tracks .sr-track-column { min-width:min-content; }
+/* Laptop: a thinner, lower route line leaves its label clear. */
+@media(min-width:900px) and (max-width:1200px) { .sc-combined-shell [data-focused=false] .sc-rail-on::after { bottom:0; height:2px; } .sc-combined-shell [data-focused=false] .sc-rail-label,.sc-combined-shell [data-focused=false] .sc-rail-end { bottom:3px; } }
