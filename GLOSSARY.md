@@ -5,6 +5,11 @@ distinguish Story and screen editing from deliberate game execution.
 
 ## Language
 
+**Beat draft**:
+An unfinished edit attached to a Story beat that has not been committed to the
+project's source. It can contain incomplete input and remains available when the
+author leaves the beat and returns.
+
 **Game stage**:
 The Story view of supported scene appearance through the selected beat, shown in
 the project's width-to-height ratio. It marks unknown state and does not run the game.

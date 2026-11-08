@@ -411,12 +411,28 @@ covers moving, unwrapping and deleting branches.
   never edits the earlier beat silently.
 - Source the editor cannot represent is a protected Custom Code beat with its reason
   and Edit in Source. Moves never cross it unless the source layer proves the move safe.
-- A pending beat edit has Commit and Cancel and blocks navigation that would lose it.
-  Failed commits keep the text and focus.
+- A pending beat edit has Commit and Cancel. The [beat draft rules](#beat-drafts)
+  allow navigation without losing unfinished input. Failed commits keep the text
+  and focus.
 - Set variable uses the [equation row](#arithmetic-equation-row) and conditions use the
   [rule builder](#condition-rule-builder).
 - Add a beat is a [pick-one dialog](#pick-one-dialogs). Its destination line names
   where the beat lands and any ending it replaces.
+
+### Beat drafts
+
+A beat draft stays attached to its beat when the author selects another beat or
+branch. Returning to that beat restores the unfinished input. Tracks, Reel and
+Writing focus also preserve drafts. Mark beats with pending edits so the author
+can find them.
+
+Navigation does not commit or discard a draft. Commit remains explicit, and
+incomplete or invalid input never reaches the source files. Ask before an action
+would discard a draft, including deleting its beat or closing the project.
+
+Undo behaviour and changes to the source beneath a retained draft still need
+decisions before implementation. This target replaces production's current rule
+that requires committing or cancelling the beat edit before navigation.
 
 ### Choices
 

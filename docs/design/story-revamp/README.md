@@ -75,6 +75,13 @@ The approved mock's 16:9 stage represents its 1920 × 1080 sample, not a restric
 on other project resolutions. [The Story layout contract](../../UI.md#layout) owns
 the fit rule. Keep the approved mock and its captures unchanged.
 
+### Draft navigation in production
+
+Kris selected retaining unfinished beat edits while navigating between beats and
+branches. [Beat drafts](../../UI.md#beat-drafts) owns the interaction rules. The
+existing production navigation guard must change during integration; preserving
+drafts must not weaken source validation or the shared transaction layer.
+
 ## Selected direction
 
 Kris selected a fourth combined mock, owned by the current section of
