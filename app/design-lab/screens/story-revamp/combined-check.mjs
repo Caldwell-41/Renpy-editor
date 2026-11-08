@@ -105,7 +105,7 @@ async function selectedVisible(mode){
   await page.locator('[data-action=next-dialogue]').click();await page.locator('.sr-prose').fill('Still narration.');
   branch=(await state()).scenes[0].beats.find(b=>b.id==='beat-1').branches[0];assert.equal(branch.beats[1].kind,'narration');
   await page.locator('.sr-prose').press('Shift+Meta+Enter');await settled();branch=(await state()).scenes[0].beats.find(b=>b.id==='beat-1').branches[0];assert.equal(branch.beats[2].kind,'narration');
-  await page.locator('[data-action=append-ticket-if]').click();await page.locator('[data-picker-search]').fill('narration');await page.keyboard.press('Enter');await page.locator('.sr-prose').fill('Last in this branch.');
+  await page.locator(`[data-column="${branch.beats.at(-1).id}"] .sr-gap`).click();await page.locator('[data-picker-search]').fill('narration');await page.keyboard.press('Enter');await page.locator('.sr-prose').fill('Last in this branch.');
   branch=(await state()).scenes[0].beats.find(b=>b.id==='beat-1').branches[0];assert.equal(branch.beats.at(-1).text,'Last in this branch.');
   await capture(`${mode}-branch-first-last`);
   await page.locator('.sc-conditions [data-action=open-branch-ticket-else]').press('Enter');await settled();
@@ -429,6 +429,9 @@ async function selectedVisible(mode){
  await page.locator('[data-action=hidden-lanes-end]').click();await settled();assert.match(await page.locator('[data-action=hidden-lanes-start]').innerText(),/‹ Beat/,'Scrolling to them names the lanes now hidden on the left');
  await capture('revision-focus-hidden-lanes');
  await page.locator('[data-action=toggle-focus]').click();await settled();assert.equal(await page.locator('.sc-resizer').count(),0,'Resizing belongs to Writing focus');
- done('Revision: Writing focus resizes the sidebar and each Tracks lane by drag or arrow keys; Escape cancels, double-click resets, widths survive redraws and stay out of Undo; hidden lanes are named at the edge and one click shows them');
+ await resize({width:1100,height:720});await open('populated');await page.locator('[data-action=toggle-focus]').click();await settled();
+ assert.equal(await page.locator('.sc-tracks .sr-track-labels .sr-track-label:visible').count(),6,'Laptop Writing focus keeps every lane');assert.equal(await page.locator('.sc-lane-resizer:visible').count(),5);
+ await page.locator('[data-action=toggle-focus]').click();
+ done('Revision: Writing focus resizes the sidebar and each Tracks lane by drag or arrow keys; Escape cancels, double-click resets, widths survive redraws and stay out of Undo; hidden lanes are named at the edge and one click shows them; laptop width keeps every lane');
  assert.deepEqual(errors,[]);
 }

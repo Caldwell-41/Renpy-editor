@@ -7,7 +7,7 @@
   --text-primary:#e9ecef; --text-secondary:#bcc4cc; --text-muted:#949ea8; --text-disabled:#66717b;
   --border-normal:#2c353e; --border-strong:#46525d;
   --accent-primary:#d6a84e; --accent-hover:#e6bc66; --accent-subtle:#3a3122; --focus-ring:#e6bc66; --on-accent:#1b1508;
-  --sc-arm-1:#4fb3a5; --sc-arm-2:#e07a5f; --sc-arm-3:#6aa9d8; --sc-arm-4:#b8c25a;
+  --sc-arm-1:#4fb3a5; --sc-arm-2:#e07a5f; --sc-arm-3:#6aa9d8; --sc-arm-4:#7fbf73;
   --sc-char-mara:#e88ea4; --sc-char-eli:#82bfe0;
   --sc-stage-edge:#0d1114; --sc-tile:#10161b;
   color-scheme:dark; background:var(--surface-app); color:var(--text-primary);
@@ -202,7 +202,7 @@
 .sc-combined-shell [data-focused=true] .sc-track-mark { flex:none; flex-direction:row; height:28px; }
 .sc-combined-shell [data-focused=true] .sc-track-mark>.button { text-align:right; padding:0 12px; }
 .sc-combined-shell [data-focused=true] .sc-track-insert { top:6px; }
-@media(min-width:1201px) {
+@media(min-width:900px) {
   .sc-combined-shell [data-focused=true] .sr-track-labels,.sc-combined-shell [data-focused=true] .sr-track-beat { grid-template-columns:var(--lane-0,52px) var(--lane-1,120px) var(--lane-2,132px) minmax(220px,1fr) var(--lane-4,108px) var(--lane-5,140px); }
   .sc-combined-shell [data-focused=true] .sr-track-label:not(.sr-track-0):not(.sr-track-3),.sc-combined-shell [data-focused=true] .sr-track-cell:not(.sr-track-0):not(.sr-track-3) { display:block; }
   .sc-combined-shell [data-focused=true] .sr-track-cell { font-size:11.5px; padding:10px 8px; }
@@ -420,7 +420,7 @@
 .sc-combined-shell [data-focused=true] .sc-tracks .sr-track-label { position:relative; }
 .sc-lane-resizer.sc-resizer-end { right:-5px; }
 .sc-lane-resizer.sc-resizer-start { left:-5px; }
-@media(max-width:1200px) { .sc-lane-resizer { display:none; } }
+@media(max-width:899px) { .sc-lane-resizer { display:none; } }
 @media(max-width:899px) { .sr-tracks-workspace>.sc-resizer { display:none; } }
 /* A lane cut off at either edge of focus Tracks: a solid edge line plus a header button naming it. */
 .sc-combined-shell [data-focused=true] .sc-tracks { position:relative; }
@@ -449,3 +449,11 @@
 .sc-combined-shell .sr-editor-location>[data-action=edit-owner] { margin-left:8px; min-height:24px; padding:1px 8px; font-size:12px; }
 /* Light mode: the selected column uses the cream selection fill so it stands apart from blue branch tints. */
 :root[data-theme="light"] .sc-combined-shell .sr-track-beat[data-selected=true],:root[data-theme="light"] .sc-combined-shell .sr-track-beat[data-selected=true] .sr-track-present,:root[data-theme="light"] .sc-combined-shell .sr-reel-beat[data-selected=true] { background:var(--surface-selected); }
+/* Laptop Writing focus: a narrower sidebar and staging lanes leave Words room; grips adjust the rest. */
+@media(min-width:900px) and (max-width:1200px) {
+  .sc-combined-shell [data-focused=true] .sc-combined-layout { grid-template-columns:minmax(0,1fr) var(--focus-side,400px); }
+  .sc-combined-shell [data-focused=true] .sr-track-labels,.sc-combined-shell [data-focused=true] .sr-track-beat { grid-template-columns:var(--lane-0,44px) var(--lane-1,96px) var(--lane-2,96px) minmax(200px,1fr) var(--lane-4,88px) var(--lane-5,112px); }
+}
+/* An end marker with no + only carries the route line and where the branch goes next. */
+.sc-combined-shell [data-focused=false] .sc-track-mark.sc-track-exit-bare { flex-basis:8px; }
+.sc-combined-shell [data-focused=true] .sc-track-mark.sc-track-exit-bare { height:22px; }

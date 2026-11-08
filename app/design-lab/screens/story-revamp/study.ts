@@ -1241,7 +1241,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   }
   function horizontalWheel(scroller: HTMLElement) { scroller.addEventListener('wheel', event => { if (!focused && Math.abs(event.deltaY) > Math.abs(event.deltaX) && scroller.scrollWidth > scroller.clientWidth) { const before = scroller.scrollLeft; scroller.scrollLeft += event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? scroller.clientWidth : 1); if (scroller.scrollLeft !== before) event.preventDefault(); } }, { passive: false }); }
   function shotReel(parent: HTMLElement) { const layout = el('div', 'sr-reel-layout'); const top = el('div', 'sr-shot-workspace'); top.dataset.prose = String(['dialogue', 'narration'].includes(current()?.kind ?? '')); if (!focused) top.append(preview()); top.append(inspector(!focused && !hideSaybox && innerWidth >= 900)); layout.append(top, orderedReel()); parent.append(layout); }
-  const wordsOnly = () => focused ? innerWidth <= 1200 : innerWidth < 900 && !allTracks;
+  const wordsOnly = () => focused ? innerWidth < 900 : innerWidth < 900 && !allTracks;
   function trackText(b: Beat, track: number) {
     const summary = combined && (b.kind.endsWith('Screen') || b.kind === 'return') ? brief(b) : `${label(b.kind)} · ${brief(b)}`;
     if (track === 0) return number(b.id);
@@ -1370,7 +1370,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       const nodes: HTMLElement[] = [];
       if (!slot) {
         const exit = mark('exit', chain); exit.append(rail(chain, { branch, end: thenText(owner, branch) }));
-        const append = action(focused ? `+ Last beat in ${branchLabel(branch)}` : '+', () => picker(branch.beats, path, defaultIndex(branch.beats)), false, `append-${branch.id}`); append.ariaLabel = append.title = `Add the last beat in ${branchLabel(branch)}${ending(branch.beats) >= 0 ? ', before its ending' : ''}`; exit.append(append); nodes.push(exit);
+        if (ending(branch.beats) >= 0) { const append = action(focused ? `+ Last beat in ${branchLabel(branch)}` : '+', () => picker(branch.beats, path, defaultIndex(branch.beats)), false, `append-${branch.id}`); append.ariaLabel = append.title = `Add the last beat in ${branchLabel(branch)}${ending(branch.beats) >= 0 ? ', before its ending' : ''}`; exit.append(append); } else exit.classList.add('sc-track-exit-bare'); nodes.push(exit);
       }
       if (!(parentChain.length && place.index === place.body.length - 1)) {
         const after = mark('after', parentChain); after.append(rail(parentChain));

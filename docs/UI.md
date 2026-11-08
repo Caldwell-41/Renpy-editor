@@ -60,7 +60,7 @@ colours. The status tokens (`--status-success`, `--status-warning`, `--status-er
 | `--accent-subtle` | `#3a3122` | `#dfe6f0` |
 | `--focus-ring` | `#e6bc66` | `#2d4d78` |
 | `--on-accent` | `#1b1508` | `#ffffff` |
-| Branch arm 1 to 4 | `#4fb3a5` `#e07a5f` `#6aa9d8` `#b8c25a` | `#1c7a6d` `#b24f2e` `#2b67a0` `#66771a` |
+| Branch arm 1 to 4 | `#4fb3a5` `#e07a5f` `#6aa9d8` `#7fbf73` | `#1c7a6d` `#b24f2e` `#2b67a0` `#66771a` |
 | Stage edge | `#0d1114` | `#c9c6be` |
 | Thumbnail tile | `#10161b` | `#d9d6ce` |
 
