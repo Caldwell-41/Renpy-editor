@@ -12,7 +12,8 @@ author leaves the beat and returns.
 
 **Game stage**:
 The Story view of supported scene appearance through the selected beat, shown in
-the project's width-to-height ratio. It marks unknown state and does not run the game.
+the project's width-to-height ratio, including valid beat drafts. It marks unknown
+state and does not run the game.
 _Avoid_: Screen canvas as a synonym
 
 **Screen canvas**:

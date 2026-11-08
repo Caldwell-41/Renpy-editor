@@ -518,6 +518,11 @@ It marks runtime-dependent or unsupported state as partial/unknown rather than
 inventing fidelity. Navigating beats must not repeatedly audition audio; audio has
 explicit audition controls.
 
+The selected Story design extends this preview with valid, uncommitted beat drafts.
+This is an inert preview of pending edits, not source acceptance or a second saved
+story document. [Stage preview](UI.md#stage-preview) owns live feedback and unsaved
+status. Unsupported or unknowable results retain the partial/unknown boundary above.
+
 Preview media is a bounded presentation snapshot, not a renderer file capability.
 Core resolves a current-session Asset UUID, retains and revalidates the safe relative
 path and regular-file identity, verifies recorded size/hash, accepts only passive

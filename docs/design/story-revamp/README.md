@@ -95,6 +95,11 @@ the whole set. [ADR 0022](../../adr/0022-saving-retained-story-drafts.md) record
 the scoped change to Save ownership; [UI.md](../../UI.md#saving-story-drafts) owns
 the interaction, including refusal and single-beat Commit.
 
+Valid drafts update the game stage before saving. The normal save-status area
+shows that work is unsaved; the stage has no extra unsaved warning or per-change
+annotation. [Stage preview](../../UI.md#stage-preview) owns this behaviour and the
+existing validation timing for incomplete input.
+
 ## Selected direction
 
 Kris selected a fourth combined mock, owned by the current section of

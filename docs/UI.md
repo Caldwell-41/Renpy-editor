@@ -507,6 +507,16 @@ The Story rules above define Loomlight's application of that reference.
 
 ### Stage preview
 
+Valid beat drafts update the game stage immediately, before Commit or Save. Show
+unsaved status only in the normal save-status area; do not add an unsaved warning
+over the stage or annotate each changed item. The beat draft markers still identify
+unfinished beats. Cancelling a draft restores the accepted value in the preview.
+Previewing a draft never writes to the game's source files.
+
+Incomplete input remains in its field while the author types. Follow the shared
+[input validation timing](#input-validation-timing-and-recovery) on field exit and
+Save. An incomplete or invalid calculation never supplies an invented preview result.
+
 Selecting a beat shows the scene-local state through that beat: background, visible
 characters and appearances, placement, music, simple variables and the current line or
 menu. A new Background clears characters. State the editor cannot prove is labelled
