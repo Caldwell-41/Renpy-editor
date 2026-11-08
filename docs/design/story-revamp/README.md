@@ -45,9 +45,12 @@ controls are finished. Screens arithmetic retains its own acceptance work, and #
 stays open until both Story and Screens meet its requirements. Shared-model changes
 must preserve existing Screens behaviour.
 
-The app-wide palette rollout and implementation order remain open decisions. This
-interview records decisions only; implementation and publication still need Kris's
-go-ahead.
+The app-wide Brass and slate palette is a separate implementation slice required
+before or with this release. [UI.md](../../UI.md#palette-brass-and-slate) owns its
+scope, including both themes and the known text-contrast fixes.
+
+Implementation order remains an open decision. This interview records decisions
+only; implementation and publication still need Kris's go-ahead.
 
 ## Selected direction
 

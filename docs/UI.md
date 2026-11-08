@@ -11,7 +11,9 @@ contract linked from each section, and exact implemented values live in the code
   and the [Story authoring notes](design/story-revamp/README.md).
 
 This is the target design. Production still ships the charcoal/copper and paper/teal
-palettes and the earlier Story layout until the Story redesign is integrated.
+palettes and the earlier Story layout. The app-wide palette change must ship before
+or with Story Combined v1, as recorded in its
+[release scope](design/story-revamp/README.md#production-release-scope).
 
 ## Design intent
 
@@ -40,7 +42,12 @@ Each theme has its own palette. Dark uses slate surfaces with a brass accent; Li
 uses warm off-white surfaces with a slate-blue accent. Game preview colours stay
 independent of the app theme. Components use semantic tokens only, never literal
 colours. The status tokens (`--status-success`, `--status-warning`, `--status-error`,
-`--status-info`, `--status-partial`) keep their current values.
+`--status-info`, `--status-partial`) retain their meanings. Adjust their values where
+needed to fix the known text-contrast gaps on the new hover and selected backgrounds.
+
+Implement the app-wide colour change as a separate slice. Update the shared tokens
+for both themes and check readability on existing screens. Layout redesigns remain
+separate work.
 
 | Token | Dark | Light |
 | --- | --- | --- |
