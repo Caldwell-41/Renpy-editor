@@ -354,7 +354,12 @@ async function selectedVisible(mode){
  await page.locator('[data-action=option-4-when-false-show-disabled]').click();assert.equal(await page.locator('.sr-stage [data-stage-choice="3"]').getAttribute('data-state'),'disabled','Show disabled keeps a false option visible');
  await page.locator('[data-action=undo]').click();
  await page.locator('[data-action=guard-2-edit]').click();await settled();assert.equal(await page.locator('[data-action=guard-2-rule-0-variable]').evaluate(n=>document.activeElement===n),true,'Edit opens the rule builder');
- await page.locator('[data-action=guard-2-done]').click();
+ await page.locator('[data-action=move-option-2-up]').click();await settled();
+ assert.equal(await page.locator('.sc-guard-open').getAttribute('aria-label'),'Option 2 only when','The open condition editor moves with its option');assert.equal(await page.getByRole('textbox',{name:'Option 2 text',exact:true}).inputValue(),'Show the gold ticket');
+ await page.locator('[data-action=undo]').click();await page.locator('[data-action=guard-2-done]').click();
+ await page.locator('[data-action=picked-options-mark-picked]').click();await page.locator('[data-action=preview-options]').click();await page.locator('[data-action=preview-option-3-unknown]').click();await page.locator('[data-action=preview-option-3-picked]').click();
+ assert.equal(await page.locator('.sr-stage [data-stage-choice="2"]').getAttribute('data-state'),'unknown','Picked shows on top of unknown availability');assert.match(await page.locator('.sr-stage [data-stage-choice="2"]').getAttribute('aria-label'),/marked as picked, availability unknown/);
+ await page.locator('[data-action=preview-option-3-picked]').click();await page.locator('[data-action=preview-option-3-false]').click();await page.keyboard.press('Escape');await page.locator('[data-action=undo]').click();
  const undoLabel=await page.locator('[data-action=undo]').getAttribute('aria-label');
  await page.locator('[data-action=preview-options]').click();await page.locator('[data-action=preview-option-3-true]').click();
  assert.equal(await page.locator('.sr-stage [data-stage-choice="2"]').getAttribute('data-state'),'available','Preview can assume a condition is true');assert.equal(await page.locator('[data-action=undo]').getAttribute('aria-label'),undoLabel,'Preview is not an edit');

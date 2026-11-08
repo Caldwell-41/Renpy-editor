@@ -650,7 +650,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     row.append(pick, open); return row;
   }
   function guardRow(b: Beat, i: number) {
-    const option = b.options[i]!, key = `guard-${i}`, id = `${b.id}:${i}`, firstRule = `[data-editor-for="${b.id}"] [data-action="${key}-rule-0-variable"]`;
+    const option = b.options[i]!, key = `guard-${i}`, id = `${b.id}:${option.body ?? i}`, firstRule = `[data-editor-for="${b.id}"] [data-action="${key}-rule-0-variable"]`;
     if (openGuard === id) {
       const wrap = el('div', 'sc-guard-open'); wrap.role = 'group'; wrap.ariaLabel = `Option ${i + 1} only when`; const head = el('div', 'sc-guard-head');
       head.append(el('span', 'sc-field-label', 'Only when'), action('Done', () => { openGuard = ''; draw(); focusField(`[data-editor-for="${b.id}"] [data-choice-index="${i}"] .sc-guard>.button`); }, false, `${key}-done`));
@@ -1015,7 +1015,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       const preview = previewOptions.get(o.body ?? '') ?? {}, truth = o.guard.trim() ? preview.truth : 'true', picked = !!preview.picked;
       if (picked && b.picked === 'hide') return 'hidden-picked';
       if (truth === 'false') return o.whenFalse === 'disable' ? 'disabled' : 'hidden';
-      if (picked && b.picked === 'mark') return 'marked';
+      if (picked && b.picked === 'mark') return truth === undefined ? 'unknown' : 'marked';
       return truth === undefined ? 'unknown' : 'available';
     });
   }
@@ -1025,10 +1025,10 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     b.options.forEach((option, i) => {
       const state = states[i]!; if (state === 'hidden' || state === 'hidden-picked') return;
       const button = action('', () => { stageExpanded = false; draw(); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${i + 1} text"]`); }, false, `stage-choice-${i}`);
-      if (state === 'marked') button.append(el('span', 'sc-stage-mark', '✓')); if (state === 'disabled') button.append(beatIcon('lock'));
+      const picked = b.picked === 'mark' && !!previewOptions.get(option.body ?? '')?.picked; if (picked) { button.append(el('span', 'sc-stage-mark', '✓')); button.dataset.picked = 'true'; } if (state === 'disabled') button.append(beatIcon('lock'));
       button.append(el('span', '', option.text || 'New choice')); button.dataset.state = state; button.dataset.stageChoice = String(i);
       const body = b.branches.find(x => x.id === option.body); if (body) button.dataset.arm = String(armOf(body));
-      button.ariaLabel = `Edit option ${i + 1}: ${option.text || 'New choice'}${state === 'disabled' ? ', shown disabled in the game' : state === 'marked' ? ', marked as picked' : state === 'unknown' ? ', availability unknown' : ''}`; choices.append(button);
+      button.ariaLabel = `Edit option ${i + 1}: ${option.text || 'New choice'}${state === 'disabled' ? ', shown disabled in the game' : ''}${picked ? ', marked as picked' : ''}${state === 'unknown' ? ', availability unknown' : ''}`; choices.append(button);
     });
     const selectable = states.some(st => st === 'available' || st === 'marked' || st === 'unknown');
     if (!selectable) { const next = continuation(b), where = next ? `at ${number(next.id)}` : 'after the Choice'; choices.append(el('p', 'sc-choice-none', states.includes('disabled') ? `Only disabled options are left, so the story continues ${where}. No pick is recorded.` : `No option can be picked, so the story continues ${where}. No pick is recorded.`)); }
