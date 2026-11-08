@@ -129,11 +129,17 @@ Run `npm run design:dev -- --port 5176` in `app/`, then open
 The selected preview is also available on LAN port 5176. Port 5175's three-reference
 server is unchanged. Standalone exports include `combined.html`.
 
-Run the focused check from the repository root with
-`node app/design-lab/screens/story-revamp/combined-check.mjs`. It expects port
-5176 and uses the shared Chrome launcher. On macOS it requires scoped execution
-outside the agent sandbox. Current evidence is under ignored
-`.toolchains/story-combined/initial/`. The initial pass covers both bottom modes,
+Checks run through the Design Lab harness from `app/`, which starts its own server and
+browser. On macOS they need scoped execution outside the agent sandbox. Add `--capture`
+for review screenshots.
+
+```sh
+npm run design:check -- story-revamp combined --interaction ./screens/story-revamp/combined-check.mjs
+npm run design:check -- story-revamp <cue-sheet|shot-reel|stage-tracks> --interaction ./screens/story-revamp/check.mjs
+```
+
+Earlier rounds ran the combined check as a standalone script; their evidence is under
+ignored `.toolchains/story-combined/`. The initial pass covered both bottom modes,
 Writing focus, nested draft/context retention at three sizes, every beat editor,
 scene validation/creation, branch moves, Choice/Call destination navigation,
 enlargement, dialogs and Undo. The normal stage measures 974 x 548 at 1600 x 1000,
@@ -156,8 +162,8 @@ preceding beat. Writing focus uses a wider editor and taller prose field. The
 header Add button stays fixed, Next line has secondary emphasis, and Delete sits
 last in beat menus. Branch-entry markers also name the continuation.
 
-The combined check accepts `STORY_CHECK_OUTPUT=round-2-captures`. Its 22 groups
-pass and produce 107 PNGs. It adds direct
+Round 2's combined check wrote to `round-2-captures`. Its 22 groups
+passed and produce 107 PNGs. It adds direct
 visibility assertions before any helper scroll, condition-edit focus checks,
 ending replacement/empty-search checks and matching property-field heights.
 The 48 boundary renders, three reference journeys, exported fourth-mock draft and
