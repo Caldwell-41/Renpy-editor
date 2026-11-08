@@ -4,6 +4,26 @@
 fourth combined Story mock. Cue sheet, Shot reel and Stage tracks remain unapproved
 reference workspaces. Production Story is unchanged.
 
+## Approved: Story Combined v1
+
+Kris approved the combined layout on 2026-11-08. Refer to it as **Story Combined v1**:
+
+| Identity | Value |
+| --- | --- |
+| Design Lab screen and layout | `story-revamp` / `combined` |
+| Approval revision | `combined-v1` in [approval.json](approval.json) |
+| Source | commit `6ecf6470`, fingerprint `a526a4da…` (full values in the record) |
+| Captures | [captures/combined-v1/](captures/combined-v1/) |
+| Preview | `/preview.html?screen=story-revamp&variant=combined&state=populated&theme=dark&viewport=wide` |
+
+The record lists the agreed behaviour and known deviations; this file holds the detailed
+decisions below. Interaction references that are not recorded captures:
+[nested branches](captures/combined-v1/combined-v1-populated-dark-wide-nested.png),
+[Choice editor](captures/combined-v1/combined-v1-populated-dark-wide-choice.png) and
+[Writing focus](captures/combined-v1/combined-v1-populated-dark-wide-focus.png).
+Approval is a design decision, not an implementation; later work follows
+[design integration](../../../app/design-lab/INTEGRATION.md).
+
 The earlier three-mock study used independent Opus/Sol councils. Its requested
 Rounds 3 and 4 and later Round 5 are complete; a subsequent score-only rescore of
 fixed source `bbd5a4dd` is recorded in chat. Those grades do not qualify the new

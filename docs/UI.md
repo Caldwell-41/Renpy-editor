@@ -349,8 +349,8 @@ but could not open offers Open, not Create. A new project opens at Chapter 1, Sc
 
 Story is the author's main workspace. Its tree is `Project → Chapter → Scene`, and each
 Scene holds ordered beats. Display names are separate from technical labels and files,
-so renaming a Scene changes neither. The target is the combined mock approved in
-issue #82. The [revision notes](design/story-revamp/README.md#post-delivery-revision)
+so renaming a Scene changes neither. The target is **Story Combined v1**, the approved
+Design Lab layout `story-revamp` / `combined` (revision `combined-v1`) from issue #82. The [revision notes](design/story-revamp/README.md#post-delivery-revision)
 hold its detailed decisions, samples and stage sizes, and the
 [3A interaction design](tasks/reference/phase-3a-story.md#story-interaction-design)
 covers moving, unwrapping and deleting branches.

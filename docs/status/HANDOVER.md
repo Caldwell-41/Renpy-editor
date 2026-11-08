@@ -1,11 +1,13 @@
 # Current outcome handover
 
-## Post-delivery revision in progress
+## Story Combined v1 approved
 
-Kris reviewed the delivered fourth mock and selected a revision, recorded in the current
-section of [#82](https://github.com/Caldwell-41/Renpy-editor/issues/82). A Claude Opus 5.5
-high chat owns it on the same worktree and branch. The reviewed code `214186ab` keeps its
-council scores; the revision has none. No council runs until Kris asks for one.
+Kris approved the combined Story layout on 2026-11-08 as **Story Combined v1**: Design Lab
+`story-revamp` / `combined`, approval revision `combined-v1` at source `6ecf6470`, recorded
+in [the approval record](../design/story-revamp/approval.json). Three council rounds ran
+(final Opus 9.1; Sol 9.2 before a gate cap); their remaining findings are fixed but unscored.
+Branch `codex/story-combined-fourth-mock` is pushed with a draft PR into
+`codex/phase3b-screen-designer`. Production implementation is not selected.
 
 The revision changes only the combined variant. It adds a Brass and slate palette for
 each mode, generated visual-novel art under `art/`, a Branch path bar of two-way switches,

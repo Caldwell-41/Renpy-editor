@@ -1,11 +1,98 @@
 {
   "schemaVersion": 1,
   "screenId": "story-revamp",
-  "currentApproved": null,
+  "currentApproved": "combined-v1",
   "revisions": [
-    { "id": "combined-v1", "variantId": "combined", "approval": null },
-    { "id": "cue-sheet-v2", "variantId": "cue-sheet", "approval": null },
-    { "id": "stage-tracks-v1", "variantId": "stage-tracks", "approval": null },
-    { "id": "shot-reel-v2", "variantId": "shot-reel", "approval": null }
+    {
+      "id": "combined-v1",
+      "variantId": "combined",
+      "approval": {
+        "date": "2026-11-08",
+        "decision": "Kris said \"Okay this mock is approved\" after reviewing annotated screenshots of the combined Story layout following three council rounds. Approve combined-v1, named \"Story Combined v1\", with the recorded source, captures and behaviour. It is the target Story workspace for later implementation work.",
+        "reason": null,
+        "supersedes": null,
+        "source": {
+          "commit": "6ecf64704044a6fee9fc4ee6b3a54985d84b9b10",
+          "fingerprint": "a526a4dabf6fc76979b2d20912b650cc4d1d3b1af772bc0a6df50754f7e012cb"
+        },
+        "captures": [
+          {
+            "path": "docs/design/story-revamp/captures/combined-v1/combined-v1-populated-dark-wide.png",
+            "sha256": "c5a4e75a89d65bfa1a695f35f6f30bd8f31dccac5e4db9b0e0b8eea5a2ee22d5",
+            "state": "populated",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/story-revamp/captures/combined-v1/combined-v1-populated-light-wide.png",
+            "sha256": "932aa5567505bc4a01e1f949eadba482b455a5d348be87d15a2a874bb99b0eb8",
+            "state": "populated",
+            "theme": "light",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/story-revamp/captures/combined-v1/combined-v1-populated-dark-compact.png",
+            "sha256": "b9f3c166436770fb70472b1e96974371296c098238db580660b22ab1b8e5d1ce",
+            "state": "populated",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/story-revamp/captures/combined-v1/combined-v1-empty-dark-wide.png",
+            "sha256": "0c6d5961eb8e7c54308bbb852ffe07a192efbebfc516d70022d638b621dccf66",
+            "state": "empty",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/story-revamp/captures/combined-v1/combined-v1-protected-dark-wide.png",
+            "sha256": "d4ddf6b38bd95387f4987d8251c2d8217d3ffb6d68226f3ac16c754dd814c9e5",
+            "state": "protected",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "A 16:9 game stage and a right-hand beat editor sit above a bottom panel that switches between Tracks and Reel; Writing focus hides the stage and keeps the editor, the Branch path and a resizable lane grid from 900 px.",
+          "The Branch path bar only switches branches with If / Else if / Otherwise and numbered option switches. It wraps; each extra row takes about 30 px from the stage.",
+          "Open branches draw an arm-coloured route line in the Tracks/Reel row, with the legend in Key. An empty branch or option is one named, selectable slot. A branch end keeps its + only before a Jump or Return; every expanded condition keeps an after marker.",
+          "Backgrounds and expressions use picker sheets in the sidebar that preview on the stage. Add a beat is a compact dialog: click or Enter adds, Escape cancels, and it shrinks to its results.",
+          "Conditions use the typed rule builder; half-typed numbers stay drafts in the field with a message and never reach the story. Set variable is the equation row (#88).",
+          "Choice options are numbered blocks that own beats, a Then ending (Continue, Go to a scene, Repeat this Choice, Return), an Only when condition with Hide or Show disabled, and move up/down that keeps identity. Picked options are Show normally, Mark picked or Hide picked; Preview options sit outside Undo (#99).",
+          "Brass and slate palette per theme; colour marks only branch arms, character names and selection, as recorded in docs/UI.md."
+        ],
+        "deviations": [
+          "Fictional browser-memory mock. Choice bodies, prompts, Hide/Show disabled, Repeat and Picked options (#98) and arithmetic (#87) are not implemented in production and the mock labels them as planned.",
+          "A multi-row Branch path can shrink the stage below the 960 x 540 minimum in #82; Kris accepted this. One-row paths keep 974 x 548 at 1600 x 1000 and 633 x 356 at 1100 x 720.",
+          "The final council rounds scored Opus 9.1 and Sol 9.2 before a gate cap; their remaining findings were fixed in this source without a further scored round.",
+          "The branching sample state renders like populated in this layout. Recorded captures cover distinct sample states only; interaction references for nested branches, the Choice editor and Writing focus are linked from the design notes."
+        ]
+      }
+    },
+    {
+      "id": "cue-sheet-v2",
+      "variantId": "cue-sheet",
+      "approval": null
+    },
+    {
+      "id": "stage-tracks-v1",
+      "variantId": "stage-tracks",
+      "approval": null
+    },
+    {
+      "id": "shot-reel-v2",
+      "variantId": "shot-reel",
+      "approval": null
+    }
   ]
 }
