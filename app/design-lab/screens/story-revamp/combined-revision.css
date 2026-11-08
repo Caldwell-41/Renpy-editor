@@ -34,6 +34,8 @@
 .sc-combined-shell .sr-character { top:0; bottom:0; height:100%; overflow:visible; }
 .sc-combined-shell .sr-character img { height:160%; filter:drop-shadow(0 6px 18px rgba(0,0,0,.35)); }
 .sc-preview-tag { position:absolute; top:10px; left:10px; z-index:4; padding:5px 10px; font-size:12px; color:#eef0f2; background:rgba(14,19,26,.86); border-left:3px solid var(--accent-primary); pointer-events:none; }
+/* The game window keeps the game's own colours in either app theme. */
+.sc-combined-shell .sr-stage { --sc-char-mara:#e88ea4; --sc-char-eli:#82bfe0; }
 .sc-combined-shell .sr-saybox>strong { color:var(--sc-speaker, var(--sc-char-mara)); background:#141a21!important; }
 
 /* Branch path: read left to right, one two-way switch per open condition. Insert actions live in Tracks and Reel. */
@@ -281,9 +283,6 @@
 .sc-variable-text { display:flex; flex-direction:column; min-width:0; }
 .sc-variable-text>small { font-size:11px; color:var(--text-muted); }
 .sc-type { flex:none; display:inline-grid; place-items:center; min-width:26px; height:18px; padding:0 3px; border-radius:3px; font:600 10px var(--font-source); color:var(--text-secondary); background:var(--surface-hover); }
-.sc-type-flag { color:var(--sc-arm-1); background:color-mix(in srgb,var(--sc-arm-1) 15%,transparent); }
-.sc-type-number { color:var(--sc-arm-3); background:color-mix(in srgb,var(--sc-arm-3) 15%,transparent); }
-.sc-type-text { color:var(--sc-arm-4); background:color-mix(in srgb,var(--sc-arm-4) 15%,transparent); }
 .sc-combined-shell .sc-dropdown-list>.sc-dropdown-create { margin-top:4px; border-top:1px solid var(--border-normal); border-radius:0; color:var(--accent-primary); min-height:34px; }
 .sc-combined-shell .sc-add-rule { align-self:flex-start; min-height:26px; padding:2px 8px; font-size:12px; background:transparent; border-color:var(--border-normal); color:var(--text-secondary); }
 .sc-combined-shell .sc-add-rule:hover { color:var(--text-primary); border-color:var(--border-strong); }
@@ -393,6 +392,7 @@
 
 /* The route band shares the Tracks/Reel row, so a scene with no open branch wastes no height.
    --band-gap keeps branch labels clear of the Branch path border; the Words lane gets the rest. */
+@media(min-width:900px) {
 .sc-combined-shell [data-focused=false] .sc-combined-layout { --band-gap:6px; --track-rows:20px 18px 20px calc(40px + var(--rail) * 2 - var(--band-gap)) 18px 20px; }
 .sc-combined-shell [data-focused=false] .sc-bottom-panel { grid-template-rows:calc(var(--rail) * 2 + var(--band-gap)) minmax(0,1fr); }
 .sc-combined-shell [data-focused=false] .sc-bottom-toolbar { position:relative; z-index:5; pointer-events:none; align-items:flex-start; padding-top:var(--band-gap); }
@@ -400,14 +400,14 @@
 .sc-combined-shell [data-focused=false] .sc-mode-switch { background:var(--surface-app); }
 .sc-combined-shell [data-focused=false] .sc-tracks,.sc-combined-shell [data-focused=false] .sc-reel { margin-top:calc(var(--rail) * -2); }
 .sc-combined-shell [data-focused=false] .sc-tracks .sr-track-copy { -webkit-line-clamp:3; }
-.sc-track-key { position:relative; margin-left:auto; }
+}
+.sc-track-key { position:relative; margin-left:6px; background:var(--surface-app); }
 .sc-combined-shell .sc-track-key>summary.button { min-height:22px; padding:1px 8px; font-size:11px; background:var(--surface-panel); list-style:none; }
 .sc-track-key>summary::-webkit-details-marker { display:none; }
-.sc-track-key-list { position:absolute; right:0; top:calc(100% + 4px); z-index:20; width:max-content; padding:8px 10px; border:1px solid var(--border-strong); border-radius:4px; background:var(--surface-raised); box-shadow:0 10px 24px #0006; font-size:11.5px; color:var(--text-secondary); }
+.sc-track-key-list { position:absolute; left:0; top:calc(100% + 4px); z-index:20; width:max-content; padding:8px 10px; border:1px solid var(--border-strong); border-radius:4px; background:var(--surface-raised); box-shadow:0 10px 24px #0006; font-size:11.5px; color:var(--text-secondary); }
 .sc-track-key-list p { margin:0; }
 .sc-track-key-list p+p { margin-top:4px; }
 @media(min-width:900px) and (max-width:1200px) { .sc-combined-shell [data-focused=false] .sc-combined-layout { --band-gap:4px; --track-rows:16px 14px 16px calc(26px + var(--rail) * 2 - var(--band-gap)) 14px 16px; } }
-@media(max-width:899px) { .sc-combined-shell [data-focused=false] .sc-combined-layout { --track-rows:24px 72px; } }
 
 /* Writing focus resizing: a thin grip on the sidebar edge and on each lane edge. */
 @media(min-width:900px) { .sc-combined-shell [data-focused=true] .sc-combined-layout { grid-template-columns:minmax(0,1fr) var(--focus-side,clamp(440px,38vw,560px)); } }
@@ -432,3 +432,20 @@
 .sc-combined-shell .sc-lane-edge[hidden] { display:none; }
 .sc-lane-edge-end { right:2px; }
 .sc-lane-edge-start { left:2px; }
+/* Hidden-lane markers sit in the Tracks/Reel row beside the tabs. */
+.sc-combined-shell .sc-lane-edge { position:static; margin-left:12px; min-height:24px; padding:0 8px; }
+.sc-combined-shell .sc-lane-edge-end { margin-left:auto; }
+/* Rows grow with their lanes so text stays inside its own lane when the sidebar is wide. */
+.sc-combined-shell [data-focused=true] .sc-tracks .sr-track-beat,.sc-combined-shell [data-focused=true] .sc-tracks .sr-track-labels { min-width:min-content; }
+/* Add a beat keeps its top edge and search field in place while the list shrinks to its results. */
+.sc-combined-shell .sc-picker { height:auto; max-height:min(640px,calc(100dvh - 32px)); inset-block-end:auto; margin:calc((100dvh - min(640px,100dvh - 32px)) / 2) auto auto; }
+/* Branch markers use their arm colour; an empty slot names itself and shows when it is the open target. */
+.sc-combined-shell .sc-track-mark[data-arm]>.button { color:var(--arm); }
+.sc-combined-shell .sc-track-slot>.button { flex-direction:column; gap:4px; color:var(--text-muted); }
+.sc-slot-name { max-width:100%; padding:0 8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--arm); font-size:12px; font-weight:600; }
+.sc-combined-shell .sc-track-slot .sc-rail-label { visibility:hidden; }
+.sc-combined-shell .sc-track-slot[data-selected=true] { background:var(--surface-selected); box-shadow:inset 2px 0 var(--accent-primary),inset -2px 0 var(--accent-primary); }
+.sc-combined-shell .sr-inspector .sr-empty h2 { font-size:14px; font-weight:600; }
+.sc-combined-shell .sr-editor-location>[data-action=edit-owner] { margin-left:8px; min-height:24px; padding:1px 8px; font-size:12px; }
+/* Light mode: the selected column uses the cream selection fill so it stands apart from blue branch tints. */
+:root[data-theme="light"] .sc-combined-shell .sr-track-beat[data-selected=true],:root[data-theme="light"] .sc-combined-shell .sr-track-beat[data-selected=true] .sr-track-present,:root[data-theme="light"] .sc-combined-shell .sr-reel-beat[data-selected=true] { background:var(--surface-selected); }

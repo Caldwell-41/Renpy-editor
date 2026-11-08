@@ -63,7 +63,7 @@ async function selectedVisible(mode){
  done('Both modes at all three sizes align a complete first column at maximum scroll while keeping the final beat visible');
  for(const mode of ['tracks','reel']) for(const focus of [false,true]){
   await resize({width:560,height:640});await open('empty',mode);if(focus)await page.locator('[data-action=toggle-focus]').click();
-  assert.match(await page.locator('.sr-inspector').innerText(),/Returns to the calling scene, or ends the story/);
+  assert.match(await page.locator('.sr-inspector').innerText(),/Returns to the caller, or the main menu/);
   await page.locator('.sr-inspector [data-action=beat-menu]').click();assert.equal(await page.getByRole('button',{name:/^Delete 01 Return/}).isDisabled(),true);
   await capture(`compact-${mode}-${focus?'focus':'main'}-empty-ending`);await page.keyboard.press('Escape');
  }
@@ -332,7 +332,7 @@ async function selectedVisible(mode){
  await page.locator('summary[data-action=test-ticket-if-rule-0-variable]').click();assert.equal(await page.locator('[data-action=test-ticket-if-rule-0-variable-found_letter]').count(),0,'Undo removes the created variable');await page.keyboard.press('Escape');
  await capture('revision-condition-builder');
  await pick('setVariable');await page.locator('summary[data-action=set-variable]').click();await page.locator('[data-action=set-variable-trust]').click();await page.locator('summary[data-action=change]').click();await page.locator('[data-action=change-add]').click();
- assert.match(await page.locator('.sr-inspector .sc-test-code').innerText(),/^\$ trust \+= 1$/);assert.match(await page.locator('.sr-inspector').innerText(),/Planned \(#87\)/);
+ assert.match(await page.locator('.sr-inspector .sc-test-code').innerText(),/^\$ trust \+= 1$/);assert.match(await page.locator('.sr-inspector').innerText(),/Planned: Loomlight can't write arithmetic/);
  done('Revision: condition rules build tests with presets, All/Any and the Ren\'Py line; new variables validate and undo; Set variable shows planned Add');
  // Revision (#99): option bodies, endings that edit the last Beat, prompt, Hide/Show disabled and the no-selectable continuation.
  await open('populated');await page.locator('[data-track-beat][data-beat-kind=choice]').click();
@@ -359,12 +359,15 @@ async function selectedVisible(mode){
  await page.locator('[data-action=preview-option-3-false]').click();await page.keyboard.press('Escape');
  await page.locator('[data-action=picked-options-hide-picked]').click();await page.locator('[data-action=preview-options]').click();await page.locator('[data-action=preview-option-1-picked]').click();await page.locator('[data-action=preview-option-2-picked]').click();
  assert.match(await page.locator('.sr-stage .sc-choice-none').innerText(),/Only disabled options are left.*continues at 09/);await capture('revision-choice-all-disabled');
- await page.keyboard.press('Escape');await page.locator('[data-action=option-3-when-false-hide]').click();assert.match(await page.locator('.sr-stage .sc-choice-none').innerText(),/No option can be picked here/);
+ await page.locator('[data-action=preview-option-3-picked]').click();assert.equal(await page.locator('.sr-stage [data-stage-choice="2"]').count(),0,'Hide picked wins over Show disabled');await page.locator('[data-action=preview-option-3-picked]').click();
+ await page.keyboard.press('Escape');await page.locator('[data-action=option-3-when-false-hide]').click();assert.match(await page.locator('.sr-stage .sc-choice-none').innerText(),/No option can be picked/);
  await page.locator('[data-action=add-choice-option]').click();let m=await menu();assert.equal(m.options.length,5);assert.equal(m.branches.length,5,'New option gets its own empty body');assert.deepEqual(m.branches.at(-1).beats,[]);
  await page.locator('[data-action=remove-choice-2]').click();m=await menu();assert.equal(m.branches.some(b=>b.beats.some(x=>x.kind==='call')),false,'Removing an option removes its beats');
  await page.locator('.sc-conditions [data-branch-segment=board-2]').click();await settled();const slot=page.locator('.sc-tracks .sc-track-slot');
  assert.equal(await slot.count(),1,'An empty option is one slot');assert.equal(await page.locator('.sc-tracks [data-branch-boundary=exit]').count(),0);
  const [named,next]=await slot.locator('.sc-rail-label,.sc-rail-end').evaluateAll(n=>n.map(x=>x.getBoundingClientRect().toJSON()));assert.ok(named.right<=next.left,'Empty option name and its next step do not overlap');
+ assert.equal(await slot.getAttribute('data-selected'),'true','The open empty option is the selected slot');assert.match(await slot.innerText(),/Stay on the platform/,'The slot names its option');
+ assert.equal(await page.locator('.sr-inspector [data-action=edit-owner]').count(),1,'The empty option keeps a way back to its Choice');
  await capture('revision-choice-empty-slot');
  await page.locator('[data-action=undo]').click();await page.locator('[data-action=option-3-beat-2]').click();
  assert.equal(await page.locator('.sr-inspector .sc-crumb').first().innerText(),'Option 3 · Show the gold ticket');assert.match(await page.locator('.sc-tracks .sc-rail-end').first().innerText(),/then 09/);
@@ -378,6 +381,11 @@ async function selectedVisible(mode){
  assert.equal(await page.locator('.sr-stage [data-stage-choice="1"]').getAttribute('data-state'),'marked','Picked state follows the moved option');assert.equal(await page.locator('.sr-stage [data-stage-choice="0"]').getAttribute('data-state'),'available');
  await settled();assert.equal(await page.locator('[data-action=move-option-1-down]').evaluate(n=>document.activeElement===n),true,'Focus follows the moved option');
  await page.locator('[data-action=undo]').click();assert.equal(await page.locator('.sr-stage [data-stage-choice="0"]').getAttribute('data-state'),'marked');
+ await page.locator('[data-action=picked-options-mark-picked]').focus();await page.keyboard.press('ArrowRight');await settled();
+ assert.equal(await page.locator('[data-action=picked-options-hide-picked]').evaluate(n=>document.activeElement===n&&n.getAttribute('aria-checked')==='true'),true,'Arrow keys move focus with the selection');
+ await page.keyboard.press('ArrowLeft');await settled();assert.equal(await page.locator('[data-action=picked-options-mark-picked]').getAttribute('aria-checked'),'true');
+ await page.locator('.sc-conditions [data-branch-segment=ask-1]').click();await page.locator('[data-track-beat][data-beat-kind=jump]').first().click();await page.locator('[data-action=select-repeat-choice]').click();
+ assert.equal(await page.locator('.sr-inspector [data-editor-for]').getAttribute('data-kind'),'choice','A Repeat ending leads back to its Choice');
  await page.locator('.sc-conditions [data-branch-segment=ask-2]').click();assert.equal(await page.locator('.sc-conditions [data-condition-owner]').count(),2,'Nested condition joins the Branch path');
  await page.locator('.sc-conditions [data-branch-segment=ask-4]').click();assert.equal(await page.locator('.sc-conditions [data-branch-segment=goodbye-1]').getAttribute('title'),'Show Option 1 · Wave goodbye');
  await page.locator('[data-action=bottom-reel]').click();assert.equal(await page.locator('.sc-reel [data-reel-beat][data-selected=true]').getAttribute('data-beat-kind'),'choice');

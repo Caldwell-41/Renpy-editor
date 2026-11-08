@@ -1,7 +1,7 @@
 import type { LabContext } from '../../contracts.ts';
 import { action as makeAction, element as el, labelled, labPage } from '../../page.ts';
 import { prototypeSwitcher } from '../../prototype-switcher.ts';
-import { kinds, label, count, brief as modelBrief, locate, ancestry, flatten, beatNumber, beatName, columns, illustrate, makeSample, type Beat, type Branch, type Kind, type Scene, type Illustration } from './model.ts';
+import { kinds, label as kindLabel, count, brief as modelBrief, locate, ancestry, flatten, beatNumber, beatName, columns, illustrate, makeSample, type Beat, type Branch, type Kind, type Scene, type Illustration } from './model.ts';
 import platform from './platform.svg';
 import mara from './mara.svg';
 import maraConcerned from './mara-concerned.svg';
@@ -20,6 +20,7 @@ export const variants = [{ id: 'cue-sheet', title: 'Cue sheet' }, { id: 'shot-re
 /** Disposable, fictional Story authoring study. No project, native or provider calls. */
 export function mountStudy(host: HTMLElement, context: LabContext, variant: Variant, compare?: (variant: Variant) => void) {
   const combined = variant === 'combined';
+  const label = (kind: Kind) => combined && kind === 'return' ? 'Return' : kindLabel(kind);
   let bottomMode: 'tracks' | 'reel' = 'tracks';
   if (combined) { try { if (sessionStorage.getItem('story-combined-bottom') === 'reel') bottomMode = 'reel'; } catch { /* File previews can refuse session storage. */ } }
   const sample = makeSample(context.state);
@@ -174,7 +175,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     trail = currentTrail(body, trail);
     const index = Math.min(requested, defaultIndex(body));
     const anchor = body[index], previous = body[index - 1];
-    return `Adds to ${trail.join(' › ')}${combined && previous ? `, after ${name(previous.id)}${previous.kind === 'condition' ? ' and its branches' : ''}` : anchor ? `, before ${name(anchor.id)}` : previous ? `, after ${name(previous.id)}` : ', as its first beat'}`;
+    return `${combined ? 'Add to' : 'Adds to'} ${trail.join(' › ')}${combined && previous ? `, after ${name(previous.id)}${previous.kind === 'condition' ? ' and its branches' : ''}` : anchor ? `, before ${name(anchor.id)}` : previous ? `, after ${name(previous.id)}` : ', as its first beat'}`;
   }
   type Bookmark = { editor?: boolean; owner?: string; action?: string; label?: string; choice?: number; start?: number | null; end?: number | null };
   function bookmark(node = document.activeElement): Bookmark | undefined {
@@ -391,7 +392,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   function segmented(values: readonly string[], value: string, title: string, update: (value: string) => void, keys: readonly string[] = values) {
     const node = el('div', 'sc-segmented'); node.role = 'radiogroup'; node.ariaLabel = title;
     const buttons = values.map((v, i) => { const button = action(v, () => { if (v !== value) change(() => update(v), `${title}: ${keys[i]} · ${name()}`); }, false, `${slug(title)}-${slug(keys[i]!)}`); button.role = 'radio'; button.ariaChecked = String(v === value); button.tabIndex = v === value ? 0 : -1; return button; });
-    buttons.forEach((button, i) => button.onkeydown = event => { const step = ['ArrowRight', 'ArrowDown'].includes(event.key) ? 1 : ['ArrowLeft', 'ArrowUp'].includes(event.key) ? -1 : 0; if (!step) return; event.preventDefault(); buttons[(i + step + buttons.length) % buttons.length]!.click(); });
+    buttons.forEach((button, i) => button.onkeydown = event => { const step = ['ArrowRight', 'ArrowDown'].includes(event.key) ? 1 : ['ArrowLeft', 'ArrowUp'].includes(event.key) ? -1 : 0; if (!step) return; event.preventDefault(); const next = buttons[(i + step + buttons.length) % buttons.length]!; next.click(); focusField(`[data-action="${next.dataset.action}"]`); });
     node.append(...buttons); return node;
   }
   /** A list menu with portraits, for speakers and characters. */
@@ -479,7 +480,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   function listChoice(values: readonly string[], value: string, title: string, icon: string, update: (value: string) => void) {
     const list = el('div', 'sc-option-list'); list.role = 'radiogroup'; list.ariaLabel = title;
     const buttons = values.map(v => { const button = action('', () => { if (v !== value) change(() => update(v), `${title}: ${v} · ${name()}`); }, false, `${slug(title)}-${slug(v)}`); button.role = 'radio'; button.ariaChecked = String(v === value); button.tabIndex = v === value ? 0 : -1; button.ariaLabel = v; button.append(beatIcon(icon), el('span', '', v)); return button; });
-    buttons.forEach((button, i) => button.onkeydown = event => { const step = ['ArrowDown', 'ArrowRight'].includes(event.key) ? 1 : ['ArrowUp', 'ArrowLeft'].includes(event.key) ? -1 : 0; if (!step) return; event.preventDefault(); buttons[(i + step + buttons.length) % buttons.length]!.click(); });
+    buttons.forEach((button, i) => button.onkeydown = event => { const step = ['ArrowDown', 'ArrowRight'].includes(event.key) ? 1 : ['ArrowUp', 'ArrowLeft'].includes(event.key) ? -1 : 0; if (!step) return; event.preventDefault(); const next = buttons[(i + step + buttons.length) % buttons.length]!; next.click(); focusField(`[data-action="${next.dataset.action}"]`); });
     list.append(...buttons); return field(title, list);
   }
   function note(text: string) { return el('p', 'sr-explanation', text); }
@@ -499,8 +500,14 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   }
   function parseTest(text: string): Test {
     const t = text.trim(); if (!t) return { join: 'and', rules: [] };
-    const hasAnd = / and /.test(t), hasOr = / or /.test(t); if (hasAnd && hasOr) return { advanced: t };
-    const join = hasOr ? 'or' : 'and', rules = t.split(` ${join} `).map(parseRule);
+    const parts: string[] = [], words = new Set<string>(); let quoted = false, start = 0;
+    for (let i = 0; i < t.length; i++) {
+      if (t[i] === '"' && t[i - 1] !== '\\') { quoted = !quoted; continue; }
+      const word = quoted ? undefined : / (and|or) /y.exec(t.slice(i, i + 5)) ?? undefined; if (!word) continue;
+      parts.push(t.slice(start, i)); words.add(word[1]!); i += word[0].length - 1; start = i + 1;
+    }
+    parts.push(t.slice(start)); if (words.size > 1) return { advanced: t };
+    const join = words.has('or') ? 'or' : 'and', rules = parts.map(parseRule);
     return rules.every(Boolean) ? { join, rules: rules as Rule[] } : { advanced: t };
   }
   function ruleText(rule: Rule) { const variable = variableOf(rule.variable), words = operators.find(o => o[0] === rule.op)![1]; return variable?.type === 'flag' ? `${rule.variable} is ${rule.value}` : variable?.type === 'text' ? `${rule.variable} ${words} "${rule.value}"` : `${rule.variable} ${words}${rule.value ? ' ' + rule.value : ''}`; }
@@ -726,7 +733,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       code.textContent = `$ ${target.name} ${op.python} ${formulaPython(b.value) || '?'}`;
     }
     update();
-    const planned = note('Planned (#87): Loomlight does not write arithmetic to source yet. This sample shows the intended editor.');
+    const planned = note("Planned: Loomlight can't write arithmetic to source yet. This sample shows the intended editor.");
     const menu = el('details', 'sc-dropdown sc-operation-menu'); const summary = el('summary', 'sc-person'); summary.dataset.action = 'change'; summary.ariaLabel = `Change: ${op.label}`; summary.append(el('span', 'sc-operation-symbol', op.python), el('span', 'sc-caret', '▾'));
     const list = el('div', 'sc-dropdown-list'); list.role = 'listbox'; list.ariaLabel = 'Change';
     for (const o of operations) { const item = action('', () => { menu.open = false; setOperation(o.key); }, false, `change-${slug(o.label)}`); item.role = 'option'; item.ariaSelected = String(o.key === operation); item.ariaLabel = o.label; const words = el('span', 'sc-outcome-words'); words.append(el('strong', '', o.label), el('span', '', o.example)); item.append(el('span', 'sc-operation-symbol', o.python), words); list.append(item); }
@@ -756,7 +763,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       b.branches.forEach((branch, index) => {
         const row = el('section', 'sr-branch-control sc-branch'); row.dataset.branch = branch.id; row.dataset.arm = String(armOf(branch)); row.ariaLabel = `${branch.name} branch`;
         const head = el('div', 'sc-branch-head'); head.append(el('strong', '', branch.name));
-        const show = action(visibleBranches.get(b.id) === branch.id ? 'Showing' : 'Show', () => openBranch(b, branch), false, `open-branch-${branch.id}`); show.ariaPressed = String(visibleBranches.get(b.id) === branch.id); head.append(show);
+        const show = action('Open', () => openBranch(b, branch), false, `open-branch-${branch.id}`); show.ariaPressed = String(visibleBranches.get(b.id) === branch.id); head.append(show);
         if (branch.name.toLowerCase() === 'else if') { const remove = action('', () => removeBranch(b, branch), false, `remove-branch-${branch.id}`); remove.append(beatIcon('close')); remove.ariaLabel = remove.title = 'Remove this Else if'; head.append(remove); }
         row.append(head);
         if (branch.name === 'Otherwise') row.append(note('Runs when no test above is true.'));
@@ -790,8 +797,14 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       form.append(action('+ Add option', () => { const index = b.options.length; change(() => { b.options.push({ text: '', target: '', guard: '' }); prepareChoice(b); }, `Add option to ${name(b.id)}`); focusField(`[data-editor-for="${b.id}"] input[aria-label="Option ${index + 1} text"]`); }, false, 'add-choice-option'));
       form.append(field('Picked options', segmented(['Show normally', 'Mark picked', 'Hide picked'], b.picked === 'mark' ? 'Mark picked' : b.picked === 'hide' ? 'Hide picked' : 'Show normally', 'Picked options', value => b.picked = value === 'Mark picked' ? 'mark' : value === 'Hide picked' ? 'hide' : 'normal'), el('p', 'sc-field-hint', 'Uses what the player picked in this save. Marked options stay selectable.')));
       const next = continuation(b);
-      form.append(note(`If no option can be picked, the story continues ${next ? `at ${number(next.id)}` : 'after the Choice'} and records no pick.`), note('Planned (#98): Loomlight writes Jump-only menus today. Option beats, the prompt and Hide or Show disabled are Stage 1; Repeat and Picked options are Stage 2.'));
+      form.append(note(`If no option can be picked, the story continues ${next ? `at ${number(next.id)}` : 'after the Choice'} and records no pick.`), note('Planned: Loomlight writes Jump-only menus today. Option beats, the prompt and Hide or Show disabled are Stage 1; Repeat and Picked options are Stage 2.'));
     }
+    else if (b.kind === 'jump' && b.repeat) {
+      const owner = flatten(scene().beats).find(x => x.kind === 'choice' && x.branches.some(br => br.beats.includes(b)));
+      form.append(note(`Shows ${owner ? `Choice ${number(owner.id)}` : 'its Choice'} again, with its prompt. Change this with the option's Then.`));
+      if (owner) form.append(action(`Select Choice ${number(owner.id)}`, () => editBeat(owner.id), false, 'select-repeat-choice'));
+    }
+    else if (b.kind === 'return') form.append(note('Returns to the caller, or the main menu. Use Add a beat to replace this ending.'));
     else return fields(b, true);
     return form;
   }
@@ -914,7 +927,17 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   }
   function inspector(textInGame = false) {
     const panel = el('aside', 'sr-inspector'); panel.ariaLabel = 'Selected beat editor'; const b = current(), emptyScene = scene().beats.length === 1 && b?.kind === 'return';
-    if (variant !== 'cue-sheet' && reelContext()?.branch.beats.length === 0 && reelContext()?.owner.id === selected) { const c = reelContext()!; panel.append(empty(c.branch.beats, c.trail)); return panel; }
+    if (variant !== 'cue-sheet' && reelContext()?.branch.beats.length === 0 && reelContext()?.owner.id === selected) {
+      const c = reelContext()!;
+      if (combined) {
+        const where = el('p', 'sr-editor-location'); where.append(scene().name);
+        for (const branch of [...chainOf(c.owner.id), c.branch]) { const part = el('span', 'sc-crumb', branchLabel(branch)); part.dataset.arm = String(armOf(branch)); part.dataset.branchLabel = branch.id; where.append(' › ', part); }
+        const index = c.owner.options.findIndex(o => o.body === c.branch.id);
+        where.append(action(c.owner.kind === 'choice' ? `Edit Choice ${number(c.owner.id)}` : `Edit condition ${number(c.owner.id)}`, () => { editBeat(c.owner.id); if (index >= 0) focusField(`[data-editor-for="${c.owner.id}"] input[aria-label="Option ${index + 1} text"]`); }, false, 'edit-owner'));
+        panel.append(where);
+      }
+      panel.append(empty(c.branch.beats, c.trail)); return panel;
+    }
     if (!b || emptyScene) { if (variant !== 'cue-sheet') panel.append(empty(scene().beats, [scene().name])); if (!combined || !b) return panel; }
     if (stageObject) {
       const state = previewState(); const owner = stageObject === 'background' ? state.background : state.characters.get(stageObject)?.from;
@@ -988,7 +1011,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   type OptionState = 'available' | 'marked' | 'unknown' | 'disabled' | 'hidden' | 'hidden-picked';
   function optionStates(b: Beat): OptionState[] {
     return b.options.map(o => {
-      const preview = previewOptions.get(o.body ?? '') ?? {}, truth = o.guard.trim() ? preview.truth : 'true', picked = !!preview.picked && truth !== 'false';
+      const preview = previewOptions.get(o.body ?? '') ?? {}, truth = o.guard.trim() ? preview.truth : 'true', picked = !!preview.picked;
       if (picked && b.picked === 'hide') return 'hidden-picked';
       if (truth === 'false') return o.whenFalse === 'disable' ? 'disabled' : 'hidden';
       if (picked && b.picked === 'mark') return 'marked';
@@ -1007,7 +1030,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       button.ariaLabel = `Edit option ${i + 1}: ${option.text || 'New choice'}${state === 'disabled' ? ', shown disabled in the game' : state === 'marked' ? ', marked as picked' : state === 'unknown' ? ', availability unknown' : ''}`; choices.append(button);
     });
     const selectable = states.some(st => st === 'available' || st === 'marked' || st === 'unknown');
-    if (!selectable) { const next = continuation(b), where = next ? `at ${number(next.id)}` : 'after the Choice'; choices.append(el('p', 'sc-choice-none', states.includes('disabled') ? `Only disabled options are left. Ren'Py would wait here; Loomlight continues ${where} instead and records no pick.` : `No option can be picked here, so the story continues ${where} and records no pick.`)); }
+    if (!selectable) { const next = continuation(b), where = next ? `at ${number(next.id)}` : 'after the Choice'; choices.append(el('p', 'sc-choice-none', states.includes('disabled') ? `Only disabled options are left, so the story continues ${where}. No pick is recorded.` : `No option can be picked, so the story continues ${where}. No pick is recorded.`)); }
     return choices;
   }
   /** Stage footer control. Changes only the illustration, never the story or Undo. */
@@ -1282,7 +1305,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
   }
   /** One colour per branch, in scene order, cycling through four. */
   function armOf(branch: Branch) { const all = flatten(scene().beats).flatMap(b => b.branches); return (Math.max(0, all.indexOf(branch)) % 4) + 1; }
-  function segmentLabel(owner: Beat, branch: Branch) { if (owner.kind === 'choice') { const i = owner.options.findIndex(o => o.body === branch.id), open = visibleBranches.get(owner.id); return open === branch.id ? `${i + 1} ${owner.options[i]?.text || 'New choice'}` : String(i + 1); } return branch === owner.branches[0] ? 'true' : branch.name === 'Otherwise' ? 'otherwise' : branch.condition || 'else if'; }
+  function segmentLabel(owner: Beat, branch: Branch) { if (owner.kind === 'choice') { const i = owner.options.findIndex(o => o.body === branch.id), open = visibleBranches.get(owner.id); return open === branch.id ? `${i + 1} ${owner.options[i]?.text || 'New choice'}` : String(i + 1); } return branch === owner.branches[0] ? 'If' : branch.name === 'Otherwise' ? 'Otherwise' : branch.condition || 'Else if'; }
   function conditionStrip() {
     const strip = el('nav', 'sc-conditions'); strip.ariaLabel = 'Branch path';
     strip.append(el('strong', 'sc-conditions-title', 'Branch path'));
@@ -1303,7 +1326,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       }
       group.append(edit, test, choices); groups.append(group);
     }
-    if (!groups.children.length) groups.append(el('span', 'sc-conditions-empty', 'No conditions or choices in this scene.'), action('+ Add condition', () => { const t = target(); insert('condition', t.body, t.trail, t.index); }, false, 'add-condition'));
+    if (!groups.children.length) groups.append(el('span', 'sc-conditions-empty', 'No conditions or choices in this scene.'));
     strip.append(groups); return strip;
   }
   function chainOf(id: string) { return (ancestry(scene(), id) ?? []).map(p => p.branch); }
@@ -1342,12 +1365,12 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       // An empty branch is one beat-wide slot holding its name and where it goes next, so the two labels never overlap.
       const slot = !branch.beats.length && !focused;
       const entry = mark('entry', chain); entry.append(rail(chain, { branch }));
-      if (slot) { entry.classList.add('sc-track-slot'); entry.querySelector('.sc-rail-label')!.after(el('span', 'sc-rail-end', thenText(owner, branch))); }
-      const first = action(focused ? '+ First beat' : slot ? '+ Add a beat' : '+', () => picker(branch.beats, path, 0), false, `inside-${branch.id}`); first.ariaLabel = first.title = `Add the first beat in ${branchLabel(branch)}`; entry.append(first);
+      if (slot) { entry.classList.add('sc-track-slot'); entry.querySelector('.sc-rail-label')!.after(el('span', 'sc-rail-end', thenText(owner, branch))); if (reelBranch === branch.id && selected === owner.id) { entry.dataset.selected = 'true'; const ownerButton = ownerWrap.querySelector<HTMLElement>('[data-selected=true]'); if (ownerButton) { ownerButton.dataset.selected = 'false'; ownerButton.ariaCurrent = null; } } }
+      const first = action(focused ? `+ First beat in ${branchLabel(branch)}` : slot ? '+ Add a beat' : '+', () => picker(branch.beats, path, 0), false, `inside-${branch.id}`); first.ariaLabel = first.title = `Add the first beat in ${branchLabel(branch)}`; if (slot) { const named = el('span', 'sc-slot-name', branchLabel(branch)); named.dataset.branchLabel = branch.id; first.prepend(named); } entry.append(first);
       const nodes: HTMLElement[] = [];
       if (!slot) {
         const exit = mark('exit', chain); exit.append(rail(chain, { branch, end: thenText(owner, branch) }));
-        const append = action(focused ? '+ Last beat' : '+', () => picker(branch.beats, path, defaultIndex(branch.beats)), false, `append-${branch.id}`); append.ariaLabel = append.title = `Add the last beat in ${branchLabel(branch)}${ending(branch.beats) >= 0 ? ', before its ending' : ''}`; exit.append(append); nodes.push(exit);
+        const append = action(focused ? `+ Last beat in ${branchLabel(branch)}` : '+', () => picker(branch.beats, path, defaultIndex(branch.beats)), false, `append-${branch.id}`); append.ariaLabel = append.title = `Add the last beat in ${branchLabel(branch)}${ending(branch.beats) >= 0 ? ', before its ending' : ''}`; exit.append(append); nodes.push(exit);
       }
       if (!(parentChain.length && place.index === place.body.length - 1)) {
         const after = mark('after', parentChain); after.append(rail(parentChain));
@@ -1382,7 +1405,7 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       }, false, `bottom-${mode}`); button.ariaPressed = String(bottomMode === mode); modes.append(button);
     }
     bar.append(modes);
-    if (bottomMode === 'tracks' && !focused) { const key = el('details', 'sc-track-key'); const summary = el('summary', 'button', 'Key'); summary.dataset.action = 'track-key'; summary.ariaLabel = 'Tracks key'; const list = el('div', 'sc-track-key-list'); list.append(el('p', '', 'Shaded: carried forward from an earlier beat'), el('p', '', 'Dashed: state may differ on another route')); key.append(summary, list); bar.append(key); }
+    if (bottomMode === 'tracks' && !focused) { const key = el('details', 'sc-track-key'); key.onkeydown = event => { if (event.key === 'Escape' && key.open) { event.preventDefault(); event.stopPropagation(); key.open = false; key.querySelector<HTMLElement>('summary')?.focus(); } }; const summary = el('summary', 'button', 'Key'); summary.dataset.action = 'track-key'; summary.ariaLabel = 'Tracks key'; const list = el('div', 'sc-track-key-list'); list.append(el('p', '', 'Shaded: carried forward from an earlier beat'), el('p', '', 'Dashed: state may differ on another route')); key.append(summary, list); bar.append(key); }
     return bar;
   }
   function combinedReel() {
@@ -1447,8 +1470,8 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       handle.classList.add('sc-lane-resizer', i < 3 ? 'sc-resizer-end' : 'sc-resizer-start'); lane(i).append(handle);
     }
     // Lanes cut off by a wide sidebar or a scroll are named at that edge; clicking scrolls them into view.
-    const scroller = tracks.querySelector<HTMLElement>('.sr-tracks-scroll'); if (!scroller) return;
-    const edge = (side: 'start' | 'end') => { const button = action('', () => scroller.scrollTo({ left: side === 'end' ? scroller.scrollWidth : 0 }), false, `hidden-lanes-${side}`); button.className = `sc-lane-edge sc-lane-edge-${side}`; button.hidden = true; tracks.append(button); return button; };
+    const scroller = tracks.querySelector<HTMLElement>('.sr-tracks-scroll'), toolbar = tracks.parentElement?.querySelector<HTMLElement>('.sc-bottom-toolbar'); if (!scroller || !toolbar) return;
+    const edge = (side: 'start' | 'end') => { const button = action('', () => scroller.scrollTo({ left: side === 'end' ? scroller.scrollWidth : 0 }), false, `hidden-lanes-${side}`); button.className = `sc-lane-edge sc-lane-edge-${side}`; button.hidden = true; toolbar.append(button); return button; };
     const before = edge('start'), after = edge('end');
     const update = () => {
       const box = scroller.getBoundingClientRect(), all = [0, 1, 2, 3, 4, 5].map(i => ({ name: names[i]!, rect: lane(i).getBoundingClientRect() })).filter(x => x.rect.width > 0);
@@ -1457,7 +1480,6 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
         button.hidden = !hidden.length; if (!hidden.length) continue;
         button.textContent = side === 'end' ? `${hidden.join(', ')} ›` : `‹ ${hidden.join(', ')}`;
         button.ariaLabel = button.title = `${hidden.length === 1 ? `The ${hidden[0]} lane is` : `${hidden.join(' and ')} lanes are`} partly or fully hidden. Show ${hidden.length === 1 ? 'it' : 'them'}.`;
-        const head = labels.getBoundingClientRect(), frame = tracks.getBoundingClientRect(); button.style.top = `${Math.max(head.top, box.top) - frame.top}px`; button.style.height = `${head.height}px`;
       }
       tracks.dataset.hiddenStart = String(!!left.length); tracks.dataset.hiddenEnd = String(!!right.length);
     };
@@ -1474,17 +1496,18 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
     const search = el('label', 'sc-picker-search'); search.append(beatIcon('search'), query);
     const results = el('div', 'sr-picker-results'); results.id = `sr-results-${++elementId}`; results.role = 'listbox'; results.ariaLabel = 'Beat types';
     query.role = 'combobox'; query.setAttribute('aria-autocomplete', 'list'); query.setAttribute('aria-expanded', 'true'); query.setAttribute('aria-controls', results.id);
-    const descriptions: Record<string, string> = { dialogue: 'A spoken line with a speaker.', narration: 'Story text with no speaker.', condition: 'Branches on a test, then the story continues.', choice: 'Options the player picks from.', background: 'Sets the scene and clears characters.', showCharacter: 'Puts a character on the stage.', hideCharacter: 'Takes a character off the stage.', changeAppearance: "Changes a shown character's expression.", placement: 'Moves a shown character.', transition: 'Animates the next visual change.', playMusic: 'Starts a music track.', stopMusic: 'Stops the current music.', playSfx: 'Plays a sound once.', call: 'Visits a scene, then comes back.', jump: 'Goes to a scene and does not return.', return: 'Returns to the caller or ends the story.', setVariable: 'Stores a value for later conditions.', showScreen: 'Shows a screen while the story continues.', hideScreen: 'Hides a screen while the story continues.', callScreen: 'Opens a screen and waits for it to close.' };
+    const descriptions: Record<string, string> = { dialogue: 'A spoken line with a speaker.', narration: 'Story text with no speaker.', condition: 'Branches on a test, then the story continues.', choice: 'Options the player picks from.', background: 'Sets the scene and clears characters.', showCharacter: 'Puts a character on the stage.', hideCharacter: 'Takes a character off the stage.', changeAppearance: "Changes a shown character's expression.", placement: 'Moves a shown character.', transition: 'Animates the next visual change.', playMusic: 'Starts a music track.', stopMusic: 'Stops the current music.', playSfx: 'Plays a sound once.', call: 'Visits a scene, then comes back.', jump: 'Goes to a scene and does not return.', return: 'Returns to the caller, or the main menu.', setVariable: 'Stores a value for later conditions.', showScreen: 'Shows a screen while the story continues.', hideScreen: 'Hides a screen while the story continues.', callScreen: 'Opens a screen and waits for it to close.' };
     const aliases: Record<string, string> = { condition: 'if else branch test', placement: 'position move', call: 'shared conversation returns', choice: 'menu options decision', setVariable: 'flag counter value', showScreen: 'panel', callScreen: 'dialog' };
     const note = el('p', 'sc-picker-note'); note.ariaLive = 'polite';
+    const pickerKinds = kinds.map(([kind, , category]) => [kind, label(kind), category] as const);
     let active = 0, items: HTMLButtonElement[] = [];
     function highlight() {
       const button = items[active]; note.replaceChildren(); note.hidden = true;
       items.forEach((item, i) => { item.dataset.highlighted = String(i === active); item.ariaSelected = String(i === active); });
-      if (!button) { query.removeAttribute('aria-activedescendant'); targetLabel.textContent = targetText(body, trail, index).replace('Adds to ', ''); return; }
+      if (!button) { query.removeAttribute('aria-activedescendant'); targetLabel.textContent = targetText(body, trail, index).replace(/^Adds? to /, ''); return; }
       query.setAttribute('aria-activedescendant', button.id); const kind = button.dataset.insertKind as Kind;
       const end = isEnding(kind) && ending(body) >= 0 ? body[ending(body)] : undefined;
-      targetLabel.textContent = end ? `Replaces ${name(end.id)} in ${trail.join(' › ')}` : isEnding(kind) ? `Goes at the end of ${trail.join(' › ')}` : replaceEmpty ? `Replaces empty line ${number(replaceEmpty.id)} in ${trail.join(' › ')}` : targetText(body, trail, index).replace('Adds to ', '');
+      targetLabel.textContent = end ? `Replaces ${name(end.id)} in ${trail.join(' › ')}` : isEnding(kind) ? `Goes at the end of ${trail.join(' › ')}` : replaceEmpty ? `Replaces empty line ${number(replaceEmpty.id)} in ${trail.join(' › ')}` : targetText(body, trail, index).replace(/^Adds? to /, '');
       destination.dataset.replaces = String(!!end);
       const message = end ? `${label(kind)} replaces ${name(end.id)}. Undo restores it.` : isEnding(kind) ? `${label(kind)} goes at the end of ${trail.at(-1)}.` : kind === 'background' ? 'A new background clears the characters on stage.' : '';
       if (message) { note.textContent = message; note.hidden = false; }
@@ -1493,12 +1516,12 @@ export function mountStudy(host: HTMLElement, context: LabContext, variant: Vari
       results.replaceChildren(); items = []; active = 0;
       const search = query.value.trim().toLowerCase();
       const common = ['dialogue', 'narration', 'condition', 'choice', 'background'];
-      const matches = kinds.filter(([kind, title, category]) => `${kind} ${title} ${category} ${aliases[kind] ?? ''}`.toLowerCase().includes(search));
+      const matches = pickerKinds.filter(([kind, title, category]) => `${kind} ${title} ${category} ${aliases[kind] ?? ''}`.toLowerCase().includes(search));
       const rank = (title: string) => title.toLowerCase() === search ? 0 : title.toLowerCase().startsWith(search) ? 1 : title.toLowerCase().includes(search) ? 2 : 3;
       const groups = search ? ['Results'] : ['Common', 'Stage', 'Audio', 'Flow', 'State', 'Screens'];
       const columnsOf = search ? [results] : [el('div', 'sc-picker-column'), el('div', 'sc-picker-column')]; if (!search) results.append(...columnsOf);
       for (const group of groups) {
-        const entries = search ? [...matches].sort((a, b) => rank(a[1]) - rank(b[1])) : group === 'Common' ? common.map(kind => kinds.find(k => k[0] === kind)!) : matches.filter(([kind, , category]) => category === group && !common.includes(kind));
+        const entries = search ? [...matches].sort((a, b) => rank(a[1]) - rank(b[1])) : group === 'Common' ? common.map(kind => pickerKinds.find(k => k[0] === kind)!) : matches.filter(([kind, , category]) => category === group && !common.includes(kind));
         if (!entries.length) continue;
         const section = el('section'); section.role = 'group'; section.ariaLabel = group; section.dataset.group = group; section.append(el('h3', '', group === 'Flow' ? 'Scene flow' : group));
         for (const [kind, title] of entries) {
