@@ -119,6 +119,7 @@ a renderer test surface, not native WebView or OS input evidence.
 | Settings flow, connection or credential-probe shape | `ai-settings.dom`, `identity-probe.dom`, `windows-studio-probe.dom`, protocol and affected Rust preparation/dispatch tests |
 | Character/reference navigation or review structure | `reference-ui.dom`, `supporting-authoring.dom`, `save-command.dom`, `smoke-report.dom` and the actual selectable sequence |
 | Scene/history/remount or selectable workflow | `selectable-native-sequence.dom`, `native-probe-driver`, relevant Scene/Save tests and real controller/transaction checks |
+| Story arithmetic controls | `story-arithmetic.dom`, `story-arithmetic-core.dispatch.mjs` and `story-arithmetic.browser.mjs`; the fixture runner discovers both scripts automatically. CI fetches their pinned approved Story reference before comparison. |
 | Request defaults, Thinking or body/schema | Real Rust prepared-body assertions, synthetic HTTP admission fixtures, `studio-request.dom` and affected native-worker tests |
 | Runtime/Source/UI probe | `native-runtime-driver.browser.mjs`, `ui-refresh.browser.mjs`, `ui-refresh-retention.browser.mjs`, Source Save browser regressions and affected packaged cases |
 

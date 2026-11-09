@@ -875,3 +875,22 @@ pass. This changes no core/runtime semantics and consumes no SDK invocation.
 Both implementers can normally merge this integration checkpoint; shared registry
 ownership remains with the coordinator. Existing qualified numeric/runtime proof
 keeps its recorded code candidates and scope.
+
+
+### 2026-11-09: #96 fixture registration and CI reference preparation
+
+The coordinator confirmed that `test:fixtures` automatically discovers #96's
+`story-arithmetic-core.dispatch.mjs` and `story-arithmetic.browser.mjs`, with no
+skip directives. The existing PR frontend job builds the real core examples and
+runs that fixture runner. No manual list or duplicate invocation is needed.
+The testing selection map now names the affected Story consumers.
+
+The browser comparison reads approved Story source `6ecf6470` with Git. CI's
+existing two-commit checkout does not retain that old reference, so the fixture
+step now fetches only that exact commit at depth one when the comparison script
+is present. This preserves the fixture's pinned reference and the normal shallow
+checkout. Actionlint, repository validation and whitespace checks pass. The
+coordinator inspected the worker's passing actual-main/core journey result but
+has not rerun or accepted its still-changing browser comparison. #96 retains
+all test source and the named Help-driver allowlist line. No SDK, browser,
+native/package or manual CI operation ran for this registration change.
