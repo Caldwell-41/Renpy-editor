@@ -2,33 +2,25 @@
 
 ## Shared arithmetic selected
 
-#97's functional increment is integrated by conflict-free normal merge `0dc53eeb`,
-preserving coordinator `72e9b555` and returned `0d49e005`. All app/fixture/script/CI
-inputs equal tested `679e0df7`; all 872 frozen hashes match Git checkout bytes and
-both working trees. Reuse 93 distinct Rust and 38 focused renderer passes, the
-11-stage actual-main Screens journey, inherited dispatch, build/format and scoped
-browser proof. Fresh pinned production typecheck, contract/branch-plan audit,
-repository validation and whitespace pass. The fresh Story/main-to-core journey
-also passes nine stages and 122 requests against the identical retained #97 driver.
-The [integration receipt](../tasks/evidence/arithmetic-97.md#integration-equivalence-and-fresh-checks)
-owns exact identities, evidence preservation and reuse limits.
+#97 and the review corrections are integrated. Conflict-free normal merge
+`b52a6723` preserves coordinator `636371b8` and returned `354b5221`. Complete
+app/fixture/script/CI trees equal the returned source; all 873 frozen inputs match
+Git checkout bytes and both working trees. Fresh pinned typecheck, nine protocol
+checks, recorded-envelope/contract/branch-plan audit, repository validation and
+whitespace pass. The [integration receipt](../tasks/evidence/arithmetic-review.md#integration-equivalence-and-fresh-checks)
+owns exact identities, the 390-test frontend reuse basis with its final 11-check
+Story follow-up, public-core/journey results and preserved evidence.
 
-#97 is a review-ready functional increment and remains open. Generic numeric
-conditions still use the stacked form rather than A2's grouped row. Host/background
-and placement differences remain; earlier textbutton captures precede the final
-scoped palette correction. New UI-emitted defaults, formulas, conditions/text and
-created-imagebutton fixtures have no new SDK proof. Full visual/native/human
-acceptance is pending. The coordinator has pinned full integration review at
-`09404bd1` against accepted Screens base `251fb477`. Fresh read-only Standards
-and Spec reviewers inspected the same complete diff. The
-[review](../tasks/evidence/arithmetic-review.md) found five Standards and four Spec
-P2 findings, including one overlap. Fresh correction `354b5221` returns all seven
-code fixes and the A2 grouped controls for integration. The coordinator verified
-873 inputs, both real-core journeys, four emitted-source files and final capture
-hashes. The merger will reuse 390 frontend and affected public-core passes on
-identical inputs. Kris's decision on moving the
-#96 workspace acceptance to #110 remains pending. Qualification and final acceptance
-remain open.
+The independent review remains pinned at `09404bd1` against accepted Screens base
+`251fb477`, with five Standards and four Spec P2 findings kept separately.
+S1-S5 and Spec P1-P3 are corrected, including the S3/P2 overlap. A2 grouped numeric
+conditions and scoped slate/brass controls now match closely. Existing workspace
+widths, placement and truthful unknown-state wording retain their stated differences.
+Spec P4 remains unresolved. Kris's decision on moving #96's Tracks/Reel/cross-view
+draft acceptance to #110 is pending; no criterion changed. New UI-emitted source
+still needs selected coherent runtime proof. Earlier #94/#95 both-target evidence
+keeps its original scope. Full workspace/native/human and final acceptance remain
+open. Integration/status/PR ownership returns to the coordinator for that selection.
 Draft PR #122 retains its Screens base and full-spec closing references.
 
 #94 decimal/public services are integrated by conflict-free normal merge

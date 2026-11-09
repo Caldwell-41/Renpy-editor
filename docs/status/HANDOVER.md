@@ -262,29 +262,35 @@ and both approved design references. No ready-for-review promotion, parent-PR
 merge, automerge or release is selected. The published checkpoint retains
 the existing draft/base and full-spec closing references. Exact-head automatic status is recorded in the merger publication
 receipt; no watch was registered. Integration/status/PR ownership returns to the
-coordinator at this handoff. Full integration review is selected at `09404bd1`
-against accepted Screens base `251fb477`, with fresh read-only Standards and Spec
-agents. The [review assignment](../tasks/active/shared-arithmetic.md#2026-11-10-full-integration-review-selected)
-owns scope and boundaries. Both axes returned. The
-[review record](../tasks/evidence/arithmetic-review.md) preserves five Standards
-and four Spec P2 findings separately. The fresh fixer returned clean `354b5221`
-with all seven code defects corrected and A2 grouped-condition/scoped control
-fidelity. The [correction audit and merger assignment](../tasks/active/shared-arithmetic.md#2026-11-10-reviewed-corrections-returned-and-audited)
-owns the 873-input/binary/source/capture match and exact reuse scope. Final
-frontend passes are 390; Screens actual-main/core passes 13 stages/505 requests
-and Story passes nine/126, both with exit 0 and cleanup. All worker evidence is
-preserved in its ignored `.toolchains/arithmetic-review-fixes/` directory.
-Kris's #96/#110 scope decision stays pending, with no criteria change or #110 work.
-The fresh merger owns integration/status/PR until its handoff, and selects no costly
-operation. After integration, select coherent remaining qualification and design/acceptance
-work. The correction selects no SDK/native/package/manual-CI run. SDK totals
-remain Mac 9/20 and Windows 3/20, zero reservations. Preserve every separate worktree
-and receipt. No remote qualification remains reserved or running.
+coordinator at this handoff. The independent review at `09404bd1` against accepted
+Screens base `251fb477` keeps its five Standards and four Spec P2 findings separately.
+Conflict-free normal merge `b52a6723bfb1c86895227813e35865d4c6d9dc2f` preserves
+coordinator `636371b8` and returned `354b5221`. All seven code defects are corrected;
+A2 grouped conditions and scoped controls now match closely. The
+[integration receipt](../tasks/evidence/arithmetic-review.md#integration-equivalence-and-fresh-checks)
+owns the complete tree/873-input match, fresh checks and scoped reuse. The 390-test
+frontend result is reused with the final 11-check Story association follow-up;
+the earlier whole-suite source is not claimed as the exact final source.
+Screens actual-main/core passes 13 stages/505 requests and Story nine/126, both
+with exit 0 and cleanup. Fresh pinned typecheck, nine protocol checks, 631 recorded
+response-envelope checks, contract/branch-plan audit, repository validation and
+whitespace pass. All worker evidence, approved references and coordinator records
+survive. New receipts are separate under ignored
+`.toolchains/arithmetic-review-fixes/integration-merge/`.
+
+Spec P4 and Kris's #96/#110 scope decision stay pending. Tracks/Reel/cross-view
+draft acceptance is unchanged; no #110 work or review approval is inferred.
+The coordinator must select coherent qualification for the new emitted UI source
+and remaining design/native/human acceptance. Earlier #94/#95 both-target proof
+keeps its original scope. This merger starts zero SDK/browser/canvas-helper/native/
+package/manual-CI/watch operations. SDK totals remain Mac 9/20 and Windows 3/20,
+zero reservations. Preserve every separate worktree and receipt. No remote
+qualification remains reserved or running.
 
 The [review CI correction](../tasks/evidence/arithmetic-review.md#ci-caller-correction-before-review-fixes)
 migrates the obsolete `Edit default` smoke caller to the current inspector. All
-three existing DOM scenarios pass after the matching red. Keep this correction
-in the fixer's base; it is neither new exact-head CI nor native-package proof.
+three existing DOM scenarios pass after the matching red. The merged corrections
+preserve this caller; its DOM proof keeps its original scope.
 
 The earlier sections below retain prior work and recovery context. Their
 unselected-next-task statements do not override this explicit #87 selection.

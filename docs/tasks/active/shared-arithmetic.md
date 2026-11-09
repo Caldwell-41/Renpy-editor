@@ -1538,3 +1538,40 @@ Update live status, ledger and draft PR #122, publish and verify clean tracking.
 Keep all issues/criteria open and P4 unresolved. No SDK/browser/native/package,
 manual-CI, watch, successor work or PR promotion/merge belongs to this merger.
 Return ownership for coherent runtime qualification and remaining acceptance work.
+
+### 2026-11-10: reviewed corrections integrated
+
+Conflict-free normal merge `b52a6723bfb1c86895227813e35865d4c6d9dc2f` preserves
+coordinator `636371b8262fbc660cc76da49a66d80271fc7356` and returned
+`354b52211b42e85721d80b751b08832db10db38e`. Complete app/fixture/script/CI trees
+equal the returned source; all 873 frozen inputs match Git checkout representations
+and both working trees. No integration fix was needed. The
+[integration receipt](../evidence/arithmetic-review.md#integration-equivalence-and-fresh-checks)
+owns exact tree identities, evidence preservation, reused checks and fresh checks.
+
+Reuse the 390-test frontend result on its recorded inputs plus the final affected
+11-check Story association rerun, without claiming the older suite used the exact
+final source. Reuse the 35-check focused result with that final Story follow-up,
+17 action/19 control
+public-core passes, actual-main journeys, production build/format and final scoped
+comparisons. The named ignored SDK gate stays unrun. Fresh pinned typecheck, nine
+protocol checks, 631 recorded-envelope checks, contract/branch-plan audit, repository
+validation and whitespace pass. All 182 worker raw evidence files, retained driver,
+four emitted sources, 32 captures, coordinator records and approved references survive.
+
+S1-S5 and Spec P1-P3 are corrected; the original Standards 5 / Spec 4 reports at
+`09404bd1` remain intact. No review approval is invented. Spec P4 and Kris's #96/#110
+scope question remain pending, with all issues/criteria open. New emitted source
+still needs selected coherent runtime qualification. Earlier #94/#95 both-target
+proof keeps its original scope. SDK totals remain Mac 9/20 and Windows 3/20, zero
+reservations. This merger starts no SDK/browser/canvas-helper/native/package/
+manual-CI/watch operation and does no successor work.
+
+The documentation successor and draft PR #122 retain the Screens base and eventual
+full-spec closing references. Separate ignored `integration-merge/` receipts own
+publication identity, clean tracking and one-time automatic CI observation.
+Integration/status/PR ownership returns to the coordinator at this handoff for the
+P4 decision and remaining runtime/design/native/human acceptance selection.
+CURRENT/HANDOVER retain inherited excess length to preserve unique earlier
+qualification and recovery context; this handoff replaces superseded live wording
+without creating another status archive.

@@ -245,3 +245,104 @@ payloads/source still need the coordinator's selected coherent runtime qualifica
 No SDK/native/human/full-feature acceptance is claimed. Mac stays 9/20 and Windows
 3/20, zero reservations. Spec P4 and the pending #96/#110 scope decision remain
 with the coordinator; neither criteria nor ticket/status/PR state was changed here.
+
+## Integration equivalence and fresh checks
+
+The fresh merger confirmed clean `codex/spec-87-arithmetic` at
+`636371b8262fbc660cc76da49a66d80271fc7356`, one coordinator-only checkpoint beyond
+published `61d70f96890276fa881f1082a2ff682496ec7911`. The returned branch was clean
+at `354b52211b42e85721d80b751b08832db10db38e`. Conflict-free normal `--no-ff`
+merge `b52a6723bfb1c86895227813e35865d4c6d9dc2f` has those coordinator and returned
+heads as its two parents, in that order. It changes the expected 20 paths and
+requires no integration fix. The subsequent handoff commit changes documentation
+only; it does not establish a new tested application candidate.
+
+Complete merged trees equal `354b5221`:
+
+| Tree | Git tree identity |
+| --- | --- |
+| `app` | `4b575f694874fee831a126fa80ed568167e36f38` |
+| `tests/fixtures` | `58bde4d6170ff1d600cc9d662e00951303212816` |
+| `scripts` | `56200065602421cdfad377180ef45a251f02b89f` |
+| `.github` | `a79289dcdb51e68e0924f4883f799887706556f7` |
+
+All 873 frozen files match both Git checkout representations and both working
+trees. The fingerprint remains
+`e06fea9537309f4f33b08afb6fd602f857f00fc078fb165f0105ca75cef445c4`.
+Four unchanged PowerShell scripts match through their explicit `eol=crlf` filters.
+The merged evidence tree equals the returned tree before this append. Coordinator
+status/ledger, approved design/source/capture trees, dependencies, fixture discovery,
+CI plan and the migrated smoke caller are preserved. Arithmetic parser/type/evaluator,
+source adapters, runtime helper and transaction/history internals are unchanged by
+the correction. Core changes remain limited to the named action-error context.
+
+### Reused results and final follow-up scope
+
+Reuse follows the returned `candidate.json`, `commands-and-results.json` and each
+recorded material-input scope. The 390-pass `frontend-candidate.log` is retained
+as the whole-suite result on its recorded source. The final Story target-association
+cleanup has a separate `story-associations-final.log` with 11 passes. Reuse
+unaffected earlier cases and that affected rerun together. The older whole-suite
+run is not represented as an exact-final-source run, and the 11 are not added to
+390 as distinct tests. Likewise, the 35 focused editor/authoring/protocol passes
+retain their original scope with that final Story follow-up.
+
+Reuse 17 public-core action passes and 19 control passes. The named ignored SDK
+gate remains unrun and adds no pass. Reuse the actual-main/core Screens journey
+with 13 stages/505 records and Story with nine stages/126 records. Both retain
+exit 0 and complete cleanup. The retained Help binary still hashes to
+`02a56bab3bbe9441918ba943eb50305ed2b7b300e67846e751dd225702e13421`.
+All four emitted source hashes and 32 final comparison capture hashes match.
+Reuse production build/typecheck/format and the final eight A2 comparisons on
+their recorded inputs. The coordinator's eight-crop inspection remains the visual
+audit; this merger opens no browser and claims no additional visual inspection.
+
+### Fresh combined checks
+
+- Pinned Node 24.19.0/npm 11.9.0 `npm run typecheck` and `npm run build:tests` pass.
+- `node --test dist-tests/tests/protocol.test.js` passes all nine existing checks,
+  including the optional typed action index and malformed/out-of-range rejection.
+- The newly compiled merged response validator accepts all 631 retained journey
+  envelopes, including 11 indexed errors. This audits recorded actual-core results;
+  it does not rerun either journey.
+- The existing contract/branch-plan audit, applied to the corrected receipt,
+  verifies 31 successful no-write validations across `actions` and `addImageButton`,
+  all seven operation keys, lossless i64/finite-decimal capabilities, original
+  revision guards, typed error context, automatic fixture discovery and quality-only
+  PR selection for the existing head/base. No CI dispatch is selected.
+- Pinned Python 3.12 repository validation passes for 1,872 files. Merged and
+  handoff whitespace checks pass. No fresh broad suite or costly campaign ran.
+
+New receipts are isolated in ignored
+`.toolchains/arithmetic-review-fixes/integration-merge/`: `equivalence.json`,
+`fresh-frontend-checks.json`, `recorded-envelope-check.json`, `contract-check.json`,
+logs, preservation manifests and publication receipts. The coordinator audit remains
+byte-identical. All 182 worker raw evidence files outside the compiler cache remain
+byte-identical, with the retained binary verified separately. All failures, logs,
+sources, binaries, captures and prior evidence remain in their original locations.
+Initial integration attempts hit sandbox DNS and Git-metadata write restrictions;
+scoped host execution completed the same authorized reads/merge. These were not
+test failures. No guard, assertion or deadline changed.
+
+### Correction state and handoff
+
+The original independent Standards 5 / Spec 4 reports at `09404bd1` remain intact.
+S1-S5 and Spec P1-P3 are corrected, with S3/Spec P2 fixed once. No independent
+re-review approval is claimed. A2 grouped numeric conditions and slate/brass scoped
+controls now match closely; existing workspace widths/placement, unknown-state
+wording and the other recorded host differences remain.
+
+Spec P4 is unresolved. Kris's pending question about moving #96's Tracks/Reel/
+cross-view-draft acceptance to unselected #110 has no answer. All issues and criteria
+stay open. New UI-emitted payload/source still needs the coordinator's selected
+coherent runtime proof; original #94/#95 both-target evidence keeps its original
+scope. Full Story workspace, native and human acceptance remain open. SDK totals
+stay Mac 9/20 and Windows 3/20, zero reservations. This merger starts zero SDK,
+browser, canvas-helper, editor-native, package, manual-CI or watch operations.
+
+Draft PR #122 keeps its Screens base and eventual full-spec closing references.
+The publication receipt owns the final documentation-successor SHA, remote/local/
+upstream agreement and the one-time exact-head automatic CI observation. No prior
+green status transfers to the published head. Integration/status/PR ownership
+returns to the coordinator after publication; successor qualification and the P4
+decision belong to that coordinator.
