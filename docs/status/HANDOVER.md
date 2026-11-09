@@ -26,8 +26,11 @@ The merge had no conflicts and preserved all coordinator records. Its app and
 fixture trees match the returned branch; app/runtime inputs match qualified
 candidate `1ba9fe447c5322683e11026c98ae9c4b38996240`. Reuse the passing tests
 and coordinator-audited Mac proof in [#92 evidence](../tasks/evidence/arithmetic-92.md).
-The merger's repository validation and whitespace checks pass. Its final status
-update changes documentation only.
+The merger's repository validation and whitespace checks pass. After publication,
+the aggregate CI reporter refused the inherited plan's previous-branch name.
+The merger corrected the head selection, retained quality-only selection and
+passed the 18 existing reporter tests. These integration updates change only
+documentation and branch-bound CI metadata; qualified app/runtime inputs are intact.
 
 Draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) publishes
 `codex/spec-87-arithmetic` into `codex/phase3b-screen-designer` and is linked in T3.
@@ -37,7 +40,8 @@ No issue was accepted or closed. The coordinator resumes mutation ownership afte
 the merger's result, takes over the PR and routes the reserved Windows #92 gate
 to SUNDOWN using the exact published head. #93 remains blocked pending that proof.
 The ledger owns unchanged operation counts; the merger started no SDK, native,
-package or manual CI operation. Automatic lightweight PR checks may run.
+package or manual CI operation. Final-head automatic lightweight checks await
+coordinator audit; no reviews have been submitted at this handoff.
 Preserve the backend worktree's unique ignored Mac receipts and the separate
 unapproved #91/#97 design worktree. Keep the PR draft. Final parent-PR merge,
 automerge/release and full Story redesign #110 are outside this selection.

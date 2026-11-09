@@ -11,6 +11,8 @@ candidate. #92 backend is integrated by merge `e8b07b31`, preserving coordinator
 tip `56c619f1` and implementation tip `e5de0c20`. Its app/runtime inputs still
 match qualified candidate `1ba9fe44`; passing implementation and audited Mac
 evidence is reused. Merger repository validation and whitespace checks pass.
+An inherited CI plan named the previous branch; its head selection is corrected,
+with 18 existing reporter tests passing. Final-head automatic checks await audit.
 Draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) publishes the
 integration branch to the Screens base; it tracks the eventual full #87 outcome.
 Only #92 is implemented so far. Windows proof remains pending, #92 is not accepted

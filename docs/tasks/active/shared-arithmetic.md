@@ -183,7 +183,7 @@ and `git diff --check 251fb477..HEAD` reports no whitespace errors. The merger
 started no SDK, native, package or manual CI operation. Cumulative accounting
 remains Mac **1 started / 0 reserved**, Windows **0 started / 1 reserved for #92**.
 The backend worktree and its unique ignored Mac receipts remain in place. The
-separate unapproved design branch/worktree is unchanged. Existing status/recovery
+merger left the separate unapproved design branch/worktree untouched. Existing status/recovery
 sections remain intact for prior acceptance and recovery evidence.
 
 No matching PR existed. The integration branch was pushed only to its own
@@ -193,8 +193,25 @@ No matching PR existed. The integration branch was pushed only to its own
 full #87 outcome, identifies only #92 as implemented, links this ledger and the
 contract/evidence, and includes eventual closing references for #87 and #91–#97.
 #88 remains closed; #89/#90 remain superseded. Automatic lightweight checks may
-run; no manual matrix was dispatched. The accompanying status update changes
+run; no manual matrix was dispatched. Status commit `729a4564` changes
 documentation only and retains the merged qualification inputs.
+
+At published head `729a4564d3ec84a200ebf1b93cad0b7ed479a2f3`, automatic quality
+[run 42594176421](https://github.com/Caldwell-41/Renpy-editor/actions/runs/42594176421)
+reported aggregate `Loomlight validation: error`. Its start-reporter log identifies
+an inherited CI selection mismatch: `.github/validation-plan.json` still named
+`codex/story-combined-v1-grill`. This is publication metadata, not a product/runtime
+failure. The existing `load_plan` owner reproduced that exact refusal locally.
+The merger corrected only the plan's head branch to `codex/spec-87-arithmetic`;
+the Screens base and empty manual-qualification list remain unchanged. The corrected
+plan admits automatic Repository quality only, and all 18 existing CI-reporting
+tests pass. Repository validation and whitespace checks also pass. App, fixture
+and ticket evidence inputs remain identical. Final-head automatic results remain
+pending for coordinator audit; no CI rerun or manual dispatch was requested.
+
+The design worktree gained concurrent uncommitted edits during publication. The
+merger did not alter or integrate them; the last committed candidate remains
+`1e547df2`, with approval pending under the recorded handoff.
 
 Next: the coordinator takes over the draft PR and routes the reserved Windows
 #92 qualification to SUNDOWN using the published branch head and recorded gate.
