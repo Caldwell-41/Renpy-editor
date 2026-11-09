@@ -267,11 +267,16 @@ against accepted Screens base `251fb477`, with fresh read-only Standards and Spe
 agents. The [review assignment](../tasks/active/shared-arithmetic.md#2026-11-10-full-integration-review-selected)
 owns scope and boundaries. Both axes returned. The
 [review record](../tasks/evidence/arithmetic-review.md) preserves five Standards
-and four Spec P2 findings separately. A fresh implementer is selected for all seven
-distinct code defects plus the existing #97 approved-control fidelity obligation.
-Kris's #96/#110 scope decision is pending; fixes proceed independently, with no
-criteria change or #110 implementation. After correction and a fresh merger,
-select coherent remaining qualification and design/acceptance
+and four Spec P2 findings separately. The fresh fixer returned clean `354b5221`
+with all seven code defects corrected and A2 grouped-condition/scoped control
+fidelity. The [correction audit and merger assignment](../tasks/active/shared-arithmetic.md#2026-11-10-reviewed-corrections-returned-and-audited)
+owns the 873-input/binary/source/capture match and exact reuse scope. Final
+frontend passes are 390; Screens actual-main/core passes 13 stages/505 requests
+and Story passes nine/126, both with exit 0 and cleanup. All worker evidence is
+preserved in its ignored `.toolchains/arithmetic-review-fixes/` directory.
+Kris's #96/#110 scope decision stays pending, with no criteria change or #110 work.
+The fresh merger owns integration/status/PR until its handoff, and selects no costly
+operation. After integration, select coherent remaining qualification and design/acceptance
 work. The correction selects no SDK/native/package/manual-CI run. SDK totals
 remain Mac 9/20 and Windows 3/20, zero reservations. Preserve every separate worktree
 and receipt. No remote qualification remains reserved or running.

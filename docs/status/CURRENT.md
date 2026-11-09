@@ -22,8 +22,11 @@ acceptance is pending. The coordinator has pinned full integration review at
 `09404bd1` against accepted Screens base `251fb477`. Fresh read-only Standards
 and Spec reviewers inspected the same complete diff. The
 [review](../tasks/evidence/arithmetic-review.md) found five Standards and four Spec
-P2 findings, including one overlap. One fresh implementer is selected for the seven
-code defects and outstanding #97 control fidelity. Kris's decision on moving the
+P2 findings, including one overlap. Fresh correction `354b5221` returns all seven
+code fixes and the A2 grouped controls for integration. The coordinator verified
+873 inputs, both real-core journeys, four emitted-source files and final capture
+hashes. The merger will reuse 390 frontend and affected public-core passes on
+identical inputs. Kris's decision on moving the
 #96 workspace acceptance to #110 remains pending. Qualification and final acceptance
 remain open.
 Draft PR #122 retains its Screens base and full-spec closing references.

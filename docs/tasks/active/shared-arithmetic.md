@@ -1494,3 +1494,47 @@ retains exact run/log scope and native-package limits; H73 indexes it. The fresh
 fixer inherits this correction and preserves the existing assertions. A final
 coherent frontend run is warranted after the seven UI corrections; no costly
 operation or additional native proof follows from the replay.
+
+### 2026-11-10: reviewed corrections returned and audited
+
+The single fresh fixer returned clean `t3/arithmetic-review-fixes` at
+`354b52211b42e85721d80b751b08832db10db38e`, containing integration `61d70f96`.
+Its 20 changed paths correct S1-S5 and Spec P1-P3, with S3/Spec P2 corrected once.
+The current review note records each red/green and the A2 control correction.
+Spec P4 and Kris's #96/#110 decision remain pending; no criterion was waived.
+
+The coordinator verified all 873 app/script/fixture/CI hashes against the tested
+Git checkout representations and returned working tree, including four explicit
+CRLF script filters. Retained driver, runtime inventory and comparison manifest
+hashes match. Both actual-main/core receipts pass with exit 0 and cleanup:
+Screens 13 stages/505 requests, Story nine stages/126 requests. All four emitted
+source files and 32 final capture hashes match. The ignored coordinator audit is
+`.toolchains/arithmetic-review-fixes/coordinator-audit.json`. Preserve every worker
+receipt under its own `.toolchains/arithmetic-review-fixes/` directory.
+
+Eight final control crops were independently inspected. Wide/compact numeric
+conditions now use A2's grouping; final equations/default controls use the approved
+slate/brass tokens and field sizes. Existing container widths and panel placement
+still differ. This is scoped control conformance, not full Story workspace,
+native or human acceptance. Approved references, arithmetic evaluator/runtime
+helper, transaction/history internals and the migrated smoke caller are unchanged.
+
+Reuse the final 390 frontend passes, 35 focused control/authoring/protocol checks,
+17 action and 19 control public-core passes, actual-main journeys, production
+build/typecheck/format and final comparison on identical inputs. An ignored SDK
+gate adds no pass. The failed first full run, lock/status correction, Python
+mismatch and corrected runs remain recorded, without deadline/guard weakening.
+New runtime payload/source inventory is available for the next coherent qualification;
+no new SDK/native/package/manual-CI proof is inferred. Counts remain Mac 9/20 and
+Windows 3/20, zero reservations.
+
+A fresh merger receives exclusive integration/status/PR mutation ownership from
+the coordinator checkpoint containing this entry. Normally merge `354b5221`,
+preserve both histories and coordinator records, verify full app/fixture/script/CI
+and frozen-input equivalence, then run affected fresh combined checks. Reuse
+unchanged final suites; do not repeat a broad or costly campaign. Preserve the
+original independent review reports and append exact correction/integration results.
+Update live status, ledger and draft PR #122, publish and verify clean tracking.
+Keep all issues/criteria open and P4 unresolved. No SDK/browser/native/package,
+manual-CI, watch, successor work or PR promotion/merge belongs to this merger.
+Return ownership for coherent runtime qualification and remaining acceptance work.
