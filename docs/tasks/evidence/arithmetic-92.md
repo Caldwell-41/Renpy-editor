@@ -230,3 +230,83 @@ Local raw evidence is ignored under `.toolchains/arithmetic-92/`, including chea
 logs, `preflight/arithmetic-produced.rpy` and `preflight/arithmetic-requests.json`.
 No private paths or raw outputs are committed. Candidate/result receipts follow
 below after the reserved invocation completes.
+
+### Mac invocation 1 reservation receipt
+
+Exact implementation candidate:
+`1ba9fe447c5322683e11026c98ae9c4b38996240`.
+The only prelaunch working-tree change is this evidence receipt; code and fixtures
+match that commit. The command is the reproduction command above, from `app/`,
+with the verified official archive and fresh ignored output directory
+`.toolchains/arithmetic-92/mac-01` in this worktree. Host is native macOS ARM64;
+Rust/Cargo 1.90.0. The existing SDK adapter owns all child argument arrays,
+timeouts and cleanup. Reservation remains **0 started, 1 reserved** until launch.
+No Windows invocation or second Mac invocation is authorized to this implementer.
+
+The reserved gate has started. Consumption is now **1 Mac invocation started,
+0 reserved, no second slot**. The raw launch receipt records candidate, fixture
+hashes, target and test-executable SHA-256. Windows remains unstarted here.
+
+### Mac invocation 1 result
+
+**Started and passed.** Consumption is **1/1 implementer Mac invocation,
+0 reserved/uncertain**, charged to the feature-wide Mac total. No second run was
+started. Windows consumption by this implementer is **0** and its proof is pending.
+
+The selected gate passed one test in 74.05 seconds. Its individual results were:
+
+| Case | Exit | Timed out | Output truncated | Duration | Result |
+| --- | ---: | --- | --- | ---: | --- |
+| Compile | 0 | false | false | 470 ms | Passed |
+| Lint | 0 | false | false | 259 ms | Passed |
+| Normal entry | 0 | false | false | 1269 ms | Passed with exact values |
+| Wrong outcome | 1 | false | false | 2092 ms | Expected rejection |
+
+Normal-entry output contained
+`ARITHMETIC_92_VALUES score=9007199254740994 money=7 opaque=kept` and the engine's
+`PASSED` status. The wrong-outcome run contained `FAILED`, without its wrong
+acceptance marker. All four named records were present once. The terminal record
+had `passed:true` and `cleanupComplete:true`; the existing Cargo log validator
+accepted the positive one-test summary. The original project, temporary SDK,
+profile, saves and token directory were removed by the owned temporary-directory
+cleanup. The `.rpy` source set was identical before/after every SDK case.
+
+Raw ignored evidence under `.toolchains/arithmetic-92/mac-01/`:
+
+- `launch-receipt.json`, including candidate, input and executable hashes.
+- `sdk.log`, containing raw gate stdout/stderr and the terminal cleanup result.
+- `arithmetic-sdk-cases.json`, containing each full SDK output and duration.
+- `arithmetic-requests.json`, containing the actual public requests/responses.
+- `arithmetic-produced.rpy`, the accepted source used by the runtime oracle.
+- `test-executable`, the retained ARM64 test binary.
+
+Accepted source SHA-256:
+`848f2c83cbd1b0759c2f5eba6c4c72a82b751407e2fcec066cfd1e491db93355`.
+Test executable SHA-256:
+`99241779f66763baa0ed4b63a4923687c961cf5677d20397d1f27746c857bcfc`.
+Fixtures are reproducible from the same selector; freshly generated Scene IDs and
+labels change project-specific bytes/hashes while the input and value oracle stay
+fixed. No editor package/native-input proof or both-target acceptance is claimed.
+
+Review checked that both root and explicit-body updates share the same assignment
+patch owner, legacy kind refinement still checks exact ranges/hashes, variable
+read/write inspection has one core owner, and renderer code only consumes typed
+results. A range-indexed lookup keeps map refinement linear in Beat count. Existing
+literal command consumers were updated only where the added Rust request field
+required compilation or typed renderer transport required compatibility.
+
+The committed `tests/fixtures/arithmetic-92/contract.json` is a complete successful
+public request/response example from the qualified fixture's final Subtract command,
+with only the outer session/request identifiers replaced by example identifiers.
+Generated UUIDs, revisions and response fields are retained exactly. The numeric
+oracle remains the independent driver fixture; this response example is contract
+documentation. The source and driver inputs used for qualification are unchanged.
+
+Final code verification repeated the affected mapping consumers after review:
+Story **37 passed** (including the five new #92 cases), Source **16 passed**,
+conditions **3 passed**, literal transport **1 passed**, fixture preflight **1 passed**
+and the Mac SDK gate **1 passed**. These are 59 distinct passing Rust cases.
+Seven existing ignored Story specialist/SDK cases remain deliberately unselected.
+The selected renderer suite passed 43 cases. Rust formatting, TypeScript,
+repository validation and whitespace checks passed. No required selected check
+was failed, cancelled or skipped at handoff.
