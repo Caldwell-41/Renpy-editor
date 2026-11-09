@@ -60,7 +60,7 @@ one becomes necessary. Routine checks and review have no numerical limits.
 
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
-| macOS ARM64 SDK qualification | 6 | 0 | 0 |
+| macOS ARM64 SDK qualification | 6 | 0 | 1 for #92 |
 | Windows x64 SDK qualification | 6 | 0 | 0 |
 
 ## Execution ledger
@@ -78,6 +78,18 @@ one becomes necessary. Routine checks and review have no numerical limits.
   instruction selects #87 only. Old exhausted campaigns remain closed.
 - Integration branch created. No application, SDK, package or CI run has started.
 
-Next: start #92 in an isolated worktree and the separate #91 mock chat; record
-their links and returned contracts/approvals here. Open the draft integration PR
-after the first ticket merge, with closing references for #87 and its active slices.
+The design chat is
+<t3-thread://v2/c95d26c7-af8c-4ab0-8c95-a45fdca2dfe6/mcp:launch:e1fe111ab62818554e2a4ef24205ba6f91f5a20e9e8190f47a78f8cd4c8c833c>,
+on its own branch `codex/spec-87-variable-mock`. It owns #91 and the additional
+decimal-control design approval needed by #97. It may commit locally and return
+design evidence; production promotion and publication stay with integration.
+
+One Mac SDK slot is reserved for the #92 implementer. It must report whether
+execution started and retain its exact result. Windows proof will be routed by
+the coordinator after the accepted-source fixture is ready. No Windows slot has
+been reserved and no SDK invocation is known to have started.
+
+Next: receive #92's implementation, use a fresh merger, route Windows qualification
+and update the graph only against actual completed evidence. Open the draft
+integration PR after the first ticket merge, with closing references for #87 and
+its active slices. The design chat works with Kris independently.

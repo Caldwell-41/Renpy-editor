@@ -14,8 +14,11 @@ Story mock #88 is approved as Story Combined v1 / `combined-v1`. Broad handoffs
 follow #92 -> #93 -> #94, then #95 and #96, then #97 with Screens approval.
 Kris authorized design chats named `Variable Mock - {description}` and separate
 worktrees. Production controls wait for their approval and qualified backend.
-No SDK/native/package/CI operation has started and no PR exists yet. Next action
-is dispatch, followed by a draft PR after the first ticket merge. Final parent
+The separate mock chat is recorded in the delivery ledger and owns #91 plus #97's
+decimal designs. One Mac SDK slot is reserved for #92; no invocation is known to
+have started. No native/package/CI operation has started and no PR exists yet.
+Next action is receive #92, merge with a fresh merger, route Windows proof and
+open the draft PR after the first ticket merge. Final parent
 PR merge/release and full Story redesign #110 are outside this selection.
 
 The earlier sections below retain prior work and recovery context. Their
