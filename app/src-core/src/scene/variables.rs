@@ -188,7 +188,7 @@ pub(super) fn inspect(beats: &mut [SceneBeat], authoring: &AuthoringMetadata) {
     }
 }
 
-pub(super) fn draft(
+pub(crate) fn draft(
     target: &str,
     value: &Value,
     authoring: &AuthoringMetadata,

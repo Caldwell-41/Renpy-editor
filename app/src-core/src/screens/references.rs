@@ -29,6 +29,7 @@ pub struct ScreenEffects {
     pub hidden_screens: Vec<String>,
     pub shown_screens: Vec<String>,
     pub assigned_variables: Vec<String>,
+    pub read_variables: Vec<String>,
     pub finishes_interaction: bool,
     pub dependencies: Vec<ScreenDependencyRevision>,
 }
@@ -404,6 +405,7 @@ struct Effects<'a> {
     hidden: BTreeSet<String>,
     shown: BTreeSet<String>,
     assigned: BTreeSet<String>,
+    reads: BTreeSet<String>,
     finishes_interaction: bool,
     blocking: bool,
     dependencies: BTreeMap<String, String>,
@@ -537,6 +539,8 @@ impl Effects<'_> {
                         .insert(dependency.id.clone(), dependency.revision.clone());
                 }
                 for action in &button.actions {
+                    self.reads
+                        .extend(actions::action_reads(action, self.variables));
                     match action {
                         interaction::ScreenAction::SetVariable { variable_id, .. } => {
                             self.assigned.insert(variable_id.clone());
@@ -689,6 +693,7 @@ impl Effects<'_> {
             .collect::<Vec<_>>();
         let hidden_screens = self.hidden.into_iter().collect::<Vec<_>>();
         let shown_screens = self.shown.into_iter().collect::<Vec<_>>();
+        let read_variables = self.reads.into_iter().collect::<Vec<_>>();
         let assigned_variables = self.assigned.into_iter().collect::<Vec<_>>();
         let revision = digest(
             &serde_json::to_vec(&(
@@ -696,6 +701,7 @@ impl Effects<'_> {
                 &hidden_screens,
                 &shown_screens,
                 &assigned_variables,
+                &read_variables,
                 self.finishes_interaction,
                 self.blocking,
                 &dependencies,
@@ -708,6 +714,7 @@ impl Effects<'_> {
             hidden_screens,
             shown_screens,
             assigned_variables,
+            read_variables,
             finishes_interaction: self.finishes_interaction,
             dependencies,
         }
@@ -823,6 +830,7 @@ impl AuthoringService {
             hidden: BTreeSet::new(),
             shown: BTreeSet::new(),
             assigned: BTreeSet::new(),
+            reads: BTreeSet::new(),
             finishes_interaction: false,
             blocking: false,
             dependencies: BTreeMap::new(),
