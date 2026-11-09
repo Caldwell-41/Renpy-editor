@@ -10,8 +10,7 @@ production control choices, coordinator records and prior fixtures remain intact
 ## Current SDK limits
 
 On 2026-11-09 Kris explicitly increased both feature-wide SDK ceilings from six
-to **20 started invocations per target**. Current usage is Mac 5 and Windows 1,
-with zero reservations, leaving 15 Mac and 19 Windows starts. The
+to **20 started invocations per target**. The
 [delivery policy/table](../active/shared-arithmetic.md#verification-and-operation-limits)
 owns current limits. Six-start and 5/6 statements in the attempts below are
 historical. This increase selects no SDK run or successor work.

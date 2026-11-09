@@ -23,9 +23,8 @@ Screens branch. No merge of that PR or release is selected.
   `equation-v2`; the reference is integrated by merge `aecf165e`. Story backend
   #92 is merged and qualified on Mac and Windows. Its scoped delivery is ready
   for final integration review. #93 is merged with qualified public-command/Mac
-  evidence. #94 is merged with successful corrected-fixture Mac proof.
-  Combined #93/#94 Windows proof remains required
-  before #95 or #96 starts.
+  evidence. #94 is merged and qualified on Mac and Windows. Combined #93/#94
+  Windows proof is integrated through `235d99ac`; #95 and #96 are selected next.
 - Backend sequence: #92, then #93, then #94. #95 follows #94.
 - Story UI #96 follows approved #88 and qualified #94.
 - Screens/decimal UI #97 follows approved #91 and qualified #95.
@@ -69,8 +68,8 @@ one becomes necessary. Routine checks and review have no numerical limits.
 
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
-| macOS ARM64 SDK qualification | 20 | 5 | 0 |
-| Windows x64 SDK qualification | 20 | 1 | 1 for combined #93/#94 |
+| macOS ARM64 SDK qualification | 20 | 5 | 1 for #95 |
+| Windows x64 SDK qualification | 20 | 2 | 0 |
 
 ## Execution ledger
 
@@ -813,3 +812,47 @@ A preflight refusal consumes no start; any actual SDK start, including failure,
 consumes the reservation. No retry or successor implementation is selected.
 Combined Windows proof remains required before #95/#96. The coordinator retains
 integration mutation and ledger ownership while the remote test assignment runs.
+
+
+### 2026-11-09: Windows evidence integrated; #95/#96 frontier selected
+
+Combined Windows proof passed at `cae4dfc08425b14513a12af009ded11f6d436514`.
+Evidence commit `918fa3cc5a03d882ce8abdd1c21af2a3b808f9b4` changes only the
+canonical #94 note. Normal merge `235d99ace918d7261ad082c575c2f02b21d63adc`
+preserves both histories. App, fixture, script and CI inputs remain unchanged
+from qualified Mac `d1c201f1` and Windows `cae4dfc0`.
+
+The coordinator inspected actual raw four-case outputs, exact witnesses, accepted
+source/screen/sample records and the remote audit of 875 inputs, binary/archive
+identities, prior receipts and cleanup. All 22 normal assertions passed. The
+expected wrong outcome failed at money -14. Duplicate SDK selector listings add
+no cases and omit no distinct required assertion. This supplies combined #93/#94
+Windows proof. No SDK was rerun during audit/integration. #94 is review-ready;
+issues remain open for full integration review.
+
+Fresh #95 and #96 implementers start from this coordinator checkpoint, with TDD
+at the already approved public authoring, source/history/reopen, accepted-source
+SDK and actual frontend-to-core boundaries. Each receives a separate T3-prepared
+worktree and branch, confirms ancestry, and normally merges integration before
+returning. Exact prepared locations belong in their scoped evidence notes.
+
+| Assignment | Branch | Exclusive file/interface ownership |
+| --- | --- | --- |
+| #95 ordered click-time Screens arithmetic | `t3/screens-click-time-arithmetic` | Core Screens action/runtime/inspection and related existing Rust tests/drivers; required shared core adapters; typed Screens compatibility in `app/src/screen-contracts.ts` and `app/src/screen-interactions.ts` only; `tests/fixtures/arithmetic-95/`; `docs/tasks/evidence/arithmetic-95.md`; canonical DATA_MODEL changes. No production control layout. |
+| #96 approved Story arithmetic controls | `t3/story-arithmetic-controls` | `app/src/scene-ui.ts`, new Story arithmetic editor modules, Story-only `main.ts` transport/captions/reference wiring, scoped production styles, Story DOM/browser/core-journey tests and fixture data, `docs/tasks/evidence/arithmetic-96.md` and UI documentation. No core arithmetic, Screens controllers/types or shared decimal setup/condition/sample controls. |
+
+The coordinator owns all status/ledger, GitHub issues, PR, shared package/test
+registries and integration mutations. Workers request overlapping registry or
+contract changes through the coordinator; they preserve each other's ownership.
+#96 uses declared decimals from source/backend fixtures. #97 owns shared decimal
+setup controls. Tracks/Reel production views belong to separately selected #110;
+#96 must report those real acceptance limits while implementing approved reusable
+controls in the existing Story workspace. Full #110/palette work is not selected.
+
+Exactly one Mac SDK start is reserved for #95 after no-SDK preflight, a clean
+candidate and fresh source/binary receipt. Use the existing outside-sandbox
+desktop/power route. No SDK start is allocated to #96, and no native editor/package
+or manual CI operation is selected. Accounting is **Mac 5/20 started, one reserved;
+Windows 2/20 started, zero reserved**, leaving fourteen Mac and eighteen Windows
+starts unallocated. #95 Windows qualification follows its coherent backend return.
+#97 waits for qualified #95. Final feature review and assembled acceptance remain.

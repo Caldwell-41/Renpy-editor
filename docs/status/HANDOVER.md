@@ -113,31 +113,50 @@ wrong-outcome rejection, four case records and SDK/desktop cleanup. Preserve
 `mac-01` in the read-only #94 worktree and `mac-02`/`mac-03` in this integration
 checkout. All 40 retained files remain unchanged; no qualification is running.
 
-Kris explicitly increased both feature-wide SDK ceilings from six to **20** on
-2026-11-09. Cumulative usage remains **Mac 5 started, Windows 1 started**. The
-[delivery policy](../tasks/active/shared-arithmetic.md#verification-and-operation-limits)
-owns current limits. Historical six-start receipts keep their real accounting.
-This change selects no new SDK run or successor work.
+Kris increased both feature-wide SDK ceilings to 20. The
+[delivery policy/table](../tasks/active/shared-arithmetic.md#verification-and-operation-limits)
+owns current cumulative use and reservations. Historical six-start receipts keep
+their real accounting.
 
-The coherent checkpoint is published only to `codex/spec-87-arithmetic`, with
-PR #122 still draft on its Screens base. Final-head automatic checks remain for
-coordinator audit. No CI watch, manual dispatch, SDK, native-editor/package or
-browser operation ran in this merger assignment. Exclusive integration mutation
-ownership returns to the coordinator when the merger reports completion.
+Combined Windows qualification passed at exact checkpoint `cae4dfc0`. Evidence
+commit `918fa3cc5a03d882ce8abdd1c21af2a3b808f9b4` is integrated through
+`235d99ace918d7261ad082c575c2f02b21d63adc`. Only the #94 note changed;
+app/fixture inputs still equal both qualified candidates. The coordinator read
+actual raw case/witness outputs and the remote input/binary/cleanup audit. All
+22 normal assertions passed; wrong outcome rejected money -14. SDK duplicate
+selector listings omit no distinct required case. All 875 inputs and prior #92
+receipts remained unchanged. The remote worktree is clean and preserves unique
+raw evidence. The registered Windows checkout is unchanged. The
+[Windows result](../tasks/evidence/arithmetic-94.md#windows-combined-invocation-1-result-2026-11-09)
+owns exact commands, outcomes and identities. Actual consumption is Mac 5 and
+Windows 2 starts; no qualification process remains running.
 
-The coordinator has now reserved one combined #93/#94 Windows SDK invocation
-against the corrected fixture before #95/#96 starts. SUNDOWN is reachable. A fresh
-remote test delegate owns only the existing Windows qualification worktree,
-`codex/spec-87-windows-92`, and the #94 evidence note. It may fast-forward that
-worktree to the published coordinator allocation after confirming clean state and
-ancestry. Preserve the registered project-root checkout and all old receipts.
-No SDK launch is known to have started; the reservation remains charged until the
-delegate returns actual start/result evidence. #92's old result does not prove
-formulas. Tickets remain open
-for final review. #95/#96/#97 production and full #87 acceptance remain pending;
-#97 still requires qualified #95. Preserve every worktree/evidence directory and
-the approved #91/#97 design reference. Keep the PR draft; no final review,
-ready-for-review promotion, parent-PR merge, automerge or release is selected.
+#94 is qualified on both targets and records the backend contract for #95/#96.
+The coordinator selects fresh implementers in separate prepared worktrees. #95
+owns core Screens action/runtime changes, its typed Screens compatibility and
+DATA_MODEL. #96 owns Story production controls, Story transport/captions and
+scoped styles/tests plus UI documentation. Both use the shared #94 owner;
+coordinator records, shared registries and integration remain coordinator-owned.
+The delivery record contains exact file ownership and base checkpoint.
+
+One Mac SDK invocation is reserved for #95 after cheap public preflight and
+clean candidate receipt. It must use scoped outside-sandbox execution and the
+existing desktop-admission/power helper, preserving both prior failure lessons.
+#96 has no SDK/native-editor/package/manual-CI allocation. Its actual frontend
+to core/source/history/reopen journey is required; mocked IPC alone is insufficient.
+
+Story Combined v1 / combined-v1 remains the approved arithmetic design. #96
+implements reusable approved controls in the existing Story workspace; full #110
+layout/palette integration is separately owned and depends on #96. Tracks/Reel
+production views are absent here. The implementer must map and report those
+acceptance limits explicitly rather than claim them from mock-only proof.
+#97 remains blocked by qualified #95. Tickets stay open for final review.
+
+The draft PR stays on its Screens base. Preserve every worktree/evidence directory
+and both approved design references. No final review, ready-for-review promotion,
+parent-PR merge, automerge or release is selected. Fresh merger agents integrate
+each completed implementer. The coordinator retains integration mutation ownership
+while implementers work in their own checkouts.
 
 The earlier sections below retain prior work and recovery context. Their
 unselected-next-task statements do not override this explicit #87 selection.

@@ -8,9 +8,11 @@ All tracked app/runtime/fixture inputs equal Mac-qualified `d1c201f1`; all 208
 recorded hashes match. Reuse 145 distinct Rust passes including SDK and 31 renderer
 passes; fresh pinned TypeScript, contract/branch-plan, repository and whitespace
 checks pass. The [#94 contract and evidence](../tasks/evidence/arithmetic-94.md)
-retain both failed attempts and the corrected runtime pass. Combined Windows
-proof remains required before #95/#96 begins. The coordinator resumes mutation
-ownership after this published draft checkpoint.
+retain both failed attempts and the corrected runtime pass. Windows evidence
+`918fa3cc` is integrated through `235d99ac`; both targets now qualify #94 and the
+combined #93 integer witnesses. The coordinator audited actual case outputs,
+source/binary identities, all required assertions and cleanup. #95 Screens runtime
+and #96 Story controls are selected in separate worktrees. #97 waits for #95.
 
 Kris selected [spec #87](https://github.com/Caldwell-41/Renpy-editor/issues/87)
 for implementation on 2026-11-09. Branch `codex/spec-87-arithmetic` starts from
@@ -48,12 +50,13 @@ and #92 fixture inputs remain unchanged. The
 [#94 contract](../tasks/evidence/arithmetic-94.md#public-contract-for-95-and-96)
 is the merged baseline for dependent work.
 On 2026-11-09 Kris raised both SDK ceilings from six to 20 started invocations.
-Totals are Mac 5 started / 0 reserved and Windows 1 started / 1 reserved for
-combined #93/#94 proof. The delivery record owns current limits and allocation.
-New whole-number/decimal Windows proof will be combined against #94 before
-dependent #95/#96 work. The corrected #94 fixture retains integer precision, precedence,
-grouping and negative floor/remainder witnesses. Windows formula proof remains
-missing; #92's Windows result does not prove it. Tickets remain open for final review.
+Totals are Mac 5 started / 1 reserved for #95 and Windows 2 started / 0 reserved.
+The delivery record owns current limits, assignments and qualified candidates.
+The corrected #94 fixture qualifies integer precision, precedence/grouping,
+negative floor/remainder and decimal behavior on both targets. Tickets remain
+open for final review. #96 must report the Tracks/Reel criteria that depend on
+the separately owned #110 layout; this assignment selects approved arithmetic
+controls in the existing Story workspace.
 Backend and approved production UI are in scope. No full #110 redesign,
 parent-PR merge or release is selected.
 
