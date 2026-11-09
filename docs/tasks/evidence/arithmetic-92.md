@@ -348,3 +348,30 @@ tests/fixtures/arithmetic-92/contract.json
 tests/fixtures/arithmetic-92/driver.rpy
 tests/fixtures/arithmetic-92/story.rpy
 ```
+
+## Windows preflight, no SDK execution
+
+The read-only SUNDOWN delegate completed preflight against requested published
+candidate `d797eb04026a5d81072d0aaa6f5f1a5b8966c33d`. The registered checkout
+is clean on `codex/phase3b-screen-designer` at
+`251fb47754a0ec1a43ece8763a0b4603b8e54dd8`, with one registered worktree.
+It does not contain the requested tested state. The delegate preserved checkout,
+refs, tracked files, other processes and prior evidence; it did not run the gate.
+
+Reported host capabilities are Rust/Cargo 1.90.0, x64 MSVC compiler/linker
+14.50.35717, Node 24.22.1 and npm 11.9.0. The existing Ren'Py 8.5.3 archive
+matches its local checksum manifest, and extracted Windows x64 executables are
+present. None ran. No fixture/preflight test, compile, lint or runtime qualification
+was executed. These inventory results establish readiness of tools, not #92 proof.
+
+The remote ignored `.toolchains/arithmetic-92/windows-preflight-01/` directory
+retains `preflight.json` and raw inventories. The coordinator read the completed
+delegate's result; no cross-host artifact transfer or independent rehash is claimed.
+SDK consumption remains **0 Windows started, 1 reserved** under the shared ledger.
+
+T3 rejected isolated remote delegation before agent creation because linked
+environments do not support `delegate_task` worktree isolation. The alternative
+requires a new top-level chat with a prepared worktree. Kris's current new-chat
+permission covers prototypes, so the coordinator has requested authorization for
+a Windows qualification chat. No such chat has been created. #92 remains pending
+Windows proof, and no target evidence or acceptance is inferred from this preflight.

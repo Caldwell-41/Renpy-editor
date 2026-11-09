@@ -42,11 +42,17 @@ No issue was accepted or closed. The coordinator has resumed mutation ownership
 and linked/taken over the PR. SUNDOWN is reachable. The isolated remote dispatch
 was rejected before agent creation because T3 does
 not support linked-environment delegate worktree isolation. No SDK start was
-consumed. The running follow-up uses the registered checkout for read-only preflight,
-with no checkout/ref changes and SDK execution only if it is already clean at
-the exact published candidate. The ledger records its request key and constraints.
-Its request key is `spec87-windows92-registered-checkout-preflight-20261109`.
-Wait for completion without polling; #93 remains blocked on actual Windows proof.
+consumed. The read-only follow-up has completed: the sole Windows checkout is clean
+at Screens baseline `251fb477`, not requested arithmetic candidate `d797eb04`.
+Required Rust/MSVC and verified Ren'Py 8.5.3 are present, but no fixture or SDK check
+ran and the checkout stayed untouched. Windows remains **0 started / 1 reserved**.
+The #92 note records preflight evidence. No qualification task remains running.
+
+The coordinator requested approval to create a new top-level Windows qualification
+chat with a host-prepared worktree from PR #122. T3 requires that route for isolated
+remote work; the current new-chat permission covers prototypes. Wait for Kris's
+decision, then launch only if approved. Do not treat elapsed time or a default
+choice as consent. #92 remains unaccepted and #93 blocked on actual Windows proof.
 The ledger owns unchanged operation counts; the merger started no SDK, native,
 package or manual CI operation. Final-head automatic lightweight checks await
 coordinator audit; no reviews have been submitted at this handoff.

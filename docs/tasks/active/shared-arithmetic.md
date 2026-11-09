@@ -280,3 +280,28 @@ Kris's explicit approval remains pending; every revision's approval and
 production promotion, runtime/source acceptance or SDK consumption follows from
 this refinement. The Windows #92 preflight remains the separate pending operation;
 wait for its completion notification without polling.
+
+### 2026-11-09: Windows preflight completed, setup authorization pending
+
+The registered-checkout delegate completed without qualification. SUNDOWN's clean
+checkout is `codex/phase3b-screen-designer` at
+`251fb47754a0ec1a43ece8763a0b4603b8e54dd8`, not requested candidate `d797eb04`.
+Only one worktree is registered. Rust/Cargo 1.90.0, x64 MSVC and the verified
+Ren'Py 8.5.3 archive/extracted executables are available. No fixture, compile,
+lint or runtime check ran, and no ref/checkout/production change occurred.
+The existing #92 evidence note records the exact preflight and ignored receipt.
+
+The isolated-dispatch refusal and completed read-only preflight together establish
+the actual remaining setup blocker. T3 can prepare a remote isolated worktree via
+`t3_thread_launch`, which creates a new top-level chat. Current user permission
+explicitly covers new prototype chats, not a qualification chat. The coordinator
+asked Kris whether to create a Windows qualification chat in its own worktree from
+PR #122, using only the one reserved run. Approval is pending; no replacement
+chat/task has started. A default selection or elapsed time grants no approval.
+
+Cumulative use remains Mac **1 started / 0 reserved**, Windows
+**0 started / 1 reserved**. #92 remains unaccepted and #93 blocked on Windows
+proof. #91/#97 still await design approval. Next action is receive Kris's setup
+decision; on approval, launch the qualification chat through the host's explicit
+worktree strategy and retain the registered Windows checkout unchanged. No test
+execution or new capability is assigned to Kris.

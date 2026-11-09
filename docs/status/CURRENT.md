@@ -17,8 +17,10 @@ with 18 existing reporter tests passing. Final-head automatic checks await audit
 Draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) publishes the
 integration branch to the Screens base; it tracks the eventual full #87 outcome.
 Only #92 is implemented so far. Windows proof remains pending, #92 is not accepted
-and #93 remains blocked. The coordinator owns the reserved Windows qualification
-on SUNDOWN. Backend and approved production UI are in scope. No full #110 redesign,
+and #93 remains blocked. SUNDOWN's tools/SDK are ready, but its checkout is on the
+Screens baseline. T3 rejected remote delegate isolation; approval for a new top-level
+Windows qualification chat/worktree is pending. The one Windows run stays reserved.
+Backend and approved production UI are in scope. No full #110 redesign,
 parent-PR merge or release is selected.
 
 ## Story Combined v1 references consolidated
