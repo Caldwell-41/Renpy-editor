@@ -18,25 +18,24 @@ conditions and scoped slate/brass controls now match closely. Existing workspace
 widths, placement and truthful unknown-state wording retain their stated differences.
 Spec P4 remains unresolved. Kris's decision on moving #96's Tracks/Reel/cross-view
 draft acceptance to #110 is pending; no criterion changed. New UI-emitted source
-still needs selected coherent runtime proof. Earlier #94/#95 both-target evidence
+is qualified on Mac; Windows proof is selected below. Earlier #94/#95 both-target evidence
 keeps its original scope. Full workspace/native/human and final acceptance remain
 open. Integration/status/PR ownership returns to the coordinator for that selection.
 Draft PR #122 retains its Screens base and full-spec closing references.
 
-The [UI recovery result](../tasks/evidence/arithmetic-review.md#recovery-integration-and-mac-invocation-2-2026-11-10)
-is integrated and published from normal merge `ec7e366b`, preserving coordinator
-`b2257241` and returned `12ce2eea`. Fresh SDK-free checks pass on the corrected
-candidate. The one new Mac SDK invocation failed after 13 normal assertions at
-the first divide result; compile/lint, Story trace/types, condition and rendered
-balance/inertness passed. Ordered actions/Finish/wrong-outcome proof remains
-missing. Source, desktop/power, owned process and temp cleanup are verified.
-The original failed run and fresh `mac-02` receipts/binary are preserved.
-The [refresh diagnosis](../tasks/evidence/arithmetic-review.md#interaction-refresh-diagnosis-and-confirmation-selection)
-reproduces the fixture's missing refresh request through pinned SDK definitions.
-The helper is corrected without altering actions, values or snapshots. One Mac
-confirmation is selected after readiness, using fresh `mac-03`. Usage is Mac 11/20
-plus one reserved, Windows 3/20 with none reserved. No further retry is selected.
-P4, Windows routing and wider acceptance stay open.
+The [Mac UI-source result](../tasks/evidence/arithmetic-review.md#mac-invocation-3-passed-2026-11-10)
+qualifies source `72eb9f13`. Compile/lint, all 28 normal assertions, five exact
+witnesses and deliberate wrong-outcome rejection pass. The fixture now requests
+interaction refresh before its timer dispatches the unchanged rendered action.
+Source, desktop/power, owned process and temp cleanup are verified. Both earlier
+failed runs, targets and binaries remain preserved. This adds no physical gesture
+or native-editor proof.
+Usage is Mac 12/20 with none reserved and Windows 3/20 with one reserved for the
+same UI-source fixture on SUNDOWN. P4 and wider acceptance stay open.
+The automatic quality failure at `72eb9f13` is traced to two obsolete fixture
+callers. The [caller corrections](../tasks/evidence/arithmetic-review.md#automatic-ci-fixture-consumers-corrected-2026-11-10)
+pass the focused Story browser and four affected dispatch fixtures, preserving
+production and SDK inputs. Successor-head CI remains for audit.
 
 #94 decimal/public services are integrated by conflict-free normal merge
 `854f6ad1`, preserving coordinator `c177d1cd` and returned `b31929f6`.
@@ -108,7 +107,7 @@ and #92 fixture inputs remain unchanged. The
 [#94 contract](../tasks/evidence/arithmetic-94.md#public-contract-for-95-and-96)
 is the merged baseline for dependent work.
 On 2026-11-09 Kris raised both SDK ceilings from six to 20 started invocations.
-Totals are Mac 11/20 and Windows 3/20 started, with one Mac confirmation reserved.
+Totals are Mac 12/20 and Windows 3/20 started, with one Windows UI-source run reserved.
 #95's fourth Mac attempt passed compile/lint, all 22 normal assertions, exact
 ordered/current values, both button kinds with click/keyboard, Finish, deliberate
 wrong-outcome rejection and cleanup. The coordinator verified all 869 inputs,

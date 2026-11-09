@@ -23,7 +23,7 @@ async function call(operation,payload={}){
  const started=Date.now();
  const response=await child.request({protocolVersion:1,requestId:randomUUID().replaceAll('-',''),operation,payload:{...payload,...(session&&!['project.listRecent','project.openRecent'].includes(operation)?{sessionId:session}:{})}});
  result.operations.push({operation,elapsedMs:Date.now()-started});
- if(!response.ok){result.refusals.push({operation,code:response.error.code});throw Object.assign(Error(response.error.message),{code:response.error.code});}return response.value;
+ if(!response.ok){result.refusals.push({operation,code:response.error.code});throw Object.assign(Error(response.error.message),response.error);}return response.value;
 }
 async function settle(check,label){const deadline=Date.now()+15000;while(!await check()){if(Date.now()>deadline)throw Error(`Did not settle: ${label}`);await new Promise(r=>setTimeout(r,5));}}
 const source=async path=>(await call('source.open',{path})).text;

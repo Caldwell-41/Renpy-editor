@@ -72,8 +72,8 @@ one becomes necessary. Routine checks and review have no numerical limits.
 
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
-| macOS ARM64 SDK qualification | 20 | 11 | 1 for interaction-refresh confirmation |
-| Windows x64 SDK qualification | 20 | 3 | 0 |
+| macOS ARM64 SDK qualification | 20 | 12 | 0 |
+| Windows x64 SDK qualification | 20 | 3 | 1 for final UI-emitted source |
 
 ## Execution ledger
 
@@ -1720,3 +1720,46 @@ the reservation even on failure. All four cases, positive/negative witnesses and
 cleanup remain required. No subsequent invocation is selected. Actual use remains
 Mac 11/20, Windows 3/20, with only this one new Mac reservation. No Windows,
 native-editor/package, browser/helper, manual-CI or watch is selected. P4 is pending.
+
+### 2026-11-10: final UI-source Mac qualification passed
+
+Source `72eb9f13b1156b76deb4873f8a8d32a57785340b` passes the single selected Mac
+confirmation. The [canonical result](../evidence/arithmetic-review.md#mac-invocation-3-passed-2026-11-10)
+owns the exact executable/driver identities, four cases, 28 normal assertions,
+all five witnesses and actual wrong-outcome rejection. The independent audit
+matches 1,880 unchanged inputs, 77 exports, 11 accepted sources, four captured
+snapshots/image bytes and all 11 physical children. Desktop/power and owned
+root/process cleanup pass. Both earlier failed UI attempts remain preserved.
+Actual use is Mac 12/20 and Windows 3/20, with no reservation before selection below.
+No physical gesture, editor-native or full-feature acceptance transfers from this
+rendered-action fixture. P4 remains unanswered. Existing status records retain
+unique recovery history beyond their usual word-count targets; live continuation
+wording is replaced rather than copied into another archive.
+
+### Windows UI-source qualification selection, 2026-11-10
+
+The coordinator reserves **one Windows SDK invocation**, with no retry, for the
+same portable UI-emitted source fixture. Linked SUNDOWN is reachable. Use its
+existing assigned F: qualification worktree on `codex/spec-87-windows-92`, last
+returned clean at `55f89ddf`, after checking current ownership, refs and changes.
+Preserve the registered project checkout, earlier raw receipts/binaries, other
+worktrees and refs. Synchronize the published integration successor normally;
+production/core, captured sources and driver must equal Mac-qualified `72eb9f13`.
+Later documentation and fixture-caller corrections do not require another Mac run.
+
+The bounded remote agent owns only Windows qualification evidence. Run both exact
+SDK-free UI preflights, retain a fresh native x64 Rust 1.90 executable and complete
+input/toolchain/verified official SDK identities, then run the existing exact SDK
+gate once. Use fresh ignored `arithmetic-ui-runtime/windows-01`, evidence outside
+the SDK temporary root and short contained Windows TEMP/TMP. Require compile,
+lint, all 28 normal assertions/five witnesses, actual wrong-outcome rejection,
+source preservation, matched physical children and owned process/root cleanup.
+Count any started invocation even on failure. Refuse before launch on a failed
+readiness check. Report failure without correction or retry.
+
+Return the tested commit, executable/source/SDK hashes, exact commands and unique
+case results, accounting and cleanup. Publish only the Windows evidence note on
+the existing qualification branch. Integration/status/PR remain coordinator-owned.
+Actual usage before launch is **Mac 12/20, Windows 3/20 plus one reserved**. No
+Mac, native-editor/package, canvas-helper or manual-CI operation is selected.
+All issues/criteria remain open pending P4, Windows and wider acceptance.

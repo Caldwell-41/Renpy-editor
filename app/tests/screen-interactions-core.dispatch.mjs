@@ -16,7 +16,7 @@ const result={passed:false,controllerToCore:true,sdkExecuted:false,helperExecute
 async function call(operation,payload={}) {
  assert(!operation.startsWith('runtime.')&&!['screens.canvasRender','screens.canvasStatus'].includes(operation));
  const response=await child.request({protocolVersion:1,requestId:randomUUID().replaceAll('-',''),operation,payload:{...payload,...(session&&!['project.listRecent','project.openRecent'].includes(operation)?{sessionId:session}:{})}});
- if(!response.ok){result.refusals.push({operation,code:response.error.code});throw Object.assign(Error(response.error.message),{code:response.error.code});}return response.value;
+ if(!response.ok){result.refusals.push({operation,code:response.error.code});throw Object.assign(Error(response.error.message),response.error);}return response.value;
 }
 const source=async path=>(await call('source.open',{path})).text;
 async function saveSource(path,text){const base=await call('source.open',{path});const draft=await call('source.updateDraft',{path,expectedBaseRevision:base.baseRevision,text,selectionStart:0,selectionEnd:0});await call('source.save',{path,expectedBaseRevision:draft.baseRevision,expectedDraftVersion:draft.draftVersion});}

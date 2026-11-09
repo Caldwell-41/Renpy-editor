@@ -660,3 +660,93 @@ Before start, actual use is Mac 11/20 plus one new reservation, Windows 3/20 wit
 none reserved. Require all positive witnesses and an actually rejected wrong
 outcome, source preservation and cleanup. No further retry is selected. P4 and
 full acceptance remain open.
+
+## Mac invocation 3 passed, 2026-11-10
+
+Clean published source `72eb9f13b1156b76deb4873f8a8d32a57785340b` includes only the
+fixture refresh correction and its records since `44898be2`. Production, four
+captured sources, image bytes, oracles, assertions and deadlines remain unchanged.
+The retained fresh executable SHA-256 is
+`5aade0c40f458aedadc2e6dadd03da6569d4b4014d778722a97f5bf84bc6b24c`;
+driver SHA-256 is
+`2f18f568077462104d45fc385638d13b1133cbe22a7373479dd7107429408d89`.
+Both exact SDK-free fixture preflights pass. The public action group passes 19
+cases with its two named SDK gates ignored. All 1,880 source/config/lock/fixture
+hashes match Git and the working checkout before and after execution. The existing
+Cargo-log validator accepts the named positive SDK result.
+
+The verified cached official archive and published manifest retain their earlier
+pins. Fourteen installed SDK execution/selector/API files match archive members;
+the staged execution identities match those inputs. The actual unlocked, awake
+desktop is admitted through `native_desktop` outside the sandbox. The selected
+invocation starts once, exits zero after 80,589 ms and consumes the reservation.
+The retained executable runs the exact fully qualified
+`screens::tests::actions::runtime::ui_emitted_arithmetic_sdk_gate --ignored --exact --nocapture`.
+
+| Unique selected case | Exit | Duration | Result |
+| --- | ---: | ---: | --- |
+| Compile | 0 | 477 ms | Passed |
+| Lint with `--error-code` | 0 | 245 ms | Passed |
+| Normal entry | 0 | 1,768 ms | All 28 assertions passed |
+| Wrong outcome | 1 | 2,059 ms | Required rejection passed |
+
+Normal entry emits all five exact witnesses:
+
+```text
+ARITHMETIC_UI_STORY precision=6 protected=5 nested=27:int money=1.5:float flag=True title=retained_text
+ARITHMETIC_UI_DIVIDE 4.5/2=2.25/2=1.125:float continuation=0
+ARITHMETIC_UI_TEXT first=2.0:float/12:int second=2.0:float/14:int current=True
+ARITHMETIC_UI_IMAGE first=10/20 second=12/24:int bonus=3,2 ordered=True
+ARITHMETIC_UI_VALUES inert=True text=True condition=True rendered_actions=True continuation=4
+```
+
+Six passive dispatch-request receipts show the timer screen still unbuilt and
+refresh changing from false to true. Subsequent assertions establish the exact
+divide, ordered/current textbutton and imagebutton results and four Finish
+continuations. Wrong outcome actually reports `FAILED` at `trust == 26`, with
+actual trust 27, and omits `ARITHMETIC_UI_WRONG_ACCEPTED`. Its two passing setup
+assertions and one deliberate failure are not extra positive cases. Duplicate
+inner selector listings omit no required case and add no passes.
+
+The independent audit matches all 11 physical SDK children, including seven
+construction children, with complete start/completion records. Every child has
+no process timeout or output truncation. All 77 exported files, 11 accepted `.rpy`
+files, four captured sources and image bytes match; all four cases preserve source.
+Both power assertions release, the owned temporary root is absent and the host
+process audit finds no owned process among the 12 recorded test/SDK PIDs.
+Terminal evidence is `passed:true,cleanupComplete:true`.
+
+Fresh ignored `.toolchains/arithmetic-ui-runtime/mac-03/` retains the executable,
+launch/frozen inputs, readiness/official SDK identities, raw cases/children,
+accepted source/assets, desktop receipt and independent/process audits. Both
+earlier failed attempts, their binaries, targets and unique receipts stay intact.
+Actual usage is **Mac 12/20, Windows 3/20, zero reservations** after this run.
+Windows selection follows in the delivery record; it does not transfer a Mac pass.
+This qualifies unchanged rendered actions dispatched by a fixture timer, with no
+new physical gesture or native-editor proof. Original #95 evidence retains its
+scope. P4, #96/#110 scope and full acceptance remain open.
+
+## Automatic CI fixture consumers corrected, 2026-11-10
+
+The exact-head [quality failure](https://github.com/Caldwell-41/Renpy-editor/actions/runs/42670532527/job/129345577963)
+at `72eb9f13` reproduces two obsolete caller assumptions. The Screens controls
+fixture throws only an error code, dropping the public core's `actionIndex` needed
+to reveal/focus the invalid row. Its Apply waits for a field error that cannot be
+associated without that context. Four inherited Screens dispatch adapters now
+preserve the complete typed error object, matching production transport. Story's
+browser fixture waits for a new formula error immediately after input; it now
+blurs that field before waiting, matching reviewed validation timing.
+
+Pinned Node 24.19.0 test compilation and all four affected dispatch fixtures pass
+against a fresh locked/offline help-controller driver. The focused Story Chrome
+fixture then passes with wide/compact control comparisons, operation-menu focus,
+formula error/recovery, keyboard/draft/Cancel and accepted-source assertions intact.
+It closes its owned browser/driver and removes its scratch project. No assertion,
+deadline or fixture was removed. Repository validation passes all 1,880 files;
+whitespace passes. The original CI log and fresh green logs/results are retained
+under ignored `arithmetic-ci-callers/` and `arithmetic-ui-runtime/mac-03/`.
+
+These five caller edits change no production, core, SDK driver, captured source or
+asset input. Those trees/files still equal Mac-qualified `72eb9f13`; another Mac
+SDK run is unnecessary. Exact successor-head automatic checks remain for audit.
+H76 indexes the consumer failure. No new SDK/native-editor/package run occurred.

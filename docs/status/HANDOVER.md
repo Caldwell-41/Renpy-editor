@@ -245,8 +245,9 @@ host/background and placement differ. Earlier textbutton captures precede the fi
 scoped palette correction; extended imagebutton/condition captures keep their actual
 source scope. These differences are review inputs, not approved deviations.
 New UI-emitted decimal defaults, ordered formulas, condition/text and created-imagebutton
-fixtures have no new SDK proof. #94/#95 both-target evidence retains its original
-candidate/input scope. Preserve the worker's entire ignored `.toolchains/arithmetic-97/`,
+fixtures now pass Mac SDK qualification below; Windows proof remains pending.
+#94/#95 both-target evidence retains its original candidate/input scope. Preserve
+the worker's entire ignored `.toolchains/arithmetic-97/`,
 including binary and every raw attempt/capture/source receipt. Integration retains
 `coordinator-audit.json` and merger receipts under `integration-merge/`. The merger's
 552-file raw-evidence manifest and retained-driver hash match after fresh checks.
@@ -289,26 +290,32 @@ match the return; all 1,880 inputs match Git. Fresh retained binary and both exa
 preflights, 19 action cases with two named SDK gates ignored, static checks,
 formatting, contract/branch-plan, repository and whitespace pass.
 
-The single Mac recovery failed after 13 normal assertions at the first divide
-value. Compile/lint, exact Story trace/types, narration progression, condition,
-rendered balance and pre-activation inertness pass at their boundaries. Later
-action/Finish witnesses and actual wrong-outcome rejection are missing; wrong
-outcome is unrun. Provisional fixture timer/interaction-refresh diagnosis needs
-selected observation before a correction. No product arithmetic defect is established.
-Ten physical children match receipts; all completed cases preserve source with no
-process timeout/truncation. Both power assertions release; owned root/process cleanup
-passes. Preserve fresh root `.toolchains/arithmetic-ui-runtime/mac-02/` and its
-retained executable, worker `mac-01` and its target/binary, and the coordinator audit.
+The [Mac UI-source result](../tasks/evidence/arithmetic-review.md#mac-invocation-3-passed-2026-11-10)
+qualifies clean published source `72eb9f13b1156b76deb4873f8a8d32a57785340b`.
+The fixture-only refresh correction preserves actions, snapshots, values and
+deadlines. Compile/lint, 28 normal assertions, all five witnesses and actual
+wrong-outcome rejection pass. Eleven physical children match receipts, without
+timeout/truncation. All 1,880 inputs, exported source/assets and retained binary
+match; desktop/power, owned process and temp cleanup pass. Preserve root `mac-03`
+and both earlier failed attempts, their targets/binaries and audits.
 
-The [refresh diagnosis and selection](../tasks/evidence/arithmetic-review.md#interaction-refresh-diagnosis-and-confirmation-selection)
-records the SDK-source admission red/green and fixture-only correction. The
-coordinator selects one Mac confirmation after clean source/binary/official SDK/
-desktop readiness, with new `mac-03` output. Before start actual usage is Mac 11/20
-plus one reservation and Windows 3/20 with none reserved. No further retry is
-selected. Preserve older evidence/targets; no Windows/native/package/browser/
-canvas-helper/manual-CI/watch is selected. P4 and #96/#110 scope remain
-unanswered, with all issues/criteria open and independent Standards five/Spec four
-reports preserved. No full native/human acceptance is claimed.
+The coordinator selects one bounded Windows UI-source run on linked SUNDOWN,
+using the existing assigned F: qualification worktree and the same runtime inputs.
+The registered Windows project checkout stays intact. The
+[delivery record](../tasks/active/shared-arithmetic.md#windows-ui-source-qualification-selection-2026-11-10)
+owns scope, reservation and return requirements. Actual use is Mac 12/20 with none
+reserved, Windows 3/20 with one reserved. No SDK retry is selected. Native-editor/
+package, canvas-helper and manual-CI operations remain unselected. P4 and #96/#110
+scope remain unanswered, with all issues/criteria open and independent Standards
+five/Spec four reports preserved. No new physical gesture or full native/human
+acceptance is claimed.
+
+Automatic quality at `72eb9f13` failed two obsolete fixture consumers. The
+[focused corrections](../tasks/evidence/arithmetic-review.md#automatic-ci-fixture-consumers-corrected-2026-11-10)
+retain typed error context in four inherited Screens adapters and blur the Story
+field before asserting a new error. All four dispatch consumers and focused
+Story Chrome pass with existing assertions/cleanup intact. SDK/production inputs
+still equal the Mac-qualified source. The next published head needs its own CI audit.
 
 The [review CI correction](../tasks/evidence/arithmetic-review.md#ci-caller-correction-before-review-fixes)
 migrates the obsolete `Edit default` smoke caller to the current inspector. All

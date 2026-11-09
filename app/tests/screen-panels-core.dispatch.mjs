@@ -25,7 +25,7 @@ async function call(operation, payload = {}) {
   result.operations[operation] = (result.operations[operation] ?? 0) + 1;
   const response = await child.request({protocolVersion: 1, requestId: randomUUID().replaceAll('-', ''), operation,
     payload: {...payload, ...(session && !['project.listRecent', 'project.openRecent'].includes(operation) ? {sessionId: session} : {})}});
-  if (!response.ok) { (result.refusals ??= []).push({operation, payload, error: response.error}); throw Object.assign(Error(response.error.message), {code: response.error.code}); }
+  if (!response.ok) { (result.refusals ??= []).push({operation, payload, error: response.error}); throw Object.assign(Error(response.error.message), response.error); }
   return response.value;
 }
 async function wait(check, description) {

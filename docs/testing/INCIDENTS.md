@@ -1069,17 +1069,33 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   fails at first timer-dispatched division; full qualification remains failed (H75).
 - **Evidence:** [coordinator audit and recovery selection](../tasks/active/shared-arithmetic.md#2026-11-10-first-ui-sdk-result-audited-recovery-selected).
 
-## H75. UI SDK recovery lacks the first timer-dispatched divide result
+## H75. UI SDK timer dispatch needs an interaction refresh
 
-- **Class/search:** missing runtime evidence; provisional fixture interaction/dispatch
-  defect; driver line 102, `money == 2.25`, 13 passing assertions.
+- **Class/search:** fixture interaction/dispatch defect; driver line 102,
+  `money == 2.25`, 13 passing assertions in the failed recovery.
 - **Observed:** destination-bound narration reaches the screen and its initial TTS/
   inertness assertions. The first divide result is not observed. SDK test Python and
   `show_screen` do not restart interaction; Timer needs render/event delivery.
   Live callback delivery and post-dispatch money remain unobserved in that run.
-- **New diagnosis:** replaying the actual SDK test/helper/API admission is red
+- **Cause/correction:** replaying the actual SDK test/helper/API admission is red
   without a refresh request and green after adding it. The fixture now requests
-  refresh and records request state; actual timer/value confirmation remains pending.
+  refresh and records request state. Mac invocation 3 confirms six requests with
+  the screen unbuilt and refresh changing false to true, then all exact action
+  results, Finish and wrong-outcome rejection pass. The earlier run did not observe
+  callback delivery; its missing evidence remains a failure.
 - **Evidence:** [Mac recovery result](../tasks/evidence/arithmetic-review.md#recovery-integration-and-mac-invocation-2-2026-11-10).
-  [Refresh confirmation](../tasks/evidence/arithmetic-review.md#interaction-refresh-diagnosis-and-confirmation-selection)
+  [Mac confirmation](../tasks/evidence/arithmetic-review.md#mac-invocation-3-passed-2026-11-10)
   keeps the admission replay separate from runtime proof.
+
+## H76. Arithmetic CI fixtures retain obsolete error contracts
+
+- **Class/search:** harness caller mismatch; `action field error`, `actionIndex`,
+  `This divides by zero`, blur timing, quality run `42670532527`.
+- **Cause/correction:** the Screens dispatch adapter discarded typed error context
+  needed for invalid-action focus. Preserve the complete public error in all four
+  inherited dispatch adapters. Story's browser expected a new error while typing;
+  complete the field with blur before asserting the reviewed diagnostic.
+- **Regression:** both failing fixtures and three affected inherited dispatch
+  consumers pass with focus, source/history and error assertions intact. No
+  production or SDK input changed; no longer timeout or deleted assertion.
+- **Evidence:** [CI consumer correction](../tasks/evidence/arithmetic-review.md#automatic-ci-fixture-consumers-corrected-2026-11-10).
