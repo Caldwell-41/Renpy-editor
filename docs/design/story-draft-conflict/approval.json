@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "screenId": "story-draft-conflict",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "inline-v2", "variantId": "inline", "approval": null },
+    { "id": "compact-v2", "variantId": "compact", "approval": null }
+  ]
+}
