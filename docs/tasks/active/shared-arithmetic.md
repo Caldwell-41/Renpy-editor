@@ -70,7 +70,7 @@ one becomes necessary. Routine checks and review have no numerical limits.
 
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
-| macOS ARM64 SDK qualification | 20 | 6 | 0 |
+| macOS ARM64 SDK qualification | 20 | 6 | 1 for coordinator #95 correction |
 | Windows x64 SDK qualification | 20 | 2 | 0 |
 
 ## Execution ledger
@@ -985,3 +985,31 @@ verification. Preserve every worktree, receipt and approved design. CURRENT and
 HANDOVER retain their existing size exception for unique recovery records; only
 the current arithmetic state changes at this handoff. Current sizes are 5,269
 words in CURRENT and 9,635 in HANDOVER.
+
+### 2026-11-09: same-handoff #95 correction reservation
+
+After publication of the #96 checkpoint `132a709b`, the coordinator reported clean
+local #95 head `32bd12871777f1712da17c4ca1aa847188413168`. Only its existing
+Rust fixture/test owner and canonical evidence changed; production is unchanged.
+The no-SDK GUI-initialization regression reproduced the shared `plan.available`
+assertion, then passed after separating minimal-project availability from
+full-template GUI limits. The strict minimal fixture also passed. The coordinator
+reports two exact cases accepted by Cargo-log, formatting/repository/whitespace
+passes, evidence export before assertions and four not-run SDK case records
+initialized before generation. Original failed `mac-01` remains immutable.
+No retry has started. Detailed evidence stays in #95's separate checkout.
+
+The coordinator selected **one controlled Mac SDK follow-up** for that corrected
+fixture, after this integration handoff returns, latest-integration merge, a clean
+candidate and fresh input/binary receipts. Current accounting is **Mac 6/20 started
+with 1 reserved for coordinator #95 correction; Windows 2/20 started, 0 reserved**.
+Thirteen Mac and eighteen Windows starts remain unallocated. This uses the existing
+20-start ceiling; it resets no counter. #95 remains unmerged and runtime-unqualified;
+#97 remains blocked until qualification.
+
+This same-handoff correction changes only ledger/CURRENT/HANDOVER and the draft
+PR's current status. #96's merge, qualified inputs, evidence and acceptance limits
+are unchanged. The merger runs no SDK, merges no #95 work and repeats no checks.
+Publish only the documentation correction to the existing integration branch,
+link PR #122 immediately and verify remote HEAD/upstream/clean state. Integration
+mutation ownership then returns to the coordinator, who owns the reserved follow-up.

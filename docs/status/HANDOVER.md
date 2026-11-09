@@ -169,14 +169,22 @@ here at `.toolchains/arithmetic-96/coordinator-audit.json`; merger equivalence a
 check receipts are under its `integration-merge/` sibling directory. No SDK,
 browser, editor-native/package or manual-CI operation ran during this merge.
 
-#95 returned clean local `t3/screens-click-time-arithmetic` at
-`5cfc4812c52be24340d9bb919585aeb8c28fccda`. Its reserved Mac SDK invocation
-actually started and failed during fixture preparation before arithmetic assertions.
-Current usage is **Mac 6/20 started, Windows 2/20 started, zero reservations**.
-The separate worker checkout's `docs/tasks/evidence/arithmetic-95.md` owns its
-failure and raw-receipt pointers. #95 is not merged or runtime-qualified; #97
-remains blocked. The coordinator is diagnosing the raw failure read-only. No retry
-or #95 correction is selected by this merger return.
+#95's corrected clean local head is `32bd12871777f1712da17c4ca1aa847188413168`
+on `t3/screens-click-time-arithmetic`. The coordinator reports two exact no-SDK
+fixture passes after reproducing and correcting the shared availability assertion.
+Only its existing Rust fixture/test owner and evidence changed; production is
+unchanged. Evidence export now precedes assertions, and four not-run SDK case
+records initialize before generation. The original failed `mac-01` is immutable;
+it actually started and failed during preparation before arithmetic assertions.
+
+Current usage is **Mac 6/20 started + 1 reserved for coordinator #95 correction;
+Windows 2/20 started, 0 reserved**. Thirteen Mac and eighteen Windows starts remain
+unallocated under the existing ceiling. The coordinator selected one controlled
+Mac follow-up after this handoff returns, latest-integration merge, a clean
+candidate and fresh input/binary identities. No retry has started. The merger runs
+zero SDK and does not merge #95. The worker checkout's canonical
+`docs/tasks/evidence/arithmetic-95.md` owns its failure/correction and raw receipts.
+#95 remains unmerged and runtime-unqualified; #97 remains blocked.
 
 Story Combined v1 / combined-v1 remains the approved arithmetic design. #96
 implements reusable approved controls in the existing Story workspace; full #110
@@ -191,7 +199,7 @@ parent-PR merge, automerge or release is selected. The published checkpoint reta
 the existing draft/base and full-spec closing references. Final-head automatic
 checks await coordinator audit; no watch was registered. After remote HEAD/upstream
 and clean-state verification, integration mutation ownership returns to the
-coordinator. Diagnose #95 from its own evidence before selecting further work.
+coordinator. The coordinator then owns the reserved #95 qualification follow-up.
 
 The earlier sections below retain prior work and recovery context. Their
 unselected-next-task statements do not override this explicit #87 selection.

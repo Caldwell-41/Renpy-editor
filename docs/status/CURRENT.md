@@ -62,10 +62,13 @@ and #92 fixture inputs remain unchanged. The
 [#94 contract](../tasks/evidence/arithmetic-94.md#public-contract-for-95-and-96)
 is the merged baseline for dependent work.
 On 2026-11-09 Kris raised both SDK ceilings from six to 20 started invocations.
-Totals are Mac 6 started and Windows 2 started, with zero reservations. #95's
-reserved Mac invocation actually started and failed before arithmetic assertions.
-Its clean return `5cfc4812` and raw evidence stay in the worker checkout; no retry
-or #95 merge ran here. The coordinator is diagnosing the failure read-only.
+Totals are Mac 6 started plus one reserved for the coordinator's #95 correction,
+and Windows 2 started with zero reserved. #95's original Mac invocation failed
+before arithmetic assertions. Corrected local `32bd1287` has two reported no-SDK
+fixture passes; production is unchanged and the failed receipt remains intact.
+No retry has started or #95 merge run here. The coordinator owns one controlled
+Mac follow-up after this handoff, latest-integration merge and fresh clean-candidate
+input/binary receipts. #97 remains blocked until runtime qualification.
 The delivery record owns current limits, assignments and qualified candidates.
 The corrected #94 fixture qualifies integer precision, precedence/grouping,
 negative floor/remainder and decimal behavior on both targets. Tickets remain
