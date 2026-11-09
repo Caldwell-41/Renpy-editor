@@ -24,7 +24,9 @@ Screens branch. No merge of that PR or release is selected.
   #92 is merged and qualified on Mac and Windows. Its scoped delivery is ready
   for final integration review. #93 is merged with qualified public-command/Mac
   evidence. #94 is merged and qualified on Mac and Windows. Combined #93/#94
-  Windows proof is integrated through `235d99ac`; #95 and #96 are selected next.
+  Windows proof is integrated through `235d99ac`. #96's functional increment is
+  integrated; its full acceptance remains open. #95 returned locally with failed
+  Mac fixture preparation and no qualified runtime proof; it is not integrated.
 - Backend sequence: #92, then #93, then #94. #95 follows #94.
 - Story UI #96 follows approved #88 and qualified #94.
 - Screens/decimal UI #97 follows approved #91 and qualified #95.
@@ -68,7 +70,7 @@ one becomes necessary. Routine checks and review have no numerical limits.
 
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
-| macOS ARM64 SDK qualification | 20 | 5 | 1 for #95 |
+| macOS ARM64 SDK qualification | 20 | 6 | 0 |
 | Windows x64 SDK qualification | 20 | 2 | 0 |
 
 ## Execution ledger
@@ -929,3 +931,57 @@ pending. No SDK/browser/native/package/manual-CI operation is selected for this
 merge. #95 continues independently in its assigned worktree; its Mac reservation
 remains charged pending actual start/result evidence. #97 still waits for qualified
 #95. Preserve every worktree and unique raw receipt.
+
+### 2026-11-09: #96 functional increment integrated and published
+
+The fresh merger took exclusive integration/PR mutation ownership at clean
+`157c1ef83c8b3b6a6d6b67c49b4952e0d21c01a6`. Conflict-free normal `--no-ff`
+merge `25fa2e1c0116170d344374b638209d51fe6ae262` preserves that first parent and
+returned `b77cc26eeeb7d8eafc9b5a53410996e38eaa4be8` as second parent.
+Coordinator records survived byte-for-byte before this receipt. The returned
+11-path change stayed within ownership; only the Help-driver allowlist changed
+in core. No #95 work was merged.
+
+All merged app and fixture bytes equal qualified implementation
+`3cb6e8f7354c3e05c1d77526c3babae857af632f`. All 252 recorded hashes match
+candidate/merged Git blobs and both working checkouts. The merger rechecked the
+retained driver identity, 122 recorded request/response pairs, 21 successful
+revision-bound validation responses, all seven operation keys, refusal codes and
+eight PNG hashes. The independent coordinator audit remains intact. The
+[#96 integration receipt](../evidence/arithmetic-96.md#integration-equivalence-and-fresh-checks)
+owns exact trees, scoped evidence reuse and fresh checks.
+
+Reuse 68 focused component/controller passes, production build/test compilation,
+the nine-stage actual-main/core journey, wide/compact Chrome/reference comparison,
+isolated Help-driver build and Rust formatting. Fresh pinned production typecheck,
+contract/branch-plan audit, repository validation (1,862 files) and whitespace pass.
+No full suite or browser was rerun. Approved designs/captures, prior fixtures,
+core library and Cargo inputs remain unchanged. Existing numeric/runtime evidence
+keeps its original candidates and scope; no SDK run qualifies the new #96 fixture.
+
+#96 stays open and in progress as a functional increment. Equation order, 40px
+formula height and 13.5px monospace font match `combined-v1`. Production retains
+its full-width panel, native selector, breadcrumb, action placement and copper
+palette. Tracks/Reel, full layout/palette and branch/view draft transitions belong
+to #110. Native WebView/physical input and assembled human acceptance remain unrun.
+
+During this merge Kris reported clean #95 return
+`5cfc4812c52be24340d9bb919585aeb8c28fccda` on
+`t3/screens-click-time-arithmetic`. Its reserved Mac SDK invocation actually
+started and failed during fixture preparation before arithmetic assertions.
+Consume the reservation: **Mac 6/20 started, Windows 2/20 started, zero
+reservations**. The worker's canonical `docs/tasks/evidence/arithmetic-95.md`
+and raw failure remain in its separate checkout. No #95 runtime proof succeeded;
+#97 stays blocked. The coordinator is diagnosing the raw failure read-only.
+This merger makes no #95 correction and starts no retry.
+
+The checkpoint is published only to `origin/codex/spec-87-arithmetic`, with
+draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) on its existing
+Screens base and full-spec eventual closing references. Final-head automatic
+checks remain for coordinator audit. No SDK/browser/editor-native/package/manual-CI
+operation, watch, final review, promotion or parent-PR merge ran here.
+Integration mutation ownership returns to the coordinator after publication
+verification. Preserve every worktree, receipt and approved design. CURRENT and
+HANDOVER retain their existing size exception for unique recovery records; only
+the current arithmetic state changes at this handoff. Current sizes are 5,269
+words in CURRENT and 9,635 in HANDOVER.

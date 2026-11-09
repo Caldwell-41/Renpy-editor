@@ -60,8 +60,9 @@ documentation and branch-bound CI metadata; qualified app/runtime inputs were in
 Draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) publishes
 `codex/spec-87-arithmetic` into `codex/phase3b-screen-designer` and is linked in T3.
 The integration branch now tracks its own origin branch. The PR describes full
-#87 scope and eventual closing references. It contains #92/#93/#94 implementation plus
-the approved #91/#97 design reference; #95 backend and #96/#97 production UI remain.
+#87 scope and eventual closing references. It contains #92/#93/#94 implementation,
+#96's functional increment and the approved #91/#97 design reference. #95 is
+unmerged and unqualified; #96 full acceptance and #97 production UI remain.
 The coordinator resumes integration-checkout ownership after this merger returns.
 Windows #92 has completed and
 passed its single SDK run at `c7b8157e`; its two completion sends were denied by
@@ -128,8 +129,8 @@ selector listings omit no distinct required case. All 875 inputs and prior #92
 receipts remained unchanged. The remote worktree is clean and preserves unique
 raw evidence. The registered Windows checkout is unchanged. The
 [Windows result](../tasks/evidence/arithmetic-94.md#windows-combined-invocation-1-result-2026-11-09)
-owns exact commands, outcomes and identities. Actual consumption is Mac 5 and
-Windows 2 starts; no qualification process remains running.
+owns exact commands, outcomes and identities. At that checkpoint consumption
+was Mac 5 and Windows 2 starts, with no qualification process running.
 
 #94 is qualified on both targets and records the backend contract for #95/#96.
 The coordinator selected fresh implementers in separate prepared worktrees. #95
@@ -149,20 +150,33 @@ requests, seven operation keys, refusal codes, eight PNG hashes and cleanup.
 The driver allowlist line is the only core change. Core/#94 runtime inputs remain
 unchanged. No SDK run was used for #96.
 
-A fresh merger receives exclusive integration/PR mutation ownership, while #95
-continues in its own worktree. Integrate #96 as a functional increment and keep
-its issue open. Its control ordering/font/height match the reference, but panel
-width, palette and action placement differ. Full Story fidelity, Tracks/Reel and
-assembled native/human acceptance remain pending. Preserve all failed/successful
-journeys, browser attempts and the worker's isolated driver under its ignored
-`.toolchains/arithmetic-96/`. The coordinator audit is retained here in
-`.toolchains/arithmetic-96/coordinator-audit.json`.
+Conflict-free normal merge `25fa2e1c0116170d344374b638209d51fe6ae262` preserves
+coordinator first parent `157c1ef83c8b3b6a6d6b67c49b4952e0d21c01a6` and returned
+second parent `b77cc26eeeb7d8eafc9b5a53410996e38eaa4be8`. All app/fixture inputs
+equal qualified `3cb6e8f7`; all 252 hashes match merged/candidate Git and working
+files. The [integration receipt](../tasks/evidence/arithmetic-96.md#integration-equivalence-and-fresh-checks)
+owns exact trees and scoped reuse. Fresh pinned typecheck, recorded contract and
+branch-plan audit, repository validation (1,862 files) and whitespace pass. Reuse
+68 component/controller passes, test compilation/build, real-main/core journey,
+Chrome/reference proof, isolated Help-driver build and Rust formatting.
 
-One Mac SDK invocation is reserved for #95 after cheap public preflight and
-clean candidate receipt. It must use scoped outside-sandbox execution and the
-existing desktop-admission/power helper, preserving both prior failure lessons.
-#96 used no SDK/native-editor/package/manual-CI allocation. Its actual frontend
-to core/source/history/reopen journey passed; mocked IPC alone was insufficient.
+Keep #96 open as a functional increment. Control order/font/height match; panel
+width, native selector, breadcrumb, copper palette and action placement differ.
+Full Story fidelity, Tracks/Reel and assembled native/human acceptance remain
+pending. Preserve every attempt and the isolated driver in the source worktree's
+ignored `.toolchains/arithmetic-96/`. The independent coordinator audit remains
+here at `.toolchains/arithmetic-96/coordinator-audit.json`; merger equivalence and
+check receipts are under its `integration-merge/` sibling directory. No SDK,
+browser, editor-native/package or manual-CI operation ran during this merge.
+
+#95 returned clean local `t3/screens-click-time-arithmetic` at
+`5cfc4812c52be24340d9bb919585aeb8c28fccda`. Its reserved Mac SDK invocation
+actually started and failed during fixture preparation before arithmetic assertions.
+Current usage is **Mac 6/20 started, Windows 2/20 started, zero reservations**.
+The separate worker checkout's `docs/tasks/evidence/arithmetic-95.md` owns its
+failure and raw-receipt pointers. #95 is not merged or runtime-qualified; #97
+remains blocked. The coordinator is diagnosing the raw failure read-only. No retry
+or #95 correction is selected by this merger return.
 
 Story Combined v1 / combined-v1 remains the approved arithmetic design. #96
 implements reusable approved controls in the existing Story workspace; full #110
@@ -173,9 +187,11 @@ acceptance limits explicitly rather than claim them from mock-only proof.
 
 The draft PR stays on its Screens base. Preserve every worktree/evidence directory
 and both approved design references. No final review, ready-for-review promotion,
-parent-PR merge, automerge or release is selected. Fresh merger agents integrate
-each completed implementer. The coordinator retains integration mutation ownership
-while implementers work in their own checkouts.
+parent-PR merge, automerge or release is selected. The published checkpoint retains
+the existing draft/base and full-spec closing references. Final-head automatic
+checks await coordinator audit; no watch was registered. After remote HEAD/upstream
+and clean-state verification, integration mutation ownership returns to the
+coordinator. Diagnose #95 from its own evidence before selecting further work.
 
 The earlier sections below retain prior work and recovery context. Their
 unselected-next-task statements do not override this explicit #87 selection.

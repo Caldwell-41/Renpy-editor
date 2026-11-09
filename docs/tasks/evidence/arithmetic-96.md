@@ -177,3 +177,44 @@ checked captured revisions/body/position, stale completion guards and literal
 compatibility, and removed the old numeric-only editor/check. No parallel evaluator
 or transaction path remains. Final assembled review/acceptance belongs to the
 coordinator. This return is local-only; no publication or ticket closure occurred.
+
+## Integration equivalence and fresh checks
+
+Normal `--no-ff` merge `25fa2e1c0116170d344374b638209d51fe6ae262` has ordered
+parents `157c1ef83c8b3b6a6d6b67c49b4952e0d21c01a6` (coordinator) and
+`b77cc26eeeb7d8eafc9b5a53410996e38eaa4be8` (returned worker). It merged without
+conflicts and preserved the coordinator's three live records before their update.
+The worker diff remains exactly the assigned 11 paths. No #95 work is integrated.
+
+The entire merged app tree `98be3cd8d18e20d0343a955e67c00e0efaa387d0` and fixture
+tree `45ece8c7dc25932cf8a5074fb60cf42fb02f45df` equal qualified implementation
+`3cb6e8f7354c3e05c1d77526c3babae857af632f`. All 252 frozen inputs match candidate
+and merged Git blobs, integration working files and source working files. The
+retained driver SHA256 is
+`ee2123feaea3c3c8aa112d3e52ced60d96403f9bf1add9c3a5ca41bb387e5816`.
+Core library/Cargo, prior arithmetic fixtures and approved Lab/design/captures are
+unchanged. There are no new production edits after the qualified candidate.
+
+The merger rechecked the retained nine-stage success, all 122 request/response
+identities, 21 successful revision-bound validation responses, all seven operation
+keys, the five recorded refusal codes and eight PNG hashes. The independent
+coordinator's earlier audit includes visual inspection of wide/compact crops;
+this merger claims no new visual inspection or browser execution. Its receipts
+remain in ignored `.toolchains/arithmetic-96/coordinator-audit.json` and
+`integration-merge/{equivalence,contract-check}.json`. Worker receipts and every
+earlier attempt stay in the preserved source checkout.
+
+Fresh pinned Node 24.19.0/npm 11.9.0 production typechecking passes. The recorded
+contract audit and existing quality-only branch-plan loader pass. Repository
+validation passes for 1,862 files; whitespace passes against the accepted base.
+Reuse the 68 scoped component/controller passes, test compilation, production
+build, actual-main/core journey, Chrome/reference comparison, isolated Help-driver
+build and Rust formatting above. No unchanged full suite was repeated.
+
+The published draft PR #122 retains its Screens base and full-spec eventual
+closing references. Automatic final-head checks remain for coordinator audit.
+#96 remains open and in progress. Visual fidelity is partial as measured above;
+Tracks/Reel, full layout/palette, branch/view drafts and native/physical-input/human
+acceptance remain unproved. The merger starts zero SDK/browser/editor-native/
+package/manual-CI operations. Existing #94 runtime proof is reused only within
+its original scope, with no new SDK execution of the #96 fixture.
