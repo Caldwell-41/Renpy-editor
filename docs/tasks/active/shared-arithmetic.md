@@ -19,7 +19,8 @@ draft PR targets the Screens branch. No merge of that PR or release is selected.
   v1, revision `combined-v1`, merged through PR #108. No new Story redesign.
 - #89 and #90 were superseded, closed as not planned. Do not implement them.
 - Screens mock #91 has a review candidate, with approval pending. Story backend
-  #92 is in progress in its isolated implementation worktree.
+  #92 has returned implementation and Mac proof; integration and Windows proof
+  remain pending.
 - Backend sequence: #92, then #93, then #94. #95 follows #94.
 - Story UI #96 follows approved #88 and qualified #94.
 - Screens/decimal UI #97 follows approved #91 and qualified #95.
@@ -61,8 +62,8 @@ one becomes necessary. Routine checks and review have no numerical limits.
 
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
-| macOS ARM64 SDK qualification | 6 | 0 | 1 for #92 |
-| Windows x64 SDK qualification | 6 | 0 | 0 |
+| macOS ARM64 SDK qualification | 6 | 1 | 0 |
+| Windows x64 SDK qualification | 6 | 0 | 1 for #92 |
 
 ## Execution ledger
 
@@ -122,3 +123,35 @@ Backend #92 continues independently on `t3/arithmetic-backend-slice`; its delega
 task uses request key `spec87-ticket92-implementer-20261109`. The existing Mac SDK
 reservation remains in place until that implementer reports started/not-started
 and its evidence. Wait for its completion notification without polling.
+
+### 2026-11-09: #92 implementation returned
+
+The completed implementer returned clean branch `t3/arithmetic-backend-slice` at
+`e5de0c20da8cd5f2812116840bf67b808d91d78a`, containing integration tip `6c2272ec`.
+The source/runtime candidate is `1ba9fe447c5322683e11026c98ae9c4b38996240`.
+Later changes are contract/evidence and coordinator-status documentation only;
+the coordinator verified that production code and runtime fixture inputs match.
+The ticket note `docs/tasks/evidence/arithmetic-92.md` owns the exact public
+contract, fixtures, commands and result details on the returned branch.
+
+Reported focused checks pass 59 distinct Rust cases and 43 renderer cases, plus
+TypeScript, formatting, repository and whitespace checks. Seven existing ignored
+Story specialist cases remain outside selection. The coordinator inspected the
+core/source-map/transport changes and audited the Mac raw launch receipt, case
+records, terminal result and accepted-source/executable hashes. Compile, lint,
+exact values, deliberate wrong-outcome rejection and cleanup pass. This consumes
+the one reserved Mac slot: feature total **1 started, 0 reserved**, with no rerun.
+Raw evidence stays in the implementer's ignored `.toolchains/arithmetic-92/mac-01/`;
+preserve that worktree until its unique evidence is safely retained.
+
+#92 is not accepted yet. A fresh merger gets exclusive integration-checkout
+ownership to merge the returned branch, update this handoff and publish the first
+draft PR to `codex/phase3b-screen-designer`. The implementation workflow authorizes
+that draft publication; no final PR merge is selected. The merger must not repeat
+unchanged SDK qualification or close tickets.
+
+One Windows SDK slot is reserved for #92. After publication the coordinator routes
+the recorded gate/fixtures to SUNDOWN, using the exact published candidate. No
+Windows invocation has started. Receive the merger's completion notification,
+link/take over the draft PR, then start the Windows qualification. #93 remains
+blocked on #92's actual delivery evidence; #91/#97 design approval is still pending.

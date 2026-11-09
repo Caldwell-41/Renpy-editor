@@ -19,12 +19,17 @@ decimal designs. Its candidate branch `codex/spec-87-variable-mock` is at
 `1e547df2`, runnable source `6b3aee30`. A/B/C are review candidates only; all
 approval fields remain null. Kris must select/approve before production UI is
 unblocked. The ledger records the source identity, capture audit and reported checks.
-Backend #92 continues on its isolated `t3/arithmetic-backend-slice` branch; wait
-for its completion notification without polling. One Mac SDK slot is reserved
-for #92; no invocation is known to
-have started. No native/package/CI operation has started and no PR exists yet.
-Next action is receive #92, merge with a fresh merger, route Windows proof and
-open the draft PR after the first ticket merge. Final parent
+Backend #92 returned clean `t3/arithmetic-backend-slice` at `e5de0c20` with the
+current integration tip included. Its qualified code/fixture candidate is
+`1ba9fe44`; the later delta is documentation only. The coordinator audited Mac
+raw receipts and hashes. One Mac SDK run started and passed; no reservation
+remains there. One Windows slot is reserved for #92, unstarted. The ledger and
+ticket evidence own details; preserve the implementer's unique ignored evidence.
+A fresh merger gets exclusive ownership of this integration checkout to merge
+#92 and publish the initial draft PR. Wait for its completion without polling,
+then link/take over the PR and route Windows qualification to SUNDOWN. No
+native/package/manual-CI operation has started and no PR exists at this checkpoint.
+Neither #92 acceptance nor #93's start is claimed yet. Final parent
 PR merge/release and full Story redesign #110 are outside this selection.
 
 The earlier sections below retain prior work and recovery context. Their
