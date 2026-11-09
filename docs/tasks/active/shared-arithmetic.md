@@ -239,3 +239,15 @@ additional SDK run, editor package/native launch or manual CI dispatch is select
 The coordinator retains integration ownership. Consumption remains Windows
 **0 started / 1 reserved** until a launch/result is reported. Wait for completion
 without polling; audit actual receipts before accepting #92 and starting #93.
+
+The isolated remote dispatch was rejected before agent creation: T3 does not
+support `delegate_task` worktree isolation in a linked environment. No SDK
+operation started. The supported safe follow-up is a read-only preflight in the
+registered Windows checkout, request key
+`spec87-windows92-registered-checkout-preflight-20261109`. It must preserve all
+refs, branches, tracked files and other worktrees. It may use the reserved gate
+only if the checkout is already clean at the exact published candidate; otherwise
+it reports the mismatch and available host capability without creating/switching
+a checkout. It writes only unique ignored evidence, not tracked documentation.
+A new top-level qualification chat is not covered by the prototype-chat permission.
+This dispatch amendment is local until the coordinator's next publication.

@@ -43,6 +43,12 @@ It has the single reserved Windows #92 gate invocation and must record the exact
 published candidate/input identity before launch. Wait for its completion without
 polling, audit the receipts and integrate its sanitized evidence. #93 remains
 blocked pending that proof.
+The isolated remote dispatch was rejected before agent creation because T3 does
+not support linked-environment delegate worktree isolation. No SDK start was
+consumed. The follow-up uses the registered checkout for read-only preflight,
+with no checkout/ref changes and SDK execution only if it is already clean at
+the exact published candidate. The ledger records its request key and constraints.
+This dispatch correction is local until the next coordinator publication.
 The ledger owns unchanged operation counts; the merger started no SDK, native,
 package or manual CI operation. Final-head automatic lightweight checks await
 coordinator audit; no reviews have been submitted at this handoff.
