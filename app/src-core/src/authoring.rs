@@ -55,6 +55,7 @@ pub enum AssetKind {
 pub enum VariableType {
     Bool,
     Int,
+    Decimal,
     String,
 }
 
@@ -2064,6 +2065,11 @@ pub fn variable_literal(kind: VariableType, value: &Value) -> Result<String, Aut
     match (kind, value) {
         (VariableType::Bool, Value::Bool(true)) => Ok("True".into()),
         (VariableType::Bool, Value::Bool(false)) => Ok("False".into()),
+        (VariableType::Decimal, Value::Number(number)) => number
+            .as_f64()
+            .filter(|v| v.is_finite())
+            .map(decimal_literal)
+            .ok_or(AuthoringError::InvalidValue),
         (VariableType::Int, Value::Number(number)) if number.is_i64() => Ok(number.to_string()),
         (VariableType::Int, Value::String(text)) if valid_i64_decimal(text) => Ok(text.clone()),
         (VariableType::String, Value::String(text)) if text.len() <= MAX_STRING_VALUE_BYTES => {
@@ -2079,6 +2085,12 @@ pub fn variable_literal(kind: VariableType, value: &Value) -> Result<String, Aut
 fn canonical_variable_value(kind: VariableType, value: &Value) -> Result<Value, AuthoringError> {
     match kind {
         VariableType::Int => Ok(Value::String(variable_literal(kind, value)?)),
+        VariableType::Decimal => {
+            variable_literal(kind, value)?;
+            Ok(Value::from(
+                value.as_f64().ok_or(AuthoringError::InvalidValue)?,
+            ))
+        }
         VariableType::Bool | VariableType::String => {
             variable_literal(kind, value)?;
             Ok(value.clone())
@@ -4127,5 +4139,21 @@ mod tests {
             fs::read(root.join(AUTHORING_PATH)).unwrap(),
             conflict_metadata
         );
+    }
+}
+
+/// Python-compatible finite floating literal, with a decimal marker for whole values.
+pub(crate) fn decimal_literal(value: f64) -> String {
+    if value != 0.0 && (value.abs() < 1e-4 || value.abs() >= 1e16) {
+        let scientific = format!("{value:e}");
+        let (mantissa, exponent) = scientific.split_once('e').expect("scientific");
+        let exponent: i32 = exponent.parse().expect("exponent");
+        return format!("{mantissa}e{exponent:+03}");
+    }
+    let text = value.to_string();
+    if text.contains(['.', 'e', 'E']) {
+        text
+    } else {
+        format!("{text}.0")
     }
 }

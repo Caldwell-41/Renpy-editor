@@ -889,6 +889,16 @@ impl LifecycleService {
             .map_err(LifecycleError::Reference)
     }
 
+    pub fn scene_validate_assignment(
+        &self,
+        request: SceneCommandRequest,
+    ) -> Result<crate::scene::AssignmentDraftValidation, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .scene_validate_assignment(&authority, &project_id, request)
+            .map_err(LifecycleError::Scene)
+    }
+
     pub fn scene_apply(
         &self,
         request: SceneCommandRequest,

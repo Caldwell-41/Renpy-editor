@@ -31,10 +31,11 @@ function defaultExpression(variables: Variables): ConditionExpression {
 }
 function validateExpression(expression: ConditionExpression, variables: Variables): void {
   let count = 0;
-  const visit = (node: ConditionExpression, depth: number): "bool" | "int" | "string" => {
+  const visit = (node: ConditionExpression, depth: number): "bool" | "int" | "decimal" | "string" => {
     if (++count > 128 || depth > 16) throw Error("Use at most 128 condition terms and 16 levels of nesting.");
     switch (node.type) {
       case "bool": return "bool";
+      case "decimal": return "decimal";
       case "int": if (!int64(node.value)) throw Error("Enter a whole number from -9223372036854775808 to 9223372036854775807, without leading zeros."); return "int";
       case "string": if (new TextEncoder().encode(node.value).length > 4096) throw Error("Use at most 4096 bytes of text in a condition."); return "string";
       case "variable": if (!variables.some(variable => variable.id === node.variableId && variable.variableType === node.variableType)) throw Error("Select an available Variable with the matching type."); return node.variableType;

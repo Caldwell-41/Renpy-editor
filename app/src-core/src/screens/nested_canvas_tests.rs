@@ -592,6 +592,11 @@ fn variable_canvas_preserves_bool_and_large_integer_spelling_and_custom_expressi
         "variable.create",
         json!({"technicalName":"ready","variableType":"bool","defaultValue":false}),
     );
+    ipc(
+        &mut service,
+        "variable.create",
+        json!({"technicalName":"fraction","variableType":"decimal","defaultValue":1.25}),
+    );
     let model = ipc(
         &mut service,
         "variable.create",
@@ -606,21 +611,27 @@ fn variable_canvas_preserves_bool_and_large_integer_spelling_and_custom_expressi
         .iter()
         .find(|v| v["technicalName"] == "score")
         .unwrap();
+    let fraction = variables
+        .iter()
+        .find(|v| v["technicalName"] == "fraction")
+        .unwrap();
     let path = root.join("game/ui/nested_component_0.rpy");
     let original = fs::read_to_string(&path).unwrap();
     let source = original.replace(
         "text \"Leaf\"",
-        "text \"[ready!q]\"\n    text \"[score!q]\"",
+        "text \"[ready!q]\"\n    text \"[score!q]\"\n    text \"[fraction!q]\"",
     );
     fs::write(&path, &source).unwrap();
     let mut payload = request(&mut service, &target);
     payload["variableSamples"] = json!([
         {"variableId":ready["id"],"expectedSourceRevision":ready["source"]["sourceRevision"],"value":true},
-        {"variableId":score["id"],"expectedSourceRevision":score["source"]["sourceRevision"],"value":"9007199254740993"}]);
+        {"variableId":score["id"],"expectedSourceRevision":score["source"]["sourceRevision"],"value":"9007199254740993"},
+        {"variableId":fraction["id"],"expectedSourceRevision":fraction["source"]["sourceRevision"],"value":1e-7}]);
     let plan = ipc(&mut service, "screens.canvasPlan", payload.clone());
     assert_eq!(plan["available"], true, "{plan}");
     assert_eq!(plan["nodes"][1]["literal"], "True");
     assert_eq!(plan["nodes"][2]["literal"], "9007199254740993");
+    assert_eq!(plan["nodes"][3]["literal"], "1e-07");
     let mut invalid = payload.clone();
     invalid["variableSamples"][0]["value"] = json!("True");
     assert!(service
@@ -651,7 +662,7 @@ fn variable_canvas_preserves_bool_and_large_integer_spelling_and_custom_expressi
     let partial = ipc(&mut service, "screens.canvasPlan", payload.clone());
     assert_eq!(partial["available"], false);
     assert_eq!(partial["nodes"][1]["literal"], "True");
-    assert_eq!(partial["nodes"][3]["literal"], "[score + 1]");
+    assert_eq!(partial["nodes"][4]["literal"], "[score + 1]");
     let definitions = root.join(score["source"]["path"].as_str().unwrap());
     let bytes = fs::read_to_string(&definitions).unwrap();
     fs::write(&definitions, format!("{bytes}# external definition edit\n")).unwrap();

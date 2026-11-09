@@ -185,7 +185,7 @@ fn arithmetic_refuses_invalid_targets_operands_and_stale_definitions_without_his
     };
     for (operand, error) in [
         ("9223372036854775808", SceneError::ArithmeticOverflow),
-        ("1.0", SceneError::InvalidArithmeticSyntax),
+        ("1.0", SceneError::ArithmeticTargetType),
         ("01", SceneError::InvalidArithmeticSyntax),
     ] {
         assert_eq!(
@@ -661,4 +661,261 @@ fn formula_recognition_keeps_bool_and_string_assignment_edits() {
     let source = fs::read_to_string(f.root.join(&f.workspace().scenes[0].source_path)).unwrap();
     assert!(source.contains("$ caption = \"(score)\""));
     assert!(source.contains("$ flag = True"));
+}
+
+#[test]
+fn decimal_defaults_are_typed_public_values_and_survive_reopen() {
+    let f = Fixture::new(b"label scene_one:\n    return\n");
+    let request = serde_json::from_value(
+        json!({"technicalName":"fraction","variableType":"decimal","defaultValue":1.25}),
+    )
+    .unwrap();
+    f.service
+        .create_variable(&f.project, &f.project_id, request)
+        .unwrap();
+    let model = f.service.list(&f.project, &f.project_id).unwrap();
+    assert_eq!(
+        serde_json::to_value(&model.variables[0]).unwrap()["defaultValue"],
+        json!(1.25)
+    );
+    assert!(
+        fs::read_to_string(f.root.join(&model.variables[0].source.path))
+            .unwrap()
+            .contains("default fraction = 1.25")
+    );
+    let service = AuthoringService::default();
+    let project = service.register_project(&f.root).unwrap();
+    assert_eq!(
+        serde_json::to_value(service.list(&project, &f.project_id).unwrap().variables).unwrap(),
+        serde_json::to_value(model.variables).unwrap()
+    );
+}
+
+#[test]
+fn decimal_formulas_use_python_types_rounding_and_diagnostics() {
+    let f = integer_fixture(b"label scene_one:\n    return\n");
+    f.service
+        .create_variable(
+            &f.project,
+            &f.project_id,
+            serde_json::from_value(
+                json!({"technicalName":"fraction","variableType":"decimal","defaultValue":99.5}),
+            )
+            .unwrap(),
+        )
+        .unwrap();
+    let mut model = f.workspace();
+    let id = model
+        .authoring
+        .variables
+        .iter()
+        .find(|v| v.technical_name == "fraction")
+        .unwrap()
+        .id
+        .clone();
+    for (operand, expected, kind) in [
+        ("1 / 2", 0.5, "decimal"),
+        ("4 / 2", 2.0, "decimal"),
+        ("9007199254740993 / 3", 3002399751580331.0, "decimal"),
+        ("1.0 // 0.1", 9.0, "decimal"),
+        ("-1.0 % 0.1", 5.551115123125783e-17, "decimal"),
+        ("7 // -3", -3.0, "decimal"),
+        ("(2 + 3) * -0.5 + 1", -1.5, "decimal"),
+    ] {
+        let scene = &model.scenes[0];
+        model = apply_wire(&f, &model, json!({"type":"insertBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beforeBeatId":scene.beats.last().unwrap().id,"beat":{"type":"setVariable","variableId":id,"value":{"operation":"assign","operand":operand}}})).unwrap();
+        let beat = &model.scenes[0].beats[model.scenes[0].beats.len() - 2];
+        let wire = serde_json::to_value(beat).unwrap();
+        assert_eq!(
+            wire["assignment"]["state"],
+            json!({"status":"known","value":expected}),
+            "{operand}"
+        );
+        assert_eq!(wire["assignment"]["inferredResultType"], kind);
+    }
+    let scene = &model.scenes[0];
+    let before = fs::read(f.root.join(&scene.source_path)).unwrap();
+    for (target, operand, error) in [
+        (
+            &model.authoring.variables[0].id,
+            "4 / 2",
+            SceneError::ArithmeticTargetType,
+        ),
+        (&id, "1.0 / 0", SceneError::ArithmeticZeroDivisor),
+        (&id, "1e308 * 2.0", SceneError::ArithmeticOverflow),
+    ] {
+        assert_eq!(apply_wire(&f, &model, json!({"type":"insertBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beforeBeatId":null,"beat":{"type":"setVariable","variableId":target,"value":{"operation":"assign","operand":operand}}})).unwrap_err(), error);
+    }
+    assert_eq!(fs::read(f.root.join(&scene.source_path)).unwrap(), before);
+}
+
+#[test]
+fn decimal_conditions_compare_large_integers_without_rounding_them() {
+    let f = integer_fixture(
+        b"label scene_one:\n    if score > 9007199254740992.0:\n        \"yes\"\n    return\n",
+    );
+    let model = f.workspace();
+    let condition = model.scenes[0]
+        .beats
+        .iter()
+        .find_map(|b| {
+            b.conditional_branch
+                .as_ref()
+                .and_then(|b| b.condition.as_ref())
+        })
+        .unwrap();
+    assert!(matches!(
+        condition,
+        crate::conditions::Condition::Supported { .. }
+    ));
+    let id = &model.authoring.variables[0].id;
+    for (integer, expected) in [
+        ("9007199254740993", true),
+        ("9007199254740992", false),
+        ("-9223372036854775808", false),
+    ] {
+        assert_eq!(
+            serde_json::to_value(crate::conditions::evaluate(
+                condition,
+                &HashMap::from([(id.clone(), json!(integer))])
+            ))
+            .unwrap(),
+            json!({"status":"known","value":expected})
+        );
+    }
+    for (source, integer, expected) in [
+        ("score == 9007199254740992.0", "9007199254740993", false),
+        ("score != 9007199254740992.0", "9007199254740993", true),
+        ("score < 9223372036854775808.0", "9223372036854775807", true),
+        (
+            "score >= -9223372036854775808.0",
+            "-9223372036854775808",
+            true,
+        ),
+        ("score <= -1.5", "-1", false),
+        ("score > -5e-324", "0", true),
+    ] {
+        let condition = crate::conditions::parse(source, &model.authoring);
+        assert_eq!(
+            serde_json::to_value(crate::conditions::evaluate(
+                &condition,
+                &HashMap::from([(id.clone(), json!(integer))])
+            ))
+            .unwrap(),
+            json!({"status":"known","value":expected}),
+            "{source}"
+        );
+    }
+    for value in [json!(true), json!(9007199254740992.0), json!("01")] {
+        assert!(matches!(
+            crate::conditions::evaluate(condition, &HashMap::from([(id.clone(), value)])),
+            crate::conditions::ConditionResult::Unknown { .. }
+        ));
+    }
+}
+
+#[test]
+fn decimal_result_for_integer_source_has_an_explicit_target_diagnostic() {
+    let f = integer_fixture(b"label scene_one:\n    $ score = 4 / 2\n    return\n");
+    let model = serde_json::to_value(f.workspace()).unwrap();
+    assert_eq!(model["scenes"][0]["beats"][0]["protected"], true);
+    assert_eq!(
+        model["scenes"][0]["beats"][0]["assignment"]["inferredResultType"],
+        "decimal"
+    );
+    assert_eq!(
+        model["scenes"][0]["beats"][0]["assignment"]["diagnostics"][0]["reason"],
+        "incompatibleTarget"
+    );
+}
+
+#[test]
+fn decimal_source_edits_preserve_trivia_ids_history_unknowns_and_reopen() {
+    let f = Fixture::new(b"label scene_one:\r\n    $ fraction /= 2 # keep\r\n    $ fraction = 5.0\r\n    $ fraction  -=  1.25 # cafe\r\n    return\r\n");
+    let model = f
+        .service
+        .create_variable(
+            &f.project,
+            &f.project_id,
+            serde_json::from_value(
+                json!({"technicalName":"fraction","variableType":"decimal","defaultValue":99.0}),
+            )
+            .unwrap(),
+        )
+        .unwrap();
+    let var = &model.variables[0];
+    for value in [json!("2.5"), json!(true), json!(null)] {
+        assert!(f.service.update_variable(&f.project, &f.project_id, serde_json::from_value(json!({"id":var.id,"expectedSourceRevision":var.source.source_revision,"defaultValue":value})).unwrap()).is_err());
+    }
+    f.service.update_variable(&f.project, &f.project_id, serde_json::from_value(json!({"id":var.id,"expectedSourceRevision":var.source.source_revision,"defaultValue":2.5})).unwrap()).unwrap();
+    f.migrate();
+    let model = f.workspace();
+    let scene = &model.scenes[0];
+    let bytes = fs::read(f.root.join(&scene.source_path)).unwrap();
+    let wire = serde_json::to_value(&scene.beats[0]).unwrap();
+    assert_eq!(
+        wire["assignment"]["state"],
+        json!({"status":"unknown","reason":"unobservedCurrentValue"})
+    );
+    let beat = &scene.beats[2];
+    let command = |value: Value| json!({"type":"updateBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":beat.id,"beat":{"type":"setVariable","variableId":var.id,"value":value}});
+    let same = apply_wire(
+        &f,
+        &model,
+        command(json!({"operation":"subtract","operand":"+1.25"})),
+    )
+    .unwrap();
+    assert_eq!(fs::read(f.root.join(&scene.source_path)).unwrap(), bytes);
+    assert_eq!(same.can_undo, model.can_undo);
+    let edited = apply_wire(
+        &f,
+        &model,
+        command(json!({"operation":"divide","operand":"2.0"})),
+    )
+    .unwrap();
+    assert_eq!(
+        fs::read_to_string(f.root.join(&scene.source_path)).unwrap(),
+        String::from_utf8(bytes.clone())
+            .unwrap()
+            .replace("-=  1.25", "/=  2.0")
+    );
+    assert_eq!(
+        serde_json::to_value(&edited.scenes[0].beats[2]).unwrap()["assignment"]["state"],
+        json!({"status":"known","value":2.5})
+    );
+    let undone = f.apply(&edited, SceneCommand::Undo).unwrap();
+    assert_eq!(fs::read(f.root.join(&scene.source_path)).unwrap(), bytes);
+    f.apply(&undone, SceneCommand::Redo).unwrap();
+    let service = AuthoringService::default();
+    let project = service.register_project(&f.root).unwrap();
+    let reopened = service.scene_workspace(&project, &f.project_id).unwrap();
+    assert_eq!(reopened.scenes[0].beats[2].id, beat.id);
+    assert_eq!(reopened.authoring.variables[0].default_value, json!(2.5));
+}
+
+#[test]
+fn decimal_target_import_preserves_an_existing_integer_assignment_exactly() {
+    let source =
+        b"label scene_one:\n    $ fraction = 9007199254740993 # imported integer\n    return\n";
+    let f = Fixture::new(source);
+    f.service
+        .create_variable(
+            &f.project,
+            &f.project_id,
+            serde_json::from_value(
+                json!({"technicalName":"fraction","variableType":"decimal","defaultValue":1.25}),
+            )
+            .unwrap(),
+        )
+        .unwrap();
+    f.migrate();
+    let model = f.workspace();
+    let scene = &model.scenes[0];
+    let beat = &scene.beats[0];
+    let wire = serde_json::to_value(beat).unwrap();
+    assert_eq!(wire["assignment"]["inferredResultType"], "int");
+    assert_eq!(wire["assignment"]["state"]["value"], "9007199254740993");
+    let after = apply_wire(&f, &model, json!({"type":"updateBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":beat.id,"beat":beat.payload})).unwrap();
+    assert_eq!(fs::read(f.root.join(&scene.source_path)).unwrap(), source);
+    assert_eq!(after.can_undo, model.can_undo);
 }

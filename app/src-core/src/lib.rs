@@ -116,6 +116,7 @@ pub const OPERATIONS: &[&str] = &[
     "scene.list",
     "flow.list",
     "scene.apply",
+    "scene.validateAssignment",
     "screens.inspect",
     "screens.canvasPlan",
     "screens.canvasRender",
@@ -806,6 +807,14 @@ pub fn handle_application_request(
                 .and_then(|_| lifecycle.scene_workspace())
                 .and_then(to_value)
         }
+        "scene.validateAssignment" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<SceneCommandRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|payload| lifecycle.scene_validate_assignment(payload))
+            .and_then(to_value),
         "scene.apply" => session_payload(validated.payload)
             .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
             .and_then(|payload| {
@@ -1219,13 +1228,13 @@ fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
         RuntimeBusy => ("RUNTIME_BUSY", "Stop the runtime operation before changing these files."),
         InvalidPayload => ("INVALID_PAYLOAD", "The Scene operation is invalid."),
         MissingArithmeticTarget => ("MISSING_ARITHMETIC_TARGET", "variableId: Choose an existing variable."),
-        ArithmeticTargetType => ("ARITHMETIC_TARGET_TYPE", "variableId: Arithmetic requires a whole-number variable."),
-        InvalidArithmeticOperand => ("INVALID_ARITHMETIC_OPERAND", "value.operand: Choose a supported whole-number operation and formula."),
-        InvalidArithmeticSyntax => ("INVALID_ARITHMETIC_SYNTAX", "value.operand: Enter a whole-number formula using signs, parentheses, +, -, *, // or %."),
+        ArithmeticTargetType => ("ARITHMETIC_TARGET_TYPE", "variableId: Choose a numeric target. Whole-number targets require an integer result."),
+        InvalidArithmeticOperand => ("INVALID_ARITHMETIC_OPERAND", "value.operand: Choose a supported numeric operation and formula."),
+        InvalidArithmeticSyntax => ("INVALID_ARITHMETIC_SYNTAX", "value.operand: Enter a numeric formula using signs, parentheses, +, -, *, /, // or %."),
         MissingArithmeticVariable => ("MISSING_ARITHMETIC_VARIABLE", "value.operand: The formula references a variable that is not declared."),
-        ArithmeticOperandType => ("ARITHMETIC_OPERAND_TYPE", "value.operand: Formula operands must be whole-number variables."),
+        ArithmeticOperandType => ("ARITHMETIC_OPERAND_TYPE", "value.operand: Formula operands must be declared integer or decimal variables."),
         ArithmeticZeroDivisor => ("ARITHMETIC_ZERO_DIVISOR", "value.operand: A divisor cannot be zero."),
-        ArithmeticOverflow => ("ARITHMETIC_OVERFLOW", "value.operand: The calculation exceeds the signed 64-bit whole-number range."),
+        ArithmeticOverflow => ("ARITHMETIC_OVERFLOW", "value.operand: The calculation exceeds the signed 64-bit integer range or produces a non-finite decimal."),
         ArithmeticLimitExceeded => ("ARITHMETIC_LIMIT_EXCEEDED", "value.operand: The formula exceeds the supported size or depth."),
         InvalidMetadata => (
             "INVALID_SCENE_METADATA",

@@ -49,7 +49,11 @@ fn inspection(
         .collect();
     let diagnostics = match &state {
         AssignmentState::Unknown { reason } => vec![AssignmentDiagnostic {
-            field: "value.operand",
+            field: if *reason == ArithmeticUnknown::IncompatibleTarget {
+                "variableId"
+            } else {
+                "value.operand"
+            },
             reason: reason.clone(),
         }],
         _ => vec![],
@@ -95,20 +99,36 @@ pub(super) fn inspect(beats: &mut [SceneBeat], authoring: &AuthoringMetadata) {
                     };
                     let result = match variable {
                         None => Err(ArithmeticUnknown::MissingVariable),
-                        Some(v) if v.variable_type != VariableType::Int => {
+                        Some(v) if !arithmetic::numeric_type(v.variable_type) => {
                             Err(ArithmeticUnknown::IncompatibleOperand)
                         }
                         Some(v) => adjustment.formula(authoring, &v.id),
                     };
-                    if let Err(reason) = result {
-                        beat.assignment = Some(inspection(
-                            None,
-                            vec![],
-                            variable.map(|v| vec![v.id.clone()]).unwrap_or_default(),
-                            AssignmentState::Unknown { reason },
-                            authoring,
-                        ));
-                    }
+                    let kind = result.as_ref().ok().map(|f| f.result_type());
+                    let mut reads = Vec::new();
+                    let reason = match result {
+                        Err(reason) => reason,
+                        Ok(formula) => {
+                            formula.reads(&mut reads);
+                            if variable.is_some_and(|v| v.variable_type == VariableType::Int)
+                                && kind == Some(VariableType::Decimal)
+                            {
+                                ArithmeticUnknown::IncompatibleTarget
+                            } else {
+                                formula
+                                    .evaluate(&|_| Err(ArithmeticUnknown::UnobservedCurrentValue))
+                                    .err()
+                                    .unwrap_or(ArithmeticUnknown::UnsupportedControlFlow)
+                            }
+                        }
+                    };
+                    beat.assignment = Some(inspection(
+                        kind,
+                        reads,
+                        variable.map(|v| vec![v.id.clone()]).unwrap_or_default(),
+                        AssignmentState::Unknown { reason },
+                        authoring,
+                    ));
                 }
                 continue;
             }
@@ -118,22 +138,21 @@ pub(super) fn inspect(beats: &mut [SceneBeat], authoring: &AuthoringMetadata) {
             continue;
         };
         let mut reads = Vec::new();
+        let mut kind = variable.variable_type;
         let state = if value.is_object() {
             let adjustment: IntegerAdjustment =
                 serde_json::from_value(value.clone()).expect("recognized formula");
             let formula = adjustment
                 .formula(authoring, variable_id)
                 .expect("recognized formula");
+            kind = formula.result_type();
             formula.reads(&mut reads);
             let result = formula.evaluate(&|id| {
                 if nested {
                     return Err(ArithmeticUnknown::UnsupportedControlFlow);
                 }
                 match values.get(id) {
-                    Some(AssignmentState::Known { value }) => value
-                        .as_str()
-                        .and_then(|v| v.parse().ok())
-                        .ok_or(ArithmeticUnknown::IncompatibleOperand),
+                    Some(AssignmentState::Known { value }) => arithmetic::Numeric::from_json(value),
                     Some(AssignmentState::Unknown { reason }) => Err(reason.clone()),
                     None => Err(unknown.clone()),
                 }
@@ -145,7 +164,7 @@ pub(super) fn inspect(beats: &mut [SceneBeat], authoring: &AuthoringMetadata) {
             };
             match result {
                 Ok(value) => AssignmentState::Known {
-                    value: Value::String(value.to_string()),
+                    value: value.json(),
                 },
                 Err(reason) => AssignmentState::Unknown { reason },
             }
@@ -159,12 +178,108 @@ pub(super) fn inspect(beats: &mut [SceneBeat], authoring: &AuthoringMetadata) {
             }
         };
         beat.assignment = Some(inspection(
-            Some(variable.variable_type),
+            Some(kind),
             reads,
             vec![variable_id.clone()],
             state.clone(),
             authoring,
         ));
         values.insert(variable_id.clone(), state);
+    }
+}
+
+pub(super) fn draft(
+    target: &str,
+    value: &Value,
+    authoring: &AuthoringMetadata,
+    refusal: Option<ArithmeticUnknown>,
+) -> AssignmentInspection {
+    let mut reads = Vec::new();
+    let formula = serde_json::from_value::<IntegerAdjustment>(value.clone())
+        .map_err(|_| ArithmeticUnknown::InvalidOperand)
+        .and_then(|a| a.formula(authoring, target));
+    let kind = formula.as_ref().ok().map(|f| f.result_type());
+    let result = formula.and_then(|f| {
+        f.reads(&mut reads);
+        f.evaluate(&|_| Err(ArithmeticUnknown::UnobservedCurrentValue))
+    });
+    let refusal = if refusal == Some(ArithmeticUnknown::NonFiniteResult) {
+        result.as_ref().err().cloned().or(refusal)
+    } else {
+        refusal
+    };
+    let state = match refusal.or_else(|| result.as_ref().err().cloned()) {
+        Some(reason) => AssignmentState::Unknown { reason },
+        None => AssignmentState::Known {
+            value: result.unwrap().json(),
+        },
+    };
+    inspection(
+        kind,
+        reads,
+        authoring
+            .variables
+            .iter()
+            .filter(|v| v.id == target)
+            .map(|v| v.id.clone())
+            .collect(),
+        state,
+        authoring,
+    )
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AssignmentDraftValidation {
+    pub target_variable_id: String,
+    pub value: Value,
+    pub support: AssignmentSupport,
+    pub assignment: AssignmentInspection,
+    pub project_revision: String,
+    pub source_map_revision: String,
+    pub authoring_revision: String,
+    pub source_revision: String,
+    pub variables: Vec<crate::authoring::Variable>,
+    pub capabilities: AssignmentCapabilities,
+}
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum AssignmentSupport {
+    Supported,
+    Refused,
+}
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AssignmentCapabilities {
+    pub operators: Vec<&'static str>,
+    pub operations: Vec<arithmetic::IntegerOperation>,
+    pub max_bytes: usize,
+    pub max_nodes: usize,
+    pub max_depth: usize,
+    pub integer_transport: &'static str,
+    pub decimal_transport: &'static str,
+    pub functions: bool,
+}
+impl Default for AssignmentCapabilities {
+    fn default() -> Self {
+        use arithmetic::IntegerOperation::*;
+        Self {
+            operators: vec!["+", "-", "*", "/", "//", "%"],
+            operations: vec![
+                Assign,
+                Add,
+                Subtract,
+                Multiply,
+                Divide,
+                FloorDivide,
+                Remainder,
+            ],
+            max_bytes: crate::conditions::MAX_EXPRESSION_BYTES,
+            max_nodes: crate::conditions::MAX_EXPRESSION_NODES,
+            max_depth: crate::conditions::MAX_EXPRESSION_DEPTH,
+            integer_transport: "signedI64String",
+            decimal_transport: "finiteFloat64",
+            functions: false,
+        }
     }
 }

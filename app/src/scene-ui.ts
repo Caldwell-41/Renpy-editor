@@ -7,8 +7,8 @@ export type TransitionRef = "none" | "dissolve" | "fade";
 
 export type ConditionExpression =
   | { readonly type: "bool"; readonly value: boolean }
-  | { readonly type: "int" | "string"; readonly value: string }
-  | { readonly type: "variable"; readonly variableId: string; readonly variableType: "bool" | "int" | "string" }
+  | { readonly type: "int" | "decimal" | "string"; readonly value: string }
+  | { readonly type: "variable"; readonly variableId: string; readonly variableType: "bool" | "int" | "decimal" | "string" }
   | { readonly type: "compare"; readonly operator: "equal" | "notEqual" | "less" | "lessEqual" | "greater" | "greaterEqual"; readonly left: ConditionExpression; readonly right: ConditionExpression }
   | { readonly type: "not"; readonly operand: ConditionExpression }
   | { readonly type: "and" | "or"; readonly left: ConditionExpression; readonly right: ConditionExpression };
@@ -22,9 +22,9 @@ export interface ChoiceOption {
   readonly condition?: Condition;
 }
 
-export interface IntegerAdjustment { readonly operation: "assign" | "add" | "subtract" | "multiply" | "floorDivide" | "remainder"; readonly operand: string }
-export type ArithmeticUnknown = "unobservedCurrentValue" | "unsupportedControlFlow" | "integerOverflow" | "invalidOperand" | "invalidSyntax" | "missingVariable" | "incompatibleOperand" | "zeroDivisor" | "limitExceeded";
-export type AssignmentState = { readonly status: "known"; readonly value: boolean | string } | { readonly status: "unknown"; readonly reason: ArithmeticUnknown };
+export interface IntegerAdjustment { readonly operation: "assign" | "add" | "subtract" | "multiply" | "divide" | "floorDivide" | "remainder"; readonly operand: string }
+export type ArithmeticUnknown = "unobservedCurrentValue" | "unsupportedControlFlow" | "integerOverflow" | "nonFiniteResult" | "incompatibleTarget" | "invalidOperand" | "invalidSyntax" | "missingVariable" | "incompatibleOperand" | "zeroDivisor" | "limitExceeded";
+export type AssignmentState = { readonly status: "known"; readonly value: boolean | number | string } | { readonly status: "unknown"; readonly reason: ArithmeticUnknown };
 export type BeatPayload =
   | { readonly type: "background"; readonly assetId: string; readonly transition: TransitionRef }
   | { readonly type: "showCharacter"; readonly characterId: string; readonly appearanceId: string; readonly placement: PlacementRef; readonly transition: TransitionRef }
@@ -38,7 +38,7 @@ export type BeatPayload =
   | { readonly type: "stopMusic" }
   | { readonly type: "playSfx"; readonly assetId: string }
   | { readonly type: "transition"; readonly transition: Exclude<TransitionRef, "none"> }
-  | { readonly type: "setVariable"; readonly variableId: string; readonly value: boolean | string | IntegerAdjustment }
+  | { readonly type: "setVariable"; readonly variableId: string; readonly value: boolean | number | string | IntegerAdjustment }
   | { readonly type: "choice"; readonly options: readonly ChoiceOption[] }
   | { readonly type: "jump"; readonly sceneId: string }
   | { readonly type: "call"; readonly sceneId: string; readonly returnLabel: string | null }
@@ -48,7 +48,7 @@ export type BeatPayload =
 export interface BeatOwner { readonly groupId: string; readonly branchId: string }
 export interface ConditionalBranch { readonly groupId: string; readonly variableId?: string; readonly otherwise: boolean; readonly ordinal?: number; readonly condition?: Condition }
 export interface SceneBeat {
-  readonly assignment?: { readonly inferredResultType: "bool" | "int" | "string" | null; readonly readVariables: readonly { readonly variableId: string; readonly technicalName: string; readonly variableType: "bool" | "int" | "string" }[]; readonly diagnostics: readonly { readonly field: "value.operand"; readonly reason: ArithmeticUnknown }[]; readonly reads: readonly string[]; readonly writes: readonly string[]; readonly state: AssignmentState };
+  readonly assignment?: { readonly inferredResultType: "bool" | "int" | "decimal" | "string" | null; readonly readVariables: readonly { readonly variableId: string; readonly technicalName: string; readonly variableType: "bool" | "int" | "decimal" | "string" }[]; readonly diagnostics: readonly { readonly field: "value.operand" | "variableId"; readonly reason: ArithmeticUnknown }[]; readonly reads: readonly string[]; readonly writes: readonly string[]; readonly state: AssignmentState };
   readonly screenEffects?: ScreenEffects;
   readonly owner?: BeatOwner;
   readonly conditionalBranch?: ConditionalBranch;
@@ -140,7 +140,7 @@ interface Chapter { readonly id: string; readonly displayName: string; readonly 
 interface Character { readonly id: string; readonly displayName: string; readonly technicalName: string }
 interface Appearance { readonly id: string; readonly characterId: string; readonly label: string; readonly assetId?: string }
 interface Asset { readonly id: string; readonly kind: "background" | "characterAppearance" | "uiImage" | "music" | "sfx"; readonly displayName: string; readonly status: string; readonly sha256?: string }
-interface Variable { readonly id: string; readonly technicalName: string; readonly variableType: "bool" | "int" | "string"; readonly defaultValue: boolean | string }
+interface Variable { readonly id: string; readonly technicalName: string; readonly variableType: "bool" | "int" | "decimal" | "string"; readonly defaultValue: boolean | number | string }
 
 export interface SceneWorkspace {
   readonly authoringRevision?: string;
@@ -171,7 +171,7 @@ export function conditionCaption(condition: Condition, variables?: SceneWorkspac
     if (--remaining < 0 || depth > 16) return "Unknown expression";
     switch (expression.type) {
       case "bool": return expression.value ? "True" : "False";
-      case "int": return expression.value;
+      case "int": case "decimal": return expression.value;
       case "string": return JSON.stringify(expression.value);
       case "variable": return variables ? variables.find(variable => variable.id === expression.variableId)?.technicalName ?? "Missing Variable" : `Variable (${expression.variableId})`;
       case "compare": {
@@ -230,7 +230,7 @@ export interface ScenePreviewState {
   readonly charactersUnknown: boolean;
   readonly music?: { readonly assetId: string; readonly beatId: string };
   readonly musicUnknown: boolean;
-  readonly variables: Readonly<Record<string, { readonly value: boolean | string; readonly beatId: string }>>;
+  readonly variables: Readonly<Record<string, { readonly value: boolean | number | string; readonly beatId: string }>>;
   readonly variablesUnknown: boolean;
   readonly overlay?: { readonly kind: "dialogue" | "narration" | "choice" | "jump" | "call" | "return"; readonly text: string; readonly beatId: string };
 }
@@ -244,7 +244,7 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string,
   let charactersUnknown = false;
   let music: ScenePreviewState["music"];
   let musicUnknown = false;
-  let variables: Record<string, { value: boolean | string; beatId: string }> = {};
+  let variables: Record<string, { value: boolean | number | string; beatId: string }> = {};
   let variablesUnknown = false;
   let overlay: ScenePreviewState["overlay"];
   const unknownBeatIds: string[] = [];
@@ -1517,4 +1517,23 @@ export function renderRecoverySurface(host: HTMLElement, report: RecoveryReport,
     }
     host.append(panel);
   }
+}
+
+/** scene.validateAssignment accepts the same revision-bound Set variable command as scene.apply. */
+export interface AssignmentDraftValidation {
+  readonly targetVariableId: string;
+  readonly value: unknown;
+  readonly support: "supported" | "refused";
+  readonly assignment: NonNullable<SceneBeat["assignment"]>;
+  readonly projectRevision: string;
+  readonly sourceMapRevision: string;
+  readonly authoringRevision: string;
+  readonly sourceRevision: string;
+  readonly variables: SceneWorkspace["authoring"]["variables"];
+  readonly capabilities: {
+    readonly operators: readonly string[];
+    readonly operations: readonly IntegerAdjustment["operation"][];
+    readonly maxBytes: number; readonly maxNodes: number; readonly maxDepth: number;
+    readonly integerTransport: "signedI64String"; readonly decimalTransport: "finiteFloat64"; readonly functions: false;
+  };
 }

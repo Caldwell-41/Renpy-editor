@@ -1,4 +1,4 @@
-//! Bounded shared whole-number formulas. Never executes Python.
+//! Bounded shared numeric formulas. Never executes Python.
 use super::*;
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -8,6 +8,7 @@ pub enum IntegerOperation {
     Add,
     Subtract,
     Multiply,
+    Divide,
     FloorDivide,
     Remainder,
 }
@@ -32,10 +33,12 @@ pub enum ArithmeticUnknown {
     UnobservedCurrentValue,
     UnsupportedControlFlow,
     IntegerOverflow,
+    NonFiniteResult,
     InvalidOperand,
     InvalidSyntax,
     MissingVariable,
     IncompatibleOperand,
+    IncompatibleTarget,
     ZeroDivisor,
     LimitExceeded,
 }
@@ -58,7 +61,7 @@ impl IntegerAdjustment {
             .iter()
             .find(|v| v.id == target)
             .ok_or(ArithmeticUnknown::MissingVariable)?;
-        if variable.variable_type != VariableType::Int {
+        if !numeric_type(variable.variable_type) {
             return Err(ArithmeticUnknown::IncompatibleOperand);
         }
         Ok(Formula::Binary(
@@ -78,6 +81,7 @@ impl IntegerOperation {
             Self::Add => "+",
             Self::Subtract => "-",
             Self::Multiply => "*",
+            Self::Divide => "/",
             Self::FloorDivide => "//",
             Self::Remainder => "%",
         }
@@ -99,30 +103,55 @@ impl Formula {
             _ => {}
         }
     }
+    pub(crate) fn result_type(&self) -> VariableType {
+        match self {
+            Self::Atom(Expression::Variable { variable_type, .. }) => *variable_type,
+            Self::Atom(Expression::Decimal { .. }) => VariableType::Decimal,
+            Self::Negate(v) => v.result_type(),
+            Self::Binary(op, l, r)
+                if *op == IntegerOperation::Divide
+                    || l.result_type() == VariableType::Decimal
+                    || r.result_type() == VariableType::Decimal =>
+            {
+                VariableType::Decimal
+            }
+            _ => VariableType::Int,
+        }
+    }
     pub(crate) fn evaluate(
         &self,
-        value: &impl Fn(&str) -> Result<i64, ArithmeticUnknown>,
-    ) -> Result<i64, ArithmeticUnknown> {
+        value: &impl Fn(&str) -> Result<Numeric, ArithmeticUnknown>,
+    ) -> Result<Numeric, ArithmeticUnknown> {
         match self {
             Self::Atom(Expression::Int { value }) => value
                 .parse()
+                .map(Numeric::Int)
                 .map_err(|_| ArithmeticUnknown::IntegerOverflow),
+            Self::Atom(Expression::Decimal { value }) => Numeric::decimal(
+                value
+                    .parse()
+                    .map_err(|_| ArithmeticUnknown::InvalidOperand)?,
+            ),
             Self::Atom(Expression::Variable { variable_id, .. }) => value(variable_id),
-            Self::Negate(v) => v
-                .evaluate(value)?
-                .checked_neg()
-                .ok_or(ArithmeticUnknown::IntegerOverflow),
+            Self::Negate(v) => match v.evaluate(value)? {
+                Numeric::Int(v) => v
+                    .checked_neg()
+                    .map(Numeric::Int)
+                    .ok_or(ArithmeticUnknown::IntegerOverflow),
+                Numeric::Decimal(v) => Numeric::decimal(-v),
+            },
             Self::Binary(op, l, r) => {
                 let l = l.evaluate(value);
                 let r = r.evaluate(value);
                 if matches!(
                     op,
-                    IntegerOperation::FloorDivide | IntegerOperation::Remainder
-                ) && r == Ok(0)
+                    IntegerOperation::Divide
+                        | IntegerOperation::FloorDivide
+                        | IntegerOperation::Remainder
+                ) && r.as_ref().is_ok_and(|v| v.float() == 0.0)
                 {
                     return Err(ArithmeticUnknown::ZeroDivisor);
                 }
-                // Determinable calculation errors remain visible beside unknown state.
                 for result in [&l, &r] {
                     if let Err(reason) = result {
                         if !matches!(
@@ -134,34 +163,7 @@ impl Formula {
                         }
                     }
                 }
-                let l = l?;
-                let r = r?;
-                match op {
-                    IntegerOperation::Add => l.checked_add(r),
-                    IntegerOperation::Subtract => l.checked_sub(r),
-                    IntegerOperation::Multiply => l.checked_mul(r),
-                    IntegerOperation::FloorDivide | IntegerOperation::Remainder => {
-                        if r == 0 {
-                            return Err(ArithmeticUnknown::ZeroDivisor);
-                        }
-                        // i128 avoids the MIN / -1 trap; Python remainder there is zero.
-                        let (l, r) = (i128::from(l), i128::from(r));
-                        let mut q = l / r;
-                        let mut rem = l % r;
-                        if rem != 0 && (rem < 0) != (r < 0) {
-                            q -= 1;
-                            rem += r;
-                        }
-                        i64::try_from(if *op == IntegerOperation::FloorDivide {
-                            q
-                        } else {
-                            rem
-                        })
-                        .ok()
-                    }
-                    IntegerOperation::Assign => return Err(ArithmeticUnknown::InvalidOperand),
-                }
-                .ok_or(ArithmeticUnknown::IntegerOverflow)
+                calculate(*op, l?, r?)
             }
             _ => Err(ArithmeticUnknown::IncompatibleOperand),
         }
@@ -240,6 +242,7 @@ impl FormulaParser<'_> {
                 Some([b'-', ..]) => (IntegerOperation::Subtract, 1, 1),
                 Some([b'*', ..]) => (IntegerOperation::Multiply, 1, 2),
                 Some([b'/', b'/', ..]) => (IntegerOperation::FloorDivide, 2, 2),
+                Some([b'/', ..]) => (IntegerOperation::Divide, 1, 2),
                 Some([b'%', ..]) => (IntegerOperation::Remainder, 1, 2),
                 _ => break,
             };
@@ -265,7 +268,11 @@ impl FormulaParser<'_> {
             self.at += 1;
             self.space();
             // Fold a signed decimal token to permit i64::MIN without a positive overflow.
-            if self.source.get(self.at).is_some_and(u8::is_ascii_digit) {
+            if self
+                .source
+                .get(self.at)
+                .is_some_and(|c| c.is_ascii_digit() || *c == b'.')
+            {
                 return self.integer(ch == b'-');
             }
             let operand = self.atom(depth + 1)?;
@@ -275,7 +282,7 @@ impl FormulaParser<'_> {
                 Ok(operand)
             };
         }
-        if ch.is_ascii_digit() {
+        if ch.is_ascii_digit() || ch == b'.' {
             return self.integer(false);
         }
         if ch == b'(' {
@@ -305,7 +312,7 @@ impl FormulaParser<'_> {
                 .iter()
                 .find(|v| v.technical_name == name)
                 .ok_or(ArithmeticUnknown::MissingVariable)?;
-            if variable.variable_type != VariableType::Int {
+            if !numeric_type(variable.variable_type) {
                 return Err(ArithmeticUnknown::IncompatibleOperand);
             }
             return self.node(Formula::Atom(Expression::Variable {
@@ -320,7 +327,44 @@ impl FormulaParser<'_> {
         while self.source.get(self.at).is_some_and(u8::is_ascii_digit) {
             self.at += 1;
         }
+        if self.source.get(self.at) == Some(&b'.') {
+            self.at += 1;
+            while self.source.get(self.at).is_some_and(u8::is_ascii_digit) {
+                self.at += 1;
+            }
+        }
+        if self
+            .source
+            .get(self.at)
+            .is_some_and(|c| matches!(c, b'e' | b'E'))
+        {
+            self.at += 1;
+            if self
+                .source
+                .get(self.at)
+                .is_some_and(|c| matches!(c, b'+' | b'-'))
+            {
+                self.at += 1;
+            }
+            let exponent = self.at;
+            while self.source.get(self.at).is_some_and(u8::is_ascii_digit) {
+                self.at += 1;
+            }
+            if self.at == exponent {
+                return Err(ArithmeticUnknown::InvalidSyntax);
+            }
+        }
         let digits = std::str::from_utf8(&self.source[start..self.at]).unwrap();
+        if digits.contains(['.', 'e', 'E']) {
+            let signed = format!("{}{digits}", if negative { "-" } else { "" });
+            let number = signed
+                .parse::<f64>()
+                .map_err(|_| ArithmeticUnknown::InvalidSyntax)?;
+            Numeric::decimal(number)?;
+            return self.node(Formula::Atom(Expression::Decimal {
+                value: crate::authoring::decimal_literal(number),
+            }));
+        }
         if digits.len() > 1 && digits.starts_with('0') {
             return Err(ArithmeticUnknown::InvalidSyntax);
         }
@@ -362,6 +406,7 @@ pub(crate) fn assignment_tokens_raw(
         ("-=", IntegerOperation::Subtract),
         ("*=", IntegerOperation::Multiply),
         ("//=", IntegerOperation::FloorDivide),
+        ("/=", IntegerOperation::Divide),
         ("%=", IntegerOperation::Remainder),
         ("=", IntegerOperation::Assign),
     ]
@@ -408,4 +453,163 @@ pub(crate) fn parse_assignment<'a>(
         operand = value;
     }
     Some((name, IntegerAdjustment { operation, operand }))
+}
+
+pub(crate) fn numeric_type(kind: VariableType) -> bool {
+    matches!(kind, VariableType::Int | VariableType::Decimal)
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) enum Numeric {
+    Int(i64),
+    Decimal(f64),
+}
+impl Numeric {
+    pub(crate) fn decimal(v: f64) -> Result<Self, ArithmeticUnknown> {
+        if v.is_finite() {
+            Ok(Self::Decimal(v))
+        } else {
+            Err(ArithmeticUnknown::NonFiniteResult)
+        }
+    }
+    pub(crate) fn float(self) -> f64 {
+        match self {
+            Self::Int(v) => v as f64,
+            Self::Decimal(v) => v,
+        }
+    }
+    pub(crate) fn json(self) -> Value {
+        match self {
+            Self::Int(v) => Value::String(v.to_string()),
+            Self::Decimal(v) => Value::from(v),
+        }
+    }
+    pub(crate) fn from_json(v: &Value) -> Result<Self, ArithmeticUnknown> {
+        if let Some(s) = v.as_str() {
+            s.parse()
+                .map(Self::Int)
+                .map_err(|_| ArithmeticUnknown::IncompatibleOperand)
+        } else {
+            v.as_f64()
+                .ok_or(ArithmeticUnknown::IncompatibleOperand)
+                .and_then(Self::decimal)
+        }
+    }
+    pub(crate) fn compare(self, other: Self) -> std::cmp::Ordering {
+        match (self, other) {
+            (Self::Int(a), Self::Int(b)) => a.cmp(&b),
+            (Self::Decimal(a), Self::Decimal(b)) => a.partial_cmp(&b).expect("finite"),
+            (Self::Int(a), Self::Decimal(b)) => compare_int_float(a, b),
+            (Self::Decimal(a), Self::Int(b)) => compare_int_float(b, a).reverse(),
+        }
+    }
+}
+// Compare in integer space before considering a fractional tail. Never round the i64.
+fn compare_int_float(a: i64, b: f64) -> std::cmp::Ordering {
+    use std::cmp::Ordering::*;
+    if b >= 9223372036854775808.0 {
+        return Less;
+    }
+    if b < -9223372036854775808.0 {
+        return Greater;
+    }
+    match a.cmp(&(b as i64)) {
+        Equal if b.fract() > 0.0 => Less,
+        Equal if b.fract() < 0.0 => Greater,
+        order => order,
+    }
+}
+fn calculate(op: IntegerOperation, l: Numeric, r: Numeric) -> Result<Numeric, ArithmeticUnknown> {
+    use IntegerOperation::*;
+    if let (Numeric::Int(l), Numeric::Int(r)) = (l, r) {
+        if op == Divide {
+            return Numeric::decimal(integer_ratio(l, r));
+        }
+        let result = match op {
+            Add => l.checked_add(r),
+            Subtract => l.checked_sub(r),
+            Multiply => l.checked_mul(r),
+            FloorDivide | Remainder => {
+                let (l, r) = (i128::from(l), i128::from(r));
+                let (mut q, mut rem) = (l / r, l % r);
+                if rem != 0 && (rem < 0) != (r < 0) {
+                    q -= 1;
+                    rem += r;
+                }
+                i64::try_from(if op == FloorDivide { q } else { rem }).ok()
+            }
+            _ => return Err(ArithmeticUnknown::InvalidOperand),
+        };
+        return result
+            .map(Numeric::Int)
+            .ok_or(ArithmeticUnknown::IntegerOverflow);
+    }
+    let (l, r) = (l.float(), r.float());
+    let result = match op {
+        Add => l + r,
+        Subtract => l - r,
+        Multiply => l * r,
+        Divide => l / r,
+        FloorDivide | Remainder => {
+            let mut rem = l % r;
+            let mut q = (l - rem) / r;
+            if rem != 0.0 {
+                if (rem < 0.0) != (r < 0.0) {
+                    rem += r;
+                    q -= 1.0;
+                }
+            } else {
+                rem = 0.0_f64.copysign(r);
+            }
+            let floor = if q == 0.0 {
+                0.0_f64.copysign(l / r)
+            } else {
+                let floor = q.floor();
+                if q - floor > 0.5 {
+                    floor + 1.0
+                } else {
+                    floor
+                }
+            };
+            if op == FloorDivide {
+                floor
+            } else {
+                rem
+            }
+        }
+        Assign => return Err(ArithmeticUnknown::InvalidOperand),
+    };
+    Numeric::decimal(result)
+}
+// Correctly round an i64 ratio to binary64, ties to even. The normalized
+// numerator has at most 117 bits, so u128 retains the exact rounding remainder.
+fn integer_ratio(l: i64, r: i64) -> f64 {
+    if l == 0 {
+        return 0.0_f64.copysign(r as f64);
+    }
+    let (a, b) = (u128::from(l.unsigned_abs()), u128::from(r.unsigned_abs()));
+    let mut exponent = (128 - a.leading_zeros()) as i32 - (128 - b.leading_zeros()) as i32;
+    if if exponent >= 0 {
+        a < (b << exponent)
+    } else {
+        (a << -exponent) < b
+    } {
+        exponent -= 1;
+    }
+    let shift = 52 - exponent;
+    let (numerator, denominator) = if shift >= 0 {
+        (a << shift, b)
+    } else {
+        (a, b << -shift)
+    };
+    let (mut q, rem) = (numerator / denominator, numerator % denominator);
+    if rem * 2 > denominator || rem * 2 == denominator && q & 1 == 1 {
+        q += 1;
+    }
+    let magnitude = (q as f64) * 2.0_f64.powi(exponent - 52);
+    if (l < 0) != (r < 0) {
+        -magnitude
+    } else {
+        magnitude
+    }
 }

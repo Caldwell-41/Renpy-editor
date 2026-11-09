@@ -254,6 +254,7 @@ fn parsed_value(variable: &Variable, raw: &str) -> Option<serde_json::Value> {
             _ => return None,
         },
         VariableType::Int => serde_json::Value::String(raw.into()),
+        VariableType::Decimal => return None, // Decimal action adapters belong to #95.
         VariableType::String => serde_json::from_str::<String>(raw).ok()?.into(),
     };
     variable_literal(variable.variable_type, &value).ok()?;
@@ -455,6 +456,9 @@ pub(super) fn prepare(
                     .iter()
                     .find(|v| &v.id == variable_id)
                     .ok_or(SceneError::ReferenceBlocked)?;
+                if variable.variable_type == VariableType::Decimal {
+                    return Err(SceneError::InvalidPayload);
+                }
                 let literal = variable_literal(variable.variable_type, value)
                     .map_err(|_| SceneError::InvalidPayload)?;
                 Ok(format!(
