@@ -526,3 +526,107 @@ The final SDK-free action result is 19 passed, zero failed, two named SDK gates
 ignored; final formatting, repository validation (1,880 files) and whitespace pass.
 No temporary dependency link was created. No source/evidence worktree, old target,
 retained binary or historical receipt was removed. Publication remains unselected.
+
+## Recovery integration and Mac invocation 2, 2026-11-10
+
+The fresh merger confirmed clean `codex/spec-87-arithmetic` at
+`b22572419bf39abb7fd9ec7ce6967505ca8492a9`, one unpublished coordinator checkpoint
+beyond `cbb0ca27`. Conflict-free normal merge
+`ec7e366b7bff4051b54b2f739fe1416b35fa5360` preserves that first parent and returned
+`12ce2eeaca7a4ab69c3853bd5409cedc9e8540da` as its second parent. Complete app,
+fixture, script and CI trees equal the return. Coordinator status/ledger/incident
+records survive unchanged. The eleven returned paths change portable fixtures,
+the existing SDK test owner, `cfg(test)` subprocess receipts and evidence only.
+Production arithmetic/UI/history, approved design references, four immutable UI
+snapshots and existing image bytes are intact.
+
+All 1,880 tracked inputs match Git checkout bytes. Fresh pinned Rust 1.90 builds
+locked/offline in isolated `target-mac-02`; retained executable SHA-256 is
+`5b09843129f38690eeda1b6140f49972acc3b25a1579930f5b6bf5867abd749f`.
+Both exact SDK-free UI preflights pass from this executable. The action group
+passes 19 cases with the two named SDK gates ignored, adding no SDK passes.
+Static admission checks 53 Python statements/expressions, seven destination-bound
+transitions, snapshot/request/asset hashes and the independent literal oracle.
+Rust formatting, repository validation (1,880 files), whitespace and the existing
+contract/quality-only branch-plan audit pass. The contract audit rechecks 31
+recorded validations and 11 indexed errors; it is not fresh runtime execution.
+
+The merger published `ec7e366b` before SDK use and verified remote/local/upstream
+identity and a clean checkout. This exact merge is both the pre-SDK tested head and
+the recovery source. All source remained fixed during execution. The corrected
+driver remains `dc52be7ec9edbe66e208c496dccca41552bc6d6a287f4b316987982c301270ac`.
+The old attempted executable and worker `mac-01` evidence were not reused or modified.
+
+The existing cached official archive and published manifest were verified again
+immediately before use, at their unchanged `eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45` and
+`4b0cad9ac05dc4ca55081bd3a36458c8ea658ed021f09a87276383652b6bd98b` pins. Twelve installed SDK execution/selector
+files match archive members; the five staged execution identities match those
+verified inputs. The launch receipt retains every source/config/lock/fixture hash,
+complete toolchain/host identities, command array and required child environment.
+Node 24.19.0/npm 11.9.0, Rust/Cargo 1.90 and Python 3.12 use the pinned project/runtime
+paths. No download or system installation occurred.
+
+The current `native_desktop` wrapper admitted the actual unlocked, awake Mac desktop
+under scoped outside-sandbox execution. The one reserved invocation started and
+consumed its slot. It ran the exact fully qualified
+`screens::tests::actions::runtime::ui_emitted_arithmetic_sdk_gate --ignored --exact --nocapture`.
+The native test exited **101** after **87,558 ms**; its named Cargo result is failed,
+zero passed. Shared `cargo-log` validation rejects it. No retry or correction followed.
+
+| Unique selected case | Exit | Duration | Result |
+| --- | ---: | ---: | --- |
+| Compile | 0 | 465 ms | Passed |
+| Lint with `--error-code` | 0 | 270 ms | Passed |
+| Normal entry | 1 | 11,672 ms | Failed at first divide assertion |
+| Wrong outcome | Unrun | Unrun | Required rejection remains missing |
+
+Normal entry passes **13 assertions**, then fails assertion 14 at driver line 102,
+`money == 2.25 and type(money) is float`, with script context still at line 53,
+`call screen arithmetic_dialog`. Destination-bound progression now reaches the
+Story return, `Fraction accepted`, condition return and rendered screen. The exact
+Story trace/types and `ARITHMETIC_UI_STORY` witness match invocation 1. Rendered TTS
+contains `Balance: 4.5`; selection, prediction and interaction restart preserve
+trust 5, reward 0, money 4.5 and zero continuations before activation.
+
+The first divide result is not observed. Required `ARITHMETIC_UI_DIVIDE`,
+`ARITHMETIC_UI_TEXT`, `ARITHMETIC_UI_IMAGE` and `ARITHMETIC_UI_VALUES` witnesses are
+absent. Ordered/current text/image activation, post-activation types, Finish and
+actual wrong-outcome rejection remain unproved. Wrong outcome is `notRun`; absence
+of `ARITHMETIC_UI_WRONG_ACCEPTED` supplies no negative-case pass. Duplicate inner
+selector listings represent one failed case and one not run, not extra executions.
+
+Classification is missing runtime evidence with a provisional fixture timer
+dispatch/interaction-refresh defect. Pinned SDK test Python execution and
+`show_screen` do not themselves restart interaction; Timer requires render/event
+delivery. The receipt does not observe the live timer callback or post-dispatch
+money, so it does not establish the exact cause or a product arithmetic defect.
+H75 indexes this boundary. A future selected diagnostic should distinguish actual
+dispatch delivery and observed values before any correction or SDK allocation.
+This merger is assigned neither. H74's narration destination is reached in this run;
+that narrower correction does not turn the full gate green.
+
+The independent terminal audit verifies all **10 physical SDK children**, each
+with matched start/completion, PID, arguments, cwd, duration and output. Seven
+construction children and compile/lint exit zero; normal exits one. Every completed
+child has no process timeout or truncation. Physical children are separate from the
+single charged invocation. Evidence/case initialization precedes SDK staging and
+lives outside the owned temporary root.
+
+All 77 exported project files, 11 accepted `.rpy` files, four captured hashes and
+image bytes match. Source hash sets are unchanged in all three completed cases.
+The actual desktop stays admitted, both power assertions release, the owned root
+is absent and host audit finds no owned process among the eleven recorded test/SDK
+PIDs. Raw outputs, accepted source/assets, launch/frozen-input manifests, retained
+executable, desktop receipt, failure classification and independent/process audits
+remain ignored under `.toolchains/arithmetic-ui-runtime/mac-02/`. Prior failed
+worker `mac-01`, its target/binary, coordinator audit and every earlier receipt remain
+preserved.
+
+Usage is **Mac 11/20 started, zero reserved; Windows 3/20 started, zero reserved**.
+The recovery fails full qualification. This is rendered-action fixture work, with
+no new mouse/keyboard/native-editor proof. Original #95 physical-gesture evidence
+keeps its unchanged-adapter scope. Independent Standards five/Spec four reports remain separate and preserved.
+P4 and Kris's #96/#110 scope decision remain open. Windows qualification remains
+pending coordinator routing; no Windows/editor-native/package/browser/canvas-helper/
+manual-CI/watch operation ran. Integration/status/PR and qualification ownership
+return to the coordinator after publication of this result.

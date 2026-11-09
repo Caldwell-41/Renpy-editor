@@ -281,18 +281,32 @@ survive. New receipts are separate under ignored
 
 Spec P4 and Kris's #96/#110 scope decision stay pending. Tracks/Reel/cross-view
 draft acceptance is unchanged; no #110 work or review approval is inferred.
-The [UI-emitted qualification assignment](../tasks/active/shared-arithmetic.md#2026-11-10-ui-emitted-source-qualification-selected)
-returned local clean `12ce2eea` with a failed Mac invocation and SDK-free driver
-correction. Compile/lint and Story trace/types passed; narration progression failed,
-so Screens/Finish/wrong-outcome proof remains absent. The
-[recovery assignment](../tasks/active/shared-arithmetic.md#2026-11-10-first-ui-sdk-result-audited-recovery-selected)
-owns the coordinator audit, exact driver hash and limits. The fresh merger receives
-integration/status/PR and one explicitly selected Mac recovery after publication,
-clean candidate/binary/preflight/official SDK/desktop checks. Mac is 10/20 started
-plus one new reservation; Windows is 3/20 with zero reserved. Preserve worker
-`mac-01` and use fresh integration `mac-02` outputs. No subsequent retry is selected.
-Return the actual result and cleanup, then coordinator routes Windows through its
-preserved checkout. P4 stays pending; no native/package/human proof is inferred.
+The [UI recovery result](../tasks/evidence/arithmetic-review.md#recovery-integration-and-mac-invocation-2-2026-11-10)
+is integrated by normal merge `ec7e366b7bff4051b54b2f739fe1416b35fa5360`, with
+parents coordinator `b2257241` and returned `12ce2eea`. This is the clean published
+pre-SDK tested and actual recovery source. Complete app/fixture/script/CI trees
+match the return; all 1,880 inputs match Git. Fresh retained binary and both exact
+preflights, 19 action cases with two named SDK gates ignored, static checks,
+formatting, contract/branch-plan, repository and whitespace pass.
+
+The single Mac recovery failed after 13 normal assertions at the first divide
+value. Compile/lint, exact Story trace/types, narration progression, condition,
+rendered balance and pre-activation inertness pass at their boundaries. Later
+action/Finish witnesses and actual wrong-outcome rejection are missing; wrong
+outcome is unrun. Provisional fixture timer/interaction-refresh diagnosis needs
+selected observation before a correction. No product arithmetic defect is established.
+Ten physical children match receipts; all completed cases preserve source with no
+process timeout/truncation. Both power assertions release; owned root/process cleanup
+passes. Preserve fresh root `.toolchains/arithmetic-ui-runtime/mac-02/` and its
+retained executable, worker `mac-01` and its target/binary, and the coordinator audit.
+
+Actual usage is Mac 11/20 and Windows 3/20, zero reserved. No further retry or source
+correction is assigned. Integration/status/PR and qualification ownership return
+to the coordinator after this result is published. Select any next diagnostic/
+allocation explicitly and route pending Windows proof; no Windows/native/package/
+browser/canvas-helper/manual-CI/watch operation ran. P4 and #96/#110 scope remain
+unanswered, with all issues/criteria open and independent Standards five/Spec four
+reports preserved. No full native/human acceptance is claimed.
 
 The [review CI correction](../tasks/evidence/arithmetic-review.md#ci-caller-correction-before-review-fixes)
 migrates the obsolete `Edit default` smoke caller to the current inspector. All

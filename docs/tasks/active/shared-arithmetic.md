@@ -72,7 +72,7 @@ one becomes necessary. Routine checks and review have no numerical limits.
 
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
-| macOS ARM64 SDK qualification | 20 | 10 | 1 for UI driver recovery |
+| macOS ARM64 SDK qualification | 20 | 11 | 0 |
 | Windows x64 SDK qualification | 20 | 3 | 0 |
 
 ## Execution ledger
@@ -1671,3 +1671,35 @@ zero-cost mergers. It allocates no Windows, editor-native/package, browser,
 canvas-helper, manual-CI or watch operation. The coordinator will route Windows
 after the published result returns. All prior failed evidence remains intact.
 P4 and the #96/#110 question remain pending, with every issue/criterion open.
+
+### 2026-11-10: recovery integrated; second UI Mac result failed
+
+Conflict-free normal merge `ec7e366b7bff4051b54b2f739fe1416b35fa5360`
+preserves coordinator `b2257241` and returned `12ce2eea`. Complete app/fixture/
+script/CI inputs equal the return; coordinator records survive. All 1,880 Git
+checkout inputs match. Fresh retained Rust binary, both exact SDK-free preflights,
+19 action passes with two named SDK gates ignored, static driver admission,
+formatting, contract/branch-plan, repository and whitespace checks pass. The clean
+corrected candidate was published and remote identity verified before SDK use.
+
+The one selected Mac recovery started on that fixed source and failed. Compile 0,
+lint `--error-code` 0, normal 1 after 13 passing assertions, wrong outcome unrun.
+Narration now reaches the screen; the first divide assertion does not observe
+money 2.25. Story trace/types, condition and rendered balance/inertness pass at
+their exact boundaries. Four later witnesses, action/Finish and negative proof
+remain missing. The [recovery evidence](../evidence/arithmetic-review.md#recovery-integration-and-mac-invocation-2-2026-11-10)
+owns identities, commands, provisional timer/interaction diagnosis and the audit.
+No source correction or additional SDK attempt is assigned.
+
+Ten physical SDK children have matched records, separate from one charged start.
+All three completed cases preserve source without process timeout/truncation;
+77 exports, four snapshots and asset bytes match. Power, owned process and temp
+cleanup pass. Fresh ignored `mac-02` evidence and executable are retained here;
+worker `mac-01`, its binary/target and coordinator audit remain untouched.
+
+Actual usage is **Mac 11/20, Windows 3/20, zero reservations**. No Windows/native/
+package/browser/canvas-helper/manual-CI/watch operation ran. The gate remains
+failed, not qualified. All issues/criteria, independent review reports and P4's
+unanswered #96/#110 scope decision remain open. Integration/status/PR and selected
+qualification mutation ownership return to the coordinator. Coordinator must
+select any next diagnosis/allocation and route the still-pending Windows proof.

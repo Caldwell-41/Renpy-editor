@@ -1065,5 +1065,17 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   `Advance` can complete on an unidentified begin callback; `Until` requires its
   destination. Replace the seven transitions with destination-bound advances while
   preserving all source, assertions and deadlines. Live callback ordering remains
-  provisional; the corrected driver's SDK confirmation is still required.
+  provisional. The selected recovery reaches its narration destinations, then
+  fails at first timer-dispatched division; full qualification remains failed (H75).
 - **Evidence:** [coordinator audit and recovery selection](../tasks/active/shared-arithmetic.md#2026-11-10-first-ui-sdk-result-audited-recovery-selected).
+
+## H75. UI SDK recovery lacks the first timer-dispatched divide result
+
+- **Class/search:** missing runtime evidence; provisional fixture interaction/dispatch
+  defect; driver line 102, `money == 2.25`, 13 passing assertions.
+- **Observed:** destination-bound narration reaches the screen and its initial TTS/
+  inertness assertions. The first divide result is not observed. SDK test Python and
+  `show_screen` do not restart interaction; Timer needs render/event delivery.
+  Live callback delivery and post-dispatch money are unobserved, so the exact cause
+  and any product defect remain unestablished. No correction or retry is assigned.
+- **Evidence:** [Mac recovery result](../tasks/evidence/arithmetic-review.md#recovery-integration-and-mac-invocation-2-2026-11-10).
