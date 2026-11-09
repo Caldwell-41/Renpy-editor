@@ -1,17 +1,21 @@
 # Current status
 
-## Story Combined v1 implementation interview
+## Story Combined v1 specification published
 
-The documentation-only interview is active on `codex/story-combined-v1-grill`.
+The documentation-only interview is complete. Kris invoked to-spec and approved
+the existing testing boundaries on 2026-11-09. [Issue #110](https://github.com/Caldwell-41/Renpy-editor/issues/110)
+owns the integration specification and final acceptance, labelled `ready-for-agent`
+with delivery state `not_started`. Its published body and label were verified;
+native blockers are #98, #94 and #96. Choice #98 and arithmetic #87 retain their
+feature requirements and active delivery slices. Screens arithmetic completion
+does not block the Story release.
+
 The [release scope](../design/story-revamp/README.md#production-release-scope) records
-settled decisions. Documentation commits stay local. Production implementation and
-tracker publication are not selected; the approved mock remains unchanged.
-
-Kris approved B, Buttons together, for draft conflicts on 2026-11-09:
-`story-draft-conflict` / `compact`, revision `compact-v2`. The
-[reference record](../design/story-revamp/README.md#approved-draft-conflict-interaction)
-identifies the candidate and local approval commit on `codex/story-draft-conflict-mock`.
-Q13 is settled; production integration and publication remain unselected.
+settled decisions, including Q13's approved B conflict interaction and Q14's full
+beat/layout review in the live app. Canonical documentation commits remain local
+on `codex/story-combined-v1-grill`. Both approved mock sources remain unchanged;
+the conflict reference remains local on `codex/story-draft-conflict-mock`.
+Production implementation, merges and pushes are not selected.
 
 ## Story Combined v1 approved
 

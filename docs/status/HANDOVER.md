@@ -1,17 +1,22 @@
 # Current outcome handover
 
-## Story Combined v1 implementation interview
+## Story Combined v1 specification published
 
-Continue the one-decision-at-a-time interview on `codex/story-combined-v1-grill`,
-created from approved-design branch head `3f5a6de9`. The
-[release scope](../design/story-revamp/README.md#production-release-scope) owns settled
-scope decisions; record domain terms in the root glossary when resolved. Q13 is
-settled: Kris approved B, Buttons together, after the copy pass and confirmed it
-here. Do not ask for approval again. Q14 is settled: final acceptance includes
-Kris's live-app review of all supported beat types/editing options and the layout
-with different Choices and variables, after automated qualification. The
-[acceptance record](../design/story-revamp/README.md#final-acceptance-in-the-live-app)
-owns the detail. Implementation task ownership and the final plan/spec remain open.
+The interview on `codex/story-combined-v1-grill`, created from approved-design
+branch head `3f5a6de9`, is complete. Kris invoked to-spec and approved testing through
+existing app controls/public authoring commands, source/history/reopen checks,
+focused Ren'Py runs and his live-app review. [Issue #110](https://github.com/Caldwell-41/Renpy-editor/issues/110)
+now owns the integration specification and final acceptance. Its published body
+matches the reviewed draft, `ready-for-agent` is applied, and native blockers #98,
+#94 and #96 were verified. Delivery state is `not_started`; implementation still
+needs Kris's selection.
+
+The [release scope](../design/story-revamp/README.md#production-release-scope) owns
+settled product decisions. Q13's B approval and Q14's full beat/layout review are
+settled; do not ask for them again. The [acceptance record](../design/story-revamp/README.md#final-acceptance-in-the-live-app)
+owns the live-app review detail. #98 and #87 retain feature requirements. Use active
+arithmetic slices #92–#94 and #96; the old handoffs #89/#90 are closed as superseded.
+Story does not wait for all Screens arithmetic work or closure of #87.
 
 The [approved conflict reference](../design/story-revamp/README.md#approved-draft-conflict-interaction)
 is `story-draft-conflict` / `compact`, revision `compact-v2`, source `af23cf4d`,
@@ -20,12 +25,14 @@ whose worktree owns the prototype, minimal lab registration and design notes.
 This chat owns the canonical domain and status docs. The handoff's focused design
 checks pass; capture hashes and unchanged candidate source were verified here.
 The approved prototype has not been merged into this branch. Production behaviour
-and tests remain unchanged; no implementation, merge or publication is selected.
+and tests remain unchanged; no implementation, merge or push is selected. #110 is
+self-contained because the canonical interview docs and conflict reference remain
+local. Make the pinned reference available before later integration checks.
 
 Commit documentation locally.
-Do not edit production code or publish issues, comments, PRs or pushes without Kris's
-request. The other chat owns `codex/story-combined-fourth-mock`; preserve its branch
-and preview. No build, test run or browser operation is pending for this interview.
+The requested specification is published; no further tracker changes, PRs or pushes
+are selected. The other chat owns `codex/story-combined-fourth-mock`; preserve its
+branch and preview. No product build, test run or browser operation is pending.
 
 ## Story Combined v1 approved
 

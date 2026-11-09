@@ -49,24 +49,30 @@ The app-wide Brass and slate palette is a separate implementation slice required
 before or with this release. [UI.md](../../UI.md#palette-brass-and-slate) owns its
 scope, including both themes and the known text-contrast fixes.
 
-This interview records decisions only; implementation and publication still need
-Kris's go-ahead.
+Kris completed the interview and requested publication through to-spec on
+2026-11-09. [Issue #110](https://github.com/Caldwell-41/Renpy-editor/issues/110) owns
+the integration specification and final acceptance. It is `ready-for-agent` with
+delivery state `not_started`; implementation still needs Kris's selection.
 
 ### Implementation prerequisites
 
 Live Story layout integration is blocked until the required Choice and Story
 arithmetic operations are implemented and qualified. Complete #98 Stage 1 before
-Stage 2. Use #87's [backend handoff #89](https://github.com/Caldwell-41/Renpy-editor/issues/89)
-for the shared arithmetic core and Story operations. Their existing specifications
-remain the requirement owners; this dependency does not create a second feature spec.
+Stage 2. #98's active delivery slices are #101–#104 for Stage 1 and #105–#106 for
+Stage 2. For arithmetic, use #87's active backend slices #92–#94 and
+[Story UI #96](https://github.com/Caldwell-41/Renpy-editor/issues/96). The earlier
+broad handoffs #89 and #90 are closed as superseded. Their replacement tickets
+retain delivery ownership; this integration does not create a second feature spec
+or arithmetic UI implementation. Shared decimal setup controls remain with #97;
+Story can use declared variables and source/backend fixtures as #96 specifies.
 
 Before layout integration, verify source edits, saving, shared Undo/Redo, reopening
 and the required game behaviour through the existing tests. Then connect the approved
 Story layout to those tested operations. The palette remains a separate slice.
 Completion of all Screens arithmetic work, or closure of #87, is not a prerequisite.
 
-Record these dependencies in the future Story integration task when Kris authorizes
-publication. This local decision does not create or change GitHub tasks.
+Issue #110 records these dependencies, with native blockers #98, #94 and #96.
+It owns the full Story acceptance while the existing tickets own their feature work.
 
 ### Final acceptance in the live app
 
@@ -86,8 +92,10 @@ the approved B conflict interaction. Review smoothness and conformance to both
 approved designs in the live app.
 
 Automated source, history and runtime checks remain required under the feature
-contracts and [TESTING](../../TESTING.md). They and the human authoring/layout
-review supply separate evidence; neither alone establishes final acceptance.
+contracts and [TESTING](../../TESTING.md). Kris confirmed the existing app-control
+and public-command testing boundaries, source/history/reopen checks and focused
+Ren'Py runs when preparing #110. They and the human authoring/layout review supply
+separate evidence; neither alone establishes final acceptance.
 
 ### Stage proportions in production
 
