@@ -1,5 +1,14 @@
 # Current status
 
+## Shared arithmetic selected
+
+Kris selected [spec #87](https://github.com/Caldwell-41/Renpy-editor/issues/87)
+for implementation on 2026-11-09. Branch `codex/spec-87-arithmetic` starts from
+accepted Screens tip `251fb477`. [The delivery record](../tasks/active/shared-arithmetic.md)
+owns execution, ticket ownership and cumulative SDK limits. Story mock #88 is
+already approved; #91 and #92 are ready. Backend and approved production UI are
+in scope. No full #110 redesign, parent-PR merge or release is selected.
+
 ## Story Combined v1 references consolidated
 
 The documentation-only interview is complete. Kris invoked to-spec and approved

@@ -1,5 +1,26 @@
 # Current outcome handover
 
+## Shared arithmetic implementation, 2026-11-09
+
+Kris selected spec #87 using implement-spec and confirmed the read-back. The live
+branch is `codex/spec-87-arithmetic`, based on accepted Screens tip `251fb477`.
+The [delivery record](../tasks/active/shared-arithmetic.md) owns the native ticket
+graph, file ownership, evidence and cumulative operation limits. Use it before
+dispatching implementation or qualification. The occupied Screens checkout is
+clean and preserved. This is a separate integration worktree.
+
+Story mock #88 is approved as Story Combined v1 / `combined-v1`. Broad handoffs
+#89/#90 were superseded by #91–#97. Start #92 backend and #91 mock independently;
+follow #92 -> #93 -> #94, then #95 and #96, then #97 with Screens approval.
+Kris authorized design chats named `Variable Mock - {description}` and separate
+worktrees. Production controls wait for their approval and qualified backend.
+No SDK/native/package/CI operation has started and no PR exists yet. Next action
+is dispatch, followed by a draft PR after the first ticket merge. Final parent
+PR merge/release and full Story redesign #110 are outside this selection.
+
+The earlier sections below retain prior work and recovery context. Their
+unselected-next-task statements do not override this explicit #87 selection.
+
 ## Story Combined v1 references consolidated
 
 The interview on `codex/story-combined-v1-grill`, created from approved-design
