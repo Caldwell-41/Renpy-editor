@@ -347,29 +347,39 @@ Undo/Redo and reopen reconstruct definitions and references from authoritative b
 ## Variables and state
 
 Visual variables support `bool`, `int`, and `string` definitions and literal
-assignment. Story's public authoring commands also support integer self-assignment
-with Add or Subtract and one signed 64-bit literal operand. The Set variable
-payload retains `variableId` and `value`; arithmetic uses a typed object in `value`
-with `operation` (`add` or `subtract`) and canonical decimal-string `operand`.
-Literal bool/string values and lossless decimal-string integers keep their contract.
+assignment. Story also supports bounded whole-number formulas. Set variable keeps
+`variableId` and `value`; arithmetic uses `{operation, operand}` in `value`.
+Operations are `assign`, `add`, `subtract`, `multiply`, `floorDivide` and `remainder`.
+The operand is source text containing integer literals, declared integer variables,
+signs, parentheses and `+`, `-`, `*`, `//`, `%` with Python precedence. Integers and
+known results cross JSON as signed i64 decimal strings. Bool/string literal
+assignments retain their existing contract. Ordinary division and decimals are
+outside this slice. Functions, powers, attribute/index access and Python execution
+remain unsupported.
 
-`scene.list` exposes the verified authoring revision and declared variable choices.
-Arithmetic mutations require that `expectedAuthoringRevision` as well as the existing
-project, source-map, Scene source and explicit-body assertions. Core inspection
-reports the inferred result type, variable reads/writes and known value or unknown
-reason. It uses only preceding supported local assignments. Declaration defaults
-never establish current Story state. Unsupported control flow and Custom Code
-invalidate that knowledge; integer overflow remains an explicit unknown result.
-The renderer consumes this result without parsing or evaluating formulas.
+`scene.list` exposes the authoring revision and declared variable choices.
+Arithmetic mutations require `expectedAuthoringRevision` plus the existing project,
+source-map, Scene source and explicit-body assertions. Pending Scene or variable
+Source drafts refuse; stale dependencies cannot authorize a write. Assignment
+inspection reports the core-inferred result type, read IDs with names/types, target
+write IDs, field diagnostics and a known value or explicit unknown reason. It uses
+preceding supported local assignments only. Defaults never establish current Story
+state. Unsupported control flow, nested ownership and Custom Code invalidate that
+knowledge. Zero divisors and out-of-range literals, intermediate values or results
+have explicit diagnostics. Negative floor/remainder match Python, including a zero
+remainder for i64 minimum modulo -1. The renderer consumes core results.
 
-Both `$ score += 2` and `$ score = score + 2` are recognized, as are their
-Subtract equivalents. Semantic no-ops retain source bytes; operand/operator edits
-retain source style, spacing, comments and identity. Source-map schema 8 is unchanged.
-An exact-byte/range match permits a previously protected arithmetic mapping to
-retain its ID without rewriting metadata on open. A later authoring or existing
-schema-migration transaction may refine the mapping. Unsupported formulas stay
-protected. [The #92 contract and fixtures](tasks/evidence/arithmetic-92.md) record
-exact shapes, diagnostics, qualification and the remaining UI/Windows work.
+Compound and general supported explicit assignments inspect/edit through the same
+Story owner, including supported nested bodies. Existing self Add/Subtract literal
+payloads retain their representation. Semantic no-ops preserve bytes/history;
+qualified edits replace only operand/expression and necessary operator tokens,
+retaining source style, spacing, comments and IDs. Source-map schema 8 is unchanged.
+An exact-byte/range match permits an old Custom Code formula mapping to retain its
+ID without rewriting metadata on open. Existing schema migration can refine it.
+Invalid formulas remain protected and expose assignment diagnostics. The
+[#93 contract and fixtures](tasks/evidence/arithmetic-93.md) own current shapes,
+qualification and target limits; [#92 evidence](tasks/evidence/arithmetic-92.md)
+retains the preceding simple-adjustment and both-target proof.
 
 Phase 1D Variables store UUID, immutable lowercase technical name, supported type,
 typed default value, and exact source mapping. Source uses ordinary mutable state:

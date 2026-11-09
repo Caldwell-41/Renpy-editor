@@ -22,8 +22,9 @@ export interface ChoiceOption {
   readonly condition?: Condition;
 }
 
-export interface IntegerAdjustment { readonly operation: "add" | "subtract"; readonly operand: string }
-export type AssignmentState = { readonly status: "known"; readonly value: boolean | string } | { readonly status: "unknown"; readonly reason: "unobservedCurrentValue" | "unsupportedControlFlow" | "integerOverflow" | "invalidOperand" };
+export interface IntegerAdjustment { readonly operation: "assign" | "add" | "subtract" | "multiply" | "floorDivide" | "remainder"; readonly operand: string }
+export type ArithmeticUnknown = "unobservedCurrentValue" | "unsupportedControlFlow" | "integerOverflow" | "invalidOperand" | "invalidSyntax" | "missingVariable" | "incompatibleOperand" | "zeroDivisor" | "limitExceeded";
+export type AssignmentState = { readonly status: "known"; readonly value: boolean | string } | { readonly status: "unknown"; readonly reason: ArithmeticUnknown };
 export type BeatPayload =
   | { readonly type: "background"; readonly assetId: string; readonly transition: TransitionRef }
   | { readonly type: "showCharacter"; readonly characterId: string; readonly appearanceId: string; readonly placement: PlacementRef; readonly transition: TransitionRef }
@@ -47,7 +48,7 @@ export type BeatPayload =
 export interface BeatOwner { readonly groupId: string; readonly branchId: string }
 export interface ConditionalBranch { readonly groupId: string; readonly variableId?: string; readonly otherwise: boolean; readonly ordinal?: number; readonly condition?: Condition }
 export interface SceneBeat {
-  readonly assignment?: { readonly inferredResultType: "bool" | "int" | "string"; readonly reads: readonly string[]; readonly writes: readonly string[]; readonly state: AssignmentState };
+  readonly assignment?: { readonly inferredResultType: "bool" | "int" | "string" | null; readonly readVariables: readonly { readonly variableId: string; readonly technicalName: string; readonly variableType: "bool" | "int" | "string" }[]; readonly diagnostics: readonly { readonly field: "value.operand"; readonly reason: ArithmeticUnknown }[]; readonly reads: readonly string[]; readonly writes: readonly string[]; readonly state: AssignmentState };
   readonly screenEffects?: ScreenEffects;
   readonly owner?: BeatOwner;
   readonly conditionalBranch?: ConditionalBranch;

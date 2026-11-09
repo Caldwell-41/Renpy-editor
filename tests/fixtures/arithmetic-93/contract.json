@@ -1,0 +1,560 @@
+{
+  "request": {
+    "protocolVersion": 1,
+    "requestId": "formula-example",
+    "operation": "scene.apply",
+    "payload": {
+      "sessionId": "example-session",
+      "command": {
+        "beat": {
+          "type": "setVariable",
+          "value": {
+            "operand": "score + (bonus + 2) * 4",
+            "operation": "assign"
+          },
+          "variableId": "e23d327b-153c-40f4-b4a8-1094e3b50a5b"
+        },
+        "beatId": "020009bb-755e-4234-8003-02d2bae3ded0",
+        "expectedBody": {
+          "type": "root"
+        },
+        "expectedSourceRevision": "16aba99fd659eca8d84ec240ea7a990fd29774871424f4fead46340dd5ee25e7",
+        "sceneId": "fc6f6415-9dbe-4437-bb66-9cb429d52f44",
+        "type": "updateBodyBeat"
+      },
+      "expectedAuthoringRevision": "373828852bbe7d72af9859daa4f48db9df0441abb093d702ce961ecfd43bf775",
+      "expectedProjectRevision": "45b18054410795b4e5e79eb346617f23a565efc5a8d9c202d2eff9abd5ef3adf",
+      "expectedSourceMapRevision": "437b27f830083c6a4f9631c161cd5766b236ac749d50febe4f5d8e96499f1375"
+    }
+  },
+  "response": {
+    "protocolVersion": 1,
+    "requestId": "formula-example",
+    "ok": true,
+    "result": {
+      "authoring": {
+        "appearances": [],
+        "assets": [],
+        "characters": [
+          {
+            "defaultAppearanceId": null,
+            "dialogueColor": "#ffffff",
+            "displayName": "Bec",
+            "id": "65b430cc-cc94-4153-a934-f825d49a302c",
+            "source": {
+              "path": "game/definitions/characters.rpy",
+              "sourceRevision": "547777c3ec87b24e3a61fccbcb89c390a9a5f573bdaaa8b87ec099c6d75028b1",
+              "statement": "define bec = Character(\"Bec\", color=\"#ffffff\")"
+            },
+            "technicalName": "bec"
+          }
+        ],
+        "projectId": "9273e056-85fb-4061-ab36-afdc48a0e217",
+        "schemaVersion": 1,
+        "variables": [
+          {
+            "defaultValue": true,
+            "id": "53af1771-f0ba-4405-8152-b00681f557d8",
+            "source": {
+              "path": "game/definitions/variables.rpy",
+              "sourceRevision": "f56a3057e7dc02c570de15da5f041e0ad8d8039de1ebcc440dcde134b3f3a93a",
+              "statement": "default flag = True"
+            },
+            "technicalName": "flag",
+            "variableType": "bool"
+          },
+          {
+            "defaultValue": "99",
+            "id": "e23d327b-153c-40f4-b4a8-1094e3b50a5b",
+            "source": {
+              "path": "game/definitions/variables.rpy",
+              "sourceRevision": "f56a3057e7dc02c570de15da5f041e0ad8d8039de1ebcc440dcde134b3f3a93a",
+              "statement": "default score = 99"
+            },
+            "technicalName": "score",
+            "variableType": "int"
+          },
+          {
+            "defaultValue": "99",
+            "id": "0a3d9b61-a87b-487e-8694-254a1ae96ad7",
+            "source": {
+              "path": "game/definitions/variables.rpy",
+              "sourceRevision": "f56a3057e7dc02c570de15da5f041e0ad8d8039de1ebcc440dcde134b3f3a93a",
+              "statement": "default money = 99"
+            },
+            "technicalName": "money",
+            "variableType": "int"
+          },
+          {
+            "defaultValue": "99",
+            "id": "dba00cf4-8246-4a56-99b3-d2e0a3df1e3d",
+            "source": {
+              "path": "game/definitions/variables.rpy",
+              "sourceRevision": "f56a3057e7dc02c570de15da5f041e0ad8d8039de1ebcc440dcde134b3f3a93a",
+              "statement": "default bonus = 99"
+            },
+            "technicalName": "bonus",
+            "variableType": "int"
+          },
+          {
+            "defaultValue": "99",
+            "id": "c09d1d7e-c392-4173-bcdc-e3e5e225dca6",
+            "source": {
+              "path": "game/definitions/variables.rpy",
+              "sourceRevision": "f56a3057e7dc02c570de15da5f041e0ad8d8039de1ebcc440dcde134b3f3a93a",
+              "statement": "default remainder = 99"
+            },
+            "technicalName": "remainder",
+            "variableType": "int"
+          },
+          {
+            "defaultValue": "99",
+            "id": "187a8498-9a43-4118-b0b2-28af5b7f6dcd",
+            "source": {
+              "path": "game/definitions/variables.rpy",
+              "sourceRevision": "f56a3057e7dc02c570de15da5f041e0ad8d8039de1ebcc440dcde134b3f3a93a",
+              "statement": "default minimum = 99"
+            },
+            "technicalName": "minimum",
+            "variableType": "int"
+          }
+        ]
+      },
+      "authoringRevision": "373828852bbe7d72af9859daa4f48db9df0441abb093d702ce961ecfd43bf775",
+      "canRedo": false,
+      "canUndo": true,
+      "chapters": [
+        {
+          "directory": "game/chapters/chapter_01",
+          "displayName": "Chapter 1",
+          "id": "7954db62-91f9-4b27-b570-67e41d03ed73"
+        }
+      ],
+      "entrySceneId": "fc6f6415-9dbe-4437-bb66-9cb429d52f44",
+      "lastOpen": {
+        "chapterId": "7954db62-91f9-4b27-b570-67e41d03ed73",
+        "sceneId": "fc6f6415-9dbe-4437-bb66-9cb429d52f44"
+      },
+      "projectRevision": "45b18054410795b4e5e79eb346617f23a565efc5a8d9c202d2eff9abd5ef3adf",
+      "scenes": [
+        {
+          "beats": [
+            {
+              "assignment": {
+                "diagnostics": [],
+                "inferredResultType": "int",
+                "readVariables": [],
+                "reads": [],
+                "state": {
+                  "status": "known",
+                  "value": "9007199254740993"
+                },
+                "writes": [
+                  "e23d327b-153c-40f4-b4a8-1094e3b50a5b"
+                ]
+              },
+              "byteEnd": 90,
+              "byteStart": 59,
+              "id": "abe64136-35dc-43ca-a23a-5e8a9035028b",
+              "payload": {
+                "type": "setVariable",
+                "value": "9007199254740993",
+                "variableId": "e23d327b-153c-40f4-b4a8-1094e3b50a5b"
+              },
+              "protected": false
+            },
+            {
+              "assignment": {
+                "diagnostics": [],
+                "inferredResultType": "int",
+                "readVariables": [],
+                "reads": [],
+                "state": {
+                  "status": "known",
+                  "value": "3"
+                },
+                "writes": [
+                  "dba00cf4-8246-4a56-99b3-d2e0a3df1e3d"
+                ]
+              },
+              "byteEnd": 106,
+              "byteStart": 90,
+              "id": "7c659976-d845-4fc1-aa56-ba30515914a2",
+              "payload": {
+                "type": "setVariable",
+                "value": "3",
+                "variableId": "dba00cf4-8246-4a56-99b3-d2e0a3df1e3d"
+              },
+              "protected": false
+            },
+            {
+              "assignment": {
+                "diagnostics": [],
+                "inferredResultType": "int",
+                "readVariables": [
+                  {
+                    "technicalName": "score",
+                    "variableId": "e23d327b-153c-40f4-b4a8-1094e3b50a5b",
+                    "variableType": "int"
+                  },
+                  {
+                    "technicalName": "bonus",
+                    "variableId": "dba00cf4-8246-4a56-99b3-d2e0a3df1e3d",
+                    "variableType": "int"
+                  }
+                ],
+                "reads": [
+                  "e23d327b-153c-40f4-b4a8-1094e3b50a5b",
+                  "dba00cf4-8246-4a56-99b3-d2e0a3df1e3d"
+                ],
+                "state": {
+                  "status": "known",
+                  "value": "36028797018963972"
+                },
+                "writes": [
+                  "e23d327b-153c-40f4-b4a8-1094e3b50a5b"
+                ]
+              },
+              "byteEnd": 160,
+              "byteStart": 106,
+              "id": "fc203e50-761e-456d-94c5-52670174db6b",
+              "payload": {
+                "type": "setVariable",
+                "value": {
+                  "operand": "bonus + 1",
+                  "operation": "multiply"
+                },
+                "variableId": "e23d327b-153c-40f4-b4a8-1094e3b50a5b"
+              },
+              "protected": false
+            },
+            {
+              "assignment": {
+                "diagnostics": [],
+                "inferredResultType": "int",
+                "readVariables": [
+                  {
+                    "technicalName": "score",
+                    "variableId": "e23d327b-153c-40f4-b4a8-1094e3b50a5b",
+                    "variableType": "int"
+                  },
+                  {
+                    "technicalName": "bonus",
+                    "variableId": "dba00cf4-8246-4a56-99b3-d2e0a3df1e3d",
+                    "variableType": "int"
+                  }
+                ],
+                "reads": [
+                  "e23d327b-153c-40f4-b4a8-1094e3b50a5b",
+                  "dba00cf4-8246-4a56-99b3-d2e0a3df1e3d"
+                ],
+                "state": {
+                  "status": "known",
+                  "value": "36028797018963992"
+                },
+                "writes": [
+                  "e23d327b-153c-40f4-b4a8-1094e3b50a5b"
+                ]
+              },
+              "byteEnd": 227,
+              "byteStart": 160,
+              "id": "020009bb-755e-4234-8003-02d2bae3ded0",
+              "payload": {
+                "type": "setVariable",
+                "value": {
+                  "operand": "score + (bonus + 2) * 4",
+                  "operation": "assign"
+                },
+                "variableId": "e23d327b-153c-40f4-b4a8-1094e3b50a5b"
+              },
+              "protected": false
+            },
+            {
+              "assignment": {
+                "diagnostics": [],
+                "inferredResultType": "int",
+                "readVariables": [],
+                "reads": [],
+                "state": {
+                  "status": "known",
+                  "value": "-7"
+                },
+                "writes": [
+                  "0a3d9b61-a87b-487e-8694-254a1ae96ad7"
+                ]
+              },
+              "byteEnd": 244,
+              "byteStart": 227,
+              "id": "8cddcde6-568c-4f29-bf5a-4fe4d23293e2",
+              "payload": {
+                "type": "setVariable",
+                "value": "-7",
+                "variableId": "0a3d9b61-a87b-487e-8694-254a1ae96ad7"
+              },
+              "protected": false
+            },
+            {
+              "assignment": {
+                "diagnostics": [],
+                "inferredResultType": "int",
+                "readVariables": [
+                  {
+                    "technicalName": "money",
+                    "variableId": "0a3d9b61-a87b-487e-8694-254a1ae96ad7",
+                    "variableType": "int"
+                  },
+                  {
+                    "technicalName": "bonus",
+                    "variableId": "dba00cf4-8246-4a56-99b3-d2e0a3df1e3d",
+                    "variableType": "int"
+                  }
+                ],
+                "reads": [
+                  "0a3d9b61-a87b-487e-8694-254a1ae96ad7",
+                  "dba00cf4-8246-4a56-99b3-d2e0a3df1e3d"
+                ],
+                "state": {
+                  "status": "known",
+                  "value": "-3"
+                },
+                "writes": [
+                  "0a3d9b61-a87b-487e-8694-254a1ae96ad7"
+                ]
+              },
+              "byteEnd": 266,
+              "byteStart": 244,
+              "id": "cd4c3411-02c2-4867-b867-aafa79c08394",
+              "payload": {
+                "type": "setVariable",
+                "value": {
+                  "operand": "bonus",
+                  "operation": "floorDivide"
+                },
+                "variableId": "0a3d9b61-a87b-487e-8694-254a1ae96ad7"
+              },
+              "protected": false
+            },
+            {
+              "assignment": {
+                "diagnostics": [],
+                "inferredResultType": "int",
+                "readVariables": [],
+                "reads": [],
+                "state": {
+                  "status": "known",
+                  "value": "-2"
+                },
+                "writes": [
+                  "c09d1d7e-c392-4173-bcdc-e3e5e225dca6"
+                ]
+              },
+              "byteEnd": 291,
+              "byteStart": 266,
+              "id": "a8a9a97b-e13a-4a6c-a6ec-b8eadb57078b",
+              "payload": {
+                "type": "setVariable",
+                "value": {
+                  "operand": "7 % -3",
+                  "operation": "assign"
+                },
+                "variableId": "c09d1d7e-c392-4173-bcdc-e3e5e225dca6"
+              },
+              "protected": false
+            },
+            {
+              "assignment": {
+                "diagnostics": [],
+                "inferredResultType": "int",
+                "readVariables": [],
+                "reads": [],
+                "state": {
+                  "status": "known",
+                  "value": "-9223372036854775808"
+                },
+                "writes": [
+                  "187a8498-9a43-4118-b0b2-28af5b7f6dcd"
+                ]
+              },
+              "byteEnd": 328,
+              "byteStart": 291,
+              "id": "ab3e3588-2cbb-4809-bc1a-9621d72d35ca",
+              "payload": {
+                "type": "setVariable",
+                "value": "-9223372036854775808",
+                "variableId": "187a8498-9a43-4118-b0b2-28af5b7f6dcd"
+              },
+              "protected": false
+            },
+            {
+              "assignment": {
+                "diagnostics": [],
+                "inferredResultType": "int",
+                "readVariables": [
+                  {
+                    "technicalName": "minimum",
+                    "variableId": "187a8498-9a43-4118-b0b2-28af5b7f6dcd",
+                    "variableType": "int"
+                  }
+                ],
+                "reads": [
+                  "187a8498-9a43-4118-b0b2-28af5b7f6dcd"
+                ],
+                "state": {
+                  "status": "known",
+                  "value": "0"
+                },
+                "writes": [
+                  "187a8498-9a43-4118-b0b2-28af5b7f6dcd"
+                ]
+              },
+              "byteEnd": 348,
+              "byteStart": 328,
+              "id": "778c5d71-2d81-4c21-969e-e2b595d83eeb",
+              "payload": {
+                "type": "setVariable",
+                "value": {
+                  "operand": "-1",
+                  "operation": "remainder"
+                },
+                "variableId": "187a8498-9a43-4118-b0b2-28af5b7f6dcd"
+              },
+              "protected": false
+            },
+            {
+              "byteEnd": 366,
+              "byteStart": 348,
+              "conditionalBranch": {
+                "condition": {
+                  "expression": {
+                    "left": {
+                      "type": "variable",
+                      "variableId": "dba00cf4-8246-4a56-99b3-d2e0a3df1e3d",
+                      "variableType": "int"
+                    },
+                    "operator": "greater",
+                    "right": {
+                      "type": "int",
+                      "value": "0"
+                    },
+                    "type": "compare"
+                  },
+                  "status": "supported"
+                },
+                "groupId": "38e5c903-8104-4fa6-b271-ed55caf5db3f",
+                "ordinal": 0,
+                "otherwise": false
+              },
+              "id": "b0e0c0dd-7b8a-4966-ba98-8f62a316e509",
+              "payload": {
+                "reason": "Unsupported or runtime-dependent Ren'Py source",
+                "source": "    if bonus > 0:",
+                "type": "customCode"
+              },
+              "protected": true
+            },
+            {
+              "assignment": {
+                "diagnostics": [
+                  {
+                    "field": "value.operand",
+                    "reason": "unsupportedControlFlow"
+                  }
+                ],
+                "inferredResultType": "int",
+                "readVariables": [
+                  {
+                    "technicalName": "money",
+                    "variableId": "0a3d9b61-a87b-487e-8694-254a1ae96ad7",
+                    "variableType": "int"
+                  },
+                  {
+                    "technicalName": "bonus",
+                    "variableId": "dba00cf4-8246-4a56-99b3-d2e0a3df1e3d",
+                    "variableType": "int"
+                  }
+                ],
+                "reads": [
+                  "0a3d9b61-a87b-487e-8694-254a1ae96ad7",
+                  "dba00cf4-8246-4a56-99b3-d2e0a3df1e3d"
+                ],
+                "state": {
+                  "reason": "unsupportedControlFlow",
+                  "status": "unknown"
+                },
+                "writes": [
+                  "0a3d9b61-a87b-487e-8694-254a1ae96ad7"
+                ]
+              },
+              "byteEnd": 431,
+              "byteStart": 366,
+              "id": "a8df57b4-1fef-42df-96d7-17f0cc1a3beb",
+              "owner": {
+                "branchId": "b0e0c0dd-7b8a-4966-ba98-8f62a316e509",
+                "groupId": "38e5c903-8104-4fa6-b271-ed55caf5db3f"
+              },
+              "payload": {
+                "type": "setVariable",
+                "value": {
+                  "operand": "money * (bonus + 1)",
+                  "operation": "assign"
+                },
+                "variableId": "0a3d9b61-a87b-487e-8694-254a1ae96ad7"
+              },
+              "protected": false
+            },
+            {
+              "byteEnd": 443,
+              "byteStart": 431,
+              "id": "057b6636-a3e0-4c95-a9cd-3730753996a7",
+              "payload": {
+                "reason": "Unsupported or runtime-dependent Ren'Py source",
+                "source": "    python:",
+                "type": "customCode"
+              },
+              "protected": true
+            },
+            {
+              "byteEnd": 476,
+              "byteStart": 443,
+              "id": "03c1340c-6ef7-4f4e-aacf-f9c06a41ede7",
+              "payload": {
+                "reason": "Unsupported or runtime-dependent Ren'Py source",
+                "source": "        opaque_neighbor = \"kept\"",
+                "type": "customCode"
+              },
+              "protected": true
+            },
+            {
+              "byteEnd": 502,
+              "byteStart": 476,
+              "id": "0b0263d0-c4ac-4871-a9b1-532a8bbaa4e1",
+              "payload": {
+                "text": "Arithmetic accepted",
+                "type": "narration"
+              },
+              "protected": false
+            },
+            {
+              "byteEnd": 513,
+              "byteStart": 502,
+              "id": "74541861-15a4-4065-90b1-6b240076d786",
+              "payload": {
+                "type": "return"
+              },
+              "protected": false
+            }
+          ],
+          "chapterId": "7954db62-91f9-4b27-b570-67e41d03ed73",
+          "displayName": "Scene 1",
+          "id": "fc6f6415-9dbe-4437-bb66-9cb429d52f44",
+          "partial": true,
+          "sourceConflict": false,
+          "sourcePath": "game/chapters/chapter_01/scene_001.rpy",
+          "sourceRevision": "f9c31c66fa0ec22b7260f34b6e5584424564748b13e580116fbf91f5bf4bd576",
+          "technicalLabel": "loomlight_scene_fc6f64159dbe4437bb669cb429d52f44"
+        }
+      ],
+      "sourceMapRevision": "3aa1d380ca2cbb1177f3f1190c75a278828dbfe2dd7c58888c99b3a9f6723d4a"
+    }
+  }
+}
