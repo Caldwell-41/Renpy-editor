@@ -195,3 +195,97 @@ Review checked one arithmetic owner, exact i64 transport, conservative state,
 reference/read metadata, declaration/source admission, both source forms' token
 ranges, typed renderer consumption and removal of literal-only expectations that
 #93 replaces. No implementation dependency was delegated.
+
+## Mac invocation 1 result
+
+**Started and passed.** The exact code candidate is
+`ca51e4c7e02c5dc54ef8c47b9c245907a1456c6b`. The selected command above ran from
+`app/` on native macOS ARM64 with Rust/Cargo 1.90.0. Prelaunch receipts recorded
+that clean commit, every core/transport/fixture input hash, the independently
+verified archive, the test executable and fresh ignored
+`.toolchains/arithmetic-93/mac-01/`. The retained binary is Mach-O arm64.
+
+Consumption is **1/1 implementer Mac invocation, 0 reserved/uncertain**. The
+feature total is now Mac **2 started / 0 reserved here**; Windows remains
+**1 started by prior work / 0 started here**. No second Mac invocation ran.
+
+The gate passed one test in 74.08 seconds:
+
+| Case | Exit | Duration | Result |
+| --- | ---: | ---: | --- |
+| Compile | 0 | 441 ms | Passed |
+| Lint | 0 | 245 ms | Passed |
+| Normal entry | 0 | 1229 ms | Passed with exact values |
+| Wrong outcome | 1 | 2101 ms | Expected assertion rejected |
+
+All four case records were present exactly once, with no timeout or truncated
+output. Normal entry reported `PASSED` and
+`ARITHMETIC_93_VALUES score=36028797018963992 money=-15 remainder=-2 minimum=0 opaque=kept`.
+The wrong run reported `FAILED` at `AssertionError: assert eval (money == -14)`
+and never printed `ARITHMETIC_93_WRONG_ACCEPTED`. The shared gate now requires
+that exact wrong assertion, as well as its failed status, for each fixture.
+
+The existing Cargo-log checker accepted the positive one-test summary. The
+terminal record had `passed:true,cleanupComplete:true`. The gate checked unchanged
+accepted `.rpy` sources after every case. A separate receipt audit verified the
+owned SDK/project/profile/saves temporary root was absent and all captured source
+and executable hashes remained unchanged. No editor application/package was built
+or launched.
+
+Accepted runtime source SHA-256:
+`9a00554463d78fd57f5537e61471d50ef2a4a165ebf451dc3cb3ae5f4ed9aeae`.
+Retained/executed ARM64 test binary SHA-256:
+`b568895463682017996f360354d9a58224edf75f77b7a9c952f4176ac52748f5`.
+Generated project/Scene IDs can change accepted-source hashes between fixtures;
+the committed source inputs and independent expected values remain fixed.
+
+Preserve the ignored worktree evidence:
+
+- `mac-01/launch-receipt.json`, `launch-started.json`, `launch-result.json` and
+  `audit.json` record identities, accounting, result checks and cleanup.
+- `mac-01/sdk.log`, `arithmetic-sdk-cases.json`, `arithmetic-requests.json`,
+  `arithmetic-produced.rpy` and `test-executable` retain raw outputs, actual public
+  commands/results, accepted bytes and the executed binary.
+- The parent evidence directory retains cheap logs, TDD reds, build JSON/stderr,
+  selector inventory and `preflight/` command-produced source/results.
+
+There are **76 distinct passing Rust cases including the SDK gate**, plus
+**36 passing renderer cases**. Seven pre-existing ignored Story specialist cases
+remain unrun. Formatting, TypeScript, repository validation and whitespace checks
+pass. No selected required check remains failed, cancelled or skipped.
+
+## Integration handoff and remaining limits
+
+After qualification, fetched current `origin/codex/spec-87-arithmetic` and ran a
+normal `git merge --no-edit codex/spec-87-arithmetic`. Both integration refs still
+pointed to `7e1c3133ebd6fe1fbd7bb9aa27b587562df4442c`, already an ancestor, so Git
+reported `Already up to date.` No reset, discarded work or history rewrite occurred.
+Subsequent edits are this result note only; core and runtime fixtures remain the
+qualified candidate's bytes. The complete representative contract JSON comes from
+the passing no-SDK preflight, with only outer request/session identifiers replaced
+by examples; its request/result shapes and generated revisions are retained.
+
+Changed files relative to integration:
+
+```text
+app/src-core/src/conditions/arithmetic.rs
+app/src-core/src/lib.rs
+app/src-core/src/renpy/tests/source_foundation/arithmetic.rs
+app/src-core/src/scene.rs
+app/src-core/src/scene/tests/arithmetic.rs
+app/src-core/src/scene/variables.rs
+app/src/scene-ui.ts
+docs/DATA_MODEL.md
+docs/tasks/evidence/arithmetic-93.md
+tests/fixtures/arithmetic-93/contract.json
+tests/fixtures/arithmetic-93/driver.rpy
+tests/fixtures/arithmetic-93/story.rpy
+```
+
+New formula Windows SDK proof is **not established**. #92's old Windows fixture
+does not qualify these formulas. The coordinator owns Windows selection/routing,
+remaining feature accounting, fresh integration review/merge, publication and issue
+acceptance. No Windows thread was contacted. No push, PR, issue closure, integration
+branch mutation or branch/worktree cleanup occurred. Preserve this worktree's raw
+Mac evidence for coordinator audit and reuse the exact #93 selector/inputs above
+for any later allocated Windows run.
