@@ -70,7 +70,7 @@ one becomes necessary. Routine checks and review have no numerical limits.
 
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
-| macOS ARM64 SDK qualification | 20 | 6 | 1 for coordinator #95 correction |
+| macOS ARM64 SDK qualification | 20 | 7 | 1 for corrected #95 imagebutton fixture |
 | Windows x64 SDK qualification | 20 | 2 | 0 |
 
 ## Execution ledger
@@ -1013,3 +1013,55 @@ are unchanged. The merger runs no SDK, merges no #95 work and repeats no checks.
 Publish only the documentation correction to the existing integration branch,
 link PR #122 immediately and verify remote HEAD/upstream/clean state. Integration
 mutation ownership then returns to the coordinator, who owns the reserved follow-up.
+
+
+### 2026-11-09: corrected #95 Mac SDK follow-up started
+
+The coordinator received the #96 merger's clean published `3db93619` and normally
+merged it into corrected #95 head `32bd1287`. The resulting clean source candidate
+is `8879088a56596780d66e94fcc19774db781e3b84`. Combined typechecking passes.
+The rebuilt and retained executable SHA-256 is
+`99bef3f59d9048b47991b2a291f42fd59592a3c5390468e4089a64c689f73dfb`.
+Fresh ignored `mac-02/launch-receipt.json` in that worktree records all 869 inputs,
+verified official archive, exact command/toolchain and desktop execution route.
+A receipt preflight refused a temporary dependency symlink; removing only that
+owned link restored clean source. That refusal started no SDK.
+
+The allocated follow-up started outside the sandbox through the existing desktop
+admission/power helper at **2026-11-09 13:18:32 UTC**, test PID **59401**. Local
+exec session **82650** owns the launcher. `mac-02/launch-started.json` records the
+actual start. Usage is now **Mac 7/20 started, Windows 2/20 started, no reservations**.
+The outcome is pending and remains charged. Preserve failed `mac-01` unchanged.
+No #95 integration, #97 implementation, Windows SDK or extra retry is selected by
+this start. Qualification still requires every runtime and rejecting witness.
+
+
+### 2026-11-09: #95 image-selector failure and CI token correction
+
+The second #95 Mac attempt, source `8879088a`, completed failed. Compile/lint
+passed; five normal-entry assertions passed before the SDK imagebutton lookup
+returned no displayable. Arithmetic click and wrong-outcome proof remain missing.
+Cleanup passed. All 869 receipt inputs match the frozen candidate; the coordinator
+verified the binary, actual failed records and retained source. Source shows no
+SDK ID: fixture replacement expected an unannotated imagebutton line, while public
+authoring writes its identity comment there. This is a distinct harness failure.
+
+The existing public no-SDK preflight now asserts the final accepted selector.
+It failed before the correction, then passed after exact UUID-marker insertion
+with one-match assertion. Production arithmetic is unchanged; #95's canonical
+note and ignored `mac-02/` retain the failure and correction. One additional Mac
+qualification is reserved after clean candidate/fresh receipt preparation.
+Consumption is **Mac 7/20 started plus one reserved; Windows 2/20 started, none
+reserved**. Twelve Mac and eighteen Windows starts remain unallocated. #97 stays
+blocked. No further SDK start has occurred at this checkpoint.
+
+Automatic Repository quality run `42623609020` at published `3db93619` failed its
+frontend theme gate because the new Story popup shadow used literal #0006. The
+coordinator reproduced that existing protocol failure locally, then used the
+existing elevation token. All nine protocol checks pass after the correction.
+No test was relaxed or added. This minor popup-shadow correction changes one
+production stylesheet input after #96's frozen comparison; that comparison keeps
+its original candidate and limits. Fresh automatic checks will qualify publication.
+Detailed failed job log and local red/green outputs are retained under ignored
+`.toolchains/arithmetic-ci/3db93619/`. No browser/native/package/manual-CI start
+ran for this correction. The parent PR remains draft; final acceptance is pending.
