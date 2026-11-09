@@ -95,3 +95,28 @@ or continue to block full #87/#96 acceptance. The question remains pending; neit
 elapsed time nor ongoing code fixes answer it. The coordinator owns that decision,
 tickets, status, integration and PR. The implementer handles the independent fixes
 without changing acceptance scope or implementing #110.
+
+## CI caller correction before review fixes
+
+One-time exact-head observation found automatic quality runs `42647963956` and
+`42647882928` failed at reviewed `09404bd1`. The newest
+[run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/42647963956) passes
+repository validation but reports 382 frontend passes and four failed results.
+Those are the parent and three scenarios of `smoke-report.dom.test`: the shipped
+probe waits for the removed `Edit default` button, preventing later Scene/Source
+checks. This is a superseded caller of #97's new inspector, not a deadline failure.
+
+The coordinator reproduced the same red with pinned Node against the merged app,
+then changed only `app/src-tauri/src/smoke_probe.js` to select `score` and wait for
+the actual `Save Default` inspector. The existing success, rejected-authoring and
+incomplete-trace scenarios all pass unchanged, four reported results including
+their parent. No assertion, timeout, security guard or report contract changed.
+Ignored `ci/` under the review directory retains the exact job/log receipt and
+local `smoke-red.log` / `smoke-green.log`. H73 indexes the cause and correction.
+
+This source change affects the embedded probe; its DOM replay is not a matching
+native-package result. No package/native/SDK was started. Later publication heads
+still require their own selected automatic checks; no passing CI is inherited.
+The fresh review-fix implementer must preserve this migrated caller while changing
+the default editor. The independent review counts remain five Standards and four
+Spec findings.

@@ -1046,3 +1046,13 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   tuple lookup; the SDK pass proves both activations with unchanged assertions and timeout.
 - **Evidence:** [#95 selector diagnosis](../tasks/evidence/arithmetic-95.md#mac-invocation-3-and-pinned-selector-name-correction)
   and [runtime pass](../tasks/evidence/arithmetic-95.md#mac-invocation-4-passed).
+
+## H73. Smoke probe calls the superseded variable-default editor
+
+- **Class/search:** harness caller migration; `Edit default` timeout in
+  `smoke-report.dom.test`, supporting authoring stops before Scene/Source.
+- **Cause/correction:** #97 replaces the old edit button with the selected variable's
+  inspector. Select the variable and wait for `Save Default`; keep all assertions
+  and deadlines. The existing three scenarios pass after the matching red.
+- **Evidence:** [exact-head CI and local replay](../tasks/evidence/arithmetic-review.md#ci-caller-correction-before-review-fixes).
+  Embedded probe changes still need a matching rebuild for any later native proof.

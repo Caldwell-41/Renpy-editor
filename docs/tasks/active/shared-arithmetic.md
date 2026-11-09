@@ -1483,3 +1483,14 @@ SDK counters stay Mac 9/20 and Windows 3/20, zero reservations. Focused browser
 comparisons are selected for approved controls; no SDK/native/package/manual-CI
 run is allocated. Return exact corrected candidates and new runtime-input scope
 for subsequent coherent qualification, not an inherited full-feature pass.
+
+Before dispatch, one-time reviewed-head CI audit found `42647963956` and
+`42647882928` failed on a superseded `Edit default` probe selector. The coordinator
+migrated that existing caller to the selected variable's inspector. The unchanged
+smoke report's three scenarios pass after a matching local red; its four reported
+results include the parent test. The
+[CI correction](../evidence/arithmetic-review.md#ci-caller-correction-before-review-fixes)
+retains exact run/log scope and native-package limits; H73 indexes it. The fresh
+fixer inherits this correction and preserves the existing assertions. A final
+coherent frontend run is warranted after the seven UI corrections; no costly
+operation or additional native proof follows from the replay.

@@ -272,9 +272,14 @@ distinct code defects plus the existing #97 approved-control fidelity obligation
 Kris's #96/#110 scope decision is pending; fixes proceed independently, with no
 criteria change or #110 implementation. After correction and a fresh merger,
 select coherent remaining qualification and design/acceptance
-work. No successor implementation or qualification starts in this merger. SDK totals
+work. The correction selects no SDK/native/package/manual-CI run. SDK totals
 remain Mac 9/20 and Windows 3/20, zero reservations. Preserve every separate worktree
 and receipt. No remote qualification remains reserved or running.
+
+The [review CI correction](../tasks/evidence/arithmetic-review.md#ci-caller-correction-before-review-fixes)
+migrates the obsolete `Edit default` smoke caller to the current inspector. All
+three existing DOM scenarios pass after the matching red. Keep this correction
+in the fixer's base; it is neither new exact-head CI nor native-package proof.
 
 The earlier sections below retain prior work and recovery context. Their
 unselected-next-task statements do not override this explicit #87 selection.
