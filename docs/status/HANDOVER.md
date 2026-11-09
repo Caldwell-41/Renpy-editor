@@ -177,12 +177,20 @@ unchanged. Evidence export now precedes assertions, and four not-run SDK case
 records initialize before generation. The original failed `mac-01` is immutable;
 it actually started and failed during preparation before arithmetic assertions.
 
-Current usage is **Mac 6/20 started + 1 reserved for coordinator #95 correction;
-Windows 2/20 started, 0 reserved**. Thirteen Mac and eighteen Windows starts remain
-unallocated under the existing ceiling. The coordinator selected one controlled
-Mac follow-up after this handoff returns, latest-integration merge, a clean
-candidate and fresh input/binary identities. No retry has started. The merger runs
-zero SDK and does not merge #95. The worker checkout's canonical
+The coordinator merged published integration `3db93619` into the corrected #95
+branch, producing clean candidate `8879088a56596780d66e94fcc19774db781e3b84`.
+Combined typechecking passes. The fresh `mac-02` receipt binds all 869 input hashes,
+the verified archive and retained executable. The reserved follow-up started
+outside the sandbox through desktop admission at 2026-11-09 13:18:32 UTC.
+The run finished failed with cleanup complete. Compile/lint passed, then normal
+entry could not find the SDK imagebutton ID before any arithmetic click. The
+fixture's unannotated-line replacement never matched the authored identity comment.
+An exact guarded marker insertion and final-source assertion now pass the existing
+no-SDK preflight. `mac-02/coordinator-audit.json` verifies 869 inputs against the
+frozen candidate, binary, real failed records and cleanup. Both failures are intact.
+One further Mac SDK run is reserved after fresh source/binary receipts. Current
+usage is **Mac 7/20 started plus one reserved; Windows 2/20 started, zero reserved**.
+The worker checkout's canonical
 `docs/tasks/evidence/arithmetic-95.md` owns its failure/correction and raw receipts.
 #95 remains unmerged and runtime-unqualified; #97 remains blocked.
 
@@ -199,7 +207,7 @@ parent-PR merge, automerge or release is selected. The published checkpoint reta
 the existing draft/base and full-spec closing references. Final-head automatic
 checks await coordinator audit; no watch was registered. After remote HEAD/upstream
 and clean-state verification, integration mutation ownership returns to the
-coordinator. The coordinator then owns the reserved #95 qualification follow-up.
+coordinator. The coordinator owns the reserved #95 qualification follow-up.
 
 The earlier sections below retain prior work and recovery context. Their
 unselected-next-task statements do not override this explicit #87 selection.
