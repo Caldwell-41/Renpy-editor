@@ -28,7 +28,7 @@ Screens branch. No merge of that PR or release is selected.
   integrated; its full acceptance remains open. #95 is integrated at `0382ae3c`
   with qualified Mac runtime proof. Windows evidence `55f89ddf` is audited and
   integrated through `7bc452a5`; #95 is qualified on both targets. #97 has returned
-  a local implementation for integration and final review; acceptance remains open.
+  a functional increment now integrated at `0dc53eeb`; full review and acceptance remain open.
 - Backend sequence: #92, then #93, then #94. #95 follows #94.
 - Story UI #96 follows approved #88 and qualified #94.
 - Screens/decimal UI #97 follows approved #91 and qualified #95.
@@ -1390,3 +1390,39 @@ acceptance open; do not promote or merge the parent PR. No successor implementat
 SDK/browser/native/package/manual-CI run or watch belongs to this merger. Return
 mutation ownership to the coordinator for the full integration code-review skill,
 in-scope fixes and the remaining qualification/design/acceptance work.
+
+
+### 2026-11-10: #97 functional increment integrated
+
+Conflict-free normal no-ff merge `0dc53eeb3f167c3000fbb7c94a56ed35b0df6793`
+preserves coordinator `72e9b5551b6b7fda39857c21a0a39529121f5f8d` and returned
+`0d49e0050aa17bfc0d253dfcfc20cc37e87f052b` in that order. Complete app/fixture/script/CI
+inputs equal tested `679e0df78d5f25afcc95af751d74d59788dab820`; all 872 frozen
+hashes match candidate/merged Git checkout representations and both working trees.
+Coordinator records and the returned evidence tree survived. Approved references,
+evaluator/runtime adapter, transaction/history internals and Story arithmetic controls
+remain unchanged. No dependency, protocol or CI registry was added.
+
+The [#97 integration receipt](../evidence/arithmetic-97.md#integration-equivalence-and-fresh-checks)
+owns exact tree/driver/source identities and command/results. Reuse 93 distinct
+Rust and 38 focused renderer passes, Screens actual-main/core and inherited dispatch,
+build/typecheck/format and scoped browser proof. Fresh pinned typecheck, contract/branch-plan,
+repository and whitespace checks pass. The selected fresh Story actual-main/core journey
+also passes nine stages/122 requests against the identical retained #97 Help binary,
+including shared Undo/Redo, refusal and reopen; exit 0 and cleanup pass.
+
+#97 is a review-ready functional increment, not full acceptance. Stacked numeric
+conditions, surrounding host/background/placement differences and capture/palette
+source limits remain for review. Newly emitted UI fixtures have no SDK execution;
+#94/#95 evidence retains its original scope. Keep #96's partial visual fidelity,
+#110 layout/palette/Tracks/Reel/branch-view drafts and native/human limits open.
+All issues stay open; only #97's delivery paragraph changes. The draft PR retains
+its Screens base and eventual full-spec closing references.
+
+The coordinator resumes integration/status/PR ownership after publication and this
+handoff. Next is the full integration code-review skill, in-scope fixes, then selection
+of coherent remaining qualification/design/acceptance work. All raw evidence and
+checkouts remain. This merger used zero SDK/browser/native/package/manual-CI or watch
+operations. Totals remain Mac 9/20 and Windows 3/20, zero reservations. Status files
+retain their inherited historical recovery sections; this bounded update does not
+perform a broader archival cleanup despite their excess word counts.

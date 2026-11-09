@@ -313,3 +313,83 @@ Owned changed paths:
 - `docs/UI.md`
 - `docs/tasks/evidence/arithmetic-95.md`
 - `docs/tasks/evidence/arithmetic-97.md`
+
+
+## Integration equivalence and fresh checks
+
+On 2026-11-10 the fresh merger confirmed clean local coordinator HEAD
+`72e9b5551b6b7fda39857c21a0a39529121f5f8d`, one unpublished checkpoint beyond
+origin `01993e9186a447b4632603676060ecd6a2633cc1`. Conflict-free normal no-ff merge
+`0dc53eeb3f167c3000fbb7c94a56ed35b0df6793` has that coordinator first parent and
+returned `0d49e0050aa17bfc0d253dfcfc20cc37e87f052b` second parent. Both histories
+and coordinator audit/status/ledger survived unchanged before status maintenance.
+The returned successor changes only this evidence note relative to tested source
+`679e0df78d5f25afcc95af751d74d59788dab820`.
+
+All 872 frozen input hashes match tested/merged Git checkout representations and
+both working checkouts. Four unchanged `.ps1` inputs require `cat-file --filters`
+with their explicit CRLF checkout attributes. Full tree identities are:
+
+| Tree | Git identity |
+| --- | --- |
+| app | `4a0cb81e788175916646758793fa5e2b9d225acc` |
+| tests/fixtures | `58bde4d6170ff1d600cc9d662e00951303212816` |
+| scripts | `56200065602421cdfad377180ef45a251f02b89f` |
+| .github | `a79289dcdb51e68e0924f4883f799887706556f7` |
+
+The entire returned evidence tree matched before this appended receipt. The 26-path
+change list matches the frozen receipt exactly. Approved design/reference/source/capture
+trees, numeric evaluator, Screens runtime adapter, transaction/history internals and
+Story arithmetic controls equal the coordinator parent. Dependencies, protocol and
+CI registry remain unchanged; existing fixture discovery includes the new dispatch.
+The retained Help binary SHA-256 is
+`b3132608703958f3b66f386ce20e3e6bc7be22d4cc04c795948f9c8533797647`.
+All three emitted-source hashes match the frozen receipt and coordinator audit.
+
+Reuse the recorded 93 distinct scoped Rust and 38 focused renderer passes, production
+build, formatting, 11-stage/473-request actual-main Screens journey, inherited interaction/control
+dispatch and scoped browser proof on identical inputs. No unchanged suite was repeated.
+Fresh commands used Node 24.19.0/npm 11.9.0 and Python 3.12:
+
+- `npm run typecheck` and `npm run build:tests` pass in `app` using existing locked dependencies.
+- `node tests/story-arithmetic-core.dispatch.mjs` passes separately from compilation,
+  with `CARGO_TARGET_DIR` pointing to the worker's retained #97 target and
+  `STORY_ARITHMETIC_OUTPUT` pointing to integration's new `story-journey-01` receipt.
+  All nine stages and 122 real requests pass. Whole/decimal formulas, shared history,
+  no-ops, refusals, Writing focus, nested insertion and reopen pass; driver exit 0 and
+  scratch cleanup are verified. Happy DOM supplies input; this adds no native/SDK proof.
+- The recorded contract audit checks all 473 responses, including 29 successful
+  no-write validation responses for actions and complete imagebutton creation,
+  revision/capability fields and all seven operation keys. The existing
+  `scripts/ci_validation.py::load_plan` selects quality-only for the unchanged head/base.
+- `python3.12 scripts/validate.py` passes for 1,870 files; `git diff --check` passes
+  after status updates.
+
+Ignored merger receipts live in integration `.toolchains/arithmetic-97/integration-merge/`.
+`equivalence.json`, `contract-check.json`, compile logs and `story-journey-01/result.json`
+retain exact results. `worker-evidence-before.json` freezes 552 raw evidence files,
+excluding the compiler cache; the retained binary is checked separately. The original
+coordinator audit and every worker attempt/capture/source receipt remain untouched.
+The first ad hoc audit incorrectly expected imagebutton review fields at the command
+root; they correctly live in its existing `interaction` object. That audit failed
+after completing input equivalence. The corrected contract-only audit passes without
+changing product, fixture or expectations. The initial sandbox merge refusal changed
+no files; the authorized merge succeeded with access to linked Git metadata.
+
+This is a functional checkpoint. Generic numeric conditions still use the stacked
+production form rather than A2's grouped comparison row. Surrounding host/background
+and placement differences remain. Earlier textbutton captures precede the final
+scoped palette correction; extended imagebutton/condition captures keep their actual
+source scope. These are pending review inputs, not approved deviations. A2 remains
+`equation-v2`, source `ce626427`, fingerprint
+`e9a4d3bd1952a92b68d184e68e87579c15001984d42f3a872815a124d3555f7b`, reference
+`82d30d6e`. #96's partial visual fidelity, #110 layout/palette/Tracks/Reel/branch-view
+drafts and assembled native/human limits remain open.
+
+New UI-emitted decimal defaults, ordered formulas, conditions/text and created-imagebutton
+fixture source have no new SDK execution. #94/#95 both-target runtime evidence keeps
+its original candidate/input scope. This merger starts zero SDK, browser, editor-native,
+package, manual-CI or watch operations. Totals remain Mac 9/20 and Windows 3/20,
+zero reservations. Keep every issue open and the existing PR draft/base/closing references.
+The coordinator resumes ownership for full integration code review, in-scope fixes,
+then selection of remaining qualification and design/acceptance work.

@@ -2,13 +2,25 @@
 
 ## Shared arithmetic selected
 
-#97 returned local implementation `0d49e005`, tested at `679e0df7`, for a fresh
-integration merger. The coordinator matched all 872 frozen inputs, the Help driver,
-three emitted-source hashes and the 11-stage actual-main/core journey. Reuse 93
-distinct Rust and 38 focused renderer passes under their recorded scope. The
-[handoff](../tasks/active/shared-arithmetic.md#2026-11-10-97-returned-and-coordinator-audit)
-owns integration scope and open visual/native/runtime acceptance. New UI-generated
-fixtures have no new SDK proof. #97 remains open for integration and final review.
+#97's functional increment is integrated by conflict-free normal merge `0dc53eeb`,
+preserving coordinator `72e9b555` and returned `0d49e005`. All app/fixture/script/CI
+inputs equal tested `679e0df7`; all 872 frozen hashes match Git checkout bytes and
+both working trees. Reuse 93 distinct Rust and 38 focused renderer passes, the
+11-stage actual-main Screens journey, inherited dispatch, build/format and scoped
+browser proof. Fresh pinned production typecheck, contract/branch-plan audit,
+repository validation and whitespace pass. The fresh Story/main-to-core journey
+also passes nine stages and 122 requests against the identical retained #97 driver.
+The [integration receipt](../tasks/evidence/arithmetic-97.md#integration-equivalence-and-fresh-checks)
+owns exact identities, evidence preservation and reuse limits.
+
+#97 is a review-ready functional increment and remains open. Generic numeric
+conditions still use the stacked form rather than A2's grouped row. Host/background
+and placement differences remain; earlier textbutton captures precede the final
+scoped palette correction. New UI-emitted defaults, formulas, conditions/text and
+created-imagebutton fixtures have no new SDK proof. Full visual/native/human
+acceptance is pending. The coordinator resumes ownership for full integration
+code review, in-scope fixes and selection of remaining qualification/design work.
+Draft PR #122 retains its Screens base and full-spec closing references.
 
 #94 decimal/public services are integrated by conflict-free normal merge
 `854f6ad1`, preserving coordinator `c177d1cd` and returned `b31929f6`.
@@ -30,7 +42,7 @@ records the Windows-ready identity. Windows evidence `55f89ddf` is audited and
 integrated through `7bc452a5`. All 22 assertions, exact witnesses, required wrong
 outcome and cleanup passed at `a2c7ab97`; 883 input hashes remained unchanged.
 The [Windows result](../tasks/evidence/arithmetic-95.md#windows-invocation-1-passed-2026-11-10-aest)
-completes #95's both-target prerequisite. #97's returned controls are the next merge.
+completes #95's both-target prerequisite. #97's controls are now integrated as described above.
 
 #96's functional increment is integrated by conflict-free normal merge `25fa2e1c`,
 preserving coordinator `157c1ef8` and returned `b77cc26e`. All app/fixture inputs
@@ -85,8 +97,8 @@ Totals are Mac 9/20 and Windows 3/20 started, with no reservations.
 ordered/current values, both button kinds with click/keyboard, Finish, deliberate
 wrong-outcome rejection and cleanup. The coordinator verified all 869 inputs,
 retained binary, actual requests and witnesses. All three failed attempts remain
-intact. Draft PR #122 retains the qualified backend. A fresh #97 implementer owns
-approved Screens arithmetic and decimal setup, conditions, text and samples.
+intact. Draft PR #122 retains the qualified backend and integrated #97 controls
+for arithmetic, decimal setup, conditions, text and samples.
 The Story shadow-token correction passes all nine protocol checks locally;
 final-head automatic CI remains for audit.
 The delivery record owns current limits, assignments and qualified candidates.
