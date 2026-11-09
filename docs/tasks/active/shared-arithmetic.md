@@ -1304,3 +1304,39 @@ integration before return. No SDK/native/package/manual-CI run is allocated;
 usage remains Mac 9/20, Windows 3/20, zero reservations. Existing SDK evidence
 keeps its original candidate and scope. Any further ownership gap returns to the
 coordinator with its exact cause and affected files.
+
+### 2026-11-10: #97 new-imagebutton validation exception
+
+The implementer identified a second admission gap. `screens.compose` currently
+admits `validateOnly:true` only for `Actions` on an accepted node. New imagebuttons
+therefore receive core feedback only at combined Apply. The coordinator traced
+`AddImageButton` through the same composition preparation: image references,
+layout and interactions prepare proposed bytes/metadata companions before the
+existing validation return, which precedes `commit_history`.
+
+Extend this implementer's ownership to the `AddImageButton` validation admission
+in `app/src-core/src/screens/composition.rs` and focused existing public tests.
+Use the complete pending creation command with its original source, authoring,
+target and asset reviews. Reuse existing preparation and response semantics;
+other unsupported validation commands remain refused. The response keeps the
+accepted `document`, `changed:false` and `documents:[]`, with proposed inspection
+in `actionValidation`. A generated node ID/revision belongs to that proposal only;
+it grants no accepted selection or write precondition. Apply revalidates the
+original reviews and commits the complete creation once.
+
+Prove live valid/invalid numeric feedback for the pending imagebutton, retained
+drafts and stale/dirty dependency refusal. Snapshot authoritative source and
+metadata and the shared history boundary to prove that successful/refused
+validation writes nothing, including proposed asset-metadata companions. Then
+prove combined Apply, one-step Undo/Redo and reopen through existing public-core
+and actual production controls. Preserve component/context/action-limit/Finish
+guards, typed core diagnostics, existing image review and asset authority. Keep
+the evaluator, runtime generation and transaction/history internals unchanged.
+
+Record the tested extension and its candidate in `arithmetic-97.md` and the
+canonical DATA_MODEL contract. Update only the current #95 handoff's validation
+contract to link the qualified #97 extension; retain historical #95 evidence and
+its original actions-only scope. The coordinator edits none of these code files
+in parallel. No additional SDK/native/package/manual-CI operation is allocated;
+counts remain Mac 9/20, Windows 3/20, zero reservations. The implementer normally
+merges the latest coordinator checkpoint before returning its scoped result.

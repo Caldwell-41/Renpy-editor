@@ -221,6 +221,9 @@ The #97 actual-main test exposed missing variable-create/default-edit history.
 The [ownership exception](../tasks/active/shared-arithmetic.md#2026-11-10-97-variable-history-ownership-exception)
 assigns the implementer the narrow `authoring.rs` wiring and focused proof through
 the existing shared history owner. It does not authorize a separate history stack.
+The [new-imagebutton exception](../tasks/active/shared-arithmetic.md#2026-11-10-97-new-imagebutton-validation-exception)
+also assigns `AddImageButton` admission through the existing composition validation
+path, with no-write/history and real-control proof. Other command boundaries remain.
 The Story shadow-token correction retains its original comparison limits.
 Automatic quality run `42630146353` succeeded at `a2c7ab97`; later heads require
 their own selected checks and final audit.
