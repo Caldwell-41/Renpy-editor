@@ -90,12 +90,19 @@ own payloads, fixtures and exact reuse comparisons. No unchanged tests were reru
 At the #93 merge, SDK totals were Mac **2 started / 0 reserved** and Windows
 **1 started / 0 reserved**. The #94 reservation follows below.
 
-The coordinator selected a fresh isolated #94 implementer from this merged contract,
-request key `spec87-ticket94-implementer-20261109`. One Mac SDK run is reserved;
-accounting is now Mac **2 started / 1 reserved for #94**, Windows **1 started /
-0 reserved**. Wait for its completion notification without polling, then use a
-fresh merger and route the combined Windows qualification against its actual
-accepted-source fixture/candidate before #95/#96 starts.
+#94 returned clean local branch `t3/decimal-arithmetic-authoring` at `532bb229`,
+code candidate `8c677ffe`, with 144 Rust/31 renderer passes. Its one Mac SDK start
+failed at display initialization before numeric assertions; compile/lint and
+cleanup passed. The failed raw evidence and rejecting Cargo-log result are retained.
+The coordinator's existing desktop query sees no session/display inside the
+sandbox and an active/awake/unlocked desktop outside it, matching H20's symptom.
+
+The coordinator owns one controlled recovery using the unchanged retained binary,
+source and fixtures outside the sandbox. The ledger owns its exact allocation.
+Accounting is Mac **3 started / 1 reserved for #94 recovery**, Windows **1 started /
+0 reserved**. New ignored evidence is `.toolchains/arithmetic-94/mac-02/` here;
+original failed receipts remain in the #94 worktree. Record the actual start/result,
+then use a fresh merger and route combined Windows qualification before #95/#96.
 Ordinary division and decimals remain #94. Combined #93/#94 Windows qualification
 against #94 is required before #95 or #96 starts. Its accepted-source fixture must
 retain integer precision, precedence/grouping and negative floor/remainder witnesses

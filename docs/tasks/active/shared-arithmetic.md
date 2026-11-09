@@ -66,7 +66,7 @@ one becomes necessary. Routine checks and review have no numerical limits.
 
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
-| macOS ARM64 SDK qualification | 6 | 2 | 1 for #94 |
+| macOS ARM64 SDK qualification | 6 | 3 | 1 for #94 controlled recovery |
 | Windows x64 SDK qualification | 6 | 1 | 0 |
 
 ## Execution ledger
@@ -623,3 +623,49 @@ proof once the fixture/candidate exists. Both #95 and #96 remain blocked on that
 qualified #94 contract. No new Windows chat/message, package/native-editor launch
 or manual CI matrix is selected at this point. Return implementation through a
 fresh merger and preserve its unique raw evidence.
+
+### 2026-11-09: #94 local implementation, failed display admission
+
+#94 returned clean `t3/decimal-arithmetic-authoring` at
+`532bb2298ba644869da9a041e0e2620edcf4d696`, code candidate
+`8c677ffea9552bc7746f1df27a59ae2bc185b861`. It reports 144 distinct Rust and
+31 renderer passes, plus type/format/repository/whitespace checks. The canonical
+contract and detailed attempt are in that branch's
+`docs/tasks/evidence/arithmetic-94.md`. Integration still has #93; #94 is local-only.
+
+The reserved Mac run started and failed: compile/lint passed, but normal entry
+stopped at `pygame.display.init()` with `The video driver did not add any displays`
+and Hiservices XPC errors before numeric assertions. Wrong-outcome rejection was
+not reached. Cleanup passed. The coordinator inspected raw case/terminal records
+and ran the existing Cargo-log validator, which correctly rejected the failure.
+This consumes the original reservation: Mac **3 started**, Windows **1 started**.
+No runtime acceptance, fixture correction or product workaround is inferred.
+
+The matching H20/early-3B evidence distinguishes this sandbox display symptom from
+driver defects. Read-only desktop inspection in the current sandbox returned all
+session/display fields null; the same existing MacPower query outside it returned
+active, awake, unlocked, logged-in/on-console state. Ranked hypotheses were sandbox
+WindowServer denial, unavailable desktop, then fixture/SDK graphics configuration.
+The observation supports the first and rejects a currently unavailable desktop;
+successful SDK execution outside the sandbox is still the discriminating test.
+
+The coordinator reserves **one** additional Mac SDK start from the existing
+six-start ceiling for controlled #94 recovery. Use the unchanged retained ARM64
+test binary and verified source/fixture identities, with scoped execution outside
+the sandbox and the existing desktop-admission/power helper. Fresh ignored evidence
+is `.toolchains/arithmetic-94/mac-02/` in the integration checkout. A prelaunch
+desktop/input refusal consumes no start. Once the selected Rust SDK gate starts,
+charge Mac **4 started / 0 reserved** even if it fails. Preserve `mac-01` unchanged.
+Record full identities and actual outcome before allocating another attempt.
+
+The coordinator owns this bounded qualification; no worker is running or writing
+the #94 worktree. Production code/fixtures remain unchanged. Both successful Mac
+runtime and combined Windows proof remain required before #95/#96 starts.
+
+Recovery preflight initially refused an overbroad hash comparison: one TypeScript
+interface annotation changed after the compiled candidate. The existing handoff
+already documents that change. Inspection confirms it only adds returned source
+revision fields to a TypeScript type, with no emitted runtime change. All 208
+current inputs match the returned commit; all core/fixture inputs and the retained
+binary still match the compiled candidate. The new receipt records both identities
+and this scoped distinction. No SDK started during either preflight check.
