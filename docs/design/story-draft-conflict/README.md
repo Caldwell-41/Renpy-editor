@@ -1,8 +1,10 @@
 # Story draft conflict study
 
-Q13 remains undecided. Neither candidate is approved. This local study asks how
-Story should handle a retained beat draft when the saved text of that beat changes.
-It does not change the interview spec or implement the feature.
+Kris approved B on 2026-11-09 after the copy pass: `story-draft-conflict` /
+`compact`, revision `compact-v2`, named Buttons together. A remains unapproved.
+The [approval record](approval.json) pins the reviewed source and captures.
+The main interview agent owns recording Q13 in the canonical spec and continuing
+the interview. This approval does not authorize production implementation.
 
 The reference is [Story Combined v1](../story-revamp/README.md), screen
 `story-revamp` / `combined`, revision `combined-v1`, source `6ecf6470`.
@@ -20,8 +22,9 @@ source text without a disclosure. Keeping source and discarding the draft are th
 same outcome, so each candidate offers one action for that outcome. A calls it
 Keep source; B calls it Discard draft. Both use Override source for the other choice.
 Override source validates and saves only this beat in memory. It replaces the v1
-step of choosing the draft and then pressing Commit. This is a candidate interaction,
-not an accepted change to the interview spec. The v1 captures remain under captures;
+step of choosing the draft and then pressing Commit. This is now the approved
+conflict interaction. The main interview agent owns updating the interview spec.
+The v1 captures remain under captures;
 the previous standalone export is retained locally at
 `.toolchains/story-draft-conflict/v1/review.html`.
 
@@ -31,8 +34,10 @@ and keeps both interactions unchanged.
 The variant switcher keeps the current fictional state for direct comparison.
 Its arrows and Left/Right keys also switch variants. Arrow keys inside text fields
 keep their normal meaning. Reset starts a fresh scenario. The Lab sample selector
-also starts fresh. Both [approval entries](approval.json) have null approvals and
-`currentApproved` is null. Review is pending; no preference has been inferred.
+also starts fresh. The [approval record](approval.json) sets `currentApproved` to
+`compact-v2`.
+The approved source is local commit `af23cf4d9141661e98280896a4aab2fbe7bd4414`.
+Its full frontend/lab fingerprint and capture hashes are in the record.
 
 ## Run and review
 
@@ -87,7 +92,7 @@ are context; their controls do not perform project operations. Source/external
 changes are buttons in the separate prototype controls. There is no project access,
 SDK execution, native Save, recovery, persistent history or source transaction.
 Chronological Undo and real transaction checks remain the production contract and
-are outside this conflict study. The prototype adds no product capability or approval.
+are outside this conflict study. The approval covers the design; the prototype adds no production capability.
 
 ## Focused verification
 
@@ -101,6 +106,11 @@ checks readiness, asset/browser errors, horizontal overflow and native-operation
 refusal. Both exported variants were visually inspected at 728 px using the host's
 HTML preview. No console messages appeared.
 
-Selected review captures are under [captures](captures/). They are evidence for this
-unapproved study, not replacement captures for Story Combined v1. No production
+Selected review captures are under [captures](captures/). The
+`compact-v2-approved-*` files retain the approved B reference. Earlier captures
+remain as review history. None replaces the Story Combined v1 captures. No production
 build, native/SDK check, full-gallery matrix or transaction qualification was run.
+
+Approval verification reran B's focused interaction journey after the copy pass.
+The recorded source fingerprint matches the local candidate commit. The normal
+lab approval check validates the approved pointer and reference rendering.
