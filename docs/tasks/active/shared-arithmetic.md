@@ -859,3 +859,38 @@ or manual CI operation is selected. Accounting is **Mac 5/20 started, one reserv
 Windows 2/20 started, zero reserved**, leaving fourteen Mac and eighteen Windows
 starts unallocated. #95 Windows qualification follows its coherent backend return.
 #97 waits for qualified #95. Final feature review and assembled acceptance remain.
+
+
+### 2026-11-09: shared renderer registry unblocks #96
+
+#96 identified that renderer `CORE_OPERATIONS` omitted `scene.validateAssignment`,
+although #94's core whitelist/dispatch already admits it. The coordinator added
+that existing public operation to `app/src/protocol.ts` and migrated the existing
+exact protocol-list expectation. The focused protocol suite failed at the missing
+entry before the fix and passes all nine cases after it. Pinned-tool test
+compilation and production TypeScript checking pass. Repository/whitespace checks
+pass. This changes no core/runtime semantics and consumes no SDK invocation.
+
+#96 retains only its authorized Help-driver allowlist addition and Story wiring.
+Both implementers can normally merge this integration checkpoint; shared registry
+ownership remains with the coordinator. Existing qualified numeric/runtime proof
+keeps its recorded code candidates and scope.
+
+
+### 2026-11-09: #96 fixture registration and CI reference preparation
+
+The coordinator confirmed that `test:fixtures` automatically discovers #96's
+`story-arithmetic-core.dispatch.mjs` and `story-arithmetic.browser.mjs`, with no
+skip directives. The existing PR frontend job builds the real core examples and
+runs that fixture runner. No manual list or duplicate invocation is needed.
+The testing selection map now names the affected Story consumers.
+
+The browser comparison reads approved Story source `6ecf6470` with Git. CI's
+existing two-commit checkout does not retain that old reference, so the fixture
+step now fetches only that exact commit at depth one when the comparison script
+is present. This preserves the fixture's pinned reference and the normal shallow
+checkout. Actionlint, repository validation and whitespace checks pass. The
+coordinator inspected the worker's passing actual-main/core journey result but
+has not rerun or accepted its still-changing browser comparison. #96 retains
+all test source and the named Help-driver allowlist line. No SDK, browser,
+native/package or manual CI operation ran for this registration change.

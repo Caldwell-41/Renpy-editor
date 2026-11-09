@@ -136,6 +136,9 @@ jobs:
         if: ${{ !cancelled() && steps.scope.outputs.code == 'true' }}
         run: |
           set -euo pipefail
+          if [ -f tests/story-arithmetic.browser.mjs ]; then
+            git fetch --no-tags --depth=1 origin 6ecf64704044a6fee9fc4ee6b3a54985d84b9b10
+          fi
           cargo +1.90.0 build -p loomlight-core --locked --examples
           # The Help failure step seals, scans and uploads this folder.
           FIXTURE_OUTPUT="$RUNNER_TEMP/help-offline/fixtures" npm run test:fixtures
