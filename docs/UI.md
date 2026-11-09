@@ -295,7 +295,23 @@ unknown or non-number variables and division by zero. A value "on this route" us
 only assignments earlier on the route, never the starting default, so most values
 read "unknown". Calculations the editor cannot show, such as `max()`, stay read-only
 with Edit in Source. [Issue #87](https://github.com/Caldwell-41/Renpy-editor/issues/87)
-owns the behaviour, the planned decimal type and the Screens actions.
+owns the behaviour, the decimal type and the Screens actions.
+
+The production Story equation row validates through revision-bound
+`scene.validateAssignment` and commits through the existing Story transaction.
+Core supplies result types, supported operations, limits and field diagnostics.
+Draft feedback folds constants only; a variable-dependent draft says its current
+value is unknown. It never substitutes declaration defaults. Accepted Story state
+stays in the core model and Scene preview. Numeric suggestions support arrows,
+Enter/Tab and Escape. Cmd/Ctrl+Enter commits the beat; Escape closes a suggestion
+or operation menu before returning to the retained draft. Cancel discards that
+draft and returns focus to the beat. Boolean and text targets keep literal fields.
+
+These reusable controls operate in the existing workspace and Writing focus.
+Tracks/Reel, cross-view retained drafts and the full Brass and slate layout remain
+with #110; shared decimal creation/default controls remain with #97.
+[#96 evidence](tasks/evidence/arithmetic-96.md) records the scoped visual comparison
+and real Story-to-core operations.
 
 ## Application shell
 
