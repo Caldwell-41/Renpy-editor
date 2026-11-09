@@ -503,3 +503,120 @@ changes are documentation only. Combined #93/#94 Windows SDK qualification is
 still required before #95/#96. Current ceilings are 20 per target as stated above;
 this merger used zero SDK/native-editor/package/browser/manual-CI starts and
 allocated none. The coordinator resumes exclusive mutation ownership on completion.
+
+
+## Windows combined invocation 1 result, 2026-11-09
+
+The one allocated Windows invocation **started and passed** on SUNDOWN. Tested
+checkpoint: `cae4dfc08425b14513a12af009ded11f6d436514`. The existing clean
+`codex/spec-87-windows-92` qualification worktree fast-forwarded from
+`c7e4e3459303736f85de8c55cd88f5895e020e19` after fetch and ancestry checks.
+No checkout, branch or worktree was created. The registered Screens checkout stayed
+clean on its original branch at `251fb47754a0ec1a43ece8763a0b4603b8e54dd8`.
+All 29 prior #92 evidence files across both checkouts retain their original hashes.
+
+Before execution, 875 tracked source/config/lock/fixture/tooling inputs matched
+`git cat-file --filters` for the dispatched checkpoint. App, fixtures, scripts and
+CI inputs also equal Mac-qualified `d1c201f1987d4768acca1fd7ca9ca5dff2c5779f`
+and merge `854f6ad11fdf79d6fc57d5d6e3cfa55131df7d90`. The app/fixture trees
+remain the identities recorded above. All 875 working input hashes stayed unchanged.
+
+Native target: `x86_64-pc-windows-msvc`, Windows 11 build 26200. Rust 1.90.0
+(`1159e78c4`), Cargo 1.90.0 (`840b83a10`), existing MSVC toolset 14.50.35717,
+compiler 19.50.35726. The process-local development helper loaded existing tools;
+the Cargo-log checker used existing Python 3.12.14. The executed SDK reports
+Ren'Py 8.5.3.26051504 and its Windows Python 3.12.7. No installation/download ran.
+
+Exact commands from `app/`, in this order:
+
+```sh
+cargo test -p loomlight-core --locked --offline --lib renpy::tests::source_foundation::arithmetic::decimal_fixture_preflight -- --exact --nocapture
+cargo test -p loomlight-core --locked --offline --lib renpy::tests::source_foundation::arithmetic::decimal_draft_contract_is_revision_bound_and_does_not_commit -- --exact --nocapture
+cargo test -p loomlight-core --locked --offline --lib --no-run --message-format=json
+cargo test -p loomlight-core --locked --offline --lib renpy::tests::source_foundation::arithmetic::decimal_sdk_gate -- --ignored --exact --nocapture
+```
+
+Both no-SDK selectors passed exactly one test, with no failures/ignored cases,
+in 16.94 s and 1.34 s respectively. Their command durations were 54.562 s and
+1.875 s, including compilation/checking. Fresh build JSON/stderr and the copied
+executed x64 test executable were retained before SDK launch. All three test logs
+passed `python scripts/check-q1-prep-gates.py cargo-log <retained-log>`.
+
+Immediately before SDK use, retained official archive SHA-256 matched
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`.
+Both retained and repository checksum manifests matched
+`4b0cad9ac05dc4ca55081bd3a36458c8ea658ed021f09a87276383652b6bd98b`.
+The unchanged [published provenance](../../../spikes/renpy-sdk/published/README.md)
+applies; no separate PGP claim is made. Archive-member, existing extracted and
+actually installed `renpy.py`/Windows Python executable hashes agree.
+Only the SDK command received `LOOMLIGHT_RUNTIME_SDK_ARCHIVE` and
+`LOOMLIGHT_FOUNDATION_EVIDENCE_DIR`, pointing to the verified archive and fresh
+ignored `.toolchains/arithmetic-94/windows-01/sdk/`. Child `TEMP`/`TMP` used a
+fresh owned short scratch. Exact local paths/args/env names stay in ignored receipts.
+
+Launch attempt: **2026-11-09T12:13:41.018950Z**; process creation receipt:
+**12:13:41.027156Z**. Cargo exited 0 after 106.343 s; its positive named one-test
+summary reports 105.90 s, zero failed/ignored cases.
+
+| Unique SDK case | Exit | Duration | Result |
+| --- | ---: | ---: | --- |
+| Compile | 0 | 1435 ms | Passed |
+| Lint | 0 | 927 ms | Passed |
+| Normal entry | 0 | 2125 ms | All 22 assertions passed |
+| Wrong outcome | 1 | 3002 ms | Required `money == -14` assertion rejected |
+
+All four records occur exactly once, with no timeout or output truncation.
+The SDK's raw inner summaries list each selected name twice, leaving one duplicate
+not run in normal entry and skipped after wrong-outcome failure. The selector audit
+retains those labels and summaries: the unique normal case executed all 22 assertions;
+the unique wrong case passed its first two assertions and failed the required third.
+No distinct required case or assertion is missing, and duplicates add no passes.
+
+Normal entry proves #93 exact integer precision, precedence/grouping, nested edits,
+negative floor/remainder and i64-minimum remainder, with actual integer types and
+opaque-neighbor preservation. #94 proves actual float storage/defaults, exact
+large-integer division bits, float floor/remainder, integer widening, mixed
+arithmetic/comparisons, negative zero and the smallest subnormal. Following H69,
+the driver requires the shown screen and checks its actual interpolated caption
+through TTS. The inert public sample and SDK scoped substitution agree. Both exact
+witnesses match:
+
+```text
+ARITHMETIC_94_NUMERIC quotient=0x1.5555555555556p+51 floor=9.0 remainder=0x1.0000000000000p-54 widened=float:-3.0 mixed=float:9007199254740992.0 zero=-0x0.0p+0 subnormal=0x0.0000000000001p-1022 default=float:2.5 comparisons=True text=Fraction_2.5 sample=Fraction_1e-07
+ARITHMETIC_94_VALUES score=36028797018963992 money=-15 remainder=-2 minimum=0 opaque=kept
+```
+
+Wrong outcome reports `FAILED` at `AssertionError: assert eval (money == -14)`
+and never emits `ARITHMETIC_94_WRONG_ACCEPTED`. This is the selected rejecting
+assertion, not an unexpected product failure.
+
+SHA-256 identities:
+
+| Input/artifact | SHA-256 |
+| --- | --- |
+| Complete 875-input manifest | `fdd6ccd6d7b6dae74308e69c8eb8e2e1e0c8eda7bbc98377406d4298d11da27d` |
+| Shared arithmetic test owner | `0f2cff6166c2a5f2de016e53edbe40985db0c1c152710a7e1c008c2fbcbce161` |
+| #94 story fixture | `38042613b7ad124b2c16515c5d389ad9f1938525f8660a1e471e098560231379` |
+| #94 driver fixture | `0b3addca6c659f11e3051c606e65722b33d6bc67ee1faee8bfef8a4200162563` |
+| Executed/retained x64 binary | `335ba0017505dfffd1020653c5abd5ac04ad6c5f504b15f8ff43dc2fc9ab688e` |
+| Accepted runtime source | `b0fd3840334a9e375b5e4947d7ae6b6659735488fabcd315a18020e758ff96d0` |
+| Composed screen source | `b25437e63cae2a8415ea0be2ed83e5b28b5c690b08af980d20a95dc66d34796e` |
+
+The gate checked unchanged accepted `.rpy` sets after every case. Terminal result
+is `passed:true,cleanupComplete:true`. Independent audit confirms matching inputs,
+binary, SDK identities, ten actual public edit request/response pairs, accepted
+source and composed screen/default/sample plans. The owned SDK/project/profile/saves
+root is absent; the empty outer scratch was removed. No owned process remains.
+
+Preserve fresh ignored `.toolchains/arithmetic-94/windows-01/`: input/source/host
+proof, build JSON/stderr and executable, both preflight logs/checker receipts,
+launch/started/result receipts, SDK log/stderr/checker receipt, `sdk/` raw cases,
+requests/responses, accepted source and screen records, independent `audit.json`,
+selector/process audits and raw hash inventory. No source/fixture correction or
+retry occurred. Repository documentation validation and whitespace checks pass.
+
+Actual consumption is **1 selected Windows SDK start**, bringing Windows to
+**2/20 started, zero reserved/uncertain for this assignment**. Mac stays **5/20**
+with no reservation here. This supplies combined #93/#94 Windows qualification;
+no selected acceptance evidence is missing. The coordinator retains integration,
+ledger/status updates, final review, tickets and #95/#96 entry decisions.
