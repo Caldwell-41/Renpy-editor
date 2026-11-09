@@ -839,11 +839,14 @@ returning. Exact prepared locations belong in their scoped evidence notes.
 | Assignment | Branch | Exclusive file/interface ownership |
 | --- | --- | --- |
 | #95 ordered click-time Screens arithmetic | `t3/screens-click-time-arithmetic` | Core Screens action/runtime/inspection and related existing Rust tests/drivers; required shared core adapters; typed Screens compatibility in `app/src/screen-contracts.ts` and `app/src/screen-interactions.ts` only; `tests/fixtures/arithmetic-95/`; `docs/tasks/evidence/arithmetic-95.md`; canonical DATA_MODEL changes. No production control layout. |
-| #96 approved Story arithmetic controls | `t3/story-arithmetic-controls` | `app/src/scene-ui.ts`, new Story arithmetic editor modules, Story-only `main.ts` transport/captions/reference wiring, scoped production styles, Story DOM/browser/core-journey tests and fixture data, `docs/tasks/evidence/arithmetic-96.md` and UI documentation. No core arithmetic, Screens controllers/types or shared decimal setup/condition/sample controls. |
+| #96 approved Story arithmetic controls | `t3/story-arithmetic-controls` | `app/src/scene-ui.ts`, new Story arithmetic editor modules, Story-only `main.ts` transport/captions/reference wiring, scoped production styles, Story DOM/browser/core-journey tests and fixture data, the existing Help controller driver's bounded `scene.validateAssignment` allowlist entry, `docs/tasks/evidence/arithmetic-96.md` and UI documentation. No core arithmetic, Screens controllers/types or shared decimal setup/condition/sample controls. |
 
 The coordinator owns all status/ledger, GitHub issues, PR, shared package/test
 registries and integration mutations. Workers request overlapping registry or
 contract changes through the coordinator; they preserve each other's ownership.
+The shared `app/src-core/examples/help-controller-driver.rs` belongs to #96 only
+for that named public-read allowlist entry; #95 uses the existing core fixture
+owners and leaves this driver intact.
 #96 uses declared decimals from source/backend fixtures. #97 owns shared decimal
 setup controls. Tracks/Reel production views belong to separately selected #110;
 #96 must report those real acceptance limits while implementing approved reusable
