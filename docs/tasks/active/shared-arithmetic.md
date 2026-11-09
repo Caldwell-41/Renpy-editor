@@ -70,7 +70,7 @@ one becomes necessary. Routine checks and review have no numerical limits.
 
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
-| macOS ARM64 SDK qualification | 20 | 7 | 1 for corrected #95 imagebutton fixture |
+| macOS ARM64 SDK qualification | 20 | 8 | 1 for pinned #95 selector verification |
 | Windows x64 SDK qualification | 20 | 2 | 0 |
 
 ## Execution ledger
@@ -1065,3 +1065,47 @@ its original candidate and limits. Fresh automatic checks will qualify publicati
 Detailed failed job log and local red/green outputs are retained under ignored
 `.toolchains/arithmetic-ci/3db93619/`. No browser/native/package/manual-CI start
 ran for this correction. The parent PR remains draft; final acceptance is pending.
+
+
+### 2026-11-09: #95 selector verification started
+
+The guarded imagebutton correction is local commit
+`bb95a59f9d545b1b9b5d5543c0fa384767cf30a9`. The coordinator normally merged
+published CI/token checkpoint `f8f4f904`, producing clean candidate
+`30072c2c98a48d27786bb53bfd893a80dc0416b3`. Both exact no-SDK fixture cases pass
+with the final SDK selector retained, including the known GUI-initialization limit.
+The rebuilt/retained executable SHA-256 is
+`0e36ff88518ab784eb1b19d5ba9a210017cb52be0ead155b79b3d31fb879d804`.
+Fresh ignored `mac-03/launch-receipt.json` binds all 869 inputs, verified archive,
+exact command/toolchain and candidate. No production arithmetic changed.
+
+The reserved verification started outside the sandbox through the existing
+admission/power helper at **2026-11-09 13:27:37 UTC**, test PID **63952**. Local
+exec session **97254** owns its launcher; the outcome is pending. Current usage is
+**Mac 8/20 started, Windows 2/20 started, zero reservations**. Preserve both failed
+SDK attempts. No #97 entry or additional SDK invocation follows without actual
+qualification evidence and a fresh allocation.
+
+
+### 2026-11-09: #95 text timing proved; pinned ID selector corrected
+
+The eighth Mac start completed failed at candidate `30072c2c`. Compile/lint and
+11 normal assertions passed, including 6/12, 7/14, changed operands and keyboard
+textbutton activation. The image click timed out; the remaining normal/rejecting
+witnesses were not reached. All 869 frozen inputs, retained binary, unchanged
+source and SDK/desktop cleanup were independently audited in `mac-03/`.
+
+Pinned SDK source shows its ID selector compares evaluated screen names directly
+with tuple scene-entry names, unlike normal get_screen/get_displayable. A no-SDK
+synthetic metadata diagnostic of that exact method finds the widget for a tuple
+and misses it for a string. The driver's two image selectors now use tuple names
+in local `eef88d7d1a4f0aa3ed4554a4422936726b2d5f72`. Timeouts and all actual
+mouse/keyboard/arithmetic/rejecting assertions remain unchanged. Production code
+is unchanged. Prior failures remain failed, with immutable raw evidence.
+
+After reassessing the complete remaining driver against pinned primary source,
+the coordinator reserves one controlled verification with latest integration,
+a clean candidate and fresh input/binary receipts. Accounting is **Mac 8/20 started
+plus one reserved; Windows 2/20 started, none reserved**, leaving eleven Mac and
+eighteen Windows starts unallocated. #95 remains runtime-unqualified and #97
+blocked. No further start occurred during this diagnosis.

@@ -188,8 +188,19 @@ fixture's unannotated-line replacement never matched the authored identity comme
 An exact guarded marker insertion and final-source assertion now pass the existing
 no-SDK preflight. `mac-02/coordinator-audit.json` verifies 869 inputs against the
 frozen candidate, binary, real failed records and cleanup. Both failures are intact.
-One further Mac SDK run is reserved after fresh source/binary receipts. Current
-usage is **Mac 7/20 started plus one reserved; Windows 2/20 started, zero reserved**.
+The next allocated Mac run started at clean `30072c2c98a48d27786bb53bfd893a80dc0416b3`,
+including published CI token correction `f8f4f904`. Fresh `mac-03` binds 869 inputs
+and retained executable `0e36ff88…`. It started outside the sandbox through desktop
+admission at 2026-11-09 13:27:37 UTC, PID 63952, local exec session 97254. Its result
+failed after compile/lint and eleven passing normal assertions. Textbutton values
+6/12, 7/14 and changed-operand keyboard activation passed; image activation and
+wrong outcome remain missing. SDK/desktop cleanup passed and no process remains.
+The pinned SDK's ID selector directly compares string screen names to stored
+tuples. A synthetic metadata diagnostic of that exact method distinguishes them;
+driver correction `eef88d7d` uses tuple names for both image inputs without changing
+timeouts/assertions. One controlled verification is reserved after latest integration
+and fresh source/binary receipts. Current usage is **Mac 8/20 started plus one reserved;
+Windows 2/20 started, none reserved**.
 The worker checkout's canonical
 `docs/tasks/evidence/arithmetic-95.md` owns its failure/correction and raw receipts.
 #95 remains unmerged and runtime-unqualified; #97 remains blocked.
