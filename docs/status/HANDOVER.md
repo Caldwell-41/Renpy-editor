@@ -7,8 +7,11 @@ created from approved-design branch head `3f5a6de9`. The
 [release scope](../design/story-revamp/README.md#production-release-scope) owns settled
 scope decisions; record domain terms in the root glossary when resolved. Q13 is
 settled: Kris approved B, Buttons together, after the copy pass and confirmed it
-here. Do not ask for approval again. The next decision concerns final acceptance
-in the live app; implementation task ownership also remains open.
+here. Do not ask for approval again. Q14 is settled: final acceptance includes
+Kris's live-app review of all supported beat types/editing options and the layout
+with different Choices and variables, after automated qualification. The
+[acceptance record](../design/story-revamp/README.md#final-acceptance-in-the-live-app)
+owns the detail. Implementation task ownership and the final plan/spec remain open.
 
 The [approved conflict reference](../design/story-revamp/README.md#approved-draft-conflict-interaction)
 is `story-draft-conflict` / `compact`, revision `compact-v2`, source `af23cf4d`,

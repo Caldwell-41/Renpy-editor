@@ -68,6 +68,27 @@ Completion of all Screens arithmetic work, or closure of #87, is not a prerequis
 Record these dependencies in the future Story integration task when Kris authorizes
 publication. This local decision does not create or change GitHub tasks.
 
+### Final acceptance in the live app
+
+After the required automated checks pass, Kris will review the implemented layout
+and complete an authoring session in the live app. Use a small public example
+project with enough scenes to exercise every supported beat type and its editing
+options, including the approved Choice and arithmetic additions. Cover the full
+beat catalogue and the existing screen-related beats; protected source keeps its
+inspection and Source fallback behaviour.
+
+The review must also show the layout with different Choice and variable
+configurations, including nested and empty options, conditions, different endings,
+picked/disabled/hidden options and supported variable types. Exercise Tracks, Reel,
+Writing focus, the Branch path and the game stage with those examples. Include
+writing and retained drafts, shared Undo/Redo, Save, reopening committed work and
+the approved B conflict interaction. Review smoothness and conformance to both
+approved designs in the live app.
+
+Automated source, history and runtime checks remain required under the feature
+contracts and [TESTING](../../TESTING.md). They and the human authoring/layout
+review supply separate evidence; neither alone establishes final acceptance.
+
 ### Stage proportions in production
 
 Kris confirmed that the game stage keeps the project's actual width-to-height ratio.
