@@ -395,3 +395,58 @@ reserved one verification invocation from the original ceiling: Mac **4 started 
 1 reserved**, Windows **1 started / 0 reserved**. The new launch receipt will bind
 the clean fixture-fix commit, rebuilt/retained binary and fresh `mac-03` evidence.
 The unchanged numeric/type/rejecting assertions remain required.
+
+
+## Mac invocation 3: corrected fixture passed
+
+The allocated verification **started and passed** outside the sandbox using the
+existing desktop-admission/power helper. Exact code/fixture candidate is
+`d1c201f1987d4768acca1fd7ca9ca5dff2c5779f`. Production core is unchanged from
+`8c677ffe`; only the failed screen-caption selector and evidence were corrected.
+The rebuilt and retained ARM64 binary embeds the corrected driver. All 208
+recorded inputs match the clean candidate and remained unchanged after execution.
+The official archive pin is unchanged and was rehashed before launch.
+
+| Case | Exit | Duration | Result |
+| --- | ---: | ---: | --- |
+| Compile | 0 | 465 ms | Passed |
+| Lint | 0 | 251 ms | Passed |
+| Normal entry | 0 | 1260 ms | Exact numeric/type/text/sample witnesses passed |
+| Wrong outcome | 1 | 2046 ms | Expected money-minus-14 assertion rejected |
+
+All four unique records passed, with no timeout/truncation. The normal run
+verified every retained #93 integer witness plus decimal types/defaults, exact
+true-division bits, float floor/remainder, integer-to-decimal storage, signed zero,
+subnormal, exact mixed comparisons, actual shown screen text and scoped sample
+substitution. It emitted both `ARITHMETIC_94_NUMERIC` and `ARITHMETIC_94_VALUES`.
+The wrong run failed at `money == -14`, reported `FAILED`, and emitted no wrong
+acceptance marker. The existing Cargo-log validator accepts the positive one-test
+summary. Accepted source sets remained unchanged through all cases.
+
+The terminal SDK result is `passed:true,cleanupComplete:true`. The temporary
+SDK/project/profile/saves root is absent. Desktop admission stayed active, awake
+and unlocked; both transient power assertions were released without error. The
+coordinator independently audited all 208 input hashes, retained binary and
+accepted-source hashes, case/witness outputs and both cleanup owners.
+
+Fresh ignored evidence is in the coordinator integration checkout under
+`.toolchains/arithmetic-94/mac-03/`: launch/started/result receipts, desktop receipt,
+`audit.json`, `sdk.log`, retained `test-executable`, and `sdk/` with full case
+outputs, actual public requests/responses, accepted source and composed screen.
+
+Accepted source SHA-256:
+`aba79ac39b77a89ea42f6f9a5252d237b0da442cbe1a96c37bac3485db5640cb`.
+Retained/executed ARM64 test binary SHA-256:
+`e924ee2788ceed5aed7ec52db9af1af12fc069306d9821d3535858851cab33d4`.
+
+Feature use is **Mac 5/6 started, Windows 1/6 started, no reservations**. The
+original sandbox failure and the later static-caption harness failure remain
+failed with immutable raw receipts. The successful result does not rewrite them.
+Combined Windows qualification of this corrected fixture is still required
+before #95/#96 starts. No further SDK start is selected by this result.
+
+The #94 public-services core now has passing Mac runtime proof. Existing 144
+passing Rust public/unit cases and 31 renderer cases remain scoped to unchanged
+production inputs; the corrected no-SDK preflight was repeated once, not counted
+as a new distinct case. This successful SDK gate adds one distinct passing case.
+Fresh integration verification and Windows proof remain coordinator-owned.
