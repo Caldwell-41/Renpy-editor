@@ -1,4 +1,4 @@
-import type { OwnedScreen, ResolvedScreenTarget, ScreenAction, ScreenRevisions, ScreenTargetBinding, ScreenVariableValue } from "./screen-contracts.ts";
+import type { OwnedScreen, ResolvedScreenTarget, ScreenAction, ScreenRevisions, ScreenTargetBinding, ScreenVariableValue, ScreenArithmeticValue } from "./screen-contracts.ts";
 
 export interface ScreenVariable {
   id:string; technicalName:string; variableType:"bool"|"int"|"decimal"|"string"; defaultValue:ScreenVariableValue;
@@ -12,7 +12,7 @@ export interface InteractionEdit {
   expectedTargetRevisions:{target:ScreenTargetBinding;revisions:ScreenRevisions}[];
   actions?:ScreenAction[];
 }
-interface Row { id:string; type:ScreenAction["type"]; variableId:string; value:string; target:ScreenTargetBinding }
+interface Row { id:string; type:ScreenAction["type"]; variableId:string; value:string; arithmetic?:ScreenArithmeticValue; target:ScreenTargetBinding }
 interface ActionFocus {id:string;part?:string;operation?:string;start?:number|null;end?:number|null}
 export interface ActionDraft { focus?:ActionFocus; rows:Row[]; touched:boolean; expanded?:string; error?:{id:string;part:string;text:string} }
 let sequence=0;
@@ -21,16 +21,19 @@ const key=(target:ScreenTargetBinding)=>JSON.stringify([target.screenId,target.s
 export function variableValue(variable:ScreenVariable,raw:string):ScreenVariableValue {
   if(variable.variableType==="bool") {if(raw!=="True"&&raw!=="False")throw Error("Choose True or False. Your value is retained.");return raw==="True";}
   if(variable.variableType==="int" && (!/^(?:0|-[1-9][0-9]*|[1-9][0-9]*)$/.test(raw)||BigInt(raw)<-9223372036854775808n||BigInt(raw)>9223372036854775807n))throw Error("Use a whole number from -9223372036854775808 to 9223372036854775807. Your value is retained.");
+  if(variable.variableType==="decimal"){const value=Number(raw);if(!raw.trim()||!Number.isFinite(value))throw Error("Use a finite decimal number. Your value is retained.");return value;}
   return raw;
 }
 export const variableLabel=(variable:ScreenVariable)=>variable.technicalName.replaceAll("_"," ").replace(/^./,letter=>letter.toUpperCase());
 export const variableRaw=(value:ScreenVariableValue)=>typeof value==="boolean"?value?"True":"False":String(value);
 export function actionSummary(row:ActionDraft["rows"][number],variables:readonly ScreenVariable[]):string {
  const variable=variables.find(v=>v.id===row.variableId);
- return row.type==="setVariable"?`Set ${variable?variableLabel(variable):"missing variable"} to ${row.value}`:row.type==="finishInteraction"?"Finish interaction":`${row.type==="showScreen"?"Show":"Hide"} ${row.target.sourceName||"missing screen"}`;
+ const name=variable?variableLabel(variable):"missing variable";
+ const operator=row.arithmetic?({assign:"",add:"+",subtract:"-",multiply:"*",divide:"/",floorDivide:"//",remainder:"%"}[row.arithmetic.operation]):"";
+ return row.type==="setVariable"?`Set ${name} to ${operator?`${name} ${operator} (${row.value})`:row.value}`:row.type==="finishInteraction"?"Finish interaction":`${row.type==="showScreen"?"Show":"Hide"} ${row.target.sourceName||"missing screen"}`;
 }
 export function actionDraft(actions:ScreenAction[]):ActionDraft {
- const rows=actions.map(action=>({id:`screen-action-${++sequence}`,type:action.type,variableId:action.type==="setVariable"?action.variableId:"",value:action.type==="setVariable"?variableRaw(action.value):"",target:action.type==="showScreen"||action.type==="hideScreen"?{...action.target}:{screenId:"",sourceName:""}}));
+ const rows=actions.map(action=>({id:`screen-action-${++sequence}`,type:action.type,variableId:action.type==="setVariable"?action.variableId:"",value:action.type==="setVariable"?(typeof action.value==="object"?action.value.operand:variableRaw(action.value)):"",...(action.type==="setVariable"&&typeof action.value==="object"?{arithmetic:{...action.value}}:{}),target:action.type==="showScreen"||action.type==="hideScreen"?{...action.target}:{screenId:"",sourceName:""}}));
  return {rows,touched:false,expanded:rows[0]?.id};
 }
 export function prepareInteraction(context:InteractionContext, draft?:ActionDraft):InteractionEdit {
@@ -40,7 +43,7 @@ export function prepareInteraction(context:InteractionContext, draft?:ActionDraf
    if(context.owner?.kind==="component")return fail(row,"type","Component actions stay in Source.");
    if(row.type==="setVariable") {
      const variable=context.variables.find(v=>v.id===row.variableId);if(!variable)return fail(row,"variable","Choose an available variable. Your input is retained.");
-     try{return {type:row.type,variableId:variable.id,value:variableValue(variable,row.value)};}catch(error){return fail(row,"value",(error as Error).message);}
+     try{return {type:row.type,variableId:variable.id,value:row.arithmetic?{...row.arithmetic,operand:row.value}:variableValue(variable,row.value)};}catch(error){return fail(row,"value",(error as Error).message);}
    }
    if(row.type==="finishInteraction") {
      const own=context.targets.find(t=>t.binding.screenId===context.owner?.id);

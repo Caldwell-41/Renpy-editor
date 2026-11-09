@@ -172,6 +172,8 @@ pub struct Node {
     pub style: Option<styles::StyleReference>,
     pub component: Option<ComponentReference>,
     pub actions: Option<Vec<interaction::ScreenAction>>,
+    pub action_assignments: Vec<Option<crate::scene::variables::AssignmentInspection>>,
+    pub action_protection_reason: Option<String>,
     pub variable_bindings: Option<Vec<interaction::VariableBinding>>,
     pub bar_binding: Option<controls::IntegerBarBinding>,
     pub bar_appearance: Option<controls::BarAppearance>,
@@ -203,6 +205,8 @@ pub struct Screen {
 #[serde(rename_all = "camelCase")]
 pub struct Document {
     pub authoring_revision: Option<String>,
+    pub action_variables: Vec<crate::authoring::Variable>,
+    pub action_capabilities: crate::scene::variables::AssignmentCapabilities,
     pub path: String,
     pub revision: String,
     pub screens: Vec<Screen>,
@@ -385,6 +389,8 @@ fn parse_body(
         style: None,
         component: None,
         actions: None,
+        action_assignments: vec![],
+        action_protection_reason: None,
         variable_bindings: None,
         bar_binding: None,
         bar_appearance: None,
@@ -634,6 +640,8 @@ fn inspect(bytes: &[u8], path: String, revision: String) -> Result<Document, Sce
     let lines = source_lines(bytes)?;
     let mut result = Document {
         authoring_revision: None,
+        action_variables: vec![],
+        action_capabilities: Default::default(),
         path,
         revision,
         screens: vec![],

@@ -395,6 +395,41 @@ qualification and target limits; [#93 evidence](tasks/evidence/arithmetic-93.md)
 retains integer-formula qualification and [#92 evidence](tasks/evidence/arithmetic-92.md)
 retains the preceding simple-adjustment and both-target proof.
 
+Screens Set variable actions use the same `{operation, operand}` value and shared
+core admission. `screens.compose` keeps the existing `actions` command and
+`expectedAuthoringRevision` / target-review assertions. Optional `validateOnly:true`
+is limited to that command. It runs the same preparation without committing source
+or history. The response keeps the current `document`, `changed:false` and empty
+`documents`; `actionValidation` contains the proposed inspection with a candidate
+revision. That candidate revision does not authorize a later write. Ordinary commits
+omit `actionValidation`. Invalid input uses the existing field-specific arithmetic
+transport errors; dirty/stale dependencies remain ordinary refusals.
+
+`screens.inspect` and returned composition documents expose `actionVariables`
+(full typed definitions with IDs and revisions) and `actionCapabilities` (the shared
+numeric grammar/limits). Button `actionAssignments` aligns with the ordered action
+list; formulas carry shared inferred types, read/write IDs, readable operands and
+explicit unknown diagnostics. Other actions have null entries. Defaults do not
+establish current click-time operands. `actionProtectionReason` explains protected
+actions. Screen effects add `readVariables` and retain conservative possible writes,
+including formula-definition revisions in dependencies.
+
+A numeric action is generated as `Function(<owned helper>.assign, target, type,
+operation, operand, lambda: <checked typed expression>)`. The lambda reads store
+operands only when that action runs. The fixed versioned helper declaration is
+appended once to its screen's source, in the same transaction and history entry;
+its name derives from the stable screen UUID. One shared core parser/type checker
+and tree-to-source adapter own both button kinds. Runtime uses generated Python
+operators and checks each node for numeric type, signed i64 bounds and finite
+results. Decimal targets promote the final value to float. Errors raise explicitly;
+the helper returns None on success so later actions and Finish retain their order.
+Inspection recognizes only the exact generated call and helper template. Imported
+expression-valued `SetVariable` calls retain captured screen-evaluation timing and
+stay protected rather than being converted. The inert canvas recognizes the exact
+owned helper declaration as data-only initialization; it never loads or runs it.
+[The #95 evidence](tasks/evidence/arithmetic-95.md) owns exact payloads, runtime
+qualification and remaining target limits.
+
 Phase 1D Variables store UUID, immutable lowercase technical name, supported type,
 typed default value, and exact source mapping. Source uses ordinary mutable state:
 

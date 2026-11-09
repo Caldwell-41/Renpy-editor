@@ -257,6 +257,7 @@ impl AuthoringService {
         };
         let authoring = authoring.or(captured_authoring.as_ref());
         document.authoring_revision = authoring.map(|a| a.revision.clone());
+        document.action_variables = authoring.map(|a| a.variables.clone()).unwrap_or_default();
         let captured_inventory = if inventory.is_none() {
             Some(self.screen_inventory(project)?)
         } else {
@@ -324,6 +325,8 @@ impl AuthoringService {
                             style: None,
                             component: None,
                             actions: None,
+                            action_assignments: vec![],
+                            action_protection_reason: None,
                             variable_bindings: None,
                             span: span.clone(),
                             parent_start: Some(parent.span.start),
@@ -433,6 +436,22 @@ impl AuthoringService {
                         .as_ref()
                         .and_then(|_| actions.buttons.get(&node.span.start))
                         .map(|b| b.actions.clone());
+                    node.action_assignments = node
+                        .actions
+                        .as_ref()
+                        .map(|a| {
+                            actions::assignment_inspections(
+                                a,
+                                authoring
+                                    .as_ref()
+                                    .map(|a| a.variables.as_slice())
+                                    .unwrap_or(&[]),
+                            )
+                        })
+                        .unwrap_or_default();
+                    if actions.unsupported.contains(&node.span.start) {
+                        node.action_protection_reason = Some("Unsupported action or evaluation timing. Expression-valued SetVariable arguments are captured during screen evaluation; click-time conversion would change behavior. Generated arithmetic requires its unchanged runtime adapter.".into());
+                    }
                     node.variable_bindings = bindings::inspect_bindings(
                         node,
                         authoring

@@ -4711,7 +4711,7 @@ fn find_asset(
         .map(|item| item.id.clone())
 }
 
-fn integer_adjustment(
+pub(crate) fn integer_adjustment(
     kind: VariableType,
     value: &Value,
     authoring: &AuthoringMetadata,

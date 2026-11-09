@@ -1259,6 +1259,12 @@ impl AuthoringService {
                 let raw = &text[start..end];
                 !raw.starts_with(char::is_whitespace)
                     && !safe_initialization(code(raw))
+                    && !actions::qualified_initialization(
+                        file,
+                        text,
+                        start,
+                        &style_inventory.source_map.owned_screens,
+                    )
                     && !style_index.supports_declaration(file, start + bom)
             }) {
                 plan.limits.push(format!(

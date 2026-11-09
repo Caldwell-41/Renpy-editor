@@ -454,7 +454,7 @@ fn anchored_launcher_args(root: &Path, args: &[OsString]) -> Result<Vec<OsString
     Ok(value)
 }
 
-fn launcher_args(root: &Path, args: &[OsString]) -> Result<Vec<OsString>, RenpyError> {
+pub(crate) fn launcher_args(root: &Path, args: &[OsString]) -> Result<Vec<OsString>, RenpyError> {
     #[cfg(windows)]
     {
         let executable = root.join("lib/py3-windows-x86_64/python.exe");
@@ -483,12 +483,12 @@ fn launcher_args(root: &Path, args: &[OsString]) -> Result<Vec<OsString>, RenpyE
 }
 
 #[cfg(not(windows))]
-fn command_path(path: &Path) -> OsString {
+pub(crate) fn command_path(path: &Path) -> OsString {
     path.as_os_str().to_owned()
 }
 
 #[cfg(windows)]
-fn command_path(path: &Path) -> OsString {
+pub(crate) fn command_path(path: &Path) -> OsString {
     use std::os::windows::ffi::{OsStrExt, OsStringExt};
     let wide = path.as_os_str().encode_wide().collect::<Vec<_>>();
     let verbatim = ['\\' as u16, '\\' as u16, '?' as u16, '\\' as u16];
@@ -542,7 +542,7 @@ fn apply_minimal_environment(command: &mut Command) {
     }
 }
 
-fn run_bounded(
+pub(crate) fn run_bounded(
     cwd: &Path,
     argv: Vec<OsString>,
     timeout: Duration,

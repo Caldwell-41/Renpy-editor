@@ -4,8 +4,9 @@ export interface ScreenTargetBinding { screenId: string; sourceName: string }
 export interface AuthoringRevisionChange { before: string; after: string }
 // Integer values use canonical decimal strings, as in existing Story authoring.
 export type ScreenVariableValue = boolean | number | string;
+export type ScreenArithmeticValue = import("./scene-ui.ts").IntegerAdjustment;
 export type ScreenAction =
-  | { type: "setVariable"; variableId: string; value: ScreenVariableValue }
+  | { type: "setVariable"; variableId: string; value: ScreenVariableValue | ScreenArithmeticValue }
   | { type: "showScreen"; target: ScreenTargetBinding }
   | { type: "hideScreen"; target: ScreenTargetBinding }
   | { type: "finishInteraction" };
@@ -16,7 +17,7 @@ export interface VariableSample {
 export interface ScreenRevisions { source: string; sourceMap: string; inventory: string; effects: string }
 export interface ScreenEffects {
   revision: string; unknown: boolean; hiddenScreens: string[]; finishesInteraction: boolean;
-  shownScreens: string[]; assignedVariables: string[];
+  shownScreens: string[]; assignedVariables: string[]; readVariables?: string[];
   dependencies: { id: string; revision: string }[];
 }
 export interface OwnedScreen {
@@ -43,4 +44,19 @@ export interface ReviewedUse {
 }
 export interface ComponentReview {
   component: ResolvedScreenTarget; affectedScreens: OwnedScreen[]; uses: ReviewedUse[]; complete: boolean;
+}
+
+// Additional core inspection fields consumed by the arithmetic editor handoff.
+export type ScreenActionAssignment = NonNullable<import("./scene-ui.ts").SceneBeat["assignment"]>;
+export interface ScreenArithmeticInspection {
+  actionVariables: import("./screen-interactions.ts").ScreenVariable[];
+  actionCapabilities: {
+    operators: string[]; operations: ScreenArithmeticValue["operation"][];
+    maxBytes: number; maxNodes: number; maxDepth: number;
+    integerTransport: "signedI64String"; decimalTransport: "finiteFloat64"; functions: false;
+  };
+}
+export interface ScreenActionInspection {
+  actionAssignments: (ScreenActionAssignment | null)[];
+  actionProtectionReason: string | null;
 }

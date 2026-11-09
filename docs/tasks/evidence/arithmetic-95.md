@@ -1,0 +1,225 @@
+# Click-time Screens arithmetic, #95
+
+Scope is [#95](https://github.com/Caldwell-41/Renpy-editor/issues/95), under
+[spec #87](https://github.com/Caldwell-41/Renpy-editor/issues/87). The T3-prepared
+worktree is `t3-6e0d6daf`, branch `t3/screens-click-time-arithmetic`. Before edits,
+HEAD and the integration base were exactly
+`5ecfd6f742e07bffce1bbab806c4ebf56c116f6a`, with a clean worktree. The branch already
+had its assigned unused name. No checkout, subagent, issue mutation, PR or push was
+created. The ignored launch receipt records the actual absolute worktree location;
+absolute machine paths stay out of Git.
+
+## Contract for #97
+
+The [#94 public contract](arithmetic-94.md#public-contract-for-95-and-96) remains the
+shared numeric owner. Integers are signed i64 strings; decimals are finite JSON
+numbers. Successful protocol responses use `value`. No declaration default becomes
+an observed current operand.
+
+`screens.compose` retains its revision-bound `actions` command. Each numeric action
+uses `{type:"setVariable",variableId,value:{operation,operand}}`. All seven operations
+and the grammar/limits from #94 apply. Literal bool/string/int/decimal assignments
+remain supported, including imported literal SetVariable actions and semantic no-ops.
+`expectedRevision`, `expectedAuthoringRevision` and `expectedTargetRevisions` remain
+mandatory under their existing rules. Dirty or changed variable-definition files
+refuse, including variables read only by the formula.
+
+Optional `validateOnly:true` uses that same command/preparation. It accepts only
+`actions`. The success response keeps `document` at the current accepted revision,
+`changed:false`, `documents:[]`, and returns `actionValidation` as the proposed
+inspection. The candidate revision inside that proposed document is not a write
+precondition. A later commit uses the original current source/authoring/target
+revisions and revalidates. Commits omit `actionValidation`. Invalid formulas use
+existing field-specific transport codes/messages, including
+`ARITHMETIC_TARGET_TYPE`, `INVALID_ARITHMETIC_OPERAND`,
+`INVALID_ARITHMETIC_SYNTAX`, `MISSING_ARITHMETIC_VARIABLE`,
+`ARITHMETIC_OPERAND_TYPE`, `ARITHMETIC_ZERO_DIVISOR`, `ARITHMETIC_OVERFLOW` and
+`ARITHMETIC_LIMIT_EXCEEDED`. Stale/dirty refusals keep their existing codes.
+
+Both accepted and proposed documents expose:
+
+- `actionVariables`: existing full Variable records, including stable ID, readable
+  technical name, fixed declared type, default and definition path/revision.
+- `actionCapabilities`: shared operators, operations, limits, exact integer/decimal
+  transports and `functions:false`.
+- Button `actions`: original operation/operand data in displayed order.
+  `actionAssignments` aligns with that list; formula entries carry the shared
+  `inferredResultType`, `reads`, `readVariables`, `writes`, `diagnostics`, and
+  known constant or unknown state. Other entries are null. Variable-dependent
+  assignments report `unobservedCurrentValue` regardless of defaults.
+- `actionProtectionReason`: a reason for source-protected actions, including the
+  captured timing of expression-valued SetVariable and the unchanged-helper rule.
+- Existing source revision and document authoring revision. Resolved target effects
+  add `readVariables`, retain possible `assignedVariables`, and include operand
+  definition revisions along with action/source/map/inventory dependencies.
+
+The fixture preflight and SDK gate retain exact full protocol requests/responses
+in `public-requests.json`, including validation and commit for both button kinds.
+The committed `tests/fixtures/arithmetic-95/` owns normal Story and SDK driver input.
+The ignored preflight and SDK directories retain complete inspections, accepted
+source/assets and sample plans. Typed renderer compatibility lives only in
+`screen-contracts.ts` and `screen-interactions.ts`; existing drafts retain formula
+operation/operand through their current owner. New controls/layout remain #97.
+
+## Source and runtime owner
+
+`app/src-core/src/screens/actions.rs` extends existing action admission, parsing and
+exact-range patches. It calls #94's existing `scene::integer_adjustment` admission
+and shared typed arithmetic tree, not another evaluator. It generates a deferred
+`Function` action and checked Python operators from that tree. The fixed
+`arithmetic-runtime.rpy` template supplies type/range/finite checks and assignment;
+no runtime or inspection parser evaluates project text. Each screen has one helper
+name derived from its stable UUID. The helper is appended to that screen source in
+the same transaction/history entry as the first arithmetic edit. Removing all
+arithmetic leaves that inert declaration available for subsequent edits. Inspection
+requires the exact generated call and unchanged helper template.
+
+Pinned Ren'Py 8.5.3 primary source was inspected before choosing the adapter:
+`renpy/common/00action_other.rpy` Function stores its callable/arguments at creation
+and calls it in `__call__`, then restarts interaction and returns the callable's
+result. The generated lambda defers every variable read; the helper returns None.
+`renpy/display/behavior.py` runs action lists in order and keeps prediction and
+selection separate. `renpy/test/testparser.py`, `testast.py` and `testkey.py` own the
+selected click, screen/id and keysym selectors. Nonfocusable captions use the actual
+screen's `_tts_all(False)` path, following H69. Their file hashes are in the local
+launch receipt. No SDK was started to inspect those sources.
+
+Imported expression-valued SetVariable remains protected because its arguments
+were captured during screen evaluation. Opening and no-op edits preserve original
+bytes/timing. Existing eight-action/context/Finish-last rules and shared transactions
+remain the only action path. The canvas consumes only validated data and samples;
+it recognizes the exact owned helper declaration without executing it.
+
+## Red/green and focused verification
+
+The user-approved seams are public authoring commands, committed source, shared
+history, reopen, accepted-source SDK, and actual frontend-to-core journeys.
+
+1. Public arithmetic composition failed with `INVALID_PAYLOAD`, then passed after
+   extending the existing action owner. It verifies operation/operand inspection,
+   unknown operands, reads, comment preservation, no-op bytes, one Undo/Redo and reopen.
+2. Public effect inspection initially omitted formula reads, then passed after
+   adding read IDs and operand dependencies. The same case rejects invalid formulas
+   and preserves imported captured-timing source with an explicit protection reason.
+3. Public composition draft validation initially refused its new request flag,
+   then passed through the shared preparation without committing. Apply/Undo proves
+   validation added no history entry. An initial fixture picked the pre-existing bool
+   definition instead of trust; selecting by technical name corrected that test.
+
+Retained logs are under ignored `.toolchains/arithmetic-95/`. SDK-free fixture
+preflight initially used a stale authoring revision after asset import; refreshing
+that public revision corrected the harness. It then caught a real canvas admission
+gap for the generated helper. Exact owned-declaration recognition fixes that gap
+without executing it. The real production controller journey initially omitted an
+untouched action list, then reused an expired Recent ID. It now deliberately touches
+the arithmetic draft and fetches the fresh Recent ID. All failed logs/results remain.
+No SDK was started during these checks.
+
+Focused public Rust, renderer, controller, typecheck and repository results and the
+qualified candidate are recorded below after their final runs. Prior #94 shared
+arithmetic qualification is reused on unchanged parser/type/evaluator inputs. Existing
+literal action/context/control/reference tests remain selected; no package matrix,
+browser, native editor or manual CI operation is allocated.
+
+## SDK allocation and result
+
+Exactly one Mac ARM64 SDK start is reserved for this assignment. Before it, feature
+usage is Mac 5/20 started plus this reservation, Windows 2/20 started with none
+reserved. A failed or cancelled start counts. No retry is authorized here. Windows
+qualification remains coordinator-owned. The SDK selector is
+`screens::tests::actions::runtime::click_time_arithmetic_sdk_gate`, with `--ignored
+--exact --nocapture`. The no-SDK selector is the same module's
+`click_time_arithmetic_fixture_preflight`.
+
+The fresh ignored directory is `.toolchains/arithmetic-95/mac-01/`. A clean
+integration-inclusive candidate, official archive checksum, complete tracked-input,
+fixture/config/source and retained executable hashes, exact command/environment and
+pinned compiler identities are required before launch. Execution must occur outside
+the sandbox through the existing `macos_native_desktop.py` admission/power helper.
+Existing sessions/processes and all prior arithmetic evidence remain untouched.
+
+Runtime outcome is pending. Required proof is normal accepted-source ordered current
+values (6/12, then 7/14), variable-dependent amounts and a changed operand, actual
+text/image clicks and keyboard activation, integer/decimal witnesses, prediction/
+evaluation/selection inertness, explicit invalid arithmetic, one Finish continuation,
+deliberate wrong-outcome rejection, unchanged accepted source, complete records and
+owned-resource cleanup. Compile/lint alone cannot qualify it.
+
+## Prepared checks and file ownership
+
+Before SDK launch, 53 distinct selected Rust cases pass: actions 16, controls 18,
+effects 4 and references 15. The repeated no-SDK fixture is one of those 16, not an
+extra case. The SDK test stays intentionally ignored during ordinary selection.
+The existing positive Cargo-log checker accepts these logs. Twelve renderer DOM
+cases and the actual production ScreensWorkspace-to-core journey pass. Pinned
+Node 24.19.0/npm 11.9.0 typecheck/test compilation, Rust 1.90.0 formatting, static
+nonexecuting Python/selector preflight, repository validation and whitespace pass.
+The final helper-ownership refinement also passes its exact no-SDK fixture.
+
+Implementation files are:
+
+```text
+app/src-core/src/renpy.rs
+app/src-core/src/scene.rs
+app/src-core/src/scene/variables.rs
+app/src-core/src/screens.rs
+app/src-core/src/screens/actions.rs
+app/src-core/src/screens/arithmetic-runtime.rpy
+app/src-core/src/screens/canvas.rs
+app/src-core/src/screens/composition.rs
+app/src-core/src/screens/ownership.rs
+app/src-core/src/screens/references.rs
+app/src-core/src/screens/action_tests.rs
+app/src-core/src/screens/action_runtime_tests.rs
+app/src/screen-contracts.ts
+app/src/screen-interactions.ts
+app/tests/screen-interactions-core.dispatch.mjs
+docs/DATA_MODEL.md
+docs/tasks/evidence/arithmetic-95.md
+tests/fixtures/arithmetic-95/story.rpy
+tests/fixtures/arithmetic-95/driver.rpy
+```
+
+The shared Rust adapter changes expose existing bounded SDK helpers within the
+crate and existing arithmetic admission/draft inspection across core owners.
+They add no SDK implementation, evaluator or transaction path. Protocol registries,
+Help driver, Story production modules, status/ledger, prior fixture/approval/evidence
+files and parent PR remain unchanged by this branch.
+
+A representative validation request has this exact shape; angle-bracket values
+stand for the IDs/revisions returned by the current public inspection:
+
+```json
+{
+  "protocolVersion": 1,
+  "requestId": "arithmetic-95",
+  "operation": "screens.compose",
+  "payload": {
+    "sessionId": "<session ID>",
+    "screenId": "<owned screen UUID>",
+    "expectedRevision": "<current screen source SHA256>",
+    "validateOnly": true,
+    "command": {
+      "type": "actions",
+      "nodeId": "<button UUID>",
+      "expectedAuthoringRevision": "<current document authoring revision>",
+      "expectedTargetRevisions": [],
+      "actions": [
+        {"type":"setVariable","variableId":"<trust UUID>","value":{"operation":"add","operand":"1"}},
+        {"type":"setVariable","variableId":"<reward UUID>","value":{"operation":"assign","operand":"2 * trust"}}
+      ]
+    }
+  }
+}
+```
+
+The response is `{protocolVersion:1,requestId:"arithmetic-95",ok:true,value:...}`.
+`value` contains `document`, `selectedId`, `changed:false`, `styles`, `documents:[]`
+and `actionValidation`. Inside its proposed button inspection, the first formula
+has integer type, reads/writes trust, and unknown `unobservedCurrentValue`; the
+second reads trust and writes reward with the same unknown reason. Setting
+`validateOnly:false` commits through the ordinary owner. The full concrete request
+and complete success response, including all variable IDs/revisions, capabilities,
+source spans and diagnostics, are retained in both `preflight-final/public-requests.json`
+and `mac-01/public-requests.json`. A target mismatch, for example, returns
+`{protocolVersion:1,requestId:"arithmetic-95",ok:false,error:{code:"ARITHMETIC_TARGET_TYPE",message:"variableId: Choose a numeric target. Whole-number targets require an integer result."}}`.
