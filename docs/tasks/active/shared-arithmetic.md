@@ -218,3 +218,24 @@ Next: the coordinator takes over the draft PR and routes the reserved Windows
 No issue was accepted or closed. #93 stays blocked pending Windows evidence;
 #91/#97 approval and later backend/UI tickets remain pending. Keep the PR draft;
 final merge, automerge and release are not selected.
+
+### 2026-11-09: Windows qualification handoff
+
+The coordinator linked/took over draft PR #122 and resumed integration-checkout
+ownership after the merger completed. Published implementation at `76bc9f37`
+matches the returned app/fixture trees; the CI-plan correction is branch metadata
+only. SUNDOWN is reachable and its registered Loomlight repository matches this
+repository. The next delegate is qualification-only, in an isolated prepared
+Windows worktree, using request key `spec87-windows92-qualification-20261109`.
+
+The existing Windows reservation authorizes **one** started invocation of the
+recorded #92 SDK gate, after cheap preflight and pinned-archive verification.
+The qualifier must record its actual full candidate and input hashes before
+launch, verify app/runtime-input equality with the published implementation, and
+return started/not-started plus all gate outcomes. It may append sanitized Windows
+evidence to the existing #92 note on its own branch; it cannot change production,
+the shared ledger/status files, the integration ref or issue acceptance. No
+additional SDK run, editor package/native launch or manual CI dispatch is selected.
+The coordinator retains integration ownership. Consumption remains Windows
+**0 started / 1 reserved** until a launch/result is reported. Wait for completion
+without polling; audit actual receipts before accepting #92 and starting #93.

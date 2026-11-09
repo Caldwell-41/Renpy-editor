@@ -36,9 +36,13 @@ Draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) publishes
 `codex/spec-87-arithmetic` into `codex/phase3b-screen-designer` and is linked in T3.
 The integration branch now tracks its own origin branch. The PR describes full
 #87 scope and eventual closing references, with only #92 implemented so far.
-No issue was accepted or closed. The coordinator resumes mutation ownership after
-the merger's result, takes over the PR and routes the reserved Windows #92 gate
-to SUNDOWN using the exact published head. #93 remains blocked pending that proof.
+No issue was accepted or closed. The coordinator has resumed mutation ownership
+and linked/taken over the PR. SUNDOWN is reachable; the next isolated delegate is
+qualification-only under request key `spec87-windows92-qualification-20261109`.
+It has the single reserved Windows #92 gate invocation and must record the exact
+published candidate/input identity before launch. Wait for its completion without
+polling, audit the receipts and integrate its sanitized evidence. #93 remains
+blocked pending that proof.
 The ledger owns unchanged operation counts; the merger started no SDK, native,
 package or manual CI operation. Final-head automatic lightweight checks await
 coordinator audit; no reviews have been submitted at this handoff.
