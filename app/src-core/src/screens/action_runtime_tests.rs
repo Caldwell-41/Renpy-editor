@@ -761,6 +761,11 @@ fn arithmetic_sources(root: &Path) -> std::collections::BTreeMap<String, Vec<u8>
 }
 
 fn verify_ui_emitted_inputs() {
+    let driver = fs::read_to_string(ui_arithmetic_fixture().join("driver.rpy")).unwrap();
+    assert!(
+        !driver.lines().any(|line| line.trim() == "advance"),
+        "UI fixture narration transitions require an explicit destination condition"
+    );
     let fixture = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/arithmetic-ui");
     let manifest: Value = serde_json::from_slice(
         &fs::read(fixture.join("manifest.json")).expect("portable UI-emitted inputs required"),

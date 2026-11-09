@@ -81,14 +81,14 @@ testsuite arithmetic_ui:
         assert eval (_ui_trace == [(5, 4.5), (5, 9.5), (6, 9.5), (6, 1.5), (5, 1.5), (6, 1.5), (27, 1.5)])
         assert eval (trust == 27 and type(trust) is int and money == 1.5 and type(money) is float and arith_flag is True and arith_title == "retained text")
         $ print("ARITHMETIC_UI_STORY precision=6 protected=5 nested=27:int money=1.5:float flag=True title=retained_text", flush=True)
-        advance
+        advance until "UI story complete" timeout 10
         assert "UI story complete" timeout 10
-        advance
+        advance until "Fraction accepted" timeout 10
         assert "Fraction accepted" timeout 10
         assert eval (money == 4.5 and type(money) is float)
-        advance
+        advance until "UI condition complete" timeout 10
         assert "UI condition complete" timeout 10
-        advance
+        advance until screen "arithmetic_dialog" timeout 10
         assert screen "arithmetic_dialog" timeout 10
         assert eval ("Balance: 4.5" in renpy.get_screen("arithmetic_dialog")._tts_all(False))
         $ renpy.restart_interaction()
@@ -113,7 +113,7 @@ testsuite arithmetic_ui:
         assert "UI text first" timeout 10
         $ renpy.hide_screen("_ui_dispatch")
         assert eval (money == 2.0 and type(money) is float and trust == 6 and reward == 12 and type(reward) is int and _ui_continuations == 1)
-        advance
+        advance until screen "arithmetic_dialog" timeout 10
         assert screen "arithmetic_dialog" timeout 10
         assert eval ("Balance: 2.0" in renpy.get_screen("arithmetic_dialog")._tts_all(False))
         $ _ui_activate("remainder")
@@ -121,13 +121,13 @@ testsuite arithmetic_ui:
         $ renpy.hide_screen("_ui_dispatch")
         assert eval (money == 2.0 and reward == 14 and trust == 7 and _ui_continuations == 2)
         $ print("ARITHMETIC_UI_TEXT first=2.0:float/12:int second=2.0:float/14:int current=True", flush=True)
-        advance
+        advance until screen "arithmetic_dialog" timeout 10
         assert screen "arithmetic_dialog" timeout 10
         $ _ui_activate("add")
         assert "UI image first" timeout 10
         $ renpy.hide_screen("_ui_dispatch")
         assert eval (trust == 10 and reward == 20 and _ui_continuations == 3)
-        advance
+        advance until screen "arithmetic_dialog" timeout 10
         assert screen "arithmetic_dialog" timeout 10
         $ _ui_activate("add")
         assert "UI complete" timeout 10

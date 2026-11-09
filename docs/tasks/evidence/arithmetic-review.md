@@ -415,3 +415,105 @@ On Mac, launch outside the sandbox under the existing `native_desktop` wrapper.
 Each unique case is compile, lint with error status, normal entry or deliberate
 wrong outcome. This command is reusable input for later coordinator-routed Windows
 work, not authorization for a Windows invocation here.
+
+### Mac invocation 1 failed at narration progression
+
+The selected invocation ran candidate
+`81494e373e770aae98bfa5d000dc0e5adb471fa7`, with retained native test executable
+SHA-256 `3ec789d8a4e988cd67653322e623d5b55f640aa814cdf0896decfe93ae7fd79c`.
+Pinned Rust 1.90 built offline/locked in this assignment's isolated target. The
+retained final binary passed both exact SDK-free fixture preflights. The broader
+public action group passed 19 tests, with the two named SDK gates explicitly ignored
+and counted as zero passes. Formatting, repository validation (1,880 files) and
+whitespace passed. All 1,880 frozen tracked inputs match the candidate's Git checkout
+representation, including configured newline filters.
+
+The archive remains
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`;
+the published manifest remains
+`4b0cad9ac05dc4ca55081bd3a36458c8ea658ed021f09a87276383652b6bd98b`.
+The launch receipt retains the complete input inventory, toolchain/host identities,
+command array, child environment subset and installed SDK file hashes. The executed
+staged SDK identities match those independently checked against archive members.
+No download or system installation occurred.
+
+The sandbox desktop query returned unreadable values and launched nothing. A scoped
+host query admitted the actual unlocked, awake desktop. The single deliberate SDK
+invocation then ran outside the sandbox under `native_desktop`, holding and releasing
+both power assertions. Total invocation duration was 86,658 ms; the Rust gate exited
+101. Its case records were initialized before SDK staging and exported before each
+assertion.
+
+| Unique selected case | Exit | Duration | Result |
+| --- | ---: | ---: | --- |
+| Compile | 0 | 460 ms | Passed |
+| Lint with `--error-code` | 0 | 269 ms | Passed |
+| Normal entry | 1 | 11,565 ms | Failed at the next narration assertion |
+| Wrong outcome | Unrun | Unrun | Required rejection remains missing |
+
+Normal entry passes five assertions before failing its sixth. It proves main-menu
+entry, inert prediction defaults, the exact Story intermediate trace and actual
+numeric types, protected `max` execution, nested assignment and literal Boolean/Text.
+The observed trace is `(trust, money)`:
+`(5, 4.5), (5, 9.5), (6, 9.5), (6, 1.5), (5, 1.5), (6, 1.5), (27, 1.5)`.
+Trust stays `int` and money stays `float`. The exact emitted witness is:
+
+```text
+ARITHMETIC_UI_STORY precision=6 protected=5 nested=27:int money=1.5:float flag=True title=retained_text
+```
+
+After bare `advance`, `assert "UI story complete" timeout 10` fails. The traceback
+still locates execution at captured `ui_story.rpy` line 15, `"Arithmetic journey"`.
+The child exits with an assertion failure, without subprocess timeout or truncation.
+The SDK prints the same inner selector twice; one is failed and one not run. These
+are one unique required case, not two executions or additional passes.
+
+No condition/text/divide/ordered-image/Finish runtime witness was reached. The wrong
+case remains `notRun`; absence of its wrong-accepted marker does not establish a
+rejected wrong outcome. This invocation does not qualify the complete fixture.
+Original #94/#95 both-target results keep their original source and gesture scope.
+
+The existing subprocess owner records **10 physical SDK children**, each with a
+matched start/completion, PID, argument array, cwd, duration, raw output and flags.
+Seven construct the fixture: three version checks, GUI generation, GUI images,
+template compile and template lint. Three run the selected compile/lint/normal cases.
+All seven construction children exit zero. Physical children are separate from the
+single charged feature invocation. No retry occurred. Usage is now **Mac 10/20
+started, zero reserved; Windows 3/20 started, zero reserved**.
+
+The raw audit verifies 77 exported project files, all four captured hashes and image
+bytes, and all 11 accepted `.rpy` files. Source hash sets remain unchanged across
+all three completed cases. Both power assertions are released, the owned temporary
+root is absent and the host process audit finds no owned SDK/test process. The
+retained binary, raw cases, complete child records, frozen inputs, source/assets,
+context, timings, desktop receipt and audit remain in ignored
+`.toolchains/arithmetic-ui-runtime/mac-01/`. Prior evidence/binaries are preserved.
+
+### SDK-free correction and remaining proof
+
+Classification is a fixture narration-progression defect, with the exact live event
+ordering still provisional. H11/H60 and the pinned SDK's `Advance`/`Until` code were
+checked before correction. An SDK-free extraction of the actual `Node`, `Advance`
+and `Until` classes shows that bare `Advance` can finish on an unidentified `begin`
+callback. `Until` continues until its destination condition becomes true. This
+supports the leading late-current-line callback hypothesis; it does not claim an
+observed native callback trace. The runtime failure itself remains the red evidence.
+No product arithmetic defect was observed and no production correction was made.
+
+The existing fixture preflight now refuses bare `advance` and was observed red
+before changing the driver. The corrected driver uses seven explicit
+`advance until <expected narration or screen> timeout 10` transitions. Source
+snapshots, asset bytes, expected values, required assertions and timeouts are intact.
+An initial shortened exact selector discovered zero tests and supplies no pass;
+the corrected full selector produced the recorded red result. The affected public
+action group then passes 19 tests again, with only the two named SDK gates ignored.
+The corrected driver's static Python and destination checks pass. It has **not**
+run in the SDK; no green runtime result transfers from the attempted driver.
+
+Latest local `codex/spec-87-arithmetic` is already an ancestor, so the requested
+normal merge reports `Already up to date`. The test branch retains the clean
+published integration and attempted candidate histories. Final portable inputs,
+correction and evidence are ready for a fresh merger. The coordinator must select
+any further Mac invocation before the missing Screens/Finish/wrong-outcome proof
+can run, then route Windows qualification. This assignment grants no retry or
+Windows start and claims no full acceptance, native editor proof or P4 resolution.

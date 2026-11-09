@@ -67,3 +67,9 @@ unresolved. The preflight retains these exact limits and still requires the type
 text sample and unchanged bytes. The SDK executes the complete raw screen and
 verified image. This arrangement does not claim full canvas rendering eligibility.
 Canvas planning precedes installation of the qualification-only entry/observer.
+
+The first Mac invocation compiled/linted these unchanged snapshots and passed the
+Story trace/types, then failed to progress beyond its narration. The corrected
+entry driver uses destination-bound `advance until` transitions. That correction
+passes SDK-free checks only; the full Screens/Finish/negative-case runtime proof
+remains pending under the canonical arithmetic review evidence.
