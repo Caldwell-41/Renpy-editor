@@ -163,3 +163,11 @@ coordinator. Until then, #91 and the #97 decimal-control decision remain pending
 The review source is `6b3aee30e78fa99d1b4e856c38169dbd6133523e`;
 [the source record](draft-source.json) contains its fingerprint. This identifies
 the candidate and does not grant approval.
+
+## A2 refinement
+
+Kris selected A for an Experience First refinement toward Story Combined v1.
+`equation-v2` is the new review candidate. [The refinement record](REFINEMENT.md)
+explains the changed controls, palette, checks and retained captures. This is a
+selected direction; design approval remains pending. The original variants and
+sources remain available.

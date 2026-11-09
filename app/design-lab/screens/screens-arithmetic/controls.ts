@@ -1,10 +1,11 @@
 import type {LabContext} from '../../contracts.ts';
 import {element as el,action,labelled} from '../../page.ts';
+import {refinedEditor} from './refined-editor.ts';
 export const operations=[['=','Set to'],['+=','Add'],['-=','Subtract'],['*=','Multiply'],['/=','Divide'],['//=','Floor divide'],['%=','Remainder']] as const;
 export const vars=[['trust','Whole number'],['reward','Whole number'],['bonus','Whole number'],['money','Decimal'],['price','Decimal']] as const;
 const types:Record<string,string>=Object.fromEntries(vars);
 export function select(label:string,options:readonly (readonly [string,string])[],value:string){const s=el('select');s.ariaLabel=label;for(const [id,name]of options){const o=el('option','',name);o.value=id;s.append(o);}s.value=value;return s;}
-type Row={id:number;kind:string;target:string;op:string;formula:string};
+export type Row={id:number;kind:string;target:string;op:string;formula:string};
 // Named response fixtures, not a parser, type checker or evaluator. Unlisted
 // formula text stays a draft. Real admission and numeric semantics belong to core.
 function feedback(row:Row):{type?:string;error?:string;note?:string}{
@@ -26,6 +27,7 @@ function feedback(row:Row):{type?:string;error?:string;note?:string}{
   return {type:decimal?'Decimal':'Whole number',note:row.op==='='?'Reads variables when this action runs.':'Uses the target and formula values when this action runs.'};
 }
 export function mountControls(root:HTMLElement,context:LabContext,variant:string){
+  const refined=variant==='equation-v2';
   let nextId=10,selected='continue',expanded=1,message='',contextKind='dialog';
   const initial=():Row[]=>[
     {id:1,kind:'set',target:['decimal','unknown'].includes(context.state)?'money':'trust',op:context.state==='decimal'?'/=':'+=',formula:context.state==='decimal'?'2':context.state==='unknown'?'price':context.state==='invalid'?'trust +':'1'},
@@ -42,7 +44,9 @@ export function mountControls(root:HTMLElement,context:LabContext,variant:string
   const editContinue=action('Continue',()=>change('continue'));editContinue.ariaLabel='Edit continue button';
   const editReward=action('Reward',()=>change('reward'));editReward.ariaLabel='Edit reward button';
   const editText=action('Text & samples',()=>{mode='text';render();});
-  tabs.append(editContinue,editReward,editText);root.append(title,tabs,body,footer,status);
+  tabs.append(editContinue,editReward,editText);
+  const review=el('details','sa2-review');review.append(el('summary','','Review cases'),tabs);
+  if(refined)root.append(title,body,footer,status,review);else root.append(title,tabs,body,footer,status);
   // The parent production inspector has its own shortcuts; this experimental
   // editor owns its keys and must not dispatch a literal-only Apply behind it.
   const key=(event:KeyboardEvent)=>{
@@ -80,9 +84,9 @@ export function mountControls(root:HTMLElement,context:LabContext,variant:string
   }
   function rowSummary(r:Row){return r.kind==='set'?`${r.target} ${r.op} ${r.formula}`:r.kind==='finish'?'Finish interaction':`${r.kind==='show'?'Show':'Hide'} About`;}
   function render(){
-    title.textContent=mode==='text'?'Text and editor samples':`${selected==='continue'?'Continue':'Reward'} ${context.state==='imagebutton'?'imagebutton':'textbutton'}`;
+    title.textContent=mode==='text'?'Text and editor samples':refined?(selected==='continue'?'Continue':'Reward'):`${selected==='continue'?'Continue':'Reward'} ${context.state==='imagebutton'?'imagebutton':'textbutton'}`;
     editContinue.ariaPressed=String(mode==='actions'&&selected==='continue');editReward.ariaPressed=String(mode==='actions'&&selected==='reward');editText.ariaPressed=String(mode==='text');
-    body.replaceChildren();footer.replaceChildren();status.textContent=message;
+    body.replaceChildren();footer.replaceChildren();review.querySelector('.sa-examples')?.remove();status.textContent=message;
     if(mode==='text'){renderText();return;}
     const heading=el('div','sa-line');heading.append(el('strong','','When clicked'),el('code','',`${rows().length} / 8 actions`));body.append(heading);
     if(context.state==='protected'||contextKind==='component'){
@@ -97,7 +101,7 @@ export function mountControls(root:HTMLElement,context:LabContext,variant:string
     for(const [index,row]of rows().entries()){
       const li=el('li');li.dataset.rowId=String(row.id);
       const line=el('div','sa-action-line');
-      const trigger=action(`${index+1}  ${rowSummary(row)}`,()=>{expanded=row.id;render();root.querySelector<HTMLElement>(`[data-step="${row.id}"]`)?.focus();});trigger.className='sa-step';trigger.dataset.step=String(row.id);trigger.ariaExpanded=String(expanded===row.id||variant==='expanded-v1');
+      const trigger=action(`${index+1}  ${refined&&expanded===row.id&&row.kind==='set'?'Set variable':rowSummary(row)}`,()=>{expanded=row.id;render();root.querySelector<HTMLElement>(`[data-step="${row.id}"]`)?.focus();});trigger.className='sa-step';trigger.dataset.step=String(row.id);trigger.ariaExpanded=String(expanded===row.id||variant==='expanded-v1');
       const tools=el('div','sa-tools');
       for(const [direction,symbol]of [[-1,'↑'],[1,'↓']] as const){const b=action(symbol,()=>{const at=index+direction;[rows()[index],rows()[at]]=[rows()[at]!,row];render();root.querySelector<HTMLElement>(`[data-step="${row.id}"]`)?.focus();});b.ariaLabel=`Move action ${index+1} ${direction<0?'earlier':'later'}`;b.disabled=row.kind==='finish'||index+direction<0||index+direction>=rows().length||rows()[index+direction]?.kind==='finish';tools.append(b);}
       const remove=action('×',()=>{rows().splice(index,1);expanded=rows()[Math.min(index,rows().length-1)]?.id??0;render();root.querySelector<HTMLElement>('.sa-step')?.focus();});remove.ariaLabel=`Remove action ${index+1}`;tools.append(remove);line.append(trigger,tools);li.append(line);
@@ -105,18 +109,19 @@ export function mountControls(root:HTMLElement,context:LabContext,variant:string
     }
     body.append(sequence);
     if(variant==='sequence-v1'){const at=rows().findIndex(r=>r.id===expanded);if(at>=0){body.append(el('h3','',`Edit action ${at+1}`),editor(rows()[at]!,at));}}
-    body.append(el('p','sa-order','Runs top to bottom during play. Each action reads the values left by the actions above it. Finish stays last.'));
+    body.append(el('p','sa-order',refined?'Runs in this order. Each action reads the values left by the action above it.':'Runs top to bottom during play. Each action reads the values left by the actions above it. Finish stays last.'));
     if(context.state==='unknown')body.append(el('p','sa-warning','Current money is unknown. No starting value or result is inferred from its default. The formula can still be authored.'));
     const info=el('details','sa-examples');info.append(el('summary','','Formula examples and context'));
     const examples=select('Formula example',[
       ['1','Whole number · 1'],['(trust + bonus) * 2','Grouping · (trust + bonus) * 2'],['trust + bonus * 2','Precedence · trust + bonus * 2'],['trust / 2','Decimal division · trust / 2'],['trust // 2','Whole floor division · trust // 2'],['price // 2','Decimal floor division · price // 2'],['-5 // 2','Negative floor · -5 // 2'],['-5 % 2','Negative remainder · -5 % 2'],['ghost + 1','Missing variable'],['help_seen + 1','Wrong type'],['price / 0','Zero divisor'],['2 ** 3','Unsupported power'],['round(price)','Unsupported call'],['1e309','Non-finite result'],['9223372036854775808','Out of range'],['9223372036854775807','Exact whole-number text']
     ],'1');examples.onchange=()=>{const row=rows().find(r=>r.id===expanded);if(row){row.formula=examples.value;render();}};
     const kind=select('Action context',[['dialog','Blocking dialog'],['panel','Qualified panel'],['component','Component']],contextKind);kind.onchange=()=>{contextKind=kind.value;if(contextKind!=='dialog')drafts[selected]=rows().filter(r=>r.kind!=='finish');render();};
-    info.append(examples,labelled('Context',kind),el('p','','Show/Hide target About is explicitly qualified by the sample contract. Kind alone does not grant eligibility. Changing this sample context resets Finish eligibility.'));body.append(info);
+    info.append(examples,labelled('Context',kind),el('p','','Show/Hide target About is explicitly qualified by the sample contract. Kind alone does not grant eligibility. Changing this sample context resets Finish eligibility.'));if(refined)review.append(info);else body.append(info);
     footer.append(action('Apply',apply,true),action('Cancel',confirmCancel));footer.children[0]!.setAttribute('aria-label','Apply action draft');footer.children[1]!.setAttribute('aria-label','Cancel action draft');
   }
   function operationField(wrap:HTMLElement){const label=el('label','field lp-field');label.append(el('span','lp-label','Operation'),wrap);return label;}
   function editor(row:Row,index:number){
+    if(refined)return refinedEditor(row,index,{variables:vars,operations,feedback,changed:()=>{const trigger=root.querySelector(`[data-step="${row.id}"]`);if(trigger)trigger.textContent=`${index+1}  ${expanded===row.id&&row.kind==='set'?'Set variable':rowSummary(row)}`;}});
     const section=el('div','sa-fields');if(row.kind!=='set'){section.append(el('p','',row.kind==='finish'?'Resume Story after this blocking dialog. Always last.':'Target: About · Qualified panel'));return section;}
     const target=select(`Action ${index+1} variable`,vars.map(([name,type])=>[name,`${name} · ${type}`]),row.target);target.dataset.target=String(row.id);
     const op=select(`Action ${index+1} operation`,operations.map(([symbol,name])=>[symbol,`${symbol}  ${name}`]),row.op);

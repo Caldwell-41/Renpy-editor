@@ -1,0 +1,114 @@
+{
+  "status": "draft, not approved",
+  "captureCommand": "npm run design:check -- screens-arithmetic equation-v2 --interaction ./screens/screens-arithmetic/refined-check.mjs --capture",
+  "captures": [
+    {
+      "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-actions-compact.png",
+      "sha256": "056663fb40d6ab911ea224caec5542bb237efcf8b8a7838114082032c3431d1c",
+      "state": "button",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-actions-wide.png",
+      "sha256": "e05f16a4cce900b89e0ebd8649a69162d9504c0f3dcb1586f0abf600b18c4d39",
+      "state": "button",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-condition-compact.png",
+      "sha256": "06ae22c5fb4822b019c30992b86823f359b57440505fb1d9ad160cf3da4bbbf3",
+      "state": "condition",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-creation-wide.png",
+      "sha256": "bb5ede4dd33916ef064ac8696cc9d9d355d900eedda4e78ebefa41a31f10f594",
+      "state": "variables",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-decimal-wide.png",
+      "sha256": "46eaed616abcd6d9f2f939b5fda323d9c309d7b7b2bd9140a7a5283d272722e2",
+      "state": "decimal",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-invalid-wide.png",
+      "sha256": "930177b10a41a73371660d6ccad1ee67be45afb595878d58e175aa490babd05e",
+      "state": "invalid",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-operation-menu.png",
+      "sha256": "d01af85f054a0ba13f73e76e3e82bc6dd140e9dd59a3cf7b6b587b438df68c30",
+      "state": "button",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-protected-wide.png",
+      "sha256": "946c719af64f33ce668095ee5ecc7557430d7095338f96055ea96bf4b42b66e7",
+      "state": "protected",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-suggestion.png",
+      "sha256": "f6f5e4a7cece0c3effdc6ccd153203ecc8616be7fcbffb80bb052102ab5a2053",
+      "state": "button",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-text-wide.png",
+      "sha256": "bc4e28b27336fd1fbc4ec8c01cef835f80f309e6e4697875868223ba61416373",
+      "state": "text",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-unknown-wide.png",
+      "sha256": "5b4f7f4d46b4865f4dd50f960c0a0e2fc228aba90ea85c2ddec8217b3c9e654d",
+      "state": "unknown",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-variables-wide.png",
+      "sha256": "013be2a269fee976d8113ab7cac1fb71df9665cacdd54ddb6741d64bfbab5cf4",
+      "state": "variables",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    }
+  ]
+}

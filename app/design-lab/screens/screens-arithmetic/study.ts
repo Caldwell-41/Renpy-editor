@@ -9,8 +9,10 @@ import {mountControls} from './controls.ts';
 import {mountDecimals} from './decimals.ts';
 import '../../../src/screen-ui.css';
 import './style.css';
+import './refined.css';
 export async function mountArithmetic(host:HTMLElement,context:LabContext,variant:string){
   document.documentElement.dataset.theme=context.theme;
+  host.classList.toggle('sa-refined',variant==='equation-v2');
   if(context.state==='variables'||context.state==='condition')return mountDecimals(host,context,variant);
   await loadPreferences();document.documentElement.dataset.theme=context.theme;
   let disposed=false,entered=false;

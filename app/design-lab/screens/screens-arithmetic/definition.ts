@@ -11,6 +11,7 @@ export const definition: Omit<LabScreen, 'approval'> = {
     {id:'text',title:'Decimal text and samples'},
   ],
   variants: [
+    {id:'equation-v2',title:'A2 · Story equation refinement',load:()=>import('./refined.ts')},
     {id:'equation-v1',title:'A · Equation disclosure',load:()=>import('./equation.ts')},
     {id:'sequence-v1',title:'B · Sequence and editor',load:()=>import('./sequence.ts')},
     {id:'expanded-v1',title:'C · Expanded worksheet',load:()=>import('./expanded.ts')},
