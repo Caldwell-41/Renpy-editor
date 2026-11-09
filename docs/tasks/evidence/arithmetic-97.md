@@ -79,7 +79,7 @@ link; the link is removed for the returned clean candidate.
 
 The actual `startApplication` journey sends production controls through the existing
 Help driver and `ApplicationHost`. Happy DOM supplies events. Its successful
-`journey-18-creation/result.json` under ignored `.toolchains/arithmetic-97/` retains complete
+`journey-20-679e0df7/result.json` under ignored `.toolchains/arithmetic-97/` retains complete
 requests/responses, accepted Screens/variable source, driver exit 0 and fixture
 cleanup. It proves decimal creation/default Undo/Redo, all seven operation keys,
 textbutton/imagebutton ordered arithmetic and Finish, validation without writes,
@@ -266,3 +266,50 @@ comparison covers the approved named controls; surrounding navigation, appearanc
 panels, canvas unavailability in this data-only fixture, and the generic Story
 condition layout remain explicit context differences. Fictional reference art is
 not evidence for production canvas fidelity.
+
+
+## Final tested source
+
+Tested source: `679e0df78d5f25afcc95af751d74d59788dab820`. The final commit after it changes this evidence
+note only; product, test and runtime inputs remain identical. The ignored
+`candidate-679e0df7.json` freezes 872 app/script/CI/fixture hashes, the Help
+driver hash, all 26 owned changed paths and emitted-source hashes. The final actual-main
+journey has 11 passing stages and 473 real protocol records, with driver exit 0
+and complete fixture cleanup. No SDK/runtime-start operation occurred.
+
+The completed source passes the 30 affected renderer cases, pinned production build
+and typecheck, Rust formatting, repository validation and whitespace. The 93 distinct
+Rust passes above are reused on identical core/test inputs. Both inherited dispatch
+consumers pass; the final extended visual run passes its 12 paired state/size records.
+Owned Chrome browsers, comparison servers and Help drivers are closed. All raw failed
+attempts, requests and captures remain retained. Vite logged ResizeObserver notices
+while resizing the reference; no native or performance acceptance is inferred.
+
+Owned changed paths:
+
+- `app/src-core/examples/help-controller-driver.rs`
+- `app/src-core/src/authoring.rs`
+- `app/src-core/src/renpy/tests/source_foundation/arithmetic.rs`
+- `app/src-core/src/screens/composition.rs`
+- `app/src-core/src/screens/control_tests.rs`
+- `app/src/main.ts`
+- `app/src/numeric-input.ts`
+- `app/src/screen-arithmetic-editor.ts`
+- `app/src/screen-control-editor.ts`
+- `app/src/screen-interactions.css`
+- `app/src/screen-interactions.ts`
+- `app/src/screen-text.ts`
+- `app/src/screen-ui.ts`
+- `app/src/screen-variable-samples.ts`
+- `app/src/story-condition-editor.ts`
+- `app/tests/screen-controls-core.dispatch.mjs`
+- `app/tests/screen-interactions-core.dispatch.mjs`
+- `app/tests/screen-interactions.dom.test.ts`
+- `app/tests/screen-panels-workspace.dom.test.ts`
+- `app/tests/screens-arithmetic-core.dispatch.mjs`
+- `app/tests/story-authoring.dom.test.ts`
+- `app/tests/supporting-authoring.dom.test.ts`
+- `docs/DATA_MODEL.md`
+- `docs/UI.md`
+- `docs/tasks/evidence/arithmetic-95.md`
+- `docs/tasks/evidence/arithmetic-97.md`
