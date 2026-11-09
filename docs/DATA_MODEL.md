@@ -346,9 +346,30 @@ Undo/Redo and reopen reconstruct definitions and references from authoritative b
 
 ## Variables and state
 
-Phase 1 visual variables support `bool`, `int`, and `string` definitions with simple
-assignment of a value the editor can represent. Arbitrary Python expressions remain
-source/custom code until a later expression/state model can represent them safely.
+Visual variables support `bool`, `int`, and `string` definitions and literal
+assignment. Story's public authoring commands also support integer self-assignment
+with Add or Subtract and one signed 64-bit literal operand. The Set variable
+payload retains `variableId` and `value`; arithmetic uses a typed object in `value`
+with `operation` (`add` or `subtract`) and canonical decimal-string `operand`.
+Literal bool/string values and lossless decimal-string integers keep their contract.
+
+`scene.list` exposes the verified authoring revision and declared variable choices.
+Arithmetic mutations require that `expectedAuthoringRevision` as well as the existing
+project, source-map, Scene source and explicit-body assertions. Core inspection
+reports the inferred result type, variable reads/writes and known value or unknown
+reason. It uses only preceding supported local assignments. Declaration defaults
+never establish current Story state. Unsupported control flow and Custom Code
+invalidate that knowledge; integer overflow remains an explicit unknown result.
+The renderer consumes this result without parsing or evaluating formulas.
+
+Both `$ score += 2` and `$ score = score + 2` are recognized, as are their
+Subtract equivalents. Semantic no-ops retain source bytes; operand/operator edits
+retain source style, spacing, comments and identity. Source-map schema 8 is unchanged.
+An exact-byte/range match permits a previously protected arithmetic mapping to
+retain its ID without rewriting metadata on open. A later authoring or existing
+schema-migration transaction may refine the mapping. Unsupported formulas stay
+protected. [The #92 contract and fixtures](tasks/evidence/arithmetic-92.md) record
+exact shapes, diagnostics, qualification and the remaining UI/Windows work.
 
 Phase 1D Variables store UUID, immutable lowercase technical name, supported type,
 typed default value, and exact source mapping. Source uses ordinary mutable state:

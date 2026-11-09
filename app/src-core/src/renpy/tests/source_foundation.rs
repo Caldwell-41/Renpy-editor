@@ -1,3 +1,5 @@
+mod arithmetic;
+
 use super::*;
 use crate::lifecycle::{acceptance::ipc, CreateProjectRequest, LifecycleService};
 use serde_json::json;

@@ -1218,6 +1218,9 @@ fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
     let (code, message) = match error {
         RuntimeBusy => ("RUNTIME_BUSY", "Stop the runtime operation before changing these files."),
         InvalidPayload => ("INVALID_PAYLOAD", "The Scene operation is invalid."),
+        MissingArithmeticTarget => ("MISSING_ARITHMETIC_TARGET", "variableId: Choose an existing variable."),
+        ArithmeticTargetType => ("ARITHMETIC_TARGET_TYPE", "variableId: Add and Subtract require a whole-number variable."),
+        InvalidArithmeticOperand => ("INVALID_ARITHMETIC_OPERAND", "value.operand: Enter a canonical signed 64-bit whole number and choose Add or Subtract."),
         InvalidMetadata => (
             "INVALID_SCENE_METADATA",
             "Scene metadata is invalid or unsupported.",

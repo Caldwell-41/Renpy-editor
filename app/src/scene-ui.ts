@@ -22,6 +22,8 @@ export interface ChoiceOption {
   readonly condition?: Condition;
 }
 
+export interface IntegerAdjustment { readonly operation: "add" | "subtract"; readonly operand: string }
+export type AssignmentState = { readonly status: "known"; readonly value: boolean | string } | { readonly status: "unknown"; readonly reason: "unobservedCurrentValue" | "unsupportedControlFlow" | "integerOverflow" | "invalidOperand" };
 export type BeatPayload =
   | { readonly type: "background"; readonly assetId: string; readonly transition: TransitionRef }
   | { readonly type: "showCharacter"; readonly characterId: string; readonly appearanceId: string; readonly placement: PlacementRef; readonly transition: TransitionRef }
@@ -35,7 +37,7 @@ export type BeatPayload =
   | { readonly type: "stopMusic" }
   | { readonly type: "playSfx"; readonly assetId: string }
   | { readonly type: "transition"; readonly transition: Exclude<TransitionRef, "none"> }
-  | { readonly type: "setVariable"; readonly variableId: string; readonly value: boolean | string }
+  | { readonly type: "setVariable"; readonly variableId: string; readonly value: boolean | string | IntegerAdjustment }
   | { readonly type: "choice"; readonly options: readonly ChoiceOption[] }
   | { readonly type: "jump"; readonly sceneId: string }
   | { readonly type: "call"; readonly sceneId: string; readonly returnLabel: string | null }
@@ -45,6 +47,7 @@ export type BeatPayload =
 export interface BeatOwner { readonly groupId: string; readonly branchId: string }
 export interface ConditionalBranch { readonly groupId: string; readonly variableId?: string; readonly otherwise: boolean; readonly ordinal?: number; readonly condition?: Condition }
 export interface SceneBeat {
+  readonly assignment?: { readonly inferredResultType: "bool" | "int" | "string"; readonly reads: readonly string[]; readonly writes: readonly string[]; readonly state: AssignmentState };
   readonly screenEffects?: ScreenEffects;
   readonly owner?: BeatOwner;
   readonly conditionalBranch?: ConditionalBranch;
@@ -139,6 +142,7 @@ interface Asset { readonly id: string; readonly kind: "background" | "characterA
 interface Variable { readonly id: string; readonly technicalName: string; readonly variableType: "bool" | "int" | "string"; readonly defaultValue: boolean | string }
 
 export interface SceneWorkspace {
+  readonly authoringRevision?: string;
   readonly projectRevision: string;
   readonly sourceMapRevision: string;
   readonly entrySceneId: string;
@@ -281,7 +285,14 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string,
       case "placement": characters = characters.map((item) => item.characterId === payload.characterId ? { ...item, placement: payload.placement, placementBeatId: beat.id } : item); break;
       case "playMusic": music = { assetId: payload.assetId, beatId: beat.id }; musicUnknown = false; break;
       case "stopMusic": music = undefined; musicUnknown = false; break;
-      case "setVariable": variables[payload.variableId] = { value: payload.value, beatId: beat.id }; break;
+      case "setVariable": {
+        if (typeof payload.value === "object") {
+          const state = beat.assignment?.state;
+          if (state?.status === "known" && !manualBranches) variables[payload.variableId] = { value: state.value, beatId: beat.id };
+          else { delete variables[payload.variableId]; variablesUnknown = true; unknownBeatIds.push(beat.id); }
+        } else variables[payload.variableId] = { value: payload.value, beatId: beat.id };
+        break;
+      }
       case "dialogue": overlay = { kind: "dialogue", text: payload.text, beatId: beat.id }; break;
       case "narration": overlay = { kind: "narration", text: payload.text, beatId: beat.id }; break;
       case "choice": overlay = { kind: "choice", text: payload.options.map((option) => `${option.text}${option.condition ? " (availability unknown)" : ""}`).join(" · "), beatId: beat.id }; break;
@@ -323,7 +334,7 @@ export interface SceneActions {
   readonly viewContinuation?: (sceneId: string, beatId: string, expectedSourceRevision: string) => void;
   readonly assist?: (sceneId: string, beatId: string, action?: string) => void;
   readonly layoutKey?: string;
-  readonly apply: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision">) => Promise<SceneWorkspace>;
+  readonly apply: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision">) => Promise<SceneWorkspace>;
   readonly status: (message: string, kind?: "normal" | "error") => void;
   readonly present: (assetId: string, purpose: MediaPresentation["purpose"]) => Promise<MediaPresentation>;
   readonly resolution: { readonly width: number; readonly height: number };
@@ -485,7 +496,7 @@ export function renderSceneAuthoring(
   };
   draftSettlers.set(host,settle);
 
-  const mutate = async (command: SceneCommand, after?: (before: SceneWorkspace, next: SceneWorkspace) => void, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision"> = model, owner?: HTMLElement): Promise<boolean> => {
+  const mutate = async (command: SceneCommand, after?: (before: SceneWorkspace, next: SceneWorkspace) => void, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision"> = model, owner?: HTMLElement): Promise<boolean> => {
     if(disposed || actions.current?.() === false)return false;
     if (drafts().some(draft => draft !== owner)) { actions.status("Complete or cancel the other edit first. Input retained.", "error"); focusDraft(); return false; }
     if (pendingWrites) { actions.status("Wait for the current change to finish.", "error"); return false; }

@@ -1,4 +1,6 @@
 //! Bounded, non-executing interpretation of the supported Ren'Py condition subset.
+pub mod arithmetic;
+
 use crate::authoring::{AuthoringMetadata, VariableType};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;

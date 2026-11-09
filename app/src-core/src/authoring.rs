@@ -2086,7 +2086,7 @@ fn canonical_variable_value(kind: VariableType, value: &Value) -> Result<Value, 
     }
 }
 
-fn valid_i64_decimal(value: &str) -> bool {
+pub(crate) fn valid_i64_decimal(value: &str) -> bool {
     if value.is_empty()
         || value.starts_with('+')
         || (value.starts_with('0') && value.len() > 1)
