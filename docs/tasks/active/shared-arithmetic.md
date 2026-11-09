@@ -18,7 +18,8 @@ draft PR targets the Screens branch. No merge of that PR or release is selected.
 - #88 is already closed with Kris's equation-row approval. Reuse Story Combined
   v1, revision `combined-v1`, merged through PR #108. No new Story redesign.
 - #89 and #90 were superseded, closed as not planned. Do not implement them.
-- Ready work: Screens mock #91 and Story backend #92.
+- Screens mock #91 has a review candidate, with approval pending. Story backend
+  #92 is in progress in its isolated implementation worktree.
 - Backend sequence: #92, then #93, then #94. #95 follows #94.
 - Story UI #96 follows approved #88 and qualified #94.
 - Screens/decimal UI #97 follows approved #91 and qualified #95.
@@ -93,3 +94,31 @@ Next: receive #92's implementation, use a fresh merger, route Windows qualificat
 and update the graph only against actual completed evidence. Open the draft
 integration PR after the first ticket merge, with closing references for #87 and
 its active slices. The design chat works with Kris independently.
+
+### 2026-11-09: Screens and decimal design candidate
+
+The design agent returned a review candidate, **not an approval**, on
+`codex/spec-87-variable-mock` at `1e547df22b9a5002a0c8676e8059077d924e3d86`.
+Runnable source is `6b3aee30e78fa99d1b4e856c38169dbd6133523e`, with frontend/Lab
+fingerprint `7f44009d4939169eeb341065cf7150a2929eee322f80273400efb8542aa08e14`.
+The coordinator verified ancestry from `bb550929`, the draft source record,
+all 18 committed capture hashes and the null approval fields. No variant is chosen.
+
+The candidates are `equation-v1` (A), `sequence-v1` (B) and `expanded-v1` (C).
+The candidate branch's `docs/design/screens-arithmetic/README.md`,
+`draft-source.json`, `draft-captures.json` and `approval.json` own design details.
+Its self-contained review export was presented in the design chat. Kris's explicit
+selection/approval remains pending there; #91 and #97's additional decimal-design
+gate remain open. The candidate has not been merged into integration.
+
+Reported checks: scoped Design Lab typecheck, coverage A 12 / B 5 / C 5 selected
+samples, and 3 TDD interaction samples pass. These are the design agent's results;
+the coordinator did not rerun them. All behavior is fictional browser memory with
+named diagnostic fixtures. No source persistence or arithmetic/runtime acceptance
+follows. The design handoff consumed no SDK/native/package/CI operation and made
+no push or PR.
+
+Backend #92 continues independently on `t3/arithmetic-backend-slice`; its delegated
+task uses request key `spec87-ticket92-implementer-20261109`. The existing Mac SDK
+reservation remains in place until that implementer reports started/not-started
+and its evidence. Wait for its completion notification without polling.

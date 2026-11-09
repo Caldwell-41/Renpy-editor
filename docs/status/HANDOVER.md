@@ -10,12 +10,18 @@ dispatching implementation or qualification. The occupied Screens checkout is
 clean and preserved. This is a separate integration worktree.
 
 Story mock #88 is approved as Story Combined v1 / `combined-v1`. Broad handoffs
-#89/#90 were superseded by #91–#97. Start #92 backend and #91 mock independently;
+#89/#90 were superseded by #91–#97. #92 backend and #91 mock started independently;
 follow #92 -> #93 -> #94, then #95 and #96, then #97 with Screens approval.
 Kris authorized design chats named `Variable Mock - {description}` and separate
 worktrees. Production controls wait for their approval and qualified backend.
 The separate mock chat is recorded in the delivery ledger and owns #91 plus #97's
-decimal designs. One Mac SDK slot is reserved for #92; no invocation is known to
+decimal designs. Its candidate branch `codex/spec-87-variable-mock` is at
+`1e547df2`, runnable source `6b3aee30`. A/B/C are review candidates only; all
+approval fields remain null. Kris must select/approve before production UI is
+unblocked. The ledger records the source identity, capture audit and reported checks.
+Backend #92 continues on its isolated `t3/arithmetic-backend-slice` branch; wait
+for its completion notification without polling. One Mac SDK slot is reserved
+for #92; no invocation is known to
 have started. No native/package/CI operation has started and no PR exists yet.
 Next action is receive #92, merge with a fresh merger, route Windows proof and
 open the draft PR after the first ticket merge. Final parent
