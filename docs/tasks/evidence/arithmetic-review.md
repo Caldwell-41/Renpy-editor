@@ -750,3 +750,201 @@ These five caller edits change no production, core, SDK driver, captured source 
 asset input. Those trees/files still equal Mac-qualified `72eb9f13`; another Mac
 SDK run is unnecessary. Exact successor-head automatic checks remain for audit.
 H76 indexes the consumer failure. No new SDK/native-editor/package run occurred.
+
+
+## Windows UI-source invocation 1 passed, 2026-11-10 AEST
+
+The bounded Windows assignment tests exactly published integration
+f3450c0644e3ed7fc8b144df6dff28012f787a2e. The existing assigned qualification
+checkout on codex/spec-87-windows-92 was clean at
+55f89ddfaab237d6786ff4242eb0b5b92f9dc666. Ownership, actual Git root/common
+directory, both worktrees, branch and refs were checked before fetching only the
+selected integration ref and fast-forwarding normally. No checkout was created or
+switched. The registered project remains clean on codex/phase3b-screen-designer
+at 251fb47754a0ec1a43ece8763a0b4603b8e54dd8, with every tracked file unchanged.
+
+Production/core and all portable SDK fixtures equal Mac-qualified
+72eb9f13b1156b76deb4873f8a8d32a57785340b. The successor changes documentation and
+five frontend fixture callers. This result binds the tested integration SHA; the
+evidence-only successor does not qualify another implementation. This assignment
+edits only this evidence note. Product, tests, fixtures, status, ledger, issues,
+PR and acceptance contracts remain unchanged.
+
+### Preparation and exact selection
+
+Fresh ignored .toolchains/arithmetic-ui-runtime/windows-01/ was absent before
+creation. Before synchronization, all 222 files under the earlier #92/#94/#95
+evidence directories were hashed, including their binaries and unique receipts.
+Every earlier file still has the same size and SHA-256 after execution.
+
+All 895 tracked app, test/fixture, script, CI, published SDK and root configuration
+inputs match Git's checkout representation through git cat-file --filters.
+This reconciles .gitattributes, Windows checkout endings and the preserved
+mixed-newline fixture. Their actual working hashes remain unchanged across the
+build, SDK execution and audit. input-manifest.json retains every path, size and
+hash. The source receipt also pins app tree
+e6b70a0cc7f8e757b7ba5fe783d9b4a37dc8c31c and fixtures tree
+80a519cd1fc375dfb46ce4c2fea8631890e45383.
+
+The existing machine helper supplies Rust 1.90.0 (1159e78c4 2025-09-14),
+Cargo 1.90.0 (840b83a10 2025-07-30), LLVM 20.1.8 and native
+x86_64-pc-windows-msvc. MSVC is 19.50.35726 for x64, from installed toolset
+14.50.35717. The orchestration interpreter is Python 3.12.14; the SDK reports its
+own Python 3.12.7 and Ren'Py 8.5.3.26051504 on Windows 11 build 26200.
+No download, installation, GNU target, SDK patch or signing change occurred.
+
+After loading the existing machine-local enter-dev.ps1, the exact Cargo commands
+ran from app/, locked and offline, with fresh isolated CARGO_TARGET_DIR and
+CARGO_BUILD_TARGET=x86_64-pc-windows-msvc:
+
+~~~text
+cargo test -p loomlight-core --locked --offline --lib screens::tests::actions::runtime::ui_emitted_arithmetic_fixture_preflight -- --exact --nocapture
+cargo test -p loomlight-core --locked --offline --lib screens::tests::actions::runtime::ui_emitted_arithmetic_fixture_preflight_with_template_initialization -- --exact --nocapture
+cargo test -p loomlight-core --locked --offline --lib --no-run --message-format=json
+~~~
+
+SDK execution variables and inherited SDL overrides were stripped for both
+preflights. Only each fresh evidence destination was supplied. Each exact selector
+passed one test with zero failures, ignores or skips. Test durations were 4.26 s
+and 4.34 s; outer durations were 61.016 s, including the fresh 56.53 s compilation,
+and 4.906 s. The no-run artifact receipt completed in 0.500 s. The existing
+python scripts/check-q1-prep-gates.py cargo-log <log> accepted both logs and the
+final SDK log. Cargo artifact JSON and the fresh retained AMD64 executable are
+available independently of the result.
+
+The existing official archive and both supplied/repository published manifests
+match their established pins. Sixteen installed SDK launcher/runtime/test/API
+files match archive members. The observed staged SDK matches the same sixteen
+hashes; the test owner's SDK context independently agrees on its execution files.
+The published provenance makes no separate PGP verification claim.
+
+Actual desktop admission checked the input desktop name Default, interactive
+64-bit session 1, foreground availability and 2560x1440 display before launch.
+The same admission passed after exit. No display resolution or physical input
+changed. Evidence stayed outside the owned SDK root. TEMP and TMP used the
+fresh short contained scratch named auiW01.
+
+The retained test-executable.exe ran this exact argument selection once, directly:
+
+~~~text
+screens::tests::actions::runtime::ui_emitted_arithmetic_sdk_gate --ignored --exact --nocapture
+~~~
+
+launch-receipt.json retains the absolute executable/cwd, complete argument array,
+selected environment, identities and readiness facts.
+LOOMLIGHT_RUNTIME_SDK_ARCHIVE points to the verified retained official archive;
+LOOMLIGHT_ACTIONS_EVIDENCE_DIR points to this run's sdk/;
+LOOMLIGHT_SDK_CHILD_EVIDENCE_DIR points to this run's children/.
+sdk-child-environment.json records the environment inherited through the existing
+renpy.rs allowlist. The unchanged driver sets dummy audio inside the fixture.
+There was no Cargo SDK invocation after direct binary execution.
+
+### Unique outcomes and witnesses
+
+The executable started at 2026-11-09T18:26:53.979788Z and exited zero at
+2026-11-09T18:28:27.214724Z, taking 93,235 ms including construction.
+The retained per-case measurements are:
+
+| Unique selected case | Exit | Duration | Result |
+| --- | ---: | ---: | --- |
+| Compile | 0 | 1,563 ms | Passed |
+| Lint with --error-code | 0 | 1,078 ms | Passed |
+| Normal entry | 0 | 2,814 ms | All 28 assertions passed |
+| Wrong outcome | 1 | 3,166 ms | Required rejection passed |
+
+Normal entry emits all five exact witnesses:
+
+~~~text
+ARITHMETIC_UI_STORY precision=6 protected=5 nested=27:int money=1.5:float flag=True title=retained_text
+ARITHMETIC_UI_DIVIDE 4.5/2=2.25/2=1.125:float continuation=0
+ARITHMETIC_UI_TEXT first=2.0:float/12:int second=2.0:float/14:int current=True
+ARITHMETIC_UI_IMAGE first=10/20 second=12/24:int bonus=3,2 ordered=True
+ARITHMETIC_UI_VALUES inert=True text=True condition=True rendered_actions=True continuation=4
+~~~
+
+The six passive requests are followed by independently asserted runtime values:
+
+~~~text
+ARITHMETIC_UI_DISPATCH_REQUEST divide 4.5 5 0 built False refresh False True
+ARITHMETIC_UI_DISPATCH_REQUEST divide 2.25 5 0 built False refresh False True
+ARITHMETIC_UI_DISPATCH_REQUEST remainder 9.5 6 0 built False refresh False True
+ARITHMETIC_UI_DISPATCH_REQUEST remainder 2.0 7 12 built False refresh False True
+ARITHMETIC_UI_DISPATCH_REQUEST add 2.0 7 14 built False refresh False True
+ARITHMETIC_UI_DISPATCH_REQUEST add 2.0 10 20 built False refresh False True
+~~~
+
+Wrong outcome reaches the captured Story's Arithmetic journey narration and
+fails assert eval (trust == 26) timeout 1. The unchanged declarations/Story and
+the normal Story trace establish trust 27 there. The negative traceback identifies
+that narration and assertion; it does not separately dump the numeric value.
+The negative child exits 1, reports FAILED, and never emits
+ARITHMETIC_UI_WRONG_ACCEPTED. It records two passing setup assertions and one
+deliberate failure. These are not additional positive cases. Both distinct normal
+and negative children ran; duplicate inner selector listings and their bookkeeping
+add no passes and excuse no missing case.
+
+### Identity, independent audit and cleanup
+
+The independent audit matches all 11 physical SDK starts to their completions and
+identical command/cwd records. Seven are construction children, all with exit zero.
+The remaining four match the selected cases and their complete outputs exactly.
+No child timed out or truncated output. The raw JSON retains Windows OsString
+arguments as UTF-16 code units; the audit decodes them for readable command arrays.
+
+All 77 exported files, 11 accepted .rpy sources, four captured sources, the exact
+image and installed driver match their manifests/portable inputs. Every case
+reports accepted source unchanged. The native executable, official archive,
+installed/staged SDK and toolchain component identities also match.
+
+| Retained input or evidence | SHA-256 |
+| --- | --- |
+| Complete 895-input manifest | af7fb41e383c15a9a6004ed9ca4ff5b536e9484fc16374fe1d1d332f2675872d |
+| Native retained executable | f0ee88c8f22d6cf57dc31c2ff5ccec16cfe90bcfc10c19c01039a6afba801f27 |
+| Cargo artifact JSON | c05d91e42cdac137ee8ff3645098d3f33caf4cf993e9c327f411f26947af1268 |
+| Official archive | eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45 |
+| Published checksum manifest | 4b0cad9ac05dc4ca55081bd3a36458c8ea658ed021f09a87276383652b6bd98b |
+| SDK renpy.py | 4f8f07333f03a5e2e2e8494cfccd487bbb0d3acc7e020282e014de7da8a0955d |
+| SDK Windows python.exe | 7c220ddbc41821a2c15199449fed09c0717e928f1d31abf0af7011c211d153a0 |
+| Portable manifest | 4a183d2be289d4f969767c209ec625849b971c99e319bb4810ba90de6f7f2e3c |
+| Portable requests | 53a4235566ef276eb1a41eed468605dc411c78b2566aa4c93c6205267c0cbff2 |
+| Driver | 2f18f568077462104d45fc385638d13b1133cbe22a7373479dd7107429408d89 |
+| Captured variables | 2aa460421e11d481aa3f8710806866bbd3ac05103fb2b81ed1e828667ef332d1 |
+| Captured screen | 6155c9e458efe38bb5e030062ed077212e58391e90d471f246fd1cfff3da8821 |
+| Captured condition | c1fa1fd8e606d45e6ca823191ba77f56a2e137729d4a75f1762720fecb79a22c |
+| Captured Story | 20d67a3c545d3ce33538d4518603a6a5c32eb25b68958db23625f2bad641c59c |
+| Image asset | f036263d027b9a8258f4a48ce1a609bf20f9f94dfb7ea0ca22b0c95011f14771 |
+| Runtime test owner | 21208f6894f1de0aa87ddb2538c54f4a644a02f4b6abd3fe90b8672f17c93e6a |
+| SDK subprocess owner | 3c47c27751080a4cb172bdc559530c3de5bf1d6a715ce4ff1b170e34be9cfd43 |
+| Physical SDK child JSONL | 0daf82d109b848141798c0e103a747003c6ca5f13f0c92e86de6043a83e28468 |
+| Exported-file manifest | 5eacb18b82c6d7083978f8280a20d72728991cf77f9eded1c7629b547836b361 |
+| Accepted-source manifest | 7f933ee80189c6ccbf7ecb6ad6c834c11fb8290301b63aa91cb3281994be1dcc |
+| Final independent audit | a6b546026696b921f6925d695bf0734c7be120363e26e1b7b92fee69fb952292 |
+| Complete 161-file raw evidence hash manifest | 8266fdefa4f7f9f2b31bb3f7e743062500fd9d966e69f0eb436afdbaa1f0cce9 |
+
+The raw run directory retains independent-audit.json, audit-summary.json,
+input-manifest.json, raw-hashes.json, native-toolchain-identities.json,
+sdk-readiness.json, executed-sdk-identities.json, launch/build/desktop receipts,
+both preflight logs/exports, all SDK child/case outputs and the retained executable.
+Its first offline audit misread serialized Windows arguments and dispatch labels,
+and counted its own inspection command as an owned process. A second audit
+corrected those and exposed a POSIX-only traceback-path check. The final offline
+audit normalizes that Windows path. Both earlier reports and scripts remain under
+audit-01/ and audit-02/. No qualification input changed and no test or SDK
+process was replayed for these audit corrections.
+
+All 12 recorded test/SDK PIDs are gone. A separate process inspection finds no
+owned executable or command under this run's scratch. No process was killed.
+The owned SDK temporary root is absent; the empty short scratch was removed
+nonrecursively. Terminal evidence is passed:true,cleanupComplete:true.
+The prior 222 evidence files and registered checkout remain unchanged.
+
+Actual cumulative usage is **Mac 12/20, Windows 4/20, zero reservations**.
+This assignment consumed exactly one Windows feature invocation; the 11 physical
+SDK children are separately recorded, not extra feature starts. No retry or source
+correction occurred. This is source/runtime proof of unchanged rendered Button
+actions dispatched by a fixture Timer. It adds no physical input, native-editor,
+package, canvas-helper, browser or human proof. No manual CI or watch ran.
+P4, #96/#110 scope, wider acceptance, coordinator audit/integration and PR #122
+remain outside this assignment. The raw executable/evidence remain local ignored
+artifacts; only this appended note is committed and published on the qualification
+branch.
