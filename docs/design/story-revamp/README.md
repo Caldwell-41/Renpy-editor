@@ -54,6 +54,12 @@ Kris completed the interview and requested publication through to-spec on
 the integration specification and final acceptance. It is `ready-for-agent` with
 delivery state `not_started`; implementation still needs Kris's selection.
 
+Kris also approved the ten delivery slices published as #110's sub-issues
+#111–#120. Those tickets own bounded implementation and their native blockers;
+[final qualification #120](https://github.com/Caldwell-41/Renpy-editor/issues/120)
+owns the assembled evidence and live-app review. Existing Choice and arithmetic
+delivery ownership remains unchanged.
+
 ### Implementation prerequisites
 
 Live Story layout integration is blocked until the required Choice and Story

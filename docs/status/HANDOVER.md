@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Story Combined v1 specification published
+## Story Combined v1 delivery tickets published
 
 The interview on `codex/story-combined-v1-grill`, created from approved-design
 branch head `3f5a6de9`, is complete. Kris invoked to-spec and approved testing through
@@ -10,6 +10,21 @@ now owns the integration specification and final acceptance. Its published body
 matches the reviewed draft, `ready-for-agent` is applied, and native blockers #98,
 #94 and #96 were verified. Delivery state is `not_started`; implementation still
 needs Kris's selection.
+
+Kris subsequently approved the ten-slice to-tickets breakdown. Sub-issues
+#111–#120 are published under #110 with `ready-for-agent` labels and native blocking
+relationships. All ticket bodies, labels, parent links and blocking edges were
+verified. The parent title, body, state, labels and comments remain unchanged.
+Use the child issues for bounded delivery and #110 for the full specification;
+do not copy the backlog into a local execution brief.
+
+[Palette #111](https://github.com/Caldwell-41/Renpy-editor/issues/111) and
+[retained drafts #112](https://github.com/Caldwell-41/Renpy-editor/issues/112) have
+no blockers. The later layout ticket waits for retained drafts, Choice #98 and
+arithmetic core #94; the editor ticket also waits for Story arithmetic UI #96.
+[Final qualification #120](https://github.com/Caldwell-41/Renpy-editor/issues/120)
+owns assembled verification and Kris's live-app review. No implementation ticket
+has been selected. All delivery states remain `not_started`.
 
 The [release scope](../design/story-revamp/README.md#production-release-scope) owns
 settled product decisions. Q13's B approval and Q14's full beat/layout review are
@@ -30,8 +45,9 @@ self-contained because the canonical interview docs and conflict reference remai
 local. Make the pinned reference available before later integration checks.
 
 Commit documentation locally.
-The requested specification is published; no further tracker changes, PRs or pushes
-are selected. The other chat owns `codex/story-combined-fourth-mock`; preserve its
+The requested specification and approved tickets are published; no further tracker
+changes, PRs or pushes are selected. The other chat owns
+`codex/story-combined-fourth-mock`; preserve its
 branch and preview. No product build, test run or browser operation is pending.
 
 ## Story Combined v1 approved

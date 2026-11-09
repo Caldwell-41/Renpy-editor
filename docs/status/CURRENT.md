@@ -1,6 +1,6 @@
 # Current status
 
-## Story Combined v1 specification published
+## Story Combined v1 delivery tickets published
 
 The documentation-only interview is complete. Kris invoked to-spec and approved
 the existing testing boundaries on 2026-11-09. [Issue #110](https://github.com/Caldwell-41/Renpy-editor/issues/110)
@@ -9,6 +9,14 @@ with delivery state `not_started`. Its published body and label were verified;
 native blockers are #98, #94 and #96. Choice #98 and arithmetic #87 retain their
 feature requirements and active delivery slices. Screens arithmetic completion
 does not block the Story release.
+
+Kris approved the ten-slice to-tickets breakdown. Sub-issues #111–#120 now own
+bounded delivery, with `ready-for-agent` labels and the approved native blockers.
+Their bodies, parent links and dependencies were verified. [Palette #111](https://github.com/Caldwell-41/Renpy-editor/issues/111)
+and [retained drafts #112](https://github.com/Caldwell-41/Renpy-editor/issues/112)
+have no blockers; neither is selected for implementation. [Final qualification #120](https://github.com/Caldwell-41/Renpy-editor/issues/120)
+owns the assembled checks and Kris's live-app review. #110 remains open and its
+specification is unchanged.
 
 The [release scope](../design/story-revamp/README.md#production-release-scope) records
 settled decisions, including Q13's approved B conflict interaction and Q14's full
