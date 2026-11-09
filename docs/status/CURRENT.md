@@ -12,7 +12,19 @@ retain both failed attempts and the corrected runtime pass. Windows evidence
 `918fa3cc` is integrated through `235d99ac`; both targets now qualify #94 and the
 combined #93 integer witnesses. The coordinator audited actual case outputs,
 source/binary identities, all required assertions and cleanup. #95 Screens runtime
-and #96 Story controls are selected in separate worktrees. #97 waits for #95.
+has returned locally with failed Mac SDK preparation and no runtime qualification;
+it is not integrated. #97 waits for qualified #95.
+
+#96's functional increment is integrated by conflict-free normal merge `25fa2e1c`,
+preserving coordinator `157c1ef8` and returned `b77cc26e`. All app/fixture inputs
+equal qualified `3cb6e8f7`; all 252 recorded hashes match. Reuse 68 focused passes,
+build, actual-main/core journey and wide/compact browser proof. Fresh pinned
+typecheck, contract/branch-plan, repository and whitespace checks pass. The
+[#96 note](../tasks/evidence/arithmetic-96.md#integration-equivalence-and-fresh-checks)
+retains the implementation, coordinator audit and reuse limits. Visual fidelity
+remains partial; #96 stays open. Tracks/Reel, full layout/palette and assembled
+native/human acceptance remain open. Draft PR #122 publishes this increment;
+final-head automatic checks remain for coordinator audit.
 
 Kris selected [spec #87](https://github.com/Caldwell-41/Renpy-editor/issues/87)
 for implementation on 2026-11-09. Branch `codex/spec-87-arithmetic` starts from
@@ -50,7 +62,13 @@ and #92 fixture inputs remain unchanged. The
 [#94 contract](../tasks/evidence/arithmetic-94.md#public-contract-for-95-and-96)
 is the merged baseline for dependent work.
 On 2026-11-09 Kris raised both SDK ceilings from six to 20 started invocations.
-Totals are Mac 5 started / 1 reserved for #95 and Windows 2 started / 0 reserved.
+Totals are Mac 6 started plus one reserved for the coordinator's #95 correction,
+and Windows 2 started with zero reserved. #95's original Mac invocation failed
+before arithmetic assertions. Corrected local `32bd1287` has two reported no-SDK
+fixture passes; production is unchanged and the failed receipt remains intact.
+No retry has started or #95 merge run here. The coordinator owns one controlled
+Mac follow-up after this handoff, latest-integration merge and fresh clean-candidate
+input/binary receipts. #97 remains blocked until runtime qualification.
 The delivery record owns current limits, assignments and qualified candidates.
 The corrected #94 fixture qualifies integer precision, precedence/grouping,
 negative floor/remainder and decimal behavior on both targets. Tickets remain

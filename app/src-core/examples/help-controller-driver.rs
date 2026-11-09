@@ -252,6 +252,7 @@ fn main() {
                 | "project.flush"
                 | "scene.list"
                 | "scene.apply"
+                | "scene.validateAssignment"
                 | "source.list"
                 | "source.open"
                 | "source.updateDraft"
