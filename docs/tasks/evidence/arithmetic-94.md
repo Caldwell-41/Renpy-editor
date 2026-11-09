@@ -7,6 +7,15 @@ Scope: [#94](https://github.com/Caldwell-41/Renpy-editor/issues/94), under
 This work owns backend services and transport. Approved Story/A2 references,
 production control choices, coordinator records and prior fixtures remain intact.
 
+## Current SDK limits
+
+On 2026-11-09 Kris explicitly increased both feature-wide SDK ceilings from six
+to **20 started invocations per target**. Current usage is Mac 5 and Windows 1,
+with zero reservations, leaving 15 Mac and 19 Windows starts. The
+[delivery policy/table](../active/shared-arithmetic.md#verification-and-operation-limits)
+owns current limits. Six-start and 5/6 statements in the attempts below are
+historical. This increase selects no SDK run or successor work.
+
 ## Public contract for #95 and #96
 
 Protocol version 1 uses `{protocolVersion,requestId,operation,payload}`. Successful
@@ -450,3 +459,47 @@ passing Rust public/unit cases and 31 renderer cases remain scoped to unchanged
 production inputs; the corrected no-SDK preflight was repeated once, not counted
 as a new distinct case. This successful SDK gate adds one distinct passing case.
 Fresh integration verification and Windows proof remain coordinator-owned.
+
+
+## Integration equivalence and fresh checks
+
+Normal merge `854f6ad11fdf79d6fc57d5d6e3cfa55131df7d90` combines ordered parents
+`c177d1cda54658bf0a71601e94d0495e4e1eb8e5` and
+`b31929f6b09158aa9d90fedfedadcf83c82493a1` without conflicts. All tracked `app/`,
+`tests/fixtures/`, `scripts/` and `.github/` inputs equal qualified corrected
+candidate `d1c201f1987d4768acca1fd7ca9ca5dff2c5779f`. All 208 successful launch
+receipt input hashes match after integration. The app tree is
+`f6f061000a3646d4f17ebe329971c58aa9f72ee5`; the fixture tree is
+`093bfc9e0ef730acd4cf299be701f9a4d37d361d`.
+
+The merger rechecked the retained binary and accepted-source hashes against the
+independent `mac-03/audit.json`. The existing audit proves all four unique case
+records, exact witnesses, deliberate rejection and SDK/desktop cleanup. The
+merger's before/after manifest preserves all 40 files across `mac-01` in the
+read-only source worktree and `mac-02`/`mac-03` in integration. Failed statuses
+remain failed. H69 links the selector cause and correction without a new test or
+production patch.
+
+The approved Design Lab tree `b32e5588f20b9e803ed32a4c2d4c0be8286e8bca`, design
+records `479a99d146ca5e04c704fd771bb857cc581cd23d`, #92 fixture tree
+`0a14efb0d9c28697204bc172381e9a0623b2ce2a` and #93 fixture tree
+`644f88580e70af831892e82327b4298dd900a0d3` equal the pre-merge coordinator.
+All three coordinator records were intact before the merger updated current state.
+
+Reuse the scoped 144 Rust public/unit and 31 renderer passes. The corrected SDK
+gate adds one distinct Rust pass, for 145 including SDK. The repeated no-SDK
+preflight is the same case. No unchanged full suite was rerun. The original code
+candidate `8c677ffe` predates the source-revision TypeScript annotation at
+`f72a91c2`; the merger freshly ran `npm run typecheck` using pinned Node 24.19.0,
+npm 11.9.0 and the repository TypeScript dependency. It passes with the annotation.
+Fresh static checks pass seven draft request/response pairs, revision identity,
+definition source fields, diagnostics, finite decimal samples/resolved text and
+the integration/base quality-only branch plan. Repository validation and
+integration/working-tree whitespace checks pass. Ignored merger outputs are in
+`.toolchains/arithmetic-94/integration-merge/`.
+
+Merge `854f6ad1` is the Windows-ready source candidate; subsequent checkpoint
+changes are documentation only. Combined #93/#94 Windows SDK qualification is
+still required before #95/#96. Current ceilings are 20 per target as stated above;
+this merger used zero SDK/native-editor/package/browser/manual-CI starts and
+allocated none. The coordinator resumes exclusive mutation ownership on completion.

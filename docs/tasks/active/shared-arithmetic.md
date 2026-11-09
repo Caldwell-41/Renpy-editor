@@ -23,8 +23,8 @@ Screens branch. No merge of that PR or release is selected.
   `equation-v2`; the reference is integrated by merge `aecf165e`. Story backend
   #92 is merged and qualified on Mac and Windows. Its scoped delivery is ready
   for final integration review. #93 is merged with qualified public-command/Mac
-  evidence. #94 is implemented locally with successful corrected-fixture Mac
-  proof and awaits integration. Combined #93/#94 Windows proof remains required
+  evidence. #94 is merged with successful corrected-fixture Mac proof.
+  Combined #93/#94 Windows proof remains required
   before #95 or #96 starts.
 - Backend sequence: #92, then #93, then #94. #95 follows #94.
 - Story UI #96 follows approved #88 and qualified #94.
@@ -54,11 +54,13 @@ then actual frontend-to-core journeys for UI integration. Do not ask to approve
 these boundaries again. Use existing selectors and extend their test owners.
 Read TESTING and the applicable runbooks before qualification.
 
-SDK qualification has a feature-wide ceiling of **six started runs per target**,
-macOS ARM64 and Windows x64. The basis is one focused accepted-source run for each
-of four backend slices, with two correction runs available per target. A started
-fixture invocation against the SDK counts, including failures and cancellation;
-preflight refusals do not. Batch relevant assertions and reuse unchanged inputs.
+SDK qualification has a feature-wide ceiling of **20 started invocations per target**,
+macOS ARM64 and Windows x64. On 2026-11-09 Kris explicitly increased both ceilings
+from six to twenty. Cumulative usage stays Mac 5 and Windows 1, with no reservations;
+15 Mac and 19 Windows starts remain. This changes no counter and selects no new
+SDK run or successor work. Historical six-start records below describe their time.
+A started fixture invocation counts, including failures and cancellation; preflight
+refusals do not. Batch relevant assertions and reuse unchanged inputs.
 Record reservations, starts and exact source/evidence before another invocation.
 The linked Windows host is SUNDOWN. Remote execution must use its supported
 environment routing. No package/native-app launch or expensive CI matrix is
@@ -67,8 +69,8 @@ one becomes necessary. Routine checks and review have no numerical limits.
 
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
-| macOS ARM64 SDK qualification | 6 | 5 | 0 |
-| Windows x64 SDK qualification | 6 | 1 | 0 |
+| macOS ARM64 SDK qualification | 20 | 5 | 0 |
+| Windows x64 SDK qualification | 20 | 1 | 0 |
 
 ## Execution ledger
 
@@ -729,3 +731,54 @@ caption-selector prevention lesson and publish to draft PR #122. It starts no SD
 package/native or manual CI operation. After that handoff returns, route one
 combined #93/#94 Windows qualification before #95 or #96 starts. No successor
 implementation or further SDK invocation is selected by this merger handoff.
+
+
+### 2026-11-09: #94 integration and SDK ceiling increase
+
+The fresh merger took exclusive mutation ownership of clean integration tip
+`c177d1cda54658bf0a71601e94d0495e4e1eb8e5`. Conflict-free normal `--no-ff` merge
+`854f6ad11fdf79d6fc57d5d6e3cfa55131df7d90` preserves that tip as first parent
+and returned branch `t3/decimal-arithmetic-authoring` at
+`b31929f6b09158aa9d90fedfedadcf83c82493a1` as second parent. All three coordinator
+records survived byte-for-byte before this receipt. No history was rewritten.
+
+All merged tracked app, fixture, scripts and CI inputs exactly match corrected
+qualified candidate `d1c201f1987d4768acca1fd7ca9ca5dff2c5779f`; all 208 hashes in
+the successful launch receipt match. The [#94 integration evidence](../evidence/arithmetic-94.md#integration-equivalence-and-fresh-checks)
+owns tree identities, scoped reuse and fresh checks. Reuse 144 Rust public/unit
+cases and 31 renderer cases, plus the corrected SDK gate for **145 distinct Rust
+passes including SDK**. The repeated no-SDK preflight adds no distinct case.
+Fresh pinned Node 24.19.0/npm 11.9.0 TypeScript checking passes, including the
+post-original-typecheck definition source fields. Contract/revision/decimal-sample
+and branch-plan checks, repository validation (1,856 files) and whitespace pass.
+Existing Rust formatting proof is reused. No full suite was repeated for this merge.
+
+Approved Story/Screens source, captures, approval records and the #92/#93 fixtures
+are unchanged from the coordinator tip. H69 records the pinned SDK caption-selector
+cause and existing-driver correction. The two failed attempts remain failed;
+`mac-01` remains in the read-only #94 worktree, and `mac-02`/`mac-03` remain in this
+integration checkout. All 40 retained files across those three attempts are unchanged.
+No worktree or evidence directory was removed or altered.
+
+During this merger assignment Kris explicitly increased the feature-wide SDK
+ceilings from six to **20 per target** on 2026-11-09. Usage remains **Mac 5 started,
+Windows 1 started, zero reservations**; **15 Mac and 19 Windows starts remain**.
+The policy/table above owns current limits. Historical attempt accounting stays
+unchanged. This increase allocates no run and starts no successor.
+
+The coherent checkpoint is published by ordinary push only to
+`origin/codex/spec-87-arithmetic`. Draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122)
+retains base `codex/phase3b-screen-designer`, full-spec scope and eventual closing
+references. Automatic final-head checks remain for coordinator audit; no manual
+CI was dispatched or watched. All tickets stay open for final review.
+
+The Windows-ready source candidate is merge `854f6ad1`; later checkpoint edits are
+documentation only. Combined #93/#94 qualification of this corrected fixture on
+Windows remains required before #95/#96 starts. #97 production still requires
+qualified #95. No SDK, native-editor/package, browser or manual CI operation ran
+in this assignment. No final review, ready-for-review promotion, PR merge,
+automerge or release is selected. On completion, exclusive integration mutation
+ownership returns to the coordinator. Preserve every checkout and raw receipt.
+CURRENT/HANDOVER retain their existing size exception for unique prior recovery;
+this handoff changes only their current arithmetic state. Current sizes are
+5,112 words and 9,176 words respectively.

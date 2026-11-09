@@ -999,3 +999,19 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   verify its removal; a large-screen public test preserves per-button authority
   and exact source edits without a permanent timing threshold.
 - **Evidence:** [PR 79 corrections and parent review](../tasks/evidence/help-dialog-and-canvas.md#pr-79-root-cause-corrections-and-parent-review-2026-11-04).
+
+
+## H69. SDK text selector cannot find a nonfocusable screen caption
+
+- **Class/search:** harness; Ren'Py 8.5.3, TextSelector, testfocus, Say text,
+  nonfocusable caption, interpolated screen text, TTS.
+- **Cause/correction:** pinned SDK text selectors search focus/Say text during
+  narration. A shown nonfocusable screen caption is outside that search. The
+  existing driver now requires the screen and asserts its actual interpolated
+  displayable text through the pinned SDK TTS path. Production is unchanged.
+- **Verification:** the outside-sandbox run passed 19 assertions before the caption
+  selector failed. The corrected fixture passes exact text, numeric/type/sample
+  witnesses and deliberate wrong-outcome rejection. Both failed attempts and the
+  corrected pass retain immutable receipts. No duplicate test was added.
+- **Evidence:** [#94 coordinator runtime recovery](../tasks/evidence/arithmetic-94.md#coordinator-runtime-recovery)
+  and [corrected Mac pass](../tasks/evidence/arithmetic-94.md#mac-invocation-3-corrected-fixture-passed).

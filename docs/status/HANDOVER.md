@@ -60,8 +60,8 @@ documentation and branch-bound CI metadata; qualified app/runtime inputs were in
 Draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) publishes
 `codex/spec-87-arithmetic` into `codex/phase3b-screen-designer` and is linked in T3.
 The integration branch now tracks its own origin branch. The PR describes full
-#87 scope and eventual closing references. It contains #92/#93 implementation plus
-the approved #91/#97 design reference; #94/#95 backend and #96/#97 production UI remain.
+#87 scope and eventual closing references. It contains #92/#93/#94 implementation plus
+the approved #91/#97 design reference; #95 backend and #96/#97 production UI remain.
 The coordinator resumes integration-checkout ownership after this merger returns.
 Windows #92 has completed and
 passed its single SDK run at `c7b8157e`; its two completion sends were denied by
@@ -90,48 +90,49 @@ own payloads, fixtures and exact reuse comparisons. No unchanged tests were reru
 At the #93 merge, SDK totals were Mac **2 started / 0 reserved** and Windows
 **1 started / 0 reserved**. The #94 reservation follows below.
 
-#94 returned clean local branch `t3/decimal-arithmetic-authoring` at `532bb229`,
-code candidate `8c677ffe`, with 144 Rust/31 renderer passes. Its one Mac SDK start
-failed at display initialization before numeric assertions; compile/lint and
-cleanup passed. The failed raw evidence and rejecting Cargo-log result are retained.
-The coordinator's existing desktop query sees no session/display inside the
-sandbox and an active/awake/unlocked desktop outside it, matching H20's symptom.
+#94 is integrated by conflict-free normal merge
+`854f6ad11fdf79d6fc57d5d6e3cfa55131df7d90`, with ordered parents coordinator
+`c177d1cda54658bf0a71601e94d0495e4e1eb8e5` and returned
+`b31929f6b09158aa9d90fedfedadcf83c82493a1`. All tracked app/fixtures/scripts/CI
+inputs exactly equal Mac-qualified `d1c201f1987d4768acca1fd7ca9ca5dff2c5779f`;
+all 208 recorded hashes match. Merge `854f6ad1` is the Windows-ready source
+candidate; later checkpoint edits are documentation only. Reuse 144 Rust public/unit
+and 31 renderer passes plus the SDK case, for 145 distinct Rust passes including SDK.
+Fresh pinned TypeScript checking covers the later definition source fields.
+Contract/revision/sample, branch-plan, repository and whitespace checks pass.
+Approved design trees/captures and #92/#93 fixtures remain unchanged.
 
-The controlled outside-sandbox run completed. Display initialization and 19
-assertions passed, then the nonfocusable caption selector failed. Wrong-outcome
-proof remained unrun; SDK and power cleanup passed. Root source inspection of the
-pinned SDK confirms its text selector searches focus/Say text. The coordinator
-owns a fixture-only correction in the completed #94 worktree, preserving numeric
-checks and verifying the actual screen's interpolated text. Production is unchanged.
+The [#94 public contract](../tasks/evidence/arithmetic-94.md#public-contract-for-95-and-96)
+owns the current service shapes. Its [runtime recovery](../tasks/evidence/arithmetic-94.md#coordinator-runtime-recovery)
+and corrected Mac pass retain all three attempts. The sandbox display failure
+and subsequent nonfocusable caption-selector failure remain failed. H69 records
+the latter cause; the existing driver now checks actual shown displayable text
+through pinned SDK TTS. Production did not fix either failure. The coordinator
+audited successful compile/lint, exact values/types/text/sample witnesses,
+wrong-outcome rejection, four case records and SDK/desktop cleanup. Preserve
+`mac-01` in the read-only #94 worktree and `mac-02`/`mac-03` in this integration
+checkout. All 40 retained files remain unchanged; no qualification is running.
 
-The corrected fixture at `d1c201f1` passed its exact no-SDK preflight and the
-allocated outside-sandbox SDK gate. Compile/lint, exact numeric/type/text/sample
-checks, deliberate wrong-outcome rejection and cleanup all passed. The coordinator
-audited all 208 unchanged inputs, binary/source hashes, four case records and
-desktop cleanup. No qualification process remains running.
+Kris explicitly increased both feature-wide SDK ceilings from six to **20** on
+2026-11-09. Cumulative usage remains **Mac 5 started, Windows 1 started, zero
+reservations**; **15 Mac and 19 Windows starts remain**. The
+[delivery policy](../tasks/active/shared-arithmetic.md#verification-and-operation-limits)
+owns current limits. Historical six-start receipts keep their real accounting.
+This change selects no new SDK run or successor work.
 
-The #94 branch is clean at evidence commit `b31929f6`; its canonical
-`docs/tasks/evidence/arithmetic-94.md` owns the contract and all three Mac attempts.
-Reuse the 144 Rust public/unit cases and 31 renderer cases on unchanged production
-inputs; the successful SDK gate adds one distinct Rust case. The delivery ledger
-owns cumulative limits, currently Mac 5/6 and Windows 1/6, with no reservations.
-Preserve `mac-02` and `mac-03` in this integration checkout and the original
-`mac-01` in the #94 worktree. A fresh merger takes exclusive integration mutation
-ownership, integrates #94, verifies input equivalence and publishes the draft PR.
-Combined Windows proof then remains required before #95/#96.
-Ordinary division and decimals remain #94. Combined #93/#94 Windows qualification
-against #94 is required before #95 or #96 starts. Its accepted-source fixture must
-retain integer precision, precedence/grouping and negative floor/remainder witnesses
-alongside decimal assertions. Formula Windows proof is still missing; #92's old
-Windows fixture does not prove it. No new Windows thread/message is selected at
-this checkpoint. The six-start feature ceilings are unchanged. Tickets remain open for final
-integration review/closure; #93's merged public-command/Mac slice is
-`review_ready` with this Windows limit. #91/#97 design gates are complete;
-#95/#96/#97 production and full feature acceptance remain pending.
-No SDK, editor package/native launch or manual CI operation ran in this merge.
-Preserve the backend worktree's unique ignored Mac receipts and the separate
-approved #91/#97 design worktree. Keep the PR draft. Final parent-PR merge,
-automerge/release and full Story redesign #110 are outside this selection.
+The coherent checkpoint is published only to `codex/spec-87-arithmetic`, with
+PR #122 still draft on its Screens base. Final-head automatic checks remain for
+coordinator audit. No CI watch, manual dispatch, SDK, native-editor/package or
+browser operation ran in this merger assignment. Exclusive integration mutation
+ownership returns to the coordinator when the merger reports completion.
+
+Next, the coordinator routes combined #93/#94 Windows qualification against the
+corrected fixture before #95/#96 starts. No Windows run is allocated by this
+handoff, and #92's old Windows result does not prove formulas. Tickets remain open
+for final review. #95/#96/#97 production and full #87 acceptance remain pending;
+#97 still requires qualified #95. Preserve every worktree/evidence directory and
+the approved #91/#97 design reference. Keep the PR draft; no final review,
+ready-for-review promotion, parent-PR merge, automerge or release is selected.
 
 The earlier sections below retain prior work and recovery context. Their
 unselected-next-task statements do not override this explicit #87 selection.

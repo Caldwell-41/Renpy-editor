@@ -2,12 +2,15 @@
 
 ## Shared arithmetic selected
 
-#94 decimal/public services and successful Mac qualification are local on
-`t3/decimal-arithmetic-authoring` at `b31929f6`. Corrected fixture candidate
-`d1c201f1` passed compile/lint, exact numeric/type/text/sample checks,
-wrong-outcome rejection and cleanup. The initial sandbox display failure and
-later caption-selector failure remain recorded. A fresh merger will integrate
-#94; combined Windows proof remains required before #95/#96 begins.
+#94 decimal/public services are integrated by conflict-free normal merge
+`854f6ad1`, preserving coordinator `c177d1cd` and returned `b31929f6`.
+All tracked app/runtime/fixture inputs equal Mac-qualified `d1c201f1`; all 208
+recorded hashes match. Reuse 145 distinct Rust passes including SDK and 31 renderer
+passes; fresh pinned TypeScript, contract/branch-plan, repository and whitespace
+checks pass. The [#94 contract and evidence](../tasks/evidence/arithmetic-94.md)
+retain both failed attempts and the corrected runtime pass. Combined Windows
+proof remains required before #95/#96 begins. The coordinator resumes mutation
+ownership after this published draft checkpoint.
 
 Kris selected [spec #87](https://github.com/Caldwell-41/Renpy-editor/issues/87)
 for implementation on 2026-11-09. Branch `codex/spec-87-arithmetic` starts from
@@ -42,11 +45,13 @@ and returned `78c92416`. App/fixture bytes equal Mac-qualified `ca51e4c7`.
 Reuse 76 Rust and 36 renderer passes, TypeScript/formatting and audited Mac proof;
 merger contract, repository and whitespace checks pass. Approved mocks/captures
 and #92 fixture inputs remain unchanged. The
-[#93 contract](../tasks/evidence/arithmetic-93.md#public-contract-for-94-95-and-96)
-is the baseline for selected fresh #94 decimal work.
-SDK totals are Mac 5 started / 0 reserved and Windows 1 started / 0 reserved.
+[#94 contract](../tasks/evidence/arithmetic-94.md#public-contract-for-95-and-96)
+is the merged baseline for dependent work.
+On 2026-11-09 Kris raised both SDK ceilings from six to 20 started invocations.
+Totals remain Mac 5 started / 0 reserved and Windows 1 started / 0 reserved;
+15 Mac and 19 Windows starts remain. The increase selects no run or successor.
 New whole-number/decimal Windows proof will be combined against #94 before
-dependent #95/#96 work. The #94 fixture must retain integer precision, precedence,
+dependent #95/#96 work. The corrected #94 fixture retains integer precision, precedence,
 grouping and negative floor/remainder witnesses. Windows formula proof remains
 missing; #92's Windows result does not prove it. Tickets remain open for final review.
 Backend and approved production UI are in scope. No full #110 redesign,
