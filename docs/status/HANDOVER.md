@@ -1,339 +1,76 @@
 # Current outcome handover
 
-## Shared arithmetic implementation, 2026-11-09
+<a id="shared-arithmetic-implementation-2026-11-09"></a>
 
-Kris selected spec #87 using implement-spec and confirmed the read-back. The live
-branch is `codex/spec-87-arithmetic`, based on accepted Screens tip `251fb477`.
-The [delivery record](../tasks/active/shared-arithmetic.md) owns the native ticket
-graph, file ownership, evidence and cumulative operation limits. Use it before
-dispatching implementation or qualification. The occupied Screens checkout is
-clean and preserved. This is a separate integration worktree.
+## Shared arithmetic ready for review, 2026-11-10
 
-Story mock #88 is approved as Story Combined v1 / `combined-v1`. Broad handoffs
-#89/#90 were superseded by #91–#97. #92 backend and #91 mock started independently;
-follow #92 -> #93 -> #94, then #95 and #96, then #97 with Screens approval.
-Kris authorized design chats named `Variable Mock - {description}` and separate
-worktrees. Production controls wait for their approval and qualified backend.
-Kris approved #91 and #97's additional decimal controls as
-`screens-arithmetic` / `equation-v2`. Merge
-`aecf165e8d2c84320924db531f3dcc18a7448bc3` combines coordinator
-`11e69a6d12c96318e7c4eaeccaf666a5cfaac2db` and approved branch
-`82d30d6e7bdf74e04dbb4cbef991cf67e921afbd`, without conflicts. Coordinator
-records survived the merge unchanged. The merged design tree equals the approved
-branch, including original A/B/C, all captures and approval history.
+Kris selected spec #87 using implement-spec. All selected arithmetic slices are
+implemented and integrated on `codex/spec-87-arithmetic`, in
+[PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) against accepted
+Screens base `codex/phase3b-screen-designer` / `251fb477`. No PR merge or release
+is selected. The integration checkout is separate from the preserved primary
+Screens checkout. The [delivery record](../tasks/active/shared-arithmetic.md)
+owns execution/accounting; GitHub owns requirements and delivery state.
 
-[The approval record](../design/screens-arithmetic/approval.json) and
-[recorded decision](../design/screens-arithmetic/REFINEMENT.md#approval-recorded-2026-11-09)
-own the approved behavior and deviations. Runnable source remains
-`ce6264279188fca4c81218a5cd93b50c393bf9a3`. The read-only reference is the
-existing sibling checkout `codex-spec-87-variable-mock`, branch
-`codex/spec-87-variable-mock` at `82d30d6e`. Its fingerprint still matches approval.
-Integration's full frontend/Lab fingerprint differs because #92 changed typed Story
-transport in `app/src/main.ts` and `app/src/scene-ui.ts`; integration correctly
-reports `sourceMatches:false`. Use the pinned reference for later comparisons.
-Do not rewrite approval identity or relabel Draft headings in the preserved source.
+Kris approved the coordinator's recommendation with "I agree with your
+recommendation." #87/#96 now deliver arithmetic controls in the current Story
+editor and Writing focus. #110 owns adopting them in Combined, including
+Tracks/Reel, cross-view branch context/selection/keyboard/focus and raw arithmetic
+draft retention. #112 owns draft lifecycle, #116/#118/#119 the views, #117 adoption
+of existing controls, and #120 assembled validation/live-app acceptance. Layout
+and palette integration remain with #110's existing owners. No required behavior
+is deleted. The unimplemented workspace remains unselected. Spec P4 is resolved
+by this explicit scope decision, with the original review report preserved.
 
-Pinned Node/npm typechecking, approval-check tests, static loading of all 28 actual
-approval records, retained capture hashes/dimensions, production build exclusion,
-repository validation and whitespace pass. All non-Lab app inputs and runtime
-fixtures remain byte-identical to pre-merge integration and Windows dispatch
-candidate `c7b8157ee90aaf416030de0692abede7e4981c30`. Reuse unchanged scoped browser
-proof; this merger launched no browser. The
-[merge receipt](../tasks/active/shared-arithmetic.md#2026-11-09-approved-a2-reference-integrated)
-owns exact fingerprints, check results and the resolved local Vite temp-write refusal.
-#91's handoff and #97's decimal-design gate are complete. Mock diagnostics and
-saves remain fictional browser memory. Real source/history/reopen/runtime proof
-and #97 production remain separate. Both-target #95 qualification is now complete;
-the approved reference is ready for #97 production integration.
-Backend #92 is merged through `e8b07b31d0dd9fd9c5dcf3f784c61f2e089fd050`.
-Its parents are coordinator `56c619f18bbcfd78873474369005853cc6f67b89` and
-returned implementation `e5de0c20da8cd5f2812116840bf67b808d91d78a`.
-The merge had no conflicts and preserved all coordinator records. Its app and
-fixture trees matched the returned branch; app/runtime inputs matched qualified
-candidate `1ba9fe447c5322683e11026c98ae9c4b38996240`. Reuse the passing tests
-and coordinator-audited Mac proof in [#92 evidence](../tasks/evidence/arithmetic-92.md).
-The merger's repository validation and whitespace checks pass. After publication,
-the aggregate CI reporter refused the inherited plan's previous-branch name.
-The merger corrected the head selection, retained quality-only selection and
-passed the 18 existing reporter tests. These integration updates change only
-documentation and branch-bound CI metadata; qualified app/runtime inputs were intact.
+The [final review disposition](../tasks/evidence/arithmetic-review.md#approved-workspace-ownership-split-2026-11-10)
+maps verified #91–#97 criteria to their canonical evidence. S1-S5 and P1-P3 are
+corrected. The independent five Standards/four Spec reports retain their separate
+counts and original source; no independent re-review approval is invented.
+Actual-main/core journeys prove source, shared history, refusal/draft handling and
+reopen. Focused production/reference comparisons cover the approved controls;
+recorded surrounding workspace differences remain with the full integration.
 
-Draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) publishes
-`codex/spec-87-arithmetic` into `codex/phase3b-screen-designer` and is linked in T3.
-The integration branch tracks its own origin branch. The PR describes full #87
-scope and eventual closing references. It contains #92/#93/#94 implementation,
-#96 and #97 functional increments, #95's both-target-qualified backend and the
-approved #91/#97 design reference. Full review and remaining acceptance are open.
-The coordinator resumes integration-checkout ownership after this merger returns.
-Windows #92 has completed and
-passed its single SDK run at `c7b8157e`; its two completion sends were denied by
-T3, so Kris pointed to the finished thread. The coordinator read its history and
-audited recorded gate/case outputs, exact values, wrong-outcome rejection and
-cleanup. Evidence commit `c7e4e345` is merged through `26047929`; production and
-runtime fixtures matched both qualified targets at that checkpoint. #92's fixture
-inputs remain retained unchanged after #93. The #92 note owns details.
-Preserve the Windows worktree and raw receipts. Cross-environment callbacks are
-not reliable; do not assume a remote completion message was delivered.
+Approved Story Combined v1 source is `6ecf64704044a6fee9fc4ee6b3a54985d84b9b10`.
+Screens A2 / `equation-v2` source is `ce6264279188fca4c81218a5cd93b50c393bf9a3`,
+fingerprint `e9a4d3bd1952a92b68d184e68e87579c15001984d42f3a872815a124d3555f7b`.
+The [approval record](../design/screens-arithmetic/approval.json) owns captures,
+behavior and deviations. Preserve its read-only sibling checkout
+`codex-spec-87-variable-mock` at `82d30d6e`. Integration's different full Lab
+fingerprint is expected after production changes; never relabel the reference.
 
-#92's scoped delivery is complete. #93 is integrated by conflict-free normal merge
-`ff6dc26c96a4c50cba68bb4b6d4ca14cf0d69da6`. Its ordered parents are coordinator
-`80c6af37125a7670862ff9f177b74994aa1e8f17` and returned clean branch
-`t3/story-whole-number-formulas` at `78c924162fed43cdb3e54e63004480c7210c40da`.
-Coordinator records survived unchanged before this receipt. The entire app and
-fixtures equal qualified code `ca51e4c7e02c5dc54ef8c47b9c245907a1456c6b`.
-Reuse 76 Rust and 36 renderer passes, TypeScript/formatting and one passing Mac SDK
-invocation. The coordinator audited all 149 input hashes, accepted-source/binary
-hashes, exact case results, wrong-outcome rejection and cleanup. Merger contract,
-branch-plan, repository (1,852 files) and whitespace checks pass. Approved mocks,
-approval history/captures and #92 fixtures remain unchanged. The
-[#93 public contract](../tasks/evidence/arithmetic-93.md#public-contract-for-94-95-and-96)
-and [integration receipt](../tasks/active/shared-arithmetic.md#2026-11-09-93-integration-and-evidence-reuse)
-own payloads, fixtures and exact reuse comparisons. No unchanged tests were rerun.
-At the #93 merge, SDK totals were Mac **2 started / 0 reserved** and Windows
-**1 started / 0 reserved**. The #94 reservation follows below.
+Mac UI-source qualification passes at `72eb9f13`; Windows passes at `f3450c06`.
+Audited evidence `743b5fdc` is integrated by normal merge `ca02b130`. Both targets
+pass compile/lint, 28 normal assertions, five exact witnesses, four continuations,
+actual wrong-outcome rejection and cleanup. Complete runtime inputs remain
+unchanged through published product checkpoint `f42747ef`; subsequent scope
+records change no app/fixture/script/CI input. Fixture-Timer dispatch supplies no
+new physical-input/native-editor/human proof. Original #95 gesture evidence keeps
+its narrower candidate/adapter scope. Full Combined acceptance remains #110/#120.
 
-#94 is integrated by conflict-free normal merge
-`854f6ad11fdf79d6fc57d5d6e3cfa55131df7d90`, with ordered parents coordinator
-`c177d1cda54658bf0a71601e94d0495e4e1eb8e5` and returned
-`b31929f6b09158aa9d90fedfedadcf83c82493a1`. All tracked app/fixtures/scripts/CI
-inputs exactly equal Mac-qualified `d1c201f1987d4768acca1fd7ca9ca5dff2c5779f`;
-all 208 recorded hashes match. Merge `854f6ad1` is the Windows-ready source
-candidate; later checkpoint edits are documentation only. Reuse 144 Rust public/unit
-and 31 renderer passes plus the SDK case, for 145 distinct Rust passes including SDK.
-Fresh pinned TypeScript checking covers the later definition source fields.
-Contract/revision/sample, branch-plan, repository and whitespace checks pass.
-Approved design trees/captures and #92/#93 fixtures remain unchanged.
+SDK totals are **Mac 12/20, Windows 4/20, zero reservations**. No further SDK,
+package/native-app or manual-CI operation is selected. All failed attempts,
+retained binaries, accepted source/assets and cleanup audits remain available in
+root and worker `.toolchains` directories referenced by the review record.
+Windows evidence stays in its clean assigned F: worktree; its registered C:
+checkout remains unchanged at `251fb477`. Evidence-bearing worker worktrees and
+the approved reference are retained cleanup exceptions. Do not force-remove them
+or delete ignored artifacts. Their implementation histories are integrated.
 
-The [#94 public contract](../tasks/evidence/arithmetic-94.md#public-contract-for-95-and-96)
-owns the current service shapes. Its [runtime recovery](../tasks/evidence/arithmetic-94.md#coordinator-runtime-recovery)
-and corrected Mac pass retain all three attempts. The sandbox display failure
-and subsequent nonfocusable caption-selector failure remain failed. H69 records
-the latter cause; the existing driver now checks actual shown displayable text
-through pinned SDK TTS. Production did not fix either failure. The coordinator
-audited successful compile/lint, exact values/types/text/sample witnesses,
-wrong-outcome rejection, four case records and SDK/desktop cleanup. Preserve
-`mac-01` in the read-only #94 worktree and `mac-02`/`mac-03` in this integration
-checkout. All 40 retained files remain unchanged; no qualification is running.
+Exact-head automatic CI at `f42747ef` is audited green: 390 frontend tests, all
+17 browser/dispatch fixtures, production build, Rust formatting, focused core
+checks and repository validation. The [owning-issue receipt](https://github.com/Caldwell-41/Renpy-editor/issues/87#issuecomment-6748668005)
+records both passing runs. Earlier failures remain historical. The records-only
+scope-closeout successor needs its own automatic checks. Use the T3 PR watcher
+for a pending check and audit the exact run on wake. Record that final receipt on
+#87 rather than creating another receipt-only commit.
 
-Kris increased both feature-wide SDK ceilings to 20. The
-[delivery policy/table](../tasks/active/shared-arithmetic.md#verification-and-operation-limits)
-owns current cumulative use and reservations. Historical six-start receipts keep
-their real accounting.
+Next: publish the scope reconciliation, mark PR #122 ready for review under the
+selected implementation workflow, and finish its automatic-check audit. Keep
+#91–#97 open for PR review/merge disposition. Do not start #110 or claim its human
+acceptance. No merge, release or parent-branch promotion follows automatically.
 
-Combined Windows qualification passed at exact checkpoint `cae4dfc0`. Evidence
-commit `918fa3cc5a03d882ce8abdd1c21af2a3b808f9b4` is integrated through
-`235d99ace918d7261ad082c575c2f02b21d63adc`. Only the #94 note changed;
-app/fixture inputs still equal both qualified candidates. The coordinator read
-actual raw case/witness outputs and the remote input/binary/cleanup audit. All
-22 normal assertions passed; wrong outcome rejected money -14. SDK duplicate
-selector listings omit no distinct required case. All 875 inputs and prior #92
-receipts remained unchanged. The remote worktree is clean and preserves unique
-raw evidence. The registered Windows checkout is unchanged. The
-[Windows result](../tasks/evidence/arithmetic-94.md#windows-combined-invocation-1-result-2026-11-09)
-owns exact commands, outcomes and identities. At that checkpoint consumption
-was Mac 5 and Windows 2 starts, with no qualification process running.
-
-#94 is qualified on both targets and records the backend contract for #95/#96.
-The coordinator selected fresh implementers in separate prepared worktrees. #95
-owns core Screens action/runtime changes, its typed Screens compatibility and
-DATA_MODEL. #96 owns Story production controls, Story transport/captions and
-scoped styles/tests plus UI documentation. Both use the shared #94 owner;
-coordinator records, shared registries and integration remain coordinator-owned.
-The delivery record contains exact file ownership and base checkpoint.
-
-#96 returned clean local branch `t3/story-arithmetic-controls` at
-`b77cc26eeeb7d8eafc9b5a53410996e38eaa4be8`; implementation is
-`3cb6e8f7354c3e05c1d77526c3babae857af632f`, including integration `53cb37fa`.
-Its evidence note owns 68 focused passes, production build, nine-stage real-main
-to-core journey and wide/compact Chrome comparison. The coordinator independently
-verified all 252 candidate/working input hashes, driver identity, 122 actual
-requests, seven operation keys, refusal codes, eight PNG hashes and cleanup.
-The driver allowlist line is the only core change. Core/#94 runtime inputs remain
-unchanged. No SDK run was used for #96.
-
-Conflict-free normal merge `25fa2e1c0116170d344374b638209d51fe6ae262` preserves
-coordinator first parent `157c1ef83c8b3b6a6d6b67c49b4952e0d21c01a6` and returned
-second parent `b77cc26eeeb7d8eafc9b5a53410996e38eaa4be8`. All app/fixture inputs
-equal qualified `3cb6e8f7`; all 252 hashes match merged/candidate Git and working
-files. The [integration receipt](../tasks/evidence/arithmetic-96.md#integration-equivalence-and-fresh-checks)
-owns exact trees and scoped reuse. Fresh pinned typecheck, recorded contract and
-branch-plan audit, repository validation (1,862 files) and whitespace pass. Reuse
-68 component/controller passes, test compilation/build, real-main/core journey,
-Chrome/reference proof, isolated Help-driver build and Rust formatting.
-
-Keep #96 open as a functional increment. Control order/font/height match; panel
-width, native selector, breadcrumb, copper palette and action placement differ.
-Full Story fidelity, Tracks/Reel and assembled native/human acceptance remain
-pending. Preserve every attempt and the isolated driver in the source worktree's
-ignored `.toolchains/arithmetic-96/`. The independent coordinator audit remains
-here at `.toolchains/arithmetic-96/coordinator-audit.json`; merger equivalence and
-check receipts are under its `integration-merge/` sibling directory. No SDK,
-browser, editor-native/package or manual-CI operation ran during this merge.
-
-#95 is integrated by conflict-free normal `--no-ff` merge
-`0382ae3c999e9e197af1fd289a3b45ffc4d1bec5`, with ordered parents coordinator
-`ecc55df80f9ced0adc8b7028acd5e6dc50fa5edf` and returned
-`899f0e5798afa8637bf4a23284cc22185b27a1fc`. All app/fixture/script/CI inputs equal
-Mac-qualified `ecf2e2f7d9df8130e9102579c9ac9db6baec56b2`, including `323a0685`.
-The merger verified all 869 frozen hashes against both Git and working checkouts.
-The [integration receipt](../tasks/evidence/arithmetic-95.md#integration-equivalence-and-windows-ready-candidate)
-owns exact app/runtime tree identities and the bounded Windows handoff basis.
-The fourth Mac attempt passed all four unique cases: compile/lint, 22 normal
-assertions and required wrong-outcome rejection. Exact text/image click/keyboard,
-ordered/current values, invalid arithmetic, inertness and one Finish continuation
-passed. SDK/desktop cleanup passed and no process remains. The coordinator audited
-all 869 candidate/working input hashes, retained binary, four public action
-request/response pairs, actual witnesses and source invariance.
-
-The integrated canonical `docs/tasks/evidence/arithmetic-95.md` owns its public
-contract and all four attempts. Preserve ignored `mac-01` through `mac-04`, the
-no-SDK regressions and selector diagnostic in that worktree. Three distinct fixture
-failures remain failed; corrected GUI limits, source-ID insertion and pinned
-screen-name selectors changed no production arithmetic. `mac-04/coordinator-audit.json`
-retains the independent successful audit. Reuse scoped 53 Rust/12 renderer passes
-and controller/core journey on unchanged product inputs. The new GUI case and SDK
-case bring distinct passing Rust coverage to 55, including SDK.
-
-Fresh pinned production typecheck, recorded contract/branch-plan, repository and
-whitespace checks pass. No unchanged full suite was repeated. Merger audit receipts
-are in integration's ignored `.toolchains/arithmetic-95/integration-merge/`.
-At that Windows integration checkpoint, use was Mac 9/20 and Windows 3/20,
-with zero reservations. The single
-Windows #95 run passed at `a2c7ab9734cfe35433a3276d39f12c4ebdf955e7`.
-Evidence `55f89ddfaab237d6786ff4242eb0b5b92f9dc666` is integrated by normal
-merge `7bc452a54d2a364b81ee139f37e250e7560f7e36`. The coordinator reviewed raw
-normal/wrong-output records, the independent audit and cleanup, and matched
-fixture/test-owner hashes locally. All 883 Windows inputs stayed unchanged;
-app/fixture/script/CI trees still equal the Mac candidate. The
-[Windows result](../tasks/evidence/arithmetic-95.md#windows-invocation-1-passed-2026-11-10-aest)
-owns full identities and cases. The ignored local coordinator audit is
-`.toolchains/arithmetic-95/windows-coordinator-audit.json`. Preserve the remote
-qualification checkout and all 154 new and 71 prior evidence files.
-
-#95 is qualified on both targets and stays open for final review. #97 is now a
-review-ready functional increment, integrated by conflict-free normal merge
-`0dc53eeb3f167c3000fbb7c94a56ed35b0df6793`. Its ordered parents are coordinator
-`72e9b5551b6b7fda39857c21a0a39529121f5f8d` and returned
-`0d49e0050aa17bfc0d253dfcfc20cc37e87f052b`. The complete app/fixture/script/CI
-trees equal tested source `679e0df78d5f25afcc95af751d74d59788dab820`.
-The [#97 integration receipt](../tasks/evidence/arithmetic-97.md#integration-equivalence-and-fresh-checks)
-owns the 872-hash checkout comparison, preserved paths, command/results and raw
-receipt locations. Coordinator ledger/status and returned evidence survived before
-these status updates. Both approved references and all unique failed attempts remain.
-
-Reuse 93 distinct Rust and 38 focused renderer passes, test compilation/production
-build, formatting, the 11-stage/473-request actual-main Screens journey, inherited
-interaction/control dispatch and scoped browser proof. Fresh pinned typecheck,
-recorded contract/quality-only branch-plan audit, repository validation and whitespace
-pass. The selected fresh `story-arithmetic-core.dispatch.mjs` runs the merged
-frontend against the identical retained #97 Help binary. All nine stages and 122
-requests pass, with exit 0 and fixture cleanup. This is actual core with Happy DOM
-input, without native/SDK execution. No unchanged suite was repeated.
-
-Both authorized core gaps are implemented through existing owners: variable
-creation/default edits use shared history, and complete new imagebutton drafts
-receive no-write validation. Their
-[history](../tasks/active/shared-arithmetic.md#2026-11-10-97-variable-history-ownership-exception)
-and [validation](../tasks/active/shared-arithmetic.md#2026-11-10-97-new-imagebutton-validation-exception)
-exceptions retain the exact boundaries. Evaluator/runtime adapter, transaction/history
-internals, Story arithmetic controls, dependencies, protocol and CI registry are
-unchanged by #97. Existing fixture discovery includes the new Screens dispatch.
-
-Full visual/native/human acceptance remains open. Generic numeric conditions use
-the stacked production form rather than A2's grouped comparison row; surrounding
-host/background and placement differ. Earlier textbutton captures precede the final
-scoped palette correction; extended imagebutton/condition captures keep their actual
-source scope. These differences are review inputs, not approved deviations.
-New UI-emitted decimal defaults, ordered formulas, condition/text and created-imagebutton
-fixtures now pass both-target SDK qualification below.
-#94/#95 both-target evidence retains its original candidate/input scope. Preserve
-the worker's entire ignored `.toolchains/arithmetic-97/`,
-including binary and every raw attempt/capture/source receipt. Integration retains
-`coordinator-audit.json` and merger receipts under `integration-merge/`. The merger's
-552-file raw-evidence manifest and retained-driver hash match after fresh checks.
-
-Story Combined v1 / combined-v1 remains the approved arithmetic design. #96
-implements reusable approved controls in the existing Story workspace; full #110
-layout/palette integration is separately owned and depends on #96. Tracks/Reel
-production views are absent here. Keep those acceptance limits explicit during
-full integration review.
-#97's backend and design prerequisites are satisfied. Tickets stay open for final review.
-
-The draft PR stays on its Screens base. Preserve every worktree/evidence directory
-and both approved design references. No ready-for-review promotion, parent-PR
-merge, automerge or release is selected. The published checkpoint retains
-the existing draft/base and full-spec closing references. Exact-head automatic status is recorded in the merger publication
-receipt; no watch was registered. Integration/status/PR ownership returns to the
-coordinator at this handoff. The independent review at `09404bd1` against accepted
-Screens base `251fb477` keeps its five Standards and four Spec P2 findings separately.
-Conflict-free normal merge `b52a6723bfb1c86895227813e35865d4c6d9dc2f` preserves
-coordinator `636371b8` and returned `354b5221`. All seven code defects are corrected;
-A2 grouped conditions and scoped controls now match closely. The
-[integration receipt](../tasks/evidence/arithmetic-review.md#integration-equivalence-and-fresh-checks)
-owns the complete tree/873-input match, fresh checks and scoped reuse. The 390-test
-frontend result is reused with the final 11-check Story association follow-up;
-the earlier whole-suite source is not claimed as the exact final source.
-Screens actual-main/core passes 13 stages/505 requests and Story nine/126, both
-with exit 0 and cleanup. Fresh pinned typecheck, nine protocol checks, 631 recorded
-response-envelope checks, contract/branch-plan audit, repository validation and
-whitespace pass. All worker evidence, approved references and coordinator records
-survive. New receipts are separate under ignored
-`.toolchains/arithmetic-review-fixes/integration-merge/`.
-
-Spec P4 and Kris's #96/#110 scope decision stay pending. Tracks/Reel/cross-view
-draft acceptance is unchanged; no #110 work or review approval is inferred.
-The [UI recovery result](../tasks/evidence/arithmetic-review.md#recovery-integration-and-mac-invocation-2-2026-11-10)
-is integrated by normal merge `ec7e366b7bff4051b54b2f739fe1416b35fa5360`, with
-parents coordinator `b2257241` and returned `12ce2eea`. This is the clean published
-pre-SDK tested and actual recovery source. Complete app/fixture/script/CI trees
-match the return; all 1,880 inputs match Git. Fresh retained binary and both exact
-preflights, 19 action cases with two named SDK gates ignored, static checks,
-formatting, contract/branch-plan, repository and whitespace pass.
-
-The [Mac UI-source result](../tasks/evidence/arithmetic-review.md#mac-invocation-3-passed-2026-11-10)
-qualifies clean published source `72eb9f13b1156b76deb4873f8a8d32a57785340b`.
-The fixture-only refresh correction preserves actions, snapshots, values and
-deadlines. Compile/lint, 28 normal assertions, all five witnesses and actual
-wrong-outcome rejection pass. Eleven physical children match receipts, without
-timeout/truncation. All 1,880 inputs, exported source/assets and retained binary
-match; desktop/power, owned process and temp cleanup pass. Preserve root `mac-03`
-and both earlier failed attempts, their targets/binaries and audits.
-
-The [Windows UI-source result](../tasks/evidence/arithmetic-review.md#windows-ui-source-invocation-1-passed-2026-11-10-aest)
-qualifies `f3450c0644e3ed7fc8b144df6dff28012f787a2e`. The coordinator inspected
-recorded raw outputs, audit corrections and publication receipts, then checked
-Git ancestry, complete trees and portable hashes locally. Conflict-free merge
-`ca02b1305c0d75545d746eb1a2c12c744dde45d4` preserves coordinator `f3450c06` and
-evidence `743b5fdc`. Complete app/fixture/script/CI trees equal the tested source.
-All 28 assertions, five witnesses, actual negative case and cleanup pass.
-The existing F: qualification worktree is clean at its evidence commit; all 222
-prior receipt files/binaries and the registered Windows checkout are unchanged.
-Actual use is Mac 12/20 and Windows 4/20, zero reservations. No further SDK run
-is selected. Preserve all unique evidence and worktrees. Native-editor/package,
-canvas-helper and manual-CI operations remain unselected. P4 and #96/#110 scope
-remain unanswered, with all issues/criteria open and independent Standards
-five/Spec four reports preserved. No new physical gesture or full native/human
-acceptance is claimed.
-
-Automatic quality at `72eb9f13` failed two obsolete fixture consumers. The
-[focused corrections](../tasks/evidence/arithmetic-review.md#automatic-ci-fixture-consumers-corrected-2026-11-10)
-retain typed error context in four inherited Screens adapters and blur the Story
-field before asserting a new error. All four dispatch consumers and focused
-Story Chrome pass with existing assertions/cleanup intact. SDK/production inputs
-still equal the Mac-qualified source. Quality run `42673016832` at `f3450c06`
-failed before a runner started, exposing only a reporter job with no steps,
-available log or annotation. Its cause is unestablished and aggregate validation
-is failed. No retry was dispatched. The next published head needs its own
-automatic CI audit; use T3's PR watcher if that operation is pending.
-
-The [review CI correction](../tasks/evidence/arithmetic-review.md#ci-caller-correction-before-review-fixes)
-migrates the obsolete `Edit default` smoke caller to the current inspector. All
-three existing DOM scenarios pass after the matching red. The merged corrections
-preserve this caller; its DOM proof keeps its original scope.
-
-The earlier sections below retain prior work and recovery context. Their
-unselected-next-task statements do not override this explicit #87 selection.
-The longer status files preserve unique prior qualification and recovery records.
+The earlier sections below retain separate project outcomes and unique recovery
+context. Their old next-action statements do not override this selected outcome.
 
 ## Story Combined v1 references consolidated
 

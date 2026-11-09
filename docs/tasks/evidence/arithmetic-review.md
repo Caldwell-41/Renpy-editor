@@ -1,5 +1,9 @@
 # Arithmetic integration review
 
+Current disposition: S1-S5 and P1-P3 are corrected and qualified. P4 is resolved by
+Kris's [approved ownership split](#approved-workspace-ownership-split-2026-11-10).
+The original reports and failed checkpoints below retain their historical scope.
+
 The code-review skill reviewed accepted Screens base
 `251fb47754a0ec1a43ece8763a0b4603b8e54dd8` through integration
 `09404bd16018c7f046bf6392143df6e235d481ba`. The three-dot diff contains 137
@@ -983,3 +987,61 @@ No additional SDK, editor-native/package or manual-CI operation ran. P4 and Kris
 waived. The draft PR retains its Screens base and eventual closing references.
 This both-target rendered-action proof adds no physical gesture or native-editor
 acceptance. Preserve both machines' worktrees, raw attempts and executables.
+
+## Approved workspace ownership split, 2026-11-10
+
+Kris replied "I agree with your recommendation" after the coordinator explained
+the two owners: #87/#96 deliver arithmetic in the current Story editor and Writing
+focus; #110 adopts those controls into Combined and preserves unfinished edits
+across its views. This is explicit resolution of Spec P4 by requirement transfer.
+It is not a claim that missing Tracks/Reel or cross-view drafts are implemented.
+
+The #96 criterion now covers current-editor arithmetic, selection, keyboard and
+draft/refusal behavior. #110 retains the transferred requirements explicitly:
+
+| Required workspace behavior | Existing delivery owner |
+| --- | --- |
+| Raw valid, invalid and incomplete arithmetic drafts across navigation | #112 |
+| Selection, branch context, focus/caret, keyboard and drafts across Tracks/Reel/Writing focus | #116, #118, #119 |
+| Adopt the existing arithmetic controls and public backend into Combined | #117 |
+| Full layout/palette and matched approved-reference integration | #110 and its existing layout/theme slices |
+| Assembled source/history/reopen, affected native/runtime checks and Kris's live-app acceptance | #120 under #110 |
+
+#87, #96, #110 and the affected draft/editor/qualification tickets record the
+decision. #110 and its unimplemented slices remain unselected and `not_started`.
+Numeric semantics, source/history/revision protections and every transferred
+product requirement remain intact. No new evaluator or competing controls are
+authorized. The decision supplies no native/physical-input or human-review result.
+
+### Arithmetic implementation review
+
+All selected slice criteria are verified for the approved arithmetic scope.
+The PR remains the review/merge vehicle, with issues open until that disposition.
+
+| Slice | Evidence and result |
+| --- | --- |
+| #91 | Approved A2 `equation-v2`, pinned source/captures and focused interactions |
+| #92 | Public source/history/reopen, exact i64 transport and both-target SDK |
+| #93 | Formula contract, grouping/precedence/precision and combined #94 both-target witnesses |
+| #94 | Decimal creation/defaults/types/comparisons/text/samples and both-target SDK |
+| #95 | Ordered/current operands, repeated text/image activation, original gesture proof and both-target runtime |
+| #96 | Actual-main Story/core journey, retained drafts/refusals, suggestions/IME/accessibility, focused approved controls |
+| #97 | Actual-main Screens/core journey, decimal controls, typed invalid-row diagnostics, inert canvas and A2 comparisons |
+
+All seven distinct code-review defects are corrected. The independent five
+Standards/four Spec reports remain separate; their findings are not rewritten or
+presented as a new independent approval. Final UI-emitted source qualifies on
+both targets with all 28 normal assertions, five witnesses, four continuations,
+actual negative-case rejection and cleanup. Final executable/app/fixture inputs
+remain identical to published `f42747ef`; this scope-closeout successor changes
+records only. That head's audited CI passes 390 frontend tests, all 17 discovered
+browser/dispatch fixtures, production build, Rust formatting and repository
+validation. The [owning-issue CI receipt](https://github.com/Caldwell-41/Renpy-editor/issues/87#issuecomment-6748668005)
+pins both successful automatic runs. A new publication head needs its own selected
+automatic checks; no SDK/native/package repetition is justified by prose changes.
+
+SDK totals remain **Mac 12/20, Windows 4/20, zero reservations**. All unique
+attempts, raw receipts, retained executables and approved design references remain
+preserved. Evidence-bearing worktrees are retained as cleanup exceptions under
+WORKFLOW rather than deleting their unique ignored artifacts. No force removal,
+branch deletion, parent-PR merge, release or #110 implementation is selected.

@@ -1,134 +1,38 @@
 # Current status
 
-## Shared arithmetic selected
+<a id="shared-arithmetic-selected"></a>
 
-#97 and the review corrections are integrated. Conflict-free normal merge
-`b52a6723` preserves coordinator `636371b8` and returned `354b5221`. Complete
-app/fixture/script/CI trees equal the returned source; all 873 frozen inputs match
-Git checkout bytes and both working trees. Fresh pinned typecheck, nine protocol
-checks, recorded-envelope/contract/branch-plan audit, repository validation and
-whitespace pass. The [integration receipt](../tasks/evidence/arithmetic-review.md#integration-equivalence-and-fresh-checks)
-owns exact identities, the 390-test frontend reuse basis with its final 11-check
-Story follow-up, public-core/journey results and preserved evidence.
+## Shared arithmetic ready for review
 
-The independent review remains pinned at `09404bd1` against accepted Screens base
-`251fb477`, with five Standards and four Spec P2 findings kept separately.
-S1-S5 and Spec P1-P3 are corrected, including the S3/P2 overlap. A2 grouped numeric
-conditions and scoped slate/brass controls now match closely. Existing workspace
-widths, placement and truthful unknown-state wording retain their stated differences.
-Spec P4 remains unresolved. Kris's decision on moving #96's Tracks/Reel/cross-view
-draft acceptance to #110 is pending; no criterion changed. New UI-emitted source
-is qualified on Mac and Windows. Earlier #94/#95 both-target evidence
-keeps its original scope. Full workspace/native/human and final acceptance remain
-open. Integration/status/PR ownership returns to the coordinator for that selection.
-Draft PR #122 retains its Screens base and full-spec closing references.
+[Spec #87](https://github.com/Caldwell-41/Renpy-editor/issues/87) is implemented on
+`codex/spec-87-arithmetic`, targeting accepted Screens base `251fb477` in
+[PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122). Approved Story
+Combined v1 and Screens A2 references remain intact. The backend, Story/Screens
+controls and all seven code-review corrections are integrated. The
+[review record](../tasks/evidence/arithmetic-review.md#approved-workspace-ownership-split-2026-11-10)
+owns exact source identities, criterion mapping, retained failures and limits.
 
-The [Mac UI-source result](../tasks/evidence/arithmetic-review.md#mac-invocation-3-passed-2026-11-10)
-qualifies source `72eb9f13`. Compile/lint, all 28 normal assertions, five exact
-witnesses and deliberate wrong-outcome rejection pass. The fixture now requests
-interaction refresh before its timer dispatches the unchanged rendered action.
-Source, desktop/power, owned process and temp cleanup are verified. Both earlier
-failed runs, targets and binaries remain preserved. This adds no physical gesture
-or native-editor proof.
-The [Windows UI-source result](../tasks/evidence/arithmetic-review.md#windows-ui-source-invocation-1-passed-2026-11-10-aest)
-passes the same 28 assertions, five witnesses and negative case at `f3450c06`.
-Evidence `743b5fdc` is audited and integrated through `ca02b130`; app, fixture,
-script and CI trees still match the tested candidate. Usage is Mac 12/20 and
-Windows 4/20, zero reservations. P4 and wider acceptance stay open.
-The automatic quality failure at `72eb9f13` is traced to two obsolete fixture
-callers. The [caller corrections](../tasks/evidence/arithmetic-review.md#automatic-ci-fixture-consumers-corrected-2026-11-10)
-pass the focused Story browser and four affected dispatch fixtures, preserving
-production and SDK inputs. The `f3450c06` quality run failed before a runner
-started, with no steps, available log or annotation; its cause is unestablished.
-The aggregate remains failed there. Successor-head automatic CI remains for audit.
+Kris approved the workspace split on 2026-11-10. #87/#96 deliver arithmetic in the
+current Story editor and Writing focus. #110 and its existing slices retain
+Combined layout/palette, Tracks/Reel, cross-view selection/branch context and
+draft retention, and assembled native/human acceptance. Spec P4 is resolved by
+this transfer; those missing workspace behaviors remain required and unimplemented.
+The decision selects no #110 implementation or release.
 
-#94 decimal/public services are integrated by conflict-free normal merge
-`854f6ad1`, preserving coordinator `c177d1cd` and returned `b31929f6`.
-All tracked app/runtime/fixture inputs equal Mac-qualified `d1c201f1`; all 208
-recorded hashes match. Reuse 145 distinct Rust passes including SDK and 31 renderer
-passes; fresh pinned TypeScript, contract/branch-plan, repository and whitespace
-checks pass. The [#94 contract and evidence](../tasks/evidence/arithmetic-94.md)
-retain both failed attempts and the corrected runtime pass. Windows evidence
-`918fa3cc` is integrated through `235d99ac`; both targets now qualify #94 and the
-combined #93 integer witnesses. The coordinator audited actual case outputs,
-source/binary identities, all required assertions and cleanup. #95 Screens runtime
-is integrated by conflict-free normal merge `0382ae3c`, preserving coordinator
-`ecc55df8` and returned `899f0e57`. All app/fixture/script/CI inputs equal
-Mac-qualified `ecf2e2f7`; all 869 frozen hashes match. Reuse 55 distinct Rust passes
-including SDK, 12 renderer passes and the controller/core journey. Fresh pinned
-typecheck, contract/branch-plan, repository and whitespace checks pass. The
-[#95 integration receipt](../tasks/evidence/arithmetic-95.md#integration-equivalence-and-windows-ready-candidate)
-records the Windows-ready identity. Windows evidence `55f89ddf` is audited and
-integrated through `7bc452a5`. All 22 assertions, exact witnesses, required wrong
-outcome and cleanup passed at `a2c7ab97`; 883 input hashes remained unchanged.
-The [Windows result](../tasks/evidence/arithmetic-95.md#windows-invocation-1-passed-2026-11-10-aest)
-completes #95's both-target prerequisite. #97's controls are now integrated as described above.
+Both-target UI-emitted source proof passes compile/lint, all 28 normal assertions,
+five witnesses, four Finish continuations, actual wrong-outcome rejection and
+cleanup. Original physical-gesture evidence retains its own candidate scope.
+Fixture-Timer dispatch adds no new native-editor or human proof. SDK usage is
+Mac 12/20 and Windows 4/20, zero reservations.
 
-#96's functional increment is integrated by conflict-free normal merge `25fa2e1c`,
-preserving coordinator `157c1ef8` and returned `b77cc26e`. All app/fixture inputs
-equal qualified `3cb6e8f7`; all 252 recorded hashes match. Reuse 68 focused passes,
-build, actual-main/core journey and wide/compact browser proof. Fresh pinned
-typecheck, contract/branch-plan, repository and whitespace checks pass. The
-[#96 note](../tasks/evidence/arithmetic-96.md#integration-equivalence-and-fresh-checks)
-retains the implementation, coordinator audit and reuse limits. Visual fidelity
-remains partial; #96 stays open. Tracks/Reel, full layout/palette and assembled
-native/human acceptance remain open. Draft PR #122 publishes this increment;
-final-head automatic checks remain for coordinator audit.
-
-Kris selected [spec #87](https://github.com/Caldwell-41/Renpy-editor/issues/87)
-for implementation on 2026-11-09. Branch `codex/spec-87-arithmetic` starts from
-accepted Screens tip `251fb477`. [The delivery record](../tasks/active/shared-arithmetic.md)
-owns execution, ticket ownership and cumulative SDK limits. Story mock #88 is
-already approved. Kris also approved A2 / `equation-v2` at reviewed source
-`ce626427` for #91 and #97's additional decimal controls. Merge
-`aecf165e8d2c84320924db531f3dcc18a7448bc3` integrates approved branch `82d30d6e`
-into coordinator tip `11e69a6d` without conflicts. The
-[approval record](../design/screens-arithmetic/approval.json), retained captures
-and pinned source remain intact. #97 uses that approved A2 reference and the
-qualified #95 contract for production integration.
-The merged full frontend/Lab fingerprint differs because #92 changed typed Story
-transport; the approved checkout remains the matching reference. Typecheck,
-static approval/hash/dimension validation, production build exclusion, repository
-validation and whitespace pass. All production app, Cargo/toolchain and runtime
-fixture inputs matched pre-merge integration and Windows dispatch source `c7b8157e`
-at that design merge. #93's later production changes are qualified separately below.
-#92 backend is integrated by merge `e8b07b31`, preserving coordinator
-tip `56c619f1` and implementation tip `e5de0c20`. Its merged app/runtime inputs
-matched qualified candidate `1ba9fe44`; passing implementation and audited Mac
-evidence is reused. Merger repository validation and whitespace checks pass.
-An inherited CI plan named the previous branch; its head selection is corrected,
-with 18 existing reporter tests passing. Final-head automatic checks await audit.
-Draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) publishes the
-integration branch to the Screens base; it tracks the eventual full #87 outcome.
-#92's Windows SDK run passed and evidence is merged
-through `26047929`, completing scoped both-target delivery. T3 denied the remote
-completion messages; the coordinator audited the finished history after Kris's
-pointer. #93 whole-number formulas are integrated by conflict-free merge
-`ff6dc26c96a4c50cba68bb4b6d4ca14cf0d69da6`, preserving coordinator `80c6af37`
-and returned `78c92416`. App/fixture bytes equal Mac-qualified `ca51e4c7`.
-Reuse 76 Rust and 36 renderer passes, TypeScript/formatting and audited Mac proof;
-merger contract, repository and whitespace checks pass. Approved mocks/captures
-and #92 fixture inputs remain unchanged. The
-[#94 contract](../tasks/evidence/arithmetic-94.md#public-contract-for-95-and-96)
-is the merged baseline for dependent work.
-On 2026-11-09 Kris raised both SDK ceilings from six to 20 started invocations.
-Totals are Mac 12/20 and Windows 4/20 started, with zero reservations.
-#95's fourth Mac attempt passed compile/lint, all 22 normal assertions, exact
-ordered/current values, both button kinds with click/keyboard, Finish, deliberate
-wrong-outcome rejection and cleanup. The coordinator verified all 869 inputs,
-retained binary, actual requests and witnesses. All three failed attempts remain
-intact. Draft PR #122 retains the qualified backend and integrated #97 controls
-for arithmetic, decimal setup, conditions, text and samples.
-The Story shadow-token correction passes all nine protocol checks locally;
-final-head automatic CI remains for audit.
-The delivery record owns current limits, assignments and qualified candidates.
-The corrected #94 fixture qualifies integer precision, precedence/grouping,
-negative floor/remainder and decimal behavior on both targets. Tickets remain
-open for final review. #96 must report the Tracks/Reel criteria that depend on
-the separately owned #110 layout; this assignment selects approved arithmetic
-controls in the existing Story workspace.
-Backend and approved production UI are in scope. No full #110 redesign,
-parent-PR merge or release is selected.
+At product checkpoint `f42747ef`, audited automatic CI passes 390 frontend tests,
+all 17 browser/dispatch fixtures, build, formatting and repository validation.
+The [issue receipt](https://github.com/Caldwell-41/Renpy-editor/issues/87#issuecomment-6748668005)
+owns the final CI audit. The scope-closeout successor changes records only and
+requires its own automatic checks. The implementation is ready for PR review;
+issues remain open for review/merge disposition. No PR merge is selected. Preserve
+all unique qualification evidence and approved reference worktrees. The
+[delivery record](../tasks/active/shared-arithmetic.md) owns accounting and continuation.
 
 ## Story Combined v1 references consolidated
 

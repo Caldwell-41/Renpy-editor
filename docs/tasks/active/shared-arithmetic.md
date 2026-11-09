@@ -11,24 +11,24 @@ Integration branch: `codex/spec-87-arithmetic`, based on the current accepted
 Screens branch `codex/phase3b-screen-designer` at `251fb477`. The initial T3
 checkout was on older `main`; no implementation uses that older baseline.
 The occupied Screens checkout and its evidence remain untouched. The
-draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) targets the
-Screens branch. No merge of that PR or release is selected.
+[PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) targets the Screens
+branch and is the review vehicle. No merge of that PR or release is selected.
 
 ## Ticket graph and ownership
 
 - #88 is already closed with Kris's equation-row approval. Reuse Story Combined
   v1, revision `combined-v1`, merged through PR #108. No new Story redesign.
 - #89 and #90 were superseded, closed as not planned. Do not implement them.
-- Screens mock #91 and #97's additional decimal controls are approved as A2 /
-  `equation-v2`; the reference is integrated by merge `aecf165e`. Story backend
-  #92 is merged and qualified on Mac and Windows. Its scoped delivery is ready
-  for final integration review. #93 is merged with qualified public-command/Mac
-  evidence. #94 is merged and qualified on Mac and Windows. Combined #93/#94
-  Windows proof is integrated through `235d99ac`. #96's functional increment is
-  integrated; its full acceptance remains open. #95 is integrated at `0382ae3c`
-  with qualified Mac runtime proof. Windows evidence `55f89ddf` is audited and
-  integrated through `7bc452a5`; #95 is qualified on both targets. #97 has returned
-  a functional increment now integrated at `0dc53eeb`; full review and acceptance remain open.
+- Screens mock #91 and #97's decimal controls are approved as A2 / `equation-v2`.
+  All #92–#97 implementation slices and seven review corrections are integrated.
+  Backend and final UI-emitted source qualification pass on Mac and Windows.
+  Product checkpoint `f42747ef` passes the full selected automatic CI. All scoped
+  implementation criteria are verified; issues remain open for PR review/merge.
+- Kris approved the #96/#110 ownership split on 2026-11-10. #96 owns arithmetic
+  in the current Story editor and Writing focus. #110 and its existing slices
+  retain Combined integration, Tracks/Reel, cross-view context/drafts and assembled
+  acceptance. Spec P4 is resolved by that transfer; no missing workspace behavior
+  is claimed implemented and no #110 work is selected.
 - Backend sequence: #92, then #93, then #94. #95 follows #94.
 - Story UI #96 follows approved #88 and qualified #94.
 - Screens/decimal UI #97 follows approved #91 and qualified #95.
@@ -47,7 +47,8 @@ Kris authorized new design chats named `Variable Mock - {description}` and separ
 worktrees. They may iterate directly with him and return exact design approvals.
 Screens variants and any additional nontrivial decimal-control changes require
 approval before production edits. #110's full Story redesign is not selected by
-this arithmetic outcome; #96 must identify any real integration dependency.
+this arithmetic outcome. The approved transfer below assigns its remaining
+workspace requirements to #110 without blocking the current-editor arithmetic slice.
 
 ## Verification and operation limits
 
@@ -1782,3 +1783,29 @@ manual retry ran. Publish the evidence/status successor, audit its automatic
 checks and use T3's watcher if they are pending. The PR stays draft, all criteria
 and P4 stay open, and no workspace/native/human acceptance or new operation is
 inferred. Integration/status/PR ownership remains with the coordinator.
+
+### 2026-11-10: approved scope reconciliation and review handover
+
+Kris replied "I agree with your recommendation" to finishing arithmetic in the
+current Story editor and transferring Combined integration/cross-view draft
+acceptance to #110. The [final disposition](../evidence/arithmetic-review.md#approved-workspace-ownership-split-2026-11-10)
+preserves every required behavior under concrete #110 slices. #87/#96 and the
+receiving #110/#112/#117/#120 records are reconciled. Their unimplemented workspace
+work remains required, unselected and `not_started`.
+
+All arithmetic slice criteria are verified and review-ready. S1-S5/P1-P3 are fixed;
+P4 is resolved by explicit scope transfer. The independent reports remain intact.
+The full selected automatic checks pass at product checkpoint `f42747ef`: 390
+frontend tests, all 17 discovered browser/dispatch fixtures, build, formatting and
+repository validation. Both-target UI-source proof passes all 28 assertions, five
+witnesses, four continuations, negative-case rejection and cleanup. No additional
+code or SDK execution is needed for this records-only closeout.
+
+Publish this scope reconciliation and mark PR #122 ready for review, preserving
+its Screens base and eventual closing references. Audit its new automatic checks
+and record the receipt on #87. Do not merge the PR, close still-unmerged issues,
+start #110 or claim assembled native/human acceptance. SDK use stays **Mac 12/20,
+Windows 4/20, zero reservations**. Unique evidence and approved references remain
+in their worktrees as retained cleanup exceptions. No forced removal or branch
+deletion is selected. Superseded live status text is replaced with compact links;
+the remaining historical project records retain their existing recovery purpose.
