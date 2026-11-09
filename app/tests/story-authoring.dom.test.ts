@@ -8,7 +8,7 @@ function setup(beats: readonly SceneBeat[], apply: (command: SceneCommand, expec
   document.body.innerHTML = '<main></main><aside></aside>';
   const model: SceneWorkspace = { projectRevision: "project-open", sourceMapRevision: "map-open", entrySceneId: "one", lastOpen: { chapterId: "chapter", sceneId: "one" }, canUndo: false, canRedo: false, chapters: [{ id: "chapter", displayName: "Chapter", directory: "game" }],
     scenes: [{ id: "one", chapterId: "chapter", displayName: "Arrival", technicalLabel: "arrival", sourcePath: "game/arrival.rpy", sourceRevision: "source-open", sourceConflict: false, partial: false, beats }, { id: "two", chapterId: "chapter", displayName: "Conversation", technicalLabel: "conversation", sourcePath: "game/conversation.rpy", sourceRevision: "other", sourceConflict: false, partial: false, beats: [] }],
-    authoring: { characters: [], assets: [], appearances: [], variables: [{ id: "trust", technicalName: "trust", variableType: "int", defaultValue: "0" }, { id: "flag", technicalName: "flag", variableType: "bool", defaultValue: true }] } };
+    authoring: { characters: [], assets: [], appearances: [], variables: [{ id:"money",technicalName:"money",variableType:"decimal",defaultValue:2.5 },{ id: "trust", technicalName: "trust", variableType: "int", defaultValue: "0" }, { id: "flag", technicalName: "flag", variableType: "bool", defaultValue: true }] } };
   const host = document.querySelector<HTMLElement>("main")!; const statuses: string[] = [];
   const dispose = renderSceneAuthoring(host, document.querySelector("aside")!, model, { apply, status: text => statuses.push(text), resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); } });
   return { browser, host, model, statuses, close: async () => { dispose(); await browser.happyDOM.close(); } };
@@ -90,3 +90,10 @@ test("unchanged pending commit blocks another draft and late disposed refusal ca
   assert.equal(hasSceneDraft(s.host), true); click(s.host, "Add Beat"); assert.equal(s.host.querySelector(".new-beat"), null);
   const statusCount = s.statuses.length; await s.close(); reject(Error("Late old-session refusal")); await tick(); assert.equal(s.statuses.length, statusCount);
 });
+
+ test("decimal numeric conditions retain thresholds and allow ordering without coercing integer text",async()=>{
+ const writes:SceneCommand[]=[];
+ const decimalChoice:SceneBeat={...choice,payload:{type:"choice",options:[{text:"Ready",destinationSceneId:"two",condition:{status:"supported",expression:{type:"compare",operator:"greaterEqual",left:{type:"variable",variableId:"money",variableType:"decimal"},right:{type:"decimal",value:"1.25"}}}}]}};
+ const s=setup([decimalChoice,ending],async command=>{writes.push(command);throw Error("Keep draft");});
+ try{s.host.querySelector<HTMLButtonElement>('[data-beat-id="choice"] .beat-select')!.click();const value=s.host.querySelector<HTMLInputElement>('[aria-label="Condition value"]')!;assert.equal(value.value,"1.25");value.value="2.75";value.dispatchEvent(new Event("input",{bubbles:true}));click(s.host,"Commit Beat");await tick();assert.equal(writes.length,1);assert.equal(value.value,"2.75");}finally{await s.close();}
+ });

@@ -1864,6 +1864,10 @@ impl AuthoringService {
         metadata: AuthoringMetadata,
         metadata_snapshot: Option<(Vec<u8>, Revision)>,
     ) -> Result<AuthoringMetadata, AuthoringError> {
+        // Keep semantic no-ops out of the shared session history.
+        if new_source == source_bytes {
+            return Ok(metadata);
+        }
         let (proposal, metadata) = self.prepare_source_and_metadata(
             project,
             source_path,
@@ -1873,7 +1877,13 @@ impl AuthoringService {
             metadata,
             metadata_snapshot,
         )?;
-        committed(self.commit_observed(project, proposal))?;
+        self.commit_history(project, proposal)
+            .map_err(|error| match error {
+                crate::scene::SceneError::RecoveryRequired => AuthoringError::RecoveryRequired,
+                crate::scene::SceneError::RuntimeBusy => AuthoringError::RuntimeBusy,
+                crate::scene::SceneError::DirtySource => AuthoringError::DirtySource,
+                _ => AuthoringError::SourceConflict,
+            })?;
         Ok(metadata)
     }
 

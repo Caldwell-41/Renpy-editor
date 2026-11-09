@@ -19,6 +19,7 @@ function fixture(kind:"dialog"|"panel"|"component"="dialog",{bound=false,extraKi
   if(op==="authoring.list")return {assets:[],variables} as T;
   if(op==="screens.resolveTarget"){const binding=payload.binding as {screenId:string};return {binding:{screenId:binding.screenId,sourceName:binding.screenId},kind:binding.screenId==="help"?kind:"panel",blocking:binding.screenId==="help"&&kind==="dialog",canShowHide:binding.screenId==="about"||binding.screenId==="help"&&kind==="panel",revisions:{source:`${binding.screenId}-source-${revision}`,sourceMap:revision,inventory:revision,effects:revision},effects:{unknown:false}} as T;}
   if(op==="screens.compose"){
+   if(payload.validateOnly)return {document:doc(),actionValidation:doc(),changed:false,documents:[]} as T;
    writes.push(payload);const command=payload.command as {nodeId:string;interaction?:{expectedTargetRevisions:{revisions:{inventory:string}}[]}};
    if(refuse||payload.expectedRevision!==revision||command.interaction?.expectedTargetRevisions.some(target=>target.revisions.inventory!==revision))throw Error("SOURCE_CONFLICT");
    if(advanceWrites)revision=`accepted-${writes.length}`;
@@ -27,7 +28,7 @@ function fixture(kind:"dialog"|"panel"|"component"="dialog",{bound=false,extraKi
   if(op==="screens.canvasRender"){renders.push(payload);throw Error("No helper in controller test");}
   throw Error(`Unexpected ${op}`);
  }});
- const find=(label:string)=>{const e=[...workspace.panel.querySelectorAll<HTMLElement>("[aria-label]")].find(e=>e.getAttribute("aria-label")===label);assert.ok(e,label);return e as HTMLSelectElement;};
+ const find=(label:string)=>{const controls=[...workspace.panel.querySelectorAll<HTMLElement>("[aria-label]")];const e=controls.find(e=>e.getAttribute("aria-label")===label)??controls.find(e=>e.getAttribute("aria-label")===label.replace(/ value$/," formula"));assert.ok(e,label);return e as HTMLSelectElement;};
  const change=(label:string,value:string)=>{const e=find(label);e.value=value;e.dispatchEvent(new window.Event(e.tagName==="SELECT"?"change":"input",{bubbles:true}));};
  const button=(label:string)=>{const e=[...workspace.panel.querySelectorAll("button")].find(e=>e.textContent===label);assert.ok(e,label);e.click();};
  const select=(id:string)=>{if(!workspace.panel.querySelector(`[data-node-id="${id}"]`))button("1  Choose");workspace.panel.querySelector<HTMLElement>(`[data-node-id="${id}"]`)!.dispatchEvent(new window.MouseEvent("dblclick",{bubbles:true}));};
@@ -95,7 +96,7 @@ test("actions and text share one original-base Apply and retain refused input ac
  f.change("Add action","showScreen");assert(![...f.find("Action 2 screen").options].some(o=>o.value.includes("unsafe")));
  f.change("Add action","finishInteraction");f.change("Text","Done");f.button("Apply");await flush();
  assert.equal(f.workspace.hasDraft(),true);const first=f.writes[0]!;assert.equal(first.expectedRevision,"original");
- assert.deepEqual(first.command,{type:"formatText",nodeId:"close",values:{text:"Done"},interaction:{expectedAuthoringRevision:"authoring-original",expectedTargetRevisions:[{target:{screenId:"about",sourceName:"about"},revisions:{source:"about-source-original",sourceMap:"original",inventory:"original",effects:"original"}}],actions:[{type:"setVariable",variableId:"coins",value:"42"},{type:"showScreen",target:{screenId:"about",sourceName:"about"}},{type:"finishInteraction"}]}});
+ assert.deepEqual(first.command,{type:"formatText",nodeId:"close",values:{text:"Done"},interaction:{expectedAuthoringRevision:"authoring-original",expectedTargetRevisions:[{target:{screenId:"about",sourceName:"about"},revisions:{source:"about-source-original",sourceMap:"original",inventory:"original",effects:"original"}}],actions:[{type:"setVariable",variableId:"coins",value:{operation:"assign",operand:"42"}},{type:"showScreen",target:{screenId:"about",sourceName:"about"}},{type:"finishInteraction"}]}});
  await f.refresh();f.workspace.panel.remove();f.workspace.mount(document.body);await flush();assert.equal(f.find("Action 1 value").value,"42");f.button("Apply");await flush();assert.deepEqual(f.writes[1],first);
  f.button("Cancel");assert.equal(f.workspace.hasDraft(),false);
  }finally{await f.dispose();}
@@ -113,13 +114,13 @@ test("Insert variable replaces the Text selection, keeps its caret, and samples 
  }finally{await f.dispose();}
 });
 
-test("typed assignments validate without losing input, preserve text-first edits, and keep Finish last through moves and removals",async()=>{
+test("typed assignments preserve text-first edits and keep Finish last through moves and removals",async()=>{
  const f=fixture();try{f.workspace.mount(document.body);await flush();f.select("close");await flush();f.change("Text","Proceed");
  f.change("Add action","setVariable");f.change("Action 1 value","True");f.change("Add action","setVariable");f.change("Action 2 variable","name");f.change("Action 2 value","[opaque_python()] {literal}");f.change("Add action","finishInteraction");
- f.change("Add action","setVariable");f.change("Action 3 variable","coins");f.change("Action 3 value","-0");f.button("Apply");await flush();assert.equal(f.writes.length,0);assert.equal(f.find("Action 3 value").value,"-0");const invalid=f.find("Action 3 value");assert.equal(invalid.getAttribute("aria-invalid"),"true");assert.ok(document.getElementById(invalid.getAttribute("aria-describedby")!));
- f.change("Action 3 value","-9223372036854775808");const earlier=f.workspace.panel.querySelector<HTMLButtonElement>('[aria-label="Move action 3 earlier"]')!;earlier.click();assert.equal(f.find("Action 2 value").value,"-9223372036854775808");assert.equal(document.activeElement?.tagName,"SUMMARY");assert.equal(f.find("Action 4 type").value,"finishInteraction");
- f.button("Apply");await flush();const command=f.writes[0]!.command as {values:unknown;interaction:{actions:unknown[]}};assert.deepEqual(command.values,{text:"Proceed"});assert.deepEqual(command.interaction.actions,[{type:"setVariable",variableId:"seen",value:true},{type:"setVariable",variableId:"coins",value:"-9223372036854775808"},{type:"setVariable",variableId:"name",value:"[opaque_python()] {literal}"},{type:"finishInteraction"}]);
- for(let i=0;i<4;i++)f.change("Add action","setVariable");assert.equal(f.find("Add action").disabled,true);assert.equal(f.find("Action 8 type").value,"finishInteraction");
+ f.change("Add action","setVariable");f.change("Action 3 variable","coins");
+ f.change("Action 3 value","-9223372036854775808");const earlier=f.workspace.panel.querySelector<HTMLButtonElement>('[aria-label="Move action 3 earlier"]')!;earlier.click();assert.equal(f.find("Action 2 value").value,"-9223372036854775808");assert.equal(document.activeElement?.tagName,"SUMMARY");assert.match(f.workspace.panel.querySelector(".siv-sequence>li:last-child summary")!.textContent!,/Finish interaction/);
+ f.button("Apply");await flush();const command=f.writes[0]!.command as {values:unknown;interaction:{actions:unknown[]}};assert.deepEqual(command.values,{text:"Proceed"});assert.deepEqual(command.interaction.actions,[{type:"setVariable",variableId:"seen",value:true},{type:"setVariable",variableId:"coins",value:{operation:"assign",operand:"-9223372036854775808"}},{type:"setVariable",variableId:"name",value:"[opaque_python()] {literal}"},{type:"finishInteraction"}]);
+ for(let i=0;i<4;i++)f.change("Add action","setVariable");assert.equal(f.find("Add action").disabled,true);assert.match(f.workspace.panel.querySelector(".siv-sequence>li:last-child summary")!.textContent!,/Finish interaction/);
  f.workspace.panel.querySelector<HTMLButtonElement>('[aria-label="Remove action 1"]')!.click();assert.equal(document.activeElement?.tagName,"SUMMARY");assert.equal(f.find("Add action").disabled,false);
  f.find("Action 1 value").dispatchEvent(new window.KeyboardEvent("keydown",{key:"Escape",bubbles:true,cancelable:true}));assert.equal(f.workspace.hasDraft(),false);assert.equal(f.writes.length,1);
  }finally{await f.dispose();}
@@ -147,5 +148,16 @@ test("component text keeps variable insertion and review controls while its butt
 test("bound Text sends pending templates through the existing core draft-render owner and never an old text-sample override",async()=>{
  const f=fixture("dialog",{bound:true});try{f.workspace.mount(document.body);await flush();f.select("body");await flush();f.change("Text","Current balance: [coins!q]");await flush();
  const request=f.renders.at(-1)!;assert.deepEqual(request.textSamples,[]);assert.deepEqual(request.textStyles,[{nodeStart:100,values:{text:"Current balance: [coins!q]"}}]);assert.equal(f.writes.length,0);
+ }finally{await f.dispose();}
+});
+
+test("numeric button drafts expose equation controls, suggestions and grouping without executing actions",async()=>{
+ const f=fixture();try{f.workspace.mount(document.body);await flush();f.select("close");
+ f.change("Add action","setVariable");f.change("Action 1 variable","coins");
+ const formula=f.workspace.panel.querySelector<HTMLInputElement>('[aria-label="Action 1 formula"]');assert.ok(formula,"numeric action has a formula field");
+ formula.value="co";formula.setSelectionRange(2,2);formula.dispatchEvent(new window.Event("input",{bubbles:true}));
+ formula.dispatchEvent(new window.KeyboardEvent("keydown",{key:"Tab",bubbles:true}));assert.equal(formula.value,"coins");assert.equal(document.activeElement===formula,true);
+ formula.setSelectionRange(0,5);f.button("( )");assert.equal(formula.value,"(coins)");
+ assert.equal(f.writes.length,0);f.button("Cancel");assert.equal(f.workspace.hasDraft(),false);
  }finally{await f.dispose();}
 });

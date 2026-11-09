@@ -347,7 +347,10 @@ Undo/Redo and reopen reconstruct definitions and references from authoritative b
 ## Variables and state
 
 Visual variables support `bool`, `int`, `decimal` and `string` definitions and literal
-assignment. Existing types stay fixed after creation. Decimal defaults and values use
+assignment. Variable creation and default edits commit source plus authoring metadata
+in one entry through the existing shared session history. Semantic no-ops and refused
+edits add no entry. Undo/Redo restores both files and their actual revisions; project
+reopen retains accepted values and starts a new empty history. Existing types stay fixed after creation. Decimal defaults and values use
 finite binary64 JSON numbers; integer values retain exact signed i64 strings. Story
 also supports bounded numeric formulas. Set variable keeps
 `variableId` and `value`; arithmetic uses `{operation, operand}` in `value`.
@@ -398,10 +401,14 @@ retains the preceding simple-adjustment and both-target proof.
 Screens Set variable actions use the same `{operation, operand}` value and shared
 core admission. `screens.compose` keeps the existing `actions` command and
 `expectedAuthoringRevision` / target-review assertions. Optional `validateOnly:true`
-is limited to that command. It runs the same preparation without committing source
-or history. The response keeps the current `document`, `changed:false` and empty
+accepts that command and complete `addImageButton` creation drafts. Other command
+variants remain refused. It runs the same preparation, including appearances, layout,
+actions, asset replacement metadata and original dependency reviews, without committing
+source, metadata or history. The response keeps the current `document`, `changed:false` and empty
 `documents`; `actionValidation` contains the proposed inspection with a candidate
-revision. That candidate revision does not authorize a later write. Ordinary commits
+revision. A new imagebutton also has a temporary proposed node ID. Neither that ID
+nor the candidate revision authorizes a later write or selects an accepted node.
+Apply revalidates the complete original creation command and commits it once. Ordinary commits
 omit `actionValidation`. Invalid input uses the existing field-specific arithmetic
 transport errors; dirty/stale dependencies remain ordinary refusals.
 

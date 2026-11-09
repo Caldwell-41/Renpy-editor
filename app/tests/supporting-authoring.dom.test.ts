@@ -169,6 +169,7 @@ test("supporting authoring ignores stale completions and reports persistence tru
   assert.match(document.querySelector("h1")?.textContent ?? "", /Variables/);
   assert.equal(document.querySelector("#app-status")?.textContent, "Saved");
 
+  click("New variable");
   const technical = labelledControl<HTMLInputElement>("Technical name (fixed after creation)");
   enter(technical, "bad_value");
   const type = labelledControl<HTMLSelectElement>("Type");
@@ -191,7 +192,7 @@ test("supporting authoring ignores stale completions and reports persistence tru
 
   click("Variables");
   await tick();
-  click("Edit default");
+  click("score");
   enter(labelledControl<HTMLInputElement>("Default value"), "-9223372036854775808");
   click("Save Default");
   await tick();

@@ -1,7 +1,7 @@
 import type { ScreenDocument, ScreenNode } from './screen-ui.ts';
 import type { CompositionView, CompositionCommand, CopyDraftParticipant } from './screen-composition.ts';
 import type { IntegerBarBinding, BarAppearance, ScreenControlCommand, BarSample, BarAddition, ImageButtonAppearances, ImageButtonSample, ImageButtonAddition, ControlButtonState } from './screen-controls.ts';
-import { actionDraft, prepareInteraction, renderActions, captureActionFocus, restoreActionFocus, type ActionDraft, type InteractionContext } from './screen-interactions.ts';
+import { showActionRefusal, actionDraft, prepareInteraction, renderActions, captureActionFocus, restoreActionFocus, type ActionDraft, type InteractionContext } from './screen-interactions.ts';
 import type { ScreenLayoutEditor, LayoutReservation } from './screen-layout.ts';
 import type { ScreenImages } from './screen-images.ts';
 import { validateField } from './authoring-input.ts';
@@ -16,6 +16,8 @@ interface Draft {
   normalSize?:{assetId:string;sha256:string;width:number;height:number};
 }
 interface Host {
+  validateCreation?:(base:ScreenDocument,screenId:string,command:Extract<ScreenControlCommand,{type:"addImageButton"}>)=>Promise<import("./screen-interactions.ts").ScreenActionValidation>;
+  validateActions?:import("./screen-interactions.ts").ValidateScreenActions;
   view:()=>CompositionView|undefined; interaction:()=>InteractionContext|undefined;
   commit:(command:CompositionCommand,base:ScreenDocument)=>Promise<void>;
   redraw:()=>void; preview:()=>void; note:(text:string,error?:boolean)=>void;
@@ -82,7 +84,7 @@ export class ScreenControlEditor {
       ...(view.selected.kind==='imagebutton'?{appearances:structuredClone(view.selected.imageButtonAppearances??{}),...(view.selected.actions?{actions:actionDraft(view.selected.actions)}:{})}:{}),
       binding:structuredClone(view.selected.barBinding??{variableId:'',minimum:'0',maximum:'100'}),appearance:structuredClone(view.selected.barAppearance??{leftBar:null,rightBar:null,thumb:null}),width:size(view.selected,'xsize',360),height:size(view.selected,'ysize',24),context:structuredClone(this.host.interaction())};
   }
-  private store(draft:Draft){if(!draft.node)this.addition=draft;else this.drafts.set(draft.key,draft);if(draft.problem?.validation){if(draft.problem.field){try{this.validate(draft,draft.problem.field);draft.problem=undefined;}catch(error){if(draft.problem)draft.problem.text=(error as {text:string}).text;}}else if(!draft.actions?.error)draft.problem=undefined;}this.showProblem(draft);this.sync();this.host.preview();}
+  private store(draft:Draft){if(!draft.node)this.addition=draft;else this.drafts.set(draft.key,draft);if(draft.problem?.validation){if(draft.problem.field){try{this.validate(draft,draft.problem.field);draft.problem=undefined;}catch(error){if(draft.problem)draft.problem.text=(error as {text:string}).text;}}else if(!draft.actions?.error)draft.problem=undefined;}this.showProblem(draft);this.sync();this.card?.querySelector(".siv-numeric")?.dispatchEvent(new Event("siv-inspect"));this.host.preview();}
   synthetic(view:CompositionView):ScreenNode|undefined {
     const d=this.addition;if(!d||d.screenId!==view.screenId)return;
     const parent=view.nodes.find(n=>n.id===d.parentId),start=1+Math.max(...view.nodes.map(n=>n.span.end));
@@ -133,7 +135,7 @@ export class ScreenControlEditor {
     const displayed=group('Displayed size',true),pair=el('div','sce-pair');field(pair,'Width',d.width,raw=>this.dimension(d,'width',raw));field(pair,'Height',d.height,raw=>this.dimension(d,'height',raw));displayed.append(pair);
     if(d.kind==='imagebutton'){const label=el('label','sce-aspect'),check=el('input');check.type='checkbox';check.checked=!!d.keepRatio;check.onchange=()=>{d.keepRatio=check.checked;this.store(d);};label.append(check,el('span','','Preserve normal image aspect ratio'));displayed.append(label);}
     const placement=group('Layout',true);this.layout.render(placement,{sharedCommit:true,dimensions:false});
-    if(d.kind==='imagebutton'){const actions=group('Actions'),section=el('div','sce-actions');actions.append(section);if(d.actions)renderActions(section,d.actions,d.context,this.isSaving()||this.host.writeBlocked()||d.context?.owner?.kind==='component',()=>{d.focus=undefined;captureActionFocus(section,d.actions!);this.store(d);});else section.append(el('p','','Custom actions stay in Source. Appearance and size edits preserve them.'));}
+    if(d.kind==='imagebutton'){const actions=group('Actions'),section=el('div','sce-actions');actions.append(section);if(d.actions)renderActions(section,d.actions,d.context,this.isSaving()||this.host.writeBlocked()||d.context?.owner?.kind==='component',()=>{d.focus=undefined;captureActionFocus(section,d.actions!);this.store(d);},d.node?this.host.validateActions&&d.context?()=>this.host.validateActions!(d.document,d.screenId,d.node!.id!,d.context!,d.actions!):undefined:this.host.validateCreation?()=>this.inspectCreation(d):undefined,d.node?.id??undefined);else section.append(el('p','',d.node?.actionProtectionReason??'Custom actions stay in Source. Appearance and size edits preserve them.'),button('Edit actions in Source',this.host.source));}
     const footer=el('footer','sce-apply'),state=el('p','sce-state');state.ariaLive='polite';footer.append(state,button('Cancel',()=>this.cancelCurrent()),button('Apply changes',()=>void this.apply(),true));card.append(footer);
     const tools=el('div','sce-tools');this.host.layoutTools(tools);tools.append(button('View in Source',this.host.source));this.host.order(tools);body.append(tools);
     card.onkeydown=event=>{if(event.isComposing||event.keyCode===229)return;if(event.key==='Escape'){event.preventDefault();event.stopPropagation();this.cancelCurrent();}else if(event.key==='Enter'&&(event.ctrlKey||event.metaKey||event.target instanceof HTMLInputElement)){event.preventDefault();event.stopPropagation();void this.apply();}};
@@ -169,6 +171,17 @@ export class ScreenControlEditor {
     }else if((!completed||completed==='Choose normal image')&&!d.appearances?.normal)throw {text:'Choose a normal UI image. Your draft is retained.',field:'Choose normal image'};
     for(const key of ['width','height']as const)if((!completed||completed===(key==='width'?'Width':'Height'))&&!validSize(d[key]))throw {text:'Use a whole pixel size from 1 to 16384. Your draft is retained.',field:key==='width'?'Width':'Height'};
   }
+  private imageButtonCommand(d:Draft,layout:ReturnType<ScreenLayoutEditor['currentDraft']>):Extract<ScreenControlCommand,{type:'imageButton'|'addImageButton'}>{
+    if(layout&&layout.document.revision!==d.document.revision)throw Error('Control and layout use different Source revisions. Input retained.');
+    const values={width:Number(d.width),height:Number(d.height),...(layout?{layout:layout.values}:{}),appearances:d.appearances as ImageButtonAppearances,interaction:prepareInteraction(d.context!,d.node&&d.context?.owner?.kind==='component'?undefined:d.actions)};
+    return d.node?{type:'imageButton',nodeId:d.node.id!,...values}:{type:'addImageButton',parentId:d.parentId,...values};
+  }
+  private async inspectCreation(d:Draft):Promise<import("./screen-interactions.ts").ScreenActionValidation>{
+    this.validate(d);
+    const command=this.imageButtonCommand(d,this.layout.currentDraft(true));
+    if(command.type!=='addImageButton'||!this.host.validateCreation)throw Error('Creation feedback unavailable. Input retained.');
+    return this.host.validateCreation(d.document,d.screenId,command);
+  }
   async apply(){
     const view=this.host.view();if(!view||view.busy||this.isSaving())return;const d=this.value(view);if(this.host.writeBlocked()){this.fail(d,'Reload or cancel the copy before applying.');return;}
     let layout:ReturnType<ScreenLayoutEditor['currentDraft']>;
@@ -183,12 +196,12 @@ export class ScreenControlEditor {
     if(d.kind==='bar'){const values={...common,binding:d.binding,appearance:d.appearance,expectedAuthoringRevision:d.context!.authoringRevision};command=d.node?{type:'bar',nodeId:d.node.id!,...values}:{type:'addBar',parentId:d.parentId,...values};}
     else {
       try{await this.images.refreshAssets();for(const [key,name]of controlSampleStates){const ref=d.appearances?.[key];if(!ref)continue;const asset=this.images.asset(ref.assetId);if(!asset||asset.status!=='available'&&!ref.replacementSha256){this.fail(d,`${name} image is missing or changed. Choose an available UI image.`,`Choose ${name.toLowerCase()} image`);return;}}
-        const values={...common,appearances:d.appearances as ImageButtonAppearances,interaction:prepareInteraction(d.context!,d.node&&d.context?.owner?.kind==='component'?undefined:d.actions)};command=d.node?{type:'imageButton',nodeId:d.node.id!,...values}:{type:'addImageButton',parentId:d.parentId,...values};
+        command=this.imageButtonCommand(d,layout);
       }catch(error){const section=this.card?.querySelector<HTMLElement>('.siv-actions');if(section&&d.actions){renderActions(section,d.actions,d.context,false,()=>this.store(d));restoreActionFocus(section,d.actions);const target=section.querySelector<HTMLElement>('[aria-invalid]');target?.focus({preventScroll:true});target?.scrollIntoView({block:'nearest'});}this.fail(d,(error as Error).message,undefined,true);return;}
     }
     if(this.disposed||!this.host.current())return;
     const submitted={draft:d,command,layout:reservation};this.submitted=submitted;this.sync();
-    try{await this.host.commit(command,d.document);this.focus(d.focus);}catch(error){this.fail(d,`${(error as Error).message} Your draft is retained.`,d.focus);}finally{if(this.submitted===submitted)this.submitted=undefined;this.sync();}
+    try{await this.host.commit(command,d.document);this.focus(d.focus);}catch(error){this.fail(d,`${(error as Error).message} Your draft is retained.`,d.focus);showActionRefusal(this.card?.querySelector<HTMLElement>(".siv-actions")??undefined,d.actions,error);}finally{if(this.submitted===submitted)this.submitted=undefined;this.sync();}
     }finally{this.preparing=false;reservation.release();this.sync();}
   }
   accept(command:CompositionCommand,_base:ScreenDocument,accepted:ScreenDocument){if(this.submitted?.command===command){const s=this.submitted;this.drafts.delete(s.draft.key);if(this.addition===s.draft)this.addition=undefined;this.mounted=undefined;s.layout.accept(accepted);this.submitted=undefined;}}
