@@ -20,7 +20,7 @@ Screens branch. No merge of that PR or release is selected.
   v1, revision `combined-v1`, merged through PR #108. No new Story redesign.
 - #89 and #90 were superseded, closed as not planned. Do not implement them.
 - Screens mock #91 and #97's additional decimal controls are approved as A2 /
-  `equation-v2`; integration of the design reference is pending. Story backend
+  `equation-v2`; the reference is integrated by merge `aecf165e`. Story backend
   #92 is merged into integration with passing Mac proof. Windows proof remains
   pending; #92 is not accepted and #93 remains blocked.
 - Backend sequence: #92, then #93, then #94. #95 follows #94.
@@ -367,3 +367,77 @@ no new browser campaign, SDK/native/package/manual-CI operation or production UI
 edit is selected. The Windows #92 chat continues independently and must report its
 actual started/result accounting. No Windows SDK start is known to the coordinator
 yet; its single reservation remains until that report.
+
+### 2026-11-09: approved A2 reference integrated
+
+The fresh merger received exclusive mutation ownership of the integration checkout.
+Both local branches were clean at the expected tips. Normal `--no-ff` merge
+`aecf165e8d2c84320924db531f3dcc18a7448bc3` has parents
+`11e69a6d12c96318e7c4eaeccaf666a5cfaac2db` (coordinator) and
+`82d30d6e7bdf74e04dbb4cbef991cf67e921afbd` (approved design), with common ancestor
+`bb550929a7854d5975b25079cc610f1ee1c19a58`. No conflicts occurred. Coordinator
+records survived unchanged before this receipt. The merged Lab and arithmetic
+design records equal the approved branch. Neither history nor the approved
+checkout was rewritten; original A/B/C and all 31 retained PNGs remain intact.
+
+Approved identity and recovery:
+
+- Screen/variant/revision is `screens-arithmetic` / `equation-v2`.
+  [approval.json](../../design/screens-arithmetic/approval.json) and
+  [REFINEMENT's approval section](../../design/screens-arithmetic/REFINEMENT.md#approval-recorded-2026-11-09)
+  retain Kris's exact decision and deviations. Primary captures are under
+  `docs/design/screens-arithmetic/captures/equation-v2/`; original captures remain
+  under `captures/draft-v1/`. Both capture manifests and source records are preserved.
+- Runnable source remains `ce6264279188fca4c81218a5cd93b50c393bf9a3`, fingerprint
+  `e9a4d3bd1952a92b68d184e68e87579c15001984d42f3a872815a124d3555f7b`.
+  The existing sibling checkout `codex-spec-87-variable-mock`, branch
+  `codex/spec-87-variable-mock` at `82d30d6e`, remains a read-only reference and
+  still has that fingerprint. Its preserved Draft headings are an approved deviation.
+- Integration's fingerprint is
+  `6555f30de73a0f299ca24859757ebabb9633a8abb1784ee9fce0226cf1706a18`.
+  Only `app/src/main.ts` and `app/src/scene-ui.ts` differ among fingerprint inputs
+  from the pinned design source, due to #92's typed Story transport. Static approval
+  loading correctly returns `sourceMatches:false` here. The pinned Git source hash
+  validates; this expected current-tree mismatch is not approval corruption.
+
+Merged checks pass with pinned Node **24.19.0** and npm **11.9.0**:
+
+- `npm run design:typecheck` and `npm run design:approvals` pass. The latter tests
+  approval parsing, history, capture identity and changed-source detection.
+- Existing `loadApprovalRecords` validates all **28** actual records against their
+  pinned Git sources and capture hashes. Additional static assertions verify the
+  A2 pointer/source, ten primary PNGs and both manifests' PNG dimensions/hashes:
+  **41 manifest entries covering 31 unique retained PNGs**. No approval record changed.
+- `npm run design:check -- --build` passes in-memory production exclusion with
+  **1 check / 0 browser samples**; it writes no production `dist`. The first attempt
+  refused a Vite temporary config write through shared `node_modules` outside the
+  sandbox. An integration-local dependency-link directory and local `.vite-temp`
+  resolved that environment limitation. Both the refusal and passing report remain
+  in ignored `.toolchains/arithmetic-91-merge/`; shared dependencies stayed intact.
+- `python3 scripts/validate.py` passes for **1,848** files; `git diff --check
+  251fb477..HEAD` and the final status-document whitespace check pass.
+
+Every non-Lab `app/` entry, including `app/src`, `app/src-core`, `app/src-tauri`,
+Cargo manifests/lock, Rust toolchain, package/configuration inputs and tests, is
+identical to pre-merge `11e69a6d` and Windows dispatch candidate
+`c7b8157ee90aaf416030de0692abede7e4981c30`. `tests/fixtures/` also matches both.
+Story's approved Lab files are unchanged. Existing Mac #92 and unchanged-input
+scoped browser evidence remains valid on its producing candidates. No browser
+campaign, SDK/native/package operation or manual CI dispatch ran. This establishes
+no new source/history/reopen, evaluator or runtime proof for the fictional mock.
+
+#91's design handoff and #97's additional decimal-design gate are integrated;
+#97 production still requires qualified #95. #88 stays unchanged. The authorized
+publication is only `codex/spec-87-arithmetic` to its own origin branch and existing
+draft PR #122, with full #87 scope and eventual closing references retained.
+Final-head automatic checks await coordinator audit; no final review is selected.
+No issue is closed and #93/#95/#97 are not started by this merger.
+
+Ownership returns to the coordinator with committed integration/status records.
+Next: receive and audit the Windows #92 callback without polling before accepting
+#92 or starting #93. No SDK start/result has been reported here. Cumulative use
+remains Mac **1 started / 0 reserved**, Windows **0 known started / 1 reserved**.
+The Windows candidate's production inputs are unchanged. Keep all evidence and
+worktrees, including unique ignored backend Mac receipts and approved design output.
+CURRENT/HANDOVER retain earlier unique acceptance/recovery sections under their
+existing size exception; this handoff makes no broader historical cleanup.

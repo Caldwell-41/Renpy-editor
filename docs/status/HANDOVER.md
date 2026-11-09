@@ -14,15 +14,36 @@ Story mock #88 is approved as Story Combined v1 / `combined-v1`. Broad handoffs
 follow #92 -> #93 -> #94, then #95 and #96, then #97 with Screens approval.
 Kris authorized design chats named `Variable Mock - {description}` and separate
 worktrees. Production controls wait for their approval and qualified backend.
-The separate mock chat is recorded in the delivery ledger and owns #91 plus #97's
-decimal designs. Kris explicitly approved A2 / `equation-v2` in the design chat.
-The clean approval branch `codex/spec-87-variable-mock` is at `82d30d6e`;
-reviewed runnable source remains `ce626427`. The coordinator verified the approved
-pointer/source and ten primary capture hashes/dimensions. A fresh merger gets
-exclusive integration-checkout ownership to integrate/publish this design reference
-to draft PR #122. Preserve the pinned source, original A/B/C and approval history.
-#91's design handoff and #97's decimal-design gate are complete; production #97
-still requires qualified #95. The ledger owns exact identity, checks and limits.
+Kris approved #91 and #97's additional decimal controls as
+`screens-arithmetic` / `equation-v2`. Merge
+`aecf165e8d2c84320924db531f3dcc18a7448bc3` combines coordinator
+`11e69a6d12c96318e7c4eaeccaf666a5cfaac2db` and approved branch
+`82d30d6e7bdf74e04dbb4cbef991cf67e921afbd`, without conflicts. Coordinator
+records survived the merge unchanged. The merged design tree equals the approved
+branch, including original A/B/C, all captures and approval history.
+
+[The approval record](../design/screens-arithmetic/approval.json) and
+[recorded decision](../design/screens-arithmetic/REFINEMENT.md#approval-recorded-2026-11-09)
+own the approved behavior and deviations. Runnable source remains
+`ce6264279188fca4c81218a5cd93b50c393bf9a3`. The read-only reference is the
+existing sibling checkout `codex-spec-87-variable-mock`, branch
+`codex/spec-87-variable-mock` at `82d30d6e`. Its fingerprint still matches approval.
+Integration's full frontend/Lab fingerprint differs because #92 changed typed Story
+transport in `app/src/main.ts` and `app/src/scene-ui.ts`; integration correctly
+reports `sourceMatches:false`. Use the pinned reference for later comparisons.
+Do not rewrite approval identity or relabel Draft headings in the preserved source.
+
+Pinned Node/npm typechecking, approval-check tests, static loading of all 28 actual
+approval records, retained capture hashes/dimensions, production build exclusion,
+repository validation and whitespace pass. All non-Lab app inputs and runtime
+fixtures remain byte-identical to pre-merge integration and Windows dispatch
+candidate `c7b8157ee90aaf416030de0692abede7e4981c30`. Reuse unchanged scoped browser
+proof; this merger launched no browser. The
+[merge receipt](../tasks/active/shared-arithmetic.md#2026-11-09-approved-a2-reference-integrated)
+owns exact fingerprints, check results and the resolved local Vite temp-write refusal.
+#91's handoff and #97's decimal-design gate are complete. Mock diagnostics and
+saves remain fictional browser memory. Real source/history/reopen/runtime proof
+and #97 production remain separate; #97 still requires qualified #95.
 Backend #92 is merged through `e8b07b31d0dd9fd9c5dcf3f784c61f2e089fd050`.
 Its parents are coordinator `56c619f18bbcfd78873474369005853cc6f67b89` and
 returned implementation `e5de0c20da8cd5f2812116840bf67b808d91d78a`.
@@ -39,10 +60,11 @@ documentation and branch-bound CI metadata; qualified app/runtime inputs are int
 Draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) publishes
 `codex/spec-87-arithmetic` into `codex/phase3b-screen-designer` and is linked in T3.
 The integration branch now tracks its own origin branch. The PR describes full
-#87 scope and eventual closing references, with only #92 implemented so far.
-No issue was accepted or closed. The coordinator has resumed mutation ownership
-and linked/taken over the PR. SUNDOWN is reachable. The isolated remote dispatch
-was rejected before agent creation because T3 does
+#87 scope and eventual closing references. It contains #92 implementation plus
+the approved #91/#97 design reference; later backend and production UI work remain.
+No issue was accepted or closed. At merger return, the coordinator resumes mutation
+ownership of this integration checkout and audits the Windows callback next.
+SUNDOWN is reachable. The isolated remote dispatch was rejected before agent creation because T3 does
 not support linked-environment delegate worktree isolation. No SDK start was
 consumed. The read-only follow-up has completed: the sole Windows checkout is clean
 at Screens baseline `251fb477`, not requested arithmetic candidate `d797eb04`.
@@ -62,7 +84,7 @@ message without polling, then audit/integrate its evidence. #92 remains unaccept
 and #93 blocked on actual Windows proof.
 The ledger owns unchanged operation counts; the merger started no SDK, native,
 package or manual CI operation. Final-head automatic lightweight checks await
-coordinator audit; no reviews have been submitted at this handoff.
+coordinator audit. No final review was selected for this merger.
 Preserve the backend worktree's unique ignored Mac receipts and the separate
 approved #91/#97 design worktree. Keep the PR draft. Final parent-PR merge,
 automerge/release and full Story redesign #110 are outside this selection.

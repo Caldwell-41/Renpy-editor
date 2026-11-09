@@ -7,9 +7,16 @@ for implementation on 2026-11-09. Branch `codex/spec-87-arithmetic` starts from
 accepted Screens tip `251fb477`. [The delivery record](../tasks/active/shared-arithmetic.md)
 owns execution, ticket ownership and cumulative SDK limits. Story mock #88 is
 already approved. Kris also approved A2 / `equation-v2` at reviewed source
-`ce626427` for #91 and #97's additional decimal controls. Its clean approval
-branch is at `82d30d6e`; integrating the reference is next. Production #97
-still waits for qualified #95.
+`ce626427` for #91 and #97's additional decimal controls. Merge
+`aecf165e8d2c84320924db531f3dcc18a7448bc3` integrates approved branch `82d30d6e`
+into coordinator tip `11e69a6d` without conflicts. The
+[approval record](../design/screens-arithmetic/approval.json), retained captures
+and pinned source remain intact. Production #97 still waits for qualified #95.
+The merged full frontend/Lab fingerprint differs because #92 changed typed Story
+transport; the approved checkout remains the matching reference. Typecheck,
+static approval/hash/dimension validation, production build exclusion, repository
+validation and whitespace pass. All production app, Cargo/toolchain and runtime
+fixture inputs match pre-merge integration and Windows dispatch source `c7b8157e`.
 #92 backend is integrated by merge `e8b07b31`, preserving coordinator
 tip `56c619f1` and implementation tip `e5de0c20`. Its app/runtime inputs still
 match qualified candidate `1ba9fe44`; passing implementation and audited Mac
@@ -19,10 +26,10 @@ with 18 existing reporter tests passing. Final-head automatic checks await audit
 Draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) publishes the
 integration branch to the Screens base; it tracks the eventual full #87 outcome.
 Only #92 is implemented so far. Windows proof remains pending, #92 is not accepted
-and #93 remains blocked. SUNDOWN's tools/SDK are ready, but its checkout is on the
-Screens baseline. After T3 rejected remote delegate isolation, Kris explicitly
-approved a new top-level Windows qualification chat/worktree. Its one SDK run
-stays reserved until execution is reported.
+and #93 remains blocked. The authorized Windows #92 chat/worktree is running
+separately. Its callback has not reported an SDK start or result; usage remains
+0 known started / 1 reserved. The coordinator audits that callback next without
+polling. This merger starts no successor work or final review.
 Backend and approved production UI are in scope. No full #110 redesign,
 parent-PR merge or release is selected.
 
