@@ -1529,7 +1529,7 @@ export interface AssignmentDraftValidation {
   readonly sourceMapRevision: string;
   readonly authoringRevision: string;
   readonly sourceRevision: string;
-  readonly variables: SceneWorkspace["authoring"]["variables"];
+  readonly variables: readonly (SceneWorkspace["authoring"]["variables"][number] & { readonly source: { readonly path: string; readonly statement: string; readonly sourceRevision: string } })[];
   readonly capabilities: {
     readonly operators: readonly string[];
     readonly operations: readonly IntegerAdjustment["operation"][];

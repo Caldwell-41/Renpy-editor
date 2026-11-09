@@ -229,3 +229,118 @@ corrected the harness. An initial renderer command named nonexistent compiled
 filenames; the actual existing `.dom.test.js` owners were then selected. These
 were harness corrections, not relaxed product admission. No SDK start occurred
 during those corrections.
+
+## Mac invocation 1: failed before runtime assertions
+
+The one reserved invocation **started and failed**. Candidate:
+`8c677ffea9552bc7746f1df27a59ae2bc185b861`, clean before launch. The exact selector
+and command above ran on native ARM64 with Rust/Cargo 1.90.0. Ren'Py reported
+8.5.3.26051504 and Python 3.12.8. The launch receipt retains all input hashes,
+official archive/manifest hashes, matching archive-member/extracted executable
+identities and a copy of the executed ARM64 test binary. Manifest provenance stays
+in `spikes/renpy-sdk/published/README.md`; no new download or PGP claim is made.
+
+| Case | Exit | Duration | Result |
+| --- | ---: | ---: | --- |
+| Compile | 0 | 478 ms | Passed |
+| Lint | 0 | 255 ms | Passed |
+| Normal entry | 1 | 545 ms | Failed at display initialization |
+| Wrong outcome | none | none | Not reached |
+
+The first failing boundary is `pygame.display.init()` during Ren'Py's initial GL
+performance test, before the selected testcase or any numeric assertions:
+`The video driver did not add any displays`. The raw output also records failed
+macOS application notification/service connections. Classification is an
+**environment limitation**, with sandbox/display access the leading explanation.
+[Incident H20](../../testing/INCIDENTS.md#h20--screen-sdk-driver-assumes-an-unavailable-menu-or-style-attribute)
+distinguishes this same display symptom from unrelated menu/style driver defects.
+No unsandboxed comparison was run, so that explanation is not promoted to fresh
+proof. No production workaround, alternative renderer or SDK retry was attempted.
+
+The command returned Cargo exit 101 after 79.46 seconds. The existing Cargo-log
+validator correctly **rejects** its failed summary. There is no positive SDK Cargo
+result, normal-entry numeric/runtime-type/text/sample witness, or deliberate
+wrong-outcome rejection. Compile/lint alone do not qualify runtime semantics.
+#94 remains unqualified for dependent integration.
+
+All three reached case outputs are untruncated and did not time out. The gate
+checked unchanged accepted `.rpy` sets after each reached case. Terminal output is
+`passed:false,cleanupComplete:true`. An independent receipt audit verified the
+owned temporary SDK/project/profile/saves root is absent, no process references
+that root, input hashes and the retained test executable are unchanged, and actual
+installed SDK identities match the verified archive. The read-only process audit
+needed scoped execution outside the sandbox because sandboxed `ps` was denied;
+that audit started no SDK or application process.
+
+Accepted runtime source SHA-256:
+`74f6427a5b2a1d47586481eedb43590182330d2897db554e1eb60e122f32faaf`.
+Executed/retained ARM64 test binary SHA-256:
+`cfc09283b55b3b28aa71c561dc6f26f3675105e4aa60080bd2d6fe7d7464345c`.
+Archive SHA-256 remains
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`;
+manifest SHA-256 remains
+`4b0cad9ac05dc4ca55081bd3a36458c8ea658ed021f09a87276383652b6bd98b`.
+
+Preserve unique ignored evidence under `.toolchains/arithmetic-94/`:
+
+- `mac-01/launch-receipt.json`, `launch-started.json`, `launch-result.json` and
+  `audit.json` record the candidate, accounting, identities and failed gate audit.
+- `mac-01/sdk.log`, `arithmetic-sdk-cases.json`, `arithmetic-sdk-context.json`,
+  `arithmetic-requests.json`, `arithmetic-produced.rpy`, `decimal-screen.json`,
+  `decimal-screen.rpy` and `test-executable` retain raw failure/source/runtime inputs.
+- `mac-01/cargo-log-validation.txt` retains the rejecting checker output.
+- The parent directory retains TDD reds, positive cheap logs, compiled-test identity,
+  distinct selector inventory and the successful exact no-SDK preflight/contract.
+
+Consumption is **1/1 implementer Mac start, 0 reserved/uncertain**. Feature totals
+are now Mac **3 started / 0 reserved**, Windows **1 started / 0 reserved**. Against
+the unchanged ceiling of six per target, three Mac and five Windows starts remain
+unallocated. This handoff authorizes none of them. A coordinator allocation is
+required for another Mac run. Combined Windows proof also remains required before
+#95/#96 can start; no Windows contact or execution occurred here.
+
+## Local verification and handoff
+
+There are **144 distinct passing Rust cases**, plus **31 passing renderer cases**.
+The failed SDK gate is a separate case and is not included among those passes.
+Selected Rust owners are Story (51 distinct, including 19 arithmetic), Source (16),
+conditions (3), variable authoring (33), nested canvas (7), actions (12), integer
+controls (18) and shared arithmetic preflight/draft contract (4). Seven existing
+Story specialists, one nested SDK specialist and unselected #92/#93 SDK gates stay
+outside this selection. Every cheap Cargo log has a positive validator result.
+Renderer owners are `scene-authoring.dom.test.js` and
+`screen-interactions.dom.test.js`, with no skips. TypeScript, Rust formatting,
+repository validation and whitespace checks pass. No editor package, browser or
+native-editor check was launched.
+
+Core and runtime fixture bytes remain the prelaunch candidate. A subsequent
+TypeScript-only contract annotation makes each returned variable's definition
+revision explicit to UI consumers; it changes no runtime bytes. Result documentation
+records the failed attempt without replacing its raw receipts. No SDK repeat is
+implied by these handoff edits.
+
+Changed files relative to integration:
+
+```text
+app/src-core/src/authoring.rs
+app/src-core/src/conditions.rs
+app/src-core/src/conditions/arithmetic.rs
+app/src-core/src/lib.rs
+app/src-core/src/lifecycle.rs
+app/src-core/src/renpy/tests/source_foundation/arithmetic.rs
+app/src-core/src/scene.rs
+app/src-core/src/scene/tests/arithmetic.rs
+app/src-core/src/scene/variables.rs
+app/src-core/src/screens/actions.rs
+app/src-core/src/screens/nested_canvas_tests.rs
+app/src/main.ts
+app/src/scene-ui.ts
+app/src/screen-contracts.ts
+app/src/screen-interactions.ts
+app/src/story-condition-editor.ts
+docs/DATA_MODEL.md
+docs/tasks/evidence/arithmetic-94.md
+tests/fixtures/arithmetic-94/contract.json
+tests/fixtures/arithmetic-94/driver.rpy
+tests/fixtures/arithmetic-94/story.rpy
+```
