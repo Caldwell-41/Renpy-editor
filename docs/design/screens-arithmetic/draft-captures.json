@@ -93,24 +93,6 @@
       "scale": 1
     },
     {
-      "path": "docs/design/screens-arithmetic/captures/draft-v1/review.png",
-      "sha256": "ba5db7e6c3e7b95e84630dca41245a3f9326f70502108fb993f42caccf6b96ca",
-      "state": "button",
-      "theme": "dark",
-      "width": 1100,
-      "height": 720,
-      "scale": 1
-    },
-    {
-      "path": "docs/design/screens-arithmetic/captures/draft-v1/review.png",
-      "sha256": "c13327e1da8beff28f3a34bb5aec524af016e6b714b83c17b6811d388215d8db",
-      "state": "button",
-      "theme": "dark",
-      "width": 1100,
-      "height": 720,
-      "scale": 1
-    },
-    {
       "path": "docs/design/screens-arithmetic/captures/draft-v1/sequence-v1-actions-wide.png",
       "sha256": "4c576b9db6040eee462989c83bdbd7f9e6811c45f014aae341a8de2c9ee7369d",
       "state": "button",
@@ -177,15 +159,6 @@
       "path": "docs/design/screens-arithmetic/captures/draft-v1/expanded-v1-variables-wide.png",
       "sha256": "f6acd17f7249b004914994910701ff7d61fd42b9ecd9c47e322f7d5eac4330b3",
       "state": "variables",
-      "theme": "dark",
-      "width": 1100,
-      "height": 720,
-      "scale": 1
-    },
-    {
-      "path": "docs/design/screens-arithmetic/captures/draft-v1/review.png",
-      "sha256": "c13327e1da8beff28f3a34bb5aec524af016e6b714b83c17b6811d388215d8db",
-      "state": "button",
       "theme": "dark",
       "width": 1100,
       "height": 720,

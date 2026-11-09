@@ -1,0 +1,14 @@
+{
+  "status": "draft, not approved",
+  "branch": "codex/spec-87-variable-mock",
+  "source": {
+    "commit": "6b3aee30e78fa99d1b4e856c38169dbd6133523e",
+    "fingerprint": "7f44009d4939169eeb341065cf7150a2929eee322f80273400efb8542aa08e14"
+  },
+  "variants": [
+    "equation-v1",
+    "sequence-v1",
+    "expanded-v1"
+  ],
+  "chosenVariant": null
+}

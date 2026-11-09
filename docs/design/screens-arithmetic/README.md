@@ -159,3 +159,7 @@ On explicit approval, follow [INTEGRATION](../../../app/design-lab/INTEGRATION.m
 record the exact revision, decision, reproducible source and chosen captures; keep
 prior records intact, validate promotion, and return the exact approval to the
 coordinator. Until then, #91 and the #97 decimal-control decision remain pending.
+
+The review source is `6b3aee30e78fa99d1b4e856c38169dbd6133523e`;
+[the source record](draft-source.json) contains its fingerprint. This identifies
+the candidate and does not grant approval.
