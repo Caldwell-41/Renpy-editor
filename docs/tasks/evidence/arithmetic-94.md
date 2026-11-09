@@ -352,3 +352,46 @@ normally into this implementation branch. Both tips remained
 Core and runtime fixture trees still match the exact prelaunch candidate. Final
 handoff is local-only with clean tracked state. The coordinator owns any further
 SDK allocation, fresh merger review, publication and issue acceptance.
+
+
+## Coordinator runtime recovery
+
+The coordinator retained the failed sandboxed run above and allocated one
+controlled run outside the sandbox from the unchanged six-start feature ceiling.
+The existing MacPower query returned no session/display fields inside the sandbox
+and an active, awake, unlocked on-console desktop outside it. The controlled
+Mac invocation 2 used the unchanged retained core binary from `8c677ffe`, with the
+existing native-desktop admission/power helper and fresh ignored evidence in the
+coordinator checkout under `.toolchains/arithmetic-94/mac-02/`. The subsequent
+TypeScript-only source-revision annotation is erased at runtime; core/fixtures
+matched the compiled candidate.
+
+This second #94 run started and failed, bringing feature totals to Mac **4
+started / 0 reserved**, Windows **1 started / 0 reserved**. Compile/lint passed.
+Display initialization succeeded and the testcase passed 19 assertions before
+failing at `assert "Fraction 2.5" timeout 10`. The following sample-text witness
+and deliberately wrong outcome were not reached. Raw outputs were untruncated,
+with no process timeout. SDK cleanup and desktop assertion release passed.
+
+This is a distinct harness defect. The exact pinned SDK's `TextSelector` delegates
+to `testfocus.find_focus`, which searches the focus list; its default focus uses
+the current Say text while in a TranslateSay node. The accepted screen source
+contains the correct `text "Fraction [fraction!q]"`, but this nonfocusable caption
+is not a target of that selector during the narration. The numeric assertions
+before the caption passed; full qualification remains failed.
+
+The fixture correction requires the accepted screen to be shown and then reads
+that actual screen displayable's interpolated text through the same pinned SDK
+TTS path. This preserves exact bound-caption verification instead of replacing
+it with an unrelated string substitution or removing the assertion. Production
+code and numeric/wrong-outcome assertions are unchanged. A new selected SDK run
+requires a coordinator allocation and fresh source/binary identities. The original
+failed receipts remain immutable.
+
+The exact no-SDK decimal fixture preflight passed after the correction: one test,
+7.50 seconds, no failures/skips; the existing Cargo-log validator accepted it.
+This rebuilt the test binary with the changed embedded driver. The coordinator
+reserved one verification invocation from the original ceiling: Mac **4 started /
+1 reserved**, Windows **1 started / 0 reserved**. The new launch receipt will bind
+the clean fixture-fix commit, rebuilt/retained binary and fresh `mac-03` evidence.
+The unchanged numeric/type/rejecting assertions remain required.

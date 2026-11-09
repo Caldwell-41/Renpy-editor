@@ -27,7 +27,9 @@ testsuite arithmetic_94:
         assert eval (9007199254740993 > 9007199254740992.0 and 9007199254740993 != 9007199254740992.0) timeout 10
         assert eval (9223372036854775807 < 9223372036854775808.0 and -9223372036854775808 == -9223372036854775808.0) timeout 10
         assert eval (numeric_branch is True) timeout 10
-        assert "Fraction 2.5" timeout 10
+        # The pinned SDK text selector searches focus/say text, not this caption.
+        assert screen "arithmetic_decimal_text" timeout 10
+        assert eval (renpy.get_screen("arithmetic_decimal_text")._tts_all(False) == "Fraction 2.5") timeout 10
         assert eval (renpy.substitute("Fraction [fraction!q]", scope={"fraction": 1e-7}) == "Fraction 1e-07") timeout 10
         $ print("ARITHMETIC_94_NUMERIC quotient=0x1.5555555555556p+51 floor=9.0 remainder=0x1.0000000000000p-54 widened=float:-3.0 mixed=float:9007199254740992.0 zero=-0x0.0p+0 subnormal=0x0.0000000000001p-1022 default=float:2.5 comparisons=True text=Fraction_2.5 sample=Fraction_1e-07", flush=True)
         $ renpy.hide_screen("arithmetic_decimal_text")
