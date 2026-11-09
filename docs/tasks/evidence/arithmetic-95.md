@@ -112,7 +112,10 @@ that public revision corrected the harness. It then caught a real canvas admissi
 gap for the generated helper. Exact owned-declaration recognition fixes that gap
 without executing it. The real production controller journey initially omitted an
 untouched action list, then reused an expired Recent ID. It now deliberately touches
-the arithmetic draft and fetches the fresh Recent ID. All failed logs/results remain.
+the arithmetic draft and fetches the fresh Recent ID. The dedicated red logs and both failed controller results remain. Some early no-SDK
+compile/preflight log filenames were reused; their observed failure excerpts remain
+in the task transcript and the classifications above, rather than complete original
+raw files. Prior #94 raw evidence is unchanged.
 No SDK was started during these checks.
 
 Focused public Rust, renderer, controller, typecheck and repository results and the
@@ -138,7 +141,8 @@ pinned compiler identities are required before launch. Execution must occur outs
 the sandbox through the existing `macos_native_desktop.py` admission/power helper.
 Existing sessions/processes and all prior arithmetic evidence remain untouched.
 
-Runtime outcome is pending. Required proof is normal accepted-source ordered current
+The attempt below failed before the selected runtime cases. Required proof remains
+normal accepted-source ordered current
 values (6/12, then 7/14), variable-dependent amounts and a changed operand, actual
 text/image clicks and keyboard activation, integer/decimal witnesses, prediction/
 evaluation/selection inertness, explicit invalid arithmetic, one Finish continuation,
@@ -223,3 +227,67 @@ and complete success response, including all variable IDs/revisions, capabilitie
 source spans and diagnostics, are retained in both `preflight-final/public-requests.json`
 and `mac-01/public-requests.json`. A target mismatch, for example, returns
 `{protocolVersion:1,requestId:"arithmetic-95",ok:false,error:{code:"ARITHMETIC_TARGET_TYPE",message:"variableId: Choose a numeric target. Whole-number targets require an integer result."}}`.
+
+## Mac invocation 1 failed before arithmetic cases
+
+The clean candidate was `dc8eb3c4589559dc229cbcd28a0dc7fd3143c42a`. It normally
+merges integration second parent `53cb37fab9c07f42b28afed4dbca68f1f1b54a80`,
+which includes the requested published `e0a9fe3b` contract fix. The immutable launch
+receipt identifies `e0a9fe3b` as the required ancestor; the audit records the actual
+later merge parent. The integration branch still points at that merged second
+parent when this result is recorded.
+
+The outside-sandbox desktop admission passed. The retained gate executable started
+at 2026-11-09 12:54:26 UTC and exited 101 after 78.364 seconds. SDK execution really
+started: `LifecycleService::create_project` completed the SDK-backed
+`generate_starter_anchored` generation, GUI-image and generated-project validation
+path and printed generated/validated/promoted checkpoints. This is a consumed start,
+not a preflight refusal. Feature usage is now **Mac 6/20 started, 0 reserved;
+Windows 2/20 started, 0 reserved**. There was no retry or Windows operation.
+
+The assertion failed at `author_arithmetic`'s `plan.available == true`. The real
+SDK project correctly reported these existing inert-canvas limits:
+
+```text
+Unresolved project initialization or inherited styles in game/gui.rpy
+Unresolved project initialization or inherited styles in game/options.rpy
+Unresolved project initialization or inherited styles in game/screens.rpy
+```
+
+This is a harness defect. The shared authoring fixture required complete canvas
+availability for both its minimal offline project and the full generated SDK
+project. The cheap fixture does not contain that SDK GUI initialization, so it
+passed without exposing the mismatch. The failed plan still contained the inert
+sample literal `99` and all button nodes. No production arithmetic runtime defect
+was observed, and no product guard was weakened to satisfy the harness.
+
+The selected compile, lint, normal arithmetic and wrong-outcome cases were not
+reached. They remain missing, including the required normal 6/12 and 7/14 witnesses.
+The positive Cargo-log validator correctly rejects this failed one-test summary.
+**No #95 code candidate is runtime-qualified on Mac or Windows. #97's qualified
+backend dependency is not satisfied by this return.**
+
+Raw `sdk.log`, launch/started/result receipts, desktop receipt, official checksum
+manifest and the exact executable remain under `mac-01`. Executable SHA256 is
+`e938c29cf590604afdcddc2d8db0e56c97607ae3bebe2c9a92b4998517ac0614`.
+`qualification-audit.json` records actual consumption, all four unrun cases, the
+rejecting checker and 864 unchanged launch-input hashes. The Rust terminal reports
+`cleanupComplete:true`; both owned Mac power assertions were released and the
+post-child desktop remained awake/unlocked. Existing processes/sessions and prior
+receipts were untouched.
+
+The assertion happened before the SDK attempt exported its accepted source/public
+requests or initialized per-case records. Those exact SDK-attempt captures are
+missing after owned temporary cleanup. They are not reconstructed from another run.
+The complete earlier no-SDK `preflight-final/` accepted source/assets, full concrete
+requests/responses and inspections remain retained, but do not substitute for SDK
+runtime evidence. Thus the planned `mac-01/public-requests.json` mentioned in the
+contract section was not produced by this failed attempt.
+
+The assignment stops SDK work here as instructed. A coordinator-selected follow-up
+can separate minimal-project canvas availability from full-template SDK execution,
+retain source/requests and unrun-case records before assertions, then choose any
+further qualification explicitly. This branch makes no post-failure implementation
+or harness correction and starts no retry. The returned local successor changes
+only this evidence note; all app/fixture inputs still equal `dc8eb3c4`. No push,
+PR, issue closure, cleanup, parent-PR work or final acceptance was performed.
