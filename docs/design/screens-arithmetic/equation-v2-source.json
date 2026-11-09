@@ -1,5 +1,5 @@
 {
-  "status": "selected for refinement, not approved",
+  "status": "approved design reference",
   "branch": "codex/spec-87-variable-mock",
   "revision": "equation-v2",
   "variant": "equation-v2",
@@ -7,5 +7,8 @@
     "commit": "ce6264279188fca4c81218a5cd93b50c393bf9a3",
     "fingerprint": "e9a4d3bd1952a92b68d184e68e87579c15001984d42f3a872815a124d3555f7b"
   },
-  "userRequest": "refine A with $principle-experience-first and make it closer to the approved story mock then show me again"
+  "userRequest": "refine A with $principle-experience-first and make it closer to the approved story mock then show me again",
+  "approvalDecision": "approved",
+  "approvalDate": "2026-11-09",
+  "approvalRecord": "docs/design/screens-arithmetic/approval.json"
 }

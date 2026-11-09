@@ -1,5 +1,5 @@
 {
-  "status": "draft, not approved",
+  "status": "Retained equation-v2 captures. approval.json owns the chosen approval set; other captures are supplementary interaction evidence.",
   "captureCommand": "npm run design:check -- screens-arithmetic equation-v2 --interaction ./screens/screens-arithmetic/refined-check.mjs --capture",
   "captures": [
     {
@@ -105,6 +105,15 @@
       "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-variables-wide.png",
       "sha256": "013be2a269fee976d8113ab7cac1fb71df9665cacdd54ddb6741d64bfbab5cf4",
       "state": "variables",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-imagebutton-wide.png",
+      "sha256": "42683cf3934e2b1f70b6b3d4f7116c09396f77b6f9a8002d6289e6c1a2c8ef94",
+      "state": "imagebutton",
       "theme": "dark",
       "width": 1100,
       "height": 720,

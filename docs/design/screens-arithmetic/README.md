@@ -8,9 +8,9 @@ and the additional decimal-control design decision required by
 [#97](https://github.com/Caldwell-41/Renpy-editor/issues/97), under parent
 [#87](https://github.com/Caldwell-41/Renpy-editor/issues/87).
 It starts exactly at integration checkpoint `bb550929` on
-`codex/spec-87-variable-mock`. All three variants are drafts. Kris has not approved
-one. [approval.json](approval.json) is the approval owner and keeps
-`currentApproved: null` until an explicit decision identifies a reproducible version.
+`codex/spec-87-variable-mock`. Kris approved A2, `equation-v2`, on 2026-11-09 with the exact decision
+"approved". [approval.json](approval.json) owns its source and chosen captures.
+The original A, B and C remain drafts.
 
 ## Compare
 
@@ -146,7 +146,7 @@ and temporary servers.
 Preserved draft captures and hashes are in [draft-captures.json](draft-captures.json).
 The action-wide captures include the grouping/reorder interaction; variable-wide
 captures include creation of fictional `fare`. The check module reproduces these
-states. No capture is approval evidence yet.
+states. The later A2 approval and its chosen captures are recorded in approval.json.
 
 The export initially clipped its parent grid and then exposed an asynchronous
 host refresh error after inspector replacement. The export grid now fits its
@@ -158,7 +158,8 @@ were prototype/export or check defects, not backend failures.
 On explicit approval, follow [INTEGRATION](../../../app/design-lab/INTEGRATION.md):
 record the exact revision, decision, reproducible source and chosen captures; keep
 prior records intact, validate promotion, and return the exact approval to the
-coordinator. Until then, #91 and the #97 decimal-control decision remain pending.
+coordinator. A2 now satisfies the design decision for #91 and the affected #97 decimal controls;
+backend qualification and production integration remain with their owning tickets.
 
 The review source is `6b3aee30e78fa99d1b4e856c38169dbd6133523e`;
 [the source record](draft-source.json) contains its fingerprint. This identifies
@@ -168,6 +169,5 @@ the candidate and does not grant approval.
 
 Kris selected A for an Experience First refinement toward Story Combined v1.
 `equation-v2` is the new review candidate. [The refinement record](REFINEMENT.md)
-explains the changed controls, palette, checks and retained captures. This is a
-selected direction; design approval remains pending. The original variants and
+explains the changed controls, palette, checks and retained captures. Kris approved this refinement on 2026-11-09. The original variants and
 sources remain available.

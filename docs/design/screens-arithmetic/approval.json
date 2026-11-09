@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "screenId": "screens-arithmetic",
-  "currentApproved": null,
+  "currentApproved": "equation-v2",
   "revisions": [
     {
       "id": "equation-v1",
@@ -21,7 +21,126 @@
     {
       "id": "equation-v2",
       "variantId": "equation-v2",
-      "approval": null
+      "approval": {
+        "date": "2026-11-09",
+        "decision": "Kris said \"approved\" in reply to A2 · Story equation refinement, presented inline and at the equation-v2 LAN Design Lab URL. Approve screens-arithmetic / equation-v2 for #91 Screens arithmetic and the affected #97 decimal creation/default, numeric-condition and screen text/sample controls. Earlier Story Combined v1 / #88 and Screens approvals remain unchanged.",
+        "reason": null,
+        "supersedes": null,
+        "source": {
+          "commit": "ce6264279188fca4c81218a5cd93b50c393bf9a3",
+          "fingerprint": "e9a4d3bd1952a92b68d184e68e87579c15001984d42f3a872815a124d3555f7b"
+        },
+        "captures": [
+          {
+            "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-actions-wide.png",
+            "sha256": "e05f16a4cce900b89e0ebd8649a69162d9504c0f3dcb1586f0abf600b18c4d39",
+            "state": "button",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-actions-compact.png",
+            "sha256": "056663fb40d6ab911ea224caec5542bb237efcf8b8a7838114082032c3431d1c",
+            "state": "button",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-imagebutton-wide.png",
+            "sha256": "42683cf3934e2b1f70b6b3d4f7116c09396f77b6f9a8002d6289e6c1a2c8ef94",
+            "state": "imagebutton",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-decimal-wide.png",
+            "sha256": "46eaed616abcd6d9f2f939b5fda323d9c309d7b7b2bd9140a7a5283d272722e2",
+            "state": "decimal",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-invalid-wide.png",
+            "sha256": "930177b10a41a73371660d6ccad1ee67be45afb595878d58e175aa490babd05e",
+            "state": "invalid",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-unknown-wide.png",
+            "sha256": "5b4f7f4d46b4865f4dd50f960c0a0e2fc228aba90ea85c2ddec8217b3c9e654d",
+            "state": "unknown",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-protected-wide.png",
+            "sha256": "946c719af64f33ce668095ee5ecc7557430d7095338f96055ea96bf4b42b66e7",
+            "state": "protected",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-variables-wide.png",
+            "sha256": "013be2a269fee976d8113ab7cac1fb71df9665cacdd54ddb6741d64bfbab5cf4",
+            "state": "variables",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-condition-compact.png",
+            "sha256": "06ae22c5fb4822b019c30992b86823f359b57440505fb1d9ad160cf3da4bbbf3",
+            "state": "condition",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/screens-arithmetic/captures/equation-v2/a2-text-wide.png",
+            "sha256": "bc4e28b27336fd1fbc4ec8c01cef835f80f309e6e4697875868223ba61416373",
+            "state": "text",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "Use one expandable ordered action at a time in the existing Screens inspector. Pick a declared variable above the Story-style equation row: target, operation picker and number/formula input. Preserve textbutton and imagebutton action parity.",
+          "Offer all seven operations: Set to, Add, Subtract, Multiply, Divide, Floor divide and Remainder. Use named operation choices, keyboard navigation, Enter selection, Escape dismissal and focus return. Keep formula drafts while changing operations.",
+          "Offer declared numeric variable suggestions while typing, replacing a partial identifier or selection. Show variable types; Enter or Tab accepts a suggestion. Escape closes suggestions without cancelling the draft. Keep parenthesis grouping available during editing.",
+          "Show concise result-type feedback. Whole-number targets refuse decimal results without rounding; Decimal targets accept whole-number results. Keep invalid syntax, missing variables, incompatible types, zero divisors, range and non-finite diagnostic states. Current values can remain unknown without using defaults as current state.",
+          "Retain displayed order, stable action identity, independent button drafts, explicit context/target eligibility, the eight-action limit and Finish-last. Each calculation reads values when its action executes, including earlier changes in the list. Canvas selection, Apply and editor samples execute no game actions.",
+          "Keep unsupported or differently timed source forms and component actions source-only, with an explanation and Source navigation. Refused invalid or stale-dependency Apply retains input. Reveal/focus the invalid field; preserve keyboard selection and cancel/discard focus behavior.",
+          "Support Decimal in variable creation and default editing while keeping existing names/types fixed. Preserve Boolean, Whole number and Text controls, finite decimal feedback, retained invalid/default drafts and exact whole-number text. Bars stay whole-number-only.",
+          "Allow decimal thresholds for numeric conditions and decimal values in screen text and editor-only samples. Keep text-token insertion at the selection and return the caret after it. Samples remain separate from declaration defaults and deliberate Test in Ren'Py.",
+          "Use the approved Story Brass and slate palette, field sizing, typography and flat sections within this new mock. Keep original Story and Screens references intact. Put fictional sample switches, formula examples and context controls under Review cases outside the main editing loop."
+        ],
+        "deviations": [
+          "This is a fictional browser-memory design reference. Apply/Save, diagnostics, refusal states and imagebutton art are simulated. It establishes no source preservation, durable save/history/reopen, click-time runtime, SDK or native proof. Backend qualification and real #97 integration remain separate.",
+          "Formula feedback uses named response fixtures, not an authoritative parser/type checker/evaluator. Unlisted formula text reports that no fixture response is available and remains a draft. Production must use core-owned admission, types, capabilities, diagnostics, unknown reasons and revision checks.",
+          "The standalone inline export uses chat host theme tokens and isolates the inspector at chat width. Retained Lab captures and the LAN preview show the full Screens context and Story palette. Original appearance/layout editing and unrelated navigation remain outside this arithmetic comparison.",
+          "The chosen captures cover dark mode at 1100×720 and 560×640. Menu, suggestion and creation interaction captures are retained as supplementary evidence in equation-v2-captures.json; they share base state/dimension combinations with primary captures. No light-mode approval or production implementation is claimed.",
+          "The preserved reviewed source retains prototype headings/description text that says Draft. The Design Lab approval label and this record own the current approval status. Review cases is prototype-only."
+        ]
+      }
     }
   ]
 }
