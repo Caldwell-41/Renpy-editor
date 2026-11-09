@@ -22,7 +22,8 @@ Screens branch. No merge of that PR or release is selected.
 - Screens mock #91 and #97's additional decimal controls are approved as A2 /
   `equation-v2`; the reference is integrated by merge `aecf165e`. Story backend
   #92 is merged and qualified on Mac and Windows. Its scoped delivery is ready
-  for final integration review, and #93 is the next implementation frontier.
+  for final integration review. #93 has returned implementation and Mac proof;
+  its integration is next, followed by #94.
 - Backend sequence: #92, then #93, then #94. #95 follows #94.
 - Story UI #96 follows approved #88 and qualified #94.
 - Screens/decimal UI #97 follows approved #91 and qualified #95.
@@ -64,7 +65,7 @@ one becomes necessary. Routine checks and review have no numerical limits.
 
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
-| macOS ARM64 SDK qualification | 6 | 1 | 1 for #93 |
+| macOS ARM64 SDK qualification | 6 | 2 | 0 |
 | Windows x64 SDK qualification | 6 | 1 | 0 |
 
 ## Execution ledger
@@ -488,3 +489,52 @@ both affected targets. No package/native/manual-CI operation is selected.
 Next: publish this evidence/checkpoint, start #93 and wait for its completion
 notification without polling. Then merge through a fresh merger and complete its
 remaining qualification before proceeding through the approved graph.
+
+### 2026-11-09: #93 returned and Mac proof audited
+
+The fresh implementer returned clean `t3/story-whole-number-formulas` at
+`78c924162fed43cdb3e54e63004480c7210c40da`, containing current integration
+`7e1c3133`. Qualified code candidate is `ca51e4c7e02c5dc54ef8c47b9c245907a1456c6b`;
+the later change is only its result note. The returned branch's
+`docs/tasks/evidence/arithmetic-93.md` owns exact contract/fixtures/selectors.
+It extends the shared core to variable operands, signs/grouping and whole-number
+`+ - * // %`, with typed read/write inspection, diagnostics and minimal source edits.
+No production layout or Design Lab change occurred.
+
+Reported checks pass 76 distinct Rust cases, 36 renderer cases, TypeScript,
+formatting, repository validation and whitespace. Seven existing Story specialist
+cases remain unrun. The coordinator inspected core parsing/evaluation/source
+adapters and verified all 149 launch input hashes, accepted-source and retained
+binary hashes, case outcomes and cleanup receipts. The single reserved Mac SDK
+gate passed compile/lint, exact formula values, deliberate money-minus-14 rejection,
+unchanged source and complete cleanup. Raw evidence remains in the implementer's
+ignored `.toolchains/arithmetic-93/mac-01/`; preserve its unique worktree evidence.
+This consumes the #93 reservation. Totals are Mac **2 started / 0 reserved** and
+Windows **1 started / 0 reserved**, with no uncertain invocation.
+
+A fresh merger, request key `spec87-merge93-20261109`, gets exclusive integration
+checkout ownership to merge this ticket and publish it to draft PR #122, retaining
+the exact qualified implementation and approved mocks. Cheap integration checks
+and evidence reuse are sufficient when inputs match; no SDK rerun is selected.
+
+#### Remaining Windows qualification selection
+
+#93's new formula Windows proof is still missing. #94 extends the same portable
+core parser/evaluator with decimal semantics. Its implementation may proceed
+after #93's public-boundary/Mac-qualified slice is integrated. Keep Windows proof
+required and batch the new whole-number and decimal cases against the combined
+#94 candidate before dependent Screens work (#95) or production Story integration
+(#96). The #94 accepted-source fixture must retain the integer precedence,
+grouping, negative floor/remainder and precision witnesses as well as new decimal
+assertions, so no case disappears in the batching. #92's both-target result remains
+the already-proved representative real path, not proof of the new formulas.
+
+This selects qualification timing within the existing full-feature both-target
+requirement and unchanged six-start ceilings. It claims no Windows pass for
+#93/#94 and waives no failed or missing target evidence. The fresh #94 implementer
+will receive its own Mac reservation after this merge; Windows routing/allocation
+remains coordinator-owned. No package, native-editor or manual matrix is selected.
+
+Next: receive the merger result, then start fresh #94 work with the exact merged
+contract. Final integration review, #95/#96/#97 production and full #87 acceptance
+remain pending. No new work is sent to the referenced Windows #92 chat.

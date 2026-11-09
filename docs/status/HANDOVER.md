@@ -71,15 +71,22 @@ runtime fixtures still match both qualified targets. The #92 note owns details.
 Preserve the Windows worktree and raw receipts. Cross-environment callbacks are
 not reliable; do not assume a remote completion message was delivered.
 
-#92's scoped delivery is complete and #93 is the next implementation frontier.
-The tickets remain open for final integration review/closure. Start a fresh #93
-implementer in its own worktree using request key
-`spec87-ticket93-implementer-20261109`. The ledger owns accounting: Mac **1 started
-/ 1 reserved for #93**, Windows **1 started / 0 reserved**. New formula Windows
-proof remains required and unclaimed; retain fixtures for appropriate qualification.
-Wait for the implementer's completion notification without polling, then merge
-through a fresh merger and continue only the approved remaining graph. No final
-review, editor package/native launch or manual CI operation has started.
+#92's scoped delivery is complete. #93 returned clean
+`t3/story-whole-number-formulas` at `78c92416`, qualified code `ca51e4c7`, with
+76 Rust and 36 renderer passes plus one passing Mac SDK invocation. The coordinator
+audited all 149 input hashes, accepted-source/binary hashes, exact case results,
+wrong-outcome rejection and cleanup. The ticket note owns full evidence/contract.
+SDK totals are Mac **2 started / 0 reserved**, Windows **1 started / 0 reserved**.
+
+A fresh merger gets exclusive integration-checkout ownership under request key
+`spec87-merge93-20261109`. Integrate/publish the exact returned slice, preserving
+approved designs and evidence. Wait for completion without polling, then start
+fresh #94 decimal work. The ledger explicitly selects combined #93/#94 Windows
+qualification against #94 before dependent #95/#96 work, retaining both integer
+and decimal witnesses. New formula Windows proof remains required and unclaimed;
+no new message/work is sent to the referenced Windows #92 chat. The six-start
+feature ceilings are unchanged. Tickets remain open for final integration review.
+No editor package/native launch or manual CI operation has started.
 Preserve the backend worktree's unique ignored Mac receipts and the separate
 approved #91/#97 design worktree. Keep the PR draft. Final parent-PR merge,
 automerge/release and full Story redesign #110 are outside this selection.
