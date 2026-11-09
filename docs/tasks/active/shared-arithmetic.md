@@ -1426,3 +1426,29 @@ checkouts remain. This merger used zero SDK/browser/native/package/manual-CI or 
 operations. Totals remain Mac 9/20 and Windows 3/20, zero reservations. Status files
 retain their inherited historical recovery sections; this bounded update does not
 perform a broader archival cleanup despite their excess word counts.
+
+### 2026-11-10: full integration review selected
+
+The coordinator received clean published `09404bd16018c7f046bf6392143df6e235d481ba`.
+Review is pinned from accepted Screens base
+`251fb47754a0ec1a43ece8763a0b4603b8e54dd8` to that exact head, using
+`git diff 251fb477...09404bd1`. The resolved merge-base is the accepted base and
+the diff contains 137 files. Full scope, commit list, changed paths and discovered
+standards sources are retained under ignored `.toolchains/arithmetic-review-09404bd1/`.
+
+Apply the code-review skill's independent Standards and Spec axes in fresh parallel
+read-only agents, request keys `spec87-review-standards-20261110` and
+`spec87-review-spec-20261110`. They own no tracked files or shared processes. Review
+the complete change, not only #97. Skip tool-enforced style findings; distinguish
+documented violations from heuristic smells. Spec review uses live #87 and active
+slice criteria plus existing design approvals, retaining #110's separate ownership.
+Known visual/proof gaps are not approved deviations. Return actionable source
+locations, evidence and requirement/rule citations. No SDK/browser/native/package,
+manual-CI, push, PR mutation, new issue or watch is selected for either reviewer.
+
+The coordinator retains integration/status/PR ownership, aggregates the two axes
+separately and then assigns one fresh implementer for in-scope review fixes under
+implement-spec. Runtime/native/human and design acceptance remain open; select
+coherent remaining proof after fixes. SDK use stays Mac 9/20 and Windows 3/20,
+zero reservations. The pinned review head remains the product candidate even if
+later coordinator-only documentation records the review assignment.

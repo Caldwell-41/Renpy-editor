@@ -258,12 +258,15 @@ full integration review.
 #97's backend and design prerequisites are satisfied. Tickets stay open for final review.
 
 The draft PR stays on its Screens base. Preserve every worktree/evidence directory
-and both approved design references. No final review, ready-for-review promotion,
-parent-PR merge, automerge or release is selected. The published checkpoint retains
+and both approved design references. No ready-for-review promotion, parent-PR
+merge, automerge or release is selected. The published checkpoint retains
 the existing draft/base and full-spec closing references. Exact-head automatic status is recorded in the merger publication
 receipt; no watch was registered. Integration/status/PR ownership returns to the
-coordinator at this handoff. Next, perform the full integration code-review skill,
-resolve in-scope findings, then select coherent remaining qualification and design/acceptance
+coordinator at this handoff. Full integration review is selected at `09404bd1`
+against accepted Screens base `251fb477`, with fresh read-only Standards and Spec
+agents. The [review assignment](../tasks/active/shared-arithmetic.md#2026-11-10-full-integration-review-selected)
+owns scope and boundaries. Aggregate both axes, resolve in-scope findings through
+one fresh implementer, then select coherent remaining qualification and design/acceptance
 work. No successor implementation or qualification starts in this merger. SDK totals
 remain Mac 9/20 and Windows 3/20, zero reservations. Preserve every separate worktree
 and receipt. No remote qualification remains reserved or running.

@@ -18,8 +18,10 @@ conditions still use the stacked form rather than A2's grouped row. Host/backgro
 and placement differences remain; earlier textbutton captures precede the final
 scoped palette correction. New UI-emitted defaults, formulas, conditions/text and
 created-imagebutton fixtures have no new SDK proof. Full visual/native/human
-acceptance is pending. The coordinator resumes ownership for full integration
-code review, in-scope fixes and selection of remaining qualification/design work.
+acceptance is pending. The coordinator has pinned full integration review at
+`09404bd1` against accepted Screens base `251fb477`. Fresh read-only Standards
+and Spec reviewers inspect the same complete diff. In-scope fixes and remaining
+qualification/design work follow.
 Draft PR #122 retains its Screens base and full-spec closing references.
 
 #94 decimal/public services are integrated by conflict-free normal merge
