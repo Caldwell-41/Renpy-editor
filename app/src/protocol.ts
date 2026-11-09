@@ -74,6 +74,7 @@ export const CORE_OPERATIONS = [
   "scene.list",
   "flow.list",
   "scene.apply",
+  "scene.validateAssignment",
   "screens.inspect",
   "screens.canvasPlan",
   "screens.canvasRender",

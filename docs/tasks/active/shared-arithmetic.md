@@ -859,3 +859,19 @@ or manual CI operation is selected. Accounting is **Mac 5/20 started, one reserv
 Windows 2/20 started, zero reserved**, leaving fourteen Mac and eighteen Windows
 starts unallocated. #95 Windows qualification follows its coherent backend return.
 #97 waits for qualified #95. Final feature review and assembled acceptance remain.
+
+
+### 2026-11-09: shared renderer registry unblocks #96
+
+#96 identified that renderer `CORE_OPERATIONS` omitted `scene.validateAssignment`,
+although #94's core whitelist/dispatch already admits it. The coordinator added
+that existing public operation to `app/src/protocol.ts` and migrated the existing
+exact protocol-list expectation. The focused protocol suite failed at the missing
+entry before the fix and passes all nine cases after it. Pinned-tool test
+compilation and production TypeScript checking pass. Repository/whitespace checks
+pass. This changes no core/runtime semantics and consumes no SDK invocation.
+
+#96 retains only its authorized Help-driver allowlist addition and Story wiring.
+Both implementers can normally merge this integration checkpoint; shared registry
+ownership remains with the coordinator. Existing qualified numeric/runtime proof
+keeps its recorded code candidates and scope.
