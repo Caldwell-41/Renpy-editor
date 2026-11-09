@@ -146,3 +146,34 @@ SDK consumption by this assignment is zero. #94's Mac `d1c201f1` and Windows
 and #94 fixture inputs. These new UI journeys prove their emitted accepted source;
 no fresh SDK execution of the #96 disposable fixture is claimed. Native and final
 assembled human acceptance remain unrun under this assignment.
+
+## Qualified local candidate
+
+Implementation commit `3cb6e8f7354c3e05c1d77526c3babae857af632f` is based on
+coordinator `53cb37fab9c07f42b28afed4dbca68f1f1b54a80`. The working tree was clean
+before the frozen-candidate journey. `.toolchains/arithmetic-96/qualified-inputs.json`
+records the actual worktree, branch, 252 frontend/core/reference/fixture input
+hashes and the retained driver binary identity. No production input changed after
+this candidate. Browser 09's production/reference inputs match it; the later
+changes before freezing were evidence/UI documentation and removal of diagnostic
+logging from the core journey consumer.
+
+Focused qualification on these inputs passes:
+
+| Check | Result and scope |
+| --- | --- |
+| Pinned production typecheck and test compilation | Passed. |
+| Selected Story component/controller suites | 68 passed, zero failures/skips. Includes the focused arithmetic DOM slice; repeats are not additional cases. |
+| Production frontend build | Passed; existing large-chunk advisory remains. |
+| Actual production main/Story/core journey | `qualified-journey/result.json` passes all nine stages, with exact accepted source, real refusals, shared history and project reopen; normal driver exit and scratch removal pass. |
+| Focused Chrome/reference comparison | Browser 09 passes both sizes, suggestions, operation keyboard/focus, backend-completion focus, diagnostic state, Writing focus and Cancel. Captures inspected; visual differences remain as listed above. |
+| Portable core compilation | Rust 1.90.0 Help example build with `--locked --offline` passed. Only the allowlist changes; no SDK invocation. |
+| Rust formatting | `cargo fmt --all --check` passed. |
+| Repository and whitespace | Validator passed for 1,862 files; whitespace passed. |
+| Reused numeric/runtime inputs | Core sources, Cargo inputs and #94 fixtures equal qualified `d1c201f1`; approved lab/captures and earlier fixtures equal the prepared base. No fresh engine/native qualification claimed. |
+
+Self-review traced both existing and inserted beats through the existing save owner,
+checked captured revisions/body/position, stale completion guards and literal
+compatibility, and removed the old numeric-only editor/check. No parallel evaluator
+or transaction path remains. Final assembled review/acceptance belongs to the
+coordinator. This return is local-only; no publication or ticket closure occurred.
