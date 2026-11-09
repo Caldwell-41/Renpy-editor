@@ -29,6 +29,13 @@ init -999 python:
         # Timer dispatch preserves normal interaction/Return handling. This is
         # rendered-action activation, not a physical mouse/keyboard gesture.
         renpy.show_screen("_ui_dispatch", emitted_action=_ui_button(operation).action)
+        displayable = renpy.get_screen("_ui_dispatch")
+        was_built = bool(displayable.child)
+        was_refreshing = renpy.game.interface.restart_interaction
+        renpy.restart_interaction()
+        print("ARITHMETIC_UI_DISPATCH_REQUEST", operation, money, trust, reward,
+              "built", was_built, "refresh", was_refreshing,
+              renpy.game.interface.restart_interaction, flush=True)
 
 screen _ui_dispatch(emitted_action):
     timer 0.01 action emitted_action

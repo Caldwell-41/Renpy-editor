@@ -1076,6 +1076,10 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Observed:** destination-bound narration reaches the screen and its initial TTS/
   inertness assertions. The first divide result is not observed. SDK test Python and
   `show_screen` do not restart interaction; Timer needs render/event delivery.
-  Live callback delivery and post-dispatch money are unobserved, so the exact cause
-  and any product defect remain unestablished. No correction or retry is assigned.
+  Live callback delivery and post-dispatch money remain unobserved in that run.
+- **New diagnosis:** replaying the actual SDK test/helper/API admission is red
+  without a refresh request and green after adding it. The fixture now requests
+  refresh and records request state; actual timer/value confirmation remains pending.
 - **Evidence:** [Mac recovery result](../tasks/evidence/arithmetic-review.md#recovery-integration-and-mac-invocation-2-2026-11-10).
+  [Refresh confirmation](../tasks/evidence/arithmetic-review.md#interaction-refresh-diagnosis-and-confirmation-selection)
+  keeps the admission replay separate from runtime proof.

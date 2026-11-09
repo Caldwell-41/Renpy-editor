@@ -630,3 +630,33 @@ P4 and Kris's #96/#110 scope decision remain open. Windows qualification remains
 pending coordinator routing; no Windows/editor-native/package/browser/canvas-helper/
 manual-CI/watch operation ran. Integration/status/PR and qualification ownership
 return to the coordinator after publication of this result.
+
+## Interaction-refresh diagnosis and confirmation selection
+
+Invocation 2 remains failed. The coordinator compared a missing interaction refresh,
+a delivered timer selecting the wrong/stale action, and arithmetic failure after
+delivery. The retained output cannot establish the latter two without delivery.
+
+The pinned SDK's test `Python.execute` runs `scoped_exec` without refreshing.
+`show_screen` registers a lazy displayable; its widgets need interaction processing.
+The fixture's `_ui_activate` requested no refresh. An SDK-free replay executes the
+actual pinned Python node, show/restart APIs and fixture helper with inert display
+registration. It is red with a registered screen but `refreshRequested:false`, and
+green after adding the missing request, with the selected action unchanged.
+Ignored `recovery-03/display-admission-replay.py` and red/green logs retain source
+identities. This proves the admission contract, not native timer/value delivery.
+The existing SDK divide assertion remains the real regression seam.
+
+The fixture-only correction adds `renpy.restart_interaction()` at the missing
+call site. A permanent dispatch-request receipt records operation, actual current
+values, screen-built state and refresh before/after. It does not execute or replace
+the captured action. Four snapshots, image bytes, oracles, assertions and deadlines
+remain unchanged; no production code changes. Subsequent value assertions must
+still establish actual delivery. No synthetic timer/evaluator supplies a pass.
+
+After reassessing the two incomplete UI attempts, select one Mac confirmation
+following clean source/binary/official SDK/desktop readiness, using fresh `mac-03`.
+Before start, actual use is Mac 11/20 plus one new reservation, Windows 3/20 with
+none reserved. Require all positive witnesses and an actually rejected wrong
+outcome, source preservation and cleanup. No further retry is selected. P4 and
+full acceptance remain open.

@@ -72,7 +72,7 @@ one becomes necessary. Routine checks and review have no numerical limits.
 
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
-| macOS ARM64 SDK qualification | 20 | 11 | 0 |
+| macOS ARM64 SDK qualification | 20 | 11 | 1 for interaction-refresh confirmation |
 | Windows x64 SDK qualification | 20 | 3 | 0 |
 
 ## Execution ledger
@@ -1703,3 +1703,20 @@ failed, not qualified. All issues/criteria, independent review reports and P4's
 unanswered #96/#110 scope decision remain open. Integration/status/PR and selected
 qualification mutation ownership return to the coordinator. Coordinator must
 select any next diagnosis/allocation and route the still-pending Windows proof.
+
+### 2026-11-10: interaction-refresh confirmation selected
+
+The coordinator applied diagnosing-bugs and principle-fix-root-causes to the
+retained failure. The [diagnosis](../evidence/arithmetic-review.md#interaction-refresh-diagnosis-and-confirmation-selection)
+records ranked explanations and a red/green SDK-source admission replay at the
+actual helper/test/API call site. Adding the missing refresh request preserves
+the selected action. This is not timer/arithmetic qualification.
+
+The coordinator owns the small fixture-only correction and passive request receipt.
+One Mac confirmation is reserved after exact preflights, clean committed source,
+fresh retained executable, official archive/SDK identity and actual desktop
+admission. Use new `mac-03`; preserve older evidence and targets. A start consumes
+the reservation even on failure. All four cases, positive/negative witnesses and
+cleanup remain required. No subsequent invocation is selected. Actual use remains
+Mac 11/20, Windows 3/20, with only this one new Mac reservation. No Windows,
+native-editor/package, browser/helper, manual-CI or watch is selected. P4 is pending.

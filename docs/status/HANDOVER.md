@@ -300,11 +300,13 @@ process timeout/truncation. Both power assertions release; owned root/process cl
 passes. Preserve fresh root `.toolchains/arithmetic-ui-runtime/mac-02/` and its
 retained executable, worker `mac-01` and its target/binary, and the coordinator audit.
 
-Actual usage is Mac 11/20 and Windows 3/20, zero reserved. No further retry or source
-correction is assigned. Integration/status/PR and qualification ownership return
-to the coordinator after this result is published. Select any next diagnostic/
-allocation explicitly and route pending Windows proof; no Windows/native/package/
-browser/canvas-helper/manual-CI/watch operation ran. P4 and #96/#110 scope remain
+The [refresh diagnosis and selection](../tasks/evidence/arithmetic-review.md#interaction-refresh-diagnosis-and-confirmation-selection)
+records the SDK-source admission red/green and fixture-only correction. The
+coordinator selects one Mac confirmation after clean source/binary/official SDK/
+desktop readiness, with new `mac-03` output. Before start actual usage is Mac 11/20
+plus one reservation and Windows 3/20 with none reserved. No further retry is
+selected. Preserve older evidence/targets; no Windows/native/package/browser/
+canvas-helper/manual-CI/watch is selected. P4 and #96/#110 scope remain
 unanswered, with all issues/criteria open and independent Standards five/Spec four
 reports preserved. No full native/human acceptance is claimed.
 
