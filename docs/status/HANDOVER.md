@@ -15,10 +15,12 @@ follow #92 -> #93 -> #94, then #95 and #96, then #97 with Screens approval.
 Kris authorized design chats named `Variable Mock - {description}` and separate
 worktrees. Production controls wait for their approval and qualified backend.
 The separate mock chat is recorded in the delivery ledger and owns #91 plus #97's
-decimal designs. Its candidate branch `codex/spec-87-variable-mock` is at
-`1e547df2`, runnable source `6b3aee30`. A/B/C are review candidates only; all
-approval fields remain null. Kris must select/approve before production UI is
-unblocked. The ledger records the source identity, capture audit and reported checks.
+decimal designs. Kris selected A for refinement toward approved Story; the current
+candidate is A2 / `equation-v2`, not an approval. Branch
+`codex/spec-87-variable-mock` is at `930a9274`, runnable source `ce626427`.
+Original A/B/C remain preserved. All approval fields remain null; explicit
+approval is required before production UI is unblocked. The ledger records the
+source identity, capture audit and reported checks.
 Backend #92 is merged through `e8b07b31d0dd9fd9c5dcf3f784c61f2e089fd050`.
 Its parents are coordinator `56c619f18bbcfd78873474369005853cc6f67b89` and
 returned implementation `e5de0c20da8cd5f2812116840bf67b808d91d78a`.
@@ -37,18 +39,14 @@ Draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) publishes
 The integration branch now tracks its own origin branch. The PR describes full
 #87 scope and eventual closing references, with only #92 implemented so far.
 No issue was accepted or closed. The coordinator has resumed mutation ownership
-and linked/taken over the PR. SUNDOWN is reachable; the next isolated delegate is
-qualification-only under request key `spec87-windows92-qualification-20261109`.
-It has the single reserved Windows #92 gate invocation and must record the exact
-published candidate/input identity before launch. Wait for its completion without
-polling, audit the receipts and integrate its sanitized evidence. #93 remains
-blocked pending that proof.
-The isolated remote dispatch was rejected before agent creation because T3 does
+and linked/taken over the PR. SUNDOWN is reachable. The isolated remote dispatch
+was rejected before agent creation because T3 does
 not support linked-environment delegate worktree isolation. No SDK start was
-consumed. The follow-up uses the registered checkout for read-only preflight,
+consumed. The running follow-up uses the registered checkout for read-only preflight,
 with no checkout/ref changes and SDK execution only if it is already clean at
 the exact published candidate. The ledger records its request key and constraints.
-This dispatch correction is local until the next coordinator publication.
+Its request key is `spec87-windows92-registered-checkout-preflight-20261109`.
+Wait for completion without polling; #93 remains blocked on actual Windows proof.
 The ledger owns unchanged operation counts; the merger started no SDK, native,
 package or manual CI operation. Final-head automatic lightweight checks await
 coordinator audit; no reviews have been submitted at this handoff.

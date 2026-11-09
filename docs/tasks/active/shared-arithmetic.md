@@ -250,4 +250,33 @@ only if the checkout is already clean at the exact published candidate; otherwis
 it reports the mismatch and available host capability without creating/switching
 a checkout. It writes only unique ignored evidence, not tracked documentation.
 A new top-level qualification chat is not covered by the prototype-chat permission.
-This dispatch amendment is local until the coordinator's next publication.
+This dispatch amendment is included in the next coordinator publication.
+
+### 2026-11-09: A selected for refinement, A2 review candidate
+
+Kris selected A for refinement using Experience First and requested closer
+alignment with approved Story. This is direction selection, not approval. The
+new review variant/revision is `equation-v2`, labelled
+"A2 · Story equation refinement". Original A/B/C remain preserved.
+
+Candidate branch `codex/spec-87-variable-mock` is at `930a9274`; runnable source
+is `ce6264279188fca4c81218a5cd93b50c393bf9a3`, with frontend/Lab fingerprint
+`e9a4d3bd1952a92b68d184e68e87579c15001984d42f3a872815a124d3555f7b`.
+The candidate branch's `docs/design/screens-arithmetic/REFINEMENT.md`,
+`equation-v2-source.json` and `equation-v2-captures.json` own details. The
+coordinator verified the recorded source identity, all 12 committed capture hashes,
+baseline ancestry and all-null approval record. A2 has not been merged here.
+
+A2 adopts Story's equation row, field sizing, contextual numeric suggestions,
+named operation menu and shorter feedback. Brass/slate changes are mock-scoped;
+decimal definitions are flatter. Top-layer menus fix inspector-scroll clipping.
+The design agent reports 9 refined interaction samples, the original A's 3
+interaction samples, scoped typechecking and whitespace passing. The coordinator
+did not rerun those checks. The candidate was shown inline and on Kris's requested
+LAN Lab. Formula responses and edits remain fictional browser-memory fixtures.
+
+Kris's explicit approval remains pending; every revision's approval and
+`currentApproved` are null. #91 and #97's decimal-design gate remain open. No
+production promotion, runtime/source acceptance or SDK consumption follows from
+this refinement. The Windows #92 preflight remains the separate pending operation;
+wait for its completion notification without polling.
