@@ -347,7 +347,10 @@ Undo/Redo and reopen reconstruct definitions and references from authoritative b
 ## Variables and state
 
 Visual variables support `bool`, `int`, `decimal` and `string` definitions and literal
-assignment. Existing types stay fixed after creation. Decimal defaults and values use
+assignment. Variable creation and default edits commit source plus authoring metadata
+in one entry through the existing shared session history. Semantic no-ops and refused
+edits add no entry. Undo/Redo restores both files and their actual revisions; project
+reopen retains accepted values and starts a new empty history. Existing types stay fixed after creation. Decimal defaults and values use
 finite binary64 JSON numbers; integer values retain exact signed i64 strings. Story
 also supports bounded numeric formulas. Set variable keeps
 `variableId` and `value`; arithmetic uses `{operation, operand}` in `value`.

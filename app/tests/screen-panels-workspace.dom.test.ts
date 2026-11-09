@@ -79,7 +79,7 @@ test("the selected button inspector routes a retained Finish draft through revis
  const action=document.querySelector<HTMLSelectElement>('[aria-label="Add action"]')!;assert.ok(action);action.value="finishInteraction";action.dispatchEvent(new window.Event("change"));
  assert.equal(f.workspace.hasDraft(),true);f.fail();document.querySelector<HTMLButtonElement>("[data-text-apply]")!.click();await flush();
  assert.equal(f.workspace.hasDraft(),true);assert.equal(f.writes[0]!.expectedRevision,"accepted");assert.deepEqual(f.writes[0]!.command,{type:"formatText",nodeId:"button",values:{},interaction:{expectedAuthoringRevision:"authoring-original",expectedTargetRevisions:[],actions:[{type:"finishInteraction"}]}});
- f.workspace.panel.remove();f.workspace.mount(document.body);await flush();assert.equal(document.querySelector<HTMLSelectElement>('[aria-label="Action 1 type"]')!.value,"finishInteraction");
+ f.workspace.panel.remove();f.workspace.mount(document.body);await flush();assert.match(document.querySelector(".siv-sequence summary")!.textContent!,/Finish interaction/);
  f.allow();document.querySelector<HTMLButtonElement>("[data-text-apply]")!.click();await flush();
  assert.equal(f.workspace.hasDraft(),false);assert.equal(f.writes.length,2);assert.equal(f.writes[1]!.expectedRevision,"accepted");assert.match(document.querySelector(".screen-message")!.textContent!,/Selected changes applied/);
  }finally{await f.close();}

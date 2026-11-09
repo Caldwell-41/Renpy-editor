@@ -600,3 +600,116 @@ fn inspect_decimal_fixture(model: &serde_json::Value) {
         );
     }
 }
+
+#[test]
+fn variable_defaults_share_history_with_scene_edits_and_reopen() {
+    let temporary = tempfile::tempdir().unwrap();
+    let root = temporary.path().join("profile");
+    let mut service = LifecycleService::prepare_source_foundation_probe(root.clone()).unwrap();
+    let project = root.join("synthetic-project");
+    service.open_path(&project).unwrap();
+    fn history(service: &mut LifecycleService, direction: &str) -> serde_json::Value {
+        let model = ipc(service, "scene.list", json!({}));
+        ipc(
+            service,
+            "scene.apply",
+            json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":direction}}),
+        )
+    }
+    for (name, kind, value, changed) in [
+        ("fraction", "decimal", json!(2.5), json!(3.75)),
+        (
+            "points",
+            "int",
+            json!("9007199254740993"),
+            json!("9223372036854775807"),
+        ),
+        ("enabled", "bool", json!(false), json!(true)),
+        ("caption", "string", json!("before"), json!("after")),
+    ] {
+        let before = ipc(&mut service, "authoring.list", json!({}));
+        let created = ipc(
+            &mut service,
+            "variable.create",
+            json!({"technicalName":name,"variableType":kind,"defaultValue":value}),
+        );
+        let variable = created["variables"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|v| v["technicalName"] == name)
+            .unwrap()
+            .clone();
+        assert_eq!(ipc(&mut service, "scene.list", json!({}))["canUndo"], true);
+        history(&mut service, "undo");
+        assert_eq!(
+            ipc(&mut service, "authoring.list", json!({}))["variables"],
+            before["variables"]
+        );
+        history(&mut service, "redo");
+        assert_eq!(
+            ipc(&mut service, "authoring.list", json!({}))["variables"],
+            created["variables"]
+        );
+        let updated = ipc(
+            &mut service,
+            "variable.update",
+            json!({"id":variable["id"],"expectedSourceRevision":variable["source"]["sourceRevision"],"defaultValue":changed}),
+        );
+        let v = updated["variables"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|v| v["technicalName"] == name)
+            .unwrap();
+        assert!(service.authoring_update_variable(serde_json::from_value(json!({"id":v["id"],"expectedSourceRevision":variable["source"]["sourceRevision"],"defaultValue":changed})).unwrap()).is_err());
+        assert!(service.authoring_update_variable(serde_json::from_value(json!({"id":v["id"],"expectedSourceRevision":v["source"]["sourceRevision"],"defaultValue":[]})).unwrap()).is_err());
+        // A semantic no-op must not hide the preceding edit in history.
+        ipc(
+            &mut service,
+            "variable.update",
+            json!({"id":v["id"],"expectedSourceRevision":v["source"]["sourceRevision"],"defaultValue":changed}),
+        );
+        history(&mut service, "undo");
+        assert_eq!(
+            ipc(&mut service, "authoring.list", json!({}))["variables"],
+            created["variables"]
+        );
+        history(&mut service, "redo");
+        assert_eq!(
+            ipc(&mut service, "authoring.list", json!({}))["variables"],
+            updated["variables"]
+        );
+    }
+    let before = ipc(&mut service, "scene.list", json!({}));
+    let scene = &before["scenes"][0];
+    ipc(
+        &mut service,
+        "scene.apply",
+        json!({"expectedProjectRevision":before["projectRevision"],"expectedSourceMapRevision":before["sourceMapRevision"],"command":{"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beforeBeatId":null,"beat":{"type":"narration","text":"History interleave"}}}),
+    );
+    history(&mut service, "undo");
+    assert_eq!(
+        ipc(&mut service, "scene.list", json!({}))["scenes"],
+        before["scenes"]
+    );
+    history(&mut service, "undo");
+    let restored = ipc(&mut service, "authoring.list", json!({}));
+    assert_eq!(
+        restored["variables"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|v| v["technicalName"] == "caption")
+            .unwrap()["defaultValue"],
+        "before"
+    );
+    history(&mut service, "redo");
+    history(&mut service, "redo");
+    let accepted = ipc(&mut service, "authoring.list", json!({}));
+    service.close().unwrap();
+    service.open_path(&project).unwrap();
+    assert_eq!(ipc(&mut service, "authoring.list", json!({})), accepted);
+    assert_eq!(ipc(&mut service, "scene.list", json!({}))["canUndo"], false);
+    service.close().unwrap();
+}

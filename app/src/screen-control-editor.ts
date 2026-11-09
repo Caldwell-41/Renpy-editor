@@ -1,7 +1,7 @@
 import type { ScreenDocument, ScreenNode } from './screen-ui.ts';
 import type { CompositionView, CompositionCommand, CopyDraftParticipant } from './screen-composition.ts';
 import type { IntegerBarBinding, BarAppearance, ScreenControlCommand, BarSample, BarAddition, ImageButtonAppearances, ImageButtonSample, ImageButtonAddition, ControlButtonState } from './screen-controls.ts';
-import { actionDraft, prepareInteraction, renderActions, captureActionFocus, restoreActionFocus, type ActionDraft, type InteractionContext } from './screen-interactions.ts';
+import { showActionRefusal, actionDraft, prepareInteraction, renderActions, captureActionFocus, restoreActionFocus, type ActionDraft, type InteractionContext } from './screen-interactions.ts';
 import type { ScreenLayoutEditor, LayoutReservation } from './screen-layout.ts';
 import type { ScreenImages } from './screen-images.ts';
 import { validateField } from './authoring-input.ts';
@@ -16,6 +16,7 @@ interface Draft {
   normalSize?:{assetId:string;sha256:string;width:number;height:number};
 }
 interface Host {
+  validateActions?:import("./screen-interactions.ts").ValidateScreenActions;
   view:()=>CompositionView|undefined; interaction:()=>InteractionContext|undefined;
   commit:(command:CompositionCommand,base:ScreenDocument)=>Promise<void>;
   redraw:()=>void; preview:()=>void; note:(text:string,error?:boolean)=>void;
@@ -133,7 +134,7 @@ export class ScreenControlEditor {
     const displayed=group('Displayed size',true),pair=el('div','sce-pair');field(pair,'Width',d.width,raw=>this.dimension(d,'width',raw));field(pair,'Height',d.height,raw=>this.dimension(d,'height',raw));displayed.append(pair);
     if(d.kind==='imagebutton'){const label=el('label','sce-aspect'),check=el('input');check.type='checkbox';check.checked=!!d.keepRatio;check.onchange=()=>{d.keepRatio=check.checked;this.store(d);};label.append(check,el('span','','Preserve normal image aspect ratio'));displayed.append(label);}
     const placement=group('Layout',true);this.layout.render(placement,{sharedCommit:true,dimensions:false});
-    if(d.kind==='imagebutton'){const actions=group('Actions'),section=el('div','sce-actions');actions.append(section);if(d.actions)renderActions(section,d.actions,d.context,this.isSaving()||this.host.writeBlocked()||d.context?.owner?.kind==='component',()=>{d.focus=undefined;captureActionFocus(section,d.actions!);this.store(d);});else section.append(el('p','','Custom actions stay in Source. Appearance and size edits preserve them.'));}
+    if(d.kind==='imagebutton'){const actions=group('Actions'),section=el('div','sce-actions');actions.append(section);if(d.actions)renderActions(section,d.actions,d.context,this.isSaving()||this.host.writeBlocked()||d.context?.owner?.kind==='component',()=>{d.focus=undefined;captureActionFocus(section,d.actions!);this.store(d);},this.host.validateActions&&d.node&&d.context?()=>this.host.validateActions!(d.document,d.screenId,d.node!.id!,d.context!,d.actions!):undefined,d.node?.id??undefined);else section.append(el('p','',d.node?.actionProtectionReason??'Custom actions stay in Source. Appearance and size edits preserve them.'),button('Edit actions in Source',this.host.source));}
     const footer=el('footer','sce-apply'),state=el('p','sce-state');state.ariaLive='polite';footer.append(state,button('Cancel',()=>this.cancelCurrent()),button('Apply changes',()=>void this.apply(),true));card.append(footer);
     const tools=el('div','sce-tools');this.host.layoutTools(tools);tools.append(button('View in Source',this.host.source));this.host.order(tools);body.append(tools);
     card.onkeydown=event=>{if(event.isComposing||event.keyCode===229)return;if(event.key==='Escape'){event.preventDefault();event.stopPropagation();this.cancelCurrent();}else if(event.key==='Enter'&&(event.ctrlKey||event.metaKey||event.target instanceof HTMLInputElement)){event.preventDefault();event.stopPropagation();void this.apply();}};
@@ -188,7 +189,7 @@ export class ScreenControlEditor {
     }
     if(this.disposed||!this.host.current())return;
     const submitted={draft:d,command,layout:reservation};this.submitted=submitted;this.sync();
-    try{await this.host.commit(command,d.document);this.focus(d.focus);}catch(error){this.fail(d,`${(error as Error).message} Your draft is retained.`,d.focus);}finally{if(this.submitted===submitted)this.submitted=undefined;this.sync();}
+    try{await this.host.commit(command,d.document);this.focus(d.focus);}catch(error){this.fail(d,`${(error as Error).message} Your draft is retained.`,d.focus);showActionRefusal(this.card?.querySelector<HTMLElement>(".siv-actions")??undefined,d.actions,error);}finally{if(this.submitted===submitted)this.submitted=undefined;this.sync();}
     }finally{this.preparing=false;reservation.release();this.sync();}
   }
   accept(command:CompositionCommand,_base:ScreenDocument,accepted:ScreenDocument){if(this.submitted?.command===command){const s=this.submitted;this.drafts.delete(s.draft.key);if(this.addition===s.draft)this.addition=undefined;this.mounted=undefined;s.layout.accept(accepted);this.submitted=undefined;}}

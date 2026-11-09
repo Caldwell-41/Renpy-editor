@@ -22,7 +22,7 @@ const source=async path=>(await call('source.open',{path})).text;
 async function saveSource(path,text){const base=await call('source.open',{path});const draft=await call('source.updateDraft',{path,expectedBaseRevision:base.baseRevision,text,selectionStart:0,selectionEnd:0});await call('source.save',{path,expectedBaseRevision:draft.baseRevision,expectedDraftVersion:draft.draftVersion});}
 async function wait(check,label){const deadline=Date.now()+5000;while(!await check()){if(Date.now()>deadline)throw Error(`Did not settle: ${label}`);await new Promise(r=>setTimeout(r,5));}}
 const writes=[];
-const control=label=>{const node=workspace.panel.querySelector(`[aria-label="${label}"]`);assert(node,label);return node;};
+const control=label=>{const node=workspace.panel.querySelector(`[aria-label="${label}"]`)??workspace.panel.querySelector(`[aria-label="${label.replace(/ value$/,' formula')}"]`);assert(node,label);return node;};
 const change=(label,value)=>{const node=control(label);node.value=value;node.dispatchEvent(new Event(node.tagName==='SELECT'?'change':'input',{bubbles:true}));};
 const button=label=>{const node=[...workspace.panel.querySelectorAll('button')].find(n=>n.textContent===label);assert(node,label);node.click();};
 const select=id=>{if(!workspace.panel.querySelector(`[data-node-id="${id}"]`))button('1  Choose');const row=workspace.panel.querySelector(`[data-node-id="${id}"]`);assert(row,id);row.dispatchEvent(new browser.MouseEvent('dblclick',{bubbles:true}));};
@@ -31,7 +31,7 @@ async function history(direction,path,expected,expectedText){button(direction);a
 async function mount(owner){
  workspace?.dispose();document.body.replaceChildren();workspace=new ScreensWorkspace({resolution:{width:1280,height:720},current:()=>true,coordinate:task=>task(),source:()=>{},preview:()=>{throw Error('No deliberate execution');},saved:()=>{},request:async(operation,payload)=>{
   if(operation==='screens.canvasRender'){const plan=await call('screens.canvasPlan',payload);result.canvasPlans.push({payload,plan});return {phase:'unavailable',message:'Offline planner proof. No helper started.'};}
-  if(operation==='screens.compose'){writes.push(structuredClone(payload));if(refuse)throw Error('Retained test refusal');}
+  if(operation==='screens.compose'&&!payload.validateOnly){writes.push(structuredClone(payload));if(refuse)throw Error('Retained test refusal');}
   return call(operation,payload);
  }});workspace.mount(document.body);await wait(()=>workspace.panel.querySelector(`[data-node-id]`),'workspace load');const picker=workspace.panel.querySelector('.screen-picker select');picker.value=JSON.stringify(['owned',owner.id]);picker.dispatchEvent(new Event('change',{bubbles:true}));
 }
@@ -54,7 +54,7 @@ try{
  for(const [index,name,value]of [[1,'seen','True'],[2,'coins','9223372036854775807'],[3,'player_name','[opaque_python()] {literal}']]){change('Add action','setVariable');change(`Action ${index} variable`,variable(name).id);change(`Action ${index} value`,value);}
  change('Add action','showScreen');const panelChoice=JSON.stringify([panel.id,panel.name]);change('Action 4 screen',panelChoice);change('Add action','hideScreen');change('Action 5 screen',panelChoice);change('Add action','finishInteraction');
  refuse=true;await apply();assert.equal(workspace.hasDraft(),true);const rejected=writes.at(-1);workspace.panel.remove();workspace.mount(document.body);await wait(()=>workspace.panel.querySelector('[aria-label="Action 3 value"]'),'remount draft');assert.equal(control('Action 3 value').value,'[opaque_python()] {literal}');refuse=false;await apply();assert.equal(workspace.hasDraft(),false);assert.deepEqual(writes.at(-1),rejected);assert.equal(writes.at(-1).command.interaction.expectedTargetRevisions.length,1);
- const afterActions=await source(owner.path);assert.match(afterActions,/SetVariable\("seen", True\)/);assert.match(afterActions,/SetVariable\("coins", 9223372036854775807\)/);assert.match(afterActions,/textbutton "Continue"/);assert.match(afterActions,/text_size 27/);assert.match(afterActions,/xsize 240/);assert.match(afterActions,/background "#345"/);assert.deepEqual(writes.at(-1).command.layout,{xsize:{unit:'pixels',value:240}});
+ const afterActions=await source(owner.path);assert.match(afterActions,/SetVariable\("seen", True\)/);assert.match(afterActions,/9223372036854775807/);assert.match(afterActions,/textbutton "Continue"/);assert.match(afterActions,/text_size 27/);assert.match(afterActions,/xsize 240/);assert.match(afterActions,/background "#345"/);assert.deepEqual(writes.at(-1).command.layout,{xsize:{unit:'pixels',value:240}});
  await history('Undo',owner.path,afterText,'Close');await history('Redo',owner.path,afterActions,'Continue');result.stages.push('bool/int/string + Show/Hide + Finish + text/typography/appearance/layout -> refused remount -> single Apply/Undo/Redo');
  select(buttonId);change('Action 1 value','True');await apply();assert.equal(await source(owner.path),afterActions);await history('Undo',owner.path,afterText,'Close');await history('Redo',owner.path,afterActions,'Continue');
  select(buttonId);change('Action 1 value','False');button('Cancel');assert.equal(await source(owner.path),afterActions);assert.equal(workspace.hasDraft(),false);

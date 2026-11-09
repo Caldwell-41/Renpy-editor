@@ -23,14 +23,14 @@ export class ScreenVariableSamples {
    const label=el("label","screen-text-field",`${variableLabel(variable)} · ${variable.variableType}`),input=variable.variableType==="bool"?el("select"):el("input");
    input.setAttribute("aria-label",`Sample ${variable.technicalName}`);
    if(input.tagName==="SELECT")for(const value of ["True","False"]){const option=el("option","",value);option.value=value;input.append(option);}
-   else if(variable.variableType==="int")(input as HTMLInputElement).inputMode="numeric";
+   else (input as HTMLInputElement).inputMode=variable.variableType==="int"?"numeric":variable.variableType==="decimal"?"decimal":"text";
    input.value=this.samples.get(variable.id)?.raw??variableRaw(variable.defaultValue);
    const error=el("span","siv-sample-error");error.id=`sample-${variable.id}-error`;error.role="alert";
    const feedback=()=>{const state=this.samples.get(variable.id);error.textContent=state?.error??"";error.hidden=!state?.error;if(state?.error){input.setAttribute("aria-invalid","true");input.setAttribute("aria-describedby",error.id);}else {input.removeAttribute("aria-invalid");input.removeAttribute("aria-describedby");}};
    input.addEventListener(input.tagName==="SELECT"?"change":"input",()=>{
     const previous=this.samples.get(variable.id);
     try{const value=variableValue(variable,input.value);this.samples.set(variable.id,{raw:input.value,valid:{variableId:variable.id,expectedSourceRevision:variable.source.sourceRevision,value}});feedback();this.changed();}
-    catch{this.samples.set(variable.id,{raw:input.value,valid:previous?.valid??{variableId:variable.id,expectedSourceRevision:variable.source.sourceRevision,value:variable.defaultValue},error:"Use a whole number in the signed 64-bit range. The canvas keeps the last valid sample."});feedback();}
+    catch{this.samples.set(variable.id,{raw:input.value,valid:previous?.valid??{variableId:variable.id,expectedSourceRevision:variable.source.sourceRevision,value:variable.defaultValue},error:variable.variableType==="decimal"?"Enter a finite decimal. The canvas keeps the last valid sample.":"Use a whole number in the signed 64-bit range. The canvas keeps the last valid sample."});feedback();}
     markOverrides();
    });feedback();label.append(input,error);panel.append(label);
   }

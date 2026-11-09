@@ -262,6 +262,7 @@ fn main() {
                 | "source.discardAll"
                 | "authoring.list"
                 | "variable.create"
+                | "variable.update"
                 | "asset.import"
                 | "asset.previewImport"
                 | "asset.reviewUiImage"
