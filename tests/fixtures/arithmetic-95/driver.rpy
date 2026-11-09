@@ -42,9 +42,9 @@ testsuite arithmetic_95:
         assert eval (bonus == 5) timeout 10
         keysym "K_RETURN" "Calculate"
         assert eval (trust == 8 and reward == 16 and points == 9 and fraction == 1.0) timeout 10
-        click screen "arithmetic_clicks" id "arithmetic_image"
+        click screen ("arithmetic_clicks",) id "arithmetic_image"
         assert eval (trust == 9 and reward == 18 and points == 14 and fraction == 0.5) timeout 10
-        keysym "K_RETURN" screen "arithmetic_clicks" id "arithmetic_image"
+        keysym "K_RETURN" screen ("arithmetic_clicks",) id "arithmetic_image"
         assert eval (trust == 10 and reward == 20 and points == 19 and fraction == 0.25) timeout 10
         assert eval (type(trust) is int and type(reward) is int and type(points) is int)
         assert eval (type(fraction) is float and type(widened) is float and widened == 2.0)

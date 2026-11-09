@@ -373,3 +373,36 @@ and preserves that identity comment. The same preflight passes in 6.51 seconds;
 unchanged. No arithmetic, inertness, keyboard, type or rejecting assertion was
 removed or relaxed. A fresh clean candidate/receipt and explicit allocation remain
 required before another SDK start. #95 runtime proof and #97 entry remain pending.
+
+
+## Mac invocation 3 and pinned selector-name correction
+
+Verification at clean candidate `30072c2c98a48d27786bb53bfd893a80dc0416b3`
+started 2026-11-09 13:27:37 UTC. Its retained executable SHA-256 is
+`0e36ff88518ab784eb1b19d5ba9a210017cb52be0ead155b79b3d31fb879d804`.
+Compile passed in 469 ms and lint in 238 ms. Normal entry verified FIRST 6/12,
+SECOND 7/14, a changed operand and keyboard textbutton activation, with 11 passing
+assertions. It then timed out at the imagebutton click; the image click, remaining
+witnesses, Finish and wrong-outcome case remain unproved. Terminal cleanup passed.
+The failed raw records remain immutable in `mac-03/`. Feature consumption is
+Mac 8/20 and Windows 2/20, with no further start during diagnosis.
+
+The imagebutton exists: the earlier normal `renpy.get_displayable` action checks
+passed. Primary SDK source distinguishes its ID selector implementation from that
+normal API. `DisplayableSelector.get_displayable` directly compares evaluated
+`screen` to the scene-list entry name, which `show_screen` stores as a tuple.
+Unlike normal `get_screen`, that selector does not normalize a string. A synthetic
+metadata diagnostic executing only this pinned method reproduces a missing widget
+for the string and finds the same widget for the tuple. This is diagnostic proof,
+not SDK execution or product-runtime acceptance. Its result is retained in
+`selector-comparison-diagnostic.json`.
+
+The SDK driver's two imagebutton selectors now use the tuple screen name for
+physical click and keyboard input. Public API lookups remain unchanged. The
+fixture keeps every arithmetic, type, prediction/selection inertness, invalid
+calculation, Finish and rejecting assertion. The five-second timeout is unchanged.
+The remaining driver API calls were checked against pinned primary source;
+`driver-static-preflight-current.json` retains the corrected selector diagnostic
+and driver identity. No production code or SDK implementation is changed.
+A clean candidate, rebuilt executable and fresh coordinator allocation are still
+required for another actual verification run. #97 remains blocked.
