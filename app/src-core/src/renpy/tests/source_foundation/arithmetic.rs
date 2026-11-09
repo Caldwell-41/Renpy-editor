@@ -1,8 +1,12 @@
-//! #92's command-produced accepted-source fixture, using the existing SDK owner.
+//! Command-produced arithmetic fixtures using the existing SDK owner.
 use super::*;
 
-fn author(service: &mut LifecycleService, root: &Path) -> (String, Vec<u8>) {
-    for name in ["score", "money"] {
+fn author(service: &mut LifecycleService, root: &Path, formulas: bool) -> (String, Vec<u8>) {
+    for name in if formulas {
+        vec!["score", "money", "bonus", "remainder", "minimum"]
+    } else {
+        vec!["score", "money"]
+    } {
         ipc(
             service,
             "variable.create",
@@ -11,7 +15,12 @@ fn author(service: &mut LifecycleService, root: &Path) -> (String, Vec<u8>) {
     }
     let model = ipc(service, "scene.list", json!({}));
     let scene = &model["scenes"][0];
-    let source = include_str!("../../../../../../tests/fixtures/arithmetic-92/story.rpy").replace(
+    let source = if formulas {
+        include_str!("../../../../../../tests/fixtures/arithmetic-93/story.rpy")
+    } else {
+        include_str!("../../../../../../tests/fixtures/arithmetic-92/story.rpy")
+    }
+    .replace(
         "label scene_one:",
         &format!("label {}:", scene["technicalLabel"].as_str().unwrap()),
     );
@@ -28,11 +37,20 @@ fn author(service: &mut LifecycleService, root: &Path) -> (String, Vec<u8>) {
         json!({"path":path,"expectedBaseRevision":draft["baseRevision"],"expectedDraftVersion":draft["draftVersion"]}),
     );
     let mut requests = Vec::new();
-    for (operation, operand, update) in [
-        ("subtract", "2", true),
-        ("add", "1", false),
-        ("subtract", "3", false),
-    ] {
+    let edits = if formulas {
+        vec![
+            ("score", "multiply", "bonus + 1", Some(2)),
+            ("score", "assign", "score + (bonus + 2) * 4", Some(3)),
+            ("money", "assign", "money * (bonus + 2)", Some(10)),
+        ]
+    } else {
+        vec![
+            ("score", "subtract", "2", Some(2)),
+            ("score", "add", "1", None),
+            ("money", "subtract", "3", None),
+        ]
+    };
+    for (target, operation, operand, update) in edits {
         let model = ipc(service, "scene.list", json!({}));
         let scene = &model["scenes"][0];
         let beats = scene["beats"].as_array().unwrap();
@@ -40,18 +58,17 @@ fn author(service: &mut LifecycleService, root: &Path) -> (String, Vec<u8>) {
             .as_array()
             .unwrap()
             .iter()
-            .find(|v| {
-                v["technicalName"]
-                    == if operation == "subtract" && !update {
-                        "money"
-                    } else {
-                        "score"
-                    }
-            })
+            .find(|v| v["technicalName"] == target)
             .unwrap();
         let payload = json!({"type":"setVariable","variableId":variable["id"],"value":{"operation":operation,"operand":operand}});
-        let command = if update {
-            json!({"type":"updateBodyBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":beats[2]["id"],"expectedBody":{"type":"root"},"beat":payload})
+        let command = if let Some(index) = update {
+            let beat = &beats[index];
+            let body = if beat["owner"].is_object() {
+                json!({"type":"branch","groupId":beat["owner"]["groupId"],"branchId":beat["owner"]["branchId"]})
+            } else {
+                json!({"type":"root"})
+            };
+            json!({"type":"updateBodyBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":beat["id"],"expectedBody":body,"beat":payload})
         } else {
             let before = if operation == "add" {
                 &beats[2]
@@ -68,10 +85,17 @@ fn author(service: &mut LifecycleService, root: &Path) -> (String, Vec<u8>) {
         requests.push(json!({"request":request,"response":after}));
     }
     let accepted = fs::read(root.join(&path)).unwrap();
-    assert!(String::from_utf8_lossy(&accepted)
-        .contains("$ score = score - 2 # explicit operand is edited"));
-    assert!(String::from_utf8_lossy(&accepted)
-        .contains("$ score += +2 # compound stays byte-identical"));
+    if formulas {
+        let accepted = String::from_utf8_lossy(&accepted);
+        assert!(accepted.contains("$ score *= bonus + 1 # compound operand is edited"));
+        assert!(accepted.contains("$ score = score + (bonus + 2) * 4 # explicit formula is edited"));
+        assert!(accepted.contains("$ money = money * (bonus + 2) # nested formula is edited"));
+    } else {
+        assert!(String::from_utf8_lossy(&accepted)
+            .contains("$ score = score - 2 # explicit operand is edited"));
+        assert!(String::from_utf8_lossy(&accepted)
+            .contains("$ score += +2 # compound stays byte-identical"));
+    }
     let after = ipc(service, "scene.list", json!({}));
     ipc(
         service,
@@ -104,12 +128,19 @@ fn author(service: &mut LifecycleService, root: &Path) -> (String, Vec<u8>) {
 
 #[test]
 fn arithmetic_fixture_preflight() {
+    preflight(false);
+}
+#[test]
+fn formula_fixture_preflight() {
+    preflight(true);
+}
+fn preflight(formulas: bool) {
     let temp = tempfile::tempdir().unwrap();
     let profile = temp.path().join("profile");
     let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
     let root = profile.join("synthetic-project");
     service.open_path(&root).unwrap();
-    let (path, accepted) = author(&mut service, &root);
+    let (path, accepted) = author(&mut service, &root, formulas);
     let model = ipc(&mut service, "scene.list", json!({}));
     let scene = &model["scenes"][0];
     let variable = model["authoring"]["variables"]
@@ -120,7 +151,7 @@ fn arithmetic_fixture_preflight() {
         .unwrap();
     let request = json!({"sessionId":service.current().unwrap().session_id,"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"expectedAuthoringRevision":model["authoringRevision"],"command":{"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beforeBeatId":null,"beat":{"type":"setVariable","variableId":variable["id"],"value":{"operation":"add","operand":"1.5"}}}});
     let response = serde_json::to_value(crate::handle_application_request(json!({"protocolVersion":1,"requestId":"arithmetic-refusal","operation":"scene.apply","payload":request}),false,&mut service)).unwrap();
-    assert_eq!(response["error"]["code"], "INVALID_ARITHMETIC_OPERAND");
+    assert_eq!(response["error"]["code"], "INVALID_ARITHMETIC_SYNTAX");
     let opened = ipc(&mut service, "source.open", json!({"path":path}));
     let draft = ipc(
         &mut service,
@@ -143,9 +174,17 @@ fn arithmetic_fixture_preflight() {
 #[test]
 #[ignore = "explicit #92 pinned SDK qualification; one reserved invocation per target"]
 fn arithmetic_sdk_gate() {
+    sdk_gate(false);
+}
+#[test]
+#[ignore = "explicit #93 pinned SDK qualification; one reserved invocation per target"]
+fn formula_sdk_gate() {
+    sdk_gate(true);
+}
+fn sdk_gate(formulas: bool) {
     let temp = tempfile::tempdir().unwrap();
     let root_path = temp.path().to_owned();
-    let result = std::panic::catch_unwind(|| run(&temp));
+    let result = std::panic::catch_unwind(|| run(&temp, formulas));
     let cleanup = temp.close().is_ok() && !root_path.exists();
     println!(
         "arithmetic-sdk-terminal: {}",
@@ -157,7 +196,7 @@ fn arithmetic_sdk_gate() {
     assert!(cleanup);
 }
 
-fn run(temp: &tempfile::TempDir) {
+fn run(temp: &tempfile::TempDir, formulas: bool) {
     fs::create_dir(temp.path().join("Ren'Py Data")).unwrap();
     let archive =
         std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE").expect("pinned archive required");
@@ -181,8 +220,12 @@ fn run(temp: &tempfile::TempDir) {
         })
         .unwrap();
     let root = temp.path().join("arithmetic");
-    let (path, accepted) = author(&mut service, &root);
-    let driver = include_str!("../../../../../../tests/fixtures/arithmetic-92/driver.rpy");
+    let (path, accepted) = author(&mut service, &root, formulas);
+    let driver = if formulas {
+        include_str!("../../../../../../tests/fixtures/arithmetic-93/driver.rpy")
+    } else {
+        include_str!("../../../../../../tests/fixtures/arithmetic-92/driver.rpy")
+    };
     fs::write(root.join("game/zz_arithmetic_test.rpy"), driver).unwrap();
     let accepted_sources = sources(&root.join("game"));
     let mut reports = Vec::new();
@@ -194,9 +237,17 @@ fn run(temp: &tempfile::TempDir) {
         ];
         if operation == "test" || reject {
             argv.push(OsString::from(if reject {
-                "arithmetic_92::wrong_outcome"
+                if formulas {
+                    "arithmetic_93::wrong_outcome"
+                } else {
+                    "arithmetic_92::wrong_outcome"
+                }
             } else {
-                "arithmetic_92::values"
+                if formulas {
+                    "arithmetic_93::values"
+                } else {
+                    "arithmetic_92::values"
+                }
             }));
             argv.push(OsString::from("--savedir"));
             argv.push(command_path(&root.join("game/saves")));
@@ -213,12 +264,25 @@ fn run(temp: &tempfile::TempDir) {
             && if reject {
                 result.exit_code.is_some_and(|code| code != 0)
                     && result.output.contains("FAILED")
-                    && !result.output.contains("ARITHMETIC_92_WRONG_ACCEPTED")
+                    && result.output.contains(if formulas {
+                        "AssertionError: assert eval (money == -14)"
+                    } else {
+                        "AssertionError: assert eval (money == 8)"
+                    })
+                    && !result.output.contains(if formulas {
+                        "ARITHMETIC_93_WRONG_ACCEPTED"
+                    } else {
+                        "ARITHMETIC_92_WRONG_ACCEPTED"
+                    })
             } else {
                 result.exit_code == Some(0)
                     && (operation != "test"
                         || result.output.contains("PASSED")
-                            && result.output.contains("ARITHMETIC_92_VALUES"))
+                            && result.output.contains(if formulas {
+                                "ARITHMETIC_93_VALUES"
+                            } else {
+                                "ARITHMETIC_92_VALUES"
+                            }))
             };
         println!(
             "arithmetic-sdk-case: {}",

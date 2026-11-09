@@ -481,6 +481,12 @@ pub enum SceneError {
     MissingArithmeticTarget,
     ArithmeticTargetType,
     InvalidArithmeticOperand,
+    InvalidArithmeticSyntax,
+    MissingArithmeticVariable,
+    ArithmeticOperandType,
+    ArithmeticZeroDivisor,
+    ArithmeticOverflow,
+    ArithmeticLimitExceeded,
     InvalidMetadata,
     UnsupportedSource,
     SourceConflict,
@@ -3076,7 +3082,12 @@ fn render_payload(
                     SceneError::UnknownEntity
                 })?;
             if value.is_object() {
-                let adjustment = integer_adjustment(variable.variable_type, value)?;
+                let adjustment = integer_adjustment(
+                    variable.variable_type,
+                    value,
+                    &loaded.authoring,
+                    variable_id,
+                )?;
                 format!(
                     "    $ {} {}= {}",
                     variable.technical_name,
@@ -3192,7 +3203,12 @@ fn validate_payload(payload: &BeatPayload, loaded: &Loaded) -> Result<(), SceneE
                     SceneError::UnknownEntity
                 })?;
             if value.is_object() {
-                integer_adjustment(variable.variable_type, value)?;
+                integer_adjustment(
+                    variable.variable_type,
+                    value,
+                    &loaded.authoring,
+                    variable_id,
+                )?;
             } else {
                 render_value(variable.variable_type, value)?;
             }
@@ -3808,17 +3824,28 @@ fn parse_line(body: &str, loaded: Option<SceneParseContext<'_>>) -> Option<BeatP
     if let Some(rest) = line.strip_prefix("show ") {
         return parse_show(rest, loaded);
     }
-    if let Some((name, adjustment)) =
-        crate::conditions::arithmetic::parse_assignment(logic::without_comment(line).trim_end())
-    {
+    if let Some((name, adjustment)) = crate::conditions::arithmetic::parse_assignment(
+        logic::without_comment(line).trim_end(),
+        loaded?.1,
+    ) {
         let variable = loaded?
             .1
             .variables
             .iter()
             .find(|v| v.technical_name == name && v.variable_type == VariableType::Int)?;
+        let value =
+            if adjustment.operation == crate::conditions::arithmetic::IntegerOperation::Assign {
+                line.strip_prefix("$ ")
+                    .and_then(|rest| rest.split_once(" = "))
+                    .filter(|(target, _)| *target == name)
+                    .and_then(|(_, literal)| parse_value(variable.variable_type, literal))
+                    .unwrap_or(serde_json::to_value(&adjustment).ok()?)
+            } else {
+                serde_json::to_value(adjustment).ok()?
+            };
         return Some(BeatPayload::SetVariable {
             variable_id: variable.id.clone(),
-            value: serde_json::to_value(adjustment).ok()?,
+            value,
         });
     }
     if let Some(rest) = line.strip_prefix("$ ") {
@@ -3828,6 +3855,9 @@ fn parse_line(body: &str, loaded: Option<SceneParseContext<'_>>) -> Option<BeatP
             .variables
             .iter()
             .find(|item| item.technical_name == name)?;
+        if variable.variable_type == VariableType::Int {
+            return None;
+        } // Integer recognition belongs to the formula owner.
         let value = parse_value(variable.variable_type, literal)?;
         return Some(BeatPayload::SetVariable {
             variable_id: variable.id.clone(),
@@ -4569,16 +4599,38 @@ fn find_asset(
 fn integer_adjustment(
     kind: VariableType,
     value: &Value,
+    authoring: &AuthoringMetadata,
+    target: &str,
 ) -> Result<crate::conditions::arithmetic::IntegerAdjustment, SceneError> {
     if kind != VariableType::Int {
         return Err(SceneError::ArithmeticTargetType);
     }
     let adjustment: crate::conditions::arithmetic::IntegerAdjustment =
         serde_json::from_value(value.clone()).map_err(|_| SceneError::InvalidArithmeticOperand)?;
-    adjustment
-        .validate()
-        .map_err(|_| SceneError::InvalidArithmeticOperand)?;
+    let formula = adjustment
+        .formula(authoring, target)
+        .map_err(arithmetic_error)?;
+    if let Err(reason) = formula.evaluate(&|_| {
+        Err(crate::conditions::arithmetic::ArithmeticUnknown::UnobservedCurrentValue)
+    }) {
+        if reason != crate::conditions::arithmetic::ArithmeticUnknown::UnobservedCurrentValue {
+            return Err(arithmetic_error(reason));
+        }
+    }
     Ok(adjustment)
+}
+
+fn arithmetic_error(reason: crate::conditions::arithmetic::ArithmeticUnknown) -> SceneError {
+    use crate::conditions::arithmetic::ArithmeticUnknown::*;
+    match reason {
+        InvalidSyntax => SceneError::InvalidArithmeticSyntax,
+        MissingVariable => SceneError::MissingArithmeticVariable,
+        IncompatibleOperand => SceneError::ArithmeticOperandType,
+        ZeroDivisor => SceneError::ArithmeticZeroDivisor,
+        IntegerOverflow => SceneError::ArithmeticOverflow,
+        LimitExceeded => SceneError::ArithmeticLimitExceeded,
+        _ => SceneError::InvalidArithmeticOperand,
+    }
 }
 
 fn compatible_arithmetic_kind(old: &str, payload: &BeatPayload) -> bool {
@@ -4604,18 +4656,98 @@ fn patch_variable_assignment(
         return Ok(None);
     };
     let text = std::str::from_utf8(original).map_err(|_| SceneError::UnsupportedSource)?;
-    if old_id == variable_id && old_value == value {
-        return Ok(Some(text.into()));
+    if old_id == variable_id {
+        if old_value == value {
+            return Ok(Some(text.into()));
+        }
+        let formula = |value: &Value| {
+            let adjustment = if value.is_object() {
+                serde_json::from_value(value.clone()).ok()?
+            } else {
+                crate::conditions::arithmetic::IntegerAdjustment {
+                    operation: crate::conditions::arithmetic::IntegerOperation::Assign,
+                    operand: value.as_str()?.into(),
+                }
+            };
+            adjustment.formula(&loaded.authoring, variable_id).ok()
+        };
+        if loaded
+            .authoring
+            .variables
+            .iter()
+            .any(|v| v.id == *variable_id && v.variable_type == VariableType::Int)
+        {
+            if let (Some(old), Some(next)) = (formula(old_value), formula(value)) {
+                if old == next {
+                    return Ok(Some(text.into()));
+                }
+            }
+        }
     }
     let code = logic::without_comment(text).trim_end();
     let mut patched = text.to_owned();
     if old_id == variable_id && old_value.is_object() && value.is_object() {
-        let next = integer_adjustment(VariableType::Int, value)?;
-        let (operand_start, operator_start) =
-            crate::conditions::arithmetic::assignment_tokens(code)
-                .ok_or(SceneError::OpaqueBoundary)?;
-        patched.replace_range(operand_start..code.len(), &next.operand);
-        patched.replace_range(operator_start..operator_start + 1, next.operator());
+        use crate::conditions::arithmetic::{self, IntegerOperation};
+        let next = integer_adjustment(VariableType::Int, value, &loaded.authoring, variable_id)?;
+        let (_, old_operation, operand_start, _) =
+            arithmetic::assignment_tokens(code).ok_or(SceneError::OpaqueBoundary)?;
+        let (name, raw_operation, rhs_start, raw_operator) =
+            arithmetic::assignment_tokens_raw(code).ok_or(SceneError::OpaqueBoundary)?;
+        if old_operation == next.operation {
+            let operand = if raw_operation == IntegerOperation::Assign
+                && old_operation != IntegerOperation::Assign
+                && next.operand.parse::<i64>().is_err()
+            {
+                format!("({})", next.operand)
+            } else {
+                next.operand.clone()
+            };
+            patched.replace_range(operand_start..code.len(), &operand);
+        } else if raw_operation == IntegerOperation::Assign {
+            let rhs = if next.operation == IntegerOperation::Assign {
+                next.operand.clone()
+            } else {
+                format!("{name} {} ({})", next.operator(), next.operand)
+            };
+            patched.replace_range(rhs_start..code.len(), &rhs);
+        } else {
+            patched.replace_range(operand_start..code.len(), &next.operand);
+            patched.replace_range(
+                raw_operator..raw_operator + raw_operation.operator().len() + 1,
+                &format!("{}=", next.operator()),
+            );
+        }
+    } else if old_id == variable_id {
+        use crate::conditions::arithmetic::{self, IntegerOperation};
+        let (_, old_operation, rhs_start, operator_start) =
+            arithmetic::assignment_tokens_raw(code).ok_or(SceneError::OpaqueBoundary)?;
+        let variable = loaded
+            .authoring
+            .variables
+            .iter()
+            .find(|v| v.id == *variable_id)
+            .ok_or(SceneError::UnknownEntity)?;
+        let (operation, operand) = if value.is_object() {
+            let next = integer_adjustment(
+                variable.variable_type,
+                value,
+                &loaded.authoring,
+                variable_id,
+            )?;
+            (next.operation, next.operand)
+        } else {
+            (
+                IntegerOperation::Assign,
+                render_value(variable.variable_type, value)?,
+            )
+        };
+        patched.replace_range(rhs_start..code.len(), &operand);
+        if operation != old_operation {
+            patched.replace_range(
+                operator_start..operator_start + old_operation.operator().len() + 1,
+                &format!("{}=", operation.operator()),
+            );
+        }
     } else {
         let indent = text.len() - text.trim_start_matches(' ').len();
         let rendered = render_payload(next, loaded, "")?;
