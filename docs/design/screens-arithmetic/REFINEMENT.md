@@ -62,5 +62,6 @@ npm run design:check -- screens-arithmetic equation-v2 --interaction ./screens/s
 node design-lab/screens/screens-arithmetic/export.mjs
 ```
 
-The runnable source identity will be recorded after the local candidate commit.
+The runnable source is `ce6264279188fca4c81218a5cd93b50c393bf9a3`.
+[The source record](equation-v2-source.json) contains its fingerprint.
 Kris must explicitly approve this revision before promotion under INTEGRATION.md.
