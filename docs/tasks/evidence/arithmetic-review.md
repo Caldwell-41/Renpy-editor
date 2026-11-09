@@ -346,3 +346,72 @@ upstream agreement and the one-time exact-head automatic CI observation. No prio
 green status transfers to the published head. Integration/status/PR ownership
 returns to the coordinator after publication; successor qualification and the P4
 decision belong to that coordinator.
+
+## UI-emitted source qualification preparation, 2026-11-10
+
+The separate test worktree starts clean on `t3/arithmetic-ui-runtime-proof` at
+`cbb0ca27dc8353dbd359f6e2c33b9719b0f26f71`. Required integration ancestry is
+confirmed. Production, dependencies, CI, status, tickets and PR remain unchanged.
+The confirmed boundary is actual UI/public core, accepted source/history/reopen,
+then focused pinned SDK. P4 and #96/#110 scope remain pending.
+
+The portable [fixture](../../../tests/fixtures/arithmetic-ui/README.md) preserves
+all four selected captured source hashes, original labels/helper identities and
+the exact existing image bytes. Its manifest pins the original inventory
+`1b8e980a52a292532c2cea8e7952210e2e81d57afb2b0fb28593415b49fdf1e4`.
+Curated public setup and successful UI payloads retain original IDs/revisions.
+Both scene files are relocated to distinct files, with no source edits. The README
+records every prerequisite, relocation, operand change and independent literal
+oracle. No app diagnostic supplies an expected runtime result.
+
+The existing `screens::tests::actions::runtime` owner now accepts these snapshots,
+checks Source history/reopen and inert typed canvas samples, and selects a new
+ignored `ui_emitted_arithmetic_sdk_gate` through its existing SDK runner. Existing
+#92–#95 fixtures/assertions remain intact; the Story source-foundation owner is
+unchanged. A test-only receipt hook in the existing subprocess owner records all
+SDK children, including fixture construction, without another runner or evaluator.
+The exact raw buttons overlap. Qualification selects actual rendered actions and
+uses a fixture timer for normal interaction/Finish delivery. It makes no new
+mouse/keyboard/native-editor claim. Original #95 gesture proof retains its scope.
+
+The first TDD check fails on missing portable inputs. SDK-free follow-ups preserve
+all failed logs: mapped defaults reject Source save (`MAPPED_DEFINITION`), so public
+variable authoring reproduces their exact bytes; an initial asset import lacks its
+required directory (`SOURCE_CONFLICT`), corrected before source acceptance. The
+standalone imported screen has no transplanted ownership metadata, so its key,
+image appearances and helper init remain explicitly unavailable to the inert canvas.
+The preflight records those bounded limits and requires correct literal text and
+unchanged source. It does not grant canvas-rendering eligibility. These are fixture
+arrangement issues, with no production correction or SDK start.
+
+Pinned SDK-free checks pass both minimal and simulated SDK-GUI fixture cases.
+The static preflight compiles 53 driver Python expressions/statements, checks unique
+rendered-action selection with inert doubles, and verifies the worked Story oracle
+using stock Python. This is not runtime proof. Official archive and both retained/
+repository published manifests match their pins. Twelve installed SDK execution/
+selector files match archive members; launcher permissions are present. Published
+[provenance](../../../spikes/renpy-sdk/published/README.md) remains authoritative.
+
+Fresh evidence is isolated under ignored `.toolchains/arithmetic-ui-runtime/`.
+Before the selected launch, require a committed clean candidate, isolated pinned
+Rust build and retained binary, full source/config/lock/fixture identities, command
+array/environment and actual Mac desktop admission/power receipt. Usage before
+launch remains Mac 9/20 started plus one reserved, Windows 3/20 plus none reserved.
+No retry, Windows, editor-native/package, browser/helper, manual-CI or watch is selected.
+
+Portable commands from repository root (pinned local toolchains and verified archive
+paths are supplied by each host; use a fresh evidence directory and short contained
+Windows `TEMP`/`TMP`):
+
+```text
+cargo test --manifest-path app/src-core/Cargo.toml --locked --offline screens::tests::actions -- --nocapture
+cargo test --manifest-path app/src-core/Cargo.toml --locked --offline --no-run --message-format=json
+<retained-test-executable> screens::tests::actions::runtime::ui_emitted_arithmetic_sdk_gate --ignored --exact --nocapture
+```
+
+The SDK command requires `LOOMLIGHT_RUNTIME_SDK_ARCHIVE`,
+`LOOMLIGHT_ACTIONS_EVIDENCE_DIR` and `LOOMLIGHT_SDK_CHILD_EVIDENCE_DIR`.
+On Mac, launch outside the sandbox under the existing `native_desktop` wrapper.
+Each unique case is compile, lint with error status, normal entry or deliberate
+wrong outcome. This command is reusable input for later coordinator-routed Windows
+work, not authorization for a Windows invocation here.

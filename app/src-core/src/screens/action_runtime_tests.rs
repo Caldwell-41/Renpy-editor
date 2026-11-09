@@ -545,7 +545,7 @@ fn click_time_arithmetic_fixture_retains_samples_with_unresolved_gui() {
 fn click_time_arithmetic_sdk_gate() {
     let temporary = tempfile::tempdir().unwrap();
     let owned = temporary.path().to_owned();
-    let result = std::panic::catch_unwind(|| run_arithmetic_sdk(&temporary));
+    let result = std::panic::catch_unwind(|| run_arithmetic_sdk(&temporary, false));
     let cleanup = temporary.close().is_ok() && !owned.exists();
     println!(
         "arithmetic-95-terminal: {}",
@@ -557,7 +557,7 @@ fn click_time_arithmetic_sdk_gate() {
     assert!(cleanup);
 }
 
-fn run_arithmetic_sdk(temporary: &tempfile::TempDir) {
+fn run_arithmetic_sdk(temporary: &tempfile::TempDir, ui_emitted: bool) {
     use crate::lifecycle::CreateProjectRequest;
     use crate::renpy::{
         command_path, install_supported_sdk_from_archive, launcher_args, run_bounded,
@@ -586,48 +586,76 @@ fn run_arithmetic_sdk(temporary: &tempfile::TempDir) {
     );
     let sdk = install_supported_sdk_from_archive(&temporary.path().join("sdk-profile"), &archive)
         .unwrap();
+    fs::write(evidence.join("sdk-context.json"), serde_json::to_vec_pretty(&json!({"ownedTemporaryRoot":temporary.path(),"sdkRoot":sdk.root,"archive":archive,"sdkIdentities":sdk_runtime_identities(&sdk.root),"fixtureStatus":"notPrepared"})).unwrap()).unwrap();
     let mut service = LifecycleService::new(temporary.path().join("profile")).unwrap();
     let parent = service.register_parent(temporary.path()).unwrap();
     let registered = service
         .register_sdk(&sdk.root, "arithmetic-95-verified")
         .unwrap();
+    let folder = if ui_emitted {
+        "arithmetic-ui"
+    } else {
+        "arithmetic-95"
+    };
     service
         .create_project(CreateProjectRequest {
             parent_id: parent.id,
             sdk_id: registered.id,
-            title: "Click time arithmetic".into(),
-            folder_name: "arithmetic-95".into(),
+            title: if ui_emitted {
+                "UI emitted arithmetic"
+            } else {
+                "Click time arithmetic"
+            }
+            .into(),
+            folder_name: folder.into(),
             width: 1280,
             height: 720,
             initialize_git: false,
         })
         .unwrap();
-    let root = temporary.path().join("arithmetic-95");
-    let document = author_arithmetic(&mut service, &root, temporary.path());
-    // Full SDK GUI initialization remains outside the inert canvas subset.
-    let plan = ipc(
-        &mut service,
-        "screens.canvasPlan",
-        json!({"path":document["path"],"screenName":"arithmetic_clicks","expectedRevision":document["revision"],"width":1280,"height":720}),
-    );
-    let template_limits = [
-        "Unresolved project initialization or inherited styles in game/gui.rpy",
-        "Unresolved project initialization or inherited styles in game/options.rpy",
-        "Unresolved project initialization or inherited styles in game/screens.rpy",
-    ];
-    for limit in plan["limits"].as_array().unwrap() {
-        assert!(
-            template_limits.contains(&limit.as_str().unwrap()),
-            "Unexpected canvas limit: {plan}"
+    let root = temporary.path().join(folder);
+    let document = if ui_emitted {
+        accept_ui_emitted_arithmetic(&mut service, &root)
+    } else {
+        author_arithmetic(&mut service, &root, temporary.path())
+    };
+    if !ui_emitted {
+        // Full SDK GUI initialization remains outside the inert canvas subset.
+        let plan = ipc(
+            &mut service,
+            "screens.canvasPlan",
+            json!({"path":document["path"],"screenName":"arithmetic_clicks","expectedRevision":document["revision"],"width":1280,"height":720}),
         );
+        let template_limits = [
+            "Unresolved project initialization or inherited styles in game/gui.rpy",
+            "Unresolved project initialization or inherited styles in game/options.rpy",
+            "Unresolved project initialization or inherited styles in game/screens.rpy",
+        ];
+        for limit in plan["limits"].as_array().unwrap() {
+            assert!(
+                template_limits.contains(&limit.as_str().unwrap()),
+                "Unexpected canvas limit: {plan}"
+            );
+        }
+        fs::write(
+            root.join("game/zz_arithmetic_95_test.rpy"),
+            include_str!("../../../../tests/fixtures/arithmetic-95/driver.rpy"),
+        )
+        .unwrap();
     }
+    let accepted = arithmetic_sources(&root);
+    fs::write(evidence.join("sdk-context.json"),serde_json::to_vec_pretty(&json!({"ownedTemporaryRoot":temporary.path(),"sdkRoot":sdk.root,"archive":archive,"screen":document,"sdkIdentities":sdk_runtime_identities(&sdk.root),"sdkLauncherSha256":hex::encode(Sha256::digest(fs::read(sdk.root.join("renpy.sh")).or_else(|_|fs::read(sdk.root.join("renpy.py"))).unwrap()))})).unwrap()).unwrap();
+    let mut paths = vec![];
+    panel_fixture::collect_files(&root, &root.join("game"), &mut paths);
+    let files: Vec<_> = paths
+        .iter()
+        .map(|p| export_file(&root, &evidence.join("sdk-project"), p))
+        .collect();
     fs::write(
-        root.join("game/zz_arithmetic_95_test.rpy"),
-        include_str!("../../../../tests/fixtures/arithmetic-95/driver.rpy"),
+        evidence.join("sdk-project-files.json"),
+        serde_json::to_vec_pretty(&files).unwrap(),
     )
     .unwrap();
-    let accepted = arithmetic_sources(&root);
-    fs::write(evidence.join("sdk-context.json"),serde_json::to_vec_pretty(&json!({"ownedTemporaryRoot":temporary.path(),"sdkRoot":sdk.root,"archive":archive,"screen":document,"sdkLauncherSha256":hex::encode(Sha256::digest(fs::read(sdk.root.join("renpy.sh")).or_else(|_|fs::read(sdk.root.join("renpy.py"))).unwrap()))})).unwrap()).unwrap();
     let source_hashes: Vec<_> = accepted.iter().map(|(path, bytes)| json!({"path":path,"sha256":hex::encode(Sha256::digest(bytes)),"bytes":bytes.len()})).collect();
     fs::write(
         evidence.join("sdk-accepted-sources.json"),
@@ -643,17 +671,35 @@ fn run_arithmetic_sdk(temporary: &tempfile::TempDir) {
             command_path(&root),
             OsString::from(if reject { "test" } else { operation }),
         ];
+        if operation == "lint" && ui_emitted {
+            args.push(OsString::from("--error-code"));
+        }
         if operation == "test" || reject {
             args.push(OsString::from(if reject {
-                "arithmetic_95::wrong_outcome"
+                if ui_emitted {
+                    "arithmetic_ui::wrong_outcome"
+                } else {
+                    "arithmetic_95::wrong_outcome"
+                }
             } else {
-                "arithmetic_95::values"
+                if ui_emitted {
+                    "arithmetic_ui::values"
+                } else {
+                    "arithmetic_95::values"
+                }
             }));
             args.push(OsString::from("--savedir"));
             args.push(command_path(&root.join("game/saves")));
         }
         let command = launcher_args(&sdk.root, &args).unwrap();
         let started = Instant::now();
+        cases[case_index] =
+            json!({"case":operation,"status":"started","passed":false,"command":command});
+        fs::write(
+            evidence.join("sdk-cases.json"),
+            serde_json::to_vec_pretty(&cases).unwrap(),
+        )
+        .unwrap();
         let result = run_bounded(&sdk.root, command.clone(), Duration::from_secs(90)).unwrap();
         let unchanged = arithmetic_sources(&root) == accepted;
         let passed = !result.timed_out
@@ -662,12 +708,24 @@ fn run_arithmetic_sdk(temporary: &tempfile::TempDir) {
             && if reject {
                 result.exit_code.is_some_and(|c| c != 0)
                     && result.output.contains("FAILED")
-                    && result
-                        .output
-                        .contains("AssertionError: assert eval (reward == 10)")
-                    && !result.output.contains("ARITHMETIC_95_WRONG_ACCEPTED")
+                    && result.output.contains(if ui_emitted {
+                        "AssertionError: assert eval (trust == 26)"
+                    } else {
+                        "AssertionError: assert eval (reward == 10)"
+                    })
+                    && !result.output.contains(if ui_emitted {
+                        "ARITHMETIC_UI_WRONG_ACCEPTED"
+                    } else {
+                        "ARITHMETIC_95_WRONG_ACCEPTED"
+                    })
             } else {
-                result.exit_code==Some(0) && (operation!="test" || ["PASSED","ARITHMETIC_95_FIRST 6/12 points=2 fraction=4.0","ARITHMETIC_95_SECOND 7/14 points=4 fraction=2.0","ARITHMETIC_95_CURRENT trust=10 reward=20 points=19 fraction=0.25 floor=-3 remainder=2 precise=9007199254740993 widened=float:2.0","ARITHMETIC_95_VALUES inert=True click=True keyboard=True textbutton=True imagebutton=True continuation=1"].iter().all(|s| result.output.contains(s)))
+                result.exit_code == Some(0)
+                    && (operation != "test"
+                        || if ui_emitted {
+                            ["PASSED", "ARITHMETIC_UI_STORY precision=6 protected=5 nested=27:int money=1.5:float flag=True title=retained_text", "ARITHMETIC_UI_DIVIDE 4.5/2=2.25/2=1.125:float continuation=0", "ARITHMETIC_UI_TEXT first=2.0:float/12:int second=2.0:float/14:int current=True", "ARITHMETIC_UI_IMAGE first=10/20 second=12/24:int bonus=3,2 ordered=True", "ARITHMETIC_UI_VALUES inert=True text=True condition=True rendered_actions=True continuation=4"].iter().all(|s| result.output.contains(s))
+                        } else {
+                            ["PASSED","ARITHMETIC_95_FIRST 6/12 points=2 fraction=4.0","ARITHMETIC_95_SECOND 7/14 points=4 fraction=2.0","ARITHMETIC_95_CURRENT trust=10 reward=20 points=19 fraction=0.25 floor=-3 remainder=2 precise=9007199254740993 widened=float:2.0","ARITHMETIC_95_VALUES inert=True click=True keyboard=True textbutton=True imagebutton=True continuation=1"].iter().all(|s| result.output.contains(s))
+                        })
             };
         cases[case_index] = json!({"status":"completed","case":operation,"passed":passed,"command":command,"exitCode":result.exit_code,"output":result.output,"timedOut":result.timed_out,"outputLimited":result.output_limited,"durationMs":started.elapsed().as_millis(),"acceptedSourceUnchanged":unchanged,"expectedRejection":reject});
         fs::write(
@@ -676,7 +734,12 @@ fn run_arithmetic_sdk(temporary: &tempfile::TempDir) {
         )
         .unwrap();
         println!(
-            "arithmetic-95-case: {}",
+            "{}: {}",
+            if ui_emitted {
+                "arithmetic-ui-case"
+            } else {
+                "arithmetic-95-case"
+            },
             json!({"case":operation,"passed":passed,"durationMs":started.elapsed().as_millis()})
         );
         assert!(passed, "{operation}: {}", cases[case_index]["output"]);
@@ -695,4 +758,243 @@ fn arithmetic_sources(root: &Path) -> std::collections::BTreeMap<String, Vec<u8>
             (p, bytes)
         })
         .collect()
+}
+
+fn verify_ui_emitted_inputs() {
+    let fixture = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/arithmetic-ui");
+    let manifest: Value = serde_json::from_slice(
+        &fs::read(fixture.join("manifest.json")).expect("portable UI-emitted inputs required"),
+    )
+    .unwrap();
+    assert_eq!(
+        hex::encode(Sha256::digest(
+            fs::read(fixture.join("requests.json")).unwrap()
+        )),
+        manifest["requestsSha256"]
+    );
+    for source in manifest["sources"].as_array().unwrap() {
+        let bytes = fs::read(fixture.join(source["file"].as_str().unwrap())).unwrap();
+        assert_eq!(hex::encode(Sha256::digest(bytes)), source["sha256"]);
+    }
+}
+
+fn sdk_runtime_identities(root: &Path) -> Value {
+    let paths = if cfg!(windows) {
+        vec!["renpy.py", "lib/py3-windows-x86_64/python.exe"]
+    } else {
+        vec![
+            "renpy.sh",
+            "renpy.py",
+            "lib/py3-mac-universal/renpy",
+            "lib/py3-mac-universal/python",
+            "lib/py3-mac-universal/librenpython.dylib",
+        ]
+    };
+    paths
+        .into_iter()
+        .map(|p| {
+            (
+                p.to_owned(),
+                json!(hex::encode(Sha256::digest(fs::read(root.join(p)).unwrap()))),
+            )
+        })
+        .collect::<serde_json::Map<_, _>>()
+        .into()
+}
+
+fn ui_arithmetic_fixture() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/arithmetic-ui")
+}
+
+fn accept_ui_emitted_arithmetic(service: &mut LifecycleService, root: &Path) -> Value {
+    let fixture = ui_arithmetic_fixture();
+    let manifest: Value =
+        serde_json::from_slice(&fs::read(fixture.join("manifest.json")).unwrap()).unwrap();
+    let existing = ipc(service, "authoring.list", json!({}));
+    for (name, kind, value) in [
+        ("flag", "bool", json!(true)),
+        ("money", "decimal", json!(4.5)),
+        ("unrelated_flag", "bool", json!(false)),
+        ("another_flag", "bool", json!(false)),
+        ("trust", "int", json!("5")),
+        ("reward", "int", json!("0")),
+        ("bonus", "int", json!("7")),
+    ] {
+        if !existing["variables"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|v| v["technicalName"] == name)
+        {
+            ipc(
+                service,
+                "variable.create",
+                json!({"technicalName":name,"variableType":kind,"defaultValue":value}),
+            );
+        }
+    }
+    let asset = &manifest["asset"];
+    let image = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .join(asset["repositoryFile"].as_str().unwrap());
+    let bytes = fs::read(image).unwrap();
+    assert_eq!(hex::encode(Sha256::digest(&bytes)), asset["sha256"]);
+    let selected = root.parent().unwrap().join("ui_station_seal.png");
+    fs::write(&selected, &bytes).unwrap();
+    fs::create_dir_all(root.join("game/images")).unwrap();
+    let choice = service.authoring_select_import(&selected).unwrap();
+    ipc(
+        service,
+        "asset.import",
+        json!({"authorityId":choice.authority_id,"kind":"uiImage","technicalName":"station_seal","displayName":"Station seal","characterId":null,"expression":null}),
+    );
+    assert_eq!(
+        fs::read(root.join(asset["target"].as_str().unwrap())).unwrap(),
+        bytes
+    );
+    for source in manifest["sources"].as_array().unwrap() {
+        let target = source["target"].as_str().unwrap();
+        let bytes = fs::read(fixture.join(source["file"].as_str().unwrap())).unwrap();
+        assert_eq!(hex::encode(Sha256::digest(&bytes)), source["sha256"]);
+        if source["file"] == "variables.rpy" {
+            assert_eq!(fs::read(root.join(target)).unwrap(), bytes);
+            continue;
+        }
+        fs::create_dir_all(root.join(target).parent().unwrap()).unwrap();
+        if !root.join(target).exists() {
+            fs::write(root.join(target), "").unwrap();
+        }
+        save_composition_source(
+            service,
+            &json!({"path":target}),
+            std::str::from_utf8(&bytes).unwrap(),
+        );
+    }
+    // Public Source history restores the exact imported Story bytes.
+    let model = ipc(service, "scene.list", json!({}));
+    ipc(
+        service,
+        "scene.apply",
+        json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"undo"}}),
+    );
+    let model = ipc(service, "scene.list", json!({}));
+    ipc(
+        service,
+        "scene.apply",
+        json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"redo"}}),
+    );
+    let accepted = arithmetic_sources(root);
+    let document = ipc(
+        service,
+        "screens.inspect",
+        json!({"path":"game/ui/arithmetic_dialog.rpy"}),
+    );
+    let variables = ipc(service, "authoring.list", json!({}));
+    let money = variables["variables"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["technicalName"] == "money")
+        .unwrap();
+    let plan = ipc(
+        service,
+        "screens.canvasPlan",
+        json!({"path":document["path"],"screenName":"arithmetic_dialog","expectedRevision":document["revision"],"width":1280,"height":720,"variableSamples":[{"variableId":money["id"],"expectedSourceRevision":money["source"]["sourceRevision"],"value":1e-7}]}),
+    );
+    assert!(
+        plan["nodes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|n| n["kind"] == "text" && n["literal"] == "Balance: 1e-07"),
+        "{plan}"
+    );
+    for limit in plan["limits"].as_array().unwrap() {
+        assert!([
+            "Unresolved project initialization or inherited styles in game/gui.rpy",
+            "Unresolved project initialization or inherited styles in game/options.rpy",
+            "Unresolved project initialization or inherited styles in game/screens.rpy",
+            "Unresolved key at 57",
+            "Unresolved idle at 1395",
+            "Unresolved image-button appearances at 1395",
+            "Unresolved idle at 2216",
+            "Unresolved image-button appearances at 2216",
+            "Unresolved project initialization or inherited styles in game/ui/arithmetic_dialog.rpy",
+        ].contains(&limit.as_str().unwrap()), "Unexpected canvas limit: {plan}");
+    }
+    assert_eq!(
+        arithmetic_sources(root),
+        accepted,
+        "inert planning changed accepted source"
+    );
+    save_composition_source(
+        service,
+        &json!({"path":"game/script.rpy"}),
+        &fs::read_to_string(fixture.join("driver.rpy")).unwrap(),
+    );
+    service.close().unwrap();
+    service.open_path(root).unwrap();
+    let reopened = ipc(service, "screens.inspect", json!({"path":document["path"]}));
+    assert_eq!(reopened["screens"], document["screens"]);
+    for source in manifest["sources"].as_array().unwrap() {
+        assert_eq!(
+            hex::encode(Sha256::digest(
+                fs::read(root.join(source["target"].as_str().unwrap())).unwrap()
+            )),
+            source["sha256"]
+        );
+    }
+    if let Some(dir) = std::env::var_os("LOOMLIGHT_ACTIONS_EVIDENCE_DIR") {
+        fs::create_dir_all(&dir).unwrap();
+        fs::write(
+            Path::new(&dir).join("canvas-sample.json"),
+            serde_json::to_vec_pretty(&plan).unwrap(),
+        )
+        .unwrap();
+        fs::write(
+            Path::new(&dir).join("portable-manifest.json"),
+            serde_json::to_vec_pretty(&manifest).unwrap(),
+        )
+        .unwrap();
+    }
+    document
+}
+
+#[test]
+fn ui_emitted_arithmetic_fixture_preflight() {
+    verify_ui_emitted_inputs();
+    let (_temporary, mut service, root, _) = composition_project();
+    accept_ui_emitted_arithmetic(&mut service, &root);
+    service.close().unwrap();
+}
+
+#[test]
+#[ignore = "#87 reviewed UI source; one explicitly selected SDK invocation per target"]
+fn ui_emitted_arithmetic_sdk_gate() {
+    let temporary = tempfile::tempdir().unwrap();
+    let owned = temporary.path().to_owned();
+    let result = std::panic::catch_unwind(|| run_arithmetic_sdk(&temporary, true));
+    let cleanup = temporary.close().is_ok() && !owned.exists();
+    println!(
+        "arithmetic-ui-terminal: {}",
+        json!({"passed":result.is_ok()&&cleanup,"cleanupComplete":cleanup})
+    );
+    if let Err(error) = result {
+        std::panic::resume_unwind(error);
+    }
+    assert!(cleanup);
+}
+
+#[test]
+fn ui_emitted_arithmetic_fixture_preflight_with_template_initialization() {
+    let (_temporary, mut service, root, _) = composition_project();
+    for file in ["gui.rpy", "options.rpy", "screens.rpy"] {
+        fs::write(
+            root.join("game").join(file),
+            "init python:\n    gui.init(1280, 720)\n",
+        )
+        .unwrap();
+    }
+    accept_ui_emitted_arithmetic(&mut service, &root);
+    service.close().unwrap();
 }

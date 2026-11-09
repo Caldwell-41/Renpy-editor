@@ -1,0 +1,36 @@
+{
+  "reviewedSource": "354b52211b42e85721d80b751b08832db10db38e",
+  "inventorySha256": "1b8e980a52a292532c2cea8e7952210e2e81d57afb2b0fb28593415b49fdf1e4",
+  "sources": [
+    {
+      "file": "variables.rpy",
+      "target": "game/definitions/variables.rpy",
+      "capture": "emitted/screens-candidate/game/definitions/variables.rpy",
+      "sha256": "2aa460421e11d481aa3f8710806866bbd3ac05103fb2b81ed1e828667ef332d1"
+    },
+    {
+      "file": "screen.rpy",
+      "target": "game/ui/arithmetic_dialog.rpy",
+      "capture": "emitted/screens-candidate/game/ui/arithmetic_dialog.rpy",
+      "sha256": "6155c9e458efe38bb5e030062ed077212e58391e90d471f246fd1cfff3da8821"
+    },
+    {
+      "file": "condition.rpy",
+      "target": "game/ui_condition.rpy",
+      "capture": "emitted/screens-candidate/game/chapters/chapter_01/scene_001.rpy",
+      "sha256": "c1fa1fd8e606d45e6ca823191ba77f56a2e137729d4a75f1762720fecb79a22c"
+    },
+    {
+      "file": "story.rpy",
+      "target": "game/ui_story.rpy",
+      "capture": "emitted/story-candidate/game/chapters/chapter_01/scene_001.rpy",
+      "sha256": "20d67a3c545d3ce33538d4518603a6a5c32eb25b68958db23625f2bad641c59c"
+    }
+  ],
+  "asset": {
+    "repositoryFile": "tests/fixtures/phase-3b-screens/ui-image/seal.png",
+    "target": "game/images/ui station_seal.png",
+    "sha256": "f036263d027b9a8258f4a48ce1a609bf20f9f94dfb7ea0ca22b0c95011f14771"
+  },
+  "requestsSha256": "53a4235566ef276eb1a41eed468605dc411c78b2566aa4c93c6205267c0cbff2"
+}

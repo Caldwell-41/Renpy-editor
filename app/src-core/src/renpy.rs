@@ -604,6 +604,18 @@ fn run_bounded_inner(
     #[cfg(test)]
     PROCESS_SPAWN_COUNT.fetch_add(1, Ordering::SeqCst);
     let mut child = command.spawn().map_err(|_| RenpyError::ProcessFailed)?;
+    #[cfg(test)]
+    let receipt_started = Instant::now();
+    #[cfg(test)]
+    if record_sdk_test_child(
+        serde_json::json!({"status":"started","pid":child.id(),"cwd":cwd,"command":argv}),
+    )
+    .is_err()
+    {
+        kill_tree(&mut child);
+        let _ = child.wait();
+        return Err(RenpyError::ProcessFailed);
+    }
     if let Some(hook) = after_spawn.as_mut() {
         if let Err(error) = hook() {
             kill_tree(&mut child);
@@ -669,6 +681,10 @@ fn run_bounded_inner(
             message: redact_line(line),
         })
         .collect();
+    #[cfg(test)]
+    record_sdk_test_child(
+        serde_json::json!({"status":"completed","pid":child.id(),"cwd":cwd,"command":argv,"exitCode":exit,"timedOut":timed_out,"outputLimited":limited.load(Ordering::SeqCst),"durationMs":receipt_started.elapsed().as_millis(),"output":output}),
+    ).map_err(|_| RenpyError::ProcessFailed)?;
     Ok(ProcessResult {
         exit_code: exit,
         output,
@@ -676,6 +692,21 @@ fn run_bounded_inner(
         output_limited: limited.load(Ordering::SeqCst),
         diagnostics,
     })
+}
+
+// Test-only receipt extension of the existing subprocess owner. This records
+// construction/version children as well as selected SDK cases, without a second runner.
+#[cfg(test)]
+fn record_sdk_test_child(value: serde_json::Value) -> io::Result<()> {
+    use std::io::Write;
+    if let Some(dir) = std::env::var_os("LOOMLIGHT_SDK_CHILD_EVIDENCE_DIR") {
+        let mut file = fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(Path::new(&dir).join("sdk-children.jsonl"))?;
+        writeln!(file, "{}", value)?;
+    }
+    Ok(())
 }
 
 #[cfg(unix)]
