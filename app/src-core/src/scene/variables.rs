@@ -278,8 +278,56 @@ impl Default for AssignmentCapabilities {
             max_nodes: crate::conditions::MAX_EXPRESSION_NODES,
             max_depth: crate::conditions::MAX_EXPRESSION_DEPTH,
             integer_transport: "signedI64String",
-            decimal_transport: "finiteFloat64",
+            decimal_transport: "finiteFloat64OrNegativeZero",
             functions: false,
         }
+    }
+}
+
+/// Compare assignments without observing runtime variables or rounding integer values.
+/// A constant formula and a literal have the same timing; variable reads do not.
+pub(crate) fn equivalent_values(
+    kind: VariableType,
+    previous: &Value,
+    next: &Value,
+    authoring: &AuthoringMetadata,
+    target: &str,
+) -> bool {
+    if !arithmetic::numeric_type(kind) {
+        return previous == next;
+    }
+    let formula = |value: &Value| {
+        let adjustment: IntegerAdjustment = if value.is_object() {
+            serde_json::from_value(value.clone()).ok()?
+        } else {
+            IntegerAdjustment {
+                operation: arithmetic::IntegerOperation::Assign,
+                operand: if kind == VariableType::Int {
+                    value
+                        .as_str()
+                        .map(str::to_owned)
+                        .or_else(|| value.as_i64().map(|v| v.to_string()))?
+                } else {
+                    crate::authoring::variable_literal(kind, value).ok()?
+                },
+            }
+        };
+        let formula = adjustment.formula(authoring, target).ok()?;
+        (kind != VariableType::Int || formula.result_type() == VariableType::Int).then_some(formula)
+    };
+    let (Some(previous), Some(next)) = (formula(previous), formula(next)) else {
+        return false;
+    };
+    if previous == next {
+        return true;
+    }
+    let unobserved = |_: &str| Err(ArithmeticUnknown::UnobservedCurrentValue);
+    match (previous.evaluate(&unobserved), next.evaluate(&unobserved)) {
+        (Ok(a), Ok(b)) => {
+            a.compare(b).is_eq()
+                && (a.float() != 0.0
+                    || a.float().is_sign_negative() == b.float().is_sign_negative())
+        }
+        _ => false,
     }
 }

@@ -4785,33 +4785,20 @@ fn patch_variable_assignment(
     };
     let text = std::str::from_utf8(original).map_err(|_| SceneError::UnsupportedSource)?;
     if old_id == variable_id {
-        if old_value == value {
+        if loaded.authoring.variables.iter().any(|variable| {
+            variable.id == *variable_id
+                && variables::equivalent_values(
+                    variable.variable_type,
+                    old_value,
+                    value,
+                    &loaded.authoring,
+                    variable_id,
+                )
+        }) {
             return Ok(Some(text.into()));
         }
-        let formula = |value: &Value| {
-            let adjustment = if value.is_object() {
-                serde_json::from_value(value.clone()).ok()?
-            } else {
-                crate::conditions::arithmetic::IntegerAdjustment {
-                    operation: crate::conditions::arithmetic::IntegerOperation::Assign,
-                    operand: value
-                        .as_str()
-                        .map(str::to_owned)
-                        .or_else(|| value.as_f64().map(crate::authoring::decimal_literal))?,
-                }
-            };
-            adjustment.formula(&loaded.authoring, variable_id).ok()
-        };
-        if loaded.authoring.variables.iter().any(|v| {
-            v.id == *variable_id && crate::conditions::arithmetic::numeric_type(v.variable_type)
-        }) {
-            if let (Some(old), Some(next)) = (formula(old_value), formula(value)) {
-                if old == next {
-                    return Ok(Some(text.into()));
-                }
-            }
-        }
     }
+
     let code = logic::without_comment(text).trim_end();
     let mut patched = text.to_owned();
     if old_id == variable_id && old_value.is_object() && value.is_object() {
@@ -4926,7 +4913,7 @@ fn parse_value(kind: VariableType, literal: &str) -> Option<Value> {
             .parse::<f64>()
             .ok()
             .filter(|v| v.is_finite())
-            .map(Value::from),
+            .map(crate::authoring::decimal_value),
         VariableType::String => literal
             .strip_prefix('"')
             .and_then(|value| value.strip_suffix('"'))

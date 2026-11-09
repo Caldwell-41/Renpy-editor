@@ -56,20 +56,22 @@ checkout remains unchanged at `251fb477`. Evidence-bearing worker worktrees and
 the approved reference are retained cleanup exceptions. Do not force-remove them
 or delete ignored artifacts. Their implementation histories are integrated.
 
-Exact-head automatic CI at `f42747ef` is audited green: 390 frontend tests, all
+Exact-head automatic CI at `2d49595e` is audited green: 391 frontend tests, all
 17 browser/dispatch fixtures, production build, Rust formatting, focused core
-checks and repository validation. The [owning-issue receipt](https://github.com/Caldwell-41/Renpy-editor/issues/87#issuecomment-6748668005)
-records both passing runs. Earlier failures remain historical. The records-only
-scope-closeout successor needs its own automatic checks. Use the T3 PR watcher
-for a pending check and audit the exact run on wake. Record that final receipt on
-#87 rather than creating another receipt-only commit.
+checks and repository validation. The [owning-issue receipt](https://github.com/Caldwell-41/Renpy-editor/issues/87#issuecomment-6752268497)
+records that successful run. Earlier failures remain historical. Record the next
+final CI receipt on #87 rather than creating another receipt-only commit.
 
-Kris selected the fresh review's variable-default validation correction and PR
-update. The [follow-up evidence](../tasks/evidence/arithmetic-review.md#variable-default-validation-follow-up-2026-11-10)
-records the failing UI test, shared-validator fix and passing focused UI/core
-checks. The local full suite retains a Python 3.9.6 `tomllib` failure; required
-CI uses supported tools. Next: publish the correction to the existing ready
-PR #122, then use its T3 watcher and audit the new exact-head automatic checks.
+Kris selected one Sol 6.1 xhigh implementer for four audited Terra findings,
+followed by coordinator verification and PR update. The
+[correction evidence](../tasks/evidence/arithmetic-review.md#audited-terra-findings-and-sol-corrections-2026-11-10)
+records the shared helper admission/no-op fixes, signed-zero transport contract,
+the coordinator's duplicate-class correction and passing independent checks.
+There are 37 passing frontend tests, 24 distinct core/preflight cases and both
+production-main/core journeys. These changes add no new SDK/native proof.
+The local full suite retains the earlier Python 3.9.6 `tomllib` limitation.
+Next: publish the verified correction to ready PR #122, then use its T3 watcher
+and audit the new exact-head automatic checks.
 Keep #91–#97 open for PR review/merge disposition. No merge, #110 implementation,
 release or parent-branch promotion is selected.
 

@@ -497,10 +497,7 @@ fn evaluate_expression(
                     TypedValue::Int(parsed)
                 }
                 VariableType::Decimal => TypedValue::Decimal(
-                    value
-                        .as_f64()
-                        .filter(|v| v.is_finite())
-                        .ok_or(ConditionError::TypeMismatch)?,
+                    crate::authoring::decimal_number(value).ok_or(ConditionError::TypeMismatch)?,
                 ),
                 VariableType::String => {
                     TypedValue::String(value.as_str().ok_or(ConditionError::TypeMismatch)?.into())

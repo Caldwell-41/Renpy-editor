@@ -1079,3 +1079,50 @@ This remains a failed local full run, not a pass. Local Node is 26.8.1 and npm
 Publication requires new exact-head automatic CI. No SDK, browser/native app or
 package run was started. SDK totals remain Mac 12/20 and Windows 4/20, with zero
 reservations. Existing design and runtime evidence retains its original scope.
+
+## Audited Terra findings and Sol corrections, 2026-11-10
+
+Kris requested a fresh review, then selected one GPT-6.1 Terra reviewer at max
+after both Fable requests failed with API rate limits. Terra reviewed `2d49595e`
+and reported two Standards findings and four Spec findings. The Standards entries
+overlap the Spec entries; the report identifies four underlying defects. The
+coordinator audited all four against public commands and production controls.
+Terra's original helper reproduction put a function outside the class. The audit
+corrected it to a method inside the class and still reproduced editable arithmetic
+with no protection reason. The failed reproduction is not runtime proof.
+
+Kris selected one GPT-6.1 Sol implementer at xhigh, followed by coordinator
+verification and publication to PR #122. The implementer returned uncommitted
+code and focused red/green results. No additional agents were started.
+
+| Defect | Root correction and independent result |
+| --- | --- |
+| P2 modified helper remains editable | Inspection, write admission and canvas qualification share the lexical declaration check. Appended methods, comments, quoted templates and duplicate declarations remain Source-only. The original inside-class override now reports protection and refuses a write without changing source. |
+| P2 unchanged Story decimal adds history | Story and Screens share assignment equivalence without observing runtime variables. Actual Story controls keep `$ money = 1.0` byte-identical and leave history empty. The comparison preserves large-i64 precision and distinguishes signed zero. |
+| P2 same-value Screens formula adds history | Re-entering `5` in the actual formula field preserves the imported literal action and helper absence. Untouched Apply also preserves source. The accepted response reports no change and history stays empty. |
+| P3 decimal negative zero becomes positive | The exact string `"-0.0"` carries signed zero across JSON. Defaults, literal assignments, formula results, conditions and inert samples use the shared numeric owner. Production Variables controls now save `default negative_zero = -0.0`; DATA_MODEL records the request/response contract. |
+
+Coordinator review found one incomplete helper correction: a duplicate class with
+an `(object)` header still passed the generated-header count. A disposable public
+command reproduction and the extended existing regression both failed. Counting
+lexical class names fixes that spelling variant through the same admission owner.
+The regression now covers six customized-source cases and the independent
+reproduction reports protection plus `OPAQUE_BOUNDARY`, preserving exact bytes.
+
+Independent checks pass: all four original reproductions, the added helper variant,
+both complete Story/Screens production-main/core journeys, 37 frontend tests, all
+21 Story arithmetic cases, the helper and signed-zero action cases, and the decimal
+fixture preflight (24 distinct core/preflight cases total). Core logs pass the
+shared `cargo-log` gate. Driver cleanup is complete with observed zero exits.
+Production build, Rust formatting, whitespace and repository validation pass.
+The final helper-name correction repeats only its affected regression and public
+reproduction; the preceding journeys retain their producing inputs and results.
+
+Prior exact-head CI at `2d49595e` passed 391 frontend tests and 17 fixtures,
+recorded in the [owning-issue receipt](https://github.com/Caldwell-41/Renpy-editor/issues/87#issuecomment-6752268497).
+The current correction requires fresh automatic CI. The full local suite was not
+rerun with this host's Python 3.9.6; its prior `tomllib` failure stays recorded.
+No SDK, browser/native app or package was launched. SDK use remains Mac 12/20 and
+Windows 4/20, with zero reservations. Generated runtime adapter code and supported
+Ren'Py syntax remain unchanged; earlier SDK/native/human evidence keeps its original
+candidate scope. No merge, release or #110 implementation is selected.

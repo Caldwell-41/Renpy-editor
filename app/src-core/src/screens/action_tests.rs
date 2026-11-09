@@ -1147,3 +1147,116 @@ fn arithmetic_draft_uses_the_composition_admission_without_committing() {
         before
     );
 }
+
+#[test]
+fn customized_arithmetic_helper_stays_source_only() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let variables = ipc(
+        &mut service,
+        "variable.create",
+        json!({"technicalName":"trust","variableType":"int","defaultValue":"0"}),
+    );
+    let variable = variables["variables"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["variableType"] == "int")
+        .unwrap();
+    let added = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"textbutton","text":"Calculate"}),
+    );
+    let command = json!({"type":"actions","nodeId":added["selectedId"],
+        "expectedAuthoringRevision":added["document"]["authoringRevision"],"expectedTargetRevisions":[],
+        "actions":[{"type":"setVariable","variableId":variable["id"],"value":{"operation":"assign","operand":"5"}}]});
+    compose_command(&mut service, &owner, command.clone());
+    let path = root.join(owner["path"].as_str().unwrap());
+    let generated = fs::read_to_string(&path).unwrap();
+    let inside_class = format!("{generated}\n        @staticmethod\n        def assign(target, kind, operation, operand, compute):\n            setattr(renpy.store, target, 999)\n");
+    let declaration = generated.find("init -100 python:").unwrap();
+    let quoted = format!(
+        "{}define helper_note = \"\"\"\n{}\"\"\"\n",
+        &generated[..declaration],
+        &generated[declaration..]
+    );
+    let duplicate = format!("{generated}\n{}", &generated[declaration..]);
+    let duplicate_customized = format!(
+        "{generated}\n{}",
+        generated[declaration..].replacen("init -100 python:", "init -99 python:", 1)
+    );
+    let duplicate_inherited = format!(
+        "{generated}\n{}",
+        generated[declaration..]
+            .replacen("init -100 python:", "init -99 python:", 1)
+            .replacen(
+                ":\n        @staticmethod",
+                "(object):\n        @staticmethod",
+                1
+            )
+    );
+    let commented_override = format!(
+        "{generated}\n# A comment does not end the class.\n{}",
+        &inside_class[generated.len()..]
+    );
+    for customized in [
+        inside_class,
+        commented_override,
+        quoted,
+        duplicate,
+        duplicate_customized,
+        duplicate_inherited,
+    ] {
+        save_composition_source(&mut service, &owner, &customized);
+        let doc = ipc(
+            &mut service,
+            "screens.inspect",
+            json!({"path":owner["path"]}),
+        );
+        let node = &doc["screens"][0]["nodes"][1];
+        assert!(node["actions"].is_null());
+        assert!(node["actionProtectionReason"]
+            .as_str()
+            .unwrap()
+            .contains("unchanged runtime adapter"));
+        reject(
+            &mut service,
+            "screens.compose",
+            json!({"screenId":owner["id"],"expectedRevision":doc["revision"],"command":command}),
+        );
+        assert_eq!(fs::read_to_string(&path).unwrap(), customized);
+    }
+}
+
+#[test]
+fn decimal_literal_screen_actions_keep_negative_zero() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let variables = ipc(
+        &mut service,
+        "variable.create",
+        json!({"technicalName":"fraction","variableType":"decimal","defaultValue":"-0.0"}),
+    );
+    let variable = variables["variables"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["technicalName"] == "fraction")
+        .unwrap();
+    let added = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"textbutton","text":"Set fraction"}),
+    );
+    let command = json!({"type":"actions","nodeId":added["selectedId"],"expectedAuthoringRevision":added["document"]["authoringRevision"],"expectedTargetRevisions":[],"actions":[{"type":"setVariable","variableId":variable["id"],"value":"-0.0"}]});
+    let applied = compose_command(&mut service, &owner, command.clone());
+    assert_eq!(
+        applied["document"]["screens"][0]["nodes"][1]["actions"],
+        command["actions"]
+    );
+    let accepted = fs::read_to_string(root.join(owner["path"].as_str().unwrap())).unwrap();
+    assert!(accepted.contains("SetVariable(\"fraction\", -0.0)"));
+    assert_eq!(
+        compose_command(&mut service, &owner, command)["changed"],
+        false
+    );
+}

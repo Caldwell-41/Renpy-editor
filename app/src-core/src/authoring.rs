@@ -1474,12 +1474,8 @@ impl AuthoringService {
         )?;
         for variable in &mut metadata.variables {
             variable.source.source_revision = variable_revision.sha256.clone();
-            if variable.variable_type == VariableType::Int {
-                variable.default_value = Value::String(variable_literal(
-                    VariableType::Int,
-                    &variable.default_value,
-                )?);
-            }
+            variable.default_value =
+                canonical_variable_value(variable.variable_type, &variable.default_value)?;
         }
         Ok(())
     }
@@ -2075,9 +2071,7 @@ pub fn variable_literal(kind: VariableType, value: &Value) -> Result<String, Aut
     match (kind, value) {
         (VariableType::Bool, Value::Bool(true)) => Ok("True".into()),
         (VariableType::Bool, Value::Bool(false)) => Ok("False".into()),
-        (VariableType::Decimal, Value::Number(number)) => number
-            .as_f64()
-            .filter(|v| v.is_finite())
+        (VariableType::Decimal, value) => decimal_number(value)
             .map(decimal_literal)
             .ok_or(AuthoringError::InvalidValue),
         (VariableType::Int, Value::Number(number)) if number.is_i64() => Ok(number.to_string()),
@@ -2097,8 +2091,8 @@ fn canonical_variable_value(kind: VariableType, value: &Value) -> Result<Value, 
         VariableType::Int => Ok(Value::String(variable_literal(kind, value)?)),
         VariableType::Decimal => {
             variable_literal(kind, value)?;
-            Ok(Value::from(
-                value.as_f64().ok_or(AuthoringError::InvalidValue)?,
+            Ok(decimal_value(
+                decimal_number(value).ok_or(AuthoringError::InvalidValue)?,
             ))
         }
         VariableType::Bool | VariableType::String => {
@@ -4165,5 +4159,22 @@ pub(crate) fn decimal_literal(value: f64) -> String {
         text
     } else {
         format!("{text}.0")
+    }
+}
+
+/// JSON stringification loses the sign of numeric zero. Only this decimal string is admitted.
+pub(crate) fn decimal_number(value: &Value) -> Option<f64> {
+    if value.as_str() == Some("-0.0") {
+        Some(-0.0)
+    } else {
+        value.as_f64().filter(|value| value.is_finite())
+    }
+}
+
+pub(crate) fn decimal_value(value: f64) -> Value {
+    if value == 0.0 && value.is_sign_negative() {
+        Value::String("-0.0".into())
+    } else {
+        Value::from(value)
     }
 }

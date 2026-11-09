@@ -53,7 +53,7 @@ export interface ScreenArithmeticInspection {
   actionCapabilities: {
     operators: string[]; operations: ScreenArithmeticValue["operation"][];
     maxBytes: number; maxNodes: number; maxDepth: number;
-    integerTransport: "signedI64String"; decimalTransport: "finiteFloat64"; functions: false;
+    integerTransport: "signedI64String"; decimalTransport: "finiteFloat64OrNegativeZero"; functions: false;
   };
 }
 export interface ScreenActionInspection {

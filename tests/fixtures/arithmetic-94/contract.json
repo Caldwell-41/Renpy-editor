@@ -45,7 +45,7 @@
         },
         "authoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
         "capabilities": {
-          "decimalTransport": "finiteFloat64",
+          "decimalTransport": "finiteFloat64OrNegativeZero",
           "functions": false,
           "integerTransport": "signedI64String",
           "maxBytes": 4096,
@@ -130,7 +130,7 @@
       },
       "authoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
       "capabilities": {
-        "decimalTransport": "finiteFloat64",
+        "decimalTransport": "finiteFloat64OrNegativeZero",
         "functions": false,
         "integerTransport": "signedI64String",
         "maxBytes": 4096,
@@ -249,7 +249,7 @@
           },
           "authoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
           "capabilities": {
-            "decimalTransport": "finiteFloat64",
+            "decimalTransport": "finiteFloat64OrNegativeZero",
             "functions": false,
             "integerTransport": "signedI64String",
             "maxBytes": 4096,
@@ -360,7 +360,7 @@
           },
           "authoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
           "capabilities": {
-            "decimalTransport": "finiteFloat64",
+            "decimalTransport": "finiteFloat64OrNegativeZero",
             "functions": false,
             "integerTransport": "signedI64String",
             "maxBytes": 4096,
@@ -471,7 +471,7 @@
           },
           "authoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
           "capabilities": {
-            "decimalTransport": "finiteFloat64",
+            "decimalTransport": "finiteFloat64OrNegativeZero",
             "functions": false,
             "integerTransport": "signedI64String",
             "maxBytes": 4096,
@@ -582,7 +582,7 @@
           },
           "authoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
           "capabilities": {
-            "decimalTransport": "finiteFloat64",
+            "decimalTransport": "finiteFloat64OrNegativeZero",
             "functions": false,
             "integerTransport": "signedI64String",
             "maxBytes": 4096,
@@ -693,7 +693,7 @@
           },
           "authoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
           "capabilities": {
-            "decimalTransport": "finiteFloat64",
+            "decimalTransport": "finiteFloat64OrNegativeZero",
             "functions": false,
             "integerTransport": "signedI64String",
             "maxBytes": 4096,
@@ -804,7 +804,7 @@
           },
           "authoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
           "capabilities": {
-            "decimalTransport": "finiteFloat64",
+            "decimalTransport": "finiteFloat64OrNegativeZero",
             "functions": false,
             "integerTransport": "signedI64String",
             "maxBytes": 4096,

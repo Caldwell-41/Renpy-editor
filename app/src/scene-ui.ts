@@ -1546,6 +1546,6 @@ export interface AssignmentDraftValidation {
     readonly operators: readonly string[];
     readonly operations: readonly IntegerAdjustment["operation"][];
     readonly maxBytes: number; readonly maxNodes: number; readonly maxDepth: number;
-    readonly integerTransport: "signedI64String"; readonly decimalTransport: "finiteFloat64"; readonly functions: false;
+    readonly integerTransport: "signedI64String"; readonly decimalTransport: "finiteFloat64OrNegativeZero"; readonly functions: false;
   };
 }

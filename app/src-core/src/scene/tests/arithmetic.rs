@@ -919,3 +919,104 @@ fn decimal_target_import_preserves_an_existing_integer_assignment_exactly() {
     assert_eq!(fs::read(f.root.join(&scene.source_path)).unwrap(), source);
     assert_eq!(after.can_undo, model.can_undo);
 }
+
+#[test]
+fn literal_formula_noops_preserve_types_signs_and_exact_integers() {
+    for (kind, literal, operand, unchanged) in [
+        (
+            VariableType::Int,
+            "+9007199254740993",
+            "9007199254740993",
+            true,
+        ),
+        (
+            VariableType::Int,
+            "-9223372036854775808",
+            "-9223372036854775808",
+            true,
+        ),
+        (VariableType::Decimal, "-1.0", "-1", true),
+        (
+            VariableType::Decimal,
+            "9007199254740992.0",
+            "9007199254740993",
+            false,
+        ),
+        (VariableType::Decimal, "-0.0", "0.0", false),
+    ] {
+        let source = format!("label scene_one:\n    $ score = {literal}\n    return\n");
+        let f = Fixture::new(source.as_bytes());
+        f.service
+            .create_variable(
+                &f.project,
+                &f.project_id,
+                CreateVariableRequest {
+                    technical_name: "score".into(),
+                    variable_type: kind,
+                    default_value: if kind == VariableType::Int {
+                        json!("0")
+                    } else {
+                        json!(0.0)
+                    },
+                },
+            )
+            .unwrap();
+        f.migrate();
+        let model = f.workspace();
+        let scene = &model.scenes[0];
+        let after = apply_wire(&f, &model, json!({"type":"updateBodyBeat","sceneId":scene.id,
+            "expectedSourceRevision":scene.source_revision,"beatId":scene.beats[0].id,
+            "expectedBody":{"type":"root"},"beat":{"type":"setVariable","variableId":model.authoring.variables[0].id,
+            "value":{"operation":"assign","operand":operand}}})).unwrap();
+        assert_eq!(
+            fs::read_to_string(f.root.join(&scene.source_path)).unwrap() == source,
+            unchanged,
+            "{literal} -> {operand}"
+        );
+        assert_eq!(after.can_undo, model.can_undo || !unchanged);
+        if !unchanged {
+            f.apply(&after, SceneCommand::Undo).unwrap();
+            assert_eq!(
+                fs::read_to_string(f.root.join(&scene.source_path)).unwrap(),
+                source
+            );
+        }
+    }
+}
+
+#[test]
+fn decimal_literal_commands_and_formula_results_keep_negative_zero() {
+    let f = Fixture::new(
+        b"label scene_one:\n    $ fraction = 1.0\n    $ fraction = fraction * 1.0\n    return\n",
+    );
+    f.service
+        .create_variable(
+            &f.project,
+            &f.project_id,
+            serde_json::from_value(
+                json!({"technicalName":"fraction","variableType":"decimal","defaultValue":"-0.0"}),
+            )
+            .unwrap(),
+        )
+        .unwrap();
+    f.migrate();
+    let model = f.workspace();
+    let scene = &model.scenes[0];
+    let command = json!({"type":"updateBodyBeat","sceneId":scene.id,
+        "expectedSourceRevision":scene.source_revision,"beatId":scene.beats[0].id,
+        "expectedBody":{"type":"root"},"beat":{"type":"setVariable","variableId":model.authoring.variables[0].id,"value":"-0.0"}});
+    let after = apply_wire(&f, &model, command).unwrap();
+    let wire = serde_json::to_value(&after).unwrap();
+    assert_eq!(wire["scenes"][0]["beats"][0]["payload"]["value"], "-0.0");
+    for beat in &wire["scenes"][0]["beats"].as_array().unwrap()[..2] {
+        assert_eq!(
+            beat["assignment"]["state"],
+            json!({"status":"known","value":"-0.0"})
+        );
+    }
+    let accepted = fs::read(f.root.join(&scene.source_path)).unwrap();
+    assert!(String::from_utf8_lossy(&accepted).contains("$ fraction = -0.0"));
+    let undone = f.apply(&after, SceneCommand::Undo).unwrap();
+    f.apply(&undone, SceneCommand::Redo).unwrap();
+    assert_eq!(fs::read(f.root.join(&scene.source_path)).unwrap(), accepted);
+}

@@ -574,7 +574,7 @@ fn inspect_decimal_fixture(model: &serde_json::Value) {
         ("remfloat", json!(5.551115123125783e-17)),
         ("widened", json!(-3.0)),
         ("mixed", json!(9007199254740992.0)),
-        ("signedzero", json!(-0.0)),
+        ("signedzero", json!("-0.0")),
         ("subnormal", json!(5e-324)),
     ] {
         let variable = model["authoring"]["variables"]
@@ -590,14 +590,7 @@ fn inspect_decimal_fixture(model: &serde_json::Value) {
             .find(|b| b["payload"]["variableId"] == variable["id"])
             .unwrap();
         assert_eq!(beat["assignment"]["inferredResultType"], "decimal");
-        assert_eq!(
-            beat["assignment"]["state"]["value"]
-                .as_f64()
-                .unwrap()
-                .to_bits(),
-            expected.as_f64().unwrap().to_bits(),
-            "{name}"
-        );
+        assert_eq!(beat["assignment"]["state"]["value"], expected, "{name}");
     }
 }
 

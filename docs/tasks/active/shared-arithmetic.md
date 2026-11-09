@@ -1819,3 +1819,15 @@ actual-main/core journey, and the local full-suite Python limitation. Publish
 the correction to PR #122 and audit its new automatic checks. The validation
 plan still selects Repository quality only. No SDK/native/package operation,
 merge or #110 work is selected; existing operation counts remain unchanged.
+
+### 2026-11-10: audited Terra findings corrected
+
+Kris selected one Sol 6.1 xhigh implementer for four audited defects, with
+coordinator verification and PR update. The [correction evidence](../evidence/arithmetic-review.md#audited-terra-findings-and-sol-corrections-2026-11-10)
+records the original review counts, corrected helper reproduction, focused
+red/green tests and the coordinator's additional helper-declaration correction.
+All four independent cases, both production-main/core journeys, 37 frontend
+tests and 24 distinct core/preflight cases pass. Build, formatting and repository
+validation pass. Publish the combined correction to PR #122 and audit its new
+automatic checks through the existing validation plan. SDK counts and reservations
+are unchanged; no native/package qualification, merge or #110 work is selected.

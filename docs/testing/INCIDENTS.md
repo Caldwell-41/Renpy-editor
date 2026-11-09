@@ -1111,3 +1111,34 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   IME, Cancel and no invalid writes. The actual-main/core journey retains
   default drafts through unrelated creation, history, refusals and reopen.
 - **Evidence:** [TDD follow-up](../tasks/evidence/arithmetic-review.md#variable-default-validation-follow-up-2026-11-10).
+
+## H78. Arithmetic helper recognition accepts customized declarations
+
+- **Class/search:** source admission; helper substring, appended method, quoted
+  template, duplicate class with `(object)`.
+- **Cause/correction:** substring and exact-header counts did not establish a
+  complete unique declaration. Share lexical declaration qualification between
+  inspection, write admission and canvas; count helper class names across headers.
+- **Regression:** six customized-source cases and independent public-command
+  checks require protection, write refusal and exact byte retention.
+- **Evidence:** [Terra audit and corrections](../tasks/evidence/arithmetic-review.md#audited-terra-findings-and-sol-corrections-2026-11-10).
+
+## H79. Literal-to-formula no-ops create source and history changes
+
+- **Class/search:** numeric representation; Story `1.0` displayed as `1`, same-value
+  Screens formula inserts `Function` and helper.
+- **Cause/correction:** raw payload/tree equality missed equivalent typed constants.
+  Share assignment equivalence without reading runtime values, rounding i64 values
+  or equating opposite signed zeros. Preserve imported action timing and source.
+- **Regression:** actual Story/Screens controls preserve bytes and empty history;
+  public-core checks retain large integers, comments and meaningful sign changes.
+- **Evidence:** [Terra audit and corrections](../tasks/evidence/arithmetic-review.md#audited-terra-findings-and-sol-corrections-2026-11-10).
+
+## H80. Decimal JSON transport loses negative zero
+
+- **Class/search:** numeric transport; `-0.0` input saves `0.0`, JSON stringification.
+- **Cause/correction:** JavaScript serializes numeric negative zero as positive zero.
+  Admit the exact `"-0.0"` string through the shared decimal owner and typed contract.
+- **Regression:** defaults, literal assignments, formula results, conditions, inert
+  samples, shared history and reopen retain the sign through public operations.
+- **Evidence:** [Terra audit and corrections](../tasks/evidence/arithmetic-review.md#audited-terra-findings-and-sol-corrections-2026-11-10).

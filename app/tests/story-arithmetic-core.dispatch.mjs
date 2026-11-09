@@ -46,12 +46,17 @@ try{
  assert.equal((await child.next()).ready,true);const recent=(await call('project.listRecent'))[0];const opened=await call('project.openRecent',{recentId:recent.id});
  for(const [technicalName,variableType,defaultValue] of [['trust','int','99'],['bonus','int','7'],['money','decimal',99.5],['arith_flag','bool',false],['arith_title','string','literal']])await call('variable.create',{technicalName,variableType,defaultValue});
  const initial=await call('scene.list'),entry=initial.scenes.find(s=>s.id===initial.entrySceneId);const path=entry.sourcePath;
- const fixture=(await readFile(new URL('../../tests/fixtures/arithmetic-96/story.rpy',import.meta.url),'utf8')).replace('ENTRY_LABEL',entry.technicalLabel);
+ const fixture=(await readFile(new URL('../../tests/fixtures/arithmetic-96/story.rpy',import.meta.url),'utf8')).replace('ENTRY_LABEL',entry.technicalLabel).replace('    $ money = 9.5','    $ money = -0.0\n    $ money = 1.0\n    $ money = 9.5');
  await saveSource(path,fixture);await call('project.close');session=undefined;
  document.body.innerHTML='<div id="app"></div>';const {startApplication}=await import('../dist-tests/src/main.js');startApplication(requester);
  await wait(()=>document.querySelector('.recent-open')&&!document.querySelector('.recent-open').disabled);document.querySelector('.recent-open').click();await wait(()=>document.querySelector('.beat-card'));await settle();
  assert.equal(await source(path),fixture,'opening imported arithmetic preserves exact source');
  const scene=()=>workspace.scenes.find(s=>s.id===entry.id),numeric=()=>scene().beats.filter(b=>b.payload.type==='setVariable');
+ const signedZero=numeric().find(b=>b.payload.value==='-0.0');assert(signedZero);await selectBeat(signedZero.id);assert.equal(formula().value,'-0.0');assert.equal((await commit()).ok,true);assert.equal(await source(path),fixture);assert.equal(workspace.canUndo,false);
+ const literal=numeric().find(b=>b.payload.value===1);assert(literal);
+ await selectBeat(literal.id);assert.equal(formula().value,'1');assert.equal(workspace.canUndo,false);
+ assert.equal((await commit()).ok,true);assert.equal(await source(path),fixture,'unchanged decimal literal preserves bytes');assert.equal(workspace.canUndo,false,'unchanged decimal literal adds no history');
+ stage('unchanged decimal literal commits through actual Story controls without source or history changes');
  const compound=numeric().find(b=>b.payload.value?.operation==='add'),decimal=numeric().find(b=>b.payload.value?.operand==='money / 2');assert(compound&&decimal);
  await selectBeat(compound.id);assert.equal(formula().value,'(bonus + 2) * 3');assert.match(selected().textContent,/Current value unknown/);assert(!selected().textContent.includes('Draft result 99'));assert.match(selected().querySelector('.beat-summary').textContent,/trust/);
  assert.equal(lastValidation.ok,true);assert.equal(lastValidation.value.assignment.inferredResultType,'int');assert.equal(lastValidation.value.assignment.state.status,'unknown');

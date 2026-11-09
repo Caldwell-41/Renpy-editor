@@ -351,7 +351,12 @@ assignment. Variable creation and default edits commit source plus authoring met
 in one entry through the existing shared session history. Semantic no-ops and refused
 edits add no entry. Undo/Redo restores both files and their actual revisions; project
 reopen retains accepted values and starts a new empty history. Existing types stay fixed after creation. Decimal defaults and values use
-finite binary64 JSON numbers; integer values retain exact signed i64 strings. Story
+finite binary64 JSON numbers, with the exact JSON string `"-0.0"` for negative
+zero. This applies to defaults, literal assignments, inspected arithmetic results
+and canvas samples. Core also accepts a signed numeric zero and returns the string
+form; other decimal strings are refused. Positive zero remains a JSON number.
+Condition decimal atoms and arithmetic operands remain source strings. Integer
+values retain exact signed i64 strings. Story
 also supports bounded numeric formulas. Set variable keeps
 `variableId` and `value`; arithmetic uses `{operation, operand}` in `value`.
 Operations are `assign`, `add`, `subtract`, `multiply`, `divide`, `floorDivide` and
@@ -369,6 +374,7 @@ command as `scene.apply` and checks the same admission without committing source
 history. Its typed response reports target/input, supported/refused state, inferred
 result type, reads/writes, field diagnostics, unknown reasons, variable choices with
 definition revisions, numeric capabilities and project/map/authoring/Scene revisions.
+`capabilities.decimalTransport` is `"finiteFloat64OrNegativeZero"`.
 Draft values are constant-folded only; variable-dependent current state remains
 explicitly unobserved. The [#94 evidence](tasks/evidence/arithmetic-94.md) records exact
 transport fixtures. No renderer parser is required.
@@ -814,7 +820,7 @@ Core resolves typed defaults or explicit editor-only samples once per variable
 into literal text with Ren'Py's quote conversion, keeping helper substitution
 disabled. A sample captures the variable definition's source revision. Integer
 samples use canonical signed-64 decimal strings, decimal samples use finite JSON
-numbers, booleans use real JSON booleans and strings remain literal. Decimal resolved
+numbers or `"-0.0"`, booleans use real JSON booleans and strings remain literal. Decimal resolved
 text follows Python float spelling, including signed zero and scientific notation. Brackets in sample values stay literal, and braces
 cannot introduce text tags. Samples never alter source or runtime state.
 

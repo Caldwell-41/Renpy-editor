@@ -255,7 +255,9 @@ fn parsed_value(variable: &Variable, raw: &str) -> Option<serde_json::Value> {
             _ => return None,
         },
         VariableType::Int => serde_json::Value::String(raw.into()),
-        VariableType::Decimal => serde_json::from_str::<f64>(raw).ok()?.into(),
+        VariableType::Decimal => {
+            crate::authoring::decimal_value(serde_json::from_str::<f64>(raw).ok()?)
+        }
         VariableType::String => serde_json::from_str::<String>(raw).ok()?.into(),
     };
     variable_literal(variable.variable_type, &value).ok()?;
@@ -343,9 +345,7 @@ pub fn inspect_actions(
         && standalone(modals[0], &lines)
         && modals[0].code == "modal True";
     let helper = helper_name(owner);
-    let qualified_helper = std::str::from_utf8(bytes)
-        .unwrap_or("")
-        .contains(&helper_source(&helper));
+    let qualified_helper = qualified_helper(bytes, &helper);
     for node in screen
         .nodes
         .iter()
@@ -525,9 +525,32 @@ pub(super) fn prepare(
         1 => expressions[0].clone(),
         _ => format!("[{}]", expressions.join(", ")),
     };
-    if parse(&expression, variables, panels, blocking, &button.helper).as_ref()
-        == Some(&button.actions)
-    {
+    let authoring = metadata(variables);
+    if parse(&expression, variables, panels, blocking, &button.helper).is_some_and(|prepared| {
+        prepared.len() == button.actions.len()
+            && prepared
+                .iter()
+                .zip(&button.actions)
+                .all(|(next, previous)| match (previous, next) {
+                    (
+                        ScreenAction::SetVariable {
+                            variable_id: old_id,
+                            value: old_value,
+                        },
+                        ScreenAction::SetVariable { variable_id, value },
+                    ) if old_id == variable_id => variables.iter().any(|variable| {
+                        variable.id == *variable_id
+                            && crate::scene::variables::equivalent_values(
+                                variable.variable_type,
+                                old_value,
+                                value,
+                                &authoring,
+                                variable_id,
+                            )
+                    }),
+                    _ => previous == next,
+                })
+    }) {
         return Ok(bytes.to_vec());
     }
     let mut proposed = bytes.to_vec();
@@ -541,7 +564,7 @@ pub(super) fn prepare(
     {
         let source = helper_source(&button.helper);
         let current = std::str::from_utf8(&proposed).map_err(|_| SceneError::UnsupportedSource)?;
-        if !current.contains(&source) {
+        if !qualified_helper(current.as_bytes(), &button.helper) {
             if std::str::from_utf8(bytes)
                 .unwrap_or("")
                 .contains(&button.helper)
@@ -689,25 +712,67 @@ pub(super) fn assignment_inspections(
         .collect()
 }
 
-/// Recognize only the exact generated declaration, with no extra indented code.
+/// Recognize only the complete generated declaration at a lexical top-level header.
 /// The canvas still consumes data only and never loads this declaration.
+fn qualified_declaration(text: &str, lines: &[Line<'_>], start: usize, name: &str) -> bool {
+    let Ok(index) = lines.binary_search_by_key(&start, |line| line.start) else {
+        return false;
+    };
+    let header = &lines[index];
+    if header.indent != 0 || !header.single || header.code != "init -100 python:" {
+        return false;
+    }
+    let helper = helper_source(name);
+    let declaration = &helper[helper.find("init -100 python:").unwrap()..];
+    if !text[start..].starts_with(declaration) {
+        return false;
+    }
+    lines
+        .iter()
+        .find(|line| line.start >= start + declaration.len())
+        .is_none_or(|line| line.indent == 0)
+}
+
+fn qualified_helper(bytes: &[u8], name: &str) -> bool {
+    let (Ok(text), Ok(lines)) = (std::str::from_utf8(bytes), source_lines(bytes)) else {
+        return false;
+    };
+    let declarations = lines.iter().filter(|line| {
+        line.code
+            .strip_prefix("class")
+            .filter(|rest| rest.starts_with(char::is_whitespace))
+            .is_some_and(|rest| {
+                rest.trim_start()
+                    .split(|c: char| c.is_whitespace() || matches!(c, '(' | ':'))
+                    .next()
+                    == Some(name)
+            })
+    });
+    if declarations.count() != 1 {
+        return false;
+    }
+    lines
+        .iter()
+        .filter(|line| qualified_declaration(text, &lines, line.start, name))
+        .count()
+        == 1
+}
+
 pub(super) fn qualified_initialization(
     file: &str,
     text: &str,
     start: usize,
     owners: &[OwnedScreen],
 ) -> bool {
+    let Ok(lines) = source_lines(text.as_bytes()) else {
+        return false;
+    };
     owners
         .iter()
         .filter(|owner| owner.path == file)
         .any(|owner| {
-            let helper = helper_source(&helper_name(owner));
-            let declaration = &helper[helper.find("init -100 python:").unwrap()..];
-            let Some(tail) = text[start..].strip_prefix(declaration) else {
-                return false;
-            };
-            tail.lines()
-                .find(|line| !line.trim().is_empty())
-                .is_none_or(|line| !line.starts_with(char::is_whitespace))
+            let name = helper_name(owner);
+            qualified_declaration(text, &lines, start, &name)
+                && qualified_helper(text.as_bytes(), &name)
         })
 }

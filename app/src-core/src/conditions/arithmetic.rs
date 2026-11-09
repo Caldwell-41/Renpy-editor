@@ -481,10 +481,13 @@ impl Numeric {
     pub(crate) fn json(self) -> Value {
         match self {
             Self::Int(v) => Value::String(v.to_string()),
-            Self::Decimal(v) => Value::from(v),
+            Self::Decimal(v) => crate::authoring::decimal_value(v),
         }
     }
     pub(crate) fn from_json(v: &Value) -> Result<Self, ArithmeticUnknown> {
+        if v.as_str() == Some("-0.0") {
+            return Ok(Self::Decimal(-0.0));
+        }
         if let Some(s) = v.as_str() {
             s.parse()
                 .map(Self::Int)
