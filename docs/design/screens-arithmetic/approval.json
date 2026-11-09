@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "screenId": "screens-arithmetic",
+  "currentApproved": null,
+  "revisions": [
+    {"id":"equation-v1","variantId":"equation-v1","approval":null},
+    {"id":"sequence-v1","variantId":"sequence-v1","approval":null},
+    {"id":"expanded-v1","variantId":"expanded-v1","approval":null}
+  ]
+}

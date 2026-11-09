@@ -31,6 +31,7 @@ import { definition as helpDialogStory } from "./screens/help-dialog-story/defin
 
 import { definition as screenInteractions } from "./screens/screen-interactions/definition.ts";
 import { definition as barsImagebuttons } from "./screens/bars-imagebuttons/definition.ts";
+import { definition as screensArithmetic } from "./screens/screens-arithmetic/definition.ts";
 
 function approvalFor(screenId: string) {
   const approval = approvalRecords.find(item => item.record.screenId === screenId);
@@ -70,7 +71,7 @@ export const screens: readonly LabScreen[] = [{
     { id: "dossier", title: "Continuous dossier", load: () => import("./screens/characters-writing/dossier.ts") },
     { id: "board", title: "Writing board", load: () => import("./screens/characters-writing/board.ts") },
   ],
-}, ...[story, storyRevamp, storyDraftConflict, source, branches, lorebook, assets, variables, welcome, newProject, settings, runtime, studioRequest, screenDesigner, canvasDrag, helpComposition, numericLayout, nestedLayout, uiImage, projectFont, sharedLook, componentsAndHelpPanel, helpDialogStory, screenInteractions, barsImagebuttons].map(definition => ({ ...definition, approval: approvalFor(definition.id) }))];
+}, ...[story, storyRevamp, storyDraftConflict, source, branches, lorebook, assets, variables, welcome, newProject, settings, runtime, studioRequest, screenDesigner, canvasDrag, helpComposition, numericLayout, nestedLayout, uiImage, projectFont, sharedLook, componentsAndHelpPanel, helpDialogStory, screenInteractions, barsImagebuttons, screensArithmetic].map(definition => ({ ...definition, approval: approvalFor(definition.id) }))];
 
 for (const screen of screens) {
   for (const variant of screen.variants) revisionFor(screen.approval, variant.id);
