@@ -644,3 +644,15 @@ Consumption is **1/1 selected Windows SDK start**, Windows **3/20 started**, wit
 this reservation consumed and no uncertainty. Mac remains **9/20**. There was no
 retry, editor/package/native/browser or manual-CI operation. The coordinator owns
 integration, status/ledger, tickets, parent PR and the #97 entry decision.
+
+## Coordinator Windows audit and integration
+
+Normal merge `7bc452a54d2a364b81ee139f37e250e7560f7e36` preserves integration
+`a2c7ab97` and evidence `55f89ddf`. The evidence commit changes only this note.
+The coordinator reviewed raw normal/wrong-output records and the independent
+audit, including all 22 assertions, four exact witnesses, public request pairs,
+binary/SDK identities, unchanged inputs and cleanup. Local fixture/test-owner
+hashes match the Windows receipt. App, fixtures, scripts and CI inputs remain
+identical to Mac-qualified `ecf2e2f7`. No SDK was repeated during integration.
+Both-target #95 qualification is complete; #97 may start. Final integration
+review, production UI and native/human acceptance remain separate.

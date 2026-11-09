@@ -18,7 +18,11 @@ Mac-qualified `ecf2e2f7`; all 869 frozen hashes match. Reuse 55 distinct Rust pa
 including SDK, 12 renderer passes and the controller/core journey. Fresh pinned
 typecheck, contract/branch-plan, repository and whitespace checks pass. The
 [#95 integration receipt](../tasks/evidence/arithmetic-95.md#integration-equivalence-and-windows-ready-candidate)
-records the Windows-ready identity. Windows proof remains required before #97.
+records the Windows-ready identity. Windows evidence `55f89ddf` is audited and
+integrated through `7bc452a5`. All 22 assertions, exact witnesses, required wrong
+outcome and cleanup passed at `a2c7ab97`; 883 input hashes remained unchanged.
+The [Windows result](../tasks/evidence/arithmetic-95.md#windows-invocation-1-passed-2026-11-10-aest)
+completes #95's both-target prerequisite. #97 production controls are selected next.
 
 #96's functional increment is integrated by conflict-free normal merge `25fa2e1c`,
 preserving coordinator `157c1ef8` and returned `b77cc26e`. All app/fixture inputs
@@ -40,7 +44,8 @@ already approved. Kris also approved A2 / `equation-v2` at reviewed source
 `aecf165e8d2c84320924db531f3dcc18a7448bc3` integrates approved branch `82d30d6e`
 into coordinator tip `11e69a6d` without conflicts. The
 [approval record](../design/screens-arithmetic/approval.json), retained captures
-and pinned source remain intact. Production #97 still waits for qualified #95.
+and pinned source remain intact. #97 uses that approved A2 reference and the
+qualified #95 contract for production integration.
 The merged full frontend/Lab fingerprint differs because #92 changed typed Story
 transport; the approved checkout remains the matching reference. Typecheck,
 static approval/hash/dimension validation, production build exclusion, repository
@@ -67,13 +72,13 @@ and #92 fixture inputs remain unchanged. The
 [#94 contract](../tasks/evidence/arithmetic-94.md#public-contract-for-95-and-96)
 is the merged baseline for dependent work.
 On 2026-11-09 Kris raised both SDK ceilings from six to 20 started invocations.
-Totals are Mac 9/20 started, none reserved, and Windows 2/20 started with one
-reserved for #95 qualification on SUNDOWN's existing worktree.
+Totals are Mac 9/20 and Windows 3/20 started, with no reservations.
 #95's fourth Mac attempt passed compile/lint, all 22 normal assertions, exact
 ordered/current values, both button kinds with click/keyboard, Finish, deliberate
 wrong-outcome rejection and cleanup. The coordinator verified all 869 inputs,
 retained binary, actual requests and witnesses. All three failed attempts remain
-intact. Draft PR #122 publishes #95 for Windows qualification. #97 stays blocked.
+intact. Draft PR #122 retains the qualified backend. A fresh #97 implementer owns
+approved Screens arithmetic and decimal setup, conditions, text and samples.
 The Story shadow-token correction passes all nine protocol checks locally;
 final-head automatic CI remains for audit.
 The delivery record owns current limits, assignments and qualified candidates.

@@ -43,7 +43,8 @@ proof; this merger launched no browser. The
 owns exact fingerprints, check results and the resolved local Vite temp-write refusal.
 #91's handoff and #97's decimal-design gate are complete. Mock diagnostics and
 saves remain fictional browser memory. Real source/history/reopen/runtime proof
-and #97 production remain separate; #97 still requires qualified #95.
+and #97 production remain separate. Both-target #95 qualification is now complete;
+the approved reference is ready for #97 production integration.
 Backend #92 is merged through `e8b07b31d0dd9fd9c5dcf3f784c61f2e089fd050`.
 Its parents are coordinator `56c619f18bbcfd78873474369005853cc6f67b89` and
 returned implementation `e5de0c20da8cd5f2812116840bf67b808d91d78a`.
@@ -61,8 +62,8 @@ Draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) publishes
 `codex/spec-87-arithmetic` into `codex/phase3b-screen-designer` and is linked in T3.
 The integration branch now tracks its own origin branch. The PR describes full
 #87 scope and eventual closing references. It contains #92/#93/#94 implementation,
-#96's functional increment, #95's Mac-qualified backend and the approved #91/#97
-design reference. #95 Windows proof, #96 full acceptance and #97 production UI remain.
+#96's functional increment, #95's both-target-qualified backend and the approved
+#91/#97 design reference. #96 full acceptance and #97 production UI remain.
 The coordinator resumes integration-checkout ownership after this merger returns.
 Windows #92 has completed and
 passed its single SDK run at `c7b8157e`; its two completion sends were denied by
@@ -196,34 +197,44 @@ case bring distinct passing Rust coverage to 55, including SDK.
 Fresh pinned production typecheck, recorded contract/branch-plan, repository and
 whitespace checks pass. No unchanged full suite was repeated. Merger audit receipts
 are in integration's ignored `.toolchains/arithmetic-95/integration-merge/`.
-Current use is Mac 9/20, none reserved, and Windows 2/20 with one reserved for #95.
-Integration/PR mutation ownership has returned to the coordinator. SUNDOWN is
-reachable; a fresh remote test delegate will reuse its existing
-`codex/spec-87-windows-92` qualification worktree. Confirm clean state/ownership,
-then safely fast-forward to the published allocation checkpoint. Prior Windows
-evidence `918fa3cc` is an ancestor. Preserve the registered project-root checkout
-and all existing evidence. No Windows #95 SDK start is known yet; the reservation
-remains charged until actual start/result evidence returns. This merger ran zero
-SDK/browser/native/package/manual-CI operations. #95 stays open; Windows runtime
-proof is still required before #97 starts. The Story shadow-token CI correction is
-published at `f8f4f904`, with nine protocol passes after a matching red. Its small
-style delta keeps #96's original comparison candidate and limits; fresh automatic
-CI remains for exact-head audit.
+Current use is Mac 9/20 and Windows 3/20, with zero reservations. The single
+Windows #95 run passed at `a2c7ab9734cfe35433a3276d39f12c4ebdf955e7`.
+Evidence `55f89ddfaab237d6786ff4242eb0b5b92f9dc666` is integrated by normal
+merge `7bc452a54d2a364b81ee139f37e250e7560f7e36`. The coordinator reviewed raw
+normal/wrong-output records, the independent audit and cleanup, and matched
+fixture/test-owner hashes locally. All 883 Windows inputs stayed unchanged;
+app/fixture/script/CI trees still equal the Mac candidate. The
+[Windows result](../tasks/evidence/arithmetic-95.md#windows-invocation-1-passed-2026-11-10-aest)
+owns full identities and cases. The ignored local coordinator audit is
+`.toolchains/arithmetic-95/windows-coordinator-audit.json`. Preserve the remote
+qualification checkout and all 154 new and 71 prior evidence files.
+
+#95 is qualified on both targets and stays open for final review. #97 is selected
+for a fresh implementer in a separate prepared worktree. The
+[current assignment](../tasks/active/shared-arithmetic.md#2026-11-10-windows-95-audited-and-97-selected)
+owns scope and file boundaries. Build approved A2 arithmetic controls and decimal
+setup/default, condition, text and sample inputs through existing services. Actual
+UI/core source, history/reopen and wide/compact reference checks are required.
+No new SDK, native editor/package or manual-CI run is allocated. If changed
+runtime inputs need qualification, return their exact scope to the coordinator.
+The Story shadow-token correction retains its original comparison limits.
+Automatic quality run `42630146353` succeeded at `a2c7ab97`; later heads require
+their own selected checks and final audit.
 
 Story Combined v1 / combined-v1 remains the approved arithmetic design. #96
 implements reusable approved controls in the existing Story workspace; full #110
 layout/palette integration is separately owned and depends on #96. Tracks/Reel
 production views are absent here. The implementer must map and report those
 acceptance limits explicitly rather than claim them from mock-only proof.
-#97 remains blocked by qualified #95. Tickets stay open for final review.
+#97's backend and design prerequisites are satisfied. Tickets stay open for final review.
 
 The draft PR stays on its Screens base. Preserve every worktree/evidence directory
 and both approved design references. No final review, ready-for-review promotion,
 parent-PR merge, automerge or release is selected. The published checkpoint retains
 the existing draft/base and full-spec closing references. Final-head automatic
-checks await coordinator audit; no watch was registered. After remote HEAD/upstream
-and clean-state verification, integration mutation ownership returns to the
-coordinator. No remote qualification is reserved or started by this handoff.
+checks await coordinator audit; no watch was registered. Integration/PR mutation
+ownership stays with the coordinator while the #97 implementer owns its separate
+worktree. No remote qualification remains reserved or running.
 
 The earlier sections below retain prior work and recovery context. Their
 unselected-next-task statements do not override this explicit #87 selection.

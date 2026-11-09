@@ -26,7 +26,8 @@ Screens branch. No merge of that PR or release is selected.
   evidence. #94 is merged and qualified on Mac and Windows. Combined #93/#94
   Windows proof is integrated through `235d99ac`. #96's functional increment is
   integrated; its full acceptance remains open. #95 is integrated at `0382ae3c`
-  with qualified Mac runtime proof; Windows qualification remains required.
+  with qualified Mac runtime proof. Windows evidence `55f89ddf` is audited and
+  integrated through `7bc452a5`; #95 is qualified on both targets. #97 is selected.
 - Backend sequence: #92, then #93, then #94. #95 follows #94.
 - Story UI #96 follows approved #88 and qualified #94.
 - Screens/decimal UI #97 follows approved #91 and qualified #95.
@@ -71,7 +72,7 @@ one becomes necessary. Routine checks and review have no numerical limits.
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
 | macOS ARM64 SDK qualification | 20 | 9 | 0 |
-| Windows x64 SDK qualification | 20 | 2 | 1 for #95 |
+| Windows x64 SDK qualification | 20 | 3 | 0 |
 
 ## Execution ledger
 
@@ -1214,3 +1215,62 @@ Preflight refusal consumes no start; any actual SDK start consumes the reservati
 including failure. No retry, native editor/package or manual-CI operation is
 selected. The coordinator retains integration/ledger/PR ownership. #97 stays
 blocked until actual successful Windows evidence is audited and integrated.
+
+### 2026-11-10: Windows #95 audited and #97 selected
+
+Windows #95 passed its single reserved invocation at `a2c7ab97`. The coordinator
+read the finished remote history, actual normal/wrong-output records, independent
+audit and cleanup. All 22 assertions and four exact markers pass. All 883 inputs,
+executed/retained binary and SDK identities agree; no timeout, truncation or owned
+process remains. Local story/driver/test-owner hashes match the receipt, and app,
+fixture, script and CI trees still equal Mac-qualified `ecf2e2f7`. No SDK was repeated.
+Evidence-only `55f89ddf` is integrated by normal merge `7bc452a5`. The
+[#95 Windows result](../evidence/arithmetic-95.md#windows-invocation-1-passed-2026-11-10-aest)
+owns full identities and cases. Preserve the remote worktree, 154 new receipts and
+71 prior receipts. Local audit: ignored `windows-coordinator-audit.json` under
+`.toolchains/arithmetic-95/`. Usage is **Mac 9/20, Windows 3/20, zero reservations**.
+Automatic quality run `42630146353` succeeded at `a2c7ab97`; later publication
+heads require their own selected checks and final audit.
+
+#95 is qualified on both targets and remains open for final review. #97 is now
+selected for a fresh implementer, request key
+`spec87-ticket97-implementer-20261110`, in a T3-prepared separate worktree from
+the committed integration checkpoint containing this entry. Confirm ancestry
+and clean state before edits. Use branch `t3/screens-decimal-arithmetic-controls`
+if unused; preserve the prepared branch if it already has a safe assigned identity.
+
+The implementer owns Screens arithmetic presentation/controllers and scoped styles,
+decimal variable creation/default wiring in `main.ts`, numeric conditions,
+screen text/sample inputs, focused tests/fixtures, `docs/UI.md` and the canonical
+`docs/tasks/evidence/arithmetic-97.md`. Read Design Lab integration and the approved
+`screens-arithmetic` / `equation-v2` record before edits. Use the preserved A2
+source/captures and existing read-only reference checkout. Keep Story arithmetic
+and backend numeric semantics with their current owners. Reuse existing controls
+and core validation; map every approved control to a real operation before editing.
+
+The sole permitted core edit is `variable.update` in the existing Help driver's
+operation allowlist, needed for the actual-main default-edit journey. All required
+operations already exist in `CORE_OPERATIONS`. The coordinator retains shared
+registries, dependency/config/CI files, status/ledger, integration and PR/tickets.
+Fixture discovery already finds `*.dispatch.mjs` and `*.browser.mjs`; add no
+parallel registry. Request a precise ownership exception if a real gap appears.
+
+Use confirmed TDD boundaries. Prove actual production UI to core, accepted source,
+one-step shared Undo/Redo and reopen for text/image arithmetic and decimal controls.
+Keep canvas/sample editing inert, bars whole-number-only, typed backend feedback,
+revision/session protection and retained drafts. Compare approved and production
+states at wide/compact sizes, using scoped browser permission before shell launch.
+Report visual fidelity and functional correctness separately, including any material
+difference. Newly uncovered design decisions need Kris's approval; the approved
+A2 behavior needs no repeat approval. No SDK, native editor/package or manual-CI
+operation is allocated. Return exact changed runtime inputs if new proof is needed.
+
+Before returning, normally merge current integration, run affected combined checks,
+commit the scoped implementation and return a clean head with exact evidence and
+limitations. No push, PR/ticket mutation or worktree cleanup. The coordinator then
+audits and assigns a fresh merger. #96 remains a functional increment; its partial
+visual fidelity, Tracks/Reel/full layout/palette, branch/view drafts and native/human
+limits are unchanged. Final full-spec review remains required after #97 integration.
+Status files retain existing unique recovery history beyond their size targets;
+this handoff replaces superseded live Windows instructions rather than adding a
+second continuation.
