@@ -25,11 +25,12 @@ An inherited CI plan named the previous branch; its head selection is corrected,
 with 18 existing reporter tests passing. Final-head automatic checks await audit.
 Draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) publishes the
 integration branch to the Screens base; it tracks the eventual full #87 outcome.
-Only #92 is implemented so far. Windows proof remains pending, #92 is not accepted
-and #93 remains blocked. The authorized Windows #92 chat/worktree is running
-separately. Its callback has not reported an SDK start or result; usage remains
-0 known started / 1 reserved. The coordinator audits that callback next without
-polling. This merger starts no successor work or final review.
+Only #92 is implemented so far. Its Windows SDK run passed and evidence is merged
+through `26047929`, completing scoped both-target delivery. T3 denied the remote
+completion messages; the coordinator audited the finished history after Kris's
+pointer. #93 is now the next implementation frontier. SDK usage is Mac
+1 started / 1 reserved for #93 and Windows 1 started / 0 reserved. A fresh
+#93 implementer is next; final integration review remains pending.
 Backend and approved production UI are in scope. No full #110 redesign,
 parent-PR merge or release is selected.
 

@@ -21,8 +21,8 @@ Screens branch. No merge of that PR or release is selected.
 - #89 and #90 were superseded, closed as not planned. Do not implement them.
 - Screens mock #91 and #97's additional decimal controls are approved as A2 /
   `equation-v2`; the reference is integrated by merge `aecf165e`. Story backend
-  #92 is merged into integration with passing Mac proof. Windows proof remains
-  pending; #92 is not accepted and #93 remains blocked.
+  #92 is merged and qualified on Mac and Windows. Its scoped delivery is ready
+  for final integration review, and #93 is the next implementation frontier.
 - Backend sequence: #92, then #93, then #94. #95 follows #94.
 - Story UI #96 follows approved #88 and qualified #94.
 - Screens/decimal UI #97 follows approved #91 and qualified #95.
@@ -64,8 +64,8 @@ one becomes necessary. Routine checks and review have no numerical limits.
 
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
-| macOS ARM64 SDK qualification | 6 | 1 | 0 |
-| Windows x64 SDK qualification | 6 | 0 | 1 for #92 |
+| macOS ARM64 SDK qualification | 6 | 1 | 1 for #93 |
+| Windows x64 SDK qualification | 6 | 1 | 0 |
 
 ## Execution ledger
 
@@ -441,3 +441,50 @@ The Windows candidate's production inputs are unchanged. Keep all evidence and
 worktrees, including unique ignored backend Mac receipts and approved design output.
 CURRENT/HANDOVER retain earlier unique acceptance/recovery sections under their
 existing size exception; this handoff makes no broader historical cleanup.
+
+### 2026-11-09: Windows #92 passed, #93 selected
+
+Kris pointed the coordinator to the completed Windows chat. Its result had not
+arrived because T3 denied both completion-send attempts with `capability_denied`.
+The source notification failed; qualification did not fail. The coordinator read
+the completed history and recorded command outputs, including the terminal gate
+record, case audit, exact runtime witness and cleanup assertions. No message or
+new work was sent to the referenced thread. Do not assume cross-environment
+top-level callbacks can resume this coordinator reliably.
+
+Windows qualification tested `c7b8157ee90aaf416030de0692abede7e4981c30` and passed
+one SDK gate invocation: compile/lint/normal entry exit 0, deliberate wrong outcome
+exit 1, no timeouts or truncated outputs, correct money-8 rejection, exact values
+score `9007199254740994`, money `7`, opaque `kept`, and complete cleanup.
+The existing Cargo-log validators accepted both the no-SDK preflight and SDK gate.
+The Windows note records verified input/archive/executable identities, unchanged
+source and original checkout, plus unique retained ignored evidence. No cross-host
+raw-artifact transfer or independent rehash is claimed; the coordinator audited
+the recorded raw command outputs and committed result note.
+
+Evidence-only commit `c7e4e3459303736f85de8c55cd88f5895e020e19` was fetched and
+merged without conflicts through `260479294711dd93b18919a7bc39245bf58c3619`.
+Only the existing #92 note changed. Current production/runtime inputs equal the
+tested Windows source and previously qualified Mac implementation; no rerun is
+needed. Preserve both hosts' unique raw receipts and worktrees.
+
+SDK accounting is now Mac **1 started / 0 prior reserved**, Windows
+**1 started / 0 reserved**. #92's scoped public-command/source/history/refusal and
+both-target runtime delivery is complete; full-feature review remains pending.
+The GitHub ticket checkpoints will reflect delivered #91/#92 while remaining open
+for the draft integration PR's final review/closure. This satisfies #93's
+implementation dependency without claiming full #87 acceptance.
+
+#93 now gets a fresh isolated implementer for whole-number formulas, using its
+existing ticket and TDD/public boundaries. Request key is
+`spec87-ticket93-implementer-20261109`. One Mac SDK invocation is reserved from
+the unchanged feature ceiling for this slice after cheap preflight. Windows
+qualification of newly added formula cases remains required evidence for the
+feature; preserve the accepted-source fixtures and do not call that proof passed
+before execution. Qualification selection may batch later portable cases through
+the existing fixture owner; the representative #92 real path is now proved on
+both affected targets. No package/native/manual-CI operation is selected.
+
+Next: publish this evidence/checkpoint, start #93 and wait for its completion
+notification without polling. Then merge through a fresh merger and complete its
+remaining qualification before proceeding through the approved graph.

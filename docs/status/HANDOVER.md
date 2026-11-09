@@ -62,29 +62,24 @@ Draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) publishes
 The integration branch now tracks its own origin branch. The PR describes full
 #87 scope and eventual closing references. It contains #92 implementation plus
 the approved #91/#97 design reference; later backend and production UI work remain.
-No issue was accepted or closed. At merger return, the coordinator resumes mutation
-ownership of this integration checkout and audits the Windows callback next.
-SUNDOWN is reachable. The isolated remote dispatch was rejected before agent creation because T3 does
-not support linked-environment delegate worktree isolation. No SDK start was
-consumed. The read-only follow-up has completed: the sole Windows checkout is clean
-at Screens baseline `251fb477`, not requested arithmetic candidate `d797eb04`.
-Required Rust/MSVC and verified Ren'Py 8.5.3 are present, but no fixture or SDK check
-ran and the checkout stayed untouched. Windows remains **0 started / 1 reserved**.
-The #92 note records the completed preflight evidence.
+The coordinator owns the integration checkout. Windows #92 has completed and
+passed its single SDK run at `c7b8157e`; its two completion sends were denied by
+T3, so Kris pointed to the finished thread. The coordinator read its history and
+audited recorded gate/case outputs, exact values, wrong-outcome rejection and
+cleanup. Evidence commit `c7e4e345` is merged through `26047929`; production and
+runtime fixtures still match both qualified targets. The #92 note owns details.
+Preserve the Windows worktree and raw receipts. Cross-environment callbacks are
+not reliable; do not assume a remote completion message was delivered.
 
-Kris explicitly approved creating the Windows qualification chat and isolated
-worktree from PR #122, and the chat has launched through the host on SUNDOWN.
-Its link is recorded in the delivery ledger. Launch key is
-`spec87-windows92-qualified-worktree-20261109`,
-branch `codex/spec-87-windows-92`, preserving the registered checkout. The qualifier
-may consume only the one reserved SDK run, append sanitized evidence on its own
-branch and return its result to this coordinator. Record the actual full candidate
-before execution. No SDK start/result is known yet. Wait for its completion
-message without polling, then audit/integrate its evidence. #92 remains unaccepted
-and #93 blocked on actual Windows proof.
-The ledger owns unchanged operation counts; the merger started no SDK, native,
-package or manual CI operation. Final-head automatic lightweight checks await
-coordinator audit. No final review was selected for this merger.
+#92's scoped delivery is complete and #93 is the next implementation frontier.
+The tickets remain open for final integration review/closure. Start a fresh #93
+implementer in its own worktree using request key
+`spec87-ticket93-implementer-20261109`. The ledger owns accounting: Mac **1 started
+/ 1 reserved for #93**, Windows **1 started / 0 reserved**. New formula Windows
+proof remains required and unclaimed; retain fixtures for appropriate qualification.
+Wait for the implementer's completion notification without polling, then merge
+through a fresh merger and continue only the approved remaining graph. No final
+review, editor package/native launch or manual CI operation has started.
 Preserve the backend worktree's unique ignored Mac receipts and the separate
 approved #91/#97 design worktree. Keep the PR draft. Final parent-PR merge,
 automerge/release and full Story redesign #110 are outside this selection.
