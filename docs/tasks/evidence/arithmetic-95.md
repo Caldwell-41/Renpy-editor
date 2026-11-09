@@ -406,3 +406,59 @@ The remaining driver API calls were checked against pinned primary source;
 and driver identity. No production code or SDK implementation is changed.
 A clean candidate, rebuilt executable and fresh coordinator allocation are still
 required for another actual verification run. #97 remains blocked.
+
+
+## Mac invocation 4 passed
+
+The allocated verification **started and passed** at clean candidate
+`ecf2e2f7d9df8130e9102579c9ac9db6baec56b2`, including published integration
+`323a0685`. Launch was 2026-11-09 13:35:52 UTC. Gate duration was 80.190 seconds;
+the positive named Cargo summary reports one passed case in 79.44 seconds, with
+zero failures/skips. The existing Cargo-log validator accepts that summary.
+The pinned archive/manifest, exact command and retained executable identities
+are bound in fresh ignored `mac-04/launch-receipt.json`.
+
+| Case | Exit | Duration | Result |
+| --- | ---: | ---: | --- |
+| Compile | 0 | 457 ms | Passed |
+| Lint | 0 | 263 ms | Passed |
+| Normal | 0 | 1593 ms | All 22 assertions passed |
+| Wrong outcome | 1 | 2064 ms | Expected reward-equals-10 assertion rejected |
+
+All four unique records completed, with no timeout or output truncation and
+unchanged accepted `.rpy` sets. Normal entry emitted all four exact witness lines:
+FIRST 6/12, SECOND 7/14, CURRENT trust 10/reward 20/points 19/fraction 0.25 with
+floor -3/remainder 2/exact large integer and float widening, and VALUES with inert
+prediction/evaluation/selection, mouse/keyboard activation on both button kinds
+and one Finish continuation. The invalid-calculation assertion passed without
+silently accepting overflow. Wrong outcome reported FAILED at reward 10 and
+emitted no ARITHMETIC_95_WRONG_ACCEPTED marker. Duplicate inner selector listings
+add no passes; no distinct required assertion is missing.
+
+SDK/project cleanup passed. The existing desktop helper admitted an active,
+awake, unlocked session throughout and released both owned power assertions.
+The coordinator independently verified all 869 input hashes against the clean
+candidate and working files, retained binary, four actual public validation/commit
+request-response pairs, exact witnesses, accepted source and absent temporary root.
+`mac-04/coordinator-audit.json` retains that independent audit. No process remains.
+
+Retained executable SHA-256:
+`1b774c1e2b8bba471c488e056aa26dead6456a38eb67a61cc75a62578c6b8ca1`.
+Actual accepted screen source SHA-256:
+`cdaaa4644fe11c5d3ec4b8a1349a9d17cccbc25c13f18663f18c657833132f69`.
+Preserve all four attempt directories, prior failed statuses and diagnostics.
+The successful run changes none of those earlier outcomes.
+
+Public/core behavior is unchanged from the implementation; only fixture assumptions
+were corrected during recovery. Reuse the original scoped 53 Rust and 12 renderer
+passes plus actual Screens controller/core journey. The new GUI regression adds
+one distinct Rust case and this successful SDK gate adds one, for 55 distinct
+passing Rust cases including SDK. Repeated fixture runs add no extra cases.
+Combined production typechecking after the Story merge also passed.
+
+Feature consumption is **Mac 9/20 started, Windows 2/20 started, no reservations**.
+#95 now has successful Mac runtime proof. Fresh integration verification and
+Windows qualification remain coordinator-owned before #97 starts. No Windows,
+editor-native/package or manual-CI operation ran during recovery. This return
+remains local-only pending the fresh merger; no issue closure or final acceptance
+is claimed.
