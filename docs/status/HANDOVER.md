@@ -87,15 +87,21 @@ approval history/captures and #92 fixtures remain unchanged. The
 [#93 public contract](../tasks/evidence/arithmetic-93.md#public-contract-for-94-95-and-96)
 and [integration receipt](../tasks/active/shared-arithmetic.md#2026-11-09-93-integration-and-evidence-reuse)
 own payloads, fixtures and exact reuse comparisons. No unchanged tests were rerun.
-SDK totals are Mac **2 started / 0 reserved**, Windows **1 started / 0 reserved**.
+At the #93 merge, SDK totals were Mac **2 started / 0 reserved** and Windows
+**1 started / 0 reserved**. The #94 reservation follows below.
 
-The coordinator next assigns a fresh #94 implementer from this merged contract.
+The coordinator selected a fresh isolated #94 implementer from this merged contract,
+request key `spec87-ticket94-implementer-20261109`. One Mac SDK run is reserved;
+accounting is now Mac **2 started / 1 reserved for #94**, Windows **1 started /
+0 reserved**. Wait for its completion notification without polling, then use a
+fresh merger and route the combined Windows qualification against its actual
+accepted-source fixture/candidate before #95/#96 starts.
 Ordinary division and decimals remain #94. Combined #93/#94 Windows qualification
 against #94 is required before #95 or #96 starts. Its accepted-source fixture must
 retain integer precision, precedence/grouping and negative floor/remainder witnesses
 alongside decimal assertions. Formula Windows proof is still missing; #92's old
-Windows fixture does not prove it. The merger starts no #94 implementer or Windows
-thread. The six-start feature ceilings are unchanged. Tickets remain open for final
+Windows fixture does not prove it. No new Windows thread/message is selected at
+this checkpoint. The six-start feature ceilings are unchanged. Tickets remain open for final
 integration review/closure; #93's merged public-command/Mac slice is
 `review_ready` with this Windows limit. #91/#97 design gates are complete;
 #95/#96/#97 production and full feature acceptance remain pending.

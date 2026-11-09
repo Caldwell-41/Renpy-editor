@@ -2,6 +2,10 @@
 
 ## Shared arithmetic selected
 
+#94 decimal/public-services implementation is selected in a fresh isolated
+worktree after #93's merge. One Mac SDK invocation is reserved; combined integer
+and decimal Windows qualification remains required before #95/#96 begins.
+
 Kris selected [spec #87](https://github.com/Caldwell-41/Renpy-editor/issues/87)
 for implementation on 2026-11-09. Branch `codex/spec-87-arithmetic` starts from
 accepted Screens tip `251fb477`. [The delivery record](../tasks/active/shared-arithmetic.md)
@@ -36,8 +40,8 @@ Reuse 76 Rust and 36 renderer passes, TypeScript/formatting and audited Mac proo
 merger contract, repository and whitespace checks pass. Approved mocks/captures
 and #92 fixture inputs remain unchanged. The
 [#93 contract](../tasks/evidence/arithmetic-93.md#public-contract-for-94-95-and-96)
-is ready for fresh #94 decimal work, which the coordinator assigns next.
-SDK totals are Mac 2 started / 0 reserved and Windows 1 started / 0 reserved.
+is the baseline for selected fresh #94 decimal work.
+SDK totals are Mac 2 started / 1 reserved for #94 and Windows 1 started / 0 reserved.
 New whole-number/decimal Windows proof will be combined against #94 before
 dependent #95/#96 work. The #94 fixture must retain integer precision, precedence,
 grouping and negative floor/remainder witnesses. Windows formula proof remains

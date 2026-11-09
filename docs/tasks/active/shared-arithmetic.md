@@ -66,7 +66,7 @@ one becomes necessary. Routine checks and review have no numerical limits.
 
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
-| macOS ARM64 SDK qualification | 6 | 2 | 0 |
+| macOS ARM64 SDK qualification | 6 | 2 | 1 for #94 |
 | Windows x64 SDK qualification | 6 | 1 | 0 |
 
 ## Execution ledger
@@ -593,3 +593,33 @@ thread was started here. Mac remains **2 started / 0 reserved**, Windows
 **1 started / 0 reserved**. No SDK, package, native or manual-CI operation ran.
 #91/#97 design gates remain complete; #95/#96/#97 production, final integration
 review and full #87 acceptance remain pending. Keep the PR draft.
+
+### 2026-11-09: #94 selected from merged formulas
+
+The coordinator read the merger handoff and resumed a clean integration checkout
+at `d01f968d35939d2a7e66d6ad993591d4d0ccb972`. #93's exact qualified app/fixture
+inputs are integrated; the approved design and prior evidence remain unchanged.
+Fresh #94 implementation is selected through request key
+`spec87-ticket94-implementer-20261109`, in its own prepared worktree.
+
+Scope is the existing #94 public-services contract: explicit decimal definitions
+and defaults, shared numeric formulas including ordinary division, exact mixed
+numeric comparisons, screen text/bindings and revision-bound inert samples. Keep
+whole-number transport lossless, existing types fixed, boolean/string support and
+integer-only bars unchanged. Complete the backend-owned type/capability/diagnostic
+contract needed by #95/#96; production layout and control wiring remain separate.
+
+One Mac SDK invocation is reserved for #94 from the unchanged ceiling, after cheap
+public-boundary preflight. The accepted-source fixture must retain #93 integer
+precedence/grouping, precision and negative floor/remainder witnesses alongside
+decimal defaults/results/comparisons/text/sample assertions. Qualify actual engine
+types and floating-point semantics, including integer results assigned to decimal
+targets and exact mixed comparisons, rather than assuming JavaScript/Rust numeric
+coercion or display formatting matches Ren'Py. Use existing gate/result owners.
+
+Mac accounting is **2 started / 1 reserved for #94**; Windows remains
+**1 started / 0 reserved**. The coordinator will select and route the combined Windows
+proof once the fixture/candidate exists. Both #95 and #96 remain blocked on that
+qualified #94 contract. No new Windows chat/message, package/native-editor launch
+or manual CI matrix is selected at this point. Return implementation through a
+fresh merger and preserve its unique raw evidence.
