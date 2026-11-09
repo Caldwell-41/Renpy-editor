@@ -6,8 +6,10 @@ Kris selected [spec #87](https://github.com/Caldwell-41/Renpy-editor/issues/87)
 for implementation on 2026-11-09. Branch `codex/spec-87-arithmetic` starts from
 accepted Screens tip `251fb477`. [The delivery record](../tasks/active/shared-arithmetic.md)
 owns execution, ticket ownership and cumulative SDK limits. Story mock #88 is
-already approved. Kris selected A for refinement; A2 / `equation-v2` at `ce626427`
-is the current separate #91/#97 review candidate, with approval still pending.
+already approved. Kris also approved A2 / `equation-v2` at reviewed source
+`ce626427` for #91 and #97's additional decimal controls. Its clean approval
+branch is at `82d30d6e`; integrating the reference is next. Production #97
+still waits for qualified #95.
 #92 backend is integrated by merge `e8b07b31`, preserving coordinator
 tip `56c619f1` and implementation tip `e5de0c20`. Its app/runtime inputs still
 match qualified candidate `1ba9fe44`; passing implementation and audited Mac

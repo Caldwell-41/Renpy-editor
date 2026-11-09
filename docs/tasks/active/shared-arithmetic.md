@@ -19,7 +19,8 @@ Screens branch. No merge of that PR or release is selected.
 - #88 is already closed with Kris's equation-row approval. Reuse Story Combined
   v1, revision `combined-v1`, merged through PR #108. No new Story redesign.
 - #89 and #90 were superseded, closed as not planned. Do not implement them.
-- Screens mock #91 has a review candidate, with approval pending. Story backend
+- Screens mock #91 and #97's additional decimal controls are approved as A2 /
+  `equation-v2`; integration of the design reference is pending. Story backend
   #92 is merged into integration with passing Mac proof. Windows proof remains
   pending; #92 is not accepted and #93 remains blocked.
 - Backend sequence: #92, then #93, then #94. #95 follows #94.
@@ -332,3 +333,37 @@ It will return its exact tested identity, consumed/not-started SDK result and
 evidence-branch commit to this coordinator. No qualification success or SDK start
 is known at dispatch. Wait for that completion message without polling; then audit
 and integrate the evidence, accept #92 only against required proof, and continue #93.
+
+### 2026-11-09: A2 approved for #91 and #97 decimal controls
+
+Kris's exact reply in the design chat was "approved" after A2 was shown inline
+and linked on the LAN. The completed design-only handoff is clean on
+`codex/spec-87-variable-mock` at `82d30d6e7bdf74e04dbb4cbef991cf67e921afbd`.
+The current approved screen is `screens-arithmetic`, variant/revision
+`equation-v2`. Runnable source remains `ce6264279188fca4c81218a5cd93b50c393bf9a3`,
+fingerprint `e9a4d3bd1952a92b68d184e68e87579c15001984d42f3a872815a124d3555f7b`.
+
+The candidate branch's `docs/design/screens-arithmetic/approval.json` owns the
+decision, behavior, deviations and ten primary captures. The coordinator verified
+the pointer/source identity, all ten primary capture hashes and dimensions, and
+that the approval commit's app files match preserved reviewed source. Reported
+promotion checks pass with `sourceMatches:true`, actual-record hash/pointer checks,
+no browser/asset errors and unchanged-source imagebutton rendering. Prior A2
+9-sample and original A 3-sample interactions, typecheck and whitespace pass.
+The coordinator did not rerun those browser checks.
+
+The approval covers ordered textbutton/imagebutton arithmetic and the additional
+decimal creation/default, numeric-condition and text/sample controls. It completes
+the design-only #91 handoff and #97's design gate; #97 production still requires
+qualified #95. All mock responses/saves remain fictional memory, with no source,
+history/reopen, evaluator, runtime or native proof. Original Story, production
+files and earlier candidates remain intact. The reviewed source's Draft headings
+are an explicitly retained prototype deviation, not a null approval.
+
+A fresh merger receives exclusive integration-checkout ownership to merge the
+approved reference and publish it to draft PR #122, preserving the pinned source
+and approval history. It may run relevant cheap type/approval/repository checks;
+no new browser campaign, SDK/native/package/manual-CI operation or production UI
+edit is selected. The Windows #92 chat continues independently and must report its
+actual started/result accounting. No Windows SDK start is known to the coordinator
+yet; its single reservation remains until that report.

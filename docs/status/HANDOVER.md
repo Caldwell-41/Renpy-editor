@@ -15,12 +15,14 @@ follow #92 -> #93 -> #94, then #95 and #96, then #97 with Screens approval.
 Kris authorized design chats named `Variable Mock - {description}` and separate
 worktrees. Production controls wait for their approval and qualified backend.
 The separate mock chat is recorded in the delivery ledger and owns #91 plus #97's
-decimal designs. Kris selected A for refinement toward approved Story; the current
-candidate is A2 / `equation-v2`, not an approval. Branch
-`codex/spec-87-variable-mock` is at `930a9274`, runnable source `ce626427`.
-Original A/B/C remain preserved. All approval fields remain null; explicit
-approval is required before production UI is unblocked. The ledger records the
-source identity, capture audit and reported checks.
+decimal designs. Kris explicitly approved A2 / `equation-v2` in the design chat.
+The clean approval branch `codex/spec-87-variable-mock` is at `82d30d6e`;
+reviewed runnable source remains `ce626427`. The coordinator verified the approved
+pointer/source and ten primary capture hashes/dimensions. A fresh merger gets
+exclusive integration-checkout ownership to integrate/publish this design reference
+to draft PR #122. Preserve the pinned source, original A/B/C and approval history.
+#91's design handoff and #97's decimal-design gate are complete; production #97
+still requires qualified #95. The ledger owns exact identity, checks and limits.
 Backend #92 is merged through `e8b07b31d0dd9fd9c5dcf3f784c61f2e089fd050`.
 Its parents are coordinator `56c619f18bbcfd78873474369005853cc6f67b89` and
 returned implementation `e5de0c20da8cd5f2812116840bf67b808d91d78a`.
@@ -46,7 +48,7 @@ consumed. The read-only follow-up has completed: the sole Windows checkout is cl
 at Screens baseline `251fb477`, not requested arithmetic candidate `d797eb04`.
 Required Rust/MSVC and verified Ren'Py 8.5.3 are present, but no fixture or SDK check
 ran and the checkout stayed untouched. Windows remains **0 started / 1 reserved**.
-The #92 note records preflight evidence. No qualification task remains running.
+The #92 note records the completed preflight evidence.
 
 Kris explicitly approved creating the Windows qualification chat and isolated
 worktree from PR #122, and the chat has launched through the host on SUNDOWN.
@@ -62,7 +64,7 @@ The ledger owns unchanged operation counts; the merger started no SDK, native,
 package or manual CI operation. Final-head automatic lightweight checks await
 coordinator audit; no reviews have been submitted at this handoff.
 Preserve the backend worktree's unique ignored Mac receipts and the separate
-unapproved #91/#97 design worktree. Keep the PR draft. Final parent-PR merge,
+approved #91/#97 design worktree. Keep the PR draft. Final parent-PR merge,
 automerge/release and full Story redesign #110 are outside this selection.
 
 The earlier sections below retain prior work and recovery context. Their
