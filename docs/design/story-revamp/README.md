@@ -100,6 +100,34 @@ shows that work is unsaved; the stage has no extra unsaved warning or per-change
 annotation. [Stage preview](../../UI.md#stage-preview) owns this behaviour and the
 existing validation timing for incomplete input.
 
+### Approved draft conflict interaction
+
+Kris approved B, Buttons together, after the unslop copy pass on 2026-11-09 and
+confirmed the approval in this interview. Q13 is settled. The
+[beat draft conflict contract](../../UI.md#beat-draft-conflicts) owns the selected
+behaviour, including single-beat Override source and all-draft Save refusal.
+
+| Reference | Identity |
+| --- | --- |
+| Screen / layout / revision | `story-draft-conflict` / `compact` / `compact-v2` |
+| Candidate source | `af23cf4d9141661e98280896a4aab2fbe7bd4414` |
+| Approval commit | `51bb6a02c936d5b4d8ebd289e208b6af7e0efdf7` |
+| Local branch | `codex/story-draft-conflict-mock` |
+
+The prototype files remain on that local branch. Read its approval record with
+`git show 51bb6a02:docs/design/story-draft-conflict/approval.json`; its adjacent
+README records the review and focused checks. The record owns the full source
+fingerprint and retained wide/compact capture hashes. Both capture hashes were
+checked during this interview handoff, and app source is unchanged between the
+candidate and approval commits.
+
+The prototype handoff reports passing design typechecking, B's focused wide/compact
+interaction journey, approval validation and the selected approval rendering check.
+This is design evidence, not production transaction or runtime qualification.
+A remains unapproved. The frozen prototype toolbar/catalog retain pre-approval
+wording; the JSON approval record owns status and names that limitation. No mock
+merge, production implementation or publication is selected by this record.
+
 ## Selected direction
 
 Kris selected a fourth combined mock, owned by the current section of

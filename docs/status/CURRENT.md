@@ -7,9 +7,11 @@ The [release scope](../design/story-revamp/README.md#production-release-scope) r
 settled decisions. Documentation commits stay local. Production implementation and
 tracker publication are not selected; the approved mock remains unchanged.
 
-The draft-conflict interaction remains undecided. A separate Sol xhigh chat on
-`codex/story-draft-conflict-mock` is preparing Design Lab options for Kris to review.
-It owns only that isolated prototype and its registration/notes.
+Kris approved B, Buttons together, for draft conflicts on 2026-11-09:
+`story-draft-conflict` / `compact`, revision `compact-v2`. The
+[reference record](../design/story-revamp/README.md#approved-draft-conflict-interaction)
+identifies the candidate and local approval commit on `codex/story-draft-conflict-mock`.
+Q13 is settled; production integration and publication remain unselected.
 
 ## Story Combined v1 approved
 

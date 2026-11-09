@@ -5,18 +5,19 @@
 Continue the one-decision-at-a-time interview on `codex/story-combined-v1-grill`,
 created from approved-design branch head `3f5a6de9`. The
 [release scope](../design/story-revamp/README.md#production-release-scope) owns settled
-scope decisions; record domain terms in the root glossary when resolved. The next
-decision concerns source changes beneath retained beat drafts. Implementation
-acceptance and task ownership also remain open.
+scope decisions; record domain terms in the root glossary when resolved. Q13 is
+settled: Kris approved B, Buttons together, after the copy pass and confirmed it
+here. Do not ask for approval again. The next decision concerns final acceptance
+in the live app; implementation task ownership also remains open.
 
-Kris requested a separate GPT-6.1 Sol xhigh chat on 2026-11-09 to prototype the
-undecided conflict interaction. Its worktree/branch is
-`codex/story-draft-conflict-mock`, based on interview commit `78290e3f`. It owns a
-new `app/design-lab/screens/story-draft-conflict/` screen, minimal lab registration
-and its own design notes/approval record. This chat retains the domain and status
-docs. The prototype must preserve the approved Story mock and production code,
-show a few interactive options, and wait for Kris's design decision. No conflict
-interaction is approved, and no merge or publication is selected.
+The [approved conflict reference](../design/story-revamp/README.md#approved-draft-conflict-interaction)
+is `story-draft-conflict` / `compact`, revision `compact-v2`, source `af23cf4d`,
+approval commit `51bb6a02`. It remains local on `codex/story-draft-conflict-mock`,
+whose worktree owns the prototype, minimal lab registration and design notes.
+This chat owns the canonical domain and status docs. The handoff's focused design
+checks pass; capture hashes and unchanged candidate source were verified here.
+The approved prototype has not been merged into this branch. Production behaviour
+and tests remain unchanged; no implementation, merge or publication is selected.
 
 Commit documentation locally.
 Do not edit production code or publish issues, comments, PRs or pushes without Kris's

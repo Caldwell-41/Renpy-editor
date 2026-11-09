@@ -10,6 +10,10 @@ An unfinished edit attached to a Story beat that has not been committed to the
 project's source. It can contain incomplete input and remains available when the
 author leaves the beat and returns.
 
+**Beat draft conflict**:
+A disagreement between a retained beat draft and source that changed after the
+draft began, requiring the author to decide which edit to keep.
+
 **Game stage**:
 The Story view of supported scene appearance through the selected beat, shown in
 the project's width-to-height ratio, including valid beat drafts. It marks unknown

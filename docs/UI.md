@@ -433,16 +433,42 @@ Navigation does not commit or discard a draft. Commit remains explicit, and
 incomplete or invalid input never reaches the source files. Ask before an action
 would discard a draft, including deleting its beat or closing the project.
 
-Changes to the source beneath a retained draft still need decisions before
-implementation. This target replaces production's current rule that requires
-committing or cancelling the beat edit before navigation.
+The [beat draft conflict rules](#beat-draft-conflicts) handle changes to the source
+beneath a retained draft. This target replaces production's current rule that
+requires committing or cancelling the beat edit before navigation.
+
+### Beat draft conflicts
+
+Use the approved B, Buttons together interaction: `story-draft-conflict` / `compact`,
+revision `compact-v2`. The [reference record](design/story-revamp/README.md#approved-draft-conflict-interaction)
+identifies its local source and approval commits.
+
+Mark a conflicting beat quietly. Unrelated non-conflicting changes need no prompt,
+and routine navigation keeps every draft. Returning to the affected beat reveals
+"Conflict with source" in the selected-beat editor, with the current source text
+above the editable retained draft. Place Discard draft and Override source together
+below the text box.
+
+- Discard draft keeps the current source and removes only this beat draft.
+- Override source validates the editor text and saves only this beat through the
+  existing transaction layer. Other drafts stay unsaved. Empty text refuses the
+  override and retains the draft.
+
+Override source must use the source revision the author reviewed and preserve all
+existing validation and source-ownership checks. If the source changes again,
+retain the draft and refresh the comparison before accepting another override.
+The action does not authorize a stale write or bypass unsupported-source refusal.
+
+Main Save reveals an unresolved conflict and retains all drafts without saving any
+of them. Navigation and Tracks/Reel changes keep drafts; valid drafts still preview
+on the game stage under the existing [stage preview rules](#stage-preview).
 
 ### Saving Story drafts
 
 In Story, the main Save button and Cmd/Ctrl+S save all pending beat drafts in the
 open project, including beats outside the current selection or scene. Check every
-draft before writing any of them. If any draft is incomplete or invalid, retain all
-drafts and reveal the failing draft with its error. No draft is saved by that request
+draft before writing any of them. If any draft is incomplete, invalid or conflicted,
+retain all drafts and reveal the failing draft with its error. No draft is saved by that request
 until all pass validation. Commit remains available to save one beat on its own.
 
 Story Save does not accept unfinished Source text. The shell coordinates acceptance
