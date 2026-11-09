@@ -183,7 +183,7 @@ fixed the fixture. These cheap failures started no SDK process.
 Cheap results before SDK qualification:
 
 - Integer public-command tests: 5 passed, none skipped.
-- Story owner: 36 passed; 7 existing explicitly ignored specialist/SDK cases unrun.
+- Story owner: 36 passed; 7 existing explicitly ignored specialist cases unrun.
 - Source owner: 16 passed; typed condition owner: 3 passed.
 - SDK fixture preflight: 1 passed, zero SDK execution.
 - Selected renderer Story/structure tests: 43 passed, none skipped.
@@ -306,7 +306,45 @@ Final code verification repeated the affected mapping consumers after review:
 Story **37 passed** (including the five new #92 cases), Source **16 passed**,
 conditions **3 passed**, literal transport **1 passed**, fixture preflight **1 passed**
 and the Mac SDK gate **1 passed**. These are 59 distinct passing Rust cases.
-Seven existing ignored Story specialist/SDK cases remain deliberately unselected.
+Seven existing ignored Story specialist cases remain deliberately unselected.
 The selected renderer suite passed 43 cases. Rust formatting, TypeScript,
 repository validation and whitespace checks passed. No required selected check
 was failed, cancelled or skipped at handoff.
+
+
+## Integration handoff
+
+Merged current integration tip `6c2272ecf7340b5e64c145059eb1f29534eb49f2` into this
+branch with merge commit `ae4c885bc486c1ec772f0c9f115f7fa35256c27b`. That merge
+carries the coordinator's CURRENT/HANDOVER/shared-ledger changes unchanged; this
+implementer did not author edits to those files. Implementation and SDK fixture
+source remain identical to the qualified implementation candidate. Publication,
+issue closure and the merge into integration belong to the coordinator/fresh merger.
+
+Changed files relative to that integration tip:
+
+```text
+app/src-core/src/authoring.rs
+app/src-core/src/conditions.rs
+app/src-core/src/conditions/arithmetic.rs
+app/src-core/src/lib.rs
+app/src-core/src/lifecycle.rs
+app/src-core/src/lifecycle/acceptance.rs
+app/src-core/src/renpy/tests/phase1h.rs
+app/src-core/src/renpy/tests/source_foundation.rs
+app/src-core/src/renpy/tests/source_foundation/arithmetic.rs
+app/src-core/src/scene.rs
+app/src-core/src/scene/structure.rs
+app/src-core/src/scene/tests/arithmetic.rs
+app/src-core/src/scene/variables.rs
+app/src-core/src/screens/component_tests.rs
+app/src-core/src/screens/panel_tests.rs
+app/src-core/src/source.rs
+app/src/main.ts
+app/src/scene-ui.ts
+docs/DATA_MODEL.md
+docs/tasks/evidence/arithmetic-92.md
+tests/fixtures/arithmetic-92/contract.json
+tests/fixtures/arithmetic-92/driver.rpy
+tests/fixtures/arithmetic-92/story.rpy
+```
