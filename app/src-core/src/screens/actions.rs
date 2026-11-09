@@ -484,7 +484,11 @@ pub(super) fn prepare(
                     .find(|v| &v.id == variable_id)
                     .ok_or(SceneError::ReferenceBlocked)?;
                 if value.is_object() {
-                    return arithmetic_expression(variable, value, variables, &button.helper);
+                    return arithmetic_expression(variable, value, variables, &button.helper)
+                        .map_err(|cause| SceneError::ScreenAction {
+                            index,
+                            cause: Box::new(cause),
+                        });
                 }
                 let literal = variable_literal(variable.variable_type, value)
                     .map_err(|_| SceneError::InvalidPayload)?;

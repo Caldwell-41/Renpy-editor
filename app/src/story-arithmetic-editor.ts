@@ -1,3 +1,4 @@
+import { formulaCompletionRange } from "./formula-editing.ts";
 import type { AssignmentDraftValidation, ArithmeticUnknown, BeatPayload, IntegerAdjustment, SceneWorkspace } from "./scene-ui.ts";
 
 type SetVariable = Extract<BeatPayload, { type: "setVariable" }>;
@@ -47,6 +48,7 @@ export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariabl
   let text = typeof payload.value === "object" ? payload.value.operand : String(payload.value);
   let primary: HTMLInputElement | HTMLSelectElement, generation = 0;
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let finishField = () => {};
   let capabilities: AssignmentDraftValidation["capabilities"] | undefined;
   const controls: HTMLElement[] = [variable];
   const read = (): SetVariable => {
@@ -55,7 +57,7 @@ export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariabl
     return { type: "setVariable", variableId: target.id, value: target.variableType === "bool" ? primary.value === "true" : target.variableType === "string" ? primary.value : { operation, operand: primary.value } };
   };
   function rebuild() {
-    generation++; clearTimeout(timer); editor.replaceChildren(); controls.splice(1);
+    generation++; clearTimeout(timer); finishField = () => {}; variable.removeAttribute("aria-describedby"); variable.removeAttribute("aria-invalid"); editor.replaceChildren(); controls.splice(1);
     const target = variables.find(v => v.id === variable.value);
     if (!target || target.variableType === "bool" || target.variableType === "string") {
       if (target?.variableType === "bool") { const choice = node("select"); for (const value of ["false", "true"]) { const option = node("option", "", value === "true" ? "True" : "False"); option.value = value; choice.append(option); } choice.value = text === "true" ? "true" : "false"; primary = choice; }
@@ -68,21 +70,21 @@ export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariabl
     const formula = node("input", "story-formula"); primary = formula; formula.value = text; formula.setAttribute("aria-label", "Formula");
     formula.autocomplete = "off"; formula.spellcheck = false; formula.placeholder = "Number or formula, e.g. (bonus + 2) * 3";
     formula.role = "combobox"; formula.setAttribute("aria-autocomplete", "list"); formula.setAttribute("aria-expanded", "false");
-    const feedback = node("div", "story-formula-feedback"); feedback.role = "status";
+    const feedback = node("div", "story-formula-feedback"); feedback.id = `story-feedback-${crypto.randomUUID()}`; feedback.ariaLive = "off"; formula.setAttribute("aria-describedby", feedback.id); variable.setAttribute("aria-describedby", feedback.id);
     const code = node("code", "story-assignment-source");
     const suggestions = node("div", "story-formula-suggestions"); suggestions.role = "listbox"; suggestions.setAttribute("aria-label", "Variables"); suggestions.hidden = true;
-    let active = 0;
+    let active = 0, composing = false, showErrors = false;
     function closeSuggestions() { suggestions.hidden = true; formula.setAttribute("aria-expanded", "false"); formula.removeAttribute("aria-activedescendant"); }
-    const fragment = () => /[A-Za-z_][A-Za-z0-9_]*$/.exec(formula.value.slice(0, formula.selectionStart ?? formula.value.length))?.[0] ?? "";
+
     function suggest() {
-      const part = fragment(), matches = part ? variables.filter(v => ["int", "decimal"].includes(v.variableType) && v.technicalName.startsWith(part) && v.technicalName !== part) : [];
+      const range = formulaCompletionRange(formula), part = range.prefix, matches = part || range.selected ? variables.filter(v => ["int", "decimal"].includes(v.variableType) && v.technicalName.startsWith(part) && v.technicalName !== part) : [];
       suggestions.replaceChildren(); active = Math.min(active, Math.max(0, matches.length - 1));
       closeSuggestions(); suggestions.hidden = !matches.length; formula.setAttribute("aria-expanded", String(!!matches.length));
       matches.forEach((v, index) => {
         const item = node("button", "", `${v.technicalName} · ${typeName(v.variableType)}`); item.type = "button"; item.role = "option"; item.tabIndex = -1;
         item.id = `${suggestions.id}-${index}`; item.setAttribute("aria-selected", String(index === active));
         item.addEventListener("mousedown", event => event.preventDefault());
-        item.addEventListener("click", () => { formula.focus(); const end = formula.selectionStart ?? formula.value.length; formula.setRangeText(v.technicalName, end - part.length, formula.selectionEnd ?? end, "end"); formula.dispatchEvent(new Event("input", { bubbles: true })); closeSuggestions(); }); suggestions.append(item);
+        item.addEventListener("click", () => { formula.focus(); formula.setRangeText(v.technicalName, range.start, range.end, "end"); formula.setSelectionRange(range.start + v.technicalName.length, range.start + v.technicalName.length); formula.dispatchEvent(new Event("input", { bubbles: true })); closeSuggestions(); }); suggestions.append(item);
       });
       if (matches.length) formula.setAttribute("aria-activedescendant", suggestions.children[active]!.id);
     }
@@ -104,7 +106,7 @@ export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariabl
     }
     function sourceCaption() { code.textContent = `$ ${target!.technicalName} ${assignmentOperations.find(op => op.key === operation)!.symbol} ${formula.value || "?"}`; }
     async function inspect() {
-      if (!host.isConnected) return;
+      if (!host.isConnected || composing || (!formula.value && !showErrors)) return;
       const own = ++generation; sourceCaption(); formula.removeAttribute("aria-invalid"); variable.removeAttribute("aria-invalid"); feedback.textContent = "Checking formula…";
       if (!validate) { feedback.textContent = "Formula feedback unavailable. Commit validates through the Story backend."; return; }
       try {
@@ -114,19 +116,24 @@ export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariabl
         const inferred = result.assignment.inferredResultType;
         if (inferred) feedback.append(node("p", "story-formula-type", `Gives a ${typeName(inferred)}${target!.variableType === "decimal" && inferred === "int" ? ", stored as a decimal" : ""}.`));
         for (const diagnostic of result.assignment.diagnostics) {
+          if (result.support === "refused" && !showErrors) continue;
           feedback.append(node("p", result.support === "refused" ? "story-formula-problem" : "story-formula-unknown", reasons[diagnostic.reason]));
           if (result.support === "refused") (diagnostic.field === "variableId" ? variable : formula).setAttribute("aria-invalid", "true");
         }
         const state = result.assignment.state;
-        if (state.status === "known" || !result.assignment.diagnostics.some(d => d.reason === state.reason)) feedback.append(node("p", "story-formula-state", state.status === "known" ? `Draft result ${String(state.value)}` : reasons[state.reason]));
+        if (result.support !== "refused" && (state.status === "known" || !result.assignment.diagnostics.some(d => d.reason === state.reason))) feedback.append(node("p", "story-formula-state", state.status === "known" ? `Draft result ${String(state.value)}` : reasons[state.reason]));
         feedback.title = `Core limits: ${capabilities.maxBytes} bytes, ${capabilities.maxNodes} nodes, depth ${capabilities.maxDepth}. Operators: ${capabilities.operators.join(" ")}.`;
       } catch (error) { if (own === generation && host.isConnected) feedback.textContent = `${error instanceof Error ? error.message : "Formula feedback unavailable."} Input retained.`; }
     }
-    function schedule() { generation++; clearTimeout(timer); sourceCaption(); feedback.textContent = "Checking formula…"; timer = setTimeout(() => void inspect(), 120); }
-    formula.addEventListener("input", () => { text = formula.value; schedule(); suggest(); });
-    formula.addEventListener("blur", closeSuggestions);
+    function schedule() { generation++; clearTimeout(timer); if (composing) return; sourceCaption(); if (!formula.value && !showErrors) { feedback.textContent = ""; return; } feedback.textContent = "Checking formula…"; timer = setTimeout(() => void inspect(), 120); }
+    formula.addEventListener("compositionstart", () => { composing = true; generation++; clearTimeout(timer); closeSuggestions(); });
+    formula.addEventListener("compositionend", () => { composing = false; text = formula.value; schedule(); });
+    formula.addEventListener("input", () => { text = formula.value; showErrors = formula.getAttribute("aria-invalid") === "true" || variable.getAttribute("aria-invalid") === "true"; feedback.ariaLive = "off"; schedule(); if (!composing) suggest(); });
+    formula.addEventListener("blur", () => { closeSuggestions(); if (!composing) { showErrors = true; feedback.ariaLive = "polite"; schedule(); } });
+    finishField = () => { showErrors = true; feedback.ariaLive = "polite"; schedule(); };
     formula.addEventListener("keydown", event => {
-      if (event.isComposing || suggestions.hidden) return;
+      if (composing || event.isComposing || event.keyCode === 229) { event.stopPropagation(); return; }
+      if (suggestions.hidden) return;
       const items = [...suggestions.children] as HTMLButtonElement[];
       if (["ArrowDown", "ArrowUp"].includes(event.key)) { event.preventDefault(); event.stopPropagation(); active = (active + (event.key === "ArrowDown" ? 1 : -1) + items.length) % items.length; items.forEach((item, index) => item.setAttribute("aria-selected", String(index === active))); formula.setAttribute("aria-activedescendant", items[active]!.id); }
       else if (["Enter", "Tab"].includes(event.key)) { event.preventDefault(); event.stopPropagation(); items[active]?.click(); }
@@ -140,5 +147,5 @@ export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariabl
   }
   variable.addEventListener("change", () => { drafts.set(editor.dataset.variableId ?? payload.variableId, { operation, text }); const draft = drafts.get(variable.value); operation = draft?.operation ?? "assign"; text = draft?.text ?? ""; editor.dataset.variableId = variable.value; rebuild(); });
   rebuild();
-  return { host, controls, get primary() { return primary; }, read, focus: () => primary.focus() };
+  return { host, controls, get primary() { return primary; }, read: () => { finishField(); return read(); }, focus: () => primary.focus() };
 }

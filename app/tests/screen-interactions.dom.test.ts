@@ -161,3 +161,34 @@ test("numeric button drafts expose equation controls, suggestions and grouping w
  assert.equal(f.writes.length,0);f.button("Cancel");assert.equal(f.workspace.hasDraft(),false);
  }finally{await f.dispose();}
 });
+
+test("composition confirmation retains exact formula and selection without inspecting or accepting suggestions",async()=>{
+ const {screenArithmeticEditor}=await import('../src/screen-arithmetic-editor.js');
+ const f=fixture();try{
+  let inspections=0;
+  const row={id:'ime',type:'setVariable' as const,variableId:'bonus',value:'bo',target:{screenId:'',sourceName:''}};
+  const editor=screenArithmeticEditor(row,0,{variables:[{id:'bonus',technicalName:'bonus',variableType:'int',defaultValue:'2',source:{sourceRevision:'bonus-v1'}}],changed:()=>{},inspect:async()=>{inspections++;return {assignment:null};}});
+  const details=document.createElement('details');details.open=true;details.append(editor);document.body.append(details);
+  const formula=editor.querySelector('input')!;formula.focus();formula.setSelectionRange(1,2);
+  formula.dispatchEvent(new window.CompositionEvent('compositionstart',{bubbles:true}));
+  formula.dispatchEvent(new window.InputEvent('input',{bubbles:true,isComposing:true}));
+  const confirm=new window.KeyboardEvent('keydown',{key:'Enter',isComposing:true,bubbles:true});formula.dispatchEvent(confirm);
+  assert.equal(formula.value,'bo');assert.equal(formula.selectionStart,1);assert.equal(formula.selectionEnd,2);
+  await new Promise(r=>setTimeout(r,160));assert.equal(inspections,0);
+  formula.dispatchEvent(new window.CompositionEvent('compositionend',{bubbles:true}));
+  formula.dispatchEvent(new window.KeyboardEvent('keydown',{key:'Enter',keyCode:229,bubbles:true}));assert.equal(formula.value,'bo');
+ }finally{await f.dispose();}
+});
+
+test("Screens delays new format errors until blur and keeps unavailable validation distinct",async()=>{
+ const {screenArithmeticEditor}=await import('../src/screen-arithmetic-editor.js');const f=fixture();try{
+  let failure:unknown=Object.assign(Error('Check the formula'),{code:'INVALID_ARITHMETIC_SYNTAX'});
+  const row={id:'timing',type:'setVariable' as const,variableId:'bonus',value:'1 +',target:{screenId:'',sourceName:''}};
+  const editor=screenArithmeticEditor(row,0,{variables:[{id:'bonus',technicalName:'bonus',variableType:'int',defaultValue:'2',source:{sourceRevision:'v1'}}],changed:()=>{},inspect:async()=>{if(failure)throw failure;return {assignment:null};}});
+  const details=document.createElement('details');details.open=true;details.append(editor);document.body.append(details);const field=editor.querySelector('input')!;
+  const settle=()=>new Promise(r=>setTimeout(r,160));await settle();assert.notEqual(field.getAttribute('aria-invalid'),'true');
+  field.dispatchEvent(new window.Event('blur'));await settle();assert.equal(field.getAttribute('aria-invalid'),'true');
+  failure=Error('Validation transport unavailable');field.value='1';field.dispatchEvent(new window.Event('input'));await settle();assert.notEqual(field.getAttribute('aria-invalid'),'true');assert.match(editor.textContent!,/unavailable/);assert.equal(field.value,'1');
+  failure=Object.assign(Error('Dependency changed'),{code:'DIRTY_SOURCE'});field.dispatchEvent(new window.Event('blur'));await settle();assert.notEqual(field.getAttribute('aria-invalid'),'true');
+ }finally{await f.dispose();}
+});

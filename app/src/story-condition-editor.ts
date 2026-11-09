@@ -59,7 +59,7 @@ function validateExpression(expression: ConditionExpression, variables: Variable
 function simpleComparison(variables: Variables, initial: Extract<ConditionExpression, { type: "compare" }>): ExpressionEditor {
   const host = document.createElement("div"); host.className = "condition-fields";
   const left = initial.left as Extract<ConditionExpression, { type: "variable" }>;
-  const variable = select(variables.map(item => ({ value: item.id, label: `${item.technicalName} · ${item.variableType}` })), left.variableId); variable.setAttribute("aria-label", "Condition Variable");
+  const variable = select(variables.map(item => ({ value: item.id, label: `${item.technicalName} · ${item.variableType === "decimal" ? "Decimal" : item.variableType === "int" ? "Whole number" : item.variableType}` })), left.variableId); variable.setAttribute("aria-label", "Condition Variable");
   const operator = select(operators, initial.operator); operator.setAttribute("aria-label", "Condition operator");
   host.append(label("Condition Variable", variable), label("Condition operator", operator));
   const valueHost = document.createElement("div"); host.append(valueHost);
@@ -71,13 +71,17 @@ function simpleComparison(variables: Variables, initial: Extract<ConditionExpres
   const rebuild = (): void => {
     const selected = variables.find(item => item.id === variable.value);
     numericGuidance.hidden=!["int","decimal"].includes(selected?.variableType??"");
+    host.dataset.numeric=String(!numericGuidance.hidden);
+    const captions=host.querySelectorAll(":scope > label > span");
+    captions[0]!.textContent=numericGuidance.hidden?"Condition Variable":"Variable";
+    captions[1]!.textContent=numericGuidance.hidden?"Condition operator":"Comparison";
     const allowed = operators.filter(item => ["int","decimal"].includes(selected?.variableType??"") || ["equal", "notEqual"].includes(item.value));
     const previous = operator.value;
     const choices = allowed.some(item => item.value === previous) ? allowed : [{ value: previous, label: "Choose a matching operator" }, ...allowed];
     operator.replaceChildren(...choices.map(item => { const option = document.createElement("option"); option.value = item.value; option.textContent = item.label; return option; })); operator.value = previous;
     if (selected?.variableType === "bool") value = select([{ value: "false", label: "False" }, { value: "true", label: "True" }], stored.get("bool") ?? "true");
     else { value = document.createElement("input"); value.type = "text"; value.value = stored.get(selected?.variableType ?? "string") ?? ""; if (["int","decimal"].includes(selected?.variableType??"")) value.inputMode = "decimal"; }
-    value.setAttribute("aria-label", "Condition value"); valueHost.replaceChildren(label("Condition value", value));
+    value.setAttribute("aria-label", "Condition value"); valueHost.replaceChildren(label(numericGuidance.hidden ? "Condition value" : "Number", value));
     validateValue = validateField(value, () => { if(["int","decimal"].includes(selected?.variableType??""))numericLiteral(value.value); });
     for (const event of ["input", "change"]) value.addEventListener(event, () => { stored.set(selected?.variableType ?? "string", value.value); });
   };
@@ -114,7 +118,7 @@ function expressionEditor(variables: Variables, initial: ConditionExpression, de
     const panel = document.createElement("div");
     if (selected === "variable") {
       const allowed = operand ? variables : variables.filter(variable => variable.variableType === "bool");
-      const variable = select(allowed.map(item => ({ value: item.id, label: `${item.technicalName} · ${item.variableType}` })), saved?.type === "variable" ? saved.variableId : allowed[0]?.id ?? ""); variable.setAttribute("aria-label", "Condition Variable"); panel.append(label("Condition Variable", variable));
+      const variable = select(allowed.map(item => ({ value: item.id, label: `${item.technicalName} · ${item.variableType === "decimal" ? "Decimal" : item.variableType === "int" ? "Whole number" : item.variableType}` })), saved?.type === "variable" ? saved.variableId : allowed[0]?.id ?? ""); variable.setAttribute("aria-label", "Condition Variable"); panel.append(label("Condition Variable", variable));
       const validate = validateField(variable, () => { if (!allowed.some(item => item.id === variable.value)) throw Error("Select an available Variable of the matching type."); });
       return { host: panel, read: () => { validate(); const item = allowed.find(item => item.id === variable.value)!; return { type: "variable", variableId: item.id, variableType: item.variableType }; } };
     }

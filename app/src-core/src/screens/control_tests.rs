@@ -1415,10 +1415,12 @@ fn new_imagebutton_validation_keeps_source_asset_metadata_and_history_unchanged(
     );
     let mut invalid = request.clone();
     invalid["command"]["interaction"]["actions"][0]["value"]["operand"] = json!("1 / 0");
-    assert_eq!(
-        reject(&mut service, "screens.compose", invalid)["error"]["code"],
-        "ARITHMETIC_ZERO_DIVISOR"
-    );
+    let failure = reject(&mut service, "screens.compose", invalid.clone());
+    assert_eq!(failure["error"]["code"], "ARITHMETIC_ZERO_DIVISOR");
+    assert_eq!(failure["error"]["actionIndex"], 0);
+    invalid["validateOnly"] = json!(false);
+    let refusal = reject(&mut service, "screens.compose", invalid);
+    assert_eq!(refusal["error"], failure["error"]);
     let mut missing = request.clone();
     missing["command"]["appearances"] = json!({});
     reject(&mut service, "screens.compose", missing);
