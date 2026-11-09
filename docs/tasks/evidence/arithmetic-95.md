@@ -531,3 +531,116 @@ manual-CI operations and registers no watch. SDK totals remain Mac 9/20 and Wind
 verification, exclusive integration/PR mutation ownership returns to the coordinator.
 No successor implementation, final review, issue closure, ready-for-review promotion,
 PR merge, automerge, release or worktree cleanup is selected.
+
+
+## Windows invocation 1 passed, 2026-11-10 AEST
+
+The single allocated Windows x64 qualification **started and passed** on SUNDOWN.
+Tested SHA: `a2c7ab9734cfe35433a3276d39f12c4ebdf955e7`. The clean existing
+`codex/spec-87-windows-92` worktree fast-forwarded from ancestor `918fa3cc`
+with `merge --ff-only` after fetch, root, ownership and process checks.
+The registered Screens checkout remains clean on its original branch at
+`251fb47754a0ec1a43ece8763a0b4603b8e54dd8`. No checkout or branch was created.
+
+All 883 tracked source/config/lock/fixture/tooling inputs matched Git's filtered
+checkout representation before execution and retained their hashes afterward.
+The app and fixture trees are the Windows-ready identities above; app, fixtures,
+scripts and CI inputs equal both Mac-qualified `ecf2e2f7` and merge `0382ae3c`.
+No source, configuration, fixture, assertion or timeout changed.
+
+Host: Windows 11 build 26200, native `x86_64-pc-windows-msvc`. Existing Rust
+1.90.0 (`1159e78c4`), Cargo 1.90.0 (`840b83a10`), MSVC toolset 14.50.35717 /
+compiler 19.50.35726 and Python 3.12.14 were loaded through the process-local
+host development helper. No installation or download ran. The executed SDK reports
+Ren'Py 8.5.3.26051504 and Windows Python 3.12.7.
+
+Exact commands from `app/`, in order:
+
+```sh
+cargo test -p loomlight-core --locked --offline --lib screens::tests::actions::runtime::click_time_arithmetic_fixture_preflight -- --exact --nocapture
+cargo test -p loomlight-core --locked --offline --lib screens::tests::actions::runtime::click_time_arithmetic_fixture_retains_samples_with_unresolved_gui -- --exact --nocapture
+cargo test -p loomlight-core --locked --offline --lib --no-run --message-format=json
+cargo test -p loomlight-core --locked --offline --lib screens::tests::actions::runtime::click_time_arithmetic_sdk_gate -- --ignored --exact --nocapture
+```
+
+Both no-SDK selectors passed exactly one test, without failures or ignored cases,
+in 18.67 s and 18.53 s. Command durations were 42.203 s and 19.141 s, including
+compilation/checking. All three named positive Cargo summaries passed
+`python scripts/check-q1-prep-gates.py cargo-log <retained-log>`.
+Fresh build JSON/stderr and the executed AMD64 test executable were retained
+before launch. The launch receipt binds the clean candidate, complete input
+manifest, toolchains, binary, archive, command, argument array and selected environment.
+
+Immediately before use, the retained official SDK archive matched
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`.
+The retained and repository published manifests matched
+`4b0cad9ac05dc4ca55081bd3a36458c8ea658ed021f09a87276383652b6bd98b`.
+The existing [official provenance](../../../spikes/renpy-sdk/published/README.md)
+applies, with no separate PGP claim. Archive members, existing extracted files and
+actual installed execution files agree for `renpy.py`, `renpy.sh` and Windows
+`python.exe`. The executed Python binary SHA-256 is
+`7c220ddbc41821a2c15199449fed09c0717e928f1d31abf0af7011c211d153a0`.
+Only the SDK child received `LOOMLIGHT_RUNTIME_SDK_ARCHIVE` and
+`LOOMLIGHT_ACTIONS_EVIDENCE_DIR`; retained evidence is outside its fresh short
+`TEMP`/`TMP` scratch. Exact local paths remain in ignored receipts.
+
+Launch attempt: **2026-11-09T14:05:20.014871Z**; process creation:
+**14:05:20.022335Z**. Cargo exited 0 after 107.968 s. Its named one-test
+summary reports 107.46 s, zero failures/ignored cases.
+
+| Unique case | Exit | Duration | Result |
+| --- | ---: | ---: | --- |
+| Compile | 0 | 1421 ms | Passed |
+| Lint | 0 | 894 ms | Passed |
+| Normal entry | 0 | 2519 ms | All 22 assertions passed |
+| Wrong outcome | 1 | 2901 ms | Required reward-10 assertion rejected |
+
+All four records completed exactly once, without timeout or output truncation.
+The SDK lists each inner selector twice. Normal entry has one duplicate not run;
+wrong outcome has one duplicate skipped after the required failure. Raw summaries
+are preserved. They add no passes and omit no distinct required case.
+Normal entry emitted every exact witness:
+
+```text
+ARITHMETIC_95_FIRST 6/12 points=2 fraction=4.0
+ARITHMETIC_95_SECOND 7/14 points=4 fraction=2.0
+ARITHMETIC_95_CURRENT trust=10 reward=20 points=19 fraction=0.25 floor=-3 remainder=2 precise=9007199254740993 widened=float:2.0
+ARITHMETIC_95_VALUES inert=True click=True keyboard=True textbutton=True imagebutton=True continuation=1
+```
+
+This covers current operands, changed amounts, ordered repeated text/image mouse
+and keyboard activation, actual numeric types/precision, overflow refusal,
+prediction/evaluation/selection inertness and one Finish continuation. Wrong outcome
+reports `FAILED` at `AssertionError: assert eval (reward == 10)` and omits
+`ARITHMETIC_95_WRONG_ACCEPTED`.
+
+| Input/artifact | SHA-256 |
+| --- | --- |
+| Complete 883-input manifest | `0e3219a3c54df0f5129953e149897046cbc861bed80036671140831f80fd8b9f` |
+| Executed/retained x64 binary | `f1e7bb933f331643d6c9a7c6c6d74209c84a457aa3d0ae2f6feb3f9d586cb8d8` |
+| Accepted composed screen | `991404a3df2b8acced3d950ee5eb7bd04c18d3d3ded19a713bdec1f76f7d98e3` |
+| Story fixture | `351a1779b184a0bd8d7068977c63a895e865bb4d7511f9baf4b04163d38806b5` |
+| Driver fixture | `f2663cd161fc98d5fc690285430f2d0706cbfd9efaa0b6464c6d4cdf8d675a4a` |
+| Runtime test owner | `1411cacc7aa2c8f3afd09973b3f409b0a2bdd85ea73c4f5e95d8092fbb85d2d5` |
+
+Independent audit passed input/binary/SDK identity, all four actual public
+validation/commit request-response pairs, both button kinds, inert samples,
+accepted source/assets and injected-driver hashes. Every case retains unchanged
+accepted `.rpy` sets. Terminal `arithmetic-95-terminal` reports
+`passed:true,cleanupComplete:true`. The owned SDK/project/profile/saves root and
+empty outer scratch are removed. No owned process remains; prior processes remain.
+All 71 prior #92/#94 evidence files across both checkouts retain their paths,
+sizes and hashes, including retained binaries. Unrelated refs and the registered
+checkout's complete tracked-file inventory remain unchanged.
+
+Preserve ignored `.toolchains/arithmetic-95/windows-01/`: before/after inventories,
+input/source/host/build proof, retained executable, both preflight exports/logs,
+launch/started/result receipts, installed/executed SDK identities, complete
+`sdk/` source/request/sample/case outputs, checker receipts, independent `audit.json`,
+source/selector/process audits and raw hash inventory. Repository documentation
+validation and whitespace checks pass. This branch changes only this Windows note.
+
+Consumption is **1/1 selected Windows SDK start**, Windows **3/20 started**, with
+this reservation consumed and no uncertainty. Mac remains **9/20**. There was no
+retry, editor/package/native/browser or manual-CI operation. The coordinator owns
+integration, status/ledger, tickets, parent PR and the #97 entry decision.
