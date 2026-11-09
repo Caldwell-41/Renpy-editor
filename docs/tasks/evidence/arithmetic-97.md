@@ -158,10 +158,15 @@ Visual fidelity is scoped, not full-workspace acceptance. Equation ordering, men
 fields, flat action rows and selected default editing follow A2. Production adds its
 honest unknown-state line. The existing app navigation/header, source/appearance tools,
 Variables search/assignment links and compact inspector overlay remain. Those differ
-from the isolated reference host; field widths follow their real containers. Image
-button visual parity, condition/text/sample full-layout captures, native WebView and
-human visual acceptance are not newly established by this comparison. Functional
-parity and decimal condition/text/sample authoring are proved separately above.
+from the isolated reference host; field widths follow their real containers. Supplementary `browser-extended/captures-03/` captures also cover actual imagebutton
+actions at both sizes, protected source, decimal text/sample controls and the compact
+numeric-condition editor. The controls were brought into view before capture; the
+initial extended captures with the wrong scroll position are retained separately.
+The numeric-condition editor includes the approved decimal-threshold guidance and
+uses a decimal input mode. Its surrounding generic Story condition/branch layout
+remains the existing production layout. Native WebView and human visual acceptance
+are not established by these browser captures. Functional parity and decimal
+condition/text/sample authoring are proved separately above.
 The full Story #110 layout/palette/Tracks/Reel and #96's existing limits are unchanged.
 
 ## Runtime qualification boundary
@@ -252,3 +257,12 @@ cases or ignored SDK gates. The four affected renderer consumers have 30 distinc
 passes; the separately corrected Windows-probe consumer has eight. Earlier failed
 and partial selections remain in the logs and are not represented as final-head
 full-suite passes. No further expensive qualification is inferred from these counts.
+
+
+The final visual correction scopes A2 Brass/slate tokens to Screens editors with
+ordered actions, including their Apply/Cancel controls. It does not alter the Story
+palette. Variables keeps its existing opaque compact inspector overlay. Browser
+comparison covers the approved named controls; surrounding navigation, appearance
+panels, canvas unavailability in this data-only fixture, and the generic Story
+condition layout remain explicit context differences. Fictional reference art is
+not evidence for production canvas fidelity.

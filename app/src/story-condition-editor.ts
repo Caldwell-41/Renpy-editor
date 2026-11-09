@@ -63,18 +63,20 @@ function simpleComparison(variables: Variables, initial: Extract<ConditionExpres
   const operator = select(operators, initial.operator); operator.setAttribute("aria-label", "Condition operator");
   host.append(label("Condition Variable", variable), label("Condition operator", operator));
   const valueHost = document.createElement("div"); host.append(valueHost);
+  const numericGuidance=document.createElement("p");numericGuidance.className="condition-numeric-guidance";numericGuidance.textContent="Numeric comparison. Decimal thresholds are allowed for either numeric type. No rounding.";host.append(numericGuidance);
   const stored = new Map<string, string>(); const literal = initial.right as Extract<ConditionExpression, { type: "bool" | "int" | "decimal" | "string" }>;
   stored.set(left.variableType, String(literal.value));
   let value: Control; let validateValue: () => void;
   const validateVariable = validateField(variable, () => { if (!variables.some(item => item.id === variable.value)) throw Error("Select an available Variable."); });
   const rebuild = (): void => {
     const selected = variables.find(item => item.id === variable.value);
+    numericGuidance.hidden=!["int","decimal"].includes(selected?.variableType??"");
     const allowed = operators.filter(item => ["int","decimal"].includes(selected?.variableType??"") || ["equal", "notEqual"].includes(item.value));
     const previous = operator.value;
     const choices = allowed.some(item => item.value === previous) ? allowed : [{ value: previous, label: "Choose a matching operator" }, ...allowed];
     operator.replaceChildren(...choices.map(item => { const option = document.createElement("option"); option.value = item.value; option.textContent = item.label; return option; })); operator.value = previous;
     if (selected?.variableType === "bool") value = select([{ value: "false", label: "False" }, { value: "true", label: "True" }], stored.get("bool") ?? "true");
-    else { value = document.createElement("input"); value.type = "text"; value.value = stored.get(selected?.variableType ?? "string") ?? ""; if (selected?.variableType === "int") value.inputMode = "numeric"; }
+    else { value = document.createElement("input"); value.type = "text"; value.value = stored.get(selected?.variableType ?? "string") ?? ""; if (["int","decimal"].includes(selected?.variableType??"")) value.inputMode = "decimal"; }
     value.setAttribute("aria-label", "Condition value"); valueHost.replaceChildren(label("Condition value", value));
     validateValue = validateField(value, () => { if(["int","decimal"].includes(selected?.variableType??""))numericLiteral(value.value); });
     for (const event of ["input", "change"]) value.addEventListener(event, () => { stored.set(selected?.variableType ?? "string", value.value); });
@@ -118,7 +120,7 @@ function expressionEditor(variables: Variables, initial: ConditionExpression, de
     }
     let value: Control;
     if (selected === "bool") value = select([{ value: "false", label: "False" }, { value: "true", label: "True" }], saved?.type === "bool" ? String(saved.value) : "true");
-    else { value = document.createElement("input"); value.type = "text"; value.value = saved?.type === selected && (saved.type === "int" || saved.type === "decimal" || saved.type === "string") ? saved.value : ["int","decimal"].includes(selected) ? "0" : ""; if (selected === "int") value.inputMode = "numeric"; }
+    else { value = document.createElement("input"); value.type = "text"; value.value = saved?.type === selected && (saved.type === "int" || saved.type === "decimal" || saved.type === "string") ? saved.value : ["int","decimal"].includes(selected) ? "0" : ""; value.inputMode=selected==="int"?"numeric":selected==="decimal"?"decimal":"text"; }
     value.setAttribute("aria-label", "Condition value"); panel.append(label("Condition value", value));
     const validate = validateField(value, () => { if(selected === "decimal")decimalValue(value.value); if (selected === "int" && !int64(value.value)) throw Error("Enter a canonical whole number within the signed 64-bit range."); });
     return { host: panel, read: () => { validate(); return selected === "bool" ? { type: "bool", value: value.value === "true" } : { type: selected as "int" | "decimal" | "string", value: value.value }; } };
