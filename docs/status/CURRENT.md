@@ -1,6 +1,6 @@
 # Current status
 
-## Story Combined v1 delivery tickets published
+## Story Combined v1 references consolidated
 
 The documentation-only interview is complete. Kris invoked to-spec and approved
 the existing testing boundaries on 2026-11-09. [Issue #110](https://github.com/Caldwell-41/Renpy-editor/issues/110)
@@ -20,10 +20,12 @@ specification is unchanged.
 
 The [release scope](../design/story-revamp/README.md#production-release-scope) records
 settled decisions, including Q13's approved B conflict interaction and Q14's full
-beat/layout review in the live app. Canonical documentation commits remain local
-on `codex/story-combined-v1-grill`. Both approved mock sources remain unchanged;
-the conflict reference remains local on `codex/story-draft-conflict-mock`.
-Production implementation, merges and pushes are not selected.
+beat/layout review in the live app. Kris authorized consolidating the interview
+docs and approved conflict reference through one PR into
+`codex/phase3b-screen-designer`. The conflict branch is merged into
+`codex/story-combined-v1-grill`; both approved sources and their reference branches
+remain intact. The PR owns checks and merge status. Production implementation is
+not selected.
 
 ## Story Combined v1 approved
 
@@ -31,8 +33,9 @@ Kris approved the combined Story layout on 2026-11-08 as **Story Combined v1**: 
 `story-revamp` / `combined`, approval revision `combined-v1` at source `6ecf6470`, recorded
 in [the approval record](../design/story-revamp/approval.json). Three council rounds ran
 (final Opus 9.1; Sol 9.2 before a gate cap); their remaining findings are fixed but unscored.
-Branch `codex/story-combined-fourth-mock` is pushed with a draft PR into
-`codex/phase3b-screen-designer`. Production implementation is not selected.
+[PR #108](https://github.com/Caldwell-41/Renpy-editor/pull/108) merged the original
+mock into `codex/phase3b-screen-designer` at `03d5b7fe`. Production implementation
+is not selected.
 
 The revision changes only the combined variant. It adds a Brass and slate palette for
 each mode, generated visual-novel art under `art/`, a Branch path bar of two-way switches,

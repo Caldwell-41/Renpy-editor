@@ -3,8 +3,9 @@
 Kris approved B on 2026-11-09 after the copy pass: `story-draft-conflict` /
 `compact`, revision `compact-v2`, named Buttons together. A remains unapproved.
 The [approval record](approval.json) pins the reviewed source and captures.
-The main interview agent owns recording Q13 in the canonical spec and continuing
-the interview. This approval does not authorize production implementation.
+Q13 is settled in the canonical UI contract and [integration spec #110](https://github.com/Caldwell-41/Renpy-editor/issues/110).
+Kris authorized consolidating this reference with the interview docs. Production
+implementation remains unselected.
 
 The reference is [Story Combined v1](../story-revamp/README.md), screen
 `story-revamp` / `combined`, revision `combined-v1`, source `6ecf6470`.
@@ -23,7 +24,7 @@ same outcome, so each candidate offers one action for that outcome. A calls it
 Keep source; B calls it Discard draft. Both use Override source for the other choice.
 Override source validates and saves only this beat in memory. It replaces the v1
 step of choosing the draft and then pressing Commit. This is now the approved
-conflict interaction. The main interview agent owns updating the interview spec.
+conflict interaction, recorded in the canonical UI contract and #110.
 The v1 captures remain under captures;
 the previous standalone export is retained locally at
 `.toolchains/story-draft-conflict/v1/review.html`.
@@ -36,7 +37,7 @@ Its arrows and Left/Right keys also switch variants. Arrow keys inside text fiel
 keep their normal meaning. Reset starts a fresh scenario. The Lab sample selector
 also starts fresh. The [approval record](approval.json) sets `currentApproved` to
 `compact-v2`.
-The approved source is local commit `af23cf4d9141661e98280896a4aab2fbe7bd4414`.
+The approved source is pinned at commit `af23cf4d9141661e98280896a4aab2fbe7bd4414`.
 Its full frontend/lab fingerprint and capture hashes are in the record.
 
 ## Run and review

@@ -1,6 +1,6 @@
 # Current outcome handover
 
-## Story Combined v1 delivery tickets published
+## Story Combined v1 references consolidated
 
 The interview on `codex/story-combined-v1-grill`, created from approved-design
 branch head `3f5a6de9`, is complete. Kris invoked to-spec and approved testing through
@@ -35,20 +35,23 @@ Story does not wait for all Screens arithmetic work or closure of #87.
 
 The [approved conflict reference](../design/story-revamp/README.md#approved-draft-conflict-interaction)
 is `story-draft-conflict` / `compact`, revision `compact-v2`, source `af23cf4d`,
-approval commit `51bb6a02`. It remains local on `codex/story-draft-conflict-mock`,
-whose worktree owns the prototype, minimal lab registration and design notes.
-This chat owns the canonical domain and status docs. The handoff's focused design
-checks pass; capture hashes and unchanged candidate source were verified here.
-The approved prototype has not been merged into this branch. Production behaviour
-and tests remain unchanged; no implementation, merge or push is selected. #110 is
-self-contained because the canonical interview docs and conflict reference remain
-local. Make the pinned reference available before later integration checks.
+approval commit `51bb6a02`. Kris authorized merging this reference into the interview
+branch, publishing one PR into `codex/phase3b-screen-designer`, and merging after
+required checks pass. The conflict branch is merged into
+`codex/story-combined-v1-grill`. The parent already contains the original mock
+through [PR #108](https://github.com/Caldwell-41/Renpy-editor/pull/108), merge
+`03d5b7fe`. Its tree exactly matched the original mock branch before consolidation.
+The squash-history reconciliation changed no file contents.
 
-Commit documentation locally.
-The requested specification and approved tickets are published; no further tracker
-changes, PRs or pushes are selected. The other chat owns
-`codex/story-combined-fourth-mock`; preserve its
-branch and preview. No product build, test run or browser operation is pending.
+The consolidation PR owns current checks and merge status. Preserve both original
+mock branches/worktrees and their pinned source/approval commits. Neither approved
+source nor production code changed. The conflict approval and captures now live
+alongside the canonical decisions; use the pinned references for visual comparison.
+The consolidated candidate passes repository validation, Design Lab typechecking,
+approval validation, B's focused wide/compact interaction journey and the selected
+approval check. Production directories and the approved mock files are unchanged.
+The prototype's old toolbar wording remains a recorded limitation. Production
+implementation and release remain unselected; #110 and its children stay open.
 
 ## Story Combined v1 approved
 
@@ -56,8 +59,9 @@ Kris approved the combined Story layout on 2026-11-08 as **Story Combined v1**: 
 `story-revamp` / `combined`, approval revision `combined-v1` at source `6ecf6470`, recorded
 in [the approval record](../design/story-revamp/approval.json). Three council rounds ran
 (final Opus 9.1; Sol 9.2 before a gate cap); their remaining findings are fixed but unscored.
-Branch `codex/story-combined-fourth-mock` is pushed with a draft PR into
-`codex/phase3b-screen-designer`. Production implementation is not selected.
+[PR #108](https://github.com/Caldwell-41/Renpy-editor/pull/108) merged the original
+mock into `codex/phase3b-screen-designer` at `03d5b7fe`. Production implementation
+is not selected.
 
 The revision changes only the combined variant. It adds a Brass and slate palette for
 each mode, generated visual-novel art under `art/`, a Branch path bar of two-way switches,
