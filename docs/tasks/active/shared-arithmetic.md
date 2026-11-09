@@ -22,8 +22,9 @@ Screens branch. No merge of that PR or release is selected.
 - Screens mock #91 and #97's additional decimal controls are approved as A2 /
   `equation-v2`; the reference is integrated by merge `aecf165e`. Story backend
   #92 is merged and qualified on Mac and Windows. Its scoped delivery is ready
-  for final integration review. #93 has returned implementation and Mac proof;
-  its integration is next, followed by #94.
+  for final integration review. #93 is merged with qualified public-command/Mac
+  evidence; fresh #94 decimal work is next. Combined #93/#94 Windows proof remains
+  required before #95 or #96 starts.
 - Backend sequence: #92, then #93, then #94. #95 follows #94.
 - Story UI #96 follows approved #88 and qualified #94.
 - Screens/decimal UI #97 follows approved #91 and qualified #95.
@@ -538,3 +539,57 @@ remains coordinator-owned. No package, native-editor or manual matrix is selecte
 Next: receive the merger result, then start fresh #94 work with the exact merged
 contract. Final integration review, #95/#96/#97 production and full #87 acceptance
 remain pending. No new work is sent to the referenced Windows #92 chat.
+
+### 2026-11-09: #93 integration and evidence reuse
+
+The merger confirmed clean integration at
+`80c6af37125a7670862ff9f177b74994aa1e8f17` and clean returned branch
+`t3/story-whole-number-formulas` at `78c924162fed43cdb3e54e63004480c7210c40da`.
+Their common ancestor is `7e1c3133ebd6fe1fbd7bb9aa27b587562df4442c`.
+Normal `--no-ff` merge `ff6dc26c96a4c50cba68bb4b6d4ca14cf0d69da6` has those
+two tips as its ordered parents. It had no conflicts and preserved all three
+coordinator records byte-for-byte before this receipt. Neither history changed.
+
+The merged app tree is `399af62449980626dda3b17ae7f47d91be57811f`; all fixtures
+are `e754c973d875ed12dcd27a8767864265d0326692`. Both match returned branch and
+qualified candidate `ca51e4c7e02c5dc54ef8c47b9c245907a1456c6b` exactly. Scripts
+and CI inputs also match the candidate. The returned branch's sole later change
+is its evidence note. Reuse the 76 distinct Rust and 36 renderer passes,
+TypeScript/formatting results and coordinator-audited Mac SDK proof in
+[#93 evidence](../evidence/arithmetic-93.md). No unchanged tests or SDK runs were
+repeated. Seven existing Story specialist cases remain outside selection.
+
+Cheap merger checks pass: retained request/result JSON has matching protocol and
+request identity, string formula/integer transport, revision assertions, exact
+score `36028797018963992` and coherent variable reads/writes. The quality-only
+validation plan still names the correct integration/base branches. Repository
+validation passes for 1,852 files; integration and working-tree whitespace pass.
+The current contract is [Variables and state](../../DATA_MODEL.md#variables-and-state),
+with exact payloads, diagnostics and fixtures in the
+[#93 public contract](../evidence/arithmetic-93.md#public-contract-for-94-95-and-96).
+
+Approved Story/Screens source, approval history and captures are unchanged from
+pre-merge integration. The Design Lab tree remains
+`b32e5588f20b9e803ed32a4c2d4c0be8286e8bca` and design records remain
+`479a99d146ca5e04c704fd771bb857cc581cd23d`. The retained #92 fixture tree is
+`0a14efb0d9c28697204bc172381e9a0623b2ce2a`, unchanged. No production layout,
+Design Lab or renderer evaluator was added. No other checkout, ignored evidence
+or branch was changed or removed. Unique Mac/Windows evidence stays retained.
+
+Publication is limited to `codex/spec-87-arithmetic` on its own origin branch and
+existing draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122).
+The PR retains full #87 scope and all eventual closing references. #93's delivery
+checkpoint is `review_ready` for this merged public-command/Mac slice, with
+new formula Windows proof explicitly missing. Tickets stay open for final review;
+this is not full feature acceptance.
+
+The coordinator resumes mutation ownership after the merger return and assigns a
+fresh #94 implementer from this merged contract. Ordinary division and decimals
+remain #94. Its fixture must retain #93's integer precedence/grouping, precision
+and negative floor/remainder witnesses alongside decimal assertions. Complete
+combined #93/#94 Windows qualification against #94 before #95 or #96 starts;
+#92's old Windows fixture does not prove formulas. No #94 implementer or Windows
+thread was started here. Mac remains **2 started / 0 reserved**, Windows
+**1 started / 0 reserved**. No SDK, package, native or manual-CI operation ran.
+#91/#97 design gates remain complete; #95/#96/#97 production, final integration
+review and full #87 acceptance remain pending. Keep the PR draft.

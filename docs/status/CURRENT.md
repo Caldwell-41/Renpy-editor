@@ -16,10 +16,11 @@ The merged full frontend/Lab fingerprint differs because #92 changed typed Story
 transport; the approved checkout remains the matching reference. Typecheck,
 static approval/hash/dimension validation, production build exclusion, repository
 validation and whitespace pass. All production app, Cargo/toolchain and runtime
-fixture inputs match pre-merge integration and Windows dispatch source `c7b8157e`.
+fixture inputs matched pre-merge integration and Windows dispatch source `c7b8157e`
+at that design merge. #93's later production changes are qualified separately below.
 #92 backend is integrated by merge `e8b07b31`, preserving coordinator
-tip `56c619f1` and implementation tip `e5de0c20`. Its app/runtime inputs still
-match qualified candidate `1ba9fe44`; passing implementation and audited Mac
+tip `56c619f1` and implementation tip `e5de0c20`. Its merged app/runtime inputs
+matched qualified candidate `1ba9fe44`; passing implementation and audited Mac
 evidence is reused. Merger repository validation and whitespace checks pass.
 An inherited CI plan named the previous branch; its head selection is corrected,
 with 18 existing reporter tests passing. Final-head automatic checks await audit.
@@ -28,11 +29,19 @@ integration branch to the Screens base; it tracks the eventual full #87 outcome.
 #92's Windows SDK run passed and evidence is merged
 through `26047929`, completing scoped both-target delivery. T3 denied the remote
 completion messages; the coordinator audited the finished history after Kris's
-pointer. #93 has now returned whole-number formulas at `78c92416`, Mac-qualified
-code `ca51e4c7`, with coordinator-audited receipts. Its merge is next, then #94.
+pointer. #93 whole-number formulas are integrated by conflict-free merge
+`ff6dc26c96a4c50cba68bb4b6d4ca14cf0d69da6`, preserving coordinator `80c6af37`
+and returned `78c92416`. App/fixture bytes equal Mac-qualified `ca51e4c7`.
+Reuse 76 Rust and 36 renderer passes, TypeScript/formatting and audited Mac proof;
+merger contract, repository and whitespace checks pass. Approved mocks/captures
+and #92 fixture inputs remain unchanged. The
+[#93 contract](../tasks/evidence/arithmetic-93.md#public-contract-for-94-95-and-96)
+is ready for fresh #94 decimal work, which the coordinator assigns next.
 SDK totals are Mac 2 started / 0 reserved and Windows 1 started / 0 reserved.
 New whole-number/decimal Windows proof will be combined against #94 before
-dependent #95/#96 work; it remains required and unclaimed. Final review is pending.
+dependent #95/#96 work. The #94 fixture must retain integer precision, precedence,
+grouping and negative floor/remainder witnesses. Windows formula proof remains
+missing; #92's Windows result does not prove it. Tickets remain open for final review.
 Backend and approved production UI are in scope. No full #110 redesign,
 parent-PR merge or release is selected.
 

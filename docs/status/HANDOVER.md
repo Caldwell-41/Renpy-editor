@@ -48,51 +48,65 @@ Backend #92 is merged through `e8b07b31d0dd9fd9c5dcf3f784c61f2e089fd050`.
 Its parents are coordinator `56c619f18bbcfd78873474369005853cc6f67b89` and
 returned implementation `e5de0c20da8cd5f2812116840bf67b808d91d78a`.
 The merge had no conflicts and preserved all coordinator records. Its app and
-fixture trees match the returned branch; app/runtime inputs match qualified
+fixture trees matched the returned branch; app/runtime inputs matched qualified
 candidate `1ba9fe447c5322683e11026c98ae9c4b38996240`. Reuse the passing tests
 and coordinator-audited Mac proof in [#92 evidence](../tasks/evidence/arithmetic-92.md).
 The merger's repository validation and whitespace checks pass. After publication,
 the aggregate CI reporter refused the inherited plan's previous-branch name.
 The merger corrected the head selection, retained quality-only selection and
 passed the 18 existing reporter tests. These integration updates change only
-documentation and branch-bound CI metadata; qualified app/runtime inputs are intact.
+documentation and branch-bound CI metadata; qualified app/runtime inputs were intact.
 
 Draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) publishes
 `codex/spec-87-arithmetic` into `codex/phase3b-screen-designer` and is linked in T3.
 The integration branch now tracks its own origin branch. The PR describes full
-#87 scope and eventual closing references. It contains #92 implementation plus
-the approved #91/#97 design reference; later backend and production UI work remain.
-The coordinator owns the integration checkout. Windows #92 has completed and
+#87 scope and eventual closing references. It contains #92/#93 implementation plus
+the approved #91/#97 design reference; #94/#95 backend and #96/#97 production UI remain.
+The coordinator resumes integration-checkout ownership after this merger returns.
+Windows #92 has completed and
 passed its single SDK run at `c7b8157e`; its two completion sends were denied by
 T3, so Kris pointed to the finished thread. The coordinator read its history and
 audited recorded gate/case outputs, exact values, wrong-outcome rejection and
 cleanup. Evidence commit `c7e4e345` is merged through `26047929`; production and
-runtime fixtures still match both qualified targets. The #92 note owns details.
+runtime fixtures matched both qualified targets at that checkpoint. #92's fixture
+inputs remain retained unchanged after #93. The #92 note owns details.
 Preserve the Windows worktree and raw receipts. Cross-environment callbacks are
 not reliable; do not assume a remote completion message was delivered.
 
-#92's scoped delivery is complete. #93 returned clean
-`t3/story-whole-number-formulas` at `78c92416`, qualified code `ca51e4c7`, with
-76 Rust and 36 renderer passes plus one passing Mac SDK invocation. The coordinator
-audited all 149 input hashes, accepted-source/binary hashes, exact case results,
-wrong-outcome rejection and cleanup. The ticket note owns full evidence/contract.
+#92's scoped delivery is complete. #93 is integrated by conflict-free normal merge
+`ff6dc26c96a4c50cba68bb4b6d4ca14cf0d69da6`. Its ordered parents are coordinator
+`80c6af37125a7670862ff9f177b74994aa1e8f17` and returned clean branch
+`t3/story-whole-number-formulas` at `78c924162fed43cdb3e54e63004480c7210c40da`.
+Coordinator records survived unchanged before this receipt. The entire app and
+fixtures equal qualified code `ca51e4c7e02c5dc54ef8c47b9c245907a1456c6b`.
+Reuse 76 Rust and 36 renderer passes, TypeScript/formatting and one passing Mac SDK
+invocation. The coordinator audited all 149 input hashes, accepted-source/binary
+hashes, exact case results, wrong-outcome rejection and cleanup. Merger contract,
+branch-plan, repository (1,852 files) and whitespace checks pass. Approved mocks,
+approval history/captures and #92 fixtures remain unchanged. The
+[#93 public contract](../tasks/evidence/arithmetic-93.md#public-contract-for-94-95-and-96)
+and [integration receipt](../tasks/active/shared-arithmetic.md#2026-11-09-93-integration-and-evidence-reuse)
+own payloads, fixtures and exact reuse comparisons. No unchanged tests were rerun.
 SDK totals are Mac **2 started / 0 reserved**, Windows **1 started / 0 reserved**.
 
-A fresh merger gets exclusive integration-checkout ownership under request key
-`spec87-merge93-20261109`. Integrate/publish the exact returned slice, preserving
-approved designs and evidence. Wait for completion without polling, then start
-fresh #94 decimal work. The ledger explicitly selects combined #93/#94 Windows
-qualification against #94 before dependent #95/#96 work, retaining both integer
-and decimal witnesses. New formula Windows proof remains required and unclaimed;
-no new message/work is sent to the referenced Windows #92 chat. The six-start
-feature ceilings are unchanged. Tickets remain open for final integration review.
-No editor package/native launch or manual CI operation has started.
+The coordinator next assigns a fresh #94 implementer from this merged contract.
+Ordinary division and decimals remain #94. Combined #93/#94 Windows qualification
+against #94 is required before #95 or #96 starts. Its accepted-source fixture must
+retain integer precision, precedence/grouping and negative floor/remainder witnesses
+alongside decimal assertions. Formula Windows proof is still missing; #92's old
+Windows fixture does not prove it. The merger starts no #94 implementer or Windows
+thread. The six-start feature ceilings are unchanged. Tickets remain open for final
+integration review/closure; #93's merged public-command/Mac slice is
+`review_ready` with this Windows limit. #91/#97 design gates are complete;
+#95/#96/#97 production and full feature acceptance remain pending.
+No SDK, editor package/native launch or manual CI operation ran in this merge.
 Preserve the backend worktree's unique ignored Mac receipts and the separate
 approved #91/#97 design worktree. Keep the PR draft. Final parent-PR merge,
 automerge/release and full Story redesign #110 are outside this selection.
 
 The earlier sections below retain prior work and recovery context. Their
 unselected-next-task statements do not override this explicit #87 selection.
+The longer status files preserve unique prior qualification and recovery records.
 
 ## Story Combined v1 references consolidated
 
