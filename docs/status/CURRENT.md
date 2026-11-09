@@ -67,7 +67,8 @@ and #92 fixture inputs remain unchanged. The
 [#94 contract](../tasks/evidence/arithmetic-94.md#public-contract-for-95-and-96)
 is the merged baseline for dependent work.
 On 2026-11-09 Kris raised both SDK ceilings from six to 20 started invocations.
-Totals are Mac 9/20 started and Windows 2/20 started, with zero reservations.
+Totals are Mac 9/20 started, none reserved, and Windows 2/20 started with one
+reserved for #95 qualification on SUNDOWN's existing worktree.
 #95's fourth Mac attempt passed compile/lint, all 22 normal assertions, exact
 ordered/current values, both button kinds with click/keyboard, Finish, deliberate
 wrong-outcome rejection and cleanup. The coordinator verified all 869 inputs,

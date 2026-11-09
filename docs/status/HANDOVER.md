@@ -196,10 +196,14 @@ case bring distinct passing Rust coverage to 55, including SDK.
 Fresh pinned production typecheck, recorded contract/branch-plan, repository and
 whitespace checks pass. No unchanged full suite was repeated. Merger audit receipts
 are in integration's ignored `.toolchains/arithmetic-95/integration-merge/`.
-Current use is Mac 9/20 and Windows 2/20, with zero reservations. The merger
-publishes this Windows-ready backend and returns exclusive mutation ownership.
-The coordinator next selects bounded Windows qualification on the existing host
-and worktree, preserving the recorded app/runtime identity. This merger ran zero
+Current use is Mac 9/20, none reserved, and Windows 2/20 with one reserved for #95.
+Integration/PR mutation ownership has returned to the coordinator. SUNDOWN is
+reachable; a fresh remote test delegate will reuse its existing
+`codex/spec-87-windows-92` qualification worktree. Confirm clean state/ownership,
+then safely fast-forward to the published allocation checkpoint. Prior Windows
+evidence `918fa3cc` is an ancestor. Preserve the registered project-root checkout
+and all existing evidence. No Windows #95 SDK start is known yet; the reservation
+remains charged until actual start/result evidence returns. This merger ran zero
 SDK/browser/native/package/manual-CI operations. #95 stays open; Windows runtime
 proof is still required before #97 starts. The Story shadow-token CI correction is
 published at `f8f4f904`, with nine protocol passes after a matching red. Its small

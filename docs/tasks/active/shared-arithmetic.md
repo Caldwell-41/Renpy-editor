@@ -71,7 +71,7 @@ one becomes necessary. Routine checks and review have no numerical limits.
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
 | macOS ARM64 SDK qualification | 20 | 9 | 0 |
-| Windows x64 SDK qualification | 20 | 2 | 0 |
+| Windows x64 SDK qualification | 20 | 2 | 1 for #95 |
 
 ## Execution ledger
 
@@ -1188,3 +1188,29 @@ no watch. After publication verification, exclusive mutation ownership returns t
 the coordinator for a bounded Windows assignment against this app/runtime identity.
 No successor implementation, final review, issue closure, PR promotion or merge
 is selected. All worktrees and raw attempt evidence remain preserved.
+
+
+### 2026-11-09: Windows #95 qualification selected
+
+The coordinator received clean published integration `fe7a49c0` and verified its
+app/fixture inputs still equal qualified `ecf2e2f7`. SUNDOWN is reachable. The prior
+Windows qualification evidence `918fa3cc` is an ancestor of integration, allowing
+a safe fast-forward of the existing assigned qualification worktree after remote
+clean-state/ownership checks. Preserve the registered project-root checkout and
+all previous #92/#94 receipts; no new checkout or top-level chat is needed.
+
+One Windows SDK invocation is reserved for the existing #95 gate after both exact
+no-SDK fixture preflights, official archive verification, a clean candidate and
+fresh build/source/binary receipts. Use fresh ignored
+`.toolchains/arithmetic-95/windows-01/` there. Require all four complete unique
+cases, 22 normal assertions and exact current/ordered text/image click/keyboard,
+invalid/inertness/Finish witnesses, deliberate rejection, source invariance and
+cleanup. The canonical #95 note owns selector details and prior harness lessons.
+A fresh remote delegate owns only qualification evidence; source remains unchanged.
+
+Accounting before dispatch is **Mac 9/20 started, zero reserved; Windows 2/20
+started, one reserved**. Eleven Mac and seventeen Windows starts are unallocated.
+Preflight refusal consumes no start; any actual SDK start consumes the reservation,
+including failure. No retry, native editor/package or manual-CI operation is
+selected. The coordinator retains integration/ledger/PR ownership. #97 stays
+blocked until actual successful Windows evidence is audited and integrated.
