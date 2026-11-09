@@ -169,41 +169,34 @@ here at `.toolchains/arithmetic-96/coordinator-audit.json`; merger equivalence a
 check receipts are under its `integration-merge/` sibling directory. No SDK,
 browser, editor-native/package or manual-CI operation ran during this merge.
 
-#95's corrected clean local head is `32bd12871777f1712da17c4ca1aa847188413168`
-on `t3/screens-click-time-arithmetic`. The coordinator reports two exact no-SDK
-fixture passes after reproducing and correcting the shared availability assertion.
-Only its existing Rust fixture/test owner and evidence changed; production is
-unchanged. Evidence export now precedes assertions, and four not-run SDK case
-records initialize before generation. The original failed `mac-01` is immutable;
-it actually started and failed during preparation before arithmetic assertions.
+#95 returned clean local `899f0e5798afa8637bf4a23284cc22185b27a1fc` on
+`t3/screens-click-time-arithmetic`, qualified at
+`ecf2e2f7d9df8130e9102579c9ac9db6baec56b2`. It includes published integration
+`323a0685`. All app/fixture inputs are unchanged in the evidence-only successor.
+The fourth Mac attempt passed all four unique cases: compile/lint, 22 normal
+assertions and required wrong-outcome rejection. Exact text/image click/keyboard,
+ordered/current values, invalid arithmetic, inertness and one Finish continuation
+passed. SDK/desktop cleanup passed and no process remains. The coordinator audited
+all 869 candidate/working input hashes, retained binary, four public action
+request/response pairs, actual witnesses and source invariance.
 
-The coordinator merged published integration `3db93619` into the corrected #95
-branch, producing clean candidate `8879088a56596780d66e94fcc19774db781e3b84`.
-Combined typechecking passes. The fresh `mac-02` receipt binds all 869 input hashes,
-the verified archive and retained executable. The reserved follow-up started
-outside the sandbox through desktop admission at 2026-11-09 13:18:32 UTC.
-The run finished failed with cleanup complete. Compile/lint passed, then normal
-entry could not find the SDK imagebutton ID before any arithmetic click. The
-fixture's unannotated-line replacement never matched the authored identity comment.
-An exact guarded marker insertion and final-source assertion now pass the existing
-no-SDK preflight. `mac-02/coordinator-audit.json` verifies 869 inputs against the
-frozen candidate, binary, real failed records and cleanup. Both failures are intact.
-The next allocated Mac run started at clean `30072c2c98a48d27786bb53bfd893a80dc0416b3`,
-including published CI token correction `f8f4f904`. Fresh `mac-03` binds 869 inputs
-and retained executable `0e36ff88…`. It started outside the sandbox through desktop
-admission at 2026-11-09 13:27:37 UTC, PID 63952, local exec session 97254. Its result
-failed after compile/lint and eleven passing normal assertions. Textbutton values
-6/12, 7/14 and changed-operand keyboard activation passed; image activation and
-wrong outcome remain missing. SDK/desktop cleanup passed and no process remains.
-The pinned SDK's ID selector directly compares string screen names to stored
-tuples. A synthetic metadata diagnostic of that exact method distinguishes them;
-driver correction `eef88d7d` uses tuple names for both image inputs without changing
-timeouts/assertions. One controlled verification is reserved after latest integration
-and fresh source/binary receipts. Current usage is **Mac 8/20 started plus one reserved;
-Windows 2/20 started, none reserved**.
-The worker checkout's canonical
-`docs/tasks/evidence/arithmetic-95.md` owns its failure/correction and raw receipts.
-#95 remains unmerged and runtime-unqualified; #97 remains blocked.
+The worker's canonical `docs/tasks/evidence/arithmetic-95.md` owns its public
+contract and all four attempts. Preserve ignored `mac-01` through `mac-04`, the
+no-SDK regressions and selector diagnostic in that worktree. Three distinct fixture
+failures remain failed; corrected GUI limits, source-ID insertion and pinned
+screen-name selectors changed no production arithmetic. `mac-04/coordinator-audit.json`
+retains the independent successful audit. Reuse scoped 53 Rust/12 renderer passes
+and controller/core journey on unchanged product inputs. The new GUI case and SDK
+case bring distinct passing Rust coverage to 55, including SDK.
+
+Current use is Mac 9/20 and Windows 2/20, with zero reservations. A fresh merger
+receives exclusive integration/PR mutation ownership to merge this qualified
+backend normally and publish it for Windows qualification. It runs no SDK or
+browser/native/package/manual-CI operation. #95 stays open; Windows runtime proof
+is still required before #97 starts. The Story shadow-token CI correction is
+published at `f8f4f904`, with nine protocol passes after a matching red. Its small
+style delta keeps #96's original comparison candidate and limits; fresh automatic
+CI remains for exact-head audit.
 
 Story Combined v1 / combined-v1 remains the approved arithmetic design. #96
 implements reusable approved controls in the existing Story workspace; full #110
@@ -218,7 +211,7 @@ parent-PR merge, automerge or release is selected. The published checkpoint reta
 the existing draft/base and full-spec closing references. Final-head automatic
 checks await coordinator audit; no watch was registered. After remote HEAD/upstream
 and clean-state verification, integration mutation ownership returns to the
-coordinator. The coordinator owns the reserved #95 qualification follow-up.
+coordinator after the new #95 merger returns.
 
 The earlier sections below retain prior work and recovery context. Their
 unselected-next-task statements do not override this explicit #87 selection.

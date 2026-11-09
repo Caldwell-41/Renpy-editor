@@ -70,7 +70,7 @@ one becomes necessary. Routine checks and review have no numerical limits.
 
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
-| macOS ARM64 SDK qualification | 20 | 8 | 1 for pinned #95 selector verification |
+| macOS ARM64 SDK qualification | 20 | 9 | 0 |
 | Windows x64 SDK qualification | 20 | 2 | 0 |
 
 ## Execution ledger
@@ -1109,3 +1109,49 @@ a clean candidate and fresh input/binary receipts. Accounting is **Mac 8/20 star
 plus one reserved; Windows 2/20 started, none reserved**, leaving eleven Mac and
 eighteen Windows starts unallocated. #95 remains runtime-unqualified and #97
 blocked. No further start occurred during this diagnosis.
+
+
+### 2026-11-09: #95 tuple-selector verification started
+
+The coordinator normally merged published allocation `323a0685` into corrected
+selector commit `eef88d7d`, producing clean candidate
+`ecf2e2f7d9df8130e9102579c9ac9db6baec56b2`. The rebuilt and retained executable
+SHA-256 is `1b774c1e2b8bba471c488e056aa26dead6456a38eb67a61cc75a62578c6b8ca1`.
+Fresh ignored `mac-04/` records all 869 input hashes, pinned archive and exact
+command/desktop context. The reserved invocation started at **2026-11-09
+13:35:52 UTC**, test PID **68200**, owned by local exec session **18844**.
+Consumption is now **Mac 9/20 started, Windows 2/20 started, zero reservations**.
+The result is pending. No previous failure is overwritten or promoted to pass.
+
+
+### 2026-11-09: #95 Mac runtime qualified; fresh merger handoff
+
+Clean local `t3/screens-click-time-arithmetic` is returned at
+`899f0e5798afa8637bf4a23284cc22185b27a1fc`. Qualified candidate is
+`ecf2e2f7d9df8130e9102579c9ac9db6baec56b2`, including published `323a0685`.
+Its evidence-only successor changes no app/fixture input. The canonical #95 note
+owns the complete public contract, four Mac attempts and exact source/runtime proof.
+
+The fourth Mac attempt passed compile/lint, all 22 normal assertions and the
+required rejecting assertion, with every exact witness, unchanged accepted source
+and SDK/desktop cleanup. The coordinator independently verified all 869 input
+hashes against clean Git and working files, retained binary, four actual public
+action validation/commit pairs, case records and source/witness outputs.
+`mac-04/coordinator-audit.json` in that worktree retains the audit. No process runs.
+All three prior attempts stay failed with immutable raw evidence. Only fixture
+assumptions changed during recovery; production arithmetic is unchanged.
+
+Reuse 53 prior scoped Rust cases, 12 renderer cases and actual Screens controller/
+core journey. The added GUI regression and successful SDK case bring distinct
+Rust coverage to 55 including SDK; repeated preflights add no cases. Fresh combined
+typechecking also passed after Story integration. #95 Mac runtime is qualified;
+Windows is still required and #97 remains blocked.
+
+Usage is **Mac 9/20 started, Windows 2/20 started, zero reservations**. A fresh
+merger receives exclusive integration/PR mutation ownership from this checkpoint.
+Normally merge #95, verify qualified input equivalence, preserve #96 and approved
+reference/evidence trees, update canonical status/PR and publish the Windows-ready
+candidate. The merger selects no SDK/browser/native/package/manual-CI operation.
+Then coordinator routes a bounded fresh Windows qualification through the existing
+host/worktree. Keep #95 open, preserve all worktrees and wait for actual target
+qualification before #97. Final feature review/acceptance remain pending.

@@ -12,8 +12,8 @@ retain both failed attempts and the corrected runtime pass. Windows evidence
 `918fa3cc` is integrated through `235d99ac`; both targets now qualify #94 and the
 combined #93 integer witnesses. The coordinator audited actual case outputs,
 source/binary identities, all required assertions and cleanup. #95 Screens runtime
-has returned locally with failed Mac SDK preparation and no runtime qualification;
-it is not integrated. #97 waits for qualified #95.
+has qualified Mac runtime proof locally at `ecf2e2f7`, returned as `899f0e57`.
+It is not integrated; Windows proof remains required before #97.
 
 #96's functional increment is integrated by conflict-free normal merge `25fa2e1c`,
 preserving coordinator `157c1ef8` and returned `b77cc26e`. All app/fixture inputs
@@ -62,19 +62,14 @@ and #92 fixture inputs remain unchanged. The
 [#94 contract](../tasks/evidence/arithmetic-94.md#public-contract-for-95-and-96)
 is the merged baseline for dependent work.
 On 2026-11-09 Kris raised both SDK ceilings from six to 20 started invocations.
-Totals are Mac 8 started plus one reserved and Windows 2 started, none reserved. #95's
-original Mac invocation failed before arithmetic assertions. Corrected branch
-`8879088a` includes published integration and has passing combined typechecking.
-Its follow-up passed compile/lint, then failed before arithmetic clicks because
-the fixture never inserted its SDK imagebutton ID. The guarded marker correction
-passes the existing no-SDK preflight. Follow-up `30072c2c` proved textbutton values
-6/12 and 7/14 plus changed-operand keyboard activation, then timed out because
-the pinned SDK ID selector compares a string against tuple screen names. A no-SDK
-diagnostic verifies the tuple form; the driver is corrected at local `eef88d7d`.
-One verification is reserved after fresh receipts. All failed runs remain intact. #95 is still unmerged;
-#97 remains blocked until runtime qualification. Automatic frontend checks found
-a literal shadow colour; the coordinator replaced it with the existing theme token
-and passed all nine protocol checks locally. Fresh CI remains required.
+Totals are Mac 9/20 started and Windows 2/20 started, with zero reservations.
+#95's fourth Mac attempt passed compile/lint, all 22 normal assertions, exact
+ordered/current values, both button kinds with click/keyboard, Finish, deliberate
+wrong-outcome rejection and cleanup. The coordinator verified all 869 inputs,
+retained binary, actual requests and witnesses. All three failed attempts remain
+intact. A fresh merger will publish #95 for Windows qualification. #97 stays blocked.
+The Story shadow-token correction passes all nine protocol checks locally;
+final-head automatic CI remains for audit.
 The delivery record owns current limits, assignments and qualified candidates.
 The corrected #94 fixture qualifies integer precision, precedence/grouping,
 negative floor/remainder and decimal behavior on both targets. Tickets remain
