@@ -338,3 +338,38 @@ retry during this correction. Runtime proof for #95 and entry to #97 remain
 missing. The #96 merger still owns integration publication; after that handoff,
 the coordinator can merge the latest integration into this corrected branch,
 record a clean candidate and allocate a fresh bounded SDK attempt explicitly.
+
+
+## Mac invocation 2 and image-selector correction
+
+The reserved correction ran at clean integration-inclusive candidate
+`8879088a56596780d66e94fcc19774db781e3b84`, with 869 input hashes and retained
+executable SHA-256 `99bef3f59d9048b47991b2a291f42fd59592a3c5390468e4089a64c689f73dfb`.
+It started at 2026-11-09 13:18:32 UTC and failed after 77.553 seconds. Compile
+passed in 478 ms and lint in 263 ms. Normal entry passed five assertions, then
+failed looking up `arithmetic_image`; no arithmetic click witness or wrong-outcome
+proof was reached. The normal record is failed and the fourth case remains notRun.
+SDK/project cleanup and desktop/power cleanup passed. Feature use is Mac 7/20 and
+Windows 2/20. No further start occurred during diagnosis.
+
+Unlike invocation 1, fresh `mac-02/` retains actual requests, inspection, sampled
+plan, accepted source/assets, SDK context, all four case statuses and raw outputs.
+The coordinator verified all 869 receipt inputs against the frozen Git candidate,
+the retained binary, three unchanged-source case records, no timeout/truncation
+and absent temporary root. `coordinator-audit.json` records the failed result.
+The original failure and its receipts remain immutable.
+
+This is a second, distinct harness defect. The fixture attempted to add an SDK ID
+by replacing `imagebutton:` followed immediately by a newline. Public composition
+actually writes an element identity comment on that line, so replacement changed
+nothing. Both earlier no-SDK accepted source and this SDK attempt lack the ID.
+The action editor did not remove it; the fixture never inserted it.
+
+The existing public no-SDK preflight now asserts that its final accepted screen
+retains the SDK ID. It failed in 6.10 seconds before the fix. The fixture insertion
+now matches the exact known imagebutton/UUID marker, requires exactly one match,
+and preserves that identity comment. The same preflight passes in 6.51 seconds;
+`image-selector-green/` retains the real source and requests. Production is
+unchanged. No arithmetic, inertness, keyboard, type or rejecting assertion was
+removed or relaxed. A fresh clean candidate/receipt and explicit allocation remain
+required before another SDK start. #95 runtime proof and #97 entry remain pending.

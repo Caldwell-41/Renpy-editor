@@ -331,17 +331,22 @@ fn author_arithmetic(service: &mut LifecycleService, root: &Path, scratch: &Path
     let asset = super::super::ui_images::import_image(service, scratch, root, "uiImage");
     let doc = ipc(service, "screens.inspect", json!({"path":owner["path"]}));
     let image=compose_command(service,&owner,json!({"type":"addImageButton","parentId":column,"appearances":{"normal":{"assetId":asset["id"],"expectedAssetSha256":asset["sha256"]}},"width":160,"height":80,"interaction":{"actions":[],"expectedAuthoringRevision":doc["authoringRevision"],"expectedTargetRevisions":[]}}))["selectedId"].clone();
-    // Stable SDK selector only. No arithmetic is introduced through this Source edit.
+    // Stable SDK selector only. Preserve the authored element identity comment.
     let original = ipc(service, "source.open", json!({"path":owner["path"]}))["text"]
         .as_str()
         .unwrap()
         .to_owned();
+    let marker = format!(
+        "imagebutton: # loomlight-element: {}\n",
+        image.as_str().unwrap()
+    );
+    assert_eq!(original.matches(&marker).count(), 1);
     save_composition_source(
         service,
         &owner,
         &original.replace(
-            "imagebutton:\n",
-            "imagebutton:\n            id \"arithmetic_image\"\n",
+            &marker,
+            &format!("{marker}            id \"arithmetic_image\"\n"),
         ),
     );
     let mut actions = vec![];
@@ -459,6 +464,12 @@ fn author_arithmetic(service: &mut LifecycleService, root: &Path, scratch: &Path
         )
         .unwrap();
     }
+    assert!(
+        std::str::from_utf8(&before)
+            .unwrap()
+            .contains("id \"arithmetic_image\""),
+        "Accepted fixture must retain the SDK imagebutton selector"
+    );
     let nodes = plan["nodes"].as_array().unwrap();
     assert!(nodes
         .iter()
