@@ -24,8 +24,12 @@ remain supported, including imported literal SetVariable actions and semantic no
 mandatory under their existing rules. Dirty or changed variable-definition files
 refuse, including variables read only by the formula.
 
-Optional `validateOnly:true` uses that same command/preparation. It accepts only
-`actions`. The success response keeps `document` at the current accepted revision,
+Optional `validateOnly:true` uses that same command/preparation. At #95 qualification
+it accepted only `actions`. The [#97 extension](arithmetic-97.md#new-imagebutton-validation-extension)
+also validates complete `addImageButton` drafts through the same preparation and
+pre-commit return. New proposed node IDs are temporary feedback identities. This
+extension does not change the actions-only scope of the original #95 evidence. The success response keeps `document` at the current accepted
+revision,
 `changed:false`, `documents:[]`, and returns `actionValidation` as the proposed
 inspection. The candidate revision inside that proposed document is not a write
 precondition. A later commit uses the original current source/authoring/target

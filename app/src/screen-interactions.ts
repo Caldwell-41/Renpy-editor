@@ -15,7 +15,8 @@ export interface InteractionEdit {
   expectedTargetRevisions:{target:ScreenTargetBinding;revisions:ScreenRevisions}[];
   actions?:ScreenAction[];
 }
-export type ValidateScreenActions = (base:ScreenDocument, screenId:string, nodeId:string, context:InteractionContext, draft:ActionDraft)=>Promise<ScreenDocument>;
+export interface ScreenActionValidation {document:ScreenDocument;selectedId:string}
+export type ValidateScreenActions = (base:ScreenDocument, screenId:string, nodeId:string, context:InteractionContext, draft:ActionDraft)=>Promise<ScreenActionValidation>;
 interface Row { id:string; type:ScreenAction["type"]; variableId:string; value:string; arithmetic?:ScreenArithmeticValue; target:ScreenTargetBinding }
 interface ActionFocus {id:string;part?:string;operation?:string;start?:number|null;end?:number|null}
 export interface ActionDraft { focus?:ActionFocus; rows:Row[]; touched:boolean; expanded?:string; error?:{id:string;part:string;text:string} }
@@ -71,7 +72,7 @@ export function captureActionFocus(section:HTMLElement,draft:ActionDraft):void {
 }
 
 /** Presentation and raw input only. ScreenText owns its original-base draft and Apply. */
-export function renderActions(section:HTMLElement,draft:ActionDraft,context:InteractionContext|undefined,readOnly:boolean,changed:()=>void,validate?:()=>Promise<ScreenDocument>,nodeId?:string):void {
+export function renderActions(section:HTMLElement,draft:ActionDraft,context:InteractionContext|undefined,readOnly:boolean,changed:()=>void,validate?:()=>Promise<ScreenActionValidation>,nodeId?:string):void {
  captureActionFocus(section,draft);
 
  const variables=context?.variables??[],targets=context?.targets.filter(t=>t.canShowHide)??[];
@@ -115,7 +116,7 @@ export function renderActions(section:HTMLElement,draft:ActionDraft,context:Inte
      if(variable&&['int','decimal'].includes(variable.variableType)){
        payload.append(screenArithmeticEditor(row,index,{variables,capabilities:context?.capabilities,
          changed:()=>{update();description.textContent="Set variable";},
-         inspect:validate?async()=>{const doc=await validate();const node=doc.screens.flatMap(s=>s.nodes).find(n=>n.id===nodeId);return {assignment:node?.actionAssignments?.[index]??null,capabilities:doc.actionCapabilities};}:undefined}));
+         inspect:validate?async()=>{const result=await validate();const node=result.document.screens.flatMap(s=>s.nodes).find(n=>n.id===(nodeId??result.selectedId));return {assignment:node?.actionAssignments?.[index]??null,capabilities:result.document.actionCapabilities};}:undefined}));
      }else{const control=variable?.variableType==="bool"?select([["True","True"],["False","False"]],row.value):el("input");control.value=row.value;field("value","Value",control,payload);}
    }
    else if(row.type!=="finishInteraction")field("target","Screen",select(targets.map(t=>[key(t.binding),`${t.binding.sourceName.replaceAll("_"," ")} · Panel`]),key(row.target)));

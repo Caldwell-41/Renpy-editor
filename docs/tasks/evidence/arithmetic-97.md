@@ -57,9 +57,9 @@ Apply still sends its original document, authoring and reviewed-target revisions
 through the existing combined composition operation and fresh core admission.
 Generation/detachment checks prevent old feedback replacing new input. Numeric
 errors mark/reveal the retained field. Protected actions expose core's timing reason
-and existing Source review/navigation. New, uncommitted imagebutton additions have
-no accepted node for the actions-only validation endpoint; their combined Apply
-performs core admission. Existing text/image buttons have live draft inspection.
+and existing Source review/navigation. New, uncommitted imagebutton additions also have live feedback through the
+subsequently authorized complete-creation validation extension below. Existing
+text/image buttons retain their actions validation path.
 
 Variables uses the approved selected-inspector default editor and a flat list.
 Creation retains the existing dialog/lifecycle owner. Decimal form values become
@@ -79,7 +79,7 @@ link; the link is removed for the returned clean candidate.
 
 The actual `startApplication` journey sends production controls through the existing
 Help driver and `ApplicationHost`. Happy DOM supplies events. Its successful
-`journey-15/result.json` under ignored `.toolchains/arithmetic-97/` retains complete
+`journey-18-creation/result.json` under ignored `.toolchains/arithmetic-97/` retains complete
 requests/responses, accepted Screens/variable source, driver exit 0 and fixture
 cleanup. It proves decimal creation/default Undo/Redo, all seven operation keys,
 textbutton/imagebutton ordered arithmetic and Finish, validation without writes,
@@ -176,8 +176,79 @@ The shared parser/type checker/evaluator and Screens runtime adapter are unchang
 the same inputs. New UI-produced source in the journey includes decimal defaults
 `2.5`, `3.75`, `4.5`, ordered `trust += bonus` then `reward = trust * 2` and Finish
 for both button kinds, all seven operations on money with `(9.5 + 0.5) / 4`,
-`Balance: [money!q]`, and condition `money >= 2.75`. The imported
+`Balance: [money!q]`, and condition `money >= 2.75`. The new imagebutton extension additionally emits
+width 280, height 64, x position 23 and `money /= 2.0` with the chosen UI-image
+reference; its prepared replacement-image metadata proof is SDK-free. The imported
 `SetVariable("trust", trust + 1)` remains protected and unchanged. Exact complete
 source and payloads are in the journey receipt. These new disposable UI fixture
 inputs have not run in an SDK. The coordinator must select any required further
 runtime proof; this handoff does not silently transfer earlier qualification to them.
+
+
+## New imagebutton validation extension
+
+Coordinator checkpoint `01993e91` authorizes only the `AddImageButton` admission
+extension in `screens/composition.rs`, its focused existing tests and current
+contract documentation. The normal merge preserves implementation `44ebbefc` and
+coordinator history. The core now permits `Actions | AddImageButton` for validateOnly;
+all other variants remain refused. Existing complete preparation and the pre-history
+return do all the work. Evaluator, runtime generation and transaction/history
+internals are unchanged.
+
+The control editor uses one imagebutton command builder for feedback and Apply.
+It includes the complete pending appearances/replacement reviews, dimensions, layout,
+actions, original source/authoring revisions and target reviews. Validation creates
+no placeholder. Proposed selection IDs only locate the proposed assignment feedback;
+Apply sends the original parent/reviews and creates a fresh accepted ID once.
+
+The new public-core test first failed with INVALID_PAYLOAD, then passed after the
+narrow admission extension. It starts with session history empty and prepares a
+real replacement-image authoring-metadata companion. Valid constant-decimal feedback,
+invalid arithmetic, absent image review, unsupported command, stale source/authoring
+and dirty declaration cases preserve authoritative source, authoring metadata,
+source-map bytes and empty history. Apply accepts source plus the prepared metadata;
+one Undo restores both exactly and leaves no earlier validation entry. Redo/reopen
+preserve the accepted creation and reset session history.
+
+The actual-main journey now creates a new imagebutton through Add element, the real
+image library, dimensions, placement and numeric actions. Its complete validation
+request includes width 280, x position 23, the chosen asset and original reviews.
+Valid/zero-divisor/dirty-dependency feedback retains the draft and writes no source
+or authoring metadata. Combined Apply creates a different accepted ID from validation,
+then one-step Undo/Redo and reopen retain that creation. Happy DOM's image decode is
+a successful external decoder substitute in this journey; core image authority and
+media reads remain real. No image-decoding/native/SDK proof is inferred from it.
+An initial UI attempt needed the existing ariaLabel-property fallback to locate the
+size fields. Its failure is retained. The extension's visual controls reuse the same
+A2 presentation; it adds no new layout or design decision.
+
+
+## Candidate verification receipt
+
+The initial implementation is `44ebbefc5be6dee333575d9d73de34d734624e4e`.
+Normal merge `123afa54134c7073612c072b40dbfdbed68f15ec` includes coordinator
+`01993e91` and preserves both histories. The following source commit adds the
+complete-creation extension; the final receipt identifies its full tested SHA.
+
+Commands ran with the pinned toolchains and this worktree's isolated Cargo target:
+
+| Selection | Result |
+| --- | --- |
+| `cargo test -p loomlight-core --locked --lib arithmetic` | 29 passed; four explicitly selected SDK gates stayed ignored and unrun. |
+| `cargo test -p loomlight-core --locked --lib authoring::tests` | 33 passed. |
+| `cargo test -p loomlight-core --locked --lib screens::tests::actions` | 17 passed; one overlapping SDK gate stayed ignored and unrun. |
+| `cargo test -p loomlight-core --locked --lib screens::tests::controls` | 19 passed, including new creation-validation/source/metadata/history proof. |
+| Existing public-core variable history case | Passed, including stale/invalid refusals and no-op history; already counted in arithmetic. |
+| Pinned `npm run build:tests` plus four affected DOM consumers | 30 passed on the completed implementation. |
+| Corrected existing Windows-probe renderer consumer | Eight passed with Python 3.12; this is synthetic DOM, not a Windows host result. |
+| New actual-main journey plus inherited interaction and control dispatch consumers | All pass against the real Help driver/ApplicationHost. No SDK/helper/native execution. |
+| `npm run typecheck`; `npm run build -- --configLoader runner` | Pass. Existing large-chunk warning only. |
+| `cargo fmt --check --all`; repository validator; staged whitespace | Pass. |
+| Pinned reference fingerprint and 13 capture hashes/dimensions | Match approval; reference checkout remains unchanged. |
+| Scoped Chrome comparison | Passed wide/compact geometry and keyboard checks, with separately stated visual limits. |
+
+There are 93 distinct Rust passes across those selections, without counting repeated
+cases or ignored SDK gates. The four affected renderer consumers have 30 distinct
+passes; the separately corrected Windows-probe consumer has eight. Earlier failed
+and partial selections remain in the logs and are not represented as final-head
+full-suite passes. No further expensive qualification is inferred from these counts.

@@ -315,7 +315,12 @@ impl AuthoringService {
         request: ComposeRequest,
     ) -> Result<ComposeResult, SceneError> {
         let validate_only = request.validate_only;
-        if validate_only && !matches!(&request.command, Command::Actions { .. }) {
+        if validate_only
+            && !matches!(
+                &request.command,
+                Command::Actions { .. } | Command::AddImageButton { .. }
+            )
+        {
             return Err(SceneError::InvalidPayload);
         }
         let catalog = self.screens_list(project, project_id)?;

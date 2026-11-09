@@ -401,10 +401,14 @@ retains the preceding simple-adjustment and both-target proof.
 Screens Set variable actions use the same `{operation, operand}` value and shared
 core admission. `screens.compose` keeps the existing `actions` command and
 `expectedAuthoringRevision` / target-review assertions. Optional `validateOnly:true`
-is limited to that command. It runs the same preparation without committing source
-or history. The response keeps the current `document`, `changed:false` and empty
+accepts that command and complete `addImageButton` creation drafts. Other command
+variants remain refused. It runs the same preparation, including appearances, layout,
+actions, asset replacement metadata and original dependency reviews, without committing
+source, metadata or history. The response keeps the current `document`, `changed:false` and empty
 `documents`; `actionValidation` contains the proposed inspection with a candidate
-revision. That candidate revision does not authorize a later write. Ordinary commits
+revision. A new imagebutton also has a temporary proposed node ID. Neither that ID
+nor the candidate revision authorizes a later write or selects an accepted node.
+Apply revalidates the complete original creation command and commits it once. Ordinary commits
 omit `actionValidation`. Invalid input uses the existing field-specific arithmetic
 transport errors; dirty/stale dependencies remain ordinary refusals.
 
