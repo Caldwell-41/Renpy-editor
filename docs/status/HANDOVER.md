@@ -217,6 +217,10 @@ setup/default, condition, text and sample inputs through existing services. Actu
 UI/core source, history/reopen and wide/compact reference checks are required.
 No new SDK, native editor/package or manual-CI run is allocated. If changed
 runtime inputs need qualification, return their exact scope to the coordinator.
+The #97 actual-main test exposed missing variable-create/default-edit history.
+The [ownership exception](../tasks/active/shared-arithmetic.md#2026-11-10-97-variable-history-ownership-exception)
+assigns the implementer the narrow `authoring.rs` wiring and focused proof through
+the existing shared history owner. It does not authorize a separate history stack.
 The Story shadow-token correction retains its original comparison limits.
 Automatic quality run `42630146353` succeeded at `a2c7ab97`; later heads require
 their own selected checks and final audit.

@@ -1248,7 +1248,7 @@ source/captures and existing read-only reference checkout. Keep Story arithmetic
 and backend numeric semantics with their current owners. Reuse existing controls
 and core validation; map every approved control to a real operation before editing.
 
-The sole permitted core edit is `variable.update` in the existing Help driver's
+The initial permitted core edit is `variable.update` in the existing Help driver's
 operation allowlist, needed for the actual-main default-edit journey. All required
 operations already exist in `CORE_OPERATIONS`. The coordinator retains shared
 registries, dependency/config/CI files, status/ledger, integration and PR/tickets.
@@ -1274,3 +1274,33 @@ limits are unchanged. Final full-spec review remains required after #97 integrat
 Status files retain existing unique recovery history beyond their size targets;
 this handoff replaces superseded live Windows instructions rather than adding a
 second continuation.
+
+### 2026-11-10: #97 variable history ownership exception
+
+The actual-main/core journey confirms that `variable.create` and `variable.update`
+persist decimal defaults but add no shared Undo entry. The coordinator traced both
+to `authoring.rs::commit_source_and_metadata`, which prepares the existing source
+and authoring-metadata transaction, then calls `commit_observed` without recording
+history. The existing `scene.rs::commit_history` already records the same proposal
+using actual committed revisions. This is a missing #97 acceptance behavior, not
+a new arithmetic requirement or a reason to defer the selected outcome.
+
+Extend this implementer's core ownership to variable creation/default commit wiring
+in `app/src-core/src/authoring.rs`, focused existing public-core tests and the
+corresponding canonical data-model paragraph. Route the complete existing proposal
+through the current shared history owner. Keep source and metadata in one entry;
+retain exact revision/error/recovery guards, semantic no-op behavior and the
+session-local history boundary. Prove creation and default-edit Undo/Redo,
+interleaving with an existing scene/screen mutation, refusal/no-op history and
+reopen through the real public owner and actual-main journey. Keep bool/int/string
+paths coherent with decimals. Reuse the current red as evidence.
+
+This exception supersedes the original driver-only core boundary. It does not
+select a second history stack, transaction/history-internal changes, catalog-wide
+history work or new renderer authority. The implementer owns these changes in its
+existing separate worktree; the coordinator edits no core files in parallel.
+Record changed paths and proof in `arithmetic-97.md`, then normally merge current
+integration before return. No SDK/native/package/manual-CI run is allocated;
+usage remains Mac 9/20, Windows 3/20, zero reservations. Existing SDK evidence
+keeps its original candidate and scope. Any further ownership gap returns to the
+coordinator with its exact cause and affected files.
