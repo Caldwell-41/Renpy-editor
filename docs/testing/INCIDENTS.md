@@ -1056,3 +1056,14 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   and deadlines. The existing three scenarios pass after the matching red.
 - **Evidence:** [exact-head CI and local replay](../tasks/evidence/arithmetic-review.md#ci-caller-correction-before-review-fixes).
   Embedded probe changes still need a matching rebuild for any later native proof.
+
+## H74. UI SDK driver does not reach the next narration
+
+- **Class/search:** harness narration progression; bare `advance`, `ui_story.rpy:15`,
+  missing `UI story complete` after five passing assertions.
+- **Evidence/correction:** the return and destination text exist. Pinned SDK
+  `Advance` can complete on an unidentified begin callback; `Until` requires its
+  destination. Replace the seven transitions with destination-bound advances while
+  preserving all source, assertions and deadlines. Live callback ordering remains
+  provisional; the corrected driver's SDK confirmation is still required.
+- **Evidence:** [coordinator audit and recovery selection](../tasks/active/shared-arithmetic.md#2026-11-10-first-ui-sdk-result-audited-recovery-selected).

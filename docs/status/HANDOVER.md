@@ -282,14 +282,17 @@ survive. New receipts are separate under ignored
 Spec P4 and Kris's #96/#110 scope decision stay pending. Tracks/Reel/cross-view
 draft acceptance is unchanged; no #110 work or review approval is inferred.
 The [UI-emitted qualification assignment](../tasks/active/shared-arithmetic.md#2026-11-10-ui-emitted-source-qualification-selected)
-selects a fresh separate test worktree and one Mac SDK invocation after cheap
-readiness, source/executable identity and official archive checks. Mac is 9/20
-started plus one reserved; Windows is 3/20 with zero reserved. Do not retry a
-started failure or infer native/package/human proof. Coordinator retains
-integration/status/PR; the test worker owns only its fixtures/tests/evidence.
-Route Windows only after the Mac result/candidate is audited and published,
-preserving the existing remote checkout and all receipts. Earlier #94/#95 proof
-keeps its original scope. No remote qualification is reserved or running.
+returned local clean `12ce2eea` with a failed Mac invocation and SDK-free driver
+correction. Compile/lint and Story trace/types passed; narration progression failed,
+so Screens/Finish/wrong-outcome proof remains absent. The
+[recovery assignment](../tasks/active/shared-arithmetic.md#2026-11-10-first-ui-sdk-result-audited-recovery-selected)
+owns the coordinator audit, exact driver hash and limits. The fresh merger receives
+integration/status/PR and one explicitly selected Mac recovery after publication,
+clean candidate/binary/preflight/official SDK/desktop checks. Mac is 10/20 started
+plus one new reservation; Windows is 3/20 with zero reserved. Preserve worker
+`mac-01` and use fresh integration `mac-02` outputs. No subsequent retry is selected.
+Return the actual result and cleanup, then coordinator routes Windows through its
+preserved checkout. P4 stays pending; no native/package/human proof is inferred.
 
 The [review CI correction](../tasks/evidence/arithmetic-review.md#ci-caller-correction-before-review-fixes)
 migrates the obsolete `Edit default` smoke caller to the current inspector. All

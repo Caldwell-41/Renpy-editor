@@ -72,7 +72,7 @@ one becomes necessary. Routine checks and review have no numerical limits.
 
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
-| macOS ARM64 SDK qualification | 20 | 9 | 1 for UI-emitted source |
+| macOS ARM64 SDK qualification | 20 | 10 | 1 for UI driver recovery |
 | Windows x64 SDK qualification | 20 | 3 | 0 |
 
 ## Execution ledger
@@ -1622,3 +1622,52 @@ Normally merge current integration before return; preserve every receipt and
 return a clean committed source/result with the reserved start's exact disposition.
 A fresh merger follows test implementation. P4 and the #96/#110 scope question
 stay pending and do not block this independently selected runtime proof.
+
+### 2026-11-10: first UI SDK result audited; recovery selected
+
+The fresh qualification implementer returned clean
+`t3/arithmetic-ui-runtime-proof` at `12ce2eeaca7a4ab69c3853bd5409cedc9e8540da`.
+Attempted source is `81494e37`; `223cd09e` adds the SDK-free driver correction
+and `12ce2eea` adds evidence identity only. Eleven changed paths are fixtures,
+the existing SDK test owner, its test-only subprocess receipts and review evidence.
+No production arithmetic/UI/history semantics changed.
+
+The coordinator audited the failed invocation, not a full qualification pass:
+all 1,880 frozen Git checkout inputs, retained binary, 77 exported files and all
+four captured source hashes match. Compile/lint passed; normal entry passed five
+assertions and exact Story trace/types, then failed at the narration transition.
+The wrong-outcome case is unrun. All three completed cases preserve accepted bytes,
+with no process timeout or output truncation. Ten physical SDK children have matched
+records, including seven fixture-construction children. Desktop/power, process and
+temporary-root cleanup are verified. Local ignored audit:
+`.toolchains/arithmetic-ui-runtime/mac-01-coordinator-audit.json`.
+
+The trace remains at captured `ui_story.rpy:15`; its return and the expected
+following narration are present. Pinned SDK `Advance`/`Until` replay supports the
+driver's missing destination guarantee. Exact late-begin callback ordering is
+still provisional. The corrected driver replaces only seven bare advances with
+destination-bound transitions, preserving source snapshots, values, assertions
+and deadlines. The driver hash is
+`dc52be7ec9edbe66e208c496dccca41552bc6d6a287f4b316987982c301270ac`.
+SDK-free preflight was observed red on the old driver; 19 action cases pass with
+the correction and two named SDK gates ignored. H74 indexes the failure and the
+remaining need for actual SDK confirmation. Do not turn this into a green runtime
+claim or reuse the old attempted executable for the corrected driver.
+
+The original reservation is consumed: actual totals are Mac 10/20 and Windows
+3/20, with zero reservations at receipt. A new single Mac recovery invocation is
+now reserved. The fresh merger owns normal integration/publication of `12ce2eea`,
+input-equivalence and affected checks, then may execute that one invocation only
+after a clean committed candidate, fresh retained binary, both exact preflights,
+official archive/SDK identity and host desktop readiness. Publish the corrected
+fixture candidate before SDK execution; keep source fixed during the run.
+Use fresh ignored `mac-02` evidence in integration, preserving worker `mac-01`.
+Require compile/lint, every normal witness and the actual wrong-outcome rejection,
+unchanged source and cleanup. A started failure consumes this new reservation;
+no further retry or driver/production correction is assigned to the merger.
+
+This explicit merger assignment includes the one Mac SDK recovery, unlike prior
+zero-cost mergers. It allocates no Windows, editor-native/package, browser,
+canvas-helper, manual-CI or watch operation. The coordinator will route Windows
+after the published result returns. All prior failed evidence remains intact.
+P4 and the #96/#110 question remain pending, with every issue/criterion open.

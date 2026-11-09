@@ -24,9 +24,12 @@ open. Integration/status/PR ownership returns to the coordinator for that select
 Draft PR #122 retains its Screens base and full-spec closing references.
 
 The [qualification selection](../tasks/active/shared-arithmetic.md#2026-11-10-ui-emitted-source-qualification-selected)
-assigns portable UI-emitted source preparation and one bounded Mac SDK invocation
-after preflight. Usage is Mac 9/20 started plus one reserved, Windows 3/20 started
-with none reserved. No Windows/native/package run is selected yet.
+now has a failed first Mac result and corrected portable driver at local `12ce2eea`.
+Compile/lint and exact Story trace/types pass; Screens/Finish/negative proof remains
+missing. The [audited recovery](../tasks/active/shared-arithmetic.md#2026-11-10-first-ui-sdk-result-audited-recovery-selected)
+assigns a fresh merger and one new Mac invocation after readiness/publication.
+Usage is Mac 10/20 started plus one reserved, Windows 3/20 started with none
+reserved. No Windows/native/package run is selected yet.
 
 #94 decimal/public services are integrated by conflict-free normal merge
 `854f6ad1`, preserving coordinator `c177d1cd` and returned `b31929f6`.
@@ -98,8 +101,8 @@ and #92 fixture inputs remain unchanged. The
 [#94 contract](../tasks/evidence/arithmetic-94.md#public-contract-for-95-and-96)
 is the merged baseline for dependent work.
 On 2026-11-09 Kris raised both SDK ceilings from six to 20 started invocations.
-Totals are Mac 9/20 and Windows 3/20 started, with one Mac invocation reserved
-for the selected UI-emitted source qualification and none reserved on Windows.
+Totals are Mac 10/20 and Windows 3/20 started, with one Mac invocation reserved
+for the selected UI driver recovery and none reserved on Windows.
 #95's fourth Mac attempt passed compile/lint, all 22 normal assertions, exact
 ordered/current values, both button kinds with click/keyboard, Finish, deliberate
 wrong-outcome rejection and cleanup. The coordinator verified all 869 inputs,
