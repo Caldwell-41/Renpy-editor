@@ -18,7 +18,7 @@ conditions and scoped slate/brass controls now match closely. Existing workspace
 widths, placement and truthful unknown-state wording retain their stated differences.
 Spec P4 remains unresolved. Kris's decision on moving #96's Tracks/Reel/cross-view
 draft acceptance to #110 is pending; no criterion changed. New UI-emitted source
-is qualified on Mac; Windows proof is selected below. Earlier #94/#95 both-target evidence
+is qualified on Mac and Windows. Earlier #94/#95 both-target evidence
 keeps its original scope. Full workspace/native/human and final acceptance remain
 open. Integration/status/PR ownership returns to the coordinator for that selection.
 Draft PR #122 retains its Screens base and full-spec closing references.
@@ -30,12 +30,17 @@ interaction refresh before its timer dispatches the unchanged rendered action.
 Source, desktop/power, owned process and temp cleanup are verified. Both earlier
 failed runs, targets and binaries remain preserved. This adds no physical gesture
 or native-editor proof.
-Usage is Mac 12/20 with none reserved and Windows 3/20 with one reserved for the
-same UI-source fixture on SUNDOWN. P4 and wider acceptance stay open.
+The [Windows UI-source result](../tasks/evidence/arithmetic-review.md#windows-ui-source-invocation-1-passed-2026-11-10-aest)
+passes the same 28 assertions, five witnesses and negative case at `f3450c06`.
+Evidence `743b5fdc` is audited and integrated through `ca02b130`; app, fixture,
+script and CI trees still match the tested candidate. Usage is Mac 12/20 and
+Windows 4/20, zero reservations. P4 and wider acceptance stay open.
 The automatic quality failure at `72eb9f13` is traced to two obsolete fixture
 callers. The [caller corrections](../tasks/evidence/arithmetic-review.md#automatic-ci-fixture-consumers-corrected-2026-11-10)
 pass the focused Story browser and four affected dispatch fixtures, preserving
-production and SDK inputs. Successor-head CI remains for audit.
+production and SDK inputs. The `f3450c06` quality run failed before a runner
+started, with no steps, available log or annotation; its cause is unestablished.
+The aggregate remains failed there. Successor-head automatic CI remains for audit.
 
 #94 decimal/public services are integrated by conflict-free normal merge
 `854f6ad1`, preserving coordinator `c177d1cd` and returned `b31929f6`.
@@ -107,7 +112,7 @@ and #92 fixture inputs remain unchanged. The
 [#94 contract](../tasks/evidence/arithmetic-94.md#public-contract-for-95-and-96)
 is the merged baseline for dependent work.
 On 2026-11-09 Kris raised both SDK ceilings from six to 20 started invocations.
-Totals are Mac 12/20 and Windows 3/20 started, with one Windows UI-source run reserved.
+Totals are Mac 12/20 and Windows 4/20 started, with zero reservations.
 #95's fourth Mac attempt passed compile/lint, all 22 normal assertions, exact
 ordered/current values, both button kinds with click/keyboard, Finish, deliberate
 wrong-outcome rejection and cleanup. The coordinator verified all 869 inputs,

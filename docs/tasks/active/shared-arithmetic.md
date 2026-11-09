@@ -73,7 +73,7 @@ one becomes necessary. Routine checks and review have no numerical limits.
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
 | macOS ARM64 SDK qualification | 20 | 12 | 0 |
-| Windows x64 SDK qualification | 20 | 3 | 1 for final UI-emitted source |
+| Windows x64 SDK qualification | 20 | 4 | 0 |
 
 ## Execution ledger
 
@@ -1763,3 +1763,22 @@ the existing qualification branch. Integration/status/PR remain coordinator-owne
 Actual usage before launch is **Mac 12/20, Windows 3/20 plus one reserved**. No
 Mac, native-editor/package, canvas-helper or manual-CI operation is selected.
 All issues/criteria remain open pending P4, Windows and wider acceptance.
+
+### 2026-11-10: Windows UI-source evidence audited and integrated
+
+Windows passes its one selected invocation at `f3450c06`. All 28 assertions, five
+exact witnesses, six dispatch receipts, actual negative-case rejection and cleanup
+pass. Usage is now **Mac 12/20, Windows 4/20, zero reservations**. No further SDK
+invocation is selected. All 895 frozen inputs and 222 prior Windows evidence files
+are preserved, along with the clean registered checkout. The coordinator inspected
+the recorded raw outputs/audits and independently compared Git trees and portable
+hashes. The [integration receipt](../evidence/arithmetic-review.md#both-target-ui-source-evidence-integrated-2026-11-10)
+records normal merge `ca02b130`, preserving `f3450c06` and evidence `743b5fdc`.
+Complete app/fixture/script/CI trees still equal the qualified candidate.
+
+The prior exact-head quality run failed before a runner started, without a log or
+annotation establishing a cause. Aggregate validation remains failed there; no
+manual retry ran. Publish the evidence/status successor, audit its automatic
+checks and use T3's watcher if they are pending. The PR stays draft, all criteria
+and P4 stay open, and no workspace/native/human acceptance or new operation is
+inferred. Integration/status/PR ownership remains with the coordinator.

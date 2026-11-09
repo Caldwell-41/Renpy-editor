@@ -245,7 +245,7 @@ host/background and placement differ. Earlier textbutton captures precede the fi
 scoped palette correction; extended imagebutton/condition captures keep their actual
 source scope. These differences are review inputs, not approved deviations.
 New UI-emitted decimal defaults, ordered formulas, condition/text and created-imagebutton
-fixtures now pass Mac SDK qualification below; Windows proof remains pending.
+fixtures now pass both-target SDK qualification below.
 #94/#95 both-target evidence retains its original candidate/input scope. Preserve
 the worker's entire ignored `.toolchains/arithmetic-97/`,
 including binary and every raw attempt/capture/source receipt. Integration retains
@@ -299,14 +299,19 @@ timeout/truncation. All 1,880 inputs, exported source/assets and retained binary
 match; desktop/power, owned process and temp cleanup pass. Preserve root `mac-03`
 and both earlier failed attempts, their targets/binaries and audits.
 
-The coordinator selects one bounded Windows UI-source run on linked SUNDOWN,
-using the existing assigned F: qualification worktree and the same runtime inputs.
-The registered Windows project checkout stays intact. The
-[delivery record](../tasks/active/shared-arithmetic.md#windows-ui-source-qualification-selection-2026-11-10)
-owns scope, reservation and return requirements. Actual use is Mac 12/20 with none
-reserved, Windows 3/20 with one reserved. No SDK retry is selected. Native-editor/
-package, canvas-helper and manual-CI operations remain unselected. P4 and #96/#110
-scope remain unanswered, with all issues/criteria open and independent Standards
+The [Windows UI-source result](../tasks/evidence/arithmetic-review.md#windows-ui-source-invocation-1-passed-2026-11-10-aest)
+qualifies `f3450c0644e3ed7fc8b144df6dff28012f787a2e`. The coordinator inspected
+recorded raw outputs, audit corrections and publication receipts, then checked
+Git ancestry, complete trees and portable hashes locally. Conflict-free merge
+`ca02b1305c0d75545d746eb1a2c12c744dde45d4` preserves coordinator `f3450c06` and
+evidence `743b5fdc`. Complete app/fixture/script/CI trees equal the tested source.
+All 28 assertions, five witnesses, actual negative case and cleanup pass.
+The existing F: qualification worktree is clean at its evidence commit; all 222
+prior receipt files/binaries and the registered Windows checkout are unchanged.
+Actual use is Mac 12/20 and Windows 4/20, zero reservations. No further SDK run
+is selected. Preserve all unique evidence and worktrees. Native-editor/package,
+canvas-helper and manual-CI operations remain unselected. P4 and #96/#110 scope
+remain unanswered, with all issues/criteria open and independent Standards
 five/Spec four reports preserved. No new physical gesture or full native/human
 acceptance is claimed.
 
@@ -315,7 +320,11 @@ Automatic quality at `72eb9f13` failed two obsolete fixture consumers. The
 retain typed error context in four inherited Screens adapters and blur the Story
 field before asserting a new error. All four dispatch consumers and focused
 Story Chrome pass with existing assertions/cleanup intact. SDK/production inputs
-still equal the Mac-qualified source. The next published head needs its own CI audit.
+still equal the Mac-qualified source. Quality run `42673016832` at `f3450c06`
+failed before a runner started, exposing only a reporter job with no steps,
+available log or annotation. Its cause is unestablished and aggregate validation
+is failed. No retry was dispatched. The next published head needs its own
+automatic CI audit; use T3's PR watcher if that operation is pending.
 
 The [review CI correction](../tasks/evidence/arithmetic-review.md#ci-caller-correction-before-review-fixes)
 migrates the obsolete `Edit default` smoke caller to the current inspector. All

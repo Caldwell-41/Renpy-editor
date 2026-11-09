@@ -948,3 +948,38 @@ P4, #96/#110 scope, wider acceptance, coordinator audit/integration and PR #122
 remain outside this assignment. The raw executable/evidence remain local ignored
 artifacts; only this appended note is committed and published on the qualification
 branch.
+
+## Both-target UI-source evidence integrated, 2026-11-10
+
+The coordinator inspected the Windows thread's recorded normal/negative outputs,
+all four case results, exact preflight results, audit corrections and final
+publication/cleanup receipts. The first offline audits remain failed at their
+recorded boundaries; the corrected argument decoding, process selection and
+Windows traceback normalization do not replay an SDK/test. Local comparison
+independently verifies the evidence commit's parent, append-only note, complete
+app/fixture/script/CI trees and all seven portable manifest/request/driver/source
+hashes against the tested candidate and Mac-qualified runtime inputs.
+
+Conflict-free normal merge `ca02b1305c0d75545d746eb1a2c12c744dde45d4` preserves
+coordinator `f3450c0644e3ed7fc8b144df6dff28012f787a2e` and returned evidence
+`743b5fdcc0fcc9f0431988582bc89b6f34e4ef31`. Its app tree remains
+`e6b70a0cc7f8e757b7ba5fe783d9b4a37dc8c31c` and fixtures tree remains
+`80a519cd1fc375dfb46ce4c2fea8631890e45383`. No product, fixture, dependency,
+workflow, approved reference or earlier raw evidence changed. Fresh repository
+validation and whitespace pass; unchanged executable tests are reused within
+their recorded source scope. Coordinator observations and Git/hash checks are
+retained under ignored `arithmetic-ui-runtime/coordinator-windows-audit/`.
+
+The [automatic quality run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/42673016832)
+at `f3450c06` is failed. GitHub exposes only a failed validation reporter with no
+runner, steps, available log or annotation, so its startup cause is unestablished.
+The separate repository-validation run passes, but aggregate validation is failed.
+No manual retry or workflow/source correction is justified by that evidence.
+The published successor requires its own selected automatic quality audit.
+
+Actual cumulative usage is **Mac 12/20, Windows 4/20, zero reservations**.
+No additional SDK, editor-native/package or manual-CI operation ran. P4 and Kris's
+#96/#110 decision remain pending; no issue or criterion is accepted, closed or
+waived. The draft PR retains its Screens base and eventual closing references.
+This both-target rendered-action proof adds no physical gesture or native-editor
+acceptance. Preserve both machines' worktrees, raw attempts and executables.
