@@ -429,15 +429,6 @@ fn author_arithmetic(service: &mut LifecycleService, root: &Path, scratch: &Path
         "screens.canvasPlan",
         json!({"path":owner["path"],"screenName":owner["name"],"expectedRevision":document["revision"],"width":1280,"height":720,"variableSamples":[{"variableId":var("trust")["id"],"expectedSourceRevision":var("trust")["source"]["sourceRevision"],"value":"99"}]}),
     );
-    assert_eq!(plan["available"], true, "{plan}");
-    assert_eq!(
-        fs::read(root.join(owner["path"].as_str().unwrap())).unwrap(),
-        before
-    );
-    service.close().unwrap();
-    service.open_path(root).unwrap();
-    let reopened = ipc(service, "screens.inspect", json!({"path":owner["path"]}));
-    assert_eq!(reopened["screens"], document["screens"]);
     if let Some(dir) = std::env::var_os("LOOMLIGHT_ACTIONS_EVIDENCE_DIR") {
         let dir = PathBuf::from(dir);
         fs::create_dir_all(&dir).unwrap();
@@ -468,13 +459,73 @@ fn author_arithmetic(service: &mut LifecycleService, root: &Path, scratch: &Path
         )
         .unwrap();
     }
+    let nodes = plan["nodes"].as_array().unwrap();
+    assert!(nodes
+        .iter()
+        .any(|node| node["kind"] == "text" && node["literal"] == "99"));
+    assert_eq!(
+        nodes
+            .iter()
+            .filter(|node| node["kind"] == "textbutton")
+            .count(),
+        3
+    );
+    assert_eq!(
+        nodes
+            .iter()
+            .filter(|node| node["kind"] == "imagebutton")
+            .count(),
+        1
+    );
+    assert_eq!(
+        fs::read(root.join(owner["path"].as_str().unwrap())).unwrap(),
+        before
+    );
+    service.close().unwrap();
+    service.open_path(root).unwrap();
+    let reopened = ipc(service, "screens.inspect", json!({"path":owner["path"]}));
+    assert_eq!(reopened["screens"], document["screens"]);
+
     document
 }
 
 #[test]
 fn click_time_arithmetic_fixture_preflight() {
     let (temporary, mut service, root, _owner) = composition_project();
-    author_arithmetic(&mut service, &root, temporary.path());
+    let document = author_arithmetic(&mut service, &root, temporary.path());
+    let plan = ipc(
+        &mut service,
+        "screens.canvasPlan",
+        json!({"path":document["path"],"screenName":"arithmetic_clicks","expectedRevision":document["revision"],"width":1280,"height":720}),
+    );
+    assert_eq!(plan["available"], true, "{plan}");
+    service.close().unwrap();
+}
+
+#[test]
+fn click_time_arithmetic_fixture_retains_samples_with_unresolved_gui() {
+    let (temporary, mut service, root, _owner) = composition_project();
+    fs::write(
+        root.join("game/gui.rpy"),
+        "init python:\n    gui.init(1280, 720)\n",
+    )
+    .unwrap();
+    let document = author_arithmetic(&mut service, &root, temporary.path());
+    let plan = ipc(
+        &mut service,
+        "screens.canvasPlan",
+        json!({"path":document["path"],"screenName":"arithmetic_clicks","expectedRevision":document["revision"],"width":1280,"height":720}),
+    );
+    assert_eq!(plan["available"], false);
+    assert_eq!(
+        plan["limits"],
+        json!(["Unresolved project initialization or inherited styles in game/gui.rpy"])
+    );
+    assert!(plan["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|node| node["kind"] == "text" && node["literal"] == "5"));
     service.close().unwrap();
 }
 
@@ -509,6 +560,14 @@ fn run_arithmetic_sdk(temporary: &tempfile::TempDir) {
             .expect("retained evidence directory required"),
     );
     fs::create_dir_all(&evidence).unwrap();
+    let mut cases = ["compile", "lint", "test", "wrong-outcome"]
+        .map(|case| json!({"case":case,"status":"notRun","passed":false}))
+        .to_vec();
+    fs::write(
+        evidence.join("sdk-cases.json"),
+        serde_json::to_vec_pretty(&cases).unwrap(),
+    )
+    .unwrap();
     fs::create_dir(temporary.path().join("Ren'Py Data")).unwrap();
     let archive = PathBuf::from(
         std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE")
@@ -534,6 +593,23 @@ fn run_arithmetic_sdk(temporary: &tempfile::TempDir) {
         .unwrap();
     let root = temporary.path().join("arithmetic-95");
     let document = author_arithmetic(&mut service, &root, temporary.path());
+    // Full SDK GUI initialization remains outside the inert canvas subset.
+    let plan = ipc(
+        &mut service,
+        "screens.canvasPlan",
+        json!({"path":document["path"],"screenName":"arithmetic_clicks","expectedRevision":document["revision"],"width":1280,"height":720}),
+    );
+    let template_limits = [
+        "Unresolved project initialization or inherited styles in game/gui.rpy",
+        "Unresolved project initialization or inherited styles in game/options.rpy",
+        "Unresolved project initialization or inherited styles in game/screens.rpy",
+    ];
+    for limit in plan["limits"].as_array().unwrap() {
+        assert!(
+            template_limits.contains(&limit.as_str().unwrap()),
+            "Unexpected canvas limit: {plan}"
+        );
+    }
     fs::write(
         root.join("game/zz_arithmetic_95_test.rpy"),
         include_str!("../../../../tests/fixtures/arithmetic-95/driver.rpy"),
@@ -541,14 +617,6 @@ fn run_arithmetic_sdk(temporary: &tempfile::TempDir) {
     .unwrap();
     let accepted = arithmetic_sources(&root);
     fs::write(evidence.join("sdk-context.json"),serde_json::to_vec_pretty(&json!({"ownedTemporaryRoot":temporary.path(),"sdkRoot":sdk.root,"archive":archive,"screen":document,"sdkLauncherSha256":hex::encode(Sha256::digest(fs::read(sdk.root.join("renpy.sh")).or_else(|_|fs::read(sdk.root.join("renpy.py"))).unwrap()))})).unwrap()).unwrap();
-    let mut cases = ["compile", "lint", "test", "wrong-outcome"]
-        .map(|case| json!({"case":case,"status":"notRun","passed":false}))
-        .to_vec();
-    fs::write(
-        evidence.join("sdk-cases.json"),
-        serde_json::to_vec_pretty(&cases).unwrap(),
-    )
-    .unwrap();
     let source_hashes: Vec<_> = accepted.iter().map(|(path, bytes)| json!({"path":path,"sha256":hex::encode(Sha256::digest(bytes)),"bytes":bytes.len()})).collect();
     fs::write(
         evidence.join("sdk-accepted-sources.json"),

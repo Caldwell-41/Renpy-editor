@@ -224,8 +224,8 @@ has integer type, reads/writes trust, and unknown `unobservedCurrentValue`; the
 second reads trust and writes reward with the same unknown reason. Setting
 `validateOnly:false` commits through the ordinary owner. The full concrete request
 and complete success response, including all variable IDs/revisions, capabilities,
-source spans and diagnostics, are retained in both `preflight-final/public-requests.json`
-and `mac-01/public-requests.json`. A target mismatch, for example, returns
+source spans and diagnostics, are retained in `preflight-final/public-requests.json`. The failed `mac-01`
+attempt did not reach its export; the failure section below records that gap. A target mismatch, for example, returns
 `{protocolVersion:1,requestId:"arithmetic-95",ok:false,error:{code:"ARITHMETIC_TARGET_TYPE",message:"variableId: Choose a numeric target. Whole-number targets require an integer result."}}`.
 
 ## Mac invocation 1 failed before arithmetic cases
@@ -291,3 +291,50 @@ further qualification explicitly. This branch makes no post-failure implementati
 or harness correction and starts no retry. The returned local successor changes
 only this evidence note; all app/fixture inputs still equal `dc8eb3c4`. No push,
 PR, issue closure, cleanup, parent-PR work or final acceptance was performed.
+
+
+## Coordinator fixture correction, no SDK retry yet
+
+The coordinator took mutation ownership of this completed worktree after the
+implementation return. The original `mac-01` failure remains failed and immutable.
+Its retained executable still has SHA-256
+`e938c29cf590604afdcddc2d8db0e56c97607ae3bebe2c9a92b4998517ac0614`.
+No production arithmetic, canvas admission or runtime adapter changed.
+
+A cheap public regression reproduces the exact assertion without the SDK. It adds
+valid newline-separated `init python: gui.init(1280, 720)` in the disposable
+project's GUI file, then authors both buttons through the same public fixture.
+`click_time_arithmetic_fixture_retains_samples_with_unresolved_gui` failed at the
+original shared availability assertion in 6.29 seconds. Its retained
+`gui-valid-init-red.log` shows only the expected GUI-initialization limit, while
+sample text 99 and every button node are still present. This rules out a missing
+generated-helper or action/source admission failure for this preparation symptom.
+
+The correction moves the full availability assertion into the existing minimal
+project preflight, where it remains required. The shared setup instead verifies
+sample text 99, both button kinds, unchanged accepted source and reopened actions.
+The new GUI regression requires the accurate GUI limit and retained inert text.
+The full SDK gate permits only its three known standard-template initialization
+limits, refusing an unexpected extra limit. Its arithmetic/type/click/keyboard/
+inertness/continuation and deliberate wrong-outcome assertions are unchanged.
+
+Public requests, inspection, sample plan and accepted files now export before the
+shared fixture's sample/source/reopen assertions. Four explicit not-run SDK case
+records now initialize before SDK installation or project generation. A later
+preparation failure therefore retains its actual available evidence and unrun
+cases; it cannot imply those cases passed.
+
+The GUI regression passes in 6.37 seconds and the original minimal-project
+preflight passes in 6.29 seconds, with no failures/skips. Existing Cargo-log
+validation accepts both. Their fresh ignored `gui-preflight-green/` and
+`minimal-preflight-green/` contain actual accepted source/public requests; their
+plans retain sample 99 and respectively one expected GUI limit or no limit.
+Rust formatting, repository validation and whitespace checks pass. Existing
+implementation proof retains its original scoped candidate; only the test owner
+and this note changed during recovery. All earlier raw logs remain available.
+
+SDK use remains **Mac 6/20 started, Windows 2/20 started**, with no new launch or
+retry during this correction. Runtime proof for #95 and entry to #97 remain
+missing. The #96 merger still owns integration publication; after that handoff,
+the coordinator can merge the latest integration into this corrected branch,
+record a clean candidate and allocate a fresh bounded SDK attempt explicitly.
