@@ -120,3 +120,128 @@ still require their own selected automatic checks; no passing CI is inherited.
 The fresh review-fix implementer must preserve this migrated caller while changing
 the default editor. The independent review counts remain five Standards and four
 Spec findings.
+
+## Review corrections, 2026-11-10
+
+The single correction implementer started on clean `t3/arithmetic-review-fixes`
+with HEAD and merge-base exactly `61d70f96890276fa881f1082a2ff682496ec7911`.
+A final fetch of `codex/spec-87-arithmetic` resolves to that same published base.
+No other checkout, approved reference or earlier ignored receipt was changed.
+The TDD seams remain the production controls and public core, including actual
+main to Help driver to ApplicationHost, accepted source, shared history and reopen.
+No additional agent, SDK, canvas helper, native editor/package or manual CI ran.
+
+### Findings corrected
+
+| Finding | Correction and observable proof |
+| --- | --- |
+| S1 | Both editors cancel pending inspection at composition start, retain raw input and selection during composition, and guard suggestion/editor confirmation for composition state, `isComposing` and legacy key code 229. Production Screens red replaced `bo` with `bonus`; green retains the exact text/selection with zero inspections. The Story consumer also proves no Ctrl+Enter write during composition or legacy confirmation. |
+| S2 | New format errors wait for blur or explicit submission. Empty untouched fields stay neutral. Live valid type/current-state help remains available; an existing error can update or clear while corrected. Whole-form submission still uses the original core admission. Live typing feedback does not announce every character. The production-control red marked an untouched Story field invalid; blur/correction checks now pass in both editors. Existing journey callers now blur before expecting new format errors. |
+| S3 / Spec P2 | Existing core action preparation adds the failing zero-based index to its existing arithmetic error, transported as optional `error.actionIndex`. Codes and guards remain unchanged. The existing requester preserves it; both Apply owners reveal/focus that row. Live inspection of another row reports that another action needs correction without invalidating its own formula. Actual-main red had no action identity; green checks both button kinds with invalid action 1 collapsed and valid action 2 expanded, exact no-write refusal and focus on action 1. Public core creation validation and Apply retain the same typed context. |
+| S4 | Screens marks formula/target admission errors invalid. Transport unavailability and dirty/stale dependencies remain separate status feedback, retaining raw text and freshness guards. Production-control checks cover unavailable transport and dirty Source with valid input. |
+| S5 | Story feedback and each Variables default error have unique IDs associated with their fields. Numeric target changes replace or remove the old association. The default-field red had no accessible description; the actual-main green resolves the error text through the field association. |
+| Spec P1 | Variables retains default text, its original accepted value and exact source revision, error, selection and dirty state during an unrelated successful creation. The existing catalogue retains the selected entity; focus returns to its dirty default after creation closes. Red changed `1e` back to `2.5`. Green preserves both `1e` and valid `4.25`, allows unrelated creation, and proves the retained original revision still refuses a later Save after the declaration file changes. Cancel restores the last loaded accepted default. Drafts remain owned by the current Variables view and its existing navigation/session lifecycle. |
+| Spec P3 | A small shared editing-range helper replaces the complete identifier around the caret or the explicit selection, preserving surrounding text and the caret. It parses no formulas. Both production editors reproduce `bonusus` before the correction and retain `bonus` afterward; selection replacement, Tab and input focus pass. |
+
+The arithmetic parser, type checker, evaluator, generated helper, source adapters
+and transaction/history implementation are unchanged. The named action-error
+context plumbing is the only core behavior change. Existing literal controls,
+comments, precision/type admission, independent drafts, action order/limits/context,
+Finish-last, source/session guards and inert samples retain their existing owners.
+The coordinator's migrated `score` / `Save Default` smoke caller is unchanged.
+
+### Verification and retained attempts
+
+Ignored receipts live under `.toolchains/arithmetic-review-fixes/` in the correction
+worktree. Red and green logs preserve each correction, including the raw
+production-control failures (`s1-red`, `p3-red`, `s2-story-red`, `s2-s4-red`),
+actual-main failures (`s3-red`, `p1-s5-red`, `p1-red`, `p1-focus-red-2`) and matching
+focused/journey results. An initial focus assertion compared DOM objects directly
+and the process exited 137 while formatting the failure; its replacement compares
+identity as a boolean and reproduces the missing focus without object expansion.
+An initial Rust build caught an overbroad edit in the unrelated source-error match;
+that edit was removed before the successful build. Neither is passing evidence.
+
+- Focused production editor, Story authoring and protocol checks pass 35 tests.
+  The existing envelope test also rejects malformed/out-of-range action indexes.
+- Public core Screens action tests pass 17 tests; their one explicitly ignored SDK
+  gate remains unrun. Controls pass 19 tests, including refusal context for
+  creation validation and Apply, source/metadata/history and recovery cases.
+- Actual-main Screens passes 13 stages and 505 protocol records. Actual-main Story
+  passes nine stages and 126 records. Both drivers exit 0 and remove their owned
+  scratch projects. The complete transcripts retain original revisions, accepted
+  source, refused requests, Undo/Redo and reopen. Happy DOM supplies input events.
+- The first complete frontend run reports 384/390 passes. Four failed results are
+  the smoke parent and its three scenarios; the supporting-authoring test also
+  fails because the new local redraw read persistence status before releasing the
+  authoring lock. This is a correction regression, not a deadline problem. Status
+  now refreshes after lock release. The unchanged affected tests pass. The sixth
+  failure is an environment mismatch: system Python lacks `tomllib`. The pinned
+  Python 3.12 invocation passes the unchanged Windows producer/validator test.
+  All 13 focused failed-suite results then pass, and the complete corrected
+  frontend run passes all 390 tests. Logs retain the failed run and both diagnoses.
+- Pinned production typecheck and build pass. The standard Vite build first hit
+  sandbox `EPERM` writing its config cache through the temporary dependency link.
+  `npm run build -- --configLoader runner` loads the same config without that
+  shared-cache write and passes. No dependency/config changes were made.
+- Rust formatting, repository validation and whitespace checks pass. The temporary
+  dependency link is removed before the clean committed handoff.
+
+### Approved A2 comparison
+
+The reference remains `screens-arithmetic/equation-v2`, runnable `ce626427`,
+fingerprint `e9a4d3bd1952a92b68d184e68e87579c15001984d42f3a872815a124d3555f7b`,
+served read-only from the existing `82d30d6e` sibling. Approved records, sources
+and captures remain intact. Final dark comparisons cover textbutton, imagebutton,
+variable defaults and numeric conditions at 1100×720 and 560×640, display scale 1,
+with matching numeric content and selected/expanded state. Each control is scrolled
+into view; full-context captures retain the different surrounding workspaces.
+`browser-final/comparison.json` records geometry, field values, computed palette,
+viewport/scale and 32 capture hashes. Both versions were visually inspected.
+The managed browser exposed only display scale 2, so the required scale-1 captures
+used one owned Chrome context after scoped unsandboxed launch approval. Managed
+resizing logged a ResizeObserver delivery warning; final paired captures recorded
+zero page errors. All owned comparison tabs/browser/server and its driver closed.
+
+Numeric comparisons now group Variable, Comparison and Number in one row, placing
+Number below the first two fields at compact width. Other condition kinds retain
+their controls. Scoped semantic palette tokens apply the approved slate surfaces,
+brass actions, readable fields and feedback. Popovers use the existing elevation
+token. The default and equation inputs match the reference's 40-pixel rendered
+height; the numeric comparison selects match its 34-pixel height. The final captures
+follow the palette changes and supersede no earlier evidence.
+
+Visual fidelity is close for the selected controls, with remaining context differences:
+production retains its existing sidebar/panels, imagebutton tabs and Apply labels,
+so available widths and compact overlay placement differ from the mock. Production
+also retains truthful unknown-current-state guidance, real refusal text and disabled
+Cancel when there is no change. Numeric condition help remains below the grouped
+fields. These captures establish scoped control conformance, not the full Story
+workspace or app-wide palette. No new layout/design decision or full #110 work
+was selected.
+
+### Runtime inputs and handoff limits
+
+`candidate.json` freezes the app/script/fixture/CI input inventory and driver hash.
+`runtime-inputs.json` records every successful UI mutation payload, refusal and
+final accepted source snapshot from both core journeys. `emitted/` retains those
+exact `.rpy` files. The input fingerprint is
+`e06fea9537309f4f33b08afb6fd602f857f00fc078fb165f0105ca75cef445c4` across 873 files.
+
+The emitted Screens inventory contains decimal creation/defaults, retained-draft
+revision refusal, both ordered button lists and Finish, all seven numeric operation
+keys with `(9.5 + 0.5) / 4`, a newly created decimal imagebutton, decimal text/sample
+inputs and a numeric condition threshold `2.75`. The final source paths are
+`game/definitions/variables.rpy`, `game/ui/arithmetic_dialog.rpy` and the fixture's
+`game/chapters/chapter_01/scene_001.rpy`. The separate Story inventory includes
+imported/comment-preserving whole/decimal formulas, all operations, literal
+Boolean/Text no-ops and nested insertion through its existing captured body/position.
+These are separate disposable projects, with exact IDs/revisions in the transcripts;
+they are not a newly qualified combined runtime fixture.
+
+Functionally, the mapped controls pass production-control/public-core checks,
+accepted-source/history/reopen and the scoped visual comparison. New UI-emitted
+payloads/source still need the coordinator's selected coherent runtime qualification.
+No SDK/native/human/full-feature acceptance is claimed. Mac stays 9/20 and Windows
+3/20, zero reservations. Spec P4 and the pending #96/#110 scope decision remain
+with the coordinator; neither criteria nor ticket/status/PR state was changed here.

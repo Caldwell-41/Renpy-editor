@@ -477,6 +477,10 @@ pub enum SceneCommand {
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum SceneError {
+    ScreenAction {
+        index: usize,
+        cause: Box<SceneError>,
+    },
     RuntimeBusy,
     InvalidPayload,
     MissingArithmeticTarget,

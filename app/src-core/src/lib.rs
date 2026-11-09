@@ -167,6 +167,8 @@ const GENERIC_ERROR: &str = "The request could not be completed.";
 pub struct CoreError {
     code: &'static str,
     message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    action_index: Option<usize>,
 }
 
 #[derive(Debug, Serialize)]
@@ -201,6 +203,7 @@ impl CoreResponse {
             error: Some(CoreError {
                 code,
                 message: message.into(),
+                action_index: None,
             }),
         }
     }
@@ -1224,7 +1227,15 @@ fn media_failure(request_id: String, error: media::MediaError) -> CoreResponse {
 
 fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
     use scene::SceneError::*;
+    if let ScreenAction { index, cause } = error {
+        let mut response = scene_failure(request_id, *cause);
+        if let Some(error) = &mut response.error {
+            error.action_index = Some(index);
+        }
+        return response;
+    }
     let (code, message) = match error {
+        ScreenAction { .. } => unreachable!("action context handled above"),
         RuntimeBusy => ("RUNTIME_BUSY", "Stop the runtime operation before changing these files."),
         InvalidPayload => ("INVALID_PAYLOAD", "The Scene operation is invalid."),
         MissingArithmeticTarget => ("MISSING_ARITHMETIC_TARGET", "variableId: Choose an existing variable."),

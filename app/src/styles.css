@@ -358,3 +358,23 @@ h2 { margin: 0; font-size: 1rem; font-weight: 650; }
 .story-arithmetic-editor .story-formula-problem { padding-left:10px; border-left:2px solid var(--status-error); }
 .story-arithmetic-editor .story-assignment-source { display:block; overflow-wrap:anywhere; white-space:pre-wrap; font-size:12.5px; }
 .story-arithmetic-editor [aria-invalid=true] { border-color:var(--status-error); }
+
+/* Approved arithmetic controls, scoped independently of the surrounding workspace. */
+:root {
+  --arithmetic-surface-app: #161b20;
+  --arithmetic-surface-panel: #1b2128;
+  --arithmetic-surface-raised: #222a32;
+  --arithmetic-surface-hover: #29323b;
+  --arithmetic-surface-selected: #342e22;
+  --arithmetic-text-primary: #e9ecef;
+  --arithmetic-text-secondary: #bcc4cc;
+  --arithmetic-text-muted: #949ea8;
+  --arithmetic-text-disabled: #66717b;
+  --arithmetic-border-normal: #2c353e;
+  --arithmetic-border-strong: #46525d;
+  --arithmetic-accent-primary: #d6a84e;
+  --arithmetic-accent-hover: #e6bc66;
+  --arithmetic-accent-subtle: #3a3122;
+  --arithmetic-focus-ring: #e6bc66;
+  --arithmetic-on-accent: #1b1508;
+}

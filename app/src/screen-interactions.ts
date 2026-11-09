@@ -147,8 +147,11 @@ export function restoreActionFocus(section:HTMLElement,draft:ActionDraft):void {
 /** A refused Apply keeps the editor and reveals its arithmetic field. */
 export function showActionRefusal(section:HTMLElement|undefined,draft:ActionDraft|undefined,error:unknown):void {
  if(!section||!draft||!(error as {code?:string}).code?.includes("ARITHMETIC"))return;
- const row=section.querySelector<HTMLElement>(`[data-row-id="${draft.expanded??draft.focus?.id}"]`);
- const input=row?.querySelector<HTMLInputElement>('.siv-formula')??section.querySelector<HTMLInputElement>('.siv-formula');
+ const index=(error as {actionIndex?:number}).actionIndex;
+ const failing=index===undefined?undefined:draft.rows[index];if(!failing)return;
+ draft.expanded=failing.id;draft.focus={id:failing.id,part:"value"};
+ const row=section.querySelector<HTMLElement>(`[data-row-id="${failing.id}"]`);
+ const input=row?.querySelector<HTMLInputElement>('.siv-formula');
  if(!input)return;const details=input.closest('details');if(details)details.open=true;
  input.setAttribute('aria-invalid','true');const feedback=input.closest('.siv-numeric')?.querySelector<HTMLElement>('.siv-feedback');if(feedback)feedback.textContent=(error as Error).message;
  queueMicrotask(()=>{input.focus({preventScroll:true});input.scrollIntoView({block:'nearest'});});

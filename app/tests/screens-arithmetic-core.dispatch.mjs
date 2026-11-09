@@ -25,7 +25,17 @@ try{
  assert.equal((await child.next()).ready,true);document.body.innerHTML='<div id="app"></div>';const {startApplication}=await import('../dist-tests/src/main.js');startApplication((op,payload)=>request(op,payload,true));
  await wait(()=>document.querySelector('.recent-open')&&!document.querySelector('.recent-open').disabled);document.querySelector('.recent-open').click();await wait(()=>document.querySelector('.beat-card'));await settle();button('Variables');await settle();
  button('New variable');const beforeCreate=(await call('authoring.list')).variables[0].source.path,createBase=await source(beforeCreate);enter(labelled('Technical name (fixed after creation)'),'money');const type=labelled('Type');assert([...type.options].some(o=>o.value==='decimal'),'Decimal creation must be available');enter(type,'decimal');enter(labelled('Default value'),'1e999');lastWrite=undefined;button('Create Variable');assert.equal(lastWrite,undefined);assert.equal(labelled('Default value').value,'1e999');enter(labelled('Default value'),'2.5');lastWrite=undefined;button('Create Variable');await wait(()=>lastWrite);assert.equal(lastWrite.ok,true);await settle();
- const money=(await call('authoring.list')).variables.find(v=>v.technicalName==='money');assert.equal(money.variableType,'decimal');assert.equal(money.defaultValue,2.5);const path=money.source.path,initial=await source(path);button('Story');await settle();await history(path,createBase,initial);button('Variables');await settle();
+ const money=(await call('authoring.list')).variables.find(v=>v.technicalName==='money');assert.equal(money.variableType,'decimal');assert.equal(money.defaultValue,2.5);const path=money.source.path;let initial=await source(path);button('Story');await settle();await history(path,createBase,initial);button('Variables');await settle();
+ // An unrelated successful creation must retain the selected default draft and its original revision.
+ for(const [raw,name] of [['1e','unrelated_flag'],['4.25','another_flag']]){
+  document.querySelector('.entity-row[data-filter="money decimal"] .card-open').click();const form=document.querySelector('.variable-default-editor'),field=labelled('Default value',form),baseRevision=(await call('authoring.list')).variables.find(v=>v.id===money.id).source.sourceRevision;enter(field,raw);field.setSelectionRange(1,raw.length);field.dispatchEvent(new Event('select'));
+  if(raw==='1e'){button('Save Default',form);await settle();assert.equal(field.getAttribute('aria-invalid'),'true');const described=field.getAttribute('aria-describedby');assert(described&&document.getElementById(described)?.textContent);}
+  button('New variable');enter(labelled('Technical name (fixed after creation)'),name);lastWrite=undefined;button('Create Variable');await wait(()=>lastWrite);assert(lastWrite.ok);await settle();
+  const retained=document.querySelector('.variable-default-editor'),retainedField=labelled('Default value',retained);assert.equal(retainedField.value,raw);assert.equal(retained.dataset.unsubmitted,'true');assert.equal(retainedField.selectionStart,1);assert.equal(retainedField.selectionEnd,raw.length);assert(document.activeElement===retainedField,"Retained default receives focus after creation closes");assert(document.querySelector('.entity-row.selected').dataset.filter.startsWith('money '));assert.equal((await call('authoring.list')).variables.find(v=>v.id===money.id).defaultValue,2.5);
+  if(raw==='4.25'){const before=await source(path);lastWrite=undefined;button('Save Default',retained);await wait(()=>lastWrite);assert.equal(lastWrite.ok,false);assert.equal(lastWrite.error.code,'SOURCE_CONFLICT');assert.equal(result.transcript.filter(t=>t.ui&&t.operation==='variable.update').at(-1).payload.expectedSourceRevision,baseRevision);assert.equal(retainedField.value,raw);assert.equal(await source(path),before);}
+  button('Cancel',retained);assert.equal(retainedField.value,'2.5');
+ }
+ initial=await source(path);stage('invalid and valid raw default drafts, selection, dirty marker and selected variable survive unrelated successful creation; accessible errors and Cancel retain accepted default');
  const row=[...document.querySelectorAll('.entity-row')].find(r=>r.textContent.includes('money'));row.querySelector('.card-open').click();const defaultEditor=document.querySelector('.variable-default-editor');assert(defaultEditor,'A2 default editor stays in the inspector');enter(labelled('Default value',defaultEditor),'3.75');lastWrite=undefined;button('Save Default',defaultEditor);await wait(()=>lastWrite);assert.equal(lastWrite.ok,true);await settle();const updated=await source(path);assert.notEqual(updated,initial);button('Story');await settle();await history(path,initial,updated);stage('actual main decimal creation/default update -> accepted source and shared history');
 
  // Set up disposable public-core data. Every edit below uses the mounted production controls.
@@ -51,6 +61,16 @@ try{
   await history(owner.path,before,accepted);stage(`${kind} actual UI -> core accepted ordered arithmetic/Finish, unknown current state, validation without history, one-step Undo/Redo`);
  }
 
+ // Refusal belongs to the first failing action, regardless of the expanded row.
+ for(const kind of ['textbutton','imagebutton']){
+  select(ids[kind]);change('Action 1 formula','1 // 0');
+  const second=labelled('Action 2 formula',panel());second.closest('details').open=true;second.closest('details').dispatchEvent(new Event('toggle'));await settle();
+  assert.notEqual(second.getAttribute('aria-invalid'),'true','another row failure must not invalidate the inspected row');
+  const before=await source(owner.path);assert.equal((await apply(kind)).ok,false);await settle();
+  assert.equal(lastWrite.error.actionIndex,0);const first=labelled('Action 1 formula',panel());assert.equal(first.getAttribute('aria-invalid'),'true');assert(first.closest('details').open);assert.equal(document.activeElement,first);assert.equal(await source(owner.path),before);
+  button('Cancel',panel());await settle();
+ }
+ stage('both button kinds reveal and focus actual failing action 1 while action 2 was expanded; live inspection and refusals write nothing');
  // New imagebuttons validate the complete pending creation without accepting a placeholder.
  browser.HTMLImageElement.prototype.decode=async()=>{};
  button('Add element',panel());panel().querySelector('[data-kind="imagebutton"]').click();button('Choose normal image',panel());await wait(()=>document.querySelector('dialog.screen-image-dialog'));button('Use Station seal',document.querySelector('dialog.screen-image-dialog'));await wait(()=>!document.querySelector('dialog.screen-image-dialog'));await settle();
@@ -67,7 +87,7 @@ try{
   select(ids.textbutton);change('Action 1 variable',variable('money').id);op(1,operation);change('Action 1 formula','(9.5 + 0.5) / 4');await settle();assert.equal((await apply()).ok,true);const emitted=result.transcript.filter(t=>t.ui&&t.operation==='screens.compose'&&!t.payload.validateOnly).at(-1);assert.equal(emitted.payload.command.interaction.actions[0].value.operation,operation);
  }
  stage('all seven menu operations and grouped decimal operands reach real core admission');
- select(ids.textbutton);change('Action 1 variable',variable('trust').id);change('Action 1 formula','4 / 2');await settle();assert.equal(labelled('Action 1 formula',panel()).getAttribute('aria-invalid'),'true');assert.equal((await apply()).ok,false);assert.equal(lastWrite.error.code,'ARITHMETIC_TARGET_TYPE');assert.equal(labelled('Action 1 formula',panel()).value,'4 / 2');
+ select(ids.textbutton);change('Action 1 variable',variable('trust').id);change('Action 1 formula','4 / 2');labelled('Action 1 formula',panel()).dispatchEvent(new Event('blur'));await settle();assert.equal(labelled('Action 1 formula',panel()).getAttribute('aria-invalid'),'true');assert.equal((await apply()).ok,false);assert.equal(lastWrite.error.code,'ARITHMETIC_TARGET_TYPE');assert.equal(labelled('Action 1 formula',panel()).value,'4 / 2');
  change('Action 1 formula','1 // 0');await settle();assert.equal((await apply()).ok,false);assert.equal(lastWrite.error.code,'ARITHMETIC_ZERO_DIVISOR');button('Cancel',panel());await settle();
  select(ids.textbutton);change('Action 1 formula','bonus + 3');staleSession=true;assert.equal((await apply()).ok,false);staleSession=false;assert.equal(lastWrite.error.code,'STALE_PROJECT_SESSION');assert.equal(labelled('Action 1 formula',panel()).value,'bonus + 3');button('Cancel',panel());await settle();
 

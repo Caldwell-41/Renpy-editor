@@ -410,7 +410,11 @@ revision. A new imagebutton also has a temporary proposed node ID. Neither that 
 nor the candidate revision authorizes a later write or selects an accepted node.
 Apply revalidates the complete original creation command and commits it once. Ordinary commits
 omit `actionValidation`. Invalid input uses the existing field-specific arithmetic
-transport errors; dirty/stale dependencies remain ordinary refusals.
+transport errors. A Screens arithmetic refusal also carries an optional zero-based
+`error.actionIndex` identifying the failing action in the submitted ordered list.
+Its code and message stay unchanged. Inspection of another row must not assign that
+error to the inspected field; Apply reveals and focuses the identified row.
+Dirty/stale dependencies remain ordinary refusals.
 
 `screens.inspect` and returned composition documents expose `actionVariables`
 (full typed definitions with IDs and revisions) and `actionCapabilities` (the shared

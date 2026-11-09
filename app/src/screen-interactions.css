@@ -79,7 +79,7 @@
 .siv-feedback p{margin:0}
 .siv-formula-hint{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text-muted);margin-top:3px}
 .screens-editor .siv-formula-hint>.button{margin-left:auto;border:0;background:transparent;padding:0 3px;min-height:22px;color:var(--text-muted);font:12px var(--font-source)}
-.siv-operation-menu,.siv-suggestions{position:fixed;inset:auto;margin:0;z-index:20;padding:4px;background:var(--surface-raised);color:var(--text-primary);border:1px solid var(--border-strong);border-radius:4px;box-shadow:0 10px 24px #0004;max-height:310px;overflow:auto;box-sizing:border-box}
+.siv-operation-menu,.siv-suggestions{position:fixed;inset:auto;margin:0;z-index:20;padding:4px;background:var(--surface-raised);color:var(--text-primary);border:1px solid var(--border-strong);border-radius:4px;box-shadow:var(--elevation-preview);max-height:310px;overflow:auto;box-sizing:border-box}
 .siv-operation-menu>.button,.siv-suggestions>.button{width:100%;display:flex;align-items:center;gap:8px;padding:5px 7px;border:0;background:transparent;border-radius:2px;text-align:left;min-height:32px;font-size:12px}
 .siv-operation-menu>.button:hover,.siv-operation-menu>.button:focus-visible,.siv-operation-menu>[aria-checked=true],.siv-suggestions>[aria-selected=true]{background:var(--accent-subtle)}
 .siv-operation-symbol{flex:0 0 33px;font:600 14px var(--font-source);text-align:center;color:var(--accent-primary)}
@@ -90,16 +90,12 @@
 .siv-calculation>.lp-label{display:none}
 .siv-numeric .siv-formula-hint{display:none}
 .siv-numeric:focus-within .siv-formula-hint{display:flex}
-:root[data-theme=dark] .siv-actions{
- --surface-raised:#222a32;--surface-hover:#29323b;--surface-selected:#342e22;
- --text-primary:#e9ecef;--text-secondary:#bcc4cc;--text-muted:#949ea8;
- --border-normal:#2c353e;--border-strong:#46525d;--accent-primary:#d6a84e;--accent-subtle:#3a3122;--focus-ring:#e6bc66;
-}
+
 @media(max-width:650px){.screens-editor .siv-formula{font-size:13px}}
 .variable-default-editor{max-width:640px;padding:0 0 16px;border-bottom:1px solid var(--border-normal)}
 .variable-default-editor h2{font-size:16px;margin:0 0 16px}
 .variable-default-editor p{font-size:12.5px;line-height:1.45}
-.variable-default-editor input,.variable-default-editor select{width:100%;min-height:40px;box-sizing:border-box;font-size:13px}
+.variable-default-editor input,.variable-default-editor select{width:100%;min-height:34px;box-sizing:border-box;font-size:13px}
 .variable-default-editor .variable-default-hint{color:var(--text-secondary)}
 /* The approved decimal setup uses a flat list and a wider default editor. */
 .decimal-variables .catalog-body{grid-template-columns:minmax(180px,.65fr) minmax(0,1.35fr)}
@@ -110,12 +106,7 @@
 .decimal-variables .catalog-value{grid-column:2;grid-row:1/3;align-self:center;font:13px var(--font-source)}
 .decimal-variables .catalog-inspector{background:transparent;border:0;border-left:1px solid var(--border-normal);border-radius:0;padding:0 24px}
 .decimal-variables .catalog-inspector>div>h2:first-child{display:none}
-:root[data-theme=dark] .decimal-variables{
- --surface-app:#161b20;--surface-panel:#1b2128;--surface-raised:#222a32;--surface-hover:#29323b;--surface-selected:#342e22;
- --text-primary:#e9ecef;--text-secondary:#bcc4cc;--text-muted:#949ea8;--border-normal:#2c353e;--border-strong:#46525d;
- --accent-primary:#d6a84e;--accent-hover:#e6bc66;--accent-subtle:#3a3122;--focus-ring:#e6bc66;--on-accent:#1b1508;
- background:var(--surface-app);color:var(--text-primary)
-}
+
 @media(max-width:650px){.decimal-variables .catalog-body{grid-template-columns:minmax(0,1fr)}.decimal-variables .catalog-inspector{padding:12px 0;border-left:0}.decimal-variables .catalog-inspector:not([hidden]){min-width:0}}
 .decimal-variables .catalog-grid.catalog-variables>.entity-row{grid-template-columns:minmax(0,1fr) auto}
 .decimal-variables .catalog-grid.catalog-variables>.entity-row>.card-open{grid-column:1;grid-row:1;padding:0;font:13px var(--font-source)}
@@ -123,9 +114,45 @@
 .decimal-variables .catalog-grid.catalog-variables>.entity-row>.catalog-value{grid-column:2;grid-row:1/3;padding:0}
 @media(max-width:1000px){.decimal-variables .catalog-inspector{background:var(--surface-app);width:min(340px,80vw);box-sizing:border-box;padding:16px}}
 .condition-numeric-guidance{grid-column:1/-1;margin:0;font-size:12.5px;line-height:1.45;color:var(--text-secondary)}
-:root[data-theme=dark] .screens-editor :is(.screen-text,.screen-control-card):has(.siv-actions){
- --surface-app:#161b20;--surface-panel:#1b2128;--surface-raised:#222a32;--surface-hover:#29323b;--surface-selected:#342e22;
- --text-primary:#e9ecef;--text-secondary:#bcc4cc;--text-muted:#949ea8;--border-normal:#2c353e;--border-strong:#46525d;
- --accent-primary:#d6a84e;--accent-hover:#e6bc66;--accent-subtle:#3a3122;--focus-ring:#e6bc66;--on-accent:#1b1508;
-}
+
 .condition-numeric-guidance{flex:1 0 100%}
+
+:root[data-theme=dark] :is(.decimal-variables,.siv-actions,.screen-text:has(.siv-actions),.screen-control-card:has(.siv-actions),.condition-fields[data-numeric=true],.story-operation:has(.condition-fields[data-numeric=true])) {
+ --surface-app:var(--arithmetic-surface-app);
+ --surface-panel:var(--arithmetic-surface-panel);
+ --surface-raised:var(--arithmetic-surface-raised);
+ --surface-hover:var(--arithmetic-surface-hover);
+ --surface-selected:var(--arithmetic-surface-selected);
+ --text-primary:var(--arithmetic-text-primary);
+ --text-secondary:var(--arithmetic-text-secondary);
+ --text-muted:var(--arithmetic-text-muted);
+ --text-disabled:var(--arithmetic-text-disabled);
+ --border-normal:var(--arithmetic-border-normal);
+ --border-strong:var(--arithmetic-border-strong);
+ --accent-primary:var(--arithmetic-accent-primary);
+ --accent-hover:var(--arithmetic-accent-hover);
+ --accent-subtle:var(--arithmetic-accent-subtle);
+ --focus-ring:var(--arithmetic-focus-ring);
+ --on-accent:var(--arithmetic-on-accent);
+ color:var(--text-primary);
+}
+
+.decimal-variables { background:var(--surface-app);color:var(--text-primary) }
+.screens-editor :is(.screen-card.screen-text,.screen-card.screen-control-card):has(.siv-actions) { background:var(--surface-app);color:var(--text-primary) }
+.decimal-variables :is(input,select),.condition-fields[data-numeric=true] :is(input,select) { background:var(--surface-raised);color:var(--text-primary);border-color:var(--border-strong);border-radius:3px;min-height:34px;font-size:13px }
+.decimal-variables .button { background:var(--surface-raised);color:var(--text-primary);border-color:var(--border-strong);border-radius:3px;min-height:32px;font-size:12px }
+.decimal-variables .button.primary { background:var(--accent-primary);border-color:var(--accent-primary);color:var(--on-accent) }
+.condition-fields[data-numeric=true] { display:grid;grid-template-columns:minmax(0,1.1fr) minmax(100px,.8fr) minmax(80px,.7fr);gap:8px;align-items:end;background:var(--surface-app) }
+.condition-fields[data-numeric=true] > div:has(>[class~=field]) { display:contents }
+.condition-fields[data-numeric=true] .field { margin:0;font-size:12px;gap:5px }
+.condition-fields[data-numeric=true] .condition-numeric-guidance { grid-column:1/-1;margin:4px 0 20px }
+@media(max-width:650px) {
+ .condition-fields[data-numeric=true] { grid-template-columns:minmax(0,1fr) minmax(90px,.8fr) }
+ .condition-fields[data-numeric=true] > div > .field { grid-column:1/-1 }
+}
+
+.siv-actions .screen-text-field select { background:var(--surface-panel) }
+.siv-actions details:not([open]) .siv-summary { font:13px var(--font-source) }
+.condition-fields[data-numeric=true] select { height:34px;min-height:34px;padding:6px 8px }
+.story-operation:has(.condition-fields[data-numeric=true]) { background:var(--surface-app);color:var(--text-primary) }
+.story-operation:has(.condition-fields[data-numeric=true]) .button.primary { background:var(--accent-primary);border-color:var(--accent-primary);color:var(--on-accent) }
