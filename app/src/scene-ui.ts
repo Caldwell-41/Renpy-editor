@@ -1,3 +1,4 @@
+import { assignmentCaption, buildAssignmentEditor, type ValidateAssignment } from "./story-arithmetic-editor.ts";
 import { layoutFor, saveLayout } from "./preferences.ts";
 import { buildAvailabilityEditor, buildConditionEditor } from "./story-condition-editor.ts";
 import { validateField } from "./authoring-input.ts";
@@ -335,6 +336,7 @@ export interface SceneActions {
   readonly viewContinuation?: (sceneId: string, beatId: string, expectedSourceRevision: string) => void;
   readonly assist?: (sceneId: string, beatId: string, action?: string) => void;
   readonly layoutKey?: string;
+  readonly validateAssignment?: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision">) => Promise<AssignmentDraftValidation>;
   readonly apply: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision">) => Promise<SceneWorkspace>;
   readonly status: (message: string, kind?: "normal" | "error") => void;
   readonly present: (assetId: string, purpose: MediaPresentation["purpose"]) => Promise<MediaPresentation>;
@@ -1096,11 +1098,13 @@ export function renderSceneAuthoring(
       const protectedPanel = document.createElement("div"); protectedPanel.className = "protected-code";
       const explanation = document.createElement("p"); explanation.textContent = beat.payload.type === "customCode" ? beat.payload.reason : "Protected source";
       const source = document.createElement("pre"); source.textContent = beat.payload.type === "customCode" ? beat.payload.source : "";
-      protectedPanel.append(explanation, source); card.append(protectedPanel); return;
+      const open = button("View in Source", "button secondary"); open.disabled = !actions.viewSource;
+      open.addEventListener("click", () => actions.viewSource?.(scene.sourcePath, beat.byteStart, beat.byteEnd, scene.sourceRevision));
+      protectedPanel.append(explanation, source, open); card.append(protectedPanel); return;
     }
-    const captured = { projectRevision: model.projectRevision, sourceMapRevision: model.sourceMapRevision };
+    const captured = { projectRevision: model.projectRevision, sourceMapRevision: model.sourceMapRevision, ...(model.authoringRevision ? { authoringRevision: model.authoringRevision } : {}) };
     const expectedBody = beatBody(beat);
-    const editor = buildBeatEditor(model, beat.payload, true, actions);
+    const editor = buildBeatEditor(model, beat.payload, true, actions, assignmentValidation(scene, captured, value => ({ type: "updateBodyBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, beatId: beat.id, expectedBody, beat: value })));
     const panel = editor.host; panel.classList.add("expanded-beat");panel.dataset.beatType=beat.payload.type;
     if (beat.payload.type === "showScreen" || beat.payload.type === "hideScreen" || beat.payload.type === "callScreen") {
       const details = document.createElement("details"), summary = document.createElement("summary"); summary.textContent = "Source and effects";
@@ -1147,7 +1151,7 @@ export function renderSceneAuthoring(
       panel.append(createDestination);
     }
     const actionsRow = document.createElement("div"); actionsRow.className = "row-actions";
-    const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => { selectedBeatId = undefined; draw(); });
+    const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => { selectedBeatId = undefined; draw(); if (beat.payload.type === "setVariable") host.querySelector<HTMLElement>(`[data-beat-id="${beat.id}"] .beat-select`)?.focus(); });
     if (beat.payload.type === "showScreen" || beat.payload.type === "hideScreen" || beat.payload.type === "callScreen") panel.addEventListener("keydown", event => {
       if (event.key !== "Escape" || event.isComposing || composing) return;
       event.preventDefault(); event.stopPropagation(); if (!pendingWrites && !settling) { selectedBeatId = undefined; draw(); }
@@ -1181,6 +1185,10 @@ export function renderSceneAuthoring(
     if(beat.payload.type==="dialogue")saveDialogue=()=>save(false);
     editor.primary.addEventListener("compositionstart",()=>{composing=true;});editor.primary.addEventListener("compositionend",()=>{composing=false;});
     commit.addEventListener("click", () => { if(!settling) { settling=save(false).finally(()=>{settling=undefined;}); } });
+    if (beat.payload.type === "setVariable") panel.addEventListener("keydown", event => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter" && !event.defaultPrevented) { event.preventDefault(); if (!event.isComposing && !settling && !pendingWrites) settling = save(false).finally(() => { settling = undefined; }); }
+      else if (event.key === "Escape" && !event.defaultPrevented && !event.isComposing) { event.preventDefault(); if (!pendingWrites && !settling) { actions.status("Use Cancel to discard this draft, or keep editing."); cancel.focus(); } }
+    });
     if (beat.payload.type === "dialogue") editor.primary.addEventListener("keydown", (event) => {
       if ((event.ctrlKey || event.metaKey) && event.key === "Enter") { event.preventDefault(); if(!event.isComposing&&!settling)settling=save(event.shiftKey).finally(()=>{settling=undefined;}); }
     });
@@ -1191,9 +1199,16 @@ export function renderSceneAuthoring(
     dirtyDraft(panel, editor.controls); card.append(panel);
   };
 
+  const assignmentValidation = (scene: SceneDocument, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision">, command: (beat: BeatPayload) => SceneCommand): ValidateAssignment => async beat => {
+    if (!actions.validateAssignment || disposed || actions.current?.() === false) throw Error("Story session is unavailable.");
+    const result = await actions.validateAssignment(command(beat), expected);
+    if (disposed || actions.current?.() === false || result.projectRevision !== expected.projectRevision || result.sourceMapRevision !== expected.sourceMapRevision || result.authoringRevision !== expected.authoringRevision || result.sourceRevision !== scene.sourceRevision) throw Error("Story revision changed. Review the current source before committing.");
+    return result;
+  };
+
   const renderNewBeat = (list: HTMLElement, scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", body: BodyRef = { type: "root" }, position: Position = defaultInsertion(scene, body), insertion?: ScreenInsertion, opener = "root"): void => {
     if (host.querySelector(".new-beat")) return;
-    const captured = { projectRevision: model.projectRevision, sourceMapRevision: model.sourceMapRevision };
+    const captured = { projectRevision: model.projectRevision, sourceMapRevision: model.sourceMapRevision, ...(model.authoringRevision ? { authoringRevision: model.authoringRevision } : {}) };
     const openingInsertion = structuredClone(insertion ?? screenInsertion ?? {sceneId:scene.id,body,position,expectedSourceRevision:scene.sourceRevision});
     let rememberedInsertion = false;
     const panel = document.createElement("section"); panel.className = "new-beat scene-draft";
@@ -1231,9 +1246,10 @@ export function renderSceneAuthoring(
     placement.host.classList.add("scene-draft");
     for(const event of ["input","change"])placement.host.addEventListener(event,()=>{if(remember())delete placement.host.dataset.unsubmitted;else placement.host.dataset.unsubmitted="true";updatePendingMarker();});
     const editorHost = document.createElement("div"),secondaryHost=document.createElement("div");secondaryHost.className="story-screen-secondary";
-    let editor = buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, actions);
+    const validateNew = assignmentValidation(scene, captured, beat => ({ type: "insertBodyBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, ...(screenType() ? readLocation() : { body, position }), beat }));
+    let editor = buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, actions, validateNew);
     const typeDrafts = new Map<string, BeatEditor>([[type.value, editor]]);
-    const replaceEditor = (): void => { placement.host.hidden=!screenType();if(placement.host.hidden)delete placement.host.dataset.unsubmitted;destination.hidden=screenType();remember();editor = typeDrafts.get(type.value) ?? buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, actions); typeDrafts.set(type.value, editor); editorHost.replaceChildren(editor.host);secondaryHost.replaceChildren(...(editor.secondary?[editor.secondary]:[]));panel.classList.toggle("story-screen-editor",screenType());dirtyDraft(panel, editor.controls); };
+    const replaceEditor = (): void => { placement.host.hidden=!screenType();if(placement.host.hidden)delete placement.host.dataset.unsubmitted;destination.hidden=screenType();remember();editor = typeDrafts.get(type.value) ?? buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, actions, validateNew); typeDrafts.set(type.value, editor); editorHost.replaceChildren(editor.host);secondaryHost.replaceChildren(...(editor.secondary?[editor.secondary]:[]));panel.classList.toggle("story-screen-editor",screenType());dirtyDraft(panel, editor.controls); };
     type.addEventListener("change", replaceEditor); replaceEditor();
     const actionsRow = document.createElement("div"); actionsRow.className = "row-actions";
     const cancel = button("Cancel", screenType()?"button secondary":"text-button");
@@ -1265,6 +1281,9 @@ export function renderSceneAuthoring(
       } catch (error) {
         actions.status(friendlyError(error, "Beat is invalid"), "error"); editor.focus();
       }finally{pending=false;}
+    });
+    panel.addEventListener("keydown", event => {
+      if (type.value === "setVariable" && (event.ctrlKey || event.metaKey) && event.key === "Enter" && !event.defaultPrevented && !event.isComposing) { event.preventDefault(); if (!pending && !composing) commit.click(); }
     });
     const orderActions=()=>actionsRow.replaceChildren(...(screenType()?[commit,cancel]:[cancel,commit]));orderActions();type.addEventListener("change",orderActions);
     dirtyDraft(panel,[type]);panel.append(heading,destination,labelled("Beat type",type),placement.host,editorHost,actionsRow,secondaryHost);list.prepend(panel);updatePendingMarker();type.focus();
@@ -1316,7 +1335,7 @@ function beatSummary(payload: BeatPayload, model: SceneWorkspace): string {
     case "playMusic": case "playSfx": return asset(payload.assetId);
     case "stopMusic": return "Stop current music";
     case "transition": return payload.transition;
-    case "setVariable": return `${model.authoring.variables.find((item) => item.id === payload.variableId)?.technicalName ?? "variable"} = ${String(payload.value)}`;
+    case "setVariable": return assignmentCaption(payload, model.authoring.variables);
     case "choice": return `${payload.options.length} option${payload.options.length === 1 ? "" : "s"}${payload.options.some(option => option.condition) ? " · Conditional availability unknown" : ""}`;
     case "jump": return scene(payload.sceneId);
     case "call": return `${scene(payload.sceneId)} · Returns to next Beat`;
@@ -1394,7 +1413,8 @@ function buildScreenBeatEditor(payload: Extract<BeatPayload, { type: "showScreen
   } };
 }
 
-function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload, existing = false, actions?: SceneActions): BeatEditor {
+function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload, existing = false, actions?: SceneActions, validate?: ValidateAssignment): BeatEditor {
+  if (payload.type === "setVariable") return buildAssignmentEditor(model, payload, validate);
   if (payload.type === "showScreen" || payload.type === "hideScreen" || payload.type === "callScreen") return buildScreenBeatEditor(payload, existing, actions);
   const host = document.createElement("div"); host.className = "beat-fields"; const controls: HTMLElement[] = [];
   const add = (label: string, control: HTMLElement): void => { controls.push(control); host.append(labelled(label, control)); };
@@ -1416,13 +1436,6 @@ function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload, existing =
     case "stopMusic": read = () => ({ type: "stopMusic" }); break;
     case "playSfx": { const asset = assets("sfx", payload.assetId); add("SFX", asset); read = () => ({ type: "playSfx", assetId: required(asset) }); break; }
     case "transition": { const transition = transitions(false); add("Transition", transition); read = () => ({ type: "transition", transition: transition.value as "dissolve" | "fade" }); break; }
-    case "setVariable": {
-      const variable = entitySelect(model.authoring.variables.map((item) => ({ id: item.id, label: `${item.technicalName} · ${item.variableType}` })), payload.variableId);
-      const valueHost = document.createElement("div"); let value: HTMLInputElement | HTMLSelectElement;
-      const rebuild = (): void => { const selected = model.authoring.variables.find((item) => item.id === variable.value); if (selected?.variableType === "bool") value = selectOf([{ value: "false", label: "False" }, { value: "true", label: "True" }], String(payload.value)); else { value = input(String(payload.value)); if (selected?.variableType === "int") value.inputMode = "numeric"; } controls.push(value); valueHost.replaceChildren(value); };
-      variable.addEventListener("change", rebuild); rebuild(); add("Variable", variable); host.append(labelled("Value", valueHost));
-      read = () => { const selected = model.authoring.variables.find((item) => item.id === required(variable)); if (!selected) throw new Error("Select a Variable."); if (selected.variableType === "bool") return { type: "setVariable", variableId: selected.id, value: value.value === "true" }; if (selected.variableType === "int" && !validInt64(value.value)) throw new Error("Enter a canonical signed 64-bit decimal integer."); return { type: "setVariable", variableId: selected.id, value: value.value }; }; break;
-    }
     case "choice": {
       const countLocked = existing && payload.options.some(option => !!option.condition);
       const optionHost = document.createElement("div"); optionHost.className = "choice-options"; host.append(optionHost);
@@ -1488,7 +1501,6 @@ function defaultPayload(type: BeatPayload["type"], model: SceneWorkspace, screen
 
 function required(control: HTMLSelectElement): string { if (!control.value || control.selectedOptions[0]?.dataset.unavailable === "true") { control.focus(); throw new Error("Select an available item first."); } return control.value; }
 function requiredText(control: HTMLInputElement, name: string): string { if (!control.value.trim()) { control.focus(); throw new Error(`${name} is required.`); } return control.value.trim(); }
-function validInt64(value: string): boolean { if (!/^-?(0|[1-9][0-9]*)$/.test(value) || value === "-0") return false; try { const parsed = BigInt(value); return parsed >= -9223372036854775808n && parsed <= 9223372036854775807n; } catch { return false; } }
 
 export function renderRecoverySurface(host: HTMLElement, report: RecoveryReport, actions: RecoveryActions): void {
   host.replaceChildren(); host.className = "recovery-workspace";

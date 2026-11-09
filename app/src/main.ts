@@ -1,3 +1,4 @@
+import { assignmentCaption } from "./story-arithmetic-editor.ts";
 import type { Options, PromptModel, Preview } from "./prompt-ui.ts";
 import { mountRewrite, type RewriteController } from "./rewrite-ui.ts";
 import { renderReferenceLibrary, type ReferenceController, type ReferenceKind, type ReferenceWorkspace } from "./reference-ui.ts";
@@ -688,6 +689,12 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
       present: (assetId, purpose) => projectValue(project, "media.present", { assetId, purpose }),
       viewSource: (path, byteStart, byteEnd, expectedRevision) => { void requestProjectNavigation(project, "source", { path, byteStart, byteEnd, expectedRevision }); },
       layoutKey: `${project.projectId}:story`,
+      validateAssignment: (command, expected) => projectValue(project, "scene.validateAssignment", {
+        expectedProjectRevision: expected.projectRevision,
+        expectedSourceMapRevision: expected.sourceMapRevision,
+        expectedAuthoringRevision: expected.authoringRevision,
+        command,
+      }),
       apply: async (command: SceneCommand, expected) => {
         const operationToken = beginAuthoringCompletion(project, command);
         if (!operationToken) throw new Error("Another persistence operation is still in progress.");
@@ -949,7 +956,7 @@ function renderVariables(workspace: HTMLElement, project: OpenProject, model: Au
   const assignmentPanels=model.variables.map(v=>{const panel=document.createElement("section");panel.className="variable-assignments";const heading=formHeading("Assigned in");const note=document.createElement("p");note.className="muted";note.textContent="Known Set Variable Beats only. Custom code is not included.";const result=document.createElement("div");result.textContent="Loading known assignments…";const declaration=document.createElement("details");const label=document.createElement("summary");label.textContent="View declaration";const code=document.createElement("pre");code.textContent=v.source.statement;declaration.append(label,code);panel.append(heading,note,result,declaration);return {panel,result};});
   disposeCatalogue=catalogue(workspace,list,create,"Variables",model.variables.map((v,i)=>({id:v.id,label:v.technicalName,kind:({bool:"Boolean",int:"Integer",string:"Text"} as Partial<Record<VariableType,string>>)[v.variableType] ?? v.variableType,extra:[assignmentPanels[i]!.panel]})),id=>projectValue<MediaPresentation>(project,"media.present",{assetId:id,purpose:"thumbnail"}),`${project.projectId}:variables`);
   const generation=viewGeneration;
-  void projectValue<SceneWorkspace>(project,"scene.list").then(scenes=>{if(generation!==viewGeneration)return;model.variables.forEach((v,i)=>{const result=assignmentPanels[i]!.result;result.replaceChildren();let count=0;scenes.scenes.forEach(scene=>scene.beats.forEach((beat,index)=>{if(beat.payload.type!=="setVariable"||beat.payload.variableId!==v.id)return;count++;const link=button(`${scene.displayName} · Beat ${index+1} · ${String(beat.payload.value)}`,"assignment-link");link.addEventListener("click",()=>void requestProjectNavigation(project,"story",{sceneId:scene.id,beatId:beat.id,expectedSourceRevision:scene.sourceRevision}));result.append(link);}));if(!count)result.textContent="No known assignments.";});}).catch(()=>{if(generation===viewGeneration)assignmentPanels.forEach(p=>p.result.textContent="Assignments unavailable. Try reopening this page.");});
+  void projectValue<SceneWorkspace>(project,"scene.list").then(scenes=>{if(generation!==viewGeneration)return;model.variables.forEach((v,i)=>{const result=assignmentPanels[i]!.result;result.replaceChildren();let count=0;scenes.scenes.forEach(scene=>scene.beats.forEach((beat,index)=>{if(beat.payload.type!=="setVariable"||beat.payload.variableId!==v.id)return;count++;const link=button(`${scene.displayName} · Beat ${index+1} · ${assignmentCaption(beat.payload, scenes.authoring.variables)}`,"assignment-link");link.addEventListener("click",()=>void requestProjectNavigation(project,"story",{sceneId:scene.id,beatId:beat.id,expectedSourceRevision:scene.sourceRevision}));result.append(link);}));if(!count)result.textContent="No known assignments.";});}).catch(()=>{if(generation===viewGeneration)assignmentPanels.forEach(p=>p.result.textContent="Assignments unavailable. Try reopening this page.");});
 }
 
 function validInt64(value: string): boolean { if (!/^-?(0|[1-9][0-9]*)$/.test(value) || value === "-0") return false; try { const parsed = BigInt(value); return parsed >= -9223372036854775808n && parsed <= 9223372036854775807n; } catch { return false; } }
