@@ -97,12 +97,28 @@ cleanup passed. The failed raw evidence and rejecting Cargo-log result are retai
 The coordinator's existing desktop query sees no session/display inside the
 sandbox and an active/awake/unlocked desktop outside it, matching H20's symptom.
 
-The coordinator owns one controlled recovery using the unchanged retained binary,
-source and fixtures outside the sandbox. The ledger owns its exact allocation.
-Accounting is Mac **3 started / 1 reserved for #94 recovery**, Windows **1 started /
-0 reserved**. New ignored evidence is `.toolchains/arithmetic-94/mac-02/` here;
-original failed receipts remain in the #94 worktree. Record the actual start/result,
-then use a fresh merger and route combined Windows qualification before #95/#96.
+The controlled outside-sandbox run completed. Display initialization and 19
+assertions passed, then the nonfocusable caption selector failed. Wrong-outcome
+proof remained unrun; SDK and power cleanup passed. Root source inspection of the
+pinned SDK confirms its text selector searches focus/Say text. The coordinator
+owns a fixture-only correction in the completed #94 worktree, preserving numeric
+checks and verifying the actual screen's interpolated text. Production is unchanged.
+
+The corrected fixture at `d1c201f1` passed its exact no-SDK preflight and the
+allocated outside-sandbox SDK gate. Compile/lint, exact numeric/type/text/sample
+checks, deliberate wrong-outcome rejection and cleanup all passed. The coordinator
+audited all 208 unchanged inputs, binary/source hashes, four case records and
+desktop cleanup. No qualification process remains running.
+
+The #94 branch is clean at evidence commit `b31929f6`; its canonical
+`docs/tasks/evidence/arithmetic-94.md` owns the contract and all three Mac attempts.
+Reuse the 144 Rust public/unit cases and 31 renderer cases on unchanged production
+inputs; the successful SDK gate adds one distinct Rust case. The delivery ledger
+owns cumulative limits, currently Mac 5/6 and Windows 1/6, with no reservations.
+Preserve `mac-02` and `mac-03` in this integration checkout and the original
+`mac-01` in the #94 worktree. A fresh merger takes exclusive integration mutation
+ownership, integrates #94, verifies input equivalence and publishes the draft PR.
+Combined Windows proof then remains required before #95/#96.
 Ordinary division and decimals remain #94. Combined #93/#94 Windows qualification
 against #94 is required before #95 or #96 starts. Its accepted-source fixture must
 retain integer precision, precedence/grouping and negative floor/remainder witnesses

@@ -2,11 +2,12 @@
 
 ## Shared arithmetic selected
 
-#94 decimal/public-services code is local on `t3/decimal-arithmetic-authoring` at
-`532bb229`. Its Mac SDK run failed at display initialization before numeric
-assertions; compile/lint and cleanup passed. A controlled unchanged-input run
-outside the sandbox is reserved after desktop diagnosis. Successful Mac runtime
-and combined Windows proof remain required before #95/#96 begins.
+#94 decimal/public services and successful Mac qualification are local on
+`t3/decimal-arithmetic-authoring` at `b31929f6`. Corrected fixture candidate
+`d1c201f1` passed compile/lint, exact numeric/type/text/sample checks,
+wrong-outcome rejection and cleanup. The initial sandbox display failure and
+later caption-selector failure remain recorded. A fresh merger will integrate
+#94; combined Windows proof remains required before #95/#96 begins.
 
 Kris selected [spec #87](https://github.com/Caldwell-41/Renpy-editor/issues/87)
 for implementation on 2026-11-09. Branch `codex/spec-87-arithmetic` starts from
@@ -43,7 +44,7 @@ merger contract, repository and whitespace checks pass. Approved mocks/captures
 and #92 fixture inputs remain unchanged. The
 [#93 contract](../tasks/evidence/arithmetic-93.md#public-contract-for-94-95-and-96)
 is the baseline for selected fresh #94 decimal work.
-SDK totals are Mac 3 started / 1 reserved for #94 recovery and Windows 1 started / 0 reserved.
+SDK totals are Mac 5 started / 0 reserved and Windows 1 started / 0 reserved.
 New whole-number/decimal Windows proof will be combined against #94 before
 dependent #95/#96 work. The #94 fixture must retain integer precision, precedence,
 grouping and negative floor/remainder witnesses. Windows formula proof remains

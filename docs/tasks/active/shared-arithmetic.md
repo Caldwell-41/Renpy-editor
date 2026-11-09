@@ -23,8 +23,9 @@ Screens branch. No merge of that PR or release is selected.
   `equation-v2`; the reference is integrated by merge `aecf165e`. Story backend
   #92 is merged and qualified on Mac and Windows. Its scoped delivery is ready
   for final integration review. #93 is merged with qualified public-command/Mac
-  evidence; fresh #94 decimal work is next. Combined #93/#94 Windows proof remains
-  required before #95 or #96 starts.
+  evidence. #94 is implemented locally with successful corrected-fixture Mac
+  proof and awaits integration. Combined #93/#94 Windows proof remains required
+  before #95 or #96 starts.
 - Backend sequence: #92, then #93, then #94. #95 follows #94.
 - Story UI #96 follows approved #88 and qualified #94.
 - Screens/decimal UI #97 follows approved #91 and qualified #95.
@@ -66,7 +67,7 @@ one becomes necessary. Routine checks and review have no numerical limits.
 
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
-| macOS ARM64 SDK qualification | 6 | 3 | 1 for #94 controlled recovery |
+| macOS ARM64 SDK qualification | 6 | 5 | 0 |
 | Windows x64 SDK qualification | 6 | 1 | 0 |
 
 ## Execution ledger
@@ -669,3 +670,62 @@ revision fields to a TypeScript type, with no emitted runtime change. All 208
 current inputs match the returned commit; all core/fixture inputs and the retained
 binary still match the compiled candidate. The new receipt records both identities
 and this scoped distinction. No SDK started during either preflight check.
+
+The controlled gate has now started outside the sandbox through the existing
+desktop-admission/power helper. `mac-02/launch-started.json` records the actual
+process and time. Consumption is **Mac 4 started / 0 reserved**, Windows
+**1 started / 0 reserved**. The result is pending; this start remains charged.
+
+The controlled run completed with a different failure. Display admission and
+initialization succeeded. Compile/lint and 19 testcase assertions passed before
+the unfocusable bound-caption selector failed; the remaining sample/witness and
+wrong-outcome checks were not reached. SDK and power-assertion cleanup passed.
+Mac remains **4 started**; neither failed run is a qualification pass.
+
+Pinned SDK source identifies a harness defect: text selectors search the focus
+list and, during narration, use the current Say text as the default focus. The
+accepted nonfocusable screen caption is not in that search. The coordinator owns
+a small fixture-only correction on the completed #94 branch: require the screen
+and check its actual interpolated displayable text via the same pinned SDK TTS
+path. All numeric and rejecting assertions stay in place; production is unchanged.
+The canonical #94 note now retains both failures and this diagnosis.
+
+One further Mac start is reserved for verification of that corrected fixture,
+after cheap preflight, clean commit and fresh source/binary identities. This is
+within the original ceiling, not a reset: **4 started / 1 reserved**, leaving one
+unallocated Mac start for later work if verification starts as planned. No further
+attempt is automatic. The next ignored directory is `mac-03`; preserve both prior
+attempts. Successful Mac runtime and combined Windows proof remain outstanding.
+
+The fixture-only correction is committed on the #94 branch as
+`d1c201f1987d4768acca1fd7ca9ca5dff2c5779f`. Its exact no-SDK public fixture
+preflight passed and rebuilt the test executable. Corrected-fixture verification
+has started outside the sandbox; `mac-03/launch-started.json` records its process
+and time. Consumption is now **Mac 5 started / 0 reserved**, Windows
+**1 started / 0 reserved**. The outcome is pending and the start remains charged.
+
+### 2026-11-09: corrected #94 Mac proof complete, merger handoff
+
+The corrected fixture passed at exact candidate
+`d1c201f1987d4768acca1fd7ca9ca5dff2c5779f`. The completed #94 branch is clean at
+evidence commit `b31929f6b09158aa9d90fedfedadcf83c82493a1`. Its canonical note
+`docs/tasks/evidence/arithmetic-94.md` owns the full contract and three attempts.
+Compile/lint, exact integer/decimal values and types, bound text/sample checks,
+deliberate wrong-outcome rejection and SDK/desktop cleanup passed. The coordinator
+audited all four case records, all 208 unchanged inputs, retained binary and
+accepted-source hashes. Ignored `mac-03/audit.json` records that audit. The two
+failed attempts retain their original statuses and raw evidence.
+
+Production code is unchanged by the selector correction. Reuse the implementer's
+144 Rust public/unit cases and 31 renderer cases on their scoped inputs; the
+successful SDK gate adds one distinct passing case. The repeated no-SDK preflight
+does not add another case. Consumption remains **Mac 5/6 started, Windows 1/6
+started, no reservations**. One Mac and five Windows starts remain unallocated.
+
+A fresh merger receives exclusive integration mutation ownership from this
+coordinator checkpoint. It will merge the returned branch normally, verify
+qualified input equivalence, retain approved design/#92 fixtures, record the
+caption-selector prevention lesson and publish to draft PR #122. It starts no SDK,
+package/native or manual CI operation. After that handoff returns, route one
+combined #93/#94 Windows qualification before #95 or #96 starts. No successor
+implementation or further SDK invocation is selected by this merger handoff.
