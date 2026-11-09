@@ -3,7 +3,7 @@ import type { StyleCatalog } from "./screen-text.ts";
 export interface ScreenTargetBinding { screenId: string; sourceName: string }
 export interface AuthoringRevisionChange { before: string; after: string }
 // Integer values use canonical decimal strings, as in existing Story authoring.
-export type ScreenVariableValue = boolean | string;
+export type ScreenVariableValue = boolean | number | string;
 export type ScreenAction =
   | { type: "setVariable"; variableId: string; value: ScreenVariableValue }
   | { type: "showScreen"; target: ScreenTargetBinding }

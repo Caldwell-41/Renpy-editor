@@ -346,16 +346,29 @@ Undo/Redo and reopen reconstruct definitions and references from authoritative b
 
 ## Variables and state
 
-Visual variables support `bool`, `int`, and `string` definitions and literal
-assignment. Story also supports bounded whole-number formulas. Set variable keeps
+Visual variables support `bool`, `int`, `decimal` and `string` definitions and literal
+assignment. Existing types stay fixed after creation. Decimal defaults and values use
+finite binary64 JSON numbers; integer values retain exact signed i64 strings. Story
+also supports bounded numeric formulas. Set variable keeps
 `variableId` and `value`; arithmetic uses `{operation, operand}` in `value`.
-Operations are `assign`, `add`, `subtract`, `multiply`, `floorDivide` and `remainder`.
-The operand is source text containing integer literals, declared integer variables,
-signs, parentheses and `+`, `-`, `*`, `//`, `%` with Python precedence. Integers and
-known results cross JSON as signed i64 decimal strings. Bool/string literal
-assignments retain their existing contract. Ordinary division and decimals are
-outside this slice. Functions, powers, attribute/index access and Python execution
+Operations are `assign`, `add`, `subtract`, `multiply`, `divide`, `floorDivide` and
+`remainder`. The operand is source text containing numeric literals, declared numeric
+variables, signs, parentheses and `+`, `-`, `*`, `/`, `//`, `%` with Python precedence.
+Ordinary division always infers decimal; floor/remainder keep integer type only with
+integer operands. Integer targets refuse decimal results. For a decimal target,
+commands emit an integer-result assignment as `(<formula>) + 0.0`, so Ren'Py stores
+a float too. This source expression uses the same bounded parser. Bool/string literal
+assignments retain their existing contract. Functions, powers, attribute/index access and Python execution
 remain unsupported.
+
+`scene.validateAssignment` accepts the same revision-bound Set variable formula
+command as `scene.apply` and checks the same admission without committing source or
+history. Its typed response reports target/input, supported/refused state, inferred
+result type, reads/writes, field diagnostics, unknown reasons, variable choices with
+definition revisions, numeric capabilities and project/map/authoring/Scene revisions.
+Draft values are constant-folded only; variable-dependent current state remains
+explicitly unobserved. The [#94 evidence](tasks/evidence/arithmetic-94.md) records exact
+transport fixtures. No renderer parser is required.
 
 `scene.list` exposes the authoring revision and declared variable choices.
 Arithmetic mutations require `expectedAuthoringRevision` plus the existing project,
@@ -377,8 +390,9 @@ retaining source style, spacing, comments and IDs. Source-map schema 8 is unchan
 An exact-byte/range match permits an old Custom Code formula mapping to retain its
 ID without rewriting metadata on open. Existing schema migration can refine it.
 Invalid formulas remain protected and expose assignment diagnostics. The
-[#93 contract and fixtures](tasks/evidence/arithmetic-93.md) own current shapes,
-qualification and target limits; [#92 evidence](tasks/evidence/arithmetic-92.md)
+[#94 contract and fixtures](tasks/evidence/arithmetic-94.md) own current shapes,
+qualification and target limits; [#93 evidence](tasks/evidence/arithmetic-93.md)
+retains integer-formula qualification and [#92 evidence](tasks/evidence/arithmetic-92.md)
 retains the preceding simple-adjustment and both-target proof.
 
 Phase 1D Variables store UUID, immutable lowercase technical name, supported type,
@@ -599,8 +613,10 @@ without overlapping source ranges. Old-map validation precedes richer recognitio
 unchanged range/hash UUIDs and extras survive metadata-only migration. Exact source
 verification remains mandatory, and newer schemas are refused.
 
-The condition model supports bool/int/string values, same-type equality/inequality,
-integer ordering and bounded boolean combinations. Integers remain canonical signed
+The condition model supports bool/int/decimal/string values, numeric ordering and
+equality across integer/decimal operands, same-type bool/string equality, and bounded
+boolean combinations. Mixed comparisons retain exact integer precision; they do not
+round the integer to binary64 before comparison. Integers remain canonical signed
 64-bit decimal strings across JSON. Unknown/missing/type-invalid expressions remain
 unknown, never false or evidence of unreachable branches. The core projection does
 not execute Python or infer a route from default values. The first local slice supplied
@@ -751,8 +767,9 @@ to effects and freshness.
 Core resolves typed defaults or explicit editor-only samples once per variable
 into literal text with Ren'Py's quote conversion, keeping helper substitution
 disabled. A sample captures the variable definition's source revision. Integer
-samples use canonical signed-64 decimal strings, booleans use real JSON booleans
-and strings remain literal. Brackets in sample values stay literal, and braces
+samples use canonical signed-64 decimal strings, decimal samples use finite JSON
+numbers, booleans use real JSON booleans and strings remain literal. Decimal resolved
+text follows Python float spelling, including signed zero and scientific notation. Brackets in sample values stay literal, and braces
 cannot introduce text tags. Samples never alter source or runtime state.
 
 Canvas button state is an explicit editor sample: normal, hover, selected,

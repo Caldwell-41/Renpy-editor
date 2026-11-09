@@ -1,0 +1,956 @@
+{
+  "draftSuccess": {
+    "request": {
+      "protocolVersion": 1,
+      "requestId": "arithmetic-94-example",
+      "operation": "scene.validateAssignment",
+      "payload": {
+        "sessionId": "<current-session>",
+        "command": {
+          "beat": {
+            "type": "setVariable",
+            "value": {
+              "operand": "4 / 2",
+              "operation": "assign"
+            },
+            "variableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da"
+          },
+          "beforeBeatId": null,
+          "expectedSourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+          "sceneId": "6cf87759-43ce-49fc-a001-4238be9e92c1",
+          "type": "insertBeat"
+        },
+        "expectedAuthoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
+        "expectedProjectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",
+        "expectedSourceMapRevision": "fd9681b30601e9cb35e9b38d237d43a5b743aef53c0375ea75dd197ebe4347da"
+      }
+    },
+    "response": {
+      "protocolVersion": 1,
+      "requestId": "arithmetic-94-example",
+      "ok": true,
+      "value": {
+        "assignment": {
+          "diagnostics": [],
+          "inferredResultType": "decimal",
+          "readVariables": [],
+          "reads": [],
+          "state": {
+            "status": "known",
+            "value": 2.0
+          },
+          "writes": [
+            "16ea66dc-425f-446a-9db2-51f38c3ee5da"
+          ]
+        },
+        "authoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
+        "capabilities": {
+          "decimalTransport": "finiteFloat64",
+          "functions": false,
+          "integerTransport": "signedI64String",
+          "maxBytes": 4096,
+          "maxDepth": 16,
+          "maxNodes": 128,
+          "operations": [
+            "assign",
+            "add",
+            "subtract",
+            "multiply",
+            "divide",
+            "floorDivide",
+            "remainder"
+          ],
+          "operators": [
+            "+",
+            "-",
+            "*",
+            "/",
+            "//",
+            "%"
+          ]
+        },
+        "projectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",
+        "sourceMapRevision": "fd9681b30601e9cb35e9b38d237d43a5b743aef53c0375ea75dd197ebe4347da",
+        "sourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+        "support": "supported",
+        "targetVariableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da",
+        "value": {
+          "operand": "4 / 2",
+          "operation": "assign"
+        },
+        "variables": [
+          {
+            "defaultValue": true,
+            "id": "9566891a-6de8-4f03-8495-6bc4eaa40a63",
+            "source": {
+              "path": "game/definitions/variables.rpy",
+              "sourceRevision": "2b2bef2cb13e241a57cfa6af2b8e09ce09a36625a675ce377ca089d17385d48e",
+              "statement": "default flag = True"
+            },
+            "technicalName": "flag",
+            "variableType": "bool"
+          },
+          {
+            "defaultValue": 1.25,
+            "id": "16ea66dc-425f-446a-9db2-51f38c3ee5da",
+            "source": {
+              "path": "game/definitions/variables.rpy",
+              "sourceRevision": "2b2bef2cb13e241a57cfa6af2b8e09ce09a36625a675ce377ca089d17385d48e",
+              "statement": "default fraction = 1.25"
+            },
+            "technicalName": "fraction",
+            "variableType": "decimal"
+          }
+        ]
+      }
+    }
+  },
+  "draftRefusal": {
+    "protocolVersion": 1,
+    "requestId": "arithmetic-94-example",
+    "ok": true,
+    "value": {
+      "assignment": {
+        "diagnostics": [
+          {
+            "field": "value.operand",
+            "reason": "zeroDivisor"
+          }
+        ],
+        "inferredResultType": "decimal",
+        "readVariables": [],
+        "reads": [],
+        "state": {
+          "reason": "zeroDivisor",
+          "status": "unknown"
+        },
+        "writes": [
+          "16ea66dc-425f-446a-9db2-51f38c3ee5da"
+        ]
+      },
+      "authoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
+      "capabilities": {
+        "decimalTransport": "finiteFloat64",
+        "functions": false,
+        "integerTransport": "signedI64String",
+        "maxBytes": 4096,
+        "maxDepth": 16,
+        "maxNodes": 128,
+        "operations": [
+          "assign",
+          "add",
+          "subtract",
+          "multiply",
+          "divide",
+          "floorDivide",
+          "remainder"
+        ],
+        "operators": [
+          "+",
+          "-",
+          "*",
+          "/",
+          "//",
+          "%"
+        ]
+      },
+      "projectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",
+      "sourceMapRevision": "fd9681b30601e9cb35e9b38d237d43a5b743aef53c0375ea75dd197ebe4347da",
+      "sourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+      "support": "refused",
+      "targetVariableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da",
+      "value": {
+        "operand": "1 / 0",
+        "operation": "assign"
+      },
+      "variables": [
+        {
+          "defaultValue": true,
+          "id": "9566891a-6de8-4f03-8495-6bc4eaa40a63",
+          "source": {
+            "path": "game/definitions/variables.rpy",
+            "sourceRevision": "2b2bef2cb13e241a57cfa6af2b8e09ce09a36625a675ce377ca089d17385d48e",
+            "statement": "default flag = True"
+          },
+          "technicalName": "flag",
+          "variableType": "bool"
+        },
+        {
+          "defaultValue": 1.25,
+          "id": "16ea66dc-425f-446a-9db2-51f38c3ee5da",
+          "source": {
+            "path": "game/definitions/variables.rpy",
+            "sourceRevision": "2b2bef2cb13e241a57cfa6af2b8e09ce09a36625a675ce377ca089d17385d48e",
+            "statement": "default fraction = 1.25"
+          },
+          "technicalName": "fraction",
+          "variableType": "decimal"
+        }
+      ]
+    }
+  },
+  "draftFixtures": [
+    {
+      "request": {
+        "protocolVersion": 1,
+        "requestId": "arithmetic-94-example",
+        "operation": "scene.validateAssignment",
+        "payload": {
+          "sessionId": "<current-session>",
+          "command": {
+            "beat": {
+              "type": "setVariable",
+              "value": {
+                "operand": "fraction + 1",
+                "operation": "assign"
+              },
+              "variableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da"
+            },
+            "beforeBeatId": null,
+            "expectedSourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+            "sceneId": "6cf87759-43ce-49fc-a001-4238be9e92c1",
+            "type": "insertBeat"
+          },
+          "expectedAuthoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
+          "expectedProjectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",
+          "expectedSourceMapRevision": "fd9681b30601e9cb35e9b38d237d43a5b743aef53c0375ea75dd197ebe4347da"
+        }
+      },
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "arithmetic-94-example",
+        "ok": true,
+        "value": {
+          "assignment": {
+            "diagnostics": [
+              {
+                "field": "value.operand",
+                "reason": "unobservedCurrentValue"
+              }
+            ],
+            "inferredResultType": "decimal",
+            "readVariables": [
+              {
+                "technicalName": "fraction",
+                "variableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da",
+                "variableType": "decimal"
+              }
+            ],
+            "reads": [
+              "16ea66dc-425f-446a-9db2-51f38c3ee5da"
+            ],
+            "state": {
+              "reason": "unobservedCurrentValue",
+              "status": "unknown"
+            },
+            "writes": [
+              "16ea66dc-425f-446a-9db2-51f38c3ee5da"
+            ]
+          },
+          "authoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
+          "capabilities": {
+            "decimalTransport": "finiteFloat64",
+            "functions": false,
+            "integerTransport": "signedI64String",
+            "maxBytes": 4096,
+            "maxDepth": 16,
+            "maxNodes": 128,
+            "operations": [
+              "assign",
+              "add",
+              "subtract",
+              "multiply",
+              "divide",
+              "floorDivide",
+              "remainder"
+            ],
+            "operators": [
+              "+",
+              "-",
+              "*",
+              "/",
+              "//",
+              "%"
+            ]
+          },
+          "projectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",
+          "sourceMapRevision": "fd9681b30601e9cb35e9b38d237d43a5b743aef53c0375ea75dd197ebe4347da",
+          "sourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+          "support": "supported",
+          "targetVariableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da",
+          "value": {
+            "operand": "fraction + 1",
+            "operation": "assign"
+          },
+          "variables": [
+            {
+              "defaultValue": true,
+              "id": "9566891a-6de8-4f03-8495-6bc4eaa40a63",
+              "source": {
+                "path": "game/definitions/variables.rpy",
+                "sourceRevision": "2b2bef2cb13e241a57cfa6af2b8e09ce09a36625a675ce377ca089d17385d48e",
+                "statement": "default flag = True"
+              },
+              "technicalName": "flag",
+              "variableType": "bool"
+            },
+            {
+              "defaultValue": 1.25,
+              "id": "16ea66dc-425f-446a-9db2-51f38c3ee5da",
+              "source": {
+                "path": "game/definitions/variables.rpy",
+                "sourceRevision": "2b2bef2cb13e241a57cfa6af2b8e09ce09a36625a675ce377ca089d17385d48e",
+                "statement": "default fraction = 1.25"
+              },
+              "technicalName": "fraction",
+              "variableType": "decimal"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "protocolVersion": 1,
+        "requestId": "arithmetic-94-example",
+        "operation": "scene.validateAssignment",
+        "payload": {
+          "sessionId": "<current-session>",
+          "command": {
+            "beat": {
+              "type": "setVariable",
+              "value": {
+                "operand": "missing + 1",
+                "operation": "assign"
+              },
+              "variableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da"
+            },
+            "beforeBeatId": null,
+            "expectedSourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+            "sceneId": "6cf87759-43ce-49fc-a001-4238be9e92c1",
+            "type": "insertBeat"
+          },
+          "expectedAuthoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
+          "expectedProjectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",
+          "expectedSourceMapRevision": "fd9681b30601e9cb35e9b38d237d43a5b743aef53c0375ea75dd197ebe4347da"
+        }
+      },
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "arithmetic-94-example",
+        "ok": true,
+        "value": {
+          "assignment": {
+            "diagnostics": [
+              {
+                "field": "value.operand",
+                "reason": "missingVariable"
+              }
+            ],
+            "inferredResultType": null,
+            "readVariables": [],
+            "reads": [],
+            "state": {
+              "reason": "missingVariable",
+              "status": "unknown"
+            },
+            "writes": [
+              "16ea66dc-425f-446a-9db2-51f38c3ee5da"
+            ]
+          },
+          "authoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
+          "capabilities": {
+            "decimalTransport": "finiteFloat64",
+            "functions": false,
+            "integerTransport": "signedI64String",
+            "maxBytes": 4096,
+            "maxDepth": 16,
+            "maxNodes": 128,
+            "operations": [
+              "assign",
+              "add",
+              "subtract",
+              "multiply",
+              "divide",
+              "floorDivide",
+              "remainder"
+            ],
+            "operators": [
+              "+",
+              "-",
+              "*",
+              "/",
+              "//",
+              "%"
+            ]
+          },
+          "projectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",
+          "sourceMapRevision": "fd9681b30601e9cb35e9b38d237d43a5b743aef53c0375ea75dd197ebe4347da",
+          "sourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+          "support": "refused",
+          "targetVariableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da",
+          "value": {
+            "operand": "missing + 1",
+            "operation": "assign"
+          },
+          "variables": [
+            {
+              "defaultValue": true,
+              "id": "9566891a-6de8-4f03-8495-6bc4eaa40a63",
+              "source": {
+                "path": "game/definitions/variables.rpy",
+                "sourceRevision": "2b2bef2cb13e241a57cfa6af2b8e09ce09a36625a675ce377ca089d17385d48e",
+                "statement": "default flag = True"
+              },
+              "technicalName": "flag",
+              "variableType": "bool"
+            },
+            {
+              "defaultValue": 1.25,
+              "id": "16ea66dc-425f-446a-9db2-51f38c3ee5da",
+              "source": {
+                "path": "game/definitions/variables.rpy",
+                "sourceRevision": "2b2bef2cb13e241a57cfa6af2b8e09ce09a36625a675ce377ca089d17385d48e",
+                "statement": "default fraction = 1.25"
+              },
+              "technicalName": "fraction",
+              "variableType": "decimal"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "protocolVersion": 1,
+        "requestId": "arithmetic-94-example",
+        "operation": "scene.validateAssignment",
+        "payload": {
+          "sessionId": "<current-session>",
+          "command": {
+            "beat": {
+              "type": "setVariable",
+              "value": {
+                "operand": "flag + 1",
+                "operation": "assign"
+              },
+              "variableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da"
+            },
+            "beforeBeatId": null,
+            "expectedSourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+            "sceneId": "6cf87759-43ce-49fc-a001-4238be9e92c1",
+            "type": "insertBeat"
+          },
+          "expectedAuthoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
+          "expectedProjectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",
+          "expectedSourceMapRevision": "fd9681b30601e9cb35e9b38d237d43a5b743aef53c0375ea75dd197ebe4347da"
+        }
+      },
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "arithmetic-94-example",
+        "ok": true,
+        "value": {
+          "assignment": {
+            "diagnostics": [
+              {
+                "field": "value.operand",
+                "reason": "incompatibleOperand"
+              }
+            ],
+            "inferredResultType": null,
+            "readVariables": [],
+            "reads": [],
+            "state": {
+              "reason": "incompatibleOperand",
+              "status": "unknown"
+            },
+            "writes": [
+              "16ea66dc-425f-446a-9db2-51f38c3ee5da"
+            ]
+          },
+          "authoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
+          "capabilities": {
+            "decimalTransport": "finiteFloat64",
+            "functions": false,
+            "integerTransport": "signedI64String",
+            "maxBytes": 4096,
+            "maxDepth": 16,
+            "maxNodes": 128,
+            "operations": [
+              "assign",
+              "add",
+              "subtract",
+              "multiply",
+              "divide",
+              "floorDivide",
+              "remainder"
+            ],
+            "operators": [
+              "+",
+              "-",
+              "*",
+              "/",
+              "//",
+              "%"
+            ]
+          },
+          "projectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",
+          "sourceMapRevision": "fd9681b30601e9cb35e9b38d237d43a5b743aef53c0375ea75dd197ebe4347da",
+          "sourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+          "support": "refused",
+          "targetVariableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da",
+          "value": {
+            "operand": "flag + 1",
+            "operation": "assign"
+          },
+          "variables": [
+            {
+              "defaultValue": true,
+              "id": "9566891a-6de8-4f03-8495-6bc4eaa40a63",
+              "source": {
+                "path": "game/definitions/variables.rpy",
+                "sourceRevision": "2b2bef2cb13e241a57cfa6af2b8e09ce09a36625a675ce377ca089d17385d48e",
+                "statement": "default flag = True"
+              },
+              "technicalName": "flag",
+              "variableType": "bool"
+            },
+            {
+              "defaultValue": 1.25,
+              "id": "16ea66dc-425f-446a-9db2-51f38c3ee5da",
+              "source": {
+                "path": "game/definitions/variables.rpy",
+                "sourceRevision": "2b2bef2cb13e241a57cfa6af2b8e09ce09a36625a675ce377ca089d17385d48e",
+                "statement": "default fraction = 1.25"
+              },
+              "technicalName": "fraction",
+              "variableType": "decimal"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "protocolVersion": 1,
+        "requestId": "arithmetic-94-example",
+        "operation": "scene.validateAssignment",
+        "payload": {
+          "sessionId": "<current-session>",
+          "command": {
+            "beat": {
+              "type": "setVariable",
+              "value": {
+                "operand": "1 +",
+                "operation": "assign"
+              },
+              "variableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da"
+            },
+            "beforeBeatId": null,
+            "expectedSourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+            "sceneId": "6cf87759-43ce-49fc-a001-4238be9e92c1",
+            "type": "insertBeat"
+          },
+          "expectedAuthoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
+          "expectedProjectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",
+          "expectedSourceMapRevision": "fd9681b30601e9cb35e9b38d237d43a5b743aef53c0375ea75dd197ebe4347da"
+        }
+      },
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "arithmetic-94-example",
+        "ok": true,
+        "value": {
+          "assignment": {
+            "diagnostics": [
+              {
+                "field": "value.operand",
+                "reason": "invalidSyntax"
+              }
+            ],
+            "inferredResultType": null,
+            "readVariables": [],
+            "reads": [],
+            "state": {
+              "reason": "invalidSyntax",
+              "status": "unknown"
+            },
+            "writes": [
+              "16ea66dc-425f-446a-9db2-51f38c3ee5da"
+            ]
+          },
+          "authoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
+          "capabilities": {
+            "decimalTransport": "finiteFloat64",
+            "functions": false,
+            "integerTransport": "signedI64String",
+            "maxBytes": 4096,
+            "maxDepth": 16,
+            "maxNodes": 128,
+            "operations": [
+              "assign",
+              "add",
+              "subtract",
+              "multiply",
+              "divide",
+              "floorDivide",
+              "remainder"
+            ],
+            "operators": [
+              "+",
+              "-",
+              "*",
+              "/",
+              "//",
+              "%"
+            ]
+          },
+          "projectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",
+          "sourceMapRevision": "fd9681b30601e9cb35e9b38d237d43a5b743aef53c0375ea75dd197ebe4347da",
+          "sourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+          "support": "refused",
+          "targetVariableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da",
+          "value": {
+            "operand": "1 +",
+            "operation": "assign"
+          },
+          "variables": [
+            {
+              "defaultValue": true,
+              "id": "9566891a-6de8-4f03-8495-6bc4eaa40a63",
+              "source": {
+                "path": "game/definitions/variables.rpy",
+                "sourceRevision": "2b2bef2cb13e241a57cfa6af2b8e09ce09a36625a675ce377ca089d17385d48e",
+                "statement": "default flag = True"
+              },
+              "technicalName": "flag",
+              "variableType": "bool"
+            },
+            {
+              "defaultValue": 1.25,
+              "id": "16ea66dc-425f-446a-9db2-51f38c3ee5da",
+              "source": {
+                "path": "game/definitions/variables.rpy",
+                "sourceRevision": "2b2bef2cb13e241a57cfa6af2b8e09ce09a36625a675ce377ca089d17385d48e",
+                "statement": "default fraction = 1.25"
+              },
+              "technicalName": "fraction",
+              "variableType": "decimal"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "protocolVersion": 1,
+        "requestId": "arithmetic-94-example",
+        "operation": "scene.validateAssignment",
+        "payload": {
+          "sessionId": "<current-session>",
+          "command": {
+            "beat": {
+              "type": "setVariable",
+              "value": {
+                "operand": "9223372036854775807 + 1",
+                "operation": "assign"
+              },
+              "variableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da"
+            },
+            "beforeBeatId": null,
+            "expectedSourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+            "sceneId": "6cf87759-43ce-49fc-a001-4238be9e92c1",
+            "type": "insertBeat"
+          },
+          "expectedAuthoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
+          "expectedProjectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",
+          "expectedSourceMapRevision": "fd9681b30601e9cb35e9b38d237d43a5b743aef53c0375ea75dd197ebe4347da"
+        }
+      },
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "arithmetic-94-example",
+        "ok": true,
+        "value": {
+          "assignment": {
+            "diagnostics": [
+              {
+                "field": "value.operand",
+                "reason": "integerOverflow"
+              }
+            ],
+            "inferredResultType": "int",
+            "readVariables": [],
+            "reads": [],
+            "state": {
+              "reason": "integerOverflow",
+              "status": "unknown"
+            },
+            "writes": [
+              "16ea66dc-425f-446a-9db2-51f38c3ee5da"
+            ]
+          },
+          "authoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
+          "capabilities": {
+            "decimalTransport": "finiteFloat64",
+            "functions": false,
+            "integerTransport": "signedI64String",
+            "maxBytes": 4096,
+            "maxDepth": 16,
+            "maxNodes": 128,
+            "operations": [
+              "assign",
+              "add",
+              "subtract",
+              "multiply",
+              "divide",
+              "floorDivide",
+              "remainder"
+            ],
+            "operators": [
+              "+",
+              "-",
+              "*",
+              "/",
+              "//",
+              "%"
+            ]
+          },
+          "projectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",
+          "sourceMapRevision": "fd9681b30601e9cb35e9b38d237d43a5b743aef53c0375ea75dd197ebe4347da",
+          "sourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+          "support": "refused",
+          "targetVariableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da",
+          "value": {
+            "operand": "9223372036854775807 + 1",
+            "operation": "assign"
+          },
+          "variables": [
+            {
+              "defaultValue": true,
+              "id": "9566891a-6de8-4f03-8495-6bc4eaa40a63",
+              "source": {
+                "path": "game/definitions/variables.rpy",
+                "sourceRevision": "2b2bef2cb13e241a57cfa6af2b8e09ce09a36625a675ce377ca089d17385d48e",
+                "statement": "default flag = True"
+              },
+              "technicalName": "flag",
+              "variableType": "bool"
+            },
+            {
+              "defaultValue": 1.25,
+              "id": "16ea66dc-425f-446a-9db2-51f38c3ee5da",
+              "source": {
+                "path": "game/definitions/variables.rpy",
+                "sourceRevision": "2b2bef2cb13e241a57cfa6af2b8e09ce09a36625a675ce377ca089d17385d48e",
+                "statement": "default fraction = 1.25"
+              },
+              "technicalName": "fraction",
+              "variableType": "decimal"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "protocolVersion": 1,
+        "requestId": "arithmetic-94-example",
+        "operation": "scene.validateAssignment",
+        "payload": {
+          "sessionId": "<current-session>",
+          "command": {
+            "beat": {
+              "type": "setVariable",
+              "value": {
+                "operand": "1e308 * 2",
+                "operation": "assign"
+              },
+              "variableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da"
+            },
+            "beforeBeatId": null,
+            "expectedSourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+            "sceneId": "6cf87759-43ce-49fc-a001-4238be9e92c1",
+            "type": "insertBeat"
+          },
+          "expectedAuthoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
+          "expectedProjectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",
+          "expectedSourceMapRevision": "fd9681b30601e9cb35e9b38d237d43a5b743aef53c0375ea75dd197ebe4347da"
+        }
+      },
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "arithmetic-94-example",
+        "ok": true,
+        "value": {
+          "assignment": {
+            "diagnostics": [
+              {
+                "field": "value.operand",
+                "reason": "nonFiniteResult"
+              }
+            ],
+            "inferredResultType": "decimal",
+            "readVariables": [],
+            "reads": [],
+            "state": {
+              "reason": "nonFiniteResult",
+              "status": "unknown"
+            },
+            "writes": [
+              "16ea66dc-425f-446a-9db2-51f38c3ee5da"
+            ]
+          },
+          "authoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
+          "capabilities": {
+            "decimalTransport": "finiteFloat64",
+            "functions": false,
+            "integerTransport": "signedI64String",
+            "maxBytes": 4096,
+            "maxDepth": 16,
+            "maxNodes": 128,
+            "operations": [
+              "assign",
+              "add",
+              "subtract",
+              "multiply",
+              "divide",
+              "floorDivide",
+              "remainder"
+            ],
+            "operators": [
+              "+",
+              "-",
+              "*",
+              "/",
+              "//",
+              "%"
+            ]
+          },
+          "projectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",
+          "sourceMapRevision": "fd9681b30601e9cb35e9b38d237d43a5b743aef53c0375ea75dd197ebe4347da",
+          "sourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+          "support": "refused",
+          "targetVariableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da",
+          "value": {
+            "operand": "1e308 * 2",
+            "operation": "assign"
+          },
+          "variables": [
+            {
+              "defaultValue": true,
+              "id": "9566891a-6de8-4f03-8495-6bc4eaa40a63",
+              "source": {
+                "path": "game/definitions/variables.rpy",
+                "sourceRevision": "2b2bef2cb13e241a57cfa6af2b8e09ce09a36625a675ce377ca089d17385d48e",
+                "statement": "default flag = True"
+              },
+              "technicalName": "flag",
+              "variableType": "bool"
+            },
+            {
+              "defaultValue": 1.25,
+              "id": "16ea66dc-425f-446a-9db2-51f38c3ee5da",
+              "source": {
+                "path": "game/definitions/variables.rpy",
+                "sourceRevision": "2b2bef2cb13e241a57cfa6af2b8e09ce09a36625a675ce377ca089d17385d48e",
+                "statement": "default fraction = 1.25"
+              },
+              "technicalName": "fraction",
+              "variableType": "decimal"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "screenSamples": {
+    "defaultPlan": {
+      "available": true,
+      "buttonState": "normal",
+      "height": 720,
+      "limits": [],
+      "nodes": [
+        {
+          "kind": "screen",
+          "literal": null,
+          "parent": null,
+          "properties": {},
+          "start": 57
+        },
+        {
+          "kind": "text",
+          "literal": "Fraction 2.5",
+          "parent": 57,
+          "properties": {},
+          "start": 100
+        }
+      ],
+      "revision": "202e1c26e47711f62d338a82294fd332ac59e78c3fad997f2842eee32e322477",
+      "width": 1280
+    },
+    "plan": {
+      "available": true,
+      "buttonState": "normal",
+      "height": 720,
+      "limits": [],
+      "nodes": [
+        {
+          "kind": "screen",
+          "literal": null,
+          "parent": null,
+          "properties": {},
+          "start": 57
+        },
+        {
+          "kind": "text",
+          "literal": "Fraction 1e-07",
+          "parent": 57,
+          "properties": {},
+          "start": 100
+        }
+      ],
+      "revision": "202e1c26e47711f62d338a82294fd332ac59e78c3fad997f2842eee32e322477",
+      "width": 1280
+    },
+    "request": {
+      "expectedRevision": "202e1c26e47711f62d338a82294fd332ac59e78c3fad997f2842eee32e322477",
+      "height": 720,
+      "path": "game/ui/arithmetic_decimal_text.rpy",
+      "screenName": "arithmetic_decimal_text",
+      "variableSamples": [
+        {
+          "expectedSourceRevision": "3388f458ef86fd6aa216cd1cce0e5a59f0b06313cfb0c7335f077f69535ce574",
+          "value": 1e-07,
+          "variableId": "fa33d5a8-5bfa-41c6-80dc-6d8e0cd9fbb7"
+        }
+      ],
+      "width": 1280
+    }
+  },
+  "variableRequests": [
+    {
+      "protocolVersion": 1,
+      "requestId": "arithmetic-94-example",
+      "operation": "variable.create",
+      "payload": {
+        "sessionId": "<current-session>",
+        "technicalName": "fraction",
+        "variableType": "decimal",
+        "defaultValue": 1.25
+      }
+    },
+    {
+      "protocolVersion": 1,
+      "requestId": "arithmetic-94-example",
+      "operation": "variable.update",
+      "payload": {
+        "sessionId": "<current-session>",
+        "id": "<fraction UUID>",
+        "expectedSourceRevision": "<definition revision>",
+        "defaultValue": 2.5
+      }
+    }
+  ]
+}

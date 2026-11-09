@@ -1,7 +1,7 @@
 import type { OwnedScreen, ResolvedScreenTarget, ScreenAction, ScreenRevisions, ScreenTargetBinding, ScreenVariableValue } from "./screen-contracts.ts";
 
 export interface ScreenVariable {
-  id:string; technicalName:string; variableType:"bool"|"int"|"string"; defaultValue:ScreenVariableValue;
+  id:string; technicalName:string; variableType:"bool"|"int"|"decimal"|"string"; defaultValue:ScreenVariableValue;
   source:{sourceRevision:string};
 }
 export interface InteractionContext {
@@ -24,7 +24,7 @@ export function variableValue(variable:ScreenVariable,raw:string):ScreenVariable
   return raw;
 }
 export const variableLabel=(variable:ScreenVariable)=>variable.technicalName.replaceAll("_"," ").replace(/^./,letter=>letter.toUpperCase());
-export const variableRaw=(value:ScreenVariableValue)=>typeof value==="boolean"?value?"True":"False":value;
+export const variableRaw=(value:ScreenVariableValue)=>typeof value==="boolean"?value?"True":"False":String(value);
 export function actionSummary(row:ActionDraft["rows"][number],variables:readonly ScreenVariable[]):string {
  const variable=variables.find(v=>v.id===row.variableId);
  return row.type==="setVariable"?`Set ${variable?variableLabel(variable):"missing variable"} to ${row.value}`:row.type==="finishInteraction"?"Finish interaction":`${row.type==="showScreen"?"Show":"Hide"} ${row.target.sourceName||"missing screen"}`;

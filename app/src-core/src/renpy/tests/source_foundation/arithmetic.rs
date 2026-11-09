@@ -1,7 +1,48 @@
 //! Command-produced arithmetic fixtures using the existing SDK owner.
 use super::*;
 
-fn author(service: &mut LifecycleService, root: &Path, formulas: bool) -> (String, Vec<u8>) {
+fn author(
+    service: &mut LifecycleService,
+    root: &Path,
+    formulas: bool,
+    decimal: bool,
+) -> (String, Vec<u8>) {
+    if decimal {
+        for name in [
+            "fraction",
+            "quotient",
+            "floorfloat",
+            "remfloat",
+            "widened",
+            "mixed",
+            "signedzero",
+            "subnormal",
+        ] {
+            ipc(
+                service,
+                "variable.create",
+                json!({"technicalName":name,"variableType":"decimal","defaultValue":1.25}),
+            );
+        }
+        let model = ipc(service, "authoring.list", json!({}));
+        let fraction = model["variables"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|v| v["technicalName"] == "fraction")
+            .unwrap();
+        ipc(
+            service,
+            "variable.update",
+            json!({"id":fraction["id"],"expectedSourceRevision":fraction["source"]["sourceRevision"],"defaultValue":2.5}),
+        );
+        ipc(
+            service,
+            "variable.create",
+            json!({"technicalName":"numeric_branch","variableType":"bool","defaultValue":false}),
+        );
+        decimal_screen(service, root);
+    }
     for name in if formulas {
         vec!["score", "money", "bonus", "remainder", "minimum"]
     } else {
@@ -15,7 +56,9 @@ fn author(service: &mut LifecycleService, root: &Path, formulas: bool) -> (Strin
     }
     let model = ipc(service, "scene.list", json!({}));
     let scene = &model["scenes"][0];
-    let source = if formulas {
+    let source = if decimal {
+        include_str!("../../../../../../tests/fixtures/arithmetic-94/story.rpy")
+    } else if formulas {
         include_str!("../../../../../../tests/fixtures/arithmetic-93/story.rpy")
     } else {
         include_str!("../../../../../../tests/fixtures/arithmetic-92/story.rpy")
@@ -37,7 +80,7 @@ fn author(service: &mut LifecycleService, root: &Path, formulas: bool) -> (Strin
         json!({"path":path,"expectedBaseRevision":draft["baseRevision"],"expectedDraftVersion":draft["draftVersion"]}),
     );
     let mut requests = Vec::new();
-    let edits = if formulas {
+    let mut edits = if formulas {
         vec![
             ("score", "multiply", "bonus + 1", Some(2)),
             ("score", "assign", "score + (bonus + 2) * 4", Some(3)),
@@ -50,6 +93,17 @@ fn author(service: &mut LifecycleService, root: &Path, formulas: bool) -> (Strin
             ("money", "subtract", "3", None),
         ]
     };
+    if decimal {
+        edits.extend([
+            ("quotient", "assign", "9007199254740993 / 3", None),
+            ("floorfloat", "assign", "1.0 // 0.1", None),
+            ("remfloat", "assign", "-1.0 % 0.1", None),
+            ("widened", "assign", "7 // -3", None),
+            ("mixed", "assign", "9007199254740993 + 0.0", None),
+            ("signedzero", "assign", "0 / -3", None),
+            ("subnormal", "assign", "5e-324", None),
+        ]);
+    }
     for (target, operation, operand, update) in edits {
         let model = ipc(service, "scene.list", json!({}));
         let scene = &model["scenes"][0];
@@ -97,6 +151,9 @@ fn author(service: &mut LifecycleService, root: &Path, formulas: bool) -> (Strin
             .contains("$ score += +2 # compound stays byte-identical"));
     }
     let after = ipc(service, "scene.list", json!({}));
+    if decimal {
+        inspect_decimal_fixture(&after);
+    }
     ipc(
         service,
         "scene.apply",
@@ -128,19 +185,19 @@ fn author(service: &mut LifecycleService, root: &Path, formulas: bool) -> (Strin
 
 #[test]
 fn arithmetic_fixture_preflight() {
-    preflight(false);
+    preflight(false, false);
 }
 #[test]
 fn formula_fixture_preflight() {
-    preflight(true);
+    preflight(true, false);
 }
-fn preflight(formulas: bool) {
+fn preflight(formulas: bool, decimal: bool) {
     let temp = tempfile::tempdir().unwrap();
     let profile = temp.path().join("profile");
     let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
     let root = profile.join("synthetic-project");
     service.open_path(&root).unwrap();
-    let (path, accepted) = author(&mut service, &root, formulas);
+    let (path, accepted) = author(&mut service, &root, formulas, decimal);
     let model = ipc(&mut service, "scene.list", json!({}));
     let scene = &model["scenes"][0];
     let variable = model["authoring"]["variables"]
@@ -151,7 +208,7 @@ fn preflight(formulas: bool) {
         .unwrap();
     let request = json!({"sessionId":service.current().unwrap().session_id,"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"expectedAuthoringRevision":model["authoringRevision"],"command":{"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beforeBeatId":null,"beat":{"type":"setVariable","variableId":variable["id"],"value":{"operation":"add","operand":"1.5"}}}});
     let response = serde_json::to_value(crate::handle_application_request(json!({"protocolVersion":1,"requestId":"arithmetic-refusal","operation":"scene.apply","payload":request}),false,&mut service)).unwrap();
-    assert_eq!(response["error"]["code"], "INVALID_ARITHMETIC_SYNTAX");
+    assert_eq!(response["error"]["code"], "ARITHMETIC_TARGET_TYPE");
     let opened = ipc(&mut service, "source.open", json!({"path":path}));
     let draft = ipc(
         &mut service,
@@ -174,17 +231,17 @@ fn preflight(formulas: bool) {
 #[test]
 #[ignore = "explicit #92 pinned SDK qualification; one reserved invocation per target"]
 fn arithmetic_sdk_gate() {
-    sdk_gate(false);
+    sdk_gate(false, false);
 }
 #[test]
 #[ignore = "explicit #93 pinned SDK qualification; one reserved invocation per target"]
 fn formula_sdk_gate() {
-    sdk_gate(true);
+    sdk_gate(true, false);
 }
-fn sdk_gate(formulas: bool) {
+fn sdk_gate(formulas: bool, decimal: bool) {
     let temp = tempfile::tempdir().unwrap();
     let root_path = temp.path().to_owned();
-    let result = std::panic::catch_unwind(|| run(&temp, formulas));
+    let result = std::panic::catch_unwind(|| run(&temp, formulas, decimal));
     let cleanup = temp.close().is_ok() && !root_path.exists();
     println!(
         "arithmetic-sdk-terminal: {}",
@@ -196,7 +253,7 @@ fn sdk_gate(formulas: bool) {
     assert!(cleanup);
 }
 
-fn run(temp: &tempfile::TempDir, formulas: bool) {
+fn run(temp: &tempfile::TempDir, formulas: bool, decimal: bool) {
     fs::create_dir(temp.path().join("Ren'Py Data")).unwrap();
     let archive =
         std::env::var_os("LOOMLIGHT_RUNTIME_SDK_ARCHIVE").expect("pinned archive required");
@@ -220,8 +277,30 @@ fn run(temp: &tempfile::TempDir, formulas: bool) {
         })
         .unwrap();
     let root = temp.path().join("arithmetic");
-    let (path, accepted) = author(&mut service, &root, formulas);
-    let driver = if formulas {
+    let (path, accepted) = author(&mut service, &root, formulas, decimal);
+    if let Some(dir) = std::env::var_os("LOOMLIGHT_FOUNDATION_EVIDENCE_DIR") {
+        let mut identities = serde_json::Map::new();
+        for relative in if cfg!(windows) {
+            vec!["renpy.py", "lib/py3-windows-x86_64/python.exe"]
+        } else {
+            vec![
+                "renpy.sh",
+                "renpy.py",
+                "lib/py3-mac-universal/renpy",
+                "lib/py3-mac-universal/python",
+                "lib/py3-mac-universal/librenpython.dylib",
+            ]
+        } {
+            identities.insert(
+                relative.into(),
+                json!(sha256_file(&sdk.root.join(relative)).unwrap()),
+            );
+        }
+        fs::write(Path::new(&dir).join("arithmetic-sdk-context.json"), serde_json::to_vec_pretty(&json!({"ownedTemporaryRoot":temp.path(),"sdkRoot":sdk.root,"archive":archive,"identities":identities})).unwrap()).unwrap();
+    }
+    let driver = if decimal {
+        include_str!("../../../../../../tests/fixtures/arithmetic-94/driver.rpy")
+    } else if formulas {
         include_str!("../../../../../../tests/fixtures/arithmetic-93/driver.rpy")
     } else {
         include_str!("../../../../../../tests/fixtures/arithmetic-92/driver.rpy")
@@ -237,13 +316,17 @@ fn run(temp: &tempfile::TempDir, formulas: bool) {
         ];
         if operation == "test" || reject {
             argv.push(OsString::from(if reject {
-                if formulas {
+                if decimal {
+                    "arithmetic_94::wrong_outcome"
+                } else if formulas {
                     "arithmetic_93::wrong_outcome"
                 } else {
                     "arithmetic_92::wrong_outcome"
                 }
             } else {
-                if formulas {
+                if decimal {
+                    "arithmetic_94::values"
+                } else if formulas {
                     "arithmetic_93::values"
                 } else {
                     "arithmetic_92::values"
@@ -269,7 +352,9 @@ fn run(temp: &tempfile::TempDir, formulas: bool) {
                     } else {
                         "AssertionError: assert eval (money == 8)"
                     })
-                    && !result.output.contains(if formulas {
+                    && !result.output.contains(if decimal {
+                        "ARITHMETIC_94_WRONG_ACCEPTED"
+                    } else if formulas {
                         "ARITHMETIC_93_WRONG_ACCEPTED"
                     } else {
                         "ARITHMETIC_92_WRONG_ACCEPTED"
@@ -278,12 +363,17 @@ fn run(temp: &tempfile::TempDir, formulas: bool) {
                 result.exit_code == Some(0)
                     && (operation != "test"
                         || result.output.contains("PASSED")
-                            && result.output.contains(if formulas {
+                            && result.output.contains(if decimal {
+                                "ARITHMETIC_94_VALUES"
+                            } else if formulas {
                                 "ARITHMETIC_93_VALUES"
                             } else {
                                 "ARITHMETIC_92_VALUES"
                             }))
             };
+        let passed = passed && (!decimal || operation != "test" ||
+            result.output.contains("ARITHMETIC_94_NUMERIC quotient=0x1.5555555555556p+51 floor=9.0 remainder=0x1.0000000000000p-54 widened=float:-3.0 mixed=float:9007199254740992.0 zero=-0x0.0p+0 subnormal=0x0.0000000000001p-1022 default=float:2.5 comparisons=True text=Fraction_2.5 sample=Fraction_1e-07") &&
+            result.output.contains("ARITHMETIC_94_VALUES score=36028797018963992 money=-15 remainder=-2 minimum=0 opaque=kept"));
         println!(
             "arithmetic-sdk-case: {}",
             json!({"case":operation,"passed":passed,"exitCode":result.exit_code,"timedOut":result.timed_out})
@@ -324,4 +414,189 @@ fn sources(game: &Path) -> std::collections::BTreeMap<PathBuf, Vec<u8>> {
     let mut out = std::collections::BTreeMap::new();
     walk(game, game, &mut out);
     out
+}
+
+#[test]
+fn decimal_draft_contract_is_revision_bound_and_does_not_commit() {
+    let temp = tempfile::tempdir().unwrap();
+    let profile = temp.path().join("profile");
+    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+    let root = profile.join("synthetic-project");
+    service.open_path(&root).unwrap();
+    ipc(
+        &mut service,
+        "variable.create",
+        json!({"technicalName":"fraction","variableType":"decimal","defaultValue":1.25}),
+    );
+    let model = ipc(&mut service, "scene.list", json!({}));
+    let scene = &model["scenes"][0];
+    let fraction = model["authoring"]["variables"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["technicalName"] == "fraction")
+        .unwrap();
+    let before = sources(&root.join("game"));
+    let request = json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"expectedAuthoringRevision":model["authoringRevision"],"command":{"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beforeBeatId":null,"beat":{"type":"setVariable","variableId":fraction["id"],"value":{"operation":"assign","operand":"4 / 2"}}}});
+    let valid = ipc(&mut service, "scene.validateAssignment", request.clone());
+    assert_eq!(valid["support"], "supported");
+    assert_eq!(valid["assignment"]["inferredResultType"], "decimal");
+    assert_eq!(
+        valid["assignment"]["state"],
+        json!({"status":"known","value":2.0})
+    );
+    assert_eq!(
+        valid["capabilities"]["operators"],
+        json!(["+", "-", "*", "/", "//", "%"])
+    );
+    assert_eq!(
+        valid["variables"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|v| v["technicalName"] == "fraction")
+            .unwrap()["variableType"],
+        "decimal"
+    );
+    let mut invalid = request.clone();
+    invalid["command"]["beat"]["value"]["operand"] = json!("1 / 0");
+    let refused = ipc(&mut service, "scene.validateAssignment", invalid);
+    assert_eq!(refused["support"], "refused");
+    assert_eq!(
+        refused["assignment"]["diagnostics"][0],
+        json!({"field":"value.operand","reason":"zeroDivisor"})
+    );
+    let mut fixtures = Vec::new();
+    for (operand, support, reason) in [
+        ("fraction + 1", "supported", "unobservedCurrentValue"),
+        ("missing + 1", "refused", "missingVariable"),
+        ("flag + 1", "refused", "incompatibleOperand"),
+        ("1 +", "refused", "invalidSyntax"),
+        ("9223372036854775807 + 1", "refused", "integerOverflow"),
+        ("1e308 * 2", "refused", "nonFiniteResult"),
+    ] {
+        let mut input = request.clone();
+        input["command"]["beat"]["value"]["operand"] = json!(operand);
+        let output = ipc(&mut service, "scene.validateAssignment", input.clone());
+        assert_eq!(output["support"], support, "{operand}: {output}");
+        assert_eq!(output["assignment"]["state"]["reason"], reason, "{operand}");
+        fixtures.push(json!({"request":input,"response":output}));
+    }
+    assert_eq!(sources(&root.join("game")), before);
+    assert_eq!(
+        ipc(&mut service, "scene.list", json!({}))["canUndo"],
+        model["canUndo"]
+    );
+    if let Some(dir) = std::env::var_os("LOOMLIGHT_FOUNDATION_EVIDENCE_DIR") {
+        fs::create_dir_all(&dir).unwrap();
+        fs::write(
+            Path::new(&dir).join("decimal-contract.json"),
+            serde_json::to_vec_pretty(
+                &json!({"request":request,"response":valid,"refused":refused,"fixtures":fixtures}),
+            )
+            .unwrap(),
+        )
+        .unwrap();
+    }
+    let mut stale = request;
+    stale["expectedAuthoringRevision"] = json!("stale");
+    let session = service.current().unwrap().session_id.clone();
+    stale["sessionId"] = json!(session);
+    let refusal = serde_json::to_value(crate::handle_application_request(json!({"protocolVersion":1,"requestId":"stale-draft","operation":"scene.validateAssignment","payload":stale}),false,&mut service)).unwrap();
+    assert_eq!(refusal["error"]["code"], "SOURCE_CONFLICT");
+}
+
+#[test]
+fn decimal_fixture_preflight() {
+    preflight(true, true);
+}
+#[test]
+#[ignore = "explicit #94 combined pinned SDK qualification; one reserved invocation per target"]
+fn decimal_sdk_gate() {
+    sdk_gate(true, true);
+}
+
+fn decimal_screen(service: &mut LifecycleService, root: &Path) {
+    let catalog = ipc(service, "screens.list", json!({}));
+    let created = ipc(
+        service,
+        "screens.create",
+        json!({"name":"arithmetic_decimal_text","expectedProjectRevision":catalog["projectRevision"],"expectedSourceMapRevision":catalog["sourceMapRevision"],"expectedInventoryRevision":catalog["inventoryRevision"]}),
+    );
+    let owner = created["owned"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["name"] == "arithmetic_decimal_text")
+        .unwrap();
+    let doc = ipc(service, "screens.inspect", json!({"path":owner["path"]}));
+    ipc(
+        service,
+        "screens.compose",
+        json!({"screenId":owner["id"],"expectedRevision":doc["revision"],"command":{"type":"add","parentId":owner["rootId"],"kind":"text","text":"Fraction [fraction!q]"}}),
+    );
+    let doc = ipc(service, "screens.inspect", json!({"path":owner["path"]}));
+    let model = ipc(service, "authoring.list", json!({}));
+    let fraction = model["variables"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["technicalName"] == "fraction")
+        .unwrap();
+    let request = json!({"path":owner["path"],"screenName":owner["name"],"expectedRevision":doc["revision"],"width":1280,"height":720});
+    let source = fs::read(root.join(owner["path"].as_str().unwrap())).unwrap();
+    let plan = ipc(service, "screens.canvasPlan", request.clone());
+    assert_eq!(plan["nodes"][1]["literal"], "Fraction 2.5");
+    let mut sampled = request;
+    sampled["variableSamples"] = json!([{"variableId":fraction["id"],"expectedSourceRevision":fraction["source"]["sourceRevision"],"value":1e-7}]);
+    let sample = ipc(service, "screens.canvasPlan", sampled.clone());
+    assert_eq!(sample["nodes"][1]["literal"], "Fraction 1e-07");
+    assert_eq!(
+        fs::read(root.join(owner["path"].as_str().unwrap())).unwrap(),
+        source
+    );
+    if let Some(dir) = std::env::var_os("LOOMLIGHT_FOUNDATION_EVIDENCE_DIR") {
+        fs::create_dir_all(&dir).unwrap();
+        fs::write(
+            Path::new(&dir).join("decimal-screen.json"),
+            serde_json::to_vec_pretty(&json!({"request":sampled,"plan":sample,"defaultPlan":plan}))
+                .unwrap(),
+        )
+        .unwrap();
+        fs::write(Path::new(&dir).join("decimal-screen.rpy"), source).unwrap();
+    }
+}
+
+fn inspect_decimal_fixture(model: &serde_json::Value) {
+    for (name, expected) in [
+        ("quotient", json!(3002399751580331.0)),
+        ("floorfloat", json!(9.0)),
+        ("remfloat", json!(5.551115123125783e-17)),
+        ("widened", json!(-3.0)),
+        ("mixed", json!(9007199254740992.0)),
+        ("signedzero", json!(-0.0)),
+        ("subnormal", json!(5e-324)),
+    ] {
+        let variable = model["authoring"]["variables"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|v| v["technicalName"] == name)
+            .unwrap();
+        let beat = model["scenes"][0]["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["payload"]["variableId"] == variable["id"])
+            .unwrap();
+        assert_eq!(beat["assignment"]["inferredResultType"], "decimal");
+        assert_eq!(
+            beat["assignment"]["state"]["value"]
+                .as_f64()
+                .unwrap()
+                .to_bits(),
+            expected.as_f64().unwrap().to_bits(),
+            "{name}"
+        );
+    }
 }
