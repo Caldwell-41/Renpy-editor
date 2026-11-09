@@ -325,6 +325,7 @@ fn run_integrated_gate(temporary: &tempfile::TempDir) {
         service.scene_apply(SceneCommandRequest {
             expected_project_revision: deleted.project_revision,
             expected_source_map_revision: deleted.source_map_revision,
+            expected_authoring_revision: None,
             command: Command::DeleteScene {
                 scene_id: incoming.id.clone(),
                 expected_source_revision: incoming.source_revision.clone()

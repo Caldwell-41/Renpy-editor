@@ -695,6 +695,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
           return await projectValue<SceneWorkspace>(project, "scene.apply", {
             expectedProjectRevision: expected.projectRevision,
             expectedSourceMapRevision: expected.sourceMapRevision,
+            expectedAuthoringRevision: expected.authoringRevision,
             command,
           });
         } finally { finishAuthoringCompletion(operationToken); }

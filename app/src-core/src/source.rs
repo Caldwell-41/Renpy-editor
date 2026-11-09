@@ -1751,6 +1751,7 @@ mod tests {
                 SceneCommandRequest {
                     expected_project_revision: workspace.project_revision.clone(),
                     expected_source_map_revision: workspace.source_map_revision.clone(),
+                    expected_authoring_revision: None,
                     command: SceneCommand::UpdateBeat {
                         scene_id: fixture.scene_id.clone(),
                         expected_source_revision: workspace.scenes[0].source_revision.clone(),
@@ -1852,6 +1853,7 @@ mod tests {
                 SceneCommandRequest {
                     expected_project_revision: workspace.project_revision.clone(),
                     expected_source_map_revision: workspace.source_map_revision.clone(),
+                    expected_authoring_revision: None,
                     command: SceneCommand::UpdateBeat {
                         scene_id: fixture.scene_id.clone(),
                         expected_source_revision: workspace.scenes[0].source_revision.clone(),
@@ -2076,6 +2078,7 @@ mod tests {
                 SceneCommandRequest {
                     expected_project_revision: workspace.project_revision,
                     expected_source_map_revision: workspace.source_map_revision,
+                    expected_authoring_revision: None,
                     command: SceneCommand::Undo,
                 },
             )
@@ -2105,6 +2108,7 @@ mod tests {
             SceneCommandRequest {
                 expected_project_revision: workspace.project_revision,
                 expected_source_map_revision: workspace.source_map_revision,
+                expected_authoring_revision: None,
                 command: SceneCommand::UpdateBeat {
                     scene_id: fixture.scene_id.clone(),
                     expected_source_revision: workspace.scenes[0].source_revision.clone(),

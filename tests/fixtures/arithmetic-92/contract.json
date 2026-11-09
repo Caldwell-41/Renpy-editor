@@ -1,0 +1,298 @@
+{
+  "request": {
+    "protocolVersion": 1,
+    "requestId": "arithmetic-92-example",
+    "operation": "scene.apply",
+    "payload": {
+      "sessionId": "example-session",
+      "command": {
+        "beat": {
+          "type": "setVariable",
+          "value": {
+            "operand": "3",
+            "operation": "subtract"
+          },
+          "variableId": "3fe55875-d782-4ce0-b506-9e8513a95ee4"
+        },
+        "body": {
+          "type": "root"
+        },
+        "expectedSourceRevision": "32b929666b3e218571f6ec9ec233f55c0fb4b6eed979cc7dc1359180ca7f9c85",
+        "position": {
+          "anchor": {
+            "beatId": "93d9a408-cf0c-4016-93b0-69e55b4f9036",
+            "type": "beat"
+          },
+          "type": "before"
+        },
+        "sceneId": "ad790449-d20c-43d3-9111-22b9b32a01bb",
+        "type": "insertBodyBeat"
+      },
+      "expectedAuthoringRevision": "fcb6e487a92aab552e6d256cf697b298445d1386dc306b67a679a4aa4151e1f5",
+      "expectedProjectRevision": "2993c542f3a7377a6f43359de9621d97362c83546cf27ae731bd542dc2d263ad",
+      "expectedSourceMapRevision": "0c3cc0a22b18ab5b65997ad564e34099a971a81506fa29a59ae7cb41ea75c811"
+    }
+  },
+  "response": {
+    "protocolVersion": 1,
+    "requestId": "arithmetic-92-example",
+    "ok": true,
+    "value": {
+      "authoring": {
+        "appearances": [],
+        "assets": [],
+        "characters": [],
+        "projectId": "ee71ab01-94ed-48eb-afb8-01eb4af20f55",
+        "schemaVersion": 1,
+        "variables": [
+          {
+            "defaultValue": "99",
+            "id": "ae2affe4-d864-40e3-9d9d-671933c15e1d",
+            "source": {
+              "path": "game/definitions/variables.rpy",
+              "sourceRevision": "5964c95078c9a35bcdc970b1fa0a084a391b25b1b962659326a1e24fa605ad24",
+              "statement": "default score = 99"
+            },
+            "technicalName": "score",
+            "variableType": "int"
+          },
+          {
+            "defaultValue": "99",
+            "id": "3fe55875-d782-4ce0-b506-9e8513a95ee4",
+            "source": {
+              "path": "game/definitions/variables.rpy",
+              "sourceRevision": "5964c95078c9a35bcdc970b1fa0a084a391b25b1b962659326a1e24fa605ad24",
+              "statement": "default money = 99"
+            },
+            "technicalName": "money",
+            "variableType": "int"
+          }
+        ]
+      },
+      "authoringRevision": "fcb6e487a92aab552e6d256cf697b298445d1386dc306b67a679a4aa4151e1f5",
+      "canRedo": false,
+      "canUndo": true,
+      "chapters": [
+        {
+          "directory": "game/chapters/chapter_01",
+          "displayName": "Chapter 1",
+          "id": "30c7f245-7439-4aed-9253-fc8485b81025"
+        }
+      ],
+      "entrySceneId": "ad790449-d20c-43d3-9111-22b9b32a01bb",
+      "lastOpen": {
+        "chapterId": "30c7f245-7439-4aed-9253-fc8485b81025",
+        "sceneId": "ad790449-d20c-43d3-9111-22b9b32a01bb"
+      },
+      "projectRevision": "2993c542f3a7377a6f43359de9621d97362c83546cf27ae731bd542dc2d263ad",
+      "scenes": [
+        {
+          "beats": [
+            {
+              "assignment": {
+                "inferredResultType": "int",
+                "reads": [],
+                "state": {
+                  "status": "known",
+                  "value": "9007199254740993"
+                },
+                "writes": [
+                  "ae2affe4-d864-40e3-9d9d-671933c15e1d"
+                ]
+              },
+              "byteEnd": 87,
+              "byteStart": 56,
+              "id": "ce92ccd7-05dd-4c92-934d-81cd30ef3a7e",
+              "payload": {
+                "type": "setVariable",
+                "value": "9007199254740993",
+                "variableId": "ae2affe4-d864-40e3-9d9d-671933c15e1d"
+              },
+              "protected": false
+            },
+            {
+              "assignment": {
+                "inferredResultType": "int",
+                "reads": [
+                  "ae2affe4-d864-40e3-9d9d-671933c15e1d"
+                ],
+                "state": {
+                  "status": "known",
+                  "value": "9007199254740995"
+                },
+                "writes": [
+                  "ae2affe4-d864-40e3-9d9d-671933c15e1d"
+                ]
+              },
+              "byteEnd": 137,
+              "byteStart": 87,
+              "id": "dd073c95-c51e-43ec-903f-dafcce630961",
+              "payload": {
+                "type": "setVariable",
+                "value": {
+                  "operand": "2",
+                  "operation": "add"
+                },
+                "variableId": "ae2affe4-d864-40e3-9d9d-671933c15e1d"
+              },
+              "protected": false
+            },
+            {
+              "assignment": {
+                "inferredResultType": "int",
+                "reads": [
+                  "ae2affe4-d864-40e3-9d9d-671933c15e1d"
+                ],
+                "state": {
+                  "status": "known",
+                  "value": "9007199254740996"
+                },
+                "writes": [
+                  "ae2affe4-d864-40e3-9d9d-671933c15e1d"
+                ]
+              },
+              "byteEnd": 154,
+              "byteStart": 137,
+              "id": "5ec029a1-a990-48c9-bc6a-ec1907e242f3",
+              "payload": {
+                "type": "setVariable",
+                "value": {
+                  "operand": "1",
+                  "operation": "add"
+                },
+                "variableId": "ae2affe4-d864-40e3-9d9d-671933c15e1d"
+              },
+              "protected": false
+            },
+            {
+              "assignment": {
+                "inferredResultType": "int",
+                "reads": [
+                  "ae2affe4-d864-40e3-9d9d-671933c15e1d"
+                ],
+                "state": {
+                  "status": "known",
+                  "value": "9007199254740994"
+                },
+                "writes": [
+                  "ae2affe4-d864-40e3-9d9d-671933c15e1d"
+                ]
+              },
+              "byteEnd": 207,
+              "byteStart": 154,
+              "id": "a70fa93d-c5c7-46eb-b5fc-626731ebba53",
+              "payload": {
+                "type": "setVariable",
+                "value": {
+                  "operand": "2",
+                  "operation": "subtract"
+                },
+                "variableId": "ae2affe4-d864-40e3-9d9d-671933c15e1d"
+              },
+              "protected": false
+            },
+            {
+              "byteEnd": 219,
+              "byteStart": 207,
+              "id": "95216c50-2303-450e-835d-84f36d04cbf9",
+              "payload": {
+                "reason": "Unsupported or runtime-dependent Ren'Py source",
+                "source": "    python:",
+                "type": "customCode"
+              },
+              "protected": true
+            },
+            {
+              "byteEnd": 252,
+              "byteStart": 219,
+              "id": "ec34f544-b2d9-4103-a457-4a7e30af3ad0",
+              "payload": {
+                "reason": "Unsupported or runtime-dependent Ren'Py source",
+                "source": "        opaque_neighbor = \"kept\"",
+                "type": "customCode"
+              },
+              "protected": true
+            },
+            {
+              "assignment": {
+                "inferredResultType": "int",
+                "reads": [],
+                "state": {
+                  "status": "known",
+                  "value": "10"
+                },
+                "writes": [
+                  "3fe55875-d782-4ce0-b506-9e8513a95ee4"
+                ]
+              },
+              "byteEnd": 269,
+              "byteStart": 252,
+              "id": "080aacf7-fe12-4ef5-b6f1-42c5e23cea63",
+              "payload": {
+                "type": "setVariable",
+                "value": "10",
+                "variableId": "3fe55875-d782-4ce0-b506-9e8513a95ee4"
+              },
+              "protected": false
+            },
+            {
+              "assignment": {
+                "inferredResultType": "int",
+                "reads": [
+                  "3fe55875-d782-4ce0-b506-9e8513a95ee4"
+                ],
+                "state": {
+                  "status": "known",
+                  "value": "7"
+                },
+                "writes": [
+                  "3fe55875-d782-4ce0-b506-9e8513a95ee4"
+                ]
+              },
+              "byteEnd": 286,
+              "byteStart": 269,
+              "id": "1ab31a10-3f86-4bb3-af2e-ca1d31dfd211",
+              "payload": {
+                "type": "setVariable",
+                "value": {
+                  "operand": "3",
+                  "operation": "subtract"
+                },
+                "variableId": "3fe55875-d782-4ce0-b506-9e8513a95ee4"
+              },
+              "protected": false
+            },
+            {
+              "byteEnd": 312,
+              "byteStart": 286,
+              "id": "93d9a408-cf0c-4016-93b0-69e55b4f9036",
+              "payload": {
+                "text": "Arithmetic accepted",
+                "type": "narration"
+              },
+              "protected": false
+            },
+            {
+              "byteEnd": 323,
+              "byteStart": 312,
+              "id": "c5b8c347-17a5-488e-b0d0-9dc3a9524421",
+              "payload": {
+                "type": "return"
+              },
+              "protected": false
+            }
+          ],
+          "chapterId": "30c7f245-7439-4aed-9253-fc8485b81025",
+          "displayName": "Scene 1",
+          "id": "ad790449-d20c-43d3-9111-22b9b32a01bb",
+          "partial": true,
+          "sourceConflict": false,
+          "sourcePath": "game/chapters/chapter_01/scene_001.rpy",
+          "sourceRevision": "848f2c83cbd1b0759c2f5eba6c4c72a82b751407e2fcec066cfd1e491db93355",
+          "technicalLabel": "loomlight_scene_ad790449d20c43d3911122b9b32a01bb"
+        }
+      ],
+      "sourceMapRevision": "624c03030095a3596e823bc503a119052f1232917eb2a57cd701054e99bf7661"
+    }
+  }
+}
