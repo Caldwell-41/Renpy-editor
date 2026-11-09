@@ -25,8 +25,8 @@ Screens branch. No merge of that PR or release is selected.
   for final integration review. #93 is merged with qualified public-command/Mac
   evidence. #94 is merged and qualified on Mac and Windows. Combined #93/#94
   Windows proof is integrated through `235d99ac`. #96's functional increment is
-  integrated; its full acceptance remains open. #95 returned locally with failed
-  Mac fixture preparation and no qualified runtime proof; it is not integrated.
+  integrated; its full acceptance remains open. #95 is integrated at `0382ae3c`
+  with qualified Mac runtime proof; Windows qualification remains required.
 - Backend sequence: #92, then #93, then #94. #95 follows #94.
 - Story UI #96 follows approved #88 and qualified #94.
 - Screens/decimal UI #97 follows approved #91 and qualified #95.
@@ -1155,3 +1155,36 @@ candidate. The merger selects no SDK/browser/native/package/manual-CI operation.
 Then coordinator routes a bounded fresh Windows qualification through the existing
 host/worktree. Keep #95 open, preserve all worktrees and wait for actual target
 qualification before #97. Final feature review/acceptance remain pending.
+
+### 2026-11-09: #95 integrated for Windows qualification
+
+The fresh merger received exclusive integration/PR mutation ownership at clean
+`ecc55df8`. Conflict-free normal `--no-ff` merge
+`0382ae3c999e9e197af1fd289a3b45ffc4d1bec5` preserves that coordinator parent and
+returned `899f0e5798afa8637bf4a23284cc22185b27a1fc`. Coordinator records,
+approved references/captures and earlier fixtures survived unchanged.
+
+The entire app/fixture/script/CI inputs equal Mac-qualified `ecf2e2f7`.
+The merger verified all 869 frozen hashes against both Git candidates and both
+working checkouts, the retained executable, four actual public action pairs,
+case outputs/witnesses, source invariance and cleanup. The
+[#95 integration receipt](../evidence/arithmetic-95.md#integration-equivalence-and-windows-ready-candidate)
+owns exact trees, reuse and fresh checks. Reuse 55 distinct Rust passes including
+SDK, 12 renderer passes and the actual Screens controller/core journey; no
+unchanged suite or SDK run was repeated. Fresh pinned production typecheck,
+contract/branch-plan, repository and whitespace checks pass. The incident index
+links the three fixture causes to their detailed recovery; H69 stays unchanged.
+
+Draft PR #122 keeps its Screens base and full-spec eventual closing references.
+#95 stays open with Mac qualified and Windows pending. #97 stays blocked.
+#96 remains a functional increment with partial visual fidelity and separate
+full-layout/palette, Tracks/Reel, branch/view drafts and native/human acceptance.
+The shadow-token correction retains its original comparison scope and limits.
+Final-head automatic checks require exact-head coordinator audit.
+
+SDK use remains Mac 9/20 and Windows 2/20, with zero reservations. This merger
+started zero SDK/browser/editor-native/package/manual-CI operations and registered
+no watch. After publication verification, exclusive mutation ownership returns to
+the coordinator for a bounded Windows assignment against this app/runtime identity.
+No successor implementation, final review, issue closure, PR promotion or merge
+is selected. All worktrees and raw attempt evidence remain preserved.

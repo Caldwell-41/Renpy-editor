@@ -12,8 +12,13 @@ retain both failed attempts and the corrected runtime pass. Windows evidence
 `918fa3cc` is integrated through `235d99ac`; both targets now qualify #94 and the
 combined #93 integer witnesses. The coordinator audited actual case outputs,
 source/binary identities, all required assertions and cleanup. #95 Screens runtime
-has qualified Mac runtime proof locally at `ecf2e2f7`, returned as `899f0e57`.
-It is not integrated; Windows proof remains required before #97.
+is integrated by conflict-free normal merge `0382ae3c`, preserving coordinator
+`ecc55df8` and returned `899f0e57`. All app/fixture/script/CI inputs equal
+Mac-qualified `ecf2e2f7`; all 869 frozen hashes match. Reuse 55 distinct Rust passes
+including SDK, 12 renderer passes and the controller/core journey. Fresh pinned
+typecheck, contract/branch-plan, repository and whitespace checks pass. The
+[#95 integration receipt](../tasks/evidence/arithmetic-95.md#integration-equivalence-and-windows-ready-candidate)
+records the Windows-ready identity. Windows proof remains required before #97.
 
 #96's functional increment is integrated by conflict-free normal merge `25fa2e1c`,
 preserving coordinator `157c1ef8` and returned `b77cc26e`. All app/fixture inputs
@@ -67,7 +72,7 @@ Totals are Mac 9/20 started and Windows 2/20 started, with zero reservations.
 ordered/current values, both button kinds with click/keyboard, Finish, deliberate
 wrong-outcome rejection and cleanup. The coordinator verified all 869 inputs,
 retained binary, actual requests and witnesses. All three failed attempts remain
-intact. A fresh merger will publish #95 for Windows qualification. #97 stays blocked.
+intact. Draft PR #122 publishes #95 for Windows qualification. #97 stays blocked.
 The Story shadow-token correction passes all nine protocol checks locally;
 final-head automatic CI remains for audit.
 The delivery record owns current limits, assignments and qualified candidates.

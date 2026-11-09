@@ -462,3 +462,72 @@ Windows qualification remain coordinator-owned before #97 starts. No Windows,
 editor-native/package or manual-CI operation ran during recovery. This return
 remains local-only pending the fresh merger; no issue closure or final acceptance
 is claimed.
+
+## Integration equivalence and Windows-ready candidate
+
+Conflict-free normal `--no-ff` merge
+`0382ae3c999e9e197af1fd289a3b45ffc4d1bec5` has ordered parents coordinator
+`ecc55df80f9ced0adc8b7028acd5e6dc50fa5edf` and returned implementation
+`899f0e5798afa8637bf4a23284cc22185b27a1fc`. Both histories survive. The
+coordinator's CURRENT, HANDOVER and delivery ledger survived unchanged before
+this update. Approved Lab/design references, captures, #92/#93/#94 fixtures and
+the #96 evidence note also survived unchanged. The returned successor adds only
+the Mac success note to qualified `ecf2e2f7d9df8130e9102579c9ac9db6baec56b2`.
+
+The complete merged inputs equal that qualified candidate:
+
+| Input | Git tree |
+| --- | --- |
+| `app/` | `4c93cea67513b039cabd0f3fa09d064dc6b62c6c` |
+| `tests/fixtures/` | `58bde4d6170ff1d600cc9d662e00951303212816` |
+| `scripts/` | `56200065602421cdfad377180ef45a251f02b89f` |
+| `.github/` | `a79289dcdb51e68e0924f4883f799887706556f7` |
+
+The merger independently verified all 869 launch-receipt hashes against Git's
+filtered checkout bytes at both candidates and the integration/source working
+files. The retained executable still matches the binary hash above and remains
+executable. The four unique actual case records retain their expected exits,
+durations, all normal witnesses/22 assertions and deliberate reward-10 rejection
+without the wrong-acceptance marker. Accepted source matches its recorded hashes;
+the injected SDK driver matches the committed fixture. SDK/project and desktop
+cleanup passed, and the owned temporary root is absent. All three prior failed
+launches remain failed. The original four attempt directories, no-SDK red/green
+and selector diagnostic remain untouched in the preserved source worktree.
+
+The recorded contract audit checks all four concrete public request/response pairs,
+both button kinds, validateOnly's unchanged accepted revision/no documents,
+commit's original preconditions, ordered actions/assignment inspections and shared
+numeric capabilities. The existing `ci_validation.load_plan` accepts the current
+head/base and quality-only selection. Fresh production typechecking passes with
+Node 24.19.0/npm 11.9.0. Repository validation passes for 1,866 tracked files;
+whitespace passes against the Screens base. Raw merger receipts are ignored under
+`.toolchains/arithmetic-95/integration-merge/{equivalence,contract-check,checks}.json`.
+The audit's initial export-path assumption was corrected locally: the SDK driver
+is injected after the accepted-source export, so its recorded hash is checked
+against the identical committed driver. No product or fixture input changed.
+
+Reuse the original 53 scoped Rust cases and 12 renderer cases, actual Screens
+controller/core journey, added GUI regression and passing SDK gate. That is 55
+distinct Rust passes including SDK, with no added count for repeated preflights.
+The complete combined app already includes Story integration and the shadow-token
+correction. Its nine protocol tests passed locally; #96's earlier comparison
+retains its original candidate and partial visual limits. No new input or unresolved
+consumer issue justifies repeating unchanged full suites or the SDK/browser campaign.
+
+This merge is the Windows-ready integration candidate. Later checkpoint changes
+are documentation only. The coordinator can route bounded Windows qualification
+against the published head after confirming these app/runtime identities. Windows
+must supply its own compile/lint, normal and rejecting runtime records, actual
+input/binary/source hashes and cleanup; Mac proof does not qualify Windows.
+#95 remains open with Mac qualified and Windows pending, and #97 remains blocked.
+#96 stays a functional increment with separate full layout/palette, Tracks/Reel,
+branch/view drafts and native/physical-input/human acceptance.
+
+The draft PR keeps its Screens base and eventual full-spec closing references.
+Final-head automatic checks require an exact-head coordinator audit; earlier green
+checks are not inherited. This merger starts zero SDK/browser/editor-native/package/
+manual-CI operations and registers no watch. SDK totals remain Mac 9/20 and Windows
+2/20, with zero reservations. After ordinary push and remote-head/upstream/clean-state
+verification, exclusive integration/PR mutation ownership returns to the coordinator.
+No successor implementation, final review, issue closure, ready-for-review promotion,
+PR merge, automerge, release or worktree cleanup is selected.

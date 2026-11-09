@@ -1015,3 +1015,34 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   corrected pass retain immutable receipts. No duplicate test was added.
 - **Evidence:** [#94 coordinator runtime recovery](../tasks/evidence/arithmetic-94.md#coordinator-runtime-recovery)
   and [corrected Mac pass](../tasks/evidence/arithmetic-94.md#mac-invocation-3-corrected-fixture-passed).
+
+## H70. Full SDK GUI initialization violates a minimal canvas fixture assumption
+
+- **Class/search:** harness; `plan.available`, `gui.init`, standard-template initialization.
+- **Cause/correction:** shared setup required full inert-canvas availability for both
+  minimal and SDK-generated projects. Keep the strict minimal preflight; the SDK
+  fixture permits only its known GUI limits and still requires inert samples.
+- **Regression:** the public no-SDK GUI case reproduces the failure and passes with
+  the accurate limit and sample. Production admission stays unchanged.
+- **Evidence:** [#95 fixture recovery](../tasks/evidence/arithmetic-95.md#coordinator-fixture-correction-no-sdk-retry-yet).
+
+## H71. Fixture source insertion misses an imagebutton identity comment
+
+- **Class/search:** harness; missing `arithmetic_image` ID, imagebutton UUID comment.
+- **Cause/correction:** insertion expected a newline directly after `imagebutton:`;
+  public composition writes its identity comment there. Match the known marker
+  exactly once and preserve the comment.
+- **Regression:** the existing public preflight fails without the ID and passes
+  after correction. It asserts the final accepted source, with no product change.
+- **Evidence:** [#95 insertion recovery](../tasks/evidence/arithmetic-95.md#mac-invocation-2-and-image-selector-correction).
+
+## H72. Pinned SDK ID selectors require a tuple screen name
+
+- **Class/search:** harness; Ren'Py 8.5.3 `DisplayableSelector`, scene-list tuple,
+  imagebutton click timeout despite successful public displayable lookup.
+- **Cause/correction:** the selector directly compares screen names without the
+  public API's normalization. Both image mouse/keyboard selectors now use tuples.
+- **Verification:** an isolated pinned-method diagnostic distinguishes string and
+  tuple lookup; the SDK pass proves both activations with unchanged assertions and timeout.
+- **Evidence:** [#95 selector diagnosis](../tasks/evidence/arithmetic-95.md#mac-invocation-3-and-pinned-selector-name-correction)
+  and [runtime pass](../tasks/evidence/arithmetic-95.md#mac-invocation-4-passed).

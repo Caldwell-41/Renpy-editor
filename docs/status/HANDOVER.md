@@ -61,8 +61,8 @@ Draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) publishes
 `codex/spec-87-arithmetic` into `codex/phase3b-screen-designer` and is linked in T3.
 The integration branch now tracks its own origin branch. The PR describes full
 #87 scope and eventual closing references. It contains #92/#93/#94 implementation,
-#96's functional increment and the approved #91/#97 design reference. #95 is
-unmerged and unqualified; #96 full acceptance and #97 production UI remain.
+#96's functional increment, #95's Mac-qualified backend and the approved #91/#97
+design reference. #95 Windows proof, #96 full acceptance and #97 production UI remain.
 The coordinator resumes integration-checkout ownership after this merger returns.
 Windows #92 has completed and
 passed its single SDK run at `c7b8157e`; its two completion sends were denied by
@@ -169,10 +169,14 @@ here at `.toolchains/arithmetic-96/coordinator-audit.json`; merger equivalence a
 check receipts are under its `integration-merge/` sibling directory. No SDK,
 browser, editor-native/package or manual-CI operation ran during this merge.
 
-#95 returned clean local `899f0e5798afa8637bf4a23284cc22185b27a1fc` on
-`t3/screens-click-time-arithmetic`, qualified at
-`ecf2e2f7d9df8130e9102579c9ac9db6baec56b2`. It includes published integration
-`323a0685`. All app/fixture inputs are unchanged in the evidence-only successor.
+#95 is integrated by conflict-free normal `--no-ff` merge
+`0382ae3c999e9e197af1fd289a3b45ffc4d1bec5`, with ordered parents coordinator
+`ecc55df80f9ced0adc8b7028acd5e6dc50fa5edf` and returned
+`899f0e5798afa8637bf4a23284cc22185b27a1fc`. All app/fixture/script/CI inputs equal
+Mac-qualified `ecf2e2f7d9df8130e9102579c9ac9db6baec56b2`, including `323a0685`.
+The merger verified all 869 frozen hashes against both Git and working checkouts.
+The [integration receipt](../tasks/evidence/arithmetic-95.md#integration-equivalence-and-windows-ready-candidate)
+owns exact app/runtime tree identities and the bounded Windows handoff basis.
 The fourth Mac attempt passed all four unique cases: compile/lint, 22 normal
 assertions and required wrong-outcome rejection. Exact text/image click/keyboard,
 ordered/current values, invalid arithmetic, inertness and one Finish continuation
@@ -180,7 +184,7 @@ passed. SDK/desktop cleanup passed and no process remains. The coordinator audit
 all 869 candidate/working input hashes, retained binary, four public action
 request/response pairs, actual witnesses and source invariance.
 
-The worker's canonical `docs/tasks/evidence/arithmetic-95.md` owns its public
+The integrated canonical `docs/tasks/evidence/arithmetic-95.md` owns its public
 contract and all four attempts. Preserve ignored `mac-01` through `mac-04`, the
 no-SDK regressions and selector diagnostic in that worktree. Three distinct fixture
 failures remain failed; corrected GUI limits, source-ID insertion and pinned
@@ -189,11 +193,15 @@ retains the independent successful audit. Reuse scoped 53 Rust/12 renderer passe
 and controller/core journey on unchanged product inputs. The new GUI case and SDK
 case bring distinct passing Rust coverage to 55, including SDK.
 
-Current use is Mac 9/20 and Windows 2/20, with zero reservations. A fresh merger
-receives exclusive integration/PR mutation ownership to merge this qualified
-backend normally and publish it for Windows qualification. It runs no SDK or
-browser/native/package/manual-CI operation. #95 stays open; Windows runtime proof
-is still required before #97 starts. The Story shadow-token CI correction is
+Fresh pinned production typecheck, recorded contract/branch-plan, repository and
+whitespace checks pass. No unchanged full suite was repeated. Merger audit receipts
+are in integration's ignored `.toolchains/arithmetic-95/integration-merge/`.
+Current use is Mac 9/20 and Windows 2/20, with zero reservations. The merger
+publishes this Windows-ready backend and returns exclusive mutation ownership.
+The coordinator next selects bounded Windows qualification on the existing host
+and worktree, preserving the recorded app/runtime identity. This merger ran zero
+SDK/browser/native/package/manual-CI operations. #95 stays open; Windows runtime
+proof is still required before #97 starts. The Story shadow-token CI correction is
 published at `f8f4f904`, with nine protocol passes after a matching red. Its small
 style delta keeps #96's original comparison candidate and limits; fresh automatic
 CI remains for exact-head audit.
@@ -211,7 +219,7 @@ parent-PR merge, automerge or release is selected. The published checkpoint reta
 the existing draft/base and full-spec closing references. Final-head automatic
 checks await coordinator audit; no watch was registered. After remote HEAD/upstream
 and clean-state verification, integration mutation ownership returns to the
-coordinator after the new #95 merger returns.
+coordinator. No remote qualification is reserved or started by this handoff.
 
 The earlier sections below retain prior work and recovery context. Their
 unselected-next-task statements do not override this explicit #87 selection.
