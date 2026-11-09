@@ -19,18 +19,28 @@ decimal designs. Its candidate branch `codex/spec-87-variable-mock` is at
 `1e547df2`, runnable source `6b3aee30`. A/B/C are review candidates only; all
 approval fields remain null. Kris must select/approve before production UI is
 unblocked. The ledger records the source identity, capture audit and reported checks.
-Backend #92 returned clean `t3/arithmetic-backend-slice` at `e5de0c20` with the
-current integration tip included. Its qualified code/fixture candidate is
-`1ba9fe44`; the later delta is documentation only. The coordinator audited Mac
-raw receipts and hashes. One Mac SDK run started and passed; no reservation
-remains there. One Windows slot is reserved for #92, unstarted. The ledger and
-ticket evidence own details; preserve the implementer's unique ignored evidence.
-A fresh merger gets exclusive ownership of this integration checkout to merge
-#92 and publish the initial draft PR. Wait for its completion without polling,
-then link/take over the PR and route Windows qualification to SUNDOWN. No
-native/package/manual-CI operation has started and no PR exists at this checkpoint.
-Neither #92 acceptance nor #93's start is claimed yet. Final parent
-PR merge/release and full Story redesign #110 are outside this selection.
+Backend #92 is merged through `e8b07b31d0dd9fd9c5dcf3f784c61f2e089fd050`.
+Its parents are coordinator `56c619f18bbcfd78873474369005853cc6f67b89` and
+returned implementation `e5de0c20da8cd5f2812116840bf67b808d91d78a`.
+The merge had no conflicts and preserved all coordinator records. Its app and
+fixture trees match the returned branch; app/runtime inputs match qualified
+candidate `1ba9fe447c5322683e11026c98ae9c4b38996240`. Reuse the passing tests
+and coordinator-audited Mac proof in [#92 evidence](../tasks/evidence/arithmetic-92.md).
+The merger's repository validation and whitespace checks pass. Its final status
+update changes documentation only.
+
+Draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) publishes
+`codex/spec-87-arithmetic` into `codex/phase3b-screen-designer` and is linked in T3.
+The integration branch now tracks its own origin branch. The PR describes full
+#87 scope and eventual closing references, with only #92 implemented so far.
+No issue was accepted or closed. The coordinator resumes mutation ownership after
+the merger's result, takes over the PR and routes the reserved Windows #92 gate
+to SUNDOWN using the exact published head. #93 remains blocked pending that proof.
+The ledger owns unchanged operation counts; the merger started no SDK, native,
+package or manual CI operation. Automatic lightweight PR checks may run.
+Preserve the backend worktree's unique ignored Mac receipts and the separate
+unapproved #91/#97 design worktree. Keep the PR draft. Final parent-PR merge,
+automerge/release and full Story redesign #110 are outside this selection.
 
 The earlier sections below retain prior work and recovery context. Their
 unselected-next-task statements do not override this explicit #87 selection.

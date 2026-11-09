@@ -10,8 +10,9 @@ acceptance criteria and native ticket dependencies; this record owns execution.
 Integration branch: `codex/spec-87-arithmetic`, based on the current accepted
 Screens branch `codex/phase3b-screen-designer` at `251fb477`. The initial T3
 checkout was on older `main`; no implementation uses that older baseline.
-The occupied Screens checkout and its evidence remain untouched. The eventual
-draft PR targets the Screens branch. No merge of that PR or release is selected.
+The occupied Screens checkout and its evidence remain untouched. The
+draft [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) targets the
+Screens branch. No merge of that PR or release is selected.
 
 ## Ticket graph and ownership
 
@@ -19,8 +20,8 @@ draft PR targets the Screens branch. No merge of that PR or release is selected.
   v1, revision `combined-v1`, merged through PR #108. No new Story redesign.
 - #89 and #90 were superseded, closed as not planned. Do not implement them.
 - Screens mock #91 has a review candidate, with approval pending. Story backend
-  #92 has returned implementation and Mac proof; integration and Windows proof
-  remain pending.
+  #92 is merged into integration with passing Mac proof. Windows proof remains
+  pending; #92 is not accepted and #93 remains blocked.
 - Backend sequence: #92, then #93, then #94. #95 follows #94.
 - Story UI #96 follows approved #88 and qualified #94.
 - Screens/decimal UI #97 follows approved #91 and qualified #95.
@@ -155,3 +156,48 @@ the recorded gate/fixtures to SUNDOWN, using the exact published candidate. No
 Windows invocation has started. Receive the merger's completion notification,
 link/take over the draft PR, then start the Windows qualification. #93 remains
 blocked on #92's actual delivery evidence; #91/#97 design approval is still pending.
+
+### 2026-11-09: #92 integration and draft publication
+
+The fresh merger confirmed clean integration checkout `codex/spec-87-arithmetic`
+at `56c619f18bbcfd78873474369005853cc6f67b89` and clean returned branch
+`t3/arithmetic-backend-slice` at `e5de0c20da8cd5f2812116840bf67b808d91d78a`.
+Their common ancestor was `6c2272ecf7340b5e64c145059eb1f29534eb49f2`.
+A normal `--no-ff` merge produced
+`e8b07b31d0dd9fd9c5dcf3f784c61f2e089fd050`, with those two tips as parents.
+There were no conflicts. All three coordinator records matched `56c619f1`
+immediately after the merge; neither history was rewritten.
+
+The merged `app/` tree is `56443af74404b1171f8d9d0524f90dbad91e23ba` and the
+`tests/fixtures/` tree is `8f07e3d432d82c4235f7ae3a72601d2e0cf15edf`.
+Both exactly match the returned branch. The entire app and both runtime inputs,
+`tests/fixtures/arithmetic-92/story.rpy` and `driver.rpy`, also match qualified
+candidate `1ba9fe447c5322683e11026c98ae9c4b38996240`. The only fixture addition
+since qualification is the documented request/response `contract.json`, which
+the runtime gate does not load. Reuse the reported 59 Rust and 43 renderer passes,
+TypeScript/formatting results and audited Mac SDK result in the
+[#92 evidence](../evidence/arithmetic-92.md); the merger did not rerun them.
+
+Merger checks pass: `python3 scripts/validate.py` validates 1,794 repository files,
+and `git diff --check 251fb477..HEAD` reports no whitespace errors. The merger
+started no SDK, native, package or manual CI operation. Cumulative accounting
+remains Mac **1 started / 0 reserved**, Windows **0 started / 1 reserved for #92**.
+The backend worktree and its unique ignored Mac receipts remain in place. The
+separate unapproved design branch/worktree is unchanged. Existing status/recovery
+sections remain intact for prior acceptance and recovery evidence.
+
+No matching PR existed. The integration branch was pushed only to its own
+`origin/codex/spec-87-arithmetic` ref, which is now its upstream. Draft
+[PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) targets
+`codex/phase3b-screen-designer` and is linked in T3. Its body describes the eventual
+full #87 outcome, identifies only #92 as implemented, links this ledger and the
+contract/evidence, and includes eventual closing references for #87 and #91–#97.
+#88 remains closed; #89/#90 remain superseded. Automatic lightweight checks may
+run; no manual matrix was dispatched. The accompanying status update changes
+documentation only and retains the merged qualification inputs.
+
+Next: the coordinator takes over the draft PR and routes the reserved Windows
+#92 qualification to SUNDOWN using the published branch head and recorded gate.
+No issue was accepted or closed. #93 stays blocked pending Windows evidence;
+#91/#97 approval and later backend/UI tickets remain pending. Keep the PR draft;
+final merge, automerge and release are not selected.
