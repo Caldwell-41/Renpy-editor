@@ -894,3 +894,38 @@ coordinator inspected the worker's passing actual-main/core journey result but
 has not rerun or accepted its still-changing browser comparison. #96 retains
 all test source and the named Help-driver allowlist line. No SDK, browser,
 native/package or manual CI operation ran for this registration change.
+
+
+### 2026-11-09: #96 returned; audited functional-increment merger handoff
+
+Clean local `t3/story-arithmetic-controls` returned at
+`b77cc26eeeb7d8eafc9b5a53410996e38eaa4be8`. Implementation candidate is
+`3cb6e8f7354c3e05c1d77526c3babae857af632f`, including latest integration
+`53cb37fa`. Its canonical `docs/tasks/evidence/arithmetic-96.md` owns the control
+map, exact implementation/check scope, retained failures and acceptance limits.
+The only core change is the assigned Help-driver allowlist line.
+
+The coordinator verified all 252 frozen input hashes against both the candidate
+and working files, the retained driver, nine successful real-main/core stages,
+122 request/response pairs, all seven operation keys and actual zero/type/dirty/
+stale/session refusals. Eight browser/reference PNG hashes and cleanup pass.
+The source and test inputs remain identical to the candidate; the successor is
+evidence only. The coordinator inspected wide/compact control captures. Equation
+ordering, font and field height match; width, palette, variable selector and action
+placement remain different. These are explicit limits, not full design acceptance.
+Ignored `coordinator-audit.json` here retains the independent audit.
+
+Reuse the worker's 68 focused component/controller passes, production typecheck,
+frontend build, isolated Help example build/formatting and scoped browser proof on
+those exact inputs. Core/library/Cargo and #94 fixtures are unchanged, so their
+numeric/runtime proof retains its recorded scope. No fresh SDK, native WebView or
+human acceptance follows from the new UI journey. #96 consumes zero SDK runs.
+
+A fresh merger takes exclusive integration/PR mutation ownership from this
+checkpoint, normally merges the returned branch, verifies combined input
+identity and publishes the functional increment to draft PR #122. Keep #96 open
+with Tracks/Reel, full layout/palette and assembled native/human acceptance
+pending. No SDK/browser/native/package/manual-CI operation is selected for this
+merge. #95 continues independently in its assigned worktree; its Mac reservation
+remains charged pending actual start/result evidence. #97 still waits for qualified
+#95. Preserve every worktree and unique raw receipt.

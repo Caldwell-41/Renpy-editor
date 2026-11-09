@@ -132,18 +132,37 @@ owns exact commands, outcomes and identities. Actual consumption is Mac 5 and
 Windows 2 starts; no qualification process remains running.
 
 #94 is qualified on both targets and records the backend contract for #95/#96.
-The coordinator selects fresh implementers in separate prepared worktrees. #95
+The coordinator selected fresh implementers in separate prepared worktrees. #95
 owns core Screens action/runtime changes, its typed Screens compatibility and
 DATA_MODEL. #96 owns Story production controls, Story transport/captions and
 scoped styles/tests plus UI documentation. Both use the shared #94 owner;
 coordinator records, shared registries and integration remain coordinator-owned.
 The delivery record contains exact file ownership and base checkpoint.
 
+#96 returned clean local branch `t3/story-arithmetic-controls` at
+`b77cc26eeeb7d8eafc9b5a53410996e38eaa4be8`; implementation is
+`3cb6e8f7354c3e05c1d77526c3babae857af632f`, including integration `53cb37fa`.
+Its evidence note owns 68 focused passes, production build, nine-stage real-main
+to-core journey and wide/compact Chrome comparison. The coordinator independently
+verified all 252 candidate/working input hashes, driver identity, 122 actual
+requests, seven operation keys, refusal codes, eight PNG hashes and cleanup.
+The driver allowlist line is the only core change. Core/#94 runtime inputs remain
+unchanged. No SDK run was used for #96.
+
+A fresh merger receives exclusive integration/PR mutation ownership, while #95
+continues in its own worktree. Integrate #96 as a functional increment and keep
+its issue open. Its control ordering/font/height match the reference, but panel
+width, palette and action placement differ. Full Story fidelity, Tracks/Reel and
+assembled native/human acceptance remain pending. Preserve all failed/successful
+journeys, browser attempts and the worker's isolated driver under its ignored
+`.toolchains/arithmetic-96/`. The coordinator audit is retained here in
+`.toolchains/arithmetic-96/coordinator-audit.json`.
+
 One Mac SDK invocation is reserved for #95 after cheap public preflight and
 clean candidate receipt. It must use scoped outside-sandbox execution and the
 existing desktop-admission/power helper, preserving both prior failure lessons.
-#96 has no SDK/native-editor/package/manual-CI allocation. Its actual frontend
-to core/source/history/reopen journey is required; mocked IPC alone is insufficient.
+#96 used no SDK/native-editor/package/manual-CI allocation. Its actual frontend
+to core/source/history/reopen journey passed; mocked IPC alone was insufficient.
 
 Story Combined v1 / combined-v1 remains the approved arithmetic design. #96
 implements reusable approved controls in the existing Story workspace; full #110

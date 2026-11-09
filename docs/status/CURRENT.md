@@ -14,6 +14,12 @@ combined #93 integer witnesses. The coordinator audited actual case outputs,
 source/binary identities, all required assertions and cleanup. #95 Screens runtime
 and #96 Story controls are selected in separate worktrees. #97 waits for #95.
 
+#96 has returned clean local `b77cc26e`, with implementation `3cb6e8f7` and passing
+component, actual-core and wide/compact browser proof. The coordinator audited
+252 inputs, the driver, 122 requests and eight capture hashes. A fresh merger
+will integrate this functional increment. Visual fidelity remains partial;
+Tracks/Reel, full layout/palette and assembled native/human acceptance are open.
+
 Kris selected [spec #87](https://github.com/Caldwell-41/Renpy-editor/issues/87)
 for implementation on 2026-11-09. Branch `codex/spec-87-arithmetic` starts from
 accepted Screens tip `251fb477`. [The delivery record](../tasks/active/shared-arithmetic.md)
