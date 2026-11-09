@@ -375,3 +375,106 @@ requires a new top-level chat with a prepared worktree. Kris's current new-chat
 permission covers prototypes, so the coordinator has requested authorization for
 a Windows qualification chat. No such chat has been created. #92 remains pending
 Windows proof, and no target evidence or acceptance is inferred from this preflight.
+
+## Windows invocation 1 result, 2026-11-09
+
+**Started and passed.** Kris explicitly selected the new Windows qualification
+chat and its host-prepared worktree. That approval supersedes the pending setup
+authorization in the preceding checkpoint. This qualification used only the one
+reserved Windows invocation. Windows feature consumption is now **1 started,
+0 reserved, ceiling 6**. No second invocation ran.
+
+Tested integration SHA: `c7b8157ee90aaf416030de0692abede7e4981c30`.
+Qualification branch: `codex/spec-87-windows-92`. The worktree started clean at
+that exact dispatched commit. Before launch, both committed trees and working
+inputs matched the dispatched source:
+
+- App tree: `56443af74404b1171f8d9d0524f90dbad91e23ba`.
+- Fixture tree: `8f07e3d432d82c4235f7ae3a72601d2e0cf15edf`.
+- `story.rpy` SHA-256:
+  `d8d05c806b6d5ad9f661ef7e5707d6ce4535de8d4ecf719d3d19ec310f941eeb`.
+- `driver.rpy` SHA-256:
+  `e83f3a719fdd470f63d0eed740c8dffcead2be425f67b60e0b8bee0c28b5b399`.
+- Complete working app/fixture hash manifest SHA-256:
+  `025ccb0edcc4d17d0c1ef2fe0adf1ab44d263fc90b0e919d334dbf8f9916561f`.
+
+The target was native Windows x64, `x86_64-pc-windows-msvc`, using Rust/Cargo
+1.90.0 and MSVC 14.50.35717. The process-local development helper loaded existing
+tools. The existing official Ren'Py 8.5.3 archive was rehashed before launch and
+matched the project pin
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`.
+The retained local and repository checksum manifests both matched
+`4b0cad9ac05dc4ca55081bd3a36458c8ea658ed021f09a87276383652b6bd98b`.
+[Retained manifest provenance](../../../spikes/renpy-sdk/published/README.md)
+records its official acquisition; no separate PGP verification is claimed.
+The gate's existing installer verified the archive again. No download was needed.
+
+The exact no-SDK preflight ran first from `app/`:
+
+```sh
+cargo test -p loomlight-core --locked --offline --lib \
+  renpy::tests::source_foundation::arithmetic::arithmetic_fixture_preflight \
+  -- --exact --nocapture
+```
+
+It passed one test in 5.11 seconds, with zero failures or ignored cases. Its
+existing assertions exercised public edits, accepted bytes, shared Undo/Redo,
+reopen, invalid-operand refusal and dirty-source refusal. It started no SDK.
+The existing `cargo-log` checker accepted its positive summary.
+
+The launch receipt recorded the full tested SHA, input hashes, verified archive,
+target, exact SDK command and test executable before launch. The SDK command was
+the reproduction command in [Verification and Mac reservation](#verification-and-mac-reservation),
+with `LOOMLIGHT_RUNTIME_SDK_ARCHIVE` pointing to
+the verified archive and `LOOMLIGHT_FOUNDATION_EVIDENCE_DIR` to fresh ignored
+`.toolchains/arithmetic-92/windows-01/sdk/`. Child `TEMP` and `TMP` used one fresh,
+short directory under the host temporary root. No global settings changed.
+
+The SDK gate passed one test in 93.81 seconds, with Cargo exit 0 and zero failures
+or ignored cases. The existing `cargo-log` checker accepted that summary.
+
+| Case | Exit | Timed out | Output truncated | Duration | Result |
+| --- | ---: | --- | --- | ---: | --- |
+| Compile | 0 | false | false | 1496 ms | Passed |
+| Lint | 0 | false | false | 988 ms | Passed |
+| Normal entry | 0 | false | false | 2249 ms | Passed with exact values |
+| Wrong outcome | 1 | false | false | 3045 ms | Expected rejection |
+
+All four named case records were present exactly once. Normal entry reported
+`ARITHMETIC_92_VALUES score=9007199254740994 money=7 opaque=kept` and `PASSED`.
+The wrong case failed at its deliberate `money == 8` assertion, reported `FAILED`
+and never emitted `ARITHMETIC_92_WRONG_ACCEPTED`. This confirms the required
+deliberate wrong-outcome rejection. Normal compile/lint/runtime outputs contained
+no unexpected diagnostic error.
+
+The gate asserted byte-identical accepted `.rpy` source sets after every SDK case.
+Its terminal record was `arithmetic-sdk-terminal` with `passed:true` and
+`cleanupComplete:true`. The owned temporary SDK/project/profile/saves root no
+longer existed after completion. The executable and every tracked app/fixture
+input hash remained unchanged. The original registered Screens checkout remained
+clean at `251fb47754a0ec1a43ece8763a0b4603b8e54dd8`; its unique preflight evidence
+hashes also remained unchanged. No production code, tests, fixtures or gates changed.
+
+Raw evidence remains in this qualification worktree under ignored
+`.toolchains/arithmetic-92/windows-01/`. Preserve this worktree:
+
+- `launch-receipt.json`, `launch-started.json`, `launch-result.json`, `host.json`,
+  `input-manifest.json` and `input-blobs.txt` retain launch and input identities.
+- `test-executable.exe` retains the x64 test executable; `build.jsonl` and
+  `build.stderr` retain compilation evidence.
+- `preflight.log`, `preflight.stderr` and `preflight/` retain the no-SDK result,
+  accepted source and actual public requests/responses.
+- `sdk.log`, `sdk.stderr`, both Cargo validation receipts and `audit.json` retain
+  the gate, terminal cleanup and result audit.
+- `sdk/arithmetic-sdk-cases.json`, `sdk/arithmetic-requests.json` and
+  `sdk/arithmetic-produced.rpy` retain complete outputs, all three actual public
+  edit requests/responses and accepted source.
+
+Accepted runtime source SHA-256:
+`e0e7243140fc20365150144b5fcb91457ecb03c59d2cbcda58222c1512fb128f`.
+Retained and executed x64 test executable SHA-256:
+`73a9f4f887456e692f173eb455f77f698aed4f034e969138f8eac13d0db22526`.
+The accepted source has generated project-specific IDs; its input fixtures and
+independent value oracle are unchanged. This result supplies the selected Windows
+SDK qualification. Ticket acceptance and integration remain with the coordinator.
+No editor package, native editor launch, manual CI matrix, release or PR-status audit ran.
