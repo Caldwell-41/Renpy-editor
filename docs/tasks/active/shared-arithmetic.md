@@ -1452,3 +1452,34 @@ implement-spec. Runtime/native/human and design acceptance remain open; select
 coherent remaining proof after fixes. SDK use stays Mac 9/20 and Windows 3/20,
 zero reservations. The pinned review head remains the product candidate even if
 later coordinator-only documentation records the review assignment.
+
+### 2026-11-10: review findings and correction selected
+
+Both read-only axes returned at pinned `09404bd1`. The
+[review record](../evidence/arithmetic-review.md) preserves them separately:
+Standards has five P2 documented violations, worst IME draft replacement; Spec
+has four P2 findings, worst silent default-draft loss. Wrong-action focus overlaps
+both axes. Seven distinct code defects require correction; no smell-only or
+substantiated scope-creep finding was reported. Both reviewers preserved tracked
+files/refs and used no browser or SDK. Detailed reproductions remain ignored
+under `.toolchains/arithmetic-review-09404bd1/`.
+
+Select one fresh TDD implementer, request key
+`spec87-review-fixes-20261110`, in a prepared separate worktree based on this
+committed coordinator checkpoint. It owns the affected Story/Screens arithmetic
+presentation and existing draft owners, variable-default retention, narrow typed
+action-failure context if needed, focused tests and canonical evidence/contracts.
+No duplicate evaluator or transaction/history owner. Fix every code finding and
+the already selected #97 grouped-condition/control fidelity obligation, preserving
+the approved reference and full #110 boundary. The coordinator owns integration,
+status/ledger, tickets and PR. A fresh merger follows the returned correction.
+
+Spec P4 needs an explicit decision: #96's Tracks/Reel and cross-view drafts depend
+on the unselected #110 workspace. The coordinator asked Kris whether to move that
+workspace acceptance to #110 or keep full #87/#96 blocked on it. The question stays
+pending; independently authorized code/design corrections proceed. The implementer
+must neither change criteria nor implement #110. Final acceptance remains open.
+SDK counters stay Mac 9/20 and Windows 3/20, zero reservations. Focused browser
+comparisons are selected for approved controls; no SDK/native/package/manual-CI
+run is allocated. Return exact corrected candidates and new runtime-input scope
+for subsequent coherent qualification, not an inherited full-feature pass.

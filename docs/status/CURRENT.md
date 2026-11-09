@@ -20,8 +20,12 @@ scoped palette correction. New UI-emitted defaults, formulas, conditions/text an
 created-imagebutton fixtures have no new SDK proof. Full visual/native/human
 acceptance is pending. The coordinator has pinned full integration review at
 `09404bd1` against accepted Screens base `251fb477`. Fresh read-only Standards
-and Spec reviewers inspect the same complete diff. In-scope fixes and remaining
-qualification/design work follow.
+and Spec reviewers inspected the same complete diff. The
+[review](../tasks/evidence/arithmetic-review.md) found five Standards and four Spec
+P2 findings, including one overlap. One fresh implementer is selected for the seven
+code defects and outstanding #97 control fidelity. Kris's decision on moving the
+#96 workspace acceptance to #110 remains pending. Qualification and final acceptance
+remain open.
 Draft PR #122 retains its Screens base and full-spec closing references.
 
 #94 decimal/public services are integrated by conflict-free normal merge

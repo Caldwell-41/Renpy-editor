@@ -265,8 +265,13 @@ receipt; no watch was registered. Integration/status/PR ownership returns to the
 coordinator at this handoff. Full integration review is selected at `09404bd1`
 against accepted Screens base `251fb477`, with fresh read-only Standards and Spec
 agents. The [review assignment](../tasks/active/shared-arithmetic.md#2026-11-10-full-integration-review-selected)
-owns scope and boundaries. Aggregate both axes, resolve in-scope findings through
-one fresh implementer, then select coherent remaining qualification and design/acceptance
+owns scope and boundaries. Both axes returned. The
+[review record](../tasks/evidence/arithmetic-review.md) preserves five Standards
+and four Spec P2 findings separately. A fresh implementer is selected for all seven
+distinct code defects plus the existing #97 approved-control fidelity obligation.
+Kris's #96/#110 scope decision is pending; fixes proceed independently, with no
+criteria change or #110 implementation. After correction and a fresh merger,
+select coherent remaining qualification and design/acceptance
 work. No successor implementation or qualification starts in this merger. SDK totals
 remain Mac 9/20 and Windows 3/20, zero reservations. Preserve every separate worktree
 and receipt. No remote qualification remains reserved or running.
