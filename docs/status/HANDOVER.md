@@ -64,10 +64,14 @@ scope-closeout successor needs its own automatic checks. Use the T3 PR watcher
 for a pending check and audit the exact run on wake. Record that final receipt on
 #87 rather than creating another receipt-only commit.
 
-Next: publish the scope reconciliation, mark PR #122 ready for review under the
-selected implementation workflow, and finish its automatic-check audit. Keep
-#91–#97 open for PR review/merge disposition. Do not start #110 or claim its human
-acceptance. No merge, release or parent-branch promotion follows automatically.
+Kris selected the fresh review's variable-default validation correction and PR
+update. The [follow-up evidence](../tasks/evidence/arithmetic-review.md#variable-default-validation-follow-up-2026-11-10)
+records the failing UI test, shared-validator fix and passing focused UI/core
+checks. The local full suite retains a Python 3.9.6 `tomllib` failure; required
+CI uses supported tools. Next: publish the correction to the existing ready
+PR #122, then use its T3 watcher and audit the new exact-head automatic checks.
+Keep #91–#97 open for PR review/merge disposition. No merge, #110 implementation,
+release or parent-branch promotion is selected.
 
 The earlier sections below retain separate project outcomes and unique recovery
 context. Their old next-action statements do not override this selected outcome.

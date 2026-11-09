@@ -29,7 +29,10 @@ At product checkpoint `f42747ef`, audited automatic CI passes 390 frontend tests
 all 17 browser/dispatch fixtures, build, formatting and repository validation.
 The [issue receipt](https://github.com/Caldwell-41/Renpy-editor/issues/87#issuecomment-6748668005)
 owns the final CI audit. The scope-closeout successor changes records only and
-requires its own automatic checks. The implementation is ready for PR review;
+requires its own automatic checks. A subsequent review found one variable-default
+validation defect and no Spec findings. The [TDD correction](../tasks/evidence/arithmetic-review.md#variable-default-validation-follow-up-2026-11-10)
+passes focused UI tests and the actual-main/core journey; its new publication
+still needs exact-head automatic CI. The implementation is ready for PR review;
 issues remain open for review/merge disposition. No PR merge is selected. Preserve
 all unique qualification evidence and approved reference worktrees. The
 [delivery record](../tasks/active/shared-arithmetic.md) owns accounting and continuation.

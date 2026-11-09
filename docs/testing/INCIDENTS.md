@@ -1099,3 +1099,15 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   consumers pass with focus, source/history and error assertions intact. No
   production or SDK input changed; no longer timeout or deleted assertion.
 - **Evidence:** [CI consumer correction](../tasks/evidence/arithmetic-review.md#automatic-ci-fixture-consumers-corrected-2026-11-10).
+
+## H77. Variable-default fields bypass completion validation
+
+- **Class/search:** frontend; decimal `1e`, missing blur error, invalid correction
+  clears `aria-invalid`, whole-number default inspector.
+- **Cause/correction:** custom default-field listeners only remembered on blur
+  and cleared errors on every input. Use the shared `validateField` with the
+  submission value reader; retain raw drafts and original source revisions.
+- **Regression:** production UI checks decimal/integer blur, invalid corrections,
+  IME, Cancel and no invalid writes. The actual-main/core journey retains
+  default drafts through unrelated creation, history, refusals and reopen.
+- **Evidence:** [TDD follow-up](../tasks/evidence/arithmetic-review.md#variable-default-validation-follow-up-2026-11-10).

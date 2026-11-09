@@ -1809,3 +1809,13 @@ Windows 4/20, zero reservations**. Unique evidence and approved references remai
 in their worktrees as retained cleanup exceptions. No forced removal or branch
 deletion is selected. Superseded live status text is replaced with compact links;
 the remaining historical project records retain their existing recovery purpose.
+
+### 2026-11-10: variable-default review correction
+
+Kris selected the fresh review's one Standards P2 for correction and PR update.
+The [follow-up evidence](../evidence/arithmetic-review.md#variable-default-validation-follow-up-2026-11-10)
+records the failing UI test, shared-validator fix, passing focused tests and
+actual-main/core journey, and the local full-suite Python limitation. Publish
+the correction to PR #122 and audit its new automatic checks. The validation
+plan still selects Repository quality only. No SDK/native/package operation,
+merge or #110 work is selected; existing operation counts remain unchanged.

@@ -1045,3 +1045,37 @@ attempts, raw receipts, retained executables and approved design references rema
 preserved. Evidence-bearing worktrees are retained as cleanup exceptions under
 WORKFLOW rather than deleting their unique ignored artifacts. No force removal,
 branch deletion, parent-PR merge, release or #110 implementation is selected.
+
+## Variable-default validation follow-up, 2026-11-10
+
+A fresh review of PR #122 at `ebc11afa` found one Standards P2 and no Spec
+findings. The variable-default inspector remembered input on blur and cleared
+all errors on every edit. Decimal `1e` showed no blur error; Save showed one,
+then editing to the still-invalid `1e+` removed it. This bypassed UI.md's shared
+validation timing rules. Kris selected the correction with TDD and
+fix-root-causes, including publication to the existing PR.
+
+The existing public UI boundary is already approved in the delivery brief.
+`variable-defaults.dom.test.ts` drives production Variables controls with mocked
+IPC. Before the fix it fails at "money validates on blur". After the fix it
+passes for decimal and whole-number defaults, invalid corrections, associated
+errors, submission focus, IME input, Cancel and zero invalid writes. The
+inspector now uses `validateField` with the same value reader as submission;
+raw draft, selection and revision retention keep their existing owner. The
+Screens dispatch fixture now handles the accessible description's ID list.
+
+Validation: all 29 focused default, supporting-authoring, Story arithmetic,
+Screens interaction and protocol tests pass. Production build and repository
+validation pass, and the complete
+`screens-arithmetic-core.dispatch.mjs` production-main/core journey passes,
+including retained defaults, source/history/reopen and ordinary refusals.
+The first full local frontend run passed 389/391. Its new-test DOM ownership
+failure is corrected by putting the test in its own file, then both affected
+files pass together. The other failure is the host's Python 3.9.6 missing
+`tomllib` in an existing Windows probe validator; the runbook requires 3.11+.
+This remains a failed local full run, not a pass. Local Node is 26.8.1 and npm
+11.19.0; the PR uses its pinned CI tools for the required complete checks.
+
+Publication requires new exact-head automatic CI. No SDK, browser/native app or
+package run was started. SDK totals remain Mac 12/20 and Windows 4/20, with zero
+reservations. Existing design and runtime evidence retains its original scope.

@@ -5,7 +5,7 @@ import { mountRewrite, type RewriteController } from "./rewrite-ui.ts";
 import { renderReferenceLibrary, type ReferenceController, type ReferenceKind, type ReferenceWorkspace } from "./reference-ui.ts";
 import { catalogDialog } from "./catalog-dialog.ts";
 import { assetImport, type ImportBatch } from "./asset-import-ui.ts";
-import { technicalName, technicalNameInput, technicalNameHelp, namingHelp } from "./authoring-input.ts";
+import { technicalName, technicalNameInput, technicalNameHelp, namingHelp, validateField } from "./authoring-input.ts";
 import { icon } from "./icons.ts";
 import { catalogue } from "./catalog-ui.ts";
 import { operationProgress } from "./operation-progress.ts";
@@ -991,17 +991,26 @@ function renderVariables(workspace: HTMLElement, project: OpenProject, model: Au
     hint.textContent = variable.variableType === "decimal" ? "Decimal default. Whole-number input is also accepted." : variable.variableType === "int" ? "Exact whole number in the signed 64-bit range." : "Declaration default. Game values stay separate.";
     const problem = document.createElement("p"); problem.className="field-error";problem.role="status";problem.id=`variable-default-${crypto.randomUUID()}`;control.setAttribute("aria-describedby",problem.id);
     problem.textContent=draft.error;if(draft.error)control.setAttribute("aria-invalid","true");
+    const readDefault = (): boolean | number | string => {
+      const raw = control.value;
+      if (variable.variableType === "int" && !validInt64(raw)) throw Error("Enter a canonical signed 64-bit whole number.");
+      return variable.variableType === "bool" ? raw === "true" : variable.variableType === "decimal" ? decimalValue(raw) : raw;
+    };
+    const validateDefault = validateField(control, () => {
+      problem.textContent = ""; draft.error = "";
+      try { readDefault(); }
+      catch (error) { draft.error = message(error, "Check the default value."); throw error; }
+    });
     const save=button("Save Default","button primary"),cancel=button("Cancel"),actions=document.createElement("div");actions.className="row-actions";actions.append(save,cancel);
-    const reset=()=>{drafts.delete(variable.id);draft.raw=String(variable.defaultValue);draft.original=draft.raw;draft.revision=variable.source.sourceRevision;draft.error="";control.value=draft.raw;delete panel.dataset.unsubmitted;problem.textContent="";control.removeAttribute("aria-invalid");control.focus();};
+    const reset=()=>{drafts.delete(variable.id);draft.raw=String(variable.defaultValue);draft.original=draft.raw;draft.revision=variable.source.sourceRevision;control.value=draft.raw;delete panel.dataset.unsubmitted;validateDefault();control.focus();};
     cancel.onclick=reset;
-    for(const event of ["input","change"])control.addEventListener(event,()=>{remember();draft.error="";if(control.value!==draft.original)panel.dataset.unsubmitted="true";else delete panel.dataset.unsubmitted;problem.textContent="";control.removeAttribute("aria-invalid");});
+    for(const event of ["input","change"])control.addEventListener(event,()=>{remember();if(control.value!==draft.original)panel.dataset.unsubmitted="true";else delete panel.dataset.unsubmitted;});
     save.onclick=async()=>{
+      try { validateDefault(); } catch { control.focus(); return; }
       const token=beginAuthoringCompletion(project,save);if(!token)return;
       let accepted=false;save.disabled=true;cancel.disabled=true;control.disabled=true;
       try {
-        const raw=control.value;
-        if(variable.variableType==="int"&&!validInt64(raw))throw Error("Enter a canonical signed 64-bit whole number.");
-        const defaultValue=variable.variableType==="bool"?raw==="true":variable.variableType==="decimal"?decimalValue(raw):raw;
+        const defaultValue=readDefault();
         await projectValue(project,"variable.update",{id:variable.id,expectedSourceRevision:draft.revision,defaultValue});
         accepted=true;if(completionIsCurrent(token)){drafts.delete(variable.id);delete panel.dataset.unsubmitted;await reload();}
       } catch(error) {if(completionIsCurrent(token)){draft.error=message(error,"Default could not be saved. Input retained.");remember();problem.textContent=draft.error;control.setAttribute("aria-invalid","true");}}
