@@ -72,7 +72,7 @@ one becomes necessary. Routine checks and review have no numerical limits.
 
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
-| macOS ARM64 SDK qualification | 20 | 9 | 0 |
+| macOS ARM64 SDK qualification | 20 | 9 | 1 for UI-emitted source |
 | Windows x64 SDK qualification | 20 | 3 | 0 |
 
 ## Execution ledger
@@ -1575,3 +1575,50 @@ P4 decision and remaining runtime/design/native/human acceptance selection.
 CURRENT/HANDOVER retain inherited excess length to preserve unique earlier
 qualification and recovery context; this handoff replaces superseded live wording
 without creating another status archive.
+
+### 2026-11-10: UI-emitted source qualification selected
+
+The corrected integration is clean and published at
+`1d90da1f7dd3e7a01e2556379ebad7b20cf8ffc3`, normal merge `b52a6723` preserving
+coordinator `636371b8` and returned `354b5221`. All 873 inputs and complete
+app/fixture/script/CI trees match the correction. Reuse final affected proof and
+unchanged earlier cases under the integration receipt's explicit scope. Fresh
+typecheck, nine protocol checks, 631 recorded-envelope checks, contract/branch-plan,
+repository and whitespace pass. No independent re-review approval is inferred.
+
+Select a fresh separate-worktree test implementer, request key
+`spec87-ui-runtime-qualification-20261110`, to prepare portable fixture inputs and
+extend the existing SDK test owner for actual UI-emitted Story/Screens source.
+The corrected worker's `runtime-inputs.json` and four hash-pinned emitted sources
+own the captured inputs; original #94/#95 qualification remains unchanged. Use
+existing fixture/adapters/receipts, not a new standalone gate or evaluator.
+Keep captured bytes and asset identities traceable. Record any relocation or
+test-host arrangement separately rather than silently changing UI source.
+
+Before SDK use, require SDK-free source/dependency/selector/oracle preflight,
+verified official Ren'Py 8.5.3 archive/provenance, a clean committed candidate,
+pinned build/executable and complete input manifest. Qualify compile/lint, normal
+entry with exact independently expected values/types/text/conditions, ordered
+text/image action behavior and deliberate wrong-outcome rejection. Preserve
+accepted source, all case outputs and owned-process/temp cleanup. Use existing
+Mac `native_desktop` admission/power handling through scoped host execution.
+The fixture must distinguish actual SDK behavior from data-only UI/core evidence;
+it cannot obtain a pass by copying expected values from the implementation.
+
+One Mac SDK invocation is reserved for the prepared coherent batch after readiness.
+Use a fresh ignored `mac-01` output under this assignment. A started fixture
+invocation consumes the reservation even if preparation, display or assertions
+fail; preflight refusal consumes none. No retry is selected. Record exact physical
+SDK child records as well as the selected invocation. No Windows invocation is
+reserved yet; the coordinator routes it after audited Mac readiness/publication.
+Before dispatch, use is **Mac 9/20 started + 1 reserved; Windows 3/20 started**.
+No editor-native/package, browser, canvas-helper, manual-CI or watch is selected.
+
+The implementer owns only qualification fixtures, existing test/receipt consumers,
+their focused public preflights and the review's qualification evidence. Production
+semantics/UI, dependencies/CI/config, approved references, status/ledger/tickets/PR
+remain coordinator-owned. Report any actual product failure before changing it.
+Normally merge current integration before return; preserve every receipt and
+return a clean committed source/result with the reserved start's exact disposition.
+A fresh merger follows test implementation. P4 and the #96/#110 scope question
+stay pending and do not block this independently selected runtime proof.

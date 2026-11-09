@@ -197,7 +197,8 @@ case bring distinct passing Rust coverage to 55, including SDK.
 Fresh pinned production typecheck, recorded contract/branch-plan, repository and
 whitespace checks pass. No unchanged full suite was repeated. Merger audit receipts
 are in integration's ignored `.toolchains/arithmetic-95/integration-merge/`.
-Current use is Mac 9/20 and Windows 3/20, with zero reservations. The single
+At that Windows integration checkpoint, use was Mac 9/20 and Windows 3/20,
+with zero reservations. The single
 Windows #95 run passed at `a2c7ab9734cfe35433a3276d39f12c4ebdf955e7`.
 Evidence `55f89ddfaab237d6786ff4242eb0b5b92f9dc666` is integrated by normal
 merge `7bc452a54d2a364b81ee139f37e250e7560f7e36`. The coordinator reviewed raw
@@ -280,12 +281,15 @@ survive. New receipts are separate under ignored
 
 Spec P4 and Kris's #96/#110 scope decision stay pending. Tracks/Reel/cross-view
 draft acceptance is unchanged; no #110 work or review approval is inferred.
-The coordinator must select coherent qualification for the new emitted UI source
-and remaining design/native/human acceptance. Earlier #94/#95 both-target proof
-keeps its original scope. This merger starts zero SDK/browser/canvas-helper/native/
-package/manual-CI/watch operations. SDK totals remain Mac 9/20 and Windows 3/20,
-zero reservations. Preserve every separate worktree and receipt. No remote
-qualification remains reserved or running.
+The [UI-emitted qualification assignment](../tasks/active/shared-arithmetic.md#2026-11-10-ui-emitted-source-qualification-selected)
+selects a fresh separate test worktree and one Mac SDK invocation after cheap
+readiness, source/executable identity and official archive checks. Mac is 9/20
+started plus one reserved; Windows is 3/20 with zero reserved. Do not retry a
+started failure or infer native/package/human proof. Coordinator retains
+integration/status/PR; the test worker owns only its fixtures/tests/evidence.
+Route Windows only after the Mac result/candidate is audited and published,
+preserving the existing remote checkout and all receipts. Earlier #94/#95 proof
+keeps its original scope. No remote qualification is reserved or running.
 
 The [review CI correction](../tasks/evidence/arithmetic-review.md#ci-caller-correction-before-review-fixes)
 migrates the obsolete `Edit default` smoke caller to the current inspector. All

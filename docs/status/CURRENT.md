@@ -23,6 +23,11 @@ keeps its original scope. Full workspace/native/human and final acceptance remai
 open. Integration/status/PR ownership returns to the coordinator for that selection.
 Draft PR #122 retains its Screens base and full-spec closing references.
 
+The [qualification selection](../tasks/active/shared-arithmetic.md#2026-11-10-ui-emitted-source-qualification-selected)
+assigns portable UI-emitted source preparation and one bounded Mac SDK invocation
+after preflight. Usage is Mac 9/20 started plus one reserved, Windows 3/20 started
+with none reserved. No Windows/native/package run is selected yet.
+
 #94 decimal/public services are integrated by conflict-free normal merge
 `854f6ad1`, preserving coordinator `c177d1cd` and returned `b31929f6`.
 All tracked app/runtime/fixture inputs equal Mac-qualified `d1c201f1`; all 208
@@ -93,7 +98,8 @@ and #92 fixture inputs remain unchanged. The
 [#94 contract](../tasks/evidence/arithmetic-94.md#public-contract-for-95-and-96)
 is the merged baseline for dependent work.
 On 2026-11-09 Kris raised both SDK ceilings from six to 20 started invocations.
-Totals are Mac 9/20 and Windows 3/20 started, with no reservations.
+Totals are Mac 9/20 and Windows 3/20 started, with one Mac invocation reserved
+for the selected UI-emitted source qualification and none reserved on Windows.
 #95's fourth Mac attempt passed compile/lint, all 22 normal assertions, exact
 ordered/current values, both button kinds with click/keyboard, Finish, deliberate
 wrong-outcome rejection and cleanup. The coordinator verified all 869 inputs,
