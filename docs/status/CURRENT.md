@@ -48,8 +48,8 @@ and #92 fixture inputs remain unchanged. The
 [#94 contract](../tasks/evidence/arithmetic-94.md#public-contract-for-95-and-96)
 is the merged baseline for dependent work.
 On 2026-11-09 Kris raised both SDK ceilings from six to 20 started invocations.
-Totals remain Mac 5 started / 0 reserved and Windows 1 started / 0 reserved;
-15 Mac and 19 Windows starts remain. The increase selects no run or successor.
+Totals are Mac 5 started / 0 reserved and Windows 1 started / 1 reserved for
+combined #93/#94 proof. The delivery record owns current limits and allocation.
 New whole-number/decimal Windows proof will be combined against #94 before
 dependent #95/#96 work. The corrected #94 fixture retains integer precision, precedence,
 grouping and negative floor/remainder witnesses. Windows formula proof remains

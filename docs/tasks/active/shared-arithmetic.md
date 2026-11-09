@@ -56,9 +56,9 @@ Read TESTING and the applicable runbooks before qualification.
 
 SDK qualification has a feature-wide ceiling of **20 started invocations per target**,
 macOS ARM64 and Windows x64. On 2026-11-09 Kris explicitly increased both ceilings
-from six to twenty. Cumulative usage stays Mac 5 and Windows 1, with no reservations;
-15 Mac and 19 Windows starts remain. This changes no counter and selects no new
-SDK run or successor work. Historical six-start records below describe their time.
+from six to twenty. The table below owns current cumulative usage and reservations.
+The increase changed no counter and selected no new SDK run or successor work.
+Historical six-start records below describe their time.
 A started fixture invocation counts, including failures and cancellation; preflight
 refusals do not. Batch relevant assertions and reuse unchanged inputs.
 Record reservations, starts and exact source/evidence before another invocation.
@@ -70,7 +70,7 @@ one becomes necessary. Routine checks and review have no numerical limits.
 | Operation | Ceiling | Started | Reserved/uncertain |
 | --- | ---: | ---: | ---: |
 | macOS ARM64 SDK qualification | 20 | 5 | 0 |
-| Windows x64 SDK qualification | 20 | 1 | 0 |
+| Windows x64 SDK qualification | 20 | 1 | 1 for combined #93/#94 |
 
 ## Execution ledger
 
@@ -782,3 +782,34 @@ ownership returns to the coordinator. Preserve every checkout and raw receipt.
 CURRENT/HANDOVER retain their existing size exception for unique prior recovery;
 this handoff changes only their current arithmetic state. Current sizes are
 5,112 words and 9,176 words respectively.
+
+
+### 2026-11-09: combined Windows #93/#94 qualification selected
+
+The coordinator received the completed merger and verified clean integration
+`b919ac4a`; its app/fixture inputs still equal qualified `d1c201f1`. SUNDOWN is
+reachable and its Loomlight project remains registered at the preserved project
+root. Existing Windows qualification branch `codex/spec-87-windows-92` contains
+#92 evidence commit `c7e4e345`, which is an ancestor of current integration.
+
+One Windows SDK invocation is reserved for the combined #94 selector after cheap
+preflight and exact candidate verification. Use a fresh remote test delegate and
+reuse the existing qualification worktree. Confirm its actual state/ownership,
+then safely fast-forward to this published coordinator checkpoint. Preserve the
+registered project-root checkout, all ignored evidence and every unrelated ref.
+No new checkout or top-level chat is required by this assignment.
+
+The remote assignment owns no production changes. It runs the existing decimal
+fixture/draft preflights, verifies the official archive and retains a freshly built
+x64 test executable plus input/launch receipts before the single SDK launch.
+Require compile/lint, all integer/decimal value/type/text/sample witnesses,
+wrong-outcome rejection, unchanged accepted source, complete records and cleanup.
+Detailed Windows results belong in `docs/tasks/evidence/arithmetic-94.md` and fresh
+ignored `.toolchains/arithmetic-94/windows-01/` in that qualification worktree.
+
+Accounting before dispatch is **Mac 5/20 started, zero reserved; Windows 1/20
+started, one reserved**. Fifteen Mac and eighteen Windows starts are unallocated.
+A preflight refusal consumes no start; any actual SDK start, including failure,
+consumes the reservation. No retry or successor implementation is selected.
+Combined Windows proof remains required before #95/#96. The coordinator retains
+integration mutation and ledger ownership while the remote test assignment runs.

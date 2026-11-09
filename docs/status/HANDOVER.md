@@ -114,8 +114,7 @@ wrong-outcome rejection, four case records and SDK/desktop cleanup. Preserve
 checkout. All 40 retained files remain unchanged; no qualification is running.
 
 Kris explicitly increased both feature-wide SDK ceilings from six to **20** on
-2026-11-09. Cumulative usage remains **Mac 5 started, Windows 1 started, zero
-reservations**; **15 Mac and 19 Windows starts remain**. The
+2026-11-09. Cumulative usage remains **Mac 5 started, Windows 1 started**. The
 [delivery policy](../tasks/active/shared-arithmetic.md#verification-and-operation-limits)
 owns current limits. Historical six-start receipts keep their real accounting.
 This change selects no new SDK run or successor work.
@@ -126,9 +125,15 @@ coordinator audit. No CI watch, manual dispatch, SDK, native-editor/package or
 browser operation ran in this merger assignment. Exclusive integration mutation
 ownership returns to the coordinator when the merger reports completion.
 
-Next, the coordinator routes combined #93/#94 Windows qualification against the
-corrected fixture before #95/#96 starts. No Windows run is allocated by this
-handoff, and #92's old Windows result does not prove formulas. Tickets remain open
+The coordinator has now reserved one combined #93/#94 Windows SDK invocation
+against the corrected fixture before #95/#96 starts. SUNDOWN is reachable. A fresh
+remote test delegate owns only the existing Windows qualification worktree,
+`codex/spec-87-windows-92`, and the #94 evidence note. It may fast-forward that
+worktree to the published coordinator allocation after confirming clean state and
+ancestry. Preserve the registered project-root checkout and all old receipts.
+No SDK launch is known to have started; the reservation remains charged until the
+delegate returns actual start/result evidence. #92's old result does not prove
+formulas. Tickets remain open
 for final review. #95/#96/#97 production and full #87 acceptance remain pending;
 #97 still requires qualified #95. Preserve every worktree/evidence directory and
 the approved #91/#97 design reference. Keep the PR draft; no final review,
