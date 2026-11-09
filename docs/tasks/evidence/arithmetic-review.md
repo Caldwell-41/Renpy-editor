@@ -517,3 +517,12 @@ correction and evidence are ready for a fresh merger. The coordinator must selec
 any further Mac invocation before the missing Screens/Finish/wrong-outcome proof
 can run, then route Windows qualification. This assignment grants no retry or
 Windows start and claims no full acceptance, native editor proof or P4 resolution.
+
+The attempted driver SHA-256 is
+`8cd35fe7de9450d47e269f42bb8b085a2c73abe0f1dfd26126654ea2f82c4d05`;
+the corrected, SDK-unrun driver is
+`dc52be7ec9edbe66e208c496dccca41552bc6d6a287f4b316987982c301270ac`.
+The final SDK-free action result is 19 passed, zero failed, two named SDK gates
+ignored; final formatting, repository validation (1,880 files) and whitespace pass.
+No temporary dependency link was created. No source/evidence worktree, old target,
+retained binary or historical receipt was removed. Publication remains unselected.
