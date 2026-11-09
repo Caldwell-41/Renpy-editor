@@ -2,6 +2,14 @@
 
 ## Shared arithmetic selected
 
+#97 returned local implementation `0d49e005`, tested at `679e0df7`, for a fresh
+integration merger. The coordinator matched all 872 frozen inputs, the Help driver,
+three emitted-source hashes and the 11-stage actual-main/core journey. Reuse 93
+distinct Rust and 38 focused renderer passes under their recorded scope. The
+[handoff](../tasks/active/shared-arithmetic.md#2026-11-10-97-returned-and-coordinator-audit)
+owns integration scope and open visual/native/runtime acceptance. New UI-generated
+fixtures have no new SDK proof. #97 remains open for integration and final review.
+
 #94 decimal/public services are integrated by conflict-free normal merge
 `854f6ad1`, preserving coordinator `c177d1cd` and returned `b31929f6`.
 All tracked app/runtime/fixture inputs equal Mac-qualified `d1c201f1`; all 208
@@ -22,7 +30,7 @@ records the Windows-ready identity. Windows evidence `55f89ddf` is audited and
 integrated through `7bc452a5`. All 22 assertions, exact witnesses, required wrong
 outcome and cleanup passed at `a2c7ab97`; 883 input hashes remained unchanged.
 The [Windows result](../tasks/evidence/arithmetic-95.md#windows-invocation-1-passed-2026-11-10-aest)
-completes #95's both-target prerequisite. #97 production controls are selected next.
+completes #95's both-target prerequisite. #97's returned controls are the next merge.
 
 #96's functional increment is integrated by conflict-free normal merge `25fa2e1c`,
 preserving coordinator `157c1ef8` and returned `b77cc26e`. All app/fixture inputs

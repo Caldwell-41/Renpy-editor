@@ -27,7 +27,8 @@ Screens branch. No merge of that PR or release is selected.
   Windows proof is integrated through `235d99ac`. #96's functional increment is
   integrated; its full acceptance remains open. #95 is integrated at `0382ae3c`
   with qualified Mac runtime proof. Windows evidence `55f89ddf` is audited and
-  integrated through `7bc452a5`; #95 is qualified on both targets. #97 is selected.
+  integrated through `7bc452a5`; #95 is qualified on both targets. #97 has returned
+  a local implementation for integration and final review; acceptance remains open.
 - Backend sequence: #92, then #93, then #94. #95 follows #94.
 - Story UI #96 follows approved #88 and qualified #94.
 - Screens/decimal UI #97 follows approved #91 and qualified #95.
@@ -1340,3 +1341,52 @@ its original actions-only scope. The coordinator edits none of these code files
 in parallel. No additional SDK/native/package/manual-CI operation is allocated;
 counts remain Mac 9/20, Windows 3/20, zero reservations. The implementer normally
 merges the latest coordinator checkpoint before returning its scoped result.
+
+### 2026-11-10: #97 returned and coordinator audit
+
+The fresh implementer returned clean `t3/screens-decimal-arithmetic-controls` at
+`0d49e0050aa17bfc0d253dfcfc20cc37e87f052b`, containing coordinator `01993e91`.
+Tested source is `679e0df78d5f25afcc95af751d74d59788dab820`; the successor changes
+only its evidence note. The note owns all 26 changed paths and exact commands.
+Both scoped core exceptions remain within their assigned owners. Numeric semantics,
+Screens runtime generation, history internals, approved references and Story
+arithmetic controls remain unchanged.
+
+The coordinator verified all 872 frozen hashes against the tested Git checkout
+representation and returned working tree. Four unchanged PowerShell files use
+their explicit CRLF checkout filters. The retained Help binary hash and three
+accepted-source hashes match; the actual-main/core journey has 11 passing stages,
+473 protocol records, driver exit 0 and fixture cleanup. The inherited interaction
+and control dispatch consumers pass on the implementation. Reuse the worker's 93
+distinct Rust and 38 focused renderer passes, build/typecheck and formatting under
+their recorded scope. Ignored SDK gates and earlier failed/partial runs add no passes.
+The ignored local receipt is `.toolchains/arithmetic-97/coordinator-audit.json`;
+preserve the worker's complete `.toolchains/arithmetic-97/` evidence and binary.
+
+The coordinator inspected eight paired capture files. Equation ordering, source
+field sizing and named controls follow A2; generic numeric conditions still use
+the existing stacked production form instead of the reference's grouped comparison
+row. Surrounding host/background and placement differences remain visible. Earlier
+textbutton comparison captures precede the final scoped palette correction; final
+extended imagebutton/condition captures retain their actual source scope. These are
+inputs to final design review, not approved deviations or full visual acceptance.
+Keep #96's previously recorded limits distinct. Native/human acceptance remains open.
+
+New UI-emitted defaults, ordered formulas, condition/text and created-imagebutton
+source have no SDK proof. #94/#95 evidence retains its exact original input scope.
+Final review must assess those new runtime inputs and remaining design/acceptance
+requirements before selecting a coherent bounded qualification candidate. Current
+usage stays **Mac 9/20, Windows 3/20, zero reservations**; no SDK/native/package or
+manual-CI operation is selected by this audit or merge.
+
+A fresh merger receives exclusive integration-checkout/status/PR mutation ownership
+from the coordinator checkpoint containing this entry. Normally merge `0d49e005`,
+preserve both histories, verify complete app/fixture equivalence to `679e0df7` and
+the frozen receipt, then run affected fresh combined checks. Preserve all approved
+references, unique evidence and coordinator records. Update CURRENT/HANDOVER, this
+ledger and draft PR #122, retaining the Screens base and eventual full-spec closing
+references. Publish and verify a clean tracking checkout. Keep #97 and all remaining
+acceptance open; do not promote or merge the parent PR. No successor implementation,
+SDK/browser/native/package/manual-CI run or watch belongs to this merger. Return
+mutation ownership to the coordinator for the full integration code-review skill,
+in-scope fixes and the remaining qualification/design/acceptance work.

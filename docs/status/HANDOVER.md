@@ -209,8 +209,8 @@ owns full identities and cases. The ignored local coordinator audit is
 `.toolchains/arithmetic-95/windows-coordinator-audit.json`. Preserve the remote
 qualification checkout and all 154 new and 71 prior evidence files.
 
-#95 is qualified on both targets and stays open for final review. #97 is selected
-for a fresh implementer in a separate prepared worktree. The
+#95 is qualified on both targets and stays open for final review. #97 returned
+clean local `0d49e005`, tested at `679e0df7`, in its separate worktree. The
 [current assignment](../tasks/active/shared-arithmetic.md#2026-11-10-windows-95-audited-and-97-selected)
 owns scope and file boundaries. Build approved A2 arithmetic controls and decimal
 setup/default, condition, text and sample inputs through existing services. Actual
@@ -224,6 +224,14 @@ the existing shared history owner. It does not authorize a separate history stac
 The [new-imagebutton exception](../tasks/active/shared-arithmetic.md#2026-11-10-97-new-imagebutton-validation-exception)
 also assigns `AddImageButton` admission through the existing composition validation
 path, with no-write/history and real-control proof. Other command boundaries remain.
+The [coordinator audit and merger assignment](../tasks/active/shared-arithmetic.md#2026-11-10-97-returned-and-coordinator-audit)
+records the matching 872 inputs, driver, emitted-source hashes and 11-stage real
+journey. A fresh merger owns integration/status/PR mutation until it returns;
+the coordinator edits none in parallel. Merge the returned implementation normally,
+verify full app/fixture equivalence, run affected combined checks and publish the
+draft without claiming final acceptance. Keep design differences and unqualified
+new runtime fixtures visible for the full integration review. The worker's ignored
+`.toolchains/arithmetic-97/` retains unique failures, binary, source and visual proof.
 The Story shadow-token correction retains its original comparison limits.
 Automatic quality run `42630146353` succeeded at `a2c7ab97`; later heads require
 their own selected checks and final audit.
@@ -240,8 +248,9 @@ and both approved design references. No final review, ready-for-review promotion
 parent-PR merge, automerge or release is selected. The published checkpoint retains
 the existing draft/base and full-spec closing references. Final-head automatic
 checks await coordinator audit; no watch was registered. Integration/PR mutation
-ownership stays with the coordinator while the #97 implementer owns its separate
-worktree. No remote qualification remains reserved or running.
+ownership is transferred only to the fresh #97 merger until its handoff. Preserve
+the separate implementation worktree and all receipts. No remote qualification
+remains reserved or running.
 
 The earlier sections below retain prior work and recovery context. Their
 unselected-next-task statements do not override this explicit #87 selection.
