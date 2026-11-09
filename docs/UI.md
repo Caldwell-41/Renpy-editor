@@ -11,7 +11,9 @@ contract linked from each section, and exact implemented values live in the code
   and the [Story authoring notes](design/story-revamp/README.md).
 
 This is the target design. Production still ships the charcoal/copper and paper/teal
-palettes and the earlier Story layout until the Story redesign is integrated.
+palettes and the earlier Story layout. The app-wide palette change must ship before
+or with Story Combined v1, as recorded in its
+[release scope](design/story-revamp/README.md#production-release-scope).
 
 ## Design intent
 
@@ -40,7 +42,12 @@ Each theme has its own palette. Dark uses slate surfaces with a brass accent; Li
 uses warm off-white surfaces with a slate-blue accent. Game preview colours stay
 independent of the app theme. Components use semantic tokens only, never literal
 colours. The status tokens (`--status-success`, `--status-warning`, `--status-error`,
-`--status-info`, `--status-partial`) keep their current values.
+`--status-info`, `--status-partial`) retain their meanings. Adjust their values where
+needed to fix the known text-contrast gaps on the new hover and selected backgrounds.
+
+Implement the app-wide colour change as a separate slice. Update the shared tokens
+for both themes and check readability on existing screens. Layout redesigns remain
+separate work.
 
 | Token | Dark | Light |
 | --- | --- | --- |
@@ -305,10 +312,13 @@ its state. When space runs short, secondary panels collapse before the main edit
 shrinks. The footer and warning regions keep a fixed height so editing content never
 moves.
 
-The header always shows the save state: Saved, Saving, Unsaved Source draft, Conflict
-or Recovery required. Cmd/Ctrl+S has one route. Outside Source it flushes accepted
-work; in Source it accepts the focused draft. A refused Source draft never reports
-Saved. [ADR 0007](adr/0007-shell-save-command-ownership.md) owns the route and the
+The header shows pending beat drafts as well as Saved, Saving, Unsaved Source draft,
+Conflict or Recovery required. Cmd/Ctrl+S has one shell-owned route. In Story it
+accepts all pending beat drafts under [Saving Story drafts](#saving-story-drafts);
+in Source it accepts the focused Source draft. Other contexts retain their existing
+Save behaviour. Pending or refused drafts never report the whole project as Saved.
+[ADR 0007](adr/0007-shell-save-command-ownership.md), extended for Story by
+[ADR 0022](adr/0022-saving-retained-story-drafts.md), owns the route and the
 [session handoff](ARCHITECTURE.md#corrective-project-session-handoff) owns status
 ordering.
 
@@ -357,7 +367,10 @@ covers moving, unwrapping and deleting branches.
 
 ### Layout
 
-- A 16:9 game stage sits beside the selected-beat editor in a right-hand sidebar.
+- The game stage sits beside the selected-beat editor in a right-hand sidebar.
+  It keeps the project's width-to-height ratio and fits the complete image into the
+  available space, leaving unused space where needed. It never stretches or crops the
+  game image to match the mock's 16:9 sample.
   Authoring forms stay outside the stage; only the game's dialogue box and choice menu
   overlay it. The stage keeps room for future character dragging.
 - Below the stage, the Branch path sits above a bottom panel that switches between
@@ -391,9 +404,9 @@ covers moving, unwrapping and deleting branches.
   Left/Centre/Right switch. Selecting an audio beat never plays it; only the labelled
   audition action plays audio.
 - Narration is its own mode, not a fake Character. In dialogue, Enter adds a line
-  break, Cmd/Ctrl+Enter commits the typing burst as one Undo step, and
+  break, Cmd/Ctrl+Enter commits the draft, and
   Shift+Cmd/Ctrl+Enter commits and starts the next line with the last speaker on the
-  current path.
+  current path. [Story Undo](#story-undo) defines the grouping of typing into steps.
 - Staging changes are explicit beats. A dialogue line never hides a `show` or
   appearance change.
 - Selecting a character or the background on the stage names the beat that set it, and
@@ -401,12 +414,104 @@ covers moving, unwrapping and deleting branches.
   never edits the earlier beat silently.
 - Source the editor cannot represent is a protected Custom Code beat with its reason
   and Edit in Source. Moves never cross it unless the source layer proves the move safe.
-- A pending beat edit has Commit and Cancel and blocks navigation that would lose it.
-  Failed commits keep the text and focus.
+- A pending beat edit has Commit and Cancel. The [beat draft rules](#beat-drafts)
+  allow navigation without losing unfinished input. Failed commits keep the text
+  and focus.
 - Set variable uses the [equation row](#arithmetic-equation-row) and conditions use the
   [rule builder](#condition-rule-builder).
 - Add a beat is a [pick-one dialog](#pick-one-dialogs). Its destination line names
   where the beat lands and any ending it replaces.
+
+### Beat drafts
+
+A beat draft stays attached to its beat when the author selects another beat or
+branch. Returning to that beat restores the unfinished input. Tracks, Reel and
+Writing focus also preserve drafts. Mark beats with pending edits so the author
+can find them.
+
+Navigation does not commit or discard a draft. Commit remains explicit, and
+incomplete or invalid input never reaches the source files. Ask before an action
+would discard a draft, including deleting its beat or closing the project.
+
+The [beat draft conflict rules](#beat-draft-conflicts) handle changes to the source
+beneath a retained draft. This target replaces production's current rule that
+requires committing or cancelling the beat edit before navigation.
+
+### Beat draft conflicts
+
+Use the approved B, Buttons together interaction: `story-draft-conflict` / `compact`,
+revision `compact-v2`. The [reference record](design/story-revamp/README.md#approved-draft-conflict-interaction)
+identifies its local source and approval commits.
+
+Mark a conflicting beat quietly. Unrelated non-conflicting changes need no prompt,
+and routine navigation keeps every draft. Returning to the affected beat reveals
+"Conflict with source" in the selected-beat editor, with the current source text
+above the editable retained draft. Place Discard draft and Override source together
+below the text box.
+
+- Discard draft keeps the current source and removes only this beat draft.
+- Override source validates the editor text and saves only this beat through the
+  existing transaction layer. Other drafts stay unsaved. Empty text refuses the
+  override and retains the draft.
+
+Override source must use the source revision the author reviewed and preserve all
+existing validation and source-ownership checks. If the source changes again,
+retain the draft and refresh the comparison before accepting another override.
+The action does not authorize a stale write or bypass unsupported-source refusal.
+
+Main Save reveals an unresolved conflict and retains all drafts without saving any
+of them. Navigation and Tracks/Reel changes keep drafts; valid drafts still preview
+on the game stage under the existing [stage preview rules](#stage-preview).
+
+### Saving Story drafts
+
+In Story, the main Save button and Cmd/Ctrl+S save all pending beat drafts in the
+open project, including beats outside the current selection or scene. Check every
+draft before writing any of them. If any draft is incomplete, invalid or conflicted,
+retain all drafts and reveal the failing draft with its error. No draft is saved by that request
+until all pass validation. Commit remains available to save one beat on its own.
+
+Story Save does not accept unfinished Source text. The shell coordinates acceptance
+through the existing transaction layer, with current-source validation and ordinary
+conflict/recovery handling. [ADR 0022](adr/0022-saving-retained-story-drafts.md) records
+the change from production's current Flush-only Story Save. Saving follows the
+[Story Undo rules](#story-undo) and does not add a separate user-visible history step.
+
+### Story Undo
+
+Story has one chronological Undo order for edits, including unfinished beat drafts.
+The Undo button and Cmd/Ctrl+Z reverse the same most recent edit, regardless of the
+selected beat or focused Story field. Group continuous typing into useful steps.
+Selecting beats, switching branches or changing views adds no history entry and
+does not change the Undo order. Saving adds no extra Undo step and does not clear
+the history. Redo restores an undone edit.
+
+For example, type in beat A, change and commit beat B's background, then return to
+A without typing. The first Undo reverses B's background change. The next Undo
+reverses the earlier typing in A. Do not expose separate draft and saved-edit Undo
+commands within Story.
+
+Use one project edit history, not a separate queue for each page. Switching
+authoring workspaces preserves that order. If the author edits Story, changes a
+button in Screens and returns to Story
+without editing, Undo reverses the Screens change first. Reveal the affected item
+in its workspace so the author can see the result. Name the action in the command,
+for example "Undo button resize". Preserve retained beat drafts during this navigation.
+
+Draft-only Undo changes the draft without writing incomplete source. Undo of saved
+source uses the existing shared transaction layer and its revision, conflict and
+recovery checks. This is target behaviour; production currently blocks project
+Undo while a beat draft exists.
+
+Source typing keeps the Source editor's existing per-file text history. Undo in
+Story does not change unfinished text in a Source tab. Accepted Source saves join
+the shared project history through the existing transaction layer. Temporary
+inputs, such as search text, keep local text Undo and add no project edit entries.
+
+Kris selected familiar Word-like editing behaviour. Microsoft's
+[Undo guidance](https://support.microsoft.com/en-us/office/foundations-experiences/undo-redo-or-repeat-an-action)
+describes keyboard and toolbar access to Undo and retaining Undo after saving.
+The Story rules above define Loomlight's application of that reference.
 
 ### Choices
 
@@ -427,6 +532,16 @@ covers moving, unwrapping and deleting branches.
 - Focusing or pointing at an option marks its button on the stage.
 
 ### Stage preview
+
+Valid beat drafts update the game stage immediately, before Commit or Save. Show
+unsaved status only in the normal save-status area; do not add an unsaved warning
+over the stage or annotate each changed item. The beat draft markers still identify
+unfinished beats. Cancelling a draft restores the accepted value in the preview.
+Previewing a draft never writes to the game's source files.
+
+Incomplete input remains in its field while the author types. Follow the shared
+[input validation timing](#input-validation-timing-and-recovery) on field exit and
+Save. An incomplete or invalid calculation never supplies an invented preview result.
 
 Selecting a beat shows the scene-local state through that beat: background, visible
 characters and appearances, placement, music, simple variables and the current line or

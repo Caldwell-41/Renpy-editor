@@ -29,6 +29,143 @@ Rounds 3 and 4 and later Round 5 are complete; a subsequent score-only rescore o
 fixed source `bbd5a4dd` is recorded in chat. Those grades do not qualify the new
 fourth mock. Historical evidence remains available locally.
 
+## Production release scope
+
+In the implementation interview on 2026-11-08, Kris selected the complete approved
+Story Combined v1 experience as the release target. The approved Choice behaviour
+and arithmetic must work before that release. A layout-only build is an intermediate
+review checkpoint, not a separately shipped version with those features deferred.
+Implementation can proceed in separately testable slices.
+
+[Choice #98](https://github.com/Caldwell-41/Renpy-editor/issues/98) and
+[arithmetic #87](https://github.com/Caldwell-41/Renpy-editor/issues/87) retain their
+feature requirements and acceptance ownership. Story Combined v1 can ship when the
+shared arithmetic core and Story controls qualify, before the new Screens arithmetic
+controls are finished. Screens arithmetic retains its own acceptance work, and #87
+stays open until both Story and Screens meet its requirements. Shared-model changes
+must preserve existing Screens behaviour.
+
+The app-wide Brass and slate palette is a separate implementation slice required
+before or with this release. [UI.md](../../UI.md#palette-brass-and-slate) owns its
+scope, including both themes and the known text-contrast fixes.
+
+Kris completed the interview and requested publication through to-spec on
+2026-11-09. [Issue #110](https://github.com/Caldwell-41/Renpy-editor/issues/110) owns
+the integration specification and final acceptance. It is `ready-for-agent` with
+delivery state `not_started`; implementation still needs Kris's selection.
+
+Kris also approved the ten delivery slices published as #110's sub-issues
+#111–#120. Those tickets own bounded implementation and their native blockers;
+[final qualification #120](https://github.com/Caldwell-41/Renpy-editor/issues/120)
+owns the assembled evidence and live-app review. Existing Choice and arithmetic
+delivery ownership remains unchanged.
+
+### Implementation prerequisites
+
+Live Story layout integration is blocked until the required Choice and Story
+arithmetic operations are implemented and qualified. Complete #98 Stage 1 before
+Stage 2. #98's active delivery slices are #101–#104 for Stage 1 and #105–#106 for
+Stage 2. For arithmetic, use #87's active backend slices #92–#94 and
+[Story UI #96](https://github.com/Caldwell-41/Renpy-editor/issues/96). The earlier
+broad handoffs #89 and #90 are closed as superseded. Their replacement tickets
+retain delivery ownership; this integration does not create a second feature spec
+or arithmetic UI implementation. Shared decimal setup controls remain with #97;
+Story can use declared variables and source/backend fixtures as #96 specifies.
+
+Before layout integration, verify source edits, saving, shared Undo/Redo, reopening
+and the required game behaviour through the existing tests. Then connect the approved
+Story layout to those tested operations. The palette remains a separate slice.
+Completion of all Screens arithmetic work, or closure of #87, is not a prerequisite.
+
+Issue #110 records these dependencies, with native blockers #98, #94 and #96.
+It owns the full Story acceptance while the existing tickets own their feature work.
+
+### Final acceptance in the live app
+
+After the required automated checks pass, Kris will review the implemented layout
+and complete an authoring session in the live app. Use a small public example
+project with enough scenes to exercise every supported beat type and its editing
+options, including the approved Choice and arithmetic additions. Cover the full
+beat catalogue and the existing screen-related beats; protected source keeps its
+inspection and Source fallback behaviour.
+
+The review must also show the layout with different Choice and variable
+configurations, including nested and empty options, conditions, different endings,
+picked/disabled/hidden options and supported variable types. Exercise Tracks, Reel,
+Writing focus, the Branch path and the game stage with those examples. Include
+writing and retained drafts, shared Undo/Redo, Save, reopening committed work and
+the approved B conflict interaction. Review smoothness and conformance to both
+approved designs in the live app.
+
+Automated source, history and runtime checks remain required under the feature
+contracts and [TESTING](../../TESTING.md). Kris confirmed the existing app-control
+and public-command testing boundaries, source/history/reopen checks and focused
+Ren'Py runs when preparing #110. They and the human authoring/layout review supply
+separate evidence; neither alone establishes final acceptance.
+
+### Stage proportions in production
+
+Kris confirmed that the game stage keeps the project's actual width-to-height ratio.
+The approved mock's 16:9 stage represents its 1920 × 1080 sample, not a restriction
+on other project resolutions. [The Story layout contract](../../UI.md#layout) owns
+the fit rule. Keep the approved mock and its captures unchanged.
+
+### Draft navigation in production
+
+Kris selected retaining unfinished beat edits while navigating between beats and
+branches. [Beat drafts](../../UI.md#beat-drafts) owns the interaction rules. The
+existing production navigation guard must change during integration; preserving
+drafts must not weaken source validation or the shared transaction layer.
+
+Kris also selected [one chronological Story Undo order](../../UI.md#story-undo)
+for draft and committed edits, with the same behaviour from the button and keyboard
+shortcut. Switching authoring workspaces preserves the order of edits in shared
+project history. Undo names its action and reveals the affected item in its workspace.
+Pages do not get separate project Undo queues. Source retains its existing per-file
+typing history; accepted Source saves join the shared project history. The earlier
+proposal for separate field and project Undo within Story was not accepted.
+
+Save in Story accepts all pending beat drafts in the open project after validating
+the whole set. [ADR 0022](../../adr/0022-saving-retained-story-drafts.md) records
+the scoped change to Save ownership; [UI.md](../../UI.md#saving-story-drafts) owns
+the interaction, including refusal and single-beat Commit.
+
+Valid drafts update the game stage before saving. The normal save-status area
+shows that work is unsaved; the stage has no extra unsaved warning or per-change
+annotation. [Stage preview](../../UI.md#stage-preview) owns this behaviour and the
+existing validation timing for incomplete input.
+
+### Approved draft conflict interaction
+
+Kris approved B, Buttons together, after the unslop copy pass on 2026-11-09 and
+confirmed the approval in this interview. Q13 is settled. The
+[beat draft conflict contract](../../UI.md#beat-draft-conflicts) owns the selected
+behaviour, including single-beat Override source and all-draft Save refusal.
+
+| Reference | Identity |
+| --- | --- |
+| Screen / layout / revision | `story-draft-conflict` / `compact` / `compact-v2` |
+| Candidate source | `af23cf4d9141661e98280896a4aab2fbe7bd4414` |
+| Approval commit | `51bb6a02c936d5b4d8ebd289e208b6af7e0efdf7` |
+| Preserved reference branch | `codex/story-draft-conflict-mock` |
+
+Kris authorized consolidating the prototype with these canonical decisions. The
+[approval record](../story-draft-conflict/approval.json) and adjacent
+[design notes](../story-draft-conflict/README.md) now accompany this document. The
+original commits and reference branch remain intact; read the frozen record with
+`git show 51bb6a02:docs/design/story-draft-conflict/approval.json`. The record owns the full source
+fingerprint and retained wide/compact capture hashes. Both capture hashes were
+checked during this interview handoff, and app source is unchanged between the
+candidate and approval commits.
+
+The prototype handoff reports passing design typechecking, B's focused wide/compact
+interaction journey, approval validation and the selected approval rendering check.
+This is design evidence, not production transaction or runtime qualification.
+A remains unapproved. The frozen prototype toolbar/catalog retain pre-approval
+wording; the JSON approval record owns status and names that limitation. Reference
+consolidation does not implement the production interaction. The original Story
+mock was already merged through [PR #108](https://github.com/Caldwell-41/Renpy-editor/pull/108).
+
 ## Selected direction
 
 Kris selected a fourth combined mock, owned by the current section of

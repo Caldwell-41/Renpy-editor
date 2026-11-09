@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "screenId": "story-draft-conflict",
+  "currentApproved": "compact-v2",
+  "revisions": [
+    {
+      "id": "inline-v2",
+      "variantId": "inline",
+      "approval": null
+    },
+    {
+      "id": "compact-v2",
+      "variantId": "compact",
+      "approval": {
+        "date": "2026-11-09",
+        "decision": "Kris said \"B approved, send to main agent and get it To continue\" after reviewing the unslopped copy. Approve B, Buttons together, screen story-draft-conflict / compact, revision compact-v2. A remains unapproved. Send the decision to the main interview agent and have it continue.",
+        "reason": null,
+        "supersedes": null,
+        "source": {
+          "commit": "af23cf4d9141661e98280896a4aab2fbe7bd4414",
+          "fingerprint": "12947be9791cf8126dde1d3b1722272bff36e77580c3218fdb85185fc30d9607"
+        },
+        "captures": [
+          {
+            "path": "docs/design/story-draft-conflict/captures/compact-v2-approved-dark-wide.png",
+            "sha256": "0ed4cdd44027163c741f798c86ae011aaec5f6bb013d00e7a95f3c9624c815c3",
+            "state": "conflict",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/story-draft-conflict/captures/compact-v2-approved-dark-compact.png",
+            "sha256": "bb551388d769e840ae5c7ee8dcac1f8aa252b9d6643bc9798bdd3735e89c3c82",
+            "state": "conflict",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "For a retained beat draft that conflicts with changed source, show Conflict with source, the current source text, and the editable draft in the selected-beat sidebar.",
+          "Place Discard draft and Override source together below the draft text box.",
+          "Discard draft keeps the source text and discards only this beat draft.",
+          "Override source validates and saves only the selected beat with the editor text. Other beat drafts remain unsaved. Empty input refuses the override and keeps the draft.",
+          "Mark the conflicted beat without interrupting unrelated work. Unrelated non-conflicting saved changes need no prompt.",
+          "An unresolved conflict blocks the main Story Save, reveals the affected beat and retains all drafts without saving any of them.",
+          "Navigation and Tracks/Reel changes retain drafts. Valid drafts preview on the game stage; the normal Save status reports unsaved work."
+        ],
+        "deviations": [
+          "The mock uses fictional, memory-only data. It does not implement source transactions, persistent saving, recovery, history or SDK execution. Production must preserve the existing transactional checks.",
+          "Only beats 05 and 07 are editable. Other beats, workspace icons and the Branch path provide context.",
+          "The reviewed prototype toolbar and catalog description still contain pre-approval wording. The Design Lab approval record owns the actual design status; those strings are prototype scaffolding."
+        ]
+      }
+    }
+  ]
+}

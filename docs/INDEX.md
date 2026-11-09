@@ -43,6 +43,7 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 | Phase 1F Source editing, synchronisation and partial-visual handling | [Accepted Phase 1F brief](tasks/archive/2026-09-23-phase-1f-source-synchronisation.md) |
 | Phase 1F Save correction, precise regressions and target acceptance | [Completed correction ledger](tasks/archive/2026-09-23-phase-1f-save-correction.md) |
 | Shell Save ownership and Source controller contract | [ADR 0007](adr/0007-shell-save-command-ownership.md) |
+| Save retained Story beat drafts | [ADR 0022](adr/0022-saving-retained-story-drafts.md), [UI contract](UI.md#saving-story-drafts) |
 | Controlled runtime, trust and process ownership | [ADR 0008](adr/0008-controlled-runtime.md) |
 | Phase 1G requirements and historical execution evidence | [Completed 1G brief](tasks/archive/2026-10-06-phase-1g-branches-runtime-git.md) |
 | Completed Phase 1G review-build delivery and historical scope | [Review delivery brief](tasks/archive/2026-10-06-phase-1g-review-delivery.md) |

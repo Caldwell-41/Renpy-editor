@@ -1,9 +1,24 @@
 # Loomlight
 
 Loomlight authors Ren'Py projects while preserving their source. These terms
-distinguish screen editing from deliberate game execution.
+distinguish Story and screen editing from deliberate game execution.
 
 ## Language
+
+**Beat draft**:
+An unfinished edit attached to a Story beat that has not been committed to the
+project's source. It can contain incomplete input and remains available when the
+author leaves the beat and returns.
+
+**Beat draft conflict**:
+A disagreement between a retained beat draft and source that changed after the
+draft began, requiring the author to decide which edit to keep.
+
+**Game stage**:
+The Story view of supported scene appearance through the selected beat, shown in
+the project's width-to-height ratio, including valid beat drafts. It marks unknown
+state and does not run the game.
+_Avoid_: Screen canvas as a synonym
 
 **Screen canvas**:
 The inert editing view of a screen's supported appearance, including marked draft
