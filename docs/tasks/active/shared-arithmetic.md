@@ -305,3 +305,30 @@ proof. #91/#97 still await design approval. Next action is receive Kris's setup
 decision; on approval, launch the qualification chat through the host's explicit
 worktree strategy and retain the registered Windows checkout unchanged. No test
 execution or new capability is assigned to Kris.
+
+### 2026-11-09: Windows qualification chat authorized
+
+Kris explicitly selected "Create the Windows qualification chat" in response to
+the setup question. This authorizes a new top-level SUNDOWN chat with a
+host-prepared worktree from draft PR #122, preserving the registered Windows
+checkout and using only the existing single reserved #92 SDK invocation.
+It supersedes the pending-authorization state above, without expanding the
+feature's SDK ceiling or selecting packages, manual CI, release or PR merge.
+
+The launch uses request key `spec87-windows92-qualified-worktree-20261109`,
+branch `codex/spec-87-windows-92` from published `codex/spec-87-arithmetic`.
+The published source at dispatch is `c7b8157e`; the qualifier must record its
+actual full source/input identity before SDK launch. The coordinator owns this
+integration checkout and status records; the qualifier owns only its ignored raw
+receipts and a sanitized Windows result in the existing #92 evidence note on its
+own branch. No source, fixtures or gates may change as part of qualification.
+Windows remains **0 started / 1 reserved**
+until execution is reported; #92 acceptance and #93 still wait on actual proof.
+
+The Windows qualification chat was launched through the host's explicit worktree
+strategy on SUNDOWN:
+<t3-thread://v2/88c3ca41-b202-47bf-8d09-09bd3411e945/mcp:launch:e94d6d651fa5579eeb3a9feed31e836009a1d19bc6ea397402d24dda9ef158ef>.
+It will return its exact tested identity, consumed/not-started SDK result and
+evidence-branch commit to this coordinator. No qualification success or SDK start
+is known at dispatch. Wait for that completion message without polling; then audit
+and integrate the evidence, accept #92 only against required proof, and continue #93.

@@ -48,11 +48,16 @@ Required Rust/MSVC and verified Ren'Py 8.5.3 are present, but no fixture or SDK 
 ran and the checkout stayed untouched. Windows remains **0 started / 1 reserved**.
 The #92 note records preflight evidence. No qualification task remains running.
 
-The coordinator requested approval to create a new top-level Windows qualification
-chat with a host-prepared worktree from PR #122. T3 requires that route for isolated
-remote work; the current new-chat permission covers prototypes. Wait for Kris's
-decision, then launch only if approved. Do not treat elapsed time or a default
-choice as consent. #92 remains unaccepted and #93 blocked on actual Windows proof.
+Kris explicitly approved creating the Windows qualification chat and isolated
+worktree from PR #122, and the chat has launched through the host on SUNDOWN.
+Its link is recorded in the delivery ledger. Launch key is
+`spec87-windows92-qualified-worktree-20261109`,
+branch `codex/spec-87-windows-92`, preserving the registered checkout. The qualifier
+may consume only the one reserved SDK run, append sanitized evidence on its own
+branch and return its result to this coordinator. Record the actual full candidate
+before execution. No SDK start/result is known yet. Wait for its completion
+message without polling, then audit/integrate its evidence. #92 remains unaccepted
+and #93 blocked on actual Windows proof.
 The ledger owns unchanged operation counts; the merger started no SDK, native,
 package or manual CI operation. Final-head automatic lightweight checks await
 coordinator audit; no reviews have been submitted at this handoff.
