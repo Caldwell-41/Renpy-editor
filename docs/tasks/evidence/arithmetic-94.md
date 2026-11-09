@@ -344,3 +344,11 @@ tests/fixtures/arithmetic-94/contract.json
 tests/fixtures/arithmetic-94/driver.rpy
 tests/fixtures/arithmetic-94/story.rpy
 ```
+
+After the result commit, fetched `origin/codex/spec-87-arithmetic` again and merged
+both the current local integration branch and its fetched remote-tracking ref
+normally into this implementation branch. Both tips remained
+`bc51521c20095043518f85ae94122fab3b9f7296`; both merges reported `Already up to date.`
+Core and runtime fixture trees still match the exact prelaunch candidate. Final
+handoff is local-only with clean tracked state. The coordinator owns any further
+SDK allocation, fresh merger review, publication and issue acceptance.
