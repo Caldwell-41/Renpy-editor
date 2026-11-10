@@ -11,7 +11,9 @@ integration branch; final review, native/human evidence and issue closure remain
 part of the combined delivery. #102 is integrated with both-target SDK and
 automatic CI evidence. #103 prompts have both-target SDK and automatic CI evidence.
 #104 has both-target SDK and automatic CI evidence on published `4339ccfc`.
-The Stage 1 runtime gate is complete; this does not establish combined acceptance.
+The Stage 1 runtime gate is complete. #105 Repeat is integrated locally with Mac
+SDK evidence on its exact final worker; Windows qualification remains pending.
+These bounded results do not establish combined acceptance.
 
 Integration branch `codex/choice-98` starts at accepted integration
 `63221b44d72c1c100815e9e638cbec5133ffc1eb` from
@@ -27,9 +29,12 @@ contracts, their production Story controls and affected tests. #103 added
 Choice-owned narration/Character prompts through the same owners. #104 delivered
 mixed Hide/Show disabled semantics through existing source, runtime and
 generated-choice-screen owners. All prior implementer/test assignments are complete.
-The coordinator next assigns #105 Repeat as sole writer of shared source/runtime,
-body/transfer, flow and Story controls. #106 is dependency ready but follows #105
-to avoid overlapping edits to those contracts. Both use fresh managed worktrees.
+#105 Repeat is integrated. After publication, the coordinator dispatches test-only
+Windows #105 and a fresh isolated Mac #106 picked-state implementer. #106 becomes
+the sole writer of shared parser/source/runtime and Story controls. These owners
+use different hosts and interfaces; #106 depends on qualified Stage 1, not Windows
+Repeat completion. The coordinator resumes integration and live-record ownership
+after the merger handoff.
 
 ## Dependencies and approved design
 
@@ -64,17 +69,19 @@ lint and named normal-play children; retain each child's result without charging
 them again as harness starts. This allows focused coverage across six tickets and
 bounded corrections. #101 had a four-start allowance per host after offline
 preflight and pinned-SDK verification; it used three Mac and two Windows starts.
-Current usage is Mac 9/20, Windows 5/20, zero reservations. #102 used 2/4 Mac
+Current usage is Mac 11/20, Windows 5/20, zero reservations. #102 used 2/4 Mac
 starts and 1/4 Windows starts. #103 used 3/4 Mac starts, including two failed
 selector attempts; its final run passed all 31 expected SDK children. #103 Windows
 used 1/4 starts and passed all 31 children. #104 used 1/4 Mac starts and passed
 exactly 12 selected children; that run selected no wrong-outcome child. #104 Windows
 used 1/4 starts and passed its 12 selected children, also without a negative child.
+#105 used 2/4 Mac starts. Its first remains a charged driver failure; its second
+passed all ten selected children, including the intended negative.
 
-For the next coordinator assignment, fresh #105 implementation may use at most
-four Mac harness starts from confirmed Mac 9/20, within the shared 20. It requires
-offline fixture, host/toolchain and official pinned-SDK preflight. No Stage 2
-Windows allowance is dispatched yet. Windows may reuse the existing T3-prepared
+After publication, Windows #105 may use at most four harness starts from confirmed
+Windows 5/20. Fresh Mac #106 may use at most four starts from Mac 11/20. Both
+remain within the shared 20 and require offline fixture, host/toolchain and official
+pinned-SDK preflight. Windows may reuse the existing T3-prepared
 `codex/choice-101-windows` worktree only after clean/idle ownership checks and safe
 fast-forward synchronization. Do not create a new checkout or change the protected
 registered root. The coordinator owns dispatch and shared counters. Completed
@@ -92,16 +99,15 @@ Entry records passed `python3 scripts/validate.py` for 1,883 repository files an
 both were within their maintenance targets. No product tests or runtime operations
 ran at entry.
 
-The fresh #104 merger integrated `7b7a6d16` in `527b1943`; the detailed
-[return below](#104-integration-and-handoff) owns that checkpoint. #104 Windows and
-automatic CI passed on published `4339ccfc`; [the completion below](#104-windows-completion-and-stage-2-entry)
-owns its audit and Stage 2 entry. The coordinator owns integration and status,
-publishes this documentation successor, then assigns fresh isolated #105 Repeat.
+The fresh #105 merger integrated `5d07f912` in `4c3497c5`; the detailed
+[return below](#105-integration-and-handoff) owns exact trees and scoped reuse.
+The coordinator resumes sole integration/status ownership, publishes this local
+checkpoint and dispatches Windows #105 alongside fresh isolated Mac #106.
 #31/#55 remain open, unselected styling/template tasks. #98/#104 own the per-option
 and runtime feature through the minimal semantic owners; their implementation does
 not take over style/canvas work or change those tickets' prerequisites or acceptance.
-Retain the #101–#104 worktrees and unique evidence. Tickets stay open for combined
-PR review and closure. #106 follows #105's integration to keep one shared-code writer.
+Retain the #101–#105 worktrees and unique evidence. Tickets stay open for combined
+PR review and closure. #106 is the next sole shared-code writer.
 
 The initial draft PR checkpoint selects automatic Repository quality only in
 `.github/validation-plan.json`, targeting `codex/phase3b-screen-designer`.
@@ -605,6 +611,8 @@ and material identities. Report SHA-256 is
 `e9c2b0cca27e796a5cb581a534c45920177624b3cf0da17986d122bb225e8a77`;
 SDK receipt SHA-256 is
 `a661c07f8d608197b91d06b1e9dc8b74efdf90fc1a716f318b9ab3fe1d627567`.
+[The published Windows receipt](https://github.com/Caldwell-41/Renpy-editor/issues/104#issuecomment-6764672541)
+records that target qualification on `4339ccfc`.
 
 The owner context was SUNDOWN/krisn. Node 24.19.0, explicit npm 11.9.0, Rust 1.90.0
 with native MSVC x64, Python 3.12.14, local Default desktop and official 8.5.3 SDK
@@ -678,3 +686,124 @@ remain Mac 9/20 and Windows 5/20; the active #105 implementer owns any new Mac
 reservations/counts. The coordinator owns only this fixture and its evidence;
 #105 retains its isolated feature-code assignment and must merge the updated local
 integration tip before return. The correction's new head needs automatic CI.
+
+Published correction `be98deec9f683d7691ab4a01ccb9d63b1d7e0607` subsequently passed
+automatic run `42798814547`, attempt 1. All 396 frontend tests and all 18 browser
+dispatch fixtures passed, including the font, Choice and Story journeys. Build,
+Rust formatting, Help admission and repository validation also passed.
+[The receipt](https://github.com/Caldwell-41/Renpy-editor/issues/98#issuecomment-6765076757)
+binds those results to that exact head. The failed `192bc0f4` attempt remains
+failed. No remaining review finding was present at the coordinator's audit.
+
+## #105 integration and handoff
+
+The fresh merger received sole integration ownership at
+`be98deec9f683d7691ab4a01ccb9d63b1d7e0607`. Worker branch
+`t3/choice-repeat-option-outcomes` ended at
+`5d07f9120051419a6b14261b6b41c71ccf1ac02b`. Its merge `61d47d46` already contained
+the current integration tip and font-fixture correction. Both checkouts had clean
+tracked inputs and only disclosed dependency symlinks untracked. Normal merge
+`4c3497c550dc0cabec915a789537a5874b60ba7c` completed without conflicts or
+implementation edits. The repository-local noreply identity was verified.
+
+The complete merge tree equals the final worker tree,
+`1c92fd027bb802a9d57e52c55243e101a36ce4c5`. Matching material trees are `app`
+`36f1349b9011d29afd81535898966574de8d0cc0`, `tests`
+`0f5f3f2b2095a5aabe485467f8141d3f78e4e5bb` and `tests/fixtures`
+`2eef253b8d9a5d1eb57bf6311ac22f55f4dbf0a7`. Approved `app/design-lab` and
+`docs/design` trees are unchanged from entry. This documentation successor changes
+only CURRENT, HANDOVER and this record. Temporary `choice105/merge/integration-trees.json`
+retains parents, ancestry, trees, status and the protected recovery-tail hash.
+
+RepeatChoice is a source-derived ending Beat under the existing parser, writer,
+body/transfer, completion and flow owners. Accepted explicit-body edits install a
+collision-checked `_ll_choice_<32 lowercase hex digits>` label immediately before
+the owning menu. The label, menu and prompt share one header mapping. The native
+jump revisits that Choice's prompt and availability gate, including safe continuation
+when nothing is selectable. It does not restart the Scene or add a Call frame.
+Calls retain their existing `from` label and resume in the option before Repeat;
+nested menus own separate targets. The stable label remains after changing the
+ending and is reused later. Opening, migration and no-op do not install or repair it.
+
+Existing bounded project Call-label inventory checks target ownership and collisions.
+Unprovable ownership refuses authoring and retains protected Source fallback.
+Arbitrary-label/general-loop editing and reserved jumps outside their own option
+remain unsupported. Schema 13 preserves verified UUIDs, unknown fields and absorbed
+mappings; recognizers through 12 stay version-gated. The final identical-caption
+neighbor test proves target installation preserves both menus' Choice/option IDs.
+Then replaces only the final transfer and preserves preceding Beats and trivia.
+Existing revisions, drafts, history and reopen own every ending. Completion treats
+Repeat as an ending; arithmetic inspection becomes unknown across it. Preview stays
+inert and reports unknown live availability. No second outcome/history store or
+Choice interpreter was added. Story Combined v1 controls remain approved; full
+workspace/layout acceptance stays with #110.
+
+Worker evidence is reused for identical material, with its original scope intact.
+`choice105/handoff.md`, `material-comparison.json` and the named logs own commands
+and candidate limits. The runtime-generating parser/writer/body/flow/variable owners,
+UI, schema and adapter match implementation `30f20be7`. The only other production
+change is the precise Source-fallback sentence in `scene.rs`. Final focused Repeat
+tests cover that sentence and the later identity proof. The SDK driver correction
+is separate from authored source. The merger independently checked the recorded
+material hashes and SDK receipt identities; no suite or export was repeated merely
+for the merge SHA.
+
+Final focused Repeat passed three tests; Source passed 16 and metadata five, with
+zero failures/ignored. The broader Scene run passed 124 tests before the final
+identity test and wording change; seven named pre-existing ADR 0009 specialists
+remain ignored and establish no proof. The production Story-to-public-core journey
+passed all ten stages and 203 requests, then cleaned scratch. Frontend passed 396
+tests with no skips, typecheck and build. Workspace Cargo check passed. Happy DOM
+events establish no native WebView, timing or rendered-reference acceptance.
+
+The worker already ran the actual public-core Help export test once, with one pass
+and no failures/ignored. Its real schema-13 `accepted.json` and all eight cases
+passed Python admission. Current Python consumer groups passed 7 base Help,
+3 nested fidelity, 2 sample fidelity, 9 Help dialog, 6 ordered actions and 10 screen
+controls cases, with no failures/skips. Shared Cargo/unittest gates admitted the
+retained results. This includes current schema admission and preserves frozen older
+recognizers. These unchanged inputs require no second Help export at integration.
+
+Mac start 1 on `61d47d46` passed compile/lint and all 21 conversation assertions,
+then failed at terminal Advance after reaching main_menu. Advance waited for a new
+dialogue callback. Only three children ran; no later group or negative result is
+claimed. That failure remains charged and retained in `sdk-01`. Replacing the three
+terminal transitions with the existing K_RETURN fixture pattern changes only the
+driver. Start 2 on exact final worker `5d07f912` passed all ten selected children.
+Three compile/lint/play groups cover repeatConversation, repeatExhausted and
+repeatNested. The intended repeat_wrong_outcome child exited nonzero at
+`choice_visits == 2` and printed no acceptance marker. No child timed out or
+truncated output. The actual controller-02 export was reused byte-for-byte, with no
+hand-authored substitute. Source, adapter, driver, official SDK 8.5.3 checksum and
+candidate identities remain in `sdk-02/result.json` and `material-comparison.json`.
+
+The passing runtime proves prompt/availability re-evaluation, Call resumption,
+unchanged stack depth, earlier Scene effects once, exhausted-choice continuation
+and the nested target returning to its outer body before Shared. Both SDK starts
+and controller roots cleaned up; no owned runtime process remains. The initial
+process-list sandbox denial was resolved by scoped read-only inspection. Earlier
+BOM assertion, nonexistent test helper and discarded unchanged-file dependency
+failures remain in the worker evidence; they consumed no SDK starts. The tentative
+general-history change was removed. The final path uses existing ownership.
+
+The merger passed Rust formatting, repository validation for 1,890 files and
+whitespace checks. CURRENT is 383 words and HANDOVER 1,113, within their maintenance
+targets. The protected recovery tail is byte-identical to entry. Temporary
+`choice105/merge/scoped-reuse.json` retains the hash and result-gate audit. Two
+read-only audit wrappers first failed on a missing script import path and a TAP
+parser applied to Node's spec-reporter log. The corrected wrapper admitted the
+original Cargo/Python logs and checked the original frontend summary; it reran no
+product test or export. Both wrapper failures remain recorded beside that audit.
+
+Confirmed totals are Mac 11/20 and Windows 5/20, zero reservations. #105 used 2/4
+Mac starts; Windows #105 has not run. After the coordinator publishes this local
+checkpoint, Windows #105 is test-only on the existing clean/idle dedicated branch,
+with safe fast-forward to the exact candidate and at most four starts from 5/20
+after preflight. Fresh isolated Mac #106 may run alongside it with at most four
+starts from 11/20 after preflight. Its dependencies are qualified Stage 1, not
+Windows Repeat completion. #106 is the sole next shared-code writer; the coordinator
+owns status and integration. #31/#55 styling/canvas remain unselected. Rendered
+comparison, matching native/human evidence, final combined review and validation
+selection remain pending. No issue closure is claimed. The merger performed no
+push, tracker/PR mutation, SDK/browser/native/editor/package/manual-CI operation,
+worktree cleanup or signing/security/credential change.

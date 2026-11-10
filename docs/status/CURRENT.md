@@ -50,14 +50,13 @@ and its #101–#106 delivery graph on a new integration branch, `codex/choice-98
 Delivery is `in_progress` in [draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125).
 #101–#104 are integrated with public-authoring, both-target SDK and automatic
 CI evidence. Their Stage 1 runtime gate is complete on `4339ccfc`. #105 Repeat
-is the next sole implementation owner of shared source/runtime and Story controls;
-#106 picked-state follows to avoid overlapping edits.
-[The delivery record](../tasks/evidence/choice-98.md) owns assignments,
-verification and operation limits. No Choice implementation or runtime acceptance
-is claimed for the combined feature. Native/human evidence and final review remain
-pending. SDK use is Mac 9/20 and Windows 5/20, with zero reservations at this
-handoff. Use the approved Story Combined
-v1 controls while leaving the full Story workspace with #110.
-
-[PR #124](https://github.com/Caldwell-41/Renpy-editor/pull/124) merged the selected
-status cleanup at `63221b44`. Other PR #122 retro items remain unselected.
+is integrated locally in `4c3497c5`; its exact worker passed the Mac SDK gate.
+Windows Repeat qualification and #106 picked-state are next, on separate hosts.
+#106 will be the sole shared-code writer.
+[The delivery record](../tasks/evidence/choice-98.md#105-integration-and-handoff)
+owns verification, publication state and operation limits. SDK use is Mac 11/20
+and Windows 5/20, with zero reservations. The last published head, `be98deec`,
+passed automatic CI; the new integration head still needs it. Rendered comparison,
+native/human evidence and combined acceptance remain pending. Approved Story
+Combined v1 controls apply; the full workspace remains with #110. Other PR #122
+retro items remain unselected.

@@ -6,55 +6,52 @@ Kris selected [#98](https://github.com/Caldwell-41/Renpy-editor/issues/98) and i
 delivery tickets under the implement-spec workflow. Work is `in_progress` on
 `codex/choice-98`, based on accepted integration `63221b44`. #101–#104 have
 public-authoring, both-target SDK and automatic CI evidence. Their Stage 1 runtime
-gate is complete on published `4339ccfc`; combined acceptance remains pending.
-[The delivery record](../tasks/evidence/choice-98.md) owns assignments, design,
-verification and cumulative operation limits.
+gate is complete on published `4339ccfc`. [The delivery record](../tasks/evidence/choice-98.md)
+owns assignments, design, verification and cumulative operation limits.
 
-Normal merge `527b1943838a91020a1424db15aaf47e2230007a` integrates #104 worker
-`7b7a6d161efa86da16894974374cf5bd626bbdef` without conflicts or implementation
-edits. Its complete tree equals the worker's before this status update. Schema 12,
-the minimal native item sensitivity adapter and transactional source/map/helper
-ownership are integrated; approved lab/design source is unchanged. The merged
-public-core Help export, schema-12 Python admission and seven offline admission
-tests pass. [The #104 return](../tasks/evidence/choice-98.md#104-integration-and-handoff)
-owns exact trees, worker checks, fallback/no-op refusals and SDK source-equivalence
-limits. It establishes no rendered-reference, native or human acceptance.
+Normal merge `4c3497c550dc0cabec915a789537a5874b60ba7c` integrates #105 worker
+`5d07f9120051419a6b14261b6b41c71ccf1ac02b` without conflicts or implementation
+edits. The complete merge tree equals the worker's. This local documentation
+successor changes only coordinator records. Repeat is a source-derived ending,
+using a stable collision-checked menu label and schema 13 through existing
+transactional owners. Approved lab/design source is unchanged. [The #105 return](../tasks/evidence/choice-98.md#105-integration-and-handoff)
+owns material equality, scoped reuse, exact checks and retained failures.
 
-[The #103 Windows completion](../tasks/evidence/choice-98.md#103-windows-completion)
-records all 31 SDK children and exact-head automatic CI passing on published
-`4be00d25`. Producing-host `c103w-20261110-1` retains its report, verified 126-entry
-manifest and cleanup receipts. [The #104 Windows completion](../tasks/evidence/choice-98.md#104-windows-completion-and-stage-2-entry)
-records the fresh controller, all 12 selected SDK children, verified 95-entry
-manifest and cleanup on `4339ccfc`. Its exact-head automatic CI also passed.
-All prior worker/test assignments are complete.
-SDK use is Mac 9/20, Windows 5/20, zero reservations. #104 used one start per host.
-No native editor/package or manual CI campaign is selected.
+The worker passed the production controller, 396 frontend tests, focused
+Repeat/Source/metadata checks, actual public-core Help export and schema-13 Python
+admission. The broader Scene suite preceded final identity/wording changes; final
+focused tests cover those changes. Seven historical specialists remain ignored.
+Mac SDK start 2 passed all ten selected children on the exact worker commit,
+including the intended wrong-outcome rejection. Start 1 remains a charged driver
+failure after compile/lint and 21 conversation assertions; both starts cleaned up.
+Windows Repeat qualification is pending. SDK totals are Mac 11/20, Windows 5/20,
+zero reservations; #105 used 2/4 Mac starts.
 
 [Draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125) targets
-`codex/phase3b-screen-designer` and is published at `4339ccfc`. This Stage 2 entry
-record is a documentation successor; it changes no implementation inputs.
-The coordinator owns the integration branch and status. Resume the same thread to
-publish the record and dispatch a fresh isolated #105 Repeat implementer under
+`codex/phase3b-screen-designer`. Last published head `be98deec` passed exact-head
+automatic run `42798814547`, attempt 1. [The receipt](https://github.com/Caldwell-41/Renpy-editor/issues/98#issuecomment-6765076757)
+records all 18 browser dispatch fixtures, frontend/build/Help and repository checks.
+The prior failed font-fixture attempt and its correction remain in
+[the evidence](../tasks/evidence/choice-98.md#ci-font-import-readiness-correction).
+The new integration head needs publication and its own automatic CI.
+
+Resume the same coordinator thread to publish this local checkpoint, link receipts,
+and dispatch Windows #105 and fresh isolated Mac #106 under
 [the selected limits](../tasks/evidence/choice-98.md#verification-and-operation-limits).
-#105 is sole writer of shared parser/writer, body/transfer, flow and Story controls.
-It may use at most four Mac SDK starts from 9/20 after preflight. #106 is dependency
-ready but follows #105 to avoid overlapping source/runtime contracts.
-#31/#55 retain their separate, unselected styling/template scope.
+Windows #105 is test-only, with at most four starts from Windows 5/20 after
+preflight. Reuse the T3-prepared dedicated worktree after clean/idle and ancestry
+checks, then safely fast-forward to the exact candidate. SUNDOWN's registered root
+stays at `251fb477`. #106 may run alongside it with at most four Mac starts from
+11/20 after preflight. It depends on qualified Stage 1, not Windows Repeat
+completion, and becomes the sole writer of shared parser/source/runtime and Story
+controls. The coordinator owns integration and status.
 
-Development is on macOS ARM64; both targets remain required for affected Stage 2
-behavior. Reuse the existing T3-prepared `codex/choice-101-windows` worktree only after
-clean/idle ownership checks and a safe fast-forward. SUNDOWN's registered checkout
-stays at `251fb477`. Preserve #101–#104 worktrees, unique evidence and the untracked
-`app/node_modules` dependency symlink. No protected session or unrelated Windows
-worktree changed. Earlier schema/Return-label CI corrections, #101's charged
-observer failure and denied callback, #102's fixture failure and #103's two charged
-selector failures and #104's test-wrapper/observer corrections remain in the linked
-delivery evidence. Issues stay open until
-the single PR closeout; rendered-reference comparison, native/human evidence and
-combined review remain pending.
-
-PR #124 completed the earlier status cleanup at `63221b44`; that work is no longer
-the live continuation. PR #122 retro items 1–3 remain unselected.
+Preserve #101–#105 worktrees, unique evidence, the untracked `app/node_modules`
+symlink and all protected recovery below. Earlier failures remain in linked
+evidence. #31/#55 styling/canvas and PR #122 retro items remain unselected.
+Native editor/package and manual CI campaigns are unselected. Rendered comparison,
+native/human evidence, final validation selection and combined #98 review remain
+pending. Issues stay open for the single PR closeout.
 
 <a id="shared-arithmetic-implementation-2026-11-09"></a>
 
