@@ -69,6 +69,26 @@ def captures(root, accepted, role):
 
 
 class AdmissionTests(unittest.TestCase):
+    def test_current_and_legacy_source_maps_require_matching_receipt_versions(self):
+        for version in (8, 9):
+            with self.subTest(version=version):
+                accepted = accepted_fixture()
+                accepted['sourceMapSchemaVersion'] = version
+                text = json.dumps({'schemaVersion': version})
+                accepted['files']['.renpy-editor/source-map.json'] = dict(
+                    text=text, sha256=proof.digest(text.encode()))
+                proof.validate_accepted(accepted)
+                accepted['sourceMapSchemaVersion'] = 9 if version == 8 else 8
+                with self.assertRaises(AssertionError):
+                    proof.validate_accepted(accepted)
+        accepted = accepted_fixture()
+        accepted['sourceMapSchemaVersion'] = 10
+        text = json.dumps({'schemaVersion': 10})
+        accepted['files']['.renpy-editor/source-map.json'] = dict(
+            text=text, sha256=proof.digest(text.encode()))
+        with self.assertRaises(AssertionError):
+            proof.validate_accepted(accepted)
+
     def test_reference_retains_scratch_until_process_cleanup_is_proven(self):
         execute = runner.run_reference_command
         for cleanup in (None, False, True):

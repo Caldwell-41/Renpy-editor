@@ -288,7 +288,7 @@ export const storyCases={
   previewBoundary(c,root);c.assert(!c.document.querySelector('.preview-canvas').textContent.includes('Caller resumed'));c.assert(!c.document.querySelector('.preview-canvas').textContent.includes('Nothing available'));
   c.assert(!c.document.querySelector('.preview-details').textContent.includes('Variable trust = 9'));c.assert(!c.document.querySelector('.preview-details').textContent.includes('Variable trust = 42'));c.assert(!c.document.querySelector('.preview-details').textContent.includes('Variable trust = 77'));c.assert.equal(c.document.querySelector('.preview-empty').textContent,'Background unknown after code or unevaluated flow');
   c.enter(selector,root.id,'change');c.assert.equal(pending.value,'Preview preserves unfinished input');c.assert(pending.isConnected&&!pending.disabled);
-  c.assert.equal(c.document.querySelector('.preview-overlay').textContent,'Return / End');previewBoundary(c,s.beats.find(b=>b.payload.type==='return'&&b.owner?.branchId===root.id));
+  c.assert.equal(c.document.querySelector('.preview-overlay').textContent,'Return to caller or main menu');previewBoundary(c,s.beats.find(b=>b.payload.type==='return'&&b.owner?.branchId===root.id));
   c.assert(c.document.querySelector('.preview-details').textContent.includes('Variable trust = 9'));c.assert(!c.document.querySelector('.preview-details').textContent.includes('Variable trust = 42'));
   c.assert(!c.document.querySelector('.preview-canvas').textContent.includes('After branch terminal'));
   c.assert(!c.document.querySelector('.preview-canvas').textContent.includes('Caller resumed'));
@@ -303,7 +303,7 @@ export const storyCases={
   const rootTerminalFixture=replaceOnce(c,accepted,'    menu:\n','    return\n    "After root terminal"\n    menu:\n');
   await editSource(c,rootTerminalFixture);const rootNow=headers(scene(c)).find(b=>b.id===root.id);c.assert(rootNow);
   c.enter(c.document.querySelector(`select[data-preview-group-id="${rootNow.conditionalBranch.groupId}"]`),otherwise.id,'change');
-  c.assert.equal(c.document.querySelector('.preview-overlay').textContent,'Return / End');previewBoundary(c,scene(c).beats.find(b=>b.payload.type==='return'&&!b.owner));
+  c.assert.equal(c.document.querySelector('.preview-overlay').textContent,'Return to caller or main menu');previewBoundary(c,scene(c).beats.find(b=>b.payload.type==='return'&&!b.owner));
   c.assert(!c.document.querySelector('.preview-canvas').textContent.includes('After root terminal'));c.assert(!c.document.querySelector('.preview-canvas').textContent.includes('Ready route'));
   c.assert.equal(c.sourceText(await c.snapshot(),path),rootTerminalFixture);await editSource(c,accepted);await openBranches(c,s.id);
   const flow=await c.call('flow.list',{refresh:true});const call=flow.edges.find(e=>e.sceneId===s.id&&e.kind==='call');c.assert(call?.location);

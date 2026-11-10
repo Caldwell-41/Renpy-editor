@@ -73,9 +73,9 @@ ran at entry.
 
 The fresh merger integrated #101 in normal merge
 `c9055fb673214365271f6ec557c92c00ce7b5f8b`. The coordinator resumes sole ownership
-of `codex/choice-98` and live status on the merger's return. Next actions are the
-draft PR, Windows qualification and dependency-ready ticket assignments, followed
-by combined review. The worker's managed worktree and temporary evidence remain
+of `codex/choice-98` and live status on the merger's return. Draft PR #125 is open.
+Next actions are the corrected candidate's automatic CI and Windows qualification,
+then dependency-ready ticket assignments and combined review. The worker's managed worktree and temporary evidence remain
 retained. No acceptance or ticket closure follows from this merge.
 
 The initial draft PR checkpoint selects automatic Repository quality only in
@@ -172,8 +172,10 @@ verified the exact selected public repository and ADMIN permission, alongside th
 invoked implement-spec workflow's draft-PR instruction. The reviewed retry and
 draft creation succeeded; no alternative publication route was used.
 
-A fresh test-only Windows assignment receives an isolated managed worktree for
-this candidate. It owns host/toolchain preflight, the existing production Choice
+A fresh test-only Windows assignment was requested in an isolated managed worktree.
+T3 refused linked-delegate worktree isolation before creating a task. A narrower
+read-only assignment used the registered checkout for host/toolchain preflight.
+Its intended qualification scope was the existing production Choice
 controller journey and pinned SDK compile/lint/normal-play checks for #101, plus
 producing-host evidence. It may use at most four Windows harness starts from the
 shared 20, after offline preflight. No source edit, package/native editor, manual
@@ -181,3 +183,54 @@ CI, push, issue closure or protected-session change is assigned. Return exact
 tested SHA, commands, individual results, counts and cleanup. Coordinator owns
 live records and correction assignments. Usage before dispatch is Mac 3/20,
 Windows 0/20, zero reservations.
+
+## Windows preflight and CI consumer correction
+
+The read-only SUNDOWN task found a clean registered checkout on
+`codex/phase3b-screen-designer` at `251fb47754a0ec1a43ece8763a0b4603b8e54dd8`.
+Published candidate `ed1c5bdc` was absent, both material tree hashes differed and
+the Choice tools were absent. It changed no files or refs and started no build,
+fixture or SDK. The Windows SDK result remains missing, not failed or passed.
+Host/toolchain findings were Windows x64 25H2 build 26200.9711, Rust/Cargo 1.90.0,
+native MSVC 19.50.35726, npm 11.9.0 and Python 3.12.14. The exposed Node was
+24.22.1; the required existing Node 24.19.0 still needs locating. The official SDK
+archive freshly matched the recorded pin. The unrelated arithmetic worktree's Git
+ownership refusal was preserved. Producing-host `choice-98-readiness-20261110T170700`
+retains `report.md` and raw inventories. Usage remains Mac 3/20, Windows 0/20.
+
+Kris explicitly approved a new Windows test chat after the linked-delegate
+isolation limitation. T3's thread workspace strategy can prepare that isolated
+checkout from the corrected published PR head. The assignment retains the same
+four-start Windows ceiling and no source-edit/native-editor/package authority.
+
+Automatic Repository quality run `42772268436`, head `ed1c5bdc`, failed in two
+stale consumers: the Help export asserted schema 8 while the source map was 9,
+and Story controller cases expected the old `Return / End` label. This is a
+harness-contract migration failure. Both were reproduced locally before edits.
+The caller search also found schema-8 assumptions in current screen qualification
+exporters/admission code and an old Return inspection label.
+
+The correction reports the actual/current schema in exporters, admits known
+versions 8/9 with receipt/map agreement, retains exact hashes/source/identity and
+matrix checks, and migrates the Story expectations and remaining inspection label
+to caller/main-menu wording. A focused admission test first rejected version 9;
+it now admits coherent 8/9 receipts and rejects a version mismatch or unknown 10.
+Historical schema-7-specific workflows and old evidence remain unchanged.
+
+Focused results passed the exact base Help, nested and sample public-core export
+tests and their actual schema-9 Python admission checks. Shared `cargo-log`
+accepted all three positive named Rust results. Seven base Help, nine Help dialog,
+six ordered-action and ten screen-control offline admission tests passed. The
+existing full Story controller journey passed all ten cases with two normal
+driver exits and complete fixture cleanup. Formatting, repository validation
+(1,887 files) and whitespace checks passed. Existing Python 3.12 and retained
+Pillow dependencies were used without installation. An initial missing-Pillow
+import and mistyped zero-test sample selector are retained setup failures, not
+passes; the corrected sample selector executed its named test successfully.
+
+Temporary `choice98-schema-*`, `choice98-admission-*`, `choice98-story-*`, nested/
+sample exports and admission logs retain the red/green results. These corrections
+change evidence consumers and an inspection label, not generated Choice source;
+no SDK/native/package/manual-CI operation was repeated. The corrected publication
+needs new automatic CI. Windows runtime, native/human, later tickets and combined
+review remain pending.

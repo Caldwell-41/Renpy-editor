@@ -22,7 +22,7 @@ ASSETS = {
 
 def validate_accepted(accepted):
     assert accepted['outcome'] == OUTCOME and accepted['publicCoreRequests'] is True
-    assert accepted['sourceMapSchemaVersion'] == 8
+    assert accepted['sourceMapSchemaVersion'] in (8, 9)
     assert accepted['exporterSourceSHA256'] == digest((REPO / 'app/src-core/src/screens/nested_canvas_tests.rs').read_bytes())
     files = accepted['files']
     project = json.loads(files['.renpy-editor/project.json']['text'])
@@ -31,7 +31,7 @@ def validate_accepted(accepted):
     for row in files.values():
         assert digest(row['text'].encode()) == row['sha256'], 'Accepted file hash differs'
     metadata = json.loads(files['.renpy-editor/source-map.json']['text'])
-    assert metadata['schemaVersion'] == 8
+    assert metadata['schemaVersion'] == accepted['sourceMapSchemaVersion']
     for path, fixture in FIXTURES.items():
         owner = next(owner for owner in metadata['ownedScreens'] if owner['path'] == path)
         text = (FIXTURE_ROOT / fixture).read_text().replace('screen ', '# loomlight-screen: ' + owner['id'] + '\nscreen ', 1)

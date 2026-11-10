@@ -52,7 +52,9 @@ Delivery is `in_progress` in [draft PR #125](https://github.com/Caldwell-41/Renp
 [The delivery record](../tasks/evidence/choice-98.md) owns assignments,
 verification and operation limits. No Choice implementation or runtime acceptance
 is claimed for the combined feature. #101 has portable and Mac SDK evidence;
-Windows and native/human evidence remain pending. Use the approved Story Combined
+CI consumer corrections pass focused local checks; their new automatic CI and
+Windows/native/human evidence remain pending. Kris approved a separate Windows
+test chat for T3 to prepare the candidate worktree. Use the approved Story Combined
 v1 controls while leaving the full Story workspace with #110.
 
 [PR #124](https://github.com/Caldwell-41/Renpy-editor/pull/124) merged the selected

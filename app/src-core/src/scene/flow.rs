@@ -793,7 +793,7 @@ fn project_scene_legacy(
             }
         } else if body == "    return" {
             kind = "return";
-            title = "Return / End".into();
+            title = "Return to caller or main menu".into();
         } else if let Some(target) = body.strip_prefix("    jump ") {
             kind = "jump";
             title = "Jump".into();

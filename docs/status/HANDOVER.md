@@ -10,27 +10,30 @@ ticket implementers use isolated managed worktrees. #101 is integrated but not
 accepted. [The delivery record](../tasks/evidence/choice-98.md) owns the graph,
 file ownership, approved design, verification and cumulative operation limits.
 
-Normal merge `c9055fb6` integrated worker `070365fa` without conflicts. Its app and
-fixture trees equal the reviewed worker; only coordinator status/evidence differs.
-The isolated worker worktree and temporary evidence remain retained. The coordinator
-resumes sole integration ownership on the merger's return. Open the draft PR, assign
-Windows qualification and continue dependency-ready tickets under the live blockers.
-#105/#106 still depend on all Stage 1 tickets. Native/human and combined review remain
-pending. The original frontend run had 391 passes and one Python environment failure;
-all eight tests in that file now pass with an existing complete Python 3.12. The full
-suite was not repeated. [The merge record](../tasks/evidence/choice-98.md#101-integration-result)
-owns tree equivalence, targeted resolution and bounded SDK evidence reuse.
+Normal merge `c9055fb6` integrated worker `070365fa` without conflicts. The worker
+worktree and temporary evidence remain retained. Initial CI failed in stale
+schema-version and Return-label consumers. The coordinator reproduced and corrected
+them, including related current qualification consumers; focused exports, admission
+checks and the ten-case real Story controller journey pass. The original frontend
+Python failure also has a passing targeted rerun. [The correction record](../tasks/evidence/choice-98.md#windows-preflight-and-ci-consumer-correction)
+owns exact results, setup failures and evidence-reuse limits. Automatic CI on the
+corrected head and Windows runtime proof are next. #102–#104 wait for #101;
+#105/#106 wait for all Stage 1 tickets. Native/human and combined review remain pending.
 
 Development is on macOS ARM64, with both supported runtime targets required. The
-linked SUNDOWN environment has a registered Loomlight project. Its test-only
-assignment must verify OS/checkout/toolchain and ownership before execution.
+linked SUNDOWN registered checkout is clean at `251fb477` and lacks the candidate.
+Its read-only preflight ran no build or SDK. Kris approved a new Windows test chat
+so T3 can prepare a managed worktree from the corrected published PR head. That
+chat must locate existing pinned Node 24.19.0 and verify host/candidate readiness.
 SDK use is Mac 3/20, Windows 0/20, zero reservations; #101 used three of its maximum
 four Mac starts. No native editor/package or manual CI campaign is selected yet.
 [Draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125) is published
 against `codex/phase3b-screen-designer`, initial head `d2504a76`. The Windows
 assignment may use at most four SDK harness starts from its shared ceiling.
-Resume in this same coordinating thread, audit its result and the draft checks,
-then continue the dependency graph.
+Resume in this same coordinating thread, audit the Windows result and current
+draft checks, then continue the dependency graph. The local untracked
+`app/node_modules` symlink points to the existing dependency cache and must not be
+committed. No protected sessions or unrelated Windows worktrees were changed.
 
 PR #124 completed the earlier status cleanup at `63221b44`; that work is no longer
 the live continuation. PR #122 retro items 1–3 remain unselected.

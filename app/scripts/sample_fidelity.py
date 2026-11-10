@@ -35,7 +35,7 @@ def validate_matrix(cases):
 
 def validate_accepted(accepted):
     assert accepted['outcome'] == OUTCOME and accepted['publicCoreRequests'] is True
-    assert accepted['sourceMapSchemaVersion'] == 8
+    assert accepted['sourceMapSchemaVersion'] in (8, 9)
     assert accepted['exporterSourceSHA256'] == digest((REPO / 'app/src-core/src/screens/sample_fidelity_tests.rs').read_bytes())
     files = accepted['files']
     project = json.loads(files['.renpy-editor/project.json']['text'])
@@ -44,7 +44,7 @@ def validate_accepted(accepted):
     for row in files.values():
         assert digest(row['text'].encode()) == row['sha256']
     metadata = json.loads(files['.renpy-editor/source-map.json']['text'])
-    assert metadata['schemaVersion'] == 8
+    assert metadata['schemaVersion'] == accepted['sourceMapSchemaVersion']
     owner = next(o for o in metadata['ownedScreens'] if o['path'] == SOURCE)
     expected_source = (FIXTURE_ROOT / 'sample-fidelity.rpy').read_text(encoding='utf-8').replace('screen ', '# loomlight-screen: ' + owner['id'] + '\nscreen ', 1)
     assert files[SOURCE]['text'] == expected_source

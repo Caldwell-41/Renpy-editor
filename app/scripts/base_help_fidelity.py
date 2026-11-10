@@ -37,14 +37,14 @@ def name(case_key):
 
 def validate_accepted(accepted):
     assert accepted['outcome'] == OUTCOME and accepted['publicCoreRequests'] is True
-    assert accepted['sourceMapSchemaVersion'] == 8
+    assert accepted['sourceMapSchemaVersion'] in (8, 9)
     assert accepted['exporterSourceSHA256'] == digest((REPO / 'app/src-core/src/screens/base_help_canvas_tests.rs').read_bytes())
     source = accepted['files'][SOURCE_PATH]
     assert source['text'].encode() == FIXTURE.read_bytes(), 'Wrong accepted fixture'
     for row in accepted['files'].values():
         assert digest(row['text'].encode()) == row['sha256'], 'Wrong accepted file hash'
     source_map = json.loads(accepted['files']['.renpy-editor/source-map.json']['text'])
-    assert source_map['schemaVersion'] == 8
+    assert source_map['schemaVersion'] == accepted['sourceMapSchemaVersion']
     assert len(accepted['assets']) == 2
     for kind, (path, fixture) in ASSETS.items():
         assets = [asset for asset in accepted['assets'] if asset['kind'] == kind]
