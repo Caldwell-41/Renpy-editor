@@ -1364,3 +1364,60 @@ commits. Retain the linked PR watcher for the combined selected status while wai
 and native/human acceptance remain pending. Local rendered conformance to approved
 A v2 is established within the stated fixture/media limits; it does not complete
 full Story #110 or grant release/merge acceptance.
+
+## Final package CI failure and core correction
+
+The selected `production-scaffold.yml` campaign ran on
+`7abb9cafd72ef6205fb29108b1eb9d32216f5fd5`, run `42914123530`, attempt 1,
+with success-only package upload. Preflight job `130172011383` passed. Windows
+x64 job `130173996551` and macOS ARM64 job `130173996427` failed core tests.
+Mac reported 681 passes, nine failures, 63 ignored and three filtered; Windows
+reported 672 passes, ten failures, 60 ignored and three filtered. SDK setup,
+runtime gates, package builds and packaged probes never ran. Later missing-report
+failures are consequences of that early stop. The finish reporter correctly
+published failure. No package artifact was produced.
+
+Both platform jobs started, so both reserved campaign places are consumed even
+though no SDK command ran. Shared consumption is **Mac 17/20, Windows 8/20, zero
+reservations**. Final campaign use is **1/1**, exhausted. The initial commentary
+that retained the pre-run totals was corrected after checking the selected unit.
+No retry, replacement dispatch or use of the unused conditional #106 correction
+start is authorized. A further package campaign requires Kris to change this
+allowance and reassess the shared Mac bound.
+
+The nine common failures have two causes:
+
+- Stale fixtures assumed only dialogue could have a branch owner, treated every
+  header as a condition, or created Choice flow through the retired destination
+  representation. Tests now select dialogue explicitly when editing it, preserve
+  all owned identities when checking root edits, admit synthetic schema 3 with
+  its original unowned trivia, and construct option-body Jumps through the public
+  body command. Exact bytes, history, reopen and refusal assertions remain.
+- A product bug in Continue Scene scanned nested terminal payloads as if they
+  terminated the root body. A newly represented option-body Jump therefore
+  removed otherwise valid root anchors. The root-terminal scan now considers
+  root statements only. Adjacent opaque/nested refusal, the required root terminal,
+  bounded generated fields and AI exclusions are unchanged. The existing public
+  preparation test catches the bug and now checks all four exclusion markers.
+
+Focused local verification passed eight Source-foundation tests, thirty Phase 3A
+tests and the exact public flow/reopen test. The one ignored SDK gate in each
+filtered set was not executed or counted as a pass. Broad local core verification
+is pending at this checkpoint.
+
+The Windows-only tenth failure is still unresolved. The controlled timeout-helper
+test reported complete cleanup and exit 0, but `cooperative: false`. No shutdown
+threshold, acknowledgment requirement or assertion has been weakened. Diagnose on
+the connected Windows host through the existing assigned checkout, with ordinary
+controlled-child tests only. That diagnosis has no SDK/native/package authority.
+
+An initial broad local core command accidentally included the two unignored SDK
+installation gates excluded by CI. It was cancelled before either archive payload
+was promoted to its validation destination. Both owned staging markers and partial
+payload inventories prove neither reached SDK validation/execution; no owned
+process remained. Private evidence retains the cancelled log and audit, and owned
+temporary trees were removed. This incomplete run is not a pass and consumed no
+SDK start. The corrected command unsets SDK settings and uses CI's three exclusions.
+
+Native/human and final package acceptance remain pending; #98/#106 and PR #125
+remain open/draft. Preserve earlier failures, approvals and protected recovery.

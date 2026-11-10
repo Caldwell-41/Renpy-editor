@@ -236,6 +236,8 @@ explicitly **before that Beat**, bound to its ID, byte offset, source/structure 
 and project session. A supported existing terminal is required and disclosed. The
 selected and preceding Beat must be supported root boundaries; nested, custom,
 ambiguous or conflicting boundaries refuse. Terminal/edge replacement is unavailable.
+A terminal inside a nested body does not terminate the root body or disqualify
+otherwise eligible root anchors.
 
 Settings → System prompts selects Dialogue rewrite or Continue Scene. Each has one
 versioned bundled baseline and a project-local editable override, using existing

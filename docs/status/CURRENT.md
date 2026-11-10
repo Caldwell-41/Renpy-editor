@@ -56,15 +56,18 @@ The fresh production controller passed thirteen stages and 284 requests.
 [The delivery record](../tasks/evidence/choice-98.md#mac-106-final-qualification) owns
 exact candidates, audit, limits and the #104 receipt limitation.
 
-Kris approved up to two additional Mac starts on 2026-11-11; one passed and the
-second remains unused. Consumed use is Mac 16/20 and Windows 7/20; final campaign reservations are below.
+Kris approved up to two additional Mac #106 starts on 2026-11-11; one passed and
+the second remains conditional and unused.
 Kris approved Choice preview A v2. It is integrated with a scrolling summary beside
 the retained Game canvas. Matched rendered samples, media preservation, interface
 scaling, 398 frontend tests and the complete required browser preflight passed.
-[The delivery record](../tasks/evidence/choice-98.md#approved-a-v2-integration-and-final-ci-reservation)
+[The delivery record](../tasks/evidence/choice-98.md#final-package-ci-failure-and-core-correction)
 owns review fixes, fixture migrations and evidence limits.
 
-One final package workflow is selected, with one reserved place per target. Current
-consumption remains Mac 16/20 and Windows 7/20; execution would take it to 17/20
-and 8/20. Final CI and native/human acceptance remain pending. #98/#106 and PR #125
-stay open/draft; full Story #110 and other PR #122 retro items remain unselected.
+The selected final package workflow failed in core tests on both targets before
+SDK execution or packaging. Both platform campaigns count as started; the single
+campaign allowance is spent, with no reservations. Local core corrections restore
+root Continue anchors and migrate old fixtures. Focused Windows shutdown diagnosis
+remains pending. Another package campaign requires Kris to extend the recorded
+allowance. Native/human acceptance remains pending. #98/#106 and PR #125 stay
+open/draft; full Story #110 and other PR #122 retro items remain unselected.

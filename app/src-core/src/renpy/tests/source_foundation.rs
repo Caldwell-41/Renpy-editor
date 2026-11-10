@@ -67,7 +67,11 @@ fn source_foundation_sdk_eof_fixture_preflight() {
             .map(|b| (b["id"].clone(), b["owner"].clone()))
             .collect::<Vec<_>>()
     };
-    assert_eq!(children(&model).len(), 2);
+    assert_eq!(
+        children(&model).len(),
+        3,
+        "two dialogue children and their owned comment"
+    );
     assert_eq!(children(&model), children(&appended));
     service.close().unwrap();
 }

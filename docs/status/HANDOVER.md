@@ -4,7 +4,7 @@
 
 Kris selected #98 and #101–#106 under implement-spec. Delivery is `in_progress` on
 `codex/choice-98` in [draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125).
-[The delivery record](../tasks/evidence/choice-98.md#approved-a-v2-integration-and-final-ci-reservation)
+[The delivery record](../tasks/evidence/choice-98.md#final-package-ci-failure-and-core-correction)
 owns exact candidates, reviews, counters and the remaining qualification.
 
 #101–#105 have both-target focused SDK evidence. Windows #106 passed all 27
@@ -30,14 +30,20 @@ fixtures/probes now use current References/Game setup and explicit source review
 Game setup preserves appearance selection through the existing bounded cache.
 Failed local attempts remain retained; no SDK/native/package campaign ran locally.
 
-Shared SDK consumption is Mac 16/20 and Windows 7/20. One place per target is
-reserved for the single selected `production-scaffold.yml` campaign; execution
-would take totals to Mac 17/20 and Windows 8/20. Publish this coherent candidate,
-dispatch once with success-only package upload, record exact run/attempt/head, then
-audit the selected Preflight, Windows x64 and macOS ARM64 jobs and current-head
-automatic CI. Do not retry or move the branch for receipt-only updates. Resolve
-uncertain dispatch without duplication. The unused conditional #106 start is not
-a new campaign allowance.
+The final package campaign ran on `7abb9caf` in run `42914123530`, attempt 1.
+Preflight passed; Windows x64 and macOS ARM64 failed core tests before SDK execution
+or packaging. Both target campaigns started and consume their reservations. The
+owning record holds cumulative use and the exhausted one-campaign allowance.
+No automatic retry or replacement campaign is authorized.
+
+The local correction restores eligible root Continue anchors when a nested option
+contains a Jump. Legacy fixtures now target actual dialogue, retain owned comments
+and build Choice flow through option bodies. Focused checks pass; the Windows-only
+controlled-helper shutdown failure still requires producing-host diagnosis. Publish
+the reviewed correction, then use the existing assigned Windows checkout for that
+bounded ordinary test work. No SDK/native/package operation is included. Complete
+that diagnosis before requesting a changed final-campaign allowance. The unused
+conditional #106 start cannot replace this allowance.
 
 Preserve all worktrees, unique evidence, `app/node_modules`, the pinned design
 references and protected recovery below. Native/human evidence remains pending;

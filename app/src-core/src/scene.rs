@@ -5333,6 +5333,7 @@ pub(crate) fn continue_anchor(beats: &[SceneBeat], before: &str) -> Result<usize
         || beats
             .iter()
             .take(beats.len() - 1)
+            .filter(|b| b.owner.is_none() && b.conditional_branch.is_none())
             .any(|b| is_terminal_payload(&b.payload))
     {
         return Err(SceneError::InvariantBlocked);
