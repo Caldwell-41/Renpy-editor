@@ -641,3 +641,40 @@ dependency. Issues remain open for the one PR's final review/closure. Rendered
 comparison, native/human evidence, final validation selection and combined #98
 acceptance remain pending. This entry changes only coordinator records and reuses
 `4339ccfc` evidence for unchanged implementation inputs.
+
+## CI font-import readiness correction
+
+Automatic run `42797086580`, attempt 1, failed on exact documentation successor
+`192bc0f487c1a49bbb9d252fc78b39dd9bb0762e` in the existing browser-fixture step.
+The only failing fixture was `project-font.browser.mjs:66`, where display-name
+`aria-invalid` was null instead of true. The other 17 fixtures, including actual
+Choice and Story controllers, passed. Repository validation also passed. This
+failed attempt remains failed; it is not waived by the earlier green head.
+
+The coordinator classified this as a fixture-readiness defect after tracing the
+actual picker/controller/field-validator owners and H48's earlier validation
+contract. An unchanged focused local replay passed, confirming the intermittent
+symptom needed controlled ordering. A temporary replay using the fixture's existing
+held-picker hook reproduced the exact failure: the empty display name first had
+`aria-invalid=true`; the late file reply supplied its default name and remounted
+the form with no error; the next whitespace edit correctly deferred new validation,
+while the fixture still expected its earlier error. No production validator defect
+or Choice regression was found.
+
+Both successful import paths now wait for the existing enabled Import and use
+control before editing names. This acknowledges completed file selection and font
+preview without a sleep or longer timeout. Cancellation and deliberately held
+picker paths, invalid/corrected-name assertions, IME, Source, draft, focus and
+history checks are retained. Production components and all SDK inputs are unchanged.
+
+The same controlled replay passes with readiness before validation. The complete
+project-font browser/controller/core journey passes with the correction. Temporary
+`choice98-font-race` retains the red, controlled green and full green scripts/logs;
+the original local baseline log remains separately retained. Browser sessions used
+scoped outside-sandbox execution as required on Mac, disposable projects and owned
+browser cleanup. These checks establish no native WebView or human acceptance.
+No SDK start or manual CI campaign was consumed. Last confirmed shared SDK totals
+remain Mac 9/20 and Windows 5/20; the active #105 implementer owns any new Mac
+reservations/counts. The coordinator owns only this fixture and its evidence;
+#105 retains its isolated feature-code assignment and must merge the updated local
+integration tip before return. The correction's new head needs automatic CI.
