@@ -9,8 +9,8 @@ Delivery is `in_progress`. #101 is integrated with public-controller, both-targe
 SDK and automatic CI evidence. Its implementation dependency is satisfied on the
 integration branch; final review, native/human evidence and issue closure remain
 part of the combined delivery. #102 is integrated with both-target SDK and
-automatic CI evidence. #103 prompts are integrated with Mac SDK evidence;
-Windows qualification is pending. #104 is the next local implementation.
+automatic CI evidence. #103 prompts have both-target SDK and automatic CI evidence.
+#104 is integrated locally with Mac SDK evidence; Windows qualification is next.
 
 Integration branch `codex/choice-98` starts at accepted integration
 `63221b44d72c1c100815e9e638cbec5133ffc1eb` from
@@ -23,12 +23,11 @@ CURRENT, HANDOVER and this file to the coordinator.
 The completed first assignment #101 established the Choice/option model, mapping,
 body operations and production controls. #102 delivered recursive source/body/Call
 contracts, their production Story controls and affected tests. #103 added
-Choice-owned narration/Character prompts through the same owners. #104 becomes
-the next sole writer of mixed Hide/Show disabled semantics through existing source,
-runtime and generated-choice-screen owners. The coordinator assigns Windows #103
-after publication. #104 depends on qualified #101, so the two assignments may run
-concurrently on separate hosts.
-#105/#106 still wait for all Stage 1 requirements.
+Choice-owned narration/Character prompts through the same owners. #104 delivered
+mixed Hide/Show disabled semantics through existing source, runtime and
+generated-choice-screen owners. All prior implementer/test assignments are complete.
+The coordinator publishes the local #104 checkpoint, then assigns Windows #104.
+#105/#106 still wait for that final Stage 1 gate.
 
 ## Dependencies and approved design
 
@@ -63,18 +62,19 @@ lint and named normal-play children; retain each child's result without charging
 them again as harness starts. This allows focused coverage across six tickets and
 bounded corrections. #101 had a four-start allowance per host after offline
 preflight and pinned-SDK verification; it used three Mac and two Windows starts.
-Current usage is Mac 8/20, Windows 3/20, zero reservations. #102 used 2/4 Mac
+Current usage is Mac 9/20, Windows 4/20, zero reservations. #102 used 2/4 Mac
 starts and 1/4 Windows starts. #103 used 3/4 Mac starts, including two failed
-selector attempts; its final run passed all 31 expected SDK children.
+selector attempts; its final run passed all 31 expected SDK children. #103 Windows
+used 1/4 starts and passed all 31 children. #104 used 1/4 Mac starts and passed
+exactly 12 selected children; that run selected no wrong-outcome child.
 
-For the next coordinator assignments, #104 may use at most four Mac harness starts
-from confirmed Mac 8/20. A fresh #103 Windows test assignment may use at most four
-starts from confirmed Windows 3/20. Both require offline fixture, host/toolchain
-and pinned-SDK preflight. Windows may reuse the existing T3-prepared
+For the next coordinator assignment, fresh Windows #104 qualification may use at
+most four harness starts from confirmed Windows 4/20. It requires offline fixture,
+host/toolchain and official pinned-SDK preflight. Windows may reuse the existing T3-prepared
 `codex/choice-101-windows` worktree only after clean/idle ownership checks and safe
 fast-forward synchronization. Do not create a new checkout or change the protected
-registered root. Separate hosts/interfaces permit #103 Windows testing alongside
-local #104 implementation. The coordinator owns dispatch and shared counters.
+registered root. The coordinator owns dispatch and shared counters. Completed
+assignments retain their consumed starts and do not grant a new allowance.
 
 Native editor/package and manual CI campaigns need recorded selection and limits
 before starting; none has started. Routine compilation, focused tests, review and
@@ -88,20 +88,15 @@ Entry records passed `python3 scripts/validate.py` for 1,883 repository files an
 both were within their maintenance targets. No product tests or runtime operations
 ran at entry.
 
-The fresh merger integrated #101 in normal merge
-`c9055fb673214365271f6ec557c92c00ce7b5f8b`. The coordinator resumes sole ownership
-of `codex/choice-98` and live status on the merger's return. Draft PR #125 is open.
-Automatic CI and Windows qualification passed for corrected candidate `3a672e96`.
-The fresh #103 merger integrated `5fc50284` in `8e8d2f5c`; the detailed
-[return below](#103-integration-and-handoff) owns this checkpoint. #102 Windows and
-automatic CI passed on `2ed83dbc`. The coordinator resumes integration ownership,
-publishes this checkpoint on PR #125, then assigns Windows #103 and local #104.
+The fresh #104 merger integrated `7b7a6d16` in `527b1943`; the detailed
+[return below](#104-integration-and-handoff) owns this local checkpoint. #103 Windows
+and automatic CI passed on published `4be00d25`. The coordinator resumes integration
+ownership, publishes and links the checkpoint on PR #125, then assigns Windows #104.
 #31/#55 remain open, unselected styling/template tasks. #98/#104 own the per-option
-and runtime feature; #104 must trace and reuse the minimal semantic owners without
-taking over their style/canvas work or changing their prerequisites or acceptance.
-They are not an additional blocker for the selected #104 assignment.
-Retain the #101–#103 worktrees and unique evidence. Tickets stay open for combined
-PR review and closure.
+and runtime feature through the minimal semantic owners; their implementation does
+not take over style/canvas work or change those tickets' prerequisites or acceptance.
+Retain the #101–#104 worktrees and unique evidence. Tickets stay open for combined
+PR review and closure. #105/#106 wait for #104's Windows Stage 1 gate.
 
 The initial draft PR checkpoint selects automatic Repository quality only in
 `.github/validation-plan.json`, targeting `codex/phase3b-screen-designer`.
@@ -464,3 +459,127 @@ semantics through existing source/runtime/generated-choice-screen owners. #31/#5
 retain their open, unselected styling/template scope and unchanged prerequisites
 and acceptance. Stage 2 still waits for every Stage 1 requirement. All issues stay
 open for the single draft PR closeout; this checkpoint claims no full #98 acceptance.
+
+## #103 Windows completion
+
+The coordinator audited the completed Windows owner on exact published candidate
+`4be00d25ca4ea0f86da4f46b8a3081cfddfa2cdd`. All 31 selected SDK children passed
+in one Windows harness start. Producing-host `c103w-20261110-1/report.md`, its
+verified 126-entry manifest and raw receipts retain the result; SDK cleanup is
+complete. The existing dedicated worktree was used and the registered root stayed
+unchanged. [The published receipt](https://github.com/Caldwell-41/Renpy-editor/issues/103#issuecomment-6763896058)
+owns that target qualification.
+
+Exact-head automatic Repository quality run `42788503420`, attempt 1, also passed,
+including 395 frontend tests, the production controller journey, Rust formatting
+and repository checks. [Its receipt](https://github.com/Caldwell-41/Renpy-editor/issues/103#issuecomment-6763650277)
+is already published. #103 Windows used 1/4 starts, taking shared Windows usage
+to 4/20 with zero reservations. No prior worker/test assignment remains active.
+These results qualify #103's inputs, not #104 or combined/native/human acceptance.
+
+## #104 integration and handoff
+
+The fresh merger received sole integration ownership on `codex/choice-98` at
+`4be00d25ca4ea0f86da4f46b8a3081cfddfa2cdd`. Worker branch
+`t3/choice-option-unavailable-policy` ended at
+`7b7a6d161efa86da16894974374cf5bd626bbdef`, descended directly from that entry.
+Both checkouts had clean tracked inputs and only their disclosed dependency
+symlinks untracked. Normal merge `527b1943838a91020a1424db15aaf47e2230007a`
+completed without conflicts or implementation edits. Git required scoped access
+to the managed worktree metadata after the sandbox refused the first merge before
+mutation; the authorized merge then succeeded.
+
+The complete merge tree exactly equals the worker tree,
+`9582bff0d496e81d78ee679bd574df76e79bfef7`. Material trees are `app`
+`67f904b0991876dd86f811cbb29ecc2ed97fefa7`, `tests`
+`9338d30ae828f6aa047c071f8a632d570ee8813c` and `tests/fixtures`
+`3b1ad82947154a68612ef54ef5cc0c456e48fce7`. This documentation successor changes
+only CURRENT, HANDOVER and this record against the worker. Approved `app/design-lab`
+and `docs/design` source is unchanged from entry. Worker checks apply to identical
+implementation inputs; no broader suite or SDK run was repeated by the merger.
+
+The worker added typed per-option Hide/Show disabled policy, with Hide as the
+omitted default. Show disabled requires a typed condition. Schema 12 recognizes
+the versioned native-menu form while recognizers through 11 stay frozen. The
+existing recursive source/map owners retain Choice and option identities, unknown
+metadata, exact sibling guard spelling and unsupported source. The minimal Screens
+adapter preserves native items, captions, actions and inherited choice styles,
+adding only per-item button sensitivity. Native filtering skips every unavailable
+body and resumes the shared continuation when no option is selectable.
+
+Accepted transactions create the collision-checked helper with source/map/history;
+Undo removes a newly created helper and Redo restores it. Adapter/template bytes
+are transaction read dependencies. Dirty helper Source drafts refuse and retain
+input. Opening or no-op never installs or repairs source. An unchanged
+Source-authored reference with a missing adapter explicitly refuses the no-op.
+Custom/edited/missing adapters, duplicate names, foreign helper files and native
+filter overrides retain protected Source fallback with a visible reason. Exact
+refusal tests include the fixture's existing BOM. No second runtime interpreter
+or separate writable path was added. #31/#55 keep their unselected styling/canvas
+scope and unchanged prerequisites and acceptance.
+
+Final worker verification passed 396 frontend tests with typecheck, 68 logic,
+16 Source and five metadata tests, focused availability/refusal cases and the
+actual production Story-to-core controller journey. The broader 121 Scene passes
+with seven pre-existing ignored specialists preceded review fixes; later focused
+logic/availability/controller checks cover the final changed owners. The ignored
+cases establish no proof. Twelve Python fidelity tests, frontend build, workspace
+Cargo check, formatting and repository validation also passed. Temporary
+`choice104/handoff.md` and `verification-commands.txt` own commands and log names.
+The controller's Happy DOM events establish no native WebView or rendered-design
+acceptance.
+
+Retained red/green evidence includes the initial unsupported payload and missing UI
+control, fallback error-name fixture correction, missing-helper no-op bug, sibling
+guard-token normalization and stale preview assertions. Controller attempts 1/2
+failed because reopen clears Undo history and Source restoration invalidated local
+option references; the corrected journey restores through Undo before reopen and
+retains identity/source checks. Both scratch roots were cleaned. Missing-Pillow,
+sandbox Vite config-write and missing frontendDist setup failures remain recorded;
+the retained runtime, scoped build and ordered workspace check passed without an
+installation or exemption. These controller/setup failures consumed no SDK start.
+
+Mac SDK candidate `00d251186022defb5baa2694647c98ae4852bd8e` passed exactly
+12 selected children in one start after offline admission, host/toolchain and
+official 8.5.3 checksum preflight. `choice104/sdk-01/result.json` retains argv,
+source/driver/archive hashes and `cleanupComplete: true`. Every child exited 0
+without timeout or truncation. The four compile/lint/play groups cover mixed
+availability, all unavailable, all disabled and all hidden. The mixed game proves
+the hidden option absent, the disabled option rendered with positive bounds/TTS,
+its actual click inert, enabled keyboard focus and selection, and both unavailable
+bodies inert. All no-selectable cases reach Shared once, record no pick and end
+safely. This selected run contains no wrong-outcome child. Its inherited success
+print mentioned one in error; the final script reports only the selected children.
+
+Final review fixes change source preservation, refusal and transaction dependencies.
+`choice104/runtime-comparison.json` proves final `controller-05` emits the same four
+qualified source shapes after normalizing only each fixture's actual generated
+entry label in memory. Adapter/template bytes and runtime driver are identical;
+no source file was rewritten for comparison. The SDK result remains bound to
+`00d25118`; reuse covers those unchanged runtime shapes and driver, not a fresh
+final-head SDK run.
+
+The merger ran the exact existing public-core Help export once with
+`LOOMLIGHT_BASE_HELP_INPUTS` and
+`screens::canvas::tests::base_help_fidelity_exports_typed_assets_styles_and_exact_source_without_execution`
+under `--exact --nocapture`. One test passed with zero failures/ignored, and the
+shared `cargo-log` gate passed. Existing Python 3.12 with retained Pillow admitted
+its actual schema-12 `accepted.json` and all eight cases. All seven offline base
+Help admission tests passed, including legacy/current agreement and unknown-version
+refusal; the shared `verify_unittest` gate confirmed seven passes and no skips.
+Temporary `choice104/merge/base-help-*` retains these checks. The first
+Cargo gate wrapper used the wrong relative script path; correcting it consumed
+the same passing Rust log without rerunning the export.
+
+Rust formatting, repository validation for 1,890 files and whitespace checks pass.
+CURRENT and HANDOVER remain within their maintenance targets. Protected native
+recovery records below the live Choice handover are unchanged.
+
+Confirmed totals are Mac 9/20, Windows 4/20, zero reservations. #104 used 1/4 Mac
+starts. No SDK/helper, native editor, browser, package or manual CI operation ran
+during integration. Windows #104, rendered-reference comparison, native/human
+evidence and combined #98 review remain pending. The coordinator resumes sole
+integration ownership, publishes and links this local checkpoint on draft PR #125,
+then dispatches Windows #104 under the limits above. No Stage 2 #105/#106
+implementation starts until that Windows Stage 1 gate passes. No issue/PR mutation,
+push, worktree cleanup, protected-session or signing/credential change occurred.
