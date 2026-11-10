@@ -6,8 +6,9 @@ Kris selected [#98](https://github.com/Caldwell-41/Renpy-editor/issues/98), its 
 delivery tickets and the implement-spec workflow, then instructed the agent to
 start building. Work is `in_progress` on `codex/choice-98`, based on accepted
 integration `63221b44`. The coordinator owns this branch and live status; fresh
-ticket implementers use isolated managed worktrees. #101 is integrated but not
-accepted. [The delivery record](../tasks/evidence/choice-98.md) owns the graph,
+ticket implementers use isolated managed worktrees. #101's implemented prerequisite
+is qualified on both SDK targets; combined acceptance remains pending. #102 is the
+next implementation assignment. [The delivery record](../tasks/evidence/choice-98.md) owns the graph,
 file ownership, approved design, verification and cumulative operation limits.
 
 Normal merge `c9055fb6` integrated worker `070365fa` without conflicts. The worker
@@ -16,22 +17,27 @@ schema-version and Return-label consumers. The coordinator reproduced and correc
 them, including related current qualification consumers; focused exports, admission
 checks and the ten-case real Story controller journey pass. The original frontend
 Python failure also has a passing targeted rerun. [The correction record](../tasks/evidence/choice-98.md#windows-preflight-and-ci-consumer-correction)
-owns exact results, setup failures and evidence-reuse limits. Automatic CI on the
-corrected head and Windows runtime proof are next. #102–#104 wait for #101;
-#105/#106 wait for all Stage 1 tickets. Native/human and combined review remain pending.
+owns exact results, setup failures and evidence-reuse limits. Automatic CI and
+Windows SDK qualification now pass on `3a672e96`. A fresh #102 implementer receives
+the recursive body/Call/parser/UI contracts as sole writer; #103/#104 start after
+that shared-contract checkpoint. #105/#106 wait for all Stage 1 tickets.
+Native/human and combined review remain pending; issues remain open until PR closeout.
 
 Development is on macOS ARM64, with both supported runtime targets required. The
-linked SUNDOWN registered checkout is clean at `251fb477` and lacks the candidate.
-Its read-only preflight ran no build or SDK. Kris approved a new Windows test chat
-so T3 can prepare a managed worktree from the corrected published PR head. That
-chat must locate existing pinned Node 24.19.0 and verify host/candidate readiness.
-SDK use is Mac 3/20, Windows 0/20, zero reservations; #101 used three of its maximum
-four Mac starts. No native editor/package or manual CI campaign is selected yet.
+linked SUNDOWN registered checkout stays at `251fb477`. The approved managed
+`codex/choice-101-windows` worktree qualified `3a672e96` with pinned tools, the
+public-controller journey and all 14 SDK children. It and producing-host evidence
+remain retained. [The Windows return](../tasks/evidence/choice-98.md#windows-qualification-and-102-entry)
+owns hashes, charged observer failure, exact child results and cleanup. Its T3
+callback was denied; Kris supplied the completed thread for this audit.
+SDK use is Mac 3/20, Windows 2/20, zero reservations. #102 may use at most four Mac
+starts from the shared ceiling after preflight. No native editor/package or
+manual CI campaign is selected yet.
 [Draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125) is published
 against `codex/phase3b-screen-designer`, initial head `d2504a76`. The Windows
-assignment may use at most four SDK harness starts from its shared ceiling.
-Resume in this same coordinating thread, audit the Windows result and current
-draft checks, then continue the dependency graph. The local untracked
+assignment is complete; the coordinator audited exact-head automatic CI. Resume
+in this same coordinating thread on #102's return, inspect its actual diff and
+evidence, then assign a fresh merger and continue the dependency graph. The local untracked
 `app/node_modules` symlink points to the existing dependency cache and must not be
 committed. No protected sessions or unrelated Windows worktrees were changed.
 

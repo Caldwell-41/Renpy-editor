@@ -5,8 +5,10 @@
 Kris selected [#98](https://github.com/Caldwell-41/Renpy-editor/issues/98)
 with the implement-spec workflow and instructed the agent to start building on
 2026-11-10. The spec owns requirements; #101–#106 own bounded acceptance.
-Delivery is `in_progress`. #101 is integrated with portable and Mac SDK evidence;
-its acceptance and the combined feature remain pending.
+Delivery is `in_progress`. #101 is integrated with public-controller, both-target
+SDK and automatic CI evidence. Its implementation dependency is satisfied on the
+integration branch; final review, native/human evidence and issue closure remain
+part of the combined delivery. #102 is the next selected assignment.
 
 Integration branch `codex/choice-98` starts at accepted integration
 `63221b44d72c1c100815e9e638cbec5133ffc1eb` from
@@ -16,10 +18,12 @@ code, affected tests and canonical technical contracts in a managed isolated
 worktree. A merger receives integration ownership explicitly. Workers leave
 CURRENT, HANDOVER and this file to the coordinator.
 
-The first assignment is #101. It owns the Choice/option model, source recognition,
-mapping and writing, explicit-body operations, flow projection, real Story controls
-and affected tests. No other implementation writer starts against those interfaces
-before that checkpoint is integrated. Later assignments must declare overlap.
+The completed first assignment #101 established the Choice/option model, mapping,
+body operations and production controls. #102 now owns recursive source/body/Call
+contracts, their production Story controls and affected tests. It is the sole
+implementation writer for those shared interfaces. #103/#104 remain ready after
+#101 but start after this recursive checkpoint to avoid simultaneous ownership of
+the same parser, writer and UI contracts.
 
 ## Dependencies and approved design
 
@@ -45,8 +49,8 @@ at a time. Inspect affected consumers before changing shared models. Lab evidenc
 establishes design only.
 
 Development is on macOS ARM64. Affected runtime behavior requires macOS ARM64 and
-Windows x64 qualification under host routing. Linked SUNDOWN answered at entry;
-its OS, checkout and tools need verification before assignment.
+Windows x64 qualification under host routing. SUNDOWN has now qualified #101 in
+the approved managed worktree; its producing-host report owns toolchain details.
 
 SDK qualification for the entire #98 outcome is capped at 20 harness invocations
 per host, including failed or cancelled starts. One invocation may launch compile,
@@ -57,7 +61,10 @@ from the shared ceiling after cheap fixture preflight and official pinned-SDK
 verification. A separate #101 Windows test assignment may use at most four
 Windows harness starts from the shared ceiling, after host/toolchain and fixture
 preflight. No other Windows writer or SDK campaign is assigned concurrently.
-Usage is Mac 3/20, Windows 0/20, zero reservations at dispatch preparation.
+Current usage is Mac 3/20, Windows 2/20, zero reservations. The fresh #102
+implementer may use at most four Mac harness starts from the shared ceiling after
+offline preflight, covering nested convergence and Call return. It has no Windows,
+native-editor/package or manual-CI assignment.
 
 Native editor/package and manual CI campaigns need recorded selection and limits
 before starting; none has started. Routine compilation, focused tests, review and
@@ -74,13 +81,14 @@ ran at entry.
 The fresh merger integrated #101 in normal merge
 `c9055fb673214365271f6ec557c92c00ce7b5f8b`. The coordinator resumes sole ownership
 of `codex/choice-98` and live status on the merger's return. Draft PR #125 is open.
-Next actions are the corrected candidate's automatic CI and Windows qualification,
-then dependency-ready ticket assignments and combined review. The worker's managed worktree and temporary evidence remain
-retained. No acceptance or ticket closure follows from this merge.
+Automatic CI and Windows qualification passed for corrected candidate `3a672e96`.
+Next is the fresh #102 implementer in an isolated managed worktree, then a fresh
+merger and the remaining ticket graph. Both #101 worktrees and their unique
+evidence remain retained. Tickets stay open for combined PR review and closure.
 
 The initial draft PR checkpoint selects automatic Repository quality only in
 `.github/validation-plan.json`, targeting `codex/phase3b-screen-designer`.
-Connected-host Windows SDK qualification is a separate pending requirement,
+Connected-host Windows SDK qualification is a separate requirement,
 and the whole spec's final automated/native qualification selection still needs
 completion before review readiness. A green draft checkpoint cannot establish
 #98 acceptance. SUNDOWN has a registered Loomlight project; its test assignment
@@ -234,3 +242,49 @@ change evidence consumers and an inspection label, not generated Choice source;
 no SDK/native/package/manual-CI operation was repeated. The corrected publication
 needs new automatic CI. Windows runtime, native/human, later tickets and combined
 review remain pending.
+
+## Windows qualification and #102 entry
+
+The coordinator read the completed Windows thread and its producing command
+receipts. The assigned managed worktree, `codex/choice-101-windows`, stayed clean
+at `3a672e96364082482526ee380be4b749a845c0d4`. The public Story/main-to-core
+journey passed with a normal observed driver exit and complete fixture cleanup.
+Pinned Node 24.19.0 was found in the retained runtime cache. An npm wrapper first
+used 24.22.1; the owner repeated restoration and compilation with the existing
+11.9.0 CLI explicitly under pinned Node before qualifying the controller.
+
+SDK invocation 2 passed all 14 named children: eight compile/lint children, five
+positive normal-entry routes and one expected wrong-outcome rejection. The five
+positive markers occurred exactly once, and the negative case exited 1 at the
+expected boolean assertion without emitting its wrong-accepted marker. No child
+timed out or truncated output. The SDK archive matched the recorded pin; producing
+Windows Python, launcher and version-file hashes matched archive members, including
+AMD64 PE identity. The SDK runtime driver SHA-256 was
+`fc954c76b67db6d4cb5041f903d18cb6cd220f5cbc3ada0d7621aa62d77e6ff6`, matching
+the Mac driver. The frozen authored receipt SHA-256 was
+`6bec6f6818dea0f586ffda603ffdca86b81adcfa1e1ed2e40ec11b41ea240181`.
+
+Windows usage is conservatively 2/20, assignment 2/4, zero reservations. Invocation
+1 failed in the owner's optional evidence observer before launching an SDK child;
+it remains charged. Invocation 2 used the unmodified repository script directly
+and completed in 56.622 seconds. The owner retained exact fixture sources and
+their hashes separately. Final receipts show no remaining SDK/controller scratch
+or owned test process; existing processes and other checkouts were untouched.
+Producing-host `c101w-20261110-1/report.md`, ledger, post-validation, authored
+receipt, 14 child logs, source/hash inventory and cleanup records are retained.
+The linked-session callback was denied by T3; Kris supplied the completed thread
+to this coordinator. No result was silently lost or re-executed.
+
+The coordinator previously audited automatic run `42775106323`, attempt 1, on
+the same head. Both selected jobs and combined status passed, including the Choice
+public-controller journey. [The receipt](https://github.com/Caldwell-41/Renpy-editor/issues/98#issuecomment-6761738652)
+owns that CI result. No SDK repetition is needed for these unchanged #101 inputs.
+
+#101's implemented prerequisite is now qualified through public authoring and
+normal SDK play on both targets, allowing #102 to start on this integration branch.
+Keep #101 open for the single integration PR's final review/closure. This does not
+claim native/human or full #98 acceptance. #102 owns Calls, conditions and nested
+Choices in option bodies under its live ticket. Reuse the existing recursive body,
+Call and qualification owners; prompts, locked options, Repeat and picked state
+remain #103–#106. The coordinator keeps live records and shared counters; #102
+returns a committed, focused-tested candidate for a fresh merger.
