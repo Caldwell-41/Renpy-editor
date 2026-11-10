@@ -102,7 +102,7 @@ def main():
                         row.update(exitCode=result.exit_code, timedOut=result.timed_out, outputLimited=result.output_limited,
                                    durationSeconds=result.duration_seconds, argv=list(result.argv))
                         if case == 'wrong_outcome':
-                            row['passed'] = result.exit_code != 0 and '[rpytest] Status: FAILED' in result.output and 'CHOICE_101_WRONG_ACCEPTED' not in result.output
+                            row['passed'] = result.exit_code != 0 and '[rpytest] Status: FAILED' in result.output and 'AssertionError: assert eval (choice_flag is False)' in result.output and 'CHOICE_101_WRONG_ACCEPTED' not in result.output
                         else:
                             row['passed'] = result.exit_code == 0 and (marker is None or result.output.count(marker) == 1 and '[rpytest] Status: PASSED' in result.output)
                         assert row['passed'] and not result.timed_out and not result.output_limited, name

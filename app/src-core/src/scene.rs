@@ -193,6 +193,20 @@ pub(crate) fn logic_boundary(payload: &BeatPayload) -> bool {
     ) || matches!(payload, BeatPayload::Choice { options } if options.iter().any(|o| o.condition.is_some()))
 }
 
+// Supported option headers and a verified inert placeholder are protected edit
+// targets, but do not make reference inspection or the Scene projection opaque.
+fn opaque_source(beat: &SceneBeat) -> bool {
+    beat.protected
+        && !beat.structural_placeholder
+        && !beat.conditional_branch.as_ref().is_some_and(|branch| {
+            branch.choice_option
+                && !matches!(
+                    branch.condition,
+                    Some(crate::conditions::Condition::Unknown { .. })
+                )
+        })
+}
+
 fn is_terminal_payload(payload: &BeatPayload) -> bool {
     matches!(payload, BeatPayload::Jump { .. } | BeatPayload::Return)
 }
@@ -773,7 +787,7 @@ impl AuthoringService {
                 source_path: scene.source_path.clone(),
                 source_revision: revision.sha256,
                 source_conflict: conflict,
-                partial: conflict || beats.iter().any(|beat| beat.protected),
+                partial: conflict || beats.iter().any(opaque_source),
                 beats,
             });
         }
@@ -2172,7 +2186,7 @@ impl AuthoringService {
                 )),
             )?;
             if beats.iter().any(|beat| {
-                beat.protected
+                opaque_source(beat)
                     || match &beat.payload {
                         BeatPayload::Jump { scene_id: target }
                         | BeatPayload::Call {
@@ -2324,7 +2338,7 @@ impl AuthoringService {
                 &[],
                 Some((&loaded.project, &previous, &loaded.source_map.owned_screens)),
             )?;
-            if beats.iter().any(|b| b.protected) {
+            if beats.iter().any(opaque_source) {
                 return Err(SceneError::OpaqueBoundary);
             }
             let mut proposed = bytes.clone();

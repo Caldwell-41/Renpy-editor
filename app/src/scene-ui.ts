@@ -84,6 +84,13 @@ function terminates(beat: SceneBeat, scene: SceneDocument, depth = 0): boolean {
     const branches = scene.beats.filter(item => item.conditionalBranch?.groupId === groupId);
     return branches.some(branch => branch.conditionalBranch?.otherwise) && branches.every(branch => bodyNodes(scene, { type: "branch", groupId: beat.conditionalBranch!.groupId, branchId: branch.id }).some(child => terminates(child, scene, depth + 1)));
   }
+  if (beat.payload.type === "choice") {
+    const options = beat.payload.options;
+    return options.some(option => !option.condition) && options.every(option => {
+      const header = scene.beats.find(b => b.id === option.id);
+      return header?.conditionalBranch && bodyNodes(scene, { type: "branch", groupId: header.conditionalBranch.groupId, branchId: header.id }).some(child => terminates(child, scene, depth + 1));
+    });
+  }
   return ["jump", "return"].includes(beat.payload.type);
 }
 function defaultInsertion(scene: SceneDocument, body: BodyRef): Position {
@@ -110,7 +117,10 @@ function bodyCaption(scene: SceneDocument, body: BodyRef, model: SceneWorkspace)
     const owner = parent;
     const branch = scene.beats.find(beat => beat.id === owner.branchId && beat.conditionalBranch?.groupId === owner.groupId);
     const option = scene.beats.flatMap(b => b.payload.type === "choice" ? b.payload.options : []).find(o => o.id === branch?.id);
-    parts.unshift(option ? `Option ${option.text}` : branch?.conditionalBranch ? branchCaption(branch.conditionalBranch, model) : "Missing branch");
+    const menus = scene.beats.filter(b => b.payload.type === "choice");
+    const menu = menus.find(b => b.payload.type === "choice" && b.payload.options.some(o => o.id === branch?.id));
+    const optionNumber = menu?.payload.type === "choice" ? menu.payload.options.findIndex(o => o.id === branch?.id) + 1 : 0;
+    parts.unshift(option ? `Choice ${menus.indexOf(menu!) + 1} / Option ${optionNumber}: ${option.text}` : branch?.conditionalBranch ? branchCaption(branch.conditionalBranch, model) : "Missing branch");
     parent = branch ? beatBody(branch) : { type: "root" };
   }
   return `${scene.displayName} / ${parts.length ? parts.join(" / ") : "Scene body"}`;

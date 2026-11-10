@@ -1609,6 +1609,24 @@ mod choice_body_tests {
     use super::tests::Fixture;
     use serde_json::json;
     #[test]
+    fn choice_known_headers_and_empty_placeholders_preserve_reference_inspection() {
+        let mut f = Fixture::new();
+        let unused = f.scene("Unused");
+        let a = f.model()["scenes"][0].clone();
+        f.save(
+            &a,
+            &format!(
+                "label {}:\n    menu:\n        \"Empty\":\n            pass\n    return\n",
+                a["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        let a = f.model()["scenes"][0].clone();
+        assert_eq!(a["partial"], false);
+        f.command(json!({"type":"deleteScene","sceneId":unused["id"],"expectedSourceRevision":unused["sourceRevision"]}));
+        assert_eq!(f.model()["scenes"].as_array().unwrap().len(), 1);
+        f.service.close().unwrap();
+    }
+    #[test]
     fn choice_ambiguous_external_reorder_retains_source_draft_and_accepted_bytes() {
         let mut f = Fixture::new();
         let a = f.model()["scenes"][0].clone();
