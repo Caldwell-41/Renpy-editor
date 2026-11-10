@@ -52,11 +52,11 @@ Delivery is `in_progress` in [draft PR #125](https://github.com/Caldwell-41/Renp
 #106 picked-state is integrated locally in `8fe1da86`; its last Mac run passed
 26/27 outcomes, including save and fresh-process Load. Rollback/New Game and the
 corrected final driver remain unqualified. #106 used all four Mac starts and is
-stopped pending additional approval. Windows #106 qualification is next.
+stopped pending approval. Four review defects need fixes before Windows qualification.
 [The delivery record](../tasks/evidence/choice-98.md#106-integration-and-handoff)
 owns scoped reuse, the #104 receipt-retention limit and next actions. SDK use is
 Mac 15/20 and Windows 6/20, zero reservations. Published `0a81ae24` passed automatic
 CI; the local integration needs publication and its own CI. Rendered comparison,
-native/human evidence, combined review and final validation remain pending. #98 and
+native/human evidence, review fixes and final validation remain pending. #98 and
 #106 stay open and draft. Approved Story Combined v1 applies; the full workspace
 remains with #110. Other PR #122 retro items remain unselected.

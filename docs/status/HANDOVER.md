@@ -31,8 +31,12 @@ duplicate controller receipt corrupt; the checksum-matching frozen SDK reference
 and original at-time audit remain retained. [The correction](../tasks/evidence/choice-98.md#104-receipt-retention-limit)
 limits current availability without overwriting or requalifying evidence.
 
-Resume the same coordinator thread for publication and a fresh test-only Windows
-#106 assignment. Use the existing T3-prepared dedicated branch after clean/idle,
+Resume the same coordinator thread for a fresh isolated review-fix implementer.
+The [two-axis review](../tasks/evidence/choice-98.md#two-axis-review-and-correction-assignment)
+identified four defects in runtime fallback, helper admission, source preservation
+and insertion positions. The fixer owns affected production/tests only; the
+coordinator retains integration/status. After fixes and fresh merger verification,
+publish and assign test-only Windows #106. Use its T3-prepared branch after clean/idle,
 ancestry and offline host/toolchain/official-SDK preflight. Safely fast-forward to
 the exact published candidate; select all 27 picked outcomes, including save/close/
 new-process Load, rollback/New Game and the intended negative. Windows may use at
@@ -43,8 +47,8 @@ starts, within 17/20 shared use, but that proposal is not authorization.
 All previous workers/test owners are complete. The coordinator resumes sole
 integration/status ownership. Preserve all worker checkouts, unique evidence,
 `app/node_modules` and the recovery below. No cleanup, native editor/package or
-manual CI campaign is selected. #98/#106 stay open and draft. Combined review and
-fixes, rendered comparison, native/human evidence and final validation selection
+manual CI campaign is selected. #98/#106 stay open and draft. Review fixes,
+rendered comparison, native/human evidence and final validation selection
 remain pending. Full Story #110 and #31/#55 styling/canvas remain separate.
 
 <a id="shared-arithmetic-implementation-2026-11-09"></a>
