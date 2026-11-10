@@ -2,81 +2,46 @@
 
 <a id="shared-arithmetic-implementation-2026-11-09"></a>
 
-## Shared arithmetic ready for review, 2026-11-10
+## Shared arithmetic accepted and merged, 2026-11-10
 
-Kris selected spec #87 using implement-spec. All selected arithmetic slices are
-implemented and integrated on `codex/spec-87-arithmetic`, in
-[PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) against accepted
-Screens base `codex/phase3b-screen-designer` / `251fb477`. No PR merge or release
-is selected. The integration checkout is separate from the preserved primary
-Screens checkout. The [delivery record](../tasks/active/shared-arithmetic.md)
-owns execution/accounting; GitHub owns requirements and delivery state.
+Kris authorized closure and cleanup. [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122)
+is squash-merged into `codex/phase3b-screen-designer` at `fab85c16865d90ecec338f3134ed83d42d532cf4`.
+Its tree equals tested head `18260b15325c10f935a1169392d99f036c5d15de`.
+Exact-head automatic run `42723078376`, attempt 1, passes 391 frontend tests,
+17 fixtures, production build, formatting, selected core checks and repository
+validation. The [owning-issue receipt](https://github.com/Caldwell-41/Renpy-editor/issues/87#issuecomment-6754747045)
+records the audit. Final publication receipts belong on #87, not another commit.
 
-Kris approved the coordinator's recommendation with "I agree with your
-recommendation." #87/#96 now deliver arithmetic controls in the current Story
-editor and Writing focus. #110 owns adopting them in Combined, including
-Tracks/Reel, cross-view branch context/selection/keyboard/focus and raw arithmetic
-draft retention. #112 owns draft lifecycle, #116/#118/#119 the views, #117 adoption
-of existing controls, and #120 assembled validation/live-app acceptance. Layout
-and palette integration remain with #110's existing owners. No required behavior
-is deleted. The unimplemented workspace remains unselected. Spec P4 is resolved
-by this explicit scope decision, with the original review report preserved.
+#87 and #91–#97 are accepted and closed. #88's existing approval is retained and
+its delivery state corrected; #89/#90 remain superseded. Parent and dependent
+issues #22/#26/#110/#112/#116/#117/#120 now record the accepted arithmetic
+prerequisites. #98 remains open. The approved #96/#110 split still assigns Combined
+layout/palette, Tracks/Reel, context/selection/draft retention and assembled
+native/human acceptance to #110 and its existing slices. No implementation or
+release from that scope is selected.
 
-The [final review disposition](../tasks/evidence/arithmetic-review.md#approved-workspace-ownership-split-2026-11-10)
-maps verified #91–#97 criteria to their canonical evidence. S1-S5 and P1-P3 are
-corrected. The independent five Standards/four Spec reports retain their separate
-counts and original source; no independent re-review approval is invented.
-Actual-main/core journeys prove source, shared history, refusal/draft handling and
-reopen. Focused production/reference comparisons cover the approved controls;
-recorded surrounding workspace differences remain with the full integration.
+The [archived delivery record](../tasks/archive/2026-11-10-shared-arithmetic.md)
+retains historical operations and recovery. The [review evidence](../tasks/evidence/arithmetic-review.md#merge-and-retirement-2026-11-10)
+owns the final four defect corrections, qualification limits and cleanup proof.
+SDK totals remain Mac 12/20, Windows 4/20, zero reservations. Earlier SDK and
+physical-input/native/human results retain their original candidate scope. Local
+full-suite Python 3.9.6 limitations remain historical; supported-toolchain CI passed.
 
-Approved Story Combined v1 source is `6ecf64704044a6fee9fc4ee6b3a54985d84b9b10`.
-Screens A2 / `equation-v2` source is `ce6264279188fca4c81218a5cd93b50c393bf9a3`,
-fingerprint `e9a4d3bd1952a92b68d184e68e87579c15001984d42f3a872815a124d3555f7b`.
-The [approval record](../design/screens-arithmetic/approval.json) owns captures,
-behavior and deviations. Preserve its read-only sibling checkout
-`codex-spec-87-variable-mock` at `82d30d6e`. Integration's different full Lab
-fingerprint is expected after production changes; never relabel the reference.
+Source recovery is published as `archive/pr122-arithmetic-2026-11-10`, preserving
+all integrated worker heads and the approved Screens A2 reference. The primary
+checkout's ignored `.toolchains/retired/pr122-2026-11-10/` contains verified Git
+bundles, file manifests, retirement receipts and preserved worker evidence/builds.
+56,964 manifest entries cover 35,751,904,065 logical bytes. Nine clean sibling
+worktrees are removed; the current documentation checkout remains until closeout
+publication. The primary checkout is clean at the accepted integration base.
+Approved Story reference branches and the open dependency-update branch remain.
+Windows evidence stays on its assigned host and is outside this Mac cleanup.
 
-Mac UI-source qualification passes at `72eb9f13`; Windows passes at `f3450c06`.
-Audited evidence `743b5fdc` is integrated by normal merge `ca02b130`. Both targets
-pass compile/lint, 28 normal assertions, five exact witnesses, four continuations,
-actual wrong-outcome rejection and cleanup. Complete runtime inputs remain
-unchanged through published product checkpoint `f42747ef`; subsequent scope
-records change no app/fixture/script/CI input. Fixture-Timer dispatch supplies no
-new physical-input/native-editor/human proof. Original #95 gesture evidence keeps
-its narrower candidate/adapter scope. Full Combined acceptance remains #110/#120.
-
-SDK totals are **Mac 12/20, Windows 4/20, zero reservations**. No further SDK,
-package/native-app or manual-CI operation is selected. All failed attempts,
-retained binaries, accepted source/assets and cleanup audits remain available in
-root and worker `.toolchains` directories referenced by the review record.
-Windows evidence stays in its clean assigned F: worktree; its registered C:
-checkout remains unchanged at `251fb477`. Evidence-bearing worker worktrees and
-the approved reference are retained cleanup exceptions. Do not force-remove them
-or delete ignored artifacts. Their implementation histories are integrated.
-
-Exact-head automatic CI at `2d49595e` is audited green: 391 frontend tests, all
-17 browser/dispatch fixtures, production build, Rust formatting, focused core
-checks and repository validation. The [owning-issue receipt](https://github.com/Caldwell-41/Renpy-editor/issues/87#issuecomment-6752268497)
-records that successful run. Earlier failures remain historical. Record the next
-final CI receipt on #87 rather than creating another receipt-only commit.
-
-Kris selected one Sol 6.1 xhigh implementer for four audited Terra findings,
-followed by coordinator verification and PR update. The
-[correction evidence](../tasks/evidence/arithmetic-review.md#audited-terra-findings-and-sol-corrections-2026-11-10)
-records the shared helper admission/no-op fixes, signed-zero transport contract,
-the coordinator's duplicate-class correction and passing independent checks.
-There are 37 passing frontend tests, 24 distinct core/preflight cases and both
-production-main/core journeys. These changes add no new SDK/native proof.
-The local full suite retains the earlier Python 3.9.6 `tomllib` limitation.
-Next: publish the verified correction to ready PR #122, then use its T3 watcher
-and audit the new exact-head automatic checks.
-Keep #91–#97 open for PR review/merge disposition. No merge, #110 implementation,
-release or parent-branch promotion is selected.
-
-The earlier sections below retain separate project outcomes and unique recovery
-context. Their old next-action statements do not override this selected outcome.
+Next: validate and publish these documentation-only closeout records, audit their
+required CI, merge, fast-forward the primary checkout and retire this last
+closeout checkout/branch. Record the final cleanup receipt on #87. Earlier sections
+below retain separate project outcomes and recovery context; old next actions do
+not override this closure or select another task.
 
 ## Story Combined v1 references consolidated
 

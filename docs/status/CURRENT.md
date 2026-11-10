@@ -2,41 +2,29 @@
 
 <a id="shared-arithmetic-selected"></a>
 
-## Shared arithmetic ready for review
+## Shared arithmetic merged and accepted
 
-[Spec #87](https://github.com/Caldwell-41/Renpy-editor/issues/87) is implemented on
-`codex/spec-87-arithmetic`, targeting accepted Screens base `251fb477` in
-[PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122). Approved Story
-Combined v1 and Screens A2 references remain intact. The backend, Story/Screens
-controls and all seven code-review corrections are integrated. The
-[review record](../tasks/evidence/arithmetic-review.md#approved-workspace-ownership-split-2026-11-10)
-owns exact source identities, criterion mapping, retained failures and limits.
+[PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) is squash-merged
+into `codex/phase3b-screen-designer` as `fab85c16865d90ecec338f3134ed83d42d532cf4`.
+The merged tree equals tested head `18260b1`. Its audited automatic CI passes
+391 frontend tests, all 17 browser/dispatch fixtures, build, formatting, selected
+core checks and repository validation. The [final product CI receipt](https://github.com/Caldwell-41/Renpy-editor/issues/87#issuecomment-6754747045)
+owns the exact run and limitations.
 
-Kris approved the workspace split on 2026-11-10. #87/#96 deliver arithmetic in the
-current Story editor and Writing focus. #110 and its existing slices retain
-Combined layout/palette, Tracks/Reel, cross-view selection/branch context and
-draft retention, and assembled native/human acceptance. Spec P4 is resolved by
-this transfer; those missing workspace behaviors remain required and unimplemented.
-The decision selects no #110 implementation or release.
+#87 and #91–#97 are accepted and closed. #88 was already closed; its stale delivery
+state is corrected. #89/#90 remain superseded. Arithmetic is delivered in the
+current Story editor, Writing focus and Screens controls. #110 retains Combined
+layout/palette, Tracks/Reel, cross-view context/drafts and assembled native/human
+acceptance. Those workspace behaviors remain required and unimplemented. No #110
+implementation or release is selected.
 
-Both-target UI-emitted source proof passes compile/lint, all 28 normal assertions,
-five witnesses, four Finish continuations, actual wrong-outcome rejection and
-cleanup. Original physical-gesture evidence retains its own candidate scope.
-Fixture-Timer dispatch adds no new native-editor or human proof. SDK usage is
-Mac 12/20 and Windows 4/20, zero reservations.
-
-At `2d49595e`, audited automatic CI passes 391 frontend tests and all 17
-browser/dispatch fixtures, build, formatting and repository validation. The
-[issue receipt](https://github.com/Caldwell-41/Renpy-editor/issues/87#issuecomment-6752268497)
-owns that audit. A fresh Terra review found four further defects in helper
-recognition, Story/Screens no-ops and signed-zero transport. The
-[Sol corrections and coordinator verification](../tasks/evidence/arithmetic-review.md#audited-terra-findings-and-sol-corrections-2026-11-10)
-pass all independent reproductions, both UI/core journeys, 37 frontend tests and
-24 core/preflight cases. The new publication still needs exact-head automatic CI.
-The implementation remains on PR #122;
-issues remain open for review/merge disposition. No PR merge is selected. Preserve
-all unique qualification evidence and approved reference worktrees. The
-[delivery record](../tasks/active/shared-arithmetic.md) owns accounting and continuation.
+The [archived delivery record](../tasks/archive/2026-11-10-shared-arithmetic.md)
+and [closeout evidence](../tasks/evidence/arithmetic-review.md#merge-and-retirement-2026-11-10)
+record source recovery and preserved qualification evidence. Completed worker
+checkouts and feature branches are retired after preservation. The documentation
+closeout checkout remains until its records are published. SDK accounting remains
+Mac 12/20 and Windows 4/20, zero reservations; original native/human evidence keeps
+its producing candidate scope.
 
 ## Story Combined v1 references consolidated
 

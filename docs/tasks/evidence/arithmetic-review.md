@@ -1126,3 +1126,46 @@ No SDK, browser/native app or package was launched. SDK use remains Mac 12/20 an
 Windows 4/20, with zero reservations. Generated runtime adapter code and supported
 Ren'Py syntax remain unchanged; earlier SDK/native/human evidence keeps its original
 candidate scope. No merge, release or #110 implementation is selected.
+
+## Merge and retirement, 2026-11-10
+
+Kris authorized updating/closing the relevant tickets, squash merge and safe branch
+and worktree retirement. [PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122)
+merged into `codex/phase3b-screen-designer` at
+`fab85c16865d90ecec338f3134ed83d42d532cf4`. Its tree and tested head
+`18260b15325c10f935a1169392d99f036c5d15de` both equal
+`dfe37944c3ca0f48a06aca234e69372186b00c8c`.
+
+Automatic run `42723078376`, attempt 1, succeeds on that exact product head.
+The [audited receipt](https://github.com/Caldwell-41/Renpy-editor/issues/87#issuecomment-6754747045)
+records 391/391 frontend tests with zero skips/failures, all 17 discovered fixtures,
+production build, Rust formatting, offline Help and selected core groups, Dialog
+core journey and repository validation. Unselected specialist jobs are not passes.
+These checks add no SDK/native/human qualification. Historical SDK totals remain
+Mac 12/20 and Windows 4/20, zero reservations.
+
+#87 and #91–#97 are accepted and closed. #88 was already closed; its stale delivery
+state is corrected. #89/#90 remain superseded. #22/#26 and #110/#112/#116/#117/#120
+record the accepted prerequisites. Native dependency edges remain as provenance.
+#110 retains the approved Combined workspace and final acceptance scope; #98
+remains open. Source links in closed ticket bodies use the immutable merge commit.
+
+Before cleanup, every arithmetic worker head was proved ancestral to tested head
+`18260b1`. Published annotated tag `archive/pr122-arithmetic-2026-11-10` and a
+verified Git bundle preserve the original DAG, worker heads and Screens A2 source.
+The primary checkout's ignored `.toolchains/retired/pr122-2026-11-10/` preserves
+worker `.toolchains`, `app/.toolchains`, `app/target`, `app/dist` and `app/dist-tests`
+where present, plus coordinator audit inputs/logs. SHA-256 manifests cover 56,964
+entries and 35,751,904,065 logical bytes. Same-volume moves preserve file identities;
+post-move size, timestamps, inode and links were verified. Private manifests and
+absolute paths remain outside Git. Reproducible dependencies were not archived.
+
+Nine clean sibling worktrees and eleven original local feature branches are
+retired. Remote arithmetic/Windows branches are deleted. Four older merged remote
+branches for PRs #81/#84/#86/#107 are also retired after merged-tree equivalence and
+ancestry checks, published `archive/retired-2026-11-10/pr<number>` tags and a verified
+`legacy-branches.bundle`. Main, the integration branch, two approved Story reference
+branches and the open dependency-update branch remain. The primary checkout is
+clean at the accepted integration commit. This documentation checkout and its
+branch remain until closeout CI and publication; the final #87 receipt will record
+their retirement. No remote Windows checkout or evidence was removed.
