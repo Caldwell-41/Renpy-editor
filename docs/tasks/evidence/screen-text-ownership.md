@@ -92,3 +92,11 @@ dispatch was needed. This audit closeout changes documentation only. Automatic
 checks on documentation successors retain their exact head/result in the PR and
 ignored audit receipts; another receipt-only commit is unnecessary.
 The next action is user review of PR #71. Merge remains unselected.
+
+## Historical merge and retirement
+
+PR #71 subsequently merged as `e9e8661`, with the same tree as final head
+`28e0675`. Its completed local/remote branch was retired during PR #75 cleanup
+after integration verification. Original commits remain in the PR #75 retirement
+bundle. This closeout was moved from live status on 2026-11-10 and supersedes the
+pending-review instruction above.
