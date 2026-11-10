@@ -325,6 +325,7 @@ pub(super) fn parse_menu(
             nesting: None,
             payload: BeatPayload::Choice {
                 options,
+                picked_policy: None,
                 prompt: None,
             },
         },

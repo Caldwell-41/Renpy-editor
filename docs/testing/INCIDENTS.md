@@ -1169,3 +1169,21 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   waiting for readiness before validation passes that replay and the full actual
   browser/controller/core journey. Production code and timeouts are unchanged.
 - **Evidence:** [Choice CI correction](../tasks/evidence/choice-98.md#ci-font-import-readiness-correction).
+
+## H83. Saved-slot Load button covers Start in an SDK fixture
+
+- **Class/search:** harness geometry; Choice lifecycle, new-process Load,
+  `Could not locate the displayable`, Start, enabled FileLoad.
+- **Cause/correction:** the fixture placed Start and Load directly in one screen
+  at the same default position. With no save, Load was insensitive. After saving,
+  enabled Load covered Start. Waiting for the screen did not change that geometry.
+  Place the two controls in a `vbox`; keep the existing input and assertions.
+- **Slot boundary:** pinned 8.5.3 `FileLoad(slot=True)` addresses the raw slot used
+  by `renpy.save`. Its disk name appends `-LT1.save`. Page-prefixed UI names and a
+  guessed `.save` filename caused separate earlier fixture failures.
+- **Verification limit:** actual Save, process exit and new-process Load passed.
+  The final allowed run retained 26 passing children and the failing initial Start
+  in the rollback/New Game child. The `vbox` correction has no SDK qualification;
+  rollback and New Game remain pending. No timeout was raised or failure waived.
+- **Evidence:** [#106](https://github.com/Caldwell-41/Renpy-editor/issues/106), the
+  producing-host handoff and the [retained driver](../../tests/fixtures/choice-101/driver.rpy).

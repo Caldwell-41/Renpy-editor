@@ -131,6 +131,8 @@ pub enum BeatPayload {
     },
     Choice {
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        picked_policy: Option<PickedPolicy>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         prompt: Option<ChoicePrompt>,
         options: Vec<ChoiceOption>,
     },
@@ -222,6 +224,14 @@ fn is_terminal_payload(payload: &BeatPayload) -> bool {
 }
 
 /// A line displayed in the menu interaction, never an option-body Beat.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum PickedPolicy {
+    ShowNormally,
+    MarkPicked,
+    HidePicked,
+}
+
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(
     rename_all = "camelCase",
@@ -788,7 +798,7 @@ impl AuthoringService {
                 )?
                 .1
             };
-            let needs_choice_runtime = beats.iter().any(|b| matches!(&b.payload, BeatPayload::Choice { options, .. } if options.iter().any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled)));
+            let needs_choice_runtime = beats.iter().any(|b| matches!(&b.payload, BeatPayload::Choice { options, picked_policy, .. } if picked_policy.is_some() || options.iter().any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled)));
             if needs_choice_runtime
                 && !*choice_runtime_valid.get_or_insert_with(|| {
                     matches!(
@@ -800,7 +810,7 @@ impl AuthoringService {
                 })
             {
                 for beat in &mut beats {
-                    if matches!(&beat.payload, BeatPayload::Choice { options, .. } if options.iter().any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled))
+                    if matches!(&beat.payload, BeatPayload::Choice { options, picked_policy, .. } if picked_policy.is_some() || options.iter().any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled))
                     {
                         beat.protected = true;
                         beat.source_fallback = Some("Choice template or availability adapter is missing, unsupported or has pending Source edits. Edit in Source.".into());
@@ -1922,6 +1932,7 @@ impl AuthoringService {
         let BeatPayload::Choice {
             mut options,
             prompt,
+            picked_policy,
         } = choice.payload.clone()
         else {
             return Err(SceneError::InvalidPayload);
@@ -1964,7 +1975,11 @@ impl AuthoringService {
             &beats,
             BeatEdit::Update {
                 id: choice_beat_id.into(),
-                payload: BeatPayload::Choice { options, prompt },
+                payload: BeatPayload::Choice {
+                    options,
+                    prompt,
+                    picked_policy,
+                },
             },
             &loaded,
         )?;
@@ -2017,7 +2032,7 @@ impl AuthoringService {
             ],
         )?;
         let proposed_source_revision = sha256(&proposed_source);
-        let (source_mapping, _) = build_mapping(
+        let (source_mapping, next_beats) = build_mapping(
             &source_scene,
             &proposed_source,
             &proposed_source_revision,
@@ -2049,28 +2064,33 @@ impl AuthoringService {
         )?;
         loaded.source_map.scene_mappings.push(destination_mapping);
 
+        let mut runtime =
+            self.choice_runtime_mutations(project, &next_beats, source_bytes != proposed_source)?;
+        runtime.retain(|m| m.path.as_str() != source_scene.source_path);
+        self.validate_choice_targets(project, &source_bytes, &proposed_source, &next_beats)?;
+        runtime.extend(vec![
+            create_mutation(&destination_path, destination_bytes)?,
+            replace_mutation(
+                &source_scene.source_path,
+                source_bytes,
+                source_revision,
+                proposed_source,
+            )?,
+            replace_mutation(
+                PROJECT_PATH,
+                loaded.project_bytes,
+                loaded.project_revision,
+                json_bytes(&loaded.project)?,
+            )?,
+            replace_mutation(
+                SOURCE_MAP_PATH,
+                loaded.source_map_bytes,
+                loaded.source_map_revision,
+                source_map_bytes(&loaded.source_map)?,
+            )?,
+        ]);
         Ok(TransactionProposal {
-            mutations: vec![
-                create_mutation(&destination_path, destination_bytes)?,
-                replace_mutation(
-                    &source_scene.source_path,
-                    source_bytes,
-                    source_revision,
-                    proposed_source,
-                )?,
-                replace_mutation(
-                    PROJECT_PATH,
-                    loaded.project_bytes,
-                    loaded.project_revision,
-                    json_bytes(&loaded.project)?,
-                )?,
-                replace_mutation(
-                    SOURCE_MAP_PATH,
-                    loaded.source_map_bytes,
-                    loaded.source_map_revision,
-                    source_map_bytes(&loaded.source_map)?,
-                )?,
-            ],
+            mutations: runtime,
             intent: TransactionIntent::Edit,
         })
     }
@@ -2368,6 +2388,7 @@ impl AuthoringService {
         let mut runtime =
             self.choice_runtime_mutations(project, &next_beats, source_bytes != proposed_source)?;
         self.validate_choice_targets(project, &source_bytes, &proposed_source, &next_beats)?;
+        runtime.retain(|m| m.path.as_str() != scene.source_path);
         runtime.extend(vec![
             replace_mutation(
                 &scene.source_path,
@@ -3042,8 +3063,21 @@ fn apply_beat_edit(
                         .ok_or(SceneError::UnknownEntity)?
                         .technical_label,
                 )?
-            } else if let BeatPayload::Choice { options, prompt } = &payload {
-                return choice::update(source, beats, beat, options, prompt.as_ref(), loaded);
+            } else if let BeatPayload::Choice {
+                options,
+                prompt,
+                picked_policy,
+            } = &payload
+            {
+                return choice::update(
+                    source,
+                    beats,
+                    beat,
+                    options,
+                    prompt.as_ref(),
+                    *picked_policy,
+                    loaded,
+                );
             } else if let Some(patched) = patch_variable_assignment(
                 &source[beat.byte_start as usize..beat.byte_end as usize],
                 &beat.payload,
@@ -3368,7 +3402,14 @@ fn render_payload(
                 )
             }
         }
-        BeatPayload::Choice { options, prompt } => {
+        BeatPayload::Choice {
+            options,
+            prompt,
+            picked_policy,
+        } => {
+            if let Some(policy) = picked_policy {
+                return choice::render_new(options, prompt.as_ref(), *policy, loaded, newline);
+            }
             let mut text = format!("    {}{newline}", choice::menu_header(options));
             if let Some(prompt) = prompt {
                 text.push_str(&choice::render_prompt(prompt, loaded, 8, newline)?);
@@ -3430,7 +3471,9 @@ fn validate_payload(payload: &BeatPayload, loaded: &Loaded) -> Result<(), SceneE
             validate_text(text)?;
         }
         BeatPayload::Narration { text } => validate_text(text)?,
-        BeatPayload::Choice { options, prompt } => {
+        BeatPayload::Choice {
+            options, prompt, ..
+        } => {
             if let Some(prompt) = prompt {
                 choice::render_prompt(prompt, loaded, 8, "\n")?;
             }
@@ -3981,6 +4024,7 @@ fn parse_scene_mode(
                     end: menu_end,
                     payload: BeatPayload::Choice {
                         options,
+                        picked_policy: None,
                         prompt: None,
                     },
                 });
@@ -4495,6 +4539,7 @@ pub(crate) fn build_mapping(
     for mut parsed in parsed {
         let hash = sha256(&bytes[parsed.start..parsed.end]);
         let kind = parsed.payload.kind().to_owned();
+        let embedded = choice::embedded_id(bytes, &parsed);
         let id = ids
             .get_mut(&(kind.clone(), hash.clone()))
             .and_then(|queue| {
@@ -4504,6 +4549,10 @@ pub(crate) fn build_mapping(
                 queue.remove(index).map(|(id, _)| id)
             })
             .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+        let id = embedded.unwrap_or(id);
+        if mappings.iter().any(|b: &BeatSourceMapping| b.id == id) {
+            return Err(SceneError::InvariantBlocked);
+        }
         let screen_target = match &mut parsed.payload {
             BeatPayload::ShowScreen { target, .. }
             | BeatPayload::HideScreen { target, .. }
@@ -6249,6 +6298,7 @@ mod tests {
                 value: Value::String("Loomlight".into()),
             },
             BeatPayload::Choice {
+                picked_policy: None,
                 prompt: None,
                 options: vec![
                     ChoiceOption {
@@ -6601,6 +6651,7 @@ mod tests {
                     expected_source_revision: entry.source_revision.clone(),
                     before_beat_id: None,
                     beat: BeatPayload::Choice {
+                        picked_policy: None,
                         prompt: None,
                         options: vec![ChoiceOption {
                             unavailable_policy: UnavailablePolicy::Hide,
@@ -7102,6 +7153,7 @@ mod tests {
                     expected_source_revision: entry.source_revision.clone(),
                     before_beat_id: None,
                     beat: BeatPayload::Choice {
+                        picked_policy: None,
                         prompt: None,
                         options: vec![
                             ChoiceOption {
@@ -7620,6 +7672,7 @@ mod tests {
                         },
                     },
                     beat: BeatPayload::Choice {
+                        picked_policy: None,
                         prompt: None,
                         options: vec![
                             ChoiceOption {
@@ -7917,6 +7970,7 @@ mod tests {
         let BeatPayload::Choice {
             mut options,
             prompt,
+            picked_policy,
         } = origin.beats[0].payload.clone()
         else {
             panic!("choice fixture");
@@ -7934,7 +7988,11 @@ mod tests {
                     scene_id: origin.id.clone(),
                     expected_source_revision: origin.source_revision.clone(),
                     beat_id: origin.beats[0].id.clone(),
-                    beat: BeatPayload::Choice { options, prompt },
+                    beat: BeatPayload::Choice {
+                        options,
+                        prompt,
+                        picked_policy,
+                    },
                 },
             )
             .unwrap();

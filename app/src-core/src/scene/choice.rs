@@ -23,9 +23,13 @@ pub(super) fn parse(
     if !lexical.contains(&menu_start) {
         return None;
     }
+    let picked = (source_version >= 14)
+        .then(|| parse_picked_header(line))
+        .flatten();
     if source_version >= 10 && depth >= MAX_CONDITION_NESTING
         || !lexical.contains(&start)
         || (line != format!("{}menu:", " ".repeat(indent))
+            && picked.is_none()
             && (source_version < 12
                 || line != format!("{}menu (screen=\"_ll_choice_v1\"):", " ".repeat(indent))))
     {
@@ -35,6 +39,7 @@ pub(super) fn parse(
     let semantic = line.trim() == "menu (screen=\"_ll_choice_v1\"):";
     let mut guards = Vec::new();
     let mut disabled_guards = Vec::new();
+    let mut picked_rows = Vec::new();
     let mut next = menu_index + 1;
     let mut header_end = end;
     let mut prompt = None;
@@ -66,14 +71,18 @@ pub(super) fn parse(
             break;
         }
         let code = logic::without_comment(line).trim_end();
-        let (text, expression, policy) = if semantic {
+        let (text, expression, policy) = if picked.is_some() {
+            let (text, guard, policy, id) = parse_picked_option(code)?;
+            picked_rows.push((id.to_owned(), code.to_owned()));
+            (text, guard, policy)
+        } else if semantic {
             parse_option(code)?
         } else {
             let (text, expression) = logic::option_text(code)?;
             (text, expression, UnavailablePolicy::Hide)
         };
         guards.push(expression.map(str::to_owned));
-        if policy == UnavailablePolicy::ShowDisabled {
+        if policy == UnavailablePolicy::ShowDisabled && picked.is_none() {
             disabled_guards.push(
                 code.trim()
                     .strip_suffix(':')?
@@ -85,6 +94,16 @@ pub(super) fn parse(
         let condition = expression.map(|s| crate::conditions::parse(s, authoring));
         let group = *group_start.get_or_insert(option_start);
         let mut header = custom(option_start, option_end, line);
+        if let Some((cid, _)) = picked {
+            let oid = &picked_rows.last()?.0;
+            let &(rs, re, rline) = lines.get(next + 1)?;
+            if !lexical.contains(&rs)
+                || format!("{}\n", rline) != record(cid, oid, indent + 8, "\n")
+            {
+                return None;
+            }
+            header.end = re;
+        }
         header.nesting = Some(ParsedNesting::Branch {
             choice_option: true,
             group_start: group,
@@ -101,7 +120,7 @@ pub(super) fn parse(
             text,
             condition,
         });
-        next += 1;
+        next += 1 + usize::from(picked.is_some());
         let mut statements = 0;
         while next < lines.len() {
             let (child_start, child_end, line) = lines[next];
@@ -196,7 +215,33 @@ pub(super) fn parse(
             return None;
         }
     }
+    if let Some((cid, policy)) = picked {
+        let ids = picked_rows
+            .iter()
+            .map(|(id, _)| id.clone())
+            .collect::<Vec<_>>();
+        if ids.iter().collect::<HashSet<_>>().len() != ids.len() {
+            return None;
+        }
+        for (index, (_, code)) in picked_rows.iter().enumerate() {
+            let (_, qe) = dialogue_quotes(code)?;
+            if code[qe + 1..code.len() - 1]
+                != picked_suffix(
+                    cid,
+                    &ids[index],
+                    policy,
+                    options[index].unavailable_policy,
+                    guards[index].as_deref(),
+                    &ids,
+                    &guards,
+                )
+            {
+                return None;
+            }
+        }
+    }
     if semantic
+        && picked.is_none()
         && (disabled_guards.is_empty()
             || disabled_guards
                 .iter()
@@ -216,7 +261,11 @@ pub(super) fn parse(
         ParsedBeat {
             start,
             end: header_end,
-            payload: BeatPayload::Choice { options, prompt },
+            payload: BeatPayload::Choice {
+                options,
+                prompt,
+                picked_policy: picked.map(|(_, policy)| policy),
+            },
             nesting: parent.map(|(group_start, branch_start)| ParsedNesting::Child {
                 group_start,
                 branch_start,
@@ -255,17 +304,22 @@ pub(super) fn update(
     beat: &SceneBeat,
     options: &[ChoiceOption],
     prompt: Option<&ChoicePrompt>,
+    picked_policy: Option<PickedPolicy>,
     loaded: &Loaded,
 ) -> Result<(Vec<u8>, Vec<ForcedBeatId>), SceneError> {
     let BeatPayload::Choice {
         options: old,
         prompt: previous_prompt,
+        picked_policy: previous_policy,
     } = &beat.payload
     else {
         return Err(SceneError::InvalidPayload);
     };
+    if previous_policy.is_some() && picked_policy.is_none() {
+        return Err(SceneError::InvalidPayload);
+    }
     let end = end(beat, beats)?;
-    if old == options && previous_prompt.as_ref() == prompt {
+    if old == options && previous_prompt.as_ref() == prompt && *previous_policy == picked_policy {
         return Ok((source.to_vec(), vec![]));
     }
     let newline = if source.windows(2).any(|w| w == b"\r\n") {
@@ -299,7 +353,18 @@ pub(super) fn update(
     let was_semantic = old
         .iter()
         .any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled);
-    let mut rendered = if semantic == was_semantic {
+    let mut rendered = if picked_policy.is_some() {
+        let mut header = original_header[..label_end].to_vec();
+        header.extend_from_slice(
+            format!(
+                "{}{}{newline}",
+                " ".repeat(indent),
+                picked_header(&beat.id, picked_policy.unwrap())
+            )
+            .as_bytes(),
+        );
+        header
+    } else if semantic == was_semantic {
         original_header[..menu_end].to_vec()
     } else {
         let mut header = original_header[..label_end].to_vec();
@@ -362,8 +427,13 @@ pub(super) fn update(
                     &source[header.byte_start as usize..header.byte_end as usize],
                 )
                 .map_err(|_| SceneError::UnsupportedSource)?;
-                let code = logic::without_comment(original).trim_end();
-                let expression = if was_semantic {
+                let code = logic::without_comment(
+                    original.lines().next().ok_or(SceneError::OpaqueBoundary)?,
+                )
+                .trim_end();
+                let expression = if previous_policy.is_some() {
+                    parse_picked_option(code).map(|(_, e, _, _)| e)
+                } else if was_semantic {
                     parse_option(code).map(|(_, e, _)| e)
                 } else {
                     logic::option_text(code).map(|(_, e)| e)
@@ -376,6 +446,13 @@ pub(super) fn update(
             }
         })
         .collect::<Result<Vec<_>, SceneError>>()?;
+    let new_ids: Vec<_> = options
+        .iter()
+        .map(|o| {
+            o.id.clone()
+                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string())
+        })
+        .collect();
     let mut seen = HashSet::new();
     for (option_index, option) in options.iter().enumerate() {
         if let Some(id) = &option.id {
@@ -401,7 +478,22 @@ pub(super) fn update(
             let mut updated = original.to_owned();
             let (qs, qe) = dialogue_quotes(original).ok_or(SceneError::OpaqueBoundary)?;
             // Preserve the exact header for a no-op, including condition spelling/comments.
-            if option.unavailable_policy == UnavailablePolicy::ShowDisabled
+            if picked_policy.is_some() {
+                let colon = logic::without_comment(original)
+                    .trim_end()
+                    .rfind(':')
+                    .ok_or(SceneError::OpaqueBoundary)?;
+                let suffix = picked_suffix(
+                    &beat.id,
+                    id,
+                    picked_policy.unwrap(),
+                    option.unavailable_policy,
+                    guards[option_index].as_deref(),
+                    &new_ids,
+                    &guards,
+                );
+                updated.replace_range(qe + 1..colon, &suffix);
+            } else if option.unavailable_policy == UnavailablePolicy::ShowDisabled
                 || old[ordinal].unavailable_policy == UnavailablePolicy::ShowDisabled
             {
                 let colon = logic::without_comment(original)
@@ -452,6 +544,13 @@ pub(super) fn update(
             if option.text != old[ordinal].text {
                 updated.replace_range(qs + 1..qe, &escape_string(&option.text)?);
             }
+            if let Some(policy) = picked_policy {
+                // The first executable statement is owned by the option header.
+                let line_end = updated.find('\n').map_or(updated.len(), |p| p + 1);
+                updated.truncate(line_end);
+                let _ = policy;
+                updated.push_str(&record(&beat.id, id, indent + 8, newline));
+            }
             let at = beat.byte_start as usize + rendered.len();
             forced.push((
                 "customCode".into(),
@@ -474,26 +573,42 @@ pub(super) fn update(
             }
             rendered.extend_from_slice(&source[header.byte_end as usize..option_end]);
         } else {
-            let generated = format!(
-                "{}\"{}\"{}:{newline}{}pass{newline}",
-                " ".repeat(indent + 4),
-                escape_string(&option.text)?,
+            let new_id = &new_ids[option_index];
+            let suffix = if let Some(policy) = picked_policy {
+                picked_suffix(
+                    &beat.id,
+                    new_id,
+                    policy,
+                    option.unavailable_policy,
+                    guards[option_index].as_deref(),
+                    &new_ids,
+                    &guards,
+                )
+            } else {
                 suffix_from_guards(
                     option.unavailable_policy,
                     guards[option_index].as_deref(),
-                    &guards
-                )?,
+                    &guards,
+                )?
+            };
+            let recording = picked_policy.map_or_else(String::new, |_| {
+                record(&beat.id, new_id, indent + 8, newline)
+            });
+            let generated = format!(
+                "{}\"{}\"{}:{newline}{recording}{}pass{newline}",
+                " ".repeat(indent + 4),
+                escape_string(&option.text)?,
+                suffix,
                 " ".repeat(indent + 8)
             );
             let base = beat.byte_start as usize + rendered.len();
-            for (start, end, _) in physical_lines(&generated) {
-                forced.push((
-                    "customCode".into(),
-                    sha256(&generated.as_bytes()[start..end]),
-                    uuid::Uuid::new_v4().to_string(),
-                    Some(base + start),
-                ));
-            }
+            let header_end = generated.find('\n').unwrap() + 1 + recording.len();
+            forced.push((
+                "customCode".into(),
+                sha256(&generated.as_bytes()[..header_end]),
+                new_id.clone(),
+                Some(base),
+            ));
             rendered.extend_from_slice(generated.as_bytes());
         }
     }
@@ -514,10 +629,18 @@ pub(super) fn may_continue(beat: &SceneBeat, beats: &[SceneBeat]) -> bool {
     may_continue_at_depth(beat, beats, 0)
 }
 pub(super) fn may_continue_at_depth(beat: &SceneBeat, beats: &[SceneBeat], depth: usize) -> bool {
-    let BeatPayload::Choice { options, .. } = &beat.payload else {
+    let BeatPayload::Choice {
+        options,
+        picked_policy,
+        ..
+    } = &beat.payload
+    else {
         return true;
     };
-    if depth >= MAX_CONDITION_NESTING || options.iter().all(|o| o.condition.is_some()) {
+    if *picked_policy == Some(PickedPolicy::HidePicked)
+        || depth >= MAX_CONDITION_NESTING
+        || options.iter().all(|o| o.condition.is_some())
+    {
         return true;
     }
     options.iter().any(|option| {
@@ -670,7 +793,17 @@ impl AuthoringService {
         beats: &[SceneBeat],
         allow_create: bool,
     ) -> Result<Vec<FileMutation>, SceneError> {
-        if !beats.iter().any(|b| matches!(&b.payload, BeatPayload::Choice { options, .. } if options.iter().any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled))) { return Ok(vec![]); }
+        let picked = beats.iter().any(|b| {
+            matches!(
+                b.payload,
+                BeatPayload::Choice {
+                    picked_policy: Some(_),
+                    ..
+                }
+            )
+        });
+        if !picked && !beats.iter().any(|b| matches!(&b.payload, BeatPayload::Choice { options, .. } if options.iter().any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled))) { return Ok(vec![]); }
+
         let paths = self
             .transactions
             .inventory_files_bounded(project, "game", 8192)
@@ -695,7 +828,9 @@ impl AuthoringService {
                 return Err(SceneError::OpaqueBoundary);
             }
             if path == crate::screens::choice_template::PATH {
-                if bytes != crate::screens::choice_template::ADAPTER.as_bytes() {
+                if bytes != crate::screens::choice_template::ADAPTER.as_bytes()
+                    && bytes != crate::screens::choice_template::PICKED_ADAPTER.as_bytes()
+                {
                     return Err(SceneError::OpaqueBoundary);
                 }
                 existing = Some((bytes.clone(), revision.clone()));
@@ -705,6 +840,22 @@ impl AuthoringService {
             {
                 return Err(SceneError::OpaqueBoundary);
             }
+            if path != crate::screens::choice_template::PATH
+                && text.lines().any(|l| {
+                    let l = l.trim();
+                    l.contains("_ll_picked_v1")
+                        && (l.starts_with("default ")
+                            || l.starts_with("define ")
+                            || l.starts_with("def ")
+                            || l.trim_start_matches('$')
+                                .trim_start()
+                                .strip_prefix("_ll_picked_v1")
+                                .is_some_and(|rest| rest.trim_start().starts_with('=')))
+                })
+            {
+                return Err(SceneError::InvariantBlocked);
+            }
+
             if text.lines().any(|l| l.starts_with("screen choice(")) {
                 if template.is_some() || !crate::screens::choice_template::supported(text) {
                     return Err(SceneError::OpaqueBoundary);
@@ -722,17 +873,34 @@ impl AuthoringService {
             return Err(SceneError::OpaqueBoundary);
         }
         let mut mutations = vec![replace_mutation(&path, bytes.clone(), revision, bytes)?];
+        mutations.retain(|m| m.path.as_str() != crate::screens::choice_template::PATH);
         if let Some((bytes, revision)) = existing {
+            let next = if picked && bytes == crate::screens::choice_template::ADAPTER.as_bytes() {
+                if !allow_create {
+                    return Err(SceneError::OpaqueBoundary);
+                }
+                crate::screens::choice_template::PICKED_ADAPTER
+                    .as_bytes()
+                    .to_vec()
+            } else {
+                bytes.clone()
+            };
             mutations.push(replace_mutation(
                 crate::screens::choice_template::PATH,
                 bytes.clone(),
                 revision,
-                bytes,
+                next,
             )?);
         } else {
             mutations.push(create_mutation(
                 crate::screens::choice_template::PATH,
-                crate::screens::choice_template::ADAPTER.as_bytes().to_vec(),
+                if picked {
+                    crate::screens::choice_template::PICKED_ADAPTER
+                } else {
+                    crate::screens::choice_template::ADAPTER
+                }
+                .as_bytes()
+                .to_vec(),
             )?);
         }
         Ok(mutations)
@@ -801,6 +969,69 @@ impl AuthoringService {
             .filter(|b| matches!(b.payload, BeatPayload::Choice { .. }))
             .filter_map(|b| target(candidate, b))
             .collect();
+        let mut embedded = HashSet::new();
+        for beat in beats {
+            let parsed = ParsedBeat {
+                start: beat.byte_start as usize,
+                end: beat.byte_end as usize,
+                payload: beat.payload.clone(),
+                nesting: beat
+                    .conditional_branch
+                    .as_ref()
+                    .filter(|g| g.choice_option)
+                    .map(|_| ParsedNesting::Branch {
+                        choice_option: true,
+                        group_start: 0,
+                        variable_id: String::new(),
+                        otherwise: false,
+                        ordinal: 0,
+                        condition: None,
+                        parent: None,
+                    }),
+            };
+            if let Some(id) = embedded_id(candidate, &parsed) {
+                if id != beat.id || !embedded.insert(id) {
+                    return Err(SceneError::InvariantBlocked);
+                }
+            }
+        }
+        if !embedded.is_empty() {
+            let original =
+                std::str::from_utf8(original).map_err(|_| SceneError::UnsupportedSource)?;
+            let mut counts = HashMap::<String, usize>::new();
+            for path in self
+                .transactions
+                .inventory_files_bounded(project, "game", 8192)
+                .map_err(diagnostic_error)?
+                .iter()
+                .filter(|p| p.ends_with(".rpy"))
+            {
+                let (bytes, _) = self.scene_snapshot(project, path)?;
+                let text =
+                    std::str::from_utf8(&bytes).map_err(|_| SceneError::UnsupportedSource)?;
+                for id in text.lines().filter_map(|line| {
+                    parse_picked_header(line).map(|(id, _)| id).or_else(|| {
+                        parse_picked_option(logic::without_comment(line).trim_end())
+                            .map(|(_, _, _, id)| id)
+                    })
+                }) {
+                    *counts.entry(id.to_owned()).or_default() += 1;
+                }
+            }
+            for id in embedded {
+                let old_count = original
+                    .lines()
+                    .filter(|line| {
+                        parse_picked_header(line).is_some_and(|(key, _)| key == id)
+                            || parse_picked_option(logic::without_comment(line).trim_end())
+                                .is_some_and(|(_, _, _, key)| key == id)
+                    })
+                    .count();
+                if old_count > 1 || counts.get(&id).copied().unwrap_or(0) != old_count {
+                    return Err(SceneError::InvariantBlocked);
+                }
+            }
+        }
         if targets.is_empty() {
             return Ok(());
         }
@@ -822,4 +1053,180 @@ impl AuthoringService {
         if beats.iter().any(|b| matches!(&b.payload, BeatPayload::CustomCode { source, .. } if logic::without_comment(source).trim().starts_with("jump _ll_choice_"))) { return Err(SceneError::InvariantBlocked); }
         Ok(())
     }
+}
+
+fn policy_name(policy: PickedPolicy) -> &'static str {
+    match policy {
+        PickedPolicy::ShowNormally => "showNormally",
+        PickedPolicy::MarkPicked => "markPicked",
+        PickedPolicy::HidePicked => "hidePicked",
+    }
+}
+fn picked_header(id: &str, policy: PickedPolicy) -> String {
+    format!(
+        "menu (screen=\"_ll_choice_v1\", _ll_mode=\"{}\", _ll_id=\"{id}\"):",
+        policy_name(policy)
+    )
+}
+fn uuid_id(id: &str) -> bool {
+    uuid::Uuid::parse_str(id).is_ok_and(|u| u.to_string() == id)
+}
+fn parse_picked_header(line: &str) -> Option<(&str, PickedPolicy)> {
+    let rest = line
+        .trim()
+        .strip_prefix("menu (screen=\"_ll_choice_v1\", _ll_mode=\"")?;
+    let (mode, id) = rest.split_once("\", _ll_id=\"")?;
+    let id = id.strip_suffix("\"):")?;
+    if !uuid_id(id) {
+        return None;
+    }
+    Some((
+        id,
+        match mode {
+            "showNormally" => PickedPolicy::ShowNormally,
+            "markPicked" => PickedPolicy::MarkPicked,
+            "hidePicked" => PickedPolicy::HidePicked,
+            _ => return None,
+        },
+    ))
+}
+fn record(cid: &str, oid: &str, indent: usize, newline: &str) -> String {
+    format!(
+        "{}$ _ll_picked_v1[(\"{cid}\", \"{oid}\")] = True{newline}",
+        " ".repeat(indent)
+    )
+}
+fn unpicked(cid: &str, oid: &str) -> String {
+    format!("(\"{cid}\", \"{oid}\") not in _ll_picked_v1")
+}
+fn picked_suffix(
+    cid: &str,
+    oid: &str,
+    policy: PickedPolicy,
+    unavailable: UnavailablePolicy,
+    guard: Option<&str>,
+    ids: &[String],
+    guards: &[Option<String>],
+) -> String {
+    let effective = |id: &str, guard: Option<&str>| {
+        let guard = guard.unwrap_or("True");
+        if policy == PickedPolicy::HidePicked {
+            format!("({guard}) and ({})", unpicked(cid, id))
+        } else {
+            guard.to_owned()
+        }
+    };
+    let enabled = effective(oid, guard);
+    let visible = if unavailable == UnavailablePolicy::ShowDisabled {
+        let gate = ids
+            .iter()
+            .zip(guards)
+            .map(|(id, g)| format!("({})", effective(id, g.as_deref())))
+            .collect::<Vec<_>>()
+            .join(" or ");
+        if policy == PickedPolicy::HidePicked {
+            format!("({}) and ({gate})", unpicked(cid, oid))
+        } else {
+            gate
+        }
+    } else {
+        enabled
+    };
+    format!(
+        " (_ll_id=\"{oid}\", _ll_available={}, _ll_guarded={}, _ll_locked={}) if {visible}",
+        guard.unwrap_or("True"),
+        if guard.is_some() { "True" } else { "False" },
+        if unavailable == UnavailablePolicy::ShowDisabled {
+            "True"
+        } else {
+            "False"
+        }
+    )
+}
+fn parse_picked_option(code: &str) -> Option<(String, Option<&str>, UnavailablePolicy, &str)> {
+    let code = code.trim().strip_suffix(':')?;
+    let (qs, qe) = dialogue_quotes(code)?;
+    let rest = code[qe + 1..].strip_prefix(" (_ll_id=\"")?;
+    let (id, rest) = rest.split_once("\", _ll_available=")?;
+    if !uuid_id(id) {
+        return None;
+    }
+    let (guard, rest) = rest.rsplit_once(", _ll_guarded=")?;
+    let (guarded, rest) = rest.split_once(", _ll_locked=")?;
+    if !matches!(guarded, "True" | "False") || guarded == "False" && guard != "True" {
+        return None;
+    }
+    let (locked, _) = rest.split_once(") if ")?;
+    Some((
+        unescape_string(&code[qs + 1..qe])?,
+        (guarded == "True").then_some(guard),
+        match locked {
+            "True" => UnavailablePolicy::ShowDisabled,
+            "False" => UnavailablePolicy::Hide,
+            _ => return None,
+        },
+        id,
+    ))
+}
+/// Source-backed runtime keys also anchor the existing map identity. No captions or ordinals.
+pub(super) fn embedded_id(source: &[u8], parsed: &ParsedBeat) -> Option<String> {
+    let text = std::str::from_utf8(&source[parsed.start..parsed.end]).ok()?;
+    if matches!(parsed.payload, BeatPayload::Choice { .. }) {
+        text.lines()
+            .find_map(parse_picked_header)
+            .map(|(id, _)| id.to_owned())
+    } else if matches!(
+        parsed.nesting,
+        Some(ParsedNesting::Branch {
+            choice_option: true,
+            ..
+        })
+    ) {
+        parse_picked_option(logic::without_comment(text.lines().next()?).trim_end())
+            .map(|(_, _, _, id)| id.to_owned())
+    } else {
+        None
+    }
+}
+
+pub(super) fn render_new(
+    options: &[ChoiceOption],
+    prompt: Option<&ChoicePrompt>,
+    policy: PickedPolicy,
+    loaded: &Loaded,
+    newline: &str,
+) -> Result<String, SceneError> {
+    let cid = uuid::Uuid::new_v4().to_string();
+    let ids = options
+        .iter()
+        .map(|_| uuid::Uuid::new_v4().to_string())
+        .collect::<Vec<_>>();
+    let guards = options
+        .iter()
+        .map(|o| {
+            logic::render_guard(o.condition.as_ref(), &loaded.authoring)
+                .map(|s| s.strip_prefix(" if ").map(str::to_owned))
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    let mut text = format!("    {}{newline}", picked_header(&cid, policy));
+    if let Some(prompt) = prompt {
+        text.push_str(&render_prompt(prompt, loaded, 8, newline)?);
+    }
+    for (i, option) in options.iter().enumerate() {
+        text.push_str(&format!(
+            "        \"{}\"{}:{newline}{}            pass{newline}",
+            escape_string(&option.text)?,
+            picked_suffix(
+                &cid,
+                &ids[i],
+                policy,
+                option.unavailable_policy,
+                guards[i].as_deref(),
+                &ids,
+                &guards
+            ),
+            record(&cid, &ids[i], 12, newline)
+        ));
+    }
+    Ok(text)
 }

@@ -70,7 +70,7 @@ def captures(root, accepted, role):
 
 class AdmissionTests(unittest.TestCase):
     def test_current_and_legacy_source_maps_require_matching_receipt_versions(self):
-        for version in (8, 9, 10, 11, 12, 13):
+        for version in (8, 9, 10, 11, 12, 13, 14):
             with self.subTest(version=version):
                 accepted = accepted_fixture()
                 accepted['sourceMapSchemaVersion'] = version
@@ -82,8 +82,8 @@ class AdmissionTests(unittest.TestCase):
                 with self.assertRaises(AssertionError):
                     proof.validate_accepted(accepted)
         accepted = accepted_fixture()
-        accepted['sourceMapSchemaVersion'] = 14
-        text = json.dumps({'schemaVersion': 14})
+        accepted['sourceMapSchemaVersion'] = 15
+        text = json.dumps({'schemaVersion': 15})
         accepted['files']['.renpy-editor/source-map.json'] = dict(
             text=text, sha256=proof.digest(text.encode()))
         with self.assertRaises(AssertionError):

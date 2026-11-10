@@ -331,6 +331,7 @@ impl AuthoringService {
         let mut runtime =
             self.choice_runtime_mutations(project, &next_beats, source != proposed)?;
         self.validate_choice_targets(project, &source, &proposed, &next_beats)?;
+        runtime.retain(|m| m.path.as_str() != scene.source_path);
         runtime.extend(vec![
             replace_mutation(&scene.source_path, source, revision, proposed)?,
             replace_mutation(
@@ -679,8 +680,21 @@ fn apply(
             {
                 return Err(SceneError::InvariantBlocked);
             }
-            if let BeatPayload::Choice { options, prompt } = &payload {
-                return choice::update(source, beats, beat, options, prompt.as_ref(), loaded);
+            if let BeatPayload::Choice {
+                options,
+                prompt,
+                picked_policy,
+            } = &payload
+            {
+                return choice::update(
+                    source,
+                    beats,
+                    beat,
+                    options,
+                    prompt.as_ref(),
+                    *picked_policy,
+                    loaded,
+                );
             }
             let original = &source[beat.byte_start as usize..beat.byte_end as usize];
             let rendered = match (&beat.payload, &payload) {
