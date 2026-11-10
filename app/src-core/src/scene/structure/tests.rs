@@ -447,3 +447,337 @@ fn phase3a_structure_nonlast_selected_trivia_and_unqualified_promotion() {
     );
     f.service.close().unwrap();
 }
+
+#[test]
+fn choice_option_call_resumes_in_its_body_with_stable_history() {
+    let mut f = setup();
+    let target = f.scene("Callee");
+    let a = model(&mut f);
+    f.save(&a, &format!("label {}:\n    menu:\n        \"Call\":\n            \"Before\"\n            \"Resume\"\n        \"Other\":\n            pass\n    \"Shared\"\n    return\n", a["technicalLabel"].as_str().unwrap()));
+    let a = model(&mut f);
+    let before = bytes(&f);
+    let resume = text(&a, "Resume");
+    let body = json!({"type":"branch","groupId":resume["owner"]["groupId"],"branchId":resume["owner"]["branchId"]});
+    command(
+        &mut f,
+        json!({"type":"insertBodyBeat","body":body,"position":{"type":"before","anchor":{"type":"beat","beatId":resume["id"]}},"beat":{"type":"call","sceneId":target["id"]}}),
+    );
+    let after = model(&mut f);
+    let call = after["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["payload"]["type"] == "call")
+        .unwrap();
+    assert_eq!(call["owner"], resume["owner"]);
+    assert!(call["payload"]["returnLabel"]
+        .as_str()
+        .unwrap()
+        .starts_with("_ll_call_"));
+    let flow = crate::lifecycle::acceptance::ipc(&mut f.service, "flow.list", json!({}));
+    let edge = flow["edges"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|e| e["beatId"] == call["id"] && e["kind"] == "call")
+        .unwrap();
+    assert_eq!(edge["continuation"]["beatId"], resume["id"]);
+    assert_eq!(
+        edge["guardPath"][0]["branchId"],
+        resume["owner"]["branchId"]
+    );
+    let accepted = bytes(&f);
+    command(
+        &mut f,
+        json!({"type":"updateBodyBeat","beatId":call["id"],"expectedBody":body,"beat":call["payload"]}),
+    );
+    assert_eq!(bytes(&f), accepted);
+    command(&mut f, json!({"type":"undo"}));
+    assert_eq!(bytes(&f), before);
+    command(&mut f, json!({"type":"redo"}));
+    assert_eq!(bytes(&f), accepted);
+    f.service.close().unwrap();
+    f.service.open_path(&f.root).unwrap();
+    assert_eq!(model(&mut f)["beats"], after["beats"]);
+    f.service.close().unwrap();
+}
+
+#[test]
+fn choice_option_recursive_condition_and_choice_keep_exact_owners() {
+    let mut f = setup();
+    let a = model(&mut f);
+    f.save(&a, &format!("label {}:\n    menu:\n        \"Outer\":\n            pass\n    \"Shared\"\n    return\n", a["technicalLabel"].as_str().unwrap()));
+    let a = model(&mut f);
+    let outer_header = a["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["conditionalBranch"]["choiceOption"] == true)
+        .unwrap();
+    let outer_body = branch_body(outer_header);
+    let a = insert_condition(&mut f, outer_body.clone(), json!({"type":"end"}), true);
+    let group = a["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| {
+            !b["conditionalBranch"].is_null() && b["conditionalBranch"]["choiceOption"] != true
+        })
+        .unwrap()
+        .clone();
+    assert_eq!(group["owner"]["branchId"], outer_header["id"]);
+    let condition_body = branch_body(&group);
+    command(
+        &mut f,
+        json!({"type":"insertBodyBeat","body":condition_body,"position":{"type":"end"},"beat":{"type":"choice","options":[{"text":"Inner"}]}}),
+    );
+    let a = model(&mut f);
+    let inner = a["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["payload"]["type"] == "choice" && !b["owner"].is_null())
+        .unwrap();
+    let header = a["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["id"] == inner["payload"]["options"][0]["id"])
+        .unwrap();
+    command(
+        &mut f,
+        json!({"type":"insertBodyBeat","body":branch_body(header),"position":{"type":"end"},"beat":{"type":"narration","text":"Nested"}}),
+    );
+    let a = model(&mut f);
+    assert_eq!(text(&a, "Nested")["owner"]["branchId"], header["id"]);
+    assert_eq!(String::from_utf8(bytes(&f)).unwrap(),format!("\u{feff}label {}:\n    menu:\n        \"Outer\":\n            if True:\n                menu:\n                    \"Inner\":\n                        \"Nested\"\n            else:\n                pass\n    \"Shared\"\n    return\n",a["technicalLabel"].as_str().unwrap()));
+    f.service.close().unwrap();
+    f.service.open_path(&f.root).unwrap();
+    assert_eq!(model(&mut f)["beats"], a["beats"]);
+    f.service.close().unwrap();
+}
+
+#[test]
+fn choice_nested_flow_enters_condition_and_joins_each_continuation() {
+    let mut f = setup();
+    let a = model(&mut f);
+    f.save(&a,&format!("label {}:\n    menu:\n        \"Outer\":\n            if True:\n                menu:\n                    \"Inner\":\n                        \"Inside\"\n                \"After inner\"\n            else:\n                return\n            \"After condition\"\n    \"Shared\"\n    return\n",a["technicalLabel"].as_str().unwrap()));
+    let a = model(&mut f);
+    let beats = a["beats"].as_array().unwrap();
+    let outer = &beats[0];
+    let inner = beats
+        .iter()
+        .find(|b| b["payload"]["type"] == "choice" && !b["owner"].is_null())
+        .unwrap();
+    let condition = beats
+        .iter()
+        .find(|b| b["conditionalBranch"]["condition"]["status"] == "supported")
+        .unwrap();
+    let flow = crate::lifecycle::acceptance::ipc(&mut f.service, "flow.list", json!({}));
+    let edges = flow["edges"].as_array().unwrap();
+    let entry = edges
+        .iter()
+        .find(|e| e["kind"] == "choice" && e["beatId"] == outer["id"])
+        .unwrap();
+    assert_eq!(entry["destination"]["beatId"], condition["id"]);
+    let option = beats
+        .iter()
+        .find(|b| b["id"] == outer["payload"]["options"][0]["id"])
+        .unwrap();
+    assert_eq!(entry["location"]["byteStart"], option["byteStart"]);
+    assert_eq!(entry["guardPath"][0]["branchId"], option["id"]);
+    let inner_join = edges
+        .iter()
+        .find(|e| e["kind"] == "continuation" && e["beatId"] == inner["id"])
+        .unwrap();
+    assert_eq!(
+        inner_join["destination"]["beatId"],
+        text(&a, "After inner")["id"]
+    );
+    let condition_join = edges
+        .iter()
+        .find(|e| e["kind"] == "continuation" && e["beatId"] == condition["id"])
+        .unwrap();
+    assert_eq!(
+        condition_join["destination"]["beatId"],
+        text(&a, "After condition")["id"]
+    );
+    let outer_join = edges
+        .iter()
+        .find(|e| e["kind"] == "continuation" && e["beatId"] == outer["id"])
+        .unwrap();
+    assert_eq!(
+        outer_join["destination"]["beatId"],
+        text(&a, "Shared")["id"]
+    );
+    f.service.close().unwrap();
+}
+
+#[test]
+fn choice_subtree_move_remove_preserve_ids_trivia_and_refuse_descendants() {
+    let mut f = setup();
+    let a = model(&mut f);
+    f.save(&a,&format!("label {}:\n    menu:\n        \"Outer\":\n            pass\n    menu:\n        \"Movable\": # keep caption\n            # keep child\n            \"Inside\" # keep text\n    \"Unrelated\"\n    return\n",a["technicalLabel"].as_str().unwrap()));
+    let a = model(&mut f);
+    let before = bytes(&f);
+    let beats = a["beats"].as_array().unwrap();
+    let menus = beats
+        .iter()
+        .filter(|b| b["payload"]["type"] == "choice")
+        .collect::<Vec<_>>();
+    let header = beats
+        .iter()
+        .find(|b| b["id"] == menus[0]["payload"]["options"][0]["id"])
+        .unwrap();
+    let inner = menus[1].clone();
+    let inside = text(&a, "Inside");
+    let node = json!({"type":"beat","beatId":inner["id"]});
+    let body = branch_body(header);
+    command(
+        &mut f,
+        json!({"type":"moveStoryNode","node":node,"expectedBody":{"type":"root"},"body":body,"position":{"type":"end"}}),
+    );
+    let moved = model(&mut f);
+    let accepted = bytes(&f);
+    assert_eq!(text(&moved, "Inside")["id"], inside["id"]);
+    assert!(String::from_utf8(accepted.clone()).unwrap().contains("            menu:\n                \"Movable\": # keep caption\n                    # keep child\n                    \"Inside\" # keep text\n    \"Unrelated\""));
+    let child_header = moved["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["id"] == inner["payload"]["options"][0]["id"])
+        .unwrap();
+    assert_eq!(
+        reject(
+            &mut f,
+            json!({"type":"moveStoryNode","node":node,"expectedBody":body,"body":branch_body(child_header),"position":{"type":"end"}})
+        )["error"]["code"],
+        "SCENE_INVARIANT"
+    );
+    assert_eq!(bytes(&f), accepted);
+    command(
+        &mut f,
+        json!({"type":"removeStoryNode","node":node,"expectedBody":body}),
+    );
+    assert!(String::from_utf8(bytes(&f))
+        .unwrap()
+        .contains("        \"Outer\":\n            pass\n    \"Unrelated\""));
+    command(&mut f, json!({"type":"undo"}));
+    assert_eq!(bytes(&f), accepted);
+    command(&mut f, json!({"type":"undo"}));
+    assert_eq!(bytes(&f), before);
+    command(&mut f, json!({"type":"redo"}));
+    assert_eq!(model(&mut f)["beats"], moved["beats"]);
+    f.service.close().unwrap();
+    f.service.open_path(&f.root).unwrap();
+    assert_eq!(model(&mut f)["beats"], moved["beats"]);
+    f.service.close().unwrap();
+}
+
+#[test]
+fn choice_recursive_terminal_paths_keep_safe_scene_endings() {
+    let mut f = setup();
+    let a = model(&mut f);
+    f.save(&a,&format!("label {}:\n    menu:\n        \"Outer\":\n            if True:\n                menu:\n                    \"Inner\":\n                        return\n            else:\n                return\n    return\n",a["technicalLabel"].as_str().unwrap()));
+    let a = model(&mut f);
+    let before = bytes(&f);
+    let inner = a["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["payload"]["type"] == "choice" && !b["owner"].is_null())
+        .unwrap();
+    let parent = json!({"type":"branch","groupId":inner["owner"]["groupId"],"branchId":inner["owner"]["branchId"]});
+    assert_eq!(
+        reject(
+            &mut f,
+            json!({"type":"insertBodyBeat","body":parent,"position":{"type":"end"},"beat":{"type":"narration","text":"Unreachable"}})
+        )["error"]["code"],
+        "SCENE_INVARIANT"
+    );
+    assert_eq!(bytes(&f), before);
+    // Removing the redundant root Return is safe only while every recursive path transfers.
+    let root_end = a["beats"].as_array().unwrap().last().unwrap();
+    command(
+        &mut f,
+        json!({"type":"removeStoryNode","node":{"type":"beat","beatId":root_end["id"]},"expectedBody":{"type":"root"}}),
+    );
+    let a = model(&mut f);
+    let terminal_source = bytes(&f);
+    let inner_header = a["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["id"] == inner["payload"]["options"][0]["id"])
+        .unwrap();
+    let terminal = a["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["payload"]["type"] == "return" && b["owner"]["branchId"] == inner_header["id"])
+        .unwrap();
+    assert_eq!(
+        reject(
+            &mut f,
+            json!({"type":"removeStoryNode","node":{"type":"beat","beatId":terminal["id"]},"expectedBody":branch_body(inner_header)})
+        )["error"]["code"],
+        "SCENE_INVARIANT"
+    );
+    assert_eq!(bytes(&f), terminal_source);
+    f.service.close().unwrap();
+}
+
+#[test]
+fn choice_nested_condition_trivia_moves_with_its_proven_owner() {
+    let mut f = setup();
+    let a = model(&mut f);
+    f.save(&a,&format!("label {}:\n    menu:\n        \"Outer\":\n            if True:\n                # branch comment\n                \"Inside\"\n            else:\n                pass\n    \"Shared\"\n    return\n",a["technicalLabel"].as_str().unwrap()));
+    let a = model(&mut f);
+    let comment = a["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| {
+            b["payload"]["source"]
+                .as_str()
+                .is_some_and(|s| s.contains("branch comment"))
+        })
+        .unwrap();
+    assert_eq!(comment["owner"], text(&a, "Inside")["owner"]);
+    f.service.close().unwrap();
+}
+
+#[test]
+fn choice_authoring_refuses_nesting_beyond_the_existing_bound_without_writes() {
+    let mut f = setup();
+    let a = model(&mut f);
+    let mut source = format!("label {}:\n", a["technicalLabel"].as_str().unwrap());
+    for level in 0..16 {
+        source += &format!(
+            "{}menu:\n{}\"Option {}\":\n",
+            " ".repeat(4 + level * 8),
+            " ".repeat(8 + level * 8),
+            level
+        );
+    }
+    source += &format!("{}pass\n    return\n", " ".repeat(4 + 16 * 8));
+    f.save(&a, &source);
+    let a = model(&mut f);
+    let header = a["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|b| b["conditionalBranch"]["choiceOption"] == true)
+        .last()
+        .unwrap();
+    let before = bytes(&f);
+    assert_eq!(
+        reject(
+            &mut f,
+            json!({"type":"insertBodyBeat","body":branch_body(header),"position":{"type":"end"},"beat":{"type":"choice","options":[{"text":"Too deep"}]}})
+        )["error"]["code"],
+        "SCENE_INVARIANT"
+    );
+    assert_eq!(bytes(&f), before);
+    f.service.close().unwrap();
+}

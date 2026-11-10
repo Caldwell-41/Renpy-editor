@@ -8,9 +8,14 @@ pub(super) fn parse(
     loaded: Option<SceneParseContext<'_>>,
     lexical: &HashSet<usize>,
     parent: Option<(usize, usize)>,
+    depth: usize,
+    source_version: u32,
 ) -> Option<(usize, Vec<ParsedBeat>)> {
     let (start, end, line) = lines[index];
-    if !lexical.contains(&start) || line != format!("{}menu:", " ".repeat(indent)) {
+    if source_version >= 10 && depth >= MAX_CONDITION_NESTING
+        || !lexical.contains(&start)
+        || line != format!("{}menu:", " ".repeat(indent))
+    {
         return None;
     }
     let (_, authoring, _) = loaded?;
@@ -56,6 +61,36 @@ pub(super) fn parse(
             }
             if !trivia && indentation(line) != indent + 8 {
                 return None;
+            }
+            if source_version >= 10 && !trivia {
+                let owner = Some((group, option_start));
+                if let Some((after, nested)) = parse_condition_group(
+                    lines,
+                    next,
+                    loaded,
+                    indent + 8,
+                    owner,
+                    depth + 1,
+                    lexical,
+                    source_version,
+                )
+                .or_else(|| {
+                    parse(
+                        lines,
+                        next,
+                        indent + 8,
+                        loaded,
+                        lexical,
+                        owner,
+                        depth + 1,
+                        source_version,
+                    )
+                }) {
+                    result.extend(nested);
+                    next = after;
+                    statements += 1;
+                    continue;
+                }
             }
             let normalized = format!("    {}", &line[indentation(line).min(indent + 8)..]);
             let code = logic::without_comment(&normalized).trim_end();
@@ -278,22 +313,30 @@ pub(super) fn update(
 }
 
 pub(super) fn may_continue(beat: &SceneBeat, beats: &[SceneBeat]) -> bool {
+    may_continue_at_depth(beat, beats, 0)
+}
+pub(super) fn may_continue_at_depth(beat: &SceneBeat, beats: &[SceneBeat], depth: usize) -> bool {
     let BeatPayload::Choice { options } = &beat.payload else {
         return true;
     };
-    // All guarded options may be unavailable. Never infer guards from defaults.
-    if options.iter().all(|o| o.condition.is_some()) {
+    if depth >= MAX_CONDITION_NESTING || options.iter().all(|o| o.condition.is_some()) {
         return true;
     }
     options.iter().any(|option| {
-        !beats
-            .iter()
-            .filter(|b| {
-                b.owner
-                    .as_ref()
-                    .is_some_and(|o| Some(&o.branch_id) == option.id.as_ref())
-            })
-            .any(|b| is_terminal_payload(&b.payload))
+        let Some(header) = beats.iter().find(|b| Some(&b.id) == option.id.as_ref()) else {
+            return true;
+        };
+        let Some(branch) = &header.conditional_branch else {
+            return true;
+        };
+        logic::body_may_continue(
+            &crate::metadata::BeatOwner {
+                group_id: branch.group_id.clone(),
+                branch_id: header.id.clone(),
+            },
+            beats,
+            depth,
+        )
     })
 }
 

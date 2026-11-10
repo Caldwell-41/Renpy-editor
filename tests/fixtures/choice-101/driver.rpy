@@ -106,3 +106,81 @@ testsuite choice_body:
         assert screen "choice_body_main_menu" timeout 10
         $ print("CHOICE_101_RETURN caller=resumed shared=0", flush=True)
         exit
+
+    testcase nested_normal:
+        assert screen "choice_body_main_menu" timeout 10
+        click "Start"
+        assert screen "choice" timeout 10
+        click "Yes, please"
+        assert "Before call" timeout 10
+        keysym "K_RETURN"
+        assert "Transferred" timeout 10
+        keysym "K_RETURN"
+        assert "Resume inside option" timeout 10
+        keysym "K_RETURN"
+        assert screen "choice" timeout 10
+        click "Inner normal"
+        assert "Inside inner" timeout 10
+        keysym "K_RETURN"
+        assert "After nested" timeout 10
+        keysym "K_RETURN"
+        assert "Shared once" timeout 10
+        keysym "K_RETURN"
+        assert screen "choice_body_main_menu" timeout 10
+        $ print("CHOICE_102_NORMAL call=returned inner=joined outer=joined", flush=True)
+        exit
+
+    testcase nested_jump:
+        assert screen "choice_body_main_menu" timeout 10
+        click "Start"
+        assert screen "choice" timeout 10
+        click "Yes, please"
+        assert "Before call" timeout 10
+        keysym "K_RETURN"
+        assert "Transferred" timeout 10
+        keysym "K_RETURN"
+        assert "Resume inside option" timeout 10
+        keysym "K_RETURN"
+        assert screen "choice" timeout 10
+        click "Inner jump"
+        assert "Transferred" timeout 10
+        keysym "K_RETURN"
+        assert screen "choice_body_main_menu" timeout 10
+        $ print("CHOICE_102_JUMP target=entered shared=0", flush=True)
+        exit
+
+    testcase nested_return:
+        assert screen "choice_body_main_menu" timeout 10
+        click "Start"
+        assert screen "choice" timeout 10
+        click "Yes, please"
+        assert "Before call" timeout 10
+        keysym "K_RETURN"
+        assert "Transferred" timeout 10
+        keysym "K_RETURN"
+        assert "Resume inside option" timeout 10
+        keysym "K_RETURN"
+        assert screen "choice" timeout 10
+        click "Inner return"
+        assert screen "choice_body_main_menu" timeout 10
+        $ print("CHOICE_102_RETURN caller=none shared=0", flush=True)
+        exit
+
+    testcase nested_return_caller:
+        assert screen "choice_body_main_menu" timeout 10
+        click "Start"
+        assert screen "choice" timeout 10
+        click "Yes, please"
+        assert "Before call" timeout 10
+        keysym "K_RETURN"
+        assert "Transferred" timeout 10
+        keysym "K_RETURN"
+        assert "Resume inside option" timeout 10
+        keysym "K_RETURN"
+        assert screen "choice" timeout 10
+        click "Inner return"
+        assert "Caller resumed" timeout 10
+        keysym "K_RETURN"
+        assert screen "choice_body_main_menu" timeout 10
+        $ print("CHOICE_102_RETURN caller=resumed shared=0", flush=True)
+        exit

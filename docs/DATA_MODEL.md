@@ -94,18 +94,30 @@ fallthrough, including when every guarded option can be unavailable.
 The Choice payload contains option caption, optional condition and mapped option ID.
 It has no destination field. A destination option has an ordinary Jump in its body.
 The option ID is its header's Beat UUID; Choice identity is the menu header UUID.
-Flat source-derived child Beats carry the existing group/branch owner. Option headers
+Source-derived child Beats carry their immediate group/branch owner, including
+conditions and Choices nested inside an option. Option headers
 reuse that branch mapping with `choiceOption: true`; they are not condition nodes.
 `BodyRef::Branch` names an option body just as it names a condition branch. Headers,
 children and shared following Beats have disjoint exact source ranges. No second
 saved story document or action-list model exists.
 
-Source-map schema 9 refines the earlier whole-menu mappings after verifying them
-with their original recognizer. The menu header keeps its old ID and unknown fields;
+Source-map schema 10 recognizes recursive option bodies and assigns indented
+condition trivia to its branch. It verifies schema 9 with its flat option-body
+recognizer before refining exact physical records. Earlier whole-menu maps also
+pass their original recognizer before refinement. The menu header keeps its old ID and unknown fields;
 provable existing physical records keep theirs. Opening and no-op editing never
 rewrite `.rpy` bytes. Unprovable ownership refuses; unsupported option contents stay
 protected Source. The reader and writer cap is 4,000,000 bytes, so the existing
 500-Scene / 2,000-route fixture still fits after menus split into physical mappings.
+Recursive recognition shares the condition/Choice nesting bound of 16. Insertion
+refuses a Choice that would become opaque beyond that bound. Moves and removal
+carry complete subtrees; a destination inside the selected subtree refuses.
+Call uses the existing collision-checked `from` label and route limits. Return from
+a callee resumes at the next Beat in the option, then normal completion rejoins
+after its containing Choice. Completion analysis traverses the same owners without
+evaluating conditions. Branches records the originating option header and ancestor
+guards, each transfer and the continuation in its actual containing body.
+
 Caption, guard, reorder and option-count edits carry each retained body's exact
 bytes and mapped IDs. New options get new IDs. Then controls edit only the last
 Jump/Return, or its absence for Continue. Source reconciliation refuses ambiguous

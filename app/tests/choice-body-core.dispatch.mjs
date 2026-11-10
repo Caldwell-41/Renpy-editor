@@ -81,6 +81,49 @@ try {
  document.querySelector(`[data-beat-id="${choice().id}"] .beat-select`).click();editor=document.querySelector('.expanded-beat');enter(editor.querySelector('[aria-label="Choice option text"]'),'Yes, please');await applied(editor,'Commit Beat');assert.equal(await source(path),(accepted+'# external accepted change\n').replace('"Yes":','"Yes, please":'));
  stage('invalid caption retained without a write; accepted caption changes only its quoted token');
  const flow=await call('flow.list');const menuEdges=flow.edges.filter(e=>e.kind==='choice'&&e.beatId===choice().id);assert.equal(menuEdges.length,2);assert(menuEdges.every(e=>e.destination.kind==='body'));
+ // #102 uses the same production body controls and source/history owner.
+ async function addBodyBeat(id,type,fill) {
+  button('Add a Beat',option(id)); const form=document.querySelector('.new-beat');
+  const types=form.querySelector('[aria-label="Beat type"]');
+  assert([...types.options].some(o=>o.value===type),`Option body must offer ${type}`);
+  enter(types,type,'change');fill?.(form);await applied(form,'Add Beat');
+ }
+ await addBodyBeat(yes.id,'narration',form=>enter(form.querySelector('textarea'),'Before call'));
+ const beforeInvalidCall=await source(path);
+ button('Add a Beat',option(yes.id));draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'call','change');
+ enter(draft.querySelector('[aria-label="Call destination Scene"]'),entry.id,'change');lastApply=undefined;button('Add Beat',draft);await wait(()=>lastApply);await settle();
+ assert.equal(lastApply.ok,false);assert.equal(lastApply.error.code,'UNSUPPORTED_CALL_ROUTE');assert(draft.isConnected);assert.equal(await source(path),beforeInvalidCall);button('Cancel',draft);assert.equal(await source(path),beforeInvalidCall);
+ await addBodyBeat(yes.id,'call',form=>enter(form.querySelector('[aria-label="Call destination Scene"]'),target.id,'change'));
+ await addBodyBeat(yes.id,'narration',form=>enter(form.querySelector('textarea'),'Resume inside option'));
+ const callBeat=scene().beats.find(b=>b.payload.type==='call');const callLabel=callBeat.payload.returnLabel;
+ assert(callLabel?.startsWith('_ll_call_'));
+ button('Add Condition',option(yes.id));panel=document.querySelector('.story-operation[aria-label="Add Condition"]');
+ // Use the existing typed boolean variable comparison, not a raw expression.
+ await applied(panel,'Create Condition');
+ const branch=scene().beats.find(b=>b.conditionalBranch&&!b.conditionalBranch.choiceOption);
+ button('Add Beat to If',document.querySelector(`[data-branch-id="${branch.id}"]`));
+ draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'choice','change');
+ enter(draft.querySelector('[aria-label="Choice option text"]'),'Inner normal');button('Add option',draft);
+ enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'Inner jump');button('Add option',draft);
+ enter(draft.querySelectorAll('[aria-label="Choice option text"]')[2],'Inner return');await applied(draft,'Add Beat');
+ const nested=scene().beats.find(b=>b.payload.type==='choice'&&b.owner);
+ const [normal,jump,ret]=nested.payload.options;
+ await addBodyBeat(normal.id,'narration',form=>enter(form.querySelector('textarea'),'Inside inner'));
+ for(const [id,kind] of [[jump.id,'jump'],[ret.id,'return']]) {
+  button('Then',option(id));panel=document.querySelector('.story-operation[aria-label="Option ending"]');
+  enter(panel.querySelector('[aria-label="Then"]'),kind,'change');if(kind==='jump')enter(panel.querySelector('[aria-label="Destination Scene"]'),target.id,'change');await applied(panel,'Apply ending');
+ }
+ await addBodyBeat(yes.id,'narration',form=>enter(form.querySelector('textarea'),'After nested'));
+ const recursive=await source(path);result.runtime.recursive=recursive;
+ assert.equal(scene().beats.find(b=>b.id===callBeat.id).payload.returnLabel,callLabel);
+ const recursiveFlow=await call('flow.list');const callEdge=recursiveFlow.edges.find(e=>e.kind==='call'&&e.beatId===callBeat.id);
+ assert.equal(callEdge.continuation.beatId,scene().beats.find(b=>b.payload.text==='Resume inside option').id);
+ assert.equal(callEdge.guardPath[0].branchId,yes.id);
+ assert.match(option(normal.id).textContent,/Choice.*Option/);
+ await applied(document,'Undo');await applied(document,'Redo');assert.equal(await source(path),recursive);
+ button('Close Project');await wait(()=>document.querySelector('.recent-open'));button(document.querySelector('.recent-open').textContent);await wait(()=>document.querySelector('.beat-card'));await settle();
+ assert.equal(await source(path),recursive);assert.equal(scene().beats.find(b=>b.id===callBeat.id).payload.returnLabel,callLabel);
+ stage('recursive production controls author dialogue, stable Call, condition and nested Choice with normal/Jump/Return paths; history and reopen preserve source');
  result.acceptedSource=await source(path);result.sourceSHA256=hash(result.acceptedSource);result.identities=ids;
  button('Close Project');await wait(()=>document.querySelector('.recent-open'));result.passed=true;
 } catch(error){result.failure={message:error.message,stack:error.stack};result.dom=document.body.innerHTML;throw error;}

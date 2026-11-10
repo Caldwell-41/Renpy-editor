@@ -331,34 +331,24 @@ pub(super) fn validate_conditional_completion(
     scene: &SceneMetadata,
     loaded: &Loaded,
 ) -> Result<(), SceneError> {
-    let (_, _, parsed) = parse_scene(
+    let (_, beats) = build_mapping(
         scene,
         bytes,
+        &sha256(bytes),
+        None,
+        &[],
         Some((
             &loaded.project,
             &loaded.authoring,
             &loaded.source_map.owned_screens,
         )),
     )?;
-    if !parsed.iter().any(|b| {
-        matches!(&b.payload, BeatPayload::Call { .. })
-            || matches!(&b.payload, BeatPayload::Choice { .. })
-    }) {
-        return Ok(());
-    }
-    let roots: Vec<_> = parsed.iter().filter(|b| b.nesting.is_none() && !matches!(&b.payload, BeatPayload::CustomCode { source, .. } if source.trim().is_empty() || source.trim_start().starts_with('#'))).collect();
-    if roots
-        .last()
-        .is_none_or(|b| {
-            if let BeatPayload::Choice { options } = &b.payload {
-                if options.iter().all(|o|o.condition.is_some()) { return true; }
-                return options.iter().any(|o| {
-                    let start=o.id.as_ref().and_then(|id|id.parse::<usize>().ok());
-                    !parsed.iter().any(|b|matches!(b.nesting,Some(ParsedNesting::Child { branch_start,.. }) if Some(branch_start)==start) && is_terminal_payload(&b.payload))
-                });
-            }
-            !is_terminal_payload(&b.payload)
-        })
+    if beats.iter().any(|b| {
+        matches!(
+            b.payload,
+            BeatPayload::Call { .. } | BeatPayload::Choice { .. }
+        )
+    }) && structure::root_may_continue(bytes, &beats)?
     {
         return Err(SceneError::InvariantBlocked);
     }
@@ -762,18 +752,51 @@ pub(super) fn group_may_continue(group_id: &str, beats: &[SceneBeat], depth: usi
         return true;
     }
     headers.iter().any(|header| {
-        let owner = crate::metadata::BeatOwner { group_id: group_id.into(), branch_id: header.id.clone() };
-        for beat in beats.iter().filter(|b|b.owner.as_ref()==Some(&owner)) {
-            if let Some(branch)=&beat.conditional_branch {
-                if branch.ordinal==0 && !group_may_continue(&branch.group_id,beats,depth+1) { return false; }
-                continue;
-            }
-            if matches!(&beat.payload,BeatPayload::CustomCode { source,.. } if source.trim() == "pass") { continue; }
-            if matches!(&beat.payload,BeatPayload::CustomCode { source,.. } if !source.trim().is_empty() && !source.trim_start().starts_with('#')) { return true; }
-            if is_terminal_payload(&beat.payload) { return false; }
-        }
-        true
+        body_may_continue(
+            &crate::metadata::BeatOwner {
+                group_id: group_id.into(),
+                branch_id: header.id.clone(),
+            },
+            beats,
+            depth,
+        )
     })
+}
+
+/// Completion is structural and conservative; it never evaluates a condition.
+pub(super) fn body_may_continue(
+    owner: &crate::metadata::BeatOwner,
+    beats: &[SceneBeat],
+    depth: usize,
+) -> bool {
+    if depth >= MAX_CONDITION_NESTING {
+        return true;
+    }
+    for beat in beats.iter().filter(|b| b.owner.as_ref() == Some(owner)) {
+        if let Some(branch) = &beat.conditional_branch {
+            if !branch.choice_option
+                && branch.ordinal == 0
+                && !group_may_continue(&branch.group_id, beats, depth + 1)
+            {
+                return false;
+            }
+            continue;
+        }
+        if matches!(beat.payload, BeatPayload::Choice { .. }) {
+            if !choice::may_continue_at_depth(beat, beats, depth + 1) {
+                return false;
+            }
+            continue;
+        }
+        if matches!(&beat.payload, BeatPayload::CustomCode { source, .. } if source.trim() != "pass" && !source.trim().is_empty() && !source.trim_start().starts_with('#'))
+        {
+            return true;
+        }
+        if is_terminal_payload(&beat.payload) {
+            return false;
+        }
+    }
+    true
 }
 
 #[cfg(test)]
@@ -1608,6 +1631,109 @@ mod dialog_tests;
 mod choice_body_tests {
     use super::tests::Fixture;
     use serde_json::json;
+    #[test]
+    fn choice_v9_refinement_keeps_physical_ids_extras_source_and_unknown_code() {
+        use super::*;
+        use std::fs;
+        let mut f = Fixture::new();
+        let a = f.model()["scenes"][0].clone();
+        f.save(&a,&format!("label {}:\n    menu:\n        \"Outer\":\n            if mystery():\n                menu:\n                    \"Inner\":\n                        python:\n                            result = \"opaque\"\n            \"Resume\"\n    return\n",a["technicalLabel"].as_str().unwrap()));
+        f.service.close().unwrap();
+        let project =
+            ProjectMetadata::read_bytes(&fs::read(f.root.join(PROJECT_PATH)).unwrap(), None)
+                .unwrap();
+        let authoring: AuthoringMetadata =
+            serde_json::from_slice(&fs::read(f.root.join(".renpy-editor/authoring.json")).unwrap())
+                .unwrap();
+        let path = f.root.join(a["sourcePath"].as_str().unwrap());
+        let bytes = fs::read(&path).unwrap();
+        let map_path = f.root.join(SOURCE_MAP_PATH);
+        let mut map =
+            SourceMapMetadata::read_bytes(&fs::read(&map_path).unwrap(), &project.project_id)
+                .unwrap();
+        let (_, _, parsed) = parse_scene_mode(
+            &project.scenes[0],
+            &bytes,
+            Some((&project, &authoring, &[])),
+            9,
+        )
+        .unwrap();
+        let physical = map.scene_mappings[0].beats.clone();
+        map.schema_version = 9;
+        map.scene_mappings[0].beats = parsed
+            .iter()
+            .map(|p| {
+                let mut b = physical
+                    .iter()
+                    .find(|b| b.byte_start as usize == p.start)
+                    .unwrap()
+                    .clone();
+                b.kind = p.payload.kind().into();
+                b.owner = None;
+                b.conditional_branch = None;
+                // v9 recognizes only the outer Choice, headers and flat opaque option rows.
+                match &p.nesting {
+                    Some(ParsedNesting::Child { branch_start, .. }) => {
+                        let header = physical
+                            .iter()
+                            .find(|b| b.byte_start as usize == *branch_start)
+                            .unwrap();
+                        b.owner = Some(crate::metadata::BeatOwner {
+                            group_id: header.conditional_branch.as_ref().unwrap().group_id.clone(),
+                            branch_id: header.id.clone(),
+                        });
+                    }
+                    Some(ParsedNesting::Branch { .. }) => {
+                        b.conditional_branch = physical
+                            .iter()
+                            .find(|b| b.byte_start as usize == p.start)
+                            .unwrap()
+                            .conditional_branch
+                            .clone()
+                    }
+                    None => {}
+                }
+                b.extra.insert("futureRecord".into(), json!({"kept":b.id}));
+                b
+            })
+            .collect();
+        let old = map.scene_mappings[0].beats.clone();
+        map.validate(&project.project_id).unwrap();
+        fs::write(&map_path, source_map_bytes(&map).unwrap()).unwrap();
+        f.service.open_path(&f.root).unwrap();
+        let current = f.model()["scenes"][0].clone();
+        assert_eq!(fs::read(&path).unwrap(), bytes);
+        assert_eq!(
+            current["beats"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .filter(|b| b["payload"]["type"] == "choice")
+                .count(),
+            2
+        );
+        assert!(current["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|b| b["conditionalBranch"]["condition"]["status"] == "unknown"));
+        let new = SourceMapMetadata::read_bytes(&fs::read(&map_path).unwrap(), &project.project_id)
+            .unwrap();
+        for b in old {
+            let retained = new.scene_mappings[0]
+                .beats
+                .iter()
+                .find(|n| n.id == b.id)
+                .unwrap();
+            assert_eq!(retained.extra, b.extra);
+        }
+        let accepted_map = fs::read(&map_path).unwrap();
+        f.service.close().unwrap();
+        f.service.open_path(&f.root).unwrap();
+        f.service.close().unwrap();
+        assert_eq!(fs::read(&map_path).unwrap(), accepted_map);
+        assert_eq!(fs::read(&path).unwrap(), bytes);
+    }
     #[test]
     fn choice_known_headers_and_empty_placeholders_preserve_reference_inspection() {
         let mut f = Fixture::new();
