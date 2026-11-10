@@ -2,66 +2,47 @@
 
 ## Selected Choice implementation
 
-Kris selected [#98](https://github.com/Caldwell-41/Renpy-editor/issues/98) and
-#101–#106 under implement-spec. Delivery remains `in_progress` on
+Kris selected #98 and #101–#106 under implement-spec. Delivery is `in_progress` on
 `codex/choice-98` in [draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125).
-#101–#105 have public-authoring, both-target SDK and automatic CI evidence.
-[The delivery record](../tasks/evidence/choice-98.md#windows-106-completion-and-mac-approval-wait)
-owns the four review fixes, both-host evidence limits and next actions;
-[operation limits](../tasks/evidence/choice-98.md#verification-and-operation-limits)
-remain cumulative.
+[The delivery record](../tasks/evidence/choice-98.md#approved-a-v2-integration-and-final-ci-reservation)
+owns exact candidates, reviews, counters and the remaining qualification.
 
-Normal merge `0b8b264f8025f5f626eade7748260ac1dad1d7f0` integrates correction
-worker `0606d70858d07154874cf59387bbb313c7a05e62` from `a7d3bf56` without conflicts
-or implementation edits. Its complete tree equals the worker's. This documentation
-successor changes only CURRENT, HANDOVER and Choice evidence. Canonical contracts
-equal the worker's; approved lab/design source, SDK fixtures, qualifier, adapter
-and schema-14 admission remain unchanged. The coordinator resumes sole
-integration/status ownership. Workers and test owners are complete.
+#101–#105 have both-target focused SDK evidence. Windows #106 passed all 27
+picked outcomes on `9d229ea4`; Mac passed all 27 on documentation successor
+`ae057e3a`, including actual Save/exit/fresh-process Load, rollback and New Game.
+All earlier failures remain charged and retained. The four earlier core review
+corrections and optional parsed-offset refactor disposition remain recorded.
+The #104 duplicate-receipt limitation is unchanged.
 
-The fixes make runtime fallback capability-specific, restrict helper creation and
-upgrade to first adoption, preserve mixed newlines/header trivia, and expose legal
-Hide picked continuation positions. The delivery record retains
-passing focused core/renderer checks and typecheck.
-The complete production-main/controller/public-core journey passes thirteen stages
-and 284 requests with cleanup. Exact-head automatic CI on published `9d229ea4`
-passed 397 frontend tests and all eighteen browser/dispatch fixtures.
-The optional parsed-offset typing refactor is deferred as wider mapping/payload work,
-not a confirmed defect. Original Standards and Spec reports remain separate.
+Kris approved preview A v2 with "Sure approved". Design delivery `95778e4a`,
+reviewed source `7ba6eea4`, was merged as `6f61babd`; production `ffefe1fc` and
+corrections `075a6648` implement its scrolling Choice summary beside the retained
+Game canvas. All six approved PNG hashes and the pinned fingerprint were verified.
+Existing approved Combined v1 source/history are intact. Three HTML exports gained
+final newlines only. The design chat and review agents are complete.
 
-After Kris approved up to two additional Mac starts on 2026-11-11, start 5 passed
-all 27 picked outcomes on `ae057e3a`. The fresh controller passed thirteen stages
-and 284 requests; pinned tools and official archive/fixture preflight passed.
-Sixteen compile/lint children, ten positive play cases and the intended negative
-passed their expected outcomes. Actual Save/exit/new-process Load, ordinary Page Up
-rollback and MainMenu/Start passed; primary/sync save hashes matched before Load.
-All positive markers appeared once, no child timed out/truncated, and owned scratch
-was removed. The independent audit and 42-entry private manifest passed.
+Local verification passes 398 frontend tests, matched eight-state A v2 rendering,
+interface scaling, media preservation, Choice thirteen-stage/284-request controller,
+full ten-case Story controller and the complete five-script browser preflight.
+Reviews found and corrected stale consumers, fixed font sizes and a premature
+probe-completion wait. Preflight exposed old Character catalogue assumptions;
+fixtures/probes now use current References/Game setup and explicit source review.
+Game setup preserves appearance selection through the existing bounded cache.
+Failed local attempts remain retained; no SDK/native/package campaign ran locally.
 
-Published `9d229ea4` passed the same 27 Windows outcomes. Source, driver, qualifier
-and SDK adapter are unchanged by subsequent coordinator commits. Exact-head
-automatic run `42817680459`, attempt 1, passed on `ad4c2760`, including 397 frontend
-tests and eighteen selected browser/controller fixtures. Prior failures and the
-[#104 duplicate-receipt limit](../tasks/evidence/choice-98.md#104-receipt-retention-limit)
-remain retained. These bounded results do not establish combined acceptance.
+Shared SDK consumption is Mac 16/20 and Windows 7/20. One place per target is
+reserved for the single selected `production-scaffold.yml` campaign; execution
+would take totals to Mac 17/20 and Windows 8/20. Publish this coherent candidate,
+dispatch once with success-only package upload, record exact run/attempt/head, then
+audit the selected Preflight, Windows x64 and macOS ARM64 jobs and current-head
+automatic CI. Do not retry or move the branch for receipt-only updates. Resolve
+uncertain dispatch without duplication. The unused conditional #106 start is not
+a new campaign allowance.
 
-Automatic CI on exact `f395f158` passed; the latest run is `42897808214`, attempt 1,
-with 397 frontend passes, eighteen browser/controller fixtures and no review findings.
-Rendered inspection found clipped/overlapping Choice prompt and unknown-state text
-in the small preview. Matching-content visual conformance remains incomplete.
-The authorized "Choice Spec - readable Choice preview" chat owns new mocks and
-approval evidence only, based on `f395f158`. Await its exact approved revision
-before coordinator implementation; preserve production and the approved reference.
-The private rendered-review handoff retains captures, setup failures, fingerprint
-proof, the design-thread link and its managed worktree identity.
-
-One existing final `production-scaffold.yml` campaign is now selected in the branch
-validation plan, but is not reserved or dispatched until the preview correction is
-settled. Its Preflight, Windows x64 and macOS ARM64 jobs are required. Shared SDK
-use remains Mac 16/20, Windows 7/20, zero reservations; no second #106 extra start
-was used. Preserve all worktrees, evidence, `app/node_modules` and recovery below.
-#98/#106 and PR #125 remain open/draft. Native/human evidence and final qualification
-remain pending; full Story #110 and #31/#55 remain separate.
+Preserve all worktrees, unique evidence, `app/node_modules`, the pinned design
+references and protected recovery below. Native/human evidence remains pending;
+CI packages do not qualify approved local Mac signing or human input. #98/#106
+and PR #125 remain open/draft. Full Story #110 and #31/#55 remain separate.
 
 <a id="shared-arithmetic-implementation-2026-11-09"></a>
 

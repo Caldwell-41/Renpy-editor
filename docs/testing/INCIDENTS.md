@@ -1187,3 +1187,19 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   rollback and New Game remain pending. No timeout was raised or failure waived.
 - **Evidence:** [#106](https://github.com/Caldwell-41/Renpy-editor/issues/106), the
   producing-host handoff and the [retained driver](../../tests/fixtures/choice-101/driver.rpy).
+
+
+## H84. Browser/native probes must follow the current UI owner
+
+- **Symptoms:** Choice checks dereference a removed overlay; Character probes select
+  hidden/ambiguous Edit controls or old catalogue forms; direct reads match reviewed
+  source text before creation commits. Lazy images have no source at decode time.
+- **Correction:** migrate consumers to the scrolling Choice summary and current
+  References/Game setup route. Require explicit source review before creation,
+  observe the new enabled entry, scope fields to the modal/active owner, and target
+  the visible shell Source Save. Wait for the current visible lazy image's assigned
+  source/load. Preserve the existing cache for manual appearance selection.
+- **Verification:** the full required browser preflight passes with unchanged
+  security/refusal/history checks. Chromium/fixture proof remains distinct from
+  native packaging and human acceptance.
+- **Evidence:** [Choice preview integration](../tasks/evidence/choice-98.md#approved-a-v2-integration-and-final-ci-reservation).

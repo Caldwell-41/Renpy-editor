@@ -57,11 +57,14 @@ The fresh production controller passed thirteen stages and 284 requests.
 exact candidates, audit, limits and the #104 receipt limitation.
 
 Kris approved up to two additional Mac starts on 2026-11-11; one passed and the
-second remains unused. Shared use is Mac 16/20, Windows 7/20, zero reservations.
-Automatic CI on `f395f158` passed 397 frontend tests and all eighteen selected
-browser/controller fixtures. Rendered inspection found clipped/overlapping Choice
-preview text. The authorized "Choice Spec - readable Choice preview" chat is
-preparing corrections for approval. Final package qualification is selected but
-not dispatched until that fix settles. Native/human evidence remains pending.
-#98/#106 and PR #125 stay open/draft; full Story #110 and other PR #122 retro items
-remain unselected.
+second remains unused. Consumed use is Mac 16/20 and Windows 7/20; final campaign reservations are below.
+Kris approved Choice preview A v2. It is integrated with a scrolling summary beside
+the retained Game canvas. Matched rendered samples, media preservation, interface
+scaling, 398 frontend tests and the complete required browser preflight passed.
+[The delivery record](../tasks/evidence/choice-98.md#approved-a-v2-integration-and-final-ci-reservation)
+owns review fixes, fixture migrations and evidence limits.
+
+One final package workflow is selected, with one reserved place per target. Current
+consumption remains Mac 16/20 and Windows 7/20; execution would take it to 17/20
+and 8/20. Final CI and native/human acceptance remain pending. #98/#106 and PR #125
+stay open/draft; full Story #110 and other PR #122 retro items remain unselected.
