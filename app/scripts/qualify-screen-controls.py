@@ -136,7 +136,7 @@ def validate_manifest(root, manifest):
         sidecars[key] = load_json(portable_file(root, name).read_text(encoding='utf-8'))
     require(sidecars == manifest['sidecars'], 'changed controls metadata sidecar')
     project, mapping, authoring = (sidecars[key] for key in ('project', 'sourceMap', 'authoring'))
-    require(mapping['schemaVersion'] in (8, 9, 10, 11, 12, 13)
+    require(mapping['schemaVersion'] in (8, 9, 10, 11, 12, 13, 14)
             and project['projectId'] == mapping['projectId'] == authoring['projectId']
             and project['sdk'] == {'adapter': 'renpy-8.5.3', 'version': '8.5.3'},
             'wrong controls metadata identity/SDK')

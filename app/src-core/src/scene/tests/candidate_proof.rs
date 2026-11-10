@@ -136,6 +136,7 @@ fn g1_o1_feasibility() {
     let BeatPayload::Choice {
         mut options,
         prompt,
+        picked_policy,
     } = origin.beats[0].payload.clone()
     else {
         panic!("choice fixture")
@@ -151,7 +152,11 @@ fn g1_o1_feasibility() {
             scene_id: origin.id.clone(),
             expected_source_revision: origin.source_revision.clone(),
             beat_id: origin.beats[0].id.clone(),
-            beat: BeatPayload::Choice { options, prompt },
+            beat: BeatPayload::Choice {
+                options,
+                prompt,
+                picked_policy,
+            },
         },
     )
     .unwrap();

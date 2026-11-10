@@ -45,7 +45,7 @@ export type BeatPayload =
   | { readonly type: "playSfx"; readonly assetId: string }
   | { readonly type: "transition"; readonly transition: Exclude<TransitionRef, "none"> }
   | { readonly type: "setVariable"; readonly variableId: string; readonly value: boolean | number | string | IntegerAdjustment }
-  | { readonly type: "choice"; readonly prompt?: ChoicePrompt; readonly options: readonly ChoiceOption[] }
+  | { readonly type: "choice"; readonly prompt?: ChoicePrompt; readonly pickedPolicy?: "showNormally" | "markPicked" | "hidePicked"; readonly options: readonly ChoiceOption[] }
   | { readonly type: "jump"; readonly sceneId: string }
   | { readonly type: "call"; readonly sceneId: string; readonly returnLabel: string | null }
   | { readonly type: "repeatChoice"; readonly target?: string | null }
@@ -315,7 +315,7 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string,
       }
       case "dialogue": overlay = { kind: "dialogue", text: payload.text, beatId: beat.id }; break;
       case "narration": overlay = { kind: "narration", text: payload.text, beatId: beat.id }; break;
-      case "choice": overlay = { kind: "choice", ...(payload.prompt ? { prompt: payload.prompt } : {}), text: payload.options.map((option) => `${option.text}${option.condition ? ` (availability unknown; if false: ${option.unavailablePolicy === "showDisabled" ? "Show disabled" : "Hide"})` : ""}`).join(" · "), beatId: beat.id }; break;
+      case "choice": overlay = { kind: "choice", ...(payload.prompt ? { prompt: payload.prompt } : {}), text: (payload.pickedPolicy ? "Picked state is unknown in this preview. " : "") + payload.options.map((option) => `${option.text}${option.condition ? ` (availability unknown; if false: ${option.unavailablePolicy === "showDisabled" ? "Show disabled" : "Hide"})` : ""}`).join(" · "), beatId: beat.id }; break;
       case "jump": overlay = { kind: "jump", text: "Jump", beatId: beat.id }; break;
       case "call": overlay = { kind: "call", text: "Call Scene · preview state unknown", beatId: beat.id }; break;
       case "repeatChoice": overlay = { kind: "repeatChoice", text: "Repeat this Choice. Live availability is unknown.", beatId: beat.id }; break;
@@ -1511,6 +1511,11 @@ function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload, existing =
     case "playSfx": { const asset = assets("sfx", payload.assetId); add("SFX", asset); read = () => ({ type: "playSfx", assetId: required(asset) }); break; }
     case "transition": { const transition = transitions(false); add("Transition", transition); read = () => ({ type: "transition", transition: transition.value as "dissolve" | "fade" }); break; }
     case "choice": {
+      const picked = selectOf([{ value: "showNormally", label: "Show normally" }, { value: "markPicked", label: "Mark picked" }, { value: "hidePicked", label: "Hide picked" }], payload.pickedPolicy ?? "showNormally");
+      picked.setAttribute("aria-label", "Picked options");
+      let pickedChanged = false;
+      picked.addEventListener("change", () => { pickedChanged = true; host.dispatchEvent(new Event("input", { bubbles: true })); });
+      host.append(labelled("Picked options", picked));
       const promptRow = document.createElement("div"); promptRow.className = "choice-prompt";
       let hasPrompt = !!payload.prompt;
       const promptText = input(payload.prompt?.text ?? ""); promptText.setAttribute("aria-label", "Prompt text");
@@ -1556,7 +1561,7 @@ function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload, existing =
         if (!rows.length) throw new Error("A Choice needs at least one option.");
         validatePrompt();
         const prompt: ChoicePrompt | undefined = hasPrompt ? speaker.value === "narration" ? { type: "narration", text: promptText.value } : { type: "dialogue", characterId: required(speaker), text: promptText.value } : undefined;
-        return { type: "choice", ...(prompt ? { prompt } : {}), options: rows.map(row => { row.validateText(); const condition = row.guard.read(); return { ...(row.id ? { id: row.id } : {}), text: row.text.value, ...(condition ? { condition, ...(row.policy.value === "showDisabled" ? { unavailablePolicy: "showDisabled" as const } : {}) } : {}) }; }) };
+        return { type: "choice", ...((payload.pickedPolicy || pickedChanged) ? { pickedPolicy: picked.value as "showNormally" | "markPicked" | "hidePicked" } : {}), ...(prompt ? { prompt } : {}), options: rows.map(row => { row.validateText(); const condition = row.guard.read(); return { ...(row.id ? { id: row.id } : {}), text: row.text.value, ...(condition ? { condition, ...(row.policy.value === "showDisabled" ? { unavailablePolicy: "showDisabled" as const } : {}) } : {}) }; }) };
       }; break;
     }
     case "jump": { const destination = scenes(payload.sceneId); add("Destination Scene", destination); read = () => ({ type: "jump", sceneId: required(destination) }); break; }

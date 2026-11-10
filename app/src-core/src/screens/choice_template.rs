@@ -24,3 +24,5 @@ pub(crate) fn supported(source: &str) -> bool {
         .take_while(|line| line.is_empty() || line.starts_with(' ') || line.starts_with('#'))
         .all(|line| line.trim().is_empty() || line.starts_with('#'))
 }
+
+pub(crate) const PICKED_ADAPTER: &str = "# Loomlight Choice saved selections v1. Ren'Py 8.5.3.\ndefault _ll_picked_v1 = {}\n\nscreen _ll_choice_v1(items, _ll_mode=\"showNormally\", _ll_id=None):\n    style_prefix \"choice\"\n\n    vbox:\n        for i in items:\n            textbutton ((\"✓ \" if _ll_mode == \"markPicked\" and (_ll_id, i.kwargs.get(\"_ll_id\")) in _ll_picked_v1 else \"\") + i.caption) action i.action sensitive i.kwargs.get(\"_ll_available\", True)\n";

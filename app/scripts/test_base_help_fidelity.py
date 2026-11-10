@@ -70,7 +70,7 @@ def captures(root, accepted, role):
 
 class AdmissionTests(unittest.TestCase):
     def test_current_and_legacy_source_maps_require_matching_receipt_versions(self):
-        for version in (8, 9, 10, 11, 12, 13):
+        for version in (8, 9, 10, 11, 12, 13, 14):
             with self.subTest(version=version):
                 accepted = accepted_fixture()
                 accepted['sourceMapSchemaVersion'] = version

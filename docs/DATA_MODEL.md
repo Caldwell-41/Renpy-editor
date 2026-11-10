@@ -116,9 +116,10 @@ reuse that branch mapping with `choiceOption: true`; they are not condition node
 children and shared following Beats have disjoint exact source ranges. No second
 saved story document or action-list model exists.
 
-Source-map schema 13 adds source-owned Repeat targets to schema 12's per-option
+Source-map schema 14 adds saved picked-option headers to schema 13's Repeat
+targets and schema 12's per-option
 availability, schema 11's prompts and schema 10's recursive option bodies and
-indented condition trivia. Migration verifies schemas 12, 11 and 10 with their frozen
+indented condition trivia. Migration verifies schemas 13, 12, 11 and 10 with their frozen
 recognizer, schema 9 with its flat option-body recognizer, and older maps with their
 original recognizers before refinement. A newly recognized prompt joins the menu
 header; absorbed physical records survive in `refinedChildMappings`, including their
@@ -152,6 +153,27 @@ label inventory, then accepts label, ending and map together in shared history.
 Only a direct option of that Choice can author this ending. A nested Choice owns
 its own target; arbitrary labels and general loop editing remain unsupported.
 Ambiguous or colliding targets expose Source fallback and refuse authoring.
+
+Picked options use Show normally, Mark picked or Hide picked for the whole Choice.
+An accepted policy edit writes the mode and stable Choice UUID in the menu arguments.
+Each option carries its own UUID and typed availability arguments. Its header mapping
+includes the first executable statement, which records `(Choice UUID, option UUID)`
+in `default _ll_picked_v1 = {}` before any authored Beat. The existing versioned
+choice adapter owns that declaration and the selectable check mark. This dictionary
+is ordinary Ren'Py saved, rollback-aware game state. It is neither authoring metadata
+nor Ren'Py's caption-keyed persistent chosen history. Existing unconfigured source
+stays byte-identical on opening and no-op edits.
+
+The native menu guard combines availability and picked hiding. Disabled rows use
+the combined selectable gate, so hiding the last enabled answer continues after the
+Choice. Hide picked takes precedence over disabled display. Completion treats hiding
+as a possible continuation and refuses an unsafe Scene ending. Repeat revisits this
+same gate and store. Source-embedded UUIDs anchor the existing mappings, preserve
+rename/reorder identity, and distinguish duplicate captions. New options get fresh
+UUIDs. Duplicate runtime keys, reserved declaration collisions, edited/missing helpers,
+dirty Source and unsupported templates refuse authoring without repair. Accepted helper
+creation or upgrade shares the source/map transaction and its Undo/Redo history.
+Editor preview never reads or mutates runtime history and reports picked state unknown.
 
 Every recognized Beat mapping records a stable UUID, exact source revision, verified
 byte range, exact range hash, and lexical context. The narrow mapper recognizes only

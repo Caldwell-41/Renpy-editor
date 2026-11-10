@@ -4486,6 +4486,7 @@ mod tests {
                 expected_source_revision: entry.source_revision.clone(),
                 before_beat_id: None,
                 beat: crate::scene::BeatPayload::Choice {
+                    picked_policy: None,
                     prompt: None,
                     options: vec![
                         crate::scene::ChoiceOption {

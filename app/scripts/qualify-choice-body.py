@@ -41,6 +41,15 @@ CASES = [('continuation', 'yes', 'CHOICE_101_YES flag=True shared=1'),
          ('repeatNested', 'repeat_nested', 'CHOICE_105_NESTED owner=inner character=again outer=resumed earlier=once shared=1')]
 
 
+PICKED_CASES = [('pickedShow', 'picked_show', 'CHOICE_106_SHOW identity=separate reentry=scene selectable=yes'),
+                ('pickedMark', 'picked_mark_save', 'CHOICE_106_SAVE actual=slot picked=first process=closing'),
+                ('pickedMark', 'picked_load', 'CHOICE_106_LOAD process=new retained=yes marked=selectable'),
+                ('pickedMark', 'picked_rollback_new', 'CHOICE_106_ROLLBACK restored=yes newgame=fresh'),
+                ('pickedHide', 'picked_hide', 'CHOICE_106_HIDE duplicates=independent disabled=skipped shared=once'),
+                ('pickedRepeat', 'picked_repeat', 'CHOICE_106_REPEAT store=shared prompt=again call=resumed')]
+PICKED_KEYS = {'pickedShow', 'pickedMark', 'pickedHide', 'pickedRepeat', 'pickedAdapter', 'pickedTarget', 'pickedIdentities'}
+
+
 def digest(data):
     return hashlib.sha256(data).hexdigest()
 
@@ -51,7 +60,7 @@ def preflight(args):
     assert evidence['cleanupComplete'] is True
     runtime = evidence['runtime']
     availability = {'mixedAvailability', 'allUnavailable', 'allDisabled', 'allHidden', 'choiceAdapter', 'choiceTemplate'}
-    assert (set(runtime) - availability - {'repeatConversation', 'repeatExhausted', 'repeatNested'}) in ({'continuation', 'return', 'jump', 'entryLabel', 'target'},
+    assert (set(runtime) - PICKED_KEYS - availability - {'repeatConversation', 'repeatExhausted', 'repeatNested'}) in ({'continuation', 'return', 'jump', 'entryLabel', 'target'},
                             {'continuation', 'return', 'jump', 'entryLabel', 'target', 'recursive'},
                             {'continuation', 'return', 'jump', 'entryLabel', 'target', 'recursive', 'narrationPrompt', 'characterPrompt', 'recursivePrompt', 'characterDefinition'})
     if 'repeatConversation' in runtime:
@@ -86,9 +95,20 @@ def preflight(args):
     assert '$ choice_flag = True' in runtime['continuation']
     assert runtime['entryLabel'].replace('_', '').isalnum()
     driver = (REPO / 'tests/fixtures/choice-101/driver.rpy').read_bytes()
-    assert driver.count(b'    testcase ') == 21 and b'--warp' not in driver
+    assert driver.count(b'    testcase ') == 28 and b'--warp' not in driver
     assert expected_sha256(args.checksums.read_text(), args.archive.name) == PIN
     assert digest(args.archive.read_bytes()) == PIN
+    if args.picked_only:
+        assert PICKED_KEYS.issubset(runtime)
+        keys = runtime['pickedIdentities']
+        assert len(set([keys['choice'], *keys['options']])) == 4
+        for variant, mode in [('pickedShow', 'showNormally'), ('pickedMark', 'markPicked'), ('pickedHide', 'hidePicked')]:
+            source = runtime[variant]
+            assert '_ll_mode="' + mode + '"' in source
+            assert source.count('$ _ll_picked_v1[') == 3
+            assert source.count('jump ' + runtime['entryLabel']) == 0
+            assert runtime['pickedTarget'].count('jump ' + runtime['entryLabel']) == 1
+        assert 'default _ll_picked_v1 = {}' in runtime['pickedAdapter']
     return runtime, driver
 
 
@@ -101,6 +121,7 @@ def main():
     parser.add_argument('--preflight', action='store_true')
     parser.add_argument('--availability-only', action='store_true')
     parser.add_argument('--repeat-only', action='store_true')
+    parser.add_argument('--picked-only', action='store_true')
     parser.add_argument('--allow-fixture-execution', action='store_true')
     args = parser.parse_args()
     runtime, driver = preflight(args)
@@ -112,7 +133,7 @@ def main():
     receipt = dict(passed=False, harnessStarts=1, children=[], host=platform.platform(),
                    candidate=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO, text=True).strip(),
                    sdkSHA256=PIN, authoredSHA256=digest(args.authored.read_bytes()), driverSHA256=digest(driver),
-                   sourceHashes={key: digest(value.encode()) for key, value in runtime.items()},
+                   sourceHashes={key: digest(value.encode()) for key, value in runtime.items() if isinstance(value, str)},
                    nativeEditorLaunches=0, cleanupComplete=False)
     (args.output / 'authored.json').write_bytes(args.authored.read_bytes())
     scratch = None
@@ -129,39 +150,44 @@ def main():
                 variants = ['continuation', 'return', 'jump', 'returnCaller'] + (['recursive', 'recursiveCaller'] if 'recursive' in runtime else []) + (['narrationPrompt', 'characterPrompt', 'recursivePrompt'] if 'narrationPrompt' in runtime else [])
                 availability = ['mixedAvailability', 'allUnavailable', 'allDisabled', 'allHidden'] if 'mixedAvailability' in runtime else []
                 repeats = ['repeatConversation', 'repeatExhausted', 'repeatNested'] if 'repeatConversation' in runtime else []
-                variants = repeats if args.repeat_only else availability if args.availability_only else variants + availability + repeats
-                assert not (args.repeat_only and args.availability_only)
+                variants = ['pickedShow', 'pickedMark', 'pickedHide', 'pickedRepeat'] if args.picked_only else repeats if args.repeat_only else availability if args.availability_only else variants + availability + repeats
+                assert sum((args.repeat_only, args.availability_only, args.picked_only)) <= 1
                 assert variants
                 for variant in variants:
                     game = scratch / variant
                     (game / 'game').mkdir(parents=True)
-                    sources = {'story.rpy': runtime['return' if variant == 'returnCaller' else 'recursive' if variant == 'recursiveCaller' else variant], 'target.rpy': runtime['target'],
+                    sources = {'story.rpy': runtime['return' if variant == 'returnCaller' else 'recursive' if variant == 'recursiveCaller' else variant], 'target.rpy': runtime['pickedTarget'] if variant in ('pickedShow', 'pickedMark', 'pickedHide') else runtime['target'],
                                'script.rpy': 'label start:\n    ' + ('call ' + runtime['entryLabel'] + ' from choice_fixture_return\n    \"Caller resumed\"\n    return\n' if variant in ('returnCaller', 'recursiveCaller') else 'jump ' + runtime['entryLabel'] + '\n'),
                                'driver.rpy': driver.decode()}
-                    if variant in availability or variant in repeats:
+                    if variant.startswith('picked'):
+                        sources['loomlight_choice_v1.rpy'] = runtime['pickedAdapter']
+                        sources['fixture_ids.rpy'] = 'define choice106_id = ' + repr(runtime['pickedIdentities']['choice']) + '\ndefine choice106_options = ' + repr(tuple(runtime['pickedIdentities']['options'])) + '\n'
+                    elif variant in availability or variant in repeats:
                         sources['loomlight_choice_v1.rpy'] = runtime['choiceAdapter']
-                    if 'Prompt' in variant or variant in repeats:
+                    if 'Prompt' in variant or variant in repeats or variant == 'pickedRepeat':
                         sources['characters.rpy'] = runtime['characterDefinition']
                     for name, source in sources.items():
                         (game / 'game' / name).write_bytes(source.encode())
                     checks = [(Command.COMPILE, None, None), (Command.LINT, None, None)]
-                    checks += [(Command.TEST, case, marker) for v, case, marker in CASES if v == variant]
+                    checks += [(Command.TEST, case, marker) for v, case, marker in CASES + PICKED_CASES if v == variant]
+                    if variant == 'pickedShow':
+                        checks.append((Command.TEST, 'picked_wrong_outcome', None))
                     if variant == 'continuation':
                         checks.append((Command.TEST, 'wrong_outcome', None))
                     if variant == 'repeatConversation':
                         checks.append((Command.TEST, 'repeat_wrong_outcome', None))
                     for command, case, marker in checks:
                         name = variant + '-' + (case or command.value)
-                        row = dict(name=name, passed=False, expected='rejected wrong outcome' if case in ('wrong_outcome', 'repeat_wrong_outcome') else 'success')
+                        row = dict(name=name, passed=False, expected='rejected wrong outcome' if case in ('wrong_outcome', 'repeat_wrong_outcome', 'picked_wrong_outcome') else 'success')
                         receipt['children'].append(row)
                         result = run_bounded(command_argv(sdk, command, game, testcase='choice_body::' + case if case else None,
                                                          allow_project_execution=True), timeout_seconds=60, output_limit=2_000_000)
                         (args.output / (name + '.log')).write_text(result.output)
                         row.update(exitCode=result.exit_code, timedOut=result.timed_out, outputLimited=result.output_limited,
                                    durationSeconds=result.duration_seconds, argv=list(result.argv))
-                        if case in ('wrong_outcome', 'repeat_wrong_outcome'):
-                            assertion = 'AssertionError: assert eval (choice_visits == 2)' if case == 'repeat_wrong_outcome' else 'AssertionError: assert eval (choice_flag is False)'
-                            row['passed'] = result.exit_code != 0 and '[rpytest] Status: FAILED' in result.output and assertion in result.output and 'CHOICE_101_WRONG_ACCEPTED' not in result.output and 'CHOICE_105_WRONG_ACCEPTED' not in result.output
+                        if case in ('wrong_outcome', 'repeat_wrong_outcome', 'picked_wrong_outcome'):
+                            assertion = 'AssertionError: assert eval (_choice106_state(1))' if case == 'picked_wrong_outcome' else 'AssertionError: assert eval (choice_visits == 2)' if case == 'repeat_wrong_outcome' else 'AssertionError: assert eval (choice_flag is False)'
+                            row['passed'] = result.exit_code != 0 and '[rpytest] Status: FAILED' in result.output and assertion in result.output and 'CHOICE_101_WRONG_ACCEPTED' not in result.output and 'CHOICE_105_WRONG_ACCEPTED' not in result.output and 'CHOICE_106_WRONG_ACCEPTED' not in result.output
                         else:
                             row['passed'] = result.exit_code == 0 and (marker is None or result.output.count(marker) == 1 and '[rpytest] Status: PASSED' in result.output)
                         assert row['passed'] and not result.timed_out and not result.output_limited, name

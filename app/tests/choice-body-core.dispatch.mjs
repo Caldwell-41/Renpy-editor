@@ -235,6 +235,44 @@ try {
  assert.equal((result.runtime.repeatNested.match(/label _ll_choice_/g)??[]).length,2);const innerRepeat=scene().beats.find(b=>b.payload.type==='repeatChoice'&&b.owner?.branchId===innerAsk.id);assert(innerRepeat);assert((await call('flow.list')).edges.some(e=>e.kind==='repeat'&&e.beatId===innerRepeat.id&&e.destination.beatId===repeatInner.id));
  const allRepeatIds=scene().beats.map(b=>b.id);button('Close Project');await wait(()=>document.querySelector('.recent-open'));button(document.querySelector('.recent-open').textContent);await wait(()=>document.querySelector('.beat-card'));await settle();assert.deepEqual(scene().beats.map(b=>b.id),allRepeatIds);assert.equal(await source(path),result.runtime.repeatNested);
  stage('production Repeat preserves preceding Beats and Call, shares one target per Choice, supports no-op/cancel/history/reopen, and exports prompted nested and availability-changing runtime sources');
+ // #106 uses the approved whole-Choice selector through the actual editor.
+ promptEditor=await editChoice(conversationId);
+ const pickedControl=promptEditor.querySelector('[aria-label="Picked options"]');
+ assert(pickedControl, 'The real Story editor must offer Picked options');
+ enter(pickedControl,'markPicked','change');await applied(promptEditor,'Commit Beat');
+ result.runtime.pickedRepeat=await source(path);
+ result.runtime.pickedAdapter=await source('game/loomlight_choice_v1.rpy');
+ assert.equal(choice().payload.pickedPolicy,'markPicked');
+ assert.deepEqual(choice().payload.options.map(o=>o.id),[station.id,ticket.id,leave.id,nestedOuter.id]);
+ await applied(document,'Undo');assert.equal(await source(path),result.runtime.repeatNested);
+ await applied(document,'Redo');assert.equal(await source(path),result.runtime.pickedRepeat);
+ stage('production Picked options controls accept current-save history through the shared transaction');
+
+ // Independent Scene reentry fixtures. Only the exported accepted bytes reach the SDK.
+ await saveSource(path,`label ${entry.technicalLabel}:\n    "Shared once"\n    return\n`);
+ await saveSource(target.sourcePath,`label ${target.technicalLabel}:\n    "Reenter Choice"\n    jump ${entry.technicalLabel}\n`);
+ result.runtime.pickedTarget=await source(target.sourcePath);
+ button('Close Project');await wait(()=>document.querySelector('.recent-open'));button(document.querySelector('.recent-open').textContent);await wait(()=>document.querySelector('.beat-card'));await settle();
+ button('Add Beat');draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'choice','change');enter(draft.querySelector('[aria-label="Insert before"]'),scene().beats.find(b=>b.payload.text==='Shared once').id,'change');
+ enter(draft.querySelector('[aria-label="Choice option text"]'),'Same');button('Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'Same');button('Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[2],'Locked');
+ enter(draft.querySelector('[aria-label="Picked options"]'),'showNormally','change');availability(draft.querySelectorAll('.choice-option')[2],true,'showDisabled');await applied(draft,'Add Beat');
+ const pickedId=choice().id,[firstPick,secondPick,lockedPick]=choice().payload.options;
+ for(const id of [firstPick.id,secondPick.id]){panel=await thenOption(id,'jump',false);enter(panel.querySelector('[aria-label="Destination Scene"]'),target.id,'change');await applied(panel,'Apply ending');}
+ promptEditor=await editChoice(pickedId);button('Add a prompt shown with the options',promptEditor);enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'Choose independently');await applied(promptEditor,'Commit Beat');
+ result.runtime.pickedShow=await source(path);
+ promptEditor=await editChoice(pickedId);enter(promptEditor.querySelector('[aria-label="Picked options"]'),'markPicked','change');await applied(promptEditor,'Commit Beat');result.runtime.pickedMark=await source(path);
+ assert.match(document.querySelector('.preview-overlay.choice').textContent,/Picked state is unknown/);assert.equal(document.querySelectorAll('.preview-overlay.choice button').length,0);
+ const pickedMap=await readFile(mapPath);promptEditor=await editChoice(pickedId);await applied(promptEditor,'Commit Beat');assert.equal(await source(path),result.runtime.pickedMark);assert.deepEqual(await readFile(mapPath),pickedMap);
+ promptEditor=await editChoice(pickedId);enter(promptEditor.querySelector('[aria-label="Picked options"]'),'hidePicked','change');button('Cancel',promptEditor);assert.equal(await source(path),result.runtime.pickedMark);
+ promptEditor=await editChoice(pickedId);enter(promptEditor.querySelector('[aria-label="Picked options"]'),'hidePicked','change');await applied(promptEditor,'Commit Beat');result.runtime.pickedHide=await source(path);
+ await applied(document,'Undo');assert.equal(await source(path),result.runtime.pickedMark);await applied(document,'Redo');assert.equal(await source(path),result.runtime.pickedHide);
+ result.runtime.pickedIdentities={choice:pickedId,options:[firstPick.id,secondPick.id,lockedPick.id]};
+ // Rename/reorder preserves keys. A newly added identical caption gets a fresh key.
+ promptEditor=await editChoice(pickedId);button('Move option down',promptEditor.querySelectorAll('.choice-option')[0]);enter(promptEditor.querySelectorAll('.choice-option')[0].querySelector('[aria-label="Choice option text"]'),'Renamed');button('Add option',promptEditor);enter(promptEditor.querySelectorAll('.choice-option')[3].querySelector('[aria-label="Choice option text"]'),'Same');await applied(promptEditor,'Commit Beat');
+ assert.equal(choice().payload.options[0].id,secondPick.id);assert.equal(choice().payload.options[1].id,firstPick.id);assert(![firstPick.id,secondPick.id,lockedPick.id].includes(choice().payload.options[3].id));
+ await applied(document,'Undo');assert.equal(await source(path),result.runtime.pickedHide);
+ button('Close Project');await wait(()=>document.querySelector('.recent-open'));button(document.querySelector('.recent-open').textContent);await wait(()=>document.querySelector('.beat-card'));await settle();assert.equal(await source(path),result.runtime.pickedHide);assert.equal(choice().id,pickedId);
+ stage('independent Scene routes export all three picked policies, duplicate-caption identities, immediate Jumps, inert preview, Cancel/no-op/history and reopen');
  result.acceptedSource=await source(path);result.sourceSHA256=hash(result.acceptedSource);result.identities=ids;
  button('Close Project');await wait(()=>document.querySelector('.recent-open'));result.passed=true;
 } catch(error){result.failure={message:error.message,stack:error.stack};result.dom=document.body.innerHTML;throw error;}
