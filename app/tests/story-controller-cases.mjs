@@ -294,7 +294,7 @@ export const storyCases={
   c.assert(!c.document.querySelector('.preview-canvas').textContent.includes('Caller resumed'));
   c.assert.match(c.document.querySelector('.illustrative-preview').textContent,/Manual selection.*not a playthrough/);c.assert.match(c.document.querySelector('.illustrative-preview').textContent,/Choice availability are not evaluated/);
   const otherwise=headers(s).find(b=>b.conditionalBranch.groupId===root.conditionalBranch.groupId&&b.conditionalBranch.otherwise);c.enter(c.document.querySelector(`select[data-preview-group-id="${root.conditionalBranch.groupId}"]`),otherwise.id,'change');c.assert.equal(pending.value,'Preview preserves unfinished input');
-  c.assert(c.document.querySelector('.preview-overlay').classList.contains('choice'));previewBoundary(c,choice);
+  c.assert(c.document.querySelector('.preview-choice-summary'));c.assert.equal(c.document.querySelector('.preview-canvas').contains(c.document.querySelector('.preview-choice-summary')),false);previewBoundary(c,choice);
   c.assert(!c.document.querySelector('.preview-details').textContent.includes('Variable trust = 77'));
   c.assert(!c.document.querySelector('.preview-canvas').textContent.includes('Nothing available'));
   c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(terminalBytes));c.assert.equal(c.requests().slice(from).filter(r=>r.request.operation==='scene.apply').length,0);

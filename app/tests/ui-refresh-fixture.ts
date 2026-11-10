@@ -1,4 +1,5 @@
 import type { CoreOperation, CoreResponse } from '../src/protocol.ts';
+import { referenceWorkspace } from './reference-workspace-fixture.ts';
 const revision='a'.repeat(64);
 const project={sessionId:'visual-session',projectId:'visual-project',title:'The Last Tram',folderName:'the-last-tram',chapterId:'chapter',chapterName:'Chapter One',sceneId:'apartment',sceneName:'The Apartment',sdkVersion:'8.5.3',resolution:{width:1920,height:1080}};
 const source={path:'game/scenes/apartment.rpy',statement:'definition',sourceRevision:revision};
@@ -20,6 +21,16 @@ export async function visualRequest<T>(operation:CoreOperation,payload:Readonly<
   const canvas=window.document.createElement('canvas');canvas.width=800;canvas.height=450;const context=canvas.getContext('2d')!;context.fillStyle='#32414b';context.fillRect(0,0,800,450);context.fillStyle='#deb688';context.beginPath();context.arc(620,100,45,0,Math.PI*2);context.fill();context.fillStyle='#526559';context.fillRect(0,350,800,100);
   value={assetId:payload.authorityId,purpose:'imagePreview',mimeType:'image/png',dataBase64:canvas.toDataURL('image/png').split(',')[1],sha256:revision,byteCount:12000,width:800,height:450,cacheKey:'selected-room'};break;
  }
+ case 'references.list':value=referenceWorkspace(authoring);break;
+ case 'references.apply':{
+  const command=payload.command as Readonly<Record<string,unknown>>;
+  if(command.type==='previewGameCharacter')value={...referenceWorkspace(authoring),characterPreview:{digest:'visual-character-review',patches:[{path:'game/definitions/characters.rpy',before:'',after:`define ${String(command.technicalName)} = Character(${JSON.stringify(command.displayName)}, color=${JSON.stringify(command.dialogueColor)})\n`}]}};
+  else if(command.type==='createGameCharacter'){
+   if(command.expectedPreviewDigest!=='visual-character-review')throw Error('Missing reviewed Character source');
+   const created=await visualRequest<unknown>('character.create',command);if(!created.ok)return created as CoreResponse<T>;value=referenceWorkspace(authoring);
+  }else throw Error('Unsupported visual Reference mutation');break;
+ }
+
  case 'authoring.list':value=authoring;break;
  case 'character.create':{
   if(!/^[a-z][a-z0-9_]{0,63}$/.test(String(payload.technicalName))||!/^#[0-9a-f]{6}$/i.test(String(payload.dialogueColor)))return {protocolVersion:1,requestId:'visual',ok:false,error:{code:'INVALID_PAYLOAD',message:'Invalid technical name or colour'}};

@@ -637,7 +637,7 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
 .preview-canvas .preview-overlay {box-sizing:border-box;max-height:88%;min-height:0;overflow:auto}
 
 /* Approved Choice preview A v2. The existing Game canvas keeps its media. */
-.preview-surround.choice-preview{display:grid;grid-template-columns:194px minmax(0,1fr);place-items:stretch;container-type:inline-size;text-align:left;font:12px/1.4 var(--font-ui,system-ui)}
+.preview-surround.choice-preview{display:grid;grid-template-columns:194px minmax(0,1fr);place-items:stretch;container-type:inline-size;text-align:left;font:calc(var(--ui-size,14px) * 6 / 7)/1.4 var(--font-ui,system-ui)}
 .choice-preview .preview-game-stage{min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;border-right:1px solid var(--border-normal);background:#17191f;overflow:hidden}
 .choice-preview .preview-canvas{box-sizing:border-box}
 .choice-preview .preview-empty,.choice-preview .preview-unknown-layer{font-size:11px;line-height:1.35;overflow-wrap:anywhere}
@@ -648,15 +648,15 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
 .preview-choice-summary:focus-visible{outline:2px solid var(--focus-ring);outline-offset:-2px}
 .preview-choice-prompt{display:flex;align-items:baseline;gap:8px;overflow-wrap:anywhere}
 .preview-choice-speaker{flex:none;font-weight:650}
-.preview-choice-picked{display:flex;flex-wrap:wrap;gap:3px 10px;margin-top:2px;font-size:11px;line-height:1.4}
+.preview-choice-picked{display:flex;flex-wrap:wrap;gap:3px 10px;margin-top:2px;font-size:calc(var(--ui-size,14px) * 11 / 14);line-height:1.4}
 .preview-choice-unknown,.preview-choice-condition{color:var(--status-partial)}
 .preview-choice-policy,.preview-choice-number{color:var(--text-secondary)}
 .preview-choice-options{list-style:none;margin:4px 0 0;padding:0}
 .preview-choice-summary>.preview-choice-options:first-child{margin-top:0}
 .preview-choice-option{display:grid;grid-template-columns:18px minmax(0,1fr);gap:6px;align-items:baseline;margin:0;padding:1px 0;border-top:1px solid var(--border-normal);overflow-wrap:anywhere}
 .preview-choice-option:has(.preview-choice-condition){grid-template-columns:18px minmax(0,1fr) auto}
-.preview-choice-number{font:11px/1.5 var(--font-source,monospace)}
-.preview-choice-condition{font-size:11px;line-height:1.4}
+.preview-choice-number{font:calc(var(--ui-size,14px) * 11 / 14)/1.5 var(--font-source,monospace)}
+.preview-choice-condition{font-size:calc(var(--ui-size,14px) * 11 / 14);line-height:1.4}
 .preview-choice-summary::-webkit-scrollbar{width:7px;height:7px}
 .preview-choice-summary::-webkit-scrollbar-thumb{background:#8d887b}
 .preview-choice-summary::-webkit-scrollbar-track{background:var(--surface-app)}

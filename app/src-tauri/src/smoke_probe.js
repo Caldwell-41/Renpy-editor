@@ -251,7 +251,7 @@ setTimeout(async () => {
     const awaitSurface = async (label) => {
       supportingAuthoringStage = label;
       await waitFor(
-        () => [...document.querySelectorAll("button")].some((item) => item.textContent === label),
+        () => [...document.querySelectorAll("button")].some((item) => (item.textContent === label || item.getAttribute("aria-label") === label) && !item.closest("[hidden]") && item.checkVisibility({ visibilityProperty: true })),
         label,
       );
     };
@@ -268,16 +268,18 @@ setTimeout(async () => {
         `${description} committed render`,
       );
     };
-    const click = (label) => {
-      const target = [...document.querySelectorAll("button")].find((item) => item.textContent === label);
-      if (!target) throw new Error(`Missing ${label}`);
-      target.click();
+    const click = (label, scope = document.querySelector('[aria-modal="true"]') ?? document) => {
+      if (!scope) throw new Error(`Missing control owner for ${label}`);
+      const targets = [...scope.querySelectorAll("button")].filter((item) => (item.textContent === label || item.getAttribute("aria-label") === label) && !item.disabled && !item.closest("[hidden]") && item.checkVisibility({ visibilityProperty: true }));
+      if (targets.length !== 1) throw new Error(`Expected one visible enabled ${label}; found ${targets.length}`);
+      targets[0].click();
     };
     const control = (label) => {
-      const wrapper = [...document.querySelectorAll("label")].find((item) => item.firstElementChild?.textContent === label);
-      const target = wrapper?.querySelector("input, select");
-      if (!target) throw new Error(`Missing ${label}`);
-      return target;
+      const scope = document.querySelector('[aria-modal="true"]') ?? document;
+      const targets = [...scope.querySelectorAll("label")].filter((item) => item.firstElementChild?.textContent === label)
+        .flatMap(item => [...item.querySelectorAll("input, select")]).filter(item => !item.disabled && !item.closest("[hidden]") && item.checkVisibility({ visibilityProperty: true }));
+      if (targets.length !== 1) throw new Error(`Expected one visible enabled ${label}; found ${targets.length}`);
+      return targets[0];
     };
     const openGameSetup=async()=>{
       await awaitSurface('Game setup');
@@ -299,7 +301,7 @@ setTimeout(async () => {
     click("Characters");
     await openGameSetup();
     supportingAuthoringStage = "edit-character";
-    click("Edit");
+    click("Edit Alice");
     const characterName = control("Display name");
     characterName.value = "Alice Updated";
     characterName.dispatchEvent(new Event("input", { bubbles: true }));
@@ -324,9 +326,10 @@ setTimeout(async () => {
     await waitFor(()=>[...document.querySelectorAll('button')].some(b=>b.textContent==='Create game character'&&!b.hidden&&!b.disabled),'reviewed character confirmation');
     click('Create game character');await awaitCall('references.createGameCharacter');
     click("Variables");
-    await awaitSurface("Create Variable");
+    await awaitSurface("New variable");
     supportingAuthoringStage = "create-variable";
     click("New variable");
+    await awaitSurface("Create Variable");
     control("Technical name (fixed after creation)").value = "maximum";
     const variableType = control("Type");
     variableType.value = "int";
@@ -358,9 +361,10 @@ setTimeout(async () => {
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: !macPlatform, metaKey: macPlatform, bubbles: true }));
     await awaitCall("project.flush");
     click("Assets");
-    await awaitSurface("Choose files…");
+    await awaitSurface("Import assets");
     supportingAuthoringStage="cancel-import";
     click("Import assets");
+    await awaitSurface("Choose files…");
     click("Choose files…");
     await waitFor(()=>importChoiceCount===2,"cancelled asset choice");await yieldTask();
     const cancelledPreserved=[...document.querySelectorAll("button")].find(item=>item.textContent==="Choose files…")?.disabled===false && document.querySelectorAll('.import-entry').length===0;
@@ -455,7 +459,7 @@ setTimeout(async () => {
     const buttonSaveBefore = operationCounts.get("source.save") ?? 0;
     const buttonFlushBefore = operationCounts.get("project.flush") ?? 0;
     sourceAuthoringStage = "source-button-save";
-    click("Save Source");
+    click("Save Source", document.querySelector(".app-header"));
     await waitFor(() => (operationCounts.get("source.save") ?? 0) === buttonSaveBefore + 1 && !sourceDocument.dirty, "visible Source acceptance");
     await waitFor(() => document.querySelector("[data-source-busy]")?.getAttribute("data-source-busy") === "false", "Source Save barrier release");
     const buttonFlushDelta = (operationCounts.get("project.flush") ?? 0) - buttonFlushBefore;
@@ -515,7 +519,7 @@ setTimeout(async () => {
     sourceCommandTrace.push(`keyboard-synthetic:source-clean:${macPlatform ? "meta" : "ctrl"}+s:generation-current:completed:saves=${cleanSaveDelta}:flushes=1:saved`);
 
     sourceAuthoringStage = "non-source-flush";
-    click("Variables");await awaitSurface("Create Variable");
+    click("Variables");await awaitSurface("New variable");
     const nonSourceFlushBefore = operationCounts.get("project.flush") ?? 0;
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: !macPlatform, metaKey: macPlatform, bubbles: true, cancelable: true }));
     await waitFor(() => (operationCounts.get("project.flush") ?? 0) === nonSourceFlushBefore + 1, "non-Source Flush");
