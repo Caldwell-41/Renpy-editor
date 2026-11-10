@@ -927,3 +927,51 @@ fn choice_repeat_refuses_foreign_body_and_colliding_source_target() {
     assert_eq!(menu["protected"], true);
     assert!(menu["sourceFallback"].as_str().unwrap().contains("target"));
 }
+
+#[test]
+fn choice_repeat_target_does_not_consume_identical_neighbor_menu_ids() {
+    let mut f = setup();
+    let scene = model(&mut f);
+    let menu =
+        "    menu:\n        \"Same\":\n            pass\n        \"Leave\":\n            pass\n";
+    f.save(
+        &scene,
+        &format!(
+            "label {}:\n{menu}{menu}    return\n",
+            scene["technicalLabel"].as_str().unwrap()
+        ),
+    );
+    let scene = model(&mut f);
+    let menus: Vec<_> = scene["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|b| b["payload"]["type"] == "choice")
+        .cloned()
+        .collect();
+    let header = scene["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["id"] == menus[1]["payload"]["options"][0]["id"])
+        .unwrap();
+    command(
+        &mut f,
+        json!({"type":"insertBodyBeat","body":branch_body(header),"position":{"type":"end"},"beat":{"type":"repeatChoice"}}),
+    );
+    let changed = model(&mut f);
+    let actual: Vec<_> = changed["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|b| b["payload"]["type"] == "choice")
+        .cloned()
+        .collect();
+    for (before, after) in menus.iter().zip(&actual) {
+        assert_eq!(before["id"], after["id"]);
+        assert_eq!(before["payload"], after["payload"]);
+    }
+    assert!(String::from_utf8(bytes(&f))
+        .unwrap()
+        .contains(&format!("{menu}    label _ll_choice_")));
+}

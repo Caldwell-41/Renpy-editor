@@ -385,7 +385,7 @@ testsuite choice_body:
         click "Leave"
         assert "Shared once" timeout 10
         assert eval (choice_visits == 1 and choice_flag)
-        advance
+        keysym "K_RETURN"
         assert screen "choice_body_main_menu" timeout 10
         $ print("CHOICE_105_REPEAT earlier=once prompt=again availability=changed call=resumed stack=stable shared=1", flush=True)
         exit
@@ -403,7 +403,7 @@ testsuite choice_body:
         advance
         assert "Shared once" timeout 10
         assert eval (choice_visits == 1 and choice_flag and renpy.get_screen("_ll_choice_v1") is None)
-        advance
+        keysym "K_RETURN"
         assert screen "choice_body_main_menu" timeout 10
         $ print("CHOICE_105_EXHAUSTED gate=reevaluated earlier=once shared=1", flush=True)
         exit
@@ -432,7 +432,7 @@ testsuite choice_body:
         advance
         assert "Shared once" timeout 10
         assert eval (choice_visits == 1 and not choice_flag)
-        advance
+        keysym "K_RETURN"
         assert screen "choice_body_main_menu" timeout 10
         $ print("CHOICE_105_NESTED owner=inner character=again outer=resumed earlier=once shared=1", flush=True)
         exit

@@ -817,7 +817,7 @@ impl AuthoringService {
                         BeatPayload::Choice { .. } | BeatPayload::RepeatChoice { .. }
                     ) {
                         beat.protected = true;
-                        beat.source_fallback = Some("Choice target ownership is ambiguous, colliding or has pending Source edits. Edit in Source.".into());
+                        beat.source_fallback = Some("Choice target ownership is ambiguous, colliding or cannot be verified. Edit in Source.".into());
                     }
                 }
             }
