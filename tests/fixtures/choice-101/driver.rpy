@@ -189,10 +189,11 @@ testsuite choice_body:
         assert screen "choice_body_main_menu" timeout 10
         click "Start"
         assert screen "choice" timeout 10
-        assert screen "say"
-        assert "Choose a route"
-        assert "Yes"
-        assert "No"
+        assert screen "say" timeout 10
+        assert "Choose a route" timeout 10
+        assert eval (renpy.get_screen("say").scope["what"] == "Choose a route" and renpy.get_screen("say").scope["who"] is None)
+        assert "Yes" timeout 10
+        assert "No" timeout 10
         click "Yes"
         assert "Shared once" timeout 10
         assert eval (choice_flag is True)
@@ -205,11 +206,12 @@ testsuite choice_body:
         assert screen "choice_body_main_menu" timeout 10
         click "Start"
         assert screen "choice" timeout 10
-        assert screen "say"
-        assert "Bec"
-        assert "Where shall we go?"
-        assert "Yes"
-        assert "No"
+        assert screen "say" timeout 10
+        assert "Bec" timeout 10
+        assert "Where shall we go?" timeout 10
+        assert eval (renpy.get_screen("say").scope["what"] == "Where shall we go?" and renpy.get_screen("say").scope["who"] == "Bec")
+        assert "Yes" timeout 10
+        assert "No" timeout 10
         click "No"
         assert "Shared once" timeout 10
         assert eval (choice_flag is False)
@@ -222,8 +224,9 @@ testsuite choice_body:
         assert screen "choice_body_main_menu" timeout 10
         click "Start"
         assert screen "choice" timeout 10
-        assert "Choose a route"
-        assert "Yes, please"
+        assert "Choose a route" timeout 10
+        assert eval (renpy.get_screen("say").scope["what"] == "Choose a route" and renpy.get_screen("say").scope["who"] is None)
+        assert "Yes, please" timeout 10
         click "Yes, please"
         assert "Before call" timeout 10
         keysym "K_RETURN"
@@ -232,12 +235,13 @@ testsuite choice_body:
         assert "Resume inside option" timeout 10
         keysym "K_RETURN"
         assert screen "choice" timeout 10
-        assert screen "say"
-        assert "Bec"
-        assert "Inside, which route?"
-        assert "Inner normal"
-        assert "Inner jump"
-        assert "Inner return"
+        assert screen "say" timeout 10
+        assert "Bec" timeout 10
+        assert "Inside, which route?" timeout 10
+        assert eval (renpy.get_screen("say").scope["what"] == "Inside, which route?" and renpy.get_screen("say").scope["who"] == "Bec")
+        assert "Inner normal" timeout 10
+        assert "Inner jump" timeout 10
+        assert "Inner return" timeout 10
         click "Inner normal"
         assert "Inside inner" timeout 10
         keysym "K_RETURN"
