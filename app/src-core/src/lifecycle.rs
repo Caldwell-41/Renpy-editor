@@ -4489,11 +4489,13 @@ mod tests {
                     prompt: None,
                     options: vec![
                         crate::scene::ChoiceOption {
+                            unavailable_policy: crate::scene::UnavailablePolicy::Hide,
                             condition: None,
                             text: "Garden".into(),
                             id: None,
                         },
                         crate::scene::ChoiceOption {
+                            unavailable_policy: crate::scene::UnavailablePolicy::Hide,
                             condition: None,
                             text: "Library".into(),
                             id: None,

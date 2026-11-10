@@ -266,16 +266,19 @@ impl AuthoringService {
             .iter_mut()
             .find(|m| m.scene_id == scene_id)
             .ok_or(SceneError::InvalidMetadata)? = mapping;
+        let mut runtime =
+            self.choice_runtime_mutations(project, &next_beats, source != proposed)?;
+        runtime.extend(vec![
+            replace_mutation(&scene.source_path, source, revision, proposed)?,
+            replace_mutation(
+                SOURCE_MAP_PATH,
+                loaded.source_map_bytes,
+                loaded.source_map_revision,
+                source_map_bytes(&loaded.source_map)?,
+            )?,
+        ]);
         Ok(TransactionProposal {
-            mutations: vec![
-                replace_mutation(&scene.source_path, source, revision, proposed)?,
-                replace_mutation(
-                    SOURCE_MAP_PATH,
-                    loaded.source_map_bytes,
-                    loaded.source_map_revision,
-                    source_map_bytes(&loaded.source_map)?,
-                )?,
-            ],
+            mutations: runtime,
             intent: TransactionIntent::Edit,
         })
     }

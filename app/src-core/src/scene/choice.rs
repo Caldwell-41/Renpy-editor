@@ -14,11 +14,16 @@ pub(super) fn parse(
     let (start, end, line) = lines[index];
     if source_version >= 10 && depth >= MAX_CONDITION_NESTING
         || !lexical.contains(&start)
-        || line != format!("{}menu:", " ".repeat(indent))
+        || (line != format!("{}menu:", " ".repeat(indent))
+            && (source_version < 12
+                || line != format!("{}menu (screen=\"_ll_choice_v1\"):", " ".repeat(indent))))
     {
         return None;
     }
     let (_, authoring, _) = loaded?;
+    let semantic = line.trim() == "menu (screen=\"_ll_choice_v1\"):";
+    let mut guards = Vec::new();
+    let mut disabled_guards = Vec::new();
     let mut next = index + 1;
     let mut header_end = end;
     let mut prompt = None;
@@ -49,7 +54,23 @@ pub(super) fn parse(
         if indentation(line) != indent + 4 || !lexical.contains(&option_start) {
             break;
         }
-        let (text, expression) = logic::option_text(logic::without_comment(line).trim_end())?;
+        let code = logic::without_comment(line).trim_end();
+        let (text, expression, policy) = if semantic {
+            parse_option(code)?
+        } else {
+            let (text, expression) = logic::option_text(code)?;
+            (text, expression, UnavailablePolicy::Hide)
+        };
+        guards.push(expression.map(str::to_owned));
+        if policy == UnavailablePolicy::ShowDisabled {
+            disabled_guards.push(
+                code.trim()
+                    .strip_suffix(':')?
+                    .rsplit_once(" if ")?
+                    .1
+                    .to_owned(),
+            );
+        }
         let condition = expression.map(|s| crate::conditions::parse(s, authoring));
         let group = *group_start.get_or_insert(option_start);
         let mut header = custom(option_start, option_end, line);
@@ -64,6 +85,7 @@ pub(super) fn parse(
         });
         result.push(header);
         options.push(ChoiceOption {
+            unavailable_policy: policy,
             id: Some(option_start.to_string()),
             text,
             condition,
@@ -155,6 +177,14 @@ pub(super) fn parse(
             return None;
         }
     }
+    if semantic
+        && (disabled_guards.is_empty()
+            || disabled_guards
+                .iter()
+                .any(|g| g != &selectable_guard(&guards)))
+    {
+        return None;
+    }
     if options.is_empty() {
         return None;
     }
@@ -216,6 +246,9 @@ pub(super) fn update(
         return Err(SceneError::InvalidPayload);
     };
     let end = end(beat, beats)?;
+    if old == options && previous_prompt.as_ref() == prompt {
+        return Ok((source.to_vec(), vec![]));
+    }
     let newline = if source.windows(2).any(|w| w == b"\r\n") {
         "\r\n"
     } else {
@@ -230,7 +263,17 @@ pub(super) fn update(
         .iter()
         .position(|b| *b == b'\n')
         .map_or(original_header.len(), |p| p + 1);
-    let mut rendered = original_header[..menu_end].to_vec();
+    let semantic = options
+        .iter()
+        .any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled);
+    let was_semantic = old
+        .iter()
+        .any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled);
+    let mut rendered = if semantic == was_semantic {
+        original_header[..menu_end].to_vec()
+    } else {
+        format!("{}{}{newline}", " ".repeat(indent), menu_header(options)).into_bytes()
+    };
     match (previous_prompt.as_ref(), prompt) {
         (Some(old), Some(next)) if old == next => {
             rendered.extend_from_slice(&original_header[menu_end..])
@@ -269,8 +312,38 @@ pub(super) fn update(
         beat.id.clone(),
         Some(beat.byte_start as usize),
     )];
+    // Carry unchanged condition tokens into the aggregate guard too. Reformatting
+    // an unrelated Hide option would violate exact source ownership.
+    let guards = options
+        .iter()
+        .map(|option| {
+            if let Some(previous) = old.iter().find(|o| {
+                o.id == option.id && option.id.is_some() && o.condition == option.condition
+            }) {
+                let header = beats
+                    .iter()
+                    .find(|b| Some(&b.id) == previous.id.as_ref())
+                    .ok_or(SceneError::InvalidMetadata)?;
+                let original = std::str::from_utf8(
+                    &source[header.byte_start as usize..header.byte_end as usize],
+                )
+                .map_err(|_| SceneError::UnsupportedSource)?;
+                let code = logic::without_comment(original).trim_end();
+                let expression = if was_semantic {
+                    parse_option(code).map(|(_, e, _)| e)
+                } else {
+                    logic::option_text(code).map(|(_, e)| e)
+                }
+                .ok_or(SceneError::OpaqueBoundary)?;
+                Ok(expression.map(str::to_owned))
+            } else {
+                logic::render_guard(option.condition.as_ref(), &loaded.authoring)
+                    .map(|s| s.strip_prefix(" if ").map(str::to_owned))
+            }
+        })
+        .collect::<Result<Vec<_>, SceneError>>()?;
     let mut seen = HashSet::new();
-    for option in options {
+    for (option_index, option) in options.iter().enumerate() {
         if let Some(id) = &option.id {
             if !seen.insert(id) {
                 return Err(SceneError::InvariantBlocked);
@@ -294,7 +367,23 @@ pub(super) fn update(
             let mut updated = original.to_owned();
             let (qs, qe) = dialogue_quotes(original).ok_or(SceneError::OpaqueBoundary)?;
             // Preserve the exact header for a no-op, including condition spelling/comments.
-            if option.condition != old[ordinal].condition {
+            if option.unavailable_policy == UnavailablePolicy::ShowDisabled
+                || old[ordinal].unavailable_policy == UnavailablePolicy::ShowDisabled
+            {
+                let colon = logic::without_comment(original)
+                    .trim_end()
+                    .rfind(':')
+                    .ok_or(SceneError::OpaqueBoundary)?;
+                let suffix = suffix_from_guards(
+                    option.unavailable_policy,
+                    guards[option_index].as_deref(),
+                    &guards,
+                )?;
+                // Keep exact bytes unless the semantic suffix itself changes.
+                if original[qe + 1..colon] != suffix {
+                    updated.replace_range(qe + 1..colon, &suffix);
+                }
+            } else if option.condition != old[ordinal].condition {
                 let colon = logic::without_comment(original)
                     .trim_end()
                     .rfind(':')
@@ -355,7 +444,11 @@ pub(super) fn update(
                 "{}\"{}\"{}:{newline}{}pass{newline}",
                 " ".repeat(indent + 4),
                 escape_string(&option.text)?,
-                logic::render_guard(option.condition.as_ref(), &loaded.authoring)?,
+                suffix_from_guards(
+                    option.unavailable_policy,
+                    guards[option_index].as_deref(),
+                    &guards
+                )?,
                 " ".repeat(indent + 8)
             );
             let base = beat.byte_start as usize + rendered.len();
@@ -460,4 +553,154 @@ pub(super) fn render_prompt(
         " ".repeat(indent),
         escape_string(text)?
     ))
+}
+
+// Native guards keep Hide filtering and no-selectable continuation in the Menu AST.
+// Per-item arguments carry only the existing typed condition to the generated screen.
+pub(super) fn menu_header(options: &[ChoiceOption]) -> &'static str {
+    if options
+        .iter()
+        .any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled)
+    {
+        "menu (screen=\"_ll_choice_v1\"):"
+    } else {
+        "menu:"
+    }
+}
+fn selectable_guard(guards: &[Option<String>]) -> String {
+    if guards.iter().any(Option::is_none) {
+        "True".into()
+    } else {
+        guards
+            .iter()
+            .flatten()
+            .map(|s| format!("({s})"))
+            .collect::<Vec<_>>()
+            .join(" or ")
+    }
+}
+pub(super) fn option_suffix(
+    option: &ChoiceOption,
+    options: &[ChoiceOption],
+    authoring: &AuthoringMetadata,
+) -> Result<String, SceneError> {
+    let guards = options
+        .iter()
+        .map(|o| {
+            logic::render_guard(o.condition.as_ref(), authoring)
+                .map(|s| s.strip_prefix(" if ").map(str::to_owned))
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    let guard = logic::render_guard(option.condition.as_ref(), authoring)?;
+    suffix_from_guards(
+        option.unavailable_policy,
+        guard.strip_prefix(" if "),
+        &guards,
+    )
+}
+fn suffix_from_guards(
+    policy: UnavailablePolicy,
+    guard: Option<&str>,
+    guards: &[Option<String>],
+) -> Result<String, SceneError> {
+    if policy == UnavailablePolicy::Hide {
+        return Ok(guard.map_or_else(String::new, |s| format!(" if {s}")));
+    }
+    let expression = guard.ok_or(SceneError::InvalidPayload)?;
+    Ok(format!(
+        " (_ll_available={expression}) if {}",
+        selectable_guard(guards)
+    ))
+}
+
+fn parse_option(code: &str) -> Option<(String, Option<&str>, UnavailablePolicy)> {
+    let code = code.trim().strip_suffix(':')?;
+    let (qs, qe) = dialogue_quotes(code)?;
+    let text = unescape_string(&code[qs + 1..qe])?;
+    if let Some(args) = code[qe + 1..].strip_prefix(" (_ll_available=") {
+        let (expression, _) = args.rsplit_once(") if ")?;
+        Some((text, Some(expression), UnavailablePolicy::ShowDisabled))
+    } else {
+        logic::option_text(&format!("{code}:"))?;
+        let expression = code[qe + 1..].trim().strip_prefix("if ");
+        Some((text, expression, UnavailablePolicy::Hide))
+    }
+}
+
+impl AuthoringService {
+    /// Add the versioned semantic screen only in the accepted source transaction.
+    /// Custom templates, name collisions and edited adapters refuse without repair.
+    pub(super) fn choice_runtime_mutations(
+        &self,
+        project: &ProjectId,
+        beats: &[SceneBeat],
+        allow_create: bool,
+    ) -> Result<Vec<FileMutation>, SceneError> {
+        if !beats.iter().any(|b| matches!(&b.payload, BeatPayload::Choice { options, .. } if options.iter().any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled))) { return Ok(vec![]); }
+        let paths = self
+            .transactions
+            .inventory_files_bounded(project, "game", 8192)
+            .map_err(diagnostic_error)?;
+        let mut existing = None;
+        let mut template = None;
+        let mut count = 0;
+        for path in paths.iter().filter(|p| p.ends_with(".rpy")) {
+            let (bytes, revision) = self.scene_snapshot(project, path)?;
+            count += bytes.len();
+            if count > 32 * 1024 * 1024 {
+                return Err(SceneError::InvariantBlocked);
+            }
+            let text = std::str::from_utf8(&bytes).map_err(|_| SceneError::UnsupportedSource)?;
+            if text.contains("config.menu_include_disabled")
+                || text.contains("config.menu_actions")
+                || text.lines().any(|l| {
+                    l.trim_start().starts_with("define menu =")
+                        || l.trim_start().starts_with("def menu(")
+                })
+            {
+                return Err(SceneError::OpaqueBoundary);
+            }
+            if path == crate::screens::choice_template::PATH {
+                if bytes != crate::screens::choice_template::ADAPTER.as_bytes() {
+                    return Err(SceneError::OpaqueBoundary);
+                }
+                existing = Some((bytes.clone(), revision.clone()));
+            } else if text
+                .lines()
+                .any(|l| l.trim_start().starts_with("screen _ll_choice_v1"))
+            {
+                return Err(SceneError::OpaqueBoundary);
+            }
+            if text.lines().any(|l| l.starts_with("screen choice(")) {
+                if template.is_some() || !crate::screens::choice_template::supported(text) {
+                    return Err(SceneError::OpaqueBoundary);
+                }
+                template = Some((path.clone(), bytes, revision));
+            }
+        }
+        let (path, bytes, revision) = template.ok_or(SceneError::OpaqueBoundary)?;
+        self.ensure_source_paths_clean(
+            project,
+            [path.as_str(), crate::screens::choice_template::PATH],
+        )
+        .map_err(|_| SceneError::DirtySource)?;
+        if existing.is_none() && !allow_create {
+            return Err(SceneError::OpaqueBoundary);
+        }
+        let mut mutations = vec![replace_mutation(&path, bytes.clone(), revision, bytes)?];
+        if let Some((bytes, revision)) = existing {
+            mutations.push(replace_mutation(
+                crate::screens::choice_template::PATH,
+                bytes.clone(),
+                revision,
+                bytes,
+            )?);
+        } else {
+            mutations.push(create_mutation(
+                crate::screens::choice_template::PATH,
+                crate::screens::choice_template::ADAPTER.as_bytes().to_vec(),
+            )?);
+        }
+        Ok(mutations)
+    }
 }

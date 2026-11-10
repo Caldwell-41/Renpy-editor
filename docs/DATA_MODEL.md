@@ -101,6 +101,11 @@ Dialogue Beat. Character identity and text validation use the existing authoring
 owners. Prompt edits preserve the menu line and change only speaker/text tokens;
 removal removes only the prompt line, including its own trailing comment.
 
+Each option has typed `unavailablePolicy`: `hide` (default, omitted in serialized
+payloads) or `showDisabled`. Show disabled requires an existing typed availability
+condition. Inspection never substitutes a Variable's default for runtime state.
+Unknown conditions remain explicit and read-only.
+
 The Choice payload contains option caption, optional condition and mapped option ID.
 It has no destination field. A destination option has an ordinary Jump in its body.
 The option ID is its header's Beat UUID; Choice identity is the menu header UUID.
@@ -111,8 +116,9 @@ reuse that branch mapping with `choiceOption: true`; they are not condition node
 children and shared following Beats have disjoint exact source ranges. No second
 saved story document or action-list model exists.
 
-Source-map schema 11 adds prompt recognition to schema 10's recursive option bodies
-and indented condition trivia. Migration verifies schema 10 with its frozen
+Source-map schema 12 adds versioned per-option availability source to schema 11's
+prompts and schema 10's recursive option bodies and indented condition trivia.
+Migration verifies schema 11 and schema 10 with their frozen
 recognizer, schema 9 with its flat option-body recognizer, and older maps with their
 original recognizers before refinement. A newly recognized prompt joins the menu
 header; absorbed physical records survive in `refinedChildMappings`, including their

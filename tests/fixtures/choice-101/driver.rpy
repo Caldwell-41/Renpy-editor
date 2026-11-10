@@ -29,6 +29,37 @@ init python:
                 and rendered is not None and rendered.w > 0 and rendered.h > 0)
 
 
+    def _choice104_locked_render():
+        screen = renpy.get_screen("_ll_choice_v1")
+        if screen is None:
+            return None
+        widgets = []
+        screen.visit_all(widgets.append)
+        for widget in widgets:
+            if isinstance(widget, renpy.text.text.Text) and widget._tts_all(False).strip() == "Locked":
+                rendered = renpy.test.testfocus.focus_from_displayable(widget)
+                if rendered is not None and rendered.w > 0 and rendered.h > 0:
+                    return rendered
+        return None
+
+    def _choice104_locked_pos():
+        rendered = _choice104_locked_render()
+        return (int(rendered.x + rendered.w / 2), int(rendered.y + rendered.h / 2))
+
+    def _choice104_mixed():
+        screen = renpy.get_screen("_ll_choice_v1")
+        if screen is None or _choice104_locked_render() is None:
+            return False
+        items = screen.scope["items"]
+        # Retain real native actions to inspect picks after this interaction ends.
+        renpy._choice104_items = items
+        return ([i.caption for i in items] == ["Locked", "Available"]
+                and all(isinstance(i.action, renpy.ui.ChoiceReturn) for i in items)
+                and renpy.test.testfocus.find_focus("Locked", False) is None
+                and renpy.test.testfocus.find_focus("Available", False) is not None
+                and not any(i.action.get_chosen() for i in items))
+
+
 screen choice_body_main_menu():
     textbutton "Start" action Start()
 
@@ -43,10 +74,16 @@ screen say(who, what):
             text who id "who"
         text what id "what"
 
+style choice_vbox is vbox
+style choice_button is button
+style choice_button_text is button_text
+
 screen choice(items):
+    style_prefix "choice"
+
     vbox:
-        for item in items:
-            textbutton item.caption action item.action
+        for i in items:
+            textbutton i.caption action i.action
 
 testsuite choice_body:
     after testcase:
@@ -258,4 +295,56 @@ testsuite choice_body:
         keysym "K_RETURN"
         assert screen "choice_body_main_menu" timeout 10
         $ print("CHOICE_103_NESTED simultaneous=yes call=returned shared=1", flush=True)
+        exit
+
+
+    testcase mixed_availability:
+        assert screen "choice_body_main_menu" timeout 10
+        click "Start"
+        assert screen "_ll_choice_v1" timeout 10
+        assert eval (_choice104_mixed()) timeout 10
+        click pos (_choice104_locked_pos())
+        pause 0.2
+        assert screen "_ll_choice_v1"
+        assert eval (choice_flag is False and not any(i.action.get_chosen() for i in renpy._choice104_items))
+        keysym "K_UP"
+        keysym "K_DOWN"
+        assert eval (renpy.display.focus.get_focused() is not None and "Available" in renpy.display.focus.get_focused()._tts_all(False)) timeout 10
+        keysym "K_RETURN"
+        assert "Shared once" timeout 10
+        assert eval (choice_flag is False)
+        assert eval (not renpy._choice104_items[0].action.get_chosen() and renpy._choice104_items[1].action.get_chosen())
+        keysym "K_RETURN"
+        assert screen "choice_body_main_menu" timeout 10
+        $ print("CHOICE_104_MIXED hidden=yes locked=rendered pointer=inert keyboard=available shared=1", flush=True)
+        exit
+
+    testcase all_unavailable:
+        assert screen "choice_body_main_menu" timeout 10
+        click "Start"
+        assert "Shared once" timeout 10
+        assert eval (choice_flag is False and renpy.get_screen("_ll_choice_v1") is None and not any(label in ("Secret", "Locked", "Available") for location, label in renpy.game.persistent._chosen))
+        keysym "K_RETURN"
+        assert screen "choice_body_main_menu" timeout 10
+        $ print("CHOICE_104_UNAVAILABLE picks=0 bodies=0 shared=1", flush=True)
+        exit
+
+    testcase all_disabled:
+        assert screen "choice_body_main_menu" timeout 10
+        click "Start"
+        assert "Shared once" timeout 10
+        assert eval (choice_flag is False and renpy.get_screen("_ll_choice_v1") is None and not any(label in ("Secret", "Locked", "Available") for location, label in renpy.game.persistent._chosen))
+        keysym "K_RETURN"
+        assert screen "choice_body_main_menu" timeout 10
+        $ print("CHOICE_104_DISABLED picks=0 bodies=0 shared=1", flush=True)
+        exit
+
+    testcase all_hidden:
+        assert screen "choice_body_main_menu" timeout 10
+        click "Start"
+        assert "Shared once" timeout 10
+        assert eval (choice_flag is False and renpy.get_screen("choice") is None and not any(label in ("Secret", "Locked", "Available") for location, label in renpy.game.persistent._chosen))
+        keysym "K_RETURN"
+        assert screen "choice_body_main_menu" timeout 10
+        $ print("CHOICE_104_HIDDEN picks=0 bodies=0 shared=1", flush=True)
         exit

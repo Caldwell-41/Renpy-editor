@@ -418,6 +418,31 @@ verified refinement retains absorbed rows and unknown metadata. Unsupported menu
 forms stay explicit Source. Preview displays literal prompt text and options
 together, and uses only manual branch assumptions. It never executes project code.
 
+Choice availability uses Ren'Py 8.5.3 native menu parsing, filtering, item arguments
+and ChoiceReturn actions. Source-map v12 recognizes the exact supported
+`menu (screen="_ll_choice_v1"):` form. A Show disabled option carries its typed
+condition in `(_ll_available=...)`; its native guard is the disjunction of all
+options' availability (or `True` when an option is unconditional). Hide options
+retain their ordinary native guards. If nothing is selectable, Ren'Py filters out
+every option and follows the existing shared continuation. No option action runs
+or records a pick. Completion analysis retains explicit safe Scene boundaries.
+
+The Screens template owner supplies a semantic derivative of the pinned generated
+`screen choice(items)`. It preserves the native loop, captions, actions and choice
+styles, adding only button sensitivity from that item's argument. Accepted authoring
+adds `game/loomlight_choice_v1.rpy` through the same source/map/history transaction.
+The fixed versioned name is stable; existing declarations and file collisions refuse.
+Opening and no-op never install or repair source. Undo/Redo includes adapter creation.
+The ordinary choice screen and menus without Show disabled remain unchanged.
+
+Only the exact bounded generated template is supported. Custom choice logic, edited
+adapter bytes, duplicate declarations and native menu-filter overrides refuse the
+semantic integration. Existing affected Choices expose a protected Source fallback
+with a reason. Unknown guards, nested bodies, Calls and optional prompts preserve
+their source. This is not #31/#55's styling/canvas adapter or their acceptance.
+Later picked-option policy must extend this availability owner and native actions.
+No project Python runs during inspection, authoring or illustrative preview.
+
 The first structural commands are `insertBodyBeat` and `updateBodyBeat`. Their explicit
 body identifies the root or a known group/branch; insertion names an immediate sibling
 node or literal body end. Mutation captures expected ownership and source/project/map

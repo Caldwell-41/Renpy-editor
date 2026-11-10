@@ -274,6 +274,7 @@ pub(super) fn parse_menu(
         }
         let _destination = project.scenes.iter().find(|s| s.technical_label == label)?;
         options.push(ChoiceOption {
+            unavailable_policy: UnavailablePolicy::Hide,
             text,
             id: None,
             condition: expression.map(|source| crate::conditions::parse(source, authoring)),
@@ -1912,3 +1913,6 @@ mod choice_body_tests {
 #[cfg(test)]
 #[path = "logic/prompt_tests.rs"]
 mod prompt_tests;
+
+#[cfg(test)]
+mod availability_tests;

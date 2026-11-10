@@ -18,6 +18,7 @@ pub mod actions;
 pub mod bindings;
 pub mod canvas;
 pub(crate) mod canvas_session;
+pub(crate) mod choice_template;
 pub mod components;
 mod composition;
 mod control_source;

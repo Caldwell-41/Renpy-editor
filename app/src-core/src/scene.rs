@@ -229,11 +229,26 @@ pub enum ChoicePrompt {
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ChoiceOption {
+    #[serde(default, skip_serializing_if = "UnavailablePolicy::is_hide")]
+    pub unavailable_policy: UnavailablePolicy,
     pub text: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub condition: Option<crate::conditions::Condition>,
+}
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum UnavailablePolicy {
+    #[default]
+    Hide,
+    ShowDisabled,
+}
+impl UnavailablePolicy {
+    fn is_hide(&self) -> bool {
+        *self == Self::Hide
+    }
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -247,6 +262,8 @@ pub struct SceneBeat {
     pub byte_start: u64,
     pub byte_end: u64,
     pub protected: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_fallback: Option<String>,
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub structural_placeholder: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -722,6 +739,7 @@ impl AuthoringService {
         let loaded = self.load(project, project_id)?;
         let mut scenes = Vec::with_capacity(loaded.project.scenes.len());
         let mut screen_targets = HashMap::new();
+        let mut choice_runtime_valid = None;
         for scene in &loaded.project.scenes {
             let stored = loaded
                 .source_map
@@ -762,6 +780,25 @@ impl AuthoringService {
                 )?
                 .1
             };
+            let needs_choice_runtime = beats.iter().any(|b| matches!(&b.payload, BeatPayload::Choice { options, .. } if options.iter().any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled)));
+            if needs_choice_runtime
+                && !*choice_runtime_valid.get_or_insert_with(|| {
+                    matches!(
+                        self.snapshot_optional(project, crate::screens::choice_template::PATH),
+                        Ok(Some(_))
+                    ) && self
+                        .choice_runtime_mutations(project, &beats, false)
+                        .is_ok()
+                })
+            {
+                for beat in &mut beats {
+                    if matches!(&beat.payload, BeatPayload::Choice { options, .. } if options.iter().any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled))
+                    {
+                        beat.protected = true;
+                        beat.source_fallback = Some("Choice template or availability adapter is missing, unsupported or has pending Source edits. Edit in Source.".into());
+                    }
+                }
+            }
             for beat in &mut beats {
                 let statement = beat.payload.screen_statement();
                 let (BeatPayload::ShowScreen { target, revisions }
@@ -1888,6 +1925,7 @@ impl AuthoringService {
             extra: Map::new(),
         };
         options.push(ChoiceOption {
+            unavailable_policy: UnavailablePolicy::Hide,
             condition: None,
             text: option_text,
             id: None,
@@ -2286,7 +2324,7 @@ impl AuthoringService {
             )?;
         }
         let proposed_revision = sha256(&proposed_source);
-        let (mut new_mapping, _) = build_mapping(
+        let (mut new_mapping, next_beats) = build_mapping(
             &scene,
             &proposed_source,
             &proposed_revision,
@@ -2305,21 +2343,24 @@ impl AuthoringService {
             .iter_mut()
             .find(|mapping| mapping.scene_id == scene_id)
             .ok_or(SceneError::InvalidMetadata)? = new_mapping;
+        let mut runtime =
+            self.choice_runtime_mutations(project, &next_beats, source_bytes != proposed_source)?;
+        runtime.extend(vec![
+            replace_mutation(
+                &scene.source_path,
+                source_bytes,
+                source_revision,
+                proposed_source,
+            )?,
+            replace_mutation(
+                SOURCE_MAP_PATH,
+                loaded.source_map_bytes,
+                loaded.source_map_revision,
+                source_map_bytes(&loaded.source_map)?,
+            )?,
+        ]);
         Ok(TransactionProposal {
-            mutations: vec![
-                replace_mutation(
-                    &scene.source_path,
-                    source_bytes,
-                    source_revision,
-                    proposed_source,
-                )?,
-                replace_mutation(
-                    SOURCE_MAP_PATH,
-                    loaded.source_map_bytes,
-                    loaded.source_map_revision,
-                    source_map_bytes(&loaded.source_map)?,
-                )?,
-            ],
+            mutations: runtime,
             intent: TransactionIntent::Edit,
         })
     }
@@ -3293,7 +3334,7 @@ fn render_payload(
             }
         }
         BeatPayload::Choice { options, prompt } => {
-            let mut text = format!("    menu:{newline}");
+            let mut text = format!("    {}{newline}", choice::menu_header(options));
             if let Some(prompt) = prompt {
                 text.push_str(&choice::render_prompt(prompt, loaded, 8, newline)?);
             }
@@ -3301,7 +3342,7 @@ fn render_payload(
                 text.push_str(&format!(
                     "        \"{}\"{}:{newline}            pass{newline}",
                     escape_string(&option.text)?,
-                    logic::render_guard(option.condition.as_ref(), &loaded.authoring)?
+                    choice::option_suffix(option, options, &loaded.authoring)?
                 ));
             }
             return Ok(text);
@@ -3356,6 +3397,11 @@ fn validate_payload(payload: &BeatPayload, loaded: &Loaded) -> Result<(), SceneE
             }
             for option in options {
                 validate_text(&option.text)?;
+                if option.unavailable_policy == UnavailablePolicy::ShowDisabled
+                    && option.condition.is_none()
+                {
+                    return Err(SceneError::InvalidPayload);
+                }
                 logic::render_guard(option.condition.as_ref(), &loaded.authoring)?;
                 if option
                     .id
@@ -3873,6 +3919,7 @@ fn parse_scene_mode(
                     break;
                 };
                 options.push(ChoiceOption {
+                    unavailable_policy: UnavailablePolicy::Hide,
                     text: option_text,
                     id: None,
                     condition: None,
@@ -4453,6 +4500,7 @@ pub(crate) fn build_mapping(
             extra: old_extra.get(&id).cloned().unwrap_or_default(),
         });
         beats.push(SceneBeat {
+            source_fallback: None,
             owner: None,
             conditional_branch: None,
             id,
@@ -6157,16 +6205,19 @@ mod tests {
                 prompt: None,
                 options: vec![
                     ChoiceOption {
+                        unavailable_policy: UnavailablePolicy::Hide,
                         condition: None,
                         text: "One".into(),
                         id: None,
                     },
                     ChoiceOption {
+                        unavailable_policy: UnavailablePolicy::Hide,
                         condition: None,
                         text: "Two".into(),
                         id: None,
                     },
                     ChoiceOption {
+                        unavailable_policy: UnavailablePolicy::Hide,
                         condition: None,
                         text: "Three".into(),
                         id: None,
@@ -6505,6 +6556,7 @@ mod tests {
                     beat: BeatPayload::Choice {
                         prompt: None,
                         options: vec![ChoiceOption {
+                            unavailable_policy: UnavailablePolicy::Hide,
                             condition: None,
                             text: "Take the first path".into(),
                             id: None,
@@ -7006,11 +7058,13 @@ mod tests {
                         prompt: None,
                         options: vec![
                             ChoiceOption {
+                                unavailable_policy: UnavailablePolicy::Hide,
                                 condition: None,
                                 text: "Garden".into(),
                                 id: None,
                             },
                             ChoiceOption {
+                                unavailable_policy: UnavailablePolicy::Hide,
                                 condition: None,
                                 text: "Library".into(),
                                 id: None,
@@ -7522,11 +7576,13 @@ mod tests {
                         prompt: None,
                         options: vec![
                             ChoiceOption {
+                                unavailable_policy: UnavailablePolicy::Hide,
                                 text: "Same".into(),
                                 id: None,
                                 condition: None,
                             },
                             ChoiceOption {
+                                unavailable_policy: UnavailablePolicy::Hide,
                                 text: "Same".into(),
                                 id: None,
                                 condition: None,
