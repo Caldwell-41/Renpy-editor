@@ -1067,7 +1067,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   preserving all source, assertions and deadlines. Live callback ordering remains
   provisional. The selected recovery reaches its narration destinations, then
   fails at first timer-dispatched division; full qualification remains failed (H75).
-- **Evidence:** [coordinator audit and recovery selection](../tasks/active/shared-arithmetic.md#2026-11-10-first-ui-sdk-result-audited-recovery-selected).
+- **Evidence:** [coordinator audit and recovery selection](../tasks/archive/2026-11-10-shared-arithmetic.md#2026-11-10-first-ui-sdk-result-audited-recovery-selected).
 
 ## H75. UI SDK timer dispatch needs an interaction refresh
 

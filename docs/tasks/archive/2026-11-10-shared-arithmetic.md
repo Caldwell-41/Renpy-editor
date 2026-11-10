@@ -1,5 +1,22 @@
 # Shared arithmetic delivery
 
+## Accepted and archived, 2026-11-10
+
+Kris authorized ticket closure, squash merge and branch/worktree retirement.
+[PR #122](https://github.com/Caldwell-41/Renpy-editor/pull/122) merged into
+`codex/phase3b-screen-designer` as `fab85c16865d90ecec338f3134ed83d42d532cf4`.
+Its tree matches tested head `18260b15325c10f935a1169392d99f036c5d15de` exactly.
+#87 and #91–#97 are accepted and closed; #88's already-closed approval now has
+accepted delivery state. #89/#90 remain superseded. #110 retains the approved
+Combined workspace integration and final acceptance scope.
+
+The [closeout evidence](../evidence/arithmetic-review.md#merge-and-retirement-2026-11-10)
+owns CI, recovery and cleanup. Original source history is published under
+`archive/pr122-arithmetic-2026-11-10`; ignored evidence is preserved in the primary
+checkout's `.toolchains/retired/pr122-2026-11-10/` archive. The sections below retain
+historical decisions, failures and accounting. Their old next actions and limits
+do not select further work. CURRENT and HANDOVER own live continuation.
+
 ## Selected outcome
 
 Kris selected implementation of [spec #87](https://github.com/Caldwell-41/Renpy-editor/issues/87)

@@ -11,7 +11,7 @@ production control choices, coordinator records and prior fixtures remain intact
 
 On 2026-11-09 Kris explicitly increased both feature-wide SDK ceilings from six
 to **20 started invocations per target**. The
-[delivery policy/table](../active/shared-arithmetic.md#verification-and-operation-limits)
+[delivery policy/table](../archive/2026-11-10-shared-arithmetic.md#verification-and-operation-limits)
 owns current limits. Six-start and 5/6 statements in the attempts below are
 historical. This increase selects no SDK run or successor work.
 
