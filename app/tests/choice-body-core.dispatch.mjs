@@ -98,7 +98,8 @@ try {
  const callBeat=scene().beats.find(b=>b.payload.type==='call');const callLabel=callBeat.payload.returnLabel;
  assert(callLabel?.startsWith('_ll_call_'));
  button('Add Condition',option(yes.id));panel=document.querySelector('.story-operation[aria-label="Add Condition"]');
- // Use the existing typed boolean variable comparison, not a raw expression.
+ // Select the declared fixture variable explicitly; default comparison may use another project variable.
+ enter(panel.querySelector('[aria-label="Condition Variable"]'),workspace.authoring.variables.find(v=>v.technicalName==='choice_flag').id,'change');
  await applied(panel,'Create Condition');
  const branch=scene().beats.find(b=>b.conditionalBranch&&!b.conditionalBranch.choiceOption);
  button('Add Beat to If',document.querySelector(`[data-branch-id="${branch.id}"]`));

@@ -731,7 +731,7 @@ fn choice_recursive_terminal_paths_keep_safe_scene_endings() {
 fn choice_nested_condition_trivia_moves_with_its_proven_owner() {
     let mut f = setup();
     let a = model(&mut f);
-    f.save(&a,&format!("label {}:\n    menu:\n        \"Outer\":\n            if True:\n                # branch comment\n                \"Inside\"\n            else:\n                pass\n    \"Shared\"\n    return\n",a["technicalLabel"].as_str().unwrap()));
+    f.save(&a,&format!("label {}:\n    menu:\n        \"Outer\":\n            if True:\n                # branch comment\n                \"Inside\"\n            else:\n                pass\n            # option comment\n    \"Shared\"\n    return\n",a["technicalLabel"].as_str().unwrap()));
     let a = model(&mut f);
     let comment = a["beats"]
         .as_array()
@@ -744,6 +744,23 @@ fn choice_nested_condition_trivia_moves_with_its_proven_owner() {
         })
         .unwrap();
     assert_eq!(comment["owner"], text(&a, "Inside")["owner"]);
+    let option_comment = a["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| {
+            b["payload"]["source"]
+                .as_str()
+                .is_some_and(|s| s.contains("option comment"))
+        })
+        .unwrap();
+    let outer_header = a["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["conditionalBranch"]["choiceOption"] == true)
+        .unwrap();
+    assert_eq!(option_comment["owner"]["branchId"], outer_header["id"]);
     f.service.close().unwrap();
 }
 

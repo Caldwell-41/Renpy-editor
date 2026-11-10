@@ -43,7 +43,7 @@ def preflight(args):
     assert set(runtime) in ({'continuation', 'return', 'jump', 'entryLabel', 'target'},
                             {'continuation', 'return', 'jump', 'entryLabel', 'target', 'recursive'})
     if 'recursive' in runtime:
-        assert all(text in runtime['recursive'] for text in ['Before call', ' from _ll_call_', 'Resume inside option', 'Inner normal', 'After nested'])
+        assert all(text in runtime['recursive'] for text in ['Before call', ' from _ll_call_', 'Resume inside option', 'if (choice_flag == True):', 'Inner normal', 'After nested'])
         assert runtime['recursive'].count('\"Shared once\"') == 1
     assert runtime['continuation'].count('"Shared once"') == 1
     assert '"No":\n            pass' in runtime['continuation']

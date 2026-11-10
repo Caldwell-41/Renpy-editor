@@ -3604,6 +3604,12 @@ fn parse_condition_group(
                         group_start,
                         branch_start,
                     });
+                } else if source_version >= 10 && indentation(body) == indent {
+                    trivia.nesting =
+                        parent.map(|(group_start, branch_start)| ParsedNesting::Child {
+                            group_start,
+                            branch_start,
+                        });
                 }
                 result.push(trivia);
                 next += 1;
