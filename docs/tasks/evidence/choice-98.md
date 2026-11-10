@@ -159,5 +159,25 @@ also satisfies the strengthened validator's exact failing-assertion check.
 semantics. No SDK, browser, native, package or CI operation ran in this merge pass.
 Usage stays Mac 3/20, Windows 0/20, zero reservations. Windows qualification,
 matching native/human evidence, draft publication, remaining tickets and combined
-review remain coordinator-owned. All work is local-only, and worker artifacts
-remain retained.
+review remain coordinator-owned. Worker artifacts remain retained.
+
+## Draft publication and Windows assignment
+
+[Draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125) targets
+`codex/phase3b-screen-designer` from `codex/choice-98`. Initial published candidate
+is `d2504a76fc1fc10e009853bde3c2747c3460cef8`, containing the #101 merge and
+automatic draft-check selection. Automatic approval review initially rejected
+publication for unclear authority and an unverified remote. Read-only checks
+verified the exact selected public repository and ADMIN permission, alongside the
+invoked implement-spec workflow's draft-PR instruction. The reviewed retry and
+draft creation succeeded; no alternative publication route was used.
+
+A fresh test-only Windows assignment receives an isolated managed worktree for
+this candidate. It owns host/toolchain preflight, the existing production Choice
+controller journey and pinned SDK compile/lint/normal-play checks for #101, plus
+producing-host evidence. It may use at most four Windows harness starts from the
+shared 20, after offline preflight. No source edit, package/native editor, manual
+CI, push, issue closure or protected-session change is assigned. Return exact
+tested SHA, commands, individual results, counts and cleanup. Coordinator owns
+live records and correction assignments. Usage before dispatch is Mac 3/20,
+Windows 0/20, zero reservations.

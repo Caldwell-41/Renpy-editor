@@ -22,11 +22,15 @@ suite was not repeated. [The merge record](../tasks/evidence/choice-98.md#101-in
 owns tree equivalence, targeted resolution and bounded SDK evidence reuse.
 
 Development is on macOS ARM64, with both supported runtime targets required. The
-linked SUNDOWN environment answered at entry but needs OS/checkout/tool discovery.
+linked SUNDOWN environment has a registered Loomlight project. Its test-only
+assignment must verify OS/checkout/toolchain and ownership before execution.
 SDK use is Mac 3/20, Windows 0/20, zero reservations; #101 used three of its maximum
 four Mac starts. No native editor/package or manual CI campaign is selected yet.
-Work is local-only until publication is verified. Resume in this same coordinating
-thread, inspect task completion and current refs, then continue the dependency graph.
+[Draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125) is published
+against `codex/phase3b-screen-designer`, initial head `d2504a76`. The Windows
+assignment may use at most four SDK harness starts from its shared ceiling.
+Resume in this same coordinating thread, audit its result and the draft checks,
+then continue the dependency graph.
 
 PR #124 completed the earlier status cleanup at `63221b44`; that work is no longer
 the live continuation. PR #122 retro items 1–3 remain unselected.

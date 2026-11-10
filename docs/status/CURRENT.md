@@ -47,8 +47,8 @@ acceptance. Historical allowances remain closed.
 
 Kris selected [Choice #98](https://github.com/Caldwell-41/Renpy-editor/issues/98)
 and its #101–#106 delivery graph on a new integration branch, `codex/choice-98`.
-Delivery is `in_progress`; #101 is integrated locally at `c9055fb6` and remains
-unaccepted.
+Delivery is `in_progress` in [draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125).
+#101 is integrated at `c9055fb6` and remains unaccepted.
 [The delivery record](../tasks/evidence/choice-98.md) owns assignments,
 verification and operation limits. No Choice implementation or runtime acceptance
 is claimed for the combined feature. #101 has portable and Mac SDK evidence;
