@@ -832,6 +832,8 @@ private desktop inside core's kill-on-close job; it never switches desktops.
 Normal project close, change or application shutdown requests a cooperative stop.
 Core requires the acknowledgment, exit 0 and complete process/pipe cleanup, plus
 Windows desktop closure, before reporting normal shutdown. The existing bounded
+cooperative budget also covers Windows job emptiness after the leader signals exit;
+a signaled leader alone does not prove that the owned job has finished. The existing
 process-tree cleanup remains the failure fallback. A helper failure retains drafts. Frame IDs, source
 and asset revisions bind exported PNGs and actual Ren'Py selection geometry to the
 request. A stale image cannot supply editing geometry. The UI has no simplified

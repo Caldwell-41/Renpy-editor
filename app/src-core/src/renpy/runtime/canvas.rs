@@ -171,7 +171,12 @@ impl HelperProcess {
                                 && record(&anchor, "desktop-closed.json")
                                     == Some(serde_json::json!({"closed": true}));
                             if acknowledged {
-                                natural = child.finish_without_force(&state).ok();
+                                natural = child
+                                    .finish_without_force(
+                                        Duration::from_secs(3).saturating_sub(start.elapsed()),
+                                        &state,
+                                    )
+                                    .ok();
                             }
                             break;
                         }

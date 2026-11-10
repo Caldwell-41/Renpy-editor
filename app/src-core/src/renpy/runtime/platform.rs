@@ -175,8 +175,10 @@ impl OwnedChild {
     /// the leader PID reserved until inspection; failure leaves force cleanup safe.
     pub(super) fn finish_without_force(
         &mut self,
+        deadline: Duration,
         observation: &Mutex<Observation>,
     ) -> io::Result<Option<i32>> {
+        let started = Instant::now();
         if !self.exited()? {
             return Err(io::Error::other("helper still running"));
         }
@@ -202,12 +204,13 @@ impl OwnedChild {
             }
         }
         #[cfg(windows)]
-        self.job.wait_empty(Duration::ZERO)?;
+        self.job
+            .wait_empty(deadline.saturating_sub(started.elapsed()))?;
         #[cfg(not(any(target_os = "macos", windows)))]
         return Err(io::Error::other("unsupported canvas host"));
         let start = Instant::now();
         while !self.drain(observation)? {
-            if start.elapsed() >= Duration::from_secs(1) {
+            if start.elapsed() >= Duration::from_secs(1) || started.elapsed() >= deadline {
                 return Err(io::Error::other("helper pipes remain"));
             }
             thread::sleep(Duration::from_millis(8));
@@ -278,4 +281,52 @@ fn drain_pipe(
         retain(observation, &bytes[..n])?;
     }
     Ok(false)
+}
+
+#[cfg(all(test, windows))]
+#[test]
+fn canvas_cooperative_finish_waits_for_job_after_leader_exit() {
+    let temp = tempfile::tempdir().unwrap();
+    fs::write(temp.path().join("stop"), b"stop").unwrap();
+    let mut command = Command::new(std::env::current_exe().unwrap());
+    command
+        .args([
+            "--exact",
+            "lifecycle::canvas_tests::controlled_canvas_child",
+            "--ignored",
+            "--nocapture",
+        ])
+        .current_dir(temp.path())
+        .env("LOOMLIGHT_CANVAS_TEST_MODE", "ready");
+    let observation = Mutex::new(Observation {
+        phase: "running",
+        exit: None,
+        bytes: vec![],
+        truncated: false,
+        cleaned: false,
+        stale: None,
+        ready: false,
+        marker_tail: vec![],
+        stages: vec![],
+    });
+    let mut child = OwnedChild::spawn(&mut command, None, true).unwrap();
+    let started = Instant::now();
+    let budget = Duration::from_secs(3);
+    // Check the job as soon as the leader exits.
+    while !child.exited().unwrap() {
+        assert!(started.elapsed() < budget, "controlled child did not exit");
+        thread::yield_now();
+    }
+    for (name, expected) in [
+        ("stopped.json", br#"{"stopped":true}"#.as_slice()),
+        ("desktop-closed.json", br#"{"closed":true}"#.as_slice()),
+    ] {
+        assert_eq!(fs::read(temp.path().join(name)).unwrap(), expected);
+    }
+    assert_eq!(
+        child
+            .finish_without_force(budget.saturating_sub(started.elapsed()), &observation)
+            .unwrap(),
+        Some(0)
+    );
 }

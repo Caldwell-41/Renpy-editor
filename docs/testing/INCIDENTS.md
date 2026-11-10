@@ -1203,3 +1203,20 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   security/refusal/history checks. Chromium/fixture proof remains distinct from
   native packaging and human acceptance.
 - **Evidence:** [Choice preview integration](../tasks/evidence/choice-98.md#approved-a-v2-integration-and-final-ci-reservation).
+
+## H85. Windows helper exit can precede empty job accounting
+
+- **Symptoms:** canvas shutdown reports cleanup complete and exit 0, but
+  `cooperative: false`; `wait_empty(Duration::ZERO)` sees `ActiveProcesses=1` after
+  the leader signals exit and both acknowledgments exist.
+- **Class/cause:** product process boundary. A reduced controlled-child experiment
+  reproduced this transient in 64/64 observations twice. Every job settled without
+  force. Attribution of the earlier broad-CI failure remains an inference because
+  the original unit passed on the connected Windows host.
+- **Correction:** pass the remaining three-second cooperative budget to the owned
+  process-tree finish. Keep acknowledgments, empty-job, pipe cleanup and exit 0
+  mandatory; keep bounded forced cleanup as the failure fallback.
+- **Regression:** retain one immediate-leader-exit controlled-child case at the
+  Windows `OwnedChild` boundary. Original lifecycle units retain their assertions.
+  Controlled-child proof does not qualify native SDK rendering or human input.
+- **Evidence:** [Choice CI correction](../tasks/evidence/choice-98.md#windows-cooperative-shutdown-correction).

@@ -1421,3 +1421,59 @@ SDK start. The corrected command unsets SDK settings and uses CI's three exclusi
 
 Native/human and final package acceptance remain pending; #98/#106 and PR #125
 remain open/draft. Preserve earlier failures, approvals and protected recovery.
+
+## Windows cooperative shutdown correction
+
+The common-failure correction was published as `6353164f`. Standards and Spec
+reviews found zero issues in that correction. Its completed broad Mac core command
+reported 659 passes, 31 failures, 63 ignored and three filtered in 672.24 seconds.
+All 31 failures were sandbox socket restrictions: 27 direct TCP bind refusals and
+four TLS Python bind failures followed by empty-port parse errors. The scoped
+outside-sandbox transport rerun passed all 38 tests in 1.54 seconds, including every
+one of those 31. These runs together cover all 690 selected nonignored cases;
+the broad command itself remains failed. All nine original common CI failures pass.
+The Windows timeout-helper unit also passed on Mac, with no Windows inference.
+The exact command outputs, failed-test set reconciliation and hashes are retained.
+
+The assigned Windows checkout safely advanced from `9d229ea4` to `6353164f` after
+clean/idle ownership checks. A producing-host diagnosis used pinned Rust 1.90.0 and
+native MSVC, locked/offline dependencies and no SDK settings. The registered root,
+unrelated worktree, prior evidence, trust settings and protected processes remained
+untouched. Its four inspected source files match the failed CI baseline `7abb9caf`.
+
+The pristine exact timeout-helper unit passed initially and after a confirmed
+rebuild. Three tagged instrumented runs also passed; they showed valid
+acknowledgments and exit 0 after 116–124 ms, without pipe or deadline errors. A
+reduced experiment then checked `OwnedChild::finish_without_force` immediately
+after leader exit. The original zero-duration Windows job check refused all 64
+observations in each of two runs, despite both acknowledgments and a signaled
+leader. The fully captured repeat measured job settlement at 1.065–2.136 ms after
+leader signal. All jobs settled without force. This proves a legitimate transient
+at the production boundary; it does not prove that transient caused the historical
+broad-CI failure. That attribution remains an inference.
+
+The two-file production proposal passes the remaining cooperative budget into
+`finish_without_force`. Windows waits for its owned job to empty within that
+budget; pipe draining also respects the remaining budget and its existing one-second
+limit. The three-second allowance, required acknowledgments, exit 0, complete
+job/pipe cleanup and failure fallback are preserved. It passed all 64 reduced cases
+and the unchanged exact lifecycle unit on Windows. The coordinator verified the
+delivered patch SHA-256 `f6f2f3506f34cd3aec278aee3e376894cb09374cfc70236b7463d15a03178ef8`
+and stable patch ID `4572551b3c6988452977dd5e6e5d1ec43b648051` before integration.
+One fast Windows controlled-child case is retained as the regression, without the
+diagnostic loop or instrumentation. The integrated patch passed all five Mac canvas
+lifecycle tests in 15.85 seconds; two unselected helper/SDK gates remained ignored.
+The new Windows-only regression and final integrated target receipt are pending.
+
+All producing-host failed attempts remain retained. A stale-binary restoration
+check was excluded and replaced by a confirmed pristine rebuild. Diagnostic source
+was restored byte-for-byte, the assigned checkout is clean, and no diagnostic child
+remains. Its 62-file manifest was verified on the producing host. No commit, push,
+SDK start, native editor, package or manual CI run occurred in that assignment.
+
+Shared use remains **Mac 17/20, Windows 8/20, zero reservations**. The final package
+campaign allowance is still **1/1 spent**. Finish review, publish the integrated
+correction and verify the exact candidate on Windows with ordinary controlled-child
+tests. Only then request a decision on another final campaign; do not dispatch or
+reserve a new campaign under the spent allowance. Native/human and final package
+acceptance remain pending; #98/#106 and PR #125 remain open/draft.

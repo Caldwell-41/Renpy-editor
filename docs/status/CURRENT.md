@@ -61,13 +61,15 @@ the second remains conditional and unused.
 Kris approved Choice preview A v2. It is integrated with a scrolling summary beside
 the retained Game canvas. Matched rendered samples, media preservation, interface
 scaling, 398 frontend tests and the complete required browser preflight passed.
-[The delivery record](../tasks/evidence/choice-98.md#final-package-ci-failure-and-core-correction)
+[The delivery record](../tasks/evidence/choice-98.md#windows-cooperative-shutdown-correction)
 owns review fixes, fixture migrations and evidence limits.
 
 The selected final package workflow failed in core tests on both targets before
 SDK execution or packaging. Both platform campaigns count as started; the single
-campaign allowance is spent, with no reservations. Local core corrections restore
-root Continue anchors and migrate old fixtures. Focused Windows shutdown diagnosis
-remains pending. Another package campaign requires Kris to extend the recorded
+campaign allowance is spent, with no reservations. The published core correction
+restores root Continue anchors and migrates old fixtures. A controlled Windows
+experiment proved that leader exit can precede job emptiness. The integrated patch
+uses the remaining cooperative budget; Mac lifecycle tests pass. Final integrated
+Windows verification remains pending. Another package campaign requires Kris to extend the recorded
 allowance. Native/human acceptance remains pending. #98/#106 and PR #125 stay
 open/draft; full Story #110 and other PR #122 retro items remain unselected.

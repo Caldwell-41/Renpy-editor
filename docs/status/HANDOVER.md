@@ -4,7 +4,7 @@
 
 Kris selected #98 and #101–#106 under implement-spec. Delivery is `in_progress` on
 `codex/choice-98` in [draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125).
-[The delivery record](../tasks/evidence/choice-98.md#final-package-ci-failure-and-core-correction)
+[The delivery record](../tasks/evidence/choice-98.md#windows-cooperative-shutdown-correction)
 owns exact candidates, reviews, counters and the remaining qualification.
 
 #101–#105 have both-target focused SDK evidence. Windows #106 passed all 27
@@ -36,14 +36,26 @@ or packaging. Both target campaigns started and consume their reservations. The
 owning record holds cumulative use and the exhausted one-campaign allowance.
 No automatic retry or replacement campaign is authorized.
 
-The local correction restores eligible root Continue anchors when a nested option
-contains a Jump. Legacy fixtures now target actual dialogue, retain owned comments
-and build Choice flow through option bodies. Focused checks pass; the Windows-only
-controlled-helper shutdown failure still requires producing-host diagnosis. Publish
-the reviewed correction, then use the existing assigned Windows checkout for that
-bounded ordinary test work. No SDK/native/package operation is included. Complete
-that diagnosis before requesting a changed final-campaign allowance. The unused
-conditional #106 start cannot replace this allowance.
+Published core correction `6353164f` restores root Continue anchors beside nested
+terminals and migrates stale fixtures. Broad Mac core verification passed 659 cases;
+31 sandbox socket failures all passed in the scoped 38-case outside-sandbox rerun.
+Ignored gates stay unexecuted. These runs cover all 690 selected nonignored cases,
+while the broad command retains its failed status.
+
+The Windows producing-host diagnosis proved a signaled leader can leave the job
+briefly nonempty. The original unit passed locally, so its attribution to the CI
+failure remains an inference. The delivered patch uses the remaining cooperative
+budget for empty-job and pipe cleanup; all acknowledgment, exit and fallback gates
+remain. Both reduced red/green experiments and the original unit pass with the
+proposed patch on Windows. A fast Windows-only regression is retained. Five Mac
+canvas lifecycle tests pass after integration; two unselected gates remain ignored.
+
+Next: complete scoped review, publish the patch and run the exact integrated Windows
+regression/lifecycle units in the existing clean assigned checkout. SDK settings
+must remain unset; no SDK/native/package/manual-CI operation is included. Then
+request Kris's decision on an additional final package campaign. Its exhausted
+allowance cannot be replaced by the unused conditional #106 start. The owning
+record holds exact outcomes, manifest/hash evidence and counters.
 
 Preserve all worktrees, unique evidence, `app/node_modules`, the pinned design
 references and protected recovery below. Native/human evidence remains pending;
