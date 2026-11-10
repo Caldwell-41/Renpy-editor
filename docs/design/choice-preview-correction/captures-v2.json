@@ -74,5 +74,9 @@
       "rasterWidth": 1440,
       "rasterHeight": 1700
     }
-  ]
+  ],
+  "source": {
+    "commit": "7ba6eea4da1f12434f8260bdc6400a00bf04a964",
+    "fingerprint": "9d62ff5224e47e8a505fe9467366b40fca66cf7a9c57a9b1bdfad59f18e99c54"
+  }
 }
