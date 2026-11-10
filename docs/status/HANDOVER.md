@@ -2,54 +2,57 @@
 
 ## Selected Choice implementation
 
-Kris selected [#98](https://github.com/Caldwell-41/Renpy-editor/issues/98), its six
-delivery tickets and the implement-spec workflow, then instructed the agent to
-start building. Work is `in_progress` on `codex/choice-98`, based on accepted
+Kris selected [#98](https://github.com/Caldwell-41/Renpy-editor/issues/98) and its six
+delivery tickets under the implement-spec workflow. Work is `in_progress` on
+`codex/choice-98`, based on accepted
 integration `63221b44`. The coordinator owns this branch and live status; fresh
-ticket implementers use isolated managed worktrees. #101's implemented prerequisite
-is qualified on both SDK targets. #102 is integrated with Mac SDK evidence;
-combined acceptance remains pending. [The delivery record](../tasks/evidence/choice-98.md) owns the graph,
+ticket implementers use isolated managed worktrees. #101 is qualified on both SDK
+targets. #102 now has both-target SDK evidence; #103 is
+integrated with Mac SDK evidence. Combined acceptance remains pending.
+[The delivery record](../tasks/evidence/choice-98.md) owns the graph,
 file ownership, approved design, verification and cumulative operation limits.
 
-Retain the #101 worktree and temporary evidence. [Its correction record](../tasks/evidence/choice-98.md#windows-preflight-and-ci-consumer-correction)
-owns the stale schema/Return-label CI failures, passing corrections and targeted
-resolution of the original frontend Python failure. Automatic CI and
-Windows SDK qualification pass for #101 on `3a672e96`. Normal merge `b100034c`
-integrated #102 worker `7d86cda5` without conflicts. Its app, test and fixture trees
-equal the worker's; approved lab/design source is unchanged. The focused merged
-public-core Help export and schema-10 Python admission pass. [The #102 return](../tasks/evidence/choice-98.md#102-integration-and-handoff)
-owns the worker checks, Mac failure/correction and exact tree identities.
-#103 prompt implementation becomes the next sole writer of shared parser, writer
-and UI; #104 follows its checkpoint. #102 Windows qualification may run on the
-other host after publication while #103 proceeds from qualified #101. #105/#106
-still wait for all Stage 1 requirements.
-Native/human and combined review remain pending; issues remain open until PR closeout.
+Retain the #101–#103 worktrees and evidence. [The #101 correction](../tasks/evidence/choice-98.md#windows-preflight-and-ci-consumer-correction)
+owns the stale schema/Return-label CI failures and passing corrections.
+[The #102 return](../tasks/evidence/choice-98.md#102-integration-and-handoff) owns its
+Mac failure/correction and exact tree identities. [The Windows completion](../tasks/evidence/choice-98.md#102-windows-completion)
+records public authoring, all 22 SDK outcomes and automatic CI on `2ed83dbc`.
+Normal merge `8e8d2f5c` integrated #103 worker `5fc50284` without conflicts or
+implementation edits. Its app, tests and fixtures exactly equal the worker's;
+approved lab/design source is unchanged. The merged public-core Help export and
+schema-11 Python admission pass. [The #103 return](../tasks/evidence/choice-98.md#103-integration-and-handoff)
+owns worker checks, the two failed SDK selector attempts and the passing rendered
+prompt witness. Windows #103, rendered-reference comparison, native/human evidence
+and combined review remain pending. Issues stay open until the single PR closeout.
 
 Development is on macOS ARM64, with both supported runtime targets required. The
 linked SUNDOWN registered checkout stays at `251fb477`. The approved managed
-`codex/choice-101-windows` worktree qualified `3a672e96` with pinned tools, the
-public-controller journey and all 14 SDK children. It and producing-host evidence
-remain retained. [The Windows return](../tasks/evidence/choice-98.md#windows-qualification-and-102-entry)
-owns hashes, charged observer failure, exact child results and cleanup. Its T3
-callback was denied; Kris supplied the completed thread for this audit.
-SDK use is Mac 5/20, Windows 2/20, zero reservations. #102 used two of its four Mac
-starts, including the failed standalone fixture with an undeclared condition flag.
-The corrected fixture passed all 22 SDK children on the final worker SHA.
+`codex/choice-101-windows` worktree completed #102 on `2ed83dbc` after a safe
+fast-forward, with clean/idle ownership and root preservation. Producing-host
+`c102w-20261110-1` retains its report and raw receipts; the coordinator audited the
+completed producing thread. [The earlier Windows return](../tasks/evidence/choice-98.md#windows-qualification-and-102-entry)
+retains #101's charged observer failure and denied callback recovery.
+SDK use is Mac 8/20, Windows 3/20, zero reservations. #103 used 3/4 Mac starts;
+both failed selector attempts remain charged and cleaned. #102 Windows used 1/4.
 No native editor/package or manual CI campaign is selected yet.
-The next #103 Mac and #102 Windows assignments each have a four-start limit under
+The next #104 Mac and #103 Windows assignments each have a four-start limit under
 [the delivery record](../tasks/evidence/choice-98.md#verification-and-operation-limits).
 [Draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125) is published
 against `codex/phase3b-screen-designer`, initial head `d2504a76`. The Windows
-assignment for #101 is complete; the coordinator audited its exact-head automatic CI.
-The #102 merge and status successor are local-only. Integration ownership returns
+assignments for #101/#102 are complete; their exact-head automatic CI was audited.
+The #103 merge and status successor are local-only. Integration ownership returns
 to the coordinator at this handoff. Resume in the same coordinating thread to
-publish the checkpoint on PR #125, assign #102 Windows qualification and #103,
-then continue the graph. Reuse the existing isolated Windows worktree only after
+publish the checkpoint on PR #125, then assign Windows #103 and local #104.
+#104 is the next sole writer of mixed Hide/Show disabled semantics through existing
+source/runtime/generated-choice-screen owners. #31/#55 remain open, unselected
+styling/template tasks; #98/#104 own the per-option/runtime feature. #104 must
+reuse the minimal semantic owners without taking over their style/canvas work or
+changing their prerequisites or acceptance. Qualified #101 permits #104 to start
+while Windows #103 runs on the other host. #105/#106 still wait for all Stage 1
+requirements. Reuse the existing isolated Windows worktree only after
 clean/idle ownership checks and a safe fast-forward; preserve the registered root.
-Rendered comparison with approved design, matching
-native/human evidence and combined review remain pending. The local untracked
-`app/node_modules` symlink points to the existing dependency cache and must not be
-committed. No protected sessions or unrelated Windows worktrees were changed.
+The untracked `app/node_modules` symlink points to the dependency cache and must not
+be committed. No protected sessions or unrelated Windows worktrees were changed.
 
 PR #124 completed the earlier status cleanup at `63221b44`; that work is no longer
 the live continuation. PR #122 retro items 1–3 remain unselected.

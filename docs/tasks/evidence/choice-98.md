@@ -8,8 +8,9 @@ with the implement-spec workflow and instructed the agent to start building on
 Delivery is `in_progress`. #101 is integrated with public-controller, both-target
 SDK and automatic CI evidence. Its implementation dependency is satisfied on the
 integration branch; final review, native/human evidence and issue closure remain
-part of the combined delivery. #102 is integrated with Mac SDK evidence; its
-Windows qualification remains pending. #103 prompt implementation is next.
+part of the combined delivery. #102 is integrated with both-target SDK and
+automatic CI evidence. #103 prompts are integrated with Mac SDK evidence;
+Windows qualification is pending. #104 is the next local implementation.
 
 Integration branch `codex/choice-98` starts at accepted integration
 `63221b44d72c1c100815e9e638cbec5133ffc1eb` from
@@ -21,10 +22,12 @@ CURRENT, HANDOVER and this file to the coordinator.
 
 The completed first assignment #101 established the Choice/option model, mapping,
 body operations and production controls. #102 delivered recursive source/body/Call
-contracts, their production Story controls and affected tests. #103 becomes the
-next sole writer of the shared parser, writer and UI; #104 follows its checkpoint.
-The coordinator assigns #102 Windows qualification separately after publication.
-#103 depends on qualified #101, so that other-host qualification may run concurrently.
+contracts, their production Story controls and affected tests. #103 added
+Choice-owned narration/Character prompts through the same owners. #104 becomes
+the next sole writer of mixed Hide/Show disabled semantics through existing source,
+runtime and generated-choice-screen owners. The coordinator assigns Windows #103
+after publication. #104 depends on qualified #101, so the two assignments may run
+concurrently on separate hosts.
 #105/#106 still wait for all Stage 1 requirements.
 
 ## Dependencies and approved design
@@ -60,18 +63,18 @@ lint and named normal-play children; retain each child's result without charging
 them again as harness starts. This allows focused coverage across six tickets and
 bounded corrections. #101 had a four-start allowance per host after offline
 preflight and pinned-SDK verification; it used three Mac and two Windows starts.
-Current usage is Mac 5/20, Windows 2/20, zero reservations. #102 used two of its
-four selected Mac starts, including the failed standalone fixture. Its final run
-passed nested convergence and Call return.
+Current usage is Mac 8/20, Windows 3/20, zero reservations. #102 used 2/4 Mac
+starts and 1/4 Windows starts. #103 used 3/4 Mac starts, including two failed
+selector attempts; its final run passed all 31 expected SDK children.
 
-For the next coordinator assignments, #103 may use at most four Mac harness starts
-from confirmed Mac 5/20. A fresh #102 Windows test assignment may use at most four
-starts from confirmed Windows 2/20. Both require offline fixture, host/toolchain
+For the next coordinator assignments, #104 may use at most four Mac harness starts
+from confirmed Mac 8/20. A fresh #103 Windows test assignment may use at most four
+starts from confirmed Windows 3/20. Both require offline fixture, host/toolchain
 and pinned-SDK preflight. Windows may reuse the existing T3-prepared
 `codex/choice-101-windows` worktree only after clean/idle ownership checks and safe
 fast-forward synchronization. Do not create a new checkout or change the protected
-registered root. Separate hosts/interfaces permit #102 Windows testing alongside
-local #103 implementation. The coordinator owns dispatch and shared counters.
+registered root. Separate hosts/interfaces permit #103 Windows testing alongside
+local #104 implementation. The coordinator owns dispatch and shared counters.
 
 Native editor/package and manual CI campaigns need recorded selection and limits
 before starting; none has started. Routine compilation, focused tests, review and
@@ -89,11 +92,16 @@ The fresh merger integrated #101 in normal merge
 `c9055fb673214365271f6ec557c92c00ce7b5f8b`. The coordinator resumes sole ownership
 of `codex/choice-98` and live status on the merger's return. Draft PR #125 is open.
 Automatic CI and Windows qualification passed for corrected candidate `3a672e96`.
-The fresh #102 merger has now integrated `7d86cda5` in `b100034c`; the detailed
-[return below](#102-integration-and-handoff) owns this checkpoint. The coordinator
-resumes integration ownership, publishes it on PR #125, then assigns #102 Windows
-qualification and #103 prompt implementation. Retain the #101/#102 worktrees and
-unique evidence. Tickets stay open for combined PR review and closure.
+The fresh #103 merger integrated `5fc50284` in `8e8d2f5c`; the detailed
+[return below](#103-integration-and-handoff) owns this checkpoint. #102 Windows and
+automatic CI passed on `2ed83dbc`. The coordinator resumes integration ownership,
+publishes this checkpoint on PR #125, then assigns Windows #103 and local #104.
+#31/#55 remain open, unselected styling/template tasks. #98/#104 own the per-option
+and runtime feature; #104 must trace and reuse the minimal semantic owners without
+taking over their style/canvas work or changing their prerequisites or acceptance.
+They are not an additional blocker for the selected #104 assignment.
+Retain the #101–#103 worktrees and unique evidence. Tickets stay open for combined
+PR review and closure.
 
 The initial draft PR checkpoint selects automatic Repository quality only in
 `.github/validation-plan.json`, targeting `codex/phase3b-screen-designer`.
@@ -361,3 +369,98 @@ is next sole writer of shared parser/writer/UI, then #104; #102 Windows may run
 concurrently on the other host after publication. Stage 2 still waits for every
 Stage 1 requirement. All issues stay open for the single integration PR closeout;
 this checkpoint does not claim full #98 acceptance.
+
+## #102 Windows completion
+
+The coordinator audited the completed Windows owner's producing thread and
+`c102w-20261110-1` receipts. Exact candidate
+`2ed83dbc1bc877cdc0fc3cf7303531ba1c0ec688` passed fresh public authoring and all
+22 expected SDK outcomes: 12 compile/lint children, nine positive markers exactly
+once each, and one expected wrong-outcome rejection. The owner safely fast-forwarded
+the existing clean/idle managed qualification branch and preserved the registered
+root. Its report and raw receipts remain on the producing host.
+[The owning receipt](https://github.com/Caldwell-41/Renpy-editor/issues/102#issuecomment-6763016408)
+records completion. The coordinator also audited passing exact-head automatic CI
+at `2ed83dbc`; [its receipt](https://github.com/Caldwell-41/Renpy-editor/issues/102#issuecomment-6762859324)
+retains that result. This qualifies #102's unchanged inputs, not the later #103 head.
+
+#102 Windows used 1/4 selected starts. Cumulative Windows use is 3/20, with zero
+reservations. Earlier #101/#102 counts above are historical checkpoints. No running
+Windows assignment remains to poll or resume.
+
+## #103 integration and handoff
+
+The fresh merger received sole integration ownership at
+`2ed83dbc1bc877cdc0fc3cf7303531ba1c0ec688`. Worker branch
+`t3/choice-prompt-authoring` ended at `5fc50284ecdc1377901b0aad969182403b3a0a50`,
+descended directly from that checkpoint. Normal merge
+`8e8d2f5c02bff6b0673b62820cf3f5b48879c44e` completed without conflicts or
+implementation edits. The dependency symlink remains untracked.
+
+The worker delivered Choice-owned optional narration/Character prompts, exact
+prompt token edits/removal, production controls and an inert illustrative preview.
+Source-map schema 11 keeps historical recognizers frozen; verified refinement
+preserves IDs, unknown fields and absorbed rows. The merger checked menu/prompt
+header ownership, disjoint option/body mappings, exact removal, existing Character
+UUID resolution, schema consumers and preservation of add-option/body-edit callers.
+The bounded review found no material integration defect or duplicate owner.
+
+Merged trees exactly equal the worker's: `app`
+`2b3a9548b1e48ab47d2792937aba6bbf3f8ced1f`, `tests`
+`35e4943e279d1d17f49de62ad7531a945bd9f17d`, and `tests/fixtures`
+`fa59a5f5af812bade559af3c0dea282657ea3d57`. Approved `app/design-lab` and
+`docs/design` source is unchanged from integration entry. Worker checks apply only
+to these identical implementation inputs; this status successor changes no product code.
+
+The worker reports 395 frontend passes with typecheck, focused public-core
+source/migration/refusal/history/reopen passes, 53 Scene passes with seven named
+historical ADR 0009 specialists ignored, workspace Cargo check, production build,
+12 Python fidelity passes and the actual production-controller journey. Temporary
+`choice103/handoff.md`, `prompt-core.log`, `logic-all.log`, `scene-tests.log`,
+`frontend-all.log`, `workspace-check.log`, `build-qualified.log`, `fidelity-all.log`
+and `controller-03/result.json` retain commands and results. Its handoff also retains
+the earlier DOM accessibility, sandbox build and external-write driver failures
+with their corrections and owned-scratch cleanup. No native or visual acceptance
+follows from the synthetic DOM/controller results.
+
+Mac SDK starts 1 and 2 failed at child 25 on the narration prompt's TextSelector
+focus assumption. Start 1 had no rendering wait; start 2 failed after the bounded
+10-second wait, disproving that timing-only diagnosis. All 24 preceding children
+passed in each attempt. Both failed starts remain charged, immutable and cleaned
+in `sdk-01` and `sdk-02`. H69's pinned displayable witness resolved the selector
+limitation: noninteracting menu say text has no dialogue-advance focus. The final
+fixture checks simultaneous active say/choice screens, exact speaker/text, the
+actual text widget's TTS text and positive rendered bounds, plus enabled option
+focus before selection. No production or authored runtime source changed after
+the first implementation commit.
+
+Start 3 on final worker `5fc50284` passed all 31 expected compile/lint/normal-entry
+children, including narration, Character and nested Character prompts, existing
+continuations/Calls/Jump/Return, and the expected wrong-outcome rejection. No child
+timed out or truncated output. `sdk-03/result.json` and child logs retain argv,
+statuses, source/driver/archive hashes and `cleanupComplete: true`. The official
+8.5.3 archive pin remains the published hash already recorded above.
+
+The merger ran the existing exact public-core base Help export once, using
+`screens::canvas::tests::base_help_fidelity_exports_typed_assets_styles_and_exact_source_without_execution`
+with `--exact --nocapture`. It passed one test with zero failures/ignored; the
+shared `cargo-log` gate passed. Existing Python 3.12 and retained Pillow ran
+`base_help_fidelity.validate_accepted` on the exported `accepted.json`; schema 11
+and all eight cases passed. Temporary `choice103/merge/base-help-export.log`,
+`base-help-export/accepted.json`, `base-help-cargo-gate.log` and
+`base-help-admission.log` retain this check. No SDK/helper, browser, native, package
+or manual-CI operation ran during integration.
+
+Repository validation passed for 1,888 files and whitespace checks passed. CURRENT
+and HANDOVER remain within their review targets. Temporary `choice103/merge/validate.log`
+retains the repository check.
+
+Confirmed totals are Mac 8/20 and Windows 3/20, zero reservations. #103 used 3/4
+Mac starts. Windows #103, rendered-reference comparison, native/human evidence and
+combined review remain pending. The coordinator resumes integration ownership and
+publication on draft PR #125, then assigns Windows #103 and local #104 under the
+limits above. #104 starts from qualified #101 and owns mixed Hide/Show disabled
+semantics through existing source/runtime/generated-choice-screen owners. #31/#55
+retain their open, unselected styling/template scope and unchanged prerequisites
+and acceptance. Stage 2 still waits for every Stage 1 requirement. All issues stay
+open for the single draft PR closeout; this checkpoint claims no full #98 acceptance.

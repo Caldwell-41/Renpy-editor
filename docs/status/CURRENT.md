@@ -48,14 +48,15 @@ acceptance. Historical allowances remain closed.
 Kris selected [Choice #98](https://github.com/Caldwell-41/Renpy-editor/issues/98)
 and its #101–#106 delivery graph on a new integration branch, `codex/choice-98`.
 Delivery is `in_progress` in [draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125).
-#101 is integrated and has public-authoring, both-target SDK and automatic CI
-evidence. #102's recursive option bodies and Calls are integrated with Mac SDK
-evidence; its Windows qualification remains pending. #103 prompt implementation
-is next, followed by #104, with one writer for their shared parser, writer and UI.
+#101 and #102 are integrated with public-authoring, both-target SDK and automatic
+CI evidence. #103's narration/Character prompts are integrated with Mac SDK
+evidence; Windows qualification is next alongside local #104 implementation.
+#104 owns mixed Hide/Show disabled semantics through the existing source/runtime
+and generated-choice-screen owners, with one writer for shared code.
 [The delivery record](../tasks/evidence/choice-98.md) owns assignments,
 verification and operation limits. No Choice implementation or runtime acceptance
 is claimed for the combined feature. Native/human evidence and final review remain
-pending. SDK use is Mac 5/20 and Windows 2/20, with zero reservations at this
+pending. SDK use is Mac 8/20 and Windows 3/20, with zero reservations at this
 handoff. Use the approved Story Combined
 v1 controls while leaving the full Story workspace with #110.
 
