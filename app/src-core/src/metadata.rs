@@ -3,7 +3,7 @@ use serde_json::{Map, Value};
 use std::{collections::HashSet, fs, io, path::Path};
 
 pub const PROJECT_SCHEMA_VERSION: u32 = 2;
-pub const SOURCE_MAP_SCHEMA_VERSION: u32 = 11;
+pub const SOURCE_MAP_SCHEMA_VERSION: u32 = 12;
 pub(crate) const MAX_SOURCE_MAP_BYTES: usize = 4_000_000;
 pub const LEGACY_PROJECT_SCHEMA_VERSION: u32 = 1;
 pub const LEGACY_SOURCE_MAP_SCHEMA_VERSION: u32 = 1;
@@ -376,6 +376,7 @@ impl SourceMapMetadata {
                 | 8
                 | 9
                 | 10
+                | 11
                 | SOURCE_MAP_SCHEMA_VERSION
         ) || !valid_id(&self.project_id)
             || self.project_id != project_id

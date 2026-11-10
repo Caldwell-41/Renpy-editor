@@ -37,7 +37,7 @@ def name(case_key):
 
 def validate_accepted(accepted):
     assert accepted['outcome'] == OUTCOME and accepted['publicCoreRequests'] is True
-    assert accepted['sourceMapSchemaVersion'] in (8, 9, 10, 11)
+    assert accepted['sourceMapSchemaVersion'] in (8, 9, 10, 11, 12)
     assert accepted['exporterSourceSHA256'] == digest((REPO / 'app/src-core/src/screens/base_help_canvas_tests.rs').read_bytes())
     source = accepted['files'][SOURCE_PATH]
     assert source['text'].encode() == FIXTURE.read_bytes(), 'Wrong accepted fixture'

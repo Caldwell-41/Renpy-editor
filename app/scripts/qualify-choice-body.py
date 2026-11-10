@@ -31,7 +31,11 @@ CASES = [('continuation', 'yes', 'CHOICE_101_YES flag=True shared=1'),
          ('recursiveCaller', 'nested_return_caller', 'CHOICE_102_RETURN caller=resumed shared=0'),
          ('narrationPrompt', 'narration_prompt', 'CHOICE_103_NARRATION simultaneous=yes shared=1'),
          ('characterPrompt', 'character_prompt', 'CHOICE_103_CHARACTER simultaneous=yes shared=1'),
-         ('recursivePrompt', 'nested_prompt', 'CHOICE_103_NESTED simultaneous=yes call=returned shared=1')]
+         ('recursivePrompt', 'nested_prompt', 'CHOICE_103_NESTED simultaneous=yes call=returned shared=1'),
+         ('mixedAvailability', 'mixed_availability', 'CHOICE_104_MIXED hidden=yes locked=rendered pointer=inert keyboard=available shared=1'),
+         ('allUnavailable', 'all_unavailable', 'CHOICE_104_UNAVAILABLE picks=0 bodies=0 shared=1'),
+         ('allDisabled', 'all_disabled', 'CHOICE_104_DISABLED picks=0 bodies=0 shared=1'),
+         ('allHidden', 'all_hidden', 'CHOICE_104_HIDDEN picks=0 bodies=0 shared=1')]
 
 
 def digest(data):
@@ -43,9 +47,19 @@ def preflight(args):
     assert evidence['passed'] is True and evidence['actualCore'] is True and evidence['actualMain'] is True
     assert evidence['cleanupComplete'] is True
     runtime = evidence['runtime']
-    assert set(runtime) in ({'continuation', 'return', 'jump', 'entryLabel', 'target'},
+    availability = {'mixedAvailability', 'allUnavailable', 'allDisabled', 'allHidden', 'choiceAdapter', 'choiceTemplate'}
+    assert (set(runtime) - availability) in ({'continuation', 'return', 'jump', 'entryLabel', 'target'},
                             {'continuation', 'return', 'jump', 'entryLabel', 'target', 'recursive'},
                             {'continuation', 'return', 'jump', 'entryLabel', 'target', 'recursive', 'narrationPrompt', 'characterPrompt', 'recursivePrompt', 'characterDefinition'})
+    if 'mixedAvailability' in runtime:
+        assert availability.issubset(runtime)
+        assert 'screen _ll_choice_v1(items):' in runtime['choiceAdapter']
+        assert 'textbutton i.caption action i.action sensitive i.kwargs.get("_ll_available", True)' in runtime['choiceAdapter']
+        assert '"Secret" if (choice_flag == True):' in runtime['mixedAvailability']
+        assert '"Locked" (_ll_available=(choice_flag == True)) if True:' in runtime['mixedAvailability']
+        assert runtime['allDisabled'].count('(_ll_available=(choice_flag == True))') == 3
+        assert 'screen=' not in runtime['allHidden']
+        assert all(runtime[v].count('"Shared once"') == 1 for v in ('mixedAvailability', 'allUnavailable', 'allDisabled', 'allHidden'))
     if 'narrationPrompt' in runtime:
         assert runtime['characterDefinition'] == 'define bec = Character("Bec", color="#ffffff")\n'
         assert runtime['narrationPrompt'] == runtime['continuation'].replace('    menu:\n', '    menu:\n        "Choose a route"\n', 1)
@@ -59,7 +73,7 @@ def preflight(args):
     assert '$ choice_flag = True' in runtime['continuation']
     assert runtime['entryLabel'].replace('_', '').isalnum()
     driver = (REPO / 'tests/fixtures/choice-101/driver.rpy').read_bytes()
-    assert driver.count(b'    testcase ') == 13 and b'--warp' not in driver
+    assert driver.count(b'    testcase ') == 17 and b'--warp' not in driver
     assert expected_sha256(args.checksums.read_text(), args.archive.name) == PIN
     assert digest(args.archive.read_bytes()) == PIN
     return runtime, driver
@@ -72,6 +86,7 @@ def main():
     parser.add_argument('--checksums', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--preflight', action='store_true')
+    parser.add_argument('--availability-only', action='store_true')
     parser.add_argument('--allow-fixture-execution', action='store_true')
     args = parser.parse_args()
     runtime, driver = preflight(args)
@@ -97,12 +112,18 @@ def main():
             old_env = dict(os.environ)
             os.environ.update(env)
             try:
-                for variant in ['continuation', 'return', 'jump', 'returnCaller'] + (['recursive', 'recursiveCaller'] if 'recursive' in runtime else []) + (['narrationPrompt', 'characterPrompt', 'recursivePrompt'] if 'narrationPrompt' in runtime else []):
+                variants = ['continuation', 'return', 'jump', 'returnCaller'] + (['recursive', 'recursiveCaller'] if 'recursive' in runtime else []) + (['narrationPrompt', 'characterPrompt', 'recursivePrompt'] if 'narrationPrompt' in runtime else [])
+                availability = ['mixedAvailability', 'allUnavailable', 'allDisabled', 'allHidden'] if 'mixedAvailability' in runtime else []
+                variants = availability if args.availability_only else variants + availability
+                assert variants
+                for variant in variants:
                     game = scratch / variant
                     (game / 'game').mkdir(parents=True)
                     sources = {'story.rpy': runtime['return' if variant == 'returnCaller' else 'recursive' if variant == 'recursiveCaller' else variant], 'target.rpy': runtime['target'],
                                'script.rpy': 'label start:\n    ' + ('call ' + runtime['entryLabel'] + ' from choice_fixture_return\n    \"Caller resumed\"\n    return\n' if variant in ('returnCaller', 'recursiveCaller') else 'jump ' + runtime['entryLabel'] + '\n'),
                                'driver.rpy': driver.decode()}
+                    if variant in availability:
+                        sources['loomlight_choice_v1.rpy'] = runtime['choiceAdapter']
                     if 'Prompt' in variant:
                         sources['characters.rpy'] = runtime['characterDefinition']
                     for name, source in sources.items():

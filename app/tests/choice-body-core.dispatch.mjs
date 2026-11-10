@@ -90,6 +90,39 @@ try {
  promptEditor=await editChoice(choice().id);button('Remove prompt',promptEditor);await applied(promptEditor,'Commit Beat');assert.equal(await source(path),accepted);assert.deepEqual(choice().payload.options,[yes,no]);
  stage('production prompt controls add narration, switch existing Character, preview with options, cancel/no-op, history and exact removal');
 
+ // #104 source is exported only after real production availability controls accept it.
+ const generatedChoice = 'screen choice(items):\n    style_prefix "choice"\n\n    vbox:\n        for i in items:\n            textbutton i.caption action i.action\n';
+ await saveSource('game/screens.rpy', generatedChoice);
+ const flagId=workspace.authoring.variables.find(v=>v.technicalName==='choice_flag').id;
+ function availability(row, enabled, policy='hide') {
+   const checkbox=row.querySelector('[aria-label="Available when"]');checkbox.checked=enabled;checkbox.dispatchEvent(new Event('change',{bubbles:true}));
+   if(enabled){enter(row.querySelector('[aria-label="Condition Variable"]'),flagId,'change');enter(row.querySelector('[aria-label="Condition value"]'),'true','change');enter(row.querySelector('[aria-label="If false"]'),policy,'change');}
+ }
+ let policyEditor=await editChoice(choice().id);button('Add option',policyEditor);
+ let policyRows=policyEditor.querySelectorAll('.choice-option');enter(policyRows[0].querySelector('[aria-label="Choice option text"]'),'Secret');enter(policyRows[1].querySelector('[aria-label="Choice option text"]'),'Locked');enter(policyRows[2].querySelector('[aria-label="Choice option text"]'),'Available');
+ availability(policyRows[0],true);availability(policyRows[1],true,'showDisabled');
+ await applied(policyEditor,'Commit Beat');
+ await addBodyBeat(no.id,'setVariable',form=>{enter(form.querySelector('[aria-label="Variable"]'),flagId,'change');enter(form.querySelector('[aria-label="Value"]'),'true','change');});
+ const mixed=await source(path);result.runtime.mixedAvailability=mixed;result.runtime.choiceAdapter=await source('game/loomlight_choice_v1.rpy');result.runtime.choiceTemplate=generatedChoice;
+ assert(mixed.includes('menu (screen="_ll_choice_v1"):\n'));assert(mixed.includes('"Secret" if (choice_flag == True):'));assert(mixed.includes('"Locked" (_ll_available=(choice_flag == True)) if True:'));
+ assert.match(document.querySelector('.preview-overlay.choice').textContent,/availability unknown; if false: Show disabled/);assert.equal(document.querySelectorAll('.preview-overlay.choice button').length,0);
+ const policies=choice().payload.options;assert.equal(policies[0].unavailablePolicy,undefined);assert.equal(policies[1].unavailablePolicy,'showDisabled');
+ const policyMap=await readFile(mapPath);policyEditor=await editChoice(choice().id);await applied(policyEditor,'Commit Beat');assert.equal(await source(path),mixed);assert.deepEqual(await readFile(mapPath),policyMap);
+ policyEditor=await editChoice(choice().id);policyRows=policyEditor.querySelectorAll('.choice-option');availability(policyRows[2],true,'showDisabled');await applied(policyEditor,'Commit Beat');
+ result.runtime.allUnavailable=await source(path);
+ assert(result.runtime.allUnavailable.includes('if ((choice_flag == True)) or ((choice_flag == True)) or ((choice_flag == True)):'));
+ // All-disabled and all-hidden variants are both authored with the same controls.
+ policyEditor=await editChoice(choice().id);policyRows=policyEditor.querySelectorAll('.choice-option');availability(policyRows[0],true,'showDisabled');await applied(policyEditor,'Commit Beat');result.runtime.allDisabled=await source(path);
+ policyEditor=await editChoice(choice().id);policyRows=policyEditor.querySelectorAll('.choice-option');for(const row of policyRows)availability(row,true,'hide');await applied(policyEditor,'Commit Beat');result.runtime.allHidden=await source(path);
+ await applied(document,'Undo');assert.equal(await source(path),result.runtime.allDisabled);await applied(document,'Redo');assert.equal(await source(path),result.runtime.allHidden);
+ policyEditor=await editChoice(choice().id);policyRows=policyEditor.querySelectorAll('.choice-option');availability(policyRows[1],true,'showDisabled');await applied(policyEditor,'Commit Beat');
+ assert.equal(choice().payload.options[1].unavailablePolicy,'showDisabled');
+ policyEditor=await editChoice(choice().id);enter(policyEditor.querySelector('[aria-label="If false"]'),'showDisabled','change');button('Cancel',policyEditor);
+ // Restore the earlier two-option source through accepted history before continuing #101/#103.
+ while((await source(path))!==accepted)await applied(document,'Undo');
+ stage('production availability controls author mixed, all-disabled and all-hidden menus; inert unknown preview, exact no-op and history pass');
+
+
 
  // A stale retained Then draft must not overwrite competing Source.
  button('Then',option(yes.id));let panel=document.querySelector('.story-operation[aria-label="Option ending"]');enter(panel.querySelector('[aria-label="Then"]'),'return','change');

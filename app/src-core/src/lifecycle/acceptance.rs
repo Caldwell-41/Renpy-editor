@@ -314,11 +314,13 @@ pub(crate) fn create_authored_game(data: &Path, parent: &Path, sdk: &Path) -> Li
             prompt: None,
             options: vec![
                 crate::scene::ChoiceOption {
+                    unavailable_policy: crate::scene::UnavailablePolicy::Hide,
                     condition: None,
                     text: "Rooftop".into(),
                     id: None,
                 },
                 crate::scene::ChoiceOption {
+                    unavailable_policy: crate::scene::UnavailablePolicy::Hide,
                     condition: None,
                     text: "Riverside".into(),
                     id: None,

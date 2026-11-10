@@ -22,6 +22,7 @@ export type ChoicePrompt =
   | { readonly type: "dialogue"; readonly characterId: string; readonly text: string };
 
 export interface ChoiceOption {
+  readonly unavailablePolicy?: "hide" | "showDisabled";
   readonly text: string;
   readonly id?: string;
   readonly condition?: Condition;
@@ -62,6 +63,7 @@ export interface SceneBeat {
   readonly byteStart: number;
   readonly byteEnd: number;
   readonly protected: boolean;
+  readonly sourceFallback?: string;
   readonly payload: BeatPayload;
 }
 
@@ -312,7 +314,7 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string,
       }
       case "dialogue": overlay = { kind: "dialogue", text: payload.text, beatId: beat.id }; break;
       case "narration": overlay = { kind: "narration", text: payload.text, beatId: beat.id }; break;
-      case "choice": overlay = { kind: "choice", ...(payload.prompt ? { prompt: payload.prompt } : {}), text: payload.options.map((option) => `${option.text}${option.condition ? " (availability unknown)" : ""}`).join(" · "), beatId: beat.id }; break;
+      case "choice": overlay = { kind: "choice", ...(payload.prompt ? { prompt: payload.prompt } : {}), text: payload.options.map((option) => `${option.text}${option.condition ? ` (availability unknown; if false: ${option.unavailablePolicy === "showDisabled" ? "Show disabled" : "Hide"})` : ""}`).join(" · "), beatId: beat.id }; break;
       case "jump": overlay = { kind: "jump", text: "Jump", beatId: beat.id }; break;
       case "call": overlay = { kind: "call", text: "Call Scene · preview state unknown", beatId: beat.id }; break;
       case "return": overlay = { kind: "return", text: "Return to caller or main menu", beatId: beat.id }; break;
@@ -1161,7 +1163,7 @@ export function renderSceneAuthoring(
     if (beat.structuralPlaceholder) { const empty = document.createElement("p"); empty.textContent = "Empty branch · source keeps pass until a Beat is added."; card.append(empty); return; }
     if (beat.protected) {
       const protectedPanel = document.createElement("div"); protectedPanel.className = "protected-code";
-      const explanation = document.createElement("p"); explanation.textContent = beat.payload.type === "customCode" ? beat.payload.reason : "Protected source";
+      const explanation = document.createElement("p"); explanation.textContent = beat.sourceFallback ?? (beat.payload.type === "customCode" ? beat.payload.reason : "Protected source");
       const source = document.createElement("pre"); source.textContent = beat.payload.type === "customCode" ? beat.payload.source : "";
       const open = button("View in Source", "button secondary"); open.disabled = !actions.viewSource;
       open.addEventListener("click", () => actions.viewSource?.(scene.sourcePath, beat.byteStart, beat.byteEnd, scene.sourceRevision));
@@ -1521,7 +1523,7 @@ function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload, existing =
       addPrompt.addEventListener("click", () => changePrompt(true)); removePrompt.addEventListener("click", () => changePrompt(false));
       controls.push(speaker, promptText); drawPrompt(); host.append(promptRow);
       const optionHost = document.createElement("div"); optionHost.className = "choice-options"; host.append(optionHost);
-      const rows: { id?: string; text: HTMLInputElement; row: HTMLElement; guard: ReturnType<typeof buildAvailabilityEditor>; validateText: () => void }[] = [];
+      const rows: { id?: string; text: HTMLInputElement; row: HTMLElement; guard: ReturnType<typeof buildAvailabilityEditor>; policy: HTMLSelectElement; validateText: () => void }[] = [];
       const redraw = (): void => { rows.forEach((row, index) => { row.row.querySelector("strong")!.textContent = `Option ${index + 1}`; optionHost.append(row.row); }); host.dispatchEvent(new Event("input", { bubbles: true })); };
       const addOption = (option: ChoiceOption = { text: "" }): void => {
         const row = document.createElement("div"); row.className = "choice-option";
@@ -1530,12 +1532,17 @@ function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload, existing =
         row.append(number, labelled("Choice option text", text));
         const validateText = validateField(text, () => { requiredText(text, "Choice text"); });
         const guard = buildAvailabilityEditor(model.authoring.variables, option.condition); row.append(guard.host);
+        const policy = selectOf([{ value: "hide", label: "Hide" }, { value: "showDisabled", label: "Show disabled" }], option.unavailablePolicy ?? "hide");
+        policy.setAttribute("aria-label", "If false");
+        const policyField = labelled("If false", policy); guard.host.append(policyField);
+        const refreshPolicy = (): void => { policyField.hidden = !guard.host.querySelector<HTMLInputElement>('input[aria-label="Available when"]')!.checked; };
+        guard.host.addEventListener("change", refreshPolicy); refreshPolicy();
         const remove = button("Remove option", "text-button"); remove.addEventListener("click", () => { const index = rows.findIndex(item => item.row === row); if (index >= 0) rows.splice(index, 1); row.remove(); redraw(); });
         const up = button("Move option up", "text-button"), down = button("Move option down", "text-button");
         const move = (delta: number): void => { const index = rows.findIndex(item => item.row === row), to = index + delta; if (to < 0 || to >= rows.length) return; [rows[index], rows[to]] = [rows[to]!, rows[index]!]; redraw(); };
         up.addEventListener("click", () => move(-1)); down.addEventListener("click", () => move(1));
         const note = document.createElement("p"); note.textContent = option.id ? "Option body follows below. Then changes only its ending." : "Starts empty. Continue after the Choice.";
-        row.append(note, up, down, remove); rows.push({ ...(option.id ? { id: option.id } : {}), text, row, guard, validateText }); controls.push(text); optionHost.append(row);
+        row.append(note, up, down, remove); rows.push({ ...(option.id ? { id: option.id } : {}), text, row, guard, policy, validateText }); controls.push(text); optionHost.append(row);
       };
       payload.options.forEach(addOption); if (!rows.length) addOption();
       const addChoice = button("Add option", "text-button"); addChoice.addEventListener("click", () => { addOption(); redraw(); }); host.append(addChoice);
@@ -1544,7 +1551,7 @@ function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload, existing =
         if (!rows.length) throw new Error("A Choice needs at least one option.");
         validatePrompt();
         const prompt: ChoicePrompt | undefined = hasPrompt ? speaker.value === "narration" ? { type: "narration", text: promptText.value } : { type: "dialogue", characterId: required(speaker), text: promptText.value } : undefined;
-        return { type: "choice", ...(prompt ? { prompt } : {}), options: rows.map(row => { row.validateText(); const condition = row.guard.read(); return { ...(row.id ? { id: row.id } : {}), text: row.text.value, ...(condition ? { condition } : {}) }; }) };
+        return { type: "choice", ...(prompt ? { prompt } : {}), options: rows.map(row => { row.validateText(); const condition = row.guard.read(); return { ...(row.id ? { id: row.id } : {}), text: row.text.value, ...(condition ? { condition, ...(row.policy.value === "showDisabled" ? { unavailablePolicy: "showDisabled" as const } : {}) } : {}) }; }) };
       }; break;
     }
     case "jump": { const destination = scenes(payload.sceneId); add("Destination Scene", destination); read = () => ({ type: "jump", sceneId: required(destination) }); break; }

@@ -123,7 +123,26 @@ test("illustrative option selection shows a nested prompt with its options witho
   const state = deriveScenePreview(s.model.scenes[0]!, undefined, new Map([["options", "arm"]]));
   assert.equal(state.overlay?.beatId, "inner");
   assert.deepEqual(state.overlay?.prompt, { type: "dialogue", characterId: "speaker", text: "Inner prompt" });
-  assert.match(state.overlay!.text, /Unknown answer \(availability unknown\)/);
+  assert.match(state.overlay!.text, /Unknown answer \(availability unknown; if false: Hide\)/);
   assert.deepEqual(state.variables, {});
+  await s.close();
+});
+
+test("Choice unavailable policy is per option and retained after refusal without guessing live values", async () => {
+  const writes: SceneCommand[] = [];
+  const s = setup([choice, ending], async command => { writes.push(command); throw Error("Source changed"); });
+  s.host.querySelector<HTMLButtonElement>('[data-beat-id="choice"] .beat-select')!.click();
+  const row = s.host.querySelector<HTMLElement>('.choice-option')!;
+  const policy = row.querySelector<HTMLSelectElement>('[aria-label="If false"]');
+  assert.ok(policy, "approved Hide / Show disabled control");
+  assert.equal(policy.value, "hide");
+  policy.value = "showDisabled"; policy.dispatchEvent(new Event("change", { bubbles: true }));
+  click(s.host, "Commit Beat"); await tick();
+  const beat = writes[0]!.beat as { options: { unavailablePolicy?: string }[] };
+  assert.equal(beat.options[0]!.unavailablePolicy, "showDisabled");
+
+  assert.equal(policy.value, "showDisabled"); assert.ok(policy.isConnected);
+  assert.match(s.host.querySelector('.preview-overlay.choice')!.textContent!, /availability unknown/);
+  assert.equal(s.host.querySelectorAll('.preview-overlay.choice button').length, 0);
   await s.close();
 });

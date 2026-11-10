@@ -577,7 +577,13 @@ approved prompt row above the options: "+ Prompt", a narration/existing Characte
 picker, prompt text and removal. Commit and Cancel use the existing retained Beat
 draft. Accepted prompts appear with the options in the illustrative preview;
 manual option selection can expose a nested prompt without evaluating its guard.
-Disabled options, Repeat and Picked options remain later #98 slices. The
+#104 adds each guarded option's If false control with Hide (default) and Show
+disabled. Commit/Cancel and refused drafts use the same existing Beat editor.
+The inert preview labels availability as unknown and names the false-condition
+policy; it does not infer values or allow game selection. Editing focus remains
+separate from game sensitivity and picked state. Unsupported runtime templates
+show a protected Source fallback reason. Repeat and Picked options remain later
+#98 slices. The
 full Combined layout and palette remain with #110. Arithmetic uses the accepted
 shared controls.
 Until a capability exists, the editor says it is not built instead of showing a

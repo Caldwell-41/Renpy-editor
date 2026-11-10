@@ -74,6 +74,8 @@ pub struct FlowEdge {
     pub scene_id: String,
     pub beat_id: Option<String>,
     pub option_ordinal: Option<usize>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub unavailable_policy: Option<super::UnavailablePolicy>,
     pub text: String,
     pub kind: String,
     pub location: FlowLocation,
@@ -841,6 +843,7 @@ fn project_scene_legacy(
             scene_id: scene.id.clone(),
             beat_id: mapped.map(|beat| beat.id.clone()),
             option_ordinal: option,
+            unavailable_policy: None,
             text: title,
             kind: kind.into(),
             location: FlowLocation {
@@ -865,6 +868,7 @@ fn project_scene_legacy(
             scene_id: scene.id.clone(),
             beat_id: None,
             option_ordinal: None,
+            unavailable_policy: None,
             text: "Incomplete / unknown flow".into(),
             kind: "unknown".into(),
             location: FlowLocation {

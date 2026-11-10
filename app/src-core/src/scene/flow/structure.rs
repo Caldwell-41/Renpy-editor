@@ -111,6 +111,7 @@ fn edge(
         scene_id: scene.id.clone(),
         beat_id: Some(beat.id.clone()),
         option_ordinal: None,
+        unavailable_policy: None,
         text,
         kind: kind.into(),
         location: location(scene, revision, beat),
@@ -338,6 +339,7 @@ pub(super) fn project(
                         }
                     }
                     choice.condition = option.condition.clone();
+                    choice.unavailable_policy = Some(option.unavailable_policy);
                     choice.editable = beat.owner.is_none()
                         && options.iter().all(|o| o.condition.is_none())
                         && !beats
