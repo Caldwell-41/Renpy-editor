@@ -50,16 +50,15 @@ and #101–#106 on `codex/choice-98`, `in_progress` in
 [draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125).
 #101–#105 have public-authoring, both-target SDK and automatic CI evidence.
 #106 and all four review corrections are published at `9d229ea4`. Windows passed
-all 27 picked-state outcomes, including save/close/new-process Load, rollback and
-New Game. Exact-head CI passed 397 frontend tests and all 18 browser/controller
-fixtures. [The delivery record](../tasks/evidence/choice-98.md#windows-106-completion-and-mac-approval-wait)
-owns scoped proof, remaining gates and the #104 receipt limit.
+all 27 picked-state outcomes there. Mac passed all 27 on documentation successor
+`ae057e3a`, including actual Save/exit/new-process Load, rollback and New Game.
+The fresh production controller passed thirteen stages and 284 requests.
+[The delivery record](../tasks/evidence/choice-98.md#mac-106-final-qualification) owns
+exact candidates, audit, limits and the #104 receipt limitation.
 
-The last Mac SDK run passed 26/27, including save/close/new-process Load.
-Mac rollback/New Game and final-driver proof remain missing. Kris approved up to
-two additional Mac starts on 2026-11-11, extending #106 to six within shared 17/20.
-Entry use is Mac 15/20, Windows 7/20, zero reservations. The coordinator is preparing
-the fresh controller export and offline preflight.
-Rendered comparison,
-native/human evidence and final validation remain pending. #98/#106 stay open;
-full Story #110 and other PR #122 retro items remain unselected.
+Kris approved up to two additional Mac starts on 2026-11-11; one passed and the
+second remains unused. Shared use is Mac 16/20, Windows 7/20, zero reservations.
+Automatic CI on `ad4c2760` passed 397 frontend tests and all eighteen selected
+browser/controller fixtures. Successor CI, rendered comparison, native/human
+evidence and final validation selection remain pending. #98/#106 stay open and
+PR #125 stays draft; full Story #110 and other PR #122 retro items remain unselected.

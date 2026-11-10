@@ -30,31 +30,28 @@ passed 397 frontend tests and all eighteen browser/dispatch fixtures.
 The optional parsed-offset typing refactor is deferred as wider mapping/payload work,
 not a confirmed defect. Original Standards and Spec reports remain separate.
 
-Mac start 4 on `49e44c12` passed 26/27, including actual save, process exit and
-new-process Load. Rollback/New Game failed before entry because Load covered Start.
-The final vbox driver remains unqualified on Mac. All four starts stay charged,
-retained and cleaned. On 2026-11-11, Kris approved up to two additional Mac starts,
-extending #106 to six total within shared 17/20. Entry use is Mac 15/20 and Windows
-7/20, zero reservations. Source comparison of 29 runtime roles establishes no
-final runtime qualification.
+After Kris approved up to two additional Mac starts on 2026-11-11, start 5 passed
+all 27 picked outcomes on `ae057e3a`. The fresh controller passed thirteen stages
+and 284 requests; pinned tools and official archive/fixture preflight passed.
+Sixteen compile/lint children, ten positive play cases and the intended negative
+passed their expected outcomes. Actual Save/exit/new-process Load, ordinary Page Up
+rollback and MainMenu/Start passed; primary/sync save hashes matched before Load.
+All positive markers appeared once, no child timed out/truncated, and owned scratch
+was removed. The independent audit and 42-entry private manifest passed.
 
-Published `9d229ea4` passed Windows #106: fresh thirteen-stage/284-request
-controller, offline preflight and all 27 SDK outcomes. Save/exit/fresh-process Load,
-ordinary Page Up rollback and MainMenu/Start passed, with matched saved artifacts.
-The intended negative failed at its exact assertion; positive markers appeared once.
-The Windows assignment used 1/4 starts and cleaned owned scratch/processes. The
-dedicated branch is clean at `9d229ea4`; the registered root remains at `251fb477`.
-Automatic run `42813998029`, attempt 1, also passed at that exact head. This
-documentation successor changes no implementation or SDK input.
-The [#104 duplicate-receipt limit](../tasks/evidence/choice-98.md#104-receipt-retention-limit)
-remains unchanged; preserve originals and the frozen reference.
+Published `9d229ea4` passed the same 27 Windows outcomes. Source, driver, qualifier
+and SDK adapter are unchanged by subsequent coordinator commits. Exact-head
+automatic run `42817680459`, attempt 1, passed on `ad4c2760`, including 397 frontend
+tests and eighteen selected browser/controller fixtures. Prior failures and the
+[#104 duplicate-receipt limit](../tasks/evidence/choice-98.md#104-receipt-retention-limit)
+remain retained. These bounded results do not establish combined acceptance.
 
-The coordinator now owns the approved Mac extension. Rebuild the production
-controller, complete offline preflight, then reserve and charge the first of up to
-two additional starts for all 27 picked outcomes. Use the second only after a
-diagnosed failure requiring a correction. The PR is linked but unwatched. No worker
-remains active. Preserve worktrees, unique evidence, `app/node_modules` and recovery
-below. No cleanup, native editor/package or manual CI campaign is selected.
+The coordinator owns publication and successor CI audit. Mac #106 used 5/6 starts;
+shared use is Mac 16/20, Windows 7/20, zero reservations. The second additional Mac
+start remains unused and conditional on a diagnosed failure requiring correction.
+No SDK repeat is needed for these coordinator-only changes. No worker remains
+active. Preserve worktrees, evidence, `app/node_modules` and protected recovery
+below. Native editor/package and manual CI campaigns are not yet selected.
 #98/#106 remain open/draft; rendered comparison, native/human evidence and final
 validation selection remain pending. Full Story #110 and #31/#55 remain separate.
 

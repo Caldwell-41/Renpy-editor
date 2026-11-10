@@ -8,10 +8,10 @@ with the implement-spec workflow and instructed the agent to start building on
 Delivery is `in_progress`. #101–#105 are integrated with public-authoring,
 both-target SDK and automatic CI evidence. The Stage 1 runtime gate is complete on
 `4339ccfc`. #106 and all four review corrections are published at `9d229ea4`.
-Windows passed all 27 picked-state outcomes on that exact candidate, including
-rollback/New Game. Exact-head automatic CI passed. The last Mac candidate passed
-26/27; Mac rollback/New Game and final-driver proof remain missing. These bounded
-results do not establish combined acceptance.
+Windows passed all 27 picked-state outcomes on that exact candidate. Mac passed
+all 27 on documentation successor `ae057e3a`, including actual Save/exit/new-process
+Load, ordinary rollback and New Game. Exact-head automatic CI passed on `ad4c2760`.
+These bounded results do not establish combined acceptance.
 
 Integration branch `codex/choice-98` starts at accepted integration
 `63221b44d72c1c100815e9e638cbec5133ffc1eb` from
@@ -30,7 +30,8 @@ generated-choice-screen owners. All implementer/test assignments are complete.
 #105 and #106 Windows assignments passed. The coordinator owns integration/status;
 no worker or test owner remains active. On 2026-11-11, Kris approved up to two
 additional Mac #106 starts, extending its allowance to six within shared 17/20.
-The coordinator owns this bounded qualification.
+The coordinator completed the first additional invocation, with all 27 outcomes
+passing. The second additional start remains unused.
 
 ## Dependencies and approved design
 
@@ -65,8 +66,10 @@ lint and named normal-play children; retain each child's result without charging
 them again as harness starts. This allows focused coverage across six tickets and
 bounded corrections. #101 had a four-start allowance per host after offline
 preflight and pinned-SDK verification; it used three Mac and two Windows starts.
-Current usage is Mac 15/20, Windows 7/20, zero reservations. #102 used 2/4 Mac
-starts and 1/4 Windows starts. #103 used 3/4 Mac starts, including two failed
+Current usage is Mac 16/20, Windows 7/20, zero reservations. Mac #106 used five
+of its six approved starts; the fifth passed all 27 picked outcomes. The unused
+additional start is conditional on a diagnosed failure requiring correction.
+#102 used 2/4 Mac starts and 1/4 Windows starts. #103 used 3/4 Mac starts, including two failed
 selector attempts; its final run passed all 31 expected SDK children. #103 Windows
 used 1/4 starts and passed all 31 children. #104 used 1/4 Mac starts and passed
 exactly 12 selected children; that run selected no wrong-outcome child. #104 Windows
@@ -75,11 +78,11 @@ used 1/4 starts and passed its 12 selected children, also without a negative chi
 passed all ten selected children, including the intended negative.
 
 #105 Windows used 1/4 starts and passed all ten selected outcomes. #106 Mac used
-four original starts from 11/20; its final run passed 26/27 outcomes and remains
-a failed qualification. On 2026-11-11, Kris explicitly approved up to two further
+four original starts from 11/20; the fourth passed 26/27 outcomes and remains
+a failed qualification. The approved fifth start subsequently passed all 27. On 2026-11-11, Kris explicitly approved up to two further
 Mac starts for the corrected picked-state plan. The #106 allowance is now six
-starts total, within shared Mac use of 17/20. The first additional start selects
-all 27 picked outcomes. The second requires a diagnosed failure and correction;
+starts total, within shared Mac use of 17/20. The first additional start selected
+and passed all 27 picked outcomes. The second requires a diagnosed failure and correction;
 success does not authorize an automatic repeat. No package, native-editor, browser
 or manual CI campaign is included in that approval.
 
@@ -101,9 +104,11 @@ The corrected candidate is published at `9d229ea4`. The
 [review-correction merge](#review-corrections-integration) owns exact tree equality,
 focused result admission and source-comparison limits. Exact-head CI and Windows
 #106 are audited passing under [the completion below](#windows-106-completion-and-mac-approval-wait).
-Kris approved the bounded two-start Mac extension on 2026-11-11. Rebuild the
-public controller from the current candidate, complete offline pinned-SDK preflight,
-then reserve and charge one start before the 27-outcome picked-only invocation.
+Kris approved the bounded two-start Mac extension on 2026-11-11. The first
+additional run passed all 27 picked outcomes on `ae057e3a`; its independent audit
+and limits are [recorded below](#mac-106-final-qualification). Publish the result
+and audit automatic CI on the successor. Rendered comparison, native/human evidence
+and final validation selection remain open.
 
 Windows's dedicated branch is clean at `9d229ea4`; no worker remains active.
 Preserve the protected
@@ -1146,3 +1151,62 @@ Candidate `ad4c276039c54c288136ee35cef2450b7caa6794` changes only coordinator
 records from Windows-qualified `9d229ea4`. Automatic Repository quality run
 `42817680459` reports success on this exact head; detailed job audit is pending.
 No new SDK start has run when this approval is recorded.
+
+### First additional Mac invocation
+
+Fresh production Story/main to ApplicationHost/core passed thirteen stages and
+284 requests, with cleanup and no SDK execution. Offline preflight verified the
+corrected driver, fresh accepted source, Mac ARM64 and official Ren'Py 8.5.3 archive
+against its published checksum. Pinned Node 24.19.0, npm 11.9.0, Rust 1.90.0 and
+complete Python 3.12 were verified.
+
+The coordinator charges #106 start 5 of the approved 6 immediately before invoking
+the picked-only qualifier on `ae057e3afc1f31beedbcf7b8c19c025fa7b39e6e`. Shared Mac use
+is now 16/20, Windows remains 7/20. This selects exactly 27 outcomes and no native
+editor/package/browser/manual CI operation. Its result is pending. The controller
+was exported before the approval-record commit; only coordinator documents changed.
+
+## Mac #106 final qualification
+
+The first additional invocation passed on exact candidate
+`ae057e3afc1f31beedbcf7b8c19c025fa7b39e6e`. Its only changes from Windows-qualified
+`9d229ea4` are coordinator records. The fresh production-controller journey passed
+thirteen stages and 284 requests. The driver, qualifier and SDK adapter match the
+corrected integration inputs. Offline official archive/fixture preflight passed.
+
+All 27 selected outcomes executed: sixteen compile/lint successes, ten positive
+normal-play successes and the intended negative. Every positive marker appeared
+once. The negative exited 1 at `_choice106_state(1)`, with the expected failed-test
+status and no acceptance marker. No child timed out or truncated output. Unselected
+SDK test-runner cases are excluded from these counts.
+
+Actual Save closed its process before the next bounded invocation created a fresh
+Load process. The primary and sync save artifacts matched each other and the hashes
+checked immediately before Load. The loaded mark remained selectable. Ordinary
+Page Up rollback and MainMenu/Start passed all twelve lifecycle assertions,
+restoring the earlier state and starting a fresh current game. This uses the
+unchanged adapter's new-process/wait boundary; no separate PID observer was added.
+
+The coordinator independently checked every child name, argv, exit, duration,
+marker, source/driver/authored hash, save/load hash, lifecycle assertion summary and
+scratch removal. The receipt reports cleanup complete, with no native editor
+launch. A 42-entry private evidence manifest passed readback. The producing-host
+receipt, raw logs, frozen controller export, ledger and audit remain retained
+outside Git. Earlier failed receipts and the #104 duplicate-receipt limit remain
+unchanged.
+
+Mac #106 used 5/6 total starts, including one of the two newly approved starts.
+Shared use is Mac 16/20 and Windows 7/20, zero reservations. The second approved
+start remains unused; success does not call for another run. No product source,
+fixture, adapter or schema change was needed.
+
+The coordinator also audited automatic run `42817680459`, attempt 1, on exact
+`ad4c2760`: 397 frontend tests passed with zero failures/skips, all eighteen selected
+browser/controller fixtures passed, production build and Rust formatting passed,
+and repository validation passed 1,890 files. Four executed jobs succeeded and
+five unselected specialist jobs were skipped. This qualifies the selected draft
+automatic checks, not final native/human acceptance.
+
+#98/#106 and PR #125 remain open/draft. Publish this result without replaying SDK
+for coordinator-only changes. Audit successor CI; rendered comparison, native/human
+evidence and final validation selection remain pending.
