@@ -4359,7 +4359,7 @@ starts the handoff. First safely fetch/fast-forward the branch and check reposit
 pins, locked dependencies, MSVC/Windows SDK, WebView2 and the verified pinned Ren'Py
 SDK. Current pins are defined in app/package.json and app/rust-toolchain.toml;
 Python 3.11+ is required by app/README.md. Environment readiness does not itself
-claim a Windows test pass. [HANDOVER](../../status/HANDOVER.md#windows-entry-prompt)
+claim a Windows test pass. [The historical entry prompt](#windows-entry-prompt)
 contains the entry prompt and completion conditions.
 
 This is a bounded continuation of the same #36 native interaction problem, not an
@@ -4544,3 +4544,53 @@ The final documentation edits only record those review results and settled count
 No further tests, package, editor or SDK launch was needed. The unchanged application
 retains the passing typecheck/231-test result, and final repository/whitespace checks
 apply to these closeout records. #36 is ready for final publication and tracker closure.
+
+## Windows entry prompt
+
+Historical #36 handoff, completed on 2026-10-24. Moved from HANDOVER during the
+2026-11-10 status cleanup. The later Windows closeout above supersedes its pending
+actions; this prompt grants no new execution allowance. Preparation was published
+at `4a4bef9` on `codex/phase3b-screen-designer`.
+
+Continue Loomlight #36 on this Windows x64 machine. Inspect local changes and the
+remote before updating; preserve unrelated work. Fetch `origin`, switch safely to
+`codex/phase3b-screen-designer`, and fast-forward from its remote branch. If the
+checkout diverges, report the exact divergence before merging or resetting. Record
+the fetched SHA. Read AGENTS.md, CURRENT, this HANDOVER, live #36 and its linked
+Windows selection record. This Windows chat takes sole ownership of this bounded
+assignment when I start it; the Mac chat has handed it off.
+
+First verify build readiness against repository pins: Node/npm in app/package.json,
+Rust and rustfmt in app/rust-toolchain.toml, Python 3.11+ from app/README.md, Windows
+MSVC C++ build tools and SDK, WebView2, and official pinned Ren'Py 8.5.3 with its
+published checksum verified. Check actual resolved versions and executable paths.
+Refresh project-local locked dependencies as needed; do not upgrade lockfiles or
+replace pins with latest versions. Report any system prerequisite that needs
+installation before changing the machine. Finish with a concise readiness result
+and the exact missing prerequisite if blocked.
+
+Prepare the existing `canvas-input` packaged probe for a disposable public Help
+fixture and isolated profile. Read app/README.md and docs/testing/NATIVE.md for the
+build and native evidence rules, and app/scripts/run-runtime-ui-probes.py plus
+app/scripts/canvas_input_evidence.py for the guided case and admission checks.
+Use a fresh output directory and verified SDK archive, with an explicit
+`canvas-input` selector. Preserve the existing conservative checks. Build one
+Windows candidate after readiness passes; do not run a package matrix. Wait for my
+availability before starting the editor session. I will handle all UI; no Computer Use.
+
+Run the eight guided physical-input stages: width draft, Escape, Enter, keyboard
+Undo, one-pixel resize, one-pixel movement, move-handle drag and anchored resize.
+Audit exact source/history restoration, fresh helper geometry, normal exit and
+owned-process/fixture cleanup. Record my separate observation of whether moving
+and resizing were smooth without sticking, jumps or lost focus. Renderer trusted
+events alone are not proof of physical input; retain the external human/native audit
+without rewriting raw receipt flags. Numerical timing is waived on both targets for
+this release and remains unverified. Do not build a recorder or run timing series.
+
+Stay within #36's remaining allowance. Diagnose any real functional failure at its
+first incorrect boundary; repeat only the affected case after a focused correction.
+Preserve earlier evidence and unrelated work. Once the Windows functional checks,
+my smoothness acceptance and cleanup pass, record the criterion-to-evidence result
+with candidate identities, commit/push the in-scope closeout and update/close #36.
+Full supported-subset and phase acceptance stay separate. If a required result is
+missing, report that named result without expanding into another test campaign.

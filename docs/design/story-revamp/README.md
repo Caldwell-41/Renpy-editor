@@ -423,6 +423,48 @@ The fourth mock remains on port 5176 and the original three on 5175. Reload/rese
 loses fictional story edits; only the view preference uses session storage. Real
 project saves, engine execution and native acceptance were not exercised.
 
+## Retained review and workspace recovery
+
+These historical recovery notes moved from CURRENT/HANDOVER on 2026-11-10.
+The approval and production release sections above own current decisions. Old
+branch names, preview ports and pending instructions describe their observation
+time; verify current refs before restoring a reference.
+
+The fourth mock's exact reviewed source is
+`214186abb53c9c985e62f716712c4772f159dc2e`. Its historical branch was
+`codex/story-combined-fourth-mock`, stacked on `codex/story-screen-prototypes`,
+with reference baseline `bbd5a4dd` and handoff `4b2e522d`. Preserve ignored
+`.toolchains/story-combined/round-1/` through `round-6/`, their terminal reviews,
+numbered diagnosis folders, `SCROLL-DIAGNOSIS.md` and Round 4's `DIAGNOSIS.md`.
+They retain early harness/field-height failures, the scroll-anchoring correction,
+the resize-caret bookmark defect, Round 3's opened Else-if crash and Round 4's
+compact menu obstruction. The last two were fixed and independently rechecked.
+Do not transfer earlier scores to changed source or restart the exhausted
+six-round review without a new selection.
+
+The final folder retains frozen HTML, source/hash metadata and the published
+readiness results described above. Standalone delivery is
+`.toolchains/story-combined/story-combined-reviewed.zip`. Kris's three favorable
+images and six refinement notes remain under ignored `story-combined/references/`.
+Opus and Sol used xhigh, independent Astra used high, and all used Standard speed.
+Managed browser snapshots timed out twice; shell checks used the shared Chrome
+launcher outside the sandbox and closed only owned browsers. This supplied no
+native, engine or durable-save acceptance.
+
+Story Combined v1's later approval source is `6ecf6470`. Its three council rounds
+ended with Opus 9.1 and Sol 9.2 before a gate cap; remaining findings were fixed
+but unscored. Revision evidence is under ignored
+`.toolchains/story-combined/revision/`. [PR #108](https://github.com/Caldwell-41/Renpy-editor/pull/108)
+merged the approved mock at `03d5b7fe`. The interview branch
+`codex/story-combined-v1-grill` started from approved-design head `3f5a6de9`;
+PR #121 later consolidated its decisions and conflict reference.
+
+Historical previews used port 5176 for Combined, 5175 for the original standalone
+three mocks from ignored `story-lan/`, and 5174 for the earlier Design Lab. The
+5175 server was found offline during Round 4 and restored from unchanged files.
+These observations do not establish a currently running server. Earlier
+three-mock reports and disclosure limits remain under Evidence and selection.
+
 ## Three-mock reference
 
 Claude Opus 5.5 at high reasoning designed this revision after inspecting the

@@ -188,6 +188,11 @@ after ancestry/equivalence and open-PR checks. Only the primary worktree remains
 state and existing stashes were preserved. No CI watch or product process is pending.
 The user-requested completion notification is the final closeout action.
 
+The later status handoff records no pending cleanup, watcher or product correction.
+Issue #64 and ignored `.toolchains/architecture-64/continuation.json` retain the
+final publication/notification receipts. This recovery pointer moved from
+HANDOVER during the 2026-11-10 status cleanup.
+
 CURRENT is 1,741 words and HANDOVER is 3,465 words, above their review targets.
 They retain earlier candidate-specific acceptance limits and protected native recovery;
 this closeout replaces its live section without deleting that inherited evidence.

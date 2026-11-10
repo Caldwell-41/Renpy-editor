@@ -108,5 +108,10 @@ There is an existing CI guardrail. This retro proposes wiring its missing Rust
 coverage, rather than adding generic lint instructions. No new coding-standards
 document or global AGENTS expansion is warranted by these findings.
 
-The retrospective adds this report only. The environment changes above remain
-candidates for selection.
+## Selected status cleanup
+
+Kris selected only item 4, then authorized its PR, relevant checks, merge and safe
+branch/workspace retirement. Items 1–3 remain unselected. The
+[maintenance record](agent-documentation-ownership.md#status-record-cleanup-2026-11-10)
+owns preservation and verification. This selection changes documentation and the
+PR's validation-plan identity; it adds no test, toolchain or acceptance-owner rule.

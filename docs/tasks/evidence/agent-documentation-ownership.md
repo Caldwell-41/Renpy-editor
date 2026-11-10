@@ -137,3 +137,61 @@ migration and this follow-up remain local. On 2026-10-22 the user selected separ
 local commits for this maintenance and the Phase 3B review/canvas requirement records.
 The pre-commit check passes all 13 validator regressions, repository validation across
 837 files and whitespace checks. No push, native run or CI dispatch was selected.
+
+## Status record cleanup 2026-11-10
+
+Kris selected only item 4 of the [PR #122 retro](pr122-retro.md), then authorized
+publication, relevant checks, merge and safe retirement of this task's branch and
+workspace. Work is on `codex/retro-pr-122`, based on integration closeout `67ee24a6`.
+The existing PR validation plan selects ordinary Repository quality only.
+No testing, toolchain or acceptance-owner change from retro items 1–3 is selected.
+
+CURRENT and HANDOVER now contain the accepted baseline, actual remaining product
+work, selected documentation outcome and protected recovery. Completed narratives
+are replaced by conditional pointers to their existing owners. The arithmetic
+closeout's obsolete publish/remove-worktree instruction is superseded by merged
+PR #123 and the observed single primary worktree. Choice #98 and Story #110 were
+read back open; the unrelated dependency PR #69 remains open and protected.
+
+### Preservation destinations
+
+| Removed live narrative | Existing owner |
+| --- | --- |
+| Arithmetic delivery and retirement | [Archived delivery](../archive/2026-11-10-shared-arithmetic.md), [review/closeout](arithmetic-review.md#merge-and-retirement-2026-11-10) |
+| Story references, approval, interview and old councils | [Design notes](../../design/story-revamp/README.md); unique workspace/review details are co-located under retained recovery |
+| Test selection and automatic checks | [Test selection](../active/test-selection.md), [automatic checks](../active/automatic-code-checks.md), including the existing ignored operation-policy snapshots |
+| L20 samples and L12/L13 controls | [Sample fidelity](sample-fidelity.md), [bars/image buttons](bars-and-image-buttons.md) |
+| L11/L19 ordered actions and nested canvas | [Action/canvas evidence](screen-actions-and-nested-canvas.md) |
+| L10/L18 and L08/L09 Help/component closeouts | [Dialog/canvas](help-dialog-and-canvas.md), [components/Help](components-and-help-panel.md) |
+| Screens audit, connected testing and complete CI | [Audit fixes](phase-3b-audit-fixes.md), [connected testing](../archive/2026-11-01-connected-native-testing.md), [CI validation](../active/ci-validation.md) |
+| L07, text ownership, L05 and L06 | [Shared look](shared-look.md), [text ownership](screen-text-ownership.md#historical-merge-and-retirement), [fonts](project-fonts.md), [images](ui-image.md) |
+| L04/L03 and architecture retirement | [Nested layout](nested-layout.md), [numeric layout](numeric-layout.md), [architecture](phase-3b-architecture.md#merge-and-cleanup) |
+| L02 and L17 qualification, failures and counters | [Help composition](simple-help-layout.md), [canvas rendering](canvas-rendering.md); the Windows entry prompt moves verbatim into its owner |
+| L01, earlier Help, scheduling and worktree policy | [Owned screen](owned-blank-screen.md), [Help evidence](help-screen-production.md), [delivery reference](../reference/phase-2-3-delivery.md), [worktrees](../active/parallel-agent-worktrees.md) |
+| Phase 2, walkthrough, CI reliability and full-app comparison | Their existing [Phase 2](../active/phase-2-initial-llm-assistance.md), [walkthrough](../active/walkthrough-redesign-implementation.md), [CI](../active/ci-harness-reliability.md) and [lab](../active/browser-ui-design-lab.md) owners; protected native recovery stays live |
+
+HANDOVER's complete native recovery section remains byte-for-byte unchanged,
+including both package hashes, protected draft/fixture handling, remaining native
+sequence and independent counters. Protected stash identities and the unrelated
+audit pointer remain live. Existing explicit status anchors remain as compatibility
+routes; the evidence link to the moved Windows prompt now targets its owner.
+
+The prior live wording remains in Git at `f1297711`; no new status snapshot is
+created. Short and full candidate identities in completed sections resolve through
+their evidence owners or that immutable source history. Unique text-owner merge
+identity and architecture notification-receipt pointers are now in their owners.
+Historical failures, closed allowances and candidate-specific acceptance remain
+unchanged. Documentation does not refresh expired artifacts or qualify new binaries.
+
+### Local verification
+
+CURRENT is 282 words and HANDOVER is 844 words, within the existing review targets.
+The prior records contained 4,783 and 8,377 words. Repository validation passes all
+1,889 files, including local section links and privacy checks; whitespace passes.
+Direct comparisons confirm the native recovery body and moved Windows prompt are
+byte-identical. All six original explicit status anchors and all four original
+binary/archive hashes remain in tracked documentation. The nine changed paths
+are Markdown plus the validation-plan identity; the existing PR scope classifier
+recognizes each as documentation. No executable, workflow trigger, dependency,
+qualification selection or private recovery artifact changed. The PR owns final
+automatic CI, merge identity and branch-retirement receipts.
