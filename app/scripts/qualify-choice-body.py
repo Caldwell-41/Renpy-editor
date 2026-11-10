@@ -190,7 +190,7 @@ def main():
                         row = dict(name=name, passed=False, expected='rejected wrong outcome' if case in ('wrong_outcome', 'repeat_wrong_outcome', 'picked_wrong_outcome') else 'success')
                         receipt['children'].append(row)
                         if case == 'picked_load':
-                            saves = {str(p.relative_to(scratch)): digest(p.read_bytes()) for p in scratch.rglob('choice106.save')}
+                            saves = {str(p.relative_to(scratch)): digest(p.read_bytes()) for p in scratch.rglob('choice106-LT1.save')}
                             assert saves and saves == receipt['savedArtifacts'], 'missing/changed save before new-process Load'
                             row['loadedArtifacts'] = saves
                         result = run_bounded(command_argv(sdk, command, game, testcase='choice_body::' + case if case else None,
@@ -205,7 +205,7 @@ def main():
                             row['passed'] = result.exit_code == 0 and (marker is None or result.output.count(marker) == 1 and '[rpytest] Status: PASSED' in result.output)
                         assert row['passed'] and not result.timed_out and not result.output_limited, name
                         if case == 'picked_mark_save':
-                            receipt['savedArtifacts'] = {str(p.relative_to(scratch)): digest(p.read_bytes()) for p in scratch.rglob('choice106.save')}
+                            receipt['savedArtifacts'] = {str(p.relative_to(scratch)): digest(p.read_bytes()) for p in scratch.rglob('choice106-LT1.save')}
                             assert receipt['savedArtifacts'], 'successful process must close with a real save artifact'
 
                         assert all((game / 'game' / name).read_bytes() == source.encode() for name, source in sources.items())
