@@ -7,10 +7,11 @@ with the implement-spec workflow and instructed the agent to start building on
 2026-11-10. The spec owns requirements; #101–#106 own bounded acceptance.
 Delivery is `in_progress`. #101–#105 are integrated with public-authoring,
 both-target SDK and automatic CI evidence. The Stage 1 runtime gate is complete on
-`4339ccfc`. #106 and all four review corrections are integrated locally through
-`0b8b264f`. Focused portable evidence passes for the identical worker material.
-The last Mac SDK candidate passed 26/27; rollback/New Game and the corrected final
-driver remain unqualified. These bounded results do not establish combined acceptance.
+`4339ccfc`. #106 and all four review corrections are published at `9d229ea4`.
+Windows passed all 27 picked-state outcomes on that exact candidate, including
+rollback/New Game. Exact-head automatic CI passed. The last Mac candidate passed
+26/27; Mac rollback/New Game and final-driver proof remain missing. These bounded
+results do not establish combined acceptance.
 
 Integration branch `codex/choice-98` starts at accepted integration
 `63221b44d72c1c100815e9e638cbec5133ffc1eb` from
@@ -26,10 +27,9 @@ contracts, their production Story controls and affected tests. #103 added
 Choice-owned narration/Character prompts through the same owners. #104 delivered
 mixed Hide/Show disabled semantics through existing source, runtime and
 generated-choice-screen owners. All implementer/test assignments are complete.
-#105 Windows passed; #106 and its review corrections are integrated locally.
-The fresh merger returns sole integration/status ownership to the coordinator for
-publication, exact-candidate CI and test-only Windows #106 dispatch. No worker or
-test owner remains active. Mac #106 is stopped at its exhausted four-start allowance.
+#105 and #106 Windows assignments passed. The coordinator owns integration/status;
+no worker or test owner remains active. Mac #106 is stopped at its exhausted
+four-start allowance while Kris's existing additional-start request awaits an answer.
 
 ## Dependencies and approved design
 
@@ -64,7 +64,7 @@ lint and named normal-play children; retain each child's result without charging
 them again as harness starts. This allows focused coverage across six tickets and
 bounded corrections. #101 had a four-start allowance per host after offline
 preflight and pinned-SDK verification; it used three Mac and two Windows starts.
-Current usage is Mac 15/20, Windows 6/20, zero reservations. #102 used 2/4 Mac
+Current usage is Mac 15/20, Windows 7/20, zero reservations. #102 used 2/4 Mac
 starts and 1/4 Windows starts. #103 used 3/4 Mac starts, including two failed
 selector attempts; its final run passed all 31 expected SDK children. #103 Windows
 used 1/4 starts and passed all 31 children. #104 used 1/4 Mac starts and passed
@@ -75,20 +75,17 @@ passed all ten selected children, including the intended negative.
 
 #105 Windows used 1/4 starts and passed all ten selected outcomes. #106 Mac used
 4/4 starts from 11/20; its final run passed 26/27 outcomes and remains a failed
-qualification. The final corrected driver has not run. The exhausted four-start
+qualification. The final corrected driver has not qualified on Mac. The exhausted four-start
 Mac limit remains binding even with shared capacity available. No new Mac harness
 or individual-child substitute may start without Kris's approval. A proposal for
 up to two further starts, taking shared Mac use at most to 17/20, grants no authority.
 
-After publication, fresh Windows #106 may use at most four starts from Windows
-6/20. Select all 27 picked outcomes with the final vbox driver, including actual
-save/close/new-process Load, rollback/New Game and the one intended negative.
-Require offline fixture, host/toolchain and official pinned-SDK preflight. Reuse
-the existing T3-prepared dedicated `codex/choice-101-windows` worktree only after
-clean/idle ownership and ancestry checks, then safely fast-forward to the exact
-candidate. Do not create a checkout, change the protected registered root or make
-remote source fixes. The coordinator owns dispatch and shared counters. Completed
-assignments retain consumed starts; handoffs do not grant a new allowance.
+Windows #106 used one of its four selected starts from 6/20 and passed all 27
+outcomes with the corrected vbox driver after offline fixture, host/toolchain and
+official pinned-SDK preflight. Its existing T3-prepared branch safely fast-forwarded
+to `9d229ea4` after clean/idle and ancestry checks; the protected root stayed
+unchanged. No Windows retry is needed. The coordinator owns shared counters.
+Completed assignments retain consumed starts; handoffs grant no new allowance.
 
 Native editor/package and manual CI campaigns need recorded selection and limits
 before starting; none has started. Routine compilation, focused tests, review and
@@ -97,20 +94,15 @@ protected native-session limits remain separate and unchanged.
 
 ## Next action
 
-The coordinator next publishes the corrected local candidate. The
+The corrected candidate is published at `9d229ea4`. The
 [review-correction merge](#review-corrections-integration) owns exact tree equality,
-focused result admission and source-comparison limits. The unpublished checkpoint
-includes #106 integration, its review record and the four corrections; remote
-`0a81ae24` does not contain them. Audit automatic CI for the published candidate and dispatch test-only Windows #106
-under the selected four-start allowance.
-Mac remains stopped pending Kris's explicit allowance change. Prepare that concrete
-request after authorized candidate preparation; the proposed two further Mac
-starts are not approved.
+focused result admission and source-comparison limits. Exact-head CI and Windows
+#106 are audited passing under [the completion below](#windows-106-completion-and-mac-approval-wait).
+Mac remains stopped pending Kris's answer to the already-issued explicit allowance
+request. The proposed two further Mac starts are not approved by a test callback.
 
-Windows uses its existing T3-prepared dedicated branch, currently clean at
-`0a81ae24`, after clean/idle, ancestry and offline preflight checks. Safely
-fast-forward to the exact published candidate and select all 27 picked outcomes
-with the final vbox driver. Its owner makes no source fixes. Preserve the protected
+Windows's dedicated branch is clean at `9d229ea4`; no worker remains active.
+Preserve the protected
 registered root, all Choice worktrees and unique evidence. #31/#55 remain unselected
 styling/template tasks. #98/#106 stay open and PR #125 stays draft. Rendered
 comparison, native/human evidence and final validation selection remain pending.
@@ -1081,3 +1073,52 @@ for publication, automatic CI, Windows dispatch and a concrete Mac allowance req
 The [#104 receipt-retention limit](#104-receipt-retention-limit) remains unchanged.
 #98/#106 and PR #125 remain open/draft; rendered/native/human proof and final
 validation selection remain pending.
+
+## Windows #106 completion and Mac approval wait
+
+The coordinator audited the completed producing thread, raw outcome/observer
+checks, lifecycle records, cleanup and final manifest readback. Exact published
+candidate `9d229ea49da9b140d06fcba69ca568919c556d6c` passed the fresh production
+controller's thirteen stages and 284 requests, offline preflight and all 27
+selected Windows SDK outcomes with the final vbox driver. Every positive marker
+appeared once; the deliberate negative exited one at `_choice106_state(1)` without
+an acceptance marker. No child timed out or truncated output.
+
+The independent audit verified accepted controller bytes against both frozen
+authored copies, source/adapter/driver identities and each observed process exit.
+The save process exited before Load began in a different process. The primary save
+and its sync copy retained matching hashes before and after Load. Ordinary Page Up
+rollback restored the prior selection state; MainMenu/Start produced a fresh game.
+These are actual game lifecycle checks, not dictionary resets or same-process Load.
+
+The first read-only observer assumed one save location and direct byte equality
+across Windows log write translation. It was corrected to require the actual
+primary/sync pair and reverse the known log translation in memory before checking
+the captured output hash. A report reader also needed the actual BOM encoding.
+Original data and failed wrappers remain retained privately. No SDK or controller
+retry, source change or process termination occurred. The final private manifest
+readback passed. Owned SDK/controller scratch and runtime processes are gone;
+the assigned branch and registered root are clean at their required candidates.
+The #104 duplicate-receipt limitation is unchanged.
+
+[Automatic run 42813998029, attempt 1](https://github.com/Caldwell-41/Renpy-editor/actions/runs/42813998029/attempts/1)
+also completed successfully for the PR event and exact `9d229ea4` head. Both
+required jobs passed, including 397 frontend tests with zero failures/skips, all
+18 browser/dispatch fixtures, the actual Choice and Story controllers, build,
+formatting, Help/public-core gates and repository validation. Four executed jobs
+succeeded; five unselected specialist jobs skipped. The combined status was success,
+with no submitted reviews or inline review findings at the audit. This qualifies
+the draft's selected automatic checks, not final native/human acceptance.
+
+Windows #106 used 1/4 selected starts, taking shared Windows use from 6/20 to
+7/20. Mac remains 15/20, stopped at #106 4/4; reservations are zero. No further
+Windows retry is required. The earlier request for up to two additional Mac starts,
+keeping shared use at most 17/20, still awaits Kris's answer. An automated test
+completion does not grant that approval. No fifth Mac start or standalone child
+has run. The PR remains linked and unwatched after that approval handoff.
+
+This update changes only coordinator records. Windows and CI evidence remain
+bound to `9d229ea4` and identical implementation inputs; a documentation successor
+does not become that tested candidate. Preserve worktrees and all failures.
+#98/#106 and PR #125 remain open/draft. Affected Mac proof, rendered comparison,
+native/human evidence and final validation selection remain pending.

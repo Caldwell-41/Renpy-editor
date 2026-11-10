@@ -6,8 +6,8 @@ Kris selected [#98](https://github.com/Caldwell-41/Renpy-editor/issues/98) and
 #101–#106 under implement-spec. Delivery remains `in_progress` on
 `codex/choice-98` in [draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125).
 #101–#105 have public-authoring, both-target SDK and automatic CI evidence.
-[The delivery record](../tasks/evidence/choice-98.md#review-corrections-integration)
-owns the four review fixes, scoped reuse and next actions;
+[The delivery record](../tasks/evidence/choice-98.md#windows-106-completion-and-mac-approval-wait)
+owns the four review fixes, both-host evidence limits and next actions;
 [operation limits](../tasks/evidence/choice-98.md#verification-and-operation-limits)
 remain cumulative.
 
@@ -25,32 +25,37 @@ Hide picked continuation positions. Retained final-production evidence passes
 78 core logic tests, the final expanded missing-helper test, the existing destination
 transaction test, ten availability tests, twenty renderer tests and typecheck.
 The complete production-main/controller/public-core journey passes thirteen stages
-and 284 requests with cleanup. No full frontend suite ran for this corrected tree.
+and 284 requests with cleanup. Exact-head automatic CI on published `9d229ea4`
+passed 397 frontend tests and all eighteen browser/dispatch fixtures.
 The optional parsed-offset typing refactor is deferred as wider mapping/payload work,
 not a confirmed defect. Original Standards and Spec reports remain separate.
 
 Mac start 4 on `49e44c12` passed 26/27, including actual save, process exit and
 new-process Load. Rollback/New Game failed before entry because Load covered Start.
-The final vbox driver remains unqualified. All four starts stay charged, retained
-and cleaned. Mac is STOPPED at #106 4/4; shared use is Mac 15/20, Windows 6/20,
+The final vbox driver remains unqualified on Mac. All four starts stay charged,
+retained and cleaned. Mac is STOPPED at #106 4/4; shared use is Mac 15/20, Windows 7/20,
 zero reservations. Neither this handoff nor shared capacity permits a fifth Mac
 harness or standalone child. A proposal for two more starts within 17/20 needs
-Kris's approval. Source comparison of 29 runtime roles preserves earlier normal-input
+Kris's approval; that request is already pending. Source comparison of 29 runtime roles preserves earlier normal-input
 evidence's scope; it establishes no final runtime qualification.
 
-Published `0a81ae24` passed Windows #105 and exact-head automatic CI. The local
-#106 integration, review record and corrections need publication and their own CI.
+Published `9d229ea4` passed Windows #106: fresh thirteen-stage/284-request
+controller, offline preflight and all 27 SDK outcomes. Save/exit/fresh-process Load,
+ordinary Page Up rollback and MainMenu/Start passed, with matched saved artifacts.
+The intended negative failed at its exact assertion; positive markers appeared once.
+The Windows assignment used 1/4 starts and cleaned owned scratch/processes. The
+dedicated branch is clean at `9d229ea4`; the registered root remains at `251fb477`.
+Automatic run `42813998029`, attempt 1, also passed at that exact head. This
+documentation successor changes no implementation or SDK input.
 The [#104 duplicate-receipt limit](../tasks/evidence/choice-98.md#104-receipt-retention-limit)
 remains unchanged; preserve originals and the frozen reference.
 
-Resume the same coordinator thread. Publish, then dispatch fresh test-only Windows
-#106 on its existing T3-prepared dedicated branch, currently clean at `0a81ae24`.
-Verify clean/idle ownership, ancestry and offline host/toolchain/official-SDK preflight;
-safely fast-forward to the exact published candidate. Use the final vbox driver and
-all 27 outcomes, including save/close/new-process Load, rollback/New Game and the
-intended negative. At most four Windows starts may run from 6/20; its owner makes
-no source fixes. The registered root stays unchanged. Request additional Mac
-allowance only after authorized candidate preparation. Preserve worktrees, unique
+Resume the same coordinator thread when Kris answers the existing request for
+up to two additional Mac SDK starts, keeping shared use at 17/20 or less. This
+Windows completion callback is not approval. Mac execution stays stopped until an
+explicit allowance change; record any approval before a reservation. The PR is
+linked but unwatched following the approval handoff. No worker remains active.
+Preserve worktrees, unique
 evidence, `app/node_modules` and recovery below. No cleanup, native editor/package
 or manual CI campaign is selected. #98/#106 remain open/draft; rendered comparison,
 native/human evidence and final validation selection remain pending. Full Story
