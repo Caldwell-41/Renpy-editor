@@ -1,9 +1,11 @@
+import { decimalValue } from "./numeric-input.ts";
+import { assignmentCaption } from "./story-arithmetic-editor.ts";
 import type { Options, PromptModel, Preview } from "./prompt-ui.ts";
 import { mountRewrite, type RewriteController } from "./rewrite-ui.ts";
 import { renderReferenceLibrary, type ReferenceController, type ReferenceKind, type ReferenceWorkspace } from "./reference-ui.ts";
 import { catalogDialog } from "./catalog-dialog.ts";
 import { assetImport, type ImportBatch } from "./asset-import-ui.ts";
-import { technicalName, technicalNameInput, technicalNameHelp, namingHelp } from "./authoring-input.ts";
+import { technicalName, technicalNameInput, technicalNameHelp, namingHelp, validateField } from "./authoring-input.ts";
 import { icon } from "./icons.ts";
 import { catalogue } from "./catalog-ui.ts";
 import { operationProgress } from "./operation-progress.ts";
@@ -44,12 +46,12 @@ interface Resolution { width: number; height: number }
 interface OpenProject { sessionId: string; projectId: string; title: string; folderName: string; chapterId: string; chapterName: string; sceneId: string; sceneName: string; sdkVersion: string; resolution: Resolution; cancelled?: boolean }
 interface CreationResult { status: string; project?: OpenProject }
 type AssetKind = "background" | "characterAppearance" | "uiImage" | "music" | "sfx";
-type VariableType = "bool" | "int" | "string";
+type VariableType = "bool" | "int" | "decimal" | "string";
 interface SourceDefinition { path: string; statement: string; sourceRevision: string }
 interface Character { id: string; technicalName: string; displayName: string; dialogueColor: string; defaultAppearanceId?: string; source: SourceDefinition }
 interface Appearance { id: string; characterId: string; label: string; attributes: Record<string, string>; renderMode: string; assetId: string }
 interface Asset { id: string; kind: AssetKind; displayName: string; relativePath: string; discoveryName: string; sha256: string; byteCount: number; status: string }
-interface Variable { id: string; technicalName: string; variableType: VariableType; defaultValue: boolean | string; source: SourceDefinition }
+interface Variable { id: string; technicalName: string; variableType: VariableType; defaultValue: boolean | number | string; source: SourceDefinition }
 interface AuthoringMetadata { schemaVersion: number; projectId: string; characters: Character[]; appearances: Appearance[]; assets: Asset[]; variables: Variable[] }
 interface ImportChoice { authorityId: string; displayName: string; byteCount: number; extension: string; cancelled?: boolean }
 type ProjectSurface = "story" | "source" | "screens" | "branches" | "characters" | "lorebook" | "assets" | "variables";
@@ -261,7 +263,7 @@ async function value<T>(operation: Parameters<typeof desktopRequestCore>[0], pay
     if (response.ok) return response.value;
     // The host has not checked out the service for this refusal. Retry only reads;
     // writes, trust and process starts are never replayed after an ambiguous result.
-    if (!retryableRead || response.error.code !== "RUNTIME_BUSY" || attempt >= 40 || viewGeneration !== capturedView) throw Object.assign(new Error(response.error.message), {code:response.error.code});
+    if (!retryableRead || response.error.code !== "RUNTIME_BUSY" || attempt >= 40 || viewGeneration !== capturedView) throw Object.assign(new Error(response.error.message), response.error);
     await new Promise(resolve => setTimeout(resolve,25));
   }
 }
@@ -688,6 +690,12 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
       present: (assetId, purpose) => projectValue(project, "media.present", { assetId, purpose }),
       viewSource: (path, byteStart, byteEnd, expectedRevision) => { void requestProjectNavigation(project, "source", { path, byteStart, byteEnd, expectedRevision }); },
       layoutKey: `${project.projectId}:story`,
+      validateAssignment: (command, expected) => projectValue(project, "scene.validateAssignment", {
+        expectedProjectRevision: expected.projectRevision,
+        expectedSourceMapRevision: expected.sourceMapRevision,
+        expectedAuthoringRevision: expected.authoringRevision,
+        command,
+      }),
       apply: async (command: SceneCommand, expected) => {
         const operationToken = beginAuthoringCompletion(project, command);
         if (!operationToken) throw new Error("Another persistence operation is still in progress.");
@@ -695,6 +703,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
           return await projectValue<SceneWorkspace>(project, "scene.apply", {
             expectedProjectRevision: expected.projectRevision,
             expectedSourceMapRevision: expected.sourceMapRevision,
+            expectedAuthoringRevision: expected.authoringRevision,
             command,
           });
         } finally { finishAuthoringCompletion(operationToken); }
@@ -939,16 +948,93 @@ function renderAssets(workspace: HTMLElement, project: OpenProject, model: Autho
   disposeCatalogue=()=>{disposeCards();importer.dispose();stageDroppedAssets=undefined;};
 }
 
-function renderVariables(workspace: HTMLElement, project: OpenProject, model: AuthoringMetadata): void {
+interface VariableDefaultDraft {
+  raw: string; original: string; revision: string; error: string;
+  start?: number | null; end?: number | null;
+}
+function renderVariables(workspace: HTMLElement, project: OpenProject, model: AuthoringMetadata, drafts = new Map<string, VariableDefaultDraft>()): void {
+  const reload = async (): Promise<void> => {
+    const generation = viewGeneration;
+    disposeCatalogue?.(); disposeCatalogue = undefined; workspace.replaceChildren();
+    try {
+      const next = await projectValue<AuthoringMetadata>(project, "authoring.list");
+      if (generation !== viewGeneration || currentProject?.sessionId !== project.sessionId) return;
+      renderVariables(workspace, project, next, drafts);
+      if (!activeAuthoringOperations.has(project.sessionId)) await refreshPersistenceStatus(project, generation);
+    } catch (error) {
+      if (generation !== viewGeneration || currentProject?.sessionId !== project.sessionId) return;
+      const notice = document.createElement("p"); notice.role = "status"; notice.textContent = "Saved. Variables could not be loaded. Your default draft is retained.";
+      const retry = button("Reload Variables"); retry.onclick = () => void reload(); workspace.replaceChildren(notice, retry);
+      setStatus(message(error, "Variables could not be loaded."), "error");
+    }
+  };
+  workspace.classList.add("decimal-variables");
   const list = supportingSection(); list.append(formHeading("Variables"));
   if (!model.variables.length) { const empty = document.createElement("p"); empty.className = "muted"; empty.textContent = "No Variables yet."; list.append(empty); }
-  model.variables.forEach((variable) => { const row = document.createElement("div"); row.className = "entity-row"; const name = document.createElement("strong"); name.textContent = variable.technicalName; const type = document.createElement("code"); type.textContent = variable.variableType; const current = document.createElement("span"); current.textContent = String(variable.defaultValue); const edit = button("Edit default"); edit.addEventListener("click", () => { const control = variable.variableType === "bool" ? document.createElement("select") : input(); if (variable.variableType === "bool") { [["false", "False"], ["true", "True"]].forEach(([value, label]) => { const option = document.createElement("option"); option.value = value!; option.textContent = label!; option.selected = String(variable.defaultValue) === value; control.append(option); }); } else { (control as HTMLInputElement).value = String(variable.defaultValue); (control as HTMLInputElement).inputMode = variable.variableType === "int" ? "numeric" : "text"; } inlineEditor(row, `Edit ${variable.technicalName}`, [field("Default value", control)], "Save Default", async (token) => { const entered = (control as HTMLInputElement | HTMLSelectElement).value; if (variable.variableType === "int" && !validInt64(entered)) throw new Error("Enter a canonical signed 64-bit decimal integer."); const defaultValue: boolean | string = variable.variableType === "bool" ? entered === "true" : entered; await projectValue(project, "variable.update", { id: variable.id, expectedSourceRevision: variable.source.sourceRevision, defaultValue }); if (completionIsCurrent(token)) showProject(project, "variables"); }); }); row.append(name, type, current, edit); list.append(row); });
-  const create = supportingSection(); create.append(formHeading("Create Variable")); const technical = input(); technicalNameInput(technical); const type = document.createElement("select"); ["bool", "int", "string"].forEach((name) => { const option = document.createElement("option"); option.value = name; option.textContent = name; type.append(option); }); const defaultValue = input(); const boolValue = document.createElement("select"); [["false", "False"], ["true", "True"]].forEach(([value, label]) => { const option = document.createElement("option"); option.value = value!; option.textContent = label!; boolValue.append(option); }); const valueField = field("Default value", boolValue); const syncControl = (): void => { valueField.replaceChildren(document.createElement("span"), type.value === "bool" ? boolValue : defaultValue); valueField.firstElementChild!.textContent = "Default value"; defaultValue.inputMode = type.value === "int" ? "numeric" : "text"; }; type.addEventListener("change", syncControl); syncControl(); create.addEventListener("catalog-discard",()=>{technical.value="";type.value="bool";defaultValue.value="";boolValue.value="false";syncControl();});
-  const submit = button("Create Variable", "button primary catalog-submit"); submit.addEventListener("click", async () => { let parsed: boolean | string = defaultValue.value; if (type.value === "bool") parsed = boolValue.value === "true"; if (type.value === "int" && !validInt64(defaultValue.value)) { setStatus("Enter a canonical signed 64-bit decimal integer.", "error"); defaultValue.focus(); return; } const token = beginAuthoringCompletion(project, submit); if (!token) return; submit.disabled = true; setStatus("Saving…"); try { await projectValue(project, "variable.create", { technicalName: technicalName(technical.value), variableType: type.value, defaultValue: parsed }); if (completionIsCurrent(token)) showProject(project, "variables"); } catch (error) { if (!completionIsCurrent(token)) return; submit.disabled = false; setStatus(message(error, "Variable could not be created"), "error"); technical.focus(); } finally { finishAuthoringCompletion(token); } }); create.append(field("Technical name (fixed after creation)", technical), field("Type", type), valueField, submit); workspace.append(list, create);
+  const defaultPanels = model.variables.map(variable => {
+    const panel = document.createElement("section"); panel.className = "variable-default-editor";
+    const names = {bool:"Boolean",int:"Whole number",decimal:"Decimal",string:"Text"};
+    const heading = formHeading(`${variable.technicalName} · ${names[variable.variableType]}`);
+    const fixed = document.createElement("p"); fixed.textContent = "Name and type are fixed. You can edit the default.";
+    const control = variable.variableType === "bool" ? document.createElement("select") : input();
+    if (variable.variableType === "bool") {
+      for (const [value, text] of [["false","False"],["true","True"]]) { const option=document.createElement("option");option.value=value!;option.textContent=text!;control.append(option); }
+    } else (control as HTMLInputElement).inputMode = variable.variableType === "int" ? "numeric" : variable.variableType === "decimal" ? "decimal" : "text";
+    const retained = drafts.get(variable.id);
+    const draft: VariableDefaultDraft = retained ?? { raw: String(variable.defaultValue), original: String(variable.defaultValue), revision: variable.source.sourceRevision, error: "" };
+    control.value = draft.raw;
+    if (draft.raw !== draft.original) panel.dataset.unsubmitted = "true";
+    if (control instanceof HTMLInputElement && draft.start != null && draft.end != null) control.setSelectionRange(draft.start, draft.end);
+    const remember = (): void => { draft.raw = control.value; if (control instanceof HTMLInputElement) { draft.start = control.selectionStart; draft.end = control.selectionEnd; } drafts.set(variable.id, draft); };
+    control.addEventListener("select", remember);control.addEventListener("blur", remember);
+    const hint = document.createElement("p"); hint.className="variable-default-hint";
+    hint.textContent = variable.variableType === "decimal" ? "Decimal default. Whole-number input is also accepted." : variable.variableType === "int" ? "Exact whole number in the signed 64-bit range." : "Declaration default. Game values stay separate.";
+    const problem = document.createElement("p"); problem.className="field-error";problem.role="status";problem.id=`variable-default-${crypto.randomUUID()}`;control.setAttribute("aria-describedby",problem.id);
+    problem.textContent=draft.error;if(draft.error)control.setAttribute("aria-invalid","true");
+    const readDefault = (): boolean | number | string => {
+      const raw = control.value;
+      if (variable.variableType === "int" && !validInt64(raw)) throw Error("Enter a canonical signed 64-bit whole number.");
+      return variable.variableType === "bool" ? raw === "true" : variable.variableType === "decimal" ? decimalValue(raw) : raw;
+    };
+    const validateDefault = validateField(control, () => {
+      problem.textContent = ""; draft.error = "";
+      try { readDefault(); }
+      catch (error) { draft.error = message(error, "Check the default value."); throw error; }
+    });
+    const save=button("Save Default","button primary"),cancel=button("Cancel"),actions=document.createElement("div");actions.className="row-actions";actions.append(save,cancel);
+    const reset=()=>{drafts.delete(variable.id);draft.raw=String(variable.defaultValue);draft.original=draft.raw;draft.revision=variable.source.sourceRevision;control.value=draft.raw;delete panel.dataset.unsubmitted;validateDefault();control.focus();};
+    cancel.onclick=reset;
+    for(const event of ["input","change"])control.addEventListener(event,()=>{remember();if(control.value!==draft.original)panel.dataset.unsubmitted="true";else delete panel.dataset.unsubmitted;});
+    save.onclick=async()=>{
+      try { validateDefault(); } catch { control.focus(); return; }
+      const token=beginAuthoringCompletion(project,save);if(!token)return;
+      let accepted=false;save.disabled=true;cancel.disabled=true;control.disabled=true;
+      try {
+        const defaultValue=readDefault();
+        await projectValue(project,"variable.update",{id:variable.id,expectedSourceRevision:draft.revision,defaultValue});
+        accepted=true;if(completionIsCurrent(token)){drafts.delete(variable.id);delete panel.dataset.unsubmitted;await reload();}
+      } catch(error) {if(completionIsCurrent(token)){draft.error=message(error,"Default could not be saved. Input retained.");remember();problem.textContent=draft.error;control.setAttribute("aria-invalid","true");}}
+      finally{finishAuthoringCompletion(token);if(accepted&&completionIsCurrent(token))void refreshPersistenceStatus(project,viewGeneration);save.disabled=false;cancel.disabled=false;control.disabled=false;if(problem.textContent)control.focus();}
+    };
+    panel.append(heading,fixed,field("Default value",control),hint,problem,actions);
+    return panel;
+  });
+  model.variables.forEach(variable=>{
+    const row=document.createElement("div");row.className="entity-row";
+    const name=document.createElement("strong");name.textContent=variable.technicalName;
+    const type=document.createElement("code");type.textContent=({bool:"Boolean",int:"Whole number",decimal:"Decimal",string:"Text"})[variable.variableType];
+    const value=document.createElement("span");value.textContent=String(variable.defaultValue);
+    row.append(name,type,value);list.append(row);
+  });
+  const create = supportingSection(); create.append(formHeading("Create Variable")); const technical = input(); technicalNameInput(technical); const type = document.createElement("select"); ["bool", "int", "decimal", "string"].forEach((name) => { const option = document.createElement("option"); option.value = name; option.textContent = ({bool:"Boolean",int:"Whole number",decimal:"Decimal",string:"Text"} as Record<string,string>)[name]!; type.append(option); }); const defaultValue = input(); const boolValue = document.createElement("select"); [["false", "False"], ["true", "True"]].forEach(([value, label]) => { const option = document.createElement("option"); option.value = value!; option.textContent = label!; boolValue.append(option); }); const valueField = field("Default value", boolValue); const syncControl = (): void => { valueField.replaceChildren(document.createElement("span"), type.value === "bool" ? boolValue : defaultValue); valueField.firstElementChild!.textContent = "Default value"; defaultValue.inputMode = type.value === "int" ? "numeric" : type.value === "decimal" ? "decimal" : "text"; }; type.addEventListener("change", syncControl); syncControl(); create.addEventListener("catalog-discard",()=>{technical.value="";type.value="bool";defaultValue.value="";boolValue.value="false";syncControl();});
+  const submit = button("Create Variable", "button primary catalog-submit"); submit.addEventListener("click", async () => { let parsed: boolean | number | string = defaultValue.value; if (type.value === "decimal") { try { parsed = decimalValue(defaultValue.value); } catch (error) { setStatus(message(error, "Enter a finite decimal."), "error"); defaultValue.focus(); return; } } if (type.value === "bool") parsed = boolValue.value === "true"; if (type.value === "int" && !validInt64(defaultValue.value)) { setStatus("Enter a canonical signed 64-bit decimal integer.", "error"); defaultValue.focus(); return; } const token = beginAuthoringCompletion(project, submit); if (!token) return; let accepted=false;submit.disabled = true; setStatus("Saving…"); try { await projectValue(project, "variable.create", { technicalName: technicalName(technical.value), variableType: type.value, defaultValue: parsed }); accepted=true;if (completionIsCurrent(token)) await reload(); } catch (error) { if (!completionIsCurrent(token)) return; submit.disabled = false; setStatus(message(error, "Variable could not be created"), "error"); technical.focus(); } finally { finishAuthoringCompletion(token);if(accepted&&completionIsCurrent(token))void refreshPersistenceStatus(project,viewGeneration); } }); create.append(field("Technical name (fixed after creation)", technical), field("Type", type), valueField, submit); workspace.append(list, create);
   const assignmentPanels=model.variables.map(v=>{const panel=document.createElement("section");panel.className="variable-assignments";const heading=formHeading("Assigned in");const note=document.createElement("p");note.className="muted";note.textContent="Known Set Variable Beats only. Custom code is not included.";const result=document.createElement("div");result.textContent="Loading known assignments…";const declaration=document.createElement("details");const label=document.createElement("summary");label.textContent="View declaration";const code=document.createElement("pre");code.textContent=v.source.statement;declaration.append(label,code);panel.append(heading,note,result,declaration);return {panel,result};});
-  disposeCatalogue=catalogue(workspace,list,create,"Variables",model.variables.map((v,i)=>({id:v.id,label:v.technicalName,kind:{bool:"Boolean",int:"Integer",string:"Text"}[v.variableType],extra:[assignmentPanels[i]!.panel]})),id=>projectValue<MediaPresentation>(project,"media.present",{assetId:id,purpose:"thumbnail"}),`${project.projectId}:variables`);
+  disposeCatalogue=catalogue(workspace,list,create,"Variables",model.variables.map((v,i)=>({id:v.id,label:v.technicalName,kind:({bool:"Boolean",int:"Whole number",decimal:"Decimal",string:"Text"} as Partial<Record<VariableType,string>>)[v.variableType] ?? v.variableType,extra:[defaultPanels[i]!,assignmentPanels[i]!.panel]})),id=>projectValue<MediaPresentation>(project,"media.present",{assetId:id,purpose:"thumbnail"}),`${project.projectId}:variables`);
+  const selectedDefault=workspace.querySelector<HTMLInputElement | HTMLSelectElement>('.variable-default-editor[data-unsubmitted="true"] [aria-describedby]');
+  selectedDefault?.focus({preventScroll:true});
+
   const generation=viewGeneration;
-  void projectValue<SceneWorkspace>(project,"scene.list").then(scenes=>{if(generation!==viewGeneration)return;model.variables.forEach((v,i)=>{const result=assignmentPanels[i]!.result;result.replaceChildren();let count=0;scenes.scenes.forEach(scene=>scene.beats.forEach((beat,index)=>{if(beat.payload.type!=="setVariable"||beat.payload.variableId!==v.id)return;count++;const link=button(`${scene.displayName} · Beat ${index+1} · ${String(beat.payload.value)}`,"assignment-link");link.addEventListener("click",()=>void requestProjectNavigation(project,"story",{sceneId:scene.id,beatId:beat.id,expectedSourceRevision:scene.sourceRevision}));result.append(link);}));if(!count)result.textContent="No known assignments.";});}).catch(()=>{if(generation===viewGeneration)assignmentPanels.forEach(p=>p.result.textContent="Assignments unavailable. Try reopening this page.");});
+  void projectValue<SceneWorkspace>(project,"scene.list").then(scenes=>{if(generation!==viewGeneration)return;model.variables.forEach((v,i)=>{const result=assignmentPanels[i]!.result;result.replaceChildren();let count=0;scenes.scenes.forEach(scene=>scene.beats.forEach((beat,index)=>{if(beat.payload.type!=="setVariable"||beat.payload.variableId!==v.id)return;count++;const link=button(`${scene.displayName} · Beat ${index+1} · ${assignmentCaption(beat.payload, scenes.authoring.variables)}`,"assignment-link");link.addEventListener("click",()=>void requestProjectNavigation(project,"story",{sceneId:scene.id,beatId:beat.id,expectedSourceRevision:scene.sourceRevision}));result.append(link);}));if(!count)result.textContent="No known assignments.";});}).catch(()=>{if(generation===viewGeneration)assignmentPanels.forEach(p=>p.result.textContent="Assignments unavailable. Try reopening this page.");});
 }
 
 function validInt64(value: string): boolean { if (!/^-?(0|[1-9][0-9]*)$/.test(value) || value === "-0") return false; try { const parsed = BigInt(value); return parsed >= -9223372036854775808n && parsed <= 9223372036854775807n; } catch { return false; } }

@@ -16,13 +16,13 @@ const result={passed:false,controllerToCore:true,sdkExecuted:false,helperExecute
 async function call(operation,payload={}) {
  assert(!operation.startsWith('runtime.')&&!['screens.canvasRender','screens.canvasStatus'].includes(operation));
  const response=await child.request({protocolVersion:1,requestId:randomUUID().replaceAll('-',''),operation,payload:{...payload,...(session&&!['project.listRecent','project.openRecent'].includes(operation)?{sessionId:session}:{})}});
- if(!response.ok){result.refusals.push({operation,code:response.error.code});throw Object.assign(Error(response.error.message),{code:response.error.code});}return response.value;
+ if(!response.ok){result.refusals.push({operation,code:response.error.code});throw Object.assign(Error(response.error.message),response.error);}return response.value;
 }
 const source=async path=>(await call('source.open',{path})).text;
 async function saveSource(path,text){const base=await call('source.open',{path});const draft=await call('source.updateDraft',{path,expectedBaseRevision:base.baseRevision,text,selectionStart:0,selectionEnd:0});await call('source.save',{path,expectedBaseRevision:draft.baseRevision,expectedDraftVersion:draft.draftVersion});}
 async function wait(check,label){const deadline=Date.now()+5000;while(!await check()){if(Date.now()>deadline)throw Error(`Did not settle: ${label}`);await new Promise(r=>setTimeout(r,5));}}
 const writes=[];
-const control=label=>{const node=workspace.panel.querySelector(`[aria-label="${label}"]`);assert(node,label);return node;};
+const control=label=>{const node=workspace.panel.querySelector(`[aria-label="${label}"]`)??workspace.panel.querySelector(`[aria-label="${label.replace(/ value$/,' formula')}"]`);assert(node,label);return node;};
 const change=(label,value)=>{const node=control(label);node.value=value;node.dispatchEvent(new Event(node.tagName==='SELECT'?'change':'input',{bubbles:true}));};
 const button=label=>{const node=[...workspace.panel.querySelectorAll('button')].find(n=>n.textContent===label);assert(node,label);node.click();};
 const select=id=>{if(!workspace.panel.querySelector(`[data-node-id="${id}"]`))button('1  Choose');const row=workspace.panel.querySelector(`[data-node-id="${id}"]`);assert(row,id);row.dispatchEvent(new browser.MouseEvent('dblclick',{bubbles:true}));};
@@ -31,7 +31,7 @@ async function history(direction,path,expected,expectedText){button(direction);a
 async function mount(owner){
  workspace?.dispose();document.body.replaceChildren();workspace=new ScreensWorkspace({resolution:{width:1280,height:720},current:()=>true,coordinate:task=>task(),source:()=>{},preview:()=>{throw Error('No deliberate execution');},saved:()=>{},request:async(operation,payload)=>{
   if(operation==='screens.canvasRender'){const plan=await call('screens.canvasPlan',payload);result.canvasPlans.push({payload,plan});return {phase:'unavailable',message:'Offline planner proof. No helper started.'};}
-  if(operation==='screens.compose'){writes.push(structuredClone(payload));if(refuse)throw Error('Retained test refusal');}
+  if(operation==='screens.compose'&&!payload.validateOnly){writes.push(structuredClone(payload));if(refuse)throw Error('Retained test refusal');}
   return call(operation,payload);
  }});workspace.mount(document.body);await wait(()=>workspace.panel.querySelector(`[data-node-id]`),'workspace load');const picker=workspace.panel.querySelector('.screen-picker select');picker.value=JSON.stringify(['owned',owner.id]);picker.dispatchEvent(new Event('change',{bubbles:true}));
 }
@@ -54,7 +54,7 @@ try{
  for(const [index,name,value]of [[1,'seen','True'],[2,'coins','9223372036854775807'],[3,'player_name','[opaque_python()] {literal}']]){change('Add action','setVariable');change(`Action ${index} variable`,variable(name).id);change(`Action ${index} value`,value);}
  change('Add action','showScreen');const panelChoice=JSON.stringify([panel.id,panel.name]);change('Action 4 screen',panelChoice);change('Add action','hideScreen');change('Action 5 screen',panelChoice);change('Add action','finishInteraction');
  refuse=true;await apply();assert.equal(workspace.hasDraft(),true);const rejected=writes.at(-1);workspace.panel.remove();workspace.mount(document.body);await wait(()=>workspace.panel.querySelector('[aria-label="Action 3 value"]'),'remount draft');assert.equal(control('Action 3 value').value,'[opaque_python()] {literal}');refuse=false;await apply();assert.equal(workspace.hasDraft(),false);assert.deepEqual(writes.at(-1),rejected);assert.equal(writes.at(-1).command.interaction.expectedTargetRevisions.length,1);
- const afterActions=await source(owner.path);assert.match(afterActions,/SetVariable\("seen", True\)/);assert.match(afterActions,/SetVariable\("coins", 9223372036854775807\)/);assert.match(afterActions,/textbutton "Continue"/);assert.match(afterActions,/text_size 27/);assert.match(afterActions,/xsize 240/);assert.match(afterActions,/background "#345"/);assert.deepEqual(writes.at(-1).command.layout,{xsize:{unit:'pixels',value:240}});
+ const afterActions=await source(owner.path);assert.match(afterActions,/SetVariable\("seen", True\)/);assert.match(afterActions,/9223372036854775807/);assert.match(afterActions,/textbutton "Continue"/);assert.match(afterActions,/text_size 27/);assert.match(afterActions,/xsize 240/);assert.match(afterActions,/background "#345"/);assert.deepEqual(writes.at(-1).command.layout,{xsize:{unit:'pixels',value:240}});
  await history('Undo',owner.path,afterText,'Close');await history('Redo',owner.path,afterActions,'Continue');result.stages.push('bool/int/string + Show/Hide + Finish + text/typography/appearance/layout -> refused remount -> single Apply/Undo/Redo');
  select(buttonId);change('Action 1 value','True');await apply();assert.equal(await source(owner.path),afterActions);await history('Undo',owner.path,afterText,'Close');await history('Redo',owner.path,afterActions,'Continue');
  select(buttonId);change('Action 1 value','False');button('Cancel');assert.equal(await source(owner.path),afterActions);assert.equal(workspace.hasDraft(),false);
@@ -73,7 +73,18 @@ try{
  select(bodyId);change('Text','Coins: [missing_name!q]');await apply();assert.equal(workspace.hasDraft(),true);assert.equal(control('Text').value,'Coins: [missing_name!q]');button('Cancel');assert.equal(await source(owner.path),afterActions);
  select(buttonId);change('Action 2 value','8');await saveSource(owner.path,afterActions+'# competing accepted Source\n');await workspace.load();await apply();assert.equal(workspace.hasDraft(),true);assert.equal(control('Action 2 value').value,'8');button('Cancel');assert.equal(await source(owner.path),afterActions+'# competing accepted Source\n');result.stages.push('unknown binding and stale original Source refuse while retaining drafts; whole-draft Cancel restores accepted Source');
  workspace.dispose();workspace=undefined;await call('project.close');session=undefined;const reopened=(await call('project.listRecent')).find(p=>p.projectId===projectId);session=(await call('project.openRecent',{recentId:reopened.id})).sessionId;
- doc=await call('screens.inspect',{path:owner.path});assert.equal(doc.screens[0].nodes.find(n=>n.id===buttonId).actions.length,6);assert.equal(await source(owner.path),afterActions+'# competing accepted Source\n');await mount(owner);select(bodyId);assert.equal(control('Text').value,'Balance: [coins!q]');assert.equal(await source('game/ui/help.rpy'),opaqueNeighbor);result.stages.push('reopen preserves accepted mixed binding/actions, exact Source and opaque neighbor bytes');result.passed=true;
+ doc=await call('screens.inspect',{path:owner.path});assert.equal(doc.screens[0].nodes.find(n=>n.id===buttonId).actions.length,6);assert.equal(await source(owner.path),afterActions+'# competing accepted Source\n');await mount(owner);select(bodyId);assert.equal(control('Text').value,'Balance: [coins!q]');assert.equal(await source('game/ui/help.rpy'),opaqueNeighbor);result.stages.push('reopen preserves accepted mixed binding/actions, exact Source and opaque neighbor bytes');// A public-core arithmetic action must survive the existing production draft owner.
+ const arithmeticActions=structuredClone(doc.screens[0].nodes.find(n=>n.id===buttonId).actions);
+ arithmeticActions[1].value={operation:'add',operand:'coins'};
+ const targets=[];for(const action of arithmeticActions)if(action.target&&!targets.some(t=>t.target.screenId===action.target.screenId)){const resolved=await call('screens.resolveTarget',{binding:action.target});targets.push({target:action.target,revisions:resolved.revisions});}
+ await call('screens.compose',{screenId:owner.id,expectedRevision:doc.revision,command:{type:'actions',nodeId:buttonId,actions:arithmeticActions,expectedAuthoringRevision:doc.authoringRevision,expectedTargetRevisions:targets}});
+ const arithmeticSource=await source(owner.path);await workspace.load();select(buttonId);change('Action 2 value','coins');change('Text','Arithmetic retained');await apply();
+ assert.deepEqual(writes.at(-1).command.interaction.actions,arithmeticActions);
+ const renamedArithmetic=await source(owner.path);assert.equal(renamedArithmetic,arithmeticSource.replace('textbutton "Continue"','textbutton "Arithmetic retained"'));
+ await history('Undo',owner.path,arithmeticSource,'Continue');await history('Redo',owner.path,renamedArithmetic,'Arithmetic retained');
+ workspace.dispose();workspace=undefined;await call('project.close');session=undefined;session=(await call('project.openRecent',{recentId:(await call('project.listRecent')).find(p=>p.projectId===projectId).id})).sessionId;
+ const finalArithmetic=await call('screens.inspect',{path:owner.path});assert.deepEqual(finalArithmetic.screens[0].nodes.find(n=>n.id===buttonId).actions,arithmeticActions);assert.equal(await source(owner.path),renamedArithmetic);
+ result.stages.push('public arithmetic -> actual action draft -> unrelated production edit -> core source/history/reopen preserves formula and timing');result.passed=true;
 }catch(error){result.failure={message:error.message,stack:error.stack};result.failureState={message:workspace?.panel.querySelector('.screen-message')?.textContent,text:workspace?.panel.querySelector('[data-text-field="text"]')?.value,history:session?await call('scene.list'):undefined};throw error;}
 finally{workspace?.dispose();await browser.happyDOM.close();try{await child.stop();await assert.rejects(access(scratch));result.cleanupComplete=true;}finally{result.driver=child.exitStatus();await writeFile(join(output,'result.json'),JSON.stringify(result,null,2)+'\n');}}
 console.log('PASS actual ScreensWorkspace -> core source/history/planner/reopen. No helper, engine, native or fidelity claim.');

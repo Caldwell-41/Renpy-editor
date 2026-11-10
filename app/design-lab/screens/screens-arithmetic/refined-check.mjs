@@ -1,0 +1,50 @@
+import assert from 'node:assert/strict';
+// Agreed mounted-mock boundary. The refinement changes suggestion interaction.
+export default async function({page,open,capture}){
+  await open({state:'button',viewport:'wide'});
+  await capture('a2-actions-wide');
+  const formula=page.getByRole('combobox',{name:'Action 1 formula',exact:true});
+  await formula.fill('bo');
+  assert.equal(await formula.getAttribute('aria-expanded'),'true');
+  await page.keyboard.press('Escape');
+  assert.equal(await formula.inputValue(),'bo');
+  assert.equal(await page.getByRole('dialog').count(),0);
+  assert.equal(await formula.evaluate(e=>e===document.activeElement),true);
+  await formula.fill('bon');await page.keyboard.press('Enter');
+  assert.equal(await formula.inputValue(),'bonus');
+  assert.equal(await formula.evaluate(e=>e.selectionStart),5);
+  await formula.fill('bo');await capture('a2-suggestion');
+  await page.keyboard.press('Escape');await formula.fill('bonus');
+  const operation=page.getByRole('button',{name:'Action 1 operation: Add',exact:true});
+  await operation.click();
+  const menu=page.getByRole('menu',{name:'Action 1 operations',exact:true});
+  assert.equal(await menu.getByRole('menuitemradio').count(),7);
+  await capture('a2-operation-menu');
+  await page.keyboard.press('Escape');
+  assert.equal(await operation.evaluate(e=>e===document.activeElement),true);
+  assert.equal(await formula.inputValue(),'bonus');
+  await page.keyboard.press('ArrowDown');await page.keyboard.press('ArrowDown');await page.keyboard.press('Enter');
+  assert.equal(await formula.evaluate(e=>e===document.activeElement),true);
+  assert.equal(await page.getByRole('button',{name:'Action 1 operation: Subtract',exact:true}).count(),1);
+  await formula.fill('trust +');await page.getByRole('button',{name:'Apply action draft',exact:true}).click();
+  assert.equal(await formula.inputValue(),'trust +');assert.equal(await formula.evaluate(e=>e===document.activeElement),true);
+  await capture('a2-invalid-wide');
+  await page.locator('.sa2-review>summary').click();
+  await page.getByRole('button',{name:'Edit reward button',exact:true}).click();
+  await page.getByRole('button',{name:'Edit continue button',exact:true}).click();
+  assert.equal(await formula.inputValue(),'trust +');
+  await open({state:'decimal',viewport:'wide'});await capture('a2-decimal-wide');
+  await open({state:'button',viewport:'compact'});await capture('a2-actions-compact');
+  await open({state:'unknown',viewport:'wide'});await capture('a2-unknown-wide');
+  await open({state:'protected',viewport:'wide'});await capture('a2-protected-wide');
+  await open({state:'variables',viewport:'wide'});
+  const value=page.getByRole('textbox',{name:'Default value',exact:true});
+  await value.fill('-');await page.getByRole('button',{name:'Save default',exact:true}).click();
+  assert.equal(await value.inputValue(),'-');assert.equal(await value.evaluate(e=>e===document.activeElement),true);
+  await value.fill('2.5');await page.getByRole('button',{name:'Save default',exact:true}).click();
+  assert.equal(await value.inputValue(),'2.5');await capture('a2-variables-wide');
+  await page.getByRole('button',{name:'New variable',exact:true}).click();await capture('a2-creation-wide');
+  await open({state:'condition',viewport:'compact'});await capture('a2-condition-compact');
+  await open({state:'text',viewport:'wide'});await capture('a2-text-wide');
+
+}

@@ -109,6 +109,7 @@ impl Fixture {
                 SceneCommandRequest {
                     expected_project_revision: workspace.project_revision,
                     expected_source_map_revision: workspace.source_map_revision,
+                    expected_authoring_revision: None,
                     command,
                 },
             )

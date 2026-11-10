@@ -5,6 +5,8 @@ use sha2::{Digest, Sha256};
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ComposeRequest {
     pub screen_id: String,
+    #[serde(default)]
+    pub validate_only: bool,
     pub expected_revision: String,
     pub command: Command,
     #[serde(default)]
@@ -146,6 +148,8 @@ pub struct InteractionEdit {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ComposeResult {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub action_validation: Option<Document>,
     pub document: Document,
     pub selected_id: String,
     pub changed: bool,
@@ -310,6 +314,15 @@ impl AuthoringService {
         project_id: &str,
         request: ComposeRequest,
     ) -> Result<ComposeResult, SceneError> {
+        let validate_only = request.validate_only;
+        if validate_only
+            && !matches!(
+                &request.command,
+                Command::Actions { .. } | Command::AddImageButton { .. }
+            )
+        {
+            return Err(SceneError::InvalidPayload);
+        }
         let catalog = self.screens_list(project, project_id)?;
         let owner = catalog
             .owned
@@ -846,6 +859,7 @@ impl AuthoringService {
                 let position = to + usize::from(after) - usize::from(from < to);
                 if node_id == target_id || position == from {
                     return Ok(ComposeResult {
+                        action_validation: None,
                         document,
                         selected_id: node_id,
                         changed: false,
@@ -1011,6 +1025,7 @@ impl AuthoringService {
         }
         if proposed == bytes && companions.is_empty() {
             return Ok(ComposeResult {
+                action_validation: validate_only.then(|| document.clone()),
                 document,
                 selected_id,
                 changed: false,
@@ -1097,6 +1112,16 @@ impl AuthoringService {
                 },
             );
         }
+        if validate_only {
+            return Ok(ComposeResult {
+                action_validation: Some(accepted),
+                document,
+                selected_id,
+                changed: false,
+                styles: catalog.styles,
+                documents: vec![],
+            });
+        }
         self.commit_history(
             project,
             TransactionProposal {
@@ -1105,6 +1130,7 @@ impl AuthoringService {
             },
         )?;
         Ok(ComposeResult {
+            action_validation: None,
             document: accepted,
             selected_id,
             changed: true,

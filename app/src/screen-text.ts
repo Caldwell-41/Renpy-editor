@@ -1,4 +1,4 @@
-import { actionDraft, actionSummary, captureActionFocus, prepareInteraction, renderActions, restoreActionFocus, variableLabel, type ActionDraft, type InteractionContext } from "./screen-interactions.ts";
+import { showActionRefusal, actionDraft, actionSummary, captureActionFocus, prepareInteraction, renderActions, restoreActionFocus, variableLabel, type ActionDraft, type InteractionContext } from "./screen-interactions.ts";
 import { ScreenCanvasFrames } from "./screen-canvas-frames.ts";
 import type { CompositionCommand, CompositionView, CopyDraftParticipant } from "./screen-composition.ts";
 import type { ScreenDocument, ScreenNode } from "./screen-ui.ts";
@@ -30,6 +30,7 @@ type Fields = Record<Field, string>;
 type TextField = "text" | "size" | "color";
 interface Draft { interaction?:InteractionContext; actions?:ActionDraft; key: string; document: ScreenDocument; screenId: string; node: ScreenNode; fields: Fields; appearance:Record<string,string>; edited:Set<string>; font?: FontReference | null; style?: StyleEdit }
 interface Host {
+  validateActions?:import("./screen-interactions.ts").ValidateScreenActions;
   interaction?:()=>InteractionContext|undefined;
   selectDraft?:(screenId:string,nodeId:string)=>void;
   view: () => CompositionView | undefined;
@@ -265,8 +266,9 @@ export class ScreenText {
     if(view.selected.kind==="textbutton") {
       const actions=el("section");body.append(actions);
       const original=draft.actions??actionDraft([]);
-      renderActions(actions,original,draft.interaction,view.busy||view.selected.actions==null||draft.interaction?.owner?.kind==="component",()=>{draft.actions=original;this.drafts.set(draft.key,draft);this.sync();this.host.preview();});
+      renderActions(actions,original,draft.interaction,view.busy||view.selected.actions==null||draft.interaction?.owner?.kind==="component",()=>{draft.actions=original;this.drafts.set(draft.key,draft);this.sync();this.host.preview();},this.host.validateActions&&draft.interaction?()=>this.host.validateActions!(draft.document,draft.screenId,draft.node.id!,draft.interaction!,original):undefined,draft.node.id!);
       heading.querySelector("h2")!.textContent=`${view.selected.literal??"Selected"} button`;
+      if(view.selected.actionProtectionReason){actions.append(el("p","siv-error",view.selected.actionProtectionReason),action("Edit in Source",this.host.source));}
     }
     if(view.selected.kind==="text" && view.selected.variableBindings!=null) {
       const insert=el("div","siv-insert"),choice=el("select");choice.setAttribute("aria-label","Existing variable");
@@ -670,8 +672,8 @@ export class ScreenText {
         if(start!=null&&end!=null&&(control instanceof HTMLTextAreaElement||control instanceof HTMLInputElement&&control.type==="text"))control.setSelectionRange(start,end);
       }
     }
-    catch (error) {if (this.active()) this.fail("source",`${(error as Error).message} Your edits are kept.`);}
-    finally {if (this.submitted === submitted) this.submitted = undefined;submitted.layout.release();if (this.active()) this.sync();}
+    catch (error) {if (this.active()) {this.fail("source",`${(error as Error).message} Your edits are kept.`);showActionRefusal(this.card?.querySelector<HTMLElement>(".siv-actions")??undefined,draft.actions,error);}}
+    finally {if (this.submitted === submitted) this.submitted = undefined;submitted.layout.release();if (this.active()) {this.sync();if(this.drafts.has(draft.key)){const invalid=this.card?.querySelector<HTMLElement>('.siv-actions [aria-invalid="true"]');if(invalid){const details=invalid.closest("details");if(details)details.open=true;invalid.focus({preventScroll:true});invalid.scrollIntoView({block:"nearest"});}}}}
   }
   accept(command: CompositionCommand, base: ScreenDocument, accepted: ScreenDocument): void {
     const submitted = this.submitted;

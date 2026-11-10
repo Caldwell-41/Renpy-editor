@@ -23,11 +23,11 @@ async function call(operation,payload={}){
  const started=Date.now();
  const response=await child.request({protocolVersion:1,requestId:randomUUID().replaceAll('-',''),operation,payload:{...payload,...(session&&!['project.listRecent','project.openRecent'].includes(operation)?{sessionId:session}:{})}});
  result.operations.push({operation,elapsedMs:Date.now()-started});
- if(!response.ok){result.refusals.push({operation,code:response.error.code});throw Object.assign(Error(response.error.message),{code:response.error.code});}return response.value;
+ if(!response.ok){result.refusals.push({operation,code:response.error.code});throw Object.assign(Error(response.error.message),response.error);}return response.value;
 }
 async function settle(check,label){const deadline=Date.now()+15000;while(!await check()){if(Date.now()>deadline)throw Error(`Did not settle: ${label}`);await new Promise(r=>setTimeout(r,5));}}
 const source=async path=>(await call('source.open',{path})).text;
-const control=label=>{const node=[...workspace.panel.querySelectorAll('input,textarea,select,button')].find(n=>n.ariaLabel===label||n.getAttribute('aria-label')===label);assert(node,label);return node;};
+const control=label=>{const node=[...workspace.panel.querySelectorAll('input,textarea,select,button')].find(n=>n.ariaLabel===label||n.getAttribute('aria-label')===label||n.getAttribute('aria-label')===label.replace(/ value$/,' formula'));assert(node,label);return node;};
 const change=(label,value)=>{const node=control(label);node.value=value;node.dispatchEvent(new Event(node.tagName==='SELECT'?'change':'input',{bubbles:true}));};
 const button=label=>{const node=[...workspace.panel.querySelectorAll('button')].find(n=>n.textContent===label);assert(node,label);node.click();};
 async function mount(owner){
@@ -37,7 +37,7 @@ async function mount(owner){
   if(operation==='authoring.list'&&catalogGate){catalogBlocked=true;await catalogGate;}
   if(operation==='screens.canvasStatus')return {phase:'unavailable',message:'Offline UI/core journey. No helper.'};
   if(operation==='screens.canvasRender'){renders.push(structuredClone(payload));return {phase:'unavailable',message:'Offline UI/core journey. No helper.'};}
-  if(operation==='screens.compose'){writes.push(structuredClone(payload));if(refuse)throw Error('Retained test refusal');}
+  if(operation==='screens.compose'&&!payload.validateOnly){writes.push(structuredClone(payload));if(refuse)throw Error('Retained test refusal');}
   return call(operation,payload);
  }});
  workspace.mount(document.body);await settle(()=>workspace.panel.querySelector('[data-node-id]'),'workspace');
@@ -213,13 +213,13 @@ try{
   control(`Choose ${name} image`).click();await settle(()=>[...document.querySelectorAll('button')].some(b=>b.ariaLabel==='Use Station seal'),`${name} picker`);
   [...document.querySelectorAll('button')].find(b=>b.ariaLabel==='Use Station seal').click();await settle(()=>!document.querySelector('dialog.screen-image-dialog'),`${name} selection`);
  }
- change('Horizontal position','23');change('Add action','setVariable');change('Action 1 variable',coins.id);change('Action 1 value','-0');
+ change('Horizontal position','23');change('Add action','setVariable');change('Action 1 variable',coins.id);change('Action 1 value','1 // 0');
  button('Apply changes');await settle(()=>control('Action 1 value').getAttribute('aria-invalid')==='true','action field error');
- assert.equal(document.activeElement===control('Action 1 value'),true,'action error keeps field focus');assert.equal(control('Action 1 value').value,'-0');
+ assert.equal(document.activeElement===control('Action 1 value'),true,'action error keeps field focus');assert.equal(control('Action 1 value').value,'1 // 0');
  change('Action 1 value','21');const beforeAll=await source(owner.path),allSaves=saves;button('Apply changes');await settle(()=>saves>allSaves&&!workspace.hasDraft()&&idle(),'six-state combined edit');
  const all=await source(owner.path),allCommand=writes.at(-1).command;
  assert.equal(Object.values(allCommand.appearances).filter(Boolean).length,6);assert.deepEqual(allCommand.layout,{xpos:{unit:'pixels',value:23}});
- assert.deepEqual(allCommand.interaction.actions,[{type:'setVariable',variableId:coins.id,value:'21'},{type:'finishInteraction'}]);
+ assert.deepEqual(allCommand.interaction.actions,[{type:'setVariable',variableId:coins.id,value:{operation:'assign',operand:'21'}},{type:'finishInteraction'}]);
  assert.equal((all.match(/Transform\(/g)??[]).length,6);
  change('Width','320');const noOpSaves=saves;button('Apply changes');await settle(()=>saves>noOpSaves&&!workspace.hasDraft()&&idle(),'no-op control Apply');assert.equal(await source(owner.path),all);
  button('Undo');await settle(async()=>await source(owner.path)===beforeAll&&control('Horizontal position').value!=='23','one-step six-state Undo');

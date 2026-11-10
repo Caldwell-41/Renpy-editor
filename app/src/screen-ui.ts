@@ -4,7 +4,7 @@ import { ScreenImages, type UiImageAsset } from "./screen-images.ts";
 import { ScreenVariableSamples } from "./screen-variable-samples.ts";
 import { ScreenControlEditor, controlSampleStates } from './screen-control-editor.ts';
 import type { IntegerBarBinding, BarAppearance, ImageButtonAppearances, ControlButtonState } from './screen-controls.ts';
-import type { InteractionContext, ScreenVariable } from "./screen-interactions.ts";
+import { prepareInteraction, type InteractionContext, type ScreenVariable } from "./screen-interactions.ts";
 import { ScreenText, type TextProperties, type StyleCatalog } from "./screen-text.ts";
 import { ScreenCanvasFrames } from "./screen-canvas-frames.ts";
 import { ScreenLayoutEditor, layoutFieldLabels, type NumericLayout, type LayoutEdits } from "./screen-layout.ts";
@@ -30,10 +30,14 @@ export interface ScreenNode {
   style?: {name:string; error:string|null} | null;
   component?: { componentId: string; resolved: boolean; sourceRevision: string | null } | null;
   actions?: ScreenAction[] | null;
+  actionAssignments?: (import("./screen-contracts.ts").ScreenActionAssignment|null)[];
+  actionProtectionReason?:string|null;
   variableBindings?: VariableBinding[] | null;
   protected: { start: number; end: number }[];
 }
 export interface ScreenDocument {
+  actionCapabilities?:import("./screen-contracts.ts").ScreenArithmeticInspection["actionCapabilities"];
+  actionVariables?:ScreenVariable[];
   authoringRevision?: string | null;
   path: string; revision: string; partial: boolean;
   screens: { name: string; nodes: ScreenNode[] }[];
@@ -187,7 +191,7 @@ export class ScreensWorkspace {
       layoutTools: host => { const tools = el("div","screen-image-order"); tools.append(button("Refresh Source",()=>void this.load()),button("Validate screen",()=>this.test(true))); host.append(tools); }, order: host => this.composer.renderOrder(host),
     }, this.layout);
     this.text = new ScreenText({
-      interaction:()=>this.interactionContext(),
+      validateActions:(base,screenId,nodeId,context,draft)=>this.validateActions(base,screenId,nodeId,context,draft),interaction:()=>this.interactionContext(),
       selectDraft:(screenId,nodeId)=>{try{this.selectOwnedScreen(screenId,nodeId);}catch(error){this.note((error as Error).message,true);}},
       writeBlocked:()=>this.components.hasPendingCopy(),cancelComponentCopy:()=>this.components.cancelCopy(),
       componentScope:(host,view)=>this.components.renderScope(host,view),
@@ -197,7 +201,7 @@ export class ScreensWorkspace {
       layoutTools:host => {const tools = el("div","screen-text-layout-tools");tools.append(button("Refresh Source",()=>void this.load()),button("Validate screen",()=>this.test(true)));host.append(tools);},
       order:host => this.composer.renderOrder(host),
     },this.layout);
-    this.controls=new ScreenControlEditor({imported:(change,base)=>this.acceptControlImport(change,base),view:()=>this.compositionView(),interaction:()=>this.interactionContext(),commit:(command,base)=>this.compose(command,base),redraw:()=>{if(this.controls.hasAddition())this.step="design";this.renderCard();},preview:()=>this.renderCanvas(),note:(text,error)=>this.note(text,error),select:(id,design)=>{const index=this.nodes().findIndex(n=>n.id===id);if(index>=0)this.choose(index,design);},source:()=>{void this.openSource();},writeBlocked:()=>this.components.hasPendingCopy(),cancelCopy:()=>this.components.cancelCopy(),order:host=>this.composer.renderOrder(host),layoutTools:host=>{host.append(button("Refresh Source",()=>void this.load()),button("Validate screen",()=>this.test(true)));},current:()=>this.current(),sample:state=>this.sampleButtonState(state)},this.layout,this.images);
+    this.controls=new ScreenControlEditor({imported:(change,base)=>this.acceptControlImport(change,base),view:()=>this.compositionView(),validateCreation:(base,screenId,command)=>this.inspectActions(base,screenId,command),validateActions:(base,screenId,nodeId,context,draft)=>this.validateActions(base,screenId,nodeId,context,draft),interaction:()=>this.interactionContext(),commit:(command,base)=>this.compose(command,base),redraw:()=>{if(this.controls.hasAddition())this.step="design";this.renderCard();},preview:()=>this.renderCanvas(),note:(text,error)=>this.note(text,error),select:(id,design)=>{const index=this.nodes().findIndex(n=>n.id===id);if(index>=0)this.choose(index,design);},source:()=>{void this.openSource();},writeBlocked:()=>this.components.hasPendingCopy(),cancelCopy:()=>this.components.cancelCopy(),order:host=>this.composer.renderOrder(host),layoutTools:host=>{host.append(button("Refresh Source",()=>void this.load()),button("Validate screen",()=>this.test(true)));},current:()=>this.current(),sample:state=>this.sampleButtonState(state)},this.layout,this.images);
     const heading = el("header", "screen-heading"); heading.append(el("h1", "", "Screens"));
     const tools = el("div", "screen-tools");
     const addImageElement = button("Add element", () => this.composer.beginAddition()); addImageElement.dataset.imageAdd = ""; addImageElement.hidden = true;
@@ -397,7 +401,17 @@ export class ScreensWorkspace {
   }
   private interactionContext():InteractionContext|undefined {
     if(!this.doc?.authoringRevision)return undefined;
-    return {authoringRevision:this.doc.authoringRevision,variables:this.interactionVariables,targets:this.interactionTargets,owner:this.owned};
+    return {authoringRevision:this.doc.authoringRevision,variables:this.doc.actionVariables??this.interactionVariables,capabilities:this.doc.actionCapabilities,targets:this.interactionTargets,owner:this.owned};
+  }
+  private async inspectActions(base:ScreenDocument,screenId:string,command:CompositionCommand):Promise<import("./screen-interactions.ts").ScreenActionValidation> {
+    const result=await this.actions.request<{actionValidation:ScreenDocument;selectedId:string}>("screens.compose",{
+      screenId,expectedRevision:base.revision,validateOnly:true,command,
+    });
+    return {document:result.actionValidation,selectedId:result.selectedId};
+  }
+  private validateActions(base:ScreenDocument,screenId:string,nodeId:string,context:InteractionContext,draft:import("./screen-interactions.ts").ActionDraft):Promise<import("./screen-interactions.ts").ScreenActionValidation> {
+    const interaction=prepareInteraction(context,draft);
+    return this.inspectActions(base,screenId,{type:"actions",nodeId,...interaction,actions:interaction.actions!});
   }
   private acceptControlImport(change:AuthoringRevisionChange,base:ScreenDocument):boolean {
     if(this.doc?.path!==base.path||this.doc.revision!==base.revision||this.doc.authoringRevision!==change.before)return false;

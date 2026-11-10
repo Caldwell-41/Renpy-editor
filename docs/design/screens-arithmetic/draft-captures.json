@@ -1,0 +1,168 @@
+{
+  "status": "draft, not approved",
+  "captureCommand": "npm run design:check -- screens-arithmetic <variant> --interaction ./screens/screens-arithmetic/coverage-check.mjs --capture",
+  "captures": [
+    {
+      "path": "docs/design/screens-arithmetic/captures/draft-v1/equation-v1-actions-wide.png",
+      "sha256": "ab9420a9436b318cce03921fbe1b0182e791fc12ea03514c2db8aa773637b0b6",
+      "state": "button",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/draft-v1/equation-v1-condition-compact.png",
+      "sha256": "c13327e1da8beff28f3a34bb5aec524af016e6b714b83c17b6811d388215d8db",
+      "state": "condition",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/draft-v1/equation-v1-decimal-compact.png",
+      "sha256": "15c1b8ff36bec8a4245fa5600162ba5fefbeaa2086d483c59a43cc9dd60df797",
+      "state": "decimal",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/draft-v1/equation-v1-imagebutton-wide.png",
+      "sha256": "76075a5ee78dbc0a04064f008202122da57e1f38c163ac4a796d25b0302e7dc5",
+      "state": "imagebutton",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/draft-v1/equation-v1-protected-wide.png",
+      "sha256": "487ae0059b629d2ec07ca971e538e94a5a336460991763b7c08cdae18a4251ef",
+      "state": "protected",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/draft-v1/equation-v1-stale-wide.png",
+      "sha256": "091c2989ce9b4cefaaf706634b38a9f7591366a46d5f3ccdf3eec2d6be14b343",
+      "state": "stale",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/draft-v1/equation-v1-text-wide.png",
+      "sha256": "177d1469e3d4c2eb152df0283fca61e3b10f2b0457482bc53d80fef875f0aee0",
+      "state": "text",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/draft-v1/equation-v1-unknown-wide.png",
+      "sha256": "7709804d78a35315c8df927f75b91df1122753e1b17ac63c9e756dc87985f8fd",
+      "state": "unknown",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/draft-v1/equation-v1-variables-compact.png",
+      "sha256": "ba5db7e6c3e7b95e84630dca41245a3f9326f70502108fb993f42caccf6b96ca",
+      "state": "variables",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/draft-v1/equation-v1-variables-wide.png",
+      "sha256": "5a885ea09b6f3af783345756725099c0c49bd633ef6e1a24aaa772c1fa403cf6",
+      "state": "variables",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/draft-v1/sequence-v1-actions-wide.png",
+      "sha256": "4c576b9db6040eee462989c83bdbd7f9e6811c45f014aae341a8de2c9ee7369d",
+      "state": "button",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/draft-v1/sequence-v1-condition-compact.png",
+      "sha256": "c13327e1da8beff28f3a34bb5aec524af016e6b714b83c17b6811d388215d8db",
+      "state": "condition",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/draft-v1/sequence-v1-decimal-compact.png",
+      "sha256": "03b97c240cfc52dc3980edc4a3e6a289ce0de2c4c2e385433a8cf411da45efe4",
+      "state": "decimal",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/draft-v1/sequence-v1-variables-wide.png",
+      "sha256": "649ad6770ac6b6d2745f42f2b89c022145cbcf1cf0e7c60b648fa045584ef723",
+      "state": "variables",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/draft-v1/expanded-v1-actions-wide.png",
+      "sha256": "3eda85415c8178c1fe8cca6bd1632daa416bb36c80bb6cf7c85846690f911f6e",
+      "state": "button",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/draft-v1/expanded-v1-condition-compact.png",
+      "sha256": "c13327e1da8beff28f3a34bb5aec524af016e6b714b83c17b6811d388215d8db",
+      "state": "condition",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/draft-v1/expanded-v1-decimal-compact.png",
+      "sha256": "2f09476ea322d7384dca687c138ccca804dfded2f0b9c1e18b155d6d08fe85df",
+      "state": "decimal",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+    },
+    {
+      "path": "docs/design/screens-arithmetic/captures/draft-v1/expanded-v1-variables-wide.png",
+      "sha256": "f6acd17f7249b004914994910701ff7d61fd42b9ecd9c47e322f7d5eac4330b3",
+      "state": "variables",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+    }
+  ]
+}

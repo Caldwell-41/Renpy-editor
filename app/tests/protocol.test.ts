@@ -11,6 +11,9 @@ test("frontend accepts only the exact versioned result envelope", () => {
   assert.equal(isCoreResponse({ protocolVersion: 1, requestId: "one", ok: true, value: {}, extra: true }, "one"), false);
   assert.equal(isCoreResponse({ protocolVersion: 1, requestId: "other", ok: true, value: {} }, "one"), false);
   assert.equal(isCoreResponse({ protocolVersion: 1, requestId: "one", ok: false, error: { code: "DENIED", message: "Denied", detail: "leak" } }), false);
+  const failure = { protocolVersion: 1, requestId: "one", ok: false, error: { code: "ARITHMETIC_ZERO_DIVISOR", message: "A divisor cannot be zero.", actionIndex: 0 } };
+  assert.equal(isCoreResponse(failure, "one"), true);
+  for (const actionIndex of [-1, 8, 1.5, "0", null]) assert.equal(isCoreResponse({ ...failure, error: { ...failure.error, actionIndex } }), false);
 });
 
 test("frontend operation list contains only bounded editor and Studio settings operations", () => {
@@ -87,6 +90,7 @@ test("frontend operation list contains only bounded editor and Studio settings o
     "scene.list",
     "flow.list",
     "scene.apply",
+    "scene.validateAssignment",
     "screens.inspect",
     "screens.canvasPlan",
     "screens.canvasRender",

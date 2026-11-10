@@ -1,3 +1,4 @@
+import { decimalValue } from "./numeric-input.ts";
 import type { Condition, ConditionExpression, SceneWorkspace } from "./scene-ui.ts";
 import { validateField } from "./authoring-input.ts";
 
@@ -17,6 +18,10 @@ function int64(value: string): boolean {
   if (!/^-?(0|[1-9][0-9]*)$/.test(value) || value === "-0") return false;
   try { const parsed = BigInt(value); return parsed >= -9223372036854775808n && parsed <= 9223372036854775807n; } catch { return false; }
 }
+function numericLiteral(raw:string):{type:"int"|"decimal";value:string} {
+  if (/^[+-]?\d+$/.test(raw)) { if(!int64(raw))throw Error("Enter an exact signed 64-bit whole number, or use decimal notation.");return {type:"int",value:raw}; }
+  decimalValue(raw);return {type:"decimal",value:raw};
+}
 const operators = [
   { value: "equal", label: "is" }, { value: "notEqual", label: "is not" }, { value: "less", label: "is less than" },
   { value: "lessEqual", label: "is at most" }, { value: "greater", label: "is greater than" }, { value: "greaterEqual", label: "is at least" },
@@ -27,14 +32,15 @@ function kind(expression: ConditionExpression): string { return expression.type 
 function defaultExpression(variables: Variables): ConditionExpression {
   const variable = variables[0];
   if (!variable) return { type: "bool", value: true };
-  return { type: "compare", operator: "equal", left: { type: "variable", variableId: variable.id, variableType: variable.variableType }, right: variable.variableType === "bool" ? { type: "bool", value: true } : { type: variable.variableType, value: variable.variableType === "int" ? "0" : "" } };
+  return { type: "compare", operator: "equal", left: { type: "variable", variableId: variable.id, variableType: variable.variableType }, right: variable.variableType === "bool" ? { type: "bool", value: true } : { type: variable.variableType, value: ["int","decimal"].includes(variable.variableType) ? "0" : "" } };
 }
 function validateExpression(expression: ConditionExpression, variables: Variables): void {
   let count = 0;
-  const visit = (node: ConditionExpression, depth: number): "bool" | "int" | "string" => {
+  const visit = (node: ConditionExpression, depth: number): "bool" | "int" | "decimal" | "string" => {
     if (++count > 128 || depth > 16) throw Error("Use at most 128 condition terms and 16 levels of nesting.");
     switch (node.type) {
       case "bool": return "bool";
+      case "decimal": decimalValue(node.value); return "decimal";
       case "int": if (!int64(node.value)) throw Error("Enter a whole number from -9223372036854775808 to 9223372036854775807, without leading zeros."); return "int";
       case "string": if (new TextEncoder().encode(node.value).length > 4096) throw Error("Use at most 4096 bytes of text in a condition."); return "string";
       case "variable": if (!variables.some(variable => variable.id === node.variableId && variable.variableType === node.variableType)) throw Error("Select an available Variable with the matching type."); return node.variableType;
@@ -42,7 +48,8 @@ function validateExpression(expression: ConditionExpression, variables: Variable
       case "and": case "or": if (visit(node.left, depth + 1) !== "bool" || visit(node.right, depth + 1) !== "bool") throw Error("All of and Any of need true/false conditions."); return "bool";
       case "compare": {
         const left = visit(node.left, depth + 1), right = visit(node.right, depth + 1);
-        if (left !== right || (!["equal", "notEqual"].includes(node.operator) && left !== "int")) throw Error("Compare matching types. Ordering is available for whole numbers.");
+        const numeric=["int","decimal"].includes(left)&&["int","decimal"].includes(right);
+        if ((!numeric && left !== right) || (!["equal", "notEqual"].includes(node.operator) && !numeric)) throw Error("Compare matching types or numeric values. Ordering is available for whole numbers and decimals.");
         return "bool";
       }
     }
@@ -52,34 +59,40 @@ function validateExpression(expression: ConditionExpression, variables: Variable
 function simpleComparison(variables: Variables, initial: Extract<ConditionExpression, { type: "compare" }>): ExpressionEditor {
   const host = document.createElement("div"); host.className = "condition-fields";
   const left = initial.left as Extract<ConditionExpression, { type: "variable" }>;
-  const variable = select(variables.map(item => ({ value: item.id, label: `${item.technicalName} · ${item.variableType}` })), left.variableId); variable.setAttribute("aria-label", "Condition Variable");
+  const variable = select(variables.map(item => ({ value: item.id, label: `${item.technicalName} · ${item.variableType === "decimal" ? "Decimal" : item.variableType === "int" ? "Whole number" : item.variableType}` })), left.variableId); variable.setAttribute("aria-label", "Condition Variable");
   const operator = select(operators, initial.operator); operator.setAttribute("aria-label", "Condition operator");
   host.append(label("Condition Variable", variable), label("Condition operator", operator));
   const valueHost = document.createElement("div"); host.append(valueHost);
-  const stored = new Map<string, string>(); const literal = initial.right as Extract<ConditionExpression, { type: "bool" | "int" | "string" }>;
-  stored.set(literal.type, String(literal.value));
+  const numericGuidance=document.createElement("p");numericGuidance.className="condition-numeric-guidance";numericGuidance.textContent="Numeric comparison. Decimal thresholds are allowed for either numeric type. No rounding.";host.append(numericGuidance);
+  const stored = new Map<string, string>(); const literal = initial.right as Extract<ConditionExpression, { type: "bool" | "int" | "decimal" | "string" }>;
+  stored.set(left.variableType, String(literal.value));
   let value: Control; let validateValue: () => void;
   const validateVariable = validateField(variable, () => { if (!variables.some(item => item.id === variable.value)) throw Error("Select an available Variable."); });
   const rebuild = (): void => {
     const selected = variables.find(item => item.id === variable.value);
-    const allowed = operators.filter(item => selected?.variableType === "int" || ["equal", "notEqual"].includes(item.value));
+    numericGuidance.hidden=!["int","decimal"].includes(selected?.variableType??"");
+    host.dataset.numeric=String(!numericGuidance.hidden);
+    const captions=host.querySelectorAll(":scope > label > span");
+    captions[0]!.textContent=numericGuidance.hidden?"Condition Variable":"Variable";
+    captions[1]!.textContent=numericGuidance.hidden?"Condition operator":"Comparison";
+    const allowed = operators.filter(item => ["int","decimal"].includes(selected?.variableType??"") || ["equal", "notEqual"].includes(item.value));
     const previous = operator.value;
     const choices = allowed.some(item => item.value === previous) ? allowed : [{ value: previous, label: "Choose a matching operator" }, ...allowed];
     operator.replaceChildren(...choices.map(item => { const option = document.createElement("option"); option.value = item.value; option.textContent = item.label; return option; })); operator.value = previous;
     if (selected?.variableType === "bool") value = select([{ value: "false", label: "False" }, { value: "true", label: "True" }], stored.get("bool") ?? "true");
-    else { value = document.createElement("input"); value.type = "text"; value.value = stored.get(selected?.variableType ?? "string") ?? ""; if (selected?.variableType === "int") value.inputMode = "numeric"; }
-    value.setAttribute("aria-label", "Condition value"); valueHost.replaceChildren(label("Condition value", value));
-    validateValue = validateField(value, () => { if (selected?.variableType === "int" && !int64(value.value)) throw Error("Enter a whole number from -9223372036854775808 to 9223372036854775807, without leading zeros."); });
+    else { value = document.createElement("input"); value.type = "text"; value.value = stored.get(selected?.variableType ?? "string") ?? ""; if (["int","decimal"].includes(selected?.variableType??"")) value.inputMode = "decimal"; }
+    value.setAttribute("aria-label", "Condition value"); valueHost.replaceChildren(label(numericGuidance.hidden ? "Condition value" : "Number", value));
+    validateValue = validateField(value, () => { if(["int","decimal"].includes(selected?.variableType??""))numericLiteral(value.value); });
     for (const event of ["input", "change"]) value.addEventListener(event, () => { stored.set(selected?.variableType ?? "string", value.value); });
   };
   variable.addEventListener("change", rebuild); rebuild();
-  const validateOperator = validateField(operator, () => { const selected = variables.find(item => item.id === variable.value); if (!operators.some(item => item.value === operator.value && (selected?.variableType === "int" || ["equal", "notEqual"].includes(item.value)))) throw Error("Choose an operator available for this Variable type."); });
-  return { host, read: () => { validateVariable(); validateOperator(); validateValue(); const selected = variables.find(item => item.id === variable.value)!; return { type: "compare", operator: operator.value as Extract<ConditionExpression, { type: "compare" }>["operator"], left: { type: "variable", variableId: selected.id, variableType: selected.variableType }, right: selected.variableType === "bool" ? { type: "bool", value: value.value === "true" } : { type: selected.variableType, value: value.value } }; } };
+  const validateOperator = validateField(operator, () => { const selected = variables.find(item => item.id === variable.value); if (!operators.some(item => item.value === operator.value && (["int","decimal"].includes(selected?.variableType??"") || ["equal", "notEqual"].includes(item.value)))) throw Error("Choose an operator available for this Variable type."); });
+  return { host, read: () => { validateVariable(); validateOperator(); validateValue(); const selected = variables.find(item => item.id === variable.value)!; return { type: "compare", operator: operator.value as Extract<ConditionExpression, { type: "compare" }>["operator"], left: { type: "variable", variableId: selected.id, variableType: selected.variableType }, right: selected.variableType === "bool" ? { type: "bool", value: value.value === "true" } : ["int","decimal"].includes(selected.variableType) ? (value.value===String(literal.value)&&selected.id===left.variableId?literal:numericLiteral(value.value)) : { type:"string",value:value.value } }; } };
 }
 function expressionEditor(variables: Variables, initial: ConditionExpression, depth = 1, operand = false): ExpressionEditor {
   const host = document.createElement("fieldset"); host.className = "condition-expression";
   if (depth > 16) { const message = document.createElement("p"); message.textContent = "Condition nesting exceeds the supported limit. Edit it in Source."; host.append(message); return { host, read: () => { throw Error(message.textContent!); } }; }
-  const values = [{ value: "compare", label: "Comparison" }, { value: "and", label: "All of" }, { value: "or", label: "Any of" }, { value: "not", label: "Not" }, { value: "variable", label: operand ? "Variable" : "Boolean Variable" }, { value: "bool", label: "True / False" }, ...(operand ? [{ value: "int", label: "Whole number" }, { value: "string", label: "Text" }] : [])];
+  const values = [{ value: "compare", label: "Comparison" }, { value: "and", label: "All of" }, { value: "or", label: "Any of" }, { value: "not", label: "Not" }, { value: "variable", label: operand ? "Variable" : "Boolean Variable" }, { value: "bool", label: "True / False" }, ...(operand ? [{ value: "int", label: "Whole number" }, { value:"decimal",label:"Decimal" }, { value: "string", label: "Text" }] : [])];
   const shape = select(values, kind(initial)); shape.setAttribute("aria-label", "Condition type");
   const body = document.createElement("div"); host.append(label("Condition type", shape), body);
   const drafts = new Map<string, ExpressionEditor>();
@@ -87,7 +100,7 @@ function expressionEditor(variables: Variables, initial: ConditionExpression, de
     if (selected === "compare") {
       const comparison = saved?.type === "compare" ? saved : defaultExpression(variables);
       const cmp = comparison.type === "compare" ? comparison : { type: "compare" as const, operator: "equal" as const, left: comparison, right: { type: "bool" as const, value: true } };
-      if (cmp.left.type === "variable" && ["bool", "int", "string"].includes(cmp.right.type)) return simpleComparison(variables, cmp);
+      if (cmp.left.type === "variable" && ["bool", "int", "decimal", "string"].includes(cmp.right.type)) return simpleComparison(variables, cmp);
       const panel = document.createElement("div"); panel.className = "condition-operands";
       const operator = select(operators, cmp.operator); operator.setAttribute("aria-label", "Condition operator");
       const left = expressionEditor(variables, cmp.left, depth + 1, true), right = expressionEditor(variables, cmp.right, depth + 1, true);
@@ -105,16 +118,16 @@ function expressionEditor(variables: Variables, initial: ConditionExpression, de
     const panel = document.createElement("div");
     if (selected === "variable") {
       const allowed = operand ? variables : variables.filter(variable => variable.variableType === "bool");
-      const variable = select(allowed.map(item => ({ value: item.id, label: `${item.technicalName} · ${item.variableType}` })), saved?.type === "variable" ? saved.variableId : allowed[0]?.id ?? ""); variable.setAttribute("aria-label", "Condition Variable"); panel.append(label("Condition Variable", variable));
+      const variable = select(allowed.map(item => ({ value: item.id, label: `${item.technicalName} · ${item.variableType === "decimal" ? "Decimal" : item.variableType === "int" ? "Whole number" : item.variableType}` })), saved?.type === "variable" ? saved.variableId : allowed[0]?.id ?? ""); variable.setAttribute("aria-label", "Condition Variable"); panel.append(label("Condition Variable", variable));
       const validate = validateField(variable, () => { if (!allowed.some(item => item.id === variable.value)) throw Error("Select an available Variable of the matching type."); });
       return { host: panel, read: () => { validate(); const item = allowed.find(item => item.id === variable.value)!; return { type: "variable", variableId: item.id, variableType: item.variableType }; } };
     }
     let value: Control;
     if (selected === "bool") value = select([{ value: "false", label: "False" }, { value: "true", label: "True" }], saved?.type === "bool" ? String(saved.value) : "true");
-    else { value = document.createElement("input"); value.type = "text"; value.value = saved?.type === selected && (saved.type === "int" || saved.type === "string") ? saved.value : selected === "int" ? "0" : ""; if (selected === "int") value.inputMode = "numeric"; }
+    else { value = document.createElement("input"); value.type = "text"; value.value = saved?.type === selected && (saved.type === "int" || saved.type === "decimal" || saved.type === "string") ? saved.value : ["int","decimal"].includes(selected) ? "0" : ""; value.inputMode=selected==="int"?"numeric":selected==="decimal"?"decimal":"text"; }
     value.setAttribute("aria-label", "Condition value"); panel.append(label("Condition value", value));
-    const validate = validateField(value, () => { if (selected === "int" && !int64(value.value)) throw Error("Enter a canonical whole number within the signed 64-bit range."); });
-    return { host: panel, read: () => { validate(); return selected === "bool" ? { type: "bool", value: value.value === "true" } : { type: selected as "int" | "string", value: value.value }; } };
+    const validate = validateField(value, () => { if(selected === "decimal")decimalValue(value.value); if (selected === "int" && !int64(value.value)) throw Error("Enter a canonical whole number within the signed 64-bit range."); });
+    return { host: panel, read: () => { validate(); return selected === "bool" ? { type: "bool", value: value.value === "true" } : { type: selected as "int" | "decimal" | "string", value: value.value }; } };
   };
   let editor: ExpressionEditor;
   const draw = (): void => { editor = drafts.get(shape.value) ?? create(shape.value, shape.value === kind(initial) ? initial : undefined); drafts.set(shape.value, editor); body.replaceChildren(editor.host); };

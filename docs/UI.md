@@ -277,7 +277,7 @@ adds the highlighted row; Escape or Close cancels. It has no separate confirm bu
 ### Condition rule builder
 
 Conditions follow the typed model in [ADR 0014](adr/0014-typed-conditions-and-recursive-source-ownership.md).
-Each rule picks a project variable (yes/no, whole number or text), a preset test and a
+Each rule picks a project variable (yes/no, whole number, decimal or text), a preset test and a
 value. Numbers offer `= ≠ < ≤ > ≥`; yes/no and text offer equality only. One All/Any
 switch joins the rules, and each branch shows its Ren'Py line. Mixed groups and Python
 the editor cannot read stay read-only with Edit in Source; the builder never writes
@@ -295,7 +295,23 @@ unknown or non-number variables and division by zero. A value "on this route" us
 only assignments earlier on the route, never the starting default, so most values
 read "unknown". Calculations the editor cannot show, such as `max()`, stay read-only
 with Edit in Source. [Issue #87](https://github.com/Caldwell-41/Renpy-editor/issues/87)
-owns the behaviour, the planned decimal type and the Screens actions.
+owns the behaviour, the decimal type and the Screens actions.
+
+The production Story equation row validates through revision-bound
+`scene.validateAssignment` and commits through the existing Story transaction.
+Core supplies result types, supported operations, limits and field diagnostics.
+Draft feedback folds constants only; a variable-dependent draft says its current
+value is unknown. It never substitutes declaration defaults. Accepted Story state
+stays in the core model and Scene preview. Numeric suggestions support arrows,
+Enter/Tab and Escape. Cmd/Ctrl+Enter commits the beat; Escape closes a suggestion
+or operation menu before returning to the retained draft. Cancel discards that
+draft and returns focus to the beat. Boolean and text targets keep literal fields.
+
+These reusable controls operate in the existing workspace and Writing focus.
+Tracks/Reel, cross-view retained drafts and the full Brass and slate layout remain
+with #110; shared decimal creation/default controls remain with #97.
+[#96 evidence](tasks/evidence/arithmetic-96.md) records the scoped visual comparison
+and real Story-to-core operations.
 
 ## Application shell
 
@@ -613,7 +629,7 @@ and are labelled that way.
   confirmed. Failed rows stay; successful files are not retried. Assets does not play
   audio.
 - **Variables.** A table shows name, type, initial value and Edit, plus the Set
-  variable beats that assign each variable. Types are yes/no, whole number and text.
+  variable beats that assign each variable. Types are yes/no, whole number, decimal and text. The selected inspector edits the declaration default. Names and types stay fixed. Save Default accepts finite decimals as numbers and keeps whole-number text exact. Cancel restores the accepted default. Creation and default edits use the shared session Undo/Redo history.
 
 ## Assist and AI settings
 
@@ -683,6 +699,28 @@ waits for Finish interaction. The [Screens contract](tasks/reference/phase-3b-sc
 owns requirements, including its
 [creation and reuse controls](tasks/reference/phase-3b-screens.md#implemented-creation-and-reuse-controls),
 and [ADR 0021](adr/0021-separate-renpy-canvas-helper.md) owns the canvas helper.
+
+Textbuttons and imagebuttons use the approved A2 / `equation-v2` action editor.
+One ordered action expands at a time. Numeric Set variable actions offer Set to,
+Add, Subtract, Multiply, Divide, Floor divide and Remainder, plus numeric variable
+suggestions and selection grouping. Change an action kind by removing it and adding
+the required kind. Boolean and text actions keep literal fields. Core supplies types,
+capabilities, diagnostics and unknown state. Defaults never stand in for current
+route values. Decimal results require decimal targets; no rounding changes the type.
+
+Draft validation uses the original source, authoring and target revisions and adds
+no history. Apply performs fresh admission against those same revisions. Invalid,
+stale, dirty and session refusals retain the draft. Cancel discards that button's
+pending changes. Source-only timing explains why the action stays protected and
+provides Source navigation. The existing eight-action, target-context and Finish-last
+rules remain in force. Each accepted action reads current values when it runs.
+
+Decimal variables can appear in numeric conditions, text tokens and editor samples.
+Text insertion replaces the selection and returns the caret after the token. Samples
+and canvas selection execute no actions and write no source. Invalid sample text
+retains the last valid value. Bars continue to list whole-number variables only.
+The [#97 evidence](tasks/evidence/arithmetic-97.md) separates production/core proof,
+A2 comparison and the remaining native, SDK and human acceptance limits.
 
 ## Later workspaces
 

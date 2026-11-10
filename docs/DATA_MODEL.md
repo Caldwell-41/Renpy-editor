@@ -346,9 +346,106 @@ Undo/Redo and reopen reconstruct definitions and references from authoritative b
 
 ## Variables and state
 
-Phase 1 visual variables support `bool`, `int`, and `string` definitions with simple
-assignment of a value the editor can represent. Arbitrary Python expressions remain
-source/custom code until a later expression/state model can represent them safely.
+Visual variables support `bool`, `int`, `decimal` and `string` definitions and literal
+assignment. Variable creation and default edits commit source plus authoring metadata
+in one entry through the existing shared session history. Semantic no-ops and refused
+edits add no entry. Undo/Redo restores both files and their actual revisions; project
+reopen retains accepted values and starts a new empty history. Existing types stay fixed after creation. Decimal defaults and values use
+finite binary64 JSON numbers, with the exact JSON string `"-0.0"` for negative
+zero. This applies to defaults, literal assignments, inspected arithmetic results
+and canvas samples. Core also accepts a signed numeric zero and returns the string
+form; other decimal strings are refused. Positive zero remains a JSON number.
+Condition decimal atoms and arithmetic operands remain source strings. Integer
+values retain exact signed i64 strings. Story
+also supports bounded numeric formulas. Set variable keeps
+`variableId` and `value`; arithmetic uses `{operation, operand}` in `value`.
+Operations are `assign`, `add`, `subtract`, `multiply`, `divide`, `floorDivide` and
+`remainder`. The operand is source text containing numeric literals, declared numeric
+variables, signs, parentheses and `+`, `-`, `*`, `/`, `//`, `%` with Python precedence.
+Ordinary division always infers decimal; floor/remainder keep integer type only with
+integer operands. Integer targets refuse decimal results. For a decimal target,
+commands emit an integer-result assignment as `(<formula>) + 0.0`, so Ren'Py stores
+a float too. This source expression uses the same bounded parser. Bool/string literal
+assignments retain their existing contract. Functions, powers, attribute/index access and Python execution
+remain unsupported.
+
+`scene.validateAssignment` accepts the same revision-bound Set variable formula
+command as `scene.apply` and checks the same admission without committing source or
+history. Its typed response reports target/input, supported/refused state, inferred
+result type, reads/writes, field diagnostics, unknown reasons, variable choices with
+definition revisions, numeric capabilities and project/map/authoring/Scene revisions.
+`capabilities.decimalTransport` is `"finiteFloat64OrNegativeZero"`.
+Draft values are constant-folded only; variable-dependent current state remains
+explicitly unobserved. The [#94 evidence](tasks/evidence/arithmetic-94.md) records exact
+transport fixtures. No renderer parser is required.
+
+`scene.list` exposes the authoring revision and declared variable choices.
+Arithmetic mutations require `expectedAuthoringRevision` plus the existing project,
+source-map, Scene source and explicit-body assertions. Pending Scene or variable
+Source drafts refuse; stale dependencies cannot authorize a write. Assignment
+inspection reports the core-inferred result type, read IDs with names/types, target
+write IDs, field diagnostics and a known value or explicit unknown reason. It uses
+preceding supported local assignments only. Defaults never establish current Story
+state. Unsupported control flow, nested ownership and Custom Code invalidate that
+knowledge. Zero divisors and out-of-range literals, intermediate values or results
+have explicit diagnostics. Negative floor/remainder match Python, including a zero
+remainder for i64 minimum modulo -1. The renderer consumes core results.
+
+Compound and general supported explicit assignments inspect/edit through the same
+Story owner, including supported nested bodies. Existing self Add/Subtract literal
+payloads retain their representation. Semantic no-ops preserve bytes/history;
+qualified edits replace only operand/expression and necessary operator tokens,
+retaining source style, spacing, comments and IDs. Source-map schema 8 is unchanged.
+An exact-byte/range match permits an old Custom Code formula mapping to retain its
+ID without rewriting metadata on open. Existing schema migration can refine it.
+Invalid formulas remain protected and expose assignment diagnostics. The
+[#94 contract and fixtures](tasks/evidence/arithmetic-94.md) own current shapes,
+qualification and target limits; [#93 evidence](tasks/evidence/arithmetic-93.md)
+retains integer-formula qualification and [#92 evidence](tasks/evidence/arithmetic-92.md)
+retains the preceding simple-adjustment and both-target proof.
+
+Screens Set variable actions use the same `{operation, operand}` value and shared
+core admission. `screens.compose` keeps the existing `actions` command and
+`expectedAuthoringRevision` / target-review assertions. Optional `validateOnly:true`
+accepts that command and complete `addImageButton` creation drafts. Other command
+variants remain refused. It runs the same preparation, including appearances, layout,
+actions, asset replacement metadata and original dependency reviews, without committing
+source, metadata or history. The response keeps the current `document`, `changed:false` and empty
+`documents`; `actionValidation` contains the proposed inspection with a candidate
+revision. A new imagebutton also has a temporary proposed node ID. Neither that ID
+nor the candidate revision authorizes a later write or selects an accepted node.
+Apply revalidates the complete original creation command and commits it once. Ordinary commits
+omit `actionValidation`. Invalid input uses the existing field-specific arithmetic
+transport errors. A Screens arithmetic refusal also carries an optional zero-based
+`error.actionIndex` identifying the failing action in the submitted ordered list.
+Its code and message stay unchanged. Inspection of another row must not assign that
+error to the inspected field; Apply reveals and focuses the identified row.
+Dirty/stale dependencies remain ordinary refusals.
+
+`screens.inspect` and returned composition documents expose `actionVariables`
+(full typed definitions with IDs and revisions) and `actionCapabilities` (the shared
+numeric grammar/limits). Button `actionAssignments` aligns with the ordered action
+list; formulas carry shared inferred types, read/write IDs, readable operands and
+explicit unknown diagnostics. Other actions have null entries. Defaults do not
+establish current click-time operands. `actionProtectionReason` explains protected
+actions. Screen effects add `readVariables` and retain conservative possible writes,
+including formula-definition revisions in dependencies.
+
+A numeric action is generated as `Function(<owned helper>.assign, target, type,
+operation, operand, lambda: <checked typed expression>)`. The lambda reads store
+operands only when that action runs. The fixed versioned helper declaration is
+appended once to its screen's source, in the same transaction and history entry;
+its name derives from the stable screen UUID. One shared core parser/type checker
+and tree-to-source adapter own both button kinds. Runtime uses generated Python
+operators and checks each node for numeric type, signed i64 bounds and finite
+results. Decimal targets promote the final value to float. Errors raise explicitly;
+the helper returns None on success so later actions and Finish retain their order.
+Inspection recognizes only the exact generated call and helper template. Imported
+expression-valued `SetVariable` calls retain captured screen-evaluation timing and
+stay protected rather than being converted. The inert canvas recognizes the exact
+owned helper declaration as data-only initialization; it never loads or runs it.
+[The #95 evidence](tasks/evidence/arithmetic-95.md) owns exact payloads, runtime
+qualification and remaining target limits.
 
 Phase 1D Variables store UUID, immutable lowercase technical name, supported type,
 typed default value, and exact source mapping. Source uses ordinary mutable state:
@@ -568,8 +665,10 @@ without overlapping source ranges. Old-map validation precedes richer recognitio
 unchanged range/hash UUIDs and extras survive metadata-only migration. Exact source
 verification remains mandatory, and newer schemas are refused.
 
-The condition model supports bool/int/string values, same-type equality/inequality,
-integer ordering and bounded boolean combinations. Integers remain canonical signed
+The condition model supports bool/int/decimal/string values, numeric ordering and
+equality across integer/decimal operands, same-type bool/string equality, and bounded
+boolean combinations. Mixed comparisons retain exact integer precision; they do not
+round the integer to binary64 before comparison. Integers remain canonical signed
 64-bit decimal strings across JSON. Unknown/missing/type-invalid expressions remain
 unknown, never false or evidence of unreachable branches. The core projection does
 not execute Python or infer a route from default values. The first local slice supplied
@@ -720,8 +819,9 @@ to effects and freshness.
 Core resolves typed defaults or explicit editor-only samples once per variable
 into literal text with Ren'Py's quote conversion, keeping helper substitution
 disabled. A sample captures the variable definition's source revision. Integer
-samples use canonical signed-64 decimal strings, booleans use real JSON booleans
-and strings remain literal. Brackets in sample values stay literal, and braces
+samples use canonical signed-64 decimal strings, decimal samples use finite JSON
+numbers or `"-0.0"`, booleans use real JSON booleans and strings remain literal. Decimal resolved
+text follows Python float spelling, including signed zero and scientific notation. Brackets in sample values stay literal, and braces
 cannot introduce text tags. Samples never alter source or runtime state.
 
 Canvas button state is an explicit editor sample: normal, hover, selected,

@@ -615,6 +615,10 @@ fn apply(
                 (BeatPayload::Narration { .. }, BeatPayload::Narration { text }) => {
                     patch_text(original, text)?
                 }
+                (BeatPayload::SetVariable { .. }, BeatPayload::SetVariable { .. }) => {
+                    patch_variable_assignment(original, &beat.payload, &payload, loaded)?
+                        .ok_or(SceneError::OpaqueBoundary)?
+                }
                 _ => {
                     // A full selected-statement replacement must not lose an attached comment.
                     let text =

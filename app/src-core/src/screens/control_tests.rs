@@ -1351,3 +1351,139 @@ fn bar_groups_do_not_gain_component_binding_permission_through_extraction() {
         source
     );
 }
+
+#[test]
+fn new_imagebutton_validation_keeps_source_asset_metadata_and_history_unchanged() {
+    let (temporary, mut service, root, owner) = composition_project();
+    let model = ipc(
+        &mut service,
+        "variable.create",
+        json!({"technicalName":"money","variableType":"decimal","defaultValue":99.5}),
+    );
+    let variable = model["variables"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["technicalName"] == "money")
+        .unwrap()
+        .clone();
+    let mut normal = import_image(&temporary, &mut service, &root, "validation_image");
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    fs::write(
+        root.join("game/images/ui validation_image.png"),
+        STATE_PNGS[0],
+    )
+    .unwrap();
+    let review = ipc(
+        &mut service,
+        "asset.reviewUiImage",
+        json!({"assetId":normal["assetId"],"expectedAssetSha256":normal["expectedAssetSha256"]}),
+    );
+    normal["replacementSha256"] = review["sha256"].clone();
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    let source_path = root.join(owner["path"].as_str().unwrap());
+    let metadata_path = root.join(".renpy-editor/authoring.json");
+    let map_path = root.join(".renpy-editor/source-map.json");
+    let before = fs::read(&source_path).unwrap();
+    let metadata = fs::read(&metadata_path).unwrap();
+    let map = fs::read(&map_path).unwrap();
+    let command = json!({"type":"addImageButton","parentId":owner["rootId"],"appearances":{"normal":normal},"width":240,"height":64,"layout":{"xpos":{"unit":"pixels","value":23}},"interaction":{"actions":[{"type":"setVariable","variableId":variable["id"],"value":{"operation":"assign","operand":"(9.5 + 0.5) / 4"}}],"expectedAuthoringRevision":doc["authoringRevision"],"expectedTargetRevisions":[]}});
+    let request = json!({"screenId":owner["id"],"expectedRevision":doc["revision"],"validateOnly":true,"command":command});
+    let validated = ipc(&mut service, "screens.compose", request.clone());
+    assert_eq!(validated["changed"], false);
+    assert_eq!(validated["documents"], json!([]));
+    assert_eq!(validated["document"]["revision"], doc["revision"]);
+    let proposed = validated["actionValidation"]["screens"][0]["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|n| n["id"] == validated["selectedId"])
+        .unwrap();
+    assert_eq!(
+        proposed["actionAssignments"][0]["inferredResultType"],
+        "decimal"
+    );
+    assert_eq!(proposed["actionAssignments"][0]["state"]["value"], 2.5);
+    assert_eq!(
+        proposed["imageButtonAppearances"]["normal"]["expectedAssetSha256"],
+        review["sha256"]
+    );
+    let mut invalid = request.clone();
+    invalid["command"]["interaction"]["actions"][0]["value"]["operand"] = json!("1 / 0");
+    let failure = reject(&mut service, "screens.compose", invalid.clone());
+    assert_eq!(failure["error"]["code"], "ARITHMETIC_ZERO_DIVISOR");
+    assert_eq!(failure["error"]["actionIndex"], 0);
+    invalid["validateOnly"] = json!(false);
+    let refusal = reject(&mut service, "screens.compose", invalid);
+    assert_eq!(refusal["error"], failure["error"]);
+    let mut missing = request.clone();
+    missing["command"]["appearances"] = json!({});
+    reject(&mut service, "screens.compose", missing);
+    let mut stale = request.clone();
+    stale["expectedRevision"] = json!("0".repeat(64));
+    assert_eq!(
+        reject(&mut service, "screens.compose", stale)["error"]["code"],
+        "SOURCE_CONFLICT"
+    );
+    let mut stale = request.clone();
+    stale["command"]["interaction"]["expectedAuthoringRevision"] = json!("0".repeat(64));
+    assert_eq!(
+        reject(&mut service, "screens.compose", stale)["error"]["code"],
+        "SOURCE_CONFLICT"
+    );
+    let mut unsupported = request.clone();
+    unsupported["command"] =
+        json!({"type":"add","parentId":owner["rootId"],"kind":"text","text":"Refused"});
+    assert_eq!(
+        reject(&mut service, "screens.compose", unsupported)["error"]["code"],
+        "INVALID_PAYLOAD"
+    );
+    let declaration = ipc(
+        &mut service,
+        "source.open",
+        json!({"path":variable["source"]["path"]}),
+    );
+    ipc(
+        &mut service,
+        "source.updateDraft",
+        json!({"path":variable["source"]["path"],"expectedBaseRevision":declaration["baseRevision"],"text":format!("{}# unfinished declaration\n",declaration["text"].as_str().unwrap()),"selectionStart":0,"selectionEnd":0}),
+    );
+    assert_eq!(
+        reject(&mut service, "screens.compose", request.clone())["error"]["code"],
+        "DIRTY_SOURCE"
+    );
+    ipc(
+        &mut service,
+        "source.discard",
+        json!({"path":variable["source"]["path"]}),
+    );
+    assert_eq!(fs::read(&source_path).unwrap(), before);
+    assert_eq!(fs::read(&metadata_path).unwrap(), metadata);
+    assert_eq!(fs::read(&map_path).unwrap(), map);
+    assert_eq!(ipc(&mut service, "scene.list", json!({}))["canUndo"], false);
+    let mut apply = request;
+    apply["validateOnly"] = json!(false);
+    let accepted = ipc(&mut service, "screens.compose", apply);
+    assert_ne!(accepted["selectedId"], validated["selectedId"]);
+    let accepted_source = fs::read(&source_path).unwrap();
+    let accepted_metadata = fs::read(&metadata_path).unwrap();
+    assert_ne!(accepted_source, before);
+    assert_ne!(accepted_metadata, metadata);
+    composition_history(&mut service, "undo");
+    assert_eq!(fs::read(&source_path).unwrap(), before);
+    assert_eq!(fs::read(&metadata_path).unwrap(), metadata);
+    assert_eq!(ipc(&mut service, "scene.list", json!({}))["canUndo"], false);
+    composition_history(&mut service, "redo");
+    assert_eq!(fs::read(&source_path).unwrap(), accepted_source);
+    assert_eq!(fs::read(&metadata_path).unwrap(), accepted_metadata);
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    assert_eq!(fs::read(&source_path).unwrap(), accepted_source);
+    assert_eq!(ipc(&mut service, "scene.list", json!({}))["canUndo"], false);
+    service.close().unwrap();
+}

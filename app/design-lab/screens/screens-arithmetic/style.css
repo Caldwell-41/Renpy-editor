@@ -1,0 +1,44 @@
+/* Scoped additions use the existing Screens/Variables fonts and colour tokens. */
+.sa-host .screen-card.screen-text{padding-bottom:0!important}
+.sa-editor{display:flex;flex-direction:column;min-height:0;height:100%;font-size:11px;line-height:1.5}
+.sa-editor>h2{font-size:14px;padding-bottom:8px;border-bottom:1px solid var(--border-normal);margin:0}
+.sa-tabs{display:flex;gap:2px;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--border-normal)}
+.sa-tabs .button{border:0;border-bottom:2px solid transparent;background:transparent;border-radius:0;padding:4px 7px;min-height:28px;font-size:11px}
+.sa-tabs .button[aria-pressed=true]{border-bottom-color:var(--accent-primary);color:var(--accent-primary)}
+.sa-body{overflow:auto;min-height:0;flex:1;padding-top:8px;scrollbar-width:thin}
+.sa-line{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px}
+.sa-editor select,.sa-editor input,.sa-editor textarea,.sa-decimals input,.sa-decimals select{width:100%;min-width:0;padding:6px 7px;border:1px solid var(--border-normal);border-radius:0;background:var(--surface-panel);color:var(--text-primary);font-size:11px;min-height:29px}
+.sa-editor input,.sa-editor textarea{font-family:var(--font-source)}
+.sa-editor .button,.sa-decimals .button{border-radius:0;min-height:28px;font-size:11px;padding:4px 8px}
+.sa-sequence{padding:0;margin:8px 0;list-style:none;border-top:1px solid var(--border-normal)}
+.sa-sequence>li{border-bottom:1px solid var(--border-normal);padding:4px 0}
+.sa-action-line{display:flex;align-items:center;gap:2px}
+.sa-step{border:0;background:transparent;color:var(--text-primary);text-align:left;flex:1;min-width:0;font:11px/1.5 var(--font-source);padding:5px 3px;overflow-wrap:anywhere;cursor:pointer}
+.sa-step[aria-expanded=true]{color:var(--accent-primary)}
+.sa-tools{display:flex;flex-shrink:0}.sa-tools .button{background:transparent;border:0;padding:1px 4px;min-width:22px;font-size:14px}
+.sa-fields{padding:7px 0 5px 8px;border-left:2px solid var(--accent-primary);margin:4px 0}
+.sa-equation{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:7px}
+.sa-equation>.field:last-child{grid-column:1/-1}.sa-equation>.field{gap:4px;margin:0}
+.sa-host[data-arithmetic-variant=expanded-v1] .sa-equation{grid-template-columns:minmax(0,1fr)}
+.sa-host[data-arithmetic-variant=expanded-v1] .sa-equation>.field:last-child{grid-column:auto}
+.sa-host[data-arithmetic-variant=sequence-v1] .sa-fields{margin-top:8px;padding:8px;border:1px solid var(--border-normal)}
+.sa-host[data-arithmetic-variant=sequence-v1] .sa-step{font-family:var(--font-ui)}
+.sa-diagnostic{margin:7px 0;font-size:11px;line-height:1.5;color:var(--text-secondary);overflow-wrap:anywhere}
+.sa-error,.sa-warning{color:var(--status-warning)}[aria-invalid=true]{border-color:var(--status-error)!important}
+.sa-suggestions{display:flex;flex-wrap:wrap;gap:4px}.sa-suggestions .button{min-height:23px;font-size:10px;padding:2px 6px;background:transparent}
+.sa-order{font-size:11px;line-height:1.5;margin:8px 0}.sa-examples{border-top:1px solid var(--border-normal);margin-top:12px;padding:6px 0}.sa-examples summary{cursor:pointer}.sa-examples select{margin-top:7px}
+.sa-footer{display:flex;gap:7px;padding:9px 0;border-top:1px solid var(--border-normal);flex-wrap:wrap;flex-shrink:0}.sa-message{font-size:11px;line-height:1.5;margin:0 0 7px}.sa-message:empty{display:none}
+.sa-editor h3,.sa-decimals h3{font-size:12px;margin:10px 0 6px}.sa-editor pre{font-size:10px;white-space:pre-wrap;overflow-wrap:anywhere}
+.sa-dialog{max-width:360px;padding:18px;background:var(--surface-panel);color:var(--text-primary);border:1px solid var(--border-strong)}.sa-dialog::backdrop{background:rgb(0 0 0 / 55%)}.sa-dialog .button{margin:8px 5px 0 0}.sa-dialog h2{font-size:16px}
+.sa-text-sample{display:block;padding:20px 8px;font-size:20px;border-block:1px solid var(--border-normal);margin-top:10px}
+.sa-decimal-workspace{display:grid;grid-template-columns:minmax(180px,.85fr) minmax(0,1.4fr);height:100%;min-height:0;overflow:auto}
+.sa-definition-list{border-right:1px solid var(--border-normal);padding-right:18px}.sa-definition-editor{padding:0 22px;min-width:0}.sa-definition-editor>h2{font-size:16px;margin-bottom:14px}.sa-definition{display:block;width:100%;background:transparent;border:0;border-bottom:1px solid var(--border-normal);border-radius:0;padding:14px 7px;text-align:left;font-size:12px;line-height:1.7;color:var(--text-primary)}.sa-definition[aria-pressed=true]{background:var(--surface-selected);border-left:2px solid var(--accent-primary)}
+.sa-definition-editor .field{margin-bottom:12px}.sa-bar-note{font-size:11px;line-height:1.6;margin:16px 6px}.sa-definition-editor>p{font-size:12px;line-height:1.6}.sa-decimal-sequence-v1{grid-template-columns:minmax(160px,.6fr) minmax(0,1fr)}.sa-type-note{border-bottom:1px solid var(--border-normal);padding:8px 0}.sa-decimal-expanded-v1{display:block}.sa-decimal-expanded-v1 .sa-definition-list{display:flex;flex-wrap:wrap;gap:4px;padding:0;border-right:0;border-bottom:1px solid var(--border-normal);margin-bottom:18px}.sa-decimal-expanded-v1 .sa-definition{width:auto;flex:1;min-width:140px}.sa-decimal-expanded-v1 .sa-bar-note{width:100%;margin:6px}.sa-definition-source{padding:12px 0;border-top:1px solid var(--border-normal)}.sa-definition-source p{font-size:11px}
+.sa-condition-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.sa-condition-fields>.field:last-child{grid-column:1/-1}.sa-condition-summary{display:block;padding:14px 0;border-block:1px solid var(--border-normal);font:14px var(--font-source)}
+@media(max-width:650px){.sa-decimal-workspace{display:block}.sa-definition-list{padding:0;border-right:0;margin-bottom:16px}.sa-definition-editor{padding:0}.sa-definition{padding:7px}.sa-editor{min-height:390px}.sa-body{max-height:430px}.sa-condition-fields{grid-template-columns:1fr}.sa-condition-fields>.field:last-child{grid-column:auto}}
+.sa-host .screen-interactions-study .lp-main{padding:0}.sa-host .screen-interactions-study .lp-content{display:flex;min-height:0;overflow:hidden}.sa-host .screen-interactions-study .screens-editor{width:100%;min-width:0}
+.sa-host .sa-card{padding:0 0 0 16px;max-height:none;border:0;border-left:1px solid var(--border-normal);border-radius:0}
+.sa-host[data-arithmetic-variant=equation-v1] .sa-equation{grid-template-columns:minmax(0,.95fr) 70px minmax(0,1.2fr)}
+.sa-host[data-arithmetic-variant=equation-v1] .sa-equation>.field:last-child{grid-column:auto}
+.sa-editor .lp-label{font-size:10px}
+.sa-operation{position:relative;min-width:0}.sa-host[data-arithmetic-variant=equation-v1] .sa-operation>select{color:transparent}.sa-operation>select>option{color:var(--text-primary)}.sa-operation-symbol{position:absolute;left:8px;top:6px;pointer-events:none;font:12px var(--font-source);color:var(--text-primary)}.sa-condition-workspace{display:block}.sa-condition-workspace .sa-definition-editor{max-width:650px}

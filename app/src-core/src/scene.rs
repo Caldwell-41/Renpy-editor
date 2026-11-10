@@ -10,6 +10,8 @@ mod logic;
 mod screen_beats;
 use screen_beats::ScreenStatement;
 mod structure;
+pub mod variables;
+pub use variables::AssignmentDraftValidation;
 
 use crate::{
     authoring::{AssetKind, AuthoringMetadata, AuthoringService, VariableType},
@@ -220,6 +222,8 @@ pub struct SceneBeat {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub screen_effects: Option<ScreenEffects>,
     pub payload: BeatPayload,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub assignment: Option<variables::AssignmentInspection>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -241,6 +245,7 @@ pub struct SceneDocument {
 pub struct SceneWorkspace {
     pub project_revision: String,
     pub source_map_revision: String,
+    pub authoring_revision: String,
     pub entry_scene_id: String,
     pub last_open: Selection,
     pub chapters: Vec<ChapterMetadata>,
@@ -294,6 +299,8 @@ pub enum Position {
 pub struct SceneCommandRequest {
     pub expected_project_revision: String,
     pub expected_source_map_revision: String,
+    #[serde(default)]
+    pub expected_authoring_revision: Option<String>,
     pub command: SceneCommand,
 }
 
@@ -470,8 +477,21 @@ pub enum SceneCommand {
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum SceneError {
+    ScreenAction {
+        index: usize,
+        cause: Box<SceneError>,
+    },
     RuntimeBusy,
     InvalidPayload,
+    MissingArithmeticTarget,
+    ArithmeticTargetType,
+    InvalidArithmeticOperand,
+    InvalidArithmeticSyntax,
+    MissingArithmeticVariable,
+    ArithmeticOperandType,
+    ArithmeticZeroDivisor,
+    ArithmeticOverflow,
+    ArithmeticLimitExceeded,
     InvalidMetadata,
     UnsupportedSource,
     SourceConflict,
@@ -611,7 +631,7 @@ impl AuthoringService {
                         mapped.byte_start as usize != parsed.start
                             || mapped.byte_end as usize != parsed.end
                             || mapped.source_sha256 != sha256(&bytes[parsed.start..parsed.end])
-                            || mapped.kind != parsed.payload.kind()
+                            || !compatible_arithmetic_kind(&mapped.kind, &parsed.payload)
                                 && !(mapped.kind == "customCode"
                                     && matches!(parsed.nesting, Some(ParsedNesting::Child { .. })))
                     })
@@ -768,6 +788,7 @@ impl AuthoringService {
             last_open: loaded.project.last_open,
             chapters: loaded.project.chapters,
             scenes,
+            authoring_revision: sha256(&json_bytes(&loaded.authoring)?),
             authoring: loaded.authoring,
             can_undo: stack.is_some_and(|value| value.can_undo()),
             can_redo: stack.is_some_and(|value| value.can_redo()),
@@ -784,16 +805,7 @@ impl AuthoringService {
             SceneCommand::Undo => self.undo_scene(project)?,
             SceneCommand::Redo => self.redo_scene(project)?,
             command => {
-                let loaded = self.load(project, project_id)?;
-                let guarded = command_source_paths(&loaded.project, &command)?;
-                self.ensure_source_paths_clean(project, guarded.iter().map(String::as_str))
-                    .map_err(|_| SceneError::DirtySource)?;
-                if loaded.project_revision.sha256 != request.expected_project_revision
-                    || loaded.source_map_revision.sha256 != request.expected_source_map_revision
-                {
-                    return Err(SceneError::SourceConflict);
-                }
-                self.admit_screen_command(project, project_id, &command)?;
+                let loaded = self.prepare_scene_command(project, project_id, &request, &command)?;
                 let proposal = self.build_command(project, loaded, command)?;
                 if proposal.mutations.iter().any(|mutation| {
                     mutation.kind != MutationKind::ReplaceExisting
@@ -814,6 +826,142 @@ impl AuthoringService {
             }
         }
         self.scene_workspace(project, project_id)
+    }
+
+    fn prepare_scene_command(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        request: &SceneCommandRequest,
+        command: &SceneCommand,
+    ) -> Result<Loaded, SceneError> {
+        let loaded = self.load(project, project_id)?;
+        let guarded = command_source_paths(&loaded.project, command)?;
+        self.ensure_source_paths_clean(project, guarded.iter().map(String::as_str))
+            .map_err(|_| SceneError::DirtySource)?;
+        if loaded.project_revision.sha256 != request.expected_project_revision
+            || loaded.source_map_revision.sha256 != request.expected_source_map_revision
+        {
+            return Err(SceneError::SourceConflict);
+        }
+        let arithmetic = matches!(command,
+                    SceneCommand::InsertBeat { beat, .. } | SceneCommand::UpdateBeat { beat, .. }
+                    | SceneCommand::InsertBodyBeat { beat, .. } | SceneCommand::UpdateBodyBeat { beat, .. }
+                    if matches!(beat, BeatPayload::SetVariable { value, .. } if value.is_object()));
+        if arithmetic {
+            if request.expected_authoring_revision.as_deref()
+                != Some(sha256(&json_bytes(&loaded.authoring)?).as_str())
+            {
+                return Err(SceneError::SourceConflict);
+            }
+            self.ensure_source_paths_clean(
+                project,
+                loaded
+                    .authoring
+                    .variables
+                    .iter()
+                    .map(|v| v.source.path.as_str()),
+            )
+            .map_err(|_| SceneError::DirtySource)?;
+        }
+        self.admit_screen_command(project, project_id, command)?;
+        Ok(loaded)
+    }
+
+    /// Check the exact authoring command without accepting source or history.
+    pub fn scene_validate_assignment(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        request: SceneCommandRequest,
+    ) -> Result<AssignmentDraftValidation, SceneError> {
+        let (target, value) = match &request.command {
+            SceneCommand::InsertBeat { beat, .. }
+            | SceneCommand::UpdateBeat { beat, .. }
+            | SceneCommand::InsertBodyBeat { beat, .. }
+            | SceneCommand::UpdateBodyBeat { beat, .. } => match beat {
+                BeatPayload::SetVariable { variable_id, value } => {
+                    (variable_id.clone(), value.clone())
+                }
+                _ => return Err(SceneError::InvalidPayload),
+            },
+            _ => return Err(SceneError::InvalidPayload),
+        };
+        if !value.is_object() {
+            return Err(SceneError::InvalidPayload);
+        }
+        let source_revision = match &request.command {
+            SceneCommand::InsertBeat {
+                expected_source_revision,
+                ..
+            }
+            | SceneCommand::UpdateBeat {
+                expected_source_revision,
+                ..
+            }
+            | SceneCommand::InsertBodyBeat {
+                expected_source_revision,
+                ..
+            }
+            | SceneCommand::UpdateBodyBeat {
+                expected_source_revision,
+                ..
+            } => expected_source_revision.clone(),
+            _ => unreachable!(),
+        };
+        let loaded = self.prepare_scene_command(project, project_id, &request, &request.command)?;
+        let authoring = loaded.authoring.clone();
+        let project_revision = loaded.project_revision.sha256.clone();
+        let source_map_revision = loaded.source_map_revision.sha256.clone();
+        let authoring_revision = sha256(&json_bytes(&authoring)?);
+        let validation = self.build_command(project, loaded, request.command);
+        let refused = validation
+            .err()
+            .map(|error| match error {
+                SceneError::InvalidArithmeticOperand => {
+                    Ok(crate::conditions::arithmetic::ArithmeticUnknown::InvalidOperand)
+                }
+                SceneError::InvalidArithmeticSyntax => {
+                    Ok(crate::conditions::arithmetic::ArithmeticUnknown::InvalidSyntax)
+                }
+                SceneError::MissingArithmeticVariable | SceneError::MissingArithmeticTarget => {
+                    Ok(crate::conditions::arithmetic::ArithmeticUnknown::MissingVariable)
+                }
+                SceneError::ArithmeticOperandType => {
+                    Ok(crate::conditions::arithmetic::ArithmeticUnknown::IncompatibleOperand)
+                }
+                SceneError::ArithmeticTargetType => {
+                    Ok(crate::conditions::arithmetic::ArithmeticUnknown::IncompatibleTarget)
+                }
+                SceneError::ArithmeticZeroDivisor => {
+                    Ok(crate::conditions::arithmetic::ArithmeticUnknown::ZeroDivisor)
+                }
+                SceneError::ArithmeticOverflow => {
+                    Ok(crate::conditions::arithmetic::ArithmeticUnknown::NonFiniteResult)
+                }
+                SceneError::ArithmeticLimitExceeded => {
+                    Ok(crate::conditions::arithmetic::ArithmeticUnknown::LimitExceeded)
+                }
+                other => Err(other),
+            })
+            .transpose()?;
+        let assignment = variables::draft(&target, &value, &authoring, refused.clone());
+        Ok(AssignmentDraftValidation {
+            target_variable_id: target,
+            value,
+            support: if refused.is_some() {
+                variables::AssignmentSupport::Refused
+            } else {
+                variables::AssignmentSupport::Supported
+            },
+            assignment,
+            project_revision,
+            source_map_revision,
+            authoring_revision,
+            source_revision,
+            variables: authoring.variables,
+            capabilities: variables::AssignmentCapabilities::default(),
+        })
     }
 
     fn admit_screen_command(
@@ -2745,6 +2893,13 @@ fn apply_beat_edit(
                     loaded,
                 )?
                 .unwrap_or(render_payload(&payload, loaded, newline)?)
+            } else if let Some(patched) = patch_variable_assignment(
+                &source[beat.byte_start as usize..beat.byte_end as usize],
+                &beat.payload,
+                &payload,
+                loaded,
+            )? {
+                patched
             } else if let Some(patched) = patch_screen_beat(
                 &source[beat.byte_start as usize..beat.byte_end as usize],
                 &beat.payload,
@@ -3033,12 +3188,31 @@ fn render_payload(
                 .variables
                 .iter()
                 .find(|item| item.id == *variable_id)
-                .ok_or(SceneError::UnknownEntity)?;
-            format!(
-                "    $ {} = {}",
-                variable.technical_name,
-                render_value(variable.variable_type, value)?
-            )
+                .ok_or(if value.is_object() {
+                    SceneError::MissingArithmeticTarget
+                } else {
+                    SceneError::UnknownEntity
+                })?;
+            if value.is_object() {
+                let adjustment = integer_adjustment(
+                    variable.variable_type,
+                    value,
+                    &loaded.authoring,
+                    variable_id,
+                )?;
+                format!(
+                    "    $ {} {}= {}",
+                    variable.technical_name,
+                    adjustment.operator(),
+                    adjustment.operand
+                )
+            } else {
+                format!(
+                    "    $ {} = {}",
+                    variable.technical_name,
+                    render_value(variable.variable_type, value)?
+                )
+            }
         }
         BeatPayload::Choice { options } => {
             let mut text = String::from("    menu:");
@@ -3135,8 +3309,21 @@ fn validate_payload(payload: &BeatPayload, loaded: &Loaded) -> Result<(), SceneE
                 .variables
                 .iter()
                 .find(|item| item.id == *variable_id)
-                .ok_or(SceneError::UnknownEntity)?;
-            render_value(variable.variable_type, value)?;
+                .ok_or(if value.is_object() {
+                    SceneError::MissingArithmeticTarget
+                } else {
+                    SceneError::UnknownEntity
+                })?;
+            if value.is_object() {
+                integer_adjustment(
+                    variable.variable_type,
+                    value,
+                    &loaded.authoring,
+                    variable_id,
+                )?;
+            } else {
+                render_value(variable.variable_type, value)?;
+            }
         }
         BeatPayload::Background { asset_id, .. } => {
             asset(loaded, asset_id, AssetKind::Background)?;
@@ -3749,6 +3936,37 @@ fn parse_line(body: &str, loaded: Option<SceneParseContext<'_>>) -> Option<BeatP
     if let Some(rest) = line.strip_prefix("show ") {
         return parse_show(rest, loaded);
     }
+    if let Some((name, adjustment)) = crate::conditions::arithmetic::parse_assignment(
+        logic::without_comment(line).trim_end(),
+        loaded?.1,
+    ) {
+        let variable = loaded?.1.variables.iter().find(|v| {
+            v.technical_name == name && crate::conditions::arithmetic::numeric_type(v.variable_type)
+        })?;
+        if variable.variable_type == VariableType::Int
+            && adjustment
+                .formula(loaded?.1, &variable.id)
+                .ok()?
+                .result_type()
+                != VariableType::Int
+        {
+            return None;
+        }
+        let value =
+            if adjustment.operation == crate::conditions::arithmetic::IntegerOperation::Assign {
+                line.strip_prefix("$ ")
+                    .and_then(|rest| rest.split_once(" = "))
+                    .filter(|(target, _)| *target == name)
+                    .and_then(|(_, literal)| parse_value(variable.variable_type, literal))
+                    .unwrap_or(serde_json::to_value(&adjustment).ok()?)
+            } else {
+                serde_json::to_value(adjustment).ok()?
+            };
+        return Some(BeatPayload::SetVariable {
+            variable_id: variable.id.clone(),
+            value,
+        });
+    }
     if let Some(rest) = line.strip_prefix("$ ") {
         let (name, literal) = rest.split_once(" = ")?;
         let (_, authoring, _) = loaded?;
@@ -3756,6 +3974,9 @@ fn parse_line(body: &str, loaded: Option<SceneParseContext<'_>>) -> Option<BeatP
             .variables
             .iter()
             .find(|item| item.technical_name == name)?;
+        if variable.variable_type == VariableType::Int {
+            return None;
+        } // Integer recognition belongs to the formula owner.
         let value = parse_value(variable.variable_type, literal)?;
         return Some(BeatPayload::SetVariable {
             variable_id: variable.id.clone(),
@@ -4002,7 +4223,7 @@ pub(crate) fn build_mapping(
                 .any(|(mapped, parsed)| {
                     mapped.byte_start as usize != parsed.start
                         || mapped.byte_end as usize != parsed.end
-                        || mapped.kind != parsed.payload.kind()
+                        || !compatible_arithmetic_kind(&mapped.kind, &parsed.payload)
                         || parsed.end > bytes.len()
                         || mapped.source_sha256 != sha256(&bytes[parsed.start..parsed.end])
                 })
@@ -4026,12 +4247,28 @@ pub(crate) fn build_mapping(
             .or_default()
             .push_back((id.clone(), *anchor));
     }
+    let arithmetic_ranges: HashMap<_, _> = parsed
+        .iter()
+        .filter(
+            |p| matches!(&p.payload, BeatPayload::SetVariable { value, .. } if value.is_object()),
+        )
+        .map(|p| ((p.start, p.end), sha256(&bytes[p.start..p.end])))
+        .collect();
     if let Some(previous) = previous {
         for beat in &previous.beats {
             if forced_ids.contains(beat.id.as_str()) {
                 continue;
             }
-            ids.entry((beat.kind.clone(), beat.source_sha256.clone()))
+            let kind = if beat.kind == "customCode"
+                && arithmetic_ranges
+                    .get(&(beat.byte_start as usize, beat.byte_end as usize))
+                    .is_some_and(|hash| hash == &beat.source_sha256)
+            {
+                "setVariable".into()
+            } else {
+                beat.kind.clone()
+            };
+            ids.entry((kind, beat.source_sha256.clone()))
                 .or_default()
                 .push_back((beat.id.clone(), None));
         }
@@ -4106,6 +4343,7 @@ pub(crate) fn build_mapping(
             structural_placeholder: false,
             screen_effects: None,
             payload: parsed.payload,
+            assignment: None,
         });
     }
     let ids_by_start: HashMap<_, _> = mappings
@@ -4179,6 +4417,9 @@ pub(crate) fn build_mapping(
         }) {
             return Err(SceneError::InvalidMetadata);
         }
+    }
+    if let Some((_, authoring, _)) = context {
+        variables::inspect(&mut beats, authoring);
     }
     Ok((
         SceneSourceMapping {
@@ -4474,6 +4715,169 @@ fn find_asset(
         .map(|item| item.id.clone())
 }
 
+pub(crate) fn integer_adjustment(
+    kind: VariableType,
+    value: &Value,
+    authoring: &AuthoringMetadata,
+    target: &str,
+) -> Result<crate::conditions::arithmetic::IntegerAdjustment, SceneError> {
+    if !crate::conditions::arithmetic::numeric_type(kind) {
+        return Err(SceneError::ArithmeticTargetType);
+    }
+    let mut adjustment: crate::conditions::arithmetic::IntegerAdjustment =
+        serde_json::from_value(value.clone()).map_err(|_| SceneError::InvalidArithmeticOperand)?;
+    let formula = adjustment
+        .formula(authoring, target)
+        .map_err(arithmetic_error)?;
+    if kind == VariableType::Int && formula.result_type() != VariableType::Int {
+        return Err(SceneError::ArithmeticTargetType);
+    }
+    if kind == VariableType::Decimal && formula.result_type() == VariableType::Int {
+        adjustment.operand = format!("({}) + 0.0", adjustment.operand);
+        adjustment
+            .formula(authoring, target)
+            .map_err(arithmetic_error)?;
+    }
+    if let Err(reason) = formula.evaluate(&|_| {
+        Err(crate::conditions::arithmetic::ArithmeticUnknown::UnobservedCurrentValue)
+    }) {
+        if reason != crate::conditions::arithmetic::ArithmeticUnknown::UnobservedCurrentValue {
+            return Err(arithmetic_error(reason));
+        }
+    }
+    Ok(adjustment)
+}
+
+fn arithmetic_error(reason: crate::conditions::arithmetic::ArithmeticUnknown) -> SceneError {
+    use crate::conditions::arithmetic::ArithmeticUnknown::*;
+    match reason {
+        InvalidSyntax => SceneError::InvalidArithmeticSyntax,
+        MissingVariable => SceneError::MissingArithmeticVariable,
+        IncompatibleOperand => SceneError::ArithmeticOperandType,
+        ZeroDivisor => SceneError::ArithmeticZeroDivisor,
+        IntegerOverflow | NonFiniteResult => SceneError::ArithmeticOverflow,
+        LimitExceeded => SceneError::ArithmeticLimitExceeded,
+        _ => SceneError::InvalidArithmeticOperand,
+    }
+}
+
+fn compatible_arithmetic_kind(old: &str, payload: &BeatPayload) -> bool {
+    old == payload.kind()
+        || old == "customCode"
+            && matches!(payload, BeatPayload::SetVariable { value, .. } if value.is_object() || value.is_number())
+}
+
+fn patch_variable_assignment(
+    original: &[u8],
+    previous: &BeatPayload,
+    next: &BeatPayload,
+    loaded: &Loaded,
+) -> Result<Option<String>, SceneError> {
+    let (
+        BeatPayload::SetVariable {
+            variable_id: old_id,
+            value: old_value,
+        },
+        BeatPayload::SetVariable { variable_id, value },
+    ) = (previous, next)
+    else {
+        return Ok(None);
+    };
+    let text = std::str::from_utf8(original).map_err(|_| SceneError::UnsupportedSource)?;
+    if old_id == variable_id {
+        if loaded.authoring.variables.iter().any(|variable| {
+            variable.id == *variable_id
+                && variables::equivalent_values(
+                    variable.variable_type,
+                    old_value,
+                    value,
+                    &loaded.authoring,
+                    variable_id,
+                )
+        }) {
+            return Ok(Some(text.into()));
+        }
+    }
+
+    let code = logic::without_comment(text).trim_end();
+    let mut patched = text.to_owned();
+    if old_id == variable_id && old_value.is_object() && value.is_object() {
+        use crate::conditions::arithmetic::{self, IntegerOperation};
+        let kind = loaded
+            .authoring
+            .variables
+            .iter()
+            .find(|v| v.id == *variable_id)
+            .ok_or(SceneError::UnknownEntity)?
+            .variable_type;
+        let next = integer_adjustment(kind, value, &loaded.authoring, variable_id)?;
+        let (_, old_operation, operand_start, _) =
+            arithmetic::assignment_tokens(code).ok_or(SceneError::OpaqueBoundary)?;
+        let (name, raw_operation, rhs_start, raw_operator) =
+            arithmetic::assignment_tokens_raw(code).ok_or(SceneError::OpaqueBoundary)?;
+        if old_operation == next.operation {
+            let operand = if raw_operation == IntegerOperation::Assign
+                && old_operation != IntegerOperation::Assign
+                && next.operand.parse::<i64>().is_err()
+            {
+                format!("({})", next.operand)
+            } else {
+                next.operand.clone()
+            };
+            patched.replace_range(operand_start..code.len(), &operand);
+        } else if raw_operation == IntegerOperation::Assign {
+            let rhs = if next.operation == IntegerOperation::Assign {
+                next.operand.clone()
+            } else {
+                format!("{name} {} ({})", next.operator(), next.operand)
+            };
+            patched.replace_range(rhs_start..code.len(), &rhs);
+        } else {
+            patched.replace_range(operand_start..code.len(), &next.operand);
+            patched.replace_range(
+                raw_operator..raw_operator + raw_operation.operator().len() + 1,
+                &format!("{}=", next.operator()),
+            );
+        }
+    } else if old_id == variable_id {
+        use crate::conditions::arithmetic::{self, IntegerOperation};
+        let (_, old_operation, rhs_start, operator_start) =
+            arithmetic::assignment_tokens_raw(code).ok_or(SceneError::OpaqueBoundary)?;
+        let variable = loaded
+            .authoring
+            .variables
+            .iter()
+            .find(|v| v.id == *variable_id)
+            .ok_or(SceneError::UnknownEntity)?;
+        let (operation, operand) = if value.is_object() {
+            let next = integer_adjustment(
+                variable.variable_type,
+                value,
+                &loaded.authoring,
+                variable_id,
+            )?;
+            (next.operation, next.operand)
+        } else {
+            (
+                IntegerOperation::Assign,
+                render_value(variable.variable_type, value)?,
+            )
+        };
+        patched.replace_range(rhs_start..code.len(), &operand);
+        if operation != old_operation {
+            patched.replace_range(
+                operator_start..operator_start + old_operation.operator().len() + 1,
+                &format!("{}=", operation.operator()),
+            );
+        }
+    } else {
+        let indent = text.len() - text.trim_start_matches(' ').len();
+        let rendered = render_payload(next, loaded, "")?;
+        patched.replace_range(indent..code.len(), rendered.trim_start());
+    }
+    Ok(Some(patched))
+}
+
 fn render_value(kind: VariableType, value: &Value) -> Result<String, SceneError> {
     match kind {
         VariableType::Bool => value
@@ -4482,6 +4886,7 @@ fn render_value(kind: VariableType, value: &Value) -> Result<String, SceneError>
         VariableType::Int => value
             .as_str()
             .and_then(|value| value.parse::<i64>().ok().map(|_| value.to_owned())),
+        VariableType::Decimal => crate::authoring::variable_literal(kind, value).ok(),
         VariableType::String => value.as_str().and_then(|value| {
             escape_string(value)
                 .ok()
@@ -4502,6 +4907,13 @@ fn parse_value(kind: VariableType, literal: &str) -> Option<Value> {
             .parse::<i64>()
             .ok()
             .map(|_| Value::String(literal.into())),
+        VariableType::Decimal => literal
+            .contains(['.', 'e', 'E'])
+            .then_some(literal)?
+            .parse::<f64>()
+            .ok()
+            .filter(|v| v.is_finite())
+            .map(crate::authoring::decimal_value),
         VariableType::String => literal
             .strip_prefix('"')
             .and_then(|value| value.strip_suffix('"'))
@@ -4743,6 +5155,7 @@ impl BoolNot for bool {
 
 #[cfg(test)]
 mod tests {
+    mod arithmetic;
     mod candidate_proof;
     mod observed;
     mod panels;
@@ -4953,6 +5366,7 @@ mod tests {
                 SceneCommandRequest {
                     expected_project_revision: workspace.project_revision.clone(),
                     expected_source_map_revision: workspace.source_map_revision.clone(),
+                    expected_authoring_revision: None,
                     command,
                 },
             )

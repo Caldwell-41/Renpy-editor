@@ -999,3 +999,146 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   verify its removal; a large-screen public test preserves per-button authority
   and exact source edits without a permanent timing threshold.
 - **Evidence:** [PR 79 corrections and parent review](../tasks/evidence/help-dialog-and-canvas.md#pr-79-root-cause-corrections-and-parent-review-2026-11-04).
+
+
+## H69. SDK text selector cannot find a nonfocusable screen caption
+
+- **Class/search:** harness; Ren'Py 8.5.3, TextSelector, testfocus, Say text,
+  nonfocusable caption, interpolated screen text, TTS.
+- **Cause/correction:** pinned SDK text selectors search focus/Say text during
+  narration. A shown nonfocusable screen caption is outside that search. The
+  existing driver now requires the screen and asserts its actual interpolated
+  displayable text through the pinned SDK TTS path. Production is unchanged.
+- **Verification:** the outside-sandbox run passed 19 assertions before the caption
+  selector failed. The corrected fixture passes exact text, numeric/type/sample
+  witnesses and deliberate wrong-outcome rejection. Both failed attempts and the
+  corrected pass retain immutable receipts. No duplicate test was added.
+- **Evidence:** [#94 coordinator runtime recovery](../tasks/evidence/arithmetic-94.md#coordinator-runtime-recovery)
+  and [corrected Mac pass](../tasks/evidence/arithmetic-94.md#mac-invocation-3-corrected-fixture-passed).
+
+## H70. Full SDK GUI initialization violates a minimal canvas fixture assumption
+
+- **Class/search:** harness; `plan.available`, `gui.init`, standard-template initialization.
+- **Cause/correction:** shared setup required full inert-canvas availability for both
+  minimal and SDK-generated projects. Keep the strict minimal preflight; the SDK
+  fixture permits only its known GUI limits and still requires inert samples.
+- **Regression:** the public no-SDK GUI case reproduces the failure and passes with
+  the accurate limit and sample. Production admission stays unchanged.
+- **Evidence:** [#95 fixture recovery](../tasks/evidence/arithmetic-95.md#coordinator-fixture-correction-no-sdk-retry-yet).
+
+## H71. Fixture source insertion misses an imagebutton identity comment
+
+- **Class/search:** harness; missing `arithmetic_image` ID, imagebutton UUID comment.
+- **Cause/correction:** insertion expected a newline directly after `imagebutton:`;
+  public composition writes its identity comment there. Match the known marker
+  exactly once and preserve the comment.
+- **Regression:** the existing public preflight fails without the ID and passes
+  after correction. It asserts the final accepted source, with no product change.
+- **Evidence:** [#95 insertion recovery](../tasks/evidence/arithmetic-95.md#mac-invocation-2-and-image-selector-correction).
+
+## H72. Pinned SDK ID selectors require a tuple screen name
+
+- **Class/search:** harness; Ren'Py 8.5.3 `DisplayableSelector`, scene-list tuple,
+  imagebutton click timeout despite successful public displayable lookup.
+- **Cause/correction:** the selector directly compares screen names without the
+  public API's normalization. Both image mouse/keyboard selectors now use tuples.
+- **Verification:** an isolated pinned-method diagnostic distinguishes string and
+  tuple lookup; the SDK pass proves both activations with unchanged assertions and timeout.
+- **Evidence:** [#95 selector diagnosis](../tasks/evidence/arithmetic-95.md#mac-invocation-3-and-pinned-selector-name-correction)
+  and [runtime pass](../tasks/evidence/arithmetic-95.md#mac-invocation-4-passed).
+
+## H73. Smoke probe calls the superseded variable-default editor
+
+- **Class/search:** harness caller migration; `Edit default` timeout in
+  `smoke-report.dom.test`, supporting authoring stops before Scene/Source.
+- **Cause/correction:** #97 replaces the old edit button with the selected variable's
+  inspector. Select the variable and wait for `Save Default`; keep all assertions
+  and deadlines. The existing three scenarios pass after the matching red.
+- **Evidence:** [exact-head CI and local replay](../tasks/evidence/arithmetic-review.md#ci-caller-correction-before-review-fixes).
+  Embedded probe changes still need a matching rebuild for any later native proof.
+
+## H74. UI SDK driver does not reach the next narration
+
+- **Class/search:** harness narration progression; bare `advance`, `ui_story.rpy:15`,
+  missing `UI story complete` after five passing assertions.
+- **Evidence/correction:** the return and destination text exist. Pinned SDK
+  `Advance` can complete on an unidentified begin callback; `Until` requires its
+  destination. Replace the seven transitions with destination-bound advances while
+  preserving all source, assertions and deadlines. Live callback ordering remains
+  provisional. The selected recovery reaches its narration destinations, then
+  fails at first timer-dispatched division; full qualification remains failed (H75).
+- **Evidence:** [coordinator audit and recovery selection](../tasks/active/shared-arithmetic.md#2026-11-10-first-ui-sdk-result-audited-recovery-selected).
+
+## H75. UI SDK timer dispatch needs an interaction refresh
+
+- **Class/search:** fixture interaction/dispatch defect; driver line 102,
+  `money == 2.25`, 13 passing assertions in the failed recovery.
+- **Observed:** destination-bound narration reaches the screen and its initial TTS/
+  inertness assertions. The first divide result is not observed. SDK test Python and
+  `show_screen` do not restart interaction; Timer needs render/event delivery.
+  Live callback delivery and post-dispatch money remain unobserved in that run.
+- **Cause/correction:** replaying the actual SDK test/helper/API admission is red
+  without a refresh request and green after adding it. The fixture now requests
+  refresh and records request state. Mac invocation 3 confirms six requests with
+  the screen unbuilt and refresh changing false to true, then all exact action
+  results, Finish and wrong-outcome rejection pass. The earlier run did not observe
+  callback delivery; its missing evidence remains a failure.
+- **Evidence:** [Mac recovery result](../tasks/evidence/arithmetic-review.md#recovery-integration-and-mac-invocation-2-2026-11-10).
+  [Mac confirmation](../tasks/evidence/arithmetic-review.md#mac-invocation-3-passed-2026-11-10)
+  keeps the admission replay separate from runtime proof.
+
+## H76. Arithmetic CI fixtures retain obsolete error contracts
+
+- **Class/search:** harness caller mismatch; `action field error`, `actionIndex`,
+  `This divides by zero`, blur timing, quality run `42670532527`.
+- **Cause/correction:** the Screens dispatch adapter discarded typed error context
+  needed for invalid-action focus. Preserve the complete public error in all four
+  inherited dispatch adapters. Story's browser expected a new error while typing;
+  complete the field with blur before asserting the reviewed diagnostic.
+- **Regression:** both failing fixtures and three affected inherited dispatch
+  consumers pass with focus, source/history and error assertions intact. No
+  production or SDK input changed; no longer timeout or deleted assertion.
+- **Evidence:** [CI consumer correction](../tasks/evidence/arithmetic-review.md#automatic-ci-fixture-consumers-corrected-2026-11-10).
+
+## H77. Variable-default fields bypass completion validation
+
+- **Class/search:** frontend; decimal `1e`, missing blur error, invalid correction
+  clears `aria-invalid`, whole-number default inspector.
+- **Cause/correction:** custom default-field listeners only remembered on blur
+  and cleared errors on every input. Use the shared `validateField` with the
+  submission value reader; retain raw drafts and original source revisions.
+- **Regression:** production UI checks decimal/integer blur, invalid corrections,
+  IME, Cancel and no invalid writes. The actual-main/core journey retains
+  default drafts through unrelated creation, history, refusals and reopen.
+- **Evidence:** [TDD follow-up](../tasks/evidence/arithmetic-review.md#variable-default-validation-follow-up-2026-11-10).
+
+## H78. Arithmetic helper recognition accepts customized declarations
+
+- **Class/search:** source admission; helper substring, appended method, quoted
+  template, duplicate class with `(object)`.
+- **Cause/correction:** substring and exact-header counts did not establish a
+  complete unique declaration. Share lexical declaration qualification between
+  inspection, write admission and canvas; count helper class names across headers.
+- **Regression:** six customized-source cases and independent public-command
+  checks require protection, write refusal and exact byte retention.
+- **Evidence:** [Terra audit and corrections](../tasks/evidence/arithmetic-review.md#audited-terra-findings-and-sol-corrections-2026-11-10).
+
+## H79. Literal-to-formula no-ops create source and history changes
+
+- **Class/search:** numeric representation; Story `1.0` displayed as `1`, same-value
+  Screens formula inserts `Function` and helper.
+- **Cause/correction:** raw payload/tree equality missed equivalent typed constants.
+  Share assignment equivalence without reading runtime values, rounding i64 values
+  or equating opposite signed zeros. Preserve imported action timing and source.
+- **Regression:** actual Story/Screens controls preserve bytes and empty history;
+  public-core checks retain large integers, comments and meaningful sign changes.
+- **Evidence:** [Terra audit and corrections](../tasks/evidence/arithmetic-review.md#audited-terra-findings-and-sol-corrections-2026-11-10).
+
+## H80. Decimal JSON transport loses negative zero
+
+- **Class/search:** numeric transport; `-0.0` input saves `0.0`, JSON stringification.
+- **Cause/correction:** JavaScript serializes numeric negative zero as positive zero.
+  Admit the exact `"-0.0"` string through the shared decimal owner and typed contract.
+- **Regression:** defaults, literal assignments, formula results, conditions, inert
+  samples, shared history and reopen retain the sign through public operations.
+- **Evidence:** [Terra audit and corrections](../tasks/evidence/arithmetic-review.md#audited-terra-findings-and-sol-corrections-2026-11-10).

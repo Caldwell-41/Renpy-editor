@@ -337,9 +337,10 @@ setTimeout(async () => {
     click("Create Variable");
     await awaitCall("variable.create");
     click("Variables");
-    await awaitSurface("Edit default");
+    await awaitSurface("score");
     supportingAuthoringStage = "update-variable";
-    click("Edit default");
+    click("score");
+    await awaitSurface("Save Default");
     const editedDefault = control("Default value");
     editedDefault.value = "-9223372036854775808";
     editedDefault.dispatchEvent(new Event("input", { bubbles: true }));

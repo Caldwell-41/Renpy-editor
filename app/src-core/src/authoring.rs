@@ -55,6 +55,7 @@ pub enum AssetKind {
 pub enum VariableType {
     Bool,
     Int,
+    Decimal,
     String,
 }
 
@@ -1473,12 +1474,8 @@ impl AuthoringService {
         )?;
         for variable in &mut metadata.variables {
             variable.source.source_revision = variable_revision.sha256.clone();
-            if variable.variable_type == VariableType::Int {
-                variable.default_value = Value::String(variable_literal(
-                    VariableType::Int,
-                    &variable.default_value,
-                )?);
-            }
+            variable.default_value =
+                canonical_variable_value(variable.variable_type, &variable.default_value)?;
         }
         Ok(())
     }
@@ -1863,6 +1860,10 @@ impl AuthoringService {
         metadata: AuthoringMetadata,
         metadata_snapshot: Option<(Vec<u8>, Revision)>,
     ) -> Result<AuthoringMetadata, AuthoringError> {
+        // Keep semantic no-ops out of the shared session history.
+        if new_source == source_bytes {
+            return Ok(metadata);
+        }
         let (proposal, metadata) = self.prepare_source_and_metadata(
             project,
             source_path,
@@ -1872,7 +1873,13 @@ impl AuthoringService {
             metadata,
             metadata_snapshot,
         )?;
-        committed(self.commit_observed(project, proposal))?;
+        self.commit_history(project, proposal)
+            .map_err(|error| match error {
+                crate::scene::SceneError::RecoveryRequired => AuthoringError::RecoveryRequired,
+                crate::scene::SceneError::RuntimeBusy => AuthoringError::RuntimeBusy,
+                crate::scene::SceneError::DirtySource => AuthoringError::DirtySource,
+                _ => AuthoringError::SourceConflict,
+            })?;
         Ok(metadata)
     }
 
@@ -2064,6 +2071,9 @@ pub fn variable_literal(kind: VariableType, value: &Value) -> Result<String, Aut
     match (kind, value) {
         (VariableType::Bool, Value::Bool(true)) => Ok("True".into()),
         (VariableType::Bool, Value::Bool(false)) => Ok("False".into()),
+        (VariableType::Decimal, value) => decimal_number(value)
+            .map(decimal_literal)
+            .ok_or(AuthoringError::InvalidValue),
         (VariableType::Int, Value::Number(number)) if number.is_i64() => Ok(number.to_string()),
         (VariableType::Int, Value::String(text)) if valid_i64_decimal(text) => Ok(text.clone()),
         (VariableType::String, Value::String(text)) if text.len() <= MAX_STRING_VALUE_BYTES => {
@@ -2079,6 +2089,12 @@ pub fn variable_literal(kind: VariableType, value: &Value) -> Result<String, Aut
 fn canonical_variable_value(kind: VariableType, value: &Value) -> Result<Value, AuthoringError> {
     match kind {
         VariableType::Int => Ok(Value::String(variable_literal(kind, value)?)),
+        VariableType::Decimal => {
+            variable_literal(kind, value)?;
+            Ok(decimal_value(
+                decimal_number(value).ok_or(AuthoringError::InvalidValue)?,
+            ))
+        }
         VariableType::Bool | VariableType::String => {
             variable_literal(kind, value)?;
             Ok(value.clone())
@@ -2086,7 +2102,7 @@ fn canonical_variable_value(kind: VariableType, value: &Value) -> Result<Value, 
     }
 }
 
-fn valid_i64_decimal(value: &str) -> bool {
+pub(crate) fn valid_i64_decimal(value: &str) -> bool {
     if value.is_empty()
         || value.starts_with('+')
         || (value.starts_with('0') && value.len() > 1)
@@ -4127,5 +4143,38 @@ mod tests {
             fs::read(root.join(AUTHORING_PATH)).unwrap(),
             conflict_metadata
         );
+    }
+}
+
+/// Python-compatible finite floating literal, with a decimal marker for whole values.
+pub(crate) fn decimal_literal(value: f64) -> String {
+    if value != 0.0 && (value.abs() < 1e-4 || value.abs() >= 1e16) {
+        let scientific = format!("{value:e}");
+        let (mantissa, exponent) = scientific.split_once('e').expect("scientific");
+        let exponent: i32 = exponent.parse().expect("exponent");
+        return format!("{mantissa}e{exponent:+03}");
+    }
+    let text = value.to_string();
+    if text.contains(['.', 'e', 'E']) {
+        text
+    } else {
+        format!("{text}.0")
+    }
+}
+
+/// JSON stringification loses the sign of numeric zero. Only this decimal string is admitted.
+pub(crate) fn decimal_number(value: &Value) -> Option<f64> {
+    if value.as_str() == Some("-0.0") {
+        Some(-0.0)
+    } else {
+        value.as_f64().filter(|value| value.is_finite())
+    }
+}
+
+pub(crate) fn decimal_value(value: f64) -> Value {
+    if value == 0.0 && value.is_sign_negative() {
+        Value::String("-0.0".into())
+    } else {
+        Value::from(value)
     }
 }

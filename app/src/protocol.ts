@@ -74,6 +74,7 @@ export const CORE_OPERATIONS = [
   "scene.list",
   "flow.list",
   "scene.apply",
+  "scene.validateAssignment",
   "screens.inspect",
   "screens.canvasPlan",
   "screens.canvasRender",
@@ -126,6 +127,7 @@ export interface CoreRequest {
 }
 
 export interface CoreError {
+  readonly actionIndex?: number;
   readonly code: string;
   readonly message: string;
 }
@@ -168,7 +170,7 @@ export function isCoreResponse(value: unknown, expectedRequestId?: string): valu
   if (value.ok !== false || !hasExactKeys(value, ["protocolVersion", "requestId", "ok", "error"]) || !isRecord(value.error)) {
     return false;
   }
-  return hasExactKeys(value.error, ["code", "message"])
+  return (hasExactKeys(value.error, ["code", "message"]) || (hasExactKeys(value.error, ["code", "message", "actionIndex"]) && Number.isInteger(value.error.actionIndex) && (value.error.actionIndex as number) >= 0 && (value.error.actionIndex as number) < 8))
     && typeof value.error.code === "string"
     && typeof value.error.message === "string";
 }

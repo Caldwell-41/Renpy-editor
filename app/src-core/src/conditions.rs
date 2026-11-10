@@ -1,4 +1,6 @@
 //! Bounded, non-executing interpretation of the supported Ren'Py condition subset.
+pub mod arithmetic;
+
 use crate::authoring::{AuthoringMetadata, VariableType};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -20,6 +22,9 @@ pub enum Expression {
         value: bool,
     },
     Int {
+        value: String,
+    },
+    Decimal {
         value: String,
     },
     String {
@@ -96,6 +101,7 @@ pub enum ConditionResult {
 enum Token {
     Word(String),
     Int(String),
+    Decimal(String),
     String(String),
     Comparison(Comparison),
     Left,
@@ -191,16 +197,40 @@ fn tokenize(source: &str) -> Result<Vec<Token>, ConditionError> {
                     _ => return Err(ConditionError::UnsupportedSyntax),
                 })
             }
-            '-' | '0'..='9' => {
+            '+' | '-' | '.' | '0'..='9' => {
                 let mut value = ch.to_string();
                 while chars.peek().is_some_and(char::is_ascii_digit) {
                     value.push(chars.next().unwrap());
+                }
+                if chars.peek() == Some(&'.') {
+                    value.push(chars.next().unwrap());
+                    while chars.peek().is_some_and(char::is_ascii_digit) {
+                        value.push(chars.next().unwrap());
+                    }
+                }
+                if chars.peek().is_some_and(|c| matches!(c, 'e' | 'E')) {
+                    value.push(chars.next().unwrap());
+                    if chars.peek().is_some_and(|c| matches!(c, '+' | '-')) {
+                        value.push(chars.next().unwrap());
+                    }
+                    while chars.peek().is_some_and(char::is_ascii_digit) {
+                        value.push(chars.next().unwrap());
+                    }
                 }
                 if chars
                     .peek()
                     .is_some_and(|ch| ch.is_ascii_alphabetic() || *ch == '_')
                 {
                     return Err(ConditionError::UnsupportedSyntax);
+                }
+                if value.contains(['.', 'e', 'E']) {
+                    let number = value
+                        .parse::<f64>()
+                        .ok()
+                        .filter(|v| v.is_finite())
+                        .ok_or(ConditionError::InvalidValue)?;
+                    tokens.push(Token::Decimal(crate::authoring::decimal_literal(number)));
+                    continue;
                 }
                 if value.parse::<i64>().is_err()
                     || value.parse::<i64>().unwrap().to_string() != value
@@ -330,6 +360,7 @@ impl Parser<'_> {
                 }
             }
             Token::Int(value) => Expression::Int { value },
+            Token::Decimal(value) => Expression::Decimal { value },
             Token::String(value) => Expression::String { value },
             _ => return Err(ConditionError::UnsupportedSyntax),
         };
@@ -380,6 +411,12 @@ fn expression_type(expression: &Expression) -> Result<VariableType, ConditionErr
             .parse::<i64>()
             .map(|_| VariableType::Int)
             .map_err(|_| ConditionError::InvalidValue),
+        Decimal { value } => value
+            .parse::<f64>()
+            .ok()
+            .filter(|v| v.is_finite())
+            .map(|_| VariableType::Decimal)
+            .ok_or(ConditionError::InvalidValue),
         String { .. } => Ok(VariableType::String),
         Variable { variable_type, .. } => Ok(*variable_type),
         Compare {
@@ -388,9 +425,11 @@ fn expression_type(expression: &Expression) -> Result<VariableType, ConditionErr
             right,
         } => {
             let kind = expression_type(left)?;
-            if kind != expression_type(right)?
-                || !matches!(operator, Comparison::Equal | Comparison::NotEqual)
-                    && kind != VariableType::Int
+            let right_kind = expression_type(right)?;
+            let numeric = arithmetic::numeric_type(kind) && arithmetic::numeric_type(right_kind);
+            if !numeric
+                && (kind != right_kind
+                    || !matches!(operator, Comparison::Equal | Comparison::NotEqual))
             {
                 return Err(ConditionError::TypeMismatch);
             }
@@ -416,6 +455,7 @@ fn expression_type(expression: &Expression) -> Result<VariableType, ConditionErr
 enum TypedValue {
     Bool(bool),
     Int(i64),
+    Decimal(f64),
     String(String),
 }
 fn evaluate_expression(
@@ -433,6 +473,9 @@ fn evaluate_expression(
     Ok(match expression {
         Bool { value } => TypedValue::Bool(*value),
         Int { value } => TypedValue::Int(value.parse().map_err(|_| ConditionError::InvalidValue)?),
+        Decimal { value } => {
+            TypedValue::Decimal(value.parse().map_err(|_| ConditionError::InvalidValue)?)
+        }
         String { value } => TypedValue::String(value.clone()),
         Variable {
             variable_id,
@@ -453,6 +496,9 @@ fn evaluate_expression(
                     }
                     TypedValue::Int(parsed)
                 }
+                VariableType::Decimal => TypedValue::Decimal(
+                    crate::authoring::decimal_number(value).ok_or(ConditionError::TypeMismatch)?,
+                ),
                 VariableType::String => {
                     TypedValue::String(value.as_str().ok_or(ConditionError::TypeMismatch)?.into())
                 }
@@ -465,21 +511,19 @@ fn evaluate_expression(
         } => {
             let left = evaluate_expression(left, values)?;
             let right = evaluate_expression(right, values)?;
+            let number = |v: &TypedValue| match v {
+                TypedValue::Int(v) => Some(arithmetic::Numeric::Int(*v)),
+                TypedValue::Decimal(v) => Some(arithmetic::Numeric::Decimal(*v)),
+                _ => None,
+            };
+            let order = number(&left).zip(number(&right)).map(|(l, r)| l.compare(r));
             let value = match operator {
-                Comparison::Equal => left == right,
-                Comparison::NotEqual => left != right,
-                _ => {
-                    let (TypedValue::Int(left), TypedValue::Int(right)) = (left, right) else {
-                        return Err(ConditionError::TypeMismatch);
-                    };
-                    match operator {
-                        Comparison::Less => left < right,
-                        Comparison::LessEqual => left <= right,
-                        Comparison::Greater => left > right,
-                        Comparison::GreaterEqual => left >= right,
-                        _ => unreachable!(),
-                    }
-                }
+                Comparison::Equal => order.map_or(left == right, |o| o.is_eq()),
+                Comparison::NotEqual => order.map_or(left != right, |o| !o.is_eq()),
+                Comparison::Less => order.ok_or(ConditionError::TypeMismatch)?.is_lt(),
+                Comparison::LessEqual => !order.ok_or(ConditionError::TypeMismatch)?.is_gt(),
+                Comparison::Greater => order.ok_or(ConditionError::TypeMismatch)?.is_gt(),
+                Comparison::GreaterEqual => !order.ok_or(ConditionError::TypeMismatch)?.is_lt(),
             };
             TypedValue::Bool(value)
         }
@@ -534,6 +578,9 @@ pub fn render(
         Ok(match expression {
             Bool { value } => if *value { "True" } else { "False" }.into(),
             Int { value } => value.clone(),
+            Decimal { value } => crate::authoring::decimal_literal(
+                value.parse().map_err(|_| ConditionError::InvalidValue)?,
+            ),
             String { value } => {
                 if value
                     .chars()

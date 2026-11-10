@@ -935,3 +935,328 @@ fn combined_apply_preserves_trivia_and_commits_text_appearance_layout_actions_in
         null_source
     );
 }
+
+#[test]
+fn arithmetic_actions_use_shared_admission_and_preserve_history_and_reopen() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    for (name, kind, value) in [
+        ("trust", "int", json!("5")),
+        ("reward", "int", json!("0")),
+        ("bonus", "int", json!("1")),
+        ("fraction", "decimal", json!(1.25)),
+    ] {
+        ipc(
+            &mut service,
+            "variable.create",
+            json!({"technicalName":name,"variableType":kind,"defaultValue":value}),
+        );
+    }
+    let added = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"textbutton","text":"Calculate"}),
+    );
+    let original = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .replace("action Null()", "action Null() # keep comment");
+    save_composition_source(&mut service, &owner, &original);
+    let authoring = ipc(&mut service, "authoring.list", json!({}));
+    let id = |name: &str| {
+        authoring["variables"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|v| v["technicalName"] == name)
+            .unwrap()["id"]
+            .clone()
+    };
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    let command = json!({"type":"actions","nodeId":added["selectedId"],"expectedAuthoringRevision":doc["authoringRevision"],"expectedTargetRevisions":[],"actions":[
+        {"type":"setVariable","variableId":id("trust"),"value":{"operation":"add","operand":"bonus"}},
+        {"type":"setVariable","variableId":id("reward"),"value":{"operation":"assign","operand":"2 * trust"}},
+        {"type":"setVariable","variableId":id("fraction"),"value":{"operation":"divide","operand":"2"}}
+    ]});
+    let applied = compose_command(&mut service, &owner, command.clone());
+    let node = &applied["document"]["screens"][0]["nodes"][1];
+    assert_eq!(node["actions"], command["actions"]);
+    assert_eq!(
+        node["actionAssignments"][0]["state"]["reason"],
+        "unobservedCurrentValue"
+    );
+    assert_eq!(
+        node["actionAssignments"][0]["reads"],
+        json!([id("trust"), id("bonus")])
+    );
+    let accepted = fs::read(root.join(owner["path"].as_str().unwrap())).unwrap();
+    assert!(String::from_utf8_lossy(&accepted).contains("# keep comment"));
+    assert_eq!(
+        compose_command(&mut service, &owner, command.clone())["changed"],
+        false
+    );
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        original
+    );
+    composition_history(&mut service, "redo");
+    service.close().unwrap();
+    service.open_path(&root).unwrap();
+    let reopened = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    assert_eq!(
+        reopened["screens"][0]["nodes"][1]["actions"],
+        command["actions"]
+    );
+    assert_eq!(
+        fs::read(root.join(owner["path"].as_str().unwrap())).unwrap(),
+        accepted
+    );
+}
+
+#[test]
+fn arithmetic_reads_are_dependencies_and_imported_capture_timing_stays_protected() {
+    let (_temporary, mut service, _root, owner) = composition_project();
+    for name in ["trust", "bonus"] {
+        ipc(
+            &mut service,
+            "variable.create",
+            json!({"technicalName":name,"variableType":"int","defaultValue":"5"}),
+        );
+    }
+    let a = ipc(&mut service, "authoring.list", json!({}));
+    let vars = a["variables"].as_array().unwrap();
+    let trust = vars.iter().find(|v| v["technicalName"] == "trust").unwrap();
+    let bonus = vars.iter().find(|v| v["technicalName"] == "bonus").unwrap();
+    let added = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"textbutton","text":"Calculate"}),
+    );
+    let doc = &added["document"];
+    let mut command = json!({"type":"actions","nodeId":added["selectedId"],"expectedAuthoringRevision":doc["authoringRevision"],"expectedTargetRevisions":[],"actions":[{"type":"setVariable","variableId":trust["id"],"value":{"operation":"add","operand":"bonus"}}]});
+    compose_command(&mut service, &owner, command.clone());
+    let target = ipc(
+        &mut service,
+        "screens.resolveTarget",
+        json!({"binding":{"screenId":owner["id"],"sourceName":owner["name"]}}),
+    );
+    assert_eq!(
+        target["effects"]["readVariables"],
+        json!([bonus["id"], trust["id"]])
+            .as_array()
+            .map(|v| {
+                let mut v = v.clone();
+                v.sort_by_key(|v| v.to_string());
+                json!(v)
+            })
+            .unwrap()
+    );
+    assert_eq!(target["effects"]["assignedVariables"], json!([trust["id"]]));
+    for operand in [
+        "1 / 0",
+        "1.0",
+        "missing + 1",
+        "pow(2, 3)",
+        "9223372036854775807 + 1",
+    ] {
+        command["actions"][0]["value"]["operand"] = json!(operand);
+        let doc = ipc(
+            &mut service,
+            "screens.inspect",
+            json!({"path":owner["path"]}),
+        );
+        reject(
+            &mut service,
+            "screens.compose",
+            json!({"screenId":owner["id"],"expectedRevision":doc["revision"],"command":command}),
+        );
+    }
+    let source = ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let begin = source.find("        action ").unwrap() + 15;
+    let end = begin + source[begin..].find('\n').unwrap();
+    let mut imported = source.clone();
+    imported.replace_range(begin..end, "SetVariable(\"trust\", trust + bonus)");
+    save_composition_source(&mut service, &owner, &imported);
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    assert!(doc["screens"][0]["nodes"][1]["actions"].is_null());
+    assert!(doc["screens"][0]["nodes"][1]["actionProtectionReason"]
+        .as_str()
+        .unwrap()
+        .contains("screen evaluation"));
+    assert_eq!(
+        ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
+        imported
+    );
+}
+
+#[test]
+fn arithmetic_draft_uses_the_composition_admission_without_committing() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let variables = ipc(
+        &mut service,
+        "variable.create",
+        json!({"technicalName":"trust","variableType":"int","defaultValue":"5"}),
+    );
+    let variable = variables["variables"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["technicalName"] == "trust")
+        .unwrap();
+    let added = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"textbutton","text":"Calculate"}),
+    );
+    let before = fs::read(root.join(owner["path"].as_str().unwrap())).unwrap();
+    let doc = &added["document"];
+    let request = json!({"screenId":owner["id"],"expectedRevision":doc["revision"],"validateOnly":true,"command":{"type":"actions","nodeId":added["selectedId"],"actions":[{"type":"setVariable","variableId":variable["id"],"value":{"operation":"add","operand":"1"}}],"expectedAuthoringRevision":doc["authoringRevision"],"expectedTargetRevisions":[]}});
+    let validated = ipc(&mut service, "screens.compose", request.clone());
+    assert_eq!(validated["changed"], false);
+    assert_eq!(validated["document"]["revision"], doc["revision"]);
+    assert_eq!(
+        validated["actionValidation"]["screens"][0]["nodes"][1]["actionAssignments"][0]["state"]
+            ["reason"],
+        "unobservedCurrentValue"
+    );
+    assert_eq!(
+        fs::read(root.join(owner["path"].as_str().unwrap())).unwrap(),
+        before
+    );
+    let mut apply = request;
+    apply["validateOnly"] = json!(false);
+    ipc(&mut service, "screens.compose", apply);
+    composition_history(&mut service, "undo");
+    assert_eq!(
+        fs::read(root.join(owner["path"].as_str().unwrap())).unwrap(),
+        before
+    );
+}
+
+#[test]
+fn customized_arithmetic_helper_stays_source_only() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let variables = ipc(
+        &mut service,
+        "variable.create",
+        json!({"technicalName":"trust","variableType":"int","defaultValue":"0"}),
+    );
+    let variable = variables["variables"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["variableType"] == "int")
+        .unwrap();
+    let added = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"textbutton","text":"Calculate"}),
+    );
+    let command = json!({"type":"actions","nodeId":added["selectedId"],
+        "expectedAuthoringRevision":added["document"]["authoringRevision"],"expectedTargetRevisions":[],
+        "actions":[{"type":"setVariable","variableId":variable["id"],"value":{"operation":"assign","operand":"5"}}]});
+    compose_command(&mut service, &owner, command.clone());
+    let path = root.join(owner["path"].as_str().unwrap());
+    let generated = fs::read_to_string(&path).unwrap();
+    let inside_class = format!("{generated}\n        @staticmethod\n        def assign(target, kind, operation, operand, compute):\n            setattr(renpy.store, target, 999)\n");
+    let declaration = generated.find("init -100 python:").unwrap();
+    let quoted = format!(
+        "{}define helper_note = \"\"\"\n{}\"\"\"\n",
+        &generated[..declaration],
+        &generated[declaration..]
+    );
+    let duplicate = format!("{generated}\n{}", &generated[declaration..]);
+    let duplicate_customized = format!(
+        "{generated}\n{}",
+        generated[declaration..].replacen("init -100 python:", "init -99 python:", 1)
+    );
+    let duplicate_inherited = format!(
+        "{generated}\n{}",
+        generated[declaration..]
+            .replacen("init -100 python:", "init -99 python:", 1)
+            .replacen(
+                ":\n        @staticmethod",
+                "(object):\n        @staticmethod",
+                1
+            )
+    );
+    let commented_override = format!(
+        "{generated}\n# A comment does not end the class.\n{}",
+        &inside_class[generated.len()..]
+    );
+    for customized in [
+        inside_class,
+        commented_override,
+        quoted,
+        duplicate,
+        duplicate_customized,
+        duplicate_inherited,
+    ] {
+        save_composition_source(&mut service, &owner, &customized);
+        let doc = ipc(
+            &mut service,
+            "screens.inspect",
+            json!({"path":owner["path"]}),
+        );
+        let node = &doc["screens"][0]["nodes"][1];
+        assert!(node["actions"].is_null());
+        assert!(node["actionProtectionReason"]
+            .as_str()
+            .unwrap()
+            .contains("unchanged runtime adapter"));
+        reject(
+            &mut service,
+            "screens.compose",
+            json!({"screenId":owner["id"],"expectedRevision":doc["revision"],"command":command}),
+        );
+        assert_eq!(fs::read_to_string(&path).unwrap(), customized);
+    }
+}
+
+#[test]
+fn decimal_literal_screen_actions_keep_negative_zero() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let variables = ipc(
+        &mut service,
+        "variable.create",
+        json!({"technicalName":"fraction","variableType":"decimal","defaultValue":"-0.0"}),
+    );
+    let variable = variables["variables"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["technicalName"] == "fraction")
+        .unwrap();
+    let added = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"textbutton","text":"Set fraction"}),
+    );
+    let command = json!({"type":"actions","nodeId":added["selectedId"],"expectedAuthoringRevision":added["document"]["authoringRevision"],"expectedTargetRevisions":[],"actions":[{"type":"setVariable","variableId":variable["id"],"value":"-0.0"}]});
+    let applied = compose_command(&mut service, &owner, command.clone());
+    assert_eq!(
+        applied["document"]["screens"][0]["nodes"][1]["actions"],
+        command["actions"]
+    );
+    let accepted = fs::read_to_string(root.join(owner["path"].as_str().unwrap())).unwrap();
+    assert!(accepted.contains("SetVariable(\"fraction\", -0.0)"));
+    assert_eq!(
+        compose_command(&mut service, &owner, command)["changed"],
+        false
+    );
+}

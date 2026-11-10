@@ -126,6 +126,7 @@ impl AuthoringService {
 
 #[derive(Clone, Debug)]
 pub struct ButtonActions {
+    pub helper: String,
     pub statement_span: Span,
     pub expression_span: Span,
     pub actions: Vec<ScreenAction>,
@@ -254,6 +255,9 @@ fn parsed_value(variable: &Variable, raw: &str) -> Option<serde_json::Value> {
             _ => return None,
         },
         VariableType::Int => serde_json::Value::String(raw.into()),
+        VariableType::Decimal => {
+            crate::authoring::decimal_value(serde_json::from_str::<f64>(raw).ok()?)
+        }
         VariableType::String => serde_json::from_str::<String>(raw).ok()?.into(),
     };
     variable_literal(variable.variable_type, &value).ok()?;
@@ -265,6 +269,7 @@ fn parse(
     variables: &[Variable],
     panels: &[PanelTarget],
     blocking: bool,
+    helper: &str,
 ) -> Option<Vec<ScreenAction>> {
     if raw == "Null()" {
         return Some(vec![]);
@@ -306,6 +311,9 @@ fn parse(
                     });
                 }
             }
+            if expression.starts_with("Function(") {
+                return parse_arithmetic(expression, variables, helper);
+            }
             let args = items(expression.strip_prefix("SetVariable(")?.strip_suffix(')')?)?;
             if args.len() != 2 {
                 return None;
@@ -336,6 +344,8 @@ pub fn inspect_actions(
         && modals.len() == 1
         && standalone(modals[0], &lines)
         && modals[0].code == "modal True";
+    let helper = helper_name(owner);
+    let qualified_helper = qualified_helper(bytes, &helper);
     for node in screen
         .nodes
         .iter()
@@ -371,7 +381,13 @@ pub fn inspect_actions(
                 return None;
             }
             let raw = statement.code.strip_prefix("action")?.trim_start();
-            let actions = parse(raw, variables, panels, result.blocking)?;
+            let actions = parse(
+                raw,
+                variables,
+                panels,
+                result.blocking,
+                if qualified_helper { &helper } else { "" },
+            )?;
             if owner.kind == OwnedScreenKind::Component && !actions.is_empty() {
                 return None;
             }
@@ -409,11 +425,23 @@ pub fn inspect_actions(
                     });
                 }
             }
+            for action in &actions {
+                for id in action_reads(action, variables) {
+                    let variable = variables.iter().find(|v| v.id == id)?;
+                    dependencies.push(references::ScreenDependencyRevision {
+                        id,
+                        revision: variable.source.source_revision.clone(),
+                    });
+                }
+            }
+            dependencies.sort_by(|a, b| a.id.cmp(&b.id));
+            dependencies.dedup_by(|a, b| a.id == b.id);
             dependencies.push(references::ScreenDependencyRevision {
                 id: format!("{}:action", node.id.as_deref().unwrap_or(&owner.root_id)),
                 revision: hex::encode(Sha256::digest(raw.as_bytes())),
             });
             Some(ButtonActions {
+                helper: helper.clone(),
                 statement_span: Span {
                     start: statement.start,
                     end: statement.end,
@@ -455,6 +483,13 @@ pub(super) fn prepare(
                     .iter()
                     .find(|v| &v.id == variable_id)
                     .ok_or(SceneError::ReferenceBlocked)?;
+                if value.is_object() {
+                    return arithmetic_expression(variable, value, variables, &button.helper)
+                        .map_err(|cause| SceneError::ScreenAction {
+                            index,
+                            cause: Box::new(cause),
+                        });
+                }
                 let literal = variable_literal(variable.variable_type, value)
                     .map_err(|_| SceneError::InvalidPayload)?;
                 Ok(format!(
@@ -490,7 +525,32 @@ pub(super) fn prepare(
         1 => expressions[0].clone(),
         _ => format!("[{}]", expressions.join(", ")),
     };
-    if parse(&expression, variables, panels, blocking).as_ref() == Some(&button.actions) {
+    let authoring = metadata(variables);
+    if parse(&expression, variables, panels, blocking, &button.helper).is_some_and(|prepared| {
+        prepared.len() == button.actions.len()
+            && prepared
+                .iter()
+                .zip(&button.actions)
+                .all(|(next, previous)| match (previous, next) {
+                    (
+                        ScreenAction::SetVariable {
+                            variable_id: old_id,
+                            value: old_value,
+                        },
+                        ScreenAction::SetVariable { variable_id, value },
+                    ) if old_id == variable_id => variables.iter().any(|variable| {
+                        variable.id == *variable_id
+                            && crate::scene::variables::equivalent_values(
+                                variable.variable_type,
+                                old_value,
+                                value,
+                                &authoring,
+                                variable_id,
+                            )
+                    }),
+                    _ => previous == next,
+                })
+    }) {
         return Ok(bytes.to_vec());
     }
     let mut proposed = bytes.to_vec();
@@ -498,5 +558,221 @@ pub(super) fn prepare(
         button.expression_span.start..button.expression_span.end,
         expression.bytes(),
     );
+    if actions
+        .iter()
+        .any(|a| matches!(a, ScreenAction::SetVariable { value, .. } if value.is_object()))
+    {
+        let source = helper_source(&button.helper);
+        let current = std::str::from_utf8(&proposed).map_err(|_| SceneError::UnsupportedSource)?;
+        if !qualified_helper(current.as_bytes(), &button.helper) {
+            if std::str::from_utf8(bytes)
+                .unwrap_or("")
+                .contains(&button.helper)
+            {
+                return Err(SceneError::OpaqueBoundary);
+            }
+            proposed.extend_from_slice(source.as_bytes());
+        }
+    }
     Ok(proposed)
+}
+
+use crate::conditions::{
+    arithmetic::{Formula, IntegerAdjustment},
+    Expression,
+};
+
+fn metadata(variables: &[Variable]) -> AuthoringMetadata {
+    let mut authoring = AuthoringMetadata::empty(String::new());
+    authoring.variables = variables.to_vec();
+    authoring
+}
+
+fn helper_name(owner: &OwnedScreen) -> String {
+    format!("_ll_numeric_{}", owner.id.replace('-', ""))
+}
+
+// This fixed adapter runs only through Function.__call__. The expression is
+// generated from the shared typed tree; neither inspection nor runtime parses Python.
+fn helper_source(name: &str) -> String {
+    include_str!("arithmetic-runtime.rpy").replace("LL_NUMERIC", name)
+}
+
+fn checked_expression(formula: &Formula, variables: &[Variable], helper: &str) -> String {
+    let expression = match formula {
+        Formula::Atom(Expression::Int { value } | Expression::Decimal { value }) => value.clone(),
+        Formula::Atom(Expression::Variable { variable_id, .. }) => variables
+            .iter()
+            .find(|v| &v.id == variable_id)
+            .unwrap()
+            .technical_name
+            .clone(),
+        Formula::Negate(v) => format!("-({})", checked_expression(v, variables, helper)),
+        Formula::Binary(op, l, r) => format!(
+            "({}) {} ({})",
+            checked_expression(l, variables, helper),
+            op.operator(),
+            checked_expression(r, variables, helper)
+        ),
+        _ => unreachable!("shared arithmetic tree is numeric"),
+    };
+    let kind = if formula.result_type() == VariableType::Int {
+        "int"
+    } else {
+        "decimal"
+    };
+    format!("{helper}.checked(\"{kind}\", {expression})")
+}
+
+fn arithmetic_expression(
+    variable: &Variable,
+    value: &serde_json::Value,
+    variables: &[Variable],
+    helper: &str,
+) -> Result<String, SceneError> {
+    let authoring = metadata(variables);
+    let _: IntegerAdjustment =
+        crate::scene::integer_adjustment(variable.variable_type, value, &authoring, &variable.id)?;
+    // Admission may promote a Story expression. Screens promotes the final value
+    // in the runtime adapter, retaining the author's original operation/operand.
+    let adjustment: IntegerAdjustment =
+        serde_json::from_value(value.clone()).map_err(|_| SceneError::InvalidArithmeticOperand)?;
+    let formula = adjustment
+        .formula(&authoring, &variable.id)
+        .map_err(|_| SceneError::InvalidArithmeticOperand)?;
+    let q = |s: &str| serde_json::to_string(s).unwrap();
+    Ok(format!(
+        "Function({helper}.assign, {}, {}, {}, {}, lambda: {})",
+        q(&variable.technical_name),
+        q(if variable.variable_type == VariableType::Int {
+            "int"
+        } else {
+            "decimal"
+        }),
+        serde_json::to_string(&adjustment.operation).unwrap(),
+        q(&adjustment.operand),
+        checked_expression(&formula, variables, helper)
+    ))
+}
+
+fn parse_arithmetic(
+    expression: &str,
+    variables: &[Variable],
+    helper: &str,
+) -> Option<ScreenAction> {
+    if helper.is_empty() {
+        return None;
+    }
+    let args = items(expression.strip_prefix("Function(")?.strip_suffix(')')?)?;
+    if args.len() != 6 || args[0] != format!("{helper}.assign") {
+        return None;
+    }
+    let name: String = serde_json::from_str(args[1]).ok()?;
+    let variable = variables.iter().find(|v| v.technical_name == name)?;
+    let adjustment = IntegerAdjustment {
+        operation: serde_json::from_str(args[3]).ok()?,
+        operand: serde_json::from_str(args[4]).ok()?,
+    };
+    let value = serde_json::to_value(adjustment).ok()?;
+    (arithmetic_expression(variable, &value, variables, helper).ok()? == expression).then(|| {
+        ScreenAction::SetVariable {
+            variable_id: variable.id.clone(),
+            value,
+        }
+    })
+}
+
+pub(super) fn action_reads(action: &ScreenAction, variables: &[Variable]) -> Vec<String> {
+    let mut reads = vec![];
+    if let ScreenAction::SetVariable { variable_id, value } = action {
+        if let Ok(adjustment) = serde_json::from_value::<IntegerAdjustment>(value.clone()) {
+            if let Ok(formula) = adjustment.formula(&metadata(variables), variable_id) {
+                formula.reads(&mut reads);
+            }
+        }
+    }
+    reads
+}
+
+pub(super) fn assignment_inspections(
+    actions: &[ScreenAction],
+    variables: &[Variable],
+) -> Vec<Option<crate::scene::variables::AssignmentInspection>> {
+    actions
+        .iter()
+        .map(|a| {
+            if let ScreenAction::SetVariable { variable_id, value } = a {
+                value.is_object().then(|| {
+                    crate::scene::variables::draft(variable_id, value, &metadata(variables), None)
+                })
+            } else {
+                None
+            }
+        })
+        .collect()
+}
+
+/// Recognize only the complete generated declaration at a lexical top-level header.
+/// The canvas still consumes data only and never loads this declaration.
+fn qualified_declaration(text: &str, lines: &[Line<'_>], start: usize, name: &str) -> bool {
+    let Ok(index) = lines.binary_search_by_key(&start, |line| line.start) else {
+        return false;
+    };
+    let header = &lines[index];
+    if header.indent != 0 || !header.single || header.code != "init -100 python:" {
+        return false;
+    }
+    let helper = helper_source(name);
+    let declaration = &helper[helper.find("init -100 python:").unwrap()..];
+    if !text[start..].starts_with(declaration) {
+        return false;
+    }
+    lines
+        .iter()
+        .find(|line| line.start >= start + declaration.len())
+        .is_none_or(|line| line.indent == 0)
+}
+
+fn qualified_helper(bytes: &[u8], name: &str) -> bool {
+    let (Ok(text), Ok(lines)) = (std::str::from_utf8(bytes), source_lines(bytes)) else {
+        return false;
+    };
+    let declarations = lines.iter().filter(|line| {
+        line.code
+            .strip_prefix("class")
+            .filter(|rest| rest.starts_with(char::is_whitespace))
+            .is_some_and(|rest| {
+                rest.trim_start()
+                    .split(|c: char| c.is_whitespace() || matches!(c, '(' | ':'))
+                    .next()
+                    == Some(name)
+            })
+    });
+    if declarations.count() != 1 {
+        return false;
+    }
+    lines
+        .iter()
+        .filter(|line| qualified_declaration(text, &lines, line.start, name))
+        .count()
+        == 1
+}
+
+pub(super) fn qualified_initialization(
+    file: &str,
+    text: &str,
+    start: usize,
+    owners: &[OwnedScreen],
+) -> bool {
+    let Ok(lines) = source_lines(text.as_bytes()) else {
+        return false;
+    };
+    owners
+        .iter()
+        .filter(|owner| owner.path == file)
+        .any(|owner| {
+            let name = helper_name(owner);
+            qualified_declaration(text, &lines, start, &name)
+                && qualified_helper(text.as_bytes(), &name)
+        })
 }

@@ -19,7 +19,7 @@ let session,disposeStory,creation,textEditor,insertion;const messages=[];
 async function call(operation,payload={}){
  assert(!operation.startsWith('runtime.')&&!['screens.canvasRender','screens.canvasStatus'].includes(operation));
  const response=await child.request({protocolVersion:1,requestId:randomUUID().replaceAll('-',''),operation,payload:{...payload,...(session&&!['project.listRecent','project.openRecent'].includes(operation)?{sessionId:session}:{})}});
- if(!response.ok){result.refusals.push({operation,code:response.error.code});throw Object.assign(Error(response.error.message),{code:response.error.code});}return response.value;
+ if(!response.ok){result.refusals.push({operation,code:response.error.code});throw Object.assign(Error(response.error.message),response.error);}return response.value;
 }
 const button=(host,text)=>{const found=[...host.querySelectorAll('button')].find(b=>b.textContent===text);assert(found,text);return found;};
 async function wait(check,label){const end=Date.now()+5000;while(!check()){if(Date.now()>end)throw Error('Did not settle: '+label);await new Promise(r=>setTimeout(r,5));}}

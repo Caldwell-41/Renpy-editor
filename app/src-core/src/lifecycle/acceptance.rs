@@ -55,6 +55,7 @@ pub(crate) fn apply(service: &LifecycleService, command: Command) -> crate::scen
         .scene_apply(SceneCommandRequest {
             expected_project_revision: workspace.project_revision,
             expected_source_map_revision: workspace.source_map_revision,
+            expected_authoring_revision: None,
             command,
         })
         .unwrap()
