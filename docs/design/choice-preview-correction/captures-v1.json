@@ -1,0 +1,87 @@
+{
+  "source": {
+    "commit": "de919b472fe78e4de3769e436f20e499ebf4bff1",
+    "fingerprint": "b1f391b59097485d11c53f1f805ba9b2e8f722085e509972004a5fdcbfb6500b"
+  },
+  "captureTool": "T3 managed preview snapshot, PNG at device scale 2.",
+  "captures": [
+    {
+      "path": "docs/design/choice-preview-correction/captures/v1/dock-duplicate-dark-1100x720-top.png",
+      "sha256": "bcc9536f58c5b499a2009a763570d37ce9096e3dabc42a75490ed9721250e2f1",
+      "variant": "dock",
+      "state": "duplicate",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "rasterWidth": 2200,
+      "rasterHeight": 1440,
+      "scroll": "top",
+      "scale": 2
+    },
+    {
+      "path": "docs/design/choice-preview-correction/captures/v1/transcript-duplicate-dark-1100x720-top.png",
+      "sha256": "e910738b883437f5d2408f385477f095424e79f88b065ec85d757bc9288293b2",
+      "variant": "transcript",
+      "state": "duplicate",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "rasterWidth": 2200,
+      "rasterHeight": 1440,
+      "scroll": "top",
+      "scale": 2
+    },
+    {
+      "path": "docs/design/choice-preview-correction/captures/v1/split-duplicate-dark-1100x720-top.png",
+      "sha256": "d9eb61430033281c01625dce270b64f9fcfe9e27c6f294e04c127e237c4f7eba",
+      "variant": "split",
+      "state": "duplicate",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "rasterWidth": 2200,
+      "rasterHeight": 1440,
+      "scroll": "top",
+      "scale": 2
+    },
+    {
+      "path": "docs/design/choice-preview-correction/captures/v1/dock-duplicate-dark-720x850-top.png",
+      "sha256": "64c44f59f3ae0488eac3cb7a2072b87a65c5b69a3c2eb38944c4c0e0f6a09516",
+      "variant": "dock",
+      "state": "duplicate",
+      "theme": "dark",
+      "width": 720,
+      "height": 850,
+      "rasterWidth": 1440,
+      "rasterHeight": 1700,
+      "scroll": "top",
+      "scale": 2
+    },
+    {
+      "path": "docs/design/choice-preview-correction/captures/v1/transcript-duplicate-dark-720x850-top.png",
+      "sha256": "2a5f91513b5f45303f955813b24f0b9e2326a76ffe47063e7aa8b38d1fa2281b",
+      "variant": "transcript",
+      "state": "duplicate",
+      "theme": "dark",
+      "width": 720,
+      "height": 850,
+      "rasterWidth": 1440,
+      "rasterHeight": 1700,
+      "scroll": "top",
+      "scale": 2
+    },
+    {
+      "path": "docs/design/choice-preview-correction/captures/v1/split-duplicate-dark-720x850-top.png",
+      "sha256": "b9cf65a30b3f635f620339594bd04894098e06dec6104b7f1713c89992fe6d36",
+      "variant": "split",
+      "state": "duplicate",
+      "theme": "dark",
+      "width": 720,
+      "height": 850,
+      "rasterWidth": 1440,
+      "rasterHeight": 1700,
+      "scroll": "top",
+      "scale": 2
+    }
+  ]
+}
