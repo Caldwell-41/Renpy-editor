@@ -98,6 +98,27 @@ test("unchanged pending commit blocks another draft and late disposed refusal ca
  try{s.host.querySelector<HTMLButtonElement>('[data-beat-id="choice"] .beat-select')!.click();const value=s.host.querySelector<HTMLInputElement>('[aria-label="Condition value"]')!;assert.equal(value.value,"1.25");value.value="2.75";value.dispatchEvent(new Event("input",{bubbles:true}));click(s.host,"Commit Beat");await tick();assert.equal(writes.length,1);assert.equal(value.value,"2.75");}finally{await s.close();}
  });
 
+test("Choice preview keeps duplicate rows, unknown state and policy outside its live Game stage", async () => {
+  const writes: SceneCommand[] = [];
+  const selected: SceneBeat = { ...choice, payload: { type: "choice", prompt: { type: "narration", text: "Choose independently" }, pickedPolicy: "hidePicked", options: [{ id: "first", text: "Same" }, { id: "second", text: "Same" }, { id: "locked", text: "Locked", condition: guard, unavailablePolicy: "showDisabled" }] } };
+  const s = setup([selected, ending], async command => { writes.push(command); return s.model; });
+  try {
+    const summary = s.host.querySelector<HTMLElement>('[aria-label="Choice prompt and options. Scroll to read more."]');
+    assert.ok(summary, "Choice text has a separate keyboard-scrollable summary");
+    assert.equal(summary.tabIndex, 0);
+    assert.equal(s.host.querySelector('.preview-canvas')!.contains(summary), false);
+    assert.equal(summary.querySelector('.preview-choice-prompt')!.textContent, "NarrationChoose independently");
+    assert.deepEqual([...summary.querySelectorAll('.preview-choice-caption')].map(row => row.textContent), ["Same", "Same", "Locked"]);
+    assert.deepEqual([...summary.querySelectorAll('.preview-choice-number')].map(row => row.textContent), ["1", "2", "3"]);
+    assert.equal(summary.querySelectorAll('.preview-choice-condition').length, 1);
+    assert.equal(summary.querySelector('.preview-choice-condition')!.getAttribute('aria-label'), "Condition unknown. If false: Show disabled.");
+    assert.match(summary.textContent!, /Picked state unknownHide picked/);
+    assert.equal(summary.querySelectorAll('button,input,select').length, 0);
+    summary.focus(); summary.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true }));
+    assert.equal(writes.length, 0);
+  } finally { await s.close(); }
+});
+
 test("Choice prompt controls retain invalid and refused drafts and preview prompt with options", async () => {
   const writes: SceneCommand[] = [];
   const s = setup([choice, ending], async command => { writes.push(command); throw Error("Source changed. Input retained."); });
@@ -122,8 +143,9 @@ test("illustrative option selection shows a nested prompt with its options witho
   const s = setup([outer, arm, nested, ending], async () => s.model);
   const state = deriveScenePreview(s.model.scenes[0]!, undefined, new Map([["options", "arm"]]));
   assert.equal(state.overlay?.beatId, "inner");
-  assert.deepEqual(state.overlay?.prompt, { type: "dialogue", characterId: "speaker", text: "Inner prompt" });
-  assert.match(state.overlay!.text, /Unknown answer \(availability unknown; if false: Hide\)/);
+  assert.deepEqual(state.overlay?.choice?.prompt, { type: "dialogue", characterId: "speaker", text: "Inner prompt" });
+  assert.equal(state.overlay?.choice?.options[0]?.text, "Unknown answer");
+  assert.deepEqual(state.overlay?.choice?.options[0]?.condition, guard);
   assert.deepEqual(state.variables, {});
   await s.close();
 });
@@ -142,7 +164,7 @@ test("Choice unavailable policy is per option and retained after refusal without
   assert.equal(beat.options[0]!.unavailablePolicy, "showDisabled");
 
   assert.equal(policy.value, "showDisabled"); assert.ok(policy.isConnected);
-  assert.match(s.host.querySelector('.preview-overlay.choice')!.textContent!, /availability unknown/);
-  assert.equal(s.host.querySelectorAll('.preview-overlay.choice button').length, 0);
+  assert.match(s.host.querySelector('.preview-choice-summary')!.textContent!, /Condition unknown/);
+  assert.equal(s.host.querySelectorAll('.preview-choice-summary button').length, 0);
   await s.close();
 });

@@ -252,7 +252,38 @@ export interface ScenePreviewState {
   readonly musicUnknown: boolean;
   readonly variables: Readonly<Record<string, { readonly value: boolean | number | string; readonly beatId: string }>>;
   readonly variablesUnknown: boolean;
-  readonly overlay?: { readonly kind: "dialogue" | "narration" | "choice" | "jump" | "call" | "return" | "repeatChoice"; readonly text: string; readonly beatId: string; readonly prompt?: ChoicePrompt };
+  readonly overlay?: { readonly kind: "dialogue" | "narration" | "choice" | "jump" | "call" | "return" | "repeatChoice"; readonly text: string; readonly beatId: string; readonly choice?: Extract<BeatPayload, { type: "choice" }> };
+}
+
+function renderChoiceSummary(choice: Extract<BeatPayload, { type: "choice" }>, characters: SceneWorkspace["authoring"]["characters"]): HTMLElement {
+  const text = (tag: string, className: string, value: string): HTMLElement => {
+    const node = document.createElement(tag); node.className = className; node.textContent = value; return node;
+  };
+  const summary = document.createElement("div"); summary.className = "preview-choice-summary";
+  summary.tabIndex = 0; summary.setAttribute("role", "region");
+  summary.setAttribute("aria-label", "Choice prompt and options. Scroll to read more.");
+  if (choice.prompt) {
+    const prompt = document.createElement("div"); prompt.className = "preview-choice-prompt";
+    const speaker = choice.prompt.type === "narration" ? "Narration" : characters.find(character => choice.prompt?.type === "dialogue" && character.id === choice.prompt.characterId)?.displayName ?? "Unavailable Character";
+    prompt.append(text("strong", "preview-choice-speaker", speaker), text("span", "preview-choice-prompt-text", choice.prompt.text)); summary.append(prompt);
+  }
+  if (choice.pickedPolicy && choice.pickedPolicy !== "showNormally") {
+    const picked = document.createElement("div"); picked.className = "preview-choice-picked";
+    picked.append(text("span", "preview-choice-unknown", "Picked state unknown"), text("span", "preview-choice-policy", choice.pickedPolicy === "markPicked" ? "Mark picked" : "Hide picked")); summary.append(picked);
+  }
+  const options = document.createElement("ol"); options.className = "preview-choice-options";
+  options.setAttribute("aria-label", "Choice options, read only");
+  choice.options.forEach((option, index) => {
+    const row = document.createElement("li"); row.className = "preview-choice-option";
+    row.append(text("span", "preview-choice-number", String(index + 1)), text("span", "preview-choice-caption", option.text));
+    if (option.condition) {
+      const condition = text("span", "preview-choice-condition", "Condition unknown");
+      const policy = `If false: ${option.unavailablePolicy === "showDisabled" ? "Show disabled" : "Hide"}`;
+      condition.title = policy; condition.setAttribute("aria-label", `Condition unknown. ${policy}.`); row.append(condition);
+    }
+    options.append(row);
+  });
+  summary.append(options); return summary;
 }
 
 export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string, manualBranches?: ReadonlyMap<string, string>): ScenePreviewState {
@@ -316,7 +347,7 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string,
       }
       case "dialogue": overlay = { kind: "dialogue", text: payload.text, beatId: beat.id }; break;
       case "narration": overlay = { kind: "narration", text: payload.text, beatId: beat.id }; break;
-      case "choice": overlay = { kind: "choice", ...(payload.prompt ? { prompt: payload.prompt } : {}), text: (payload.pickedPolicy ? "Picked state is unknown in this preview. " : "") + payload.options.map((option) => `${option.text}${option.condition ? ` (availability unknown; if false: ${option.unavailablePolicy === "showDisabled" ? "Show disabled" : "Hide"})` : ""}`).join(" · "), beatId: beat.id }; break;
+      case "choice": overlay = { kind: "choice", choice: payload, text: "", beatId: beat.id }; break;
       case "jump": overlay = { kind: "jump", text: "Jump", beatId: beat.id }; break;
       case "call": overlay = { kind: "call", text: "Call Scene · preview state unknown", beatId: beat.id }; break;
       case "repeatChoice": overlay = { kind: "repeatChoice", text: "Repeat this Choice. Live availability is unknown.", beatId: beat.id }; break;
@@ -722,13 +753,16 @@ export function renderSceneAuthoring(
     const heading = document.createElement("h2"); heading.textContent = "Scene Preview";
     const through = document.createElement("span"); through.textContent = selectedIndex >= 0 ? `Through Beat ${selectedIndex + 1}` : "Scene start";
     if (state.partial) { const badge = document.createElement("strong"); badge.className = "partial-badge"; badge.textContent = "Partial / unknown"; header.append(heading, through, badge); } else header.append(heading, through);
-    const surround = document.createElement("div"); surround.className = "preview-surround";
+    const choice = state.overlay?.choice;
+    const surround = document.createElement("div"); surround.className = choice ? "preview-surround choice-preview" : "preview-surround";
     const canvas = document.createElement("div"); canvas.className = "preview-canvas"; canvas.style.aspectRatio = `${actions.resolution.width} / ${actions.resolution.height}`;
     if (state.background) {
       const image = document.createElement("img"); image.className = "preview-background"; image.alt = model.authoring.assets.find((asset) => asset.id === state.background?.assetId)?.displayName ?? "Scene background";
       canvas.append(image); void loadImage(state.background.assetId, "imagePreview", image, canvas);
     } else {
-      const empty = document.createElement("p"); empty.className = "preview-empty"; empty.textContent = state.backgroundUnknown ? "Background unknown after code or unevaluated flow" : "No background at this point"; canvas.append(empty);
+      const empty = document.createElement("p"); empty.className = "preview-empty"; empty.textContent = state.backgroundUnknown ? "Background unknown after code or unevaluated flow" : "No background at this point";
+      if (choice && state.backgroundUnknown) { empty.title = empty.textContent; empty.textContent = "Background unknown"; }
+      canvas.append(empty);
     }
     for (const visible of state.characters) {
       const figure = document.createElement("figure"); figure.className = `preview-character ${visible.placement}`;
@@ -738,17 +772,33 @@ export function renderSceneAuthoring(
       const caption = document.createElement("figcaption"); caption.textContent = character?.displayName ?? "Character"; figure.append(caption); canvas.append(figure);
     }
     if (state.charactersUnknown) { const unknown = document.createElement("span"); unknown.className = "preview-unknown-layer"; unknown.textContent = "Other character state may be unknown"; canvas.append(unknown); }
-    if (state.overlay) { const overlay = document.createElement("div"); overlay.className = `preview-overlay ${state.overlay.kind}`; overlay.textContent = state.overlay.text || (state.overlay.kind === "dialogue" ? "Empty dialogue" : state.overlay.kind);if(state.overlay.kind==="dialogue"){const beat=scene.beats.find(b=>b.id===state.overlay?.beatId);if(beat?.payload.type==="dialogue"){const character=model.authoring.characters.find(c=>c.id===(beat.payload as {characterId:string}).characterId);const name=document.createElement("strong");name.textContent=character?.displayName??"";name.className="preview-speaker";overlay.prepend(name);}} if (state.overlay.prompt) {
-      const prompt = document.createElement("div"); prompt.className = "preview-choice-prompt";
-      if (state.overlay.prompt.type === "dialogue") {
-        const name = document.createElement("strong"); name.className = "preview-speaker";
-        name.textContent = model.authoring.characters.find(c => c.id === (state.overlay!.prompt as Extract<ChoicePrompt, { type: "dialogue" }>).characterId)?.displayName ?? "Unavailable Character";
-        prompt.append(name);
+    if (state.overlay && !choice) {
+      const overlay = document.createElement("div"); overlay.className = `preview-overlay ${state.overlay.kind}`;
+      overlay.textContent = state.overlay.text || (state.overlay.kind === "dialogue" ? "Empty dialogue" : state.overlay.kind);
+      if (state.overlay.kind === "dialogue") {
+        const beat = scene.beats.find(b => b.id === state.overlay?.beatId);
+        if (beat?.payload.type === "dialogue") {
+          const characterId = beat.payload.characterId;
+          const name = document.createElement("strong"); name.className = "preview-speaker";
+          name.textContent = model.authoring.characters.find(character => character.id === characterId)?.displayName ?? ""; overlay.prepend(name);
+        }
       }
-      prompt.append(document.createTextNode(state.overlay.prompt.text)); overlay.prepend(prompt);
-    } canvas.append(overlay); }
-    surround.append(canvas); preview.append(header, surround);
-    if(typeof ResizeObserver!=="undefined"){const observer=new ResizeObserver(()=>{const b=surround.getBoundingClientRect();const ratio=actions.resolution.width/actions.resolution.height;const width=Math.max(1,Math.min(b.width,b.height*ratio));canvas.style.width=`${width}px`;canvas.style.height=`${width/ratio}px`;});observer.observe(surround);layoutObservers.push(observer);}
+      canvas.append(overlay);
+    }
+    let stage = surround;
+    if (choice) {
+      stage = document.createElement("div"); stage.className = "preview-game-stage"; stage.setAttribute("aria-label", "Game stage");
+      stage.append(canvas); surround.append(stage, renderChoiceSummary(choice, model.authoring.characters));
+    } else surround.append(canvas);
+    preview.append(header, surround);
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(() => {
+        const bounds = stage.getBoundingClientRect(), ratio = actions.resolution.width / actions.resolution.height;
+        const width = Math.max(1, Math.min(bounds.width, bounds.height * ratio));
+        canvas.style.width = `${width}px`; canvas.style.height = `${width / ratio}px`;
+      });
+      observer.observe(stage); layoutObservers.push(observer);
+    }
 
     const details = document.createElement("div"); details.className = "preview-details scene-context-inspector";details.hidden=!(actions.layoutKey&&layoutFor(actions.layoutKey).inspectorOpen);
     const toggle=button("Scene details");toggle.ariaExpanded=String(!details.hidden);toggle.addEventListener("click",()=>{details.hidden=!details.hidden;toggle.ariaExpanded=String(!details.hidden);if(actions.layoutKey)saveLayout(actions.layoutKey,{inspectorOpen:!details.hidden});});header.append(toggle);

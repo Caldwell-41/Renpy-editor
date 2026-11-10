@@ -83,7 +83,7 @@ try {
  const narrationPrompt=await source(path);result.runtime.narrationPrompt=narrationPrompt;
  assert.equal(narrationPrompt,accepted.replace(initialHeader,initialHeader+'        "Choose a route"\n'));
  assert.deepEqual(choice().payload.options,[yes,no]);
- assert.match(document.querySelector('.preview-overlay.choice').textContent,/Choose a route.*Yes.*No/);
+ assert.match(document.querySelector('.preview-choice-summary').textContent,/Choose a route.*Yes.*No/);
  const mapPath=join(scratch,'synthetic-project/.renpy-editor/source-map.json');
  const noOpMap=await readFile(mapPath);promptEditor=await editChoice(choice().id);await applied(promptEditor,'Commit Beat');assert.deepEqual(await readFile(mapPath),noOpMap);assert.equal(await source(path),narrationPrompt);
  promptEditor=await editChoice(choice().id);enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'Cancelled prompt');button('Cancel',promptEditor);assert.equal(await source(path),narrationPrompt);
@@ -91,7 +91,7 @@ try {
  const characterPrompt=await source(path);result.runtime.characterPrompt=characterPrompt;
  assert.equal(characterPrompt,narrationPrompt.replace('"Choose a route"',`${speaker.technicalName} "Where shall we go?"`));
  assert.equal(choice().payload.prompt.characterId,speaker.id);
- assert.match(document.querySelector('.preview-overlay.choice').textContent,new RegExp(`${speaker.displayName}.*Where shall we go.*Yes.*No`));
+ assert.match(document.querySelector('.preview-choice-summary').textContent,new RegExp(`${speaker.displayName}.*Where shall we go.*Yes.*No`));
  await applied(document,'Undo');assert.equal(await source(path),narrationPrompt);await applied(document,'Redo');assert.equal(await source(path),characterPrompt);
  promptEditor=await editChoice(choice().id);button('Remove prompt',promptEditor);await applied(promptEditor,'Commit Beat');assert.equal(await source(path),accepted);assert.deepEqual(choice().payload.options,[yes,no]);
  stage('production prompt controls add narration, switch existing Character, preview with options, cancel/no-op, history and exact removal');
@@ -109,7 +109,7 @@ try {
  await addBodyBeat(no.id,'setVariable',form=>{enter(form.querySelector('[aria-label="Variable"]'),flagId,'change');enter(form.querySelector('[aria-label="Value"]'),'true','change');});
  const mixed=await source(path);result.runtime.mixedAvailability=mixed;result.runtime.choiceAdapter=await source('game/loomlight_choice_v1.rpy');result.runtime.choiceTemplate=generatedChoice;
  assert(mixed.includes('_ll_mode="showNormally"'));assert(mixed.includes('_ll_available=(choice_flag == True), _ll_guarded=True, _ll_locked=True'));assert.equal(choice().payload.options[0].text,'Secret');
- assert.match(document.querySelector('.preview-overlay.choice').textContent,/availability unknown; if false: Show disabled/);assert.equal(document.querySelectorAll('.preview-overlay.choice button').length,0);
+ assert.match(document.querySelector('.preview-choice-summary').textContent,/Condition unknown/);assert.equal(document.querySelectorAll('.preview-choice-summary button').length,0);
  const policies=choice().payload.options;assert.equal(policies[0].unavailablePolicy,undefined);assert.equal(policies[1].unavailablePolicy,'showDisabled');
  const policyMap=await readFile(mapPath);policyEditor=await editChoice(choice().id);await applied(policyEditor,'Commit Beat');assert.equal(await source(path),mixed);assert.deepEqual(await readFile(mapPath),policyMap);
  policyEditor=await editChoice(choice().id);policyRows=policyEditor.querySelectorAll('.choice-option');availability(policyRows[2],true,'showDisabled');await applied(policyEditor,'Commit Beat');
@@ -267,7 +267,7 @@ try {
  promptEditor=await editChoice(pickedId);button('Add a prompt shown with the options',promptEditor);enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'Choose independently');await applied(promptEditor,'Commit Beat');
  result.runtime.pickedShow=await source(path);
  promptEditor=await editChoice(pickedId);enter(promptEditor.querySelector('[aria-label="Picked options"]'),'markPicked','change');await applied(promptEditor,'Commit Beat');result.runtime.pickedMark=await source(path);
- assert.match(document.querySelector('.preview-overlay.choice').textContent,/Picked state is unknown/);assert.equal(document.querySelectorAll('.preview-overlay.choice button').length,0);
+ assert.match(document.querySelector('.preview-choice-summary').textContent,/Picked state unknown/);assert.equal(document.querySelectorAll('.preview-choice-summary button').length,0);
  const pickedMap=await readFile(mapPath);promptEditor=await editChoice(pickedId);await applied(promptEditor,'Commit Beat');assert.equal(await source(path),result.runtime.pickedMark);assert.deepEqual(await readFile(mapPath),pickedMap);
  promptEditor=await editChoice(pickedId);enter(promptEditor.querySelector('[aria-label="Picked options"]'),'hidePicked','change');button('Cancel',promptEditor);assert.equal(await source(path),result.runtime.pickedMark);
  promptEditor=await editChoice(pickedId);enter(promptEditor.querySelector('[aria-label="Picked options"]'),'hidePicked','change');await applied(promptEditor,'Commit Beat');result.runtime.pickedHide=await source(path);

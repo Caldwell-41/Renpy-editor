@@ -54,7 +54,8 @@ test("Call and every guarded option leave preview state unknown without filterin
   assert.equal(called.partial, true); assert.equal(called.variablesUnknown, true); assert.deepEqual(called.variables, {}); assert.deepEqual(called.unknownBeatIds, ["call"]); assert.equal(called.overlay?.kind, "call");
   const chosen = deriveScenePreview(scene, "choice");
   assert.deepEqual(chosen.unknownBeatIds, ["call", "choice"]); assert.equal(chosen.partial, true);
-  assert.match(chosen.overlay!.text, /High trust \(availability unknown; if false: Hide\).*Custom \(availability unknown; if false: Hide\).*Ordinary/);
+  assert.deepEqual(chosen.overlay?.choice, choice.payload);
+  assert.equal(chosen.overlay?.choice?.options.length, 3);
 });
 
 test("recursive and unknown branch captions remain accurate and do not execute sibling bodies", async () => {
