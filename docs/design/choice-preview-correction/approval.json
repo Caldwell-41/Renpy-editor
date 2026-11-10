@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "screenId": "choice-preview-correction",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "dock-v1", "variantId": "dock", "approval": null },
+    { "id": "transcript-v1", "variantId": "transcript", "approval": null },
+    { "id": "split-v1", "variantId": "split", "approval": null }
+  ]
+}
