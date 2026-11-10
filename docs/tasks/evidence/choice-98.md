@@ -8,7 +8,8 @@ with the implement-spec workflow and instructed the agent to start building on
 Delivery is `in_progress`. #101 is integrated with public-controller, both-target
 SDK and automatic CI evidence. Its implementation dependency is satisfied on the
 integration branch; final review, native/human evidence and issue closure remain
-part of the combined delivery. #102 is the next selected assignment.
+part of the combined delivery. #102 is integrated with Mac SDK evidence; its
+Windows qualification remains pending. #103 prompt implementation is next.
 
 Integration branch `codex/choice-98` starts at accepted integration
 `63221b44d72c1c100815e9e638cbec5133ffc1eb` from
@@ -19,11 +20,12 @@ worktree. A merger receives integration ownership explicitly. Workers leave
 CURRENT, HANDOVER and this file to the coordinator.
 
 The completed first assignment #101 established the Choice/option model, mapping,
-body operations and production controls. #102 now owns recursive source/body/Call
-contracts, their production Story controls and affected tests. It is the sole
-implementation writer for those shared interfaces. #103/#104 remain ready after
-#101 but start after this recursive checkpoint to avoid simultaneous ownership of
-the same parser, writer and UI contracts.
+body operations and production controls. #102 delivered recursive source/body/Call
+contracts, their production Story controls and affected tests. #103 becomes the
+next sole writer of the shared parser, writer and UI; #104 follows its checkpoint.
+The coordinator assigns #102 Windows qualification separately after publication.
+#103 depends on qualified #101, so that other-host qualification may run concurrently.
+#105/#106 still wait for all Stage 1 requirements.
 
 ## Dependencies and approved design
 
@@ -56,15 +58,20 @@ SDK qualification for the entire #98 outcome is capped at 20 harness invocations
 per host, including failed or cancelled starts. One invocation may launch compile,
 lint and named normal-play children; retain each child's result without charging
 them again as harness starts. This allows focused coverage across six tickets and
-bounded corrections. The #101 implementer may use at most four Mac invocations
-from the shared ceiling after cheap fixture preflight and official pinned-SDK
-verification. A separate #101 Windows test assignment may use at most four
-Windows harness starts from the shared ceiling, after host/toolchain and fixture
-preflight. No other Windows writer or SDK campaign is assigned concurrently.
-Current usage is Mac 3/20, Windows 2/20, zero reservations. The fresh #102
-implementer may use at most four Mac harness starts from the shared ceiling after
-offline preflight, covering nested convergence and Call return. It has no Windows,
-native-editor/package or manual-CI assignment.
+bounded corrections. #101 had a four-start allowance per host after offline
+preflight and pinned-SDK verification; it used three Mac and two Windows starts.
+Current usage is Mac 5/20, Windows 2/20, zero reservations. #102 used two of its
+four selected Mac starts, including the failed standalone fixture. Its final run
+passed nested convergence and Call return.
+
+For the next coordinator assignments, #103 may use at most four Mac harness starts
+from confirmed Mac 5/20. A fresh #102 Windows test assignment may use at most four
+starts from confirmed Windows 2/20. Both require offline fixture, host/toolchain
+and pinned-SDK preflight. Windows may reuse the existing T3-prepared
+`codex/choice-101-windows` worktree only after clean/idle ownership checks and safe
+fast-forward synchronization. Do not create a new checkout or change the protected
+registered root. Separate hosts/interfaces permit #102 Windows testing alongside
+local #103 implementation. The coordinator owns dispatch and shared counters.
 
 Native editor/package and manual CI campaigns need recorded selection and limits
 before starting; none has started. Routine compilation, focused tests, review and
@@ -82,9 +89,11 @@ The fresh merger integrated #101 in normal merge
 `c9055fb673214365271f6ec557c92c00ce7b5f8b`. The coordinator resumes sole ownership
 of `codex/choice-98` and live status on the merger's return. Draft PR #125 is open.
 Automatic CI and Windows qualification passed for corrected candidate `3a672e96`.
-Next is the fresh #102 implementer in an isolated managed worktree, then a fresh
-merger and the remaining ticket graph. Both #101 worktrees and their unique
-evidence remain retained. Tickets stay open for combined PR review and closure.
+The fresh #102 merger has now integrated `7d86cda5` in `b100034c`; the detailed
+[return below](#102-integration-and-handoff) owns this checkpoint. The coordinator
+resumes integration ownership, publishes it on PR #125, then assigns #102 Windows
+qualification and #103 prompt implementation. Retain the #101/#102 worktrees and
+unique evidence. Tickets stay open for combined PR review and closure.
 
 The initial draft PR checkpoint selects automatic Repository quality only in
 `.github/validation-plan.json`, targeting `codex/phase3b-screen-designer`.
@@ -288,3 +297,67 @@ Choices in option bodies under its live ticket. Reuse the existing recursive bod
 Call and qualification owners; prompts, locked options, Repeat and picked state
 remain #103–#106. The coordinator keeps live records and shared counters; #102
 returns a committed, focused-tested candidate for a fresh merger.
+
+## #102 integration and handoff
+
+The fresh merger received sole integration ownership at `7dd772155f04defedcb0c68e8e414f6747323d1d`.
+Worker branch `t3/choice-recursive-authoring` ended at
+`7d86cda57c3e6e6c1c1cc5b44c958a33833e0954`, descended directly from that checkpoint.
+Normal merge `b100034c212c79233f6797ac33a7d2aaaff7cfd2` completed without conflicts
+or implementation edits. The local dependency symlink remains untracked.
+
+The worker delivered recursive Choice/condition option bodies, option Calls,
+structural completion and exact flow continuations, subtree moves/removal and
+production Story controls. Source-map schema 10 keeps the schema-9 recognizer
+frozen and refines verified physical records while preserving source, identities
+and unknown fields. Current qualification consumers admit coherent schema-10
+receipts without relaxing source/hash, identity or matrix checks. The merger's
+bounded ownership, completion, caller and schema inspection found no material
+integration defect. Rendered approved-design comparison remains missing.
+
+The merged trees exactly equal the worker's: `app`
+`1d4c3cdc6984470854e531535c44ae2b8def4d6c`, `tests`
+`3f74a05af438c448908f0e403273bf98bd3610a0`, and `tests/fixtures`
+`9b504508da62b6d5d29cd7f0d9f63bee65ad2184`. Approved `app/design-lab` and
+`docs/design` source is unchanged from integration entry. Worker checks apply only
+to these identical implementation inputs. This status successor changes no product code.
+
+The worker reports 61 affected core passes, 53 Scene passes with seven named
+historical ADR 0009 specialists ignored, 393 frontend passes and 12 Python passes.
+Typecheck, build, formatting, repository validation and the actual production
+main/Story-to-core authoring journey pass. Happy DOM evidence does not establish
+native or visual acceptance. Temporary `choice102/handoff.md`, `logic-final-2.log`,
+`scene-tests.log`, `frontend-all.log`, `fidelity-python-2.log`, `controller-qualified-2`
+and the worker's retained worktree own commands and detailed evidence.
+
+Mac SDK invocation 1 remains charged. Its first 16 children passed; child 17's
+standalone recursive game failed because the public condition builder selected
+`flag`, while the game declared only `choice_flag`. The worker explicitly selected
+the declared variable through the production control and tightened offline admission
+to require that guard. No product assertion was relaxed. `sdk-01` retains the
+failure; incident H81 records its cause. Invocation 2 at final worker SHA passed
+all 22 compile/lint/play children, including the required wrong-outcome rejection,
+and completed owned scratch cleanup. `sdk-02/result.json`, its child logs and the
+frozen authored source retain exact commands and hashes. The SDK archive pin is
+the same published 8.5.3 SHA-256 recorded for #101. The old bad authored receipt
+now fails offline admission before any SDK start.
+
+The merger ran the existing exact public-core base Help export offline once:
+`LOOMLIGHT_BASE_HELP_INPUTS=<fresh-output> cargo test --manifest-path app/Cargo.toml -p loomlight-core --locked --offline --lib screens::canvas::tests::base_help_fidelity_exports_typed_assets_styles_and_exact_source_without_execution -- --exact --nocapture`.
+It passed one test, zero failures/ignored, and the shared `cargo-log` gate passed.
+Existing Python 3.12 and retained Pillow then ran
+`base_help_fidelity.validate_accepted` on its `accepted.json`; schema 10 and all
+eight cases passed. Temporary `choice102/merge/base-help-export.log`,
+`base-help-export/accepted.json` and `base-help-admission.log` retain this focused
+CI-consumer check. No SDK/helper, browser, native, package or manual-CI operation
+ran in this merge pass. Repository validation passed for 1,887 files; whitespace
+checks passed. CURRENT is 386 words and HANDOVER is 1,190, within their review targets.
+
+Cumulative SDK use is Mac 5/20, Windows 2/20, zero reservations. #102 used 2/4
+Mac starts. #102 Windows qualification, rendered design comparison, matching
+native/human evidence and combined review remain pending. The coordinator resumes
+integration ownership and publication on draft PR #125. #103 prompt implementation
+is next sole writer of shared parser/writer/UI, then #104; #102 Windows may run
+concurrently on the other host after publication. Stage 2 still waits for every
+Stage 1 requirement. All issues stay open for the single integration PR closeout;
+this checkpoint does not claim full #98 acceptance.

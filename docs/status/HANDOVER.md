@@ -7,20 +7,22 @@ delivery tickets and the implement-spec workflow, then instructed the agent to
 start building. Work is `in_progress` on `codex/choice-98`, based on accepted
 integration `63221b44`. The coordinator owns this branch and live status; fresh
 ticket implementers use isolated managed worktrees. #101's implemented prerequisite
-is qualified on both SDK targets; combined acceptance remains pending. #102 is the
-next implementation assignment. [The delivery record](../tasks/evidence/choice-98.md) owns the graph,
+is qualified on both SDK targets. #102 is integrated with Mac SDK evidence;
+combined acceptance remains pending. [The delivery record](../tasks/evidence/choice-98.md) owns the graph,
 file ownership, approved design, verification and cumulative operation limits.
 
-Normal merge `c9055fb6` integrated worker `070365fa` without conflicts. The worker
-worktree and temporary evidence remain retained. Initial CI failed in stale
-schema-version and Return-label consumers. The coordinator reproduced and corrected
-them, including related current qualification consumers; focused exports, admission
-checks and the ten-case real Story controller journey pass. The original frontend
-Python failure also has a passing targeted rerun. [The correction record](../tasks/evidence/choice-98.md#windows-preflight-and-ci-consumer-correction)
-owns exact results, setup failures and evidence-reuse limits. Automatic CI and
-Windows SDK qualification now pass on `3a672e96`. A fresh #102 implementer receives
-the recursive body/Call/parser/UI contracts as sole writer; #103/#104 start after
-that shared-contract checkpoint. #105/#106 wait for all Stage 1 tickets.
+Retain the #101 worktree and temporary evidence. [Its correction record](../tasks/evidence/choice-98.md#windows-preflight-and-ci-consumer-correction)
+owns the stale schema/Return-label CI failures, passing corrections and targeted
+resolution of the original frontend Python failure. Automatic CI and
+Windows SDK qualification pass for #101 on `3a672e96`. Normal merge `b100034c`
+integrated #102 worker `7d86cda5` without conflicts. Its app, test and fixture trees
+equal the worker's; approved lab/design source is unchanged. The focused merged
+public-core Help export and schema-10 Python admission pass. [The #102 return](../tasks/evidence/choice-98.md#102-integration-and-handoff)
+owns the worker checks, Mac failure/correction and exact tree identities.
+#103 prompt implementation becomes the next sole writer of shared parser, writer
+and UI; #104 follows its checkpoint. #102 Windows qualification may run on the
+other host after publication while #103 proceeds from qualified #101. #105/#106
+still wait for all Stage 1 requirements.
 Native/human and combined review remain pending; issues remain open until PR closeout.
 
 Development is on macOS ARM64, with both supported runtime targets required. The
@@ -30,14 +32,22 @@ public-controller journey and all 14 SDK children. It and producing-host evidenc
 remain retained. [The Windows return](../tasks/evidence/choice-98.md#windows-qualification-and-102-entry)
 owns hashes, charged observer failure, exact child results and cleanup. Its T3
 callback was denied; Kris supplied the completed thread for this audit.
-SDK use is Mac 3/20, Windows 2/20, zero reservations. #102 may use at most four Mac
-starts from the shared ceiling after preflight. No native editor/package or
-manual CI campaign is selected yet.
+SDK use is Mac 5/20, Windows 2/20, zero reservations. #102 used two of its four Mac
+starts, including the failed standalone fixture with an undeclared condition flag.
+The corrected fixture passed all 22 SDK children on the final worker SHA.
+No native editor/package or manual CI campaign is selected yet.
+The next #103 Mac and #102 Windows assignments each have a four-start limit under
+[the delivery record](../tasks/evidence/choice-98.md#verification-and-operation-limits).
 [Draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125) is published
 against `codex/phase3b-screen-designer`, initial head `d2504a76`. The Windows
-assignment is complete; the coordinator audited exact-head automatic CI. Resume
-in this same coordinating thread on #102's return, inspect its actual diff and
-evidence, then assign a fresh merger and continue the dependency graph. The local untracked
+assignment for #101 is complete; the coordinator audited its exact-head automatic CI.
+The #102 merge and status successor are local-only. Integration ownership returns
+to the coordinator at this handoff. Resume in the same coordinating thread to
+publish the checkpoint on PR #125, assign #102 Windows qualification and #103,
+then continue the graph. Reuse the existing isolated Windows worktree only after
+clean/idle ownership checks and a safe fast-forward; preserve the registered root.
+Rendered comparison with approved design, matching
+native/human evidence and combined review remain pending. The local untracked
 `app/node_modules` symlink points to the existing dependency cache and must not be
 committed. No protected sessions or unrelated Windows worktrees were changed.
 
