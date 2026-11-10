@@ -6,18 +6,20 @@ Kris selected [#98](https://github.com/Caldwell-41/Renpy-editor/issues/98), its 
 delivery tickets and the implement-spec workflow, then instructed the agent to
 start building. Work is `in_progress` on `codex/choice-98`, based on accepted
 integration `63221b44`. The coordinator owns this branch and live status; fresh
-ticket implementers use isolated managed worktrees. #101 is the first ready
-assignment. [The delivery record](../tasks/evidence/choice-98.md) owns the graph,
+ticket implementers use isolated managed worktrees. #101 is integrated but not
+accepted. [The delivery record](../tasks/evidence/choice-98.md) owns the graph,
 file ownership, approved design, verification and cumulative operation limits.
 
-The #101 implementer returned `070365fa` on `t3/choice-source-editor`. Its isolated
-worktree and temporary evidence are retained. The coordinator inspected the diff
-and receipts; a fresh merger receives sole integration-write ownership next.
-#102–#104 wait for #101; #105/#106 wait for all Stage 1 tickets. The draft PR opens
-after this first implementation merge. Windows, native/human and combined-review
-acceptance remain pending; the full frontend suite retains one Python environment
-failure. [The delivery record](../tasks/evidence/choice-98.md#101-implementation-return)
-owns results, SDK failures and unchanged-source evidence reuse.
+Normal merge `c9055fb6` integrated worker `070365fa` without conflicts. Its app and
+fixture trees equal the reviewed worker; only coordinator status/evidence differs.
+The isolated worker worktree and temporary evidence remain retained. The coordinator
+resumes sole integration ownership on the merger's return. Open the draft PR, assign
+Windows qualification and continue dependency-ready tickets under the live blockers.
+#105/#106 still depend on all Stage 1 tickets. Native/human and combined review remain
+pending. The original frontend run had 391 passes and one Python environment failure;
+all eight tests in that file now pass with an existing complete Python 3.12. The full
+suite was not repeated. [The merge record](../tasks/evidence/choice-98.md#101-integration-result)
+owns tree equivalence, targeted resolution and bounded SDK evidence reuse.
 
 Development is on macOS ARM64, with both supported runtime targets required. The
 linked SUNDOWN environment answered at entry but needs OS/checkout/tool discovery.
