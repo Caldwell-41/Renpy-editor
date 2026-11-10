@@ -10,16 +10,21 @@ in progress and its evidence. The code owns behavior. Before work, read the sele
 issue, its parent and the code it touches. Use `gh` as described in
 [the tracker guide](docs/agents/issue-tracker.md).
 
-- The user selects work. A label, assignment or open issue does not by itself
-  authorize implementation, publication or a costly run.
-- Record decisions, failed attempts and native, SDK or human results as issue
-  comments, with the exact commit they apply to. Raw logs, packages and private
-  artifacts stay out of Git and out of issues.
-- Write the PR body once, with the `pr` skill, when opening the PR. Post later
-  results, such as CI audits and native or SDK runs, as PR comments. Editing the
+- The user selects work, by naming an issue or by asking directly. A label,
+  assignment or open issue does not by itself authorize implementation,
+  publication or a costly run.
+- Record each result with the exact commit it applies to. Results tied to a PR
+  head, such as CI audits and SDK, native or package runs, go in PR comments.
+  Decisions, scope changes, acceptance and results with no PR go in issue
+  comments. Raw logs, packages and private artifacts stay out of Git, issues and PRs.
+- Write the PR body once, with the `pr` skill, when opening the PR. Editing the
   body re-runs Repository quality, so edit it only when scope changes.
-- Closing an issue means accepted. Track outstanding native or human acceptance as
-  its own `ready-for-human` issue.
+- Close an issue only when all its acceptance criteria pass. If a human check
+  remains, keep it open and comment what is left. With the user's OK, move that
+  check to a new `ready-for-human` issue and edit the criteria to match.
+- Before stopping with unfinished work, comment on the PR, or on the issue when
+  there is no PR, with the branch, head SHA, uncommitted work, pending runs, limits
+  used and the next action.
 - Put lasting behavior in the canonical doc that owns it ([INDEX](docs/INDEX.md)).
   Write an ADR only for a decision that is hard to reverse, surprising without
   context and the result of a real trade-off (`domain-modeling`).
@@ -93,8 +98,8 @@ requirement, test validity and layer before a third attempt.
 ## Operation limits
 
 Package builds, native app launches, SDK campaigns and expensive CI matrices need
-a numeric limit. Before the first attempt, record on the issue the limit, its basis
-and what counts as an attempt. Count every attempt that starts, including failed
+a numeric limit. Before the first attempt, record the limit, its basis and what
+counts as an attempt on the issue, or on the PR when there is no issue. Count every attempt that starts, including failed
 and cancelled ones. The count carries across sessions, hosts and successor tickets
 for the same problem. Ask before exceeding it, and continue other work that does
 not depend on it. Routine work needs no limit.

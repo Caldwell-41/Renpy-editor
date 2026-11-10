@@ -1,6 +1,6 @@
 # Phased roadmap
 
-**Planning clarification:** 2026-09-15; Phases 2–3 delivery planning updated 2026-10-02. Each phase is gated by measured outcomes, not elapsed time. This roadmap defines scope and dependencies; it does not authorise implementation. Each milestone needs a bounded brief and explicit approval. Read [CURRENT](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/status/CURRENT.md) for actual implementation and gate state.
+**Planning clarification:** 2026-09-15; Phases 2–3 delivery planning updated 2026-10-02. Each phase is gated by measured outcomes, not elapsed time. This roadmap defines scope and dependencies; it does not authorise implementation. Each milestone needs its own issue and explicit approval. GitHub Issues hold actual implementation and gate state.
 
 ## Phase 0 — Foundation and proof (complete)
 
@@ -30,7 +30,7 @@ audit prove integration. The [closure ledger](https://github.com/Caldwell-41/Ren
 retains identities, both earlier failed matrices, cumulative attempts and limits.
 The bounded Phase 2 source foundation is independently reviewed and qualified on both
 targets and integrated through [PR19](https://github.com/Caldwell-41/Renpy-editor/pull/19). Provider/AI and remaining Phase 3 implementation are
-unstarted; CURRENT/HANDOVER own the next selection.
+unstarted; GitHub Issues own the next selection.
 
 **Outcome:** a small but genuinely usable Loomlight-created Ren'Py project from creation through authoring, validation, run, close and reopen. The [Phase 1 vertical-slice plan](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-07-phase-1-vertical-slice.md) owns detailed milestone scope and gates.
 

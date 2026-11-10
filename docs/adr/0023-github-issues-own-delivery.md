@@ -20,5 +20,5 @@ and dependency folders are deleted. Their final contents remain at the
 `archive/docs-ledgers-2026-11` tag, so existing links keep working.
 
 Copying the ledgers into issues was rejected. Most of the content is finished
-receipts, and it would bury the open work. Closing an issue means accepted;
-outstanding human or native acceptance gets its own issue.
+receipts, and it would bury the open work. An issue closes only when all its
+acceptance criteria pass, so open or closed replaces the old delivery-state field.

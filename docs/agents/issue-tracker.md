@@ -7,6 +7,9 @@ Issues own scope, acceptance and decisions; [AGENTS](../../AGENTS.md#work-from-t
 says what to record where. Creating, assigning or labelling an issue does not
 authorize implementation, publication or additional attempts.
 
+Older issue bodies carry a `Delivery state:` line. It is retired: open or closed,
+labels and comments carry state. Remove the line when editing such an issue.
+
 ## Operations
 
 - Create: `gh issue create --title "..." --body-file <file>`.

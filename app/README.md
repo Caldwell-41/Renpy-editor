@@ -2,8 +2,7 @@
 
 This directory contains Loomlight's Tauri desktop application, Rust core and
 TypeScript UI, with build, test and packaging tools. Disposable prototypes live in
-`spikes/`. [Current project state](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/status/CURRENT.md) owns active work and
-acceptance status.
+`spikes/`. GitHub Issues own active work and acceptance status.
 
 ## Local checks
 
