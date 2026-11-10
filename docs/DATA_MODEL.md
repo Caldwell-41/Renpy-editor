@@ -84,11 +84,32 @@ music, play SFX, transition reference, and protected Custom Code. Supporting ref
 use stable Character, Appearance, Asset, Variable, and Scene UUIDs rather than
 filenames. Later phases extend the same Beat/semantic model rather than replacing it.
 
-Choice, Jump, and Return/End are mutually exclusive terminal Beat forms. A newly
-created Scene starts with Return/End; adding a Choice or Jump at the natural end
-replaces that terminal range rather than leaving unreachable statements after it.
-Terminal Beats cannot be removed, converted to a non-terminal Beat, or reordered away
-from the end through the supported Scene surface.
+A Choice owns ordered option bodies and can continue at the next Beat in its
+containing body. A new option is empty; its source contains a sole verified `pass`
+until a Beat replaces it. Jump and Return are explicit transfers inside an option.
+Return returns to the caller, or to the main menu when there is no caller. A newly
+created Scene still starts with Return. Structural commands refuse a new Scene
+fallthrough, including when every guarded option can be unavailable.
+
+The Choice payload contains option caption, optional condition and mapped option ID.
+It has no destination field. A destination option has an ordinary Jump in its body.
+The option ID is its header's Beat UUID; Choice identity is the menu header UUID.
+Flat source-derived child Beats carry the existing group/branch owner. Option headers
+reuse that branch mapping with `choiceOption: true`; they are not condition nodes.
+`BodyRef::Branch` names an option body just as it names a condition branch. Headers,
+children and shared following Beats have disjoint exact source ranges. No second
+saved story document or action-list model exists.
+
+Source-map schema 9 refines the earlier whole-menu mappings after verifying them
+with their original recognizer. The menu header keeps its old ID and unknown fields;
+provable existing physical records keep theirs. Opening and no-op editing never
+rewrite `.rpy` bytes. Unprovable ownership refuses; unsupported option contents stay
+protected Source. The reader and writer cap is 4,000,000 bytes, so the existing
+500-Scene / 2,000-route fixture still fits after menus split into physical mappings.
+Caption, guard, reorder and option-count edits carry each retained body's exact
+bytes and mapped IDs. New options get new IDs. Then controls edit only the last
+Jump/Return, or its absence for Continue. Source reconciliation refuses ambiguous
+movement of children between duplicate-caption option headers.
 
 Every recognized Beat mapping records a stable UUID, exact source revision, verified
 byte range, exact range hash, and lexical context. The narrow mapper recognizes only
@@ -680,7 +701,8 @@ owns its reviewed contract and early both-target qualification. Older maps use t
 refinement. Exact tiled menu merges retain the header identity and preserve removed
 records in non-authoritative `refinedChildMappings` extras. Every old record must be
 accounted for; split ranges, reserved-key collisions and output exceeding the unchanged
-1,000,000-byte reader cap refuse without writes. Source bytes are not migrated.
+1,000,000-byte reader cap refused without writes at that checkpoint. Schema 9 above
+extends the bounded reader for disjoint option mappings. Source bytes are not migrated.
 
 `Call` carries a target Scene UUID and stable `returnLabel`; insertion generates the
 label, and target edits preserve it. Choice options may carry the shared `Condition`.

@@ -388,6 +388,9 @@ pub(super) fn apply(
                 return Err(SceneError::InvariantBlocked);
             }
             let (start, end) = place(&body, &position, source, beats, None, false)?;
+            if option_body(&body, beats) {
+                return Err(SceneError::OpaqueBoundary);
+            }
             let expr = expression(&condition, loaded)?;
             let mut bytes = format!("{}if {expr}:{newline}", " ".repeat(body.indent)).into_bytes();
             bytes.extend(pass(body.indent + 4, newline));
@@ -527,6 +530,15 @@ pub(super) fn apply(
                 return Err(SceneError::OpaqueBoundary);
             }
             let destination = qualify_body(source, beats, &destination)?;
+            if option_body(&destination, beats)
+                && (selected.conditional_branch.is_some()
+                    || matches!(
+                        selected.payload,
+                        BeatPayload::Choice { .. } | BeatPayload::Call { .. }
+                    ))
+            {
+                return Err(SceneError::OpaqueBoundary);
+            }
             if let NodeRef::Condition { group_id } = &node {
                 if inside_group(&destination, group_id, beats) {
                     return Err(SceneError::InvariantBlocked);

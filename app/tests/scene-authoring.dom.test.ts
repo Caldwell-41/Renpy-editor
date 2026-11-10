@@ -49,7 +49,7 @@ function sceneModel(): SceneWorkspace {
         id: "scene-one", chapterId: "chapter-one", displayName: "Arrival", technicalLabel: "arrival", sourcePath: "game/chapters/chapter_01/scene_001.rpy", sourceRevision: "3".repeat(64), sourceConflict: false, partial: false,
         beats: [
           { id: "dialogue", byteStart: 15, byteEnd: 35, protected: false, payload: { type: "dialogue", characterId: "alice", text: "Hello" } },
-          { id: "choice", byteStart: 35, byteEnd: 80, protected: false, payload: { type: "choice", options: [{ text: "Go", destinationSceneId: "scene-two" }] } },
+          { id: "choice", byteStart: 35, byteEnd: 80, protected: false, payload: { type: "choice", options: [{ text: "Go" }] } },
           { id: "return", byteStart: 80, byteEnd: 91, protected: false, payload: { type: "return" } },
         ],
       },
@@ -211,7 +211,7 @@ test("Scene authoring exposes hierarchy, every Beat, natural dialogue continuati
   const type = [...document.querySelectorAll("label")].find((item) => item.firstElementChild?.textContent === "Beat type")?.querySelector("select");
   assert.ok(type);
   const options = [...type.options].map((option) => option.textContent);
-  for (const label of ["Background", "Show Character", "Hide Character", "Change Appearance", "Placement", "Dialogue", "Narration", "Play Music", "Stop Music", "Play SFX", "Transition", "Set Variable", "Choice", "Jump", "Return / End"]) assert.ok(options.includes(label), label);
+  for (const label of ["Background", "Show Character", "Hide Character", "Change Appearance", "Placement", "Dialogue", "Narration", "Play Music", "Stop Music", "Play SFX", "Transition", "Set Variable", "Choice", "Jump", "Return"]) assert.ok(options.includes(label), label);
   click("Cancel");
 
   const choice = [...document.querySelectorAll("button")].find((item) => item.textContent?.startsWith("3. Choice"));
@@ -292,7 +292,7 @@ test("preview presents images through the bounded bridge and auditions audio onl
   assert.equal(calls.some((call) => call.purpose === "audioAudition"), false);
   assert.equal(calls.filter((call) => call.assetId === "bg").length, 1);
   assert.equal(calls.filter((call) => call.assetId === "appearance").length, 1);
-  assert.match(document.querySelector(".preview-overlay")?.textContent ?? "", /Return \/ End/);
+  assert.match(document.querySelector(".preview-overlay")?.textContent ?? "", /Return to caller or main menu/);
   assert.ok([...document.querySelectorAll("button")].some((item) => item.textContent?.startsWith("Edit Beat")));
   assert.ok([...document.querySelectorAll("button")].some((item) => item.textContent === "Add change here"));
   click("Audition current music"); await tick();

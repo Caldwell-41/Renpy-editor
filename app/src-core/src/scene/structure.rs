@@ -117,10 +117,7 @@ impl AuthoringService {
                     .flat_map(|b| match &b.payload {
                         BeatPayload::Call { scene_id, .. } => vec![(scene_id.clone(), true)],
                         BeatPayload::Jump { scene_id } => vec![(scene_id.clone(), false)],
-                        BeatPayload::Choice { options } => options
-                            .iter()
-                            .map(|o| (o.destination_scene_id.clone(), false))
-                            .collect(),
+                        BeatPayload::Choice { .. } => vec![],
                         _ => vec![],
                     })
                     .collect(),
@@ -353,7 +350,9 @@ fn qualify_body<'a>(
             (b.byte_start as usize) < scene_end
                 && (b.byte_end as usize) <= scene_end
                 && b.owner == owner
-                && b.conditional_branch.as_ref().is_none_or(|g| g.ordinal == 0)
+                && b.conditional_branch
+                    .as_ref()
+                    .is_none_or(|g| g.ordinal == 0 && !g.choice_option)
                 && !trivia(b)
         })
         .collect::<Vec<_>>();
@@ -401,11 +400,24 @@ fn scene_body_end(source: &[u8]) -> Result<usize, SceneError> {
     Ok(source.len())
 }
 
+fn option_body(body: &Body<'_>, beats: &[SceneBeat]) -> bool {
+    body.owner
+        .as_ref()
+        .and_then(|o| beats.iter().find(|b| b.id == o.branch_id))
+        .is_some_and(|b| {
+            b.conditional_branch
+                .as_ref()
+                .is_some_and(|g| g.choice_option)
+        })
+}
 fn trivia(beat: &SceneBeat) -> bool {
     beat.conditional_branch.is_none()
         && matches!(&beat.payload, BeatPayload::CustomCode { source, .. } if source.trim().is_empty() || source.trim_start().starts_with('#'))
 }
-fn node_end(beat: &SceneBeat, beats: &[SceneBeat]) -> Result<usize, SceneError> {
+pub(super) fn node_end(beat: &SceneBeat, beats: &[SceneBeat]) -> Result<usize, SceneError> {
+    if matches!(beat.payload, BeatPayload::Choice { .. }) {
+        return choice::end(beat, beats);
+    }
     if let Some(group) = &beat.conditional_branch {
         conditional_extents(beats)
             .get(group.group_id.as_str())
@@ -416,6 +428,9 @@ fn node_end(beat: &SceneBeat, beats: &[SceneBeat]) -> Result<usize, SceneError> 
     }
 }
 fn terminal(beat: &SceneBeat, beats: &[SceneBeat]) -> bool {
+    if matches!(beat.payload, BeatPayload::Choice { .. }) {
+        return !choice::may_continue(beat, beats);
+    }
     beat.conditional_branch.as_ref().map_or_else(
         || is_terminal_payload(&beat.payload),
         |g| !logic::group_may_continue(&g.group_id, beats, 0),
@@ -429,7 +444,9 @@ fn root_may_continue(source: &[u8], beats: &[SceneBeat]) -> Result<bool, SceneEr
             (b.byte_start as usize) < end
                 && (b.byte_end as usize) <= end
                 && b.owner.is_none()
-                && b.conditional_branch.as_ref().is_none_or(|g| g.ordinal == 0)
+                && b.conditional_branch
+                    .as_ref()
+                    .is_none_or(|g| g.ordinal == 0 && !g.choice_option)
                 && !trivia(b)
         })
         .any(|b| terminal(b, beats)))
@@ -443,7 +460,7 @@ fn qualified_node<'a>(body: &Body<'a>, node: &NodeRef) -> Result<&'a SceneBeat, 
             NodeRef::Condition { group_id } => b
                 .conditional_branch
                 .as_ref()
-                .is_some_and(|g| g.group_id == *group_id && g.ordinal == 0),
+                .is_some_and(|g| g.group_id == *group_id && g.ordinal == 0 && !g.choice_option),
         })
         .ok_or(SceneError::InvariantBlocked)
 }
@@ -481,6 +498,14 @@ fn apply(
         } => {
             validate_payload(&payload, loaded)?;
             let body = qualify_body(source, beats, &body)?;
+            if option_body(&body, beats)
+                && matches!(
+                    payload,
+                    BeatPayload::Choice { .. } | BeatPayload::Call { .. }
+                )
+            {
+                return Err(SceneError::OpaqueBoundary);
+            }
             let (index, insertion) = match position {
                 Position::Before { anchor } => {
                     let beat = qualified_node(&body, &anchor)?;
@@ -552,6 +577,16 @@ fn apply(
                 uuid::Uuid::new_v4().to_string(),
                 Some(offset),
             ));
+            if matches!(payload, BeatPayload::Choice { .. }) {
+                choice::retain_insertion(
+                    source,
+                    beats,
+                    insertion,
+                    replacement_end,
+                    rendered.len(),
+                    &mut forced,
+                );
+            }
             let mut output = source.to_vec();
             output.splice(insertion..replacement_end, rendered.bytes());
             Ok((output, forced))
@@ -574,6 +609,14 @@ fn apply(
             {
                 return Err(SceneError::InvariantBlocked);
             }
+            if matches!(beat.payload, BeatPayload::Choice { .. })
+                != matches!(payload, BeatPayload::Choice { .. })
+            {
+                return Err(SceneError::InvariantBlocked);
+            }
+            if let BeatPayload::Choice { options } = &payload {
+                return choice::update(source, beats, beat, options, loaded);
+            }
             let original = &source[beat.byte_start as usize..beat.byte_end as usize];
             let rendered = match (&beat.payload, &payload) {
                 (
@@ -595,10 +638,6 @@ fn apply(
                         .find(|s| &s.id == scene_id)
                         .ok_or(SceneError::UnknownEntity)?;
                     logic::patch_call_target(original, &target.technical_label)?
-                }
-                (BeatPayload::Choice { options: previous }, BeatPayload::Choice { options }) => {
-                    logic::patch_menu(original, previous, options, loaded)?
-                        .unwrap_or(generated_at_indent(&payload, loaded, newline, body.indent)?)
                 }
                 (previous, next)
                     if previous.screen_target().is_some() && next.screen_target().is_some() =>
@@ -660,10 +699,12 @@ fn patch_text(original: &[u8], text: &str) -> Result<String, SceneError> {
 
 pub(super) fn mark_placeholders(beats: &mut [SceneBeat]) {
     let mut counts = HashMap::<(String, String), usize>::new();
-    for beat in beats
-        .iter()
-        .filter(|b| !trivia(b) && b.conditional_branch.as_ref().is_none_or(|g| g.ordinal == 0))
-    {
+    for beat in beats.iter().filter(|b| {
+        !trivia(b)
+            && b.conditional_branch
+                .as_ref()
+                .is_none_or(|g| g.ordinal == 0 && !g.choice_option)
+    }) {
         if let Some(owner) = &beat.owner {
             *counts
                 .entry((owner.group_id.clone(), owner.branch_id.clone()))

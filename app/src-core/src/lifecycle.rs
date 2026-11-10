@@ -4490,12 +4490,12 @@ mod tests {
                         crate::scene::ChoiceOption {
                             condition: None,
                             text: "Garden".into(),
-                            destination_scene_id: garden_id.clone(),
+                            id: None,
                         },
                         crate::scene::ChoiceOption {
                             condition: None,
                             text: "Library".into(),
-                            destination_scene_id: library_id.clone(),
+                            id: None,
                         },
                     ],
                 },
@@ -4884,7 +4884,7 @@ mod tests {
             json!({"sessionId":session,
             "expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],
             "command":{"type":"insertBeat","sceneId":entry["id"],"expectedSourceRevision":entry["sourceRevision"],"beforeBeatId":null,
-                "beat":{"type":"choice","options":[{"text":"Again","destinationSceneId":entry["id"]}]}}}),
+                "beat":{"type":"choice","options":[{"text":"Again"}]}}}),
         );
         assert_eq!(updated["ok"], true, "{updated}");
         let model = &updated["value"];

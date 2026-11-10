@@ -1232,6 +1232,42 @@ fn build_reconciled_mapping(
         .iter()
         .map(|beat| beat.id.as_str())
         .collect::<HashSet<_>>();
+    let mut option_hashes = HashMap::<&str, usize>::new();
+    for header in previous.beats.iter().filter(|b| {
+        b.conditional_branch
+            .as_ref()
+            .is_some_and(|g| g.choice_option)
+    }) {
+        *option_hashes.entry(&header.source_sha256).or_default() += 1;
+    }
+    let ambiguous_options = previous
+        .beats
+        .iter()
+        .filter(|b| {
+            b.conditional_branch
+                .as_ref()
+                .is_some_and(|g| g.choice_option)
+                && option_hashes
+                    .get(b.source_sha256.as_str())
+                    .is_some_and(|count| *count > 1)
+        })
+        .map(|b| b.id.as_str())
+        .collect::<HashSet<_>>();
+    if candidate.beats.iter().any(|after| {
+        previous
+            .beats
+            .iter()
+            .find(|before| before.id == after.id)
+            .is_some_and(|before| {
+                before
+                    .owner
+                    .as_ref()
+                    .is_some_and(|owner| ambiguous_options.contains(owner.branch_id.as_str()))
+                    && before.owner != after.owner
+            })
+    }) {
+        return Err(SceneError::InvalidMetadata);
+    }
     let same_structure = previous.beats.len() == candidate.beats.len()
         && previous
             .beats
