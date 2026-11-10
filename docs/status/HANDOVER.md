@@ -1,24 +1,29 @@
 # Current outcome handover
 
-## Selected documentation cleanup
+## Selected Choice implementation
 
-Kris selected item 4 of the [PR #122 retro](../tasks/evidence/pr122-retro.md),
-then authorized opening a PR, running relevant checks, merging and retiring unused
-branches/workspaces. Scope is the live status cleanup and necessary preservation
-and link repairs. Retro items 1–3 remain unselected.
+Kris selected [#98](https://github.com/Caldwell-41/Renpy-editor/issues/98), its six
+delivery tickets and the implement-spec workflow, then instructed the agent to
+start building. Work is `in_progress` on `codex/choice-98`, based on accepted
+integration `63221b44`. The coordinator owns this branch and live status; fresh
+ticket implementers use isolated managed worktrees. #101 is the first ready
+assignment. [The delivery record](../tasks/evidence/choice-98.md) owns the graph,
+file ownership, approved design, verification and cumulative operation limits.
 
-Work is on `codex/retro-pr-122`, based on accepted integration closeout `67ee24a6`.
-The PR targets `codex/phase3b-screen-designer` and owns final checks, merge and
-cleanup receipts. Before continuation, inspect that PR and current refs; completed
-publication is not an instruction to replay it. After merge, return the primary
-checkout to the integration branch and retire only integrated, unused task refs.
-Main, archive/recovery tags, protected stashes and unrelated work remain protected.
-There is no separate task worktree to remove at this checkpoint.
+Next action is the #101 implementer, followed by exact-diff/evidence review and a
+fresh merger assignment. #102–#104 wait for #101; #105/#106 wait for all Stage 1
+tickets. The draft PR opens after the first implementation merge. No feature,
+runtime, native or combined-review acceptance is claimed at this entry checkpoint.
 
-This documentation outcome needs no particular OS, SDK, app or package execution.
-Use repository/link/privacy and whitespace checks plus the selected ordinary PR
-validation. [The preservation record](../tasks/evidence/agent-documentation-ownership.md#status-record-cleanup-2026-11-10)
-accounts for relocated evidence. No product implementation or release is selected.
+Development is on macOS ARM64, with both supported runtime targets required. The
+linked SUNDOWN environment answered at entry but needs OS/checkout/tool discovery.
+SDK use is Mac 0/20, Windows 0/20; #101 has a maximum four Mac harness starts from
+that ceiling. No native editor/package or manual CI campaign is selected yet.
+Work is local-only until publication is verified. Resume in this same coordinating
+thread, inspect task completion and current refs, then continue the dependency graph.
+
+PR #124 completed the earlier status cleanup at `63221b44`; that work is no longer
+the live continuation. PR #122 retro items 1–3 remain unselected.
 
 <a id="shared-arithmetic-implementation-2026-11-09"></a>
 
@@ -44,8 +49,8 @@ and worker evidence/builds. Windows evidence remains on its producing host.
 #111–#120 retain the full workspace. The approved #96/#110 split delivers arithmetic
 in the current editor while leaving layout/palette, Tracks/Reel, cross-view
 selection, focus and beat drafts, and final native/human acceptance with #110.
-Arithmetic prerequisites are accepted. Choice #98 remains open. No child ticket
-is selected; refresh its state and actual blockers before work. The
+Arithmetic prerequisites are accepted. Choice #98 and its delivery graph are now
+selected above. No #110 Story child ticket is selected. The
 [release scope](../design/story-revamp/README.md#production-release-scope) and
 [live-app acceptance](../design/story-revamp/README.md#final-acceptance-in-the-live-app)
 retain settled decisions; Q13's conflict interaction and Q14's review are approved.

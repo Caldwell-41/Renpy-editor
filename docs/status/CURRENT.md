@@ -25,8 +25,8 @@ remain separate from those bounded results.
 [Story Combined #110](https://github.com/Caldwell-41/Renpy-editor/issues/110) and
 its #111–#120 slices own the approved layout/palette, Tracks/Reel, cross-view
 context and beat drafts, and assembled native/human acceptance. Arithmetic
-prerequisites are accepted; Choice #98 remains open. No Story implementation or
-release is selected. Read the live tickets before selecting a slice.
+prerequisites are accepted. Choice #98 is selected below; the full Story workspace
+and release remain unselected. Read the live tickets before selecting a Story slice.
 
 [Story Combined v1](../design/story-revamp/approval.json), its
 [conflict interaction](../design/story-revamp/README.md#approved-draft-conflict-interaction)
@@ -43,10 +43,15 @@ The [standing 3B exception](../tasks/reference/phase-2-3-delivery.md#standing-ph
 permits remaining ticket starts while preserving actual dependencies and pending
 acceptance. Historical allowances remain closed.
 
-## Selected documentation work
+## Selected Choice implementation
 
-Kris selected only item 4 of the [PR #122 retro](../tasks/evidence/pr122-retro.md):
-shorten CURRENT/HANDOVER while preserving recovery and evidence. Publication,
-required checks, merge and safe task-branch retirement are authorized. Items 1–3
-are unselected. [The maintenance record](../tasks/evidence/agent-documentation-ownership.md#status-record-cleanup-2026-11-10)
-owns preservation and verification; HANDOVER owns continuation.
+Kris selected [Choice #98](https://github.com/Caldwell-41/Renpy-editor/issues/98)
+and its #101–#106 delivery graph on a new integration branch, `codex/choice-98`.
+Delivery is `in_progress`; #101 is the first dependency-ready assignment.
+[The delivery record](../tasks/evidence/choice-98.md) owns assignments,
+verification and operation limits. No Choice implementation or runtime acceptance
+is claimed yet. Use the approved Story Combined v1 controls while leaving the
+full Story workspace with #110.
+
+[PR #124](https://github.com/Caldwell-41/Renpy-editor/pull/124) merged the selected
+status cleanup at `63221b44`. Other PR #122 retro items remain unselected.
