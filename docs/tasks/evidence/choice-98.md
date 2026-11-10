@@ -7,9 +7,10 @@ with the implement-spec workflow and instructed the agent to start building on
 2026-11-10. The spec owns requirements; #101–#106 own bounded acceptance.
 Delivery is `in_progress`. #101–#105 are integrated with public-authoring,
 both-target SDK and automatic CI evidence. The Stage 1 runtime gate is complete on
-`4339ccfc`. #106 is integrated locally with portable checks and 26/27 outcomes on
-its last Mac SDK candidate. Rollback/New Game and the corrected final driver remain
-unqualified. These bounded results do not establish combined acceptance.
+`4339ccfc`. #106 and all four review corrections are integrated locally through
+`0b8b264f`. Focused portable evidence passes for the identical worker material.
+The last Mac SDK candidate passed 26/27; rollback/New Game and the corrected final
+driver remain unqualified. These bounded results do not establish combined acceptance.
 
 Integration branch `codex/choice-98` starts at accepted integration
 `63221b44d72c1c100815e9e638cbec5133ffc1eb` from
@@ -25,10 +26,10 @@ contracts, their production Story controls and affected tests. #103 added
 Choice-owned narration/Character prompts through the same owners. #104 delivered
 mixed Hide/Show disabled semantics through existing source, runtime and
 generated-choice-screen owners. All implementer/test assignments are complete.
-#105 Windows passed and #106 is integrated locally. The coordinator owns
-integration/status and next assigns one isolated review-fix implementer for the
-four defects recorded below. Windows #106 follows correction and publication;
-Mac #106 is stopped at its exhausted four-start allowance.
+#105 Windows passed; #106 and its review corrections are integrated locally.
+The fresh merger returns sole integration/status ownership to the coordinator for
+publication, exact-candidate CI and test-only Windows #106 dispatch. No worker or
+test owner remains active. Mac #106 is stopped at its exhausted four-start allowance.
 
 ## Dependencies and approved design
 
@@ -96,30 +97,29 @@ protected native-session limits remain separate and unchanged.
 
 ## Next action
 
-Entry records passed `python3 scripts/validate.py` for 1,883 repository files and
-`git diff --check`. At entry, CURRENT was 317 words and HANDOVER was 901 words;
-both were within their maintenance targets. No product tests or runtime operations
-ran at entry.
+The coordinator next publishes the corrected local candidate. The
+[review-correction merge](#review-corrections-integration) owns exact tree equality,
+focused result admission and source-comparison limits. The unpublished checkpoint
+includes #106 integration, its review record and the four corrections; remote
+`0a81ae24` does not contain them. Audit automatic CI for the published candidate and dispatch test-only Windows #106
+under the selected four-start allowance.
+Mac remains stopped pending Kris's explicit allowance change. Prepare that concrete
+request after authorized candidate preparation; the proposed two further Mac
+starts are not approved.
 
-The fresh #106 merger integrated `e6ab0aaf` in `8fe1da86`; the detailed
-[return below](#106-integration-and-handoff) owns tree equality and scoped reuse.
-The coordinator owns integration/status and assigns the fresh correction worker
-under [the two-axis review](#two-axis-review-and-correction-assignment). Correct
-those defects before publication and test-only Windows #106. Mac remains stopped
-pending an explicit allowance change. #31/#55 remain unselected styling/template tasks;
-#98/#104's runtime feature does not change their prerequisites or acceptance.
-Retain all Choice worktrees and unique evidence. #98/#106 and the remaining delivery
-tickets stay open for combined review and closure. Rendered comparison,
-native/human evidence, final combined review/fixes and final validation selection
-remain pending.
+Windows uses its existing T3-prepared dedicated branch, currently clean at
+`0a81ae24`, after clean/idle, ancestry and offline preflight checks. Safely
+fast-forward to the exact published candidate and select all 27 picked outcomes
+with the final vbox driver. Its owner makes no source fixes. Preserve the protected
+registered root, all Choice worktrees and unique evidence. #31/#55 remain unselected
+styling/template tasks. #98/#106 stay open and PR #125 stays draft. Rendered
+comparison, native/human evidence and final validation selection remain pending.
 
-The initial draft PR checkpoint selects automatic Repository quality only in
+The draft checkpoint selects automatic Repository quality only in
 `.github/validation-plan.json`, targeting `codex/phase3b-screen-designer`.
-Connected-host Windows SDK qualification is a separate requirement,
-and the whole spec's final automated/native qualification selection still needs
-completion before review readiness. A green draft checkpoint cannot establish
-#98 acceptance. SUNDOWN has a registered Loomlight project; its test assignment
-must verify actual OS, toolchains, ownership and candidate before execution.
+Connected-host Windows SDK qualification is separate. The whole spec's final
+automated/native selection still needs completion before review readiness. A green
+draft checkpoint cannot establish #98 acceptance.
 
 ## #101 implementation return
 
@@ -1001,3 +1001,83 @@ Additional Mac starts still require Kris's approval. Preserve all retained failu
 the #104 duplicate-receipt limitation and the protected recovery. #98/#106 and
 PR #125 remain open/draft; rendered/native/human proof, final validation selection
 and combined acceptance remain pending.
+
+## Review corrections integration
+
+The fresh merger received sole integration ownership at
+`a7d3bf56a26fa5bf4f83113ff9bbc81caf818540`. Correction worker
+`0606d70858d07154874cf59387bbb313c7a05e62` descends directly from that base.
+Both tracked checkouts were clean; only their retained dependency symlinks were
+untracked. The repository-local noreply identity was verified. Normal merge
+`0b8b264f8025f5f626eade7748260ac1dad1d7f0` completed without conflicts or
+implementation edits. Its complete tree equals the worker tree,
+`815466fce82e51c1cf4d2fd9e29c45f8684a2e4c`. This successor changes only
+CURRENT, HANDOVER and this record; all other files equal the worker.
+
+The original Standards and Spec reports remain separate. Their overlapping cache
+finding gives four distinct P2 defects, all corrected in this worker:
+
+- Runtime fallback previously depended on Scene order. The existing owner now
+  caches availability-only and picked requirements separately and protects each
+  dependent Choice. The public save/list/apply test covers both Scene orders with
+  missing, legacy and picked helpers. It reproduces the defect and passes afterward.
+- Changed-source commands could recreate a missing helper. The existing owner now
+  inspects accepted source dependencies before allowing first creation or first
+  picked upgrade. The final expanded public test covers legacy/root/nested edits,
+  insertion, destination creation, another Scene's adoption and downgraded helpers.
+  Refusal preserves source/map/project bytes, history flags and missing helpers.
+  The separate first-adoption/upgrade test retains shared Undo/Redo and stable IDs.
+- Picked edits rebuilt unrelated newline and header bytes. Existing menu rows and
+  selection records now retain their bytes; policy changes patch the mode token,
+  and first adoption uses each row's newline. The mixed-LF/CRLF public test checks
+  caption, prompt and policy edits, trivia, IDs, no-op, Undo/Redo and reopen.
+- The renderer omitted legal Hide picked continuation positions. Its existing
+  termination predicate now agrees with core. Actual Add Beat controls cover root
+  and nested bodies, default final Return and explicit shared positions. The full
+  production controller accepts all three positions and proves exact Undo.
+
+The optional parsed-offset typing suggestion is deferred. A typed parsed option
+would require wider public-payload/parser/mapping plumbing; it is not a confirmed
+behavior defect. The parent accepted this bounded disposition. No architecture
+expansion or second runtime/history owner was added. DATA_MODEL and ARCHITECTURE
+retain the worker's technical clarifications. Approved lab/design source is unchanged.
+
+### Focused proof and reuse limits
+
+The merger admitted retained Cargo logs with the existing result gate. Final
+production passed 78 logic tests, the final expanded missing-helper test, the
+existing destination transaction test and ten availability tests, with zero failures
+or ignored tests. The final renderer file passed twenty tests without skips;
+typecheck passed. The production-main/controller/ApplicationHost journey passed
+thirteen stages and 284 requests, exited zero and removed its fixture. Expected
+red logs remain retained. No full frontend suite ran on this corrected tree;
+the earlier 396-test CI belongs to published `0a81ae24` only.
+
+The complete merge tree proves identical material. No passed test or Help export
+was repeated for a merge SHA. The worker's temporary `choice98-review-fixes/handoff.md`,
+`runtime-material-comparison.json`, `controller/result.json` and named logs own
+commands and candidate scope. The merger's `merge/integration-trees.json` and
+`merge/scoped-reuse.json` retain the independent tree/result audit. The private
+handoff preserves BOM/setup and external-file history-boundary details without
+copying raw logs here. Original review reports remain unchanged.
+
+All 29 runtime string roles from the fresh controller match the prior frozen SDK
+normal-input fixtures after generated-identity normalization; the picked adapter
+bytes match exactly. The merger independently checked that comparison. SDK fixtures,
+qualifier, final vbox driver, adapters and schema-14 admission bytes are unchanged.
+Inspection, helper admission and mixed-source preservation changed authoring
+behavior; the renderer exposes already legal positions. This source comparison
+establishes no new runtime qualification. Prior runtime results retain their exact
+candidate/outcome scope, including the failed 26/27 result and unqualified final
+driver. Rollback/New Game remains unproved.
+
+Rust formatting, whitespace and repository validation passed at integration.
+The live status records meet their maintenance targets; the protected HANDOVER
+suffix remains byte-identical. The merger used no SDK start, browser, native editor,
+package, manual CI, push, tracker/PR mutation, cleanup or signing/security change.
+Shared SDK use remains Mac 15/20, Windows 6/20, zero reservations. Mac stays stopped
+at #106 4/4; handoffs grant no further start. The coordinator resumes sole ownership
+for publication, automatic CI, Windows dispatch and a concrete Mac allowance request.
+The [#104 receipt-retention limit](#104-receipt-retention-limit) remains unchanged.
+#98/#106 and PR #125 remain open/draft; rendered/native/human proof and final
+validation selection remain pending.

@@ -46,17 +46,19 @@ acceptance. Historical allowances remain closed.
 ## Selected Choice implementation
 
 Kris selected [Choice #98](https://github.com/Caldwell-41/Renpy-editor/issues/98)
-and its #101–#106 delivery graph on a new integration branch, `codex/choice-98`.
-Delivery is `in_progress` in [draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125).
+and #101–#106 on `codex/choice-98`, `in_progress` in
+[draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125).
 #101–#105 have public-authoring, both-target SDK and automatic CI evidence.
-#106 picked-state is integrated locally in `8fe1da86`; its last Mac run passed
-26/27 outcomes, including save and fresh-process Load. Rollback/New Game and the
-corrected final driver remain unqualified. #106 used all four Mac starts and is
-stopped pending approval. Four review defects need fixes before Windows qualification.
-[The delivery record](../tasks/evidence/choice-98.md#106-integration-and-handoff)
-owns scoped reuse, the #104 receipt-retention limit and next actions. SDK use is
-Mac 15/20 and Windows 6/20, zero reservations. Published `0a81ae24` passed automatic
-CI; the local integration needs publication and its own CI. Rendered comparison,
-native/human evidence, review fixes and final validation remain pending. #98 and
-#106 stay open and draft. Approved Story Combined v1 applies; the full workspace
-remains with #110. Other PR #122 retro items remain unselected.
+#106 and all four review corrections are integrated locally through `0b8b264f`.
+Focused core, renderer and controller evidence passes for identical worker material.
+[The delivery record](../tasks/evidence/choice-98.md#review-corrections-integration)
+owns fixes, scoped reuse and the #104 receipt limit.
+
+The last Mac SDK run passed 26/27, including save/close/new-process Load.
+Rollback/New Game and the final driver remain unqualified. Mac is stopped at
+#106 4/4; shared use is Mac 15/20, Windows 6/20, zero reservations.
+The coordinator next publishes the corrected candidate for automatic CI and
+test-only Windows #106. Additional Mac starts need Kris's approval.
+Published `0a81ae24` CI covers that earlier candidate. Rendered comparison,
+native/human evidence and final validation remain pending. #98/#106 stay open;
+full Story #110 and other PR #122 retro items remain unselected.

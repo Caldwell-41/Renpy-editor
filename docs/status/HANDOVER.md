@@ -6,50 +6,55 @@ Kris selected [#98](https://github.com/Caldwell-41/Renpy-editor/issues/98) and
 #101–#106 under implement-spec. Delivery remains `in_progress` on
 `codex/choice-98` in [draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125).
 #101–#105 have public-authoring, both-target SDK and automatic CI evidence.
-[The delivery record](../tasks/evidence/choice-98.md#106-integration-and-handoff)
-owns current verification, scoped reuse and cumulative limits.
+[The delivery record](../tasks/evidence/choice-98.md#review-corrections-integration)
+owns the four review fixes, scoped reuse and next actions;
+[operation limits](../tasks/evidence/choice-98.md#verification-and-operation-limits)
+remain cumulative.
 
-Normal merge `8fe1da8687594db110c7489d19f06f94d3e37ece` integrates #106 worker
-`e6ab0aaf0376ca6f2b69b0536077a652d08c91cb` without conflicts or implementation
-edits. Its complete tree equals the worker's. This local successor changes only
-CURRENT, HANDOVER, Choice evidence, ARCHITECTURE and UI. Approved lab/design source
-is unchanged. Picked options use source-backed UUIDs, the existing native Choice
-owner and ordinary saved Ren'Py state. Portable authoring checks pass within their
-recorded candidate scope.
+Normal merge `0b8b264f8025f5f626eade7748260ac1dad1d7f0` integrates correction
+worker `0606d70858d07154874cf59387bbb313c7a05e62` from `a7d3bf56` without conflicts
+or implementation edits. Its complete tree equals the worker's. This documentation
+successor changes only CURRENT, HANDOVER and Choice evidence. Canonical contracts
+equal the worker's; approved lab/design source, SDK fixtures, qualifier, adapter
+and schema-14 admission remain unchanged. The coordinator resumes sole
+integration/status ownership. Workers and test owners are complete.
 
-#106 Mac start 4 on `49e44c12` passed 26/27 selected outcomes, including actual save,
-process exit and new-process Load with matching artifact hashes. Rollback/New Game
-failed before game entry because enabled Load covered Start. The final vbox driver
-fix is unqualified. All four starts remain charged, retained and cleaned. Mac is
-STOPPED at #106 4/4; SDK totals are Mac 15/20, Windows 6/20, zero reservations.
-Shared capacity and successor assignments do not renew the exhausted Mac allowance.
+The fixes make runtime fallback capability-specific, restrict helper creation and
+upgrade to first adoption, preserve mixed newlines/header trivia, and expose legal
+Hide picked continuation positions. Retained final-production evidence passes
+78 core logic tests, the final expanded missing-helper test, the existing destination
+transaction test, ten availability tests, twenty renderer tests and typecheck.
+The complete production-main/controller/public-core journey passes thirteen stages
+and 284 requests with cleanup. No full frontend suite ran for this corrected tree.
+The optional parsed-offset typing refactor is deferred as wider mapping/payload work,
+not a confirmed defect. Original Standards and Spec reports remain separate.
 
-Windows #105 passed its exact `0a81ae24` candidate, all ten SDK outcomes and a fresh
-controller. Exact-head automatic CI also passed on that published head. The local
-#106 integration needs publication and its own CI. A later audit found #104's
-duplicate controller receipt corrupt; the checksum-matching frozen SDK reference
-and original at-time audit remain retained. [The correction](../tasks/evidence/choice-98.md#104-receipt-retention-limit)
-limits current availability without overwriting or requalifying evidence.
+Mac start 4 on `49e44c12` passed 26/27, including actual save, process exit and
+new-process Load. Rollback/New Game failed before entry because Load covered Start.
+The final vbox driver remains unqualified. All four starts stay charged, retained
+and cleaned. Mac is STOPPED at #106 4/4; shared use is Mac 15/20, Windows 6/20,
+zero reservations. Neither this handoff nor shared capacity permits a fifth Mac
+harness or standalone child. A proposal for two more starts within 17/20 needs
+Kris's approval. Source comparison of 29 runtime roles preserves earlier normal-input
+evidence's scope; it establishes no final runtime qualification.
 
-Resume the same coordinator thread for a fresh isolated review-fix implementer.
-The [two-axis review](../tasks/evidence/choice-98.md#two-axis-review-and-correction-assignment)
-identified four defects in runtime fallback, helper admission, source preservation
-and insertion positions. The fixer owns affected production/tests only; the
-coordinator retains integration/status. After fixes and fresh merger verification,
-publish and assign test-only Windows #106. Use its T3-prepared branch after clean/idle,
-ancestry and offline host/toolchain/official-SDK preflight. Safely fast-forward to
-the exact published candidate; select all 27 picked outcomes, including save/close/
-new-process Load, rollback/New Game and the intended negative. Windows may use at
-most four starts from 6/20. Its test owner makes no source fixes. Mac stays stopped
-while Windows continues. The coordinator may propose up to two additional Mac
-starts, within 17/20 shared use, but that proposal is not authorization.
+Published `0a81ae24` passed Windows #105 and exact-head automatic CI. The local
+#106 integration, review record and corrections need publication and their own CI.
+The [#104 duplicate-receipt limit](../tasks/evidence/choice-98.md#104-receipt-retention-limit)
+remains unchanged; preserve originals and the frozen reference.
 
-All previous workers/test owners are complete. The coordinator resumes sole
-integration/status ownership. Preserve all worker checkouts, unique evidence,
-`app/node_modules` and the recovery below. No cleanup, native editor/package or
-manual CI campaign is selected. #98/#106 stay open and draft. Review fixes,
-rendered comparison, native/human evidence and final validation selection
-remain pending. Full Story #110 and #31/#55 styling/canvas remain separate.
+Resume the same coordinator thread. Publish, then dispatch fresh test-only Windows
+#106 on its existing T3-prepared dedicated branch, currently clean at `0a81ae24`.
+Verify clean/idle ownership, ancestry and offline host/toolchain/official-SDK preflight;
+safely fast-forward to the exact published candidate. Use the final vbox driver and
+all 27 outcomes, including save/close/new-process Load, rollback/New Game and the
+intended negative. At most four Windows starts may run from 6/20; its owner makes
+no source fixes. The registered root stays unchanged. Request additional Mac
+allowance only after authorized candidate preparation. Preserve worktrees, unique
+evidence, `app/node_modules` and recovery below. No cleanup, native editor/package
+or manual CI campaign is selected. #98/#106 remain open/draft; rendered comparison,
+native/human evidence and final validation selection remain pending. Full Story
+#110 and #31/#55 styling/canvas remain separate.
 
 <a id="shared-arithmetic-implementation-2026-11-09"></a>
 
