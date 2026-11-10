@@ -21,9 +21,8 @@ integration/status ownership. Workers and test owners are complete.
 
 The fixes make runtime fallback capability-specific, restrict helper creation and
 upgrade to first adoption, preserve mixed newlines/header trivia, and expose legal
-Hide picked continuation positions. Retained final-production evidence passes
-78 core logic tests, the final expanded missing-helper test, the existing destination
-transaction test, ten availability tests, twenty renderer tests and typecheck.
+Hide picked continuation positions. The delivery record retains
+passing focused core/renderer checks and typecheck.
 The complete production-main/controller/public-core journey passes thirteen stages
 and 284 requests with cleanup. Exact-head automatic CI on published `9d229ea4`
 passed 397 frontend tests and all eighteen browser/dispatch fixtures.
@@ -46,14 +45,23 @@ tests and eighteen selected browser/controller fixtures. Prior failures and the
 [#104 duplicate-receipt limit](../tasks/evidence/choice-98.md#104-receipt-retention-limit)
 remain retained. These bounded results do not establish combined acceptance.
 
-The coordinator owns publication and successor CI audit. Mac #106 used 5/6 starts;
-shared use is Mac 16/20, Windows 7/20, zero reservations. The second additional Mac
-start remains unused and conditional on a diagnosed failure requiring correction.
-No SDK repeat is needed for these coordinator-only changes. No worker remains
-active. Preserve worktrees, evidence, `app/node_modules` and protected recovery
-below. Native editor/package and manual CI campaigns are not yet selected.
-#98/#106 remain open/draft; rendered comparison, native/human evidence and final
-validation selection remain pending. Full Story #110 and #31/#55 remain separate.
+Automatic CI on exact `f395f158` passed; the latest run is `42897808214`, attempt 1,
+with 397 frontend passes, eighteen browser/controller fixtures and no review findings.
+Rendered inspection found clipped/overlapping Choice prompt and unknown-state text
+in the small preview. Matching-content visual conformance remains incomplete.
+The authorized "Choice Spec - readable Choice preview" chat owns new mocks and
+approval evidence only, based on `f395f158`. Await its exact approved revision
+before coordinator implementation; preserve production and the approved reference.
+The private rendered-review handoff retains captures, setup failures, fingerprint
+proof, the design-thread link and its managed worktree identity.
+
+One existing final `production-scaffold.yml` campaign is now selected in the branch
+validation plan, but is not reserved or dispatched until the preview correction is
+settled. Its Preflight, Windows x64 and macOS ARM64 jobs are required. Shared SDK
+use remains Mac 16/20, Windows 7/20, zero reservations; no second #106 extra start
+was used. Preserve all worktrees, evidence, `app/node_modules` and recovery below.
+#98/#106 and PR #125 remain open/draft. Native/human evidence and final qualification
+remain pending; full Story #110 and #31/#55 remain separate.
 
 <a id="shared-arithmetic-implementation-2026-11-09"></a>
 

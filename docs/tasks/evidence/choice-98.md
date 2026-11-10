@@ -28,7 +28,9 @@ Choice-owned narration/Character prompts through the same owners. #104 delivered
 mixed Hide/Show disabled semantics through existing source, runtime and
 generated-choice-screen owners. All implementer/test assignments are complete.
 #105 and #106 Windows assignments passed. The coordinator owns integration/status;
-no worker or test owner remains active. On 2026-11-11, Kris approved up to two
+all implementation/test assignments are complete. The coordinator opened the
+authorized separate preview-design chat after finding clipped Choice text. It owns
+only new mocks and approval evidence. On 2026-11-11, Kris approved up to two
 additional Mac #106 starts, extending its allowance to six within shared 17/20.
 The coordinator completed the first additional invocation, with all 27 outcomes
 passing. The second additional start remains unused.
@@ -93,8 +95,9 @@ to `9d229ea4` after clean/idle and ancestry checks; the protected root stayed
 unchanged. No Windows retry is needed. The coordinator owns shared counters.
 Completed assignments retain consumed starts; handoffs grant no new allowance.
 
-Native editor/package and manual CI campaigns need recorded selection and limits
-before starting; none has started. Routine compilation, focused tests, review and
+The final coherent-candidate CI package campaign is selected below, with one
+workflow invocation and one target campaign per supported host. Native physical
+input/human sessions remain separate and have not started. Routine compilation, focused tests, review and
 automatic PR checks need no numerical allowance. Historical arithmetic and
 protected native-session limits remain separate and unchanged.
 
@@ -107,17 +110,20 @@ focused result admission and source-comparison limits. Exact-head CI and Windows
 Kris approved the bounded two-start Mac extension on 2026-11-11. The first
 additional run passed all 27 picked outcomes on `ae057e3a`; its independent audit
 and limits are [recorded below](#mac-106-final-qualification). Publish the result
-and audit automatic CI on the successor. Rendered comparison, native/human evidence
-and final validation selection remain open.
+and audit automatic CI on the successor. That audit passed on `f395f158`; the
+remaining rendered comparison, native/human evidence and selected final package
+qualification are [recorded below](#final-coherent-candidate-qualification-selection).
 
-Windows's dedicated branch is clean at `9d229ea4`; no worker remains active.
+Windows's dedicated branch is clean at `9d229ea4`. Only the new preview-design
+chat is active; implementation/test workers remain complete.
 Preserve the protected
 registered root, all Choice worktrees and unique evidence. #31/#55 remain unselected
 styling/template tasks. #98/#106 stay open and PR #125 stays draft. Rendered
 comparison, native/human evidence and final validation selection remain pending.
 
-The draft checkpoint selects automatic Repository quality only in
-`.github/validation-plan.json`, targeting `codex/phase3b-screen-designer`.
+The initial draft selected automatic Repository quality only. The final plan now
+also requires the existing `production-scaffold.yml` Preflight, Windows x64 and
+macOS ARM64 jobs, targeting `codex/phase3b-screen-designer`.
 Connected-host Windows SDK qualification is separate. The whole spec's final
 automated/native selection still needs completion before review readiness. A green
 draft checkpoint cannot establish #98 acceptance.
@@ -1210,3 +1216,77 @@ automatic checks, not final native/human acceptance.
 #98/#106 and PR #125 remain open/draft. Publish this result without replaying SDK
 for coordinator-only changes. Audit successor CI; rendered comparison, native/human
 evidence and final validation selection remain pending.
+
+## Final coherent-candidate qualification selection
+
+The coordinator audited exact-head Repository quality run `42897808214`, attempt 1,
+on `f395f158cbb6df11eb733316cf6ccc4c498c1d10`. The tested PR merge was `d77140a`.
+All four executed jobs succeeded; five unselected specialist jobs were skipped.
+Logs confirm 397 frontend passes with zero failures/skips, all eighteen selected
+browser/controller fixtures, production build, Rust formatting, offline Help/core
+checks and repository validation over 1,890 files. The finish reporter published
+`Loomlight validation: success` for that exact candidate. Earlier duplicate run
+`42897755145` also completed successfully. There are no submitted reviews or inline
+review threads in the audit snapshot. This does not establish unselected native or
+human acceptance.
+
+Under the selected #98 implementation and WORKFLOW's coherent-candidate milestone,
+choose one final `production-scaffold.yml` invocation, including expected failures.
+Its existing Preflight, Windows x64 and macOS ARM64 jobs are required in the branch
+validation plan. Request success-only package upload for prepared human review.
+Use the existing workflow unchanged; do not replay protected historical native
+sessions, credentials or unrelated local profiles. CI packages do not establish
+approved local Mac signing or human input.
+
+One platform job is one coordinated final SDK/package campaign, with its existing
+compile/lint/runtime/probe children retained individually. Reserve one shared SDK
+place per target before dispatch. Entry use is Mac 16/20 and Windows 7/20; if both
+target campaigns start, use becomes Mac 17/20 and Windows 8/20. The selected ceiling
+is one invocation per target, with no automatic retry or replacement campaign.
+An uncertain dispatch retains reservations until its actual execution is resolved.
+A preflight failure consumes the CI invocation but consumes no target SDK start
+if evidence confirms neither platform campaign executed. This does not spend or
+renew the unused conditional #106 correction start. Any further Mac SDK operation
+requires reassessment against the approved shared 17/20 bound.
+
+Before dispatch, finish the covered Choice-control comparison using approved
+Combined v1 source `6ecf6470` and an actual-core accepted workspace at the current
+production source. Use dark 1100 by 720 at scale 1 for both references; check the
+current controls at 720 by 850 too. Preserve the approved reference and record
+workspace-layout/palette differences as #110 scope, without claiming full Combined
+conformance. This browser check supplies rendered, synthetic-input evidence only.
+Native physical-input/human evidence remains a separate open gate.
+
+### Rendered finding and design handoff
+
+The pinned reference's normal approval guard admitted exact Combined v1 source
+`6ecf6470` and its recorded fingerprint. Current production `f395f158` rendered
+an accepted real-core public workspace. Checks found all three Picked options
+values, simultaneous narration prompt, three option controls and all four Then
+endings, with zero mutation calls, runtime errors or horizontal overflow at dark
+1100 by 720 and 720 by 850, scale 1. These are synthetic Chromium checks only.
+
+Inspection of all three captures found a blocking preview readability defect.
+The fitted game canvas is about 110 pixels high. The Choice prompt and unknown
+picked-state/option text overlap the existing unknown-state notice and are clipped.
+The presence/overflow checks do not establish readable presentation. The reference
+used its original sample rather than identical content, so matching-content visual
+conformance also remains incomplete. Full Combined workspace/palette differences
+remain #110 scope; this new finding concerns the selected Choice preview.
+
+The coordinator retained three private preparation/check failures: missing reference
+captures, a copy placed one directory too high, and a nonexistent option selector.
+After reassessment, offline approval loading verified exact paths/fingerprint; the
+captured DOM identified the actual selector. The corrected check completed. All
+owned browsers/servers closed. No product source, SDK, native app or package ran.
+Private raw evidence, captures and an independently read-back manifest are retained.
+
+Under Kris's standing authorization, the separate chat "Choice Spec - readable
+Choice preview" is preparing several narrow corrections for his approval. It is
+based on `f395f158`, owns only new draft/approval evidence and must return the
+approved source/captures before coordinator implementation. Existing approved lab
+source and production remain unchanged. The package campaign is selected but
+**not reserved or dispatched** until this correction is settled. Shared SDK use
+remains Mac 16/20 and Windows 7/20, zero reservations. #98 and PR #125 stay open/draft;
+preview correction, rendered/native/human proof and final package qualification
+remain pending.
