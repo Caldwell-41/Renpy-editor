@@ -54,8 +54,10 @@ lint and named normal-play children; retain each child's result without charging
 them again as harness starts. This allows focused coverage across six tickets and
 bounded corrections. The #101 implementer may use at most four Mac invocations
 from the shared ceiling after cheap fixture preflight and official pinned-SDK
-verification. Windows runs remain coordinator assigned. Usage is Mac 3/20,
-Windows 0/20, zero reservations.
+verification. A separate #101 Windows test assignment may use at most four
+Windows harness starts from the shared ceiling, after host/toolchain and fixture
+preflight. No other Windows writer or SDK campaign is assigned concurrently.
+Usage is Mac 3/20, Windows 0/20, zero reservations at dispatch preparation.
 
 Native editor/package and manual CI campaigns need recorded selection and limits
 before starting; none has started. Routine compilation, focused tests, review and
@@ -75,6 +77,14 @@ of `codex/choice-98` and live status on the merger's return. Next actions are th
 draft PR, Windows qualification and dependency-ready ticket assignments, followed
 by combined review. The worker's managed worktree and temporary evidence remain
 retained. No acceptance or ticket closure follows from this merge.
+
+The initial draft PR checkpoint selects automatic Repository quality only in
+`.github/validation-plan.json`, targeting `codex/phase3b-screen-designer`.
+Connected-host Windows SDK qualification is a separate pending requirement,
+and the whole spec's final automated/native qualification selection still needs
+completion before review readiness. A green draft checkpoint cannot establish
+#98 acceptance. SUNDOWN has a registered Loomlight project; its test assignment
+must verify actual OS, toolchains, ownership and candidate before execution.
 
 ## #101 implementation return
 
