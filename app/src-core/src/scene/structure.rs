@@ -400,16 +400,6 @@ fn scene_body_end(source: &[u8]) -> Result<usize, SceneError> {
     Ok(source.len())
 }
 
-fn option_body(body: &Body<'_>, beats: &[SceneBeat]) -> bool {
-    body.owner
-        .as_ref()
-        .and_then(|o| beats.iter().find(|b| b.id == o.branch_id))
-        .is_some_and(|b| {
-            b.conditional_branch
-                .as_ref()
-                .is_some_and(|g| g.choice_option)
-        })
-}
 fn trivia(beat: &SceneBeat) -> bool {
     beat.conditional_branch.is_none()
         && matches!(&beat.payload, BeatPayload::CustomCode { source, .. } if source.trim().is_empty() || source.trim_start().starts_with('#'))
@@ -436,7 +426,7 @@ fn terminal(beat: &SceneBeat, beats: &[SceneBeat]) -> bool {
         |g| !logic::group_may_continue(&g.group_id, beats, 0),
     )
 }
-fn root_may_continue(source: &[u8], beats: &[SceneBeat]) -> Result<bool, SceneError> {
+pub(super) fn root_may_continue(source: &[u8], beats: &[SceneBeat]) -> Result<bool, SceneError> {
     let end = scene_body_end(source)?;
     Ok(!beats
         .iter()
@@ -498,14 +488,6 @@ fn apply(
         } => {
             validate_payload(&payload, loaded)?;
             let body = qualify_body(source, beats, &body)?;
-            if option_body(&body, beats)
-                && matches!(
-                    payload,
-                    BeatPayload::Choice { .. } | BeatPayload::Call { .. }
-                )
-            {
-                return Err(SceneError::OpaqueBoundary);
-            }
             let (index, insertion) = match position {
                 Position::Before { anchor } => {
                     let beat = qualified_node(&body, &anchor)?;
@@ -589,6 +571,23 @@ fn apply(
             }
             let mut output = source.to_vec();
             output.splice(insertion..replacement_end, rendered.bytes());
+            if matches!(payload, BeatPayload::Choice { .. }) {
+                let (_, _, parsed) = parse_scene(
+                    scene,
+                    &output,
+                    Some((
+                        &loaded.project,
+                        &loaded.authoring,
+                        &loaded.source_map.owned_screens,
+                    )),
+                )?;
+                if !parsed
+                    .iter()
+                    .any(|b| b.start == offset && matches!(b.payload, BeatPayload::Choice { .. }))
+                {
+                    return Err(SceneError::InvariantBlocked);
+                }
+            }
             Ok((output, forced))
         }
         BodyEdit::Update { id, body, payload } => {

@@ -1142,3 +1142,16 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** defaults, literal assignments, formula results, conditions, inert
   samples, shared history and reopen retain the sign through public operations.
 - **Evidence:** [Terra audit and corrections](../tasks/evidence/arithmetic-review.md#audited-terra-findings-and-sol-corrections-2026-11-10).
+
+## H81. Standalone SDK fixture omits the editor's default condition variable
+
+- **Class/search:** harness; Choice nested condition, `NameError`, missing `flag`.
+- **Cause/correction:** the production condition builder selected the first existing
+  project variable. The standalone SDK game declared a different fixture variable.
+  Select the declared variable through the real control before freezing the source.
+- **Regression:** the [controller journey](../../app/tests/choice-body-core.dispatch.mjs)
+  selects `choice_flag`; [offline admission](../../app/scripts/qualify-choice-body.py)
+  requires its expected typed condition before reserving an SDK invocation.
+- **Evidence:** [Choice #102](https://github.com/Caldwell-41/Renpy-editor/issues/102)
+  owns the requirement. Producing-host logs retain the failed play, successful
+  compile/lint children and cleanup separately from the corrected candidate.

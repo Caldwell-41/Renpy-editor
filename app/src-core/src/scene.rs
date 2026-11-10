@@ -3596,7 +3596,21 @@ fn parse_condition_group(
         while next < lines.len() {
             let (start, end, body) = lines[next];
             if body.trim().is_empty() || body.trim_start().starts_with('#') {
-                let trivia = custom(start, end, body);
+                let mut trivia = custom(start, end, body);
+                if source_version >= 10
+                    && (body.trim().is_empty() || indentation(body) >= indent + 4)
+                {
+                    trivia.nesting = Some(ParsedNesting::Child {
+                        group_start,
+                        branch_start,
+                    });
+                } else if source_version >= 10 && indentation(body) == indent {
+                    trivia.nesting =
+                        parent.map(|(group_start, branch_start)| ParsedNesting::Child {
+                            group_start,
+                            branch_start,
+                        });
+                }
                 result.push(trivia);
                 next += 1;
                 continue;
@@ -3630,6 +3644,8 @@ fn parse_condition_group(
                     loaded,
                     lexical,
                     Some((group_start, branch_start)),
+                    depth + 1,
+                    source_version,
                 ) {
                     result.extend(menu);
                     next = after;
@@ -3785,7 +3801,9 @@ fn parse_scene_mode(
             continue;
         }
         if source_version >= 9 {
-            if let Some((next, menu)) = choice::parse(&lines, index, 4, loaded, &lexical, None) {
+            if let Some((next, menu)) =
+                choice::parse(&lines, index, 4, loaded, &lexical, None, 0, source_version)
+            {
                 beats.extend(menu);
                 index = next;
                 continue;

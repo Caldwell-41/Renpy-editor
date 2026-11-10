@@ -176,7 +176,7 @@ def validate_bundle(root):
         record = manifest['metadata'][key]; require(record['path'] == name, 'wrong sidecar path')
         metadata[key] = load_json(verify(record).read_text(encoding='utf-8'))
     project, mapping, authoring = (metadata[key] for key in ('project', 'sourceMap', 'authoring'))
-    require(mapping['schemaVersion'] in (8, 9) and project['projectId'] == mapping['projectId'] == authoring['projectId'], 'wrong metadata identity')
+    require(mapping['schemaVersion'] in (8, 9, 10) and project['projectId'] == mapping['projectId'] == authoring['projectId'], 'wrong metadata identity')
     entry, dialog, asset = (manifest[key] for key in ('entry', 'dialog', 'asset'))
     require(project['sdk'] == {'adapter':'renpy-8.5.3','version':'8.5.3'} and project['entrySceneId'] == entry['id'], 'wrong normal entry')
     require(any(s['id'] == entry['id'] and s['sourcePath'] == entry['sourcePath'] and s['technicalLabel'] == entry['technicalLabel'] for s in project['scenes']), 'missing Scene owner')

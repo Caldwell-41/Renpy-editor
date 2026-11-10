@@ -24,7 +24,11 @@ CASES = [('continuation', 'yes', 'CHOICE_101_YES flag=True shared=1'),
          ('continuation', 'no', 'CHOICE_101_NO flag=False shared=1'),
          ('return', 'return_option', 'CHOICE_101_RETURN caller=none shared=0'),
          ('jump', 'jump_option', 'CHOICE_101_JUMP target=1 shared=0'),
-         ('returnCaller', 'return_to_caller', 'CHOICE_101_RETURN caller=resumed shared=0')]
+         ('returnCaller', 'return_to_caller', 'CHOICE_101_RETURN caller=resumed shared=0'),
+         ('recursive', 'nested_normal', 'CHOICE_102_NORMAL call=returned inner=joined outer=joined'),
+         ('recursive', 'nested_jump', 'CHOICE_102_JUMP target=entered shared=0'),
+         ('recursive', 'nested_return', 'CHOICE_102_RETURN caller=none shared=0'),
+         ('recursiveCaller', 'nested_return_caller', 'CHOICE_102_RETURN caller=resumed shared=0')]
 
 
 def digest(data):
@@ -36,13 +40,17 @@ def preflight(args):
     assert evidence['passed'] is True and evidence['actualCore'] is True and evidence['actualMain'] is True
     assert evidence['cleanupComplete'] is True
     runtime = evidence['runtime']
-    assert set(runtime) == {'continuation', 'return', 'jump', 'entryLabel', 'target'}
+    assert set(runtime) in ({'continuation', 'return', 'jump', 'entryLabel', 'target'},
+                            {'continuation', 'return', 'jump', 'entryLabel', 'target', 'recursive'})
+    if 'recursive' in runtime:
+        assert all(text in runtime['recursive'] for text in ['Before call', ' from _ll_call_', 'Resume inside option', 'if (choice_flag == True):', 'Inner normal', 'After nested'])
+        assert runtime['recursive'].count('\"Shared once\"') == 1
     assert runtime['continuation'].count('"Shared once"') == 1
     assert '"No":\n            pass' in runtime['continuation']
     assert '$ choice_flag = True' in runtime['continuation']
     assert runtime['entryLabel'].replace('_', '').isalnum()
     driver = (REPO / 'tests/fixtures/choice-101/driver.rpy').read_bytes()
-    assert driver.count(b'    testcase ') == 6 and b'--warp' not in driver
+    assert driver.count(b'    testcase ') == 10 and b'--warp' not in driver
     assert expected_sha256(args.checksums.read_text(), args.archive.name) == PIN
     assert digest(args.archive.read_bytes()) == PIN
     return runtime, driver
@@ -80,11 +88,11 @@ def main():
             old_env = dict(os.environ)
             os.environ.update(env)
             try:
-                for variant in ['continuation', 'return', 'jump', 'returnCaller']:
+                for variant in ['continuation', 'return', 'jump', 'returnCaller'] + (['recursive', 'recursiveCaller'] if 'recursive' in runtime else []):
                     game = scratch / variant
                     (game / 'game').mkdir(parents=True)
-                    sources = {'story.rpy': runtime['return' if variant == 'returnCaller' else variant], 'target.rpy': runtime['target'],
-                               'script.rpy': 'label start:\n    ' + ('call ' + runtime['entryLabel'] + ' from choice_fixture_return\n    \"Caller resumed\"\n    return\n' if variant == 'returnCaller' else 'jump ' + runtime['entryLabel'] + '\n'),
+                    sources = {'story.rpy': runtime['return' if variant == 'returnCaller' else 'recursive' if variant == 'recursiveCaller' else variant], 'target.rpy': runtime['target'],
+                               'script.rpy': 'label start:\n    ' + ('call ' + runtime['entryLabel'] + ' from choice_fixture_return\n    \"Caller resumed\"\n    return\n' if variant in ('returnCaller', 'recursiveCaller') else 'jump ' + runtime['entryLabel'] + '\n'),
                                'driver.rpy': driver.decode()}
                     for name, source in sources.items():
                         (game / 'game' / name).write_bytes(source.encode())

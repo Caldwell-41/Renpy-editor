@@ -281,7 +281,7 @@ pub(super) fn project(
                                 branch_id: h.id.clone(),
                             })
                     });
-                    let children=beats.iter().filter(|b|b.owner==owner && !b.structural_placeholder && b.conditional_branch.is_none() && !matches!(&b.payload,BeatPayload::CustomCode{source,..} if source.trim().is_empty() || source.trim_start().starts_with('#'))).collect::<Vec<_>>();
+                    let children=beats.iter().filter(|b|b.owner==owner && !b.structural_placeholder && b.conditional_branch.as_ref().is_none_or(|g| g.ordinal == 0 && !g.choice_option) && !matches!(&b.payload,BeatPayload::CustomCode{source,..} if source.trim().is_empty() || source.trim_start().starts_with('#'))).collect::<Vec<_>>();
                     let child = children.first().copied();
                     let transfer = if children.len() == 1 {
                         child.and_then(|b| match &b.payload {
@@ -328,6 +328,15 @@ pub(super) fn project(
                     );
                     choice.id = format!("{}:{}:choice:{ordinal}", scene.id, beat.id);
                     choice.option_ordinal = Some(ordinal);
+                    if let Some(header) = header {
+                        choice.location = location(scene, revision, header);
+                        if let Some(branch) = &header.conditional_branch {
+                            choice.guard_path.push(FlowGuard {
+                                branch_id: header.id.clone(),
+                                branch: branch.clone(),
+                            });
+                        }
+                    }
                     choice.condition = option.condition.clone();
                     choice.editable = beat.owner.is_none()
                         && options.iter().all(|o| o.condition.is_none())

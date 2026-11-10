@@ -789,7 +789,8 @@ export function renderSceneAuthoring(
     let parent = beat ? beatBody(beat) : { type: "root" } as BodyRef;
     while (parent.type === "branch") { const owner = parent; collapsedConditions.delete(owner.groupId); const header = scene.beats.find(item => item.id === owner.branchId); parent = header ? beatBody(header) : { type: "root" }; }
     draw();
-    return beat ? [...host.querySelectorAll<HTMLElement>(".beat-card")].find(item => item.dataset.beatId === beat.id) : host.querySelector<HTMLElement>(".beats-list") ?? undefined;
+    return beat?.conditionalBranch?.choiceOption ? [...host.querySelectorAll<HTMLElement>(".story-choice-option")].find(item => item.dataset.optionId === beat.id)
+      : beat ? [...host.querySelectorAll<HTMLElement>(".beat-card")].find(item => item.dataset.beatId === beat.id) : host.querySelector<HTMLElement>(".beats-list") ?? undefined;
   };
   const destinations = (scene: SceneDocument, initialBody: BodyRef, exclude?: SceneBeat, initialPosition?: Position, insertion = false, retained?: ScreenInsertion): { host: HTMLElement; read: () => { body: BodyRef; position: Position } } => {
     const panel = document.createElement("div"); panel.className = "story-destination";
@@ -797,6 +798,10 @@ export function renderSceneAuthoring(
     for (const branch of scene.beats.filter(beat => beat.conditionalBranch)) {
       const body: BodyRef = { type: "branch", groupId: branch.conditionalBranch!.groupId, branchId: branch.id };
       if (exclude?.conditionalBranch && insideCondition(scene, body, exclude.conditionalBranch.groupId)) continue;
+      if (exclude?.payload.type === "choice" && exclude.payload.options.some(option => {
+        const header = scene.beats.find(b => b.id === option.id);
+        return header?.conditionalBranch && insideCondition(scene, body, header.conditionalBranch.groupId);
+      })) continue;
       parents.push({ key: branch.id, body, label: bodyCaption(scene, body, model) });
     }
     const initialParent = parents.find(item => item.body.type === initialBody.type && (item.body.type === "root" || initialBody.type === "branch" && item.body.groupId === initialBody.groupId && item.body.branchId === initialBody.branchId));
@@ -1042,7 +1047,12 @@ export function renderSceneAuthoring(
           }, "Apply ending");
         });
         const following = document.createElement("p"); following.className = "story-continuation"; following.textContent = bodyNodes(scene, body).some(b => ["jump", "return"].includes(b.payload.type)) ? "Explicit transfer at the end of this option" : "Continue after the Choice";
-        section.append(heading, availability, add, then, following); (beat.owner ? branchHosts.get(beat.owner.branchId) ?? list : list).append(section); branchHosts.set(beat.id, section); return;
+        const context = document.createElement("p"); context.className = "story-breadcrumb"; context.textContent = bodyCaption(scene, body, model);
+        const addCondition = button("Add Condition", "text-button"); addCondition.disabled = scene.sourceConflict;
+        addCondition.addEventListener("click", () => openConditionForm(scene, body, defaultInsertion(scene, body)));
+        const focus = button("Focus this branch", "text-button"); focus.addEventListener("click", () => { if (draftGuard()) { focusedBranch = beat.id; draw(); } });
+        following.textContent += ` · ${bodyCaption(scene, menu ? beatBody(menu) : { type: "root" }, model)}`;
+        section.append(heading, context, availability, add, addCondition, focus, then, following); (beat.owner ? branchHosts.get(beat.owner.branchId) ?? list : list).append(section); branchHosts.set(beat.id, section); return;
       }
       const card = document.createElement("article"); card.className = `beat-card${selectedBeatId === beat.id ? " selected" : ""}`; card.setAttribute("role", "listitem");card.dataset.beatId=beat.id;
       if (beat.owner) { card.classList.add("nested-dialogue"); card.dataset.groupId=beat.owner.groupId; card.dataset.branchId=beat.owner.branchId; }
@@ -1253,7 +1263,7 @@ export function renderSceneAuthoring(
     panel.addEventListener("compositionstart", () => { composing = true; }); panel.addEventListener("compositionend", () => { composing = false; }); panel.setAttribute("aria-labelledby", "new-beat-title");
     const heading = document.createElement("h3"); heading.id = "new-beat-title"; heading.textContent = "Add Beat";
     const types = (Object.keys(beatLabels) as BeatPayload["type"][]).filter((type) => type !== "customCode");
-    const type = selectOf(types.filter(value => !(body.type === "branch" && scene.beats.find(b => b.id === body.branchId)?.conditionalBranch?.choiceOption && ["choice", "call"].includes(value))).map((value) => ({ value, label: beatLabels[value] })), initialType); type.setAttribute("aria-label", "Beat type");
+    const type = selectOf(types.map((value) => ({ value, label: beatLabels[value] })), initialType); type.setAttribute("aria-label", "Beat type");
     const destination = document.createElement("p"); destination.className = "story-insertion";
     const insertionAnchor = position.type === "before" ? position.anchor : undefined;
     const anchor = insertionAnchor ? bodyNodes(scene, body).find(beat => JSON.stringify(nodeRef(beat)) === JSON.stringify(insertionAnchor)) : undefined;
