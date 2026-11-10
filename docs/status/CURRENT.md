@@ -56,9 +56,10 @@ fixtures. [The delivery record](../tasks/evidence/choice-98.md#windows-106-compl
 owns scoped proof, remaining gates and the #104 receipt limit.
 
 The last Mac SDK run passed 26/27, including save/close/new-process Load.
-Mac rollback/New Game and final-driver proof remain missing. Mac is stopped at
-#106 4/4; shared use is Mac 15/20, Windows 7/20, zero reservations.
-The existing request for up to two additional Mac starts awaits Kris's answer.
+Mac rollback/New Game and final-driver proof remain missing. Kris approved up to
+two additional Mac starts on 2026-11-11, extending #106 to six within shared 17/20.
+Entry use is Mac 15/20, Windows 7/20, zero reservations. The coordinator is preparing
+the fresh controller export and offline preflight.
 Rendered comparison,
 native/human evidence and final validation remain pending. #98/#106 stay open;
 full Story #110 and other PR #122 retro items remain unselected.

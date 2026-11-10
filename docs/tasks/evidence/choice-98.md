@@ -28,8 +28,9 @@ Choice-owned narration/Character prompts through the same owners. #104 delivered
 mixed Hide/Show disabled semantics through existing source, runtime and
 generated-choice-screen owners. All implementer/test assignments are complete.
 #105 and #106 Windows assignments passed. The coordinator owns integration/status;
-no worker or test owner remains active. Mac #106 is stopped at its exhausted
-four-start allowance while Kris's existing additional-start request awaits an answer.
+no worker or test owner remains active. On 2026-11-11, Kris approved up to two
+additional Mac #106 starts, extending its allowance to six within shared 17/20.
+The coordinator owns this bounded qualification.
 
 ## Dependencies and approved design
 
@@ -74,11 +75,13 @@ used 1/4 starts and passed its 12 selected children, also without a negative chi
 passed all ten selected children, including the intended negative.
 
 #105 Windows used 1/4 starts and passed all ten selected outcomes. #106 Mac used
-4/4 starts from 11/20; its final run passed 26/27 outcomes and remains a failed
-qualification. The final corrected driver has not qualified on Mac. The exhausted four-start
-Mac limit remains binding even with shared capacity available. No new Mac harness
-or individual-child substitute may start without Kris's approval. A proposal for
-up to two further starts, taking shared Mac use at most to 17/20, grants no authority.
+four original starts from 11/20; its final run passed 26/27 outcomes and remains
+a failed qualification. On 2026-11-11, Kris explicitly approved up to two further
+Mac starts for the corrected picked-state plan. The #106 allowance is now six
+starts total, within shared Mac use of 17/20. The first additional start selects
+all 27 picked outcomes. The second requires a diagnosed failure and correction;
+success does not authorize an automatic repeat. No package, native-editor, browser
+or manual CI campaign is included in that approval.
 
 Windows #106 used one of its four selected starts from 6/20 and passed all 27
 outcomes with the corrected vbox driver after offline fixture, host/toolchain and
@@ -98,8 +101,9 @@ The corrected candidate is published at `9d229ea4`. The
 [review-correction merge](#review-corrections-integration) owns exact tree equality,
 focused result admission and source-comparison limits. Exact-head CI and Windows
 #106 are audited passing under [the completion below](#windows-106-completion-and-mac-approval-wait).
-Mac remains stopped pending Kris's answer to the already-issued explicit allowance
-request. The proposed two further Mac starts are not approved by a test callback.
+Kris approved the bounded two-start Mac extension on 2026-11-11. Rebuild the
+public controller from the current candidate, complete offline pinned-SDK preflight,
+then reserve and charge one start before the 27-outcome picked-only invocation.
 
 Windows's dedicated branch is clean at `9d229ea4`; no worker remains active.
 Preserve the protected
@@ -1122,3 +1126,23 @@ bound to `9d229ea4` and identical implementation inputs; a documentation success
 does not become that tested candidate. Preserve worktrees and all failures.
 #98/#106 and PR #125 remain open/draft. Affected Mac proof, rendered comparison,
 native/human evidence and final validation selection remain pending.
+
+
+## Approved Mac #106 qualification extension
+
+On 2026-11-11, Kris answered "Yes approved" to the request for up to two
+additional Mac SDK starts under the corrected qualification plan. This extends
+#106 from four to six starts and caps shared Mac use for this extension at 17/20.
+Entry use is Mac 15/20 and Windows 7/20, zero reservations. All earlier failures
+remain charged and retained. The coordinator owns this operation.
+
+The first additional invocation requires a fresh production-controller export and
+offline official archive/fixture preflight, then all 27 picked outcomes including
+actual Save/exit/new-process Load, ordinary rollback and MainMenu/Start. A second
+start is conditional on a diagnosed failure requiring a correction. The approval
+includes no package, native editor, browser or manual CI campaign.
+
+Candidate `ad4c276039c54c288136ee35cef2450b7caa6794` changes only coordinator
+records from Windows-qualified `9d229ea4`. Automatic Repository quality run
+`42817680459` reports success on this exact head; detailed job audit is pending.
+No new SDK start has run when this approval is recorded.

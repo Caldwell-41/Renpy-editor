@@ -33,11 +33,10 @@ not a confirmed defect. Original Standards and Spec reports remain separate.
 Mac start 4 on `49e44c12` passed 26/27, including actual save, process exit and
 new-process Load. Rollback/New Game failed before entry because Load covered Start.
 The final vbox driver remains unqualified on Mac. All four starts stay charged,
-retained and cleaned. Mac is STOPPED at #106 4/4; shared use is Mac 15/20, Windows 7/20,
-zero reservations. Neither this handoff nor shared capacity permits a fifth Mac
-harness or standalone child. A proposal for two more starts within 17/20 needs
-Kris's approval; that request is already pending. Source comparison of 29 runtime roles preserves earlier normal-input
-evidence's scope; it establishes no final runtime qualification.
+retained and cleaned. On 2026-11-11, Kris approved up to two additional Mac starts,
+extending #106 to six total within shared 17/20. Entry use is Mac 15/20 and Windows
+7/20, zero reservations. Source comparison of 29 runtime roles establishes no
+final runtime qualification.
 
 Published `9d229ea4` passed Windows #106: fresh thirteen-stage/284-request
 controller, offline preflight and all 27 SDK outcomes. Save/exit/fresh-process Load,
@@ -50,16 +49,14 @@ documentation successor changes no implementation or SDK input.
 The [#104 duplicate-receipt limit](../tasks/evidence/choice-98.md#104-receipt-retention-limit)
 remains unchanged; preserve originals and the frozen reference.
 
-Resume the same coordinator thread when Kris answers the existing request for
-up to two additional Mac SDK starts, keeping shared use at 17/20 or less. This
-Windows completion callback is not approval. Mac execution stays stopped until an
-explicit allowance change; record any approval before a reservation. The PR is
-linked but unwatched following the approval handoff. No worker remains active.
-Preserve worktrees, unique
-evidence, `app/node_modules` and recovery below. No cleanup, native editor/package
-or manual CI campaign is selected. #98/#106 remain open/draft; rendered comparison,
-native/human evidence and final validation selection remain pending. Full Story
-#110 and #31/#55 styling/canvas remain separate.
+The coordinator now owns the approved Mac extension. Rebuild the production
+controller, complete offline preflight, then reserve and charge the first of up to
+two additional starts for all 27 picked outcomes. Use the second only after a
+diagnosed failure requiring a correction. The PR is linked but unwatched. No worker
+remains active. Preserve worktrees, unique evidence, `app/node_modules` and recovery
+below. No cleanup, native editor/package or manual CI campaign is selected.
+#98/#106 remain open/draft; rendered comparison, native/human evidence and final
+validation selection remain pending. Full Story #110 and #31/#55 remain separate.
 
 <a id="shared-arithmetic-implementation-2026-11-09"></a>
 
