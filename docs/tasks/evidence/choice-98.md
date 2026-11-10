@@ -10,7 +10,8 @@ SDK and automatic CI evidence. Its implementation dependency is satisfied on the
 integration branch; final review, native/human evidence and issue closure remain
 part of the combined delivery. #102 is integrated with both-target SDK and
 automatic CI evidence. #103 prompts have both-target SDK and automatic CI evidence.
-#104 is integrated locally with Mac SDK evidence; Windows qualification is next.
+#104 has both-target SDK and automatic CI evidence on published `4339ccfc`.
+The Stage 1 runtime gate is complete; this does not establish combined acceptance.
 
 Integration branch `codex/choice-98` starts at accepted integration
 `63221b44d72c1c100815e9e638cbec5133ffc1eb` from
@@ -26,8 +27,9 @@ contracts, their production Story controls and affected tests. #103 added
 Choice-owned narration/Character prompts through the same owners. #104 delivered
 mixed Hide/Show disabled semantics through existing source, runtime and
 generated-choice-screen owners. All prior implementer/test assignments are complete.
-The coordinator publishes the local #104 checkpoint, then assigns Windows #104.
-#105/#106 still wait for that final Stage 1 gate.
+The coordinator next assigns #105 Repeat as sole writer of shared source/runtime,
+body/transfer, flow and Story controls. #106 is dependency ready but follows #105
+to avoid overlapping edits to those contracts. Both use fresh managed worktrees.
 
 ## Dependencies and approved design
 
@@ -62,15 +64,17 @@ lint and named normal-play children; retain each child's result without charging
 them again as harness starts. This allows focused coverage across six tickets and
 bounded corrections. #101 had a four-start allowance per host after offline
 preflight and pinned-SDK verification; it used three Mac and two Windows starts.
-Current usage is Mac 9/20, Windows 4/20, zero reservations. #102 used 2/4 Mac
+Current usage is Mac 9/20, Windows 5/20, zero reservations. #102 used 2/4 Mac
 starts and 1/4 Windows starts. #103 used 3/4 Mac starts, including two failed
 selector attempts; its final run passed all 31 expected SDK children. #103 Windows
 used 1/4 starts and passed all 31 children. #104 used 1/4 Mac starts and passed
-exactly 12 selected children; that run selected no wrong-outcome child.
+exactly 12 selected children; that run selected no wrong-outcome child. #104 Windows
+used 1/4 starts and passed its 12 selected children, also without a negative child.
 
-For the next coordinator assignment, fresh Windows #104 qualification may use at
-most four harness starts from confirmed Windows 4/20. It requires offline fixture,
-host/toolchain and official pinned-SDK preflight. Windows may reuse the existing T3-prepared
+For the next coordinator assignment, fresh #105 implementation may use at most
+four Mac harness starts from confirmed Mac 9/20, within the shared 20. It requires
+offline fixture, host/toolchain and official pinned-SDK preflight. No Stage 2
+Windows allowance is dispatched yet. Windows may reuse the existing T3-prepared
 `codex/choice-101-windows` worktree only after clean/idle ownership checks and safe
 fast-forward synchronization. Do not create a new checkout or change the protected
 registered root. The coordinator owns dispatch and shared counters. Completed
@@ -89,14 +93,15 @@ both were within their maintenance targets. No product tests or runtime operatio
 ran at entry.
 
 The fresh #104 merger integrated `7b7a6d16` in `527b1943`; the detailed
-[return below](#104-integration-and-handoff) owns this local checkpoint. #103 Windows
-and automatic CI passed on published `4be00d25`. The coordinator resumes integration
-ownership, publishes and links the checkpoint on PR #125, then assigns Windows #104.
+[return below](#104-integration-and-handoff) owns that checkpoint. #104 Windows and
+automatic CI passed on published `4339ccfc`; [the completion below](#104-windows-completion-and-stage-2-entry)
+owns its audit and Stage 2 entry. The coordinator owns integration and status,
+publishes this documentation successor, then assigns fresh isolated #105 Repeat.
 #31/#55 remain open, unselected styling/template tasks. #98/#104 own the per-option
 and runtime feature through the minimal semantic owners; their implementation does
 not take over style/canvas work or change those tickets' prerequisites or acceptance.
 Retain the #101–#104 worktrees and unique evidence. Tickets stay open for combined
-PR review and closure. #105/#106 wait for #104's Windows Stage 1 gate.
+PR review and closure. #106 follows #105's integration to keep one shared-code writer.
 
 The initial draft PR checkpoint selects automatic Repository quality only in
 `.github/validation-plan.json`, targeting `codex/phase3b-screen-designer`.
@@ -583,3 +588,56 @@ integration ownership, publishes and links this local checkpoint on draft PR #12
 then dispatches Windows #104 under the limits above. No Stage 2 #105/#106
 implementation starts until that Windows Stage 1 gate passes. No issue/PR mutation,
 push, worktree cleanup, protected-session or signing/credential change occurred.
+
+## #104 Windows completion and Stage 2 entry
+
+The coordinator audited the completed producing thread and its raw post-validation,
+ledger, final checkout/process checks and report-manifest verification. Exact
+candidate `4339ccfc7c7a2a5c9b35f5fedcc9f321f65a12ce` passed the fresh nine-stage
+production Story-to-core controller journey, offline preflight and all 12 selected
+Windows SDK children. Four compile/lint/play groups cover mixed availability,
+all unavailable, all disabled and all hidden. Every child exited zero without
+timeout or output truncation; each positive play marker appeared exactly once.
+No wrong-outcome child ran. Frozen authored bytes, adapter, driver and source
+hashes matched the candidate. The retained `c104w-20261110-1` report, SDK receipt,
+independent audit and verified 95-entry manifest own full commands, argv, durations
+and material identities. Report SHA-256 is
+`e9c2b0cca27e796a5cb581a534c45920177624b3cf0da17986d122bb225e8a77`;
+SDK receipt SHA-256 is
+`a661c07f8d608197b91d06b1e9dc8b74efdf90fc1a716f318b9ab3fe1d627567`.
+
+The owner context was SUNDOWN/krisn. Node 24.19.0, explicit npm 11.9.0, Rust 1.90.0
+with native MSVC x64, Python 3.12.14, local Default desktop and official 8.5.3 SDK
+archive/checksum identity were verified before execution. The clean dedicated branch
+fast-forwarded from `4be00d25` to the assigned candidate after clean/idle ownership
+and ancestry checks. Its final status is clean; the registered root remains clean
+at `251fb477`, and the unrelated arithmetic checkout was untouched. SDK/controller
+scratch and owned temporary cache are gone; no owned runtime process remains.
+No process termination action was issued.
+
+Retained test-owned wrapper/observer failures do not establish product failures.
+The first PowerShell Rust wrapper stopped on ordinary Cargo progress; corrected
+output handling completed the build without a repository change. A provisional
+process collection had null fields, and a later observer incorrectly required all
+unrelated CUA runtime processes to remain alive. The corrected audit records three
+unrelated process exits, zero termination actions and zero remaining owned processes.
+The failed observers remain retained. No controller or SDK retry occurred for them.
+
+[Automatic CI receipt](https://github.com/Caldwell-41/Renpy-editor/issues/104#issuecomment-6764485048)
+records exact-head run `42794630725`, attempt 1, PR event, completed success.
+Both required jobs passed, including all 396 frontend tests with no failures/skips,
+production build, Rust formatting, Help admission, actual Choice/Story controller
+journeys and repository validation. Four executed jobs succeeded; five unselected
+specialist jobs skipped. No review or inline finding was present at that audit.
+This is the draft quality selection, not final automated/native acceptance.
+
+#104 Windows used 1/4 starts. Confirmed totals are Mac 9/20 and Windows 5/20,
+zero reservations. #101–#104 now satisfy the selected Stage 1 public-controller
+and both-target runtime gate. Fresh isolated #105 Repeat is next sole writer;
+the coordinator retains live records and integration. Its Mac assignment is capped
+at four starts from 9/20 after preflight. #106 follows #105's integration because
+their source/runtime and Story controls overlap, although its ticket has no Repeat
+dependency. Issues remain open for the one PR's final review/closure. Rendered
+comparison, native/human evidence, final validation selection and combined #98
+acceptance remain pending. This entry changes only coordinator records and reuses
+`4339ccfc` evidence for unchanged implementation inputs.
