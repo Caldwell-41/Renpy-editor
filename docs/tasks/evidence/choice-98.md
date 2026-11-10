@@ -53,7 +53,7 @@ lint and named normal-play children; retain each child's result without charging
 them again as harness starts. This allows focused coverage across six tickets and
 bounded corrections. The #101 implementer may use at most four Mac invocations
 from the shared ceiling after cheap fixture preflight and official pinned-SDK
-verification. Windows runs remain coordinator assigned. Usage is Mac 0/20,
+verification. Windows runs remain coordinator assigned. Usage is Mac 3/20,
 Windows 0/20, zero reservations.
 
 Native editor/package and manual CI campaigns need recorded selection and limits
@@ -67,7 +67,44 @@ Entry records passed `python3 scripts/validate.py` for 1,883 repository files an
 `git diff --check`. CURRENT is 317 words and HANDOVER is 901 words; both remain
 within their maintenance targets. No product tests or runtime operations ran.
 
-Launch a fresh #101 implementer from this integration checkpoint. On return,
-inspect the exact diff and evidence, integrate through a fresh merger, open the
-workflow's draft PR and schedule dependency-ready assignments. Required runtime,
-native and combined-review evidence remains pending.
+The #101 implementer returned `070365fac417edba137c57841708574cd6ddbeb2` on
+`t3/choice-source-editor`, based on the unchanged integration checkpoint
+`15e90f2c`. Its managed worktree and temporary evidence are retained. The coordinator
+inspected the source/body/mapping, flow, UI and harness changes. A fresh merger
+now receives sole write ownership of this integration worktree for the #101 merge
+and focused integration checks. Publication, Windows qualification and subsequent
+ticket scheduling remain coordinator-owned after the merger returns.
+
+## #101 implementation return
+
+The worker delivered ordered option bodies, stable mapped Choice/option identities,
+legacy source-map refinement to schema 9, shared continuation, explicit body
+commands/history, flow inspection and production Story controls. Approved lab
+source and coordinator records were untouched. Nested bodies/Calls, prompts,
+locked options, Repeat and picked-state behavior remain later tickets.
+
+Worker checks passed 107 Scene, 16 Source and five metadata tests, targeted
+identity/migration tests, the production UI-to-core journey, browser route fixture,
+frontend typecheck/build, formatting and repository validation. The Scene group
+retained seven explicitly ignored specialist cases. The frontend suite reported
+391 passes and one environment failure: its existing Windows Studio validator
+cannot import `tomllib` with the available Python. No skip or installation was
+added. This failure remains unresolved rather than a passing full-suite claim.
+
+Mac SDK use is three harness starts. Start 1 reached shared continuation but its
+driver timed out at game end; start 2 exposed an invalid post-game store assertion.
+Both are retained harness failures. Start 3 passed all 14 named children, covering
+compile/lint, Yes/No convergence once, Jump, callerless Return, caller resumption
+and a deliberately wrong outcome rejected at the expected assertion. Every run
+reported owned scratch cleanup complete. SDK 8.5.3 archive SHA-256 was verified as
+`eb0a9be7f0fb13632fe25ceade9a8bed5a1b4d6b6e83bd19eeeb29e1a1bb4a45`.
+The SDK-qualified source candidate was `a64b4bb1`; subsequent fixes affected editor
+targeting, inspection labels and the negative oracle without changing generated
+game source. The latest UI-to-core journey used the reviewed final Rust/UI code.
+
+Detailed commands, red/green logs, authored receipts and per-child SDK results
+remain in the worker's temporary `choice101-handoff.md`, `choice101-controller-07`
+and `choice101-sdk-01` through `choice101-sdk-03` artifacts. Preserve them for the
+target handoff and final audit. Windows x64 qualification, matching native/human
+evidence and combined review remain pending. #101 is implemented, not accepted or
+closed. No code was pushed and no PR was opened by the worker.

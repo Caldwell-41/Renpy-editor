@@ -47,11 +47,12 @@ acceptance. Historical allowances remain closed.
 
 Kris selected [Choice #98](https://github.com/Caldwell-41/Renpy-editor/issues/98)
 and its #101–#106 delivery graph on a new integration branch, `codex/choice-98`.
-Delivery is `in_progress`; #101 is the first dependency-ready assignment.
+Delivery is `in_progress`; #101 returned implementation for integration.
 [The delivery record](../tasks/evidence/choice-98.md) owns assignments,
 verification and operation limits. No Choice implementation or runtime acceptance
-is claimed yet. Use the approved Story Combined v1 controls while leaving the
-full Story workspace with #110.
+is claimed for the combined feature. #101 has portable and Mac SDK evidence;
+Windows and native/human evidence remain pending. Use the approved Story Combined
+v1 controls while leaving the full Story workspace with #110.
 
 [PR #124](https://github.com/Caldwell-41/Renpy-editor/pull/124) merged the selected
 status cleanup at `63221b44`. Other PR #122 retro items remain unselected.

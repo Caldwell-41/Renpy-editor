@@ -10,15 +10,19 @@ ticket implementers use isolated managed worktrees. #101 is the first ready
 assignment. [The delivery record](../tasks/evidence/choice-98.md) owns the graph,
 file ownership, approved design, verification and cumulative operation limits.
 
-Next action is the #101 implementer, followed by exact-diff/evidence review and a
-fresh merger assignment. #102–#104 wait for #101; #105/#106 wait for all Stage 1
-tickets. The draft PR opens after the first implementation merge. No feature,
-runtime, native or combined-review acceptance is claimed at this entry checkpoint.
+The #101 implementer returned `070365fa` on `t3/choice-source-editor`. Its isolated
+worktree and temporary evidence are retained. The coordinator inspected the diff
+and receipts; a fresh merger receives sole integration-write ownership next.
+#102–#104 wait for #101; #105/#106 wait for all Stage 1 tickets. The draft PR opens
+after this first implementation merge. Windows, native/human and combined-review
+acceptance remain pending; the full frontend suite retains one Python environment
+failure. [The delivery record](../tasks/evidence/choice-98.md#101-implementation-return)
+owns results, SDK failures and unchanged-source evidence reuse.
 
 Development is on macOS ARM64, with both supported runtime targets required. The
 linked SUNDOWN environment answered at entry but needs OS/checkout/tool discovery.
-SDK use is Mac 0/20, Windows 0/20; #101 has a maximum four Mac harness starts from
-that ceiling. No native editor/package or manual CI campaign is selected yet.
+SDK use is Mac 3/20, Windows 0/20, zero reservations; #101 used three of its maximum
+four Mac starts. No native editor/package or manual CI campaign is selected yet.
 Work is local-only until publication is verified. Resume in this same coordinating
 thread, inspect task completion and current refs, then continue the dependency graph.
 
