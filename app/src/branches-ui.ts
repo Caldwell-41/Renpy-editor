@@ -105,14 +105,14 @@ export function renderBranches(host: HTMLElement, actions: BranchesActions): () 
     if (edge?.continuation) { sourceLink("View continuation in Source", edge.continuation.location); storyBody("Open continuation in Story", edge.continuation); }
     if (edge) {
       const text = document.createElement("p"); text.textContent = edge.destination.kind === "missing" ? `Missing label: ${edge.destination.label}` : edge.destination.kind === "unknown" ? "Unresolved / custom flow. This graph does not prove every route."
-        : edge.kind === "call" ? "Call Scene returns to its continuation. This graph does not execute the called Scene." : edge.destination.kind === "terminal" ? "Return / End has no destination edge." : edge.destination.kind === "body" ? "Possible flow within this Scene. Open its exact source body to inspect." : editable ? "Use the existing Scene controls to change or create a destination." : "Read-only observed flow. Open Source to inspect.";
+        : edge.kind === "call" ? "Call Scene returns to its continuation. This graph does not execute the called Scene." : edge.destination.kind === "terminal" ? "Return goes to the caller, or the main menu when there is no caller." : edge.destination.kind === "body" ? "Possible flow within this Scene. Open its exact source body to inspect." : editable ? "Use the existing Scene controls to change or create a destination." : "Read-only observed flow. Open Source to inspect.";
       details.append(text);
       if (edge.guardPath?.length || edge.condition) {
         const guards = document.createElement("p"); guards.textContent = "Possible guarded route · Conditions are not evaluated here."; details.append(guards);
         const list = document.createElement("ul");
         for (const guard of edge.guardPath ?? []) {
           const item = document.createElement("li");
-          item.textContent = guard.branch.otherwise ? "Otherwise · prior branches did not match" : `${guard.branch.ordinal ? "Else If" : "If"} ${guard.branch.condition ? conditionCaption(guard.branch.condition) : "Unknown condition"}${guard.branch.ordinal ? " · prior branches did not match" : ""}`;
+          item.textContent = guard.branch.choiceOption ? `Choice option ${(guard.branch.ordinal ?? 0) + 1} · ${guard.branch.condition ? `Only when ${conditionCaption(guard.branch.condition)}` : "Always available"}` : guard.branch.otherwise ? "Otherwise · prior branches did not match" : `${guard.branch.ordinal ? "Else If" : "If"} ${guard.branch.condition ? conditionCaption(guard.branch.condition) : "Unknown condition"}${guard.branch.ordinal ? " · prior branches did not match" : ""}`;
           list.append(item);
         }
         if (edge.condition && edge.kind === "choice") { const item = document.createElement("li"); item.textContent = `Available when ${conditionCaption(edge.condition)} · Availability unknown`; list.append(item); }

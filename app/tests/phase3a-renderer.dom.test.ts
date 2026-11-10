@@ -130,3 +130,13 @@ test("core guard conditions remain distinct from Choice availability and missing
   choose("Selected route", "call-missing"); assert.match(host.textContent!, /Missing label: absent_scene/); assert.doesNotMatch(host.textContent!, /Call Scene returns to its continuation/);
   dispose(); await browser.happyDOM.close();
 });
+
+test("Branches names an option owner without inventing an If test or first-match order", async () => {
+  const { browser, host } = setup(); const location = { path: "game/arrival.rpy", revision: "saved", byteStart: 40, byteEnd: 50 };
+  const flow: FlowWorkspace = { revision: "saved", entrySceneId: "one", partial: false, stale: false, overLimit: false, notice: "Possible flow", nodes: [{ sceneId: "one", name: "Arrival", label: "arrival", location, partial: false, stale: false }], edges: [{ id: "return", sceneId: "one", beatId: "return", optionOrdinal: null, text: "Return", kind: "return", location, destination: { kind: "terminal" }, editable: false, guardPath: [{ branchId: "yes", branch: { choiceOption: true, groupId: "options", ordinal: 0, otherwise: false } }] }] };
+  const dispose = renderBranches(host, { load: async () => flow, source: () => {}, scene: () => {}, status: () => {} }); await tick();
+  const scene = host.querySelector<HTMLSelectElement>('[aria-label="Selected Scene"]')!; scene.value = "one"; scene.dispatchEvent(new Event("change"));
+  const route = host.querySelector<HTMLSelectElement>('[aria-label="Selected route"]')!; route.value = "return"; route.dispatchEvent(new Event("change"));
+  assert.match(host.textContent!, /Choice option 1 · Always available/); assert.doesNotMatch(host.textContent!, /If Unknown condition|prior branches did not match/);
+  dispose(); await browser.happyDOM.close();
+});
