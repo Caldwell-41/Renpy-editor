@@ -82,8 +82,8 @@ class AdmissionTests(unittest.TestCase):
                 with self.assertRaises(AssertionError):
                     proof.validate_accepted(accepted)
         accepted = accepted_fixture()
-        accepted['sourceMapSchemaVersion'] = 14
-        text = json.dumps({'schemaVersion': 14})
+        accepted['sourceMapSchemaVersion'] = 15
+        text = json.dumps({'schemaVersion': 15})
         accepted['files']['.renpy-editor/source-map.json'] = dict(
             text=text, sha256=proof.digest(text.encode()))
         with self.assertRaises(AssertionError):

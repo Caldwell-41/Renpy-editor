@@ -1596,7 +1596,7 @@ function defaultPayload(type: BeatPayload["type"], model: SceneWorkspace, screen
     case "playSfx": return { type, assetId: model.authoring.assets.find((item) => item.kind === "sfx")?.id ?? "" };
     case "transition": return { type, transition: "dissolve" };
     case "setVariable": { const variable = model.authoring.variables[0]; return { type, variableId: variable?.id ?? "", value: variable?.defaultValue ?? "" }; }
-    case "choice": return { type, options: [{ text: "" }] };
+    case "choice": return { type, pickedPolicy: "showNormally", options: [{ text: "" }] };
     case "jump": return { type, sceneId: model.scenes[0]?.id ?? "" };
     case "call": return { type, sceneId: model.scenes[0]?.id ?? "", returnLabel: null };
     case "repeatChoice": return { type };

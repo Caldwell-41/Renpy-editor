@@ -847,8 +847,10 @@ impl AuthoringService {
                         && (l.starts_with("default ")
                             || l.starts_with("define ")
                             || l.starts_with("def ")
-                            || l.starts_with("$ _ll_picked_v1 =")
-                            || l.starts_with("_ll_picked_v1 ="))
+                            || l.trim_start_matches('$')
+                                .trim_start()
+                                .strip_prefix("_ll_picked_v1")
+                                .is_some_and(|rest| rest.trim_start().starts_with('=')))
                 })
             {
                 return Err(SceneError::InvariantBlocked);

@@ -46,8 +46,12 @@ PICKED_CASES = [('pickedShow', 'picked_show', 'CHOICE_106_SHOW identity=separate
                 ('pickedMark', 'picked_load', 'CHOICE_106_LOAD process=new retained=yes marked=selectable'),
                 ('pickedMark', 'picked_rollback_new', 'CHOICE_106_ROLLBACK restored=yes newgame=fresh'),
                 ('pickedHide', 'picked_hide', 'CHOICE_106_HIDE duplicates=independent disabled=skipped shared=once'),
-                ('pickedRepeat', 'picked_repeat', 'CHOICE_106_REPEAT store=shared prompt=again call=resumed')]
-PICKED_KEYS = {'pickedShow', 'pickedMark', 'pickedHide', 'pickedRepeat', 'pickedAdapter', 'pickedTarget', 'pickedIdentities'}
+                ('pickedRepeat', 'picked_repeat', 'CHOICE_106_REPEAT store=shared prompt=again call=resumed'),
+                ('pickedReturn', 'picked_return', 'CHOICE_106_RETURN recorded=before-transfer'),
+                ('pickedImmediateRepeat', 'picked_immediate_repeat', 'CHOICE_106_IMMEDIATE_REPEAT recorded=yes hidden=first'),
+                ('pickedInstances', 'picked_instances', 'CHOICE_106_INSTANCES keys=separate captions=identical'),
+                ('pickedRepeatHide', 'picked_repeat_hide', 'CHOICE_106_REPEAT_HIDE picked=hidden unavailable=disabled gate=combined')]
+PICKED_KEYS = {'pickedShow', 'pickedMark', 'pickedHide', 'pickedRepeat', 'pickedAdapter', 'pickedTarget', 'pickedIdentities', 'pickedReturn', 'pickedImmediateRepeat', 'pickedInstances', 'pickedInstanceIdentities', 'pickedRepeatHide'}
 
 
 def digest(data):
@@ -63,39 +67,40 @@ def preflight(args):
     assert (set(runtime) - PICKED_KEYS - availability - {'repeatConversation', 'repeatExhausted', 'repeatNested'}) in ({'continuation', 'return', 'jump', 'entryLabel', 'target'},
                             {'continuation', 'return', 'jump', 'entryLabel', 'target', 'recursive'},
                             {'continuation', 'return', 'jump', 'entryLabel', 'target', 'recursive', 'narrationPrompt', 'characterPrompt', 'recursivePrompt', 'characterDefinition'})
-    if 'repeatConversation' in runtime:
-        assert {'repeatConversation', 'repeatExhausted', 'repeatNested'}.issubset(runtime)
-        for variant in ('repeatConversation', 'repeatExhausted', 'repeatNested'):
-            assert runtime[variant].count('$ choice_visits = choice_visits + 1') == 1
-            assert all(text in runtime[variant] for text in ('Ask about the station', 'Ask about the ticket', 'Leave', 'What would you like to ask?', 'Station call resumed', ' from _ll_call_', 'jump _ll_choice_'))
-            assert runtime[variant].count('"Shared once"') == 1
-        assert runtime['repeatConversation'].count('label _ll_choice_') == 1
-        assert runtime['repeatNested'].count('label _ll_choice_') == 2
-        assert 'bec "Inside, ask again?"' in runtime['repeatNested'] and 'if (choice_flag == False):' in runtime['repeatNested']
-        assert runtime['repeatExhausted'].count('(_ll_available=(choice_flag == False))') == 3
-    if 'mixedAvailability' in runtime:
-        assert availability.issubset(runtime)
-        assert 'screen _ll_choice_v1(items):' in runtime['choiceAdapter']
-        assert 'textbutton i.caption action i.action sensitive i.kwargs.get("_ll_available", True)' in runtime['choiceAdapter']
-        assert '"Secret" if (choice_flag == True):' in runtime['mixedAvailability']
-        assert '"Locked" (_ll_available=(choice_flag == True)) if True:' in runtime['mixedAvailability']
-        assert runtime['allDisabled'].count('(_ll_available=(choice_flag == True))') == 3
-        assert 'screen=' not in runtime['allHidden']
-        assert all(runtime[v].count('"Shared once"') == 1 for v in ('mixedAvailability', 'allUnavailable', 'allDisabled', 'allHidden'))
-    if 'narrationPrompt' in runtime:
-        assert runtime['characterDefinition'] == 'define bec = Character("Bec", color="#ffffff")\n'
-        assert runtime['narrationPrompt'] == runtime['continuation'].replace('    menu:\n', '    menu:\n        "Choose a route"\n', 1)
-        assert runtime['characterPrompt'] == runtime['narrationPrompt'].replace('"Choose a route"', 'bec "Where shall we go?"')
-        assert runtime['recursivePrompt'] == runtime['recursive'].replace('    menu:\n', '    menu:\n        "Choose a route"\n', 1).replace('                menu:\n', '                menu:\n                    bec "Inside, which route?"\n')
-    if 'recursive' in runtime:
-        assert all(text in runtime['recursive'] for text in ['Before call', ' from _ll_call_', 'Resume inside option', 'if (choice_flag == True):', 'Inner normal', 'After nested'])
-        assert runtime['recursive'].count('\"Shared once\"') == 1
-    assert runtime['continuation'].count('"Shared once"') == 1
-    assert '"No":\n            pass' in runtime['continuation']
-    assert '$ choice_flag = True' in runtime['continuation']
+    if '_ll_mode=' not in runtime['continuation']:
+        if 'repeatConversation' in runtime:
+            assert {'repeatConversation', 'repeatExhausted', 'repeatNested'}.issubset(runtime)
+            for variant in ('repeatConversation', 'repeatExhausted', 'repeatNested'):
+                assert runtime[variant].count('$ choice_visits = choice_visits + 1') == 1
+                assert all(text in runtime[variant] for text in ('Ask about the station', 'Ask about the ticket', 'Leave', 'What would you like to ask?', 'Station call resumed', ' from _ll_call_', 'jump _ll_choice_'))
+                assert runtime[variant].count('"Shared once"') == 1
+            assert runtime['repeatConversation'].count('label _ll_choice_') == 1
+            assert runtime['repeatNested'].count('label _ll_choice_') == 2
+            assert 'bec "Inside, ask again?"' in runtime['repeatNested'] and 'if (choice_flag == False):' in runtime['repeatNested']
+            assert runtime['repeatExhausted'].count('(_ll_available=(choice_flag == False))') == 3
+        if 'mixedAvailability' in runtime:
+            assert availability.issubset(runtime)
+            assert 'screen _ll_choice_v1(items):' in runtime['choiceAdapter']
+            assert 'textbutton i.caption action i.action sensitive i.kwargs.get("_ll_available", True)' in runtime['choiceAdapter']
+            assert '"Secret" if (choice_flag == True):' in runtime['mixedAvailability']
+            assert '"Locked" (_ll_available=(choice_flag == True)) if True:' in runtime['mixedAvailability']
+            assert runtime['allDisabled'].count('(_ll_available=(choice_flag == True))') == 3
+            assert 'screen=' not in runtime['allHidden']
+            assert all(runtime[v].count('"Shared once"') == 1 for v in ('mixedAvailability', 'allUnavailable', 'allDisabled', 'allHidden'))
+        if 'narrationPrompt' in runtime:
+            assert runtime['characterDefinition'] == 'define bec = Character("Bec", color="#ffffff")\n'
+            assert runtime['narrationPrompt'] == runtime['continuation'].replace('    menu:\n', '    menu:\n        "Choose a route"\n', 1)
+            assert runtime['characterPrompt'] == runtime['narrationPrompt'].replace('"Choose a route"', 'bec "Where shall we go?"')
+            assert runtime['recursivePrompt'] == runtime['recursive'].replace('    menu:\n', '    menu:\n        "Choose a route"\n', 1).replace('                menu:\n', '                menu:\n                    bec "Inside, which route?"\n')
+        if 'recursive' in runtime:
+            assert all(text in runtime['recursive'] for text in ['Before call', ' from _ll_call_', 'Resume inside option', 'if (choice_flag == True):', 'Inner normal', 'After nested'])
+            assert runtime['recursive'].count('\"Shared once\"') == 1
+        assert runtime['continuation'].count('"Shared once"') == 1
+        assert '"No":\n            pass' in runtime['continuation']
+        assert '$ choice_flag = True' in runtime['continuation']
     assert runtime['entryLabel'].replace('_', '').isalnum()
     driver = (REPO / 'tests/fixtures/choice-101/driver.rpy').read_bytes()
-    assert driver.count(b'    testcase ') == 28 and b'--warp' not in driver
+    assert driver.count(b'    testcase ') == 32 and b'--warp' not in driver
     assert expected_sha256(args.checksums.read_text(), args.archive.name) == PIN
     assert digest(args.archive.read_bytes()) == PIN
     if args.picked_only:
@@ -150,21 +155,25 @@ def main():
                 variants = ['continuation', 'return', 'jump', 'returnCaller'] + (['recursive', 'recursiveCaller'] if 'recursive' in runtime else []) + (['narrationPrompt', 'characterPrompt', 'recursivePrompt'] if 'narrationPrompt' in runtime else [])
                 availability = ['mixedAvailability', 'allUnavailable', 'allDisabled', 'allHidden'] if 'mixedAvailability' in runtime else []
                 repeats = ['repeatConversation', 'repeatExhausted', 'repeatNested'] if 'repeatConversation' in runtime else []
-                variants = ['pickedShow', 'pickedMark', 'pickedHide', 'pickedRepeat'] if args.picked_only else repeats if args.repeat_only else availability if args.availability_only else variants + availability + repeats
+                variants = ['pickedShow', 'pickedMark', 'pickedHide', 'pickedRepeat', 'pickedReturn', 'pickedImmediateRepeat', 'pickedInstances', 'pickedRepeatHide'] if args.picked_only else repeats if args.repeat_only else availability if args.availability_only else variants + availability + repeats
                 assert sum((args.repeat_only, args.availability_only, args.picked_only)) <= 1
                 assert variants
                 for variant in variants:
                     game = scratch / variant
                     (game / 'game').mkdir(parents=True)
-                    sources = {'story.rpy': runtime['return' if variant == 'returnCaller' else 'recursive' if variant == 'recursiveCaller' else variant], 'target.rpy': runtime['pickedTarget'] if variant in ('pickedShow', 'pickedMark', 'pickedHide') else runtime['target'],
+                    sources = {'story.rpy': runtime['return' if variant == 'returnCaller' else 'recursive' if variant == 'recursiveCaller' else variant], 'target.rpy': runtime['pickedTarget'] if variant in ('pickedShow', 'pickedMark', 'pickedHide', 'pickedReturn', 'pickedImmediateRepeat', 'pickedInstances') else runtime['target'],
                                'script.rpy': 'label start:\n    ' + ('call ' + runtime['entryLabel'] + ' from choice_fixture_return\n    \"Caller resumed\"\n    return\n' if variant in ('returnCaller', 'recursiveCaller') else 'jump ' + runtime['entryLabel'] + '\n'),
                                'driver.rpy': driver.decode()}
+                    if '_ll_mode=' in sources['story.rpy']:
+                        sources['loomlight_choice_v1.rpy'] = runtime.get('pickedAdapter', runtime['choiceAdapter'])
                     if variant.startswith('picked'):
                         sources['loomlight_choice_v1.rpy'] = runtime['pickedAdapter']
                         sources['fixture_ids.rpy'] = 'define choice106_id = ' + repr(runtime['pickedIdentities']['choice']) + '\ndefine choice106_options = ' + repr(tuple(runtime['pickedIdentities']['options'])) + '\n'
+                        if variant == 'pickedInstances':
+                            sources['fixture_ids.rpy'] += 'define choice106_second_id = ' + repr(runtime['pickedInstanceIdentities']['choice']) + '\ndefine choice106_second_options = ' + repr(tuple(runtime['pickedInstanceIdentities']['options'])) + '\n'
                     elif variant in availability or variant in repeats:
                         sources['loomlight_choice_v1.rpy'] = runtime['choiceAdapter']
-                    if 'Prompt' in variant or variant in repeats or variant == 'pickedRepeat':
+                    if 'Prompt' in variant or variant in repeats or variant in ('pickedRepeat', 'pickedRepeatHide'):
                         sources['characters.rpy'] = runtime['characterDefinition']
                     for name, source in sources.items():
                         (game / 'game' / name).write_bytes(source.encode())
@@ -180,6 +189,10 @@ def main():
                         name = variant + '-' + (case or command.value)
                         row = dict(name=name, passed=False, expected='rejected wrong outcome' if case in ('wrong_outcome', 'repeat_wrong_outcome', 'picked_wrong_outcome') else 'success')
                         receipt['children'].append(row)
+                        if case == 'picked_load':
+                            saves = {str(p.relative_to(scratch)): digest(p.read_bytes()) for p in scratch.rglob('choice106.save')}
+                            assert saves and saves == receipt['savedArtifacts'], 'missing/changed save before new-process Load'
+                            row['loadedArtifacts'] = saves
                         result = run_bounded(command_argv(sdk, command, game, testcase='choice_body::' + case if case else None,
                                                          allow_project_execution=True), timeout_seconds=60, output_limit=2_000_000)
                         (args.output / (name + '.log')).write_text(result.output)
@@ -191,6 +204,10 @@ def main():
                         else:
                             row['passed'] = result.exit_code == 0 and (marker is None or result.output.count(marker) == 1 and '[rpytest] Status: PASSED' in result.output)
                         assert row['passed'] and not result.timed_out and not result.output_limited, name
+                        if case == 'picked_mark_save':
+                            receipt['savedArtifacts'] = {str(p.relative_to(scratch)): digest(p.read_bytes()) for p in scratch.rglob('choice106.save')}
+                            assert receipt['savedArtifacts'], 'successful process must close with a real save artifact'
+
                         assert all((game / 'game' / name).read_bytes() == source.encode() for name, source in sources.items())
             finally:
                 os.environ.clear()

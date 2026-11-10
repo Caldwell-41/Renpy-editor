@@ -2032,7 +2032,7 @@ impl AuthoringService {
             ],
         )?;
         let proposed_source_revision = sha256(&proposed_source);
-        let (source_mapping, _) = build_mapping(
+        let (source_mapping, next_beats) = build_mapping(
             &source_scene,
             &proposed_source,
             &proposed_source_revision,
@@ -2064,28 +2064,33 @@ impl AuthoringService {
         )?;
         loaded.source_map.scene_mappings.push(destination_mapping);
 
+        let mut runtime =
+            self.choice_runtime_mutations(project, &next_beats, source_bytes != proposed_source)?;
+        runtime.retain(|m| m.path.as_str() != source_scene.source_path);
+        self.validate_choice_targets(project, &source_bytes, &proposed_source, &next_beats)?;
+        runtime.extend(vec![
+            create_mutation(&destination_path, destination_bytes)?,
+            replace_mutation(
+                &source_scene.source_path,
+                source_bytes,
+                source_revision,
+                proposed_source,
+            )?,
+            replace_mutation(
+                PROJECT_PATH,
+                loaded.project_bytes,
+                loaded.project_revision,
+                json_bytes(&loaded.project)?,
+            )?,
+            replace_mutation(
+                SOURCE_MAP_PATH,
+                loaded.source_map_bytes,
+                loaded.source_map_revision,
+                source_map_bytes(&loaded.source_map)?,
+            )?,
+        ]);
         Ok(TransactionProposal {
-            mutations: vec![
-                create_mutation(&destination_path, destination_bytes)?,
-                replace_mutation(
-                    &source_scene.source_path,
-                    source_bytes,
-                    source_revision,
-                    proposed_source,
-                )?,
-                replace_mutation(
-                    PROJECT_PATH,
-                    loaded.project_bytes,
-                    loaded.project_revision,
-                    json_bytes(&loaded.project)?,
-                )?,
-                replace_mutation(
-                    SOURCE_MAP_PATH,
-                    loaded.source_map_bytes,
-                    loaded.source_map_revision,
-                    source_map_bytes(&loaded.source_map)?,
-                )?,
-            ],
+            mutations: runtime,
             intent: TransactionIntent::Edit,
         })
     }

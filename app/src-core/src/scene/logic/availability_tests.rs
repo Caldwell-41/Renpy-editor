@@ -203,6 +203,20 @@ fn picked_choice_records_before_transfers_and_roundtrips_history() {
         fs::read(f.root.join(".renpy-editor/source-map.json")).unwrap(),
         map
     );
+    let fresh = f.model();
+    let created = f.command(json!({"type":"createSceneFromChoice","sceneId":scene["id"],"expectedSourceRevision":fresh["scenes"][0]["sourceRevision"],"choiceBeatId":menu["id"],"optionText":"Same","chapterId":fresh["chapters"][0]["id"],"displayName":"New destination"}));
+    let origin = created["scenes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|s| s["id"] == scene["id"])
+        .unwrap();
+    let options = &origin["beats"][0]["payload"]["options"];
+    assert_eq!(options.as_array().unwrap().len(), 3);
+    assert_ne!(options[2]["id"], options[0]["id"]);
+    assert_ne!(options[2]["id"], options[1]["id"]);
+    let text = fs::read_to_string(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap();
+    assert!(text.contains("] = True\n            jump "));
     f.service.close().unwrap();
 }
 
@@ -242,5 +256,73 @@ fn picked_hiding_rechecks_scene_ending_and_preserves_fresh_option_identities() {
     let text = fs::read_to_string(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap();
     assert!(text.contains("not in _ll_picked_v1"));
     assert!(!text.replace("\r\n", "").contains('\n'));
+    f.service.close().unwrap();
+}
+
+#[test]
+fn picked_helper_collisions_missing_edits_and_dirty_source_never_repair_on_inspection() {
+    let mut f = Fixture::new();
+    fs::write(f.root.join("game/screens.rpy"), "screen choice(items):\n    style_prefix \"choice\"\n\n    vbox:\n        for i in items:\n            textbutton i.caption action i.action\n").unwrap();
+    let scene = f.model()["scenes"][0].clone();
+    f.save(
+        &scene,
+        &format!(
+            "label {}:\n    menu:\n        \"Same\":\n            pass\n    return\n",
+            scene["technicalLabel"].as_str().unwrap()
+        ),
+    );
+    let w = f.model();
+    let mut payload = w["scenes"][0]["beats"][0]["payload"].clone();
+    payload["pickedPolicy"] = json!("showNormally");
+    let command = |w: &serde_json::Value, p| json!({"type":"updateBodyBeat","sceneId":scene["id"],"expectedSourceRevision":w["scenes"][0]["sourceRevision"],"beatId":w["scenes"][0]["beats"][0]["id"],"expectedBody":{"type":"root"},"beat":p});
+    fs::write(f.root.join("game/collision.rpy"), "$ _ll_picked_v1={}\n").unwrap();
+    assert_eq!(
+        f.reject(command(&w, payload.clone()))["error"]["code"],
+        "SCENE_INVARIANT"
+    );
+    assert!(!f.root.join("game/loomlight_choice_v1.rpy").exists());
+    fs::remove_file(f.root.join("game/collision.rpy")).unwrap();
+    let after = f.command(command(&w, payload));
+    let helper = f.root.join("game/loomlight_choice_v1.rpy");
+    let accepted = fs::read(&helper).unwrap();
+    fs::write(&helper, b"# edited helper\n").unwrap();
+    let fallback = f.model();
+    assert_eq!(fallback["scenes"][0]["beats"][0]["protected"], true);
+    assert_eq!(fs::read(&helper).unwrap(), b"# edited helper\n");
+    fs::remove_file(&helper).unwrap();
+    let fallback = f.model();
+    assert_eq!(fallback["scenes"][0]["beats"][0]["protected"], true);
+    assert!(!helper.exists());
+    assert_eq!(
+        f.reject(command(
+            &after,
+            after["scenes"][0]["beats"][0]["payload"].clone()
+        ))["error"]["code"],
+        "OPAQUE_BOUNDARY"
+    );
+    assert!(!helper.exists());
+    fs::write(&helper, accepted).unwrap();
+    let opened = ipc(
+        &mut f.service,
+        "source.open",
+        json!({"path":"game/loomlight_choice_v1.rpy"}),
+    );
+    ipc(
+        &mut f.service,
+        "source.updateDraft",
+        json!({"path":"game/loomlight_choice_v1.rpy","expectedBaseRevision":opened["baseRevision"],"text":"# retained helper draft\n","selectionStart":0,"selectionEnd":0}),
+    );
+    assert_eq!(
+        f.reject(command(
+            &after,
+            after["scenes"][0]["beats"][0]["payload"].clone()
+        ))["error"]["code"],
+        "DIRTY_SOURCE"
+    );
+    ipc(
+        &mut f.service,
+        "source.discard",
+        json!({"path":"game/loomlight_choice_v1.rpy"}),
+    );
     f.service.close().unwrap();
 }

@@ -155,11 +155,12 @@ its own target; arbitrary labels and general loop editing remain unsupported.
 Ambiguous or colliding targets expose Source fallback and refuse authoring.
 
 Picked options use Show normally, Mark picked or Hide picked for the whole Choice.
+New Story Choices explicitly use Show normally and record selections immediately.
 An accepted policy edit writes the mode and stable Choice UUID in the menu arguments.
 Each option carries its own UUID and typed availability arguments. Its header mapping
 includes the first executable statement, which records `(Choice UUID, option UUID)`
 in `default _ll_picked_v1 = {}` before any authored Beat. The existing versioned
-choice adapter owns that declaration and the selectable check mark. This dictionary
+choice adapter owns that declaration and the selectable check mark and the distinct disabled lock. This dictionary
 is ordinary Ren'Py saved, rollback-aware game state. It is neither authoring metadata
 nor Ren'Py's caption-keyed persistent chosen history. Existing unconfigured source
 stays byte-identical on opening and no-op edits.

@@ -12,9 +12,11 @@ init python:
     # The menu resets store variables after an uncaught Return. Observe the
     # actual saved-source Return before that reset, outside the store being reset.
     renpy._choice101_return_flags = []
+    renpy._choice106_returns = []
     def _choice101_statement(name):
         if name == "return" and renpy.get_filename_line()[0].endswith("story.rpy"):
             renpy._choice101_return_flags.append(bool(renpy.store.choice_flag))
+            renpy._choice106_returns.append(dict(getattr(renpy.store, "_ll_picked_v1", {})))
     config.statement_callbacks.append(_choice101_statement)
 
     def _choice103_visible_prompt(who, what):
@@ -37,7 +39,7 @@ init python:
         widgets = []
         screen.visit_all(widgets.append)
         for widget in widgets:
-            if isinstance(widget, renpy.text.text.Text) and widget._tts_all(False).strip() == "Locked":
+            if isinstance(widget, renpy.text.text.Text) and widget._tts_all(False).strip() in ("Locked", "🔒 Locked"):
                 rendered = renpy.test.testfocus.focus_from_displayable(widget)
                 if rendered is not None and rendered.w > 0 and rendered.h > 0:
                     return rendered
@@ -82,7 +84,7 @@ init python:
 
 screen choice_body_main_menu():
     textbutton "Start" action Start()
-    textbutton "Load Choice" action FileLoad("choice106", confirm=False)
+    textbutton "Load Choice" action FileLoad("choice106", confirm=False, slot=True)
 
 label main_menu:
     call screen choice_body_main_menu
@@ -113,7 +115,7 @@ testsuite choice_body:
     testcase yes:
         assert screen "choice_body_main_menu" timeout 10
         click "Start"
-        assert screen "choice" timeout 10
+        assert eval (renpy.get_screen("choice") is not None or renpy.get_screen("_ll_choice_v1") is not None) timeout 10
         click "Yes"
         assert "Shared once" timeout 10
         assert eval (choice_flag is True)
@@ -125,7 +127,7 @@ testsuite choice_body:
     testcase no:
         assert screen "choice_body_main_menu" timeout 10
         click "Start"
-        assert screen "choice" timeout 10
+        assert eval (renpy.get_screen("choice") is not None or renpy.get_screen("_ll_choice_v1") is not None) timeout 10
         click "No"
         assert "Shared once" timeout 10
         assert eval (choice_flag is False)
@@ -137,7 +139,7 @@ testsuite choice_body:
     testcase return_option:
         assert screen "choice_body_main_menu" timeout 10
         click "Start"
-        assert screen "choice" timeout 10
+        assert eval (renpy.get_screen("choice") is not None or renpy.get_screen("_ll_choice_v1") is not None) timeout 10
         click "Yes"
         assert screen "choice_body_main_menu" timeout 10
         assert eval (renpy._choice101_return_flags == [True])
@@ -147,7 +149,7 @@ testsuite choice_body:
     testcase jump_option:
         assert screen "choice_body_main_menu" timeout 10
         click "Start"
-        assert screen "choice" timeout 10
+        assert eval (renpy.get_screen("choice") is not None or renpy.get_screen("_ll_choice_v1") is not None) timeout 10
         click "Yes"
         assert "Transferred" timeout 10
         assert eval (choice_flag is True)
@@ -159,7 +161,7 @@ testsuite choice_body:
     testcase wrong_outcome:
         assert screen "choice_body_main_menu" timeout 10
         click "Start"
-        assert screen "choice" timeout 10
+        assert eval (renpy.get_screen("choice") is not None or renpy.get_screen("_ll_choice_v1") is not None) timeout 10
         click "Yes"
         assert "Shared once" timeout 10
         assert eval (choice_flag is False) timeout 1
@@ -169,7 +171,7 @@ testsuite choice_body:
     testcase return_to_caller:
         assert screen "choice_body_main_menu" timeout 10
         click "Start"
-        assert screen "choice" timeout 10
+        assert eval (renpy.get_screen("choice") is not None or renpy.get_screen("_ll_choice_v1") is not None) timeout 10
         click "Yes"
         assert "Caller resumed" timeout 10
         assert eval (choice_flag is True and renpy._choice101_return_flags == [True])
@@ -181,7 +183,7 @@ testsuite choice_body:
     testcase nested_normal:
         assert screen "choice_body_main_menu" timeout 10
         click "Start"
-        assert screen "choice" timeout 10
+        assert eval (renpy.get_screen("choice") is not None or renpy.get_screen("_ll_choice_v1") is not None) timeout 10
         click "Yes, please"
         assert "Before call" timeout 10
         keysym "K_RETURN"
@@ -189,7 +191,7 @@ testsuite choice_body:
         keysym "K_RETURN"
         assert "Resume inside option" timeout 10
         keysym "K_RETURN"
-        assert screen "choice" timeout 10
+        assert eval (renpy.get_screen("choice") is not None or renpy.get_screen("_ll_choice_v1") is not None) timeout 10
         click "Inner normal"
         assert "Inside inner" timeout 10
         keysym "K_RETURN"
@@ -204,7 +206,7 @@ testsuite choice_body:
     testcase nested_jump:
         assert screen "choice_body_main_menu" timeout 10
         click "Start"
-        assert screen "choice" timeout 10
+        assert eval (renpy.get_screen("choice") is not None or renpy.get_screen("_ll_choice_v1") is not None) timeout 10
         click "Yes, please"
         assert "Before call" timeout 10
         keysym "K_RETURN"
@@ -212,7 +214,7 @@ testsuite choice_body:
         keysym "K_RETURN"
         assert "Resume inside option" timeout 10
         keysym "K_RETURN"
-        assert screen "choice" timeout 10
+        assert eval (renpy.get_screen("choice") is not None or renpy.get_screen("_ll_choice_v1") is not None) timeout 10
         click "Inner jump"
         assert "Transferred" timeout 10
         keysym "K_RETURN"
@@ -223,7 +225,7 @@ testsuite choice_body:
     testcase nested_return:
         assert screen "choice_body_main_menu" timeout 10
         click "Start"
-        assert screen "choice" timeout 10
+        assert eval (renpy.get_screen("choice") is not None or renpy.get_screen("_ll_choice_v1") is not None) timeout 10
         click "Yes, please"
         assert "Before call" timeout 10
         keysym "K_RETURN"
@@ -231,7 +233,7 @@ testsuite choice_body:
         keysym "K_RETURN"
         assert "Resume inside option" timeout 10
         keysym "K_RETURN"
-        assert screen "choice" timeout 10
+        assert eval (renpy.get_screen("choice") is not None or renpy.get_screen("_ll_choice_v1") is not None) timeout 10
         click "Inner return"
         assert screen "choice_body_main_menu" timeout 10
         $ print("CHOICE_102_RETURN caller=none shared=0", flush=True)
@@ -240,7 +242,7 @@ testsuite choice_body:
     testcase nested_return_caller:
         assert screen "choice_body_main_menu" timeout 10
         click "Start"
-        assert screen "choice" timeout 10
+        assert eval (renpy.get_screen("choice") is not None or renpy.get_screen("_ll_choice_v1") is not None) timeout 10
         click "Yes, please"
         assert "Before call" timeout 10
         keysym "K_RETURN"
@@ -248,7 +250,7 @@ testsuite choice_body:
         keysym "K_RETURN"
         assert "Resume inside option" timeout 10
         keysym "K_RETURN"
-        assert screen "choice" timeout 10
+        assert eval (renpy.get_screen("choice") is not None or renpy.get_screen("_ll_choice_v1") is not None) timeout 10
         click "Inner return"
         assert "Caller resumed" timeout 10
         keysym "K_RETURN"
@@ -259,7 +261,7 @@ testsuite choice_body:
     testcase narration_prompt:
         assert screen "choice_body_main_menu" timeout 10
         click "Start"
-        assert screen "choice" timeout 10
+        assert eval (renpy.get_screen("choice") is not None or renpy.get_screen("_ll_choice_v1") is not None) timeout 10
         assert screen "say" timeout 10
         assert eval (_choice103_visible_prompt(None, "Choose a route")) timeout 10
         assert "Yes" timeout 10
@@ -275,7 +277,7 @@ testsuite choice_body:
     testcase character_prompt:
         assert screen "choice_body_main_menu" timeout 10
         click "Start"
-        assert screen "choice" timeout 10
+        assert eval (renpy.get_screen("choice") is not None or renpy.get_screen("_ll_choice_v1") is not None) timeout 10
         assert screen "say" timeout 10
         assert eval (_choice103_visible_prompt("Bec", "Where shall we go?")) timeout 10
         assert "Yes" timeout 10
@@ -291,7 +293,7 @@ testsuite choice_body:
     testcase nested_prompt:
         assert screen "choice_body_main_menu" timeout 10
         click "Start"
-        assert screen "choice" timeout 10
+        assert eval (renpy.get_screen("choice") is not None or renpy.get_screen("_ll_choice_v1") is not None) timeout 10
         assert eval (_choice103_visible_prompt(None, "Choose a route")) timeout 10
         assert "Yes, please" timeout 10
         click "Yes, please"
@@ -301,7 +303,7 @@ testsuite choice_body:
         keysym "K_RETURN"
         assert "Resume inside option" timeout 10
         keysym "K_RETURN"
-        assert screen "choice" timeout 10
+        assert eval (renpy.get_screen("choice") is not None or renpy.get_screen("_ll_choice_v1") is not None) timeout 10
         assert screen "say" timeout 10
         assert eval (_choice103_visible_prompt("Bec", "Inside, which route?")) timeout 10
         assert "Inner normal" timeout 10
@@ -433,19 +435,19 @@ testsuite choice_body:
         click "Start"
         assert screen "_ll_choice_v1" timeout 10
         click "Nested conversation"
-        assert screen "choice" timeout 10
+        assert eval (renpy.get_screen("choice") is not None or renpy.get_screen("_ll_choice_v1") is not None) timeout 10
         assert eval (_choice103_visible_prompt("Bec", "Inside, ask again?")) timeout 10
         $ renpy._choice105_stack = len(renpy.game.context().return_stack)
         click "Inner ask"
         assert "Inner answer" timeout 10
         advance
-        assert screen "choice" timeout 10
+        assert eval (renpy.get_screen("choice") is not None or renpy.get_screen("_ll_choice_v1") is not None) timeout 10
         assert eval (_choice103_visible_prompt("Bec", "Inside, ask again?")) timeout 10
         assert eval (renpy.test.testfocus.find_focus("Nested conversation", False) is None and choice_visits == 1)
         click "Inner ask"
         assert "Inner answer" timeout 10
         advance
-        assert screen "choice" timeout 10
+        assert eval (renpy.get_screen("choice") is not None or renpy.get_screen("_ll_choice_v1") is not None) timeout 10
         assert eval (len(renpy.game.context().return_stack) == renpy._choice105_stack)
         click "Inner leave"
         assert "Outer resumed" timeout 10
@@ -581,4 +583,62 @@ testsuite choice_body:
         assert screen "_ll_choice_v1" timeout 10
         assert eval (_choice106_state(1)) timeout 1
         $ print("CHOICE_106_WRONG_ACCEPTED", flush=True)
+        exit
+
+    testcase picked_return:
+        click "Start"
+        assert screen "_ll_choice_v1" timeout 10
+        click "Same"
+        assert screen "choice_body_main_menu" timeout 10
+        assert eval (renpy._choice106_returns[-1] == {(choice106_id, choice106_options[0]): True})
+        $ print("CHOICE_106_RETURN recorded=before-transfer", flush=True)
+        exit
+
+    testcase picked_immediate_repeat:
+        click "Start"
+        assert screen "_ll_choice_v1" timeout 10
+        click "Same"
+        assert screen "_ll_choice_v1" timeout 10
+        assert eval (_choice106_state(1) and _choice106_picks() == [True, False, False] and _choice106_captions() == ["Same", "Locked"])
+        $ print("CHOICE_106_IMMEDIATE_REPEAT recorded=yes hidden=first", flush=True)
+        exit
+
+    testcase picked_instances:
+        click "Start"
+        assert screen "_ll_choice_v1" timeout 10
+        click "Same"
+        assert "Reenter Choice" timeout 10
+        advance
+        assert screen "_ll_choice_v1" timeout 10
+        click "Same"
+        assert "Reenter Choice" timeout 10
+        advance
+        assert screen "_ll_choice_v1" timeout 10
+        assert eval (renpy.get_screen("_ll_choice_v1").scope["_ll_id"] == choice106_second_id and _choice106_captions() == ["Same", "Same"] and not _choice106_rendered("✓ Same"))
+        click "Same"
+        assert "Shared once" timeout 10
+        assert eval (_choice106_picks() == [True, True, False] and len(_ll_picked_v1) == 3 and (choice106_second_id, choice106_second_options[0]) in _ll_picked_v1 and (choice106_second_id, choice106_second_options[1]) not in _ll_picked_v1)
+        $ print("CHOICE_106_INSTANCES keys=separate captions=identical", flush=True)
+        exit
+
+    testcase picked_repeat_hide:
+        click "Start"
+        assert screen "_ll_choice_v1" timeout 10
+        click "Ask about the station"
+        assert "Station answer" timeout 10
+        advance
+        assert "Transferred" timeout 10
+        advance
+        assert "Station call resumed" timeout 10
+        advance
+        assert screen "_ll_choice_v1" timeout 10
+        assert eval ("Ask about the station" not in _choice106_captions() and choice_flag and choice_visits == 1 and _choice103_visible_prompt(None, "What would you like to ask?"))
+        click "Ask about the ticket"
+        assert "Ticket answer" timeout 10
+        advance
+        assert screen "_ll_choice_v1" timeout 10
+        assert eval ("Ask about the station" not in _choice106_captions() and "Ask about the ticket" not in _choice106_captions())
+        click "Leave"
+        assert "Shared once" timeout 10
+        $ print("CHOICE_106_REPEAT_HIDE picked=hidden unavailable=disabled gate=combined", flush=True)
         exit
