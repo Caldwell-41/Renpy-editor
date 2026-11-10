@@ -80,8 +80,8 @@ refusing exactly one response read. Reads, Cancel, failed Save and mismatches ne
 consume it. A bounded host capture acknowledgement holds the disabled UI before one
 read-only Retry; the original phase assertions then continue. The Windows target
 branch remains natively unproved. The
-[acceptance-gap review](tasks/archive/2026-10-09-phase-2-execution-history.md#studio-2a1-acceptance-gap-review-and-windows-proposal--2026-10-09)
-maps the remaining proof; the [finalized preparation schedule](tasks/archive/2026-10-09-phase-2-execution-history.md#windows-acceptance-schedule-preparation--2026-10-09)
+[acceptance-gap review](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-09-phase-2-execution-history.md#studio-2a1-acceptance-gap-review-and-windows-proposal--2026-10-09)
+maps the remaining proof; the [finalized preparation schedule](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-09-phase-2-execution-history.md#windows-acceptance-schedule-preparation--2026-10-09)
 owns source checks and separate publication/native approval. Mac selector, storage,
 entry callbacks, transaction behavior and signing policy are unchanged.
 
@@ -109,14 +109,14 @@ file-generation records have explicit downgrade limits. Signing gates remain int
 need separate approval. No plaintext API-key fallback, session mode, generic provider or
 generation is exposed. Bounded synthetic packaged Mac qualification passed for retained
 native input, recovery and reuse across two builds; source tests alone do not qualify those paths.
-[The development ledger](tasks/archive/2026-10-09-phase-2-execution-history.md#mac-development-file-storage-implementation--2026-10-08)
+[The development ledger](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-09-phase-2-execution-history.md#mac-development-file-storage-implementation--2026-10-08)
 owns actual proof, preserved failures and its limits.
 
 Windows accepts shared v2 records while keeping native entry serialization unchanged.
 Mac file references remain unavailable and owned on Windows; explicit new native entry
 can replace them, with unsupported old-file cleanup reported pending. No automatic file
 migration, Mac key access or generation deletion. The
-[Windows ledger](tasks/archive/2026-10-09-phase-2-execution-history.md#windows-remembered-credential-continuation--2026-10-08)
+[Windows ledger](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-09-phase-2-execution-history.md#windows-remembered-credential-continuation--2026-10-08)
 owns its separate packaged qualification.
 
 `ai_discovery` sends one explicit authenticated `/models` GET, with a 15-second
@@ -128,7 +128,7 @@ retries are disabled. Network work runs outside the project service checkout, so
 does not own the authoring/Save lock. Availability evidence is transient and bound
 to the full saved configuration/credential revision; stale results are discarded.
 Discovery does not qualify generation or maximum context capacity. The
-[Mac implementation ledger](tasks/archive/2026-10-09-phase-2-execution-history.md#mac-implementation-and-native-proof--2026-10-08)
+[Mac implementation ledger](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-09-phase-2-execution-history.md#mac-implementation-and-native-proof--2026-10-08)
 owns actual proof, budgets and remaining Windows/OS identity limitations.
 
 ## System boundaries
@@ -220,7 +220,7 @@ not be imported as the Phase 1 production architecture.
 | Transaction service | Preview, validate, commit, undo/redo, recovery | Maintain separate visual/source/LLM edit paths |
 | File coordinator | Watch, hash/revision, conflict detection, safe paths | Follow unchecked symlinks or overwrite conflicts |
 | Ren'Py adapter | Versioned CLI discovery, compile/lint/run/test/build | Treat CLI output or private internals as stable |
-| Preview service | Supported editor views, the bounded [Screens canvas helper proof](tasks/evidence/canvas-rendering.md) and deliberate official project preview | Execute project code during editing or claim unqualified rendering fidelity |
+| Preview service | Supported editor views, the bounded [Screens canvas helper proof](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/canvas-rendering.md) and deliberate official project preview | Execute project code during editing or claim unqualified rendering fidelity |
 | Git adapter | Status, diff, checkpoints, history, safe restore, remote flows | Force-push or destructively reset by default |
 | LLM service | Providers, context selection, proposals, schema validation | Send content without explicit user action |
 | Credential service | OS keychain/credential store references | Store plaintext secrets in project metadata |
@@ -249,7 +249,7 @@ syntax as well as source-string syntax. Core protects existing reviewed interpol
 and formatting as immutable revision-bound tokens; unsupported target boundaries or
 token changes refuse before acceptance. Model prose cannot introduce active expressions
 or action-bearing tags. This does not alter manual Source editing or stored reference
-prose. The [Phase 2 proposal contract](tasks/reference/phase-2-requirements.md#7-structured-proposals-and-source-preparation)
+prose. The [Phase 2 proposal contract](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-2-requirements.md#7-structured-proposals-and-source-preparation)
 owns preparation and proof; this is selected design, not implemented behavior.
 External file-watch events enter the source service with a content hash; supported
 changes update the visual model, while unsupported regions remain visible custom code
@@ -543,7 +543,7 @@ alone cannot establish variable changes made by buttons during an interaction.
 effects unknown and refuses affected starts. Qualified conventional interactions and
 proven passive screens remain eligible. Relevant screen/action edits invalidate launch
 preparation. Full screen-interaction recording/replay is deferred; manual values cannot
-erase unknown side effects. The [3D contract](tasks/reference/phase-3d-state-run.md#6-3d--supported-state-and-run-from-here)
+erase unknown side effects. The [3D contract](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-3d-state-run.md#6-3d--supported-state-and-run-from-here)
 owns the eligible subset and rejecting tests; no current implementation is claimed.
 
 ## Resolved Phase 0 boundaries and implementation risks
@@ -600,9 +600,9 @@ later file reads. Material implementation decisions still require the owning run
 Shared flow projection must preserve known routes and explicit missing/unknown/partial
 boundaries without a second parser/document authority. Diagnostics gain structured
 locations and revision/session freshness through the existing SDK adapter. See the
-[1G brief](tasks/archive/2026-10-06-phase-1g-branches-runtime-git.md) for budgets and proof gates.
+[1G brief](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-06-phase-1g-branches-runtime-git.md) for budgets and proof gates.
 New Git status/diff/checkpoint services are deferred to
-[optional Git](tasks/active/optional-local-git.md); only existing optional creation-time
+[optional Git](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/optional-local-git.md); only existing optional creation-time
 init remains in Phase 1. No Git implementation is implied by the general adapter table.
 
 ### Implemented 1G.1 flow boundary
@@ -704,7 +704,7 @@ retain their existing independent harness behavior. OS termination still uses sh
 
 ### Data-only Screens canvas proof
 
-The selected [L17 proof](tasks/evidence/canvas-rendering.md) adds session-bound
+The selected [L17 proof](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/canvas-rendering.md) adds session-bound
 `screens.canvasPlan`, `screens.canvasRender` and `screens.canvasStatus` requests.
 Core derives the plan from lossless screen inspection and the expected source
 revision. Literal properties, size/position drafts and canvas-only text/button samples enter
@@ -730,7 +730,7 @@ state names, then constructs only its own known displayables. It receives no sty
 expressions or project code. Runtime render failures exit the helper and retain an
 unavailable canvas, rather than entering Ren'Py's interactive error UI. The existing
 frame-delivery class also owns the affected-use preview; the main canvas pauses
-while that dialog previews one screen at a time. [L07 evidence](tasks/evidence/shared-look.md)
+while that dialog previews one screen at a time. [L07 evidence](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/shared-look.md)
 keeps visual, source, SDK/helper and native results separate. General inherited
 styles and full canvas acceptance remain outside this extension.
 
@@ -763,7 +763,7 @@ Windows desktop closure, before reporting normal shutdown. The existing bounded
 process-tree cleanup remains the failure fallback. A helper failure retains drafts. Frame IDs, source
 and asset revisions bind exported PNGs and actual Ren'Py selection geometry to the
 request. A stale image cannot supply editing geometry. The UI has no simplified
-canvas fallback. The [proof record](tasks/evidence/canvas-rendering.md) owns the
+canvas fallback. The [proof record](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/canvas-rendering.md) owns the
 observed drawable-resolution differences and pending native presentation/focus gates.
 
 ### Isolated scratch preview jobs for custom screens
@@ -917,7 +917,7 @@ combined project/source-map changes with core UUIDs and explicit terminal Return
 Acceptance commits that exact digest-bound proposal through shared history once;
 ordinary directory creation is deferred until explicit acceptance. There is no incoming
 edge or loop of single-Beat apply calls. [PROMPTS_CONTEXT](PROMPTS_CONTEXT.md#bounded-draft-scene)
-owns the closed authority and [TESTING](TESTING.md#draft-scene-focused-qualification)
+owns the closed authority and [TESTING](testing/SDK-RUNTIME.md#source-and-transaction-coverage)
 owns focused proof.
 
 ### Generated Character card boundary
@@ -937,7 +937,7 @@ sent story/definition sources remain durable dependencies, distinct from full-so
 acceptance guards. Explicit manual replacement clears generated source bindings.
 Unknown content/provenance/revision extensions survive; core-owned support snapshots
 replace their predecessor. See [context contract](PROMPTS_CONTEXT.md#generated-character-card)
-and [focused qualification](TESTING.md#generated-character-card-focused-qualification).
+and [focused qualification](testing/AUTOMATED.md#renderer-and-production-probe-consumers).
 
 ### Generated lorebook entry boundary
 
@@ -954,7 +954,7 @@ extensions and retain unselected/unresolved support. Supporting-source freshness
 checked for both collections and propagates through explicit reference citations;
 this is eligibility validation without retrieval or context injection. Stale support
 blocks approval/inclusion. See [context](PROMPTS_CONTEXT.md#generated-lorebook-entry)
-and [focused proof](TESTING.md#generated-lorebook-entry-focused-qualification).
+and [focused proof](testing/AUTOMATED.md#renderer-and-production-probe-consumers).
 
 
 ### Selectable proposal composition
@@ -975,4 +975,4 @@ commit, and retains ordinary blocking recovery on ambiguity. Candidate Character
 metadata is tested against all saved Scene mappings before source composition; custom
 regions cannot acquire a new interpretation. See
 [PROMPTS_CONTEXT](PROMPTS_CONTEXT.md#selectable-scene-edits) for the bounded schema and
-[TESTING](TESTING.md#selectable-proposal-editing-focused-qualification) for proof ownership.
+[TESTING](testing/NATIVE.md#native-driver-requirements) for proof ownership.

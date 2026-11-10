@@ -1,8 +1,7 @@
 # ADR 0002: Versioned Ren'Py SDK adapter and verified installation
 
 **Status:** Accepted<br>
-**Date:** 2026-09-10<br>
-**Evidence updated:** 2026-09-13
+**Date:** 2026-09-10
 
 ## Context
 
@@ -10,7 +9,7 @@ Ren'Py's command-line interface is not a stable API, its commands load project c
 and an SDK is a large executable dependency obtained as an archive. The editor needs
 repeatable version behavior without treating untrusted projects or archives as data
 only. Initial Linux evidence for 8.5.3 and the later cross-platform results are
-recorded in the [SDK spike results](../research/RENPY_SDK_SPIKE_RESULTS.md).
+recorded in the [SDK spike results](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/research/RENPY_SDK_SPIKE_RESULTS.md).
 
 ## Decision
 
@@ -52,12 +51,9 @@ fixture compile/lint/test/run/warp/build evidence, and an adapter compatibility 
 A user can inspect and revoke project trust independently of opening source as text.
 Failures are explicit rather than silently retried with different commands.
 
-The accepted boundary is platform-neutral and now has integration evidence on all
-supported targets. Phase 0 run 34731460283 passed the original Windows x64, macOS
-ARM64, and Linux regression matrix, and corrective run 34742452653 revalidated the
-trusted fixture on the same targets after the safety fixes. Version, compile, lint,
-test, run, warp, diagnostics, bounded distribution, containment-checked installation,
-and package launch are therefore established for the Ren'Py 8.5.3 adapter baseline.
+The accepted boundary is platform-neutral. Version, compile, lint, test, run, warp,
+diagnostics, bounded distribution, containment-checked installation and package
+launch are established for the Ren'Py 8.5.3 adapter baseline on all supported targets.
 Physical SmartScreen behavior, browser-origin macOS quarantine, signing/notarisation,
 and wider release UX remain later release-validation gates rather than unresolved
 Phase 0 adapter gates.

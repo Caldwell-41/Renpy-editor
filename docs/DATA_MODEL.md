@@ -248,7 +248,7 @@ Late picker responses cannot clear the selected thumbnail or revive a disposed
 workspace. Selection changes release the previous mounted preview's priority.
 
 [Ticket #40](https://github.com/Caldwell-41/Renpy-editor/issues/40) owns delivery and
-acceptance. [UI-image evidence](tasks/evidence/ui-image.md) distinguishes service
+acceptance. [UI-image evidence](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/ui-image.md) distinguishes service
 checks, approved design, controller proof and SDK/native qualification.
 
 ### Project font role and text properties
@@ -284,7 +284,7 @@ invalid input and focus the affected field. An unchanged source literal above th
 bound does not block typography-only edits, because its text is not submitted.
 
 [Ticket #39](https://github.com/Caldwell-41/Renpy-editor/issues/39) owns acceptance.
-[Project font evidence](tasks/evidence/project-fonts.md) records the tested limits.
+[Project font evidence](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/project-fonts.md) records the tested limits.
 
 ## Shared screen styles
 
@@ -342,7 +342,7 @@ defaults without turning the previous Style's values into shared edits. Local bu
 decoration stays outside text-only shared previews. Source reconciliation,
 Undo/Redo and reopen reconstruct definitions and references from authoritative bytes.
 [Ticket #43](https://github.com/Caldwell-41/Renpy-editor/issues/43) owns acceptance;
-[shared-look evidence](tasks/evidence/shared-look.md) owns candidate-specific proof.
+[shared-look evidence](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/shared-look.md) owns candidate-specific proof.
 
 ## Variables and state
 
@@ -376,7 +376,7 @@ result type, reads/writes, field diagnostics, unknown reasons, variable choices 
 definition revisions, numeric capabilities and project/map/authoring/Scene revisions.
 `capabilities.decimalTransport` is `"finiteFloat64OrNegativeZero"`.
 Draft values are constant-folded only; variable-dependent current state remains
-explicitly unobserved. The [#94 evidence](tasks/evidence/arithmetic-94.md) records exact
+explicitly unobserved. The [#94 evidence](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-94.md) records exact
 transport fixtures. No renderer parser is required.
 
 `scene.list` exposes the authoring revision and declared variable choices.
@@ -399,9 +399,9 @@ retaining source style, spacing, comments and IDs. Source-map schema 8 is unchan
 An exact-byte/range match permits an old Custom Code formula mapping to retain its
 ID without rewriting metadata on open. Existing schema migration can refine it.
 Invalid formulas remain protected and expose assignment diagnostics. The
-[#94 contract and fixtures](tasks/evidence/arithmetic-94.md) own current shapes,
-qualification and target limits; [#93 evidence](tasks/evidence/arithmetic-93.md)
-retains integer-formula qualification and [#92 evidence](tasks/evidence/arithmetic-92.md)
+[#94 contract and fixtures](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-94.md) own current shapes,
+qualification and target limits; [#93 evidence](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-93.md)
+retains integer-formula qualification and [#92 evidence](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-92.md)
 retains the preceding simple-adjustment and both-target proof.
 
 Screens Set variable actions use the same `{operation, operand}` value and shared
@@ -444,7 +444,7 @@ Inspection recognizes only the exact generated call and helper template. Importe
 expression-valued `SetVariable` calls retain captured screen-evaluation timing and
 stay protected rather than being converted. The inert canvas recognizes the exact
 owned helper declaration as data-only initialization; it never loads or runs it.
-[The #95 evidence](tasks/evidence/arithmetic-95.md) owns exact payloads, runtime
+[The #95 evidence](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-95.md) owns exact payloads, runtime
 qualification and remaining target limits.
 
 Phase 1D Variables store UUID, immutable lowercase technical name, supported type,
@@ -478,7 +478,7 @@ style notes live in `.renpy-editor/ai.json`, with full text and baseline version
 Machine-local `ai-profiles.json` owns endpoints, model defaults and project bindings;
 keys use the OS store or explicit backend-memory-only session mode. See
 [ADR 0011](adr/0011-ai-settings-secrets-and-reference-storage.md) and the
-[Phase 2 brief](tasks/active/phase-2-initial-llm-assistance.md).
+[Phase 2 brief](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/phase-2-initial-llm-assistance.md).
 
 The implemented Studio slice uses strict device records with a store revision, up to
 32 profiles and 128 owned cleanup references, bounded to 128 KiB. Profiles retain opaque
@@ -578,7 +578,7 @@ side-mask portion. Container/codec/timing metadata must be verified and versione
 existing Phase 1 allowlist is not silently expanded. Preserve accepted media bytes;
 there is no conversion or extracted-frame cache as a new source of truth. Dependencies
 share existing import/history/recovery and source mapping. The
-[3C media contract](tasks/reference/phase-3c-timeline.md#selected-staging-native-media-and-idle-playback)
+[3C media contract](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-3c-timeline.md#selected-staging-native-media-and-idle-playback)
 owns format qualification and acceptance; this describes a future schema, not current
 implemented metadata or browser decoder support.
 
@@ -1048,7 +1048,7 @@ After an accepted numeric save, unchanged drafts for other durable element UUIDs
 rebase onto that returned revision. Unmarked nodes use kind, literal and source offset
 as a temporary key, without claiming durable identity. Missing targets expose a
 read-only retained draft with explicit discard. Source remains authoritative.
-[Numeric layout evidence](tasks/evidence/numeric-layout.md) owns the qualified SDK
+[Numeric layout evidence](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/numeric-layout.md) owns the qualified SDK
 cases and the limits of geometry and native proof.
 
 ### Nested containers and viewport limits

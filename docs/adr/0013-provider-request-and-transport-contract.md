@@ -1,6 +1,6 @@
 # ADR 0013: Provider request and transport contract
 
-**Status:** Studio-scoped reference/design accepted for the first bounded 2A.1 slice on 2026-10-08. Generic deferred; full live/production qualification incomplete.
+**Status:** Accepted for Unsloth Studio on 2026-10-08. Generic-provider support is deferred.
 **Date:** 2026-10-07.
 
 ## Draft connection setup and thinking preference — 2026-10-16
@@ -33,17 +33,12 @@ Failures retain owned cleanup state and the draft. A confirmed Save followed by 
 failure disables writes until read-only reload. Existing namespace, backend, signing
 and per-model management policies remain unchanged. The separate **Test response
 format** operation is explicit and model-specific; Connect never runs it implicitly.
-Scoped tests, real Studio and native/platform evidence remain distinct in the
-[owning outcome](../tasks/evidence/phase-2-execution.md#thinking-settings-and-full-workflow--selected-2026-10-16).
 
 ## Generation-time Studio readiness — 2026-10-15
 
-The [approved redesign task](../tasks/active/walkthrough-redesign-implementation.md)
-selects a capability/response-contract model-management adapter for Unsloth Studio.
-The user explicitly rejected exact-version acceptance gates. Implementation is local;
-owner setup and rewrite/include passed, while remaining action and final both-host
-evidence are pending. It changes no provider/credential/signing
-policy. Saving, Settings open and explicit inventory refresh never load a model.
+Loomlight uses a capability/response-contract model-management adapter for Unsloth
+Studio. The user explicitly rejected exact-version acceptance gates. It changes no
+provider/credential/signing policy. Saving, Settings open and explicit inventory refresh never load a model.
 
 Production native generation calls `execute_ready`. Authenticated management calls
 and chat share the captured credential/destination, cancellation socket owner and one
@@ -63,7 +58,7 @@ and [`133a8076`](https://github.com/unslothai/unsloth/tree/133a8076d10aa109f812f
 These source versions establish evidence, not an acceptance allowlist. `/version` and
 the prebuilt installation marker are diagnostic information, not load prerequisites.
 The owner diagnostic observed a compatible idle status and v0.1.907-beta; the old
-902-only gate would refuse that current state. The task ledger owns qualification.
+902-only gate would refuse that current state.
 
 Required loaded/loading arrays, identity/context fields and authenticated inventory
 must establish no observed resident or loading model before cache lookup. Explicit
@@ -148,38 +143,21 @@ own that limitation. Warnings retain generation/proposal review when the prepare
 request fits actual capacity; a genuine admission/load/authentication failure remains
 an error. No specific Unsloth Studio version is an acceptance gate.
 
-**Current closeout disposition, 2026-10-12:** Phase 2 is Studio-only. The selected
-literal-HTTP/nonstreaming/off-only client slices are qualified; full-phase scope and
-final integrated acceptance remain incomplete. The
-[closeout map](../tasks/evidence/phase-2-execution.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12)
-identifies missing configuration-bound capability readiness, editable sampling and
-the unresolved full-phase TLS/hostname boundary. The LAN amendment's exclusions apply
-to that slice, not automatically to the entire phase. Thinking-on/default failures,
-unknown server-internal tools and all other exact evidence limits remain intact.
-The user's subsequent decision selects local Temperature/Top-p implementation with
-saved creative-writing defaults1.0/0.95 and finite bounds0–2/0–1. Both fields are visible
+**Amended 2026-10-12:** Phase 2 is Studio-only. Local Temperature/Top-p use saved
+creative-writing defaults 1.0/0.95 with finite bounds 0–2/0–1. Both fields are visible
 in exact reviewed action bodies; saved changes invalidate prepared sends through the
 existing profile revision/token. Legacy absent fields remain omitted until explicit
-profile Save, with effective defaults used for new reviewed sends. Installed-Studio
-sampling acceptance and both-target native qualification remain pending. No capability,
-TLS, thinking-mode or provider expansion is selected by this change.
-The user's subsequent 2026-10-12 decision defers AI changes to existing Scene endings
-and story connections beyond Phase 2. Continue preserves its ending; Draft creates
-an unconnected Scene with Return. Terminal validity remains required. The wider
-operation family is possible future separately selected work, not a closeout blocker.
-**Prior authority:** the user accepted the corrected Studio disposition and selected the
-first remembered-profile/settings/credential slice. Generation, project sends,
-generic completion and screen implementation remain outside that selection.
+profile Save, with effective defaults used for new reviewed sends. AI changes to
+existing Scene endings and story connections are deferred beyond Phase 2: Continue
+preserves its ending, and Draft creates an unconnected Scene with Return. Terminal
+validity remains required.
 
 ## Remaining Studio closeout changes — 2026-10-12
 
-The user subsequently defers selected-route context as well as AI ending/connection
-changes and directs implementation of the remaining items 2–5. This supersedes the
-earlier unselected readiness/TLS disposition above. The local implementation adds
-explicit **Test setup**, configuration-bound saved readiness, verified HTTPS generation
-and hostname resolution. It keeps one saved credential reused across sessions and the
-existing approved Windows/Mac storage and package identities. Native/Windows/live and
-final integrated acceptance remain pending; local fixture success is not Studio proof.
+Selected-route context is deferred. Loomlight adds explicit **Test setup**,
+configuration-bound saved readiness, verified HTTPS generation and hostname
+resolution. It keeps one saved credential reused across sessions and the existing
+approved Windows/Mac storage and package identities.
 
 Test setup shows its complete tiny synthetic closed-JSON request, with strict schema,
 tools disabled, thinking off, nonstreaming response and the saved sampling/output
@@ -207,10 +185,7 @@ the pinned ureq3.1.4 adapter cannot validate its bracketed certificate name; HTT
 DNS names resolving IPv6 and literal IPv4 HTTPS retain verification. This limit is
 reported, not bypassed by disabling TLS or replacing dependencies.
 
-Any live Test setup counts toward the existing ten-send ceiling, separately from
-the five action counters. No live preflight or generation has occurred in this
-closeout. Fresh native credential entry and the exact selected Studio configuration
-are required before owner-machine live qualification; CI gets only public fixtures.
+CI uses only public fixtures.
 
 ## Studio-only production LAN amendment — 2026-10-11
 
@@ -222,8 +197,6 @@ credential-origin/configuration binding, exact SocketAddr connection, no DNS, am
 proxy, redirect or retry, and bounded socket cancellation. Review discloses unencrypted
 LAN transport; inference locality/internal server tools remain separately unknown.
 HTTPS/hostname support and generic production modes remain outside this amendment.
-Implementation and actual live/native evidence are recorded in the existing Phase2 task;
-this amendment alone is not a successful live qualification or full Phase2 acceptance.
 
 ## Context
 
@@ -319,40 +292,13 @@ on/off maps to `enable_thinking=true|false`. Generic thinking requires its own
 documented, measured mapping, otherwise it stays unavailable. Sampling fields are a
 typed, qualified allowlist. No invented server-context resize parameters.
 
-The measured Studio candidate uses explicit thinking **off**, `max_tokens=1024`,
-sampling omitted, direct private-LAN HTTP. Closed-schema JSON with protected tokens
-and harmless tool-disabled prose, plus literal-fixture SSE, passed. Normal completion,
-model identity, no tools and whole-document validation remain mandatory. Thinking
-on exhausted both 256 and 1024 output tokens without a usable final answer; default
-at 256 also failed. Keep on/default evidence distinct; never silently change modes.
-Thinking-on SSE remains unqualified because the successful-JSON prerequisite failed.
-Output allowance includes reasoning where applicable; it is not final-answer length.
-The recorded thinking failures are output-cap truncations, not evidence that thinking
-is unsupported. T03 explicitly sent `max_tokens=1024` and reported 1024 completion
-tokens with `finish_reason=length`; no `max_new_tokens` wire field was sent. Current
-upstream resolves the Chat Completions output field into the backend generation cap,
-but the installed backend mapping and a larger thinking allowance remain unqualified.
-
-Configuration: exact `unsloth/gemma-4-12B-it-qat-GGUF`; API-advertised quant
-`UD-Q4_K_XL`, loaded=true after ordinary inference, runtime/native/advisory context
-metadata each 262144. User reports Studio v0.1.902-beta and UI context 262144.
-Installed backend/kernel and effective sampling values remain unknown. Metadata is
-not a maximum-workload capacity pass. Tiny fixture preflight uses local total budget
-4096, conservative full-body byte token estimate plus visible margin plus output
-1024 <= budget <= advertised ceiling. No per-request context resize is sent.
-
-Actual JSON and partial-SSE client cancellation released owned workers within the
-2 s cleanup target, with no proposal published; post-JSON-cancel discovery succeeded.
-These qualify this isolated Python client's transport ownership, not server-stop,
-production async adapter, Save responsiveness or deadline/cold-capacity guarantees.
-The existing ledger preserves prior failures, incomplete evidence and generic deferral.
-
 Success requires HTTP/protocol completion, one choice/index, allowed returned model
 identity, `finish_reason=stop`, no refusal/tools, and bounded nonempty final content.
 Missing/unknown finish reason, `length`, interrupted stream or refusal cannot become
 a proposal. Parse one entire JSON document: no Markdown stripping, regex extraction,
 duplicate keys, NaN/Infinity, heuristic repair or code execution. Validate schema,
 operation bounds, references/dependencies and all revisions before preparing edits.
+Output allowance includes reasoning where applicable; it is not final-answer length.
 Usage is optional; missing is unknown, not zero. Reasoning is separate bounded data,
 never a source of proposal text. A response cannot enlarge the target/action allowlist.
 
@@ -361,7 +307,7 @@ Existing reviewed interpolation/formatting is protected by core-owned opaque tok
 bound to target revision. Refuse altered, reordered, duplicated, removed or invented
 tokens and unsupported target boundaries. The qualification fixture verifies the
 wire boundary only; it does not emit `.rpy` or claim SDK literal-display evidence.
-Cards/lore remain metadata prose. [Phase 2 section 7](../tasks/reference/phase-2-requirements.md#7-structured-proposals-and-source-preparation)
+Cards/lore remain metadata prose. [Phase 2 section 7](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-2-requirements.md#7-structured-proposals-and-source-preparation)
 owns the generated-text boundary and first-rewrite gates.
 
 ### Transport, states and resource limits
@@ -372,7 +318,6 @@ each, response bytes including reasoning 8 MiB, SSE line/event 256 KiB, JSON dep
 32, maximum 256 operations. Non-streaming uses the total deadline for no-progress.
 Every byte/event is bounded before assembly; limits reject, never silently truncate.
 These are application bounds, not live-confirmed model capacities or latency promises.
-Live qualification uses the stricter deadlines in the probe plan.
 
 Require an effective context ceiling if introspection is unreliable; label user values
 unverified. Estimate all messages/framing/schema plus reserved output and a visible
@@ -387,9 +332,7 @@ Cancellation competes with final publication under the same request/session guar
 cancelled/replaced sessions never publish late review. Abort socket/reader/task, remove
 request registry entries and release buffers within a 2 s client cleanup target.
 Project close cancels its work; app exit clears session credentials. Do not claim
-server computation/billing stopped unless separately documented and observed. Spike
-fixtures prove ownership ordering; actual JSON/SSE client cleanup is recorded separately.
-Production adapter cancellation remains a 2A.2 gate.
+server computation/billing stopped unless separately documented and observed.
 
 SSE is optional and separately qualified: require `text/event-stream`, incremental
 strict UTF-8 decoding, CR/LF/CRLF and split-boundary handling, comments/heartbeats,
@@ -417,17 +360,7 @@ the staged key. Cleanup failure retains a nonsecret reference for explicit bound
 retry. Removal disables sends first, then deletes; no other profile's entry is touched.
 Session/no-auth changes use the same publish-before-retire order. Key changes invalidate
 prepared sends/evidence. Local removal is not provider revocation. Native errors expose
-categories, not key values. The spike implements only a user-requested macOS qualification
-credential seam: explicit native Remember, separate test-service Keychain entry and
-origin-bound nonsecret reference. Disposable round-trip/read in a second process/delete
-passed on this host. This is not a production packaged adapter or 2A.1 implementation;
-production identity, native replacement/removal and Windows behavior remain gates.
-The corrected seam saves the owned nonsecret `.pending` reference before adding the
-key and publishes it only after store verification. Failed cleanup retains that record
-and the primary fixed failure category; startup refuses entry/use while it remains.
-One explicitly selected cleanup attempt validates ownership before deleting that entry
-and removes the record only on success. No automatic cleanup, key export or real-key
-removal was performed during the portable correction; native recovery execution is unqualified.
+categories, not key values.
 
 The selected Windows adapter retains shared fixed legacy/current services, with
 targets `<service>/provider/<profile UUID>/<credential UUID>` and an ownership digest
@@ -435,9 +368,7 @@ bound to origin/revision/reference. New Windows entries use the legacy service;
 namespace changes are not implicit. Credential Manager's 2560-byte blob bound causes
 an explicit native save refusal above that limit, retaining input. App-owned masked
 entry, Retry/Cancel, transactional switching, unsupported Mac-file retention and
-fixed-loopback discovery use production desktop services. The Windows ledger owns
-bounded packaged proof; this does not qualify real Studio, generation, generic,
-every future build or clean-OS reinstall behavior.
+fixed-loopback discovery use production desktop services.
 
 HTTP diagnostics retain status, safe category, elapsed time, byte/token counts and
 opaque request ID only. Never surface raw server error bodies, headers, URLs with
@@ -484,36 +415,14 @@ waits off-thread within the captured response deadline. A busy service alone is 
 stale configuration. Cancel, configuration/project changes and shutdown still invalidate
 that waiting result. Each reported usage component remains bounded even when other
 usage fields are absent; missing fields remain unknown.
-This selection excludes SSE, general providers/auth modes and live Studio compatibility;
-it does not close full 2A.2 or Phase 2. Windows requires focused affected-request proof,
-without repeating unchanged remembered-credential qualification.
 
-## Qualification and alternatives
-
-The [Studio contract review](../tasks/archive/2026-10-09-phase-2-execution-history.md#studio-qualification-contract-review--2026-10-08)
-verified all 22 input digests and retained live results, but found uncovered candidate
-defects in malformed-response classification, failed credential cleanup recovery and
-nonfinite-number parsing. The [correction and owner review](../tasks/archive/2026-10-09-phase-2-execution-history.md#studio-review-corrections-and-owner-review--2026-10-08)
-closes R1–R3 with 61 portable passes and original-candidate rejection checks. The
-corrected Studio reference was accepted for the bounded first 2A.1 slice. Full
-generic/live/production qualification is not inferred. The
-[slice continuation](../tasks/archive/2026-10-09-phase-2-execution-history.md#first-studio-settingscredential-slice--2026-10-08)
-owns partial implementation and the native-access prerequisite.
-
-The [existing ledger](../tasks/archive/2026-10-09-phase-2-execution-history.md#25-provider-qualification-ledger--2026-10-07)
-owns actual configuration, planned probes, counts and results. Missing endpoint access
-is incomplete evidence. Deterministic checks cannot qualify Studio, generic, TLS,
-server tool suppression, server cancellation or production native credentials.
-User-managed model loading/switching stays the baseline; management APIs require a
-documented public contract and separately selected follow-on. No new dependency,
-provider installation, download, native build, SDK run or CI is selected here.
+## Alternatives and references
 
 Current core uses pinned `ureq` 3.1.4 for a synchronous SDK-download path with
 redirects refused and a global timeout. That path is not a proved cancellable generation
 worker. 2A.2 must demonstrate aborting a stalled read, cleanup and validated-address/TLS
 binding at the chosen adapter seam before retaining it or proposing a dependency change.
-Transitive `reqwest` in the lockfile is not an existing core request service. No transport
-dependency was added or replaced during this spike.
+Transitive `reqwest` in the lockfile is not an existing core request service.
 
 Upstream wire references checked 2026-10-07: [Unsloth HTTP guide](https://unsloth.ai/docs/integrations/connect-curl-and-http-to-unsloth)
 documents discovery, output/thinking fields and server tool controls; [Unsloth Python guide](https://unsloth.ai/docs/integrations/connect-python-sdk-to-unsloth)

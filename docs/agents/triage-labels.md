@@ -10,5 +10,4 @@ Use these labels when an engineering skill names a triage role.
 | ready-for-human | ready-for-human | Requires human implementation |
 | wontfix | wontfix | Will not be implemented |
 
-A readiness label does not replace the selected task, authorization or
-any applicable operation limits under AGENTS.md and docs/WORKFLOW.md.
+A readiness label does not authorize work; the user selects it.

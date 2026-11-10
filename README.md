@@ -8,8 +8,8 @@ The production application lives in [`app/`](app/README.md).
 
 Project Loomlight is the temporary codename for this standalone, single-user authoring
 environment. Tauri 2 is the accepted desktop runtime. Phase 2/3 remain planning only.
-Start with [the documentation index](docs/INDEX.md) and
-[the current status](docs/status/CURRENT.md).
+Start with [the documentation index](docs/INDEX.md). Open work is tracked in
+[GitHub Issues](https://github.com/Caldwell-41/Renpy-editor/issues).
 
 ## Download 0.1.0 preview
 
@@ -18,7 +18,7 @@ available for Windows x64 and macOS ARM64, with checksums, provenance and licenc
 This early public prerelease is **unsigned and not notarized**; exact installer paths
 have not been separately qualified. Packaged applications passed both-target CI.
 See the release notes for the approved one-off exception and remaining limitations.
-The [publication record](docs/tasks/archive/2026-10-07-release-0.1.0.md) retains exact identities.
+The [publication record](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-07-release-0.1.0.md) retains exact identities.
 
 The repository validator is:
 

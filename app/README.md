@@ -2,7 +2,7 @@
 
 This directory contains Loomlight's Tauri desktop application, Rust core and
 TypeScript UI, with build, test and packaging tools. Disposable prototypes live in
-`spikes/`. [Current project state](../docs/status/CURRENT.md) owns active work and
+`spikes/`. [Current project state](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/status/CURRENT.md) owns active work and
 acceptance status.
 
 ## Local checks
@@ -38,7 +38,7 @@ and Rust-only storage; the renderer receives redacted status through narrow type
 Use [Design Lab](design-lab/README.md) for browser mockups and individual component
 previews. Run `npm run design:dev` locally. Select prototype, shared-tooling and
 approval checks under [focused verification](design-lab/README.md#focused-verification).
-Product integration retains the selected task's normal acceptance gates.
+Product integration retains the issue's normal acceptance gates.
 
 ## Synthetic Studio request
 
@@ -75,8 +75,8 @@ request under the publication guard; Cancel discards even a racing final result.
 Client cancellation does not promise that server computation/billing stopped.
 
 Focused checks and the task-specific signed-app walkthrough are described in
-[TESTING](../docs/TESTING.md#studio-synthetic-non-streaming-request).
-The [Mac acceptance record](../docs/tasks/archive/2026-10-09-mac-studio-request-lifecycle.md#final-mac-acceptance--2026-10-09)
+[TESTING](../docs/testing/AUTOMATED.md#renderer-and-production-probe-consumers).
+The [Mac acceptance record](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-09-mac-studio-request-lifecycle.md#final-mac-acceptance--2026-10-09)
 qualifies this packaged synthetic subset, including responsive Source Save during a
 stalled request and scoped cleanup. Windows request-service proof remains separate;
 unchanged Mac/Windows credential qualification is reused.
@@ -97,7 +97,7 @@ Change it only after explicit approval and inspection of the certificate; never 
 a key there. The pin records the selected identity, not successful package qualification.
 Debug unit tests need no certificate. Windows signing/packaging is unchanged.
 Unconfigured Mac CI release/package jobs fail closed: verify that the approved identity
-is available before selecting such a job. [CI routing authority](../docs/WORKFLOW.md#test-host-routing-and-ownership)
+is available before selecting such a job. [CI routing authority](../docs/TESTING.md#test-host-routing)
 permits focused checks within the selected outcome; it does not authorize secret
 provisioning, certificate export, trust/ACL changes or a signing-policy bypass.
 
@@ -234,7 +234,7 @@ guidance in [TN2206](https://developer.apple.com/library/archive/technotes/tn220
 is insufficient alone. Do not add root trust, weaken ACLs or rebuild the same approach
 as an automatic correction. A changed signing route requires explicit approval and
 fresh app-owned update proof; see the
-[identity ledger](../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#stable-macos-identity-and-remembered-keys--2026-10-08).
+[identity ledger](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-09-phase-2-execution-history.md#stable-macos-identity-and-remembered-keys--2026-10-08).
 
 Free Apple Development signing is a candidate for local qualification, not the currently
 approved identity. [Tauri](https://v2.tauri.app/distribute/sign/macos/) supports that
@@ -253,7 +253,7 @@ keys may require one-time native re-entry; retain their references and pending c
 The Windows remembered-profile adapter is described in
 [Windows native Studio credentials](#windows-native-studio-credentials) below.
 
-The selected [development plan](../docs/tasks/active/2026-10-08-macos-development-credential-storage.md)
+The selected [development plan](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/2026-10-08-macos-development-credential-storage.md)
 uses encrypted local records plus an unencrypted random local unlock key. Software under
 the same login can decrypt them. Native AppKit entry stays outside the web view; failed
 persistence keeps input for explicit Retry/Cancel. Healthy compatible storage is intended
@@ -271,7 +271,7 @@ not packaged native UI/reuse. See [format/ownership](../docs/DATA_MODEL.md) and
 If Settings cannot reload after a confirmed save, its visible status still reports
 cleanup pending where applicable, and mutations wait for read-only reload. The independent
 review corrected this response after the original native sequence; source/DOM evidence
-covers the correction. The separately approved [Mac section-15 packaged proof](../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#mac-section-15-corrected-packaged-proof--2026-10-09)
+covers the correction. The separately approved [Mac section-15 packaged proof](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-09-phase-2-execution-history.md#mac-section-15-corrected-packaged-proof--2026-10-09)
 now confirms the exact saved/cleanup-pending/reload-required UI, disabled controls and
 read-only Retry restoring selected configured C with unchanged persistent bytes on
 source `37e3ab3`. This narrow result does not accept Studio 2A.1/Phase 2 or release.
@@ -285,7 +285,7 @@ is used. Read-only Retry restores configured C without another save/request. The
 `reload_failure_environment` helper in `scripts/macos-development-credentials.py`
 checks fresh/private fixture state and returns the explicit environment without launching
 anything. The original four-phase runner refuses inherited fault selectors.
-[Mac plan section 15](../docs/tasks/active/2026-10-08-macos-development-credential-storage.md#15-independent-review-correction-and-proposed-narrow-native-follow-up)
+[Mac plan section 15](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/2026-10-08-macos-development-credential-storage.md#15-independent-review-correction-and-proposed-narrow-native-follow-up)
 owns the separately approved and completed package schedule. Its single-use allowance
 is exhausted; this selector grants no further native operations.
 
@@ -315,9 +315,9 @@ uses the actual Settings/AppKit UI. Source-only control checks use
 Run signing/native process controls on the host with the required execution capability;
 an empty sandbox identity listing is not evidence that the certificate is absent, and
 never permits fallback or certificate/trust changes. The
-[bounded native operation schedule](../docs/tasks/active/2026-10-08-macos-development-credential-storage.md#13-prepared-native-fixture-and-proposed-allowance)
+[bounded native operation schedule](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/2026-10-08-macos-development-credential-storage.md#13-prepared-native-fixture-and-proposed-allowance)
 requires explicit allowance before packaging/signing or runtime execution. The
-[owning result](../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#development-file-native-qualification-result--2026-10-08)
+[owning result](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-09-phase-2-execution-history.md#development-file-native-qualification-result--2026-10-08)
 records the passed bounded sequence and retained failures; it grants no further operation.
 After a native quit, verify the external receipt/PID and do not call a UI observer or
 `getApp` on the exited app: reacquisition can implicitly launch it without fixture state.
@@ -341,7 +341,7 @@ references remain preserved and require explicit Windows re-entry; no Mac key/fi
 operation is attempted. See [ADR 0011](../docs/adr/0011-ai-settings-secrets-and-reference-storage.md)
 and [the data model](../docs/DATA_MODEL.md).
 
-The [selected Windows qualification](../docs/tasks/evidence/phase-2-execution.md#final-windows-acceptance-and-cleanup--2026-10-09)
+The [selected Windows qualification](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#final-windows-acceptance-and-cleanup--2026-10-09)
 is complete: run 14 proves phase 1; run 16 proves reopen, replacement, discovery,
 reload recovery, removal and normal exit. All known synthetic credentials are cleaned
 up. Run 16 reused unchanged production-code evidence across probe-only build 7;
@@ -358,8 +358,8 @@ identity, loopback requests, whole-store snapshots and external process exit.
 `--acceptance --combined-attempts 10 --replacement --sequence 14 --completion-run 16`
 was the final selection; these arguments are a record, not permission to replay a
 completed run. Commands refuse reused identities and count cumulative attempts.
-The [contract](../docs/tasks/evidence/phase-2-execution.md#current-windows-qualification-contract)
-owns authorization and final accounting; [historical failures](../docs/tasks/archive/2026-10-09-phase-2-execution-history.md#windows-remembered-credential-continuation--2026-10-08)
+The [contract](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#current-windows-qualification-contract)
+owns authorization and final accounting; [historical failures](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-09-phase-2-execution-history.md#windows-remembered-credential-continuation--2026-10-08)
 remain preserved without repaired/backfilled manifests.
 
 `LOOMLIGHT_STUDIO_WINDOWS_EVIDENCE=1` records actual client request/cleanup timing.
@@ -373,11 +373,11 @@ observations cannot be replaced by probe markers. The opt-in
 the fixed beta post-save reload failure and requires one read-only Retry.
 
 Focused controller checks: `python -m unittest discover -s scripts -p test_windows_studio_credentials.py -v`.
-The selected [current native harness migration](../docs/tasks/evidence/ci-harness-reliability.md#deliverable3-selected-implementation--2026-10-16)
+The selected [current native harness migration](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/ci-harness-reliability.md#deliverable3-selected-implementation--2026-10-16)
 uses `scripts/windows-studio-credentials.py current build|run --output <fresh-output>
 --candidate <exact-reviewed-sha> --ordinal 1|2|3` through the focused Repository quality
 selector `studio_connection_native`. The current Windows sequence and both-host
-portable/rendered gates passed the [CI3 terminal audit](../docs/tasks/evidence/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17).
+portable/rendered gates passed the [CI3 terminal audit](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17).
 This exact-candidate proof does not qualify signed Mac native or human acceptance.
 It retains the approved Windows credential namespace, uses the current native draft
 dialog, observes Cancel before committing keys, proves failed-entry retained-field

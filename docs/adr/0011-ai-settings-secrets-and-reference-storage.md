@@ -1,20 +1,11 @@
 # ADR 0011: AI settings, secrets and reference storage
 
-**Status:** Accepted design with selected temporary Mac development file-store exception; implemented with bounded synthetic packaged Mac and Windows remembered-credential qualification passed. Full 2A.1/both-target provider qualification remains incomplete.
+**Status:** Accepted, with a temporary Mac development file-store exception.
 **Date:** 2026-10-07.
-**Current closeout disposition, 2026-10-12:** Phase 2 is Studio-only. Remembered
-credential slices remain qualified within their exact evidence; full-phase integrated
-saved-key qualification remains incomplete as recorded in the
-[closeout map](../tasks/evidence/phase-2-execution.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12).
-The user's subsequent 2026-10-12 decision removes session-only credentials from the
-product requirement: reuse the saved profile key across sessions. This supersedes
-earlier session-mode design clauses below; it does not change the approved Mac storage
-exception or Windows remembered-store implementation. No signing, namespace or
-credential-access policy changes are selected.
-**Authority:** on 2026-10-08 the user supplied the development credential implementation prompt, selecting source/docs and focused synthetic tests only. A subsequent explicit allowance selected the bounded native fixture, now passed; publication remains separate. The earlier user selected project-local prompts, native references with basic
-scope/notes, localhost/LAN/HTTPS and adaptive helpers; accepted the omission/credential
-review and requested the agreed plan be recorded. The original documentation selection granted no provider operation; the temporary
-implementation selection grants no real endpoint, package/signing or app launch.
+**Amended 2026-10-12:** Phase 2 is Studio-only. Session-only credentials are no
+longer a product requirement: reuse the saved profile key across sessions. This
+supersedes earlier session-mode clauses below; it does not change the approved Mac
+storage exception or the Windows remembered-store implementation.
 
 ## Context
 
@@ -101,7 +92,7 @@ local-machine persistence; no enumeration or occupied-target overwrite. The OS b
 limit is 2560 bytes: larger shared-valid input remains native with explicit failure,
 never truncation/plaintext fallback. Shared v1/v2 records stay compatible; Mac file
 references/cleanup remain owned without Windows migration/deletion. The
-[Windows ledger](../tasks/archive/2026-10-09-phase-2-execution-history.md#windows-remembered-credential-continuation--2026-10-08)
+[Windows ledger](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-09-phase-2-execution-history.md#windows-remembered-credential-continuation--2026-10-08)
 owns selected operations, actual evidence and the independent-review boundary.
 
 The permanent new credential service is user-selected `app.loomlight`; bundle identifier
@@ -144,7 +135,7 @@ separate and continue requiring the established identity/gates and explicit allo
 
 ### Selected temporary Mac development exception — 2026-10-08
 
-[The selected plan](../tasks/active/2026-10-08-macos-development-credential-storage.md)
+[The selected plan](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/2026-10-08-macos-development-credential-storage.md)
 permits encrypted local API-key files with a persisted, unencrypted random unlock key.
 This is accepted accidental-exposure protection, with no isolation from software under
 the same login. It is temporary development policy, not production release acceptance.
@@ -180,25 +171,6 @@ replacement/removal/reinstall retaining app data. No guarantee survives app clea
 explicit user-data deletion, disk loss or clean OS installation. Coherent restore requires
 profiles, generation metadata, master keys and ciphertext with correct permissions;
 that backup can decrypt the keys. No automatic sync/transfer or restore UI is added.
-Actual packaged native entry, retained-input Retry/Cancel, file recovery and two-build
-reuse passed in the separately approved public synthetic fixture. The
-[owning ledger](../tasks/archive/2026-10-09-phase-2-execution-history.md#development-file-native-qualification-result--2026-10-08)
-retains exact counts, failures and limits. Source tests and this bounded native proof
-do not imply Windows or production-release acceptance.
-Subsequent independent review corrected the visible cleanup-pending qualifier when a
-confirmed save cannot reload Settings. That changed response has shared source/DOM
-proof and corrected Mac section-15
-packaged proof on source `37e3ab3`; Windows target proof remains missing. The original
-packaged inputs and their historical evidence remain distinct. The
-[acceptance-gap disposition](../tasks/archive/2026-10-09-phase-2-execution-history.md#studio-2a1-acceptance-gap-review-and-windows-proposal--2026-10-09) retains Windows complete-manifest/full-flow
-blockers and proposes a combined replacement/reload proof. Its
-[prepared qualification fixture](../tasks/archive/2026-10-09-phase-2-execution-history.md#windows-acceptance-schedule-preparation--2026-10-09)
-uses only the existing post-confirmation snapshot seam on an isolated Windows beta
-replacement; it changes no persistent bytes, production credential behavior or Mac
-policy. Source/DOM/controller PASS prepares the schedule; Windows native proof still
-requires separate allowance and an actual packaged x64 executable. Windows cross-build
-continuity remains outside the selected same-package slice; no update guarantee is
-accepted. Generic/session-only/no-auth and full 2A.1 remain deferred/incomplete.
 
 Local removal does not revoke the provider key. Project movement requires new device
 profile/credential setup. Adapter persistence/access attributes must match this intent;
@@ -211,17 +183,12 @@ storage. Password-protected portable vaults, external password-manager integrati
 OAuth, key export/sync and external card JSON/PNG interoperability are deferred.
 No service/signing purchase or enterprise-policy qualification is required by this ADR.
 
-## Evidence and implementation gates
+## References
 
-- [ADR 0013](0013-provider-request-and-transport-contract.md) proposes the concrete
-  request/credential-origin/transport contract accepted for the bounded Studio 2A.1
-  remembered-profile slice. Full compatibility/native qualification remains incomplete;
-  this does not change storage policy or authorize generic/generation integration.
-- [Credential spike](../research/CREDENTIAL_STORE_SPIKE_RESULTS.md): packaged native
+- [ADR 0013](0013-provider-request-and-transport-contract.md) defines the request,
+  credential-origin and transport contract. It does not change storage policy.
+- [Credential spike](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/research/CREDENTIAL_STORE_SPIKE_RESULTS.md): packaged native
   storage evidence and its no-entry-UI/locked-store/signing limits.
-- [Phase 2 contracts and gates](../tasks/active/phase-2-initial-llm-assistance.md):
-  production native entry/store/request/replace/delete, session/no-auth, failure ordering,
-  exact reviewed context and reference/schema proof before completion claims.
 - [Electron OS-backed storage](https://www.electronjs.org/docs/latest/api/safe-storage),
   [SillyTavern key storage](https://docs.sillytavern.app/usage/faq/) and
   [Continue CLI secrets](https://docs.continue.dev/cli/configuration) show differing
@@ -230,7 +197,3 @@ No service/signing purchase or enterprise-policy qualification is required by th
   [V3](https://github.com/kwaroran/character-card-spec-v3/blob/main/SPEC_V3.md) and
   [World Info](https://docs.sillytavern.app/usage/core-concepts/worldinfo/) inform fields,
   without adopting their roleplay instruction/automatic-inclusion semantics.
-
-Existing WORKFLOW/TESTING requirement IDs, target routing and cumulative budgets remain.
-Use controlled failure fixtures plus early actual production paths; no full matrix for
-each feature, new hostile/crash programme or unsupported cross-SHA reuse policy.

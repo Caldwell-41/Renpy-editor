@@ -1,6 +1,7 @@
 # ADR 0008: Explicit session execution and controlled play
 
-Status: implemented and native R1 evidence verified; R1-B1/B2 closed, user acceptance separate (2026-09-26).
+**Status:** Accepted<br>
+**Date:** 2026-09-26
 
 Compile, lint and Run can execute project Python. The core exposes closed typed
 operations, session/preparation/trust/operation capabilities and no arbitrary argv.
@@ -50,10 +51,6 @@ inverses under transaction serialization. The runtime policy script itself is pr
 Status includes the launch digest. Terminal results conservatively report revision stale; cleanup performs no filesystem inventory. The next preparation performs full project/SDK inventories and consent comparison. Unknown output is never silently attributed to the SDK. Launch evidence is not a filesystem snapshot. External writers can race execution;
 validation/result freshness and consent must not infer ownership of SDK-generated files.
 
-The broad runtime and Diagnostics UI remains Phase 1G.2b. This ADR does not accept R1;
-exact test results and missing evidence are maintained in the Phase 1G task ledger.
-
-
 ## Request and control ownership correction
 
 The desktop uses `ApplicationHost` in the core. A short mutex protects an exclusive
@@ -93,20 +90,3 @@ disappearance independently of pipe EOF; Windows waits for the owned job to empt
 cleanup failure retains both the failed process owner and the reservation, even if service
 shutdown is called again. Preparation/trust are cleared on shutdown. This does not claim
 containment of deliberately escaping project Python.
-
-R1-B1/B2 implementation and automated cases are in the
-[1G ledger](../tasks/archive/2026-10-06-phase-1g-branches-runtime-git.md#13-1g2a-execution-ledger).
-Historical replacement run `36144974132`, attempt 1, verifies candidate `07f23b6` on
-Windows x64 and macOS ARM64 with checked artifacts and all 60 input hashes per target.
-Independent review then identified the renderer completion branch bypassing receipt
-cancellation. Candidate `c12d953` corrects that branch, with a red/green actual-helper
-regression for completion/abort or stale view under competing ownership. R1-B2 remains
-resolved. Replacement native run `36148942247`, attempt 1, passed on this exact
-candidate. Both complete logs, six-file artifacts, ZIP size/SHA-256/CRC and all 60
-input hashes per target were verified; frontend 50, runtime core Windows 17/macOS 18,
-explicit SDK 1 and desktop 1 passed per target. The two ignored core entries are the
-separately executed SDK gate and child-process fixture. R1 technical findings are
-closed; 1G.2a is review-ready, not user-accepted. See the
-[final-source closure](../tasks/archive/2026-10-06-phase-1g-branches-runtime-git.md#final-source-r1-recheck-and-closure--2026-09-26).
-Existing native successes retain their original inputs and provenance; 1G.2b remains
-unstarted and separately selected.

@@ -1,7 +1,7 @@
 # Canvas drag alternatives
 
 The selected move-handle direction and two alternative drafts for [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36),
-after the [capture-loss diagnosis](../../tasks/evidence/canvas-rendering.md#probe-movement-bounds-and-drag-diagnosis).
+after the [capture-loss diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/canvas-rendering.md#probe-movement-bounds-and-drag-diagnosis).
 They compare how to grab the bounded Help frame and distinguish immediate draft
 guides from delayed content. They do not replace the approved flow-v1 reference.
 

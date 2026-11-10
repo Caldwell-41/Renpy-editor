@@ -1,9 +1,7 @@
 # ADR 0007 — Shell-owned Save command and document-bound Source acceptance
 
 **Date:** 2026-09-21.
-**Status:** Accepted design for the bounded Phase 1F correction; implementation and
-supported-target acceptance are tracked separately in the
-[1F-SAVE brief](../tasks/archive/2026-09-23-phase-1f-save-correction.md).
+**Status:** Accepted.
 **Extends:** ADRs 0003, 0004 and 0006 without replacing their runtime, transaction,
 source-authority or media boundaries.
 
@@ -20,7 +18,7 @@ are incorrectly treated as dirty edits by the fake Source requester. A reduced b
 experiment reproduces acceptance followed by false re-dirtying with either target or
 capture handling. This does not establish the exact ordering in the failed native
 runs. Their composite wait and missing operation traces cannot prove that global Flush
-stole the command. The task brief preserves the evidence and confidence limits.
+stole the command. The 1F-SAVE diagnosis below preserves the evidence and confidence limits.
 
 The shell already owns the project/session, authoring/Flush exclusion and completion
 generations. Explicit arbitration belongs there. Source owns editor semantics, local
@@ -112,7 +110,7 @@ matrix and gates. Green mocked UI results cannot certify durable Source writes.
 
 ## Evidence and references
 
-The [1F-SAVE diagnosis](../tasks/archive/2026-09-23-phase-1f-save-correction.md#1-evidence-and-corrected-diagnosis)
+The [1F-SAVE diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-09-23-phase-1f-save-correction.md#1-evidence-and-corrected-diagnosis)
 records the failed candidates, reduced experiment, uncertainty and reproduction recipe.
 Relevant implementation paths are [shell](../../app/src/main.ts),
 [Source UI](../../app/src/source-ui.ts), [packaged smoke](../../app/src-tauri/src/smoke_probe.js),

@@ -7,7 +7,7 @@ no live capture or claim about current uncommitted Phase 1 work is made. No priv
 game content or credentials were used. The saved actual screenshot remains ignored
 local evidence; the generated assets below are unchanged project copies.
 
-The [Phase 2 LLM interaction design](../../tasks/evidence/phase-2-execution.md#18-proposed-llm-screen-and-interaction-design)
+The [Phase 2 LLM interaction design](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#18-proposed-llm-screen-and-interaction-design)
 owns behavior and acceptance; sections 5–9 of that brief own provider, size, prompt,
 transaction and reference contracts. These are **proposed, not accepted or implemented**
 screens. The [existing UI references](../ui-refresh/README.md) still own shell,

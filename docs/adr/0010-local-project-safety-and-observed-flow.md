@@ -1,6 +1,6 @@
 # ADR 0010: Local-project safety and last-observed Branches
 
-**Status:** Accepted; G1-OBS implementation, qualification recorded in the active task ledger.
+**Status:** Accepted.
 **Date:** 2026-09-27.
 **Authority:** after reviewing G1-O1-N, the user approved refocusing the hobby editor
 on protecting work, ordinary external edits, explicit execution and responsiveness:
@@ -132,7 +132,3 @@ remain routine. G1-OBS updates production code, tests and workflow selectors tog
 Retired candidate/timed hostile-namespace experiments are explicitly ignored by
 default and retain their named specialist selectors and historical failure evidence.
 Baseline path/link rejection, ordinary conflicts and recovery remain routine.
-
-The original scope reset changed requirements only. G1-OBS implements this contract;
-its ledger owns current evidence. Final Windows/macOS package evidence,
-runtime/diagnostic completion, the final human session and integration remain separate.

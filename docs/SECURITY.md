@@ -203,7 +203,7 @@ available to untrusted pull requests.
 
 **Approved 0.1.0 exception — 2026-10-07:** the early public prerelease uses original
 unsigned/non-notarized packages, with unqualified installer paths explicitly disclosed,
-following the user’s specific approval. The [publication record](tasks/archive/2026-10-07-release-0.1.0.md)
+following the user’s specific approval. The [publication record](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-07-release-0.1.0.md)
 retains exact source/build/asset evidence. This is a one-off distribution exception;
 future broader releases remain subject to the baseline above.
 

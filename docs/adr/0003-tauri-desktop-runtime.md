@@ -18,7 +18,7 @@ claims did not establish the intended guarantees. The spike now uses a core-owne
 approved-project registry, explicit application-command permissions, packaged
 authorised/unauthorised-window checks, and deterministic concurrent-save tests. The
 complete results, commands, failures, and limitations are recorded in the
-[desktop-shell evidence](../research/DESKTOP_SPIKE_RESULTS.md).
+[desktop-shell evidence](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/research/DESKTOP_SPIKE_RESULTS.md).
 
 ## Decision
 

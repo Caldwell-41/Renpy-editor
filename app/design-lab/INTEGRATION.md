@@ -48,7 +48,7 @@ already authorised to implement can proceed; a design-only task ends at its own 
 
 ## Implement the approved layout
 
-1. Read the selected task, current approved record, captures and written corrections.
+1. Read the selected issue, current approved record, captures and written corrections.
    State the target revision and covered states in the task. A changed source or an
    uncovered state must be identified before claiming a match. If there is no approved
    runnable version, establish it through the approval steps; preserve any earlier
@@ -63,7 +63,7 @@ already authorised to implement can proceed; a design-only task ends at its own 
    in-memory Save workflows in the lab. Preserve validation, draft retention, undo/redo,
    external-edit handling, recovery and source preservation through their existing owners.
 4. Launch the lab at the recorded source version and the working app through the
-   selected task's supported route. Use a separate comparison checkout when the app's
+   selected issue's supported route. Use a separate comparison checkout when the app's
    changes affect the source fingerprint. Copy the current approval record and retained
    captures into that checkout if they were recorded after the source commit; keep its
    frontend files pinned. Avoid resetting the active implementation checkout. With
@@ -90,5 +90,5 @@ already authorised to implement can proceed; a design-only task ends at its own 
 
 Finish with two explicit findings: visual fidelity to the named approved version,
 including remaining differences, and functional correctness of all mapped actions.
-Required evidence and any user acceptance must meet the owning task's criteria before
+Required evidence and any user acceptance must meet the issue's acceptance criteria before
 calling that implementation complete. Browser similarity cannot establish durable saves.

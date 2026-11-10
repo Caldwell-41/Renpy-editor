@@ -213,7 +213,7 @@ All saves, history, restore, proposal decisions, Undo/Redo and reload use browse
 Reloading the document resets the sample. Other project destinations are disabled.
 There are no real project, provider, asset, source or persistence operations.
 
-The [owning task](../../tasks/active/browser-ui-design-lab.md#two-characters-writing-drafts-2026-10-19)
+The [owning task](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/browser-ui-design-lab.md#two-characters-writing-drafts-2026-10-19)
 records the allowance, failures, fixes and final evidence. Local Design Lab checks pass
 56 rendering cases, including 40 cases for these drafts, and six check groups. The
 interaction check runs the same journey against both layouts. Screenshots and the

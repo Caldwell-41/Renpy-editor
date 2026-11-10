@@ -72,7 +72,7 @@ every display update. The selected contract and measurable gates are in
 
 Phase 1 ends with the authoring/source/Branches/validation/play/reopen workflow.
 New local Git status/diff/checkpoint work is deferred to an
-[optional milestone](tasks/active/optional-local-git.md), selected separately at a later
+[optional milestone](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/optional-local-git.md), selected separately at a later
 date. The user reaffirmed on 2026-10-02 that local Git/GitHub remain deferred: they
 are not required for Phase 1, Phase 2, Phase 3 or initial-release acceptance. Existing
 optional Git initialization during project creation remains. No Git panel, checkpoint
@@ -95,7 +95,7 @@ and maximum response tokens are explicit controls with an inspectable usage esti
 The bounded Studio actions, references, prompts and limits are implemented and
 qualified within their recorded scopes. Full Phase 2 scope disposition, the final
 coherent integrated workflow and explicit human acceptance remain incomplete; the
-[closeout map](tasks/evidence/phase-2-execution.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12)
+[closeout map](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12)
 distinguishes implemented behavior from retained requirements.
 
 Studio Settings now has local Temperature and Top-p controls with editable defaults
@@ -127,7 +127,7 @@ Phase 2. Continue preserves its ending; Draft creates an unconnected Scene with 
   Video/animation imports use pinned-Ren'Py-supported profiles only; conversion is deferred.
 - Source editor with bidirectional navigation and lossless unsupported regions.
 - Branch-aware characters, variables, lore, state simulation, and run-from-here.
-- First-class Unsloth Studio support without hardcoded model names. Studio has dedicated setup, diagnostics and acceptance tests; generic/OpenAI-compatible adapters are deferred outside Phase 2. See the [Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md).
+- First-class Unsloth Studio support without hardcoded model names. Studio has dedicated setup, diagnostics and acceptance tests; generic/OpenAI-compatible adapters are deferred outside Phase 2. See the [Phase 2 plan](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/phase-2-initial-llm-assistance.md).
 
 ## Constraints and principles
 

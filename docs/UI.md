@@ -27,7 +27,7 @@ are information-dense.
 Story, Source, Branches and Screens are the main workspaces. Characters, Assets,
 Variables, Settings, project setup and Runtime support them. Timeline and Run From
 Here are later work and must not appear as working features before they exist. Git
-status, diff and checkpoints are deferred to [optional Git](tasks/active/optional-local-git.md).
+status, diff and checkpoints are deferred to [optional Git](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/optional-local-git.md).
 
 ## Visual language
 
@@ -310,7 +310,7 @@ draft and returns focus to the beat. Boolean and text targets keep literal field
 These reusable controls operate in the existing workspace and Writing focus.
 Tracks/Reel, cross-view retained drafts and the full Brass and slate layout remain
 with #110; shared decimal creation/default controls remain with #97.
-[#96 evidence](tasks/evidence/arithmetic-96.md) records the scoped visual comparison
+[#96 evidence](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-96.md) records the scoped visual comparison
 and real Story-to-core operations.
 
 ## Application shell
@@ -378,7 +378,7 @@ Scene holds ordered beats. Display names are separate from technical labels and 
 so renaming a Scene changes neither. The target is **Story Combined v1**, the approved
 Design Lab layout `story-revamp` / `combined` (revision `combined-v1`) from issue #82. The [revision notes](design/story-revamp/README.md#post-delivery-revision)
 hold its detailed decisions, samples and stage sizes, and the
-[3A interaction design](tasks/reference/phase-3a-story.md#story-interaction-design)
+[3A interaction design](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-3a-story.md#story-interaction-design)
 covers moving, unwrapping and deleting branches.
 
 ### Layout
@@ -655,7 +655,7 @@ System prompts edits each action's prompt, with Restore baseline and Undo.
 [REFERENCE_LIBRARY](REFERENCE_LIBRARY.md) owns cards and lore,
 [ADR 0011](adr/0011-ai-settings-secrets-and-reference-storage.md) and
 [ADR 0013](adr/0013-provider-request-and-transport-contract.md) own keys, providers and
-model settings, and the [Phase 2 brief](tasks/active/phase-2-initial-llm-assistance.md)
+model settings, and the [Phase 2 brief](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/phase-2-initial-llm-assistance.md)
 owns current Settings scope.
 
 ## Runtime and diagnostics
@@ -695,9 +695,9 @@ geometry. Number and resize drafts render before acceptance; canvas-only sample 
 and button states never change source. Fit and 100% scale the same composition.
 Unsupported code stays in place and marks only its region as partly visual. Story
 offers Show screen, Hide screen and Call screen for owned parameterless screens; Call
-waits for Finish interaction. The [Screens contract](tasks/reference/phase-3b-screens.md)
+waits for Finish interaction. The [Screens contract](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-3b-screens.md)
 owns requirements, including its
-[creation and reuse controls](tasks/reference/phase-3b-screens.md#implemented-creation-and-reuse-controls),
+[creation and reuse controls](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-3b-screens.md#implemented-creation-and-reuse-controls),
 and [ADR 0021](adr/0021-separate-renpy-canvas-helper.md) owns the canvas helper.
 
 Textbuttons and imagebuttons use the approved A2 / `equation-v2` action editor.
@@ -719,7 +719,7 @@ Decimal variables can appear in numeric conditions, text tokens and editor sampl
 Text insertion replaces the selection and returns the caret after the token. Samples
 and canvas selection execute no actions and write no source. Invalid sample text
 retains the last valid value. Bars continue to list whole-number variables only.
-The [#97 evidence](tasks/evidence/arithmetic-97.md) separates production/core proof,
+The [#97 evidence](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-97.md) separates production/core proof,
 A2 comparison and the remaining native, SDK and human acceptance limits.
 
 ## Later workspaces
@@ -728,12 +728,12 @@ A2 comparison and the remaining native, SDK and human acceptance limits.
   background, characters, camera, effects, music, ambience, sound, voice, dialogue and
   movies. Static staging happens on the Story stage: drag, aspect-locked resize, and
   position, anchor and scale fields, without keyframes. The
-  [3C contract](tasks/reference/phase-3c-timeline.md#selected-staging-native-media-and-idle-playback)
+  [3C contract](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-3c-timeline.md#selected-staging-native-media-and-idle-playback)
   owns it.
 - **State and Run From Here** label reachable, saved, synthetic and contradictory
   states distinctly and show the effective variables and facts before launch.
   Development content never ships in a release. The
-  [3D contract](tasks/reference/phase-3d-state-run.md) owns it.
+  [3D contract](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-3d-state-run.md) owns it.
 
 ## Accessibility and resolution checks
 

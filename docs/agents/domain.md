@@ -20,6 +20,5 @@ Check existing contracts before introducing a new domain term.
 Identify conflicts with an existing ADR explicitly. Follow
 docs/adr/README.md when recording decisions or proposing supersession.
 
-Current delivery and acceptance belong to the existing status records
-and owning task. An ADR's decision status does not prove implementation
-or acceptance.
+Current delivery and acceptance live in GitHub Issues. An ADR's status
+does not prove implementation or acceptance.

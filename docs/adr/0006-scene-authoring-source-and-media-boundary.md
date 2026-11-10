@@ -1,6 +1,6 @@
 # ADR 0006: Exact-range Scene authoring and bounded media presentation
 
-**Status:** Accepted for Phase 1E  
+**Status:** Accepted<br>
 **Date:** 2026-09-16
 
 ## Context

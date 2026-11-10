@@ -1,8 +1,7 @@
 # ADR 0017: Versioned design approval and app integration
 
 - Date: 2026-10-19
-- Status: Accepted workflow. Implementation evidence belongs to the
-  [Design Lab task](../tasks/active/browser-ui-design-lab.md).
+- Status: Accepted
 - Scope: Browser design references and their integration into the live app.
 
 ## Context
@@ -22,9 +21,9 @@ supersession follows from the next approval. The lab derives its labels from thi
 record. Before the first approval, the pointer is null.
 
 Only an explicit user decision promotes a particular version. Promotion updates the
-design reference. App implementation proceeds within the selected task's existing
+design reference. App implementation proceeds within the selected issue's existing
 authorisation; design-only work gains no implementation scope from promotion.
-Implementation progress stays in the owning task, separate from design approval.
+Implementation progress stays in the issue, separate from design approval.
 
 Pin a local Git source commit and a SHA-256 fingerprint of the frontend/lab inputs,
 including shared styles, icons and dependency/configuration inputs. Retain reviewed

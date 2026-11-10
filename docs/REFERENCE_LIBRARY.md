@@ -2,7 +2,7 @@
 
 ## Walkthrough redesign contract — 2026-10-15
 
-The [approved redesign task](tasks/active/walkthrough-redesign-implementation.md)
+The [approved redesign task](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/walkthrough-redesign-implementation.md)
 owns the locally implemented successor below; its technical qualification and human
 acceptance remain pending. Earlier acceptance paragraphs describe their frozen inputs.
 
@@ -57,8 +57,8 @@ it neither edits legacy lore nor merges it into the global notes. Failures stay 
 Native authoring, consecutive Undo/Redo, byte-exact process reopen, keyboard/focus,
 both themes and compact layout pass on both targets. Shared-history regressions
 preserve real external boundaries. UI A remains approved. The
-[Mac acceptance](tasks/evidence/phase-2-execution.md#final-manual-library-mac-acceptance--2026-10-09)
-and [Windows acceptance](tasks/evidence/phase-2-execution.md#final-manual-library-windows-acceptance--2026-10-10)
+[Mac acceptance](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#final-manual-library-mac-acceptance--2026-10-09)
+and [Windows acceptance](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#final-manual-library-windows-acceptance--2026-10-10)
 distinguish native forms from deterministic bounds/recovery/project-isolation proof.
 
 **Manual UX correction, 2026-10-09:** the user's latest direction replaces the
