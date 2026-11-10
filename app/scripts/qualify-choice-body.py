@@ -28,7 +28,10 @@ CASES = [('continuation', 'yes', 'CHOICE_101_YES flag=True shared=1'),
          ('recursive', 'nested_normal', 'CHOICE_102_NORMAL call=returned inner=joined outer=joined'),
          ('recursive', 'nested_jump', 'CHOICE_102_JUMP target=entered shared=0'),
          ('recursive', 'nested_return', 'CHOICE_102_RETURN caller=none shared=0'),
-         ('recursiveCaller', 'nested_return_caller', 'CHOICE_102_RETURN caller=resumed shared=0')]
+         ('recursiveCaller', 'nested_return_caller', 'CHOICE_102_RETURN caller=resumed shared=0'),
+         ('narrationPrompt', 'narration_prompt', 'CHOICE_103_NARRATION simultaneous=yes shared=1'),
+         ('characterPrompt', 'character_prompt', 'CHOICE_103_CHARACTER simultaneous=yes shared=1'),
+         ('recursivePrompt', 'nested_prompt', 'CHOICE_103_NESTED simultaneous=yes call=returned shared=1')]
 
 
 def digest(data):
@@ -41,7 +44,13 @@ def preflight(args):
     assert evidence['cleanupComplete'] is True
     runtime = evidence['runtime']
     assert set(runtime) in ({'continuation', 'return', 'jump', 'entryLabel', 'target'},
-                            {'continuation', 'return', 'jump', 'entryLabel', 'target', 'recursive'})
+                            {'continuation', 'return', 'jump', 'entryLabel', 'target', 'recursive'},
+                            {'continuation', 'return', 'jump', 'entryLabel', 'target', 'recursive', 'narrationPrompt', 'characterPrompt', 'recursivePrompt', 'characterDefinition'})
+    if 'narrationPrompt' in runtime:
+        assert runtime['characterDefinition'] == 'define bec = Character("Bec", color="#ffffff")\n'
+        assert runtime['narrationPrompt'] == runtime['continuation'].replace('    menu:\n', '    menu:\n        "Choose a route"\n', 1)
+        assert runtime['characterPrompt'] == runtime['narrationPrompt'].replace('"Choose a route"', 'bec "Where shall we go?"')
+        assert runtime['recursivePrompt'] == runtime['recursive'].replace('    menu:\n', '    menu:\n        "Choose a route"\n', 1).replace('                menu:\n', '                menu:\n                    bec "Inside, which route?"\n')
     if 'recursive' in runtime:
         assert all(text in runtime['recursive'] for text in ['Before call', ' from _ll_call_', 'Resume inside option', 'if (choice_flag == True):', 'Inner normal', 'After nested'])
         assert runtime['recursive'].count('\"Shared once\"') == 1
@@ -50,7 +59,7 @@ def preflight(args):
     assert '$ choice_flag = True' in runtime['continuation']
     assert runtime['entryLabel'].replace('_', '').isalnum()
     driver = (REPO / 'tests/fixtures/choice-101/driver.rpy').read_bytes()
-    assert driver.count(b'    testcase ') == 10 and b'--warp' not in driver
+    assert driver.count(b'    testcase ') == 13 and b'--warp' not in driver
     assert expected_sha256(args.checksums.read_text(), args.archive.name) == PIN
     assert digest(args.archive.read_bytes()) == PIN
     return runtime, driver
@@ -88,12 +97,14 @@ def main():
             old_env = dict(os.environ)
             os.environ.update(env)
             try:
-                for variant in ['continuation', 'return', 'jump', 'returnCaller'] + (['recursive', 'recursiveCaller'] if 'recursive' in runtime else []):
+                for variant in ['continuation', 'return', 'jump', 'returnCaller'] + (['recursive', 'recursiveCaller'] if 'recursive' in runtime else []) + (['narrationPrompt', 'characterPrompt', 'recursivePrompt'] if 'narrationPrompt' in runtime else []):
                     game = scratch / variant
                     (game / 'game').mkdir(parents=True)
                     sources = {'story.rpy': runtime['return' if variant == 'returnCaller' else 'recursive' if variant == 'recursiveCaller' else variant], 'target.rpy': runtime['target'],
                                'script.rpy': 'label start:\n    ' + ('call ' + runtime['entryLabel'] + ' from choice_fixture_return\n    \"Caller resumed\"\n    return\n' if variant in ('returnCaller', 'recursiveCaller') else 'jump ' + runtime['entryLabel'] + '\n'),
                                'driver.rpy': driver.decode()}
+                    if 'Prompt' in variant:
+                        sources['characters.rpy'] = runtime['characterDefinition']
                     for name, source in sources.items():
                         (game / 'game' / name).write_bytes(source.encode())
                     checks = [(Command.COMPILE, None, None), (Command.LINT, None, None)]

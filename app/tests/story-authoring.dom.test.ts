@@ -97,3 +97,33 @@ test("unchanged pending commit blocks another draft and late disposed refusal ca
  const s=setup([decimalChoice,ending],async command=>{writes.push(command);throw Error("Keep draft");});
  try{s.host.querySelector<HTMLButtonElement>('[data-beat-id="choice"] .beat-select')!.click();const value=s.host.querySelector<HTMLInputElement>('[aria-label="Condition value"]')!;assert.equal(value.value,"1.25");value.value="2.75";value.dispatchEvent(new Event("input",{bubbles:true}));click(s.host,"Commit Beat");await tick();assert.equal(writes.length,1);assert.equal(value.value,"2.75");}finally{await s.close();}
  });
+
+test("Choice prompt controls retain invalid and refused drafts and preview prompt with options", async () => {
+  const writes: SceneCommand[] = [];
+  const s = setup([choice, ending], async command => { writes.push(command); throw Error("Source changed. Input retained."); });
+  s.host.querySelector<HTMLButtonElement>('[data-beat-id="choice"] .beat-select')!.click();
+  click(s.host, "+ Prompt");
+  const text = s.host.querySelector<HTMLInputElement>('[aria-label="Prompt text"]')!;
+  assert.ok(text); assert.equal(document.activeElement, text);
+  click(s.host, "Commit Beat"); await tick(); assert.equal(writes.length, 0); assert.equal(text.getAttribute("aria-invalid"), "true");
+  text.value = "Which route?"; text.dispatchEvent(new Event("input", { bubbles: true })); text.dispatchEvent(new Event("blur"));
+  click(s.host, "Commit Beat"); await tick(); assert.equal(writes.length, 1);
+  assert.deepEqual(writes[0]!.beat, { ...choice.payload, prompt: { type: "narration", text: "Which route?" } });
+  assert.ok(text.isConnected); assert.equal(text.value, "Which route?");
+  click(s.host, "Cancel"); assert.equal(hasSceneDraft(s.host), false);
+  await s.close();
+});
+
+test("illustrative option selection shows a nested prompt with its options without evaluating availability", async () => {
+  const { deriveScenePreview } = await import("../src/scene-ui.js");
+  const outer: SceneBeat = { ...choice, payload: { type: "choice", prompt: { type: "narration", text: "Outer prompt" }, options: [{ id: "arm", text: "Enter" }] } };
+  const arm: SceneBeat = { id: "arm", byteStart: 65, byteEnd: 75, protected: true, conditionalBranch: { choiceOption: true, groupId: "options", ordinal: 0, otherwise: false }, payload: { type: "customCode", source: '"Enter":', reason: "Option" } };
+  const nested: SceneBeat = { id: "inner", byteStart: 75, byteEnd: 95, protected: false, owner: { groupId: "options", branchId: "arm" }, payload: { type: "choice", prompt: { type: "dialogue", characterId: "speaker", text: "Inner prompt" }, options: [{ text: "Unknown answer", condition: guard }] } };
+  const s = setup([outer, arm, nested, ending], async () => s.model);
+  const state = deriveScenePreview(s.model.scenes[0]!, undefined, new Map([["options", "arm"]]));
+  assert.equal(state.overlay?.beatId, "inner");
+  assert.deepEqual(state.overlay?.prompt, { type: "dialogue", characterId: "speaker", text: "Inner prompt" });
+  assert.match(state.overlay!.text, /Unknown answer \(availability unknown\)/);
+  assert.deepEqual(state.variables, {});
+  await s.close();
+});

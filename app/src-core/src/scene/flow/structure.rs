@@ -270,7 +270,7 @@ pub(super) fn project(
                 FlowDestination::Terminal,
                 path,
             )),
-            BeatPayload::Choice { options } => {
+            BeatPayload::Choice { options, .. } => {
                 for (ordinal, option) in options.iter().enumerate() {
                     let header = beats.iter().find(|b| Some(&b.id) == option.id.as_ref());
                     let owner = header.and_then(|h| {

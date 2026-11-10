@@ -63,8 +63,34 @@ try {
  enter(draft.querySelector('[aria-label="Variable"]'),workspace.authoring.variables.find(v=>v.technicalName==='choice_flag').id,'change');enter(draft.querySelector('[aria-label="Value"]'),'true','change');await applied(draft,'Add Beat');
  const accepted=await source(path);result.runtime={continuation:accepted,entryLabel:entry.technicalLabel,target:await source(target.sourcePath)};assert.equal(accepted,empty.replace('        "Yes":\n            pass','        "Yes":\n            $ choice_flag = True'));
  assert.equal(scene().beats.filter(b=>b.structuralPlaceholder).length,1);assert.equal(scene().beats.filter(b=>b.payload.text==='Shared once').length,1);
- stage('production option body writes the boolean through explicit body/position to real core');
  await applied(document,'Undo');assert.equal(await source(path),empty);await applied(document,'Redo');assert.equal(await source(path),accepted);
+ stage('production option body writes the boolean through explicit body/position to real core');
+ // #103 uses the same Choice editor and accepted transaction boundary.
+ const speaker=workspace.authoring.characters[0];
+ result.runtime.characterDefinition=speaker.source.statement+'\n';
+ async function editChoice(id) { document.querySelector(`[data-beat-id="${id}"] .beat-select`).click(); await settle(); return document.querySelector('.expanded-beat'); }
+ let promptEditor=await editChoice(choice().id);
+ button('Add a prompt shown with the options',promptEditor);
+ let promptText=promptEditor.querySelector('[aria-label="Prompt text"]');
+ lastApply=undefined;button('Commit Beat',promptEditor);await settle();assert.equal(lastApply,undefined);assert.equal(promptText.getAttribute('aria-invalid'),'true');
+ enter(promptText,'Choose a route');await applied(promptEditor,'Commit Beat');
+ const narrationPrompt=await source(path);result.runtime.narrationPrompt=narrationPrompt;
+ assert.equal(narrationPrompt,accepted.replace('    menu:\n','    menu:\n        "Choose a route"\n'));
+ assert.deepEqual(choice().payload.options,[yes,no]);
+ assert.match(document.querySelector('.preview-overlay.choice').textContent,/Choose a route.*Yes.*No/);
+ const mapPath=join(scratch,'synthetic-project/.renpy-editor/source-map.json');
+ const noOpMap=await readFile(mapPath);promptEditor=await editChoice(choice().id);await applied(promptEditor,'Commit Beat');assert.deepEqual(await readFile(mapPath),noOpMap);assert.equal(await source(path),narrationPrompt);
+ promptEditor=await editChoice(choice().id);enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'Cancelled prompt');button('Cancel',promptEditor);assert.equal(await source(path),narrationPrompt);
+ promptEditor=await editChoice(choice().id);enter(promptEditor.querySelector('[aria-label="Prompt speaker"]'),speaker.id,'change');enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'Where shall we go?');await applied(promptEditor,'Commit Beat');
+ const characterPrompt=await source(path);result.runtime.characterPrompt=characterPrompt;
+ assert.equal(characterPrompt,narrationPrompt.replace('"Choose a route"',`${speaker.technicalName} "Where shall we go?"`));
+ assert.equal(choice().payload.prompt.characterId,speaker.id);
+ assert.match(document.querySelector('.preview-overlay.choice').textContent,new RegExp(`${speaker.displayName}.*Where shall we go.*Yes.*No`));
+ await applied(document,'Undo');assert.equal(await source(path),narrationPrompt);await applied(document,'Redo');assert.equal(await source(path),characterPrompt);
+ promptEditor=await editChoice(choice().id);button('Remove prompt',promptEditor);await applied(promptEditor,'Commit Beat');assert.equal(await source(path),accepted);assert.deepEqual(choice().payload.options,[yes,no]);
+ stage('production prompt controls add narration, switch existing Character, preview with options, cancel/no-op, history and exact removal');
+
+
  // A stale retained Then draft must not overwrite competing Source.
  button('Then',option(yes.id));let panel=document.querySelector('.story-operation[aria-label="Option ending"]');enter(panel.querySelector('[aria-label="Then"]'),'return','change');
  await saveSource(path,accepted+'# external accepted change\n');lastApply=undefined;button('Apply ending',panel);await wait(()=>lastApply);await settle();assert.equal(lastApply.ok,false);assert.equal(lastApply.error.code,'SOURCE_CONFLICT');assert.equal(panel.querySelector('[aria-label="Then"]').value,'return');assert(panel.isConnected);assert.equal(await source(path),accepted+'# external accepted change\n');button('Cancel',panel);
@@ -125,6 +151,20 @@ try {
  button('Close Project');await wait(()=>document.querySelector('.recent-open'));button(document.querySelector('.recent-open').textContent);await wait(()=>document.querySelector('.beat-card'));await settle();
  assert.equal(await source(path),recursive);assert.equal(scene().beats.find(b=>b.id===callBeat.id).payload.returnLabel,callLabel);
  stage('recursive production controls author dialogue, stable Call, condition and nested Choice with normal/Jump/Return paths; history and reopen preserve source');
+
+ promptEditor=await editChoice(choice().id);button('Add a prompt shown with the options',promptEditor);enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'Choose a route');await applied(promptEditor,'Commit Beat');
+ promptEditor=await editChoice(nested.id);button('Add a prompt shown with the options',promptEditor);enter(promptEditor.querySelector('[aria-label="Prompt speaker"]'),speaker.id,'change');enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'Inside, which route?');await applied(promptEditor,'Commit Beat');
+ const recursivePrompt=await source(path);result.runtime.recursivePrompt=recursivePrompt;
+ assert.equal(recursivePrompt,recursive.replace('    menu:\n','    menu:\n        "Choose a route"\n').replace('                menu:\n',`                menu:\n                    ${speaker.technicalName} "Inside, which route?"\n`));
+ const nestedNow=scene().beats.find(b=>b.id===nested.id);assert.equal(nestedNow.payload.prompt.characterId,speaker.id);assert.deepEqual(nestedNow.payload.options,nested.payload.options);
+ button('Close Project');await wait(()=>document.querySelector('.recent-open'));button(document.querySelector('.recent-open').textContent);await wait(()=>document.querySelector('.beat-card'));await settle();assert.equal(await source(path),recursivePrompt);
+ // Ordinary external filesystem conflict must retain the original prompt draft.
+ promptEditor=await editChoice(choice().id);enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'Retained prompt after conflict');
+ await appendFile(join(scratch,'synthetic-project',path),'# ordinary external writer\r\n');
+ const external=await readFile(join(scratch,'synthetic-project',path));const externalMap=await readFile(mapPath);
+ lastApply=undefined;button('Commit Beat',promptEditor);await wait(()=>lastApply);await settle();assert.equal(lastApply.ok,false);assert.equal(lastApply.error.code,'SOURCE_CONFLICT');assert.equal(promptEditor.querySelector('[aria-label="Prompt text"]').value,'Retained prompt after conflict');assert(promptEditor.isConnected);assert.deepEqual(await readFile(join(scratch,'synthetic-project',path)),external);assert.deepEqual(await readFile(mapPath),externalMap);button('Cancel',promptEditor);
+ button('Close Project');await wait(()=>document.querySelector('.recent-open'));button(document.querySelector('.recent-open').textContent);await wait(()=>document.querySelector('.beat-card'));await settle();assert.equal(await source(path),external.toString('utf8').replace(/^\uFEFF/,''));
+ stage('nested prompt preserves recursive Call and option ownership; reopen and ordinary external conflict retain exact source and drafts');
  result.acceptedSource=await source(path);result.sourceSHA256=hash(result.acceptedSource);result.identities=ids;
  button('Close Project');await wait(()=>document.querySelector('.recent-open'));result.passed=true;
 } catch(error){result.failure={message:error.message,stack:error.stack};result.dom=document.body.innerHTML;throw error;}

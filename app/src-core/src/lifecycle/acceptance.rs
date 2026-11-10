@@ -311,6 +311,7 @@ pub(crate) fn create_authored_game(data: &Path, parent: &Path, sdk: &Path) -> Li
             text: "Choose a road at sundown.".into(),
         },
         Beat::Choice {
+            prompt: None,
             options: vec![
                 crate::scene::ChoiceOption {
                     condition: None,

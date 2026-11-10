@@ -572,8 +572,12 @@ media rules.
 Production Story still has the earlier layout, with the preview above a beat list.
 The #101 slice adds numbered option bodies, caption/order controls, explicit Beat
 insertion positions and Then controls for Continue, Jump and Return in that editor.
-Conditions, nested Choices and Scene Call authoring inside options remain with #102.
-Prompts, disabled options, Repeat and Picked options remain later #98 slices. The
+#102 adds conditions, nested Choices and Scene Calls inside options. #103 adds the
+approved prompt row above the options: "+ Prompt", a narration/existing Character
+picker, prompt text and removal. Commit and Cancel use the existing retained Beat
+draft. Accepted prompts appear with the options in the illustrative preview;
+manual option selection can expose a nested prompt without evaluating its guard.
+Disabled options, Repeat and Picked options remain later #98 slices. The
 full Combined layout and palette remain with #110. Arithmetic uses the accepted
 shared controls.
 Until a capability exists, the editor says it is not built instead of showing a

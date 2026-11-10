@@ -409,6 +409,15 @@ Source navigation. Exact early and final SDK proof is recorded in the Phase 3 ta
 CI4 establishes full authoring and saved-callee return after the qualified caller
 narration edit; it does not promise arbitrary script-change save compatibility.
 
+Choice prompts use the existing Choice payload, recursive source recognizer and
+writer. `insertBodyBeat`/`updateBodyBeat` carry an optional narration or existing
+Character prompt through the same transaction/history owner. Source-map v11
+recognizes the menu line plus prompt as one disjoint header, while option headers
+and bodies retain their own records. Historical recognizers remain version-gated;
+verified refinement retains absorbed rows and unknown metadata. Unsupported menu
+forms stay explicit Source. Preview displays literal prompt text and options
+together, and uses only manual branch assumptions. It never executes project code.
+
 The first structural commands are `insertBodyBeat` and `updateBodyBeat`. Their explicit
 body identifies the root or a known group/branch; insertion names an immediate sibling
 node or literal body end. Mutation captures expected ownership and source/project/map

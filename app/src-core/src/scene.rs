@@ -130,6 +130,8 @@ pub enum BeatPayload {
         value: Value,
     },
     Choice {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        prompt: Option<ChoicePrompt>,
         options: Vec<ChoiceOption>,
     },
     Jump {
@@ -190,7 +192,7 @@ pub(crate) fn logic_boundary(payload: &BeatPayload) -> bool {
             | BeatPayload::ShowScreen { .. }
             | BeatPayload::HideScreen { .. }
             | BeatPayload::CallScreen { .. }
-    ) || matches!(payload, BeatPayload::Choice { options } if options.iter().any(|o| o.condition.is_some()))
+    ) || matches!(payload, BeatPayload::Choice { options, .. } if options.iter().any(|o| o.condition.is_some()))
 }
 
 // Supported option headers and a verified inert placeholder are protected edit
@@ -209,6 +211,19 @@ fn opaque_source(beat: &SceneBeat) -> bool {
 
 fn is_terminal_payload(payload: &BeatPayload) -> bool {
     matches!(payload, BeatPayload::Jump { .. } | BeatPayload::Return)
+}
+
+/// A line displayed in the menu interaction, never an option-body Beat.
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase",
+    tag = "type",
+    deny_unknown_fields
+)]
+pub enum ChoicePrompt {
+    Narration { text: String },
+    Dialogue { character_id: String, text: String },
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -1845,7 +1860,11 @@ impl AuthoringService {
             .iter()
             .find(|beat| beat.id == choice_beat_id)
             .ok_or(SceneError::UnknownEntity)?;
-        let BeatPayload::Choice { mut options } = choice.payload.clone() else {
+        let BeatPayload::Choice {
+            mut options,
+            prompt,
+        } = choice.payload.clone()
+        else {
             return Err(SceneError::InvalidPayload);
         };
         if choice.protected || options.len() >= 64 {
@@ -1885,7 +1904,7 @@ impl AuthoringService {
             &beats,
             BeatEdit::Update {
                 id: choice_beat_id.into(),
-                payload: BeatPayload::Choice { options },
+                payload: BeatPayload::Choice { options, prompt },
             },
             &loaded,
         )?;
@@ -1902,7 +1921,7 @@ impl AuthoringService {
             .iter()
             .find(|b| b.start == choice.byte_start as usize)
             .and_then(|b| match &b.payload {
-                BeatPayload::Choice { options } => options
+                BeatPayload::Choice { options, .. } => options
                     .last()
                     .and_then(|o| o.id.as_ref())
                     .and_then(|id| id.parse::<usize>().ok()),
@@ -2947,8 +2966,8 @@ fn apply_beat_edit(
                         .ok_or(SceneError::UnknownEntity)?
                         .technical_label,
                 )?
-            } else if let BeatPayload::Choice { options } = &payload {
-                return choice::update(source, beats, beat, options, loaded);
+            } else if let BeatPayload::Choice { options, prompt } = &payload {
+                return choice::update(source, beats, beat, options, prompt.as_ref(), loaded);
             } else if let Some(patched) = patch_variable_assignment(
                 &source[beat.byte_start as usize..beat.byte_end as usize],
                 &beat.payload,
@@ -3273,8 +3292,11 @@ fn render_payload(
                 )
             }
         }
-        BeatPayload::Choice { options } => {
+        BeatPayload::Choice { options, prompt } => {
             let mut text = format!("    menu:{newline}");
+            if let Some(prompt) = prompt {
+                text.push_str(&choice::render_prompt(prompt, loaded, 8, newline)?);
+            }
             for option in options {
                 text.push_str(&format!(
                     "        \"{}\"{}:{newline}            pass{newline}",
@@ -3325,7 +3347,10 @@ fn validate_payload(payload: &BeatPayload, loaded: &Loaded) -> Result<(), SceneE
             validate_text(text)?;
         }
         BeatPayload::Narration { text } => validate_text(text)?,
-        BeatPayload::Choice { options } => {
+        BeatPayload::Choice { options, prompt } => {
+            if let Some(prompt) = prompt {
+                choice::render_prompt(prompt, loaded, 8, "\n")?;
+            }
             if options.is_empty() || options.len() > 64 {
                 return Err(SceneError::InvalidPayload);
             }
@@ -3860,7 +3885,10 @@ fn parse_scene_mode(
                     nesting: None,
                     start: menu_start,
                     end: menu_end,
-                    payload: BeatPayload::Choice { options },
+                    payload: BeatPayload::Choice {
+                        options,
+                        prompt: None,
+                    },
                 });
                 continue;
             }
@@ -4513,7 +4541,7 @@ pub(crate) fn build_mapping(
         .map(|b| (b.byte_start, b.id.clone()))
         .collect::<Vec<_>>();
     for beat in &mut beats {
-        if let BeatPayload::Choice { options } = &mut beat.payload {
+        if let BeatPayload::Choice { options, .. } = &mut beat.payload {
             // The parser carries header byte starts until the mapping has assigned identities.
             for option in options {
                 let start = option
@@ -6126,6 +6154,7 @@ mod tests {
                 value: Value::String("Loomlight".into()),
             },
             BeatPayload::Choice {
+                prompt: None,
                 options: vec![
                     ChoiceOption {
                         condition: None,
@@ -6167,7 +6196,7 @@ mod tests {
             .into_iter()
             .filter(|b| b.nesting.is_none())
             .map(|mut b| {
-                if let BeatPayload::Choice { options } = &mut b.payload {
+                if let BeatPayload::Choice { options, .. } = &mut b.payload {
                     for o in options {
                         o.id = None;
                     }
@@ -6474,6 +6503,7 @@ mod tests {
                     expected_source_revision: entry.source_revision.clone(),
                     before_beat_id: None,
                     beat: BeatPayload::Choice {
+                        prompt: None,
                         options: vec![ChoiceOption {
                             condition: None,
                             text: "Take the first path".into(),
@@ -6557,7 +6587,7 @@ mod tests {
             .iter()
             .find(|scene| scene.id == fixture.entry_scene_id)
             .unwrap();
-        let BeatPayload::Choice { options } = &source_scene
+        let BeatPayload::Choice { options, .. } = &source_scene
             .beats
             .iter()
             .find(|beat| matches!(beat.payload, BeatPayload::Choice { .. }))
@@ -6582,7 +6612,7 @@ mod tests {
         let undone = fixture.apply(&expanded, SceneCommand::Undo).unwrap();
         assert_eq!(undone.scenes.len(), 2);
         assert!(!fixture.root.join(&created.source_path).exists());
-        let BeatPayload::Choice { options } = &undone
+        let BeatPayload::Choice { options, .. } = &undone
             .scenes
             .iter()
             .find(|scene| scene.id == fixture.entry_scene_id)
@@ -6973,6 +7003,7 @@ mod tests {
                     expected_source_revision: entry.source_revision.clone(),
                     before_beat_id: None,
                     beat: BeatPayload::Choice {
+                        prompt: None,
                         options: vec![
                             ChoiceOption {
                                 condition: None,
@@ -7067,7 +7098,7 @@ mod tests {
         assert!(entry.partial);
         assert!(matches!(
             &entry.beats.iter().find(|b|matches!(b.payload,BeatPayload::Choice{..})).unwrap().payload,
-            BeatPayload::Choice { options } if options.len() == 3
+            BeatPayload::Choice { options, .. } if options.len() == 3
         ));
         let garden = workspace
             .scenes
@@ -7488,6 +7519,7 @@ mod tests {
                         },
                     },
                     beat: BeatPayload::Choice {
+                        prompt: None,
                         options: vec![
                             ChoiceOption {
                                 text: "Same".into(),
@@ -7779,7 +7811,11 @@ mod tests {
         assert_eq!(graph.revision, again.revision);
         let workspace = fixture.workspace();
         let origin = &workspace.scenes[0];
-        let BeatPayload::Choice { mut options } = origin.beats[0].payload.clone() else {
+        let BeatPayload::Choice {
+            mut options,
+            prompt,
+        } = origin.beats[0].payload.clone()
+        else {
             panic!("choice fixture");
         };
         options[0].text = "Route A".into();
@@ -7795,7 +7831,7 @@ mod tests {
                     scene_id: origin.id.clone(),
                     expected_source_revision: origin.source_revision.clone(),
                     beat_id: origin.beats[0].id.clone(),
-                    beat: BeatPayload::Choice { options },
+                    beat: BeatPayload::Choice { options, prompt },
                 },
             )
             .unwrap();

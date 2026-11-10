@@ -91,6 +91,16 @@ Return returns to the caller, or to the main menu when there is no caller. A new
 created Scene still starts with Return. Structural commands refuse a new Scene
 fallthrough, including when every guarded option can be unavailable.
 
+The Choice payload has an optional `prompt`, either
+`{"type":"narration","text":"..."}` or
+`{"type":"dialogue","characterId":"<existing UUID>","text":"..."}`.
+The prompt belongs to the menu interaction. Its single source line sits immediately
+inside `menu:`, before the option headers, and displays with the options in Ren'Py.
+It is part of the Choice header's exact mapping, never a preceding or option-body
+Dialogue Beat. Character identity and text validation use the existing authoring
+owners. Prompt edits preserve the menu line and change only speaker/text tokens;
+removal removes only the prompt line, including its own trailing comment.
+
 The Choice payload contains option caption, optional condition and mapped option ID.
 It has no destination field. A destination option has an ordinary Jump in its body.
 The option ID is its header's Beat UUID; Choice identity is the menu header UUID.
@@ -101,9 +111,12 @@ reuse that branch mapping with `choiceOption: true`; they are not condition node
 children and shared following Beats have disjoint exact source ranges. No second
 saved story document or action-list model exists.
 
-Source-map schema 10 recognizes recursive option bodies and assigns indented
-condition trivia to its branch. It verifies schema 9 with its flat option-body
-recognizer before refining exact physical records. Earlier whole-menu maps also
+Source-map schema 11 adds prompt recognition to schema 10's recursive option bodies
+and indented condition trivia. Migration verifies schema 10 with its frozen
+recognizer, schema 9 with its flat option-body recognizer, and older maps with their
+original recognizers before refinement. A newly recognized prompt joins the menu
+header; absorbed physical records survive in `refinedChildMappings`, including their
+IDs and unknown fields. Earlier whole-menu maps also
 pass their original recognizer before refinement. The menu header keeps its old ID and unknown fields;
 provable existing physical records keep theirs. Opening and no-op editing never
 rewrite `.rpy` bytes. Unprovable ownership refuses; unsupported option contents stay

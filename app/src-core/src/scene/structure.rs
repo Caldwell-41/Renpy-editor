@@ -613,8 +613,8 @@ fn apply(
             {
                 return Err(SceneError::InvariantBlocked);
             }
-            if let BeatPayload::Choice { options } = &payload {
-                return choice::update(source, beats, beat, options, loaded);
+            if let BeatPayload::Choice { options, prompt } = &payload {
+                return choice::update(source, beats, beat, options, prompt.as_ref(), loaded);
             }
             let original = &source[beat.byte_start as usize..beat.byte_end as usize];
             let rendered = match (&beat.payload, &payload) {

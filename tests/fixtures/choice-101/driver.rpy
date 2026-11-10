@@ -184,3 +184,67 @@ testsuite choice_body:
         assert screen "choice_body_main_menu" timeout 10
         $ print("CHOICE_102_RETURN caller=resumed shared=0", flush=True)
         exit
+
+    testcase narration_prompt:
+        assert screen "choice_body_main_menu" timeout 10
+        click "Start"
+        assert screen "choice" timeout 10
+        assert screen "say"
+        assert "Choose a route"
+        assert "Yes"
+        assert "No"
+        click "Yes"
+        assert "Shared once" timeout 10
+        assert eval (choice_flag is True)
+        keysym "K_RETURN"
+        assert screen "choice_body_main_menu" timeout 10
+        $ print("CHOICE_103_NARRATION simultaneous=yes shared=1", flush=True)
+        exit
+
+    testcase character_prompt:
+        assert screen "choice_body_main_menu" timeout 10
+        click "Start"
+        assert screen "choice" timeout 10
+        assert screen "say"
+        assert "Bec"
+        assert "Where shall we go?"
+        assert "Yes"
+        assert "No"
+        click "No"
+        assert "Shared once" timeout 10
+        assert eval (choice_flag is False)
+        keysym "K_RETURN"
+        assert screen "choice_body_main_menu" timeout 10
+        $ print("CHOICE_103_CHARACTER simultaneous=yes shared=1", flush=True)
+        exit
+
+    testcase nested_prompt:
+        assert screen "choice_body_main_menu" timeout 10
+        click "Start"
+        assert screen "choice" timeout 10
+        assert "Choose a route"
+        assert "Yes, please"
+        click "Yes, please"
+        assert "Before call" timeout 10
+        keysym "K_RETURN"
+        assert "Transferred" timeout 10
+        keysym "K_RETURN"
+        assert "Resume inside option" timeout 10
+        keysym "K_RETURN"
+        assert screen "choice" timeout 10
+        assert screen "say"
+        assert "Bec"
+        assert "Inside, which route?"
+        assert "Inner normal"
+        assert "Inner jump"
+        assert "Inner return"
+        click "Inner normal"
+        assert "Inside inner" timeout 10
+        keysym "K_RETURN"
+        assert "After nested" timeout 10
+        keysym "K_RETURN"
+        assert "Shared once" timeout 10
+        keysym "K_RETURN"
+        assert screen "choice_body_main_menu" timeout 10
+        $ print("CHOICE_103_NESTED simultaneous=yes call=returned shared=1", flush=True)
+        exit
