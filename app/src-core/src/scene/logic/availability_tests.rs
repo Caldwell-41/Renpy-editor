@@ -121,6 +121,7 @@ fn choice_disabled_completion_keeps_safe_endings_and_refuses_stale_or_invalid_po
     payload["options"][0]["unavailablePolicy"] = json!("showDisabled");
     let command = |payload: serde_json::Value| json!({"type":"updateBodyBeat","sceneId":scene["id"],"expectedSourceRevision":w["scenes"][0]["sourceRevision"],"beatId":menu["id"],"expectedBody":{"type":"root"},"beat":payload});
     let path = f.root.join(scene["sourcePath"].as_str().unwrap());
+    let original = fs::read(&path).unwrap();
     assert_eq!(
         f.reject(command(payload.clone()))["error"]["code"],
         "INVALID_PAYLOAD"
@@ -131,7 +132,7 @@ fn choice_disabled_completion_keeps_safe_endings_and_refuses_stale_or_invalid_po
         f.reject(command(payload.clone()))["error"]["code"],
         "SCENE_INVARIANT"
     );
-    assert!(fs::read(&path).unwrap().ends_with(source.as_bytes()));
+    assert_eq!(fs::read(&path).unwrap(), original);
     f.save(&w["scenes"][0], &(source + "    return\n"));
     assert_eq!(
         f.reject(command(payload.clone()))["error"]["code"],
