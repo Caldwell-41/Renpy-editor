@@ -739,6 +739,7 @@ impl AuthoringService {
         let loaded = self.load(project, project_id)?;
         let mut scenes = Vec::with_capacity(loaded.project.scenes.len());
         let mut screen_targets = HashMap::new();
+        let mut choice_runtime_valid = None;
         for scene in &loaded.project.scenes {
             let stored = loaded
                 .source_map
@@ -781,18 +782,20 @@ impl AuthoringService {
             };
             let needs_choice_runtime = beats.iter().any(|b| matches!(&b.payload, BeatPayload::Choice { options, .. } if options.iter().any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled)));
             if needs_choice_runtime
-                && (self
-                    .snapshot_optional(project, crate::screens::choice_template::PATH)?
-                    .is_none()
-                    || self
-                        .choice_runtime_mutations(project, &bytes, &beats)
-                        .is_err())
+                && !*choice_runtime_valid.get_or_insert_with(|| {
+                    matches!(
+                        self.snapshot_optional(project, crate::screens::choice_template::PATH),
+                        Ok(Some(_))
+                    ) && self
+                        .choice_runtime_mutations(project, &beats, false)
+                        .is_ok()
+                })
             {
                 for beat in &mut beats {
                     if matches!(&beat.payload, BeatPayload::Choice { options, .. } if options.iter().any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled))
                     {
                         beat.protected = true;
-                        beat.source_fallback = Some("Choice template or availability adapter is unsupported or missing. Edit in Source.".into());
+                        beat.source_fallback = Some("Choice template or availability adapter is missing, unsupported or has pending Source edits. Edit in Source.".into());
                     }
                 }
             }
@@ -2340,7 +2343,8 @@ impl AuthoringService {
             .iter_mut()
             .find(|mapping| mapping.scene_id == scene_id)
             .ok_or(SceneError::InvalidMetadata)? = new_mapping;
-        let mut runtime = self.choice_runtime_mutations(project, &proposed_source, &next_beats)?;
+        let mut runtime =
+            self.choice_runtime_mutations(project, &next_beats, source_bytes != proposed_source)?;
         runtime.extend(vec![
             replace_mutation(
                 &scene.source_path,

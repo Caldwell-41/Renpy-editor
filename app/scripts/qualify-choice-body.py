@@ -154,7 +154,7 @@ def main():
     finally:
         receipt['cleanupComplete'] = scratch is None or not scratch.exists()
         (args.output / 'result.json').write_text(json.dumps(receipt, indent=2) + '\n')
-    print('Choice normal-entry compile, lint and play passed; wrong outcome rejected.')
+    print('Selected Choice normal-entry compile, lint and play children passed.')
 
 
 if __name__ == '__main__':

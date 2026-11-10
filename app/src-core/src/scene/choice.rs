@@ -312,8 +312,38 @@ pub(super) fn update(
         beat.id.clone(),
         Some(beat.byte_start as usize),
     )];
+    // Carry unchanged condition tokens into the aggregate guard too. Reformatting
+    // an unrelated Hide option would violate exact source ownership.
+    let guards = options
+        .iter()
+        .map(|option| {
+            if let Some(previous) = old.iter().find(|o| {
+                o.id == option.id && option.id.is_some() && o.condition == option.condition
+            }) {
+                let header = beats
+                    .iter()
+                    .find(|b| Some(&b.id) == previous.id.as_ref())
+                    .ok_or(SceneError::InvalidMetadata)?;
+                let original = std::str::from_utf8(
+                    &source[header.byte_start as usize..header.byte_end as usize],
+                )
+                .map_err(|_| SceneError::UnsupportedSource)?;
+                let code = logic::without_comment(original).trim_end();
+                let expression = if was_semantic {
+                    parse_option(code).map(|(_, e, _)| e)
+                } else {
+                    logic::option_text(code).map(|(_, e)| e)
+                }
+                .ok_or(SceneError::OpaqueBoundary)?;
+                Ok(expression.map(str::to_owned))
+            } else {
+                logic::render_guard(option.condition.as_ref(), &loaded.authoring)
+                    .map(|s| s.strip_prefix(" if ").map(str::to_owned))
+            }
+        })
+        .collect::<Result<Vec<_>, SceneError>>()?;
     let mut seen = HashSet::new();
-    for option in options {
+    for (option_index, option) in options.iter().enumerate() {
         if let Some(id) = &option.id {
             if !seen.insert(id) {
                 return Err(SceneError::InvariantBlocked);
@@ -337,12 +367,18 @@ pub(super) fn update(
             let mut updated = original.to_owned();
             let (qs, qe) = dialogue_quotes(original).ok_or(SceneError::OpaqueBoundary)?;
             // Preserve the exact header for a no-op, including condition spelling/comments.
-            if semantic || was_semantic {
+            if option.unavailable_policy == UnavailablePolicy::ShowDisabled
+                || old[ordinal].unavailable_policy == UnavailablePolicy::ShowDisabled
+            {
                 let colon = logic::without_comment(original)
                     .trim_end()
                     .rfind(':')
                     .ok_or(SceneError::OpaqueBoundary)?;
-                let suffix = option_suffix(option, options, &loaded.authoring)?;
+                let suffix = suffix_from_guards(
+                    option.unavailable_policy,
+                    guards[option_index].as_deref(),
+                    &guards,
+                )?;
                 // Keep exact bytes unless the semantic suffix itself changes.
                 if original[qe + 1..colon] != suffix {
                     updated.replace_range(qe + 1..colon, &suffix);
@@ -408,7 +444,11 @@ pub(super) fn update(
                 "{}\"{}\"{}:{newline}{}pass{newline}",
                 " ".repeat(indent + 4),
                 escape_string(&option.text)?,
-                option_suffix(option, options, &loaded.authoring)?,
+                suffix_from_guards(
+                    option.unavailable_policy,
+                    guards[option_index].as_deref(),
+                    &guards
+                )?,
                 " ".repeat(indent + 8)
             );
             let base = beat.byte_start as usize + rendered.len();
@@ -544,13 +584,6 @@ pub(super) fn option_suffix(
     options: &[ChoiceOption],
     authoring: &AuthoringMetadata,
 ) -> Result<String, SceneError> {
-    let guard = logic::render_guard(option.condition.as_ref(), authoring)?;
-    if option.unavailable_policy == UnavailablePolicy::Hide {
-        return Ok(guard);
-    }
-    let expression = guard
-        .strip_prefix(" if ")
-        .ok_or(SceneError::InvalidPayload)?;
     let guards = options
         .iter()
         .map(|o| {
@@ -558,11 +591,28 @@ pub(super) fn option_suffix(
                 .map(|s| s.strip_prefix(" if ").map(str::to_owned))
         })
         .collect::<Result<Vec<_>, _>>()?;
+    let guard = logic::render_guard(option.condition.as_ref(), authoring)?;
+    suffix_from_guards(
+        option.unavailable_policy,
+        guard.strip_prefix(" if "),
+        &guards,
+    )
+}
+fn suffix_from_guards(
+    policy: UnavailablePolicy,
+    guard: Option<&str>,
+    guards: &[Option<String>],
+) -> Result<String, SceneError> {
+    if policy == UnavailablePolicy::Hide {
+        return Ok(guard.map_or_else(String::new, |s| format!(" if {s}")));
+    }
+    let expression = guard.ok_or(SceneError::InvalidPayload)?;
     Ok(format!(
         " (_ll_available={expression}) if {}",
-        selectable_guard(&guards)
+        selectable_guard(guards)
     ))
 }
+
 fn parse_option(code: &str) -> Option<(String, Option<&str>, UnavailablePolicy)> {
     let code = code.trim().strip_suffix(':')?;
     let (qs, qe) = dialogue_quotes(code)?;
@@ -583,11 +633,10 @@ impl AuthoringService {
     pub(super) fn choice_runtime_mutations(
         &self,
         project: &ProjectId,
-        source: &[u8],
         beats: &[SceneBeat],
+        allow_create: bool,
     ) -> Result<Vec<FileMutation>, SceneError> {
         if !beats.iter().any(|b| matches!(&b.payload, BeatPayload::Choice { options, .. } if options.iter().any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled))) { return Ok(vec![]); }
-        let _ = source;
         let paths = self
             .transactions
             .inventory_files_bounded(project, "game", 8192)
@@ -615,7 +664,7 @@ impl AuthoringService {
                 if bytes != crate::screens::choice_template::ADAPTER.as_bytes() {
                     return Err(SceneError::OpaqueBoundary);
                 }
-                existing = Some(());
+                existing = Some((bytes.clone(), revision.clone()));
             } else if text
                 .lines()
                 .any(|l| l.trim_start().starts_with("screen _ll_choice_v1"))
@@ -630,8 +679,23 @@ impl AuthoringService {
             }
         }
         let (path, bytes, revision) = template.ok_or(SceneError::OpaqueBoundary)?;
+        self.ensure_source_paths_clean(
+            project,
+            [path.as_str(), crate::screens::choice_template::PATH],
+        )
+        .map_err(|_| SceneError::DirtySource)?;
+        if existing.is_none() && !allow_create {
+            return Err(SceneError::OpaqueBoundary);
+        }
         let mut mutations = vec![replace_mutation(&path, bytes.clone(), revision, bytes)?];
-        if existing.is_none() {
+        if let Some((bytes, revision)) = existing {
+            mutations.push(replace_mutation(
+                crate::screens::choice_template::PATH,
+                bytes.clone(),
+                revision,
+                bytes,
+            )?);
+        } else {
             mutations.push(create_mutation(
                 crate::screens::choice_template::PATH,
                 crate::screens::choice_template::ADAPTER.as_bytes().to_vec(),
