@@ -468,6 +468,7 @@ testsuite choice_body:
         exit
 
     testcase picked_show:
+        assert screen "choice_body_main_menu" timeout 10
         click "Start"
         assert screen "_ll_choice_v1" timeout 10
         assert eval (_choice106_state(0))
@@ -484,6 +485,7 @@ testsuite choice_body:
         exit
 
     testcase picked_mark_save:
+        assert screen "choice_body_main_menu" timeout 10
         click "Start"
         assert screen "_ll_choice_v1" timeout 10
         assert eval (_choice106_state(0))
@@ -517,6 +519,7 @@ testsuite choice_body:
         exit
 
     testcase picked_rollback_new:
+        assert screen "choice_body_main_menu" timeout 10
         click "Start"
         assert screen "_ll_choice_v1" timeout 10
         assert eval (_choice106_state(0))
@@ -538,6 +541,7 @@ testsuite choice_body:
         exit
 
     testcase picked_hide:
+        assert screen "choice_body_main_menu" timeout 10
         click "Start"
         assert screen "_ll_choice_v1" timeout 10
         assert eval (_choice106_state(0))
@@ -559,6 +563,7 @@ testsuite choice_body:
         exit
 
     testcase picked_repeat:
+        assert screen "choice_body_main_menu" timeout 10
         click "Start"
         assert screen "_ll_choice_v1" timeout 10
         click "Ask about the station"
@@ -579,6 +584,7 @@ testsuite choice_body:
         exit
 
     testcase picked_wrong_outcome:
+        assert screen "choice_body_main_menu" timeout 10
         click "Start"
         assert screen "_ll_choice_v1" timeout 10
         assert eval (_choice106_state(1)) timeout 1
@@ -586,6 +592,7 @@ testsuite choice_body:
         exit
 
     testcase picked_return:
+        assert screen "choice_body_main_menu" timeout 10
         click "Start"
         assert screen "_ll_choice_v1" timeout 10
         click "Same"
@@ -595,6 +602,7 @@ testsuite choice_body:
         exit
 
     testcase picked_immediate_repeat:
+        assert screen "choice_body_main_menu" timeout 10
         click "Start"
         assert screen "_ll_choice_v1" timeout 10
         click "Same"
@@ -604,6 +612,7 @@ testsuite choice_body:
         exit
 
     testcase picked_instances:
+        assert screen "choice_body_main_menu" timeout 10
         click "Start"
         assert screen "_ll_choice_v1" timeout 10
         click "Same"
@@ -622,6 +631,7 @@ testsuite choice_body:
         exit
 
     testcase picked_repeat_hide:
+        assert screen "choice_body_main_menu" timeout 10
         click "Start"
         assert screen "_ll_choice_v1" timeout 10
         click "Ask about the station"

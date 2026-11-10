@@ -203,7 +203,7 @@ def main():
                             row['passed'] = result.exit_code != 0 and '[rpytest] Status: FAILED' in result.output and assertion in result.output and 'CHOICE_101_WRONG_ACCEPTED' not in result.output and 'CHOICE_105_WRONG_ACCEPTED' not in result.output and 'CHOICE_106_WRONG_ACCEPTED' not in result.output
                         else:
                             row['passed'] = result.exit_code == 0 and (marker is None or result.output.count(marker) == 1 and '[rpytest] Status: PASSED' in result.output)
-                        assert row['passed'] and not result.timed_out and not result.output_limited, name
+                        row['passed'] = row['passed'] and not result.timed_out and not result.output_limited
                         if case == 'picked_mark_save':
                             receipt['savedArtifacts'] = {str(p.relative_to(scratch)): digest(p.read_bytes()) for p in scratch.rglob('choice106-LT1.save')}
                             assert receipt['savedArtifacts'], 'successful process must close with a real save artifact'
@@ -212,10 +212,11 @@ def main():
             finally:
                 os.environ.clear()
                 os.environ.update(old_env)
-        receipt['passed'] = True
+        receipt['passed'] = all(row['passed'] for row in receipt['children'])
     finally:
         receipt['cleanupComplete'] = scratch is None or not scratch.exists()
         (args.output / 'result.json').write_text(json.dumps(receipt, indent=2) + '\n')
+    assert receipt['passed'], 'One or more selected SDK children failed; inspect result.json'
     print('Selected Choice normal-entry compile, lint and play children passed.')
 
 
