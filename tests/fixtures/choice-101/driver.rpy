@@ -83,8 +83,9 @@ init python:
         return False
 
 screen choice_body_main_menu():
-    textbutton "Start" action Start()
-    textbutton "Load Choice" action FileLoad("choice106", confirm=False, slot=True)
+    vbox:
+        textbutton "Start" action Start()
+        textbutton "Load Choice" action FileLoad("choice106", confirm=False, slot=True)
 
 label main_menu:
     call screen choice_body_main_menu
