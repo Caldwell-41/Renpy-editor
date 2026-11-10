@@ -92,6 +92,7 @@ function terminates(beat: SceneBeat, scene: SceneDocument, depth = 0): boolean {
     return branches.some(branch => branch.conditionalBranch?.otherwise) && branches.every(branch => bodyNodes(scene, { type: "branch", groupId: beat.conditionalBranch!.groupId, branchId: branch.id }).some(child => terminates(child, scene, depth + 1)));
   }
   if (beat.payload.type === "choice") {
+    if (beat.payload.pickedPolicy === "hidePicked") return false;
     const options = beat.payload.options;
     return options.some(option => !option.condition) && options.every(option => {
       const header = scene.beats.find(b => b.id === option.id);

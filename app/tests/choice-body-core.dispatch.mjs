@@ -288,6 +288,30 @@ try {
  button('Add Beat');draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'choice','change');enter(draft.querySelector('[aria-label="Insert before"]'),scene().beats.find(b=>b.payload.text==='Shared once').id,'change');enter(draft.querySelector('[aria-label="Choice option text"]'),'Same');button('Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'Same');enter(draft.querySelector('[aria-label="Picked options"]'),'markPicked','change');await applied(draft,'Add Beat');
  const secondChoice=scene().beats.find(b=>b.payload.type==='choice'&&b.id!==pickedId);result.runtime.pickedInstanceIdentities={choice:secondChoice.id,options:secondChoice.payload.options.map(o=>o.id)};assert(![pickedId,firstPick.id,secondPick.id].includes(secondChoice.id));result.runtime.pickedInstances=await source(path);
  await applied(document,'Undo');assert.equal(await source(path),result.runtime.pickedHide);
+ // Exhaustion makes the shared continuation reachable even when every option transfers.
+ promptEditor=await editChoice(pickedId);button('Remove option',promptEditor.querySelectorAll('.choice-option')[2]);await applied(promptEditor,'Commit Beat');
+ const transferOnly=await source(path),sharedAnchor=scene().beats.find(b=>b.payload.text==='Shared once'),finalReturn=scene().beats.at(-1);
+ for(const anchor of [sharedAnchor,finalReturn]){
+  button('Add Beat');draft=document.querySelector('.new-beat');
+  const position=draft.querySelector('[aria-label="Insert before"]');
+  assert.deepEqual([...position.options].map(o=>o.value),[pickedId,sharedAnchor.id,finalReturn.id]);assert.equal(position.value,finalReturn.id);
+  enter(position,anchor.id,'change');enter(draft.querySelector('[aria-label="Beat type"]'),'narration','change');enter(draft.querySelector('textarea'),'Exhaustion insertion');await applied(draft,'Add Beat');
+  const inserted=scene().beats.find(b=>b.payload.text==='Exhaustion insertion');assert(inserted&&!inserted.owner);assert.equal(lastApply.ok,true);
+  assert.deepEqual(result.transcript.filter(t=>t.request.operation==='scene.apply').at(-1).request.payload.command.position,{type:'before',anchor:{type:'beat',beatId:anchor.id}});
+  await applied(document,'Undo');assert.equal(await source(path),transferOnly);
+ }
+ await addBodyBeat(firstPick.id,'choice',form=>{enter(form.querySelector('[aria-label="Choice option text"]'),'Nested leave');enter(form.querySelector('[aria-label="Picked options"]'),'hidePicked','change');});
+ const exhaustionInner=scene().beats.find(b=>b.payload.type==='choice'&&b.owner?.branchId===firstPick.id);
+ await thenOption(exhaustionInner.payload.options[0].id,'return');
+ const nestedBefore=await source(path),sharedJump=scene().beats.find(b=>b.payload.type==='jump'&&b.owner?.branchId===firstPick.id);
+ button('Add a Beat',option(firstPick.id));draft=document.querySelector('.new-beat');
+ const nestedPosition=draft.querySelector('[aria-label="Insert before"]');assert.deepEqual([...nestedPosition.options].map(o=>o.value),[exhaustionInner.id,sharedJump.id]);
+ enter(nestedPosition,sharedJump.id,'change');enter(draft.querySelector('[aria-label="Beat type"]'),'narration','change');enter(draft.querySelector('textarea'),'Nested exhaustion insertion');await applied(draft,'Add Beat');
+ const nestedInserted=scene().beats.find(b=>b.payload.text==='Nested exhaustion insertion');assert.equal(nestedInserted.owner.branchId,firstPick.id);assert.equal(lastApply.ok,true);
+ await applied(document,'Undo');assert.equal(await source(path),nestedBefore);
+ await applied(document,'Undo');await applied(document,'Undo');assert.equal(await source(path),transferOnly);
+ await applied(document,'Undo');assert.equal(await source(path),result.runtime.pickedHide);
+ stage('Hide picked exposes shared Beat/final Return and nested continuation positions through actual controls and public dispatch');
  promptEditor=await editChoice(pickedId);enter(promptEditor.querySelector('[aria-label="Picked options"]'),'markPicked','change');await appendFile(join(scratch,'synthetic-project',path),'# picked external writer\n');const pickedExternal=await readFile(join(scratch,'synthetic-project',path));lastApply=undefined;button('Commit Beat',promptEditor);await wait(()=>lastApply);await settle();assert.equal(lastApply.ok,false);assert.equal(lastApply.error.code,'SOURCE_CONFLICT');assert(promptEditor.isConnected);assert.equal(promptEditor.querySelector('[aria-label="Picked options"]').value,'markPicked');assert.deepEqual(await readFile(join(scratch,'synthetic-project',path)),pickedExternal);button('Cancel',promptEditor);
  stage('independent Scene routes export all three picked policies, duplicate-caption identities, immediate Jumps, inert preview, Cancel/no-op/history and reopen');
  result.acceptedSource=await source(path);result.sourceSHA256=hash(result.acceptedSource);result.identities=ids;

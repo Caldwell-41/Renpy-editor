@@ -353,26 +353,31 @@ pub(super) fn update(
     let was_semantic = old
         .iter()
         .any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled);
-    let mut rendered = if picked_policy.is_some() {
-        let mut header = original_header[..label_end].to_vec();
-        header.extend_from_slice(
-            format!(
-                "{}{}{newline}",
-                " ".repeat(indent),
-                picked_header(&beat.id, picked_policy.unwrap())
-            )
-            .as_bytes(),
+    let mut menu = std::str::from_utf8(&original_header[label_end..menu_end])
+        .map_err(|_| SceneError::UnsupportedSource)?
+        .to_owned();
+    if let (Some(previous), Some(next)) = (previous_policy, picked_policy) {
+        if *previous != next {
+            let start =
+                menu.find("_ll_mode=\"").ok_or(SceneError::OpaqueBoundary)? + "_ll_mode=\"".len();
+            menu.replace_range(
+                start..start + policy_name(*previous).len(),
+                policy_name(next),
+            );
+        }
+    } else if picked_policy.is_some() || semantic != was_semantic {
+        // Replace only the menu token. Keep this row's indentation, trailing
+        // whitespace and newline even when adopting the runtime arguments.
+        let start = menu.len() - menu.trim_start_matches(' ').len();
+        let end = menu.trim_end().len();
+        let next = picked_policy.map_or_else(
+            || menu_header(options).to_owned(),
+            |p| picked_header(&beat.id, p),
         );
-        header
-    } else if semantic == was_semantic {
-        original_header[..menu_end].to_vec()
-    } else {
-        let mut header = original_header[..label_end].to_vec();
-        header.extend_from_slice(
-            format!("{}{}{newline}", " ".repeat(indent), menu_header(options)).as_bytes(),
-        );
-        header
-    };
+        menu.replace_range(start..end, &next);
+    }
+    let mut rendered = original_header[..label_end].to_vec();
+    rendered.extend_from_slice(menu.as_bytes());
     match (previous_prompt.as_ref(), prompt) {
         (Some(old), Some(next)) if old == next => {
             rendered.extend_from_slice(&original_header[menu_end..])
@@ -544,12 +549,15 @@ pub(super) fn update(
             if option.text != old[ordinal].text {
                 updated.replace_range(qs + 1..qe, &escape_string(&option.text)?);
             }
-            if let Some(policy) = picked_policy {
-                // The first executable statement is owned by the option header.
-                let line_end = updated.find('\n').map_or(updated.len(), |p| p + 1);
-                updated.truncate(line_end);
-                let _ = policy;
-                updated.push_str(&record(&beat.id, id, indent + 8, newline));
+            if picked_policy.is_some() && previous_policy.is_none() {
+                // First adoption adds the record using this existing header's
+                // newline. Retained source-backed records already own exact bytes.
+                let row_newline = if original.ends_with("\r\n") {
+                    "\r\n"
+                } else {
+                    "\n"
+                };
+                updated.push_str(&record(&beat.id, id, indent + 8, row_newline));
             }
             let at = beat.byte_start as usize + rendered.len();
             forced.push((
@@ -791,7 +799,7 @@ impl AuthoringService {
         &self,
         project: &ProjectId,
         beats: &[SceneBeat],
-        allow_create: bool,
+        allow_adoption: bool,
     ) -> Result<Vec<FileMutation>, SceneError> {
         let picked = beats.iter().any(|b| {
             matches!(
@@ -811,6 +819,8 @@ impl AuthoringService {
         let mut existing = None;
         let mut template = None;
         let mut count = 0;
+        let mut referenced = false;
+        let mut picked_referenced = false;
         for path in paths.iter().filter(|p| p.ends_with(".rpy")) {
             let (bytes, revision) = self.scene_snapshot(project, path)?;
             count += bytes.len();
@@ -818,6 +828,16 @@ impl AuthoringService {
                 return Err(SceneError::InvariantBlocked);
             }
             let text = std::str::from_utf8(&bytes).map_err(|_| SceneError::UnsupportedSource)?;
+            // Inspect the accepted on-disk dependencies before this proposal. A
+            // changed source range alone does not authorize repairing a helper.
+            for (start, end) in crate::authoring::lexical_lines(&bytes, false)
+                .map_err(|_| SceneError::UnsupportedSource)?
+            {
+                let line = text[start..end].trim();
+                let uses_picked = parse_picked_header(line).is_some();
+                picked_referenced |= uses_picked;
+                referenced |= uses_picked || line == "menu (screen=\"_ll_choice_v1\"):";
+            }
             if text.contains("config.menu_include_disabled")
                 || text.contains("config.menu_actions")
                 || text.lines().any(|l| {
@@ -869,14 +889,14 @@ impl AuthoringService {
             [path.as_str(), crate::screens::choice_template::PATH],
         )
         .map_err(|_| SceneError::DirtySource)?;
-        if existing.is_none() && !allow_create {
+        if existing.is_none() && (!allow_adoption || referenced) {
             return Err(SceneError::OpaqueBoundary);
         }
         let mut mutations = vec![replace_mutation(&path, bytes.clone(), revision, bytes)?];
         mutations.retain(|m| m.path.as_str() != crate::screens::choice_template::PATH);
         if let Some((bytes, revision)) = existing {
             let next = if picked && bytes == crate::screens::choice_template::ADAPTER.as_bytes() {
-                if !allow_create {
+                if !allow_adoption || picked_referenced {
                     return Err(SceneError::OpaqueBoundary);
                 }
                 crate::screens::choice_template::PICKED_ADAPTER

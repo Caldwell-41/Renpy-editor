@@ -474,7 +474,10 @@ Schema 14 recognizes the source-backed policy and selection records; recognizers
 through 13 remain frozen and version-gated. Existing source/map transactions,
 Undo/Redo, drafts and reopen own accepted changes and helper creation or upgrade.
 Duplicate keys, reserved declarations, missing or edited helpers, dirty Source and
-unsupported templates refuse authoring with protected Source fallback. Rollback
+unsupported templates refuse authoring with protected Source fallback. The existing
+runtime owner checks each required adapter capability and inspects accepted source
+references before allowing first creation or upgrade. A changed source range alone
+does not permit helper repair. Rollback
 and New Game runtime proof remains pending in [the Choice evidence](tasks/evidence/choice-98.md#106-integration-and-handoff).
 No project Python runs during inspection, authoring or illustrative preview.
 
