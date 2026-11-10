@@ -1,0 +1,859 @@
+{
+  "revision": "draft-v1",
+  "status": "awaiting-explicit-user-approval",
+  "source": {
+    "commit": "de919b472fe78e4de3769e436f20e499ebf4bff1",
+    "fingerprint": "b1f391b59097485d11c53f1f805ba9b2e8f722085e509972004a5fdcbfb6500b"
+  },
+  "baseCommit": "f395f158cbb6df11eb733316cf6ccc4c498c1d10",
+  "date": "2026-11-11",
+  "route": "Existing production scene renderer, read-only public sample callbacks, draft preview only. Managed T3 browser.",
+  "inputLayer": "Browser DOM and synthetic scroll; no native input claim.",
+  "checks": {
+    "typescript": "passed; pinned Node v24.19.0 and repository TypeScript v7.0.2; scoped draft config; dependencies read only",
+    "inlinePreview": "passed; 728px; no console messages",
+    "sourceIdentity": "npm run design:source passed",
+    "sdkStarts": 0,
+    "nativeEditorOrPackageLaunches": 0,
+    "ciRuns": 0
+  },
+  "limits": [
+    "Browser summary review only; no production implementation or runtime correctness claim.",
+    "Public sample has no media; asset fitting and character placement are not covered.",
+    "Long text scrolls within the existing allocation. No selection, condition evaluation, pick simulation, or Preview options assumptions.",
+    "The managed browser began with cached earlier draft CSS. Server restarted on pinned Node; all retained measurements below use the committed CSS. Earlier cached measurements are excluded."
+  ],
+  "samples": [
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 720,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked state unknown · Hide picked",
+      "prompt": "NarrationChoose independently",
+      "scrolls": [],
+      "selectableOptions": 0,
+      "state": "duplicate",
+      "summary": {
+        "height": 110,
+        "width": 774
+      },
+      "summaryOverflow": false,
+      "variant": "dock",
+      "width": 1100,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 720,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked state unknown · Mark picked",
+      "prompt": "BecThe last service leaves in a minute. Are you coming with me?",
+      "scrolls": [],
+      "selectableOptions": 0,
+      "state": "character",
+      "summary": {
+        "height": 110,
+        "width": 774
+      },
+      "summaryOverflow": false,
+      "variant": "dock",
+      "width": 1100,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 720,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked state unknown · Hide picked",
+      "prompt": "BecBefore the last service leaves, tell me whether you want to follow the lamplighter or wait here until someone explains the new stop on the timetable.",
+      "scrolls": [
+        {
+          "class": "cpc-scroll",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 192
+        }
+      ],
+      "selectableOptions": 0,
+      "state": "long",
+      "summary": {
+        "height": 110,
+        "width": 774
+      },
+      "summaryOverflow": false,
+      "variant": "dock",
+      "width": 1100,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 720,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked options · Show normally",
+      "prompt": "ChoiceNo prompt",
+      "scrolls": [],
+      "selectableOptions": 0,
+      "state": "none",
+      "summary": {
+        "height": 110,
+        "width": 774
+      },
+      "summaryOverflow": false,
+      "variant": "dock",
+      "width": 1100,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 720,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked state unknown · Hide picked",
+      "prompt": "NarrationChoose independently",
+      "scrolls": [
+        {
+          "class": "cpc-scroll",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 132
+        }
+      ],
+      "selectableOptions": 0,
+      "state": "duplicate",
+      "summary": {
+        "height": 110,
+        "width": 774
+      },
+      "summaryOverflow": false,
+      "variant": "transcript",
+      "width": 1100,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 720,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked state unknown · Mark picked",
+      "prompt": "BecThe last service leaves in a minute. Are you coming with me?",
+      "scrolls": [
+        {
+          "class": "cpc-scroll",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 132
+        }
+      ],
+      "selectableOptions": 0,
+      "state": "character",
+      "summary": {
+        "height": 110,
+        "width": 774
+      },
+      "summaryOverflow": false,
+      "variant": "transcript",
+      "width": 1100,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 720,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked state unknown · Hide picked",
+      "prompt": "BecBefore the last service leaves, tell me whether you want to follow the lamplighter or wait here until someone explains the new stop on the timetable.",
+      "scrolls": [
+        {
+          "class": "cpc-scroll",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 182
+        }
+      ],
+      "selectableOptions": 0,
+      "state": "long",
+      "summary": {
+        "height": 110,
+        "width": 774
+      },
+      "summaryOverflow": false,
+      "variant": "transcript",
+      "width": 1100,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 720,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked options · Show normally",
+      "prompt": "ChoiceNo prompt",
+      "scrolls": [
+        {
+          "class": "cpc-scroll",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 132
+        }
+      ],
+      "selectableOptions": 0,
+      "state": "none",
+      "summary": {
+        "height": 110,
+        "width": 774
+      },
+      "summaryOverflow": false,
+      "variant": "transcript",
+      "width": 1100,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 720,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked state unknown · Hide picked",
+      "prompt": "NarrationChoose independently",
+      "scrolls": [
+        {
+          "class": "cpc-options",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 129
+        }
+      ],
+      "selectableOptions": 0,
+      "state": "duplicate",
+      "summary": {
+        "height": 110,
+        "width": 774
+      },
+      "summaryOverflow": false,
+      "variant": "split",
+      "width": 1100,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 720,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked state unknown · Mark picked",
+      "prompt": "BecThe last service leaves in a minute. Are you coming with me?",
+      "scrolls": [
+        {
+          "class": "cpc-context",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 129
+        },
+        {
+          "class": "cpc-options",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 129
+        }
+      ],
+      "selectableOptions": 0,
+      "state": "character",
+      "summary": {
+        "height": 110,
+        "width": 774
+      },
+      "summaryOverflow": false,
+      "variant": "split",
+      "width": 1100,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 720,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked state unknown · Hide picked",
+      "prompt": "BecBefore the last service leaves, tell me whether you want to follow the lamplighter or wait here until someone explains the new stop on the timetable.",
+      "scrolls": [
+        {
+          "class": "cpc-context",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 162
+        },
+        {
+          "class": "cpc-options",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 162
+        }
+      ],
+      "selectableOptions": 0,
+      "state": "long",
+      "summary": {
+        "height": 110,
+        "width": 774
+      },
+      "summaryOverflow": false,
+      "variant": "split",
+      "width": 1100,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 720,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked options · Show normally",
+      "prompt": "ChoiceNo prompt",
+      "scrolls": [
+        {
+          "class": "cpc-options",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 129
+        }
+      ],
+      "selectableOptions": 0,
+      "state": "none",
+      "summary": {
+        "height": 110,
+        "width": 774
+      },
+      "summaryOverflow": false,
+      "variant": "split",
+      "width": 1100,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 850,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked state unknown · Hide picked",
+      "prompt": "NarrationChoose independently",
+      "scrolls": [
+        {
+          "class": "cpc-scroll",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 121
+        }
+      ],
+      "selectableOptions": 0,
+      "state": "duplicate",
+      "summary": {
+        "height": 110,
+        "width": 648
+      },
+      "summaryOverflow": false,
+      "variant": "dock",
+      "width": 720,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 850,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked state unknown · Mark picked",
+      "prompt": "BecThe last service leaves in a minute. Are you coming with me?",
+      "scrolls": [
+        {
+          "class": "cpc-scroll",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 121
+        }
+      ],
+      "selectableOptions": 0,
+      "state": "character",
+      "summary": {
+        "height": 110,
+        "width": 648
+      },
+      "summaryOverflow": false,
+      "variant": "dock",
+      "width": 720,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 850,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked state unknown · Hide picked",
+      "prompt": "BecBefore the last service leaves, tell me whether you want to follow the lamplighter or wait here until someone explains the new stop on the timetable.",
+      "scrolls": [
+        {
+          "class": "cpc-scroll",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 242
+        }
+      ],
+      "selectableOptions": 0,
+      "state": "long",
+      "summary": {
+        "height": 110,
+        "width": 648
+      },
+      "summaryOverflow": false,
+      "variant": "dock",
+      "width": 720,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 850,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked options · Show normally",
+      "prompt": "ChoiceNo prompt",
+      "scrolls": [
+        {
+          "class": "cpc-scroll",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 121
+        }
+      ],
+      "selectableOptions": 0,
+      "state": "none",
+      "summary": {
+        "height": 110,
+        "width": 648
+      },
+      "summaryOverflow": false,
+      "variant": "dock",
+      "width": 720,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 850,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked state unknown · Hide picked",
+      "prompt": "NarrationChoose independently",
+      "scrolls": [
+        {
+          "class": "cpc-scroll",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 132
+        }
+      ],
+      "selectableOptions": 0,
+      "state": "duplicate",
+      "summary": {
+        "height": 110,
+        "width": 648
+      },
+      "summaryOverflow": false,
+      "variant": "transcript",
+      "width": 720,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 850,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked state unknown · Mark picked",
+      "prompt": "BecThe last service leaves in a minute. Are you coming with me?",
+      "scrolls": [
+        {
+          "class": "cpc-scroll",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 132
+        }
+      ],
+      "selectableOptions": 0,
+      "state": "character",
+      "summary": {
+        "height": 110,
+        "width": 648
+      },
+      "summaryOverflow": false,
+      "variant": "transcript",
+      "width": 720,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 850,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked state unknown · Hide picked",
+      "prompt": "BecBefore the last service leaves, tell me whether you want to follow the lamplighter or wait here until someone explains the new stop on the timetable.",
+      "scrolls": [
+        {
+          "class": "cpc-scroll",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 216
+        }
+      ],
+      "selectableOptions": 0,
+      "state": "long",
+      "summary": {
+        "height": 110,
+        "width": 648
+      },
+      "summaryOverflow": false,
+      "variant": "transcript",
+      "width": 720,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 850,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked options · Show normally",
+      "prompt": "ChoiceNo prompt",
+      "scrolls": [
+        {
+          "class": "cpc-scroll",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 132
+        }
+      ],
+      "selectableOptions": 0,
+      "state": "none",
+      "summary": {
+        "height": 110,
+        "width": 648
+      },
+      "summaryOverflow": false,
+      "variant": "transcript",
+      "width": 720,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 850,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked state unknown · Hide picked",
+      "prompt": "NarrationChoose independently",
+      "scrolls": [
+        {
+          "class": "cpc-context",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 112
+        },
+        {
+          "class": "cpc-options",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 129
+        }
+      ],
+      "selectableOptions": 0,
+      "state": "duplicate",
+      "summary": {
+        "height": 110,
+        "width": 648
+      },
+      "summaryOverflow": false,
+      "variant": "split",
+      "width": 720,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 850,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked state unknown · Mark picked",
+      "prompt": "BecThe last service leaves in a minute. Are you coming with me?",
+      "scrolls": [
+        {
+          "class": "cpc-context",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 129
+        },
+        {
+          "class": "cpc-options",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 129
+        }
+      ],
+      "selectableOptions": 0,
+      "state": "character",
+      "summary": {
+        "height": 110,
+        "width": 648
+      },
+      "summaryOverflow": false,
+      "variant": "split",
+      "width": 720,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 850,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked state unknown · Hide picked",
+      "prompt": "BecBefore the last service leaves, tell me whether you want to follow the lamplighter or wait here until someone explains the new stop on the timetable.",
+      "scrolls": [
+        {
+          "class": "cpc-context",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 179
+        },
+        {
+          "class": "cpc-options",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 179
+        }
+      ],
+      "selectableOptions": 0,
+      "state": "long",
+      "summary": {
+        "height": 110,
+        "width": 648
+      },
+      "summaryOverflow": false,
+      "variant": "split",
+      "width": 720,
+      "nativeRefused": true
+    },
+    {
+      "conditionUnknown": "Condition unknown · if false: Show disabled",
+      "css": {
+        "contextPadding": "4px 10px",
+        "optionPadding": "1px 0px"
+      },
+      "currentUnknownNotice": true,
+      "dpr": 2,
+      "height": 850,
+      "mutations": 0,
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "pickedState": "Picked options · Show normally",
+      "prompt": "ChoiceNo prompt",
+      "scrolls": [
+        {
+          "class": "cpc-context",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 112
+        },
+        {
+          "class": "cpc-options",
+          "height": 110,
+          "reachesBottom": true,
+          "scrollHeight": 129
+        }
+      ],
+      "selectableOptions": 0,
+      "state": "none",
+      "summary": {
+        "height": 110,
+        "width": 648
+      },
+      "summaryOverflow": false,
+      "variant": "split",
+      "width": 720,
+      "nativeRefused": true
+    }
+  ]
+}
