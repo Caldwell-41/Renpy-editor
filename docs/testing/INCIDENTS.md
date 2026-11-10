@@ -1155,3 +1155,17 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Evidence:** [Choice #102](https://github.com/Caldwell-41/Renpy-editor/issues/102)
   owns the requirement. Producing-host logs retain the failed play, successful
   compile/lint children and cleanup separately from the corrected candidate.
+
+## H82. Font browser fixture edits before the chosen file is ready
+
+- **Class/search:** harness readiness; `project-font.browser.mjs:66`, display-name
+  `aria-invalid`, `null !== 'true'`, asynchronous native-picker reply.
+- **Cause/correction:** the fixture edits import names before file selection and
+  preview finish. The late reply supplies a default name and replaces the form,
+  so the next assertion observes a different validation state. Wait for the
+  existing enabled Import and use control before both successful name-edit paths.
+  Keep held-picker cancellation and all validation assertions unchanged.
+- **Verification:** a controlled held-picker replay reproduces the exact failure;
+  waiting for readiness before validation passes that replay and the full actual
+  browser/controller/core journey. Production code and timeouts are unchanged.
+- **Evidence:** [Choice CI correction](../tasks/evidence/choice-98.md#ci-font-import-readiness-correction).
