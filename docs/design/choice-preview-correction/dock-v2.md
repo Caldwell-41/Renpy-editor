@@ -1,9 +1,10 @@
 # A v2
 
 Kris asked to apply unslop and Experience First to A, then show the result.
-This selects a new draft for review. It does not approve the draft or authorize
-production implementation. Story Combined v1 and the three v1 candidates remain
-unchanged.
+The notes below describe that review candidate. Kris later approved this exact
+revision with "Sure approved"; [the handoff](HANDOFF.md) records the decision.
+Production implementation remains with the coordinator. Story Combined v1 and
+the three v1 candidates remain unchanged.
 
 The current Story page keeps its layout and preview allocation. The small Game
 stage stays on the left. The prompt and numbered option summary share one scroll

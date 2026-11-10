@@ -1,7 +1,8 @@
 # Choice preview correction
 
-Design-only correction for Choice #98 in the current Story editor. All revisions
-are drafts until Kris explicitly selects one. Story Combined v1 remains approved
+Design-only correction for Choice #98 in the current Story editor. Kris approved
+A v2 (`dock-v2`); [the handoff](HANDOFF.md) records its scope and exact source.
+The three v1 candidates below remain unapproved drafts. Story Combined v1 remains approved
 at source `6ecf64704044a6fee9fc4ee6b3a54985d84b9b10`, fingerprint
 `a526a4dabf6fc76979b2d20912b650cc4d1d3b1af772bc0a6df50754f7e012cb`.
 This study does not replace that design or select Story #110 implementation.

@@ -1,11 +1,97 @@
 {
   "schemaVersion": 1,
   "screenId": "choice-preview-correction",
-  "currentApproved": null,
+  "currentApproved": "dock-v2",
   "revisions": [
-    { "id": "dock-v1", "variantId": "dock", "approval": null },
-    { "id": "transcript-v1", "variantId": "transcript", "approval": null },
-    { "id": "split-v1", "variantId": "split", "approval": null },
-    { "id": "dock-v2", "variantId": "dock-refined", "approval": null }
+    {
+      "id": "dock-v1",
+      "variantId": "dock",
+      "approval": null
+    },
+    {
+      "id": "transcript-v1",
+      "variantId": "transcript",
+      "approval": null
+    },
+    {
+      "id": "split-v1",
+      "variantId": "split",
+      "approval": null
+    },
+    {
+      "id": "dock-v2",
+      "variantId": "dock-refined",
+      "approval": {
+        "date": "2026-11-11",
+        "decision": "Kris said \"Sure approved\" after the A v2 review in this design-only chat. Approve dock-v2 (A v2), variant dock-refined, as the compact Choice preview correction for the current Story page. Story Combined v1 remains unchanged and is not superseded.",
+        "reason": null,
+        "supersedes": null,
+        "source": {
+          "commit": "7ba6eea4da1f12434f8260bdc6400a00bf04a964",
+          "fingerprint": "9d62ff5224e47e8a505fe9467366b40fca66cf7a9c57a9b1bdfad59f18e99c54"
+        },
+        "captures": [
+          {
+            "path": "docs/design/choice-preview-correction/captures/v2/dock-v2-duplicate-dark-1100x720-top.png",
+            "sha256": "4c535f936af68863fab40e8816369e4ab52edd078e28b10e5ff3cd5693eb9721",
+            "state": "duplicate",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 2
+          },
+          {
+            "path": "docs/design/choice-preview-correction/captures/v2/dock-v2-duplicate-dark-720x850-top.png",
+            "sha256": "c54bb27c39c45948eef5362fcee8488b9c7dea3f6be5087057ed29d3b23f6326",
+            "state": "duplicate",
+            "theme": "dark",
+            "width": 720,
+            "height": 850,
+            "scale": 2
+          },
+          {
+            "path": "docs/design/choice-preview-correction/captures/v2/dock-v2-character-dark-720x850-top.png",
+            "sha256": "05d1de1ac5eecc27f44fb5da6f3f51c354bcdc6f942d2b5131be0c75d79b47c2",
+            "state": "character",
+            "theme": "dark",
+            "width": 720,
+            "height": 850,
+            "scale": 2
+          },
+          {
+            "path": "docs/design/choice-preview-correction/captures/v2/dock-v2-none-dark-720x850-top.png",
+            "sha256": "61e896b89c159e56de662a48b2c51673a29d0dfd5d1aa33bfa6c8341616302b4",
+            "state": "none",
+            "theme": "dark",
+            "width": 720,
+            "height": 850,
+            "scale": 2
+          },
+          {
+            "path": "docs/design/choice-preview-correction/captures/v2/dock-v2-long-dark-720x850-top.png",
+            "sha256": "a08382b7017e1ae40b0a43a335b6291f6ce8373bf200b3682dade987fbebb51f",
+            "state": "long",
+            "theme": "dark",
+            "width": 720,
+            "height": 850,
+            "scale": 2
+          }
+        ],
+        "behaviour": [
+          "Use the existing current Story page and preview allocation. Keep the small Game stage on the left; put the prompt and numbered option summary in a single scrolling column on the right.",
+          "Show short prompt/options together without scrolling in the retained 1100 x 720 and 720 x 850 samples. Wrap and scroll long content; omit an absent prompt without an empty row.",
+          "Keep duplicate captions as separate ordered, numbered rows. Options are inert text; the preview never evaluates conditions, assumes picked state or executes a project.",
+          "Show Condition unknown only on conditional options. Keep Picked state unknown separate from the configured Mark picked or Hide picked policy. Show normally adds no picked-state presentation.",
+          "Keep the existing other-character-state notice at 11px. Use Background unknown with its original reason in hover text. Keep If false policy in hover/accessibility text and its existing Beat editor control.",
+          "Preserve the current dark palette, dense layout and existing editor controls. Add no product buttons, Preview options assumptions, decorative cards/pills or continuous animations."
+        ],
+        "deviations": [
+          "Standalone Design Lab draft outside the gallery registry, under the assignment restriction against editing shared files. The exported review adds sample and viewport selectors for design review only.",
+          "The public fixture has no media. The retained reference covers unknown scene state and does not prove image fitting or Character placement. Production integration must retain existing Game stage media behavior.",
+          "Long content scrolls within the 110px allocation. If false policy is not in the main summary row; it remains in hover/accessibility text and the existing Beat editor.",
+          "Browser DOM/synthetic-scroll evidence only. Source writes and native operations are refused. Approval does not establish production integration, runtime behavior, real saves, package qualification or Story #110 acceptance."
+        ]
+      }
+    }
   ]
 }
