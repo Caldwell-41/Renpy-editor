@@ -757,7 +757,7 @@ impl AuthoringService {
         let loaded = self.load(project, project_id)?;
         let mut scenes = Vec::with_capacity(loaded.project.scenes.len());
         let mut screen_targets = HashMap::new();
-        let mut choice_runtime_valid = None;
+        let mut choice_runtime_valid = [None; 2];
         for scene in &loaded.project.scenes {
             let stored = loaded
                 .source_map
@@ -798,23 +798,31 @@ impl AuthoringService {
                 )?
                 .1
             };
-            let needs_choice_runtime = beats.iter().any(|b| matches!(&b.payload, BeatPayload::Choice { options, picked_policy, .. } if picked_policy.is_some() || options.iter().any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled)));
-            if needs_choice_runtime
-                && !*choice_runtime_valid.get_or_insert_with(|| {
-                    matches!(
-                        self.snapshot_optional(project, crate::screens::choice_template::PATH),
-                        Ok(Some(_))
-                    ) && self
-                        .choice_runtime_mutations(project, &beats, false)
+            for beat in &mut beats {
+                let BeatPayload::Choice {
+                    options,
+                    picked_policy,
+                    ..
+                } = &beat.payload
+                else {
+                    continue;
+                };
+                if picked_policy.is_none()
+                    && !options
+                        .iter()
+                        .any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled)
+                {
+                    continue;
+                }
+                // Availability-only menus also work with the legacy adapter. Cache
+                // each required capability, rather than the first Scene's result.
+                let capability = usize::from(picked_policy.is_some());
+                if !*choice_runtime_valid[capability].get_or_insert_with(|| {
+                    self.choice_runtime_mutations(project, std::slice::from_ref(beat), false)
                         .is_ok()
-                })
-            {
-                for beat in &mut beats {
-                    if matches!(&beat.payload, BeatPayload::Choice { options, picked_policy, .. } if picked_policy.is_some() || options.iter().any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled))
-                    {
-                        beat.protected = true;
-                        beat.source_fallback = Some("Choice template or availability adapter is missing, unsupported or has pending Source edits. Edit in Source.".into());
-                    }
+                }) {
+                    beat.protected = true;
+                    beat.source_fallback = Some("Choice template or availability adapter is missing, unsupported or has pending Source edits. Edit in Source.".into());
                 }
             }
             if self

@@ -554,3 +554,50 @@ test("shipped source-foundation native driver completes against strict renderer 
   assert.equal(result.passed,true,JSON.stringify(result));assert.ok(result.checks.length>=10);
   dispose?.();browser.happyDOM.abort();
 });
+
+test("Hide picked exposes shared continuation positions in root and nested bodies", async () => {
+  for (const nested of [false, true]) for (const pickedPolicy of ["showNormally", "markPicked", "hidePicked"] as const) {
+    const browser = installDom();
+    const base = sceneModel();
+    const owner = nested ? { groupId: "outer-options", branchId: "outer-option" } : undefined;
+    const scene: SceneWorkspace["scenes"][number] = { ...base.scenes[0]!, beats: [
+      ...(nested ? [
+        { id: "outer", byteStart: 0, byteEnd: 10, protected: false, payload: { type: "choice" as const, options: [{ id: "outer-option", text: "Enter" }] } },
+        { id: "outer-option", byteStart: 10, byteEnd: 20, protected: true, conditionalBranch: { choiceOption: true, groupId: "outer-options", ordinal: 0, otherwise: false }, payload: { type: "customCode" as const, source: '        "Enter":', reason: "Option header" } },
+      ] : []),
+      { id: "choice", byteStart: 20, byteEnd: 40, protected: false, owner, payload: { type: "choice", pickedPolicy, options: [{ id: "option", text: "Leave" }] } },
+      { id: "option", byteStart: 40, byteEnd: 60, protected: true, owner, conditionalBranch: { choiceOption: true, groupId: "options", ordinal: 0, otherwise: false }, payload: { type: "customCode", source: '        "Leave":', reason: "Option header" } },
+      { id: "option-return", byteStart: 60, byteEnd: 80, protected: false, owner: { groupId: "options", branchId: "option" }, payload: { type: "return" } },
+      { id: "shared", byteStart: 80, byteEnd: 100, protected: false, owner, payload: { type: "narration", text: "Exhaustion continuation" } },
+      { id: "end", byteStart: 100, byteEnd: 120, protected: false, owner, payload: { type: "return" } },
+      ...(nested ? [{ id: "root-end", byteStart: 120, byteEnd: 130, protected: false, payload: { type: "return" as const } }] : []),
+    ] };
+    const model = { ...base, scenes: [scene] };
+    const calls: SceneCommand[] = [];
+    const dispose = renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+      status: () => {}, resolution: { width: 1280, height: 720 }, present: async () => { throw Error("unused"); },
+      apply: async command => { calls.push(command); return model; },
+    });
+    click("Add Beat");
+    const form = document.querySelector<HTMLElement>(".new-beat")!;
+    if (nested) {
+      const parent = form.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;
+      parent.value = "outer-option"; parent.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+    const position = form.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;
+    assert.deepEqual([...position.options].map(o => o.value), pickedPolicy === "hidePicked" ? ["choice", "shared", "end"] : ["choice"]);
+    if (pickedPolicy === "hidePicked") {
+      assert.equal(position.value, "end", "default insertion precedes the actual final Return");
+      position.value = "shared"; position.dispatchEvent(new Event("change", { bubbles: true }));
+      const type = form.querySelector<HTMLSelectElement>('[aria-label="Beat type"]')!;
+      type.value = "narration"; type.dispatchEvent(new Event("change", { bubbles: true }));
+      const text = form.querySelector<HTMLTextAreaElement>("textarea")!;
+      text.value = "Inserted after exhaustion"; text.dispatchEvent(new Event("input", { bubbles: true }));
+      [...form.querySelectorAll("button")].find(b => b.textContent === "Add Beat")!.click(); await tick();
+      assert.equal(calls[0]?.type, "insertBodyBeat");
+      assert.deepEqual(calls[0]?.body, owner ? { type: "branch", ...owner } : { type: "root" });
+      assert.deepEqual(calls[0]?.position, { type: "before", anchor: { type: "beat", beatId: "shared" } });
+    }
+    dispose(); await browser.happyDOM.close();
+  }
+});

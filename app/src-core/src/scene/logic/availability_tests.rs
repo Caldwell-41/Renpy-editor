@@ -326,3 +326,268 @@ fn picked_helper_collisions_missing_edits_and_dirty_source_never_repair_on_inspe
     );
     f.service.close().unwrap();
 }
+
+#[test]
+fn choice_runtime_fallback_tracks_required_capability_in_either_scene_order() {
+    for picked_first in [false, true] {
+        let mut f = Fixture::new();
+        fs::write(f.root.join("game/screens.rpy"), "screen choice(items):\n    style_prefix \"choice\"\n\n    vbox:\n        for i in items:\n            textbutton i.caption action i.action\n").unwrap();
+        let first = f.model()["scenes"][0].clone();
+        let second = f.scene("Second");
+        let (legacy, picked) = if picked_first {
+            (&second, &first)
+        } else {
+            (&first, &second)
+        };
+        f.save(legacy, &format!("label {}:\n    menu (screen=\"_ll_choice_v1\"):\n        \"Legacy locked\" (_ll_available=True) if (True):\n            pass\n    return\n", legacy["technicalLabel"].as_str().unwrap()));
+        f.save(picked, &format!("label {}:\n    menu (screen=\"_ll_choice_v1\", _ll_mode=\"markPicked\", _ll_id=\"11111111-1111-4111-8111-111111111111\"):\n        \"Picked\" (_ll_id=\"22222222-2222-4222-8222-222222222222\", _ll_available=True, _ll_guarded=False, _ll_locked=False) if True:\n            $ _ll_picked_v1[(\"11111111-1111-4111-8111-111111111111\", \"22222222-2222-4222-8222-222222222222\")] = True\n            pass\n    return\n", picked["technicalLabel"].as_str().unwrap()));
+        let paths = [legacy, picked].map(|s| f.root.join(s["sourcePath"].as_str().unwrap()));
+        let before = paths.each_ref().map(|p| fs::read(p).unwrap());
+        let helper = f.root.join("game/loomlight_choice_v1.rpy");
+        for adapter in [
+            None,
+            Some(crate::screens::choice_template::ADAPTER),
+            Some(crate::screens::choice_template::PICKED_ADAPTER),
+        ] {
+            if let Some(bytes) = adapter {
+                fs::write(&helper, bytes).unwrap();
+            }
+            let w = f.model();
+            for scene in w["scenes"].as_array().unwrap() {
+                let menu = &scene["beats"][0];
+                let supported = adapter == Some(crate::screens::choice_template::PICKED_ADAPTER)
+                    || (adapter.is_some() && scene["id"] == legacy["id"]);
+                assert_eq!(
+                    menu["protected"], !supported,
+                    "order={picked_first}, adapter={adapter:?}, scene={scene}"
+                );
+                assert_eq!(menu["sourceFallback"].is_string(), !supported);
+            }
+            assert_eq!(paths.each_ref().map(|p| fs::read(p).unwrap()), before);
+            assert_eq!(
+                fs::read(&helper).ok(),
+                adapter.map(|s| s.as_bytes().to_vec())
+            );
+        }
+        // A legacy-only menu remains editable with its valid availability adapter.
+        fs::write(&helper, crate::screens::choice_template::ADAPTER).unwrap();
+        let w = f.model();
+        let s = w["scenes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|s| s["id"] == legacy["id"])
+            .unwrap();
+        let mut payload = s["beats"][0]["payload"].clone();
+        payload["options"][0]["text"] = json!("Legacy renamed");
+        f.command(json!({"type":"updateBodyBeat","sceneId":s["id"],"expectedSourceRevision":s["sourceRevision"],"beatId":s["beats"][0]["id"],"expectedBody":{"type":"root"},"beat":payload}));
+        assert_eq!(
+            fs::read(&helper).unwrap(),
+            crate::screens::choice_template::ADAPTER.as_bytes()
+        );
+        f.service.close().unwrap();
+    }
+}
+
+#[test]
+fn choice_missing_existing_helper_refuses_changed_source_commands_without_history_or_repair() {
+    for picked in [false, true] {
+        let mut f = Fixture::new();
+        fs::write(f.root.join("game/screens.rpy"), "screen choice(items):\n    style_prefix \"choice\"\n\n    vbox:\n        for i in items:\n            textbutton i.caption action i.action\n").unwrap();
+        let s = f.model()["scenes"][0].clone();
+        let other = f.scene("Other");
+        f.save(&s, &format!("label {}:\n    \"Before\"\n    menu:\n        \"Answer\" if flag:\n            \"Inside\"\n    return\n", s["technicalLabel"].as_str().unwrap()));
+        let w = f.model();
+        let menu = &w["scenes"][0]["beats"][1];
+        let mut payload = menu["payload"].clone();
+        if picked {
+            payload["pickedPolicy"] = json!("showNormally");
+        } else {
+            payload["options"][0]["unavailablePolicy"] = json!("showDisabled");
+        }
+        f.command(json!({"type":"updateBodyBeat","sceneId":s["id"],"expectedSourceRevision":w["scenes"][0]["sourceRevision"],"beatId":menu["id"],"expectedBody":{"type":"root"},"beat":payload}));
+        let helper = f.root.join("game/loomlight_choice_v1.rpy");
+        let accepted_helper = fs::read(&helper).unwrap();
+        fs::remove_file(&helper).unwrap();
+        let w = f.model();
+        let scene = &w["scenes"][0];
+        let beats = scene["beats"].as_array().unwrap();
+        let menu = &beats[1];
+        let inside = beats
+            .iter()
+            .find(|b| b["payload"]["text"] == "Inside")
+            .unwrap();
+        let body = json!({"type":"branch","groupId":inside["owner"]["groupId"],"branchId":inside["owner"]["branchId"]});
+        let commands = [
+            json!({"type":"updateBeat","beatId":beats[0]["id"],"beat":{"type":"narration","text":"Changed"}}),
+            json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"beatId":beats[0]["id"],"beat":{"type":"narration","text":"Changed"}}),
+            json!({"type":"updateBodyBeat","expectedBody":body,"beatId":inside["id"],"beat":{"type":"narration","text":"Changed"}}),
+            json!({"type":"insertBodyBeat","body":body,"position":{"type":"end"},"beat":{"type":"narration","text":"Added"}}),
+            json!({"type":"createSceneFromChoice","choiceBeatId":menu["id"],"optionText":"New answer","chapterId":w["chapters"][0]["id"],"displayName":"Must not exist"}),
+        ];
+        for mut command in commands.clone() {
+            command["sceneId"] = scene["id"].clone();
+            command["expectedSourceRevision"] = scene["sourceRevision"].clone();
+            assert_eq!(f.reject(command)["error"]["code"], "OPAQUE_BOUNDARY");
+            assert!(!helper.exists());
+            assert_eq!(f.model(), w, "refusal must retain source/map/IDs/history");
+        }
+        let other_scene = w["scenes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|s| s["id"] == other["id"])
+            .unwrap();
+        assert_eq!(f.reject(json!({"type":"insertBodyBeat","sceneId":other_scene["id"],"expectedSourceRevision":other_scene["sourceRevision"],"body":{"type":"root"},"position":{"type":"before","anchor":{"type":"beat","beatId":other_scene["beats"][0]["id"]}},"beat":{"type":"choice","pickedPolicy":"showNormally","options":[{"text":"New adoption"}]}}))["error"]["code"], "OPAQUE_BOUNDARY");
+        assert!(!helper.exists());
+        assert_eq!(f.model(), w);
+        if picked {
+            fs::write(&helper, crate::screens::choice_template::ADAPTER).unwrap();
+            let mut command = commands[0].clone();
+            command["sceneId"] = scene["id"].clone();
+            command["expectedSourceRevision"] = scene["sourceRevision"].clone();
+            assert_eq!(f.reject(command)["error"]["code"], "OPAQUE_BOUNDARY");
+            assert_eq!(
+                fs::read(&helper).unwrap(),
+                crate::screens::choice_template::ADAPTER.as_bytes()
+            );
+        }
+        fs::write(&helper, &accepted_helper).unwrap();
+        // External deletion/recreation remains an ordinary history boundary.
+        assert_eq!(
+            f.reject(json!({"type":"undo"}))["error"]["code"],
+            "HISTORY_BOUNDARY"
+        );
+        assert_eq!(fs::read(&helper).unwrap(), accepted_helper);
+        f.service.close().unwrap();
+    }
+}
+
+#[test]
+fn picked_caption_prompt_and_policy_edits_preserve_mixed_newlines_and_header_trivia() {
+    let mut f = Fixture::new();
+    fs::write(f.root.join("game/screens.rpy"), "screen choice(items):\n    style_prefix \"choice\"\n\n    vbox:\n        for i in items:\n            textbutton i.caption action i.action\n").unwrap();
+    let s = f.model()["scenes"][0].clone();
+    f.save(&s, &format!("label {}:\n    menu:\n        \"Question\" # prompt\n        \"Answer\": # option\n            \"Body\"\n    return\n", s["technicalLabel"].as_str().unwrap()));
+    let w = f.model();
+    let mut payload = w["scenes"][0]["beats"][0]["payload"].clone();
+    payload["pickedPolicy"] = json!("markPicked");
+    let command = |w: &serde_json::Value, payload| json!({"type":"updateBodyBeat","sceneId":s["id"],"expectedSourceRevision":w["scenes"][0]["sourceRevision"],"beatId":w["scenes"][0]["beats"][0]["id"],"expectedBody":{"type":"root"},"beat":payload});
+    f.command(command(&w, payload));
+    let path = f.root.join(s["sourcePath"].as_str().unwrap());
+    let mixed = fs::read_to_string(&path)
+        .unwrap()
+        .replace("):\n", "):  \n")
+        .replace("# prompt\n", "# prompt\r\n")
+        .replace("# option\n", "# option\r\n")
+        .replace("    return\n", "    return\r\n");
+    f.save(&s, mixed.trim_start_matches('\u{feff}'));
+    for field in ["caption", "prompt", "policy"] {
+        let w = f.model();
+        let ids = w["scenes"][0]["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|b| b["id"].clone())
+            .collect::<Vec<_>>();
+        let mut payload = w["scenes"][0]["beats"][0]["payload"].clone();
+        let expected = match field {
+            "caption" => {
+                payload["options"][0]["text"] = json!("Renamed");
+                mixed.replace("\"Answer\"", "\"Renamed\"")
+            }
+            "prompt" => {
+                payload["prompt"]["text"] = json!("New question");
+                mixed.replace("\"Question\"", "\"New question\"")
+            }
+            _ => {
+                payload["pickedPolicy"] = json!("showNormally");
+                mixed.replace("_ll_mode=\"markPicked\"", "_ll_mode=\"showNormally\"")
+            }
+        };
+        let after = f.command(command(&w, payload));
+        assert_eq!(fs::read(&path).unwrap(), expected.as_bytes(), "{field}");
+        assert_eq!(
+            after["scenes"][0]["beats"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|b| b["id"].clone())
+                .collect::<Vec<_>>(),
+            ids
+        );
+        let map = fs::read(f.root.join(".renpy-editor/source-map.json")).unwrap();
+        f.command(command(
+            &after,
+            after["scenes"][0]["beats"][0]["payload"].clone(),
+        ));
+        assert_eq!(
+            fs::read(f.root.join(".renpy-editor/source-map.json")).unwrap(),
+            map
+        );
+        f.command(json!({"type":"undo"}));
+        assert_eq!(fs::read(&path).unwrap(), mixed.as_bytes());
+        f.command(json!({"type":"redo"}));
+        assert_eq!(fs::read(&path).unwrap(), expected.as_bytes());
+        f.service.close().unwrap();
+        f.service.open_path(&f.root).unwrap();
+        assert_eq!(f.model()["scenes"][0]["beats"], after["scenes"][0]["beats"]);
+        f.save(&s, mixed.trim_start_matches('\u{feff}'));
+    }
+    f.service.close().unwrap();
+}
+
+#[test]
+fn choice_explicit_first_picked_adoption_upgrades_legacy_adapter_in_shared_history() {
+    let mut f = Fixture::new();
+    fs::write(f.root.join("game/screens.rpy"), "screen choice(items):\n    style_prefix \"choice\"\n\n    vbox:\n        for i in items:\n            textbutton i.caption action i.action\n").unwrap();
+    let s = f.model()["scenes"][0].clone();
+    f.save(
+        &s,
+        &format!(
+            "label {}:\n    menu:\n        \"Answer\" if flag:\n            pass\n    return\n",
+            s["technicalLabel"].as_str().unwrap()
+        ),
+    );
+    let command = |w: &serde_json::Value, payload| json!({"type":"updateBodyBeat","sceneId":s["id"],"expectedSourceRevision":w["scenes"][0]["sourceRevision"],"beatId":w["scenes"][0]["beats"][0]["id"],"expectedBody":{"type":"root"},"beat":payload});
+    let w = f.model();
+    let mut payload = w["scenes"][0]["beats"][0]["payload"].clone();
+    payload["options"][0]["unavailablePolicy"] = json!("showDisabled");
+    let legacy = f.command(command(&w, payload));
+    let helper = f.root.join("game/loomlight_choice_v1.rpy");
+    let path = f.root.join(s["sourcePath"].as_str().unwrap());
+    let legacy_source = fs::read(&path).unwrap();
+    assert_eq!(
+        fs::read(&helper).unwrap(),
+        crate::screens::choice_template::ADAPTER.as_bytes()
+    );
+    let mut payload = legacy["scenes"][0]["beats"][0]["payload"].clone();
+    payload["pickedPolicy"] = json!("markPicked");
+    let picked = f.command(command(&legacy, payload));
+    let picked_source = fs::read(&path).unwrap();
+    assert_eq!(
+        fs::read(&helper).unwrap(),
+        crate::screens::choice_template::PICKED_ADAPTER.as_bytes()
+    );
+    assert_eq!(
+        picked["scenes"][0]["beats"][0]["id"],
+        legacy["scenes"][0]["beats"][0]["id"]
+    );
+    assert_eq!(
+        picked["scenes"][0]["beats"][0]["payload"]["options"],
+        legacy["scenes"][0]["beats"][0]["payload"]["options"]
+    );
+    f.command(json!({"type":"undo"}));
+    assert_eq!(fs::read(&path).unwrap(), legacy_source);
+    assert_eq!(
+        fs::read(&helper).unwrap(),
+        crate::screens::choice_template::ADAPTER.as_bytes()
+    );
+    f.command(json!({"type":"redo"}));
+    assert_eq!(fs::read(&path).unwrap(), picked_source);
+    assert_eq!(
+        fs::read(&helper).unwrap(),
+        crate::screens::choice_template::PICKED_ADAPTER.as_bytes()
+    );
+    f.service.close().unwrap();
+}

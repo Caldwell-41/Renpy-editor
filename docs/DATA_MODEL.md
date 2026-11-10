@@ -174,6 +174,14 @@ rename/reorder identity, and distinguish duplicate captions. New options get fre
 UUIDs. Duplicate runtime keys, reserved declaration collisions, edited/missing helpers,
 dirty Source and unsupported templates refuse authoring without repair. Accepted helper
 creation or upgrade shares the source/map transaction and its Undo/Redo history.
+Creation requires first adoption with no existing source dependency on the helper.
+An availability adapter can upgrade on first picked-policy adoption; a previously
+picked-dependent source cannot repair a downgraded adapter through an unrelated edit.
+Inspection checks the capability each Choice needs, independently of Scene order.
+Caption and prompt edits retain the menu line and selection records byte for byte;
+policy edits replace only the mode and affected guard tokens. Existing rows keep
+their own newline bytes. Hide picked keeps shared-continuation insertion positions
+available in root and nested bodies, even when every option transfers control.
 Editor preview never reads or mutates runtime history and reports picked state unknown.
 
 Every recognized Beat mapping records a stable UUID, exact source revision, verified
