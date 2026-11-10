@@ -109,7 +109,7 @@ impl AuthoringService {
         }
         Ok(edit)
     }
-    fn call_label_inventory(
+    pub(super) fn call_label_inventory(
         &self,
         project: &ProjectId,
     ) -> Result<HashMap<String, usize>, SceneError> {

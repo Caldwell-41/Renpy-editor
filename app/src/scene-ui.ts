@@ -48,6 +48,7 @@ export type BeatPayload =
   | { readonly type: "choice"; readonly prompt?: ChoicePrompt; readonly options: readonly ChoiceOption[] }
   | { readonly type: "jump"; readonly sceneId: string }
   | { readonly type: "call"; readonly sceneId: string; readonly returnLabel: string | null }
+  | { readonly type: "repeatChoice"; readonly target?: string | null }
   | { readonly type: "return" }
   | { readonly type: "customCode"; readonly source: string; readonly reason: string };
 
@@ -97,7 +98,7 @@ function terminates(beat: SceneBeat, scene: SceneDocument, depth = 0): boolean {
       return header?.conditionalBranch && bodyNodes(scene, { type: "branch", groupId: header.conditionalBranch.groupId, branchId: header.id }).some(child => terminates(child, scene, depth + 1));
     });
   }
-  return ["jump", "return"].includes(beat.payload.type);
+  return ["jump", "repeatChoice", "return"].includes(beat.payload.type);
 }
 function defaultInsertion(scene: SceneDocument, body: BodyRef): Position {
   const terminal = bodyNodes(scene, body).find(beat => terminates(beat, scene));
@@ -250,7 +251,7 @@ export interface ScenePreviewState {
   readonly musicUnknown: boolean;
   readonly variables: Readonly<Record<string, { readonly value: boolean | number | string; readonly beatId: string }>>;
   readonly variablesUnknown: boolean;
-  readonly overlay?: { readonly kind: "dialogue" | "narration" | "choice" | "jump" | "call" | "return"; readonly text: string; readonly beatId: string; readonly prompt?: ChoicePrompt };
+  readonly overlay?: { readonly kind: "dialogue" | "narration" | "choice" | "jump" | "call" | "return" | "repeatChoice"; readonly text: string; readonly beatId: string; readonly prompt?: ChoicePrompt };
 }
 
 export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string, manualBranches?: ReadonlyMap<string, string>): ScenePreviewState {
@@ -317,6 +318,7 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string,
       case "choice": overlay = { kind: "choice", ...(payload.prompt ? { prompt: payload.prompt } : {}), text: payload.options.map((option) => `${option.text}${option.condition ? ` (availability unknown; if false: ${option.unavailablePolicy === "showDisabled" ? "Show disabled" : "Hide"})` : ""}`).join(" · "), beatId: beat.id }; break;
       case "jump": overlay = { kind: "jump", text: "Jump", beatId: beat.id }; break;
       case "call": overlay = { kind: "call", text: "Call Scene · preview state unknown", beatId: beat.id }; break;
+      case "repeatChoice": overlay = { kind: "repeatChoice", text: "Repeat this Choice. Live availability is unknown.", beatId: beat.id }; break;
       case "return": overlay = { kind: "return", text: "Return to caller or main menu", beatId: beat.id }; break;
       case "playSfx": case "transition": break;
       case "showScreen": case "hideScreen": case "callScreen": break;
@@ -327,7 +329,7 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string,
       const selected = firstOption?.conditionalBranch && manualBranches?.get(firstOption.conditionalBranch.groupId);
       if (!selected || !payload.options.some(option => option.id === selected)) break;
     }
-    if (payload.type === "jump" || payload.type === "return") break;
+    if (payload.type === "jump" || payload.type === "repeatChoice" || payload.type === "return") break;
   }
   return { throughBeatId: lastVisitedBeatId, partial: unknownBeatIds.length > 0, unknownBeatIds, background, backgroundUnknown, characters, charactersUnknown, music, musicUnknown, variables, variablesUnknown, overlay };
 }
@@ -391,6 +393,7 @@ const beatLabels: Record<BeatPayload["type"], string> = {
   choice: "Choice",
   jump: "Jump",
   call: "Call Scene",
+  repeatChoice: "Repeat this Choice",
   return: "Return",
   customCode: "Custom Code",
 };
@@ -1052,20 +1055,21 @@ export function renderSceneAuthoring(
         const body: BodyRef = { type: "branch", groupId: branch.groupId, branchId: beat.id };
         const add = button("Add a Beat", "text-button"); add.dataset.beatOpener = `branch:${beat.id}`; add.disabled = scene.sourceConflict;
         add.addEventListener("click", () => { if (!draftGuard()) return; renderNewBeat(section, scene, "narration", body, defaultInsertion(scene, body), undefined, `branch:${beat.id}`); });
-        const then = button("Then", "text-button"); then.disabled = scene.sourceConflict;
+        const then = button("Then", "text-button"); then.disabled = scene.sourceConflict || !!menu?.protected;
         then.addEventListener("click", () => {
           const target = prepareOperation(scene); if (!target) return;
-          const ending = bodyNodes(scene, body).find(b => ["jump", "return"].includes(b.payload.type));
-          const kind = selectOf([{ value: "continue", label: "Continue after the Choice" }, { value: "jump", label: "Go to a Scene" }, { value: "return", label: "Return to caller or main menu" }], ending?.payload.type ?? "continue"); kind.setAttribute("aria-label", "Then");
+          const last = bodyNodes(scene, body).at(-1);
+          const ending = last && ["jump", "repeatChoice", "return"].includes(last.payload.type) ? last : undefined;
+          const kind = selectOf([{ value: "continue", label: "Continue after the Choice" }, { value: "jump", label: "Go to a Scene" }, { value: "repeatChoice", label: "Repeat this Choice" }, { value: "return", label: "Return to caller or main menu" }], ending?.payload.type ?? "continue"); kind.setAttribute("aria-label", "Then");
           const destination = entitySelect(model.scenes.map(s => ({ id: s.id, label: s.displayName })), ending?.payload.type === "jump" ? ending.payload.sceneId : ""); destination.setAttribute("aria-label", "Destination Scene");
           const destinationLabel = labelled("Destination Scene", destination); const show = (): void => { destinationLabel.hidden = kind.value !== "jump"; }; kind.addEventListener("change", show); show();
           operation(scene, target, "Option ending", [labelled("Then", kind), destinationLabel], () => {
-            if (kind.value === "continue") { if (!ending) throw Error("This option already continues after the Choice."); return { type: "removeStoryNode", node: nodeRef(ending), expectedBody: body }; }
-            const payload: BeatPayload = kind.value === "jump" ? { type: "jump", sceneId: required(destination) } : { type: "return" };
+            if (kind.value === "continue") { if (!ending && menu) return { type: "updateBodyBeat", beatId: menu.id, expectedBody: beatBody(menu), beat: menu.payload }; if (!ending) throw Error("The owning Choice is unavailable."); return { type: "removeStoryNode", node: nodeRef(ending), expectedBody: body }; }
+            const payload: BeatPayload = kind.value === "jump" ? { type: "jump", sceneId: required(destination) } : kind.value === "repeatChoice" ? { type: "repeatChoice", target: ending?.payload.type === "repeatChoice" ? ending.payload.target : null } : { type: "return" };
             return ending ? { type: "updateBodyBeat", beatId: ending.id, expectedBody: body, beat: payload } : { type: "insertBodyBeat", body, position: { type: "end" }, beat: payload };
           }, "Apply ending");
         });
-        const following = document.createElement("p"); following.className = "story-continuation"; following.textContent = bodyNodes(scene, body).some(b => ["jump", "return"].includes(b.payload.type)) ? "Explicit transfer at the end of this option" : "Continue after the Choice";
+        const following = document.createElement("p"); following.className = "story-continuation"; following.textContent = bodyNodes(scene, body).some(b => ["jump", "repeatChoice", "return"].includes(b.payload.type)) ? "Explicit transfer at the end of this option" : "Continue after the Choice";
         const context = document.createElement("p"); context.className = "story-breadcrumb"; context.textContent = bodyCaption(scene, body, model);
         const addCondition = button("Add Condition", "text-button"); addCondition.disabled = scene.sourceConflict;
         addCondition.addEventListener("click", () => openConditionForm(scene, body, defaultInsertion(scene, body)));
@@ -1281,7 +1285,7 @@ export function renderSceneAuthoring(
     const panel = document.createElement("section"); panel.className = "new-beat scene-draft";
     panel.addEventListener("compositionstart", () => { composing = true; }); panel.addEventListener("compositionend", () => { composing = false; }); panel.setAttribute("aria-labelledby", "new-beat-title");
     const heading = document.createElement("h3"); heading.id = "new-beat-title"; heading.textContent = "Add Beat";
-    const types = (Object.keys(beatLabels) as BeatPayload["type"][]).filter((type) => type !== "customCode");
+    const types = (Object.keys(beatLabels) as BeatPayload["type"][]).filter((type) => type !== "customCode" && type !== "repeatChoice");
     const type = selectOf(types.map((value) => ({ value, label: beatLabels[value] })), initialType); type.setAttribute("aria-label", "Beat type");
     const destination = document.createElement("p"); destination.className = "story-insertion";
     const insertionAnchor = position.type === "before" ? position.anchor : undefined;
@@ -1408,6 +1412,7 @@ function beatSummary(payload: BeatPayload, model: SceneWorkspace): string {
     case "choice": return `${payload.options.length} option${payload.options.length === 1 ? "" : "s"}${payload.options.some(option => option.condition) ? " · Conditional availability unknown" : ""}`;
     case "jump": return scene(payload.sceneId);
     case "call": return `${scene(payload.sceneId)} · Returns to next Beat`;
+    case "repeatChoice": return "Repeat this Choice";
     case "return": return "Return to caller or main menu";
     case "customCode": return payload.reason;
   }
@@ -1562,6 +1567,7 @@ function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload, existing =
       const note = document.createElement("p"); note.textContent = "Returns to the next Beat. The editor preview does not execute the called Scene."; host.append(note);
       read = () => { validate(); return { type: "call", sceneId: required(destination), returnLabel: payload.returnLabel }; }; break;
     }
+    case "repeatChoice": read = () => payload; break;
     case "return": read = () => ({ type: "return" }); break;
     case "customCode": read = () => payload; break;
   }
@@ -1588,6 +1594,7 @@ function defaultPayload(type: BeatPayload["type"], model: SceneWorkspace, screen
     case "choice": return { type, options: [{ text: "" }] };
     case "jump": return { type, sceneId: model.scenes[0]?.id ?? "" };
     case "call": return { type, sceneId: model.scenes[0]?.id ?? "", returnLabel: null };
+    case "repeatChoice": return { type };
     case "return": return { type };
     case "customCode": return { type, source: "", reason: "Protected source" };
   }

@@ -22,7 +22,7 @@ ASSETS = {
 
 def validate_accepted(accepted):
     assert accepted['outcome'] == OUTCOME and accepted['publicCoreRequests'] is True
-    assert accepted['sourceMapSchemaVersion'] in (8, 9, 10, 11, 12)
+    assert accepted['sourceMapSchemaVersion'] in (8, 9, 10, 11, 12, 13)
     assert accepted['exporterSourceSHA256'] == digest((REPO / 'app/src-core/src/screens/nested_canvas_tests.rs').read_bytes())
     files = accepted['files']
     project = json.loads(files['.renpy-editor/project.json']['text'])

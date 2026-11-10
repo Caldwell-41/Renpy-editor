@@ -798,3 +798,132 @@ fn choice_authoring_refuses_nesting_beyond_the_existing_bound_without_writes() {
     assert_eq!(bytes(&f), before);
     f.service.close().unwrap();
 }
+
+#[test]
+fn choice_repeat_preserves_body_identity_history_and_reopen() {
+    let mut f = Fixture::new();
+    let scene = model(&mut f);
+    let original = format!("label {}:\n    # earlier effect stays here\n    menu:\n        \"Ask about the station\":\n            \"Station answer\"\n        \"Ask about the ticket\":\n            pass\n        \"Leave\":\n            pass\n    \"Shared\"\n    return\n", scene["technicalLabel"].as_str().unwrap());
+    f.save(&scene, &original);
+    let original = String::from_utf8(bytes(&f)).unwrap();
+    let before = model(&mut f);
+    let choice = before["beats"][0].clone();
+    let choice = before["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["payload"]["type"] == "choice")
+        .unwrap_or(&choice)
+        .clone();
+    let option_id = choice["payload"]["options"][0]["id"].clone();
+    let header = before["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["id"] == option_id)
+        .unwrap();
+    let body = branch_body(header);
+    command(
+        &mut f,
+        json!({"type":"insertBodyBeat","body":body,"position":{"type":"end"},"beat":{"type":"repeatChoice"}}),
+    );
+    let repeated = model(&mut f);
+    let current = repeated["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["payload"]["type"] == "choice")
+        .unwrap();
+    assert_eq!(current["id"], choice["id"]);
+    assert_eq!(current["payload"]["options"], choice["payload"]["options"]);
+    let source = fs::read_to_string(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap();
+    assert!(source.contains("\"Station answer\"\n            jump _ll_choice_"));
+    assert_eq!(source.matches("label _ll_choice_").count(), 1);
+    assert!(source.contains("# earlier effect stays here\n    label _ll_choice_"));
+    let flow = crate::lifecycle::acceptance::ipc(&mut f.service, "flow.list", json!({}));
+    let repeat = flow["edges"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|e| e["kind"] == "repeat")
+        .expect("Repeat route to owning menu");
+    assert_eq!(repeat["destination"]["kind"], "body");
+    assert_eq!(repeat["destination"]["beatId"], choice["id"]);
+    f.command(json!({"type":"undo"}));
+    assert_eq!(
+        fs::read_to_string(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap(),
+        original
+    );
+    f.command(json!({"type":"redo"}));
+    assert_eq!(
+        fs::read_to_string(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap(),
+        source
+    );
+    let map_path = f.root.join(".renpy-editor/source-map.json");
+    let map_before = fs::read(&map_path).unwrap();
+    let current = model(&mut f);
+    let repeat = current["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["payload"]["type"] == "repeatChoice")
+        .unwrap();
+    command(
+        &mut f,
+        json!({"type":"updateBodyBeat","beatId":repeat["id"],"expectedBody":body,"beat":repeat["payload"]}),
+    );
+    assert_eq!(fs::read(&map_path).unwrap(), map_before);
+    f.service.close().unwrap();
+    f.service.open_path(&f.root).unwrap();
+    assert_eq!(model(&mut f)["beats"], current["beats"]);
+    assert_eq!(String::from_utf8(bytes(&f)).unwrap(), source);
+}
+
+#[test]
+fn choice_repeat_refuses_foreign_body_and_colliding_source_target() {
+    let mut f = setup();
+    let scene = model(&mut f);
+    f.save(&scene, &format!("label {}:\n    menu:\n        \"Ask\":\n            pass\n        \"Leave\":\n            pass\n    return\n", scene["technicalLabel"].as_str().unwrap()));
+    reject(
+        &mut f,
+        json!({"type":"insertBodyBeat","body":{"type":"root"},"position":{"type":"end"},"beat":{"type":"repeatChoice"}}),
+    );
+    let scene = model(&mut f);
+    let header = scene["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["conditionalBranch"]["choiceOption"] == true)
+        .unwrap();
+    let body = branch_body(header);
+    command(
+        &mut f,
+        json!({"type":"insertBodyBeat","body":body,"position":{"type":"end"},"beat":{"type":"repeatChoice"}}),
+    );
+    let scene = model(&mut f);
+    let repeat = scene["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["payload"]["type"] == "repeatChoice")
+        .unwrap();
+    let target = repeat["payload"]["target"].as_str().unwrap();
+    fs::write(
+        f.root.join("game/foreign.rpy"),
+        format!("label {target}:\n    return\n"),
+    )
+    .unwrap();
+    reject(
+        &mut f,
+        json!({"type":"updateBodyBeat","beatId":repeat["id"],"expectedBody":body,"beat":repeat["payload"]}),
+    );
+    let scene = model(&mut f);
+    let menu = scene["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["payload"]["type"] == "choice")
+        .unwrap();
+    assert_eq!(menu["protected"], true);
+    assert!(menu["sourceFallback"].as_str().unwrap().contains("target"));
+}

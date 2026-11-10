@@ -238,6 +238,35 @@ pub(super) fn project(
                 }
                 edges.push(call);
             }
+            BeatPayload::RepeatChoice { target } => {
+                let menu = beats.iter().find(|b| {
+                    super::super::choice::target(bytes, b).as_ref() == target.as_ref()
+                        && matches!(b.payload, BeatPayload::Choice { .. })
+                        && target.as_ref().is_some_and(|t| {
+                            inventory.labels.get(t).is_some_and(|rows| {
+                                rows.len() == 1
+                                    && rows[0].path == scene.source_path
+                                    && rows[0].byte_start == b.byte_start
+                            })
+                        })
+                });
+                let dest = menu
+                    .map(|menu| destination(body(scene, revision, Some(menu), menu.owner.clone())))
+                    .unwrap_or(FlowDestination::Unknown {
+                        label: target.clone(),
+                        location: Some(location(scene, revision, beat)),
+                    });
+                edges.push(edge(
+                    scene,
+                    revision,
+                    beat,
+                    "repeat",
+                    "Repeat this Choice".into(),
+                    dest,
+                    path,
+                ));
+                unknown |= menu.is_none();
+            }
             BeatPayload::Jump { scene_id } => {
                 if beat.owner.as_ref().is_some_and(|owner| {
                     beats.iter().find(|b|b.id==owner.branch_id).is_some_and(|b|b.conditional_branch.as_ref().is_some_and(|g|g.choice_option)) && beats.iter().filter(|b|b.owner.as_ref()==Some(owner) && !b.structural_placeholder && !matches!(&b.payload,BeatPayload::CustomCode{source,..} if source.trim().is_empty() || source.trim_start().starts_with('#'))).count()==1

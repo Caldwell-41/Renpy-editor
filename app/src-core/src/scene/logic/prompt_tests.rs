@@ -57,7 +57,7 @@ fn choice_prompt_is_owned_source_with_exact_removal_history_and_reopen() {
 
 #[test]
 fn choice_prompt_legacy_refinement_preserves_records_and_nested_character_source() {
-    for version in [3, 4, 5, 8, 9, 10, 11] {
+    for version in [3, 4, 5, 8, 9, 10, 11, 12] {
         let mut f = Fixture::new();
         let w = f.model();
         let scene = &w["scenes"][0];
@@ -131,7 +131,7 @@ fn choice_prompt_legacy_refinement_preserves_records_and_nested_character_source
             1
         );
         let new_map: Value = serde_json::from_slice(&fs::read(&map_path).unwrap()).unwrap();
-        assert_eq!(new_map["schemaVersion"], 12);
+        assert_eq!(new_map["schemaVersion"], 13);
         assert_eq!(new_map["futureMap"], 17);
         let serialized = serde_json::to_string(&new_map).unwrap();
         for row in old {
