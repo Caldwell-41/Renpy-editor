@@ -315,17 +315,48 @@ pub(crate) fn create_authored_game(data: &Path, parent: &Path, sdk: &Path) -> Li
                 crate::scene::ChoiceOption {
                     condition: None,
                     text: "Rooftop".into(),
-                    destination_scene_id: scenes["Rooftop"].clone(),
+                    id: None,
                 },
                 crate::scene::ChoiceOption {
                     condition: None,
                     text: "Riverside".into(),
-                    destination_scene_id: scenes["Riverside"].clone(),
+                    id: None,
                 },
             ],
         },
     ] {
         insert(&service, &entry, beat);
+    }
+    // Destination options are ordinary Jump Beats in explicit option bodies.
+    for (ordinal, name) in ["Rooftop", "Riverside"].iter().enumerate() {
+        let workspace = service.scene_workspace().unwrap();
+        let scene = workspace.scenes.iter().find(|s| s.id == entry).unwrap();
+        let option = scene
+            .beats
+            .iter()
+            .filter(|b| {
+                b.conditional_branch
+                    .as_ref()
+                    .is_some_and(|g| g.choice_option)
+            })
+            .nth(ordinal)
+            .unwrap();
+        let group_id = option.conditional_branch.as_ref().unwrap().group_id.clone();
+        apply(
+            &service,
+            Command::InsertBodyBeat {
+                scene_id: entry.clone(),
+                expected_source_revision: scene.source_revision.clone(),
+                body: crate::scene::BodyRef::Branch {
+                    group_id,
+                    branch_id: option.id.clone(),
+                },
+                position: crate::scene::Position::End,
+                beat: Beat::Jump {
+                    scene_id: scenes[*name].clone(),
+                },
+            },
+        );
     }
     for (name, who, placement) in [
         ("Rooftop", "alex", Place::Right),

@@ -570,10 +570,12 @@ media rules.
 ### Not yet in production
 
 Production Story still has the earlier layout, with the preview above a beat list.
-Its Choice is jump-only and ends the scene, and options have no body. Option bodies,
-prompts, hidden or disabled options, Repeat and Picked options need the model and
-runtime work in [issue #98](https://github.com/Caldwell-41/Renpy-editor/issues/98).
-Arithmetic and the decimal type need [issue #87](https://github.com/Caldwell-41/Renpy-editor/issues/87).
+The #101 slice adds numbered option bodies, caption/order controls, explicit Beat
+insertion positions and Then controls for Continue, Jump and Return in that editor.
+Conditions, nested Choices and Scene Call authoring inside options remain with #102.
+Prompts, disabled options, Repeat and Picked options remain later #98 slices. The
+full Combined layout and palette remain with #110. Arithmetic uses the accepted
+shared controls.
 Until a capability exists, the editor says it is not built instead of showing a
 working-looking control.
 

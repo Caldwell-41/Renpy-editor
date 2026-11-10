@@ -17,7 +17,7 @@ function click(host: ParentNode, label: string): void { const button = [...host.
 function select(host: ParentNode, label: string, value: string): HTMLSelectElement { const control = host.querySelector<HTMLSelectElement>(`select[aria-label="${label}"]`)!; assert.ok(control, label); control.value = value; control.dispatchEvent(new Event("change", { bubbles: true })); return control; }
 const call: SceneBeat = { id: "call", byteStart: 10, byteEnd: 35, protected: false, payload: { type: "call", sceneId: "two", returnLabel: "stable_return" } };
 const guard = { status: "supported" as const, expression: { type: "compare" as const, operator: "greaterEqual" as const, left: { type: "variable" as const, variableId: "trust", variableType: "int" as const }, right: { type: "int" as const, value: "5" } } };
-const choice: SceneBeat = { id: "choice", byteStart: 35, byteEnd: 65, protected: false, payload: { type: "choice", options: [{ text: "Ready", destinationSceneId: "two", condition: guard }] } };
+const choice: SceneBeat = { id: "choice", byteStart: 35, byteEnd: 65, protected: false, payload: { type: "choice", options: [{ text: "Ready", condition: guard }] } };
 const ending: SceneBeat = { id: "end", byteStart: 65, byteEnd: 75, protected: false, payload: { type: "return" } };
 
 test("Call edit keeps label and captured envelopes; stale refusal keeps fields and disabled controls", async () => {
@@ -73,12 +73,12 @@ test("root Call insertion is explicit before Return and generates no renderer-ow
   assert.deepEqual(writes[0], { type: "insertBodyBeat", sceneId: "one", expectedSourceRevision: "source-open", body: { type: "root" }, position: { type: "before", anchor: { type: "beat", beatId: "end" } }, beat: { type: "call", sceneId: "two", returnLabel: null } }); await s.close();
 });
 
-test("guard-only Choice edit preserves raw captions and guarded option-count controls stay constrained", async () => {
-  const raw: SceneBeat = { ...choice, payload: { type: "choice", options: [{ text: "  Ready café 雪  ", destinationSceneId: "two", condition: guard }, { text: " Neighbor ", destinationSceneId: "two", condition: guard }] } };
+test("guard-only Choice edit preserves raw captions and permits explicit option creation", async () => {
+  const raw: SceneBeat = { ...choice, payload: { type: "choice", options: [{ text: "  Ready café 雪  ", condition: guard }, { text: " Neighbor ", condition: guard }] } };
   let saved: SceneCommand | undefined;
   const s = setup([raw, ending], async command => { saved = command; throw Error("Hold input"); });
   s.host.querySelector<HTMLButtonElement>('[data-beat-id="choice"] .beat-select')!.click();
-  for (const label of ["Add option", "Remove", "Create New Scene"]) assert.ok([...s.host.querySelectorAll<HTMLButtonElement>("button")].filter(button => button.textContent === label).every(button => button.disabled));
+  assert.equal([...s.host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === "Add option")!.disabled, false);
   const value = s.host.querySelector<HTMLInputElement>('input[aria-label="Condition value"]')!; value.value = "6"; value.dispatchEvent(new Event("input", { bubbles: true })); click(s.host, "Commit Beat"); await tick();
   assert.deepEqual((saved!.beat as {options:{text:string}[]}).options.map(option => option.text), ["  Ready café 雪  ", " Neighbor "]); await s.close();
 });
@@ -93,7 +93,7 @@ test("unchanged pending commit blocks another draft and late disposed refusal ca
 
  test("decimal numeric conditions retain thresholds and allow ordering without coercing integer text",async()=>{
  const writes:SceneCommand[]=[];
- const decimalChoice:SceneBeat={...choice,payload:{type:"choice",options:[{text:"Ready",destinationSceneId:"two",condition:{status:"supported",expression:{type:"compare",operator:"greaterEqual",left:{type:"variable",variableId:"money",variableType:"decimal"},right:{type:"decimal",value:"1.25"}}}}]}};
+ const decimalChoice:SceneBeat={...choice,payload:{type:"choice",options:[{text:"Ready",condition:{status:"supported",expression:{type:"compare",operator:"greaterEqual",left:{type:"variable",variableId:"money",variableType:"decimal"},right:{type:"decimal",value:"1.25"}}}}]}};
  const s=setup([decimalChoice,ending],async command=>{writes.push(command);throw Error("Keep draft");});
  try{s.host.querySelector<HTMLButtonElement>('[data-beat-id="choice"] .beat-select')!.click();const value=s.host.querySelector<HTMLInputElement>('[aria-label="Condition value"]')!;assert.equal(value.value,"1.25");value.value="2.75";value.dispatchEvent(new Event("input",{bubbles:true}));click(s.host,"Commit Beat");await tick();assert.equal(writes.length,1);assert.equal(value.value,"2.75");}finally{await s.close();}
  });

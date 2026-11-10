@@ -5,6 +5,7 @@
 //! persisted mapping and patches only exact byte ranges or creates/deletes an owned
 //! Scene file through the journalled transaction service.
 
+mod choice;
 pub mod flow;
 mod logic;
 mod screen_beats;
@@ -194,14 +195,14 @@ pub(crate) fn logic_boundary(payload: &BeatPayload) -> bool {
 
 fn is_terminal_payload(payload: &BeatPayload) -> bool {
     matches!(payload, BeatPayload::Jump { .. } | BeatPayload::Return)
-        || matches!(payload, BeatPayload::Choice { options } if !logic::choice_may_continue(options))
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ChoiceOption {
     pub text: String,
-    pub destination_scene_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub condition: Option<crate::conditions::Condition>,
 }
@@ -536,6 +537,7 @@ struct Loaded {
 #[derive(Clone)]
 enum ParsedNesting {
     Branch {
+        choice_option: bool,
         group_start: usize,
         variable_id: String,
         otherwise: bool,
@@ -1855,7 +1857,7 @@ impl AuthoringService {
         options.push(ChoiceOption {
             condition: None,
             text: option_text,
-            destination_scene_id: destination_id.clone(),
+            id: None,
         });
         loaded.project.scenes.push(destination.clone());
         loaded.project.last_open = Selection {
@@ -1873,6 +1875,46 @@ impl AuthoringService {
             },
             &loaded,
         )?;
+        let (_, _, parsed) = parse_scene(
+            &source_scene,
+            &proposed_source,
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
+        )?;
+        let new_option = parsed
+            .iter()
+            .find(|b| b.start == choice.byte_start as usize)
+            .and_then(|b| match &b.payload {
+                BeatPayload::Choice { options } => options
+                    .last()
+                    .and_then(|o| o.id.as_ref())
+                    .and_then(|id| id.parse::<usize>().ok()),
+                _ => None,
+            })
+            .ok_or(SceneError::InvariantBlocked)?;
+        let new_pass=parsed.iter().find(|b|matches!(b.nesting,Some(ParsedNesting::Child{branch_start,..}) if branch_start==new_option) && matches!(&b.payload,BeatPayload::CustomCode{source,..} if source.trim()=="pass")).ok_or(SceneError::InvariantBlocked)?;
+        let indent = indentation(
+            std::str::from_utf8(&proposed_source[new_pass.start..new_pass.end])
+                .map_err(|_| SceneError::UnsupportedSource)?,
+        );
+        let newline = if proposed_source.windows(2).any(|w| w == b"\r\n") {
+            "\r\n"
+        } else {
+            "\n"
+        };
+        let mut proposed_source = proposed_source;
+        proposed_source.splice(
+            new_pass.start..new_pass.end,
+            format!(
+                "{}jump {}{newline}",
+                " ".repeat(indent),
+                destination.technical_label
+            )
+            .bytes(),
+        );
         self.validate_candidate_transfers(
             project,
             &loaded,
@@ -2136,9 +2178,7 @@ impl AuthoringService {
                         | BeatPayload::Call {
                             scene_id: target, ..
                         } => target == scene_id,
-                        BeatPayload::Choice { options } => options
-                            .iter()
-                            .any(|option| option.destination_scene_id == scene_id),
+                        BeatPayload::Choice { .. } => false,
                         _ => false,
                     }
             }) {
@@ -2835,6 +2875,16 @@ fn apply_beat_edit(
                     ));
                 }
             }
+            if matches!(payload, BeatPayload::Choice { .. }) {
+                choice::retain_insertion(
+                    source,
+                    beats,
+                    insertion,
+                    insertion,
+                    rendered.len() + output.len() - insertion,
+                    &mut forced,
+                );
+            }
             output.extend_from_slice(rendered.as_bytes());
             output.extend_from_slice(&source[insertion..]);
             Ok((output, forced))
@@ -2851,7 +2901,9 @@ fn apply_beat_edit(
             if beat.protected {
                 return Err(SceneError::OpaqueBoundary);
             }
-            if is_terminal_payload(&beat.payload) != is_terminal_payload(&payload)
+            if matches!(beat.payload, BeatPayload::Choice { .. })
+                != matches!(payload, BeatPayload::Choice { .. })
+                || is_terminal_payload(&beat.payload) != is_terminal_payload(&payload)
                 || (is_terminal_payload(&payload)
                     && beats.last().is_none_or(|last| last.id != beat.id))
             {
@@ -2881,18 +2933,8 @@ fn apply_beat_edit(
                         .ok_or(SceneError::UnknownEntity)?
                         .technical_label,
                 )?
-            } else if let (
-                BeatPayload::Choice { options: previous },
-                BeatPayload::Choice { options },
-            ) = (&beat.payload, &payload)
-            {
-                logic::patch_menu(
-                    &source[beat.byte_start as usize..beat.byte_end as usize],
-                    previous,
-                    options,
-                    loaded,
-                )?
-                .unwrap_or(render_payload(&payload, loaded, newline)?)
+            } else if let BeatPayload::Choice { options } = &payload {
+                return choice::update(source, beats, beat, options, loaded);
             } else if let Some(patched) = patch_variable_assignment(
                 &source[beat.byte_start as usize..beat.byte_end as usize],
                 &beat.payload,
@@ -2997,7 +3039,7 @@ fn apply_beat_edit(
                 return Err(SceneError::InvariantBlocked);
             }
             let mut output = source.to_vec();
-            output.drain(beat.byte_start as usize..beat.byte_end as usize);
+            output.drain(beat.byte_start as usize..structure::node_end(beat, beats)?);
             Ok((output, Vec::new()))
         }
         BeatEdit::Reorder { id, to_index } => {
@@ -3010,7 +3052,10 @@ fn apply_beat_edit(
             }
             let (first, last) = (from.min(to_index), from.max(to_index));
             let window = &beats[first..=last];
-            if window.iter().any(|b| b.owner.is_some()) {
+            if window
+                .iter()
+                .any(|b| b.owner.is_some() || matches!(b.payload, BeatPayload::Choice { .. }))
+            {
                 return Err(SceneError::InvariantBlocked);
             }
             if window.iter().any(|b| b.protected)
@@ -3215,23 +3260,13 @@ fn render_payload(
             }
         }
         BeatPayload::Choice { options } => {
-            let mut text = String::from("    menu:");
-            text.push_str(newline);
+            let mut text = format!("    menu:{newline}");
             for option in options {
-                let destination = loaded
-                    .project
-                    .scenes
-                    .iter()
-                    .find(|scene| scene.id == option.destination_scene_id)
-                    .ok_or(SceneError::UnknownEntity)?;
                 text.push_str(&format!(
-                    "        \"{}\"{}:{}            jump {}",
+                    "        \"{}\"{}:{newline}            pass{newline}",
                     escape_string(&option.text)?,
-                    logic::render_guard(option.condition.as_ref(), &loaded.authoring)?,
-                    newline,
-                    destination.technical_label
+                    logic::render_guard(option.condition.as_ref(), &loaded.authoring)?
                 ));
-                text.push_str(newline);
             }
             return Ok(text);
         }
@@ -3283,13 +3318,12 @@ fn validate_payload(payload: &BeatPayload, loaded: &Loaded) -> Result<(), SceneE
             for option in options {
                 validate_text(&option.text)?;
                 logic::render_guard(option.condition.as_ref(), &loaded.authoring)?;
-                if !loaded
-                    .project
-                    .scenes
-                    .iter()
-                    .any(|scene| scene.id == option.destination_scene_id)
+                if option
+                    .id
+                    .as_ref()
+                    .is_some_and(|id| uuid::Uuid::parse_str(id).is_err())
                 {
-                    return Err(SceneError::UnknownEntity);
+                    return Err(SceneError::InvalidPayload);
                 }
             }
         }
@@ -3430,6 +3464,7 @@ fn parse_bool_group(
             }
             let mut parsed = custom(start, end, body);
             parsed.nesting = Some(ParsedNesting::Branch {
+                choice_option: false,
                 group_start,
                 variable_id: variable.id.clone(),
                 otherwise,
@@ -3501,8 +3536,9 @@ fn parse_condition_group(
     parent: Option<(usize, usize)>,
     depth: usize,
     lexical: &HashSet<usize>,
-    rich_logic: bool,
+    source_version: u32,
 ) -> Option<(usize, Vec<ParsedBeat>)> {
+    let rich_logic = source_version >= 5;
     if depth >= MAX_CONDITION_NESTING || !lexical.contains(&lines[index].0) {
         return None;
     }
@@ -3532,6 +3568,7 @@ fn parse_condition_group(
         let branch_start = start;
         let mut header = custom(start, end, body);
         header.nesting = Some(ParsedNesting::Branch {
+            choice_option: false,
             group_start,
             variable_id: legacy_variable.clone(),
             otherwise,
@@ -3564,14 +3601,29 @@ fn parse_condition_group(
                 Some((group_start, branch_start)),
                 depth + 1,
                 lexical,
-                rich_logic,
+                source_version,
             ) {
                 result.extend(nested);
                 next = after;
                 statements += 1;
                 continue;
             }
-            if rich_logic {
+            if source_version >= 9 {
+                if let Some((after, menu)) = choice::parse(
+                    lines,
+                    next,
+                    indent + 4,
+                    loaded,
+                    lexical,
+                    Some((group_start, branch_start)),
+                ) {
+                    result.extend(menu);
+                    next = after;
+                    statements += 1;
+                    continue;
+                }
+            }
+            if rich_logic && source_version < 9 {
                 if let Some((after, mut menu)) =
                     logic::parse_menu(lines, next, indent + 4, loaded, lexical)
                 {
@@ -3712,13 +3764,20 @@ fn parse_scene_mode(
         if let Some((next, nested)) = if legacy {
             parse_bool_group(&lines, index, loaded)
         } else {
-            parse_condition_group(&lines, index, loaded, 4, None, 0, &lexical, rich_logic)
+            parse_condition_group(&lines, index, loaded, 4, None, 0, &lexical, source_version)
         } {
             beats.extend(nested);
             index = next;
             continue;
         }
-        if rich_logic {
+        if source_version >= 9 {
+            if let Some((next, menu)) = choice::parse(&lines, index, 4, loaded, &lexical, None) {
+                beats.extend(menu);
+                index = next;
+                continue;
+            }
+        }
+        if rich_logic && source_version < 9 {
             if let Some((next, menu)) = logic::parse_menu(&lines, index, 4, loaded, &lexical) {
                 beats.push(menu);
                 index = next;
@@ -3753,12 +3812,12 @@ fn parse_scene_mode(
                             .find(|scene| scene.technical_label == label)
                     })
                     .map(|scene| scene.id.clone());
-                let Some(destination_scene_id) = destination else {
+                let Some(_destination_scene_id) = destination else {
                     break;
                 };
                 options.push(ChoiceOption {
                     text: option_text,
-                    destination_scene_id,
+                    id: None,
                     condition: None,
                 });
                 menu_end = jump_end.max(option_end);
@@ -4371,6 +4430,7 @@ pub(crate) fn build_mapping(
     {
         match nested {
             Some(ParsedNesting::Branch {
+                choice_option,
                 group_start,
                 variable_id,
                 otherwise,
@@ -4387,6 +4447,7 @@ pub(crate) fn build_mapping(
                     beat.owner = Some(owner);
                 }
                 let branch = crate::metadata::ConditionalBranch {
+                    choice_option,
                     group_id: groups[&group_start].clone(),
                     variable_id: (!variable_id.is_empty()).then_some(variable_id),
                     otherwise,
@@ -4408,6 +4469,35 @@ pub(crate) fn build_mapping(
                 beat.owner = Some(owner);
             }
             None => {}
+        }
+    }
+    let option_ids = beats
+        .iter()
+        .filter(|b| {
+            b.conditional_branch
+                .as_ref()
+                .is_some_and(|g| g.choice_option)
+        })
+        .map(|b| (b.byte_start, b.id.clone()))
+        .collect::<Vec<_>>();
+    for beat in &mut beats {
+        if let BeatPayload::Choice { options } = &mut beat.payload {
+            // The parser carries header byte starts until the mapping has assigned identities.
+            for option in options {
+                let start = option
+                    .id
+                    .as_ref()
+                    .and_then(|s| s.parse::<u64>().ok())
+                    .ok_or(SceneError::InvalidMetadata)?;
+                option.id = Some(
+                    option_ids
+                        .iter()
+                        .find(|(offset, _)| *offset == start)
+                        .ok_or(SceneError::InvalidMetadata)?
+                        .1
+                        .clone(),
+                );
+            }
         }
     }
     structure::mark_placeholders(&mut beats);
@@ -5224,7 +5314,7 @@ mod tests {
             json!({"type": "playSfx", "assetId": "a"}),
             json!({"type": "transition", "transition": "fade"}),
             json!({"type": "setVariable", "variableId": "v", "value": true}),
-            json!({"type": "choice", "options": [{"text": "Go", "destinationSceneId": "s"}]}),
+            json!({"type": "choice", "options": [{"text": "Go"}]}),
             json!({"type": "jump", "sceneId": "s"}),
             json!({"type": "return"}),
             json!({"type": "customCode", "source": "pass", "reason": "Unsupported"}),
@@ -6008,17 +6098,17 @@ mod tests {
                     ChoiceOption {
                         condition: None,
                         text: "One".into(),
-                        destination_scene_id: destination_id.clone(),
+                        id: None,
                     },
                     ChoiceOption {
                         condition: None,
                         text: "Two".into(),
-                        destination_scene_id: destination_id.clone(),
+                        id: None,
                     },
                     ChoiceOption {
                         condition: None,
                         text: "Three".into(),
-                        destination_scene_id: destination_id.clone(),
+                        id: None,
                     },
                 ],
             },
@@ -6041,6 +6131,18 @@ mod tests {
             )),
         )
         .unwrap();
+        let parsed = parsed
+            .into_iter()
+            .filter(|b| b.nesting.is_none())
+            .map(|mut b| {
+                if let BeatPayload::Choice { options } = &mut b.payload {
+                    for o in options {
+                        o.id = None;
+                    }
+                }
+                b
+            })
+            .collect::<Vec<_>>();
         assert_eq!(
             parsed
                 .iter()
@@ -6327,7 +6429,7 @@ mod tests {
             .iter()
             .find(|scene| scene.id == fixture.entry_scene_id)
             .unwrap();
-        let existing = with_target
+        let _existing = with_target
             .scenes
             .iter()
             .find(|scene| scene.id != fixture.entry_scene_id)
@@ -6343,7 +6445,7 @@ mod tests {
                         options: vec![ChoiceOption {
                             condition: None,
                             text: "Take the first path".into(),
-                            destination_scene_id: existing.id.clone(),
+                            id: None,
                         }],
                     },
                 },
@@ -6355,11 +6457,16 @@ mod tests {
             .find(|scene| scene.id == fixture.entry_scene_id)
             .unwrap();
         assert!(matches!(
-            entry.beats.last().unwrap().payload,
+            entry
+                .beats
+                .iter()
+                .find(|b| matches!(b.payload, BeatPayload::Choice { .. }))
+                .unwrap()
+                .payload,
             BeatPayload::Choice { .. }
         ));
         let entry_source = fs::read_to_string(fixture.root.join(&entry.source_path)).unwrap();
-        assert!(!entry_source.contains("    return\n"));
+        assert!(entry_source.contains("    return\n"));
         let choice_id = entry
             .beats
             .iter()
@@ -6367,17 +6474,18 @@ mod tests {
             .unwrap()
             .id
             .clone();
-        assert!(matches!(
-            fixture.apply(
+        let removed = fixture
+            .apply(
                 &with_choice,
                 SceneCommand::RemoveBeat {
                     scene_id: entry.id.clone(),
                     expected_source_revision: entry.source_revision.clone(),
                     beat_id: choice_id.clone(),
-                }
-            ),
-            Err(SceneError::InvariantBlocked)
-        ));
+                },
+            )
+            .unwrap();
+        let restored = fixture.apply(&removed, SceneCommand::Undo).unwrap();
+        assert_eq!(restored.scenes[0].source_revision, entry.source_revision);
         assert!(matches!(
             fixture.apply(
                 &with_choice,
@@ -6427,7 +6535,7 @@ mod tests {
             panic!("choice was not preserved")
         };
         assert_eq!(options.len(), 2);
-        assert_eq!(options[1].destination_scene_id, created.id);
+        assert!(options[1].id.is_some());
         assert!(matches!(
             fixture.apply(
                 &expanded,
@@ -6837,12 +6945,12 @@ mod tests {
                             ChoiceOption {
                                 condition: None,
                                 text: "Garden".into(),
-                                destination_scene_id: garden_id.clone(),
+                                id: None,
                             },
                             ChoiceOption {
                                 condition: None,
                                 text: "Library".into(),
-                                destination_scene_id: library_id.clone(),
+                                id: None,
                             },
                         ],
                     },
@@ -6899,7 +7007,12 @@ mod tests {
             .beats
             .iter()
             .rev()
-            .find(|beat| !beat.protected && !is_terminal_payload(&beat.payload))
+            .find(|beat| {
+                !beat.protected
+                    && beat.owner.is_none()
+                    && !matches!(beat.payload, BeatPayload::Choice { .. })
+                    && !is_terminal_payload(&beat.payload)
+            })
             .unwrap();
         workspace = fixture
             .apply(
@@ -6921,7 +7034,7 @@ mod tests {
             .unwrap();
         assert!(entry.partial);
         assert!(matches!(
-            &entry.beats.last().unwrap().payload,
+            &entry.beats.iter().find(|b|matches!(b.payload,BeatPayload::Choice{..})).unwrap().payload,
             BeatPayload::Choice { options } if options.len() == 3
         ));
         let garden = workspace
@@ -7330,24 +7443,80 @@ mod tests {
         let left = model.scenes[1].clone();
         let right = model.scenes[2].clone();
         let end = model.scenes[3].clone();
-        for (scene, payload) in [
-            (
-                &entry,
-                BeatPayload::Choice {
-                    options: vec![
-                        ChoiceOption {
-                            condition: None,
-                            text: "Same".into(),
-                            destination_scene_id: left.id.clone(),
+        model = fixture
+            .apply(
+                &model,
+                SceneCommand::InsertBodyBeat {
+                    scene_id: entry.id.clone(),
+                    expected_source_revision: entry.source_revision.clone(),
+                    body: BodyRef::Root,
+                    position: Position::Before {
+                        anchor: NodeRef::Beat {
+                            beat_id: entry.beats[0].id.clone(),
                         },
-                        ChoiceOption {
-                            condition: None,
-                            text: "Same".into(),
-                            destination_scene_id: right.id.clone(),
-                        },
-                    ],
+                    },
+                    beat: BeatPayload::Choice {
+                        options: vec![
+                            ChoiceOption {
+                                text: "Same".into(),
+                                id: None,
+                                condition: None,
+                            },
+                            ChoiceOption {
+                                text: "Same".into(),
+                                id: None,
+                                condition: None,
+                            },
+                        ],
+                    },
                 },
-            ),
+            )
+            .unwrap();
+        for (ordinal, target) in [&left, &right].into_iter().enumerate() {
+            let scene = model.scenes[0].clone();
+            let header = scene
+                .beats
+                .iter()
+                .filter(|b| {
+                    b.conditional_branch
+                        .as_ref()
+                        .is_some_and(|g| g.choice_option)
+                })
+                .nth(ordinal)
+                .unwrap();
+            model = fixture
+                .apply(
+                    &model,
+                    SceneCommand::InsertBodyBeat {
+                        scene_id: scene.id.clone(),
+                        expected_source_revision: scene.source_revision.clone(),
+                        body: BodyRef::Branch {
+                            group_id: header.conditional_branch.as_ref().unwrap().group_id.clone(),
+                            branch_id: header.id.clone(),
+                        },
+                        position: Position::End,
+                        beat: BeatPayload::Jump {
+                            scene_id: target.id.clone(),
+                        },
+                    },
+                )
+                .unwrap();
+        }
+        let scene = model.scenes[0].clone();
+        model = fixture
+            .apply(
+                &model,
+                SceneCommand::RemoveStoryNode {
+                    scene_id: scene.id.clone(),
+                    expected_source_revision: scene.source_revision.clone(),
+                    expected_body: BodyRef::Root,
+                    node: NodeRef::Beat {
+                        beat_id: entry.beats[0].id.clone(),
+                    },
+                },
+            )
+            .unwrap();
+        for (scene, payload) in [
             (
                 &left,
                 BeatPayload::Jump {

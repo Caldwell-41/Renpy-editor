@@ -97,7 +97,7 @@ setTimeout(async () => {
           { id: "background", byteStart: 30, byteEnd: 50, protected: false, payload: { type: "background", assetId: "background", transition: "dissolve" } },
           { id: "dialogue", byteStart: 50, byteEnd: 70, protected: false, payload: { type: "dialogue", characterId: "character", text: "Hello" } },
           { id: "music", byteStart: 70, byteEnd: 90, protected: false, payload: { type: "playMusic", assetId: "music" } },
-          { id: "choice", byteStart: 90, byteEnd: 130, protected: false, payload: { type: "choice", options: [{ text: "Continue", destinationSceneId: "scene-two" }] } },
+          { id: "choice", byteStart: 90, byteEnd: 130, protected: false, payload: { type: "choice", options: [{ text: "Continue" }] } },
         ],
       }, {
         id: "scene-two", chapterId: "chapter-two", displayName: "Scene 2", technicalLabel: "scene_two",

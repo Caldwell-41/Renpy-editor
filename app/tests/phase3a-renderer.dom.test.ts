@@ -22,7 +22,7 @@ function model(beats: readonly SceneBeat[]): SceneWorkspace {
     authoring: { characters: [], appearances: [], assets: [], variables: [{ id: "trust", technicalName: "trust", variableType: "int", defaultValue: "0" }] } };
 }
 const call: SceneBeat = { id: "call", byteStart: 40, byteEnd: 95, protected: false, payload: { type: "call", sceneId: "two", returnLabel: "_loomlight_return_stable" } };
-const choice: SceneBeat = { id: "choice", byteStart: 95, byteEnd: 180, protected: false, payload: { type: "choice", options: [{ text: "High trust", destinationSceneId: "two", condition: guard }, { text: "Custom", destinationSceneId: "two", condition: unknown }, { text: "Ordinary", destinationSceneId: "two" }] } };
+const choice: SceneBeat = { id: "choice", byteStart: 95, byteEnd: 180, protected: false, payload: { type: "choice", options: [{ text: "High trust", condition: guard }, { text: "Custom", condition: unknown }, { text: "Ordinary" }] } };
 
 test("Unknown guarded Choice is read-only with exact Source navigation and no mutations", async () => {
   const { browser, host, tree } = setup(); const writes: unknown[] = []; const sources: unknown[] = [];

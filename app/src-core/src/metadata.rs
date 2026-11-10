@@ -3,8 +3,8 @@ use serde_json::{Map, Value};
 use std::{collections::HashSet, fs, io, path::Path};
 
 pub const PROJECT_SCHEMA_VERSION: u32 = 2;
-pub const SOURCE_MAP_SCHEMA_VERSION: u32 = 8;
-pub(crate) const MAX_SOURCE_MAP_BYTES: usize = 1_000_000;
+pub const SOURCE_MAP_SCHEMA_VERSION: u32 = 9;
+pub(crate) const MAX_SOURCE_MAP_BYTES: usize = 4_000_000;
 pub const LEGACY_PROJECT_SCHEMA_VERSION: u32 = 1;
 pub const LEGACY_SOURCE_MAP_SCHEMA_VERSION: u32 = 1;
 
@@ -182,6 +182,9 @@ pub struct BeatOwner {
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ConditionalBranch {
+    /// A menu option uses the same disjoint branch/body ownership.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub choice_option: bool,
     pub group_id: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub variable_id: Option<String>,
@@ -363,7 +366,15 @@ impl SourceMapMetadata {
     pub fn validate(&self, project_id: &str) -> Result<(), MetadataError> {
         if !matches!(
             self.schema_version,
-            LEGACY_SOURCE_MAP_SCHEMA_VERSION | 2 | 3 | 4 | 5 | 6 | 7 | SOURCE_MAP_SCHEMA_VERSION
+            LEGACY_SOURCE_MAP_SCHEMA_VERSION
+                | 2
+                | 3
+                | 4
+                | 5
+                | 6
+                | 7
+                | 8
+                | SOURCE_MAP_SCHEMA_VERSION
         ) || !valid_id(&self.project_id)
             || self.project_id != project_id
             || self.sources.len() > 4096
@@ -512,6 +523,7 @@ impl SourceMapMetadata {
                     }
                     if let Some(branch) = &beat.conditional_branch {
                         if beat.kind != "customCode"
+                            || branch.choice_option && self.schema_version < 9
                             || !valid_id(&branch.group_id)
                             || beat_ids.contains(&branch.group_id)
                             || branch
@@ -520,6 +532,7 @@ impl SourceMapMetadata {
                                 .is_some_and(|id| !valid_id(id))
                             || branch.otherwise && branch.condition.is_some()
                             || !branch.otherwise
+                                && !branch.choice_option
                                 && branch.condition.is_none()
                                 && branch.variable_id.is_none()
                         {
