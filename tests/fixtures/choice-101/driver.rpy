@@ -16,6 +16,19 @@ init python:
             renpy._choice101_return_flags.append(bool(renpy.store.choice_flag))
     config.statement_callbacks.append(_choice101_statement)
 
+    def _choice103_visible_prompt(who, what):
+        # Text selectors search focus targets. Noninteracting menu dialogue has
+        # no dialogue-advance focus, so inspect the displayed say widget itself.
+        say = renpy.get_screen("say")
+        widget = renpy.get_displayable("say", "what")
+        if say is None or widget is None or renpy.get_screen("choice") is None:
+            return False
+        rendered = renpy.test.testfocus.focus_from_displayable(widget)
+        return (say.scope["who"] == who and say.scope["what"] == what
+                and what in widget._tts_all(False)
+                and rendered is not None and rendered.w > 0 and rendered.h > 0)
+
+
 screen choice_body_main_menu():
     textbutton "Start" action Start()
 
@@ -183,4 +196,66 @@ testsuite choice_body:
         keysym "K_RETURN"
         assert screen "choice_body_main_menu" timeout 10
         $ print("CHOICE_102_RETURN caller=resumed shared=0", flush=True)
+        exit
+
+    testcase narration_prompt:
+        assert screen "choice_body_main_menu" timeout 10
+        click "Start"
+        assert screen "choice" timeout 10
+        assert screen "say" timeout 10
+        assert eval (_choice103_visible_prompt(None, "Choose a route")) timeout 10
+        assert "Yes" timeout 10
+        assert "No" timeout 10
+        click "Yes"
+        assert "Shared once" timeout 10
+        assert eval (choice_flag is True)
+        keysym "K_RETURN"
+        assert screen "choice_body_main_menu" timeout 10
+        $ print("CHOICE_103_NARRATION simultaneous=yes shared=1", flush=True)
+        exit
+
+    testcase character_prompt:
+        assert screen "choice_body_main_menu" timeout 10
+        click "Start"
+        assert screen "choice" timeout 10
+        assert screen "say" timeout 10
+        assert eval (_choice103_visible_prompt("Bec", "Where shall we go?")) timeout 10
+        assert "Yes" timeout 10
+        assert "No" timeout 10
+        click "No"
+        assert "Shared once" timeout 10
+        assert eval (choice_flag is False)
+        keysym "K_RETURN"
+        assert screen "choice_body_main_menu" timeout 10
+        $ print("CHOICE_103_CHARACTER simultaneous=yes shared=1", flush=True)
+        exit
+
+    testcase nested_prompt:
+        assert screen "choice_body_main_menu" timeout 10
+        click "Start"
+        assert screen "choice" timeout 10
+        assert eval (_choice103_visible_prompt(None, "Choose a route")) timeout 10
+        assert "Yes, please" timeout 10
+        click "Yes, please"
+        assert "Before call" timeout 10
+        keysym "K_RETURN"
+        assert "Transferred" timeout 10
+        keysym "K_RETURN"
+        assert "Resume inside option" timeout 10
+        keysym "K_RETURN"
+        assert screen "choice" timeout 10
+        assert screen "say" timeout 10
+        assert eval (_choice103_visible_prompt("Bec", "Inside, which route?")) timeout 10
+        assert "Inner normal" timeout 10
+        assert "Inner jump" timeout 10
+        assert "Inner return" timeout 10
+        click "Inner normal"
+        assert "Inside inner" timeout 10
+        keysym "K_RETURN"
+        assert "After nested" timeout 10
+        keysym "K_RETURN"
+        assert "Shared once" timeout 10
+        keysym "K_RETURN"
+        assert screen "choice_body_main_menu" timeout 10
+        $ print("CHOICE_103_NESTED simultaneous=yes call=returned shared=1", flush=True)
         exit

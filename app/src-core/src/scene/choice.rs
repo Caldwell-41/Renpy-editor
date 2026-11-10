@@ -20,6 +20,27 @@ pub(super) fn parse(
     }
     let (_, authoring, _) = loaded?;
     let mut next = index + 1;
+    let mut header_end = end;
+    let mut prompt = None;
+    if source_version >= 11 {
+        if let Some(&(ps, pe, line)) = lines.get(next) {
+            if indentation(line) == indent + 4 && lexical.contains(&ps) {
+                let normalized = format!("    {}", &line[indent + 4..]);
+                let code = logic::without_comment(&normalized).trim_end();
+                prompt = match parse_line(code, loaded) {
+                    Some(BeatPayload::Narration { text }) => Some(ChoicePrompt::Narration { text }),
+                    Some(BeatPayload::Dialogue { character_id, text }) => {
+                        Some(ChoicePrompt::Dialogue { character_id, text })
+                    }
+                    _ => None,
+                };
+                if prompt.is_some() {
+                    header_end = pe;
+                    next += 1;
+                }
+            }
+        }
+    }
     let mut result = Vec::new();
     let mut options = Vec::new();
     let mut group_start = None;
@@ -145,8 +166,8 @@ pub(super) fn parse(
         0,
         ParsedBeat {
             start,
-            end,
-            payload: BeatPayload::Choice { options },
+            end: header_end,
+            payload: BeatPayload::Choice { options, prompt },
             nesting: parent.map(|(group_start, branch_start)| ParsedNesting::Child {
                 group_start,
                 branch_start,
@@ -157,7 +178,7 @@ pub(super) fn parse(
 }
 
 pub(super) fn end(beat: &SceneBeat, beats: &[SceneBeat]) -> Result<usize, SceneError> {
-    let BeatPayload::Choice { options } = &beat.payload else {
+    let BeatPayload::Choice { options, .. } = &beat.payload else {
         return Err(SceneError::InvalidPayload);
     };
     let header = beats
@@ -184,9 +205,14 @@ pub(super) fn update(
     beats: &[SceneBeat],
     beat: &SceneBeat,
     options: &[ChoiceOption],
+    prompt: Option<&ChoicePrompt>,
     loaded: &Loaded,
 ) -> Result<(Vec<u8>, Vec<ForcedBeatId>), SceneError> {
-    let BeatPayload::Choice { options: old } = &beat.payload else {
+    let BeatPayload::Choice {
+        options: old,
+        prompt: previous_prompt,
+    } = &beat.payload
+    else {
         return Err(SceneError::InvalidPayload);
     };
     let end = end(beat, beats)?;
@@ -199,7 +225,44 @@ pub(super) fn update(
         std::str::from_utf8(&source[beat.byte_start as usize..beat.byte_end as usize])
             .map_err(|_| SceneError::UnsupportedSource)?,
     );
-    let mut rendered = source[beat.byte_start as usize..beat.byte_end as usize].to_vec();
+    let original_header = &source[beat.byte_start as usize..beat.byte_end as usize];
+    let menu_end = original_header
+        .iter()
+        .position(|b| *b == b'\n')
+        .map_or(original_header.len(), |p| p + 1);
+    let mut rendered = original_header[..menu_end].to_vec();
+    match (previous_prompt.as_ref(), prompt) {
+        (Some(old), Some(next)) if old == next => {
+            rendered.extend_from_slice(&original_header[menu_end..])
+        }
+        (Some(_), Some(next)) => {
+            let original = std::str::from_utf8(&original_header[menu_end..])
+                .map_err(|_| SceneError::UnsupportedSource)?;
+            let (qs, qe) = dialogue_quotes(original).ok_or(SceneError::OpaqueBoundary)?;
+            let text = match next {
+                ChoicePrompt::Narration { text } | ChoicePrompt::Dialogue { text, .. } => text,
+            };
+            let mut patched = original.to_owned();
+            patched.replace_range(qs + 1..qe, &escape_string(text)?);
+            let prefix = match next {
+                ChoicePrompt::Narration { .. } => String::new(),
+                ChoicePrompt::Dialogue { character_id, .. } => {
+                    format!("{} ", character(loaded, character_id)?.technical_name)
+                }
+            };
+            // Keep indentation and trailing comments; replace only speaker and text tokens.
+            let leading = original.len() - original.trim_start_matches(' ').len();
+            let old_prefix = original[leading..qs].trim_end();
+            let next_name = prefix.trim_end();
+            if old_prefix != next_name {
+                patched.replace_range(leading..qs, &prefix);
+            }
+            rendered.extend_from_slice(patched.as_bytes());
+        }
+        (None, Some(prompt)) => rendered
+            .extend_from_slice(render_prompt(prompt, loaded, indent + 4, newline)?.as_bytes()),
+        (_, None) => {}
+    }
     let mut forced = vec![(
         "choice".into(),
         sha256(&rendered),
@@ -307,6 +370,14 @@ pub(super) fn update(
             rendered.extend_from_slice(generated.as_bytes());
         }
     }
+    retain_insertion(
+        source,
+        beats,
+        beat.byte_start as usize,
+        end,
+        rendered.len(),
+        &mut forced,
+    );
     let mut output = source.to_vec();
     output.splice(beat.byte_start as usize..end, rendered);
     Ok((output, forced))
@@ -316,7 +387,7 @@ pub(super) fn may_continue(beat: &SceneBeat, beats: &[SceneBeat]) -> bool {
     may_continue_at_depth(beat, beats, 0)
 }
 pub(super) fn may_continue_at_depth(beat: &SceneBeat, beats: &[SceneBeat], depth: usize) -> bool {
-    let BeatPayload::Choice { options } = &beat.payload else {
+    let BeatPayload::Choice { options, .. } = &beat.payload else {
         return true;
     };
     if depth >= MAX_CONDITION_NESTING || options.iter().all(|o| o.condition.is_some()) {
@@ -369,4 +440,24 @@ pub(super) fn retain_insertion(
             Some(next),
         ));
     }
+}
+
+pub(super) fn render_prompt(
+    prompt: &ChoicePrompt,
+    loaded: &Loaded,
+    indent: usize,
+    newline: &str,
+) -> Result<String, SceneError> {
+    let (prefix, text) = match prompt {
+        ChoicePrompt::Narration { text } => (String::new(), text),
+        ChoicePrompt::Dialogue { character_id, text } => (
+            format!("{} ", character(loaded, character_id)?.technical_name),
+            text,
+        ),
+    };
+    Ok(format!(
+        "{}{prefix}\"{}\"{newline}",
+        " ".repeat(indent),
+        escape_string(text)?
+    ))
 }

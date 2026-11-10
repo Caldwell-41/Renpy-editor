@@ -322,7 +322,10 @@ pub(super) fn parse_menu(
             start,
             end: menu_end,
             nesting: None,
-            payload: BeatPayload::Choice { options },
+            payload: BeatPayload::Choice {
+                options,
+                prompt: None,
+            },
         },
     ))
 }
@@ -1905,3 +1908,7 @@ mod choice_body_tests {
         f.service.close().unwrap();
     }
 }
+
+#[cfg(test)]
+#[path = "logic/prompt_tests.rs"]
+mod prompt_tests;

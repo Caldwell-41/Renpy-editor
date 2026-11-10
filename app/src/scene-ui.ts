@@ -17,6 +17,10 @@ export type Condition =
   | { readonly status: "supported"; readonly expression: ConditionExpression }
   | { readonly status: "unknown"; readonly source: string; readonly diagnostic: "unsupportedSyntax" | "limitExceeded" | "missingVariable" | "typeMismatch" | "invalidValue" };
 
+export type ChoicePrompt =
+  | { readonly type: "narration"; readonly text: string }
+  | { readonly type: "dialogue"; readonly characterId: string; readonly text: string };
+
 export interface ChoiceOption {
   readonly text: string;
   readonly id?: string;
@@ -40,7 +44,7 @@ export type BeatPayload =
   | { readonly type: "playSfx"; readonly assetId: string }
   | { readonly type: "transition"; readonly transition: Exclude<TransitionRef, "none"> }
   | { readonly type: "setVariable"; readonly variableId: string; readonly value: boolean | number | string | IntegerAdjustment }
-  | { readonly type: "choice"; readonly options: readonly ChoiceOption[] }
+  | { readonly type: "choice"; readonly prompt?: ChoicePrompt; readonly options: readonly ChoiceOption[] }
   | { readonly type: "jump"; readonly sceneId: string }
   | { readonly type: "call"; readonly sceneId: string; readonly returnLabel: string | null }
   | { readonly type: "return" }
@@ -244,7 +248,7 @@ export interface ScenePreviewState {
   readonly musicUnknown: boolean;
   readonly variables: Readonly<Record<string, { readonly value: boolean | number | string; readonly beatId: string }>>;
   readonly variablesUnknown: boolean;
-  readonly overlay?: { readonly kind: "dialogue" | "narration" | "choice" | "jump" | "call" | "return"; readonly text: string; readonly beatId: string };
+  readonly overlay?: { readonly kind: "dialogue" | "narration" | "choice" | "jump" | "call" | "return"; readonly text: string; readonly beatId: string; readonly prompt?: ChoicePrompt };
 }
 
 export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string, manualBranches?: ReadonlyMap<string, string>): ScenePreviewState {
@@ -308,14 +312,19 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string,
       }
       case "dialogue": overlay = { kind: "dialogue", text: payload.text, beatId: beat.id }; break;
       case "narration": overlay = { kind: "narration", text: payload.text, beatId: beat.id }; break;
-      case "choice": overlay = { kind: "choice", text: payload.options.map((option) => `${option.text}${option.condition ? " (availability unknown)" : ""}`).join(" · "), beatId: beat.id }; break;
+      case "choice": overlay = { kind: "choice", ...(payload.prompt ? { prompt: payload.prompt } : {}), text: payload.options.map((option) => `${option.text}${option.condition ? " (availability unknown)" : ""}`).join(" · "), beatId: beat.id }; break;
       case "jump": overlay = { kind: "jump", text: "Jump", beatId: beat.id }; break;
       case "call": overlay = { kind: "call", text: "Call Scene · preview state unknown", beatId: beat.id }; break;
       case "return": overlay = { kind: "return", text: "Return to caller or main menu", beatId: beat.id }; break;
       case "playSfx": case "transition": break;
       case "showScreen": case "hideScreen": case "callScreen": break;
     }
-    if (payload.type === "choice") { if (!unknownBeatIds.includes(beat.id)) unknownBeatIds.push(beat.id); break; }
+    if (payload.type === "choice") {
+      if (!unknownBeatIds.includes(beat.id)) unknownBeatIds.push(beat.id);
+      const firstOption = scene.beats.find(b => b.id === payload.options[0]?.id);
+      const selected = firstOption?.conditionalBranch && manualBranches?.get(firstOption.conditionalBranch.groupId);
+      if (!selected || !payload.options.some(option => option.id === selected)) break;
+    }
     if (payload.type === "jump" || payload.type === "return") break;
   }
   return { throughBeatId: lastVisitedBeatId, partial: unknownBeatIds.length > 0, unknownBeatIds, background, backgroundUnknown, characters, charactersUnknown, music, musicUnknown, variables, variablesUnknown, overlay };
@@ -723,7 +732,15 @@ export function renderSceneAuthoring(
       const caption = document.createElement("figcaption"); caption.textContent = character?.displayName ?? "Character"; figure.append(caption); canvas.append(figure);
     }
     if (state.charactersUnknown) { const unknown = document.createElement("span"); unknown.className = "preview-unknown-layer"; unknown.textContent = "Other character state may be unknown"; canvas.append(unknown); }
-    if (state.overlay) { const overlay = document.createElement("div"); overlay.className = `preview-overlay ${state.overlay.kind}`; overlay.textContent = state.overlay.text || (state.overlay.kind === "dialogue" ? "Empty dialogue" : state.overlay.kind);if(state.overlay.kind==="dialogue"){const beat=scene.beats.find(b=>b.id===state.overlay?.beatId);if(beat?.payload.type==="dialogue"){const character=model.authoring.characters.find(c=>c.id===(beat.payload as {characterId:string}).characterId);const name=document.createElement("strong");name.textContent=character?.displayName??"";name.className="preview-speaker";overlay.prepend(name);}} canvas.append(overlay); }
+    if (state.overlay) { const overlay = document.createElement("div"); overlay.className = `preview-overlay ${state.overlay.kind}`; overlay.textContent = state.overlay.text || (state.overlay.kind === "dialogue" ? "Empty dialogue" : state.overlay.kind);if(state.overlay.kind==="dialogue"){const beat=scene.beats.find(b=>b.id===state.overlay?.beatId);if(beat?.payload.type==="dialogue"){const character=model.authoring.characters.find(c=>c.id===(beat.payload as {characterId:string}).characterId);const name=document.createElement("strong");name.textContent=character?.displayName??"";name.className="preview-speaker";overlay.prepend(name);}} if (state.overlay.prompt) {
+      const prompt = document.createElement("div"); prompt.className = "preview-choice-prompt";
+      if (state.overlay.prompt.type === "dialogue") {
+        const name = document.createElement("strong"); name.className = "preview-speaker";
+        name.textContent = model.authoring.characters.find(c => c.id === (state.overlay!.prompt as Extract<ChoicePrompt, { type: "dialogue" }>).characterId)?.displayName ?? "Unavailable Character";
+        prompt.append(name);
+      }
+      prompt.append(document.createTextNode(state.overlay.prompt.text)); overlay.prepend(prompt);
+    } canvas.append(overlay); }
     surround.append(canvas); preview.append(header, surround);
     if(typeof ResizeObserver!=="undefined"){const observer=new ResizeObserver(()=>{const b=surround.getBoundingClientRect();const ratio=actions.resolution.width/actions.resolution.height;const width=Math.max(1,Math.min(b.width,b.height*ratio));canvas.style.width=`${width}px`;canvas.style.height=`${width/ratio}px`;});observer.observe(surround);layoutObservers.push(observer);}
 
@@ -1487,6 +1504,22 @@ function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload, existing =
     case "playSfx": { const asset = assets("sfx", payload.assetId); add("SFX", asset); read = () => ({ type: "playSfx", assetId: required(asset) }); break; }
     case "transition": { const transition = transitions(false); add("Transition", transition); read = () => ({ type: "transition", transition: transition.value as "dissolve" | "fade" }); break; }
     case "choice": {
+      const promptRow = document.createElement("div"); promptRow.className = "choice-prompt";
+      let hasPrompt = !!payload.prompt;
+      const promptText = input(payload.prompt?.text ?? ""); promptText.setAttribute("aria-label", "Prompt text");
+      const speaker = entitySelect([{ id: "narration", label: "Narration (no speaker)" }, ...model.authoring.characters.map(c => ({ id: c.id, label: c.displayName }))], payload.prompt?.type === "dialogue" ? payload.prompt.characterId : "narration");
+      speaker.setAttribute("aria-label", "Prompt speaker");
+      const validatePrompt = validateField(promptText, () => { if (hasPrompt) requiredText(promptText, "Prompt text"); });
+      const addPrompt = button("+ Prompt", "text-button"); addPrompt.setAttribute("aria-label", "Add a prompt shown with the options");
+      const removePrompt = button("Remove prompt", "text-button");
+      const drawPrompt = (): void => {
+        promptRow.replaceChildren();
+        if (hasPrompt) promptRow.append(labelled("Prompt", speaker), labelled("Prompt text", promptText), removePrompt);
+        else { const empty = document.createElement("span"); empty.textContent = "No prompt with the options"; promptRow.append(empty, addPrompt); }
+      };
+      const changePrompt = (enabled: boolean): void => { hasPrompt = enabled; drawPrompt(); host.dispatchEvent(new Event("input", { bubbles: true })); (enabled ? promptText : addPrompt).focus(); };
+      addPrompt.addEventListener("click", () => changePrompt(true)); removePrompt.addEventListener("click", () => changePrompt(false));
+      controls.push(speaker, promptText); drawPrompt(); host.append(promptRow);
       const optionHost = document.createElement("div"); optionHost.className = "choice-options"; host.append(optionHost);
       const rows: { id?: string; text: HTMLInputElement; row: HTMLElement; guard: ReturnType<typeof buildAvailabilityEditor>; validateText: () => void }[] = [];
       const redraw = (): void => { rows.forEach((row, index) => { row.row.querySelector("strong")!.textContent = `Option ${index + 1}`; optionHost.append(row.row); }); host.dispatchEvent(new Event("input", { bubbles: true })); };
@@ -1509,7 +1542,9 @@ function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload, existing =
       const note = document.createElement("p"); note.textContent = "Each option runs its own Beats, then continues after the Choice. Availability is unknown in this preview."; host.append(note);
       read = () => {
         if (!rows.length) throw new Error("A Choice needs at least one option.");
-        return { type: "choice", options: rows.map(row => { row.validateText(); const condition = row.guard.read(); return { ...(row.id ? { id: row.id } : {}), text: row.text.value, ...(condition ? { condition } : {}) }; }) };
+        validatePrompt();
+        const prompt: ChoicePrompt | undefined = hasPrompt ? speaker.value === "narration" ? { type: "narration", text: promptText.value } : { type: "dialogue", characterId: required(speaker), text: promptText.value } : undefined;
+        return { type: "choice", ...(prompt ? { prompt } : {}), options: rows.map(row => { row.validateText(); const condition = row.guard.read(); return { ...(row.id ? { id: row.id } : {}), text: row.text.value, ...(condition ? { condition } : {}) }; }) };
       }; break;
     }
     case "jump": { const destination = scenes(payload.sceneId); add("Destination Scene", destination); read = () => ({ type: "jump", sceneId: required(destination) }); break; }
