@@ -588,8 +588,20 @@ menu with its prompt and reevaluated availability. Continue removes only the end
 Return retains its caller-sensitive meaning. Cancel and refused drafts retain the
 existing draft protections; accepted edits use shared Undo/Redo and reopen. Nested
 Choices own separate Repeat targets. Preview describes Repeat without executing it
-or inventing current values. Picked options remains the later #106 slice. The
-full Combined layout and palette remain with #110. Arithmetic uses the accepted
+or inventing current values. #106 adds the whole-Choice Picked options selector
+with Show normally, Mark picked and Hide picked. New Choices start with Show
+normally and record selections from their first visit. Existing unconfigured
+Choices keep their source until an accepted policy edit. Stable source-backed
+Choice and option UUIDs preserve identity through caption changes and reorder.
+Mark picked keeps the native action selectable with a check; Show disabled rows
+have a distinct lock. Hide picked takes precedence over disabled display,
+and hiding the last selectable option continues after the Choice. Selection records
+precede authored option Beats and use ordinary current-save, rollback-aware state.
+Preview reports picked state unknown. Commit, Cancel, refused drafts, Source
+fallback, shared history and reopen retain their existing owners. The implementation
+uses schema 14 while preserving frozen older recognizers. Rollback and New Game
+runtime proof remains pending in [the Choice evidence](tasks/evidence/choice-98.md#106-integration-and-handoff).
+The full Combined layout and palette remain with #110. Arithmetic uses the accepted
 shared controls.
 Until a capability exists, the editor says it is not built instead of showing a
 working-looking control.

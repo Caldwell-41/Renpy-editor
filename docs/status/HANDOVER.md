@@ -2,56 +2,50 @@
 
 ## Selected Choice implementation
 
-Kris selected [#98](https://github.com/Caldwell-41/Renpy-editor/issues/98) and its six
-delivery tickets under the implement-spec workflow. Work is `in_progress` on
-`codex/choice-98`, based on accepted integration `63221b44`. #101–#104 have
-public-authoring, both-target SDK and automatic CI evidence. Their Stage 1 runtime
-gate is complete on published `4339ccfc`. [The delivery record](../tasks/evidence/choice-98.md)
-owns assignments, design, verification and cumulative operation limits.
+Kris selected [#98](https://github.com/Caldwell-41/Renpy-editor/issues/98) and
+#101–#106 under implement-spec. Delivery remains `in_progress` on
+`codex/choice-98` in [draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125).
+#101–#105 have public-authoring, both-target SDK and automatic CI evidence.
+[The delivery record](../tasks/evidence/choice-98.md#106-integration-and-handoff)
+owns current verification, scoped reuse and cumulative limits.
 
-Normal merge `4c3497c550dc0cabec915a789537a5874b60ba7c` integrates #105 worker
-`5d07f9120051419a6b14261b6b41c71ccf1ac02b` without conflicts or implementation
-edits. The complete merge tree equals the worker's. This local documentation
-successor changes only coordinator records. Repeat is a source-derived ending,
-using a stable collision-checked menu label and schema 13 through existing
-transactional owners. Approved lab/design source is unchanged. [The #105 return](../tasks/evidence/choice-98.md#105-integration-and-handoff)
-owns material equality, scoped reuse, exact checks and retained failures.
+Normal merge `8fe1da8687594db110c7489d19f06f94d3e37ece` integrates #106 worker
+`e6ab0aaf0376ca6f2b69b0536077a652d08c91cb` without conflicts or implementation
+edits. Its complete tree equals the worker's. This local successor changes only
+CURRENT, HANDOVER, Choice evidence, ARCHITECTURE and UI. Approved lab/design source
+is unchanged. Picked options use source-backed UUIDs, the existing native Choice
+owner and ordinary saved Ren'Py state. Portable authoring checks pass within their
+recorded candidate scope.
 
-The worker passed the production controller, 396 frontend tests, focused
-Repeat/Source/metadata checks, actual public-core Help export and schema-13 Python
-admission. The broader Scene suite preceded final identity/wording changes; final
-focused tests cover those changes. Seven historical specialists remain ignored.
-Mac SDK start 2 passed all ten selected children on the exact worker commit,
-including the intended wrong-outcome rejection. Start 1 remains a charged driver
-failure after compile/lint and 21 conversation assertions; both starts cleaned up.
-Windows Repeat qualification is pending. SDK totals are Mac 11/20, Windows 5/20,
-zero reservations; #105 used 2/4 Mac starts.
+#106 Mac start 4 on `49e44c12` passed 26/27 selected outcomes, including actual save,
+process exit and new-process Load with matching artifact hashes. Rollback/New Game
+failed before game entry because enabled Load covered Start. The final vbox driver
+fix is unqualified. All four starts remain charged, retained and cleaned. Mac is
+STOPPED at #106 4/4; SDK totals are Mac 15/20, Windows 6/20, zero reservations.
+Shared capacity and successor assignments do not renew the exhausted Mac allowance.
 
-[Draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125) targets
-`codex/phase3b-screen-designer`. Last published head `be98deec` passed exact-head
-automatic run `42798814547`, attempt 1. [The receipt](https://github.com/Caldwell-41/Renpy-editor/issues/98#issuecomment-6765076757)
-records all 18 browser dispatch fixtures, frontend/build/Help and repository checks.
-The prior failed font-fixture attempt and its correction remain in
-[the evidence](../tasks/evidence/choice-98.md#ci-font-import-readiness-correction).
-The new integration head needs publication and its own automatic CI.
+Windows #105 passed its exact `0a81ae24` candidate, all ten SDK outcomes and a fresh
+controller. Exact-head automatic CI also passed on that published head. The local
+#106 integration needs publication and its own CI. A later audit found #104's
+duplicate controller receipt corrupt; the checksum-matching frozen SDK reference
+and original at-time audit remain retained. [The correction](../tasks/evidence/choice-98.md#104-receipt-retention-limit)
+limits current availability without overwriting or requalifying evidence.
 
-Resume the same coordinator thread to publish this local checkpoint, link receipts,
-and dispatch Windows #105 and fresh isolated Mac #106 under
-[the selected limits](../tasks/evidence/choice-98.md#verification-and-operation-limits).
-Windows #105 is test-only, with at most four starts from Windows 5/20 after
-preflight. Reuse the T3-prepared dedicated worktree after clean/idle and ancestry
-checks, then safely fast-forward to the exact candidate. SUNDOWN's registered root
-stays at `251fb477`. #106 may run alongside it with at most four Mac starts from
-11/20 after preflight. It depends on qualified Stage 1, not Windows Repeat
-completion, and becomes the sole writer of shared parser/source/runtime and Story
-controls. The coordinator owns integration and status.
+Resume the same coordinator thread for publication and a fresh test-only Windows
+#106 assignment. Use the existing T3-prepared dedicated branch after clean/idle,
+ancestry and offline host/toolchain/official-SDK preflight. Safely fast-forward to
+the exact published candidate; select all 27 picked outcomes, including save/close/
+new-process Load, rollback/New Game and the intended negative. Windows may use at
+most four starts from 6/20. Its test owner makes no source fixes. Mac stays stopped
+while Windows continues. The coordinator may propose up to two additional Mac
+starts, within 17/20 shared use, but that proposal is not authorization.
 
-Preserve #101–#105 worktrees, unique evidence, the untracked `app/node_modules`
-symlink and all protected recovery below. Earlier failures remain in linked
-evidence. #31/#55 styling/canvas and PR #122 retro items remain unselected.
-Native editor/package and manual CI campaigns are unselected. Rendered comparison,
-native/human evidence, final validation selection and combined #98 review remain
-pending. Issues stay open for the single PR closeout.
+All previous workers/test owners are complete. The coordinator resumes sole
+integration/status ownership. Preserve all worker checkouts, unique evidence,
+`app/node_modules` and the recovery below. No cleanup, native editor/package or
+manual CI campaign is selected. #98/#106 stay open and draft. Combined review and
+fixes, rendered comparison, native/human evidence and final validation selection
+remain pending. Full Story #110 and #31/#55 styling/canvas remain separate.
 
 <a id="shared-arithmetic-implementation-2026-11-09"></a>
 

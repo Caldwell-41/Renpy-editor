@@ -451,9 +451,31 @@ preceding Scene effects or adding Call frames. Calls retain their stable `from`
 labels and resume inside the option before its Repeat. Nested menus use their own
 targets. Branches projects a body route to the exact owning Choice header; collisions
 produce an unknown route and protected Story fallback. Preview never follows a loop
-or claims current availability. There is no independent ending or picked-history store.
+or claims current availability. Repeat retains the existing ending owner.
 
-Later picked-option policy must extend this availability owner and native actions.
+Picked options extend this native availability and action owner. An accepted policy
+adoption writes the mode and stable Choice UUID into the menu arguments, with a
+separate UUID and typed availability arguments for each option. New Story Choices
+explicitly start with Show normally. Existing unconfigured source stays unchanged
+until an accepted policy edit. The option header mapping includes the first
+executable statement, which records the UUID pair before any authored Beat,
+including Jump, Return or Repeat. Rename and reorder preserve these source-backed
+identities; new options receive fresh UUIDs.
+
+The versioned adapter declares `default _ll_picked_v1 = {}` as ordinary current-save,
+rollback-aware Ren'Py state. It preserves native `i.action`, adds a selectable check
+for Mark picked and a distinct disabled lock, and combines Hide picked with native
+availability guards. Disabled rows use the combined selectable gate. Hide wins over
+disabled display; hiding the last selectable answer continues after the Choice
+without recording a pick. Completion checks retain safe Scene endings. Repeat
+revisits the same gate and store. Preview reports picked state unknown.
+
+Schema 14 recognizes the source-backed policy and selection records; recognizers
+through 13 remain frozen and version-gated. Existing source/map transactions,
+Undo/Redo, drafts and reopen own accepted changes and helper creation or upgrade.
+Duplicate keys, reserved declarations, missing or edited helpers, dirty Source and
+unsupported templates refuse authoring with protected Source fallback. Rollback
+and New Game runtime proof remains pending in [the Choice evidence](tasks/evidence/choice-98.md#106-integration-and-handoff).
 No project Python runs during inspection, authoring or illustrative preview.
 
 The first structural commands are `insertBodyBeat` and `updateBodyBeat`. Their explicit
