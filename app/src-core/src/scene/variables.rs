@@ -78,7 +78,10 @@ pub(super) fn inspect(beats: &mut [SceneBeat], authoring: &AuthoringMetadata) {
             || logic_boundary(&beat.payload)
             || matches!(
                 &beat.payload,
-                BeatPayload::Choice { .. } | BeatPayload::Jump { .. } | BeatPayload::Return
+                BeatPayload::Choice { .. }
+                    | BeatPayload::Jump { .. }
+                    | BeatPayload::RepeatChoice { .. }
+                    | BeatPayload::Return
             )
         {
             values.clear();

@@ -665,6 +665,19 @@ fn collect_labels(path: &str, bytes: &[u8], revision: &str, inventory: &mut Inve
                     byte_end: (end + bom) as u64,
                 });
         }
+        if let Some(target) = super::choice::target_line(line) {
+            inventory
+                .labels
+                .entry(target.into())
+                .or_default()
+                .push(FlowLocation {
+                    path: path.into(),
+                    revision: revision.into(),
+                    byte_start: (start + bom) as u64,
+                    byte_end: (end + bom) as u64,
+                });
+            continue;
+        }
         // Story labels are top-level declarations. Indented screen-language
         // label controls (including translated text) are not story destinations.
         if line.starts_with([' ', '\t']) {

@@ -22,7 +22,7 @@ async function request(operation,payload={},ui=false){
   const response=await child.request(request);assert(isCoreResponse(response,request.requestId));
   result.transcript.push({request,response,event:ui?lastEvent:undefined});
   await appendFile(join(output,"requests.jsonl"),JSON.stringify({operation,ok:response.ok,code:response.error?.code})+"\n");
-  assert(result.transcript.length<400,"Unexpected request loop");
+  assert(result.transcript.length<800,"Unexpected request loop");
   if(ui&&operation==='scene.apply'){assert(lastEvent?.connected,'Story mutation must originate at connected production controls');lastApply=response;}
   if(ui&&operation==='scene.validateAssignment')lastValidation=response;
   if(response.ok&&operation==='project.openRecent')session=response.value.sessionId;
@@ -198,6 +198,43 @@ try {
  lastApply=undefined;button('Commit Beat',promptEditor);await wait(()=>lastApply);await settle();assert.equal(lastApply.ok,false);assert.equal(lastApply.error.code,'SOURCE_CONFLICT');assert.equal(promptEditor.querySelector('[aria-label="Prompt text"]').value,'Retained prompt after conflict');assert(promptEditor.isConnected);assert.deepEqual(await readFile(join(scratch,'synthetic-project',path)),external);assert.deepEqual(await readFile(mapPath),externalMap);button('Cancel',promptEditor);
  button('Close Project');await wait(()=>document.querySelector('.recent-open'));button(document.querySelector('.recent-open').textContent);await wait(()=>document.querySelector('.beat-card'));await settle();assert.equal(await source(path),external.toString('utf8').replace(/^\uFEFF/,''));
  stage('nested prompt preserves recursive Call and option ownership; reopen and ordinary external conflict retain exact source and drafts');
+ // #105 authors the conversation and its endings through the production controls.
+ await call('variable.create',{technicalName:'choice_visits',variableType:'int',defaultValue:0});
+ await saveSource(path,`label ${entry.technicalLabel}:\n    "Shared once"\n    return\n`);
+ button('Close Project');await wait(()=>document.querySelector('.recent-open'));button(document.querySelector('.recent-open').textContent);await wait(()=>document.querySelector('.beat-card'));await settle();
+ button('Add Beat');draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'setVariable','change');enter(draft.querySelector('[aria-label="Insert before"]'),scene().beats.find(b=>b.payload.text==='Shared once').id,'change');enter(draft.querySelector('[aria-label="Variable"]'),workspace.authoring.variables.find(v=>v.technicalName==='choice_visits').id,'change');enter(draft.querySelector('[aria-label="Formula"]'),'choice_visits + 1');await applied(draft,'Add Beat');
+ button('Add Beat');draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'choice','change');enter(draft.querySelector('[aria-label="Insert before"]'),scene().beats.find(b=>b.payload.text==='Shared once').id,'change');
+ enter(draft.querySelector('[aria-label="Choice option text"]'),'Ask about the station');button('Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'Ask about the ticket');button('Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[2],'Leave');await applied(draft,'Add Beat');
+ const conversationId=choice().id,[station,ticket,leave]=choice().payload.options;
+ promptEditor=await editChoice(conversationId);button('Add a prompt shown with the options',promptEditor);enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'What would you like to ask?');availability(promptEditor.querySelectorAll('.choice-option')[1],true,'showDisabled');await applied(promptEditor,'Commit Beat');
+ await addBodyBeat(station.id,'narration',form=>enter(form.querySelector('textarea'),'Station answer'));
+ await addBodyBeat(station.id,'call',form=>enter(form.querySelector('[aria-label="Call destination Scene"]'),target.id,'change'));
+ await addBodyBeat(station.id,'narration',form=>enter(form.querySelector('textarea'),'Station call resumed'));
+ await addBodyBeat(station.id,'setVariable',form=>{enter(form.querySelector('[aria-label="Variable"]'),flagId,'change');enter(form.querySelector('[aria-label="Value"]'),'true','change');});
+ await addBodyBeat(ticket.id,'narration',form=>enter(form.querySelector('textarea'),'Ticket answer'));
+ async function thenOption(id,kind,commit=true){button('Then',option(id));const form=document.querySelector('.story-operation[aria-label="Option ending"]');enter(form.querySelector('[aria-label="Then"]'),kind,'change');if(commit)await applied(form,'Apply ending');return form;}
+ const beforeRepeat=await source(path),beforeRepeatMap=await readFile(mapPath);
+ panel=await thenOption(station.id,'repeatChoice',false);assert([...panel.querySelector('[aria-label="Then"]').options].some(o=>o.textContent==='Repeat this Choice'));button('Cancel',panel);assert.equal(await source(path),beforeRepeat);assert.deepEqual(await readFile(mapPath),beforeRepeatMap);
+ await thenOption(station.id,'repeatChoice');const oneRepeat=await source(path);assert.equal((oneRepeat.match(/label _ll_choice_/g)??[]).length,1);assert(oneRepeat.includes('"Station call resumed"\n            $ choice_flag = True\n            jump _ll_choice_'));
+ assert.equal(choice().id,conversationId);assert.deepEqual(choice().payload.options.map(o=>o.id),[station.id,ticket.id,leave.id]);
+ const repeatMap=await readFile(mapPath);await thenOption(station.id,'repeatChoice');assert.equal(await source(path),oneRepeat);assert.deepEqual(await readFile(mapPath),repeatMap);
+ await applied(document,'Undo');assert.equal(await source(path),beforeRepeat);await applied(document,'Redo');assert.equal(await source(path),oneRepeat);
+ panel=await thenOption(ticket.id,'repeatChoice',false);staleSession=true;lastApply=undefined;button('Apply ending',panel);await wait(()=>lastApply);await settle();staleSession=false;assert.equal(lastApply.ok,false);assert.equal(panel.querySelector('[aria-label="Then"]').value,'repeatChoice');assert(panel.isConnected);assert.equal(await source(path),oneRepeat);button('Cancel',panel);
+ await thenOption(ticket.id,'repeatChoice');result.runtime.repeatConversation=await source(path);assert.equal((result.runtime.repeatConversation.match(/label _ll_choice_/g)??[]).length,1);
+ await thenOption(station.id,'continue');assert((await source(path)).includes('"Station call resumed"\n            $ choice_flag = True\n'));await applied(document,'Undo');assert.equal(await source(path),result.runtime.repeatConversation);
+ const repeatFlow=await call('flow.list');assert.equal(repeatFlow.edges.filter(e=>e.kind==='repeat'&&e.destination.beatId===conversationId).length,2);
+ // No selectable options after Repeat must traverse the same aggregate gate.
+ promptEditor=await editChoice(conversationId);for(const row of promptEditor.querySelectorAll('.choice-option')){availability(row,true,'showDisabled');enter(row.querySelector('[aria-label="Condition value"]'),'false','change');}await applied(promptEditor,'Commit Beat');result.runtime.repeatExhausted=await source(path);
+ await applied(document,'Undo');assert.equal(await source(path),result.runtime.repeatConversation);
+ // A Choice nested in a condition inside another option owns its own target.
+ promptEditor=await editChoice(conversationId);button('Add option',promptEditor);enter(promptEditor.querySelectorAll('[aria-label="Choice option text"]')[3],'Nested conversation');await applied(promptEditor,'Commit Beat');
+ const nestedOuter=choice().payload.options[3];button('Add Condition',option(nestedOuter.id));panel=document.querySelector('.story-operation[aria-label="Add Condition"]');enter(panel.querySelector('[aria-label="Condition Variable"]'),flagId,'change');enter(panel.querySelector('[aria-label="Condition value"]'),'false','change');await applied(panel,'Create Condition');
+ const repeatBranch=scene().beats.find(b=>b.conditionalBranch&&!b.conditionalBranch.choiceOption);button('Add Beat to If',document.querySelector(`[data-branch-id="${repeatBranch.id}"]`));draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'choice','change');enter(draft.querySelector('[aria-label="Choice option text"]'),'Inner ask');button('Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'Inner leave');await applied(draft,'Add Beat');
+ const repeatInner=scene().beats.find(b=>b.payload.type==='choice'&&b.owner),innerAsk=repeatInner.payload.options[0];promptEditor=await editChoice(repeatInner.id);button('Add a prompt shown with the options',promptEditor);enter(promptEditor.querySelector('[aria-label="Prompt speaker"]'),speaker.id,'change');enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'Inside, ask again?');await applied(promptEditor,'Commit Beat');
+ await addBodyBeat(innerAsk.id,'narration',form=>enter(form.querySelector('textarea'),'Inner answer'));await thenOption(innerAsk.id,'repeatChoice');await addBodyBeat(nestedOuter.id,'narration',form=>enter(form.querySelector('textarea'),'Outer resumed'));result.runtime.repeatNested=await source(path);
+ assert.equal((result.runtime.repeatNested.match(/label _ll_choice_/g)??[]).length,2);const innerRepeat=scene().beats.find(b=>b.payload.type==='repeatChoice'&&b.owner?.branchId===innerAsk.id);assert(innerRepeat);assert((await call('flow.list')).edges.some(e=>e.kind==='repeat'&&e.beatId===innerRepeat.id&&e.destination.beatId===repeatInner.id));
+ const allRepeatIds=scene().beats.map(b=>b.id);button('Close Project');await wait(()=>document.querySelector('.recent-open'));button(document.querySelector('.recent-open').textContent);await wait(()=>document.querySelector('.beat-card'));await settle();assert.deepEqual(scene().beats.map(b=>b.id),allRepeatIds);assert.equal(await source(path),result.runtime.repeatNested);
+ stage('production Repeat preserves preceding Beats and Call, shares one target per Choice, supports no-op/cancel/history/reopen, and exports prompted nested and availability-changing runtime sources');
  result.acceptedSource=await source(path);result.sourceSHA256=hash(result.acceptedSource);result.identities=ids;
  button('Close Project');await wait(()=>document.querySelector('.recent-open'));result.passed=true;
 } catch(error){result.failure={message:error.message,stack:error.stack};result.dom=document.body.innerHTML;throw error;}

@@ -60,7 +60,10 @@ pub(super) enum BodyEdit {
 pub(super) fn transfer(payload: &BeatPayload) -> bool {
     matches!(
         payload,
-        BeatPayload::Call { .. } | BeatPayload::Jump { .. } | BeatPayload::Choice { .. }
+        BeatPayload::Call { .. }
+            | BeatPayload::Jump { .. }
+            | BeatPayload::RepeatChoice { .. }
+            | BeatPayload::Choice { .. }
     )
 }
 pub(super) fn edit_changes_transfers(edit: &BeatEdit) -> bool {
@@ -232,7 +235,66 @@ impl AuthoringService {
                 .map(|target| (id.clone(), target.clone())),
             _ => None,
         };
-        let (proposed, forced) = apply(&source, &beats, edit, &loaded, &scene)?;
+        let mut edit = edit;
+        let mut install_target = None;
+        match &mut edit {
+            BodyEdit::Insert {
+                body,
+                payload: BeatPayload::RepeatChoice { target },
+                ..
+            }
+            | BodyEdit::Update {
+                body,
+                payload: BeatPayload::RepeatChoice { target },
+                ..
+            } => {
+                let menu = choice::owning_menu(&beats, body)?;
+                let existing = choice::target(&source, menu);
+                let selected = existing
+                    .clone()
+                    .unwrap_or_else(|| format!("_ll_choice_{}", uuid::Uuid::new_v4().simple()));
+                if target.as_ref().is_some_and(|t| t != &selected) {
+                    return Err(SceneError::InvariantBlocked);
+                }
+                let labels = self.call_label_inventory(project)?;
+                if labels.get(&selected).copied().unwrap_or(0) != usize::from(existing.is_some()) {
+                    return Err(SceneError::InvariantBlocked);
+                }
+                *target = Some(selected.clone());
+                if existing.is_none() {
+                    install_target = Some((menu, selected));
+                }
+            }
+            _ => {}
+        }
+        let (mut proposed, mut forced) = apply(&source, &beats, edit, &loaded, &scene)?;
+        if let Some((menu, target)) = install_target {
+            let start = menu.byte_start as usize;
+            let indent = indentation(
+                std::str::from_utf8(&source[start..menu.byte_end as usize])
+                    .map_err(|_| SceneError::UnsupportedSource)?,
+            );
+            let newline = if source.windows(2).any(|w| w == b"\r\n") {
+                "\r\n"
+            } else {
+                "\n"
+            };
+            let label = format!("{}label {target}:{newline}", " ".repeat(indent));
+            for (_, _, _, anchor) in &mut forced {
+                if let Some(at) = anchor {
+                    if *at >= start {
+                        *at += label.len();
+                    }
+                }
+            }
+            proposed.splice(start..start, label.bytes());
+            forced.push((
+                "choice".into(),
+                sha256(&proposed[start..menu.byte_end as usize + label.len()]),
+                menu.id.clone(),
+                Some(start),
+            ));
+        }
         logic::validate_conditional_completion(&proposed, &scene, &loaded)?;
         if transfer_edit {
             self.validate_candidate_transfers(
@@ -268,6 +330,7 @@ impl AuthoringService {
             .ok_or(SceneError::InvalidMetadata)? = mapping;
         let mut runtime =
             self.choice_runtime_mutations(project, &next_beats, source != proposed)?;
+        self.validate_choice_targets(project, &source, &proposed, &next_beats)?;
         runtime.extend(vec![
             replace_mutation(&scene.source_path, source, revision, proposed)?,
             replace_mutation(

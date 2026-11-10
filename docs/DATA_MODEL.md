@@ -116,9 +116,9 @@ reuse that branch mapping with `choiceOption: true`; they are not condition node
 children and shared following Beats have disjoint exact source ranges. No second
 saved story document or action-list model exists.
 
-Source-map schema 12 adds versioned per-option availability source to schema 11's
-prompts and schema 10's recursive option bodies and indented condition trivia.
-Migration verifies schema 11 and schema 10 with their frozen
+Source-map schema 13 adds source-owned Repeat targets to schema 12's per-option
+availability, schema 11's prompts and schema 10's recursive option bodies and
+indented condition trivia. Migration verifies schemas 12, 11 and 10 with their frozen
 recognizer, schema 9 with its flat option-body recognizer, and older maps with their
 original recognizers before refinement. A newly recognized prompt joins the menu
 header; absorbed physical records survive in `refinedChildMappings`, including their
@@ -139,8 +139,19 @@ guards, each transfer and the continuation in its actual containing body.
 
 Caption, guard, reorder and option-count edits carry each retained body's exact
 bytes and mapped IDs. New options get new IDs. Then controls edit only the last
-Jump/Return, or its absence for Continue. Source reconciliation refuses ambiguous
+Jump/Repeat/Return, or its absence for Continue. Source reconciliation refuses ambiguous
 movement of children between duplicate-caption option headers.
+
+A Repeat is an ordinary ending transfer in the authoritative option body. The
+source contains `jump _ll_choice_<32 lowercase hex digits>` to a generated label
+immediately before that option's owning menu at the same indentation. The label,
+menu line and optional prompt form one Choice header mapping. The label survives
+ending removal and later reuse; opening, migration and no-op never install one.
+Insertion generates and collision-checks the name through the existing project
+label inventory, then accepts label, ending and map together in shared history.
+Only a direct option of that Choice can author this ending. A nested Choice owns
+its own target; arbitrary labels and general loop editing remain unsupported.
+Ambiguous or colliding targets expose Source fallback and refuse authoring.
 
 Every recognized Beat mapping records a stable UUID, exact source revision, verified
 byte range, exact range hash, and lexical context. The narrow mapper recognizes only

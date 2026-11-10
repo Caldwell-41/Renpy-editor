@@ -142,6 +142,10 @@ pub enum BeatPayload {
         #[serde(default)]
         return_label: Option<String>,
     },
+    RepeatChoice {
+        #[serde(default)]
+        target: Option<String>,
+    },
     Return,
     CustomCode {
         source: String,
@@ -179,6 +183,7 @@ impl BeatPayload {
             Self::Choice { .. } => "choice",
             Self::Jump { .. } => "jump",
             Self::Call { .. } => "call",
+            Self::RepeatChoice { .. } => "repeatChoice",
             Self::Return => "return",
             Self::CustomCode { .. } => "customCode",
         }
@@ -210,7 +215,10 @@ fn opaque_source(beat: &SceneBeat) -> bool {
 }
 
 fn is_terminal_payload(payload: &BeatPayload) -> bool {
-    matches!(payload, BeatPayload::Jump { .. } | BeatPayload::Return)
+    matches!(
+        payload,
+        BeatPayload::Jump { .. } | BeatPayload::RepeatChoice { .. } | BeatPayload::Return
+    )
 }
 
 /// A line displayed in the menu interaction, never an option-body Beat.
@@ -796,6 +804,20 @@ impl AuthoringService {
                     {
                         beat.protected = true;
                         beat.source_fallback = Some("Choice template or availability adapter is missing, unsupported or has pending Source edits. Edit in Source.".into());
+                    }
+                }
+            }
+            if self
+                .validate_choice_targets(project, &bytes, &bytes, &beats)
+                .is_err()
+            {
+                for beat in &mut beats {
+                    if matches!(
+                        beat.payload,
+                        BeatPayload::Choice { .. } | BeatPayload::RepeatChoice { .. }
+                    ) {
+                        beat.protected = true;
+                        beat.source_fallback = Some("Choice target ownership is ambiguous, colliding or cannot be verified. Edit in Source.".into());
                     }
                 }
             }
@@ -2345,6 +2367,7 @@ impl AuthoringService {
             .ok_or(SceneError::InvalidMetadata)? = new_mapping;
         let mut runtime =
             self.choice_runtime_mutations(project, &next_beats, source_bytes != proposed_source)?;
+        self.validate_choice_targets(project, &source_bytes, &proposed_source, &next_beats)?;
         runtime.extend(vec![
             replace_mutation(
                 &scene.source_path,
@@ -2697,6 +2720,18 @@ fn apply_beat_edit(
     edit: BeatEdit,
     loaded: &Loaded,
 ) -> Result<(Vec<u8>, Vec<ForcedBeatId>), SceneError> {
+    if matches!(
+        &edit,
+        BeatEdit::Insert {
+            payload: BeatPayload::RepeatChoice { .. },
+            ..
+        } | BeatEdit::Update {
+            payload: BeatPayload::RepeatChoice { .. },
+            ..
+        }
+    ) {
+        return Err(SceneError::InvariantBlocked);
+    }
     if beats
         .iter()
         .take(beats.len().saturating_sub(1))
@@ -3375,6 +3410,13 @@ fn render_payload(
         BeatPayload::ShowScreen { target, .. } => format!("    show screen {}", target.source_name),
         BeatPayload::HideScreen { target, .. } => format!("    hide screen {}", target.source_name),
         BeatPayload::CallScreen { target, .. } => format!("    call screen {}", target.source_name),
+        BeatPayload::RepeatChoice { target } => format!(
+            "    jump {}",
+            target
+                .as_deref()
+                .filter(|t| choice::valid_target(t))
+                .ok_or(SceneError::InvalidPayload)?
+        ),
         BeatPayload::Return => "    return".into(),
         BeatPayload::CustomCode { .. } => return Err(SceneError::InvalidPayload),
     };
@@ -3482,6 +3524,11 @@ fn validate_payload(payload: &BeatPayload, loaded: &Loaded) -> Result<(), SceneE
             asset(loaded, asset_id, AssetKind::Sfx)?;
         }
         BeatPayload::StopMusic | BeatPayload::Transition { .. } | BeatPayload::Return => {}
+        BeatPayload::RepeatChoice { target } => {
+            if target.as_deref().is_none_or(|t| !choice::valid_target(t)) {
+                return Err(SceneError::InvalidPayload);
+            }
+        }
         BeatPayload::CustomCode { .. } => return Err(SceneError::InvalidPayload),
     }
     Ok(())

@@ -11,7 +11,18 @@ pub(super) fn parse(
     depth: usize,
     source_version: u32,
 ) -> Option<(usize, Vec<ParsedBeat>)> {
-    let (start, end, line) = lines[index];
+    let (start, _, first_line) = lines[index];
+    let target = (source_version >= 13)
+        .then(|| target_line(first_line))
+        .flatten();
+    if target.is_some() && indentation(first_line) != indent {
+        return None;
+    }
+    let menu_index = index + usize::from(target.is_some());
+    let (menu_start, end, line) = *lines.get(menu_index)?;
+    if !lexical.contains(&menu_start) {
+        return None;
+    }
     if source_version >= 10 && depth >= MAX_CONDITION_NESTING
         || !lexical.contains(&start)
         || (line != format!("{}menu:", " ".repeat(indent))
@@ -24,7 +35,7 @@ pub(super) fn parse(
     let semantic = line.trim() == "menu (screen=\"_ll_choice_v1\"):";
     let mut guards = Vec::new();
     let mut disabled_guards = Vec::new();
-    let mut next = index + 1;
+    let mut next = menu_index + 1;
     let mut header_end = end;
     let mut prompt = None;
     if source_version >= 11 {
@@ -140,7 +151,15 @@ pub(super) fn parse(
             let payload = if trivia || !lexical.contains(&child_start) {
                 None
             } else {
-                parse_line_version(code, loaded, true)
+                if let Some(target) =
+                    target.filter(|target| code.trim() == format!("jump {target}"))
+                {
+                    Some(BeatPayload::RepeatChoice {
+                        target: Some(target.into()),
+                    })
+                } else {
+                    parse_line_version(code, loaded, true)
+                }
             };
             let payload = payload.unwrap_or_else(|| custom(child_start, child_end, line).payload);
             result.push(ParsedBeat {
@@ -259,10 +278,21 @@ pub(super) fn update(
             .map_err(|_| SceneError::UnsupportedSource)?,
     );
     let original_header = &source[beat.byte_start as usize..beat.byte_end as usize];
-    let menu_end = original_header
-        .iter()
-        .position(|b| *b == b'\n')
-        .map_or(original_header.len(), |p| p + 1);
+    let label_end = std::str::from_utf8(original_header)
+        .ok()
+        .and_then(|s| s.lines().next())
+        .and_then(target_line)
+        .map_or(0, |_| {
+            original_header
+                .iter()
+                .position(|b| *b == b'\n')
+                .map_or(original_header.len(), |p| p + 1)
+        });
+    let menu_end = label_end
+        + original_header[label_end..]
+            .iter()
+            .position(|b| *b == b'\n')
+            .map_or(original_header.len() - label_end, |p| p + 1);
     let semantic = options
         .iter()
         .any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled);
@@ -272,7 +302,11 @@ pub(super) fn update(
     let mut rendered = if semantic == was_semantic {
         original_header[..menu_end].to_vec()
     } else {
-        format!("{}{}{newline}", " ".repeat(indent), menu_header(options)).into_bytes()
+        let mut header = original_header[..label_end].to_vec();
+        header.extend_from_slice(
+            format!("{}{}{newline}", " ".repeat(indent), menu_header(options)).as_bytes(),
+        );
+        header
     };
     match (previous_prompt.as_ref(), prompt) {
         (Some(old), Some(next)) if old == next => {
@@ -702,5 +736,90 @@ impl AuthoringService {
             )?);
         }
         Ok(mutations)
+    }
+}
+
+/// Reserved, versioned menu targets are source-owned, never an arbitrary-label editor.
+pub(super) fn valid_target(target: &str) -> bool {
+    target.strip_prefix("_ll_choice_").is_some_and(|id| {
+        id.len() == 32
+            && id
+                .bytes()
+                .all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase())
+    })
+}
+pub(super) fn target_line(line: &str) -> Option<&str> {
+    line.trim()
+        .strip_prefix("label ")
+        .and_then(|s| s.strip_suffix(':'))
+        .filter(|t| valid_target(t))
+}
+pub(super) fn target(source: &[u8], beat: &SceneBeat) -> Option<String> {
+    target_line(
+        std::str::from_utf8(&source[beat.byte_start as usize..beat.byte_end as usize])
+            .ok()?
+            .lines()
+            .next()?,
+    )
+    .map(str::to_owned)
+}
+pub(super) fn owning_menu<'a>(
+    beats: &'a [SceneBeat],
+    body: &BodyRef,
+) -> Result<&'a SceneBeat, SceneError> {
+    let BodyRef::Branch {
+        group_id,
+        branch_id,
+    } = body
+    else {
+        return Err(SceneError::InvariantBlocked);
+    };
+    let header = beats
+        .iter()
+        .find(|b| {
+            b.id == *branch_id
+                && b.conditional_branch
+                    .as_ref()
+                    .is_some_and(|g| g.choice_option && g.group_id == *group_id)
+        })
+        .ok_or(SceneError::InvariantBlocked)?;
+    beats.iter().find(|b| matches!(&b.payload, BeatPayload::Choice { options, .. } if options.iter().any(|o| o.id.as_ref() == Some(&header.id)))).ok_or(SceneError::InvariantBlocked)
+}
+
+impl AuthoringService {
+    /// Check reserved targets through the same project label inventory as stable
+    /// Call continuations. Never repair source on open.
+    pub(super) fn validate_choice_targets(
+        &self,
+        project: &ProjectId,
+        original: &[u8],
+        candidate: &[u8],
+        beats: &[SceneBeat],
+    ) -> Result<(), SceneError> {
+        let targets: Vec<_> = beats
+            .iter()
+            .filter(|b| matches!(b.payload, BeatPayload::Choice { .. }))
+            .filter_map(|b| target(candidate, b))
+            .collect();
+        if targets.is_empty() {
+            return Ok(());
+        }
+        let labels = self.call_label_inventory(project)?;
+        let original_text =
+            std::str::from_utf8(original).map_err(|_| SceneError::UnsupportedSource)?;
+        let original_targets: Vec<_> = original_text.lines().filter_map(target_line).collect();
+        let mut seen = HashSet::new();
+        for target in targets {
+            if !seen.insert(target.clone())
+                || labels.get(&target).copied().unwrap_or(0)
+                    != usize::from(original_targets.contains(&target.as_str()))
+            {
+                return Err(SceneError::InvariantBlocked);
+            }
+        }
+        // A moved Repeat must still parse as a Repeat of its own Choice. Opaque
+        // reserved jumps cannot be introduced by structural authoring.
+        if beats.iter().any(|b| matches!(&b.payload, BeatPayload::CustomCode { source, .. } if logic::without_comment(source).trim().starts_with("jump _ll_choice_"))) { return Err(SceneError::InvariantBlocked); }
+        Ok(())
     }
 }

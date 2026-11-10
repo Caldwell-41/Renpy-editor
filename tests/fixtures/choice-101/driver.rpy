@@ -6,6 +6,7 @@ define config.save_directory = None
 define config.default_text_cps = 0
 
 default choice_flag = False
+default choice_visits = 0
 
 init python:
     # The menu resets store variables after an uncaught Return. Observe the
@@ -21,7 +22,7 @@ init python:
         # no dialogue-advance focus, so inspect the displayed say widget itself.
         say = renpy.get_screen("say")
         widget = renpy.get_displayable("say", "what")
-        if say is None or widget is None or renpy.get_screen("choice") is None:
+        if say is None or widget is None or (renpy.get_screen("choice") is None and renpy.get_screen("_ll_choice_v1") is None):
             return False
         rendered = renpy.test.testfocus.focus_from_displayable(widget)
         return (say.scope["who"] == who and say.scope["what"] == what
@@ -347,4 +348,99 @@ testsuite choice_body:
         keysym "K_RETURN"
         assert screen "choice_body_main_menu" timeout 10
         $ print("CHOICE_104_HIDDEN picks=0 bodies=0 shared=1", flush=True)
+        exit
+
+    testcase repeat_conversation:
+        assert screen "choice_body_main_menu" timeout 10
+        click "Start"
+        assert screen "_ll_choice_v1" timeout 10
+        assert eval (_choice103_visible_prompt(None, "What would you like to ask?")) timeout 10
+        assert eval (choice_visits == 1 and not choice_flag and renpy.test.testfocus.find_focus("Ask about the ticket", False) is None)
+        $ renpy._choice105_stack = len(renpy.game.context().return_stack)
+        click "Ask about the station"
+        assert "Station answer" timeout 10
+        advance
+        assert "Transferred" timeout 10
+        advance
+        assert "Station call resumed" timeout 10
+        advance
+        assert screen "_ll_choice_v1" timeout 10
+        assert eval (_choice103_visible_prompt(None, "What would you like to ask?")) timeout 10
+        assert eval (choice_visits == 1 and choice_flag and len(renpy.game.context().return_stack) == renpy._choice105_stack)
+        assert "Ask about the ticket" timeout 10
+        click "Ask about the ticket"
+        assert "Ticket answer" timeout 10
+        advance
+        assert screen "_ll_choice_v1" timeout 10
+        assert eval (_choice103_visible_prompt(None, "What would you like to ask?")) timeout 10
+        click "Ask about the station"
+        assert "Station answer" timeout 10
+        advance
+        assert "Transferred" timeout 10
+        advance
+        assert "Station call resumed" timeout 10
+        advance
+        assert screen "_ll_choice_v1" timeout 10
+        assert eval (choice_visits == 1 and len(renpy.game.context().return_stack) == renpy._choice105_stack)
+        click "Leave"
+        assert "Shared once" timeout 10
+        assert eval (choice_visits == 1 and choice_flag)
+        keysym "K_RETURN"
+        assert screen "choice_body_main_menu" timeout 10
+        $ print("CHOICE_105_REPEAT earlier=once prompt=again availability=changed call=resumed stack=stable shared=1", flush=True)
+        exit
+
+    testcase repeat_exhausted:
+        assert screen "choice_body_main_menu" timeout 10
+        click "Start"
+        assert screen "_ll_choice_v1" timeout 10
+        click "Ask about the station"
+        assert "Station answer" timeout 10
+        advance
+        assert "Transferred" timeout 10
+        advance
+        assert "Station call resumed" timeout 10
+        advance
+        assert "Shared once" timeout 10
+        assert eval (choice_visits == 1 and choice_flag and renpy.get_screen("_ll_choice_v1") is None)
+        keysym "K_RETURN"
+        assert screen "choice_body_main_menu" timeout 10
+        $ print("CHOICE_105_EXHAUSTED gate=reevaluated earlier=once shared=1", flush=True)
+        exit
+
+    testcase repeat_nested:
+        assert screen "choice_body_main_menu" timeout 10
+        click "Start"
+        assert screen "_ll_choice_v1" timeout 10
+        click "Nested conversation"
+        assert screen "choice" timeout 10
+        assert eval (_choice103_visible_prompt("Bec", "Inside, ask again?")) timeout 10
+        $ renpy._choice105_stack = len(renpy.game.context().return_stack)
+        click "Inner ask"
+        assert "Inner answer" timeout 10
+        advance
+        assert screen "choice" timeout 10
+        assert eval (_choice103_visible_prompt("Bec", "Inside, ask again?")) timeout 10
+        assert eval (renpy.test.testfocus.find_focus("Nested conversation", False) is None and choice_visits == 1)
+        click "Inner ask"
+        assert "Inner answer" timeout 10
+        advance
+        assert screen "choice" timeout 10
+        assert eval (len(renpy.game.context().return_stack) == renpy._choice105_stack)
+        click "Inner leave"
+        assert "Outer resumed" timeout 10
+        advance
+        assert "Shared once" timeout 10
+        assert eval (choice_visits == 1 and not choice_flag)
+        keysym "K_RETURN"
+        assert screen "choice_body_main_menu" timeout 10
+        $ print("CHOICE_105_NESTED owner=inner character=again outer=resumed earlier=once shared=1", flush=True)
+        exit
+
+    testcase repeat_wrong_outcome:
+        assert screen "choice_body_main_menu" timeout 10
+        click "Start"
+        assert screen "_ll_choice_v1" timeout 10
+        assert eval (choice_visits == 2) timeout 1
+        $ print("CHOICE_105_WRONG_ACCEPTED", flush=True)
         exit

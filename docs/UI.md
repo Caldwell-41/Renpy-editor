@@ -582,8 +582,13 @@ disabled. Commit/Cancel and refused drafts use the same existing Beat editor.
 The inert preview labels availability as unknown and names the false-condition
 policy; it does not infer values or allow game selection. Editing focus remains
 separate from game sensitivity and picked state. Unsupported runtime templates
-show a protected Source fallback reason. Repeat and Picked options remain later
-#98 slices. The
+show a protected Source fallback reason. #105 adds Repeat this Choice to Then.
+It edits the same ending Beat, preserves earlier Beats, and revisits the owning
+menu with its prompt and reevaluated availability. Continue removes only the ending;
+Return retains its caller-sensitive meaning. Cancel and refused drafts retain the
+existing draft protections; accepted edits use shared Undo/Redo and reopen. Nested
+Choices own separate Repeat targets. Preview describes Repeat without executing it
+or inventing current values. Picked options remains the later #106 slice. The
 full Combined layout and palette remain with #110. Arithmetic uses the accepted
 shared controls.
 Until a capability exists, the editor says it is not built instead of showing a

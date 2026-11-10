@@ -440,6 +440,19 @@ adapter bytes, duplicate declarations and native menu-filter overrides refuse th
 semantic integration. Existing affected Choices expose a protected Source fallback
 with a reason. Unknown guards, nested bodies, Calls and optional prompts preserve
 their source. This is not #31/#55's styling/canvas adapter or their acceptance.
+Repeat uses this same native menu and availability owner. The existing explicit-body
+command inserts or replaces only the ending transfer. It adds a collision-checked
+`_ll_choice_` label to the owning menu header when needed. Schema 13 recognizes that
+label and its menu as one disjoint header, preserving the Choice and option UUIDs.
+A source jump parses as Repeat only within that menu's own direct option body.
+The target precedes both prompt display and the native availability gate. Repeating
+reevaluates availability, including no-selectable continuation, without replaying
+preceding Scene effects or adding Call frames. Calls retain their stable `from`
+labels and resume inside the option before its Repeat. Nested menus use their own
+targets. Branches projects a body route to the exact owning Choice header; collisions
+produce an unknown route and protected Story fallback. Preview never follows a loop
+or claims current availability. There is no independent ending or picked-history store.
+
 Later picked-option policy must extend this availability owner and native actions.
 No project Python runs during inspection, authoring or illustrative preview.
 
