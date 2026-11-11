@@ -1152,8 +1152,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   project variable. The standalone SDK game declared a different fixture variable.
   Select the declared variable through the real control before freezing the source.
 - **Regression:** the [controller journey](../../app/tests/choice-body-core.dispatch.mjs)
-  selects `choice_flag`; [offline admission](../../app/scripts/qualify-choice-body.py)
-  requires its expected typed condition before reserving an SDK invocation.
+  selects `choice_flag`. The retired [offline admission](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/app/scripts/qualify-choice-body.py)
+  required its expected typed condition before reserving an SDK invocation.
 - **Evidence:** [Choice #102](https://github.com/Caldwell-41/Renpy-editor/issues/102)
   owns the requirement. Producing-host logs retain the failed play, successful
   compile/lint children and cleanup separately from the corrected candidate.
@@ -1188,7 +1188,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   in the rollback/New Game child. The `vbox` correction has no SDK qualification;
   rollback and New Game remain pending. No timeout was raised or failure waived.
 - **Evidence:** [#106](https://github.com/Caldwell-41/Renpy-editor/issues/106), the
-  producing-host handoff and the [retained driver](../../tests/fixtures/choice-101/driver.rpy).
+  producing-host handoff and the [archived driver](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/tests/fixtures/choice-101/driver.rpy).
 
 
 ## H84. Browser/native probes must follow the current UI owner
