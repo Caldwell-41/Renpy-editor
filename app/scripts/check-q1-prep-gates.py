@@ -65,17 +65,20 @@ def join_shell_continuations(text):
 
 
 def workflow_python_ok(workflow):
-    # Job env is evaluated before a runner exists. Keep this focused contract
-    # separate from actionlint's independent YAML/expression-context validation.
-    selection = "      Q1_PYTHON: ${{ matrix.runner == 'windows-2025' && 'python' || 'python3' }}"
-    assignments = re.findall(r"^[ \t]*Q1_PYTHON:.*$", workflow, re.MULTILINE)
+    # Job env is evaluated before a runner exists, so it selects Python from the
+    # matrix runner or a literal. Keep this focused contract separate from
+    # actionlint's independent YAML/expression-context validation.
+    selections = {
+        "${{ matrix.runner == 'windows-2025' && 'python' || 'python3' }}", "python", "python3",
+    }
+    assignments = re.findall(r"^([ \t]*)Q1_PYTHON: (.*)$", workflow, re.MULTILINE)
     helper_calls = re.findall(
         r'^\s*(?:run: )?(.*?)\s+scripts/(?:check-q1-prep-gates|retain-q1-package)\.py\b',
         workflow, re.MULTILINE,
     )
     return (
-        assignments == [selection]
-        and "    env:\n" + selection in workflow
+        bool(assignments)
+        and all(indent == "      " and value in selections for indent, value in assignments)
         and bool(helper_calls)
         and all(command == '"$Q1_PYTHON"' for command in helper_calls)
     )
@@ -85,6 +88,7 @@ def source_audit(repo):
     transaction = (repo / "app/src-core/src/transaction/tests.rs").read_text(encoding="utf-8")
     lifecycle = (repo / "app/src-core/src/lifecycle.rs").read_text(encoding="utf-8")
     production = (repo / ".github/workflows/production-scaffold.yml").read_text(encoding="utf-8")
+    core_suite = (repo / "app/scripts/test-core.mjs").read_text(encoding="utf-8")
     quality = (repo / ".github/workflows/quality.yml").read_text(encoding="utf-8")
     prepared = (repo / "app/scripts/run-runtime-ui-probes.py").read_text(encoding="utf-8")
     retainer = (repo / "app/scripts/retain-q1-package.py").read_text(encoding="utf-8")
@@ -116,12 +120,16 @@ def source_audit(repo):
         "lifecycle::tests::official_sdk_phase_1c_target_gate",
         "renpy::reconciliation_tests::official_sdk_download_handoff_target_gate",
     )
+    for selector in exclusions:
+        if core_suite.count(f"'{selector}'") != 1:
+            return False, f"core suite skip mismatch: {selector}"
     for workflow_name, workflow in (("production", production), ("quality", quality)):
         if not workflow_python_ok(workflow):
-            return False, f"{workflow_name} Q1 helpers require matrix-selected job env Python and quoted helper calls"
-        for selector in exclusions:
-            if workflow.count("--skip " + selector) != 1:
-                return False, f"{workflow_name} selector mismatch: {selector}"
+            return False, f"{workflow_name} Q1 helpers require job env Python and quoted helper calls"
+        if "npm run test:core -- --release" not in workflow or any(
+            "--skip " + selector in workflow for selector in exclusions
+        ):
+            return False, f"{workflow_name} must run the core suite through npm run test:core"
         flow_command = "cargo test -p loomlight-core --release --locked scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges"
         if workflow.count(flow_command) != 1:
             return False, f"{workflow_name} must select G1-U2 exactly once"
@@ -174,12 +182,13 @@ def self_test():
     )
     assert workflow_python_ok(portable)
     assert not workflow_python_ok(portable.replace('"$Q1_PYTHON"', 'python'))
-    assert not workflow_python_ok(portable.split('\n', 1)[1])
+    assert not workflow_python_ok(portable.split('\n', 2)[2])
     # Reproduce the exact expression GitHub rejected before creating a Q1 run.
     assert not workflow_python_ok(portable.replace("matrix.runner == 'windows-2025'", "runner.os == 'Windows'"))
     assert not workflow_python_ok(portable.replace("'windows-2025'", "'macos-26'"))
     assert not workflow_python_ok(portable.replace("      Q1_PYTHON:", "          Q1_PYTHON:"))
-    assert not workflow_python_ok(portable + "      Q1_PYTHON: python\n")
+    assert workflow_python_ok(portable + "      Q1_PYTHON: python\n")
+    assert not workflow_python_ok(portable + "      Q1_PYTHON: py\n")
     selector = "lifecycle::tests::official_sdk_phase_1c_target_gate -- --exact"
     multiline = (
         "cargo test -p loomlight-core --release --locked "

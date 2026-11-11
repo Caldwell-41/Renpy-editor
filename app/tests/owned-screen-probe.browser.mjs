@@ -1,4 +1,4 @@
-// fixture: skip run by screens-source.yml.
+// fixture: skip manual: runs only in the screens-source.yml dispatch.
 // Rehearse the exact packaged controller against real core services; no native claim.
 import assert from 'node:assert/strict';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';

@@ -14,10 +14,12 @@ unavailable comparisons, unknown paths and empty diffs select code checks. Main
 pushes always select them. The job summary records the selection; the job itself
 is never skipped. Required manual qualifications remain selected by the plan.
 
-Code checks run `npm run check`, production frontend build, Rust formatting,
-offline Help admission tests, five Help/core filters and the Dialog controller/core
-journey. They use pinned tooling, build no native application or package and start
-no SDK. Help remains selected for all code changes because it exercises shared
+Code checks run `npm run check`, the production frontend build, Rust formatting,
+the offline Help admission tests, the broad core suite (`npm run test:core`), the
+Dialog controller/core journey, `test:fixtures`, `test:source-browser` and the
+Branches browser workload on the real-service flow fixture. They run on
+`ubuntu-latest` with pinned tooling, build no native application or package and
+start no SDK. Windows and Mac coverage comes from the manual workflows. Help remains selected for all code changes because it exercises shared
 controllers and core services. Failure diagnostics keep their existing ownership.
 
 ## Inexpensive harness checks
@@ -151,15 +153,18 @@ cargo test -p loomlight-core --locked --lib <affected-scope> -- --nocapture
 cargo test -p loomlight-desktop --locked --bin loomlight <affected-scope> -- --nocapture
 ```
 
-For coherent routine broad-core qualification, use the existing exclusions:
+For the broad core suite, run the same command as PR CI and the Phase 1 production
+gates. From `app/`:
 
 ```bash
-cargo test -p loomlight-core --release --locked -- \
-  --skip scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges \
-  --skip lifecycle::tests::official_sdk_phase_1c_target_gate \
-  --skip renpy::reconciliation_tests::official_sdk_download_handoff_target_gate \
-  --nocapture
+npm run test:core              # PR CI profile
+npm run test:core -- --release # production-gate profile
 ```
+
+[`scripts/test-core.mjs`](../../app/scripts/test-core.mjs) owns the exact skips.
+Options after `--` go to Cargo. Gate the output with `cargo-log`. The transport
+tests need loopback sockets, so a sandbox that blocks them reports false failures.
+Unset the SDK archive variables first, as CI has none.
 
 Run the observed-flow fixture separately when selected, with enforced budgets.
 SDK-backed tests require the verified archive and exact selector described in the

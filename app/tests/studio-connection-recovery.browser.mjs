@@ -1,4 +1,4 @@
-// fixture: skip run by studio-connection-native.yml.
+// fixture: skip manual: runs only in the studio-connection-native.yml dispatch.
 /** Real rendered Settings/probe/close-guard integration. Synthetic IPC is not native proof. */
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';

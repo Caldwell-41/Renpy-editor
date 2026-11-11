@@ -63,13 +63,15 @@ jobs:
     if: ${{ !inputs.validation_dummy && (github.event_name == 'pull_request' || github.event_name == 'push') }}
     name: Frontend tests and Rust formatting
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: app
     env:
       HARNESS_PYTHON: python3
+      Q1_PYTHON: python3
       CARGO_TERM_COLOR: never
+      RUSTUP_TOOLCHAIN: 1.90.0
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -102,7 +104,7 @@ jobs:
         if: ${{ !cancelled() && steps.scope.outputs.code == 'true' }}
         run: |
           rustup toolchain install 1.90.0 --profile minimal --component rustfmt
-          cargo +1.90.0 fmt --check --all
+          cargo fmt --check --all
       - name: Run offline Help evidence admission gates
         if: ${{ !cancelled() && steps.scope.outputs.code == 'true' }}
         run: |
@@ -116,21 +118,19 @@ jobs:
           key: help-offline-core
           workspaces: app -> target
           cache-bin: 'false'
-      - name: Check authoring fixtures, Help, references and fractional geometry without SDK execution
+      - name: Run the broad core suite without SDK execution
         if: ${{ !cancelled() && steps.scope.outputs.code == 'true' }}
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/help-offline"
-          for filter in scene::logic::dialog_tests screens::tests::references screens::canvas::tests::base_help_fidelity_exports_typed_assets_styles_and_exact_source_without_execution screens::canvas::tests::helper_accounting_reserves_failed_initial_and_replacement_owner_attempts_offline lifecycle::canvas_tests::canvas_status_preserves_helper_fractional_geometry lifecycle::acceptance::phase1h_authored_sources_match_manifest_without_sdk; do
-            cargo +1.90.0 test -p loomlight-core --locked --message-format=json-render-diagnostics --lib "$filter" -- --nocapture 2>&1 | tee -a "$RUNNER_TEMP/help-offline/core-artifacts.jsonl" | tee "$RUNNER_TEMP/help-offline/${filter//::/-}.log"
-            grep -Eq '^test result: ok\. [1-9][0-9]* passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/help-offline/${filter//::/-}.log"
-          done
+          npm run test:core -- --message-format=json-render-diagnostics 2>&1 | tee "$RUNNER_TEMP/help-offline/core-artifacts.jsonl"
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/help-offline/core-artifacts.jsonl"
       - name: Exercise Dialog controllers through production core
         if: ${{ !cancelled() && steps.scope.outputs.code == 'true' }}
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/help-offline"
-          cargo +1.90.0 build -p loomlight-core --locked --example help-controller-driver --message-format=json-render-diagnostics 2>&1 | tee "$RUNNER_TEMP/help-offline/controller-artifacts.jsonl"
+          cargo build -p loomlight-core --locked --example help-controller-driver --message-format=json-render-diagnostics 2>&1 | tee "$RUNNER_TEMP/help-offline/controller-artifacts.jsonl"
           DIALOG_CORE_UI_OUTPUT="$RUNNER_TEMP/help-offline/controller" node tests/screen-dialog-core.dispatch.mjs
       - name: Run browser and dispatch fixtures
         if: ${{ !cancelled() && steps.scope.outputs.code == 'true' }}
@@ -139,9 +139,21 @@ jobs:
           if [ -f tests/story-arithmetic.browser.mjs ]; then
             git fetch --no-tags --depth=1 origin 6ecf64704044a6fee9fc4ee6b3a54985d84b9b10
           fi
-          cargo +1.90.0 build -p loomlight-core --locked --examples
+          cargo build -p loomlight-core --locked --examples
           # The Help failure step seals, scans and uploads this folder.
           FIXTURE_OUTPUT="$RUNNER_TEMP/help-offline/fixtures" npm run test:fixtures
+      - name: Run Source Save real-browser regressions
+        if: ${{ !cancelled() && steps.scope.outputs.code == 'true' }}
+        run: npm run test:source-browser
+      - name: Run Branches browser workload on the real-service flow fixture
+        if: ${{ !cancelled() && steps.scope.outputs.code == 'true' }}
+        env:
+          LOOMLIGHT_FLOW_EVIDENCE: ${{ runner.temp }}/help-offline/runtime-flow.json
+        run: |
+          set -euo pipefail
+          cargo test -p loomlight-core --locked --lib scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges -- --exact 2>&1 | tee "$RUNNER_TEMP/help-offline/flow-fixture.log"
+          "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/help-offline/flow-fixture.log"
+          node tests/branches.browser.mjs
       - name: Seal and scan failed Help diagnostics and producing executables
         id: help_privacy
         if: ${{ steps.scope.outputs.code == 'true' && failure() }}
@@ -319,11 +331,7 @@ jobs:
           "$Q1_PYTHON" --version
           npm ci --ignore-scripts
           npm run check 2>&1 | tee "$RUNNER_TEMP/observed-ui.log"
-          cargo test -p loomlight-core --release --locked -- \
-            --skip scene::tests::flow_observed_budget_fixture_500_scenes_2000_edges \
-            --skip lifecycle::tests::official_sdk_phase_1c_target_gate \
-            --skip renpy::reconciliation_tests::official_sdk_download_handoff_target_gate \
-            --exact --nocapture 2>&1 | tee "$RUNNER_TEMP/observed-core.log"
+          npm run test:core -- --release 2>&1 | tee "$RUNNER_TEMP/observed-core.log"
           "$Q1_PYTHON" scripts/check-q1-prep-gates.py cargo-log "$RUNNER_TEMP/observed-core.log"
       - name: Three isolated real-service observed-flow samples
         if: ${{ !inputs.phase1g_candidate_proof }}

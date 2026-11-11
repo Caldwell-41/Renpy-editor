@@ -1,4 +1,4 @@
-// fixture: skip run by screens-source.yml.
+// fixture: skip manual: runs only in the screens-source.yml dispatch.
 // Probe controller rehearsal only. Real authoring core, fake runtime, no SDK/native claim.
 import assert from 'node:assert/strict';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';

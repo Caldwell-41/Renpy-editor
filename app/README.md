@@ -13,7 +13,7 @@ npm ci --ignore-scripts
 npm run check
 npm run build
 cargo fmt --check --all
-cargo test -p loomlight-core --locked
+npm run test:core
 ```
 
 Full desktop tests and packaging require a supported Windows x86-64 or macOS Apple
@@ -95,9 +95,9 @@ Neither an environment variable nor a command-line selector can override that pi
 Change it only after explicit approval and inspection of the certificate; never store
 a key there. The pin records the selected identity, not successful package qualification.
 Debug unit tests need no certificate. Windows signing/packaging is unchanged.
-Unconfigured Mac CI release/package jobs fail closed: verify that the approved identity
-is available before selecting such a job. [CI routing authority](../docs/TESTING.md#test-host-routing)
-permits focused checks within the selected outcome; it does not authorize secret
+Hosted CI has no Mac package job: its runners lack the approved identity, so a Mac
+release build there fails closed. Build Mac packages on the local signed route below.
+[CI routing authority](../docs/TESTING.md#test-host-routing) permits focused checks within the selected outcome; it does not authorize secret
 provisioning, certificate export, trust/ACL changes or a signing-policy bypass.
 
 After separate approval for certificate setup and for a package build, use an existing
