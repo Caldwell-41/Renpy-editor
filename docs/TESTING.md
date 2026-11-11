@@ -124,8 +124,9 @@ selected runs, jobs and retained evidence have been audited.
 1. Record the workflow, run ID, attempt, head SHA and branch in a PR comment before
    waiting. A dispatch without a confirmed run is unconfirmed; resolve it before
    dispatching again.
-2. In T3, register the PR watcher after publishing and end the turn. Otherwise,
-   end the turn and resume when the user returns. Do not poll.
+2. In T3, register the PR watcher after publishing and end the turn. In Codex
+   desktop, use the installed `ci-watch` skill for the exact run. If neither route
+   is confirmed to work, end the turn and resume when the user returns. Do not poll.
 3. On resume, read the recorded run and its terminal status. A watcher event is a
    cue to inspect CI, not proof of success. If it is still pending, wait again. If
    it is terminal, audit the required jobs, artifacts and identity. Missing,
