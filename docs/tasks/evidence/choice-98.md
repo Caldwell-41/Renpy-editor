@@ -1745,3 +1745,38 @@ run `42966320960`, attempt 1: all four executed jobs, 399 frontend tests and all
 18 selected fixtures. Five unselected jobs skipped. Combined validation remains
 pending for unstarted selected package qualification at that head. Final CI
 receipts belong on #98; do not create a successor solely to record its own SHA.
+
+## Closeout review and final campaign
+
+Kris approved the closeout route on 2026-11-11 in the
+[closeout receipt](https://github.com/Caldwell-41/Renpy-editor/issues/98#issuecomment-6789436342).
+The native/human session is waived for #98. The forced 40 ms Windows TLS re-check
+is dropped; the next Windows package run executes the corrected test in its core suite.
+Merge and issue closure wait for Kris after a two-axis review.
+
+The SUNDOWN cleanup restored `ai_request.rs` through the experiment's own restore
+step. Its hash matches the recorded original, all 1,932 tracked files match the
+snapshot, both protected checkouts are unchanged and no owned process remained.
+The forced verification never ran. Its cleanup report stays with the private evidence.
+
+A two-axis review of `63221b44...fbb49c8e` found no documented-standard breach.
+The Spec axis found one regression: every new Story Choice used the picked helper,
+so a project with a customised `screen choice` could not add any Choice. A new Show
+normally Choice without Show disabled options now writes the plain native menu when
+the helper cannot be adopted; dirty Source and Mark/Hide adoption still refuse. A
+public-command test reproduced the refusal and now passes. Behaviour-preserving
+cleanups merged duplicated runtime checks, guard and colon helpers, a group predicate
+and renderer helpers, removed dead code and fixed a tautological assertion.
+
+Kept as reviewed: the deliberate refusal of edits in a Scene whose helper or template
+is unsupported, frozen recognizers for schemas 9–13, the parse-time option offset,
+conservative whole-file menu-override checks and the lock that appears only with the
+picked helper. The incident fixes for canvas shutdown, smoke delivery and TLS
+readiness stay in this PR because they unblock its package gates.
+
+On `fbb49c8e`, debug core passes 695 tests with 63 ignored, and 399 frontend tests
+and typecheck pass. The final campaign is one hosted Windows dispatch with
+`windows_only` and one local signed Mac run. Core code changed after `2997c202`,
+so the Mac run repeats its full gate list within the same single start. Ceilings
+are Mac 21 and Windows 12, with one retry per target only after a diagnosed,
+corrected failure.
