@@ -1,12 +1,4 @@
 setTimeout(async () => {
-  // The desktop injects this probe once its permission window reports, which can
-  // precede the shell's first render. Wait, bounded, for the Welcome shell; if it
-  // never appears, the lifecycle observations below fail as before.
-  const shellReady = () => typeof window.__loomlightInstallSmokeRequester === "function"
-    && [...document.querySelectorAll("button")].some((button) => button.textContent === "Open Loomlight Project");
-  for (const deadline = performance.now() + 15000; !shellReady() && performance.now() < deadline;) {
-    await new Promise((resolve) => setTimeout(resolve, 50));
-  }
   const invoke = window.__TAURI_INTERNALS__.invoke;
   // These probe observations can contend with normal shell reads. RUNTIME_BUSY
   // refuses before dispatch, so retry delivery through the existing bounded helper.
@@ -284,7 +276,12 @@ setTimeout(async () => {
     const click = (label, scope = document.querySelector('[aria-modal="true"]') ?? document) => {
       if (!scope) throw new Error(`Missing control owner for ${label}`);
       const targets = [...scope.querySelectorAll("button")].filter((item) => (item.textContent === label || item.getAttribute("aria-label") === label) && !item.disabled && !item.closest("[hidden]") && item.checkVisibility({ visibilityProperty: true }));
-      if (targets.length !== 1) throw new Error(`Expected one visible enabled ${label}; found ${targets.length}`);
+      if (targets.length !== 1) {
+        // Name the active dialog and visible controls, so a native failure shows what was on screen.
+        const visible = [...scope.querySelectorAll("button")].filter((item) => !item.closest("[hidden]") && item.checkVisibility({ visibilityProperty: true }))
+          .map((item) => item.getAttribute("aria-label") || item.textContent.trim()).filter(Boolean).slice(0, 12);
+        throw new Error(`Expected one visible enabled ${label}; found ${targets.length}; scope=${scope === document ? "document" : scope.getAttribute("aria-label")}; visible=${visible.join("|")}`);
+      }
       targets[0].click();
     };
     const control = (label) => {

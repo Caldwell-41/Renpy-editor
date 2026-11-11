@@ -74,7 +74,7 @@ fn smoke_report_summary(payload: Option<&Value>) -> Value {
         payload
             .get(key)
             .and_then(Value::as_str)
-            .map(|value| value.chars().take(256).collect::<String>())
+            .map(|value| value.chars().take(1024).collect::<String>())
     };
     json!({
         "supportingAuthoringStage": stage("supportingAuthoringStage"),
