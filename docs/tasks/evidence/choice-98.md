@@ -1633,3 +1633,65 @@ skipped, 398 frontend tests and all 18 selected fixtures passed. The routed cand
 needs its own automatic checks. Actionlint, Q1 source audit and all 18 validation
 coordinator tests pass during preparation. Physical-input/human acceptance,
 issue closure, merge and release remain separate and unfinished.
+
+## Third campaign results and offline harness corrections
+
+The approved routed candidate is `2997c2021cb3f3a786a4d8e7555823a2d3ca9988`.
+The [started receipt](https://github.com/Caldwell-41/Renpy-editor/issues/98#issuecomment-6787234833)
+records the single Windows dispatch and local Mac start. Both targets started;
+shared use is now Mac 19/20 and Windows 10/20, zero reservations. Final campaigns
+are 3/3 spent. No retry, replacement or second package build is authorized.
+
+Mac completed 691 ordinary release-core tests with zero failures, 63 ignored and
+three filtered; the isolated flow budgets and both runtime/Branches browser checks
+passed. SDK lifecycle/download, runtime-service/diagnostics and Phase 1H passed.
+Phase 1H exercised both routes, a metadata-free copy and the intended wrong-outcome
+rejection, with twelve adapter spawns and complete cleanup. All 38 release desktop
+tests passed. The approved local wrapper built and verified the signed app and
+installer without exporting a key or changing signing policy. Executable SHA-256
+is `ac02bab353a86c8ee6e717d037356b093ab09a99aa4a03f18bf6c629db24613d`;
+installer SHA-256 is `704662b1a73193f6a6095324cf3a5af41489ae91deab6f3d05e8a2b5748f6f98`.
+Privacy scan and dependency inventory pass; the package and original reports remain
+retained privately. None of this establishes physical input or human acceptance.
+
+All six Mac packaged case producers reported success and cleanup with exit 0.
+The outer runner rejected UI refresh because its validator still expected the
+unrelated route-driver stages. The actual shipped UI-refresh probe reports eleven
+ordered checks for Character creation/source, unsupported-drop refusal, editor
+draft retention, geometry, Settings and preferences. The validator now requires
+that exact complete report, including success, layer, stage and cleanup. Its
+superseded route expectation is removed. The existing browser preflight now feeds
+the actual shipped probe's report into the Python validator and rejects each
+missing check, incomplete/failure flags and missing cleanup. It reproduced the
+rejection before the fix and passes afterward. All six immutable native reports
+pass revalidation; original failed wrapper files are unchanged and retained.
+Revalidation launched no app, SDK or build.
+
+The selected, previously unexecuted Mac WebView/single-instance smoke then ran once
+on that same signed app. Primary readiness and secondary rejection passed. Final
+report delivery received pre-dispatch `RUNTIME_BUSY`; primary exited 1, secondary
+exited 0 and owned processes were absent afterward. The smoke remains failed and
+unqualified. Its observations/checkpoints/report now use the existing bounded busy
+helper; other errors, timeouts and incomplete reports remain failures. A unit test
+reproduced the failure, then passed with one busy refusal at both health reads,
+each checkpoint and final report. Existing failed-authoring and incomplete-trace
+cases still reject, and exactly one final payload is delivered after contention.
+The test's root timer stub now permits the helper's real bounded delay. This
+corrected embedded probe has no fresh package/native proof.
+
+Windows [run 42960921424](https://github.com/Caldwell-41/Renpy-editor/actions/runs/42960921424),
+attempt 1, failed the ordinary core gate: 683 passed, one failed, 60 ignored and
+three filtered. `https_cancellation_closes_handshake_and_body_owned_socket` failed
+its successful-shutdown observation assertion. The unchanged test passed earlier
+campaigns; its actual observation/mode is not printed, so its cause remains open.
+Later missing-report/binary/browser failures are consequences of that early stop.
+No Windows SDK or package stage ran. The three-member failure archive matches
+GitHub's SHA-256 `8f5db019598f9901ec0405880f8a01754aa5b95c9e4b9194abea332e26db73ed`.
+Use a focused SDK-free producing-host unit diagnosis, preserving P02's owned socket,
+EOF and timing requirements. Do not infer the old P02 cause from this assertion.
+
+The combined harness corrections pass 399 frontend tests, the current browser
+preflight, Q1 gate controls and retention tests. Continue focused review and
+Windows diagnosis before any further campaign decision. Preserve original failures,
+package identity, recovery and the separate conditional #106 allowance. #98/#106
+and PR #125 remain open/draft; package, native/human and final acceptance are incomplete.

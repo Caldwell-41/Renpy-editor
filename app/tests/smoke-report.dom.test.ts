@@ -11,7 +11,7 @@ import type { CoreResponse } from "../src/protocol.js";
 const probe = await readFile(new URL("../../src-tauri/src/native_editor_probe.js", import.meta.url),"utf8")+"\n"+await readFile(new URL("../../src-tauri/src/smoke_probe.js", import.meta.url), "utf8");
 
 test("packaged probe constructs exactly one truthful final report", async (t) => {
-  for (const scenario of ["success", "authoring-failure", "incomplete-trace"] as const) {
+  for (const scenario of ["success", "authoring-failure", "incomplete-trace", "busy"] as const) {
     await t.test(scenario, async () => {
       const browser = new Window({ url: "http://tauri.localhost" });
       browser.document.body.innerHTML = '<div id="app"></div>';
@@ -31,10 +31,18 @@ test("packaged probe constructs exactly one truthful final report", async (t) =>
       const shell = browser as unknown as globalThis.Window;
       const order: string[] = [];
       const reports: Record<string, unknown>[] = [];
+      const busyRejections = new Set<string>();
       let runProbe: (() => Promise<void>) | undefined;
       const invoke = async (command: string, args: { request?: { operation: string; payload: Record<string, unknown> } }) => {
         if (command !== "core_request") throw new Error("Denied desktop command stub");
         const request = args.request!;
+        if (scenario === "busy" && ["system.health", "probe.smokeCheckpoint", "probe.smokeReport"].includes(request.operation)) {
+          const key = `${request.operation}:${JSON.stringify(request.payload)}`;
+          if (!busyRejections.has(key)) {
+            busyRejections.add(key);
+            return { ok: false, error: { code: "RUNTIME_BUSY" } };
+          }
+        }
         if (request.operation === "system.health") {
           return Object.keys(request.payload).length === 0
             ? { ok: true, value: { status: "ready" } }
@@ -49,7 +57,7 @@ test("packaged probe constructs exactly one truthful final report", async (t) =>
         order.push("report");
         reports.push(request.payload);
         // Model acceptance versus rejection; retain every attempted report.
-        return { ok: scenario === "success" };
+        return { ok: scenario === "success" || scenario === "busy" };
       };
       const probeWindow = {
         __TAURI_INTERNALS__: { invoke },
@@ -70,13 +78,17 @@ test("packaged probe constructs exactly one truthful final report", async (t) =>
           Event: browser.Event, KeyboardEvent: browser.KeyboardEvent,
           MessageChannel, performance, crypto,
           fetch: async () => { throw new Error("Denied network stub"); },
-          setTimeout: (callback: () => Promise<void>) => { runProbe = callback; },
+          setTimeout: (callback: () => Promise<void>, delay: number) => {
+            if (!runProbe) runProbe = callback;
+            else return setTimeout(callback, delay);
+          },
         }, { filename: "smoke_probe.js" });
         assert.ok(runProbe);
-        if (scenario === "success") await runProbe();
+        if (scenario === "success" || scenario === "busy") await runProbe();
         else await assert.rejects(runProbe(), /Smoke report was rejected\./);
         assert.equal(reports.length, 1);
         const report = reports[0]!;
+        assert.equal(report.unauthorisedWindowDenied, true);
         assert.deepEqual(order.slice(-3), ["restore-requester", "final-report-start", "report"]);
         assert.equal(report.supportingAuthoringUiPassed, true, JSON.stringify(report));
         if (scenario === "authoring-failure") {
@@ -90,10 +102,11 @@ test("packaged probe constructs exactly one truthful final report", async (t) =>
           assert.equal(report.sceneAuthoringUiPassed, true, JSON.stringify(report));
           assert.equal(report.sourceAuthoringUiPassed, true);
           assert.equal(report.sourceAuthoringStage, "complete");
-          assert.equal(report.sourceCommandTracePassed, scenario === "success");
+          assert.equal(report.sourceCommandTracePassed, scenario === "success" || scenario === "busy");
           assert.match(String(report.sourceCommandTrace), /button:source:generation-current:completed:saves=1:flushes=0:saved/);
           assert.deepEqual(order, ["pre-source-complete", "source-complete", "post-source-recovery-complete",
             "post-source-conflict-complete", "restore-requester", "final-report-start", "report"]);
+          if (scenario === "busy") assert.equal(busyRejections.size, 8);
         }
       } finally {
         await browser.happyDOM.close();

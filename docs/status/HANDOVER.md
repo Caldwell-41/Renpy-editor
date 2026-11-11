@@ -2,48 +2,54 @@
 
 ## Selected Choice implementation
 
-The new coordinating chat owns Choice #98 and #101–#106 on `codex/choice-98` in
-[draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125). The outgoing
-coordinator and workers have stopped. All six slices and approved preview A v2
-are integrated; full Story #110 remains separate. Preserve the worktrees, unique
-private evidence, intentional `app/node_modules` symlink and recovery suffix below.
+The coordinating chat owns #98 and #101–#106 on `codex/choice-98` in
+[draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125). All six slices
+and approved preview A v2 are integrated. Full Story #110 remains separate.
+Preserve worktrees, private evidence, `app/node_modules` and the recovery suffix.
 
-The [live receipt](https://github.com/Caldwell-41/Renpy-editor/issues/98#issuecomment-6784104150)
-owns final verification at published `bf3abd2f`. Both targets have focused SDK
-Choice evidence, including all 27 picked outcomes. Mac Save/exit/fresh-process Load,
-rollback and New Game passed. Exact-head offline Windows verification, automatic
-quality and scoped reviews passed. These do not establish package/human acceptance.
-The #104 duplicate-receipt limitation remains recorded in the delivery evidence.
+The [third campaign audit](../tasks/evidence/choice-98.md#third-campaign-results-and-offline-harness-corrections)
+owns current results and the new harness corrections. Published routed candidate
+is `2997c202`; Kris approved signed local Mac and hosted Windows qualification.
+Windows run 42960921424 attempt 1 is terminal failure. Core had 683 passes and
+one TLS cancellation shutdown-observation failure. No Windows SDK or package ran;
+its bounded three-member failure archive is retained with matching GitHub digest.
+The failure omits mode/raw observation. Diagnose the exact unit on the connected
+Windows host without SDK/package execution; preserve P02's EOF/timing/ownership
+requirements and do not assume its historical cause.
 
-The [continuation audit](../tasks/evidence/choice-98.md#continuation-audit-of-unexecuted-package-paths)
-owns the new preparation and remaining acceptance sequence. Packaged runtime and
-optional Branches probes still expected a legacy edit button for option-owned
-routes. The runtime mock now carries real core ownership; its first failure and
-intermediate restore failure are retained. Both runtime navigation points and the
-optional probe now use Open Scene. All five shipped runtime browser cases and
-ordered Source observation pass with pinned Node. No product behavior changed.
-The optional packaged probe has not been launched.
+Mac passed 691 core tests, isolated flow/browser gates, SDK lifecycle/download,
+runtime diagnostics/service, Phase 1H and 38 release desktop tests. One signed
+app/installer was built and verified with the approved identity. Privacy scan,
+dependency inventory and retained package hashes pass. The six native case
+producers all passed. The outer UI-refresh validator incorrectly required route
+stages; it now requires the actual eleven ordered checks. The actual browser
+producer reproduced that rejection and passes the corrected Python validator,
+including missing-check and refusal controls. Immutable native reports revalidate;
+original failed wrapper files remain untouched.
 
-Kris approved one additional attempt using the approved identity on this Mac and
-hosted Windows qualification. The [selected route](../tasks/evidence/choice-98.md#approved-local-mac-and-hosted-windows-qualification)
-and [approval receipt](https://github.com/Caldwell-41/Renpy-editor/issues/98#issuecomment-6787163572)
-own the replacement of the hosted Mac gate, required local evidence and limits.
-The workflow gains an opt-in Windows-only selector. Default targets and signing
-policy remain unchanged. No key export or credential setup is selected.
+The previously unexecuted Mac WebView smoke ran once on the same package. Primary
+readiness/secondary rejection passed, but final report delivery hit pre-dispatch
+RUNTIME_BUSY and exited 1. No owned process remained. Its observations and terminal
+delivery now use the existing bounded busy helper. Unit red/green covers all
+checkpoints, report, both health reads and retained failure cases. The timer stub
+permits actual bounded waits. All 399 frontend tests, the affected browser preflight,
+Q1 controls and ten retention tests pass. This embedded probe correction has no
+fresh native/package proof. Product UI/core and signing policy are unchanged.
 
-Shared use remains Mac 18/20 and Windows 9/20, with one place reserved per target
-for maxima Mac 19/20 and Windows 10/20. Final campaign limit is now three total;
-two earlier attempts are consumed. No target has started the third attempt. One
-local signed build and the existing packaged children belong to the Mac target;
-no retry or replacement is authorized. The unused conditional #106 start remains
-separate. A green Windows/ordinary CI status cannot establish local Mac acceptance.
+Shared consumption is Mac 19/20 and Windows 10/20, zero reservations. Final
+campaigns are 3/3 spent. No retry, rebuild or replacement is authorized. The
+conditional unused #106 start stays separate. Earlier both-target Choice SDK
+proof, including all 27 picked-state outcomes, retains its candidate scope; the
+#104 duplicate-receipt limit remains recorded. Native physical-input/human and
+final package acceptance remain incomplete. No merge, release or closure is selected.
 
-Next: publish the reviewed routing candidate, verify prerequisites and run the
-single approved qualification on each target. Audit exact candidate, reports,
-package/signature hashes and cleanup. Automatic quality on prior 43ce24da passed
-run 42940609725, including 398 frontend tests and all 18 fixtures; the new candidate
-needs its own checks. Native physical-input/human acceptance remains unfinished.
-No merge, release, issue closure or human acceptance is authorized.
+Next: finish independent review of the harness corrections, publish the coherent
+correction and run SDK-free Windows unit diagnosis in the existing assigned
+checkout. The coordinator owns durable source writes; a Windows assignment may
+use temporary diagnostic instrumentation only and must restore exact bytes.
+Use the owning issue for live publication/CI receipts and preserve candidate-specific
+package evidence. Do not request another campaign before the focused diagnosis
+and all independent authorized preparation finish.
 
 <a id="shared-arithmetic-implementation-2026-11-09"></a>
 

@@ -1,5 +1,6 @@
 // fixture: skip run by npm run test:source-browser.
 import assert from 'node:assert/strict';
+import {spawnSync} from 'node:child_process';
 import { mkdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { createServer } from 'vite';
@@ -333,6 +334,22 @@ try {
  await refresh.waitForFunction(()=>window.__refreshReport,{},{timeout:30000});
  const refreshReport=await refresh.evaluate(()=>window.__refreshReport);
  assert.equal(refreshReport.passed,true,JSON.stringify(refreshReport));assert.equal(refreshReport.checks.length,11);
+ const admitted=spawnSync(process.env.HARNESS_PYTHON??(process.platform==='win32'?'python':'python3'),['-c',`import copy,json,sys
+sys.path.insert(0,'scripts')
+from runtime_probe_cases import runtime_report_ok
+report=dict(evidence='runtime-ui-packaged',case='ui-refresh',passed=True,cleanupComplete=True,details=json.load(sys.stdin))
+assert runtime_report_ok('ui-refresh',report), 'Shipped UI refresh report rejected'
+for index in range(len(report['details']['checks'])):
+    bad=copy.deepcopy(report);bad['details']['checks'].pop(index)
+    assert not runtime_report_ok('ui-refresh',bad), 'Missing check accepted'
+for key in ('passed','cleanupComplete'):
+    bad=copy.deepcopy(report);bad[key]=False
+    assert not runtime_report_ok('ui-refresh',bad), key
+for key,value in [('stage','open'),('passed',False),('error','failure')]:
+    bad=copy.deepcopy(report);bad['details'][key]=value
+    assert not runtime_report_ok('ui-refresh',bad), key
+`],{input:JSON.stringify(refreshReport),encoding:'utf8'});
+ assert.equal(admitted.status,0,admitted.stderr);
  assert.deepEqual(await refresh.evaluate(()=>window.__busyRemaining),[0,0,0]);
  await refresh.close();
  // A user may navigate as soon as the shell appears, before a large Story read

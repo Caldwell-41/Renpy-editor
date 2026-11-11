@@ -58,12 +58,17 @@ records exact-head Windows offline verification and passing automatic quality at
 `bf3abd2f`. Both final package campaigns failed before producing a package; their
 allowance is 2/2 spent. Native/human acceptance remains pending.
 
-The [continuation audit](../tasks/evidence/choice-98.md#continuation-audit-of-unexecuted-package-paths)
-found another stale packaged-driver selector hidden by incomplete mock ownership.
-The corrected fixture and five shipped runtime browser cases pass. The hosted Mac
-release path also lacks required signing prerequisites. Kris approved one additional
-attempt with signed local Mac and hosted Windows qualification. The
-[selected route](../tasks/evidence/choice-98.md#approved-local-mac-and-hosted-windows-qualification)
-preserves both-target evidence, signing policy and protected recovery. Preparation
-is in progress; no target has started this attempt.
+The [third campaign audit](../tasks/evidence/choice-98.md#third-campaign-results-and-offline-harness-corrections)
+records the approved signed-local-Mac/hosted-Windows attempt on `2997c202`.
+Mac passed core, SDK/Phase 1H and desktop gates and produced a verified signed app.
+All six native case producers passed; a stale outer validator is corrected with
+retained-report and browser proof. Mac smoke failed final-report delivery on busy
+contention; its bounded probe correction passes unit/browser checks. Windows stopped
+at one TLS cancellation unit failure before SDK/package work. Focused Windows
+diagnosis and independent harness review are next.
+
+The three-campaign allowance is spent, with Mac 19/20 and Windows 10/20 used and
+zero reservations. No retry or rebuild is selected. The corrected harness has
+399 passing frontend tests; fresh native/package proof remains incomplete.
+Signing policy, approved designs and protected recovery are unchanged.
 #98/#106 and PR #125 stay open/draft.

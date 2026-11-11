@@ -18,8 +18,21 @@ RUNTIME_STAGES = {
     'runtime-error': ('controlled-play-install', 'normal-run', 'runtime-failure-passed'),
     'route-a': ('route-running-observed', 'long-run-duration-passed', 'long-run-save-stop-passed', 'disk-reopen-passed'),
     'route-b': ('draft-cancel-save-refusal-passed', 'route-running-observed', 'long-run-duration-passed', 'long-run-save-stop-passed', 'disk-reopen-passed'),
-    'ui-refresh': ('branches-destination-reopen-passed', 'branches-real-edit-restored', 'route-running-observed', 'long-run-duration-passed', 'long-run-save-stop-passed', 'disk-reopen-passed'),
 }
+
+UI_REFRESH_CHECKS = (
+    'Technical name disables macOS automatic capitalisation',
+    'Native character form keeps its default hex colour',
+    'Native reviewed source creates the character with its technical name and unchanged default colour through real IPC',
+    'Character creation persists an authoritative source definition',
+    'Unsupported-only production drop callback reports error without exposing the empty form or a dialog',
+    'Unsupported-only callback imports no asset through real service',
+    'CodeMirror styles accepted by native CSP',
+    'Native editor input retained as a session draft',
+    'Status updates preserve native editor geometry',
+    'Settings return retains draft',
+    'Device preference write and read round trip',
+)
 
 
 def runtime_report_ok(case, report, target_os=None):
@@ -27,6 +40,12 @@ def runtime_report_ok(case, report, target_os=None):
             or report.get('case') != case or report.get('passed') is not True
             or report.get('cleanupComplete') is not True):
         return False
+    if case == 'ui-refresh':
+        details = report.get('details')
+        return (isinstance(details, dict) and details.get('stage') == 'complete'
+                and details.get('passed') is True and not details.get('error')
+                and details.get('layer') == 'packaged native WebView; real IPC; synthetic editor input'
+                and details.get('checks') == list(UI_REFRESH_CHECKS))
     if case == "canvas-input":
         from canvas_input_evidence import admit
         return admit(report.get("details", {}), target_os)

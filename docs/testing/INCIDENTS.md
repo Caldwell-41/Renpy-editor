@@ -1244,3 +1244,29 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   The corrected five-case runtime browser sequence passes; native execution stays
   pending. [Continuation preparation](../tasks/evidence/choice-98.md#continuation-audit-of-unexecuted-package-paths)
   retains the reproduced failure and signing-prerequisite finding.
+
+## H87. UI refresh validator expects another probe's report
+
+- **Class/cause:** harness; the native UI-refresh producer completed eleven checks
+  and cleanup, but the outer validator expected route-driver stages. Synthetic
+  gate self-tests repeated that stale schema and did not consume the producer.
+- **Correction:** require the actual ordered UI-refresh checks, complete/success
+  fields and cleanup. Remove the superseded route expectation. Feed the shipped
+  producer's browser report into the same Python validator during preflight.
+- **Verification:** browser red/green and missing-check/failure controls pass.
+  All six retained Mac reports revalidate without native launches; original failed
+  wrapper results remain retained. This does not supply missing smoke acceptance.
+- **Evidence:** [Third Choice campaign](../tasks/evidence/choice-98.md#third-campaign-results-and-offline-harness-corrections).
+
+## H88. Smoke report delivery collides with ordinary shell reads
+
+- **Class/cause:** harness; the native smoke's final report received pre-dispatch
+  RUNTIME_BUSY. Direct health/checkpoint/report calls bypass the renderer lane and
+  can contend with ordinary reads, including after restoring the requester.
+- **Correction:** use the existing bounded probe busy helper for these observations
+  and terminal delivery. Preserve other errors, the deadline, all required report
+  fields and the single final payload. No application mutation is retried.
+- **Verification:** unit red/green covers busy health reads, every checkpoint and
+  report, plus failed-authoring/incomplete-trace rejection. The affected browser
+  preflight passes. Fresh packaged smoke remains unqualified.
+- **Evidence:** [Third Choice campaign](../tasks/evidence/choice-98.md#third-campaign-results-and-offline-harness-corrections).

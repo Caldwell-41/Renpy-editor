@@ -37,8 +37,8 @@ window.__loomlightProbeSelectBeat = beatId => {
   if (!select) throw Error('Unique rendered fixture Beat required');
   if (select.ariaExpanded !== 'true') select.click();
 };
-// Only use for reads or explicitly idempotent preference writes. Busy is a
-// pre-dispatch rejection; other failures and the deadline remain failures.
+// Only use for reads, idempotent preference writes, or probe checkpoint/report
+// delivery. Busy refuses before dispatch; other errors and the deadline still fail.
 window.__loomlightProbeRetryBusy = async (task, timeoutMs = 10000) => {
   const deadline = performance.now() + timeoutMs;
   for (;;) {

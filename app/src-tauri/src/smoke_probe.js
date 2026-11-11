@@ -1,5 +1,14 @@
 setTimeout(async () => {
   const invoke = window.__TAURI_INTERNALS__.invoke;
+  // These probe observations can contend with normal shell reads. RUNTIME_BUSY
+  // refuses before dispatch, so retry delivery through the existing bounded helper.
+  const callProbe = request => window.__loomlightProbeRetryBusy(async () => {
+    const reply = await invoke("core_request", { request });
+    if (reply?.ok === false && reply.error?.code === "RUNTIME_BUSY") {
+      throw Object.assign(new Error("Probe request was busy."), { code: "RUNTIME_BUSY" });
+    }
+    return reply;
+  });
   const yieldTask = () => new Promise((resolve) => {
     const channel = new MessageChannel();
     channel.port1.onmessage = () => {
@@ -9,12 +18,10 @@ setTimeout(async () => {
     };
     channel.port2.postMessage(null);
   });
-  const known = await invoke("core_request", {
-    request: { protocolVersion: 1, requestId: "smoke-health", operation: "system.health", payload: {} },
-  }).then((value) => value?.ok === true && value?.value?.status === "ready", () => false);
-  const malformedPayloadDenied = await invoke("core_request", {
-    request: { protocolVersion: 1, requestId: "smoke-malformed", operation: "system.health", payload: { extra: true } },
-  }).then((value) => value?.ok === false && value?.error?.code === "INVALID_PAYLOAD", () => false);
+  const known = await callProbe({ protocolVersion: 1, requestId: "smoke-health", operation: "system.health", payload: {} })
+    .then((value) => value?.ok === true && value?.value?.status === "ready", () => false);
+  const malformedPayloadDenied = await callProbe({ protocolVersion: 1, requestId: "smoke-malformed", operation: "system.health", payload: { extra: true } })
+    .then((value) => value?.ok === false && value?.error?.code === "INVALID_PAYLOAD", () => false);
   const unknownCommandDenied = await invoke("unlisted_command", {}).then(() => false, () => true);
   const ambientFilesystemDenied = await invoke("plugin:fs|read_text_file", { path: "/synthetic-denied" }).then(() => false, () => true);
   const ambientProcessDenied = await invoke("plugin:shell|execute", { program: "synthetic-denied" }).then(() => false, () => true);
@@ -51,13 +58,11 @@ setTimeout(async () => {
   let checkpointSequence = 0;
   const checkpoint = async (stage) => {
     checkpointSequence += 1;
-    const value = await invoke("core_request", {
-      request: {
+    const value = await callProbe({
         protocolVersion: 1,
         requestId: `smoke-checkpoint-${checkpointSequence}`,
         operation: "probe.smokeCheckpoint",
         payload: { stage },
-      },
     });
     if (value?.ok !== true) throw new Error(`Smoke checkpoint was rejected: ${stage}`);
   };
@@ -622,8 +627,7 @@ setTimeout(async () => {
     && shellSaveTrace.includes("phase=flushed")
     && shellSaveTrace.includes("route=flush;origin=keyboard;context=non-source;phase=completed");
   await checkpoint("final-report-start");
-  await invoke("core_request", {
-    request: {
+  await callProbe({
       protocolVersion: 1,
       requestId: "smoke-report",
       operation: "probe.smokeReport",
@@ -649,7 +653,6 @@ setTimeout(async () => {
         unauthorisedWindowDenied: known && window.__loomlightUnauthorisedDenied === true,
         unknownCommandDenied,
       },
-    },
   }).then((value) => {
     if (value?.ok !== true) throw new Error("Smoke report was rejected.");
   });
