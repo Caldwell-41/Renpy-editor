@@ -67,8 +67,8 @@ contention; its bounded probe correction passes unit/browser checks. Windows sto
 at one TLS cancellation unit failure before SDK/package work. Focused Windows
 diagnosis and independent harness review are next.
 
-The three-campaign allowance is spent, with Mac 19/20 and Windows 10/20 used and
-zero reservations. No retry or rebuild is selected. The corrected harness has
+The additional campaign allowance is exhausted. The owning issue retains the
+current accounting. No retry or rebuild is selected. The corrected harness has
 399 passing frontend tests; fresh native/package proof remains incomplete.
 Signing policy, approved designs and protected recovery are unchanged.
 #98/#106 and PR #125 stay open/draft.

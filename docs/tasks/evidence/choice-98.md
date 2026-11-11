@@ -1690,6 +1690,15 @@ GitHub's SHA-256 `8f5db019598f9901ec0405880f8a01754aa5b95c9e4b9194abea332e26db73
 Use a focused SDK-free producing-host unit diagnosis, preserving P02's owned socket,
 EOF and timing requirements. Do not infer the old P02 cause from this assertion.
 
+Independent review found two corrections to finish. The status documents no
+longer copy the live consumption arithmetic. The desktop smoke handler also
+classified a busy report as terminal rejection and scheduled exit before the
+JavaScript retry could complete. It now leaves pre-dispatch busy reports pending,
+using a typed error-code accessor on the existing response owner. The same
+classification function used by the handler has an exact unit red/green check;
+successful reports still accept and malformed reports still reject. The watchdog
+and all other termination rules remain unchanged. No package/native retry ran.
+
 The combined harness corrections pass 399 frontend tests, the current browser
 preflight, Q1 gate controls and retention tests. Continue focused review and
 Windows diagnosis before any further campaign decision. Preserve original failures,

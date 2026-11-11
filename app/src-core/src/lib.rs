@@ -211,6 +211,10 @@ impl CoreResponse {
     pub fn is_success(&self) -> bool {
         self.ok
     }
+
+    pub fn error_code(&self) -> Option<&'static str> {
+        self.error.as_ref().map(|error| error.code)
+    }
 }
 
 fn object(value: &Value) -> Option<&Map<String, Value>> {

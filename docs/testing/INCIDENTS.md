@@ -1265,8 +1265,12 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   can contend with ordinary reads, including after restoring the requester.
 - **Correction:** use the existing bounded probe busy helper for these observations
   and terminal delivery. Preserve other errors, the deadline, all required report
-  fields and the single final payload. No application mutation is retried.
+  fields and the single final payload. The desktop handler must also leave a busy
+  report pending; treating it as rejected schedules exit before delivery can retry.
+  No application mutation is retried.
 - **Verification:** unit red/green covers busy health reads, every checkpoint and
   report, plus failed-authoring/incomplete-trace rejection. The affected browser
-  preflight passes. Fresh packaged smoke remains unqualified.
+  preflight passes. An exact Rust classification red/green check covers the native
+  termination decision and preserves malformed-report rejection. Fresh packaged
+  smoke remains unqualified.
 - **Evidence:** [Third Choice campaign](../tasks/evidence/choice-98.md#third-campaign-results-and-offline-harness-corrections).

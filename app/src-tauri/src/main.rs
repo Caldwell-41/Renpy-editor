@@ -55,7 +55,7 @@ fn smoke_report_disposition(
     is_smoke_report: bool,
     response: &CoreResponse,
 ) -> SmokeReportDisposition {
-    if !smoke_enabled || !is_smoke_report {
+    if !smoke_enabled || !is_smoke_report || response.error_code() == Some("RUNTIME_BUSY") {
         SmokeReportDisposition::Ignore
     } else if response.is_success() {
         SmokeReportDisposition::Accepted
@@ -1352,6 +1352,8 @@ mod tests {
             "INVALID_PAYLOAD",
             "Payload does not match the operation schema.",
         );
+        let busy =
+            CoreResponse::failure("busy".to_owned(), "RUNTIME_BUSY", "Busy before dispatch.");
 
         assert_eq!(
             smoke_report_disposition(true, true, &accepted),
@@ -1360,6 +1362,10 @@ mod tests {
         assert_eq!(
             smoke_report_disposition(true, true, &rejected),
             SmokeReportDisposition::Rejected
+        );
+        assert_eq!(
+            smoke_report_disposition(true, true, &busy),
+            SmokeReportDisposition::Ignore
         );
         assert_eq!(
             smoke_report_disposition(false, true, &accepted),

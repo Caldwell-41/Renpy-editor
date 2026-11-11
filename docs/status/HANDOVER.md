@@ -30,14 +30,16 @@ original failed wrapper files remain untouched.
 The previously unexecuted Mac WebView smoke ran once on the same package. Primary
 readiness/secondary rejection passed, but final report delivery hit pre-dispatch
 RUNTIME_BUSY and exited 1. No owned process remained. Its observations and terminal
-delivery now use the existing bounded busy helper. Unit red/green covers all
+delivery now use the existing bounded busy helper. The desktop disposition also
+leaves pre-dispatch busy reports pending instead of scheduling exit; its exact
+Rust boundary has a unit red/green check. Unit red/green covers all
 checkpoints, report, both health reads and retained failure cases. The timer stub
 permits actual bounded waits. All 399 frontend tests, the affected browser preflight,
 Q1 controls and ten retention tests pass. This embedded probe correction has no
 fresh native/package proof. Product UI/core and signing policy are unchanged.
 
-Shared consumption is Mac 19/20 and Windows 10/20, zero reservations. Final
-campaigns are 3/3 spent. No retry, rebuild or replacement is authorized. The
+The additional campaign allowance is exhausted; the owning issue retains current
+accounting and target results. No retry, rebuild or replacement is authorized. The
 conditional unused #106 start stays separate. Earlier both-target Choice SDK
 proof, including all 27 picked-state outcomes, retains its candidate scope; the
 #104 duplicate-receipt limit remains recorded. Native physical-input/human and
