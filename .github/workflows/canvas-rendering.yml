@@ -34,7 +34,7 @@ jobs:
           CANDIDATE: ${{ inputs.candidate }}
           ORDINAL: ${{ inputs.ordinal }}
         run: |
-          test "$GITHUB_REF" = refs/heads/codex/phase3b-screen-designer
+          test "$GITHUB_REF" = refs/heads/main
           test "$GITHUB_RUN_ATTEMPT" = 1
           test "$ORDINAL" = 13
           test "$(git rev-parse HEAD)" = "$CANDIDATE"

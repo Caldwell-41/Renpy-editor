@@ -83,7 +83,7 @@ jobs:
           CANDIDATE: ${{ inputs.candidate }}
           ORDINAL: ${{ inputs.ordinal }}
         run: |
-          test "$GITHUB_REF" = refs/heads/codex/phase3b-screen-designer
+          test "$GITHUB_REF" = refs/heads/main
           test "$GITHUB_RUN_ATTEMPT" = 1
           test "$ORDINAL" = 3
           test "$(git rev-parse HEAD)" = "$CANDIDATE"
@@ -222,7 +222,7 @@ jobs:
           CANDIDATE: ${{ inputs.candidate }}
           ORDINAL: ${{ inputs.ordinal }}
         run: |
-          test "$GITHUB_REF" = refs/heads/codex/phase3b-screen-designer
+          test "$GITHUB_REF" = refs/heads/main
           test "$GITHUB_RUN_ATTEMPT" = 1
           case "$ORDINAL" in 1|2|3) ;; *) exit 1 ;; esac
           test "$(git rev-parse HEAD)" = "$CANDIDATE"
@@ -370,7 +370,7 @@ jobs:
           CANDIDATE: ${{ inputs.candidate }}
           ORDINAL: ${{ inputs.ordinal }}
         run: |
-          test "$GITHUB_REF" = refs/heads/codex/phase3b-screen-designer
+          test "$GITHUB_REF" = refs/heads/main
           test "$GITHUB_RUN_ATTEMPT" = 1
           test "$ORDINAL" = 11
           test "$(git rev-parse HEAD)" = "$CANDIDATE"
@@ -470,7 +470,7 @@ jobs:
           CANDIDATE: ${{ inputs.candidate }}
           ORDINAL: ${{ inputs.ordinal }}
         run: |
-          test "$GITHUB_REF" = refs/heads/codex/phase3b-screen-designer
+          test "$GITHUB_REF" = refs/heads/main
           test "$GITHUB_RUN_ATTEMPT" = 1
           test "$ORDINAL" = 9
           test "$(git rev-parse HEAD)" = "$CANDIDATE"
