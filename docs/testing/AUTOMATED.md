@@ -162,7 +162,7 @@ npm run test:core -- --release # production-gate profile
 ```
 
 [`scripts/test-core.mjs`](../../app/scripts/test-core.mjs) owns the exact skips,
-including two Linux-only skips for Windows/macOS file and process behavior.
+including three Linux-only skips for Windows/macOS file and process behavior.
 Options after `--` go to Cargo. Gate the output with `cargo-log`. The transport
 tests need loopback sockets, so a sandbox that blocks them reports false failures.
 Unset the SDK archive variables first, as CI has none.
