@@ -30,7 +30,8 @@ issue, its parent and the code it touches. Use `gh` as described in
   context and the result of a real trade-off (`domain-modeling`).
 - Records before November 2026 (status, task briefs, ledgers and evidence) live at
   the `archive/docs-ledgers-2026-11` tag. Read them only for a matching diagnosis,
-  result reuse or a requested audit.
+  result reuse, a requested audit, or requirements that an issue or canonical
+  doc cites.
 
 ## Project invariants
 

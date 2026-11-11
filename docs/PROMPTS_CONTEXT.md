@@ -223,7 +223,8 @@ actual native UI before releasing bounded stage markers; do not observe an exite
 The gate explicitly requires enabled prompt focus after physical Save and light/dark/
 compact observation markers, as well as persistence/context checks. Failed native
 reports remain failures even when individual preceding checks passed.
-Use only the selected ledger's remaining cumulative build/launch allowance.
+Use only the remaining cumulative build/launch limit recorded on the issue or PR
+([operation limits](../AGENTS.md#operation-limits)).
 
 
 ## Continue Scene

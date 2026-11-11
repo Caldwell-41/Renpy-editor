@@ -5,7 +5,8 @@ GitHub Issues own scope, acceptance and delivery state; see
 and decisions. Records before November 2026 (status, task briefs, ledgers and
 evidence) live at the
 [`archive/docs-ledgers-2026-11` tag](https://github.com/Caldwell-41/Renpy-editor/tree/archive/docs-ledgers-2026-11/docs).
-Read them only for a matching diagnosis, result reuse or a requested audit.
+Read them only for a matching diagnosis, result reuse, a requested audit, or
+requirements that an issue or canonical doc cites.
 
 | Concern | Canonical document |
 | --- | --- |

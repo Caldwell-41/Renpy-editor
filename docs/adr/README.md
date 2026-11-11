@@ -33,4 +33,4 @@ Superseded ADRs 0009, 0019 and 0020 are at the `archive/docs-ledgers-2026-11` ta
 | 0020 | Superseded by [0023](0023-github-issues-own-delivery.md) | GitHub Issues own remaining Phase 3B delivery. |
 | [0021](0021-separate-renpy-canvas-helper.md) | Accepted | Separate inert Ren'Py canvas helper; live drafts, logical pixel coordinates and an initial 100 ms feedback target. |
 | [0022](0022-saving-retained-story-drafts.md) | Accepted | Story Save accepts all pending beat drafts after validating the whole set, through ADR 0007's shell and transaction owners. |
-| [0023](0023-github-issues-own-delivery.md) | Accepted | GitHub Issues own scope, acceptance and evidence; the repository keeps lasting behavior and decisions. |
+| [0023](0023-github-issues-own-delivery.md) | Accepted | GitHub Issues own scope, acceptance, decisions and results; PRs own work in progress and its evidence; the repository keeps lasting behavior and decisions. |

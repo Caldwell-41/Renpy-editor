@@ -717,7 +717,7 @@ priorities. `flow.list` accepts an optional `refresh` boolean (default false); t
 requests disk acquisition. Opening Branches shows the observed model then coalesces a
 disk check if it came from cache or saved edits. Focus/Refresh acquire disk; the old
 periodic scan is removed. Source reconciliation handles external mapped edits and
-preserves dirty buffers. See the active checkpoint ledger for qualification evidence.
+preserves dirty buffers. The archived [Phase 1G record](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-06-phase-1g-branches-runtime-git.md) holds qualification evidence.
 
 ## Controlled runtime foundation (Phase 1G.2a)
 
@@ -735,7 +735,7 @@ manifest comparison conservatively marks changed output/source stale. Unknown SD
 or save provenance requires renewed consent; no `.rpyc` suffix is trusted automatically.
 Desktop exit explicitly shuts down the supervisor. Core close/switch refuse until
 preparation is cancelled or Stop cleanup finishes, then use existing draft safeguards.
-Target acceptance remains recorded in the live Phase 1G ledger, not inferred here.
+Target acceptance remains recorded in the archived [Phase 1G record](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-06-phase-1g-branches-runtime-git.md), not inferred here.
 
 
 ### Runtime presentation and diagnostic authority (1G.2b)
