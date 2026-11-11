@@ -64,11 +64,38 @@ fn smoke_report_disposition(
     }
 }
 
-fn terminate_rejected_smoke_report(response: &CoreResponse) {
+/// Name the probe stages and failed observations, so a rejected report says where
+/// the smoke stopped. The payload holds only probe-generated booleans and stages.
+fn smoke_report_summary(payload: Option<&Value>) -> Value {
+    let Some(payload) = payload.and_then(Value::as_object) else {
+        return json!({ "payload": "missing" });
+    };
+    let stage = |key: &str| {
+        payload
+            .get(key)
+            .and_then(Value::as_str)
+            .map(|value| value.chars().take(256).collect::<String>())
+    };
+    json!({
+        "supportingAuthoringStage": stage("supportingAuthoringStage"),
+        "sceneAuthoringStage": stage("sceneAuthoringStage"),
+        "sourceAuthoringStage": stage("sourceAuthoringStage"),
+        "failedObservations": payload
+            .iter()
+            .filter(|(_, value)| value.as_bool() == Some(false))
+            .map(|(key, _)| key.as_str())
+            .collect::<Vec<_>>(),
+    })
+}
+
+fn terminate_rejected_smoke_report(response: &CoreResponse, payload: Option<&Value>) {
     SMOKE_REPORT_RECEIVED.store(true, Ordering::SeqCst);
     let diagnostic =
         serde_json::to_string(response).unwrap_or_else(|_| "{\"ok\":false}".to_owned());
-    eprintln!("packaged boundary smoke report rejected: {diagnostic}");
+    eprintln!(
+        "packaged boundary smoke report rejected: {diagnostic} {}",
+        smoke_report_summary(payload)
+    );
     let _ = std::io::stderr().flush();
     thread::spawn(|| {
         thread::sleep(Duration::from_millis(100));
@@ -624,7 +651,7 @@ fn core_request(
             Ok(value) => value,
             Err(response) => {
                 if smoke_enabled && is_smoke_report {
-                    terminate_rejected_smoke_report(&response);
+                    terminate_rejected_smoke_report(&response, smoke_payload.as_ref());
                 }
                 return Ok(response);
             }
@@ -918,7 +945,7 @@ fn core_request(
             });
         }
     } else if report_disposition == SmokeReportDisposition::Rejected {
-        terminate_rejected_smoke_report(&response);
+        terminate_rejected_smoke_report(&response, smoke_payload.as_ref());
     }
     Ok(response)
 }
@@ -1343,6 +1370,25 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn rejected_smoke_report_summary_names_stages_and_failed_observations() {
+        let payload = json!({
+            "sceneAuthoringStage": "welcome: Expected one visible enabled Loomlight; found 0",
+            "sourceAuthoringStage": "not-started",
+            "welcomeLifecycleVisible": false,
+            "networkDenied": true,
+        });
+        assert_eq!(
+            smoke_report_summary(Some(&payload)),
+            json!({
+                "supportingAuthoringStage": null,
+                "sceneAuthoringStage": "welcome: Expected one visible enabled Loomlight; found 0",
+                "sourceAuthoringStage": "not-started",
+                "failedObservations": ["welcomeLifecycleVisible"],
+            })
+        );
+    }
 
     #[test]
     fn only_successful_smoke_reports_enter_the_accepted_path() {

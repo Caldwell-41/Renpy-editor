@@ -11,7 +11,7 @@ import type { CoreResponse } from "../src/protocol.js";
 const probe = await readFile(new URL("../../src-tauri/src/native_editor_probe.js", import.meta.url),"utf8")+"\n"+await readFile(new URL("../../src-tauri/src/smoke_probe.js", import.meta.url), "utf8");
 
 test("packaged probe constructs exactly one truthful final report", async (t) => {
-  for (const scenario of ["success", "authoring-failure", "incomplete-trace", "busy"] as const) {
+  for (const scenario of ["success", "authoring-failure", "incomplete-trace", "busy", "late-shell"] as const) {
     await t.test(scenario, async () => {
       const browser = new Window({ url: "http://tauri.localhost" });
       browser.document.body.innerHTML = '<div id="app"></div>';
@@ -24,10 +24,14 @@ test("packaged probe constructs exactly one truthful final report", async (t) =>
       });
       Object.assign(browser, { __loomlightScaffoldSmokeMode: true });
       // Fresh shell module/root/listener state for each isolated window.
-      const { startApplication } = await import(`../src/main.js?smoke-report=${scenario}`);
-      startApplication(async <T>(): Promise<CoreResponse<T>> => ({
-        protocolVersion: 1, requestId: "test", ok: true, value: [] as T,
-      }));
+      // The desktop can inject the probe before the shell's first render.
+      const startShell = async () => {
+        const { startApplication } = await import(`../src/main.js?smoke-report=${scenario}`);
+        startApplication(async <T>(): Promise<CoreResponse<T>> => ({
+          protocolVersion: 1, requestId: "test", ok: true, value: [] as T,
+        }));
+      };
+      if (scenario !== "late-shell") await startShell();
       const shell = browser as unknown as globalThis.Window;
       const order: string[] = [];
       const reports: Record<string, unknown>[] = [];
@@ -57,20 +61,24 @@ test("packaged probe constructs exactly one truthful final report", async (t) =>
         order.push("report");
         reports.push(request.payload);
         // Model acceptance versus rejection; retain every attempted report.
-        return { ok: scenario === "success" || scenario === "busy" };
+        return { ok: scenario === "success" || scenario === "busy" || scenario === "late-shell" };
       };
       const probeWindow = {
         __TAURI_INTERNALS__: { invoke },
         __loomlightUnauthorisedDenied: true,
-        __loomlightInstallSmokeRequester(requester: Parameters<NonNullable<typeof shell.__loomlightInstallSmokeRequester>>[0]) {
-          const restore = shell.__loomlightInstallSmokeRequester!(requester);
-          return () => { restore(); order.push("restore-requester"); };
-        },
+        __loomlightInstallSmokeRequester: undefined as unknown,
         __loomlightReadSaveTrace: () => shell.__loomlightReadSaveTrace!()
           .filter((entry) => scenario !== "incomplete-trace" || !entry.includes("phase=accepted")),
         dispatchEvent: browser.dispatchEvent.bind(browser),
         open: () => null,
       };
+      const installHook = () => {
+        probeWindow.__loomlightInstallSmokeRequester = (requester: Parameters<NonNullable<typeof shell.__loomlightInstallSmokeRequester>>[0]) => {
+          const restore = shell.__loomlightInstallSmokeRequester!(requester);
+          return () => { restore(); order.push("restore-requester"); };
+        };
+      };
+      if (scenario !== "late-shell") installHook();
       try {
         runInNewContext(probe, {
           window: probeWindow, document: browser.document, navigator: browser.navigator,
@@ -84,7 +92,8 @@ test("packaged probe constructs exactly one truthful final report", async (t) =>
           },
         }, { filename: "smoke_probe.js" });
         assert.ok(runProbe);
-        if (scenario === "success" || scenario === "busy") await runProbe();
+        if (scenario === "late-shell") setTimeout(() => { void startShell().then(installHook); }, 50);
+        if (scenario === "success" || scenario === "busy" || scenario === "late-shell") await runProbe();
         else await assert.rejects(runProbe(), /Smoke report was rejected\./);
         assert.equal(reports.length, 1);
         const report = reports[0]!;
@@ -102,7 +111,7 @@ test("packaged probe constructs exactly one truthful final report", async (t) =>
           assert.equal(report.sceneAuthoringUiPassed, true, JSON.stringify(report));
           assert.equal(report.sourceAuthoringUiPassed, true);
           assert.equal(report.sourceAuthoringStage, "complete");
-          assert.equal(report.sourceCommandTracePassed, scenario === "success" || scenario === "busy");
+          assert.equal(report.sourceCommandTracePassed, scenario !== "incomplete-trace");
           assert.match(String(report.sourceCommandTrace), /button:source:generation-current:completed:saves=1:flushes=0:saved/);
           assert.deepEqual(order, ["pre-source-complete", "source-complete", "post-source-recovery-complete",
             "post-source-conflict-complete", "restore-requester", "final-report-start", "report"]);

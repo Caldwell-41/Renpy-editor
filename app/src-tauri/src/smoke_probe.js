@@ -1,4 +1,12 @@
 setTimeout(async () => {
+  // The desktop injects this probe once its permission window reports, which can
+  // precede the shell's first render. Wait, bounded, for the Welcome shell; if it
+  // never appears, the lifecycle observations below fail as before.
+  const shellReady = () => typeof window.__loomlightInstallSmokeRequester === "function"
+    && [...document.querySelectorAll("button")].some((button) => button.textContent === "Open Loomlight Project");
+  for (const deadline = performance.now() + 15000; !shellReady() && performance.now() < deadline;) {
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
   const invoke = window.__TAURI_INTERNALS__.invoke;
   // These probe observations can contend with normal shell reads. RUNTIME_BUSY
   // refuses before dispatch, so retry delivery through the existing bounded helper.
