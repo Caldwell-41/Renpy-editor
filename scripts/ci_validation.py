@@ -147,7 +147,15 @@ def report(api, pr, run_url):
     try:
         if len(api.open_prs(pr["head"]["ref"])) != 1:
             raise ValueError("Use one open PR per head branch; commit statuses are shared across PRs")
-        requirements = load_plan(json.loads(api.contents(PLAN_PATH, sha)), pr["head"]["ref"], pr["base"]["ref"])
+        # Main keeps the last merged PR's plan. A PR selects qualifications only by
+        # editing the plan; an inherited plan selects Repository quality only.
+        plan_edited = any(item["filename"] == PLAN_PATH
+                          for item in api.pages("pulls/" + str(number) + "/files"))
+        if plan_edited:
+            requirements = load_plan(json.loads(api.contents(PLAN_PATH, sha)),
+                                     pr["head"]["ref"], pr["base"]["ref"])
+        else:
+            requirements = [QUALITY]
         results = []
         for requirement in requirements:
             if requirement is not QUALITY:
@@ -165,6 +173,8 @@ def report(api, pr, run_url):
         state = combined_state(results)
         details = [f"- {item['name']}: {result[1]}" + (f". [Run]({result[2]})" if result[2] else "")
                    for item, result in zip(requirements, results)]
+        if not plan_edited:
+            details.insert(0, "- Validation plan not edited by this PR; Repository quality only")
         unresolved = [item["name"] for item, result in zip(requirements, results) if result[0] != "success"]
         description = "All selected CI passed" if not unresolved else state + ": " + ", ".join(unresolved)
     except (ValueError, KeyError, TypeError, subprocess.CalledProcessError) as error:
