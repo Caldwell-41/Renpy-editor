@@ -259,9 +259,13 @@ and mark the owning scene or screen partially visual.
 
 Every accepted visual or source edit uses the same transaction path. Loomlight does
 not keep a long-lived visual document that is later exported over authoritative
-source. Short-lived typing/edit buffers may group a natural edit burst; after idle,
-blur, or an explicit action they become one semantic transaction and are persisted
-through the source/file boundary.
+source. An edit reaches source only through an explicit action, such as Commit, Save
+or an editor's accept control. That action turns the edit into one semantic
+transaction and persists it through the source/file boundary. Blur, idle time and
+navigation may validate or normalize input under
+[input validation timing](UI.md#input-validation-timing-and-recovery), but never
+persist it. [Beat drafts](UI.md#beat-drafts) owns how Story keeps unsaved drafts
+across navigation.
 
 The shell always exposes a meaningful persistence state such as `Saved`, `Saving`,
 `Unsubmitted editor input`, `Pending validation`, `Conflict`, or `Recovery required`.
