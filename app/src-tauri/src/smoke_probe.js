@@ -245,8 +245,8 @@ setTimeout(async () => {
     supportingAuthoringStage = "install-requester";
     if (typeof window.__loomlightInstallSmokeRequester !== "function") throw new Error("Missing smoke requester hook.");
     restoreSmokeRequester = window.__loomlightInstallSmokeRequester(smokeRequester);
-    const waitFor = async (condition, description) => {
-      const deadline = performance.now() + 2000;
+    const waitFor = async (condition, description, timeoutMs = 2000) => {
+      const deadline = performance.now() + timeoutMs;
       while (performance.now() < deadline) {
         if (condition()) return;
         await yieldTask();
@@ -264,6 +264,12 @@ setTimeout(async () => {
       supportingAuthoringStage = operation;
       await waitFor(() => called.has(operation), operation);
       await yieldTask();
+    };
+    // A dialog closes only after its save finishes, including real desktop round
+    // trips such as the shell's preferences write. Navigate only after that.
+    const awaitDialogClosed = async (operation) => {
+      await awaitCall(operation);
+      await waitFor(() => !document.querySelector('[aria-modal="true"]'), `${operation} dialog close`, 10000);
     };
     const awaitSceneCommit = async (count, description) => {
       await waitFor(() => sceneApplyCount >= count, description);
@@ -316,7 +322,7 @@ setTimeout(async () => {
     characterName.value = "Alice Updated";
     characterName.dispatchEvent(new Event("input", { bubbles: true }));
     click("Save Character");
-    await awaitCall("character.update");
+    await awaitDialogClosed("character.update");
     click("Characters");
     await openGameSetup();
     supportingAuthoringStage = "add-appearance";
@@ -325,7 +331,7 @@ setTimeout(async () => {
     expression.value = "delighted";
     expression.dispatchEvent(new Event("input", { bubbles: true }));
     click("Choose image…");
-    await awaitCall("asset.import");
+    await awaitDialogClosed("asset.import");
     click("Characters");await awaitSurface("New character");
     supportingAuthoringStage="create-character";
     click("New character");await yieldTask();click("Game setup");await yieldTask();
@@ -334,7 +340,7 @@ setTimeout(async () => {
     }
     click("Review game character source");await awaitCall('references.previewGameCharacter');
     await waitFor(()=>[...document.querySelectorAll('button')].some(b=>b.textContent==='Create game character'&&!b.hidden&&!b.disabled),'reviewed character confirmation');
-    click('Create game character');await awaitCall('references.createGameCharacter');
+    click('Create game character');await awaitDialogClosed('references.createGameCharacter');
     click("Variables");
     await awaitSurface("New variable");
     supportingAuthoringStage = "create-variable";
@@ -348,7 +354,7 @@ setTimeout(async () => {
     defaultValue.value = "9223372036854775807";
     defaultValue.dispatchEvent(new Event("input", { bubbles: true }));
     click("Create Variable");
-    await awaitCall("variable.create");
+    await awaitDialogClosed("variable.create");
     click("Variables");
     await awaitSurface("score");
     supportingAuthoringStage = "update-variable";

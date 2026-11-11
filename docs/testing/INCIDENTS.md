@@ -1292,16 +1292,17 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   failed campaign.
 - **Evidence:** [Windows TLS diagnosis](../tasks/evidence/choice-98.md#windows-tls-readiness-diagnosis-and-correction).
 
-## H90. Packaged smoke probe starts before the shell renders
+## H90. Packaged smoke navigates before a dialog's save closes it
 
-- **Class/cause:** harness; the desktop injects the smoke probe once its hidden
-  permission window reports, with no wait for the main page. Both Mac smokes sent
-  their final report 401–539 ms after setup, before any authoring checkpoint, so
-  the Welcome observations and first click failed. H88's busy error hid this once.
-- **Correction:** the probe waits up to 15 s for the requester hook and Welcome
-  shell before observing. A missing shell still fails the lifecycle observations.
-  A rejected report now prints its stage fields and failed observations.
-- **Verification:** a DOM scenario that starts the probe before the shell reproduced
-  the immediate report, then passes with the full authoring sequence. The other
-  smoke scenarios, browser preflight and an exact desktop summary test pass.
+- **Class/cause:** harness; after Save Character the probe waited only for the
+  request and one task, then clicked the sidebar. Natively the dialog's save also
+  crosses real desktop IPC (the shell's direct preferences write), so the Edit dialog
+  was still open and the modal-scoped click found no "Characters". Both targets
+  failed at that step. An earlier shell-readiness theory was wrong and is removed.
+- **Correction:** after each dialog submit that precedes navigation, wait up to
+  10 s for the dialog to close. Failed clicks name the active dialog and visible
+  controls; a rejected report prints its stage fields and failed observations.
+- **Verification:** a local Mac diagnostic showed `scope=Edit Alice` with only the
+  dialog's controls. The browser preflight now delays direct shell calls by 25 ms;
+  it reproduced that failure before the fix and passes after it.
 - **Evidence:** [Final Choice campaign](../tasks/evidence/choice-98.md#closeout-review-and-final-campaign).

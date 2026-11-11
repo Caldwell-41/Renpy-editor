@@ -1791,3 +1791,13 @@ the incomplete report. The third campaign's Mac smoke shows the same 539 ms repo
 [H90](../../testing/INCIDENTS.md#h90-packaged-smoke-probe-starts-before-the-shell-renders)
 owns the cause and correction `a62c7390`. The retries use one corrected head:
 Mac 21/21 and Windows 12/12, with no further attempt.
+
+The retries on `aacd5823` failed at the same smoke step on both targets, while all
+earlier gates, the package builds and the six packaged cases passed again. The new
+rejection summary disproved the shell-readiness theory: the journey reached Save
+Character, then found no "Characters" control. Game setup state retention restores
+the accepted 2026-10-03 behaviour broken by the October reference rework, so it stays.
+Kris approved one Mac diagnostic and one final run per target (Mac 23, Windows 13).
+The diagnostic smoke on `62145673` showed the Edit dialog still open. H90 owns the
+corrected cause and fix. A 25 ms delay on direct shell calls reproduces it in the
+browser preflight, which passes after the fix with 399 frontend and 39 desktop tests.

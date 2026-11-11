@@ -279,6 +279,8 @@ try {
    if(request.operation==='probe.smokeReport'){window.__reviewProbeReport=request.payload;return {ok:true};}
    if(request.operation==='system.health')return Object.keys(request.payload).length?{ok:false,error:{code:'INVALID_PAYLOAD'}}:{ok:true,value:{status:'ready'}};
    if(request.operation==='probe.smokeCheckpoint')return {ok:true};
+   // Direct shell calls, such as preferences writes, cross real desktop IPC natively.
+   await new Promise(resolve=>setTimeout(resolve,25));
    return {protocolVersion:1,requestId:request.requestId,ok:true,value:[]};
   }};
   window.fetch=async()=>{throw Error('Denied network stub');};window.open=()=>null;
