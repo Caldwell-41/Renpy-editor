@@ -94,7 +94,7 @@ jobs:
           node-version: 24.19.0
           cache: npm
           cache-dependency-path: app/package-lock.json
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0
         with:
           key: help-production-${{ matrix.runner }}
           workspaces: app -> target
@@ -233,7 +233,7 @@ jobs:
           node-version: 24.19.0
           cache: npm
           cache-dependency-path: app/package-lock.json
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0
         with:
           key: owned-screen-${{ matrix.runner }}
           workspaces: app -> target
@@ -384,7 +384,7 @@ jobs:
       - name: Provision and verify the matched-reference desktop
         shell: pwsh
         run: ./scripts/prepare-canvas-display.ps1 -Output "$env:RUNNER_TEMP/canvas-proof/display.json"
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0
         with:
           key: canvas-helper-windows
           workspaces: app -> target
