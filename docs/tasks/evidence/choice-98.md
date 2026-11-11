@@ -1817,3 +1817,25 @@ popup and final single-instance confirmation run only after an accepted report, 
 neither smoke observed them; secondary-instance rejection was observed. `8d80a348`
 has unit and browser proof only. All run allowances are spent. The selected
 `Loomlight validation` status stays failed for the final heads by this decision.
+
+## Merge and retirement, 2026-11-11
+
+Before merge, Kris asked to confirm the smoke correction. A SUNDOWN agent built the
+release app at `49cc3f1f` and ran the packaged smoke once. After four sandbox-only
+refusals that built and launched nothing, the core accepted the report with every
+workflow marker, including navigation, popup and single-instance checks. Its script
+did not capture exit codes; the desktop exits 0 only when all printed flags are true.
+A signed local Mac rebuild running only the smoke passed with both exit codes 0.
+Hosted Windows [run 43003341576](https://github.com/Caldwell-41/Renpy-editor/actions/runs/43003341576)
+passed every job on `49cc3f1f`, and `Loomlight validation` was green. This closes
+the earlier caveat that those three checks were not observed. Final accounting is
+Mac 24/24 and Windows 15/15; every allowance for #98 is closed.
+
+Kris authorized merge, issue closure, this closeout and worktree retirement.
+[PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125) squash-merged into
+`codex/phase3b-screen-designer` at `8fbfb094ed762b1652c931cdc4a68ebcc0ea12ac`.
+#98 and #101–#106 are closed as completed with links to that commit. Seven local
+ticket/preview worktrees held only reproducible build output and are retired, and
+the integration worktree follows after this closeout. Their branches and remote heads
+remain. The detached Story design-reference worktree keeps uncommitted approval and
+capture changes, so it stays. SUNDOWN's checkout and its diagnostics are unchanged.

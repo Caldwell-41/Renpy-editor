@@ -28,6 +28,7 @@ open-ended coding task. Historical snapshots are evidence, not current instructi
 
 | Concern | Canonical document |
 | --- | --- |
+| Accepted Choice bodies, prompts, availability, Repeat and picked options | [Closed spec #98](https://github.com/Caldwell-41/Renpy-editor/issues/98), [delivery and closeout evidence](tasks/evidence/choice-98.md) |
 | Accepted shared arithmetic, review corrections and retirement | [Closed spec #87](https://github.com/Caldwell-41/Renpy-editor/issues/87), [archived delivery](tasks/archive/2026-11-10-shared-arithmetic.md), [review and closeout evidence](tasks/evidence/arithmetic-review.md) |
 | Remaining 3B delivery and acceptance after the published cutover receipt | [GitHub parent](https://github.com/Caldwell-41/Renpy-editor/issues/22), [approved Screens requirements](tasks/reference/phase-3b-screens.md), [ownership decision](adr/0020-phase-3b-github-task-ownership.md) |
 | Manual Character-card/lore schema, bounds, lifecycle and fixtures | [REFERENCE_LIBRARY.md](REFERENCE_LIBRARY.md) |

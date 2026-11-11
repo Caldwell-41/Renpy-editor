@@ -1,25 +1,14 @@
 # Current outcome handover
 
-## Selected Choice implementation
+## Accepted Choice delivery
 
-The coordinating chat owns #98 and #101–#106 on `codex/choice-98` in
-[PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125). All six slices,
-approved preview A v2 and the closeout review fixes are integrated. Full Story #110
-remains separate. Preserve worktrees, private evidence, `app/node_modules` and the
-recovery suffix.
-
-[The closeout record](../tasks/evidence/choice-98.md#closeout-review-and-final-campaign)
-owns the final campaign, smoke diagnosis and acceptance. Kris accepted the package
-evidence on 2026-11-11: both targets passed every gate, package build and packaged
-case, and both smokes passed every observation. The report was rejected only for a
-stale supporting-stage label, corrected in `8d80a348` with unit and browser proof.
-Navigation, popup and final single-instance confirmation run only after acceptance,
-so they were not observed. Kris waived the native/human session.
-
-Run allowances are spent (Mac 23/23, Windows 13/13); no further package run is
-authorized. SUNDOWN's assigned checkout is clean and restored. The PR is ready for
-Kris's merge decision. After merge, close #98 and #101–#106 by hand, because the
-PR targets `codex/phase3b-screen-designer`, then retire the merged ticket worktrees.
+#98 and #101–#106 are closed after [PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125)
+merged at `8fbfb094`. No Choice work, run or worker is pending. All package/SDK
+allowances for this outcome are spent and closed (Mac 24/24, Windows 15/15).
+[The delivery record](../tasks/evidence/choice-98.md#merge-and-retirement-2026-11-11)
+owns final receipts, retired worktrees and retained evidence. SUNDOWN's assigned
+checkout keeps its diagnostics folders; private Mac evidence stays outside Git.
+The next outcome needs Kris's selection.
 
 <a id="shared-arithmetic-implementation-2026-11-09"></a>
 
