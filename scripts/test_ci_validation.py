@@ -9,7 +9,7 @@ from ci_validation import QUALITY, PLAN_PATH, combined_state, evaluate_run, load
 
 SHA = "a" * 40
 BRANCH = "codex/ci-validation"
-BASE = "codex/phase3b-screen-designer"
+BASE = "main"
 QUALIFICATION = {
     "name": "Windows qualification", "workflow": "screens-source.yml",
     "event": "workflow_dispatch", "jobs": ["Style / Windows x64"],

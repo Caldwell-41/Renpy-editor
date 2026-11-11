@@ -9,7 +9,7 @@ audit; it does not grant human acceptance, merge or another costly attempt.
 ## Select the work before starting CI
 
 On each new PR branch, update `.github/validation-plan.json` before publication.
-Set `branch` to that branch's name and `base` to its integration target. Keep
+Set `branch` to that branch's name and `base` to `main`. Keep
 `version: 1`. List each required manual
 workflow and its exact GitHub job names in `qualifications`. An explicit empty
 list selects Repository quality only when that satisfies the task. An inherited
@@ -23,7 +23,7 @@ For example, Windows Style qualification selects:
 {
   "version": 1,
   "branch": "codex/example-style-change",
-  "base": "codex/phase3b-screen-designer",
+  "base": "main",
   "qualifications": [
     {
       "name": "Windows Style qualification",

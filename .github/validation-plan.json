@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "branch": "t3/migrate-to-issue-driven-workflow",
+  "branch": "t3/target-main",
   "qualifications": [],
-  "base": "codex/phase3b-screen-designer"
+  "base": "main"
 }

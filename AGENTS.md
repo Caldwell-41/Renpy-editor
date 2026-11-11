@@ -114,9 +114,9 @@ branch does not block other worktrees.
 
 ## Branches
 
-Delete a branch only after proving its work is merged or redundant and no open
-issue depends on it. Use ancestry, or patch equivalence for squash merges. Keep
-main, protected refs and `archive/*` tags.
+Branch from `main` and target PRs at `main`. Delete a branch only after proving
+its work is merged or redundant and no open issue depends on it. Use ancestry, or
+patch equivalence for squash merges. Keep main, protected refs and `archive/*` tags.
 
 ## Read the relevant reference
 
