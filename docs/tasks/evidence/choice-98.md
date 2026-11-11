@@ -1780,3 +1780,14 @@ and typecheck pass. The final campaign is one hosted Windows dispatch with
 so the Mac run repeats its full gate list within the same single start. Ceilings
 are Mac 21 and Windows 12, with one retry per target only after a diagnosed,
 corrected failure.
+
+The first final attempts on `80278d4e` both failed only at the packaged smoke.
+Mac passed every earlier gate, the signed package build and all six packaged cases.
+Hosted Windows [run 42980375485](https://github.com/Caldwell-41/Renpy-editor/actions/runs/42980375485)
+passed core with the corrected TLS test, SDK gates, Phase 1H, desktop, package build
+and all six packaged cases. Both smokes sent their final report 401 ms (Mac) and
+559 ms (Windows) after setup, with no authoring checkpoint, and the core rejected
+the incomplete report. The third campaign's Mac smoke shows the same 539 ms report.
+[H90](../../testing/INCIDENTS.md#h90-packaged-smoke-probe-starts-before-the-shell-renders)
+owns the cause and correction `a62c7390`. The retries use one corrected head:
+Mac 21/21 and Windows 12/12, with no further attempt.
