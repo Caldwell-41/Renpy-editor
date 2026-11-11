@@ -88,11 +88,11 @@ test("Branches forwards selected guarded origin and exact body/continuation targ
 
 test("manual selected branch terminals and Choices stop before unvisited root effects", async () => {
   const s = setup(); const header = s.model.scenes[0]!.beats[0]!;
-  for (const payload of [{ type: "return" as const }, { type: "jump" as const, sceneId: "two" }, { type: "choice" as const, options: [{ text: "Leave", destinationSceneId: "two" }] }]) {
+  for (const payload of [{ type: "return" as const }, { type: "jump" as const, sceneId: "two" }, { type: "choice" as const, options: [{ text: "Leave" }] }]) {
     const scene = { ...s.model.scenes[0]!, beats: [header, { id: "terminal", owner: { groupId: "group", branchId: "if" }, byteStart: 40, byteEnd: 50, protected: false, payload }, { id: "unreachable-value", byteStart: 50, byteEnd: 60, protected: false, payload: { type: "setVariable" as const, variableId: "trust", value: "999" } }, { id: "unreachable-text", byteStart: 60, byteEnd: 70, protected: false, payload: { type: "narration" as const, text: "Must not appear" } }] };
     const state = deriveScenePreview(scene, undefined, new Map([["group", "if"]])); assert.equal(state.overlay?.kind, payload.type); assert.equal(state.variables.trust, undefined); assert.notEqual(state.overlay?.text, "Must not appear"); assert.equal(state.throughBeatId, "terminal");
   }
-  const guarded = { ...s.model.scenes[0]!, beats: [header, { id: "guarded", owner: { groupId: "group", branchId: "if" }, byteStart: 40, byteEnd: 50, protected: false, payload: { type: "choice" as const, options: [{ text: "Leave", destinationSceneId: "two", condition: flagCondition }] } }, { id: "unvisited-value", byteStart: 50, byteEnd: 60, protected: false, payload: { type: "setVariable" as const, variableId: "trust", value: "999" } }, { id: "unvisited-background", byteStart: 60, byteEnd: 70, protected: false, payload: { type: "background" as const, assetId: "bg", transition: "none" as const } }, { id: "possible", byteStart: 70, byteEnd: 80, protected: false, payload: { type: "narration" as const, text: "Possible continuation" } }] };
+  const guarded = { ...s.model.scenes[0]!, beats: [header, { id: "guarded", owner: { groupId: "group", branchId: "if" }, byteStart: 40, byteEnd: 50, protected: false, payload: { type: "choice" as const, options: [{ text: "Leave", condition: flagCondition }] } }, { id: "unvisited-value", byteStart: 50, byteEnd: 60, protected: false, payload: { type: "setVariable" as const, variableId: "trust", value: "999" } }, { id: "unvisited-background", byteStart: 60, byteEnd: 70, protected: false, payload: { type: "background" as const, assetId: "bg", transition: "none" as const } }, { id: "possible", byteStart: 70, byteEnd: 80, protected: false, payload: { type: "narration" as const, text: "Possible continuation" } }] };
   const state = deriveScenePreview(guarded, undefined, new Map([["group", "if"]])); assert.equal(state.partial, true); assert.equal(state.variablesUnknown, true); assert.deepEqual(state.unknownBeatIds, ["guarded"]); assert.equal(state.overlay?.kind, "choice"); assert.notEqual(state.overlay?.text, "Possible continuation"); assert.equal(state.throughBeatId, "guarded"); assert.equal(state.variables.trust, undefined); assert.equal(state.background, undefined); await s.close();
 });
 
@@ -123,4 +123,22 @@ test("unresolved manual conditions stop at the actual header; explicit no-match 
   for (const choice of [undefined, "removed-branch"]) { const state = deriveScenePreview(scene, undefined, choice ? new Map([["group", choice]]) : new Map()); assert.equal(state.partial, true); assert.equal(state.throughBeatId, "if"); assert.equal(state.variables.trust, undefined); assert.equal(state.background, undefined); assert.equal(state.overlay, undefined); }
   const matched = deriveScenePreview(scene, "body", new Map([["group", "if"]])); assert.equal(matched.overlay?.text, "Selected body"); assert.equal(matched.throughBeatId, "body");
   const noMatch = deriveScenePreview(scene, undefined, new Map([["group", "no-match"]])); assert.equal(noMatch.variables.trust?.value, "42"); assert.equal(noMatch.background?.assetId, "bg"); assert.equal(noMatch.overlay?.text, "Explicit continuation"); assert.equal(noMatch.throughBeatId, "root-text"); await s.close();
+});
+
+test("Choice option body inserts at an explicit position and Then retains earlier Beats on refusal", async () => {
+  const fixture = storyFixture(0); const scene = fixture.scenes[0]!;
+  const choice = { id: "menu", byteStart: 0, byteEnd: 10, protected: false, payload: { type: "choice" as const, options: [{ id: "yes", text: "Yes" }, { id: "no", text: "No" }] } };
+  const header = (id: string, ordinal: number) => ({ id, byteStart: 10 + ordinal * 40, byteEnd: 20 + ordinal * 40, protected: true, conditionalBranch: { groupId: "options", choiceOption: true, ordinal, otherwise: false }, payload: { type: "customCode" as const, source: `        "${id}":`, reason: "Option header" } });
+  const model = { ...fixture, scenes: [{ ...scene, beats: [choice, header("yes", 0), { id: "set", owner: { groupId: "options", branchId: "yes" }, byteStart: 20, byteEnd: 40, protected: false, payload: { type: "setVariable" as const, variableId: "flag", value: true } }, header("no", 1), { id: "pass", owner: { groupId: "options", branchId: "no" }, byteStart: 60, byteEnd: 70, protected: true, structuralPlaceholder: true, payload: { type: "customCode" as const, source: "            pass", reason: "Empty option" } }, { id: "shared", byteStart: 70, byteEnd: 90, protected: false, payload: { type: "narration" as const, text: "Shared once" } }, { id: "end", byteStart: 90, byteEnd: 100, protected: false, payload: { type: "return" as const } }] }, ...fixture.scenes.slice(1)] };
+  const s = setup(async () => { throw Error("Source changed. Input retained."); }, model);
+  const option = s.host.querySelector<HTMLElement>('.story-choice-option[data-option-id="yes"]'); assert.ok(option);
+  button(option, "Then").click(); const panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Option ending"]')!;
+  choose(panel, "Then", "return"); button(panel, "Apply ending").click(); await tick();
+  assert.deepEqual(s.calls[0]!.command, { sceneId: "one", expectedSourceRevision: "source", type: "insertBodyBeat", body: { type: "branch", groupId: "options", branchId: "yes" }, position: { type: "end" }, beat: { type: "return" } });
+  assert.ok(panel.isConnected && hasSceneDraft(s.host)); assert.equal(panel.querySelector<HTMLSelectElement>('select[aria-label="Then"]')!.value, "return");
+  button(panel, "Cancel").click(); assert.equal(hasSceneDraft(s.host), false);
+  const no = s.host.querySelector<HTMLElement>('.story-choice-option[data-option-id="no"]')!; button(no, "Add a Beat").click();
+  const editor = s.host.querySelector<HTMLElement>('.new-beat')!; choose(editor, "Beat type", "narration"); editor.querySelector<HTMLTextAreaElement>("textarea")!.value = "No body"; button(editor, "Add Beat").click(); await tick();
+  assert.deepEqual(s.calls[1]!.command.body, { type: "branch", groupId: "options", branchId: "no" }); assert.deepEqual(s.calls[1]!.command.position, { type: "end" });
+  await s.close();
 });

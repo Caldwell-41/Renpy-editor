@@ -68,12 +68,16 @@ fn next_body(
             .and_then(|g| groups.get(g.group_id.as_str()))
             .map_or(origin.byte_end as usize, |(_, end)| *end)
     } else {
-        origin.byte_end as usize
+        if matches!(origin.payload, BeatPayload::Choice { .. }) {
+            super::super::choice::end(origin, beats).unwrap_or(origin.byte_end as usize)
+        } else {
+            origin.byte_end as usize
+        }
     };
     let mut owner = origin.owner.clone();
     for _ in 0..=MAX_CONDITION_NESTING {
         if let Some(next) = beats.iter().find(|b| b.byte_start as usize >= offset && b.owner == owner
-            && b.conditional_branch.as_ref().is_none_or(|branch| branch.ordinal == 0)
+            && b.conditional_branch.as_ref().is_none_or(|branch| branch.opens_group())
             && !matches!(&b.payload, BeatPayload::CustomCode { source, .. } if source.trim().is_empty() || source.trim_start().starts_with('#'))) {
             return body(scene, revision, Some(next), owner);
         }
@@ -107,6 +111,7 @@ fn edge(
         scene_id: scene.id.clone(),
         beat_id: Some(beat.id.clone()),
         option_ordinal: None,
+        unavailable_policy: None,
         text,
         kind: kind.into(),
         location: location(scene, revision, beat),
@@ -141,6 +146,13 @@ pub(super) fn project(
             continue;
         }
         let path = guards(beat, beats);
+        if beat
+            .conditional_branch
+            .as_ref()
+            .is_some_and(|b| b.choice_option)
+        {
+            continue;
+        }
         if let Some(branch) = &beat.conditional_branch {
             let owner = crate::metadata::BeatOwner {
                 group_id: branch.group_id.clone(),
@@ -226,7 +238,40 @@ pub(super) fn project(
                 }
                 edges.push(call);
             }
+            BeatPayload::RepeatChoice { target } => {
+                let menu = beats.iter().find(|b| {
+                    super::super::choice::target(bytes, b).as_ref() == target.as_ref()
+                        && matches!(b.payload, BeatPayload::Choice { .. })
+                        && target.as_ref().is_some_and(|t| {
+                            inventory.labels.get(t).is_some_and(|rows| {
+                                rows.len() == 1
+                                    && rows[0].path == scene.source_path
+                                    && rows[0].byte_start == b.byte_start
+                            })
+                        })
+                });
+                let dest = menu
+                    .map(|menu| destination(body(scene, revision, Some(menu), menu.owner.clone())))
+                    .unwrap_or(FlowDestination::Unknown {
+                        label: target.clone(),
+                        location: Some(location(scene, revision, beat)),
+                    });
+                edges.push(edge(
+                    scene,
+                    revision,
+                    beat,
+                    "repeat",
+                    "Repeat this Choice".into(),
+                    dest,
+                    path,
+                ));
+                unknown |= menu.is_none();
+            }
             BeatPayload::Jump { scene_id } => {
+                if beat.owner.as_ref().is_some_and(|owner| {
+                    beats.iter().find(|b|b.id==owner.branch_id).is_some_and(|b|b.conditional_branch.as_ref().is_some_and(|g|g.choice_option)) && beats.iter().filter(|b|b.owner.as_ref()==Some(owner) && !b.structural_placeholder && !matches!(&b.payload,BeatPayload::CustomCode{source,..} if source.trim().is_empty() || source.trim_start().starts_with('#'))).count()==1
+                }) { continue; }
+
                 let label = nodes
                     .iter()
                     .find(|n| &n.scene_id == scene_id)
@@ -251,28 +296,79 @@ pub(super) fn project(
                 revision,
                 beat,
                 "return",
-                "Return / End".into(),
+                "Return to caller or main menu".into(),
                 FlowDestination::Terminal,
                 path,
             )),
-            BeatPayload::Choice { options } => {
+            BeatPayload::Choice { options, .. } => {
                 for (ordinal, option) in options.iter().enumerate() {
-                    let label = nodes
-                        .iter()
-                        .find(|n| n.scene_id == option.destination_scene_id)
-                        .map(|n| n.label.as_str());
+                    let header = beats.iter().find(|b| Some(&b.id) == option.id.as_ref());
+                    let owner = header.and_then(|h| {
+                        h.conditional_branch
+                            .as_ref()
+                            .map(|g| crate::metadata::BeatOwner {
+                                group_id: g.group_id.clone(),
+                                branch_id: h.id.clone(),
+                            })
+                    });
+                    let children=beats.iter().filter(|b|b.owner==owner && !b.structural_placeholder && b.conditional_branch.as_ref().is_none_or(|g| g.opens_group()) && !matches!(&b.payload,BeatPayload::CustomCode{source,..} if source.trim().is_empty() || source.trim_start().starts_with('#'))).collect::<Vec<_>>();
+                    let child = children.first().copied();
+                    let transfer = if children.len() == 1 {
+                        child.and_then(|b| match &b.payload {
+                            BeatPayload::Jump { scene_id } => nodes
+                                .iter()
+                                .find(|n| &n.scene_id == scene_id)
+                                .map(|n| inventory.destination(Some(&n.label), nodes)),
+                            BeatPayload::CustomCode { source, .. } => {
+                                source.trim().strip_prefix("jump ").map(|target| {
+                                    if super::super::logic::identifier(target) {
+                                        inventory.destination(Some(target), nodes)
+                                    } else {
+                                        FlowDestination::Unknown {
+                                            label: Some(target.into()),
+                                            location: Some(location(
+                                                scene,
+                                                revision,
+                                                child.unwrap(),
+                                            )),
+                                        }
+                                    }
+                                })
+                            }
+                            _ => None,
+                        })
+                    } else {
+                        None
+                    };
+                    let dest = if let Some(dest) = transfer {
+                        dest
+                    } else if child.is_some() {
+                        destination(body(scene, revision, child, owner))
+                    } else {
+                        destination(next_body(scene, revision, beats, beat, false))
+                    };
                     let mut choice = edge(
                         scene,
                         revision,
                         beat,
                         "choice",
                         option.text.clone(),
-                        inventory.destination(label, nodes),
+                        dest,
                         path.clone(),
                     );
                     choice.id = format!("{}:{}:choice:{ordinal}", scene.id, beat.id);
                     choice.option_ordinal = Some(ordinal);
+                    if let Some(header) = header {
+                        choice.location = location(scene, revision, header);
+                        if let Some(branch) = &header.conditional_branch {
+                            choice.guard_path.push(FlowGuard {
+                                branch_id: header.id.clone(),
+                                branch: branch.clone(),
+                            });
+                        }
+                    }
                     choice.condition = option.condition.clone();
+                    choice.unavailable_policy = Some(option.unavailable_policy);
                     choice.editable = beat.owner.is_none()
                         && options.iter().all(|o| o.condition.is_none())
                         && !beats
@@ -281,7 +377,7 @@ pub(super) fn project(
                     unknown |= matches!(option.condition, Some(Condition::Unknown { .. }));
                     edges.push(choice);
                 }
-                if super::super::logic::choice_may_continue(options) {
+                if super::super::choice::may_continue(beat, beats) {
                     let target = next_body(scene, revision, beats, beat, false);
                     unresolved_continuation |= target.beat_id.is_none();
                     edges.push(edge(
@@ -289,7 +385,7 @@ pub(super) fn project(
                         revision,
                         beat,
                         "continuation",
-                        "No available choices · continue".into(),
+                        "Continue after Choice".into(),
                         destination(target),
                         path,
                     ));

@@ -1,24 +1,25 @@
 # Current outcome handover
 
-## Selected documentation cleanup
+## Selected Choice implementation
 
-Kris selected item 4 of the [PR #122 retro](../tasks/evidence/pr122-retro.md),
-then authorized opening a PR, running relevant checks, merging and retiring unused
-branches/workspaces. Scope is the live status cleanup and necessary preservation
-and link repairs. Retro items 1–3 remain unselected.
+The coordinating chat owns #98 and #101–#106 on `codex/choice-98` in
+[PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125). All six slices,
+approved preview A v2 and the closeout review fixes are integrated. Full Story #110
+remains separate. Preserve worktrees, private evidence, `app/node_modules` and the
+recovery suffix.
 
-Work is on `codex/retro-pr-122`, based on accepted integration closeout `67ee24a6`.
-The PR targets `codex/phase3b-screen-designer` and owns final checks, merge and
-cleanup receipts. Before continuation, inspect that PR and current refs; completed
-publication is not an instruction to replay it. After merge, return the primary
-checkout to the integration branch and retire only integrated, unused task refs.
-Main, archive/recovery tags, protected stashes and unrelated work remain protected.
-There is no separate task worktree to remove at this checkpoint.
+[The closeout record](../tasks/evidence/choice-98.md#closeout-review-and-final-campaign)
+owns the final campaign, smoke diagnosis and acceptance. Kris accepted the package
+evidence on 2026-11-11: both targets passed every gate, package build and packaged
+case, and both smokes passed every observation. The report was rejected only for a
+stale supporting-stage label, corrected in `8d80a348` with unit and browser proof.
+Navigation, popup and final single-instance confirmation run only after acceptance,
+so they were not observed. Kris waived the native/human session.
 
-This documentation outcome needs no particular OS, SDK, app or package execution.
-Use repository/link/privacy and whitespace checks plus the selected ordinary PR
-validation. [The preservation record](../tasks/evidence/agent-documentation-ownership.md#status-record-cleanup-2026-11-10)
-accounts for relocated evidence. No product implementation or release is selected.
+Run allowances are spent (Mac 23/23, Windows 13/13); no further package run is
+authorized. SUNDOWN's assigned checkout is clean and restored. The PR is ready for
+Kris's merge decision. After merge, close #98 and #101–#106 by hand, because the
+PR targets `codex/phase3b-screen-designer`, then retire the merged ticket worktrees.
 
 <a id="shared-arithmetic-implementation-2026-11-09"></a>
 
@@ -44,8 +45,8 @@ and worker evidence/builds. Windows evidence remains on its producing host.
 #111–#120 retain the full workspace. The approved #96/#110 split delivers arithmetic
 in the current editor while leaving layout/palette, Tracks/Reel, cross-view
 selection, focus and beat drafts, and final native/human acceptance with #110.
-Arithmetic prerequisites are accepted. Choice #98 remains open. No child ticket
-is selected; refresh its state and actual blockers before work. The
+Arithmetic prerequisites are accepted. Choice #98 and its delivery graph are now
+selected above. No #110 Story child ticket is selected. The
 [release scope](../design/story-revamp/README.md#production-release-scope) and
 [live-app acceptance](../design/story-revamp/README.md#final-acceptance-in-the-live-app)
 retain settled decisions; Q13's conflict interaction and Q14's review are approved.

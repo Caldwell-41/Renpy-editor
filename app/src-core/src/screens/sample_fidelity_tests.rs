@@ -251,7 +251,7 @@ fn sample_fidelity_exports_all_states_and_typed_boundaries_without_execution() {
         );
     }
     service.close().unwrap();
-    let accepted = json!({"outcome":"L20-sample-fidelity","publicCoreRequests":true,"sourceMapSchemaVersion":8,"exporterSourceSHA256":hex::encode(Sha256::digest(include_bytes!("sample_fidelity_tests.rs"))),"files":files,"assets":assets,"cases":cases});
+    let accepted = json!({"outcome":"L20-sample-fidelity","publicCoreRequests":true,"sourceMapSchemaVersion":crate::metadata::SOURCE_MAP_SCHEMA_VERSION,"exporterSourceSHA256":hex::encode(Sha256::digest(include_bytes!("sample_fidelity_tests.rs"))),"files":files,"assets":assets,"cases":cases});
     if let Some(output) = std::env::var_os("LOOMLIGHT_SAMPLE_FIDELITY_INPUTS") {
         fs::create_dir_all(&output).unwrap();
         fs::write(

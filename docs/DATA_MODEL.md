@@ -84,11 +84,107 @@ music, play SFX, transition reference, and protected Custom Code. Supporting ref
 use stable Character, Appearance, Asset, Variable, and Scene UUIDs rather than
 filenames. Later phases extend the same Beat/semantic model rather than replacing it.
 
-Choice, Jump, and Return/End are mutually exclusive terminal Beat forms. A newly
-created Scene starts with Return/End; adding a Choice or Jump at the natural end
-replaces that terminal range rather than leaving unreachable statements after it.
-Terminal Beats cannot be removed, converted to a non-terminal Beat, or reordered away
-from the end through the supported Scene surface.
+A Choice owns ordered option bodies and can continue at the next Beat in its
+containing body. A new option is empty; its source contains a sole verified `pass`
+until a Beat replaces it. Jump and Return are explicit transfers inside an option.
+Return returns to the caller, or to the main menu when there is no caller. A newly
+created Scene still starts with Return. Structural commands refuse a new Scene
+fallthrough, including when every guarded option can be unavailable.
+
+The Choice payload has an optional `prompt`, either
+`{"type":"narration","text":"..."}` or
+`{"type":"dialogue","characterId":"<existing UUID>","text":"..."}`.
+The prompt belongs to the menu interaction. Its single source line sits immediately
+inside `menu:`, before the option headers, and displays with the options in Ren'Py.
+It is part of the Choice header's exact mapping, never a preceding or option-body
+Dialogue Beat. Character identity and text validation use the existing authoring
+owners. Prompt edits preserve the menu line and change only speaker/text tokens;
+removal removes only the prompt line, including its own trailing comment.
+
+Each option has typed `unavailablePolicy`: `hide` (default, omitted in serialized
+payloads) or `showDisabled`. Show disabled requires an existing typed availability
+condition. Inspection never substitutes a Variable's default for runtime state.
+Unknown conditions remain explicit and read-only.
+
+The Choice payload contains option caption, optional condition and mapped option ID.
+It has no destination field. A destination option has an ordinary Jump in its body.
+The option ID is its header's Beat UUID; Choice identity is the menu header UUID.
+Source-derived child Beats carry their immediate group/branch owner, including
+conditions and Choices nested inside an option. Option headers
+reuse that branch mapping with `choiceOption: true`; they are not condition nodes.
+`BodyRef::Branch` names an option body just as it names a condition branch. Headers,
+children and shared following Beats have disjoint exact source ranges. No second
+saved story document or action-list model exists.
+
+Source-map schema 14 adds saved picked-option headers to schema 13's Repeat
+targets and schema 12's per-option
+availability, schema 11's prompts and schema 10's recursive option bodies and
+indented condition trivia. Migration verifies schemas 13, 12, 11 and 10 with their frozen
+recognizer, schema 9 with its flat option-body recognizer, and older maps with their
+original recognizers before refinement. A newly recognized prompt joins the menu
+header; absorbed physical records survive in `refinedChildMappings`, including their
+IDs and unknown fields. Earlier whole-menu maps also
+pass their original recognizer before refinement. The menu header keeps its old ID and unknown fields;
+provable existing physical records keep theirs. Opening and no-op editing never
+rewrite `.rpy` bytes. Unprovable ownership refuses; unsupported option contents stay
+protected Source. The reader and writer cap is 4,000,000 bytes, so the existing
+500-Scene / 2,000-route fixture still fits after menus split into physical mappings.
+Recursive recognition shares the condition/Choice nesting bound of 16. Insertion
+refuses a Choice that would become opaque beyond that bound. Moves and removal
+carry complete subtrees; a destination inside the selected subtree refuses.
+Call uses the existing collision-checked `from` label and route limits. Return from
+a callee resumes at the next Beat in the option, then normal completion rejoins
+after its containing Choice. Completion analysis traverses the same owners without
+evaluating conditions. Branches records the originating option header and ancestor
+guards, each transfer and the continuation in its actual containing body.
+
+Caption, guard, reorder and option-count edits carry each retained body's exact
+bytes and mapped IDs. New options get new IDs. Then controls edit only the last
+Jump/Repeat/Return, or its absence for Continue. Source reconciliation refuses ambiguous
+movement of children between duplicate-caption option headers.
+
+A Repeat is an ordinary ending transfer in the authoritative option body. The
+source contains `jump _ll_choice_<32 lowercase hex digits>` to a generated label
+immediately before that option's owning menu at the same indentation. The label,
+menu line and optional prompt form one Choice header mapping. The label survives
+ending removal and later reuse; opening, migration and no-op never install one.
+Insertion generates and collision-checks the name through the existing project
+label inventory, then accepts label, ending and map together in shared history.
+Only a direct option of that Choice can author this ending. A nested Choice owns
+its own target; arbitrary labels and general loop editing remain unsupported.
+Ambiguous or colliding targets expose Source fallback and refuse authoring.
+
+Picked options use Show normally, Mark picked or Hide picked for the whole Choice.
+New Story Choices explicitly use Show normally and record selections immediately.
+If the project's choice screen cannot host the helper, a new Show normally Choice
+without Show disabled options is written as an unconfigured native menu instead.
+An accepted policy edit writes the mode and stable Choice UUID in the menu arguments.
+Each option carries its own UUID and typed availability arguments. Its header mapping
+includes the first executable statement, which records `(Choice UUID, option UUID)`
+in `default _ll_picked_v1 = {}` before any authored Beat. The existing versioned
+choice adapter owns that declaration and the selectable check mark and the distinct disabled lock. This dictionary
+is ordinary Ren'Py saved, rollback-aware game state. It is neither authoring metadata
+nor Ren'Py's caption-keyed persistent chosen history. Existing unconfigured source
+stays byte-identical on opening and no-op edits.
+
+The native menu guard combines availability and picked hiding. Disabled rows use
+the combined selectable gate, so hiding the last enabled answer continues after the
+Choice. Hide picked takes precedence over disabled display. Completion treats hiding
+as a possible continuation and refuses an unsafe Scene ending. Repeat revisits this
+same gate and store. Source-embedded UUIDs anchor the existing mappings, preserve
+rename/reorder identity, and distinguish duplicate captions. New options get fresh
+UUIDs. Duplicate runtime keys, reserved declaration collisions, edited/missing helpers,
+dirty Source and unsupported templates refuse authoring without repair. Accepted helper
+creation or upgrade shares the source/map transaction and its Undo/Redo history.
+Creation requires first adoption with no existing source dependency on the helper.
+An availability adapter can upgrade on first picked-policy adoption; a previously
+picked-dependent source cannot repair a downgraded adapter through an unrelated edit.
+Inspection checks the capability each Choice needs, independently of Scene order.
+Caption and prompt edits retain the menu line and selection records byte for byte;
+policy edits replace only the mode and affected guard tokens. Existing rows keep
+their own newline bytes. Hide picked keeps shared-continuation insertion positions
+available in root and nested bodies, even when every option transfers control.
+Editor preview never reads or mutates runtime history and reports picked state unknown.
 
 Every recognized Beat mapping records a stable UUID, exact source revision, verified
 byte range, exact range hash, and lexical context. The narrow mapper recognizes only
@@ -680,7 +776,8 @@ owns its reviewed contract and early both-target qualification. Older maps use t
 refinement. Exact tiled menu merges retain the header identity and preserve removed
 records in non-authoritative `refinedChildMappings` extras. Every old record must be
 accounted for; split ranges, reserved-key collisions and output exceeding the unchanged
-1,000,000-byte reader cap refuse without writes. Source bytes are not migrated.
+1,000,000-byte reader cap refused without writes at that checkpoint. Schema 9 above
+extends the bounded reader for disjoint option mappings. Source bytes are not migrated.
 
 `Call` carries a target Scene UUID and stable `returnLabel`; insertion generates the
 label, and target edits preserve it. Choice options may carry the shared `Condition`.

@@ -5,17 +5,20 @@ export function runtimeProbeFixture(mode) {
   const entryPath = 'game/chapters/chapter_01/scene_001.rpy';
   const diagnosticPath = 'game/雪 diagnostic.rpy';
   const project = {sessionId:'session-0',projectId:'runtime-fixture',title:'Runtime UI fixture',folderName:'runtime-fixture',chapterId:'chapter',chapterName:'Chapter One',sceneId:'entry',sceneName:'Entry',sdkVersion:'8.5.3',resolution:{width:1280,height:720}};
-  const choice = {id:'choice',byteStart:16,byteEnd:140,protected:false,payload:{type:'choice',options:[{text:'Route A',destinationSceneId:'a'},{text:'Route B',destinationSceneId:'b'}]}};
-  const scenes = ['entry','a','b'].map(id=>({id,chapterId:'chapter',displayName:id,technicalLabel:id,sourcePath:id==='entry'?entryPath:`game/${id}.rpy`,sourceRevision:revision,sourceConflict:false,partial:false,beats:id==='entry'?[choice]:[]}));
+  const choice = {id:'choice',byteStart:16,byteEnd:140,protected:false,payload:{type:'choice',options:[{id:'option-a',text:'Route A'},{id:'option-b',text:'Route B'}]}};
+  const jumps=['a','b'].map((sceneId,i)=>({id:`jump-${i}`,owner:{groupId:'options',branchId:choice.payload.options[i].id},byteStart:40+i*50,byteEnd:60+i*50,protected:false,payload:{type:'jump',sceneId}}));
+  const optionBeats=choice.payload.options.flatMap((o,i)=>[{id:o.id,byteStart:20+i*50,byteEnd:40+i*50,protected:true,conditionalBranch:{choiceOption:true,groupId:'options',ordinal:i,otherwise:false},payload:{type:'customCode',source:`        "${o.text}":`,reason:'Option header'}},jumps[i]]);
+  const scenes = ['entry','a','b'].map(id=>({id,chapterId:'chapter',displayName:id,technicalLabel:id,sourcePath:id==='entry'?entryPath:`game/${id}.rpy`,sourceRevision:revision,sourceConflict:false,partial:false,beats:id==='entry'?[choice,...optionBeats]:[]}));
   const model = {projectRevision:revision,sourceMapRevision:revision,entrySceneId:'entry',lastOpen:{chapterId:'chapter',sceneId:'entry'},chapters:[{id:'chapter',displayName:'Chapter One',directory:'game/chapters/chapter_01'}],scenes,authoring:{characters:[],appearances:[],assets:[],variables:[]},canUndo:false,canRedo:false};
-  const entryText = () => `label entry:\n    menu:\n${choice.payload.options.map(o=>`        "${o.text}":\n            jump ${o.destinationSceneId}`).join('\n')}\n`;
+  const entryText = () => `label entry:\n    menu:\n${choice.payload.options.map((o,i)=>`        "${o.text}":\n            jump ${jumps[i].payload.sceneId}`).join('\n')}\n`;
   const accepted = new Map([[entryPath,entryText()],[diagnosticPath,`label diagnostic_case:\r\n    ${mode==='compile'?'not a statement':'scene loomlight_image_that_does_not_exist'}\r\n`]]);
   const drafts = new Map();
   let session = 0, phase = 'running', savedWhileRunning = false;
   const calls = [];
   const document = (path, target={}) => ({path,text:drafts.get(path)?.text??accepted.get(path),state:drafts.has(path)?'dirty':'clean',dirty:drafts.has(path),editable:true,baseRevision:revision,liveRevision:revision,draftVersion:1,hasBom:false,newline:path===diagnosticPath?'CRLF':'LF',partial:false,diagnostics:[],ranges:[],selectionStart:target.selectionStart??target.byteStart??drafts.get(path)?.selectionStart??0,selectionEnd:target.selectionEnd??target.byteEnd??drafts.get(path)?.selectionEnd??0,canApplyBoth:false});
   const inventory = () => ({files:[...accepted.keys()].map(path=>({path,state:drafts.has(path)?'dirty':'clean',dirty:drafts.has(path),readOnly:false})),dirtyCount:drafts.size,draftBytes:[...drafts.values()].reduce((n,d)=>n+d.text.length,0)});
-  const flow = () => ({revision,entrySceneId:'entry',nodes:scenes.map(s=>({sceneId:s.id,name:s.displayName,label:s.technicalLabel,location:{path:s.sourcePath,revision,byteStart:0,byteEnd:16},partial:false,stale:false})),edges:choice.payload.options.map((o,i)=>({id:`edge-${i}`,sceneId:'entry',beatId:'choice',optionOrdinal:i,text:o.text,kind:'choice',location:{path:entryPath,revision,byteStart:16,byteEnd:140},destination:{kind:'resolved',sceneId:o.destinationSceneId},editable:true})),observation:{status:'checked',checkedAt:Date.now(),fromCache:false},partial:false,stale:false,overLimit:false,notice:'Driver fixture'});
+  // Real Choice edges carry the option header's ownership and exact location.
+  const flow = () => ({revision,entrySceneId:'entry',nodes:scenes.map(s=>({sceneId:s.id,name:s.displayName,label:s.technicalLabel,location:{path:s.sourcePath,revision,byteStart:0,byteEnd:16},partial:false,stale:false})),edges:choice.payload.options.map((o,i)=>({id:`edge-${i}`,sceneId:'entry',beatId:'choice',optionOrdinal:i,text:o.text,kind:'choice',guardPath:[{branchId:o.id,branch:optionBeats[i*2].conditionalBranch}],location:{path:entryPath,revision,byteStart:20+i*50,byteEnd:40+i*50},destination:{kind:'resolved',sceneId:jumps[i].payload.sceneId},editable:true})),observation:{status:'checked',checkedAt:Date.now(),fromCache:false},partial:false,stale:false,overLimit:false,notice:'Driver fixture'});
   const status = () => ({operationId:'op',phase:mode==='compile'||mode==='lint'?'failed':phase,exitCode:null,output:phase==='cancelled'?'':mode==='runtime-error'?'R2_RUNTIME_ERROR_ORACLE':`R2_ROUTE_${mode==='route-b'?'b':'a'}_DIALOGUE_STATE_ASSET_PASS`,nextSequence:1,outputTruncated:false,earlierRevision:savedWhileRunning,cleanupComplete:mode==='compile'||mode==='lint'||phase==='cancelled',launchRevision:revision,revisionStale:false});
   const diagnostics = () => ({diagnostics:mode.startsWith('route')?[]:[{id:0,origin:mode==='runtime-error'?'runtime':mode,severity:'error',message:'Driver fixture diagnostic',path:diagnosticPath,line:2,column:null,sourceRevision:revision,operationId:'op',sessionId:project.sessionId,freshness:'unverified'}]});
   const request = async (operation,payload={}) => {
@@ -29,7 +32,7 @@ export function runtimeProbeFixture(mode) {
       case 'project.close':value=null;break;
       case 'scene.list':value=model;break;
       case 'scene.apply': {
-        if(payload.command.type==='updateBeat'){choice.payload=payload.command.beat;accepted.set(entryPath,entryText());}
+        if(payload.command.type==='updateBodyBeat'){const jump=jumps.find(b=>b.id===payload.command.beatId);if(!jump)throw Error('Unknown Jump body');jump.payload=payload.command.beat;accepted.set(entryPath,entryText());}
         else if(payload.command.type==='selectScene')model.lastOpen.sceneId=payload.command.sceneId;
         else throw Error(`Unexpected fixture Scene command: ${payload.command.type}`);
         value=model;break;

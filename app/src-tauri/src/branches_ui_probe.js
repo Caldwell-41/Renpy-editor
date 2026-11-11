@@ -113,7 +113,7 @@
     await click("Scene details");
     const select = document.querySelector('select[aria-label="Selected Scene"]'); select.value = project.sceneId; select.dispatchEvent(new Event("change"));
     const routes = document.querySelector('select[aria-label="Selected route"]'); routes.value = [...routes.options].find(option => option.value)?.value; routes.dispatchEvent(new Event("change"));
-    await click("Edit Choice / Jump"); await until(() => document.querySelectorAll('input[aria-label="Choice option text"]').length === 4);
+    await click("Open Scene"); await until(() => document.querySelectorAll('input[aria-label="Choice option text"]').length === 4);
     const input = document.querySelector('input[aria-label="Choice option text"]'); input.value = "Route A"; input.dispatchEvent(new Event("input", { bubbles: true }));
     start = performance.now(); await click("Commit Beat"); await until(() => !input.isConnected && document.querySelector("#app-status")?.textContent === "Saved"); await frames();
     report.operations.commitClickToSavedTwoRafMs = performance.now() - start;

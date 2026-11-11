@@ -1,6 +1,16 @@
 {
   "version": 1,
-  "branch": "codex/retro-pr-122",
-  "qualifications": [],
+  "branch": "codex/choice-98",
+  "qualifications": [
+    {
+      "name": "Choice Windows package qualification; signed Mac proof retained on #98",
+      "workflow": "production-scaffold.yml",
+      "event": "workflow_dispatch",
+      "jobs": [
+        "Preflight",
+        "Windows x64"
+      ]
+    }
+  ],
   "base": "codex/phase3b-screen-designer"
 }

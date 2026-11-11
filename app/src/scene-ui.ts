@@ -17,15 +17,21 @@ export type Condition =
   | { readonly status: "supported"; readonly expression: ConditionExpression }
   | { readonly status: "unknown"; readonly source: string; readonly diagnostic: "unsupportedSyntax" | "limitExceeded" | "missingVariable" | "typeMismatch" | "invalidValue" };
 
+export type ChoicePrompt =
+  | { readonly type: "narration"; readonly text: string }
+  | { readonly type: "dialogue"; readonly characterId: string; readonly text: string };
+
 export interface ChoiceOption {
+  readonly unavailablePolicy?: "hide" | "showDisabled";
   readonly text: string;
-  readonly destinationSceneId: string;
+  readonly id?: string;
   readonly condition?: Condition;
 }
 
 export interface IntegerAdjustment { readonly operation: "assign" | "add" | "subtract" | "multiply" | "divide" | "floorDivide" | "remainder"; readonly operand: string }
 export type ArithmeticUnknown = "unobservedCurrentValue" | "unsupportedControlFlow" | "integerOverflow" | "nonFiniteResult" | "incompatibleTarget" | "invalidOperand" | "invalidSyntax" | "missingVariable" | "incompatibleOperand" | "zeroDivisor" | "limitExceeded";
 export type AssignmentState = { readonly status: "known"; readonly value: boolean | number | string } | { readonly status: "unknown"; readonly reason: ArithmeticUnknown };
+export type PickedPolicy = "showNormally" | "markPicked" | "hidePicked";
 export type BeatPayload =
   | { readonly type: "background"; readonly assetId: string; readonly transition: TransitionRef }
   | { readonly type: "showCharacter"; readonly characterId: string; readonly appearanceId: string; readonly placement: PlacementRef; readonly transition: TransitionRef }
@@ -40,14 +46,15 @@ export type BeatPayload =
   | { readonly type: "playSfx"; readonly assetId: string }
   | { readonly type: "transition"; readonly transition: Exclude<TransitionRef, "none"> }
   | { readonly type: "setVariable"; readonly variableId: string; readonly value: boolean | number | string | IntegerAdjustment }
-  | { readonly type: "choice"; readonly options: readonly ChoiceOption[] }
+  | { readonly type: "choice"; readonly prompt?: ChoicePrompt; readonly pickedPolicy?: PickedPolicy; readonly options: readonly ChoiceOption[] }
   | { readonly type: "jump"; readonly sceneId: string }
   | { readonly type: "call"; readonly sceneId: string; readonly returnLabel: string | null }
+  | { readonly type: "repeatChoice"; readonly target?: string | null }
   | { readonly type: "return" }
   | { readonly type: "customCode"; readonly source: string; readonly reason: string };
 
 export interface BeatOwner { readonly groupId: string; readonly branchId: string }
-export interface ConditionalBranch { readonly groupId: string; readonly variableId?: string; readonly otherwise: boolean; readonly ordinal?: number; readonly condition?: Condition }
+export interface ConditionalBranch { readonly choiceOption?: boolean; readonly groupId: string; readonly variableId?: string; readonly otherwise: boolean; readonly ordinal?: number; readonly condition?: Condition }
 export interface SceneBeat {
   readonly assignment?: { readonly inferredResultType: "bool" | "int" | "decimal" | "string" | null; readonly readVariables: readonly { readonly variableId: string; readonly technicalName: string; readonly variableType: "bool" | "int" | "decimal" | "string" }[]; readonly diagnostics: readonly { readonly field: "value.operand" | "variableId"; readonly reason: ArithmeticUnknown }[]; readonly reads: readonly string[]; readonly writes: readonly string[]; readonly state: AssignmentState };
   readonly screenEffects?: ScreenEffects;
@@ -58,6 +65,7 @@ export interface SceneBeat {
   readonly byteStart: number;
   readonly byteEnd: number;
   readonly protected: boolean;
+  readonly sourceFallback?: string;
   readonly payload: BeatPayload;
 }
 
@@ -71,11 +79,18 @@ function sameBody(beat: SceneBeat, body: BodyRef): boolean {
   return body.type === "root" ? !beat.owner : beat.owner?.groupId === body.groupId && beat.owner.branchId === body.branchId;
 }
 function bodyNodes(scene: SceneDocument, body: BodyRef): readonly SceneBeat[] {
-  return scene.beats.filter(beat => !beat.structuralPlaceholder && sameBody(beat, body) && (!beat.conditionalBranch || (!beat.conditionalBranch.otherwise && !beat.conditionalBranch.ordinal))
+  return scene.beats.filter(beat => !beat.structuralPlaceholder && sameBody(beat, body) && (!beat.conditionalBranch || (!beat.conditionalBranch.choiceOption && !beat.conditionalBranch.otherwise && !beat.conditionalBranch.ordinal))
     && !(beat.payload.type === "customCode" && !beat.conditionalBranch && (!beat.payload.source.trim() || beat.payload.source.trimStart().startsWith("#"))));
 }
 function nodeRef(beat: SceneBeat): NodeRef {
   return beat.conditionalBranch ? { type: "condition", groupId: beat.conditionalBranch.groupId } : { type: "beat", beatId: beat.id };
+}
+/** Jump, Repeat and Return end a body explicitly. */
+function isTransfer(beat: SceneBeat): boolean {
+  return beat.payload.type === "jump" || beat.payload.type === "repeatChoice" || beat.payload.type === "return";
+}
+function owningChoice(scene: SceneDocument, optionId: string | undefined): SceneBeat | undefined {
+  return scene.beats.find(b => b.payload.type === "choice" && b.payload.options.some(o => o.id === optionId));
 }
 function terminates(beat: SceneBeat, scene: SceneDocument, depth = 0): boolean {
   if (depth > 16) return false;
@@ -84,7 +99,15 @@ function terminates(beat: SceneBeat, scene: SceneDocument, depth = 0): boolean {
     const branches = scene.beats.filter(item => item.conditionalBranch?.groupId === groupId);
     return branches.some(branch => branch.conditionalBranch?.otherwise) && branches.every(branch => bodyNodes(scene, { type: "branch", groupId: beat.conditionalBranch!.groupId, branchId: branch.id }).some(child => terminates(child, scene, depth + 1)));
   }
-  return ["jump", "return"].includes(beat.payload.type) || (beat.payload.type === "choice" && beat.payload.options.some(option => !option.condition));
+  if (beat.payload.type === "choice") {
+    if (beat.payload.pickedPolicy === "hidePicked") return false;
+    const options = beat.payload.options;
+    return options.some(option => !option.condition) && options.every(option => {
+      const header = scene.beats.find(b => b.id === option.id);
+      return header?.conditionalBranch && bodyNodes(scene, { type: "branch", groupId: header.conditionalBranch.groupId, branchId: header.id }).some(child => terminates(child, scene, depth + 1));
+    });
+  }
+  return isTransfer(beat);
 }
 function defaultInsertion(scene: SceneDocument, body: BodyRef): Position {
   const terminal = bodyNodes(scene, body).find(beat => terminates(beat, scene));
@@ -109,7 +132,11 @@ function bodyCaption(scene: SceneDocument, body: BodyRef, model: SceneWorkspace)
     seen.add(parent.branchId);
     const owner = parent;
     const branch = scene.beats.find(beat => beat.id === owner.branchId && beat.conditionalBranch?.groupId === owner.groupId);
-    parts.unshift(branch?.conditionalBranch ? branchCaption(branch.conditionalBranch, model) : "Missing branch");
+    const option = scene.beats.flatMap(b => b.payload.type === "choice" ? b.payload.options : []).find(o => o.id === branch?.id);
+    const menus = scene.beats.filter(b => b.payload.type === "choice");
+    const menu = owningChoice(scene, branch?.id);
+    const optionNumber = menu?.payload.type === "choice" ? menu.payload.options.findIndex(o => o.id === branch?.id) + 1 : 0;
+    parts.unshift(option ? `Choice ${menus.indexOf(menu!) + 1} / Option ${optionNumber}: ${option.text}` : branch?.conditionalBranch ? branchCaption(branch.conditionalBranch, model) : "Missing branch");
     parent = branch ? beatBody(branch) : { type: "root" };
   }
   return `${scene.displayName} / ${parts.length ? parts.join(" / ") : "Scene body"}`;
@@ -233,7 +260,38 @@ export interface ScenePreviewState {
   readonly musicUnknown: boolean;
   readonly variables: Readonly<Record<string, { readonly value: boolean | number | string; readonly beatId: string }>>;
   readonly variablesUnknown: boolean;
-  readonly overlay?: { readonly kind: "dialogue" | "narration" | "choice" | "jump" | "call" | "return"; readonly text: string; readonly beatId: string };
+  readonly overlay?: { readonly kind: "dialogue" | "narration" | "choice" | "jump" | "call" | "return" | "repeatChoice"; readonly text: string; readonly beatId: string; readonly choice?: Extract<BeatPayload, { type: "choice" }> };
+}
+
+function renderChoiceSummary(choice: Extract<BeatPayload, { type: "choice" }>, characters: SceneWorkspace["authoring"]["characters"]): HTMLElement {
+  const text = (tag: string, className: string, value: string): HTMLElement => {
+    const node = document.createElement(tag); node.className = className; node.textContent = value; return node;
+  };
+  const summary = document.createElement("div"); summary.className = "preview-choice-summary";
+  summary.tabIndex = 0; summary.setAttribute("role", "region");
+  summary.setAttribute("aria-label", "Choice prompt and options. Scroll to read more.");
+  if (choice.prompt) {
+    const prompt = document.createElement("div"); prompt.className = "preview-choice-prompt";
+    const speaker = choice.prompt.type === "narration" ? "Narration" : characters.find(character => choice.prompt?.type === "dialogue" && character.id === choice.prompt.characterId)?.displayName ?? "Unavailable Character";
+    prompt.append(text("strong", "preview-choice-speaker", speaker), text("span", "preview-choice-prompt-text", choice.prompt.text)); summary.append(prompt);
+  }
+  if (choice.pickedPolicy && choice.pickedPolicy !== "showNormally") {
+    const picked = document.createElement("div"); picked.className = "preview-choice-picked";
+    picked.append(text("span", "preview-choice-unknown", "Picked state unknown"), text("span", "preview-choice-policy", choice.pickedPolicy === "markPicked" ? "Mark picked" : "Hide picked")); summary.append(picked);
+  }
+  const options = document.createElement("ol"); options.className = "preview-choice-options";
+  options.setAttribute("aria-label", "Choice options, read only");
+  choice.options.forEach((option, index) => {
+    const row = document.createElement("li"); row.className = "preview-choice-option";
+    row.append(text("span", "preview-choice-number", String(index + 1)), text("span", "preview-choice-caption", option.text));
+    if (option.condition) {
+      const condition = text("span", "preview-choice-condition", "Condition unknown");
+      const policy = `If false: ${option.unavailablePolicy === "showDisabled" ? "Show disabled" : "Hide"}`;
+      condition.title = policy; condition.setAttribute("aria-label", `Condition unknown. ${policy}.`); row.append(condition);
+    }
+    options.append(row);
+  });
+  summary.append(options); return summary;
 }
 
 export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string, manualBranches?: ReadonlyMap<string, string>): ScenePreviewState {
@@ -297,15 +355,21 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string,
       }
       case "dialogue": overlay = { kind: "dialogue", text: payload.text, beatId: beat.id }; break;
       case "narration": overlay = { kind: "narration", text: payload.text, beatId: beat.id }; break;
-      case "choice": overlay = { kind: "choice", text: payload.options.map((option) => `${option.text}${option.condition ? " (availability unknown)" : ""}`).join(" · "), beatId: beat.id }; break;
+      case "choice": overlay = { kind: "choice", choice: payload, text: "", beatId: beat.id }; break;
       case "jump": overlay = { kind: "jump", text: "Jump", beatId: beat.id }; break;
       case "call": overlay = { kind: "call", text: "Call Scene · preview state unknown", beatId: beat.id }; break;
-      case "return": overlay = { kind: "return", text: "Return / End", beatId: beat.id }; break;
+      case "repeatChoice": overlay = { kind: "repeatChoice", text: "Repeat this Choice. Live availability is unknown.", beatId: beat.id }; break;
+      case "return": overlay = { kind: "return", text: "Return to caller or main menu", beatId: beat.id }; break;
       case "playSfx": case "transition": break;
       case "showScreen": case "hideScreen": case "callScreen": break;
     }
-    if (payload.type === "choice") { if (!unknownBeatIds.includes(beat.id)) unknownBeatIds.push(beat.id); break; }
-    if (payload.type === "jump" || payload.type === "return") break;
+    if (payload.type === "choice") {
+      if (!unknownBeatIds.includes(beat.id)) unknownBeatIds.push(beat.id);
+      const firstOption = scene.beats.find(b => b.id === payload.options[0]?.id);
+      const selected = firstOption?.conditionalBranch && manualBranches?.get(firstOption.conditionalBranch.groupId);
+      if (!selected || !payload.options.some(option => option.id === selected)) break;
+    }
+    if (payload.type === "jump" || payload.type === "repeatChoice" || payload.type === "return") break;
   }
   return { throughBeatId: lastVisitedBeatId, partial: unknownBeatIds.length > 0, unknownBeatIds, background, backgroundUnknown, characters, charactersUnknown, music, musicUnknown, variables, variablesUnknown, overlay };
 }
@@ -369,7 +433,8 @@ const beatLabels: Record<BeatPayload["type"], string> = {
   choice: "Choice",
   jump: "Jump",
   call: "Call Scene",
-  return: "Return / End",
+  repeatChoice: "Repeat this Choice",
+  return: "Return",
   customCode: "Custom Code",
 };
 
@@ -501,7 +566,7 @@ export function renderSceneAuthoring(
 
   const mutate = async (command: SceneCommand, after?: (before: SceneWorkspace, next: SceneWorkspace) => void, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision"> = model, owner?: HTMLElement): Promise<boolean> => {
     if(disposed || actions.current?.() === false)return false;
-    if (drafts().some(draft => draft !== owner)) { actions.status("Complete or cancel the other edit first. Input retained.", "error"); focusDraft(); return false; }
+    if (drafts().some(draft => draft !== owner && !owner?.contains(draft))) { actions.status("Complete or cancel the other edit first. Input retained.", "error"); focusDraft(); return false; }
     if (pendingWrites) { actions.status("Wait for the current change to finish.", "error"); return false; }
     const before = model;
     const locks = [host, treeHost].flatMap(root => [...root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLButtonElement>("input,select,textarea,button")]).map(control => ({ control, disabled: control.disabled }));
@@ -696,13 +761,16 @@ export function renderSceneAuthoring(
     const heading = document.createElement("h2"); heading.textContent = "Scene Preview";
     const through = document.createElement("span"); through.textContent = selectedIndex >= 0 ? `Through Beat ${selectedIndex + 1}` : "Scene start";
     if (state.partial) { const badge = document.createElement("strong"); badge.className = "partial-badge"; badge.textContent = "Partial / unknown"; header.append(heading, through, badge); } else header.append(heading, through);
-    const surround = document.createElement("div"); surround.className = "preview-surround";
+    const choice = state.overlay?.choice;
+    const surround = document.createElement("div"); surround.className = choice ? "preview-surround choice-preview" : "preview-surround";
     const canvas = document.createElement("div"); canvas.className = "preview-canvas"; canvas.style.aspectRatio = `${actions.resolution.width} / ${actions.resolution.height}`;
     if (state.background) {
       const image = document.createElement("img"); image.className = "preview-background"; image.alt = model.authoring.assets.find((asset) => asset.id === state.background?.assetId)?.displayName ?? "Scene background";
       canvas.append(image); void loadImage(state.background.assetId, "imagePreview", image, canvas);
     } else {
-      const empty = document.createElement("p"); empty.className = "preview-empty"; empty.textContent = state.backgroundUnknown ? "Background unknown after code or unevaluated flow" : "No background at this point"; canvas.append(empty);
+      const empty = document.createElement("p"); empty.className = "preview-empty"; empty.textContent = state.backgroundUnknown ? "Background unknown after code or unevaluated flow" : "No background at this point";
+      if (choice && state.backgroundUnknown) { empty.title = empty.textContent; empty.textContent = "Background unknown"; }
+      canvas.append(empty);
     }
     for (const visible of state.characters) {
       const figure = document.createElement("figure"); figure.className = `preview-character ${visible.placement}`;
@@ -712,9 +780,33 @@ export function renderSceneAuthoring(
       const caption = document.createElement("figcaption"); caption.textContent = character?.displayName ?? "Character"; figure.append(caption); canvas.append(figure);
     }
     if (state.charactersUnknown) { const unknown = document.createElement("span"); unknown.className = "preview-unknown-layer"; unknown.textContent = "Other character state may be unknown"; canvas.append(unknown); }
-    if (state.overlay) { const overlay = document.createElement("div"); overlay.className = `preview-overlay ${state.overlay.kind}`; overlay.textContent = state.overlay.text || (state.overlay.kind === "dialogue" ? "Empty dialogue" : state.overlay.kind);if(state.overlay.kind==="dialogue"){const beat=scene.beats.find(b=>b.id===state.overlay?.beatId);if(beat?.payload.type==="dialogue"){const character=model.authoring.characters.find(c=>c.id===(beat.payload as {characterId:string}).characterId);const name=document.createElement("strong");name.textContent=character?.displayName??"";name.className="preview-speaker";overlay.prepend(name);}} canvas.append(overlay); }
-    surround.append(canvas); preview.append(header, surround);
-    if(typeof ResizeObserver!=="undefined"){const observer=new ResizeObserver(()=>{const b=surround.getBoundingClientRect();const ratio=actions.resolution.width/actions.resolution.height;const width=Math.max(1,Math.min(b.width,b.height*ratio));canvas.style.width=`${width}px`;canvas.style.height=`${width/ratio}px`;});observer.observe(surround);layoutObservers.push(observer);}
+    if (state.overlay && !choice) {
+      const overlay = document.createElement("div"); overlay.className = `preview-overlay ${state.overlay.kind}`;
+      overlay.textContent = state.overlay.text || (state.overlay.kind === "dialogue" ? "Empty dialogue" : state.overlay.kind);
+      if (state.overlay.kind === "dialogue") {
+        const beat = scene.beats.find(b => b.id === state.overlay?.beatId);
+        if (beat?.payload.type === "dialogue") {
+          const characterId = beat.payload.characterId;
+          const name = document.createElement("strong"); name.className = "preview-speaker";
+          name.textContent = model.authoring.characters.find(character => character.id === characterId)?.displayName ?? ""; overlay.prepend(name);
+        }
+      }
+      canvas.append(overlay);
+    }
+    let stage = surround;
+    if (choice) {
+      stage = document.createElement("div"); stage.className = "preview-game-stage"; stage.setAttribute("aria-label", "Game stage");
+      stage.append(canvas); surround.append(stage, renderChoiceSummary(choice, model.authoring.characters));
+    } else surround.append(canvas);
+    preview.append(header, surround);
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(() => {
+        const bounds = stage.getBoundingClientRect(), ratio = actions.resolution.width / actions.resolution.height;
+        const width = Math.max(1, Math.min(bounds.width, bounds.height * ratio));
+        canvas.style.width = `${width}px`; canvas.style.height = `${width / ratio}px`;
+      });
+      observer.observe(stage); layoutObservers.push(observer);
+    }
 
     const details = document.createElement("div"); details.className = "preview-details scene-context-inspector";details.hidden=!(actions.layoutKey&&layoutFor(actions.layoutKey).inspectorOpen);
     const toggle=button("Scene details");toggle.ariaExpanded=String(!details.hidden);toggle.addEventListener("click",()=>{details.hidden=!details.hidden;toggle.ariaExpanded=String(!details.hidden);if(actions.layoutKey)saveLayout(actions.layoutKey,{inspectorOpen:!details.hidden});});header.append(toggle);
@@ -778,7 +870,8 @@ export function renderSceneAuthoring(
     let parent = beat ? beatBody(beat) : { type: "root" } as BodyRef;
     while (parent.type === "branch") { const owner = parent; collapsedConditions.delete(owner.groupId); const header = scene.beats.find(item => item.id === owner.branchId); parent = header ? beatBody(header) : { type: "root" }; }
     draw();
-    return beat ? [...host.querySelectorAll<HTMLElement>(".beat-card")].find(item => item.dataset.beatId === beat.id) : host.querySelector<HTMLElement>(".beats-list") ?? undefined;
+    return beat?.conditionalBranch?.choiceOption ? [...host.querySelectorAll<HTMLElement>(".story-choice-option")].find(item => item.dataset.optionId === beat.id)
+      : beat ? [...host.querySelectorAll<HTMLElement>(".beat-card")].find(item => item.dataset.beatId === beat.id) : host.querySelector<HTMLElement>(".beats-list") ?? undefined;
   };
   const destinations = (scene: SceneDocument, initialBody: BodyRef, exclude?: SceneBeat, initialPosition?: Position, insertion = false, retained?: ScreenInsertion): { host: HTMLElement; read: () => { body: BodyRef; position: Position } } => {
     const panel = document.createElement("div"); panel.className = "story-destination";
@@ -786,6 +879,10 @@ export function renderSceneAuthoring(
     for (const branch of scene.beats.filter(beat => beat.conditionalBranch)) {
       const body: BodyRef = { type: "branch", groupId: branch.conditionalBranch!.groupId, branchId: branch.id };
       if (exclude?.conditionalBranch && insideCondition(scene, body, exclude.conditionalBranch.groupId)) continue;
+      if (exclude?.payload.type === "choice" && exclude.payload.options.some(option => {
+        const header = scene.beats.find(b => b.id === option.id);
+        return header?.conditionalBranch && insideCondition(scene, body, header.conditionalBranch.groupId);
+      })) continue;
       parents.push({ key: branch.id, body, label: bodyCaption(scene, body, model) });
     }
     const initialParent = parents.find(item => item.body.type === initialBody.type && (item.body.type === "root" || initialBody.type === "branch" && item.body.groupId === initialBody.groupId && item.body.branchId === initialBody.branchId));
@@ -1006,6 +1103,39 @@ export function renderSceneAuthoring(
     const branchHosts = new Map<string, HTMLElement>();
     const groupHosts = new Map<string, HTMLElement>();
     scene.beats.forEach((beat, index) => {
+      if (beat.conditionalBranch?.choiceOption) {
+        const branch = beat.conditionalBranch;
+        const menu = owningChoice(scene, beat.id);
+        const option = menu?.payload.type === "choice" ? menu.payload.options.find(o => o.id === beat.id) : undefined;
+        const section = document.createElement("section"); section.className = "story-choice-option story-branch-body"; section.dataset.optionId = beat.id; section.dataset.branchId = beat.id;
+        section.style.setProperty("--option-color", ["var(--choice-arm-one)", "var(--choice-arm-two)", "var(--choice-arm-three)", "var(--choice-arm-four)"][(branch.ordinal ?? 0) % 4]!);
+        const heading = document.createElement("strong"); heading.textContent = `${(branch.ordinal ?? 0) + 1}. ${option?.text ?? "Option"}`;
+        const availability = document.createElement("p"); availability.textContent = option?.condition ? `Only when ${conditionCaption(option.condition, model.authoring.variables)}` : "Always available";
+        const body: BodyRef = { type: "branch", groupId: branch.groupId, branchId: beat.id };
+        const add = button("Add a Beat", "text-button"); add.dataset.beatOpener = `branch:${beat.id}`; add.disabled = scene.sourceConflict;
+        add.addEventListener("click", () => { if (!draftGuard()) return; renderNewBeat(section, scene, "narration", body, defaultInsertion(scene, body), undefined, `branch:${beat.id}`); });
+        const then = button("Then", "text-button"); then.disabled = scene.sourceConflict || !!menu?.protected;
+        then.addEventListener("click", () => {
+          const target = prepareOperation(scene); if (!target) return;
+          const last = bodyNodes(scene, body).at(-1);
+          const ending = last && isTransfer(last) ? last : undefined;
+          const kind = selectOf([{ value: "continue", label: "Continue after the Choice" }, { value: "jump", label: "Go to a Scene" }, { value: "repeatChoice", label: "Repeat this Choice" }, { value: "return", label: "Return to caller or main menu" }], ending?.payload.type ?? "continue"); kind.setAttribute("aria-label", "Then");
+          const destination = entitySelect(model.scenes.map(s => ({ id: s.id, label: s.displayName })), ending?.payload.type === "jump" ? ending.payload.sceneId : ""); destination.setAttribute("aria-label", "Destination Scene");
+          const destinationLabel = labelled("Destination Scene", destination); const show = (): void => { destinationLabel.hidden = kind.value !== "jump"; }; kind.addEventListener("change", show); show();
+          operation(scene, target, "Option ending", [labelled("Then", kind), destinationLabel], () => {
+            if (kind.value === "continue") { if (!ending && menu) return { type: "updateBodyBeat", beatId: menu.id, expectedBody: beatBody(menu), beat: menu.payload }; if (!ending) throw Error("The owning Choice is unavailable."); return { type: "removeStoryNode", node: nodeRef(ending), expectedBody: body }; }
+            const payload: BeatPayload = kind.value === "jump" ? { type: "jump", sceneId: required(destination) } : kind.value === "repeatChoice" ? { type: "repeatChoice", target: ending?.payload.type === "repeatChoice" ? ending.payload.target : null } : { type: "return" };
+            return ending ? { type: "updateBodyBeat", beatId: ending.id, expectedBody: body, beat: payload } : { type: "insertBodyBeat", body, position: { type: "end" }, beat: payload };
+          }, "Apply ending");
+        });
+        const following = document.createElement("p"); following.className = "story-continuation"; following.textContent = bodyNodes(scene, body).some(isTransfer) ? "Explicit transfer at the end of this option" : "Continue after the Choice";
+        const context = document.createElement("p"); context.className = "story-breadcrumb"; context.textContent = bodyCaption(scene, body, model);
+        const addCondition = button("Add Condition", "text-button"); addCondition.disabled = scene.sourceConflict;
+        addCondition.addEventListener("click", () => openConditionForm(scene, body, defaultInsertion(scene, body)));
+        const focus = button("Focus this branch", "text-button"); focus.addEventListener("click", () => { if (draftGuard()) { focusedBranch = beat.id; draw(); } });
+        following.textContent += ` · ${bodyCaption(scene, menu ? beatBody(menu) : { type: "root" }, model)}`;
+        section.append(heading, context, availability, add, addCondition, focus, then, following); (beat.owner ? branchHosts.get(beat.owner.branchId) ?? list : list).append(section); branchHosts.set(beat.id, section); return;
+      }
       const card = document.createElement("article"); card.className = `beat-card${selectedBeatId === beat.id ? " selected" : ""}`; card.setAttribute("role", "listitem");card.dataset.beatId=beat.id;
       if (beat.owner) { card.classList.add("nested-dialogue"); card.dataset.groupId=beat.owner.groupId; card.dataset.branchId=beat.owner.branchId; }
       if (beat.conditionalBranch) card.classList.add("conditional-branch");
@@ -1083,7 +1213,7 @@ export function renderSceneAuthoring(
       if (beat.payload.type === "choice") {
         const options = document.createElement("ul");
         for (const option of beat.payload.options) {
-          const item = document.createElement("li"); const destination = model.scenes.find(scene => scene.id === option.destinationSceneId)?.displayName ?? "Missing Scene";
+          const item = document.createElement("li"); const destination = "Option body, then shared continuation";
           item.textContent = `${option.text} → ${destination} · ${option.condition ? `Available when ${conditionCaption(option.condition, model.authoring.variables)} · Availability unknown` : "Always available"}`;
           options.append(item);
         }
@@ -1096,7 +1226,7 @@ export function renderSceneAuthoring(
     if (beat.structuralPlaceholder) { const empty = document.createElement("p"); empty.textContent = "Empty branch · source keeps pass until a Beat is added."; card.append(empty); return; }
     if (beat.protected) {
       const protectedPanel = document.createElement("div"); protectedPanel.className = "protected-code";
-      const explanation = document.createElement("p"); explanation.textContent = beat.payload.type === "customCode" ? beat.payload.reason : "Protected source";
+      const explanation = document.createElement("p"); explanation.textContent = beat.sourceFallback ?? (beat.payload.type === "customCode" ? beat.payload.reason : "Protected source");
       const source = document.createElement("pre"); source.textContent = beat.payload.type === "customCode" ? beat.payload.source : "";
       const open = button("View in Source", "button secondary"); open.disabled = !actions.viewSource;
       open.addEventListener("click", () => actions.viewSource?.(scene.sourcePath, beat.byteStart, beat.byteEnd, scene.sourceRevision));
@@ -1214,8 +1344,8 @@ export function renderSceneAuthoring(
     const panel = document.createElement("section"); panel.className = "new-beat scene-draft";
     panel.addEventListener("compositionstart", () => { composing = true; }); panel.addEventListener("compositionend", () => { composing = false; }); panel.setAttribute("aria-labelledby", "new-beat-title");
     const heading = document.createElement("h3"); heading.id = "new-beat-title"; heading.textContent = "Add Beat";
-    const types = (Object.keys(beatLabels) as BeatPayload["type"][]).filter((type) => type !== "customCode");
-    const type = selectOf(types.map((value) => ({ value, label: beatLabels[value] })), initialType);
+    const types = (Object.keys(beatLabels) as BeatPayload["type"][]).filter((type) => type !== "customCode" && type !== "repeatChoice");
+    const type = selectOf(types.map((value) => ({ value, label: beatLabels[value] })), initialType); type.setAttribute("aria-label", "Beat type");
     const destination = document.createElement("p"); destination.className = "story-insertion";
     const insertionAnchor = position.type === "before" ? position.anchor : undefined;
     const anchor = insertionAnchor ? bodyNodes(scene, body).find(beat => JSON.stringify(nodeRef(beat)) === JSON.stringify(insertionAnchor)) : undefined;
@@ -1223,6 +1353,8 @@ export function renderSceneAuthoring(
     const placement=destinations(scene,body,undefined,position,true,insertion);
     const screenType=()=>["showScreen","hideScreen","callScreen"].includes(type.value);
     const unavailableScene = !!insertion && insertion.sceneId !== scene.id;
+    const usesPlacement = (): boolean => screenType() || !insertion && !screenInsertion;
+    const chosenLocation = (): { body: BodyRef; position: Position } => usesPlacement() ? readLocation() : unavailableScene ? { body: { type: "root" }, position: defaultInsertion(scene, { type: "root" }) } : { body, position };
     const readLocation=placement.read;
     const pendingMarker=document.createElement("div");pendingMarker.className="story-screen-pending";pendingMarker.role="status";
     const updatePendingMarker=()=>{
@@ -1246,10 +1378,10 @@ export function renderSceneAuthoring(
     placement.host.classList.add("scene-draft");
     for(const event of ["input","change"])placement.host.addEventListener(event,()=>{if(remember())delete placement.host.dataset.unsubmitted;else placement.host.dataset.unsubmitted="true";updatePendingMarker();});
     const editorHost = document.createElement("div"),secondaryHost=document.createElement("div");secondaryHost.className="story-screen-secondary";
-    const validateNew = assignmentValidation(scene, captured, beat => ({ type: "insertBodyBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, ...(screenType() ? readLocation() : { body, position }), beat }));
+    const validateNew = assignmentValidation(scene, captured, beat => ({ type: "insertBodyBeat", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, ...chosenLocation(), beat }));
     let editor = buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, actions, validateNew);
     const typeDrafts = new Map<string, BeatEditor>([[type.value, editor]]);
-    const replaceEditor = (): void => { placement.host.hidden=!screenType();if(placement.host.hidden)delete placement.host.dataset.unsubmitted;destination.hidden=screenType();remember();editor = typeDrafts.get(type.value) ?? buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, actions, validateNew); typeDrafts.set(type.value, editor); editorHost.replaceChildren(editor.host);secondaryHost.replaceChildren(...(editor.secondary?[editor.secondary]:[]));panel.classList.toggle("story-screen-editor",screenType());dirtyDraft(panel, editor.controls); };
+    const replaceEditor = (): void => { placement.host.hidden=!usesPlacement();if(placement.host.hidden)delete placement.host.dataset.unsubmitted;destination.hidden=screenType();remember();editor = typeDrafts.get(type.value) ?? buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, actions, validateNew); typeDrafts.set(type.value, editor); editorHost.replaceChildren(editor.host);secondaryHost.replaceChildren(...(editor.secondary?[editor.secondary]:[]));panel.classList.toggle("story-screen-editor",screenType());dirtyDraft(panel, editor.controls); };
     type.addEventListener("change", replaceEditor); replaceEditor();
     const actionsRow = document.createElement("div"); actionsRow.className = "row-actions";
     const cancel = button("Cancel", screenType()?"button secondary":"text-button");
@@ -1264,7 +1396,7 @@ export function renderSceneAuthoring(
       if(pending || composing)return;
       try {
         const payload = editor.read();
-        const location=screenType()?readLocation():unavailableScene?{body:{type:"root"} as BodyRef,position:defaultInsertion(scene,{type:"root"})}:{body,position};
+        const location=chosenLocation();
         pending=true;panel.dataset.unsubmitted="true";
         const controls=[...panel.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement|HTMLButtonElement>("input,select,textarea,button")];
         const locks = controls.map(control => ({ control, disabled: control.disabled }));
@@ -1339,7 +1471,8 @@ function beatSummary(payload: BeatPayload, model: SceneWorkspace): string {
     case "choice": return `${payload.options.length} option${payload.options.length === 1 ? "" : "s"}${payload.options.some(option => option.condition) ? " · Conditional availability unknown" : ""}`;
     case "jump": return scene(payload.sceneId);
     case "call": return `${scene(payload.sceneId)} · Returns to next Beat`;
-    case "return": return "Scene terminal";
+    case "repeatChoice": return "Repeat this Choice";
+    case "return": return "Return to caller or main menu";
     case "customCode": return payload.reason;
   }
 }
@@ -1437,27 +1570,57 @@ function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload, existing =
     case "playSfx": { const asset = assets("sfx", payload.assetId); add("SFX", asset); read = () => ({ type: "playSfx", assetId: required(asset) }); break; }
     case "transition": { const transition = transitions(false); add("Transition", transition); read = () => ({ type: "transition", transition: transition.value as "dissolve" | "fade" }); break; }
     case "choice": {
-      const countLocked = existing && payload.options.some(option => !!option.condition);
+      const picked = selectOf([{ value: "showNormally", label: "Show normally" }, { value: "markPicked", label: "Mark picked" }, { value: "hidePicked", label: "Hide picked" }], payload.pickedPolicy ?? "showNormally");
+      picked.setAttribute("aria-label", "Picked options");
+      let pickedChanged = false;
+      picked.addEventListener("change", () => { pickedChanged = true; host.dispatchEvent(new Event("input", { bubbles: true })); });
+      host.append(labelled("Picked options", picked));
+      const promptRow = document.createElement("div"); promptRow.className = "choice-prompt";
+      let hasPrompt = !!payload.prompt;
+      const promptText = input(payload.prompt?.text ?? ""); promptText.setAttribute("aria-label", "Prompt text");
+      const speaker = entitySelect([{ id: "narration", label: "Narration (no speaker)" }, ...model.authoring.characters.map(c => ({ id: c.id, label: c.displayName }))], payload.prompt?.type === "dialogue" ? payload.prompt.characterId : "narration");
+      speaker.setAttribute("aria-label", "Prompt speaker");
+      const validatePrompt = validateField(promptText, () => { if (hasPrompt) requiredText(promptText, "Prompt text"); });
+      const addPrompt = button("+ Prompt", "text-button"); addPrompt.setAttribute("aria-label", "Add a prompt shown with the options");
+      const removePrompt = button("Remove prompt", "text-button");
+      const drawPrompt = (): void => {
+        promptRow.replaceChildren();
+        if (hasPrompt) promptRow.append(labelled("Prompt", speaker), labelled("Prompt text", promptText), removePrompt);
+        else { const empty = document.createElement("span"); empty.textContent = "No prompt with the options"; promptRow.append(empty, addPrompt); }
+      };
+      const changePrompt = (enabled: boolean): void => { hasPrompt = enabled; drawPrompt(); host.dispatchEvent(new Event("input", { bubbles: true })); (enabled ? promptText : addPrompt).focus(); };
+      addPrompt.addEventListener("click", () => changePrompt(true)); removePrompt.addEventListener("click", () => changePrompt(false));
+      controls.push(speaker, promptText); drawPrompt(); host.append(promptRow);
       const optionHost = document.createElement("div"); optionHost.className = "choice-options"; host.append(optionHost);
-      const rows: { text: HTMLInputElement; destination: HTMLSelectElement; row: HTMLElement; guard: ReturnType<typeof buildAvailabilityEditor>; validateText: () => void; validateDestination: () => void }[] = [];
-      const addOption = (option: ChoiceOption = { text: "", destinationSceneId: model.scenes[0]?.id ?? "" }): void => {
+      const rows: { id?: string; text: HTMLInputElement; row: HTMLElement; guard: ReturnType<typeof buildAvailabilityEditor>; policy: HTMLSelectElement; validateText: () => void }[] = [];
+      const redraw = (): void => { rows.forEach((row, index) => { row.row.querySelector("strong")!.textContent = `Option ${index + 1}`; optionHost.append(row.row); }); host.dispatchEvent(new Event("input", { bubbles: true })); };
+      const addOption = (option: ChoiceOption = { text: "" }): void => {
         const row = document.createElement("div"); row.className = "choice-option";
+        const number = document.createElement("strong"); number.textContent = `Option ${rows.length + 1}`;
         const text = input(option.text); text.setAttribute("aria-label", "Choice option text");
-        const destination = scenes(option.destinationSceneId); destination.setAttribute("aria-label", "Choice destination Scene");
-        row.append(labelled("Choice option text", text), labelled("Choice destination Scene", destination));
+        row.append(number, labelled("Choice option text", text));
         const validateText = validateField(text, () => { requiredText(text, "Choice text"); });
-        const validateDestination = validateField(destination, () => { required(destination); });
         const guard = buildAvailabilityEditor(model.authoring.variables, option.condition); row.append(guard.host);
-        const remove = button("Remove", "text-button"); remove.disabled = countLocked; remove.addEventListener("click", () => { const index = rows.findIndex(item => item.row === row); if (index >= 0) rows.splice(index, 1); row.remove(); host.dispatchEvent(new Event("input", { bubbles: true })); });
-        row.append(remove); rows.push({ text, destination, row, guard, validateText, validateDestination }); controls.push(text, destination); optionHost.append(row);
+        const policy = selectOf([{ value: "hide", label: "Hide" }, { value: "showDisabled", label: "Show disabled" }], option.unavailablePolicy ?? "hide");
+        policy.setAttribute("aria-label", "If false");
+        const policyField = labelled("If false", policy); guard.host.append(policyField);
+        const refreshPolicy = (): void => { policyField.hidden = !guard.host.querySelector<HTMLInputElement>('input[aria-label="Available when"]')!.checked; };
+        guard.host.addEventListener("change", refreshPolicy); refreshPolicy();
+        const remove = button("Remove option", "text-button"); remove.addEventListener("click", () => { const index = rows.findIndex(item => item.row === row); if (index >= 0) rows.splice(index, 1); row.remove(); redraw(); });
+        const up = button("Move option up", "text-button"), down = button("Move option down", "text-button");
+        const move = (delta: number): void => { const index = rows.findIndex(item => item.row === row), to = index + delta; if (to < 0 || to >= rows.length) return; [rows[index], rows[to]] = [rows[to]!, rows[index]!]; redraw(); };
+        up.addEventListener("click", () => move(-1)); down.addEventListener("click", () => move(1));
+        const note = document.createElement("p"); note.textContent = option.id ? "Option body follows below. Then changes only its ending." : "Starts empty. Continue after the Choice.";
+        row.append(note, up, down, remove); rows.push({ ...(option.id ? { id: option.id } : {}), text, row, guard, policy, validateText }); controls.push(text); optionHost.append(row);
       };
       payload.options.forEach(addOption); if (!rows.length) addOption();
-      const addChoice = button("Add option", "text-button"); addChoice.disabled = countLocked; addChoice.addEventListener("click", () => { addOption(); host.dispatchEvent(new Event("input", { bubbles: true })); }); host.append(addChoice);
-      const note = document.createElement("p"); note.textContent = "Availability is unknown in the editor preview. If no options are available, execution continues at the next Beat." + (countLocked ? " To change the number of options, edit this Choice in Source." : ""); host.append(note);
+      const addChoice = button("Add option", "text-button"); addChoice.addEventListener("click", () => { addOption(); redraw(); }); host.append(addChoice);
+      const note = document.createElement("p"); note.textContent = "Each option runs its own Beats, then continues after the Choice. Availability is unknown in this preview."; host.append(note);
       read = () => {
         if (!rows.length) throw new Error("A Choice needs at least one option.");
-        const options = rows.map(row => { row.validateText(); row.validateDestination(); const condition = row.guard.read(); return { text: row.text.value, destinationSceneId: required(row.destination), ...(condition ? { condition } : {}) }; });
-        return { type: "choice", options };
+        validatePrompt();
+        const prompt: ChoicePrompt | undefined = hasPrompt ? speaker.value === "narration" ? { type: "narration", text: promptText.value } : { type: "dialogue", characterId: required(speaker), text: promptText.value } : undefined;
+        return { type: "choice", ...((payload.pickedPolicy || pickedChanged) ? { pickedPolicy: picked.value as PickedPolicy } : {}), ...(prompt ? { prompt } : {}), options: rows.map(row => { row.validateText(); const condition = row.guard.read(); return { ...(row.id ? { id: row.id } : {}), text: row.text.value, ...(condition ? { condition, ...(row.policy.value === "showDisabled" ? { unavailablePolicy: "showDisabled" as const } : {}) } : {}) }; }) };
       }; break;
     }
     case "jump": { const destination = scenes(payload.sceneId); add("Destination Scene", destination); read = () => ({ type: "jump", sceneId: required(destination) }); break; }
@@ -1468,6 +1631,7 @@ function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload, existing =
       const note = document.createElement("p"); note.textContent = "Returns to the next Beat. The editor preview does not execute the called Scene."; host.append(note);
       read = () => { validate(); return { type: "call", sceneId: required(destination), returnLabel: payload.returnLabel }; }; break;
     }
+    case "repeatChoice": read = () => payload; break;
     case "return": read = () => ({ type: "return" }); break;
     case "customCode": read = () => payload; break;
   }
@@ -1491,9 +1655,10 @@ function defaultPayload(type: BeatPayload["type"], model: SceneWorkspace, screen
     case "playSfx": return { type, assetId: model.authoring.assets.find((item) => item.kind === "sfx")?.id ?? "" };
     case "transition": return { type, transition: "dissolve" };
     case "setVariable": { const variable = model.authoring.variables[0]; return { type, variableId: variable?.id ?? "", value: variable?.defaultValue ?? "" }; }
-    case "choice": return { type, options: [{ text: "", destinationSceneId: model.scenes[0]?.id ?? "" }] };
+    case "choice": return { type, pickedPolicy: "showNormally", options: [{ text: "" }] };
     case "jump": return { type, sceneId: model.scenes[0]?.id ?? "" };
     case "call": return { type, sceneId: model.scenes[0]?.id ?? "", returnLabel: null };
+    case "repeatChoice": return { type };
     case "return": return { type };
     case "customCode": return { type, source: "", reason: "Protected source" };
   }

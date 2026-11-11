@@ -570,10 +570,48 @@ media rules.
 ### Not yet in production
 
 Production Story still has the earlier layout, with the preview above a beat list.
-Its Choice is jump-only and ends the scene, and options have no body. Option bodies,
-prompts, hidden or disabled options, Repeat and Picked options need the model and
-runtime work in [issue #98](https://github.com/Caldwell-41/Renpy-editor/issues/98).
-Arithmetic and the decimal type need [issue #87](https://github.com/Caldwell-41/Renpy-editor/issues/87).
+The #101 slice adds numbered option bodies, caption/order controls, explicit Beat
+insertion positions and Then controls for Continue, Jump and Return in that editor.
+#102 adds conditions, nested Choices and Scene Calls inside options. #103 adds the
+approved prompt row above the options: "+ Prompt", a narration/existing Character
+picker, prompt text and removal. Commit and Cancel use the existing retained Beat
+draft. Accepted prompts appear with the options in the illustrative preview;
+manual option selection can expose a nested prompt without evaluating its guard.
+#104 adds each guarded option's If false control with Hide (default) and Show
+disabled. Commit/Cancel and refused drafts use the same existing Beat editor.
+The inert preview labels availability as unknown and retains the false-condition
+policy in hover/accessibility text; it does not infer values or allow game selection. Editing focus remains
+separate from game sensitivity and picked state. Unsupported runtime templates
+show a protected Source fallback reason. #105 adds Repeat this Choice to Then.
+It edits the same ending Beat, preserves earlier Beats, and revisits the owning
+menu with its prompt and reevaluated availability. Continue removes only the ending;
+Return retains its caller-sensitive meaning. Cancel and refused drafts retain the
+existing draft protections; accepted edits use shared Undo/Redo and reopen. Nested
+Choices own separate Repeat targets. Preview describes Repeat without executing it
+or inventing current values. #106 adds the whole-Choice Picked options selector
+with Show normally, Mark picked and Hide picked. New Choices start with Show
+normally and record selections from their first visit. Existing unconfigured
+Choices keep their source until an accepted policy edit. Stable source-backed
+Choice and option UUIDs preserve identity through caption changes and reorder.
+Mark picked keeps the native action selectable with a check; Show disabled rows
+have a distinct lock. Hide picked takes precedence over disabled display,
+and hiding the last selectable option continues after the Choice. Selection records
+precede authored option Beats and use ordinary current-save, rollback-aware state.
+Preview reports picked state unknown. Commit, Cancel, refused drafts, Source
+fallback, shared history and reopen retain their existing owners. The implementation
+uses schema 14 while preserving frozen older recognizers.
+
+The approved [Choice preview A v2](design/choice-preview-correction/HANDOFF.md)
+keeps the existing Game canvas on the left and puts the prompt, picked-state notice
+and numbered options in one keyboard-scrollable summary on the right. Missing
+prompts leave no empty row. Duplicate captions stay separate and numbered. Only
+conditional rows say "Condition unknown"; Show normally adds no picked-state line.
+The picked-state notice stays separate from the configured Mark picked/Hide picked
+policy. Long text wraps and scrolls within the existing preview allocation. The
+Game canvas retains background/Character media and the other-character-state notice;
+the shortened background notice keeps its original reason in hover text.
+The full Combined layout and palette remain with #110. Arithmetic uses the accepted
+shared controls.
 Until a capability exists, the editor says it is not built instead of showing a
 working-looking control.
 

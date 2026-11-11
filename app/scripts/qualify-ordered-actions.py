@@ -106,7 +106,7 @@ def validate_bundle(root):
         require(record['path'] == name, 'wrong metadata sidecar')
         metadata[key] = load_json(verify(record).read_text(encoding='utf-8'))
     project,mapping,authoring = (metadata[k] for k in ('project','sourceMap','authoring'))
-    require(mapping['schemaVersion'] == 8 and project['projectId'] == mapping['projectId'] == authoring['projectId'], 'wrong source identity')
+    require(mapping['schemaVersion'] in (8, 9, 10, 11, 12, 13, 14) and project['projectId'] == mapping['projectId'] == authoring['projectId'], 'wrong source identity')
     require(project['sdk'] == {'adapter':'renpy-8.5.3','version':'8.5.3'}, 'wrong pinned SDK')
     panel,dialog,entry = (manifest[k] for k in ('panel','dialog','entry'))
     owners = {o['id']:o for o in mapping['ownedScreens']}

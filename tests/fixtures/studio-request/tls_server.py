@@ -63,7 +63,10 @@ with socket.socket() as listener:
         print("connected", flush=True)
         if mode == "handshake_stall":
             # Read ClientHello then wait for cancellation of the exact transport.
-            raw.recv(65536)
+            hello = raw.recv(65536)
+            if not hello:
+                raise RuntimeError("Client closed before sending ClientHello")
+            print("handshake_started", flush=True)
             while raw.recv(65536):
                 pass
             print("closed", flush=True)

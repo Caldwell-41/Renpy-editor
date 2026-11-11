@@ -858,6 +858,10 @@ mod source_tests {
         for scene in map["sceneMappings"].as_array_mut().unwrap() {
             for beat in scene["beats"].as_array_mut().unwrap() {
                 beat["legacyExtra"] = json!({"kept":true});
+                // Version 3 left trivia unowned; only dialogue carried a branch owner.
+                if beat["kind"] != "dialogue" {
+                    beat.as_object_mut().unwrap().remove("owner");
+                }
                 if let Some(branch) = beat
                     .get_mut("conditionalBranch")
                     .and_then(Value::as_object_mut)

@@ -25,8 +25,8 @@ remain separate from those bounded results.
 [Story Combined #110](https://github.com/Caldwell-41/Renpy-editor/issues/110) and
 its #111–#120 slices own the approved layout/palette, Tracks/Reel, cross-view
 context and beat drafts, and assembled native/human acceptance. Arithmetic
-prerequisites are accepted; Choice #98 remains open. No Story implementation or
-release is selected. Read the live tickets before selecting a slice.
+prerequisites are accepted. Choice #98 is selected below; the full Story workspace
+and release remain unselected. Read the live tickets before selecting a Story slice.
 
 [Story Combined v1](../design/story-revamp/approval.json), its
 [conflict interaction](../design/story-revamp/README.md#approved-draft-conflict-interaction)
@@ -43,10 +43,17 @@ The [standing 3B exception](../tasks/reference/phase-2-3-delivery.md#standing-ph
 permits remaining ticket starts while preserving actual dependencies and pending
 acceptance. Historical allowances remain closed.
 
-## Selected documentation work
+## Selected Choice implementation
 
-Kris selected only item 4 of the [PR #122 retro](../tasks/evidence/pr122-retro.md):
-shorten CURRENT/HANDOVER while preserving recovery and evidence. Publication,
-required checks, merge and safe task-branch retirement are authorized. Items 1–3
-are unselected. [The maintenance record](../tasks/evidence/agent-documentation-ownership.md#status-record-cleanup-2026-11-10)
-owns preservation and verification; HANDOVER owns continuation.
+Kris selected [Choice #98](https://github.com/Caldwell-41/Renpy-editor/issues/98)
+and #101–#106 on `codex/choice-98` in
+[PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125). All six slices,
+approved preview A v2 and the closeout review fixes are integrated. Both targets
+have focused Choice SDK proof, including all 27 picked-state outcomes. Full Story
+#110 remains separate.
+
+Kris accepted the final package evidence on 2026-11-11. Every gate, package build
+and packaged case passed on both targets, and each smoke passed every observation.
+The smoke report was rejected only for a stale probe stage label, now corrected.
+The native/human session is waived. [The closeout record](../tasks/evidence/choice-98.md#closeout-review-and-final-campaign)
+owns results, caveats and spent allowances. The PR awaits Kris's merge decision.

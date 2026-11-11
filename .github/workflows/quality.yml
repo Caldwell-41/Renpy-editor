@@ -116,12 +116,12 @@ jobs:
           key: help-offline-core
           workspaces: app -> target
           cache-bin: 'false'
-      - name: Check Help creation, references and fractional geometry without SDK execution
+      - name: Check authoring fixtures, Help, references and fractional geometry without SDK execution
         if: ${{ !cancelled() && steps.scope.outputs.code == 'true' }}
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/help-offline"
-          for filter in scene::logic::dialog_tests screens::tests::references screens::canvas::tests::base_help_fidelity_exports_typed_assets_styles_and_exact_source_without_execution screens::canvas::tests::helper_accounting_reserves_failed_initial_and_replacement_owner_attempts_offline lifecycle::canvas_tests::canvas_status_preserves_helper_fractional_geometry; do
+          for filter in scene::logic::dialog_tests screens::tests::references screens::canvas::tests::base_help_fidelity_exports_typed_assets_styles_and_exact_source_without_execution screens::canvas::tests::helper_accounting_reserves_failed_initial_and_replacement_owner_attempts_offline lifecycle::canvas_tests::canvas_status_preserves_helper_fractional_geometry lifecycle::acceptance::phase1h_authored_sources_match_manifest_without_sdk; do
             cargo +1.90.0 test -p loomlight-core --locked --message-format=json-render-diagnostics --lib "$filter" -- --nocapture 2>&1 | tee -a "$RUNNER_TEMP/help-offline/core-artifacts.jsonl" | tee "$RUNNER_TEMP/help-offline/${filter//::/-}.log"
             grep -Eq '^test result: ok\. [1-9][0-9]* passed; 0 failed; 0 ignored;' "$RUNNER_TEMP/help-offline/${filter//::/-}.log"
           done

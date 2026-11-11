@@ -406,7 +406,9 @@ fn edit_nested_dialogue(
         .as_array()
         .unwrap()
         .iter()
-        .filter(|b| b["conditionalBranch"].is_object())
+        .filter(|b| {
+            b["conditionalBranch"].is_object() && b["conditionalBranch"]["choiceOption"] != true
+        })
         .collect::<Vec<_>>();
     assert_eq!(
         branches.len(),

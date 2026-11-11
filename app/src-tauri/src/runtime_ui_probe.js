@@ -94,12 +94,19 @@
         select.value = project.sceneId; select.dispatchEvent(new Event("change"));
         const routes = document.querySelector('select[aria-label="Selected route"]');
         routes.value = [...routes.options].find(o => o.value)?.value; routes.dispatchEvent(new Event("change"));
-        await click("Edit Choice / Jump"); await until(() => document.querySelectorAll('select[aria-label="Choice destination Scene"]').length === 2);
-        const destinations = [...document.querySelectorAll('select[aria-label="Choice destination Scene"]')];
-        // Swap the destinations using visible authoring controls, then restore them.
-        const initial = destinations.map(d => d.value);
-        destinations[0].value=initial[1]; destinations[0].dispatchEvent(new Event("change",{bubbles:true}));
-        await commitBeat();
+        const initialFlow = await read("flow.list",{sessionId});
+        const initial = initialFlow.edges.filter(e=>e.sceneId===project.sceneId && e.kind==="choice").map(e=>e.destination.sceneId);
+        const setFirstEnding = async destination => {
+          await until(()=>document.querySelector('.story-choice-option'));
+          const option=document.querySelector('.story-choice-option');
+          [...option.querySelectorAll('button')].find(b=>b.textContent==='Then').click();
+          await until(()=>document.querySelector('.story-operation[aria-label="Option ending"]'));
+          const panel=document.querySelector('.story-operation[aria-label="Option ending"]');
+          const kind=panel.querySelector('[aria-label="Then"]');kind.value='jump';kind.dispatchEvent(new Event('change',{bubbles:true}));
+          const target=panel.querySelector('[aria-label="Destination Scene"]');target.value=destination;target.dispatchEvent(new Event('change',{bubbles:true}));
+          await click('Apply ending');await until(()=>!document.querySelector('.story-operation'));await settled();
+        };
+        await click("Open Scene");await setFirstEnding(initial[1]);
         let flow = await read("flow.list",{sessionId});
         const assertChangedDestinations = graph => {
           const choices = graph.edges.filter(e=>e.sceneId===project.sceneId && e.kind==="choice");
@@ -129,8 +136,7 @@
         await click("Branches"); await until(() => document.querySelectorAll('.branch-node').length === 3); await click("Scene details");
         const sceneSelect = document.querySelector('select[aria-label="Selected Scene"]'); sceneSelect.value=project.sceneId; sceneSelect.dispatchEvent(new Event("change"));
         const routeSelect = document.querySelector('select[aria-label="Selected route"]'); routeSelect.value=[...routeSelect.options].find(o=>o.value)?.value; routeSelect.dispatchEvent(new Event("change"));
-        await click("Edit Choice / Jump"); await until(() => document.querySelector('select[aria-label="Choice destination Scene"]'));
-        const restore=document.querySelector('select[aria-label="Choice destination Scene"]'); restore.value=initial[0]; restore.dispatchEvent(new Event("change",{bubbles:true})); await commitBeat();
+        await click("Open Scene");await setFirstEnding(initial[0]);
         checkpoint("branches-real-edit-restored");
       }
       checkpoint("controlled-play-install");

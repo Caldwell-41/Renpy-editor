@@ -15,7 +15,7 @@ export function storyFixture(deep = 1): SceneWorkspace {
   add({ id: "maybe", protected: false, owner: { groupId: "group", branchId: "elif" }, payload: { type: "narration", text: "Maybe another time." } });
   header("otherwise", "group", 2, true);
   add({ id: "empty", protected: true, structuralPlaceholder: true, owner: { groupId: "group", branchId: "otherwise" }, payload: { type: "customCode", source: "        pass", reason: "Empty branch" } });
-  add({ id: "choice", protected: false, payload: { type: "choice", options: [{ text: "  Ask about the tram  ", destinationSceneId: "two", condition: trustCondition }, { text: "Leave it for now", destinationSceneId: "two", condition: flagCondition }] } });
+  add({ id: "choice", protected: false, payload: { type: "choice", options: [{ text: "  Ask about the tram  ", condition: trustCondition }, { text: "Leave it for now", condition: flagCondition }] } });
   add({ id: "call", protected: false, payload: { type: "call", sceneId: "two", returnLabel: "stable_return" } });
   add({ id: "after-call", protected: false, payload: { type: "narration", text: "The conversation has ended." } });
   add({ id: "end", protected: false, payload: { type: "return" } });

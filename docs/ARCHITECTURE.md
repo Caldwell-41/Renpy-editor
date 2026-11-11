@@ -409,6 +409,81 @@ Source navigation. Exact early and final SDK proof is recorded in the Phase 3 ta
 CI4 establishes full authoring and saved-callee return after the qualified caller
 narration edit; it does not promise arbitrary script-change save compatibility.
 
+Choice prompts use the existing Choice payload, recursive source recognizer and
+writer. `insertBodyBeat`/`updateBodyBeat` carry an optional narration or existing
+Character prompt through the same transaction/history owner. Source-map v11
+recognizes the menu line plus prompt as one disjoint header, while option headers
+and bodies retain their own records. Historical recognizers remain version-gated;
+verified refinement retains absorbed rows and unknown metadata. Unsupported menu
+forms stay explicit Source. Preview displays literal prompt text and options
+together, and uses only manual branch assumptions. It never executes project code.
+
+Choice availability uses Ren'Py 8.5.3 native menu parsing, filtering, item arguments
+and ChoiceReturn actions. Source-map v12 recognizes the exact supported
+`menu (screen="_ll_choice_v1"):` form. A Show disabled option carries its typed
+condition in `(_ll_available=...)`; its native guard is the disjunction of all
+options' availability (or `True` when an option is unconditional). Hide options
+retain their ordinary native guards. If nothing is selectable, Ren'Py filters out
+every option and follows the existing shared continuation. No option action runs
+or records a pick. Completion analysis retains explicit safe Scene boundaries.
+
+The Screens template owner supplies a semantic derivative of the pinned generated
+`screen choice(items)`. It preserves the native loop, captions, actions and choice
+styles, adding only button sensitivity from that item's argument. Accepted authoring
+adds `game/loomlight_choice_v1.rpy` through the same source/map/history transaction.
+The fixed versioned name is stable; existing declarations and file collisions refuse.
+Opening and no-op never install or repair source. Undo/Redo includes adapter creation.
+The ordinary choice screen and menus without Show disabled remain unchanged.
+
+Only the exact bounded generated template is supported. Custom choice logic, edited
+adapter bytes, duplicate declarations and native menu-filter overrides refuse the
+semantic integration. Existing affected Choices expose a protected Source fallback
+with a reason. Unknown guards, nested bodies, Calls and optional prompts preserve
+their source. This is not #31/#55's styling/canvas adapter or their acceptance.
+Repeat uses this same native menu and availability owner. The existing explicit-body
+command inserts or replaces only the ending transfer. It adds a collision-checked
+`_ll_choice_` label to the owning menu header when needed. Schema 13 recognizes that
+label and its menu as one disjoint header, preserving the Choice and option UUIDs.
+A source jump parses as Repeat only within that menu's own direct option body.
+The target precedes both prompt display and the native availability gate. Repeating
+reevaluates availability, including no-selectable continuation, without replaying
+preceding Scene effects or adding Call frames. Calls retain their stable `from`
+labels and resume inside the option before its Repeat. Nested menus use their own
+targets. Branches projects a body route to the exact owning Choice header; collisions
+produce an unknown route and protected Story fallback. Preview never follows a loop
+or claims current availability. Repeat retains the existing ending owner.
+
+Picked options extend this native availability and action owner. An accepted policy
+adoption writes the mode and stable Choice UUID into the menu arguments, with a
+separate UUID and typed availability arguments for each option. New Story Choices
+explicitly start with Show normally. If the project's choice screen cannot host the
+helper, a new Show normally Choice without Show disabled options is written as the
+plain native menu instead, with no selection records. Existing unconfigured source stays unchanged
+until an accepted policy edit. The option header mapping includes the first
+executable statement, which records the UUID pair before any authored Beat,
+including Jump, Return or Repeat. Rename and reorder preserve these source-backed
+identities; new options receive fresh UUIDs.
+
+The versioned adapter declares `default _ll_picked_v1 = {}` as ordinary current-save,
+rollback-aware Ren'Py state. It preserves native `i.action`, adds a selectable check
+for Mark picked and a distinct disabled lock, and combines Hide picked with native
+availability guards. Disabled rows use the combined selectable gate. Hide wins over
+disabled display; hiding the last selectable answer continues after the Choice
+without recording a pick. Completion checks retain safe Scene endings. Repeat
+revisits the same gate and store. Preview reports picked state unknown.
+
+Schema 14 recognizes the source-backed policy and selection records; recognizers
+through 13 remain frozen and version-gated. Existing source/map transactions,
+Undo/Redo, drafts and reopen own accepted changes and helper creation or upgrade.
+Duplicate keys, reserved declarations, missing or edited helpers, dirty Source and
+unsupported templates refuse authoring with protected Source fallback. The existing
+runtime owner checks each required adapter capability and inspects accepted source
+references before allowing first creation or upgrade. A changed source range alone
+does not permit helper repair. Save/Load, rollback and New Game pass on both
+targets; [the Choice evidence](tasks/evidence/choice-98.md#mac-106-final-qualification)
+owns those results.
+No project Python runs during inspection, authoring or illustrative preview.
+
 The first structural commands are `insertBodyBeat` and `updateBodyBeat`. Their explicit
 body identifies the root or a known group/branch; insertion names an immediate sibling
 node or literal body end. Mutation captures expected ownership and source/project/map
@@ -760,6 +835,8 @@ private desktop inside core's kill-on-close job; it never switches desktops.
 Normal project close, change or application shutdown requests a cooperative stop.
 Core requires the acknowledgment, exit 0 and complete process/pipe cleanup, plus
 Windows desktop closure, before reporting normal shutdown. The existing bounded
+cooperative budget also covers Windows job emptiness after the leader signals exit;
+a signaled leader alone does not prove that the owned job has finished. The existing
 process-tree cleanup remains the failure fallback. A helper failure retains drafts. Frame IDs, source
 and asset revisions bind exported PNGs and actual Ren'Py selection geometry to the
 request. A stale image cannot supply editing geometry. The UI has no simplified
