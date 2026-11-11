@@ -106,7 +106,7 @@
           const target=panel.querySelector('[aria-label="Destination Scene"]');target.value=destination;target.dispatchEvent(new Event('change',{bubbles:true}));
           await click('Apply ending');await until(()=>!document.querySelector('.story-operation'));await settled();
         };
-        await click("Edit Choice / Jump");await setFirstEnding(initial[1]);
+        await click("Open Scene");await setFirstEnding(initial[1]);
         let flow = await read("flow.list",{sessionId});
         const assertChangedDestinations = graph => {
           const choices = graph.edges.filter(e=>e.sceneId===project.sceneId && e.kind==="choice");
@@ -136,7 +136,7 @@
         await click("Branches"); await until(() => document.querySelectorAll('.branch-node').length === 3); await click("Scene details");
         const sceneSelect = document.querySelector('select[aria-label="Selected Scene"]'); sceneSelect.value=project.sceneId; sceneSelect.dispatchEvent(new Event("change"));
         const routeSelect = document.querySelector('select[aria-label="Selected route"]'); routeSelect.value=[...routeSelect.options].find(o=>o.value)?.value; routeSelect.dispatchEvent(new Event("change"));
-        await click("Edit Choice / Jump");await setFirstEnding(initial[0]);
+        await click("Open Scene");await setFirstEnding(initial[0]);
         checkpoint("branches-real-edit-restored");
       }
       checkpoint("controlled-play-install");

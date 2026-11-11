@@ -46,29 +46,22 @@ acceptance. Historical allowances remain closed.
 ## Selected Choice implementation
 
 Kris selected [Choice #98](https://github.com/Caldwell-41/Renpy-editor/issues/98)
-and #101–#106 on `codex/choice-98`, `in_progress` in
+and #101–#106 on `codex/choice-98` in
 [draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125).
-#101–#105 have public-authoring, both-target SDK and automatic CI evidence.
-#106 and all four review corrections are published at `9d229ea4`. Windows passed
-all 27 picked-state outcomes there. Mac passed all 27 on documentation successor
-`ae057e3a`, including actual Save/exit/new-process Load, rollback and New Game.
-The fresh production controller passed thirteen stages and 284 requests.
-[The delivery record](../tasks/evidence/choice-98.md#mac-106-final-qualification) owns
-exact candidates, audit, limits and the #104 receipt limitation.
+All six slices and approved preview A v2 are integrated. Both targets have focused
+Choice SDK proof, including all 27 picked-state outcomes. Rendered comparison,
+398 frontend tests and the required browser/controller checks pass under their
+recorded scopes. Full Story #110 remains separate.
 
-Kris approved up to two additional Mac #106 starts on 2026-11-11; one passed and
-the second remains conditional and unused.
-Kris approved Choice preview A v2. It is integrated with a scrolling summary beside
-the retained Game canvas. Matched rendered samples, media preservation, interface
-scaling, 398 frontend tests and the complete required browser preflight passed.
-[The delivery record](../tasks/evidence/choice-98.md#second-campaign-terminal-audit-and-harness-correction)
-owns review fixes, fixture migrations and evidence limits.
+The [live verification receipt](https://github.com/Caldwell-41/Renpy-editor/issues/98#issuecomment-6784104150)
+records exact-head Windows offline verification and passing automatic quality at
+`bf3abd2f`. Both final package campaigns failed before producing a package; their
+allowance is 2/2 spent. Native/human acceptance remains pending.
 
-The additional approved campaign passed broad core and earlier SDK gates on both
-targets, then failed a stale Phase 1H golden; a deferred Branches browser selector
-also failed. No package was built. Both target reservations are consumed and the
-two-campaign allowance is spent. Harness corrections now have SDK-free red/green
-proof; focused review and Windows offline verification are next. Another package
-campaign requires Kris to extend the recorded allowance. Native/human acceptance
-remains pending. #98/#106 and PR #125 stay open/draft; full Story #110 and other
-PR #122 retro items remain unselected.
+The [continuation audit](../tasks/evidence/choice-98.md#continuation-audit-of-unexecuted-package-paths)
+found another stale packaged-driver selector hidden by incomplete mock ownership.
+The corrected fixture and five shipped runtime browser cases pass. The hosted Mac
+release path also lacks required signing prerequisites. The approved identity is
+available locally; choosing a replacement route requires Kris's decision before
+another campaign. Signing policy and protected recovery remain unchanged.
+#98/#106 and PR #125 stay open/draft.

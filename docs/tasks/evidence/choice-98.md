@@ -1526,3 +1526,67 @@ These are harness corrections, not new SDK/package evidence. Focused local proof
 review and exact Windows offline verification must finish before another campaign
 decision. All prior failures remain retained. #98/#106 and PR #125 stay open/draft;
 final package and native/human acceptance remain pending.
+
+## Continuation audit of unexecuted package paths
+
+The new coordinator resumed published `bf3abd2f` after the explicit ownership
+transfer. The [live receipt](https://github.com/Caldwell-41/Renpy-editor/issues/98#issuecomment-6784104150)
+supersedes the earlier pending-Windows checkpoint. Exact-head Windows offline
+authoring and Branches checks, automatic quality and both scoped reviews passed.
+No worker or campaign remained active. The intentional dependency symlink,
+retained worktrees and protected recovery suffix are preserved.
+
+Before proposing another campaign, the coordinator audited the steps that neither
+failed campaign reached. Two remaining problems were found without SDK execution:
+
+- The packaged runtime driver still selected `Edit Choice / Jump` before editing
+  and restoring an option destination. Real Choice edges carry option-header
+  `guardPath` ownership, so Branches offers `Open Scene`. The ordinary browser
+  fixture omitted that ownership and concealed the stale selector. A three-Scene
+  public-core fixture confirmed both real Choice edges' ownership. Adding it and
+  exact option-header locations to the existing browser fixture reproduced the
+  first navigation timeout. The first correction exposed the same stale restore
+  selector; both are now corrected. The optional packaged Branches probe had the
+  same selector and now follows `Open Scene` too. Production UI/core are unchanged.
+- The selected hosted Mac job has no signing configuration or certificate setup.
+  Its release-mode desktop tests run before packaging; the shared build policy
+  requires the approved signing selector and fingerprint for every Mac release
+  build. Two existing policy tests pass, including refusal of those missing
+  inputs. Repository Actions variables and secret names are empty. An identical
+  hosted campaign cannot complete the Mac path. This is a missing prerequisite,
+  not permission to weaken signing or export a key. A read-only host check confirms
+  the approved identity is available locally. See the
+  [package identity contract](../../../app/README.md#macos-local-package-identity).
+
+All five shipped runtime driver browser cases now pass under pinned Node 24.19.0,
+including destination edit/reopen/restore, long-run Save/Stop, draft refusal and
+runtime-error handling. The ordered Source-observation case also passes. The
+browser/server processes close in the runner's existing `finally` cleanup. The
+optional packaged Branches probe was not launched; its selector correction shares
+the verified production navigation rule but does not claim native workload proof.
+The original failure and intermediate restore failure remain retained privately.
+These results establish renderer/driver compatibility only.
+
+The remaining acceptance sequence is prepared:
+
+1. Review/publish this harness correction and audit its exact-head automatic CI.
+2. Settle the Mac qualification route before authorizing another campaign. Using
+   the existing signed local route with hosted Windows avoids key export, but
+   replacing the selected hosted Mac gate requires Kris's acceptance decision and
+   a corresponding validation-plan/workflow change. Preserve both-target evidence.
+3. After explicit allowance and route approval, qualify the coherent candidate,
+   retaining exact input/package hashes and every required report/cleanup result.
+   The six ordinary packaged cases and WebView/single-instance smoke remain
+   selected. Earlier focused Choice SDK proof keeps its recorded candidate scope.
+4. Use fresh matching packages for focused physical-input/human sessions on each
+   target. Cover Choice body/continuation navigation, prompted and mixed-availability
+   menus, Repeat and picked modes, native Save/focus and retained drafts, exact
+   Source/Branches navigation, resize/scaling, Run/Stop and close/reopen. Existing
+   automatic tests own exhaustive source/history/refusal and saved-state assertions.
+   Record actual human observations separately from synthetic probe input.
+
+Shared consumption remains Mac 18/20 and Windows 9/20, zero reservations, final
+campaign allowance 2/2 spent. No SDK, package, native-editor or manual CI operation
+started during this preparation. The unused conditional #106 correction start
+remains separate. Routing approval, additional campaign allowance and native/human
+acceptance are still pending. #98/#106 and PR #125 remain open/draft.

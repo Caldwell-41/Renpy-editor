@@ -2,59 +2,42 @@
 
 ## Selected Choice implementation
 
-Kris selected #98 and #101–#106 under implement-spec. Delivery is `in_progress` on
-`codex/choice-98` in [draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125).
-[The delivery record](../tasks/evidence/choice-98.md#second-campaign-terminal-audit-and-harness-correction)
-owns exact candidates, reviews, counters and the remaining qualification.
+The new coordinating chat owns Choice #98 and #101–#106 on `codex/choice-98` in
+[draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125). The outgoing
+coordinator and workers have stopped. All six slices and approved preview A v2
+are integrated; full Story #110 remains separate. Preserve the worktrees, unique
+private evidence, intentional `app/node_modules` symlink and recovery suffix below.
 
-#101–#105 have both-target focused SDK evidence. Windows #106 passed all 27
-picked outcomes on `9d229ea4`; Mac passed all 27 on documentation successor
-`ae057e3a`, including actual Save/exit/fresh-process Load, rollback and New Game.
-All earlier failures remain charged and retained. The four earlier core review
-corrections and optional parsed-offset refactor disposition remain recorded.
-The #104 duplicate-receipt limitation is unchanged.
+The [live receipt](https://github.com/Caldwell-41/Renpy-editor/issues/98#issuecomment-6784104150)
+owns final verification at published `bf3abd2f`. Both targets have focused SDK
+Choice evidence, including all 27 picked outcomes. Mac Save/exit/fresh-process Load,
+rollback and New Game passed. Exact-head offline Windows verification, automatic
+quality and scoped reviews passed. These do not establish package/human acceptance.
+The #104 duplicate-receipt limitation remains recorded in the delivery evidence.
 
-Kris approved preview A v2 with "Sure approved". Design delivery `95778e4a`,
-reviewed source `7ba6eea4`, was merged as `6f61babd`; production `ffefe1fc` and
-corrections `075a6648` implement its scrolling Choice summary beside the retained
-Game canvas. All six approved PNG hashes and the pinned fingerprint were verified.
-Existing approved Combined v1 source/history are intact. Three HTML exports gained
-final newlines only. The design chat and review agents are complete.
+The [continuation audit](../tasks/evidence/choice-98.md#continuation-audit-of-unexecuted-package-paths)
+owns the new preparation and remaining acceptance sequence. Packaged runtime and
+optional Branches probes still expected a legacy edit button for option-owned
+routes. The runtime mock now carries real core ownership; its first failure and
+intermediate restore failure are retained. Both runtime navigation points and the
+optional probe now use Open Scene. All five shipped runtime browser cases and
+ordered Source observation pass with pinned Node. No product behavior changed.
+The optional packaged probe has not been launched.
 
-Local verification passes 398 frontend tests, matched eight-state A v2 rendering,
-interface scaling, media preservation, Choice thirteen-stage/284-request controller,
-full ten-case Story controller and the complete five-script browser preflight.
-Reviews found and corrected stale consumers, fixed font sizes and a premature
-probe-completion wait. Preflight exposed old Character catalogue assumptions;
-fixtures/probes now use current References/Game setup and explicit source review.
-Game setup preserves appearance selection through the existing bounded cache.
-Failed local attempts remain retained; no SDK/native/package campaign ran locally.
+The selected hosted Mac path cannot complete without signing prerequisites. Its
+release-mode desktop tests and package build require the pinned identity, but the
+workflow provides no signing setup. Policy tests confirm refusal; Actions secret
+and variable inventories are empty. The approved identity exists locally. Do not
+export a key, bypass signing, change the selected gate or start a replacement
+campaign without the required decision. A local signed-Mac/hosted-Windows route
+is a proposal requiring Kris's acceptance and allowance approval.
 
-The first final campaign failed core tests on `7abb9caf`. Published corrections
-`6353164f` and `e0050aba` restore root Continue anchors, migrate fixtures and let
-Windows cooperative shutdown wait for job emptiness within its existing budget.
-Both review axes found no issues. Exact Windows red/green and lifecycle verification
-passed, with unchanged candidate bytes and cleanup. Mac lifecycle tests also passed.
-
-Kris approved one additional campaign on `e0050aba`. Run `42929422784`, attempt 1,
-passed Preflight, both-target broad core, observed-flow and the earlier SDK lifecycle/
-runtime gates. Both targets then failed the Phase 1H golden comparison; the deferred
-Branches browser check also failed on a legacy navigation selector. No package was
-built. Both target reservations are consumed and the two-campaign allowance is
-exhausted. The owning record holds counters and immutable receipts.
-
-Current harness corrections preserve the root Return in the golden, share the real
-authoring sequence with an SDK-free test, and put that test into automatic PR CI.
-Branches navigation now follows the actual option-owned route to Scene and exact
-Source. Local red/green checks pass without SDK execution; production is unchanged.
-Next: finish focused verification/review, publish and verify the offline fixture on
-Windows in the assigned checkout. Do not run another SDK/package campaign without
-Kris changing the spent allowance. The unused conditional #106 start is separate.
-
-Preserve all worktrees, unique evidence, `app/node_modules`, the pinned design
-references and protected recovery below. Native/human evidence remains pending;
-CI packages do not qualify approved local Mac signing or human input. #98/#106
-and PR #125 remain open/draft. Full Story #110 and #31/#55 remain separate.
+Next: finish scoped review and ordinary verification, publish the harness correction,
+and audit its automatic CI. Then present the concrete qualification-route decision.
+Shared use remains Mac 18/20 and Windows 9/20, zero reservations; final campaigns
+are 2/2 spent. No capped operation ran during this continuation. The unused
+conditional #106 start remains separate. Native physical-input/human sessions
+have not started. No merge, release, issue closure or acceptance is authorized.
 
 <a id="shared-arithmetic-implementation-2026-11-09"></a>
 

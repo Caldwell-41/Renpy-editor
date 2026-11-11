@@ -1237,3 +1237,10 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   rendering assertions and timing policy remain intact. SDK/package acceptance is
   still pending.
 - **Evidence:** [Second Choice campaign audit](../tasks/evidence/choice-98.md#second-campaign-terminal-audit-and-harness-correction).
+- **Unexecuted consumer audit:** the packaged runtime edit/restore and optional
+  Branches probes retained the same old button. Their mock omitted option-header
+  ownership, so its prior pass concealed the mismatch. Carry real `guardPath` and
+  exact header locations in the fixture and follow `Open Scene` in those probes.
+  The corrected five-case runtime browser sequence passes; native execution stays
+  pending. [Continuation preparation](../tasks/evidence/choice-98.md#continuation-audit-of-unexecuted-package-paths)
+  retains the reproduced failure and signing-prerequisite finding.
