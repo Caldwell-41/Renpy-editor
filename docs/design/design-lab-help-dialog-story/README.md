@@ -2,7 +2,7 @@
 
 Kris requested a separate prototype for [#45](https://github.com/Caldwell-41/Renpy-editor/issues/45), then asked to view it in a local browser and refine all three alternatives with `principle-experience-first`. Kris has now approved Help A4, Inspector extension. Help B4/C4 remain drafts. [The exact approval](approval-decision.json) is "Approved", clarified as "Sorry a4". [HANDOFF.md](HANDOFF.md) owns the approved source, integration map and completed promotion results.
 
-This study extends [Components and Help panel A2](../design-lab-components-and-help-panel/HANDOFF.md), whose source, captures and authority remain unchanged. Help A4/B4/C4 belong to this separate screen. Screens owns appearance; Use in Story hands a selected target to Story and creates no Beat. [Delivery evidence](../../tasks/evidence/help-dialog-and-canvas.md) owns implementation and acceptance. This chat changes only Design Lab and design evidence.
+This study extends [Components and Help panel A2](../design-lab-components-and-help-panel/HANDOFF.md), whose source, captures and authority remain unchanged. Help A4/B4/C4 belong to this separate screen. Screens owns appearance; Use in Story hands a selected target to Story and creates no Beat. [Delivery evidence](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/help-dialog-and-canvas.md) owns implementation and acceptance. This chat changes only Design Lab and design evidence.
 
 ## Open and compare
 

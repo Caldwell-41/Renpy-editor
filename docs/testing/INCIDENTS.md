@@ -1,10 +1,12 @@
 # CI incident index
 
 Search by symptom, host, test, control or script (for example `rg -n -i 'BOM|focus' docs/testing/INCIDENTS.md`).
-Read only matching entries and their linked original task sections. This is a compact
-lookup index, not another execution ledger or current task selection. Detailed attempts,
-hashes, consumed attempts and uncertainty stay in linked task evidence. Links to CI may outlive artifacts;
-an expired archive is not freshly auditable evidence.
+Read only matching entries and their linked original evidence. This is a compact
+lookup index, not an execution ledger or a task selection. Detailed attempts, hashes,
+consumed attempts and uncertainty stay in the linked evidence: task records at the
+`archive/docs-ledgers-2026-11` tag for earlier incidents, and issue or PR comments
+for later ones. Links to CI may outlive artifacts; an expired archive is not freshly
+auditable evidence.
 
 Add an entry for a new cause, materially revised diagnosis or lasting regression lesson.
 Group repeated attempts under that cause; do not append every rerun. Include symptom/host,
@@ -18,7 +20,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Cause/correction:** two Settings-dispatch fixtures omitted the shared ownership guard.
   Use the same fixture guard and preserve production locking/cancellation assertions.
 - **Regression:** full desktop tests under the ordinary parallel runner on Windows.
-- **Evidence:** [first diagnosis](../tasks/evidence/phase-2-execution.md#ci-audit-and-repository-harness-review--2026-10-16),
+- **Evidence:** [first diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#ci-audit-and-repository-harness-review--2026-10-16),
   [both-host corrected CI3](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38853421609).
 
 ## H02 — POSIX fixture errors or nonexistent-PID behavior on Windows
@@ -30,8 +32,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   and exact named Python exclusions in `check-thinking-evidence.py`.
 - **Related Linux case:** a portable Help cleanup fixture mocked SDK execution but
   leaked the real target lookup. Supply the mocked target explicitly; keep actual
-  SDK host admission strict. [Diagnosis and correction](../tasks/evidence/help-dialog-and-canvas.md#linux-offline-ci-fixture-correction-2026-11-04).
-- **Evidence:** [CI2 diagnosis and correction](../tasks/evidence/phase-2-execution.md#ci2-terminal-diagnosis-and-proposed-correction--2026-10-16),
+  SDK host admission strict. [Diagnosis and correction](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/help-dialog-and-canvas.md#linux-offline-ci-fixture-correction-2026-11-04).
+- **Evidence:** [CI2 diagnosis and correction](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#ci2-terminal-diagnosis-and-proposed-correction--2026-10-16),
   [failed run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38850950449).
 
 ## H03 — Mocked operation finishes in one clock tick
@@ -40,7 +42,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Cause/correction:** immediate failed-build fixture asserted strict elapsed progress.
   Use a controlled advancing clock with exact expected receipt values.
 - **Regression:** `test_failed_build_preserves_exclusive_terminal_and_cannot_redispatch`.
-- **Evidence:** [CI2 diagnosis](../tasks/evidence/phase-2-execution.md#ci2-terminal-diagnosis-and-proposed-correction--2026-10-16).
+- **Evidence:** [CI2 diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#ci2-terminal-diagnosis-and-proposed-correction--2026-10-16).
 
 ## H04 — Native path separators differ from fixture or preview keys
 
@@ -48,8 +50,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Cause/correction:** use native `Path` for executable arguments; use normal relative
   components joined with `/` for portable snapshot keys. Preserve exact bytes/containment.
 - **Regression:** `test_npm_routes_through_pinned_node_cli_without_shell`, `snapshot_paths`.
-- **Evidence:** [argument fixture](../tasks/evidence/phase-2-execution.md#selectable-ci2-windows-harness-failure-and-narrow-correction--2026-10-12),
-  [snapshot diagnosis](../tasks/evidence/phase-2-execution.md#selectable-ci4-terminal-audit-and-portable-snapshot-correction--2026-10-12).
+- **Evidence:** [argument fixture](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#selectable-ci2-windows-harness-failure-and-narrow-correction--2026-10-12),
+  [snapshot diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#selectable-ci4-terminal-audit-and-portable-snapshot-correction--2026-10-12).
 
 ## H05 — ZIP fixture name normalized before archive refusal
 
@@ -57,7 +59,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Cause/correction:** reader and writer can normalize unsafe names. Reject raw versus
   normalized name differences before extraction; preserve archive-entry defenses.
 - **Regression:** `test_studio_settings_evidence.py` archive normalization/refusal cases.
-- **Evidence:** [CI2 archive diagnosis](../tasks/evidence/phase-2-execution.md#ci2-terminal-audit-and-unlocked-owner-continuation--2026-10-13).
+- **Evidence:** [CI2 archive diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#ci2-terminal-audit-and-unlocked-owner-continuation--2026-10-13).
 
 ## H06 — Approved temporary root rejected before launch
 
@@ -65,7 +67,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Cause/correction:** Python and inherited Rust child resolved different temporary
   parents. Align environment with the approved runner root, retaining containment.
 - **Regression:** native root admission fixtures and actual target preparation.
-- **Evidence:** [CI3 root diagnosis](../tasks/evidence/phase-2-execution.md#ci3-terminal-audit-and-explicit-ci-allowance-extension--2026-10-13).
+- **Evidence:** [CI3 root diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#ci3-terminal-audit-and-explicit-ci-allowance-extension--2026-10-13).
 
 ## H07 — Fixture preparation consumes the request deadline
 
@@ -73,7 +75,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Cause/correction:** construct/drop the unrelated project before starting the stalled
   request timer. Preserve original cancellation, EOF and shutdown assertions.
 - **Regression:** `ordinary_external_configuration_change_and_project_session_reject_results`.
-- **Evidence:** [generated-card first failure](../tasks/evidence/phase-2-execution.md#generated-card-first-ci-failure-and-correction--2026-10-11).
+- **Evidence:** [generated-card first failure](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#generated-card-first-ci-failure-and-correction--2026-10-11).
 
 ## H08 — Native focus/readiness or dialog children unproven
 
@@ -85,8 +87,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** `test_studio_setup_native.py` logic, explicit
   `studio_setup_native_dialog_checks.py`, Windows focus fixtures and actual native
   sequence. Mocks do not establish native proof; CI8's exact UIA provider cause remained unknown.
-- **Evidence:** [whole-sequence reassessment](../tasks/evidence/phase-2-execution.md#ci7-terminal-audit-and-whole-sequence-reassessment--2026-10-13),
-  [child-control gap](../tasks/evidence/phase-2-execution.md#ci8-terminal-review--native-child-control-observation-gap--2026-10-13),
+- **Evidence:** [whole-sequence reassessment](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#ci7-terminal-audit-and-whole-sequence-reassessment--2026-10-13),
+  [child-control gap](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#ci8-terminal-review--native-child-control-observation-gap--2026-10-13),
   [historical CI9 completion](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38317425509).
 
 ## H09 — Remount toggles an already-selected Beat off
@@ -95,7 +97,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Cause/correction:** production selection toggles; the probe clicked unconditionally.
   Select idempotently and observe the selected state before the next operation.
 - **Regression:** `native-probe-driver.test.ts`, full `selectable-native-sequence.dom.test.ts`.
-- **Evidence:** [selectable CI6 diagnosis](../tasks/evidence/phase-2-execution.md#selectable-ci6-terminal-audit-and-idempotent-remount-correction--2026-10-12).
+- **Evidence:** [selectable CI6 diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#selectable-ci6-terminal-audit-and-idempotent-remount-correction--2026-10-12).
 
 ## H10 — Snapshot overlaps async history; cleanup hides owner failures
 
@@ -104,8 +106,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   pre-dispatch contention; do not retry inner I/O failures. Attempt cleanup owners
   independently, retain timeout output, and read only the exact attempted phase report.
 - **Regression:** `snapshot_paths`, `probe_cleanup`, rejecting selectable/phase gates.
-- **Evidence:** [CI5 ownership diagnosis](../tasks/evidence/phase-2-execution.md#selectable-ci5-terminal-audit-and-probe-ownership-correction--2026-10-12),
-  [remaining-sequence audit](../tasks/evidence/phase-2-execution.md#remaining-windows-suite-review-and-approved-ci7--2026-10-12).
+- **Evidence:** [CI5 ownership diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#selectable-ci5-terminal-audit-and-probe-ownership-correction--2026-10-12),
+  [remaining-sequence audit](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#remaining-windows-suite-review-and-approved-ci7--2026-10-12).
 
 ## H11 — SDK driver advances dialogue while at a menu
 
@@ -113,7 +115,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Cause/correction:** await/assert the choice screen before the route click; retain
   ordinary advance for no-option continuation and all expected route assertions.
 - **Regression:** zero-SDK generated-driver preflight in `renpy/tests/phase3a.rs`.
-- **Evidence:** [CI1 diagnosis](../tasks/evidence/phase-3-history.md#resume-and-exact-ci1-failure-audit--2026-10-13),
+- **Evidence:** [CI1 diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-3-history.md#resume-and-exact-ci1-failure-audit--2026-10-13),
   [failed run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38346032499).
 
 ## H12 — SDK scaffold import uses an accepted-document BOM rule
@@ -122,7 +124,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Cause/correction:** distinguish external import encoding from captured document
   editing; retain actual input bytes, accept one transport BOM and reject multiple BOMs.
 - **Regression:** all three scaffold imports in the zero-SDK `phase3a_` preflight.
-- **Evidence:** [CI3 diagnosis](../tasks/evidence/phase-3-history.md#ci3-terminal-audit-and-scaffold-import-diagnosis--2026-10-14),
+- **Evidence:** [CI3 diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-3-history.md#ci3-terminal-audit-and-scaffold-import-diagnosis--2026-10-14),
   [failed run](https://github.com/Caldwell-41/Renpy-editor/actions/runs/38428839556).
 
 ## H13 — UI/request fixtures retain an old application contract
@@ -134,8 +136,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   Dispose cancelled timers; version/refuse incompatible frozen-product contracts.
 - **Regression:** full renderer critical consumer names, synthetic Thinking on/off
   preparation/admission, legacy Windows contract2 refusal before build/launch.
-- **Evidence:** [repository harness review](../tasks/evidence/phase-2-execution.md#ci-audit-and-repository-harness-review--2026-10-16),
-  [repair record](../tasks/evidence/phase-2-execution.md#harness-repair-and-second-review--2026-10-16).
+- **Evidence:** [repository harness review](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#ci-audit-and-repository-harness-review--2026-10-16),
+  [repair record](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#harness-repair-and-second-review--2026-10-16).
 
 ## H14 — Official checksum host times out before tests
 
@@ -144,7 +146,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   published manifest; bounded official download on miss, corrupted cache refusal.
   Record bootstrap before acquisition and retain safe early failures.
 - **Regression:** `selectable-evidence.py` acquisition/identity/early-failure gates.
-- **Evidence:** [selectable acquisition diagnosis](../tasks/evidence/phase-2-execution.md#selectable-ci1-failure-audit-and-acquisition-correction--2026-10-12).
+- **Evidence:** [selectable acquisition diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#selectable-ci1-failure-audit-and-acquisition-correction--2026-10-12).
 
 ## H15 — Verbose unittest warning interrupts a completed result row
 
@@ -153,7 +155,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   Parse the completed result across warning lines, while requiring exact row/count
   agreement and rejecting missing/duplicate results and extra host exclusions.
 - **Regression:** `test_check_thinking_evidence.py` warning/unterminated-result fixtures.
-- **Evidence:** [maintenance verification](../tasks/evidence/ci-harness-reliability.md#implementation-and-verification).
+- **Evidence:** [maintenance verification](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/ci-harness-reliability.md#implementation-and-verification).
 
 ## H16 — Hyphenated test script is absent from unittest discovery
 
@@ -162,7 +164,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   Invoke `test-q1-package-retention.py -v` directly and require its exact named results.
 - **Regression:** `test_harness_checks.py` retention missing/duplicate/skip rejection;
   the shared runner's actual retention execution remains required on both hosts.
-- **Evidence:** [maintenance verification](../tasks/evidence/ci-harness-reliability.md#implementation-and-verification).
+- **Evidence:** [maintenance verification](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/ci-harness-reliability.md#implementation-and-verification).
 
 ## H17 — Inventory unit fixtures depend on an earlier Tauri build
 
@@ -175,9 +177,9 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** named `test_source_inventory_requires_generated_permissions_without_prior_builds`
   is required by the Python evidence gate. Run the shared harness from a clean export
   without generated permissions, dependencies or build output before affected CI.
-- **Evidence:** [CI1 audit and repair](../tasks/evidence/ci-harness-reliability.md#ci1-terminal-audit-and-selected-repair--2026-10-16),
-  [clean-checkout verification](../tasks/evidence/ci-harness-reliability.md#clean-checkout-repair-verification--2026-10-16),
-  [both-host CI2 completion](../tasks/evidence/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16).
+- **Evidence:** [CI1 audit and repair](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/ci-harness-reliability.md#ci1-terminal-audit-and-selected-repair--2026-10-16),
+  [clean-checkout verification](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/ci-harness-reliability.md#clean-checkout-repair-verification--2026-10-16),
+  [both-host CI2 completion](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/ci-harness-reliability.md#ci2-terminal-audit-and-deliverable2-completion--2026-10-16).
 
 ## H18 — Current native window exceeds the runner desktop; cleanup repeats the gate
 
@@ -196,9 +198,9 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   after observation refusal run on Windows before packaging. CI2 proves geometry,
   state retention and phase1; phase2 reaches the distinct H19 recovery/close gap.
   CI3 completes both native phases with normal exit. No app defect is established by CI1.
-- **Evidence:** [native CI1 terminal audit and proposal](../tasks/evidence/ci-harness-reliability.md#deliverable3-native-ci1-terminal-audit-and-proposed-repair--2026-10-16).
-  [Approved repair and local results](../tasks/evidence/ci-harness-reliability.md#deliverable3-scoped-repair-preparation-and-review--2026-10-16).
-  [CI3 complete native audit](../tasks/evidence/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17).
+- **Evidence:** [native CI1 terminal audit and proposal](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/ci-harness-reliability.md#deliverable3-native-ci1-terminal-audit-and-proposed-repair--2026-10-16).
+  [Approved repair and local results](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/ci-harness-reliability.md#deliverable3-scoped-repair-preparation-and-review--2026-10-16).
+  [CI3 complete native audit](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17).
 
 ## H19 — Retry inside closed disclosure; Settings modal blocks app-close cleanup
 
@@ -225,9 +227,9 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   prove Retry visible/enabled; successful flow does not exercise failure cleanup.
   CI1 had stopped earlier at geometry, so CI2 reaching this later state required no
   product regression. Embedded probe changes still require a matching rebuilt package.
-- **Evidence:** [final native CI2 audit](../tasks/evidence/ci-harness-reliability.md#deliverable3-final-ci2-audit-and-missed-settings-interactions--2026-10-17).
-  [H19 build/rejecting-gate review](../tasks/evidence/ci-harness-reliability.md#deliverable3-h19-build-and-pre-dispatch-review--2026-10-17).
-  [CI3 terminal audit and completion](../tasks/evidence/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17).
+- **Evidence:** [final native CI2 audit](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/ci-harness-reliability.md#deliverable3-final-ci2-audit-and-missed-settings-interactions--2026-10-17).
+  [H19 build/rejecting-gate review](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/ci-harness-reliability.md#deliverable3-h19-build-and-pre-dispatch-review--2026-10-17).
+  [CI3 terminal audit and completion](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17).
 
 ## H20 — Screen SDK driver assumes an unavailable menu or style attribute
 
@@ -241,7 +243,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** named core/evidence rejection cases and retained native assertions;
   corrected rendering passes the audited both-host CI1 proof. All failed local
   attempts remain in the owning ledger.
-- **Evidence:** [early 3B execution ledger](../tasks/evidence/phase-3-history.md#early-execution-ledger).
+- **Evidence:** [early 3B execution ledger](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-3-history.md#early-execution-ledger).
 
 ## H21 — Generated arrow names and offscreen inspector text break browser checks
 
@@ -255,7 +257,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression/evidence:** original failures reproduce in local10; all three
   focused journeys then pass. Local11 passes 508 cases and 20 groups. Per-layout
   progress and failure state prevent another missing-variant diagnosis.
-  [3B execution ledger](../tasks/evidence/phase-3-history.md#early-execution-ledger)
+  [3B execution ledger](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-3-history.md#early-execution-ledger)
   retains both failures, actual visibility/name facts and final results.
 
 ## P01 — Redo refuses an app-owned clean deletion
@@ -264,7 +266,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Correction:** evict only exact accepted clean buffers after successful app deletion;
   preserve external missing-source and dirty/conflict protections.
 - **Regression:** production Draft history with refresh, Undo/Redo and process reopen.
-- **Evidence:** [reproduced product diagnosis](../tasks/evidence/phase-2-execution.md#draft-scene-ci-artifact-audit-and-redo-correction--2026-10-10).
+- **Evidence:** [reproduced product diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#draft-scene-ci-artifact-audit-and-redo-correction--2026-10-10).
 
 ## P02 — Windows partial-body cancellation does not close promptly
 
@@ -273,7 +275,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   exact Winsock internal cause was not established; do not generalize clone behavior.
 - **Regression:** header/body cancellation requires owned socket, shutdown, Cancelled,
   EOF and the original two-second bounds. Initial timing-only diagnosis was provisional.
-- **Evidence:** [decisive handle/phase evidence](../tasks/evidence/phase-2-execution.md#generated-card-third-ci-audit-and-exact-handle-repair--2026-10-11).
+- **Evidence:** [decisive handle/phase evidence](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#generated-card-third-ci-audit-and-exact-handle-repair--2026-10-11).
 
 
 ## H22 — Scratch screen preview selects a menu context
@@ -285,7 +287,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   the ordinary `start` label and keeps skip-menu/skip-splash behavior inside the SDK
   runtime adapter. Qualification requires `main_menu == False`, geometry, retained
   process status and cleanup. The correction passes both-aspect Mac SDK service proof; native/Windows proof remains pending.
-- **Evidence:** [Help outcome attempts](../tasks/evidence/help-screen-production.md#local5-result-cancelled-local6-and-corrected-local7).
+- **Evidence:** [Help outcome attempts](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/help-screen-production.md#local5-result-cancelled-local6-and-corrected-local7).
 
 ## H23. Help gate assumes an owned Windows Stop exits with zero
 
@@ -297,7 +299,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   untruncated evidence and no runtime error. Keep raw codes and reject abnormal results.
 - **Regression:** Rust/Python gates and the real native probe script through the
   bridge/core with a marked runtime test double cover positive and rejecting states.
-- **Evidence:** [CI2 diagnosis](../tasks/evidence/help-screen-production.md#ci2-retained-audit-and-causal-diagnosis).
+- **Evidence:** [CI2 diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/help-screen-production.md#ci2-retained-audit-and-causal-diagnosis).
 
 ## H24. Desktop check precedes the frontend build in a clean checkout
 
@@ -308,7 +310,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   frontend build before the desktop check, preserving both checks and all selectors.
 - **Verification:** reproduce the missing-output failure in a disposable clean
   export, then run the frontend build and the same desktop check in that export.
-- **Evidence:** [L01 CI1 audit](../tasks/evidence/owned-blank-screen.md#ci1-terminal-audit-and-workflow-correction).
+- **Evidence:** [L01 CI1 audit](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/owned-blank-screen.md#ci1-terminal-audit-and-workflow-correction).
 
 ## P03. Initial Screens catalog read stops on service contention
 
@@ -320,7 +322,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** held-service request-lane cases and the production renderer/core
   controller with a refused initial catalog read reproduce the failure and pass
   after correction. Current-package native proof remains required.
-- **Evidence:** [L01 native diagnosis](../tasks/evidence/owned-blank-screen.md#ci2-terminal-audit-and-native-correction).
+- **Evidence:** [L01 native diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/owned-blank-screen.md#ci2-terminal-audit-and-native-correction).
 
 ## H25. Screen probe omits rich-editor and early-failure states
 
@@ -332,7 +334,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   PowerShell identity output uses `$env:RUNNER_TEMP`.
 - **Regression:** exact busy/rich-editor browser controller and whole-runner synthetic
   success, early-failure and unreadable-metadata cases. These are not native passes.
-- **Evidence:** [L01 CI2 corrections](../tasks/evidence/owned-blank-screen.md#ci2-terminal-audit-and-native-correction).
+- **Evidence:** [L01 CI2 corrections](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/owned-blank-screen.md#ci2-terminal-audit-and-native-correction).
 
 ## P04. Windows canvas readers conflict with legacy file replacement
 
@@ -352,7 +354,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   publisher failure after 31 warm captures and retains its exact operation/code.
   CI5 passes the corrected primitive, shared recent-file caller, 200 Windows
   updates and exact-controller rehearsal. Its later reference-size failure is H26.
-- **Evidence:** [L17 CI4 root cause](../tasks/evidence/canvas-rendering.md#ci4-terminal-audit-and-open-reader-replacement).
+- **Evidence:** [L17 CI4 root cause](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/canvas-rendering.md#ci4-terminal-audit-and-open-reader-replacement).
 
 ## H26. Ren'Py reference capture shrinks to the runner desktop
 
@@ -370,7 +372,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   reference windows, every reference criterion/cleanup result and Windows native
   functional proof. The workflow succeeds; pixel fidelity and native timing/focus
   remain unaccepted. Six dispatches are consumed; no further run is allocated.
-- **Evidence:** [L17 CI5 audit](../tasks/evidence/canvas-rendering.md#ci5-terminal-audit-and-prepared-reference-correction).
+- **Evidence:** [L17 CI5 audit](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/canvas-rendering.md#ci5-terminal-audit-and-prepared-reference-correction).
 
 
 ## H27. Nested PowerShell and cmd quoting prevents compiler startup
@@ -382,7 +384,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   its PowerShell script, then pass compiler arguments directly in PowerShell.
 - **Verification:** CI7 fails before compiler/SDK execution. Portable checks and
   independent review pass for the correction; native compilation passes in CI8.
-- **Evidence:** [L17 CI7 audit](../tasks/evidence/canvas-rendering.md#ci7-terminal-audit-and-compiler-invocation-correction).
+- **Evidence:** [L17 CI7 audit](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/canvas-rendering.md#ci7-terminal-audit-and-compiler-invocation-correction).
 
 
 ## H28. Forced OpenGL disables the Windows ANGLE fallback
@@ -399,7 +401,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   window-owning observer thread must process messages and stop within a bound.
 - **Verification:** portable checks pass; CI9 passes corrected ANGLE2 rendering, bounded desktop
   observation and cooperative shutdown in the capability probe.
-- **Evidence:** [L17 CI8 audit](../tasks/evidence/canvas-rendering.md#ci8-terminal-audit-and-windows-renderer-correction).
+- **Evidence:** [L17 CI8 audit](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/canvas-rendering.md#ci8-terminal-audit-and-windows-renderer-correction).
 
 ## H29. A new workflow cannot be dispatched before GitHub registers it
 
@@ -412,7 +414,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Verification:** actionlint and all 16 selector combinations pass; both review
   axes report no findings. The rejected attempt remains charged. Actual Windows
   execution remains pending under the owning evidence record.
-- **Evidence:** [Matched comparison continuation](../tasks/evidence/canvas-rendering.md#mac-matched-comparison-and-dispatch-correction).
+- **Evidence:** [Matched comparison continuation](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/canvas-rendering.md#mac-matched-comparison-and-dispatch-correction).
 
 ## P05. Canvas image updates cancel a captured drag
 
@@ -427,8 +429,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   Immediate feedback and drag-target alternatives await design approval; native
   smoothness remains pending. The separate probe-clamping correction passes both
   parent bounds with exact source/geometry/Undo checks.
-- **Evidence:** [Diagnosis](../tasks/evidence/canvas-rendering.md#probe-movement-bounds-and-drag-diagnosis)
-  and [capture correction](../tasks/evidence/canvas-rendering.md#capture-preservation-and-drag-alternatives-2026-10-24).
+- **Evidence:** [Diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/canvas-rendering.md#probe-movement-bounds-and-drag-diagnosis)
+  and [capture correction](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/canvas-rendering.md#capture-preservation-and-drag-alternatives-2026-10-24).
 
 
 ## H30. Native drag oracle rejects JSON alignment roundoff
@@ -444,7 +446,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   a linked parser check isolates its last-bit change. The source comparator rejects
   a one-pixel difference, changed dimensions/comments/whitespace, integer alignment,
   expressions and extra lines. This change grants no image-pixel tolerance.
-- **Evidence:** [Signed Mac qualification](../tasks/evidence/canvas-rendering.md#signed-mac-handle-qualification-2026-10-24).
+- **Evidence:** [Signed Mac qualification](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/canvas-rendering.md#signed-mac-handle-qualification-2026-10-24).
 
 ## H31. Unposted macOS events have no clock timestamp
 
@@ -457,7 +459,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   posted input or permission requests. Offline receipts reject unvalidated clocks,
   wrong ordering, stale pixels and delayed/missing results. Live capture remains
   pending separate permission and qualification.
-- **Evidence:** [Recorder selection and results](../tasks/evidence/canvas-rendering.md#standalone-mac-recorder-selection-2026-10-24).
+- **Evidence:** [Recorder selection and results](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/canvas-rendering.md#standalone-mac-recorder-selection-2026-10-24).
 
 ## H32. Mac recorder rejects an unlocked console
 
@@ -470,7 +472,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   test reproduces the false refusal before correction; all twelve recorder checks
   and both independent review axes pass afterward. Preflight alone does not prove
   the live console/foreground/capture path.
-- **Evidence:** [native 8 preparation and console correction](../tasks/evidence/canvas-rendering.md#mac-timing-native-8-preparation-and-console-correction-2026-10-24).
+- **Evidence:** [native 8 preparation and console correction](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/canvas-rendering.md#mac-timing-native-8-preparation-and-console-correction-2026-10-24).
 
 ## H33. Slow settled references do not identify fast provisional content
 
@@ -488,7 +490,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   gate; timing arithmetic stays unchanged. Compiled/Python checks cover route transfer,
   generation rollover and omitted content inputs. Public DOM checks verify the actual
   move/text/resize routes without claiming native presentation.
-- **Evidence:** [Mac reference-boundary correction](../tasks/evidence/canvas-rendering.md#mac-measurement-reference-boundary-correction-2026-10-24).
+- **Evidence:** [Mac reference-boundary correction](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/canvas-rendering.md#mac-measurement-reference-boundary-correction-2026-10-24).
 
 ## H34. Optional compiled-recorder tests break ordinary discovery
 
@@ -499,8 +501,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   the shared skip gate remains strict.
 - **Verification:** actual discovery regression fails before the change and passes
   afterward; the general Mac runner passes all four groups without a recorder.
-- **Evidence:** [Automatic code checks](../tasks/active/automatic-code-checks.md#verification-and-review).
-  [Test selection reduction](../tasks/active/test-selection.md#local-validation)
+- **Evidence:** [Automatic code checks](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/automatic-code-checks.md#verification-and-review).
+  [Test selection reduction](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/test-selection.md#local-validation)
   applies the same split to the Windows dialog fixture. Its known foreground
   failure remains a failed explicit native check, outside offline discovery.
 
@@ -525,8 +527,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   composition candidate passes seven groups and cleanup in 9.425 seconds.
   A separate external display-awake assertion was active, so this is functional
   verification rather than an isolated sleep-prevention timing experiment.
-- **Evidence:** [Mac pause diagnosis](../tasks/evidence/simple-help-layout.md#mac-pause-cause-established-2026-10-27),
-  [runner correction](../tasks/evidence/simple-help-layout.md#mac-native-runner-correction-selected-2026-10-27).
+- **Evidence:** [Mac pause diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/simple-help-layout.md#mac-pause-cause-established-2026-10-27),
+  [runner correction](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/simple-help-layout.md#mac-native-runner-correction-selected-2026-10-27).
 
 ## H36. Empty composition text loses field focus
 
@@ -537,7 +539,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Verification:** component regressions reject lost focus/missing association;
   the current renderer/core and signed native probe require a positive validation
   checkpoint with unchanged source and retained input.
-- **Evidence:** [Final review corrections](../tasks/evidence/simple-help-layout.md#final-implementation-review-and-corrections-2026-10-27).
+- **Evidence:** [Final review corrections](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/simple-help-layout.md#final-implementation-review-and-corrections-2026-10-27).
 
 ## H37. Desktop-exit errors skip native fixture cleanup
 
@@ -547,7 +549,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   while independent cleanup owners finish. Prelaunch refusal still prevents launch.
 - **Verification:** actual-runner fixtures complete source/metadata and fixture
   cleanup under post-child lock or assertion-release failure; neither becomes a pass.
-- **Evidence:** [Final review corrections](../tasks/evidence/simple-help-layout.md#final-implementation-review-and-corrections-2026-10-27).
+- **Evidence:** [Final review corrections](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/simple-help-layout.md#final-implementation-review-and-corrections-2026-10-27).
 
 ## H38. No-op geometry saves lose owned hierarchy state
 
@@ -558,7 +560,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   no-op paths so the same source revision retains the same owned model.
 - **Verification:** dispatch coverage for size, pixel-property and position no-ops,
   exact source and Undo/Redo; production controller/core check accepts root Add afterward.
-- **Evidence:** [No-op geometry correction](../tasks/evidence/simple-help-layout.md#local-no-op-geometry-ownership-correction-2026-10-27).
+- **Evidence:** [No-op geometry correction](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/simple-help-layout.md#local-no-op-geometry-ownership-correction-2026-10-27).
 
 
 ## H39. Pending numeric Apply loses focus and cleanup masks the assertion
@@ -574,7 +576,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   rendering turns; verify retained control focus/input, no duplicate Enter write,
   unchanged source and normal driver exit. The packaged Help probe also checks
   focus after clicked Apply.
-- **Evidence:** [PR #66 CI2 diagnosis](../tasks/evidence/numeric-layout.md#ci2-root-cause-and-affected-requalification).
+- **Evidence:** [PR #66 CI2 diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/numeric-layout.md#ci2-root-cause-and-affected-requalification).
 
 
 ## H40. Import hashing overflows the Windows main stack
@@ -587,7 +589,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** public UI-image and Background selection/preview/import in a
   child with a 256 KiB stack; verify exact accepted bytes and hashes. Actual Windows
   main-thread/controller and package proof remains a separate target gate.
-- **Evidence:** [L06 CI1 diagnosis](../tasks/evidence/ui-image.md#ci1-windows-import-stack-failure).
+- **Evidence:** [L06 CI1 diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/ui-image.md#ci1-windows-import-stack-failure).
 
 ## H41. Normal-entry image capture differs under an unrecorded renderer
 
@@ -600,8 +602,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** reject missing/fallback renderers, unstable repeated capture and
   whole-window capture of an empty Render. Both-host normal entry and helper pass
   both aspects with exact pixels after correction; original CI2 remains failed.
-- **Evidence:** [L06 capture diagnosis](../tasks/evidence/ui-image.md#ci2-windows-capture-failure-and-reassessment),
-  [CI3 audit](../tasks/evidence/ui-image.md#ci3-success-audit-and-review-ready-outcome).
+- **Evidence:** [L06 capture diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/ui-image.md#ci2-windows-capture-failure-and-reassessment),
+  [CI3 audit](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/ui-image.md#ci3-success-audit-and-review-ready-outcome).
 
 
 ## H42. Image Apply admits edits that its completion clears
@@ -614,7 +616,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** hold media and core completion separately; verify reserved original
   size, readonly layout and alignment, then success/conflict retention and restored
   editing. The actual controller/core also checks a held Apply and unchanged Source.
-- **Evidence:** [Pending image Apply ownership](../tasks/evidence/ui-image.md#pending-image-apply-edit-ownership-2026-10-29).
+- **Evidence:** [Pending image Apply ownership](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/ui-image.md#pending-image-apply-edit-ownership-2026-10-29).
 
 
 ## H43. Numeric controller assumes the toolbar survives element removal
@@ -627,7 +629,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Verification:** the untouched PR #68 frontend reproduces the same timeout and
   hidden toolbar. The corrected journey passes against the integrated candidate
   without changing production UI or its deadline.
-- **Evidence:** [Architecture refactor validation](../tasks/evidence/ui-image.md#pr-68-architecture-refactors-2026-10-29).
+- **Evidence:** [Architecture refactor validation](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/ui-image.md#pr-68-architecture-refactors-2026-10-29).
 
 ## H44. Fixture construction uses the ordinary request deadline
 
@@ -640,7 +642,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** the controlled delayed-start process passes construction, then
   refuses a stalled ordinary reply and confirms child exit. Both actual font
   controller paths pass; Windows requalification remains pending.
-- **Evidence:** [L05 CI1](../tasks/evidence/project-fonts.md#ci1-failure-and-root-cause-correction).
+- **Evidence:** [L05 CI1](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/project-fonts.md#ci1-failure-and-root-cause-correction).
 
 ## H45. Passive font reads bypass the shared request lane
 
@@ -657,8 +659,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   retain opaque interior proof and exact source/literal/helper equality, and record
   raw/expected samples. Retained Windows/Mac replay passes; missing border, filled
   interior and even a one-unit literal RGB/alpha difference still fail.
-- **Evidence:** [L05 CI2 audit](../tasks/evidence/project-fonts.md#ci2-audit-and-corrections),
-  [L07 correction](../tasks/evidence/shared-look.md#root-cause-correction-and-bounded-ci2-2026-10-31).
+- **Evidence:** [L05 CI2 audit](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/project-fonts.md#ci2-audit-and-corrections),
+  [L07 correction](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/shared-look.md#root-cause-correction-and-bounded-ci2-2026-10-31).
 
 ## H46. Physical capture size mistaken for virtual resolution
 
@@ -674,8 +676,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   retain opaque interior proof and exact source/literal/helper equality, and record
   raw/expected samples. Retained Windows/Mac replay passes; missing border, filled
   interior and even a one-unit literal RGB/alpha difference still fail.
-- **Evidence:** [L05 CI2 audit](../tasks/evidence/project-fonts.md#ci2-audit-and-corrections),
-  [L07 correction](../tasks/evidence/shared-look.md#root-cause-correction-and-bounded-ci2-2026-10-31).
+- **Evidence:** [L05 CI2 audit](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/project-fonts.md#ci2-audit-and-corrections),
+  [L07 correction](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/shared-look.md#root-cause-correction-and-bounded-ci2-2026-10-31).
 
 - **Controls follow-up:** raw source PNG bytes also differ from native render
   readback. Both targets produce source-minus-one RGBA for the six-state fixture.
@@ -687,7 +689,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   corrected launcher and offline launch-boundary regression now pass. Windows
   start18 also passes exact native/helper admission with matching scale1.0;
   errors now print both actual capture conditions. See
-  [the control diagnosis](../tasks/evidence/bars-and-image-buttons.md#continuation-and-passive-helper-diagnosis-2026-11-06).
+  [the control diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/bars-and-image-buttons.md#continuation-and-passive-helper-diagnosis-2026-11-06).
 
 ## H47. Shared Apply hides text dimensions
 
@@ -698,7 +700,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** the actual controller journey fails with zero text Width controls,
   then passes dimension Apply, exact Source and grouped Undo/Redo. The image
   controller still passes with one set of dimensions.
-- **Evidence:** [L05 review corrections](../tasks/evidence/project-fonts.md#independent-pr-review-corrections-2026-10-30).
+- **Evidence:** [L05 review corrections](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/project-fonts.md#independent-pr-review-corrections-2026-10-30).
 
 ## H48. Text inspector bypasses field-completion validation
 
@@ -709,7 +711,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** red blur cases for Size and import names turn green. Actual
   controller checks cover Text/Color, still-invalid correction, IME, focus,
   unchanged Source and retained Source-conflict feedback.
-- **Evidence:** [L05 review corrections](../tasks/evidence/project-fonts.md#independent-pr-review-corrections-2026-10-30).
+- **Evidence:** [L05 review corrections](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/project-fonts.md#independent-pr-review-corrections-2026-10-30).
 
 
 ## H49. Font admission accepts an empty character-map container
@@ -722,7 +724,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** public preview/import reject the licensed TTF fixture after its
   encoding-record count is set to zero; source, metadata and prior history stay
   intact. Valid TTF/OTF import/history/reopen still pass.
-- **Evidence:** [L05 root-cause corrections](../tasks/evidence/project-fonts.md#font-admission-and-stale-text-corrections-2026-10-30).
+- **Evidence:** [L05 root-cause corrections](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/project-fonts.md#font-admission-and-stale-text-corrections-2026-10-30).
 
 ## H50. Retained text drafts compare with the old saved node
 
@@ -734,7 +736,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** actual controller/core checks cover current-value resolution,
   subsequent edit/history, old-literal retention, divergent typography and full
   conflict resolution without writing Source.
-- **Evidence:** [L05 root-cause corrections](../tasks/evidence/project-fonts.md#font-admission-and-stale-text-corrections-2026-10-30).
+- **Evidence:** [L05 root-cause corrections](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/project-fonts.md#font-admission-and-stale-text-corrections-2026-10-30).
 
 ## H51. Hierarchy Enter submits the text draft it opens
 
@@ -746,7 +748,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** existing text/textbutton focus cases now use core-shaped typed
   documents. The actual controller/core journey first observed changed Source,
   then passed retained input, focus and unchanged Source after the correction.
-- **Evidence:** [Text ownership maintenance](../tasks/evidence/screen-text-ownership.md#hierarchy-enter-correction).
+- **Evidence:** [Text ownership maintenance](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/screen-text-ownership.md#hierarchy-enter-correction).
 
 
 ## H52. SDK border and helper conversion differ from the intended appearance
@@ -760,7 +762,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** normal and helper output matches independent literal screens;
   border/interior semantic checks and distinct-state checks reject the original
   wrong output. Runtime render errors exit with a bounded diagnostic.
-- **Evidence:** [L07 diagnosis and qualification](../tasks/evidence/shared-look.md#implementation-and-first-sdk-diagnosis).
+- **Evidence:** [L07 diagnosis and qualification](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/shared-look.md#implementation-and-first-sdk-diagnosis).
 
 
 ## H53. Helper qualification omits implicit SDK validation starts
@@ -771,7 +773,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   commands before its helper. Count staged validation, post-promotion discovery
   and initial canvas discovery separately from the helper process. The L07 helper
   receipt now records the existing adapter spawn counter and checks this count.
-- **Evidence:** [L07 corrected operation accounting](../tasks/evidence/shared-look.md#corrected-operation-accounting).
+- **Evidence:** [L07 corrected operation accounting](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/shared-look.md#corrected-operation-accounting).
   The old Mac receipt lacked this counter. Its reconstructed SDK overrun remains
   recorded; the added counter awaits actual Windows execution.
 
@@ -788,7 +790,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** the original real-controller assertion fails with correct queued
   payloads and no delivered request under controlled scheduling. The corrected
   journey passes under the same schedule without a sleep or retry in the test.
-- **Evidence:** [L07 CI2 audit and correction](../tasks/evidence/shared-look.md#ci2-terminal-audit-and-controller-acknowledgement-correction-2026-10-31).
+- **Evidence:** [L07 CI2 audit and correction](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/shared-look.md#ci2-terminal-audit-and-controller-acknowledgement-correction-2026-10-31).
 
 
 ## H55. Cross-run helper reuse pairs different authored source snapshots
@@ -802,7 +804,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** full consumer accepts 32 same-source pairs and rejects another
   project's manifest despite identical pixels. Actual failed CI3 identity still
   refuses, while copied same-source retained captures pass all five rejecting cases.
-- **Evidence:** [L07 CI3 audit and full correction](../tasks/evidence/shared-look.md#ci3-terminal-audit-and-fresh-full-ci4-correction-2026-10-31).
+- **Evidence:** [L07 CI3 audit and full correction](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/shared-look.md#ci3-terminal-audit-and-fresh-full-ci4-correction-2026-10-31).
 
 ## H56. A concurrency group cancels a waiting validation reporter
 
@@ -814,8 +816,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   `queue: max` on the shared status reporter while retaining serialized updates.
 - **Verification:** the original GitHub check annotation identifies replacement
   by another waiting request. The cancelled trial is failed evidence. Live overlap
-  verification and terminal audit belong to the owning task and PR #73.
-- **Evidence:** [CI reporter queue diagnosis](../tasks/active/ci-validation.md#passing-trial-exposed-reporter-queue-cancellation).
+  verification and terminal audit belong to the issue and PR #73.
+- **Evidence:** [CI reporter queue diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/ci-validation.md#passing-trial-exposed-reporter-queue-cancellation).
 
 ## H57. Nested layout journey uses the hierarchy before Source refresh completes
 
@@ -828,7 +830,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Verification:** a held catalog response reproduces the old open dialog and
   original assertion timeout. The corrected real controller/core journey passes
   with the held response and normally, preserving the existing deadline.
-- **Evidence:** [Audit-fix CI1 diagnosis](../tasks/evidence/phase-3b-audit-fixes.md#ci1-failure-and-controller-ordering-correction).
+- **Evidence:** [Audit-fix CI1 diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-3b-audit-fixes.md#ci1-failure-and-controller-ordering-correction).
 
 ## H58. Resize feedback inherits the movement-eligibility guard
 
@@ -842,7 +844,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** held-response DOM cases check immediate and settled geometry,
   focus, revision-bound submission, refusal retention and cancellation. Existing
   nested-fixed and ambiguous-parent cases remain covered.
-- **Evidence:** [Independent-review corrections](../tasks/evidence/phase-3b-audit-fixes.md#independent-review-corrections).
+- **Evidence:** [Independent-review corrections](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-3b-audit-fixes.md#independent-review-corrections).
 
 ## H59. LibreSSL derives a fixture serial path outside a dotted worktree
 
@@ -855,7 +857,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Verification:** actual host certificate preparation under a dotted temporary
   path now creates the serial and certificate inside that root and cleans up all
   generated material. No listener, provider request or native application runs.
-- **Evidence:** [TLS fixture isolation](../tasks/evidence/components-and-help-panel.md#tls-fixture-isolation).
+- **Evidence:** [TLS fixture isolation](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/components-and-help-panel.md#tls-fixture-isolation).
 
 ## H60. Normal-entry fixture calls Start outside a menu context
 
@@ -868,7 +870,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Verification:** the first SDK failure and exact pinned implementation establish
   the cause. Cheap admission checks require the new entry signal; corrected SDK
   execution remains pending at this record.
-- **Evidence:** [Entry diagnosis](../tasks/evidence/components-and-help-panel.md#first-help-sdk-campaign-and-entry-diagnosis).
+- **Evidence:** [Entry diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/components-and-help-panel.md#first-help-sdk-campaign-and-entry-diagnosis).
 
 ## H61. Exact completion-line comparison rejects reporter whitespace
 
@@ -880,7 +882,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Verification:** the new cheap assertion fails before correction and passes
   afterward; the retained real Show log now admits without another SDK process.
   Its original failed campaign remains failed and the other cases remain unrun.
-- **Evidence:** [Reporter admission](../tasks/evidence/components-and-help-panel.md#second-help-sdk-campaign-and-reporter-admission).
+- **Evidence:** [Reporter admission](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/components-and-help-panel.md#second-help-sdk-campaign-and-reporter-admission).
 
 ## H62. Interrupted bounded command skips process cleanup
 
@@ -893,7 +895,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Verification:** the new real-process cancellation case first fails, then all
   thirteen adapter tests pass on macOS. A syscall trace separates repeated-kill
   EPERM from a denied initial termination. Windows target evidence remains pending.
-- **Evidence:** [Cancellation correction](../tasks/evidence/components-and-help-panel.md#component-harness-review-and-shared-cancellation).
+- **Evidence:** [Cancellation correction](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/components-and-help-panel.md#component-harness-review-and-shared-cancellation).
 
 ## H63. Design Lab approval loading exceeds initial navigation deadline
 
@@ -909,7 +911,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   The corrected current-source gate passes 1,216 rendering cases, 29 groups and
   nine actual approval/source guards. Its original zero-case timeout and later
   interaction failures remain failed, with their separate corrections retained.
-- **Evidence:** [A2 integration](../tasks/evidence/components-and-help-panel.md#a2-approval-integration-and-first-production-ui-wiring).
+- **Evidence:** [A2 integration](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/components-and-help-panel.md#a2-approval-integration-and-first-production-ui-wiring).
 
 
 ## H64: Image evidence dependency install rejected by managed macOS Python
@@ -925,7 +927,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   interpreter-isolation checks pass. Corrected paired run 41548765954 at `ee17b94`
   passes all four harness groups on both hosts; exact-head artifacts and declared
   checkout filters verify. Original failed Mac preflight remains failed.
-- **Evidence:** [CI1 diagnosis](../tasks/evidence/components-and-help-panel.md#ci1-macos-dependency-failure-and-isolated-environment-correction).
+- **Evidence:** [CI1 diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/components-and-help-panel.md#ci1-macos-dependency-failure-and-isolated-environment-correction).
 
 
 ## H65: Native form validation bypasses component-name errors
@@ -937,7 +939,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** use `requestSubmit()` in the existing naming test. Directly dispatching
   `submit` bypassed the browser gate. Assert associated error, retained input/focus
   and no write. The case fails before the fix and passes afterward.
-- **Evidence:** [Naming correction](../tasks/evidence/components-and-help-panel.md#component-name-submission-correction-2026-11-03).
+- **Evidence:** [Naming correction](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/components-and-help-panel.md#component-name-submission-correction-2026-11-03).
 
 ## H66: Inline script loading loses sibling imports
 
@@ -950,7 +952,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Verification:** the import error reproduces locally. Corrected invocation
   retains both actual executables, verifies hashes, emits the source/manifest
   receipts and passes the artifact privacy scan.
-- **Evidence:** [Offline CI correction](../tasks/evidence/help-dialog-and-canvas.md#linux-offline-ci-fixture-correction-2026-11-04).
+- **Evidence:** [Offline CI correction](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/help-dialog-and-canvas.md#linux-offline-ci-fixture-correction-2026-11-04).
 
 ## P06. Canvas JSON decoding changes fractional geometry
 
@@ -962,7 +964,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** the production Canvas status path with the existing controlled
   child reproduces the changed coordinate before the fix and preserves its exact
   floating-point bits afterward. The child exits and its scratch is removed.
-- **Evidence:** [Matched captures and geometry diagnosis](../tasks/evidence/help-dialog-and-canvas.md#mac-matrix-and-exact-geometry-diagnosis).
+- **Evidence:** [Matched captures and geometry diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/help-dialog-and-canvas.md#mac-matrix-and-exact-geometry-diagnosis).
 
 ## H67. Nonblocking Dialog actions lose source protection
 
@@ -974,7 +976,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** public inspection/composition retains protected actions and
   refuses removal in missing, false, calculated and duplicate modality, while
   valid Dialog Finish and inert Null edits remain available.
-- **Evidence:** [PR 79 corrections and parent review](../tasks/evidence/help-dialog-and-canvas.md#pr-79-root-cause-corrections-and-parent-review-2026-11-04).
+- **Evidence:** [PR 79 corrections and parent review](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/help-dialog-and-canvas.md#pr-79-root-cause-corrections-and-parent-review-2026-11-04).
 
 ## H68. Stale sole-position insertion cannot be confirmed
 
@@ -986,7 +988,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** actual Story controls through core refuse before selection,
   accept the sole legal position after a real value change, preserve Cancel/Escape
   and source comments, and retain one-step Undo/Redo and accepted revision.
-- **Evidence:** [PR 79 corrections and parent review](../tasks/evidence/help-dialog-and-canvas.md#pr-79-root-cause-corrections-and-parent-review-2026-11-04).
+- **Evidence:** [PR 79 corrections and parent review](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/help-dialog-and-canvas.md#pr-79-root-cause-corrections-and-parent-review-2026-11-04).
 
 ## P07. Screen inspection repeats whole-source analysis per button
 
@@ -998,7 +1000,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** optimized public-service diagnostics reproduce the overhead and
   verify its removal; a large-screen public test preserves per-button authority
   and exact source edits without a permanent timing threshold.
-- **Evidence:** [PR 79 corrections and parent review](../tasks/evidence/help-dialog-and-canvas.md#pr-79-root-cause-corrections-and-parent-review-2026-11-04).
+- **Evidence:** [PR 79 corrections and parent review](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/help-dialog-and-canvas.md#pr-79-root-cause-corrections-and-parent-review-2026-11-04).
 
 
 ## H69. SDK text selector cannot find a nonfocusable screen caption
@@ -1013,8 +1015,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   selector failed. The corrected fixture passes exact text, numeric/type/sample
   witnesses and deliberate wrong-outcome rejection. Both failed attempts and the
   corrected pass retain immutable receipts. No duplicate test was added.
-- **Evidence:** [#94 coordinator runtime recovery](../tasks/evidence/arithmetic-94.md#coordinator-runtime-recovery)
-  and [corrected Mac pass](../tasks/evidence/arithmetic-94.md#mac-invocation-3-corrected-fixture-passed).
+- **Evidence:** [#94 coordinator runtime recovery](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-94.md#coordinator-runtime-recovery)
+  and [corrected Mac pass](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-94.md#mac-invocation-3-corrected-fixture-passed).
 
 ## H70. Full SDK GUI initialization violates a minimal canvas fixture assumption
 
@@ -1024,7 +1026,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   fixture permits only its known GUI limits and still requires inert samples.
 - **Regression:** the public no-SDK GUI case reproduces the failure and passes with
   the accurate limit and sample. Production admission stays unchanged.
-- **Evidence:** [#95 fixture recovery](../tasks/evidence/arithmetic-95.md#coordinator-fixture-correction-no-sdk-retry-yet).
+- **Evidence:** [#95 fixture recovery](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-95.md#coordinator-fixture-correction-no-sdk-retry-yet).
 
 ## H71. Fixture source insertion misses an imagebutton identity comment
 
@@ -1034,7 +1036,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   exactly once and preserve the comment.
 - **Regression:** the existing public preflight fails without the ID and passes
   after correction. It asserts the final accepted source, with no product change.
-- **Evidence:** [#95 insertion recovery](../tasks/evidence/arithmetic-95.md#mac-invocation-2-and-image-selector-correction).
+- **Evidence:** [#95 insertion recovery](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-95.md#mac-invocation-2-and-image-selector-correction).
 
 ## H72. Pinned SDK ID selectors require a tuple screen name
 
@@ -1044,8 +1046,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   public API's normalization. Both image mouse/keyboard selectors now use tuples.
 - **Verification:** an isolated pinned-method diagnostic distinguishes string and
   tuple lookup; the SDK pass proves both activations with unchanged assertions and timeout.
-- **Evidence:** [#95 selector diagnosis](../tasks/evidence/arithmetic-95.md#mac-invocation-3-and-pinned-selector-name-correction)
-  and [runtime pass](../tasks/evidence/arithmetic-95.md#mac-invocation-4-passed).
+- **Evidence:** [#95 selector diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-95.md#mac-invocation-3-and-pinned-selector-name-correction)
+  and [runtime pass](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-95.md#mac-invocation-4-passed).
 
 ## H73. Smoke probe calls the superseded variable-default editor
 
@@ -1054,7 +1056,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Cause/correction:** #97 replaces the old edit button with the selected variable's
   inspector. Select the variable and wait for `Save Default`; keep all assertions
   and deadlines. The existing three scenarios pass after the matching red.
-- **Evidence:** [exact-head CI and local replay](../tasks/evidence/arithmetic-review.md#ci-caller-correction-before-review-fixes).
+- **Evidence:** [exact-head CI and local replay](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-review.md#ci-caller-correction-before-review-fixes).
   Embedded probe changes still need a matching rebuild for any later native proof.
 
 ## H74. UI SDK driver does not reach the next narration
@@ -1067,7 +1069,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   preserving all source, assertions and deadlines. Live callback ordering remains
   provisional. The selected recovery reaches its narration destinations, then
   fails at first timer-dispatched division; full qualification remains failed (H75).
-- **Evidence:** [coordinator audit and recovery selection](../tasks/archive/2026-11-10-shared-arithmetic.md#2026-11-10-first-ui-sdk-result-audited-recovery-selected).
+- **Evidence:** [coordinator audit and recovery selection](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-11-10-shared-arithmetic.md#2026-11-10-first-ui-sdk-result-audited-recovery-selected).
 
 ## H75. UI SDK timer dispatch needs an interaction refresh
 
@@ -1083,8 +1085,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   the screen unbuilt and refresh changing false to true, then all exact action
   results, Finish and wrong-outcome rejection pass. The earlier run did not observe
   callback delivery; its missing evidence remains a failure.
-- **Evidence:** [Mac recovery result](../tasks/evidence/arithmetic-review.md#recovery-integration-and-mac-invocation-2-2026-11-10).
-  [Mac confirmation](../tasks/evidence/arithmetic-review.md#mac-invocation-3-passed-2026-11-10)
+- **Evidence:** [Mac recovery result](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-review.md#recovery-integration-and-mac-invocation-2-2026-11-10).
+  [Mac confirmation](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-review.md#mac-invocation-3-passed-2026-11-10)
   keeps the admission replay separate from runtime proof.
 
 ## H76. Arithmetic CI fixtures retain obsolete error contracts
@@ -1098,7 +1100,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** both failing fixtures and three affected inherited dispatch
   consumers pass with focus, source/history and error assertions intact. No
   production or SDK input changed; no longer timeout or deleted assertion.
-- **Evidence:** [CI consumer correction](../tasks/evidence/arithmetic-review.md#automatic-ci-fixture-consumers-corrected-2026-11-10).
+- **Evidence:** [CI consumer correction](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-review.md#automatic-ci-fixture-consumers-corrected-2026-11-10).
 
 ## H77. Variable-default fields bypass completion validation
 
@@ -1110,7 +1112,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** production UI checks decimal/integer blur, invalid corrections,
   IME, Cancel and no invalid writes. The actual-main/core journey retains
   default drafts through unrelated creation, history, refusals and reopen.
-- **Evidence:** [TDD follow-up](../tasks/evidence/arithmetic-review.md#variable-default-validation-follow-up-2026-11-10).
+- **Evidence:** [TDD follow-up](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-review.md#variable-default-validation-follow-up-2026-11-10).
 
 ## H78. Arithmetic helper recognition accepts customized declarations
 
@@ -1121,7 +1123,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   inspection, write admission and canvas; count helper class names across headers.
 - **Regression:** six customized-source cases and independent public-command
   checks require protection, write refusal and exact byte retention.
-- **Evidence:** [Terra audit and corrections](../tasks/evidence/arithmetic-review.md#audited-terra-findings-and-sol-corrections-2026-11-10).
+- **Evidence:** [Terra audit and corrections](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-review.md#audited-terra-findings-and-sol-corrections-2026-11-10).
 
 ## H79. Literal-to-formula no-ops create source and history changes
 
@@ -1132,7 +1134,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   or equating opposite signed zeros. Preserve imported action timing and source.
 - **Regression:** actual Story/Screens controls preserve bytes and empty history;
   public-core checks retain large integers, comments and meaningful sign changes.
-- **Evidence:** [Terra audit and corrections](../tasks/evidence/arithmetic-review.md#audited-terra-findings-and-sol-corrections-2026-11-10).
+- **Evidence:** [Terra audit and corrections](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-review.md#audited-terra-findings-and-sol-corrections-2026-11-10).
 
 ## H80. Decimal JSON transport loses negative zero
 
@@ -1141,7 +1143,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   Admit the exact `"-0.0"` string through the shared decimal owner and typed contract.
 - **Regression:** defaults, literal assignments, formula results, conditions, inert
   samples, shared history and reopen retain the sign through public operations.
-- **Evidence:** [Terra audit and corrections](../tasks/evidence/arithmetic-review.md#audited-terra-findings-and-sol-corrections-2026-11-10).
+- **Evidence:** [Terra audit and corrections](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-review.md#audited-terra-findings-and-sol-corrections-2026-11-10).
 
 ## H81. Standalone SDK fixture omits the editor's default condition variable
 
@@ -1168,7 +1170,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Verification:** a controlled held-picker replay reproduces the exact failure;
   waiting for readiness before validation passes that replay and the full actual
   browser/controller/core journey. Production code and timeouts are unchanged.
-- **Evidence:** [Choice CI correction](../tasks/evidence/choice-98.md#ci-font-import-readiness-correction).
+- **Evidence:** [Choice CI correction](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/choice-98.md#ci-font-import-readiness-correction).
 
 ## H83. Saved-slot Load button covers Start in an SDK fixture
 
@@ -1202,7 +1204,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Verification:** the full required browser preflight passes with unchanged
   security/refusal/history checks. Chromium/fixture proof remains distinct from
   native packaging and human acceptance.
-- **Evidence:** [Choice preview integration](../tasks/evidence/choice-98.md#approved-a-v2-integration-and-final-ci-reservation).
+- **Evidence:** [Choice preview integration](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/choice-98.md#approved-a-v2-integration-and-final-ci-reservation).
 
 ## H85. Windows helper exit can precede empty job accounting
 
@@ -1219,7 +1221,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** retain one immediate-leader-exit controlled-child case at the
   Windows `OwnedChild` boundary. Original lifecycle units retain their assertions.
   Controlled-child proof does not qualify native SDK rendering or human input.
-- **Evidence:** [Choice CI correction](../tasks/evidence/choice-98.md#windows-cooperative-shutdown-correction).
+- **Evidence:** [Choice CI correction](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/choice-98.md#windows-cooperative-shutdown-correction).
 
 ## H86. SDK-only authoring fixture hides stale continuation expectations
 
@@ -1236,13 +1238,13 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   without executing an SDK. Exact source, assets, history, reopen, graph workload,
   rendering assertions and timing policy remain intact. SDK/package acceptance is
   still pending.
-- **Evidence:** [Second Choice campaign audit](../tasks/evidence/choice-98.md#second-campaign-terminal-audit-and-harness-correction).
+- **Evidence:** [Second Choice campaign audit](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/choice-98.md#second-campaign-terminal-audit-and-harness-correction).
 - **Unexecuted consumer audit:** the packaged runtime edit/restore and optional
   Branches probes retained the same old button. Their mock omitted option-header
   ownership, so its prior pass concealed the mismatch. Carry real `guardPath` and
   exact header locations in the fixture and follow `Open Scene` in those probes.
   The corrected five-case runtime browser sequence passes; native execution stays
-  pending. [Continuation preparation](../tasks/evidence/choice-98.md#continuation-audit-of-unexecuted-package-paths)
+  pending. [Continuation preparation](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/choice-98.md#continuation-audit-of-unexecuted-package-paths)
   retains the reproduced failure and signing-prerequisite finding.
 
 ## H87. UI refresh validator expects another probe's report
@@ -1256,7 +1258,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Verification:** browser red/green and missing-check/failure controls pass.
   All six retained Mac reports revalidate without native launches; original failed
   wrapper results remain retained. This does not supply missing smoke acceptance.
-- **Evidence:** [Third Choice campaign](../tasks/evidence/choice-98.md#third-campaign-results-and-offline-harness-corrections).
+- **Evidence:** [Third Choice campaign](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/choice-98.md#third-campaign-results-and-offline-harness-corrections).
 
 ## H88. Smoke report delivery collides with ordinary shell reads
 
@@ -1273,7 +1275,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   preflight passes. An exact Rust classification red/green check covers the native
   termination decision and preserves malformed-report rejection. Fresh packaged
   smoke remains unqualified.
-- **Evidence:** [Third Choice campaign](../tasks/evidence/choice-98.md#third-campaign-results-and-offline-harness-corrections).
+- **Evidence:** [Third Choice campaign](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/choice-98.md#third-campaign-results-and-offline-harness-corrections).
 
 ## H89. TLS server accept precedes client socket ownership
 
@@ -1290,7 +1292,7 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   controlled Windows re-check at closeout; the next Windows package run executes
   the corrected test in its core suite. Earlier unforced passes do not erase the
   failed campaign.
-- **Evidence:** [Windows TLS diagnosis](../tasks/evidence/choice-98.md#windows-tls-readiness-diagnosis-and-correction).
+- **Evidence:** [Windows TLS diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/choice-98.md#windows-tls-readiness-diagnosis-and-correction).
 
 ## H90. Packaged smoke navigates before a dialog's save closes it
 
@@ -1305,4 +1307,4 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Verification:** a local Mac diagnostic showed `scope=Edit Alice` with only the
   dialog's controls. The browser preflight now delays direct shell calls by 25 ms;
   it reproduced that failure before the fix and passes after it.
-- **Evidence:** [Final Choice campaign](../tasks/evidence/choice-98.md#closeout-review-and-final-campaign).
+- **Evidence:** [Final Choice campaign](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/choice-98.md#closeout-review-and-final-campaign).

@@ -17,8 +17,8 @@ prototype behaviour; product acceptance remains under [TESTING](../../docs/TESTI
 - Use fresh fictional data on each mount. Scenario changes and Reset open a fresh
   document. Keep project files, credentials, model requests and SDK execution in
   their existing application workflows.
-- Keep the current fonts, colours and icons unless the selected task changes them.
-  Use real editable controls and enough interaction to review the selected task.
+- Keep the current fonts, colours and icons unless the selected issue changes them.
+  Use real editable controls and enough interaction to review the selected issue.
   Preserve existing capabilities; identify additions, removals and changed behaviour
   in the screen's review notes.
 - Before review, follow [focused verification](README.md#focused-verification).

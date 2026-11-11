@@ -1,7 +1,28 @@
 # Crossroads at Sundown fixture
 
 This is synthetic test data for Project Loomlight. It contains no personal data,
-downloaded media, or private game material.
+downloaded media, or private game material. It is a test instrument for source
+preservation, visual authoring, branching and state, screens, SDK validation and
+LLM context. It is not a product demo or a writing sample.
+
+Two fictional adult colleagues, Alex Rowan and Morgan Vale, finish a community-radio
+shift and choose a rooftop event or a riverside walk. Both routes change trust and
+time, then reconverge before one of two endings. The subject matter stays neutral so
+fixtures are safe in logs and screenshots. A separate synthetic metadata case checks
+that adult-content flags survive without application filtering, and contains no
+graphic material.
+
+```mermaid
+flowchart TD
+    A["s001: Radio booth"] --> B{"Leave together?"}
+    B -->|Rooftop| C["s010: Rooftop event"]
+    B -->|Riverside| D["s020: Riverside walk"]
+    C --> E["s030: Station platform"]
+    D --> E
+    E --> F{"Trust threshold"}
+    F -->|Met| G["Ending: shared plan"]
+    F -->|Not met| H["Ending: separate ways"]
+```
 
 - `game/` is the integrated representative project source.
 - `micro/valid/` isolates syntax and byte-preservation cases.

@@ -1,6 +1,6 @@
 # Phased roadmap
 
-**Planning clarification:** 2026-09-15; Phases 2–3 delivery planning updated 2026-10-02. Each phase is gated by measured outcomes, not elapsed time. This roadmap defines scope and dependencies; it does not authorise implementation. Each milestone needs a bounded brief and explicit approval. Read [CURRENT](status/CURRENT.md) for actual implementation and gate state.
+**Planning clarification:** 2026-09-15; Phases 2–3 delivery planning updated 2026-10-02. Each phase is gated by measured outcomes, not elapsed time. This roadmap defines scope and dependencies; it does not authorise implementation. Each milestone needs its own issue and explicit approval. GitHub Issues hold actual implementation and gate state.
 
 ## Phase 0 — Foundation and proof (complete)
 
@@ -26,13 +26,13 @@ Completed 2026-09-13. ADR 0001 selects the lossless source model, ADR 0002 selec
 `82d45189d003239b622bc946c85b639a093f46a1` after one fresh independent review.
 Production 37529174148/1 at exact `ba01a84` proves required Windows x64/macOS ARM64
 H01–H12/sections 3–4 gates; main quality 37536967028/1 Pass and exact integrated-input
-audit prove integration. The [closure ledger](tasks/archive/2026-10-07-phase-1h-vertical-slice-acceptance.md#independent-review-integration-and-phase-1-closure--2026-10-07)
+audit prove integration. The [closure ledger](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-07-phase-1h-vertical-slice-acceptance.md#independent-review-integration-and-phase-1-closure--2026-10-07)
 retains identities, both earlier failed matrices, cumulative attempts and limits.
 The bounded Phase 2 source foundation is independently reviewed and qualified on both
 targets and integrated through [PR19](https://github.com/Caldwell-41/Renpy-editor/pull/19). Provider/AI and remaining Phase 3 implementation are
-unstarted; CURRENT/HANDOVER own the next selection.
+unstarted; GitHub Issues own the next selection.
 
-**Outcome:** a small but genuinely usable Loomlight-created Ren'Py project from creation through authoring, validation, run, close and reopen. The [Phase 1 vertical-slice plan](tasks/archive/2026-10-07-phase-1-vertical-slice.md) owns detailed milestone scope and gates.
+**Outcome:** a small but genuinely usable Loomlight-created Ren'Py project from creation through authoring, validation, run, close and reopen. The [Phase 1 vertical-slice plan](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-07-phase-1-vertical-slice.md) owns detailed milestone scope and gates.
 
 Phase 1 includes conventional staged project creation; distinct title/folder identity, selected parent, compatible pinned SDK, configurable resolution and optional local Git initialization; modular source and editor-only metadata; safe persistence/reopen; Characters with extensible Appearances; copied Assets and bool/int/string Variables; the bounded visual beat set; Scene/Source/Branches workspaces; scene-local partial preview; lossless Custom Code; shared transactions, coherent history, minimum usable recovery; explicit SDK validation/normal run and supported script editing/saving during play; asset mutations require Stop. New Git status/diff/checkpoint work is optional later scope.
 
@@ -71,7 +71,7 @@ These subdivisions do not add a new product scope or bypass milestone approval. 
 
 ## Optional milestone — Local Git checkpoints (deferred)
 
-**Decision:** 2026-09-25. [Optional Git](tasks/active/optional-local-git.md) preserves the
+**Decision:** 2026-09-25. [Optional Git](https://github.com/Caldwell-41/Renpy-editor/issues/135) preserves the
 former 1G.3a/1G.3b requirements as GIT.1 safety and GIT.2 UI. No date or automatic start;
 the user may select it later. It is not required for 1G/1H, Phase 1 closure or Phase 2
 entry, Phase 3 or initial-release acceptance. The user removed proposed 3E on
@@ -80,14 +80,13 @@ this foundation if selected; it must not assume Phase 1 delivered status/diff/ch
 
 The remaining Phase 1 test cadence is agent-run development and early native process
 proof, one final human session at 1G closure, and automated 1H acceptance with narrowly
-reused human evidence; [TESTING](TESTING.md#phase-1g-testing-ownership-and-cadence) owns it.
+reused human evidence; [TESTING](testing/NATIVE.md#evidence-layers-and-ownership) owns it.
 
 ## Phase 2 — Initial LLM assistance
 
-Phase 2 acceptance remains incomplete. The [current Phase 2 brief](tasks/active/phase-2-initial-llm-assistance.md)
-owns outstanding work and qualified evidence; CURRENT and HANDOVER own live state
-and recovery. Read this roadmap for product scope, and follow the brief's current
-contract rather than dated execution directions when selecting further work.
+Phase 2 acceptance remains incomplete. Its [GitHub issue](https://github.com/Caldwell-41/Renpy-editor/issues/132) owns outstanding work; the
+[archived Phase 2 brief](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/phase-2-initial-llm-assistance.md)
+keeps its requirements and qualified evidence. Read this roadmap for product scope.
 
 **Outcome:** Unsloth Studio alone supports user-initiated structured scene, Character
 and proposed-lore actions, with reviewable semantic/file changes. Persistent Character
@@ -97,11 +96,11 @@ limits. Studio is a first-class provider with dedicated setup, capability qualif
 diagnostics and live acceptance. Generic/OpenAI-compatible adapters are deferred outside
 Phase 2. No hardcoded model catalogue or automatic application.
 
-The [detailed Phase 2 plan](tasks/active/phase-2-initial-llm-assistance.md) records provider contracts,
+The [detailed Phase 2 plan](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/phase-2-initial-llm-assistance.md) ([#132](https://github.com/Caldwell-41/Renpy-editor/issues/132) owns outstanding work) records provider contracts,
 selected-context rules, proposal/history ownership and separately selected execution.
 The bounded source foundation, settings/credentials, synthetic request lifecycle,
 manual references, prompts/context, first rewrite, Continue Scene, Draft Scene,
-[Generated Character cards](tasks/evidence/phase-2-execution.md#generated-character-cards-qualified-closure--2026-10-11),
+[Generated Character cards](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#generated-character-cards-qualified-closure--2026-10-11),
 Generated lorebook entries, the Studio integrated/live slice and selectable proposal
 editing are qualified within their recorded scopes. The remaining Phase 2 outcome is
 Studio-only closure: reconcile the residual verification-matrix gaps and complete the
@@ -115,20 +114,19 @@ configuration-bound setup readiness and verified HTTPS/hostname generation are n
 selected and locally implemented, with qualification pending. AI changes to existing Scene endings/connections
 are explicitly deferred beyond Phase 2, as possible future work. Earlier slice
 exclusions do not waive the remaining phase requirements. See the
-[requirement map](tasks/evidence/phase-2-execution.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12).
+[requirement map](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#studio-only-closeout-entry-audit-and-requirement-map--2026-10-12).
 
 The selected delivery sequence brought forward bounded 3A source foundations alongside
 Studio feasibility, then completed the reviewed dialogue workflow using manual
 cards/lorebook and configurable prompts/limits. Residual Studio verification and 3A
 Story logic may overlap under separately selected bounded outcomes.
-[Shared foundations and lane assignments](tasks/reference/phase-2-3-delivery.md#19-selected-shared-foundations-and-two-lane-delivery)
+[Shared foundations and lane assignments](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-2-3-delivery.md#19-selected-shared-foundations-and-two-lane-delivery)
 own the detailed gates and GPT-6.1 Sol High owner with zero to two useful independent helpers.
 Phase 2 still requires residual verification and final integrated acceptance; these
 stages do not enlarge its AI operation allowlist or authorize implementation.
-[The deliverable queue](tasks/reference/phase-2-3-delivery.md#20-bounded-deliverables-and-next-outcome-prompts)
+[The deliverable queue](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-2-3-delivery.md#20-bounded-deliverables-and-next-outcome-prompts)
 maps those outcomes to the requirement checkpoints below; it retains Unsloth Studio
-and its five actions. Generic-compatible providers are deferred. Checkpoints use
-internal commits in the same outcome/chat under WORKFLOW, not mandatory chat transfers.
+and its five actions. Generic-compatible providers are deferred.
 
 Execute separately scoped internal briefs after Phase 1 acceptance and explicit approval:
 
@@ -158,11 +156,11 @@ Git/GitHub are deferred and absent from Phase 3/release acceptance.
 
 **Outcome:** satisfy PRODUCT's initial-release scope through separately gated capabilities, not one large implementation goal. Preserve the accepted source/transaction/authority architecture and exclude arbitrary existing-project import.
 
-The [detailed Phase 3 draft](tasks/active/phase-3-initial-wysiwyg-release.md) defines
+The [detailed Phase 3 draft](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/phase-3-initial-wysiwyg-release.md) defines
 first usable results, proposed subsets, dependencies, implementation steps, inspected
 code seams, early risk proofs and completion gates. The user selected **Story logic first, then screen design** on 2026-10-02.
 The selected shared-foundation sequence allows scoped 3A work before Phase 2
-completion. All remaining Screens work uses the [standing 3B scheduling exception](tasks/reference/phase-2-3-delivery.md#standing-phase-3b-scheduling-exception)
+completion. All remaining Screens work uses the [standing 3B scheduling exception](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-2-3-delivery.md#standing-phase-3b-scheduling-exception)
 and its actual technical dependencies without waiting for final Phase 2/3A acceptance.
 Timeline retains its existing entry gates; the lanes can overlap when those hold.
 State/Run From Here consumes qualified story/effect semantics, and release qualification
@@ -172,13 +170,13 @@ entry points and release audience remain explicit design decisions.
 
 | Checkpoint | Bounded capability and essential acceptance |
 | --- | --- |
-| 3A — Mature authoring and supported flow/state constructs | Explicitly own initial-release conditions/calls and their shared semantics, source mapping, diagnostics and history. Mature Scene/Source/Branches without creating a second graph or document truth. Unknown/custom constructs remain lossless. |
-| 3B — Supported screen designer | Reviewed screen-language subset with canvas/hierarchy editing, minimal source patches and runtime comparisons. Unsupported screens remain source/custom code; no claim of full arbitrary-screen WYSIWYG. |
-| 3C — Staging, native animation and VN Timeline | Character drag/resize with matching runtime placement; native pre-rendered playback and dialogue idle loops; reviewed timing/transform/audio subset with source mapping, undo and native tests. Only pinned-Ren'Py-supported media profiles; no GIF import/conversion, transcoding or video editing. |
-| 3D — Supported state simulation and Run From Here | Depends on a validated state/provenance model and supported control-flow semantics. Distinguish reachable, saved-route and synthetic/manual starting state; refuse or clearly limit unknown prerequisites. A label jump/warp alone is not correct state reconstruction. |
-| 3F — Distribution and release acceptance | The agreed initial-release capabilities pass integrated E2E, pinned-SDK comparisons, accessibility, performance, privacy/security, recovery and packaging. Verify the actual distribution audience/channel and install/launch behavior before publication. |
+| 3A — Mature authoring and supported flow/state constructs ([#133](https://github.com/Caldwell-41/Renpy-editor/issues/133)) | Explicitly own initial-release conditions/calls and their shared semantics, source mapping, diagnostics and history. Mature Scene/Source/Branches without creating a second graph or document truth. Unknown/custom constructs remain lossless. |
+| 3B — Supported screen designer ([#22](https://github.com/Caldwell-41/Renpy-editor/issues/22)) | Reviewed screen-language subset with canvas/hierarchy editing, minimal source patches and runtime comparisons. Unsupported screens remain source/custom code; no claim of full arbitrary-screen WYSIWYG. |
+| 3C — Staging, native animation and VN Timeline ([#129](https://github.com/Caldwell-41/Renpy-editor/issues/129)) | Character drag/resize with matching runtime placement; native pre-rendered playback and dialogue idle loops; reviewed timing/transform/audio subset with source mapping, undo and native tests. Only pinned-Ren'Py-supported media profiles; no GIF import/conversion, transcoding or video editing. |
+| 3D — Supported state simulation and Run From Here ([#130](https://github.com/Caldwell-41/Renpy-editor/issues/130)) | Depends on a validated state/provenance model and supported control-flow semantics. Distinguish reachable, saved-route and synthetic/manual starting state; refuse or clearly limit unknown prerequisites. A label jump/warp alone is not correct state reconstruction. |
+| 3F — Distribution and release acceptance ([#131](https://github.com/Caldwell-41/Renpy-editor/issues/131)) | The agreed initial-release capabilities pass integrated E2E, pinned-SDK comparisons, accessibility, performance, privacy/security, recovery and packaging. Verify the actual distribution audience/channel and install/launch behavior before publication. |
 
-These are dependency-planning boundaries; each execution brief must name its exact subset, entry conditions, measurable acceptance and exclusions. Shared state semantics must precede 3D. General analysis completeness is not assumed: deeper Phase 4 analysis may refine this supported subset later without making 3D's claims retroactively true.
+These are dependency-planning boundaries; each milestone issue must name its exact subset, entry conditions, measurable acceptance and exclusions. Shared state semantics must precede 3D. General analysis completeness is not assumed: deeper Phase 4 analysis may refine this supported subset later without making 3D's claims retroactively true.
 
 **Exit criteria:** every capability in PRODUCT's initial-release scope passes its gates and the integrated create/author/source/preview/run/LLM/recover/reopen workflow on both targets. Preserve visible partial/unknown handling. Signing/notarisation is not required for early genuinely private builds, but is required before broader distribution under the release policy below.
 
@@ -205,7 +203,7 @@ Early genuinely private packages may be unsigned only under a separately approve
 **One-off 0.1.0 exception — 2026-10-07:** the user explicitly approved
 [v0.1.0](https://github.com/Caldwell-41/Renpy-editor/releases/tag/v0.1.0) as an early
 public prerelease with original unsigned/non-notarized Windows/macOS packages and
-unqualified installer paths disclosed. [Publication evidence](tasks/archive/2026-10-07-release-0.1.0.md)
+unqualified installer paths disclosed. [Publication evidence](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-07-release-0.1.0.md)
 records the tagged source, original qualification, asset checksums, licences/provenance
 and approval. This exception applies only to 0.1.0 and does not change later-release
 signing/notarisation or install/launch requirements.

@@ -1,6 +1,6 @@
 # ADR 0005: Version-pinned staged project creation
 
-**Status:** Accepted for Phase 1C  
+**Status:** Accepted<br>
 **Date:** 2026-09-14
 
 ## Context

@@ -1,27 +1,12 @@
 # ADR 0021: Separate Ren'Py helper for the Screens canvas
 
-- Status: Accepted design; bounded Help integration, shutdown, matched rendering, physical input and observed smoothness accepted
+- Status: Accepted
 - Date: 2026-10-22
-- Authority: The user confirmed the complete interview agreement and requested this
-  ADR and the update to [L17 #36](https://github.com/Caldwell-41/Renpy-editor/issues/36).
 
 The supported screen canvas must agree with the project's pinned Ren'Py render,
 including text wrapping, while editing remains inert and shows draft changes.
-Use a separate Ren'Py canvas helper as the approach for the later representative
-proof. Reusing Ren'Py's layout and text rendering reduces the behavior Loomlight
-must reproduce. This decision accepts the approach and proof scope; it supplies
-no rendering evidence or authorization to implement or run that proof now.
-
-The user subsequently selected implementation of #36. The
-[proof record](../tasks/evidence/canvas-rendering.md) owns implementation mappings,
-observed differences and remaining qualification. This does not weaken the fidelity
-or feedback requirements below.
-
-The [matched comparison closeout](../tasks/evidence/canvas-rendering.md#both-target-matched-rendering-closeout)
-qualifies the accepted Help composition at both internal aspects and normal/hover
-states on both targets, with no pixel tolerance. The [Windows closeout](../tasks/evidence/canvas-rendering.md#windows-functional-and-smoothness-closeout-2026-10-24)
-and recorded Mac evidence accept physical input and observed move/resize smoothness
-for this bounded Help proof. The full supported subset retains its separate gates.
+Use a separate Ren'Py canvas helper. Reusing Ren'Py's layout and text rendering
+reduces the behavior Loomlight must reproduce.
 
 ## Execution and editing boundary
 
@@ -55,14 +40,12 @@ acknowledgment and exit. Success requires exit 0, drained output and no remainin
 owned process. Windows also requires the private desktop to close. If any part
 fails, core retains its bounded process-tree cleanup fallback. Project close,
 project change and application shutdown use this same owner. Startup refusal
-exits before Ren'Py can display a graphical error dialog. The linked proof record
-distinguishes service checks from packaged native observation and unproved focus
-or presentation cases.
+exits before Ren'Py can display a graphical error dialog.
 
 The canvas shows provisional property changes and gestures before acceptance.
 Keep drafts and sample values distinct from accepted source and runtime values.
 Canvas clicks select elements. Existing Apply/Cancel, gesture Escape and shared
-transaction/history rules remain under the [Screens contract](../tasks/reference/phase-3b-screens.md#editing-and-interaction-behavior).
+transaction/history rules remain under the [Screens contract](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-3b-screens.md#editing-and-interaction-behavior).
 The helper creates no second saved screen document. Test in Ren'Py remains an
 explicit actual-project execution using accepted source and the existing runtime
 trust, frozen-revision, stale-preview, Stop and cleanup rules.
@@ -87,47 +70,10 @@ waiver or general unsupported-code exemption for supported content.
 The initial warm-update target was at least 95% of editing inputs visible on the
 canvas within 100 ms. For #36 in this release, the user accepted functional behavior
 and observed smoothness on both targets and closed that numerical qualification.
-[The recorded release decision](../tasks/evidence/canvas-rendering.md#windows-functional-and-smoothness-selection-2026-10-24)
+[The recorded release decision](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/canvas-rendering.md#windows-functional-and-smoothness-selection-2026-10-24)
 retains the unverified numerical result without claiming a measured pass. Reopen
 only on explicit user request or a newly observed concrete performance regression.
 This scoped decision does not change other features' performance contracts.
-
-## Later representative proof
-
-When separately selected and budgeted, use the existing Help source/preview
-foundation for one production-path example containing nested containers, padding,
-spacing, anchors, a real image, a project font, multiline wrapped text and a text
-button with sample appearances. Exercise live text changes, dragging and resizing.
-
-Compare the helper's source-derived composition with the actual accepted screen in
-deliberate Ren'Py preview, using the same assets, samples and state. Use project
-resolution and a second internal aspect on Windows x64 and macOS ARM64, with window
-scaling checked separately. Record captures, geometry, every visible difference,
-cause and affected scope. Keep accepted-source fidelity comparisons separate from
-provisional draft timing. Verify selection outlines, selection geometry, helper
-startup/failure/shutdown, focus retention and absence of project-script/action
-execution during editing. Preserve the existing source/transaction safeguards for
-any writes introduced by that later outcome.
-
-The proof must record the actual source-property-to-rendering mappings, coordinate
-conversions, supported style/sample rules and remaining limits. Ren'Py rendering
-APIs alone do not provide an editor connection or a complete selection map. Frame
-delivery, request/revision handling and geometry mapping need qualification. A
-failure returns to decision review before broad renderer implementation or a
-weaker requirement is accepted.
-
-| Later ticket | What it must extend and prove |
-| --- | --- |
-| [L18 #46](https://github.com/Caldwell-41/Renpy-editor/issues/46) | Base fixed/frame/vbox/text/image/textbutton composition, actual assets/styles, anchors and text wrapping through the qualified mappings. |
-| [L19 #50](https://github.com/Caldwell-41/Renpy-editor/issues/50) | Window/hbox/grid/viewport and reusable components, clipping, layering, constraints and shared-definition invalidation. |
-| [L20 #54](https://github.com/Caldwell-41/Renpy-editor/issues/54) | Existing-variable samples and applicable normal/hover/selected/disabled appearances for the remaining supported controls. |
-
-Each extension retains matched both-target/two-aspect comparison and explicit
-coverage limits. One Help proof does not accept the full subset, generated-screen
-adapters, editor layout or whole 3B. [B07 #29](https://github.com/Caldwell-41/Renpy-editor/issues/29)
-retains aggregate ownership; #36's bounded Help proof is accepted.
-[B08 #30](https://github.com/Caldwell-41/Renpy-editor/issues/30)
-owns full supported canvas acceptance.
 
 ## Alternatives and consequences
 
@@ -136,10 +82,7 @@ owns full supported canvas acceptance.
   equivalence, so this carries substantial risk under matching text wrapping.
 - Capturing the actual project supplies its initialized behavior but executes game
   code. Keep it for deliberate comparison under the existing runtime boundary.
-- The chosen helper requires the pinned SDK and a new editor connection. Its
-  bounded Help responsiveness and fidelity are accepted; the full subset remains unproved. The
-  [bounded production integration and shutdown proof](../tasks/evidence/canvas-rendering.md#both-target-production-integration-and-shutdown-closeout)
-  records the selected both-target native observations and their limits. Unknown
+- The chosen helper requires the pinned SDK and a new editor connection. Unknown
   custom dependencies stay explicit even though Ren'Py performs the drawing.
 
 This refines the proposed Preview service's Screens responsibility in
@@ -149,7 +92,7 @@ actual-project execution controls. No earlier accepted ADR or historical result 
 superseded. [Source authority](0001-lossless-source-model.md), narrow IPC, SDK
 verification, approved-root containment and signing rules remain applicable.
 
-## Technical basis and pending evidence
+## Technical basis
 
 [Ren'Py's rendering API](https://www.renpy.org/doc/html/cdd.html#renpy.render) can
 render displayables inside the engine. Inspected
@@ -157,8 +100,7 @@ render displayables inside the engine. Inspected
 requires an initialized display for render export; screenshot export is not a
 demonstrated live-update transport. The
 [pinned text implementation](https://github.com/renpy/renpy/blob/8.5.3.26051504/renpy/text/text.py)
-confirms distinct line-breaking behavior. These facts support testing engine reuse,
-not a claim that the helper already exists. Public Ren'Py documentation currently
+confirms distinct line-breaking behavior. These facts support engine reuse. Public Ren'Py documentation currently
 describes 8.5.4; version-sensitive behavior must use the project's pinned adapter.
 
 [Ren'Py configuration](https://www.renpy.org/doc/html/config.html#var-config.screen_width)
@@ -166,5 +108,4 @@ distinguishes virtual game dimensions from window dimensions.
 [CSS pixel definitions](https://www.w3.org/TR/css-values-4/#absolute-lengths) distinguish
 logical and device pixels. [Response-time guidance](https://www.nngroup.com/articles/website-response-times/)
 and [ADR 0010's input/pan gate](0010-local-project-safety-and-observed-flow.md#acceptance-replacing-the-old-observation-gate)
-explain the initial latency target. No SDK, app, renderer proof or CI was run for
-this decision session. #36 owns current delivery, allowance and remaining evidence.
+explain the initial latency target.

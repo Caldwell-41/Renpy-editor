@@ -1,7 +1,7 @@
 # ADR 0022: Save retained Story drafts through the shell
 
 - Date: 2026-11-08
-- Status: Accepted design in the Story Combined v1 interview; not implemented.
+- Status: Accepted
 - Scope: Save in Story with pending beat drafts. Extends ADR 0007 and supersedes
   its non-Source Flush-only rule for this case. Other Save routes and Source
   acceptance rules remain unchanged.
@@ -36,5 +36,5 @@ does not create an extra Undo step or clear earlier steps.
 Keeping Flush-only Save or accepting only the selected beat would leave other
 pending Story edits unsaved after the main Save action. Checking and accepting the
 whole set adds coordination work, but gives Save an explicit project-wide meaning
-within Story. Detailed implementation and qualification remain unselected under
-the [interview's release scope](../design/story-revamp/README.md#production-release-scope).
+within Story. The [interview's release scope](../design/story-revamp/README.md#production-release-scope)
+sets the delivery boundaries.

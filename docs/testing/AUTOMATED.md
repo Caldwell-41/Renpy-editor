@@ -1,7 +1,7 @@
 # Automated checks and harness contracts
 
-[Testing entry point](../TESTING.md) owns navigation; [WORKFLOW](../WORKFLOW.md)
-owns selection, budgets, host routing and waiting. Commands below are references,
+[Testing entry point](../TESTING.md) owns navigation, selection, host routing and
+waiting; [AGENTS](../../AGENTS.md#operation-limits) owns operation limits. Commands below are references,
 not a run-all instruction. Run from `app/` unless stated otherwise.
 
 ## Automatic PR and main checks
@@ -89,7 +89,7 @@ selector false. The Windows job requires its hosted interactive desktop. This is
 optional focused verification route, not an extra mandatory dispatch per feature.
 The Thinking path already runs the same underlying fixtures and host gates
 independently; do not add a duplicate run there.
-Current results and consumed attempts belong in the selected task.
+Current results and consumed attempts belong on the issue.
 
 ## Renderer and production-probe consumers
 
@@ -199,5 +199,4 @@ core scope does not suppress the other scopes. Historical recipe branches retain
 their scoped meaning; this does not qualify them on current application contracts.
 
 See [INCIDENTS](INCIDENTS.md) before correcting a matching failure. Record its
-classification and smallest discriminating check in linked task evidence, and keep
-the brief's unresolved result current.
+classification and smallest discriminating check on the issue.

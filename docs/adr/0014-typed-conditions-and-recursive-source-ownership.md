@@ -1,6 +1,6 @@
 # ADR 0014: Typed conditions and recursive source ownership
 
-- Status: Independently reviewed; scoped both-target frontend/core/SDK qualification passed; Phase3A acceptance pending
+- Status: Accepted
 - Date: 2026-10-13
 - Scope: Phase 3A.1; extends ADR 0012 without changing its historical acceptance
 
@@ -57,10 +57,5 @@ by older source-map readers. Reusing v3 would misrepresent its single-level vali
 rewriting scripts during migration would violate source authority. Keeping all richer
 logic opaque would prevent the selected nested authoring outcome.
 
-This decision alone does not deliver editable conditions, calls, Story controls or
-3A acceptance. Those slices retain their own review and runtime requirements. The
-[Phase 3 task](../tasks/evidence/phase-3-history.md#3a-execution-ledger--2026-10-13)
-owns exact check outcomes, failures, source identities and qualification status.
-
-Scoped final CI4 evidence and limits are recorded in the [terminal audit](../tasks/evidence/phase-3-history.md#ci4-terminal-audit-and-scoped-qualification--2026-10-14).
-Prior failures, portable visual self-review and user acceptance remain distinct.
+This decision alone does not deliver editable conditions, calls or Story controls.
+Those slices retain their own review and runtime requirements.

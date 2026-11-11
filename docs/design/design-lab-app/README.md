@@ -6,7 +6,7 @@ that pair. A final Characters subagent applies the same review standard to Writi
 and Game setup. The [gallery](http://127.0.0.1:5174/catalog.html) lists registered
 drafts and links to the interactive previews.
 
-The [owning task](../../tasks/active/browser-ui-design-lab.md#full-app-comparison-and-characters-refinement-2026-10-20)
+The [owning task](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/browser-ui-design-lab.md#full-app-comparison-and-characters-refinement-2026-10-20)
 records scope, cumulative verification and failures. Individual page notes account
 for existing capabilities, explain control placement and identify simulated actions.
 All records remain unapproved. Earlier approved references retain their authority.

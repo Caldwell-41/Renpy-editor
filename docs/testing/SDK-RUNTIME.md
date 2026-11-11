@@ -1,12 +1,12 @@
 # SDK, source and runtime gates
 
-Select affected gates under [WORKFLOW](../WORKFLOW.md). This runbook does not open
+Select affected gates under [TESTING](../TESTING.md#scope). This runbook does not open
 historical allowances. Keep independent source/media/runtime expectations; never
 derive an expected result solely from the output under test.
 
 ## Source and transaction coverage
 
-Use the synthetic [representative fixture](../fixtures/REPRESENTATIVE_GAME.md):
+Use the synthetic [representative fixture](../../tests/fixtures/crossroads-at-sundown/README.md):
 comments/formatting, dialogue/narration, labels, menus/conditions, variables,
 calls/jumps/returns, screens, ATL, media, translations, embedded Python, custom and
 malformed/incomplete syntax, non-ASCII text and mixed newlines. Assert byte-identical
@@ -43,9 +43,9 @@ prove actual rendered dimensions, a captured screen, unchanged accepted bytes an
 one continuation after Close. Retain individual cases, source/toolchain/executable
 identity, the executable on failure, durations and cleanup. Scan before upload.
 The focused branch workflow uses both Windows x64 and macOS ARM64 without packaging
-an editor. The [task ledger](../tasks/evidence/phase-3-history.md#early-execution-ledger)
+an editor. The [Phase 3 history](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-3-history.md#early-execution-ledger)
 owns the fresh allowance and all failures. Its
-[CI1 audit](../tasks/evidence/phase-3-history.md#ci1-terminal-audit-and-prototype-continuation)
+[CI1 audit](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-3-history.md#ci1-terminal-audit-and-prototype-continuation)
 qualifies the early source/runtime proof on both hosts. Require measured virtual
 dimensions separately from capture pixels; successful compile/lint or an active
 screen alone cannot qualify rendering. Broader screen behavior remains under the
@@ -152,4 +152,4 @@ samples, workload, thresholds, allowance and stop rule first. Do not pool cold a
 steady samples, trim outliers, subtract idle/instrumentation time, or infer a native
 defect from hosted Chrome timing alone. Keep tracing/captures outside measured
 populations where possible and disclose perturbation. Detailed original measurements
-and diagnostic hypotheses remain in the [historical reference](../tasks/archive/2026-10-16-testing-reference.md#branches-timing-interpretation).
+and diagnostic hypotheses remain in the [historical reference](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-16-testing-reference.md#branches-timing-interpretation).

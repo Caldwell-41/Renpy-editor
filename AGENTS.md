@@ -1,21 +1,37 @@
 # Agent Guide
 
-## Project and task entry
-
 Loomlight is a single-user Windows x64/macOS ARM64 visual Ren'Py authoring tool,
-built with Tauri 2. [CURRENT](docs/status/CURRENT.md) owns project state;
-[HANDOVER](docs/status/HANDOVER.md) owns continuation and recovery;
-the selected task owns scope and acceptance. Remaining Phase 3B may start before
-final Phase 2/3A acceptance under the standing scheduling exception. For 3B entry or
-continuation, follow the owner, scheduling and dependency rules under
-[3B issue ownership](docs/WORKFLOW.md#phase-3b-github-task-ownership).
+built with Tauri 2. Follow the closest nested AGENTS.md.
 
-For a substantive new outcome or transfer, read those live records and only the
-relevant task sections. Narrow edits need applicable instructions and relevant code
-or contracts. Follow the closest nested AGENTS.md. Search before reading broadly;
-history links are for evidence lookup, not mandatory full-ledger reading. On resume,
-check changed or missing state. Inspect the relevant branch/worktree and preserve
-unrelated work; never reset to a historical SHA from an old prompt.
+## Work from the issue
+
+GitHub Issues own scope, acceptance criteria and decisions. The open PR owns work
+in progress and its evidence. The code owns behavior. Before work, read the selected
+issue, its parent and the code it touches. Use `gh` as described in
+[the tracker guide](docs/agents/issue-tracker.md).
+
+- The user selects work, by naming an issue or by asking directly. A label,
+  assignment or open issue does not by itself authorize implementation,
+  publication or a costly run.
+- Record each result with the exact commit it applies to. Results tied to a PR
+  head, such as CI audits and SDK, native or package runs, go in PR comments.
+  Decisions, scope changes, acceptance and results with no PR go in issue
+  comments. Raw logs, packages and private artifacts stay out of Git, issues and PRs.
+- Write the PR body once, with the `pr` skill, when opening the PR. Editing the
+  body re-runs Repository quality, so edit it only when scope changes.
+- Close an issue only when all its acceptance criteria pass. If a human check
+  remains, keep it open and comment what is left. With the user's OK, move that
+  check to a new `ready-for-human` issue and edit the criteria to match.
+- Before stopping with unfinished work, comment on the PR, or on the issue when
+  there is no PR, with the branch, head SHA, uncommitted work, pending runs, limits
+  used and the next action.
+- Put lasting behavior in the canonical doc that owns it ([INDEX](docs/INDEX.md)).
+  Write an ADR only for a decision that is hard to reverse, surprising without
+  context and the result of a real trade-off (`domain-modeling`).
+- Records before November 2026 (status, task briefs, ledgers and evidence) live at
+  the `archive/docs-ledgers-2026-11` tag. Read them only for a matching diagnosis,
+  result reuse, a requested audit, or requirements that an issue or canonical
+  doc cites.
 
 ## Project invariants
 
@@ -45,56 +61,71 @@ unrelated work; never reset to a historical SHA from an old prompt.
 - Use the account's noreply Git identity, configured only in this repository.
   Never rewrite history, force-push, change visibility or discard unrelated work.
 
-## Deliver the selected outcome
+## Delivery
 
-Carry an authorised implementation outcome through preparation, implementation,
-focused verification, review and in-scope fixes.
-Checkpoints are internal progress, not automatic stops. Preserve review-only scope
-and explicit user limits. Follow [operation limits and reassessment](docs/WORKFLOW.md#5-operation-limits-and-reassessment)
-when selecting costly operations or revisiting failed corrections. Report a
-concrete blocker when continuation needs a real decision or unavailable capability.
+- Before adding behavior, trace existing implementations and callers, and extend
+  the existing owner. When replacing an implementation, migrate its callers and
+  tests and remove the superseded path in the same change. Keep two
+  implementations only for distinct behavior or an explicitly scoped migration,
+  and say why both remain.
+- Before broad work on a platform-sensitive feature, prove one small production
+  path on each affected OS, for example a release build that reaches the SDK and
+  stops the owned game. A mock or spike is not that proof.
+- Match guarantees to the action. Read-only views need no save or transaction
+  guarantees unless a requirement says so. Saves keep reopen, Undo, external-edit
+  conflicts, interrupted-save recovery and retained drafts.
+- A new blocker names the requirement or user harm, its evidence and the smallest
+  fix. Label each finding as a demonstrated defect, missing evidence, a hypothesis
+  or an optional improvement.
+- Per-ticket qualification workflows, scripts and fixtures are temporary. The PR
+  that closes the ticket deletes them or moves lasting checks into routine suites.
+- Report a failed, cancelled or skipped required check as unresolved.
 
-Before adding behavior, trace existing implementations and callers. Prefer extending
-the existing owner. When replacing an implementation, migrate affected callers and
-tests and remove the superseded path in the same change. Retain parallel
-implementations only for distinct behavior or an explicitly scoped migration, and
-explain why both remain. During review, check for duplicated ownership and tests
-that still exercise superseded paths.
+## Debugging
 
-For connected-machine builds/tests, test-host selection, qualification cadence or
-a capability handoff, follow [host routing](docs/WORKFLOW.md#test-host-routing-and-ownership). For failures,
-follow [diagnosis](docs/WORKFLOW.md#4-classify-failures-before-fixing).
-Failed, cancelled or skipped required checks are not passes. No package matrix for docs alone.
+Use `diagnosing-bugs` for failures. Search the [incident index](docs/testing/INCIDENTS.md)
+for a matching symptom before changing a harness. Fix the root cause:
+
+- Ask whether the state that broke the code is legitimate. If it is, handle it
+  where it broke. If it should never exist, find what produced it. A guard, retry,
+  clamp, raised threshold or swallowed error at the symptom hides the bug.
+- Fix every instance of the same fault, not only the one that surfaced.
+- When the deciding fact took a deep dig, add the cheap always-on signal that
+  would have shown it.
+
+After two failed corrections of the same hypothesis, reassess the diagnosis,
+requirement, test validity and layer before a third attempt.
+
+## Operation limits
+
+Package builds, native app launches, SDK campaigns and expensive CI matrices need
+a numeric limit. Before the first attempt, record the limit, its basis and what
+counts as an attempt on the issue, or on the PR when there is no issue. Count every attempt that starts, including failed
+and cancelled ones. The count carries across sessions, hosts and successor tickets
+for the same problem. Ask before exceeding it, and continue other work that does
+not depend on it. Routine work needs no limit.
+
+## Parallel agents
+
+One writer per branch and worktree. Before an agent starts, record its issue,
+branch, base and the files it owns, and give each shared contract one owner.
+Sequence work that needs the same native app or mutable fixture. Pending CI on one
+branch does not block other worktrees.
+
+## Branches
+
+Delete a branch only after proving its work is merged or redundant and no open
+issue depends on it. Use ancestry, or patch equivalence for squash merges. Keep
+main, protected refs and `archive/*` tags.
 
 ## Read the relevant reference
 
-- Browser UI mockups, component previews or lab check selection: read
-  [Design Lab](app/design-lab/README.md#focused-verification).
-  For promotion or live app implementation of approved designs, read
-  [Design integration](app/design-lab/INTEGRATION.md) before edits.
-  For non-trivial UI, layout or copy changes, show prototypes and obtain the user's
-  approval before production implementation.
-- Build/check commands: [app/README](app/README.md#local-checks); test selection,
-  specialist exclusions and native evidence: [TESTING](docs/TESTING.md).
-  Commands are references, not a requirement to run every suite.
-  For a matching failure or harness change, search the [incident index](docs/testing/INCIDENTS.md)
-  and follow relevant evidence links; do not read the full historical ledger by default.
-- Multi-step delivery, test-host routing or integration:
-  [WORKFLOW](docs/WORKFLOW.md). Read the sections needed by the task.
-- Parallel agent assignments or worktree handoffs: follow
-  [parallel worktrees](docs/WORKFLOW.md#parallel-agents-and-worktrees).
-- CI selection, completion or external waits: follow [complete validation and client-specific waiting](docs/WORKFLOW.md#waiting-without-model-polling).
-- Meaningful pause, transfer or closure:
-  [status maintenance](docs/WORKFLOW.md#status-document-maintenance).
-  Record compact results in the owning task, keep one live handover and update
-  the one canonical contract that owns changed behavior. Preserve unique failure/recovery evidence.
-- Task documentation: follow [brief and evidence ownership](docs/WORKFLOW.md#task-briefs-and-supporting-files)
-  when creating or updating briefs, requirements or validation records. For remaining
-  3B delivery, apply the [GitHub ownership exception](docs/WORKFLOW.md#phase-3b-github-task-ownership).
-- Product, architecture, data, UI and ADR ownership: [INDEX](docs/INDEX.md).
-
-Publish only within actual authorization and disclose local-only work. Historical
-instructions do not override the current selected contract or new user directions.
+- Browser mockups, component previews or lab checks: [Design Lab](app/design-lab/README.md#focused-verification).
+  Promoting an approved design into the app: [Design integration](app/design-lab/INTEGRATION.md).
+  Show prototypes and get the user's approval before production UI, layout or copy changes.
+- Build and check commands: [app/README](app/README.md#local-checks).
+- Test selection, host routing, CI validation and waiting: [TESTING](docs/TESTING.md).
+- Product, architecture, data, UI and ADRs: [INDEX](docs/INDEX.md).
 
 ## Agent skills
 

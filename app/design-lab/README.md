@@ -37,7 +37,7 @@ review. Those actions also stay in browser memory. The starter remains available
 
 ## Add a screen
 
-1. Read the selected task and that screen's existing design decisions. List the
+1. Read the selected issue and that screen's existing design decisions. List the
    controls and behaviours the proposal must preserve. Complete this before choosing
    which interactions to simulate.
 2. Copy the small `screens/character-notes/` example into a new screen directory, or
@@ -63,7 +63,7 @@ The layout picker labels Draft, Approved and Superseded versions. Approval histo
 shows the current record and replacement reasons. Promotion happens through an explicit
 instruction to an agent. A changed approved source is flagged and its preview refuses
 to pose as the recorded reference. Conditions outside retained comparison states are
-labelled separately. These are design statuses; app progress remains in the owning task.
+labelled separately. These are design statuses; app progress lives in the issue.
 
 ## Focused verification
 

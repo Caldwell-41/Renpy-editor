@@ -112,7 +112,7 @@ production capability. Existing project fonts, numeric layout and image workflow
 keep their approved scope. A5 approval is recorded under ADR 0017; production implementation and acceptance remain separate.
 
 Verification and remaining acceptance are recorded in
-[the L07 evidence](../../tasks/evidence/shared-look.md).
+[the L07 evidence](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/shared-look.md).
 
 ## A5 approval, 2026-10-31
 

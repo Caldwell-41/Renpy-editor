@@ -1,6 +1,6 @@
 # ADR 0016: Explicit-body Story structural authoring
 
-- Status: Independently reviewed; scoped both-target frontend/core/SDK qualification passed; Phase3A acceptance pending
+- Status: Accepted
 - Date: 2026-10-13
 - Scope: Phase 3A.3 core authoring; extends ADR 0014/0015
 
@@ -54,18 +54,9 @@ source/map companions and obsolete compiled-file handling. Conflicts, unsupporte
 boundaries and failed preparation refuse without source/map/history writes. Source
 round trips and external editing continue to use the same authority.
 
-## Consequences and evidence
+## Consequences
 
 The UI can name exact parents and destinations, preserve revision-bound drafts and
 show delete versus unwrap explicitly. Conservative refusal keeps unsupported bytes
 intact rather than silently promoting them into a different editable role. This is
 not a general Ren'Py parser or an arbitrary reindentation tool.
-
-Independent review and 30 focused core tests cover all command paths, stable IDs/extras,
-minimal headers, selected trivia, pass replacement, moves, history/reopen and exact
-refusals. Earlier failed runs remain in the [Phase 3 ledger](../tasks/evidence/phase-3-history.md#3a-execution-ledger--2026-10-13).
-Actual frontend-to-core and final both-target saved-callee/runtime proof pass CI4.
-This decision does not accept Phase3A or resume Phase2.
-
-Scoped final CI4 evidence and limits are recorded in the [terminal audit](../tasks/evidence/phase-3-history.md#ci4-terminal-audit-and-scoped-qualification--2026-10-14).
-Prior failures, portable visual self-review and user acceptance remain distinct.

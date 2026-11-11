@@ -22,5 +22,5 @@ python3 -m unittest discover -s spikes/renpy-sdk/tests -v
 python3 spikes/renpy-sdk/probe.py --help
 ```
 
-See [the recorded Linux results](../../docs/research/RENPY_SDK_SPIKE_RESULTS.md)
+See [the recorded Linux results](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/research/RENPY_SDK_SPIKE_RESULTS.md)
 before repeating the networked probe.

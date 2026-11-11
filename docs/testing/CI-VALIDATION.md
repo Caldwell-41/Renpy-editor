@@ -3,7 +3,7 @@
 `Loomlight validation` is the combined PR status for the current candidate. It
 covers Repository quality and the qualifications explicitly selected in
 [the validation plan](../../.github/validation-plan.json). A passing status means
-those automated jobs passed. The result still needs the task's normal evidence
+those automated jobs passed. The result still needs the issue's normal evidence
 audit; it does not grant human acceptance, merge or another costly attempt.
 
 ## Select the work before starting CI
@@ -14,7 +14,7 @@ Set `branch` to that branch's name and `base` to its integration target. Keep
 workflow and its exact GitHub job names in `qualifications`. An explicit empty
 list selects Repository quality only when that satisfies the task. An inherited
 plan for a different branch, a missing plan or invalid selection reports an error.
-The selected task owns the reason for requiring qualification and its operation
+The issue owns the reason for requiring qualification and its operation
 limits; the JSON file owns the executable selection.
 
 For example, Windows Style qualification selects:
@@ -62,8 +62,8 @@ status from that outdated snapshot.
 The required frontend/Rust job may select documentation-only steps under
 [automatic check selection](AUTOMATED.md#automatic-pr-and-main-checks). The job
 still runs and explains its selection; this does not reuse a prior head's status
-or remove manual qualifications from the plan. Record final CI receipts on the
-owning issue rather than committing another receipt-only head. PR body/title
+or remove manual qualifications from the plan. Record final CI receipts as PR comments
+rather than committing another receipt-only head. PR body/title
 edits also rerun Repository quality because `edited` must cover base retargets.
 
 Each update's job summary lists the required workflows, their states and links to
@@ -135,5 +135,5 @@ Before relying on a client watcher, verify that ordinary checks can finish while
 the combined status remains pending, an intentional dummy failure is visible,
 and a later passing dummy makes the required status pass. Confirm actual same-
 thread delivery separately. A status update visible on GitHub does not prove that
-T3 resumed the agent. T3 uses its built-in PR watcher; Codex desktop can use its
-compatible installed `ci-watch` skill. Follow [the wait procedure](../WORKFLOW.md#waiting-without-model-polling).
+T3 resumed the agent. T3 uses its built-in PR watcher. Follow
+[the wait procedure](../TESTING.md#waiting-for-ci).

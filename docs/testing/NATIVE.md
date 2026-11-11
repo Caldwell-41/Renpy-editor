@@ -1,7 +1,7 @@
 # Native, package and human evidence
 
 For connected-machine checks, CI selection and capability handoffs, follow
-[WORKFLOW host routing](../WORKFLOW.md#test-host-routing-and-ownership).
+[host routing](../TESTING.md#test-host-routing).
 
 ## Evidence layers and ownership
 
@@ -24,7 +24,7 @@ Run actual controls through the current renderer fixture first. Within the same
 bounded native qualification, observe risky primitive controls/focus early, then
 complete the unchanged required sequence. A mock or an outer dialog handle cannot
 establish actual native children or later steps. All launches/reservations consume
-the owning task's allowance; an early failure is not a free attempt.
+the issue's operation limit; an early failure is not a free attempt.
 
 On Mac, `run-runtime-ui-probes.py` checks the console session and main display
 before each app launch. A locked, sleeping or unreadable desktop fails before an
@@ -63,14 +63,14 @@ The current draft-connection probe contract is version 2. The historical Windows
 credential runner refuses it before building/launching; its frozen store/reload-fault
 qualification is not current native connection proof. The frozen Studio Settings
 external verification route and its old ordinals remain historical. A current native
-migration needs its own selected task.
-The [selected deliverable3 continuation](../tasks/evidence/ci-harness-reliability.md#deliverable3-selected-implementation--2026-10-16)
+migration needs its own selected issue.
+The [selected deliverable3 continuation](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/ci-harness-reliability.md#deliverable3-selected-implementation--2026-10-16)
 adds explicit `windows-studio-credentials.py current` build/run selection and the
 `Repository quality` → `studio_connection_native` route. This current mode uses a
 fresh namespace, exact candidate/ordinal, two processes and seven loopback GETs
 (alpha/gamma/alpha/alpha, then alpha/beta/beta). The ordinary legacy entry and frozen
 929 workflow remain unchanged. The current Windows sequence and both-host portable/
-rendered gates are qualified by the [CI3 terminal audit](../tasks/evidence/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17).
+rendered gates are qualified by the [CI3 terminal audit](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/ci-harness-reliability.md#deliverable3-ci3-terminal-audit-and-completion--2026-10-17).
 This is exact-candidate evidence; the selector is not permission to replay old attempts.
 The current driver alone fits its owned main window inside the measured monitor
 work area, including frame/DPI and the product's minimum client size. Frozen layout
@@ -144,7 +144,7 @@ acceptance stays historical; do not automatically reopen the whole session.
 ## L17 current-release timing waiver
 
 For #36's bounded Help proof, the user [waived numerical timing as a release gate
-on both targets](../tasks/evidence/canvas-rendering.md#windows-functional-and-smoothness-selection-2026-10-24).
+on both targets](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/canvas-rendering.md#windows-functional-and-smoothness-selection-2026-10-24).
 The 95/100-within-100-ms target remains unverified; no timing pass is claimed.
 Mac functional performance and observed smoothness are accepted. Windows physical
 input and the user's move/resize smoothness judgement remain required. Use the
@@ -156,7 +156,7 @@ for this release, not other features' performance contracts.
 
 ## Standalone Mac canvas recorder
 
-The #36 Mac timing effort is [closed by user acceptance for this release](../tasks/evidence/canvas-rendering.md#mac-timing-qualification-closed-by-user-acceptance-2026-10-24).
+The #36 Mac timing effort is [closed by user acceptance for this release](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/canvas-rendering.md#mac-timing-qualification-closed-by-user-acceptance-2026-10-24).
 Its numerical target remains unverified and is waived as an acceptance gate.
 The procedure below is retained reference, not scheduled work or a release blocker.
 Use it only after reopening under the recorded condition; missing numerical proof
@@ -306,7 +306,7 @@ cannot count as the content response.
 
 ### Recording and interpretation
 
-After explicit permission approval and the owning task's native/SDK reservations,
+After explicit permission approval and the issue's native/SDK reservations,
 use the existing signed package and disposable isolated fixture:
 
 ```bash

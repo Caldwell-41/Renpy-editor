@@ -2,10 +2,10 @@
 
 Updated 2026-10-16. This is the current design decision index for the walkthrough;
 it supersedes conflicting earlier mockup details and pending recommendations. The
-[combined task ledger](../../tasks/evidence/phase-3-history.md#combined-phase-2--3a-mac-approval-walkthrough--2026-10-14)
+[combined task ledger](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-3-history.md#combined-phase-2--3a-mac-approval-walkthrough--2026-10-14)
 retains the sequence, qualifications and unique evidence. The Phase 2 task owns the
-[model-loading follow-up](../../tasks/evidence/phase-2-execution.md#walkthrough-follow-up--studio-model-loading-and-one-context-setting--2026-10-14)
-and [linked-character follow-up](../../tasks/evidence/phase-2-execution.md#walkthrough-follow-up--linked-character-workspace--2026-10-15).
+[model-loading follow-up](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#walkthrough-follow-up--studio-model-loading-and-one-context-setting--2026-10-14)
+and [linked-character follow-up](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-2-execution.md#walkthrough-follow-up--linked-character-workspace--2026-10-15).
 
 **Character-card design review: COMPLETE — approved on 2026-10-15.** The user also
 agrees to omit generic Related story items controls while preserving stored links.
@@ -56,7 +56,7 @@ distinct from the model-specific response-format test. This newer direction supe
 conflicting earlier Model ID/Refresh placement and save-first interaction assumptions;
 local-only Save semantics remain. The user confirms the UI needs rearranging. This is
 an agreed functional/layout follow-up, not an implemented change or phase acceptance.
-The [restart ledger](../../tasks/evidence/phase-3-history.md#restarted-combined-phase-2--3a-guided-walkthrough--2026-10-16)
+The [restart ledger](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/phase-3-history.md#restarted-combined-phase-2--3a-guided-walkthrough--2026-10-16)
 owns current build/session state; the earlier scope/budget paragraph above is historical
 to the 2026-10-15 design review. No implementation, live connection or credential
 operation is performed to record this amendment.
@@ -225,6 +225,6 @@ follow-up work, with no product or provider change during review.
 
 The user requests a refined plan for a new Sol6.1/xhigh chat to coordinate Sol6.1/high
 implementation/testing subagents, review and audited CI, with an Unsloth generation
-budget. The [implementation proposal](../../tasks/active/walkthrough-redesign-implementation.md)
+budget. The [implementation proposal](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/walkthrough-redesign-implementation.md)
 is the single owning plan and awaits approval. It does not start implementation or
 create the chat; prior no-build restrictions remain pending the explicitly scoped plan.

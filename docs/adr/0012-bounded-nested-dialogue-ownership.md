@@ -1,6 +1,6 @@
 # ADR 0012: Bounded nested dialogue ownership
 
-- Status: Accepted and integrated bounded checkpoint; independently reviewed and Windows/macOS qualified
+- Status: Accepted
 - Date: 2026-10-07
 - Scope: Phase 2 section 21, bounded 3A.1/3A.2 foundation
 
@@ -53,5 +53,4 @@ later selected outcome. Existing Source reconciliation and runtime adapters rema
 shared. Core/renderer regressions reject wrong owners, stale sessions/revisions and
 root operations, and compare exact bytes/IDs across migration/history/reopen. The
 optional packaged `source-foundation` case and separately selected pinned-SDK gate
-qualify real native action and true/false syntax outcomes. Supported-target proof and earlier failure
-evidence are recorded in the [owning ledger](../tasks/archive/2026-10-09-phase-2-execution-history.md#23-source-foundation-implementation-ledger--2026-10-07), never inferred from a fixture.
+qualify real native action and true/false syntax outcomes.

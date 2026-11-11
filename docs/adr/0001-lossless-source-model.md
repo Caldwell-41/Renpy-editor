@@ -12,7 +12,7 @@ is not a stable token-preserving persistence API.
 
 Phase 0 evaluated current community tree-sitter candidates and implemented an isolated
 byte-slice proof over the representative fixture corpus. Results are recorded in
-[the spike report](../research/PARSER_SPIKE_RESULTS.md).
+[the spike report](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/research/PARSER_SPIKE_RESULTS.md).
 
 ## Decision
 

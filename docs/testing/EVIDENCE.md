@@ -1,15 +1,14 @@
 # Results, retention and diagnosis
 
-When recording results, follow [brief and evidence ownership](../WORKFLOW.md#task-briefs-and-supporting-files).
-For retries or exhausted allowance, follow the [budget policy](../WORKFLOW.md#5-budget-the-problem-not-the-checkpoint-name);
-CI and external waits follow [client-specific waiting and manual fallback](../WORKFLOW.md#waiting-without-model-polling).
+Record results as [issue and PR comments](../../AGENTS.md#work-from-the-issue).
+Retries follow [operation limits](../../AGENTS.md#operation-limits); CI waits
+follow [waiting for CI](../TESTING.md#waiting-for-ci).
 An available workflow selector does not grant a new attempt.
 
 ## Diagnose before correcting
 
 Before correcting a failure or changing its harness, follow
-[WORKFLOW diagnosis](../WORKFLOW.md#4-classify-failures-before-fixing) for classification,
-failed-layer investigation, [incident lookup](INCIDENTS.md) and index maintenance.
+[debugging](../../AGENTS.md#debugging) and search the [incident index](INCIDENTS.md).
 A timeout alone does not establish a slow application, and a passing mock does not
 establish native behavior. Keep failed, cancelled, skipped, unrun and passed states
 distinct, including cascading prerequisite failures.
@@ -59,12 +58,12 @@ native key entry or real Studio generation.
 
 ## Historical evidence
 
-Detailed attempts stay in linked task evidence; older unsplit archived tasks remain
-valid historical lookup destinations. The one-time
-[former testing reference](../tasks/archive/2026-10-16-testing-reference.md) preserves
+Detailed attempts before November 2026 are in the task records at the
+`archive/docs-ledgers-2026-11` tag; later attempts are issue and PR comments. The one-time
+[former testing reference](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/archive/2026-10-16-testing-reference.md) preserves
 unique mixed historical material from the documentation migration. Its old counts,
 commands, selected outcomes and next-step wording are not current instructions.
 The incident index retains a concise cause/correction/regression trail even after
-external artifacts expire, and links to exact runs and source/task evidence. Do not
+external artifacts expire, and links to exact runs and original evidence. Do not
 claim expired raw artifacts were freshly checked or that a later pass fixes an old
-failure retrospectively. Current scope comes from live status and the selected task.
+failure retrospectively. Current scope comes from the selected issue.
