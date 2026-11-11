@@ -61,7 +61,9 @@ allowance is 2/2 spent. Native/human acceptance remains pending.
 The [continuation audit](../tasks/evidence/choice-98.md#continuation-audit-of-unexecuted-package-paths)
 found another stale packaged-driver selector hidden by incomplete mock ownership.
 The corrected fixture and five shipped runtime browser cases pass. The hosted Mac
-release path also lacks required signing prerequisites. The approved identity is
-available locally; choosing a replacement route requires Kris's decision before
-another campaign. Signing policy and protected recovery remain unchanged.
+release path also lacks required signing prerequisites. Kris approved one additional
+attempt with signed local Mac and hosted Windows qualification. The
+[selected route](../tasks/evidence/choice-98.md#approved-local-mac-and-hosted-windows-qualification)
+preserves both-target evidence, signing policy and protected recovery. Preparation
+is in progress; no target has started this attempt.
 #98/#106 and PR #125 stay open/draft.

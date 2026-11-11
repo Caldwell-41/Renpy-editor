@@ -1590,3 +1590,46 @@ campaign allowance 2/2 spent. No SDK, package, native-editor or manual CI operat
 started during this preparation. The unused conditional #106 correction start
 remains separate. Routing approval, additional campaign allowance and native/human
 acceptance are still pending. #98/#106 and PR #125 remain open/draft.
+
+## Approved local Mac and hosted Windows qualification
+
+Kris approved the proposed route and one additional attempt after confirming that
+the coordinating Mac has the approved signing identity. The
+[approval receipt](https://github.com/Caldwell-41/Renpy-editor/issues/98#issuecomment-6787163572)
+owns the extension and live accounting. The two earlier failures remain consumed.
+The third campaign permits one local Mac qualification and one hosted Windows
+qualification, with no automatic retry or replacement. Before target starts,
+shared use is Mac 18/20 and Windows 9/20, with one reservation each for maxima
+Mac 19/20 and Windows 10/20. The unused conditional #106 start stays separate.
+
+The workflow gains an explicit `windows_only` input, default false. Its ordinary
+two-target selection remains available; this approved dispatch selects Windows
+only and success-only package upload. The Choice validation plan requires
+Preflight and Windows x64. This is Kris's bounded replacement of the hosted Mac
+gate, not removal of Mac qualification. A green combined CI status alone cannot
+complete Choice package acceptance without the matching local Mac evidence.
+
+The local Mac target uses the same core, observed-flow, SDK lifecycle/download,
+runtime diagnostics and Phase 1H authoring/route gates as the production workflow.
+Broad core runs without SDK environment variables and retains the workflow's
+explicit exclusions; SDK gates run only in their named stages. Browser checks
+remain separate from broad builds and use the full existing workload. The target
+then runs release desktop tests with the approved public signing selector and pin,
+builds once through `macos-package.py`, verifies the signed app and installer,
+records input hashes, executes the six ordinary packaged runtime cases, and runs
+the WebView/single-instance smoke. Scan, dependency inventory, individual process
+results and cleanup evidence remain required. The local signing key stays on the
+Mac; no credential, policy, trust or Keychain change is selected.
+
+Local prerequisite checks precede charging the reservation. Verify pinned tools,
+the official archive checksum, approved identity, awake/unlocked desktop and no
+existing Loomlight process. Use a fresh evidence/package destination. One started
+target qualification consumes its reservation even if later gates fail. A failure
+retains its exact stage and blocks a replacement attempt under this approval.
+
+Before this routing change, exact-head automatic quality on `43ce24da` passed
+run `42940609725`, attempt 1: four executed jobs passed, five unselected jobs
+skipped, 398 frontend tests and all 18 selected fixtures passed. The routed candidate
+needs its own automatic checks. Actionlint, Q1 source audit and all 18 validation
+coordinator tests pass during preparation. Physical-input/human acceptance,
+issue closure, merge and release remain separate and unfinished.

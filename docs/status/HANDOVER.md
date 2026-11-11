@@ -24,20 +24,26 @@ optional probe now use Open Scene. All five shipped runtime browser cases and
 ordered Source observation pass with pinned Node. No product behavior changed.
 The optional packaged probe has not been launched.
 
-The selected hosted Mac path cannot complete without signing prerequisites. Its
-release-mode desktop tests and package build require the pinned identity, but the
-workflow provides no signing setup. Policy tests confirm refusal; Actions secret
-and variable inventories are empty. The approved identity exists locally. Do not
-export a key, bypass signing, change the selected gate or start a replacement
-campaign without the required decision. A local signed-Mac/hosted-Windows route
-is a proposal requiring Kris's acceptance and allowance approval.
+Kris approved one additional attempt using the approved identity on this Mac and
+hosted Windows qualification. The [selected route](../tasks/evidence/choice-98.md#approved-local-mac-and-hosted-windows-qualification)
+and [approval receipt](https://github.com/Caldwell-41/Renpy-editor/issues/98#issuecomment-6787163572)
+own the replacement of the hosted Mac gate, required local evidence and limits.
+The workflow gains an opt-in Windows-only selector. Default targets and signing
+policy remain unchanged. No key export or credential setup is selected.
 
-Next: finish scoped review and ordinary verification, publish the harness correction,
-and audit its automatic CI. Then present the concrete qualification-route decision.
-Shared use remains Mac 18/20 and Windows 9/20, zero reservations; final campaigns
-are 2/2 spent. No capped operation ran during this continuation. The unused
-conditional #106 start remains separate. Native physical-input/human sessions
-have not started. No merge, release, issue closure or acceptance is authorized.
+Shared use remains Mac 18/20 and Windows 9/20, with one place reserved per target
+for maxima Mac 19/20 and Windows 10/20. Final campaign limit is now three total;
+two earlier attempts are consumed. No target has started the third attempt. One
+local signed build and the existing packaged children belong to the Mac target;
+no retry or replacement is authorized. The unused conditional #106 start remains
+separate. A green Windows/ordinary CI status cannot establish local Mac acceptance.
+
+Next: publish the reviewed routing candidate, verify prerequisites and run the
+single approved qualification on each target. Audit exact candidate, reports,
+package/signature hashes and cleanup. Automatic quality on prior 43ce24da passed
+run 42940609725, including 398 frontend tests and all 18 fixtures; the new candidate
+needs its own checks. Native physical-input/human acceptance remains unfinished.
+No merge, release, issue closure or human acceptance is authorized.
 
 <a id="shared-arithmetic-implementation-2026-11-09"></a>
 
