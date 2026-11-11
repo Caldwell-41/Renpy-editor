@@ -328,10 +328,13 @@ impl AuthoringService {
             .iter_mut()
             .find(|m| m.scene_id == scene_id)
             .ok_or(SceneError::InvalidMetadata)? = mapping;
-        let mut runtime =
-            self.choice_runtime_mutations(project, &next_beats, source != proposed)?;
-        self.validate_choice_targets(project, &source, &proposed, &next_beats)?;
-        runtime.retain(|m| m.path.as_str() != scene.source_path);
+        let mut runtime = self.choice_scene_runtime(
+            project,
+            &scene.source_path,
+            &source,
+            &proposed,
+            &next_beats,
+        )?;
         runtime.extend(vec![
             replace_mutation(&scene.source_path, source, revision, proposed)?,
             replace_mutation(
@@ -419,7 +422,7 @@ fn qualify_body<'a>(
                 && b.owner == owner
                 && b.conditional_branch
                     .as_ref()
-                    .is_none_or(|g| g.ordinal == 0 && !g.choice_option)
+                    .is_none_or(|g| g.opens_group())
                 && !trivia(b)
         })
         .collect::<Vec<_>>();
@@ -503,7 +506,7 @@ pub(super) fn root_may_continue(source: &[u8], beats: &[SceneBeat]) -> Result<bo
                 && b.owner.is_none()
                 && b.conditional_branch
                     .as_ref()
-                    .is_none_or(|g| g.ordinal == 0 && !g.choice_option)
+                    .is_none_or(|g| g.opens_group())
                 && !trivia(b)
         })
         .any(|b| terminal(b, beats)))
@@ -517,7 +520,7 @@ fn qualified_node<'a>(body: &Body<'a>, node: &NodeRef) -> Result<&'a SceneBeat, 
             NodeRef::Condition { group_id } => b
                 .conditional_branch
                 .as_ref()
-                .is_some_and(|g| g.group_id == *group_id && g.ordinal == 0 && !g.choice_option),
+                .is_some_and(|g| g.group_id == *group_id && g.opens_group()),
         })
         .ok_or(SceneError::InvariantBlocked)
 }
@@ -782,7 +785,7 @@ pub(super) fn mark_placeholders(beats: &mut [SceneBeat]) {
         !trivia(b)
             && b.conditional_branch
                 .as_ref()
-                .is_none_or(|g| g.ordinal == 0 && !g.choice_option)
+                .is_none_or(|g| g.opens_group())
     }) {
         if let Some(owner) = &beat.owner {
             *counts

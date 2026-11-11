@@ -156,6 +156,8 @@ Ambiguous or colliding targets expose Source fallback and refuse authoring.
 
 Picked options use Show normally, Mark picked or Hide picked for the whole Choice.
 New Story Choices explicitly use Show normally and record selections immediately.
+If the project's choice screen cannot host the helper, a new Show normally Choice
+without Show disabled options is written as an unconfigured native menu instead.
 An accepted policy edit writes the mode and stable Choice UUID in the menu arguments.
 Each option carries its own UUID and typed availability arguments. Its header mapping
 includes the first executable statement, which records `(Choice UUID, option UUID)`

@@ -1409,7 +1409,7 @@ impl AuthoringService {
         mut loaded: Loaded,
         command: SceneCommand,
     ) -> Result<TransactionProposal, SceneError> {
-        match command {
+        match self.native_menu_fallback(project, command) {
             SceneCommand::CreateChapter { display_name } => {
                 validate_display(&display_name)?;
                 if loaded.project.chapters.len() >= MAX_CHAPTERS {
@@ -2072,10 +2072,13 @@ impl AuthoringService {
         )?;
         loaded.source_map.scene_mappings.push(destination_mapping);
 
-        let mut runtime =
-            self.choice_runtime_mutations(project, &next_beats, source_bytes != proposed_source)?;
-        runtime.retain(|m| m.path.as_str() != source_scene.source_path);
-        self.validate_choice_targets(project, &source_bytes, &proposed_source, &next_beats)?;
+        let mut runtime = self.choice_scene_runtime(
+            project,
+            &source_scene.source_path,
+            &source_bytes,
+            &proposed_source,
+            &next_beats,
+        )?;
         runtime.extend(vec![
             create_mutation(&destination_path, destination_bytes)?,
             replace_mutation(
@@ -2393,10 +2396,13 @@ impl AuthoringService {
             .iter_mut()
             .find(|mapping| mapping.scene_id == scene_id)
             .ok_or(SceneError::InvalidMetadata)? = new_mapping;
-        let mut runtime =
-            self.choice_runtime_mutations(project, &next_beats, source_bytes != proposed_source)?;
-        self.validate_choice_targets(project, &source_bytes, &proposed_source, &next_beats)?;
-        runtime.retain(|m| m.path.as_str() != scene.source_path);
+        let mut runtime = self.choice_scene_runtime(
+            project,
+            &scene.source_path,
+            &source_bytes,
+            &proposed_source,
+            &next_beats,
+        )?;
         runtime.extend(vec![
             replace_mutation(
                 &scene.source_path,
@@ -4547,7 +4553,18 @@ pub(crate) fn build_mapping(
     for mut parsed in parsed {
         let hash = sha256(&bytes[parsed.start..parsed.end]);
         let kind = parsed.payload.kind().to_owned();
-        let embedded = choice::embedded_id(bytes, &parsed);
+        let embedded = choice::embedded_id(
+            bytes,
+            parsed.start..parsed.end,
+            &parsed.payload,
+            matches!(
+                parsed.nesting,
+                Some(ParsedNesting::Branch {
+                    choice_option: true,
+                    ..
+                })
+            ),
+        );
         let id = ids
             .get_mut(&(kind.clone(), hash.clone()))
             .and_then(|queue| {
@@ -6647,11 +6664,6 @@ mod tests {
             .iter()
             .find(|scene| scene.id == fixture.entry_scene_id)
             .unwrap();
-        let _existing = with_target
-            .scenes
-            .iter()
-            .find(|scene| scene.id != fixture.entry_scene_id)
-            .unwrap();
         let with_choice = fixture
             .apply(
                 &with_target,
@@ -6677,15 +6689,10 @@ mod tests {
             .iter()
             .find(|scene| scene.id == fixture.entry_scene_id)
             .unwrap();
-        assert!(matches!(
-            entry
-                .beats
-                .iter()
-                .find(|b| matches!(b.payload, BeatPayload::Choice { .. }))
-                .unwrap()
-                .payload,
-            BeatPayload::Choice { .. }
-        ));
+        assert!(entry.beats.iter().any(|b| matches!(
+            &b.payload,
+            BeatPayload::Choice { options, .. } if options.len() == 1 && options[0].text == "Take the first path"
+        )));
         let entry_source = fs::read_to_string(fixture.root.join(&entry.source_path)).unwrap();
         assert!(entry_source.contains("    return\n"));
         let choice_id = entry

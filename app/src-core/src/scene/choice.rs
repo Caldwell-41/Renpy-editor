@@ -446,8 +446,7 @@ pub(super) fn update(
                 .ok_or(SceneError::OpaqueBoundary)?;
                 Ok(expression.map(str::to_owned))
             } else {
-                logic::render_guard(option.condition.as_ref(), &loaded.authoring)
-                    .map(|s| s.strip_prefix(" if ").map(str::to_owned))
+                guard_expression(option.condition.as_ref(), &loaded.authoring)
             }
         })
         .collect::<Result<Vec<_>, SceneError>>()?;
@@ -484,10 +483,7 @@ pub(super) fn update(
             let (qs, qe) = dialogue_quotes(original).ok_or(SceneError::OpaqueBoundary)?;
             // Preserve the exact header for a no-op, including condition spelling/comments.
             if picked_policy.is_some() {
-                let colon = logic::without_comment(original)
-                    .trim_end()
-                    .rfind(':')
-                    .ok_or(SceneError::OpaqueBoundary)?;
+                let colon = header_colon(original)?;
                 let suffix = picked_suffix(
                     &beat.id,
                     id,
@@ -501,10 +497,7 @@ pub(super) fn update(
             } else if option.unavailable_policy == UnavailablePolicy::ShowDisabled
                 || old[ordinal].unavailable_policy == UnavailablePolicy::ShowDisabled
             {
-                let colon = logic::without_comment(original)
-                    .trim_end()
-                    .rfind(':')
-                    .ok_or(SceneError::OpaqueBoundary)?;
+                let colon = header_colon(original)?;
                 let suffix = suffix_from_guards(
                     option.unavailable_policy,
                     guards[option_index].as_deref(),
@@ -515,10 +508,7 @@ pub(super) fn update(
                     updated.replace_range(qe + 1..colon, &suffix);
                 }
             } else if option.condition != old[ordinal].condition {
-                let colon = logic::without_comment(original)
-                    .trim_end()
-                    .rfind(':')
-                    .ok_or(SceneError::OpaqueBoundary)?;
+                let colon = header_colon(original)?;
                 let suffix = &original[qe + 1..colon];
                 let leading = suffix.len() - suffix.trim_start().len();
                 let replacement =
@@ -751,10 +741,7 @@ pub(super) fn option_suffix(
 ) -> Result<String, SceneError> {
     let guards = options
         .iter()
-        .map(|o| {
-            logic::render_guard(o.condition.as_ref(), authoring)
-                .map(|s| s.strip_prefix(" if ").map(str::to_owned))
-        })
+        .map(|o| guard_expression(o.condition.as_ref(), authoring))
         .collect::<Result<Vec<_>, _>>()?;
     let guard = logic::render_guard(option.condition.as_ref(), authoring)?;
     suffix_from_guards(
@@ -811,7 +798,63 @@ impl AuthoringService {
             )
         });
         if !picked && !beats.iter().any(|b| matches!(&b.payload, BeatPayload::Choice { options, .. } if options.iter().any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled))) { return Ok(vec![]); }
+        self.choice_helper_mutations(project, picked, allow_adoption)
+    }
 
+    /// Helper mutations and Repeat-target checks for one changed Scene. The caller
+    /// adds the Scene file's own replacement.
+    pub(super) fn choice_scene_runtime(
+        &self,
+        project: &ProjectId,
+        scene_path: &str,
+        original: &[u8],
+        candidate: &[u8],
+        beats: &[SceneBeat],
+    ) -> Result<Vec<FileMutation>, SceneError> {
+        let mut runtime = self.choice_runtime_mutations(project, beats, original != candidate)?;
+        self.validate_choice_targets(project, original, candidate, beats)?;
+        runtime.retain(|m| m.path.as_str() != scene_path);
+        Ok(runtime)
+    }
+
+    /// A new Show normally Choice without Show disabled options needs no helper.
+    /// When the project's choice screen cannot host one, write the plain native
+    /// menu, as before saved selections. Other refusals, such as dirty Source, stand.
+    pub(super) fn native_menu_fallback(
+        &self,
+        project: &ProjectId,
+        mut command: SceneCommand,
+    ) -> SceneCommand {
+        if let SceneCommand::InsertBeat { beat, .. } | SceneCommand::InsertBodyBeat { beat, .. } =
+            &mut command
+        {
+            if let BeatPayload::Choice {
+                options,
+                picked_policy: policy @ Some(PickedPolicy::ShowNormally),
+                ..
+            } = beat
+            {
+                if options
+                    .iter()
+                    .all(|o| o.unavailable_policy != UnavailablePolicy::ShowDisabled)
+                    && matches!(
+                        self.choice_helper_mutations(project, true, true),
+                        Err(SceneError::OpaqueBoundary)
+                    )
+                {
+                    *policy = None;
+                }
+            }
+        }
+        command
+    }
+
+    fn choice_helper_mutations(
+        &self,
+        project: &ProjectId,
+        picked: bool,
+        allow_adoption: bool,
+    ) -> Result<Vec<FileMutation>, SceneError> {
         let paths = self
             .transactions
             .inventory_files_bounded(project, "game", 8192)
@@ -893,7 +936,6 @@ impl AuthoringService {
             return Err(SceneError::OpaqueBoundary);
         }
         let mut mutations = vec![replace_mutation(&path, bytes.clone(), revision, bytes)?];
-        mutations.retain(|m| m.path.as_str() != crate::screens::choice_template::PATH);
         if let Some((bytes, revision)) = existing {
             let next = if picked && bytes == crate::screens::choice_template::ADAPTER.as_bytes() {
                 if !allow_adoption || picked_referenced {
@@ -991,25 +1033,14 @@ impl AuthoringService {
             .collect();
         let mut embedded = HashSet::new();
         for beat in beats {
-            let parsed = ParsedBeat {
-                start: beat.byte_start as usize,
-                end: beat.byte_end as usize,
-                payload: beat.payload.clone(),
-                nesting: beat
-                    .conditional_branch
+            if let Some(id) = embedded_id(
+                candidate,
+                beat.byte_start as usize..beat.byte_end as usize,
+                &beat.payload,
+                beat.conditional_branch
                     .as_ref()
-                    .filter(|g| g.choice_option)
-                    .map(|_| ParsedNesting::Branch {
-                        choice_option: true,
-                        group_start: 0,
-                        variable_id: String::new(),
-                        otherwise: false,
-                        ordinal: 0,
-                        condition: None,
-                        parent: None,
-                    }),
-            };
-            if let Some(id) = embedded_id(candidate, &parsed) {
+                    .is_some_and(|g| g.choice_option),
+            ) {
                 if id != beat.id || !embedded.insert(id) {
                     return Err(SceneError::InvariantBlocked);
                 }
@@ -1188,20 +1219,35 @@ fn parse_picked_option(code: &str) -> Option<(String, Option<&str>, UnavailableP
         id,
     ))
 }
+/// An option's native guard expression, without the leading ` if `.
+fn guard_expression(
+    condition: Option<&crate::conditions::Condition>,
+    authoring: &AuthoringMetadata,
+) -> Result<Option<String>, SceneError> {
+    logic::render_guard(condition, authoring).map(|s| s.strip_prefix(" if ").map(str::to_owned))
+}
+
+/// The block colon of an option header line, ignoring a trailing comment.
+fn header_colon(line: &str) -> Result<usize, SceneError> {
+    logic::without_comment(line)
+        .trim_end()
+        .rfind(':')
+        .ok_or(SceneError::OpaqueBoundary)
+}
+
 /// Source-backed runtime keys also anchor the existing map identity. No captions or ordinals.
-pub(super) fn embedded_id(source: &[u8], parsed: &ParsedBeat) -> Option<String> {
-    let text = std::str::from_utf8(&source[parsed.start..parsed.end]).ok()?;
-    if matches!(parsed.payload, BeatPayload::Choice { .. }) {
+pub(super) fn embedded_id(
+    source: &[u8],
+    range: std::ops::Range<usize>,
+    payload: &BeatPayload,
+    option_header: bool,
+) -> Option<String> {
+    let text = std::str::from_utf8(&source[range]).ok()?;
+    if matches!(payload, BeatPayload::Choice { .. }) {
         text.lines()
             .find_map(parse_picked_header)
             .map(|(id, _)| id.to_owned())
-    } else if matches!(
-        parsed.nesting,
-        Some(ParsedNesting::Branch {
-            choice_option: true,
-            ..
-        })
-    ) {
+    } else if option_header {
         parse_picked_option(logic::without_comment(text.lines().next()?).trim_end())
             .map(|(_, _, _, id)| id.to_owned())
     } else {
@@ -1223,10 +1269,7 @@ pub(super) fn render_new(
         .collect::<Vec<_>>();
     let guards = options
         .iter()
-        .map(|o| {
-            logic::render_guard(o.condition.as_ref(), &loaded.authoring)
-                .map(|s| s.strip_prefix(" if ").map(str::to_owned))
-        })
+        .map(|o| guard_expression(o.condition.as_ref(), &loaded.authoring))
         .collect::<Result<Vec<_>, _>>()?;
     let mut text = format!("    {}{newline}", picked_header(&cid, policy));
     if let Some(prompt) = prompt {

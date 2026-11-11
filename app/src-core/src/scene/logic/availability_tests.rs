@@ -106,6 +106,36 @@ fn choice_custom_template_has_visible_source_fallback_and_refuses_policy_writes(
 }
 
 #[test]
+fn new_show_normally_choice_uses_native_menu_when_the_choice_screen_is_customised() {
+    let mut f = Fixture::new();
+    // A restyled choice screen cannot host the semantic helper.
+    fs::write(f.root.join("game/screens.rpy"), "screen choice(items):\n    style_prefix \"choice\"\n\n    vbox:\n        spacing 12\n        for i in items:\n            textbutton i.caption action i.action\n").unwrap();
+    let scene = f.model()["scenes"][0].clone();
+    f.save(
+        &scene,
+        &format!(
+            "label {}:\n    \"Before\"\n    return\n",
+            scene["technicalLabel"].as_str().unwrap()
+        ),
+    );
+    let w = f.model();
+    let insert = |policy: &str| json!({"type":"insertBodyBeat","sceneId":scene["id"],"expectedSourceRevision":w["scenes"][0]["sourceRevision"],"body":{"type":"root"},"position":{"type":"before","anchor":{"type":"beat","beatId":w["scenes"][0]["beats"][1]["id"]}},"beat":{"type":"choice","pickedPolicy":policy,"options":[{"text":"Yes"}]}});
+    assert_eq!(
+        f.reject(insert("markPicked"))["error"]["code"],
+        "OPAQUE_BOUNDARY"
+    );
+    let after = f.command(insert("showNormally"));
+    let source = fs::read_to_string(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap();
+    assert_eq!(source.trim_start_matches('\u{feff}'), format!("label {}:\n    \"Before\"\n    menu:\n        \"Yes\":\n            pass\n    return\n", scene["technicalLabel"].as_str().unwrap()));
+    assert!(!f.root.join("game/loomlight_choice_v1.rpy").exists());
+    let menu = &after["scenes"][0]["beats"][1];
+    assert_eq!(menu["payload"]["type"], "choice");
+    assert!(menu["payload"].get("pickedPolicy").is_none());
+    assert_ne!(menu["protected"], true);
+    f.service.close().unwrap();
+}
+
+#[test]
 fn choice_disabled_completion_keeps_safe_endings_and_refuses_stale_or_invalid_policy() {
     let mut f = Fixture::new();
     fs::write(f.root.join("game/screens.rpy"), "screen choice(items):\n    style_prefix \"choice\"\n\n    vbox:\n        for i in items:\n            textbutton i.caption action i.action\n").unwrap();
@@ -438,9 +468,25 @@ fn choice_missing_existing_helper_refuses_changed_source_commands_without_histor
             .iter()
             .find(|s| s["id"] == other["id"])
             .unwrap();
-        assert_eq!(f.reject(json!({"type":"insertBodyBeat","sceneId":other_scene["id"],"expectedSourceRevision":other_scene["sourceRevision"],"body":{"type":"root"},"position":{"type":"before","anchor":{"type":"beat","beatId":other_scene["beats"][0]["id"]}},"beat":{"type":"choice","pickedPolicy":"showNormally","options":[{"text":"New adoption"}]}}))["error"]["code"], "OPAQUE_BOUNDARY");
+        let insert = |policy: &str| json!({"type":"insertBodyBeat","sceneId":other_scene["id"],"expectedSourceRevision":other_scene["sourceRevision"],"body":{"type":"root"},"position":{"type":"before","anchor":{"type":"beat","beatId":other_scene["beats"][0]["id"]}},"beat":{"type":"choice","pickedPolicy":policy,"options":[{"text":"New adoption"}]}});
+        assert_eq!(
+            f.reject(insert("markPicked"))["error"]["code"],
+            "OPAQUE_BOUNDARY"
+        );
         assert!(!helper.exists());
         assert_eq!(f.model(), w);
+        // Show normally needs no helper, so it falls back to a plain native menu.
+        let inserted = f.command(insert("showNormally"));
+        assert!(!helper.exists());
+        let added = &inserted["scenes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|s| s["id"] == other["id"])
+            .unwrap()["beats"][0];
+        assert!(added["payload"].get("pickedPolicy").is_none());
+        f.command(json!({"type":"undo"}));
+        assert_eq!(f.model()["scenes"], w["scenes"]);
         if picked {
             fs::write(&helper, crate::screens::choice_template::ADAPTER).unwrap();
             let mut command = commands[0].clone();

@@ -195,6 +195,14 @@ pub struct ConditionalBranch {
     pub condition: Option<crate::conditions::Condition>,
 }
 
+impl ConditionalBranch {
+    /// The first branch of a condition group stands for the whole group in its
+    /// parent body. A Choice option header belongs to its menu instead.
+    pub fn opens_group(&self) -> bool {
+        self.ordinal == 0 && !self.choice_option
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub enum MetadataError {
     Io,

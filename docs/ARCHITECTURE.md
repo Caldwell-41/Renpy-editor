@@ -456,7 +456,9 @@ or claims current availability. Repeat retains the existing ending owner.
 Picked options extend this native availability and action owner. An accepted policy
 adoption writes the mode and stable Choice UUID into the menu arguments, with a
 separate UUID and typed availability arguments for each option. New Story Choices
-explicitly start with Show normally. Existing unconfigured source stays unchanged
+explicitly start with Show normally. If the project's choice screen cannot host the
+helper, a new Show normally Choice without Show disabled options is written as the
+plain native menu instead, with no selection records. Existing unconfigured source stays unchanged
 until an accepted policy edit. The option header mapping includes the first
 executable statement, which records the UUID pair before any authored Beat,
 including Jump, Return or Repeat. Rename and reorder preserve these source-backed
@@ -477,8 +479,9 @@ Duplicate keys, reserved declarations, missing or edited helpers, dirty Source a
 unsupported templates refuse authoring with protected Source fallback. The existing
 runtime owner checks each required adapter capability and inspects accepted source
 references before allowing first creation or upgrade. A changed source range alone
-does not permit helper repair. Rollback
-and New Game runtime proof remains pending in [the Choice evidence](tasks/evidence/choice-98.md#106-integration-and-handoff).
+does not permit helper repair. Save/Load, rollback and New Game pass on both
+targets; [the Choice evidence](tasks/evidence/choice-98.md#mac-106-final-qualification)
+owns those results.
 No project Python runs during inspection, authoring or illustrative preview.
 
 The first structural commands are `insertBodyBeat` and `updateBodyBeat`. Their explicit

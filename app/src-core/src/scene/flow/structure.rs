@@ -77,7 +77,7 @@ fn next_body(
     let mut owner = origin.owner.clone();
     for _ in 0..=MAX_CONDITION_NESTING {
         if let Some(next) = beats.iter().find(|b| b.byte_start as usize >= offset && b.owner == owner
-            && b.conditional_branch.as_ref().is_none_or(|branch| branch.ordinal == 0 && !branch.choice_option)
+            && b.conditional_branch.as_ref().is_none_or(|branch| branch.opens_group())
             && !matches!(&b.payload, BeatPayload::CustomCode { source, .. } if source.trim().is_empty() || source.trim_start().starts_with('#'))) {
             return body(scene, revision, Some(next), owner);
         }
@@ -311,7 +311,7 @@ pub(super) fn project(
                                 branch_id: h.id.clone(),
                             })
                     });
-                    let children=beats.iter().filter(|b|b.owner==owner && !b.structural_placeholder && b.conditional_branch.as_ref().is_none_or(|g| g.ordinal == 0 && !g.choice_option) && !matches!(&b.payload,BeatPayload::CustomCode{source,..} if source.trim().is_empty() || source.trim_start().starts_with('#'))).collect::<Vec<_>>();
+                    let children=beats.iter().filter(|b|b.owner==owner && !b.structural_placeholder && b.conditional_branch.as_ref().is_none_or(|g| g.opens_group()) && !matches!(&b.payload,BeatPayload::CustomCode{source,..} if source.trim().is_empty() || source.trim_start().starts_with('#'))).collect::<Vec<_>>();
                     let child = children.first().copied();
                     let transfer = if children.len() == 1 {
                         child.and_then(|b| match &b.payload {
