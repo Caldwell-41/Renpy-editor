@@ -1704,3 +1704,44 @@ preflight, Q1 gate controls and retention tests. Continue focused review and
 Windows diagnosis before any further campaign decision. Preserve original failures,
 package identity, recovery and the separate conditional #106 allowance. #98/#106
 and PR #125 remain open/draft; package, native/human and final acceptance are incomplete.
+
+## Windows TLS readiness diagnosis and correction
+
+The producing-host assignment tested exact `c31017d5` with Rust 1.90/MSVC and
+the same three TLS inputs as the failed Windows campaign. One unchanged-source
+baseline and two temporarily instrumented, unforced executions passed. Two
+executions with a test-only 40 ms delay after connect and before socket publication
+reproduced the shutdown-observation assertion. Cancellation saw no published
+socket, so its observation was `None`; the connector's early-cancellation branch
+still shut down successfully. Cancelled completion and actual server EOF arrived
+within 41 ms. No Winsock error or lost close was observed in those executions.
+
+This demonstrates a fixture-readiness race. The server's `connected` event follows
+accept but does not order the client's socket publication. The hosted failure
+omitted mode/value, so attributing it to this mechanism remains provisional.
+The result does not establish the historical P02 cause or justify accepting a
+missing/failed shutdown observation. All temporary instrumentation was removed;
+the worker verified every tracked file against its original hash and retained
+36 diagnostic artifacts privately. No owned processes or generated keys remained.
+
+The coordinator changes handshake-stall readiness to a dedicated event after
+receiving nonempty ClientHello data. That IO uses the published owned transport.
+The existing test now waits for that event and explicitly checks ownership before
+cancelling. Body readiness is unchanged. Successful shutdown, Cancelled, EOF and
+the original two-second cancellation/completion bound remain required. Failure
+messages and safe per-mode observations expose ownership, shutdown/error value,
+result and elapsed time if another failure appears. Production transport is
+unchanged; no delay hook is committed.
+
+The exact corrected unit passes on Mac in both modes. Windows verification must
+test the published correction with the same controlled pre-publication delay;
+green unforced retries alone do not prove the correction. This is SDK-free unit
+work, not another package/native campaign. Keep the original Windows campaign
+failed. The final campaign allowance remains exhausted; no rebuild/retry is
+selected and native/human acceptance remains pending.
+
+Automatic quality on the preceding correction `c31017d5` also passes exact-head
+run `42966320960`, attempt 1: all four executed jobs, 399 frontend tests and all
+18 selected fixtures. Five unselected jobs skipped. Combined validation remains
+pending for unstarted selected package qualification at that head. Final CI
+receipts belong on #98; do not create a successor solely to record its own SHA.

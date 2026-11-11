@@ -64,8 +64,10 @@ Mac passed core, SDK/Phase 1H and desktop gates and produced a verified signed a
 All six native case producers passed; a stale outer validator is corrected with
 retained-report and browser proof. Mac smoke failed final-report delivery on busy
 contention; its bounded probe correction passes unit/browser checks. Windows stopped
-at one TLS cancellation unit failure before SDK/package work. Focused Windows
-diagnosis and independent harness review are next.
+at one TLS cancellation unit failure before SDK/package work. A controlled Windows
+experiment reproduced a fixture-readiness race; the correction waits for
+ClientHello before cancellation. Mac unit proof passes; reviewed producing-host
+verification is next. Attribution of the original CI failure remains provisional.
 
 The additional campaign allowance is exhausted. The owning issue retains the
 current accounting. No retry or rebuild is selected. The corrected harness has

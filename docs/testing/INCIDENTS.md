@@ -1274,3 +1274,19 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   termination decision and preserves malformed-report rejection. Fresh packaged
   smoke remains unqualified.
 - **Evidence:** [Third Choice campaign](../tasks/evidence/choice-98.md#third-campaign-results-and-offline-harness-corrections).
+
+## H89. TLS server accept precedes client socket ownership
+
+- **Class/cause:** harness; the handshake cancellation test treated server accept
+  as proof that the client had published its owned socket. Controlled Windows
+  scheduling reproduced an absent observation while early shutdown, Cancelled
+  and EOF succeeded. The original CI mode/value were not captured, so attribution
+  remains provisional.
+- **Correction:** emit handshake readiness after nonempty ClientHello arrives and
+  check client ownership before cancelling. Keep successful shutdown, Cancelled,
+  EOF and the original timing bound; expose safe mode/observation diagnostics.
+  No production transport or committed scheduling hook changes.
+- **Verification:** the exact corrected unit passes on Mac. Producing-host Windows
+  proof with the controlled publication delay remains required. Earlier unforced
+  passes do not qualify the correction or erase the failed campaign.
+- **Evidence:** [Windows TLS diagnosis](../tasks/evidence/choice-98.md#windows-tls-readiness-diagnosis-and-correction).

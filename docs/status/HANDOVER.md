@@ -13,9 +13,13 @@ is `2997c202`; Kris approved signed local Mac and hosted Windows qualification.
 Windows run 42960921424 attempt 1 is terminal failure. Core had 683 passes and
 one TLS cancellation shutdown-observation failure. No Windows SDK or package ran;
 its bounded three-member failure archive is retained with matching GitHub digest.
-The failure omits mode/raw observation. Diagnose the exact unit on the connected
-Windows host without SDK/package execution; preserve P02's EOF/timing/ownership
-requirements and do not assume its historical cause.
+The failure omits mode/raw observation. The [focused diagnosis](../tasks/evidence/choice-98.md#windows-tls-readiness-diagnosis-and-correction)
+reproduced a fixture-readiness race twice with a temporary publication delay.
+Early shutdown, Cancelled and EOF succeeded, but the shared observation was None
+because no socket had been published. The correction waits for ClientHello and
+checks ownership before cancelling. Mac proof passes; exact producing-host
+verification with the controlled delay is next. Preserve P02's EOF/timing/ownership
+requirements; attribution of the original CI failure remains provisional.
 
 Mac passed 691 core tests, isolated flow/browser gates, SDK lifecycle/download,
 runtime diagnostics/service, Phase 1H and 38 release desktop tests. One signed
@@ -45,9 +49,9 @@ proof, including all 27 picked-state outcomes, retains its candidate scope; the
 #104 duplicate-receipt limit remains recorded. Native physical-input/human and
 final package acceptance remain incomplete. No merge, release or closure is selected.
 
-Next: finish independent review of the harness corrections, publish the coherent
-correction and run SDK-free Windows unit diagnosis in the existing assigned
-checkout. The coordinator owns durable source writes; a Windows assignment may
+Next: review/publish the readiness correction and verify the exact SDK-free
+Windows unit in the existing assigned checkout, including the demonstrated
+publication window. The coordinator owns durable source writes; a Windows assignment may
 use temporary diagnostic instrumentation only and must restore exact bytes.
 Use the owning issue for live publication/CI receipts and preserve candidate-specific
 package evidence. Do not request another campaign before the focused diagnosis
