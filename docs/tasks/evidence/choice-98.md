@@ -1477,3 +1477,52 @@ correction and verify the exact candidate on Windows with ordinary controlled-ch
 tests. Only then request a decision on another final campaign; do not dispatch or
 reserve a new campaign under the spent allowance. Native/human and final package
 acceptance remain pending; #98/#106 and PR #125 remain open/draft.
+
+## Second campaign terminal audit and harness correction
+
+Kris explicitly approved one additional Windows/macOS package campaign on
+`e0050aba`, extending the final allowance to two total invocations. The additional
+run was `42929422784`, attempt 1, on exact head
+`e0050aba96892b528f6f48c0d0af6960dfae3c2b`, with success-only package upload.
+Preflight passed. Both platform jobs started and failed later: macOS ARM64
+`130225522899` and Windows x64 `130225523045`. Shared consumption is now
+**Mac 18/20, Windows 9/20, zero reservations**; the final campaign allowance is
+**2/2 spent**. No retry or replacement is authorized by that approval.
+
+The previous corrections passed both-target broad core verification: Mac had 690
+passes, zero failures, 63 ignored and three filtered; Windows had 683 passes, zero
+failures, 60 ignored and three filtered. Both targets also passed the isolated
+observed-flow gate, official SDK installation/project lifecycle and download reuse,
+runtime service and diagnostics gates. Ignored cases stay unexecuted in those
+broad results. The subsequent Phase 1H gate failed its exact authored-source golden
+before any route cases ran. Both terminal receipts report complete cleanup and
+seven bounded adapter spawns. Package build, packaged runtime cases and WebView
+smoke never ran; later absent-report/binary failures are consequences. No package
+was produced. Both fourteen-file failure archives were downloaded and their SHA-256
+values matched GitHub's digests; raw logs and selected fixture inputs are retained.
+
+Two harness failures were present on both targets:
+
+- The Phase 1H golden omitted the root Return that current Choice authoring preserves
+  after its option-body Jumps. The full existing authoring sequence now has a shared
+  test-only owner used by both the SDK gate and a new SDK-free test on a synthetic
+  open project. That test reproduced the exact golden mismatch, then passed after
+  the one-line golden correction. It retains exact source comparison for every
+  Scene, imported asset identities, history, opaque content and reopen assertions.
+  Its initial synthetic setup lacked the normal media directories; that failed
+  preparation is retained separately. Automatic PR checks now run the offline test
+  before any separate SDK campaign.
+- The Branches browser selected an actual Choice edge whose guard path includes its
+  option ownership, then assumed it had the legacy direct-edit button. Production
+  exposes Open Scene for that route. The corrected harness checks the exact Scene/
+  Beat navigation and full revision-qualified Source location on the real service
+  fixture. It reproduced the missing-button failure locally and passed afterward.
+  The 500-node/2,000-edge workload, geometry and resize assertions, refresh/pan checks,
+  sample population and timing thresholds remain unchanged. Chrome timing remains
+  diagnostic; the Mac CI timing overrun is not the functional failure or a native
+  responsiveness verdict. The production renderer is unchanged.
+
+These are harness corrections, not new SDK/package evidence. Focused local proof,
+review and exact Windows offline verification must finish before another campaign
+decision. All prior failures remain retained. #98/#106 and PR #125 stay open/draft;
+final package and native/human acceptance remain pending.

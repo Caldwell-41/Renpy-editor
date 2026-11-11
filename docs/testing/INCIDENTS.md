@@ -1220,3 +1220,20 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   Windows `OwnedChild` boundary. Original lifecycle units retain their assertions.
   Controlled-child proof does not qualify native SDK rendering or human input.
 - **Evidence:** [Choice CI correction](../tasks/evidence/choice-98.md#windows-cooperative-shutdown-correction).
+
+## H86. SDK-only authoring fixture hides stale continuation expectations
+
+- **Symptoms:** Phase 1H fails its exact Radio booth source comparison after SDK
+  installation because the authored Choice retains a root Return absent from the
+  golden source. Branches browser navigation waits for a legacy edit button on an
+  option-owned route.
+- **Cause/correction:** the golden retained the old terminal-Choice representation,
+  and the manifest check ran only inside an ignored SDK gate. Share its authoring
+  sequence with an ordinary offline test, include the preserved Return in the golden,
+  and run that test in automatic PR checks. Browser navigation now selects a real
+  option-owned route and checks its current Scene and exact Source targets.
+- **Verification:** both failures reproduce and pass after the harness corrections
+  without executing an SDK. Exact source, assets, history, reopen, graph workload,
+  rendering assertions and timing policy remain intact. SDK/package acceptance is
+  still pending.
+- **Evidence:** [Second Choice campaign audit](../tasks/evidence/choice-98.md#second-campaign-terminal-audit-and-harness-correction).

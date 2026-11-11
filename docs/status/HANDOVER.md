@@ -4,7 +4,7 @@
 
 Kris selected #98 and #101–#106 under implement-spec. Delivery is `in_progress` on
 `codex/choice-98` in [draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125).
-[The delivery record](../tasks/evidence/choice-98.md#windows-cooperative-shutdown-correction)
+[The delivery record](../tasks/evidence/choice-98.md#second-campaign-terminal-audit-and-harness-correction)
 owns exact candidates, reviews, counters and the remaining qualification.
 
 #101–#105 have both-target focused SDK evidence. Windows #106 passed all 27
@@ -30,32 +30,26 @@ fixtures/probes now use current References/Game setup and explicit source review
 Game setup preserves appearance selection through the existing bounded cache.
 Failed local attempts remain retained; no SDK/native/package campaign ran locally.
 
-The final package campaign ran on `7abb9caf` in run `42914123530`, attempt 1.
-Preflight passed; Windows x64 and macOS ARM64 failed core tests before SDK execution
-or packaging. Both target campaigns started and consume their reservations. The
-owning record holds cumulative use and the exhausted one-campaign allowance.
-No automatic retry or replacement campaign is authorized.
+The first final campaign failed core tests on `7abb9caf`. Published corrections
+`6353164f` and `e0050aba` restore root Continue anchors, migrate fixtures and let
+Windows cooperative shutdown wait for job emptiness within its existing budget.
+Both review axes found no issues. Exact Windows red/green and lifecycle verification
+passed, with unchanged candidate bytes and cleanup. Mac lifecycle tests also passed.
 
-Published core correction `6353164f` restores root Continue anchors beside nested
-terminals and migrates stale fixtures. Broad Mac core verification passed 659 cases;
-31 sandbox socket failures all passed in the scoped 38-case outside-sandbox rerun.
-Ignored gates stay unexecuted. These runs cover all 690 selected nonignored cases,
-while the broad command retains its failed status.
+Kris approved one additional campaign on `e0050aba`. Run `42929422784`, attempt 1,
+passed Preflight, both-target broad core, observed-flow and the earlier SDK lifecycle/
+runtime gates. Both targets then failed the Phase 1H golden comparison; the deferred
+Branches browser check also failed on a legacy navigation selector. No package was
+built. Both target reservations are consumed and the two-campaign allowance is
+exhausted. The owning record holds counters and immutable receipts.
 
-The Windows producing-host diagnosis proved a signaled leader can leave the job
-briefly nonempty. The original unit passed locally, so its attribution to the CI
-failure remains an inference. The delivered patch uses the remaining cooperative
-budget for empty-job and pipe cleanup; all acknowledgment, exit and fallback gates
-remain. Both reduced red/green experiments and the original unit pass with the
-proposed patch on Windows. A fast Windows-only regression is retained. Five Mac
-canvas lifecycle tests pass after integration; two unselected gates remain ignored.
-
-Next: complete scoped review, publish the patch and run the exact integrated Windows
-regression/lifecycle units in the existing clean assigned checkout. SDK settings
-must remain unset; no SDK/native/package/manual-CI operation is included. Then
-request Kris's decision on an additional final package campaign. Its exhausted
-allowance cannot be replaced by the unused conditional #106 start. The owning
-record holds exact outcomes, manifest/hash evidence and counters.
+Current harness corrections preserve the root Return in the golden, share the real
+authoring sequence with an SDK-free test, and put that test into automatic PR CI.
+Branches navigation now follows the actual option-owned route to Scene and exact
+Source. Local red/green checks pass without SDK execution; production is unchanged.
+Next: finish focused verification/review, publish and verify the offline fixture on
+Windows in the assigned checkout. Do not run another SDK/package campaign without
+Kris changing the spent allowance. The unused conditional #106 start is separate.
 
 Preserve all worktrees, unique evidence, `app/node_modules`, the pinned design
 references and protected recovery below. Native/human evidence remains pending;

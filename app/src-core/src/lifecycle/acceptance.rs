@@ -96,6 +96,10 @@ pub(crate) fn create_authored_game(data: &Path, parent: &Path, sdk: &Path) -> Li
         })
         .unwrap();
     assert_eq!(created.status, "complete");
+    author_game(service)
+}
+
+fn author_game(mut service: LifecycleService) -> LifecycleService {
     let entry = service.current().unwrap().scene_id;
     apply(
         &service,
@@ -604,4 +608,23 @@ fn phase1h_authoring_continues_after_4097_terminal_journals_and_reopens() {
         .chapters
         .iter()
         .any(|c| c.display_name == "Continue authoring"));
+}
+
+#[test]
+fn phase1h_authored_sources_match_manifest_without_sdk() {
+    let temp = tempfile::tempdir().unwrap();
+    let root = temp.path().join("synthetic-project");
+    super::tests::make_openable_project(&root, "Crossroads at Sundown");
+    for directory in ["game/images", "game/audio"] {
+        fs::create_dir_all(root.join(directory)).unwrap();
+    }
+    fs::write(
+        root.join("game/definitions/transforms.rpy"),
+        b"# Transform definitions are added by Loomlight.\n",
+    )
+    .unwrap();
+    let mut service = LifecycleService::new(temp.path().join("profile")).unwrap();
+    service.open_path(&root).unwrap();
+    let mut service = author_game(service);
+    service.close().unwrap();
 }

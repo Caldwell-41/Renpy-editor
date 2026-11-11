@@ -6,6 +6,10 @@ handlers, Scene commands and transactional Source saving. `expected.json` fixes
 route dialogue, integer/Boolean/string state, image identities and exact Scene
 source templates. Generated technical labels alone are normalized to logical names.
 The builder checks copied media, history and reopen state before SDK execution.
+An ordinary offline test runs that same authoring sequence and exact manifest check
+on a synthetic open project. It catches source-contract drift in automatic PR checks
+before a separate SDK campaign. The Choice retains its root Return as the shared
+continuation after its option-body Jumps.
 
 The native SDK testcases use the generated standard main menu and normal Start,
 then select each real Choice. They assert dialogue, state, media discovery,

@@ -193,10 +193,13 @@ try {
   await page.getByRole("button", {name:"Zoom in",exact:true}).click();
   await page.getByRole("button", {name:"Fit graph",exact:true}).click();
   await page.getByLabel("Selected Scene",{exact:true}).selectOption(fixture.nodes[0].sceneId);
-  const edge=fixture.edges.find(edge=>edge.sceneId===fixture.nodes[0].sceneId && edge.editable);
+  const edge=fixture.edges.find(edge=>edge.sceneId===fixture.nodes[0].sceneId && edge.kind === "choice" && edge.guardPath?.some(guard=>guard.branch.choiceOption));
+  assert.ok(edge, "service fixture must retain a Choice option's body ownership");
   await page.getByLabel("Selected route",{exact:true}).selectOption(edge.id);
-  await page.getByRole("button",{name:"Edit Choice / Jump",exact:true}).click();
-  assert.equal((await page.evaluate(()=>window.__branchesCalls))[0][2],edge.beatId);
+  await page.getByRole("button",{name:"Open Scene",exact:true}).click();
+  assert.deepEqual((await page.evaluate(()=>window.__branchesCalls))[0],["scene",edge.sceneId,edge.beatId]);
+  await page.getByRole("button",{name:"View origin in Source",exact:true}).click();
+  assert.deepEqual((await page.evaluate(()=>window.__branchesCalls))[1],["source",edge.location]);
   await page.evaluate(() => { window.__holdFlowRefresh=false; window.__releaseFlowRefresh({...window.__branchesFixture, observation:{status:"checked",checkedAt:Date.now()}}); });
   await page.waitForFunction(() => document.querySelector(".branches-observation").textContent.startsWith("Checked at"));
   report.navigationAndRefresh = "pass";

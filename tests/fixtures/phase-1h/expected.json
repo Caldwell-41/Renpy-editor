@@ -58,7 +58,7 @@
     }
   },
   "sceneSources": {
-    "Radio booth": "label ${Radio booth}:\n    scene bg booth with dissolve\n    show alex happy at left\n    show morgan calm at right with fade\n    show alex at center\n    play music music_theme\n    play sound sfx_bell\n    alex \"The shift is over. Where shall we go?\"\n    \"Choose a road at sundown.\"\n    menu:\n        \"Rooftop\":\n            jump ${Rooftop}\n        \"Riverside\":\n            jump ${Riverside}\n",
+    "Radio booth": "label ${Radio booth}:\n    scene bg booth with dissolve\n    show alex happy at left\n    show morgan calm at right with fade\n    show alex at center\n    play music music_theme\n    play sound sfx_bell\n    alex \"The shift is over. Where shall we go?\"\n    \"Choose a road at sundown.\"\n    menu:\n        \"Rooftop\":\n            jump ${Rooftop}\n        \"Riverside\":\n            jump ${Riverside}\n    return\n",
     "Rooftop": "label ${Rooftop}:\n    scene bg rooftop with fade\n    show alex happy at right with dissolve\n    show alex happy\n    $ heard_news = True\n    $ trust = 9223372036854775807\n    $ route = \"rooftop\"\n    alex \"Rooftop: a shared plan.\"\n    stop music\n    hide alex with fade\n    jump ${Station platform}\n",
     "Riverside": "label ${Riverside}:\n    scene bg riverside with fade\n    show morgan calm at left with dissolve\n    show morgan calm\n    $ heard_news = False\n    $ trust = -9223372036854775808\n    $ route = \"riverside\"\n    morgan \"Riverside: separate ways.\"\n    stop music\n    hide morgan with fade\n    jump ${Station platform}\n",
     "Station platform": "label ${Station platform}:\n    \"We meet again at the station.\"\n    return\n",
