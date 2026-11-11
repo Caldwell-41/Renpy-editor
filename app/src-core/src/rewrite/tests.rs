@@ -2745,15 +2745,16 @@ fn phase3a_logic_context_and_generated_fields_keep_ai_allowlist_closed() {
                 .iter()
                 .filter(|b| b["excluded"].is_string())
                 .count(),
-            2
+            4,
+            "Call, Choice, option header and option-body Jump remain excluded"
         );
         assert!(!user["story"]["sceneBeats"]
             .as_array()
             .unwrap()
             .iter()
-            .any(
-                |b| b["payload"]["type"] == "call" || b["payload"]["options"].as_array().is_some()
-            ));
+            .any(|b| b["payload"]["type"] == "call"
+                || b["payload"]["type"] == "jump"
+                || b["payload"]["options"].as_array().is_some()));
         f.take(&prepared, Cancel::default()).unwrap();
         let mut response = f.continue_response(&prepared);
         response["beats"] = json!([extra]);

@@ -74,6 +74,8 @@ pub struct FlowEdge {
     pub scene_id: String,
     pub beat_id: Option<String>,
     pub option_ordinal: Option<usize>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub unavailable_policy: Option<super::UnavailablePolicy>,
     pub text: String,
     pub kind: String,
     pub location: FlowLocation,
@@ -663,6 +665,19 @@ fn collect_labels(path: &str, bytes: &[u8], revision: &str, inventory: &mut Inve
                     byte_end: (end + bom) as u64,
                 });
         }
+        if let Some(target) = super::choice::target_line(line) {
+            inventory
+                .labels
+                .entry(target.into())
+                .or_default()
+                .push(FlowLocation {
+                    path: path.into(),
+                    revision: revision.into(),
+                    byte_start: (start + bom) as u64,
+                    byte_end: (end + bom) as u64,
+                });
+            continue;
+        }
         // Story labels are top-level declarations. Indented screen-language
         // label controls (including translated text) are not story destinations.
         if line.starts_with([' ', '\t']) {
@@ -793,7 +808,7 @@ fn project_scene_legacy(
             }
         } else if body == "    return" {
             kind = "return";
-            title = "Return / End".into();
+            title = "Return to caller or main menu".into();
         } else if let Some(target) = body.strip_prefix("    jump ") {
             kind = "jump";
             title = "Jump".into();
@@ -841,6 +856,7 @@ fn project_scene_legacy(
             scene_id: scene.id.clone(),
             beat_id: mapped.map(|beat| beat.id.clone()),
             option_ordinal: option,
+            unavailable_policy: None,
             text: title,
             kind: kind.into(),
             location: FlowLocation {
@@ -865,6 +881,7 @@ fn project_scene_legacy(
             scene_id: scene.id.clone(),
             beat_id: None,
             option_ordinal: None,
+            unavailable_policy: None,
             text: "Incomplete / unknown flow".into(),
             kind: "unknown".into(),
             location: FlowLocation {

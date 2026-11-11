@@ -143,7 +143,10 @@ fn base_help_fidelity_exports_typed_assets_styles_and_exact_source_without_execu
     let map: Value =
         serde_json::from_slice(&fs::read(root.join(".renpy-editor/source-map.json")).unwrap())
             .unwrap();
-    assert_eq!(map["schemaVersion"], 8);
+    assert_eq!(
+        map["schemaVersion"],
+        crate::metadata::SOURCE_MAP_SCHEMA_VERSION
+    );
     for asset in &assets {
         let bytes = fs::read(root.join(asset["relativePath"].as_str().unwrap())).unwrap();
         assert_eq!(hex::encode(Sha256::digest(&bytes)), asset["sha256"]);
@@ -159,7 +162,7 @@ fn base_help_fidelity_exports_typed_assets_styles_and_exact_source_without_execu
     service.close().unwrap();
     let accepted = json!({"outcome":"L18-base-help-fidelity","publicCoreRequests":true,
         "exporterSourceSHA256":hex::encode(Sha256::digest(include_bytes!("base_help_canvas_tests.rs"))),
-        "sourceMapSchemaVersion":8,"files":files,"assets":assets,"cases":plans});
+        "sourceMapSchemaVersion":map["schemaVersion"],"files":files,"assets":assets,"cases":plans});
     if let Some(output) = std::env::var_os("LOOMLIGHT_BASE_HELP_INPUTS") {
         let output = PathBuf::from(output);
         fs::create_dir(&output).unwrap();
@@ -203,7 +206,10 @@ fn base_help_fidelity_hidden_helper_captures_exact_exported_cases() {
     let accepted: Value = serde_json::from_slice(&accepted_bytes).unwrap();
     assert_eq!(accepted["outcome"], "L18-base-help-fidelity");
     assert_eq!(accepted["publicCoreRequests"], true);
-    assert_eq!(accepted["sourceMapSchemaVersion"], 8);
+    assert_eq!(
+        accepted["sourceMapSchemaVersion"],
+        crate::metadata::SOURCE_MAP_SCHEMA_VERSION
+    );
     assert_eq!(
         accepted["exporterSourceSHA256"],
         hex::encode(Sha256::digest(include_bytes!("base_help_canvas_tests.rs")))

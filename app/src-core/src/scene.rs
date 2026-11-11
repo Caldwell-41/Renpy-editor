@@ -5,6 +5,7 @@
 //! persisted mapping and patches only exact byte ranges or creates/deletes an owned
 //! Scene file through the journalled transaction service.
 
+mod choice;
 pub mod flow;
 mod logic;
 mod screen_beats;
@@ -129,6 +130,10 @@ pub enum BeatPayload {
         value: Value,
     },
     Choice {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        picked_policy: Option<PickedPolicy>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        prompt: Option<ChoicePrompt>,
         options: Vec<ChoiceOption>,
     },
     Jump {
@@ -138,6 +143,10 @@ pub enum BeatPayload {
         scene_id: String,
         #[serde(default)]
         return_label: Option<String>,
+    },
+    RepeatChoice {
+        #[serde(default)]
+        target: Option<String>,
     },
     Return,
     CustomCode {
@@ -176,6 +185,7 @@ impl BeatPayload {
             Self::Choice { .. } => "choice",
             Self::Jump { .. } => "jump",
             Self::Call { .. } => "call",
+            Self::RepeatChoice { .. } => "repeatChoice",
             Self::Return => "return",
             Self::CustomCode { .. } => "customCode",
         }
@@ -189,21 +199,74 @@ pub(crate) fn logic_boundary(payload: &BeatPayload) -> bool {
             | BeatPayload::ShowScreen { .. }
             | BeatPayload::HideScreen { .. }
             | BeatPayload::CallScreen { .. }
-    ) || matches!(payload, BeatPayload::Choice { options } if options.iter().any(|o| o.condition.is_some()))
+    ) || matches!(payload, BeatPayload::Choice { options, .. } if options.iter().any(|o| o.condition.is_some()))
+}
+
+// Supported option headers and a verified inert placeholder are protected edit
+// targets, but do not make reference inspection or the Scene projection opaque.
+fn opaque_source(beat: &SceneBeat) -> bool {
+    beat.protected
+        && !beat.structural_placeholder
+        && !beat.conditional_branch.as_ref().is_some_and(|branch| {
+            branch.choice_option
+                && !matches!(
+                    branch.condition,
+                    Some(crate::conditions::Condition::Unknown { .. })
+                )
+        })
 }
 
 fn is_terminal_payload(payload: &BeatPayload) -> bool {
-    matches!(payload, BeatPayload::Jump { .. } | BeatPayload::Return)
-        || matches!(payload, BeatPayload::Choice { options } if !logic::choice_may_continue(options))
+    matches!(
+        payload,
+        BeatPayload::Jump { .. } | BeatPayload::RepeatChoice { .. } | BeatPayload::Return
+    )
+}
+
+/// A line displayed in the menu interaction, never an option-body Beat.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum PickedPolicy {
+    ShowNormally,
+    MarkPicked,
+    HidePicked,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase",
+    tag = "type",
+    deny_unknown_fields
+)]
+pub enum ChoicePrompt {
+    Narration { text: String },
+    Dialogue { character_id: String, text: String },
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ChoiceOption {
+    #[serde(default, skip_serializing_if = "UnavailablePolicy::is_hide")]
+    pub unavailable_policy: UnavailablePolicy,
     pub text: String,
-    pub destination_scene_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub condition: Option<crate::conditions::Condition>,
+}
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum UnavailablePolicy {
+    #[default]
+    Hide,
+    ShowDisabled,
+}
+impl UnavailablePolicy {
+    fn is_hide(&self) -> bool {
+        *self == Self::Hide
+    }
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -217,6 +280,8 @@ pub struct SceneBeat {
     pub byte_start: u64,
     pub byte_end: u64,
     pub protected: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_fallback: Option<String>,
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub structural_placeholder: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -536,6 +601,7 @@ struct Loaded {
 #[derive(Clone)]
 enum ParsedNesting {
     Branch {
+        choice_option: bool,
         group_start: usize,
         variable_id: String,
         otherwise: bool,
@@ -691,6 +757,7 @@ impl AuthoringService {
         let loaded = self.load(project, project_id)?;
         let mut scenes = Vec::with_capacity(loaded.project.scenes.len());
         let mut screen_targets = HashMap::new();
+        let mut choice_runtime_valid = [None; 2];
         for scene in &loaded.project.scenes {
             let stored = loaded
                 .source_map
@@ -732,6 +799,47 @@ impl AuthoringService {
                 .1
             };
             for beat in &mut beats {
+                let BeatPayload::Choice {
+                    options,
+                    picked_policy,
+                    ..
+                } = &beat.payload
+                else {
+                    continue;
+                };
+                if picked_policy.is_none()
+                    && !options
+                        .iter()
+                        .any(|o| o.unavailable_policy == UnavailablePolicy::ShowDisabled)
+                {
+                    continue;
+                }
+                // Availability-only menus also work with the legacy adapter. Cache
+                // each required capability, rather than the first Scene's result.
+                let capability = usize::from(picked_policy.is_some());
+                if !*choice_runtime_valid[capability].get_or_insert_with(|| {
+                    self.choice_runtime_mutations(project, std::slice::from_ref(beat), false)
+                        .is_ok()
+                }) {
+                    beat.protected = true;
+                    beat.source_fallback = Some("Choice template or availability adapter is missing, unsupported or has pending Source edits. Edit in Source.".into());
+                }
+            }
+            if self
+                .validate_choice_targets(project, &bytes, &bytes, &beats)
+                .is_err()
+            {
+                for beat in &mut beats {
+                    if matches!(
+                        beat.payload,
+                        BeatPayload::Choice { .. } | BeatPayload::RepeatChoice { .. }
+                    ) {
+                        beat.protected = true;
+                        beat.source_fallback = Some("Choice target ownership is ambiguous, colliding or cannot be verified. Edit in Source.".into());
+                    }
+                }
+            }
+            for beat in &mut beats {
                 let statement = beat.payload.screen_statement();
                 let (BeatPayload::ShowScreen { target, revisions }
                 | BeatPayload::HideScreen { target, revisions }
@@ -771,7 +879,7 @@ impl AuthoringService {
                 source_path: scene.source_path.clone(),
                 source_revision: revision.sha256,
                 source_conflict: conflict,
-                partial: conflict || beats.iter().any(|beat| beat.protected),
+                partial: conflict || beats.iter().any(opaque_source),
                 beats,
             });
         }
@@ -1301,7 +1409,7 @@ impl AuthoringService {
         mut loaded: Loaded,
         command: SceneCommand,
     ) -> Result<TransactionProposal, SceneError> {
-        match command {
+        match self.native_menu_fallback(project, command) {
             SceneCommand::CreateChapter { display_name } => {
                 validate_display(&display_name)?;
                 if loaded.project.chapters.len() >= MAX_CHAPTERS {
@@ -1829,7 +1937,12 @@ impl AuthoringService {
             .iter()
             .find(|beat| beat.id == choice_beat_id)
             .ok_or(SceneError::UnknownEntity)?;
-        let BeatPayload::Choice { mut options } = choice.payload.clone() else {
+        let BeatPayload::Choice {
+            mut options,
+            prompt,
+            picked_policy,
+        } = choice.payload.clone()
+        else {
             return Err(SceneError::InvalidPayload);
         };
         if choice.protected || options.len() >= 64 {
@@ -1853,9 +1966,10 @@ impl AuthoringService {
             extra: Map::new(),
         };
         options.push(ChoiceOption {
+            unavailable_policy: UnavailablePolicy::Hide,
             condition: None,
             text: option_text,
-            destination_scene_id: destination_id.clone(),
+            id: None,
         });
         loaded.project.scenes.push(destination.clone());
         loaded.project.last_open = Selection {
@@ -1869,10 +1983,54 @@ impl AuthoringService {
             &beats,
             BeatEdit::Update {
                 id: choice_beat_id.into(),
-                payload: BeatPayload::Choice { options },
+                payload: BeatPayload::Choice {
+                    options,
+                    prompt,
+                    picked_policy,
+                },
             },
             &loaded,
         )?;
+        let (_, _, parsed) = parse_scene(
+            &source_scene,
+            &proposed_source,
+            Some((
+                &loaded.project,
+                &loaded.authoring,
+                &loaded.source_map.owned_screens,
+            )),
+        )?;
+        let new_option = parsed
+            .iter()
+            .find(|b| b.start == choice.byte_start as usize)
+            .and_then(|b| match &b.payload {
+                BeatPayload::Choice { options, .. } => options
+                    .last()
+                    .and_then(|o| o.id.as_ref())
+                    .and_then(|id| id.parse::<usize>().ok()),
+                _ => None,
+            })
+            .ok_or(SceneError::InvariantBlocked)?;
+        let new_pass=parsed.iter().find(|b|matches!(b.nesting,Some(ParsedNesting::Child{branch_start,..}) if branch_start==new_option) && matches!(&b.payload,BeatPayload::CustomCode{source,..} if source.trim()=="pass")).ok_or(SceneError::InvariantBlocked)?;
+        let indent = indentation(
+            std::str::from_utf8(&proposed_source[new_pass.start..new_pass.end])
+                .map_err(|_| SceneError::UnsupportedSource)?,
+        );
+        let newline = if proposed_source.windows(2).any(|w| w == b"\r\n") {
+            "\r\n"
+        } else {
+            "\n"
+        };
+        let mut proposed_source = proposed_source;
+        proposed_source.splice(
+            new_pass.start..new_pass.end,
+            format!(
+                "{}jump {}{newline}",
+                " ".repeat(indent),
+                destination.technical_label
+            )
+            .bytes(),
+        );
         self.validate_candidate_transfers(
             project,
             &loaded,
@@ -1882,7 +2040,7 @@ impl AuthoringService {
             ],
         )?;
         let proposed_source_revision = sha256(&proposed_source);
-        let (source_mapping, _) = build_mapping(
+        let (source_mapping, next_beats) = build_mapping(
             &source_scene,
             &proposed_source,
             &proposed_source_revision,
@@ -1914,28 +2072,36 @@ impl AuthoringService {
         )?;
         loaded.source_map.scene_mappings.push(destination_mapping);
 
+        let mut runtime = self.choice_scene_runtime(
+            project,
+            &source_scene.source_path,
+            &source_bytes,
+            &proposed_source,
+            &next_beats,
+        )?;
+        runtime.extend(vec![
+            create_mutation(&destination_path, destination_bytes)?,
+            replace_mutation(
+                &source_scene.source_path,
+                source_bytes,
+                source_revision,
+                proposed_source,
+            )?,
+            replace_mutation(
+                PROJECT_PATH,
+                loaded.project_bytes,
+                loaded.project_revision,
+                json_bytes(&loaded.project)?,
+            )?,
+            replace_mutation(
+                SOURCE_MAP_PATH,
+                loaded.source_map_bytes,
+                loaded.source_map_revision,
+                source_map_bytes(&loaded.source_map)?,
+            )?,
+        ]);
         Ok(TransactionProposal {
-            mutations: vec![
-                create_mutation(&destination_path, destination_bytes)?,
-                replace_mutation(
-                    &source_scene.source_path,
-                    source_bytes,
-                    source_revision,
-                    proposed_source,
-                )?,
-                replace_mutation(
-                    PROJECT_PATH,
-                    loaded.project_bytes,
-                    loaded.project_revision,
-                    json_bytes(&loaded.project)?,
-                )?,
-                replace_mutation(
-                    SOURCE_MAP_PATH,
-                    loaded.source_map_bytes,
-                    loaded.source_map_revision,
-                    source_map_bytes(&loaded.source_map)?,
-                )?,
-            ],
+            mutations: runtime,
             intent: TransactionIntent::Edit,
         })
     }
@@ -2130,15 +2296,13 @@ impl AuthoringService {
                 )),
             )?;
             if beats.iter().any(|beat| {
-                beat.protected
+                opaque_source(beat)
                     || match &beat.payload {
                         BeatPayload::Jump { scene_id: target }
                         | BeatPayload::Call {
                             scene_id: target, ..
                         } => target == scene_id,
-                        BeatPayload::Choice { options } => options
-                            .iter()
-                            .any(|option| option.destination_scene_id == scene_id),
+                        BeatPayload::Choice { .. } => false,
                         _ => false,
                     }
             }) {
@@ -2213,7 +2377,7 @@ impl AuthoringService {
             )?;
         }
         let proposed_revision = sha256(&proposed_source);
-        let (mut new_mapping, _) = build_mapping(
+        let (mut new_mapping, next_beats) = build_mapping(
             &scene,
             &proposed_source,
             &proposed_revision,
@@ -2232,21 +2396,29 @@ impl AuthoringService {
             .iter_mut()
             .find(|mapping| mapping.scene_id == scene_id)
             .ok_or(SceneError::InvalidMetadata)? = new_mapping;
+        let mut runtime = self.choice_scene_runtime(
+            project,
+            &scene.source_path,
+            &source_bytes,
+            &proposed_source,
+            &next_beats,
+        )?;
+        runtime.extend(vec![
+            replace_mutation(
+                &scene.source_path,
+                source_bytes,
+                source_revision,
+                proposed_source,
+            )?,
+            replace_mutation(
+                SOURCE_MAP_PATH,
+                loaded.source_map_bytes,
+                loaded.source_map_revision,
+                source_map_bytes(&loaded.source_map)?,
+            )?,
+        ]);
         Ok(TransactionProposal {
-            mutations: vec![
-                replace_mutation(
-                    &scene.source_path,
-                    source_bytes,
-                    source_revision,
-                    proposed_source,
-                )?,
-                replace_mutation(
-                    SOURCE_MAP_PATH,
-                    loaded.source_map_bytes,
-                    loaded.source_map_revision,
-                    source_map_bytes(&loaded.source_map)?,
-                )?,
-            ],
+            mutations: runtime,
             intent: TransactionIntent::Edit,
         })
     }
@@ -2284,7 +2456,7 @@ impl AuthoringService {
                 &[],
                 Some((&loaded.project, &previous, &loaded.source_map.owned_screens)),
             )?;
-            if beats.iter().any(|b| b.protected) {
+            if beats.iter().any(opaque_source) {
                 return Err(SceneError::OpaqueBoundary);
             }
             let mut proposed = bytes.clone();
@@ -2583,6 +2755,18 @@ fn apply_beat_edit(
     edit: BeatEdit,
     loaded: &Loaded,
 ) -> Result<(Vec<u8>, Vec<ForcedBeatId>), SceneError> {
+    if matches!(
+        &edit,
+        BeatEdit::Insert {
+            payload: BeatPayload::RepeatChoice { .. },
+            ..
+        } | BeatEdit::Update {
+            payload: BeatPayload::RepeatChoice { .. },
+            ..
+        }
+    ) {
+        return Err(SceneError::InvariantBlocked);
+    }
     if beats
         .iter()
         .take(beats.len().saturating_sub(1))
@@ -2835,6 +3019,16 @@ fn apply_beat_edit(
                     ));
                 }
             }
+            if matches!(payload, BeatPayload::Choice { .. }) {
+                choice::retain_insertion(
+                    source,
+                    beats,
+                    insertion,
+                    insertion,
+                    rendered.len() + output.len() - insertion,
+                    &mut forced,
+                );
+            }
             output.extend_from_slice(rendered.as_bytes());
             output.extend_from_slice(&source[insertion..]);
             Ok((output, forced))
@@ -2851,7 +3045,9 @@ fn apply_beat_edit(
             if beat.protected {
                 return Err(SceneError::OpaqueBoundary);
             }
-            if is_terminal_payload(&beat.payload) != is_terminal_payload(&payload)
+            if matches!(beat.payload, BeatPayload::Choice { .. })
+                != matches!(payload, BeatPayload::Choice { .. })
+                || is_terminal_payload(&beat.payload) != is_terminal_payload(&payload)
                 || (is_terminal_payload(&payload)
                     && beats.last().is_none_or(|last| last.id != beat.id))
             {
@@ -2881,18 +3077,21 @@ fn apply_beat_edit(
                         .ok_or(SceneError::UnknownEntity)?
                         .technical_label,
                 )?
-            } else if let (
-                BeatPayload::Choice { options: previous },
-                BeatPayload::Choice { options },
-            ) = (&beat.payload, &payload)
+            } else if let BeatPayload::Choice {
+                options,
+                prompt,
+                picked_policy,
+            } = &payload
             {
-                logic::patch_menu(
-                    &source[beat.byte_start as usize..beat.byte_end as usize],
-                    previous,
+                return choice::update(
+                    source,
+                    beats,
+                    beat,
                     options,
+                    prompt.as_ref(),
+                    *picked_policy,
                     loaded,
-                )?
-                .unwrap_or(render_payload(&payload, loaded, newline)?)
+                );
             } else if let Some(patched) = patch_variable_assignment(
                 &source[beat.byte_start as usize..beat.byte_end as usize],
                 &beat.payload,
@@ -2997,7 +3196,7 @@ fn apply_beat_edit(
                 return Err(SceneError::InvariantBlocked);
             }
             let mut output = source.to_vec();
-            output.drain(beat.byte_start as usize..beat.byte_end as usize);
+            output.drain(beat.byte_start as usize..structure::node_end(beat, beats)?);
             Ok((output, Vec::new()))
         }
         BeatEdit::Reorder { id, to_index } => {
@@ -3010,7 +3209,10 @@ fn apply_beat_edit(
             }
             let (first, last) = (from.min(to_index), from.max(to_index));
             let window = &beats[first..=last];
-            if window.iter().any(|b| b.owner.is_some()) {
+            if window
+                .iter()
+                .any(|b| b.owner.is_some() || matches!(b.payload, BeatPayload::Choice { .. }))
+            {
                 return Err(SceneError::InvariantBlocked);
             }
             if window.iter().any(|b| b.protected)
@@ -3214,24 +3416,24 @@ fn render_payload(
                 )
             }
         }
-        BeatPayload::Choice { options } => {
-            let mut text = String::from("    menu:");
-            text.push_str(newline);
+        BeatPayload::Choice {
+            options,
+            prompt,
+            picked_policy,
+        } => {
+            if let Some(policy) = picked_policy {
+                return choice::render_new(options, prompt.as_ref(), *policy, loaded, newline);
+            }
+            let mut text = format!("    {}{newline}", choice::menu_header(options));
+            if let Some(prompt) = prompt {
+                text.push_str(&choice::render_prompt(prompt, loaded, 8, newline)?);
+            }
             for option in options {
-                let destination = loaded
-                    .project
-                    .scenes
-                    .iter()
-                    .find(|scene| scene.id == option.destination_scene_id)
-                    .ok_or(SceneError::UnknownEntity)?;
                 text.push_str(&format!(
-                    "        \"{}\"{}:{}            jump {}",
+                    "        \"{}\"{}:{newline}            pass{newline}",
                     escape_string(&option.text)?,
-                    logic::render_guard(option.condition.as_ref(), &loaded.authoring)?,
-                    newline,
-                    destination.technical_label
+                    choice::option_suffix(option, options, &loaded.authoring)?
                 ));
-                text.push_str(newline);
             }
             return Ok(text);
         }
@@ -3263,6 +3465,13 @@ fn render_payload(
         BeatPayload::ShowScreen { target, .. } => format!("    show screen {}", target.source_name),
         BeatPayload::HideScreen { target, .. } => format!("    hide screen {}", target.source_name),
         BeatPayload::CallScreen { target, .. } => format!("    call screen {}", target.source_name),
+        BeatPayload::RepeatChoice { target } => format!(
+            "    jump {}",
+            target
+                .as_deref()
+                .filter(|t| choice::valid_target(t))
+                .ok_or(SceneError::InvalidPayload)?
+        ),
         BeatPayload::Return => "    return".into(),
         BeatPayload::CustomCode { .. } => return Err(SceneError::InvalidPayload),
     };
@@ -3276,20 +3485,29 @@ fn validate_payload(payload: &BeatPayload, loaded: &Loaded) -> Result<(), SceneE
             validate_text(text)?;
         }
         BeatPayload::Narration { text } => validate_text(text)?,
-        BeatPayload::Choice { options } => {
+        BeatPayload::Choice {
+            options, prompt, ..
+        } => {
+            if let Some(prompt) = prompt {
+                choice::render_prompt(prompt, loaded, 8, "\n")?;
+            }
             if options.is_empty() || options.len() > 64 {
                 return Err(SceneError::InvalidPayload);
             }
             for option in options {
                 validate_text(&option.text)?;
-                logic::render_guard(option.condition.as_ref(), &loaded.authoring)?;
-                if !loaded
-                    .project
-                    .scenes
-                    .iter()
-                    .any(|scene| scene.id == option.destination_scene_id)
+                if option.unavailable_policy == UnavailablePolicy::ShowDisabled
+                    && option.condition.is_none()
                 {
-                    return Err(SceneError::UnknownEntity);
+                    return Err(SceneError::InvalidPayload);
+                }
+                logic::render_guard(option.condition.as_ref(), &loaded.authoring)?;
+                if option
+                    .id
+                    .as_ref()
+                    .is_some_and(|id| uuid::Uuid::parse_str(id).is_err())
+                {
+                    return Err(SceneError::InvalidPayload);
                 }
             }
         }
@@ -3363,6 +3581,11 @@ fn validate_payload(payload: &BeatPayload, loaded: &Loaded) -> Result<(), SceneE
             asset(loaded, asset_id, AssetKind::Sfx)?;
         }
         BeatPayload::StopMusic | BeatPayload::Transition { .. } | BeatPayload::Return => {}
+        BeatPayload::RepeatChoice { target } => {
+            if target.as_deref().is_none_or(|t| !choice::valid_target(t)) {
+                return Err(SceneError::InvalidPayload);
+            }
+        }
         BeatPayload::CustomCode { .. } => return Err(SceneError::InvalidPayload),
     }
     Ok(())
@@ -3430,6 +3653,7 @@ fn parse_bool_group(
             }
             let mut parsed = custom(start, end, body);
             parsed.nesting = Some(ParsedNesting::Branch {
+                choice_option: false,
                 group_start,
                 variable_id: variable.id.clone(),
                 otherwise,
@@ -3501,8 +3725,9 @@ fn parse_condition_group(
     parent: Option<(usize, usize)>,
     depth: usize,
     lexical: &HashSet<usize>,
-    rich_logic: bool,
+    source_version: u32,
 ) -> Option<(usize, Vec<ParsedBeat>)> {
+    let rich_logic = source_version >= 5;
     if depth >= MAX_CONDITION_NESTING || !lexical.contains(&lines[index].0) {
         return None;
     }
@@ -3532,6 +3757,7 @@ fn parse_condition_group(
         let branch_start = start;
         let mut header = custom(start, end, body);
         header.nesting = Some(ParsedNesting::Branch {
+            choice_option: false,
             group_start,
             variable_id: legacy_variable.clone(),
             otherwise,
@@ -3545,7 +3771,21 @@ fn parse_condition_group(
         while next < lines.len() {
             let (start, end, body) = lines[next];
             if body.trim().is_empty() || body.trim_start().starts_with('#') {
-                let trivia = custom(start, end, body);
+                let mut trivia = custom(start, end, body);
+                if source_version >= 10
+                    && (body.trim().is_empty() || indentation(body) >= indent + 4)
+                {
+                    trivia.nesting = Some(ParsedNesting::Child {
+                        group_start,
+                        branch_start,
+                    });
+                } else if source_version >= 10 && indentation(body) == indent {
+                    trivia.nesting =
+                        parent.map(|(group_start, branch_start)| ParsedNesting::Child {
+                            group_start,
+                            branch_start,
+                        });
+                }
                 result.push(trivia);
                 next += 1;
                 continue;
@@ -3564,14 +3804,31 @@ fn parse_condition_group(
                 Some((group_start, branch_start)),
                 depth + 1,
                 lexical,
-                rich_logic,
+                source_version,
             ) {
                 result.extend(nested);
                 next = after;
                 statements += 1;
                 continue;
             }
-            if rich_logic {
+            if source_version >= 9 {
+                if let Some((after, menu)) = choice::parse(
+                    lines,
+                    next,
+                    indent + 4,
+                    loaded,
+                    lexical,
+                    Some((group_start, branch_start)),
+                    depth + 1,
+                    source_version,
+                ) {
+                    result.extend(menu);
+                    next = after;
+                    statements += 1;
+                    continue;
+                }
+            }
+            if rich_logic && source_version < 9 {
                 if let Some((after, mut menu)) =
                     logic::parse_menu(lines, next, indent + 4, loaded, lexical)
                 {
@@ -3712,13 +3969,22 @@ fn parse_scene_mode(
         if let Some((next, nested)) = if legacy {
             parse_bool_group(&lines, index, loaded)
         } else {
-            parse_condition_group(&lines, index, loaded, 4, None, 0, &lexical, rich_logic)
+            parse_condition_group(&lines, index, loaded, 4, None, 0, &lexical, source_version)
         } {
             beats.extend(nested);
             index = next;
             continue;
         }
-        if rich_logic {
+        if source_version >= 9 {
+            if let Some((next, menu)) =
+                choice::parse(&lines, index, 4, loaded, &lexical, None, 0, source_version)
+            {
+                beats.extend(menu);
+                index = next;
+                continue;
+            }
+        }
+        if rich_logic && source_version < 9 {
             if let Some((next, menu)) = logic::parse_menu(&lines, index, 4, loaded, &lexical) {
                 beats.push(menu);
                 index = next;
@@ -3753,12 +4019,13 @@ fn parse_scene_mode(
                             .find(|scene| scene.technical_label == label)
                     })
                     .map(|scene| scene.id.clone());
-                let Some(destination_scene_id) = destination else {
+                let Some(_destination_scene_id) = destination else {
                     break;
                 };
                 options.push(ChoiceOption {
+                    unavailable_policy: UnavailablePolicy::Hide,
                     text: option_text,
-                    destination_scene_id,
+                    id: None,
                     condition: None,
                 });
                 menu_end = jump_end.max(option_end);
@@ -3769,7 +4036,11 @@ fn parse_scene_mode(
                     nesting: None,
                     start: menu_start,
                     end: menu_end,
-                    payload: BeatPayload::Choice { options },
+                    payload: BeatPayload::Choice {
+                        options,
+                        picked_policy: None,
+                        prompt: None,
+                    },
                 });
                 continue;
             }
@@ -4282,6 +4553,18 @@ pub(crate) fn build_mapping(
     for mut parsed in parsed {
         let hash = sha256(&bytes[parsed.start..parsed.end]);
         let kind = parsed.payload.kind().to_owned();
+        let embedded = choice::embedded_id(
+            bytes,
+            parsed.start..parsed.end,
+            &parsed.payload,
+            matches!(
+                parsed.nesting,
+                Some(ParsedNesting::Branch {
+                    choice_option: true,
+                    ..
+                })
+            ),
+        );
         let id = ids
             .get_mut(&(kind.clone(), hash.clone()))
             .and_then(|queue| {
@@ -4291,6 +4574,10 @@ pub(crate) fn build_mapping(
                 queue.remove(index).map(|(id, _)| id)
             })
             .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+        let id = embedded.unwrap_or(id);
+        if mappings.iter().any(|b: &BeatSourceMapping| b.id == id) {
+            return Err(SceneError::InvariantBlocked);
+        }
         let screen_target = match &mut parsed.payload {
             BeatPayload::ShowScreen { target, .. }
             | BeatPayload::HideScreen { target, .. }
@@ -4334,6 +4621,7 @@ pub(crate) fn build_mapping(
             extra: old_extra.get(&id).cloned().unwrap_or_default(),
         });
         beats.push(SceneBeat {
+            source_fallback: None,
             owner: None,
             conditional_branch: None,
             id,
@@ -4371,6 +4659,7 @@ pub(crate) fn build_mapping(
     {
         match nested {
             Some(ParsedNesting::Branch {
+                choice_option,
                 group_start,
                 variable_id,
                 otherwise,
@@ -4387,6 +4676,7 @@ pub(crate) fn build_mapping(
                     beat.owner = Some(owner);
                 }
                 let branch = crate::metadata::ConditionalBranch {
+                    choice_option,
                     group_id: groups[&group_start].clone(),
                     variable_id: (!variable_id.is_empty()).then_some(variable_id),
                     otherwise,
@@ -4408,6 +4698,35 @@ pub(crate) fn build_mapping(
                 beat.owner = Some(owner);
             }
             None => {}
+        }
+    }
+    let option_ids = beats
+        .iter()
+        .filter(|b| {
+            b.conditional_branch
+                .as_ref()
+                .is_some_and(|g| g.choice_option)
+        })
+        .map(|b| (b.byte_start, b.id.clone()))
+        .collect::<Vec<_>>();
+    for beat in &mut beats {
+        if let BeatPayload::Choice { options, .. } = &mut beat.payload {
+            // The parser carries header byte starts until the mapping has assigned identities.
+            for option in options {
+                let start = option
+                    .id
+                    .as_ref()
+                    .and_then(|s| s.parse::<u64>().ok())
+                    .ok_or(SceneError::InvalidMetadata)?;
+                option.id = Some(
+                    option_ids
+                        .iter()
+                        .find(|(offset, _)| *offset == start)
+                        .ok_or(SceneError::InvalidMetadata)?
+                        .1
+                        .clone(),
+                );
+            }
         }
     }
     structure::mark_placeholders(&mut beats);
@@ -5031,6 +5350,7 @@ pub(crate) fn continue_anchor(beats: &[SceneBeat], before: &str) -> Result<usize
         || beats
             .iter()
             .take(beats.len() - 1)
+            .filter(|b| b.owner.is_none() && b.conditional_branch.is_none())
             .any(|b| is_terminal_payload(&b.payload))
     {
         return Err(SceneError::InvariantBlocked);
@@ -5224,7 +5544,7 @@ mod tests {
             json!({"type": "playSfx", "assetId": "a"}),
             json!({"type": "transition", "transition": "fade"}),
             json!({"type": "setVariable", "variableId": "v", "value": true}),
-            json!({"type": "choice", "options": [{"text": "Go", "destinationSceneId": "s"}]}),
+            json!({"type": "choice", "options": [{"text": "Go"}]}),
             json!({"type": "jump", "sceneId": "s"}),
             json!({"type": "return"}),
             json!({"type": "customCode", "source": "pass", "reason": "Unsupported"}),
@@ -6004,21 +6324,26 @@ mod tests {
                 value: Value::String("Loomlight".into()),
             },
             BeatPayload::Choice {
+                picked_policy: None,
+                prompt: None,
                 options: vec![
                     ChoiceOption {
+                        unavailable_policy: UnavailablePolicy::Hide,
                         condition: None,
                         text: "One".into(),
-                        destination_scene_id: destination_id.clone(),
+                        id: None,
                     },
                     ChoiceOption {
+                        unavailable_policy: UnavailablePolicy::Hide,
                         condition: None,
                         text: "Two".into(),
-                        destination_scene_id: destination_id.clone(),
+                        id: None,
                     },
                     ChoiceOption {
+                        unavailable_policy: UnavailablePolicy::Hide,
                         condition: None,
                         text: "Three".into(),
-                        destination_scene_id: destination_id.clone(),
+                        id: None,
                     },
                 ],
             },
@@ -6041,6 +6366,18 @@ mod tests {
             )),
         )
         .unwrap();
+        let parsed = parsed
+            .into_iter()
+            .filter(|b| b.nesting.is_none())
+            .map(|mut b| {
+                if let BeatPayload::Choice { options, .. } = &mut b.payload {
+                    for o in options {
+                        o.id = None;
+                    }
+                }
+                b
+            })
+            .collect::<Vec<_>>();
         assert_eq!(
             parsed
                 .iter()
@@ -6327,11 +6664,6 @@ mod tests {
             .iter()
             .find(|scene| scene.id == fixture.entry_scene_id)
             .unwrap();
-        let existing = with_target
-            .scenes
-            .iter()
-            .find(|scene| scene.id != fixture.entry_scene_id)
-            .unwrap();
         let with_choice = fixture
             .apply(
                 &with_target,
@@ -6340,10 +6672,13 @@ mod tests {
                     expected_source_revision: entry.source_revision.clone(),
                     before_beat_id: None,
                     beat: BeatPayload::Choice {
+                        picked_policy: None,
+                        prompt: None,
                         options: vec![ChoiceOption {
+                            unavailable_policy: UnavailablePolicy::Hide,
                             condition: None,
                             text: "Take the first path".into(),
-                            destination_scene_id: existing.id.clone(),
+                            id: None,
                         }],
                     },
                 },
@@ -6354,12 +6689,12 @@ mod tests {
             .iter()
             .find(|scene| scene.id == fixture.entry_scene_id)
             .unwrap();
-        assert!(matches!(
-            entry.beats.last().unwrap().payload,
-            BeatPayload::Choice { .. }
-        ));
+        assert!(entry.beats.iter().any(|b| matches!(
+            &b.payload,
+            BeatPayload::Choice { options, .. } if options.len() == 1 && options[0].text == "Take the first path"
+        )));
         let entry_source = fs::read_to_string(fixture.root.join(&entry.source_path)).unwrap();
-        assert!(!entry_source.contains("    return\n"));
+        assert!(entry_source.contains("    return\n"));
         let choice_id = entry
             .beats
             .iter()
@@ -6367,17 +6702,18 @@ mod tests {
             .unwrap()
             .id
             .clone();
-        assert!(matches!(
-            fixture.apply(
+        let removed = fixture
+            .apply(
                 &with_choice,
                 SceneCommand::RemoveBeat {
                     scene_id: entry.id.clone(),
                     expected_source_revision: entry.source_revision.clone(),
                     beat_id: choice_id.clone(),
-                }
-            ),
-            Err(SceneError::InvariantBlocked)
-        ));
+                },
+            )
+            .unwrap();
+        let restored = fixture.apply(&removed, SceneCommand::Undo).unwrap();
+        assert_eq!(restored.scenes[0].source_revision, entry.source_revision);
         assert!(matches!(
             fixture.apply(
                 &with_choice,
@@ -6417,7 +6753,7 @@ mod tests {
             .iter()
             .find(|scene| scene.id == fixture.entry_scene_id)
             .unwrap();
-        let BeatPayload::Choice { options } = &source_scene
+        let BeatPayload::Choice { options, .. } = &source_scene
             .beats
             .iter()
             .find(|beat| matches!(beat.payload, BeatPayload::Choice { .. }))
@@ -6427,7 +6763,7 @@ mod tests {
             panic!("choice was not preserved")
         };
         assert_eq!(options.len(), 2);
-        assert_eq!(options[1].destination_scene_id, created.id);
+        assert!(options[1].id.is_some());
         assert!(matches!(
             fixture.apply(
                 &expanded,
@@ -6442,7 +6778,7 @@ mod tests {
         let undone = fixture.apply(&expanded, SceneCommand::Undo).unwrap();
         assert_eq!(undone.scenes.len(), 2);
         assert!(!fixture.root.join(&created.source_path).exists());
-        let BeatPayload::Choice { options } = &undone
+        let BeatPayload::Choice { options, .. } = &undone
             .scenes
             .iter()
             .find(|scene| scene.id == fixture.entry_scene_id)
@@ -6833,16 +7169,20 @@ mod tests {
                     expected_source_revision: entry.source_revision.clone(),
                     before_beat_id: None,
                     beat: BeatPayload::Choice {
+                        picked_policy: None,
+                        prompt: None,
                         options: vec![
                             ChoiceOption {
+                                unavailable_policy: UnavailablePolicy::Hide,
                                 condition: None,
                                 text: "Garden".into(),
-                                destination_scene_id: garden_id.clone(),
+                                id: None,
                             },
                             ChoiceOption {
+                                unavailable_policy: UnavailablePolicy::Hide,
                                 condition: None,
                                 text: "Library".into(),
-                                destination_scene_id: library_id.clone(),
+                                id: None,
                             },
                         ],
                     },
@@ -6899,7 +7239,12 @@ mod tests {
             .beats
             .iter()
             .rev()
-            .find(|beat| !beat.protected && !is_terminal_payload(&beat.payload))
+            .find(|beat| {
+                !beat.protected
+                    && beat.owner.is_none()
+                    && !matches!(beat.payload, BeatPayload::Choice { .. })
+                    && !is_terminal_payload(&beat.payload)
+            })
             .unwrap();
         workspace = fixture
             .apply(
@@ -6921,8 +7266,8 @@ mod tests {
             .unwrap();
         assert!(entry.partial);
         assert!(matches!(
-            &entry.beats.last().unwrap().payload,
-            BeatPayload::Choice { options } if options.len() == 3
+            &entry.beats.iter().find(|b|matches!(b.payload,BeatPayload::Choice{..})).unwrap().payload,
+            BeatPayload::Choice { options, .. } if options.len() == 3
         ));
         let garden = workspace
             .scenes
@@ -7330,24 +7675,84 @@ mod tests {
         let left = model.scenes[1].clone();
         let right = model.scenes[2].clone();
         let end = model.scenes[3].clone();
-        for (scene, payload) in [
-            (
-                &entry,
-                BeatPayload::Choice {
-                    options: vec![
-                        ChoiceOption {
-                            condition: None,
-                            text: "Same".into(),
-                            destination_scene_id: left.id.clone(),
+        model = fixture
+            .apply(
+                &model,
+                SceneCommand::InsertBodyBeat {
+                    scene_id: entry.id.clone(),
+                    expected_source_revision: entry.source_revision.clone(),
+                    body: BodyRef::Root,
+                    position: Position::Before {
+                        anchor: NodeRef::Beat {
+                            beat_id: entry.beats[0].id.clone(),
                         },
-                        ChoiceOption {
-                            condition: None,
-                            text: "Same".into(),
-                            destination_scene_id: right.id.clone(),
-                        },
-                    ],
+                    },
+                    beat: BeatPayload::Choice {
+                        picked_policy: None,
+                        prompt: None,
+                        options: vec![
+                            ChoiceOption {
+                                unavailable_policy: UnavailablePolicy::Hide,
+                                text: "Same".into(),
+                                id: None,
+                                condition: None,
+                            },
+                            ChoiceOption {
+                                unavailable_policy: UnavailablePolicy::Hide,
+                                text: "Same".into(),
+                                id: None,
+                                condition: None,
+                            },
+                        ],
+                    },
                 },
-            ),
+            )
+            .unwrap();
+        for (ordinal, target) in [&left, &right].into_iter().enumerate() {
+            let scene = model.scenes[0].clone();
+            let header = scene
+                .beats
+                .iter()
+                .filter(|b| {
+                    b.conditional_branch
+                        .as_ref()
+                        .is_some_and(|g| g.choice_option)
+                })
+                .nth(ordinal)
+                .unwrap();
+            model = fixture
+                .apply(
+                    &model,
+                    SceneCommand::InsertBodyBeat {
+                        scene_id: scene.id.clone(),
+                        expected_source_revision: scene.source_revision.clone(),
+                        body: BodyRef::Branch {
+                            group_id: header.conditional_branch.as_ref().unwrap().group_id.clone(),
+                            branch_id: header.id.clone(),
+                        },
+                        position: Position::End,
+                        beat: BeatPayload::Jump {
+                            scene_id: target.id.clone(),
+                        },
+                    },
+                )
+                .unwrap();
+        }
+        let scene = model.scenes[0].clone();
+        model = fixture
+            .apply(
+                &model,
+                SceneCommand::RemoveStoryNode {
+                    scene_id: scene.id.clone(),
+                    expected_source_revision: scene.source_revision.clone(),
+                    expected_body: BodyRef::Root,
+                    node: NodeRef::Beat {
+                        beat_id: entry.beats[0].id.clone(),
+                    },
+                },
+            )
+            .unwrap();
+        for (scene, payload) in [
             (
                 &left,
                 BeatPayload::Jump {
@@ -7578,7 +7983,12 @@ mod tests {
         assert_eq!(graph.revision, again.revision);
         let workspace = fixture.workspace();
         let origin = &workspace.scenes[0];
-        let BeatPayload::Choice { mut options } = origin.beats[0].payload.clone() else {
+        let BeatPayload::Choice {
+            mut options,
+            prompt,
+            picked_policy,
+        } = origin.beats[0].payload.clone()
+        else {
             panic!("choice fixture");
         };
         options[0].text = "Route A".into();
@@ -7594,7 +8004,11 @@ mod tests {
                     scene_id: origin.id.clone(),
                     expected_source_revision: origin.source_revision.clone(),
                     beat_id: origin.beats[0].id.clone(),
-                    beat: BeatPayload::Choice { options },
+                    beat: BeatPayload::Choice {
+                        options,
+                        prompt,
+                        picked_policy,
+                    },
                 },
             )
             .unwrap();

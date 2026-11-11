@@ -1,0 +1,2 @@
+body{margin:0}.review-shell{height:100vh;display:grid;grid-template-columns:230px minmax(0,1fr)}.review-tree{overflow:auto;border-right:1px solid var(--border-normal);padding:12px}.scene-workspace{height:100vh;box-sizing:border-box}.preview-surround:has(>.cp2-summary){display:block}
+@media(max-width:800px){.review-shell{grid-template-columns:minmax(0,1fr)}.review-tree{display:none}}

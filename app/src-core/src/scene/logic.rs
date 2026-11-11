@@ -109,7 +109,7 @@ impl AuthoringService {
         }
         Ok(edit)
     }
-    fn call_label_inventory(
+    pub(super) fn call_label_inventory(
         &self,
         project: &ProjectId,
     ) -> Result<HashMap<String, usize>, SceneError> {
@@ -205,10 +205,6 @@ pub(super) fn call_route_with_budget(
     false
 }
 
-pub(super) fn choice_may_continue(options: &[ChoiceOption]) -> bool {
-    // Every guarded option may be false. Defaults are not observed route state.
-    options.iter().all(|option| option.condition.is_some())
-}
 pub(super) fn render_guard(
     condition: Option<&Condition>,
     authoring: &AuthoringMetadata,
@@ -276,10 +272,11 @@ pub(super) fn parse_menu(
         if !identifier(label) {
             return None;
         }
-        let destination = project.scenes.iter().find(|s| s.technical_label == label)?;
+        let _destination = project.scenes.iter().find(|s| s.technical_label == label)?;
         options.push(ChoiceOption {
+            unavailable_policy: UnavailablePolicy::Hide,
             text,
-            destination_scene_id: destination.id.clone(),
+            id: None,
             condition: expression.map(|source| crate::conditions::parse(source, authoring)),
         });
         menu_end = jump_end;
@@ -295,7 +292,14 @@ pub(super) fn parse_menu(
             let label = project
                 .scenes
                 .iter()
-                .find(|s| s.id == option.destination_scene_id)?
+                .find(|s| {
+                    s.technical_label
+                        == lines[index + 2 + ordinal * 2]
+                            .2
+                            .trim()
+                            .strip_prefix("jump ")
+                            .unwrap_or("")
+                })?
                 .technical_label
                 .as_str();
             if lines[index + 1 + ordinal * 2].2 != caption
@@ -319,128 +323,37 @@ pub(super) fn parse_menu(
             start,
             end: menu_end,
             nesting: None,
-            payload: BeatPayload::Choice { options },
+            payload: BeatPayload::Choice {
+                options,
+                picked_policy: None,
+                prompt: None,
+            },
         },
     ))
 }
-pub(super) fn patch_menu(
-    bytes: &[u8],
-    previous: &[ChoiceOption],
-    options: &[ChoiceOption],
-    loaded: &Loaded,
-) -> Result<Option<String>, SceneError> {
-    if previous.len() != options.len() {
-        return if previous.iter().any(|o| o.condition.is_some()) {
-            Err(SceneError::OpaqueBoundary)
-        } else {
-            Ok(None)
-        };
-    }
-    let source = std::str::from_utf8(bytes).map_err(|_| SceneError::UnsupportedSource)?;
-    let lines = physical_lines(source);
-    if lines.len() != 1 + options.len() * 2 {
-        return Err(SceneError::OpaqueBoundary);
-    }
-    let mut edits = Vec::<(usize, usize, String)>::new();
-    for (ordinal, (old, new)) in previous.iter().zip(options).enumerate() {
-        let (start, _, line) = lines[ordinal * 2 + 1];
-        let (quote_start, quote_end) = dialogue_quotes(line).ok_or(SceneError::OpaqueBoundary)?;
-        let colon = line.rfind(':').ok_or(SceneError::OpaqueBoundary)?;
-        if old.text != new.text {
-            edits.push((
-                start + quote_start + 1,
-                start + quote_end,
-                escape_string(&new.text)?,
-            ));
-        }
-        if old.condition != new.condition {
-            let suffix = &line[quote_end + 1..colon];
-            let leading = suffix.len() - suffix.trim_start().len();
-            match (&old.condition, &new.condition) {
-                (Some(_), Some(_)) => {
-                    let keyword = quote_end + 1 + leading;
-                    if !line[keyword..].starts_with("if ") {
-                        return Err(SceneError::OpaqueBoundary);
-                    }
-                    let after_keyword = keyword + 2;
-                    let remainder = &line[after_keyword..colon];
-                    let expression_start =
-                        after_keyword + remainder.len() - remainder.trim_start().len();
-                    let expression_end = colon - (remainder.len() - remainder.trim_end().len());
-                    edits.push((
-                        start + expression_start,
-                        start + expression_end,
-                        render_guard(new.condition.as_ref(), &loaded.authoring)?
-                            .strip_prefix(" if ")
-                            .ok_or(SceneError::InvalidPayload)?
-                            .into(),
-                    ));
-                }
-                (None, Some(_)) => edits.push((
-                    start + quote_end + 1,
-                    start + quote_end + 1,
-                    render_guard(new.condition.as_ref(), &loaded.authoring)?,
-                )),
-                (Some(_), None) => {
-                    let keyword = quote_end + 1 + leading;
-                    let expression_end = colon - (suffix.len() - suffix.trim_end().len());
-                    edits.push((start + keyword, start + expression_end, String::new()));
-                }
-                _ => {}
-            }
-        }
-        if old.destination_scene_id != new.destination_scene_id {
-            let (start, _, line) = lines[ordinal * 2 + 2];
-            let keyword = line.len() - line.trim_start().len();
-            if !line[keyword..].starts_with("jump ") {
-                return Err(SceneError::OpaqueBoundary);
-            }
-            let after_keyword = keyword + 4;
-            let target_start = after_keyword + line[after_keyword..].len()
-                - line[after_keyword..].trim_start().len();
-            let target_end = line.trim_end().len();
-            let target = &loaded
-                .project
-                .scenes
-                .iter()
-                .find(|s| s.id == new.destination_scene_id)
-                .ok_or(SceneError::UnknownEntity)?
-                .technical_label;
-            edits.push((start + target_start, start + target_end, target.clone()));
-        }
-    }
-    edits.sort_by_key(|e| e.0);
-    let mut output = source.to_owned();
-    for (start, end, text) in edits.into_iter().rev() {
-        output.replace_range(start..end, &text);
-    }
-    Ok(Some(output))
-}
-
 pub(super) fn validate_conditional_completion(
     bytes: &[u8],
     scene: &SceneMetadata,
     loaded: &Loaded,
 ) -> Result<(), SceneError> {
-    let (_, _, parsed) = parse_scene(
+    let (_, beats) = build_mapping(
         scene,
         bytes,
+        &sha256(bytes),
+        None,
+        &[],
         Some((
             &loaded.project,
             &loaded.authoring,
             &loaded.source_map.owned_screens,
         )),
     )?;
-    if !parsed.iter().any(|b| {
-        matches!(&b.payload, BeatPayload::Call { .. })
-            || matches!(&b.payload, BeatPayload::Choice { options } if choice_may_continue(options))
-    }) {
-        return Ok(());
-    }
-    let roots: Vec<_> = parsed.iter().filter(|b| b.nesting.is_none() && !matches!(&b.payload, BeatPayload::CustomCode { source, .. } if source.trim().is_empty() || source.trim_start().starts_with('#'))).collect();
-    if roots
-        .last()
-        .is_none_or(|b| !is_terminal_payload(&b.payload))
+    if beats.iter().any(|b| {
+        matches!(
+            b.payload,
+            BeatPayload::Call { .. } | BeatPayload::Choice { .. }
+        )
+    }) && structure::root_may_continue(bytes, &beats)?
     {
         return Err(SceneError::InvariantBlocked);
     }
@@ -471,6 +384,18 @@ pub(super) fn refine_legacy_ids(
                 Some(parsed.start),
             ));
             continue;
+        }
+        // v9 splits a verified legacy whole-menu mapping into disjoint records.
+        if matches!(parsed.payload, BeatPayload::Choice { .. }) {
+            if let Some(whole) = old.beats.iter().find(|m| {
+                m.kind == "choice"
+                    && m.byte_start as usize == parsed.start
+                    && m.byte_end as usize > parsed.end
+            }) {
+                covered.insert(whole.id.clone());
+                forced.push(("choice".into(), hash, whole.id.clone(), Some(parsed.start)));
+                continue;
+            }
         }
         if !matches!(parsed.payload, BeatPayload::Choice { .. }) {
             continue;
@@ -696,7 +621,7 @@ mod tests {
     #[test]
     fn phase3a_guarded_menu_requires_explicit_root_ending() {
         let mut f = Fixture::new();
-        let target = f.scene("Target");
+        let _target = f.scene("Target");
         let scene = f.model()["scenes"][0].clone();
         f.save(
             &scene,
@@ -708,23 +633,23 @@ mod tests {
         let w = f.model();
         let scene = &w["scenes"][0];
         let guard = json!({"status":"supported","expression":{"type":"bool","value":false}});
-        let inserted = f.command(json!({"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beforeBeatId":null,"beat":{"type":"choice","options":[{"text":"Unavailable","destinationSceneId":target["id"],"condition":guard}]}}));
+        let inserted = f.command(json!({"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beforeBeatId":null,"beat":{"type":"choice","options":[{"text":"Unavailable","condition":guard}]}}));
         let beats = inserted["scenes"][0]["beats"].as_array().unwrap();
         assert_eq!(beats[0]["payload"]["type"], "choice");
         assert_eq!(beats[0]["payload"]["options"][0]["condition"], guard);
-        assert_eq!(beats[1]["payload"]["type"], "return");
-        f.reject(json!({"type":"removeBeat","sceneId":scene["id"],"expectedSourceRevision":inserted["scenes"][0]["sourceRevision"],"beatId":beats[1]["id"]}));
+        assert_eq!(beats.last().unwrap()["payload"]["type"], "return");
+        f.reject(json!({"type":"removeBeat","sceneId":scene["id"],"expectedSourceRevision":inserted["scenes"][0]["sourceRevision"],"beatId":beats.last().unwrap()["id"]}));
         f.command(json!({"type":"undo"}));
         let w = f.model();
         let scene = &w["scenes"][0];
-        let terminal = f.command(json!({"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beforeBeatId":null,"beat":{"type":"choice","options":[{"text":"End","destinationSceneId":target["id"]}]}}));
+        let terminal = f.command(json!({"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beforeBeatId":null,"beat":{"type":"choice","options":[{"text":"End"}]}}));
         let choice = &terminal["scenes"][0]["beats"][0];
-        f.reject(json!({"type":"updateBeat","sceneId":scene["id"],"expectedSourceRevision":terminal["scenes"][0]["sourceRevision"],"beatId":choice["id"],"beat":{"type":"choice","options":[{"text":"Unavailable","destinationSceneId":target["id"],"condition":guard}]}}));
+        f.command(json!({"type":"updateBeat","sceneId":scene["id"],"expectedSourceRevision":terminal["scenes"][0]["sourceRevision"],"beatId":choice["id"],"beat":{"type":"choice","options":[{"text":"Unavailable","condition":guard}]}}));
         f.service.close().unwrap();
     }
     #[test]
     fn phase3a_v3_v4_call_menu_refinement_preserves_records_and_reopen() {
-        for version in [3, 4] {
+        for version in [3, 4, 8] {
             let mut f = Fixture::new();
             let target = f.scene("Target");
             let scene = f.model()["scenes"][0].clone();
@@ -797,9 +722,14 @@ mod tests {
                 .unwrap();
             assert_eq!(menu.id, old[1].id);
             assert_eq!(menu.extra["futureRecord"], old[1].extra["futureRecord"]);
-            let retained: Vec<BeatSourceMapping> =
-                serde_json::from_value(menu.extra["refinedChildMappings"].clone()).unwrap();
-            assert_eq!(retained, old[2..old.len() - 1]);
+            for old_child in &old[2..old.len() - 1] {
+                let retained = new.scene_mappings[0]
+                    .beats
+                    .iter()
+                    .find(|b| b.id == old_child.id)
+                    .unwrap();
+                assert_eq!(retained.extra, old_child.extra);
+            }
             let before_map = fs::read(&map_path).unwrap();
             f.service.open_path(&f.root).unwrap();
             f.service.close().unwrap();
@@ -827,18 +757,51 @@ pub(super) fn group_may_continue(group_id: &str, beats: &[SceneBeat], depth: usi
         return true;
     }
     headers.iter().any(|header| {
-        let owner = crate::metadata::BeatOwner { group_id: group_id.into(), branch_id: header.id.clone() };
-        for beat in beats.iter().filter(|b|b.owner.as_ref()==Some(&owner)) {
-            if let Some(branch)=&beat.conditional_branch {
-                if branch.ordinal==0 && !group_may_continue(&branch.group_id,beats,depth+1) { return false; }
-                continue;
-            }
-            if matches!(&beat.payload,BeatPayload::CustomCode { source,.. } if source.trim() == "pass") { continue; }
-            if matches!(&beat.payload,BeatPayload::CustomCode { source,.. } if !source.trim().is_empty() && !source.trim_start().starts_with('#')) { return true; }
-            if is_terminal_payload(&beat.payload) { return false; }
-        }
-        true
+        body_may_continue(
+            &crate::metadata::BeatOwner {
+                group_id: group_id.into(),
+                branch_id: header.id.clone(),
+            },
+            beats,
+            depth,
+        )
     })
+}
+
+/// Completion is structural and conservative; it never evaluates a condition.
+pub(super) fn body_may_continue(
+    owner: &crate::metadata::BeatOwner,
+    beats: &[SceneBeat],
+    depth: usize,
+) -> bool {
+    if depth >= MAX_CONDITION_NESTING {
+        return true;
+    }
+    for beat in beats.iter().filter(|b| b.owner.as_ref() == Some(owner)) {
+        if let Some(branch) = &beat.conditional_branch {
+            if !branch.choice_option
+                && branch.ordinal == 0
+                && !group_may_continue(&branch.group_id, beats, depth + 1)
+            {
+                return false;
+            }
+            continue;
+        }
+        if matches!(beat.payload, BeatPayload::Choice { .. }) {
+            if !choice::may_continue_at_depth(beat, beats, depth + 1) {
+                return false;
+            }
+            continue;
+        }
+        if matches!(&beat.payload, BeatPayload::CustomCode { source, .. } if source.trim() != "pass" && !source.trim().is_empty() && !source.trim_start().starts_with('#'))
+        {
+            return true;
+        }
+        if is_terminal_payload(&beat.payload) {
+            return false;
+        }
+    }
+    true
 }
 
 #[cfg(test)]
@@ -1007,7 +970,7 @@ mod boundary_tests {
     fn phase3a_guarded_menu_field_edits_preserve_exact_formatting() {
         let mut f = Fixture::new();
         let b = f.scene("B");
-        let c = f.scene("C");
+        let _c = f.scene("C");
         let a = f.model()["scenes"][0].clone();
         let source=format!("label {}:\r\n    menu:\r\n        \"Old café\"   if    flag  :  \r\n            jump   {}   \r\n    return\r\n",a["technicalLabel"].as_str().unwrap(),b["technicalLabel"].as_str().unwrap());
         f.save(&a, &source);
@@ -1016,12 +979,9 @@ mod boundary_tests {
         let choice = &scene["beats"][0];
         let mut options = choice["payload"]["options"].clone();
         options[0]["text"] = json!("New café");
-        options[0]["destinationSceneId"] = c["id"].clone();
+
         let changed=f.command(json!({"type":"updateBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":choice["id"],"beat":{"type":"choice","options":options}}));
-        let expected = source.replace("Old café", "New café").replace(
-            b["technicalLabel"].as_str().unwrap(),
-            c["technicalLabel"].as_str().unwrap(),
-        );
+        let expected = source.replace("Old café", "New café");
         let path = f.root.join(a["sourcePath"].as_str().unwrap());
         assert_eq!(
             fs::read(&path).unwrap(),
@@ -1095,7 +1055,7 @@ mod boundary_tests {
         f.service.close().unwrap();
     }
     #[test]
-    fn phase3a_unsafe_refinement_and_stash_collision_refuse_without_writes() {
+    fn phase3a_refinement_preserves_unowned_comments_and_unknown_metadata() {
         for problem in ["split", "collision"] {
             let mut f = Fixture::new();
             let b = f.scene("B");
@@ -1153,10 +1113,29 @@ mod boundary_tests {
                 );
             }
             fs::write(&map_path, source_map_bytes(&map).unwrap()).unwrap();
-            let old_map = fs::read(&map_path).unwrap();
-            assert!(f.service.open_path(&f.root).is_err());
+            if problem == "split" {
+                let before = fs::read(&map_path).unwrap();
+                assert!(f.service.open_path(&f.root).is_err());
+                assert_eq!(fs::read(&map_path).unwrap(), before);
+                assert_eq!(fs::read(&path).unwrap(), source);
+                continue;
+            }
+            f.service.open_path(&f.root).unwrap();
             assert_eq!(fs::read(&path).unwrap(), source);
-            assert_eq!(fs::read(&map_path).unwrap(), old_map);
+            let migrated = SourceMapMetadata::read_bytes(
+                &fs::read(&map_path).unwrap(),
+                &project_metadata.project_id,
+            )
+            .unwrap();
+            for before in &map.scene_mappings[0].beats {
+                let after = migrated.scene_mappings[0]
+                    .beats
+                    .iter()
+                    .find(|b| b.id == before.id)
+                    .unwrap();
+                assert_eq!(after.extra, before.extra);
+            }
+            f.service.close().unwrap();
         }
     }
 }
@@ -1414,7 +1393,6 @@ mod body_tests {
         let last = bs["beats"].as_array().unwrap().last().unwrap();
         for fields in [
             json!({"type":"updateBeat","beatId":last["id"],"beat":{"type":"jump","sceneId":a["id"]}}),
-            json!({"type":"insertBeat","beforeBeatId":null,"beat":{"type":"choice","options":[{"text":"Recurse","destinationSceneId":a["id"]}]}}),
             json!({"type":"updateBodyBeat","beatId":last["id"],"expectedBody":{"type":"root"},"beat":{"type":"jump","sceneId":a["id"]}}),
         ] {
             assert_eq!(
@@ -1653,3 +1631,289 @@ mod panel_tests;
 #[cfg(test)]
 #[path = "logic/dialog_tests.rs"]
 mod dialog_tests;
+
+#[cfg(test)]
+mod choice_body_tests {
+    use super::tests::Fixture;
+    use serde_json::json;
+    #[test]
+    fn choice_v9_refinement_keeps_physical_ids_extras_source_and_unknown_code() {
+        use super::*;
+        use std::fs;
+        let mut f = Fixture::new();
+        let a = f.model()["scenes"][0].clone();
+        f.save(&a,&format!("label {}:\n    menu:\n        \"Outer\":\n            if mystery():\n                menu:\n                    \"Inner\":\n                        python:\n                            result = \"opaque\"\n            \"Resume\"\n    return\n",a["technicalLabel"].as_str().unwrap()));
+        f.service.close().unwrap();
+        let project =
+            ProjectMetadata::read_bytes(&fs::read(f.root.join(PROJECT_PATH)).unwrap(), None)
+                .unwrap();
+        let authoring: AuthoringMetadata =
+            serde_json::from_slice(&fs::read(f.root.join(".renpy-editor/authoring.json")).unwrap())
+                .unwrap();
+        let path = f.root.join(a["sourcePath"].as_str().unwrap());
+        let bytes = fs::read(&path).unwrap();
+        let map_path = f.root.join(SOURCE_MAP_PATH);
+        let mut map =
+            SourceMapMetadata::read_bytes(&fs::read(&map_path).unwrap(), &project.project_id)
+                .unwrap();
+        let (_, _, parsed) = parse_scene_mode(
+            &project.scenes[0],
+            &bytes,
+            Some((&project, &authoring, &[])),
+            9,
+        )
+        .unwrap();
+        let physical = map.scene_mappings[0].beats.clone();
+        map.schema_version = 9;
+        map.scene_mappings[0].beats = parsed
+            .iter()
+            .map(|p| {
+                let mut b = physical
+                    .iter()
+                    .find(|b| b.byte_start as usize == p.start)
+                    .unwrap()
+                    .clone();
+                b.kind = p.payload.kind().into();
+                b.owner = None;
+                b.conditional_branch = None;
+                // v9 recognizes only the outer Choice, headers and flat opaque option rows.
+                match &p.nesting {
+                    Some(ParsedNesting::Child { branch_start, .. }) => {
+                        let header = physical
+                            .iter()
+                            .find(|b| b.byte_start as usize == *branch_start)
+                            .unwrap();
+                        b.owner = Some(crate::metadata::BeatOwner {
+                            group_id: header.conditional_branch.as_ref().unwrap().group_id.clone(),
+                            branch_id: header.id.clone(),
+                        });
+                    }
+                    Some(ParsedNesting::Branch { .. }) => {
+                        b.conditional_branch = physical
+                            .iter()
+                            .find(|b| b.byte_start as usize == p.start)
+                            .unwrap()
+                            .conditional_branch
+                            .clone()
+                    }
+                    None => {}
+                }
+                b.extra.insert("futureRecord".into(), json!({"kept":b.id}));
+                b
+            })
+            .collect();
+        let old = map.scene_mappings[0].beats.clone();
+        map.validate(&project.project_id).unwrap();
+        fs::write(&map_path, source_map_bytes(&map).unwrap()).unwrap();
+        f.service.open_path(&f.root).unwrap();
+        let current = f.model()["scenes"][0].clone();
+        assert_eq!(fs::read(&path).unwrap(), bytes);
+        assert_eq!(
+            current["beats"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .filter(|b| b["payload"]["type"] == "choice")
+                .count(),
+            2
+        );
+        assert!(current["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|b| b["conditionalBranch"]["condition"]["status"] == "unknown"));
+        let new = SourceMapMetadata::read_bytes(&fs::read(&map_path).unwrap(), &project.project_id)
+            .unwrap();
+        for b in old {
+            let retained = new.scene_mappings[0]
+                .beats
+                .iter()
+                .find(|n| n.id == b.id)
+                .unwrap();
+            assert_eq!(retained.extra, b.extra);
+        }
+        let accepted_map = fs::read(&map_path).unwrap();
+        f.service.close().unwrap();
+        f.service.open_path(&f.root).unwrap();
+        f.service.close().unwrap();
+        assert_eq!(fs::read(&map_path).unwrap(), accepted_map);
+        assert_eq!(fs::read(&path).unwrap(), bytes);
+    }
+    #[test]
+    fn choice_known_headers_and_empty_placeholders_preserve_reference_inspection() {
+        let mut f = Fixture::new();
+        let unused = f.scene("Unused");
+        let a = f.model()["scenes"][0].clone();
+        f.save(
+            &a,
+            &format!(
+                "label {}:\n    menu:\n        \"Empty\":\n            pass\n    return\n",
+                a["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        let a = f.model()["scenes"][0].clone();
+        assert_eq!(a["partial"], false);
+        f.command(json!({"type":"deleteScene","sceneId":unused["id"],"expectedSourceRevision":unused["sourceRevision"]}));
+        assert_eq!(f.model()["scenes"].as_array().unwrap().len(), 1);
+        f.service.close().unwrap();
+    }
+    #[test]
+    fn choice_ambiguous_external_reorder_retains_source_draft_and_accepted_bytes() {
+        let mut f = Fixture::new();
+        let a = f.model()["scenes"][0].clone();
+        f.save(&a,&format!("label {}:\n    menu:\n        \"Same\":\n            \"First\"\n        \"Same\":\n            \"Second\"\n    return\n",a["technicalLabel"].as_str().unwrap()));
+        let before = std::fs::read(f.root.join(a["sourcePath"].as_str().unwrap())).unwrap();
+        let opened = crate::lifecycle::acceptance::ipc(
+            &mut f.service,
+            "source.open",
+            json!({"path":a["sourcePath"]}),
+        );
+        let text = opened["text"]
+            .as_str()
+            .unwrap()
+            .replace("First", "Temp")
+            .replace("Second", "First")
+            .replace("Temp", "Second");
+        let draft = crate::lifecycle::acceptance::ipc(
+            &mut f.service,
+            "source.updateDraft",
+            json!({"path":a["sourcePath"],"expectedBaseRevision":opened["baseRevision"],"text":text,"selectionStart":0,"selectionEnd":0}),
+        );
+        let response = crate::handle_application_request(
+            json!({"protocolVersion":1,"requestId":"ambiguous-choice","operation":"source.save","payload":{"sessionId":f.service.current().unwrap().session_id,"path":a["sourcePath"],"expectedBaseRevision":draft["baseRevision"],"expectedDraftVersion":draft["draftVersion"]}}),
+            false,
+            &mut f.service,
+        );
+        assert_eq!(serde_json::to_value(response).unwrap()["ok"], false);
+        assert_eq!(
+            std::fs::read(f.root.join(a["sourcePath"].as_str().unwrap())).unwrap(),
+            before
+        );
+        let retained = crate::lifecycle::acceptance::ipc(
+            &mut f.service,
+            "source.open",
+            json!({"path":a["sourcePath"]}),
+        );
+        assert_eq!(retained["text"], text);
+        assert_eq!(retained["dirty"], true);
+        crate::lifecycle::acceptance::ipc(
+            &mut f.service,
+            "source.discard",
+            json!({"path":a["sourcePath"]}),
+        );
+        f.service.close().unwrap();
+    }
+    #[test]
+    fn choice_insertion_before_an_identical_menu_preserves_existing_identities() {
+        let mut f = Fixture::new();
+        let a = f.model()["scenes"][0].clone();
+        f.save(
+            &a,
+            &format!(
+                "label {}:\n    menu:\n        \"Same\":\n            pass\n    return\n",
+                a["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        let a = f.model()["scenes"][0].clone();
+        let old = &a["beats"][0];
+        let old_option = old["payload"]["options"][0]["id"].clone();
+        f.command(json!({"type":"insertBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"body":{"type":"root"},"position":{"type":"before","anchor":{"type":"beat","beatId":old["id"]}},"beat":{"type":"choice","options":[{"text":"Same"}]}}));
+        let after = f.model()["scenes"][0].clone();
+        let menus = after["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|b| b["payload"]["type"] == "choice")
+            .collect::<Vec<_>>();
+        assert_eq!(menus[1]["id"], old["id"]);
+        assert_eq!(menus[1]["payload"]["options"][0]["id"], old_option);
+        assert_ne!(menus[0]["id"], old["id"]);
+        f.service.close().unwrap();
+    }
+    #[test]
+    fn choice_caption_reorder_add_preserve_bodies_ids_comments_history_and_reopen() {
+        let mut f = Fixture::new();
+        let a = f.model()["scenes"][0].clone();
+        let original=format!("label {}:\r\n    # neighbor\r\n    menu:\r\n        \"Same\": # caption\r\n            \"First\" # keep\r\n        \"Same\":\r\n            pass\r\n    \"Shared\"\r\n    return\r\n",a["technicalLabel"].as_str().unwrap());
+        f.save(&a, &original);
+        let original =
+            std::fs::read_to_string(f.root.join(a["sourcePath"].as_str().unwrap())).unwrap();
+        let a = f.model()["scenes"][0].clone();
+        let choice = a["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["payload"]["type"] == "choice")
+            .unwrap();
+        let mut options = choice["payload"]["options"].as_array().unwrap().clone();
+        let ids = options.iter().map(|o| o["id"].clone()).collect::<Vec<_>>();
+        options[0]["text"] = json!("Renamed");
+        options.swap(0, 1);
+        options.push(json!({"text":"New"}));
+        let fields = json!({"type":"updateBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"expectedBody":{"type":"root"},"beatId":choice["id"],"beat":{"type":"choice","options":options}});
+        f.command(fields.clone());
+        let updated = f.model()["scenes"][0].clone();
+        let updated_choice = updated["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["id"] == choice["id"])
+            .unwrap();
+        assert_eq!(updated_choice["payload"]["options"][0]["id"], ids[1]);
+        assert_eq!(updated_choice["payload"]["options"][1]["id"], ids[0]);
+        let expected=original.replace("        \"Same\": # caption\r\n            \"First\" # keep\r\n        \"Same\":\r\n            pass\r\n", "        \"Same\":\r\n            pass\r\n        \"Renamed\": # caption\r\n            \"First\" # keep\r\n        \"New\":\r\n            pass\r\n");
+        assert_eq!(
+            std::fs::read_to_string(f.root.join(a["sourcePath"].as_str().unwrap())).unwrap(),
+            expected
+        );
+        assert_eq!(f.reject(fields)["error"]["code"], "SOURCE_CONFLICT");
+        f.command(json!({"type":"undo"}));
+        assert_eq!(
+            std::fs::read_to_string(f.root.join(a["sourcePath"].as_str().unwrap())).unwrap(),
+            original
+        );
+        f.command(json!({"type":"redo"}));
+        f.service.close().unwrap();
+        f.service.open_path(&f.root).unwrap();
+        assert_eq!(f.model()["scenes"][0]["beats"], updated["beats"]);
+        f.service.close().unwrap();
+    }
+    #[test]
+    fn choice_empty_option_and_inline_body_share_one_continuation() {
+        let mut f = Fixture::new();
+        let a = f.model()["scenes"][0].clone();
+        f.save(&a, &format!("label {}:\n    menu:\n        \"Yes\":\n            \"Inside\"\n        \"No\":\n            pass\n    \"Shared\"\n    return\n", a["technicalLabel"].as_str().unwrap()));
+        let a = f.model()["scenes"][0].clone();
+        let beats = a["beats"].as_array().unwrap();
+        let choice = beats
+            .iter()
+            .find(|b| b["payload"]["type"] == "choice")
+            .expect("Choice with ordered option bodies");
+        let options = choice["payload"]["options"].as_array().unwrap();
+        assert_ne!(options[0]["id"], options[1]["id"]);
+        let inside = beats
+            .iter()
+            .find(|b| b["payload"]["text"] == "Inside")
+            .unwrap();
+        assert_eq!(inside["owner"]["branchId"], options[0]["id"]);
+        let placeholder = beats
+            .iter()
+            .find(|b| b["structuralPlaceholder"] == true)
+            .unwrap();
+        assert_eq!(placeholder["owner"]["branchId"], options[1]["id"]);
+        let no_body = json!({"type":"branch","groupId":placeholder["owner"]["groupId"],"branchId":options[1]["id"]});
+        f.command(json!({"type":"insertBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"body":no_body,"position":{"type":"end"},"beat":{"type":"narration","text":"No body"}}));
+        let actual =
+            std::fs::read_to_string(f.root.join(a["sourcePath"].as_str().unwrap())).unwrap();
+        assert!(actual.contains("        \"No\":\n            \"No body\"\n    \"Shared\"\n"));
+        assert_eq!(actual.matches("\"Shared\"").count(), 1);
+        f.service.close().unwrap();
+    }
+}
+
+#[cfg(test)]
+#[path = "logic/prompt_tests.rs"]
+mod prompt_tests;
+
+#[cfg(test)]
+mod availability_tests;

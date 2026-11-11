@@ -459,7 +459,7 @@ fn nested_fidelity_exports_accepted_source_assets_and_matched_plans_without_exec
         );
     }
     service.close().unwrap();
-    let accepted = json!({"outcome":"L19-nested-fidelity","publicCoreRequests":true,"sourceMapSchemaVersion":8,
+    let accepted = json!({"outcome":"L19-nested-fidelity","publicCoreRequests":true,"sourceMapSchemaVersion":crate::metadata::SOURCE_MAP_SCHEMA_VERSION,
         "exporterSourceSHA256":hex::encode(Sha256::digest(include_bytes!("nested_canvas_tests.rs"))),"files":files,"assets":assets,"cases":cases});
     // Replay the exported files into an independently generated project, just as
     // the SDK producer does. Reopening the original root cannot catch missing

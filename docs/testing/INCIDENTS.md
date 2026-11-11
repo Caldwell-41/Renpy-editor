@@ -1144,3 +1144,167 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 - **Regression:** defaults, literal assignments, formula results, conditions, inert
   samples, shared history and reopen retain the sign through public operations.
 - **Evidence:** [Terra audit and corrections](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-review.md#audited-terra-findings-and-sol-corrections-2026-11-10).
+
+## H81. Standalone SDK fixture omits the editor's default condition variable
+
+- **Class/search:** harness; Choice nested condition, `NameError`, missing `flag`.
+- **Cause/correction:** the production condition builder selected the first existing
+  project variable. The standalone SDK game declared a different fixture variable.
+  Select the declared variable through the real control before freezing the source.
+- **Regression:** the [controller journey](../../app/tests/choice-body-core.dispatch.mjs)
+  selects `choice_flag`; [offline admission](../../app/scripts/qualify-choice-body.py)
+  requires its expected typed condition before reserving an SDK invocation.
+- **Evidence:** [Choice #102](https://github.com/Caldwell-41/Renpy-editor/issues/102)
+  owns the requirement. Producing-host logs retain the failed play, successful
+  compile/lint children and cleanup separately from the corrected candidate.
+
+## H82. Font browser fixture edits before the chosen file is ready
+
+- **Class/search:** harness readiness; `project-font.browser.mjs:66`, display-name
+  `aria-invalid`, `null !== 'true'`, asynchronous native-picker reply.
+- **Cause/correction:** the fixture edits import names before file selection and
+  preview finish. The late reply supplies a default name and replaces the form,
+  so the next assertion observes a different validation state. Wait for the
+  existing enabled Import and use control before both successful name-edit paths.
+  Keep held-picker cancellation and all validation assertions unchanged.
+- **Verification:** a controlled held-picker replay reproduces the exact failure;
+  waiting for readiness before validation passes that replay and the full actual
+  browser/controller/core journey. Production code and timeouts are unchanged.
+- **Evidence:** [Choice CI correction](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/choice-98.md#ci-font-import-readiness-correction).
+
+## H83. Saved-slot Load button covers Start in an SDK fixture
+
+- **Class/search:** harness geometry; Choice lifecycle, new-process Load,
+  `Could not locate the displayable`, Start, enabled FileLoad.
+- **Cause/correction:** the fixture placed Start and Load directly in one screen
+  at the same default position. With no save, Load was insensitive. After saving,
+  enabled Load covered Start. Waiting for the screen did not change that geometry.
+  Place the two controls in a `vbox`; keep the existing input and assertions.
+- **Slot boundary:** pinned 8.5.3 `FileLoad(slot=True)` addresses the raw slot used
+  by `renpy.save`. Its disk name appends `-LT1.save`. Page-prefixed UI names and a
+  guessed `.save` filename caused separate earlier fixture failures.
+- **Verification limit:** actual Save, process exit and new-process Load passed.
+  The final allowed run retained 26 passing children and the failing initial Start
+  in the rollback/New Game child. The `vbox` correction has no SDK qualification;
+  rollback and New Game remain pending. No timeout was raised or failure waived.
+- **Evidence:** [#106](https://github.com/Caldwell-41/Renpy-editor/issues/106), the
+  producing-host handoff and the [retained driver](../../tests/fixtures/choice-101/driver.rpy).
+
+
+## H84. Browser/native probes must follow the current UI owner
+
+- **Symptoms:** Choice checks dereference a removed overlay; Character probes select
+  hidden/ambiguous Edit controls or old catalogue forms; direct reads match reviewed
+  source text before creation commits. Lazy images have no source at decode time.
+- **Correction:** migrate consumers to the scrolling Choice summary and current
+  References/Game setup route. Require explicit source review before creation,
+  observe the new enabled entry, scope fields to the modal/active owner, and target
+  the visible shell Source Save. Wait for the current visible lazy image's assigned
+  source/load. Preserve the existing cache for manual appearance selection.
+- **Verification:** the full required browser preflight passes with unchanged
+  security/refusal/history checks. Chromium/fixture proof remains distinct from
+  native packaging and human acceptance.
+- **Evidence:** [Choice preview integration](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/choice-98.md#approved-a-v2-integration-and-final-ci-reservation).
+
+## H85. Windows helper exit can precede empty job accounting
+
+- **Symptoms:** canvas shutdown reports cleanup complete and exit 0, but
+  `cooperative: false`; `wait_empty(Duration::ZERO)` sees `ActiveProcesses=1` after
+  the leader signals exit and both acknowledgments exist.
+- **Class/cause:** product process boundary. A reduced controlled-child experiment
+  reproduced this transient in 64/64 observations twice. Every job settled without
+  force. Attribution of the earlier broad-CI failure remains an inference because
+  the original unit passed on the connected Windows host.
+- **Correction:** pass the remaining three-second cooperative budget to the owned
+  process-tree finish. Keep acknowledgments, empty-job, pipe cleanup and exit 0
+  mandatory; keep bounded forced cleanup as the failure fallback.
+- **Regression:** retain one immediate-leader-exit controlled-child case at the
+  Windows `OwnedChild` boundary. Original lifecycle units retain their assertions.
+  Controlled-child proof does not qualify native SDK rendering or human input.
+- **Evidence:** [Choice CI correction](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/choice-98.md#windows-cooperative-shutdown-correction).
+
+## H86. SDK-only authoring fixture hides stale continuation expectations
+
+- **Symptoms:** Phase 1H fails its exact Radio booth source comparison after SDK
+  installation because the authored Choice retains a root Return absent from the
+  golden source. Branches browser navigation waits for a legacy edit button on an
+  option-owned route.
+- **Cause/correction:** the golden retained the old terminal-Choice representation,
+  and the manifest check ran only inside an ignored SDK gate. Share its authoring
+  sequence with an ordinary offline test, include the preserved Return in the golden,
+  and run that test in automatic PR checks. Browser navigation now selects a real
+  option-owned route and checks its current Scene and exact Source targets.
+- **Verification:** both failures reproduce and pass after the harness corrections
+  without executing an SDK. Exact source, assets, history, reopen, graph workload,
+  rendering assertions and timing policy remain intact. SDK/package acceptance is
+  still pending.
+- **Evidence:** [Second Choice campaign audit](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/choice-98.md#second-campaign-terminal-audit-and-harness-correction).
+- **Unexecuted consumer audit:** the packaged runtime edit/restore and optional
+  Branches probes retained the same old button. Their mock omitted option-header
+  ownership, so its prior pass concealed the mismatch. Carry real `guardPath` and
+  exact header locations in the fixture and follow `Open Scene` in those probes.
+  The corrected five-case runtime browser sequence passes; native execution stays
+  pending. [Continuation preparation](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/choice-98.md#continuation-audit-of-unexecuted-package-paths)
+  retains the reproduced failure and signing-prerequisite finding.
+
+## H87. UI refresh validator expects another probe's report
+
+- **Class/cause:** harness; the native UI-refresh producer completed eleven checks
+  and cleanup, but the outer validator expected route-driver stages. Synthetic
+  gate self-tests repeated that stale schema and did not consume the producer.
+- **Correction:** require the actual ordered UI-refresh checks, complete/success
+  fields and cleanup. Remove the superseded route expectation. Feed the shipped
+  producer's browser report into the same Python validator during preflight.
+- **Verification:** browser red/green and missing-check/failure controls pass.
+  All six retained Mac reports revalidate without native launches; original failed
+  wrapper results remain retained. This does not supply missing smoke acceptance.
+- **Evidence:** [Third Choice campaign](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/choice-98.md#third-campaign-results-and-offline-harness-corrections).
+
+## H88. Smoke report delivery collides with ordinary shell reads
+
+- **Class/cause:** harness; the native smoke's final report received pre-dispatch
+  RUNTIME_BUSY. Direct health/checkpoint/report calls bypass the renderer lane and
+  can contend with ordinary reads, including after restoring the requester.
+- **Correction:** use the existing bounded probe busy helper for these observations
+  and terminal delivery. Preserve other errors, the deadline, all required report
+  fields and the single final payload. The desktop handler must also leave a busy
+  report pending; treating it as rejected schedules exit before delivery can retry.
+  No application mutation is retried.
+- **Verification:** unit red/green covers busy health reads, every checkpoint and
+  report, plus failed-authoring/incomplete-trace rejection. The affected browser
+  preflight passes. An exact Rust classification red/green check covers the native
+  termination decision and preserves malformed-report rejection. Fresh packaged
+  smoke remains unqualified.
+- **Evidence:** [Third Choice campaign](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/choice-98.md#third-campaign-results-and-offline-harness-corrections).
+
+## H89. TLS server accept precedes client socket ownership
+
+- **Class/cause:** harness; the handshake cancellation test treated server accept
+  as proof that the client had published its owned socket. Controlled Windows
+  scheduling reproduced an absent observation while early shutdown, Cancelled
+  and EOF succeeded. The original CI mode/value were not captured, so attribution
+  remains provisional.
+- **Correction:** emit handshake readiness after nonempty ClientHello arrives and
+  check client ownership before cancelling. Keep successful shutdown, Cancelled,
+  EOF and the original timing bound; expose safe mode/observation diagnostics.
+  No production transport or committed scheduling hook changes.
+- **Verification:** the exact corrected unit passes on Mac. Kris dropped the
+  controlled Windows re-check at closeout; the next Windows package run executes
+  the corrected test in its core suite. Earlier unforced passes do not erase the
+  failed campaign.
+- **Evidence:** [Windows TLS diagnosis](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/choice-98.md#windows-tls-readiness-diagnosis-and-correction).
+
+## H90. Packaged smoke navigates before a dialog's save closes it
+
+- **Class/cause:** harness; after Save Character the probe waited only for the
+  request and one task, then clicked the sidebar. Natively the dialog's save also
+  crosses real desktop IPC (the shell's direct preferences write), so the Edit dialog
+  was still open and the modal-scoped click found no "Characters". Both targets
+  failed at that step. An earlier shell-readiness theory was wrong and is removed.
+- **Correction:** after each dialog submit that precedes navigation, wait up to
+  10 s for the dialog to close. Failed clicks name the active dialog and visible
+  controls; a rejected report prints its stage fields and failed observations.
+- **Verification:** a local Mac diagnostic showed `scope=Edit Alice` with only the
+  dialog's controls. The browser preflight now delays direct shell calls by 25 ms;
+  it reproduced that failure before the fix and passes after it.
+- **Evidence:** [Final Choice campaign](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/choice-98.md#closeout-review-and-final-campaign).

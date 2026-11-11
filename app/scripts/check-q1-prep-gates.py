@@ -6,7 +6,7 @@ import re
 import sys
 import tempfile
 
-from runtime_probe_cases import RUNTIME_CASES, RUNTIME_STAGES, runtime_report_ok
+from runtime_probe_cases import RUNTIME_CASES, RUNTIME_STAGES, UI_REFRESH_CHECKS, runtime_report_ok
 
 
 SUMMARY = re.compile(
@@ -201,6 +201,11 @@ def self_test():
         assert not cargo_log_ok(invalid)[0]
 
     def report(case):
+        if case == 'ui-refresh':
+            return {"evidence":"runtime-ui-packaged", "case":case,"passed":True,"cleanupComplete":True,
+                    "details":{"stage":"complete","passed":True,
+                               "layer":"packaged native WebView; real IPC; synthetic editor input",
+                               "checks":list(UI_REFRESH_CHECKS)}}
         return {"evidence":"runtime-ui-packaged", "case":case,"passed":True,"cleanupComplete":True,
                 "details":{"scenario":case,"stage":"complete","stages":[
                     {"stage":name,"runningObservedMs":9500} for name in (*RUNTIME_STAGES[case], 'complete')]}}

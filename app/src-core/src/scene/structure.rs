@@ -60,7 +60,10 @@ pub(super) enum BodyEdit {
 pub(super) fn transfer(payload: &BeatPayload) -> bool {
     matches!(
         payload,
-        BeatPayload::Call { .. } | BeatPayload::Jump { .. } | BeatPayload::Choice { .. }
+        BeatPayload::Call { .. }
+            | BeatPayload::Jump { .. }
+            | BeatPayload::RepeatChoice { .. }
+            | BeatPayload::Choice { .. }
     )
 }
 pub(super) fn edit_changes_transfers(edit: &BeatEdit) -> bool {
@@ -117,10 +120,7 @@ impl AuthoringService {
                     .flat_map(|b| match &b.payload {
                         BeatPayload::Call { scene_id, .. } => vec![(scene_id.clone(), true)],
                         BeatPayload::Jump { scene_id } => vec![(scene_id.clone(), false)],
-                        BeatPayload::Choice { options } => options
-                            .iter()
-                            .map(|o| (o.destination_scene_id.clone(), false))
-                            .collect(),
+                        BeatPayload::Choice { .. } => vec![],
                         _ => vec![],
                     })
                     .collect(),
@@ -235,7 +235,66 @@ impl AuthoringService {
                 .map(|target| (id.clone(), target.clone())),
             _ => None,
         };
-        let (proposed, forced) = apply(&source, &beats, edit, &loaded, &scene)?;
+        let mut edit = edit;
+        let mut install_target = None;
+        match &mut edit {
+            BodyEdit::Insert {
+                body,
+                payload: BeatPayload::RepeatChoice { target },
+                ..
+            }
+            | BodyEdit::Update {
+                body,
+                payload: BeatPayload::RepeatChoice { target },
+                ..
+            } => {
+                let menu = choice::owning_menu(&beats, body)?;
+                let existing = choice::target(&source, menu);
+                let selected = existing
+                    .clone()
+                    .unwrap_or_else(|| format!("_ll_choice_{}", uuid::Uuid::new_v4().simple()));
+                if target.as_ref().is_some_and(|t| t != &selected) {
+                    return Err(SceneError::InvariantBlocked);
+                }
+                let labels = self.call_label_inventory(project)?;
+                if labels.get(&selected).copied().unwrap_or(0) != usize::from(existing.is_some()) {
+                    return Err(SceneError::InvariantBlocked);
+                }
+                *target = Some(selected.clone());
+                if existing.is_none() {
+                    install_target = Some((menu, selected));
+                }
+            }
+            _ => {}
+        }
+        let (mut proposed, mut forced) = apply(&source, &beats, edit, &loaded, &scene)?;
+        if let Some((menu, target)) = install_target {
+            let start = menu.byte_start as usize;
+            let indent = indentation(
+                std::str::from_utf8(&source[start..menu.byte_end as usize])
+                    .map_err(|_| SceneError::UnsupportedSource)?,
+            );
+            let newline = if source.windows(2).any(|w| w == b"\r\n") {
+                "\r\n"
+            } else {
+                "\n"
+            };
+            let label = format!("{}label {target}:{newline}", " ".repeat(indent));
+            for (_, _, _, anchor) in &mut forced {
+                if let Some(at) = anchor {
+                    if *at >= start {
+                        *at += label.len();
+                    }
+                }
+            }
+            proposed.splice(start..start, label.bytes());
+            forced.push((
+                "choice".into(),
+                sha256(&proposed[start..menu.byte_end as usize + label.len()]),
+                menu.id.clone(),
+                Some(start),
+            ));
+        }
         logic::validate_conditional_completion(&proposed, &scene, &loaded)?;
         if transfer_edit {
             self.validate_candidate_transfers(
@@ -269,16 +328,24 @@ impl AuthoringService {
             .iter_mut()
             .find(|m| m.scene_id == scene_id)
             .ok_or(SceneError::InvalidMetadata)? = mapping;
+        let mut runtime = self.choice_scene_runtime(
+            project,
+            &scene.source_path,
+            &source,
+            &proposed,
+            &next_beats,
+        )?;
+        runtime.extend(vec![
+            replace_mutation(&scene.source_path, source, revision, proposed)?,
+            replace_mutation(
+                SOURCE_MAP_PATH,
+                loaded.source_map_bytes,
+                loaded.source_map_revision,
+                source_map_bytes(&loaded.source_map)?,
+            )?,
+        ]);
         Ok(TransactionProposal {
-            mutations: vec![
-                replace_mutation(&scene.source_path, source, revision, proposed)?,
-                replace_mutation(
-                    SOURCE_MAP_PATH,
-                    loaded.source_map_bytes,
-                    loaded.source_map_revision,
-                    source_map_bytes(&loaded.source_map)?,
-                )?,
-            ],
+            mutations: runtime,
             intent: TransactionIntent::Edit,
         })
     }
@@ -353,7 +420,9 @@ fn qualify_body<'a>(
             (b.byte_start as usize) < scene_end
                 && (b.byte_end as usize) <= scene_end
                 && b.owner == owner
-                && b.conditional_branch.as_ref().is_none_or(|g| g.ordinal == 0)
+                && b.conditional_branch
+                    .as_ref()
+                    .is_none_or(|g| g.opens_group())
                 && !trivia(b)
         })
         .collect::<Vec<_>>();
@@ -405,7 +474,10 @@ fn trivia(beat: &SceneBeat) -> bool {
     beat.conditional_branch.is_none()
         && matches!(&beat.payload, BeatPayload::CustomCode { source, .. } if source.trim().is_empty() || source.trim_start().starts_with('#'))
 }
-fn node_end(beat: &SceneBeat, beats: &[SceneBeat]) -> Result<usize, SceneError> {
+pub(super) fn node_end(beat: &SceneBeat, beats: &[SceneBeat]) -> Result<usize, SceneError> {
+    if matches!(beat.payload, BeatPayload::Choice { .. }) {
+        return choice::end(beat, beats);
+    }
     if let Some(group) = &beat.conditional_branch {
         conditional_extents(beats)
             .get(group.group_id.as_str())
@@ -416,12 +488,15 @@ fn node_end(beat: &SceneBeat, beats: &[SceneBeat]) -> Result<usize, SceneError> 
     }
 }
 fn terminal(beat: &SceneBeat, beats: &[SceneBeat]) -> bool {
+    if matches!(beat.payload, BeatPayload::Choice { .. }) {
+        return !choice::may_continue(beat, beats);
+    }
     beat.conditional_branch.as_ref().map_or_else(
         || is_terminal_payload(&beat.payload),
         |g| !logic::group_may_continue(&g.group_id, beats, 0),
     )
 }
-fn root_may_continue(source: &[u8], beats: &[SceneBeat]) -> Result<bool, SceneError> {
+pub(super) fn root_may_continue(source: &[u8], beats: &[SceneBeat]) -> Result<bool, SceneError> {
     let end = scene_body_end(source)?;
     Ok(!beats
         .iter()
@@ -429,7 +504,9 @@ fn root_may_continue(source: &[u8], beats: &[SceneBeat]) -> Result<bool, SceneEr
             (b.byte_start as usize) < end
                 && (b.byte_end as usize) <= end
                 && b.owner.is_none()
-                && b.conditional_branch.as_ref().is_none_or(|g| g.ordinal == 0)
+                && b.conditional_branch
+                    .as_ref()
+                    .is_none_or(|g| g.opens_group())
                 && !trivia(b)
         })
         .any(|b| terminal(b, beats)))
@@ -443,7 +520,7 @@ fn qualified_node<'a>(body: &Body<'a>, node: &NodeRef) -> Result<&'a SceneBeat, 
             NodeRef::Condition { group_id } => b
                 .conditional_branch
                 .as_ref()
-                .is_some_and(|g| g.group_id == *group_id && g.ordinal == 0),
+                .is_some_and(|g| g.group_id == *group_id && g.opens_group()),
         })
         .ok_or(SceneError::InvariantBlocked)
 }
@@ -552,8 +629,35 @@ fn apply(
                 uuid::Uuid::new_v4().to_string(),
                 Some(offset),
             ));
+            if matches!(payload, BeatPayload::Choice { .. }) {
+                choice::retain_insertion(
+                    source,
+                    beats,
+                    insertion,
+                    replacement_end,
+                    rendered.len(),
+                    &mut forced,
+                );
+            }
             let mut output = source.to_vec();
             output.splice(insertion..replacement_end, rendered.bytes());
+            if matches!(payload, BeatPayload::Choice { .. }) {
+                let (_, _, parsed) = parse_scene(
+                    scene,
+                    &output,
+                    Some((
+                        &loaded.project,
+                        &loaded.authoring,
+                        &loaded.source_map.owned_screens,
+                    )),
+                )?;
+                if !parsed
+                    .iter()
+                    .any(|b| b.start == offset && matches!(b.payload, BeatPayload::Choice { .. }))
+                {
+                    return Err(SceneError::InvariantBlocked);
+                }
+            }
             Ok((output, forced))
         }
         BodyEdit::Update { id, body, payload } => {
@@ -573,6 +677,27 @@ fn apply(
                 || (is_terminal_payload(&payload) && index + 1 != body.siblings.len())
             {
                 return Err(SceneError::InvariantBlocked);
+            }
+            if matches!(beat.payload, BeatPayload::Choice { .. })
+                != matches!(payload, BeatPayload::Choice { .. })
+            {
+                return Err(SceneError::InvariantBlocked);
+            }
+            if let BeatPayload::Choice {
+                options,
+                prompt,
+                picked_policy,
+            } = &payload
+            {
+                return choice::update(
+                    source,
+                    beats,
+                    beat,
+                    options,
+                    prompt.as_ref(),
+                    *picked_policy,
+                    loaded,
+                );
             }
             let original = &source[beat.byte_start as usize..beat.byte_end as usize];
             let rendered = match (&beat.payload, &payload) {
@@ -595,10 +720,6 @@ fn apply(
                         .find(|s| &s.id == scene_id)
                         .ok_or(SceneError::UnknownEntity)?;
                     logic::patch_call_target(original, &target.technical_label)?
-                }
-                (BeatPayload::Choice { options: previous }, BeatPayload::Choice { options }) => {
-                    logic::patch_menu(original, previous, options, loaded)?
-                        .unwrap_or(generated_at_indent(&payload, loaded, newline, body.indent)?)
                 }
                 (previous, next)
                     if previous.screen_target().is_some() && next.screen_target().is_some() =>
@@ -660,10 +781,12 @@ fn patch_text(original: &[u8], text: &str) -> Result<String, SceneError> {
 
 pub(super) fn mark_placeholders(beats: &mut [SceneBeat]) {
     let mut counts = HashMap::<(String, String), usize>::new();
-    for beat in beats
-        .iter()
-        .filter(|b| !trivia(b) && b.conditional_branch.as_ref().is_none_or(|g| g.ordinal == 0))
-    {
+    for beat in beats.iter().filter(|b| {
+        !trivia(b)
+            && b.conditional_branch
+                .as_ref()
+                .is_none_or(|g| g.opens_group())
+    }) {
         if let Some(owner) = &beat.owner {
             *counts
                 .entry((owner.group_id.clone(), owner.branch_id.clone()))

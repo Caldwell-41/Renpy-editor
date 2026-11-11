@@ -17,7 +17,7 @@ function click(host: ParentNode, label: string): void { const button = [...host.
 function select(host: ParentNode, label: string, value: string): HTMLSelectElement { const control = host.querySelector<HTMLSelectElement>(`select[aria-label="${label}"]`)!; assert.ok(control, label); control.value = value; control.dispatchEvent(new Event("change", { bubbles: true })); return control; }
 const call: SceneBeat = { id: "call", byteStart: 10, byteEnd: 35, protected: false, payload: { type: "call", sceneId: "two", returnLabel: "stable_return" } };
 const guard = { status: "supported" as const, expression: { type: "compare" as const, operator: "greaterEqual" as const, left: { type: "variable" as const, variableId: "trust", variableType: "int" as const }, right: { type: "int" as const, value: "5" } } };
-const choice: SceneBeat = { id: "choice", byteStart: 35, byteEnd: 65, protected: false, payload: { type: "choice", options: [{ text: "Ready", destinationSceneId: "two", condition: guard }] } };
+const choice: SceneBeat = { id: "choice", byteStart: 35, byteEnd: 65, protected: false, payload: { type: "choice", options: [{ text: "Ready", condition: guard }] } };
 const ending: SceneBeat = { id: "end", byteStart: 65, byteEnd: 75, protected: false, payload: { type: "return" } };
 
 test("Call edit keeps label and captured envelopes; stale refusal keeps fields and disabled controls", async () => {
@@ -73,12 +73,12 @@ test("root Call insertion is explicit before Return and generates no renderer-ow
   assert.deepEqual(writes[0], { type: "insertBodyBeat", sceneId: "one", expectedSourceRevision: "source-open", body: { type: "root" }, position: { type: "before", anchor: { type: "beat", beatId: "end" } }, beat: { type: "call", sceneId: "two", returnLabel: null } }); await s.close();
 });
 
-test("guard-only Choice edit preserves raw captions and guarded option-count controls stay constrained", async () => {
-  const raw: SceneBeat = { ...choice, payload: { type: "choice", options: [{ text: "  Ready café 雪  ", destinationSceneId: "two", condition: guard }, { text: " Neighbor ", destinationSceneId: "two", condition: guard }] } };
+test("guard-only Choice edit preserves raw captions and permits explicit option creation", async () => {
+  const raw: SceneBeat = { ...choice, payload: { type: "choice", options: [{ text: "  Ready café 雪  ", condition: guard }, { text: " Neighbor ", condition: guard }] } };
   let saved: SceneCommand | undefined;
   const s = setup([raw, ending], async command => { saved = command; throw Error("Hold input"); });
   s.host.querySelector<HTMLButtonElement>('[data-beat-id="choice"] .beat-select')!.click();
-  for (const label of ["Add option", "Remove", "Create New Scene"]) assert.ok([...s.host.querySelectorAll<HTMLButtonElement>("button")].filter(button => button.textContent === label).every(button => button.disabled));
+  assert.equal([...s.host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === "Add option")!.disabled, false);
   const value = s.host.querySelector<HTMLInputElement>('input[aria-label="Condition value"]')!; value.value = "6"; value.dispatchEvent(new Event("input", { bubbles: true })); click(s.host, "Commit Beat"); await tick();
   assert.deepEqual((saved!.beat as {options:{text:string}[]}).options.map(option => option.text), ["  Ready café 雪  ", " Neighbor "]); await s.close();
 });
@@ -93,7 +93,78 @@ test("unchanged pending commit blocks another draft and late disposed refusal ca
 
  test("decimal numeric conditions retain thresholds and allow ordering without coercing integer text",async()=>{
  const writes:SceneCommand[]=[];
- const decimalChoice:SceneBeat={...choice,payload:{type:"choice",options:[{text:"Ready",destinationSceneId:"two",condition:{status:"supported",expression:{type:"compare",operator:"greaterEqual",left:{type:"variable",variableId:"money",variableType:"decimal"},right:{type:"decimal",value:"1.25"}}}}]}};
+ const decimalChoice:SceneBeat={...choice,payload:{type:"choice",options:[{text:"Ready",condition:{status:"supported",expression:{type:"compare",operator:"greaterEqual",left:{type:"variable",variableId:"money",variableType:"decimal"},right:{type:"decimal",value:"1.25"}}}}]}};
  const s=setup([decimalChoice,ending],async command=>{writes.push(command);throw Error("Keep draft");});
  try{s.host.querySelector<HTMLButtonElement>('[data-beat-id="choice"] .beat-select')!.click();const value=s.host.querySelector<HTMLInputElement>('[aria-label="Condition value"]')!;assert.equal(value.value,"1.25");value.value="2.75";value.dispatchEvent(new Event("input",{bubbles:true}));click(s.host,"Commit Beat");await tick();assert.equal(writes.length,1);assert.equal(value.value,"2.75");}finally{await s.close();}
  });
+
+test("Choice preview keeps duplicate rows, unknown state and policy outside its live Game stage", async () => {
+  const writes: SceneCommand[] = [];
+  const selected: SceneBeat = { ...choice, payload: { type: "choice", prompt: { type: "narration", text: "Choose independently" }, pickedPolicy: "hidePicked", options: [{ id: "first", text: "Same" }, { id: "second", text: "Same" }, { id: "locked", text: "Locked", condition: guard, unavailablePolicy: "showDisabled" }] } };
+  const s = setup([selected, ending], async command => { writes.push(command); return s.model; });
+  try {
+    const summary = s.host.querySelector<HTMLElement>('[aria-label="Choice prompt and options. Scroll to read more."]');
+    assert.ok(summary, "Choice text has a separate keyboard-scrollable summary");
+    assert.equal(summary.tabIndex, 0);
+    assert.equal(s.host.querySelector('.preview-canvas')!.contains(summary), false);
+    assert.equal(summary.querySelector('.preview-choice-prompt')!.textContent, "NarrationChoose independently");
+    assert.deepEqual([...summary.querySelectorAll('.preview-choice-caption')].map(row => row.textContent), ["Same", "Same", "Locked"]);
+    assert.deepEqual([...summary.querySelectorAll('.preview-choice-number')].map(row => row.textContent), ["1", "2", "3"]);
+    assert.equal(summary.querySelectorAll('.preview-choice-condition').length, 1);
+    assert.equal(summary.querySelector('.preview-choice-condition')!.getAttribute('aria-label'), "Condition unknown. If false: Show disabled.");
+    assert.match(summary.textContent!, /Picked state unknownHide picked/);
+    assert.equal(summary.querySelectorAll('button,input,select').length, 0);
+    summary.focus(); summary.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true }));
+    assert.equal(writes.length, 0);
+  } finally { await s.close(); }
+});
+
+test("Choice prompt controls retain invalid and refused drafts and preview prompt with options", async () => {
+  const writes: SceneCommand[] = [];
+  const s = setup([choice, ending], async command => { writes.push(command); throw Error("Source changed. Input retained."); });
+  s.host.querySelector<HTMLButtonElement>('[data-beat-id="choice"] .beat-select')!.click();
+  click(s.host, "+ Prompt");
+  const text = s.host.querySelector<HTMLInputElement>('[aria-label="Prompt text"]')!;
+  assert.ok(text); assert.equal(document.activeElement, text);
+  click(s.host, "Commit Beat"); await tick(); assert.equal(writes.length, 0); assert.equal(text.getAttribute("aria-invalid"), "true");
+  text.value = "Which route?"; text.dispatchEvent(new Event("input", { bubbles: true })); text.dispatchEvent(new Event("blur"));
+  click(s.host, "Commit Beat"); await tick(); assert.equal(writes.length, 1);
+  assert.deepEqual(writes[0]!.beat, { ...choice.payload, prompt: { type: "narration", text: "Which route?" } });
+  assert.ok(text.isConnected); assert.equal(text.value, "Which route?");
+  click(s.host, "Cancel"); assert.equal(hasSceneDraft(s.host), false);
+  await s.close();
+});
+
+test("illustrative option selection shows a nested prompt with its options without evaluating availability", async () => {
+  const { deriveScenePreview } = await import("../src/scene-ui.js");
+  const outer: SceneBeat = { ...choice, payload: { type: "choice", prompt: { type: "narration", text: "Outer prompt" }, options: [{ id: "arm", text: "Enter" }] } };
+  const arm: SceneBeat = { id: "arm", byteStart: 65, byteEnd: 75, protected: true, conditionalBranch: { choiceOption: true, groupId: "options", ordinal: 0, otherwise: false }, payload: { type: "customCode", source: '"Enter":', reason: "Option" } };
+  const nested: SceneBeat = { id: "inner", byteStart: 75, byteEnd: 95, protected: false, owner: { groupId: "options", branchId: "arm" }, payload: { type: "choice", prompt: { type: "dialogue", characterId: "speaker", text: "Inner prompt" }, options: [{ text: "Unknown answer", condition: guard }] } };
+  const s = setup([outer, arm, nested, ending], async () => s.model);
+  const state = deriveScenePreview(s.model.scenes[0]!, undefined, new Map([["options", "arm"]]));
+  assert.equal(state.overlay?.beatId, "inner");
+  assert.deepEqual(state.overlay?.choice?.prompt, { type: "dialogue", characterId: "speaker", text: "Inner prompt" });
+  assert.equal(state.overlay?.choice?.options[0]?.text, "Unknown answer");
+  assert.deepEqual(state.overlay?.choice?.options[0]?.condition, guard);
+  assert.deepEqual(state.variables, {});
+  await s.close();
+});
+
+test("Choice unavailable policy is per option and retained after refusal without guessing live values", async () => {
+  const writes: SceneCommand[] = [];
+  const s = setup([choice, ending], async command => { writes.push(command); throw Error("Source changed"); });
+  s.host.querySelector<HTMLButtonElement>('[data-beat-id="choice"] .beat-select')!.click();
+  const row = s.host.querySelector<HTMLElement>('.choice-option')!;
+  const policy = row.querySelector<HTMLSelectElement>('[aria-label="If false"]');
+  assert.ok(policy, "approved Hide / Show disabled control");
+  assert.equal(policy.value, "hide");
+  policy.value = "showDisabled"; policy.dispatchEvent(new Event("change", { bubbles: true }));
+  click(s.host, "Commit Beat"); await tick();
+  const beat = writes[0]!.beat as { options: { unavailablePolicy?: string }[] };
+  assert.equal(beat.options[0]!.unavailablePolicy, "showDisabled");
+
+  assert.equal(policy.value, "showDisabled"); assert.ok(policy.isConnected);
+  assert.match(s.host.querySelector('.preview-choice-summary')!.textContent!, /Condition unknown/);
+  assert.equal(s.host.querySelectorAll('.preview-choice-summary button').length, 0);
+  await s.close();
+});

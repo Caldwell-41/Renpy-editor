@@ -1,0 +1,82 @@
+{
+  "revision": "dock-v2",
+  "captureTool": "T3 managed preview snapshot",
+  "captures": [
+    {
+      "path": "docs/design/choice-preview-correction/captures/v2/dock-v2-duplicate-dark-1100x720-top.png",
+      "sha256": "4c535f936af68863fab40e8816369e4ab52edd078e28b10e5ff3cd5693eb9721",
+      "state": "duplicate",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 2,
+      "scroll": "top",
+      "rasterWidth": 2200,
+      "rasterHeight": 1440
+    },
+    {
+      "path": "docs/design/choice-preview-correction/captures/v2/dock-v2-duplicate-dark-720x850-top.png",
+      "sha256": "c54bb27c39c45948eef5362fcee8488b9c7dea3f6be5087057ed29d3b23f6326",
+      "state": "duplicate",
+      "theme": "dark",
+      "width": 720,
+      "height": 850,
+      "scale": 2,
+      "scroll": "top",
+      "rasterWidth": 1440,
+      "rasterHeight": 1700
+    },
+    {
+      "path": "docs/design/choice-preview-correction/captures/v2/dock-v2-character-dark-720x850-top.png",
+      "sha256": "05d1de1ac5eecc27f44fb5da6f3f51c354bcdc6f942d2b5131be0c75d79b47c2",
+      "state": "character",
+      "theme": "dark",
+      "width": 720,
+      "height": 850,
+      "scale": 2,
+      "scroll": "top",
+      "rasterWidth": 1440,
+      "rasterHeight": 1700
+    },
+    {
+      "path": "docs/design/choice-preview-correction/captures/v2/dock-v2-none-dark-720x850-top.png",
+      "sha256": "61e896b89c159e56de662a48b2c51673a29d0dfd5d1aa33bfa6c8341616302b4",
+      "state": "none",
+      "theme": "dark",
+      "width": 720,
+      "height": 850,
+      "scale": 2,
+      "scroll": "top",
+      "rasterWidth": 1440,
+      "rasterHeight": 1700
+    },
+    {
+      "path": "docs/design/choice-preview-correction/captures/v2/dock-v2-long-dark-720x850-top.png",
+      "sha256": "a08382b7017e1ae40b0a43a335b6291f6ce8373bf200b3682dade987fbebb51f",
+      "state": "long",
+      "theme": "dark",
+      "width": 720,
+      "height": 850,
+      "scale": 2,
+      "scroll": "top",
+      "rasterWidth": 1440,
+      "rasterHeight": 1700
+    },
+    {
+      "path": "docs/design/choice-preview-correction/captures/v2/dock-v2-long-dark-720x850-bottom.png",
+      "sha256": "f898a49c702d495addaae85fff1f615756c665d7fc2bc0a3f4fb41792dfc6e2f",
+      "state": "long",
+      "theme": "dark",
+      "width": 720,
+      "height": 850,
+      "scale": 2,
+      "scroll": "bottom",
+      "rasterWidth": 1440,
+      "rasterHeight": 1700
+    }
+  ],
+  "source": {
+    "commit": "7ba6eea4da1f12434f8260bdc6400a00bf04a964",
+    "fingerprint": "9d62ff5224e47e8a505fe9467366b40fca66cf7a9c57a9b1bdfad59f18e99c54"
+  }
+}

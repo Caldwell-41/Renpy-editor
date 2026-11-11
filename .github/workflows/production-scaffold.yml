@@ -3,6 +3,11 @@ name: Phase 1 production gates
 on:
   workflow_dispatch:
     inputs:
+      windows_only:
+        description: Qualify Windows only when macOS qualification runs on a signed local host
+        required: false
+        type: boolean
+        default: false
       upload_packages:
         description: Upload packaged applications after all production gates pass
         required: false
@@ -61,11 +66,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: Windows x64
-            runner: windows-2025
-          - name: macOS ARM64
-            runner: macos-26
+        include: ${{ fromJSON(inputs.windows_only && '[{"name":"Windows x64","runner":"windows-2025"}]' || '[{"name":"Windows x64","runner":"windows-2025"},{"name":"macOS ARM64","runner":"macos-26"}]') }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     env:

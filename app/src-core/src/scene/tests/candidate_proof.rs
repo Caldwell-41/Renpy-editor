@@ -133,7 +133,12 @@ fn g1_o1_feasibility() {
     assert_eq!(cold.revision, warm.revision);
     let workspace = f.workspace();
     let origin = &workspace.scenes[0];
-    let BeatPayload::Choice { mut options } = origin.beats[0].payload.clone() else {
+    let BeatPayload::Choice {
+        mut options,
+        prompt,
+        picked_policy,
+    } = origin.beats[0].payload.clone()
+    else {
         panic!("choice fixture")
     };
     options[0].text = "Route A".into();
@@ -147,7 +152,11 @@ fn g1_o1_feasibility() {
             scene_id: origin.id.clone(),
             expected_source_revision: origin.source_revision.clone(),
             beat_id: origin.beats[0].id.clone(),
-            beat: BeatPayload::Choice { options },
+            beat: BeatPayload::Choice {
+                options,
+                prompt,
+                picked_policy,
+            },
         },
     )
     .unwrap();

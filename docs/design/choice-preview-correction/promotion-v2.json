@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "revision": "dock-v2",
+  "source": {
+    "commit": "7ba6eea4da1f12434f8260bdc6400a00bf04a964",
+    "fingerprint": "9d62ff5224e47e8a505fe9467366b40fca66cf7a9c57a9b1bdfad59f18e99c54"
+  },
+  "approvalDate": "2026-11-11",
+  "checks": [
+    "Typed approval record and current pointer",
+    "Prior draft entries unchanged",
+    "Committed and working source fingerprints match reviewed source",
+    "Six retained capture hashes and PNG dimensions",
+    "Five distinct typed approval capture conditions",
+    "Eight focused source-matched browser samples retained",
+    "Approved export changes review status label only",
+    "All changed tracked paths stay within assigned draft/design ownership"
+  ],
+  "galleryRunner": "Not applicable to standalone entry outside the shared registry. Existing parser/fingerprint utilities and retained focused browser proof used instead.",
+  "productionImplemented": false,
+  "sdkStarts": 0
+}

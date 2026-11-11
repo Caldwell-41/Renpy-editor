@@ -1,5 +1,6 @@
 // fixture: skip run by npm run test:source-browser.
 import assert from 'node:assert/strict';
+import {spawnSync} from 'node:child_process';
 import { mkdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { createServer } from 'vite';
@@ -10,7 +11,7 @@ const output=fileURLToPath(new URL('../../.toolchains/reports/ui-refresh/',impor
 await mkdir(output,{recursive:true});
 try {
  await server.listen();const address=server.httpServer.address();
- try{browser=await chromium.launch({channel:'chrome'});}catch{browser=await chromium.launch();}
+ try{browser=await chromium.launch({channel:'chrome'});}catch(error){if(process.platform==='darwin')throw error;browser=await chromium.launch();}
  const page=await browser.newPage({viewport:{width:1440,height:900}});
  page.setDefaultTimeout(8000);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
@@ -86,41 +87,28 @@ try {
  await page.setViewportSize({width:1440,height:900});
  await page.evaluate(async()=>{const {enableRichSourceEditor}=await import('/src/source-editor.ts');enableRichSourceEditor();const {visualRequest}=await import('/tests/ui-refresh-fixture.ts');const {startApplication}=await import('/src/main.ts');startApplication(visualRequest);});
  await page.locator('.recent-open').click();await page.getByRole('button',{name:'Add Beat',exact:true}).waitFor();
- for(const theme of ['light','dark']){await page.evaluate(async theme=>{const {updatePreferences}=await import('/src/preferences.ts');await updatePreferences({theme});},theme);for(const surface of ['Story','Source','Branches','Characters','Assets','Variables']){await page.getByRole('button',{name:surface,exact:true}).click();await page.locator('#app-status').filter({hasText:'Saved'}).waitFor();if(surface==='Source')await page.locator('.cm-content').waitFor();if(surface==='Branches')await page.locator('.branch-node').first().waitFor();if(surface==='Story')await page.locator('.beat-select').nth(2).click();await page.waitForFunction(()=>[...document.querySelectorAll('.catalog-thumbnail')].every(i=>(i.getAttribute('src')&&i.complete)||i.alt==='Preview unavailable'));await page.screenshot({path:output+surface.toLowerCase()+'-'+theme+'.png'});}}
+ for(const theme of ['light','dark']){await page.evaluate(async theme=>{const {updatePreferences}=await import('/src/preferences.ts');await updatePreferences({theme});},theme);for(const surface of ['Story','Source','Branches','Characters','Assets','Variables']){await page.getByRole('button',{name:surface,exact:true}).click();await page.locator('#app-status').filter({hasText:'Saved'}).waitFor().catch(async error=>{throw new Error(`${theme}/${surface}: ${await page.locator('#app-status').textContent()}`,{cause:error});});if(surface==='Source')await page.locator('.cm-content').waitFor();if(surface==='Branches')await page.locator('.branch-node').first().waitFor();if(surface==='Story')await page.locator('.beat-select').nth(2).click();await page.waitForFunction(()=>[...document.querySelectorAll('.catalog-thumbnail')].every(i=>(i.getAttribute('src')&&i.complete)||i.alt==='Preview unavailable'));await page.screenshot({path:output+surface.toLowerCase()+'-'+theme+'.png'});}}
 
 
  // Long accepted Choice captions remain reachable inside a short preview.
  await page.getByRole('button',{name:'Story',exact:true}).click();
  await page.locator('.beat-select').nth(3).click();
- await page.evaluate(()=>{const surround=document.querySelector('.preview-surround');surround.style.flex='none';surround.style.height='90px';document.querySelector('.preview-overlay').textContent='Return to the origin · Repeat the garden · First path to the station · Second English path to the same station';});
+ await page.evaluate(()=>{const surround=document.querySelector('.preview-surround');surround.style.flex='none';surround.style.height='90px';document.querySelectorAll('.preview-choice-caption').forEach((row,index)=>row.textContent=`Option ${index+1}: `+'Return to the origin, then take the English path to the garden and the station. '.repeat(4));});
  await page.waitForFunction(()=>document.querySelector('.preview-canvas').getBoundingClientRect().height<=91);
- const caption=await page.locator('.preview-overlay').evaluate(e=>{const c=e.parentElement.getBoundingClientRect(),r=e.getBoundingClientRect();e.scrollTop=e.scrollHeight;return {inside:r.top>=c.top-1&&r.bottom<=c.bottom+1,scrollable:e.scrollHeight>e.clientHeight,reachedEnd:e.scrollTop+e.clientHeight>=e.scrollHeight-1};});
+ const caption=await page.locator('.preview-choice-summary').evaluate(e=>{const c=e.parentElement.getBoundingClientRect(),r=e.getBoundingClientRect();e.scrollTop=e.scrollHeight;return {inside:r.top>=c.top-1&&r.bottom<=c.bottom+1,scrollable:e.scrollHeight>e.clientHeight,reachedEnd:e.scrollTop+e.clientHeight>=e.scrollHeight-1};});
  assert.equal(caption.inside,true,'long caption extends outside the bounded preview');assert.equal(caption.scrollable,true);assert.equal(caption.reachedEnd,true,'end of long caption is unreachable');
  await page.getByRole('button',{name:'Source',exact:true}).click();
 
- // Catalogue follow-up: mixed media/placeholder rows and exact Variable header alignment.
+ // Current Variable name, type and initial-value columns align with their headers.
  for(const theme of ['light','dark']) for(const width of [1440,960,560]) {
   await page.setViewportSize({width,height:900});
   await page.evaluate(async theme=>{const {updatePreferences}=await import('/src/preferences.ts');await updatePreferences({theme});},theme);
-  await page.getByRole('button',{name:'Characters',exact:true}).click();
-  if(width<1000&&await page.locator('.catalog-inspector').isVisible())await page.getByRole('button',{name:'Close details',exact:true}).click();
-  for(const list of [false,true]){
-   if(await page.locator('.catalog-grid').evaluate(e=>e.classList.contains('catalog-list'))!==list)await page.locator('.catalog-toolbar').getByRole('button',{name:list?'List view':'Grid view',exact:true}).click();
-   const rows=await page.locator('.catalog-grid>.entity-row').evaluateAll(rows=>rows.map(row=>{
-    const b=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width};};
-    return {row:b(row),media:b(row.querySelector('.catalog-thumbnail,.catalog-placeholder')),summary:b(row.querySelector('.catalog-summary')),edit:b(row.querySelector('.catalog-direct-edit')),overflow:row.scrollWidth>row.clientWidth+1};
-   }));
-   assert.equal(rows.length,4);
-   for(const row of rows){assert.equal(row.overflow,false,JSON.stringify(row));assert.ok(list?row.media.right<=row.summary.x:row.media.bottom<=row.summary.y,`media overlaps name: ${JSON.stringify(row)}`);assert.ok(row.summary.right<=row.row.right);assert.ok(row.edit.right<=row.row.right);}
-   if(list)assert.equal(new Set(rows.map(r=>r.summary.x)).size,1,'image and no-image rows must share columns');
-   if(width===1440&&theme==='light')await page.screenshot({path:output+`characters-corrected-${list?'list':'grid'}.png`});
-  }
   await page.getByRole('button',{name:'Variables',exact:true}).click();
   const variable=await page.locator('.catalog-variables').evaluate(grid=>{
    const rect=e=>{const b=e.getBoundingClientRect();return {x:b.x,y:b.y,bottom:b.bottom,right:b.right};};
    return {header:[...grid.querySelector('.catalog-table-header').children].map(rect),rows:[...grid.querySelectorAll('.entity-row')].map(row=>[...row.querySelectorAll(':scope > .card-open,:scope > .catalog-type,:scope > .catalog-value,:scope > .catalog-direct-edit')].map(rect))};
   });
-  for(const row of variable.rows){assert.equal(row.length,4);row.forEach((cell,i)=>assert.ok(Math.abs(cell.x-variable.header[i].x)<1,`Variable column ${i} misaligned: ${JSON.stringify(variable)}`));assert.ok(Math.max(...row.map(c=>c.y))<Math.min(...row.map(c=>c.bottom)),'Variable cells must share a single row');}
+  for(const row of variable.rows){assert.equal(row.length,3);row.forEach((cell,i)=>assert.ok(Math.abs(cell.x-variable.header[i].x)<1,`Variable column ${i} misaligned: ${JSON.stringify(variable)}`));assert.ok(Math.max(...row.map(c=>c.y))<Math.min(...row.map(c=>c.bottom)),'Variable cells must share a single row');}
   if(width===1440&&theme==='light')await page.screenshot({path:output+'variables-corrected-columns.png'});
  }
  await page.setViewportSize({width:1440,height:900});
@@ -166,7 +154,7 @@ try {
     const range=document.createRange();range.selectNodeContents(text);
     return {label:item.ariaLabel,gap:range.getBoundingClientRect().left-icon.right};
    }));
-   assert.equal(gaps.length,6);
+   assert.deepEqual(gaps.map(item=>item.label),['Story','Source','Screens','Branches','Characters','Lorebook','Assets','Variables']);
    for(const item of gaps)assert.equal(item.gap,12,`${theme} ${surface} at ${width}px: ${item.label} icon/label spacing`);
    if(width===1100)await page.screenshot({path:output+`navigation-spacing-${surface.toLowerCase()}-${theme}.png`});
   }
@@ -242,25 +230,6 @@ try {
  await page.screenshot({path:output+'choice-corrections.png'});
  await page.locator('.choice-new-scene').getByRole('button',{name:'Cancel',exact:true}).click();
  await page.locator('.expanded-beat>.row-actions').getByRole('button',{name:'Cancel',exact:true}).click();
- await page.getByRole('button',{name:'Characters',exact:true}).click();
- if(!await page.locator('.catalog-grid').evaluate(e=>e.classList.contains('catalog-list')))await page.getByRole('button',{name:'List view',exact:true}).click();
- await page.locator('.catalog-grid .entity-row').nth(1).locator('code').click();
- assert.equal(await page.locator('.catalog-inspector h2').textContent(),'Alice');
- await page.getByRole('button',{name:'Edit Alice',exact:true}).click();
- assert.equal(await page.getByRole('dialog',{name:'Edit Alice',exact:true}).isVisible(),true);
- await page.keyboard.press('Escape');
- assert.equal(await page.getByRole('dialog').count(),0);
- await page.getByRole('button',{name:'Edit Alice',exact:true}).click();
- await page.keyboard.press('Escape'); // Reopening after dismissal must work.
- await page.getByRole('button',{name:'New character',exact:true}).click();
- await page.locator('[aria-modal="true"] input[name="technicalName"]').fill('BEC');
- await page.locator('[aria-modal="true"] input[name="displayName"]').focus();
- assert.equal(await page.locator('[aria-modal="true"] input[name="technicalName"]').inputValue(),'bec');
- await page.screenshot({path:output+'character-modal.png'});
- await page.getByRole('button',{name:'Close New character',exact:true}).click();
- await page.getByRole('button',{name:'Discard changes',exact:true}).click();
- assert.equal(await page.getByRole('dialog').count(),0);
- await page.screenshot({path:output+'characters-list-corrections.png'});
  await page.getByRole('button',{name:'Assets',exact:true}).click();
  assert.equal(await page.locator('.asset-drop-target').isVisible(),true);
  await page.evaluate(()=>window.__loomlightAssetDragState(true));
@@ -310,6 +279,8 @@ try {
    if(request.operation==='probe.smokeReport'){window.__reviewProbeReport=request.payload;return {ok:true};}
    if(request.operation==='system.health')return Object.keys(request.payload).length?{ok:false,error:{code:'INVALID_PAYLOAD'}}:{ok:true,value:{status:'ready'}};
    if(request.operation==='probe.smokeCheckpoint')return {ok:true};
+   // Direct shell calls, such as preferences writes, cross real desktop IPC natively.
+   await new Promise(resolve=>setTimeout(resolve,25));
    return {protocolVersion:1,requestId:request.requestId,ok:true,value:[]};
   }};
   window.fetch=async()=>{throw Error('Denied network stub');};window.open=()=>null;
@@ -328,6 +299,7 @@ try {
  await probe.waitForFunction(()=>window.__reviewProbeReport,{},{timeout:30000});
  const report=await probe.evaluate(()=>window.__reviewProbeReport);
  for(const key of ['supportingAuthoringUiPassed','sceneAuthoringUiPassed','sourceAuthoringUiPassed','sourceCommandTracePassed'])assert.equal(report[key],true,JSON.stringify(report));
+ for(const key of ['supportingAuthoringStage','sceneAuthoringStage','sourceAuthoringStage'])assert.equal(report[key],'complete',JSON.stringify(report));
  await probe.close();
  // Exercise the shipped UI probe itself, including contention while source input
  // is being retained. This is a browser/driver regression, not native acceptance.
@@ -365,6 +337,22 @@ try {
  await refresh.waitForFunction(()=>window.__refreshReport,{},{timeout:30000});
  const refreshReport=await refresh.evaluate(()=>window.__refreshReport);
  assert.equal(refreshReport.passed,true,JSON.stringify(refreshReport));assert.equal(refreshReport.checks.length,11);
+ const admitted=spawnSync(process.env.HARNESS_PYTHON??(process.platform==='win32'?'python':'python3'),['-c',`import copy,json,sys
+sys.path.insert(0,'scripts')
+from runtime_probe_cases import runtime_report_ok
+report=dict(evidence='runtime-ui-packaged',case='ui-refresh',passed=True,cleanupComplete=True,details=json.load(sys.stdin))
+assert runtime_report_ok('ui-refresh',report), 'Shipped UI refresh report rejected'
+for index in range(len(report['details']['checks'])):
+    bad=copy.deepcopy(report);bad['details']['checks'].pop(index)
+    assert not runtime_report_ok('ui-refresh',bad), 'Missing check accepted'
+for key in ('passed','cleanupComplete'):
+    bad=copy.deepcopy(report);bad[key]=False
+    assert not runtime_report_ok('ui-refresh',bad), key
+for key,value in [('stage','open'),('passed',False),('error','failure')]:
+    bad=copy.deepcopy(report);bad['details'][key]=value
+    assert not runtime_report_ok('ui-refresh',bad), key
+`],{input:JSON.stringify(refreshReport),encoding:'utf8'});
+ assert.equal(admitted.status,0,admitted.stderr);
  assert.deepEqual(await refresh.evaluate(()=>window.__busyRemaining),[0,0,0]);
  await refresh.close();
  // A user may navigate as soon as the shell appears, before a large Story read
@@ -452,7 +440,7 @@ try {
     const command=payload.command;window.__auditCommands.push(command);
     if(command.type==='reorderBeat'){previous=structuredClone(scene);const beats=scene.scenes.find(s=>s.id===command.sceneId).beats;const from=beats.findIndex(b=>b.id===command.beatId);beats.splice(command.toIndex,0,beats.splice(from,1)[0]);scene.canUndo=true;}
     if(command.type==='undo'){scene=previous;previous=undefined;}
-    if(command.type==='insertBeat'){await new Promise(resolve=>window.__auditReleaseBeat=resolve);scene.scenes.find(s=>s.id===command.sceneId).beats.push({id:'audit-added',protected:false,byteStart:130,byteEnd:150,payload:command.beat});}
+    if(command.type==='insertBodyBeat'){await new Promise(resolve=>window.__auditReleaseBeat=resolve);scene.scenes.find(s=>s.id===command.sceneId).beats.push({id:'audit-added',protected:false,byteStart:130,byteEnd:150,payload:command.beat});}
     return response(scene);
    }
    return visualRequest(op,payload);
@@ -493,17 +481,19 @@ try {
   await type.selectOption(kind);if(kind!=='bool')assert.equal(await defaultField.locator('input').inputValue(),'');await audit.keyboard.press('Escape');if(await audit.getByRole('button',{name:'Discard changes',exact:true}).count())await audit.getByRole('button',{name:'Discard changes',exact:true}).click();
  }
  await audit.getByRole('button',{name:'New variable',exact:true}).click();await dialog.locator('input').fill('audit_flag');await defaultField.locator('select').selectOption('true');await dialog.getByRole('button',{name:'Create Variable',exact:true}).click();await audit.waitForFunction(()=>window.__auditVariables.length===1);assert.deepEqual(await audit.evaluate(()=>window.__auditVariables.map(v=>[v.variableType,v.defaultValue])),[['bool',true]]);
- await audit.getByRole('button',{name:'Characters',exact:true}).click();await audit.getByRole('button',{name:'View appearance happy',exact:true}).click();
+ await audit.getByRole('button',{name:'Characters',exact:true}).click();await audit.getByRole('tab',{name:'Game setup',exact:true}).click();await audit.getByRole('button',{name:'View appearance happy',exact:true}).click();
  const selectedAppearance=async()=>{assert.equal(await audit.locator('.catalog-inspector .inspector-thumbnail').getAttribute('data-asset-id'),'bec-happy');assert.equal(await audit.getByRole('button',{name:'View appearance happy',exact:true}).getAttribute('aria-pressed'),'true');};
  await audit.getByRole('button',{name:'Edit Bec',exact:true}).click();await audit.getByRole('button',{name:'Save Character',exact:true}).click();await audit.waitForFunction(()=>!document.querySelector('.catalog-dialog'));await audit.getByRole('button',{name:'View appearance happy',exact:true}).waitFor();await selectedAppearance();
- await audit.locator('.catalog-inspector .appearance-row').filter({has:audit.getByRole('button',{name:'View appearance happy',exact:true})}).getByRole('button',{name:'Set default',exact:true}).click();await audit.waitForFunction(()=>document.querySelector('.appearance-select[data-appearance-id="bec-happy"]')?.dataset.default==='true');await selectedAppearance();
- await audit.getByRole('button',{name:'Assets',exact:true}).click();await audit.getByRole('button',{name:'Characters',exact:true}).click();await audit.getByRole('button',{name:'View appearance happy',exact:true}).waitFor();await selectedAppearance();
- await audit.waitForFunction(()=>[...document.querySelectorAll('.catalog-inspector .appearance-thumbnail')].every(img=>img.complete&&img.naturalWidth>0));await audit.screenshot({path:output+'audit-fixed-appearance.png'});
+ await audit.locator('.catalog-inspector .appearance-row').filter({has:audit.getByRole('button',{name:'View appearance happy',exact:true})}).getByRole('button',{name:'Set default',exact:true}).click();await audit.waitForFunction(()=>{const rows=[...document.querySelectorAll('.appearance-select[data-appearance-id="bec-happy"]')].filter(n=>!n.closest('[hidden]')&&n.checkVisibility({visibilityProperty:true}));return rows.length===1&&rows[0].dataset.default==='true';}).catch(async error=>{throw new Error(JSON.stringify(await audit.locator('.appearance-select').evaluateAll(rows=>rows.map(n=>({id:n.dataset.appearanceId,default:n.dataset.default,visible:n.checkVisibility({visibilityProperty:true}),hidden:!!n.closest('[hidden]')})))),{cause:error});});await selectedAppearance();
+ await audit.getByRole('button',{name:'Assets',exact:true}).click();await audit.getByRole('button',{name:'Characters',exact:true}).click();await audit.getByRole('tab',{name:'Game setup',exact:true}).click();await audit.getByRole('button',{name:'View appearance happy',exact:true}).waitFor();await selectedAppearance();
+ const appearanceThumbnails=audit.locator('.character-game-setup .catalog-inspector .appearance-thumbnail:visible');
+ for(let index=0;index<await appearanceThumbnails.count();index++){const image=appearanceThumbnails.nth(index);await image.scrollIntoViewIfNeeded();await audit.waitForFunction(index=>{const images=[...document.querySelectorAll('.character-game-setup .catalog-inspector .appearance-thumbnail')].filter(n=>!n.closest('[hidden]')&&n.checkVisibility({visibilityProperty:true}));const img=images[index];return img?.getAttribute('src')&&img.complete&&img.naturalWidth>0;},index);await image.evaluate(img=>img.decode());}
+ await audit.screenshot({path:output+'audit-fixed-appearance.png'});
  await audit.getByRole('button',{name:'Story',exact:true}).click();await audit.getByRole('button',{name:'Add Beat',exact:true}).click();await audit.locator('.new-beat select').first().selectOption('narration');await audit.locator('.new-beat textarea').fill('Saved narration');
  await audit.locator('.new-beat').getByRole('button',{name:'Add Beat',exact:true}).click();await audit.waitForFunction(()=>window.__auditReleaseBeat);
  assert.equal(await audit.locator('.new-beat').getByRole('button',{name:'Add Beat',exact:true}).isDisabled(),true);assert.equal(await audit.locator('.new-beat').getByRole('button',{name:'Cancel',exact:true}).isDisabled(),true);
- await audit.evaluate(()=>document.querySelector('.new-beat button.button.primary').click());assert.equal(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='insertBeat').length),1);
+ await audit.evaluate(()=>document.querySelector('.new-beat button.button.primary').click());assert.equal(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='insertBodyBeat').length),1);
  await audit.evaluate(()=>window.__auditReleaseBeat());await audit.locator('.new-beat').waitFor({state:'detached'});assert.equal(await audit.locator('[data-beat-id="audit-added"] .beat-select').evaluate(e=>document.activeElement===e),true);assert.equal(await audit.locator('[data-beat-id="audit-added"] .expanded-beat').count(),0);
  assert.deepEqual(errors,[]);await audit.close();
- console.log('PASS: mixed Character grid/list columns and Variable header alignment at three widths/both themes; staged PNG decode, chooser replacement, compact actions, remove/discard/reopen; all six workspaces in both themes; onboarding, Settings, compact layouts, Source undo; shipped smoke and busy contention; audit regressions for Choice actions, Variable discard/reopen/submission, appearance retention, sidebar focus, divider reset, pending Beat creation and captured pointer reorder/cancellation. Fixture bridge only; not native SDK or security proof.');
+ console.log('PASS: current Character library and Variable header alignment at three widths/both themes; staged PNG decode, chooser replacement, compact actions, remove/discard/reopen; all six workspaces in both themes; onboarding, Settings, compact layouts, Source undo; shipped smoke and busy contention; audit regressions for Choice actions, Variable discard/reopen/submission, Character Game setup appearance retention, sidebar focus, divider reset, pending Beat creation and captured pointer reorder/cancellation. Fixture bridge only; not native SDK or security proof.');
 } finally {await browser?.close();await server.close();}

@@ -48,7 +48,7 @@ function sceneModel(): SceneWorkspace {
         id: "scene-one", chapterId: "chapter-one", displayName: "Arrival", technicalLabel: "arrival", sourcePath: "game/chapters/chapter_01/scene_001.rpy", sourceRevision: "3".repeat(64), sourceConflict: false, partial: false,
         beats: [
           { id: "dialogue", byteStart: 15, byteEnd: 35, protected: false, payload: { type: "dialogue", characterId: "alice", text: "Hello" } },
-          { id: "choice", byteStart: 35, byteEnd: 80, protected: false, payload: { type: "choice", options: [{ text: "Go", destinationSceneId: "scene-two" }] } },
+          { id: "choice", byteStart: 35, byteEnd: 80, protected: false, payload: { type: "choice", options: [{ text: "Go" }] } },
           { id: "return", byteStart: 80, byteEnd: 91, protected: false, payload: { type: "return" } },
         ],
       },

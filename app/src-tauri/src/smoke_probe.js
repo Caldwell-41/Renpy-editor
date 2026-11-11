@@ -1,5 +1,14 @@
 setTimeout(async () => {
   const invoke = window.__TAURI_INTERNALS__.invoke;
+  // These probe observations can contend with normal shell reads. RUNTIME_BUSY
+  // refuses before dispatch, so retry delivery through the existing bounded helper.
+  const callProbe = request => window.__loomlightProbeRetryBusy(async () => {
+    const reply = await invoke("core_request", { request });
+    if (reply?.ok === false && reply.error?.code === "RUNTIME_BUSY") {
+      throw Object.assign(new Error("Probe request was busy."), { code: "RUNTIME_BUSY" });
+    }
+    return reply;
+  });
   const yieldTask = () => new Promise((resolve) => {
     const channel = new MessageChannel();
     channel.port1.onmessage = () => {
@@ -9,12 +18,10 @@ setTimeout(async () => {
     };
     channel.port2.postMessage(null);
   });
-  const known = await invoke("core_request", {
-    request: { protocolVersion: 1, requestId: "smoke-health", operation: "system.health", payload: {} },
-  }).then((value) => value?.ok === true && value?.value?.status === "ready", () => false);
-  const malformedPayloadDenied = await invoke("core_request", {
-    request: { protocolVersion: 1, requestId: "smoke-malformed", operation: "system.health", payload: { extra: true } },
-  }).then((value) => value?.ok === false && value?.error?.code === "INVALID_PAYLOAD", () => false);
+  const known = await callProbe({ protocolVersion: 1, requestId: "smoke-health", operation: "system.health", payload: {} })
+    .then((value) => value?.ok === true && value?.value?.status === "ready", () => false);
+  const malformedPayloadDenied = await callProbe({ protocolVersion: 1, requestId: "smoke-malformed", operation: "system.health", payload: { extra: true } })
+    .then((value) => value?.ok === false && value?.error?.code === "INVALID_PAYLOAD", () => false);
   const unknownCommandDenied = await invoke("unlisted_command", {}).then(() => false, () => true);
   const ambientFilesystemDenied = await invoke("plugin:fs|read_text_file", { path: "/synthetic-denied" }).then(() => false, () => true);
   const ambientProcessDenied = await invoke("plugin:shell|execute", { program: "synthetic-denied" }).then(() => false, () => true);
@@ -51,13 +58,11 @@ setTimeout(async () => {
   let checkpointSequence = 0;
   const checkpoint = async (stage) => {
     checkpointSequence += 1;
-    const value = await invoke("core_request", {
-      request: {
+    const value = await callProbe({
         protocolVersion: 1,
         requestId: `smoke-checkpoint-${checkpointSequence}`,
         operation: "probe.smokeCheckpoint",
         payload: { stage },
-      },
     });
     if (value?.ok !== true) throw new Error(`Smoke checkpoint was rejected: ${stage}`);
   };
@@ -97,7 +102,7 @@ setTimeout(async () => {
           { id: "background", byteStart: 30, byteEnd: 50, protected: false, payload: { type: "background", assetId: "background", transition: "dissolve" } },
           { id: "dialogue", byteStart: 50, byteEnd: 70, protected: false, payload: { type: "dialogue", characterId: "character", text: "Hello" } },
           { id: "music", byteStart: 70, byteEnd: 90, protected: false, payload: { type: "playMusic", assetId: "music" } },
-          { id: "choice", byteStart: 90, byteEnd: 130, protected: false, payload: { type: "choice", options: [{ text: "Continue", destinationSceneId: "scene-two" }] } },
+          { id: "choice", byteStart: 90, byteEnd: 130, protected: false, payload: { type: "choice", options: [{ text: "Continue" }] } },
         ],
       }, {
         id: "scene-two", chapterId: "chapter-two", displayName: "Scene 2", technicalLabel: "scene_two",
@@ -240,25 +245,35 @@ setTimeout(async () => {
     supportingAuthoringStage = "install-requester";
     if (typeof window.__loomlightInstallSmokeRequester !== "function") throw new Error("Missing smoke requester hook.");
     restoreSmokeRequester = window.__loomlightInstallSmokeRequester(smokeRequester);
-    const waitFor = async (condition, description) => {
-      const deadline = performance.now() + 2000;
+    const waitFor = async (condition, description, timeoutMs = 2000) => {
+      const deadline = performance.now() + timeoutMs;
       while (performance.now() < deadline) {
         if (condition()) return;
         await yieldTask();
       }
       throw new Error(`Timed out waiting for ${description}`);
     };
+    // Track progress only until the supporting stage records its result; later
+    // Scene steps reuse these helpers and must not overwrite that result.
+    let supportingFinal = false;
+    const track = (stage) => { if (!supportingFinal) supportingAuthoringStage = stage; };
     const awaitSurface = async (label) => {
-      supportingAuthoringStage = label;
+      track(label);
       await waitFor(
-        () => [...document.querySelectorAll("button")].some((item) => item.textContent === label),
+        () => [...document.querySelectorAll("button")].some((item) => (item.textContent === label || item.getAttribute("aria-label") === label) && !item.closest("[hidden]") && item.checkVisibility({ visibilityProperty: true })),
         label,
       );
     };
     const awaitCall = async (operation) => {
-      supportingAuthoringStage = operation;
+      track(operation);
       await waitFor(() => called.has(operation), operation);
       await yieldTask();
+    };
+    // A dialog closes only after its save finishes, including real desktop round
+    // trips such as the shell's preferences write. Navigate only after that.
+    const awaitDialogClosed = async (operation) => {
+      await awaitCall(operation);
+      await waitFor(() => !document.querySelector('[aria-modal="true"]'), `${operation} dialog close`, 10000);
     };
     const awaitSceneCommit = async (count, description) => {
       await waitFor(() => sceneApplyCount >= count, description);
@@ -268,16 +283,23 @@ setTimeout(async () => {
         `${description} committed render`,
       );
     };
-    const click = (label) => {
-      const target = [...document.querySelectorAll("button")].find((item) => item.textContent === label);
-      if (!target) throw new Error(`Missing ${label}`);
-      target.click();
+    const click = (label, scope = document.querySelector('[aria-modal="true"]') ?? document) => {
+      if (!scope) throw new Error(`Missing control owner for ${label}`);
+      const targets = [...scope.querySelectorAll("button")].filter((item) => (item.textContent === label || item.getAttribute("aria-label") === label) && !item.disabled && !item.closest("[hidden]") && item.checkVisibility({ visibilityProperty: true }));
+      if (targets.length !== 1) {
+        // Name the active dialog and visible controls, so a native failure shows what was on screen.
+        const visible = [...scope.querySelectorAll("button")].filter((item) => !item.closest("[hidden]") && item.checkVisibility({ visibilityProperty: true }))
+          .map((item) => item.getAttribute("aria-label") || item.textContent.trim()).filter(Boolean).slice(0, 12);
+        throw new Error(`Expected one visible enabled ${label}; found ${targets.length}; scope=${scope === document ? "document" : scope.getAttribute("aria-label")}; visible=${visible.join("|")}`);
+      }
+      targets[0].click();
     };
     const control = (label) => {
-      const wrapper = [...document.querySelectorAll("label")].find((item) => item.firstElementChild?.textContent === label);
-      const target = wrapper?.querySelector("input, select");
-      if (!target) throw new Error(`Missing ${label}`);
-      return target;
+      const scope = document.querySelector('[aria-modal="true"]') ?? document;
+      const targets = [...scope.querySelectorAll("label")].filter((item) => item.firstElementChild?.textContent === label)
+        .flatMap(item => [...item.querySelectorAll("input, select")]).filter(item => !item.disabled && !item.closest("[hidden]") && item.checkVisibility({ visibilityProperty: true }));
+      if (targets.length !== 1) throw new Error(`Expected one visible enabled ${label}; found ${targets.length}`);
+      return targets[0];
     };
     const openGameSetup=async()=>{
       await awaitSurface('Game setup');
@@ -299,12 +321,12 @@ setTimeout(async () => {
     click("Characters");
     await openGameSetup();
     supportingAuthoringStage = "edit-character";
-    click("Edit");
+    click("Edit Alice");
     const characterName = control("Display name");
     characterName.value = "Alice Updated";
     characterName.dispatchEvent(new Event("input", { bubbles: true }));
     click("Save Character");
-    await awaitCall("character.update");
+    await awaitDialogClosed("character.update");
     click("Characters");
     await openGameSetup();
     supportingAuthoringStage = "add-appearance";
@@ -313,7 +335,7 @@ setTimeout(async () => {
     expression.value = "delighted";
     expression.dispatchEvent(new Event("input", { bubbles: true }));
     click("Choose image…");
-    await awaitCall("asset.import");
+    await awaitDialogClosed("asset.import");
     click("Characters");await awaitSurface("New character");
     supportingAuthoringStage="create-character";
     click("New character");await yieldTask();click("Game setup");await yieldTask();
@@ -322,11 +344,12 @@ setTimeout(async () => {
     }
     click("Review game character source");await awaitCall('references.previewGameCharacter');
     await waitFor(()=>[...document.querySelectorAll('button')].some(b=>b.textContent==='Create game character'&&!b.hidden&&!b.disabled),'reviewed character confirmation');
-    click('Create game character');await awaitCall('references.createGameCharacter');
+    click('Create game character');await awaitDialogClosed('references.createGameCharacter');
     click("Variables");
-    await awaitSurface("Create Variable");
+    await awaitSurface("New variable");
     supportingAuthoringStage = "create-variable";
     click("New variable");
+    await awaitSurface("Create Variable");
     control("Technical name (fixed after creation)").value = "maximum";
     const variableType = control("Type");
     variableType.value = "int";
@@ -335,7 +358,7 @@ setTimeout(async () => {
     defaultValue.value = "9223372036854775807";
     defaultValue.dispatchEvent(new Event("input", { bubbles: true }));
     click("Create Variable");
-    await awaitCall("variable.create");
+    await awaitDialogClosed("variable.create");
     click("Variables");
     await awaitSurface("score");
     supportingAuthoringStage = "update-variable";
@@ -358,9 +381,10 @@ setTimeout(async () => {
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: !macPlatform, metaKey: macPlatform, bubbles: true }));
     await awaitCall("project.flush");
     click("Assets");
-    await awaitSurface("Choose files…");
+    await awaitSurface("Import assets");
     supportingAuthoringStage="cancel-import";
     click("Import assets");
+    await awaitSurface("Choose files…");
     click("Choose files…");
     await waitFor(()=>importChoiceCount===2,"cancelled asset choice");await yieldTask();
     const cancelledPreserved=[...document.querySelectorAll("button")].find(item=>item.textContent==="Choose files…")?.disabled===false && document.querySelectorAll('.import-entry').length===0;
@@ -389,6 +413,7 @@ setTimeout(async () => {
       : !overlappingFlushSuppressed ? "overlapping-flush-not-suppressed"
       : !cancelledPreserved ? "cancel-state-lost"
       : requiredCalls.find((operation) => !called.has(operation)) ?? "complete";
+    supportingFinal = true;
 
     sceneAuthoringStage = "open-scene-workspace";
     click("Story");
@@ -455,7 +480,7 @@ setTimeout(async () => {
     const buttonSaveBefore = operationCounts.get("source.save") ?? 0;
     const buttonFlushBefore = operationCounts.get("project.flush") ?? 0;
     sourceAuthoringStage = "source-button-save";
-    click("Save Source");
+    click("Save Source", document.querySelector(".app-header"));
     await waitFor(() => (operationCounts.get("source.save") ?? 0) === buttonSaveBefore + 1 && !sourceDocument.dirty, "visible Source acceptance");
     await waitFor(() => document.querySelector("[data-source-busy]")?.getAttribute("data-source-busy") === "false", "Source Save barrier release");
     const buttonFlushDelta = (operationCounts.get("project.flush") ?? 0) - buttonFlushBefore;
@@ -515,7 +540,7 @@ setTimeout(async () => {
     sourceCommandTrace.push(`keyboard-synthetic:source-clean:${macPlatform ? "meta" : "ctrl"}+s:generation-current:completed:saves=${cleanSaveDelta}:flushes=1:saved`);
 
     sourceAuthoringStage = "non-source-flush";
-    click("Variables");await awaitSurface("Create Variable");
+    click("Variables");await awaitSurface("New variable");
     const nonSourceFlushBefore = operationCounts.get("project.flush") ?? 0;
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: !macPlatform, metaKey: macPlatform, bubbles: true, cancelable: true }));
     await waitFor(() => (operationCounts.get("project.flush") ?? 0) === nonSourceFlushBefore + 1, "non-Source Flush");
@@ -618,8 +643,7 @@ setTimeout(async () => {
     && shellSaveTrace.includes("phase=flushed")
     && shellSaveTrace.includes("route=flush;origin=keyboard;context=non-source;phase=completed");
   await checkpoint("final-report-start");
-  await invoke("core_request", {
-    request: {
+  await callProbe({
       protocolVersion: 1,
       requestId: "smoke-report",
       operation: "probe.smokeReport",
@@ -645,7 +669,6 @@ setTimeout(async () => {
         unauthorisedWindowDenied: known && window.__loomlightUnauthorisedDenied === true,
         unknownCommandDenied,
       },
-    },
   }).then((value) => {
     if (value?.ok !== true) throw new Error("Smoke report was rejected.");
   });

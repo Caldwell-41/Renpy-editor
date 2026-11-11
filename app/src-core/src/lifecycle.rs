@@ -4486,16 +4486,20 @@ mod tests {
                 expected_source_revision: entry.source_revision.clone(),
                 before_beat_id: None,
                 beat: crate::scene::BeatPayload::Choice {
+                    picked_policy: None,
+                    prompt: None,
                     options: vec![
                         crate::scene::ChoiceOption {
+                            unavailable_policy: crate::scene::UnavailablePolicy::Hide,
                             condition: None,
                             text: "Garden".into(),
-                            destination_scene_id: garden_id.clone(),
+                            id: None,
                         },
                         crate::scene::ChoiceOption {
+                            unavailable_policy: crate::scene::UnavailablePolicy::Hide,
                             condition: None,
                             text: "Library".into(),
-                            destination_scene_id: library_id.clone(),
+                            id: None,
                         },
                     ],
                 },
@@ -4878,13 +4882,37 @@ mod tests {
         let entry = &model["scenes"][0];
         let source_path = entry["sourcePath"].as_str().unwrap().to_owned();
         let before = fs::read_to_string(root.join(&source_path)).unwrap();
-        let updated = closeout_ipc(
+        let inserted = closeout_ipc(
             &mut service,
             "scene.apply",
             json!({"sessionId":session,
             "expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],
-            "command":{"type":"insertBeat","sceneId":entry["id"],"expectedSourceRevision":entry["sourceRevision"],"beforeBeatId":null,
-                "beat":{"type":"choice","options":[{"text":"Again","destinationSceneId":entry["id"]}]}}}),
+            "command":{"type":"insertBodyBeat","sceneId":entry["id"],"expectedSourceRevision":entry["sourceRevision"],
+                "body":{"type":"root"},"position":{"type":"before","anchor":{"type":"beat","beatId":entry["beats"].as_array().unwrap().last().unwrap()["id"]}},
+                "beat":{"type":"choice","options":[{"text":"Again"}]}}}),
+        );
+        assert_eq!(inserted["ok"], true, "{inserted}");
+        let entry = &inserted["value"]["scenes"][0];
+        let choice = entry["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["payload"]["type"] == "choice")
+            .unwrap();
+        let option_id = &choice["payload"]["options"][0]["id"];
+        let option = entry["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["id"] == *option_id)
+            .unwrap();
+        let updated = closeout_ipc(
+            &mut service,
+            "scene.apply",
+            json!({"sessionId":session,"expectedProjectRevision":inserted["value"]["projectRevision"],"expectedSourceMapRevision":inserted["value"]["sourceMapRevision"],
+            "command":{"type":"insertBodyBeat","sceneId":entry["id"],"expectedSourceRevision":entry["sourceRevision"],
+                "body":{"type":"branch","groupId":option["conditionalBranch"]["groupId"],"branchId":option_id},"position":{"type":"end"},
+                "beat":{"type":"jump","sceneId":entry["id"]}}}),
         );
         assert_eq!(updated["ok"], true, "{updated}");
         let model = &updated["value"];
@@ -4906,7 +4934,15 @@ mod tests {
         assert!(accepted.contains("New destination"));
         assert!(accepted.starts_with(before.split("    return").next().unwrap()));
         let graph = closeout_ipc(&mut service, "flow.list", json!({"sessionId":session}));
-        assert_eq!(graph["value"]["edges"].as_array().unwrap().len(), 3);
+        assert_eq!(
+            graph["value"]["edges"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .filter(|edge| edge["kind"] == "choice")
+                .count(),
+            2
+        );
         service.close().unwrap();
         drop(service);
         let mut service = LifecycleService::new(temp.path().join("state")).unwrap();

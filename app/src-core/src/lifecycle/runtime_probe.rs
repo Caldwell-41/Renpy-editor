@@ -544,7 +544,7 @@ mod branches_tests {
             .as_array()
             .unwrap()
             .iter()
-            .find(|b| b["owner"].is_object())
+            .find(|b| b["owner"].is_object() && b["payload"]["type"] == "dialogue")
             .unwrap();
         json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{
             "type":"updateChildDialogue","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":child["id"],"expectedOwner":child["owner"],"characterId":child["payload"]["characterId"],"text":text}})
@@ -562,7 +562,7 @@ mod branches_tests {
             .as_array()
             .unwrap()
             .iter()
-            .filter(|b| b["owner"].is_object())
+            .filter(|b| b["owner"].is_object() && b["payload"]["type"] == "dialogue")
             .collect::<Vec<_>>();
         assert_eq!(children.len(), 2);
         assert_eq!(
@@ -612,7 +612,7 @@ mod branches_tests {
                 .as_array()
                 .unwrap()
                 .iter()
-                .filter(|r| r["owner"].is_object())
+                .filter(|r| r["owner"].is_object() && r["kind"] == "dialogue")
                 .count(),
             2
         );
@@ -740,7 +740,7 @@ mod branches_tests {
             .as_array()
             .unwrap()
             .iter()
-            .filter(|b| b["owner"].is_object())
+            .filter(|b| b["owner"].is_object() && b["payload"]["type"] == "dialogue")
             .nth(1)
             .unwrap();
         let mut duplicate = child_command(&before, "True café 雪");
@@ -753,7 +753,10 @@ mod branches_tests {
             old.iter().map(|b| &b["id"]).collect::<Vec<_>>(),
             new.iter().map(|b| &b["id"]).collect::<Vec<_>>()
         );
-        let child = new.iter().find(|b| b["owner"].is_object()).unwrap();
+        let child = new
+            .iter()
+            .find(|b| b["owner"].is_object() && b["payload"]["type"] == "dialogue")
+            .unwrap();
         let accepted = fs::read(root.join(path)).unwrap();
         for command in [
             json!({"type":"updateBeat","beatId":child["id"],"beat":child["payload"]}),
@@ -872,7 +875,7 @@ mod branches_tests {
                 .as_array()
                 .unwrap()
                 .iter()
-                .filter(|b| b["owner"].is_object())
+                .filter(|b| b["owner"].is_object() && b["payload"]["type"] == "dialogue")
                 .count(),
             2
         );
@@ -1083,7 +1086,7 @@ mod branches_tests {
                 .as_array()
                 .unwrap()
                 .iter()
-                .find(|b| b["owner"].is_object())
+                .find(|b| b["owner"].is_object() && b["payload"]["type"] == "dialogue")
                 .unwrap();
             let start = child["byteStart"].as_u64().unwrap() as usize;
             let end = child["byteEnd"].as_u64().unwrap() as usize;

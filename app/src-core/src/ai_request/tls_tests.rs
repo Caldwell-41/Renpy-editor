@@ -179,19 +179,32 @@ fn https_cancellation_closes_handshake_and_body_owned_socket() {
         let handle =
             thread::spawn(move || execute_with_tls(p, &worker_cancel, |_| {}, &mut None, tls));
         fixture.until(if mode == "handshake_stall" {
-            "connected"
+            "handshake_started"
         } else {
             "receiving"
         });
+        let owned = cancel.0.socket.lock().unwrap().is_some();
+        assert!(owned, "{mode}: readiness must follow socket publication");
         let started = Instant::now();
         cancel.cancel();
-        assert_eq!(handle.join().unwrap(), Err(Failure::Cancelled));
-        assert!(started.elapsed() < Duration::from_secs(2));
-        assert!(matches!(
-            *cancel.0.shutdown_observation.lock().unwrap(),
-            Some(Ok(()))
-        ));
+        let result = handle.join().unwrap();
+        let elapsed = started.elapsed();
+        let shutdown = *cancel.0.shutdown_observation.lock().unwrap();
+        assert_eq!(
+            result,
+            Err(Failure::Cancelled),
+            "{mode}: shutdown={shutdown:?}"
+        );
+        assert!(
+            elapsed < Duration::from_secs(2),
+            "{mode}: {elapsed:?}, shutdown={shutdown:?}"
+        );
+        assert!(
+            matches!(shutdown, Some(Ok(()))),
+            "{mode}: owned={owned}, shutdown={shutdown:?}, result={result:?}, elapsed={elapsed:?}"
+        );
         fixture.until("closed");
+        eprintln!("tls-cancellation: mode={mode} owned={owned} shutdown={shutdown:?} result={result:?} elapsed={elapsed:?} eof=observed");
     }
 }
 #[test]

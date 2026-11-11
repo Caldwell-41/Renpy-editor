@@ -1,0 +1,235 @@
+{
+  "revision": "dock-v2",
+  "status": "draft-awaiting-explicit-user-approval",
+  "source": {
+    "commit": "7ba6eea4da1f12434f8260bdc6400a00bf04a964",
+    "fingerprint": "9d62ff5224e47e8a505fe9467366b40fca66cf7a9c57a9b1bdfad59f18e99c54"
+  },
+  "date": "2026-11-11",
+  "request": "Apply unslop and Experience First to A, then show it.",
+  "changes": [
+    "Remove repeated No condition labels; label conditional options only.",
+    "Keep the prompt and numbered options in a single scroll area; omit an absent prompt.",
+    "Keep picked state and condition state separate; omit picked-state-dependent presentation for Show normally.",
+    "Increase scene-state notices to 11px; shorten background notice while retaining its original reason in hover text.",
+    "Keep If false: Show disabled in hover/accessibility text and in the existing editable Beat control.",
+    "Use a visible scrollbar thumb. No new product controls or animations."
+  ],
+  "checks": {
+    "typescript": "passed; Node 24.19.0 and repository TypeScript 7.0.2; scoped draft config",
+    "inlinePreview": {
+      "width": 728,
+      "height": 706,
+      "consoleMessages": []
+    },
+    "source": "npm run design:source passed",
+    "protectedPaths": "No changes to production app/src, Story Combined source, or Story Combined approval history.",
+    "sdkStarts": 0,
+    "nativeEditorOrPackageLaunches": 0,
+    "ciRuns": 0
+  },
+  "route": "Current production Story presentation with read-only sample callbacks; draft replaces preview content only. Managed T3 browser.",
+  "inputLayer": "Browser DOM and synthetic scrolling; no native input claim.",
+  "samples": [
+    {
+      "height": 720,
+      "inert": true,
+      "lastOptionReachable": true,
+      "mutations": 0,
+      "notice": "Other character state may be unknown",
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "picked": "Picked state unknownHide picked",
+      "prompt": "NarrationChoose independently",
+      "reachesBottom": true,
+      "scale": 2,
+      "scrollHeight": 110,
+      "shortOptionsVisible": true,
+      "state": "duplicate",
+      "summary": {
+        "height": 110,
+        "width": 774
+      },
+      "summaryOverflow": false,
+      "width": 1100,
+      "nativeRefused": true
+    },
+    {
+      "height": 720,
+      "inert": true,
+      "lastOptionReachable": true,
+      "mutations": 0,
+      "notice": "Other character state may be unknown",
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "picked": "Picked state unknownMark picked",
+      "prompt": "BecThe last service leaves in a minute. Are you coming with me?",
+      "reachesBottom": true,
+      "scale": 2,
+      "scrollHeight": 110,
+      "shortOptionsVisible": true,
+      "state": "character",
+      "summary": {
+        "height": 110,
+        "width": 774
+      },
+      "summaryOverflow": false,
+      "width": 1100,
+      "nativeRefused": true
+    },
+    {
+      "height": 720,
+      "inert": true,
+      "lastOptionReachable": true,
+      "mutations": 0,
+      "notice": "Other character state may be unknown",
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "picked": "Picked state unknownHide picked",
+      "prompt": "BecBefore the last service leaves, tell me whether you want to follow the lamplighter or wait here until someone explains the new stop on the timetable.",
+      "reachesBottom": true,
+      "scale": 2,
+      "scrollHeight": 156,
+      "shortOptionsVisible": null,
+      "state": "long",
+      "summary": {
+        "height": 110,
+        "width": 774
+      },
+      "summaryOverflow": false,
+      "width": 1100,
+      "nativeRefused": true
+    },
+    {
+      "height": 720,
+      "inert": true,
+      "lastOptionReachable": true,
+      "mutations": 0,
+      "notice": "Other character state may be unknown",
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "picked": null,
+      "prompt": null,
+      "reachesBottom": true,
+      "scale": 2,
+      "scrollHeight": 110,
+      "shortOptionsVisible": true,
+      "state": "none",
+      "summary": {
+        "height": 110,
+        "width": 774
+      },
+      "summaryOverflow": false,
+      "width": 1100,
+      "nativeRefused": true
+    },
+    {
+      "height": 850,
+      "inert": true,
+      "lastOptionReachable": true,
+      "mutations": 0,
+      "notice": "Other character state may be unknown",
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "picked": "Picked state unknownHide picked",
+      "prompt": "NarrationChoose independently",
+      "reachesBottom": true,
+      "scale": 2,
+      "scrollHeight": 110,
+      "shortOptionsVisible": true,
+      "state": "duplicate",
+      "summary": {
+        "height": 110,
+        "width": 648
+      },
+      "summaryOverflow": false,
+      "width": 720,
+      "nativeRefused": true
+    },
+    {
+      "height": 850,
+      "inert": true,
+      "lastOptionReachable": true,
+      "mutations": 0,
+      "notice": "Other character state may be unknown",
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "picked": "Picked state unknownMark picked",
+      "prompt": "BecThe last service leaves in a minute. Are you coming with me?",
+      "reachesBottom": true,
+      "scale": 2,
+      "scrollHeight": 110,
+      "shortOptionsVisible": true,
+      "state": "character",
+      "summary": {
+        "height": 110,
+        "width": 648
+      },
+      "summaryOverflow": false,
+      "width": 720,
+      "nativeRefused": true
+    },
+    {
+      "height": 850,
+      "inert": true,
+      "lastOptionReachable": true,
+      "mutations": 0,
+      "notice": "Other character state may be unknown",
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "picked": "Picked state unknownHide picked",
+      "prompt": "BecBefore the last service leaves, tell me whether you want to follow the lamplighter or wait here until someone explains the new stop on the timetable.",
+      "reachesBottom": true,
+      "scale": 2,
+      "scrollHeight": 190,
+      "shortOptionsVisible": null,
+      "state": "long",
+      "summary": {
+        "height": 110,
+        "width": 648
+      },
+      "summaryOverflow": false,
+      "width": 720,
+      "nativeRefused": true
+    },
+    {
+      "height": 850,
+      "inert": true,
+      "lastOptionReachable": true,
+      "mutations": 0,
+      "notice": "Other character state may be unknown",
+      "optionCount": 3,
+      "overlaps": [],
+      "pageOverflow": false,
+      "picked": null,
+      "prompt": null,
+      "reachesBottom": true,
+      "scale": 2,
+      "scrollHeight": 110,
+      "shortOptionsVisible": true,
+      "state": "none",
+      "summary": {
+        "height": 110,
+        "width": 648
+      },
+      "summaryOverflow": false,
+      "width": 720,
+      "nativeRefused": true
+    }
+  ],
+  "limits": [
+    "Draft presentation only. No production integration, save or runtime correctness claim.",
+    "Fixture has no media. Image fitting and character placement are not covered.",
+    "Long prompt/options require scrolling within the current 110px allocation.",
+    "If false policy is no longer in the main option row. It remains in hover/accessibility text and the Beat editor.",
+    "No conditions are evaluated, no picked state is assumed, and options are inert text.",
+    "Story Combined v1 remains unchanged."
+  ]
+}

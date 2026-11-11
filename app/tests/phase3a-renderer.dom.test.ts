@@ -22,7 +22,7 @@ function model(beats: readonly SceneBeat[]): SceneWorkspace {
     authoring: { characters: [], appearances: [], assets: [], variables: [{ id: "trust", technicalName: "trust", variableType: "int", defaultValue: "0" }] } };
 }
 const call: SceneBeat = { id: "call", byteStart: 40, byteEnd: 95, protected: false, payload: { type: "call", sceneId: "two", returnLabel: "_loomlight_return_stable" } };
-const choice: SceneBeat = { id: "choice", byteStart: 95, byteEnd: 180, protected: false, payload: { type: "choice", options: [{ text: "High trust", destinationSceneId: "two", condition: guard }, { text: "Custom", destinationSceneId: "two", condition: unknown }, { text: "Ordinary", destinationSceneId: "two" }] } };
+const choice: SceneBeat = { id: "choice", byteStart: 95, byteEnd: 180, protected: false, payload: { type: "choice", options: [{ text: "High trust", condition: guard }, { text: "Custom", condition: unknown }, { text: "Ordinary" }] } };
 
 test("Unknown guarded Choice is read-only with exact Source navigation and no mutations", async () => {
   const { browser, host, tree } = setup(); const writes: unknown[] = []; const sources: unknown[] = [];
@@ -54,7 +54,8 @@ test("Call and every guarded option leave preview state unknown without filterin
   assert.equal(called.partial, true); assert.equal(called.variablesUnknown, true); assert.deepEqual(called.variables, {}); assert.deepEqual(called.unknownBeatIds, ["call"]); assert.equal(called.overlay?.kind, "call");
   const chosen = deriveScenePreview(scene, "choice");
   assert.deepEqual(chosen.unknownBeatIds, ["call", "choice"]); assert.equal(chosen.partial, true);
-  assert.match(chosen.overlay!.text, /High trust \(availability unknown\).*Custom \(availability unknown\).*Ordinary/);
+  assert.deepEqual(chosen.overlay?.choice, choice.payload);
+  assert.equal(chosen.overlay?.choice?.options.length, 3);
 });
 
 test("recursive and unknown branch captions remain accurate and do not execute sibling bodies", async () => {
@@ -128,5 +129,15 @@ test("core guard conditions remain distinct from Choice availability and missing
   assert.match(host.textContent!, /If Unknown condition: custom_check\(\)/); assert.doesNotMatch(host.textContent!, /Available when|Availability unknown/);
   choose("Selected route", "choice"); assert.match(host.textContent!, /Available when Unknown condition: custom_check\(\).*Availability unknown/);
   choose("Selected route", "call-missing"); assert.match(host.textContent!, /Missing label: absent_scene/); assert.doesNotMatch(host.textContent!, /Call Scene returns to its continuation/);
+  dispose(); await browser.happyDOM.close();
+});
+
+test("Branches names an option owner without inventing an If test or first-match order", async () => {
+  const { browser, host } = setup(); const location = { path: "game/arrival.rpy", revision: "saved", byteStart: 40, byteEnd: 50 };
+  const flow: FlowWorkspace = { revision: "saved", entrySceneId: "one", partial: false, stale: false, overLimit: false, notice: "Possible flow", nodes: [{ sceneId: "one", name: "Arrival", label: "arrival", location, partial: false, stale: false }], edges: [{ id: "return", sceneId: "one", beatId: "return", optionOrdinal: null, text: "Return", kind: "return", location, destination: { kind: "terminal" }, editable: false, guardPath: [{ branchId: "yes", branch: { choiceOption: true, groupId: "options", ordinal: 0, otherwise: false } }] }] };
+  const dispose = renderBranches(host, { load: async () => flow, source: () => {}, scene: () => {}, status: () => {} }); await tick();
+  const scene = host.querySelector<HTMLSelectElement>('[aria-label="Selected Scene"]')!; scene.value = "one"; scene.dispatchEvent(new Event("change"));
+  const route = host.querySelector<HTMLSelectElement>('[aria-label="Selected route"]')!; route.value = "return"; route.dispatchEvent(new Event("change"));
+  assert.match(host.textContent!, /Choice option 1 · Always available/); assert.doesNotMatch(host.textContent!, /If Unknown condition|prior branches did not match/);
   dispose(); await browser.happyDOM.close();
 });
