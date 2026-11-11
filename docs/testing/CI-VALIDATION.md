@@ -8,14 +8,15 @@ audit; it does not grant human acceptance, merge or another costly attempt.
 
 ## Select the work before starting CI
 
-On each new PR branch, update `.github/validation-plan.json` before publication.
-Set `branch` to that branch's name and `base` to `main`. Keep
-`version: 1`. List each required manual
-workflow and its exact GitHub job names in `qualifications`. An explicit empty
-list selects Repository quality only when that satisfies the task. An inherited
-plan for a different branch, a missing plan or invalid selection reports an error.
-The issue owns the reason for requiring qualification and its operation
-limits; the JSON file owns the executable selection.
+Main keeps the plan of the last merged PR. A PR that does not edit
+`.github/validation-plan.json` requires Repository quality only, and its job
+summary says so. A PR that needs a qualification edits the plan before
+publication. Set `branch` to that branch's name and `base` to `main`. Keep
+`version: 1`. List each required manual workflow and its exact GitHub job names
+in `qualifications`. When a PR edits the plan, a plan for a different branch, a
+missing plan or an invalid selection reports an error. The issue owns the reason
+for requiring qualification and its operation limits; the JSON file owns the
+executable selection.
 
 For example, Windows Style qualification selects:
 

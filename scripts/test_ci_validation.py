@@ -130,6 +130,7 @@ class FakeGitHub:
         self.qualifying_run = run(2)
         self.qualifying_jobs = [job()]
         self.job_requests = []
+        self.changed_files = [PLAN_PATH]
 
     def request(self, path, body=None):
         if path.startswith("pulls/"):
@@ -152,6 +153,8 @@ class FakeGitHub:
         return json.dumps(self.plan) if path == PLAN_PATH else self.source
 
     def pages(self, path, key=None):
+        if path == "pulls/73/files":
+            return [{"filename": name} for name in self.changed_files]
         if path.startswith("actions/workflows/quality.yml/runs?"):
             assert "head_sha=" + SHA in path
             assert "event=pull_request" in path
@@ -195,6 +198,14 @@ class ReporterTests(unittest.TestCase):
                 api.source = "jobs: {}"
             self.assertEqual(report(api, api.pr, "https://example.test/run"), "error")
             self.assertEqual(api.statuses[-1]["state"], "error")
+
+    @patch("builtins.print")
+    def test_inherited_plan_selects_quality_only(self, _):
+        api = FakeGitHub()
+        api.changed_files = ["docs/ARCHITECTURE.md"]
+        api.plan["branch"] = "old-branch"
+        api.qualifying_run = None
+        self.assertEqual(report(api, api.pr, "https://example.test/run"), "success")
 
     @patch("builtins.print")
     def test_shared_commit_with_multiple_open_prs_is_rejected(self, _):

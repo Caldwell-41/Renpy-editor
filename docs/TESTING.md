@@ -116,8 +116,9 @@ results. Use existing scripts and workflows rather than a new CI controller.
 
 ## Waiting for CI
 
-Before publishing a PR, select the required qualification in
+Before publishing a PR that needs a qualification, select it in
 `.github/validation-plan.json` under [complete PR validation](testing/CI-VALIDATION.md).
+A PR that leaves the plan unedited requires Repository quality only.
 CI is complete when `Loomlight validation` passes for the current head and the
 selected runs, jobs and retained evidence have been audited.
 
