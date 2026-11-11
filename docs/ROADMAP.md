@@ -71,7 +71,7 @@ These subdivisions do not add a new product scope or bypass milestone approval. 
 
 ## Optional milestone — Local Git checkpoints (deferred)
 
-**Decision:** 2026-09-25. [Optional Git](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/optional-local-git.md) preserves the
+**Decision:** 2026-09-25. [Optional Git](https://github.com/Caldwell-41/Renpy-editor/issues/135) preserves the
 former 1G.3a/1G.3b requirements as GIT.1 safety and GIT.2 UI. No date or automatic start;
 the user may select it later. It is not required for 1G/1H, Phase 1 closure or Phase 2
 entry, Phase 3 or initial-release acceptance. The user removed proposed 3E on
@@ -84,7 +84,7 @@ reused human evidence; [TESTING](testing/NATIVE.md#evidence-layers-and-ownership
 
 ## Phase 2 — Initial LLM assistance
 
-Phase 2 acceptance remains incomplete. Its GitHub issue owns outstanding work; the
+Phase 2 acceptance remains incomplete. Its [GitHub issue](https://github.com/Caldwell-41/Renpy-editor/issues/132) owns outstanding work; the
 [archived Phase 2 brief](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/phase-2-initial-llm-assistance.md)
 keeps its requirements and qualified evidence. Read this roadmap for product scope.
 
@@ -96,7 +96,7 @@ limits. Studio is a first-class provider with dedicated setup, capability qualif
 diagnostics and live acceptance. Generic/OpenAI-compatible adapters are deferred outside
 Phase 2. No hardcoded model catalogue or automatic application.
 
-The [detailed Phase 2 plan](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/phase-2-initial-llm-assistance.md) records provider contracts,
+The [detailed Phase 2 plan](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/active/phase-2-initial-llm-assistance.md) ([#132](https://github.com/Caldwell-41/Renpy-editor/issues/132) owns outstanding work) records provider contracts,
 selected-context rules, proposal/history ownership and separately selected execution.
 The bounded source foundation, settings/credentials, synthetic request lifecycle,
 manual references, prompts/context, first rewrite, Continue Scene, Draft Scene,
@@ -170,11 +170,11 @@ entry points and release audience remain explicit design decisions.
 
 | Checkpoint | Bounded capability and essential acceptance |
 | --- | --- |
-| 3A — Mature authoring and supported flow/state constructs | Explicitly own initial-release conditions/calls and their shared semantics, source mapping, diagnostics and history. Mature Scene/Source/Branches without creating a second graph or document truth. Unknown/custom constructs remain lossless. |
-| 3B — Supported screen designer | Reviewed screen-language subset with canvas/hierarchy editing, minimal source patches and runtime comparisons. Unsupported screens remain source/custom code; no claim of full arbitrary-screen WYSIWYG. |
-| 3C — Staging, native animation and VN Timeline | Character drag/resize with matching runtime placement; native pre-rendered playback and dialogue idle loops; reviewed timing/transform/audio subset with source mapping, undo and native tests. Only pinned-Ren'Py-supported media profiles; no GIF import/conversion, transcoding or video editing. |
-| 3D — Supported state simulation and Run From Here | Depends on a validated state/provenance model and supported control-flow semantics. Distinguish reachable, saved-route and synthetic/manual starting state; refuse or clearly limit unknown prerequisites. A label jump/warp alone is not correct state reconstruction. |
-| 3F — Distribution and release acceptance | The agreed initial-release capabilities pass integrated E2E, pinned-SDK comparisons, accessibility, performance, privacy/security, recovery and packaging. Verify the actual distribution audience/channel and install/launch behavior before publication. |
+| 3A — Mature authoring and supported flow/state constructs ([#133](https://github.com/Caldwell-41/Renpy-editor/issues/133)) | Explicitly own initial-release conditions/calls and their shared semantics, source mapping, diagnostics and history. Mature Scene/Source/Branches without creating a second graph or document truth. Unknown/custom constructs remain lossless. |
+| 3B — Supported screen designer ([#22](https://github.com/Caldwell-41/Renpy-editor/issues/22)) | Reviewed screen-language subset with canvas/hierarchy editing, minimal source patches and runtime comparisons. Unsupported screens remain source/custom code; no claim of full arbitrary-screen WYSIWYG. |
+| 3C — Staging, native animation and VN Timeline ([#129](https://github.com/Caldwell-41/Renpy-editor/issues/129)) | Character drag/resize with matching runtime placement; native pre-rendered playback and dialogue idle loops; reviewed timing/transform/audio subset with source mapping, undo and native tests. Only pinned-Ren'Py-supported media profiles; no GIF import/conversion, transcoding or video editing. |
+| 3D — Supported state simulation and Run From Here ([#130](https://github.com/Caldwell-41/Renpy-editor/issues/130)) | Depends on a validated state/provenance model and supported control-flow semantics. Distinguish reachable, saved-route and synthetic/manual starting state; refuse or clearly limit unknown prerequisites. A label jump/warp alone is not correct state reconstruction. |
+| 3F — Distribution and release acceptance ([#131](https://github.com/Caldwell-41/Renpy-editor/issues/131)) | The agreed initial-release capabilities pass integrated E2E, pinned-SDK comparisons, accessibility, performance, privacy/security, recovery and packaging. Verify the actual distribution audience/channel and install/launch behavior before publication. |
 
 These are dependency-planning boundaries; each execution brief must name its exact subset, entry conditions, measurable acceptance and exclusions. Shared state semantics must precede 3D. General analysis completeness is not assumed: deeper Phase 4 analysis may refine this supported subset later without making 3D's claims retroactively true.
 
