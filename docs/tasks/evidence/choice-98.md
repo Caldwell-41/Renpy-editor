@@ -1801,3 +1801,19 @@ Kris approved one Mac diagnostic and one final run per target (Mac 23, Windows 1
 The diagnostic smoke on `62145673` showed the Edit dialog still open. H90 owns the
 corrected cause and fix. A 25 ms delay on direct shell calls reproduces it in the
 browser preflight, which passes after the fix with 399 frontend and 39 desktop tests.
+
+The final runs on `fc2688d8` passed every gate, package build and packaged case on
+both targets: the local signed Mac run (Mac 23/23) and hosted Windows
+[run 42992823551](https://github.com/Caldwell-41/Renpy-editor/actions/runs/42992823551)
+(Windows 13/13). Both smokes completed the whole scripted journey with no failed
+observation, and the Scene and Source stages were complete. The core rejected each
+report because later Scene steps, present on the base branch, overwrote the finished
+supporting stage with "Add Appearance". `8d80a348` freezes that stage. The DOM smoke
+test and browser preflight now require all three stages to be complete; both
+reproduced the rejection and pass after the fix.
+
+Kris accepted this evidence for #98 without another package run. Caveat: navigation,
+popup and final single-instance confirmation run only after an accepted report, so
+neither smoke observed them; secondary-instance rejection was observed. `8d80a348`
+has unit and browser proof only. All run allowances are spent. The selected
+`Loomlight validation` status stays failed for the final heads by this decision.

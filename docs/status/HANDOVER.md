@@ -3,59 +3,23 @@
 ## Selected Choice implementation
 
 The coordinating chat owns #98 and #101–#106 on `codex/choice-98` in
-[draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125). All six slices
-and approved preview A v2 are integrated. Full Story #110 remains separate.
-Preserve worktrees, private evidence, `app/node_modules` and the recovery suffix.
+[PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125). All six slices,
+approved preview A v2 and the closeout review fixes are integrated. Full Story #110
+remains separate. Preserve worktrees, private evidence, `app/node_modules` and the
+recovery suffix.
 
-The [third campaign audit](../tasks/evidence/choice-98.md#third-campaign-results-and-offline-harness-corrections)
-owns current results and the new harness corrections. Published routed candidate
-is `2997c202`; Kris approved signed local Mac and hosted Windows qualification.
-Windows run 42960921424 attempt 1 is terminal failure. Core had 683 passes and
-one TLS cancellation shutdown-observation failure. No Windows SDK or package ran;
-its bounded three-member failure archive is retained with matching GitHub digest.
-The failure omits mode/raw observation. The [focused diagnosis](../tasks/evidence/choice-98.md#windows-tls-readiness-diagnosis-and-correction)
-reproduced a fixture-readiness race twice with a temporary publication delay.
-Early shutdown, Cancelled and EOF succeeded, but the shared observation was None
-because no socket had been published. The correction waits for ClientHello and
-checks ownership before cancelling. Mac proof passes; exact producing-host
-verification with the controlled delay is next. Preserve P02's EOF/timing/ownership
-requirements; attribution of the original CI failure remains provisional.
+[The closeout record](../tasks/evidence/choice-98.md#closeout-review-and-final-campaign)
+owns the final campaign, smoke diagnosis and acceptance. Kris accepted the package
+evidence on 2026-11-11: both targets passed every gate, package build and packaged
+case, and both smokes passed every observation. The report was rejected only for a
+stale supporting-stage label, corrected in `8d80a348` with unit and browser proof.
+Navigation, popup and final single-instance confirmation run only after acceptance,
+so they were not observed. Kris waived the native/human session.
 
-Mac passed 691 core tests, isolated flow/browser gates, SDK lifecycle/download,
-runtime diagnostics/service, Phase 1H and 38 release desktop tests. One signed
-app/installer was built and verified with the approved identity. Privacy scan,
-dependency inventory and retained package hashes pass. The six native case
-producers all passed. The outer UI-refresh validator incorrectly required route
-stages; it now requires the actual eleven ordered checks. The actual browser
-producer reproduced that rejection and passes the corrected Python validator,
-including missing-check and refusal controls. Immutable native reports revalidate;
-original failed wrapper files remain untouched.
-
-The previously unexecuted Mac WebView smoke ran once on the same package. Primary
-readiness/secondary rejection passed, but final report delivery hit pre-dispatch
-RUNTIME_BUSY and exited 1. No owned process remained. Its observations and terminal
-delivery now use the existing bounded busy helper. The desktop disposition also
-leaves pre-dispatch busy reports pending instead of scheduling exit; its exact
-Rust boundary has a unit red/green check. Unit red/green covers all
-checkpoints, report, both health reads and retained failure cases. The timer stub
-permits actual bounded waits. All 399 frontend tests, the affected browser preflight,
-Q1 controls and ten retention tests pass. This embedded probe correction has no
-fresh native/package proof. Product UI/core and signing policy are unchanged.
-
-The additional campaign allowance is exhausted; the owning issue retains current
-accounting and target results. No retry, rebuild or replacement is authorized. The
-conditional unused #106 start stays separate. Earlier both-target Choice SDK
-proof, including all 27 picked-state outcomes, retains its candidate scope; the
-#104 duplicate-receipt limit remains recorded. Native physical-input/human and
-final package acceptance remain incomplete. No merge, release or closure is selected.
-
-Next: review/publish the readiness correction and verify the exact SDK-free
-Windows unit in the existing assigned checkout, including the demonstrated
-publication window. The coordinator owns durable source writes; a Windows assignment may
-use temporary diagnostic instrumentation only and must restore exact bytes.
-Use the owning issue for live publication/CI receipts and preserve candidate-specific
-package evidence. Do not request another campaign before the focused diagnosis
-and all independent authorized preparation finish.
+Run allowances are spent (Mac 23/23, Windows 13/13); no further package run is
+authorized. SUNDOWN's assigned checkout is clean and restored. The PR is ready for
+Kris's merge decision. After merge, close #98 and #101–#106 by hand, because the
+PR targets `codex/phase3b-screen-designer`, then retire the merged ticket worktrees.
 
 <a id="shared-arithmetic-implementation-2026-11-09"></a>
 

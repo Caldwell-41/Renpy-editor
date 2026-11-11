@@ -47,30 +47,13 @@ acceptance. Historical allowances remain closed.
 
 Kris selected [Choice #98](https://github.com/Caldwell-41/Renpy-editor/issues/98)
 and #101–#106 on `codex/choice-98` in
-[draft PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125).
-All six slices and approved preview A v2 are integrated. Both targets have focused
-Choice SDK proof, including all 27 picked-state outcomes. Rendered comparison,
-398 frontend tests and the required browser/controller checks pass under their
-recorded scopes. Full Story #110 remains separate.
+[PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125). All six slices,
+approved preview A v2 and the closeout review fixes are integrated. Both targets
+have focused Choice SDK proof, including all 27 picked-state outcomes. Full Story
+#110 remains separate.
 
-The [live verification receipt](https://github.com/Caldwell-41/Renpy-editor/issues/98#issuecomment-6784104150)
-records exact-head Windows offline verification and passing automatic quality at
-`bf3abd2f`. Both final package campaigns failed before producing a package; their
-allowance is 2/2 spent. Native/human acceptance remains pending.
-
-The [third campaign audit](../tasks/evidence/choice-98.md#third-campaign-results-and-offline-harness-corrections)
-records the approved signed-local-Mac/hosted-Windows attempt on `2997c202`.
-Mac passed core, SDK/Phase 1H and desktop gates and produced a verified signed app.
-All six native case producers passed; a stale outer validator is corrected with
-retained-report and browser proof. Mac smoke failed final-report delivery on busy
-contention; its bounded probe correction passes unit/browser checks. Windows stopped
-at one TLS cancellation unit failure before SDK/package work. A controlled Windows
-experiment reproduced a fixture-readiness race; the correction waits for
-ClientHello before cancellation. Mac unit proof passes; reviewed producing-host
-verification is next. Attribution of the original CI failure remains provisional.
-
-The additional campaign allowance is exhausted. The owning issue retains the
-current accounting. No retry or rebuild is selected. The corrected harness has
-399 passing frontend tests; fresh native/package proof remains incomplete.
-Signing policy, approved designs and protected recovery are unchanged.
-#98/#106 and PR #125 stay open/draft.
+Kris accepted the final package evidence on 2026-11-11. Every gate, package build
+and packaged case passed on both targets, and each smoke passed every observation.
+The smoke report was rejected only for a stale probe stage label, now corrected.
+The native/human session is waived. [The closeout record](../tasks/evidence/choice-98.md#closeout-review-and-final-campaign)
+owns results, caveats and spent allowances. The PR awaits Kris's merge decision.
