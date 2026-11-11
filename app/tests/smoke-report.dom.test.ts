@@ -100,6 +100,9 @@ test("packaged probe constructs exactly one truthful final report", async (t) =>
           assert.match(String(report.sourceCommandTrace), /^\|shell=/);
         } else {
           assert.equal(report.sceneAuthoringUiPassed, true, JSON.stringify(report));
+          // The core accepts only complete stages, as well as passed observations.
+          assert.equal(report.supportingAuthoringStage, "complete");
+          assert.equal(report.sceneAuthoringStage, "complete");
           assert.equal(report.sourceAuthoringUiPassed, true);
           assert.equal(report.sourceAuthoringStage, "complete");
           assert.equal(report.sourceCommandTracePassed, scenario === "success" || scenario === "busy");

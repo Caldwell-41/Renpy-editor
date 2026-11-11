@@ -299,6 +299,7 @@ try {
  await probe.waitForFunction(()=>window.__reviewProbeReport,{},{timeout:30000});
  const report=await probe.evaluate(()=>window.__reviewProbeReport);
  for(const key of ['supportingAuthoringUiPassed','sceneAuthoringUiPassed','sourceAuthoringUiPassed','sourceCommandTracePassed'])assert.equal(report[key],true,JSON.stringify(report));
+ for(const key of ['supportingAuthoringStage','sceneAuthoringStage','sourceAuthoringStage'])assert.equal(report[key],'complete',JSON.stringify(report));
  await probe.close();
  // Exercise the shipped UI probe itself, including contention while source input
  // is being retained. This is a browser/driver regression, not native acceptance.

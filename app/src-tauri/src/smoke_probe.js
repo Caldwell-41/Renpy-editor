@@ -253,15 +253,19 @@ setTimeout(async () => {
       }
       throw new Error(`Timed out waiting for ${description}`);
     };
+    // Track progress only until the supporting stage records its result; later
+    // Scene steps reuse these helpers and must not overwrite that result.
+    let supportingFinal = false;
+    const track = (stage) => { if (!supportingFinal) supportingAuthoringStage = stage; };
     const awaitSurface = async (label) => {
-      supportingAuthoringStage = label;
+      track(label);
       await waitFor(
         () => [...document.querySelectorAll("button")].some((item) => (item.textContent === label || item.getAttribute("aria-label") === label) && !item.closest("[hidden]") && item.checkVisibility({ visibilityProperty: true })),
         label,
       );
     };
     const awaitCall = async (operation) => {
-      supportingAuthoringStage = operation;
+      track(operation);
       await waitFor(() => called.has(operation), operation);
       await yieldTask();
     };
@@ -409,6 +413,7 @@ setTimeout(async () => {
       : !overlappingFlushSuppressed ? "overlapping-flush-not-suppressed"
       : !cancelledPreserved ? "cancel-state-lost"
       : requiredCalls.find((operation) => !called.has(operation)) ?? "complete";
+    supportingFinal = true;
 
     sceneAuthoringStage = "open-scene-workspace";
     click("Story");
