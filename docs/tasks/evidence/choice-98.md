@@ -1834,8 +1834,10 @@ Mac 24/24 and Windows 15/15; every allowance for #98 is closed.
 Kris authorized merge, issue closure, this closeout and worktree retirement.
 [PR #125](https://github.com/Caldwell-41/Renpy-editor/pull/125) squash-merged into
 `codex/phase3b-screen-designer` at `8fbfb094ed762b1652c931cdc4a68ebcc0ea12ac`.
-#98 and #101–#106 are closed as completed with links to that commit. Seven local
-ticket/preview worktrees held only reproducible build output and are retired, and
-the integration worktree follows after this closeout. Their branches and remote heads
+#98 and #101–#106 are closed as completed with links to that commit. Eight local
+ticket/preview worktrees held only reproducible build and dependency output. Each
+head is an ancestor of tested head `49cc3f1f`, whose tree equals the merge tree
+`616ec0da`; they are retired. The integration worktree follows after this closeout,
+with its ignored test reports kept under the primary checkout's `.toolchains/retired/`. Their branches and remote heads
 remain. The detached Story design-reference worktree keeps uncommitted approval and
 capture changes, so it stays. SUNDOWN's checkout and its diagnostics are unchanged.
