@@ -1788,7 +1788,7 @@ passed core with the corrected TLS test, SDK gates, Phase 1H, desktop, package b
 and all six packaged cases. Both smokes sent their final report 401 ms (Mac) and
 559 ms (Windows) after setup, with no authoring checkpoint, and the core rejected
 the incomplete report. The third campaign's Mac smoke shows the same 539 ms report.
-[H90](../../testing/INCIDENTS.md#h90-packaged-smoke-probe-starts-before-the-shell-renders)
+[H90](../../testing/INCIDENTS.md#h90-packaged-smoke-navigates-before-a-dialogs-save-closes-it)
 owns the cause and correction `a62c7390`. The retries use one corrected head:
 Mac 21/21 and Windows 12/12, with no further attempt.
 
