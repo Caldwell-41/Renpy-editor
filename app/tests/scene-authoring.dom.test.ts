@@ -7,7 +7,7 @@ import {
   hasSceneDraft,
   renderRecoverySurface,
   renderSceneAuthoring,
-  settleSceneDraft,
+  renderStoryView,
   storyScene,
   type RecoveryReport,
   type SceneCommand,
@@ -415,17 +415,59 @@ test("Background resolves default-layer uncertainty after Custom Code without cl
 });
 
 
-test("dialogue navigation protects IME and shares one pending commit",async()=>{
- const browser=installDom();const host=document.querySelector<HTMLElement>("#host")!;host.className="scene-workspace";
- const original=sceneModel();const pending=deferred<SceneWorkspace>();let calls=0;
- const dispose=renderSceneAuthoring(host,document.querySelector("#tree")!,original,{status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error("unused");},apply:async()=>{calls++;return pending.promise;}});
- host.querySelector<HTMLButtonElement>(".beat-select")!.click();const text=host.querySelector("textarea")!;text.value="Kept through navigation";text.dispatchEvent(new window.Event("input",{bubbles:true}));
- text.dispatchEvent(new window.Event("compositionstart"));assert.equal(await settleSceneDraft(host),false);assert.equal(calls,0);
- text.dispatchEvent(new window.Event("compositionend"));const a=settleSceneDraft(host),b=settleSceneDraft(host);assert.equal(calls,1);assert.equal(text.disabled,true);
- pending.resolve({...original,scenes:original.scenes.map((scene,i)=>i?scene:{...scene,beats:scene.beats.map((beat,j)=>j?beat:{...beat,payload:{type:"dialogue",characterId:"alice",text:"Kept through navigation"}})})});
- assert.deepEqual(await Promise.all([a,b]),[true,true]);assert.equal(calls,1);assert.match(host.textContent!,/Kept through navigation/);dispose();await browser.happyDOM.close();
+test("a beat draft stays attached across beats, scenes and remounts, and Commit sends only that beat",async()=>{
+ const browser=installDom();const host=document.querySelector<HTMLElement>("#host")!,tree=document.querySelector<HTMLElement>("#tree")!;host.className="scene-workspace";
+ const original=sceneModel(),calls:{command:SceneCommand;expected:unknown}[]=[];
+ const card=(id:string)=>host.querySelector<HTMLElement>(`[data-beat-id="${id}"]`)!;
+ const sceneRow=(name:string)=>[...tree.querySelectorAll<HTMLElement>(".tree-scene-row")].find(row=>row.querySelector(".tree-scene-open")?.textContent===name)!;
+ const actions={status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error("unused");},apply:async(command:SceneCommand,expected:unknown)=>{calls.push({command,expected});return original;}};
+ const view=renderStoryView(host,tree,original,actions);
+ card("dialogue").querySelector<HTMLButtonElement>(".beat-select")!.click();
+ const text=card("dialogue").querySelector("textarea")!;text.value="Kept through navigation";text.dispatchEvent(new window.Event("input",{bubbles:true}));
+ text.dispatchEvent(new window.Event("compositionstart"));assert.equal(await view.settle(),false);
+ text.dispatchEvent(new window.Event("compositionend"));assert.equal(await view.settle(),true);
+ card("choice").querySelector<HTMLButtonElement>(".beat-select")!.click();
+ assert.equal(card("dialogue").querySelector("textarea"),null);assert.equal(card("dialogue").dataset.beatDraft,"true");assert.equal(sceneRow("Arrival").dataset.beatDraft,"true");
+ sceneRow("Garden").querySelector<HTMLButtonElement>(".tree-scene-open")!.click();await tick();
+ assert.equal(view.hasDrafts("scene-one"),true);assert.equal(view.hasDrafts("scene-two"),false);
+ sceneRow("Arrival").querySelector<HTMLButtonElement>(".tree-scene-open")!.click();await tick();
+ // Returning from another workspace shows a fresh model; another edit moved the project revision.
+ const moved={...original,projectRevision:"9".repeat(64)};
+ view.update(moved,actions,"dialogue");
+ assert.equal(card("dialogue").querySelector("textarea"),text);assert.equal(text.value,"Kept through navigation");assert.equal(calls.length,0);
+ [...card("dialogue").querySelectorAll("button")].find(item=>item.textContent==="Commit Beat")!.click();await tick();
+ assert.equal(calls.length,1);assert.equal(calls[0]!.command.type,"updateBodyBeat");assert.equal(calls[0]!.command.beatId,"dialogue");
+ assert.equal((calls[0]!.command.beat as {text:string}).text,"Kept through navigation");
+ assert.equal((calls[0]!.expected as {projectRevision:string}).projectRevision,moved.projectRevision);
+ assert.equal(view.hasDrafts(),false);view.dispose();await browser.happyDOM.close();
 });
 
+test("a valid beat draft shows on the stage while typing, and Cancel restores the accepted line",async()=>{
+ const browser=installDom();const host=document.querySelector<HTMLElement>("#host")!,tree=document.querySelector<HTMLElement>("#tree")!;
+ const view=renderStoryView(host,tree,sceneModel(),{status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error("unused");},apply:async()=>{throw Error("unused");}});
+ const overlay=()=>host.querySelector(".preview-overlay.dialogue")?.textContent;
+ host.querySelector<HTMLButtonElement>('[data-beat-id="dialogue"] .beat-select')!.click();assert.match(overlay()!,/Hello/);
+ const text=host.querySelector<HTMLTextAreaElement>('[data-beat-id="dialogue"] textarea')!;text.focus();text.value="Draft line";text.dispatchEvent(new window.Event("input",{bubbles:true}));
+ await new Promise(resolve=>setTimeout(resolve,200));
+ assert.match(overlay()!,/Draft line/);assert.equal(document.activeElement,text);
+ [...host.querySelectorAll<HTMLButtonElement>('[data-beat-id="dialogue"] button')].find(item=>item.textContent==="Cancel")!.click();
+ host.querySelector<HTMLButtonElement>('[data-beat-id="dialogue"] .beat-select')!.click();assert.match(overlay()!,/Hello/);
+ view.dispose();await browser.happyDOM.close();
+});
+
+test("a beat draft refuses Commit when its beat changed in source, and keeps the input",async()=>{
+ const browser=installDom();const host=document.querySelector<HTMLElement>("#host")!,tree=document.querySelector<HTMLElement>("#tree")!;
+ const original=sceneModel(),calls:SceneCommand[]=[],statuses:string[]=[];
+ const actions={status:(value:string)=>{statuses.push(value);},resolution:{width:1920,height:1080},present:async()=>{throw Error("unused");},apply:async(command:SceneCommand)=>{calls.push(command);return original;}};
+ const view=renderStoryView(host,tree,original,actions);
+ host.querySelector<HTMLButtonElement>('[data-beat-id="dialogue"] .beat-select')!.click();
+ const text=host.querySelector<HTMLTextAreaElement>('[data-beat-id="dialogue"] textarea')!;text.value="Mine";text.dispatchEvent(new window.Event("input",{bubbles:true}));
+ const external={...original,scenes:original.scenes.map((scene,i)=>i?scene:{...scene,beats:scene.beats.map(beat=>beat.id==="dialogue"?{...beat,payload:{type:"dialogue" as const,characterId:"alice",text:"Theirs"}}:beat)})};
+ view.update(external,actions,"dialogue");
+ [...host.querySelectorAll<HTMLButtonElement>('[data-beat-id="dialogue"] button')].find(item=>item.textContent==="Commit Beat")!.click();await tick();
+ assert.equal(calls.length,0);assert.match(statuses.at(-1)!,/changed in source/);assert.equal(text.value,"Mine");assert.equal(view.hasDrafts(),true);
+ view.dispose();await browser.happyDOM.close();
+});
 
 test("adding a Beat saves once and returns a collapsed row without a second commit",async()=>{
  const browser=installDom();let model=sceneModel();let calls=0;

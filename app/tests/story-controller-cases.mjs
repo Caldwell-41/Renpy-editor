@@ -10,6 +10,7 @@ const names=[
  'Manual branch preview and Branches navigation agree with exact Source locations',
  'Cancel and dirty Source draft refusal retain pending author input',
  'Ordinary external edits and stale revisions refuse with zero source writes',
+ 'Beat drafts stay attached across scenes and workspaces until Commit or Cancel',
 ];
 const scene=c=>c.workspace().scenes.find(s=>s.id===c.workspace().entrySceneId);
 // The scene Story shows, read from the selected row in the actual scene tree.
@@ -328,7 +329,10 @@ export const storyCases={
  [names[7]]:async c=>{
   const s=scene(c),choice=s.beats.find(b=>b.payload.type==='choice');const accepted=await c.snapshot();const from=c.requests().length;
   await select(c,choice.id);let card=row(c,choice.id);const input=card.querySelector('[aria-label="Choice option text"]');c.enter(input,'Cancelled intent');
-  const draftTree=c.workspace().scenes.map(item=>[item.id,item.displayName]);const draftControls=treeControls(c);for(const control of draftControls){c.assert(!control.disabled);control.click();await c.settle();c.assert(!c.document.querySelector('.tree-inline'));c.assert.equal(input.value,'Cancelled intent');c.assert(input.isConnected);}
+  const draftTree=c.workspace().scenes.map(item=>[item.id,item.displayName]);const draftControls=treeControls(c);for(const control of draftControls){c.assert(!control.disabled);control.click();await c.settle();
+   // A beat draft does not block tree forms; cancelling one leaves the draft untouched.
+   const inline=c.document.querySelector('.tree-inline');if(inline){await c.click('Cancel',inline);await c.settle();}
+   c.assert.equal(input.value,'Cancelled intent');c.assert(input.isConnected);}
   c.assert.deepEqual(c.workspace().scenes.map(item=>[item.id,item.displayName]),draftTree);
   await c.click('Cancel',card);c.assert.deepEqual(await c.snapshot(),accepted);c.assert.equal(c.requests().slice(from).filter(r=>r.request.operation==='scene.apply').length,0);
   // Hold only a validated response to one actual UI request, after Host dispatch, to inspect pending locks.
@@ -378,5 +382,33 @@ export const storyCases={
   await c.click('Commit Beat',freshCard);await c.wait(()=>c.lastMutation()?.response.ok&&!row(c,refreshed.id).querySelector('.expanded-beat'));
   c.assert(c.sourceText(await c.snapshot(),s.sourcePath).includes('# ordinary external Story writer'));
   unchangedOtherSources(c,accepted,await c.snapshot(),s.sourcePath);
+ },
+ [names[9]]:async c=>{
+  const entry=scene(c),called=c.workspace().scenes.find(x=>x.displayName==='Called scene');c.assert(called);
+  const narration=id=>c.workspace().scenes.find(x=>x.id===id).beats.find(b=>b.payload.type==='narration'&&!b.owner);
+  const a=narration(entry.id),b=narration(called.id);c.assert(a&&b);
+  const accepted=await c.snapshot(),from=c.requests().length;
+  const writes=()=>c.requests().slice(from).filter(r=>r.request.operation==='scene.apply').length;
+  const openScene=async id=>{const name=c.workspace().scenes.find(x=>x.id===id).displayName;
+   [...c.document.querySelectorAll('.tree-scene-open')].find(x=>x.textContent===name).click();
+   await c.wait(()=>shownScene(c)===id&&c.document.querySelector('.scene-workspace .beat-card'));await c.settle();};
+  const type=async(id,text)=>{await select(c,id);c.enter(row(c,id).querySelector('textarea'),text);await c.settle();};
+  // Two drafts in two scenes. Navigation between beats, scenes and workspaces never writes.
+  await type(a.id,'Draft A kept');row(c,a.id).querySelector('.beat-select').click();await c.settle();
+  c.assert.equal(row(c,a.id).dataset.beatDraft,'true');c.assert(!row(c,a.id).querySelector('textarea'));
+  await openScene(called.id);await type(b.id,'Draft B kept');
+  const owner=c.session();await c.click('Source');await c.wait(()=>c.session()===owner&&c.document.querySelector('.source-workspace'));await c.settle();
+  await goStory(c,called.id);c.assert.equal(writes(),0);c.assert.deepEqual(await c.snapshot(),accepted);
+  await select(c,b.id);c.assert.equal(row(c,b.id).querySelector('textarea').value,'Draft B kept');
+  // Commit accepts only the selected beat; the other scene's draft stays unsaved.
+  await c.click('Commit Beat',row(c,b.id));await c.wait(()=>c.lastMutation()?.response.ok&&!row(c,b.id).querySelector('.expanded-beat'));await c.settle();
+  c.assert.equal(writes(),1);const committed=await c.snapshot();
+  c.assert(c.sourceText(committed,called.sourcePath).includes('Draft B kept'));
+  c.assert.equal(c.sourceText(committed,entry.sourcePath),c.sourceText(accepted,entry.sourcePath));unchangedOtherSources(c,accepted,committed,called.sourcePath);
+  // Cancel removes the remaining draft without a write.
+  await openScene(entry.id);c.assert.equal(row(c,a.id).dataset.beatDraft,'true');
+  await select(c,a.id);c.assert.equal(row(c,a.id).querySelector('textarea').value,'Draft A kept');
+  await c.click('Cancel',row(c,a.id));await c.settle();
+  c.assert.equal(row(c,a.id).dataset.beatDraft,'false');c.assert.equal(writes(),1);c.assert.deepEqual(await c.snapshot(),committed);
  },
 };
