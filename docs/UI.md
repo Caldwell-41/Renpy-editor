@@ -510,8 +510,8 @@ Unrelated non-conflicting changes need no prompt, and routine navigation keeps e
 draft. Returning to the affected beat reveals "Conflict with source" in the
 selected-beat editor, with the current source text above the editable retained
 draft, now labelled "Your draft". Place Discard draft and Override source together
-below the text box, in place of Cancel and Commit. "Other drafts stay unsaved."
-sits under them.
+below the text box, in place of Cancel and Commit. While the comparison shows, the
+Commit and Cancel shortcuts ask the author to choose one of the two actions.
 
 - Discard draft keeps the current source and removes only this beat draft. The beat
   stays selected, and its editor shows the source text.
@@ -521,9 +521,9 @@ sits under them.
 
 Override source uses the source revision its comparison shows and keeps all existing
 validation and source-ownership checks. If the source changed again, core refuses the
-write. Story reloads, keeps the input, shows the newer source text in the comparison
-and reports "The source changed again. Review it, then choose again. Draft retained."
-The author presses Override source again to save over the newer text. There is no
+write. Story reloads, keeps the input, shows the current source text in the comparison
+and reports "Source changed. Review it, then choose again. Draft retained." The author
+presses Override source again to save over that text. There is no
 automatic retry. The action does not authorize a stale write or bypass
 unsupported-source refusal.
 
@@ -531,7 +531,9 @@ A draft whose beat, insertion place or scene left source has no beat to sit unde
 It shows above the shown scene's beats with "Conflict with source" and, in place of
 source text, why there is none, for example "This beat is no longer in source." A
 beat that became protected says to edit it in Source. Only Discard draft resolves
-these drafts. If Story cannot map the scene's source, its drafts say so and wait.
+these drafts. A scene whose source Story cannot map has no beats to compare with. Its
+drafts are not conflicts: they show above its beats with their own actions, and Commit
+and Story Save refuse them until Story can read the source again.
 A new beat whose insertion anchor is gone but whose body remains stays in its body,
 where the author can choose another place.
 

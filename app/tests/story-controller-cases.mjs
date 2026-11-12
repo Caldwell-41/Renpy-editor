@@ -548,6 +548,8 @@ export const storyCases={
   c.assert.equal(undoName(),'Undo discard of narration draft in High ending');
   // Discard draft keeps source and removes only that draft. Undo brings it back with its comparison; neither writes.
   await openScene(low.id);const lowCard=await open(l.id);c.assert.equal(lowCard.querySelector('.story-conflict-source').textContent,'Source L changed');
+  // A valid conflicting draft still previews on the stage.
+  await c.wait(()=>c.document.querySelector('.preview-overlay')?.textContent.includes('Discarded draft L'));
   await c.click('Discard draft',lowCard);await c.settle();
   c.assert.equal(row(c,l.id).dataset.beatDraft,'false');c.assert.equal(row(c,l.id).querySelector('textarea').value,'Source L changed','The beat stays open on source');
   c.assert.equal(undoName(),'Undo discard of narration draft in Low ending');
@@ -566,7 +568,7 @@ export const storyCases={
   const reviewed=c.workspace().scenes.find(x=>x.id===entry.id).sourceRevision;
   await c.raw({driver:'externalReplace',path:entry.sourcePath,remove:'"Source edit one"',insert:'"Source edit two"'});const twice=await c.snapshot();
   const staleAt=c.requests().length;await c.click('Override source',row(c,a.id));
-  await c.wait(()=>status()==='The source changed again. Review it, then choose again. Draft retained.');await c.settle();
+  await c.wait(()=>status()==='Source changed. Review it, then choose again. Draft retained.');await c.settle();
   const stale=c.requests().slice(staleAt).find(r=>r.request.operation==='scene.apply');
   c.assert.equal(stale?.errorCode,'SOURCE_CONFLICT');c.assert.equal(stale.request.payload.command.expectedSourceRevision,reviewed,'Override uses the revision the author reviewed');
   c.assert.deepEqual(stale.request.payload.drafts?.length,1);

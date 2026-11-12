@@ -1000,9 +1000,11 @@ export function renderStoryView(
   };
 
   // A draft whose beat, place or scene left source has no beat to sit under. It shows
-  // above the shown scene's beats, with the comparison and Discard draft.
+  // above the shown scene's beats, with the comparison and Discard draft. So does a
+  // draft in a scene Story cannot map, with its own actions.
   const showLostDrafts = (scene: SceneDocument): void => {
-    const lost = pendingDrafts().filter(draft => (draft.sceneId === scene.id || !model.scenes.some(item => item.id === draft.sceneId)) && "missing" in (draft.conflict() ?? {}));
+    const away = (draft: BeatDraft): boolean => scene.sourceConflict ? !draft.panel.isConnected : "missing" in (draft.conflict() ?? {});
+    const lost = pendingDrafts().filter(draft => (draft.sceneId === scene.id || !model.scenes.some(item => item.id === draft.sceneId)) && away(draft));
     host.querySelector(".beats-list")?.prepend(...lost.map(draft => draft.panel));
   };
   // Shows or clears a draft's comparison (approved B, `story-draft-conflict` / `compact-v2`):
@@ -1731,19 +1733,25 @@ export function renderStoryView(
     // A draft commits against current revisions while its beat's accepted payload is unchanged.
     // Otherwise it conflicts: only Discard draft or Override source resolves it.
     const accepted = JSON.stringify(beat.payload);
-    const base = (): { scene: SceneDocument; expectedBody: BodyRef; captured: ExpectedRevisions } => {
+    // The beat in the shown model, and the revisions a write of it expects.
+    const located = () => {
       const current = model.scenes.find(item => item.id === scene.id), node = current?.beats.find(item => item.id === beat.id);
-      if (!current || !node || JSON.stringify(node.payload) !== accepted) throw new Error("Conflict with source. Draft retained.");
-      return { scene: current, expectedBody: beatBody(node), captured: expectedRevisions(model) };
+      return { current, node, basis: current && node ? { scene: current, expectedBody: beatBody(node), captured: expectedRevisions(model) } : undefined };
+    };
+    const base = (): { scene: SceneDocument; expectedBody: BodyRef; captured: ExpectedRevisions } => {
+      const { current, node, basis } = located();
+      if (current?.sourceConflict) throw new Error(unreadable);
+      if (!basis || JSON.stringify(node!.payload) !== accepted) throw new Error("Conflict with source. Draft retained.");
+      return basis;
     };
     const conflict = (): DraftConflict | undefined => {
-      const current = model.scenes.find(item => item.id === scene.id), node = current?.beats.find(item => item.id === beat.id);
-      if (current?.sourceConflict) return { missing: unreadable };
-      if (!current || !node) return { missing: "This beat is no longer in source." };
+      const { current, node, basis } = located();
+      if (current?.sourceConflict) return undefined;
+      if (!node || !basis) return { missing: "This beat is no longer in source." };
       if (node.protected || node.conditionalBranch || node.structuralPlaceholder || readOnlyLogic(node)) return { missing: "Story can no longer edit this beat. Edit it in Source." };
       if (JSON.stringify(node.payload) === accepted) return undefined;
       // Override writes against exactly the source this comparison shows.
-      const reviewed = { scene: current, expectedBody: beatBody(node), captured: expectedRevisions(model) };
+      const reviewed = basis;
       const { payload } = node, sameSpeaker = payload.type === "dialogue" && beat.payload.type === "dialogue" && payload.characterId === beat.payload.characterId;
       return { source: payload.type === "narration" || sameSpeaker ? payload.text : beatSummary(payload, model), override: () => override(reviewed) };
     };
@@ -1755,7 +1763,7 @@ export function renderStoryView(
         let payload: BeatPayload;
         try { payload = editor.read(); } catch (error) { actions.status(friendlyError(error, invalidDraft), "error"); editor.focus(); return false; }
         if (editor.primary.tagName === "TEXTAREA" && !(editor.primary as HTMLTextAreaElement).value.trim()) { actions.status("Enter text before overriding the source. Draft retained.", "error"); editor.primary.focus(); return false; }
-        return mutate(updateCommand(payload, reviewed), () => dropDraft(beat.id), reviewed.captured, panel, draft, "The source changed again. Review it, then choose again. Draft retained.");
+        return mutate(updateCommand(payload, reviewed), () => dropDraft(beat.id), reviewed.captured, panel, draft, staleOverride);
       })().finally(() => { settling = undefined; });
     };
     const updateCommand = (payload: BeatPayload, current = base()): SceneCommand => ({ type: "updateBodyBeat", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, beatId: beat.id, expectedBody: current.expectedBody, beat: payload });
@@ -1810,7 +1818,7 @@ export function renderStoryView(
     const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => { cancelStep(beat.id); dropDraft(beat.id); selectedBeatId = undefined; draw(); if (beat.payload.type === "setVariable") host.querySelector<HTMLElement>(`[data-beat-id="${beat.id}"] .beat-select`)?.focus(); });
     if (beat.payload.type === "showScreen" || beat.payload.type === "hideScreen" || beat.payload.type === "callScreen") panel.addEventListener("keydown", event => {
       if (event.key !== "Escape" || event.isComposing || composing) return;
-      event.preventDefault(); event.stopPropagation(); if (!pendingWrites && !settling) { cancelStep(beat.id); dropDraft(beat.id); selectedBeatId = undefined; draw(); }
+      event.preventDefault(); event.stopPropagation(); if (!pendingWrites && !settling && !conflicted()) { cancelStep(beat.id); dropDraft(beat.id); selectedBeatId = undefined; draw(); }
     });
     const commit = button("Commit Beat", "button primary"); commit.disabled = scene.sourceConflict;
     const save = async (continueDialogue: boolean): Promise<boolean> => {
@@ -1841,12 +1849,14 @@ export function renderStoryView(
     };
     editor.primary.addEventListener("compositionstart",()=>{composing=true;});editor.primary.addEventListener("compositionend",()=>{composing=false;});
     commit.addEventListener("click", () => { if(!settling) { settling=save(false).finally(()=>{settling=undefined;}); } });
+    // While the comparison shows, only Discard draft or Override source resolves the draft.
+    const conflicted = (): boolean => { if (panel.dataset.conflict !== "true") return false; actions.status("Choose Discard draft or Override source. Draft retained."); panel.querySelector<HTMLElement>(".story-resolution button")?.focus(); return true; };
     if (beat.payload.type === "setVariable") panel.addEventListener("keydown", event => {
-      if ((event.ctrlKey || event.metaKey) && event.key === "Enter" && !event.defaultPrevented) { event.preventDefault(); if (!event.isComposing && !settling && !pendingWrites) settling = save(false).finally(() => { settling = undefined; }); }
-      else if (event.key === "Escape" && !event.defaultPrevented && !event.isComposing) { event.preventDefault(); if (!pendingWrites && !settling) { actions.status("Use Cancel to discard this draft, or keep editing."); cancel.focus(); } }
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter" && !event.defaultPrevented) { event.preventDefault(); if (!event.isComposing && !settling && !pendingWrites && !conflicted()) settling = save(false).finally(() => { settling = undefined; }); }
+      else if (event.key === "Escape" && !event.defaultPrevented && !event.isComposing) { event.preventDefault(); if (!pendingWrites && !settling && !conflicted()) { actions.status("Use Cancel to discard this draft, or keep editing."); cancel.focus(); } }
     });
     if (beat.payload.type === "dialogue") editor.primary.addEventListener("keydown", (event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") { event.preventDefault(); if(!event.isComposing&&!settling)settling=save(event.shiftKey).finally(()=>{settling=undefined;}); }
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") { event.preventDefault(); if(!event.isComposing&&!settling&&!conflicted())settling=save(event.shiftKey).finally(()=>{settling=undefined;}); }
     });
     const screenBeat=["showScreen","hideScreen","callScreen"].includes(beat.payload.type);
     if(screenBeat){panel.classList.add("story-screen-editor");cancel.className="button secondary";}
@@ -1873,6 +1883,7 @@ export function renderStoryView(
     const base = (): { scene: SceneDocument; captured: ExpectedRevisions } => {
       const current = model.scenes.find(item => item.id === scene.id);
       if (!current) throw new Error("This Scene is no longer available. Draft retained.");
+      if (current.sourceConflict) throw new Error(unreadable);
       return { scene: current, captured: expectedRevisions(model) };
     };
     const insertCommand = (payload: BeatPayload, location: { body: BodyRef; position: Position }, current = base()): SceneCommand => ({ type: "insertBodyBeat", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, ...location, beat: payload });
@@ -1970,7 +1981,12 @@ export function renderStoryView(
     placement.host.addEventListener("change",()=>{const target=bodyList(place().body);if(target&&panel.parentElement!==target)target.prepend(panel);});
     const draft=keepDraft(key,{panel,sceneId:scene.id,place,read:()=>editor.read(),command:savedCommand,kind:()=>beatLabels[type.value as BeatPayload["type"]].toLowerCase(),editors:()=>[...typeDrafts.values()],primary:()=>editor.primary,
       // A new beat whose scene or branch left source has nowhere to go: only Discard draft resolves it.
-      conflict:()=>{const current=model.scenes.find(item=>item.id===scene.id),{body:at}=place();if(!current)return {missing:"This beat's scene is no longer in source."};if(current.sourceConflict)return {missing:unreadable};return at.type==="branch"&&!current.beats.some(item=>item.id===at.branchId)?{missing:"This beat's place is no longer in source."}:undefined;},
+      conflict:()=>{
+        const current=model.scenes.find(item=>item.id===scene.id),{body:at}=place();
+        if(!current)return {missing:"This beat's scene is no longer in source."};
+        if(current.sourceConflict||at.type==="root"||current.beats.some(item=>item.id===at.branchId))return undefined;
+        return {missing:"This beat's place is no longer in source."};
+      },
       detach:()=>{pendingMarker.remove();panel.remove();}});updatePendingMarker();
     // A new beat is a draft from the moment it is added, so adding it is its first step.
     draft.state=captureDraft(draft);startStep(draft,"new",undefined,draft.state);type.focus();
@@ -2060,8 +2076,11 @@ function beatSummary(payload: BeatPayload, model: SceneWorkspace): string {
  * that left source has only `missing`, which says why there is no source text.
  */
 type DraftConflict = { readonly source: string; readonly override: () => void } | { readonly missing: string };
-// A scene whose source Story cannot map has no beats to compare with, so its drafts wait.
-const unreadable = "Story cannot read this scene's source right now. The draft stays until it can.";
+// A scene whose source Story cannot map has no beats to compare with. Its drafts are not
+// conflicts: they wait, and Commit and Story Save refuse them until Story can read it.
+const unreadable = "Story cannot read this scene's source right now. Draft retained.";
+// Core refused an Override because the project changed after the comparison showed.
+const staleOverride = "Source changed. Review it, then choose again. Draft retained.";
 
 /** What an editor keeps outside its controls, such as a Choice's option rows, for draft-step Undo. */
 interface EditorInternals { readonly capture: () => unknown; readonly restore: (saved: unknown) => void }

@@ -447,6 +447,26 @@ test("a valid beat draft shows on the stage while typing, and Cancel restores th
  view.dispose();await browser.happyDOM.close();
 });
 
+test("a draft whose beat left source offers only Discard draft; a scene Story cannot map keeps its drafts as they are",async()=>{
+ const browser=installDom();const host=document.querySelector<HTMLElement>("#host")!,tree=document.querySelector<HTMLElement>("#tree")!;
+ const original=sceneModel(),actions={status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error("unused");},apply:async()=>original};
+ const view=renderStoryView(host,tree,original,actions);
+ const type=(text:string)=>{host.querySelector<HTMLButtonElement>('[data-beat-id="dialogue"] .beat-select')!.click();const field=host.querySelector<HTMLTextAreaElement>('[data-beat-id="dialogue"] textarea')!;field.value=text;field.dispatchEvent(new window.Event("input",{bubbles:true}));return field;};
+ const visible=(scope:Element)=>[...scope.querySelectorAll("button")].filter(item=>!item.closest("[hidden]")).map(item=>item.textContent);
+ const withScene=(change:(scene:SceneWorkspace["scenes"][number])=>SceneWorkspace["scenes"][number])=>({...original,scenes:original.scenes.map((scene,i)=>i?scene:change(scene))});
+ // A scene Story cannot map has no beats to compare with: the draft keeps its own actions and is not a conflict.
+ let text=type("Waiting");view.update(withScene(scene=>({...scene,sourceConflict:true,beats:[],bodies:[]})),actions);
+ assert.ok(host.contains(text));assert.equal(text.value,"Waiting");assert.equal(host.querySelector(".story-conflict"),null);
+ assert.deepEqual(visible(text.closest("[data-beat-draft-key]")!).slice(-2),["Cancel","Commit Beat"]);
+ // Once the beat leaves source, the draft shows the comparison with no source text and only Discard draft.
+ view.update(withScene(scene=>({...scene,beats:scene.beats.filter(beat=>beat.id!=="dialogue")})),actions);
+ const lost=host.querySelector<HTMLElement>(".beats-list > [data-beat-draft-key]")!;assert.ok(lost.contains(text));
+ assert.equal(lost.querySelector(".story-conflict > p")?.textContent,"This beat is no longer in source.");assert.deepEqual(visible(lost),["Discard draft"]);
+ [...lost.querySelectorAll("button")].find(item=>item.textContent==="Discard draft")!.click();
+ assert.equal(view.hasDrafts(),false);assert.equal(host.querySelector(".beats-list > [data-beat-draft-key]"),null);
+ view.dispose();await browser.happyDOM.close();
+});
+
 test("an unsaved new beat moves with the place the author chooses",async()=>{
  const browser=installDom();const host=document.querySelector<HTMLElement>("#host")!,tree=document.querySelector<HTMLElement>("#tree")!;
  const view=renderStoryView(host,tree,foundationModel(),{status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error("unused");},apply:async()=>{throw Error("unused");}});
