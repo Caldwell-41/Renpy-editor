@@ -4,6 +4,7 @@
 //! `default` statements. Original source bytes remain authoritative; mapped statements
 //! are patched only when their exact bytes and file revision still match.
 
+use crate::history::{HistoryItem, HistoryLabel};
 use crate::transaction::{
     CommitOutcome, DirectoryAnchor, FileIdentity, FileMutation, FlushOutcome, MutationKind,
     ProjectId, RelativePath, Revision, TransactionIntent, TransactionProposal, TransactionService,
@@ -437,7 +438,7 @@ pub struct AuthoringService {
     pub(crate) transactions: TransactionService,
     imports: HashMap<String, ImportAuthority>,
     pub(crate) observed_flow: Mutex<HashMap<ProjectId, crate::scene::flow::ObservedFlow>>,
-    pub(crate) scene_history: Mutex<HashMap<ProjectId, crate::transaction::HistoryStack>>,
+    pub(crate) project_history: Mutex<HashMap<ProjectId, crate::history::HistoryStack>>,
     pub(crate) source_sessions: Mutex<crate::source::SourceSessions>,
 }
 
@@ -479,7 +480,7 @@ impl AuthoringService {
         self.clear_observed_flow(id);
         self.transactions.unregister_trusted_project(id);
         self.imports.retain(|_, authority| &authority.project != id);
-        if let Ok(mut history) = self.scene_history.lock() {
+        if let Ok(mut history) = self.project_history.lock() {
             history.remove(id);
         }
     }
@@ -821,8 +822,15 @@ impl AuthoringService {
                 existing.source.source_revision = new_revision.clone();
             }
         }
+        let variable_id = uuid::Uuid::new_v4().to_string();
+        let label = HistoryLabel::new(
+            format!("new variable {}", request.technical_name),
+            HistoryItem::Variable {
+                variable_id: variable_id.clone(),
+            },
+        );
         metadata.variables.push(Variable {
-            id: uuid::Uuid::new_v4().to_string(),
+            id: variable_id,
             technical_name: request.technical_name,
             variable_type: request.variable_type,
             default_value: stored_value,
@@ -842,6 +850,7 @@ impl AuthoringService {
             new_source,
             metadata,
             metadata_snapshot,
+            label,
         )
     }
 
@@ -878,6 +887,12 @@ impl AuthoringService {
                 .map(|item| item.source.statement.as_str()),
         )?;
         let variable = &mut metadata.variables[variable_index];
+        let label = HistoryLabel::new(
+            format!("{} default change", variable.technical_name),
+            HistoryItem::Variable {
+                variable_id: variable.id.clone(),
+            },
+        );
         let new_statement = format!("default {} = {}", variable.technical_name, literal);
         let new_source =
             replace_exact_once(&source_bytes, &variable.source.statement, &new_statement)?;
@@ -898,6 +913,7 @@ impl AuthoringService {
             new_source,
             metadata,
             metadata_snapshot,
+            label,
         )
     }
 
@@ -1094,12 +1110,31 @@ impl AuthoringService {
                     proposed: bytes,
                 },
             );
+            let label = HistoryLabel::new(
+                format!(
+                    "{} import",
+                    if request.kind == AssetKind::UiImage {
+                        "UI image"
+                    } else {
+                        "font"
+                    }
+                ),
+                HistoryItem::Asset {
+                    asset_id: metadata
+                        .assets
+                        .last()
+                        .ok_or(AuthoringError::CorruptMetadata)?
+                        .id
+                        .clone(),
+                },
+            );
             self.commit_history(
                 project,
                 TransactionProposal {
                     mutations: companions,
                     intent: TransactionIntent::Edit,
                 },
+                label,
             )
             .map_err(|error| match error {
                 crate::scene::SceneError::RecoveryRequired => AuthoringError::RecoveryRequired,
@@ -1859,6 +1894,7 @@ impl AuthoringService {
         new_source: Vec<u8>,
         metadata: AuthoringMetadata,
         metadata_snapshot: Option<(Vec<u8>, Revision)>,
+        label: HistoryLabel,
     ) -> Result<AuthoringMetadata, AuthoringError> {
         // Keep semantic no-ops out of the shared session history.
         if new_source == source_bytes {
@@ -1873,7 +1909,7 @@ impl AuthoringService {
             metadata,
             metadata_snapshot,
         )?;
-        self.commit_history(project, proposal)
+        self.commit_history(project, proposal, label)
             .map_err(|error| match error {
                 crate::scene::SceneError::RecoveryRequired => AuthoringError::RecoveryRequired,
                 crate::scene::SceneError::RuntimeBusy => AuthoringError::RuntimeBusy,

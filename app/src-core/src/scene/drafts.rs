@@ -144,8 +144,9 @@ impl AuthoringService {
             request.expected_authoring_revision.as_deref(),
             &request.commands,
         )?;
+        let label = save_label(&loaded.project, &request.commands);
         let proposal = self.build_drafts(project, project_id, loaded, request.commands)?;
-        self.commit_or_verify(project, proposal)?;
+        self.commit_or_verify(project, proposal, label)?;
         self.scene_workspace(project, project_id)
     }
 
@@ -219,4 +220,28 @@ impl AuthoringService {
             intent: TransactionIntent::Edit,
         })
     }
+}
+
+/// One Story Save is one history entry until #113 adds an entry per beat. It
+/// reveals the last saved beat, which the renderer sends last.
+fn save_label(project: &ProjectMetadata, commands: &[SceneCommand]) -> HistoryLabel {
+    let (scene_id, beat_id) = match commands.last() {
+        Some(SceneCommand::UpdateBodyBeat {
+            scene_id, beat_id, ..
+        }) => (scene_id.clone(), Some(beat_id.clone())),
+        Some(SceneCommand::InsertBodyBeat { scene_id, .. }) => (scene_id.clone(), None),
+        _ => (String::new(), None),
+    };
+    let name = match commands.len() {
+        1 => {
+            let scene = project
+                .scenes
+                .iter()
+                .find(|scene| scene.id == scene_id)
+                .map_or("a scene", |scene| scene.display_name.as_str());
+            format!("saved beat in {scene}")
+        }
+        count => format!("save of {count} beat drafts"),
+    };
+    HistoryLabel::new(name, HistoryItem::beat(scene_id, beat_id))
 }

@@ -1,6 +1,7 @@
 //! Project-local prose and read-only, deterministic one-Beat preparation. No transport.
 use crate::{
     authoring::AuthoringService,
+    history::{HistoryItem, HistoryLabel},
     references,
     scene::{BeatPayload, SceneError},
     transaction::{
@@ -77,8 +78,6 @@ pub struct PromptRequest {
 pub enum PromptCommand {
     Save { text: String },
     Restore,
-    Undo,
-    Redo,
 }
 #[derive(Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -135,8 +134,6 @@ pub struct PromptWorkspace {
     pub saved_baseline_digest: Option<String>,
     pub customized: bool,
     pub style_notes: String,
-    pub can_undo: bool,
-    pub can_redo: bool,
 }
 fn empty(project: &str) -> Value {
     json!({"schemaVersion":1,"projectId":project,"prompts":{},"styleNotes":""})
@@ -249,11 +246,6 @@ impl AuthoringService {
         let baseline = baseline(action)?;
         let (doc, _, revision) = self.prompt_snapshot(project, project_id)?;
         let override_text = doc["prompts"][action]["text"].as_str();
-        let histories = self
-            .scene_history
-            .lock()
-            .map_err(|_| PromptError::Unavailable)?;
-        let h = histories.get(project);
         Ok(PromptWorkspace {
             revision: token(&revision),
             effective_text: override_text.unwrap_or(baseline).into(),
@@ -268,8 +260,6 @@ impl AuthoringService {
                 .map(String::from),
             customized: override_text.is_some(),
             style_notes: doc["styleNotes"].as_str().unwrap_or_default().into(),
-            can_undo: h.is_some_and(|h| h.can_undo()),
-            can_redo: h.is_some_and(|h| h.can_redo()),
         })
     }
     pub fn prompts_apply(
@@ -284,15 +274,11 @@ impl AuthoringService {
         if request.expected_revision != token(&revision) {
             return Err(PromptError::Stale);
         }
+        let name = match request.command {
+            PromptCommand::Save { .. } => "system prompt edit",
+            PromptCommand::Restore => "system prompt restore",
+        };
         match request.command {
-            PromptCommand::Undo => {
-                self.undo_scene(project).map_err(PromptError::History)?;
-                return self.prompts_for(project, project_id, action);
-            }
-            PromptCommand::Redo => {
-                self.redo_scene(project).map_err(PromptError::History)?;
-                return self.prompts_for(project, project_id, action);
-            }
             PromptCommand::Restore => {
                 if doc["prompts"]
                     .as_object_mut()
@@ -337,6 +323,12 @@ impl AuthoringService {
                 }],
                 intent: TransactionIntent::Edit,
             },
+            HistoryLabel::new(
+                name,
+                HistoryItem::Prompt {
+                    action: action.to_owned(),
+                },
+            ),
         )
         .map_err(PromptError::History)?;
         self.prompts_for(project, project_id, action)

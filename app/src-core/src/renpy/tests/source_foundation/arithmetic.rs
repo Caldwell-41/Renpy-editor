@@ -154,17 +154,8 @@ fn author(
     if decimal {
         inspect_decimal_fixture(&after);
     }
-    ipc(
-        service,
-        "scene.apply",
-        json!({"expectedProjectRevision":after["projectRevision"],"expectedSourceMapRevision":after["sourceMapRevision"],"command":{"type":"undo"}}),
-    );
-    let undone = ipc(service, "scene.list", json!({}));
-    ipc(
-        service,
-        "scene.apply",
-        json!({"expectedProjectRevision":undone["projectRevision"],"expectedSourceMapRevision":undone["sourceMapRevision"],"command":{"type":"redo"}}),
-    );
+    ipc(service, "history.undo", json!({}));
+    ipc(service, "history.redo", json!({}));
     assert_eq!(fs::read(root.join(&path)).unwrap(), accepted);
     service.close().unwrap();
     service.open_path(root).unwrap();
@@ -429,6 +420,7 @@ fn decimal_draft_contract_is_revision_bound_and_does_not_commit() {
         json!({"technicalName":"fraction","variableType":"decimal","defaultValue":1.25}),
     );
     let model = ipc(&mut service, "scene.list", json!({}));
+    let history = ipc(&mut service, "history.state", json!({}));
     let scene = &model["scenes"][0];
     let fraction = model["authoring"]["variables"]
         .as_array()
@@ -483,10 +475,7 @@ fn decimal_draft_contract_is_revision_bound_and_does_not_commit() {
         fixtures.push(json!({"request":input,"response":output}));
     }
     assert_eq!(sources(&root.join("game")), before);
-    assert_eq!(
-        ipc(&mut service, "scene.list", json!({}))["canUndo"],
-        model["canUndo"]
-    );
+    assert_eq!(ipc(&mut service, "history.state", json!({})), history);
     if let Some(dir) = std::env::var_os("LOOMLIGHT_FOUNDATION_EVIDENCE_DIR") {
         fs::create_dir_all(&dir).unwrap();
         fs::write(
@@ -602,12 +591,8 @@ fn variable_defaults_share_history_with_scene_edits_and_reopen() {
     let project = root.join("synthetic-project");
     service.open_path(&project).unwrap();
     fn history(service: &mut LifecycleService, direction: &str) -> serde_json::Value {
-        let model = ipc(service, "scene.list", json!({}));
-        ipc(
-            service,
-            "scene.apply",
-            json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":direction}}),
-        )
+        ipc(service, &format!("history.{direction}"), json!({}));
+        ipc(service, "scene.list", json!({}))
     }
     for (name, kind, value, changed) in [
         ("fraction", "decimal", json!(2.5), json!(3.75)),
@@ -633,7 +618,7 @@ fn variable_defaults_share_history_with_scene_edits_and_reopen() {
             .find(|v| v["technicalName"] == name)
             .unwrap()
             .clone();
-        assert_eq!(ipc(&mut service, "scene.list", json!({}))["canUndo"], true);
+        assert!(!ipc(&mut service, "history.state", json!({}))["undo"].is_null());
         history(&mut service, "undo");
         assert_eq!(
             ipc(&mut service, "authoring.list", json!({}))["variables"],
@@ -703,6 +688,6 @@ fn variable_defaults_share_history_with_scene_edits_and_reopen() {
     service.close().unwrap();
     service.open_path(&project).unwrap();
     assert_eq!(ipc(&mut service, "authoring.list", json!({})), accepted);
-    assert_eq!(ipc(&mut service, "scene.list", json!({}))["canUndo"], false);
+    assert!(ipc(&mut service, "history.state", json!({}))["undo"].is_null());
     service.close().unwrap();
 }

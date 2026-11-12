@@ -3,7 +3,7 @@
 :root[data-density="small"]{--ui-size:12px}:root[data-density="large"]{--ui-size:16px}
 html,body,#app{height:100%;margin:0}html,body{font-size:var(--ui-size)}button,input,select,textarea{font-size:inherit}button{touch-action:manipulation}[hidden]{display:none!important}
 .app-shell{height:100dvh;min-height:0;display:grid;grid-template-rows:54px minmax(0,1fr) 30px;overflow:hidden}.app-shell:has(.runtime-panel){grid-template-rows:54px minmax(0,1fr) 30px}
-.app-header{padding:0 22px;gap:18px;min-width:0;overflow:hidden;position:relative}.brand{font-size:1.15rem;flex:none}.brand::before{content:'◧';color:var(--accent-primary);margin-right:10px}.header-project{padding-left:24px;border-left:1px solid var(--border-strong);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:auto}
+.app-header{padding:0 22px;gap:18px;min-width:0;overflow-x:clip;overflow-y:visible;position:relative;z-index:5}.brand{font-size:1.15rem;flex:none}.brand::before{content:'◧';color:var(--accent-primary);margin-right:10px}.header-project{padding-left:24px;border-left:1px solid var(--border-strong);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:auto}
 .app-status{min-width:0;max-width:40vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:24px}.app-footer{display:flex;gap:20px;align-items:center;justify-content:space-between;padding:0 22px;border-top:1px solid var(--border-normal);color:var(--text-muted);font-size:.8em;min-width:0;overflow:hidden}.footer-status{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.shell-settings{white-space:nowrap}
 .project-shell{display:grid;grid-template-columns:200px minmax(0,1fr);height:100%;min-height:0;padding:0;overflow:hidden}.story-sidebar{display:flex;flex-direction:column;border-right:1px solid var(--border-normal);background:var(--surface-panel);padding:22px 12px;min-height:0;overflow:auto}.story-sidebar>h2{padding:0 10px 16px;overflow-wrap:anywhere}.story-sidebar>.eyebrow{padding:0 10px}.tree-item{min-height:44px;text-align:left;padding:10px 14px;border-radius:6px;margin:3px 0;white-space:nowrap}.tree-item.selected{background:var(--accent-subtle);color:var(--text-primary);box-shadow:inset 3px 0 var(--accent-primary)}.close-project{margin-top:auto}.story-tree{min-height:0;overflow:auto;border-top:1px solid var(--border-normal);margin-top:18px;padding-top:14px}.tree-tools{opacity:0}.tree-scene-row:focus-within .tree-tools,.tree-scene-row:hover .tree-tools,.tree-chapter-row:hover .tree-tools,.tree-chapter-row:focus-within .tree-tools{opacity:1}
 .project-shell[data-navigation-collapsed="true"]{grid-template-columns:72px minmax(0,1fr)}.project-shell[data-navigation-collapsed="true"]>.story-sidebar>.tree-item{font-size:0;padding:10px}.tree-item::before{content:attr(data-symbol);font-size:18px;display:inline-block;width:28px}.project-shell[data-navigation-collapsed="true"] .story-sidebar>h2,.project-shell[data-navigation-collapsed="true"] .story-sidebar>.eyebrow{display:none}.project-shell[data-navigation-collapsed="true"] .close-project{font-size:.7em;padding:4px}.navigation-toggle{margin-top:16px}
@@ -850,3 +850,18 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
   .character-workspace .reference-form-footer>.button,.project-lorebook .reference-form-footer>.button {min-width:0;white-space:nowrap;}
   .reference-writing-body {padding-right:0;}
 }
+
+/* Header Undo and Redo: header-undo / icons-v1. Square icon buttons between the save
+   state and Save; the tooltip shows at once on keyboard focus and after a short pause
+   on hover. The header clips sideways overflow only, so the tooltip can drop below it. */
+.header-history{display:flex;gap:4px;flex:none}
+.app-header>.header-history{margin-left:auto}.app-header>.header-history+.button{margin-left:0}
+.header-history-command{position:relative;display:inline-flex}
+.app-header .header-history-button{width:36px;min-height:36px;padding:0}
+.header-history-button .navigation-icon{width:16px;height:16px;margin:0;flex:none}
+.header-history-button[aria-disabled="true"]{color:var(--text-muted);border-color:var(--border-normal);background:transparent;cursor:default}
+.header-history-button[aria-disabled="true"]:hover{background:transparent}
+.header-history-tip{position:absolute;top:calc(100% + 7px);right:0;z-index:20;display:flex;gap:10px;align-items:center;white-space:nowrap;padding:4px 8px;font-size:11px;color:var(--surface-app);background:var(--text-primary);border-radius:3px;visibility:hidden;opacity:0;pointer-events:none}
+.header-history-tip kbd{font:inherit;opacity:.7}
+.header-history-command:hover>.header-history-tip{visibility:visible;opacity:1;transition:opacity .1s linear .45s,visibility 0s .45s}
+.header-history-command:has(>.header-history-button:focus-visible)>.header-history-tip{visibility:visible;opacity:1;transition:none}

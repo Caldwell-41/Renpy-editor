@@ -6,6 +6,7 @@
 
 use crate::{
     authoring::{AuthoringService, PersistenceStatus},
+    history::{HistoryItem, HistoryLabel},
     metadata::{ProjectMetadata, SceneMetadata, SceneSourceMapping, SourceMapMetadata},
     scene::{build_mapping, SceneBeat, SceneError},
     transaction::{
@@ -366,7 +367,11 @@ impl AuthoringService {
         };
         if let Some(prepared) = prepared {
             let proposal = self.source_proposal(project, project_id, vec![prepared])?;
-            self.commit_source_history(project, proposal)?;
+            let label = HistoryLabel::new(
+                format!("Source edit in {}", file_name(&request.path)),
+                HistoryItem::source(&request.path),
+            );
+            self.commit_source_history(project, proposal, label)?;
             self.accept_committed_paths(project, std::slice::from_ref(&request.path))?;
         }
         self.source_document(project, project_id, &request.path)
@@ -393,7 +398,18 @@ impl AuthoringService {
         };
         if !prepared.is_empty() {
             let proposal = self.source_proposal(project, project_id, prepared)?;
-            self.commit_source_history(project, proposal)?;
+            let label = match paths.as_slice() {
+                [path] => HistoryLabel::new(
+                    format!("Source edit in {}", file_name(path)),
+                    HistoryItem::source(path),
+                ),
+                [first, ..] => HistoryLabel::new(
+                    format!("Source edits in {} files", paths.len()),
+                    HistoryItem::source(first),
+                ),
+                [] => unreachable!("Save All commits only prepared buffers"),
+            };
+            self.commit_source_history(project, proposal, label)?;
             self.accept_committed_paths(project, &paths)?;
         }
         self.source_inventory(project, project_id)
@@ -452,7 +468,11 @@ impl AuthoringService {
         request: SourceApplyBothRequest,
     ) -> Result<SourceDocument, SourceError> {
         let proposal = self.prepare_apply_both(project, project_id, &request)?;
-        self.commit_source_history(project, proposal)?;
+        let label = HistoryLabel::new(
+            format!("combined Source edit in {}", file_name(&request.path)),
+            HistoryItem::source(&request.path),
+        );
+        self.commit_source_history(project, proposal, label)?;
         self.accept_committed_paths(project, std::slice::from_ref(&request.path))?;
         self.source_document(project, project_id, &request.path)
     }
@@ -1137,8 +1157,9 @@ impl AuthoringService {
         &self,
         project: &ProjectId,
         proposal: TransactionProposal,
+        label: HistoryLabel,
     ) -> Result<(), SourceError> {
-        self.commit_history(project, proposal)
+        self.commit_history(project, proposal, label)
             .map(|_| ())
             .map_err(scene_source_error)
     }
@@ -1532,6 +1553,11 @@ fn commit_error(outcome: CommitOutcome) -> SourceError {
         CommitOutcome::Rejected { diagnostic } => transaction_error(diagnostic),
         CommitOutcome::Committed { .. } => SourceError::Io,
     }
+}
+
+/// The file name a history name shows, for example "script.rpy".
+fn file_name(path: &str) -> &str {
+    path.rsplit('/').next().unwrap_or(path)
 }
 
 #[cfg(test)]
@@ -2102,23 +2128,7 @@ mod tests {
             .service
             .source_save_all(&fixture.project, &fixture.project_id)
             .unwrap();
-        let workspace = fixture
-            .service
-            .scene_workspace(&fixture.project, &fixture.project_id)
-            .unwrap();
-        fixture
-            .service
-            .scene_apply(
-                &fixture.project,
-                &fixture.project_id,
-                SceneCommandRequest {
-                    expected_project_revision: workspace.project_revision,
-                    expected_source_map_revision: workspace.source_map_revision,
-                    expected_authoring_revision: None,
-                    command: SceneCommand::Undo,
-                },
-            )
-            .unwrap();
+        fixture.service.history_undo(&fixture.project).unwrap();
         assert_eq!(
             fs::read(fixture.root.join(&fixture.scene_path)).unwrap(),
             scene_before

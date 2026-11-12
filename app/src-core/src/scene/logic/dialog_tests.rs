@@ -96,9 +96,9 @@ fn call_screen_is_distinct_exact_source_with_one_history_entry_and_stable_reopen
     let current = f.model()["scenes"][0].clone();
     f.command(json!({"type":"updateBodyBeat","sceneId":current["id"],"expectedSourceRevision":current["sourceRevision"],
         "beatId":call["id"],"expectedBody":{"type":"root"},"beat":call["payload"]}));
-    f.command(json!({"type":"undo"}));
+    f.undo();
     assert_eq!(source(&mut f, &scene), original);
-    let redone = f.command(json!({"type":"redo"}));
+    let redone = f.redo();
     assert!(redone["scenes"][0]["beats"]
         .as_array()
         .unwrap()
@@ -178,9 +178,9 @@ fn call_source_retarget_keeps_each_original_binding_and_comments_through_history
             assert_eq!(beat["protected"], true);
             assert!(beat["payload"]["revisions"].is_null());
         }
-        f.command(json!({"type":"undo"}));
+        f.undo();
         assert_eq!(source(&mut f, &scene), original);
-        f.command(json!({"type":"redo"}));
+        f.redo();
         f.service.close().unwrap();
         f.service.open_path(&f.root).unwrap();
         let reopened = f.model()["scenes"][0].clone();
@@ -263,9 +263,9 @@ fn added_inert_button_can_finish_dialog_in_one_exact_transaction_and_undo_redo()
         )["changed"],
         false
     );
-    f.command(json!({"type":"undo"}));
+    f.undo();
     assert_eq!(source(&mut f, &path), before);
-    f.command(json!({"type":"redo"}));
+    f.redo();
     assert_eq!(source(&mut f, &path), expected);
     f.service.close().unwrap();
     f.service.open_path(&f.root).unwrap();
@@ -372,9 +372,9 @@ fn actions_change_only_expression_preserving_crlf_comments_and_opaque_neighbors(
             "expectedAuthoringRevision":document["authoringRevision"],"expectedTargetRevisions":[]}),
         Some(document["revision"].clone()),
     );
-    f.command(json!({"type":"undo"}));
+    f.undo();
     assert_eq!(source(&mut f, &path), before);
-    f.command(json!({"type":"redo"}));
+    f.redo();
     assert_eq!(source(&mut f, &path), expected);
 }
 

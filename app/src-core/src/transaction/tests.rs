@@ -1,4 +1,5 @@
 use super::*;
+use crate::history::{HistoryEntry, HistoryItem, HistoryLabel, HistoryMutation, HistoryStack};
 use std::{collections::HashMap, fs, path::Path};
 use tempfile::TempDir;
 
@@ -372,16 +373,19 @@ fn create_delete_history_uses_actual_commit_identities_repeatedly() {
         panic!("{created:?}")
     };
     let mut history = HistoryStack::default();
-    history.push(HistoryEntry {
-        transaction_id,
-        mutations: vec![HistoryMutation {
-            path: path.clone(),
-            before_revision: Revision::expected_absence(),
-            before_bytes: Vec::new(),
-            after_revision: revisions[0].clone(),
-            after_bytes: bytes.clone(),
-        }],
-    });
+    history
+        .push(HistoryEntry {
+            label: test_label(),
+            transaction_id,
+            mutations: vec![HistoryMutation {
+                path: path.clone(),
+                before_revision: Revision::expected_absence(),
+                before_bytes: Vec::new(),
+                after_revision: revisions[0].clone(),
+                after_bytes: bytes.clone(),
+            }],
+        })
+        .unwrap();
     let undo = history
         .undo_proposal(&HashMap::from([(path.clone(), revisions[0].clone())]))
         .unwrap();
@@ -1910,16 +1914,19 @@ fn undo_and_redo_stop_at_external_revision_boundaries() {
     };
     let after_revision = revisions[0].clone();
     let mut history = HistoryStack::default();
-    history.push(HistoryEntry {
-        transaction_id,
-        mutations: vec![HistoryMutation {
-            path: path.clone(),
-            before_revision,
-            before_bytes,
-            after_revision: after_revision.clone(),
-            after_bytes: b"after\n".to_vec(),
-        }],
-    });
+    history
+        .push(HistoryEntry {
+            label: test_label(),
+            transaction_id,
+            mutations: vec![HistoryMutation {
+                path: path.clone(),
+                before_revision,
+                before_bytes,
+                after_revision: after_revision.clone(),
+                after_bytes: b"after\n".to_vec(),
+            }],
+        })
+        .unwrap();
     let mut current = HashMap::from([(path.clone(), after_revision.clone())]);
     assert_eq!(
         history.undo_proposal(&current).unwrap().intent,
@@ -2432,6 +2439,10 @@ fn g1_o1_counterexample_same_byte_replacement_after_leaf_open() {
 #[cfg(windows)]
 mod native_boundary;
 
+fn test_label() -> HistoryLabel {
+    HistoryLabel::new("fixture edit", HistoryItem::source("game/one.rpy"))
+}
+
 fn history_record(f: &Fixture, history: &mut HistoryStack, changes: &[(&str, &[u8])]) {
     let mutations: Vec<_> = changes
         .iter()
@@ -2444,20 +2455,23 @@ fn history_record(f: &Fixture, history: &mut HistoryStack, changes: &[(&str, &[u
     else {
         panic!("fixture commit failed")
     };
-    history.push(HistoryEntry {
-        transaction_id,
-        mutations: mutations
-            .into_iter()
-            .zip(revisions)
-            .map(|(m, after_revision)| HistoryMutation {
-                path: m.path,
-                before_revision: m.base,
-                before_bytes: m.expected_bytes,
-                after_revision,
-                after_bytes: m.proposed,
-            })
-            .collect(),
-    });
+    history
+        .push(HistoryEntry {
+            label: test_label(),
+            transaction_id,
+            mutations: mutations
+                .into_iter()
+                .zip(revisions)
+                .map(|(m, after_revision)| HistoryMutation {
+                    path: m.path,
+                    before_revision: m.base,
+                    before_bytes: m.expected_bytes,
+                    after_revision,
+                    after_bytes: m.proposed,
+                })
+                .collect(),
+        })
+        .unwrap();
 }
 fn history_current(f: &Fixture, paths: Vec<RelativePath>) -> HashMap<RelativePath, Revision> {
     paths

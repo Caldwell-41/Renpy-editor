@@ -520,7 +520,23 @@ mod tests {
                 json!({"path":scene["sourcePath"],"expectedBaseRevision":draft["baseRevision"],"expectedDraftVersion":draft["draftVersion"]}),
             );
         }
+        pub(super) fn undo(&mut self) -> Value {
+            ipc(&mut self.service, "history.undo", json!({}));
+            self.model()
+        }
+        pub(super) fn redo(&mut self) -> Value {
+            ipc(&mut self.service, "history.redo", json!({}));
+            self.model()
+        }
         pub(super) fn reject(&mut self, command: Value) -> Value {
+            let w = self.model();
+            self.refused(
+                "scene.apply",
+                json!({"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":command}),
+            )
+        }
+        /// A refused request that leaves every Story file unchanged.
+        pub(super) fn refused(&mut self, operation: &str, mut payload: Value) -> Value {
             let w = self.model();
             let mut paths = w["scenes"]
                 .as_array()
@@ -531,8 +547,9 @@ mod tests {
             paths.push(self.root.join(".renpy-editor/source-map.json"));
             paths.push(self.root.join(".renpy-editor/project.json"));
             let before: Vec<_> = paths.iter().map(|p| fs::read(p).unwrap()).collect();
+            payload["sessionId"] = json!(self.service.current().unwrap().session_id);
             let response = crate::handle_application_request(
-                json!({"protocolVersion":1,"requestId":"phase3a-reject","operation":"scene.apply","payload":{"sessionId":self.service.current().unwrap().session_id,"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":command}}),
+                json!({"protocolVersion":1,"requestId":"phase3a-reject","operation":operation,"payload":payload}),
                 false,
                 &mut self.service,
             );
@@ -583,7 +600,7 @@ mod tests {
             "retained_return"
         );
         f.reject(json!({"type":"updateBeat","sceneId":scene["id"],"expectedSourceRevision":after["scenes"][0]["sourceRevision"],"beatId":call["id"],"beat":{"type":"call","sceneId":b["id"],"returnLabel":"invented_return"}}));
-        f.command(json!({"type":"undo"}));
+        f.undo();
         assert_eq!(
             fs::read(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap(),
             [b"\xef\xbb\xbf".as_slice(), source.as_bytes()].concat()
@@ -636,7 +653,7 @@ mod tests {
         assert_eq!(beats[0]["payload"]["options"][0]["condition"], guard);
         assert_eq!(beats.last().unwrap()["payload"]["type"], "return");
         f.reject(json!({"type":"removeBeat","sceneId":scene["id"],"expectedSourceRevision":inserted["scenes"][0]["sourceRevision"],"beatId":beats.last().unwrap()["id"]}));
-        f.command(json!({"type":"undo"}));
+        f.undo();
         let w = f.model();
         let scene = &w["scenes"][0];
         let terminal = f.command(json!({"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beforeBeatId":null,"beat":{"type":"choice","options":[{"text":"End"}]}}));
@@ -1173,14 +1190,14 @@ mod body_tests {
             .concat()
         );
         for _ in 0..3 {
-            f.command(json!({"type":"undo"}));
+            f.undo();
         }
         assert_eq!(
             fs::read(f.root.join(a["sourcePath"].as_str().unwrap())).unwrap(),
             original
         );
         for _ in 0..3 {
-            f.command(json!({"type":"redo"}));
+            f.redo();
         }
         assert_eq!(
             fs::read(f.root.join(a["sourcePath"].as_str().unwrap())).unwrap(),
@@ -1802,12 +1819,12 @@ mod choice_body_tests {
             expected
         );
         assert_eq!(f.reject(fields)["error"]["code"], "SOURCE_CONFLICT");
-        f.command(json!({"type":"undo"}));
+        f.undo();
         assert_eq!(
             std::fs::read_to_string(f.root.join(a["sourcePath"].as_str().unwrap())).unwrap(),
             original
         );
-        f.command(json!({"type":"redo"}));
+        f.redo();
         f.service.close().unwrap();
         f.service.open_path(&f.root).unwrap();
         assert_eq!(f.model()["scenes"][0]["beats"], updated["beats"]);

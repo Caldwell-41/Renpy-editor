@@ -1006,20 +1006,15 @@ mod source_tests {
                 .collect::<Vec<_>>()
         };
         assert_eq!(identities(&before), identities(&changed));
-        let undone = ipc(
-            &mut service,
-            "scene.apply",
-            json!({"expectedProjectRevision":changed["projectRevision"],"expectedSourceMapRevision":changed["sourceMapRevision"],"command":{"type":"undo"}}),
-        );
+        ipc(&mut service, "history.undo", json!({}));
         assert_eq!(
             fs::read(&path).unwrap(),
             [b"\xef\xbb\xbf".as_slice(), source.as_bytes()].concat()
         );
-        let redone = ipc(
-            &mut service,
-            "scene.apply",
-            json!({"expectedProjectRevision":undone["projectRevision"],"expectedSourceMapRevision":undone["sourceMapRevision"],"command":{"type":"redo"}}),
-        );
+        let redone = {
+            ipc(&mut service, "history.redo", json!({}));
+            ipc(&mut service, "scene.list", json!({}))
+        };
         assert_eq!(
             fs::read(&path).unwrap(),
             [b"\xef\xbb\xbf".as_slice(), accepted.as_bytes()].concat()

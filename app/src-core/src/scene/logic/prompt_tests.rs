@@ -39,12 +39,12 @@ fn choice_prompt_is_owned_source_with_exact_removal_history_and_reopen() {
         original
     );
     assert_eq!(removed["scenes"][0]["beats"], w["scenes"][0]["beats"]);
-    f.command(json!({"type":"undo"}));
+    f.undo();
     assert_eq!(
         fs::read(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap(),
         accepted
     );
-    f.command(json!({"type":"redo"}));
+    f.redo();
     assert_eq!(
         fs::read(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap(),
         original

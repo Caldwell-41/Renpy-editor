@@ -876,18 +876,8 @@ fn accept_ui_emitted_arithmetic(service: &mut LifecycleService, root: &Path) -> 
         );
     }
     // Public Source history restores the exact imported Story bytes.
-    let model = ipc(service, "scene.list", json!({}));
-    ipc(
-        service,
-        "scene.apply",
-        json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"undo"}}),
-    );
-    let model = ipc(service, "scene.list", json!({}));
-    ipc(
-        service,
-        "scene.apply",
-        json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"redo"}}),
-    );
+    ipc(service, "history.undo", json!({}));
+    ipc(service, "history.redo", json!({}));
     let accepted = arithmetic_sources(root);
     let document = ipc(
         service,

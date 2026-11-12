@@ -20,6 +20,7 @@ pub use variables::AssignmentDraftValidation;
 
 use crate::{
     authoring::{AssetKind, AuthoringMetadata, AuthoringService, VariableType},
+    history::{HistoryItem, HistoryLabel},
     metadata::{
         BeatSourceMapping, ChapterMetadata, OwnedScreenKind, ProjectMetadata, SceneMetadata,
         SceneSourceMapping, ScreenTargetBinding, Selection, SourceMapMetadata,
@@ -27,9 +28,8 @@ use crate::{
     },
     screens::references::{ScreenEffects, ScreenRevisions},
     transaction::{
-        CommitOutcome, ErrorCode, FileMutation, HistoryEntry, HistoryMutation, MutationKind,
-        ProjectId, RecoveryReport, RecoveryResolution, RelativePath, Revision, TransactionIntent,
-        TransactionProposal,
+        CommitOutcome, ErrorCode, FileMutation, MutationKind, ProjectId, RecoveryReport,
+        RecoveryResolution, RelativePath, Revision, TransactionIntent, TransactionProposal,
     },
 };
 use serde::{Deserialize, Serialize};
@@ -322,8 +322,6 @@ pub struct SceneWorkspace {
     pub chapters: Vec<ChapterMetadata>,
     pub scenes: Vec<SceneDocument>,
     pub authoring: AuthoringMetadata,
-    pub can_undo: bool,
-    pub can_redo: bool,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq)]
@@ -542,8 +540,6 @@ pub enum SceneCommand {
         beat_id: String,
         to_index: usize,
     },
-    Undo,
-    Redo,
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -899,8 +895,6 @@ impl AuthoringService {
                 bodies,
             });
         }
-        let history = self.scene_history.lock().map_err(|_| SceneError::Io)?;
-        let stack = history.get(project);
         Ok(SceneWorkspace {
             project_revision: loaded.project_revision.sha256,
             source_map_revision: loaded.source_map_revision.sha256,
@@ -914,8 +908,6 @@ impl AuthoringService {
             scenes,
             authoring_revision: sha256(&json_bytes(&loaded.authoring)?),
             authoring: loaded.authoring,
-            can_undo: stack.is_some_and(|value| value.can_undo()),
-            can_redo: stack.is_some_and(|value| value.can_redo()),
         })
     }
 
@@ -925,20 +917,16 @@ impl AuthoringService {
         project_id: &str,
         request: SceneCommandRequest,
     ) -> Result<SceneWorkspace, SceneError> {
-        match request.command.clone() {
-            SceneCommand::Undo => self.undo_scene(project)?,
-            SceneCommand::Redo => self.redo_scene(project)?,
-            command => {
-                let loaded = self.prepare_scene_command(project, project_id, &request, &command)?;
-                let proposal = if drafts::is_body_beat_command(&command) {
-                    self.build_drafts(project, project_id, loaded, vec![command])
-                        .map_err(SceneError::unindexed)?
-                } else {
-                    self.build_command(project, loaded, command)?
-                };
-                self.commit_or_verify(project, proposal)?;
-            }
-        }
+        let command = request.command.clone();
+        let loaded = self.prepare_scene_command(project, project_id, &request, &command)?;
+        let label = history_label(&loaded.project, &command);
+        let proposal = if drafts::is_body_beat_command(&command) {
+            self.build_drafts(project, project_id, loaded, vec![command])
+                .map_err(SceneError::unindexed)?
+        } else {
+            self.build_command(project, loaded, command)?
+        };
+        self.commit_or_verify(project, proposal, label)?;
         self.scene_workspace(project, project_id)
     }
 
@@ -948,12 +936,13 @@ impl AuthoringService {
         &self,
         project: &ProjectId,
         proposal: TransactionProposal,
+        label: HistoryLabel,
     ) -> Result<(), SceneError> {
         if proposal.mutations.iter().any(|mutation| {
             mutation.kind != MutationKind::ReplaceExisting
                 || mutation.expected_bytes != mutation.proposed
         }) {
-            self.commit_history(project, proposal)?;
+            self.commit_history(project, proposal, label)?;
             return Ok(());
         }
         for mutation in proposal.mutations {
@@ -1845,7 +1834,6 @@ impl AuthoringService {
                     to_index,
                 },
             ),
-            SceneCommand::Undo | SceneCommand::Redo => unreachable!(),
         }
     }
 
@@ -2652,80 +2640,6 @@ impl AuthoringService {
             )?;
         }
         Ok(())
-    }
-
-    pub(crate) fn commit_history(
-        &self,
-        project: &ProjectId,
-        proposal: TransactionProposal,
-    ) -> Result<Vec<Revision>, SceneError> {
-        let snapshot = proposal.mutations.clone();
-        match self.commit_observed(project, proposal) {
-            CommitOutcome::Committed {
-                transaction_id,
-                revisions,
-            } => {
-                let retained_revisions = revisions.clone();
-                let mutations = snapshot
-                    .into_iter()
-                    .zip(revisions)
-                    .map(|(mutation, after_revision)| HistoryMutation {
-                        path: mutation.path,
-                        before_revision: mutation.base,
-                        before_bytes: mutation.expected_bytes,
-                        after_revision,
-                        after_bytes: mutation.proposed,
-                    })
-                    .collect();
-                self.scene_history
-                    .lock()
-                    .map_err(|_| SceneError::Io)?
-                    .entry(project.clone())
-                    .or_default()
-                    .push(HistoryEntry {
-                        transaction_id,
-                        mutations,
-                    });
-                Ok(retained_revisions)
-            }
-            outcome => Err(outcome_error(outcome)),
-        }
-    }
-
-    pub(crate) fn undo_scene(&self, project: &ProjectId) -> Result<(), SceneError> {
-        let mut histories = self.scene_history.lock().map_err(|_| SceneError::Io)?;
-        let history = histories
-            .get_mut(project)
-            .ok_or(SceneError::HistoryBoundary)?;
-        let paths = history.undo_paths().map_err(history_error)?;
-        self.ensure_source_paths_clean(project, paths.iter().map(RelativePath::as_str))
-            .map_err(|_| SceneError::DirtySource)?;
-        let current = current_revisions(&self.transactions, project, paths)?;
-        let proposal = history.undo_proposal(&current).map_err(history_error)?;
-        match self.commit_observed(project, proposal) {
-            CommitOutcome::Committed { revisions, .. } => history
-                .accepted_undo_with_revisions(&revisions)
-                .map_err(history_error),
-            outcome => Err(outcome_error(outcome)),
-        }
-    }
-
-    pub(crate) fn redo_scene(&self, project: &ProjectId) -> Result<(), SceneError> {
-        let mut histories = self.scene_history.lock().map_err(|_| SceneError::Io)?;
-        let history = histories
-            .get_mut(project)
-            .ok_or(SceneError::HistoryBoundary)?;
-        let paths = history.redo_paths().map_err(history_error)?;
-        self.ensure_source_paths_clean(project, paths.iter().map(RelativePath::as_str))
-            .map_err(|_| SceneError::DirtySource)?;
-        let current = current_revisions(&self.transactions, project, paths)?;
-        let proposal = history.redo_proposal(&current).map_err(history_error)?;
-        match self.commit_observed(project, proposal) {
-            CommitOutcome::Committed { revisions, .. } => history
-                .accepted_redo_with_revisions(&revisions)
-                .map_err(history_error),
-            outcome => Err(outcome_error(outcome)),
-        }
     }
 
     fn scene_snapshot(
@@ -4876,22 +4790,6 @@ fn delete_mutation(
     })
 }
 
-fn current_revisions(
-    transactions: &crate::transaction::TransactionService,
-    project: &ProjectId,
-    paths: Vec<RelativePath>,
-) -> Result<HashMap<RelativePath, Revision>, SceneError> {
-    let mut current = HashMap::new();
-    for path in paths {
-        let revision = transactions
-            .snapshot_optional(project, path.clone())
-            .map_err(diagnostic_error)?
-            .map_or_else(Revision::expected_absence, |(_, revision)| revision);
-        current.insert(path, revision);
-    }
-    Ok(current)
-}
-
 fn command_source_paths(
     project: &ProjectMetadata,
     command: &SceneCommand,
@@ -5502,7 +5400,164 @@ fn sha256(bytes: &[u8]) -> String {
     hex::encode(Sha256::digest(bytes))
 }
 
-fn diagnostic_error(value: crate::transaction::PublicDiagnostic) -> SceneError {
+/// The project history name and item for a Story command, for example
+/// "dialogue edit in Arrival" revealing the edited beat.
+fn history_label(project: &ProjectMetadata, command: &SceneCommand) -> HistoryLabel {
+    let scene = |id: &str| {
+        project
+            .scenes
+            .iter()
+            .find(|scene| scene.id == id)
+            .map_or_else(|| "a scene".to_owned(), |scene| scene.display_name.clone())
+    };
+    let chapter = |id: &str| {
+        project
+            .chapters
+            .iter()
+            .find(|chapter| chapter.id == id)
+            .map_or_else(
+                || "a chapter".to_owned(),
+                |chapter| chapter.display_name.clone(),
+            )
+    };
+    let story = HistoryItem::Story {
+        scene_id: None,
+        beat_id: None,
+    };
+    let in_scene = |name: &str, scene_id: &str, beat_id: Option<&String>| {
+        HistoryLabel::new(
+            format!("{name} in {}", scene(scene_id)),
+            HistoryItem::beat(scene_id, beat_id.cloned()),
+        )
+    };
+    fn node(node: &NodeRef) -> Option<&String> {
+        match node {
+            NodeRef::Beat { beat_id } => Some(beat_id),
+            NodeRef::Condition { .. } => None,
+        }
+    }
+    match command {
+        SceneCommand::CreateChapter { display_name } => {
+            HistoryLabel::new(format!("new chapter {display_name}"), story)
+        }
+        SceneCommand::RenameChapter { chapter_id, .. } => {
+            HistoryLabel::new(format!("rename of {}", chapter(chapter_id)), story)
+        }
+        SceneCommand::MoveChapter { chapter_id, .. } => {
+            HistoryLabel::new(format!("move of {}", chapter(chapter_id)), story)
+        }
+        SceneCommand::DeleteChapter { chapter_id } => {
+            HistoryLabel::new(format!("deletion of {}", chapter(chapter_id)), story)
+        }
+        SceneCommand::CreateScene { display_name, .. }
+        | SceneCommand::CreateSceneFromChoice { display_name, .. } => {
+            HistoryLabel::new(format!("new scene {display_name}"), story)
+        }
+        SceneCommand::RenameScene { scene_id, .. } => HistoryLabel::new(
+            format!("rename of {}", scene(scene_id)),
+            HistoryItem::beat(scene_id, None),
+        ),
+        SceneCommand::MoveScene { scene_id, .. } => HistoryLabel::new(
+            format!("move of {}", scene(scene_id)),
+            HistoryItem::beat(scene_id, None),
+        ),
+        SceneCommand::DeleteScene { scene_id, .. } => HistoryLabel::new(
+            format!("deletion of {}", scene(scene_id)),
+            HistoryItem::beat(scene_id, None),
+        ),
+        SceneCommand::InsertBeat { scene_id, beat, .. }
+        | SceneCommand::InsertBodyBeat { scene_id, beat, .. } => {
+            in_scene(&format!("new {}", beat_kind(beat)), scene_id, None)
+        }
+        SceneCommand::UpdateBeat {
+            scene_id,
+            beat_id,
+            beat,
+            ..
+        }
+        | SceneCommand::UpdateBodyBeat {
+            scene_id,
+            beat_id,
+            beat,
+            ..
+        } => in_scene(
+            &format!("{} edit", beat_kind(beat)),
+            scene_id,
+            Some(beat_id),
+        ),
+        SceneCommand::InsertCondition { scene_id, .. } => in_scene("new condition", scene_id, None),
+        SceneCommand::UpdateConditionBranch {
+            scene_id,
+            branch_id,
+            ..
+        } => in_scene("condition edit", scene_id, Some(branch_id)),
+        SceneCommand::AddConditionBranch { scene_id, .. } => {
+            in_scene("new condition branch", scene_id, None)
+        }
+        SceneCommand::RemoveConditionBranch { scene_id, .. } => {
+            in_scene("condition branch removal", scene_id, None)
+        }
+        SceneCommand::UnwrapCondition {
+            scene_id,
+            branch_id,
+            ..
+        } => in_scene("condition unwrap", scene_id, Some(branch_id)),
+        SceneCommand::MoveStoryNode {
+            scene_id,
+            node: moved,
+            ..
+        } => in_scene("move", scene_id, node(moved)),
+        SceneCommand::RemoveStoryNode {
+            scene_id,
+            node: removed,
+            ..
+        } => in_scene("deletion", scene_id, node(removed)),
+        SceneCommand::UpdateChildDialogue {
+            scene_id, beat_id, ..
+        } => in_scene("dialogue edit", scene_id, Some(beat_id)),
+        SceneCommand::ContinueDialogue {
+            scene_id, beat_id, ..
+        } => in_scene("dialogue continuation", scene_id, Some(beat_id)),
+        SceneCommand::RemoveBeat {
+            scene_id, beat_id, ..
+        } => in_scene("beat deletion", scene_id, Some(beat_id)),
+        SceneCommand::MoveBeat {
+            scene_id, beat_id, ..
+        }
+        | SceneCommand::ReorderBeat {
+            scene_id, beat_id, ..
+        } => in_scene("beat move", scene_id, Some(beat_id)),
+    }
+}
+
+/// The beat's kind as the author reads it in a history name.
+pub(crate) fn beat_kind(beat: &BeatPayload) -> &'static str {
+    match beat {
+        BeatPayload::Background { .. } => "background",
+        BeatPayload::ShowCharacter { .. } => "show character",
+        BeatPayload::HideCharacter { .. } => "hide character",
+        BeatPayload::ShowScreen { .. } => "show screen",
+        BeatPayload::HideScreen { .. } => "hide screen",
+        BeatPayload::CallScreen { .. } => "call screen",
+        BeatPayload::ChangeAppearance { .. } => "appearance",
+        BeatPayload::Placement { .. } => "placement",
+        BeatPayload::Dialogue { .. } => "dialogue",
+        BeatPayload::Narration { .. } => "narration",
+        BeatPayload::PlayMusic { .. } => "music",
+        BeatPayload::StopMusic => "stop music",
+        BeatPayload::PlaySfx { .. } => "sound effect",
+        BeatPayload::Transition { .. } => "transition",
+        BeatPayload::SetVariable { .. } => "variable",
+        BeatPayload::Choice { .. } => "choice",
+        BeatPayload::Jump { .. } => "jump",
+        BeatPayload::Call { .. } => "call",
+        BeatPayload::RepeatChoice { .. } => "repeat choice",
+        BeatPayload::Return => "return",
+        BeatPayload::CustomCode { .. } => "custom code",
+    }
+}
+
+pub(crate) fn diagnostic_error(value: crate::transaction::PublicDiagnostic) -> SceneError {
     match value.code {
         ErrorCode::RuntimeBusy => SceneError::RuntimeBusy,
         ErrorCode::Conflict => SceneError::Conflict,
@@ -5515,19 +5570,12 @@ fn diagnostic_error(value: crate::transaction::PublicDiagnostic) -> SceneError {
     }
 }
 
-fn outcome_error(value: CommitOutcome) -> SceneError {
+pub(crate) fn outcome_error(value: CommitOutcome) -> SceneError {
     match value {
         CommitOutcome::Conflict { .. } => SceneError::Conflict,
         CommitOutcome::RecoveryRequired { .. } => SceneError::RecoveryRequired,
         CommitOutcome::Rejected { diagnostic } => diagnostic_error(diagnostic),
         CommitOutcome::Committed { .. } => SceneError::Io,
-    }
-}
-
-fn history_error(value: ErrorCode) -> SceneError {
-    match value {
-        ErrorCode::HistoryBoundary => SceneError::HistoryBoundary,
-        _ => SceneError::Io,
     }
 }
 
@@ -5577,8 +5625,6 @@ mod tests {
             json!({"type": "continueDialogue", "sceneId": "s", "expectedSourceRevision": "r", "beatId": "b", "characterId": "character", "text": "Next"}),
             json!({"type": "removeBeat", "sceneId": "s", "expectedSourceRevision": "r", "beatId": "b"}),
             json!({"type": "moveBeat", "sceneId": "s", "expectedSourceRevision": "r", "beatId": "b", "direction": "down"}),
-            json!({"type": "undo"}),
-            json!({"type": "redo"}),
         ];
         for command in commands {
             let request = json!({
@@ -5742,6 +5788,21 @@ mod tests {
                 .unwrap()
         }
 
+        fn history(&self) -> crate::history::HistoryState {
+            self.service.history_state(&self.project).unwrap()
+        }
+
+        /// Project Undo, then the Story workspace it leaves.
+        fn undo(&self) -> Result<SceneWorkspace, SceneError> {
+            self.service.history_undo(&self.project)?;
+            Ok(self.workspace())
+        }
+
+        fn redo(&self) -> Result<SceneWorkspace, SceneError> {
+            self.service.history_redo(&self.project)?;
+            Ok(self.workspace())
+        }
+
         fn apply(
             &self,
             workspace: &SceneWorkspace,
@@ -5792,7 +5853,7 @@ mod tests {
             ]
         );
         assert_eq!(std::fs::read(fixture.root.join(&scene.source_path)).unwrap(),b"label scene_one:\r\n    \"Second\"\r\n    \"Third\"\r\n    \"First\"\r\n    return\r\n");
-        let undone = fixture.apply(&after, SceneCommand::Undo).unwrap();
+        let undone = fixture.undo().unwrap();
         assert_eq!(
             undone.scenes[0]
                 .beats
@@ -6155,7 +6216,7 @@ mod tests {
             fs::read(fixture.root.join(&scene.source_path)).unwrap(),
             source
         );
-        assert!(!fixture.workspace().can_undo);
+        assert_eq!(fixture.history(), Default::default());
     }
 
     #[test]
@@ -6548,14 +6609,14 @@ mod tests {
             .join(compiled_path(&created.source_path))
             .exists());
         assert_eq!(deleted.scenes.len(), 1);
-        let restored = fixture.apply(&deleted, SceneCommand::Undo).unwrap();
+        let restored = fixture.undo().unwrap();
         assert!(fixture.root.join(&created.source_path).is_file());
         assert_eq!(
             fs::read(fixture.root.join(compiled_path(&created.source_path))).unwrap(),
             b"compiled ghost"
         );
         assert!(restored.scenes.iter().any(|scene| scene.id == created.id));
-        let deleted_again = fixture.apply(&restored, SceneCommand::Redo).unwrap();
+        let deleted_again = fixture.redo().unwrap();
         assert_eq!(deleted_again.scenes.len(), 1);
     }
 
@@ -6572,7 +6633,7 @@ mod tests {
             .unwrap()
             .id
             .clone();
-        let edited = fixture
+        fixture
             .apply(
                 &before,
                 SceneCommand::InsertBeat {
@@ -6590,12 +6651,12 @@ mod tests {
             bytes,
             b"label scene_one:\r\n    \"Hello\"\r\n    \"Snowman \xe2\x98\x83\"\r\n    return\r\n"
         );
-        let undone = fixture.apply(&edited, SceneCommand::Undo).unwrap();
+        fixture.undo().unwrap();
         assert_eq!(
             fs::read(fixture.root.join(&scene.source_path)).unwrap(),
             b"label scene_one:\r\n    \"Hello\"\r\n    return\r\n"
         );
-        let redone = fixture.apply(&undone, SceneCommand::Redo).unwrap();
+        let redone = fixture.redo().unwrap();
         assert_eq!(redone.scenes[0].beats.len(), 3);
     }
 
@@ -6769,7 +6830,7 @@ mod tests {
             .unwrap()
             .id
             .clone();
-        let removed = fixture
+        fixture
             .apply(
                 &with_choice,
                 SceneCommand::RemoveBeat {
@@ -6779,7 +6840,7 @@ mod tests {
                 },
             )
             .unwrap();
-        let restored = fixture.apply(&removed, SceneCommand::Undo).unwrap();
+        let restored = fixture.undo().unwrap();
         assert_eq!(restored.scenes[0].source_revision, entry.source_revision);
         assert!(matches!(
             fixture.apply(
@@ -6842,7 +6903,7 @@ mod tests {
             Err(SceneError::ReferenceBlocked)
         ));
 
-        let undone = fixture.apply(&expanded, SceneCommand::Undo).unwrap();
+        let undone = fixture.undo().unwrap();
         assert_eq!(undone.scenes.len(), 2);
         assert!(!fixture.root.join(&created.source_path).exists());
         let BeatPayload::Choice { options, .. } = &undone
@@ -6921,7 +6982,7 @@ mod tests {
             })
             .collect();
         assert_eq!(dialogues, ["Committed", ""]);
-        let undone = fixture.apply(&continued, SceneCommand::Undo).unwrap();
+        let undone = fixture.undo().unwrap();
         let dialogues: Vec<_> = undone.scenes[0]
             .beats
             .iter()
@@ -7313,7 +7374,7 @@ mod tests {
                     && !is_terminal_payload(&beat.payload)
             })
             .unwrap();
-        workspace = fixture
+        fixture
             .apply(
                 &workspace,
                 SceneCommand::MoveBeat {
@@ -7324,8 +7385,8 @@ mod tests {
                 },
             )
             .unwrap();
-        workspace = fixture.apply(&workspace, SceneCommand::Undo).unwrap();
-        workspace = fixture.apply(&workspace, SceneCommand::Redo).unwrap();
+        fixture.undo().unwrap();
+        workspace = fixture.redo().unwrap();
         let entry = workspace
             .scenes
             .iter()
@@ -7381,7 +7442,10 @@ mod tests {
                 .collect::<Vec<_>>(),
             scene_ids
         );
-        assert!(!reopened.can_undo && !reopened.can_redo);
+        assert_eq!(
+            fixture.service.history_state(&reopened_id).unwrap(),
+            Default::default()
+        );
         assert_eq!(reopened.last_open.scene_id, workspace.last_open.scene_id);
     }
 
@@ -7557,7 +7621,7 @@ mod tests {
         let fixture = Fixture::new(b"label scene_one:\n    return\n");
         fixture.migrate();
         let before = fixture.workspace();
-        let changed = fixture
+        fixture
             .apply(
                 &before,
                 SceneCommand::CreateChapter {
@@ -7567,15 +7631,9 @@ mod tests {
             .unwrap();
         let external = b"external metadata bytes";
         fs::write(fixture.root.join(PROJECT_PATH), external).unwrap();
-        assert!(matches!(
-            fixture.apply(&changed, SceneCommand::Undo),
-            Err(SceneError::HistoryBoundary)
-        ));
+        assert!(matches!(fixture.undo(), Err(SceneError::HistoryBoundary)));
         assert_eq!(fs::read(fixture.root.join(PROJECT_PATH)).unwrap(), external);
-        assert!(matches!(
-            fixture.apply(&changed, SceneCommand::Undo),
-            Err(SceneError::HistoryBoundary)
-        ));
+        assert!(matches!(fixture.undo(), Err(SceneError::HistoryBoundary)));
     }
     #[test]
     fn review_sdk_screen_labels_keep_saved_choice_routes_and_project_entry() {
@@ -7870,7 +7928,7 @@ mod tests {
             ),
             Err(SceneError::ReferenceBlocked)
         ));
-        model = fixture.apply(&model, SceneCommand::Undo).unwrap();
+        fixture.undo().unwrap();
         assert_eq!(
             fixture
                 .service
@@ -7882,7 +7940,7 @@ mod tests {
                 .count(),
             2
         );
-        let _ = fixture.apply(&model, SceneCommand::Redo).unwrap();
+        let _ = fixture.redo().unwrap();
         let reopened = AuthoringService::default();
         let authority = reopened.register_project(&fixture.root).unwrap();
         reopened
@@ -8081,7 +8139,11 @@ mod tests {
             .unwrap();
         fixture
             .service
-            .commit_history(&fixture.project, proposal)
+            .commit_history(
+                &fixture.project,
+                proposal,
+                HistoryLabel::new("choice edit", HistoryItem::beat(&origin.id, None)),
+            )
             .unwrap();
         let start = flow::ACCEPTED_AT
             .get()
@@ -8218,23 +8280,35 @@ mod tests {
         let fixture = Fixture::new(b"label scene_one:\n    return\n");
         fixture.migrate();
         let paths = ["game/images/history.png", "game/history.rpy"];
+        let proposal = || TransactionProposal {
+            intent: TransactionIntent::Edit,
+            mutations: paths
+                .iter()
+                .map(|path| FileMutation {
+                    path: RelativePath::new(*path).unwrap(),
+                    kind: MutationKind::CreateNew,
+                    base: Revision::expected_absence(),
+                    expected_bytes: vec![],
+                    proposed: b"# synthetic history content\n".to_vec(),
+                })
+                .collect(),
+        };
+        // An entry without a name is refused before anything is written.
+        assert_eq!(
+            fixture.service.commit_history(
+                &fixture.project,
+                proposal(),
+                HistoryLabel::new(" ", HistoryItem::source("game/history.rpy")),
+            ),
+            Err(SceneError::InvalidPayload)
+        );
+        assert!(paths.iter().all(|path| !fixture.root.join(path).exists()));
         fixture
             .service
             .commit_history(
                 &fixture.project,
-                TransactionProposal {
-                    intent: TransactionIntent::Edit,
-                    mutations: paths
-                        .iter()
-                        .map(|path| FileMutation {
-                            path: RelativePath::new(*path).unwrap(),
-                            kind: MutationKind::CreateNew,
-                            base: Revision::expected_absence(),
-                            expected_bytes: vec![],
-                            proposed: b"# synthetic history content\n".to_vec(),
-                        })
-                        .collect(),
-                },
+                proposal(),
+                HistoryLabel::new("history fixture", HistoryItem::source("game/history.rpy")),
             )
             .unwrap();
         let mut workspace = fixture.workspace();
@@ -8255,36 +8329,21 @@ mod tests {
                 false,
             );
             let before = serde_json::to_value(&workspace).unwrap();
-            let command = if redo {
-                SceneCommand::Redo
-            } else {
-                SceneCommand::Undo
-            };
-            assert!(matches!(
-                fixture.apply(&workspace, command),
-                Err(SceneError::RuntimeBusy)
-            ));
+            let step = || if redo { fixture.redo() } else { fixture.undo() };
+            assert!(matches!(step(), Err(SceneError::RuntimeBusy)));
             assert_eq!(serde_json::to_value(fixture.workspace()).unwrap(), before);
             for path in paths {
                 assert_eq!(fixture.root.join(path).exists(), !redo);
             }
             process.stop();
             drop(process); // actual child cleanup releases the transaction gate
-            workspace = fixture
-                .apply(
-                    &workspace,
-                    if redo {
-                        SceneCommand::Redo
-                    } else {
-                        SceneCommand::Undo
-                    },
-                )
-                .unwrap();
+            workspace = step().unwrap();
             for path in paths {
                 assert_eq!(fixture.root.join(path).exists(), redo);
             }
-            assert_eq!(workspace.can_undo, redo);
-            assert_eq!(workspace.can_redo, !redo);
+            let history = fixture.service.history_state(&fixture.project).unwrap();
+            assert_eq!(history.undo.is_some(), redo);
+            assert_eq!(history.redo.is_some(), !redo);
         }
     }
 
@@ -8321,19 +8380,25 @@ mod tests {
             "redoDelete",
         ] {
             let scene = workspace.scenes.iter().find(|s| s.id == scene_id).cloned();
-            let command = || match step {
-                "move" => SceneCommand::MoveScene {
-                    scene_id: scene_id.clone(),
-                    chapter_id: chapter.clone(),
-                    direction: None,
-                    expected_source_revision: scene.as_ref().unwrap().source_revision.clone(),
-                },
-                "delete" => SceneCommand::DeleteScene {
-                    scene_id: scene_id.clone(),
-                    expected_source_revision: scene.as_ref().unwrap().source_revision.clone(),
-                },
-                "undoMove" | "undoDelete" => SceneCommand::Undo,
-                _ => SceneCommand::Redo,
+            let command = |workspace: &SceneWorkspace| match step {
+                "move" => fixture.apply(
+                    workspace,
+                    SceneCommand::MoveScene {
+                        scene_id: scene_id.clone(),
+                        chapter_id: chapter.clone(),
+                        direction: None,
+                        expected_source_revision: scene.as_ref().unwrap().source_revision.clone(),
+                    },
+                ),
+                "delete" => fixture.apply(
+                    workspace,
+                    SceneCommand::DeleteScene {
+                        scene_id: scene_id.clone(),
+                        expected_source_revision: scene.as_ref().unwrap().source_revision.clone(),
+                    },
+                ),
+                "undoMove" | "undoDelete" => fixture.undo(),
+                _ => fixture.redo(),
             };
             let gate = fixture
                 .service
@@ -8373,10 +8438,7 @@ mod tests {
             };
             let manifest = manifest_snapshot();
             assert!(
-                matches!(
-                    fixture.apply(&workspace, command()),
-                    Err(SceneError::RuntimeBusy)
-                ),
+                matches!(command(&workspace), Err(SceneError::RuntimeBusy)),
                 "{step}"
             );
             assert_eq!(
@@ -8387,7 +8449,7 @@ mod tests {
             assert_eq!(manifest_snapshot(), manifest, "{step}");
             process.stop();
             drop(process);
-            workspace = fixture.apply(&workspace, command()).unwrap();
+            workspace = command(&workspace).unwrap();
         }
     }
 }

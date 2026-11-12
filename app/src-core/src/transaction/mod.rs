@@ -12,7 +12,7 @@ mod manifest;
 mod observation;
 pub(crate) use execution::ExecutionGate;
 pub(crate) use manifest::{execution_manifest, ExecutionManifest};
-mod history;
+
 mod identity;
 mod journal;
 mod path;
@@ -21,7 +21,6 @@ mod platform;
 pub(crate) use path::is_link_or_reparse;
 pub(crate) use platform::{flush_open_file, DirectoryAnchor};
 
-pub use history::{HistoryEntry, HistoryMutation, HistoryStack};
 use identity::identity_for_file;
 pub use identity::FileIdentity;
 pub use journal::JournalState;

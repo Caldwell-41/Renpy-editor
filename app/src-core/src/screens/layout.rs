@@ -769,6 +769,10 @@ impl AuthoringService {
         if proposed == bytes {
             return Ok(document);
         }
+        let label = HistoryLabel::new(
+            format!("{} layout change", element_name(&node.kind)),
+            HistoryItem::screen(&request.path, &request.screen_name, node.id.clone()),
+        );
         let candidate = inspect(&proposed, request.path.clone(), String::new())?;
         if !candidate
             .screens
@@ -792,6 +796,7 @@ impl AuthoringService {
                 }],
                 intent: TransactionIntent::Edit,
             },
+            label,
         )?;
         self.screens_inspect_owned(project, InspectRequest { path: request.path })
     }

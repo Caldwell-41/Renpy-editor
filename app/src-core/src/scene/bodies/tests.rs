@@ -1,5 +1,6 @@
 //! Bodies, body endings and insertion places through the actual dispatch.
 use super::tests::Fixture;
+use crate::lifecycle::acceptance::ipc;
 use serde_json::{json, Value};
 
 fn scene(f: &mut Fixture) -> Value {
@@ -108,7 +109,7 @@ fn deleting_the_otherwise_return_after_custom_code_refuses_a_new_fallthrough() {
         json!({"type":"ends","beatId":header["id"]})
     );
     assert_eq!(positions(scene_body(&a)), vec![before(header)]);
-    let before = f.model();
+    let history = ipc(&mut f.service, "history.state", json!({}));
     let refused = f.reject(with_scene(
         &a,
         json!({"type":"removeStoryNode","node":{"type":"beat","beatId":ending["id"]},
@@ -117,11 +118,7 @@ fn deleting_the_otherwise_return_after_custom_code_refuses_a_new_fallthrough() {
     assert_eq!(refused["error"]["code"], "SCENE_INVARIANT");
     // `reject` proves the scene source, source map and project file are unchanged.
     // History is unchanged too: Undo still reverses the source save, not a removal.
-    let after = f.model();
-    assert_eq!(
-        (&after["canUndo"], &after["canRedo"]),
-        (&before["canUndo"], &before["canRedo"])
-    );
+    assert_eq!(ipc(&mut f.service, "history.state", json!({})), history);
     f.service.close().unwrap();
 }
 
@@ -179,7 +176,7 @@ fn every_listed_insertion_place_is_accepted_and_no_other() {
             narration()
         };
         f.command(insert(&current, &body["body"], &place["position"], payload));
-        f.command(json!({"type":"undo"}));
+        f.undo();
     }
     // Before the Custom Code in "Go" is not listed, and core refuses it.
     let a = scene(&mut f);

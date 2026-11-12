@@ -133,18 +133,18 @@ fn production_prompt_save_restore_history_reopen_isolation_and_extensions() {
         serde_json::from_slice::<Value>(&restored_bytes).unwrap()["unrelated"],
         doc["unrelated"]
     );
-    f.apply(json!({"type":"undo"}));
+    f.ok("history.undo", json!({}));
     assert_eq!(fs::read(f.root.join(PATH)).unwrap(), bytes);
-    f.apply(json!({"type":"redo"}));
+    f.ok("history.redo", json!({}));
     assert_eq!(fs::read(f.root.join(PATH)).unwrap(), restored_bytes);
-    f.apply(json!({"type":"undo"}));
-    f.apply(json!({"type":"undo"}));
+    f.ok("history.undo", json!({}));
+    f.ok("history.undo", json!({}));
     assert_eq!(
         serde_json::from_slice::<Value>(&fs::read(f.root.join(PATH)).unwrap()).unwrap(),
         doc
     );
-    f.apply(json!({"type":"redo"}));
-    f.apply(json!({"type":"redo"}));
+    f.ok("history.redo", json!({}));
+    f.ok("history.redo", json!({}));
     assert_eq!(fs::read(f.root.join("game/script.rpy")).unwrap(), source);
     f.ok("project.close", json!({}));
     let p = f.service.open_path(&f.root).unwrap();

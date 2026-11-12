@@ -90,7 +90,7 @@ fn source_changes_to_multiple_screen_names_retain_each_beats_target_intent() {
             assert_eq!(new["protected"], true);
             assert!(new["payload"]["revisions"].is_null());
         }
-        f.command(json!({"type":"undo"}));
+        f.undo();
         assert_eq!(
             ipc(
                 &mut f.service,
@@ -99,7 +99,7 @@ fn source_changes_to_multiple_screen_names_retain_each_beats_target_intent() {
             )["text"],
             original
         );
-        f.command(json!({"type":"redo"}));
+        f.redo();
         f.service.close().unwrap();
         f.service.open_path(&f.root).unwrap();
         let reopened = f.model()["scenes"][0]["beats"].clone();
@@ -434,9 +434,9 @@ fn inserting_an_identical_screen_statement_does_not_adopt_or_replace_its_opaque_
     assert_ne!(beats[0]["id"], opaque["id"]);
     assert_eq!(beats[1]["payload"]["type"], "customCode");
     assert_eq!(beats[1]["id"], opaque["id"]);
-    f.command(json!({"type":"undo"}));
+    f.undo();
     assert_eq!(f.model()["scenes"][0]["beats"], before["beats"]);
-    let redone = f.command(json!({"type":"redo"}));
+    let redone = f.redo();
     assert_eq!(redone["scenes"][0]["beats"], accepted["scenes"][0]["beats"]);
 }
 
@@ -477,9 +477,9 @@ fn an_explicit_picker_update_changes_the_target_in_one_history_entry_and_preserv
         assert_eq!(after["payload"]["target"], selected["binding"]);
         assert_eq!(after["protected"], false);
         assert!(after["payload"]["revisions"].is_object());
-        let undone = f.command(json!({"type":"undo"}));
+        let undone = f.undo();
         assert_eq!(undone["scenes"][0]["beats"], shown["scenes"][0]["beats"]);
-        let redone = f.command(json!({"type":"redo"}));
+        let redone = f.redo();
         assert_eq!(redone["scenes"][0]["beats"], updated["scenes"][0]["beats"]);
     }
 }
@@ -689,7 +689,7 @@ fn picker_updates_patch_only_screen_name_tokens_and_keep_comments_spacing_and_no
             command["expectedSourceRevision"] = updated["scenes"][0]["sourceRevision"].clone();
             command["beat"]["revisions"] = target["revisions"].clone();
             f.command(command);
-            f.command(json!({"type":"undo"}));
+            f.undo();
             assert_eq!(
                 ipc(
                     &mut f.service,
@@ -698,7 +698,7 @@ fn picker_updates_patch_only_screen_name_tokens_and_keep_comments_spacing_and_no
                 )["text"],
                 expected
             );
-            f.command(json!({"type":"redo"}));
+            f.redo();
             assert_eq!(
                 ipc(
                     &mut f.service,
@@ -757,8 +757,10 @@ fn v6_panel_beats_migrate_on_open_without_source_or_identity_changes_and_reopen_
     assert_eq!(beats[0]["payload"]["target"]["screenId"], owner["id"]);
     assert_eq!(beats[2]["payload"]["target"]["screenId"], owner["id"]);
     assert!(!beats[0]["protected"].as_bool().unwrap());
-    assert_eq!(opened["canUndo"], false);
-    assert_eq!(opened["canRedo"], false);
+    assert_eq!(
+        ipc(&mut f.service, "history.state", json!({})),
+        json!({"undo":null,"redo":null})
+    );
     assert_eq!(fs::read(&path).unwrap(), before);
     let accepted = fs::read(&map_path).unwrap();
     let mapped: Value = serde_json::from_slice(&accepted).unwrap();
@@ -834,12 +836,12 @@ fn show_hide_beats_use_exact_source_stable_identity_one_history_entry_and_fresh_
     f.command(json!({"type":"updateBodyBeat","sceneId":current["id"],"expectedSourceRevision":current["sourceRevision"],
         "beatId":show["id"],"expectedBody":{"type":"root"},"beat":show["payload"]}));
     assert_eq!(fs::read(&map_path).unwrap(), map_before);
-    f.command(json!({"type":"undo"}));
+    f.undo();
     assert_eq!(
         ipc(&mut f.service, "source.open", json!({"path":path}))["text"],
         source
     );
-    let redone = f.command(json!({"type":"redo"}));
+    let redone = f.redo();
     assert!(redone["scenes"][0]["beats"]
         .as_array()
         .unwrap()

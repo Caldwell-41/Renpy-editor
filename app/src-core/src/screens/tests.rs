@@ -166,14 +166,14 @@ fn nested_containers_compose_through_public_requests_and_restore_history() {
     assert!(accepted.as_str().unwrap().contains("grid 2 2:"));
     assert!(accepted.as_str().unwrap().contains("allow_underfull True"));
     for _ in 0..5 {
-        composition_history(&mut service, "undo");
+        project_history(&mut service, "undo");
     }
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         original
     );
     for _ in 0..5 {
-        composition_history(&mut service, "redo");
+        project_history(&mut service, "redo");
     }
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
@@ -256,12 +256,12 @@ fn nested_grid_layout_is_one_minimal_change_with_capacity_and_canvas_validation(
         reject(&mut service, "screens.canvasPlan", draft)["error"]["code"],
         "INVALID_PAYLOAD"
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         before
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         after
@@ -510,9 +510,9 @@ fn numeric_layout_applies_typed_coordinates_and_size_as_one_lossless_change() {
         ipc(&mut service, "screens.setLayout", change(&after))["revision"],
         after["revision"]
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(fs::read(root.join(PATH)).unwrap(), before.as_bytes());
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     assert_eq!(fs::read(root.join(PATH)).unwrap(), expected.as_bytes());
     service.close().unwrap();
     service.open_path(&root).unwrap();
@@ -828,18 +828,9 @@ fn owned_composition_adds_one_element_with_stable_identity_through_history_and_r
     assert!(String::from_utf8(after.clone())
         .unwrap()
         .contains(&format!("vbox: # loomlight-element: {id}\n        pass\n")));
-    let history = |service: &mut LifecycleService, kind: &str| {
-        let model = ipc(service, "scene.list", json!({}));
-        ipc(
-            service,
-            "scene.apply",
-            json!({"expectedProjectRevision":model["projectRevision"],
-            "expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":kind}}),
-        );
-    };
-    history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(fs::read(root.join(path)).unwrap(), before);
-    history(&mut service, "redo");
+    project_history(&mut service, "redo");
     assert_eq!(fs::read(root.join(path)).unwrap(), after);
     service.close().unwrap();
     service.open_path(&root).unwrap();
@@ -879,14 +870,9 @@ fn compose_command(service: &mut LifecycleService, owner: &Value, command: Value
     )
 }
 
-fn composition_history(service: &mut LifecycleService, kind: &str) {
-    let model = ipc(service, "scene.list", json!({}));
-    ipc(
-        service,
-        "scene.apply",
-        json!({"expectedProjectRevision":model["projectRevision"],
-        "expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":kind}}),
-    );
+/// Project Undo or Redo through the one history route; returns the step.
+fn project_history(service: &mut LifecycleService, kind: &str) -> Value {
+    ipc(service, &format!("history.{kind}"), json!({}))
 }
 
 fn save_composition_source(service: &mut LifecycleService, owner: &Value, text: &str) {
@@ -943,13 +929,13 @@ fn owned_geometry_preserves_document_ownership_and_history_for_unchanged_and_cha
         );
         assert_eq!(fs::read(root.join(source_path)).unwrap(), source.as_bytes());
     }
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         fs::read(root.join(source_path)).unwrap(),
         blank.as_bytes(),
         "No-op geometry saves must not add an Undo entry"
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     assert_eq!(
         ipc(&mut service, "screens.inspect", json!({"path":source_path})),
         document
@@ -999,13 +985,13 @@ fn owned_geometry_preserves_document_ownership_and_history_for_unchanged_and_cha
             changed["screens"][0]["nodes"].as_array().unwrap().len(),
             document["screens"][0]["nodes"].as_array().unwrap().len()
         );
-        composition_history(&mut service, "undo");
+        project_history(&mut service, "undo");
         assert_eq!(fs::read(root.join(source_path)).unwrap(), source.as_bytes());
         assert_eq!(
             ipc(&mut service, "screens.inspect", json!({"path":source_path})),
             document
         );
-        composition_history(&mut service, "redo");
+        project_history(&mut service, "redo");
         assert_eq!(
             fs::read(root.join(source_path)).unwrap(),
             expected.as_bytes()
@@ -1052,13 +1038,13 @@ fn owned_composition_text_changes_only_the_literal_preserving_identity_comments_
         json!({"type":"text","nodeId":added["selectedId"],"text":text}),
     );
     assert_eq!(noop["document"]["revision"], result["document"]["revision"]);
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         fs::read_to_string(&path).unwrap(),
         before,
         "No-op adds no history entry"
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     service.close().unwrap();
     service.open_path(&root).unwrap();
     let doc = ipc(
@@ -1123,9 +1109,9 @@ fn owned_composition_reorders_whole_groups_without_changing_their_children_or_id
         json!({"type":"reorder","nodeId":a,"targetId":b,"after":true}),
     );
     assert_eq!(noop["document"]["revision"], after["document"]["revision"]);
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(fs::read_to_string(&path).unwrap(), before);
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     service.close().unwrap();
     service.open_path(&root).unwrap();
     let reopened = ipc(
@@ -1173,7 +1159,7 @@ fn owned_composition_refuses_reorder_after_an_unterminated_final_sibling_without
         json!({"path":owner["path"]}),
     );
     assert_eq!(unchanged, doc);
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         fs::read_to_string(&path).unwrap(),
         terminated,
@@ -1217,9 +1203,9 @@ fn owned_composition_removal_selects_an_unmarked_next_sibling_without_granting_e
         "command":{"type":"remove","nodeId":removed["selectedId"]}}),
     );
     assert_eq!(fs::read_to_string(&path).unwrap(), after);
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(fs::read_to_string(&path).unwrap(), before);
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     assert_eq!(fs::read_to_string(&path).unwrap(), after);
 }
 
@@ -1257,10 +1243,10 @@ fn owned_composition_removes_exact_subtree_and_returns_next_previous_or_parent_s
         fs::read_to_string(&path).unwrap(),
         before.replace(&group_block, "")
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(fs::read_to_string(&path).unwrap(), before);
-    composition_history(&mut service, "redo");
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "redo");
+    project_history(&mut service, "undo");
     let previous = compose_command(&mut service, &owner, json!({"type":"remove","nodeId":next}));
     assert_eq!(previous["selectedId"], group);
     let parent = compose_command(
@@ -1370,7 +1356,7 @@ fn owned_composition_protected_neighbors_stay_visible_and_refuse_unsafe_operatio
     assert!(fs::read_to_string(&path)
         .unwrap()
         .contains("    use extra_notes()  # opaque neighbor\r\n"));
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(fs::read_to_string(&path).unwrap(), before_remove);
     assert_eq!(
         edited["document"]["screens"][0]["nodes"]
@@ -2041,25 +2027,13 @@ fn owned_blank_screen_creation_source_history_and_reopen() {
         .unwrap()
         .ends_with("screen travel_notes():\n    pass\n"));
     let accepted = source["text"].clone();
-    let model = ipc(&mut service, "scene.list", json!({}));
-    ipc(
-        &mut service,
-        "scene.apply",
-        json!({"expectedProjectRevision":model["projectRevision"],
-        "expectedSourceMapRevision":model["sourceMapRevision"], "command":{"type":"undo"}}),
-    );
+    ipc(&mut service, "history.undo", json!({}));
     assert!(!root.join(path).exists());
     assert_eq!(
         ipc(&mut service, "screens.list", json!({}))["owned"],
         json!([])
     );
-    let model = ipc(&mut service, "scene.list", json!({}));
-    ipc(
-        &mut service,
-        "scene.apply",
-        json!({"expectedProjectRevision":model["projectRevision"],
-        "expectedSourceMapRevision":model["sourceMapRevision"], "command":{"type":"redo"}}),
-    );
+    ipc(&mut service, "history.redo", json!({}));
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":path}))["text"],
         accepted
@@ -2402,21 +2376,9 @@ fn screen_source_dispatch_roundtrip_history_conflict_and_reopen() {
     let stale = reject(&mut service, "screens.setPixelProperty", mutation);
     assert_eq!(stale["error"]["code"], "SOURCE_CONFLICT");
     // Existing shared history undoes the screen edit; the no-op added no entry.
-    let model = ipc(&mut service, "scene.list", json!({}));
-    ipc(
-        &mut service,
-        "scene.apply",
-        json!({"expectedProjectRevision":model["projectRevision"],
-        "expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"undo"}}),
-    );
+    ipc(&mut service, "history.undo", json!({}));
     assert_eq!(fs::read(root.join(PATH)).unwrap(), before);
-    let model = ipc(&mut service, "scene.list", json!({}));
-    ipc(
-        &mut service,
-        "scene.apply",
-        json!({"expectedProjectRevision":model["projectRevision"],
-        "expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"redo"}}),
-    );
+    ipc(&mut service, "history.redo", json!({}));
     assert_eq!(fs::read(root.join(PATH)).unwrap(), after);
     let opened = ipc(&mut service, "source.open", json!({"path":PATH}));
     let draft = ipc(
@@ -2625,12 +2587,7 @@ fn screen_position_preserves_alignment_source_and_one_history_entry() {
             .replacen("yalign 0.5", "yalign 0.0", 1),
         "Ren'Py float fractions must remain floats at the endpoints"
     );
-    let model = ipc(&mut service, "scene.list", json!({}));
-    ipc(
-        &mut service,
-        "scene.apply",
-        json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"undo"}}),
-    );
+    ipc(&mut service, "history.undo", json!({}));
     let after = ipc(&mut service, "screens.setPosition", change(&doc, 0.6, 0.4));
     let expected =
         before
@@ -2658,12 +2615,7 @@ fn screen_position_preserves_alignment_source_and_one_history_entry() {
         "SOURCE_CONFLICT"
     );
     for (operation, bytes) in [("undo", before.as_bytes()), ("redo", expected.as_bytes())] {
-        let model = ipc(&mut service, "scene.list", json!({}));
-        ipc(
-            &mut service,
-            "scene.apply",
-            json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":operation}}),
-        );
+        project_history(&mut service, operation);
         assert_eq!(fs::read(root.join(PATH)).unwrap(), bytes);
     }
     let plan = ipc(
@@ -2717,9 +2669,25 @@ fn screen_atomic_size_two_tokens_one_history_entry_and_source_reconciliation() {
     let before = format!("\u{feff}{}", FIXTURE.replace('\n', "\r\n"));
     fs::write(root.join(PATH), &before).unwrap();
     service.open_path(&root).unwrap();
+    // A Story edit first: the project history keeps one order across workspaces.
+    let story = ipc(&mut service, "scene.list", json!({}));
+    let scene = story["scenes"][0].clone();
+    ipc(
+        &mut service,
+        "scene.apply",
+        json!({"expectedProjectRevision":story["projectRevision"],"expectedSourceMapRevision":story["sourceMapRevision"],
+        "command":{"type":"renameScene","sceneId":scene["id"],"displayName":"Arrival"}}),
+    );
     let doc = ipc(&mut service, "screens.inspect", json!({"path":PATH}));
     let change = |d: &Value, w: u32, h: u32| json!({"path":PATH,"expectedRevision":d["revision"],"screenName":"loomlight_help","nodeStart":frame(d)["span"]["start"],"width":w,"height":h});
     let after = ipc(&mut service, "screens.setSize", change(&doc, 811, 407));
+    let resize = json!({"name":"frame resize","item":{"type":"screen","path":PATH,"screen":"loomlight_help","nodeId":null}});
+    let rename = json!({"name":format!("rename of {}", scene["displayName"].as_str().unwrap()),
+        "item":{"type":"story","sceneId":scene["id"],"beatId":null}});
+    assert_eq!(
+        ipc(&mut service, "history.state", json!({})),
+        json!({"undo":resize,"redo":null})
+    );
     let expected = before.replacen("640", "811", 1).replacen("360", "407", 1);
     assert_eq!(fs::read(root.join(PATH)).unwrap(), expected.as_bytes());
     assert_eq!(
@@ -2731,15 +2699,14 @@ fn screen_atomic_size_two_tokens_one_history_entry_and_source_reconciliation() {
         "INVALID_PAYLOAD"
     );
     assert_eq!(fs::read(root.join(PATH)).unwrap(), expected.as_bytes());
-    for (operation, bytes) in [("undo", before.as_bytes()), ("redo", expected.as_bytes())] {
-        let model = ipc(&mut service, "scene.list", json!({}));
-        ipc(
-            &mut service,
-            "scene.apply",
-            json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":operation}}),
-        );
-        assert_eq!(fs::read(root.join(PATH)).unwrap(), bytes);
-    }
+    // Undo names the resize, reveals the frame and leaves the Story edit next.
+    assert_eq!(
+        project_history(&mut service, "undo"),
+        json!({"entry":resize,"history":{"undo":rename,"redo":resize}})
+    );
+    assert_eq!(fs::read(root.join(PATH)).unwrap(), before.as_bytes());
+    assert_eq!(project_history(&mut service, "redo")["entry"], resize);
+    assert_eq!(fs::read(root.join(PATH)).unwrap(), expected.as_bytes());
     let opened = ipc(&mut service, "source.open", json!({"path":PATH}));
     let changed_source = opened["text"].as_str().unwrap().replacen("811", "812", 1);
     let draft = ipc(

@@ -11,6 +11,8 @@ const paths: Record<string,string> = {
   lorebook: "M4 3h16v18H4zM8 3v18M12 7h5M12 11h5",
   assets: 'M3 3h18v18H3zM3 17l5-6 5 6 3-4 5 6M15 7h.01',
   variables: 'M8 3H5v6l-2 3 2 3v6h3m8-18h3v6l2 3-2 3v6h-3',
+  undo: 'M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11',
+  redo: 'm15 14 5-5-5-5m5 5H9.5a5.5 5.5 0 0 0 0 11H13',
 };
 export function icon(name: string): SVGSVGElement {
   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');

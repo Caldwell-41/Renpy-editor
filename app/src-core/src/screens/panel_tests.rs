@@ -80,10 +80,7 @@ impl Fixture {
 fn help_panel_preparation_uses_real_ui_image_and_does_not_accept_source_or_history() {
     let f = Fixture::new();
     let map_before = fs::read(f.root.join(".renpy-editor/source-map.json")).unwrap();
-    let workspace_before = f
-        .service
-        .scene_workspace(&f.project, &f.project_id)
-        .unwrap();
+    let history_before = f.service.history_state(&f.project).unwrap();
     let source = f
         .service
         .prepare_help_panel(&f.project, &f.project_id, "help_panel", f.starter())
@@ -108,22 +105,14 @@ fn help_panel_preparation_uses_real_ui_image_and_does_not_accept_source_or_histo
         fs::read(f.root.join(".renpy-editor/source-map.json")).unwrap(),
         map_before
     );
-    let workspace_after = f
-        .service
-        .scene_workspace(&f.project, &f.project_id)
-        .unwrap();
-    assert_eq!(workspace_after.can_undo, workspace_before.can_undo);
-    assert_eq!(workspace_after.can_redo, workspace_before.can_redo);
+    assert_eq!(f.service.history_state(&f.project).unwrap(), history_before);
 }
 
 #[test]
 fn help_dialog_preparation_is_editable_modal_and_finishes_without_accepting() {
     let f = Fixture::new();
     let map_before = fs::read(f.root.join(".renpy-editor/source-map.json")).unwrap();
-    let workspace_before = f
-        .service
-        .scene_workspace(&f.project, &f.project_id)
-        .unwrap();
+    let history_before = f.service.history_state(&f.project).unwrap();
     let source = f
         .service
         .prepare_help_dialog(&f.project, &f.project_id, "help_dialog", f.starter())
@@ -151,12 +140,7 @@ fn help_dialog_preparation_is_editable_modal_and_finishes_without_accepting() {
         fs::read(f.root.join(".renpy-editor/source-map.json")).unwrap(),
         map_before
     );
-    let after = f
-        .service
-        .scene_workspace(&f.project, &f.project_id)
-        .unwrap();
-    assert_eq!(after.can_undo, workspace_before.can_undo);
-    assert_eq!(after.can_redo, workspace_before.can_redo);
+    assert_eq!(f.service.history_state(&f.project).unwrap(), history_before);
 }
 
 #[test]
@@ -218,23 +202,12 @@ fn compose(
         .unwrap()
 }
 
-fn history(f: &Fixture, command: crate::scene::SceneCommand) {
-    let workspace = f
-        .service
-        .scene_workspace(&f.project, &f.project_id)
-        .unwrap();
-    f.service
-        .scene_apply(
-            &f.project,
-            &f.project_id,
-            crate::scene::SceneCommandRequest {
-                expected_project_revision: workspace.project_revision,
-                expected_source_map_revision: workspace.source_map_revision,
-                expected_authoring_revision: None,
-                command,
-            },
-        )
-        .unwrap();
+fn undo(f: &Fixture) {
+    f.service.history_undo(&f.project).unwrap();
+}
+
+fn redo(f: &Fixture) {
+    f.service.history_redo(&f.project).unwrap();
 }
 
 #[test]
@@ -328,7 +301,7 @@ fn help_dismissal_cannot_be_extracted_into_a_component_with_another_panel_target
             map
         );
     }
-    history(&f, crate::scene::SceneCommand::Undo);
+    undo(&f);
     assert!(
         f.service
             .screens_list(&f.project, &f.project_id)
@@ -413,9 +386,9 @@ fn help_starter_nodes_edit_reorder_remove_and_reopen_with_qualified_dismissal_so
         )
         .changed
     );
-    history(&f, crate::scene::SceneCommand::Undo);
+    undo(&f);
     assert_eq!(fs::read_to_string(&path).unwrap(), initial);
-    history(&f, crate::scene::SceneCommand::Redo);
+    redo(&f);
     assert_eq!(fs::read_to_string(&path).unwrap(), edited);
     compose(
         &f,
@@ -447,9 +420,9 @@ fn help_starter_nodes_edit_reorder_remove_and_reopen_with_qualified_dismissal_so
     let removed = fs::read_to_string(&path).unwrap();
     assert!(!removed.contains("textbutton \"Close\""));
     assert!(removed.contains("    key \"game_menu\" action Hide(\"help_panel\")\n"));
-    history(&f, crate::scene::SceneCommand::Undo);
+    undo(&f);
     assert_eq!(fs::read_to_string(&path).unwrap(), reordered);
-    history(&f, crate::scene::SceneCommand::Redo);
+    redo(&f);
     assert_eq!(fs::read_to_string(&path).unwrap(), removed);
     let target = crate::metadata::ScreenTargetBinding {
         screen_id: owner.id.clone(),

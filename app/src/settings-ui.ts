@@ -2,7 +2,7 @@ import { preferenceError, readPreferences, subscribePreferences, updatePreferenc
 import { requestCore } from "./bridge.ts";
 import { mountPromptPreparation, type PromptActions, type PromptController } from "./prompt-ui.ts";
 import { mountStudioSettings, type StudioSettingsController } from "./ai-settings-ui.ts";
-interface SettingsContext { title: string; sdkVersion: string; resolution: { width: number; height: number }; runtime: () => void; prompts?: PromptActions }
+interface SettingsContext { title: string; sdkVersion: string; resolution: { width: number; height: number }; runtime: () => void; prompts?: PromptActions; /** Opens Current project at this System prompts action. */ promptAction?: string }
 function node<K extends keyof HTMLElementTagNameMap>(tag: K, text = "", className = ""): HTMLElementTagNameMap[K] { const el = document.createElement(tag); el.textContent = text; el.className = className; return el; }
 export function openSettings(context?: SettingsContext): void {
   if (document.querySelector('[aria-modal="true"]')) return;
@@ -75,7 +75,7 @@ export function openSettings(context?: SettingsContext): void {
       row("Game resolution", "Read-only here; this is independent of interface size.",node("span",`${context.resolution.width} × ${context.resolution.height}`));
       const manage=node("button","Manage SDK & execution trust","button"); manage.addEventListener("click",()=>{finish();context.runtime();});
       row("Preview & Run", "Inspect SDK selection and session trust using the existing runtime controls.",manage);
-      if(context.prompts)promptController=mountPromptPreparation(content,context.prompts);
+      if(context.prompts)promptController=mountPromptPreparation(content,context.prompts,context.promptAction);
     } else if (category === "About") {
       const version=node("p","Loading version…"); content.append(version);
       void requestCore<{applicationVersion:string;protocolVersion:number}>("system.version").then(r=>{ if(overlay.isConnected) version.textContent = r.ok ? `Loomlight ${r.value.applicationVersion}` : "Version unavailable"; }).catch(()=>version.textContent="Version unavailable");
@@ -91,5 +91,5 @@ export function openSettings(context?: SettingsContext): void {
     if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
   });
   application.id="settings-application-tab";project.id="settings-project-tab";for(const tab of [application,project]){tab.setAttribute("aria-controls","settings-scope-panel");tab.addEventListener("keydown",e=>{if(!["ArrowLeft","ArrowRight","Home","End"].includes(e.key))return;e.preventDefault();const next=e.key==="Home"?application:e.key==="End"?project:tab===application?project:application;if(next.disabled)return;next.click();if(next.ariaSelected==="true")next.focus();});}
-  body.append(categorySelect,rail,content); overlay.append(header,body,footer); document.body.append(overlay); draw("Workspace");notify();close.focus();
+  body.append(categorySelect,rail,content); overlay.append(header,body,footer); document.body.append(overlay); draw(context?.promptAction ? "Current project" : "Workspace");notify();close.focus();
 }

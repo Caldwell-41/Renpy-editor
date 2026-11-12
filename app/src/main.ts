@@ -17,6 +17,7 @@ import { ScreensWorkspace } from "./screen-ui.ts";
 import type { ScreenCatalog, ResolvedScreenTarget } from "./screen-contracts.ts";
 import { RuntimeWorkspace } from "./runtime-ui.ts";
 import { renderBranches, type FlowWorkspace } from "./branches-ui.ts";
+import { emptyHistory, historyControls, historyShortcut, isTextField, type HistoryDirection, type HistoryItem, type HistoryState, type HistoryStep } from "./project-history.ts";
 import { completeApplicationClose, requestCore as desktopRequestCore } from "./bridge.ts";
 import {
   renderRecoverySurface,
@@ -58,7 +59,11 @@ interface ImportChoice { authorityId: string; displayName: string; byteCount: nu
 type ProjectSurface = "story" | "source" | "screens" | "branches" | "characters" | "lorebook" | "assets" | "variables";
 type PersistenceStatus = "saved" | "pendingValidation" | "conflict" | "recoveryRequired";
 type SceneTarget = import("./scene-ui.ts").StoryTarget;
-type ProjectTarget = SourceTarget | SceneTarget;
+/** A screen element to select when Screens opens, by its Source path and screen name. */
+interface ScreenTarget { readonly path: string; readonly screen: string; readonly nodeId?: string }
+/** A Characters entry to select when Characters opens, such as `card:<record id>`. */
+interface ReferenceTarget { readonly referenceKey: string }
+type ProjectTarget = SourceTarget | SceneTarget | ScreenTarget | ReferenceTarget;
 
 const rootElement = document.querySelector<HTMLDivElement>("#app");
 if (rootElement === null) throw new Error("Application root is unavailable.");
@@ -68,7 +73,7 @@ let operationGeneration = 0;
 let operationGenerations = new WeakMap<object, number>();
 const operationScopes = {
   projectOpen: {}, projectClose: {}, projectCreate: {}, persistence: {},
-  authoringLoad: {}, sceneLoad: {}, sourceLoad: {}, sourceSave: {}, storySave: {}, sourceNavigation: {}, recovery: {}, wizardDestination: {}, wizardSdk: {},
+  authoringLoad: {}, sceneLoad: {}, sourceLoad: {}, sourceSave: {}, storySave: {}, sourceNavigation: {}, history: {}, recovery: {}, wizardDestination: {}, wizardSdk: {},
 };
 const activeAuthoringOperations = new Map<string, number>();
 const activeFlushOperations = new Map<string, number>();
@@ -93,6 +98,12 @@ let screenInsertion: import("./scene-ui.ts").ScreenInsertion | undefined;
 // Session copy of the Story scene selection; the layout preference is skipped when layouts are not remembered.
 let storySceneId: string | undefined;
 let lifecycleBusy = false;
+// The header's project history: the next Undo and Redo, and the status after one.
+let historyState: HistoryState = emptyHistory;
+let historyView: ReturnType<typeof historyControls> | undefined;
+let historyRequestSequence = 0;
+let historyRunning = false;
+let historyNotice: { readonly text: string; readonly view: number } | undefined;
 let stageDroppedAssets: ((batch:ImportBatch)=>void)|undefined;
 
 declare global {
@@ -138,7 +149,7 @@ interface CompletionToken { view: number; operation: number; scope: object; sess
 function beginView(project?: OpenProject): number {
   activeReferenceController?.dispose(); activeReferenceController=undefined;
   disposeCatalogue?.();disposeCatalogue=undefined;
-  if (currentProject?.sessionId !== project?.sessionId) { runtimeWorkspace?.dispose(); runtimeWorkspace = undefined; screensWorkspace?.dispose(); screensWorkspace = undefined; screenInsertion = undefined; storySceneId = undefined; storyView?.dispose(); storyView = undefined; }
+  if (currentProject?.sessionId !== project?.sessionId) { runtimeWorkspace?.dispose(); runtimeWorkspace = undefined; screensWorkspace?.dispose(); screensWorkspace = undefined; screenInsertion = undefined; storySceneId = undefined; storyView?.dispose(); storyView = undefined; historyState = emptyHistory; historyRequestSequence += 1; }
   disposeBranchesView?.();
   disposeBranchesView = undefined;
   disposeSourceView?.();
@@ -173,6 +184,7 @@ function beginAuthoringCompletion(project: OpenProject, scope: object): Completi
   const token = beginCompletion(project, scope);
   activeAuthoringOperations.set(project.sessionId, token.operation);
   reflectAuthoringState();
+  historyNotice = undefined;
   return token;
 }
 
@@ -185,6 +197,8 @@ function finishAuthoringCompletion(token: CompletionToken): void {
     activeAuthoringOperations.delete(token.sessionId);
     reflectAuthoringState();
     refreshPersistenceAfterStaleCompletion(token);
+    // Any write may have added a history entry.
+    if (currentProject?.sessionId === token.sessionId) void refreshHistory(currentProject);
   }
 }
 
@@ -237,6 +251,7 @@ function persistenceMessage(state: PersistenceStatus, localPending: boolean): { 
   const refusal: StoryStatus | undefined = storyView?.saveStatus();
   if (refusal) return refusal;
   if (storyView?.hasDrafts()) return { text: "Unsaved changes", kind: "normal" };
+  if (historyNotice?.view === viewGeneration) return { text: historyNotice.text, kind: "normal" };
   return { text: hasUnsubmittedInput() ? "Unsubmitted input — accepted changes saved" : "Saved", kind: "normal" };
 }
 
@@ -294,8 +309,7 @@ function shell(content: HTMLElement): void {
   const studioRequest=button("Studio request", "button");studioRequest.addEventListener("click",()=>openStudioRequest(currentProject?.sessionId??null));header.append(studioRequest);
   const footer = document.createElement("footer"); footer.className = "app-footer";
   const context = document.createElement("span"); context.textContent = currentProject ? "Local project" : "Local workspace";
-  const settings = button("Settings", "text-button shell-settings"); settings.prepend(icon("settings")); settings.addEventListener("click", () => { const project=currentProject;if(!project){openSettings();return;}const owner={};openSettings({...project,runtime:()=>{if(runtimeWorkspace){runtimeWorkspace.panel.hidden=false;runtimeWorkspace.panel.focus();}},prompts:{current:()=>currentProject?.sessionId===project.sessionId,
-          load:()=>projectValue<Options>(project,"context.options"),preview:input=>projectValue<Preview>(project,"context.preview",{...input}),apply:async(command,expectedRevision,action)=>{const result=await runAuthoringOperation(project,owner,()=>projectValue<PromptModel>(project,"prompts.apply",{command,expectedRevision,action}));if(!result)throw new Error("Another change is still being saved. Wait for it to finish.");return result;}}});});
+  const settings = button("Settings", "text-button shell-settings"); settings.prepend(icon("settings")); settings.addEventListener("click", () => { const project=currentProject;if(!project){openSettings();return;}openProjectSettings(project);});
   footer.append(context,status,settings); main.append(header, content, footer); root.replaceChildren(main);
 }
 
@@ -452,6 +466,68 @@ async function createProject(): Promise<void> {
 
 async function openPickedProject(): Promise<void> { const token = beginCompletion(undefined, operationScopes.projectOpen); try { const project = await value<OpenProject>("project.openPicker"); if (completionIsCurrent(token) && !project.cancelled) showProject(project); } catch (error) { if (completionIsCurrent(token)) setStatus(message(error, "Project could not be opened"), "error"); } }
 async function openRecent(id: string): Promise<void> { const token = beginCompletion(undefined, operationScopes.projectOpen); try { const project = await value<OpenProject>("project.openRecent", { recentId: id }); if (completionIsCurrent(token)) showProject(project); } catch (error) { if (completionIsCurrent(token)) setStatus(message(error, "Project could not be opened"), "error"); } }
+/** Settings for the open project; `promptAction` opens System prompts at that action. */
+function openProjectSettings(project: OpenProject, promptAction?: string): void {
+  const owner={};
+  openSettings({...project,promptAction,runtime:()=>{if(runtimeWorkspace){runtimeWorkspace.panel.hidden=false;runtimeWorkspace.panel.focus();}},prompts:{current:()=>currentProject?.sessionId===project.sessionId,
+    load:()=>projectValue<Options>(project,"context.options"),preview:input=>projectValue<Preview>(project,"context.preview",{...input}),apply:async(command,expectedRevision,action)=>{const result=await runAuthoringOperation(project,owner,()=>projectValue<PromptModel>(project,"prompts.apply",{command,expectedRevision,action}));if(!result)throw new Error("Another change is still being saved. Wait for it to finish.");return result;}}});
+}
+
+function showHistory(state: HistoryState): void { historyState = state; historyView?.update(state); }
+
+// Reads the next Undo and Redo names for the header. A failed read dims both.
+async function refreshHistory(project: OpenProject): Promise<void> {
+  const sequence = ++historyRequestSequence;
+  try {
+    const state = await projectValue<HistoryState>(project, "history.state");
+    if (sequence === historyRequestSequence && currentProject?.sessionId === project.sessionId) showHistory(state);
+  } catch { if (sequence === historyRequestSequence) showHistory(emptyHistory); }
+}
+
+// The one Undo and Redo command for the header buttons and Cmd/Ctrl+Z. It follows
+// ordinary navigation: a refused leave keeps the input, and "Keep editing?" must be
+// answered Discard and leave. Beat drafts still make it wait until #113.
+async function runHistory(project: OpenProject, direction: HistoryDirection): Promise<void> {
+  if (historyRunning || lifecycleBusy || hasBlockingModal() || currentProject?.sessionId !== project.sessionId || !historyState[direction]) return;
+  if (storyView?.hasDrafts()) { setStatus("Commit or cancel beat drafts before Undo or Redo. Drafts retained.", "error"); return; }
+  if (activeReferenceController?.isBusy()) return;
+  if ((storyView?.busy() || hasUnsubmittedInput()) && !await allowSceneNavigation()) return;
+  historyRunning = true;
+  const focused = (document.activeElement as HTMLElement | null)?.dataset.history;
+  try {
+    const controller = currentSourceController(project);
+    const transition = controller ? await runAuthoringOperation(project, operationScopes.sourceNavigation, () => controller.prepareTransition("navigation")) : undefined;
+    if (controller && !transition) return;
+    try {
+      const step = await runAuthoringOperation(project, operationScopes.history, () => projectValue<HistoryStep>(project, direction === "undo" ? "history.undo" : "history.redo"));
+      if (currentProject?.sessionId !== project.sessionId) return;
+      revealHistoryItem(project, step.entry.item);
+      showHistory(step.history);
+      historyNotice = { text: `${direction === "undo" ? "Undone" : "Redone"}: ${step.entry.name}`, view: viewGeneration };
+      setStatus(historyNotice.text);
+      if (focused) document.querySelector<HTMLElement>(`[data-history="${focused}"]`)?.focus();
+    } finally { transition?.release(); }
+  } catch (error) {
+    if (currentProject?.sessionId !== project.sessionId) return;
+    setStatus(message(error, direction === "undo" ? "Undo failed. Nothing changed." : "Redo failed. Nothing changed."), "error");
+    void refreshHistory(project);
+  } finally { historyRunning = false; }
+}
+
+// Opens the entry's workspace at its item. A missing item falls back to what
+// contains it: a beat to its scene, a screen element to its screen, then the workspace.
+function revealHistoryItem(project: OpenProject, item: HistoryItem): void {
+  switch (item.type) {
+    case "story": showProject(project, "story", item.sceneId ? { sceneId: item.sceneId, ...(item.beatId ? { beatId: item.beatId } : {}) } : undefined); break;
+    case "screen": showProject(project, "screens", { path: item.path, screen: item.screen, ...(item.nodeId ? { nodeId: item.nodeId } : {}) }); break;
+    case "source": showProject(project, "source", { path: item.path }); break;
+    case "prompt": openProjectSettings(project, item.action); break;
+    case "reference": showProject(project, item.kind === "card" ? "characters" : "lorebook", item.kind === "card" && item.recordId ? { referenceKey: `card:${item.recordId}` } : undefined); break;
+    case "variable": showProject(project, "variables"); break;
+    case "asset": showProject(project, "assets"); break;
+  }
+}
+
 function showProject(project: OpenProject, surface: ProjectSurface = "story", target?: ProjectTarget): void {
   const generation = beginView(project);
   const layout = document.createElement("section"); layout.className = "project-shell";
@@ -503,7 +579,9 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
     refreshPersistence: () => { if (currentProject?.sessionId === project.sessionId) void refreshPersistenceStatus(project, viewGeneration); },
   });
   const shellSave=button(surface==="source"?"Save Source":"Save");shellSave.addEventListener("click",()=>routeSave(project,"toolbar"));
-  document.querySelector(".app-header")?.append(shellSave);
+  historyView=historyControls(direction=>void runHistory(project,direction));historyView.update(historyState);
+  document.querySelector(".app-header")?.append(historyView.element,shellSave);
+  void refreshHistory(project);
   const settingsButton=document.querySelector<HTMLElement>(".shell-settings");if(settingsButton){settingsButton.classList.add("sidebar-settings");settingsButton.ariaLabel="Settings";settingsButton.title="Settings";sidebar.insertBefore(settingsButton,close);}
   document.querySelector(".app-header")?.append(runtimeWorkspace.toolbar);
   document.querySelector(".app-shell")?.append(runtimeWorkspace.panel);
@@ -511,7 +589,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   const runtimeToggle=button("Runtime & diagnostics","text-button runtime-toggle");runtimeToggle.addEventListener("click",()=>{if(runtimeWorkspace){runtimeWorkspace.panel.hidden=!runtimeWorkspace.panel.hidden;runtimeToggle.ariaExpanded=String(!runtimeWorkspace.panel.hidden);}});document.querySelector(".app-footer")?.append(runtimeToggle);
   setStatus("Checking saved state…");
   if (surface === "story") void renderStorySurface(workspace, tree, project, generation, target && "sceneId" in target ? target : undefined);
-  else if (surface === "source") void renderSourceSurface(workspace, tree, project, generation, target && "path" in target ? target : undefined);
+  else if (surface === "source") void renderSourceSurface(workspace, tree, project, generation, target && "path" in target && !("screen" in target) ? target : undefined);
   else if (surface === "screens") {
     screensWorkspace ??= new ScreensWorkspace({ resolution: project.resolution, projectId: project.projectId,
       request: (operation, payload) => projectValue(project, operation, payload),
@@ -527,7 +605,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
         if (currentProject?.sessionId === project.sessionId) await requestProjectNavigation(project,"story",{sceneId,screenHint,screenHintKind,screenInsertion});
       },
     });
-    screensWorkspace.mount(workspace);
+    screensWorkspace.mount(workspace, target && "screen" in target ? target : undefined);
     void refreshPersistenceStatus(project, generation);
   }
   else if (surface === "branches") {
@@ -541,7 +619,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
     });
     void refreshPersistenceStatus(project, generation);
   }
-  else void renderAuthoringSurface(workspace, project, surface, generation);
+  else void renderAuthoringSurface(workspace, project, surface, generation, target && "referenceKey" in target ? target.referenceKey : undefined);
 }
 
 async function requestProjectNavigation(project: OpenProject, surface: ProjectSurface, target?: ProjectTarget): Promise<void> {
@@ -854,7 +932,7 @@ async function requestProjectClose(project: OpenProject, afterClose: () => void 
   }
 }
 
-async function renderAuthoringSurface(workspace: HTMLElement, project: OpenProject, surface: Exclude<ProjectSurface, "story" | "source" | "branches">, generation: number): Promise<void> {
+async function renderAuthoringSurface(workspace: HTMLElement, project: OpenProject, surface: Exclude<ProjectSurface, "story" | "source" | "branches">, generation: number, referenceKey?: string): Promise<void> {
   const title = document.createElement("h1"); title.textContent = surface[0]!.toUpperCase() + surface.slice(1);
   const header=document.createElement("div");header.className="reference-page-header";header.append(title);workspace.append(header);
   const token = beginCompletion(project, operationScopes.authoringLoad);
@@ -863,7 +941,7 @@ async function renderAuthoringSurface(workspace: HTMLElement, project: OpenProje
     const model=await projectValue<ReferenceWorkspace>(project,"references.list");if(!current())return;
     const owner={};activeReferenceController=renderReferenceLibrary(host,kind,model,{
       creationHost:header,current,guard:allowSceneNavigation,status:setStatus,
-      workspaceKey:`${project.projectId}:characters`,
+      workspaceKey:`${project.projectId}:characters`,selection:referenceKey,
       renderGameSetup:async(host,characterId)=>{
         let disposed=false,cleanup:(()=>void)|undefined;
         const refresh=async():Promise<void>=>{
@@ -1196,6 +1274,15 @@ function installListeners(): void {
       target.dataset.unsubmitted = "true";
       setStatus("Unsubmitted input");
     }
+  });
+  // Project Undo and Redo when no text field has focus. A text field keeps its own
+  // text Undo, and an open dialog keeps the shortcut.
+  window.addEventListener("keydown", (event) => {
+    const direction = historyShortcut(event);
+    const project = currentProject;
+    if (!direction || !project || event.isComposing || hasBlockingModal() || isTextField(event.target)) return;
+    event.preventDefault();
+    if (!event.repeat) void runHistory(project, direction);
   });
   window.addEventListener("keydown", (event) => {
     if (!isSaveShortcut(event)) return;

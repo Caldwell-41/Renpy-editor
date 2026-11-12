@@ -616,18 +616,9 @@ mod branches_tests {
                 .count(),
             2
         );
-        ipc(
-            &mut service,
-            "scene.apply",
-            json!({"expectedProjectRevision":changed["projectRevision"],"expectedSourceMapRevision":changed["sourceMapRevision"],"command":{"type":"undo"}}),
-        );
+        ipc(&mut service, "history.undo", json!({}));
         assert_eq!(fs::read(root.join(path)).unwrap(), original);
-        let undone = ipc(&mut service, "scene.list", json!({}));
-        ipc(
-            &mut service,
-            "scene.apply",
-            json!({"expectedProjectRevision":undone["projectRevision"],"expectedSourceMapRevision":undone["sourceMapRevision"],"command":{"type":"redo"}}),
-        );
+        ipc(&mut service, "history.redo", json!({}));
         assert_eq!(fs::read(root.join(path)).unwrap(), expected);
         service.close().unwrap();
         service.open_path(&root).unwrap();
@@ -955,19 +946,11 @@ mod branches_tests {
                 "append must separate the root statement from the unterminated child"
             );
             assert_eq!(children(&appended), children(&model));
-            ipc(
-                &mut service,
-                "scene.apply",
-                json!({"expectedProjectRevision":appended["projectRevision"],"expectedSourceMapRevision":appended["sourceMapRevision"],"command":{"type":"undo"}}),
-            );
+            ipc(&mut service, "history.undo", json!({}));
             assert_eq!(fs::read(root.join(path)).unwrap(), accepted);
             let undone = ipc(&mut service, "scene.list", json!({}));
             assert_eq!(children(&undone), children(&model));
-            ipc(
-                &mut service,
-                "scene.apply",
-                json!({"expectedProjectRevision":undone["projectRevision"],"expectedSourceMapRevision":undone["sourceMapRevision"],"command":{"type":"redo"}}),
-            );
+            ipc(&mut service, "history.redo", json!({}));
             service.close().unwrap();
             service.open_path(&root).unwrap();
             assert_eq!(

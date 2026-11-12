@@ -373,6 +373,33 @@ impl AuthoringService {
             &request.command,
             Command::AddBar { .. } | Command::AddImageButton { .. }
         );
+        let kind_of = |id: &str| {
+            screen
+                .nodes
+                .iter()
+                .find(|n| n.id.as_deref() == Some(id))
+                .map_or("element", |n| element_name(&n.kind))
+        };
+        let (name, removed) = match &request.command {
+            Command::AddImageButton { .. } => ("new image button".to_owned(), None),
+            Command::ImageButton { .. } => ("image button change".to_owned(), None),
+            Command::AddBar { .. } => ("new bar".to_owned(), None),
+            Command::Bar { .. } => ("bar change".to_owned(), None),
+            Command::Add { kind, .. } => (format!("new {}", element_name(kind)), None),
+            Command::AddImage { .. } => ("new image".to_owned(), None),
+            Command::Image { .. } => ("image change".to_owned(), None),
+            Command::Text { .. } => ("text edit".to_owned(), None),
+            Command::FormatText { node_id, .. } => {
+                (format!("{} format change", kind_of(node_id)), None)
+            }
+            Command::Actions { .. } => ("button action change".to_owned(), None),
+            Command::VariableText { .. } => ("text binding change".to_owned(), None),
+            Command::Reorder { node_id, .. } => (format!("{} reorder", kind_of(node_id)), None),
+            Command::Remove { node_id } => (
+                format!("{} removal", kind_of(node_id)),
+                Some(node_id.clone()),
+            ),
+        };
         let selected_id = match request.command {
             Command::AddImageButton {
                 parent_id,
@@ -1122,12 +1149,22 @@ impl AuthoringService {
                 documents: vec![],
             });
         }
+        // Undo of a removal brings the element back, so it reveals that element.
+        let label = HistoryLabel::new(
+            name,
+            HistoryItem::screen(
+                &owner.screen.path,
+                &owner.screen.name,
+                Some(removed.unwrap_or_else(|| selected_id.clone())),
+            ),
+        );
         self.commit_history(
             project,
             TransactionProposal {
                 mutations: companions,
                 intent: TransactionIntent::Edit,
             },
+            label,
         )?;
         Ok(ComposeResult {
             action_validation: None,

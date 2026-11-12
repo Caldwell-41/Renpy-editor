@@ -419,7 +419,15 @@ impl AuthoringService {
             proposed,
         };
         check_created_graph(&mut prepared, &companion)?;
-        self.commit_owned_screen_create(project, project_id, prepared, vec![companion])?;
+        let label = HistoryLabel::new(
+            "component copy",
+            HistoryItem::screen(
+                &target.path,
+                &target.binding.source_name,
+                Some(request.use_id.clone()),
+            ),
+        );
+        self.commit_owned_screen_create(project, project_id, prepared, vec![companion], label)?;
         Ok(ComponentChange {
             component_id,
             screen_id: request.target.screen_id,
@@ -529,6 +537,14 @@ impl AuthoringService {
         });
         map.validate(project_id)
             .map_err(|_| SceneError::InvalidMetadata)?;
+        let label = HistoryLabel::new(
+            "component placement",
+            HistoryItem::screen(
+                &target.path,
+                &target.binding.source_name,
+                Some(use_id.clone()),
+            ),
+        );
         self.commit_history(
             project,
             TransactionProposal {
@@ -550,6 +566,7 @@ impl AuthoringService {
                 ],
                 intent: TransactionIntent::Edit,
             },
+            label,
         )?;
         Ok(ComponentChange {
             component_id: component.binding.screen_id,
@@ -591,10 +608,11 @@ impl AuthoringService {
             project_id,
             PrepareExtractRequest {
                 screen_id: request.target.screen_id.clone(),
-                node_id: request.node_id,
-                expected_revision: target.revisions.source,
+                node_id: request.node_id.clone(),
+                expected_revision: target.revisions.source.clone(),
             },
         )?;
+        let group_node = request.node_id;
         let newline = if group.source.contains("\r\n") {
             "\r\n"
         } else {
@@ -656,7 +674,12 @@ impl AuthoringService {
             proposed,
         };
         check_created_graph(&mut prepared, &companion)?;
-        self.commit_owned_screen_create(project, project_id, prepared, vec![companion])?;
+        // Undo brings the extracted group back to this screen.
+        let label = HistoryLabel::new(
+            "component extraction",
+            HistoryItem::screen(&group.path, &target.binding.source_name, Some(group_node)),
+        );
+        self.commit_owned_screen_create(project, project_id, prepared, vec![companion], label)?;
         Ok(ComponentChange {
             component_id,
             screen_id: group.screen_id,

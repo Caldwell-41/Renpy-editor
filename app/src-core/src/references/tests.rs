@@ -40,6 +40,14 @@ impl Fixture {
             json!({"expectedRevision":revision,"command":command}),
         )
     }
+    /// Project Undo or Redo, then the library it leaves; a refusal returns its error.
+    fn history(&mut self, kind: &str) -> Value {
+        let step = self.request(&format!("history.{kind}"), json!({}));
+        if step["ok"] != true {
+            return step;
+        }
+        self.request("references.list", json!({}))
+    }
     fn install(&self, bytes: &[u8]) {
         fs::write(self.root.join(PATH), bytes).unwrap();
     }
@@ -106,29 +114,27 @@ fn real_dispatch_manual_save_history_and_reopen_preserve_exact_revisions() {
     );
     assert_eq!(current(doc, Kind::Card)["status"], "approved");
     assert_eq!(doc["cards"][0]["revisions"][0]["status"], "superseded");
-    let undo = f.apply(&b["value"]["revision"], json!({"type":"undo"}));
+    let undo = f.history("undo");
     assert_eq!(undo["ok"], true, "{undo}");
     assert_eq!(fs::read(f.root.join(PATH)).unwrap(), first);
-    let redo = f.apply(&undo["value"]["revision"], json!({"type":"redo"}));
+    let redo = f.history("redo");
     assert_eq!(redo["ok"], true);
     assert_eq!(fs::read(f.root.join(PATH)).unwrap(), second);
     // Ordinary consecutive Undo/Redo must cross the preceding transaction, even
     // though each committed replacement allocates a fresh platform file identity.
-    let mut state = redo["value"].clone();
     for _ in 0..3 {
-        let undo_one = f.apply(&state["revision"], json!({"type":"undo"}));
+        let undo_one = f.history("undo");
         assert_eq!(undo_one["ok"], true, "{undo_one}");
         assert_eq!(fs::read(f.root.join(PATH)).unwrap(), first);
-        let undo_two = f.apply(&undo_one["value"]["revision"], json!({"type":"undo"}));
+        let undo_two = f.history("undo");
         assert_eq!(undo_two["ok"], true, "{undo_two}");
         assert!(!f.root.join(PATH).exists());
-        let redo_one = f.apply(&undo_two["value"]["revision"], json!({"type":"redo"}));
+        let redo_one = f.history("redo");
         assert_eq!(redo_one["ok"], true, "{redo_one}");
         assert_eq!(fs::read(f.root.join(PATH)).unwrap(), first);
-        let redo_two = f.apply(&redo_one["value"]["revision"], json!({"type":"redo"}));
+        let redo_two = f.history("redo");
         assert_eq!(redo_two["ok"], true, "{redo_two}");
         assert_eq!(fs::read(f.root.join(PATH)).unwrap(), second);
-        state = redo_two["value"].clone();
     }
     f.service.close().unwrap();
     let p = f.service.open_path(&f.root).unwrap();
@@ -284,8 +290,7 @@ fn external_edits_refuse_stale_save_and_history_without_overwrite() {
     f.install(&bytes);
     let stale=f.apply(&r["value"]["revision"],json!({"type":"save","kind":"lore","recordId":external["loreEntries"][0]["id"],"fields":{"text":"Must not write"}}));
     assert_eq!(stale["error"]["code"], "REFERENCE_CONFLICT");
-    let fresh = f.list();
-    let undo = f.apply(&fresh["revision"], json!({"type":"undo"}));
+    let undo = f.history("undo");
     assert_eq!(undo["error"]["code"], "HISTORY_BOUNDARY");
     assert_eq!(fs::read(f.root.join(PATH)).unwrap(), bytes);
 }
@@ -372,7 +377,7 @@ fn reorder_and_source_changes_share_history_and_other_projects_stay_isolated() {
         moved["value"]["document"]["cards"][0],
         b["value"]["document"]["cards"][1]
     );
-    let undo = f.apply(&moved["value"]["revision"], json!({"type":"undo"}));
+    let undo = f.history("undo");
     assert_eq!(undo["ok"], true);
     assert_eq!(fs::read(f.root.join(PATH)).unwrap(), original);
     let opened = f.request("source.open", json!({"path":"game/script.rpy"}));
@@ -382,8 +387,7 @@ fn reorder_and_source_changes_share_history_and_other_projects_stay_isolated() {
     assert_eq!(draft["ok"], true, "{draft}");
     let saved=f.request("source.save",json!({"path":"game/script.rpy","expectedBaseRevision":opened["value"]["baseRevision"],"expectedDraftVersion":draft["value"]["draftVersion"]}));
     assert_eq!(saved["ok"], true, "{saved}");
-    let latest = f.list();
-    let undo = f.apply(&latest["revision"], json!({"type":"undo"}));
+    let undo = f.history("undo");
     assert_eq!(undo["ok"], true, "{undo}");
     assert_eq!(fs::read(f.root.join(PATH)).unwrap(), original);
     assert_eq!(
@@ -468,8 +472,8 @@ fn explicit_reload_after_external_replace_allows_a_fresh_manual_save() {
         json!({"type":"save","kind":"card","recordId":id,"fields":{"description":"Edited"}}),
     );
     assert_eq!(b["ok"], true);
-    let undo = f.apply(&b["value"]["revision"], json!({"type":"undo"}));
-    let redo = f.apply(&undo["value"]["revision"], json!({"type":"redo"}));
+    f.history("undo");
+    let redo = f.history("redo");
     assert_eq!(redo["ok"], true);
     let mut doc = redo["value"]["document"].clone();
     doc["externalExtension"] = json!({"retained":true});
@@ -543,10 +547,10 @@ fn game_only_reads_are_virtual_and_explicit_link_is_stable_and_undoable() {
     let duplicate = f.apply(&linked["value"]["revision"], json!({"type":"linkCharacter","recordId":null,"characterId":character_id,"expectedSourceRevision":source_revision}));
     assert_eq!(duplicate["ok"], false);
     assert_eq!(fs::read(f.root.join(PATH)).unwrap(), exact);
-    let undo = f.apply(&linked["value"]["revision"], json!({"type":"undo"}));
+    let undo = f.history("undo");
     assert_eq!(undo["ok"], true, "{undo}");
     assert!(!f.root.join(PATH).exists());
-    let redo = f.apply(&undo["value"]["revision"], json!({"type":"redo"}));
+    let redo = f.history("redo");
     assert_eq!(redo["ok"], true, "{redo}");
     assert_eq!(fs::read(f.root.join(PATH)).unwrap(), exact);
     f.service.close().unwrap();
@@ -615,7 +619,7 @@ fn reviewed_game_creation_is_atomic_preserves_source_and_refuses_changed_review(
         .find(|c| c["technicalName"] == "new_character")
         .unwrap();
     assert_eq!(content["linkedCharacterId"], created_character["id"]);
-    let undo = f.apply(&created["value"]["revision"], json!({"type":"undo"}));
+    let undo = f.history("undo");
     assert_eq!(undo["ok"], true, "{undo}");
     assert_eq!(fs::read(&source_path).unwrap(), source);
     assert_eq!(
@@ -623,7 +627,7 @@ fn reviewed_game_creation_is_atomic_preserves_source_and_refuses_changed_review(
         metadata
     );
     assert!(!f.root.join(PATH).exists());
-    let redo = f.apply(&undo["value"]["revision"], json!({"type":"redo"}));
+    let redo = f.history("redo");
     assert_eq!(redo["ok"], true, "{redo}");
     assert_eq!(fs::read(&source_path).unwrap(), after_source);
     assert_eq!(
@@ -691,10 +695,10 @@ fn planning_creation_and_restore_preserve_ids_extensions_and_current_game_link()
     );
     assert!(doc["cards"][0]["revisions"].as_array().unwrap().len() <= 3);
     let restored_bytes = fs::read(f.root.join(PATH)).unwrap();
-    let undo = f.apply(&restored["value"]["revision"], json!({"type":"undo"}));
+    let undo = f.history("undo");
     assert_eq!(undo["ok"], true, "{undo}");
     assert_eq!(fs::read(f.root.join(PATH)).unwrap(), bytes);
-    let redo = f.apply(&undo["value"]["revision"], json!({"type":"redo"}));
+    let redo = f.history("redo");
     assert_eq!(redo["ok"], true, "{redo}");
     assert_eq!(fs::read(f.root.join(PATH)).unwrap(), restored_bytes);
     f.service.close().unwrap();
@@ -769,10 +773,10 @@ fn project_context_save_history_bounds_and_extensions_leave_legacy_lore_exact() 
         context["revisions"][1]["content"]["futureContent"],
         json!([1, 2])
     );
-    let undo = f.apply(&second["value"]["revision"], json!({"type":"undo"}));
+    let undo = f.history("undo");
     assert_eq!(undo["ok"], true, "{undo}");
     assert_eq!(fs::read(f.root.join(PATH)).unwrap(), old_bytes);
-    let redo = f.apply(&undo["value"]["revision"], json!({"type":"redo"}));
+    let redo = f.history("redo");
     assert_eq!(redo["ok"], true, "{redo}");
     assert_eq!(fs::read(f.root.join(PATH)).unwrap(), new_bytes);
     let refused = f.apply(
