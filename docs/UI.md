@@ -49,9 +49,9 @@ other stylesheet redefines them. Source syntax colours (`--syntax-*`) stay in
 **Contrast contract.** Text and status colours reach 4.5:1 on every surface a row can
 take: app, panel, raised, hover, selected and `--accent-subtle` (the active Source
 line). The focus ring reaches 3:1 on the same surfaces. `--text-disabled` is exempt.
-Branch arm colours colour text, so they follow the contract, except dark arm 2, which
-is 4.41:1 on hover and 4.33:1 on `--accent-subtle` and is checked on the other four
-surfaces. `theme-contrast.test.ts` checks every text, status and arm token against this
+Branch arm colours colour text, so they follow the contract. Dark arm 2 is `#e47d62`
+(decided 2026-11-13, up from `#e07a5f`, which was 4.33:1 on `--accent-subtle`).
+`theme-contrast.test.ts` checks every text, status and arm token against this
 contract and compares all tokens in the table with `styles.css`.
 
 | Token | Dark | Light |
@@ -77,7 +77,7 @@ contract and compares all tokens in the table with `styles.css`.
 | `--status-info` | `#7f9fbd` | `#356383` |
 | `--status-partial` | `#d1b887` | `#73612f` |
 | `--on-accent` | `#1b1508` | `#ffffff` |
-| Branch arm 1 to 4 | `#4fb3a5` `#e07a5f` `#6aa9d8` `#7fbf73` | `#0e7266` `#a94726` `#2b67a0` `#5c6c07` |
+| Branch arm 1 to 4 | `#4fb3a5` `#e47d62` `#6aa9d8` `#7fbf73` | `#0e7266` `#a94726` `#2b67a0` `#5c6c07` |
 | Stage edge | `#0d1114` | `#c9c6be` |
 | Thumbnail tile | `#10161b` | `#d9d6ce` |
 
