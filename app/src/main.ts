@@ -13,11 +13,11 @@ import { openStudioRequest } from "./studio-request-ui.ts";
 import { openSettings } from "./settings-ui.ts";
 import { layoutFor, saveLayout } from "./preferences.ts";
 import { applicationRequestLane as requestLane } from "./request-lane.ts";
-import { ScreensWorkspace } from "./screen-ui.ts";
+import { ScreensWorkspace, type ScreenReveal } from "./screen-ui.ts";
 import type { ScreenCatalog, ResolvedScreenTarget } from "./screen-contracts.ts";
 import { RuntimeWorkspace } from "./runtime-ui.ts";
 import { renderBranches, type FlowWorkspace } from "./branches-ui.ts";
-import { emptyHistory, historyControls, historyShortcut, isTextField, type HistoryDirection, type HistoryItem, type HistoryState, type HistoryStep } from "./project-history.ts";
+import { emptyHistory, hasPrimaryModifier, historyControls, historyShortcut, isTextField, type HistoryDirection, type HistoryItem, type HistoryState, type HistoryStep } from "./project-history.ts";
 import { completeApplicationClose, requestCore as desktopRequestCore } from "./bridge.ts";
 import {
   renderRecoverySurface,
@@ -59,11 +59,9 @@ interface ImportChoice { authorityId: string; displayName: string; byteCount: nu
 type ProjectSurface = "story" | "source" | "screens" | "branches" | "characters" | "lorebook" | "assets" | "variables";
 type PersistenceStatus = "saved" | "pendingValidation" | "conflict" | "recoveryRequired";
 type SceneTarget = import("./scene-ui.ts").StoryTarget;
-/** A screen element to select when Screens opens, by its Source path and screen name. */
-interface ScreenTarget { readonly path: string; readonly screen: string; readonly nodeId?: string; readonly parentId?: string }
 /** A Characters entry to select when Characters opens, such as `card:<record id>`. */
 interface ReferenceTarget { readonly referenceKey: string }
-type ProjectTarget = SourceTarget | SceneTarget | ScreenTarget | ReferenceTarget;
+type ProjectTarget = SourceTarget | SceneTarget | ScreenReveal | ReferenceTarget;
 
 const rootElement = document.querySelector<HTMLDivElement>("#app");
 if (rootElement === null) throw new Error("Application root is unavailable.");
@@ -488,8 +486,11 @@ async function refreshHistory(project: OpenProject): Promise<void> {
 // ordinary navigation: a refused leave keeps the input, and "Keep editing?" must be
 // answered Discard and leave. Beat drafts still make it wait until #113.
 // Each run reports `committed`, `refused` or `blocked` on the app root for tests and probes.
+// An open dialog, including a native modal <dialog>, owns Cmd/Ctrl+Z.
+const dialogOpen = (): boolean => hasBlockingModal() || document.querySelector("dialog[open]") !== null;
+
 async function runHistory(project: OpenProject, direction: HistoryDirection): Promise<void> {
-  if (historyRunning || lifecycleBusy || hasBlockingModal() || currentProject?.sessionId !== project.sessionId || !historyState[direction]) return;
+  if (historyRunning || lifecycleBusy || dialogOpen() || currentProject?.sessionId !== project.sessionId || !historyState[direction]) return;
   historyRunning = true;
   let outcome = "blocked", errorCode: string | undefined;
   const focused = (document.activeElement as HTMLElement | null)?.dataset.history;
@@ -1200,15 +1201,8 @@ async function allowSceneNavigation(): Promise<boolean> {
   return false;
 }
 
-function isMacPlatform(): boolean {
-  return /Mac|iPhone|iPad|iPod/.test(window.navigator.platform);
-}
-
 function isSaveShortcut(event: KeyboardEvent): boolean {
-  if (event.key.toLowerCase() !== "s" || event.altKey || event.shiftKey) return false;
-  return isMacPlatform()
-    ? event.metaKey && !event.ctrlKey
-    : event.ctrlKey && !event.metaKey;
+  return event.key.toLowerCase() === "s" && !event.shiftKey && hasPrimaryModifier(event);
 }
 
 // Toolbar Save and Cmd/Ctrl+S take this one route: modal, reference library, Source
@@ -1289,7 +1283,7 @@ function installListeners(): void {
   window.addEventListener("keydown", (event) => {
     const direction = historyShortcut(event);
     const project = currentProject;
-    if (!direction || !project || event.isComposing || hasBlockingModal() || isTextField(event.target)) return;
+    if (!direction || !project || event.isComposing || dialogOpen() || isTextField(event.target)) return;
     event.preventDefault();
     if (!event.repeat) void runHistory(project, direction);
   });

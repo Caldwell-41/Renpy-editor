@@ -9,8 +9,8 @@ export type HistoryItem =
   | { readonly type: "source"; readonly path: string }
   | { readonly type: "prompt"; readonly action: string }
   | { readonly type: "reference"; readonly kind: "card" | "lore" | "context"; readonly recordId: string | null }
-  | { readonly type: "variable"; readonly variableId: string }
-  | { readonly type: "asset"; readonly assetId: string };
+  | { readonly type: "variable" }
+  | { readonly type: "asset" };
 export interface HistoryLabel { readonly name: string; readonly item: HistoryItem }
 export interface HistoryState { readonly undo: HistoryLabel | null; readonly redo: HistoryLabel | null }
 export interface HistoryStep { readonly entry: HistoryLabel; readonly history: HistoryState }
@@ -18,15 +18,17 @@ export type HistoryDirection = "undo" | "redo";
 
 export const emptyHistory: HistoryState = { undo: null, redo: null };
 
-const mac = (): boolean => /Mac|iPhone|iPad|iPod/.test(window.navigator.platform);
-const shortcut = (direction: HistoryDirection): string => direction === "undo" ? mac() ? "⌘Z" : "Ctrl+Z" : mac() ? "⇧⌘Z" : "Ctrl+Y";
+export const isMacPlatform = (): boolean => /Mac|iPhone|iPad|iPod/.test(window.navigator.platform);
+/** Cmd on macOS and Ctrl elsewhere, alone with no Alt. */
+export const hasPrimaryModifier = (event: KeyboardEvent): boolean => !event.altKey && (isMacPlatform() ? event.metaKey && !event.ctrlKey : event.ctrlKey && !event.metaKey);
+const shortcut = (direction: HistoryDirection): string => direction === "undo" ? isMacPlatform() ? "⌘Z" : "Ctrl+Z" : isMacPlatform() ? "⇧⌘Z" : "Ctrl+Y";
 
 /** Cmd/Ctrl+Z, Shift+Cmd/Ctrl+Z, and Ctrl+Y off macOS. */
 export function historyShortcut(event: KeyboardEvent): HistoryDirection | undefined {
-  if (event.altKey || (mac() ? !event.metaKey || event.ctrlKey : !event.ctrlKey || event.metaKey)) return undefined;
+  if (!hasPrimaryModifier(event)) return undefined;
   const key = event.key.toLowerCase();
   if (key === "z") return event.shiftKey ? "redo" : "undo";
-  if (key === "y" && !mac() && !event.shiftKey) return "redo";
+  if (key === "y" && !isMacPlatform() && !event.shiftKey) return "redo";
   return undefined;
 }
 

@@ -822,15 +822,12 @@ impl AuthoringService {
                 existing.source.source_revision = new_revision.clone();
             }
         }
-        let variable_id = uuid::Uuid::new_v4().to_string();
         let label = HistoryLabel::new(
             format!("new variable {}", request.technical_name),
-            HistoryItem::Variable {
-                variable_id: variable_id.clone(),
-            },
+            HistoryItem::Variable,
         );
         metadata.variables.push(Variable {
-            id: variable_id,
+            id: uuid::Uuid::new_v4().to_string(),
             technical_name: request.technical_name,
             variable_type: request.variable_type,
             default_value: stored_value,
@@ -889,9 +886,7 @@ impl AuthoringService {
         let variable = &mut metadata.variables[variable_index];
         let label = HistoryLabel::new(
             format!("{} default change", variable.technical_name),
-            HistoryItem::Variable {
-                variable_id: variable.id.clone(),
-            },
+            HistoryItem::Variable,
         );
         let new_statement = format!("default {} = {}", variable.technical_name, literal);
         let new_source =
@@ -1119,14 +1114,7 @@ impl AuthoringService {
                         "font"
                     }
                 ),
-                HistoryItem::Asset {
-                    asset_id: metadata
-                        .assets
-                        .last()
-                        .ok_or(AuthoringError::CorruptMetadata)?
-                        .id
-                        .clone(),
-                },
+                HistoryItem::Asset,
             );
             self.commit_history(
                 project,

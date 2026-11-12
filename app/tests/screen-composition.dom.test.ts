@@ -568,7 +568,6 @@ test("Undo of a removal reveals the removed element, and Redo reveals its parent
     const emptied = structuredClone(removed); emptied.revision = "emptied"; emptied.screens[0]!.nodes.splice(1, 2);
     await h.reveal(emptied, { nodeId: "title-id", parentId: "box-id" });
     assert.equal(h.row("root-id").ariaSelected, "true", "With its container gone too, the screen is selected");
-    assert.equal(h.calls.some(c => c.operation.startsWith("history.")), false, "Screens runs no history request of its own");
   } finally { h.workspace.dispose(); }
 });
 

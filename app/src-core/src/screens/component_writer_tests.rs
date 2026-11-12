@@ -91,12 +91,7 @@ fn extracted_component_geometry_requires_review_for_all_four_existing_writers() 
         );
         assert_eq!(fixture.read(&component.path).text.as_ref(), Some(&before));
     }
-    assert!(!fixture
-        .service
-        .history_state(&fixture.project)
-        .unwrap()
-        .undo
-        .is_some());
+    assert!(fixture.service.history_state(&fixture.project).unwrap().undo.is_none());
     for (operation, fields) in &cases {
         geometry(&fixture, &component, operation, fields.clone(), true).unwrap();
     }
@@ -110,12 +105,7 @@ fn extracted_component_geometry_requires_review_for_all_four_existing_writers() 
         fixture.undo();
     }
     assert_eq!(fixture.read(&component.path).text, Some(before));
-    assert!(!fixture
-        .service
-        .history_state(&fixture.project)
-        .unwrap()
-        .undo
-        .is_some());
+    assert!(fixture.service.history_state(&fixture.project).unwrap().undo.is_none());
     for _ in &cases {
         fixture.redo();
     }
@@ -288,12 +278,7 @@ fn component_styles_and_images_use_existing_writers_and_copy_without_changing_ot
         fixture.undo();
     }
     assert_eq!(fixture.read(&component.path).text, original);
-    assert!(!fixture
-        .service
-        .history_state(&fixture.project)
-        .unwrap()
-        .undo
-        .is_some());
+    assert!(fixture.service.history_state(&fixture.project).unwrap().undo.is_none());
     for _ in 0..6 {
         fixture.redo();
     }

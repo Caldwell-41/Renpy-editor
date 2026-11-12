@@ -1937,7 +1937,9 @@ fn undo_and_redo_stop_at_external_revision_boundaries() {
         history.undo_proposal(&current),
         Err(ErrorCode::HistoryBoundary)
     );
-    history.accepted_undo().unwrap();
+    history
+        .accepted_undo_with_revisions(&[after_revision.clone()])
+        .unwrap();
     assert_eq!(
         history.redo_proposal(&current),
         Err(ErrorCode::HistoryBoundary)
@@ -2531,17 +2533,17 @@ fn history_continuity_handles_interleaved_paths_multi_file_commits_and_branching
         assert_eq!(fs::read(f.root.join("game/two.rpy")).unwrap(), original_two);
         history_step(&f, &mut history, false);
         assert_eq!(fs::read(f.root.join("game/one.rpy")).unwrap(), original_one);
-        assert!(!history.can_undo());
+        assert!(history.state().undo.is_none());
         for _ in 0..3 {
             history_step(&f, &mut history, true);
         }
         assert_eq!(fs::read(f.root.join("game/one.rpy")).unwrap(), b"one-2\n");
         assert_eq!(fs::read(f.root.join("game/two.rpy")).unwrap(), b"two-2\n");
-        assert!(!history.can_redo());
+        assert!(history.state().redo.is_none());
     }
     history_step(&f, &mut history, false);
     history_record(&f, &mut history, &[("game/one.rpy", b"branched\n")]);
-    assert!(!history.can_redo());
+    assert!(history.state().redo.is_none());
     for _ in 0..3 {
         history_step(&f, &mut history, false);
     }
@@ -2570,7 +2572,7 @@ fn history_continuity_does_not_cross_external_replacements_between_entries() {
             Err(ErrorCode::HistoryBoundary)
         );
         assert_eq!(fs::read(f.root.join("game/one.rpy")).unwrap(), external);
-        assert!(history.can_undo() && history.can_redo());
+        assert!(history.state().undo.is_some() && history.state().redo.is_some());
         // Refusal does not move the cursor: redo of the last accepted edit is still available.
         history_step(&f, &mut history, true);
         assert_eq!(
@@ -2605,7 +2607,7 @@ fn history_continuity_refuses_external_replacements_after_undo_without_cursor_ch
             history.redo_proposal(&redo_current),
             Err(ErrorCode::HistoryBoundary)
         );
-        assert!(history.can_undo() && history.can_redo());
+        assert!(history.state().undo.is_some() && history.state().redo.is_some());
         assert_eq!(fs::read(f.root.join("game/one.rpy")).unwrap(), external);
     }
 }

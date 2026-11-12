@@ -11,7 +11,7 @@ try{
  browser=await chromium.launch({channel:'chrome',headless:true});const page=await browser.newPage();await page.goto(`http://127.0.0.1:${server.address().port}`);
  const result=await page.evaluate(async()=>{
   const {mountPromptPreparation}=await import('/prompt-ui.js');
-  const prompt={revision:'p',effectiveText:'Saved',baselineText:'Baseline',baselineVersion:'1',baselineDigest:'b',savedBaselineVersion:'1',savedBaselineDigest:'b',customized:true,styleNotes:'',canUndo:true,canRedo:true};
+  const prompt={revision:'p',effectiveText:'Saved',baselineText:'Baseline',baselineVersion:'1',baselineDigest:'b',savedBaselineVersion:'1',savedBaselineDigest:'b',customized:true,styleNotes:''};
   let fail=false;const c=mountPromptPreparation(document.querySelector('main'),{current:()=>true,load:async()=>({prompt,targets:[],references:[],structureRevision:'s'}),apply:async command=>{if(fail)throw Object.assign(Error('Stale saved prompt'),{code:'STALE_CONTEXT'});return {...prompt,effectiveText:command.text??'Baseline'};},preview:async()=>{throw Error('Unused');}});
   const settled=async()=>{while(document.querySelector('.prompt-preparation').dataset.busy!=='false')await new Promise(r=>setTimeout(r,10));};
   const button=label=>[...document.querySelectorAll('button')].find(b=>b.textContent===label);

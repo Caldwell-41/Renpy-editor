@@ -1102,8 +1102,9 @@ After removal the UI selects next sibling, otherwise previous sibling, otherwise
 parent. An unmarked sibling uses its source offset in the accepted revision as a
 selection key. Device preferences restore that key only against the same source
 revision on reopen; this grants no editing authority and is not a durable identity.
-Its shared-history integration restores the removed target on Undo and the
-fallback on Redo. Other history preserves a surviving selection. Device preferences
+Project Undo of a removal selects the restored element. Redo leaves it gone, so
+it selects the element that contained it. Undo and Redo of other edits select the
+element they changed (UI.md "Story Undo"). Device preferences
 optionally remember screen/element selection by project UUID; history itself remains
 session-local. Text/addition drafts retain their original source revision. If Source
 removes their target, the UI keeps the text available for copying or explicit discard.
@@ -1112,9 +1113,7 @@ returned document, preserving focus, expanded sections and scroll. New edits use
 that revision; existing drafts retain their captured revision.
 No-op geometry saves return the same ownership-annotated document, preserving root
 and element identities and protected rows without changing source or history.
-Explicit Design entry focuses the text editor. The removal notice's specific Undo
-action expires after a later source-changing Screens save or Source reload,
-including return from another workspace. No-op saves retain the action.
+Explicit Design entry focuses the text editor.
 
 ### Numeric screen layout
 

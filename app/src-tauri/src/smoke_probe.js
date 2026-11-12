@@ -89,7 +89,7 @@ setTimeout(async () => {
     };
     const sceneWorkspace = {
       projectRevision: "3".repeat(64), sourceMapRevision: "4".repeat(64), entrySceneId: "scene",
-      lastOpen: { chapterId: "chapter", sceneId: "scene" }, canUndo: true, canRedo: false,
+      lastOpen: { chapterId: "chapter", sceneId: "scene" },
       chapters: [
         { id: "chapter", displayName: "Chapter 1", directory: "game/chapters/chapter_01" },
         { id: "chapter-two", displayName: "Chapter 2", directory: "game/chapters/chapter_02" },
@@ -147,7 +147,7 @@ setTimeout(async () => {
     let projectStatus = "saved";
     let recoveryReport = { items: [] };
     const references = () => ({document:{schemaVersion:1,projectId:project.projectId,cards:[],loreEntries:[]},revision:'smoke-reference-revision',diagnostic:null,
-      entities:model.characters.map(c=>({kind:'character',id:c.id,title:c.displayName,revision:c.source.sourceRevision})),issues:[],canUndo:false,canRedo:false});
+      entities:model.characters.map(c=>({kind:'character',id:c.id,title:c.displayName,revision:c.source.sourceRevision})),issues:[]});
     const smokeRequester = async (operation, payload = {}) => {
       const request = {
         protocolVersion: 1,

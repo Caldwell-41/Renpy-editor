@@ -38,7 +38,7 @@ function click(label: string): void {
 function sceneModel(): SceneWorkspace {
   return {
     projectRevision: "1".repeat(64), sourceMapRevision: "2".repeat(64), entrySceneId: "scene-one",
-    lastOpen: { chapterId: "chapter-one", sceneId: "scene-one" }, canUndo: false, canRedo: false,
+    lastOpen: { chapterId: "chapter-one", sceneId: "scene-one" },
     chapters: [
       { id: "chapter-one", displayName: "Opening", directory: "game/chapters/chapter_01" },
       { id: "chapter-two", displayName: "Branches", directory: "game/chapters/chapter_02" },

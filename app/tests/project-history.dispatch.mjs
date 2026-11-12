@@ -78,12 +78,18 @@ try{
  assert.equal(await header('redo'),'committed');assert.equal(await source(owner.path),resized);
  if(!mac){assert.equal(await shortcut('undo'),'committed');assert.equal(await step(()=>key(document.body,{y:true}),'Ctrl+Y'),'committed');assert.equal(await source(owner.path),resized,'Ctrl+Y redoes');}
  stage('Shift+Cmd/Ctrl+Z and the header Redo restore the resize; Cmd/Ctrl+Z matches the header Undo');
+ // A native modal dialog owns the shortcut too.
+ button('View in Source');await wait(()=>document.querySelector('.screen-source-dialog[open]'),'source dialog');await settle();
+ let requests=historyRequests(),event=key(document.querySelector('.screen-source-dialog button'));await settle();
+ assert.equal(historyRequests(),requests,'An open dialog keeps Cmd/Ctrl+Z');assert.equal(event.defaultPrevented,false);assert.equal(await source(owner.path),resized);
+ button('Close source');await wait(()=>!document.querySelector('.screen-source-dialog[open]'),'source dialog closed');
+ stage('an open Screens dialog keeps Cmd/Ctrl+Z');
 
  // A text field keeps its own text Undo: Find a file, then the Source editor.
  const fileSearch=()=>[...document.querySelectorAll('input[type="search"]')].find(n=>n.ariaLabel==='Find a file');
  button('Source');await wait(fileSearch,'Source');await settle();
  const find=fileSearch();find.focus();find.value='scene';find.dispatchEvent(new Event('input',{bubbles:true}));
- let requests=historyRequests(),event=key(find);await settle();
+ requests=historyRequests();event=key(find);await settle();
  assert.equal(event.defaultPrevented,false,'Cmd/Ctrl+Z stays with the search field');assert.equal(historyRequests(),requests);assert.equal(find.value,'scene');assert.equal(await source(owner.path),resized);
  const editor=document.querySelector('.source-editor');if(editor){editor.focus();event=key(editor);await settle();assert.equal(event.defaultPrevented,false);assert.equal(historyRequests(),requests,'The Source editor keeps its text Undo');}
  stage('Cmd/Ctrl+Z in the file search and the Source editor changes only that field');

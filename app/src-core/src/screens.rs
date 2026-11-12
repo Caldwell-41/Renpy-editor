@@ -975,12 +975,8 @@ impl AuthoringService {
         if patches.is_empty() {
             return Ok(document);
         }
-        let change = match values {
-            [(PixelProperty::Xsize, _), (PixelProperty::Ysize, _)] => "resize",
-            _ => "size change",
-        };
         let label = HistoryLabel::new(
-            format!("{} {change}", element_name(&node.kind)),
+            format!("{} resize", element_name(&node.kind)),
             HistoryItem::screen(&source_path, &screen_name, node.id.clone()),
         );
         patches.sort_by_key(|(span, _)| std::cmp::Reverse(span.start));

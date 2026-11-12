@@ -51,8 +51,7 @@ impl HistoryLabel {
                 HistoryItem::Source { path } => named(path),
                 HistoryItem::Prompt { action } => named(action),
                 HistoryItem::Reference { record_id, .. } => record_id.as_deref().is_none_or(named),
-                HistoryItem::Variable { variable_id } => named(variable_id),
-                HistoryItem::Asset { asset_id } => named(asset_id),
+                HistoryItem::Variable | HistoryItem::Asset => true,
             }
     }
 }
@@ -90,12 +89,9 @@ pub enum HistoryItem {
         kind: ReferenceItem,
         record_id: Option<String>,
     },
-    Variable {
-        variable_id: String,
-    },
-    Asset {
-        asset_id: String,
-    },
+    /// Variables and Assets open their workspace.
+    Variable,
+    Asset,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
@@ -172,52 +168,32 @@ pub struct HistoryStack {
 }
 
 impl HistoryStack {
-    pub fn can_undo(&self) -> bool {
-        self.cursor > 0
+    /// The entry Undo would reverse: the one below the cursor.
+    fn undo_entry(&self) -> Option<&HistoryEntry> {
+        self.entries.get(self.cursor.checked_sub(1)?)
     }
 
-    pub fn can_redo(&self) -> bool {
-        self.cursor < self.entries.len()
+    /// The entry Redo would restore: the one at the cursor.
+    fn redo_entry(&self) -> Option<&HistoryEntry> {
+        self.entries.get(self.cursor)
     }
 
     pub fn undo_paths(&self) -> Result<Vec<RelativePath>, ErrorCode> {
-        self.cursor
-            .checked_sub(1)
-            .and_then(|index| self.entries.get(index))
-            .map(|entry| {
-                entry
-                    .mutations
-                    .iter()
-                    .map(|item| item.path.clone())
-                    .collect()
-            })
+        self.undo_entry()
+            .map(paths)
             .ok_or(ErrorCode::HistoryBoundary)
     }
 
     pub fn redo_paths(&self) -> Result<Vec<RelativePath>, ErrorCode> {
-        self.entries
-            .get(self.cursor)
-            .map(|entry| {
-                entry
-                    .mutations
-                    .iter()
-                    .map(|item| item.path.clone())
-                    .collect()
-            })
+        self.redo_entry()
+            .map(paths)
             .ok_or(ErrorCode::HistoryBoundary)
     }
 
     pub fn state(&self) -> HistoryState {
         HistoryState {
-            undo: self
-                .cursor
-                .checked_sub(1)
-                .and_then(|index| self.entries.get(index))
-                .map(|entry| entry.label.clone()),
-            redo: self
-                .entries
-                .get(self.cursor)
-                .map(|entry| entry.label.clone()),
+            undo: self.undo_entry().map(|entry| entry.label.clone()),
+            redo: self.redo_entry().map(|entry| entry.label.clone()),
         }
     }
 
@@ -237,30 +213,16 @@ impl HistoryStack {
         &self,
         current: &HashMap<RelativePath, Revision>,
     ) -> Result<TransactionProposal, ErrorCode> {
-        let index = self
-            .cursor
-            .checked_sub(1)
-            .ok_or(ErrorCode::HistoryBoundary)?;
-        proposal(&self.entries[index], current, false)
+        let entry = self.undo_entry().ok_or(ErrorCode::HistoryBoundary)?;
+        proposal(entry, current, false)
     }
 
     pub fn redo_proposal(
         &self,
         current: &HashMap<RelativePath, Revision>,
     ) -> Result<TransactionProposal, ErrorCode> {
-        let entry = self
-            .entries
-            .get(self.cursor)
-            .ok_or(ErrorCode::HistoryBoundary)?;
+        let entry = self.redo_entry().ok_or(ErrorCode::HistoryBoundary)?;
         proposal(entry, current, true)
-    }
-
-    pub fn accepted_undo(&mut self) -> Result<(), ErrorCode> {
-        self.cursor = self
-            .cursor
-            .checked_sub(1)
-            .ok_or(ErrorCode::HistoryBoundary)?;
-        Ok(())
     }
 
     /// Advances the cursor only after the inverse transaction commits, replacing the
@@ -300,14 +262,6 @@ impl HistoryStack {
         Ok(())
     }
 
-    pub fn accepted_redo(&mut self) -> Result<(), ErrorCode> {
-        if self.cursor >= self.entries.len() {
-            return Err(ErrorCode::HistoryBoundary);
-        }
-        self.cursor += 1;
-        Ok(())
-    }
-
     /// Advances the cursor only after redo commits and retains the new platform file
     /// identities for a subsequent undo.
     pub fn accepted_redo_with_revisions(
@@ -340,6 +294,14 @@ impl HistoryStack {
         self.cursor += 1;
         Ok(())
     }
+}
+
+fn paths(entry: &HistoryEntry) -> Vec<RelativePath> {
+    entry
+        .mutations
+        .iter()
+        .map(|item| item.path.clone())
+        .collect()
 }
 
 fn proposal(
