@@ -50,6 +50,19 @@ test("Story Show picker resolves only owned Panels and retains captured revision
   await s.close();
 });
 
+test("a retained screen Beat draft resolves through the actions of the current Story mount", async () => {
+  let mount = 1; const s = setup({ current: () => mount === 1 }); const panel = openNew(s.host, "showScreen"); await tick();
+  assert.deepEqual(s.resolutions, [binding]);
+  const later: ScreenTargetBinding[] = [];
+  mount = 2;
+  s.view.update(fixture(), { resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); }, status: value => s.messages.push(value), current: () => mount === 2,
+    apply: async command => { s.commands.push(command); throw Error("STALE_SCREEN_REVISION"); }, screenCatalog: async () => catalog, resolveScreenTarget: async value => { later.push(value); return structuredClone(target); } });
+  assert.ok(panel.isConnected);
+  const picker = panel.querySelector<HTMLSelectElement>('[aria-label="Panel screen"]')!; picker.dispatchEvent(new Event("change", { bubbles: true })); await tick();
+  assert.deepEqual(later, [binding]); assert.equal(s.resolutions.length, 1);
+  await s.close();
+});
+
 test("editor Escape cancels a new Hide operation without sending a game action or Beat write", async () => {
   const s = setup(); const panel = openNew(s.host, "hideScreen"); await tick();
   panel.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));

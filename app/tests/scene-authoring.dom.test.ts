@@ -455,6 +455,20 @@ test("a valid beat draft shows on the stage while typing, and Cancel restores th
  view.dispose();await browser.happyDOM.close();
 });
 
+test("a draft whose beat left source stays listed until the author cancels it",async()=>{
+ const browser=installDom();const host=document.querySelector<HTMLElement>("#host")!,tree=document.querySelector<HTMLElement>("#tree")!;
+ const original=sceneModel(),actions={status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error("unused");},apply:async()=>original};
+ const view=renderStoryView(host,tree,original,actions);
+ host.querySelector<HTMLButtonElement>('[data-beat-id="dialogue"] .beat-select')!.click();
+ const text=host.querySelector<HTMLTextAreaElement>('[data-beat-id="dialogue"] textarea')!;text.value="Orphaned";text.dispatchEvent(new window.Event("input",{bubbles:true}));
+ const removed={...original,scenes:original.scenes.map((scene,i)=>i?scene:{...scene,beats:scene.beats.filter(beat=>beat.id!=="dialogue")})};
+ view.update(removed,actions);
+ const listed=host.querySelector<HTMLElement>('[aria-label="Drafts no longer in source"]')!;assert.ok(listed.contains(text));assert.equal(text.value,"Orphaned");
+ [...listed.querySelectorAll("button")].find(item=>item.textContent==="Cancel")!.click();
+ assert.equal(view.hasDrafts(),false);assert.equal(host.querySelector('[aria-label="Drafts no longer in source"]'),null);
+ view.dispose();await browser.happyDOM.close();
+});
+
 test("a beat draft refuses Commit when its beat changed in source, and keeps the input",async()=>{
  const browser=installDom();const host=document.querySelector<HTMLElement>("#host")!,tree=document.querySelector<HTMLElement>("#tree")!;
  const original=sceneModel(),calls:SceneCommand[]=[],statuses:string[]=[];

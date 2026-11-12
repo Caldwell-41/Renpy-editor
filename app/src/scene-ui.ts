@@ -519,8 +519,8 @@ function presentationUrl(media: MediaPresentation): string {
   return URL.createObjectURL(new Blob([bytes], { type: media.mimeType }));
 }
 
-type Envelope = Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision">;
-const envelope = (model: SceneWorkspace): Envelope => ({ projectRevision: model.projectRevision, sourceMapRevision: model.sourceMapRevision, ...(model.authoringRevision ? { authoringRevision: model.authoringRevision } : {}) });
+type ExpectedRevisions = Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision">;
+const expectedRevisions = (model: SceneWorkspace): ExpectedRevisions => ({ projectRevision: model.projectRevision, sourceMapRevision: model.sourceMapRevision, ...(model.authoringRevision ? { authoringRevision: model.authoringRevision } : {}) });
 
 /** The scene Story shows: the preferred scene if it exists, else the project's last open scene. */
 export function storyScene(model: SceneWorkspace, preferred?: string): SceneDocument | undefined {
@@ -540,6 +540,10 @@ export interface StoryView {
   hasDrafts(sceneId?: string): boolean;
   /** True while a Story write is in flight. */
   busy(): boolean;
+  /** Whether a Story form other than a beat draft (a name, a move, a condition operation) has input. */
+  hasOpenForm(): boolean;
+  /** Where to reveal a pending beat draft. */
+  firstDraft(): { readonly sceneId: string; readonly beatId?: string } | undefined;
   /** Resolves true when the author may leave Story; beat drafts never block. */
   settle(): Promise<boolean>;
   dispose(): void;
@@ -558,6 +562,7 @@ export function renderStoryView(
   initialBeatId?: string,
 ): StoryView {
   let actions = initialActions;
+  const liveActions = new Proxy({} as SceneActions, { get: (_target, key) => actions[key as keyof SceneActions] });
   let model = initial;
   let screenInsertion = actions.screenInsertion ? structuredClone(actions.screenInsertion) : undefined;
   const rememberScreenInsertion = (insertion: ScreenInsertion): void => {
@@ -589,8 +594,8 @@ export function renderStoryView(
   // A new beat is a draft from the moment it is added; an existing beat only once edited.
   interface BeatDraft { readonly panel: HTMLElement; readonly sceneId: string; readonly beatId?: string; readonly body?: BodyRef; readonly read?: () => BeatPayload }
   const beatDrafts = new Map<string, BeatDraft>();
-  const pending = (draft: BeatDraft): boolean => !draft.beatId || draft.panel.dataset.unsubmitted === "true";
-  const pendingDrafts = (sceneId?: string): BeatDraft[] => [...beatDrafts.values()].filter(draft => pending(draft) && (sceneId === undefined || draft.sceneId === sceneId));
+  const isPending = (draft: BeatDraft): boolean => !draft.beatId || draft.panel.dataset.unsubmitted === "true";
+  const pendingDrafts = (sceneId?: string): BeatDraft[] => [...beatDrafts.values()].filter(draft => isPending(draft) && (sceneId === undefined || draft.sceneId === sceneId));
   let reportedDrafts = 0;
   const draftsChanged = (): void => {
     markDrafts();
@@ -616,15 +621,25 @@ export function renderStoryView(
   };
   const withDrafts = (scene: SceneDocument): SceneDocument => {
     const edits = new Map<string, BeatPayload>();
-    for (const draft of pendingDrafts(scene.id)) { const payload = draft.beatId && draft.read ? readQuietly(draft.read) : undefined; if (payload) edits.set(draft.beatId!, payload); }
-    if (!edits.size) return scene;
-    // A changed calculation has no core result yet, so its value stays unknown.
-    return { ...scene, beats: scene.beats.map(beat => { const payload = edits.get(beat.id); if (!payload) return beat; const { assignment: _accepted, ...rest } = beat; return { ...rest, payload }; }) };
+    const unknown = new Set<string>();
+    for (const draft of pendingDrafts(scene.id)) {
+      if (!draft.beatId || !draft.read) continue;
+      // Reading an arithmetic draft validates it, so it is not read for the preview.
+      if (scene.beats.find(beat => beat.id === draft.beatId)?.payload.type === "setVariable") { unknown.add(draft.beatId); continue; }
+      const payload = readQuietly(draft.read); if (payload) edits.set(draft.beatId, payload);
+    }
+    if (!edits.size && !unknown.size) return scene;
+    return { ...scene, beats: scene.beats.map(beat => {
+      const payload = edits.get(beat.id);
+      // Without the accepted core result, a calculation previews as unknown.
+      if (unknown.has(beat.id)) { const { assignment: _accepted, ...rest } = beat; return rest; }
+      return payload ? { ...beat, payload } : beat;
+    }) };
   };
   let previewTarget: { readonly preview: HTMLElement; readonly sceneId: string } | undefined;
   const refreshPreview = (): void => {
     const scene = previewTarget && model.scenes.find(item => item.id === previewTarget!.sceneId);
-    if (!previewTarget?.preview.isConnected || !scene) return;
+    if (!previewTarget?.preview.isConnected || !scene || composing) return;
     mediaGeneration++; previewTarget.preview.replaceChildren(); renderPreview(previewTarget.preview, scene);
   };
   const dropDraft = (key: string): void => { beatDrafts.delete(key); draftsChanged(); };
@@ -709,7 +724,7 @@ export function renderStoryView(
     cancelBeatDrag?.();
     layoutObservers.splice(0).forEach(o=>o.disconnect());
     // An unedited editor is rebuilt from accepted source; only edited ones are drafts.
-    for (const [key, draft] of beatDrafts) if (!pending(draft)) beatDrafts.delete(key);
+    for (const [key, draft] of beatDrafts) if (!isPending(draft)) beatDrafts.delete(key);
     mediaGeneration += 1;
     for (const url of audioUrls) URL.revokeObjectURL?.(url);
     audioUrls.clear();
@@ -722,7 +737,26 @@ export function renderStoryView(
     drawTree(selectedScene);
     drawBeats(selectedScene);
     restoreNewBeatDrafts(selectedScene);
+    showOrphanedDrafts(selectedScene);
     markDrafts();
+  };
+
+  // A draft whose beat, branch or scene left source stays listed, with its editor, until
+  // the author cancels it. Commit refuses it because its beat changed.
+  const orphaned = (draft: BeatDraft): boolean => {
+    const scene = model.scenes.find(item => item.id === draft.sceneId);
+    if (!scene) return true;
+    if (draft.beatId) { const beat = scene.beats.find(item => item.id === draft.beatId); return !beat || beat.protected || !!beat.conditionalBranch || !!beat.structuralPlaceholder || readOnlyLogic(beat); }
+    const body = draft.body;
+    return body?.type === "branch" && !scene.beats.some(item => item.id === body.branchId);
+  };
+  const showOrphanedDrafts = (scene: SceneDocument): void => {
+    const lost = pendingDrafts().filter(draft => orphaned(draft) && (draft.sceneId === scene.id || !model.scenes.some(item => item.id === draft.sceneId)));
+    if (!lost.length) return;
+    const section = document.createElement("section"); section.className = "orphaned-drafts state-banner partial-state"; section.setAttribute("aria-label", "Drafts no longer in source");
+    const heading = document.createElement("h2"); heading.textContent = "Drafts whose beat is no longer in source";
+    section.append(heading, ...lost.map(draft => draft.panel));
+    host.querySelector(".beats-region")?.prepend(section);
   };
 
   // A body's beat list: the root list or a condition or Choice branch.
@@ -1370,12 +1404,12 @@ export function renderStoryView(
     if (kept) { card.append(kept.panel); return; }
     // A draft commits against current revisions while its beat's accepted payload is unchanged.
     const accepted = JSON.stringify(beat.payload);
-    const base = (): { scene: SceneDocument; expectedBody: BodyRef; captured: Envelope } => {
+    const base = (): { scene: SceneDocument; expectedBody: BodyRef; captured: ExpectedRevisions } => {
       const current = model.scenes.find(item => item.id === scene.id), node = current?.beats.find(item => item.id === beat.id);
       if (!current || !node || JSON.stringify(node.payload) !== accepted) throw new Error("This Beat changed in source after the draft began. Draft retained.");
-      return { scene: current, expectedBody: beatBody(node), captured: envelope(model) };
+      return { scene: current, expectedBody: beatBody(node), captured: expectedRevisions(model) };
     };
-    const editor = buildBeatEditor(model, beat.payload, true, actions, assignmentValidation(() => base(), value => { const current = base(); return { type: "updateBodyBeat", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, beatId: beat.id, expectedBody: current.expectedBody, beat: value }; }));
+    const editor = buildBeatEditor(model, beat.payload, true, liveActions, assignmentValidation(() => base(), value => { const current = base(); return { type: "updateBodyBeat", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, beatId: beat.id, expectedBody: current.expectedBody, beat: value }; }));
     const panel = editor.host; panel.classList.add("expanded-beat");panel.dataset.beatType=beat.payload.type;
     if (beat.payload.type === "showScreen" || beat.payload.type === "hideScreen" || beat.payload.type === "callScreen") {
       const details = document.createElement("details"), summary = document.createElement("summary"); summary.textContent = "Source and effects";
@@ -1472,7 +1506,7 @@ export function renderStoryView(
     keepDraft(beat.id, { panel, sceneId: scene.id, beatId: beat.id, read: editor.read });
   };
 
-  const assignmentValidation = (base: () => { scene: SceneDocument; captured: Envelope }, command: (beat: BeatPayload) => SceneCommand): ValidateAssignment => async beat => {
+  const assignmentValidation = (base: () => { scene: SceneDocument; captured: ExpectedRevisions }, command: (beat: BeatPayload) => SceneCommand): ValidateAssignment => async beat => {
     if (!actions.validateAssignment || disposed || actions.current?.() === false) throw Error("Story session is unavailable.");
     const { scene, captured: expected } = base();
     const result = await actions.validateAssignment(command(beat), expected);
@@ -1485,10 +1519,10 @@ export function renderStoryView(
     const key = `new:${scene.id}:${JSON.stringify(body)}:${JSON.stringify(position)}`;
     const existing = beatDrafts.get(key);
     if (existing) { if (!existing.panel.isConnected) list.prepend(existing.panel); existing.panel.querySelector<HTMLElement>("select, input, textarea")?.focus(); return; }
-    const base = (): { scene: SceneDocument; captured: Envelope } => {
+    const base = (): { scene: SceneDocument; captured: ExpectedRevisions } => {
       const current = model.scenes.find(item => item.id === scene.id);
       if (!current) throw new Error("This Scene is no longer available. Draft retained.");
-      return { scene: current, captured: envelope(model) };
+      return { scene: current, captured: expectedRevisions(model) };
     };
     const openingInsertion = structuredClone(insertion ?? screenInsertion ?? {sceneId:scene.id,body,position,expectedSourceRevision:scene.sourceRevision});
     let rememberedInsertion = false;
@@ -1530,9 +1564,9 @@ export function renderStoryView(
     for(const event of ["input","change"])placement.host.addEventListener(event,()=>{if(remember())delete placement.host.dataset.unsubmitted;else placement.host.dataset.unsubmitted="true";updatePendingMarker();});
     const editorHost = document.createElement("div"),secondaryHost=document.createElement("div");secondaryHost.className="story-screen-secondary";
     const validateNew = assignmentValidation(base, beat => ({ type: "insertBodyBeat", sceneId: scene.id, expectedSourceRevision: base().scene.sourceRevision, ...chosenLocation(), beat }));
-    let editor = buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, actions, validateNew);
+    let editor = buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, liveActions, validateNew);
     const typeDrafts = new Map<string, BeatEditor>([[type.value, editor]]);
-    const replaceEditor = (): void => { placement.host.hidden=!usesPlacement();if(placement.host.hidden)delete placement.host.dataset.unsubmitted;destination.hidden=screenType();remember();editor = typeDrafts.get(type.value) ?? buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, actions, validateNew); typeDrafts.set(type.value, editor); editorHost.replaceChildren(editor.host);secondaryHost.replaceChildren(...(editor.secondary?[editor.secondary]:[]));panel.classList.toggle("story-screen-editor",screenType());dirtyDraft(panel, editor.controls); };
+    const replaceEditor = (): void => { placement.host.hidden=!usesPlacement();if(placement.host.hidden)delete placement.host.dataset.unsubmitted;destination.hidden=screenType();remember();editor = typeDrafts.get(type.value) ?? buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, liveActions, validateNew); typeDrafts.set(type.value, editor); editorHost.replaceChildren(editor.host);secondaryHost.replaceChildren(...(editor.secondary?[editor.secondary]:[]));panel.classList.toggle("story-screen-editor",screenType());dirtyDraft(panel, editor.controls); };
     type.addEventListener("change", replaceEditor); replaceEditor();
     const actionsRow = document.createElement("div"); actionsRow.className = "row-actions";
     const cancel = button("Cancel", screenType()?"button secondary":"text-button");
@@ -1587,6 +1621,8 @@ export function renderStoryView(
       host.closest<HTMLElement>(".project-shell")?.setAttribute("data-writing-focus", String(writingFocus));
     },
     hasDrafts: sceneId => pendingDrafts(sceneId).length > 0,
+    hasOpenForm: hasDraft,
+    firstDraft: () => { const draft = pendingDrafts()[0]; return draft && { sceneId: draft.sceneId, ...(draft.beatId ? { beatId: draft.beatId } : {}) }; },
     busy: () => pendingWrites > 0 || settling !== undefined,
     settle,
     dispose: () => {

@@ -271,7 +271,8 @@ mounts it again on each visit, so beat drafts keep their live editors
 current revisions while its beat's accepted payload is unchanged.
 
 The shell always exposes a meaningful persistence state such as `Saved`, `Saving`,
-`Unsubmitted editor input`, `Pending validation`, `Conflict`, or `Recovery required`.
+`Unsubmitted editor input`, `Unsaved changes` (pending beat drafts), `Pending validation`,
+`Conflict`, or `Recovery required`.
 One application-lifetime shell adapter owns `Ctrl/Cmd+S`. Outside Source editing it is
 an explicit Flush/durability action. In a Source editing context, the registered
 document controller captures the session, controller, open generation and latest input,

@@ -484,7 +484,8 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   runtimeWorkspace ??= new RuntimeWorkspace({ sessionId: project.sessionId, sdkVersion: project.sdkVersion,
     request: (operation, payload) => value(operation, operation.startsWith("sdk.") ? payload : { ...payload, sessionId: project.sessionId }),
     current: () => currentProject?.sessionId === project.sessionId,
-    capture: () => { const capturedGeneration = viewGeneration; return { controller: currentSourceController(project), sceneRoot: root, current: () => capturedGeneration === viewGeneration }; },
+    capture: () => { const capturedGeneration = viewGeneration; return { controller: currentSourceController(project), current: () => capturedGeneration === viewGeneration,
+      storyDrafts: { has: () => !!storyView?.hasDrafts(), reveal: () => { const draft = storyView?.firstDraft(); if (draft) void requestProjectNavigation(project, "story", draft); } } }; },
     coordinate: task => runAuthoringOperation(project, runtimeWorkspace!, task),
     navigate: target => requestProjectNavigation(project, "source", target),
     refreshPersistence: () => { if (currentProject?.sessionId === project.sessionId) void refreshPersistenceStatus(project, viewGeneration); },
@@ -1055,8 +1056,10 @@ function renderVariables(workspace: HTMLElement, project: OpenProject, model: Au
 
 function validInt64(value: string): boolean { if (!/^-?(0|[1-9][0-9]*)$/.test(value) || value === "-0") return false; try { const parsed = BigInt(value); return parsed >= -9223372036854775808n && parsed <= 9223372036854775807n; } catch { return false; } }
 function message(error: unknown, fallback: string): string { return error instanceof Error ? error.message : fallback; }
+// Story answers for itself: beat drafts never count, and its open forms come from hasOpenForm.
 function hasUnsubmittedInput(): boolean {
-  return [...root.querySelectorAll('[data-unsubmitted="true"]')].some(input => !input.closest("[data-beat-draft-key]"));
+  const story = storyView;
+  return !!story?.hasOpenForm() || [...root.querySelectorAll('[data-unsubmitted="true"]')].some(input => !story?.host.contains(input) && !story?.treeHost.contains(input));
 }
 
 async function allowSceneNavigation(): Promise<boolean> {
