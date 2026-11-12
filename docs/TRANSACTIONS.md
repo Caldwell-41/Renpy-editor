@@ -225,6 +225,13 @@ the cursor advances only after a successful commit. External changes, a failed i
 or recovery-required state stop at `HISTORY_BOUNDARY`/the corresponding blocked state
 without overwriting live bytes. Close/reopen deliberately clears the history cursor.
 
+Story Save builds every beat draft command on one cumulative candidate before it
+writes. Each command finds its beat or anchor by id in that candidate. The whole set
+shares one project, source-map and authoring revision check. A refused command stops
+the request with its index, and nothing is written. An accepted Story Save is one
+commit and one history entry. Like Source Save All, it is a recoverable sequential
+commit, not all-files atomicity.
+
 The recovery renderer is an inspection/resolution client, not a journal editor. It can
 show affected paths and accepted/displaced evidence and invoke only the typed safe
 resolution returned by core. It cannot delete the journal, select arbitrary files,

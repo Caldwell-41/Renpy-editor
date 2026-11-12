@@ -15,6 +15,11 @@ when the author leaves the beat and returns.
 A disagreement between a retained beat draft and source that changed after the
 draft began, requiring the author to decide which edit to keep.
 
+**Story Save**:
+The main Save action in Story. It accepts every pending beat draft in the open
+project, or none of them.
+_Avoid_: Commit as a synonym
+
 **Game stage**:
 The Story view of supported scene appearance through the selected beat, shown in
 the project's width-to-height ratio, including valid beat drafts. It marks unknown
