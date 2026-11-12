@@ -30,6 +30,20 @@ pub struct TextEdits {
     pub italic: Option<Option<bool>>,
 }
 
+impl TextEdits {
+    /// Whether the edit leaves the text and its appearance as they are.
+    pub fn is_unchanged(&self) -> bool {
+        self.text.is_none()
+            && self.appearance.is_empty()
+            && self.font.is_none()
+            && self.size.is_none()
+            && self.color.is_none()
+            && self.align.is_none()
+            && self.bold.is_none()
+            && self.italic.is_none()
+    }
+}
+
 pub(super) const FIELDS: &[&str] = &[
     "font",
     "size",

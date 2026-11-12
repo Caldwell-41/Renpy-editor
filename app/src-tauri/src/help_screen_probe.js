@@ -85,8 +85,8 @@
     assert(document.activeElement === width(), "Enter Apply preserves focus in the numeric field");
     const accepted = await read("source.open", { sessionId, path: "game/ui/help.rpy" });
     assert(accepted.text === before.text.replace("xsize 640", "xsize 760"), "Apply patches only the accepted dimension token");
-    await click("Undo"); await until(() => width()?.value === "640");
-    await click("Redo"); await until(() => width()?.value === "760");
+    await window.__loomlightProbeHistory('undo'); await until(() => width()?.value === "640");
+    await window.__loomlightProbeHistory('redo'); await until(() => width()?.value === "760");
     edit(0); await click("Apply layout"); await until(() => message().startsWith("Width needs a whole number of pixels"));
     await click("Cancel layout"); assert(width().value === "760", "Cancel restores the accepted value");
     checkpoint("source-roundtrip-passed");

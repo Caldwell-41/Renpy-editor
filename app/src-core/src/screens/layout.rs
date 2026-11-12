@@ -770,7 +770,11 @@ impl AuthoringService {
             return Ok(document);
         }
         let label = HistoryLabel::new(
-            format!("{} layout change", element_name(&node.kind)),
+            format!(
+                "{} {}",
+                element_name(&node.kind),
+                layout_change(request.values.keys())
+            ),
             HistoryItem::screen(&request.path, &request.screen_name, node.id.clone()),
         );
         let candidate = inspect(&proposed, request.path.clone(), String::new())?;
@@ -799,5 +803,23 @@ impl AuthoringService {
             label,
         )?;
         self.screens_inspect_owned(project, InspectRequest { path: request.path })
+    }
+}
+
+/// How a history name describes a layout edit: a resize, a move, or a change.
+pub(crate) fn layout_change<'a>(
+    keys: impl IntoIterator<Item = &'a String> + Clone,
+) -> &'static str {
+    let only = |allowed: &[&str]| {
+        keys.clone()
+            .into_iter()
+            .all(|key| allowed.contains(&key.as_str()))
+    };
+    if only(&["xsize", "ysize"]) {
+        "resize"
+    } else if only(&["xpos", "ypos", "xalign", "yalign", "xanchor", "yanchor"]) {
+        "move"
+    } else {
+        "layout change"
     }
 }

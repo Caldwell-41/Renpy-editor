@@ -29,6 +29,8 @@ async function settle(check,label){const deadline=Date.now()+15000;while(!await 
 const source=async path=>(await call('source.open',{path})).text;
 const control=label=>{const node=[...workspace.panel.querySelectorAll('input,textarea,select,button')].find(n=>n.ariaLabel===label||n.getAttribute('aria-label')===label||n.getAttribute('aria-label')===label.replace(/ value$/,' formula'));assert(node,label);return node;};
 const change=(label,value)=>{const node=control(label);node.value=value;node.dispatchEvent(new Event(node.tagName==='SELECT'?'change':'input',{bubbles:true}));};
+// Project Undo or Redo as the shell runs it: the real core step, then Screens opens at the entry's item.
+async function projectHistory(direction){const step=await call(`history.${direction}`);const item=step.entry.item;assert.equal(item.type,'screen');await workspace.mount(document.body,{path:item.path,screen:item.screen,...(item.nodeId?{nodeId:item.nodeId}:{}),...(item.parentId?{parentId:item.parentId}:{})});return step;}
 const button=label=>{const node=[...workspace.panel.querySelectorAll('button')].find(n=>n.textContent===label);assert(node,label);node.click();};
 async function mount(owner){
  workspace?.dispose();document.body.replaceChildren();
@@ -78,7 +80,7 @@ try{
    await settle(()=>!document.querySelector('dialog.screen-image-dialog'),'import and select');
    const savedBefore=saves;button('Apply changes');await settle(()=>saves>savedBefore&&!workspace.hasDraft()&&idle(),'imported imagebutton Apply');
    assert.equal(writes.at(-1).command.width,280);assert.match(await source(owner.path),/idle Transform\(/);
-   const accepted=await source(owner.path),undoSaves=saves;button('Undo');await settle(async()=>saves>undoSaves&&await source(owner.path)===original,'imported control Undo');const redoSaves=saves;button('Redo');await settle(async()=>saves>redoSaves&&await source(owner.path)===accepted,'imported control Redo');
+   const accepted=await source(owner.path);await projectHistory('undo');await settle(async()=>await source(owner.path)===original,'imported control Undo');await projectHistory('redo');await settle(async()=>await source(owner.path)===accepted,'imported control Redo');
    stage('actual Import and use followed by imagebutton Apply succeeds and control history remains grouped');
   }
   result.passed=true;
@@ -125,7 +127,7 @@ try{
    for(const actions of [[{type:'setVariable',variableId:coins.id,value:'8'}],[{type:'finishInteraction'}]]){
     await assert.rejects(call('screens.compose',{...request,expectedRevision:accepted.document.revision,componentRevisions:refreshed.revisions,command:{...request.command,interaction:{...request.command.interaction,actions}}}),error=>error.code==='INCOMING_REFERENCE');assert.equal(await source(comp.path),after);
    }
-   const history=async type=>{const state=await call('scene.list');await call('scene.apply',{expectedProjectRevision:state.projectRevision,expectedSourceMapRevision:state.sourceMapRevision,command:{type}});};
+   const history=type=>call(`history.${type}`);
    await history('undo');assert.equal(await source(comp.path),before);await history('redo');assert.equal(await source(comp.path),after);
    stage('passive component imagebutton addition is one history change and effectful actions remain blocked');
   }else{
@@ -162,8 +164,8 @@ try{
  const accepted=await source(owner.path),command=writes.at(-1).command;
  assert.equal(command.type,'addBar');assert.deepEqual(command.binding,{variableId:coins.id,minimum:'-10',maximum:'90'});
  assert.equal(command.width,360);assert.equal(command.height,24);assert.match(accepted,/bar:/);assert.notEqual(accepted,before);
- button('Undo');await settle(async()=>await source(owner.path)===before&&!workspace.panel.querySelector('.sce-title'),'one-step bar Undo');
- button('Redo');await settle(async()=>await source(owner.path)===accepted&&saves>=3,'one-step bar Redo');
+ await projectHistory('undo');await settle(async()=>await source(owner.path)===before&&!workspace.panel.querySelector('.sce-title'),'one-step bar Undo');
+ await projectHistory('redo');await settle(async()=>await source(owner.path)===accepted,'one-step bar Redo');
  assert.equal(await source('game/ui/help.rpy'),opaque);
  stage('actual Add bar -> typed decimal binding/dimensions -> one Apply -> Undo/Redo, opaque neighbor unchanged');
  const choice=await child.request({driver:'chooseImage'});
@@ -182,8 +184,8 @@ try{
  assert.equal(imageCommand.type,'addImageButton');assert.equal(imageCommand.appearances.normal.assetId,asset.id);assert.equal(imageCommand.appearances.hover,null);
  assert.deepEqual(imageCommand.interaction.actions,[{type:'finishInteraction'}]);
  assert.match(buttonSource,/idle Transform\("images\/ui station_seal.png", xysize=\(240, 64\)\)/);
- button('Undo');await settle(async()=>await source(owner.path)===beforeButton&&!workspace.panel.querySelector('.sce-title'),'combined button Undo');
- const undoSaves=saves;button('Redo');await settle(async()=>await source(owner.path)===buttonSource&&saves>undoSaves,'combined button Redo');
+ await projectHistory('undo');await settle(async()=>await source(owner.path)===beforeButton&&!workspace.panel.querySelector('.sce-title'),'combined button Undo');
+ await projectHistory('redo');await settle(async()=>await source(owner.path)===buttonSource,'combined button Redo');
  stage('actual existing image picker -> real image reference + shared dimensions + typed Finish -> one Apply/Undo/Redo');
  const imageId=(await call('screens.inspect',{path:owner.path})).screens[0].nodes.find(n=>n.kind==='imagebutton').id;
  await mount(owner);button('1  Choose');workspace.panel.querySelector(`[data-node-id="${imageId}"]`).dispatchEvent(new browser.MouseEvent('dblclick',{bubbles:true}));
@@ -222,8 +224,8 @@ try{
  assert.deepEqual(allCommand.interaction.actions,[{type:'setVariable',variableId:coins.id,value:{operation:'assign',operand:'21'}},{type:'finishInteraction'}]);
  assert.equal((all.match(/Transform\(/g)??[]).length,6);
  change('Width','320');const noOpSaves=saves;button('Apply changes');await settle(()=>saves>noOpSaves&&!workspace.hasDraft()&&idle(),'no-op control Apply');assert.equal(await source(owner.path),all);
- button('Undo');await settle(async()=>await source(owner.path)===beforeAll&&control('Horizontal position').value!=='23','one-step six-state Undo');
- const undoAll=saves;button('Redo');await settle(async()=>await source(owner.path)===all&&saves>undoAll,'six-state Redo');
+ await projectHistory('undo');await settle(async()=>await source(owner.path)===beforeAll&&control('Horizontal position').value!=='23','one-step six-state Undo');
+ await projectHistory('redo');await settle(async()=>await source(owner.path)===all,'six-state Redo');
  stage('six explicit image states/actions/layout use one transaction; typed action errors keep input/focus; no-op adds no history');
  const beforeKey=writes.length;change('Width','400');control('Width').dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));await settle(()=>writes.length>beforeKey&&writes.at(-1).command.width===400&&!workspace.hasDraft()&&idle()&&workspace.panel.querySelector('.screen-message')?.textContent.startsWith('Control applied'),'keyboard combined size');
  assert.equal(writes.at(-1).command.type,'imageButton');assert.equal(writes.at(-1).command.width,400);

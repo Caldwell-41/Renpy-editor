@@ -68,8 +68,8 @@ try {
   await columns.press('Escape');
   await columns.fill('0');await columns.press('Enter');assert.equal(await columns.getAttribute('aria-invalid'),'true');assert.equal(await read(),accepted);
   await columns.press('Escape');assert.equal(await columns.inputValue(),'3');
-  await ui.getByRole('button',{name:'Undo',exact:true}).click();await page.waitForFunction(()=>document.querySelector('[data-layout-field=columns]')?.value==='2');
-  await ui.getByRole('button',{name:'Redo',exact:true}).click();await page.waitForFunction(()=>document.querySelector('[data-layout-field=columns]')?.value==='3');assert.equal(await read(),accepted);
+  await page.locator('.app-header [data-history="undo"]:not([aria-disabled="true"])').click();await page.waitForFunction(()=>document.querySelector('[data-layout-field=columns]')?.value==='2');
+  await page.locator('.app-header [data-history="redo"]:not([aria-disabled="true"])').click();await page.waitForFunction(()=>document.querySelector('[data-layout-field=columns]')?.value==='3');assert.equal(await read(),accepted);
   await page.screenshot({path:join(output,'grid-dark-wide.png'),fullPage:true});
   await columns.fill('4');
   await ui.getByRole('button',{name:'View in Source',exact:true}).first().click();
@@ -126,8 +126,8 @@ try {
   await ui.getByText(/Source-only grid children have an unknown cell count/).first().waitFor();assert.equal(await columns.inputValue(),'1');assert.equal(await read(),opaque);
   await columns.press('Escape');await spacing.fill('9');await spacing.press('Enter');await page.waitForFunction(()=>document.querySelector('.layout-state')?.textContent==='Saved');
   assert.equal(await read(),opaque.replace('spacing 8','spacing 9'),'Unrelated spacing remains editable without touching opaque children');
-  await ui.getByRole('button',{name:'Undo',exact:true}).click();await page.waitForFunction(()=>document.querySelector('[data-layout-field=spacing]')?.value==='8');assert.equal(await read(),opaque);
-  await ui.getByRole('button',{name:'Redo',exact:true}).click();await page.waitForFunction(()=>document.querySelector('[data-layout-field=spacing]')?.value==='9');assert.equal(await read(),opaque.replace('spacing 8','spacing 9'));
+  await page.locator('.app-header [data-history="undo"]:not([aria-disabled="true"])').click();await page.waitForFunction(()=>document.querySelector('[data-layout-field=spacing]')?.value==='8');assert.equal(await read(),opaque);
+  await page.locator('.app-header [data-history="redo"]:not([aria-disabled="true"])').click();await page.waitForFunction(()=>document.querySelector('[data-layout-field=spacing]')?.value==='9');assert.equal(await read(),opaque.replace('spacing 8','spacing 9'));
   const strict=changed.replace('grid 4 1:','grid 3 1:').replace('allow_underfull True','allow_underfull False');
   await save(strict);await ui.getByRole('button',{name:'Refresh Source',exact:true}).click();
   await ui.getByRole('button',{name:'1  Choose',exact:true}).click();await ui.getByRole('treeitem',{name:'Grid',exact:true}).dblclick();

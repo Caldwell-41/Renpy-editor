@@ -60,7 +60,7 @@ type ProjectSurface = "story" | "source" | "screens" | "branches" | "characters"
 type PersistenceStatus = "saved" | "pendingValidation" | "conflict" | "recoveryRequired";
 type SceneTarget = import("./scene-ui.ts").StoryTarget;
 /** A screen element to select when Screens opens, by its Source path and screen name. */
-interface ScreenTarget { readonly path: string; readonly screen: string; readonly nodeId?: string }
+interface ScreenTarget { readonly path: string; readonly screen: string; readonly nodeId?: string; readonly parentId?: string }
 /** A Characters entry to select when Characters opens, such as `card:<record id>`. */
 interface ReferenceTarget { readonly referenceKey: string }
 type ProjectTarget = SourceTarget | SceneTarget | ScreenTarget | ReferenceTarget;
@@ -487,19 +487,22 @@ async function refreshHistory(project: OpenProject): Promise<void> {
 // The one Undo and Redo command for the header buttons and Cmd/Ctrl+Z. It follows
 // ordinary navigation: a refused leave keeps the input, and "Keep editing?" must be
 // answered Discard and leave. Beat drafts still make it wait until #113.
+// Each run reports `committed`, `refused` or `blocked` on the app root for tests and probes.
 async function runHistory(project: OpenProject, direction: HistoryDirection): Promise<void> {
   if (historyRunning || lifecycleBusy || hasBlockingModal() || currentProject?.sessionId !== project.sessionId || !historyState[direction]) return;
-  if (storyView?.hasDrafts()) { setStatus("Commit or cancel beat drafts before Undo or Redo. Drafts retained.", "error"); return; }
-  if (activeReferenceController?.isBusy()) return;
-  if ((storyView?.busy() || hasUnsubmittedInput()) && !await allowSceneNavigation()) return;
   historyRunning = true;
+  let outcome = "blocked", errorCode: string | undefined;
   const focused = (document.activeElement as HTMLElement | null)?.dataset.history;
   try {
+    if (storyView?.hasDrafts()) { setStatus("Commit or cancel beat drafts before Undo or Redo. Drafts retained.", "error"); return; }
+    if (activeReferenceController?.isBusy()) return;
+    if ((storyView?.busy() || hasUnsubmittedInput()) && !await allowSceneNavigation()) return;
     const controller = currentSourceController(project);
     const transition = controller ? await runAuthoringOperation(project, operationScopes.sourceNavigation, () => controller.prepareTransition("navigation")) : undefined;
     if (controller && !transition) return;
     try {
       const step = await runAuthoringOperation(project, operationScopes.history, () => projectValue<HistoryStep>(project, direction === "undo" ? "history.undo" : "history.redo"));
+      outcome = "committed";
       if (currentProject?.sessionId !== project.sessionId) return;
       revealHistoryItem(project, step.entry.item);
       showHistory(step.history);
@@ -508,10 +511,16 @@ async function runHistory(project: OpenProject, direction: HistoryDirection): Pr
       if (focused) document.querySelector<HTMLElement>(`[data-history="${focused}"]`)?.focus();
     } finally { transition?.release(); }
   } catch (error) {
+    outcome = "refused"; errorCode = (error as { code?: string }).code;
     if (currentProject?.sessionId !== project.sessionId) return;
     setStatus(message(error, direction === "undo" ? "Undo failed. Nothing changed." : "Redo failed. Nothing changed."), "error");
     void refreshHistory(project);
-  } finally { historyRunning = false; }
+  } finally {
+    historyRunning = false;
+    root.dataset.historyOutcome = outcome;
+    if (errorCode) root.dataset.historyErrorCode = errorCode; else delete root.dataset.historyErrorCode;
+    root.dataset.historySequence = String(Number(root.dataset.historySequence ?? 0) + 1);
+  }
 }
 
 // Opens the entry's workspace at its item. A missing item falls back to what
@@ -519,7 +528,7 @@ async function runHistory(project: OpenProject, direction: HistoryDirection): Pr
 function revealHistoryItem(project: OpenProject, item: HistoryItem): void {
   switch (item.type) {
     case "story": showProject(project, "story", item.sceneId ? { sceneId: item.sceneId, ...(item.beatId ? { beatId: item.beatId } : {}) } : undefined); break;
-    case "screen": showProject(project, "screens", { path: item.path, screen: item.screen, ...(item.nodeId ? { nodeId: item.nodeId } : {}) }); break;
+    case "screen": showProject(project, "screens", { path: item.path, screen: item.screen, ...(item.nodeId ? { nodeId: item.nodeId } : {}), ...(item.parentId ? { parentId: item.parentId } : {}) }); break;
     case "source": showProject(project, "source", { path: item.path }); break;
     case "prompt": openProjectSettings(project, item.action); break;
     case "reference": showProject(project, item.kind === "card" ? "characters" : "lorebook", item.kind === "card" && item.recordId ? { referenceKey: `card:${item.recordId}` } : undefined); break;
@@ -605,7 +614,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
         if (currentProject?.sessionId === project.sessionId) await requestProjectNavigation(project,"story",{sceneId,screenHint,screenHintKind,screenInsertion});
       },
     });
-    screensWorkspace.mount(workspace, target && "screen" in target ? target : undefined);
+    void screensWorkspace.mount(workspace, target && "screen" in target ? target : undefined);
     void refreshPersistenceStatus(project, generation);
   }
   else if (surface === "branches") {

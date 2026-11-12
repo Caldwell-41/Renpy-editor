@@ -8,34 +8,30 @@ import { renderStoryView, type SceneWorkspace } from '../src/scene-ui.js';
 const helper = await readFile(new URL('../../src-tauri/src/native_editor_probe.js', import.meta.url), 'utf8');
 const selectable = await readFile(new URL('../../src-tauri/src/selectable_edit_probe.js', import.meta.url), 'utf8');
 
-test('selectable native probe retains the selected Beat across history and reports bounded wait diagnostics', async () => {
+test('selectable native probe keeps the selected Beat target and reports bounded wait diagnostics', async () => {
   const browser = new Window();
   Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement });
   browser.document.body.innerHTML = '<aside id="tree"></aside><main id="host"></main>';
   const model: SceneWorkspace = {
     projectRevision: '1'.repeat(64), sourceMapRevision: '2'.repeat(64), entrySceneId: 'scene',
-    lastOpen: { chapterId: 'chapter', sceneId: 'scene' }, canUndo: true, canRedo: true,
+    lastOpen: { chapterId: 'chapter', sceneId: 'scene' },
     chapters: [{ id: 'chapter', displayName: 'Chapter', directory: 'game/chapters' }],
     scenes: [{ id: 'scene', chapterId: 'chapter', displayName: 'Scene', technicalLabel: 'scene', sourcePath: 'game/scene.rpy', sourceRevision: '3'.repeat(64), sourceConflict: false, partial: false,
       beats: [{ id: 'narration', byteStart: 0, byteEnd: 20, protected: false, payload: { type: 'narration', text: 'Synthetic narration' } }, { id: 'return', byteStart: 20, byteEnd: 30, protected: false, payload: { type: 'return' } }], bodies: [{body: {type: 'root'}, kind: 'scene', nodes: [{beatId: 'narration'}, {beatId: 'return'}], ending: {type: 'ends', beatId: 'return'}, places: [{position: {type: 'before', anchor: {type: 'beat', beatId: 'narration'}}, fitsEnding: false}, {position: {type: 'before', anchor: {type: 'beat', beatId: 'return'}}, fitsEnding: false}], defaultPlace: {type: 'before', anchor: {type: 'beat', beatId: 'return'}}}] }],
     authoring: { characters: [], appearances: [], assets: [], variables: [] },
   };
-  const history: string[] = [], opened: string[] = [];
+  const opened: string[] = [];
   const dispose = renderStoryView(document.querySelector('#host')!, document.querySelector('#tree')!, model, {
     status: () => {}, resolution: { width: 1280, height: 720 }, present: async () => { throw Error('unexpected media'); },
-    apply: async command => { history.push(command.type); return model; },
+    apply: async () => model,
     assist: (_scene, beat, action) => { opened.push(`${action}:${beat}`); },
-  }, 'narration').dispose; // Acceptance explicitly restores this target before Undo/Redo.
+  }, 'narration').dispose; // Acceptance and project Undo reveal this target.
   const scope: { __loomlightProbeSelectBeat?: (id: string) => void; __loomlightProbeFindButton?: (label: string) => HTMLButtonElement } = {};
   runInNewContext(helper, { window: scope, document, performance, setTimeout });
   const selected = () => document.querySelector('.beat-select')!.ariaExpanded;
   const assist = () => scope.__loomlightProbeFindButton!('Assist · Edit Scene')!;
   try {
-    for (const command of ['Undo', 'Redo']) {
-      scope.__loomlightProbeFindButton!(command)!.click();
-      await new Promise(resolve => setTimeout(resolve, 0));
-    }
-    assert.deepEqual(history, ['undo', 'redo']); assert.equal(selected(), 'true');
+    assert.equal(selected(), 'true');
     document.querySelector<HTMLButtonElement>('.beat-select')!.click();
     assert.equal(selected(), 'false'); assert.equal(assist().disabled, true, 'old unconditional probe click deselects the retained target');
     scope.__loomlightProbeSelectBeat!('narration');
@@ -59,7 +55,7 @@ test('selectable native probe retains the selected Beat across history and repor
   assert.match(String(reported?.failure), /Timeout at open waiting for button: Source foundation fixture/);
   assert.deepEqual(JSON.parse(JSON.stringify(reported?.observation)), {
     panelPresent: false, busy: null, active: null, errorCode: '', selectedBeatCount: 0,
-    buttons: Object.fromEntries(['Assist · Edit Scene', 'Review complete send', 'Generate proposal', 'Save selected changes', 'Undo', 'Redo'].map(name => [name, { present: false, disabled: null }])),
+    buttons: Object.fromEntries(['Assist · Edit Scene', 'Review complete send', 'Generate proposal', 'Save selected changes'].map(name => [name, { present: false, disabled: null }])),
   });
   assert.equal(JSON.stringify(reported).includes('private project text'), false);
   await browser.happyDOM.close();

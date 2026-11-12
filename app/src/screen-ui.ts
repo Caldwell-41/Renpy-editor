@@ -48,8 +48,8 @@ type AcceptedEdit =
   | { type: "geometry"; document: ScreenDocument; draft: Draft; key: string }
   | { type: "layout"; document: ScreenDocument; base: ScreenDocument; key: string }
   | { type: "composition"; result: CompositionResult; command: CompositionCommand; base: ScreenDocument };
-/** A screen element to select once Screens loads, for example after project Undo. */
-export interface ScreenReveal { readonly path: string; readonly screen: string; readonly nodeId?: string }
+/** A screen element to select once Screens loads, for example after project Undo. A gone element selects its parent, then the screen. */
+export interface ScreenReveal { readonly path: string; readonly screen: string; readonly nodeId?: string; readonly parentId?: string }
 interface Actions {
   projectId?: string;
   resolution: { width: number; height: number };
@@ -264,12 +264,12 @@ export class ScreensWorkspace {
     });
     this.observer = new ResizeObserver(() => this.renderCanvas()); this.observer.observe(viewport);
   }
-  /** `reveal` selects that screen element once the saved screens load. */
-  mount(host: HTMLElement, reveal?: ScreenReveal): void {
+  /** `reveal` selects that screen element once the saved screens load; the result settles when they have. */
+  mount(host: HTMLElement, reveal?: ScreenReveal): Promise<void> {
     this.reveal = reveal;
     host.append(this.panel);
     if (this.creation) { this.creation.suspended = false; this.creation.refreshBase = true; this.closeCreationHost(); }
-    this.frames.invalidate("Checking canvas source."); void this.load();
+    this.frames.invalidate("Checking canvas source."); return this.load();
   }
   dispose(): void { this.disposed = true; this.sourceSequence++; this.sourceDialog?.remove(); this.components.dispose(); this.composer.dispose(); this.images.dispose(); this.controls.dispose(); this.text.dispose(); this.frames.dispose(); this.observer.disconnect(); this.cancelMove(); this.cancelResize(); this.closeCreationHost(); }
   hasDraft(): boolean { return this.components.hasPendingCopy() || this.components.isSaving() || this.drafts.size > 0 || !!this.resize || !!this.creation || this.composer.hasAddition() || this.layout.hasDraft() || this.controls.hasDraft() || this.images.hasDraft() || this.text.hasDraft(); }
@@ -454,6 +454,8 @@ export class ScreensWorkspace {
         if (!document || document.revision !== owned.sourceRevision || !document.screens.some(s => s.name === owned.name)) owned.resolved = false;
       });
       const reveal = this.reveal; this.reveal = undefined;
+      // A reveal without an element (an unmarked one) keeps the selection on the screen already open.
+      const sameScreen = !!reveal && reveal.path === this.doc?.path && reveal.screen === this.screen;
       const path = reveal?.path ?? this.doc?.path, selectedId = this.nodes()[this.selected]?.id; this.documents = documents; this.catalog = catalog;
       if (this.creation?.refreshBase) { this.creation.base = catalog; this.creation.refreshBase = false; }
       const supported = documents.filter(d => d.screens.length > 0);
@@ -464,9 +466,10 @@ export class ScreensWorkspace {
       if (this.owned) this.screen = this.owned.name;
       if (!this.owned && !this.doc?.screens.some(s => s.name === this.screen)) this.screen = this.doc?.screens[0]?.name ?? "";
       const remembered = layoutFor(this.preferenceKey()).screenSelection;
-      // A revealed element that is gone selects its screen.
-      const preferred = reveal ? reveal.nodeId : selectedId ?? (remembered?.screenId === this.owned?.id && (!remembered?.sourceRevision || remembered.sourceRevision === this.doc?.revision) ? remembered?.elementId : undefined);
-      this.selected = preferred ? Math.max(0, this.nodes().findIndex(n => screenNodeKey(n) === preferred)) : reveal ? 0 : Math.min(this.selected, Math.max(0, this.nodes().length - 1));
+      const index = (id?: string): number => id ? this.nodes().findIndex(n => screenNodeKey(n) === id) : -1;
+      const preferred = selectedId ?? (remembered?.screenId === this.owned?.id && (!remembered?.sourceRevision || remembered.sourceRevision === this.doc?.revision) ? remembered?.elementId : undefined);
+      if (reveal && (reveal.nodeId || reveal.parentId || !sameScreen)) this.selected = Math.max(0, [index(reveal.nodeId), index(reveal.parentId)].find(found => found >= 0) ?? 0);
+      else this.selected = preferred ? Math.max(0, index(preferred)) : Math.min(this.selected, Math.max(0, this.nodes().length - 1));
       this.selection.replaceChildren();
       const owned = [...catalog.owned];
       if (this.owned && !owned.some(s => s.id === this.owned!.id)) owned.push(this.owned);

@@ -25,7 +25,6 @@ function interactiveFixture(initial?: ScreenDocument, canvas = false) {
   ] }] };
   const calls: { operation: CoreOperation; payload?: Record<string, unknown> }[] = [];
   let reply: { document: ScreenDocument; selectedId: string } | undefined;
-  let historyReply: ScreenDocument | undefined;
   let inspectionGate: Promise<void> | undefined;
   let compositionGate: Promise<void> | undefined;
   let current = true, saved = 0;
@@ -49,8 +48,6 @@ function interactiveFixture(initial?: ScreenDocument, canvas = false) {
         doc = reply.document; return structuredClone(reply) as T;
       }
       if (["screens.setSize", "screens.setPosition"].includes(operation) && reply) { doc = reply.document; return structuredClone(doc) as T; }
-      if (operation === "scene.list") return { projectRevision: "project", sourceMapRevision: "map" } as T;
-      if (operation === "scene.apply" && historyReply) { doc = historyReply; return {} as T; }
       throw new Error(operation === "screens.compose" ? "Source conflict" : operation);
     } });
   workspace.mount(document.body);
@@ -59,7 +56,9 @@ function interactiveFixture(initial?: ScreenDocument, canvas = false) {
   const edit = (id: string) => { row(id).dispatchEvent(new window.MouseEvent("dblclick")); };
   const text = () => { const input = [...document.querySelectorAll("textarea")].find(i => i.ariaLabel === "Text"); assert.ok(input); return input; };
   return { workspace, calls, click, row, edit, text, browser, original: structuredClone(doc), respond: (next: ScreenDocument, selectedId: string) => { reply = { document: next, selectedId }; },
-    respondHistory: (next: ScreenDocument) => { historyReply = next; }, replaceDocument: (next: ScreenDocument) => { doc = next; },
+    // The shell's project Undo or Redo: core leaves `next`, then Screens opens at the entry's item.
+    reveal: async (next: ScreenDocument, item: { nodeId?: string; parentId?: string }) => { doc = next; await workspace.mount(document.body, { path: next.path, screen: "notes", ...item }); },
+    replaceDocument: (next: ScreenDocument) => { doc = next; },
     setCurrent: (value: boolean) => { current = value; }, saved: () => saved,
     holdComposition: () => { let release!: () => void; compositionGate = new Promise<void>(resolve => { release = resolve; }); return () => { compositionGate = undefined; release(); }; },
     holdInspection: () => { let release!: () => void; inspectionGate = new Promise<void>(resolve => { release = resolve; }); return () => { inspectionGate = undefined; release(); }; } };
@@ -216,10 +215,9 @@ test("a pending Add blocks competing operations and a stale completion retains i
     const accepted = structuredClone(h.original); accepted.revision = "accepted";
     accepted.screens[0]!.nodes.splice(4, 0, node("added-id", "text", 150, 180, 30, "Pending addition"));
     h.respond(accepted, "added-id"); const release = h.holdComposition(); h.click("Add text");
-    h.click("Add text"); h.click("Undo"); h.click("Refresh Source");
+    h.click("Add text"); h.click("Refresh Source");
     assert.equal(h.calls.filter(c => c.operation === "screens.compose").length, 1);
     assert.equal(h.calls.filter(c => c.operation === "source.list").length, 1);
-    assert.equal(h.calls.some(c => c.operation === "scene.apply"), false);
     const card = document.querySelector(".screen-card")!.innerHTML;
     h.setCurrent(false); release(); await tick(); await tick();
     assert.equal(h.workspace.hasDraft(), true, "A completion for an inactive session must not clear its addition");
@@ -241,7 +239,7 @@ test("removing the only child settles the dialog before rendering the selected r
     assert.equal(h.row("root-id").ariaSelected, "true"); assert.equal(document.activeElement, h.row("root-id"));
     assert.equal(h.row("root-id").disabled, false);
     assert.equal(document.querySelector<HTMLElement>(".screen-removal-notice")?.hidden, false);
-    h.respondHistory(before); h.click("Undo removal"); await tick(); await tick();
+    await h.reveal(before, { nodeId: "title-id", parentId: "root-id" });
     assert.equal(h.row("title-id").ariaSelected, "true");
   } finally { h.workspace.dispose(); }
 });
@@ -522,38 +520,6 @@ test("clearing a retained stale text draft starts the next edit at the accepted 
   } finally { h.workspace.dispose(); }
 });
 
-test("removal selection survives Undo and Redo after 128 later accepted text edits", async () => {
-  const h = interactiveFixture();
-  try {
-    await tick(); await tick(); h.row("title-id").click(); h.click("Remove element");
-    const removed = structuredClone(h.original); removed.revision = "removed"; removed.screens[0]!.nodes.splice(2, 1);
-    h.respond(removed, "body-id"); h.click("Remove text"); await tick(); await tick();
-    assert.equal(h.row("body-id").ariaSelected, "true");
-    const states = [removed]; h.edit("body-id");
-    for (let i = 1; i <= 128; i++) {
-      const next = structuredClone(states.at(-1)!); next.revision = `edit-${i}`;
-      next.screens[0]!.nodes[2]!.literal = `Directions ${i}`;
-      h.text().value = `Directions ${i}`; h.text().dispatchEvent(new window.Event("input"));
-      h.respond(next, "body-id"); h.click("Apply"); await tick(); await tick(); states.push(next);
-    }
-    h.click("1  Choose");
-    for (const state of states.slice(0, -1).reverse()) {
-      h.respondHistory(state); h.click("Undo"); await tick(); await tick();
-      assert.equal(h.row("body-id").ariaSelected, "true"); assert.ok(h.row("body-id").textContent!.includes(state.screens[0]!.nodes[2]!.literal!));
-    }
-    h.respondHistory(h.original); h.click("Undo"); await tick(); await tick();
-    assert.equal(h.row("title-id").ariaSelected, "true", "Undo of the older removal restores its selected target");
-    assert.equal(document.activeElement, h.row("title-id")); assert.ok(h.row("title-id").textContent!.includes("Title"));
-    for (const state of states) {
-      h.respondHistory(state); h.click("Redo"); await tick(); await tick();
-      assert.equal(document.querySelector('[data-node-id="title-id"]'), null);
-      assert.equal(h.row("body-id").ariaSelected, "true"); assert.ok(h.row("body-id").textContent!.includes(state.screens[0]!.nodes[2]!.literal!));
-    }
-    assert.equal(h.calls.filter(c => c.operation === "scene.apply").length, 258);
-    assert.equal(h.saved(), 387);
-  } finally { h.workspace.dispose(); }
-});
-
 test("removal confirms every element, retains exact Cancel focus, and selects the core fallback", async () => {
   const h = interactiveFixture();
   try {
@@ -585,77 +551,28 @@ test("removal confirms every element, retains exact Cancel focus, and selects th
       { screenId: "screen-id", expectedRevision: "before", command: { type: "remove", nodeId: "title-id" } });
     assert.equal(h.row("body-id").ariaSelected, "true"); assert.equal(document.activeElement === h.row("body-id"), true, "Focus follows the remaining sibling");
     assert.ok(document.querySelector(".screen-removal-notice"));
-    assert.equal(document.querySelector(".screen-card .screen-removal-notice"), null, "Undo feedback stays outside the panel layout");
+    assert.equal(document.querySelector(".screen-card .screen-removal-notice"), null, "Removal feedback stays outside the panel layout");
   } finally { h.workspace.dispose(); }
 });
 
-test("Undo removal restores the removed selected identity and Redo restores the fallback", async () => {
+test("Undo of a removal reveals the removed element, and Redo reveals its parent", async () => {
   const h = interactiveFixture();
   try {
     await tick(); await tick(); h.row("title-id").click(); h.click("Remove element");
     const removed = structuredClone(h.original); removed.revision = "removed"; removed.screens[0]!.nodes.splice(2, 1);
     h.respond(removed, "body-id"); h.click("Remove text"); await tick(); await tick();
-    h.respondHistory(h.original); h.click("Undo removal"); await tick(); await tick();
+    await h.reveal(h.original, { nodeId: "title-id", parentId: "box-id" });
     assert.equal(h.row("title-id").ariaSelected, "true");
-    assert.equal(document.activeElement === h.row("title-id"), true);
-    h.respondHistory(removed); h.click("Redo"); await tick(); await tick();
-    assert.equal(h.row("body-id").ariaSelected, "true");
-    assert.equal(document.activeElement === h.row("body-id"), true);
+    await h.reveal(removed, { nodeId: "title-id", parentId: "box-id" });
+    assert.equal(h.row("box-id").ariaSelected, "true", "A gone element selects the element that contained it");
+    const emptied = structuredClone(removed); emptied.revision = "emptied"; emptied.screens[0]!.nodes.splice(1, 2);
+    await h.reveal(emptied, { nodeId: "title-id", parentId: "box-id" });
+    assert.equal(h.row("root-id").ariaSelected, "true", "With its container gone too, the screen is selected");
+    assert.equal(h.calls.some(c => c.operation.startsWith("history.")), false, "Screens runs no history request of its own");
   } finally { h.workspace.dispose(); }
 });
 
-for (const edit of ["size", "position"] as const) {
-  test(`a saved ${edit} edit expires Undo removal before it can undo unrelated work`, async () => {
-    const h = interactiveFixture(undefined, true);
-    try {
-      await tick(); await tick();
-      const before = structuredClone(h.original); before.screens[0]!.nodes[0]!.span.end = 500;
-      before.screens[0]!.nodes.push({ id: "frame-id", kind: "frame", literal: null, span: { start: 250, end: 300 },
-        parentStart: 0, layout: {}, protected: [], properties: [{ property: "xsize", value: 640 }, { property: "ysize", value: 360 }],
-        position: { xalign: 0.5, yalign: 0.5 } });
-      h.replaceDocument(before); await h.workspace.load();
-      h.row("title-id").click(); h.click("Remove element");
-      const removed = structuredClone(before); removed.revision = "removed"; removed.screens[0]!.nodes.splice(2, 1);
-      h.respond(removed, "body-id"); h.click("Remove text"); await tick(); await tick();
-      const notice = document.querySelector<HTMLElement>(".screen-removal-notice"); assert.ok(notice && !notice.hidden);
-      const changed = structuredClone(removed); changed.revision = "changed";
-      const changedFrame = changed.screens[0]!.nodes.find(node => node.id === "frame-id")!;
-      if (edit === "size") {
-        h.edit("frame-id"); const width = document.querySelector<HTMLInputElement>('[data-size="width"]'); assert.ok(width);
-        width.value = "640"; width.dispatchEvent(new window.Event("input")); h.click("Apply size"); await tick(); await tick();
-        assert.equal(notice.hidden, false, "A no-op does not advance history or expire its Undo action");
-        changedFrame.properties[0]!.value = 700; h.respond(changed, "frame-id");
-        width.value = "700"; width.dispatchEvent(new window.Event("input")); h.click("Apply size");
-      } else {
-        changedFrame.position!.xalign += 1 / 640; h.respond(changed, "frame-id");
-        document.querySelector("img")!.dispatchEvent(new window.Event("load"));
-        const target = document.querySelector<HTMLButtonElement>(".screen-node-frame"); assert.ok(target);
-        target.focus(); target.dispatchEvent(new window.KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
-      }
-      await tick(); await tick();
-      assert.equal(h.calls.filter(call => call.operation === (edit === "size" ? "screens.setSize" : "screens.setPosition")).length, edit === "size" ? 2 : 1);
-      assert.equal(notice.hidden, true, "A removal-specific Undo action expires when shared history advances");
-      h.respondHistory(removed); h.click("Undo"); await tick(); await tick();
-      assert.equal(document.querySelector('[data-node-id="title-id"]'), null, "Generic Undo reverses the later edit, leaving removal intact");
-    } finally { h.workspace.dispose(); }
-  });
-}
-
-test("returning to Screens expires an Undo removal action from the previous visit", async () => {
-  const h = interactiveFixture();
-  try {
-    await tick(); await tick(); h.row("title-id").click(); h.click("Remove element");
-    const removed = structuredClone(h.original); removed.revision = "removed"; removed.screens[0]!.nodes.splice(2, 1);
-    h.respond(removed, "body-id"); h.click("Remove text"); await tick(); await tick();
-    const notice = document.querySelector<HTMLElement>(".screen-removal-notice"); assert.ok(notice && !notice.hidden);
-    h.workspace.panel.remove();
-    h.workspace.mount(document.body); await tick(); await tick();
-    assert.equal(notice.hidden, true, "Other workspaces may have advanced shared history while Screens was detached");
-    assert.equal(h.calls.some(call => call.operation === "scene.apply"), false);
-  } finally { h.workspace.dispose(); }
-});
-
-test("addition history keeps a surviving parent selection on Redo", async () => {
+test("Undo of an addition reveals its parent, and Redo reveals the addition", async () => {
   const h = interactiveFixture();
   try {
     await tick(); await tick(); h.row("box-id").click(); h.click("Add element");
@@ -664,12 +581,12 @@ test("addition history keeps a surviving parent selection on Redo", async () => 
     const added = structuredClone(h.original); added.revision = "added";
     added.screens[0]!.nodes.splice(4, 0, node("added-id", "text", 150, 180, 30, "Added"));
     h.respond(added, "added-id"); h.click("Add text"); await tick(); await tick();
-    h.respondHistory(h.original); h.click("Undo"); await tick(); await tick(); assert.equal(h.row("box-id").ariaSelected, "true");
-    h.respondHistory(added); h.click("Redo"); await tick(); await tick(); assert.equal(h.row("box-id").ariaSelected, "true");
+    await h.reveal(h.original, { nodeId: "added-id", parentId: "box-id" }); assert.equal(h.row("box-id").ariaSelected, "true");
+    await h.reveal(added, { nodeId: "added-id", parentId: "box-id" }); assert.equal(h.row("added-id").ariaSelected, "true");
   } finally { h.workspace.dispose(); }
 });
 
-test("removal and its history select an unmarked next sibling by its accepted source position", async () => {
+test("removal selects an unmarked next sibling by its accepted source position", async () => {
   const h = interactiveFixture();
   try {
     await tick(); await tick();
@@ -679,11 +596,6 @@ test("removal and its history select an unmarked next sibling by its accepted so
     const removed = structuredClone(before); removed.revision = "removed"; removed.screens[0]!.nodes.splice(2, 1);
     removed.screens[0]!.nodes[2]!.span = { start: 70, end: 100 };
     h.respond(removed, "source-at-70"); h.click("Remove text"); await tick(); await tick();
-    assert.equal(h.row("source-at-70").ariaSelected, "true");
-    assert.equal(document.activeElement, h.row("source-at-70"));
-    h.respondHistory(before); h.click("Undo"); await tick(); await tick();
-    assert.equal(h.row("title-id").ariaSelected, "true");
-    h.respondHistory(removed); h.click("Redo"); await tick(); await tick();
     assert.equal(h.row("source-at-70").ariaSelected, "true");
     assert.equal(document.activeElement, h.row("source-at-70"));
     h.workspace.dispose();
@@ -701,13 +613,3 @@ test("removal and its history select an unmarked next sibling by its accepted so
   } finally { h.workspace.dispose(); }
 });
 
-test("history remains busy until its refreshed document and selection are installed", async () => {
-  const h = interactiveFixture(); let release: (() => void) | undefined;
-  try {
-    await tick(); await tick();
-    h.respondHistory(h.original); release = h.holdInspection();
-    h.click("Undo"); await tick(); await tick(); h.click("Redo"); await tick();
-    assert.equal(h.calls.filter(call => call.operation === "scene.apply").length, 1, "A second history command must wait for the first refresh");
-    release(); release = undefined; await tick(); await tick();
-  } finally { release?.(); h.workspace.dispose(); }
-});

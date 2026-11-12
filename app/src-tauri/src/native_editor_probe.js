@@ -29,6 +29,22 @@ window.__loomlightProbeFindButton = label => {
   // stage action remains observable while probes wait for its disabled state.
   return matches.find(button => !button.hidden && !button.closest('[hidden]')) ?? matches[0];
 };
+// The header Undo and Redo are icon buttons with no text. Press one once it is
+// available, wait for the shell to report the run, and refuse anything but a
+// committed step unless the probe expects a refusal.
+window.__loomlightProbeHistory = async (direction, { refusal = false, timeoutMs = 20000 } = {}) => {
+  const app = document.querySelector('#app');
+  const deadline = performance.now() + timeoutMs;
+  const pause = () => new Promise(resolve => setTimeout(resolve, 30));
+  const ready = () => document.querySelector(`.app-header [data-history="${direction}"]:not([aria-disabled="true"])`);
+  while (!ready()) { if (performance.now() >= deadline) throw Error(`Header ${direction} is unavailable`); await pause(); }
+  const before = Number(app.dataset.historySequence ?? 0);
+  ready().click();
+  while (Number(app.dataset.historySequence ?? 0) <= before) { if (performance.now() >= deadline) throw Error(`Header ${direction} did not finish`); await pause(); }
+  const result = { outcome: app.dataset.historyOutcome, code: app.dataset.historyErrorCode ?? null };
+  if (result.outcome !== 'committed' && !refusal) throw Object.assign(Error(`Header ${direction} ${result.outcome}`), { code: result.code });
+  return result;
+};
 // Beat disclosure buttons toggle selection. Acceptance and history refreshes can
 // retain the fixture target, so clicking it unconditionally would deselect it.
 window.__loomlightProbeSelectBeat = beatId => {

@@ -41,7 +41,13 @@ impl HistoryLabel {
                     path,
                     screen,
                     node_id,
-                } => named(path) && named(screen) && node_id.as_deref().is_none_or(named),
+                    parent_id,
+                } => {
+                    named(path)
+                        && named(screen)
+                        && node_id.as_deref().is_none_or(named)
+                        && parent_id.as_deref().is_none_or(named)
+                }
                 HistoryItem::Source { path } => named(path),
                 HistoryItem::Prompt { action } => named(action),
                 HistoryItem::Reference { record_id, .. } => record_id.as_deref().is_none_or(named),
@@ -66,10 +72,12 @@ pub enum HistoryItem {
         beat_id: Option<String>,
     },
     /// An element of a screen, or the screen itself, by its Source path and name.
+    /// `parent_id` is revealed when Undo or Redo leaves the element gone.
     Screen {
         path: String,
         screen: String,
         node_id: Option<String>,
+        parent_id: Option<String>,
     },
     Source {
         path: String,
@@ -115,6 +123,7 @@ impl HistoryItem {
             path: path.into(),
             screen: screen.into(),
             node_id,
+            parent_id: None,
         }
     }
 

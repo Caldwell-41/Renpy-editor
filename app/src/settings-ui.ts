@@ -8,7 +8,7 @@ export function openSettings(context?: SettingsContext): void {
   if (document.querySelector('[aria-modal="true"]')) return;
   const previous = document.activeElement as HTMLElement | null;
   const background = document.querySelector<HTMLElement>(".app-shell"); if (background) background.inert = true;
-  const overlay = node("div", "", "settings-overlay"); overlay.role = "dialog"; overlay.ariaModal = "true"; overlay.ariaLabel = "Settings";
+  const overlay = node("div", "", "settings-overlay"); overlay.setAttribute("role", "dialog"); overlay.setAttribute("aria-modal", "true"); overlay.ariaLabel = "Settings";
   const rail = node("nav", "", "settings-rail"); rail.ariaLabel = "Settings categories";
   const header = node("header", "", "settings-header"); const close = node("button", "Close settings", "button");
   const scope=node("div","","settings-scope");scope.role="tablist";scope.ariaLabel="Settings scope";

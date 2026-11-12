@@ -23,7 +23,7 @@ async function request(operation,payload={},ui=false){
   result.transcript.push({request,response,event:ui?lastEvent:undefined});
   await appendFile(join(output,"requests.jsonl"),JSON.stringify({operation,ok:response.ok,code:response.error?.code})+"\n");
   assert(result.transcript.length<800,"Unexpected request loop");
-  if(ui&&operation==='scene.apply'){assert(lastEvent?.connected,'Story mutation must originate at connected production controls');lastApply=response;}
+  if(ui&&['scene.apply','history.undo','history.redo'].includes(operation)){assert(lastEvent?.connected,'Story mutation must originate at connected production controls');lastApply=response;}
   if(ui&&operation==='scene.validateAssignment')lastValidation=response;
   if(response.ok&&operation==='project.openRecent')session=response.value.sessionId;
   if(response.ok&&['scene.list','scene.apply'].includes(operation))workspace=response.value;
@@ -34,12 +34,14 @@ const call=async(operation,payload={})=>{const r=await request(operation,{...pay
 const requester=(operation,payload)=>request(operation,staleSession&&operation==='scene.apply'?{...payload,sessionId:'stale-session'}:payload,true);
 const wait=async check=>{const until=Date.now()+8000;while(!await check()){assert(Date.now()<until,'Choice deadline exceeded');await new Promise(r=>setTimeout(r,10));}};
 const settle=async()=>{await new Promise(r=>setTimeout(r,150));await wait(()=>inflight===0);};
+// The header Undo and Redo: icon buttons with no text, enabled once the next entry is known.
+async function historyStep(direction){await wait(()=>document.querySelector(`.app-header [data-history="${direction}"]:not([aria-disabled="true"])`));lastApply=undefined;document.querySelector(`.app-header [data-history="${direction}"]`).click();await wait(()=>lastApply);await settle();return lastApply;}
 const button=(text,scope=document)=>{const b=[...scope.querySelectorAll('button')].find(b=>(b.textContent===text||b.getAttribute('aria-label')===text)&&!b.disabled);assert(b,`Missing enabled ${text}`);b.click();return b;};
 const enter=(node,text,event='input')=>{assert(node?.isConnected&&!node.disabled);node.focus();node.value=text;node.dispatchEvent(new Event(event,{bubbles:true}));};
 const source=async path=>(await call('source.open',{path})).text;
 async function saveSource(path,text){const base=await call('source.open',{path});const draft=await call('source.updateDraft',{path,expectedBaseRevision:base.baseRevision,text,selectionStart:0,selectionEnd:0});await call('source.save',{path,expectedBaseRevision:draft.baseRevision,expectedDraftVersion:draft.draftVersion});}
 const option=id=>document.querySelector(`.story-choice-option[data-option-id="${id}"]`);
-async function applied(scope,label){lastApply=undefined;button(label,scope);await wait(()=>lastApply);await settle();assert.equal(lastApply.ok,true,JSON.stringify(lastApply));}
+async function applied(scope,label){if(label==='Undo'||label==='Redo'){assert.equal((await historyStep(label.toLowerCase())).ok,true,JSON.stringify(lastApply));return;}lastApply=undefined;button(label,scope);await wait(()=>lastApply);await settle();assert.equal(lastApply.ok,true,JSON.stringify(lastApply));}
 try {
  assert.equal((await child.next()).ready,true);
  const recent=(await call('project.listRecent'))[0];await call('project.openRecent',{recentId:recent.id});
@@ -75,7 +77,8 @@ try {
  // #103 uses the same Choice editor and accepted transaction boundary.
  const speaker=workspace.authoring.characters[0];
  result.runtime.characterDefinition=speaker.source.statement+'\n';
- async function editChoice(id) { document.querySelector(`[data-beat-id="${id}"] .beat-select`).click(); await settle(); return document.querySelector('.expanded-beat'); }
+ // Undo and Redo reveal the beat they change, so it may already be open.
+ async function editChoice(id) { const select=document.querySelector(`[data-beat-id="${id}"] .beat-select`); if (select.ariaExpanded!=='true') select.click(); await settle(); return document.querySelector('.expanded-beat'); }
  let promptEditor=await editChoice(choice().id);
  button('Add a prompt shown with the options',promptEditor);
  let promptText=promptEditor.querySelector('[aria-label="Prompt text"]');

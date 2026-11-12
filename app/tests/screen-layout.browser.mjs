@@ -65,11 +65,11 @@ try {
   const accepted=saved.value.text;
   await ui.getByRole('button',{name:'Apply layout',exact:true}).click();
   await ui.getByText('No change. No undo entry added.',{exact:true}).waitFor();
-  await ui.getByRole('button',{name:'Undo',exact:true}).click();
+  await page.locator('.app-header [data-history="undo"]:not([aria-disabled="true"])').click();
   await page.waitForFunction(()=>document.querySelector('[data-layout-field=xpos]')?.value==='0.5');
   const original=(await request('source.open',{path:'game/ui/help.rpy'})).value.text;
   assert.match(original,/xalign 0\.5/);
-  await ui.getByRole('button',{name:'Redo',exact:true}).click();
+  await page.locator('.app-header [data-history="redo"]:not([aria-disabled="true"])').click();
   await page.waitForFunction(()=>document.querySelector('[data-layout-field=xpos]')?.value==='0.25');
   assert.equal((await request('source.open',{path:'game/ui/help.rpy'})).value.text,accepted);
   const positionUnit=ui.getByLabel('Horizontal position unit',{exact:true});

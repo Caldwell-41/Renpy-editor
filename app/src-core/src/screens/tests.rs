@@ -2681,7 +2681,7 @@ fn screen_atomic_size_two_tokens_one_history_entry_and_source_reconciliation() {
     let doc = ipc(&mut service, "screens.inspect", json!({"path":PATH}));
     let change = |d: &Value, w: u32, h: u32| json!({"path":PATH,"expectedRevision":d["revision"],"screenName":"loomlight_help","nodeStart":frame(d)["span"]["start"],"width":w,"height":h});
     let after = ipc(&mut service, "screens.setSize", change(&doc, 811, 407));
-    let resize = json!({"name":"frame resize","item":{"type":"screen","path":PATH,"screen":"loomlight_help","nodeId":null}});
+    let resize = json!({"name":"frame resize","item":{"type":"screen","path":PATH,"screen":"loomlight_help","nodeId":null,"parentId":null}});
     let rename = json!({"name":format!("rename of {}", scene["displayName"].as_str().unwrap()),
         "item":{"type":"story","sceneId":scene["id"],"beatId":null}});
     assert_eq!(

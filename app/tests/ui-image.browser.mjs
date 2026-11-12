@@ -82,13 +82,15 @@ try {
  const movedDocument=await request('screens.inspect',{path:owner.path});
  const movedNode=movedDocument.screens[0].nodes.find(n=>n.id===imageId);
  assert.equal(movedNode.parentStart,movedDocument.screens[0].nodes.find(n=>n.id===owner.rootId).span.start);
- await ui.getByRole('button',{name:'Undo',exact:true}).click();await waitParent(group.selectedId);
+ await page.locator('.app-header [data-history="undo"]:not([aria-disabled="true"])').click();await waitParent(group.selectedId);
  assert.equal(await read(),grouped,'One Undo restores both the parent and position');
- await ui.getByRole('button',{name:'Redo',exact:true}).click();await waitParent(owner.rootId);
+ await page.locator('.app-header [data-history="redo"]:not([aria-disabled="true"])').click();await waitParent(owner.rootId);
  assert.equal(await read(),moved,'One Redo restores the combined move');
- await ui.getByRole('button',{name:'Undo',exact:true}).click();await waitParent(group.selectedId);assert.equal(await read(),grouped);
- await ui.getByRole('button',{name:'Undo',exact:true}).click();await waitParent(owner.rootId);assert.equal(await read(),withGroup);
- await ui.getByRole('button',{name:'Undo',exact:true}).click();await page.waitForFunction(()=>[...document.querySelectorAll('select')].some(s=>s.ariaLabel==='Inside parent'&&s.options.length===1));assert.equal(await read(),placed);
+ await page.locator('.app-header [data-history="undo"]:not([aria-disabled="true"])').click();await waitParent(group.selectedId);assert.equal(await read(),grouped);
+ await page.locator('.app-header [data-history="undo"]:not([aria-disabled="true"])').click();await waitParent(owner.rootId);assert.equal(await read(),withGroup);
+ // Undo of the group addition leaves the group gone, so Screens selects the screen that contained it.
+ await page.locator('.app-header [data-history="undo"]:not([aria-disabled="true"])').click();await page.waitForFunction(()=>document.querySelector('.screen-selection-path button:last-child')?.getAttribute('aria-current')==='true'&&document.querySelectorAll('.screen-selection-path button').length===1);assert.equal(await read(),placed);
+ await ui.getByRole('button',{name:/^1\s+Choose$/}).click();await ui.locator(`[data-node-id="${imageId}"]`).press('Enter');await page.waitForFunction(()=>[...document.querySelectorAll('select')].some(s=>s.ariaLabel==='Inside parent'&&s.options.length===1));
  await ui.locator('.screen-image-asset').click();await browse();await picker().getByRole('textbox',{name:'Display name',exact:true}).fill('Second seal');await picker().getByRole('button',{name:'Import and use',exact:true}).click();
  await picker().getByText(/Identical asset content is already imported/).waitFor();assert.equal(await picker().getByRole('textbox',{name:'Display name',exact:true}).inputValue(),'Second seal');await picker().getByRole('button',{name:'Cancel import',exact:true}).click();await picker().getByRole('button',{name:'Close',exact:true}).click();assert.equal(await read(),placed);
  alternate=true;await ui.locator('.screen-image-asset').click();await browse();await picker().getByRole('textbox',{name:'Display name',exact:true}).fill('Second seal');await picker().getByRole('button',{name:'Import and use',exact:true}).click();await picker().waitFor({state:'detached'});
@@ -128,8 +130,8 @@ try {
  const sized=await read();assert.match(sized,/xsize 200\n\s+ysize 100/);assert.equal(await width.evaluate(e=>e===document.activeElement),true);
  await width.fill('bad');await ui.getByRole('button',{name:'Apply image',exact:true}).click();assert.equal(await width.getAttribute('aria-invalid'),'true');assert.equal(await read(),sized);await width.press('Escape');assert.equal(await width.inputValue(),'200');
  await ui.getByLabel('Preserve aspect ratio',{exact:true}).uncheck();await height.fill('70');await height.press('Enter');await page.waitForFunction(()=>document.querySelector('.screen-image-state')?.textContent==='No pending changes');const stretched=await read();assert.match(stretched,/ysize 70/);
- await ui.getByRole('button',{name:'Undo',exact:true}).click();await height.waitFor();await page.waitForFunction(()=>document.querySelector('[data-image-field=height]')?.value==='100');assert.equal(await read(),sized);
- await ui.getByRole('button',{name:'Redo',exact:true}).click();await page.waitForFunction(()=>document.querySelector('[data-image-field=height]')?.value==='70');assert.equal(await read(),stretched);
+ await page.locator('.app-header [data-history="undo"]:not([aria-disabled="true"])').click();await height.waitFor();await page.waitForFunction(()=>document.querySelector('[data-image-field=height]')?.value==='100');assert.equal(await read(),sized);
+ await page.locator('.app-header [data-history="redo"]:not([aria-disabled="true"])').click();await page.waitForFunction(()=>document.querySelector('[data-image-field=height]')?.value==='70');assert.equal(await read(),stretched);
  await page.screenshot({path:join(output,'placed-dark-wide.png'),fullPage:false});
  await page.setViewportSize({width:560,height:640});await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));await page.screenshot({path:join(output,'placed-dark-compact.png'),fullPage:false});await writeFile(join(output,'compact-dom.json'),JSON.stringify(await page.evaluate(()=>({appCount:document.querySelectorAll('#app').length,headers:[...document.querySelectorAll('.app-header')].map(e=>({text:e.textContent,rect:e.getBoundingClientRect().toJSON()})),apply:document.querySelector('[data-image-apply]')?.getBoundingClientRect().toJSON(),pixel:document.elementFromPoint(280,580)?.outerHTML})),null,2));
  assert.equal(await ui.getByRole('button',{name:'Apply image',exact:true}).evaluate(e=>{const r=e.getBoundingClientRect();return r.bottom<640&&document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)===e;}),true);

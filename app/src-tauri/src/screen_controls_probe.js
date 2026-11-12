@@ -29,7 +29,7 @@
   const history = async (direction, expected) => {
     const previous = document.querySelector('.screen-card').firstChild;
     historyObservation = { direction, expected, widthReadOnly: field('Width')?.readOnly };
-    await click(direction);
+    await window.__loomlightProbeHistory(direction.toLowerCase());
     await until(async () => { historyObservation.actual = await source(); historyObservation.previousConnected = previous.isConnected; return historyObservation.actual === expected && !previous.isConnected; });
   };
   try {

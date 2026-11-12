@@ -33,7 +33,7 @@ async function wait(check, description) {
   while (!check()) { if (Date.now() >= deadline) throw Error('Controller did not settle: ' + description); await new Promise(resolve => setTimeout(resolve, 5)); }
 }
 function button(host, text) { const node = [...host.querySelectorAll('button')].find(node => node.textContent === text); assert(node, text); return node; }
-async function history(type) { const model = await call('scene.list'); return call('scene.apply', {expectedProjectRevision: model.projectRevision, expectedSourceMapRevision: model.sourceMapRevision, command: {type}}); }
+async function history(type) { return call(`history.${type}`); }
 async function source(path) { return (await call('source.open', {path})).text; }
 async function saveSource(path, text) {
   const base = await call('source.open', {path});

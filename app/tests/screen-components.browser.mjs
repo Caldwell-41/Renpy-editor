@@ -109,10 +109,10 @@ try {
     const history=async direction=>{
       let timer,observe;
       const accepted=new Promise((resolve,reject)=>{
-        observe=({request,result})=>{if(request.operation==='scene.apply' && request.payload.command?.type===direction){clearTimeout(timer);listeners.delete(observe);result.ok?resolve(result):reject(Error(JSON.stringify(result)));}};
+        observe=({request,result})=>{if(request.operation===`history.${direction}`){clearTimeout(timer);listeners.delete(observe);result.ok?resolve(result):reject(Error(JSON.stringify(result)));}};
         listeners.add(observe);timer=setTimeout(()=>{listeners.delete(observe);reject(Error('History acknowledgement missing'));},10000);
       });
-      try {await ui.getByRole('button',{name:direction==='undo'?'Undo':'Redo',exact:true}).click();await accepted;}
+      try {await page.locator(`.app-header [data-history="${direction}"]:not([aria-disabled="true"])`).click();await accepted;}
       finally {clearTimeout(timer);listeners.delete(observe);}
     };
     const choose=()=>ui.getByRole('button',{name:/^1\s+Choose$/}).click();
@@ -188,7 +188,8 @@ try {
       await page.waitForFunction(id=>{const option=[...document.querySelectorAll('.screen-picker select option')].find(option=>option.value===JSON.stringify(['owned',id]));return option && !option.textContent.includes('unavailable');},acceptedRecovery.id);
       await select(about);await choose();await ui.locator(`[data-node-id="${secondUse.id}"]`).press('Enter');await ui.getByRole('button',{name:'Edit component',exact:true}).click();
       await page.waitForFunction(id=>document.querySelector('.screens-editor select[aria-label="Screen"]')?.value===JSON.stringify(['owned',id]),acceptedRecovery.id);
-      await history('undo');await page.waitForFunction(id=>document.querySelector('.screens-editor select[aria-label="Screen"]')?.value===JSON.stringify(['owned',id]),component.id);
+      // Undo of the copy reveals the screen element whose use it changed.
+      await history('undo');await page.waitForFunction(id=>document.querySelector('.screens-editor select[aria-label="Screen"]')?.value===JSON.stringify(['owned',id]),about.id);
       await assert.rejects(readFile(join(game,acceptedRecovery.path)),error=>error.code==='ENOENT');assert.deepEqual(await mapBytes(),mapBefore);
     }
     checks.push('clean Copy and layout-only Copy track newly typed recovery text; Cancel/Reload never leave it on the original shared definition');

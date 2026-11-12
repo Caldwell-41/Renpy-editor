@@ -5,7 +5,7 @@ import { icon } from "./icons.ts";
 /** The item an entry reveals; core's `HistoryItem`. */
 export type HistoryItem =
   | { readonly type: "story"; readonly sceneId: string | null; readonly beatId: string | null }
-  | { readonly type: "screen"; readonly path: string; readonly screen: string; readonly nodeId: string | null }
+  | { readonly type: "screen"; readonly path: string; readonly screen: string; readonly nodeId: string | null; readonly parentId: string | null }
   | { readonly type: "source"; readonly path: string }
   | { readonly type: "prompt"; readonly action: string }
   | { readonly type: "reference"; readonly kind: "card" | "lore" | "context"; readonly recordId: string | null }
@@ -40,13 +40,13 @@ export function isTextField(target: EventTarget | null): boolean {
 
 /** The header Undo and Redo: icon buttons whose tooltip and name carry the next edit. */
 export function historyControls(run: (direction: HistoryDirection) => void): { readonly element: HTMLElement; update(state: HistoryState): void } {
-  const element = document.createElement("div"); element.className = "header-history"; element.role = "group"; element.ariaLabel = "Project history";
+  const element = document.createElement("div"); element.className = "header-history"; element.setAttribute("role", "group"); element.setAttribute("aria-label", "Project history");
   const controls = (["undo", "redo"] as const).map(direction => {
     const wrapper = document.createElement("span"); wrapper.className = "header-history-command";
     const button = document.createElement("button"); button.type = "button"; button.className = "button header-history-button";
     button.dataset.history = direction; button.setAttribute("aria-keyshortcuts", direction === "undo" ? "Meta+Z Control+Z" : "Meta+Shift+Z Control+Y");
     button.append(icon(direction));
-    const tip = document.createElement("span"); tip.className = "header-history-tip"; tip.ariaHidden = "true";
+    const tip = document.createElement("span"); tip.className = "header-history-tip"; tip.setAttribute("aria-hidden", "true");
     const text = document.createElement("span"); const key = document.createElement("kbd"); key.textContent = shortcut(direction); tip.append(text, key);
     button.addEventListener("click", () => { if (button.getAttribute("aria-disabled") !== "true") run(direction); });
     wrapper.append(button, tip); element.append(wrapper);
@@ -55,7 +55,7 @@ export function historyControls(run: (direction: HistoryDirection) => void): { r
   const update = (state: HistoryState): void => {
     for (const { direction, button, text } of controls) {
       const entry = state[direction], word = direction === "undo" ? "Undo" : "Redo";
-      button.ariaLabel = entry ? `${word} ${entry.name}` : word;
+      button.setAttribute("aria-label", entry ? `${word} ${entry.name}` : word);
       button.setAttribute("aria-disabled", String(!entry));
       text.textContent = entry ? `${word} ${entry.name}` : `Nothing to ${direction}`;
     }

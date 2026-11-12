@@ -23,7 +23,7 @@ async function request(operation,payload={},ui=false){
   result.transcript.push({request,response,event:ui?lastEvent:undefined});
   await appendFile(join(output,"requests.jsonl"),JSON.stringify({operation,ok:response.ok,code:response.error?.code})+"\n");
   assert(result.transcript.length<400,"Unexpected request loop");
-  if(ui&&operation==='scene.apply'){assert(lastEvent?.connected,'Story mutation must originate at connected production controls');lastApply=response;}
+  if(ui&&['scene.apply','history.undo','history.redo'].includes(operation)){assert(lastEvent?.connected,'Story mutation must originate at connected production controls');lastApply=response;}
   if(ui&&operation==='scene.validateAssignment')lastValidation=response;
   if(response.ok&&operation==='project.openRecent')session=response.value.sessionId;
   if(response.ok&&['scene.list','scene.apply'].includes(operation))workspace=response.value;
@@ -34,6 +34,8 @@ const call=async(operation,payload={})=>{const r=await request(operation,{...pay
 const requester=(operation,payload)=>request(operation,staleSession&&operation==='scene.apply'?{...payload,sessionId:'stale-session'}:payload,true);
 const wait=async check=>{const until=Date.now()+8000;while(!await check()){assert(Date.now()<until,'Story arithmetic deadline exceeded');await new Promise(r=>setTimeout(r,10));}};
 const settle=async()=>{await new Promise(r=>setTimeout(r,150));await wait(()=>inflight===0);};
+// The header Undo and Redo: icon buttons with no text, enabled once the next entry is known.
+async function historyStep(direction){await wait(()=>document.querySelector(`.app-header [data-history="${direction}"]:not([aria-disabled="true"])`));lastApply=undefined;document.querySelector(`.app-header [data-history="${direction}"]`).click();await wait(()=>lastApply);await settle();return lastApply;}
 const button=(text,scope=document)=>{const b=[...scope.querySelectorAll('button')].find(b=>(b.textContent===text||b.getAttribute('aria-label')===text)&&!b.disabled);assert(b,`Missing enabled ${text}`);b.click();return b;};
 const enter=(node,text,event='input')=>{assert(node?.isConnected&&!node.disabled);node.focus();node.value=text;node.dispatchEvent(new Event(event,{bubbles:true}));};
 const source=async path=>(await call('source.open',{path})).text;
@@ -52,10 +54,10 @@ try{
  await wait(()=>document.querySelector('.recent-open')&&!document.querySelector('.recent-open').disabled);document.querySelector('.recent-open').click();await wait(()=>document.querySelector('.beat-card'));await settle();
  assert.equal(await source(path),fixture,'opening imported arithmetic preserves exact source');
  const scene=()=>workspace.scenes.find(s=>s.id===entry.id),numeric=()=>scene().beats.filter(b=>b.payload.type==='setVariable');
- const signedZero=numeric().find(b=>b.payload.value==='-0.0');assert(signedZero);await selectBeat(signedZero.id);assert.equal(formula().value,'-0.0');assert.equal((await commit()).ok,true);assert.equal(await source(path),fixture);assert.equal(workspace.canUndo,false);
+ const signedZero=numeric().find(b=>b.payload.value==='-0.0');assert(signedZero);await selectBeat(signedZero.id);assert.equal(formula().value,'-0.0');assert.equal((await commit()).ok,true);assert.equal(await source(path),fixture);assert.equal((await call('history.state')).undo,null);
  const literal=numeric().find(b=>b.payload.value===1);assert(literal);
- await selectBeat(literal.id);assert.equal(formula().value,'1');assert.equal(workspace.canUndo,false);
- assert.equal((await commit()).ok,true);assert.equal(await source(path),fixture,'unchanged decimal literal preserves bytes');assert.equal(workspace.canUndo,false,'unchanged decimal literal adds no history');
+ await selectBeat(literal.id);assert.equal(formula().value,'1');assert.equal((await call('history.state')).undo,null);
+ assert.equal((await commit()).ok,true);assert.equal(await source(path),fixture,'unchanged decimal literal preserves bytes');assert.equal((await call('history.state')).undo,null,'unchanged decimal literal adds no history');
  stage('unchanged decimal literal commits through actual Story controls without source or history changes');
  const compound=numeric().find(b=>b.payload.value?.operation==='add'),decimal=numeric().find(b=>b.payload.value?.operand==='money / 2');assert(compound&&decimal);
  await selectBeat(compound.id);assert.equal(formula().value,'(bonus + 2) * 3');assert.match(selected().textContent,/Current value unknown/);assert(!selected().textContent.includes('Draft result 99'));assert.match(selected().querySelector('.beat-summary').textContent,/trust/);
@@ -65,12 +67,12 @@ try{
  await selectBeat(compound.id);enter(formula(),'(9007199254740993 // 3) % 5');
  assert.equal((await commit()).ok,true);const whole=await source(path);assert(whole.includes('$ trust += (9007199254740993 // 3) % 5  # imported compound'));
  const acceptedWhole=numeric().find(b=>b.id===compound.id);assert.equal(acceptedWhole.assignment.inferredResultType,'int');assert.equal(acceptedWhole.assignment.state.value,'6');
- lastApply=undefined;button('Undo');await wait(()=>lastApply?.ok);assert.equal(await source(path),noOp);lastApply=undefined;button('Redo');await wait(()=>lastApply?.ok);assert.equal(await source(path),whole);
+ assert.equal((await historyStep('undo')).ok,true);assert.equal(await source(path),noOp);assert.equal((await historyStep('redo')).ok,true);assert.equal(await source(path),whole);
  stage('whole formula accepted; exact i64 transport, one-step shared Undo and Redo');
  await selectBeat(decimal.id);assert.equal(formula().value,'money / 2');enter(formula(),'(9.5 + 0.5) / 4');
  assert.equal((await commit()).ok,true);const accepted=await source(path);assert(accepted.includes('$ money = (9.5 + 0.5) / 4  # imported explicit'));
  assert.equal(numeric().find(b=>b.id===decimal.id).assignment.state.value,2.5);
- lastApply=undefined;button('Undo');await wait(()=>lastApply?.ok);assert.equal(await source(path),whole);lastApply=undefined;button('Redo');await wait(()=>lastApply?.ok);assert.equal(await source(path),accepted);
+ assert.equal((await historyStep('undo')).ok,true);assert.equal(await source(path),whole);assert.equal((await historyStep('redo')).ok,true);assert.equal(await source(path),accepted);
  stage('decimal grouped formula accepted as actual finite JSON number; exact one-step shared Undo/Redo');
  await selectBeat(compound.id);enter(formula(),'1 // 0');formula().dispatchEvent(new Event('blur'));await settle();assert.equal(formula().getAttribute('aria-invalid'),'true');assert.match(selected().textContent,/divides by zero/);assert.equal((await commit()).ok,false);assert.equal(lastApply.error.code,'ARITHMETIC_ZERO_DIVISOR');assert.equal(formula().value,'1 // 0');assert.equal(await source(path),accepted);
  enter(formula(),'4 / 2');await settle();assert.match(selected().textContent,/gives a decimal/);assert.equal((await commit()).ok,false);assert.equal(lastApply.error.code,'ARITHMETIC_TARGET_TYPE');assert.equal(formula().value,'4 / 2');button('Cancel',selected());await settle();
@@ -86,7 +88,7 @@ try{
  await selectBeat(compound.id);enter(formula(),'bonus + 9');assert.equal((await commit()).ok,false);assert.equal(lastApply.error.code,'DIRTY_SOURCE');assert.equal(formula().value,'bonus + 9');button('Cancel',selected());await settle();await call('source.discard',{path});
  await selectBeat(compound.id);enter(formula(),'bonus + 10');await saveSource(path,accepted+'# competing accepted Source\n');assert.equal((await commit()).ok,false);assert.equal(formula().value,'bonus + 10');assert.equal(await source(path),accepted+'# competing accepted Source\n');button('Cancel',selected());await settle();
  stage('ordinary session, dirty Source and stale revision refusals retain Story drafts and accepted source');
- button('Close Project');await wait(()=>document.querySelector('.recent-open'));document.querySelector('.recent-open').click();await wait(()=>document.querySelector('.beat-card'));await settle();assert.equal(await source(path),accepted+'# competing accepted Source\n');assert.equal(workspace.canUndo,false);assert.equal(workspace.canRedo,false);
+ button('Close Project');await wait(()=>document.querySelector('.recent-open'));document.querySelector('.recent-open').click();await wait(()=>document.querySelector('.beat-card'));await settle();assert.equal(await source(path),accepted+'# competing accepted Source\n');assert.equal((await call('history.state')).undo,null);assert.equal((await call('history.state')).redo,null);
  await selectBeat(decimal.id);assert.equal(formula().value,'(9.5 + 0.5) / 4');assert.equal(numeric().find(b=>b.id===decimal.id).assignment.state.value,2.5);
  stage('real project close/reopen preserves accepted source, editable formulas and core results; session history resets');
  // Exercise every approved operation through actual menu controls and core admission.
@@ -107,7 +109,7 @@ try{
  lastApply=undefined;button('Add Beat',newBeat);await wait(()=>lastApply);assert.equal(lastApply.ok,true);await settle();
  const inserted=scene().beats.find(b=>b.payload.value?.operand==='(bonus + 2) * 3'&&b.owner);assert(inserted);assert.deepEqual(inserted.owner,{groupId:validated.request.payload.command.body.groupId,branchId:validated.request.payload.command.body.branchId});
  const finalSource=await source(path);assert(finalSource.includes('        $ trust = (bonus + 2) * 3\n'));assert(finalSource.includes('# competing accepted Source'));
- lastApply=undefined;button('Undo');await wait(()=>lastApply?.ok);assert.equal(await source(path),literalSource);lastApply=undefined;button('Redo');await wait(()=>lastApply?.ok);assert.equal(await source(path),finalSource);
+ assert.equal((await historyStep('undo')).ok,true);assert.equal(await source(path),literalSource);assert.equal((await historyStep('redo')).ok,true);assert.equal(await source(path),finalSource);
  button('Close Project');await wait(()=>document.querySelector('.recent-open'));document.querySelector('.recent-open').click();await wait(()=>document.querySelector('.beat-card'));await settle();assert.equal(await source(path),finalSource);assert(scene().beats.some(b=>b.id===inserted.id&&b.owner?.branchId===inserted.owner.branchId));
  stage('nested formula insertion validates and commits its captured branch/position; exact shared history and reopen retain it');
  await selectBeat(decimal.id);

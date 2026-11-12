@@ -45,7 +45,7 @@ try {
  await ui.locator('[data-text-apply]').click();let review=page.getByRole('dialog',{name:'Review style changes',exact:true});await review.getByRole('button',{name:'Apply to this element',exact:true}).click();
  const settled=()=>page.waitForFunction(()=>document.querySelector('[data-text-apply]')?.disabled===true&&!document.querySelector('.screen-text-state')?.textContent.includes('Applying'));
  await settled();assert.equal(calls.filter(c=>c.operation==='screens.compose').length,commitsBefore+1);const accepted=await read(owner);assert.match(accepted,/background "#abc"/);assert.match(accepted,/Local caption/);assert.equal(await readFile(join(root,'synthetic-project/game/screens.rpy'),'utf8'),external);
- await ui.getByRole('button',{name:'Undo',exact:true}).click();await page.waitForFunction(()=>document.querySelector('[data-text-field=text]')?.value==='Continue');assert.equal(await read(owner),source);
+ await page.locator('.app-header [data-history="undo"]:not([aria-disabled="true"])').click();await page.waitForFunction(()=>document.querySelector('[data-text-field=text]')?.value==='Continue');assert.equal(await read(owner),source);
  // The catalog's outside-file use must reach the existing planner, including pending shared values.
  await ui.getByRole('textbox',{name:'Size · px',exact:true}).fill('30');await ui.locator('[data-text-apply]').click();review=page.getByRole('dialog',{name:'Review style changes',exact:true});await review.getByRole('button',{name:/external.*game\/screens.rpy/}).click();
  await page.waitForFunction(()=>window.__checkedPlans.some(r=>r.payload.path==='game/screens.rpy'&&r.payload.textStyles?.some(s=>s.values.size===30)));

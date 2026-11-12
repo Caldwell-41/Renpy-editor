@@ -97,7 +97,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   }
   const event=attributed?{...attributed}:null;
   const eligible=event&&event.connected&&event.enabled&&event.currentDocument&&event.ownerSession===session&&payload.sessionId===session;
-  if(operation==='scene.apply'&&!['undo','redo'].includes(payload.command.type)){
+  if(operation==='scene.apply'){
    assert(caseActive&&eligible&&event.sequence>caseEventStart&&event.panel==='story',
     'A fresh event in the current actual Story panel must initiate authoring');
   }
@@ -136,26 +136,38 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   if(operation==='scene.list'&&response.ok)latestWorkspace=response.value;
   if(operation==='scene.apply'){
    assert.equal(payload.sessionId,session);assert(payload.expectedProjectRevision&&payload.expectedSourceMapRevision);
-   if(!['undo','redo'].includes(payload.command.type)){
-    assert(payload.command.sceneId&&payload.command.expectedSourceRevision);
-    if(payload.command.type==='updateBodyBeat')assert(payload.command.beatId&&payload.command.expectedBody);
-    if(payload.command.type==='insertBodyBeat')assert(payload.command.body&&payload.command.position);
-   }
+   assert(payload.command.sceneId&&payload.command.expectedSourceRevision);
+   if(payload.command.type==='updateBodyBeat')assert(payload.command.beatId&&payload.command.expectedBody);
+   if(payload.command.type==='insertBodyBeat')assert(payload.command.body&&payload.command.position);
    lastMutation={request,response,event};
    if(response.ok)latestWorkspace=response.value;
   }
+  // The header Undo and Redo reach the one project history route.
+  if(['history.undo','history.redo'].includes(operation)){
+   assert(event?.panel==='header','Undo and Redo must come from the actual header controls');
+   lastMutation={request,response,event};
+  }
   return response;
  };
- const reads=new Set(['project.listRecent','project.current','project.status','scene.list','source.list','source.open','flow.list','authoring.list']);
+ const reads=new Set(['project.listRecent','project.current','project.status','history.state','scene.list','source.list','source.open','flow.list','authoring.list']);
  const call=async(operation,payload={})=>{
   assert(reads.has(operation),'Scenario context.call permits typed reads only; use actual DOM controls for writes');
   const response=await requester(operation,{...payload,...(operation.startsWith('project.')&&['project.listRecent','project.current','project.openRecent'].includes(operation)?{}:{sessionId:session})});
   if(!response.ok)throw Object.assign(Error(response.error.message),response.error);return response.value;
  };
+ // The header Undo and Redo have no text; their name starts with the command.
+ const named=(b,label)=>b.textContent===label||b.getAttribute('aria-label')===label||(b.dataset.history&&b.getAttribute('aria-label')?.startsWith(`${label} `));
+ const usable=b=>!b.disabled&&b.getAttribute('aria-disabled')!=='true';
  const click=async(label,scope=document)=>{
-  await wait(()=>[...scope.querySelectorAll('button')].some(b=>(b.textContent===label||b.getAttribute('aria-label')===label)&&!b.disabled));
-  const button=[...scope.querySelectorAll('button')].find(b=>(b.textContent===label||b.getAttribute('aria-label')===label)&&!b.disabled);
+  await wait(()=>[...scope.querySelectorAll('button')].some(b=>named(b,label)&&usable(b)));
+  const button=[...scope.querySelectorAll('button')].find(b=>named(b,label)&&usable(b));
   button.click();return button;
+ };
+ // Presses the header Undo or Redo once it names an entry, then waits for that step.
+ const history=async direction=>{
+  const operation=`history.${direction}`,before=lastMutation;
+  await click(direction==='undo'?'Undo':'Redo',document.querySelector('.app-header'));
+  await wait(()=>lastMutation!==before&&lastMutation?.request.operation===operation&&lastMutation.response.ok);
  };
  const enter=(control,value,event='input')=>{assert(control?.isConnected&&control.ownerDocument===document&&!control.disabled&&!control.readOnly,'Input must be a connected enabled current control');control.focus();control.value=value;control.dispatchEvent(new w.Event(event,{bubbles:true}));};
  const key=(control,key,options={})=>{assert(control?.isConnected&&control.ownerDocument===document&&!control.disabled);control.focus();assert.equal(document.activeElement,control);control.dispatchEvent(new w.KeyboardEvent('keydown',{key,bubbles:true,...options}));};
@@ -202,14 +214,15 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   await wait(()=>document.querySelector('.beat-card')&&latestWorkspace&&session);
   // The seed leaves the last created scene open. Selecting the entry scene must write nothing.
   const opened=latestWorkspace,entryName=opened.scenes.find(s=>s.id===opened.entrySceneId).displayName;
+  const historyBeforeSelection=await call('history.state');
   const selectionStart=transcript.length,beforeSelection=await snapshot();
   [...document.querySelectorAll('.tree-scene-open')].find(b=>b.textContent===entryName).click();
   await wait(()=>document.querySelector('.tree-scene-row.selected .tree-scene-open')?.textContent===entryName&&document.querySelector('.beat-card'));
   assert(!transcript.slice(selectionStart).some(r=>r.request.operation==='scene.apply'),'Selecting a scene must not send a Scene command');
   assert.deepEqual(await snapshot(),beforeSelection,'Selecting a scene must not change project files');
   const selected=await call('scene.list');
-  assert.equal(selected.projectRevision,opened.projectRevision);assert.equal(selected.canUndo,opened.canUndo);
-  const context={assert,wait,click,enter,key,labelled,call,raw,snapshot,rpy,hashes,pendingWrite,
+  assert.equal(selected.projectRevision,opened.projectRevision);assert.deepEqual(await call('history.state'),historyBeforeSelection);
+  const context={assert,wait,click,history,enter,key,labelled,call,raw,snapshot,rpy,hashes,pendingWrite,
    requests:()=>transcript,settle:async()=>{await new Promise(r=>setTimeout(r,0));await wait(()=>inFlight===0);await new Promise(r=>setTimeout(r,0));},
    workspace:()=>latestWorkspace,session:()=>session,lastMutation:()=>lastMutation,document,
    sourceText:(snapshot,path)=>Buffer.from(snapshot[path]).toString('utf8')};
@@ -227,10 +240,15 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   assert(saveBefore&&saveAfter,'One exact nested transaction required for shared history/reopen proof');
   // The DOM cases must leave their last accepted transaction undoable and restore any ordinary conflict.
   const beforeUndo=await snapshot();
-  await click('Undo');await wait(()=>lastMutation?.request.payload.command.type==='undo'&&lastMutation.response.ok);
+  await history('undo');
   const undone=await snapshot();assert.notDeepEqual(rpy(undone),rpy(beforeUndo),'Undo must reverse an actual source transaction');
-  await click('Redo');await wait(()=>lastMutation?.request.payload.command.type==='redo'&&lastMutation.response.ok);
+  await history('redo');
   const redone=await snapshot();assert.deepEqual(rpy(redone),rpy(beforeUndo),'Redo must restore exact accepted bytes');
+  // Redo opens the entry's workspace; a Source save opens Source, so return to Story.
+  const revealed=lastMutation.response.value.entry.item.type;
+  assert.equal(document.querySelector('.story-sidebar .tree-item.selected')?.textContent,revealed==='source'?'Source':'Story');
+  if(revealed!=='story')await click('Story',document.querySelector('.story-sidebar'));
+  await wait(()=>document.querySelector('.tree-scene-row.selected .tree-scene-open')&&inFlight===0);
   const beforeReopen=await call('scene.list');const oldSession=session;
   const staleRequest=lastMutation.request;
   const selectedBeforeClose=document.querySelector('.tree-scene-row.selected .tree-scene-open')?.textContent;assert(selectedBeforeClose);
@@ -244,7 +262,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   const reopened=await call('scene.list');assert.deepEqual(reopened.scenes,beforeReopen.scenes);
   const reopenedSnapshot=await snapshot();assert.deepEqual(rpy(reopenedSnapshot),rpy(redone));
   assert.equal(reopened.sourceMapRevision,beforeReopen.sourceMapRevision);
-  assert.equal(reopened.canUndo,false);assert.equal(reopened.canRedo,false);
+  assert.deepEqual(await call('history.state'),{undo:null,redo:null});
   // Transaction contract: accepted bytes/maps persist; Close deliberately clears its session cursor.
   const stale=await child.request(staleRequest);assert(isCoreResponse(stale,staleRequest.requestId));
   assert.equal(stale.ok,false);assert.equal(stale.error.code,'STALE_PROJECT_SESSION');

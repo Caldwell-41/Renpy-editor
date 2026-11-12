@@ -37,9 +37,9 @@
     await click("Cancel layout");await until(()=>fresh() && width()?.value==="640"); checkpoint("draft-cancel-focus-passed");
     edit(760);await click("Apply layout");await until(()=>document.querySelector('.screen-message')?.textContent.startsWith("Layout saved"));
     assert((await read("source.open",{sessionId,path:"game/ui/help.rpy"})).text===before.text.replace("xsize 640","xsize 760"),"Only the accepted token may change");
-    await click("Undo");await until(()=>width()?.value==="640" && fresh());
-    await click("Redo");await until(()=>width()?.value==="760" && fresh());
-    await click("Undo");await until(()=>width()?.value==="640" && fresh()); checkpoint("source-history-passed");
+    await window.__loomlightProbeHistory('undo');await until(()=>width()?.value==="640" && fresh());
+    await window.__loomlightProbeHistory('redo');await until(()=>width()?.value==="760" && fresh());
+    await window.__loomlightProbeHistory('undo');await until(()=>width()?.value==="640" && fresh()); checkpoint("source-history-passed");
     const aspect=document.querySelector('[aria-label="Canvas resolution (sample)"]');
     aspect.value="1024x768";aspect.dispatchEvent(new Event("change"));
     await until(()=>fresh() && latest?.width===1024);frames.push(latest);checkpoint("second-aspect-passed");
