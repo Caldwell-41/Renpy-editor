@@ -41,6 +41,8 @@ pub struct Layout {
     pub graph: Option<GraphView>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub screen_selection: Option<ScreenSelection>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub scene_selection: Option<String>,
 }
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -100,6 +102,10 @@ impl Preferences {
                     && layout
                         .preview_percent
                         .is_none_or(|v| (20..=70).contains(&v))
+                    && layout
+                        .scene_selection
+                        .as_ref()
+                        .is_none_or(|id| uuid::Uuid::parse_str(id).is_ok())
                     && layout.screen_selection.as_ref().is_none_or(|s| {
                         uuid::Uuid::parse_str(&s.screen_id).is_ok()
                             && s.source_revision.as_ref().is_none_or(|revision| {
@@ -141,6 +147,19 @@ mod tests {
             },
         );
         assert!(!p.valid());
+        for (scene, valid) in [
+            ("c77b865e-a6cf-434a-8ecb-02e1c4582de4", true),
+            ("scene-one", false),
+        ] {
+            p.layouts.insert(
+                "project:story".into(),
+                Layout {
+                    scene_selection: Some(scene.into()),
+                    ..Layout::default()
+                },
+            );
+            assert_eq!(p.valid(), valid);
+        }
         p.layouts.clear();
         p.schema_version = 2;
         assert!(!p.valid());

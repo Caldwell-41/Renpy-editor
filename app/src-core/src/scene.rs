@@ -423,9 +423,6 @@ pub enum SceneCommand {
         scene_id: String,
         expected_source_revision: String,
     },
-    SelectScene {
-        scene_id: String,
-    },
     InsertBeat {
         scene_id: String,
         expected_source_revision: String,
@@ -1502,19 +1499,6 @@ impl AuthoringService {
                     .display_name = display_name;
                 metadata_only_proposal(loaded)
             }
-            SceneCommand::SelectScene { scene_id } => {
-                let scene = loaded
-                    .project
-                    .scenes
-                    .iter()
-                    .find(|item| item.id == scene_id)
-                    .ok_or(SceneError::UnknownEntity)?;
-                loaded.project.last_open = Selection {
-                    chapter_id: scene.chapter_id.clone(),
-                    scene_id: scene.id.clone(),
-                };
-                metadata_only_proposal(loaded)
-            }
             SceneCommand::MoveScene {
                 scene_id,
                 chapter_id,
@@ -2223,17 +2207,17 @@ impl AuthoringService {
             .source_map
             .scene_mappings
             .retain(|mapping| mapping.scene_id != scene_id);
-        if loaded.project.last_open.scene_id == scene_id {
-            let fallback = loaded
-                .project
-                .scenes
-                .get(index.min(loaded.project.scenes.len() - 1))
-                .ok_or(SceneError::InvariantBlocked)?;
-            loaded.project.last_open = Selection {
-                chapter_id: fallback.chapter_id.clone(),
-                scene_id: fallback.id.clone(),
-            };
-        }
+        // Story keeps its selection outside project files, so the deleted Scene may be
+        // selected even when `last_open` names another. Point the fallback at its neighbour.
+        let fallback = loaded
+            .project
+            .scenes
+            .get(index.min(loaded.project.scenes.len() - 1))
+            .ok_or(SceneError::InvariantBlocked)?;
+        loaded.project.last_open = Selection {
+            chapter_id: fallback.chapter_id.clone(),
+            scene_id: fallback.id.clone(),
+        };
         let mut mutations = vec![delete_mutation(
             &removed.source_path,
             source_bytes,
@@ -5504,7 +5488,6 @@ mod tests {
             json!({"type": "renameScene", "sceneId": "s", "displayName": "Scene"}),
             json!({"type": "moveScene", "sceneId": "s", "chapterId": "c", "direction": null, "expectedSourceRevision": "r"}),
             json!({"type": "deleteScene", "sceneId": "s", "expectedSourceRevision": "r"}),
-            json!({"type": "selectScene", "sceneId": "s"}),
             json!({"type": "insertBeat", "sceneId": "s", "expectedSourceRevision": "r", "beforeBeatId": "before", "beat": {"type": "narration", "text": "New"}}),
             json!({"type": "updateBeat", "sceneId": "s", "expectedSourceRevision": "r", "beatId": "b", "beat": {"type": "narration", "text": "Edited"}}),
             json!({"type": "continueDialogue", "sceneId": "s", "expectedSourceRevision": "r", "beatId": "b", "characterId": "character", "text": "Next"}),

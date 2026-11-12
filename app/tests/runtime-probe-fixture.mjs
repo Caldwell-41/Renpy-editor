@@ -33,7 +33,6 @@ export function runtimeProbeFixture(mode) {
       case 'scene.list':value=model;break;
       case 'scene.apply': {
         if(payload.command.type==='updateBodyBeat'){const jump=jumps.find(b=>b.id===payload.command.beatId);if(!jump)throw Error('Unknown Jump body');jump.payload=payload.command.beat;accepted.set(entryPath,entryText());}
-        else if(payload.command.type==='selectScene')model.lastOpen.sceneId=payload.command.sceneId;
         else throw Error(`Unexpected fixture Scene command: ${payload.command.type}`);
         value=model;break;
       }

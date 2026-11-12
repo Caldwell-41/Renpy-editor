@@ -400,6 +400,10 @@ export interface SceneActions {
   readonly viewContinuation?: (sceneId: string, beatId: string, expectedSourceRevision: string) => void;
   readonly assist?: (sceneId: string, beatId: string, action?: string) => void;
   readonly layoutKey?: string;
+  /** Scene to show first; falls back to the project's last open scene. */
+  readonly sceneId?: string;
+  /** Records a scene the author selected. Selection never writes project files. */
+  readonly rememberScene?: (sceneId: string) => void;
   readonly validateAssignment?: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision">) => Promise<AssignmentDraftValidation>;
   readonly apply: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision">) => Promise<SceneWorkspace>;
   readonly status: (message: string, kind?: "normal" | "error") => void;
@@ -519,6 +523,11 @@ export async function settleSceneDraft(root: HTMLElement): Promise<boolean> {
   return host && draftSettlers.has(host) ? draftSettlers.get(host)!() : !hasSceneDraft(root);
 }
 
+/** The scene Story shows: the preferred scene if it exists, else the project's last open scene. */
+export function storyScene(model: SceneWorkspace, preferred?: string): SceneDocument | undefined {
+  return model.scenes.find(scene => scene.id === preferred) ?? model.scenes.find(scene => scene.id === model.lastOpen.sceneId) ?? model.scenes[0];
+}
+
 export function renderSceneAuthoring(
   host: HTMLElement,
   treeHost: HTMLElement,
@@ -533,6 +542,8 @@ export function renderSceneAuthoring(
     actions.rememberScreenInsertion?.(structuredClone(insertion));
   };
   let selectedBeatId: string | undefined = initialBeatId;
+  let selectedSceneId = storyScene(initial, actions.sceneId)?.id;
+  const selectScene = (sceneId: string): void => { selectedSceneId = sceneId; actions.rememberScene?.(sceneId); };
   let mediaGeneration = 0;
   const imageCache = new Map<string, { readonly key: string; readonly url: string }>();
   const pendingImages = new Map<string, Promise<MediaPresentation>>();
@@ -576,6 +587,8 @@ export function renderSceneAuthoring(
       const next = await actions.apply(command, expected);
       if (disposed || actions.current?.() === false) return false;
       model = next;
+      // A command that creates a scene opens it; other commands keep the author's selection.
+      if (!before.scenes.some(scene => scene.id === next.lastOpen.sceneId)) selectScene(next.lastOpen.sceneId);
       after?.(before, next);
       draw();
       actions.status("Saved");
@@ -604,7 +617,7 @@ export function renderSceneAuthoring(
     audioUrls.clear();
     treeHost.replaceChildren();
     host.replaceChildren();
-    const selectedScene = model.scenes.find((scene) => scene.id === model.lastOpen.sceneId) ?? model.scenes[0];
+    const selectedScene = storyScene(model, selectedSceneId);
     if (!selectedScene) {
       const empty = document.createElement("p"); empty.className = "error-message"; empty.textContent = "No valid Scene is available."; host.append(empty); return;
     }
@@ -648,7 +661,7 @@ export function renderSceneAuthoring(
         const sceneRow = document.createElement("div"); sceneRow.className = `tree-scene-row${scene.id === selectedScene.id ? " selected" : ""}`;
         const open = button(scene.displayName, "tree-scene-open");
         if (scene.id === selectedScene.id) open.ariaCurrent = "page";
-        open.addEventListener("click",()=>{if(scene.id!==selectedScene.id)void settle().then(ok=>{if(ok)void mutate({type:"selectScene",sceneId:scene.id});else actions.status("Complete or cancel this edit before changing scenes.","error");});});
+        open.addEventListener("click",()=>{if(scene.id!==selectedScene.id)void settle().then(ok=>{if(ok&&!disposed){selectScene(scene.id);draw();}else if(!ok) actions.status("Complete or cancel this edit before changing scenes.","error");});});
         const controls = document.createElement("div"); controls.className = "tree-tools";
         const renameScene = button("Rename", "icon-button"); renameScene.ariaLabel = `Rename scene ${scene.displayName}`;
         renameScene.addEventListener("click", () => treeName(sceneRow, "Scene name", scene.displayName, displayName => ({ type: "renameScene", sceneId: scene.id, displayName })));

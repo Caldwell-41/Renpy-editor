@@ -184,11 +184,6 @@ fn seed(host: &ApplicationHost, session: &str, root: &Path, evidence: &Path) {
         json!({"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],
         "beforeBeatId":anchor["id"],"beat":{"type":"call","sceneId":created[0]["id"],"returnLabel":null}}),
     );
-    apply(
-        host,
-        session,
-        json!({"type":"selectScene","sceneId":entry["id"]}),
-    );
 }
 fn files(dir: &Path, base: &Path, snapshot: &mut serde_json::Map<String, Value>) {
     for entry in std::fs::read_dir(dir).unwrap() {
