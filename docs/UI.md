@@ -423,6 +423,23 @@ covers moving, unwrapping and deleting branches.
   its name, where it continues and Add a beat.
 - Every insertion names its body and position, and replacing an ending names what it
   replaces.
+- Core gives each [body](../GLOSSARY.md) its beats, body ending and insertion places.
+  Story views, Add a beat and moves read them and never work them out again.
+- A body has an insertion place before each node up to its ending, and one at its end
+  when it does not end. There is none after the ending, before protected Custom Code
+  or before an Else if or Otherwise header. Jump, Repeat this Choice and Return fit
+  only at the end. An empty body has one insertion place, and its new beat replaces
+  the `pass`.
+- Add a beat starts at the place before the body's ending, or at the end when the
+  body does not end.
+- A body ends at its first Jump, Repeat this Choice or Return, at a condition with
+  Otherwise whose branches all end, or at a Choice whose selectable options all end.
+  Custom Code that starts with `jump` or `return` also ends it. Other Custom Code
+  never ends a body or hides an ending after it. When it is the last beat, the
+  ending is unknown.
+- When a body's ending is unknown, Story says so and never claims that the story
+  continues. Authoring treats an unknown ending as one that may continue, so it
+  never relies on an ending it cannot prove.
 
 ### Beat editors
 
@@ -586,6 +603,10 @@ The Story rules above define Loomlight's application of that reference.
   order.
 - Then edits only the body's last beat: Continue after the Choice, Go to a scene (Jump),
   Repeat this Choice or Return. Call is an ordinary beat inside the body.
+- When protected Custom Code ends the option, Then reads "Ends with Custom Code:"
+  and its source line, offers Edit in Source, and turns its four choices off. When
+  the ending is unknown, Then reads "Ending unknown: Custom Code can leave this
+  option" and keeps its choices, so the author can add an explicit ending after it.
 - A destination is a scene card (opening background, name and first line) that opens a
   scene sheet with New scene.
 - An option's condition reads as one line, "Always available" or "Only when ...", and

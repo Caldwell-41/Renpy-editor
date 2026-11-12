@@ -34,6 +34,22 @@ and writes no source. Commit, Story Save or Source Save joins the draft steps of
 beat or file into one edit. Input that does not survive navigation, such as search
 text or an open form, has no draft steps.
 
+**Body**:
+An ordered list of beats that play top to bottom without branching. A scene body
+holds the beats directly under the scene's label, a branch body holds one If, Else if
+or Otherwise branch, and an option body holds one Choice option. A whole condition or
+Choice is one node in its parent body and owns the bodies under it.
+_Avoid_: Root body, block, lane, track
+
+**Body ending**:
+Whether the story can pass the end of a body: the body ends, it continues, or its
+ending is unknown because its last beat is Custom Code that may leave it.
+
+**Insertion place**:
+A body plus a position in it, before one of its nodes or at its end, where a new
+or moved beat can go.
+_Avoid_: Slot, destination, insertion target
+
 **Game stage**:
 The Story view of supported scene appearance through the selected beat, shown in
 the project's width-to-height ratio, including valid beat drafts. It marks unknown
