@@ -1,4 +1,5 @@
 //! Explicit-body Beat edits over verified disjoint source ranges.
+use super::bodies::{qualify_body, root_may_continue, scene_body_end, trivia, Body};
 use super::*;
 mod operations;
 
@@ -351,129 +352,6 @@ impl AuthoringService {
     }
 }
 
-struct Body<'a> {
-    owner: Option<crate::metadata::BeatOwner>,
-    indent: usize,
-    end: usize,
-    siblings: Vec<&'a SceneBeat>,
-}
-fn qualify_body<'a>(
-    source: &[u8],
-    beats: &'a [SceneBeat],
-    body: &BodyRef,
-) -> Result<Body<'a>, SceneError> {
-    let scene_end = scene_body_end(source)?;
-    let (owner, indent, end) = match body {
-        BodyRef::Root => (None, 4, scene_end),
-        BodyRef::Branch {
-            group_id,
-            branch_id,
-        } => {
-            let header = beats
-                .iter()
-                .find(|b| {
-                    b.id == *branch_id
-                        && b.conditional_branch
-                            .as_ref()
-                            .is_some_and(|g| g.group_id == *group_id)
-                })
-                .ok_or(SceneError::InvariantBlocked)?;
-            if header.byte_start as usize >= scene_end {
-                return Err(SceneError::OpaqueBoundary);
-            }
-            let line =
-                std::str::from_utf8(&source[header.byte_start as usize..header.byte_end as usize])
-                    .map_err(|_| SceneError::UnsupportedSource)?;
-            let indent = indentation(line);
-            if line.as_bytes().get(indent) == Some(&b'\t') || indent < 4 {
-                return Err(SceneError::OpaqueBoundary);
-            }
-            let end = beats
-                .iter()
-                .filter(|b| {
-                    b.conditional_branch
-                        .as_ref()
-                        .is_some_and(|g| g.group_id == *group_id)
-                        && b.byte_start > header.byte_start
-                })
-                .map(|b| b.byte_start as usize)
-                .min()
-                .or_else(|| {
-                    conditional_extents(beats)
-                        .get(group_id.as_str())
-                        .map(|(_, end)| *end)
-                })
-                .ok_or(SceneError::InvalidMetadata)?;
-            (
-                Some(crate::metadata::BeatOwner {
-                    group_id: group_id.clone(),
-                    branch_id: branch_id.clone(),
-                }),
-                indent + 4,
-                end,
-            )
-        }
-    };
-    let siblings = beats
-        .iter()
-        .filter(|b| {
-            (b.byte_start as usize) < scene_end
-                && (b.byte_end as usize) <= scene_end
-                && b.owner == owner
-                && b.conditional_branch
-                    .as_ref()
-                    .is_none_or(|g| g.opens_group())
-                && !trivia(b)
-        })
-        .collect::<Vec<_>>();
-    // Unowned trivia never becomes an implicit branch insertion target.
-    let end = if owner.is_some() {
-        siblings
-            .last()
-            .map(|b| node_end(b, beats))
-            .transpose()?
-            .unwrap_or(end)
-    } else {
-        end
-    };
-    Ok(Body {
-        owner,
-        indent,
-        end,
-        siblings,
-    })
-}
-/// A later top-level declaration ends the selected label's body. The legacy flat
-/// projection can retain such rows losslessly, but it cannot authorize Story edits.
-fn scene_body_end(source: &[u8]) -> Result<usize, SceneError> {
-    let bom = usize::from(source.starts_with(&[0xef, 0xbb, 0xbf])) * 3;
-    let text = std::str::from_utf8(&source[bom..]).map_err(|_| SceneError::UnsupportedSource)?;
-    let lexical = crate::authoring::lexical_lines(&source[bom..], false)
-        .map_err(|_| SceneError::UnsupportedSource)?
-        .into_iter()
-        .map(|(start, _)| start)
-        .collect::<HashSet<_>>();
-    let mut label_seen = false;
-    for (start, _, line) in physical_lines(text) {
-        if !label_seen {
-            label_seen = line.starts_with("label ") && line.ends_with(':');
-            continue;
-        }
-        if lexical.contains(&start)
-            && indentation(line) == 0
-            && !line.trim().is_empty()
-            && !line.trim_start().starts_with('#')
-        {
-            return Ok(start + bom);
-        }
-    }
-    Ok(source.len())
-}
-
-fn trivia(beat: &SceneBeat) -> bool {
-    beat.conditional_branch.is_none()
-        && matches!(&beat.payload, BeatPayload::CustomCode { source, .. } if source.trim().is_empty() || source.trim_start().starts_with('#'))
-}
 pub(super) fn node_end(beat: &SceneBeat, beats: &[SceneBeat]) -> Result<usize, SceneError> {
     if matches!(beat.payload, BeatPayload::Choice { .. }) {
         return choice::end(beat, beats);
@@ -486,43 +364,6 @@ pub(super) fn node_end(beat: &SceneBeat, beats: &[SceneBeat]) -> Result<usize, S
     } else {
         Ok(beat.byte_end as usize)
     }
-}
-fn terminal(beat: &SceneBeat, beats: &[SceneBeat]) -> bool {
-    if matches!(beat.payload, BeatPayload::Choice { .. }) {
-        return !choice::may_continue(beat, beats);
-    }
-    beat.conditional_branch.as_ref().map_or_else(
-        || is_terminal_payload(&beat.payload),
-        |g| !logic::group_may_continue(&g.group_id, beats, 0),
-    )
-}
-pub(super) fn root_may_continue(source: &[u8], beats: &[SceneBeat]) -> Result<bool, SceneError> {
-    let end = scene_body_end(source)?;
-    Ok(!beats
-        .iter()
-        .filter(|b| {
-            (b.byte_start as usize) < end
-                && (b.byte_end as usize) <= end
-                && b.owner.is_none()
-                && b.conditional_branch
-                    .as_ref()
-                    .is_none_or(|g| g.opens_group())
-                && !trivia(b)
-        })
-        .any(|b| terminal(b, beats)))
-}
-fn qualified_node<'a>(body: &Body<'a>, node: &NodeRef) -> Result<&'a SceneBeat, SceneError> {
-    body.siblings
-        .iter()
-        .copied()
-        .find(|b| match node {
-            NodeRef::Beat { beat_id } => b.id == *beat_id && b.conditional_branch.is_none(),
-            NodeRef::Condition { group_id } => b
-                .conditional_branch
-                .as_ref()
-                .is_some_and(|g| g.group_id == *group_id && g.opens_group()),
-        })
-        .ok_or(SceneError::InvariantBlocked)
 }
 fn generated_at_indent(
     payload: &BeatPayload,
@@ -574,63 +415,25 @@ fn apply(
                 }
             }
             let body = qualify_body(source, beats, &body)?;
-            let (index, insertion) = match position {
-                Position::Before { anchor } => {
-                    let exists = beats.iter().any(|b| match &anchor {
-                        NodeRef::Beat { beat_id } => b.id == *beat_id,
-                        NodeRef::Condition { group_id } => b
-                            .conditional_branch
-                            .as_ref()
-                            .is_some_and(|g| g.group_id == *group_id),
-                    });
-                    if !exists {
-                        return Err(SceneError::BeatDraftConflict);
-                    }
-                    let beat = qualified_node(&body, &anchor)?;
-                    if beat.protected && beat.conditional_branch.is_none() {
-                        return Err(SceneError::OpaqueBoundary);
-                    }
-                    (
-                        body.siblings.iter().position(|b| b.id == beat.id).unwrap(),
-                        beat.byte_start as usize,
-                    )
+            if let Position::Before { anchor } = &position {
+                if !beats.iter().any(|b| match anchor {
+                    NodeRef::Beat { beat_id } => b.id == *beat_id,
+                    NodeRef::Condition { group_id } => b
+                        .conditional_branch
+                        .as_ref()
+                        .is_some_and(|g| g.group_id == *group_id),
+                }) {
+                    return Err(SceneError::BeatDraftConflict);
                 }
-                Position::End => {
-                    if body.owner.is_none() && body.end < source.len() {
-                        return Err(SceneError::OpaqueBoundary);
-                    }
-                    if body.owner.is_none()
-                        && body
-                            .siblings
-                            .last()
-                            .is_some_and(|b| b.protected && b.conditional_branch.is_none())
-                    {
-                        return Err(SceneError::OpaqueBoundary);
-                    }
-                    (body.siblings.len(), body.end)
-                }
-            };
-            if body.siblings[..index].iter().any(|b| terminal(b, beats))
-                || (is_terminal_payload(&payload) && index < body.siblings.len())
-            {
-                return Err(SceneError::InvariantBlocked);
             }
-            if boundary_is_opaque(beats, insertion) {
-                return Err(SceneError::OpaqueBoundary);
-            }
-            let replacing_placeholder = body.owner.is_some()
-                && body.siblings.len() == 1
-                && body.siblings[0].structural_placeholder;
-            let replacement_end = if replacing_placeholder {
-                body.siblings[0].byte_end as usize
-            } else {
-                insertion
-            };
-            let insertion = if replacing_placeholder {
-                body.siblings[0].byte_start as usize
-            } else {
-                insertion
-            };
+            // An empty body's place replaces its `pass`.
+            let (insertion, replacement_end) = body.place(
+                &position,
+                source,
+                beats,
+                None,
+                is_terminal_payload(&payload),
+            )?;
             let mut rendered = generated_at_indent(&payload, loaded, newline, body.indent)?;
             let mut forced = Vec::new();
             let mut offset = insertion;
@@ -689,17 +492,14 @@ fn apply(
         BodyEdit::Update { id, body, payload } => {
             validate_payload(&payload, loaded)?;
             let body = qualify_body(source, beats, &body)?;
-            let beat = qualified_node(
-                &body,
-                &NodeRef::Beat {
-                    beat_id: id.clone(),
-                },
-            )?;
+            let beat = body.node(&NodeRef::Beat {
+                beat_id: id.clone(),
+            })?;
             if beat.protected || beat.owner != body.owner {
                 return Err(SceneError::OpaqueBoundary);
             }
             let index = body.siblings.iter().position(|b| b.id == id).unwrap();
-            if body.siblings[..index].iter().any(|b| terminal(b, beats))
+            if body.siblings[..index].iter().any(|b| body.ends(b))
                 || (is_terminal_payload(&payload) && index + 1 != body.siblings.len())
             {
                 return Err(SceneError::InvariantBlocked);

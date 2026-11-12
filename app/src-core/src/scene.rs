@@ -5,6 +5,8 @@
 //! persisted mapping and patches only exact byte ranges or creates/deletes an owned
 //! Scene file through the journalled transaction service.
 
+mod bodies;
+pub use bodies::SceneBody;
 mod choice;
 mod drafts;
 pub use drafts::SceneSaveDraftsRequest;
@@ -305,6 +307,8 @@ pub struct SceneDocument {
     pub source_conflict: bool,
     pub partial: bool,
     pub beats: Vec<SceneBeat>,
+    /// Each body's nodes, ending and insertion places, naming beats by ID.
+    pub bodies: Vec<SceneBody>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -779,6 +783,7 @@ impl AuthoringService {
                     source_conflict: true,
                     partial: true,
                     beats: Vec::new(),
+                    bodies: Vec::new(),
                 });
                 continue;
             };
@@ -873,6 +878,11 @@ impl AuthoringService {
                 beat.screen_effects = captured.as_ref().map(|resolved| resolved.effects.clone());
                 beat.protected = !context_valid;
             }
+            let bodies = if conflict {
+                Vec::new()
+            } else {
+                bodies::Bodies::new(&bytes, &beats)?.tree()?
+            };
             scenes.push(SceneDocument {
                 id: scene.id.clone(),
                 chapter_id: scene.chapter_id.clone(),
@@ -883,6 +893,7 @@ impl AuthoringService {
                 source_conflict: conflict,
                 partial: conflict || beats.iter().any(opaque_source),
                 beats,
+                bodies,
             });
         }
         let history = self.scene_history.lock().map_err(|_| SceneError::Io)?;

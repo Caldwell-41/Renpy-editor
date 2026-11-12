@@ -37,14 +37,11 @@ fn group<'a>(
     expected: &BodyRef,
 ) -> Result<(Body<'a>, Group<'a>), SceneError> {
     let body = qualify_body(source, beats, expected)?;
-    let header = qualified_node(
-        &body,
-        &NodeRef::Condition {
-            group_id: id.into(),
-        },
-    )?;
+    let header = body.node(&NodeRef::Condition {
+        group_id: id.into(),
+    })?;
     let end = node_end(header, beats)?;
-    if end > scene_body_end(source)? {
+    if end > scene_body_end(source, beats)? {
         return Err(SceneError::OpaqueBoundary);
     }
     let headers = beats
@@ -105,65 +102,6 @@ fn expression(
 }
 fn pass(indent: usize, newline: &str) -> Vec<u8> {
     format!("{}pass{newline}", " ".repeat(indent)).into_bytes()
-}
-fn place(
-    body: &Body<'_>,
-    position: &Position,
-    source: &[u8],
-    beats: &[SceneBeat],
-    excluded: Option<&str>,
-    terminating: bool,
-) -> Result<(usize, usize), SceneError> {
-    let siblings = body
-        .siblings
-        .iter()
-        .copied()
-        .filter(|b| excluded != Some(b.id.as_str()))
-        .collect::<Vec<_>>();
-    let (index, start) = match position {
-        Position::Before { anchor } => {
-            let target = qualified_node(body, anchor)?;
-            if excluded == Some(target.id.as_str()) {
-                return Err(SceneError::InvariantBlocked);
-            }
-            if target.protected && target.conditional_branch.is_none() {
-                return Err(SceneError::OpaqueBoundary);
-            }
-            (
-                siblings
-                    .iter()
-                    .position(|b| b.id == target.id)
-                    .ok_or(SceneError::InvariantBlocked)?,
-                target.byte_start as usize,
-            )
-        }
-        Position::End => {
-            if body.owner.is_none()
-                && (body.end < source.len()
-                    || siblings
-                        .last()
-                        .is_some_and(|b| b.protected && b.conditional_branch.is_none()))
-            {
-                return Err(SceneError::OpaqueBoundary);
-            }
-            (siblings.len(), body.end)
-        }
-    };
-    if siblings[..index].iter().any(|b| terminal(b, beats))
-        || (terminating && index < siblings.len())
-    {
-        return Err(SceneError::InvariantBlocked);
-    }
-    if siblings.len() == 1 && siblings[0].structural_placeholder && body.owner.is_some() {
-        return Ok((
-            siblings[0].byte_start as usize,
-            siblings[0].byte_end as usize,
-        ));
-    }
-    if boundary_is_opaque(beats, start) {
-        return Err(SceneError::OpaqueBoundary);
-    }
-    Ok((start, start))
 }
 fn empty_after_remove(body: &Body<'_>, selected: &SceneBeat, newline: &str) -> Vec<u8> {
     if body.owner.is_some() && body.siblings.iter().all(|b| b.id == selected.id) {
@@ -387,7 +325,7 @@ pub(super) fn apply(
             if body.indent > MAX_CONDITION_NESTING * 4 {
                 return Err(SceneError::InvariantBlocked);
             }
-            let (start, end) = place(&body, &position, source, beats, None, false)?;
+            let (start, end) = body.place(&position, source, beats, None, false)?;
             let expr = expression(&condition, loaded)?;
             let mut bytes = format!("{}if {expr}:{newline}", " ".repeat(body.indent)).into_bytes();
             bytes.extend(pass(body.indent + 4, newline));
@@ -505,7 +443,7 @@ pub(super) fn apply(
             expected_body,
         } => {
             let body = qualify_body(source, beats, &expected_body)?;
-            let selected = qualified_node(&body, &node)?;
+            let selected = body.node(&node)?;
             if selected.protected && selected.conditional_branch.is_none() {
                 return Err(SceneError::OpaqueBoundary);
             }
@@ -522,7 +460,7 @@ pub(super) fn apply(
             position,
         } => {
             let source_body = qualify_body(source, beats, &expected_body)?;
-            let selected = qualified_node(&source_body, &node)?;
+            let selected = source_body.node(&node)?;
             if selected.protected && selected.conditional_branch.is_none() {
                 return Err(SceneError::OpaqueBoundary);
             }
@@ -535,13 +473,12 @@ pub(super) fn apply(
             let start = selected.byte_start as usize;
             let end = node_end(selected, beats)?;
             let same_body = source_body.owner == destination.owner;
-            let (target, target_end) = place(
-                &destination,
+            let (target, target_end) = destination.place(
                 &position,
                 source,
                 beats,
                 if same_body { Some(&selected.id) } else { None },
-                terminal(selected, beats),
+                source_body.ends(selected),
             )?;
             if target >= start && target <= end {
                 return Err(SceneError::InvariantBlocked);

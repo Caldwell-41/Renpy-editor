@@ -623,42 +623,6 @@ pub(super) fn update(
     Ok((output, forced))
 }
 
-pub(super) fn may_continue(beat: &SceneBeat, beats: &[SceneBeat]) -> bool {
-    may_continue_at_depth(beat, beats, 0)
-}
-pub(super) fn may_continue_at_depth(beat: &SceneBeat, beats: &[SceneBeat], depth: usize) -> bool {
-    let BeatPayload::Choice {
-        options,
-        picked_policy,
-        ..
-    } = &beat.payload
-    else {
-        return true;
-    };
-    if *picked_policy == Some(PickedPolicy::HidePicked)
-        || depth >= MAX_CONDITION_NESTING
-        || options.iter().all(|o| o.condition.is_some())
-    {
-        return true;
-    }
-    options.iter().any(|option| {
-        let Some(header) = beats.iter().find(|b| Some(&b.id) == option.id.as_ref()) else {
-            return true;
-        };
-        let Some(branch) = &header.conditional_branch else {
-            return true;
-        };
-        logic::body_may_continue(
-            &crate::metadata::BeatOwner {
-                group_id: branch.group_id.clone(),
-                branch_id: header.id.clone(),
-            },
-            beats,
-            depth,
-        )
-    })
-}
-
 /// Reserve unchanged physical records before mapping a newly inserted menu. Identical
 /// menu/option headers must not consume an existing menu's identities by hash order.
 pub(super) fn retain_insertion(

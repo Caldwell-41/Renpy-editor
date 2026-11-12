@@ -72,82 +72,75 @@ export interface SceneBeat {
 export type BodyRef = { readonly type: "root" } | { readonly type: "branch"; readonly groupId: string; readonly branchId: string };
 export type NodeRef = { readonly type: "beat"; readonly beatId: string } | { readonly type: "condition"; readonly groupId: string };
 export type Position = { readonly type: "before"; readonly anchor: NodeRef } | { readonly type: "end" };
+export interface InsertionPlace { readonly position: Position; readonly fitsEnding: boolean }
+export type BodyEnding = { readonly type: "ends"; readonly beatId: string } | { readonly type: "continues" } | { readonly type: "unknown" };
+/** One body as core reads it from source. Its nodes name beats in `beats` by ID. */
+export interface SceneBody {
+  readonly body: BodyRef;
+  readonly kind: "scene" | "branch" | "option";
+  readonly number?: number;
+  readonly parent?: BodyRef;
+  readonly owningNode?: string;
+  readonly nodes: readonly { readonly beatId: string; readonly bodies?: readonly BodyRef[] }[];
+  readonly ending: BodyEnding;
+  readonly places: readonly InsertionPlace[];
+  readonly defaultPlace?: Position;
+}
 export function beatBody(beat: SceneBeat): BodyRef {
   return beat.owner ? { type: "branch", ...beat.owner } : { type: "root" };
 }
-function sameBody(beat: SceneBeat, body: BodyRef): boolean {
-  return body.type === "root" ? !beat.owner : beat.owner?.groupId === body.groupId && beat.owner.branchId === body.branchId;
+function sameBody(a: BodyRef, b: BodyRef): boolean {
+  return a.type === "root" ? b.type === "root" : b.type === "branch" && a.groupId === b.groupId && a.branchId === b.branchId;
 }
-function bodyNodes(scene: SceneDocument, body: BodyRef): readonly SceneBeat[] {
-  return scene.beats.filter(beat => !beat.structuralPlaceholder && sameBody(beat, body) && (!beat.conditionalBranch || (!beat.conditionalBranch.choiceOption && !beat.conditionalBranch.otherwise && !beat.conditionalBranch.ordinal))
-    && !(beat.payload.type === "customCode" && !beat.conditionalBranch && (!beat.payload.source.trim() || beat.payload.source.trimStart().startsWith("#"))));
+function sameNode(a: NodeRef, b: NodeRef): boolean {
+  return a.type === "beat" ? b.type === "beat" && a.beatId === b.beatId : b.type === "condition" && a.groupId === b.groupId;
+}
+function samePosition(a: Position, b: Position): boolean {
+  return a.type === "end" ? b.type === "end" : b.type === "before" && sameNode(a.anchor, b.anchor);
+}
+function bodyOf(scene: SceneDocument, body: BodyRef): SceneBody | undefined {
+  return scene.bodies.find(item => sameBody(item.body, body));
+}
+/** A body's nodes as beats, in source order. */
+function nodeBeats(scene: SceneDocument, body: BodyRef): SceneBeat[] {
+  return (bodyOf(scene, body)?.nodes ?? []).flatMap(node => scene.beats.find(beat => beat.id === node.beatId) ?? []);
 }
 function nodeRef(beat: SceneBeat): NodeRef {
   return beat.conditionalBranch ? { type: "condition", groupId: beat.conditionalBranch.groupId } : { type: "beat", beatId: beat.id };
 }
-/** Jump, Repeat and Return end a body explicitly. */
-function isTransfer(beat: SceneBeat): boolean {
-  return beat.payload.type === "jump" || beat.payload.type === "repeatChoice" || beat.payload.type === "return";
+function defaultPlace(scene: SceneDocument, body: BodyRef): Position {
+  return bodyOf(scene, body)?.defaultPlace ?? { type: "end" };
 }
-function owningChoice(scene: SceneDocument, optionId: string | undefined): SceneBeat | undefined {
-  return scene.beats.find(b => b.payload.type === "choice" && b.payload.options.some(o => o.id === optionId));
+/** Whether this node is where its body ends. */
+function endsBody(scene: SceneDocument, beat: SceneBeat): boolean {
+  const ending = bodyOf(scene, beatBody(beat))?.ending;
+  return ending?.type === "ends" && ending.beatId === beat.id;
 }
-function terminates(beat: SceneBeat, scene: SceneDocument, depth = 0): boolean {
-  if (depth > 16) return false;
-  if (beat.conditionalBranch) {
-    const groupId = beat.conditionalBranch.groupId;
-    const branches = scene.beats.filter(item => item.conditionalBranch?.groupId === groupId);
-    return branches.some(branch => branch.conditionalBranch?.otherwise) && branches.every(branch => bodyNodes(scene, { type: "branch", groupId: beat.conditionalBranch!.groupId, branchId: branch.id }).some(child => terminates(child, scene, depth + 1)));
-  }
-  if (beat.payload.type === "choice") {
-    if (beat.payload.pickedPolicy === "hidePicked") return false;
-    const options = beat.payload.options;
-    return options.some(option => !option.condition) && options.every(option => {
-      const header = scene.beats.find(b => b.id === option.id);
-      return header?.conditionalBranch && bodyNodes(scene, { type: "branch", groupId: header.conditionalBranch.groupId, branchId: header.id }).some(child => terminates(child, scene, depth + 1));
-    });
-  }
-  return isTransfer(beat);
+/** Places for a moved node: the destination's places without the node's own place.
+ *  A node that ends its body goes only where an ending fits. Core still checks the move. */
+function movePlaces(scene: SceneDocument, moved: SceneBeat, body: BodyRef): InsertionPlace[] {
+  const own = nodeRef(moved), ends = endsBody(scene, moved);
+  return (bodyOf(scene, body)?.places ?? []).filter(place => !(place.position.type === "before" && sameNode(place.position.anchor, own)) && (!ends || place.fitsEnding));
 }
-function defaultInsertion(scene: SceneDocument, body: BodyRef): Position {
-  const terminal = bodyNodes(scene, body).find(beat => terminates(beat, scene));
-  return terminal ? { type: "before", anchor: nodeRef(terminal) } : { type: "end" };
+/** Branch IDs of every body inside a condition or Choice, nested ones included. */
+function innerBodies(scene: SceneDocument, node: SceneBeat): Set<string> {
+  const inner = new Set<string>();
+  for (const item of scene.bodies) if (item.body.type === "branch" && (item.owningNode === node.id || item.parent?.type === "branch" && inner.has(item.parent.branchId))) inner.add(item.body.branchId);
+  return inner;
 }
-function rootInsertionIsNested(scene: SceneDocument, beforeBeatId: string | null): boolean {
-  const target = scene.beats.find(beat => beat.id === beforeBeatId);
-  if (!target) return false;
-  if (target.owner || (target.conditionalBranch && (target.conditionalBranch.otherwise || target.conditionalBranch.ordinal))) return true;
-  const extent = (groupId: string, depth = 0): number => {
-    if (depth > 16) return Number.MAX_SAFE_INTEGER;
-    return Math.max(0, ...scene.beats.filter(beat => beat.owner?.groupId === groupId || beat.conditionalBranch?.groupId === groupId).map(beat => beat.conditionalBranch && beat.conditionalBranch.groupId !== groupId ? extent(beat.conditionalBranch.groupId, depth + 1) : beat.byteEnd));
-  };
-  return scene.beats.some(beat => beat.conditionalBranch && beat.byteStart < target.byteStart && target.byteStart < extent(beat.conditionalBranch.groupId));
-}
-
 function bodyCaption(scene: SceneDocument, body: BodyRef, model: SceneWorkspace): string {
   const parts: string[] = [];
-  let parent = body;
-  const seen = new Set<string>();
-  while (parent.type === "branch" && !seen.has(parent.branchId)) {
-    seen.add(parent.branchId);
-    const owner = parent;
-    const branch = scene.beats.find(beat => beat.id === owner.branchId && beat.conditionalBranch?.groupId === owner.groupId);
-    const option = scene.beats.flatMap(b => b.payload.type === "choice" ? b.payload.options : []).find(o => o.id === branch?.id);
-    const menus = scene.beats.filter(b => b.payload.type === "choice");
-    const menu = owningChoice(scene, branch?.id);
-    const optionNumber = menu?.payload.type === "choice" ? menu.payload.options.findIndex(o => o.id === branch?.id) + 1 : 0;
-    parts.unshift(option ? `Choice ${menus.indexOf(menu!) + 1} / Option ${optionNumber}: ${option.text}` : branch?.conditionalBranch ? branchCaption(branch.conditionalBranch, model) : "Missing branch");
-    parent = branch ? beatBody(branch) : { type: "root" };
+  const menus = scene.beats.filter(beat => beat.payload.type === "choice");
+  let current = bodyOf(scene, body);
+  if (!current && body.type === "branch") parts.push("Missing branch");
+  for (let steps = 0; current && current.kind !== "scene" && steps <= 16; steps++) {
+    const owner = scene.beats.find(beat => beat.id === current!.owningNode), branchId = current.body.type === "branch" ? current.body.branchId : "";
+    const option = owner?.payload.type === "choice" ? owner.payload.options.find(item => item.id === branchId) : undefined;
+    const branch = scene.beats.find(beat => beat.id === branchId)?.conditionalBranch;
+    parts.unshift(current.kind === "option" ? `Choice ${menus.indexOf(owner!) + 1} / Option ${current.number}: ${option?.text ?? "Option"}` : branch ? branchCaption(branch, model) : "Missing branch");
+    current = current.parent && bodyOf(scene, current.parent);
   }
   return `${scene.displayName} / ${parts.length ? parts.join(" / ") : "Scene body"}`;
-}
-function insideCondition(scene: SceneDocument, body: BodyRef, groupId: string): boolean {
-  let current = body; const seen = new Set<string>();
-  while (current.type === "branch" && !seen.has(current.branchId)) {
-    if (current.groupId === groupId) return true;
-    const branchId = current.branchId; seen.add(branchId); const header = scene.beats.find(beat => beat.id === branchId); current = header ? beatBody(header) : { type: "root" };
-  }
-  return false;
 }
 export interface ScreenInsertion { readonly sceneId:string; readonly body:BodyRef; readonly position:Position; readonly expectedSourceRevision:string }
 export interface StoryTarget { readonly sceneId: string; readonly beatId?: string; readonly expectedSourceRevision?: string; readonly body?: BodyRef; readonly caller?: StoryTarget; readonly screenHint?: ScreenTargetBinding; readonly screenHintKind?: "panel" | "dialog"; readonly screenInsertion?: ScreenInsertion }
@@ -162,6 +155,7 @@ export interface SceneDocument {
   readonly sourceConflict: boolean;
   readonly partial: boolean;
   readonly beats: readonly SceneBeat[];
+  readonly bodies: readonly SceneBody[];
 }
 
 interface Chapter { readonly id: string; readonly displayName: string; readonly directory: string }
@@ -738,7 +732,7 @@ export function renderStoryView(
     const place = draft.place?.();
     if (!place) return [sceneIndex, scene.beats.length];
     if (place.position.type === "before") return [sceneIndex, at(place.position.anchor) - 0.5];
-    const { body } = place, last = bodyNodes(scene, body).at(-1);
+    const { body } = place, last = nodeBeats(scene, body).at(-1);
     if (last) return [sceneIndex, scene.beats.indexOf(last) + 0.5];
     return [sceneIndex, body.type === "branch" ? scene.beats.findIndex(beat => beat.id === body.branchId) + 0.5 : scene.beats.length];
   };
@@ -1007,7 +1001,7 @@ export function renderStoryView(
   const openNewBeat = (scene: SceneDocument, initialType: BeatPayload["type"] = actions.screenHintKind === "dialog" ? "callScreen" : "dialogue", beforeBeatId: string | null = null, opener = "root"): void => {
     if (!draftGuard()) return;
     const anchor = beforeBeatId ? scene.beats.find(beat => beat.id === beforeBeatId) : undefined;
-    if (anchor?.owner || (anchor?.conditionalBranch && (anchor.conditionalBranch.otherwise || anchor.conditionalBranch.ordinal))) {
+    if (anchor && !nodeBeats(scene, { type: "root" }).includes(anchor)) {
       actions.status("Add a root Beat before or after the whole condition group.", "error"); return;
     }
     selectedBeatId = undefined;
@@ -1019,7 +1013,7 @@ export function renderStoryView(
       const remembered = screenInsertion;
       const hint = !anchor && screenBeat && remembered && (remembered.sceneId === scene.id || !model.scenes.some(item=>item.id===remembered.sceneId)) ? structuredClone(remembered) : undefined;
       const body = hint?.body ?? {type:"root"} as BodyRef;
-      renderNewBeat(list, current, initialType, body, anchor ? {type:"before",anchor:nodeRef(anchor)} : hint?.position ?? defaultInsertion(current, body), hint, opener);
+      renderNewBeat(list, current, initialType, body, anchor ? {type:"before",anchor:nodeRef(anchor)} : hint?.position ?? defaultPlace(current, body), hint, opener);
     }
   };
 
@@ -1139,7 +1133,7 @@ export function renderStoryView(
     const contribution = (label: string, beatId: string | undefined, addType: BeatPayload["type"]): void => {
       const row = document.createElement("div"); row.className = "provenance-row"; const name = document.createElement("span"); name.textContent = label; row.append(name);
       if (beatId) { const index = scene.beats.findIndex((beat) => beat.id === beatId); const edit = button(`Edit Beat ${index + 1}`, "text-button"); edit.addEventListener("click", () => { if (draftGuard()) { selectedBeatId = beatId; draw(); host.querySelector<HTMLElement>(".beat-card.selected")?.scrollIntoView?.({ block: "nearest" }); } }); row.append(edit); }
-      const add = button("Add change here", "text-button"); add.dataset.beatOpener = `change:${addType}`; add.disabled = rootInsertionIsNested(scene, selectedBeatId ?? null); add.addEventListener("click", () => openNewBeat(scene, addType, selectedBeatId ?? null, `change:${addType}`)); row.append(add); provenance.append(row);
+      const add = button("Add change here", "text-button"); add.dataset.beatOpener = `change:${addType}`; add.disabled = !!selectedBeatId && !nodeBeats(scene, { type: "root" }).some(beat => beat.id === selectedBeatId); add.addEventListener("click", () => openNewBeat(scene, addType, selectedBeatId ?? null, `change:${addType}`)); row.append(add); provenance.append(row);
     };
     contribution(state.backgroundUnknown ? "Background · unknown" : "Background", state.background?.beatId, "background");
     state.characters.forEach((character) => contribution(`${model.authoring.characters.find((item) => item.id === character.characterId)?.displayName ?? "Character"} · ${character.placement}`, character.appearanceBeatId, "changeAppearance"));
@@ -1198,16 +1192,10 @@ export function renderStoryView(
   };
   const destinations = (scene: SceneDocument, initialBody: BodyRef, exclude?: SceneBeat, initialPosition?: Position, insertion = false, retained?: ScreenInsertion): { host: HTMLElement; read: () => { body: BodyRef; position: Position } } => {
     const panel = document.createElement("div"); panel.className = "story-destination";
-    const parents: { key: string; body: BodyRef; label: string }[] = [{ key: "root", body: { type: "root" }, label: bodyCaption(scene, { type: "root" }, model) }];
-    for (const branch of scene.beats.filter(beat => beat.conditionalBranch)) {
-      const body: BodyRef = { type: "branch", groupId: branch.conditionalBranch!.groupId, branchId: branch.id };
-      if (exclude?.conditionalBranch && insideCondition(scene, body, exclude.conditionalBranch.groupId)) continue;
-      if (exclude?.payload.type === "choice" && exclude.payload.options.some(option => {
-        const header = scene.beats.find(b => b.id === option.id);
-        return header?.conditionalBranch && insideCondition(scene, body, header.conditionalBranch.groupId);
-      })) continue;
-      parents.push({ key: branch.id, body, label: bodyCaption(scene, body, model) });
-    }
+    // A node never moves into its own bodies.
+    const inner = exclude ? innerBodies(scene, exclude) : new Set<string>();
+    const parents = scene.bodies.filter(item => item.body.type === "root" || !inner.has(item.body.branchId))
+      .map(item => ({ key: item.body.type === "root" ? "root" : item.body.branchId, body: item.body, label: bodyCaption(scene, item.body, model) }));
     const initialParent = parents.find(item => item.body.type === initialBody.type && (item.body.type === "root" || initialBody.type === "branch" && item.body.groupId === initialBody.groupId && item.body.branchId === initialBody.branchId));
     const parent = selectOf(parents.map(item => ({ value: item.key, label: item.label })), initialParent?.key ?? ""); parent.setAttribute("aria-label", insertion ? "Insert in" : "Destination body");
     if(insertion && !parent.value){const missing=document.createElement("option");missing.value="unavailable-body";missing.textContent="Original body unavailable";parent.prepend(missing);parent.value="unavailable-body";}
@@ -1220,14 +1208,13 @@ export function renderStoryView(
     const rebuild = (): void => {
       const selectedBody=parents.find(item=>item.key===parent.value);
       if(!selectedBody){placements=[];position.replaceChildren();summary.textContent="Original body unavailable. Choose a body explicitly. Input retained.";return;}
-      const body = selectedBody.body;
-      let siblings = bodyNodes(scene, body).filter(beat => beat.id !== exclude?.id);
-      const terminal = siblings.findIndex(beat => terminates(beat, scene));
-      if (insertion && terminal >= 0) siblings = siblings.slice(0, terminal + 1);
-      placements = siblings.filter(beat => (!beat.protected || !!beat.conditionalBranch) && (!exclude || !terminates(exclude, scene))).map(beat => ({ key: beat.id, position: { type: "before", anchor: nodeRef(beat) } as Position, label: `Before ${beat.conditionalBranch ? "Condition" : beatLabels[beat.payload.type]} · ${beatSummary(beat.payload, model)}` }));
-      if (!siblings.some(beat => terminates(beat, scene))) placements.push({ key: "end", position: { type: "end" }, label: "End of body" });
+      const body = selectedBody.body, nodes = nodeBeats(scene, body);
+      placements = (exclude ? movePlaces(scene, exclude, body) : bodyOf(scene, body)?.places ?? []).map(({ position }) => {
+        const anchor = position.type === "before" ? nodes.find(beat => sameNode(nodeRef(beat), position.anchor)) : undefined;
+        return anchor ? { key: anchor.id, position, label: `Before ${anchor.conditionalBranch ? "Condition" : beatLabels[anchor.payload.type]} · ${beatSummary(anchor.payload, model)}` } : { key: "end", position, label: "End of body" };
+      });
       position.replaceChildren(...placements.map(item => { const option = document.createElement("option"); option.value = item.key; option.textContent = item.label; return option; }));
-      const preferred = initialPosition ?? defaultInsertion(scene, body); const match = placements.find(item => JSON.stringify(item.position) === JSON.stringify(preferred));
+      const preferred = initialPosition ?? defaultPlace(scene, body); const match = placements.find(item => samePosition(item.position, preferred));
       if (confirmationRequired) { const choose=document.createElement("option");choose.value="";choose.textContent="Choose a position";choose.disabled=true;position.prepend(choose);position.value=""; }
       else if (insertion && initialPosition && !match) { const unavailable=document.createElement("option"); unavailable.value="unavailable";unavailable.textContent="Original position unavailable";position.prepend(unavailable);position.value="unavailable"; }
       else position.value = match?.key ?? placements[0]?.key ?? "";
@@ -1248,7 +1235,16 @@ export function renderStoryView(
     operation(scene, target, "Add Condition", [location, builder.host, labelled("Include Otherwise", otherwise)], () => ({ type: "insertCondition", body, position, condition: builder.read(), otherwise: otherwise.checked }), "Create Condition");
   };
   const groupHeader = (scene: SceneDocument, groupId: string): SceneBeat => scene.beats.find(beat => beat.conditionalBranch?.groupId === groupId && !beat.conditionalBranch.ordinal && !beat.conditionalBranch.otherwise)!;
-  const groupCount = (scene: SceneDocument, groupId: string): number => scene.beats.filter(beat => !beat.conditionalBranch && !beat.structuralPlaceholder && insideCondition(scene, beatBody(beat), groupId)).length;
+  const groupCount = (scene: SceneDocument, header: SceneBeat): number => { const inner = innerBodies(scene, header); return scene.beats.filter(beat => !beat.conditionalBranch && !beat.structuralPlaceholder && !!beat.owner && inner.has(beat.owner.branchId)).length; };
+  // Move up or down: the listed place one node earlier or later, never across protected Custom Code.
+  const siblingPlace = (scene: SceneDocument, beat: SceneBeat, direction: "up" | "down"): Position | undefined => {
+    const siblings = nodeBeats(scene, beatBody(beat)), index = siblings.indexOf(beat);
+    const crossed = siblings[direction === "up" ? index - 1 : index + 1];
+    if (index < 0 || !crossed || crossed.protected && !crossed.conditionalBranch) return undefined;
+    const anchor = direction === "up" ? crossed : siblings[index + 2];
+    const target: Position = anchor ? { type: "before", anchor: nodeRef(anchor) } : { type: "end" };
+    return movePlaces(scene, beat, beatBody(beat)).some(place => samePosition(place.position, target)) ? target : undefined;
+  };
   const addBranchForm = (scene: SceneDocument, header: SceneBeat, otherwise: boolean): void => {
     const target = prepareOperation(scene, header); if (!target) return;
     const groupId = header.conditionalBranch!.groupId, expectedBody = beatBody(header);
@@ -1281,15 +1277,12 @@ export function renderStoryView(
   };
   const moveSibling = (scene: SceneDocument, beat: SceneBeat, direction: "up" | "down"): void => {
     if (!draftGuard()) return;
-    const siblings = bodyNodes(scene, beatBody(beat)), index = siblings.findIndex(item => item.id === beat.id);
-    if (index < 0 || (direction === "up" ? index === 0 : index === siblings.length - 1)) return;
-    const anchor = direction === "up" ? siblings[index - 1] : siblings[index + 2];
-    const position: Position = anchor ? { type: "before", anchor: nodeRef(anchor) } : { type: "end" };
+    const position = siblingPlace(scene, beat, direction); if (!position) return;
     void mutate({ type: "moveStoryNode", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, node: nodeRef(beat), expectedBody: beatBody(beat), body: beatBody(beat), position }, () => { selectedBeatId = undefined; }).then(saved => { if (saved) [...host.querySelectorAll<HTMLElement>(".beat-card")].find(item => item.dataset.beatId === beat.id)?.querySelector<HTMLElement>(".beat-select")?.focus(); });
   };
   const removeNodeForm = (scene: SceneDocument, beat: SceneBeat): void => {
     const target = prepareOperation(scene, beat); if (!target) return;
-    const copy = document.createElement("p"); copy.textContent = beat.conditionalBranch ? `Delete ${branchCaption(beat.conditionalBranch, model)} and all ${groupCount(scene, beat.conditionalBranch.groupId)} contained Beats. Use Unwrap to keep one selected branch instead.` : `Delete this ${beatLabels[beat.payload.type]} Beat. If its branch becomes empty, Source keeps pass.`;
+    const copy = document.createElement("p"); copy.textContent = beat.conditionalBranch ? `Delete ${branchCaption(beat.conditionalBranch, model)} and all ${groupCount(scene, beat)} contained Beats. Use Unwrap to keep one selected branch instead.` : `Delete this ${beatLabels[beat.payload.type]} Beat. If its branch becomes empty, Source keeps pass.`;
     discardNote(copy, scene, beat.conditionalBranch?.groupId ?? beat.id);
     operation(scene, target, beat.conditionalBranch ? "Delete entire condition" : "Delete Beat", [copy], () => ({ type: "removeStoryNode", node: nodeRef(beat), expectedBody: beatBody(beat) }), beat.conditionalBranch ? "Delete entire condition" : "Delete this Beat");
   };
@@ -1349,7 +1342,7 @@ export function renderStoryView(
       tools.append(screenBeat);
     }
     const addCondition = button("Add Condition"); addCondition.disabled = scene.sourceConflict;
-    addCondition.addEventListener("click", () => openConditionForm(scene, { type: "root" }, defaultInsertion(scene, { type: "root" }))); tools.append(addCondition);
+    addCondition.addEventListener("click", () => openConditionForm(scene, { type: "root" }, defaultPlace(scene, { type: "root" }))); tools.append(addCondition);
     if (actions.assist) {
       const selected=scene.beats.find(b=>b.id===selectedBeatId);
       const assist=button("Assist · Rewrite dialogue");
@@ -1424,7 +1417,7 @@ export function renderStoryView(
       const moved=scene.beats.find(b=>b.id===id),onto=target===undefined?undefined:scene.beats[target];
       if(!active||!moved||!onto||target===undefined){if(grip.isConnected)grip.focus();return;}
       // Dropping below the start lands after the target; above it, before the target.
-      const siblings=bodyNodes(scene,{type:"root"}),anchor=target>from?siblings[siblings.findIndex(b=>b.id===onto.id)+1]:onto;
+      const siblings=nodeBeats(scene,{type:"root"}),anchor=target>from?siblings[siblings.findIndex(b=>b.id===onto.id)+1]:onto;
       const position:Position=anchor?{type:"before",anchor:nodeRef(anchor)}:{type:"end"};
       void mutate({type:"moveStoryNode",sceneId:scene.id,expectedSourceRevision:scene.sourceRevision,node:nodeRef(moved),expectedBody:beatBody(moved),body:{type:"root"},position})
         .then(saved=>{if(saved)[...host.querySelectorAll<HTMLElement>(".beat-card")].find(row=>row.dataset.beatId===id)?.querySelector<HTMLElement>(".beat-grip")?.focus();});
@@ -1435,35 +1428,48 @@ export function renderStoryView(
     scene.beats.forEach((beat, index) => {
       if (beat.conditionalBranch?.choiceOption) {
         const branch = beat.conditionalBranch;
-        const menu = owningChoice(scene, beat.id);
+        const body: BodyRef = { type: "branch", groupId: branch.groupId, branchId: beat.id }, info = bodyOf(scene, body);
+        const menu = scene.beats.find(item => item.id === info?.owningNode);
         const option = menu?.payload.type === "choice" ? menu.payload.options.find(o => o.id === beat.id) : undefined;
+        // Then edits an explicit ending beat. Custom Code that ends the option is edited in Source.
+        const bodyEnding = info?.ending, endedAt = bodyEnding?.type === "ends" ? scene.beats.find(item => item.id === bodyEnding.beatId) : undefined;
+        const code = endedAt?.payload.type === "customCode" ? endedAt : undefined;
+        const explicit = endedAt && ["jump", "repeatChoice", "return"].includes(endedAt.payload.type) ? endedAt : undefined;
+        const endingText = code?.payload.type === "customCode" ? `Ends with Custom Code: ${code.payload.source.trim()}` : bodyEnding?.type === "unknown" ? "Ending unknown: Custom Code can leave this option" : endedAt ? "Explicit transfer at the end of this option" : "Continue after the Choice";
         const section = document.createElement("section"); section.className = "story-choice-option story-branch-body"; section.dataset.optionId = beat.id; section.dataset.branchId = beat.id;
         section.style.setProperty("--option-color", ["var(--choice-arm-one)", "var(--choice-arm-two)", "var(--choice-arm-three)", "var(--choice-arm-four)"][(branch.ordinal ?? 0) % 4]!);
         const heading = document.createElement("strong"); heading.textContent = `${(branch.ordinal ?? 0) + 1}. ${option?.text ?? "Option"}`;
         const availability = document.createElement("p"); availability.textContent = option?.condition ? `Only when ${conditionCaption(option.condition, model.authoring.variables)}` : "Always available";
-        const body: BodyRef = { type: "branch", groupId: branch.groupId, branchId: beat.id };
         const add = button("Add a Beat", "text-button"); add.dataset.beatOpener = `branch:${beat.id}`; add.disabled = scene.sourceConflict;
-        add.addEventListener("click", () => { if (!draftGuard()) return; renderNewBeat(section, scene, "narration", body, defaultInsertion(scene, body), undefined, `branch:${beat.id}`); });
+        add.addEventListener("click", () => { if (!draftGuard()) return; renderNewBeat(section, scene, "narration", body, defaultPlace(scene, body), undefined, `branch:${beat.id}`); });
         const then = button("Then", "text-button"); then.disabled = scene.sourceConflict || !!menu?.protected;
         then.addEventListener("click", () => {
           const target = prepareOperation(scene); if (!target) return;
-          const last = bodyNodes(scene, body).at(-1);
-          const ending = last && isTransfer(last) ? last : undefined;
+          const ending = explicit;
           const kind = selectOf([{ value: "continue", label: "Continue after the Choice" }, { value: "jump", label: "Go to a Scene" }, { value: "repeatChoice", label: "Repeat this Choice" }, { value: "return", label: "Return to caller or main menu" }], ending?.payload.type ?? "continue"); kind.setAttribute("aria-label", "Then");
           const destination = entitySelect(model.scenes.map(s => ({ id: s.id, label: s.displayName })), ending?.payload.type === "jump" ? ending.payload.sceneId : ""); destination.setAttribute("aria-label", "Destination Scene");
           const destinationLabel = labelled("Destination Scene", destination); const show = (): void => { destinationLabel.hidden = kind.value !== "jump"; }; kind.addEventListener("change", show); show();
-          operation(scene, target, "Option ending", [labelled("Then", kind), destinationLabel], () => {
+          const notes: HTMLElement[] = [];
+          if (code || bodyEnding?.type === "unknown") { const note = document.createElement("p"); note.className = "story-continuation"; note.textContent = endingText; notes.push(note); }
+          if (code) {
+            kind.disabled = true;
+            const source = button("Edit in Source", "button secondary"); source.disabled = !actions.viewSource;
+            source.addEventListener("click", () => actions.viewSource?.(scene.sourcePath, code.byteStart, code.byteEnd, scene.sourceRevision)); notes.push(source);
+          }
+          const panel = operation(scene, target, "Option ending", [...notes, labelled("Then", kind), destinationLabel], () => {
+            if (code) throw Error("Custom Code ends this option. Edit it in Source.");
             if (kind.value === "continue") { if (!ending && menu) return { type: "updateBodyBeat", beatId: menu.id, expectedBody: beatBody(menu), beat: menu.payload }; if (!ending) throw Error("The owning Choice is unavailable."); return { type: "removeStoryNode", node: nodeRef(ending), expectedBody: body }; }
             const payload: BeatPayload = kind.value === "jump" ? { type: "jump", sceneId: required(destination) } : kind.value === "repeatChoice" ? { type: "repeatChoice", target: ending?.payload.type === "repeatChoice" ? ending.payload.target : null } : { type: "return" };
             return ending ? { type: "updateBodyBeat", beatId: ending.id, expectedBody: body, beat: payload } : { type: "insertBodyBeat", body, position: { type: "end" }, beat: payload };
           }, "Apply ending");
+          if (code) panel.querySelectorAll<HTMLButtonElement>(".row-actions .button.primary").forEach(apply => { apply.disabled = true; });
         });
-        const following = document.createElement("p"); following.className = "story-continuation"; following.textContent = bodyNodes(scene, body).some(isTransfer) ? "Explicit transfer at the end of this option" : "Continue after the Choice";
+        const following = document.createElement("p"); following.className = "story-continuation"; following.textContent = endingText;
         const context = document.createElement("p"); context.className = "story-breadcrumb"; context.textContent = bodyCaption(scene, body, model);
         const addCondition = button("Add Condition", "text-button"); addCondition.disabled = scene.sourceConflict;
-        addCondition.addEventListener("click", () => openConditionForm(scene, body, defaultInsertion(scene, body)));
+        addCondition.addEventListener("click", () => openConditionForm(scene, body, defaultPlace(scene, body)));
         const focus = button("Focus this branch", "text-button"); focus.addEventListener("click", () => { if (draftGuard()) { focusedBranch = beat.id; draw(); } });
-        following.textContent += ` · ${bodyCaption(scene, menu ? beatBody(menu) : { type: "root" }, model)}`;
+        following.textContent += ` · ${bodyCaption(scene, info?.parent ?? { type: "root" }, model)}`;
         section.append(heading, context, availability, add, addCondition, focus, then, following); (beat.owner ? branchHosts.get(beat.owner.branchId) ?? list : list).append(section); branchHosts.set(beat.id, section); return;
       }
       const card = document.createElement("article"); card.className = `beat-card${selectedBeatId === beat.id ? " selected" : ""}`; card.setAttribute("role", "listitem");card.dataset.beatId=beat.id;
@@ -1475,10 +1481,9 @@ export function renderStoryView(
       select.append(summary); select.addEventListener("click",()=>{const selectBeat=():void=>{selectedBeatId=selectedBeatId===beat.id?undefined:beat.id;draw();[...host.querySelectorAll<HTMLElement>(".beat-card")].find(item=>item.dataset.beatId===beat.id)?.querySelector<HTMLElement>(".beat-select")?.focus();};if(!settling&&!pendingWrites&&!hasDraft()){selectBeat();return;}if(hasDraft()){actions.status("Commit or cancel the open form before changing Beats.","error");focusDraft();return;}actions.status("Wait for the current Beat change to finish.","error");});
       const controls = document.createElement("div"); controls.className = "beat-controls";
       const nodeEditable = !readOnlyLogic(beat) && !beat.structuralPlaceholder && (!beat.protected || !!beat.conditionalBranch && !beat.conditionalBranch.ordinal && !beat.conditionalBranch.otherwise);
-      const siblings = bodyNodes(scene, beatBody(beat)); const ordinal = siblings.findIndex(item => item.id === beat.id);
-      const up = button("↑", "icon-button"); up.ariaLabel = `Move beat ${index + 1} up`; up.disabled = !nodeEditable || ordinal <= 0 || terminates(beat, scene) || !!siblings[ordinal - 1]?.protected && !siblings[ordinal - 1]?.conditionalBranch || scene.sourceConflict;
+      const up = button("↑", "icon-button"); up.ariaLabel = `Move beat ${index + 1} up`; up.disabled = !nodeEditable || !siblingPlace(scene, beat, "up") || scene.sourceConflict;
       up.addEventListener("click", () => moveSibling(scene, beat, "up"));
-      const down = button("↓", "icon-button"); down.ariaLabel = `Move beat ${index + 1} down`; down.disabled = !nodeEditable || ordinal < 0 || ordinal === siblings.length - 1 || terminates(beat, scene) || !!siblings[ordinal + 1] && terminates(siblings[ordinal + 1]!, scene) || !!siblings[ordinal + 1]?.protected && !siblings[ordinal + 1]?.conditionalBranch || scene.sourceConflict;
+      const down = button("↓", "icon-button"); down.ariaLabel = `Move beat ${index + 1} down`; down.disabled = !nodeEditable || !siblingPlace(scene, beat, "down") || scene.sourceConflict;
       down.addEventListener("click", () => moveSibling(scene, beat, "down"));
       const remove = button("Delete", "icon-button"); remove.ariaLabel = `Delete beat ${index + 1}`; remove.disabled = !nodeEditable || beat.payload.type === "return" && !beat.owner || scene.sourceConflict;
       remove.addEventListener("click", () => removeNodeForm(scene, beat));
@@ -1498,8 +1503,8 @@ export function renderStoryView(
           if (depth >= 3) group.style.paddingInlineStart = "0";
           const heading = document.createElement("div"); heading.className = "story-group-heading";
           const selected = scene.beats.find(item => item.id === selectedBeatId);
-          if (selected && (selected.conditionalBranch?.groupId === branch.groupId || insideCondition(scene, beatBody(selected), branch.groupId))) group.classList.add("selected");
-          const caption = document.createElement("strong"); caption.textContent = `Condition · ${branch.condition ? conditionCaption(branch.condition, model.authoring.variables) : "Unknown condition"} · ${scene.beats.filter(item => item.conditionalBranch?.groupId === branch.groupId).length} branches / ${groupCount(scene, branch.groupId)} Beats${group.classList.contains("selected") ? " · Contains selection" : ""}`;
+          if (selected && (selected.conditionalBranch?.groupId === branch.groupId || !!selected.owner && innerBodies(scene, beat).has(selected.owner.branchId))) group.classList.add("selected");
+          const caption = document.createElement("strong"); caption.textContent = `Condition · ${branch.condition ? conditionCaption(branch.condition, model.authoring.variables) : "Unknown condition"} · ${scene.beats.filter(item => item.conditionalBranch?.groupId === branch.groupId).length} branches / ${groupCount(scene, beat)} Beats${group.classList.contains("selected") ? " · Contains selection" : ""}`;
           const collapse = button(collapsedConditions.has(branch.groupId) ? "Expand condition" : "Collapse condition"); collapse.setAttribute("aria-expanded", String(!collapsedConditions.has(branch.groupId))); collapse.dataset.collapseGroupId = branch.groupId;
           collapse.addEventListener("click", () => { if (!draftGuard()) return; if (collapsedConditions.has(branch.groupId)) collapsedConditions.delete(branch.groupId); else collapsedConditions.add(branch.groupId); draw(); [...host.querySelectorAll<HTMLElement>("[data-collapse-group-id]")].find(item => item.dataset.collapseGroupId === branch.groupId)?.focus(); });
           const elseif = button("Add Else If"); elseif.disabled = scene.sourceConflict; elseif.addEventListener("click", () => addBranchForm(scene, beat, false));
@@ -1520,10 +1525,10 @@ export function renderStoryView(
           if (!draftGuard()) return;
           selectedBeatId = undefined; draw();
           const target = [...host.querySelectorAll<HTMLElement>(".story-branch-body")].find(node => node.dataset.branchId === beat.id);
-          if (target) { const parent: BodyRef = { type: "branch", groupId: branch.groupId, branchId: beat.id }; renderNewBeat(target, scene, "dialogue", parent, defaultInsertion(scene, parent), undefined, `branch:${beat.id}`); }
+          if (target) { const parent: BodyRef = { type: "branch", groupId: branch.groupId, branchId: beat.id }; renderNewBeat(target, scene, "dialogue", parent, defaultPlace(scene, parent), undefined, `branch:${beat.id}`); }
         });
         const addCondition = button(`Add Condition to ${branch.otherwise ? "Otherwise" : branch.ordinal ? "Else If" : "If"}`); addCondition.disabled = scene.sourceConflict;
-        addCondition.addEventListener("click", () => { const parent: BodyRef = { type: "branch", groupId: branch.groupId, branchId: beat.id }; openConditionForm(scene, parent, defaultInsertion(scene, parent)); });
+        addCondition.addEventListener("click", () => { const parent: BodyRef = { type: "branch", groupId: branch.groupId, branchId: beat.id }; openConditionForm(scene, parent, defaultPlace(scene, parent)); });
         const focus = button("Focus this branch", "text-button"); focus.addEventListener("click", () => { if (draftGuard()) { focusedBranch = beat.id; collapsedConditions.delete(branch.groupId); draw(); } });
         body.append(addChild, addCondition, focus);
       } else (beat.owner ? branchHosts.get(beat.owner.branchId) ?? list : list).append(card);
@@ -1677,7 +1682,7 @@ export function renderStoryView(
     return result;
   };
 
-  const renderNewBeat = (list: HTMLElement, scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", body: BodyRef = { type: "root" }, position: Position = defaultInsertion(scene, body), insertion?: ScreenInsertion, opener = "root"): void => {
+  const renderNewBeat = (list: HTMLElement, scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", body: BodyRef = { type: "root" }, position: Position = defaultPlace(scene, body), insertion?: ScreenInsertion, opener = "root"): void => {
     // One pending new beat per insertion place: adding there again returns to it.
     const requested = JSON.stringify({ body, position });
     const existing = [...beatDrafts.values()].find(draft => !draft.beatId && draft.sceneId === scene.id && JSON.stringify(draft.place?.()) === requested);
@@ -1693,9 +1698,8 @@ export function renderStoryView(
     // Core repeats this check on its candidate (BEAT_DRAFT_CONFLICT); this one lets Story refuse before sending.
     const savedCommand = (): SceneCommand => {
       const payload = editor.read(), location = chosenLocation(), current = base(), { body, position } = location;
-      const anchor = position.type === "before" ? JSON.stringify(position.anchor) : undefined;
-      const bodyKept = body.type === "root" || current.scene.beats.some(item => item.id === body.branchId && item.conditionalBranch?.groupId === body.groupId);
-      if (!bodyKept || (anchor && !bodyNodes(current.scene, body).some(node => JSON.stringify(nodeRef(node)) === anchor))) throw new Error("This beat's place changed in source after the draft began. Draft retained.");
+      const bodyKept = body.type === "root" || !!bodyOf(current.scene, body);
+      if (!bodyKept || (position.type === "before" && !nodeBeats(current.scene, body).some(node => sameNode(nodeRef(node), position.anchor)))) throw new Error("This beat's place changed in source after the draft began. Draft retained.");
       return insertCommand(payload, location, current);
     };
     const openingInsertion = structuredClone(insertion ?? screenInsertion ?? {sceneId:scene.id,body,position,expectedSourceRevision:scene.sourceRevision});
@@ -1707,13 +1711,13 @@ export function renderStoryView(
     const type = selectOf(types.map((value) => ({ value, label: beatLabels[value] })), initialType); type.setAttribute("aria-label", "Beat type");
     const destination = document.createElement("p"); destination.className = "story-insertion";
     const insertionAnchor = position.type === "before" ? position.anchor : undefined;
-    const anchor = insertionAnchor ? bodyNodes(scene, body).find(beat => JSON.stringify(nodeRef(beat)) === JSON.stringify(insertionAnchor)) : undefined;
+    const anchor = insertionAnchor ? nodeBeats(scene, body).find(beat => sameNode(nodeRef(beat), insertionAnchor)) : undefined;
     destination.textContent = `Insert in ${bodyCaption(scene, body, model)} · ${anchor ? `Before ${anchor.conditionalBranch ? "Condition" : beatLabels[anchor.payload.type]}` : "End of body"}`;
     const placement=destinations(scene,body,undefined,position,true,insertion);
     const screenType=()=>["showScreen","hideScreen","callScreen"].includes(type.value);
     const unavailableScene = !!insertion && insertion.sceneId !== scene.id;
     const usesPlacement = (): boolean => screenType() || !insertion && !screenInsertion;
-    const chosenLocation = (): { body: BodyRef; position: Position } => usesPlacement() ? readLocation() : unavailableScene ? { body: { type: "root" }, position: defaultInsertion(scene, { type: "root" }) } : { body, position };
+    const chosenLocation = (): { body: BodyRef; position: Position } => usesPlacement() ? readLocation() : unavailableScene ? { body: { type: "root" }, position: defaultPlace(scene, { type: "root" }) } : { body, position };
     const readLocation=placement.read;
     const pendingMarker=document.createElement("div");pendingMarker.className="story-screen-pending";pendingMarker.role="status";
     const updatePendingMarker=()=>{

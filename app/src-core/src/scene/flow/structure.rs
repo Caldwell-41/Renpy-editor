@@ -132,6 +132,9 @@ pub(super) fn project(
     nodes: &[FlowNode],
 ) -> Vec<FlowEdge> {
     let mut edges = Vec::new();
+    // The parsed beats came from these bytes, so their statements always read.
+    // Without them, a condition or Choice may continue.
+    let bodies = super::super::bodies::Bodies::new(bytes, beats).ok();
     let mut unknown = beats.is_empty();
     let mut unresolved_continuation = false;
     let mut ambiguous_returns = Vec::new();
@@ -185,7 +188,9 @@ pub(super) fn project(
             edges.push(branch_edge);
             unknown |= matches!(branch.condition, Some(Condition::Unknown { .. }));
             if branch.ordinal == 0
-                && super::super::logic::group_may_continue(&branch.group_id, beats, 0)
+                && bodies
+                    .as_ref()
+                    .is_none_or(|b| b.group_may_continue(&branch.group_id))
             {
                 let target = next_body(scene, revision, beats, beat, true);
                 unresolved_continuation |= target.beat_id.is_none();
@@ -377,7 +382,7 @@ pub(super) fn project(
                     unknown |= matches!(option.condition, Some(Condition::Unknown { .. }));
                     edges.push(choice);
                 }
-                if super::super::choice::may_continue(beat, beats) {
+                if bodies.as_ref().is_none_or(|b| b.choice_may_continue(beat)) {
                     let target = next_body(scene, revision, beats, beat, false);
                     unresolved_continuation |= target.beat_id.is_none();
                     edges.push(edge(
