@@ -117,6 +117,7 @@ pub const OPERATIONS: &[&str] = &[
     "history.state",
     "history.undo",
     "history.redo",
+    "history.draftStep",
     "scene.list",
     "flow.list",
     "scene.apply",
@@ -824,6 +825,14 @@ pub fn handle_application_request(
                     _ => lifecycle.history_redo().and_then(to_value),
                 })
         }
+        "history.draftStep" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<history::DraftStepRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|request| lifecycle.history_draft_step(request))
+            .and_then(to_value),
         "scene.list" if has_exact_keys(validated.payload, &["sessionId"]) => {
             session_only(validated.payload)
                 .and_then(|session| lifecycle.require_session(&session))

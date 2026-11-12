@@ -331,6 +331,7 @@ fn main() {
                 | "history.state"
                 | "history.undo"
                 | "history.redo"
+                | "history.draftStep"
                 | "scene.list"
                 | "scene.apply"
                 | "scene.saveDrafts"

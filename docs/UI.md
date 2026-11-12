@@ -584,14 +584,19 @@ dialog is open, Cmd/Ctrl+Z belongs to the dialog.
 
 Typing in a beat draft makes draft steps. A text step ends when focus leaves the
 field or after 2 seconds without typing. Each change to another control, such as a
-menu, media picker or checkbox, is one step. Undo of a draft step changes the draft
-and writes no source. Undo past a draft's first step ends the draft.
+menu, media picker or checkbox, is one step, and adding a beat is its draft's first
+step. Undo of a draft step changes the draft and writes no source. Undo past a
+draft's first step ends the draft. The header names a step by its beat and kind, for
+example "Undo narration typing in Arrival" or "Undo cancel of dialogue draft in
+Arrival".
 
 Commit and Story Save join a beat's draft steps into one edit at the top of the
 history, so one Undo reverses the whole beat. A Story Save adds one edit for each
-saved beat, with the most recently edited beat on top. Cancel is an edit, and Undo
-of it brings the draft back. Undo of deleting a beat restores the beat from source,
-but not the draft the author agreed to discard.
+saved beat, with the most recently edited beat on top. A saved beat whose source did
+not change adds none. Cancel is an edit, and Undo of it brings the draft back. Undo
+of deleting a beat restores the beat from source, but not the draft the author agreed
+to discard. The same holds for deleting a branch, condition or scene, and for the
+branches that Unwrap does not keep.
 
 For example, type in beat A, change and commit beat B's background, then return to
 A without typing. The first Undo reverses B's background change. The next Undo
@@ -609,10 +614,9 @@ grouping, and Source Save joins a file's steps into one edit. Other text fields,
 such as search, open Story forms, unapplied Screens fields and unsaved prompt text,
 keep the browser's text Undo and add no entries.
 
-This is target behaviour. Production blocks project Undo while a beat draft exists.
-Until a separate issue builds Source draft steps, Source typing keeps the Source
-editor's per-file text history, Cmd/Ctrl+Z in Source does text Undo, and accepted
-Source saves already join the project history.
+Source draft steps are target behaviour (#155). Until then, Source typing keeps the
+Source editor's per-file text history, Cmd/Ctrl+Z in Source does text Undo, and
+accepted Source saves join the project history.
 
 Kris selected familiar Word-like editing behaviour. Microsoft's
 [Undo guidance](https://support.microsoft.com/en-us/office/foundations-experiences/undo-redo-or-repeat-an-action)

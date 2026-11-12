@@ -292,9 +292,11 @@ replace a newer external revision. Conflicts should block writes to the affected
 file/scene while allowing unrelated scenes to remain editable when safe.
 
 Core's `history` module keeps the [project history](../GLOSSARY.md#language). Every
-commit records the edit's name and the item it changed. `history.undo` and
-`history.redo` are the only Undo routes, and `history.state` gives the header the
-next names. The shell owns the one Undo command ([Story Undo](UI.md#story-undo)).
+commit records the edit's name and the item it changed. `history.draftStep` adds a
+beat draft's step, and `scene.apply` and `scene.saveDrafts` name the drafts whose
+steps they join. `history.undo` and `history.redo` are the only Undo routes, and
+`history.state` gives the header the next names. The shell owns the one Undo command
+([Story Undo](UI.md#story-undo)).
 
 Phase 1B implements Gate E as a multi-mutation journalled recovery protocol. Recovery
 artifacts live only in an anchored transaction directory. macOS uses descriptor-

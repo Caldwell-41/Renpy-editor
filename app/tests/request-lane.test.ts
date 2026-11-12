@@ -112,3 +112,13 @@ test('project font reads finish before text Apply takes the shared service',asyn
   assert.deepEqual(calls,['font','stop','apply']);
  }
 });
+
+test("a beat draft step reaches core before the Commit, Story Save or Undo that follows it",async()=>{
+ for(const operation of ["scene.apply","scene.saveDrafts","history.undo"] as const){
+  const lane=new RequestLane(),calls:string[]=[];let release!:()=>void;
+  const step=lane.run("history.draftStep",async()=>{calls.push("step");await new Promise<void>(r=>{release=r;});});
+  await Promise.resolve();const next=lane.run(operation,async()=>{calls.push(operation);});
+  await Promise.resolve();try{assert.deepEqual(calls,["step"]);}finally{release();await step;await next;}
+  assert.deepEqual(calls,["step",operation]);
+ }
+});

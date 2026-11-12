@@ -1,15 +1,25 @@
 //! Project history: the one ordered list of the author's edits in an open project
 //! (GLOSSARY "Project history", ADR 0025). Every workspace commits through it, and
 //! one Undo and one Redo reverse its latest entry. Each entry restores exact bytes
-//! only while the current revisions still match its boundary (ADR 0006).
+//! only while the current revisions still match its boundary (ADR 0006). A
+//! draft-step entry holds only the place of one unfinished draft edit; its Undo and
+//! Redo write nothing, and the renderer restores the draft.
 use crate::authoring::AuthoringService;
 use crate::scene::SceneError;
 use crate::transaction::{
     CommitOutcome, ErrorCode, FileMutation, MutationKind, ProjectId, RelativePath, Revision,
     TransactionIntent, TransactionProposal,
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+
+/// The longest step id, draft id or name a draft step may carry.
+const MAX_DRAFT_STEP_TEXT: usize = 256;
+
+/// A step id, draft id or step name: not blank, and short.
+pub(crate) fn draft_text(value: &str) -> bool {
+    !value.trim().is_empty() && value.len() <= MAX_DRAFT_STEP_TEXT
+}
 
 /// What the author sees for an entry: the edit's name and the item Undo reveals.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
@@ -58,11 +68,12 @@ impl HistoryLabel {
 
 /// The item an entry reveals. When it no longer exists, the renderer selects the
 /// nearest item that contains it, or opens the workspace.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(
     tag = "type",
     rename_all = "camelCase",
-    rename_all_fields = "camelCase"
+    rename_all_fields = "camelCase",
+    deny_unknown_fields
 )]
 pub enum HistoryItem {
     /// A beat, its scene when `beat_id` is absent, or Story when both are absent.
@@ -94,7 +105,7 @@ pub enum HistoryItem {
     Asset,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ReferenceItem {
     Card,
@@ -137,12 +148,34 @@ pub struct HistoryState {
 }
 
 /// The result of one Undo or Redo: the entry it reversed or restored, then the
-/// history that follows.
+/// history that follows. `step` names the draft step when the entry was one, so
+/// the renderer can restore that draft.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct HistoryStep {
     pub entry: HistoryLabel,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub step: Option<DraftStep>,
     pub history: HistoryState,
+}
+
+/// One unfinished draft edit's place in the history: its step id and the draft it
+/// belongs to. It carries no field values or bytes (ADR 0025).
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DraftStep {
+    pub step_id: String,
+    pub draft: String,
+}
+
+/// `history.draftStep`: adds a draft-step entry with its name and item.
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct DraftStepRequest {
+    pub step_id: String,
+    pub draft: String,
+    pub name: String,
+    pub item: HistoryItem,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -154,11 +187,13 @@ pub struct HistoryMutation {
     pub after_bytes: Vec<u8>,
 }
 
+/// A committed edit restores `mutations`; a draft step has none and names its `step`.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct HistoryEntry {
     pub transaction_id: String,
     pub label: HistoryLabel,
     pub mutations: Vec<HistoryMutation>,
+    pub step: Option<DraftStep>,
 }
 
 #[derive(Default)]
@@ -200,13 +235,41 @@ impl HistoryStack {
     /// Adds an entry above the cursor and drops Redo. An entry without a name and
     /// an item is refused.
     pub fn push(&mut self, entry: HistoryEntry) -> Result<(), ErrorCode> {
-        if !entry.label.is_complete() {
+        self.push_joined(vec![entry], &[])
+    }
+
+    /// Adds `entries` above the cursor, the last on top, and drops Redo. The
+    /// draft-step entries of the `joined` drafts leave the history, because their
+    /// edit is now in `entries` or was discarded. Nothing changes if any entry has
+    /// no name or item.
+    pub fn push_joined(
+        &mut self,
+        entries: Vec<HistoryEntry>,
+        joined: &[String],
+    ) -> Result<(), ErrorCode> {
+        if entries.iter().any(|entry| !entry.label.is_complete()) {
             return Err(ErrorCode::InvalidProposal);
         }
         self.entries.truncate(self.cursor);
-        self.entries.push(entry);
+        self.entries.retain(|entry| {
+            entry
+                .step
+                .as_ref()
+                .is_none_or(|step| !joined.contains(&step.draft))
+        });
+        self.entries.extend(entries);
         self.cursor = self.entries.len();
         Ok(())
+    }
+
+    /// The draft step Undo would reverse, if the next entry is one.
+    fn undo_step(&self) -> Option<&DraftStep> {
+        self.undo_entry()?.step.as_ref()
+    }
+
+    /// The draft step Redo would restore, if the next entry is one.
+    fn redo_step(&self) -> Option<&DraftStep> {
+        self.redo_entry()?.step.as_ref()
     }
 
     pub fn undo_proposal(
@@ -353,6 +416,14 @@ fn proposal(
     })
 }
 
+/// One edit inside a committed proposal: its history name and item, and the
+/// mutations it made. A proposal's parts chain in order from its bases to its
+/// proposed bytes, so each part becomes its own entry and the last is on top.
+pub(crate) struct HistoryPart {
+    pub label: HistoryLabel,
+    pub mutations: Vec<FileMutation>,
+}
+
 impl AuthoringService {
     /// Commits a proposal and records it as one project history entry with the
     /// edit's name and the item to reveal. An incomplete label is refused before
@@ -363,41 +434,102 @@ impl AuthoringService {
         proposal: TransactionProposal,
         label: HistoryLabel,
     ) -> Result<Vec<Revision>, SceneError> {
-        if !label.is_complete() {
+        let mutations = proposal.mutations.clone();
+        self.commit_history_parts(
+            project,
+            proposal,
+            vec![HistoryPart { label, mutations }],
+            &[],
+        )
+    }
+
+    /// Commits a proposal and records one entry for each part, in order, with
+    /// the draft-step entries of the `joined` drafts removed (ADR 0025). An
+    /// incomplete label is refused before anything is written.
+    pub(crate) fn commit_history_parts(
+        &self,
+        project: &ProjectId,
+        proposal: TransactionProposal,
+        parts: Vec<HistoryPart>,
+        joined: &[String],
+    ) -> Result<Vec<Revision>, SceneError> {
+        if parts.iter().any(|part| !part.label.is_complete()) {
             return Err(SceneError::InvalidPayload);
         }
-        let snapshot = proposal.mutations.clone();
+        let paths: Vec<RelativePath> = proposal
+            .mutations
+            .iter()
+            .map(|mutation| mutation.path.clone())
+            .collect();
         match self.commit_observed(project, proposal) {
             CommitOutcome::Committed {
                 transaction_id,
                 revisions,
             } => {
-                let mutations = snapshot
-                    .into_iter()
-                    .zip(revisions.iter().cloned())
-                    .map(|(mutation, after_revision)| HistoryMutation {
-                        path: mutation.path,
-                        before_revision: mutation.base,
-                        before_bytes: mutation.expected_bytes,
-                        after_revision,
-                        after_bytes: mutation.proposed,
-                    })
-                    .collect();
-                self.project_history
-                    .lock()
-                    .map_err(|_| SceneError::Io)?
-                    .entry(project.clone())
-                    .or_default()
-                    .push(HistoryEntry {
-                        transaction_id,
-                        label,
-                        mutations,
-                    })
-                    .map_err(|_| SceneError::InvalidPayload)?;
+                let committed: HashMap<_, _> = paths.into_iter().zip(revisions.iter()).collect();
+                let entries = part_entries(&transaction_id, parts, &committed)?;
+                self.record_history(project, entries, joined)?;
                 Ok(revisions)
             }
             outcome => Err(crate::scene::outcome_error(outcome)),
         }
+    }
+
+    /// Removes the draft-step entries of drafts that ended without a byte change,
+    /// such as a Commit that changed nothing.
+    pub(crate) fn forget_draft_steps(
+        &self,
+        project: &ProjectId,
+        joined: &[String],
+    ) -> Result<(), SceneError> {
+        if joined.is_empty() {
+            return Ok(());
+        }
+        self.record_history(project, Vec::new(), joined)
+    }
+
+    fn record_history(
+        &self,
+        project: &ProjectId,
+        entries: Vec<HistoryEntry>,
+        joined: &[String],
+    ) -> Result<(), SceneError> {
+        self.project_history
+            .lock()
+            .map_err(|_| SceneError::Io)?
+            .entry(project.clone())
+            .or_default()
+            .push_joined(entries, joined)
+            .map_err(|_| SceneError::InvalidPayload)
+    }
+
+    /// Adds a draft-step entry on top and drops Redo. It records no bytes and
+    /// writes nothing.
+    pub fn history_draft_step(
+        &self,
+        project: &ProjectId,
+        request: DraftStepRequest,
+    ) -> Result<HistoryState, SceneError> {
+        if ![&request.step_id, &request.draft, &request.name]
+            .into_iter()
+            .all(|value| draft_text(value))
+        {
+            return Err(SceneError::InvalidPayload);
+        }
+        let mut histories = self.project_history.lock().map_err(|_| SceneError::Io)?;
+        let history = histories.entry(project.clone()).or_default();
+        history
+            .push(HistoryEntry {
+                transaction_id: request.step_id.clone(),
+                label: HistoryLabel::new(request.name, request.item),
+                mutations: Vec::new(),
+                step: Some(DraftStep {
+                    step_id: request.step_id,
+                    draft: request.draft,
+                }),
+            })
+            .map_err(|_| SceneError::InvalidPayload)?;
+        Ok(history.state())
     }
 
     pub fn history_state(&self, project: &ProjectId) -> Result<HistoryState, SceneError> {
@@ -429,6 +561,26 @@ impl AuthoringService {
         let state = history.state();
         let entry =
             if redo { state.redo } else { state.undo }.ok_or(SceneError::HistoryBoundary)?;
+        // A draft step writes nothing: only the cursor moves.
+        let step = if redo {
+            history.redo_step()
+        } else {
+            history.undo_step()
+        }
+        .cloned();
+        if step.is_some() {
+            if redo {
+                history.accepted_redo_with_revisions(&[])
+            } else {
+                history.accepted_undo_with_revisions(&[])
+            }
+            .map_err(history_error)?;
+            return Ok(HistoryStep {
+                entry,
+                step,
+                history: history.state(),
+            });
+        }
         let paths = if redo {
             history.redo_paths()
         } else {
@@ -465,9 +617,50 @@ impl AuthoringService {
         }
         Ok(HistoryStep {
             entry,
+            step: None,
             history: history.state(),
         })
     }
+}
+
+/// Builds each part's entry. A part's after state for a path is the next part's
+/// base for it, or the committed revision when no later part touches the path, so
+/// Undo and Redo of consecutive parts carry revisions across (ADR 0006).
+fn part_entries(
+    transaction_id: &str,
+    parts: Vec<HistoryPart>,
+    committed: &HashMap<RelativePath, &Revision>,
+) -> Result<Vec<HistoryEntry>, SceneError> {
+    let mut entries = Vec::with_capacity(parts.len());
+    for (index, part) in parts.iter().enumerate() {
+        let mut mutations = Vec::with_capacity(part.mutations.len());
+        for mutation in &part.mutations {
+            let after_revision = parts[index + 1..]
+                .iter()
+                .find_map(|later| later.mutations.iter().find(|m| m.path == mutation.path))
+                .map(|later| later.base.clone())
+                .or_else(|| {
+                    committed
+                        .get(&mutation.path)
+                        .map(|&revision| revision.clone())
+                })
+                .ok_or(SceneError::Io)?;
+            mutations.push(HistoryMutation {
+                path: mutation.path.clone(),
+                before_revision: mutation.base.clone(),
+                before_bytes: mutation.expected_bytes.clone(),
+                after_revision,
+                after_bytes: mutation.proposed.clone(),
+            });
+        }
+        entries.push(HistoryEntry {
+            transaction_id: transaction_id.to_owned(),
+            label: part.label.clone(),
+            mutations,
+            step: None,
+        });
+    }
+    Ok(entries)
 }
 
 fn history_error(value: ErrorCode) -> SceneError {
@@ -486,6 +679,7 @@ mod tests {
             transaction_id: "fixture".into(),
             label: HistoryLabel::new(name, item),
             mutations: Vec::new(),
+            step: None,
         }
     }
 
