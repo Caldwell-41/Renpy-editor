@@ -25,7 +25,7 @@
     await until(()=>!document.querySelector('.screen-addition'));
     const node=(await inspect()).find(node=>node.id===selected());assert(node?.kind===kind,'Addition keeps a distinct owned identity');return node.id;
   };
-  const history=async(direction,expected,id)=>{await click(direction);await until(async()=>await source()===expected&&selected()===id);};
+  const history=async(direction,expected,id)=>{await window.__loomlightProbeHistory(direction.toLowerCase());await until(async()=>await source()===expected&&selected()===id);};
   try {
     await until(()=>document.querySelector('.recent-open'));document.querySelector('.recent-open').click();await click('Screens');
     sessionId=(await call('project.current')).sessionId;
@@ -42,7 +42,7 @@
     const gridSaved=await source();assert(gridSaved.includes('grid 4 1:')&&gridSaved.includes('spacing 8'),'Grid header and spacing are saved together');
     const invalid=input('Columns','1');await click('Apply layout');assert(invalid.value==='1'&&invalid.getAttribute('aria-invalid')==='true','Capacity refusal retains input and field error');assert(await source()===gridSaved,'Invalid capacity writes nothing');
     await click('Cancel layout');await click('Apply layout');await until(()=>document.querySelector('.screen-message')?.textContent.includes('No change'));
-    await click('Undo');await until(()=>document.querySelector('[data-layout-field=columns]')?.value==='2');await click('Redo');await until(()=>document.querySelector('[data-layout-field=columns]')?.value==='4');assert(await source()===gridSaved,'Redo restores exact grid source');
+    await window.__loomlightProbeHistory('undo');await until(()=>document.querySelector('[data-layout-field=columns]')?.value==='2');await window.__loomlightProbeHistory('redo');await until(()=>document.querySelector('[data-layout-field=columns]')?.value==='4');assert(await source()===gridSaved,'Redo restores exact grid source');
     checkpoint('grid-layout-passed');
 
     await click('Back to elements');await select(viewport,true);await until(()=>document.querySelector('[data-layout-field=ysize]'));

@@ -21,15 +21,14 @@ fn flow_observed_saved_history_reuses_unchanged_inputs_and_lifecycle_inventory()
     .unwrap();
     assert_eq!(observe(&f).revision, original.revision);
     let model = f.workspace();
-    let created = f
-        .apply(
-            &model,
-            SceneCommand::CreateScene {
-                chapter_id: model.chapters[0].id.clone(),
-                display_name: "Second".into(),
-            },
-        )
-        .unwrap();
+    f.apply(
+        &model,
+        SceneCommand::CreateScene {
+            chapter_id: model.chapters[0].id.clone(),
+            display_name: "Second".into(),
+        },
+    )
+    .unwrap();
     let updated = observe(&f);
     assert_eq!(updated.observation.status, "savedEdits");
     assert_eq!(updated.nodes.len(), 2);
@@ -38,9 +37,9 @@ fn flow_observed_saved_history_reuses_unchanged_inputs_and_lifecycle_inventory()
         original.observation.checked_at
     );
     assert!(!updated.stale);
-    let undone = f.apply(&created, SceneCommand::Undo).unwrap();
+    f.undo().unwrap();
     assert_eq!(observe(&f).nodes.len(), 1);
-    let redone = f.apply(&undone, SceneCommand::Redo).unwrap();
+    let redone = f.redo().unwrap();
     assert_eq!(observe(&f).nodes.len(), 2);
     assert!(refresh(&f).partial); // duplicate label discovered on explicit Refresh
     fs::remove_file(f.root.join("game/external.rpy")).unwrap();

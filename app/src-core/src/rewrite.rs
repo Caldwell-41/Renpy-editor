@@ -4,6 +4,7 @@ use crate::{
     ai_profiles::StudioProfile,
     ai_request::{Cancel, Completion},
     authoring::AuthoringService,
+    history::{HistoryItem, HistoryLabel, ReferenceItem},
     prompts::{self, PreviewRequest},
     rewrite_text::{Boundary, Segment},
     transaction::{ProjectId, RelativePath, Revision, TransactionProposal},
@@ -283,6 +284,53 @@ fn schema(scene: &str, beat: &str, boundary: &Boundary) -> Value {
         "segments":{"type":"array","minItems":1,"maxItems":256,"items":{"anyOf":alternatives}}
     }})
 }
+/// The history name and item for an accepted Assist proposal: the beat or scene it
+/// changed, or the generated card or lore entry.
+fn accept_label(context: &prompts::PreviewRequest, review: Option<&Value>) -> HistoryLabel {
+    let record = |kind: &str| {
+        review
+            .and_then(|r| r[kind]["recordId"].as_str())
+            .map(String::from)
+    };
+    let story = |name: &str, beat: bool| {
+        HistoryLabel::new(
+            name,
+            HistoryItem::beat(
+                context.scene_id.clone(),
+                beat.then(|| context.beat_id.clone()),
+            ),
+        )
+    };
+    match context.action.as_str() {
+        prompts::LORE => HistoryLabel::new(
+            "Assist lore entry",
+            HistoryItem::Reference {
+                kind: ReferenceItem::Lore,
+                record_id: record("lore"),
+            },
+        ),
+        prompts::CARD => HistoryLabel::new(
+            "Assist character card",
+            HistoryItem::Reference {
+                kind: ReferenceItem::Card,
+                record_id: record("card"),
+            },
+        ),
+        prompts::DRAFT => HistoryLabel::new(
+            "Assist scene draft",
+            HistoryItem::Story {
+                scene_id: review
+                    .and_then(|r| r["scene"]["id"].as_str())
+                    .map(String::from),
+                beat_id: None,
+            },
+        ),
+        prompts::CONTINUE => story("Assist scene continuation", false),
+        batch::ACTION => story("Assist scene edit", false),
+        _ => story("Assist dialogue rewrite", true),
+    }
+}
+
 impl AuthoringService {
     pub fn rewrite_prepare(
         &self,
@@ -1029,6 +1077,7 @@ impl AuthoringService {
             return Err(RewriteError::Invalid);
         }
         self.rewrite_validate(project, project_id, session, profile_token, t)?;
+        let label = accept_label(&t.context, t.review.as_ref());
         let proposal = t.proposal.take().ok_or(RewriteError::Stale)?;
         t.phase = Phase::Consumed; // Commit ambiguity is handled by ordinary recovery, not redispatch.
         if t.context.action == prompts::DRAFT {
@@ -1045,7 +1094,7 @@ impl AuthoringService {
                 .ensure_directory(project, directory)
                 .map_err(|_| RewriteError::Stale)?;
         }
-        self.commit_history(project, proposal)
+        self.commit_history(project, proposal, label)
             .map_err(RewriteError::Scene)?;
         self.scene_workspace(project, project_id)
             .map_err(RewriteError::Scene)

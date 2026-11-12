@@ -373,6 +373,80 @@ impl AuthoringService {
             &request.command,
             Command::AddBar { .. } | Command::AddImageButton { .. }
         );
+        let kind_of = |id: &str| {
+            screen
+                .nodes
+                .iter()
+                .find(|n| n.id.as_deref() == Some(id))
+                .map_or("element", |n| element_name(&n.kind))
+        };
+        let parent_of = |id: &str| {
+            let node = screen.nodes.iter().find(|n| n.id.as_deref() == Some(id))?;
+            screen
+                .nodes
+                .iter()
+                .find(|p| Some(p.span.start) == node.parent_start)?
+                .id
+                .clone()
+        };
+        // An addition is gone after Undo and a removal after Redo; both reveal the parent.
+        let (name, removed, parent) = match &request.command {
+            Command::AddImageButton { parent_id, .. } => {
+                ("new image button".to_owned(), None, Some(parent_id.clone()))
+            }
+            Command::ImageButton { .. } => ("image button change".to_owned(), None, None),
+            Command::AddBar { parent_id, .. } => {
+                ("new bar".to_owned(), None, Some(parent_id.clone()))
+            }
+            Command::Bar { .. } => ("bar change".to_owned(), None, None),
+            Command::Add {
+                kind, parent_id, ..
+            } => (
+                format!("new {}", element_name(kind)),
+                None,
+                Some(parent_id.clone()),
+            ),
+            Command::AddImage { parent_id, .. } => {
+                ("new image".to_owned(), None, Some(parent_id.clone()))
+            }
+            Command::Image { .. } => ("image change".to_owned(), None, None),
+            Command::Text { .. } => ("text edit".to_owned(), None, None),
+            // Width and height alone, applied with the text editor, are a resize.
+            Command::FormatText {
+                node_id,
+                values,
+                style,
+                layout,
+                interaction,
+            } if !layout.is_empty()
+                && style.is_none()
+                && interaction.is_none()
+                && values.is_unchanged() =>
+            {
+                (
+                    format!(
+                        "{} {}",
+                        kind_of(node_id),
+                        layout::layout_change(layout.keys())
+                    ),
+                    None,
+                    None,
+                )
+            }
+            Command::FormatText { node_id, .. } => {
+                (format!("{} format change", kind_of(node_id)), None, None)
+            }
+            Command::Actions { .. } => ("button action change".to_owned(), None, None),
+            Command::VariableText { .. } => ("text binding change".to_owned(), None, None),
+            Command::Reorder { node_id, .. } => {
+                (format!("{} reorder", kind_of(node_id)), None, None)
+            }
+            Command::Remove { node_id } => (
+                format!("{} removal", kind_of(node_id)),
+                Some(node_id.clone()),
+                parent_of(node_id),
+            ),
+        };
         let selected_id = match request.command {
             Command::AddImageButton {
                 parent_id,
@@ -1122,12 +1196,23 @@ impl AuthoringService {
                 documents: vec![],
             });
         }
+        // Undo of a removal brings the element back, so it reveals that element.
+        let label = HistoryLabel::new(
+            name,
+            HistoryItem::Screen {
+                path: owner.screen.path.clone(),
+                screen: owner.screen.name.clone(),
+                node_id: Some(removed.unwrap_or_else(|| selected_id.clone())),
+                parent_id: parent,
+            },
+        );
         self.commit_history(
             project,
             TransactionProposal {
                 mutations: companions,
                 intent: TransactionIntent::Edit,
             },
+            label,
         )?;
         Ok(ComposeResult {
             action_validation: None,

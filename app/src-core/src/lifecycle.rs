@@ -712,6 +712,27 @@ impl LifecycleService {
             .map_err(LifecycleError::Scene)
     }
 
+    pub fn history_state(&self) -> Result<crate::history::HistoryState, LifecycleError> {
+        let (authority, _) = self.authoring_context()?;
+        self.authoring
+            .history_state(&authority)
+            .map_err(LifecycleError::Scene)
+    }
+
+    pub fn history_undo(&self) -> Result<crate::history::HistoryStep, LifecycleError> {
+        let (authority, _) = self.authoring_context()?;
+        self.authoring
+            .history_undo(&authority)
+            .map_err(LifecycleError::Scene)
+    }
+
+    pub fn history_redo(&self) -> Result<crate::history::HistoryStep, LifecycleError> {
+        let (authority, _) = self.authoring_context()?;
+        self.authoring
+            .history_redo(&authority)
+            .map_err(LifecycleError::Scene)
+    }
+
     pub fn scene_workspace(&self) -> Result<SceneWorkspace, LifecycleError> {
         let (authority, project_id) = self.authoring_context()?;
         self.authoring
@@ -4525,7 +4546,7 @@ mod tests {
             .iter()
             .find(|beat| matches!(beat.payload, crate::scene::BeatPayload::Choice { .. }))
             .unwrap();
-        scene_workspace = apply_scene_target(
+        apply_scene_target(
             &service,
             &scene_workspace,
             crate::scene::SceneCommand::CreateSceneFromChoice {
@@ -4537,10 +4558,9 @@ mod tests {
                 display_name: "Created from Choice".into(),
             },
         );
-        scene_workspace =
-            apply_scene_target(&service, &scene_workspace, crate::scene::SceneCommand::Undo);
-        scene_workspace =
-            apply_scene_target(&service, &scene_workspace, crate::scene::SceneCommand::Redo);
+        service.history_undo().unwrap();
+        service.history_redo().unwrap();
+        scene_workspace = service.scene_workspace().unwrap();
         assert_eq!(scene_workspace.scenes.len(), 4);
         let garden = scene_workspace
             .scenes
@@ -4670,17 +4690,13 @@ mod tests {
             clean_selection_only.draft_version,
             saved_source.draft_version
         );
-        scene_workspace = apply_scene_target(
-            &service,
-            &service.scene_workspace().unwrap(),
-            crate::scene::SceneCommand::Undo,
-        );
+        service.history_undo().unwrap();
         assert_eq!(
             fs::read_to_string(&source_file).unwrap(),
             accepted_before_source
         );
-        scene_workspace =
-            apply_scene_target(&service, &scene_workspace, crate::scene::SceneCommand::Redo);
+        service.history_redo().unwrap();
+        scene_workspace = service.scene_workspace().unwrap();
         assert_eq!(
             fs::read_to_string(&source_file).unwrap(),
             accepted_source_text

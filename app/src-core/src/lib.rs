@@ -6,6 +6,7 @@ pub mod ai_profiles;
 pub mod authoring;
 pub mod conditions;
 pub mod dispatch;
+pub mod history;
 pub mod lifecycle;
 pub mod media;
 pub mod metadata;
@@ -113,6 +114,9 @@ pub const OPERATIONS: &[&str] = &[
     "asset.repairCompatibility",
     "variable.create",
     "variable.update",
+    "history.state",
+    "history.undo",
+    "history.redo",
     "scene.list",
     "flow.list",
     "scene.apply",
@@ -809,6 +813,17 @@ pub fn handle_application_request(
             })
             .and_then(|request| lifecycle.references_apply(request))
             .and_then(to_value),
+        "history.state" | "history.undo" | "history.redo"
+            if has_exact_keys(validated.payload, &["sessionId"]) =>
+        {
+            session_only(validated.payload)
+                .and_then(|session| lifecycle.require_session(&session))
+                .and_then(|_| match validated.operation {
+                    "history.state" => lifecycle.history_state().and_then(to_value),
+                    "history.undo" => lifecycle.history_undo().and_then(to_value),
+                    _ => lifecycle.history_redo().and_then(to_value),
+                })
+        }
         "scene.list" if has_exact_keys(validated.payload, &["sessionId"]) => {
             session_only(validated.payload)
                 .and_then(|session| lifecycle.require_session(&session))

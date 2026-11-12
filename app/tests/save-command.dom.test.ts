@@ -85,7 +85,7 @@ test("the shell owns Save routing across Source, clean fallback, modifiers, remo
   };
   const emptyScene = {
     projectRevision: "1".repeat(64), sourceMapRevision: "2".repeat(64), entrySceneId: "scene",
-    lastOpen: { chapterId: "chapter", sceneId: "scene" }, canUndo: false, canRedo: false,
+    lastOpen: { chapterId: "chapter", sceneId: "scene" },
     chapters: [{ id: "chapter", displayName: "Chapter", directory: "game" }],
     scenes: [{ id: "scene", chapterId: "chapter", displayName: "Scene", technicalLabel: "scene", sourcePath: model.path, sourceRevision: model.baseRevision, sourceConflict: false, partial: false, beats: [], bodies: sceneBodies([]) }],
     authoring: { characters: [], appearances: [], assets: [], variables: [] },
@@ -284,7 +284,7 @@ test("Story Save takes one route from toolbar and keyboard, and a refusal never 
   let accepted = "Hello", revision = 3;
   const workspace = () => ({
     projectRevision: "1".repeat(64), sourceMapRevision: String(revision).repeat(64), entrySceneId: "scene",
-    lastOpen: { chapterId: "chapter", sceneId: "scene" }, canUndo: revision > 3, canRedo: false,
+    lastOpen: { chapterId: "chapter", sceneId: "scene" },
     chapters: [{ id: "chapter", displayName: "Chapter", directory: "game" }],
     scenes: [{ id: "scene", chapterId: "chapter", displayName: "Scene", technicalLabel: "scene", sourcePath: "game/scene.rpy", sourceRevision: String(revision).repeat(64), sourceConflict: false, partial: false,
       ...(beats => ({ beats, bodies: sceneBodies(beats) }))([{ id: "line", byteStart: 15, byteEnd: 30, protected: false, payload: { type: "narration" as const, text: accepted } }]) }],
@@ -367,7 +367,7 @@ test("A refused Story Save counts failing drafts, links each scene and marks fai
     sourceRevision: String(revision).repeat(64), sourceConflict: false, partial: false, ...(beats => ({ beats, bodies: sceneBodies(beats as SceneBeat[]) }))(ids.map((item, index) => beat(item, 20 + index * 10))) });
   const workspace = () => ({
     projectRevision: "1".repeat(64), sourceMapRevision: String(revision).repeat(64), entrySceneId: "arrival",
-    lastOpen: { chapterId: "chapter", sceneId: "arrival" }, canUndo: false, canRedo: false,
+    lastOpen: { chapterId: "chapter", sceneId: "arrival" },
     chapters: [{ id: "chapter", displayName: "Chapter", directory: "game" }],
     scenes: [scene("arrival", "Arrival", ["n1", "g1", "g2"]), scene("depot", "Depot", ["n2", "g3"])],
     authoring: { characters: [{ id: "mara", displayName: "Mara", technicalName: "mara" }], appearances: [], assets: [], variables: [] },

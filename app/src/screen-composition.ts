@@ -36,7 +36,6 @@ interface Host {
   note: (message: string, error?: boolean) => void;
   preview: () => void;
   newScreen: () => void;
-  undo: () => void;
   geometry: (host: HTMLElement) => void;
   hover: (id?: string) => void;
   image?: (card: HTMLElement, view: CompositionView) => boolean;
@@ -125,7 +124,7 @@ export class ScreenComposer {
     this.saving = false; this.error = "";
   }
   showRemovalNotice(node: ScreenNode): void {
-    this.notice.replaceChildren(el("span", "", `Removed ${node.literal ?? names[node.kind] ?? node.kind}.`), action("Undo removal", this.host.undo), action("Dismiss", () => { this.clearNotice(); this.focusRow(); }));
+    this.notice.replaceChildren(el("span", "", `Removed ${node.literal ?? names[node.kind] ?? node.kind}.`), action("Dismiss", () => { this.clearNotice(); this.focusRow(); }));
     this.notice.hidden = false;
   }
   selectionLabel(node: ScreenNode): string { const view = this.host.view(); return view ? this.name(view, node) : node.literal ?? names[node.kind] ?? node.kind; }

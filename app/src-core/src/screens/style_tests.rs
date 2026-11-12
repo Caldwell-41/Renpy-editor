@@ -99,12 +99,12 @@ fn shared_style_apply_changes_only_definition_and_one_history_entry_restores_bot
         compose_command(&mut service, &first, noop)["changed"],
         false
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"],
         before
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     service.close().unwrap();
     service.open_path(&root).unwrap();
     assert_eq!(
@@ -146,12 +146,12 @@ fn independent_style_copy_keeps_other_use_and_restores_reference_with_history() 
         ipc(&mut service, "source.open", json!({"path":second["path"]}))["text"],
         other
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"],
         before
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     service.close().unwrap();
     service.open_path(&root).unwrap();
     assert_eq!(
@@ -293,7 +293,7 @@ fn text_style_button_copy_preserves_local_decoration_canvas_and_single_history_e
         )["changed"],
         false
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"],
         before
@@ -302,7 +302,7 @@ fn text_style_button_copy_preserves_local_decoration_canvas_and_single_history_e
         button_canvas_properties(&mut service, &first, &first_id),
         appearance
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     service.close().unwrap();
     service.open_path(&root).unwrap();
     assert_eq!(
@@ -345,7 +345,7 @@ fn text_style_button_assignment_preserves_element_properties_and_noop() {
         compose_command(&mut service, &first, command)["changed"],
         false
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"],
         before
@@ -405,7 +405,7 @@ fn text_style_button_assignment_from_button_style_keeps_inherited_decoration_loc
         definitions,
         before.split_once("\nstyle ll_button").unwrap().1
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         before
@@ -488,7 +488,7 @@ fn text_style_button_edits_route_decoration_to_use_and_text_to_selected_scope() 
                 other.clone()
             }
         );
-        composition_history(&mut service, "undo");
+        project_history(&mut service, "undo");
         assert_eq!(
             ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"],
             before
@@ -497,7 +497,7 @@ fn text_style_button_edits_route_decoration_to_use_and_text_to_selected_scope() 
             ipc(&mut service, "source.open", json!({"path":second["path"]}))["text"],
             other
         );
-        composition_history(&mut service, "redo");
+        project_history(&mut service, "redo");
         assert_eq!(
             ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"],
             saved
@@ -661,7 +661,7 @@ fn existing_style_assignment_and_new_style_creation_use_ordinary_source_and_noop
         compose_command(&mut service, &first, noop)["changed"],
         false
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":first["path"]}))["text"],
         before
@@ -692,7 +692,7 @@ fn existing_style_assignment_and_new_style_creation_use_ordinary_source_and_noop
             .unwrap()["textProperties"]["values"]["size"],
         22
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":second["path"]}))["text"],
         source
@@ -732,7 +732,7 @@ fn frame_decoration_and_button_states_are_typed_source_properties_in_one_history
     assert!(source.contains("style panel_style is frame:"));
     assert!(source.contains("background \"#123456\""));
     assert!(source.contains("foreground Frame(Composite((6, 6), (0, 0), Transform(Solid(\"#abcdef\"), xysize=(6, 2)), (0, 4), Transform(Solid(\"#abcdef\"), xysize=(6, 2)), (0, 2), Transform(Solid(\"#abcdef\"), xysize=(2, 2)), (4, 2), Transform(Solid(\"#abcdef\"), xysize=(2, 2))), 2, 2)"));
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         before

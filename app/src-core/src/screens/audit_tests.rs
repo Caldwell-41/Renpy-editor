@@ -65,7 +65,7 @@ fn screen_creation_returns_the_committed_catalog_when_a_later_inventory_cannot_b
     );
     fs::remove_file(root.join("game/late.rpy")).unwrap();
     assert_eq!(created, ipc(&mut service, "screens.list", json!({})));
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert!(!root.join("game/ui/saved.rpy").exists());
     assert_eq!(
         ipc(&mut service, "screens.list", json!({}))["owned"],
@@ -318,7 +318,7 @@ fn grid_add_accepts_scalar_policy_whitespace_and_refuses_ambiguous_policies() {
                 json!({"path":owner["path"],"screenName":"notes","expectedRevision":added["document"]["revision"],"width":1280,"height":720,"drafts":[]}),
             );
             assert_eq!(plan["available"], true, "{plan}");
-            composition_history(&mut service, "undo");
+            project_history(&mut service, "undo");
         } else {
             assert_eq!(
                 reject(&mut service, "screens.compose", request)["error"]["code"],
@@ -359,9 +359,9 @@ fn literal_alias_edits_preserve_parent_controlled_values_and_comments() {
         noop["values"] = json!({blocked:{"unit":"relative","value":0.25}});
         assert_eq!(reject(&mut service, "screens.setLayout", noop)["error"]["code"], "OPAQUE_BOUNDARY");
         assert_eq!(reject(&mut service, "screens.setLayout", request)["error"]["code"], "SOURCE_CONFLICT");
-        composition_history(&mut service, "undo");
+        project_history(&mut service, "undo");
         assert_eq!(ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"], source);
-        composition_history(&mut service, "redo");
+        project_history(&mut service, "redo");
         assert_eq!(ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"], expected);
     }
 }
@@ -397,7 +397,7 @@ fn structural_edits_preserve_ambiguous_interleaved_comments() {
                 ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
                 source.replace(&block, "")
             );
-            composition_history(&mut service, "undo");
+            project_history(&mut service, "undo");
         } else {
             for command in [
                 json!({"type":"remove","nodeId":group}),

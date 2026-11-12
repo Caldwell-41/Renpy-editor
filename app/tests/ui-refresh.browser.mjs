@@ -428,7 +428,7 @@ for key,value in [('stage','open'),('passed',False),('error','failure')]:
   window.__TAURI_INTERNALS__={invoke:async(_,{request})=>{if(request.operation==='preferences.write')preferences=structuredClone(request.payload);return {protocolVersion:1,requestId:request.requestId,ok:true,value:preferences};}};
   const authoring=structuredClone((await visualRequest('authoring.list')).value);
   authoring.appearances.push({...authoring.appearances[0],id:'bec-happy',label:'happy',assetId:'bec-happy'});authoring.assets.push({...authoring.assets[3],id:'bec-happy',displayName:'Bec happy'});
-  let scene=structuredClone((await visualRequest('scene.list')).value);scene.authoring=authoring;let previous;
+  let scene=structuredClone((await visualRequest('scene.list')).value);scene.authoring=authoring;let previous,movedScene;
   window.__auditCommands=[];window.__auditVariables=[];
   const response=value=>({protocolVersion:1,requestId:'fixture',ok:true,value:structuredClone(value)});
   startApplication(async(op,payload={})=>{
@@ -436,10 +436,13 @@ for key,value in [('stage','open'),('passed',False),('error','failure')]:
    if(op==='appearance.setDefault'){authoring.characters.find(c=>c.id===payload.characterId).defaultAppearanceId=payload.appearanceId;return response(authoring);}
    if(op==='variable.create'){window.__auditVariables.push(payload);authoring.variables.push({id:payload.technicalName,source:authoring.variables[0].source,...payload});return response(authoring);}
    if(op==='scene.list')return response(scene);
+   // The beat move is the only history entry; Undo reveals its scene.
+   const moveEntry=()=>({name:'move in The Apartment',item:{type:'story',sceneId:movedScene,beatId:null}});
+   if(op==='history.state')return response({undo:previous?moveEntry():null,redo:null});
+   if(op==='history.undo'){const entry=moveEntry();scene=previous;previous=undefined;return response({entry,history:{undo:null,redo:null}});}
    if(op==='scene.apply'){
     const command=payload.command;window.__auditCommands.push(command);
-    if(command.type==='moveStoryNode'){previous=structuredClone(scene);const beats=scene.scenes.find(s=>s.id===command.sceneId).beats;const moved=beats.splice(beats.findIndex(b=>b.id===command.node.beatId),1)[0];beats.splice(command.position.type==='end'?beats.length:beats.findIndex(b=>b.id===command.position.anchor.beatId),0,moved);scene.canUndo=true;}
-    if(command.type==='undo'){scene=previous;previous=undefined;}
+    if(command.type==='moveStoryNode'){previous=structuredClone(scene);movedScene=command.sceneId;const beats=scene.scenes.find(s=>s.id===command.sceneId).beats;const moved=beats.splice(beats.findIndex(b=>b.id===command.node.beatId),1)[0];beats.splice(command.position.type==='end'?beats.length:beats.findIndex(b=>b.id===command.position.anchor.beatId),0,moved);}
     if(command.type==='insertBodyBeat'){await new Promise(resolve=>window.__auditReleaseBeat=resolve);scene.scenes.find(s=>s.id===command.sceneId).beats.push({id:'audit-added',protected:false,byteStart:130,byteEnd:150,payload:command.beat});}
     return response(scene);
    }
@@ -471,7 +474,7 @@ for key,value in [('stage','open'),('passed',False),('error','failure')]:
  await drag(audit.locator('.app-header'));assert.equal(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='moveStoryNode').length),0);
  await drag(audit.locator('[data-beat-id="dialogue"]'));await audit.waitForFunction(()=>document.activeElement?.closest('.beat-card')?.dataset.beatId==='background');
  assert.deepEqual(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='moveStoryNode').map(c=>c.node.beatId)),['background']);assert.equal(await audit.locator('.beat-card').nth(2).getAttribute('data-beat-id'),'background');
- await audit.getByRole('button',{name:'Undo',exact:true}).click();await audit.waitForFunction(()=>document.querySelector('.beat-card')?.dataset.beatId==='background');
+ await audit.locator('.app-header [data-history="undo"]:not([aria-disabled="true"])').click();await audit.waitForFunction(()=>document.querySelector('.beat-card')?.dataset.beatId==='background');
  await audit.getByRole('button',{name:'Variables',exact:true}).click();
  const dialog=audit.getByRole('dialog');const type=dialog.locator('.field').filter({has:audit.locator('span:text-is("Type")')}).locator('select');const defaultField=dialog.locator('.field').filter({has:audit.locator('span:text-is("Default value")')});
  for(const [kind,value] of [['int','42'],['string','Discard this'],['bool','true']]){

@@ -208,7 +208,7 @@ fn exact_reviewed_send_selected_references_one_acceptance_undo_redo_reopen() {
     let response = f.response(&p);
     let r = f.complete(&p, response.to_string()).unwrap();
     assert_snapshots(&before, &f.snapshots());
-    let w = f.ok(
+    f.ok(
         "rewrite.accept",
         json!({"proposalId":r["proposalId"],"previewDigest":r["previewDigest"]}),
     );
@@ -241,9 +241,9 @@ fn exact_reviewed_send_selected_references_one_acceptance_undo_redo_reopen() {
         )["ok"],
         false
     );
-    let undo=f.ok("scene.apply",json!({"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":{"type":"undo"}}));
+    f.ok("history.undo", json!({}));
     assert_eq!(fs::read(f.root.join(&f.path)).unwrap(), before[&f.path]);
-    f.ok("scene.apply",json!({"expectedProjectRevision":undo["projectRevision"],"expectedSourceMapRevision":undo["sourceMapRevision"],"command":{"type":"redo"}}));
+    f.ok("history.redo", json!({}));
     assert_eq!(fs::read(f.root.join(&f.path)).unwrap(), after[&f.path]);
     f.ok("project.close", json!({}));
     let reopened = f.service.open_path(&f.root).unwrap();
@@ -470,13 +470,16 @@ fn continue_scene_exact_group_preview_preserves_bytes_ids_terminal_history_reope
         false
     );
     assert_snapshots(&accepted, &f.snapshots());
-    let undo=f.ok("scene.apply",json!({"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":{"type":"undo"}}));
+    f.ok("history.undo", json!({}));
     assert_eq!(fs::read(f.root.join(&f.path)).unwrap(), before[&f.path]);
     assert_eq!(
         fs::read(f.root.join(".renpy-editor/source-map.json")).unwrap(),
         before[".renpy-editor/source-map.json"]
     );
-    let redo=f.ok("scene.apply",json!({"expectedProjectRevision":undo["projectRevision"],"expectedSourceMapRevision":undo["sourceMapRevision"],"command":{"type":"redo"}}));
+    let redo = {
+        f.ok("history.redo", json!({}));
+        f.ok("scene.list", json!({}))
+    };
     assert_eq!(redo["scenes"][0]["beats"], w["scenes"][0]["beats"]);
     assert_eq!(fs::read(f.root.join(&f.path)).unwrap(), after[&f.path]);
     f.ok("project.close", json!({}));
@@ -636,7 +639,13 @@ fn continue_scene_action_prompt_save_restore_undo_and_stale_send() {
     );
     let restored=f.ok("prompts.apply",json!({"action":prompts::CONTINUE,"expectedRevision":prompt["revision"],"command":{"type":"restore"}}));
     assert_eq!(restored["customized"], false);
-    let undone=f.ok("prompts.apply",json!({"action":prompts::CONTINUE,"expectedRevision":restored["revision"],"command":{"type":"undo"}}));
+    let step = f.ok("history.undo", json!({}));
+    assert_eq!(step["entry"]["name"], "system prompt restore");
+    assert_eq!(
+        step["entry"]["item"],
+        json!({"type":"prompt","action":prompts::CONTINUE})
+    );
+    let undone = f.ok("context.options", json!({}))["continuePrompt"].clone();
     assert_eq!(undone["effectiveText"], "Continue custom instructions");
     f.ok("project.close", json!({}));
     let reopened = f.service.open_path(&f.root).unwrap();
@@ -807,10 +816,13 @@ fn draft_scene_exact_dispatch_inert_source_metadata_one_transaction_undo_redo_re
     // Native review reads the saved source, then refreshes inventory after Undo.
     let document = f.ok("source.open", json!({"path":path}));
     f.ok("source.updateDraft", json!({"path":path,"expectedBaseRevision":document["baseRevision"],"text":format!("{}# retained draft\n", document["text"].as_str().unwrap()),"selectionStart":0,"selectionEnd":0}));
-    assert_eq!(f.call("scene.apply",json!({"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":{"type":"undo"}}))["error"]["code"], "DIRTY_SOURCE");
+    assert_eq!(
+        f.call("history.undo", json!({}))["error"]["code"],
+        "DIRTY_SOURCE"
+    );
     assert_snapshots(&after, &f.snapshots());
     f.ok("source.discard", json!({"path":path}));
-    let undo=f.ok("scene.apply",json!({"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":{"type":"undo"}}));
+    f.ok("history.undo", json!({}));
     assert!(!f.root.join(path).exists());
     for key in [
         ".renpy-editor/project.json",
@@ -821,7 +833,10 @@ fn draft_scene_exact_dispatch_inert_source_metadata_one_transaction_undo_redo_re
     let inventory = f.ok("source.list", json!({}));
     assert_eq!(inventory["dirtyCount"], 0);
     assert_eq!(f.ok("project.status", json!({})), "saved");
-    let redo=f.ok("scene.apply",json!({"expectedProjectRevision":undo["projectRevision"],"expectedSourceMapRevision":undo["sourceMapRevision"],"command":{"type":"redo"}}));
+    let redo = {
+        f.ok("history.redo", json!({}));
+        f.ok("scene.list", json!({}))
+    };
     assert_eq!(redo["scenes"], w["scenes"]);
     assert_eq!(fs::read(f.root.join(path)).unwrap(), after[path]);
     f.ok("project.close", json!({}));
@@ -979,9 +994,11 @@ fn draft_scene_prompt_save_restore_history_and_stale_send() {
     assert_eq!(body["messages"][0]["content"], "Custom Draft instructions");
     let restored=f.ok("prompts.apply",json!({"action":prompts::DRAFT,"expectedRevision":saved["revision"],"command":{"type":"restore"}}));
     assert_eq!(restored["customized"], false);
-    let undone=f.ok("prompts.apply",json!({"action":prompts::DRAFT,"expectedRevision":restored["revision"],"command":{"type":"undo"}}));
+    f.ok("history.undo", json!({}));
+    let undone = f.ok("context.options", json!({}))["draftPrompt"].clone();
     assert_eq!(undone["effectiveText"], "Custom Draft instructions");
-    let redone=f.ok("prompts.apply",json!({"action":prompts::DRAFT,"expectedRevision":undone["revision"],"command":{"type":"redo"}}));
+    f.ok("history.redo", json!({}));
+    let redone = f.ok("context.options", json!({}))["draftPrompt"].clone();
     assert_eq!(redone["customized"], false);
     f.ok("project.close", json!({}));
     f.session = f.service.open_path(&f.root).unwrap().session_id;
@@ -1031,11 +1048,7 @@ impl Fixture {
         self.call("references.apply",json!({"expectedRevision":w["revision"],"command":{"type":"reviewCard","recordId":r["card"]["recordId"],"revisionId":r["card"]["revisionId"],"approve":approve}}))
     }
     fn ref_history(&mut self, kind: &str) {
-        let w = self.ok("references.list", json!({}));
-        self.ok(
-            "references.apply",
-            json!({"expectedRevision":w["revision"],"command":{"type":kind}}),
-        );
+        self.ok(&format!("history.{kind}"), json!({}));
     }
 }
 #[test]
@@ -2165,9 +2178,9 @@ fn selectable_batch_dependencies_fresh_subset_ids_and_one_history_reopen() {
     {
         assert!(ids.contains(id));
     }
-    let undo=f.ok("scene.apply",json!({"expectedProjectRevision":ws["projectRevision"],"expectedSourceMapRevision":ws["sourceMapRevision"],"command":{"type":"undo"}}));
+    f.ok("history.undo", json!({}));
     assert_authoritative(&before, &f.snapshots());
-    f.ok("scene.apply",json!({"expectedProjectRevision":undo["projectRevision"],"expectedSourceMapRevision":undo["sourceMapRevision"],"command":{"type":"redo"}}));
+    f.ok("history.redo", json!({}));
     assert_authoritative(&after, &f.snapshots());
     f.ok("project.close", json!({}));
     f.session = f.service.open_path(&f.root).unwrap().session_id;
@@ -2222,9 +2235,9 @@ fn selectable_existing_character_update_exact_preview_metadata_and_history() {
     );
     assert_eq!(ws["authoring"]["characters"][0]["technicalName"], "bec");
     assert_eq!(ws["authoring"]["characters"][0]["dialogueColor"], "#aabbcc");
-    let undo=f.ok("scene.apply",json!({"expectedProjectRevision":ws["projectRevision"],"expectedSourceMapRevision":ws["sourceMapRevision"],"command":{"type":"undo"}}));
+    f.ok("history.undo", json!({}));
     assert_authoritative(&before, &f.snapshots());
-    f.ok("scene.apply",json!({"expectedProjectRevision":undo["projectRevision"],"expectedSourceMapRevision":undo["sourceMapRevision"],"command":{"type":"redo"}}));
+    f.ok("history.redo", json!({}));
     assert_authoritative(&after, &f.snapshots());
     let c = &ws["authoring"]["characters"][0];
     assert_eq!(c["displayName"], "New [str(7)] café");

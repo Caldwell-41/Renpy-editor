@@ -37,10 +37,10 @@ fn choice_unavailable_policy_uses_native_source_and_shared_history() {
     assert!(String::from_utf8(runtime.clone()).unwrap().contains(
         "textbutton i.caption action i.action sensitive i.kwargs.get(\"_ll_available\", True)"
     ));
-    f.command(json!({"type":"undo"}));
+    f.undo();
     assert_eq!(fs::read(&path).unwrap(), before);
     assert!(!f.root.join("game/loomlight_choice_v1.rpy").exists());
-    f.command(json!({"type":"redo"}));
+    f.redo();
     assert_eq!(fs::read(&path).unwrap(), accepted);
     assert_eq!(
         fs::read(f.root.join("game/loomlight_choice_v1.rpy")).unwrap(),
@@ -211,12 +211,12 @@ fn picked_choice_records_before_transfers_and_roundtrips_history() {
         after["scenes"][0]["beats"][0]["payload"]["options"],
         menu["payload"]["options"]
     );
-    f.command(json!({"type":"undo"}));
+    f.undo();
     assert_eq!(
         fs::read(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap(),
         before
     );
-    f.command(json!({"type":"redo"}));
+    f.redo();
     assert_eq!(
         fs::read(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap(),
         bytes
@@ -489,7 +489,7 @@ fn choice_missing_existing_helper_refuses_changed_source_commands_without_histor
             .find(|s| s["id"] == other["id"])
             .unwrap()["beats"][0];
         assert!(added["payload"].get("pickedPolicy").is_none());
-        f.command(json!({"type":"undo"}));
+        f.undo();
         assert_eq!(f.model()["scenes"], w["scenes"]);
         if picked {
             fs::write(&helper, crate::screens::choice_template::ADAPTER).unwrap();
@@ -506,7 +506,7 @@ fn choice_missing_existing_helper_refuses_changed_source_commands_without_histor
         fs::remove_file(&aside).unwrap();
         // External deletion/recreation remains an ordinary history boundary.
         assert_eq!(
-            f.reject(json!({"type":"undo"}))["error"]["code"],
+            f.refused("history.undo", json!({}))["error"]["code"],
             "HISTORY_BOUNDARY"
         );
         assert_eq!(fs::read(&helper).unwrap(), accepted_helper);
@@ -576,9 +576,9 @@ fn picked_caption_prompt_and_policy_edits_preserve_mixed_newlines_and_header_tri
             fs::read(f.root.join(".renpy-editor/source-map.json")).unwrap(),
             map
         );
-        f.command(json!({"type":"undo"}));
+        f.undo();
         assert_eq!(fs::read(&path).unwrap(), mixed.as_bytes());
-        f.command(json!({"type":"redo"}));
+        f.redo();
         assert_eq!(fs::read(&path).unwrap(), expected.as_bytes());
         f.service.close().unwrap();
         f.service.open_path(&f.root).unwrap();
@@ -628,13 +628,13 @@ fn choice_explicit_first_picked_adoption_upgrades_legacy_adapter_in_shared_histo
         picked["scenes"][0]["beats"][0]["payload"]["options"],
         legacy["scenes"][0]["beats"][0]["payload"]["options"]
     );
-    f.command(json!({"type":"undo"}));
+    f.undo();
     assert_eq!(fs::read(&path).unwrap(), legacy_source);
     assert_eq!(
         fs::read(&helper).unwrap(),
         crate::screens::choice_template::ADAPTER.as_bytes()
     );
-    f.command(json!({"type":"redo"}));
+    f.redo();
     assert_eq!(fs::read(&path).unwrap(), picked_source);
     assert_eq!(
         fs::read(&helper).unwrap(),

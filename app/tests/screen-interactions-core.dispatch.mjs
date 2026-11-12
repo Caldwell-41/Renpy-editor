@@ -24,10 +24,12 @@ async function wait(check,label){const deadline=Date.now()+5000;while(!await che
 const writes=[];
 const control=label=>{const node=workspace.panel.querySelector(`[aria-label="${label}"]`)??workspace.panel.querySelector(`[aria-label="${label.replace(/ value$/,' formula')}"]`);assert(node,label);return node;};
 const change=(label,value)=>{const node=control(label);node.value=value;node.dispatchEvent(new Event(node.tagName==='SELECT'?'change':'input',{bubbles:true}));};
+// Project Undo or Redo as the shell runs it: the real core step, then Screens opens at the entry's item.
+async function projectHistory(direction){const step=await call(`history.${direction}`);const item=step.entry.item;assert.equal(item.type,'screen');await workspace.mount(document.body,{path:item.path,screen:item.screen,...(item.nodeId?{nodeId:item.nodeId}:{}),...(item.parentId?{parentId:item.parentId}:{})});return step;}
 const button=label=>{const node=[...workspace.panel.querySelectorAll('button')].find(n=>n.textContent===label);assert(node,label);node.click();};
 const select=id=>{if(!workspace.panel.querySelector(`[data-node-id="${id}"]`))button('1  Choose');const row=workspace.panel.querySelector(`[data-node-id="${id}"]`);assert(row,id);row.dispatchEvent(new browser.MouseEvent('dblclick',{bubbles:true}));};
 async function apply(){const before=writes.length;button('Apply');await wait(()=>writes.length>before&&!(workspace.panel.querySelector('.screen-text-state')?.textContent??'').includes('Applying changes'),'Apply');}
-async function history(direction,path,expected,expectedText){button(direction);await wait(async()=>await source(path)===expected&&workspace.panel.querySelector('[data-text-field="text"]')?.value===expectedText&&workspace.panel.querySelector('[data-text-field="text"]')?.readOnly===false,`${direction} and refreshed controls`);}
+async function history(direction,path,expected,expectedText){await projectHistory(direction.toLowerCase());await wait(async()=>await source(path)===expected&&workspace.panel.querySelector('[data-text-field="text"]')?.value===expectedText&&workspace.panel.querySelector('[data-text-field="text"]')?.readOnly===false,`${direction} and refreshed controls`);}
 async function mount(owner){
  workspace?.dispose();document.body.replaceChildren();workspace=new ScreensWorkspace({resolution:{width:1280,height:720},current:()=>true,coordinate:task=>task(),source:()=>{},preview:()=>{throw Error('No deliberate execution');},saved:()=>{},request:async(operation,payload)=>{
   if(operation==='screens.canvasRender'){const plan=await call('screens.canvasPlan',payload);result.canvasPlans.push({payload,plan});return {phase:'unavailable',message:'Offline planner proof. No helper started.'};}

@@ -18,7 +18,7 @@ function setup(): { browser: Window; host: HTMLElement; tree: HTMLElement } {
   return { browser, host: document.querySelector("main")!, tree: document.querySelector("aside")! };
 }
 function model(beats: readonly SceneBeat[]): SceneWorkspace {
-  return { projectRevision: "project", sourceMapRevision: "map", entrySceneId: "one", lastOpen: { chapterId: "chapter", sceneId: "one" }, chapters: [{ id: "chapter", displayName: "Chapter", directory: "game" }], canUndo: false, canRedo: false,
+  return { projectRevision: "project", sourceMapRevision: "map", entrySceneId: "one", lastOpen: { chapterId: "chapter", sceneId: "one" }, chapters: [{ id: "chapter", displayName: "Chapter", directory: "game" }],
     scenes: [{ id: "one", chapterId: "chapter", displayName: "Arrival", technicalLabel: "arrival", sourcePath: "game/arrival.rpy", sourceRevision: "saved", sourceConflict: false, partial: false, beats, bodies: sceneBodies(beats) }, { id: "two", chapterId: "chapter", displayName: "Shared conversation", technicalLabel: "shared", sourcePath: "game/shared.rpy", sourceRevision: "other", sourceConflict: false, partial: false, beats: [], bodies: [] }],
     authoring: { characters: [], appearances: [], assets: [], variables: [{ id: "trust", technicalName: "trust", variableType: "int", defaultValue: "0" }] } };
 }

@@ -14,12 +14,14 @@ async function request(operation,payload={},ui=false){if(ui&&operation==='screen
 const call=async(operation,payload={})=>{const r=await request(operation,{...payload,...(session&&!['project.listRecent','project.openRecent'].includes(operation)?{sessionId:session}:{})});if(!r.ok)throw Object.assign(Error(r.error.message),r.error);return r.value;};
 const wait=async check=>{const until=Date.now()+8000;while(!await check()){assert(Date.now()<until,'Screens arithmetic deadline exceeded');await new Promise(r=>setTimeout(r,10));}};
 const settle=async()=>{await new Promise(r=>setTimeout(r,180));await wait(()=>inflight===0);};
+// The header Undo and Redo: icon buttons with no text, enabled once the next entry is known.
+const historyButton=async direction=>{await wait(()=>document.querySelector(`.app-header [data-history="${direction}"]:not([aria-disabled="true"])`));document.querySelector(`.app-header [data-history="${direction}"]`).click();};
 const button=(text,scope=document)=>{const b=[...scope.querySelectorAll('button')].find(b=>(b.textContent===text||b.getAttribute('aria-label')===text||b.ariaLabel===text)&&!b.disabled);assert(b,`Missing enabled ${text}`);b.click();return b;};
 const enter=(node,text,event)=>{assert(node?.isConnected&&!node.disabled,'Connected enabled input');node.focus();node.value=text;node.dispatchEvent(new Event(event??(node.tagName==='SELECT'?'change':'input'),{bubbles:true}));};
 const labelled=(label,scope=document)=>scope.querySelector(`[aria-label="${label}"]`)??[...scope.querySelectorAll("input,select,textarea,button")].find(n=>n.ariaLabel===label)??[...scope.querySelectorAll('label')].find(l=>l.firstChild?.textContent===label)?.querySelector('input,select,textarea');
 async function saveSource(path,text){const b=await call('source.open',{path}),d=await call('source.updateDraft',{path,expectedBaseRevision:b.baseRevision,text,selectionStart:0,selectionEnd:0});await call('source.save',{path,expectedBaseRevision:d.baseRevision,expectedDraftVersion:d.draftVersion});}
 const source=async path=>(await call('source.open',{path})).text;
-async function history(path,before,after){button('Undo');await wait(async()=>await source(path)===before);await settle();button('Redo');await wait(async()=>await source(path)===after);await settle();}
+async function history(path,before,after){await historyButton('undo');await wait(async()=>await source(path)===before);await settle();await historyButton('redo');await wait(async()=>await source(path)===after);await settle();}
 const stage=text=>{result.stages.push(text);console.log(text);};
 try{
  assert.equal((await child.next()).ready,true);document.body.innerHTML='<div id="app"></div>';const {startApplication}=await import('../dist-tests/src/main.js');startApplication((op,payload)=>request(op,payload,true));
@@ -65,7 +67,8 @@ try{
  assert.notEqual(importedLiteral,originalActions);await saveSource(owner.path,importedLiteral);button('Refresh Source',panel());await settle();
  select(ids.protected);assert.equal(labelled('Action 1 formula',panel()).value,'5');assert.equal(await source(owner.path),importedLiteral);
  select(ids.protected);change('Action 1 formula','5');assert.equal((await apply()).ok,true);assert.equal(await source(owner.path),importedLiteral,'same formula preserves imported SetVariable and helper absence');assert.equal(lastWrite.value.changed,false);
- button('Undo',panel());await wait(async()=>await source(owner.path)===originalActions);await settle();button('Redo',panel());await wait(async()=>await source(owner.path)===importedLiteral);await settle();
+ // Undo of the Source save opens Source; return to Screens afterwards.
+ await historyButton('undo');await wait(async()=>await source(owner.path)===originalActions);await settle();await historyButton('redo');await wait(async()=>await source(owner.path)===importedLiteral);await settle();button('Screens');await wait(()=>panel());await settle();
  stage('re-entering the same literal through actual Screens controls preserves source and adds no history');
  await saveSource(owner.path,originalActions);button('Refresh Source',panel());await settle();
  for(const kind of ['textbutton','imagebutton']){
@@ -120,7 +123,7 @@ try{
  enter(defaultField,'1e999');lastWrite=undefined;button('Save Default',form);await settle();assert.equal(lastWrite,undefined);assert.equal(defaultField.value,'1e999');assert.equal(defaultField.getAttribute('aria-invalid'),'true');button('Cancel',form);assert.equal(defaultField.value,'3.75');
  enter(defaultField,'4.5');lastWrite=undefined;button('Save Default',form);await wait(()=>lastWrite);assert.equal(lastWrite.ok,true);await settle();const nextDefault=await source(path);
  const noopForm=document.querySelector('.variable-default-editor');lastWrite=undefined;button('Save Default',noopForm);await wait(()=>lastWrite);assert.equal(lastWrite.ok,true);await settle();
- button('Screens');await settle();button('Undo',panel());await wait(async()=>await source(path)===priorDefault);await settle();button('Undo',panel());await wait(async()=>await source(owner.path)!==screenAfter);await settle();button('Redo',panel());await wait(async()=>await source(owner.path)===screenAfter);await settle();button('Redo',panel());await wait(async()=>await source(path)===nextDefault);await settle();
+ button('Screens');await settle();await historyButton('undo');await wait(async()=>await source(path)===priorDefault);await settle();await historyButton('undo');await wait(async()=>await source(owner.path)!==screenAfter);await settle();await historyButton('redo');await wait(async()=>await source(owner.path)===screenAfter);await settle();await historyButton('redo');await wait(async()=>await source(path)===nextDefault);await settle();assert(document.querySelector('.variable-default-editor')||document.querySelector('[aria-current="page"][aria-label="Variables"]'),'Redo of a default edit opens Variables');button('Screens');await wait(()=>panel());await settle();
  stage('invalid/default Cancel retains exact input; default no-op adds no history; real screen and default edits Undo/Redo in shared order');
  // A differently timed imported action remains Source-only and explains why.
  await saveSource(owner.path,(await source(owner.path)).replace(`textbutton "Protected": # loomlight-element: ${ids.protected}\n        action Null()`, `textbutton "Protected": # loomlight-element: ${ids.protected}\n        action SetVariable("trust", trust + 1)`));

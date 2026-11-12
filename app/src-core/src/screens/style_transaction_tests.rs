@@ -122,12 +122,12 @@ fn style_edit_keeps_owning_screen(scope: &str, kind: &str) {
         assert_eq!(saved, expected);
         saved
     });
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(source(&mut service, &owner), before);
     if let Some(before) = &companion_before {
         assert_eq!(source(&mut service, &companion), *before);
     }
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     assert_eq!(source(&mut service, &owner), saved);
     if let Some(saved) = &companion_saved {
         assert_eq!(source(&mut service, &companion), *saved);
@@ -204,9 +204,9 @@ fn composition_ignores_unrelated_uninspectable_screen_document() {
         .unwrap()
         .iter()
         .all(|n| n["id"].is_null()));
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(source(&mut service, &owner), before);
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     assert_eq!(source(&mut service, &owner), saved);
     assert_eq!(
         fs::read_to_string(root.join("game/ui/other.rpy")).unwrap(),
@@ -285,9 +285,9 @@ fn copy_new_style(kind: &str, parent: &str, prefix: &str) {
         .1;
     assert!(copy.contains("hover_size 48 # target hover"));
     assert!(copy.contains("color \"#abcdef\""));
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(source(&mut service, &owner), before);
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     assert_eq!(source(&mut service, &owner), saved);
     service.close().unwrap();
     service.open_path(&root).unwrap();

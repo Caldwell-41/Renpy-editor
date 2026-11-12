@@ -183,12 +183,12 @@ fn imagebutton_asset_action_roundtrip_is_one_transaction() {
         .as_str()
         .unwrap()
         .contains("idle Transform(\"images/ui button_idle.png\", xysize=(160, 80))"));
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         original
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     service.close().unwrap();
     service.open_path(&root).unwrap();
     let reopened = ipc(
@@ -426,14 +426,14 @@ fn integer_bar_creation_binds_without_changing_default_and_reopens() {
         fs::read(root.join(variable["source"]["path"].as_str().unwrap())).unwrap(),
         defaults
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert!(
         !ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"]
             .as_str()
             .unwrap()
             .contains("VariableValue")
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     service.close().unwrap();
     service.open_path(&root).unwrap();
     let reopened = ipc(
@@ -948,12 +948,12 @@ fn imagebutton_reviewed_replacements_update_both_assets_and_return_current_inspe
             appearances[state]["replacementSha256"]
         );
     }
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         fs::read(root.join(".renpy-editor/authoring.json")).unwrap(),
         before
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     assert_eq!(
         ipc(
             &mut service,
@@ -1034,7 +1034,7 @@ fn reviewed_image_apply_returns_committed_documents_when_later_inventory_fails()
             json!({"path":owner["path"]})
         )
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         before
@@ -1043,7 +1043,7 @@ fn reviewed_image_apply_returns_committed_documents_when_later_inventory_fails()
         ipc(&mut service, "authoring.list", json!({}))["assets"][0]["sha256"],
         asset["expectedAssetSha256"]
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     assert_eq!(
         result["document"],
         ipc(
@@ -1465,7 +1465,7 @@ fn new_imagebutton_validation_keeps_source_asset_metadata_and_history_unchanged(
     assert_eq!(fs::read(&source_path).unwrap(), before);
     assert_eq!(fs::read(&metadata_path).unwrap(), metadata);
     assert_eq!(fs::read(&map_path).unwrap(), map);
-    assert_eq!(ipc(&mut service, "scene.list", json!({}))["canUndo"], false);
+    assert!(ipc(&mut service, "history.state", json!({}))["undo"].is_null());
     let mut apply = request;
     apply["validateOnly"] = json!(false);
     let accepted = ipc(&mut service, "screens.compose", apply);
@@ -1474,16 +1474,16 @@ fn new_imagebutton_validation_keeps_source_asset_metadata_and_history_unchanged(
     let accepted_metadata = fs::read(&metadata_path).unwrap();
     assert_ne!(accepted_source, before);
     assert_ne!(accepted_metadata, metadata);
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(fs::read(&source_path).unwrap(), before);
     assert_eq!(fs::read(&metadata_path).unwrap(), metadata);
-    assert_eq!(ipc(&mut service, "scene.list", json!({}))["canUndo"], false);
-    composition_history(&mut service, "redo");
+    assert!(ipc(&mut service, "history.state", json!({}))["undo"].is_null());
+    project_history(&mut service, "redo");
     assert_eq!(fs::read(&source_path).unwrap(), accepted_source);
     assert_eq!(fs::read(&metadata_path).unwrap(), accepted_metadata);
     service.close().unwrap();
     service.open_path(&root).unwrap();
     assert_eq!(fs::read(&source_path).unwrap(), accepted_source);
-    assert_eq!(ipc(&mut service, "scene.list", json!({}))["canUndo"], false);
+    assert!(ipc(&mut service, "history.state", json!({}))["undo"].is_null());
     service.close().unwrap();
 }

@@ -131,9 +131,13 @@ fn story_save_commits_drafts_across_scenes_as_one_history_action() {
     assert_eq!(accepted.beats[0].id, first.beats[0].id);
     assert_eq!(accepted.beats[2].id, first.beats[1].id);
     assert_eq!(accepted.beats[1].payload, narration("Inserted draft"));
-    assert!(saved.can_undo);
+    assert_eq!(
+        f.history().undo.unwrap().name,
+        "save of 3 beat drafts",
+        "one Story Save is one entry until #113"
+    );
 
-    f.apply(&saved, SceneCommand::Undo).unwrap();
+    f.undo().unwrap();
     assert_eq!(
         project_bytes(&f),
         before,
@@ -151,7 +155,15 @@ fn story_save_refusal_names_the_command_and_writes_nothing() {
         SceneError::InvalidPayload
     );
     assert_eq!(
-        save(&f, &ws, vec![SceneCommand::Undo]).unwrap_err(),
+        save(
+            &f,
+            &ws,
+            vec![SceneCommand::RenameScene {
+                scene_id: first.id.clone(),
+                display_name: "Not a beat".into(),
+            }]
+        )
+        .unwrap_err(),
         SceneError::InvalidPayload
     );
     let mut missing = update(first, 1, "Lost beat");

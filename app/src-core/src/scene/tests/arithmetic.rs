@@ -41,7 +41,7 @@ fn arithmetic_insert_update_history_and_reopen() {
     let f = integer_fixture(b"label scene_one:\n    $ score = 5\n    return\n");
     let model = f.workspace();
     let scene = &model.scenes[0];
-    let added = apply_wire(
+    apply_wire(
         &f,
         &model,
         json!({"type":"insertBodyBeat", "sceneId":scene.id,
@@ -57,12 +57,12 @@ fn arithmetic_insert_update_history_and_reopen() {
         fs::read_to_string(&path).unwrap(),
         "label scene_one:\n    $ score = 5\n    $ score += 2\n    return\n"
     );
-    let undone = f.apply(&added, SceneCommand::Undo).unwrap();
+    f.undo().unwrap();
     assert_eq!(
         fs::read_to_string(&path).unwrap(),
         "label scene_one:\n    $ score = 5\n    return\n"
     );
-    let redone = f.apply(&undone, SceneCommand::Redo).unwrap();
+    let redone = f.redo().unwrap();
     let reopened = AuthoringService::default();
     let project = reopened.register_project(&f.root).unwrap();
     let model = reopened.scene_workspace(&project, &f.project_id).unwrap();
@@ -84,6 +84,7 @@ fn arithmetic_source_styles_preserve_noop_comments_legacy_ids_and_minimal_edits(
         let source = format!("label scene_one:\r\n    {statement}\r\n    python:\r\n        opaque = 42\r\n    return\r\n");
         let f = integer_fixture(source.as_bytes());
         let model = f.workspace();
+        let history = f.history();
         let scene = &model.scenes[0];
         let beat = &scene.beats[0];
         assert_eq!(beat.payload.kind(), "setVariable", "{statement}");
@@ -95,13 +96,13 @@ fn arithmetic_source_styles_preserve_noop_comments_legacy_ids_and_minimal_edits(
         };
         let wire = serde_json::to_value(&beat.payload).unwrap();
         let before_map = fs::read(f.root.join(SOURCE_MAP_PATH)).unwrap();
-        let unchanged = apply_wire(&f, &model, command(wire.clone())).unwrap();
+        apply_wire(&f, &model, command(wire.clone())).unwrap();
         assert_eq!(
             fs::read(f.root.join(&scene.source_path)).unwrap(),
             source.as_bytes()
         );
         assert_eq!(fs::read(f.root.join(SOURCE_MAP_PATH)).unwrap(), before_map);
-        assert_eq!(unchanged.can_undo, model.can_undo);
+        assert_eq!(f.history(), history);
         let mut changed = wire;
         changed["value"]["operand"] = json!("3");
         let after = apply_wire(&f, &model, command(changed)).unwrap();
@@ -110,7 +111,7 @@ fn arithmetic_source_styles_preserve_noop_comments_legacy_ids_and_minimal_edits(
             fs::read_to_string(f.root.join(&scene.source_path)).unwrap(),
             source.replacen(if statement.contains("-2") { "-2" } else { "+2" }, "3", 1)
         );
-        f.apply(&after, SceneCommand::Undo).unwrap();
+        f.undo().unwrap();
         // A map produced by the preceding recognizer recorded this exact range as Custom Code.
         let mut legacy: Value = serde_json::from_slice(&before_map).unwrap();
         legacy["sceneMappings"][0]["beats"][0]["kind"] = json!("customCode");
@@ -175,6 +176,7 @@ fn arithmetic_inspection_has_lossless_results_and_never_uses_defaults() {
 fn arithmetic_refuses_invalid_targets_operands_and_stale_definitions_without_history() {
     let f = integer_fixture(b"label scene_one:\n    return\n");
     let model = f.workspace();
+    let history = f.history();
     let scene = &model.scenes[0];
     let before_source = fs::read(f.root.join(&scene.source_path)).unwrap();
     let before_map = fs::read(f.root.join(SOURCE_MAP_PATH)).unwrap();
@@ -210,6 +212,7 @@ fn arithmetic_refuses_invalid_targets_operands_and_stale_definitions_without_his
         .unwrap_err(),
         SceneError::MissingArithmeticTarget
     );
+    assert_eq!(f.history(), history);
     f.service
         .create_variable(
             &f.project,
@@ -221,6 +224,8 @@ fn arithmetic_refuses_invalid_targets_operands_and_stale_definitions_without_his
             },
         )
         .unwrap();
+    // The variable is the latest entry; the refusals below add none.
+    let history = f.history();
     assert_eq!(
         apply_wire(
             &f,
@@ -251,7 +256,7 @@ fn arithmetic_refuses_invalid_targets_operands_and_stale_definitions_without_his
         before_source
     );
     assert_eq!(fs::read(f.root.join(SOURCE_MAP_PATH)).unwrap(), before_map);
-    assert_eq!(f.workspace().can_undo, model.can_undo);
+    assert_eq!(f.history(), history);
 }
 
 #[test]
@@ -332,6 +337,7 @@ fn formula_negative_floor_remainder_and_i64_boundaries_match_python() {
 fn formula_diagnostics_are_explicit_for_protected_source_and_refused_commands() {
     let f = integer_fixture(b"label scene_one:\n    $ score = 1 +\n    $ score = missing + 1\n    $ score = 1 // 0\n    $ score = 9223372036854775807 * 2\n    $ score = score + 1\n    return\n");
     let model = f.workspace();
+    let history = f.history();
     let wire = serde_json::to_value(&model).unwrap();
     for (index, reason) in [
         "invalidSyntax",
@@ -364,7 +370,7 @@ fn formula_diagnostics_are_explicit_for_protected_source_and_refused_commands() 
         assert_eq!(apply_wire(&f, &model, json!({"type":"insertBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beforeBeatId":null,"beat":{"type":"setVariable","variableId":model.authoring.variables[0].id,"value":{"operation":"assign","operand":operand}}})).unwrap_err(), error);
     }
     assert_eq!(fs::read(f.root.join(&scene.source_path)).unwrap(), source);
-    assert_eq!(f.workspace().can_undo, model.can_undo);
+    assert_eq!(f.history(), history);
 }
 
 #[test]
@@ -426,12 +432,12 @@ fn formulas_preserve_nested_bodies_noops_maps_history_and_reopen() {
                 .kind(),
             "setVariable"
         );
-        let undone = f.apply(&after, SceneCommand::Undo).unwrap();
+        f.undo().unwrap();
         assert_eq!(
             fs::read(f.root.join(&scene.source_path)).unwrap(),
             source.as_bytes()
         );
-        f.apply(&undone, SceneCommand::Redo).unwrap();
+        f.redo().unwrap();
         let service = AuthoringService::default();
         let project = service.register_project(&f.root).unwrap();
         let reopened = service.scene_workspace(&project, &f.project_id).unwrap();
@@ -461,7 +467,7 @@ fn formulas_preserve_nested_bodies_noops_maps_history_and_reopen() {
                 _ => {}
             }
         }
-        f.apply(&reopened, SceneCommand::Undo).unwrap();
+        f.undo().unwrap();
         old_kind(&mut legacy, &beat.id);
         fs::write(
             f.root.join(SOURCE_MAP_PATH),
@@ -481,12 +487,13 @@ fn formula_edits_preserve_explicit_style_and_semantic_noop_bytes() {
     let source = b"label scene_one:\n    $ score = score + +2 # keep\n    return\n";
     let f = integer_fixture(source);
     let model = f.workspace();
+    let history = f.history();
     let scene = &model.scenes[0];
     let beat = &scene.beats[0];
     let edit = |operation: &str, operand: &str| json!({"type":"updateBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":beat.id,"beat":{"type":"setVariable","variableId":model.authoring.variables[0].id,"value":{"operation":operation,"operand":operand}}});
-    let noop = apply_wire(&f, &model, edit("add", "( +2 )")).unwrap();
+    apply_wire(&f, &model, edit("add", "( +2 )")).unwrap();
     assert_eq!(fs::read(f.root.join(&scene.source_path)).unwrap(), source);
-    assert_eq!(noop.can_undo, model.can_undo);
+    assert_eq!(f.history(), history);
     apply_wire(&f, &model, edit("multiply", "score + 3")).unwrap();
     assert_eq!(
         fs::read_to_string(f.root.join(&scene.source_path)).unwrap(),
@@ -609,10 +616,11 @@ fn formula_dependencies_types_unknowns_and_stale_edits_use_declared_variables() 
 fn formula_replaces_only_literal_expression_bytes() {
     let f = integer_fixture(b"label scene_one:\n    $ score  =  +2 # kept\n    return\n");
     let model = f.workspace();
+    let history = f.history();
     let scene = &model.scenes[0];
     let command = |operand: &str| json!({"type":"updateBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":scene.beats[0].id,"beat":{"type":"setVariable","variableId":model.authoring.variables[0].id,"value":{"operation":"assign","operand":operand}}});
-    let noop = apply_wire(&f, &model, command("(2)")).unwrap();
-    assert_eq!(noop.can_undo, model.can_undo);
+    apply_wire(&f, &model, command("(2)")).unwrap();
+    assert_eq!(f.history(), history);
     assert_eq!(
         fs::read_to_string(f.root.join(&scene.source_path)).unwrap(),
         "label scene_one:\n    $ score  =  +2 # kept\n    return\n"
@@ -850,6 +858,7 @@ fn decimal_source_edits_preserve_trivia_ids_history_unknowns_and_reopen() {
     f.service.update_variable(&f.project, &f.project_id, serde_json::from_value(json!({"id":var.id,"expectedSourceRevision":var.source.source_revision,"defaultValue":2.5})).unwrap()).unwrap();
     f.migrate();
     let model = f.workspace();
+    let history = f.history();
     let scene = &model.scenes[0];
     let bytes = fs::read(f.root.join(&scene.source_path)).unwrap();
     let wire = serde_json::to_value(&scene.beats[0]).unwrap();
@@ -859,14 +868,14 @@ fn decimal_source_edits_preserve_trivia_ids_history_unknowns_and_reopen() {
     );
     let beat = &scene.beats[2];
     let command = |value: Value| json!({"type":"updateBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":beat.id,"beat":{"type":"setVariable","variableId":var.id,"value":value}});
-    let same = apply_wire(
+    apply_wire(
         &f,
         &model,
         command(json!({"operation":"subtract","operand":"+1.25"})),
     )
     .unwrap();
     assert_eq!(fs::read(f.root.join(&scene.source_path)).unwrap(), bytes);
-    assert_eq!(same.can_undo, model.can_undo);
+    assert_eq!(f.history(), history);
     let edited = apply_wire(
         &f,
         &model,
@@ -883,9 +892,9 @@ fn decimal_source_edits_preserve_trivia_ids_history_unknowns_and_reopen() {
         serde_json::to_value(&edited.scenes[0].beats[2]).unwrap()["assignment"]["state"],
         json!({"status":"known","value":2.5})
     );
-    let undone = f.apply(&edited, SceneCommand::Undo).unwrap();
+    f.undo().unwrap();
     assert_eq!(fs::read(f.root.join(&scene.source_path)).unwrap(), bytes);
-    f.apply(&undone, SceneCommand::Redo).unwrap();
+    f.redo().unwrap();
     let service = AuthoringService::default();
     let project = service.register_project(&f.root).unwrap();
     let reopened = service.scene_workspace(&project, &f.project_id).unwrap();
@@ -910,14 +919,15 @@ fn decimal_target_import_preserves_an_existing_integer_assignment_exactly() {
         .unwrap();
     f.migrate();
     let model = f.workspace();
+    let history = f.history();
     let scene = &model.scenes[0];
     let beat = &scene.beats[0];
     let wire = serde_json::to_value(beat).unwrap();
     assert_eq!(wire["assignment"]["inferredResultType"], "int");
     assert_eq!(wire["assignment"]["state"]["value"], "9007199254740993");
-    let after = apply_wire(&f, &model, json!({"type":"updateBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":beat.id,"beat":beat.payload})).unwrap();
+    apply_wire(&f, &model, json!({"type":"updateBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":beat.id,"beat":beat.payload})).unwrap();
     assert_eq!(fs::read(f.root.join(&scene.source_path)).unwrap(), source);
-    assert_eq!(after.can_undo, model.can_undo);
+    assert_eq!(f.history(), history);
 }
 
 #[test]
@@ -963,8 +973,9 @@ fn literal_formula_noops_preserve_types_signs_and_exact_integers() {
             .unwrap();
         f.migrate();
         let model = f.workspace();
+        let history = f.history();
         let scene = &model.scenes[0];
-        let after = apply_wire(&f, &model, json!({"type":"updateBodyBeat","sceneId":scene.id,
+        apply_wire(&f, &model, json!({"type":"updateBodyBeat","sceneId":scene.id,
             "expectedSourceRevision":scene.source_revision,"beatId":scene.beats[0].id,
             "expectedBody":{"type":"root"},"beat":{"type":"setVariable","variableId":model.authoring.variables[0].id,
             "value":{"operation":"assign","operand":operand}}})).unwrap();
@@ -973,9 +984,12 @@ fn literal_formula_noops_preserve_types_signs_and_exact_integers() {
             unchanged,
             "{literal} -> {operand}"
         );
-        assert_eq!(after.can_undo, model.can_undo || !unchanged);
+        assert_eq!(
+            f.history().undo.is_some(),
+            history.undo.is_some() || !unchanged
+        );
         if !unchanged {
-            f.apply(&after, SceneCommand::Undo).unwrap();
+            f.undo().unwrap();
             assert_eq!(
                 fs::read_to_string(f.root.join(&scene.source_path)).unwrap(),
                 source
@@ -1016,7 +1030,7 @@ fn decimal_literal_commands_and_formula_results_keep_negative_zero() {
     }
     let accepted = fs::read(f.root.join(&scene.source_path)).unwrap();
     assert!(String::from_utf8_lossy(&accepted).contains("$ fraction = -0.0"));
-    let undone = f.apply(&after, SceneCommand::Undo).unwrap();
-    f.apply(&undone, SceneCommand::Redo).unwrap();
+    f.undo().unwrap();
+    f.redo().unwrap();
     assert_eq!(fs::read(f.root.join(&scene.source_path)).unwrap(), accepted);
 }

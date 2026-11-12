@@ -415,7 +415,7 @@ fn story_call_accepts_known_assignment_then_finish_and_rejects_changed_effect_re
         .find(|beat| beat["payload"]["type"] == "callScreen")
         .unwrap();
     assert_eq!(call["screenEffects"], target["effects"]);
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     ipc(
         &mut service,
         "variable.update",

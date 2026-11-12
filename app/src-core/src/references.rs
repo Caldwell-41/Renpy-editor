@@ -2,6 +2,7 @@
 //! Values retain extensions; renderer commands edit known content fields only.
 use crate::{
     authoring::{AuthoringError, AuthoringService, CreateCharacterRequest},
+    history::{HistoryItem, HistoryLabel, ReferenceItem},
     metadata::ProjectMetadata,
     scene::SceneError,
     transaction::{
@@ -144,8 +145,6 @@ pub enum Command {
         world: String,
         tone: String,
     },
-    Undo,
-    Redo,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -161,8 +160,6 @@ pub struct Workspace {
     pub diagnostic: Option<&'static str>,
     pub entities: Vec<Entity>,
     pub issues: Vec<Issue>,
-    pub can_undo: bool,
-    pub can_redo: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub character_preview: Option<CharacterPreview>,
 }
@@ -719,6 +716,89 @@ fn now() -> String {
     )
 }
 
+/// The history name, record kind and record for a reference command. A new
+/// record has no id until the command adds it.
+fn history_name(command: &Command) -> (&'static str, ReferenceItem, Option<String>) {
+    let pick = |first: bool, yes: &'static str, no: &'static str| if first { yes } else { no };
+    match command {
+        Command::Save {
+            kind: Kind::Card,
+            record_id,
+            ..
+        } => (
+            pick(
+                record_id.is_some(),
+                "character card edit",
+                "new character card",
+            ),
+            ReferenceItem::Card,
+            record_id.clone(),
+        ),
+        Command::Save {
+            kind: Kind::Lore,
+            record_id,
+            ..
+        } => (
+            pick(record_id.is_some(), "lore entry edit", "new lore entry"),
+            ReferenceItem::Lore,
+            record_id.clone(),
+        ),
+        Command::Move {
+            kind: Kind::Card,
+            record_id,
+            ..
+        } => (
+            "character card move",
+            ReferenceItem::Card,
+            Some(record_id.clone()),
+        ),
+        Command::Move {
+            kind: Kind::Lore,
+            record_id,
+            ..
+        } => (
+            "lore entry move",
+            ReferenceItem::Lore,
+            Some(record_id.clone()),
+        ),
+        Command::ReviewLore {
+            record_id, approve, ..
+        } => (
+            pick(*approve, "lore entry approval", "lore entry rejection"),
+            ReferenceItem::Lore,
+            Some(record_id.clone()),
+        ),
+        Command::ReviewCard {
+            record_id, approve, ..
+        } => (
+            pick(
+                *approve,
+                "character card approval",
+                "character card rejection",
+            ),
+            ReferenceItem::Card,
+            Some(record_id.clone()),
+        ),
+        Command::LinkCharacter { record_id, .. } => (
+            "game character link",
+            ReferenceItem::Card,
+            record_id.clone(),
+        ),
+        Command::PreviewGameCharacter { record_id, .. }
+        | Command::CreateGameCharacter { record_id, .. } => {
+            ("new game character", ReferenceItem::Card, record_id.clone())
+        }
+        Command::RestoreCard { record_id, .. } => (
+            "character card version restore",
+            ReferenceItem::Card,
+            Some(record_id.clone()),
+        ),
+        Command::SaveProjectContext { .. } => {
+            ("project context edit", ReferenceItem::Context, None)
+        }
+    }
+}
+
 impl AuthoringService {
     fn reference_snapshot(
         &self,
@@ -739,7 +819,7 @@ impl AuthoringService {
         project: &ProjectId,
         project_id: &str,
     ) -> Result<Workspace, ReferenceError> {
-        let(bytes,revision)=match self.reference_snapshot(project){Ok(snapshot)=>snapshot,Err(_)=>return Ok(Workspace{document:None,revision:String::new(),diagnostic:Some("This reference library could not be read within its bounds. Its file has been retained."),entities:vec![],issues:vec![],can_undo:false,can_redo:false,character_preview:None})};
+        let(bytes,revision)=match self.reference_snapshot(project){Ok(snapshot)=>snapshot,Err(_)=>return Ok(Workspace{document:None,revision:String::new(),diagnostic:Some("This reference library could not be read within its bounds. Its file has been retained."),entities:vec![],issues:vec![],character_preview:None})};
         let parsed = if bytes.is_empty() && revision == Revision::expected_absence() {
             Ok(empty(project_id))
         } else {
@@ -862,16 +942,12 @@ impl AuthoringService {
                 issues.extend(added);
             }
         }
-        let histories = self.scene_history.lock().map_err(|_| ReferenceError::Io)?;
-        let history = histories.get(project);
         Ok(Workspace {
             document,
             revision: token(&revision),
             diagnostic,
             entities,
             issues,
-            can_undo: history.is_some_and(|h| h.can_undo()),
-            can_redo: history.is_some_and(|h| h.can_redo()),
             character_preview: None,
         })
     }
@@ -1136,6 +1212,7 @@ impl AuthoringService {
         } else {
             Kind::Card
         };
+        let (name, item_kind, known_record) = history_name(&request.command);
         match request.command {
             Command::ReviewCard {
                 record_id,
@@ -1444,14 +1521,6 @@ impl AuthoringService {
                 context["currentRevisionId"] = json!(revision_id);
                 context["revisionCounter"] = json!(number);
             }
-            Command::Undo => {
-                self.undo_scene(project).map_err(ReferenceError::History)?;
-                return self.references(project, project_id);
-            }
-            Command::Redo => {
-                self.redo_scene(project).map_err(ReferenceError::History)?;
-                return self.references(project, project_id);
-            }
             Command::Move {
                 kind,
                 record_id,
@@ -1580,6 +1649,24 @@ impl AuthoringService {
             }
         }
         validate(&doc, project_id)?;
+        // A new card or lore entry is the last record of its list.
+        let record_id = known_record.or_else(|| {
+            let collection = match item_kind {
+                ReferenceItem::Card => Kind::Card.collection(),
+                ReferenceItem::Lore => Kind::Lore.collection(),
+                ReferenceItem::Context => return None,
+            };
+            doc[collection].as_array()?.last()?["id"]
+                .as_str()
+                .map(String::from)
+        });
+        let label = HistoryLabel::new(
+            name,
+            HistoryItem::Reference {
+                kind: item_kind,
+                record_id,
+            },
+        );
         let mut proposed = serde_json::to_vec_pretty(&doc).map_err(|_| ReferenceError::Invalid)?;
         proposed.push(b'\n');
         if proposed.len() > MAX_BYTES {
@@ -1606,10 +1693,11 @@ impl AuthoringService {
                     },
                     intent: TransactionIntent::Edit,
                 },
+                label,
             )
             .map_err(ReferenceError::History)?;
         // Commit success remains explicit even if subsequent supporting-data reads fail.
-        self.references(project,project_id).or_else(|_|Ok(Workspace{document:Some(doc),revision:token(&committed[0]),diagnostic:Some("Saved. Supporting links could not be checked; reload the library to check them."),entities:vec![],issues:vec![],can_undo:true,can_redo:false,character_preview:None}))
+        self.references(project,project_id).or_else(|_|Ok(Workspace{document:Some(doc),revision:token(&committed[0]),diagnostic:Some("Saved. Supporting links could not be checked; reload the library to check them."),entities:vec![],issues:vec![],character_preview:None}))
     }
 }
 

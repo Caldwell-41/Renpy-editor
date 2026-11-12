@@ -18,7 +18,7 @@ test("closing the project asks before discarding Story beat drafts", async () =>
   const project = { sessionId: "close-session", projectId: "close-project", title: "Close Project", folderName: "close-project", chapterId: "chapter", chapterName: "Chapter", sceneId: "scene", sceneName: "Scene", sdkVersion: "8.5.3", resolution: { width: 1280, height: 720 } };
   const scene = {
     projectRevision: "1".repeat(64), sourceMapRevision: "2".repeat(64), entrySceneId: "scene",
-    lastOpen: { chapterId: "chapter", sceneId: "scene" }, canUndo: false, canRedo: false,
+    lastOpen: { chapterId: "chapter", sceneId: "scene" },
     chapters: [{ id: "chapter", displayName: "Chapter", directory: "game" }],
     scenes: [{ id: "scene", chapterId: "chapter", displayName: "Scene", technicalLabel: "scene", sourcePath: "game/scene.rpy", sourceRevision: "3".repeat(64), sourceConflict: false, partial: false,
       ...(beats => ({ beats, bodies: sceneBodies(beats) }))([{ id: "line", byteStart: 15, byteEnd: 30, protected: false, payload: { type: "narration" as const, text: "Hello" } }]) }],

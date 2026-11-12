@@ -269,12 +269,12 @@ export const storyCases={
   await c.click('Delete condition',group(c,authored.groupId).querySelector('.story-group-heading'));let form=panel(c,'Delete entire condition');
   c.assert.match(form.textContent,/all 4 contained Beats/);c.assert(form.textContent.includes(`all ${members.length} contained Beats`));await applyOperation(c,form,'Delete entire condition','removeStoryNode');
   c.assert.deepEqual(envelope(c,before,'removeStoryNode').node,{type:'condition',groupId:authored.groupId});c.assert.equal(c.sourceText(await c.snapshot(),s.sourcePath),replaceOnce(c,withOpaque,opaqueBlock,''));c.assert.equal(newHeaders(c).length,0);
-  await c.click('Undo');await c.wait(()=>c.lastMutation()?.request.payload.command.type==='undo'&&c.lastMutation().response.ok);await c.settle();c.assert.equal(c.sourceText(await c.snapshot(),s.sourcePath),withOpaque);
+  await c.history('undo');await c.settle();c.assert.equal(c.sourceText(await c.snapshot(),s.sourcePath),withOpaque);
   await editSource(c,original);
   before=c.workspace();const leaf=scene(c).beats.find(b=>b.id===authored.leafId);c.assert(leaf);await c.click('Delete',row(c,leaf.id));form=panel(c,'Delete Beat');await applyOperation(c,form,'Delete this Beat','removeStoryNode');
   c.assert.deepEqual(envelope(c,before,'removeStoryNode').expectedBody,{type:'branch',...leaf.owner});c.assert(scene(c).beats.some(b=>b.structuralPlaceholder&&b.owner?.branchId===leaf.owner.branchId));
   c.assert.equal(c.sourceText(await c.snapshot(),s.sourcePath),replaceOnce(c,original,'        "Movable subtree leaf"\n','        pass\n'));
-  await c.click('Undo');await c.wait(()=>c.lastMutation()?.request.payload.command.type==='undo'&&c.lastMutation().response.ok);await c.settle();c.assert.equal(c.sourceText(await c.snapshot(),s.sourcePath),original);
+  await c.history('undo');await c.settle();c.assert.equal(c.sourceText(await c.snapshot(),s.sourcePath),original);
   before=c.workspace();const selected=newHeaders(c).find(b=>b.conditionalBranch.otherwise);await c.click('Unwrap…',group(c,authored.groupId).querySelector('.story-group-heading'));form=panel(c,'Unwrap one branch');
   c.enter(form.querySelector('[aria-label="Branch to keep"]'),selected.id,'change');c.assert.match(form.textContent,/Remove the condition and all other branches/);await applyOperation(c,form,'Unwrap selected branch','unwrapCondition');
   const command=envelope(c,before,'unwrapCondition');c.assert.equal(command.branchId,selected.id);c.assert.equal(command.groupId,authored.groupId);
@@ -347,7 +347,7 @@ export const storyCases={
   await c.wait(()=>c.lastMutation()?.response.ok&&!row(c,choice.id).querySelector('.expanded-beat'));await c.settle();envelope(c,beforePending,'updateBodyBeat');
   c.assert.equal(c.requests().slice(at).filter(r=>r.request.operation==='scene.apply').length,1);
   c.assert.equal(c.sourceText(await c.snapshot(),s.sourcePath),replaceOnce(c,c.sourceText(accepted,s.sourcePath),'"Ready route" if (trust >= 6):','"Pending tree guard intent" if (trust >= 6):'));
-  await c.click('Undo');await c.wait(()=>c.lastMutation()?.request.payload.command.type==='undo'&&c.lastMutation().response.ok);await c.settle();c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(accepted));
+  await c.history('undo');await c.settle();c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(accepted));
   const editor=await openSourceEditor(c,s.sourcePath);
   const retained=editor.value+'# retained unaccepted Source draft\n';c.enter(editor,retained);
   await c.wait(async()=> (await source(c)()).text===retained);const draft=await source(c)();c.assert(draft.draftVersion>0);c.assert.equal(draft.baseRevision,s.sourceRevision);
@@ -482,9 +482,9 @@ export const storyCases={
   c.assert.deepEqual(others(after),others(removed));
   for(const id of [a.id,b.id])c.assert(!c.document.querySelector(`[data-beat-id="${id}"][data-beat-draft="true"]`));
   // As the last case, the harness then reopens the project and checks these accepted bytes.
-  await c.click('Undo');await c.wait(()=>c.lastMutation()?.request.payload.command.type==='undo'&&c.lastMutation().response.ok);await c.settle();
+  await c.history('undo');await c.settle();
   c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(removed)),'One Undo reverts the whole Story Save');
-  await c.click('Redo');await c.wait(()=>c.lastMutation()?.request.payload.command.type==='redo'&&c.lastMutation().response.ok);await c.settle();
+  await c.history('redo');await c.settle();
   c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(after)));
  },
 };

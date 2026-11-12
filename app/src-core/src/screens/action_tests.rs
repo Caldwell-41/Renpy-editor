@@ -130,12 +130,12 @@ fn ordered_assignments_preserve_source_and_roundtrip_through_history_and_reopen(
         compose_command(&mut service, &owner, command.clone())["changed"],
         false
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         original
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     service.close().unwrap();
     service.open_path(&root).unwrap();
     let reopened = ipc(
@@ -195,12 +195,12 @@ fn existing_variable_text_preserves_neighbors_and_reconciles_history_and_reopen(
         compose_command(&mut service, &owner, command)["changed"],
         false
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         original
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     service.close().unwrap();
     service.open_path(&root).unwrap();
     assert_eq!(
@@ -325,12 +325,12 @@ fn mixed_variable_templates_preserve_source_samples_dependencies_history_and_reo
             expected
         );
     }
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         original
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     service.close().unwrap();
     service.open_path(&root).unwrap();
     let reopened = ipc(
@@ -390,12 +390,12 @@ fn mixed_variable_templates_preserve_source_samples_dependencies_history_and_reo
         compose_command(&mut service, &owner, formatted_command)["changed"],
         false
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         expected
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     let before = ipc(
         &mut service,
         "screens.resolveTarget",
@@ -892,12 +892,12 @@ fn combined_apply_preserves_trivia_and_commits_text_appearance_layout_actions_in
             saved
         );
     }
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         original
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         saved
@@ -924,12 +924,12 @@ fn combined_apply_preserves_trivia_and_commits_text_appearance_layout_actions_in
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         null_source
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         saved
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         null_source
@@ -998,12 +998,12 @@ fn arithmetic_actions_use_shared_admission_and_preserve_history_and_reopen() {
         compose_command(&mut service, &owner, command.clone())["changed"],
         false
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         original
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     service.close().unwrap();
     service.open_path(&root).unwrap();
     let reopened = ipc(
@@ -1141,7 +1141,7 @@ fn arithmetic_draft_uses_the_composition_admission_without_committing() {
     let mut apply = request;
     apply["validateOnly"] = json!(false);
     ipc(&mut service, "screens.compose", apply);
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         fs::read(root.join(owner["path"].as_str().unwrap())).unwrap(),
         before

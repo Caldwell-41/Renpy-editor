@@ -60,7 +60,7 @@ try {
   await ui.getByText('Size saved. Undo reverses both dimensions together.',{exact:true}).waitFor();
   await page.waitForFunction(()=>document.querySelector('.screen-edit-actions button')?.getAttribute('aria-disabled')==='false');
   await page.waitForFunction(()=>document.querySelector('.screen-game')?.dataset.stale==='false' && document.querySelector('.screens-editor [aria-label="Width"]')?.value==='648');
-  await ui.getByRole('button',{name:'Undo',exact:true}).click();
+  await page.locator('.app-header [data-history="undo"]:not([aria-disabled="true"])').click();
   await page.waitForFunction(()=>document.querySelector('.screen-game')?.dataset.stale==='false' && document.querySelector('.screens-editor [aria-label="Width"]')?.value==='640');
   cases.push('keyboard resize reaches the transactional core and Undo restores its rendered source');
   const rectangle=await handle.boundingBox();

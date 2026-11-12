@@ -178,8 +178,6 @@ export interface SceneWorkspace {
     readonly assets: readonly Asset[];
     readonly variables: readonly Variable[];
   };
-  readonly canUndo: boolean;
-  readonly canRedo: boolean;
 }
 
 /** Read the core's typed expression without evaluating project state. */
@@ -848,12 +846,6 @@ export function renderStoryView(
     return draft.sceneId === scene.id && !!anchor && ancestry(scene, anchor).has(id);
   });
   const discardNote = (copy: HTMLElement, scene: SceneDocument, id: string, text = "Its unsaved beat drafts are discarded."): void => { if (draftsWithin(scene, id)) copy.textContent += ` ${text}`; };
-  const historyGuard = (): boolean => {
-    if (!draftGuard()) return false;
-    if (!pendingDrafts().length) return true;
-    actions.status("Commit or cancel beat drafts before Undo or Redo. Drafts retained.", "error");
-    return false;
-  };
 
   const draw = (): void => {
     cancelBeatDrag?.();
@@ -1306,12 +1298,10 @@ export function renderStoryView(
     const history = document.createElement("div"); history.className = "scene-history";
     const mapped = scene.beats.find((beat) => beat.id === selectedBeatId) ?? scene.beats[0];
     const viewSource = button("View in Source"); viewSource.disabled = actions.viewSource === undefined; viewSource.addEventListener("click", () => actions.viewSource?.(scene.sourcePath, mapped?.byteStart, mapped?.byteEnd, scene.sourceRevision));
-    const undo = button("Undo"); undo.disabled = !model.canUndo; undo.addEventListener("click", () => { if (historyGuard()) void mutate({ type: "undo" }); });
-    const redo = button("Redo"); redo.disabled = !model.canRedo; redo.addEventListener("click", () => { if (historyGuard()) void mutate({ type: "redo" }); });
     const focus = button(writingFocus ? "Exit Writing focus" : "Writing focus");focus.ariaPressed=String(writingFocus);focus.addEventListener("click",()=>{writingFocus=!writingFocus;host.dataset.writingFocus=String(writingFocus);host.closest<HTMLElement>(".project-shell")?.setAttribute("data-writing-focus",String(writingFocus));focus.textContent=writingFocus?"Exit Writing focus":"Writing focus";focus.ariaPressed=String(writingFocus);});
     if (actions.caller && actions.viewScene) { const caller = button("Back to caller"); caller.addEventListener("click", () => { if (draftGuard()) actions.viewScene?.(actions.caller!); }); history.append(caller); }
     if (focusedBranch) { const all = button("Show whole Scene"); all.addEventListener("click", () => { if (draftGuard()) { focusedBranch = undefined; draw(); } }); history.append(all); }
-    history.append(viewSource, focus, undo, redo); header.append(titleBlock, history); host.append(header);
+    history.append(viewSource, focus); header.append(titleBlock, history); host.append(header);
     if (scene.sourceConflict) {
       const conflict = document.createElement("section"); conflict.className = "state-banner error-state"; conflict.role = "alert";
       const heading = document.createElement("h2"); heading.textContent = "Source projection unavailable";

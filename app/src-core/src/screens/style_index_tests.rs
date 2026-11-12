@@ -43,7 +43,7 @@ fn style_index_budget_preserves_small_screen_public_edits() {
             &owner,
             json!({"type":"formatText","nodeId":id,"values":{"size":24}}),
         );
-        composition_history(&mut service, "undo");
+        project_history(&mut service, "undo");
         let inspect = |service: &mut LifecycleService| {
             ipc(service, "screens.inspect", json!({"path":owner["path"]}))
         };
@@ -52,7 +52,7 @@ fn style_index_budget_preserves_small_screen_public_edits() {
             .unwrap()
             .iter()
             .any(|n| n["id"] == id && n["textProperties"]["values"].get("size").is_none()));
-        composition_history(&mut service, "redo");
+        project_history(&mut service, "redo");
         service.close().unwrap();
         service.open_path(&root).unwrap();
         assert!(inspect(&mut service)["screens"][0]["nodes"]
@@ -236,12 +236,12 @@ fn style_index_refuses_unreviewed_inclusion_graph_without_blocking_ordinary_edit
             &first,
             json!({"type":"text","nodeId":first_id,"text":"Local"}),
         );
-        composition_history(&mut service, "undo");
+        project_history(&mut service, "undo");
         assert_eq!(
             fs::read(root.join(first["path"].as_str().unwrap())).unwrap(),
             before
         );
-        composition_history(&mut service, "redo");
+        project_history(&mut service, "redo");
         assert_eq!(
             fs::read_to_string(root.join("game/parent.rpy")).unwrap(),
             parent

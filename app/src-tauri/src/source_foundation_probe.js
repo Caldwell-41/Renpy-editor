@@ -36,8 +36,8 @@
     check(ids(model) === ids(changed), 'All existing Beat IDs preserved');
     details.sourceRevision = accepted.baseRevision;
     details.stage = 'undo-redo';
-    await click('Undo'); await wait(async () => (await read('source.open', { sessionId: project.sessionId, path: scene.sourcePath })).text === original.text);
-    await click('Redo'); await wait(async () => (await read('source.open', { sessionId: project.sessionId, path: scene.sourcePath })).text === accepted.text);
+    await window.__loomlightProbeHistory('undo'); await wait(async () => (await read('source.open', { sessionId: project.sessionId, path: scene.sourcePath })).text === original.text);
+    await window.__loomlightProbeHistory('redo'); await wait(async () => (await read('source.open', { sessionId: project.sessionId, path: scene.sourcePath })).text === accepted.text);
     check(true, 'Native Story Undo/Redo restores exact source');
     const current = await read('scene.list', { sessionId: project.sessionId });
     let rejected = false;
@@ -45,7 +45,8 @@
     catch (error) { rejected = error.code === 'SCENE_INVARIANT'; details.ownerRejection = error.code; }
     check(rejected, 'Wrong child owner rejected by real core dispatch');
     details.stage = 'retained-draft';
-    card().querySelector('.beat-select').click(); await wait(() => card().querySelector('textarea'));
+    // Redo reveals and selects the edited child, so select it without toggling.
+    window.__loomlightProbeSelectBeat(children[0].id); await wait(() => card().querySelector('textarea'));
     const retainedEditor = card().querySelector('textarea'); retainedEditor.value = 'Retained Story draft'; retainedEditor.dispatchEvent(new Event('input', { bubbles: true }));
     await call('source.updateDraft', { sessionId: project.sessionId, path: scene.sourcePath, expectedBaseRevision: accepted.baseRevision, text: accepted.text + '# dirty source draft\n', selectionStart: 0, selectionEnd: 0 });
     await click('Commit Beat'); await wait(() => !retainedEditor.disabled && document.querySelector('#app-status')?.textContent !== 'Saving…');

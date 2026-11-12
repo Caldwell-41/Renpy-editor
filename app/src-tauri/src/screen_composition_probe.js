@@ -35,7 +35,7 @@
     return added.id;
   };
   const history = async (direction, expected, id) => {
-    await click(direction); await until(async () => {
+    await window.__loomlightProbeHistory(direction.toLowerCase()); await until(async () => {
       if (await source() !== expected || selected() !== id) return false;
       const current = nodes(await inspect()), rows = [...document.querySelectorAll('.screen-tree [data-node-id]')];
       return rows.length === current.length && current.every((node, index) => rows[index]?.dataset.nodeId === node.id && (!node.literal || rows[index].getAttribute('aria-label').includes(node.literal)));
@@ -55,7 +55,7 @@
     const title = await add(box, "text", "Travel notes"), body = await add(box, "text", "Your next stop"), close = await add(box, "textbutton", "Close");
     const nested = await source();
     await history("Undo", nested.slice(0, nested.lastIndexOf('                textbutton ')), box);
-    await history("Redo", nested, box);
+    await history("Redo", nested, close);
     await checkpoint("composition-passed");
 
     const beforeValidation = await source();
@@ -109,7 +109,8 @@
     const removed = await source(), buttonLine = reordered.split('\n').find(line => line.includes('textbutton "Close"')) + '\n';
     assert(removed === reordered.replace(buttonLine, ""), "Removal deletes the exact element and no neighboring bytes");
     assert(selected() === title && document.activeElement === row(title), "Last-child removal selects and focuses previous sibling");
-    await history("Undo", reordered, close); await history("Redo", removed, title); await history("Undo", reordered, close);
+    // Redo of a removal leaves the element gone, so it reveals the parent.
+    await history("Undo", reordered, close); await history("Redo", removed, box); await history("Undo", reordered, close);
     await checkpoint("confirmed-removal-passed");
 
     await click("View in Source"); await until(() => document.querySelector(".screen-source-dialog[open]")); await click("Edit in Source"); await until(() => document.querySelector(".source-editor"));
@@ -129,7 +130,7 @@
     await click("Remove element"); await until(() => dialog.open); await click("Remove group and 4 children"); await until(() => !dialog.open);
     assert(selected() === opaque.id && document.activeElement === row(opaque.id), "Group removal selects protected next sibling without altering it");
     const groupRemoved = await source(); assert(groupRemoved.includes('        use source_only_footer()\n'), "Protected bytes survive neighboring group removal");
-    await history("Undo", protectedSource, frame); await history("Redo", groupRemoved, opaque.id); await history("Undo", protectedSource, frame);
+    await history("Undo", protectedSource, frame); await history("Redo", groupRemoved, fixed); await history("Undo", protectedSource, frame);
     acceptedSource = await source(); await select(body);
     await checkpoint("protected-source-passed");
 

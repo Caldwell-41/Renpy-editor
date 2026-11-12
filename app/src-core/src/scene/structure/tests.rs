@@ -148,11 +148,11 @@ fn phase3a_structure_condition_branch_edits_empty_pass_history_reopen() {
     assert_eq!(headers(&a, &id)[1]["id"], branches[2]["id"]);
     let final_bytes = bytes(&f);
     for _ in 0..5 {
-        command(&mut f, json!({"type":"undo"}));
+        f.undo();
     }
     assert_eq!(bytes(&f), original);
     for _ in 0..5 {
-        command(&mut f, json!({"type":"redo"}));
+        f.redo();
     }
     assert_eq!(bytes(&f), final_bytes);
     f.service.close().unwrap();
@@ -289,7 +289,7 @@ fn phase3a_structure_leaf_moves_whole_subtrees_stable_ids_and_empty_bodies() {
     );
     let a = model(&mut f);
     assert!(headers(&a, &nid).is_empty());
-    command(&mut f, json!({"type":"undo"}));
+    f.undo();
     assert_eq!(headers(&model(&mut f), &nid)[0]["id"], nested["id"]);
     f.service.close().unwrap();
 }
@@ -313,7 +313,7 @@ fn phase3a_structure_selected_unwrap_preserves_only_selected_body_and_trivia() {
     assert!(text(&a, "ELSE")["owner"].is_null());
     assert!(headers(&a, &gid).is_empty());
     assert_eq!(bytes(&f),[b"\xef\xbb\xbf".as_slice(),format!("label {}:\r\n    # selected café 雪\r\n    \"ELSE\"\r\n    # parent retained\r\n    return\r\n",a["technicalLabel"].as_str().unwrap()).as_bytes()].concat());
-    command(&mut f, json!({"type":"undo"}));
+    f.undo();
     assert_eq!(
         bytes(&f),
         [b"\xef\xbb\xbf".as_slice(), source.as_bytes()].concat()
@@ -409,7 +409,7 @@ fn phase3a_structure_nonlast_selected_trivia_and_unqualified_promotion() {
     assert_eq!(text(&after, "IF")["id"], leaf["id"]);
     assert!(text(&after, "IF")["owner"].is_null());
     assert_eq!(bytes(&f),[b"\xef\xbb\xbf".as_slice(),format!("label {}:\r\n    \"IF\"\r\n    # selected trailing café 雪\r\n        \r\n    # parent retained\r\n    return\r\n",a["technicalLabel"].as_str().unwrap()).as_bytes()].concat());
-    command(&mut f, json!({"type":"undo"}));
+    f.undo();
     assert_eq!(
         bytes(&f),
         [b"\xef\xbb\xbf".as_slice(), source.as_bytes()].concat()
@@ -492,9 +492,9 @@ fn choice_option_call_resumes_in_its_body_with_stable_history() {
         json!({"type":"updateBodyBeat","beatId":call["id"],"expectedBody":body,"beat":call["payload"]}),
     );
     assert_eq!(bytes(&f), accepted);
-    command(&mut f, json!({"type":"undo"}));
+    f.undo();
     assert_eq!(bytes(&f), before);
-    command(&mut f, json!({"type":"redo"}));
+    f.redo();
     assert_eq!(bytes(&f), accepted);
     f.service.close().unwrap();
     f.service.open_path(&f.root).unwrap();
@@ -662,11 +662,11 @@ fn choice_subtree_move_remove_preserve_ids_trivia_and_refuse_descendants() {
     assert!(String::from_utf8(bytes(&f))
         .unwrap()
         .contains("        \"Outer\":\n            pass\n    \"Unrelated\""));
-    command(&mut f, json!({"type":"undo"}));
+    f.undo();
     assert_eq!(bytes(&f), accepted);
-    command(&mut f, json!({"type":"undo"}));
+    f.undo();
     assert_eq!(bytes(&f), before);
-    command(&mut f, json!({"type":"redo"}));
+    f.redo();
     assert_eq!(model(&mut f)["beats"], moved["beats"]);
     f.service.close().unwrap();
     f.service.open_path(&f.root).unwrap();
@@ -849,12 +849,12 @@ fn choice_repeat_preserves_body_identity_history_and_reopen() {
         .expect("Repeat route to owning menu");
     assert_eq!(repeat["destination"]["kind"], "body");
     assert_eq!(repeat["destination"]["beatId"], choice["id"]);
-    f.command(json!({"type":"undo"}));
+    f.undo();
     assert_eq!(
         fs::read_to_string(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap(),
         original
     );
-    f.command(json!({"type":"redo"}));
+    f.redo();
     assert_eq!(
         fs::read_to_string(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap(),
         source

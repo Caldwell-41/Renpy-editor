@@ -31,7 +31,7 @@ function click(label: string): void {
 function sceneModel(): SceneWorkspace {
   return {
     projectRevision: "1".repeat(64), sourceMapRevision: "2".repeat(64), entrySceneId: "scene-one",
-    lastOpen: { chapterId: "chapter-one", sceneId: "scene-one" }, canUndo: false, canRedo: false,
+    lastOpen: { chapterId: "chapter-one", sceneId: "scene-one" },
     chapters: [
       { id: "chapter-one", displayName: "Opening", directory: "game/chapters/chapter_01" },
       { id: "chapter-two", displayName: "Branches", directory: "game/chapters/chapter_02" },
@@ -173,7 +173,7 @@ test("Scene authoring exposes hierarchy, every Beat, natural dialogue continuati
       assert.equal(expected.projectRevision, model.projectRevision); calls.push(command);
       if (command.type === "continueDialogue") {
         const first = model.scenes[0]!;
-        model = { ...model, projectRevision: "5".repeat(64), sourceMapRevision: "6".repeat(64), canUndo: true, scenes: [{ ...first, sourceRevision: "7".repeat(64), beats: [
+        model = { ...model, projectRevision: "5".repeat(64), sourceMapRevision: "6".repeat(64), scenes: [{ ...first, sourceRevision: "7".repeat(64), beats: [
           { ...first.beats[0]!, payload: { type: "dialogue", characterId: "alice", text: String(command.text) } },
           { id: "dialogue-next", byteStart: 35, byteEnd: 48, protected: false, payload: { type: "dialogue", characterId: "alice", text: "" } },
           ...first.beats.slice(1),
@@ -586,19 +586,32 @@ test("pointer Beat reorder cancels outside, on Escape and across protected bound
 
 test("shipped source-foundation native driver completes against strict renderer fixture", async () => {
   const browser = installDom();
-  let model = foundationModel(), saved = model, draft: string | undefined;
+  document.body.innerHTML = '<div id="app"></div>';
+  Object.assign(globalThis, { HTMLTextAreaElement: browser.HTMLTextAreaElement });
+  let model = foundationModel(), saved = model, draft: string | undefined, committed = false, undone = false;
   const original = readFileSync(new URL("../../../tests/fixtures/source-foundation/scene.rpy", import.meta.url), "utf8").replace(/^\uFEFF/, "");
-  let text = original, accepted = text, dispose: (()=>void) | undefined;
+  let text = original, accepted = text;
   let report!: (value: { passed: boolean; error?: string; checks: string[] })=>void;
   const completed = new Promise<{ passed: boolean; error?: string; checks: string[] }>(resolve=>{report=resolve;});
+  const project = { sessionId: "native-fixture-session", projectId: "foundation", title: "Source foundation fixture", folderName: "foundation", chapterId: "chapter", chapterName: "Chapter", sceneId: model.scenes[0]!.id, sceneName: "Scene", sdkVersion: "8.5.3", resolution: { width: 1280, height: 720 } };
+  // One committed child edit is the only project history entry.
+  const entry = { name: "dialogue edit in Scene", item: { type: "story", sceneId: model.scenes[0]!.id, beatId: "child" } };
+  const history = () => !committed ? { undo: null, redo: null } : { undo: undone ? null : entry, redo: undone ? entry : null };
   const dispatch = async (operation: string, payload: Record<string, any> = {}): Promise<any> => {
     switch(operation) {
-      case "project.current": return {sessionId:"native-fixture-session"};
+      case "project.listRecent": return [{ id: "foundation", projectId: project.projectId, title: project.title, displayPath: "Synthetic fixture", lastOpenedUnixMs: 0, status: "available" }];
+      case "project.openRecent": case "project.current": return project;
+      case "project.status": return "saved";
+      case "project.close": return null;
+      case "source.list": return { files: [], dirtyCount: 0, draftBytes: 0 };
       case "scene.list": return model;
       case "source.open": return {text:draft ?? text,hasBom:true,baseRevision:model.scenes[0]!.sourceRevision,dirty:draft!==undefined};
       case "source.updateDraft": draft=payload.text; return {};
       case "source.discard": draft=undefined; return {};
       case "probe.runtimeUiReport": report(payload as {passed:boolean;checks:string[]}); return {};
+      case "history.state": return history();
+      case "history.undo": if (undone || !committed) throw Object.assign(Error("boundary"),{code:"HISTORY_BOUNDARY"}); text=original;model=foundationModel();undone=true; return { entry, history: history() };
+      case "history.redo": if (!undone) throw Object.assign(Error("boundary"),{code:"HISTORY_BOUNDARY"}); text=accepted;model=saved;undone=false; return { entry, history: history() };
       case "scene.apply": {
         const command = payload.command as SceneCommand;
         if (command.type === "updateBodyBeat" || command.type === "updateChildDialogue") {
@@ -609,41 +622,25 @@ test("shipped source-foundation native driver completes against strict renderer 
           if(draft!==undefined)throw Object.assign(Error("dirty source"),{code:"DIRTY_SOURCE"});
           const changedText = command.type === "updateBodyBeat" ? (command.beat as {text:string}).text : command.text as string;
           text = original.replace("True café 雪",changedText); accepted=text;
-          model={...model,canUndo:true,canRedo:false,sourceMapRevision:"5".repeat(64),scenes:[{...model.scenes[0]!,sourceRevision:"6".repeat(64),beats:model.scenes[0]!.beats.map(b=>b.id===child.id?{...b,payload:{type:"dialogue",characterId:"alice",text:changedText}}:b)}]};
-          saved=model;
-        } else if(command.type==="undo") { text=original;model={...foundationModel(),canRedo:true}; }
-        else if(command.type==="redo") { text=accepted;model=saved; }
-        else throw Error(`Unexpected command ${command.type}`);
+          model={...model,sourceMapRevision:"5".repeat(64),scenes:[{...model.scenes[0]!,sourceRevision:"6".repeat(64),beats:model.scenes[0]!.beats.map(b=>b.id===child.id?{...b,payload:{type:"dialogue",characterId:"alice",text:changedText}}:b)}]};
+          saved=model;committed=true;undone=false;
+        } else throw Error(`Unexpected command ${command.type}`);
         return model;
       }
       default:throw Error(`Unexpected operation ${operation}`);
     }
   };
-  const welcome=():void=>{
-    dispose?.();document.querySelector("#native-close")?.remove();document.querySelector("#host")!.replaceChildren();document.querySelector("#tree")!.replaceChildren();
-    const recent=document.createElement("button");recent.textContent="Source foundation fixture";document.querySelector("#host")!.append(recent);
-    recent.addEventListener("click",()=>{
-      dispose=renderStoryView(document.querySelector("#host")!,document.querySelector("#tree")!,model,{
-        status:message=>{document.querySelector("#app-status")!.textContent=message;},resolution:{width:1280,height:720},present:async()=>{throw Error("unexpected media");},
-        apply:(command,expected)=>dispatch("scene.apply",{...expected,command}),
-      }).dispose;
-      const close=document.createElement("button");close.id="native-close";close.textContent="Close Project";close.addEventListener("click",welcome);document.body.append(close);
-    });
+  const respond = async (operation: string, payload: Record<string, any> = {}, requestId = "fixture") => {
+    try { return { protocolVersion: 1, requestId, ok: true as const, value: await dispatch(operation, payload) }; }
+    catch (error) { return { protocolVersion: 1, requestId, ok: false as const, error: { code: (error as {code?: string}).code ?? "UNEXPECTED", message: String(error) } }; }
   };
-  document.querySelector("#status")!.id="app-status";
-  Object.assign(browser, {
-    __TAURI_INTERNALS__: {
-      invoke: async (_name: string, args: any) => {
-        try { return { ok: true, value: await dispatch(args.request.operation, args.request.payload) }; }
-        catch (error) { return { ok: false, error: { code: (error as {code?: string}).code ?? "UNEXPECTED" } }; }
-      },
-    },
-  });
-  welcome();
+  Object.assign(browser, { __TAURI_INTERNALS__: { invoke: async (_name: string, args: any) => respond(args.request.operation, args.request.payload, args.request.requestId) } });
+  const { startApplication } = await import("../src/main.js");
+  startApplication(((operation: string, payload: Record<string, any> = {}) => respond(operation, payload)) as Parameters<typeof startApplication>[0]);
   browser.eval(readFileSync(new URL("../../src-tauri/src/native_editor_probe.js",import.meta.url),"utf8"));
   browser.eval(readFileSync(new URL("../../src-tauri/src/source_foundation_probe.js",import.meta.url),"utf8"));
   const result=await completed;
   assert.equal(result.passed,true,JSON.stringify(result));assert.ok(result.checks.length>=10);
-  dispose?.();browser.happyDOM.abort();
+  browser.happyDOM.abort();
 });
 

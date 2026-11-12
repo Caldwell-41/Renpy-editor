@@ -299,10 +299,11 @@ fn run_integrated_gate(temporary: &tempfile::TempDir) {
             .source_path,
     );
     assert_eq!(fs::read(&new_source).unwrap(), original_bytes);
-    apply(&service, Command::Undo);
+    service.history_undo().unwrap();
     assert_eq!(fs::read(&old_compiled).unwrap(), compiled_bytes);
     assert!(!new_source.exists());
-    let moved = apply(&service, Command::Redo);
+    service.history_redo().unwrap();
+    let moved = service.scene_workspace().unwrap();
     let moved_scene = moved.scenes.iter().find(|s| s.id == disposable.id).unwrap();
     let deleted = apply(
         &service,
@@ -335,9 +336,9 @@ fn run_integrated_gate(temporary: &tempfile::TempDir) {
             crate::scene::SceneError::ReferenceBlocked
         ))
     ));
-    apply(&service, Command::Undo);
+    service.history_undo().unwrap();
     assert_eq!(fs::read(&new_source).unwrap(), original_bytes);
-    apply(&service, Command::Redo);
+    service.history_redo().unwrap();
     service.close().unwrap();
     service.open_path(&root).unwrap();
     assert_eq!(service.scene_workspace().unwrap().scenes.len(), 4);

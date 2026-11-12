@@ -3,7 +3,6 @@ use crate::{
     authoring::AuthoringService,
     lifecycle::LifecycleService,
     metadata::{OwnedScreen, OwnedScreenKind, ScreenTargetBinding},
-    scene::{SceneCommand, SceneCommandRequest},
     screens::{references::ScreenRevisions, CreateRequest, InspectRequest},
     source::{SourceDocument, SourceDraftRequest, SourceOpenRequest},
     transaction::ProjectId,
@@ -97,23 +96,12 @@ impl Fixture {
             .revisions
     }
 
-    fn history(&self, command: SceneCommand) {
-        let workspace = self
-            .service
-            .scene_workspace(&self.project, &self.project_id)
-            .unwrap();
-        self.service
-            .scene_apply(
-                &self.project,
-                &self.project_id,
-                SceneCommandRequest {
-                    expected_project_revision: workspace.project_revision,
-                    expected_source_map_revision: workspace.source_map_revision,
-                    expected_authoring_revision: None,
-                    command,
-                },
-            )
-            .unwrap();
+    fn undo(&self) {
+        self.service.history_undo(&self.project).unwrap();
+    }
+
+    fn redo(&self) {
+        self.service.history_redo(&self.project).unwrap();
     }
 
     fn extract_request(&self, name: &str) -> ExtractRequest {
@@ -264,16 +252,15 @@ fn placement_adds_a_distinct_bound_use_with_one_history_entry_and_reopen() {
         .dependencies
         .iter()
         .any(|d| d.id == component.id));
-    fixture.history(SceneCommand::Undo);
+    fixture.undo();
     assert_eq!(fixture.read(&second.path).text, Some(before));
-    assert!(
-        !fixture
-            .service
-            .scene_workspace(&fixture.project, &fixture.project_id)
-            .unwrap()
-            .can_undo
-    );
-    fixture.history(SceneCommand::Redo);
+    assert!(fixture
+        .service
+        .history_state(&fixture.project)
+        .unwrap()
+        .undo
+        .is_none());
+    fixture.redo();
     assert_eq!(fixture.read(&second.path).text, Some(accepted));
     fixture.service.unregister_project(&fixture.project);
     fixture.service = AuthoringService::default();
@@ -388,19 +375,18 @@ fn independent_copy_retargets_only_one_use_and_allocates_fresh_child_identities(
         .text
         .unwrap()
         .contains("\"Independent\""));
-    fixture.history(SceneCommand::Undo);
+    fixture.undo();
     assert_eq!(fixture.read(&copy.path).text, copy_initial);
-    fixture.history(SceneCommand::Undo);
+    fixture.undo();
     assert_eq!(fixture.read(&second.path).text, Some(second_before));
-    assert!(
-        !fixture
-            .service
-            .scene_workspace(&fixture.project, &fixture.project_id)
-            .unwrap()
-            .can_undo
-    );
-    fixture.history(SceneCommand::Redo);
-    fixture.history(SceneCommand::Redo);
+    assert!(fixture
+        .service
+        .history_state(&fixture.project)
+        .unwrap()
+        .undo
+        .is_none());
+    fixture.redo();
+    fixture.redo();
     let accepted_effects = fixture
         .service
         .screens_resolve_target(
@@ -468,13 +454,12 @@ fn extraction_refuses_a_missing_group_body_without_creating_source_or_history() 
             .len(),
         1
     );
-    assert!(
-        !fixture
-            .service
-            .scene_workspace(&fixture.project, &fixture.project_id)
-            .unwrap()
-            .can_undo
-    );
+    assert!(fixture
+        .service
+        .history_state(&fixture.project)
+        .unwrap()
+        .undo
+        .is_none());
 }
 
 #[test]
@@ -549,13 +534,12 @@ fn extraction_refusals_keep_source_metadata_history_and_source_drafts() {
         .unwrap();
     assert_eq!(after.source_map_revision, before.source_map_revision);
     assert_eq!(after.inventory_revision, before.inventory_revision);
-    assert!(
-        !fixture
-            .service
-            .scene_workspace(&fixture.project, &fixture.project_id)
-            .unwrap()
-            .can_undo
-    );
+    assert!(fixture
+        .service
+        .history_state(&fixture.project)
+        .unwrap()
+        .undo
+        .is_none());
 }
 
 #[test]
@@ -908,13 +892,12 @@ fn stale_place_and_copy_keep_the_source_draft_and_competing_external_revision() 
         .unwrap();
     assert_eq!(after.source_map_revision, before.source_map_revision);
     assert_eq!(after.owned.len(), before.owned.len());
-    assert!(
-        !fixture
-            .service
-            .scene_workspace(&fixture.project, &fixture.project_id)
-            .unwrap()
-            .can_undo
-    );
+    assert!(fixture
+        .service
+        .history_state(&fixture.project)
+        .unwrap()
+        .undo
+        .is_none());
 }
 
 #[test]
@@ -963,13 +946,12 @@ fn shared_component_text_noop_has_no_history_and_changed_apply_updates_both_uses
         .unwrap();
     assert_eq!(after_noop.inventory_revision, before.inventory_revision);
     assert_eq!(after_noop.source_map_revision, before.source_map_revision);
-    assert!(
-        !fixture
-            .service
-            .scene_workspace(&fixture.project, &fixture.project_id)
-            .unwrap()
-            .can_undo
-    );
+    assert!(fixture
+        .service
+        .history_state(&fixture.project)
+        .unwrap()
+        .undo
+        .is_none());
     let changed = fixture
         .service
         .screens_compose(&fixture.project, &fixture.project_id, compose("Updated"))
@@ -1013,16 +995,15 @@ fn shared_component_text_noop_has_no_history_and_changed_apply_updates_both_uses
             .iter()
             .any(|d| d.id == component.id && d.revision == changed.document.revision));
     }
-    fixture.history(SceneCommand::Undo);
+    fixture.undo();
     assert_eq!(fixture.read(&component.path).text, component_before);
-    assert!(
-        !fixture
-            .service
-            .scene_workspace(&fixture.project, &fixture.project_id)
-            .unwrap()
-            .can_undo
-    );
-    fixture.history(SceneCommand::Redo);
+    assert!(fixture
+        .service
+        .history_state(&fixture.project)
+        .unwrap()
+        .undo
+        .is_none());
+    fixture.redo();
     assert!(fixture
         .read(&component.path)
         .text
@@ -1126,13 +1107,12 @@ fn component_review_lists_both_affected_screens_and_exact_use_source_locations()
         .unwrap();
     assert_eq!(after.source_map_revision, before.source_map_revision);
     assert_eq!(after.inventory_revision, before.inventory_revision);
-    assert!(
-        !fixture
-            .service
-            .scene_workspace(&fixture.project, &fixture.project_id)
-            .unwrap()
-            .can_undo
-    );
+    assert!(fixture
+        .service
+        .history_state(&fixture.project)
+        .unwrap()
+        .undo
+        .is_none());
 }
 
 #[test]
@@ -1287,7 +1267,7 @@ fn extract_replaces_only_the_group_and_creates_one_owned_component_history_entry
         target.effects.unknown,
         "opaque neighbor must remain unknown"
     );
-    fixture.history(SceneCommand::Undo);
+    fixture.undo();
     assert_eq!(
         fixture.source().text.as_deref(),
         Some(source.trim_start_matches('\u{feff}'))
@@ -1301,14 +1281,13 @@ fn extract_replaces_only_the_group_and_creates_one_owned_component_history_entry
             .len(),
         1
     );
-    assert!(
-        !fixture
-            .service
-            .scene_workspace(&fixture.project, &fixture.project_id)
-            .unwrap()
-            .can_undo
-    );
-    fixture.history(SceneCommand::Redo);
+    assert!(fixture
+        .service
+        .history_state(&fixture.project)
+        .unwrap()
+        .undo
+        .is_none());
+    fixture.redo();
     assert_eq!(
         fixture.source().text.as_deref(),
         Some(accepted.trim_start_matches('\u{feff}'))
@@ -1372,11 +1351,10 @@ fn prepare_extract_preserves_exact_group_and_opaque_neighbors_without_writing() 
         catalog_after.inventory_revision,
         catalog_before.inventory_revision
     );
-    let workspace = fixture
-        .service
-        .scene_workspace(&fixture.project, &fixture.project_id)
-        .unwrap();
-    assert!(!workspace.can_undo && !workspace.can_redo);
+    assert_eq!(
+        fixture.service.history_state(&fixture.project).unwrap(),
+        Default::default()
+    );
 }
 
 #[test]
@@ -1395,13 +1373,12 @@ fn prepare_extract_refuses_unterminated_group_without_changing_source_or_history
         crate::scene::SceneError::OpaqueBoundary
     );
     assert_eq!(fixture.source().text, Some(source));
-    assert!(
-        !fixture
-            .service
-            .scene_workspace(&fixture.project, &fixture.project_id)
-            .unwrap()
-            .can_undo
-    );
+    assert!(fixture
+        .service
+        .history_state(&fixture.project)
+        .unwrap()
+        .undo
+        .is_none());
 }
 
 #[test]
@@ -1478,13 +1455,12 @@ fn prepare_extract_refuses_dirty_source_and_retains_the_draft() {
     assert_eq!(retained.text, Some(draft));
     assert_eq!(retained.base_revision, before.base_revision);
     assert_eq!(retained.selection_start, 12);
-    assert!(
-        !fixture
-            .service
-            .scene_workspace(&fixture.project, &fixture.project_id)
-            .unwrap()
-            .can_undo
-    );
+    assert!(fixture
+        .service
+        .history_state(&fixture.project)
+        .unwrap()
+        .undo
+        .is_none());
 }
 
 #[test]
@@ -1506,11 +1482,10 @@ fn prepare_extract_refuses_a_stale_selection_after_an_external_edit() {
         crate::scene::SceneError::SourceConflict
     );
     assert_eq!(fixture.source().text, Some(external));
-    assert!(
-        !fixture
-            .service
-            .scene_workspace(&fixture.project, &fixture.project_id)
-            .unwrap()
-            .can_undo
-    );
+    assert!(fixture
+        .service
+        .history_state(&fixture.project)
+        .unwrap()
+        .undo
+        .is_none());
 }

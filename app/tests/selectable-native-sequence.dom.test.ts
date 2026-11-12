@@ -26,7 +26,7 @@ test('complete selectable native probe drives production shell/controller throug
     settings: { label: 'Synthetic', endpoint: 'http://127.0.0.1:9999/v1', model: 'synthetic-model', contextBudget: 32768, contextCeiling: 32768, maximumResponse: 1024 } }] };
   const initial: SceneWorkspace = {
     projectRevision: digest('project'), sourceMapRevision: digest('map'), entrySceneId: 'scene',
-    lastOpen: { chapterId: 'chapter', sceneId: 'scene' }, canUndo: false, canRedo: false,
+    lastOpen: { chapterId: 'chapter', sceneId: 'scene' },
     chapters: [{ id: 'chapter', displayName: 'Chapter', directory: 'game/chapters' }],
     scenes: [{ id: 'scene', chapterId: 'chapter', displayName: 'Scene', technicalLabel: 'scene', sourcePath: 'game/scene.rpy', sourceRevision: digest('source'), sourceConflict: false, partial: false,
       beats: [{ id: 'narration', byteStart: 0, byteEnd: 20, protected: false, payload: { type: 'narration', text: 'Public narration' } }, { id: 'return', byteStart: 20, byteEnd: 30, protected: false, payload: { type: 'return' } }], bodies: [{body: {type: 'root'}, kind: 'scene', nodes: [{beatId: 'narration'}, {beatId: 'return'}], ending: {type: 'ends', beatId: 'return'}, places: [{position: {type: 'before', anchor: {type: 'beat', beatId: 'narration'}}, fitsEnding: false}, {position: {type: 'before', anchor: {type: 'beat', beatId: 'return'}}, fitsEnding: false}], defaultPlace: {type: 'before', anchor: {type: 'beat', beatId: 'return'}}}] }],
@@ -39,7 +39,10 @@ test('complete selectable native probe drives production shell/controller throug
   let task = '', sendCount = 0, saveCount = 0, busy = false, external = false, restoredSource = '', phase = 1, delayedStatus: ((value: unknown) => void) | undefined, delayedRender = false, delayedSceneRead = false;
   let report: Record<string, any> | undefined;
   const sentDigests: string[] = [], operations: string[] = [], histories: string[] = [], stages: string[] = [];
-  const model = () => ({ ...structuredClone(state.workspace), canUndo: !!undo, canRedo: !!redo });
+  const model = () => structuredClone(state.workspace);
+  // The accepted Assist edit is the only project history entry in this fixture.
+  const entry = { name: 'Assist scene edit', item: { type: 'story', sceneId: 'scene', beatId: null } };
+  const history = () => ({ undo: undo ? entry : null, redo: redo ? entry : null });
   const snapshot = () => ({ files: Object.fromEntries(Object.entries(state.files).sort(([a], [b]) => a.localeCompare(b)).map(([path, text]) => [path, digest(text)])) });
   const button = (name: string) => [...document.querySelectorAll<HTMLButtonElement>('button')].find(b => b.textContent === name)!;
   const candidate = () => {
@@ -82,10 +85,18 @@ test('complete selectable native probe drives production shell/controller throug
           const scene = state.workspace.scenes[0]!;
           scene.beats = [...scene.beats.slice(0, -1), { id: 'second', byteStart: 20, byteEnd: 30, protected: false, payload: payload.command.beat }, scene.beats.at(-1)!];
           state.files['game/scene.rpy'] += '# second saved narration\n';
-        } else if (payload.command.type === 'undo') { histories.push('undo'); redo = structuredClone(state); state = undo!; undo = undefined; }
-        else if (payload.command.type === 'redo') { histories.push('redo'); undo = structuredClone(state); state = redo!; redo = undefined; }
-        else throw Error('Unexpected Scene command');
+        } else throw Error('Unexpected Scene command');
         return model();
+      } finally { busy = false; }
+    }
+    if (operation === 'history.state') return history();
+    if (operation === 'history.undo' || operation === 'history.redo') {
+      busy = true;
+      try {
+        await delay();
+        if (operation === 'history.undo') { histories.push('undo'); redo = structuredClone(state); state = undo!; undo = undefined; }
+        else { histories.push('redo'); undo = structuredClone(state); state = redo!; redo = undefined; }
+        return { entry, history: history() };
       } finally { busy = false; }
     }
     if (operation === 'context.options') {

@@ -56,12 +56,12 @@ fn text_format_is_one_minimal_transaction_with_typed_font_noop_history_and_reope
     assert_eq!(result["selectedId"], added["selectedId"]);
     let unchanged = compose_command(&mut service, &owner, command);
     assert_eq!(unchanged["changed"], false);
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         source
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     service.close().unwrap();
     service.open_path(&root).unwrap();
     assert_eq!(
@@ -168,7 +168,7 @@ fn resetting_last_text_property_preserves_comment_and_leaves_a_valid_block() {
             ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
             expected
         );
-        composition_history(&mut service, "undo");
+        project_history(&mut service, "undo");
         assert_eq!(
             ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
             before
@@ -552,7 +552,7 @@ fn invalid_font_import_keeps_metadata_source_and_previous_history() {
             before
         );
         assert!(!root.join(format!("game/fonts/bad.{extension}")).exists());
-        composition_history(&mut service, "undo");
+        project_history(&mut service, "undo");
         assert!(!root.join(owner["path"].as_str().unwrap()).exists());
     }
 }
@@ -638,13 +638,13 @@ fn project_fonts_import_as_typed_assets_with_shared_history_and_reopen() {
             ipc(&mut service, "authoring.list", json!({}))["assets"][0]["status"],
             "available"
         );
-        composition_history(&mut service, "undo");
+        project_history(&mut service, "undo");
         assert!(!imported.exists());
         assert_eq!(
             ipc(&mut service, "authoring.list", json!({}))["assets"],
             json!([])
         );
-        composition_history(&mut service, "redo");
+        project_history(&mut service, "redo");
         assert_eq!(fs::read(&imported).unwrap(), bytes);
         service.close().unwrap();
         service.open_path(&root).unwrap();

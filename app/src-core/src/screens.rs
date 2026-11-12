@@ -2,6 +2,7 @@
 //! Explicit new-screen ownership lives in the source map; existing screens stay in place.
 use crate::{
     authoring::AuthoringService,
+    history::{HistoryItem, HistoryLabel},
     scene::SceneError,
     transaction::{
         FileMutation, MutationKind, ProjectId, RelativePath, TransactionIntent, TransactionProposal,
@@ -869,13 +870,17 @@ impl AuthoringService {
             source_path.clone(),
             revision.sha256.clone(),
         )?;
-        let position = document
+        let node = document
             .screens
             .iter()
             .find(|s| s.name == request.screen_name)
             .and_then(|s| s.nodes.iter().find(|n| n.span.start == request.node_start))
-            .and_then(|n| n.position.as_ref())
             .ok_or(SceneError::OpaqueBoundary)?;
+        let label = HistoryLabel::new(
+            format!("{} move", element_name(&node.kind)),
+            HistoryItem::screen(&source_path, &request.screen_name, node.id.clone()),
+        );
+        let position = node.position.as_ref().ok_or(SceneError::OpaqueBoundary)?;
         let mut proposed = bytes.clone();
         let mut patches = position
             .spans
@@ -905,6 +910,7 @@ impl AuthoringService {
                 }],
                 intent: TransactionIntent::Edit,
             },
+            label,
         )?;
         self.screens_inspect_owned(project, InspectRequest { path: source_path })
     }
@@ -969,6 +975,10 @@ impl AuthoringService {
         if patches.is_empty() {
             return Ok(document);
         }
+        let label = HistoryLabel::new(
+            format!("{} resize", element_name(&node.kind)),
+            HistoryItem::screen(&source_path, &screen_name, node.id.clone()),
+        );
         patches.sort_by_key(|(span, _)| std::cmp::Reverse(span.start));
         let mut proposed = bytes.clone();
         for (span, value) in patches {
@@ -987,8 +997,20 @@ impl AuthoringService {
                 }],
                 intent: TransactionIntent::Edit,
             },
+            label,
         )?;
         self.screens_inspect_owned(project, InspectRequest { path: source_path })
+    }
+}
+
+/// A screen element's kind as the author reads it in a history name, for example
+/// "button" in "button resize".
+pub(crate) fn element_name(kind: &str) -> &str {
+    match kind {
+        "screen" | "frame" | "window" | "grid" | "viewport" | "text" | "image" | "bar" => kind,
+        "fixed" | "vbox" | "hbox" => "group",
+        "textbutton" | "imagebutton" => "button",
+        _ => "element",
     }
 }
 

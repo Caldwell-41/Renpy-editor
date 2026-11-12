@@ -73,9 +73,9 @@ window.__loomlightFoundationExtended = async ({ details, check, wait, click, cal
   await wait(() => !adding.isConnected); await refresh();
   const appended = await source();
   check(appended.text === eofText + '\r\n    "EOF continuation"\r\n' && owners(model) === eofOwners, 'EOF append adds separator and retains child IDs and owners');
-  await click('Undo'); await wait(async () => (await source()).text === eofText); await refresh();
+  await window.__loomlightProbeHistory('undo'); await wait(async () => (await source()).text === eofText); await refresh();
   check(owners(model) === eofOwners, 'EOF Undo restores unterminated bytes and owners');
-  await click('Redo'); await wait(async () => (await source()).text === appended.text); await reopen();
+  await window.__loomlightProbeHistory('redo'); await wait(async () => (await source()).text === appended.text); await reopen();
   check(owners(model) === eofOwners && (await source()).text === appended.text, 'EOF Redo and shell reopen retain bytes, IDs and owners');
   details.stage = 'external-refusal';
   const editing = scene.beats.find(b => b.owner);

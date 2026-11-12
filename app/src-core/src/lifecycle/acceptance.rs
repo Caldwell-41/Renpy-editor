@@ -462,18 +462,18 @@ fn author_game(mut service: LifecycleService) -> LifecycleService {
     let changed = fs::read(parent_path(&service).join(&entry_source.source_path)).unwrap();
     assert_ne!(bytes, changed);
     for _ in 0..3 {
-        apply(&service, Command::Undo);
+        service.history_undo().unwrap();
         assert_eq!(
             fs::read(parent_path(&service).join(&entry_source.source_path)).unwrap(),
             bytes
         );
-        apply(&service, Command::Redo);
+        service.history_redo().unwrap();
         assert_eq!(
             fs::read(parent_path(&service).join(&entry_source.source_path)).unwrap(),
             changed
         );
     }
-    apply(&service, Command::Undo);
+    service.history_undo().unwrap();
     // Tree ordering is editorial: the route edges and standard entry remain unchanged.
     apply(
         &service,
@@ -526,7 +526,7 @@ fn author_game(mut service: LifecycleService) -> LifecycleService {
         serde_json::to_value(before.scenes).unwrap(),
         serde_json::to_value(&after.scenes).unwrap()
     );
-    assert!(!after.can_undo && !after.can_redo);
+    assert_eq!(service.history_state().unwrap(), Default::default());
     assert_eq!(
         fs::read(root.join(entry_source.source_path)).unwrap(),
         bytes

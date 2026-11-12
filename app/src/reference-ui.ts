@@ -25,13 +25,12 @@ export interface ReferenceDocument { schemaVersion: 1; projectId: string; cards:
 export interface ReferenceEntity { kind: EntityLink["type"]; id: string; title: string; revision: string | null }
 export interface ReferenceIssue { recordId: string; revisionId: string; field: string; index: number; state: "missing" | "stale" }
 export interface CharacterPreview { digest:string; patches:{path:string;before:string;after:string}[] }
-export interface ReferenceWorkspace { document: ReferenceDocument | null; revision: string; diagnostic: string | null; entities: ReferenceEntity[]; issues: ReferenceIssue[]; canUndo: boolean; canRedo: boolean; characterPreview?:CharacterPreview }
+export interface ReferenceWorkspace { document: ReferenceDocument | null; revision: string; diagnostic: string | null; entities: ReferenceEntity[]; issues: ReferenceIssue[]; characterPreview?:CharacterPreview }
 interface GameCharacterFields { recordId:string|null; technicalName:string; displayName:string; dialogueColor:string }
 export type ReferenceCommand =
   | {type:"reviewCard"|"reviewLore";recordId:string;revisionId:string;approve:boolean}
   | {type:"save";kind:ReferenceKind;recordId:string|null;fields:ReferenceContent}
   | {type:"move";kind:ReferenceKind;recordId:string;direction:"up"|"down"}
-  | {type:"undo"|"redo"}
   | ({type:"previewGameCharacter"}&GameCharacterFields)
   | ({type:"createGameCharacter";expectedPreviewDigest:string}&GameCharacterFields)
   | {type:"linkCharacter";recordId:string|null;characterId:string;expectedSourceRevision:string}
@@ -42,6 +41,8 @@ export interface ReferenceActions {
   load(): Promise<ReferenceWorkspace>; current(): boolean; guard(): Promise<boolean>;
   status(text: string, kind?: "normal" | "error"): void; creationHost: HTMLElement;
   workspaceKey?:string;
+  /** The Characters entry to open, such as `card:<record id>`; a missing one opens the first. */
+  selection?:string;
   renderGameSetup?(host:HTMLElement,characterId:string):Promise<void|(()=>void)>;
 }
 export interface ReferenceController { save(): Promise<void>; reload(): Promise<void>; isBusy(): boolean; dispose(): void }
@@ -80,7 +81,7 @@ function renderProjectLore(host:HTMLElement,initial:ReferenceWorkspace,actions:R
   let draft=saved(),baseline=JSON.stringify(draft),expectedRevision=model.revision;
   const root=el("section","","reference-library project-lorebook");root.dataset.kind="lore";
   const toolbar=el("div","","reference-history"),notice=el("p","","reference-notice");notice.role="status";
-  const undo=button("Undo",()=>{void mutate({type:"undo"});}),redo=button("Redo",()=>{void mutate({type:"redo"});}),reload=button("Reload Lorebook",()=>{void refresh();});toolbar.append(undo,redo,reload);
+  const reload=button("Reload Lorebook",()=>{void refresh();});toolbar.append(reload);
   const editor=el("div","","reference-editor lorebook-editor"),body=el("div","","reference-writing-body");
   const footer=el("div","","reference-form-footer"),state=el("span"),discard=button("Discard changes",()=>{void discardDraft();}),saveButton=button("Save changes",()=>{void save();},"button primary");footer.append(state,discard,saveButton);
   const header=el("div","","reference-identity-header"),versions=button("Version history",()=>openHistory()),proposedLore=button("Review proposed lore",()=>openProposedLore());header.append(el("h2","Project Lorebook","reference-identity"),proposedLore,versions);root.append(toolbar,notice,editor);editor.append(header,el("p","Shared context for AI writing in this project. You can omit these notes for each request. Review these notes in the AI request before sending. Saving sends nothing.","muted"),body,footer);host.append(root);
@@ -92,7 +93,7 @@ function renderProjectLore(host:HTMLElement,initial:ReferenceWorkspace,actions:R
   const active=():boolean=>!disposed&&actions.current();const dirty=():boolean=>JSON.stringify(draft)!==baseline;
   function feedback(text:string,error=false):void{notice.textContent=text;notice.dataset.kind=error?"error":"normal";actions.status(text,error?"error":"normal");}
   function validate(key:keyof ProjectContextContent):boolean{const message=new TextEncoder().encode(draft[key]).length>10000?"Use at most 10,000 UTF-8 bytes for this field.":"";errors.get(key)!.textContent=message;controls.get(key)!.setAttribute("aria-invalid",String(!!message));return !message;}
-  function synchronize():void{const blocked=busy||!!history;root.dataset.busy=String(busy);if(dirty())root.dataset.unsubmitted="true";else delete root.dataset.unsubmitted;state.textContent=busy?"Saving…":dirty()?"Unsaved changes":"Saved";saveButton.disabled=blocked||!dirty()||!model.document;discard.disabled=blocked||!dirty();undo.disabled=blocked||dirty()||!model.canUndo;redo.disabled=blocked||dirty()||!model.canRedo;reload.disabled=blocked;versions.disabled=busy||!model.document?.projectContext;proposedLore.hidden=!pendingLore().length;proposedLore.disabled=busy;controls.forEach(n=>n.disabled=blocked||!model.document);if(history)history.querySelectorAll<HTMLButtonElement>("button").forEach(n=>n.disabled=busy||n.dataset.refused==="true");}
+  function synchronize():void{const blocked=busy||!!history;root.dataset.busy=String(busy);if(dirty())root.dataset.unsubmitted="true";else delete root.dataset.unsubmitted;state.textContent=busy?"Saving…":dirty()?"Unsaved changes":"Saved";saveButton.disabled=blocked||!dirty()||!model.document;discard.disabled=blocked||!dirty();reload.disabled=blocked;versions.disabled=busy||!model.document?.projectContext;proposedLore.hidden=!pendingLore().length;proposedLore.disabled=busy;controls.forEach(n=>n.disabled=blocked||!model.document);if(history)history.querySelectorAll<HTMLButtonElement>("button").forEach(n=>n.disabled=busy||n.dataset.refused==="true");}
   function draw():void{for(const [key,input]of controls){input.value=draft[key];errors.get(key)!.textContent="";input.removeAttribute("aria-invalid");grow(input);}synchronize();}
   async function discardDraft():Promise<void>{if(busy||history||!active()||!await actions.guard()||!active())return;draft=saved();baseline=JSON.stringify(draft);expectedRevision=model.revision;draw();feedback("Returned to saved text.");}
   async function save():Promise<void>{if(busy||history||!active()||!dirty())return;let first:HTMLTextAreaElement|undefined;for(const key of controls.keys())if(!validate(key))first??=controls.get(key);if(first){feedback("Correct the marked fields before saving. Your draft is retained.",true);first.focus();return;}await mutate({type:"saveProjectContext",...draft});}
@@ -157,12 +158,12 @@ const topics:[Topic,string][]=[["overview","Overview"],["personality","Personali
 function renderCharacters(host:HTMLElement,initial:ReferenceWorkspace,actions:ReferenceActions):ReferenceController {
   let model=initial,busy=false,disposed=false,sequence=0,viewGeneration=0,gameCleanup:(()=>void)|undefined,gameHost:HTMLElement|undefined,history:HTMLElement|undefined;
   const workspaceKey=actions.workspaceKey??`${initial.document?.projectId??"project"}:characters`,remembered=layoutFor(workspaceKey);
-  let selected=remembered.referenceSelection??"",topic:Topic=topics.some(([key])=>key===remembered.referenceTopic)?remembered.referenceTopic as Topic:"overview",view:"writing"|"game"="writing";
+  let selected=actions.selection??remembered.referenceSelection??"",topic:Topic=topics.some(([key])=>key===remembered.referenceTopic)?remembered.referenceTopic as Topic:"overview",view:"writing"|"game"="writing";
   const drafts=new Map<string,DraftEntry>();
   const root=el("section","","reference-library character-workspace");root.dataset.kind="card";
   const create=button("New character",()=>{void select("new");},"button primary");create.prepend(icon("plus"));actions.creationHost.append(create);
   const toolbar=el("div","","reference-history"),notice=el("p","","reference-notice");notice.role="status";
-  const undo=button("Undo",()=>{void mutate({type:"undo"});}),redo=button("Redo",()=>{void mutate({type:"redo"});}),reload=button("Reload library",()=>{void refresh();});undo.ariaLabel="Undo last project change";redo.ariaLabel="Redo last project change";toolbar.append(undo,redo,reload);
+  const reload=button("Reload library",()=>{void refresh();});toolbar.append(reload);
   const layout=el("div","","reference-layout"),list=el("aside","","reference-list");list.id="character-list";list.ariaLabel="Characters";
   const collapse=button("",()=>setCollapsed(true,true),"icon-button project-tree-toggle");collapse.append(icon("panel"));collapse.title=collapse.ariaLabel="Collapse character list";collapse.setAttribute("aria-controls",list.id);
   const restore=button("",()=>setCollapsed(false,true),"icon-button tree-restore");restore.append(icon("panelOpen"));restore.title=restore.ariaLabel="Show character list";restore.setAttribute("aria-controls",list.id);
@@ -189,7 +190,7 @@ function renderCharacters(host:HTMLElement,initial:ReferenceWorkspace,actions:Re
     root.dataset.busy=String(busy);if(anyDirty())root.dataset.unsubmitted="true";else delete root.dataset.unsubmitted;
     if(editor){if(dirty())editor.dataset.unsubmitted="true";else delete editor.dataset.unsubmitted;}
     state.textContent=busy?"Saving…":currentDirty()?"Unsaved changes":proposed()?"Proposed · needs approval":selected==="new"?"New character":"Saved";
-    saveButton.disabled=busy||!dirty()||proposed()||!model.document;discardButton.disabled=busy||!currentDirty();undo.disabled=busy||anyDirty()||!model.canUndo;redo.disabled=busy||anyDirty()||!model.canRedo;reload.disabled=busy;create.disabled=busy||!model.document;
+    saveButton.disabled=busy||!dirty()||proposed()||!model.document;discardButton.disabled=busy||!currentDirty();reload.disabled=busy;create.disabled=busy||!model.document;
     for(const n of root.querySelectorAll<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>(".reference-writing input,.reference-writing textarea,.reference-writing select"))n.disabled=busy||proposed()||!model.document;
     for(const n of root.querySelectorAll<HTMLButtonElement>(".reference-writing button,.reference-game-linking button,.reference-entry,.reference-topics button,.reference-view-tabs button,.reference-identity-header button"))n.disabled=busy||n.dataset.refused==="true"||(proposed()&&n.dataset.mutation==="true");
     root.querySelectorAll<HTMLInputElement|HTMLSelectElement>(".reference-game-linking input,.reference-game-linking select").forEach(n=>n.disabled=busy||proposed());
@@ -288,7 +289,7 @@ function renderCharacters(host:HTMLElement,initial:ReferenceWorkspace,actions:Re
   async function discard():Promise<void>{if(busy||!active()||!await actions.guard()||!active())return;drafts.delete(selected);drawList();drawEditor();feedback("Returned to saved text.");focusEditor();}
   async function save():Promise<void>{if(busy||!active()||!dirty()||proposed()||history)return;if(gameHost?.querySelector('[data-unsubmitted="true"]')){feedback("Finish or discard game setup changes before saving writing. Both drafts are retained.",true);return;}let invalid:HTMLInputElement|HTMLTextAreaElement|undefined;for(const [n,validate]of validators)if(!validate())invalid??=n;if(invalid){const section=invalid.closest<HTMLElement>(".reference-topic-panel");if(section){topic=section.dataset.topic as Topic;showTopic();}const details=invalid.closest("details");if(details)details.open=true;feedback("Correct the marked fields before saving. Your draft is retained.",true);invalid.focus();return;}await mutate({type:"save",kind:"card",recordId:entry().record?.id??null,fields:knownContent(data().draft,"card")});}
   function reconcileDrafts(previous:ReferenceWorkspace):void{for(const [key,value]of drafts){if(!dirty(value)&&JSON.stringify(value.gameFields)===value.gameBaseline){drafts.delete(key);continue;}const id=key.startsWith("card:")?key.slice(5):null,old=previous.document?.cards.find(r=>r.id===id),next=model.document?.cards.find(r=>r.id===id);if(old?.currentRevisionId===next?.currentRevisionId)value.expectedRevision=model.revision;}}
-  async function mutate(command:ReferenceCommand):Promise<void>{if(busy||!active()||!model.document)return;if(command.type!=="save"&&dirty()){feedback("Save or discard your changes first.",true);return;}if(proposed()&&!["reviewCard","undo","redo"].includes(command.type)){feedback("Review this proposed revision before changing the character.",true);return;}
+  async function mutate(command:ReferenceCommand):Promise<void>{if(busy||!active()||!model.document)return;if(command.type!=="save"&&dirty()){feedback("Save or discard your changes first.",true);return;}if(proposed()&&command.type!=="reviewCard"){feedback("Review this proposed revision before changing the character.",true);return;}
     busy=true;root.dataset.mutationCommand=command.type;root.dataset.mutationOutcome="pending";delete root.dataset.mutationErrorCode;synchronize();feedback("Saving…");const previous=model,key=selected,pendingGameFields=structuredClone(data().gameFields),pendingGameBaseline=data().gameBaseline;
     try{const next=await actions.apply(command,command.type==="save"?data().expectedRevision:model.revision);if(!active())return;model=next;root.dataset.mutationOutcome="committed";drafts.delete(key);reconcileDrafts(previous);
       if(command.type==="save"&&command.recordId===null){const linked=command.fields.linkedCharacterId,created=model.document?.cards.find(r=>!previous.document?.cards.some(old=>old.id===r.id)&&(linked?currentRevision(r).content.linkedCharacterId===linked:true));if(created)selected=`card:${created.id}`;}

@@ -660,7 +660,15 @@ impl AuthoringService {
                 (crate::metadata::OwnedScreenKind::Component, _) => unreachable!(),
             },
         )?;
-        self.commit_owned_screen_create(project, project_id, prepared, Vec::new())
+        let label = HistoryLabel::new(
+            format!("new screen {}", prepared.owner.name),
+            HistoryItem::screen(
+                &prepared.owner.path,
+                &prepared.owner.name,
+                Some(prepared.owner.root_id.clone()),
+            ),
+        );
+        self.commit_owned_screen_create(project, project_id, prepared, Vec::new(), label)
     }
 
     pub(super) fn prepare_owned_screen_create(
@@ -777,6 +785,7 @@ impl AuthoringService {
         project_id: &str,
         mut prepared: PreparedOwnedScreenCreate,
         companions: Vec<FileMutation>,
+        label: HistoryLabel,
     ) -> Result<Catalog, SceneError> {
         let Some((_, source)) = prepared
             .inventory
@@ -873,6 +882,7 @@ impl AuthoringService {
                 mutations,
                 intent: TransactionIntent::Edit,
             },
+            label,
         )?;
         Ok(committed_catalog)
     }

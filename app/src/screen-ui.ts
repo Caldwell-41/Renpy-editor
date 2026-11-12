@@ -14,7 +14,7 @@ import { layoutFor, saveLayout } from "./preferences.ts";
 import type { CoreOperation } from "./protocol.ts";
 import type { SourceDocument, SourceInventory, SourceTarget } from "./source-ui.ts";
 import type { ScreenPreview } from "./runtime-preparation.ts";
-import type { AuthoringRevisionChange, OwnedScreen, ScreenCatalog, ScreenTargetBinding, ResolvedScreenTarget, ComponentChange, ScreenRevisions, ScreenAction, VariableBinding } from "./screen-contracts.ts";
+import type { AuthoringRevisionChange, OwnedScreen, ScreenCatalog, ScreenTargetBinding, ResolvedScreenTarget, ScreenRevisions, ScreenAction, VariableBinding } from "./screen-contracts.ts";
 
 export interface ScreenNode {
   barBinding?:IntegerBarBinding|null;
@@ -47,8 +47,9 @@ interface CompositionResult { document: ScreenDocument; selectedId: string; chan
 type AcceptedEdit =
   | { type: "geometry"; document: ScreenDocument; draft: Draft; key: string }
   | { type: "layout"; document: ScreenDocument; base: ScreenDocument; key: string }
-  | { type: "composition"; result: CompositionResult; command: CompositionCommand; base: ScreenDocument; beforeId?: string | null }
-  | { type: "history"; direction: "undo" | "redo"; before?: ScreenDocument; selectedId?: string | null; sourceChanged: boolean };
+  | { type: "composition"; result: CompositionResult; command: CompositionCommand; base: ScreenDocument };
+/** A screen element to select once Screens loads, for example after project Undo. A gone element selects its parent, then the screen. */
+export interface ScreenReveal { readonly path: string; readonly screen: string; readonly nodeId?: string; readonly parentId?: string }
 interface Actions {
   projectId?: string;
   resolution: { width: number; height: number };
@@ -120,9 +121,7 @@ export class ScreensWorkspace {
   private readonly observer: ResizeObserver;
   private readonly composer: ScreenComposer;
   private readonly components: ScreenComponents;
-  private readonly componentReceipts = new Map<string,{componentId:string;beforeMap:string;afterMap?:string;before?:{screenId:string;nodeId:string};after?:{screenId:string;nodeId:string}}>();
-  private lastComponentReceipt?: string;
-  private componentBefore?: {map:string;selection?:{screenId:string;nodeId:string}};
+  private reveal?: ScreenReveal;
   private readonly layout: ScreenLayoutEditor;
   private readonly images: ScreenImages;
   private readonly text: ScreenText;
@@ -130,12 +129,10 @@ export class ScreensWorkspace {
   private interactionVariables:ScreenVariable[] = [];
   private interactionTargets:ResolvedScreenTarget[] = [];
   private reviewingAppearance = false;
-  // Core history has no entry cap within a session; keep its selection receipts for this workspace's lifetime.
-  private readonly compositionHistory: { path: string; before: string; after: string; beforeId?: string | null; afterId: string; removal: boolean }[] = [];
   constructor(private readonly actions: Actions) {
     this.gameResolution = {...actions.resolution};
-    this.components = new ScreenComponents({view:()=>this.compositionView(),catalog:()=>this.catalog,current:()=>this.current() && this.panel.isConnected,request:actions.request,coordinate:task=>this.coordinateComponent(task),
-      accepted:(change,selection)=>this.componentAccepted(change,selection),
+    this.components = new ScreenComponents({view:()=>this.compositionView(),catalog:()=>this.catalog,current:()=>this.current() && this.panel.isConnected,request:actions.request,coordinate:actions.coordinate,
+      accepted:(_change,selection)=>this.componentAccepted(selection),
       openDefinition:(id,nodeId)=>this.openOwnedScreen(id,nodeId,"component"),inspectScreen:id=>this.inspectOwnedPanel(id),
       structureBlocked:()=>this.busy || !!this.creation || !!this.resize || !!this.move || this.composer.hasAddition() || this.composer.hasRemoval() || this.images.hasAddition() || this.images.isSaving() || this.text.isSaving() || this.controls?.isSaving() || this.text.hasActionDraft() || this.controls.hasActionDraft() || this.controls.hasAddition(),
       captureDrafts:(view,trackNewDrafts=false)=>[...this.text.captureComponentDrafts(view,trackNewDrafts),this.controls.captureCopyDraft(view,trackNewDrafts),this.layout.captureCopyDraft(view,trackNewDrafts),this.images.captureCopyDraft(view,trackNewDrafts),this.captureGeometryDraft(view,trackNewDrafts)].filter((value):value is CopyDraftParticipant=>!!value),
@@ -170,7 +167,7 @@ export class ScreensWorkspace {
       select: (id, design) => { const index = this.nodes().findIndex(n => screenNodeKey(n) === id); if (index >= 0) { if (design === false) this.step = "choose"; this.choose(index, design); } },
       commit: (command, base) => this.compose(command, base),
       source: node => { void this.openSource(node); },
-      note: (text, error) => this.note(text, error), preview: () => { this.updateSizeControls(); this.renderCanvas(); }, newScreen: () => this.beginCreation(), undo: () => void this.history("undo"),
+      note: (text, error) => this.note(text, error), preview: () => { this.updateSizeControls(); this.renderCanvas(); }, newScreen: () => this.beginCreation(),
       geometry: host => this.renderGeometry(host),
       control:(card,view)=>this.controls.render(card,view),
       beginControl:(parentId,document,kind)=>this.controls.begin(parentId,document,kind),
@@ -205,7 +202,7 @@ export class ScreensWorkspace {
     const heading = el("header", "screen-heading"); heading.append(el("h1", "", "Screens"));
     const tools = el("div", "screen-tools");
     const addImageElement = button("Add element", () => this.composer.beginAddition()); addImageElement.dataset.imageAdd = ""; addImageElement.hidden = true;
-    tools.append(addImageElement, button("Undo", () => void this.history("undo")), button("Redo", () => void this.history("redo")),
+    tools.append(addImageElement,
       button("Refresh Source", () => void this.load()), button("View in Source", () => this.openSource()),
       button("Validate screen", () => this.test(true)), button("Test in Ren'Py", () => this.test(false), "button primary"));
     for (const control of tools.querySelectorAll("button")) if (["Refresh Source","Validate screen","Test in Ren'Py"].includes(control.textContent ?? "")) control.dataset.imageExtra = "";
@@ -263,26 +260,20 @@ export class ScreensWorkspace {
     this.composer.attach(this.panel);
     this.panel.addEventListener("keydown", event => {
       if (this.composer.hasRemoval()) return;
-      const field = event.target instanceof HTMLElement && (event.target.matches("input,textarea,select") || event.target.isContentEditable);
-      if (!field && !event.isComposing && !event.repeat && !this.composer.hasRemoval() && (event.metaKey || event.ctrlKey) && ["z","y"].includes(event.key.toLowerCase())) {
-        event.preventDefault(); event.stopPropagation(); void this.history(event.shiftKey || event.key.toLowerCase() === "y" ? "redo" : "undo"); return;
-      }
       if (event.key === "Escape") { if (this.move) this.cancelMove(); else if (this.resize) this.cancelResize(); else if (!this.controls.cancelCurrent() && !this.layout.cancelCurrent()) this.cancel(); event.stopPropagation(); }
     });
     this.observer = new ResizeObserver(() => this.renderCanvas()); this.observer.observe(viewport);
   }
-  mount(host: HTMLElement): void {
+  /** `reveal` selects that screen element once the saved screens load; the result settles when they have. */
+  mount(host: HTMLElement, reveal?: ScreenReveal): Promise<void> {
+    this.reveal = reveal;
     host.append(this.panel);
     if (this.creation) { this.creation.suspended = false; this.creation.refreshBase = true; this.closeCreationHost(); }
-    this.frames.invalidate("Checking canvas source."); void this.load();
+    this.frames.invalidate("Checking canvas source."); return this.load();
   }
   dispose(): void { this.disposed = true; this.sourceSequence++; this.sourceDialog?.remove(); this.components.dispose(); this.composer.dispose(); this.images.dispose(); this.controls.dispose(); this.text.dispose(); this.frames.dispose(); this.observer.disconnect(); this.cancelMove(); this.cancelResize(); this.closeCreationHost(); }
   hasDraft(): boolean { return this.components.hasPendingCopy() || this.components.isSaving() || this.drafts.size > 0 || !!this.resize || !!this.creation || this.composer.hasAddition() || this.layout.hasDraft() || this.controls.hasDraft() || this.images.hasDraft() || this.text.hasDraft(); }
   private current(): boolean { return !this.disposed && this.actions.current(); }
-  private ownedSelection(): {screenId:string;nodeId:string} | undefined {
-    const id = this.nodes()[this.selected]?.id;
-    return this.owned && id ? {screenId:this.owned.id,nodeId:id} : undefined;
-  }
   private selectOwnedScreen(id: string, nodeId?: string, kind?: "panel"|"component"): CompositionView {
     const owner = this.catalog?.owned.find(owner => owner.id === id);
     const document = owner && this.documents.find(document => document.path === owner.path);
@@ -292,8 +283,6 @@ export class ScreensWorkspace {
     if (index < 0) throw Error("The selected element is unavailable after refresh. Input retained.");
     this.owned = owner; this.doc = document; this.screen = owner.name; this.selected = index; this.step = "design";
     this.selection.value = JSON.stringify(["owned",owner.id]);
-    const receipt = this.lastComponentReceipt && this.componentReceipts.get(this.lastComponentReceipt);
-    if (receipt && receipt.afterMap === this.catalog?.sourceMapRevision && receipt.componentId === id) receipt.after = {screenId:id,nodeId:nodes[index]!.id!};
     this.rememberSelection(); this.render();
     return this.compositionView()!;
   }
@@ -310,26 +299,9 @@ export class ScreensWorkspace {
     if(!nodes || !selected)throw Error("The selected screen changed. Input retained.");
     return {document,screenId:owner.id,screenName:owner.name,nodes,selected,step:"design",busy:false};
   }
-  private async componentAccepted(change: ComponentChange, selection: {screenId:string;nodeId:string}): Promise<CompositionView> {
-    const key = JSON.stringify([change.componentId,change.screenId,change.useId]);
-    let receipt = this.componentReceipts.get(key);
-    if (!receipt) {
-      receipt = {componentId:change.componentId,beforeMap:this.componentBefore?.map ?? this.catalog?.sourceMapRevision ?? "",before:this.componentBefore?.selection ?? this.ownedSelection()};
-      this.componentReceipts.set(key,receipt); this.saved(true);
-    }
-    this.lastComponentReceipt = key;
-    const view = await this.openOwnedScreen(selection.screenId,selection.nodeId);
-    receipt.afterMap = this.catalog!.sourceMapRevision; receipt.after = {...selection};
-    return view;
-  }
-  private coordinateComponent<T>(task: () => Promise<T>): Promise<T> {
-    return this.actions.coordinate(async () => {
-      const state = await this.actions.request<{sourceMapRevision:string}>("scene.list");
-      const before = {map:state.sourceMapRevision,selection:this.ownedSelection()};
-      const result = await task();
-      this.componentBefore = before;
-      return result;
-    });
+  private async componentAccepted(selection: {screenId:string;nodeId:string}): Promise<CompositionView> {
+    this.saved(true);
+    return this.openOwnedScreen(selection.screenId,selection.nodeId);
   }
   private captureGeometryDraft(view: CompositionView, trackNewDrafts=false): CopyDraftParticipant | undefined {
     const currentKeys = () => [...this.drafts].filter(([,draft]) => draft.document.path === view.document.path && draft.screen === view.screenName).map(([key]) => key);
@@ -481,17 +453,23 @@ export class ScreensWorkspace {
         const document = documents.find(d => d.path === owned.path);
         if (!document || document.revision !== owned.sourceRevision || !document.screens.some(s => s.name === owned.name)) owned.resolved = false;
       });
-      const path = this.doc?.path, selectedId = this.nodes()[this.selected]?.id; this.documents = documents; this.catalog = catalog;
+      const reveal = this.reveal; this.reveal = undefined;
+      // A reveal without an element (an unmarked one) keeps the selection on the screen already open.
+      const sameScreen = !!reveal && reveal.path === this.doc?.path && reveal.screen === this.screen;
+      const path = reveal?.path ?? this.doc?.path, selectedId = this.nodes()[this.selected]?.id; this.documents = documents; this.catalog = catalog;
       if (this.creation?.refreshBase) { this.creation.base = catalog; this.creation.refreshBase = false; }
       const supported = documents.filter(d => d.screens.length > 0);
-      if (this.owned) this.owned = catalog.owned.find(s => s.id === this.owned!.id) ?? { ...this.owned, resolved: false };
+      if (reveal) { this.owned = catalog.owned.find(s => s.path === reveal.path && s.name === reveal.screen); this.screen = reveal.screen; }
+      else if (this.owned) this.owned = catalog.owned.find(s => s.id === this.owned!.id) ?? { ...this.owned, resolved: false };
       else if (!path) this.owned = catalog.owned.find(s => s.id === layoutFor(this.preferenceKey()).screenSelection?.screenId) ?? catalog.owned[0];
       this.doc = this.owned ? this.owned.resolved ? supported.find(d => d.path === this.owned!.path) : undefined : supported.find(d => d.path === path) ?? supported[0];
       if (this.owned) this.screen = this.owned.name;
       if (!this.owned && !this.doc?.screens.some(s => s.name === this.screen)) this.screen = this.doc?.screens[0]?.name ?? "";
       const remembered = layoutFor(this.preferenceKey()).screenSelection;
+      const index = (id?: string): number => id ? this.nodes().findIndex(n => screenNodeKey(n) === id) : -1;
       const preferred = selectedId ?? (remembered?.screenId === this.owned?.id && (!remembered?.sourceRevision || remembered.sourceRevision === this.doc?.revision) ? remembered?.elementId : undefined);
-      this.selected = preferred ? Math.max(0, this.nodes().findIndex(n => screenNodeKey(n) === preferred)) : Math.min(this.selected, Math.max(0, this.nodes().length - 1));
+      if (reveal && (reveal.nodeId || reveal.parentId || !sameScreen)) this.selected = Math.max(0, [index(reveal.nodeId), index(reveal.parentId)].find(found => found >= 0) ?? 0);
+      else this.selected = preferred ? Math.max(0, index(preferred)) : Math.min(this.selected, Math.max(0, this.nodes().length - 1));
       this.selection.replaceChildren();
       const owned = [...catalog.owned];
       if (this.owned && !owned.some(s => s.id === this.owned!.id)) owned.push(this.owned);
@@ -737,20 +715,6 @@ export class ScreensWorkspace {
   }
   private async finishAcceptedEdit(edit: AcceptedEdit): Promise<void> {
     if (!this.current()) return;
-    if (edit.type === "history") {
-      const { direction, before, selectedId } = edit;
-      const entry = [...this.compositionHistory].reverse().find(item => item.path === before?.path && item.path === this.doc?.path
-        && (direction === "undo" ? item.after === before?.revision && item.before === this.doc?.revision : item.before === before?.revision && item.after === this.doc?.revision));
-      const preferred = entry?.removal ? direction === "undo" ? entry.beforeId : entry.afterId : selectedId;
-      const index = this.nodes().findIndex(n => screenNodeKey(n) === preferred);
-      if (index >= 0) this.selected = index;
-      else if (entry) { const fallback = direction === "undo" ? entry.beforeId : entry.afterId; this.selected = Math.max(0, this.nodes().findIndex(n => screenNodeKey(n) === fallback)); }
-      this.rememberSelection();
-      if (edit.sourceChanged) this.saved(true);
-      this.busy = false; this.render(); this.composer.focusSelection();
-      return;
-    }
-
     const document = edit.type === "geometry" || edit.type === "layout" ? edit.document : edit.result.document;
     const base = edit.type === "geometry" ? edit.draft.document : edit.base;
     const sourceChanged = document.revision !== base.revision || edit.type === "composition" && edit.result.changed === true;
@@ -769,9 +733,6 @@ export class ScreensWorkspace {
     else {
       this.selected = Math.max(0, this.nodes().findIndex(n => screenNodeKey(n) === edit.result.selectedId));
       this.composer.accept(edit.command);
-      if (sourceChanged) {
-        this.compositionHistory.push({ path: base.path, before: base.revision, after: document.revision, beforeId: edit.beforeId, afterId: edit.result.selectedId, removal: edit.command.type === "remove" });
-      }
       if (edit.command.type === "remove") this.step = "choose";
     }
     if (sourceChanged && this.catalog) {
@@ -853,46 +814,12 @@ export class ScreensWorkspace {
     const componentRevisions = this.owned?.kind === "component" ? await this.componentWrite(base,this.compositionChanges(command)) : undefined;
     this.busy = true; this.loadSequence++;
     const owner = this.owned;
-    const beforeId = this.nodes()[this.selected]?.id;
     try {
       const result = await this.actions.coordinate(() => this.actions.request<CompositionResult>("screens.compose", {
         screenId: owner.id, expectedRevision: base.revision, command, ...(componentRevisions?{componentRevisions}:{}),
       }));
-      await this.finishAcceptedEdit({ type: "composition", command, base, result, beforeId });
+      await this.finishAcceptedEdit({ type: "composition", command, base, result });
     } finally { this.busy = false; }
-  }
-  private async history(type: "undo" | "redo"): Promise<void> {
-    if (this.busy || this.hasDraft() || this.composer.hasRemoval()) { this.note("Apply or cancel unfinished changes before Undo or Redo. Input retained.", true); return; }
-    const before = this.doc, selectedId = this.nodes()[this.selected]?.id, beforeMap = this.catalog?.sourceMapRevision;
-    this.busy = true; let accepted = false;
-    try {
-      await this.actions.coordinate(async () => {
-        const model = await this.actions.request<{ projectRevision: string; sourceMapRevision: string }>("scene.list");
-        await this.actions.request("scene.apply", { expectedProjectRevision: model.projectRevision, expectedSourceMapRevision: model.sourceMapRevision, command: { type } });
-      });
-      accepted = true;
-    } catch (error) { if (this.current()) this.note((error as Error).message, true); }
-    finally {
-      if (this.current()) {
-        const refreshed = await this.reload(false);
-        if (!refreshed) {
-          this.doc = undefined; if(this.owned)this.owned={...this.owned,resolved:false};
-          this.busy = false; this.render();
-          this.note(accepted ? "History changed, but the screen could not be refreshed. Refresh Source before editing." : "The screen could not be refreshed. Input retained.",true);
-          return;
-        }
-        this.components.invalidate(); this.lastComponentReceipt = undefined;
-        const receipt = refreshed && [...this.componentReceipts.values()].reverse().find(receipt => type === "undo"
-          ? receipt.afterMap === beforeMap && receipt.beforeMap === this.catalog?.sourceMapRevision
-          : receipt.beforeMap === beforeMap && receipt.afterMap === this.catalog?.sourceMapRevision);
-        const selection = receipt && (type === "undo" ? receipt.before : receipt.after);
-        if (selection) {
-          try { this.selectOwnedScreen(selection.screenId,selection.nodeId); } catch { /* Retain unresolved selection instead of resolving by name. */ }
-        }
-        await this.finishAcceptedEdit({ type: "history", direction: type, before, selectedId, sourceChanged: accepted });
-      }
-      this.busy = false;
-    }
   }
   private async openSource(selected = this.nodes()[this.selected]): Promise<void> {
     if (this.owned && !this.owned.resolved) { this.reportUnresolved(); return; }

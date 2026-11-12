@@ -230,7 +230,7 @@ fn nonblocking_dialog_keeps_return_source_protected_but_null_editable() {
             .to_owned();
         assert!(removed.contains("action Return() # keep finish"));
         assert!(removed.contains("    $ custom = ['untouched', 17] # keep custom\n"));
-        composition_history(&mut service, "undo");
+        project_history(&mut service, "undo");
         assert_eq!(
             ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
             source
@@ -457,7 +457,7 @@ fn inert_button_action_stays_editable_and_extractable() {
         json!({"screenId":component["id"],"expectedRevision":document["revision"],
             "componentRevisions":target["revisions"],"command":{"type":"remove","nodeId":inert["id"]}}),
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(
             &mut service,
@@ -466,7 +466,7 @@ fn inert_button_action_stays_editable_and_extractable() {
         )["text"],
         copied
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         fs::read_to_string(root.join(owner["path"].as_str().unwrap())).unwrap(),
         source
@@ -478,7 +478,7 @@ fn inert_button_action_stays_editable_and_extractable() {
     );
     let removed = fs::read_to_string(root.join(owner["path"].as_str().unwrap())).unwrap();
     assert!(!removed.contains("Optional") && !removed.contains("Null()"));
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         fs::read_to_string(root.join(owner["path"].as_str().unwrap())).unwrap(),
         source
@@ -514,13 +514,13 @@ fn blank_dialog_creation_uses_one_transaction_and_rejects_component_kind() {
     let accepted = fs::read_to_string(root.join(owner["path"].as_str().unwrap())).unwrap();
     assert!(accepted.contains("    modal True\n    key \"game_menu\" action Return()\n    pass\n"));
     let after = fs::read(root.join(".renpy-editor/source-map.json")).unwrap();
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert!(!root.join(owner["path"].as_str().unwrap()).exists());
     assert_eq!(
         fs::read(root.join(".renpy-editor/source-map.json")).unwrap(),
         before
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     assert_eq!(
         fs::read(root.join(".renpy-editor/source-map.json")).unwrap(),
         after
@@ -750,7 +750,7 @@ fn component_ipc_prepares_extracts_places_reviews_and_copies_with_typed_requests
             .unwrap()
             .contains("use shared_details")
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         fs::read(root.join(other["path"].as_str().unwrap())).unwrap(),
         other_before
@@ -759,7 +759,7 @@ fn component_ipc_prepares_extracts_places_reviews_and_copies_with_typed_requests
         fs::read(root.join(".renpy-editor/source-map.json")).unwrap(),
         map_before
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     service.close().unwrap();
     service.open_path(&root).unwrap();
     assert_eq!(
@@ -835,10 +835,10 @@ fn removing_a_component_subtree_prunes_only_its_use_bindings_in_one_history_entr
         ipc(&mut service, "screens.list", json!({}))["styles"]["error"],
         Value::Null
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(fs::read(&path).unwrap(), source.as_bytes());
     assert_eq!(fs::read(&map_path).unwrap(), before_map);
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     assert_eq!(fs::read(&path).unwrap(), after_source);
     assert_eq!(fs::read(&map_path).unwrap(), after_map);
     service.close().unwrap();
@@ -1056,24 +1056,12 @@ fn help_starter_content_extracts_without_capturing_its_local_close_action() {
         .unwrap()
         .contains("action Hide(\"help_panel\")"));
     assert!(panel["text"].as_str().unwrap().contains("use help_content"));
-    let model = ipc(&mut service, "scene.list", json!({}));
-    ipc(
-        &mut service,
-        "scene.apply",
-        json!({"expectedProjectRevision":model["projectRevision"],
-        "expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"undo"}}),
-    );
+    ipc(&mut service, "history.undo", json!({}));
     assert_eq!(
         fs::read(root.join(owner["path"].as_str().unwrap())).unwrap(),
         source
     );
-    let model = ipc(&mut service, "scene.list", json!({}));
-    ipc(
-        &mut service,
-        "scene.apply",
-        json!({"expectedProjectRevision":model["projectRevision"],
-        "expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"redo"}}),
-    );
+    ipc(&mut service, "history.redo", json!({}));
     service.close().unwrap();
     service.open_path(&root).unwrap();
     let review = ipc(
@@ -1167,16 +1155,16 @@ fn help_starter_creation_is_one_source_and_metadata_history_transaction() {
     let moved = fs::read_to_string(&path).unwrap();
     assert!(moved.find("textbutton \"Close\"").unwrap() < moved.find("text \"Help\"").unwrap());
     assert_eq!(moved.matches("Hide(\"help_panel\")").count(), 2);
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(fs::read(&path).unwrap(), source);
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert!(!path.exists());
     assert_eq!(
         fs::read(root.join(".renpy-editor/source-map.json")).unwrap(),
         before_map
     );
     assert!(root.join("game/images/ui seal.png").exists());
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     assert_eq!(fs::read(&path).unwrap(), source);
     service.close().unwrap();
     service.open_path(&root).unwrap();
@@ -1329,7 +1317,7 @@ fn marked_component_uses_resolve_by_identity_and_preserve_changed_name_intent() 
     assert!(fs::read_to_string(root.join("game/ui/details.rpy"))
         .unwrap()
         .contains("xsize 300"));
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         fs::read(root.join("game/ui/details.rpy")).unwrap(),
         original_component

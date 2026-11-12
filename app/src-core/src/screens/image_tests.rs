@@ -27,7 +27,7 @@ fn ui_image_import_is_typed_transactional_and_restores_through_shared_history() 
     assert_eq!(image["discoveryName"], "ui seal");
     let imported = root.join("game/images/ui seal.png");
     assert_eq!(fs::read(&imported).unwrap(), bytes);
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert!(
         !imported.exists(),
         "One Undo removes the imported file and its metadata"
@@ -37,7 +37,7 @@ fn ui_image_import_is_typed_transactional_and_restores_through_shared_history() 
         .unwrap()
         .iter()
         .all(|a| a["id"] != asset_id));
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     assert_eq!(fs::read(&imported).unwrap(), bytes);
     service.close().unwrap();
     service.open_path(&root).unwrap();
@@ -75,7 +75,7 @@ fn invalid_ui_image_import_retains_project_bytes_and_shared_history() {
             before
         );
         assert_eq!(fs::read_dir(root.join("game/images")).unwrap().count(), 0);
-        composition_history(&mut service, "undo");
+        project_history(&mut service, "undo");
         assert_eq!(
             ipc(&mut service, "screens.list", json!({}))["owned"],
             json!([]),
@@ -214,12 +214,12 @@ fn ui_image_placement_is_an_owned_node_with_exact_source_history_and_reopen() {
         node["numericLayout"]["values"]["ysize"]["value"].as_f64(),
         Some(80.0)
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         format!("{original}{neighbors}")
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         expected
@@ -314,12 +314,12 @@ fn ui_image_asset_and_size_change_is_one_minimal_history_entry_and_noop_is_not_a
         noop["document"]["revision"],
         changed["document"]["revision"]
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         before
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         expected
@@ -631,7 +631,7 @@ fn ui_image_replacement_review_is_readonly_and_apply_accepts_source_and_referenc
             .unwrap()
             .contains("ysize 64")
     );
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         fs::read(root.join(owner["path"].as_str().unwrap())).unwrap(),
         source
@@ -640,7 +640,7 @@ fn ui_image_replacement_review_is_readonly_and_apply_accepts_source_and_referenc
         ipc(&mut service, "authoring.list", json!({}))["assets"][0]["sha256"],
         asset["sha256"]
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     assert_eq!(
         ipc(
             &mut service,
@@ -690,12 +690,12 @@ fn ui_image_parent_and_numeric_layout_change_is_one_owned_source_transaction() {
         json!({"unit":"relative","value":0.5})
     );
     let after = fs::read(root.join(owner["path"].as_str().unwrap())).unwrap();
-    composition_history(&mut service, "undo");
+    project_history(&mut service, "undo");
     assert_eq!(
         ipc(&mut service, "source.open", json!({"path":owner["path"]}))["text"],
         before
     );
-    composition_history(&mut service, "redo");
+    project_history(&mut service, "redo");
     assert_eq!(
         fs::read(root.join(owner["path"].as_str().unwrap())).unwrap(),
         after

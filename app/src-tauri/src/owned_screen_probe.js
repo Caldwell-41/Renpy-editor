@@ -41,9 +41,10 @@
     await until(() => editor.value.slice(editor.selectionStart, editor.selectionEnd) === "screen travel_notes():\n    pass\n", "Source declaration selection");
     assert(editor.value.slice(editor.selectionStart, editor.selectionEnd) === "screen travel_notes():\n    pass\n", "Exact declaration selected in Source");
     checkpoint("exact-source-passed");
-    await click("Screens"); await click("Undo"); await until(() => message().includes("Unresolved owned screen travel_notes"));
+    // Undo of creation leaves no screen to reveal, so Screens opens without it.
+    await click("Screens"); await window.__loomlightProbeHistory("undo");
     assert((await call("screens.list", { sessionId })).owned.length === 0, "One Undo removes creation and ownership");
-    await click("Redo"); await until(() => document.querySelector('.screen-tree [aria-selected="true"]')?.getAttribute("aria-label") === "Screen root");
+    await window.__loomlightProbeHistory("redo"); await until(() => document.querySelector('.screen-tree [aria-selected="true"]')?.getAttribute("aria-label") === "Screen root");
     assert(JSON.stringify((await call("screens.list", { sessionId })).owned[0]) === JSON.stringify(identity), "One Redo restores both IDs");
     checkpoint("history-passed");
     await click("Close Project"); await until(() => document.querySelector(".recent-open")); document.querySelector(".recent-open").click();
