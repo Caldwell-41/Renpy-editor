@@ -517,8 +517,7 @@ export const storyCases={
   const buttons=scope=>[...scope.querySelectorAll('button')].filter(x=>!x.hidden&&!x.closest('[hidden]')).map(x=>x.textContent);
   for(const [id,text] of [[a.id,'Conflict draft A'],[b.id,'Other draft B'],[h.id,'Lost draft H'],[l.id,'Discarded draft L']]){
    await openScene(c.workspace().scenes.find(x=>x.beats.some(y=>y.id===id)).id);await type(id,text);}
-  // Core reconciles an ordinary external edit in a file that Source has open.
-  for(const s of [entry,called,high,low])await c.call('source.open',{path:s.sourcePath});
+  // Ordinary external edits. Source has not opened the Called, High or Low files in this session (#168).
   await c.raw({driver:'externalReplace',path:entry.sourcePath,remove:`"${a.payload.text}"`,insert:'"Source edit one"'});
   await c.raw({driver:'externalRemove',path:high.sourcePath,remove:`    "${h.payload.text}"\n`});
   await c.raw({driver:'externalReplace',path:low.sourcePath,remove:`"${l.payload.text}"`,insert:'"Source L changed"'});

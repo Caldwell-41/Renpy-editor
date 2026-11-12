@@ -649,6 +649,21 @@ impl AuthoringService {
                 .iter()
                 .any(|value| value == "scene-authoring-v1");
         if !needs_migration {
+            // A scene file edited while the project was closed reconciles as it would
+            // during the session. A source that stays unmapped opens as unavailable.
+            self.source_refresh_project(project, project_id)
+                .map_err(|error| {
+                    use crate::source::SourceError;
+                    match error {
+                        SourceError::RecoveryRequired => SceneError::RecoveryRequired,
+                        SourceError::RuntimeBusy => SceneError::RuntimeBusy,
+                        SourceError::Io => SceneError::Io,
+                        _ => SceneError::SourceConflict,
+                    }
+                })?;
+            let (map_bytes, _) = self.scene_snapshot(project, SOURCE_MAP_PATH)?;
+            let source_map = SourceMapMetadata::read_bytes(&map_bytes, project_id)
+                .map_err(|_| SceneError::InvalidMetadata)?;
             self.verify_current_mappings(project, &metadata, &source_map)?;
             return Ok(());
         }
@@ -2636,7 +2651,8 @@ impl AuthoringService {
                 .ok_or(SceneError::InvalidMetadata)?;
             let (bytes, revision) = self.scene_snapshot(project, &scene.source_path)?;
             if revision.sha256 != stored.source_revision {
-                return Err(SceneError::SourceConflict);
+                // Reconciliation refused this source; Story shows it as unavailable.
+                continue;
             }
             let authoring = self
                 .list(project, &metadata.project_id)
@@ -6760,27 +6776,25 @@ mod tests {
             b"label scene_one:\n    \"external\"\n    return\n",
         )
         .unwrap();
-        let conflicted = clean.workspace();
-        assert!(
-            conflicted
-                .scenes
-                .iter()
-                .find(|scene| scene.id == clean.entry_scene_id)
-                .unwrap()
-                .source_conflict
-        );
+        // Story reconciles the external revision; a write against the old one refuses.
+        let refreshed = clean.workspace();
+        let external = refreshed
+            .scenes
+            .iter()
+            .find(|scene| scene.id == clean.entry_scene_id)
+            .unwrap();
+        assert!(!external.source_conflict);
+        assert_ne!(external.source_revision, current_entry.source_revision);
+        assert!(external.beats.iter().any(|beat| matches!(
+            &beat.payload,
+            BeatPayload::Narration { text } if text == "external"
+        )));
         assert!(matches!(
             clean.apply(
-                &conflicted,
+                &refreshed,
                 SceneCommand::InsertBeat {
                     scene_id: current_entry.id.clone(),
-                    expected_source_revision: conflicted
-                        .scenes
-                        .iter()
-                        .find(|scene| scene.id == clean.entry_scene_id)
-                        .unwrap()
-                        .source_revision
-                        .clone(),
+                    expected_source_revision: current_entry.source_revision.clone(),
                     before_beat_id: None,
                     beat: BeatPayload::Return,
                 }

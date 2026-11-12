@@ -281,7 +281,7 @@ impl AuthoringService {
                 buffer.selection_end = request.selection_end.unwrap_or(start);
             }
         }
-        self.reconcile_clean_source(project, project_id, &request.path)?;
+        self.reconcile_clean_sources(project, project_id, Some(&request.path))?;
         self.source_document(project, project_id, &request.path)
     }
 
@@ -435,7 +435,7 @@ impl AuthoringService {
             buffer.draft_version = buffer.draft_version.saturating_add(1);
         }
         self.refresh_buffer(project, &request.path)?;
-        self.reconcile_clean_source(project, project_id, &request.path)?;
+        self.reconcile_clean_sources(project, project_id, Some(&request.path))?;
         self.source_document(project, project_id, &request.path)
     }
 
@@ -456,7 +456,7 @@ impl AuthoringService {
         };
         for path in paths {
             self.refresh_buffer(project, &path)?;
-            self.reconcile_clean_source(project, project_id, &path)?;
+            self.reconcile_clean_sources(project, project_id, Some(&path))?;
         }
         self.source_inventory(project, project_id)
     }
@@ -629,21 +629,10 @@ impl AuthoringService {
         project_id: &str,
     ) -> Result<(), SourceError> {
         self.source_refresh_all(project)?;
-        let paths = self
-            .source_sessions
-            .lock()
-            .map_err(|_| SourceError::Io)?
-            .projects
-            .get(project)
-            .map(|items| items.keys().cloned().collect::<Vec<_>>())
-            .unwrap_or_default();
-        for path in paths {
-            match self.reconcile_clean_source(project, project_id, &path) {
-                Ok(()) | Err(SourceError::InvalidSource) => {}
-                Err(error) => return Err(error),
-            }
+        match self.reconcile_clean_sources(project, project_id, None) {
+            Ok(()) | Err(SourceError::InvalidSource) => Ok(()),
+            Err(error) => Err(error),
         }
-        Ok(())
     }
 
     fn source_refresh_all(&self, project: &ProjectId) -> Result<(), SourceError> {
@@ -1039,32 +1028,19 @@ impl AuthoringService {
         })
     }
 
-    fn reconcile_clean_source(
+    /// Brings source-map projections up to date with clean scene sources: the clean
+    /// Source buffer when Source holds one, otherwise the file on disk. With no `only`
+    /// path it covers every scene, so an external edit reaches Story whether or not
+    /// Source opened the file. A dirty, external-pending or unavailable buffer keeps
+    /// its stale projection until the author resolves it in Source. `only` limits the
+    /// pass to one path.
+    fn reconcile_clean_sources(
         &self,
         project: &ProjectId,
         project_id: &str,
-        path: &str,
+        only: Option<&str>,
     ) -> Result<(), SourceError> {
-        let buffer = self
-            .source_sessions
-            .lock()
-            .map_err(|_| SourceError::Io)?
-            .projects
-            .get(project)
-            .and_then(|items| items.get(path))
-            .filter(|item| item.draft.is_none() && item.external.is_none() && !item.unavailable)
-            .cloned();
-        let Some(buffer) = buffer else {
-            return Ok(());
-        };
         let project_metadata = self.project_metadata(project, project_id)?;
-        let Some(scene) = project_metadata
-            .scenes
-            .iter()
-            .find(|scene| scene.source_path == path)
-        else {
-            return Ok(());
-        };
         let (map_bytes, map_revision) = self
             .transactions
             .snapshot(
@@ -1074,53 +1050,83 @@ impl AuthoringService {
             .map_err(transaction_error)?;
         let mut source_map =
             SourceMapMetadata::read_bytes(&map_bytes, project_id).map_err(|_| SourceError::Io)?;
-        let previous = source_map
-            .scene_mappings
+        let mut authoring = None;
+        let mut reconciled = Vec::new();
+        for scene in project_metadata
+            .scenes
             .iter()
-            .find(|mapping| mapping.scene_id == scene.id)
-            .cloned()
-            .ok_or(SourceError::InvalidSource)?;
-        if previous.source_revision == buffer.base_revision.sha256 {
+            .filter(|scene| only.is_none_or(|path| path == scene.source_path))
+        {
+            let path = scene.source_path.as_str();
+            let buffered = self
+                .source_sessions
+                .lock()
+                .map_err(|_| SourceError::Io)?
+                .projects
+                .get(project)
+                .and_then(|items| items.get(path))
+                .map(|item| {
+                    (item.draft.is_none() && item.external.is_none() && !item.unavailable)
+                        .then(|| (item.base_bytes.clone(), item.base_revision.sha256.clone()))
+                });
+            let (bytes, revision) = match buffered {
+                Some(Some(clean)) => clean,
+                Some(None) => continue,
+                None => match self.transactions.snapshot_optional(
+                    project,
+                    RelativePath::new(path).map_err(|_| SourceError::InvalidPayload)?,
+                ) {
+                    Ok(Some((bytes, revision))) => (bytes, revision.sha256),
+                    // Story reports a missing or unsafe source as unavailable.
+                    Ok(None) | Err(_) => continue,
+                },
+            };
+            // Story reports a scene with no stored mapping as invalid metadata.
+            let Some(index) = source_map
+                .scene_mappings
+                .iter()
+                .position(|mapping| mapping.scene_id == scene.id)
+            else {
+                continue;
+            };
+            let previous = source_map.scene_mappings[index].clone();
+            if previous.source_revision == revision {
+                continue;
+            }
+            let authoring = match &authoring {
+                Some(authoring) => authoring,
+                None => authoring.insert(
+                    self.list(project, project_id)
+                        .map_err(|_| SourceError::Io)?,
+                ),
+            };
+            let built = build_reconciled_mapping(
+                scene,
+                &bytes,
+                &revision,
+                Some(&previous),
+                Some((&project_metadata, authoring, &source_map.owned_screens)),
+            );
+            let mapping = match built.map_err(scene_source_error) {
+                Ok((mapping, _)) => mapping,
+                Err(SourceError::InvalidSource) => {
+                    self.mark_projection_invalid(project, path, true)?;
+                    continue;
+                }
+                Err(error) => return Err(error),
+            };
+            // One scene that cannot be mapped leaves the others to reconcile.
+            source_map.scene_mappings[index] = mapping;
+            if source_map.validate(project_id).is_err() {
+                source_map.scene_mappings[index] = previous;
+                self.mark_projection_invalid(project, path, true)?;
+                continue;
+            }
+            reconciled.push(path);
+        }
+        if reconciled.is_empty() {
             return Ok(());
         }
-        let authoring = self
-            .list(project, project_id)
-            .map_err(|_| SourceError::Io)?;
-        let reconciled = build_reconciled_mapping(
-            scene,
-            &buffer.base_bytes,
-            &buffer.base_revision.sha256,
-            Some(&previous),
-            Some((&project_metadata, &authoring, &source_map.owned_screens)),
-        );
-        let (mapping, _) = match reconciled {
-            Ok(value) => value,
-            Err(error) => {
-                let error = scene_source_error(error);
-                if error == SourceError::InvalidSource {
-                    if let Some(current) = self
-                        .source_sessions
-                        .lock()
-                        .map_err(|_| SourceError::Io)?
-                        .projects
-                        .get_mut(project)
-                        .and_then(|items| items.get_mut(path))
-                    {
-                        current.projection_invalid = true;
-                    }
-                    return Ok(());
-                }
-                return Err(error);
-            }
-        };
-        *source_map
-            .scene_mappings
-            .iter_mut()
-            .find(|stored| stored.scene_id == scene.id)
-            .ok_or(SourceError::InvalidSource)? = mapping;
-        source_map
-            .validate(project_id)
-            .map_err(|_| SourceError::InvalidSource)?;
         let outcome = self.commit_observed(
             project,
             TransactionProposal {
@@ -1137,20 +1143,34 @@ impl AuthoringService {
         );
         match outcome {
             CommitOutcome::Committed { .. } => {
-                if let Some(current) = self
-                    .source_sessions
-                    .lock()
-                    .map_err(|_| SourceError::Io)?
-                    .projects
-                    .get_mut(project)
-                    .and_then(|items| items.get_mut(path))
-                {
-                    current.projection_invalid = false;
+                for path in reconciled {
+                    self.mark_projection_invalid(project, path, false)?;
                 }
                 Ok(())
             }
             other => Err(commit_error(other)),
         }
+    }
+
+    /// Records whether a Source buffer's scene projection failed to reconcile.
+    /// Paths without a buffer carry no flag; Story reports them from the source map.
+    fn mark_projection_invalid(
+        &self,
+        project: &ProjectId,
+        path: &str,
+        invalid: bool,
+    ) -> Result<(), SourceError> {
+        if let Some(buffer) = self
+            .source_sessions
+            .lock()
+            .map_err(|_| SourceError::Io)?
+            .projects
+            .get_mut(project)
+            .and_then(|items| items.get_mut(path))
+        {
+            buffer.projection_invalid = invalid;
+        }
+        Ok(())
     }
 
     fn commit_source_history(
@@ -1971,6 +1991,69 @@ mod tests {
         let overlap = fixture.open("game/custom.rpy");
         assert_eq!(overlap.text, next.text);
         assert!(!overlap.can_apply_both);
+    }
+
+    #[test]
+    fn story_projects_external_edit_to_scene_source_never_opened() {
+        let fixture = Fixture::new(b"label scene_one:\n    \"Hello\"\n    return\n");
+        let narration = |workspace: &crate::scene::SceneWorkspace| {
+            let scene = &workspace.scenes[0];
+            assert!(!scene.source_conflict, "external edit left Story unmapped");
+            scene
+                .beats
+                .iter()
+                .find_map(|beat| match &beat.payload {
+                    BeatPayload::Narration { text, .. } => Some((beat.id.clone(), text.clone())),
+                    _ => None,
+                })
+                .unwrap()
+        };
+        let before = narration(
+            &fixture
+                .service
+                .scene_workspace(&fixture.project, &fixture.project_id)
+                .unwrap(),
+        );
+        fs::write(
+            fixture.root.join(&fixture.scene_path),
+            b"label scene_one:\n    \"Changed elsewhere\"\n    return\n",
+        )
+        .unwrap();
+        let after = narration(
+            &fixture
+                .service
+                .scene_workspace(&fixture.project, &fixture.project_id)
+                .unwrap(),
+        );
+        assert_eq!(after, (before.0, "Changed elsewhere".into()));
+    }
+
+    #[test]
+    fn project_opens_after_scene_source_changed_while_closed() {
+        let fixture = Fixture::new(b"label scene_one:\n    \"Hello\"\n    return\n");
+        let reopen = |bytes: &[u8]| {
+            fs::write(fixture.root.join(&fixture.scene_path), bytes).unwrap();
+            let service = AuthoringService::default();
+            let project = service.register_project(&fixture.root).unwrap();
+            service
+                .ensure_phase_1e_metadata(&project, &fixture.project_id)
+                .unwrap();
+            service
+                .scene_workspace(&project, &fixture.project_id)
+                .unwrap()
+                .scenes[0]
+                .clone()
+        };
+        let edited = reopen(b"label scene_one:\n    \"Changed elsewhere\"\n    return\n");
+        assert!(!edited.source_conflict);
+        assert!(edited.beats.iter().any(|beat| matches!(
+            &beat.payload,
+            BeatPayload::Narration { text, .. } if text == "Changed elsewhere"
+        )));
+        // A source Story cannot map opens as unavailable, not as a refused project.
+        let invalid = reopen(b"label scene_one\n    \"unfinished\n");
+        assert!(invalid.source_conflict);
+        assert!(invalid.beats.is_empty());
     }
 
     #[test]
