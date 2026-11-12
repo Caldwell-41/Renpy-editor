@@ -501,8 +501,9 @@ draft before writing any of them. If any draft is incomplete, invalid or conflic
 retain all drafts and reveal the failing draft with its error. No draft is saved by that request
 until all pass validation. Commit remains available to save one beat on its own.
 
-Story Save applies only while the Story workspace is open. In other workspaces Save
-keeps its existing behaviour, and the header still shows pending beat drafts. While
+Story Save applies only while the Story workspace is open and beat drafts exist. In
+other workspaces, and in Story with no beat drafts, Save keeps its existing behaviour.
+The header still shows pending beat drafts. While
 a Story Save runs, Story controls stay locked and a second Save reports busy. If
 another Story form has input, Save refuses and writes nothing. If the project changed
 after Story last refreshed, Save refreshes Story, marks any beat draft conflicts and

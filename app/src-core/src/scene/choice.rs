@@ -855,10 +855,7 @@ impl AuthoringService {
         picked: bool,
         allow_adoption: bool,
     ) -> Result<Vec<FileMutation>, SceneError> {
-        let paths = self
-            .transactions
-            .inventory_files_bounded(project, "game", 8192)
-            .map_err(diagnostic_error)?;
+        let paths = self.game_files(project)?;
         let mut existing = None;
         let mut template = None;
         let mut count = 0;
@@ -1051,9 +1048,7 @@ impl AuthoringService {
                 std::str::from_utf8(original).map_err(|_| SceneError::UnsupportedSource)?;
             let mut counts = HashMap::<String, usize>::new();
             for path in self
-                .transactions
-                .inventory_files_bounded(project, "game", 8192)
-                .map_err(diagnostic_error)?
+                .game_files(project)?
                 .iter()
                 .filter(|p| p.ends_with(".rpy"))
             {

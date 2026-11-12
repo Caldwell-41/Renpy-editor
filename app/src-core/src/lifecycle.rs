@@ -909,6 +909,16 @@ impl LifecycleService {
             .map_err(LifecycleError::Scene)
     }
 
+    pub fn scene_save_drafts(
+        &self,
+        request: crate::scene::SceneSaveDraftsRequest,
+    ) -> Result<SceneWorkspace, LifecycleError> {
+        let (authority, project_id) = self.authoring_context()?;
+        self.authoring
+            .scene_save_drafts(&authority, &project_id, request)
+            .map_err(LifecycleError::Scene)
+    }
+
     pub fn screens_list(&self) -> Result<crate::screens::Catalog, LifecycleError> {
         let (authority, project_id) = self.authoring_context()?;
         self.authoring

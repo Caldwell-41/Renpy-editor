@@ -28,20 +28,22 @@ function saveEvent(options: { meta?: boolean; ctrl?: boolean; shift?: boolean; a
   return event;
 }
 
+// main.ts keeps #app and its keyboard listener from first import, so both tests share one window.
+const browser = new Window({ url: "http://tauri.localhost" });
+browser.document.body.innerHTML = '<div id="app"></div>';
+Object.assign(globalThis, {
+  window: browser,
+  document: browser.document,
+  HTMLElement: browser.HTMLElement,
+  HTMLInputElement: browser.HTMLInputElement,
+  HTMLSelectElement: browser.HTMLSelectElement,
+  HTMLTextAreaElement: browser.HTMLTextAreaElement,
+  Event: browser.Event,
+  KeyboardEvent: browser.KeyboardEvent,
+});
+
 test("the shell owns Save routing across Source, clean fallback, modifiers, remount, modal, and retention failure", async () => {
-  const browser = new Window({ url: "http://tauri.localhost" });
-  browser.document.body.innerHTML = '<div id="app"></div>';
   Object.defineProperty(browser.navigator, "platform", { configurable: true, value: "Win32" });
-  Object.assign(globalThis, {
-    window: browser,
-    document: browser.document,
-    HTMLElement: browser.HTMLElement,
-    HTMLInputElement: browser.HTMLInputElement,
-    HTMLSelectElement: browser.HTMLSelectElement,
-    HTMLTextAreaElement: browser.HTMLTextAreaElement,
-    Event: browser.Event,
-    KeyboardEvent: browser.KeyboardEvent,
-  });
 
   const project = {
     sessionId: "save-session", projectId: "save-project", title: "Save Project", folderName: "save-project",
@@ -268,4 +270,72 @@ test("the shell owns Save routing across Source, clean fallback, modifiers, remo
   assert.equal(closes, 0);
   assert.match(document.querySelector<HTMLTextAreaElement>(".source-editor")?.value ?? "", /Unretained close/);
   assert.match(document.querySelector("#app-status")?.textContent ?? "", /could not be retained/);
+});
+
+test("Story Save takes one route from toolbar and keyboard, and a refusal never flushes or reports Saved", async () => {
+  Object.defineProperty(browser.navigator, "platform", { configurable: true, value: "Win32" });
+  const project = {
+    sessionId: "story-save-session", projectId: "story-save-project", title: "Story Save", folderName: "story-save",
+    chapterId: "chapter", chapterName: "Chapter", sceneId: "scene", sceneName: "Scene",
+    sdkVersion: "8.5.3", resolution: { width: 1280, height: 720 },
+  };
+  let accepted = "Hello", revision = 3;
+  const workspace = () => ({
+    projectRevision: "1".repeat(64), sourceMapRevision: String(revision).repeat(64), entrySceneId: "scene",
+    lastOpen: { chapterId: "chapter", sceneId: "scene" }, canUndo: revision > 3, canRedo: false,
+    chapters: [{ id: "chapter", displayName: "Chapter", directory: "game" }],
+    scenes: [{ id: "scene", chapterId: "chapter", displayName: "Scene", technicalLabel: "scene", sourcePath: "game/scene.rpy", sourceRevision: String(revision).repeat(64), sourceConflict: false, partial: false,
+      beats: [{ id: "line", byteStart: 15, byteEnd: 30, protected: false, payload: { type: "narration", text: accepted } }] }],
+    authoring: { characters: [], appearances: [], assets: [], variables: [] },
+  });
+  const sent: { commands: { beat: { text: string } }[] }[] = [];
+  let flushes = 0;
+  let refusal: { code: string; message: string; actionIndex: number } | undefined;
+  const request = async <T>(operation: CoreOperation, payload: Readonly<Record<string, unknown>> = {}): Promise<CoreResponse<T>> => {
+    let value: unknown = {};
+    if (operation === "project.listRecent") value = [];
+    else if (operation === "project.openPicker") value = project;
+    else if (operation === "project.status") value = "saved";
+    else if (operation === "project.flush") { flushes += 1; value = null; }
+    else if (operation === "source.list") value = { files: [], dirtyCount: 0, draftBytes: 0 };
+    else if (operation === "scene.list") value = workspace();
+    else if (operation === "scene.saveDrafts") {
+      sent.push(payload as unknown as (typeof sent)[number]);
+      if (refusal) return { protocolVersion: 1, requestId: "test", ok: false, error: refusal };
+      accepted = sent.at(-1)!.commands[0]!.beat.text; revision += 1; value = workspace();
+    }
+    return { protocolVersion: 1, requestId: "test", ok: true, value: value as T };
+  };
+  const status = (): string => document.querySelector("#app-status")?.textContent ?? "";
+  const draft = async (text: string): Promise<HTMLTextAreaElement> => {
+    if (!document.querySelector('[data-beat-id="line"] textarea')) document.querySelector<HTMLButtonElement>('[data-beat-id="line"] .beat-select')!.click();
+    const editor = document.querySelector<HTMLTextAreaElement>('[data-beat-id="line"] textarea')!;
+    editor.value = text; editor.dispatchEvent(new window.Event("input", { bubbles: true })); await ticks();
+    return editor;
+  };
+
+  const { startApplication } = await import("../src/main.js");
+  startApplication(request);
+  await ticks(); click("Open Loomlight Project"); await ticks(8);
+
+  await draft("From toolbar"); click("Save"); await ticks(10);
+  assert.equal(sent.length, 1); assert.equal(accepted, "From toolbar"); assert.equal(status(), "Saved");
+  await draft("From keyboard"); window.dispatchEvent(saveEvent({ ctrl: true })); await ticks(10);
+  assert.equal(sent.length, 2); assert.equal(accepted, "From keyboard"); assert.equal(status(), "Saved");
+  assert.equal(flushes, 0, "a Story Save never runs Flush afterwards");
+
+  // Core refuses the draft at index 0. Neither origin falls through to Flush or reports Saved.
+  refusal = { code: "INVALID_PAYLOAD", message: "The Scene operation is invalid.", actionIndex: 0 };
+  let editor = await draft("Refused draft");
+  click("Save"); await ticks(10);
+  window.dispatchEvent(saveEvent({ ctrl: true })); await ticks(10);
+  assert.equal(sent.length, 4); assert.equal(flushes, 0); assert.equal(accepted, "From keyboard");
+  assert.match(status(), /^Nothing was saved\./);
+  editor = document.querySelector<HTMLTextAreaElement>('[data-beat-id="line"] textarea')!;
+  assert.equal(editor.value, "Refused draft"); assert.equal(editor.closest<HTMLElement>("[data-beat-draft-key]")?.dataset.saveRefused, "true");
+
+  // With no beat drafts, Save in Story still runs Flush.
+  click("Cancel"); await ticks();
+  click("Save"); await ticks(10);
+  assert.equal(flushes, 1); assert.equal(sent.length, 4);
 });

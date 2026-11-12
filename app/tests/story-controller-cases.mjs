@@ -11,6 +11,7 @@ const names=[
  'Cancel and dirty Source draft refusal retain pending author input',
  'Ordinary external edits and stale revisions refuse with zero source writes',
  'Beat drafts stay attached across scenes and workspaces until Commit or Cancel',
+ 'Story Save accepts every beat draft across scenes in one transaction, or none',
 ];
 const scene=c=>c.workspace().scenes.find(s=>s.id===c.workspace().entrySceneId);
 // The scene Story shows, read from the selected row in the actual scene tree.
@@ -410,5 +411,50 @@ export const storyCases={
   await select(c,a.id);c.assert.equal(row(c,a.id).querySelector('textarea').value,'Draft A kept');
   await c.click('Cancel',row(c,a.id));await c.settle();
   c.assert.equal(row(c,a.id).dataset.beatDraft,'false');c.assert.equal(writes(),1);c.assert.deepEqual(await c.snapshot(),committed);
+ },
+ [names[10]]:async c=>{
+  const entry=scene(c),called=c.workspace().scenes.find(x=>x.displayName==='Called scene');c.assert(called);
+  const narration=id=>c.workspace().scenes.find(x=>x.id===id).beats.find(b=>b.payload.type==='narration'&&!b.owner);
+  const a=narration(entry.id),b=narration(called.id),choice=entry.beats.find(x=>x.payload.type==='choice');c.assert(a&&b&&choice);
+  const from=c.requests().length,ops=name=>c.requests().slice(from).filter(r=>r.request.operation===name);
+  const status=()=>c.document.querySelector('#app-status')?.textContent??'';
+  const openScene=async id=>{const name=c.workspace().scenes.find(x=>x.id===id).displayName;
+   [...c.document.querySelectorAll('.tree-scene-open')].find(x=>x.textContent===name).click();
+   await c.wait(()=>shownScene(c)===id&&c.document.querySelector('.scene-workspace .beat-card'));await c.settle();};
+  const type=async(id,text)=>{await select(c,id);c.enter(row(c,id).querySelector('textarea'),text);await c.settle();};
+  const save=async()=>{const at=c.requests().length;await c.click('Save',c.document.querySelector('.app-header'));
+   await c.wait(()=>!c.document.querySelector('.scene-workspace [disabled].beat-select')&&/^(Saved|Nothing was saved|Story changed)/.test(status()));await c.settle();return c.requests().slice(at);};
+  // Drafts in two scenes plus an invalid one. The renderer refuses before sending anything.
+  await type(a.id,'Story Save A');await select(c,choice.id);c.enter(row(c,choice.id).querySelector('[aria-label="Choice option text"]'),'');
+  await openScene(called.id);await type(b.id,'Story Save B');
+  const accepted=await c.snapshot();
+  const refused=await save();
+  c.assert(!refused.some(r=>r.request.operation==='scene.saveDrafts'),'An invalid draft must stop Story Save before any request');
+  c.assert.deepEqual(c.hashes(await c.snapshot()),c.hashes(accepted),'A refused Story Save writes nothing');c.assert.match(status(),/^Nothing was saved\. Choice text is required/);
+  c.assert.equal(shownScene(c),entry.id,'Story Save reveals the failing draft in its own scene');
+  c.assert.equal(row(c,choice.id).querySelector('[data-beat-draft-key]')?.dataset.saveRefused,'true');
+  await c.click('Cancel',row(c,choice.id));await c.settle();
+  // An ordinary external edit makes the request stale: core refuses with no writes and Story refreshes.
+  const external=await c.raw({driver:'externalAppend',path:entry.sourcePath});const externalSnapshot=await c.snapshot();
+  c.assert.deepEqual(externalSnapshot[entry.sourcePath],external.externalBytes);
+  const stale=await save(),staleSave=stale.find(r=>r.request.operation==='scene.saveDrafts');
+  // The refresh may record the external revision in the source map; scripts stay as the external writer left them.
+  c.assert.equal(staleSave?.errorCode,'SOURCE_CONFLICT');c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(externalSnapshot)),'A stale Story Save writes nothing');
+  c.assert(stale.some(r=>r.request.operation==='scene.list'&&r.responseOk),'A stale refusal refreshes Story');
+  c.assert.match(status(),/Save again\.$/);c.assert.equal(ops('project.flush').length,0);
+  // The second Save accepts both drafts in one request and one history entry.
+  const saved=await save(),request=saved.find(r=>r.request.operation==='scene.saveDrafts');
+  c.assert(request?.responseOk);c.assert.equal(request.request.payload.commands.length,2);c.assert.equal(status(),'Saved');
+  c.assert.equal(ops('scene.apply').length,0);c.assert.equal(ops('project.flush').length,0);
+  const after=await c.snapshot();
+  c.assert.equal(c.sourceText(after,entry.sourcePath),replaceOnce(c,c.sourceText(externalSnapshot,entry.sourcePath),`"${a.payload.text}"`,'"Story Save A"'));
+  c.assert.equal(c.sourceText(after,called.sourcePath),replaceOnce(c,c.sourceText(accepted,called.sourcePath),`"${b.payload.text}"`,'"Story Save B"'));
+  const others=snapshot=>Object.fromEntries(Object.entries(c.hashes(c.rpy(snapshot))).filter(([p])=>![entry.sourcePath,called.sourcePath].includes(p)));
+  c.assert.deepEqual(others(after),others(externalSnapshot));
+  for(const id of [a.id,b.id])c.assert(!c.document.querySelector(`[data-beat-id="${id}"][data-beat-draft="true"]`));
+  await c.click('Undo');await c.wait(()=>c.lastMutation()?.request.payload.command.type==='undo'&&c.lastMutation().response.ok);await c.settle();
+  c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(externalSnapshot)),'One Undo reverts the whole Story Save');
+  await c.click('Redo');await c.wait(()=>c.lastMutation()?.request.payload.command.type==='redo'&&c.lastMutation().response.ok);await c.settle();
+  c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(after)));
  },
 };

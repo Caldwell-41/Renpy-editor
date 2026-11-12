@@ -408,6 +408,10 @@ export interface SceneActions {
   readonly draftsChanged?: () => void;
   readonly validateAssignment?: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision">) => Promise<AssignmentDraftValidation>;
   readonly apply: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision">) => Promise<SceneWorkspace>;
+  /** Story Save: accepts every beat draft command in one transaction, or none. */
+  readonly saveDrafts?: (commands: readonly SceneCommand[], expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision">) => Promise<SceneWorkspace>;
+  /** Reads the current workspace, so Story can refresh after a stale refusal. */
+  readonly load?: () => Promise<SceneWorkspace>;
   readonly status: (message: string, kind?: "normal" | "error") => void;
   readonly present: (assetId: string, purpose: MediaPresentation["purpose"]) => Promise<MediaPresentation>;
   readonly resolution: { readonly width: number; readonly height: number };
@@ -527,6 +531,14 @@ export function storyScene(model: SceneWorkspace, preferred?: string): SceneDocu
   return model.scenes.find(scene => scene.id === preferred) ?? model.scenes.find(scene => scene.id === model.lastOpen.sceneId) ?? model.scenes[0];
 }
 
+/** A beat draft that stopped a Story Save, and why. */
+export interface StorySaveFailure { readonly sceneId: string; readonly beatId?: string; readonly message: string }
+export type StorySaveOutcome =
+  | { readonly kind: "saved" }
+  | { readonly kind: "busy" | "blocked" }
+  // Every failing draft, in store order. Story reveals the first.
+  | { readonly kind: "refused"; readonly failures: readonly StorySaveFailure[] };
+
 /**
  * The Story view for one open project session. The shell keeps it while the author
  * visits other workspaces, so beat drafts and their editors survive (ADR 0024).
@@ -546,6 +558,8 @@ export interface StoryView {
   firstDraft(): { readonly sceneId: string; readonly beatId?: string } | undefined;
   /** Resolves true when the author may leave Story; beat drafts never block. */
   settle(): Promise<boolean>;
+  /** Story Save: checks every pending beat draft, then saves all of them or none. */
+  save(): Promise<StorySaveOutcome>;
   dispose(): void;
 }
 
@@ -587,7 +601,8 @@ export function renderStoryView(
   let pendingWrites = 0;
   // Beat drafts for the project session, keyed by beat id or by a new beat's insertion place.
   // A new beat is a draft from the moment it is added; an existing beat only once edited.
-  interface BeatDraft { readonly panel: HTMLElement; readonly sceneId: string; readonly beatId?: string; readonly place?: () => { body: BodyRef; position: Position }; readonly read?: () => BeatPayload }
+  // `command` throws when the draft is incomplete, invalid or conflicts with source.
+  interface BeatDraft { readonly panel: HTMLElement; readonly sceneId: string; readonly beatId?: string; readonly place?: () => { body: BodyRef; position: Position }; readonly read?: () => BeatPayload; readonly command: () => SceneCommand }
   let newBeatDrafts = 0;
   const beatDrafts = new Map<string, BeatDraft>();
   const isPending = (draft: BeatDraft): boolean => !draft.beatId || draft.panel.dataset.unsubmitted === "true";
@@ -649,13 +664,19 @@ export function renderStoryView(
     return true;
   };
 
+  // Locks every Story control while a write is in flight; the result unlocks them.
+  const lockStory = (): (() => void) => {
+    const locks = [host, treeHost].flatMap(root => [...root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLButtonElement>("input,select,textarea,button")]).map(control => ({ control, disabled: control.disabled }));
+    locks.forEach(({ control }) => { control.disabled = true; }); pendingWrites++;
+    return () => { pendingWrites--; locks.forEach(({ control, disabled }) => { if (control.isConnected) control.disabled = disabled; }); };
+  };
+
   const mutate = async (command: SceneCommand, after?: (before: SceneWorkspace, next: SceneWorkspace) => void, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision"> = model, owner?: HTMLElement): Promise<boolean> => {
     if(disposed || actions.current?.() === false)return false;
     if (drafts().some(draft => draft !== owner && !owner?.contains(draft))) { actions.status("Complete or cancel the other edit first. Input retained.", "error"); focusDraft(); return false; }
     if (pendingWrites) { actions.status("Wait for the current change to finish.", "error"); return false; }
     const before = model;
-    const locks = [host, treeHost].flatMap(root => [...root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLButtonElement>("input,select,textarea,button")]).map(control => ({ control, disabled: control.disabled }));
-    locks.forEach(({ control }) => { control.disabled = true; }); pendingWrites++;
+    const unlock = lockStory();
     actions.status("Saving…");
     try {
       const next = await actions.apply(command, expected);
@@ -673,7 +694,74 @@ export function renderStoryView(
       actions.status(`${friendlyError(error, "Scene change could not be saved")} Input retained. If this source structure cannot be moved safely, edit it in Source.`, "error");
       focusDraft();
       return false;
-    } finally { pendingWrites--; locks.forEach(({ control, disabled }) => { if (control.isConnected) control.disabled = disabled; }); }
+    } finally { unlock(); }
+  };
+
+  // Shows a draft's editor: its scene, its beat and any condition that hides it.
+  const reveal = (draft: BeatDraft): void => {
+    const scene = model.scenes.find(item => item.id === draft.sceneId);
+    if (scene && scene.id !== selectedSceneId) selectScene(scene.id);
+    const place = draft.place?.().body, anchor = draft.beatId ?? (place?.type === "branch" ? place.branchId : undefined);
+    if (scene && anchor) {
+      const ids = ancestry(scene, anchor);
+      for (const id of ids) collapsedConditions.delete(id);
+      if (focusedBranch && !ids.has(focusedBranch)) focusedBranch = undefined;
+    }
+    selectedBeatId = draft.beatId;
+    draw();
+    draft.panel.querySelector<HTMLElement>("input, textarea, select")?.focus();
+  };
+  // Reads every pending draft's command. Nothing is sent while any draft fails.
+  const preflight = (): { readonly drafts: BeatDraft[]; readonly commands: SceneCommand[]; readonly failures: [BeatDraft, string][] } => {
+    const pending = pendingDrafts(), commands: SceneCommand[] = [], failures: [BeatDraft, string][] = [];
+    for (const draft of pending) { try { commands.push(draft.command()); } catch (error) { failures.push([draft, friendlyError(error, "This beat draft is invalid. Draft retained.")]); } }
+    return { drafts: pending, commands, failures };
+  };
+  // Marks every failing draft and reveals the first. An approved mock will set how several show.
+  const refuseSave = (failures: readonly (readonly [BeatDraft, string])[], lead = "Nothing was saved."): StorySaveOutcome => {
+    for (const draft of beatDrafts.values()) delete draft.panel.dataset.saveRefused;
+    for (const [draft] of failures) draft.panel.dataset.saveRefused = "true";
+    const [first, reason] = failures[0]!;
+    reveal(first);
+    actions.status(`${lead} ${reason}`, "error");
+    return { kind: "refused", failures: failures.map(([draft, message]) => ({ sceneId: draft.sceneId, ...(draft.beatId ? { beatId: draft.beatId } : {}), message })) };
+  };
+  const saveDrafts = async (): Promise<StorySaveOutcome> => {
+    if (disposed || actions.current?.() === false || !actions.saveDrafts) return { kind: "blocked" };
+    if (settling || pendingWrites) { actions.status("Wait for the current Story change to finish. Nothing was saved.", "error"); return { kind: "busy" }; }
+    if (hasDraft()) { actions.status("Commit or cancel the open Story form before saving. Nothing was saved.", "error"); focusDraft(); return { kind: "blocked" }; }
+    const { drafts: saving, commands, failures } = preflight();
+    if (failures.length) return refuseSave(failures);
+    const expected = expectedRevisions(model);
+    const unlock = lockStory();
+    actions.status("Saving…");
+    try {
+      const next = await actions.saveDrafts(commands, expected);
+      if (disposed || actions.current?.() === false) return { kind: "blocked" };
+      for (const [key, draft] of beatDrafts) if (saving.includes(draft)) { if (!draft.beatId) draft.panel.remove(); beatDrafts.delete(key); }
+      model = next; selectedBeatId = undefined;
+      draw(); draftsChanged();
+      return { kind: "saved" };
+    } catch (error) {
+      if (disposed || actions.current?.() === false) return { kind: "blocked" };
+      const { code, actionIndex } = error as { code?: string; actionIndex?: number };
+      // A stale model refreshes; only drafts whose own beat changed then conflict (ADR 0007: no retry).
+      if (code === "SOURCE_CONFLICT" && actions.load) {
+        try { model = await actions.load(); } catch { /* Keep the shown model; the author can save again. */ }
+        if (disposed || actions.current?.() === false) return { kind: "blocked" };
+        draw();
+        const lead = "Story changed in source and was refreshed. Nothing was saved.";
+        const conflicts = preflight().failures;
+        if (conflicts.length) return refuseSave(conflicts, lead);
+        actions.status(`${lead} Save again.`, "error");
+        return { kind: "refused", failures: [] };
+      }
+      const reason = friendlyError(error, "Story drafts could not be saved.");
+      const refused = actionIndex === undefined ? undefined : saving[actionIndex];
+      if (refused) return refuseSave([[refused, `${reason} Drafts retained.`]]);
+      actions.status(`Nothing was saved. ${reason} Drafts retained.`, "error");
+      return { kind: "refused", failures: [] };
+    } finally { unlock(); }
   };
 
   const draftGuard = (): boolean => {
@@ -1413,7 +1501,8 @@ export function renderStoryView(
       if (!current || !node || JSON.stringify(node.payload) !== accepted) throw new Error("This Beat changed in source after the draft began. Draft retained.");
       return { scene: current, expectedBody: beatBody(node), captured: expectedRevisions(model) };
     };
-    const editor = buildBeatEditor(model, beat.payload, true, liveActions, assignmentValidation(() => base(), value => { const current = base(); return { type: "updateBodyBeat", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, beatId: beat.id, expectedBody: current.expectedBody, beat: value }; }));
+    const updateCommand = (payload: BeatPayload, current = base()): SceneCommand => ({ type: "updateBodyBeat", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, beatId: beat.id, expectedBody: current.expectedBody, beat: payload });
+    const editor = buildBeatEditor(model, beat.payload, true, liveActions, assignmentValidation(() => base(), value => updateCommand(value)));
     const panel = editor.host; panel.classList.add("expanded-beat");panel.dataset.beatType=beat.payload.type;
     if (beat.payload.type === "showScreen" || beat.payload.type === "hideScreen" || beat.payload.type === "callScreen") {
       const details = document.createElement("details"), summary = document.createElement("summary"); summary.textContent = "Source and effects";
@@ -1484,7 +1573,7 @@ export function renderStoryView(
             saved=true;dropDraft(beat.id);selectedBeatId = next.scenes.find((item) => item.id === scene.id)?.beats.find((item) => item.payload.type === "dialogue" && !oldIds.has(item.id))?.id;
           }, current.captured, panel);
         } else {
-          await mutate({ type: "updateBodyBeat", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, beatId: beat.id, expectedBody: current.expectedBody, beat: payload }, () => { saved=true;dropDraft(beat.id);selectedBeatId = undefined; }, current.captured, panel);
+          await mutate(updateCommand(payload, current), () => { saved=true;dropDraft(beat.id);selectedBeatId = undefined; }, current.captured, panel);
         }
       } catch (error) {
         actions.status(friendlyError(error, `Beat ${index + 1} is invalid`), "error");
@@ -1507,7 +1596,7 @@ export function renderStoryView(
     actionsRow.append(...(screenBeat?[commit,cancel]:[cancel,commit]));
     const secondary=panel.querySelector("details.story-screen-secondary");panel.append(actionsRow);if(secondary)panel.append(secondary);
     dirtyDraft(panel, editor.controls); card.append(panel);
-    keepDraft(beat.id, { panel, sceneId: scene.id, beatId: beat.id, read: editor.read });
+    keepDraft(beat.id, { panel, sceneId: scene.id, beatId: beat.id, read: editor.read, command: () => updateCommand(editor.read()) });
   };
 
   const assignmentValidation = (base: () => { scene: SceneDocument; captured: ExpectedRevisions }, command: (beat: BeatPayload) => SceneCommand): ValidateAssignment => async beat => {
@@ -1528,6 +1617,13 @@ export function renderStoryView(
       const current = model.scenes.find(item => item.id === scene.id);
       if (!current) throw new Error("This Scene is no longer available. Draft retained.");
       return { scene: current, captured: expectedRevisions(model) };
+    };
+    // A new beat finds its body and anchor by id; if source dropped either, the draft conflicts.
+    const insertCommand = (payload: BeatPayload, location: { body: BodyRef; position: Position }, current = base()): SceneCommand => {
+      const { body, position } = location, anchor = position.type === "before" ? JSON.stringify(position.anchor) : undefined;
+      const bodyKept = body.type === "root" || current.scene.beats.some(item => item.id === body.branchId && item.conditionalBranch?.groupId === body.groupId);
+      if (!bodyKept || (anchor && !bodyNodes(current.scene, body).some(node => JSON.stringify(nodeRef(node)) === anchor))) throw new Error("This beat's place changed in source after the draft began. Draft retained.");
+      return { type: "insertBodyBeat", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, ...location, beat: payload };
     };
     const openingInsertion = structuredClone(insertion ?? screenInsertion ?? {sceneId:scene.id,body,position,expectedSourceRevision:scene.sourceRevision});
     let rememberedInsertion = false;
@@ -1568,7 +1664,7 @@ export function renderStoryView(
     placement.host.classList.add("scene-draft");
     for(const event of ["input","change"])placement.host.addEventListener(event,()=>{if(remember())delete placement.host.dataset.unsubmitted;else placement.host.dataset.unsubmitted="true";updatePendingMarker();});
     const editorHost = document.createElement("div"),secondaryHost=document.createElement("div");secondaryHost.className="story-screen-secondary";
-    const validateNew = assignmentValidation(base, beat => ({ type: "insertBodyBeat", sceneId: scene.id, expectedSourceRevision: base().scene.sourceRevision, ...chosenLocation(), beat }));
+    const validateNew = assignmentValidation(base, beat => insertCommand(beat, chosenLocation()));
     let editor = buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, liveActions, validateNew);
     const typeDrafts = new Map<string, BeatEditor>([[type.value, editor]]);
     const replaceEditor = (): void => { placement.host.hidden=!usesPlacement();if(placement.host.hidden)delete placement.host.dataset.unsubmitted;destination.hidden=screenType();remember();editor = typeDrafts.get(type.value) ?? buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, liveActions, validateNew); typeDrafts.set(type.value, editor); editorHost.replaceChildren(editor.host);secondaryHost.replaceChildren(...(editor.secondary?[editor.secondary]:[]));panel.classList.toggle("story-screen-editor",screenType());dirtyDraft(panel, editor.controls); };
@@ -1593,7 +1689,7 @@ export function renderStoryView(
         const locks = controls.map(control => ({ control, disabled: control.disabled }));
         controls.forEach(control=>control.disabled=true);
         let insertedId:string|undefined;
-        const saved=await mutate({ type: "insertBodyBeat", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, ...location, beat: payload }, (before,next) => {
+        const saved=await mutate(insertCommand(payload, location, current), (before,next) => {
           selectedBeatId = undefined;panel.remove();dropDraft(key);
           const acceptedScene=next.scenes.find(s=>s.id===scene.id);if(screenType()&&acceptedScene)rememberScreenInsertion({sceneId:scene.id,...location,expectedSourceRevision:acceptedScene.sourceRevision});
           const previousIds=new Set(before.scenes.find(s=>s.id===scene.id)?.beats.map(b=>b.id));
@@ -1613,7 +1709,7 @@ export function renderStoryView(
     // A new beat moves with the place the author chooses, until it is added.
     const place=():{body:BodyRef;position:Position}=>{try{return chosenLocation();}catch{return {body,position};}};
     placement.host.addEventListener("change",()=>{const target=bodyList(place().body);if(target&&panel.parentElement!==target)target.prepend(panel);});
-    keepDraft(key,{panel,sceneId:scene.id,place,read:()=>editor.read()});updatePendingMarker();type.focus();
+    keepDraft(key,{panel,sceneId:scene.id,place,read:()=>editor.read(),command:()=>insertCommand(editor.read(),chosenLocation())});updatePendingMarker();type.focus();
   };
 
   draw();
@@ -1633,6 +1729,7 @@ export function renderStoryView(
     firstDraft: () => { const draft = pendingDrafts()[0]; return draft && { sceneId: draft.sceneId, ...(draft.beatId ? { beatId: draft.beatId } : {}) }; },
     busy: () => pendingWrites > 0 || settling !== undefined,
     settle,
+    save: saveDrafts,
     dispose: () => {
       disposed = true; beatDrafts.clear();
       cancelBeatDrag?.();window.removeEventListener("loomlight-reset-layout",resetLayout);

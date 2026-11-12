@@ -66,7 +66,7 @@ let operationGeneration = 0;
 let operationGenerations = new WeakMap<object, number>();
 const operationScopes = {
   projectOpen: {}, projectClose: {}, projectCreate: {}, persistence: {},
-  authoringLoad: {}, sceneLoad: {}, sourceLoad: {}, sourceSave: {}, sourceNavigation: {}, recovery: {}, wizardDestination: {}, wizardSdk: {},
+  authoringLoad: {}, sceneLoad: {}, sourceLoad: {}, sourceSave: {}, storySave: {}, sourceNavigation: {}, recovery: {}, wizardDestination: {}, wizardSdk: {},
 };
 const activeAuthoringOperations = new Map<string, number>();
 const activeFlushOperations = new Map<string, number>();
@@ -490,7 +490,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
     navigate: target => requestProjectNavigation(project, "source", target),
     refreshPersistence: () => { if (currentProject?.sessionId === project.sessionId) void refreshPersistenceStatus(project, viewGeneration); },
   });
-  const shellSave=button(surface==="source"?"Save Source":"Save");shellSave.addEventListener("click",()=>{if(hasBlockingModal())return;if(activeReferenceController){void activeReferenceController.save();return;}const controller=currentSourceController(project);const capture=controller?.captureSaveIntent("toolbar",false);if(controller&&capture?.kind==="captured")void requestSourceSave(project,controller,capture.intent);else if(capture?.kind==="blocked")setStatus(capture.message,"error");else requestProjectFlush(project);});
+  const shellSave=button(surface==="source"?"Save Source":"Save");shellSave.addEventListener("click",()=>routeSave(project,"toolbar"));
   document.querySelector(".app-header")?.append(shellSave);
   const settingsButton=document.querySelector<HTMLElement>(".shell-settings");if(settingsButton){settingsButton.classList.add("sidebar-settings");settingsButton.ariaLabel="Settings";settingsButton.title="Settings";sidebar.insertBefore(settingsButton,close);}
   document.querySelector(".app-header")?.append(runtimeWorkspace.toolbar);
@@ -707,6 +707,13 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
         expectedAuthoringRevision: expected.authoringRevision,
         command,
       }),
+      saveDrafts: async (commands, expected) => runAuthoringOperation(project, operationScopes.storySave, () => projectValue<SceneWorkspace>(project, "scene.saveDrafts", {
+        expectedProjectRevision: expected.projectRevision,
+        expectedSourceMapRevision: expected.sourceMapRevision,
+        expectedAuthoringRevision: expected.authoringRevision,
+        commands,
+      })),
+      load: () => projectValue<SceneWorkspace>(project, "scene.list"),
       apply: async (command: SceneCommand, expected) => {
         const operationToken = beginAuthoringCompletion(project, command);
         if (!operationToken) throw new Error("Another persistence operation is still in progress.");
@@ -1105,7 +1112,30 @@ function isSaveShortcut(event: KeyboardEvent): boolean {
     : event.ctrlKey && !event.metaKey;
 }
 
-function requestProjectFlush(project: OpenProject): void {
+// Toolbar Save and Cmd/Ctrl+S take this one route: modal, reference library, Source
+// capture, Story drafts, then Flush. A refused Story Save never falls through to Flush.
+function routeSave(project: OpenProject, origin: "keyboard" | "toolbar"): void {
+  if (hasBlockingModal()) { recordSaveTrace(`route=suppressed;origin=${origin};reason=modal`); return; }
+  if (activeReferenceController) { void activeReferenceController.save(); return; }
+  const controller = currentSourceController(project);
+  const capture = controller?.captureSaveIntent(origin, origin === "keyboard");
+  if (controller && capture?.kind === "captured") { void requestSourceSave(project, controller, capture.intent); return; }
+  if (capture?.kind === "blocked") { setStatus(capture.message, "error"); return; }
+  const story = storyView;
+  if (story?.host.isConnected && story.hasDrafts()) { void requestStorySave(project, story, origin); return; }
+  requestProjectFlush(project, origin);
+}
+
+async function requestStorySave(project: OpenProject, story: StoryView, origin: "keyboard" | "toolbar"): Promise<void> {
+  recordSaveTrace(`route=story;origin=${origin};phase=start`);
+  const outcome = await story.save();
+  recordSaveTrace(`route=story;origin=${origin};phase=${outcome.kind}`);
+  if (outcome.kind === "saved" && currentProject?.sessionId === project.sessionId) {
+    await refreshPersistenceStatus(project, viewGeneration, "Story drafts saved, but project status could not be confirmed");
+  }
+}
+
+function requestProjectFlush(project: OpenProject, origin: "keyboard" | "toolbar"): void {
   if (activeAuthoringOperations.has(project.sessionId)) {
     setStatus("Authoring operation in progress — no additional Flush started");
     return;
@@ -1116,7 +1146,7 @@ function requestProjectFlush(project: OpenProject): void {
   }
   const token = beginCompletion(project, operationScopes.persistence);
   activeFlushOperations.set(project.sessionId, token.operation);
-  recordSaveTrace("route=flush;origin=keyboard;context=non-source;phase=start");
+  recordSaveTrace(`route=flush;origin=${origin};context=non-source;phase=start`);
   setStatus("Saving…");
   void projectValue(project, "project.flush").then(async () => {
     if (!completionIsCurrent(token)) return;
@@ -1124,9 +1154,9 @@ function requestProjectFlush(project: OpenProject): void {
     if (!completionIsCurrent(token)) return;
     const rendered = persistenceMessage(state, currentSourceController(project)?.hasUnretainedInput() ?? false);
     setStatus(rendered.text, rendered.kind);
-    recordSaveTrace(`route=flush;origin=keyboard;context=non-source;phase=completed;status=${rendered.text}`);
+    recordSaveTrace(`route=flush;origin=${origin};context=non-source;phase=completed;status=${rendered.text}`);
   }).catch((error) => {
-    recordSaveTrace("route=flush;origin=keyboard;context=non-source;phase=error");
+    recordSaveTrace(`route=flush;origin=${origin};context=non-source;phase=error`);
     if (completionIsCurrent(token)) setStatus(message(error, "Save could not be confirmed"), "error");
   }).finally(() => {
     finishFlushCompletion(token);
@@ -1170,19 +1200,7 @@ function installListeners(): void {
       setStatus("Save is already being handled.");
       return;
     }
-    if (hasBlockingModal()) { recordSaveTrace("route=suppressed;origin=keyboard;reason=modal"); return; }
-    if(activeReferenceController){void activeReferenceController.save();return;}
-    const controller = currentSourceController(project);
-    const source = controller?.captureSaveIntent("keyboard", true);
-    if (controller && source?.kind === "captured") {
-      void requestSourceSave(project, controller, source.intent);
-      return;
-    }
-    if (source?.kind === "blocked") {
-      setStatus(source.message, "error");
-      return;
-    }
-    requestProjectFlush(project);
+    routeSave(project, "keyboard");
   });
 }
 

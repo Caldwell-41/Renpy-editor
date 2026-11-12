@@ -319,6 +319,7 @@ fn main() {
                 | "project.flush"
                 | "scene.list"
                 | "scene.apply"
+                | "scene.saveDrafts"
                 | "scene.recovery"
                 | "scene.resolveRecovery"
                 | "flow.list"
