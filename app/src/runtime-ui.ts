@@ -1,6 +1,6 @@
 import type { CoreOperation } from "./protocol.js";
 import type { SourceTarget, SourceWorkspaceController } from "./source-ui.js";
-import { awaitRuntimeRequest, prepareRuntimeInput, type RuntimeKind, type RuntimePreparation, type RuntimeRevisionChoice, type RuntimeTicket, type ScreenPreview } from "./runtime-preparation.js";
+import { awaitRuntimeRequest, prepareRuntimeInput, type RuntimeKind, type RuntimePreparationActions, type RuntimePreparation, type RuntimeRevisionChoice, type RuntimeTicket, type ScreenPreview } from "./runtime-preparation.js";
 
 export interface RuntimeStatus {
   operationId: string; phase: string; exitCode: number | null; output: string;
@@ -20,7 +20,7 @@ export interface RuntimeActions {
   sessionId: string; sdkVersion: string;
   request: <T>(operation: CoreOperation, payload?: Readonly<Record<string, unknown>>) => Promise<T>;
   current: () => boolean;
-  capture: () => { controller?: SourceWorkspaceController; sceneRoot: ParentNode; current: () => boolean };
+  capture: () => { controller?: SourceWorkspaceController; storyDrafts?: RuntimePreparationActions["storyDrafts"]; current: () => boolean };
   coordinate: <T>(task: () => Promise<T>) => Promise<T>;
   navigate: (target: SourceTarget) => Promise<void>;
   refreshPersistence: () => void;

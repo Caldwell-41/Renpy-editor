@@ -13,7 +13,7 @@ try {
   await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/__runtime`);
   await page.evaluate(async()=>{
     const {RuntimeWorkspace}=await import("/src/runtime-ui.ts");
-    const runtime=new RuntimeWorkspace({sessionId:"session",sdkVersion:"8.5.3",current:()=>true,capture:()=>({sceneRoot:document.body,current:()=>true}),coordinate:task=>task(),navigate:async()=>{},refreshPersistence:()=>{},request:async operation=>{
+    const runtime=new RuntimeWorkspace({sessionId:"session",sdkVersion:"8.5.3",current:()=>true,capture:()=>({current:()=>true}),coordinate:task=>task(),navigate:async()=>{},refreshPersistence:()=>{},request:async operation=>{
       if(operation==="sdk.discover")return[{id:"sdk",version:"8.5.3",compatible:true,displayName:"SDK"}];
       if(operation==="source.list")return{dirtyCount:0,files:[]};
       if(operation==="runtime.prepare")return{preparationId:"p",savedRevision:"abc".repeat(20),trustId:null,projectPath:"synthetic-project",sdkPath:"verified-sdk",sdkVersion:"8.5.3",sdkRevision:"123".repeat(20),inputs:["game/雪 diagnostic.rpy"],trustNotice:"Compile, lint and play execute project Python. Session consent is not a sandbox."};

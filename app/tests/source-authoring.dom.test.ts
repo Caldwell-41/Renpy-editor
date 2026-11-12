@@ -762,10 +762,10 @@ test("runtime preparation retains current Source input and Scene forms under the
     await tick();
     const editor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
     editor.value = editor.value.replace("Hello", "Pending"); // Deliberately before input event.
-    const scene = document.createElement("section");
-    if (choice === "commitScene" || choice === "saved") { scene.className = "scene-draft"; scene.dataset.unsubmitted = "true"; scene.innerHTML = '<input value="uncommitted">'; document.body.append(scene); }
+    let revealed = 0;
+    const storyDrafts = { has: () => choice === "commitScene" || choice === "saved", reveal: () => { revealed += 1; } };
     const preparation = await prepareRuntimeInput("run", "sdk-capability", {
-      controller, sceneRoot: document, current: () => true, coordinate: async (task) => task(),
+      controller, storyDrafts, current: () => true, coordinate: async (task) => task(),
       choose: async ({ sourceDrafts, pendingScene }) => { assert.equal(sourceDrafts, 1); assert.equal(pendingScene, choice === "saved" || choice === "commitScene"); return choice; },
       request: async <T>(operation: import("../src/protocol.js").CoreOperation) => {
         calls.push(operation);
@@ -781,7 +781,7 @@ test("runtime preparation retains current Source input and Scene forms under the
     assert.equal(calls.includes("source.saveAll"), choice === "saveAll");
     assert.match(model.text!, /Pending/);
     assert.equal(model.dirty, choice !== "saveAll");
-    if (scene.isConnected) assert.equal(scene.querySelector("input")?.value, "uncommitted");
+    assert.equal(revealed, choice === "commitScene" ? 1 : 0);
     assert.equal(document.querySelector<HTMLTextAreaElement>(".source-editor")!.readOnly, false);
     controller.dispose();
   }
@@ -795,7 +795,7 @@ test("runtime Save All failure releases the Source lease and never prepares exec
   await tick();
   const calls: string[] = [];
   await assert.rejects(prepareRuntimeInput("validate", "sdk", {
-    controller, sceneRoot: document, current: () => true, coordinate: async (task) => task(), choose: async () => "saveAll",
+    controller, current: () => true, coordinate: async (task) => task(), choose: async () => "saveAll",
     request: async <T>(operation: import("../src/protocol.js").CoreOperation) => {
       calls.push(operation);
       if (operation === "source.list") return inventory("dirty", true) as T;
@@ -824,7 +824,7 @@ test("runtime inventory ticket releases Source lease before cancellable long wor
   let cancelled = false;
   let observed = false;
   const result = await prepareRuntimeInput("run", "sdk", {
-    controller, sceneRoot: document, current: () => true, signal: abort.signal,
+    controller, current: () => true, signal: abort.signal,
     coordinate: async task => { coordinating = true; try { return await task(); } finally { coordinating = false; } },
     choose: async () => "saved",
     request: async <T>(operation: import("../src/protocol.js").CoreOperation) => {
@@ -860,9 +860,8 @@ test("runtime completion cancellation keeps its receipt while authoring owns the
       await tick();
       const editor = document.querySelector<HTMLTextAreaElement>(".source-editor")!;
       editor.value += "\n# retained across completed cancellation";
-      const scene = document.createElement("section");
-      scene.className = "scene-draft"; scene.dataset.unsubmitted = "true";
-      scene.innerHTML = '<input value="retained Scene input">'; document.body.append(scene);
+      let revealed = 0;
+      const storyDrafts = { has: () => true, reveal: () => { revealed += 1; } };
       const abort = new AbortController();
       let current = true;
       let coordinating = false;
@@ -872,7 +871,7 @@ test("runtime completion cancellation keeps its receipt while authoring owns the
       const calls: { operation: string; payload: Readonly<Record<string, unknown>> | undefined }[] = [];
       try {
         const preparing = prepareRuntimeInput(kind, "sdk", {
-          controller, sceneRoot: document, current: () => current, signal: abort.signal,
+          controller, storyDrafts, current: () => current, signal: abort.signal,
           coordinate: async task => { coordinating = true; try { return await task(); } finally { coordinating = false; } },
           choose: async () => "saved",
           request: async <T>(operation: import("../src/protocol.js").CoreOperation, payload?: Readonly<Record<string, unknown>>) => {
@@ -908,7 +907,7 @@ test("runtime completion cancellation keeps its receipt while authoring owns the
         assert.match(editor.value, /retained across completed cancellation/);
         assert.match(model.text!, /retained across completed cancellation/);
         assert.equal(model.dirty, true);
-        assert.equal(scene.querySelector("input")?.value, "retained Scene input");
+        assert.equal(revealed, 0);
       } finally { controller.dispose(); }
     }
   }

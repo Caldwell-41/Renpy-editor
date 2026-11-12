@@ -21,6 +21,7 @@ export const STORY_CASES=[
  'Manual branch preview and Branches navigation agree with exact Source locations',
  'Cancel and dirty Source draft refusal retain pending author input',
  'Ordinary external edits and stale revisions refuse with zero source writes',
+ 'Beat drafts stay attached across scenes and workspaces until Commit or Cancel',
 ];
 const NARROW=STORY_CASES.filter((_,i)=>[0,1,2,7,8].includes(i));
 const REOPEN_CASE='Undo Redo preserves exact bytes and process reopen retains maps with session history reset';

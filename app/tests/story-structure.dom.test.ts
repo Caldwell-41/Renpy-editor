@@ -2,14 +2,14 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
 import { buildConditionEditor } from "../src/story-condition-editor.js";
-import { deriveScenePreview, hasSceneDraft, renderSceneAuthoring, type SceneCommand, type SceneWorkspace, type StoryTarget } from "../src/scene-ui.js";
+import { deriveScenePreview, hasSceneDraft, renderStoryView, type SceneCommand, type SceneWorkspace, type StoryTarget } from "../src/scene-ui.js";
 import { renderBranches, type FlowBody } from "../src/branches-ui.js";
 import { flagCondition, storyFixture } from "./story-controls-fixture.js";
 const tick = async (): Promise<void> => { await new Promise(resolve => setTimeout(resolve, 0)); };
 function setup(apply?: (command: SceneCommand) => Promise<SceneWorkspace>, fixture = storyFixture(3)) {
   const browser = new Window(); Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, HTMLInputElement: browser.HTMLInputElement, HTMLSelectElement: browser.HTMLSelectElement, Event: browser.Event, KeyboardEvent: browser.KeyboardEvent });
   document.body.innerHTML = '<main></main><aside></aside>'; const host = document.querySelector<HTMLElement>("main")!; const model = fixture; const calls: { command: SceneCommand; expected: unknown }[] = []; const status: string[] = []; const navigation: StoryTarget[] = []; const continuations: unknown[] = [];
-  const dispose = renderSceneAuthoring(host, document.querySelector("aside")!, model, { apply: async (command, expected) => { calls.push({ command, expected }); return apply ? apply(command) : model; }, resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); }, status: text => status.push(text), viewScene: target => navigation.push(target), viewContinuation: (...args) => continuations.push(args), viewSource: () => {} });
+  const dispose = renderStoryView(host, document.querySelector("aside")!, model, { apply: async (command, expected) => { calls.push({ command, expected }); return apply ? apply(command) : model; }, resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); }, status: text => status.push(text), viewScene: target => navigation.push(target), viewContinuation: (...args) => continuations.push(args), viewSource: () => {} }).dispose;
   return { browser, host, model, calls, status, navigation, continuations, close: async () => { dispose(); await browser.happyDOM.close(); } };
 }
 function button(host: ParentNode, text: string): HTMLButtonElement { const found = [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === text); assert.ok(found, text); return found; }
@@ -69,9 +69,13 @@ test("manual preview never runs sibling bodies and changing its selection retain
   open(s.host, "a"); const text = row(s.host, "a").querySelector<HTMLTextAreaElement>("textarea")!; text.value = "Retained draft"; text.dispatchEvent(new Event("input", { bubbles: true })); const selector = s.host.querySelector<HTMLSelectElement>('select[data-preview-group-id="group"]')!; selector.value = "otherwise"; selector.dispatchEvent(new Event("change", { bubbles: true })); assert.ok(text.isConnected); assert.equal(text.value, "Retained draft"); assert.equal(s.calls.length, 0); await s.close();
 });
 
-test("collapse cannot hide drafts; branch focus retains ancestors and empty pass is inert", async () => {
-  const s = setup(); open(s.host, "a"); const text = row(s.host, "a").querySelector<HTMLTextAreaElement>("textarea")!; text.value = "Draft"; text.dispatchEvent(new Event("input", { bubbles: true })); button(s.host.querySelector('[data-condition-group-id="group"] > .story-group-heading')!, "Collapse condition").click(); assert.ok(text.isConnected); assert.equal(s.host.querySelector<HTMLElement>('[data-condition-group-id="group"] > .story-branches')!.hidden, false);
-  button(row(s.host, "a"), "Cancel").click(); button(s.host.querySelector('[data-condition-group-id="group"] > .story-group-heading')!, "Collapse condition").click(); assert.equal(s.host.querySelector<HTMLElement>('[data-condition-group-id="group"] > .story-branches')!.hidden, true); button(s.host.querySelector('[data-condition-group-id="group"] > .story-group-heading')!, "Expand condition").click();
+test("collapse keeps a marked draft; branch focus retains ancestors and empty pass is inert", async () => {
+  const s = setup(); open(s.host, "a"); const text = row(s.host, "a").querySelector<HTMLTextAreaElement>("textarea")!; text.value = "Draft"; text.dispatchEvent(new Event("input", { bubbles: true })); button(s.host.querySelector('[data-condition-group-id="group"] > .story-group-heading')!, "Collapse condition").click();
+  // A collapsed condition hides its beats but marks the draft inside it.
+  const group = (): HTMLElement => s.host.querySelector<HTMLElement>('[data-condition-group-id="group"]')!;
+  assert.equal(group().querySelector<HTMLElement>(":scope > .story-branches")!.hidden, true); assert.equal(group().dataset.beatDraft, "true");
+  button(group().querySelector(":scope > .story-group-heading")!, "Expand condition").click(); assert.ok(text.isConnected); assert.equal(text.value, "Draft");
+  button(row(s.host, "a"), "Cancel").click(); assert.equal(group().dataset.beatDraft, "false");
   button(s.host.querySelector('[data-branch-id="nested-if-2"].story-branch-body')!, "Focus this branch").click(); assert.ok(button(s.host, "Show whole Scene")); assert.match(s.host.querySelector('.beats-list > .story-breadcrumb')!.textContent!, /Arrival.*If.*trust/);
   const emptyScene = { ...s.model.scenes[0]!, beats: s.model.scenes[0]!.beats.filter(beat => ["if", "otherwise", "empty"].includes(beat.id)) }; const state = deriveScenePreview(emptyScene, undefined, new Map([["group", "otherwise"]])); assert.equal(state.partial, false); assert.equal(state.overlay, undefined); await s.close();
 });

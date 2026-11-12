@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
-import { hasSceneDraft, renderSceneAuthoring, settleSceneDraft, type SceneActions, type SceneCommand, type SceneWorkspace, type ScreenInsertion } from "../src/scene-ui.js";
+import { hasSceneDraft, renderStoryView, type SceneActions, type SceneCommand, type SceneWorkspace, type ScreenInsertion } from "../src/scene-ui.js";
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenTargetBinding } from "../src/screen-contracts.js";
 import { storyFixture } from "./story-controls-fixture.js";
 
@@ -23,12 +23,12 @@ function setup(overrides: Partial<SceneActions> = {}, model = fixture()) {
   const browser = new Window(); Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, HTMLInputElement: browser.HTMLInputElement, HTMLSelectElement: browser.HTMLSelectElement, Event: browser.Event, KeyboardEvent: browser.KeyboardEvent });
   document.body.innerHTML = '<main></main><aside></aside>'; const host = document.querySelector<HTMLElement>("main")!;
   const commands: SceneCommand[] = [], resolutions: ScreenTargetBinding[] = [], messages: string[] = [];
-  const dispose = renderSceneAuthoring(host, document.querySelector("aside")!, model, {
+  const view = renderStoryView(host, document.querySelector("aside")!, model, {
     resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); }, status: value => messages.push(value),
     apply: async command => { commands.push(command); throw Error("STALE_SCREEN_REVISION"); },
     screenCatalog: async () => catalog, resolveScreenTarget: async value => { resolutions.push(value); return structuredClone(target); }, ...overrides,
   });
-  return { host, commands, resolutions, messages, close: async () => { dispose(); await browser.happyDOM.close(); } };
+  return { host, view, commands, resolutions, messages, close: async () => { view.dispose(); await browser.happyDOM.close(); } };
 }
 function openNew(host: HTMLElement, type: string) {
   button(host, "Add Beat").click();
@@ -47,6 +47,19 @@ test("Story Show picker resolves only owned Panels and retains captured revision
   assert.deepEqual(s.commands[0]!.beat, { type: "showScreen", target: binding, revisions });
   assert.deepEqual(s.commands[1], s.commands[0]); assert.equal(s.resolutions.length, 1);
   assert.equal(picker.value, binding.screenId); assert.ok(panel.isConnected); assert.match(s.messages.at(-1)!, /Input retained/);
+  await s.close();
+});
+
+test("a retained screen Beat draft resolves through the actions of the current Story mount", async () => {
+  let mount = 1; const s = setup({ current: () => mount === 1 }); const panel = openNew(s.host, "showScreen"); await tick();
+  assert.deepEqual(s.resolutions, [binding]);
+  const later: ScreenTargetBinding[] = [];
+  mount = 2;
+  s.view.update(fixture(), { resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); }, status: value => s.messages.push(value), current: () => mount === 2,
+    apply: async command => { s.commands.push(command); throw Error("STALE_SCREEN_REVISION"); }, screenCatalog: async () => catalog, resolveScreenTarget: async value => { later.push(value); return structuredClone(target); } });
+  assert.ok(panel.isConnected);
+  const picker = panel.querySelector<HTMLSelectElement>('[aria-label="Panel screen"]')!; picker.dispatchEvent(new Event("change", { bubbles: true })); await tick();
+  assert.deepEqual(later, [binding]); assert.equal(s.resolutions.length, 1);
   await s.close();
 });
 
@@ -119,7 +132,7 @@ test("a new screen draft captures the navigation hint before the asynchronous ca
   await s.close();
 });
 
-test("existing Show draft captures its workspace revisions before catalog refresh settles", async () => {
+test("existing Show draft refuses Commit when its accepted revisions change underneath", async () => {
   const supplied = { ...revisions }, base = fixture(); let finish!: (value: ScreenCatalog) => void;
   const model: SceneWorkspace = { ...base, scenes: [{ ...base.scenes[0]!, beats: [
     { id: "show", byteStart: 20, byteEnd: 47, protected: false, payload: { type: "showScreen", target: binding, revisions: supplied } }, base.scenes[0]!.beats[1]!,
@@ -127,7 +140,7 @@ test("existing Show draft captures its workspace revisions before catalog refres
   const s = setup({ screenCatalog: async () => new Promise(resolve => { finish = resolve; }) }, model);
   s.host.querySelector<HTMLButtonElement>('[data-beat-id="show"] .beat-select')!.click(); supplied.source = "newer-revision"; finish(catalog); await tick();
   button(s.host.querySelector('[data-beat-type="showScreen"]')!, "Commit Beat").click(); await tick();
-  assert.deepEqual(s.commands[0]!.beat, { type: "showScreen", target: binding, revisions });
+  assert.equal(s.commands.length, 0); assert.match(s.messages.at(-1)!, /changed in source/);
   await s.close();
 });
 
@@ -273,7 +286,7 @@ test("pending screen placement survives workspace navigation without becoming un
    const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";
    for(const event of ["input","change"])position.dispatchEvent(new Event(event,{bubbles:true}));
    assert.equal(hasSceneDraft(first.host),false,"Already retained navigation context must not block leaving Story");
-   assert.equal(await settleSceneDraft(first.host),true);
+   assert.equal(await first.view.settle(),true);
    assert.deepEqual(insertion.body,nested?{type:"branch",groupId:"group",branchId:"branch"}:{type:"root"});
    assert.deepEqual(insertion.position,{type:"before",anchor:{type:"beat",beatId:"line"}});assert.equal(first.commands.length,0);
   }finally{await first.close();}
@@ -295,13 +308,13 @@ test("retained placement does not clear payload edits or a refused Add",async()=
    if(edited==="payload"){const type=draft.querySelector<HTMLSelectElement>("select")!;type.value="showScreen";type.dispatchEvent(new Event("change",{bubbles:true}));await tick();}
    else{button(draft,"Add Beat").click();await tick();}
    const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));
-   assert.equal(hasSceneDraft(s.host),true);assert.equal(await settleSceneDraft(s.host),false);
-   button(draft,"Cancel").click();assert.equal(hasSceneDraft(s.host),false);
+   assert.equal(hasSceneDraft(s.host),true);assert.equal(await s.view.settle(),true);assert.equal(s.view.hasDrafts(),true);
+   button(draft,"Cancel").click();assert.equal(hasSceneDraft(s.host),false);assert.equal(s.view.hasDrafts(),false);
   }finally{await s.close();}
  }
 });
 
-test("incomplete placement recovery still blocks navigation until it can be retained",async()=>{
+test("incomplete placement stays in its retained new beat draft",async()=>{
  for(const next of ["confirm placement","ordinary Beat"]){
  const model=fixture(),scene=model.scenes[0]!;
  const original:ScreenInsertion={sceneId:scene.id,body:{type:"root"},position:{type:"before",anchor:{type:"beat",beatId:"end"}},expectedSourceRevision:"old-source"};
@@ -311,10 +324,10 @@ test("incomplete placement recovery still blocks navigation until it can be reta
   button(s.host,"Add screen Beat").click();await tick();const draft=s.host.querySelector<HTMLElement>(".new-beat")!;
   const body=draft.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;body.dispatchEvent(new Event("change",{bubbles:true}));
   assert.equal(draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!.value,"");
-  assert.deepEqual(insertion,original);assert.equal(hasSceneDraft(s.host),true);assert.equal(await settleSceneDraft(s.host),false);
+  assert.deepEqual(insertion,original);assert.equal(hasSceneDraft(s.host),true);assert.equal(await s.view.settle(),true);assert.equal(s.view.hasDrafts(),true);
   if(next==="confirm placement"){
    const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));
-   assert.equal(hasSceneDraft(s.host),false);assert.equal(await settleSceneDraft(s.host),true);assert.equal(insertion.expectedSourceRevision,scene.sourceRevision);
+   assert.equal(hasSceneDraft(s.host),false);assert.equal(await s.view.settle(),true);assert.equal(insertion.expectedSourceRevision,scene.sourceRevision);
   }else{
    const type=draft.querySelector<HTMLSelectElement>("select")!;type.value="narration";type.dispatchEvent(new Event("change",{bubbles:true}));
    draft.querySelector<HTMLTextAreaElement>("textarea")!.value="Ordinary Beat";button(draft,"Add Beat").click();await tick();

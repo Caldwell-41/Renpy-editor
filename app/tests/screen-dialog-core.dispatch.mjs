@@ -9,13 +9,13 @@ import {driverProcess} from './phase2-driver-process.mjs';
 import {buildPanelCreationForm} from '../dist-tests/src/screen-panels.js';
 import {ScreenText} from '../dist-tests/src/screen-text.js';
 import {ScreenLayoutEditor} from '../dist-tests/src/screen-layout.js';
-import {hasSceneDraft,renderSceneAuthoring,settleSceneDraft} from '../dist-tests/src/scene-ui.js';
+import {hasSceneDraft,renderStoryView} from '../dist-tests/src/scene-ui.js';
 const output=resolve(process.env.DIALOG_CORE_UI_OUTPUT??`target/dialog-core-${randomUUID()}`);await mkdir(output,{recursive:true});
 const scratch=join(await realpath(output),`loomlight-help-controller-dialog-${randomUUID()}`);
 const child=driverProcess(resolve(process.env.CARGO_TARGET_DIR??'target',`debug/examples/help-controller-driver${process.platform==='win32'?'.exe':''}`),[scratch]);
 const browser=new Window();Object.assign(globalThis,{window:browser,document:browser.document,HTMLElement:browser.HTMLElement,HTMLInputElement:browser.HTMLInputElement,HTMLSelectElement:browser.HTMLSelectElement,HTMLTextAreaElement:browser.HTMLTextAreaElement,HTMLDetailsElement:browser.HTMLDetailsElement,Event:browser.Event,KeyboardEvent:browser.KeyboardEvent});
 const result={passed:false,controllerToCore:true,sdkExecuted:false,stages:[],refusals:[]};
-let session,disposeStory,creation,textEditor,insertion;const messages=[];
+let session,storyView,creation,textEditor,insertion;const messages=[];
 async function call(operation,payload={}){
  assert(!operation.startsWith('runtime.')&&!['screens.canvasRender','screens.canvasStatus'].includes(operation));
  const response=await child.request({protocolVersion:1,requestId:randomUUID().replaceAll('-',''),operation,payload:{...payload,...(session&&!['project.listRecent','project.openRecent'].includes(operation)?{sessionId:session}:{})}});
@@ -26,8 +26,8 @@ async function wait(check,label){const end=Date.now()+5000;while(!check()){if(Da
 const source=async path=>(await call('source.open',{path})).text;
 async function saveSource(path,text){const base=await call('source.open',{path});const draft=await call('source.updateDraft',{path,expectedBaseRevision:base.baseRevision,text,selectionStart:0,selectionEnd:0});return call('source.save',{path,expectedBaseRevision:draft.baseRevision,expectedDraftVersion:draft.draftVersion});}
 async function history(type){const model=await call('scene.list');return call('scene.apply',{expectedProjectRevision:model.projectRevision,expectedSourceMapRevision:model.sourceMapRevision,command:{type}});}
-async function mountStory(sceneId){disposeStory?.();document.body.replaceChildren();const model=await call('scene.list');model.lastOpen={chapterId:model.scenes.find(s=>s.id===sceneId).chapterId,sceneId};const host=document.createElement('main'),tree=document.createElement('aside');host.className='scene-workspace';document.body.append(host,tree);
- disposeStory=renderSceneAuthoring(host,tree,model,{resolution:{width:1280,height:720},status:m=>messages.push(m),present:async()=>{throw Error('No media');},screenHintKind:'dialog',screenInsertion:insertion,rememberScreenInsertion:value=>{insertion=structuredClone(value);},screenCatalog:()=>call('screens.list'),resolveScreenTarget:binding=>call('screens.resolveTarget',{binding}),apply:(command,expected)=>call('scene.apply',{expectedProjectRevision:expected.projectRevision,expectedSourceMapRevision:expected.sourceMapRevision,command})});return host;}
+async function mountStory(sceneId){storyView?.dispose();document.body.replaceChildren();const model=await call('scene.list');model.lastOpen={chapterId:model.scenes.find(s=>s.id===sceneId).chapterId,sceneId};const host=document.createElement('main'),tree=document.createElement('aside');host.className='scene-workspace';document.body.append(host,tree);
+ storyView=renderStoryView(host,tree,model,{resolution:{width:1280,height:720},status:m=>messages.push(m),present:async()=>{throw Error('No media');},screenHintKind:'dialog',screenInsertion:insertion,rememberScreenInsertion:value=>{insertion=structuredClone(value);},screenCatalog:()=>call('screens.list'),resolveScreenTarget:binding=>call('screens.resolveTarget',{binding}),apply:(command,expected)=>call('scene.apply',{expectedProjectRevision:expected.projectRevision,expectedSourceMapRevision:expected.sourceMapRevision,command})});return host;}
 async function newCall(host){button(host,'Add screen Beat').click();const draft=host.querySelector('.new-beat');await wait(()=>/Dialog ready/.test(draft.textContent),'Dialog picker');return draft;}
 try{
  assert.equal((await child.next()).ready,true);const recent=(await call('project.listRecent'))[0];const opened=await call('project.openRecent',{recentId:recent.id});session=opened.sessionId;const projectId=opened.projectId;
@@ -40,8 +40,8 @@ try{
  let model=await call('scene.list');model=await call('scene.apply',{expectedProjectRevision:model.projectRevision,expectedSourceMapRevision:model.sourceMapRevision,command:{type:'createScene',chapterId:model.chapters[0].id,displayName:'Dialog UI proof'}});let scene=model.scenes.find(s=>s.displayName==='Dialog UI proof');
  await saveSource(scene.sourcePath,`label ${scene.technicalLabel}:\n    "Before"\n    "Following"\n    return\n`);const before=await source(scene.sourcePath);
  let host=await mountStory(scene.id),draft=await newCall(host);model=await call('scene.list');scene=model.scenes.find(s=>s.id===scene.id);const following=scene.beats.find(b=>b.payload.text==='Following');const placement=draft.querySelector('[aria-label="Insert before"]');placement.value=following.id;placement.dispatchEvent(new Event('change',{bubbles:true}));
- assert.equal(hasSceneDraft(host),false);assert.equal(await settleSceneDraft(host),true);const pendingInsertion=structuredClone(insertion);
- disposeStory();disposeStory=undefined;document.body.replaceChildren();await call('screens.inspect',{path:owner.path});host=await mountStory(scene.id);draft=await newCall(host);
+ assert.equal(hasSceneDraft(host),false);assert.equal(await storyView.settle(),true);const pendingInsertion=structuredClone(insertion);
+ storyView.dispose();storyView=undefined;document.body.replaceChildren();await call('screens.inspect',{path:owner.path});host=await mountStory(scene.id);draft=await newCall(host);
  assert.equal(draft.querySelector('[aria-label="Insert before"]').value,following.id);assert.deepEqual(insertion,pendingInsertion);assert.equal(hasSceneDraft(host),false);assert.equal(await source(scene.sourcePath),before);
  const afterNavigation=await call('scene.list');assert.equal(afterNavigation.projectRevision,model.projectRevision);assert.equal(afterNavigation.sourceMapRevision,model.sourceMapRevision);
  result.stages.push('pending placement -> navigation settlement -> Screens inspection -> remounted Story, no source/history write');
@@ -86,5 +86,5 @@ try{
  insertion=acceptedInsertion;result.stages.push('stale sole-position recovery requires real selection, Cancel restores intent, accepted Call has one-step Undo/Redo');
  await saveSource(owner.path,finished.replace('screen guide_dialog():','screen renamed_dialog():'));await call('project.close');session=undefined;const currentRecent=(await call('project.listRecent')).find(r=>r.projectId===projectId);assert(currentRecent);session=(await call('project.openRecent',{recentId:currentRecent.id})).sessionId;model=await call('scene.list');const reopened=model.scenes.find(s=>s.id===scene.id).beats.find(b=>b.id===callBeat.id);assert.equal(reopened.protected,true);assert.equal(reopened.payload.target.screenId,owner.id);assert.equal(reopened.payload.target.sourceName,'guide_dialog');assert.equal(await source(scene.sourcePath),accepted);assert.equal(await source(entry.sourcePath),opaque);result.stages.push('renamed Dialog -> reopen keeps protected Call identity and opaque neighbor bytes');result.passed=true;
 }catch(error){result.failure={message:error.message,stack:error.stack};throw error;}
-finally{creation?.dispose();textEditor?.dispose();disposeStory?.();await browser.happyDOM.close();result.messages=messages;try{await child.stop();await assert.rejects(access(scratch));result.cleanupComplete=true;}catch(error){result.passed=false;result.cleanupFailure=error.message;throw error;}finally{result.driver=child.exitStatus();await writeFile(join(output,'result.json'),JSON.stringify(result,null,2)+'\n');}}
+finally{creation?.dispose();textEditor?.dispose();storyView?.dispose();await browser.happyDOM.close();result.messages=messages;try{await child.stop();await assert.rejects(access(scratch));result.cleanupComplete=true;}catch(error){result.passed=false;result.cleanupFailure=error.message;throw error;}finally{result.driver=child.exitStatus();await writeFile(join(output,'result.json'),JSON.stringify(result,null,2)+'\n');}}
 console.log('PASS #45 actual creation/Call/Finish controllers -> core, selected anchor, no-op/cancel/stale/source/history/reopen. No SDK/runtime claim.');

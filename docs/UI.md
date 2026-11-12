@@ -450,8 +450,12 @@ incomplete or invalid input never reaches the source files. Ask before an action
 would discard a draft, including deleting its beat or closing the project.
 
 The [beat draft conflict rules](#beat-draft-conflicts) handle changes to the source
-beneath a retained draft. This target replaces production's current rule that
-requires committing or cancelling the beat edit before navigation.
+beneath a retained draft. Until that comparison is built, Commit refuses a draft
+whose beat changed in source and keeps the input. A beat that the author has not
+edited is not a draft. A collapsed condition shows the draft marker on its heading.
+A beat with a draft can be moved, and the draft moves with it. A new beat that is
+not yet added moves with the place the author chooses. Undo and Redo wait for
+pending drafts until the [Story Undo](#story-undo) order is built.
 
 ### Beat draft conflicts
 
@@ -549,7 +553,8 @@ The Story rules above define Loomlight's application of that reference.
 
 ### Stage preview
 
-Valid beat drafts update the game stage immediately, before Commit or Save. Show
+Valid beat drafts update the game stage immediately, before Commit or Save. Text
+updates as the author types; other fields update when the field is complete. Show
 unsaved status only in the normal save-status area; do not add an unsaved warning
 over the stage or annotate each changed item. The beat draft markers still identify
 unfinished beats. Cancelling a draft restores the accepted value in the preview.

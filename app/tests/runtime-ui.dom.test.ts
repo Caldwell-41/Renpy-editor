@@ -32,7 +32,7 @@ function harness(options: { drafts?: number; refuseSave?: boolean; stale?: boole
     return {} as T;
   };
   const runtime = new RuntimeWorkspace({ sessionId: "session", sdkVersion: "8.5.3", request, current: () => current,
-    capture: () => ({ sceneRoot: document.body, current: () => current }), coordinate: task => task(),
+    capture: () => ({ current: () => current }), coordinate: task => task(),
     navigate: async target => { assert.equal(target.expectedRevision, "file"); navigated = true; }, refreshPersistence: () => {} });
   document.body.append(runtime.toolbar, runtime.panel);
   return { runtime, browser, calls, drafts: () => drafts, navigated: () => navigated, stale: () => { current = false; }, dispose: () => runtime.dispose() };

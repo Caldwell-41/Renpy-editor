@@ -1,7 +1,7 @@
 import "../../../src/styles.css";
 import "../../../src/ui-refresh.css";
 import "./draft.css";
-import { renderSceneAuthoring, type SceneWorkspace } from "../../../src/scene-ui";
+import { renderStoryView, type SceneWorkspace } from "../../../src/scene-ui";
 import sample from "./sample";
 import { summary, states, type State, type Variant } from "./summary";
 
@@ -20,11 +20,11 @@ const scene = model.scenes.find(scene => scene.beats.some(beat => beat.payload.t
 const choice = scene.beats.find(beat => beat.payload.type === "choice")!;
 // Read-only sample renderer. No project service or native entry is mounted.
 let mutations = 0;
-renderSceneAuthoring(document.querySelector("main")!, document.querySelector("aside")!, model, {
+renderStoryView(document.querySelector("main")!, document.querySelector("aside")!, model, {
   apply: async () => { mutations++; throw new Error("Draft preview refuses source writes"); },
   status: () => {}, resolution: { width: 1280, height: 720 },
   present: async () => { throw new Error("Draft has no media"); },
-});
+}).dispose;
 (document.querySelector(`[data-beat-id="${choice.id}"] .beat-select`) as HTMLButtonElement).click();
 const surround = document.querySelector(".preview-surround")!;
 surround.replaceChildren(summary(variant, state));

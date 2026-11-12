@@ -1,6 +1,5 @@
 import type { CoreOperation } from "./protocol.js";
 import type { SourceInventory, SourceWorkspaceController } from "./source-ui.js";
-import { focusSceneDraft, hasSceneDraft } from "./scene-ui.js";
 
 export interface ScreenPreview { readonly purpose: "screen"; readonly path: string; readonly screenName: string; readonly expectedRevision: string; }
 export type RuntimeKind = "run" | "validate";
@@ -13,7 +12,8 @@ export interface RuntimePreparation {
 }
 export interface RuntimePreparationActions {
   readonly controller?: SourceWorkspaceController;
-  readonly sceneRoot: ParentNode;
+  /** Pending Story beat drafts; Run never commits them. */
+  readonly storyDrafts?: { readonly has: () => boolean; readonly reveal: () => void };
   readonly current: () => boolean;
   readonly signal?: AbortSignal;
   readonly coordinate: <T>(task: () => Promise<T>) => Promise<T>;
@@ -30,12 +30,12 @@ export async function prepareRuntimeInput(kind: RuntimeKind, sdkId: string, acti
     try {
       if (!actions.current()) return undefined;
       const inventory = await actions.request<SourceInventory>("source.list");
-      const pendingScene = hasSceneDraft(actions.sceneRoot);
+      const pendingScene = actions.storyDrafts?.has() ?? false;
       const choice = inventory.dirtyCount || pendingScene
         ? await actions.choose({ sourceDrafts: inventory.dirtyCount, pendingScene }) : "saved";
       if (!actions.current() || choice === "cancel") return undefined;
       if (choice === "commitScene" || (pendingScene && choice === "saveAll")) {
-        focusSceneDraft(actions.sceneRoot);
+        actions.storyDrafts?.reveal();
         return undefined; // Existing explicit Commit, then retry; never auto-commit.
       }
       if (choice === "saveAll") {

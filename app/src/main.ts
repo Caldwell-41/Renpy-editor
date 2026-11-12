@@ -19,12 +19,10 @@ import { RuntimeWorkspace } from "./runtime-ui.ts";
 import { renderBranches, type FlowWorkspace } from "./branches-ui.ts";
 import { completeApplicationClose, requestCore as desktopRequestCore } from "./bridge.ts";
 import {
-  focusSceneDraft,
-  settleSceneDraft,
-  hasSceneDraft,
   renderRecoverySurface,
-  renderSceneAuthoring,
+  renderStoryView,
   storyScene,
+  type StoryView,
   type RecoveryReport,
   type SceneCommand,
   type SceneWorkspace,
@@ -78,7 +76,8 @@ let coreRequester: typeof desktopRequestCore = desktopRequestCore;
 let listenersInstalled = false;
 let authorInputGeneration = 0;
 let disposeCatalogue: (()=>void) | undefined;
-let disposeSceneView: (() => void) | undefined;
+// The Story view lives for the project session so beat drafts survive navigation (ADR 0024).
+let storyView: StoryView | undefined;
 let rewriteController: RewriteController | undefined;
 let disposeBranchesView: (() => void) | undefined;
 let disposeSourceView: (() => void) | undefined;
@@ -137,11 +136,9 @@ interface CompletionToken { view: number; operation: number; scope: object; sess
 function beginView(project?: OpenProject): number {
   activeReferenceController?.dispose(); activeReferenceController=undefined;
   disposeCatalogue?.();disposeCatalogue=undefined;
-  if (currentProject?.sessionId !== project?.sessionId) { runtimeWorkspace?.dispose(); runtimeWorkspace = undefined; screensWorkspace?.dispose(); screensWorkspace = undefined; screenInsertion = undefined; storySceneId = undefined; }
+  if (currentProject?.sessionId !== project?.sessionId) { runtimeWorkspace?.dispose(); runtimeWorkspace = undefined; screensWorkspace?.dispose(); screensWorkspace = undefined; screenInsertion = undefined; storySceneId = undefined; storyView?.dispose(); storyView = undefined; }
   disposeBranchesView?.();
   disposeBranchesView = undefined;
-  disposeSceneView?.();
-  disposeSceneView = undefined;
   disposeSourceView?.();
   disposeSourceView = undefined;
   viewGeneration += 1;
@@ -234,6 +231,7 @@ function persistenceMessage(state: PersistenceStatus, localPending: boolean): { 
   if (state === "recoveryRequired") return { text: "Recovery required — writes are disabled", kind: "error" };
   if (state === "conflict") return { text: "Conflict — Source is invalid, missing, or changed outside Loomlight", kind: "error" };
   if (localPending || state === "pendingValidation") return { text: "Unsaved Source draft", kind: "normal" };
+  if (storyView?.hasDrafts()) return { text: "Unsaved changes", kind: "normal" };
   return { text: hasUnsubmittedInput() ? "Unsubmitted input — accepted changes saved" : "Saved", kind: "normal" };
 }
 
@@ -486,7 +484,8 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   runtimeWorkspace ??= new RuntimeWorkspace({ sessionId: project.sessionId, sdkVersion: project.sdkVersion,
     request: (operation, payload) => value(operation, operation.startsWith("sdk.") ? payload : { ...payload, sessionId: project.sessionId }),
     current: () => currentProject?.sessionId === project.sessionId,
-    capture: () => { const capturedGeneration = viewGeneration; return { controller: currentSourceController(project), sceneRoot: root, current: () => capturedGeneration === viewGeneration }; },
+    capture: () => { const capturedGeneration = viewGeneration; return { controller: currentSourceController(project), current: () => capturedGeneration === viewGeneration,
+      storyDrafts: { has: () => !!storyView?.hasDrafts(), reveal: () => { const draft = storyView?.firstDraft(); if (draft) void requestProjectNavigation(project, "story", draft); } } }; },
     coordinate: task => runAuthoringOperation(project, runtimeWorkspace!, task),
     navigate: target => requestProjectNavigation(project, "source", target),
     refreshPersistence: () => { if (currentProject?.sessionId === project.sessionId) void refreshPersistenceStatus(project, viewGeneration); },
@@ -535,7 +534,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
 
 async function requestProjectNavigation(project: OpenProject, surface: ProjectSurface, target?: ProjectTarget): Promise<void> {
   if (hasBlockingModal() || activeReferenceController?.isBusy()) return;
-  if((hasSceneDraft(root)||hasUnsubmittedInput()) && !await allowSceneNavigation())return;
+  if((storyView?.busy()||hasUnsubmittedInput()) && !await allowSceneNavigation())return;
   const controller = currentSourceController(project);
   if (!controller) {
     showProject(project, surface, target);
@@ -641,7 +640,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
       }
     }
     if (target) rememberStoryScene(project, target.sceneId);
-    disposeSceneView = renderSceneAuthoring(workspace, tree, model, {
+    const storyActions: Parameters<typeof renderStoryView>[3] = {
       current: () => generation === viewGeneration && currentProject?.sessionId === project.sessionId,
       caller: target?.caller,
       screenHint: target?.screenHint,
@@ -664,24 +663,25 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
         })();
       },
       assist: (sceneId,beatId,action="rewriteDialogue") => {
+        if (storyView?.hasDrafts(sceneId)) { setStatus("Commit or cancel the beat drafts in this Scene first. Drafts retained.","error"); return; }
         if (rewriteController?.busy()) { setStatus("Finish or cancel the current Assist operation first.","error"); return; }
         if (rewriteController?.hasWork() && !window.confirm("Discard the unfinished Assist task/proposal and select this Beat?")) return;
         rewriteController?.dispose();
         const owner={};
         rewriteController=mountRewrite(document.body,sceneId,beatId,{
           current:()=>currentProject?.sessionId===project.sessionId,
-          inputState:()=>({generation:authorInputGeneration,blocked:hasSceneDraft(root)||hasUnsubmittedInput()}),
+          inputState:()=>({generation:authorInputGeneration,blocked:!!storyView?.hasDrafts(sceneId)||hasUnsubmittedInput()}),
           call:async <T>(operation:Parameters<typeof desktopRequestCore>[0],payload:Record<string,unknown>={}):Promise<T>=>{
             const task=()=>operation.startsWith("ai.")?value<T>(operation,payload):projectValue<T>(project,operation,payload);
             if(operation==="rewrite.prepare"||operation==="rewrite.send"||operation==="rewrite.accept"||operation==="rewrite.select") {
               const result=await runAuthoringOperation(project,owner,async()=>{
-                if(hasSceneDraft(root)||hasUnsubmittedInput())throw new Error("Finish or discard unsubmitted author input first. Input retained.");
+                if(storyView?.hasDrafts(sceneId)||hasUnsubmittedInput())throw new Error("Finish or discard unsubmitted author input first. Input retained.");
                 const inputGeneration=authorInputGeneration;
                 const source=currentSourceController(project);
                 const transition=source?await source.prepareTransition("navigation"):undefined;
                 if(source&&!transition)throw new Error("Source input could not be retained. Input retained.");
                 try {
-                  if(inputGeneration!==authorInputGeneration||hasSceneDraft(root)||hasUnsubmittedInput())throw new Error("Author input changed. Review a fresh send.");
+                  if(inputGeneration!==authorInputGeneration||storyView?.hasDrafts(sceneId)||hasUnsubmittedInput())throw new Error("Author input changed. Review a fresh send.");
                   return await task();
                 } finally {transition?.release();}
               });
@@ -700,6 +700,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
       layoutKey: storyLayoutKey(project),
       sceneId: preferredStoryScene(project),
       rememberScene: sceneId => rememberStoryScene(project, sceneId),
+      draftsChanged: () => { if (currentProject?.sessionId === project.sessionId) void refreshPersistenceStatus(project, viewGeneration); },
       validateAssignment: (command, expected) => projectValue(project, "scene.validateAssignment", {
         expectedProjectRevision: expected.projectRevision,
         expectedSourceMapRevision: expected.sourceMapRevision,
@@ -718,8 +719,12 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
           });
         } finally { finishAuthoringCompletion(operationToken); }
       },
-    }, target?.beatId || (target?.body?.type === "branch" ? target.body.branchId : undefined));
-    setStatus(persistence === "pendingValidation" ? "Unsaved Source draft" : persistence === "conflict" ? "Conflict — Source is invalid, missing, or changed outside Loomlight" : "Saved", persistence === "conflict" ? "error" : "normal");
+    };
+    const beatId = target?.beatId || (target?.body?.type === "branch" ? target.body.branchId : undefined);
+    if (storyView) { workspace.replaceWith(storyView.host); tree.replaceWith(storyView.treeHost); storyView.update(model, storyActions, beatId); }
+    else storyView = renderStoryView(workspace, tree, model, storyActions, beatId);
+    const rendered = persistenceMessage(persistence, false);
+    setStatus(rendered.text, rendered.kind);
   } catch (error) {
     if (generation === viewGeneration && completionIsCurrent(token)) setStatus(message(error, "Scene workspace could not be loaded"), "error");
   }
@@ -761,6 +766,7 @@ async function requestProjectClose(project: OpenProject, afterClose: () => void 
   if(rewriteController?.busy()){setStatus("Finish or cancel the Assist request before closing the project.","error");return;}
   if(rewriteController?.hasWork()&&!window.confirm("Discard the unfinished Assist task/proposal and close the project?"))return;
   if (document.querySelector(".leave-source-dialog") || !await allowSceneNavigation()) return;
+  if (storyView?.hasDrafts() && !window.confirm("Discard unsaved Story beat drafts and close the project?")) return;
   const finishClose=afterClose;
   afterClose=async()=>{rewriteController?.dispose();rewriteController=undefined;await finishClose();};
   try { if (runtimeWorkspace && !await runtimeWorkspace.beforeClose()) return; }
@@ -1050,8 +1056,10 @@ function renderVariables(workspace: HTMLElement, project: OpenProject, model: Au
 
 function validInt64(value: string): boolean { if (!/^-?(0|[1-9][0-9]*)$/.test(value) || value === "-0") return false; try { const parsed = BigInt(value); return parsed >= -9223372036854775808n && parsed <= 9223372036854775807n; } catch { return false; } }
 function message(error: unknown, fallback: string): string { return error instanceof Error ? error.message : fallback; }
+// Story answers for itself: beat drafts never count, and its open forms come from hasOpenForm.
 function hasUnsubmittedInput(): boolean {
-  return root.querySelector('[data-unsubmitted="true"]') !== null;
+  const story = storyView;
+  return !!story?.hasOpenForm() || [...root.querySelectorAll('[data-unsubmitted="true"]')].some(input => !story?.host.contains(input) && !story?.treeHost.contains(input));
 }
 
 async function allowSceneNavigation(): Promise<boolean> {
@@ -1081,9 +1089,8 @@ async function allowSceneNavigation(): Promise<boolean> {
       actions.append(stay, discard); panel.append(title, copy, actions); backdrop.append(panel); root.append(backdrop); stay.focus();
     });
   }
-  if (!hasSceneDraft(root) || await settleSceneDraft(root)) return true;
-  setStatus("Commit or cancel the Scene editor before navigating.", "error");
-  focusSceneDraft(root);
+  if (!storyView || await storyView.settle()) return true;
+  setStatus("Finish the open Story form or wait for the current change before navigating. Beat drafts are kept.", "error");
   return false;
 }
 
@@ -1193,8 +1200,8 @@ export function startApplication(requester: typeof desktopRequestCore = desktopR
   statusRequestSequence += 1;
   currentProject = undefined;
   reflectAuthoringState();
-  disposeSceneView?.();
-  disposeSceneView = undefined;
+  storyView?.dispose();
+  storyView = undefined;
   disposeSourceView?.();
   disposeSourceView = undefined;
   activeSourceController = undefined;
