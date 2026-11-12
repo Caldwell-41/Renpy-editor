@@ -1029,12 +1029,12 @@ impl AuthoringService {
     }
 
     /// Brings source-map projections up to date with clean scene sources: the clean
-    /// Source buffer when Source holds one, otherwise the file on disk. Project open and
-    /// every Story, Source and Flow refresh pass all scenes, so an external edit reaches
-    /// them whether or not Source opened the file. A dirty, external-pending or unavailable buffer keeps
+    /// Source buffer when Source holds one, otherwise the file on disk. With no `only`
+    /// path it covers every scene, so an external edit reaches Story whether or not
+    /// Source opened the file. A dirty, external-pending or unavailable buffer keeps
     /// its stale projection until the author resolves it in Source. `only` limits the
     /// pass to one path.
-    pub(crate) fn reconcile_clean_sources(
+    fn reconcile_clean_sources(
         &self,
         project: &ProjectId,
         project_id: &str,
@@ -1081,56 +1081,52 @@ impl AuthoringService {
                     Ok(None) | Err(_) => continue,
                 },
             };
-            let previous = source_map
+            // Story reports a scene with no stored mapping as invalid metadata.
+            let Some(index) = source_map
                 .scene_mappings
                 .iter()
-                .find(|mapping| mapping.scene_id == scene.id)
-                .cloned()
-                .ok_or(SourceError::InvalidSource)?;
+                .position(|mapping| mapping.scene_id == scene.id)
+            else {
+                continue;
+            };
+            let previous = source_map.scene_mappings[index].clone();
             if previous.source_revision == revision {
                 continue;
             }
-            if authoring.is_none() {
-                authoring = Some(
+            let authoring = match &authoring {
+                Some(authoring) => authoring,
+                None => authoring.insert(
                     self.list(project, project_id)
                         .map_err(|_| SourceError::Io)?,
-                );
-            }
+                ),
+            };
             let built = build_reconciled_mapping(
                 scene,
                 &bytes,
                 &revision,
                 Some(&previous),
-                Some((
-                    &project_metadata,
-                    authoring.as_ref().unwrap(),
-                    &source_map.owned_screens,
-                )),
+                Some((&project_metadata, authoring, &source_map.owned_screens)),
             );
-            let mapping = match built {
+            let mapping = match built.map_err(scene_source_error) {
                 Ok((mapping, _)) => mapping,
-                Err(error) => {
-                    let error = scene_source_error(error);
-                    if error == SourceError::InvalidSource {
-                        self.mark_projection_invalid(project, path, true)?;
-                        continue;
-                    }
-                    return Err(error);
+                Err(SourceError::InvalidSource) => {
+                    self.mark_projection_invalid(project, path, true)?;
+                    continue;
                 }
+                Err(error) => return Err(error),
             };
-            *source_map
-                .scene_mappings
-                .iter_mut()
-                .find(|stored| stored.scene_id == scene.id)
-                .ok_or(SourceError::InvalidSource)? = mapping;
+            // One scene that cannot be mapped leaves the others to reconcile.
+            source_map.scene_mappings[index] = mapping;
+            if source_map.validate(project_id).is_err() {
+                source_map.scene_mappings[index] = previous;
+                self.mark_projection_invalid(project, path, true)?;
+                continue;
+            }
             reconciled.push(path);
         }
         if reconciled.is_empty() {
             return Ok(());
         }
-        source_map
-            .validate(project_id)
-            .map_err(|_| SourceError::InvalidSource)?;
         let outcome = self.commit_observed(
             project,
             TransactionProposal {

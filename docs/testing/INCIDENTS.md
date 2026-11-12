@@ -1334,7 +1334,8 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
 
 ## H92. Story shows "Source projection unavailable" after an external edit
 
-- **Class/search:** product; `sourceConflict`, no beats, external edit, unopened file,
+- **Class/search:** product, demonstrated on macOS ARM64 with real core and not
+  host-specific; `sourceConflict`, no beats, external edit, unopened file,
   `source_refresh_project`, `verify_current_mappings`, reopen `SOURCE_CONFLICT`.
 - **Cause:** core reconciled a scene's source map only through a Source buffer. A scene
   file that Source had not opened this session kept its old mapping revision, so Story

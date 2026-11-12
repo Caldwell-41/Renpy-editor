@@ -651,10 +651,16 @@ impl AuthoringService {
         if !needs_migration {
             // A scene file edited while the project was closed reconciles as it would
             // during the session. A source that stays unmapped opens as unavailable.
-            match self.reconcile_clean_sources(project, project_id, None) {
-                Ok(()) | Err(crate::source::SourceError::InvalidSource) => {}
-                Err(_) => return Err(SceneError::SourceConflict),
-            }
+            self.source_refresh_project(project, project_id)
+                .map_err(|error| {
+                    use crate::source::SourceError;
+                    match error {
+                        SourceError::RecoveryRequired => SceneError::RecoveryRequired,
+                        SourceError::RuntimeBusy => SceneError::RuntimeBusy,
+                        SourceError::Io => SceneError::Io,
+                        _ => SceneError::SourceConflict,
+                    }
+                })?;
             let (map_bytes, _) = self.scene_snapshot(project, SOURCE_MAP_PATH)?;
             let source_map = SourceMapMetadata::read_bytes(&map_bytes, project_id)
                 .map_err(|_| SceneError::InvalidMetadata)?;
