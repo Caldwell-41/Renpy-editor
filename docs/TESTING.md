@@ -51,15 +51,20 @@ copy every case into an expensive end-to-end suite.
 Prefer the relevant existing DOM or unit test file, and create one only when none
 fits. Write a browser fixture only for behavior a DOM test cannot reach, such as
 real layout, pointer input or a controller-to-core journey. Every new test is found
-by an existing selector: `npm test` and `test:fixtures` on every PR, `test_*.py`
-discovery in the harness checks, or `cargo test`. A fixture that `test:fixtures`
-cannot run declares `// fixture: skip <reason>` under the
-[fixture runner](testing/AUTOMATED.md#renderer-and-production-probe-consumers),
-and the reason names where it runs instead. Skip tests that only prove deleted
+by an existing selector. Every PR runs `npm test`, `test:fixtures`,
+`test:source-browser`, `npm run test:core` and the `test_*.py` suites that
+`quality.yml` names. Full `test_*.py` discovery runs in the harness-regressions
+dispatch, and `loomlight-desktop` tests run in the Phase 1 production gates. A
+fixture that `test:fixtures` cannot run declares `// fixture: skip <reason>` under
+the [fixture runner](testing/AUTOMATED.md#renderer-and-production-probe-consumers).
+A reason that starts `run by` names a selector that runs on every PR; the runner
+rejects any other. A fixture that only a dispatched workflow runs says `manual:`. Skip tests that only prove deleted
 code stays deleted, and smoke tests that repeat existing coverage.
 
-Gate results with the shared checks: `verify_unittest` for Python and `cargo-log`
-for Rust reject failures, zero tests and skips outside named host exclusions. Use
+Gate results with the shared checks. `verify_unittest` for Python rejects failures,
+zero tests and skips outside named host exclusions. `cargo-log` for Rust rejects
+failures and zero passing tests; it does not check skipped names, so Rust skips
+live only in `app/scripts/test-core.mjs` or a workflow's exact selectors. Use
 `--exact` with Cargo filters and skips. Do not add per-gate test-name lists, or a new
 gate script with its own tests, for each qualification. Keep synthetic DOM, browser,
 real service, SDK, native input and human acceptance distinct. Use controlled data

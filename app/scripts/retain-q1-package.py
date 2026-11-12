@@ -5,7 +5,6 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
-import tarfile
 
 from runtime_probe_cases import RUNTIME_CASES, runtime_report_ok
 
@@ -22,32 +21,17 @@ def digest(path):
         return stream_digest(stream)
 
 
-def retain_package(executable, bundle, output):
+def retain_package(executable, output):
     expected = digest(executable)
-    if bundle is None:
-        retained = output / "loomlight.exe"
-        shutil.copy2(executable, retained)
-        actual = digest(retained)
-    else:
-        # Artifact ZIP uploads discard Unix permissions and can dereference links.
-        # Keep the whole scanned bundle in a tar before uploading it.
-        retained = output / "Loomlight.app.tar"
-        with tarfile.open(retained, "w", dereference=False) as archive:
-            archive.add(bundle, arcname=bundle.name)
-        with tarfile.open(retained, "r") as archive:
-            member = archive.extractfile("Loomlight.app/Contents/MacOS/loomlight")
-            if member is None:
-                raise RuntimeError("retained archive is missing the executable")
-            with member:
-                actual = stream_digest(member)
-    if actual != expected:
+    retained = output / "loomlight.exe"
+    shutil.copy2(executable, retained)
+    if digest(retained) != expected:
         raise RuntimeError("retained executable digest does not match the produced executable")
     return retained
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--platform", choices=("Windows", "macOS"), required=True)
     parser.add_argument("--package-outcome", required=True)
     parser.add_argument("--scan-outcome", required=True)
     parser.add_argument("--runtime-outcome", required=True)
@@ -58,13 +42,9 @@ def main():
     parser.add_argument("--sha", required=True)
     args = parser.parse_args()
 
+    # Only the hosted Windows package job retains packages; Mac packages are local.
     app_root = Path.cwd()
-    if args.platform == "Windows":
-        executable = app_root / "target/release/loomlight.exe"
-        bundle = None
-    else:
-        bundle = app_root / "target/release/bundle/macos/Loomlight.app"
-        executable = bundle / "Contents/MacOS/loomlight"
+    executable = app_root / "target/release/loomlight.exe"
     executable_present = executable.is_file()
     scan_ok = args.scan_outcome == "success"
     if not executable_present:
@@ -82,7 +62,7 @@ def main():
     retained_hashes = {}
     binary_hash = digest(executable) if executable_present else None
     if executable_present and scan_ok:
-        retained = retain_package(executable, bundle, output)
+        retained = retain_package(executable, output)
         retained_files.append(retained.name)
         retained_hashes[retained.name] = digest(retained)
 
@@ -94,7 +74,7 @@ def main():
         "packageOutcome": args.package_outcome,
         "sourceScanOutcome": args.scan_outcome,
         "runtimeCasesOutcome": args.runtime_outcome,
-        "target": {"platform": args.platform, "runner": args.runner},
+        "target": {"platform": "Windows", "runner": args.runner},
         "runId": args.run_id,
         "runAttempt": args.run_attempt,
         "workflowSha": args.sha,

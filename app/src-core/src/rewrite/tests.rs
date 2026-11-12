@@ -1236,8 +1236,11 @@ fn generated_card_cancel_stale_competing_draft_external_source_metadata_approval
             4 => {
                 let path = f.root.join(crate::references::PATH);
                 let bytes = fs::read(&path).unwrap();
-                fs::remove_file(&path).unwrap();
-                fs::write(path, bytes).unwrap();
+                // Create the replacement while the original exists, so its file
+                // identity differs on every filesystem (ext4 reuses freed inodes).
+                let replacement = path.with_extension("tmp");
+                fs::write(&replacement, &bytes).unwrap();
+                fs::rename(replacement, path).unwrap();
             }
             5 => {
                 let o = f.ok("context.options", json!({}));
@@ -1615,8 +1618,11 @@ fn generated_lore_cancel_stale_competing_draft_external_source_metadata_approval
             4 => {
                 let path = f.root.join(crate::references::PATH);
                 let bytes = fs::read(&path).unwrap();
-                fs::remove_file(&path).unwrap();
-                fs::write(path, bytes).unwrap();
+                // Create the replacement while the original exists, so its file
+                // identity differs on every filesystem (ext4 reuses freed inodes).
+                let replacement = path.with_extension("tmp");
+                fs::write(&replacement, &bytes).unwrap();
+                fs::rename(replacement, path).unwrap();
             }
             5 => {
                 let o = f.ok("context.options", json!({}));

@@ -37,7 +37,9 @@ For example, Windows Style qualification selects:
 ```
 
 Use job names returned by GitHub, including reusable-workflow and matrix names.
-List all required target jobs. Keep existing exact-candidate, selector and attempt
+List all required target jobs. The production gates (`production-scaffold.yml`)
+package on `Windows x64` only. A Mac package qualification is a local signed run
+recorded in a PR comment with its exact commit, not a plan entry. Keep existing exact-candidate, selector and attempt
 controls in their workflows. The coordinator does not infer requirements from a
 green PR or start qualification itself.
 

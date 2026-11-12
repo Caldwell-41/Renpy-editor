@@ -1,4 +1,4 @@
-// fixture: skip run by quality.yml and production-scaffold.yml.
+// fixture: skip run by quality.yml code-checks after the flow fixture writes LOOMLIGHT_FLOW_EVIDENCE.
 // Real service fixture + unchanged production renderer. Synthetic Chromium input only.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";

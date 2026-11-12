@@ -1,4 +1,4 @@
-// fixture: skip run by screens-source.yml.
+// fixture: skip manual: runs only in the screens-source.yml dispatch.
 // Real production renderer and Rust dispatch/service. No SDK or native WebView claim.
 import assert from 'node:assert/strict';
 import {createServer} from 'vite';
