@@ -41,13 +41,19 @@ structure, beat presentation, the stage, typography and interaction quality.
 Each theme has its own palette. Dark uses slate surfaces with a brass accent; Light
 uses warm off-white surfaces with a slate-blue accent. Game preview colours stay
 independent of the app theme. Components use semantic tokens only, never literal
-colours. The status tokens (`--status-success`, `--status-warning`, `--status-error`,
-`--status-info`, `--status-partial`) retain their meanings. Adjust their values where
-needed to fix the known text-contrast gaps on the new hover and selected backgrounds.
+colours. `app/src/styles.css` defines every token below once for each theme, and no
+other stylesheet redefines them. Source syntax colours (`--syntax-*`) stay in
+`ui-refresh.css`. The status tokens (`--status-success`, `--status-warning`,
+`--status-error`, `--status-info`, `--status-partial`) keep their meanings.
 
-Implement the app-wide colour change as a separate slice. Update the shared tokens
-for both themes and check readability on existing screens. Layout redesigns remain
-separate work.
+**Contrast contract.** Text and status colours reach 4.5:1 on every surface a row can
+take: app, panel, raised, hover, selected and `--accent-subtle` (the active Source
+line). The focus ring reaches 3:1 on the same surfaces. `--text-disabled` is exempt.
+The floor changed three values. Dark `--status-error` is `#d4888f`, because `#c87c83`
+fell below 4.5:1 on hover and selected rows. Light `--status-warning` is `#775a1c`,
+because `#81611f` fell below it on hover. Light `--syntax-comment` is `#5a6357`, for
+the active Source line. `--status-partial` is `#d1b887` in Dark and `#73612f` in Light.
+`theme-contrast.test.ts` measures these from the stylesheets.
 
 | Token | Dark | Light |
 | --- | --- | --- |
@@ -74,6 +80,8 @@ separate work.
 The values come from [`combined-revision.css`](../app/design-lab/screens/story-revamp/combined-revision.css),
 which scopes them to the Story mock. There the last three rows are `--sc-arm-1` to
 `--sc-arm-4`, `--sc-stage-edge` and `--sc-tile`; the `sc-` prefix belongs to the mock.
+The app names the four arm tokens `--choice-arm-one` to `--choice-arm-four`. Stage edge and
+thumbnail tile stay in the Story layout slice, which adds them where it uses them.
 
 ### Colour carries meaning
 
