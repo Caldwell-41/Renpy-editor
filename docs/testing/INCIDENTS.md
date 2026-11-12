@@ -1308,3 +1308,26 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   dialog's controls. The browser preflight now delays direct shell calls by 25 ms;
   it reproduced that failure before the fix and passes after it.
 - **Evidence:** [Final Choice campaign](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/choice-98.md#closeout-review-and-final-campaign).
+
+## H91. External-change test passes on macOS, fails intermittently on Linux
+
+- **Class/search:** test fixture; inode reuse, ext4, `FileIdentity`, delete and
+  recreate, `HISTORY_BOUNDARY`, `SOURCE_CONFLICT`, passes locally.
+- **Cause:** core identifies a file revision by content hash plus device and inode.
+  A test that deletes a file and recreates it with the same bytes gets the freed
+  inode back on ext4 often enough to flake, so core sees no external change. APFS
+  never reuses file IDs, so the same test always passes on macOS. The product is
+  correct. `choice_missing_existing_helper_refuses_changed_source_commands_without_history_or_repair`
+  expected `HISTORY_BOUNDARY` after such a recreation and got an accepted Undo.
+- **Correction:** simulate an external replacement while the old file still holds its
+  inode: write the replacement first and rename it over the original, or rename the
+  original aside, write the new file, then delete the aside copy. Never delete, then
+  recreate the same bytes.
+- **Finding the rest:** temporarily force the `file` half of `FileIdentity` to a
+  constant in `transaction/identity.rs` and run `npm run test:core`. Tests that build
+  the replacement first fail too, so read each failure; only a test that deletes
+  before recreating is exposed. On `0ea86c07` that was the one test above.
+- **Reproduction:** rename the helper aside and back instead of deleting and
+  recreating. The original test then fails at the same assertion on macOS.
+- **Evidence:** [CI diagnosis](https://github.com/Caldwell-41/Renpy-editor/pull/151#issuecomment-6823176789),
+  issue #159.

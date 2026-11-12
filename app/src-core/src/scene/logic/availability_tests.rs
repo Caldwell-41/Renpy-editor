@@ -438,7 +438,11 @@ fn choice_missing_existing_helper_refuses_changed_source_commands_without_histor
         f.command(json!({"type":"updateBodyBeat","sceneId":s["id"],"expectedSourceRevision":w["scenes"][0]["sourceRevision"],"beatId":menu["id"],"expectedBody":{"type":"root"},"beat":payload}));
         let helper = f.root.join("game/loomlight_choice_v1.rpy");
         let accepted_helper = fs::read(&helper).unwrap();
-        fs::remove_file(&helper).unwrap();
+        // Keep the deleted helper's inode allocated until the final recreation:
+        // ext4 hands a freed inode to the next new file, which would make the
+        // recreated helper look unchanged (same bytes, same identity).
+        let aside = f.root.join("helper-aside.tmp");
+        fs::rename(&helper, &aside).unwrap();
         let w = f.model();
         let scene = &w["scenes"][0];
         let beats = scene["beats"].as_array().unwrap();
@@ -499,6 +503,7 @@ fn choice_missing_existing_helper_refuses_changed_source_commands_without_histor
             );
         }
         fs::write(&helper, &accepted_helper).unwrap();
+        fs::remove_file(&aside).unwrap();
         // External deletion/recreation remains an ordinary history boundary.
         assert_eq!(
             f.reject(json!({"type":"undo"}))["error"]["code"],
