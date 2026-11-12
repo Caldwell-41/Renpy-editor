@@ -1,0 +1,93 @@
+/* Header Undo study only. Uses the production colour tokens. */
+.hu-shell { font:13px/1.45 var(--font-ui); color:var(--text-primary); width:100%; min-width:0; }
+.hu-shell * { box-sizing:border-box; }
+.hu-shell button, .hu-shell select { font:inherit; color:var(--text-primary); background:var(--surface-raised); border:1px solid var(--border-strong); border-radius:3px; padding:4px 9px; min-height:28px; cursor:pointer; }
+.hu-shell button:hover:not(:disabled):not([aria-disabled=true]) { background:var(--surface-hover); }
+.hu-shell button:disabled { color:var(--text-muted); cursor:default; }
+.hu-shell button:focus-visible, .hu-shell select:focus-visible { outline:2px solid var(--focus-ring); outline-offset:2px; }
+.hu-shell button.hu-primary { color:var(--on-accent); background:var(--accent-primary); border-color:var(--accent-primary); font-weight:600; }
+.hu-shell button.hu-primary:hover { background:var(--accent-hover); }
+.hu-shell svg { width:16px; height:16px; flex:none; }
+.hu-muted { color:var(--text-secondary); }
+.hu-spacer { flex:1; min-width:0; }
+
+.hu-scenario { display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px; padding:6px 12px; border-bottom:1px dashed var(--border-strong); font-size:11px; }
+.hu-scenario-actions { display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
+.hu-shell .hu-scenario button, .hu-shell .hu-scenario select { min-height:24px; padding:1px 7px; font-size:11px; }
+.hu-switcher { margin-left:auto; display:flex; align-items:center; gap:6px; }
+
+.hu-app { height:640px; display:grid; grid-template-rows:auto minmax(0,1fr) 26px; background:var(--surface-app); }
+.hu-header { position:relative; z-index:5; min-height:44px; padding:6px 12px; display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; background:var(--surface-panel); border-bottom:1px solid var(--border-normal); font-size:12px; }
+.hu-brand { display:flex; align-items:center; gap:8px; font-size:15px; font-weight:650; }
+.hu-shell .hu-brand svg { color:var(--accent-primary); width:17px; height:17px; margin:0; }
+.hu-project { color:var(--text-secondary); padding-left:12px; border-left:1px solid var(--border-strong); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.hu-save-state { color:var(--text-secondary); font-size:11px; white-space:nowrap; }
+.hu-runtime { display:flex; gap:6px; padding-left:12px; border-left:1px solid var(--border-strong); }
+.hu-history-group { display:flex; gap:4px; }
+
+/* Undo/Redo controls and their tooltip. The tooltip shows on keyboard focus at once and on hover after a short delay. */
+.hu-cmd { position:relative; display:inline-flex; }
+.hu-shell .hu-history { display:inline-flex; align-items:center; justify-content:center; gap:5px; white-space:nowrap; }
+.hu-shell .hu-history[aria-disabled=true] { color:var(--text-muted); border-color:var(--border-normal); background:transparent; cursor:default; }
+.hu-shell .hu-cmd-icon>.hu-history { width:30px; padding:0; }
+.hu-shell .hu-cmd-both>.hu-history { background:transparent; border-color:transparent; padding:4px 7px; }
+.hu-shell .hu-cmd-both>.hu-history:hover:not([aria-disabled=true]) { background:var(--surface-hover); }
+.hu-tip { position:absolute; top:calc(100% + 7px); left:0; z-index:20; display:flex; gap:10px; align-items:center; white-space:nowrap; padding:4px 8px; font-size:11px; color:var(--surface-app); background:var(--text-primary); border-radius:3px; visibility:hidden; opacity:0; pointer-events:none; }
+.hu-tip kbd { font:inherit; opacity:.7; }
+.hu-cmd:hover>.hu-tip { visibility:visible; opacity:1; transition:opacity .1s linear .45s, visibility 0s .45s; }
+.hu-cmd:has(>.hu-history:focus-visible)>.hu-tip { visibility:visible; opacity:1; transition:none; }
+[data-variant=icons] .hu-header .hu-tip { left:auto; right:0; }
+
+.hu-cluster { display:flex; align-items:center; gap:8px; padding-left:12px; border-left:1px solid var(--border-strong); }
+.hu-cluster .hu-save-state { min-width:38px; }
+[data-variant=apart] .hu-history-group { gap:0; margin-left:-4px; }
+
+.hu-body { min-height:0; display:grid; grid-template-columns:46px minmax(0,1fr); }
+.hu-rail { display:flex; flex-direction:column; align-items:center; gap:6px; padding-top:10px; background:var(--surface-panel); border-right:1px solid var(--border-normal); }
+.hu-rail>span, .hu-shell .hu-rail>button { width:36px; height:36px; display:flex; align-items:center; justify-content:center; color:var(--text-muted); padding:0; background:transparent; border:0; border-radius:4px; }
+.hu-shell .hu-rail>button[aria-pressed=true] { color:var(--text-primary); background:var(--accent-subtle); box-shadow:inset 3px 0 var(--accent-primary); }
+.hu-rail svg { width:18px; height:18px; }
+.hu-main { min-width:0; min-height:0; overflow:auto; padding:0 16px 16px; }
+.hu-ws-head { display:flex; align-items:center; gap:10px; height:44px; border-bottom:1px solid var(--border-normal); margin-bottom:10px; }
+.hu-ws-head>strong { font-size:14px; }
+.hu-ws-head .hu-muted { font-size:11px; }
+.hu-scene-history { display:flex; gap:4px; }
+.hu-shell .hu-scene-history .hu-history { min-height:24px; padding:1px 8px; font-size:11px; }
+.hu-scene-history .hu-tip { left:auto; right:0; }
+
+.hu-beats { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+.hu-shell .hu-beats button { width:100%; display:grid; grid-template-columns:28px 90px minmax(0,1fr); gap:10px; text-align:left; border:0; border-bottom:1px solid var(--border-normal); border-left:2px solid transparent; border-radius:0; background:transparent; padding:7px 8px; }
+.hu-shell .hu-beats button[aria-pressed=true] { background:var(--accent-subtle); border-left-color:var(--accent-primary); }
+.hu-beats b { font-variant-numeric:tabular-nums; color:var(--text-secondary); font-weight:500; }
+.hu-beats span:nth-child(2) { color:var(--text-secondary); }
+.hu-beats span:last-child { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+.hu-screens { display:grid; grid-template-columns:minmax(0,1fr) 180px; gap:16px; }
+.hu-canvas { aspect-ratio:16/9; max-height:380px; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:10px; padding:24px 32px; background:#1c2733; border:1px solid var(--border-strong); }
+.hu-canvas-title { font-size:22px; font-weight:650; color:#e8e2d4; margin-bottom:8px; }
+.hu-shell .hu-canvas-button { height:32px; min-height:0; text-align:left; color:#e8e2d4; background:#2c3a48; border:1px solid #435567; }
+.hu-shell .hu-canvas-button[aria-pressed=true] { outline:2px solid #e6bc66; outline-offset:2px; } /* Game art keeps its own colours in both themes. */
+.hu-inspector { margin:0; display:grid; grid-template-columns:auto 1fr; gap:6px 12px; font-size:12px; align-content:start; }
+.hu-inspector dt { color:var(--text-secondary); }
+.hu-inspector dd { margin:0; font-variant-numeric:tabular-nums; }
+
+.hu-footer { display:flex; align-items:center; gap:16px; padding:0 12px; font-size:11px; background:var(--surface-panel); border-top:1px solid var(--border-normal); }
+.hu-status { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+@media (max-width:640px) {
+  .hu-switcher { margin-left:0; }
+  .hu-scenario>.hu-muted { display:none; }
+  .hu-app { height:auto; min-height:520px; }
+  .hu-header { padding:6px 10px; gap:6px 8px; }
+  .hu-brand { font-size:14px; }
+  .hu-project { display:none; }
+  .hu-cluster { padding-left:0; border-left:0; }
+  .hu-shell .hu-header button { font-size:11px; padding:3px 7px; min-height:26px; }
+  .hu-shell .hu-header .hu-cmd-icon>.hu-history { width:28px; padding:0; }
+  .hu-runtime { padding-left:8px; gap:4px; }
+  .hu-body { display:block; }
+  .hu-rail { display:none; }
+  .hu-main { padding:0 10px 10px; }
+  .hu-shell .hu-beats button { grid-template-columns:24px 82px minmax(0,1fr); gap:6px; }
+  .hu-screens { grid-template-columns:1fr; }
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "screenId": "header-undo",
+  "currentApproved": null,
+  "revisions": [
+    {
+      "id": "icons-v1",
+      "variantId": "icons",
+      "approval": null
+    },
+    {
+      "id": "grouped-v1",
+      "variantId": "grouped",
+      "approval": null
+    },
+    {
+      "id": "apart-v1",
+      "variantId": "apart",
+      "approval": null
+    }
+  ]
+}
