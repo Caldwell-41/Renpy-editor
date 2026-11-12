@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "screenId": "header-undo",
+  "currentApproved": "icons-v1",
+  "revisions": [
+    {
+      "id": "icons-v1",
+      "variantId": "icons",
+      "approval": {
+        "date": "2026-11-12",
+        "decision": "Kris approved variant 1, \"Icons beside Save\", for the header Undo and Redo buttons: screen header-undo / icons, revision icons-v1. Variants 2 (grouped-v1) and 3 (apart-v1) are not approved. He also decided that the workspace Undo and Redo buttons (Story, Screens, prompts, references) are removed once the header buttons ship, which changes #143 decision 8. The decision is recorded in issue #143 (comment 6822833410).",
+        "reason": null,
+        "supersedes": null,
+        "source": {
+          "commit": "aff4443735657ac52a9b03d5069b794f551a3605",
+          "fingerprint": "9e2f5ed817e24ba7ec3d77ff31dbcdd4c5e624d1bf52aad2054b38198d0134d1"
+        },
+        "captures": [
+          {
+            "path": "docs/design/header-undo/captures/icons-v1-ready-focus-dark-wide.png",
+            "sha256": "49a3091af7a4e2a20f5feb974015e62ca41edda44f3b9ec6b17af1dd92529137",
+            "state": "ready",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/header-undo/captures/icons-v1-ready-focus-dark-compact.png",
+            "sha256": "346025c72c78f0238e71cf1e98d0c3b71850e61fd622a3f54df4dee2ac7ba6e5",
+            "state": "ready",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/header-undo/captures/icons-v1-ready-focus-light-wide.png",
+            "sha256": "fcf1f94721fbbdc9f13159a22cfe17334f39722c11fe51a8fcc7c32ab2c07c8b",
+            "state": "ready",
+            "theme": "light",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/header-undo/captures/icons-v1-ready-focus-light-compact.png",
+            "sha256": "a0f160548f8006ad3c0ec8ef1f758a23bd1d15f37e4563e0012090ac6d0154d3",
+            "state": "ready",
+            "theme": "light",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/header-undo/captures/icons-v1-undone-focus-dark-wide.png",
+            "sha256": "8465281cf2fc6f25c8cec774c00d289e04780849c46bda7b342be625fd516ee3",
+            "state": "undone",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/header-undo/captures/icons-v1-undone-focus-dark-compact.png",
+            "sha256": "6f7fc969a20fc789a283ee9be9a814a68cbd4dd87f79434ea5f4bffb8ca579ae",
+            "state": "undone",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/header-undo/captures/icons-v1-undone-focus-light-wide.png",
+            "sha256": "ff70b174e02c05f1d442d691ca59e2d1c0dae6e0e569742bbd30ea3ea2443f60",
+            "state": "undone",
+            "theme": "light",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/header-undo/captures/icons-v1-undone-focus-light-compact.png",
+            "sha256": "8b141d293d8265125bd146eef9805c1d50281b3e24d4a9cf7f1449f658176f76",
+            "state": "undone",
+            "theme": "light",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/header-undo/captures/icons-v1-empty-focus-dark-wide.png",
+            "sha256": "0d3f6a1348d06b03dc2b9a0d0b33db210f3a735e2495bc0c484c3d93b32c5015",
+            "state": "empty",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/header-undo/captures/icons-v1-empty-focus-light-wide.png",
+            "sha256": "7d880ce29a1cca82b8be851c511cfac467709b79b9b336af62331b91961633b4",
+            "state": "empty",
+            "theme": "light",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "The header's right side reads save state, Undo, Redo, Save, then Validate, Run and Stop. Undo and Redo are square icon buttons with no visible text.",
+          "The tooltip and accessible name name the next edit and the shortcut, for example \"Undo button resize ⌘Z\". With nothing to undo or redo they read \"Nothing to undo\" and \"Nothing to redo\".",
+          "A disabled button is dimmed with a thin border and does nothing. It uses aria-disabled, not disabled, so it stays in the Tab order.",
+          "On hover the tooltip appears after about half a second. On keyboard focus it appears at once and the button shows the 2px focus ring.",
+          "The shortcuts are Cmd+Z and Shift+Cmd+Z on macOS, and Ctrl+Z and Ctrl+Y on Windows.",
+          "The header buttons and Cmd/Ctrl+Z are the only Undo and Redo controls. The workspace buttons in Story, Screens, prompts and references are removed.",
+          "Undo opens the edit's workspace and selects its item. After Undo the status line reads \"Undone: button resize\", and Redo reads \"Redone: ...\". A new edit drops Redo.",
+          "At 560 px the project name hides, the header buttons use 11px text and the header stays on one row with no horizontal scroll."
+        ],
+        "deviations": [
+          "Fictional browser-memory mock. It has no source transaction, revision check, draft step or save. Save, Validate and Run only write a status message.",
+          "The mock's Story scene still shows its own Undo and Redo buttons beside the header buttons, and its captures include them. They show where the old controls were. Production removes them.",
+          "The Story beat list and the Screens canvas are reduced stand-ins for Story Combined v1 and the Screens workspace.",
+          "The recorded source predates the Brass and slate palette (#150). The lab still pins this version. Production colours follow docs/UI.md.",
+          "The toolbar still reads \"Header Undo study · unapproved\" in the reviewed source. The approval record owns the design status. That string is prototype scaffolding.",
+          "The captures were taken at d615b99f. The pinned commit differs only in the catalogue description.",
+          "Variants 2 and 3 remain in the lab as unapproved drafts for comparison."
+        ]
+      }
+    },
+    {
+      "id": "grouped-v1",
+      "variantId": "grouped",
+      "approval": null
+    },
+    {
+      "id": "apart-v1",
+      "variantId": "apart",
+      "approval": null
+    }
+  ]
+}

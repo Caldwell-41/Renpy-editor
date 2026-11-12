@@ -327,11 +327,17 @@ and real Story-to-core operations.
 
 | Region | Contents |
 | --- | --- |
-| Header | Project, save state, Save, Undo/Redo, Validate, Run and Stop |
+| Header | Project, save state, Undo, Redo, Save, Validate, Run and Stop |
 | Left | Collapsible main navigation, then the workspace's own list (scenes or files) |
 | Centre | The active workspace |
 | Right | The workspace's editor or optional inspector |
 | Bottom | Runtime and diagnostics drawer, opened on demand |
+
+The header Undo and Redo are square icon buttons with no visible text, between the
+save state and Save. They and Cmd/Ctrl+Z are the only Undo and Redo controls in the
+application; no workspace has its own. [Story Undo](#story-undo) defines them. The
+approved layout is `header-undo` / `icons`, revision `icons-v1`
+([record](design/header-undo/README.md)).
 
 Each panel has a visible collapse and restore control that moves focus and remembers
 its state. When space runs short, secondary panels collapse before the main editor
@@ -544,11 +550,14 @@ Saving adds no extra entry and does not clear the history.
 [ADR 0025](adr/0025-project-history-orders-draft-steps.md) records how the order
 includes unfinished drafts.
 
-Every Undo button and Cmd/Ctrl+Z run one shell-owned Undo command. Redo uses
-Shift+Cmd/Ctrl+Z, or Ctrl+Y on Windows. Each existing button keeps its place and its "Undo" or
-"Redo" text. Its tooltip and accessible name name the next edit, for example "Undo
-button resize". After Undo the status line reports it, for example "Undone: button
-resize".
+The header Undo and Redo buttons and Cmd/Ctrl+Z run one shell-owned Undo command.
+Redo uses Shift+Cmd/Ctrl+Z, or Ctrl+Y on Windows. Story, Screens, Prompts and
+References have no Undo or Redo buttons of their own. The header buttons are icons.
+Their tooltip and accessible name name the next edit and the shortcut, for example
+"Undo button resize ⌘Z". With nothing to undo or redo, a button is dimmed, does
+nothing and reads "Nothing to undo" or "Nothing to redo". It stays in the Tab order
+(`aria-disabled`, not `disabled`). After Undo the status line reports it, for example
+"Undone: button resize".
 
 Undo opens the edit's workspace and selects its item: the beat, screen element,
 Source file, prompt action or reference record. If the item no longer exists,
@@ -758,7 +767,8 @@ Settings → Application → AI providers sets up a profile in this order: name,
 Connect, model, then Save profile. The key never returns to the web view. Opening or
 saving Settings sends nothing; Test response format is a separate explicit request.
 The header's Studio request panel sends only a fixed test message. Current project →
-System prompts edits each action's prompt, with Restore baseline and Undo.
+System prompts edits each action's prompt, with Restore baseline. The header Undo
+reverses a prompt edit and opens System prompts.
 
 [PROMPTS_CONTEXT](PROMPTS_CONTEXT.md) owns each action,
 [REFERENCE_LIBRARY](REFERENCE_LIBRARY.md) owns cards and lore,
