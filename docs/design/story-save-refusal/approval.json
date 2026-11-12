@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "screenId": "story-save-refusal",
+  "currentApproved": "marked-v1",
+  "revisions": [
+    {
+      "id": "marked-v1",
+      "variantId": "marked",
+      "approval": {
+        "date": "2026-11-12",
+        "decision": "Kris approved variant 1, \"Count and failure marks\", for how a Story Save refusal shows several failing drafts: screen story-save-refusal / marked, revision marked-v1. Variants 2 (stepper-v1) and 3 (first-v1) are not approved. The decision is recorded in issue #114 (comment 6820468198).",
+        "reason": null,
+        "supersedes": null,
+        "source": {
+          "commit": "3f64ad9db849f459de0f12b17e57f0c4678025e5",
+          "fingerprint": "ee469be1c478374d3ef466f961473bf3fa764985b28d9b559ca1e264bc1ae024"
+        },
+        "captures": [
+          {
+            "path": "docs/design/story-save-refusal/captures/marked-v1-approved-dark-wide.png",
+            "sha256": "20e276994b8363611aeb47c8736e89d209be3d23ade9c7fe807e0c5b9261cab9",
+            "state": "refused",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/story-save-refusal/captures/marked-v1-approved-dark-compact.png",
+            "sha256": "84ca5c644bdf7ff83f239e1ab80b648547fb3435c54fbc60148fe56a27e5aa3f",
+            "state": "refused",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "Save checks every beat draft. If any fails, it writes none of them, keeps all drafts and opens the first failing draft in project order with its error.",
+          "The header status reads \"Nothing saved. 3 of 5 drafts need changes:\" (the numbers are the live counts), followed by one link per scene with its failure count. A link opens that scene's first failing draft.",
+          "Failing beats get a red ! and a red top edge in Tracks, with the reason in Reel and the tooltip. Ready drafts keep the amber •. The scene menu lists draft and failure counts per scene.",
+          "Each failing beat shows its error when selected. Commit on a failing draft shows that draft's error.",
+          "The count and marks update as the author fixes drafts. When none fail, the status reads \"5 unsaved beat drafts. Ready to save.\"",
+          "Marks appear only after a refused Save, never while the author types a first draft.",
+          "A source conflict uses the approved B editor from story-draft-conflict (compact-v2). A new dialogue beat with no speaker shows \"Choose a speaker.\" An unclosed text tag shows \"Close {i} with {/i}.\""
+        ],
+        "deviations": [
+          "Fictional browser-memory mock. It has no source transaction, history, stale-revision refresh, busy lock or Flush. The text-tag check covers only paired tags. The scene menu stands in for Combined v1's scene tree.",
+          "Only the beats that carry drafts are editable. Branch path and non-text beats are context.",
+          "The recorded source predates the Brass and slate palette (#150). The lab still pins this version; production colours follow docs/UI.md.",
+          "The toolbar still reads \"Save refusal study · unapproved\" in the reviewed source. The approval record owns the design status; that string is prototype scaffolding.",
+          "Variants 2 and 3 remain in the lab as unapproved drafts for comparison."
+        ]
+      }
+    },
+    {
+      "id": "stepper-v1",
+      "variantId": "stepper",
+      "approval": null
+    },
+    {
+      "id": "first-v1",
+      "variantId": "first",
+      "approval": null
+    }
+  ]
+}
