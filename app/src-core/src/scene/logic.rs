@@ -350,7 +350,7 @@ pub(super) fn validate_conditional_completion(
             b.payload,
             BeatPayload::Call { .. } | BeatPayload::Choice { .. }
         )
-    }) && structure::root_may_continue(bytes, &beats)?
+    }) && bodies::root_may_continue(bytes, &beats)?
     {
         return Err(SceneError::InvariantBlocked);
     }
@@ -733,72 +733,6 @@ mod tests {
             assert_eq!(fs::read(&map_path).unwrap(), before_map);
         }
     }
-}
-
-pub(super) fn group_may_continue(group_id: &str, beats: &[SceneBeat], depth: usize) -> bool {
-    if depth >= MAX_CONDITION_NESTING {
-        return true;
-    }
-    let headers: Vec<_> = beats
-        .iter()
-        .filter(|b| {
-            b.conditional_branch
-                .as_ref()
-                .is_some_and(|g| g.group_id == group_id)
-        })
-        .collect();
-    if !headers
-        .iter()
-        .any(|h| h.conditional_branch.as_ref().is_some_and(|g| g.otherwise))
-    {
-        return true;
-    }
-    headers.iter().any(|header| {
-        body_may_continue(
-            &crate::metadata::BeatOwner {
-                group_id: group_id.into(),
-                branch_id: header.id.clone(),
-            },
-            beats,
-            depth,
-        )
-    })
-}
-
-/// Completion is structural and conservative; it never evaluates a condition.
-pub(super) fn body_may_continue(
-    owner: &crate::metadata::BeatOwner,
-    beats: &[SceneBeat],
-    depth: usize,
-) -> bool {
-    if depth >= MAX_CONDITION_NESTING {
-        return true;
-    }
-    for beat in beats.iter().filter(|b| b.owner.as_ref() == Some(owner)) {
-        if let Some(branch) = &beat.conditional_branch {
-            if !branch.choice_option
-                && branch.ordinal == 0
-                && !group_may_continue(&branch.group_id, beats, depth + 1)
-            {
-                return false;
-            }
-            continue;
-        }
-        if matches!(beat.payload, BeatPayload::Choice { .. }) {
-            if !choice::may_continue_at_depth(beat, beats, depth + 1) {
-                return false;
-            }
-            continue;
-        }
-        if matches!(&beat.payload, BeatPayload::CustomCode { source, .. } if source.trim() != "pass" && !source.trim().is_empty() && !source.trim_start().starts_with('#'))
-        {
-            return true;
-        }
-        if is_terminal_payload(&beat.payload) {
-            return false;
-        }
-    }
-    true
 }
 
 #[cfg(test)]
@@ -1621,6 +1555,10 @@ mod structural_review_tests {
 #[cfg(test)]
 #[path = "structure/tests.rs"]
 mod structural_tests;
+
+#[cfg(test)]
+#[path = "bodies/tests.rs"]
+mod body_tree_tests;
 
 #[cfg(test)]
 mod panel_tests;

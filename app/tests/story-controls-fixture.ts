@@ -1,4 +1,37 @@
-import type { Condition, SceneBeat, SceneWorkspace } from "../src/scene-ui.ts";
+import { renderStoryView as renderStory, type BodyRef, type Condition, type InsertionPlace, type SceneActions, type SceneBeat, type SceneBody, type SceneWorkspace } from "../src/scene-ui.ts";
+/** Gives every scene the small bodies value its current beats describe. */
+export function withBodies(model: SceneWorkspace): SceneWorkspace {
+  return { ...model, scenes: model.scenes.map(scene => ({ ...scene, bodies: sceneBodies(scene.beats) })) };
+}
+/** Story for presentation tests: each model it shows, including accepted results, gets
+ *  bodies from `withBodies`. Hand-built beats then never carry stale bodies. */
+export const renderStoryView: typeof renderStory = (host, tree, model, actions, beatId) => {
+  const wrap = (next: SceneActions): SceneActions => ({ ...next, apply: async (command, expected) => withBodies(await next.apply(command, expected)) });
+  const view = renderStory(host, tree, withBodies(model), wrap(actions), beatId);
+  return { ...view, update: (next, nextActions, selected) => view.update(withBodies(next), wrap(nextActions), selected) };
+};
+/** A small bodies value for presentation tests. Real endings and places come from
+ *  core and are tested against it. A body ends at its first Jump, Repeat or Return, or
+ *  at a node that `ends` names; otherwise it continues. */
+export function sceneBodies(beats: readonly SceneBeat[], ends: readonly string[] = []): SceneBody[] {
+  const parentOf = (beat: SceneBeat): BodyRef => beat.owner ? { type: "branch", ...beat.owner } : { type: "root" };
+  const owned = (body: BodyRef, beat: SceneBeat): boolean => body.type === "root" ? !beat.owner : beat.owner?.groupId === body.groupId && beat.owner.branchId === body.branchId;
+  const shells: Omit<SceneBody, "nodes" | "ending" | "places" | "defaultPlace">[] = [{ body: { type: "root" }, kind: "scene" }];
+  for (const beat of beats) {
+    const branch = beat.conditionalBranch; if (!branch) continue;
+    const owner = branch.choiceOption ? beats.find(b => b.payload.type === "choice" && b.payload.options.some(o => o.id === beat.id)) : beats.find(b => b.conditionalBranch?.groupId === branch.groupId && !b.conditionalBranch.ordinal && !b.conditionalBranch.otherwise);
+    shells.push({ body: { type: "branch", groupId: branch.groupId, branchId: beat.id }, kind: branch.choiceOption ? "option" : "branch", number: (branch.ordinal ?? 0) + 1, parent: parentOf(beat), ...(owner ? { owningNode: owner.id } : {}) });
+  }
+  return shells.map(shell => {
+    const trivia = (beat: SceneBeat): boolean => !beat.conditionalBranch && beat.payload.type === "customCode" && (!beat.payload.source.trim() || beat.payload.source.trim().startsWith("#"));
+    const nodes = beats.filter(beat => owned(shell.body, beat) && !trivia(beat) && !beat.structuralPlaceholder && !beat.conditionalBranch?.choiceOption && !beat.conditionalBranch?.otherwise && !beat.conditionalBranch?.ordinal);
+    const ending = nodes.findIndex(beat => ends.includes(beat.id) || ["jump", "repeatChoice", "return"].includes(beat.payload.type)), reached = ending < 0 ? nodes : nodes.slice(0, ending + 1);
+    const places: InsertionPlace[] = reached.filter(beat => !beat.protected || beat.conditionalBranch).map(beat => ({ position: { type: "before" as const, anchor: beat.conditionalBranch ? { type: "condition" as const, groupId: beat.conditionalBranch.groupId } : { type: "beat" as const, beatId: beat.id } }, fitsEnding: false }));
+    if (ending < 0) places.push({ position: { type: "end" }, fitsEnding: true });
+    return { ...shell, nodes: nodes.map(beat => ({ beatId: beat.id, bodies: shells.filter(item => item.owningNode === beat.id).map(item => item.body) })),
+      ending: ending < 0 ? { type: "continues" as const } : { type: "ends" as const, beatId: nodes[ending]!.id }, places, defaultPlace: ending < 0 ? { type: "end" as const } : places.at(-1)?.position };
+  });
+}
 export const trustCondition: Condition = { status: "supported", expression: { type: "compare", operator: "greaterEqual", left: { type: "variable", variableId: "trust", variableType: "int" }, right: { type: "int", value: "5" } } };
 export const flagCondition: Condition = { status: "supported", expression: { type: "variable", variableId: "flag", variableType: "bool" } };
 export function storyFixture(deep = 1): SceneWorkspace {
@@ -20,5 +53,5 @@ export function storyFixture(deep = 1): SceneWorkspace {
   add({ id: "after-call", protected: false, payload: { type: "narration", text: "The conversation has ended." } });
   add({ id: "end", protected: false, payload: { type: "return" } });
   return { projectRevision: "project", sourceMapRevision: "map", entrySceneId: "one", lastOpen: { chapterId: "chapter", sceneId: "one" }, canUndo: true, canRedo: false,
-    chapters: [{ id: "chapter", displayName: "The Last Tram", directory: "game" }], scenes: [{ id: "one", chapterId: "chapter", displayName: "Arrival", technicalLabel: "arrival", sourcePath: "game/arrival.rpy", sourceRevision: "source", sourceConflict: false, partial: false, beats }, { id: "two", chapterId: "chapter", displayName: "Shared conversation", technicalLabel: "shared", sourcePath: "game/shared.rpy", sourceRevision: "other", sourceConflict: false, partial: false, beats: [{ id: "callee", byteStart: 20, byteEnd: 40, protected: false, payload: { type: "narration", text: "We meet again." } }] }], authoring: { characters: [], assets: [], appearances: [], variables: [{ id: "flag", technicalName: "flag", variableType: "bool", defaultValue: true }, { id: "trust", technicalName: "trust", variableType: "int", defaultValue: "0" }, { id: "name", technicalName: "name", variableType: "string", defaultValue: "Bec" }] } };
+    chapters: [{ id: "chapter", displayName: "The Last Tram", directory: "game" }], scenes: [{ id: "one", chapterId: "chapter", displayName: "Arrival", technicalLabel: "arrival", sourcePath: "game/arrival.rpy", sourceRevision: "source", sourceConflict: false, partial: false, beats, bodies: sceneBodies(beats) }, { id: "two", chapterId: "chapter", displayName: "Shared conversation", technicalLabel: "shared", sourcePath: "game/shared.rpy", sourceRevision: "other", sourceConflict: false, partial: false, beats: [{ id: "callee", byteStart: 20, byteEnd: 40, protected: false, payload: { type: "narration", text: "We meet again." } }], bodies: [{ body: { type: "root" }, kind: "scene", nodes: [{ beatId: "callee" }], ending: { type: "continues" }, places: [{ position: { type: "end" }, fitsEnding: true }], defaultPlace: { type: "end" } }] }], authoring: { characters: [], assets: [], appearances: [], variables: [{ id: "flag", technicalName: "flag", variableType: "bool", defaultValue: true }, { id: "trust", technicalName: "trust", variableType: "int", defaultValue: "0" }, { id: "name", technicalName: "name", variableType: "string", defaultValue: "Bec" }] } };
 }

@@ -29,7 +29,7 @@ test('complete selectable native probe drives production shell/controller throug
     lastOpen: { chapterId: 'chapter', sceneId: 'scene' }, canUndo: false, canRedo: false,
     chapters: [{ id: 'chapter', displayName: 'Chapter', directory: 'game/chapters' }],
     scenes: [{ id: 'scene', chapterId: 'chapter', displayName: 'Scene', technicalLabel: 'scene', sourcePath: 'game/scene.rpy', sourceRevision: digest('source'), sourceConflict: false, partial: false,
-      beats: [{ id: 'narration', byteStart: 0, byteEnd: 20, protected: false, payload: { type: 'narration', text: 'Public narration' } }, { id: 'return', byteStart: 20, byteEnd: 30, protected: false, payload: { type: 'return' } }] }],
+      beats: [{ id: 'narration', byteStart: 0, byteEnd: 20, protected: false, payload: { type: 'narration', text: 'Public narration' } }, { id: 'return', byteStart: 20, byteEnd: 30, protected: false, payload: { type: 'return' } }], bodies: [{body: {type: 'root'}, kind: 'scene', nodes: [{beatId: 'narration'}, {beatId: 'return'}], ending: {type: 'ends', beatId: 'return'}, places: [{position: {type: 'before', anchor: {type: 'beat', beatId: 'narration'}}, fitsEnding: false}, {position: {type: 'before', anchor: {type: 'beat', beatId: 'return'}}, fitsEnding: false}], defaultPlace: {type: 'before', anchor: {type: 'beat', beatId: 'return'}}}] }],
     authoring: { characters: [{ id: 'alice', technicalName: 'alice', displayName: 'Alice' }], appearances: [], assets: [], variables: [] },
   };
   type Mutable<T> = { -readonly [K in keyof T]: Mutable<T[K]> };

@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
-import { hasSceneDraft, renderStoryView, type SceneActions, type SceneCommand, type SceneWorkspace, type ScreenInsertion } from "../src/scene-ui.js";
+import { hasSceneDraft, type SceneActions, type SceneCommand, type SceneWorkspace, type ScreenInsertion } from "../src/scene-ui.js";
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenTargetBinding } from "../src/screen-contracts.js";
-import { storyFixture } from "./story-controls-fixture.js";
+import { storyFixture, renderStoryView } from "./story-controls-fixture.js";
 
 const binding: ScreenTargetBinding = { screenId: "panel-id", sourceName: "help_panel" };
 const revisions = { source: "panel-source", sourceMap: "map", inventory: "inventory", effects: "effect" };

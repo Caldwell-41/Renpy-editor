@@ -250,6 +250,195 @@ export default {
           "protected": false
         }
       ],
+      "bodies": [
+        {
+          "body": {
+            "type": "root"
+          },
+          "kind": "scene",
+          "nodes": [
+            {
+              "beatId": "feee4a25-fa28-4e51-8ccc-e4e471162461",
+              "bodies": [
+                {
+                  "type": "branch",
+                  "groupId": "205331a6-7d87-45aa-addc-1c476d498be2",
+                  "branchId": "24a9772c-2961-48cb-b41d-9c86ce41fbb1"
+                },
+                {
+                  "type": "branch",
+                  "groupId": "205331a6-7d87-45aa-addc-1c476d498be2",
+                  "branchId": "6505faf9-8600-40ae-89cb-66d20aaf3b31"
+                },
+                {
+                  "type": "branch",
+                  "groupId": "205331a6-7d87-45aa-addc-1c476d498be2",
+                  "branchId": "7263f535-1886-4378-938a-7ee30902d93e"
+                }
+              ]
+            },
+            {
+              "beatId": "db78fad2-4d17-4311-8ca8-49cb2cb86141"
+            },
+            {
+              "beatId": "50900405-a9bd-4f74-8b0d-b7eb60c2e03b"
+            }
+          ],
+          "ending": {
+            "type": "ends",
+            "beatId": "50900405-a9bd-4f74-8b0d-b7eb60c2e03b"
+          },
+          "places": [
+            {
+              "position": {
+                "type": "before",
+                "anchor": {
+                  "type": "beat",
+                  "beatId": "feee4a25-fa28-4e51-8ccc-e4e471162461"
+                }
+              },
+              "fitsEnding": false
+            },
+            {
+              "position": {
+                "type": "before",
+                "anchor": {
+                  "type": "beat",
+                  "beatId": "db78fad2-4d17-4311-8ca8-49cb2cb86141"
+                }
+              },
+              "fitsEnding": false
+            },
+            {
+              "position": {
+                "type": "before",
+                "anchor": {
+                  "type": "beat",
+                  "beatId": "50900405-a9bd-4f74-8b0d-b7eb60c2e03b"
+                }
+              },
+              "fitsEnding": false
+            }
+          ],
+          "defaultPlace": {
+            "type": "before",
+            "anchor": {
+              "type": "beat",
+              "beatId": "50900405-a9bd-4f74-8b0d-b7eb60c2e03b"
+            }
+          }
+        },
+        {
+          "body": {
+            "type": "branch",
+            "groupId": "205331a6-7d87-45aa-addc-1c476d498be2",
+            "branchId": "24a9772c-2961-48cb-b41d-9c86ce41fbb1"
+          },
+          "kind": "option",
+          "number": 1,
+          "parent": {
+            "type": "root"
+          },
+          "owningNode": "feee4a25-fa28-4e51-8ccc-e4e471162461",
+          "nodes": [
+            {
+              "beatId": "150b4a6f-42f3-4bca-9d68-456a9d151439"
+            }
+          ],
+          "ending": {
+            "type": "ends",
+            "beatId": "150b4a6f-42f3-4bca-9d68-456a9d151439"
+          },
+          "places": [
+            {
+              "position": {
+                "type": "before",
+                "anchor": {
+                  "type": "beat",
+                  "beatId": "150b4a6f-42f3-4bca-9d68-456a9d151439"
+                }
+              },
+              "fitsEnding": false
+            }
+          ],
+          "defaultPlace": {
+            "type": "before",
+            "anchor": {
+              "type": "beat",
+              "beatId": "150b4a6f-42f3-4bca-9d68-456a9d151439"
+            }
+          }
+        },
+        {
+          "body": {
+            "type": "branch",
+            "groupId": "205331a6-7d87-45aa-addc-1c476d498be2",
+            "branchId": "6505faf9-8600-40ae-89cb-66d20aaf3b31"
+          },
+          "kind": "option",
+          "number": 2,
+          "parent": {
+            "type": "root"
+          },
+          "owningNode": "feee4a25-fa28-4e51-8ccc-e4e471162461",
+          "nodes": [
+            {
+              "beatId": "69b32d01-a2e4-4dc8-b4ca-15844c0ac56f"
+            }
+          ],
+          "ending": {
+            "type": "ends",
+            "beatId": "69b32d01-a2e4-4dc8-b4ca-15844c0ac56f"
+          },
+          "places": [
+            {
+              "position": {
+                "type": "before",
+                "anchor": {
+                  "type": "beat",
+                  "beatId": "69b32d01-a2e4-4dc8-b4ca-15844c0ac56f"
+                }
+              },
+              "fitsEnding": false
+            }
+          ],
+          "defaultPlace": {
+            "type": "before",
+            "anchor": {
+              "type": "beat",
+              "beatId": "69b32d01-a2e4-4dc8-b4ca-15844c0ac56f"
+            }
+          }
+        },
+        {
+          "body": {
+            "type": "branch",
+            "groupId": "205331a6-7d87-45aa-addc-1c476d498be2",
+            "branchId": "7263f535-1886-4378-938a-7ee30902d93e"
+          },
+          "kind": "option",
+          "number": 3,
+          "parent": {
+            "type": "root"
+          },
+          "owningNode": "feee4a25-fa28-4e51-8ccc-e4e471162461",
+          "nodes": [],
+          "ending": {
+            "type": "continues"
+          },
+          "places": [
+            {
+              "position": {
+                "type": "end"
+              },
+              "fitsEnding": true
+            }
+          ],
+          "defaultPlace": {
+            "type": "end"
+          }
+        }
+      ],
       "chapterId": "beebe7e0-6fa9-4cb5-a7d3-a5113968a665",
       "displayName": "Scene 1",
       "id": "1d39663b-f7e2-4d66-ae02-e9f2d0a7b513",
@@ -280,6 +469,55 @@ export default {
             "type": "jump"
           },
           "protected": false
+        }
+      ],
+      "bodies": [
+        {
+          "body": {
+            "type": "root"
+          },
+          "kind": "scene",
+          "nodes": [
+            {
+              "beatId": "c6628839-ffa7-449c-8110-750f0360e113"
+            },
+            {
+              "beatId": "0d3d3354-4728-4392-ba63-97b3d5204275"
+            }
+          ],
+          "ending": {
+            "type": "ends",
+            "beatId": "0d3d3354-4728-4392-ba63-97b3d5204275"
+          },
+          "places": [
+            {
+              "position": {
+                "type": "before",
+                "anchor": {
+                  "type": "beat",
+                  "beatId": "c6628839-ffa7-449c-8110-750f0360e113"
+                }
+              },
+              "fitsEnding": false
+            },
+            {
+              "position": {
+                "type": "before",
+                "anchor": {
+                  "type": "beat",
+                  "beatId": "0d3d3354-4728-4392-ba63-97b3d5204275"
+                }
+              },
+              "fitsEnding": false
+            }
+          ],
+          "defaultPlace": {
+            "type": "before",
+            "anchor": {
+              "type": "beat",
+              "beatId": "0d3d3354-4728-4392-ba63-97b3d5204275"
+            }
+          }
         }
       ],
       "chapterId": "beebe7e0-6fa9-4cb5-a7d3-a5113968a665",

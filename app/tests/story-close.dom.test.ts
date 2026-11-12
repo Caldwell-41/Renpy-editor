@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
 import type { CoreOperation, CoreResponse } from "../src/protocol.js";
+import { sceneBodies } from "./story-controls-fixture.js";
 
 // Runs the shell in its own file so main.ts module state starts fresh.
 const ticks = async (count = 6): Promise<void> => { for (let index = 0; index < count; index += 1) await new Promise(resolve => setTimeout(resolve, 0)); };
@@ -20,7 +21,7 @@ test("closing the project asks before discarding Story beat drafts", async () =>
     lastOpen: { chapterId: "chapter", sceneId: "scene" }, canUndo: false, canRedo: false,
     chapters: [{ id: "chapter", displayName: "Chapter", directory: "game" }],
     scenes: [{ id: "scene", chapterId: "chapter", displayName: "Scene", technicalLabel: "scene", sourcePath: "game/scene.rpy", sourceRevision: "3".repeat(64), sourceConflict: false, partial: false,
-      beats: [{ id: "line", byteStart: 15, byteEnd: 30, protected: false, payload: { type: "narration", text: "Hello" } }] }],
+      ...(beats => ({ beats, bodies: sceneBodies(beats) }))([{ id: "line", byteStart: 15, byteEnd: 30, protected: false, payload: { type: "narration" as const, text: "Hello" } }]) }],
     authoring: { characters: [], appearances: [], assets: [], variables: [] },
   };
   let closes = 0, writes = 0;

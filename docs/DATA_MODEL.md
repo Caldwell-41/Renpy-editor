@@ -800,6 +800,24 @@ Custom Code generally editable. Empty-body replacement and all structural mutati
 re-prove source ownership. Schema remains v5; IDs/extras are retained through qualified
 moves and reindentation, with ambiguous or unsupported promotion refused.
 
+Each `SceneDocument` keeps its flat `beats` list for beat content and adds `bodies`,
+derived from source on every read and never stored. The list holds the scene body, then
+each branch body and option body, with every parent before its children. A body has its
+`BodyRef`, its `kind` (`scene`, `branch` or `option`), a `number` counted from 1 (branch
+ordinal or option position; the scene body has none), its `parent` body and `owningNode`
+(the If header or Choice beat), its ordered `nodes` and its `ending`. Nodes name beats by
+ID. A condition or Choice is one node that lists its child bodies, a Choice's in option
+order by option ID. Trivia and a structural placeholder are not nodes, so an empty body
+has none. Beats after a later top-level statement belong to no body. `ending` is `ends`
+at a node, `continues` or `unknown`, under the one rule in
+[UI Branches in a scene](UI.md#branches-in-a-scene). Custom Code counts as an ending only
+when its statement, at the body's indentation, starts with the word `jump` or `return`.
+`places` lists each insertion place core accepts as an ADR 0016 `Position` with
+`fitsEnding`, and `defaultPlace` is the place before the ending node, or the end, or else
+the last listed place. Insert, condition insert and move check a request with the same
+code that lists the places. Unknown endings count as "may continue" for the scene
+fallthrough guard, Call and Choice completion and the Branches continuation lines.
+
 Source-map v6 adds `ownedScreens` for explicitly created custom screens. Each entry
 stores distinct screen/root UUIDs, its source name, `game/ui/<name>.rpy` path and
 preserved extension fields. Migration from older supported maps preserves Scene
