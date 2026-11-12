@@ -459,7 +459,7 @@ export const storyCases={
   // The refresh may record the external revision in the source map; scripts stay as the external writer left them.
   c.assert.equal(staleSave?.errorCode,'SOURCE_CONFLICT');c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(externalSnapshot)),'A stale Story Save writes nothing');
   c.assert(stale.some(r=>r.request.operation==='scene.list'&&r.responseOk),'A stale refusal refreshes Story');
-  c.assert.match(status(),/Save again\.$/);c.assert.equal(ops('project.flush').length,0);
+  c.assert.equal(status(),"Story changed in source and was refreshed. Nothing saved. Save again.");c.assert.equal(ops('project.flush').length,0);
   // A new beat placed before a beat that source then removes conflicts, marked like any failing draft.
   const placed=await addBeat('narration');c.enter(placed.querySelector('[aria-label="Insert before"]'),anchor.id,'change');c.enter(placed.querySelector('textarea'),'Story Save placed');await c.settle();
   await c.raw({driver:'externalRemove',path:entry.sourcePath,remove:'    "Nothing available"\n'});const removed=await c.snapshot();

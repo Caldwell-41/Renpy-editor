@@ -777,8 +777,8 @@ export function renderStoryView(
   };
   const saveDrafts = async (): Promise<StorySaveOutcome> => {
     if (disposed || actions.current?.() === false || !actions.saveDrafts) return { kind: "blocked" };
-    if (settling || pendingWrites) { actions.status("Wait for the current Story change to finish. Nothing was saved.", "error"); return { kind: "busy" }; }
-    if (hasDraft()) { actions.status("Commit or cancel the open Story form before saving. Nothing was saved.", "error"); focusDraft(); return { kind: "blocked" }; }
+    if (settling || pendingWrites) { actions.status("Wait for the current Story change to finish. Nothing saved.", "error"); return { kind: "busy" }; }
+    if (hasDraft()) { actions.status("Commit or cancel the open Story form before saving. Nothing saved.", "error"); focusDraft(); return { kind: "blocked" }; }
     const { drafts: saving, commands, failures } = preflight();
     if (failures.length) return refuseSave(failures);
     const expected = expectedRevisions(model);
@@ -802,13 +802,13 @@ export function renderStoryView(
         draw();
         const conflicts = preflight().failures;
         if (conflicts.length) return refuseSave(conflicts, "Story changed in source and was refreshed. Nothing saved.");
-        actions.status("Story changed in source and was refreshed. Nothing was saved. Save again.", "error");
+        actions.status("Story changed in source and was refreshed. Nothing saved. Save again.", "error");
         return { kind: "refused", failures: [] };
       }
       const reason = friendlyError(error, "Story drafts could not be saved.");
       const refused = actionIndex === undefined ? undefined : saving[actionIndex];
       if (refused) return refuseSave([[refused, reason]]);
-      actions.status(`Nothing was saved. ${reason} Drafts retained.`, "error");
+      actions.status(`Nothing saved. ${reason} Drafts retained.`, "error");
       return { kind: "refused", failures: [] };
     } finally { unlock(); }
   };
