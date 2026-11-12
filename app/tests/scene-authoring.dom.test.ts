@@ -447,17 +447,23 @@ test("a valid beat draft shows on the stage while typing, and Cancel restores th
  view.dispose();await browser.happyDOM.close();
 });
 
-test("a draft whose beat left source stays listed until the author cancels it",async()=>{
+test("a draft whose beat left source offers only Discard draft; a scene Story cannot map keeps its drafts as they are",async()=>{
  const browser=installDom();const host=document.querySelector<HTMLElement>("#host")!,tree=document.querySelector<HTMLElement>("#tree")!;
  const original=sceneModel(),actions={status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error("unused");},apply:async()=>original};
  const view=renderStoryView(host,tree,original,actions);
- host.querySelector<HTMLButtonElement>('[data-beat-id="dialogue"] .beat-select')!.click();
- const text=host.querySelector<HTMLTextAreaElement>('[data-beat-id="dialogue"] textarea')!;text.value="Orphaned";text.dispatchEvent(new window.Event("input",{bubbles:true}));
- const removed={...original,scenes:original.scenes.map((scene,i)=>i?scene:{...scene,beats:scene.beats.filter(beat=>beat.id!=="dialogue")})};
- view.update(removed,actions);
- const listed=host.querySelector<HTMLElement>('[aria-label="Drafts no longer in source"]')!;assert.ok(listed.contains(text));assert.equal(text.value,"Orphaned");
- [...listed.querySelectorAll("button")].find(item=>item.textContent==="Cancel")!.click();
- assert.equal(view.hasDrafts(),false);assert.equal(host.querySelector('[aria-label="Drafts no longer in source"]'),null);
+ const type=(text:string)=>{host.querySelector<HTMLButtonElement>('[data-beat-id="dialogue"] .beat-select')!.click();const field=host.querySelector<HTMLTextAreaElement>('[data-beat-id="dialogue"] textarea')!;field.value=text;field.dispatchEvent(new window.Event("input",{bubbles:true}));return field;};
+ const visible=(scope:Element)=>[...scope.querySelectorAll("button")].filter(item=>!item.closest("[hidden]")).map(item=>item.textContent);
+ const withScene=(change:(scene:SceneWorkspace["scenes"][number])=>SceneWorkspace["scenes"][number])=>({...original,scenes:original.scenes.map((scene,i)=>i?scene:change(scene))});
+ // A scene Story cannot map has no beats to compare with: the draft keeps its own actions and is not a conflict.
+ let text=type("Waiting");view.update(withScene(scene=>({...scene,sourceConflict:true,beats:[],bodies:[]})),actions);
+ assert.ok(host.contains(text));assert.equal(text.value,"Waiting");assert.equal(host.querySelector(".story-conflict"),null);
+ assert.deepEqual(visible(text.closest("[data-beat-draft-key]")!).slice(-2),["Cancel","Commit Beat"]);
+ // Once the beat leaves source, the draft shows the comparison with no source text and only Discard draft.
+ view.update(withScene(scene=>({...scene,beats:scene.beats.filter(beat=>beat.id!=="dialogue")})),actions);
+ const lost=host.querySelector<HTMLElement>(".beats-list > [data-beat-draft-key]")!;assert.ok(lost.contains(text));
+ assert.equal(lost.querySelector(".story-conflict > p")?.textContent,"This beat is no longer in source.");assert.deepEqual(visible(lost),["Discard draft"]);
+ [...lost.querySelectorAll("button")].find(item=>item.textContent==="Discard draft")!.click();
+ assert.equal(view.hasDrafts(),false);assert.equal(host.querySelector(".beats-list > [data-beat-draft-key]"),null);
  view.dispose();await browser.happyDOM.close();
 });
 
@@ -473,20 +479,6 @@ test("an unsaved new beat moves with the place the author chooses",async()=>{
  assert.ok(branch().contains(panel));assert.equal(view.hasDrafts(),true);
  // The root place is free again, so Add Beat there starts a second draft.
  addBeat();assert.equal(host.querySelectorAll(".new-beat").length,2);
- view.dispose();await browser.happyDOM.close();
-});
-
-test("a beat draft refuses Commit when its beat changed in source, and keeps the input",async()=>{
- const browser=installDom();const host=document.querySelector<HTMLElement>("#host")!,tree=document.querySelector<HTMLElement>("#tree")!;
- const original=sceneModel(),calls:SceneCommand[]=[],statuses:string[]=[];
- const actions={status:(value:string)=>{statuses.push(value);},resolution:{width:1920,height:1080},present:async()=>{throw Error("unused");},apply:async(command:SceneCommand)=>{calls.push(command);return original;}};
- const view=renderStoryView(host,tree,original,actions);
- host.querySelector<HTMLButtonElement>('[data-beat-id="dialogue"] .beat-select')!.click();
- const text=host.querySelector<HTMLTextAreaElement>('[data-beat-id="dialogue"] textarea')!;text.value="Mine";text.dispatchEvent(new window.Event("input",{bubbles:true}));
- const external={...original,scenes:original.scenes.map((scene,i)=>i?scene:{...scene,beats:scene.beats.map(beat=>beat.id==="dialogue"?{...beat,payload:{type:"dialogue" as const,characterId:"alice",text:"Theirs"}}:beat)})};
- view.update(external,actions,"dialogue");
- [...host.querySelectorAll<HTMLButtonElement>('[data-beat-id="dialogue"] button')].find(item=>item.textContent==="Commit Beat")!.click();await tick();
- assert.equal(calls.length,0);assert.match(statuses.at(-1)!,/changed in source/);assert.equal(text.value,"Mine");assert.equal(view.hasDrafts(),true);
  view.dispose();await browser.happyDOM.close();
 });
 

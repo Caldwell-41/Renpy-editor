@@ -489,12 +489,11 @@ incomplete or invalid input never reaches the source files. Ask before an action
 would discard a draft, including deleting its beat or closing the project.
 
 The [beat draft conflict rules](#beat-draft-conflicts) handle changes to the source
-beneath a retained draft. Until that comparison is built, Commit refuses a draft
-whose beat changed in source and keeps the input. A beat that the author has not
-edited is not a draft. A collapsed condition shows the draft marker on its heading.
-A beat with a draft can be moved, and the draft moves with it. A new beat that is
-not yet added moves with the place the author chooses. Undo and Redo wait for
-pending drafts until the [Story Undo](#story-undo) order is built.
+beneath a retained draft. A beat that the author has not edited is not a draft. A
+collapsed condition shows the draft marker on its heading. A beat with a draft can
+be moved, and the draft moves with it. A new beat that is not yet added moves with
+the place the author chooses. [Story Undo](#story-undo) orders draft steps with
+every other edit.
 
 ### Beat draft conflicts
 
@@ -502,25 +501,50 @@ Use the approved B, Buttons together interaction: `story-draft-conflict` / `comp
 revision `compact-v2`. The [reference record](design/story-revamp/README.md#approved-draft-conflict-interaction)
 identifies its local source and approval commits.
 
-Mark a conflicting beat quietly. Unrelated non-conflicting changes need no prompt,
-and routine navigation keeps every draft. Returning to the affected beat reveals
-"Conflict with source" in the selected-beat editor, with the current source text
-above the editable retained draft. Place Discard draft and Override source together
-below the text box.
+A draft conflicts when its own beat changed in source after the draft began.
+Changes elsewhere in the file are not conflicts. Story learns of a source change
+when it reloads, for example when the author returns from another workspace.
 
-- Discard draft keeps the current source and removes only this beat draft.
+Mark a conflicting beat quietly with an amber `!` in place of the draft `*`.
+Unrelated non-conflicting changes need no prompt, and routine navigation keeps every
+draft. Returning to the affected beat reveals "Conflict with source" in the
+selected-beat editor, with the current source text above the editable retained
+draft, now labelled "Your draft". Place Discard draft and Override source together
+below the text box, in place of Cancel and Commit. While the comparison shows, the
+Commit and Cancel shortcuts ask the author to choose one of the two actions.
+
+- Discard draft keeps the current source and removes only this beat draft. The beat
+  stays selected, and its editor shows the source text.
 - Override source validates the editor text and saves only this beat through the
   existing transaction layer. Other drafts stay unsaved. Empty text refuses the
-  override and retains the draft.
+  override with "Enter text before overriding the source. Draft retained."
 
-Override source must use the source revision the author reviewed and preserve all
-existing validation and source-ownership checks. If the source changes again,
-retain the draft and refresh the comparison before accepting another override.
-The action does not authorize a stale write or bypass unsupported-source refusal.
+Override source uses the source revision its comparison shows and keeps all existing
+validation and source-ownership checks. If the source changed again, core refuses the
+write. Story reloads, keeps the input, shows the current source text in the comparison
+and reports "Source changed. Review it, then choose again. Draft retained." The author
+presses Override source again to save over that text. There is no
+automatic retry. The action does not authorize a stale write or bypass
+unsupported-source refusal.
+
+A draft whose beat, insertion place or scene left source has no beat to sit under.
+It shows above the shown scene's beats with "Conflict with source" and, in place of
+source text, why there is none, for example "This beat is no longer in source." A
+beat that became protected says to edit it in Source. Only Discard draft resolves
+these drafts. A scene whose source Story cannot map has no beats to compare with. Its
+drafts are not conflicts: they show above its beats with their own actions, and Commit
+and Story Save refuse them until Story can read the source again.
+A new beat whose insertion anchor is gone but whose body remains stays in its body,
+where the author can choose another place.
 
 Main Save reveals an unresolved conflict and retains all drafts without saving any
-of them. Navigation and Tracks/Reel changes keep drafts; valid drafts still preview
-on the game stage under the existing [stage preview rules](#stage-preview).
+of them. The [Story Save refusal](#saving-story-drafts) marks a conflicting draft with
+the red `!`; its comparison explains the failure, so the editor adds no separate reason.
+Navigation and Tracks/Reel changes keep drafts; valid drafts still preview on the
+game stage under the existing [stage preview rules](#stage-preview).
+
+For history, Discard draft is an edit like Cancel, and Override source is a commit
+like Commit. The [Story Undo](#story-undo) rules apply to both.
 
 ### Saving Story drafts
 
@@ -590,10 +614,13 @@ draft's first step ends the draft. The header names a step by its beat and kind,
 example "Undo narration typing in Arrival" or "Undo cancel of dialogue draft in
 Arrival".
 
-Commit and Story Save join a beat's draft steps into one edit at the top of the
-history, so one Undo reverses the whole beat. A Story Save adds one edit for each
+Commit, Override source and Story Save join a beat's draft steps into one edit at
+the top of the history, so one Undo reverses the whole beat. Undo of Override source
+restores the source it replaced, not the draft. A Story Save adds one edit for each
 saved beat, with the most recently edited beat on top. A saved beat whose source did
-not change adds none. Cancel is an edit, and Undo of it brings the draft back. Undo
+not change adds none. Cancel and Discard draft are edits, and Undo of either brings
+the draft back, with its comparison while the conflict lasts ("Undo discard of
+dialogue draft in Arrival"). Undo
 of deleting a beat restores the beat from source, but not the draft the author agreed
 to discard. The same holds for deleting a branch, condition or scene, and for the
 branches that Unwrap does not keep.

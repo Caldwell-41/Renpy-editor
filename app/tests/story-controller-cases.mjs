@@ -12,6 +12,7 @@ const names=[
  'Ordinary external edits and stale revisions refuse with zero source writes',
  'Beat drafts stay attached across scenes and workspaces until Commit or Cancel',
  'Story Save accepts every beat draft across scenes in one transaction, or none',
+ 'Beat draft conflicts resolve with Discard draft or Override source',
 ];
 const scene=c=>c.workspace().scenes.find(s=>s.id===c.workspace().entrySceneId);
 // The scene Story shows, read from the selected row in the actual scene tree.
@@ -494,5 +495,105 @@ export const storyCases={
   // As the last case, the harness then reopens the project and checks these accepted bytes.
   for(const direction of ['redo','redo']){await c.history(direction);await c.settle();}
   c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(after)));
+ },
+ [names[11]]:async c=>{
+  const entry=scene(c),byName=name=>c.workspace().scenes.find(x=>x.displayName===name);
+  const called=byName('Called scene'),high=byName('High ending'),low=byName('Low ending');c.assert(called&&high&&low);
+  const narration=id=>c.workspace().scenes.find(x=>x.id===id).beats.find(b=>b.payload.type==='narration'&&!b.owner);
+  // A and L conflict, H leaves source, and B only sees an unrelated change in its file.
+  const a=narration(entry.id),b=narration(called.id),h=narration(high.id),l=narration(low.id);c.assert(a&&b&&h&&l);
+  const from=c.requests().length,ops=name=>c.requests().slice(from).filter(r=>r.request.operation===name);
+  // Leaving Story rebuilds the shell, so the header and status line are read when used.
+  const header=()=>c.document.querySelector('.app-header'),status=()=>c.document.querySelector('#app-status').textContent;
+  const undoName=()=>header().querySelector('[data-history="undo"]').getAttribute('aria-label');
+  const openScene=async id=>{const name=c.workspace().scenes.find(x=>x.id===id).displayName;
+   [...c.document.querySelectorAll('.tree-scene-open')].find(x=>x.textContent===name).click();
+   await c.wait(()=>shownScene(c)===id&&c.document.querySelector('.scene-workspace .beat-card'));await c.settle();};
+  const open=async id=>{if(!row(c,id).querySelector('.expanded-beat'))await select(c,id);return row(c,id);};
+  const type=async(id,text)=>{c.enter((await open(id)).querySelector('textarea'),text);await c.settle();};
+  // Story reads source again when the author comes back from another workspace.
+  const refresh=async()=>{const shown=shownScene(c),owner=c.session();await c.click('Branches');await c.wait(()=>c.session()===owner&&c.document.querySelector('.branches-workspace'));await c.settle();await goStory(c,shown);};
+  const lost=()=>c.document.querySelector('.scene-workspace .beats-list > [data-beat-draft-key]');
+  const buttons=scope=>[...scope.querySelectorAll('button')].filter(x=>!x.hidden&&!x.closest('[hidden]')).map(x=>x.textContent);
+  for(const [id,text] of [[a.id,'Conflict draft A'],[b.id,'Other draft B'],[h.id,'Lost draft H'],[l.id,'Discarded draft L']]){
+   await openScene(c.workspace().scenes.find(x=>x.beats.some(y=>y.id===id)).id);await type(id,text);}
+  // Core reconciles an ordinary external edit in a file that Source has open.
+  for(const s of [entry,called,high,low])await c.call('source.open',{path:s.sourcePath});
+  await c.raw({driver:'externalReplace',path:entry.sourcePath,remove:`"${a.payload.text}"`,insert:'"Source edit one"'});
+  await c.raw({driver:'externalRemove',path:high.sourcePath,remove:`    "${h.payload.text}"\n`});
+  await c.raw({driver:'externalReplace',path:low.sourcePath,remove:`"${l.payload.text}"`,insert:'"Source L changed"'});
+  await c.raw({driver:'externalAppend',path:called.sourcePath});
+  // The refresh records the external revisions in project metadata; scripts stay as the writer left them.
+  const changed=await c.snapshot();await refresh();
+  // Conflicts are marked quietly. The unrelated change leaves B as an ordinary draft with Commit.
+  await openScene(called.id);c.assert.equal(row(c,b.id).dataset.beatConflict,undefined);c.assert.equal(row(c,b.id).dataset.beatDraft,'true');
+  c.assert.equal((await open(b.id)).querySelector('.story-conflict'),null);c.assert.deepEqual(buttons(row(c,b.id).querySelector('.expanded-beat > .row-actions')),['Cancel','Commit Beat']);
+  await openScene(entry.id);c.assert.equal(row(c,a.id).dataset.beatConflict,'true');c.assert.equal(row(c,a.id).querySelector('.story-conflict'),null,'A conflict waits until the author returns to the beat');
+  c.assert(!/conflict/i.test(status()),'A conflict does not prompt');
+  // Story Save reveals the first conflict and saves none of the drafts.
+  const at=c.requests().length,before=status();await c.click('Save',header());
+  await c.wait(()=>status()!==before&&/^Nothing saved/.test(status()));await c.settle();
+  c.assert(!c.requests().slice(at).some(r=>r.request.operation==='scene.saveDrafts'),'A conflict stops Story Save before any request');
+  c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(changed)),'A refused Story Save writes nothing');
+  c.assert.equal(status(),`Nothing saved. 3 of 4 drafts need changes:${entry.displayName} 1High ending 1Low ending 1`);
+  c.assert.equal(shownScene(c),entry.id);const card=row(c,a.id);c.assert.equal(card.dataset.saveRefused,'true');
+  c.assert.equal(card.querySelector('.story-conflict > strong')?.textContent,'Conflict with source');
+  c.assert.equal(card.querySelector('.story-conflict-source')?.textContent,'Source edit one');c.assert.equal(card.querySelector('.story-save-reason'),null);
+  c.assert.equal(c.labelled('Your draft',card).value,'Conflict draft A');
+  c.assert.deepEqual(buttons(card.querySelector('.expanded-beat')).slice(-2),['Discard draft','Override source'],'Discard draft and Override source sit together below the draft');
+  // A draft whose beat left source shows the comparison with no source text, and only Discard draft.
+  await openScene(high.id);c.assert(lost());c.assert.equal(lost().querySelector('textarea').value,'Lost draft H');
+  c.assert.equal(lost().querySelector('.story-conflict > p').textContent,'This beat is no longer in source.');c.assert.deepEqual(buttons(lost()),['Discard draft']);
+  await c.click('Discard draft',lost());await c.settle();c.assert.equal(lost(),null);
+  c.assert.equal(undoName(),'Undo discard of narration draft in High ending');
+  // Discard draft keeps source and removes only that draft. Undo brings it back with its comparison; neither writes.
+  await openScene(low.id);const lowCard=await open(l.id);c.assert.equal(lowCard.querySelector('.story-conflict-source').textContent,'Source L changed');
+  // A valid conflicting draft still previews on the stage.
+  await c.wait(()=>c.document.querySelector('.preview-overlay')?.textContent.includes('Discarded draft L'));
+  await c.click('Discard draft',lowCard);await c.settle();
+  c.assert.equal(row(c,l.id).dataset.beatDraft,'false');c.assert.equal(row(c,l.id).querySelector('textarea').value,'Source L changed','The beat stays open on source');
+  c.assert.equal(undoName(),'Undo discard of narration draft in Low ending');
+  await c.history('undo');await c.wait(()=>findRow(c,l.id)?.querySelector('textarea')?.value==='Discarded draft L');await c.settle();
+  c.assert.equal(row(c,l.id).querySelector('.story-conflict-source').textContent,'Source L changed');c.assert.equal(row(c,l.id).dataset.beatConflict,'true');
+  await c.history('redo');await c.wait(()=>findRow(c,l.id)?.dataset.beatDraft==='false');await c.settle();
+  c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(changed)),'Discard draft and its Undo write nothing');
+  // Override source refuses empty text and keeps the draft.
+  await openScene(entry.id);const field=async()=>(await open(a.id)).querySelector('textarea');
+  c.enter(await field(),'  ');await c.settle();const empty=c.requests().length;
+  await c.click('Override source',row(c,a.id));await c.settle();
+  c.assert.equal(c.requests().slice(empty).filter(r=>r.request.operation==='scene.apply').length,0);
+  c.assert.equal(status(),'Enter text before overriding the source. Draft retained.');c.assert.equal((await field()).value,'  ');
+  // A further source change refuses Override with no write, keeps the input and refreshes the comparison.
+  c.enter(await field(),'Override A');await c.settle();
+  const reviewed=c.workspace().scenes.find(x=>x.id===entry.id).sourceRevision;
+  await c.raw({driver:'externalReplace',path:entry.sourcePath,remove:'"Source edit one"',insert:'"Source edit two"'});const twice=await c.snapshot();
+  const staleAt=c.requests().length;await c.click('Override source',row(c,a.id));
+  await c.wait(()=>status()==='Source changed. Review it, then choose again. Draft retained.');await c.settle();
+  const stale=c.requests().slice(staleAt).find(r=>r.request.operation==='scene.apply');
+  c.assert.equal(stale?.errorCode,'SOURCE_CONFLICT');c.assert.equal(stale.request.payload.command.expectedSourceRevision,reviewed,'Override uses the revision the author reviewed');
+  c.assert.deepEqual(stale.request.payload.drafts?.length,1);
+  c.assert(c.requests().slice(staleAt).some(r=>r.request.operation==='scene.list'&&r.responseOk));
+  c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(twice)),'A stale Override writes nothing');
+  c.assert.equal(row(c,a.id).querySelector('.story-conflict-source')?.textContent,'Source edit two');c.assert.equal((await field()).value,'Override A');
+  // Override saves only this beat against the refreshed source. B stays an unsaved draft.
+  const overrideAt=c.requests().length;await c.click('Override source',row(c,a.id));
+  await c.wait(()=>c.requests().slice(overrideAt).some(r=>r.request.operation==='scene.apply'&&r.responseOk));await c.settle();
+  const applied=c.requests().slice(overrideAt).filter(r=>r.request.operation==='scene.apply');
+  c.assert.equal(applied.length,1);c.assert.equal(applied[0].request.payload.command.type,'updateBodyBeat');c.assert.equal(applied[0].request.payload.command.beatId,a.id);
+  const overridden=await c.snapshot();
+  c.assert.equal(c.sourceText(overridden,entry.sourcePath),replaceOnce(c,c.sourceText(twice,entry.sourcePath),'"Source edit two"','"Override A"'));
+  unchangedOtherSources(c,twice,overridden,entry.sourcePath);
+  c.assert.equal(row(c,a.id).dataset.beatDraft,'false');c.assert.equal(row(c,a.id).dataset.beatConflict,undefined);
+  await openScene(called.id);c.assert.equal(row(c,b.id).dataset.beatDraft,'true');c.assert.equal((await open(b.id)).querySelector('textarea').value,'Other draft B');
+  // Override is one edit: Undo restores the source it replaced, without the draft, and Redo applies it again.
+  c.assert.equal(undoName(),`Undo narration edit in ${entry.displayName}`);
+  await c.history('undo');await c.settle();c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(twice)));
+  await c.wait(()=>shownScene(c)===entry.id&&findRow(c,a.id));c.assert.equal(row(c,a.id).dataset.beatDraft,'false');
+  await c.history('redo');await c.settle();c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(overridden)));
+  // Story Save then saves the remaining draft, so an accepted transaction ends the case.
+  const saveAt=c.requests().length;await c.click('Save',header());
+  await c.wait(()=>c.requests().slice(saveAt).some(r=>r.request.operation==='scene.saveDrafts'&&r.responseOk));await c.settle();
+  c.assert(c.sourceText(await c.snapshot(),called.sourcePath).includes('"Other draft B"'));c.assert.equal(status(),'Saved');
+  c.assert.equal(ops('project.flush').length,0);
  },
 };

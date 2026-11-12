@@ -342,11 +342,11 @@ test("Story Save takes one route from toolbar and keyboard, and a refusal never 
   click("Save"); await ticks(10);
   assert.equal(sent.length, 5); assert.equal(flushes, 0);
   assert.equal(status(), "Story changed in source and was refreshed. Nothing saved. 1 of 1 draft needs changes:Scene 1");
-  assert.equal(document.querySelector('[data-beat-id="line"] .story-save-reason')?.textContent, "This Beat changed in source after the draft began. Draft retained.");
+  assert.equal(document.querySelector('[data-beat-id="line"] .story-conflict-source')?.textContent, "Edited elsewhere");
   assert.equal(document.querySelector<HTMLTextAreaElement>('[data-beat-id="line"] textarea')?.value, "Refused draft");
 
   // With no beat drafts, Save in Story still runs Flush.
-  click("Cancel"); await ticks();
+  click("Discard draft"); await ticks();
   click("Save"); await ticks(10);
   assert.equal(flushes, 1); assert.equal(sent.length, 5);
 });
