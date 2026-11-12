@@ -491,6 +491,15 @@ draft before writing any of them. If any draft is incomplete, invalid or conflic
 retain all drafts and reveal the failing draft with its error. No draft is saved by that request
 until all pass validation. Commit remains available to save one beat on its own.
 
+Story Save applies only while the Story workspace is open. In other workspaces Save
+keeps its existing behaviour, and the header still shows pending beat drafts. While
+a Story Save runs, Story controls stay locked and a second Save reports busy. If
+another Story form has input, Save refuses and writes nothing. If the project changed
+after Story last refreshed, Save refreshes Story, marks any beat draft conflicts and
+asks the author to save again. It never retries on its own. An approved Design Lab
+mock will set how a refusal shows several failing drafts. Until then, Save reveals
+the first one.
+
 Story Save does not accept unfinished Source text. The shell coordinates acceptance
 through the existing transaction layer, with current-source validation and ordinary
 conflict/recovery handling. [ADR 0022](adr/0022-saving-retained-story-drafts.md) records
