@@ -171,7 +171,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   finally{release();responseBarrier=undefined;await actionPromise;}
  };
  const raw=async request=>{
-  assert(request?.driver==='snapshot'||request?.driver==='externalAppend','Only owned fixture controls allowed');return child.request(request);
+  assert(['snapshot','externalAppend','externalRemove'].includes(request?.driver),'Only owned fixture controls allowed');return child.request(request);
  };
  const start=async reopen=>{
   evidence.driverStarts++;

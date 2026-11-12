@@ -557,9 +557,35 @@ fn apply(
             payload,
         } => {
             validate_payload(&payload, loaded)?;
+            // A new beat finds its body and anchor by id. If either is gone, the draft conflicts.
+            // An anchor that exists in another body is still an invariant refusal.
+            if let BodyRef::Branch {
+                group_id,
+                branch_id,
+            } = &body
+            {
+                if !beats.iter().any(|b| {
+                    b.id == *branch_id
+                        && b.conditional_branch
+                            .as_ref()
+                            .is_some_and(|g| g.group_id == *group_id)
+                }) {
+                    return Err(SceneError::BeatDraftConflict);
+                }
+            }
             let body = qualify_body(source, beats, &body)?;
             let (index, insertion) = match position {
                 Position::Before { anchor } => {
+                    let exists = beats.iter().any(|b| match &anchor {
+                        NodeRef::Beat { beat_id } => b.id == *beat_id,
+                        NodeRef::Condition { group_id } => b
+                            .conditional_branch
+                            .as_ref()
+                            .is_some_and(|g| g.group_id == *group_id),
+                    });
+                    if !exists {
+                        return Err(SceneError::BeatDraftConflict);
+                    }
                     let beat = qualified_node(&body, &anchor)?;
                     if beat.protected && beat.conditional_branch.is_none() {
                         return Err(SceneError::OpaqueBoundary);

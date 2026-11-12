@@ -1272,6 +1272,10 @@ fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
             "SOURCE_CONFLICT",
             "The Scene source changed outside Loomlight. Reload before editing.",
         ),
+        BeatDraftConflict => (
+            "BEAT_DRAFT_CONFLICT",
+            "This beat's place changed in source after the draft began.",
+        ),
         DirtySource => (
             "DIRTY_SOURCE",
             "This source file has an unaccepted draft. Save or discard it before changing the Scene.",

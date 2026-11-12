@@ -560,6 +560,8 @@ pub enum SceneError {
     InvalidMetadata,
     UnsupportedSource,
     SourceConflict,
+    /// A new beat draft's body or insertion anchor is gone from the candidate.
+    BeatDraftConflict,
     DirtySource,
     UnknownEntity,
     ReferenceBlocked,

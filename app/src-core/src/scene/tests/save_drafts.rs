@@ -195,3 +195,40 @@ fn story_save_refusal_names_the_command_and_writes_nothing() {
     );
     assert_eq!(project_bytes(&f), before);
 }
+
+#[test]
+fn story_save_reports_a_missing_insertion_place_as_a_beat_draft_conflict() {
+    let (f, ws) = two_scenes();
+    let (first, other) = (&ws.scenes[0], &ws.scenes[1]);
+    let before = project_bytes(&f);
+    let insert = |body: BodyRef, anchor: &str| SceneCommand::InsertBodyBeat {
+        scene_id: first.id.clone(),
+        expected_source_revision: first.source_revision.clone(),
+        body,
+        position: Position::Before {
+            anchor: NodeRef::Beat {
+                beat_id: anchor.into(),
+            },
+        },
+        beat: narration("New beat"),
+    };
+    let missing_branch = BodyRef::Branch {
+        group_id: "missing-group".into(),
+        branch_id: "missing-branch".into(),
+    };
+    for place in [
+        insert(BodyRef::Root, "missing-anchor"),
+        insert(missing_branch, &first.beats[0].id),
+    ] {
+        let refused = save(
+            &f,
+            &ws,
+            vec![update(first, 0, "Kept out"), place, update(other, 0, "Never built")],
+        );
+        assert!(
+            matches!(&refused, Err(SceneError::Indexed { index: 1, cause }) if **cause == SceneError::BeatDraftConflict),
+            "{refused:?}"
+        );
+        assert_eq!(project_bytes(&f), before);
+    }
+}

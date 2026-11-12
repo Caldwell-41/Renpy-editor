@@ -330,7 +330,7 @@ test("Story Save takes one route from toolbar and keyboard, and a refusal never 
   click("Save"); await ticks(10);
   window.dispatchEvent(saveEvent({ ctrl: true })); await ticks(10);
   assert.equal(sent.length, 4); assert.equal(flushes, 0); assert.equal(accepted, "From keyboard");
-  assert.match(status(), /^Nothing was saved\./);
+  assert.equal(status(), "Nothing saved. 1 of 1 draft needs changes:Scene 1");
   editor = document.querySelector<HTMLTextAreaElement>('[data-beat-id="line"] textarea')!;
   assert.equal(editor.value, "Refused draft"); assert.equal(editor.closest<HTMLElement>("[data-beat-draft-key]")?.dataset.saveRefused, "true");
 
@@ -339,11 +339,126 @@ test("Story Save takes one route from toolbar and keyboard, and a refusal never 
   accepted = "Edited elsewhere"; revision += 1;
   click("Save"); await ticks(10);
   assert.equal(sent.length, 5); assert.equal(flushes, 0);
-  assert.equal(status(), "Story changed in source and was refreshed. Nothing was saved. This Beat changed in source after the draft began. Draft retained.");
+  assert.equal(status(), "Story changed in source and was refreshed. Nothing saved. 1 of 1 draft needs changes:Scene 1");
+  assert.equal(document.querySelector('[data-beat-id="line"] .story-save-reason')?.textContent, "This Beat changed in source after the draft began. Draft retained.");
   assert.equal(document.querySelector<HTMLTextAreaElement>('[data-beat-id="line"] textarea')?.value, "Refused draft");
 
   // With no beat drafts, Save in Story still runs Flush.
   click("Cancel"); await ticks();
   click("Save"); await ticks(10);
   assert.equal(flushes, 1); assert.equal(sent.length, 5);
+});
+
+test("A refused Story Save counts failing drafts, links each scene and marks failures until they are fixed", async () => {
+  Object.defineProperty(browser.navigator, "platform", { configurable: true, value: "Win32" });
+  const project = {
+    sessionId: "story-refusal-session", projectId: "story-refusal-project", title: "Story refusal", folderName: "story-refusal",
+    chapterId: "chapter", chapterName: "Chapter", sceneId: "arrival", sceneName: "Arrival",
+    sdkVersion: "8.5.3", resolution: { width: 1280, height: 720 },
+  };
+  // Dialogue by "ghost", a character no longer in the project, cannot be saved until the author picks a speaker.
+  const texts: Record<string, string> = { n1: "Hello", g1: "Who?", g2: "Me.", n2: "Steam.", g3: "Late." };
+  let revision = 3;
+  const beat = (id: string, offset: number) => ({ id, byteStart: offset, byteEnd: offset + 10, protected: false,
+    payload: id.startsWith("g") ? { type: "dialogue", characterId: "ghost", text: texts[id] } : { type: "narration", text: texts[id] } });
+  const scene = (id: string, displayName: string, ids: string[]) => ({ id, chapterId: "chapter", displayName, technicalLabel: id, sourcePath: `game/${id}.rpy`,
+    sourceRevision: String(revision).repeat(64), sourceConflict: false, partial: false, beats: ids.map((item, index) => beat(item, 20 + index * 10)) });
+  const workspace = () => ({
+    projectRevision: "1".repeat(64), sourceMapRevision: String(revision).repeat(64), entrySceneId: "arrival",
+    lastOpen: { chapterId: "chapter", sceneId: "arrival" }, canUndo: false, canRedo: false,
+    chapters: [{ id: "chapter", displayName: "Chapter", directory: "game" }],
+    scenes: [scene("arrival", "Arrival", ["n1", "g1", "g2"]), scene("depot", "Depot", ["n2", "g3"])],
+    authoring: { characters: [{ id: "mara", displayName: "Mara", technicalName: "mara" }], appearances: [], assets: [], variables: [] },
+  });
+  const sent: { commands: { type: string }[] }[] = [];
+  let refusal: { code: string; message: string; actionIndex: number } | undefined;
+  const request = async <T>(operation: CoreOperation, payload: Readonly<Record<string, unknown>> = {}): Promise<CoreResponse<T>> => {
+    let value: unknown = {};
+    if (operation === "project.listRecent") value = [];
+    else if (operation === "project.openPicker") value = project;
+    else if (operation === "project.status") value = "saved";
+    else if (operation === "source.list") value = { files: [], dirtyCount: 0, draftBytes: 0 };
+    else if (operation === "scene.list") value = workspace();
+    else if (operation === "scene.saveDrafts") {
+      sent.push(payload as unknown as (typeof sent)[number]);
+      if (refusal) return { protocolVersion: 1, requestId: "test", ok: false, error: refusal };
+      revision += 1; value = workspace();
+    }
+    return { protocolVersion: 1, requestId: "test", ok: true, value: value as T };
+  };
+  const status = (): string => document.querySelector("#app-status")?.textContent ?? "";
+  const links = (): string[] => [...document.querySelectorAll<HTMLButtonElement>("#app-status .status-link")].map(link => link.getAttribute("aria-label") ?? "");
+  const card = (id: string): HTMLElement => document.querySelector<HTMLElement>(`.beat-card[data-beat-id="${id}"]`)!;
+  const failing = (): string[] => [...document.querySelectorAll<HTMLElement>('.beat-card[data-save-refused="true"]')].map(item => item.dataset.beatId!);
+  const sceneRow = (name: string): HTMLElement => [...document.querySelectorAll<HTMLElement>(".tree-scene-row")].find(row => row.querySelector(".tree-scene-open")?.textContent === name)!;
+  const shown = (): string | undefined => document.querySelector<HTMLElement>(".tree-scene-row.selected .tree-scene-open")?.textContent ?? undefined;
+  const openScene = async (name: string): Promise<void> => { sceneRow(name).querySelector<HTMLButtonElement>(".tree-scene-open")!.click(); await ticks(); };
+  const draft = async (id: string, text: string): Promise<void> => {
+    if (!card(id).querySelector("textarea")) card(id).querySelector<HTMLButtonElement>(".beat-select")!.click();
+    const editor = card(id).querySelector<HTMLTextAreaElement>("textarea")!;
+    editor.value = text; editor.dispatchEvent(new window.Event("input", { bubbles: true })); await ticks();
+  };
+  const pickSpeaker = async (id: string): Promise<void> => {
+    if (!card(id).querySelector("select")) { card(id).querySelector<HTMLButtonElement>(".beat-select")!.click(); await ticks(); }
+    const speaker = card(id).querySelector<HTMLSelectElement>("select")!;
+    speaker.value = "mara"; speaker.dispatchEvent(new window.Event("change", { bubbles: true })); await ticks();
+  };
+
+  const { startApplication } = await import("../src/main.js");
+  startApplication(request);
+  await ticks(); click("Open Loomlight Project"); await ticks(8);
+
+  // Five drafts across two scenes. Three keep the missing speaker.
+  await draft("n1", "Hello again"); await draft("g1", "Who is there?"); await draft("g2", "Only me.");
+  await openScene("Depot"); await draft("n2", "Steam rises."); await draft("g3", "You are late.");
+  click("Save"); await ticks(10);
+  assert.equal(sent.length, 0, "a failing draft stops Story Save before any request");
+  assert.equal(status(), "Nothing saved. 3 of 5 drafts need changes:Arrival 2Depot 1");
+  assert.deepEqual(links(), ["Arrival, 2 to fix", "Depot, 1 to fix"]);
+  // Save opens the first failing draft, in its own scene, and shows why it failed.
+  assert.equal(shown(), "Arrival");
+  assert.deepEqual(failing(), ["g1", "g2"]);
+  assert.equal(card("n1").dataset.saveRefused, undefined, "a ready draft keeps the plain draft mark");
+  assert.equal(card("n1").dataset.beatDraft, "true");
+  assert.equal(card("g1").querySelector(".beat-select")?.getAttribute("aria-description"), "Unsaved draft. Needs changes.");
+  assert.equal(card("g1").querySelector(".story-save-reason")?.textContent, "Select an available item first.");
+  assert.deepEqual([sceneRow("Arrival").dataset.saveRefused, sceneRow("Depot").dataset.saveRefused], ["true", "true"]);
+
+  // A scene link opens that scene's failing draft.
+  document.querySelectorAll<HTMLButtonElement>("#app-status .status-link")[1]!.click(); await ticks();
+  assert.equal(shown(), "Depot"); assert.deepEqual(failing(), ["g3"]);
+  assert.ok(card("g3").querySelector("textarea"), "the link opens the failing draft's editor");
+
+  // Fixing a draft clears its mark and its scene's link. Cancelling one lowers both counts.
+  await pickSpeaker("g3");
+  assert.deepEqual(failing(), []); assert.equal(sceneRow("Depot").dataset.saveRefused, undefined);
+  assert.equal(card("g3").querySelector(".story-save-reason"), null);
+  assert.equal(status(), "Nothing saved. 2 of 5 drafts need changes:Arrival 2");
+  await openScene("Arrival");
+  card("g1").querySelector<HTMLButtonElement>(".beat-select")!.click(); await ticks();
+  [...card("g1").querySelectorAll<HTMLButtonElement>("button")].find(item => item.textContent === "Cancel")!.click(); await ticks(6);
+  assert.equal(status(), "Nothing saved. 1 of 4 drafts needs changes:Arrival 1");
+  assert.deepEqual(failing(), ["g2"]);
+  await pickSpeaker("g2");
+  assert.equal(status(), "4 unsaved beat drafts. Ready to save.");
+  assert.deepEqual(failing(), []); assert.equal(sceneRow("Arrival").dataset.saveRefused, undefined);
+
+  // A new beat whose place is gone from core's candidate is a beat draft conflict, marked like the others.
+  click("Add Beat"); await ticks();
+  const added = document.querySelector<HTMLElement>(".new-beat")!;
+  const text = added.querySelector<HTMLTextAreaElement>("textarea")!;
+  text.value = "A new line."; text.dispatchEvent(new window.Event("input", { bubbles: true })); await ticks();
+  refusal = { code: "BEAT_DRAFT_CONFLICT", message: "This beat's place changed in source after the draft began.", actionIndex: 4 };
+  click("Save"); await ticks(10);
+  assert.equal(sent.length, 1); assert.equal(sent[0]!.commands[4]!.type, "insertBodyBeat");
+  assert.equal(status(), "Nothing saved. 1 of 5 drafts needs changes:Arrival 1");
+  assert.equal(added.dataset.saveRefused, "true");
+  assert.equal(added.querySelector(".story-save-reason")?.textContent, "This beat's place changed in source after the draft began.");
+
+  // A later Save that succeeds clears every mark and the refusal status.
+  refusal = undefined;
+  click("Save"); await ticks(10);
+  assert.equal(sent.length, 2); assert.equal(status(), "Saved");
+  assert.deepEqual(failing(), []); assert.equal(links().length, 0);
+  assert.equal(document.querySelector('[data-save-refused="true"]'), null);
 });

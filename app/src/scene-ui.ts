@@ -412,7 +412,7 @@ export interface SceneActions {
   readonly saveDrafts?: (commands: readonly SceneCommand[], expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision">) => Promise<SceneWorkspace>;
   /** Reads the current workspace, so Story can refresh after a stale refusal. */
   readonly load?: () => Promise<SceneWorkspace>;
-  readonly status: (message: string, kind?: "normal" | "error") => void;
+  readonly status: (message: string, kind?: "normal" | "error", links?: readonly StatusLink[]) => void;
   readonly present: (assetId: string, purpose: MediaPresentation["purpose"]) => Promise<MediaPresentation>;
   readonly resolution: { readonly width: number; readonly height: number };
   readonly viewSource?: (path: string, byteStart?: number, byteEnd?: number, expectedRevision?: string) => void;
@@ -531,6 +531,9 @@ export function storyScene(model: SceneWorkspace, preferred?: string): SceneDocu
   return model.scenes.find(scene => scene.id === preferred) ?? model.scenes.find(scene => scene.id === model.lastOpen.sceneId) ?? model.scenes[0];
 }
 
+/** A status-line link: one scene and its failing drafts after a refused Story Save. */
+export interface StatusLink { readonly label: string; readonly count: number; readonly open: () => void }
+export interface StoryStatus { readonly text: string; readonly kind: "normal" | "error"; readonly links: readonly StatusLink[] }
 /** A beat draft that stopped a Story Save, and why. */
 export interface StorySaveFailure { readonly sceneId: string; readonly beatId?: string; readonly message: string }
 export type StorySaveOutcome =
@@ -560,6 +563,8 @@ export interface StoryView {
   settle(): Promise<boolean>;
   /** Story Save: checks every pending beat draft, then saves all of them or none. */
   save(): Promise<StorySaveOutcome>;
+  /** The refusal status while a refused Story Save has drafts left to save. */
+  saveStatus(): StoryStatus | undefined;
   dispose(): void;
 }
 
@@ -605,31 +610,37 @@ export function renderStoryView(
   interface BeatDraft { readonly panel: HTMLElement; readonly sceneId: string; readonly beatId?: string; readonly place?: () => { body: BodyRef; position: Position }; readonly read?: () => BeatPayload; readonly command: () => SceneCommand }
   let newBeatDrafts = 0;
   const beatDrafts = new Map<string, BeatDraft>();
+  const invalidDraft = "This beat draft is invalid. Draft retained.";
+  // After a refused Story Save: each failing draft and why, until it is saved or cancelled.
+  let refusal: { readonly lead: string; readonly failing: Map<BeatDraft, string> } | undefined;
   const isPending = (draft: BeatDraft): boolean => !draft.beatId || draft.panel.dataset.unsubmitted === "true";
   const pendingDrafts = (sceneId?: string): BeatDraft[] => [...beatDrafts.values()].filter(draft => isPending(draft) && (sceneId === undefined || draft.sceneId === sceneId));
   let reportedDrafts = 0;
-  const draftsChanged = (): void => {
+  const draftsChanged = (edited?: BeatDraft): void => {
+    settleRefusal(edited);
     markDrafts();
     const count = pendingDrafts().length;
     if (count !== reportedDrafts) { reportedDrafts = count; actions.draftsChanged?.(); }
   };
   const keepDraft = (key: string, draft: BeatDraft): void => {
     draft.panel.dataset.beatDraftKey = key; beatDrafts.set(key, draft);
-    for (const event of ["input", "change"]) draft.panel.addEventListener(event, draftsChanged);
+    for (const event of ["input", "change"]) draft.panel.addEventListener(event, () => draftsChanged(draft));
     // Text previews as the author types; other fields preview once complete.
     let typing: ReturnType<typeof setTimeout> | undefined;
     draft.panel.addEventListener("input", event => { if ((event.target as HTMLElement | null)?.tagName === "TEXTAREA") { clearTimeout(typing); typing = setTimeout(refreshPreview, 150); } });
     draft.panel.addEventListener("change", refreshPreview);
     draftsChanged();
   };
-  // Valid beat drafts preview on the stage; invalid input previews the accepted beat.
-  const readQuietly = (read: () => BeatPayload): BeatPayload | undefined => {
+  // Reads a draft without moving focus or the caret, which a failing field read can do.
+  const keepFocus = <T,>(read: () => T): T => {
     const active = document.activeElement as (HTMLElement & Partial<Pick<HTMLInputElement, "selectionStart" | "selectionEnd" | "setSelectionRange">>) | null;
     const caret = active?.setSelectionRange ? { start: active.selectionStart ?? null, end: active.selectionEnd ?? null } : undefined;
-    try { return read(); } catch { return undefined; } finally {
+    try { return read(); } finally {
       if (active && document.activeElement !== active) { active.focus({ preventScroll: true }); if (caret) active.setSelectionRange?.(caret.start, caret.end); }
     }
   };
+  // Valid beat drafts preview on the stage; invalid input previews the accepted beat.
+  const readQuietly = (read: () => BeatPayload): BeatPayload | undefined => { try { return keepFocus(read); } catch { return undefined; } };
   const withDrafts = (scene: SceneDocument): SceneDocument => {
     const edits = new Map<string, BeatPayload>();
     const unknown = new Set<string>();
@@ -714,16 +725,40 @@ export function renderStoryView(
   // Reads every pending draft's command. Nothing is sent while any draft fails.
   const preflight = (): { readonly drafts: BeatDraft[]; readonly commands: SceneCommand[]; readonly failures: [BeatDraft, string][] } => {
     const pending = pendingDrafts(), commands: SceneCommand[] = [], failures: [BeatDraft, string][] = [];
-    for (const draft of pending) { try { commands.push(draft.command()); } catch (error) { failures.push([draft, friendlyError(error, "This beat draft is invalid. Draft retained.")]); } }
+    for (const draft of pending) { try { commands.push(draft.command()); } catch (error) { failures.push([draft, friendlyError(error, invalidDraft)]); } }
     return { drafts: pending, commands, failures };
   };
-  // Marks every failing draft and reveals the first. An approved mock will set how several show.
-  const refuseSave = (failures: readonly (readonly [BeatDraft, string])[], lead = "Nothing was saved."): StorySaveOutcome => {
-    for (const draft of beatDrafts.values()) delete draft.panel.dataset.saveRefused;
-    for (const [draft] of failures) draft.panel.dataset.saveRefused = "true";
-    const [first, reason] = failures[0]!;
-    reveal(first);
-    actions.status(`${lead} ${reason}`, "error");
+  // The status line after a refused Save: the failing count, then one link per scene.
+  const saveStatus = (): StoryStatus | undefined => {
+    if (!refusal) return undefined;
+    const total = pendingDrafts().length, failing = [...refusal.failing.keys()], drafts = total === 1 ? "draft" : "drafts";
+    if (!failing.length) return { text: `${total} unsaved beat ${drafts}. Ready to save.`, kind: "normal", links: [] };
+    // Each link reveals the scene's first failing draft at the time of the click.
+    const open = (sceneId: string): void => { const draft = [...refusal?.failing.keys() ?? []].find(item => item.sceneId === sceneId); if (draft && host.isConnected) reveal(draft); };
+    const links = model.scenes.flatMap(scene => {
+      const count = failing.filter(draft => draft.sceneId === scene.id).length;
+      return count ? [{ label: scene.displayName, count, open: () => open(scene.id) }] : [];
+    });
+    return { text: `${refusal.lead} ${failing.length} of ${total} ${drafts} ${failing.length === 1 ? "needs" : "need"} changes:`, kind: "error", links };
+  };
+  const statusKey = (): string => { const status = saveStatus(); return JSON.stringify(status && [status.text, status.links.map(link => [link.label, link.count])]); };
+  const showRefusal = (): void => { const status = saveStatus(); if (status) actions.status(status.text, status.kind, status.links); };
+  // Drops failing drafts that were saved or cancelled, and rechecks the one the author edited.
+  const settleRefusal = (edited?: BeatDraft): void => {
+    if (!refusal) return;
+    const before = statusKey(), live = new Set(pendingDrafts());
+    for (const draft of refusal.failing.keys()) if (!live.has(draft)) refusal.failing.delete(draft);
+    if (edited && refusal.failing.has(edited)) {
+      try { keepFocus(edited.command); refusal.failing.delete(edited); } catch (error) { refusal.failing.set(edited, friendlyError(error, invalidDraft)); }
+    }
+    if (!live.size) { refusal = undefined; return; }
+    if (statusKey() !== before) showRefusal();
+  };
+  // Marks every failing draft, reveals the first and shows the count with a link per scene.
+  const refuseSave = (failures: readonly (readonly [BeatDraft, string])[], lead = "Nothing saved."): StorySaveOutcome => {
+    refusal = { lead, failing: new Map(failures) };
+    reveal(failures[0]![0]);
+    showRefusal();
     return { kind: "refused", failures: failures.map(([draft, message]) => ({ sceneId: draft.sceneId, ...(draft.beatId ? { beatId: draft.beatId } : {}), message })) };
   };
   const saveDrafts = async (): Promise<StorySaveOutcome> => {
@@ -733,6 +768,7 @@ export function renderStoryView(
     const { drafts: saving, commands, failures } = preflight();
     if (failures.length) return refuseSave(failures);
     const expected = expectedRevisions(model);
+    refusal = undefined; markDrafts();
     const unlock = lockStory();
     actions.status("Saving…");
     try {
@@ -750,15 +786,14 @@ export function renderStoryView(
         try { model = await actions.load(); } catch { /* Keep the shown model; the author can save again. */ }
         if (disposed || actions.current?.() === false) return { kind: "blocked" };
         draw();
-        const lead = "Story changed in source and was refreshed. Nothing was saved.";
         const conflicts = preflight().failures;
-        if (conflicts.length) return refuseSave(conflicts, lead);
-        actions.status(`${lead} Save again.`, "error");
+        if (conflicts.length) return refuseSave(conflicts, "Story changed in source and was refreshed. Nothing saved.");
+        actions.status("Story changed in source and was refreshed. Nothing was saved. Save again.", "error");
         return { kind: "refused", failures: [] };
       }
       const reason = friendlyError(error, "Story drafts could not be saved.");
       const refused = actionIndex === undefined ? undefined : saving[actionIndex];
-      if (refused) return refuseSave([[refused, `${reason} Drafts retained.`]]);
+      if (refused) return refuseSave([[refused, reason]]);
       actions.status(`Nothing was saved. ${reason} Drafts retained.`, "error");
       return { kind: "refused", failures: [] };
     } finally { unlock(); }
@@ -823,6 +858,7 @@ export function renderStoryView(
     drawBeats(selectedScene);
     restoreNewBeatDrafts(selectedScene);
     showOrphanedDrafts(selectedScene);
+    settleRefusal();
     markDrafts();
   };
 
@@ -852,17 +888,30 @@ export function renderStoryView(
     for (const draft of beatDrafts.values()) if (!draft.beatId && draft.sceneId === scene.id && draft.place) bodyList(draft.place().body)?.prepend(draft.panel);
   };
   // Quiet markers: the Screens draft convention on beat rows and scene rows.
+  // After a refused Save, failing drafts get a "!" mark and show why in their editor.
   const markDrafts = (): void => {
     const beats = new Set(pendingDrafts().flatMap(draft => draft.beatId ? [draft.beatId] : []));
     const scenes = new Set(pendingDrafts().map(draft => draft.sceneId));
-    const mark = (node: HTMLElement, label: Element | null, has: boolean): void => {
+    const failing = refusal?.failing ?? new Map<BeatDraft, string>();
+    const failingBeats = new Set([...failing.keys()].flatMap(draft => draft.beatId ? [draft.beatId] : []));
+    const failingScenes = new Set([...failing.keys()].map(draft => draft.sceneId));
+    const mark = (node: HTMLElement, label: Element | null, has: boolean, fails = false): void => {
       node.dataset.beatDraft = String(has);
-      if (has) label?.setAttribute("aria-description", "Unsaved draft"); else label?.removeAttribute("aria-description");
+      if (fails) node.dataset.saveRefused = "true"; else node.removeAttribute("data-save-refused");
+      if (has) label?.setAttribute("aria-description", fails ? "Unsaved draft. Needs changes." : "Unsaved draft"); else label?.removeAttribute("aria-description");
     };
-    host.querySelectorAll<HTMLElement>(".beat-card").forEach(card => mark(card, card.querySelector(":scope > .beat-compact > .beat-select"), beats.has(card.dataset.beatId ?? "")));
+    host.querySelectorAll<HTMLElement>(".beat-card").forEach(card => mark(card, card.querySelector(":scope > .beat-compact > .beat-select"), beats.has(card.dataset.beatId ?? ""), failingBeats.has(card.dataset.beatId ?? "")));
     const shown = storyScene(model, selectedSceneId);
     host.querySelectorAll<HTMLElement>(".story-condition-group").forEach(group => mark(group, group.querySelector(":scope > .story-group-heading > strong"), !!shown && draftsWithin(shown, group.dataset.conditionGroupId ?? "")));
-    treeHost.querySelectorAll<HTMLElement>(".tree-scene-row").forEach(row => mark(row, row.querySelector(".tree-scene-open"), scenes.has(row.dataset.sceneId ?? "")));
+    treeHost.querySelectorAll<HTMLElement>(".tree-scene-row").forEach(row => mark(row, row.querySelector(".tree-scene-open"), scenes.has(row.dataset.sceneId ?? ""), failingScenes.has(row.dataset.sceneId ?? "")));
+    for (const draft of beatDrafts.values()) {
+      const reason = failing.get(draft);
+      let note = draft.panel.querySelector<HTMLElement>(":scope > .story-save-reason");
+      if (reason === undefined) { draft.panel.removeAttribute("data-save-refused"); note?.remove(); continue; }
+      draft.panel.dataset.saveRefused = "true";
+      if (!note) { note = document.createElement("p"); note.className = "error-message story-save-reason"; draft.panel.prepend(note); }
+      if (note.textContent !== reason) note.textContent = reason;
+    }
   };
 
   const treeName = (target: HTMLElement, label: string, initial: string, command: (displayName: string) => SceneCommand): void => {
@@ -1732,6 +1781,7 @@ export function renderStoryView(
     busy: () => pendingWrites > 0 || settling !== undefined,
     settle,
     save: saveDrafts,
+    saveStatus,
     dispose: () => {
       disposed = true; beatDrafts.clear();
       cancelBeatDrag?.();window.removeEventListener("loomlight-reset-layout",resetLayout);
@@ -1975,7 +2025,7 @@ function defaultPayload(type: BeatPayload["type"], model: SceneWorkspace, screen
   }
 }
 
-function required(control: HTMLSelectElement): string { if (!control.value || control.selectedOptions[0]?.dataset.unavailable === "true") { control.focus(); throw new Error("Select an available item first."); } return control.value; }
+function required(control: HTMLSelectElement): string { if (!control.value || control.options[control.selectedIndex]?.dataset.unavailable === "true") { control.focus(); throw new Error("Select an available item first."); } return control.value; }
 function requiredText(control: HTMLInputElement, name: string): string { if (!control.value.trim()) { control.focus(); throw new Error(`${name} is required.`); } return control.value.trim(); }
 
 export function renderRecoverySurface(host: HTMLElement, report: RecoveryReport, actions: RecoveryActions): void {

@@ -507,9 +507,17 @@ The header still shows pending beat drafts. While
 a Story Save runs, Story controls stay locked and a second Save reports busy. If
 another Story form has input, Save refuses and writes nothing. If the project changed
 after Story last refreshed, Save refreshes Story, marks any beat draft conflicts and
-asks the author to save again. It never retries on its own. An approved Design Lab
-mock will set how a refusal shows several failing drafts. Until then, Save reveals
-the first one.
+asks the author to save again. It never retries on its own.
+
+A refused Story Save follows the approved `story-save-refusal` design (`marked-v1`).
+Save reveals the first failing draft. The status line reads "Nothing saved. 3 of 5
+drafts need changes:", followed by one link per scene with its count of failing
+drafts. Each link reveals that scene's first failing draft. A failing beat and its
+scene row show a red `!` in place of the draft `*`, and the draft's editor shows why
+it failed. A new beat whose body or insertion anchor is gone from source is a beat
+draft conflict. The marks and counts update as the author fixes or cancels each
+failing draft. When none fail, the status reads "5 unsaved beat drafts. Ready to
+save." The marks clear when a later Save succeeds.
 
 Story Save does not accept unfinished Source text. The shell coordinates acceptance
 through the existing transaction layer, with current-source validation and ordinary
