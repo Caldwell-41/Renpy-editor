@@ -527,34 +527,60 @@ the change from production's current Flush-only Story Save. Saving follows the
 
 ### Story Undo
 
-Story has one chronological Undo order for edits, including unfinished beat drafts.
-The Undo button and Cmd/Ctrl+Z reverse the same most recent edit, regardless of the
-selected beat or focused Story field. Group continuous typing into useful steps.
-Selecting beats, switching branches or changing views adds no history entry and
-does not change the Undo order. Saving adds no extra Undo step and does not clear
-the history. Redo restores an undone edit.
+The open project has one [project history](../GLOSSARY.md#language). Undo reverses
+the latest edit in it, saved or not, and Redo restores an undone edit. Story,
+Screens, Source, Prompts and References share it. There is no separate queue for
+a page and no separate draft and saved-edit Undo in Story. Selecting beats,
+switching branches, scenes, views or workspaces adds no entry and keeps the order.
+Saving adds no extra entry and does not clear the history.
+[ADR 0025](adr/0025-project-history-orders-draft-steps.md) records how the order
+includes unfinished drafts.
+
+Every Undo button and Cmd/Ctrl+Z run one shell-owned Undo command. Redo uses
+Shift+Cmd/Ctrl+Z, or Ctrl+Y on Windows. Each existing button keeps its place and its "Undo" or
+"Redo" text. Its tooltip and accessible name name the next edit, for example "Undo
+button resize". After Undo the status line reports it, for example "Undone: button
+resize".
+
+Undo opens the edit's workspace and selects its item: the beat, screen element,
+Source file, prompt action or reference record. If the item no longer exists,
+select the nearest item that contains it, or open the workspace. Undo and Redo
+follow ordinary navigation. Where leaving is refused, Undo does nothing and the
+input stays. Where leaving asks "Keep editing?", Undo asks too and continues only
+after Discard and leave. Beat drafts and Source drafts never block it. While a
+dialog is open, Cmd/Ctrl+Z belongs to the dialog.
+
+Typing in a beat draft makes draft steps. A text step ends when focus leaves the
+field or after 2 seconds without typing. Each change to another control, such as a
+menu, media picker or checkbox, is one step. Undo of a draft step changes the draft
+and writes no source. Undo past a draft's first step ends the draft.
+
+Commit and Story Save join a beat's draft steps into one edit at the top of the
+history, so one Undo reverses the whole beat. A Story Save adds one edit for each
+saved beat, with the most recently edited beat on top. Cancel is an edit, and Undo
+of it brings the draft back. Undo of deleting a beat restores the beat from source,
+but not the draft the author agreed to discard.
 
 For example, type in beat A, change and commit beat B's background, then return to
 A without typing. The first Undo reverses B's background change. The next Undo
-reverses the earlier typing in A. Do not expose separate draft and saved-edit Undo
-commands within Story.
+reverses the latest typing step in A. If the author edits Story, resizes a button in
+Screens and returns to Story without editing, Undo reverses the resize, opens
+Screens and selects the button. Retained beat drafts stay through that navigation.
 
-Use one project edit history, not a separate queue for each page. Switching
-authoring workspaces preserves that order. If the author edits Story, changes a
-button in Screens and returns to Story
-without editing, Undo reverses the Screens change first. Reveal the affected item
-in its workspace so the author can see the result. Name the action in the command,
-for example "Undo button resize". Preserve retained beat drafts during this navigation.
+Undo of saved source uses the existing shared transaction layer and its revision,
+conflict and recovery checks.
 
-Draft-only Undo changes the draft without writing incomplete source. Undo of saved
-source uses the existing shared transaction layer and its revision, conflict and
-recovery checks. This is target behaviour; production currently blocks project
-Undo while a beat draft exists.
+Input that Loomlight keeps when the author leaves joins the project history. That
+is beat drafts and unsaved Source text. In those fields, and when no text field has
+focus, Cmd/Ctrl+Z runs project Undo. Source typing makes draft steps under the same
+grouping, and Source Save joins a file's steps into one edit. Other text fields,
+such as search, open Story forms, unapplied Screens fields and unsaved prompt text,
+keep the browser's text Undo and add no entries.
 
-Source typing keeps the Source editor's existing per-file text history. Undo in
-Story does not change unfinished text in a Source tab. Accepted Source saves join
-the shared project history through the existing transaction layer. Temporary
-inputs, such as search text, keep local text Undo and add no project edit entries.
+This is target behaviour. Production blocks project Undo while a beat draft exists.
+Until a separate issue builds Source draft steps, Source typing keeps the Source
+editor's per-file text history, Cmd/Ctrl+Z in Source does text Undo, and accepted
+Source saves already join the project history.
 
 Kris selected familiar Word-like editing behaviour. Microsoft's
 [Undo guidance](https://support.microsoft.com/en-us/office/foundations-experiences/undo-redo-or-repeat-an-action)

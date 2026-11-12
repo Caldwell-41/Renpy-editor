@@ -20,6 +20,20 @@ The main Save action in Story. It accepts every pending beat draft in the open
 project, or none of them.
 _Avoid_: Commit as a synonym
 
+**Project history**:
+The one ordered list of the author's edits in the open project, saved or not.
+Undo reverses the latest edit in it and Redo restores it, in every workspace.
+Navigation and view changes add nothing to it. It ends with the project session.
+_Avoid_: Scene history, Story history, page history
+
+**Draft step**:
+One edit in a beat draft or in unsaved Source text that a single Undo reverses.
+Typing in one field is one step until focus leaves the field or the author pauses.
+Each change to another control is one step. Undo of a draft step changes the draft
+and writes no source. Commit, Story Save or Source Save joins the draft steps of a
+beat or file into one edit. Input that does not survive navigation, such as search
+text or an open form, has no draft steps.
+
 **Game stage**:
 The Story view of supported scene appearance through the selected beat, shown in
 the project's width-to-height ratio, including valid beat drafts. It marks unknown

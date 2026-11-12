@@ -29,8 +29,8 @@ The preferred Settings layout applies to Settings, not every page.
 | Characters | [Layout](characters-layout.png) | Cast grid, appearances and optional inspector |
 | Assets | [Layout](assets-layout.png) | Grid/filter/details; new audio controls remain disabled |
 | Variables | [Layout](variables-layout.png) | Table/inspector and known assignments only |
-| Dark theme | [Charcoal and copper](palette-dark-charcoal-copper.png) | Superseded by Brass and slate in [UI](../../UI.md#palette-brass-and-slate); production still ships it |
-| Light theme | [Paper and teal](palette-light-paper-teal.png) | Superseded by Brass and slate in [UI](../../UI.md#palette-brass-and-slate); production still ships it |
+| Dark theme | [Charcoal and copper](palette-dark-charcoal-copper.png) | Superseded by Brass and slate in [UI](../../UI.md#palette-brass-and-slate); production ships Brass and slate |
+| Light theme | [Paper and teal](palette-light-paper-teal.png) | Superseded by Brass and slate in [UI](../../UI.md#palette-brass-and-slate); production ships Brass and slate |
 | Opening screen | [Both themes](welcome-light-dark.png) | Actions and searchable recent projects |
 | New project | [Four steps](new-project-four-steps.png) | Latest corrected Back labels |
 | Game configuration, resolution | [Accepted picker detail](game-configuration-resolution-picker.png) | Larger readable dropdown and small dynamic aspect-ratio preview; retains Custom fields |

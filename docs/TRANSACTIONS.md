@@ -225,11 +225,25 @@ the cursor advances only after a successful commit. External changes, a failed i
 or recovery-required state stop at `HISTORY_BOUNDARY`/the corresponding blocked state
 without overwriting live bytes. Close/reopen deliberately clears the history cursor.
 
+This history is the one [project history](../GLOSSARY.md#language) for every
+workspace. Each entry also records a user-facing name and the item to reveal, and
+the history refuses an entry without them. The module that commits writes both. One
+Undo and one Redo operation return the reversed entry's name and item. Draft-step
+entries record only a step id, the draft they belong to, a name and an item. They
+carry no bytes, and their Undo or Redo writes nothing
+([ADR 0025](adr/0025-project-history-orders-draft-steps.md)). Commit or Save of a
+draft removes its draft-step entries and adds its byte entry at the top. A new
+project session starts with no draft-step entries.
+
 Story Save builds every beat draft command on one cumulative candidate before it
 writes. Each command finds its beat or anchor by id in that candidate. The whole set
 shares one project, source-map and authoring revision check. A refused command stops
 the request with its index, and nothing is written. An accepted Story Save is one
-commit and one history entry. Like Source Save All, it is a recoverable sequential
+commit with one history entry for each saved beat. Each entry spans the candidate
+before and after that beat's command. The renderer sends commands in the order of
+each beat's last draft step, so the most recently edited beat is on top. Draft-step
+entries and these per-beat entries are target behaviour for #113; until then a Story
+Save adds one entry. Like Source Save All, a Story Save is a recoverable sequential
 commit, not all-files atomicity.
 
 The recovery renderer is an inspection/resolution client, not a journal editor. It can
