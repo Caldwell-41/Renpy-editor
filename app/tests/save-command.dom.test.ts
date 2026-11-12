@@ -334,8 +334,16 @@ test("Story Save takes one route from toolbar and keyboard, and a refusal never 
   editor = document.querySelector<HTMLTextAreaElement>('[data-beat-id="line"] textarea')!;
   assert.equal(editor.value, "Refused draft"); assert.equal(editor.closest<HTMLElement>("[data-beat-draft-key]")?.dataset.saveRefused, "true");
 
+  // A stale refusal refreshes Story. A draft whose own beat changed in source is then a conflict.
+  refusal = { code: "SOURCE_CONFLICT", message: "The Scene source changed outside Loomlight. Reload before editing.", actionIndex: 0 };
+  accepted = "Edited elsewhere"; revision += 1;
+  click("Save"); await ticks(10);
+  assert.equal(sent.length, 5); assert.equal(flushes, 0);
+  assert.equal(status(), "Story changed in source and was refreshed. Nothing was saved. This Beat changed in source after the draft began. Draft retained.");
+  assert.equal(document.querySelector<HTMLTextAreaElement>('[data-beat-id="line"] textarea')?.value, "Refused draft");
+
   // With no beat drafts, Save in Story still runs Flush.
   click("Cancel"); await ticks();
   click("Save"); await ticks(10);
-  assert.equal(flushes, 1); assert.equal(sent.length, 4);
+  assert.equal(flushes, 1); assert.equal(sent.length, 5);
 });

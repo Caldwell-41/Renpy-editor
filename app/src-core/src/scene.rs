@@ -914,7 +914,7 @@ impl AuthoringService {
             SceneCommand::Redo => self.redo_scene(project)?,
             command => {
                 let loaded = self.prepare_scene_command(project, project_id, &request, &command)?;
-                let proposal = if drafts::is_draft_command(&command) {
+                let proposal = if drafts::is_body_beat_command(&command) {
                     self.build_drafts(project, project_id, loaded, vec![command])
                         .map_err(SceneError::unindexed)?
                 } else {

@@ -452,6 +452,7 @@ export const storyCases={
   const others=snapshot=>Object.fromEntries(Object.entries(c.hashes(c.rpy(snapshot))).filter(([p])=>![entry.sourcePath,called.sourcePath].includes(p)));
   c.assert.deepEqual(others(after),others(externalSnapshot));
   for(const id of [a.id,b.id])c.assert(!c.document.querySelector(`[data-beat-id="${id}"][data-beat-draft="true"]`));
+  // As the last case, the harness then reopens the project and checks these accepted bytes.
   await c.click('Undo');await c.wait(()=>c.lastMutation()?.request.payload.command.type==='undo'&&c.lastMutation().response.ok);await c.settle();
   c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(externalSnapshot)),'One Undo reverts the whole Story Save');
   await c.click('Redo');await c.wait(()=>c.lastMutation()?.request.payload.command.type==='redo'&&c.lastMutation().response.ok);await c.settle();

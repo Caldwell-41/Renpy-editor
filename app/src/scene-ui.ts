@@ -1618,12 +1618,14 @@ export function renderStoryView(
       if (!current) throw new Error("This Scene is no longer available. Draft retained.");
       return { scene: current, captured: expectedRevisions(model) };
     };
-    // A new beat finds its body and anchor by id; if source dropped either, the draft conflicts.
-    const insertCommand = (payload: BeatPayload, location: { body: BodyRef; position: Position }, current = base()): SceneCommand => {
-      const { body, position } = location, anchor = position.type === "before" ? JSON.stringify(position.anchor) : undefined;
+    const insertCommand = (payload: BeatPayload, location: { body: BodyRef; position: Position }, current = base()): SceneCommand => ({ type: "insertBodyBeat", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, ...location, beat: payload });
+    // Story Save: a new beat finds its body and anchor by id; if source dropped either, the draft conflicts.
+    const savedCommand = (): SceneCommand => {
+      const payload = editor.read(), location = chosenLocation(), current = base(), { body, position } = location;
+      const anchor = position.type === "before" ? JSON.stringify(position.anchor) : undefined;
       const bodyKept = body.type === "root" || current.scene.beats.some(item => item.id === body.branchId && item.conditionalBranch?.groupId === body.groupId);
       if (!bodyKept || (anchor && !bodyNodes(current.scene, body).some(node => JSON.stringify(nodeRef(node)) === anchor))) throw new Error("This beat's place changed in source after the draft began. Draft retained.");
-      return { type: "insertBodyBeat", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, ...location, beat: payload };
+      return insertCommand(payload, location, current);
     };
     const openingInsertion = structuredClone(insertion ?? screenInsertion ?? {sceneId:scene.id,body,position,expectedSourceRevision:scene.sourceRevision});
     let rememberedInsertion = false;
@@ -1709,7 +1711,7 @@ export function renderStoryView(
     // A new beat moves with the place the author chooses, until it is added.
     const place=():{body:BodyRef;position:Position}=>{try{return chosenLocation();}catch{return {body,position};}};
     placement.host.addEventListener("change",()=>{const target=bodyList(place().body);if(target&&panel.parentElement!==target)target.prepend(panel);});
-    keepDraft(key,{panel,sceneId:scene.id,place,read:()=>editor.read(),command:()=>insertCommand(editor.read(),chosenLocation())});updatePendingMarker();type.focus();
+    keepDraft(key,{panel,sceneId:scene.id,place,read:()=>editor.read(),command:savedCommand});updatePendingMarker();type.focus();
   };
 
   draw();

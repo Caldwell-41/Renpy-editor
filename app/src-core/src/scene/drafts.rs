@@ -31,8 +31,15 @@ struct CandidateScope;
 
 impl CandidateScope {
     fn open(project: &ProjectId) -> Self {
-        CANDIDATE
-            .with(|candidate| *candidate.borrow_mut() = Some((project.clone(), HashMap::new())));
+        CANDIDATE.with(|candidate| {
+            let mut candidate = candidate.borrow_mut();
+            // One build at a time: a nested build would replace the outer candidate.
+            assert!(
+                candidate.is_none(),
+                "a Story Save candidate is already open"
+            );
+            *candidate = Some((project.clone(), HashMap::new()));
+        });
         Self
     }
 
@@ -92,7 +99,7 @@ pub(super) fn candidate_created(project: &ProjectId, directory: &str) -> Vec<Str
     })
 }
 
-pub(super) fn is_draft_command(command: &SceneCommand) -> bool {
+pub(super) fn is_body_beat_command(command: &SceneCommand) -> bool {
     matches!(
         command,
         SceneCommand::InsertBodyBeat { .. } | SceneCommand::UpdateBodyBeat { .. }
@@ -125,7 +132,7 @@ impl AuthoringService {
     ) -> Result<SceneWorkspace, SceneError> {
         if request.commands.is_empty()
             || request.commands.len() > MAX_SAVE_DRAFTS
-            || !request.commands.iter().all(is_draft_command)
+            || !request.commands.iter().all(is_body_beat_command)
         {
             return Err(SceneError::InvalidPayload);
         }
