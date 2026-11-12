@@ -301,7 +301,11 @@ fn main() {
             let mut bytes = std::fs::read(&path).unwrap();
             if let Some(line) = request["remove"].as_str() {
                 let text = String::from_utf8(bytes).unwrap();
-                assert_eq!(text.matches(line).count(), 1, "the removed line must be unique");
+                assert_eq!(
+                    text.matches(line).count(),
+                    1,
+                    "the removed line must be unique"
+                );
                 bytes = text.replacen(line, "", 1).into_bytes();
             } else {
                 bytes.extend(b"# ordinary external Story writer\n");

@@ -223,7 +223,11 @@ fn story_save_reports_a_missing_insertion_place_as_a_beat_draft_conflict() {
         let refused = save(
             &f,
             &ws,
-            vec![update(first, 0, "Kept out"), place, update(other, 0, "Never built")],
+            vec![
+                update(first, 0, "Kept out"),
+                place,
+                update(other, 0, "Never built"),
+            ],
         );
         assert!(
             matches!(&refused, Err(SceneError::Indexed { index: 1, cause }) if **cause == SceneError::BeatDraftConflict),
