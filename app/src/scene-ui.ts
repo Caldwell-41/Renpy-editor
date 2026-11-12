@@ -613,7 +613,9 @@ export function renderStoryView(
   // beat, `editors` keep editor state that controls do not show, `detach` removes a new
   // beat's editor, `state` is the draft after its last step (none before its first) and
   // `lastStep` orders Story Save, so the most recently edited beat ends on top.
-  interface BeatDraft { readonly id: string; readonly panel: HTMLElement; readonly sceneId: string; readonly beatId?: string; readonly place?: () => { body: BodyRef; position: Position }; readonly read?: () => BeatPayload; readonly command: () => SceneCommand; readonly kind: () => string; readonly editors: () => readonly BeatEditor[]; readonly detach?: () => void; state?: DraftState; lastStep: number }
+  // `conflict` compares the draft with source now (see DraftConflict); `primary` is the
+  // field the comparison sits above.
+  interface BeatDraft { readonly id: string; readonly panel: HTMLElement; readonly sceneId: string; readonly beatId?: string; readonly place?: () => { body: BodyRef; position: Position }; readonly read?: () => BeatPayload; readonly command: () => SceneCommand; readonly kind: () => string; readonly editors: () => readonly BeatEditor[]; readonly conflict: () => DraftConflict | undefined; readonly primary: () => HTMLElement; readonly detach?: () => void; state?: DraftState; lastStep: number }
   let newBeatDrafts = 0, draftSequence = 0;
   const beatDrafts = new Map<string, BeatDraft>();
   const invalidDraft = "This beat draft is invalid. Draft retained.";
@@ -653,9 +655,9 @@ export function renderStoryView(
   let openText: { readonly draft: BeatDraft; readonly field: EventTarget; readonly stepId: string; timer?: ReturnType<typeof setTimeout> } | undefined;
   let openChange: string | undefined;
   const captureDraft = (draft: BeatDraft): DraftState => captureState(draft.panel, draft.editors());
-  const stepName = (draft: BeatDraft, kind: "typing" | "change" | "new" | "cancel"): string => {
+  const stepName = (draft: BeatDraft, kind: "typing" | "change" | "new" | "cancel" | "discard"): string => {
     const scene = model.scenes.find(item => item.id === draft.sceneId)?.displayName ?? "a scene", beat = draft.kind();
-    return `${kind === "new" ? `new ${beat} draft` : kind === "cancel" ? `cancel of ${beat} draft` : `${beat} ${kind}`} in ${scene}`;
+    return `${kind === "new" ? `new ${beat} draft` : kind === "cancel" || kind === "discard" ? `${kind} of ${beat} draft` : `${beat} ${kind}`} in ${scene}`;
   };
   const startStep = (draft: BeatDraft, kind: Parameters<typeof stepName>[1], before: DraftState | undefined, after?: DraftState): string => {
     const stepId = `step:${++stepSequence}`;
@@ -690,11 +692,11 @@ export function renderStoryView(
     queueMicrotask(() => { openChange = undefined; endStep(stepId); });
   };
   const forgetSteps = (drafts: readonly BeatDraft[]): void => { for (const [id, step] of steps) if (drafts.includes(step.draft)) steps.delete(id); };
-  // Cancel is an edit: Undo of it brings the draft back.
-  const cancelStep = (key: string): void => {
+  // Cancel and Discard draft are edits: Undo of either brings the draft back.
+  const cancelStep = (key: string, kind: "cancel" | "discard" = "cancel"): void => {
     const draft = beatDrafts.get(key);
     if (!draft || !isPending(draft)) return;
-    closeText(); startStep(draft, "cancel", captureDraft(draft)); draft.state = undefined;
+    closeText(); startStep(draft, kind, captureDraft(draft)); draft.state = undefined;
   };
   // Undo or Redo of a step sets its draft to that step's state; no state ends the draft.
   const applyStep = (step: DraftStep, direction: HistoryDirection): boolean => {
@@ -767,9 +769,19 @@ export function renderStoryView(
     return () => { pendingWrites--; locks.forEach(({ control, disabled }) => { if (control.isConnected) control.disabled = disabled; }); };
   };
 
+  // Reloads Story after core refuses a stale request, keeping every draft. A failed
+  // read keeps the shown model. False when the session ended meanwhile.
+  const reload = async (): Promise<boolean> => {
+    try { model = await actions.load!(); } catch { /* Keep the shown model; the author can try again. */ }
+    if (disposed || actions.current?.() === false) return false;
+    draw();
+    return true;
+  };
+
   // `committed` is the beat draft a Commit saves. A removal discards the drafts inside
   // what it removes. Core joins both drafts' steps into this edit (ADR 0025).
-  const mutate = async (command: SceneCommand, after?: (before: SceneWorkspace, next: SceneWorkspace) => void, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision"> = model, owner?: HTMLElement, committed?: BeatDraft): Promise<boolean> => {
+  // With `staleStatus`, a stale refusal reloads Story and reports that status (ADR 0007: no retry).
+  const mutate = async (command: SceneCommand, after?: (before: SceneWorkspace, next: SceneWorkspace) => void, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision"> = model, owner?: HTMLElement, committed?: BeatDraft, staleStatus?: string): Promise<boolean> => {
     if(disposed || actions.current?.() === false)return false;
     if (drafts().some(draft => draft !== owner && !owner?.contains(draft))) { actions.status("Complete or cancel the other edit first. Input retained.", "error"); focusDraft(); return false; }
     if (pendingWrites) { actions.status("Wait for the current change to finish.", "error"); return false; }
@@ -792,6 +804,10 @@ export function renderStoryView(
       return true;
     } catch (error) {
       if (disposed || actions.current?.() === false) return false;
+      if (staleStatus && (error as { code?: string }).code === "SOURCE_CONFLICT" && actions.load) {
+        if (await reload()) actions.status(staleStatus, "error");
+        return false;
+      }
       actions.status(`${friendlyError(error, "Scene change could not be saved")} Input retained. If this source structure cannot be moved safely, edit it in Source.`, "error");
       focusDraft();
       return false;
@@ -897,9 +913,7 @@ export function renderStoryView(
       const { code, actionIndex } = error as { code?: string; actionIndex?: number };
       // A stale model refreshes; only drafts whose own beat changed then conflict (ADR 0007: no retry).
       if (code === "SOURCE_CONFLICT" && actions.load) {
-        try { model = await actions.load(); } catch { /* Keep the shown model; the author can save again. */ }
-        if (disposed || actions.current?.() === false) return { kind: "blocked" };
-        draw();
+        if (!await reload()) return { kind: "blocked" };
         const conflicts = preflight().failures;
         if (conflicts.length) return refuseSave(conflicts, "Story changed in source and was refreshed. Nothing saved.");
         actions.status("Story changed in source and was refreshed. Nothing saved. Save again.", "error");
@@ -979,27 +993,62 @@ export function renderStoryView(
     drawTree(selectedScene);
     drawBeats(selectedScene);
     restoreNewBeatDrafts(selectedScene);
-    showOrphanedDrafts(selectedScene);
+    showLostDrafts(selectedScene);
+    for (const draft of pendingDrafts()) drawConflict(draft);
     settleRefusal();
     markDrafts();
   };
 
-  // A draft whose beat, branch or scene left source stays listed, with its editor, until
-  // the author cancels it. Commit refuses it because its beat changed.
-  const orphaned = (draft: BeatDraft): boolean => {
-    const scene = model.scenes.find(item => item.id === draft.sceneId);
-    if (!scene) return true;
-    if (draft.beatId) { const beat = scene.beats.find(item => item.id === draft.beatId); return !beat || beat.protected || !!beat.conditionalBranch || !!beat.structuralPlaceholder || readOnlyLogic(beat); }
-    const body = draft.place?.().body;
-    return body?.type === "branch" && !scene.beats.some(item => item.id === body.branchId);
+  // A draft whose beat, place or scene left source has no beat to sit under. It shows
+  // above the shown scene's beats, with the comparison and Discard draft.
+  const showLostDrafts = (scene: SceneDocument): void => {
+    const lost = pendingDrafts().filter(draft => (draft.sceneId === scene.id || !model.scenes.some(item => item.id === draft.sceneId)) && "missing" in (draft.conflict() ?? {}));
+    host.querySelector(".beats-list")?.prepend(...lost.map(draft => draft.panel));
   };
-  const showOrphanedDrafts = (scene: SceneDocument): void => {
-    const lost = pendingDrafts().filter(draft => orphaned(draft) && (draft.sceneId === scene.id || !model.scenes.some(item => item.id === draft.sceneId)));
-    if (!lost.length) return;
-    const section = document.createElement("section"); section.className = "orphaned-drafts state-banner partial-state"; section.setAttribute("aria-label", "Drafts no longer in source");
-    const heading = document.createElement("h2"); heading.textContent = "Drafts whose beat is no longer in source";
-    section.append(heading, ...lost.map(draft => draft.panel));
-    host.querySelector(".beats-region")?.prepend(section);
+  // Shows or clears a draft's comparison (approved B, `story-draft-conflict` / `compact-v2`):
+  // Conflict with source and the source text above the draft's field, then Discard draft
+  // and Override source in place of its own actions.
+  const drawConflict = (draft: BeatDraft): void => {
+    const { panel } = draft, conflict = draft.conflict();
+    panel.querySelectorAll(".story-conflict, .story-resolution").forEach(node => node.remove());
+    panel.querySelectorAll<HTMLElement>("[data-draft-label]").forEach(caption => { caption.textContent = caption.dataset.draftLabel!; delete caption.dataset.draftLabel; });
+    const own = panel.querySelector<HTMLElement>(":scope > .row-actions");
+    if (own) own.hidden = !!conflict;
+    if (!conflict) { delete panel.dataset.conflict; return; }
+    panel.dataset.conflict = "true";
+    // Dialogue and narration keep their text field: the comparison goes right above it.
+    const field = draft.primary(), caption = field.tagName === "TEXTAREA" && panel.contains(field) ? field.closest("label")?.querySelector<HTMLElement>(":scope > span") ?? undefined : undefined;
+    const section = document.createElement("section"); section.className = "story-conflict"; section.tabIndex = -1; section.setAttribute("aria-label", "Conflict with source");
+    const heading = document.createElement("strong"); heading.textContent = "Conflict with source";
+    const copy = document.createElement("p"); section.append(heading, copy);
+    if ("missing" in conflict) copy.textContent = conflict.missing;
+    else {
+      copy.textContent = "The source changed after you started editing.";
+      const source = document.createElement("output"); source.className = "story-conflict-source"; source.textContent = conflict.source;
+      section.append(labelled("Source", source));
+    }
+    if (caption) { caption.dataset.draftLabel = caption.textContent ?? ""; caption.textContent = "Your draft"; caption.parentElement!.before(section); }
+    else {
+      const top = panel.querySelector(":scope > .story-breadcrumb, :scope > h3");
+      if (top) top.after(section); else panel.prepend(section);
+    }
+    const resolution = document.createElement("div"); resolution.className = "story-resolution";
+    const row = document.createElement("div"); row.className = "row-actions";
+    const discard = button("Discard draft", "button secondary"); discard.addEventListener("click", () => discardDraft(draft));
+    row.append(discard); resolution.append(row);
+    if ("override" in conflict) {
+      const override = button("Override source", "button primary"); override.addEventListener("click", conflict.override);
+      const note = document.createElement("p"); note.textContent = "Other drafts stay unsaved.";
+      row.append(override); resolution.append(note);
+    }
+    if (own) own.before(resolution); else panel.append(resolution);
+  };
+  // Discard draft keeps source and removes only this draft. Like Cancel, it is an edit
+  // that Undo reverses. The beat stays selected, so its editor shows source.
+  const discardDraft = (draft: BeatDraft): void => {
+    if (settling || pendingWrites) return;
+    const key = draft.panel.dataset.beatDraftKey!;
+    cancelStep(key, "discard"); draft.detach?.(); dropDraft(key); draw();
   };
 
   // A body's beat list: the root list or a condition or Choice branch.
@@ -1009,20 +1058,23 @@ export function renderStoryView(
   const restoreNewBeatDrafts = (scene: SceneDocument): void => {
     for (const draft of beatDrafts.values()) if (!draft.beatId && draft.sceneId === scene.id && draft.place) bodyList(draft.place().body)?.prepend(draft.panel);
   };
-  // Quiet markers: the Screens draft convention on beat rows and scene rows.
-  // After a refused Save, failing drafts get a "!" mark and show why in their editor.
+  // Quiet markers: the Screens draft convention on beat rows and scene rows. A draft
+  // that conflicts with source gets a quiet "!". After a refused Save, failing drafts
+  // get a red "!" and show why in their editor; a conflict shows its comparison instead.
   const markDrafts = (): void => {
     const beats = new Set(pendingDrafts().flatMap(draft => draft.beatId ? [draft.beatId] : []));
     const scenes = new Set(pendingDrafts().map(draft => draft.sceneId));
+    const conflicting = new Set(pendingDrafts().filter(draft => draft.conflict()).flatMap(draft => draft.beatId ? [draft.beatId] : []));
     const failing = refusal?.failing ?? new Map<BeatDraft, string>();
     const failingBeats = new Set([...failing.keys()].flatMap(draft => draft.beatId ? [draft.beatId] : []));
     const failingScenes = new Set([...failing.keys()].map(draft => draft.sceneId));
-    const mark = (node: HTMLElement, label: Element | null, has: boolean, fails = false): void => {
+    const mark = (node: HTMLElement, label: Element | null, has: boolean, fails = false, conflict = false): void => {
       node.dataset.beatDraft = String(has);
       if (fails) node.dataset.saveRefused = "true"; else node.removeAttribute("data-save-refused");
-      if (has) label?.setAttribute("aria-description", fails ? "Unsaved draft. Needs changes." : "Unsaved draft"); else label?.removeAttribute("aria-description");
+      if (conflict) node.dataset.beatConflict = "true"; else node.removeAttribute("data-beat-conflict");
+      if (has) label?.setAttribute("aria-description", fails ? "Unsaved draft. Needs changes." : conflict ? "Unsaved draft. Conflict with source." : "Unsaved draft"); else label?.removeAttribute("aria-description");
     };
-    host.querySelectorAll<HTMLElement>(".beat-card").forEach(card => mark(card, card.querySelector(":scope > .beat-compact > .beat-select"), beats.has(card.dataset.beatId ?? ""), failingBeats.has(card.dataset.beatId ?? "")));
+    host.querySelectorAll<HTMLElement>(".beat-card").forEach(card => { const id = card.dataset.beatId ?? ""; mark(card, card.querySelector(":scope > .beat-compact > .beat-select"), beats.has(id), failingBeats.has(id), conflicting.has(id)); });
     const shown = storyScene(model, selectedSceneId);
     host.querySelectorAll<HTMLElement>(".story-condition-group").forEach(group => { const id = group.dataset.conditionGroupId ?? ""; mark(group, group.querySelector(":scope > .story-group-heading > strong"), !!shown && draftsWithin(shown, id), !!shown && draftsWithin(shown, id, [...failing.keys()])); });
     treeHost.querySelectorAll<HTMLElement>(".tree-scene-row").forEach(row => mark(row, row.querySelector(".tree-scene-open"), scenes.has(row.dataset.sceneId ?? ""), failingScenes.has(row.dataset.sceneId ?? "")));
@@ -1031,6 +1083,7 @@ export function renderStoryView(
       let note = draft.panel.querySelector<HTMLElement>(":scope > .story-save-reason");
       if (reason === undefined) { draft.panel.removeAttribute("data-save-refused"); note?.remove(); continue; }
       draft.panel.dataset.saveRefused = "true";
+      if (draft.conflict()) { note?.remove(); continue; }
       if (!note) { note = document.createElement("p"); note.className = "error-message story-save-reason"; draft.panel.prepend(note); }
       if (note.textContent !== reason) note.textContent = reason;
     }
@@ -1676,11 +1729,34 @@ export function renderStoryView(
     const kept = beatDrafts.get(beat.id);
     if (kept) { card.append(kept.panel); return; }
     // A draft commits against current revisions while its beat's accepted payload is unchanged.
+    // Otherwise it conflicts: only Discard draft or Override source resolves it.
     const accepted = JSON.stringify(beat.payload);
     const base = (): { scene: SceneDocument; expectedBody: BodyRef; captured: ExpectedRevisions } => {
       const current = model.scenes.find(item => item.id === scene.id), node = current?.beats.find(item => item.id === beat.id);
-      if (!current || !node || JSON.stringify(node.payload) !== accepted) throw new Error("This Beat changed in source after the draft began. Draft retained.");
+      if (!current || !node || JSON.stringify(node.payload) !== accepted) throw new Error("Conflict with source. Draft retained.");
       return { scene: current, expectedBody: beatBody(node), captured: expectedRevisions(model) };
+    };
+    const conflict = (): DraftConflict | undefined => {
+      const current = model.scenes.find(item => item.id === scene.id), node = current?.beats.find(item => item.id === beat.id);
+      if (current?.sourceConflict) return { missing: unreadable };
+      if (!current || !node) return { missing: "This beat is no longer in source." };
+      if (node.protected || node.conditionalBranch || node.structuralPlaceholder || readOnlyLogic(node)) return { missing: "Story can no longer edit this beat. Edit it in Source." };
+      if (JSON.stringify(node.payload) === accepted) return undefined;
+      // Override writes against exactly the source this comparison shows.
+      const reviewed = { scene: current, expectedBody: beatBody(node), captured: expectedRevisions(model) };
+      const { payload } = node, sameSpeaker = payload.type === "dialogue" && beat.payload.type === "dialogue" && payload.characterId === beat.payload.characterId;
+      return { source: payload.type === "narration" || sameSpeaker ? payload.text : beatSummary(payload, model), override: () => override(reviewed) };
+    };
+    // Override source validates the editor and saves only this beat. A stale revision
+    // reloads Story, so the author reviews the newer source before overriding again.
+    const override = (reviewed: ReturnType<typeof base>): void => {
+      if (settling || pendingWrites || composing) return;
+      settling = (async (): Promise<boolean> => {
+        let payload: BeatPayload;
+        try { payload = editor.read(); } catch (error) { actions.status(friendlyError(error, invalidDraft), "error"); editor.focus(); return false; }
+        if (editor.primary.tagName === "TEXTAREA" && !(editor.primary as HTMLTextAreaElement).value.trim()) { actions.status("Enter text before overriding the source. Draft retained.", "error"); editor.primary.focus(); return false; }
+        return mutate(updateCommand(payload, reviewed), () => dropDraft(beat.id), reviewed.captured, panel, draft, "The source changed again. Review it, then choose again. Draft retained.");
+      })().finally(() => { settling = undefined; });
     };
     const updateCommand = (payload: BeatPayload, current = base()): SceneCommand => ({ type: "updateBodyBeat", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, beatId: beat.id, expectedBody: current.expectedBody, beat: payload });
     const editor = buildBeatEditor(model, beat.payload, true, liveActions, assignmentValidation(() => base(), value => updateCommand(value)));
@@ -1777,7 +1853,7 @@ export function renderStoryView(
     actionsRow.append(...(screenBeat?[commit,cancel]:[cancel,commit]));
     const secondary=panel.querySelector("details.story-screen-secondary");panel.append(actionsRow);if(secondary)panel.append(secondary);
     dirtyDraft(panel, editor.controls); card.append(panel);
-    const draft = keepDraft(beat.id, { panel, sceneId: scene.id, beatId: beat.id, read: editor.read, command: () => updateCommand(editor.read()), kind: () => beatLabels[beat.payload.type].toLowerCase(), editors: () => [editor] });
+    const draft = keepDraft(beat.id, { panel, sceneId: scene.id, beatId: beat.id, read: editor.read, command: () => updateCommand(editor.read()), kind: () => beatLabels[beat.payload.type].toLowerCase(), editors: () => [editor], conflict, primary: () => editor.primary });
   };
 
   const assignmentValidation = (base: () => { scene: SceneDocument; captured: ExpectedRevisions }, command: (beat: BeatPayload) => SceneCommand): ValidateAssignment => async beat => {
@@ -1892,7 +1968,10 @@ export function renderStoryView(
     // A new beat moves with the place the author chooses, until it is added.
     const place=():{body:BodyRef;position:Position}=>{try{return chosenLocation();}catch{return {body,position};}};
     placement.host.addEventListener("change",()=>{const target=bodyList(place().body);if(target&&panel.parentElement!==target)target.prepend(panel);});
-    const draft=keepDraft(key,{panel,sceneId:scene.id,place,read:()=>editor.read(),command:savedCommand,kind:()=>beatLabels[type.value as BeatPayload["type"]].toLowerCase(),editors:()=>[...typeDrafts.values()],detach:()=>{pendingMarker.remove();panel.remove();}});updatePendingMarker();
+    const draft=keepDraft(key,{panel,sceneId:scene.id,place,read:()=>editor.read(),command:savedCommand,kind:()=>beatLabels[type.value as BeatPayload["type"]].toLowerCase(),editors:()=>[...typeDrafts.values()],primary:()=>editor.primary,
+      // A new beat whose scene or branch left source has nowhere to go: only Discard draft resolves it.
+      conflict:()=>{const current=model.scenes.find(item=>item.id===scene.id),{body:at}=place();if(!current)return {missing:"This beat's scene is no longer in source."};if(current.sourceConflict)return {missing:unreadable};return at.type==="branch"&&!current.beats.some(item=>item.id===at.branchId)?{missing:"This beat's place is no longer in source."}:undefined;},
+      detach:()=>{pendingMarker.remove();panel.remove();}});updatePendingMarker();
     // A new beat is a draft from the moment it is added, so adding it is its first step.
     draft.state=captureDraft(draft);startStep(draft,"new",undefined,draft.state);type.focus();
   };
@@ -1974,6 +2053,15 @@ function beatSummary(payload: BeatPayload, model: SceneWorkspace): string {
     case "customCode": return payload.reason;
   }
 }
+
+/**
+ * How a beat draft disagrees with source now. `source` is the beat's current source text,
+ * and `override` saves the draft against exactly that revision. A beat, place or scene
+ * that left source has only `missing`, which says why there is no source text.
+ */
+type DraftConflict = { readonly source: string; readonly override: () => void } | { readonly missing: string };
+// A scene whose source Story cannot map has no beats to compare with, so its drafts wait.
+const unreadable = "Story cannot read this scene's source right now. The draft stays until it can.";
 
 /** What an editor keeps outside its controls, such as a Choice's option rows, for draft-step Undo. */
 interface EditorInternals { readonly capture: () => unknown; readonly restore: (saved: unknown) => void }

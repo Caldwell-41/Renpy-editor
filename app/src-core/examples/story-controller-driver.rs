@@ -281,8 +281,11 @@ fn main() {
             emit(json!({"snapshot":snapshot}));
             continue;
         }
-        // An ordinary external writer appends a comment, or removes one exact line.
-        if request["driver"] == "externalAppend" || request["driver"] == "externalRemove" {
+        // An ordinary external writer appends a comment, or removes or replaces one exact text.
+        if request["driver"] == "externalAppend"
+            || request["driver"] == "externalRemove"
+            || request["driver"] == "externalReplace"
+        {
             let relative = request["path"].as_str().unwrap();
             let allowed = host
                 .with_service(|s| {
@@ -306,7 +309,8 @@ fn main() {
                     1,
                     "the removed line must be unique"
                 );
-                bytes = text.replacen(line, "", 1).into_bytes();
+                let insert = request["insert"].as_str().unwrap_or("");
+                bytes = text.replacen(line, insert, 1).into_bytes();
             } else {
                 bytes.extend(b"# ordinary external Story writer\n");
             }

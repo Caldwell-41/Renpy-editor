@@ -140,7 +140,7 @@ test("existing Show draft refuses Commit when its accepted revisions change unde
   const s = setup({ screenCatalog: async () => new Promise(resolve => { finish = resolve; }) }, model);
   s.host.querySelector<HTMLButtonElement>('[data-beat-id="show"] .beat-select')!.click(); supplied.source = "newer-revision"; finish(catalog); await tick();
   button(s.host.querySelector('[data-beat-type="showScreen"]')!, "Commit Beat").click(); await tick();
-  assert.equal(s.commands.length, 0); assert.match(s.messages.at(-1)!, /changed in source/);
+  assert.equal(s.commands.length, 0); assert.match(s.messages.at(-1)!, /Conflict with source/);
   await s.close();
 });
 

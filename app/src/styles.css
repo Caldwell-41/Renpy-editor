@@ -144,9 +144,19 @@ h2 { margin: 0; font-size: 1rem; font-weight: 650; }
 .tree-scene-open { flex: 1; }
 /* Quiet beat draft markers, the same convention as Screens layout drafts. */
 .beat-card[data-beat-draft=true] > .beat-compact > .beat-select::after, .tree-scene-row[data-beat-draft=true] .tree-scene-open::after { content: "*"; color: var(--accent-primary); }
+/* A draft that conflicts with source gets a quiet "!" until a Story Save refuses it. */
+.beat-card[data-beat-conflict=true] > .beat-compact > .beat-select::after { content: "!"; color: var(--accent-primary); font-weight: 700; }
 /* After a refused Story Save, a failing draft's "!" replaces its "*". Its editor shows why. */
 .beat-card[data-save-refused=true] > .beat-compact > .beat-select::after, .tree-scene-row[data-save-refused=true] .tree-scene-open::after { content: "!"; color: var(--status-error); font-weight: 700; }
 .story-save-reason { grid-column: 1 / -1; margin: 0 0 8px; font-size: .8rem; }
+/* Beat draft conflict, approved B (`story-draft-conflict` / `compact-v2`): source text above the draft, both actions below it. */
+.expanded-beat[data-beat-type][data-conflict=true] { display: flex; flex-direction: column; }
+.story-conflict { padding-left: 10px; border-left: 2px solid var(--accent-primary); font-size: .8rem; }
+.story-conflict > strong { color: var(--accent-primary); }
+.story-conflict > p { margin: 4px 0 10px; color: var(--text-secondary); line-height: 1.55; }
+.story-conflict-source { display: block; padding: 8px; color: var(--text-primary); background: var(--surface-panel); border: 1px solid var(--border-normal); font-size: .9rem; overflow-wrap: anywhere; white-space: pre-wrap; }
+.story-resolution > .row-actions { justify-content: flex-start; flex-wrap: wrap; }
+.story-resolution > p { margin: 6px 0 0; color: var(--text-secondary); font-size: .72rem; }
 /* Status-line links: one per scene with failing drafts, and its count. */
 .app-status:has(.status-link) { max-width: none; }
 .app-status .status-link { margin-left: 8px; padding: 0 2px; color: var(--text-primary); font: inherit; background: none; border: 0; border-bottom: 1px solid var(--border-strong); border-radius: 0; cursor: pointer; }

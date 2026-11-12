@@ -23,6 +23,7 @@ export const STORY_CASES=[
  'Ordinary external edits and stale revisions refuse with zero source writes',
  'Beat drafts stay attached across scenes and workspaces until Commit or Cancel',
  'Story Save accepts every beat draft across scenes in one transaction, or none',
+ 'Beat draft conflicts resolve with Discard draft or Override source',
 ];
 const NARROW=STORY_CASES.filter((_,i)=>[0,1,2,7,8].includes(i));
 const REOPEN_CASE='Undo Redo preserves exact bytes and process reopen retains maps with session history reset';
@@ -183,7 +184,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   finally{release();responseBarrier=undefined;await actionPromise;}
  };
  const raw=async request=>{
-  assert(['snapshot','externalAppend','externalRemove'].includes(request?.driver),'Only owned fixture controls allowed');return child.request(request);
+  assert(['snapshot','externalAppend','externalRemove','externalReplace'].includes(request?.driver),'Only owned fixture controls allowed');return child.request(request);
  };
  const start=async reopen=>{
   evidence.driverStarts++;
