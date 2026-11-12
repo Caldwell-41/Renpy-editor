@@ -94,7 +94,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   }
   const event=attributed?{...attributed}:null;
   const eligible=event&&event.connected&&event.enabled&&event.currentDocument&&event.ownerSession===session&&payload.sessionId===session;
-  if(operation==='scene.apply'&&!['undo','redo','selectScene'].includes(payload.command.type)){
+  if(operation==='scene.apply'&&!['undo','redo'].includes(payload.command.type)){
    assert(caseActive&&eligible&&event.sequence>caseEventStart&&event.panel==='story',
     'A fresh event in the current actual Story panel must initiate authoring');
   }
@@ -129,7 +129,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   if(operation==='scene.list'&&response.ok)latestWorkspace=response.value;
   if(operation==='scene.apply'){
    assert.equal(payload.sessionId,session);assert(payload.expectedProjectRevision&&payload.expectedSourceMapRevision);
-   if(!['undo','redo','selectScene'].includes(payload.command.type)){
+   if(!['undo','redo'].includes(payload.command.type)){
     assert(payload.command.sceneId&&payload.command.expectedSourceRevision);
     if(payload.command.type==='updateBodyBeat')assert(payload.command.beatId&&payload.command.expectedBody);
     if(payload.command.type==='insertBodyBeat')assert(payload.command.body&&payload.command.position);
@@ -193,6 +193,15 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   await wait(()=>document.querySelector('.recent-open')&&!document.querySelector('.recent-open').disabled);
   document.querySelector('.recent-open').click();
   await wait(()=>document.querySelector('.beat-card')&&latestWorkspace&&session);
+  // The seed leaves the last created scene open. Selecting the entry scene must write nothing.
+  const opened=latestWorkspace,entryName=opened.scenes.find(s=>s.id===opened.entrySceneId).displayName;
+  const selectionStart=transcript.length,beforeSelection=await snapshot();
+  [...document.querySelectorAll('.tree-scene-open')].find(b=>b.textContent===entryName).click();
+  await wait(()=>document.querySelector('.tree-scene-row.selected .tree-scene-open')?.textContent===entryName&&document.querySelector('.beat-card'));
+  assert(!transcript.slice(selectionStart).some(r=>r.request.operation==='scene.apply'),'Selecting a scene must not send a Scene command');
+  assert.deepEqual(await snapshot(),beforeSelection,'Selecting a scene must not change project files');
+  const selected=await call('scene.list');
+  assert.equal(selected.projectRevision,opened.projectRevision);assert.equal(selected.canUndo,opened.canUndo);
   const context={assert,wait,click,enter,key,labelled,call,raw,snapshot,rpy,hashes,pendingWrite,
    requests:()=>transcript,settle:async()=>{await new Promise(r=>setTimeout(r,0));await wait(()=>inFlight===0);await new Promise(r=>setTimeout(r,0));},
    workspace:()=>latestWorkspace,session:()=>session,lastMutation:()=>lastMutation,document,
@@ -217,12 +226,14 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   const redone=await snapshot();assert.deepEqual(rpy(redone),rpy(beforeUndo),'Redo must restore exact accepted bytes');
   const beforeReopen=await call('scene.list');const oldSession=session;
   const staleRequest=lastMutation.request;
+  const selectedBeforeClose=document.querySelector('.tree-scene-row.selected .tree-scene-open')?.textContent;assert(selectedBeforeClose);
   await click('Close Project');await wait(()=>document.querySelector('.recent-open'));
   await stop();assert(existsSync(fixture),'First normal process exit retains only the owned fixture');
   await start(true);startApplication(requester);
   await wait(()=>document.querySelector('.recent-open')&&!document.querySelector('.recent-open').disabled);
   document.querySelector('.recent-open').click();
   await wait(()=>document.querySelector('.beat-card')&&session!==oldSession);
+  assert.equal(document.querySelector('.tree-scene-row.selected .tree-scene-open')?.textContent,selectedBeforeClose,'Reopen restores the selected scene from device preferences');
   const reopened=await call('scene.list');assert.deepEqual(reopened.scenes,beforeReopen.scenes);
   const reopenedSnapshot=await snapshot();assert.deepEqual(rpy(reopenedSnapshot),rpy(redone));
   assert.equal(reopened.sourceMapRevision,beforeReopen.sourceMapRevision);

@@ -48,9 +48,10 @@ try {
  const generatedChoice = 'screen choice(items):\n    style_prefix "choice"\n\n    vbox:\n        for i in items:\n            textbutton i.caption action i.action\n';
  await saveSource('game/screens.rpy', generatedChoice);
  const original=`label ${entry.technicalLabel}:\n    # retained neighbor\n    "Shared once"\n    return\n`;
- await saveSource(path,original);const selectedModel=await call('scene.list');await call('scene.apply',{expectedProjectRevision:selectedModel.projectRevision,expectedSourceMapRevision:selectedModel.sourceMapRevision,command:{type:'selectScene',sceneId:entry.id}});await call('project.close');session=undefined;
+ await saveSource(path,original);await call('project.close');session=undefined;
  document.body.innerHTML='<div id="app"></div>';const {startApplication}=await import('../dist-tests/src/main.js');startApplication(requester);
  await wait(()=>document.querySelector('.recent-open')&&!document.querySelector('.recent-open').disabled);button(document.querySelector('.recent-open').textContent);await wait(()=>document.querySelector('.beat-card'));await settle();
+ [...document.querySelectorAll('.tree-scene-open')].find(b=>b.textContent===entry.displayName).click();await wait(()=>document.querySelector('.tree-scene-row.selected .tree-scene-open')?.textContent===entry.displayName);await settle();
  const scene=()=>workspace.scenes.find(s=>s.id===entry.id),choice=()=>scene().beats.find(b=>b.payload.type==='choice');
  assert.equal(await source(path),original);
  button('Add Beat');let draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'choice','change');

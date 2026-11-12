@@ -38,7 +38,7 @@ export async function visualRequest<T>(operation:CoreOperation,payload:Readonly<
   characters.push({id:String(payload.technicalName),technicalName:String(payload.technicalName),displayName:String(payload.displayName),dialogueColor:String(payload.dialogueColor),defaultAppearanceId:undefined,source:{path:'game/definitions/characters.rpy',statement:`define ${String(payload.technicalName)} = Character(${JSON.stringify(payload.displayName)}, color=${JSON.stringify(payload.dialogueColor)})`,sourceRevision:revision}});value=authoring;break;
  }
  case 'scene.list':value=sceneModel;break;
- case 'scene.apply':{const command=payload.command as {type:string;sceneId?:string;beatId?:string;beat?:unknown};if(command.type==='selectScene')sceneModel.lastOpen.sceneId=command.sceneId!;value=sceneModel;break;}
+ case 'scene.apply':value=sceneModel;break;
  case 'source.list':value={files:[{path:source.path,state:document.state,dirty:document.dirty,readOnly:false},...Array.from({length:12},(_,i)=>({path:`game/scenes/extra_scene_${i+1}.rpy`,state:'clean',dirty:false,readOnly:false}))],dirtyCount:Number(document.dirty),draftBytes:document.dirty?document.text.length:0};break;
  case 'source.open':value=payload.path==='game/definitions/characters.rpy'?{...document,path:payload.path,text:characters.map(c=>c.source.statement).join('\n')}:{...document,path:payload.path};break;
  case 'source.updateDraft':document={...document,...payload,text:String(payload.text),dirty:payload.text!==accepted,state:payload.text!==accepted?'dirty':'clean',draftVersion:document.draftVersion+1};value=document;break;

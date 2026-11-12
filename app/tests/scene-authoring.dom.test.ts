@@ -8,6 +8,7 @@ import {
   renderRecoverySurface,
   renderSceneAuthoring,
   settleSceneDraft,
+  storyScene,
   type RecoveryReport,
   type SceneCommand,
   type SceneWorkspace,
@@ -223,6 +224,26 @@ test("Scene authoring exposes hierarchy, every Beat, natural dialogue continuati
   click("Create Scene and option"); await tick();
   assert.equal(calls.at(-1)?.type, "createSceneFromChoice");
   assert.equal(calls.at(-1)?.optionText, "Stay");
+});
+
+test("scene selection stays in the renderer and falls back to the last open scene", async () => {
+  installDom(); const model = sceneModel();
+  assert.equal(storyScene(model, "scene-two")?.id, "scene-two");
+  assert.equal(storyScene(model, "deleted-scene")?.id, "scene-one");
+  const calls: SceneCommand[] = [], remembered: string[] = [];
+  const selected = (): string | null | undefined => document.querySelector(".tree-scene-row.selected .tree-scene-open")?.textContent;
+  const dispose = renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+    status:()=>{}, resolution:{width:1280,height:720}, present:async()=>{throw Error("unexpected media")},
+    sceneId:"scene-two", rememberScene:id=>remembered.push(id),
+    apply:async command=>{ calls.push(command); return model; },
+  });
+  assert.equal(selected(), "Garden");
+  [...document.querySelectorAll<HTMLButtonElement>(".tree-scene-open")].find(item => item.textContent === "Arrival")!.click();
+  await tick();
+  assert.equal(selected(), "Arrival");
+  assert.deepEqual(remembered, ["scene-one"]);
+  assert.deepEqual(calls, []);
+  dispose();
 });
 
 test("recovery UI offers only proven resolutions and keeps ambiguous transactions blocked", async () => {

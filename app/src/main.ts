@@ -24,6 +24,7 @@ import {
   hasSceneDraft,
   renderRecoverySurface,
   renderSceneAuthoring,
+  storyScene,
   type RecoveryReport,
   type SceneCommand,
   type SceneWorkspace,
@@ -88,6 +89,7 @@ let statusRequestSequence = 0;
 let runtimeWorkspace: RuntimeWorkspace | undefined;
 let screensWorkspace: ScreensWorkspace | undefined;
 let screenInsertion: import("./scene-ui.ts").ScreenInsertion | undefined;
+let storySceneId: string | undefined;
 let lifecycleBusy = false;
 let stageDroppedAssets: ((batch:ImportBatch)=>void)|undefined;
 
@@ -134,7 +136,7 @@ interface CompletionToken { view: number; operation: number; scope: object; sess
 function beginView(project?: OpenProject): number {
   activeReferenceController?.dispose(); activeReferenceController=undefined;
   disposeCatalogue?.();disposeCatalogue=undefined;
-  if (currentProject?.sessionId !== project?.sessionId) { runtimeWorkspace?.dispose(); runtimeWorkspace = undefined; screensWorkspace?.dispose(); screensWorkspace = undefined; screenInsertion = undefined; }
+  if (currentProject?.sessionId !== project?.sessionId) { runtimeWorkspace?.dispose(); runtimeWorkspace = undefined; screensWorkspace?.dispose(); screensWorkspace = undefined; screenInsertion = undefined; storySceneId = undefined; }
   disposeBranchesView?.();
   disposeBranchesView = undefined;
   disposeSceneView?.();
@@ -509,7 +511,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
       openAssets: () => requestProjectNavigation(project,"assets"),
       useInStory: async (screenHint, screenHintKind) => {
         const scenes = await projectValue<SceneWorkspace>(project,"scene.list");
-        const sceneId = scenes.scenes.find(scene=>scene.id===screenInsertion?.sceneId)?.id ?? scenes.lastOpen.sceneId;
+        const sceneId = scenes.scenes.find(scene=>scene.id===screenInsertion?.sceneId)?.id ?? storyScene(scenes, preferredStoryScene(project))?.id ?? scenes.lastOpen.sceneId;
         if (currentProject?.sessionId === project.sessionId) await requestProjectNavigation(project,"story",{sceneId,screenHint,screenHintKind,screenInsertion});
       },
     });
@@ -594,6 +596,14 @@ async function refreshPersistenceStatus(project: OpenProject, generation: number
   }
 }
 
+const storyLayoutKey = (project: OpenProject): string => `${project.projectId}:story`;
+const preferredStoryScene = (project: OpenProject): string | undefined => storySceneId ?? layoutFor(storyLayoutKey(project)).sceneSelection;
+function rememberStoryScene(project: OpenProject, sceneId: string): void {
+  if (currentProject?.sessionId !== project.sessionId) return;
+  storySceneId = sceneId;
+  saveLayout(storyLayoutKey(project), { sceneSelection: sceneId });
+}
+
 async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, project: OpenProject, generation: number, target?: SceneTarget): Promise<void> {
   const token = beginCompletion(project, operationScopes.sceneLoad);
   try {
@@ -616,7 +626,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
       setStatus("Recovery required — writes are disabled", "error");
       return;
     }
-    let model = await projectValue<SceneWorkspace>(project, "scene.list");
+    const model = await projectValue<SceneWorkspace>(project, "scene.list");
     if (generation !== viewGeneration || !completionIsCurrent(token)) return;
     if (target?.expectedSourceRevision) {
       const scene = model.scenes.find((item) => item.id === target.sceneId);
@@ -629,10 +639,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
         return;
       }
     }
-    if (target && model.lastOpen.sceneId !== target.sceneId) {
-      model = await projectValue<SceneWorkspace>(project, "scene.apply", { expectedProjectRevision: model.projectRevision, expectedSourceMapRevision: model.sourceMapRevision, command: { type: "selectScene", sceneId: target.sceneId } });
-      if (generation !== viewGeneration || !completionIsCurrent(token)) return;
-    }
+    if (target) rememberStoryScene(project, target.sceneId);
     disposeSceneView = renderSceneAuthoring(workspace, tree, model, {
       current: () => generation === viewGeneration && currentProject?.sessionId === project.sessionId,
       caller: target?.caller,
@@ -689,7 +696,9 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
       resolution: project.resolution,
       present: (assetId, purpose) => projectValue(project, "media.present", { assetId, purpose }),
       viewSource: (path, byteStart, byteEnd, expectedRevision) => { void requestProjectNavigation(project, "source", { path, byteStart, byteEnd, expectedRevision }); },
-      layoutKey: `${project.projectId}:story`,
+      layoutKey: storyLayoutKey(project),
+      sceneId: preferredStoryScene(project),
+      rememberScene: sceneId => rememberStoryScene(project, sceneId),
       validateAssignment: (command, expected) => projectValue(project, "scene.validateAssignment", {
         expectedProjectRevision: expected.projectRevision,
         expectedSourceMapRevision: expected.sourceMapRevision,
