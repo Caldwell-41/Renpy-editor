@@ -35,3 +35,4 @@ Superseded ADRs 0009, 0019 and 0020 are at the `archive/docs-ledgers-2026-11` ta
 | [0022](0022-saving-retained-story-drafts.md) | Accepted | Story Save accepts all pending beat drafts after validating the whole set, through ADR 0007's shell and transaction owners. |
 | [0023](0023-github-issues-own-delivery.md) | Accepted | GitHub Issues own scope, acceptance, decisions and results; PRs own work in progress and its evidence; the repository keeps lasting behavior and decisions. |
 | [0024](0024-beat-drafts-live-in-the-renderer.md) | Accepted | Retained beat drafts live in a shell-owned renderer store that keeps the live editors; core holds no Story drafts and checks each command. |
+| [0025](0025-project-history-orders-draft-steps.md) | Accepted | Core's project history orders draft steps beside committed edits without their content; Commit or Save moves the joined edit to the top. |
