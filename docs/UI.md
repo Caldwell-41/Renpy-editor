@@ -510,9 +510,9 @@ after Story last refreshed, Save refreshes Story, marks any beat draft conflicts
 asks the author to save again. It never retries on its own.
 
 A refused Story Save follows the approved `story-save-refusal` design (`marked-v1`).
-Save reveals the first failing draft. The status line reads "Nothing saved. 3 of 5
-drafts need changes:", followed by one link per scene with its count of failing
-drafts. Each link reveals that scene's first failing draft. A failing beat and its
+Save reveals the first failing draft in project order. The status line reads "Nothing
+saved. 3 of 5 drafts need changes:", followed by one link per scene with its count of
+failing drafts. Each link reveals that scene's first failing draft. A failing beat and its
 scene row show a red `!` in place of the draft `*`, and the draft's editor shows why
 it failed. A new beat whose body or insertion anchor is gone from source is a beat
 draft conflict. The marks and counts update as the author fixes or cancels each

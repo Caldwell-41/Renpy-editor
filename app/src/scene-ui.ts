@@ -539,7 +539,7 @@ export interface StorySaveFailure { readonly sceneId: string; readonly beatId?: 
 export type StorySaveOutcome =
   | { readonly kind: "saved" }
   | { readonly kind: "busy" | "blocked" }
-  // Every failing draft, in store order. Story reveals the first.
+  // Every failing draft, in project order. Story reveals the first.
   | { readonly kind: "refused"; readonly failures: readonly StorySaveFailure[] };
 
 /**
@@ -728,13 +728,30 @@ export function renderStoryView(
     for (const draft of pending) { try { commands.push(draft.command()); } catch (error) { failures.push([draft, friendlyError(error, invalidDraft)]); } }
     return { drafts: pending, commands, failures };
   };
+  // A draft's place in project order: its scene, then its beat or insertion point.
+  const projectOrder = (draft: BeatDraft): readonly [number, number] => {
+    const sceneIndex = model.scenes.findIndex(item => item.id === draft.sceneId), scene = model.scenes[sceneIndex];
+    if (!scene) return [model.scenes.length, 0];
+    const at = (node: NodeRef): number => scene.beats.findIndex(beat => JSON.stringify(nodeRef(beat)) === JSON.stringify(node));
+    if (draft.beatId) return [sceneIndex, at({ type: "beat", beatId: draft.beatId })];
+    const place = draft.place?.();
+    if (!place) return [sceneIndex, scene.beats.length];
+    if (place.position.type === "before") return [sceneIndex, at(place.position.anchor) - 0.5];
+    const { body } = place, last = bodyNodes(scene, body).at(-1);
+    if (last) return [sceneIndex, scene.beats.indexOf(last) + 0.5];
+    return [sceneIndex, body.type === "branch" ? scene.beats.findIndex(beat => beat.id === body.branchId) + 0.5 : scene.beats.length];
+  };
+  const inProjectOrder = <T,>(items: readonly T[], draft: (item: T) => BeatDraft): T[] => {
+    const order = new Map(items.map(item => [item, projectOrder(draft(item))]));
+    return [...items].sort((a, b) => { const [x, y] = [order.get(a)!, order.get(b)!]; return x[0] - y[0] || x[1] - y[1]; });
+  };
   // The status line after a refused Save: the failing count, then one link per scene.
   const saveStatus = (): StoryStatus | undefined => {
     if (!refusal) return undefined;
     const total = pendingDrafts().length, failing = [...refusal.failing.keys()], drafts = total === 1 ? "draft" : "drafts";
     if (!failing.length) return { text: `${total} unsaved beat ${drafts}. Ready to save.`, kind: "normal", links: [] };
     // Each link reveals the scene's first failing draft at the time of the click.
-    const open = (sceneId: string): void => { const draft = [...refusal?.failing.keys() ?? []].find(item => item.sceneId === sceneId); if (draft && host.isConnected) reveal(draft); };
+    const open = (sceneId: string): void => { const draft = inProjectOrder([...refusal?.failing.keys() ?? []].filter(item => item.sceneId === sceneId), item => item)[0]; if (draft && host.isConnected) reveal(draft); };
     const links = model.scenes.flatMap(scene => {
       const count = failing.filter(draft => draft.sceneId === scene.id).length;
       return count ? [{ label: scene.displayName, count, open: () => open(scene.id) }] : [];
@@ -754,8 +771,9 @@ export function renderStoryView(
     if (!live.size) { refusal = undefined; return; }
     if (statusKey() !== before) showRefusal();
   };
-  // Marks every failing draft, reveals the first and shows the count with a link per scene.
-  const refuseSave = (failures: readonly (readonly [BeatDraft, string])[], lead = "Nothing saved."): StorySaveOutcome => {
+  // Marks every failing draft, reveals the first in project order and shows the count with a link per scene.
+  const refuseSave = (unordered: readonly (readonly [BeatDraft, string])[], lead = "Nothing saved."): StorySaveOutcome => {
+    const failures = inProjectOrder(unordered, ([draft]) => draft);
     refusal = { lead, failing: new Map(failures) };
     reveal(failures[0]![0]);
     showRefusal();

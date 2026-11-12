@@ -408,15 +408,17 @@ test("A refused Story Save counts failing drafts, links each scene and marks fai
   startApplication(request);
   await ticks(); click("Open Loomlight Project"); await ticks(8);
 
-  // Five drafts across two scenes. Three keep the missing speaker.
-  await draft("n1", "Hello again"); await draft("g1", "Who is there?"); await draft("g2", "Only me.");
+  // Five drafts across two scenes, begun out of project order. Three keep the missing speaker.
   await openScene("Depot"); await draft("n2", "Steam rises."); await draft("g3", "You are late.");
+  await openScene("Arrival"); await draft("n1", "Hello again"); await draft("g2", "Only me."); await draft("g1", "Who is there?");
+  await openScene("Depot");
   click("Save"); await ticks(10);
   assert.equal(sent.length, 0, "a failing draft stops Story Save before any request");
   assert.equal(status(), "Nothing saved. 3 of 5 drafts need changes:Arrival 2Depot 1");
   assert.deepEqual(links(), ["Arrival, 2 to fix", "Depot, 1 to fix"]);
-  // Save opens the first failing draft, in its own scene, and shows why it failed.
+  // Save opens the first failing draft in project order, in its own scene, and shows why it failed.
   assert.equal(shown(), "Arrival");
+  assert.ok(card("g1").contains(document.activeElement), "Save reveals Arrival's first failing beat");
   assert.deepEqual(failing(), ["g1", "g2"]);
   assert.equal(card("n1").dataset.saveRefused, undefined, "a ready draft keeps the plain draft mark");
   assert.equal(card("n1").dataset.beatDraft, "true");
