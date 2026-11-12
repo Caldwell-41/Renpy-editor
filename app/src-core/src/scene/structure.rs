@@ -1,5 +1,5 @@
 //! Explicit-body Beat edits over verified disjoint source ranges.
-use super::bodies::{qualify_body, root_may_continue, scene_body_end, trivia, Body};
+use super::bodies::{qualify_body, root_may_continue, trivia, Bodies, Body};
 use super::*;
 mod operations;
 

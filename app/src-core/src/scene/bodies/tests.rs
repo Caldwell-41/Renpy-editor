@@ -108,12 +108,20 @@ fn deleting_the_otherwise_return_after_custom_code_refuses_a_new_fallthrough() {
         json!({"type":"ends","beatId":header["id"]})
     );
     assert_eq!(positions(scene_body(&a)), vec![before(header)]);
+    let before = f.model();
     let refused = f.reject(with_scene(
         &a,
         json!({"type":"removeStoryNode","node":{"type":"beat","beatId":ending["id"]},
             "expectedBody":{"type":"branch","groupId":otherwise["conditionalBranch"]["groupId"],"branchId":otherwise["id"]}}),
     ));
     assert_eq!(refused["error"]["code"], "SCENE_INVARIANT");
+    // `reject` proves the scene source, source map and project file are unchanged.
+    // History is unchanged too: Undo still reverses the source save, not a removal.
+    let after = f.model();
+    assert_eq!(
+        (&after["canUndo"], &after["canRedo"]),
+        (&before["canUndo"], &before["canRedo"])
+    );
     f.service.close().unwrap();
 }
 

@@ -36,12 +36,13 @@ fn group<'a>(
     id: &str,
     expected: &BodyRef,
 ) -> Result<(Body<'a>, Group<'a>), SceneError> {
-    let body = qualify_body(source, beats, expected)?;
+    let bodies = Bodies::new(source, beats)?;
+    let body = bodies.qualify(expected)?;
     let header = body.node(&NodeRef::Condition {
         group_id: id.into(),
     })?;
     let end = node_end(header, beats)?;
-    if end > scene_body_end(source, beats)? {
+    if end > bodies.scene_end() {
         return Err(SceneError::OpaqueBoundary);
     }
     let headers = beats

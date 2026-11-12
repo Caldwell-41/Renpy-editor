@@ -132,8 +132,8 @@ pub(super) fn project(
     nodes: &[FlowNode],
 ) -> Vec<FlowEdge> {
     let mut edges = Vec::new();
-    // The parsed beats came from these bytes, so their statements always read.
-    // Without them, a condition or Choice may continue.
+    // Flow shows unreadable source as a partial graph with no beats. Bodies read the
+    // same bytes, so they fail only then, and with no beats nothing asks them.
     let bodies = super::super::bodies::Bodies::new(bytes, beats).ok();
     let mut unknown = beats.is_empty();
     let mut unresolved_continuation = false;

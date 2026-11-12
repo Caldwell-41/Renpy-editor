@@ -211,7 +211,7 @@ impl<'s, 'a> Bodies<'s, 'a> {
     fn ending(&self, body: Key<'_>, depth: usize) -> (Ending, Option<&'a SceneBeat>) {
         let mut last = Ending::Continues;
         for node in self.nodes(body) {
-            match self.node(node, depth) {
+            match self.node_ending(node, depth) {
                 Ending::Ends => return (Ending::Ends, Some(node)),
                 ending => last = ending,
             }
@@ -219,7 +219,7 @@ impl<'s, 'a> Bodies<'s, 'a> {
         (last, None)
     }
 
-    fn node(&self, beat: &SceneBeat, depth: usize) -> Ending {
+    fn node_ending(&self, beat: &SceneBeat, depth: usize) -> Ending {
         if depth >= MAX_CONDITION_NESTING {
             return Ending::Continues;
         }
@@ -229,7 +229,9 @@ impl<'s, 'a> Bodies<'s, 'a> {
         match &beat.payload {
             BeatPayload::Choice { .. } => self.choice(beat, depth),
             payload if is_terminal_payload(payload) => Ending::Ends,
-            BeatPayload::CustomCode { source, .. } if self.leaves(beat, source) => Ending::Ends,
+            BeatPayload::CustomCode { source, .. } if self.code_leaves(beat, source) => {
+                Ending::Ends
+            }
             BeatPayload::CustomCode { source, .. } if source.trim() != "pass" => Ending::Unknown,
             _ => Ending::Continues,
         }
@@ -237,7 +239,7 @@ impl<'s, 'a> Bodies<'s, 'a> {
 
     /// Custom Code whose statement starts with `jump` or `return` ends its body.
     /// Lines inside an opaque block or a multi-line string are not statements.
-    fn leaves(&self, beat: &SceneBeat, code: &str) -> bool {
+    fn code_leaves(&self, beat: &SceneBeat, code: &str) -> bool {
         let indent = match &beat.owner {
             None => Some(4),
             Some(owner) => self
@@ -377,7 +379,7 @@ impl<'s, 'a> Bodies<'s, 'a> {
         };
         let ends = siblings
             .iter()
-            .map(|b| self.node(b, 0) == Ending::Ends)
+            .map(|b| self.node_ending(b, 0) == Ending::Ends)
             .collect();
         Ok(Body {
             owner,
@@ -543,9 +545,6 @@ pub(super) fn qualify_body<'a>(
 ) -> Result<Body<'a>, SceneError> {
     Bodies::new(source, beats)?.qualify(body)
 }
-pub(super) fn scene_body_end(source: &[u8], beats: &[SceneBeat]) -> Result<usize, SceneError> {
-    Ok(Bodies::new(source, beats)?.scene_end())
-}
 pub(super) fn root_may_continue(source: &[u8], beats: &[SceneBeat]) -> Result<bool, SceneError> {
     Ok(Bodies::new(source, beats)?.scene_may_continue())
 }
@@ -582,14 +581,14 @@ impl<'a> Body<'a> {
     }
 
     /// The source range a new or moved node replaces at `position`. A move passes
-    /// the moved node as `excluded`; `ending` says the node ends its body.
+    /// the moved node as `excluded`; `terminating` says the node ends its body.
     pub(super) fn place(
         &self,
         position: &Position,
         source: &[u8],
         beats: &[SceneBeat],
         excluded: Option<&str>,
-        ending: bool,
+        terminating: bool,
     ) -> Result<(usize, usize), SceneError> {
         let kept = self.kept(excluded);
         let index = match position {
@@ -604,7 +603,7 @@ impl<'a> Body<'a> {
             }
             Position::End => kept.len(),
         };
-        self.check(&kept, index, source, beats, ending)
+        self.check(&kept, index, source, beats, terminating)
     }
 
     /// The places `place` accepts for a new beat, in body order.
@@ -638,7 +637,7 @@ impl<'a> Body<'a> {
         index: usize,
         source: &[u8],
         beats: &[SceneBeat],
-        ending: bool,
+        terminating: bool,
     ) -> Result<(usize, usize), SceneError> {
         let opaque = |b: &SceneBeat| b.protected && b.conditional_branch.is_none();
         let start = match kept.get(index) {
@@ -653,7 +652,7 @@ impl<'a> Body<'a> {
                 self.end
             }
         };
-        if kept[..index].iter().any(|(_, ends)| *ends) || (ending && index < kept.len()) {
+        if kept[..index].iter().any(|(_, ends)| *ends) || (terminating && index < kept.len()) {
             return Err(SceneError::InvariantBlocked);
         }
         if kept.len() == 1 && kept[0].0.structural_placeholder && self.owner.is_some() {

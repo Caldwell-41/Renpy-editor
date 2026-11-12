@@ -1419,6 +1419,7 @@ export function renderStoryView(
       // Dropping below the start lands after the target; above it, before the target.
       const siblings=nodeBeats(scene,{type:"root"}),anchor=target>from?siblings[siblings.findIndex(b=>b.id===onto.id)+1]:onto;
       const position:Position=anchor?{type:"before",anchor:nodeRef(anchor)}:{type:"end"};
+      if(!movePlaces(scene,moved,{type:"root"}).some(place=>samePosition(place.position,position))){actions.status("This beat cannot move there. Choose a listed place with Move to….","error");if(grip.isConnected)grip.focus();return;}
       void mutate({type:"moveStoryNode",sceneId:scene.id,expectedSourceRevision:scene.sourceRevision,node:nodeRef(moved),expectedBody:beatBody(moved),body:{type:"root"},position})
         .then(saved=>{if(saved)[...host.querySelectorAll<HTMLElement>(".beat-card")].find(row=>row.dataset.beatId===id)?.querySelector<HTMLElement>(".beat-grip")?.focus();});
     };
