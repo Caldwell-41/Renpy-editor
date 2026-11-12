@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "screenId": "story-save-refusal",
+  "currentApproved": null,
+  "revisions": [
+    {
+      "id": "marked-v1",
+      "variantId": "marked",
+      "approval": null
+    },
+    {
+      "id": "stepper-v1",
+      "variantId": "stepper",
+      "approval": null
+    },
+    {
+      "id": "first-v1",
+      "variantId": "first",
+      "approval": null
+    }
+  ]
+}
