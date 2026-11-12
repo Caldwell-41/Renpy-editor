@@ -30,7 +30,7 @@ use authoring::{
 };
 use lifecycle::{CreateProjectRequest, LifecycleError, LifecycleService};
 use media::MediaRequest;
-use scene::{RecoveryResolveRequest, SceneCommandRequest};
+use scene::{RecoveryResolveRequest, SceneCommandRequest, SceneSaveDraftsRequest};
 use serde::Serialize;
 use serde_json::{json, Map, Value};
 use source::{
@@ -116,6 +116,7 @@ pub const OPERATIONS: &[&str] = &[
     "scene.list",
     "flow.list",
     "scene.apply",
+    "scene.saveDrafts",
     "scene.validateAssignment",
     "screens.inspect",
     "screens.canvasPlan",
@@ -830,6 +831,14 @@ pub fn handle_application_request(
             })
             .and_then(|payload| lifecycle.scene_apply(payload))
             .and_then(to_value),
+        "scene.saveDrafts" => session_payload(validated.payload)
+            .and_then(|(session, payload)| lifecycle.require_session(&session).map(|_| payload))
+            .and_then(|payload| {
+                serde_json::from_value::<SceneSaveDraftsRequest>(Value::Object(payload))
+                    .map_err(|_| LifecycleError::Scene(scene::SceneError::InvalidPayload))
+            })
+            .and_then(|payload| lifecycle.scene_save_drafts(payload))
+            .and_then(to_value),
         "scene.recovery" if has_exact_keys(validated.payload, &["sessionId"]) => {
             session_only(validated.payload)
                 .and_then(|session| lifecycle.require_session(&session))
@@ -1231,7 +1240,7 @@ fn media_failure(request_id: String, error: media::MediaError) -> CoreResponse {
 
 fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
     use scene::SceneError::*;
-    if let ScreenAction { index, cause } = error {
+    if let Indexed { index, cause } = error {
         let mut response = scene_failure(request_id, *cause);
         if let Some(error) = &mut response.error {
             error.action_index = Some(index);
@@ -1239,7 +1248,7 @@ fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
         return response;
     }
     let (code, message) = match error {
-        ScreenAction { .. } => unreachable!("action context handled above"),
+        Indexed { .. } => unreachable!("action context handled above"),
         RuntimeBusy => ("RUNTIME_BUSY", "Stop the runtime operation before changing these files."),
         InvalidPayload => ("INVALID_PAYLOAD", "The Scene operation is invalid."),
         MissingArithmeticTarget => ("MISSING_ARITHMETIC_TARGET", "variableId: Choose an existing variable."),
@@ -1262,6 +1271,10 @@ fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
         SourceConflict => (
             "SOURCE_CONFLICT",
             "The Scene source changed outside Loomlight. Reload before editing.",
+        ),
+        BeatDraftConflict => (
+            "BEAT_DRAFT_CONFLICT",
+            "This beat's place changed in source after the draft began. Draft retained.",
         ),
         DirtySource => (
             "DIRTY_SOURCE",

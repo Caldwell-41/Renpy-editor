@@ -113,10 +113,7 @@ impl AuthoringService {
         &self,
         project: &ProjectId,
     ) -> Result<HashMap<String, usize>, SceneError> {
-        let paths = self
-            .transactions
-            .inventory_files_bounded(project, "game", 8192)
-            .map_err(diagnostic_error)?;
+        let paths = self.game_files(project)?;
         let paths: Vec<_> = paths.into_iter().filter(|p| p.ends_with(".rpy")).collect();
         if paths.len() > 2048 {
             return Err(SceneError::InvariantBlocked);

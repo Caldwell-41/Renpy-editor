@@ -74,6 +74,7 @@ export const CORE_OPERATIONS = [
   "scene.list",
   "flow.list",
   "scene.apply",
+  "scene.saveDrafts",
   "scene.validateAssignment",
   "screens.inspect",
   "screens.canvasPlan",
@@ -146,6 +147,9 @@ export type CoreResponse<T = unknown> =
       readonly error: CoreError;
     };
 
+// Core's MAX_SAVE_DRAFTS: a Story Save refusal names the index of its refused draft.
+const MAX_ACTION_INDEX = 1024;
+
 const REQUEST_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -170,7 +174,7 @@ export function isCoreResponse(value: unknown, expectedRequestId?: string): valu
   if (value.ok !== false || !hasExactKeys(value, ["protocolVersion", "requestId", "ok", "error"]) || !isRecord(value.error)) {
     return false;
   }
-  return (hasExactKeys(value.error, ["code", "message"]) || (hasExactKeys(value.error, ["code", "message", "actionIndex"]) && Number.isInteger(value.error.actionIndex) && (value.error.actionIndex as number) >= 0 && (value.error.actionIndex as number) < 8))
+  return (hasExactKeys(value.error, ["code", "message"]) || (hasExactKeys(value.error, ["code", "message", "actionIndex"]) && Number.isInteger(value.error.actionIndex) && (value.error.actionIndex as number) >= 0 && (value.error.actionIndex as number) < MAX_ACTION_INDEX))
     && typeof value.error.code === "string"
     && typeof value.error.message === "string";
 }

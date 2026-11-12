@@ -22,6 +22,7 @@ export const STORY_CASES=[
  'Cancel and dirty Source draft refusal retain pending author input',
  'Ordinary external edits and stale revisions refuse with zero source writes',
  'Beat drafts stay attached across scenes and workspaces until Commit or Cancel',
+ 'Story Save accepts every beat draft across scenes in one transaction, or none',
 ];
 const NARROW=STORY_CASES.filter((_,i)=>[0,1,2,7,8].includes(i));
 const REOPEN_CASE='Undo Redo preserves exact bytes and process reopen retains maps with session history reset';
@@ -85,6 +86,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   const request=createRequest(operation,payload);
   let attributed=lastEvent;
   if(operation==='scene.apply')attributed=panelEvents.get('story');
+  if(operation==='scene.saveDrafts')attributed=panelEvents.get('header');
   if(operation==='source.updateDraft'){
    attributed=sourceInputEvent??panelEvents.get('source');
    if(sourceNavigationEvent&&(!attributed||sourceNavigationEvent.sequence>attributed.sequence))attributed=sourceNavigationEvent;
@@ -98,6 +100,10 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   if(operation==='scene.apply'&&!['undo','redo'].includes(payload.command.type)){
    assert(caseActive&&eligible&&event.sequence>caseEventStart&&event.panel==='story',
     'A fresh event in the current actual Story panel must initiate authoring');
+  }
+  if(operation==='scene.saveDrafts'){
+   assert(caseActive&&eligible&&event.sequence>caseEventStart&&event.panel==='header'&&payload.commands.length>0,
+    'Story Save must come from a fresh press of the actual header Save');
   }
   if(operation==='source.updateDraft'&&event?.panel==='source-navigation'){
    const captured=event.sourceSnapshot,surface=document.querySelector('.source-workspace');
@@ -165,7 +171,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   finally{release();responseBarrier=undefined;await actionPromise;}
  };
  const raw=async request=>{
-  assert(request?.driver==='snapshot'||request?.driver==='externalAppend','Only owned fixture controls allowed');return child.request(request);
+  assert(['snapshot','externalAppend','externalRemove'].includes(request?.driver),'Only owned fixture controls allowed');return child.request(request);
  };
  const start=async reopen=>{
   evidence.driverStarts++;

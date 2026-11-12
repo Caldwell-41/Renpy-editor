@@ -485,7 +485,7 @@ pub(super) fn prepare(
                     .ok_or(SceneError::ReferenceBlocked)?;
                 if value.is_object() {
                     return arithmetic_expression(variable, value, variables, &button.helper)
-                        .map_err(|cause| SceneError::ScreenAction {
+                        .map_err(|cause| SceneError::Indexed {
                             index,
                             cause: Box::new(cause),
                         });

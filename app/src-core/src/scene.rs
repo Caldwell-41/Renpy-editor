@@ -6,6 +6,8 @@
 //! Scene file through the journalled transaction service.
 
 mod choice;
+mod drafts;
+pub use drafts::SceneSaveDraftsRequest;
 pub mod flow;
 mod logic;
 mod screen_beats;
@@ -539,7 +541,8 @@ pub enum SceneCommand {
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum SceneError {
-    ScreenAction {
+    /// The refused item of a set: a screen action, or a Story Save command.
+    Indexed {
         index: usize,
         cause: Box<SceneError>,
     },
@@ -557,6 +560,8 @@ pub enum SceneError {
     InvalidMetadata,
     UnsupportedSource,
     SourceConflict,
+    /// A new beat draft's body or insertion anchor is gone from the candidate.
+    BeatDraftConflict,
     DirtySource,
     UnknownEntity,
     ReferenceBlocked,
@@ -911,26 +916,42 @@ impl AuthoringService {
             SceneCommand::Redo => self.redo_scene(project)?,
             command => {
                 let loaded = self.prepare_scene_command(project, project_id, &request, &command)?;
-                let proposal = self.build_command(project, loaded, command)?;
-                if proposal.mutations.iter().any(|mutation| {
-                    mutation.kind != MutationKind::ReplaceExisting
-                        || mutation.expected_bytes != mutation.proposed
-                }) {
-                    self.commit_history(project, proposal)?;
+                let proposal = if drafts::is_body_beat_command(&command) {
+                    self.build_drafts(project, project_id, loaded, vec![command])
+                        .map_err(SceneError::unindexed)?
                 } else {
-                    for mutation in proposal.mutations {
-                        let (bytes, revision) = self
-                            .transactions
-                            .snapshot(project, mutation.path)
-                            .map_err(|_| SceneError::SourceConflict)?;
-                        if revision != mutation.base || bytes != mutation.expected_bytes {
-                            return Err(SceneError::SourceConflict);
-                        }
-                    }
-                }
+                    self.build_command(project, loaded, command)?
+                };
+                self.commit_or_verify(project, proposal)?;
             }
         }
         self.scene_workspace(project, project_id)
+    }
+
+    /// Commits a proposal that changes a file. A proposal that changes nothing
+    /// only proves its bases are still current.
+    fn commit_or_verify(
+        &self,
+        project: &ProjectId,
+        proposal: TransactionProposal,
+    ) -> Result<(), SceneError> {
+        if proposal.mutations.iter().any(|mutation| {
+            mutation.kind != MutationKind::ReplaceExisting
+                || mutation.expected_bytes != mutation.proposed
+        }) {
+            self.commit_history(project, proposal)?;
+            return Ok(());
+        }
+        for mutation in proposal.mutations {
+            let (bytes, revision) = self
+                .transactions
+                .snapshot(project, mutation.path)
+                .map_err(|_| SceneError::SourceConflict)?;
+            if revision != mutation.base || bytes != mutation.expected_bytes {
+                return Err(SceneError::SourceConflict);
+            }
+        }
+        Ok(())
     }
 
     fn prepare_scene_command(
@@ -940,36 +961,64 @@ impl AuthoringService {
         request: &SceneCommandRequest,
         command: &SceneCommand,
     ) -> Result<Loaded, SceneError> {
+        self.prepare_scene_commands(
+            project,
+            project_id,
+            &request.expected_project_revision,
+            &request.expected_source_map_revision,
+            request.expected_authoring_revision.as_deref(),
+            std::slice::from_ref(command),
+        )
+        .map_err(SceneError::unindexed)
+    }
+
+    /// Checks the shared revisions once for the set, and each command's own
+    /// source, authoring and screen dependencies. A refused command returns its index.
+    fn prepare_scene_commands(
+        &self,
+        project: &ProjectId,
+        project_id: &str,
+        expected_project_revision: &str,
+        expected_source_map_revision: &str,
+        expected_authoring_revision: Option<&str>,
+        commands: &[SceneCommand],
+    ) -> Result<Loaded, SceneError> {
         let loaded = self.load(project, project_id)?;
-        let guarded = command_source_paths(&loaded.project, command)?;
-        self.ensure_source_paths_clean(project, guarded.iter().map(String::as_str))
-            .map_err(|_| SceneError::DirtySource)?;
-        if loaded.project_revision.sha256 != request.expected_project_revision
-            || loaded.source_map_revision.sha256 != request.expected_source_map_revision
+        for (index, command) in commands.iter().enumerate() {
+            let guarded =
+                command_source_paths(&loaded.project, command).map_err(SceneError::at(index))?;
+            self.ensure_source_paths_clean(project, guarded.iter().map(String::as_str))
+                .map_err(|_| SceneError::at(index)(SceneError::DirtySource))?;
+        }
+        if loaded.project_revision.sha256 != expected_project_revision
+            || loaded.source_map_revision.sha256 != expected_source_map_revision
         {
             return Err(SceneError::SourceConflict);
         }
-        let arithmetic = matches!(command,
+        let authoring_revision = sha256(&json_bytes(&loaded.authoring)?);
+        for (index, command) in commands.iter().enumerate() {
+            let at = SceneError::at(index);
+            let arithmetic = matches!(command,
                     SceneCommand::InsertBeat { beat, .. } | SceneCommand::UpdateBeat { beat, .. }
                     | SceneCommand::InsertBodyBeat { beat, .. } | SceneCommand::UpdateBodyBeat { beat, .. }
                     if matches!(beat, BeatPayload::SetVariable { value, .. } if value.is_object()));
-        if arithmetic {
-            if request.expected_authoring_revision.as_deref()
-                != Some(sha256(&json_bytes(&loaded.authoring)?).as_str())
-            {
-                return Err(SceneError::SourceConflict);
+            if arithmetic {
+                if expected_authoring_revision != Some(authoring_revision.as_str()) {
+                    return Err(at(SceneError::SourceConflict));
+                }
+                self.ensure_source_paths_clean(
+                    project,
+                    loaded
+                        .authoring
+                        .variables
+                        .iter()
+                        .map(|v| v.source.path.as_str()),
+                )
+                .map_err(|_| at(SceneError::DirtySource))?;
             }
-            self.ensure_source_paths_clean(
-                project,
-                loaded
-                    .authoring
-                    .variables
-                    .iter()
-                    .map(|v| v.source.path.as_str()),
-            )
-            .map_err(|_| SceneError::DirtySource)?;
+            self.admit_screen_command(project, project_id, command)
+                .map_err(&at)?;
         }
-        self.admit_screen_command(project, project_id, command)?;
         Ok(loaded)
     }
 
@@ -2670,6 +2719,9 @@ impl AuthoringService {
         project: &ProjectId,
         path: &str,
     ) -> Result<(Vec<u8>, Revision), SceneError> {
+        if let Some(candidate) = drafts::candidate_file(project, path) {
+            return Ok(candidate);
+        }
         self.transactions
             .snapshot(
                 project,
@@ -2683,12 +2735,29 @@ impl AuthoringService {
         project: &ProjectId,
         path: &str,
     ) -> Result<Option<(Vec<u8>, Revision)>, SceneError> {
+        if let Some(candidate) = drafts::candidate_file(project, path) {
+            return Ok(Some(candidate));
+        }
         self.transactions
             .snapshot_optional(
                 project,
                 RelativePath::new(path).map_err(|_| SceneError::InvalidMetadata)?,
             )
             .map_err(diagnostic_error)
+    }
+
+    /// Project files under `game`, including files a running Story Save build created.
+    fn game_files(&self, project: &ProjectId) -> Result<Vec<String>, SceneError> {
+        let mut paths = self
+            .transactions
+            .inventory_files_bounded(project, "game", 8192)
+            .map_err(diagnostic_error)?;
+        for path in drafts::candidate_created(project, "game") {
+            if !paths.contains(&path) {
+                paths.push(path);
+            }
+        }
+        Ok(paths)
     }
 }
 
@@ -5463,6 +5532,7 @@ mod tests {
     mod candidate_proof;
     mod observed;
     mod panels;
+    mod save_drafts;
     use super::*;
     use crate::authoring::{
         Appearance, Asset, Character, CreateCharacterRequest, CreateVariableRequest,

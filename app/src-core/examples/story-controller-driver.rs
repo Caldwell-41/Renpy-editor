@@ -281,7 +281,8 @@ fn main() {
             emit(json!({"snapshot":snapshot}));
             continue;
         }
-        if request["driver"] == "externalAppend" {
+        // An ordinary external writer appends a comment, or removes one exact line.
+        if request["driver"] == "externalAppend" || request["driver"] == "externalRemove" {
             let relative = request["path"].as_str().unwrap();
             let allowed = host
                 .with_service(|s| {
@@ -298,7 +299,17 @@ fn main() {
             );
             let path = root.join("synthetic-project").join(relative);
             let mut bytes = std::fs::read(&path).unwrap();
-            bytes.extend(b"# ordinary external Story writer\n");
+            if let Some(line) = request["remove"].as_str() {
+                let text = String::from_utf8(bytes).unwrap();
+                assert_eq!(
+                    text.matches(line).count(),
+                    1,
+                    "the removed line must be unique"
+                );
+                bytes = text.replacen(line, "", 1).into_bytes();
+            } else {
+                bytes.extend(b"# ordinary external Story writer\n");
+            }
             std::fs::write(path, &bytes).unwrap();
             emit(json!({"externalBytes":bytes}));
             continue;
@@ -319,6 +330,7 @@ fn main() {
                 | "project.flush"
                 | "scene.list"
                 | "scene.apply"
+                | "scene.saveDrafts"
                 | "scene.recovery"
                 | "scene.resolveRecovery"
                 | "flow.list"
