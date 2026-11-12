@@ -60,10 +60,15 @@ const textTokens = [
   "--status-success", "--status-warning", "--status-error", "--status-info", "--status-partial",
   "--syntax-keyword", "--syntax-string", "--syntax-comment", "--syntax-number",
 ];
+// Arm colours colour the Choice option heading. Dark arm 2 (#e07a5f) is 4.41:1 on hover and 4.33:1 on
+// --accent-subtle, and the dark values are fixed, so dark checks arms on the other four surfaces.
+const armTokens = ["--choice-arm-one", "--choice-arm-two", "--choice-arm-three", "--choice-arm-four"];
+const armSurfaces = (theme: Theme) => theme === "dark" ? surfaces.filter(s => s !== "--surface-hover" && s !== "--accent-subtle") : surfaces;
 for (const theme of ["dark", "light"] as const) {
   test(`${theme} text and status colours stay readable on every surface`, () => {
     const failures: string[] = [];
-    for (const name of textTokens) for (const surface of surfaces) {
+    const pairs = [...textTokens.map(name => [name, surfaces] as const), ...armTokens.map(name => [name, armSurfaces(theme)] as const)];
+    for (const [name, onSurfaces] of pairs) for (const surface of onSurfaces) {
       const ratio = contrast(token(theme, name), token(theme, surface));
       if (ratio < 4.5) failures.push(`${name} on ${surface} ${ratio.toFixed(2)}`);
     }

@@ -50,10 +50,10 @@
   --status-info: #356383;
   --status-partial: #73612f;
   --focus-ring: #2d4d78;
-  --choice-arm-one: #1c7a6d;
-  --choice-arm-two: #b24f2e;
+  --choice-arm-one: #0e7266;
+  --choice-arm-two: #a94726;
   --choice-arm-three: #2b67a0;
-  --choice-arm-four: #66771a;
+  --choice-arm-four: #5c6c07;
   --shadow-preview: 0 2px 8px rgb(35 37 45 / 14%);
 }
 :root { --font-ui: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; --font-source: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; --radius-small: 4px; --radius-medium: 6px; --elevation-preview: var(--shadow-preview); font-family: var(--font-ui); font-synthesis: none; background: var(--surface-app); color: var(--text-primary); }

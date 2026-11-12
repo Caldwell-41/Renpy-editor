@@ -49,8 +49,10 @@ other stylesheet redefines them. Source syntax colours (`--syntax-*`) stay in
 **Contrast contract.** Text and status colours reach 4.5:1 on every surface a row can
 take: app, panel, raised, hover, selected and `--accent-subtle` (the active Source
 line). The focus ring reaches 3:1 on the same surfaces. `--text-disabled` is exempt.
-`theme-contrast.test.ts` checks every text and status token against this contract and
-compares all tokens in the table with `styles.css`.
+Branch arm colours colour text, so they follow the contract, except dark arm 2, which
+is 4.41:1 on hover and 4.33:1 on `--accent-subtle` and is checked on the other four
+surfaces. `theme-contrast.test.ts` checks every text, status and arm token against this
+contract and compares all tokens in the table with `styles.css`.
 
 | Token | Dark | Light |
 | --- | --- | --- |
@@ -75,7 +77,7 @@ compares all tokens in the table with `styles.css`.
 | `--status-info` | `#7f9fbd` | `#356383` |
 | `--status-partial` | `#d1b887` | `#73612f` |
 | `--on-accent` | `#1b1508` | `#ffffff` |
-| Branch arm 1 to 4 | `#4fb3a5` `#e07a5f` `#6aa9d8` `#7fbf73` | `#1c7a6d` `#b24f2e` `#2b67a0` `#66771a` |
+| Branch arm 1 to 4 | `#4fb3a5` `#e07a5f` `#6aa9d8` `#7fbf73` | `#0e7266` `#a94726` `#2b67a0` `#5c6c07` |
 | Stage edge | `#0d1114` | `#c9c6be` |
 | Thumbnail tile | `#10161b` | `#d9d6ce` |
 
@@ -84,6 +86,10 @@ which scopes them to the Story mock. There the last three rows are `--sc-arm-1` 
 `--sc-arm-4`, `--sc-stage-edge` and `--sc-tile`; the `sc-` prefix belongs to the mock.
 The app names the four arm tokens `--choice-arm-one` to `--choice-arm-four`. Stage edge and
 thumbnail tile stay in the Story layout slice, which adds them where it uses them.
+
+Kris approved darker light arm values on 2026-11-12 so arm text reaches 4.5:1. Light
+arm 1, 2 and 4 are darker than the mock's `#1c7a6d`, `#b24f2e` and `#66771a`; arm 3
+and every dark value match the mock.
 
 ### Colour carries meaning
 
