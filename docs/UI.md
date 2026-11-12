@@ -49,11 +49,8 @@ other stylesheet redefines them. Source syntax colours (`--syntax-*`) stay in
 **Contrast contract.** Text and status colours reach 4.5:1 on every surface a row can
 take: app, panel, raised, hover, selected and `--accent-subtle` (the active Source
 line). The focus ring reaches 3:1 on the same surfaces. `--text-disabled` is exempt.
-The floor changed three values. Dark `--status-error` is `#d4888f`, because `#c87c83`
-fell below 4.5:1 on hover and selected rows. Light `--status-warning` is `#775a1c`,
-because `#81611f` fell below it on hover. Light `--syntax-comment` is `#5a6357`, for
-the active Source line. `--status-partial` is `#d1b887` in Dark and `#73612f` in Light.
-`theme-contrast.test.ts` measures these from the stylesheets.
+`theme-contrast.test.ts` checks every text and status token against this contract and
+compares all tokens in the table with `styles.css`.
 
 | Token | Dark | Light |
 | --- | --- | --- |
@@ -72,6 +69,11 @@ the active Source line. `--status-partial` is `#d1b887` in Dark and `#73612f` in
 | `--accent-hover` | `#e6bc66` | `#203b60` |
 | `--accent-subtle` | `#3a3122` | `#dfe6f0` |
 | `--focus-ring` | `#e6bc66` | `#2d4d78` |
+| `--status-success` | `#78ad8c` | `#34704b` |
+| `--status-warning` | `#c4a66a` | `#775a1c` |
+| `--status-error` | `#d4888f` | `#983f49` |
+| `--status-info` | `#7f9fbd` | `#356383` |
+| `--status-partial` | `#d1b887` | `#73612f` |
 | `--on-accent` | `#1b1508` | `#ffffff` |
 | Branch arm 1 to 4 | `#4fb3a5` `#e07a5f` `#6aa9d8` `#7fbf73` | `#1c7a6d` `#b24f2e` `#2b67a0` `#66771a` |
 | Stage edge | `#0d1114` | `#c9c6be` |

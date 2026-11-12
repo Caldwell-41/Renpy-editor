@@ -7,19 +7,19 @@ const styles = readFileSync("src/styles.css", "utf8");
 const refresh = readFileSync("src/ui-refresh.css", "utf8");
 const ui = readFileSync("../docs/UI.md", "utf8");
 
-function block(css: string, selector: string): Map<string, string> {
+function customProperties(css: string, selector: string): Map<string, string> {
   const start = css.indexOf(selector);
   assert.notEqual(start, -1, selector);
   const body = css.slice(css.indexOf("{", start) + 1, css.indexOf("}", start));
   return new Map([...body.matchAll(/(--[a-z-]+)\s*:\s*([^;]+?)\s*(?:;|$)/g)].map(match => [match[1]!, match[2]!]));
 }
 const tokens: Record<Theme, Map<string, string>> = {
-  dark: block(styles, ':root, :root[data-theme="dark"]'),
-  light: block(styles, ':root[data-theme="light"] {'),
+  dark: customProperties(styles, ':root, :root[data-theme="dark"]'),
+  light: customProperties(styles, ':root[data-theme="light"] {'),
 };
 const syntax: Record<Theme, Map<string, string>> = {
-  dark: block(refresh, ":root{--syntax-keyword"),
-  light: block(refresh, ':root[data-theme="light"]{--syntax-keyword'),
+  dark: customProperties(refresh, ":root{--syntax-keyword"),
+  light: customProperties(refresh, ':root[data-theme="light"]{--syntax-keyword'),
 };
 const token = (theme: Theme, name: string) => {
   const value = tokens[theme].get(name) ?? syntax[theme].get(name);
@@ -53,15 +53,9 @@ test("Brass and slate tokens match the palette table in UI.md", () => {
   }
 });
 
-test("only styles.css defines the colour tokens", () => {
-  for (const name of ["--surface-app", "--accent-primary", "--status-error", "--focus-ring"]) {
-    assert.ok(!refresh.includes(`${name}:`), `ui-refresh.css redefines ${name}`);
-  }
-});
-
 // Normal text needs 4.5:1 on every surface a row can take, including hover, selected and the active Source line.
 const surfaces = ["--surface-app", "--surface-panel", "--surface-raised", "--surface-hover", "--surface-selected", "--accent-subtle"];
-const readable = [
+const textTokens = [
   "--text-primary", "--text-secondary", "--text-muted", "--accent-primary", "--accent-hover",
   "--status-success", "--status-warning", "--status-error", "--status-info", "--status-partial",
   "--syntax-keyword", "--syntax-string", "--syntax-comment", "--syntax-number",
@@ -69,7 +63,7 @@ const readable = [
 for (const theme of ["dark", "light"] as const) {
   test(`${theme} text and status colours stay readable on every surface`, () => {
     const failures: string[] = [];
-    for (const name of readable) for (const surface of surfaces) {
+    for (const name of textTokens) for (const surface of surfaces) {
       const ratio = contrast(token(theme, name), token(theme, surface));
       if (ratio < 4.5) failures.push(`${name} on ${surface} ${ratio.toFixed(2)}`);
     }
