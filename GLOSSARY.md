@@ -7,8 +7,9 @@ distinguish Story and screen editing from deliberate game execution.
 
 **Beat draft**:
 An unfinished edit attached to a Story beat that has not been committed to the
-project's source. It can contain incomplete input and remains available when the
-author leaves the beat and returns.
+project's source. A beat added with Add a beat is a beat draft at its insertion
+place until it is committed. It can contain incomplete input and remains available
+when the author leaves the beat and returns.
 
 **Beat draft conflict**:
 A disagreement between a retained beat draft and source that changed after the
