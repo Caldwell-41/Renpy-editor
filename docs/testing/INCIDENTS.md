@@ -1331,3 +1331,21 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   recreating. The original test then fails at the same assertion on macOS.
 - **Evidence:** [CI diagnosis](https://github.com/Caldwell-41/Renpy-editor/pull/151#issuecomment-6823176789),
   issue #159.
+
+## H92. Story shows "Source projection unavailable" after an external edit
+
+- **Class/search:** product; `sourceConflict`, no beats, external edit, unopened file,
+  `source_refresh_project`, `verify_current_mappings`, reopen `SOURCE_CONFLICT`.
+- **Cause:** core reconciled a scene's source map only through a Source buffer. A scene
+  file that Source had not opened this session kept its old mapping revision, so Story
+  showed it as unavailable with no beats. A file edited while the project was closed
+  made `project.openRecent` refuse with `SOURCE_CONFLICT`. Tests hid both: the Story
+  conflict case opened every file in Source before writing, and a scene test asserted
+  the conflict.
+- **Correction:** each Story, Source and Branches refresh and each project open
+  reconciles every clean scene source from its buffer or from disk. A missing or
+  invalid source, or a dirty Source buffer, still stays unavailable.
+- **Regression:** `story_projects_external_edit_to_scene_source_never_opened`,
+  `project_opens_after_scene_source_changed_while_closed`, and the Story case "Beat
+  draft conflicts resolve with Discard draft or Override source" without Source opens.
+- **Evidence:** issue #168.

@@ -266,9 +266,13 @@ submitting one mutation vector; the vector remains a recoverable sequential comm
 not all-files atomicity.
 
 A clean verified external revision replaces the buffer base and reconciles its
-source-map projection transactionally when required. A dirty external revision keeps
-base, draft, and external bytes and blocks stale writes. Core computes conservative
-single exact base-relative patches; only non-overlap exposes a combined preview and
+source-map projection transactionally when required. A scene file with no Source buffer
+reconciles from disk the same way when the project opens and whenever Story, Source or
+Branches reads it, so an external edit reaches Story whether or not Source opened the
+file. A changed source that core cannot map opens as unavailable instead of refusing
+the project. A dirty external revision keeps base, draft, and external bytes and
+blocks stale writes. Core computes conservative single exact base-relative patches;
+only non-overlap exposes a combined preview and
 confirmed Apply Both proposal against the verified external revision. Confirmation uses
 `SourceApplyBothRequest`: path, accepted base hash, draft version, reviewed external
 hash, and exact displayed combined text. Core refreshes disk and checks every binding
