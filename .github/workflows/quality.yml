@@ -211,7 +211,7 @@ jobs:
           test "$GITHUB_RUN_ATTEMPT" = 1
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           "$HARNESS_PYTHON" -c "import os,platform,sys; assert sys.version_info >= (3,11); assert platform.machine().lower() == ('arm64' if os.environ['RUNNER_OS']=='macOS' else 'amd64')"
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: 24.19.0
       - name: Prepare isolated Python image evidence dependency

@@ -51,7 +51,7 @@ jobs:
           case "$ATTEMPT_ORDINAL" in 1|2|3) ;; *) exit 1 ;; esac
           test "$(git rev-parse HEAD)" = "$EXPECTED_CANDIDATE"
           python -c "import os,platform; expected='arm64' if os.environ['RUNNER_OS']=='macOS' else 'amd64'; assert platform.machine().lower()==expected, platform.machine()"
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         id: node
         if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
         with:
