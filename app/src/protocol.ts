@@ -74,6 +74,7 @@ export const CORE_OPERATIONS = [
   "history.state",
   "history.undo",
   "history.redo",
+  "history.draftStep",
   "scene.list",
   "flow.list",
   "scene.apply",

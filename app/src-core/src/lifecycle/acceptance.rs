@@ -53,6 +53,7 @@ pub(crate) fn apply(service: &LifecycleService, command: Command) -> crate::scen
     let workspace = service.scene_workspace().unwrap();
     service
         .scene_apply(SceneCommandRequest {
+            drafts: Vec::new(),
             expected_project_revision: workspace.project_revision,
             expected_source_map_revision: workspace.source_map_revision,
             expected_authoring_revision: None,

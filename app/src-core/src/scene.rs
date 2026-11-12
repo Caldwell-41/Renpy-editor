@@ -20,7 +20,7 @@ pub use variables::AssignmentDraftValidation;
 
 use crate::{
     authoring::{AssetKind, AuthoringMetadata, AuthoringService, VariableType},
-    history::{HistoryItem, HistoryLabel},
+    history::{HistoryItem, HistoryLabel, HistoryPart},
     metadata::{
         BeatSourceMapping, ChapterMetadata, OwnedScreenKind, ProjectMetadata, SceneMetadata,
         SceneSourceMapping, ScreenTargetBinding, Selection, SourceMapMetadata,
@@ -374,6 +374,10 @@ pub struct SceneCommandRequest {
     #[serde(default)]
     pub expected_authoring_revision: Option<String>,
     pub command: SceneCommand,
+    /// Beat drafts this command commits or discards. Their draft-step entries
+    /// leave the project history when it succeeds (ADR 0025).
+    #[serde(default)]
+    pub drafts: Vec<String>,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -918,31 +922,41 @@ impl AuthoringService {
         request: SceneCommandRequest,
     ) -> Result<SceneWorkspace, SceneError> {
         let command = request.command.clone();
+        drafts::check_draft_ids(&request.drafts, drafts::MAX_SAVE_DRAFTS)?;
         let loaded = self.prepare_scene_command(project, project_id, &request, &command)?;
         let label = history_label(&loaded.project, &command);
         let proposal = if drafts::is_body_beat_command(&command) {
             self.build_drafts(project, project_id, loaded, vec![command])
                 .map_err(SceneError::unindexed)?
+                .0
         } else {
             self.build_command(project, loaded, command)?
         };
-        self.commit_or_verify(project, proposal, label)?;
+        let mutations = proposal.mutations.clone();
+        self.commit_or_verify(
+            project,
+            proposal,
+            vec![HistoryPart { label, mutations }],
+            &request.drafts,
+        )?;
         self.scene_workspace(project, project_id)
     }
 
-    /// Commits a proposal that changes a file. A proposal that changes nothing
-    /// only proves its bases are still current.
+    /// Commits a proposal that changes a file, with one history entry per part.
+    /// A proposal that changes nothing only proves its bases are still current.
+    /// Either way the `joined` drafts' draft-step entries leave the history.
     fn commit_or_verify(
         &self,
         project: &ProjectId,
         proposal: TransactionProposal,
-        label: HistoryLabel,
+        parts: Vec<HistoryPart>,
+        joined: &[String],
     ) -> Result<(), SceneError> {
         if proposal.mutations.iter().any(|mutation| {
             mutation.kind != MutationKind::ReplaceExisting
                 || mutation.expected_bytes != mutation.proposed
         }) {
-            self.commit_history(project, proposal, label)?;
+            self.commit_history_parts(project, proposal, parts, joined)?;
             return Ok(());
         }
         for mutation in proposal.mutations {
@@ -954,7 +968,7 @@ impl AuthoringService {
                 return Err(SceneError::SourceConflict);
             }
         }
-        Ok(())
+        self.forget_draft_steps(project, joined)
     }
 
     fn prepare_scene_command(
@@ -5812,6 +5826,7 @@ mod tests {
                 &self.project,
                 &self.project_id,
                 SceneCommandRequest {
+                    drafts: Vec::new(),
                     expected_project_revision: workspace.project_revision.clone(),
                     expected_source_map_revision: workspace.source_map_revision.clone(),
                     expected_authoring_revision: None,

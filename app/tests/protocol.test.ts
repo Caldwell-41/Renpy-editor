@@ -92,6 +92,7 @@ test("frontend operation list contains only bounded editor and Studio settings o
     "history.state",
     "history.undo",
     "history.redo",
+    "history.draftStep",
     "scene.list",
     "flow.list",
     "scene.apply",

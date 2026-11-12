@@ -13,7 +13,12 @@ export type HistoryItem =
   | { readonly type: "asset" };
 export interface HistoryLabel { readonly name: string; readonly item: HistoryItem }
 export interface HistoryState { readonly undo: HistoryLabel | null; readonly redo: HistoryLabel | null }
-export interface HistoryStep { readonly entry: HistoryLabel; readonly history: HistoryState }
+/** One unfinished draft edit's place in core's history; core's `DraftStep` (ADR 0025). */
+export interface DraftStep { readonly stepId: string; readonly draft: string }
+/** `history.draftStep`: a draft step with its name and the item Undo reveals. */
+export interface DraftStepRecord extends DraftStep, HistoryLabel {}
+/** `step` is present when Undo or Redo moved over a draft step, which writes nothing. */
+export interface HistoryStep { readonly entry: HistoryLabel; readonly step?: DraftStep; readonly history: HistoryState }
 export type HistoryDirection = "undo" | "redo";
 
 export const emptyHistory: HistoryState = { undo: null, redo: null };

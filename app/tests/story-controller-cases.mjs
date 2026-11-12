@@ -470,9 +470,9 @@ export const storyCases={
   c.assert.equal(newBeat().dataset.saveRefused,'true');
   c.assert.equal(newBeat().querySelector('.story-save-reason')?.textContent,"This beat's place changed in source after the draft began. Draft retained.");
   await c.click('Cancel',newBeat());await c.settle();c.assert.equal(status(),'3 unsaved beat drafts. Ready to save.');
-  // The next Save accepts the three drafts in one request and one history entry, and clears the refusal.
+  // The next Save accepts the three drafts in one request and clears the refusal.
   const saved=await save(),request=saved.find(r=>r.request.operation==='scene.saveDrafts');
-  c.assert(request?.responseOk);c.assert.equal(request.request.payload.commands.length,3);c.assert.equal(status(),'Saved');
+  c.assert(request?.responseOk);c.assert.equal(request.request.payload.commands.length,3);c.assert.equal(request.request.payload.drafts.length,3);c.assert.equal(status(),'Saved');
   c.assert.equal(c.document.querySelector('[data-save-refused]'),null);c.assert.deepEqual(links(),[]);
   c.assert.equal(ops('scene.apply').length,0);c.assert.equal(ops('project.flush').length,0);
   const after=await c.snapshot();
@@ -481,10 +481,18 @@ export const storyCases={
   const others=snapshot=>Object.fromEntries(Object.entries(c.hashes(c.rpy(snapshot))).filter(([p])=>![entry.sourcePath,called.sourcePath].includes(p)));
   c.assert.deepEqual(others(after),others(removed));
   for(const id of [a.id,b.id])c.assert(!c.document.querySelector(`[data-beat-id="${id}"][data-beat-draft="true"]`));
-  // As the last case, the harness then reopens the project and checks these accepted bytes.
+  // One entry per beat whose bytes changed, the most recently edited on top. The Choice
+  // draft was set back to its saved text, so it adds none.
+  const undoName=()=>c.document.querySelector('.app-header [data-history="undo"]').getAttribute('aria-label');
+  c.assert.equal(undoName(),'Undo narration edit in Called scene');
+  await c.history('undo');await c.settle();const undone=await c.snapshot();
+  c.assert.equal(c.sourceText(undone,called.sourcePath),c.sourceText(accepted,called.sourcePath),'Undo reverses B first');
+  c.assert.equal(c.sourceText(undone,entry.sourcePath),c.sourceText(after,entry.sourcePath),'A stays saved');
+  c.assert.equal(undoName(),`Undo narration edit in ${entry.displayName}`);
   await c.history('undo');await c.settle();
-  c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(removed)),'One Undo reverts the whole Story Save');
-  await c.history('redo');await c.settle();
+  c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(removed)),'Two Undos revert the Story Save');
+  // As the last case, the harness then reopens the project and checks these accepted bytes.
+  for(const direction of ['redo','redo']){await c.history(direction);await c.settle();}
   c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(after)));
  },
 };

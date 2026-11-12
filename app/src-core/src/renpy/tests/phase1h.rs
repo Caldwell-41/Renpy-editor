@@ -324,6 +324,7 @@ fn run_integrated_gate(temporary: &tempfile::TempDir) {
         .unwrap();
     assert!(matches!(
         service.scene_apply(SceneCommandRequest {
+            drafts: Vec::new(),
             expected_project_revision: deleted.project_revision,
             expected_source_map_revision: deleted.source_map_revision,
             expected_authoring_revision: None,

@@ -248,8 +248,9 @@ function persistenceMessage(state: PersistenceStatus, localPending: boolean): { 
   // A refused Story Save keeps its count and scene links until its drafts are saved or cancelled.
   const refusal: StoryStatus | undefined = storyView?.saveStatus();
   if (refusal) return refusal;
-  if (storyView?.hasDrafts()) return { text: "Unsaved changes", kind: "normal" };
+  // "Undone: …" stays until the next edit or view, including over retained drafts.
   if (historyNotice?.view === viewGeneration) return { text: historyNotice.text, kind: "normal" };
+  if (storyView?.hasDrafts()) return { text: "Unsaved changes", kind: "normal" };
   return { text: hasUnsubmittedInput() ? "Unsubmitted input — accepted changes saved" : "Saved", kind: "normal" };
 }
 
@@ -484,18 +485,21 @@ async function refreshHistory(project: OpenProject): Promise<void> {
 
 // The one Undo and Redo command for the header buttons and Cmd/Ctrl+Z. It follows
 // ordinary navigation: a refused leave keeps the input, and "Keep editing?" must be
-// answered Discard and leave. Beat drafts still make it wait until #113.
+// answered Discard and leave. Beat drafts never block it: an unfinished typing step
+// ends first, so Undo reverses it, and a draft step writes nothing (ADR 0025).
 // Each run reports `committed`, `refused` or `blocked` on the app root for tests and probes.
 // An open dialog, including a native modal <dialog>, owns Cmd/Ctrl+Z.
 const dialogOpen = (): boolean => hasBlockingModal() || document.querySelector("dialog[open]") !== null;
 
 async function runHistory(project: OpenProject, direction: HistoryDirection): Promise<void> {
-  if (historyRunning || lifecycleBusy || dialogOpen() || currentProject?.sessionId !== project.sessionId || !historyState[direction]) return;
+  if (historyRunning || lifecycleBusy || dialogOpen() || currentProject?.sessionId !== project.sessionId) return;
   historyRunning = true;
-  let outcome = "blocked", errorCode: string | undefined;
+  let outcome = "blocked", errorCode: string | undefined, ran = false;
   const focused = (document.activeElement as HTMLElement | null)?.dataset.history;
   try {
-    if (storyView?.hasDrafts()) { setStatus("Commit or cancel beat drafts before Undo or Redo. Drafts retained.", "error"); return; }
+    await storyView?.flushSteps();
+    if (currentProject?.sessionId !== project.sessionId || !historyState[direction]) return;
+    ran = true;
     if (activeReferenceController?.isBusy()) return;
     if ((storyView?.busy() || hasUnsubmittedInput()) && !await allowSceneNavigation()) return;
     const controller = currentSourceController(project);
@@ -505,6 +509,7 @@ async function runHistory(project: OpenProject, direction: HistoryDirection): Pr
       const step = await runAuthoringOperation(project, operationScopes.history, () => projectValue<HistoryStep>(project, direction === "undo" ? "history.undo" : "history.redo"));
       outcome = "committed";
       if (currentProject?.sessionId !== project.sessionId) return;
+      if (step.step) storyView?.applyStep(step.step, direction);
       revealHistoryItem(project, step.entry.item);
       showHistory(step.history);
       historyNotice = { text: `${direction === "undo" ? "Undone" : "Redone"}: ${step.entry.name}`, view: viewGeneration };
@@ -518,9 +523,11 @@ async function runHistory(project: OpenProject, direction: HistoryDirection): Pr
     void refreshHistory(project);
   } finally {
     historyRunning = false;
-    root.dataset.historyOutcome = outcome;
-    if (errorCode) root.dataset.historyErrorCode = errorCode; else delete root.dataset.historyErrorCode;
-    root.dataset.historySequence = String(Number(root.dataset.historySequence ?? 0) + 1);
+    if (ran) {
+      root.dataset.historyOutcome = outcome;
+      if (errorCode) root.dataset.historyErrorCode = errorCode; else delete root.dataset.historyErrorCode;
+      root.dataset.historySequence = String(Number(root.dataset.historySequence ?? 0) + 1);
+    }
   }
 }
 
@@ -807,14 +814,23 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
         expectedAuthoringRevision: expected.authoringRevision,
         command,
       }),
-      saveDrafts: async (commands, expected) => runAuthoringOperation(project, operationScopes.storySave, () => projectValue<SceneWorkspace>(project, "scene.saveDrafts", {
+      saveDrafts: async (commands, expected, drafts) => runAuthoringOperation(project, operationScopes.storySave, () => projectValue<SceneWorkspace>(project, "scene.saveDrafts", {
         expectedProjectRevision: expected.projectRevision,
         expectedSourceMapRevision: expected.sourceMapRevision,
         expectedAuthoringRevision: expected.authoringRevision,
         commands,
+        drafts,
       })),
+      // A draft step writes nothing, so it takes no authoring turn; the request lane
+      // still delivers it before the Commit, Save or Undo that follows.
+      recordStep: async step => {
+        const sequence = ++historyRequestSequence;
+        historyNotice = undefined;
+        const state = await projectValue<HistoryState>(project, "history.draftStep", { ...step });
+        if (sequence === historyRequestSequence && currentProject?.sessionId === project.sessionId) showHistory(state);
+      },
       load: () => projectValue<SceneWorkspace>(project, "scene.list"),
-      apply: async (command: SceneCommand, expected) => {
+      apply: async (command: SceneCommand, expected, drafts = []) => {
         const operationToken = beginAuthoringCompletion(project, command);
         if (!operationToken) throw new Error("Another persistence operation is still in progress.");
         try {
@@ -823,6 +839,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
             expectedSourceMapRevision: expected.sourceMapRevision,
             expectedAuthoringRevision: expected.authoringRevision,
             command,
+            ...(drafts.length ? { drafts } : {}),
           });
         } finally { finishAuthoringCompletion(operationToken); }
       },
@@ -1278,12 +1295,12 @@ function installListeners(): void {
       setStatus("Unsubmitted input");
     }
   });
-  // Project Undo and Redo when no text field has focus. A text field keeps its own
-  // text Undo, and an open dialog keeps the shortcut.
+  // Project Undo and Redo when no text field has focus, or in a beat draft field. Other
+  // text fields keep their own text Undo, and an open dialog keeps the shortcut.
   window.addEventListener("keydown", (event) => {
     const direction = historyShortcut(event);
     const project = currentProject;
-    if (!direction || !project || event.isComposing || dialogOpen() || isTextField(event.target)) return;
+    if (!direction || !project || event.isComposing || dialogOpen() || (isTextField(event.target) && !storyView?.ownsDraftField(event.target))) return;
     event.preventDefault();
     if (!event.repeat) void runHistory(project, direction);
   });

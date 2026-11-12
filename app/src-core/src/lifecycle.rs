@@ -726,6 +726,16 @@ impl LifecycleService {
             .map_err(LifecycleError::Scene)
     }
 
+    pub fn history_draft_step(
+        &self,
+        request: crate::history::DraftStepRequest,
+    ) -> Result<crate::history::HistoryState, LifecycleError> {
+        let (authority, _) = self.authoring_context()?;
+        self.authoring
+            .history_draft_step(&authority, request)
+            .map_err(LifecycleError::Scene)
+    }
+
     pub fn history_redo(&self) -> Result<crate::history::HistoryStep, LifecycleError> {
         let (authority, _) = self.authoring_context()?;
         self.authoring
@@ -2681,6 +2691,7 @@ mod tests {
     ) -> SceneWorkspace {
         service
             .scene_apply(SceneCommandRequest {
+                drafts: Vec::new(),
                 expected_project_revision: workspace.project_revision.clone(),
                 expected_source_map_revision: workspace.source_map_revision.clone(),
                 expected_authoring_revision: None,

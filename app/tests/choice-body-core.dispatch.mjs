@@ -22,7 +22,8 @@ async function request(operation,payload={},ui=false){
   const response=await child.request(request);assert(isCoreResponse(response,request.requestId));
   result.transcript.push({request,response,event:ui?lastEvent:undefined});
   await appendFile(join(output,"requests.jsonl"),JSON.stringify({operation,ok:response.ok,code:response.error?.code})+"\n");
-  assert(result.transcript.length<800,"Unexpected request loop");
+  // Each beat draft step adds one history.draftStep request (#113).
+  assert(result.transcript.length<1000,"Unexpected request loop");
   if(ui&&['scene.apply','history.undo','history.redo'].includes(operation)){assert(lastEvent?.connected,'Story mutation must originate at connected production controls');lastApply=response;}
   if(ui&&operation==='scene.validateAssignment')lastValidation=response;
   if(response.ok&&operation==='project.openRecent')session=response.value.sessionId;

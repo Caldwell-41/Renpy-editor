@@ -15,6 +15,10 @@ pub struct SceneSaveDraftsRequest {
     #[serde(default)]
     pub expected_authoring_revision: Option<String>,
     pub commands: Vec<SceneCommand>,
+    /// The beat draft each command saves, in the same order. Their draft-step
+    /// entries leave the project history when the Save succeeds (ADR 0025).
+    #[serde(default)]
+    pub drafts: Vec<String>,
 }
 
 /// Candidate bytes and revision by path, and whether the build created the file.
@@ -99,6 +103,19 @@ pub(super) fn candidate_created(project: &ProjectId, directory: &str) -> Vec<Str
     })
 }
 
+/// Draft ids name renderer drafts. Each is short, not blank and listed once.
+pub(super) fn check_draft_ids(drafts: &[String], most: usize) -> Result<(), SceneError> {
+    let mut seen = HashSet::new();
+    if drafts.len() > most
+        || !drafts.iter().all(|draft| {
+            !draft.trim().is_empty() && draft.len() <= 256 && seen.insert(draft.as_str())
+        })
+    {
+        return Err(SceneError::InvalidPayload);
+    }
+    Ok(())
+}
+
 pub(super) fn is_body_beat_command(command: &SceneCommand) -> bool {
     matches!(
         command,
@@ -133,9 +150,11 @@ impl AuthoringService {
         if request.commands.is_empty()
             || request.commands.len() > MAX_SAVE_DRAFTS
             || !request.commands.iter().all(is_body_beat_command)
+            || (!request.drafts.is_empty() && request.drafts.len() != request.commands.len())
         {
             return Err(SceneError::InvalidPayload);
         }
+        check_draft_ids(&request.drafts, MAX_SAVE_DRAFTS)?;
         let loaded = self.prepare_scene_commands(
             project,
             project_id,
@@ -144,24 +163,44 @@ impl AuthoringService {
             request.expected_authoring_revision.as_deref(),
             &request.commands,
         )?;
-        let label = save_label(&loaded.project, &request.commands);
-        let proposal = self.build_drafts(project, project_id, loaded, request.commands)?;
-        self.commit_or_verify(project, proposal, label)?;
+        // One entry per saved beat. The renderer sends the most recently edited
+        // beat last, so it ends on top.
+        let labels: Vec<_> = request
+            .commands
+            .iter()
+            .map(|command| history_label(&loaded.project, command))
+            .collect();
+        let (proposal, built) = self.build_drafts(project, project_id, loaded, request.commands)?;
+        // A saved beat whose bytes did not change adds no entry; its draft still ends.
+        let parts = labels
+            .into_iter()
+            .zip(built)
+            .filter(|(_, mutations)| {
+                mutations.iter().any(|mutation| {
+                    mutation.kind != MutationKind::ReplaceExisting
+                        || mutation.expected_bytes != mutation.proposed
+                })
+            })
+            .map(|(label, mutations)| HistoryPart { label, mutations })
+            .collect();
+        self.commit_or_verify(project, proposal, parts, &request.drafts)?;
         self.scene_workspace(project, project_id)
     }
 
     /// Builds each beat draft command on the candidate the commands before it
-    /// left, and merges them into one proposal. A refused command returns its
-    /// index and nothing is written.
+    /// left, and merges them into one proposal. It also returns each command's
+    /// own mutations, in order. A refused command returns its index and nothing
+    /// is written.
     pub(super) fn build_drafts(
         &self,
         project: &ProjectId,
         project_id: &str,
         loaded: Loaded,
         commands: Vec<SceneCommand>,
-    ) -> Result<TransactionProposal, SceneError> {
+    ) -> Result<(TransactionProposal, Vec<Vec<FileMutation>>), SceneError> {
         let _scope = CandidateScope::open(project);
         let mut merged: Vec<FileMutation> = Vec::new();
+        let mut built = Vec::with_capacity(commands.len());
         // The source revision each scene was checked at, before any command changed it.
         let mut checked = HashMap::<String, String>::new();
         let mut first = Some(loaded);
@@ -202,46 +241,26 @@ impl AuthoringService {
                 checked.insert(scene_id, expected.clone());
             }
             let proposal = self.build_command(project, current, command).map_err(&at)?;
-            for mutation in proposal.mutations {
-                CandidateScope::record(project, &mutation);
+            for mutation in &proposal.mutations {
+                CandidateScope::record(project, mutation);
                 match merged.iter_mut().find(|item| item.path == mutation.path) {
                     Some(item) => {
                         if item.proposed != mutation.expected_bytes {
                             return Err(at(SceneError::SourceConflict));
                         }
-                        item.proposed = mutation.proposed;
+                        item.proposed = mutation.proposed.clone();
                     }
-                    None => merged.push(mutation),
+                    None => merged.push(mutation.clone()),
                 }
             }
+            built.push(proposal.mutations);
         }
-        Ok(TransactionProposal {
-            mutations: merged,
-            intent: TransactionIntent::Edit,
-        })
+        Ok((
+            TransactionProposal {
+                mutations: merged,
+                intent: TransactionIntent::Edit,
+            },
+            built,
+        ))
     }
-}
-
-/// One Story Save is one history entry until #113 adds an entry per beat. It
-/// reveals the last saved beat, which the renderer sends last.
-fn save_label(project: &ProjectMetadata, commands: &[SceneCommand]) -> HistoryLabel {
-    let (scene_id, beat_id) = match commands.last() {
-        Some(SceneCommand::UpdateBodyBeat {
-            scene_id, beat_id, ..
-        }) => (scene_id.clone(), Some(beat_id.clone())),
-        Some(SceneCommand::InsertBodyBeat { scene_id, .. }) => (scene_id.clone(), None),
-        _ => (String::new(), None),
-    };
-    let name = match commands.len() {
-        1 => {
-            let scene = project
-                .scenes
-                .iter()
-                .find(|scene| scene.id == scene_id)
-                .map_or("a scene", |scene| scene.display_name.as_str());
-            format!("saved beat in {scene}")
-        }
-        count => format!("save of {count} beat drafts"),
-    };
-    HistoryLabel::new(name, HistoryItem::beat(scene_id, beat_id))
 }

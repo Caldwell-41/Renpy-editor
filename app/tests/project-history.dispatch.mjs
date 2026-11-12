@@ -1,9 +1,9 @@
 // Project Undo and Redo across workspaces: actual main controls -> Help driver -> ApplicationHost history.
 // No SDK, helper or native claim; happy-dom key events are synthetic.
 import assert from 'node:assert/strict';
-import {mkdir,writeFile,access} from 'node:fs/promises';
+import {mkdir,writeFile,access,readdir,readFile,stat} from 'node:fs/promises';
 import {resolve,join} from 'node:path';
-import {randomUUID} from 'node:crypto';
+import {randomUUID,createHash} from 'node:crypto';
 import {Window} from 'happy-dom';
 import {driverProcess} from './phase2-driver-process.mjs';
 import {createRequest} from '../dist-tests/src/protocol.js';
@@ -29,6 +29,12 @@ async function header(direction){await wait(()=>(direction==='undo'?undoButton()
 const key=(target,{shiftKey=false,y=false}={})=>{const event=new KeyboardEvent('keydown',{key:y?'y':'z',shiftKey,metaKey:mac,ctrlKey:!mac,bubbles:true,cancelable:true});target.dispatchEvent(event);return event;};
 async function shortcut(direction){return step(()=>key(document.body,{shiftKey:direction==='redo'}),`shortcut ${direction}`);}
 const source=async path=>(await call('source.open',{path})).text;
+// Every project file's hash and modification time: a draft-step Undo must change none of them.
+async function disk(dir=join(scratch,'synthetic-project'),prefix='',files={}){
+ for(const entry of await readdir(dir,{withFileTypes:true})){const path=join(dir,entry.name),name=prefix+entry.name;
+  if(entry.isDirectory())await disk(path,`${name}/`,files);else files[name]=`${createHash('sha256').update(await readFile(path)).digest('hex')}@${(await stat(path)).mtimeMs}`;}
+ return files;
+}
 const stage=text=>{result.stages.push(text);console.log(text);};
 async function storyEdit(text){
  const scene=(await call('scene.list')).scenes[0],beat=scene.beats.find(b=>b.payload.type==='narration');assert(beat,'fixture narration beat');
@@ -102,14 +108,106 @@ try{
  button('Cancel',document.querySelector('.tree-inline'));await settle();
  stage('an open Story form stops Undo with its input kept and the existing message');
 
- // Until #113, Undo waits while a beat draft exists.
- const narration=(await call('scene.list')).scenes[0].beats.find(b=>b.payload.type==='narration');
- const select=document.querySelector(`[data-beat-id="${narration.id}"] .beat-select`);if(select.ariaExpanded!=='true')select.click();await wait(()=>document.querySelector(`[data-beat-id="${narration.id}"] textarea`),'draft editor');
- const draft=document.querySelector(`[data-beat-id="${narration.id}"] textarea`);draft.value='Draft that must stay';draft.dispatchEvent(new Event('input',{bubbles:true}));await settle();
- requests=historyRequests();assert.equal(await shortcut('undo'),'blocked');assert.equal(historyRequests(),requests);assert.match(status(),/Commit or cancel beat drafts before Undo or Redo/);
- assert.equal(document.querySelector(`[data-beat-id="${narration.id}"] textarea`)?.value,'Draft that must stay');
- button('Cancel',document.querySelector(`[data-beat-id="${narration.id}"]`));await settle();
- stage('Undo and Redo still wait while a beat draft exists (#113 removes this)');
+ // Beat draft steps (#113). A is the root narration, B the dialogue in the true branch.
+ const current=(await call('scene.list')).scenes[0],path=current.sourcePath,sceneName=current.displayName;
+ const beatA=current.beats.find(b=>b.payload.type==='narration'),beatB=current.beats.find(b=>b.payload.type==='dialogue'&&b.payload.text.startsWith('True'));assert(beatA&&beatB,'fixture beats A and B');
+ const row=id=>document.querySelector(`.scene-workspace [data-beat-id="${id}"]`),field=id=>row(id)?.querySelector('textarea'),marked=id=>row(id)?.dataset.beatDraft==='true';
+ const open=async id=>{if(!field(id)){row(id).querySelector('.beat-select').click();await wait(()=>field(id),`editor for ${id}`);}return field(id);};
+ const input=(control,value,type='input')=>{control.focus();control.value=value;control.dispatchEvent(new Event(type,{bubbles:true}));};
+ const type=async(id,text)=>{const control=await open(id);input(control,text);await settle();return control;};
+ const named=direction=>(direction==='undo'?undoButton():redoButton()).getAttribute('aria-label');
+ const historyNow=()=>call('history.state');
+ const newBeat=()=>document.querySelector('.scene-workspace .new-beat'),beatType=()=>newBeat()?.querySelector(':scope > .field select');
+ const headerSave=async check=>{button('Save',document.querySelector('.app-header'));await wait(check,'Story Save');await settle();};
+ const original=await source(path),files=await disk(),prior=(await historyNow()).undo;assert.equal(prior.name,'button resize');
+
+ // A beat field change is a draft step. Cmd/Ctrl+Z in the focused field and the header Undo reverse it the same way, and neither writes.
+ let typed=await type(beatA.id,'Draft A typed');
+ await wait(()=>named('undo')===`Undo narration typing in ${sceneName}`,'the header names the typing step');assert.equal(marked(beatA.id),true);
+ assert.equal(await step(()=>{event=key(typed);},'Cmd/Ctrl+Z in a beat field'),'committed');assert.equal(event.defaultPrevented,true,'the beat field gives Cmd/Ctrl+Z to project Undo');
+ const reversed=async()=>({text:(await open(beatA.id)).value,marked:marked(beatA.id),status:status(),redo:named('redo'),workspace:workspace()});
+ const byShortcut=await reversed();
+ assert.deepEqual(byShortcut,{text:beatA.payload.text,marked:false,status:`Undone: narration typing in ${sceneName}`,redo:`Redo narration typing in ${sceneName}`,workspace:'Story'});
+ assert.deepEqual(await disk(),files,'Undo of a draft step writes nothing');
+ assert.equal(await shortcut('redo'),'committed');assert.equal((await open(beatA.id)).value,'Draft A typed');assert.equal(marked(beatA.id),true);
+ assert.deepEqual(await disk(),files,'Redo of a draft step writes nothing');
+ (await open(beatA.id)).focus();assert.equal(await header('undo'),'committed');
+ assert.deepEqual(await reversed(),byShortcut,'the header Undo gives the Cmd/Ctrl+Z result');
+ assert.deepEqual((await historyNow()).undo,prior);assert.deepEqual(await disk(),files);
+ // Unfinished Source text in another file keeps its own draft through Story Undo and Redo (#155 moves it later).
+ const stylePath='game/ui/a_styles.rpy',style=await call('source.open',{path:stylePath}),unfinished=`${style.text}# unfinished\n`;
+ await call('source.updateDraft',{path:stylePath,expectedBaseRevision:style.baseRevision,text:unfinished,selectionStart:0,selectionEnd:0});
+ assert.equal(await header('redo'),'committed');assert.equal((await open(beatA.id)).value,'Draft A typed');
+ assert.equal(await header('undo'),'committed');assert.equal((await open(beatA.id)).value,beatA.payload.text);
+ const kept=await call('source.open',{path:stylePath});assert.deepEqual([kept.dirty,kept.text],[true,unfinished],'Story Undo leaves unfinished Source text alone');
+ await call('source.discard',{path:stylePath});assert.deepEqual(await disk(),files);
+ stage('a beat draft change is a draft step; Cmd/Ctrl+Z in the beat field and the header Undo reverse it alike, write nothing and leave Source drafts alone');
+
+ // A text step ends after 2 seconds without typing or when its field loses focus. Each other control change is one step.
+ typed=await type(beatA.id,'One');await new Promise(r=>setTimeout(r,2100));
+ input(typed,'One two');typed.blur();input(typed,'One two three');await settle();
+ for(const expected of ['One two','One',beatA.payload.text]){assert.equal(await header('undo'),'committed');assert.equal((await open(beatA.id)).value,expected);}
+ assert.equal(marked(beatA.id),false,'Undo past the first step ends the draft');
+ button('Add Beat',document.querySelector('.scene-workspace .beats-tools'));await wait(newBeat,'new beat');await settle();
+ await wait(()=>named('undo')===`Undo new dialogue draft in ${sceneName}`,'adding a beat is its first step');
+ input(beatType(),'narration','change');await settle();input(newBeat().querySelector('textarea'),'New narration');await settle();
+ assert.equal(await header('undo'),'committed');assert.equal(beatType().value,'narration');assert.equal(newBeat().querySelector('textarea').value,'');
+ assert.equal(await header('undo'),'committed');assert.equal(beatType().value,'dialogue','a menu change is one step');
+ assert.equal(await header('undo'),'committed');assert.equal(newBeat(),null,'Undo of adding the beat ends its draft');
+ for(let i=0;i<3;i+=1)assert.equal(await header('redo'),'committed');
+ assert.equal(beatType().value,'narration');assert.equal(newBeat().querySelector('textarea').value,'New narration');
+ // Cancel is an edit: Undo brings the draft back, and Redo cancels it again.
+ button('Cancel',newBeat());await settle();assert.equal(newBeat(),null);assert.equal(named('undo'),`Undo cancel of narration draft in ${sceneName}`);
+ assert.equal(await header('undo'),'committed');assert.equal(newBeat()?.querySelector('textarea').value,'New narration','Undo of Cancel brings the draft back');
+ assert.equal(await header('redo'),'committed');assert.equal(newBeat(),null);assert.deepEqual(await disk(),files);
+ stage('text steps end on a 2 second pause or blur, a menu change is one step, and Cancel is an edit that Undo reverses');
+
+ // Type in A, commit an edit in B, then return to A without editing: Undo reverses B, then A's typing.
+ const beforeAB=(await historyNow()).undo;await type(beatA.id,'A typing');
+ await type(beatB.id,'B committed');button('Commit Beat',row(beatB.id));await wait(async()=>(await source(path)).includes('B committed'),'B commit');await settle();
+ const afterCommit=await historyNow();assert.equal(afterCommit.undo.name,`dialogue edit in ${sceneName}`);
+ button('Screens');await wait(()=>document.querySelector('.screen-picker select'),'Screens');await settle();button('Story');await wait(()=>workspace()==='Story'&&row(beatA.id),'Story');await settle();
+ assert.equal((await open(beatA.id)).value,'A typing','A keeps its draft through navigation');
+ assert.deepEqual(await historyNow(),afterCommit,'selecting beats and changing workspace add no entries');
+ assert.equal(await header('undo'),'committed');assert.equal(await source(path),original,'Undo reverses B first, to the exact bytes');
+ assert.equal((await open(beatA.id)).value,'A typing');const beforeA=await disk();
+ assert.equal(await header('undo'),'committed');assert.equal(status(),`Undone: narration typing in ${sceneName}`);
+ assert.equal((await open(beatA.id)).value,beatA.payload.text);assert.deepEqual(await disk(),beforeA);assert.deepEqual((await historyNow()).undo,beforeAB);
+ stage('type in A, commit B, return to A: Undo reverses B, then the typing in A');
+
+ // Commit joins a beat's steps into one edit on top; Story Save adds one per beat, the latest edited on top. Neither clears earlier history.
+ const earlier=(await historyNow()).undo;typed=await type(beatA.id,'Joined one');typed.blur();input(typed,'Joined one two');await settle();
+ button('Commit Beat',row(beatA.id));await wait(async()=>(await source(path)).includes('Joined one two'),'A commit');await settle();
+ assert.equal(named('undo'),`Undo narration edit in ${sceneName}`);assert.equal(await header('undo'),'committed');
+ assert.equal(await source(path),original,'one Undo reverses the whole beat');assert.deepEqual((await historyNow()).undo,earlier,'Commit joined both typing steps');
+ await type(beatA.id,'Saved A');await type(beatB.id,'Saved B');
+ await headerSave(async()=>{const text=await source(path);return text.includes('Saved A')&&text.includes('Saved B');});const saved=await source(path);
+ assert.equal(named('undo'),`Undo dialogue edit in ${sceneName}`,'the most recently edited beat is on top');
+ assert.equal(await header('undo'),'committed');let text=await source(path);assert(text.includes('Saved A')&&!text.includes('Saved B'),'Undo reverses only B');
+ assert.equal(named('undo'),`Undo narration edit in ${sceneName}`);assert.equal(await header('undo'),'committed');assert.equal(await source(path),original);
+ assert.deepEqual((await historyNow()).undo,earlier,'Story Save clears no earlier history');
+ for(let i=0;i<2;i+=1)assert.equal(await header('redo'),'committed');assert.equal(await source(path),saved);
+ for(let i=0;i<2;i+=1)assert.equal(await header('undo'),'committed');assert.equal(await source(path),original);
+ stage('Commit joins its typing steps into one Undo; Story Save adds one entry per beat with the latest edited on top');
+
+ // Undo of a beat delete brings back the beat from source, not the draft the author discarded.
+ await type(beatA.id,'Discarded A');
+ button('Delete',row(beatA.id).querySelector('.beat-controls'));button('Delete this Beat',document.querySelector('.story-operation[aria-label="Delete Beat"]'));
+ await wait(async()=>!(await source(path)).includes('Foundation continuation'),'delete');await settle();
+ assert.equal(await header('undo'),'committed');assert.equal(await source(path),original,'Undo brings the beat back');
+ assert.equal((await open(beatA.id)).value,beatA.payload.text,'not its discarded draft');assert.equal(marked(beatA.id),false);
+ assert.deepEqual((await historyNow()).undo,earlier,'the discarded draft left the history');
+ stage('Undo of a beat delete restores the beat but not its discarded draft');
+
+ // A refused Story Save writes nothing and keeps every draft step; Undo then fixes the failing draft and Save succeeds.
+ await type(beatA.id,'Refused save A');button('Add Beat',document.querySelector('.scene-workspace .beats-tools'));await wait(newBeat,'new beat');input(beatType(),'choice','change');await settle();
+ const quiet=await disk();await headerSave(()=>/^Nothing saved/.test(status()));
+ assert.deepEqual(await disk(),quiet,'a refused Story Save writes nothing');assert.equal(named('undo'),`Undo choice change in ${sceneName}`);
+ assert.equal(await header('undo'),'committed');assert.equal(beatType().value,'dialogue');await wait(()=>status()==='2 unsaved beat drafts. Ready to save.','Undo fixes the refusal');
+ assert.equal(await header('undo'),'committed');assert.equal(newBeat(),null);assert.deepEqual(await disk(),quiet);
+ await headerSave(async()=>(await source(path)).includes('Refused save A'));assert.equal(status(),'Saved');
+ assert.equal(named('undo'),`Undo narration edit in ${sceneName}`);assert.equal(await header('undo'),'committed');assert.equal(await source(path),original);
+ stage('a refused Story Save keeps the drafts and their steps; Undo repairs the draft and the next Save succeeds');
 
  // System prompts: a prompt edit, then a Story edit. Settings is a dialog, so it owns the shortcut.
  const baseline=(await call('prompts.list')).effectiveText;

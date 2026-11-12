@@ -377,6 +377,7 @@ fn create_delete_history_uses_actual_commit_identities_repeatedly() {
         .push(HistoryEntry {
             label: test_label(),
             transaction_id,
+            step: None,
             mutations: vec![HistoryMutation {
                 path: path.clone(),
                 before_revision: Revision::expected_absence(),
@@ -1918,6 +1919,7 @@ fn undo_and_redo_stop_at_external_revision_boundaries() {
         .push(HistoryEntry {
             label: test_label(),
             transaction_id,
+            step: None,
             mutations: vec![HistoryMutation {
                 path: path.clone(),
                 before_revision,
@@ -2461,6 +2463,7 @@ fn history_record(f: &Fixture, history: &mut HistoryStack, changes: &[(&str, &[u
         .push(HistoryEntry {
             label: test_label(),
             transaction_id,
+            step: None,
             mutations: mutations
                 .into_iter()
                 .zip(revisions)
