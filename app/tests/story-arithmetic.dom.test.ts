@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
-import { renderStoryView, type SceneWorkspace } from "../src/scene-ui.js";
+import { renderStoryView, type SceneCommand, type SceneWorkspace } from "../src/scene-ui.js";
 import { storyFixture } from "./story-controls-fixture.js";
 
 test("imported arithmetic opens as an equation and commits the retained formula through Story", async () => {
@@ -32,6 +32,30 @@ test("imported arithmetic opens as an equation and commits the retained formula 
   assert.deepEqual(committed,{command:{type:"updateBodyBeat",sceneId:"one",expectedSourceRevision:"source",beatId:"arithmetic",expectedBody:{type:"root"},beat:{type:"setVariable",variableId:"trust",value:{operation:"add",operand:"(trust + 2) * 3"}}},expected:{projectRevision:"project",sourceMapRevision:"map",authoringRevision:"authoring"}});
   assert.equal(formula.value,"(trust + 2) * 3");assert.ok(formula.isConnected&&!formula.disabled);
   dispose();await browser.happyDOM.close();
+});
+
+test("an unfinished formula stays in its beat draft across beats, scenes and remounts, and survives a refused Commit",async()=>{
+  const browser = new Window({url:"http://tauri.localhost"});
+  Object.assign(globalThis, {window:browser,document:browser.document,HTMLElement:browser.HTMLElement,HTMLInputElement:browser.HTMLInputElement,HTMLSelectElement:browser.HTMLSelectElement,KeyboardEvent:browser.KeyboardEvent,Event:browser.Event});
+  document.body.innerHTML='<main></main><aside></aside>';
+  const base=storyFixture(),host=document.querySelector<HTMLElement>("main")!,tree=document.querySelector<HTMLElement>("aside")!;
+  const model:SceneWorkspace={...base,authoringRevision:"authoring",scenes:[{...base.scenes[0]!,beats:[{id:"arithmetic",byteStart:0,byteEnd:30,protected:false,payload:{type:"setVariable",variableId:"trust",value:{operation:"add",operand:"trust + 2"}}},{id:"end",byteStart:30,byteEnd:41,protected:false,payload:{type:"return"}}]},base.scenes[1]!]};
+  // Core parses formulas; it refuses an unfinished one without writing.
+  const sent:string[]=[];const statuses:string[]=[];
+  const actions={validateAssignment:async()=>{throw Error("offline");},resolution:{width:1280,height:720},present:async()=>{throw Error("no media");},status:(value:string)=>{statuses.push(value);},apply:async(command:SceneCommand)=>{sent.push(JSON.stringify(command.beat));throw Error("INVALID_ASSIGNMENT");}};
+  const view=renderStoryView(host,tree,model,actions,"arithmetic");
+  const formula=host.querySelector<HTMLInputElement>('[aria-label="Formula"]')!;
+  formula.focus();formula.value="(trust + ";formula.dispatchEvent(new Event("input",{bubbles:true}));
+  const open=(name:string)=>[...tree.querySelectorAll<HTMLButtonElement>(".tree-scene-open")].find(item=>item.textContent===name)!.click();
+  host.querySelector<HTMLButtonElement>('[data-beat-id="end"] .beat-select')!.click();
+  assert.equal(host.querySelector<HTMLElement>('[data-beat-id="arithmetic"]')!.dataset.beatDraft,"true");
+  open("Shared conversation");await new Promise(r=>setTimeout(r,0));open("Arrival");await new Promise(r=>setTimeout(r,0));
+  view.update(model,actions,"arithmetic");
+  assert.equal(host.querySelector('[aria-label="Formula"]'),formula);assert.equal(formula.value,"(trust + ");assert.deepEqual(sent,[]);
+  [...host.querySelectorAll<HTMLButtonElement>('[data-beat-id="arithmetic"] button')].find(item=>item.textContent==="Commit Beat")!.click();
+  await new Promise(r=>setTimeout(r,0));
+  assert.equal(sent.length,1);assert.match(sent[0]!,/\(trust \+ /);assert.match(statuses.at(-1)!,/Input retained/);assert.equal(formula.value,"(trust + ");assert.ok(formula.isConnected);assert.equal(view.hasDrafts("one"),true);
+  view.dispose();await browser.happyDOM.close();
 });
 
 test("Story and Screens completion replaces a whole identifier or an explicit selection",async()=>{
