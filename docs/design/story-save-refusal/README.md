@@ -2,9 +2,16 @@
 
 [Issue #114](https://github.com/Caldwell-41/Renpy-editor/issues/114), decision 14,
 asks how a refused Story Save shows several failing beat drafts. This Design Lab
-screen, `story-save-refusal`, compares three answers. Kris has not chosen one, and
-the [approval record](approval.json) has no approved revision. If no variant wins,
-Story keeps first-only.
+screen, `story-save-refusal`, compares three answers.
+
+Kris approved variant 1 on 2026-11-12: `story-save-refusal` / `marked`, revision
+`marked-v1`, named Count and failure marks
+([decision](https://github.com/Caldwell-41/Renpy-editor/issues/114#issuecomment-6820468198)).
+Variants 2 (`stepper-v1`) and 3 (`first-v1`) are not approved and stay in the lab as
+drafts. The [approval record](approval.json) sets `currentApproved` to `marked-v1` and
+pins the reviewed source at commit `3f64ad9db849f459de0f12b17e57f0c4678025e5`. That
+source predates the Brass and slate palette, so the lab reports "source changed" for
+the current tree. Compare against a separate checkout of that commit.
 
 The rules come from [UI.md](../../UI.md#saving-story-drafts): Save checks every
 draft, writes none of them if one fails, keeps all drafts and reveals the failing
@@ -83,5 +90,7 @@ Focused check, once per layout:
 npm run design:check -- story-save-refusal marked --interaction ./screens/story-save-refusal/review-check.mjs --capture
 ```
 
-[captures/](captures/) holds draft review captures of each variant at wide and
-compact sizes. They are not approval evidence.
+[captures/](captures/) holds the approved `marked-v1-approved-dark-wide.png` and
+`marked-v1-approved-dark-compact.png`, which the approval record lists. The
+`marked-v1-depot-wide.png` capture and the captures of the other two variants are
+draft review images, not approval evidence.
