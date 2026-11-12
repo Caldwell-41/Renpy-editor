@@ -450,12 +450,12 @@ test("A refused Story Save counts failing drafts, links each scene and marks fai
   const added = document.querySelector<HTMLElement>(".new-beat")!;
   const text = added.querySelector<HTMLTextAreaElement>("textarea")!;
   text.value = "A new line."; text.dispatchEvent(new window.Event("input", { bubbles: true })); await ticks();
-  refusal = { code: "BEAT_DRAFT_CONFLICT", message: "This beat's place changed in source after the draft began.", actionIndex: 4 };
+  refusal = { code: "BEAT_DRAFT_CONFLICT", message: "This beat's place changed in source after the draft began. Draft retained.", actionIndex: 4 };
   click("Save"); await ticks(10);
   assert.equal(sent.length, 1); assert.equal(sent[0]!.commands[4]!.type, "insertBodyBeat");
   assert.equal(status(), "Nothing saved. 1 of 5 drafts needs changes:Arrival 1");
   assert.equal(added.dataset.saveRefused, "true");
-  assert.equal(added.querySelector(".story-save-reason")?.textContent, "This beat's place changed in source after the draft began.");
+  assert.equal(added.querySelector(".story-save-reason")?.textContent, "This beat's place changed in source after the draft began. Draft retained.");
 
   // A later Save that succeeds clears every mark and the refusal status.
   refusal = undefined;

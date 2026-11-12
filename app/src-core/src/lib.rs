@@ -1274,7 +1274,7 @@ fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
         ),
         BeatDraftConflict => (
             "BEAT_DRAFT_CONFLICT",
-            "This beat's place changed in source after the draft began.",
+            "This beat's place changed in source after the draft began. Draft retained.",
         ),
         DirtySource => (
             "DIRTY_SOURCE",

@@ -732,7 +732,8 @@ export function renderStoryView(
   const projectOrder = (draft: BeatDraft): readonly [number, number] => {
     const sceneIndex = model.scenes.findIndex(item => item.id === draft.sceneId), scene = model.scenes[sceneIndex];
     if (!scene) return [model.scenes.length, 0];
-    const at = (node: NodeRef): number => scene.beats.findIndex(beat => JSON.stringify(nodeRef(beat)) === JSON.stringify(node));
+    // A beat or anchor that left source sorts after the scene's beats.
+    const at = (node: NodeRef): number => { const index = scene.beats.findIndex(beat => JSON.stringify(nodeRef(beat)) === JSON.stringify(node)); return index < 0 ? scene.beats.length + 1 : index; };
     if (draft.beatId) return [sceneIndex, at({ type: "beat", beatId: draft.beatId })];
     const place = draft.place?.();
     if (!place) return [sceneIndex, scene.beats.length];
@@ -747,17 +748,18 @@ export function renderStoryView(
   };
   // The status line after a refused Save: the failing count, then one link per scene.
   const saveStatus = (): StoryStatus | undefined => {
-    if (!refusal) return undefined;
+    if (!refusal || !host.isConnected) return undefined;
     const total = pendingDrafts().length, failing = [...refusal.failing.keys()], drafts = total === 1 ? "draft" : "drafts";
     if (!failing.length) return { text: `${total} unsaved beat ${drafts}. Ready to save.`, kind: "normal", links: [] };
     // Each link reveals the scene's first failing draft at the time of the click.
-    const open = (sceneId: string): void => { const draft = inProjectOrder([...refusal?.failing.keys() ?? []].filter(item => item.sceneId === sceneId), item => item)[0]; if (draft && host.isConnected) reveal(draft); };
+    const open = (sceneId: string): void => { const draft = inProjectOrder([...refusal?.failing.keys() ?? []].filter(item => item.sceneId === sceneId), item => item)[0]; if (draft) reveal(draft); };
     const links = model.scenes.flatMap(scene => {
       const count = failing.filter(draft => draft.sceneId === scene.id).length;
       return count ? [{ label: scene.displayName, count, open: () => open(scene.id) }] : [];
     });
     return { text: `${refusal.lead} ${failing.length} of ${total} ${drafts} ${failing.length === 1 ? "needs" : "need"} changes:`, kind: "error", links };
   };
+  // Status changes only when the count or links change, so typing does not replace other status.
   const statusKey = (): string => { const status = saveStatus(); return JSON.stringify(status && [status.text, status.links.map(link => [link.label, link.count])]); };
   const showRefusal = (): void => { const status = saveStatus(); if (status) actions.status(status.text, status.kind, status.links); };
   // Drops failing drafts that were saved or cancelled, and rechecks the one the author edited.
@@ -845,10 +847,11 @@ export function renderStoryView(
     }
     return ids;
   };
-  const draftsWithin = (scene: SceneDocument, id: string): boolean => pendingDrafts(scene.id).some(draft => {
+  // Whether any of `drafts` (by default the scene's pending drafts) sits inside node `id`.
+  const draftsWithin = (scene: SceneDocument, id: string, drafts: readonly BeatDraft[] = pendingDrafts(scene.id)): boolean => drafts.some(draft => {
     const place = draft.place?.().body;
     const anchor = draft.beatId ?? (place?.type === "branch" ? place.branchId : undefined);
-    return !!anchor && ancestry(scene, anchor).has(id);
+    return draft.sceneId === scene.id && !!anchor && ancestry(scene, anchor).has(id);
   });
   const discardNote = (copy: HTMLElement, scene: SceneDocument, id: string, text = "Its unsaved beat drafts are discarded."): void => { if (draftsWithin(scene, id)) copy.textContent += ` ${text}`; };
   const historyGuard = (): boolean => {
@@ -920,7 +923,7 @@ export function renderStoryView(
     };
     host.querySelectorAll<HTMLElement>(".beat-card").forEach(card => mark(card, card.querySelector(":scope > .beat-compact > .beat-select"), beats.has(card.dataset.beatId ?? ""), failingBeats.has(card.dataset.beatId ?? "")));
     const shown = storyScene(model, selectedSceneId);
-    host.querySelectorAll<HTMLElement>(".story-condition-group").forEach(group => mark(group, group.querySelector(":scope > .story-group-heading > strong"), !!shown && draftsWithin(shown, group.dataset.conditionGroupId ?? "")));
+    host.querySelectorAll<HTMLElement>(".story-condition-group").forEach(group => { const id = group.dataset.conditionGroupId ?? ""; mark(group, group.querySelector(":scope > .story-group-heading > strong"), !!shown && draftsWithin(shown, id), !!shown && draftsWithin(shown, id, [...failing.keys()])); });
     treeHost.querySelectorAll<HTMLElement>(".tree-scene-row").forEach(row => mark(row, row.querySelector(".tree-scene-open"), scenes.has(row.dataset.sceneId ?? ""), failingScenes.has(row.dataset.sceneId ?? "")));
     for (const draft of beatDrafts.values()) {
       const reason = failing.get(draft);
@@ -1687,6 +1690,7 @@ export function renderStoryView(
     };
     const insertCommand = (payload: BeatPayload, location: { body: BodyRef; position: Position }, current = base()): SceneCommand => ({ type: "insertBodyBeat", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, ...location, beat: payload });
     // Story Save: a new beat finds its body and anchor by id; if source dropped either, the draft conflicts.
+    // Core repeats this check on its candidate (BEAT_DRAFT_CONFLICT); this one lets Story refuse before sending.
     const savedCommand = (): SceneCommand => {
       const payload = editor.read(), location = chosenLocation(), current = base(), { body, position } = location;
       const anchor = position.type === "before" ? JSON.stringify(position.anchor) : undefined;

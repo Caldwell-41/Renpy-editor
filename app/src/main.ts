@@ -234,7 +234,7 @@ function persistenceMessage(state: PersistenceStatus, localPending: boolean): { 
   if (state === "conflict") return { text: "Conflict — Source is invalid, missing, or changed outside Loomlight", kind: "error" };
   if (localPending || state === "pendingValidation") return { text: "Unsaved Source draft", kind: "normal" };
   // A refused Story Save keeps its count and scene links until its drafts are saved or cancelled.
-  const refusal: StoryStatus | undefined = storyView?.host.isConnected ? storyView.saveStatus() : undefined;
+  const refusal: StoryStatus | undefined = storyView?.saveStatus();
   if (refusal) return refusal;
   if (storyView?.hasDrafts()) return { text: "Unsaved changes", kind: "normal" };
   return { text: hasUnsubmittedInput() ? "Unsubmitted input — accepted changes saved" : "Saved", kind: "normal" };
