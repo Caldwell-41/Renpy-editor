@@ -117,26 +117,6 @@
 
 .condition-numeric-guidance{flex:1 0 100%}
 
-:root[data-theme=dark] :is(.decimal-variables,.siv-actions,.screen-text:has(.siv-actions),.screen-control-card:has(.siv-actions),.condition-fields[data-numeric=true],.story-operation:has(.condition-fields[data-numeric=true])) {
- --surface-app:var(--arithmetic-surface-app);
- --surface-panel:var(--arithmetic-surface-panel);
- --surface-raised:var(--arithmetic-surface-raised);
- --surface-hover:var(--arithmetic-surface-hover);
- --surface-selected:var(--arithmetic-surface-selected);
- --text-primary:var(--arithmetic-text-primary);
- --text-secondary:var(--arithmetic-text-secondary);
- --text-muted:var(--arithmetic-text-muted);
- --text-disabled:var(--arithmetic-text-disabled);
- --border-normal:var(--arithmetic-border-normal);
- --border-strong:var(--arithmetic-border-strong);
- --accent-primary:var(--arithmetic-accent-primary);
- --accent-hover:var(--arithmetic-accent-hover);
- --accent-subtle:var(--arithmetic-accent-subtle);
- --focus-ring:var(--arithmetic-focus-ring);
- --on-accent:var(--arithmetic-on-accent);
- color:var(--text-primary);
-}
-
 .decimal-variables { background:var(--surface-app);color:var(--text-primary) }
 .screens-editor :is(.screen-card.screen-text,.screen-card.screen-control-card):has(.siv-actions) { background:var(--surface-app);color:var(--text-primary) }
 .decimal-variables :is(input,select),.condition-fields[data-numeric=true] :is(input,select) { background:var(--surface-raised);color:var(--text-primary);border-color:var(--border-strong);border-radius:3px;min-height:34px;font-size:13px }
