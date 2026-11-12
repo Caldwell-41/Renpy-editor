@@ -17,7 +17,7 @@ test('selectable native probe retains the selected Beat across history and repor
     lastOpen: { chapterId: 'chapter', sceneId: 'scene' }, canUndo: true, canRedo: true,
     chapters: [{ id: 'chapter', displayName: 'Chapter', directory: 'game/chapters' }],
     scenes: [{ id: 'scene', chapterId: 'chapter', displayName: 'Scene', technicalLabel: 'scene', sourcePath: 'game/scene.rpy', sourceRevision: '3'.repeat(64), sourceConflict: false, partial: false,
-      beats: [{ id: 'narration', byteStart: 0, byteEnd: 20, protected: false, payload: { type: 'narration', text: 'Synthetic narration' } }, { id: 'return', byteStart: 20, byteEnd: 30, protected: false, payload: { type: 'return' } }] }],
+      beats: [{ id: 'narration', byteStart: 0, byteEnd: 20, protected: false, payload: { type: 'narration', text: 'Synthetic narration' } }, { id: 'return', byteStart: 20, byteEnd: 30, protected: false, payload: { type: 'return' } }], bodies: [{body: {type: 'root'}, kind: 'scene', nodes: [{beatId: 'narration'}, {beatId: 'return'}], ending: {type: 'ends', beatId: 'return'}, places: [{position: {type: 'before', anchor: {type: 'beat', beatId: 'narration'}}, fitsEnding: false}, {position: {type: 'before', anchor: {type: 'beat', beatId: 'return'}}, fitsEnding: false}], defaultPlace: {type: 'before', anchor: {type: 'beat', beatId: 'return'}}}] }],
     authoring: { characters: [], appearances: [], assets: [], variables: [] },
   };
   const history: string[] = [], opened: string[] = [];

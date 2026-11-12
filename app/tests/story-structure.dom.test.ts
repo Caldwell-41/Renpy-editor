@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
 import { buildConditionEditor } from "../src/story-condition-editor.js";
-import { deriveScenePreview, hasSceneDraft, renderStoryView, type SceneCommand, type SceneWorkspace, type StoryTarget } from "../src/scene-ui.js";
+import { deriveScenePreview, hasSceneDraft, type SceneCommand, type SceneWorkspace, type StoryTarget } from "../src/scene-ui.js";
 import { renderBranches, type FlowBody } from "../src/branches-ui.js";
-import { flagCondition, storyFixture } from "./story-controls-fixture.js";
+import { flagCondition, storyFixture, renderStoryView } from "./story-controls-fixture.js";
 const tick = async (): Promise<void> => { await new Promise(resolve => setTimeout(resolve, 0)); };
 function setup(apply?: (command: SceneCommand) => Promise<SceneWorkspace>, fixture = storyFixture(3)) {
   const browser = new Window(); Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, HTMLInputElement: browser.HTMLInputElement, HTMLSelectElement: browser.HTMLSelectElement, Event: browser.Event, KeyboardEvent: browser.KeyboardEvent });
@@ -22,11 +22,11 @@ test("full condition builder hydrates All/Any/Not, exact values and boolean comp
   const editor = buildConditionEditor(s.model.authoring.variables, { status: "supported", expression }); document.body.append(editor.host); assert.deepEqual(editor.read().expression, expression); await s.close();
 });
 
-test("create Condition submits explicit root anchor and full typed boolean combinations in one command", async () => {
+test("create Condition submits the root body and full typed boolean combinations in one command", async () => {
   const s = setup(); button(s.host, "Add Condition").click(); const panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Add Condition"]')!;
   choose(panel, "Condition type", "and"); const children = panel.querySelectorAll<HTMLElement>(".condition-combination > .condition-expression"); choose(children[0]!, "Condition type", "not"); choose(children[1]!, "Condition type", "bool");
   (panel.querySelector<HTMLInputElement>('input[aria-label="Include Otherwise"]')!).checked = true; button(panel, "Create Condition").click(); await tick();
-  const command = s.calls[0]!.command; assert.equal(command.type, "insertCondition"); assert.deepEqual(command.body, { type: "root" }); assert.deepEqual(command.position, { type: "before", anchor: { type: "beat", beatId: "end" } }); assert.equal((command.condition as {expression:{type:string}}).expression.type, "and"); assert.equal(command.otherwise, true); assert.deepEqual(s.calls[0]!.expected, { projectRevision: "project", sourceMapRevision: "map" }); await s.close();
+  const command = s.calls[0]!.command; assert.equal(command.type, "insertCondition"); assert.deepEqual(command.body, { type: "root" }); assert.equal((command.condition as {expression:{type:string}}).expression.type, "and"); assert.equal(command.otherwise, true); assert.deepEqual(s.calls[0]!.expected, { projectRevision: "project", sourceMapRevision: "map" }); await s.close();
 });
 
 test("Else If insertion exposes first-match order and captures containing group parent", async () => {
@@ -41,20 +41,15 @@ test("nested Otherwise creation and condition editing use group-parent qualifica
   open(s.host, "nested-if-0"); const editor = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Edit Condition"]')!; button(editor, "Apply condition").click(); await tick(); assert.deepEqual(s.calls[1]!.command.expectedBody, { type: "branch", groupId: "group", branchId: "if" }); await s.close();
 });
 
-test("explicit leaf move shows destination, excludes pass anchors and retains every field on core refusal", async () => {
+test("explicit leaf move shows destination and retains every field on core refusal", async () => {
   const s = setup(async () => { throw Error("Cannot safely promote inline comments. Use Source."); }); button(row(s.host, "a"), "Move to…").click(); const panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Move story content"]')!;
-  choose(panel, "Destination body", "otherwise"); assert.deepEqual([...panel.querySelector<HTMLSelectElement>('select[aria-label="Destination position"]')!.options].map(option => option.value), ["end"]); button(panel, "Move to destination").click(); await tick();
+  choose(panel, "Destination body", "otherwise"); button(panel, "Move to destination").click(); await tick();
   assert.deepEqual(s.calls[0]!.command, { sceneId: "one", expectedSourceRevision: "source", type: "moveStoryNode", node: { type: "beat", beatId: "a" }, expectedBody: { type: "branch", groupId: "group", branchId: "if" }, body: { type: "branch", groupId: "group", branchId: "otherwise" }, position: { type: "end" } });
   assert.ok(panel.isConnected && hasSceneDraft(s.host)); assert.equal(panel.querySelector<HTMLSelectElement>('select[aria-label="Destination body"]')!.value, "otherwise"); assert.match(s.status.at(-1)!, /Input retained/); await s.close();
 });
 
 test("whole condition move excludes own descendant bodies; headers never become ordinary Beat targets", async () => {
   const s = setup(); button(row(s.host, "if"), "Move to…").click(); const panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Move story content"]')!; assert.deepEqual([...panel.querySelector<HTMLSelectElement>('select[aria-label="Destination body"]')!.options].map(option => option.value), ["root"]); button(panel, "Move to destination").click(); await tick(); assert.deepEqual(s.calls[0]!.command.node, { type: "condition", groupId: "group" }); assert.equal(button(row(s.host, "elif"), "Move to…").disabled, true); await s.close();
-});
-
-test("keyboard up/down moves use immediate body siblings and one captured transaction", async () => {
-  const s = setup(); row(s.host, "a").querySelector<HTMLElement>(".beat-select")!.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", altKey: true, bubbles: true, cancelable: true })); await tick();
-  assert.deepEqual(s.calls[0]!.command.position, { type: "before", anchor: { type: "condition", groupId: "nested-0" } }); assert.deepEqual(s.calls[0]!.command.expectedBody, { type: "branch", groupId: "group", branchId: "if" }); await s.close();
 });
 
 test("delete whole group and selected unwrap remain distinct; initial If cannot be removed as a branch", async () => {
@@ -129,20 +124,3 @@ test("unresolved manual conditions stop at the actual header; explicit no-match 
   const noMatch = deriveScenePreview(scene, undefined, new Map([["group", "no-match"]])); assert.equal(noMatch.variables.trust?.value, "42"); assert.equal(noMatch.background?.assetId, "bg"); assert.equal(noMatch.overlay?.text, "Explicit continuation"); assert.equal(noMatch.throughBeatId, "root-text"); await s.close();
 });
 
-test("Choice option body inserts at an explicit position and Then retains earlier Beats on refusal", async () => {
-  const fixture = storyFixture(0); const scene = fixture.scenes[0]!;
-  const choice = { id: "menu", byteStart: 0, byteEnd: 10, protected: false, payload: { type: "choice" as const, options: [{ id: "yes", text: "Yes" }, { id: "no", text: "No" }] } };
-  const header = (id: string, ordinal: number) => ({ id, byteStart: 10 + ordinal * 40, byteEnd: 20 + ordinal * 40, protected: true, conditionalBranch: { groupId: "options", choiceOption: true, ordinal, otherwise: false }, payload: { type: "customCode" as const, source: `        "${id}":`, reason: "Option header" } });
-  const model = { ...fixture, scenes: [{ ...scene, beats: [choice, header("yes", 0), { id: "set", owner: { groupId: "options", branchId: "yes" }, byteStart: 20, byteEnd: 40, protected: false, payload: { type: "setVariable" as const, variableId: "flag", value: true } }, header("no", 1), { id: "pass", owner: { groupId: "options", branchId: "no" }, byteStart: 60, byteEnd: 70, protected: true, structuralPlaceholder: true, payload: { type: "customCode" as const, source: "            pass", reason: "Empty option" } }, { id: "shared", byteStart: 70, byteEnd: 90, protected: false, payload: { type: "narration" as const, text: "Shared once" } }, { id: "end", byteStart: 90, byteEnd: 100, protected: false, payload: { type: "return" as const } }] }, ...fixture.scenes.slice(1)] };
-  const s = setup(async () => { throw Error("Source changed. Input retained."); }, model);
-  const option = s.host.querySelector<HTMLElement>('.story-choice-option[data-option-id="yes"]'); assert.ok(option);
-  button(option, "Then").click(); const panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Option ending"]')!;
-  choose(panel, "Then", "return"); button(panel, "Apply ending").click(); await tick();
-  assert.deepEqual(s.calls[0]!.command, { sceneId: "one", expectedSourceRevision: "source", type: "insertBodyBeat", body: { type: "branch", groupId: "options", branchId: "yes" }, position: { type: "end" }, beat: { type: "return" } });
-  assert.ok(panel.isConnected && hasSceneDraft(s.host)); assert.equal(panel.querySelector<HTMLSelectElement>('select[aria-label="Then"]')!.value, "return");
-  button(panel, "Cancel").click(); assert.equal(hasSceneDraft(s.host), false);
-  const no = s.host.querySelector<HTMLElement>('.story-choice-option[data-option-id="no"]')!; button(no, "Add a Beat").click();
-  const editor = s.host.querySelector<HTMLElement>('.new-beat')!; choose(editor, "Beat type", "narration"); editor.querySelector<HTMLTextAreaElement>("textarea")!.value = "No body"; button(editor, "Add Beat").click(); await tick();
-  assert.deepEqual(s.calls[1]!.command.body, { type: "branch", groupId: "options", branchId: "no" }); assert.deepEqual(s.calls[1]!.command.position, { type: "end" });
-  await s.close();
-});

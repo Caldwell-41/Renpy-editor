@@ -39,7 +39,11 @@ pub enum BodyKind {
 }
 
 #[derive(Clone, Debug, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase", rename_all_fields = "camelCase", tag = "type")]
+#[serde(
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase",
+    tag = "type"
+)]
 pub enum BodyEnding {
     Ends { beat_id: String },
     Continues,
@@ -166,7 +170,10 @@ impl<'s, 'a> Bodies<'s, 'a> {
                     .is_none_or(|g| g.opens_group())
                 && !trivia(b)
         }) {
-            nodes.entry(key(beat.owner.as_ref())).or_default().push(index);
+            nodes
+                .entry(key(beat.owner.as_ref()))
+                .or_default()
+                .push(index);
         }
         Ok(Self {
             source,
@@ -184,9 +191,9 @@ impl<'s, 'a> Bodies<'s, 'a> {
     /// One body's nodes in source order, including a structural placeholder.
     fn nodes(&self, body: Key<'_>) -> Vec<&'a SceneBeat> {
         let beats = self.beats;
-        self.nodes
-            .get(&body)
-            .map_or(Vec::new(), |nodes| nodes.iter().map(|&i| &beats[i]).collect())
+        self.nodes.get(&body).map_or(Vec::new(), |nodes| {
+            nodes.iter().map(|&i| &beats[i]).collect()
+        })
     }
 
     pub(super) fn scene_may_continue(&self) -> bool {
@@ -296,7 +303,9 @@ impl<'s, 'a> Bodies<'s, 'a> {
     }
 
     fn option_header(&self, option: &ChoiceOption) -> Option<&'a SceneBeat> {
-        self.beats.iter().find(|b| Some(&b.id) == option.id.as_ref())
+        self.beats
+            .iter()
+            .find(|b| Some(&b.id) == option.id.as_ref())
     }
 
     /// The source extent of one body, for an edit that names it.
@@ -382,7 +391,15 @@ impl<'s, 'a> Bodies<'s, 'a> {
     /// Every scene body, branch body and option body, parents before children.
     pub(super) fn tree(&self) -> Result<Vec<SceneBody>, SceneError> {
         let mut bodies = Vec::new();
-        self.push_body(&mut bodies, BodyRef::Root, BodyKind::Scene, None, None, None, 0)?;
+        self.push_body(
+            &mut bodies,
+            BodyRef::Root,
+            BodyKind::Scene,
+            None,
+            None,
+            None,
+            0,
+        )?;
         Ok(bodies)
     }
 
@@ -435,13 +452,14 @@ impl<'s, 'a> Bodies<'s, 'a> {
             Err(error) => return Err(error),
         };
         let before_ending = match &ending {
-            BodyEnding::Ends { beat_id } => self
-                .beats
-                .iter()
-                .find(|b| b.id == *beat_id)
-                .map(|b| Position::Before {
-                    anchor: node_ref(b),
-                }),
+            BodyEnding::Ends { beat_id } => {
+                self.beats
+                    .iter()
+                    .find(|b| b.id == *beat_id)
+                    .map(|b| Position::Before {
+                        anchor: node_ref(b),
+                    })
+            }
             _ => Some(Position::End),
         };
         let default_place = places
@@ -595,9 +613,11 @@ impl<'a> Body<'a> {
         (0..=kept.len())
             .filter(|&index| self.check(&kept, index, source, beats, false).is_ok())
             .map(|index| InsertionPlace {
-                position: kept.get(index).map_or(Position::End, |(b, _)| Position::Before {
-                    anchor: node_ref(b),
-                }),
+                position: kept
+                    .get(index)
+                    .map_or(Position::End, |(b, _)| Position::Before {
+                        anchor: node_ref(b),
+                    }),
                 fits_ending: self.check(&kept, index, source, beats, true).is_ok(),
             })
             .collect()

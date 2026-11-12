@@ -334,6 +334,9 @@ pub enum MoveDirection {
 }
 
 /// Explicit source-derived body; a root assertion is never inferred from selection.
+/// `Root` is the scene body. `Branch` addresses a branch body (a condition group and
+/// its If, Else if or Otherwise header) or an option body (a Choice's option group and
+/// its option header).
 #[derive(Clone, Debug, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(
     rename_all = "camelCase",

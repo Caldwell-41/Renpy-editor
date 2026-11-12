@@ -104,10 +104,13 @@ setTimeout(async () => {
           { id: "music", byteStart: 70, byteEnd: 90, protected: false, payload: { type: "playMusic", assetId: "music" } },
           { id: "choice", byteStart: 90, byteEnd: 130, protected: false, payload: { type: "choice", options: [{ text: "Continue" }] } },
         ],
+        bodies: [{ body: { type: "root" }, kind: "scene", nodes: ["custom", "background", "dialogue", "music", "choice"].map(beatId => ({ beatId })), ending: { type: "continues" },
+          places: [{ position: { type: "before", anchor: { type: "beat", beatId: "background" } }, fitsEnding: false }, { position: { type: "before", anchor: { type: "beat", beatId: "dialogue" } }, fitsEnding: false }, { position: { type: "before", anchor: { type: "beat", beatId: "music" } }, fitsEnding: false }, { position: { type: "before", anchor: { type: "beat", beatId: "choice" } }, fitsEnding: false }, { position: { type: "end" }, fitsEnding: true }], defaultPlace: { type: "end" } }],
       }, {
         id: "scene-two", chapterId: "chapter-two", displayName: "Scene 2", technicalLabel: "scene_two",
         sourcePath: "game/chapters/chapter_02/scene_001.rpy", sourceRevision: "6".repeat(64), sourceConflict: false, partial: false,
         beats: [{ id: "return-two", byteStart: 16, byteEnd: 27, protected: false, payload: { type: "return" } }],
+        bodies: [{ body: { type: "root" }, kind: "scene", nodes: [{ beatId: "return-two" }], ending: { type: "ends", beatId: "return-two" }, places: [{ position: { type: "before", anchor: { type: "beat", beatId: "return-two" } }, fitsEnding: false }], defaultPlace: { type: "before", anchor: { type: "beat", beatId: "return-two" } } }],
       }],
       authoring: {
         characters: model.characters,

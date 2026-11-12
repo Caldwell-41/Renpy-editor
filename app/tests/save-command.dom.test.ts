@@ -3,6 +3,8 @@ import test from "node:test";
 import { Window } from "happy-dom";
 import type { CoreOperation, CoreResponse } from "../src/protocol.js";
 import type { SourceDocument, SourceInventory } from "../src/source-ui.js";
+import type { SceneBeat } from "../src/scene-ui.js";
+import { sceneBodies } from "./story-controls-fixture.js";
 
 const tick = async (): Promise<void> => { await new Promise((resolve) => setTimeout(resolve, 0)); };
 const ticks = async (count = 4): Promise<void> => { for (let index = 0; index < count; index += 1) await tick(); };
@@ -85,7 +87,7 @@ test("the shell owns Save routing across Source, clean fallback, modifiers, remo
     projectRevision: "1".repeat(64), sourceMapRevision: "2".repeat(64), entrySceneId: "scene",
     lastOpen: { chapterId: "chapter", sceneId: "scene" }, canUndo: false, canRedo: false,
     chapters: [{ id: "chapter", displayName: "Chapter", directory: "game" }],
-    scenes: [{ id: "scene", chapterId: "chapter", displayName: "Scene", technicalLabel: "scene", sourcePath: model.path, sourceRevision: model.baseRevision, sourceConflict: false, partial: false, beats: [] }],
+    scenes: [{ id: "scene", chapterId: "chapter", displayName: "Scene", technicalLabel: "scene", sourcePath: model.path, sourceRevision: model.baseRevision, sourceConflict: false, partial: false, beats: [], bodies: sceneBodies([]) }],
     authoring: { characters: [], appearances: [], assets: [], variables: [] },
   };
 
@@ -285,7 +287,7 @@ test("Story Save takes one route from toolbar and keyboard, and a refusal never 
     lastOpen: { chapterId: "chapter", sceneId: "scene" }, canUndo: revision > 3, canRedo: false,
     chapters: [{ id: "chapter", displayName: "Chapter", directory: "game" }],
     scenes: [{ id: "scene", chapterId: "chapter", displayName: "Scene", technicalLabel: "scene", sourcePath: "game/scene.rpy", sourceRevision: String(revision).repeat(64), sourceConflict: false, partial: false,
-      beats: [{ id: "line", byteStart: 15, byteEnd: 30, protected: false, payload: { type: "narration", text: accepted } }] }],
+      ...(beats => ({ beats, bodies: sceneBodies(beats) }))([{ id: "line", byteStart: 15, byteEnd: 30, protected: false, payload: { type: "narration" as const, text: accepted } }]) }],
     authoring: { characters: [], appearances: [], assets: [], variables: [] },
   });
   const sent: { commands: { beat: { text: string } }[] }[] = [];
@@ -362,7 +364,7 @@ test("A refused Story Save counts failing drafts, links each scene and marks fai
   const beat = (id: string, offset: number) => ({ id, byteStart: offset, byteEnd: offset + 10, protected: false,
     payload: id.startsWith("g") ? { type: "dialogue", characterId: "ghost", text: texts[id] } : { type: "narration", text: texts[id] } });
   const scene = (id: string, displayName: string, ids: string[]) => ({ id, chapterId: "chapter", displayName, technicalLabel: id, sourcePath: `game/${id}.rpy`,
-    sourceRevision: String(revision).repeat(64), sourceConflict: false, partial: false, beats: ids.map((item, index) => beat(item, 20 + index * 10)) });
+    sourceRevision: String(revision).repeat(64), sourceConflict: false, partial: false, ...(beats => ({ beats, bodies: sceneBodies(beats as SceneBeat[]) }))(ids.map((item, index) => beat(item, 20 + index * 10))) });
   const workspace = () => ({
     projectRevision: "1".repeat(64), sourceMapRevision: String(revision).repeat(64), entrySceneId: "arrival",
     lastOpen: { chapterId: "chapter", sceneId: "arrival" }, canUndo: false, canRedo: false,

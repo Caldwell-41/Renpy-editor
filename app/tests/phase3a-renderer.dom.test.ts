@@ -2,10 +2,11 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFile } from "node:fs/promises";
 import { Window } from "happy-dom";
-import { conditionCaption, deriveScenePreview, hasSceneDraft, renderStoryView, type Condition, type SceneBeat, type SceneWorkspace } from "../src/scene-ui.js";
+import { conditionCaption, deriveScenePreview, hasSceneDraft, type Condition, type SceneBeat, type SceneWorkspace } from "../src/scene-ui.js";
 import { renderBranches, type FlowWorkspace } from "../src/branches-ui.js";
 import { routeBranches } from "../src/branches-routing.js";
 import { renderSourceWorkspace, type SourceTarget } from "../src/source-ui.js";
+import { sceneBodies, renderStoryView } from "./story-controls-fixture.js";
 
 const tick = async (): Promise<void> => { await new Promise(resolve => setTimeout(resolve, 0)); };
 const guard: Condition = { status: "supported", expression: { type: "compare", operator: "greaterEqual", left: { type: "variable", variableId: "trust", variableType: "int" }, right: { type: "int", value: "9223372036854775807" } } };
@@ -18,7 +19,7 @@ function setup(): { browser: Window; host: HTMLElement; tree: HTMLElement } {
 }
 function model(beats: readonly SceneBeat[]): SceneWorkspace {
   return { projectRevision: "project", sourceMapRevision: "map", entrySceneId: "one", lastOpen: { chapterId: "chapter", sceneId: "one" }, chapters: [{ id: "chapter", displayName: "Chapter", directory: "game" }], canUndo: false, canRedo: false,
-    scenes: [{ id: "one", chapterId: "chapter", displayName: "Arrival", technicalLabel: "arrival", sourcePath: "game/arrival.rpy", sourceRevision: "saved", sourceConflict: false, partial: false, beats }, { id: "two", chapterId: "chapter", displayName: "Shared conversation", technicalLabel: "shared", sourcePath: "game/shared.rpy", sourceRevision: "other", sourceConflict: false, partial: false, beats: [] }],
+    scenes: [{ id: "one", chapterId: "chapter", displayName: "Arrival", technicalLabel: "arrival", sourcePath: "game/arrival.rpy", sourceRevision: "saved", sourceConflict: false, partial: false, beats, bodies: sceneBodies(beats) }, { id: "two", chapterId: "chapter", displayName: "Shared conversation", technicalLabel: "shared", sourcePath: "game/shared.rpy", sourceRevision: "other", sourceConflict: false, partial: false, beats: [], bodies: [] }],
     authoring: { characters: [], appearances: [], assets: [], variables: [{ id: "trust", technicalName: "trust", variableType: "int", defaultValue: "0" }] } };
 }
 const call: SceneBeat = { id: "call", byteStart: 40, byteEnd: 95, protected: false, payload: { type: "call", sceneId: "two", returnLabel: "_loomlight_return_stable" } };

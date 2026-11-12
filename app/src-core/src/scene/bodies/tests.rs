@@ -31,7 +31,12 @@ fn bodies(scene: &Value) -> &Vec<Value> {
 fn beat<'a>(scene: &'a Value, text: &str) -> &'a Value {
     beats(scene)
         .iter()
-        .find(|b| b["payload"]["text"] == text || b["payload"]["source"].as_str().is_some_and(|s| s.trim() == text))
+        .find(|b| {
+            b["payload"]["text"] == text
+                || b["payload"]["source"]
+                    .as_str()
+                    .is_some_and(|s| s.trim() == text)
+        })
         .unwrap_or_else(|| panic!("no beat {text}"))
 }
 /// The body that holds the beat with this text or Custom Code line.
@@ -39,7 +44,13 @@ fn holding<'a>(scene: &'a Value, text: &str) -> &'a Value {
     let id = &beat(scene, text)["id"];
     bodies(scene)
         .iter()
-        .find(|b| b["nodes"].as_array().unwrap().iter().any(|n| n["beatId"] == *id))
+        .find(|b| {
+            b["nodes"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|n| n["beatId"] == *id)
+        })
         .unwrap()
 }
 fn scene_body(scene: &Value) -> &Value {
@@ -88,8 +99,14 @@ fn deleting_the_otherwise_return_after_custom_code_refuses_a_new_fallthrough() {
         .unwrap()
         .clone();
     // The scene body ends at the condition, and the story never passes it.
-    let header = beats(&a).iter().find(|b| b["conditionalBranch"]["ordinal"] == 0).unwrap();
-    assert_eq!(scene_body(&a)["ending"], json!({"type":"ends","beatId":header["id"]}));
+    let header = beats(&a)
+        .iter()
+        .find(|b| b["conditionalBranch"]["ordinal"] == 0)
+        .unwrap();
+    assert_eq!(
+        scene_body(&a)["ending"],
+        json!({"type":"ends","beatId":header["id"]})
+    );
     assert_eq!(positions(scene_body(&a)), vec![before(header)]);
     let refused = f.reject(with_scene(
         &a,
@@ -160,7 +177,12 @@ fn every_listed_insertion_place_is_accepted_and_no_other() {
     let a = scene(&mut f);
     let go = holding(&a, "$ seen = True");
     assert!(!positions(go).contains(&before(beat(&a, "$ seen = True"))));
-    let refused = f.reject(insert(&a, &go["body"], &before(beat(&a, "$ seen = True")), narration()));
+    let refused = f.reject(insert(
+        &a,
+        &go["body"],
+        &before(beat(&a, "$ seen = True")),
+        narration(),
+    ));
     assert_eq!(refused["error"]["code"], "OPAQUE_BOUNDARY");
     f.service.close().unwrap();
 }
@@ -200,7 +222,12 @@ fn custom_code_jump_or_return_ends_its_body_and_refuses_a_later_insert() {
         assert_eq!(body["ending"], json!({"type":"ends","beatId":ending["id"]}));
         assert_eq!(positions(&body), vec![before(beat(&a, "Hello"))]);
         assert_eq!(body["defaultPlace"], before(beat(&a, "Hello")));
-        let refused = f.reject(insert(&a, &body["body"], &json!({"type":"end"}), narration()));
+        let refused = f.reject(insert(
+            &a,
+            &body["body"],
+            &json!({"type":"end"}),
+            narration(),
+        ));
         assert_eq!(refused["error"]["code"], "SCENE_INVARIANT");
         f.service.close().unwrap();
     }
@@ -218,13 +245,19 @@ fn final_other_custom_code_leaves_the_ending_unknown() {
     assert_eq!(body["ending"], json!({"type":"unknown"}));
     // An explicit ending can still go after the Custom Code.
     let places = body["places"].as_array().unwrap();
-    assert_eq!(places.last().unwrap(), &json!({"position":{"type":"end"},"fitsEnding":true}));
+    assert_eq!(
+        places.last().unwrap(),
+        &json!({"position":{"type":"end"},"fitsEnding":true})
+    );
     assert_eq!(body["defaultPlace"], json!({"type":"end"}));
     // Unknown is "may continue": the Choice does not end the scene body.
     assert_eq!(scene_body(&a)["ending"]["type"], "ends");
     assert_eq!(
         scene_body(&a)["ending"]["beatId"],
-        beats(&a).iter().find(|b| b["payload"]["type"] == "return" && b["owner"].is_null()).unwrap()["id"]
+        beats(&a)
+            .iter()
+            .find(|b| b["payload"]["type"] == "return" && b["owner"].is_null())
+            .unwrap()["id"]
     );
     f.service.close().unwrap();
 }
@@ -233,7 +266,10 @@ fn final_other_custom_code_leaves_the_ending_unknown() {
 fn an_empty_body_has_one_place_that_replaces_its_pass() {
     let mut f = Fixture::new();
     let a = save(&mut f, "    if flag:\n        pass\n    \"After\"\n");
-    let header = beats(&a).iter().find(|b| !b["conditionalBranch"].is_null()).unwrap();
+    let header = beats(&a)
+        .iter()
+        .find(|b| !b["conditionalBranch"].is_null())
+        .unwrap();
     let body = bodies(&a)
         .iter()
         .find(|b| b["body"]["branchId"] == header["id"])
@@ -241,9 +277,17 @@ fn an_empty_body_has_one_place_that_replaces_its_pass() {
         .clone();
     assert_eq!(body["nodes"], json!([]));
     assert_eq!(body["ending"], json!({"type":"continues"}));
-    assert_eq!(body["places"], json!([{"position":{"type":"end"},"fitsEnding":true}]));
+    assert_eq!(
+        body["places"],
+        json!([{"position":{"type":"end"},"fitsEnding":true}])
+    );
     assert_eq!(body["defaultPlace"], json!({"type":"end"}));
-    f.command(insert(&a, &body["body"], &json!({"type":"end"}), narration()));
+    f.command(insert(
+        &a,
+        &body["body"],
+        &json!({"type":"end"}),
+        narration(),
+    ));
     let path = f.root.join(a["sourcePath"].as_str().unwrap());
     assert!(std::fs::read_to_string(path)
         .unwrap()
@@ -258,10 +302,18 @@ fn protected_custom_code_is_one_node_with_no_place_before_it() {
     let code = beat(&a, "$ seen = True");
     assert_eq!(code["protected"], true);
     let body = scene_body(&a);
-    assert!(body["nodes"].as_array().unwrap().iter().any(|n| n["beatId"] == code["id"] && n.get("bodies").is_none()));
+    assert!(body["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|n| n["beatId"] == code["id"] && n.get("bodies").is_none()));
     assert_eq!(
         positions(body),
-        vec![before(beat(&a, "Hello")), before(beat(&a, "After")), json!({"type":"end"})]
+        vec![
+            before(beat(&a, "Hello")),
+            before(beat(&a, "After")),
+            json!({"type":"end"})
+        ]
     );
     f.service.close().unwrap();
 }
@@ -269,7 +321,10 @@ fn protected_custom_code_is_one_node_with_no_place_before_it() {
 #[test]
 fn a_later_top_level_statement_closes_the_scene_body() {
     let mut f = Fixture::new();
-    let a = save(&mut f, "    \"Known\"\ninit python:\n    \"Opaque Python\"\n");
+    let a = save(
+        &mut f,
+        "    \"Known\"\ninit python:\n    \"Opaque Python\"\n",
+    );
     let body = scene_body(&a);
     assert_eq!(bodies(&a).len(), 1);
     let ids = body["nodes"]
@@ -280,7 +335,12 @@ fn a_later_top_level_statement_closes_the_scene_body() {
         .collect::<Vec<_>>();
     assert_eq!(ids, vec![beat(&a, "Known")["id"].clone()]);
     assert_eq!(positions(body), vec![before(beat(&a, "Known"))]);
-    let refused = f.reject(insert(&a, &body["body"], &json!({"type":"end"}), narration()));
+    let refused = f.reject(insert(
+        &a,
+        &body["body"],
+        &json!({"type":"end"}),
+        narration(),
+    ));
     assert_eq!(refused["error"]["code"], "OPAQUE_BOUNDARY");
     f.service.close().unwrap();
 }
@@ -306,13 +366,24 @@ fn nested_bodies_follow_source_order_and_options_keep_their_ids() {
     );
     let headers = beats(&a)
         .iter()
-        .filter(|b| !b["conditionalBranch"].is_null() && b["conditionalBranch"]["choiceOption"].is_null())
+        .filter(|b| {
+            !b["conditionalBranch"].is_null() && b["conditionalBranch"]["choiceOption"].is_null()
+        })
         .collect::<Vec<_>>();
-    let menu = beats(&a).iter().find(|b| b["payload"]["type"] == "choice").unwrap();
+    let menu = beats(&a)
+        .iter()
+        .find(|b| b["payload"]["type"] == "choice")
+        .unwrap();
     let options = menu["payload"]["options"].as_array().unwrap();
     let order = bodies(&a)
         .iter()
-        .map(|b| (b["kind"].clone(), b["number"].clone(), b["body"]["branchId"].clone()))
+        .map(|b| {
+            (
+                b["kind"].clone(),
+                b["number"].clone(),
+                b["body"]["branchId"].clone(),
+            )
+        })
         .collect::<Vec<_>>();
     assert_eq!(
         order,
@@ -335,7 +406,10 @@ fn nested_bodies_follow_source_order_and_options_keep_their_ids() {
     assert_eq!(first["owningNode"], menu["id"]);
     assert_eq!(first["parent"]["branchId"], headers[0]["id"]);
     assert_eq!(bodies(&a)[1]["owningNode"], headers[0]["id"]);
-    assert_eq!(bodies(&a)[1]["nodes"][0]["bodies"], json!([first["body"], second["body"]]));
+    assert_eq!(
+        bodies(&a)[1]["nodes"][0]["bodies"],
+        json!([first["body"], second["body"]])
+    );
     f.service.close().unwrap();
 }
 

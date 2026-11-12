@@ -315,6 +315,35 @@ try {
  stage('Hide picked exposes shared Beat/final Return and nested continuation positions through actual controls and public dispatch');
  promptEditor=await editChoice(pickedId);enter(promptEditor.querySelector('[aria-label="Picked options"]'),'markPicked','change');await appendFile(join(scratch,'synthetic-project',path),'# picked external writer\n');const pickedExternal=await readFile(join(scratch,'synthetic-project',path));lastApply=undefined;button('Commit Beat',promptEditor);await wait(()=>lastApply);await settle();assert.equal(lastApply.ok,false);assert.equal(lastApply.error.code,'SOURCE_CONFLICT');assert(promptEditor.isConnected);assert.equal(promptEditor.querySelector('[aria-label="Picked options"]').value,'markPicked');assert.deepEqual(await readFile(join(scratch,'synthetic-project',path)),pickedExternal);button('Cancel',promptEditor);
  stage('independent Scene routes export all three picked policies, duplicate-caption identities, immediate Jumps, inert preview, Cancel/no-op/history and reopen');
+ // Core bodies drive the Then ending states and every place list (#144). The condition
+ // is the issue's example: Custom Code before Return does not hide the ending.
+ const bodiesBefore=await source(path);
+ const bodiesSource=`label ${entry.technicalLabel}:\n    menu:\n        "Coded":\n            "Before code"\n            return "good"\n        "Unknown":\n            "Before unknown"\n            $ renpy.jump("elsewhere")\n    if choice_flag:\n        $ seen = True\n        return\n    else:\n        return\n`;
+ const reopen=async()=>{button('Close Project');await wait(()=>document.querySelector('.recent-open'));button(document.querySelector('.recent-open').textContent);await wait(()=>document.querySelector('.beat-card'));await settle();};
+ await saveSource(path,bodiesSource);await reopen();
+ const endingMenu=choice(),[coded,unknownOption]=endingMenu.payload.options,bodyOf=id=>scene().bodies.find(b=>b.body.branchId===id);
+ const codeEnding=scene().beats.find(b=>b.payload.source?.trim()==='return "good"');
+ assert.deepEqual(bodyOf(coded.id).ending,{type:'ends',beatId:codeEnding.id});assert.equal(bodyOf(unknownOption.id).ending.type,'unknown');
+ button('Then',option(coded.id));panel=document.querySelector('.story-operation[aria-label="Option ending"]');
+ assert.match(panel.textContent,/Ends with Custom Code: return "good"/);assert([...panel.querySelectorAll('button')].some(b=>b.textContent==='Edit in Source'&&!b.disabled));
+ assert.equal(panel.querySelector('[aria-label="Then"]').disabled,true);assert.equal([...panel.querySelectorAll('button')].find(b=>b.textContent==='Apply ending').disabled,true);
+ assert.match(option(coded.id).querySelector(':scope > .story-continuation').textContent,/^Ends with Custom Code: return "good"/);button('Cancel',panel);
+ button('Add a Beat',option(coded.id));draft=document.querySelector('.new-beat');
+ assert.deepEqual([...draft.querySelector('[aria-label="Insert before"]').options].map(o=>o.value),[scene().beats.find(b=>b.payload.text==='Before code').id],'no place before Custom Code or after the ending');button('Cancel',draft);
+ button('Then',option(unknownOption.id));panel=document.querySelector('.story-operation[aria-label="Option ending"]');
+ assert.match(panel.textContent,/Ending unknown: Custom Code can leave this option/);enter(panel.querySelector('[aria-label="Then"]'),'return','change');await applied(panel,'Apply ending');
+ assert.equal(await source(path),bodiesSource.replace('$ renpy.jump("elsewhere")\n','$ renpy.jump("elsewhere")\n            return\n'));await applied(document,'Undo');assert.equal(await source(path),bodiesSource);
+ const conditionHeader=scene().beats.find(b=>b.conditionalBranch&&!b.owner&&!b.conditionalBranch.choiceOption&&!b.conditionalBranch.ordinal&&!b.conditionalBranch.otherwise);
+ button('Add Beat');draft=document.querySelector('.new-beat');const rootPlaces=draft.querySelector('[aria-label="Insert before"]');
+ assert.deepEqual([...rootPlaces.options].map(o=>o.value),[endingMenu.id,conditionHeader.id]);assert(![...rootPlaces.options].some(o=>o.textContent==='End of body'),'the condition ends the scene body');
+ assert.equal(rootPlaces.value,conditionHeader.id,'the default place is before the ending condition');button('Cancel',draft);
+ assert.equal(document.querySelector(`[data-beat-id="${endingMenu.id}"] .beat-controls`).querySelectorAll('button')[1].disabled,true,'Move down cannot pass the ending condition');
+ const otherwiseHeader=scene().beats.find(b=>b.conditionalBranch?.otherwise),otherwiseReturn=scene().beats.find(b=>b.payload.type==='return'&&b.owner?.branchId===otherwiseHeader.id);
+ button('Delete',document.querySelector(`[data-beat-id="${otherwiseReturn.id}"] .beat-controls`));panel=document.querySelector('.story-operation[aria-label="Delete Beat"]');
+ lastApply=undefined;button('Delete this Beat',panel);await wait(()=>lastApply);await settle();
+ assert.equal(lastApply.ok,false);assert.equal(lastApply.error.code,'SCENE_INVARIANT');assert.equal(await source(path),bodiesSource);assert(panel.isConnected);button('Cancel',panel);
+ stage('core bodies drive Then for Custom Code and unknown endings, the place lists and Move down, and refuse a new fallthrough');
+ await saveSource(path,bodiesBefore);await reopen();assert.equal(await source(path),bodiesBefore);
  result.acceptedSource=await source(path);result.sourceSHA256=hash(result.acceptedSource);result.identities=ids;
  button('Close Project');await wait(()=>document.querySelector('.recent-open'));result.passed=true;
 } catch(error){result.failure={message:error.message,stack:error.stack};result.dom=document.body.innerHTML;throw error;}
