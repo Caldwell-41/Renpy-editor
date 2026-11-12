@@ -542,7 +542,7 @@ export function renderSceneAuthoring(
     actions.rememberScreenInsertion?.(structuredClone(insertion));
   };
   let selectedBeatId: string | undefined = initialBeatId;
-  let selectedSceneId = actions.sceneId;
+  let selectedSceneId = storyScene(initial, actions.sceneId)?.id;
   const selectScene = (sceneId: string): void => { selectedSceneId = sceneId; actions.rememberScene?.(sceneId); };
   let mediaGeneration = 0;
   const imageCache = new Map<string, { readonly key: string; readonly url: string }>();

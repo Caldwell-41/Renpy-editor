@@ -226,23 +226,28 @@ test("Scene authoring exposes hierarchy, every Beat, natural dialogue continuati
   assert.equal(calls.at(-1)?.optionText, "Stay");
 });
 
-test("scene selection stays in the renderer and falls back to the last open scene", async () => {
-  installDom(); const model = sceneModel();
-  assert.equal(storyScene(model, "scene-two")?.id, "scene-two");
-  assert.equal(storyScene(model, "deleted-scene")?.id, "scene-one");
-  const calls: SceneCommand[] = [], remembered: string[] = [];
+test("Story keeps the selected scene when a command moves the project's last open scene", async () => {
+  installDom(); const base = sceneModel();
+  assert.equal(storyScene(base, "scene-two")?.id, "scene-two");
+  assert.equal(storyScene(base, "deleted-scene")?.id, "scene-one");
+  const cellar = { ...base.scenes[1]!, id: "scene-three", chapterId: "chapter-one", displayName: "Cellar", technicalLabel: "cellar" };
+  const model: SceneWorkspace = { ...base, scenes: [base.scenes[0]!, cellar, base.scenes[1]!] };
+  // Core points last_open at a surviving neighbour after a delete elsewhere.
+  const next: SceneWorkspace = { ...base, lastOpen: { chapterId: "chapter-two", sceneId: "scene-two" } };
+  const remembered: string[] = [];
   const selected = (): string | null | undefined => document.querySelector(".tree-scene-row.selected .tree-scene-open")?.textContent;
   const dispose = renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
     status:()=>{}, resolution:{width:1280,height:720}, present:async()=>{throw Error("unexpected media")},
-    sceneId:"scene-two", rememberScene:id=>remembered.push(id),
-    apply:async command=>{ calls.push(command); return model; },
+    rememberScene:id=>remembered.push(id), apply:async()=>next,
   });
-  assert.equal(selected(), "Garden");
-  [...document.querySelectorAll<HTMLButtonElement>(".tree-scene-open")].find(item => item.textContent === "Arrival")!.click();
+  assert.equal(selected(), "Arrival");
+  [...document.querySelectorAll<HTMLButtonElement>("button")].find(item => item.ariaLabel === "Move scene Arrival down")!.click();
   await tick();
   assert.equal(selected(), "Arrival");
-  assert.deepEqual(remembered, ["scene-one"]);
-  assert.deepEqual(calls, []);
+  [...document.querySelectorAll<HTMLButtonElement>(".tree-scene-open")].find(item => item.textContent === "Garden")!.click();
+  await tick();
+  assert.equal(selected(), "Garden");
+  assert.deepEqual(remembered, ["scene-two"]);
   dispose();
 });
 

@@ -744,7 +744,8 @@ last-open Chapter/Scene selection. Reopen validates every relationship and sourc
 mapping. Selecting a Scene in Story writes no project file and adds no history entry.
 The device-local layout preference remembers the selected Scene; Story falls back to
 `last_open` when that Scene no longer exists or layouts are not remembered. Creating a
-Scene opens it. Move/delete selects the nearest deterministic surviving Scene; at least one
+Scene opens it, and moving a Scene keeps the current selection. Deleting a Scene points
+`last_open` at the nearest deterministic surviving Scene; at least one
 Chapter and one Scene remain, and the entry Scene cannot be deleted. Display rename
 changes neither labels, source paths, nor UUIDs.
 

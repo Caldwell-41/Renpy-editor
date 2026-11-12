@@ -89,6 +89,7 @@ let statusRequestSequence = 0;
 let runtimeWorkspace: RuntimeWorkspace | undefined;
 let screensWorkspace: ScreensWorkspace | undefined;
 let screenInsertion: import("./scene-ui.ts").ScreenInsertion | undefined;
+// Session copy of the Story scene selection; the layout preference is skipped when layouts are not remembered.
 let storySceneId: string | undefined;
 let lifecycleBusy = false;
 let stageDroppedAssets: ((batch:ImportBatch)=>void)|undefined;
