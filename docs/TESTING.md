@@ -61,8 +61,10 @@ A reason that starts `run by` names a selector that runs on every PR; the runner
 rejects any other. A fixture that only a dispatched workflow runs says `manual:`. Skip tests that only prove deleted
 code stays deleted, and smoke tests that repeat existing coverage.
 
-Gate results with the shared checks: `verify_unittest` for Python and `cargo-log`
-for Rust reject failures, zero tests and skips outside named host exclusions. Use
+Gate results with the shared checks. `verify_unittest` for Python rejects failures,
+zero tests and skips outside named host exclusions. `cargo-log` for Rust rejects
+failures and zero passing tests; it does not check skipped names, so Rust skips
+live only in `app/scripts/test-core.mjs` or a workflow's exact selectors. Use
 `--exact` with Cargo filters and skips. Do not add per-gate test-name lists, or a new
 gate script with its own tests, for each qualification. Keep synthetic DOM, browser,
 real service, SDK, native input and human acceptance distinct. Use controlled data

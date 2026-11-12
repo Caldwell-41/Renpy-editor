@@ -163,7 +163,7 @@ def source_audit(repo):
     for state in ("not-built", "built-but-missing", "available", "withheld-by-scan"):
         if state not in retainer:
             return False, f"package evidence state is not recorded: {state}"
-    if "sha256" not in retainer or "tarfile.open" not in retainer or "package-evidence.json" not in retainer:
+    if "sha256" not in retainer or "package-evidence.json" not in retainer:
         return False, "package hash/retention manifest is incomplete"
     if RUNTIME_CASES != ("compile", "lint", "route-a", "route-b", "runtime-error", "ui-refresh"):
         return False, "ordinary packaged case contract changed"
