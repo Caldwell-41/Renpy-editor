@@ -12,6 +12,8 @@ const names=[
  'Ordinary external edits and stale revisions refuse with zero source writes',
 ];
 const scene=c=>c.workspace().scenes.find(s=>s.id===c.workspace().entrySceneId);
+// The scene Story shows, read from the selected row in the actual scene tree.
+const shownScene=c=>{const name=c.document.querySelector('.tree-scene-row.selected .tree-scene-open')?.textContent;return c.workspace().scenes.find(s=>s.displayName===name)?.id;};
 const findRow=(c,id)=>c.document.querySelector(`.scene-workspace [data-beat-id="${id}"]`);
 const row=(c,id)=>{const node=findRow(c,id);c.assert(node);return node;};
 const text=c=>async()=>c.sourceText(await c.snapshot(),scene(c).sourcePath);
@@ -78,7 +80,7 @@ const openSourceEditor=async(c,path)=>{
 };
 const goStory=async(c,sceneId=scene(c).id)=>{
  const from=c.requests().length,owner=c.session();await c.click('Story');
- await c.wait(()=>c.session()===owner&&c.workspace().lastOpen.sceneId===sceneId&&c.document.querySelector('.scene-workspace .beat-card')&&c.requests().slice(from).some(r=>r.request.operation==='scene.list'&&r.request.payload.sessionId===owner&&r.responseOk));await c.settle();
+ await c.wait(()=>c.session()===owner&&shownScene(c)===sceneId&&c.document.querySelector('.scene-workspace .beat-card')&&c.requests().slice(from).some(r=>r.request.operation==='scene.list'&&r.request.payload.sessionId===owner&&r.responseOk));await c.settle();
 };
 const openBranches=async(c,sceneId,routeId)=>{
  const from=c.requests().length,owner=c.session();await c.click('Branches');
@@ -148,9 +150,9 @@ export const storyCases={
   const after=await c.snapshot();c.assert.equal(c.sourceText(after,s.sourcePath),original.replace(`call ${oldDestination.technicalLabel} from ${savedLabel}`,`call ${destination.technicalLabel} from ${savedLabel}`));
   c.assert.equal(scene(c).beats.find(b=>b.id===call.id).payload.returnLabel,savedLabel);unchangedOtherSources(c,bytes,after,s.sourcePath);
   const flow=await c.call('flow.list',{refresh:true}),edge=flow.edges.find(e=>e.kind==='call'&&e.beatId===call.id);c.assert(edge?.continuation?.location);
-  await select(c,call.id);await c.click('Open called Scene',row(c,call.id));await c.wait(()=>c.workspace().lastOpen.sceneId===destination.id&&c.document.querySelector('.scene-workspace .beat-card'));await c.settle();
+  await select(c,call.id);await c.click('Open called Scene',row(c,call.id));await c.wait(()=>shownScene(c)===destination.id&&c.document.querySelector('.scene-workspace .beat-card'));await c.settle();
   c.assert([...c.document.querySelectorAll('.scene-workspace button')].some(b=>b.textContent==='Back to caller'));
-  await c.click('Back to caller');await c.wait(()=>c.workspace().lastOpen.sceneId===s.id&&findRow(c,call.id)?.classList.contains('selected'));await c.settle();
+  await c.click('Back to caller');await c.wait(()=>shownScene(c)===s.id&&findRow(c,call.id)?.classList.contains('selected'));await c.settle();
   await c.click('View Call continuation',row(c,call.id));await c.wait(()=>c.document.querySelector(`.beat-card.selected[data-beat-id="${edge.continuation.beatId}"]`));await c.settle();
   const continuation=scene(c).beats.find(b=>b.id===edge.continuation.beatId);c.assert.equal(continuation.payload.text,'Caller resumed');c.assert(!continuation.owner);
   c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(after));
@@ -309,7 +311,7 @@ export const storyCases={
   const flow=await c.call('flow.list',{refresh:true});const call=flow.edges.find(e=>e.sceneId===s.id&&e.kind==='call');c.assert(call?.location);
   await c.wait(()=>[...c.document.querySelector('[aria-label="Selected route"]').options].some(o=>o.value===call.id));c.enter(c.document.querySelector('[aria-label="Selected route"]'),call.id,'change');c.assert.match(c.document.querySelector('.branches-workspace').textContent,/Call Scene returns to its continuation/);
   await c.click('Open Scene');await c.wait(()=>c.document.querySelector(`.beat-card.selected[data-beat-id="${call.beatId}"]`));await c.settle();
-  c.assert.equal(c.workspace().lastOpen.sceneId,s.id);c.assert.equal(scene(c).beats.find(b=>b.id===call.beatId).payload.type,'call');
+  c.assert.equal(shownScene(c),s.id);c.assert.equal(scene(c).beats.find(b=>b.id===call.beatId).payload.type,'call');
   await openBranches(c,s.id,call.id);
   await c.click('Open continuation in Story');await c.wait(()=>c.document.querySelector(`.beat-card.selected[data-beat-id="${call.continuation.beatId}"]`));await c.settle();c.assert.equal(scene(c).beats.find(b=>b.id===call.continuation.beatId).payload.text,'Caller resumed');
   await openBranches(c,s.id);
