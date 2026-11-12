@@ -549,11 +549,6 @@ export interface StoryView {
   dispose(): void;
 }
 
-export function renderSceneAuthoring(host: HTMLElement, treeHost: HTMLElement, initial: SceneWorkspace, actions: SceneActions, initialBeatId?: string): () => void {
-  const view = renderStoryView(host, treeHost, initial, actions, initialBeatId);
-  return () => view.dispose();
-}
-
 export function renderStoryView(
   host: HTMLElement,
   treeHost: HTMLElement,
@@ -592,7 +587,8 @@ export function renderStoryView(
   let pendingWrites = 0;
   // Beat drafts for the project session, keyed by beat id or by a new beat's insertion place.
   // A new beat is a draft from the moment it is added; an existing beat only once edited.
-  interface BeatDraft { readonly panel: HTMLElement; readonly sceneId: string; readonly beatId?: string; readonly body?: BodyRef; readonly read?: () => BeatPayload }
+  interface BeatDraft { readonly panel: HTMLElement; readonly sceneId: string; readonly beatId?: string; readonly place?: () => { body: BodyRef; position: Position }; readonly read?: () => BeatPayload }
+  let newBeatDrafts = 0;
   const beatDrafts = new Map<string, BeatDraft>();
   const isPending = (draft: BeatDraft): boolean => !draft.beatId || draft.panel.dataset.unsubmitted === "true";
   const pendingDrafts = (sceneId?: string): BeatDraft[] => [...beatDrafts.values()].filter(draft => isPending(draft) && (sceneId === undefined || draft.sceneId === sceneId));
@@ -692,7 +688,7 @@ export function renderStoryView(
   const dropRemovedDrafts = (next: SceneWorkspace): void => {
     for (const [key, draft] of beatDrafts) {
       const scene = next.scenes.find(item => item.id === draft.sceneId);
-      const body = draft.body?.type === "branch" ? draft.body.branchId : undefined;
+      const place = draft.place?.().body, body = place?.type === "branch" ? place.branchId : undefined;
       if (!scene || [draft.beatId, body].some(id => id && !scene.beats.some(beat => beat.id === id))) beatDrafts.delete(key);
     }
     draftsChanged();
@@ -709,7 +705,8 @@ export function renderStoryView(
     return ids;
   };
   const draftsWithin = (scene: SceneDocument, id: string): boolean => pendingDrafts(scene.id).some(draft => {
-    const anchor = draft.beatId ?? (draft.body?.type === "branch" ? draft.body.branchId : undefined);
+    const place = draft.place?.().body;
+    const anchor = draft.beatId ?? (place?.type === "branch" ? place.branchId : undefined);
     return !!anchor && ancestry(scene, anchor).has(id);
   });
   const discardNote = (copy: HTMLElement, scene: SceneDocument, id: string, text = "Its unsaved beat drafts are discarded."): void => { if (draftsWithin(scene, id)) copy.textContent += ` ${text}`; };
@@ -747,7 +744,7 @@ export function renderStoryView(
     const scene = model.scenes.find(item => item.id === draft.sceneId);
     if (!scene) return true;
     if (draft.beatId) { const beat = scene.beats.find(item => item.id === draft.beatId); return !beat || beat.protected || !!beat.conditionalBranch || !!beat.structuralPlaceholder || readOnlyLogic(beat); }
-    const body = draft.body;
+    const body = draft.place?.().body;
     return body?.type === "branch" && !scene.beats.some(item => item.id === body.branchId);
   };
   const showOrphanedDrafts = (scene: SceneDocument): void => {
@@ -764,7 +761,7 @@ export function renderStoryView(
     ? host.querySelector<HTMLElement>(".beats-list") ?? undefined
     : [...host.querySelectorAll<HTMLElement>(".story-branch-body")].find(node => node.dataset.branchId === body.branchId);
   const restoreNewBeatDrafts = (scene: SceneDocument): void => {
-    for (const draft of beatDrafts.values()) if (!draft.beatId && draft.sceneId === scene.id && draft.body) bodyList(draft.body)?.prepend(draft.panel);
+    for (const draft of beatDrafts.values()) if (!draft.beatId && draft.sceneId === scene.id && draft.place) bodyList(draft.place().body)?.prepend(draft.panel);
   };
   // Quiet markers: the Screens draft convention on beat rows and scene rows.
   const markDrafts = (): void => {
@@ -775,6 +772,8 @@ export function renderStoryView(
       if (has) label?.setAttribute("aria-description", "Unsaved draft"); else label?.removeAttribute("aria-description");
     };
     host.querySelectorAll<HTMLElement>(".beat-card").forEach(card => mark(card, card.querySelector(":scope > .beat-compact > .beat-select"), beats.has(card.dataset.beatId ?? "")));
+    const shown = storyScene(model, selectedSceneId);
+    host.querySelectorAll<HTMLElement>(".story-condition-group").forEach(group => mark(group, group.querySelector(":scope > .story-group-heading > strong"), !!shown && draftsWithin(shown, group.dataset.conditionGroupId ?? "")));
     treeHost.querySelectorAll<HTMLElement>(".tree-scene-row").forEach(row => mark(row, row.querySelector(".tree-scene-open"), scenes.has(row.dataset.sceneId ?? "")));
   };
 
@@ -1263,9 +1262,14 @@ export function renderStoryView(
     const dropDrag=(event:PointerEvent):void=>{
       if(!drag||event.pointerId!==drag.pointerId)return;
       drag.x=event.clientX;drag.y=event.clientY;if(drag.active)updateTarget();
-      const {id,target,active,grip}=drag;cancelDrag();
-      if(active&&target!==undefined)void mutate({type:"reorderBeat",sceneId:scene.id,expectedSourceRevision:scene.sourceRevision,beatId:id,toIndex:target}).then(saved=>{if(saved)[...host.querySelectorAll<HTMLElement>(".beat-card")].find(row=>row.dataset.beatId===id)?.querySelector<HTMLElement>(".beat-grip")?.focus();});
-      else if(grip.isConnected)grip.focus();
+      const {id,from,target,active,grip}=drag;cancelDrag();
+      const moved=scene.beats.find(b=>b.id===id),onto=target===undefined?undefined:scene.beats[target];
+      if(!active||!moved||!onto||target===undefined){if(grip.isConnected)grip.focus();return;}
+      // Dropping below the start lands after the target; above it, before the target.
+      const siblings=bodyNodes(scene,{type:"root"}),anchor=target>from?siblings[siblings.findIndex(b=>b.id===onto.id)+1]:onto;
+      const position:Position=anchor?{type:"before",anchor:nodeRef(anchor)}:{type:"end"};
+      void mutate({type:"moveStoryNode",sceneId:scene.id,expectedSourceRevision:scene.sourceRevision,node:nodeRef(moved),expectedBody:beatBody(moved),body:{type:"root"},position})
+        .then(saved=>{if(saved)[...host.querySelectorAll<HTMLElement>(".beat-card")].find(row=>row.dataset.beatId===id)?.querySelector<HTMLElement>(".beat-grip")?.focus();});
     };
     const escapeDrag=(event:KeyboardEvent):void=>{if(event.key==="Escape"&&drag){event.preventDefault();const grip=drag.grip;cancelDrag();grip.focus();}};
     const branchHosts = new Map<string, HTMLElement>();
@@ -1324,7 +1328,7 @@ export function renderStoryView(
       select.addEventListener("keydown", event => { if (event.altKey && ["ArrowUp", "ArrowDown"].includes(event.key)) { event.preventDefault(); const direction = event.key === "ArrowUp" ? "up" : "down"; if (!(direction === "up" ? up : down).disabled) moveSibling(scene, beat, direction); } });
       const grip=button("⠿","icon-button beat-grip");grip.draggable=false;grip.ariaLabel=`Drag beat ${index+1} to reorder`;grip.title="Drag to reorder; use arrow controls with the keyboard";grip.disabled=!!beat.owner||beat.protected||previewLogicBoundary(beat)||["choice","jump","return"].includes(beat.payload.type)||scene.sourceConflict;
       grip.addEventListener("lostpointercapture",e=>{if(drag?.pointerId===e.pointerId)cancelDrag();});
-      grip.addEventListener("pointerdown",e=>{if(e.button!==0||grip.disabled)return;if(hasDraft()||settling||host.querySelector(".new-beat")){actions.status("Complete or cancel the current edit first.","error");return;}e.preventDefault();cancelDrag();grip.focus();drag={id:beat.id,from:index,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,x:e.clientX,y:e.clientY,active:false,grip};grip.setPointerCapture?.(e.pointerId);window.addEventListener("pointermove",moveDrag,{passive:false});window.addEventListener("pointerup",dropDrag);window.addEventListener("pointercancel",cancelDrag);window.addEventListener("keydown",escapeDrag);window.addEventListener("blur",cancelDrag);});
+      grip.addEventListener("pointerdown",e=>{if(e.button!==0||grip.disabled)return;if(hasDraft()||settling){actions.status("Complete or cancel the current edit first.","error");return;}e.preventDefault();cancelDrag();grip.focus();drag={id:beat.id,from:index,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,x:e.clientX,y:e.clientY,active:false,grip};grip.setPointerCapture?.(e.pointerId);window.addEventListener("pointermove",moveDrag,{passive:false});window.addEventListener("pointerup",dropDrag);window.addEventListener("pointercancel",cancelDrag);window.addEventListener("keydown",escapeDrag);window.addEventListener("blur",cancelDrag);});
       controls.append(up, down, remove, move); compact.append(grip,select, controls); card.append(compact);
       if (selectedBeatId === beat.id) renderExistingBeat(card, scene, beat, index);
       if (beat.conditionalBranch) {
@@ -1339,7 +1343,7 @@ export function renderStoryView(
           if (selected && (selected.conditionalBranch?.groupId === branch.groupId || insideCondition(scene, beatBody(selected), branch.groupId))) group.classList.add("selected");
           const caption = document.createElement("strong"); caption.textContent = `Condition · ${branch.condition ? conditionCaption(branch.condition, model.authoring.variables) : "Unknown condition"} · ${scene.beats.filter(item => item.conditionalBranch?.groupId === branch.groupId).length} branches / ${groupCount(scene, branch.groupId)} Beats${group.classList.contains("selected") ? " · Contains selection" : ""}`;
           const collapse = button(collapsedConditions.has(branch.groupId) ? "Expand condition" : "Collapse condition"); collapse.setAttribute("aria-expanded", String(!collapsedConditions.has(branch.groupId))); collapse.dataset.collapseGroupId = branch.groupId;
-          collapse.addEventListener("click", () => { if (!draftGuard()) return; if (!collapsedConditions.has(branch.groupId) && draftsWithin(scene, branch.groupId)) { actions.status("Commit or cancel the beat drafts inside this condition before collapsing it.", "error"); return; } if (collapsedConditions.has(branch.groupId)) collapsedConditions.delete(branch.groupId); else collapsedConditions.add(branch.groupId); draw(); [...host.querySelectorAll<HTMLElement>("[data-collapse-group-id]")].find(item => item.dataset.collapseGroupId === branch.groupId)?.focus(); });
+          collapse.addEventListener("click", () => { if (!draftGuard()) return; if (collapsedConditions.has(branch.groupId)) collapsedConditions.delete(branch.groupId); else collapsedConditions.add(branch.groupId); draw(); [...host.querySelectorAll<HTMLElement>("[data-collapse-group-id]")].find(item => item.dataset.collapseGroupId === branch.groupId)?.focus(); });
           const elseif = button("Add Else If"); elseif.disabled = scene.sourceConflict; elseif.addEventListener("click", () => addBranchForm(scene, beat, false));
           const otherwise = button("Add Otherwise"); otherwise.disabled = scene.sourceConflict || scene.beats.some(item => item.conditionalBranch?.groupId === branch.groupId && item.conditionalBranch.otherwise); otherwise.addEventListener("click", () => addBranchForm(scene, beat, true));
           const unwrap = button("Unwrap…"); unwrap.disabled = scene.sourceConflict; unwrap.addEventListener("click", () => unwrapForm(scene, beat));
@@ -1516,9 +1520,10 @@ export function renderStoryView(
 
   const renderNewBeat = (list: HTMLElement, scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", body: BodyRef = { type: "root" }, position: Position = defaultInsertion(scene, body), insertion?: ScreenInsertion, opener = "root"): void => {
     // One pending new beat per insertion place: adding there again returns to it.
-    const key = `new:${scene.id}:${JSON.stringify(body)}:${JSON.stringify(position)}`;
-    const existing = beatDrafts.get(key);
+    const requested = JSON.stringify({ body, position });
+    const existing = [...beatDrafts.values()].find(draft => !draft.beatId && draft.sceneId === scene.id && JSON.stringify(draft.place?.()) === requested);
     if (existing) { if (!existing.panel.isConnected) list.prepend(existing.panel); existing.panel.querySelector<HTMLElement>("select, input, textarea")?.focus(); return; }
+    const key = `new:${++newBeatDrafts}`;
     const base = (): { scene: SceneDocument; captured: ExpectedRevisions } => {
       const current = model.scenes.find(item => item.id === scene.id);
       if (!current) throw new Error("This Scene is no longer available. Draft retained.");
@@ -1605,7 +1610,10 @@ export function renderStoryView(
     });
     const orderActions=()=>actionsRow.replaceChildren(...(screenType()?[commit,cancel]:[cancel,commit]));orderActions();type.addEventListener("change",orderActions);
     dirtyDraft(panel,[type]);panel.append(heading,destination,labelled("Beat type",type),placement.host,editorHost,actionsRow,secondaryHost);list.prepend(panel);
-    keepDraft(key,{panel,sceneId:scene.id,body,read:()=>editor.read()});updatePendingMarker();type.focus();
+    // A new beat moves with the place the author chooses, until it is added.
+    const place=():{body:BodyRef;position:Position}=>{try{return chosenLocation();}catch{return {body,position};}};
+    placement.host.addEventListener("change",()=>{const target=bodyList(place().body);if(target&&panel.parentElement!==target)target.prepend(panel);});
+    keepDraft(key,{panel,sceneId:scene.id,place,read:()=>editor.read()});updatePendingMarker();type.focus();
   };
 
   draw();

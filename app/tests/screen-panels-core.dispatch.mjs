@@ -8,7 +8,7 @@ import {driverProcess} from './phase2-driver-process.mjs';
 import {buildPanelCreationForm} from '../dist-tests/src/screen-panels.js';
 import {ScreenText} from '../dist-tests/src/screen-text.js';
 import {ScreenLayoutEditor} from '../dist-tests/src/screen-layout.js';
-import {renderSceneAuthoring} from '../dist-tests/src/scene-ui.js';
+import {renderStoryView} from '../dist-tests/src/scene-ui.js';
 
 const output = resolve(process.env.PANEL_CORE_UI_OUTPUT ?? `target/screen-panels-core-ui-${randomUUID()}`);
 await mkdir(dirname(output), {recursive: true}); await mkdir(output);
@@ -44,12 +44,12 @@ async function mountStory(sceneId) {
   disposeStory?.(); document.body.replaceChildren();
   const model = await call('scene.list'); model.lastOpen = {chapterId: model.scenes.find(scene => scene.id === sceneId).chapterId, sceneId};
   const host = document.createElement('main'), tree = document.createElement('aside'); document.body.append(host, tree);
-  disposeStory = renderSceneAuthoring(host, tree, model, {
+  disposeStory = renderStoryView(host, tree, model, {
     resolution: {width: 1280, height: 720}, status: message => messages.push(message), present: async () => { throw Error('No media requested'); },
     screenCatalog: () => call('screens.list'), resolveScreenTarget: binding => call('screens.resolveTarget', {binding}),
     apply: (command, expected) => call('scene.apply', {expectedProjectRevision: expected.projectRevision, expectedSourceMapRevision: expected.sourceMapRevision, command}),
     viewSource: (...args) => { result.sourceNavigation = args; },
-  });
+  }).dispose;
   return host;
 }
 async function openBeat(host, type) {

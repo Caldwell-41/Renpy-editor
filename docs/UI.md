@@ -452,9 +452,10 @@ would discard a draft, including deleting its beat or closing the project.
 The [beat draft conflict rules](#beat-draft-conflicts) handle changes to the source
 beneath a retained draft. Until that comparison is built, Commit refuses a draft
 whose beat changed in source and keeps the input. A beat that the author has not
-edited is not a draft. Collapsing a condition that contains a draft is refused, so
-the draft stays visible. Undo and Redo wait for pending drafts until the
-[Story Undo](#story-undo) order is built.
+edited is not a draft. A collapsed condition shows the draft marker on its heading.
+A beat with a draft can be moved, and the draft moves with it. A new beat that is
+not yet added moves with the place the author chooses. Undo and Redo wait for
+pending drafts until the [Story Undo](#story-undo) order is built.
 
 ### Beat draft conflicts
 

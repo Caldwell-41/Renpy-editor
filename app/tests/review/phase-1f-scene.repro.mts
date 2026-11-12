@@ -6,7 +6,7 @@ import {
   deriveScenePreview,
   hasSceneDraft,
   renderRecoverySurface,
-  renderSceneAuthoring,
+  renderStoryView,
   type RecoveryReport,
   type SceneCommand,
   type SceneWorkspace,
@@ -83,11 +83,11 @@ test("closeout: Add change here retains selected Beat anchor", async () => {
     { id: "show", byteStart: 0, byteEnd: 10, protected: false, payload: { type: "showCharacter", characterId: "alice", appearanceId: "alice-happy", placement: "left", transition: "none" } as const },
     ...first.beats,
   ] }, base.scenes[1]!] };
-  renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+  renderStoryView(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
     status: () => {}, resolution: { width: 1920, height: 1080 },
     present: async (assetId, purpose) => ({ assetId, purpose, mimeType: "image/png", dataBase64: "", sha256: "a", byteCount: 24, width: 1, height: 1, cacheKey: `${assetId}:a` }),
     apply: async (command) => { calls.push(command); return model; },
-  });
+  }).dispose;
   [...document.querySelectorAll("button")].find(item => item.textContent?.startsWith("2. Dialogue"))!.click();
   click("Add change here"); document.querySelector<HTMLButtonElement>(".new-beat .button.primary")!.click(); await tick();
   assert.equal(calls.at(-1)?.beforeBeatId, "dialogue");

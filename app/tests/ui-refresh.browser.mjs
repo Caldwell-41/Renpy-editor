@@ -438,7 +438,7 @@ for key,value in [('stage','open'),('passed',False),('error','failure')]:
    if(op==='scene.list')return response(scene);
    if(op==='scene.apply'){
     const command=payload.command;window.__auditCommands.push(command);
-    if(command.type==='reorderBeat'){previous=structuredClone(scene);const beats=scene.scenes.find(s=>s.id===command.sceneId).beats;const from=beats.findIndex(b=>b.id===command.beatId);beats.splice(command.toIndex,0,beats.splice(from,1)[0]);scene.canUndo=true;}
+    if(command.type==='moveStoryNode'){previous=structuredClone(scene);const beats=scene.scenes.find(s=>s.id===command.sceneId).beats;const moved=beats.splice(beats.findIndex(b=>b.id===command.node.beatId),1)[0];beats.splice(command.position.type==='end'?beats.length:beats.findIndex(b=>b.id===command.position.anchor.beatId),0,moved);scene.canUndo=true;}
     if(command.type==='undo'){scene=previous;previous=undefined;}
     if(command.type==='insertBodyBeat'){await new Promise(resolve=>window.__auditReleaseBeat=resolve);scene.scenes.find(s=>s.id===command.sceneId).beats.push({id:'audit-added',protected:false,byteStart:130,byteEnd:150,payload:command.beat});}
     return response(scene);
@@ -466,11 +466,11 @@ for key,value in [('stage','open'),('passed',False),('error','failure')]:
  await audit.locator('.choice-new-scene').getByRole('button',{name:'Cancel',exact:true}).click();await audit.locator('.expanded-beat > .row-actions').getByRole('button',{name:'Cancel',exact:true}).click();
  // Real mouse pointer capture, cancellation and protected-boundary rejection.
  const drag=async(target,escape=false)=>{const grip=await audit.locator('[data-beat-id="background"] .beat-grip').boundingBox();const box=await target.boundingBox();await audit.mouse.move(grip.x+grip.width/2,grip.y+grip.height/2);await audit.mouse.down();await audit.mouse.move(box.x+box.width/2,box.y+box.height/2,{steps:8});if(escape)await audit.keyboard.press('Escape');await audit.mouse.up();};
- await drag(audit.locator('[data-beat-id="dialogue"]'),true);assert.equal(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='reorderBeat').length),0);
- await drag(audit.locator('[data-beat-id="choice"]'));assert.equal(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='reorderBeat').length),0);
- await drag(audit.locator('.app-header'));assert.equal(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='reorderBeat').length),0);
+ await drag(audit.locator('[data-beat-id="dialogue"]'),true);assert.equal(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='moveStoryNode').length),0);
+ await drag(audit.locator('[data-beat-id="choice"]'));assert.equal(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='moveStoryNode').length),0);
+ await drag(audit.locator('.app-header'));assert.equal(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='moveStoryNode').length),0);
  await drag(audit.locator('[data-beat-id="dialogue"]'));await audit.waitForFunction(()=>document.activeElement?.closest('.beat-card')?.dataset.beatId==='background');
- assert.deepEqual(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='reorderBeat').map(c=>c.toIndex)),[2]);assert.equal(await audit.locator('.beat-card').nth(2).getAttribute('data-beat-id'),'background');
+ assert.deepEqual(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='moveStoryNode').map(c=>c.node.beatId)),['background']);assert.equal(await audit.locator('.beat-card').nth(2).getAttribute('data-beat-id'),'background');
  await audit.getByRole('button',{name:'Undo',exact:true}).click();await audit.waitForFunction(()=>document.querySelector('.beat-card')?.dataset.beatId==='background');
  await audit.getByRole('button',{name:'Variables',exact:true}).click();
  const dialog=audit.getByRole('dialog');const type=dialog.locator('.field').filter({has:audit.locator('span:text-is("Type")')}).locator('select');const defaultField=dialog.locator('.field').filter({has:audit.locator('span:text-is("Default value")')});

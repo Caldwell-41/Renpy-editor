@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
-import { renderSceneAuthoring, type SceneWorkspace } from "../src/scene-ui.js";
+import { renderStoryView, type SceneWorkspace } from "../src/scene-ui.js";
 import { storyFixture } from "./story-controls-fixture.js";
 
 test("imported arithmetic opens as an equation and commits the retained formula through Story", async () => {
@@ -11,11 +11,11 @@ test("imported arithmetic opens as an equation and commits the retained formula 
   const base=storyFixture();
   const model:SceneWorkspace={...base,authoringRevision:"authoring",scenes:[{...base.scenes[0]!,beats:[{id:"arithmetic",byteStart:0,byteEnd:30,protected:false,payload:{type:"setVariable",variableId:"trust",value:{operation:"add",operand:"(trust + 2) * 3"}}}]}]};
   let committed:unknown,inspections=0;
-  const dispose=renderSceneAuthoring(document.querySelector("main")!,document.querySelector("aside")!,model,{
+  const dispose=renderStoryView(document.querySelector("main")!,document.querySelector("aside")!,model,{
     validateAssignment:async()=>{inspections++;throw Error("offline");},
     resolution:{width:1280,height:720},present:async()=>{throw Error("no media");},status:()=>{},
     apply:async(command,expected)=>{committed={command,expected};throw Error("SOURCE_CONFLICT");},
-  },"arithmetic");
+  },"arithmetic").dispose;
   const formula=document.querySelector<HTMLInputElement>('[aria-label="Formula"]');
   assert.ok(formula,"a supported formula must have a formula field");
   assert.equal(formula.value,"(trust + 2) * 3");

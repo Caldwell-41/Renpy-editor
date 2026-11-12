@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { runInNewContext } from 'node:vm';
 import test from 'node:test';
 import { Window } from 'happy-dom';
-import { renderSceneAuthoring, type SceneWorkspace } from '../src/scene-ui.js';
+import { renderStoryView, type SceneWorkspace } from '../src/scene-ui.js';
 
 const helper = await readFile(new URL('../../src-tauri/src/native_editor_probe.js', import.meta.url), 'utf8');
 const selectable = await readFile(new URL('../../src-tauri/src/selectable_edit_probe.js', import.meta.url), 'utf8');
@@ -21,11 +21,11 @@ test('selectable native probe retains the selected Beat across history and repor
     authoring: { characters: [], appearances: [], assets: [], variables: [] },
   };
   const history: string[] = [], opened: string[] = [];
-  const dispose = renderSceneAuthoring(document.querySelector('#host')!, document.querySelector('#tree')!, model, {
+  const dispose = renderStoryView(document.querySelector('#host')!, document.querySelector('#tree')!, model, {
     status: () => {}, resolution: { width: 1280, height: 720 }, present: async () => { throw Error('unexpected media'); },
     apply: async command => { history.push(command.type); return model; },
     assist: (_scene, beat, action) => { opened.push(`${action}:${beat}`); },
-  }, 'narration'); // Acceptance explicitly restores this target before Undo/Redo.
+  }, 'narration').dispose; // Acceptance explicitly restores this target before Undo/Redo.
   const scope: { __loomlightProbeSelectBeat?: (id: string) => void; __loomlightProbeFindButton?: (label: string) => HTMLButtonElement } = {};
   runInNewContext(helper, { window: scope, document, performance, setTimeout });
   const selected = () => document.querySelector('.beat-select')!.ariaExpanded;

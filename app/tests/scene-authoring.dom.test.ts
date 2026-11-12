@@ -6,7 +6,6 @@ import {
   deriveScenePreview,
   hasSceneDraft,
   renderRecoverySurface,
-  renderSceneAuthoring,
   renderStoryView,
   storyScene,
   type RecoveryReport,
@@ -86,10 +85,10 @@ function foundationModel(): SceneWorkspace {
 test("nested child commits carry owner and retain input on stale/session refusal", async () => {
   const browser = installDom(); const model = foundationModel();
   const calls: SceneCommand[] = [];
-  const dispose = renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+  const dispose = renderStoryView(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
     status:()=>{}, resolution:{width:1280,height:720}, present:async()=>{throw Error("unexpected media")},
     apply:async command=>{ calls.push(command); throw Error(calls.length===1 ? "SOURCE_CONFLICT" : "STALE_SESSION"); },
-  });
+  }).dispose;
   let card = document.querySelector<HTMLElement>('[data-beat-id="child"]')!;
   assert.ok(card.classList.contains("nested-dialogue"));
   assert.equal(document.querySelectorAll(".conditional-branch").length, 2);
@@ -132,10 +131,10 @@ test("root controls respect nested children and conditional insertion boundaries
   ] }] };
   const host = document.querySelector<HTMLElement>("#host")!;
   const calls: SceneCommand[] = [];
-  const dispose = renderSceneAuthoring(host, document.querySelector("#tree")!, model, {
+  const dispose = renderStoryView(host, document.querySelector("#tree")!, model, {
     status: () => {}, resolution: { width: 1280, height: 720 }, present: async () => { throw Error("unused"); },
     apply: async command => { calls.push(command); return model; },
-  });
+  }).dispose;
   try {
     const root = host.querySelector<HTMLElement>('[data-beat-id="root-one"]')!;
     const controls = root.querySelectorAll<HTMLButtonElement>(".beat-controls button");
@@ -173,7 +172,7 @@ test("root controls respect nested children and conditional insertion boundaries
 
 test("Scene authoring exposes hierarchy, every Beat, natural dialogue continuation, and Create New Scene", async () => {
   const browser = installDom(); let model = sceneModel(); const calls: SceneCommand[] = []; let status = "";
-  renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+  renderStoryView(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
     status: (message) => { status = message; },
     resolution: { width: 1920, height: 1080 },
     present: async (assetId, purpose) => ({ assetId, purpose, mimeType: "image/png", dataBase64: "", sha256: "a", byteCount: 24, width: 1, height: 1, cacheKey: `${assetId}:a` }),
@@ -189,7 +188,7 @@ test("Scene authoring exposes hierarchy, every Beat, natural dialogue continuati
       }
       return model;
     },
-  });
+  }).dispose;
 
   assert.match(document.querySelector("#tree")?.textContent ?? "", /Opening/);
   assert.match(document.querySelector("#tree")?.textContent ?? "", /Garden/);
@@ -236,10 +235,10 @@ test("Story keeps the selected scene when a command moves the project's last ope
   const next: SceneWorkspace = { ...base, lastOpen: { chapterId: "chapter-two", sceneId: "scene-two" } };
   const remembered: string[] = [];
   const selected = (): string | null | undefined => document.querySelector(".tree-scene-row.selected .tree-scene-open")?.textContent;
-  const dispose = renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+  const dispose = renderStoryView(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
     status:()=>{}, resolution:{width:1280,height:720}, present:async()=>{throw Error("unexpected media")},
     rememberScene:id=>remembered.push(id), apply:async()=>next,
-  });
+  }).dispose;
   assert.equal(selected(), "Arrival");
   [...document.querySelectorAll<HTMLButtonElement>("button")].find(item => item.ariaLabel === "Move scene Arrival down")!.click();
   await tick();
@@ -270,12 +269,12 @@ test("recovery UI offers only proven resolutions and keeps ambiguous transaction
 
 test("failed Beat validation preserves the draft and restores focus", async () => {
   installDom(); const model = sceneModel(); let status = "";
-  renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+  renderStoryView(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
     status: (message) => { status = message; },
     resolution: { width: 1920, height: 1080 },
     present: async (assetId, purpose) => ({ assetId, purpose, mimeType: "image/png", dataBase64: "", sha256: "a", byteCount: 24, width: 1, height: 1, cacheKey: `${assetId}:a` }),
     apply: async () => { throw new Error("Source revision changed"); },
-  });
+  }).dispose;
   const dialogue = [...document.querySelectorAll("button")].find((item) => item.textContent?.startsWith("1. Dialogue"))!; dialogue.click();
   const textarea = document.querySelector<HTMLTextAreaElement>("textarea")!; textarea.value = "Unsaved words"; textarea.dispatchEvent(new window.Event("input", { bubbles: true }));
   click("Commit Beat"); await tick();
@@ -310,10 +309,10 @@ test("preview presents images through the bounded bridge and auditions audio onl
     { id: "end-beat", byteStart: 50, byteEnd: 60, protected: false, payload: { type: "return" } },
   ] }, model.scenes[1]!] };
   const calls: Array<{ assetId: string; purpose: string }> = [];
-  renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+  renderStoryView(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
     status: () => {}, resolution: { width: 1280, height: 720 }, apply: async () => model,
     present: async (assetId, purpose) => { calls.push({ assetId, purpose }); return { assetId, purpose, mimeType: purpose === "audioAudition" ? "audio/ogg" : "image/png", dataBase64: "", sha256: "hash", byteCount: 24, width: purpose === "audioAudition" ? undefined : 1, height: purpose === "audioAudition" ? undefined : 1, cacheKey: `${assetId}:hash` }; },
-  });
+  }).dispose;
   await tick();
   assert.equal(calls.some((call) => call.purpose === "audioAudition"), false);
   assert.equal(calls.filter((call) => call.assetId === "bg").length, 1);
@@ -332,10 +331,10 @@ test("pending media is cancelled logically and disposed with the project view", 
     { id: "return-only", byteStart: 20, byteEnd: 30, protected: false, payload: { type: "return" } },
   ] }, model.scenes[1]!] };
   const pending = deferred<{ assetId: string; purpose: "thumbnail"; mimeType: string; dataBase64: string; sha256: string; byteCount: number; width: number; height: number; cacheKey: string }>();
-  const dispose = renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+  const dispose = renderStoryView(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
     status: () => {}, resolution: { width: 16, height: 9 }, apply: async () => model,
     present: async () => pending.promise,
-  });
+  }).dispose;
   const oldImage = document.querySelector<HTMLImageElement>(".preview-background")!;
   assert.equal(oldImage.src, ""); dispose(); document.querySelector("#host")!.replaceChildren();
   pending.resolve({ assetId: "bg", purpose: "thumbnail", mimeType: "image/png", dataBase64: "iVBORw0KGgo=", sha256: "hash", byteCount: 8, width: 1, height: 1, cacheKey: "bg:hash" });
@@ -356,10 +355,10 @@ test("simultaneous Story preview and thumbnail keep their displayed URLs alive",
   URL.revokeObjectURL = (url: string) => { revoked.add(url); originalRevoke(url); };
   let dispose: (() => void) | undefined;
   try {
-    dispose = renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+    dispose = renderStoryView(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
       status: () => {}, resolution: { width: 1280, height: 720 }, apply: async () => model,
       present: async (assetId, purpose) => ({ assetId, purpose, mimeType: "image/png", dataBase64: "", sha256: "hash", byteCount: 1, width: 1, height: 1, cacheKey: `${assetId}:hash` }),
-    });
+    }).dispose;
     await tick();
     const images = [...document.querySelectorAll<HTMLImageElement>(".preview-background, .asset-thumbnail img")];
     assert.equal(images.length, 2);
@@ -387,11 +386,11 @@ test("closeout: Add change here retains selected Beat anchor", async () => {
     { id: "show", byteStart: 0, byteEnd: 10, protected: false, payload: { type: "showCharacter", characterId: "alice", appearanceId: "alice-happy", placement: "left", transition: "none" } as const },
     ...first.beats,
   ] }, base.scenes[1]!] };
-  renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+  renderStoryView(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
     status: () => {}, resolution: { width: 1920, height: 1080 },
     present: async (assetId, purpose) => ({ assetId, purpose, mimeType: "image/png", dataBase64: "", sha256: "a", byteCount: 24, width: 1, height: 1, cacheKey: `${assetId}:a` }),
     apply: async (command) => { calls.push(command); return model; },
-  });
+  }).dispose;
   [...document.querySelectorAll("button")].find(item => item.textContent?.startsWith("2. Dialogue"))!.click();
   click("Add change here"); document.querySelector<HTMLButtonElement>(".new-beat .button.primary")!.click(); await tick();
   assert.deepEqual(calls.at(-1)?.position, { type: "before", anchor: { type: "beat", beatId: "dialogue" } });
@@ -469,6 +468,21 @@ test("a draft whose beat left source stays listed until the author cancels it",a
  view.dispose();await browser.happyDOM.close();
 });
 
+test("an unsaved new beat moves with the place the author chooses",async()=>{
+ const browser=installDom();const host=document.querySelector<HTMLElement>("#host")!,tree=document.querySelector<HTMLElement>("#tree")!;
+ const view=renderStoryView(host,tree,foundationModel(),{status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error("unused");},apply:async()=>{throw Error("unused");}});
+ const addBeat=()=>host.querySelector<HTMLButtonElement>('button[data-beat-opener="root"]')!.click();
+ const branch=()=>host.querySelector<HTMLElement>('.story-branch-body[data-branch-id="if"]')!;
+ addBeat();const panel=host.querySelector<HTMLElement>(".new-beat")!;
+ const body=panel.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;body.value="if";body.dispatchEvent(new window.Event("change",{bubbles:true}));
+ assert.ok(branch().contains(panel));
+ host.querySelector<HTMLButtonElement>('[data-beat-id="return"] .beat-select')!.click();
+ assert.ok(branch().contains(panel));assert.equal(view.hasDrafts(),true);
+ // The root place is free again, so Add Beat there starts a second draft.
+ addBeat();assert.equal(host.querySelectorAll(".new-beat").length,2);
+ view.dispose();await browser.happyDOM.close();
+});
+
 test("a beat draft refuses Commit when its beat changed in source, and keeps the input",async()=>{
  const browser=installDom();const host=document.querySelector<HTMLElement>("#host")!,tree=document.querySelector<HTMLElement>("#tree")!;
  const original=sceneModel(),calls:SceneCommand[]=[],statuses:string[]=[];
@@ -485,9 +499,9 @@ test("a beat draft refuses Commit when its beat changed in source, and keeps the
 
 test("adding a Beat saves once and returns a collapsed row without a second commit",async()=>{
  const browser=installDom();let model=sceneModel();let calls=0;
- const dispose=renderSceneAuthoring(document.querySelector('#host')!,document.querySelector('#tree')!,model,{status:()=>{},resolution:{width:1920,height:1080},present:async(assetId,purpose)=>({assetId,purpose,mimeType:'image/png',dataBase64:'',sha256:'a',byteCount:1,cacheKey:'a'}),apply:async command=>{
+ const dispose=renderStoryView(document.querySelector('#host')!,document.querySelector('#tree')!,model,{status:()=>{},resolution:{width:1920,height:1080},present:async(assetId,purpose)=>({assetId,purpose,mimeType:'image/png',dataBase64:'',sha256:'a',byteCount:1,cacheKey:'a'}),apply:async command=>{
   assert.equal(command.type,'insertBodyBeat');calls++;const scene=model.scenes[0]!;model={...model,scenes:[{...scene,beats:[...scene.beats,{id:'new',byteStart:100,byteEnd:120,protected:false,payload:{type:'narration',text:'New text'}}]},model.scenes[1]!]};return model;
- }});
+ }}).dispose;
  click('Add Beat');const type=document.querySelector<HTMLSelectElement>('.new-beat select')!;type.value='narration';type.dispatchEvent(new window.Event('change',{bubbles:true}));
  const text=document.querySelector<HTMLTextAreaElement>('.new-beat textarea')!;text.value='New text';text.dispatchEvent(new window.Event('input',{bubbles:true}));
  [...document.querySelectorAll<HTMLButtonElement>('.new-beat button')].find(b=>b.textContent==='Add Beat')!.click();await tick();
@@ -497,7 +511,7 @@ test("adding a Beat saves once and returns a collapsed row without a second comm
 
 test("new Beat waits for its receipt, restores failure input, and focuses the saved row",async()=>{
  const browser=installDom();const host=document.querySelector<HTMLElement>('#host')!;const model=sceneModel();const receipt=deferred<SceneWorkspace>();let calls=0,fail=true;let status='';
- const dispose=renderSceneAuthoring(host,document.querySelector('#tree')!,model,{status:text=>status=text,resolution:{width:1920,height:1080},present:async()=>{throw Error('unused');},apply:async()=>{calls++;if(fail)throw Error('Source changed');return receipt.promise;}});
+ const dispose=renderStoryView(host,document.querySelector('#tree')!,model,{status:text=>status=text,resolution:{width:1920,height:1080},present:async()=>{throw Error('unused');},apply:async()=>{calls++;if(fail)throw Error('Source changed');return receipt.promise;}}).dispose;
  click('Add Beat');const form=host.querySelector<HTMLElement>('.new-beat')!;const type=form.querySelector<HTMLSelectElement>('select')!;type.value='narration';type.dispatchEvent(new window.Event('change',{bubbles:true}));const text=form.querySelector<HTMLTextAreaElement>('textarea')!;text.value='Keep this text';text.dispatchEvent(new window.Event('input',{bubbles:true}));
  const confirm=[...form.querySelectorAll('button')].find(b=>b.textContent==='Add Beat')!;const cancel=[...form.querySelectorAll('button')].find(b=>b.textContent==='Cancel')!;
  confirm.click();await tick();assert.match(status,/^Source changed Input retained\..*edit it in Source\.$/);assert.equal(confirm.disabled,false);assert.equal(text.value,'Keep this text');
@@ -514,10 +528,10 @@ test("held Beat drag scrolls the visible writing panel edges and stops on cancel
   let frameId = 0;
   window.requestAnimationFrame = callback => { frames.set(++frameId, callback); return frameId; };
   window.cancelAnimationFrame = id => { frames.delete(id); };
-  const dispose = renderSceneAuthoring(host, document.querySelector("#tree")!, sceneModel(), {
+  const dispose = renderStoryView(host, document.querySelector("#tree")!, sceneModel(), {
     status: () => {}, resolution: { width: 1920, height: 1080 },
     present: async () => { throw Error("unused"); }, apply: async () => { writes++; return sceneModel(); },
-  });
+  }).dispose;
   try {
     const panel = host.querySelector<HTMLElement>(".beats-region")!;
     const list = host.querySelector<HTMLElement>(".beats-list")!;
@@ -553,7 +567,7 @@ test("held Beat drag scrolls the visible writing panel edges and stops on cancel
 
 test("preview reset updates the divider and layout without a hidden slider",async()=>{
  const browser=installDom();const host=document.querySelector<HTMLElement>('#host')!;
- const dispose=renderSceneAuthoring(host,document.querySelector('#tree')!,sceneModel(),{status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error('unused');},apply:async()=>sceneModel()});
+ const dispose=renderStoryView(host,document.querySelector('#tree')!,sceneModel(),{status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error('unused');},apply:async()=>sceneModel()}).dispose;
  const divider=host.querySelector<HTMLElement>('.preview-divider')!;divider.dispatchEvent(new window.KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true}));assert.equal(divider.getAttribute('aria-valuenow'),'36');
  window.dispatchEvent(new window.Event('loomlight-reset-layout'));assert.equal(divider.getAttribute('aria-valuenow'),'34');assert.equal(host.querySelector<HTMLElement>('.scene-stack')!.style.getPropertyValue('--preview-share'),'34fr');assert.equal(host.querySelector('input[type="range"]'),null);dispose();await browser.happyDOM.close();
 });
@@ -561,7 +575,7 @@ test("preview reset updates the divider and layout without a hidden slider",asyn
 test("pointer Beat reorder cancels outside, on Escape and across protected boundaries",async()=>{
  const browser=installDom();const host=document.querySelector<HTMLElement>('#host')!;let model=sceneModel();
  const beats=[...model.scenes[0]!.beats];beats.splice(1,0,{id:'narration',byteStart:35,byteEnd:40,protected:false,payload:{type:'narration',text:'Second'}});beats[2]={...beats[2]!,byteStart:40};model={...model,scenes:model.scenes.map((scene,i)=>i?scene:{...scene,beats})};
- const calls:SceneCommand[]=[];const dispose=renderSceneAuthoring(host,document.querySelector('#tree')!,model,{status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error('unused');},apply:async command=>{calls.push(command);return model;}});
+ const calls:SceneCommand[]=[];const dispose=renderStoryView(host,document.querySelector('#tree')!,model,{status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error('unused');},apply:async command=>{calls.push(command);return model;}}).dispose;
  const grip=host.querySelector<HTMLButtonElement>('.beat-grip')!;const target=host.querySelector<HTMLElement>('[data-beat-id="narration"]')!;
  let hit:Element|null=target;document.elementFromPoint=()=>hit;
  const pointer=(type:string,x:number)=>new browser.PointerEvent(type,{button:0,pointerId:1,clientX:x,clientY:20,bubbles:true}) as unknown as Event;
@@ -569,8 +583,11 @@ test("pointer Beat reorder cancels outside, on Escape and across protected bound
  hit=null;grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));window.dispatchEvent(pointer('pointerup',30));assert.equal(calls.length,0);
  hit=host.querySelector('[data-beat-id="choice"]');grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));window.dispatchEvent(pointer('pointerup',30));assert.equal(calls.length,0);
  hit=target;for(const cancel of ['pointercancel','blur','lostpointercapture']){grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));if(cancel==='lostpointercapture')grip.dispatchEvent(pointer(cancel,30));else window.dispatchEvent(cancel==='blur'?new window.Event('blur'):pointer(cancel,30));window.dispatchEvent(pointer('pointerup',30));assert.equal(calls.length,0);assert.equal(document.querySelector('.beat-drag-ghost'),null);}
- click('Add Beat');const form=host.querySelector<HTMLElement>('.new-beat')!;form.dataset.unsubmitted='true';grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));window.dispatchEvent(pointer('pointerup',30));assert.equal(calls.length,0);[...form.querySelectorAll('button')].find(b=>b.textContent==='Cancel')!.click();
- hit=target;grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));window.dispatchEvent(pointer('pointerup',30));await tick();assert.equal(calls.length,1);assert.equal(calls[0]!.type,'reorderBeat');assert.equal(calls[0]!.toIndex,1);assert.equal(grip.draggable,false);dispose();await browser.happyDOM.close();
+ // A pending new beat does not block moving another beat; the drop moves the whole node.
+ click('Add Beat');const form=host.querySelector<HTMLElement>('.new-beat')!;form.dataset.unsubmitted='true';
+ hit=target;grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));window.dispatchEvent(pointer('pointerup',30));await tick();assert.equal(calls.length,1);
+ assert.equal(calls[0]!.type,'moveStoryNode');assert.deepEqual(calls[0]!.node,{type:'beat',beatId:'dialogue'});assert.deepEqual(calls[0]!.position,{type:'before',anchor:{type:'beat',beatId:'choice'}});
+ assert.equal(grip.draggable,false);dispose();await browser.happyDOM.close();
 });
 
 
@@ -613,10 +630,10 @@ test("shipped source-foundation native driver completes against strict renderer 
     dispose?.();document.querySelector("#native-close")?.remove();document.querySelector("#host")!.replaceChildren();document.querySelector("#tree")!.replaceChildren();
     const recent=document.createElement("button");recent.textContent="Source foundation fixture";document.querySelector("#host")!.append(recent);
     recent.addEventListener("click",()=>{
-      dispose=renderSceneAuthoring(document.querySelector("#host")!,document.querySelector("#tree")!,model,{
+      dispose=renderStoryView(document.querySelector("#host")!,document.querySelector("#tree")!,model,{
         status:message=>{document.querySelector("#app-status")!.textContent=message;},resolution:{width:1280,height:720},present:async()=>{throw Error("unexpected media");},
         apply:(command,expected)=>dispatch("scene.apply",{...expected,command}),
-      });
+      }).dispose;
       const close=document.createElement("button");close.id="native-close";close.textContent="Close Project";close.addEventListener("click",welcome);document.body.append(close);
     });
   };
@@ -656,10 +673,10 @@ test("Hide picked exposes shared continuation positions in root and nested bodie
     ] };
     const model = { ...base, scenes: [scene] };
     const calls: SceneCommand[] = [];
-    const dispose = renderSceneAuthoring(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+    const dispose = renderStoryView(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
       status: () => {}, resolution: { width: 1280, height: 720 }, present: async () => { throw Error("unused"); },
       apply: async command => { calls.push(command); return model; },
-    });
+    }).dispose;
     click("Add Beat");
     const form = document.querySelector<HTMLElement>(".new-beat")!;
     if (nested) {
