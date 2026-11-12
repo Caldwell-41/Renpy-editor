@@ -104,12 +104,12 @@ pub(super) fn candidate_created(project: &ProjectId, directory: &str) -> Vec<Str
 }
 
 /// Draft ids name renderer drafts. Each is short, not blank and listed once.
-pub(super) fn check_draft_ids(drafts: &[String], most: usize) -> Result<(), SceneError> {
+pub(super) fn check_draft_ids(drafts: &[String], max: usize) -> Result<(), SceneError> {
     let mut seen = HashSet::new();
-    if drafts.len() > most
-        || !drafts.iter().all(|draft| {
-            !draft.trim().is_empty() && draft.len() <= 256 && seen.insert(draft.as_str())
-        })
+    if drafts.len() > max
+        || !drafts
+            .iter()
+            .all(|draft| crate::history::draft_text(draft) && seen.insert(draft.as_str()))
     {
         return Err(SceneError::InvalidPayload);
     }
@@ -175,12 +175,7 @@ impl AuthoringService {
         let parts = labels
             .into_iter()
             .zip(built)
-            .filter(|(_, mutations)| {
-                mutations.iter().any(|mutation| {
-                    mutation.kind != MutationKind::ReplaceExisting
-                        || mutation.expected_bytes != mutation.proposed
-                })
-            })
+            .filter(|(_, mutations)| mutations.iter().any(changes_bytes))
             .map(|(label, mutations)| HistoryPart { label, mutations })
             .collect();
         self.commit_or_verify(project, proposal, parts, &request.drafts)?;

@@ -647,7 +647,8 @@ export function renderStoryView(
   // draft, a name and an item; Story keeps the draft's controls before and after it.
   // A text step ends when its field loses focus or after 2 seconds without typing.
   // Each change to another control is one step.
-  const steps = new Map<string, { readonly draft: BeatDraft; readonly before?: DraftState; after?: DraftState }>();
+  // `sequence` and `previous` are the draft's `lastStep` after and before the step.
+  const steps = new Map<string, { readonly draft: BeatDraft; readonly sequence: number; readonly previous: number; readonly before?: DraftState; after?: DraftState }>();
   let stepSequence = 0, restoring = false, recording: Promise<unknown> = Promise.resolve();
   let openText: { readonly draft: BeatDraft; readonly field: EventTarget; readonly stepId: string; timer?: ReturnType<typeof setTimeout> } | undefined;
   let openChange: string | undefined;
@@ -658,7 +659,7 @@ export function renderStoryView(
   };
   const startStep = (draft: BeatDraft, kind: Parameters<typeof stepName>[1], before: DraftState | undefined, after?: DraftState): string => {
     const stepId = `step:${++stepSequence}`;
-    steps.set(stepId, { draft, before, after }); draft.lastStep = stepSequence;
+    steps.set(stepId, { draft, sequence: stepSequence, previous: draft.lastStep, before, after }); draft.lastStep = stepSequence;
     const sent = actions.recordStep?.({ stepId, draft: draft.id, name: stepName(draft, kind), item: { type: "story", sceneId: draft.sceneId, beatId: draft.beatId ?? null } });
     // A step core refuses has no entry to undo; the draft keeps its input.
     recording = Promise.all([recording, sent?.catch(() => undefined)]);
@@ -711,7 +712,7 @@ export function renderStoryView(
         restoreState(draft.panel, state);
       }
     } finally { restoring = false; }
-    draft.state = state;
+    draft.state = state; draft.lastStep = direction === "undo" ? record.previous : record.sequence;
     draftsChanged(draft); refreshPreview();
     return true;
   };
@@ -773,15 +774,15 @@ export function renderStoryView(
     if (drafts().some(draft => draft !== owner && !owner?.contains(draft))) { actions.status("Complete or cancel the other edit first. Input retained.", "error"); focusDraft(); return false; }
     if (pendingWrites) { actions.status("Wait for the current change to finish.", "error"); return false; }
     const before = model;
-    const ended = committed ? [committed] : discardedBy(command);
+    const joined = committed ? [committed] : discardedBy(command);
     closeText();
     const unlock = lockStory();
     actions.status("Saving…");
     try {
-      const next = await actions.apply(command, expected, ended.map(draft => draft.id));
+      const next = await actions.apply(command, expected, joined.map(draft => draft.id));
       if (disposed || actions.current?.() === false) return false;
       model = next;
-      forgetSteps(ended);
+      forgetSteps(joined);
       if (removals.has(command.type)) dropRemovedDrafts(next);
       // A command that creates a scene opens it; other commands keep the author's selection.
       if (!before.scenes.some(scene => scene.id === next.lastOpen.sceneId)) selectScene(next.lastOpen.sceneId);
@@ -921,15 +922,14 @@ export function renderStoryView(
   };
   // Removing beats the author chose discards their drafts after a confirmed operation.
   const removals = new Set(["removeStoryNode", "removeConditionBranch", "unwrapCondition", "deleteScene"]);
+  // Core already dropped the steps of the drafts `mutate` named. Any other draft keeps
+  // its steps, so their Undo still brings it back.
   const dropRemovedDrafts = (next: SceneWorkspace): void => {
-    const dropped: BeatDraft[] = [];
     for (const [key, draft] of beatDrafts) {
       const scene = next.scenes.find(item => item.id === draft.sceneId);
       const place = draft.place?.().body, body = place?.type === "branch" ? place.branchId : undefined;
-      if (!scene || [draft.beatId, body].some(id => id && !scene.beats.some(beat => beat.id === id))) { beatDrafts.delete(key); dropped.push(draft); }
+      if (!scene || [draft.beatId, body].some(id => id && !scene.beats.some(beat => beat.id === id))) beatDrafts.delete(key);
     }
-    // Undo of the removal brings back the beats, not these drafts.
-    forgetSteps(dropped);
     draftsChanged();
   };
   // The pending drafts a removal discards, as its confirmation says: those inside the
@@ -1720,7 +1720,7 @@ export function renderStoryView(
         createNew.addEventListener("click", () => {
           try {
             const current = base();
-            void mutate({ type: "createSceneFromChoice", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, choiceBeatId: beat.id, optionText: requiredText(optionText, "Choice text"), chapterId: required(chapter), displayName: requiredText(sceneName, "Scene name") }, () => dropDraft(beat.id), current.captured, form);
+            void mutate({ type: "createSceneFromChoice", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, choiceBeatId: beat.id, optionText: requiredText(optionText, "Choice text"), chapterId: required(chapter), displayName: requiredText(sceneName, "Scene name") }, () => dropDraft(beat.id), current.captured, form, draft);
           } catch (error) { actions.status(friendlyError(error, "New Scene details are invalid"), "error"); optionText.focus(); }
         });
         cancelNew.className="button secondary";
@@ -1975,19 +1975,19 @@ function beatSummary(payload: BeatPayload, model: SceneWorkspace): string {
   }
 }
 
-/** Editor state that its controls do not show, such as a Choice's option rows. */
-export interface EditorState { readonly capture: () => unknown; readonly restore: (state: unknown) => void }
-interface BeatEditor { readonly host: HTMLElement; readonly controls: readonly HTMLElement[]; readonly primary: HTMLElement; readonly secondary?: HTMLElement; readonly read: () => BeatPayload; readonly focus: () => void; readonly state?: EditorState }
+/** What an editor keeps outside its controls, such as a Choice's option rows, for draft-step Undo. */
+interface EditorInternals { readonly capture: () => unknown; readonly restore: (saved: unknown) => void }
+interface BeatEditor { readonly host: HTMLElement; readonly controls: readonly HTMLElement[]; readonly primary: HTMLElement; readonly secondary?: HTMLElement; readonly read: () => BeatPayload; readonly focus: () => void; readonly internals?: EditorInternals }
 
 /** A beat draft's controls and its editors' own state, kept for draft-step Undo (ADR 0025). */
-interface DraftState { readonly controls: readonly { readonly tag: string; readonly type: string; readonly value: string; readonly checked: boolean }[]; readonly editors: readonly (readonly [EditorState, unknown])[] }
+interface DraftState { readonly controls: readonly { readonly tag: string; readonly type: string; readonly value: string; readonly checked: boolean }[]; readonly editors: readonly (readonly [EditorInternals, unknown])[] }
 // A Choice's nested Create New Scene form is not part of its draft.
 const draftControls = (panel: HTMLElement): (HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement)[] =>
   [...panel.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input, select, textarea")].filter(control => !control.closest(".choice-new-scene"));
 function captureState(panel: HTMLElement, editors: readonly BeatEditor[]): DraftState {
   return {
     controls: draftControls(panel).map(control => ({ tag: control.tagName, type: control.type, value: control.value, checked: control instanceof HTMLInputElement && control.checked })),
-    editors: editors.flatMap(editor => editor.state ? [[editor.state, editor.state.capture()] as const] : []),
+    editors: editors.flatMap(editor => editor.internals ? [[editor.internals, editor.internals.capture()] as const] : []),
   };
 }
 // Sets each control in document order. A changed control fires input and change, so a
@@ -2084,7 +2084,7 @@ function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload, existing =
   const characters = (selected?: string) => entitySelect(model.authoring.characters.map((item) => ({ id: item.id, label: item.displayName })), selected);
   const assets = (kind: Asset["kind"], selected?: string) => entitySelect(model.authoring.assets.filter((item) => item.kind === kind && item.status === "available").map((item) => ({ id: item.id, label: item.displayName })), selected);
   const scenes = (selected?: string) => entitySelect(model.scenes.map((item) => ({ id: item.id, label: item.displayName })), selected);
-  let read: () => BeatPayload, state: EditorState | undefined;
+  let read: () => BeatPayload, internals: EditorInternals | undefined;
   switch (payload.type) {
     case "background": { const asset = assets("background", payload.assetId); const transition = transitions(); add("Background", asset); add("Transition", transition); read = () => ({ type: "background", assetId: required(asset), transition: transition.value as TransitionRef }); break; }
     case "showCharacter": { const character = characters(payload.characterId); const appearance = entitySelect(model.authoring.appearances.map((item) => ({ id: item.id, label: item.label })), payload.appearanceId); const placement = placements(payload.placement); const transition = transitions(); add("Character", character); add("Appearance", appearance); add("Placement", placement); add("Transition", transition); read = () => ({ type: "showCharacter", characterId: required(character), appearanceId: required(appearance), placement: placement.value as PlacementRef, transition: transition.value as TransitionRef }); break; }
@@ -2144,7 +2144,7 @@ function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload, existing =
       payload.options.forEach(addOption); if (!rows.length) addOption();
       const addChoice = button("Add option", "text-button"); addChoice.addEventListener("click", () => { addOption(); redraw(); }); host.append(addChoice);
       // Draft-step Undo restores the prompt, the option rows and their order.
-      state = {
+      internals = {
         capture: () => ({ hasPrompt, pickedChanged, rows: [...rows] }),
         restore: saved => { const kept = saved as { hasPrompt: boolean; pickedChanged: boolean; rows: typeof rows }; hasPrompt = kept.hasPrompt; pickedChanged = kept.pickedChanged; rows.splice(0, rows.length, ...kept.rows); optionHost.replaceChildren(); drawPrompt(); redraw(); },
       };
@@ -2169,7 +2169,7 @@ function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload, existing =
     case "customCode": read = () => payload; break;
   }
   const primary = controls[controls.length - 1] ?? host;
-  return { host, controls, primary, read: read!, ...(state ? { state } : {}), focus: () => (host.querySelector<HTMLElement>('[aria-invalid="true"]') ?? controls[0] as HTMLElement | undefined)?.focus() };
+  return { host, controls, primary, read: read!, ...(internals ? { internals } : {}), focus: () => (host.querySelector<HTMLElement>('[aria-invalid="true"]') ?? controls[0] as HTMLElement | undefined)?.focus() };
 }
 
 function defaultPayload(type: BeatPayload["type"], model: SceneWorkspace, screenHint?: ScreenTargetBinding): BeatPayload {

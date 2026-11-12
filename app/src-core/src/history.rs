@@ -16,6 +16,11 @@ use std::collections::HashMap;
 /// The longest step id, draft id or name a draft step may carry.
 const MAX_DRAFT_STEP_TEXT: usize = 256;
 
+/// A step id, draft id or step name: not blank, and short.
+pub(crate) fn draft_text(value: &str) -> bool {
+    !value.trim().is_empty() && value.len() <= MAX_DRAFT_STEP_TEXT
+}
+
 /// What the author sees for an entry: the edit's name and the item Undo reveals.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -505,8 +510,10 @@ impl AuthoringService {
         project: &ProjectId,
         request: DraftStepRequest,
     ) -> Result<HistoryState, SceneError> {
-        let text = |value: &str| !value.trim().is_empty() && value.len() <= MAX_DRAFT_STEP_TEXT;
-        if !text(&request.step_id) || !text(&request.draft) || !text(&request.name) {
+        if ![&request.step_id, &request.draft, &request.name]
+            .into_iter()
+            .all(|value| draft_text(value))
+        {
             return Err(SceneError::InvalidPayload);
         }
         let mut histories = self.project_history.lock().map_err(|_| SceneError::Io)?;

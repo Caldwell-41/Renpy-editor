@@ -148,7 +148,7 @@ export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariabl
   variable.addEventListener("change", () => { drafts.set(editor.dataset.variableId ?? payload.variableId, { operation, text }); const draft = drafts.get(variable.value); operation = draft?.operation ?? "assign"; text = draft?.text ?? ""; editor.dataset.variableId = variable.value; rebuild(); });
   rebuild();
   // Draft-step Undo restores the variable, the chosen change and the text kept for each variable.
-  const state = {
+  const internals = {
     capture: () => ({ variable: variable.value, operation, text, drafts: new Map(drafts) }),
     restore: (saved: unknown) => {
       const kept = saved as { variable: string; operation: IntegerAdjustment["operation"]; text: string; drafts: typeof drafts };
@@ -156,5 +156,5 @@ export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariabl
       drafts.clear(); kept.drafts.forEach((value, key) => drafts.set(key, value)); rebuild();
     },
   };
-  return { host, controls, get primary() { return primary; }, read: () => { finishField(); return read(); }, focus: () => primary.focus(), state };
+  return { host, controls, get primary() { return primary; }, read: () => { finishField(); return read(); }, focus: () => primary.focus(), internals };
 }

@@ -952,10 +952,7 @@ impl AuthoringService {
         parts: Vec<HistoryPart>,
         joined: &[String],
     ) -> Result<(), SceneError> {
-        if proposal.mutations.iter().any(|mutation| {
-            mutation.kind != MutationKind::ReplaceExisting
-                || mutation.expected_bytes != mutation.proposed
-        }) {
+        if proposal.mutations.iter().any(changes_bytes) {
             self.commit_history_parts(project, proposal, parts, joined)?;
             return Ok(());
         }
@@ -5412,6 +5409,11 @@ fn json_bytes(value: &impl Serialize) -> Result<Vec<u8>, SceneError> {
 
 fn sha256(bytes: &[u8]) -> String {
     hex::encode(Sha256::digest(bytes))
+}
+
+/// Whether a mutation writes anything: it creates or deletes a file, or changes its bytes.
+fn changes_bytes(mutation: &FileMutation) -> bool {
+    mutation.kind != MutationKind::ReplaceExisting || mutation.expected_bytes != mutation.proposed
 }
 
 /// The project history name and item for a Story command, for example
