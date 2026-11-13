@@ -745,15 +745,20 @@ impl AuthoringService {
         let mut scenes = Vec::with_capacity(loaded.project.scenes.len());
         let mut screen_targets = HashMap::new();
         let mut choice_runtime_valid = [None; 2];
-        for scene in &loaded.project.scenes {
+        let sources = self.scene_sources(project, &loaded.project.scenes)?;
+        for (scene, source) in loaded.project.scenes.iter().zip(sources) {
             let stored = loaded
                 .source_map
                 .scene_mappings
                 .iter()
                 .find(|mapping| mapping.scene_id == scene.id)
                 .ok_or(SceneError::InvalidMetadata)?;
-            let Some((bytes, revision)) = self.snapshot_optional(project, &scene.source_path)?
-            else {
+            // A file that changed while it was read shows as unavailable, like a missing one.
+            let source = match source {
+                Err(SceneError::SourceConflict) => None,
+                source => source?,
+            };
+            let Some((bytes, revision)) = source else {
                 scenes.push(SceneDocument {
                     id: scene.id.clone(),
                     chapter_id: scene.chapter_id.clone(),
@@ -2394,27 +2399,39 @@ impl AuthoringService {
         if source_map.scene_mappings.len() != metadata.scenes.len() {
             return Err(SceneError::InvalidMetadata);
         }
-        for scene in &metadata.scenes {
+        let mut authoring = None;
+        let sources = self.scene_sources(project, &metadata.scenes)?;
+        for (scene, source) in metadata.scenes.iter().zip(sources) {
             let stored = source_map
                 .scene_mappings
                 .iter()
                 .find(|mapping| mapping.scene_id == scene.id && mapping.path == scene.source_path)
                 .ok_or(SceneError::InvalidMetadata)?;
-            let (bytes, revision) = self.scene_snapshot(project, &scene.source_path)?;
+            let (bytes, revision) = match source {
+                Ok(Some(read)) => read,
+                // The file changed while it was read; Story shows it as unavailable.
+                Err(SceneError::SourceConflict) => continue,
+                Ok(None) => return Err(SceneError::Io),
+                Err(error) => return Err(error),
+            };
             if revision.sha256 != stored.source_revision {
                 // Reconciliation refused this source; Story shows it as unavailable.
                 continue;
             }
-            let authoring = self
-                .list(project, &metadata.project_id)
-                .map_err(|_| SceneError::InvalidMetadata)?;
+            let authoring = match &authoring {
+                Some(authoring) => authoring,
+                None => authoring.insert(
+                    self.list(project, &metadata.project_id)
+                        .map_err(|_| SceneError::InvalidMetadata)?,
+                ),
+            };
             build_mapping(
                 scene,
                 &bytes,
                 &revision.sha256,
                 Some(stored),
                 &[],
-                Some((metadata, &authoring, &source_map.owned_screens)),
+                Some((metadata, authoring, &source_map.owned_screens)),
             )?;
         }
         Ok(())
@@ -2434,6 +2451,39 @@ impl AuthoringService {
                 RelativePath::new(path).map_err(|_| SceneError::InvalidMetadata)?,
             )
             .map_err(diagnostic_error)
+    }
+
+    /// Reads each scene source as `snapshot_optional` does, in one batch from disk.
+    /// Draft candidates belong to this thread, so they are taken before the batch.
+    fn scene_sources(
+        &self,
+        project: &ProjectId,
+        scenes: &[SceneMetadata],
+    ) -> Result<Vec<Result<Option<(Vec<u8>, Revision)>, SceneError>>, SceneError> {
+        let candidates = scenes
+            .iter()
+            .map(|scene| drafts::candidate_file(project, &scene.source_path))
+            .collect::<Vec<_>>();
+        let unread = scenes
+            .iter()
+            .zip(&candidates)
+            .filter(|(_, candidate)| candidate.is_none())
+            .map(|(scene, _)| scene.source_path.clone())
+            .collect::<Vec<_>>();
+        let mut disk = self
+            .transactions
+            .snapshot_optional_many(project, &unread)
+            .map_err(diagnostic_error)?
+            .into_iter();
+        Ok(candidates
+            .into_iter()
+            .map(|candidate| match candidate {
+                Some(candidate) => Ok(Some(candidate)),
+                None => disk
+                    .next()
+                    .map_or(Err(SceneError::Io), |read| read.map_err(diagnostic_error)),
+            })
+            .collect())
     }
 
     fn snapshot_optional(

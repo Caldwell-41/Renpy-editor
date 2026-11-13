@@ -1099,6 +1099,29 @@ mod branches_tests {
     }
 
     #[test]
+    fn opening_many_scenes_validates_the_root_once_per_read() {
+        // Each root validation stands for one read's file system work. Opening this
+        // fixture and loading Story made four read passes over 500 scenes, but about
+        // fifteen validations per scene, which took 17 s on Windows (#176).
+        let temporary = tempfile::tempdir().unwrap();
+        let mut service =
+            LifecycleService::prepare_branches_ui_probe(temporary.path().join("profile")).unwrap();
+        let root = service.data_root.join("synthetic-project");
+        let validations = &service.authoring.transactions.root_validations;
+        let before = validations.load(std::sync::atomic::Ordering::Relaxed);
+        service.open_path(&root).unwrap();
+        let workspace = service.scene_workspace().unwrap();
+        let validations = &service.authoring.transactions.root_validations;
+        let used = validations.load(std::sync::atomic::Ordering::Relaxed) - before;
+        let scenes = workspace.scenes.len();
+        assert_eq!(scenes, 500);
+        assert!(
+            used <= 5 * scenes,
+            "{used} root validations for {scenes} scenes"
+        );
+    }
+
+    #[test]
     fn branches_native_fixture_has_full_workload_without_sdk_or_execution() {
         let temporary = tempfile::tempdir().unwrap();
         let mut service =

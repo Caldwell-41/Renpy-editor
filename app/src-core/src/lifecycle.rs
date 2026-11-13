@@ -2043,16 +2043,23 @@ where
         .iter()
         .find(|chapter| chapter.id == scene.chapter_id)
         .ok_or(LifecycleError::InvalidMetadata)?;
-    for required in [
+    // Scenes share a few folders, so the last folder is kept. Each open still
+    // validates the folder's full anchor chain.
+    let mut folder = None;
+    for path in [
         "game/script.rpy",
         "game/options.rpy",
         "game/gui.rpy",
         "game/screens.rpy",
-    ] {
-        open_project_file(&anchor, required)?;
-    }
-    for scene in &metadata.scenes {
-        open_project_file(&anchor, &scene.source_path)?;
+    ]
+    .into_iter()
+    .chain(
+        metadata
+            .scenes
+            .iter()
+            .map(|scene| scene.source_path.as_str()),
+    ) {
+        open_project_file(&anchor, &mut folder, path)?;
     }
     let project = OpenProject {
         session_id: String::new(),
@@ -2075,30 +2082,45 @@ where
 
 fn open_project_file(
     root: &crate::transaction::DirectoryAnchor,
+    folder: &mut Option<(String, crate::transaction::DirectoryAnchor)>,
     relative: &str,
 ) -> Result<File, LifecycleError> {
     crate::metadata::validate_relative_path(relative)
         .map_err(|_| LifecycleError::InvalidMetadata)?;
-    let mut components = relative.split('/').peekable();
-    let mut directory = root.clone();
-    while let Some(component) = components.next() {
-        let name = OsStr::new(component);
-        if directory
-            .entry_absent(name)
-            .map_err(|_| LifecycleError::UnsafePath)?
-        {
-            return Err(LifecycleError::InvalidMetadata);
+    let (parent, name) = relative.rsplit_once('/').unwrap_or(("", relative));
+    if folder.as_ref().is_none_or(|(path, _)| path != parent) {
+        *folder = None;
+        let mut directory = root.clone();
+        for component in parent.split('/').filter(|component| !component.is_empty()) {
+            directory = open_present(&directory, component, |directory, name| {
+                directory.open_child(name, false)
+            })?;
         }
-        if components.peek().is_none() {
-            return directory
-                .open_file(name)
-                .map_err(|_| LifecycleError::UnsafePath);
-        }
-        directory = directory
-            .open_child(name, false)
-            .map_err(|_| LifecycleError::UnsafePath)?;
+        *folder = Some((parent.to_owned(), directory));
     }
-    Err(LifecycleError::InvalidMetadata)
+    let Some((_, directory)) = folder.as_ref() else {
+        return Err(LifecycleError::InvalidMetadata);
+    };
+    open_present(directory, name, |directory, name| directory.open_file(name))
+}
+
+/// Opens one entry, reporting a missing entry as invalid metadata.
+fn open_present<T>(
+    directory: &crate::transaction::DirectoryAnchor,
+    name: &str,
+    open: impl FnOnce(
+        &crate::transaction::DirectoryAnchor,
+        &OsStr,
+    ) -> Result<T, crate::transaction::ErrorCode>,
+) -> Result<T, LifecycleError> {
+    let name = OsStr::new(name);
+    if directory
+        .entry_absent(name)
+        .map_err(|_| LifecycleError::UnsafePath)?
+    {
+        return Err(LifecycleError::InvalidMetadata);
+    }
+    open(directory, name).map_err(|_| LifecycleError::UnsafePath)
 }
 
 #[cfg(test)]

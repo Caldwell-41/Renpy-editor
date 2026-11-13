@@ -30,6 +30,26 @@ impl TransactionService {
         })
     }
 
+    /// Reads each path as `snapshot_optional` does, under the same per-open checks:
+    /// a missing file is `None` and any other failure stays with its path. Lists
+    /// longer than one observation run in consecutive batches.
+    pub(crate) fn snapshot_optional_many(
+        &self,
+        project: &ProjectId,
+        paths: &[String],
+    ) -> Result<Vec<Result<Option<(Vec<u8>, Revision)>, PublicDiagnostic>>, PublicDiagnostic> {
+        let mut results = Vec::with_capacity(paths.len());
+        for batch in paths.chunks(MAX_OBSERVATION_FILES) {
+            results.extend(
+                self.with_observation_readers(project, batch, |reader, path| {
+                    let path = RelativePath::new(path).map_err(diagnostic)?;
+                    reader.snapshot_optional(&path)
+                })?,
+            );
+        }
+        Ok(results)
+    }
+
     #[cfg(test)]
     pub(crate) fn observations_still_current(
         &self,
@@ -133,6 +153,28 @@ impl ObservationReader<'_> {
             .1
             .open_file(name)
             .map_err(diagnostic)
+    }
+
+    fn snapshot_optional(
+        &mut self,
+        path: &RelativePath,
+    ) -> Result<Option<(Vec<u8>, Revision)>, PublicDiagnostic> {
+        match self.snapshot_with_budget(path, MAX_MUTATION_BYTES, None) {
+            Ok(value) => Ok(Some(value)),
+            Err(_) if self.absent(path) => Ok(None),
+            Err(error) => Err(error),
+        }
+    }
+
+    /// True only when the retained parent of `path` reports its leaf missing. A
+    /// parent that failed to resolve leaves the read's own error in place.
+    fn absent(&self, path: &RelativePath) -> bool {
+        let (Some((parent, anchor)), Some(name)) = (&self.parent, path.as_path().file_name())
+        else {
+            return false;
+        };
+        path.as_path().parent() == Some(parent.as_path())
+            && matches!(anchor.entry_absent(name), Ok(true))
     }
 
     #[cfg(test)]

@@ -1155,35 +1155,53 @@ impl AuthoringService {
             .map_err(transaction_error)?;
         let mut source_map =
             SourceMapMetadata::read_bytes(&map_bytes, project_id).map_err(|_| SourceError::Io)?;
-        let mut authoring = None;
-        let mut reconciled = Vec::new();
-        for scene in project_metadata
+        let scenes = project_metadata
             .scenes
             .iter()
             .filter(|scene| only.is_none_or(|path| path == scene.source_path))
-        {
+            .collect::<Vec<_>>();
+        // A clean Source buffer stands in for its file. Every other scene is read from
+        // disk in one batch, which validates the project root once per file instead
+        // of once per path component.
+        let buffered = {
+            let sessions = self.source_sessions.lock().map_err(|_| SourceError::Io)?;
+            let items = sessions.projects.get(project);
+            scenes
+                .iter()
+                .map(|scene| {
+                    items
+                        .and_then(|items| items.get(&scene.source_path))
+                        .map(|item| {
+                            (item.draft.is_none() && item.external.is_none() && !item.unavailable)
+                                .then(|| {
+                                    (item.base_bytes.clone(), item.base_revision.sha256.clone())
+                                })
+                        })
+                })
+                .collect::<Vec<_>>()
+        };
+        let unbuffered = scenes
+            .iter()
+            .zip(&buffered)
+            .filter(|(_, buffer)| buffer.is_none())
+            .map(|(scene, _)| scene.source_path.clone())
+            .collect::<Vec<_>>();
+        let mut disk = self
+            .transactions
+            .snapshot_optional_many(project, &unbuffered)
+            .map_err(transaction_error)?
+            .into_iter();
+        let mut authoring = None;
+        let mut reconciled = Vec::new();
+        for (scene, buffer) in scenes.into_iter().zip(buffered) {
             let path = scene.source_path.as_str();
-            let buffered = self
-                .source_sessions
-                .lock()
-                .map_err(|_| SourceError::Io)?
-                .projects
-                .get(project)
-                .and_then(|items| items.get(path))
-                .map(|item| {
-                    (item.draft.is_none() && item.external.is_none() && !item.unavailable)
-                        .then(|| (item.base_bytes.clone(), item.base_revision.sha256.clone()))
-                });
-            let (bytes, revision) = match buffered {
+            let (bytes, revision) = match buffer {
                 Some(Some(clean)) => clean,
                 Some(None) => continue,
-                None => match self.transactions.snapshot_optional(
-                    project,
-                    RelativePath::new(path).map_err(|_| SourceError::InvalidPayload)?,
-                ) {
-                    Ok(Some((bytes, revision))) => (bytes, revision.sha256),
+                None => match disk.next() {
+                    Some(Ok(Some((bytes, revision)))) => (bytes, revision.sha256),
                     // Story reports a missing or unsafe source as unavailable.
-                    Ok(None) | Err(_) => continue,
+                    _ => continue,
                 },
             };
             // Story reports a scene with no stored mapping as invalid metadata.
