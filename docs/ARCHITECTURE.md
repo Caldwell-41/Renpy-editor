@@ -615,6 +615,10 @@ before the selected beat with no open branch leaves its state unknown rather tha
 choosing a branch. Core supplies the bodies, endings and insertion places that Tracks
 and Reel lay out; the renderer works out no scene structure of its own. Both views draw
 one route from the same Story controller, with one selection and one set of beat drafts.
+Writing focus is view state in that controller too. It lays out the same editor and
+route with CSS, and its sidebar and lane widths are CSS custom properties kept for the
+project session, so entering, leaving and resizing send nothing to core and add no
+history entry.
 
 The selected Story design extends this preview with valid, uncommitted beat drafts.
 This is an inert preview of pending edits, not source acceptance or a second saved

@@ -3,7 +3,8 @@
 // ending and insertion places (UI.md "Branches in a scene"); this module lays them out
 // and works out no structure of its own. Open branches and the view are view state: they
 // add no history entry. Both views draw the same route with the same columns, markers
-// and actions; only a beat column's contents differ.
+// and actions; only a beat column's contents differ. Writing focus draws the columns as
+// rows and labels the markers; story-focus.ts adds its grips and hidden-lane markers.
 import type { BeatPayload, BodyRef, NodeRef, Position, SceneBeat, SceneBody, SceneDocument } from "./scene-ui.ts";
 
 /** groupId → the open branch or option (its header beat id). */
@@ -142,6 +143,9 @@ export const trackCopy = {
   choice: "Choice",
   addAfter: (name: string, fork: "condition" | "choice" | undefined) => `Add after ${name}${fork === "choice" ? " and its options" : fork ? " and its branches" : ""}`,
   firstBeat: (branch: string) => `Add the first beat in ${branch}`,
+  // Writing focus labels its markers.
+  firstIn: (branch: string) => `+ First beat in ${branch}`,
+  afterNumber: (number: string) => `+ After ${number}`,
   outside: (fork: "condition" | "choice", number: string) => `Add after ${fork} ${number}, outside its ${fork === "choice" ? "options" : "branches"}`,
   addBeat: "+ Add a beat",
   empty: "empty",
@@ -171,6 +175,8 @@ export const viewName = (view: RouteView): string => routeViews.find(item => ite
 /** What Tracks and Reel need from Story to draw and to act. */
 export interface RouteContext {
   readonly view: RouteView;
+  /** Writing focus: beats are rows, markers are labelled, and Up and Down move between beats. */
+  readonly focus: boolean;
   readonly scene: SceneDocument;
   readonly items: readonly TrackItem[];
   readonly numbers: ReadonlyMap<string, string>;
@@ -253,12 +259,18 @@ function rail(context: RouteContext, chain: readonly BodyRef[], label?: { readon
 const laneCell = (index: number, text?: string): HTMLElement => element("span", `story-lane story-lane-${index}${index === 0 ? " story-beat-number" : ""}`, text);
 /** Tracks: the six lanes of a beat, each beat filling the lane its kind belongs to. */
 function laneCells(context: RouteContext, beat: SceneBeat, number: string): HTMLElement[] {
-  const state = context.state(beat), lane = laneOf(beat);
+  const state = context.state(beat), lane = laneOf(beat), summary = context.summary(beat);
+  // Flow names the beat's kind; the other lanes show only what it sets. Below 900 px
+  // Writing focus folds every beat into Words, so there each one names its kind.
+  const named = `${context.label(beat)} · ${summary}`;
   return lanes.map((_lane, index) => {
     const cell = laneCell(index);
     if (index === 0) cell.textContent = number;
-    else if (index === lane) cell.textContent = lane === 5 ? `${context.label(beat)} · ${context.summary(beat)}` : context.summary(beat);
-    if (index === 3) { const copy = element("span", "story-lane-copy", cell.textContent ?? ""); cell.replaceChildren(copy); }
+    else if (index === lane) cell.textContent = lane === 5 ? named : summary;
+    if (index === 3) {
+      const copy = element("span", "story-lane-copy", cell.textContent ?? ""); cell.replaceChildren(copy);
+      if (context.focus && lane !== 3) copy.append(element("span", "story-lane-all", named));
+    }
     cell.classList.toggle("story-lane-present", index === 1 && state.background || index === 2 && state.characters || index === 4 && state.music);
     cell.classList.toggle("story-lane-unknown", index > 0 && state.unknown);
     return cell;
@@ -277,8 +289,11 @@ export function renderRoute(context: RouteContext): HTMLElement {
   const { scene, numbers } = context, reel = context.view === "reel";
   const grid = element("div", `story-route story-${context.view}`); grid.role = "group"; grid.ariaLabel = "Beats in story order";
   if (!reel) {
-    const labels = element("div", "story-track-labels"); labels.ariaHidden = "true";
+    // Writing focus puts grips in the lane names, so screen readers read them there.
+    const labels = element("div", "story-track-labels"); if (!context.focus) labels.ariaHidden = "true";
     lanes.forEach((lane, index) => labels.append(element("span", `story-track-label story-lane-${index}`, lane)));
+    // Below 900 px Writing focus keeps two lanes, and Words then holds every beat's content.
+    if (context.focus) labels.children[3]!.replaceChildren(element("span", "story-lane-name", lanes[3]), element("span", "story-lane-all", "Beat content"));
     grid.append(labels);
   }
   const beats = context.items.flatMap(item => item.kind === "beat" ? [item.beat] : []);
@@ -300,7 +315,8 @@ export function renderRoute(context: RouteContext): HTMLElement {
       button.addEventListener("keydown", event => {
         const index = beats.indexOf(beat);
         if (event.altKey && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) { event.preventDefault(); context.move(beat, event.key === "ArrowUp" || event.key === "ArrowLeft" ? "up" : "down"); return; }
-        const target = event.key === "ArrowRight" ? beats[index + 1] : event.key === "ArrowLeft" ? beats[index - 1] : event.key === "Home" ? beats[0] : event.key === "End" ? beats.at(-1) : undefined;
+        const next = context.focus ? "ArrowDown" : "ArrowRight", previous = context.focus ? "ArrowUp" : "ArrowLeft";
+        const target = event.key === next ? beats[index + 1] : event.key === previous ? beats[index - 1] : event.key === "Home" ? beats[0] : event.key === "End" ? beats.at(-1) : undefined;
         if (!target) return;
         event.preventDefault(); context.select(target.id); focusColumn(target.id);
       });
@@ -341,7 +357,7 @@ export function renderRoute(context: RouteContext): HTMLElement {
       mark.append(rail(context, item.chain));
       const fork = forkKind(item.owner) ?? "condition", after = placeAfter(scene, item.owner);
       if (after && !context.locked) {
-        const add = action("+", "", () => context.insert(beatBody(item.owner), after, `after:${item.owner.id}`));
+        const add = action(context.focus ? trackCopy.afterNumber(numbers.get(item.owner.id) ?? "") : "+", "", () => context.insert(beatBody(item.owner), after, `after:${item.owner.id}`));
         add.dataset.beatOpener = `after:${item.owner.id}`; add.ariaLabel = add.title = trackCopy.outside(fork, numbers.get(item.owner.id) ?? "");
         mark.append(add);
       }
@@ -371,7 +387,7 @@ export function renderRoute(context: RouteContext): HTMLElement {
     }
     const first = firstPlace(scene, item.branch);
     if (first && !context.locked) {
-      const add = action(slot ? trackCopy.addBeat : "+", "", () => context.insert(item.branch, first, `first:${mark.dataset.branchId}`));
+      const add = action(slot ? trackCopy.addBeat : context.focus ? trackCopy.firstIn(name) : "+", "", () => context.insert(item.branch, first, `first:${mark.dataset.branchId}`));
       add.dataset.beatOpener = `first:${mark.dataset.branchId}`; add.ariaLabel = add.title = trackCopy.firstBeat(name); mark.append(add);
     }
     grid.append(mark);

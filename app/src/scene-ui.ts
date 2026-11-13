@@ -3,6 +3,7 @@ import { buildAvailabilityEditor, buildConditionEditor } from "./story-condition
 import { validateField } from "./authoring-input.ts";
 import { isTextField, typingStepIdleMs, type DraftStep, type DraftStepRecord, type HistoryDirection } from "./project-history.ts";
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenEffects, ScreenRevisions, ScreenTargetBinding } from "./screen-contracts.ts";
+import { laneGrips, resizeGrip, watchHiddenLanes, type FocusWidths } from "./story-focus.ts";
 import { armOf, beatBody, beatNumbers, bodyOf, laneOf, nodeBeats, nodeRef, ownedBodies, pinRouteLabels, renderBranchPath, renderMarksLegend, renderRoute, renderTracksKey, renderViewSwitch, sameNode, samePosition, shorten, trackCopy, trackRoute, type PendingBeat, type RouteView, viewName } from "./story-tracks.ts";
 export type PlacementRef = "left" | "centre" | "right";
 export type TransitionRef = "none" | "dissolve" | "fade";
@@ -570,6 +571,10 @@ export interface StoryView {
   dispose(): void;
 }
 
+/** Where Tracks or Reel is scrolled, kept across redraws. */
+interface ScrollPosition { readonly left: number; readonly top: number }
+const scrollOf = (scroller: HTMLElement | null): ScrollPosition => ({ left: scroller?.scrollLeft ?? 0, top: scroller?.scrollTop ?? 0 });
+
 export function renderStoryView(
   host: HTMLElement,
   treeHost: HTMLElement,
@@ -593,7 +598,11 @@ export function renderStoryView(
   const pendingImages = new Map<string, Promise<MediaPresentation>>();
   const audioUrls = new Set<string>();
   let disposed = false;
+  // Writing focus hides the stage. It and its widths are view state for the project
+  // session, outside Undo; the widths live on `host` as custom properties.
   let writingFocus = false;
+  const focusWidths: FocusWidths = new Map();
+  let stopLaneWatch: (() => void) | undefined;
   const collapsedChapters=new Set<string>();
   // The Branch path route: groupId → open branch or option. View state outside Undo.
   const openBranches = new Map<string, string>();
@@ -1022,7 +1031,7 @@ export function renderStoryView(
     mediaGeneration += 1;
     for (const url of audioUrls) URL.revokeObjectURL?.(url);
     audioUrls.clear();
-    const scroll = host.querySelector<HTMLElement>(".story-tracks-scroll")?.scrollLeft ?? 0;
+    const scroll = scrollOf(host.querySelector<HTMLElement>(".story-tracks-scroll"));
     treeHost.replaceChildren();
     host.replaceChildren();
     const selectedScene = storyScene(model, selectedSceneId);
@@ -1541,6 +1550,13 @@ export function renderStoryView(
   // Keeps a Tracks or Reel column in view, beside the sticky lane labels in Tracks, without scrolling the page.
   const revealColumn = (column: HTMLElement): void => {
     const scroll = column.closest<HTMLElement>(".story-tracks-scroll"); if (!scroll) return;
+    if (writingFocus) {
+      // Rows: below the sticky lane labels, without scrolling the page.
+      const box = scroll.getBoundingClientRect(), row = column.getBoundingClientRect();
+      const top = box.top + (scroll.querySelector<HTMLElement>(".story-track-labels")?.offsetHeight ?? 0), bottom = box.top + scroll.clientHeight;
+      if (row.top < top) scroll.scrollTop -= top - row.top; else if (row.bottom > bottom) scroll.scrollTop += Math.min(row.bottom - bottom, row.top - top);
+      return;
+    }
     const labels = scroll.querySelector<HTMLElement>(".story-track-labels")?.offsetWidth ?? 0;
     const left = column.offsetLeft - labels, right = column.offsetLeft + column.offsetWidth - scroll.clientWidth;
     if (scroll.scrollLeft > left) scroll.scrollLeft = left; else if (scroll.scrollLeft < right) scroll.scrollLeft = right;
@@ -1562,7 +1578,18 @@ export function renderStoryView(
     if (done) [...host.querySelectorAll<HTMLElement>(".story-branch-segment")].find(item => item.dataset.branchId === body.branchId)?.focus();
   };
 
-  const drawStory = (scene: SceneDocument, scroll = 0): void => {
+  // Entering or leaving Writing focus moves no content: the editor, its drafts, focus and
+  // caret stay, and only the bottom panel redraws for its rows. Nothing reaches core.
+  const focusToggleName = (on: boolean): string => on ? "Show game window" : "Writing focus";
+  const setWritingFocus = (scene: SceneDocument, on: boolean, toggle: HTMLButtonElement): void => {
+    writingFocus = on; host.dataset.writingFocus = String(on);
+    host.closest<HTMLElement>(".project-shell")?.setAttribute("data-writing-focus", String(on));
+    toggle.textContent = focusToggleName(on);
+    const inPanel = !!bottomHost?.contains(document.activeElement);
+    drawBottom(scene, { left: 0, top: 0 });
+    if (inPanel) focusColumn(selectedNewDraft ?? selectedBeatId);
+  };
+  const drawStory = (scene: SceneDocument, scroll?: ScrollPosition): void => {
     const header = document.createElement("header"); header.className = "scene-header";
     const title = document.createElement("h1"); title.title = `${scene.technicalLabel} · ${scene.sourcePath}`;
     // Story Combined v1: the scene title ("Arrival ▾") opens and closes the scene list.
@@ -1573,7 +1600,10 @@ export function renderStoryView(
     } else title.textContent = scene.displayName;
     const history = document.createElement("div"); history.className = "scene-history";
     const mapped = scene.beats.find((beat) => beat.id === selectedBeatId) ?? scene.beats[0];
-    const focus = button(writingFocus ? "Exit Writing focus" : "Writing focus");focus.ariaPressed=String(writingFocus);focus.addEventListener("click",()=>{writingFocus=!writingFocus;host.dataset.writingFocus=String(writingFocus);host.closest<HTMLElement>(".project-shell")?.setAttribute("data-writing-focus",String(writingFocus));focus.textContent=writingFocus?"Exit Writing focus":"Writing focus";focus.ariaPressed=String(writingFocus);});
+    const focus = button(focusToggleName(writingFocus)); focus.dataset.writingFocusToggle = "";
+    // A mouse press would move focus out of the editor; Writing focus keeps it and the caret.
+    focus.addEventListener("mousedown", event => event.preventDefault());
+    focus.addEventListener("click", () => setWritingFocus(scene, !writingFocus, focus));
     if (actions.caller && actions.viewScene) { const caller = button("Back to caller"); caller.addEventListener("click", () => { if (draftGuard()) actions.viewScene?.(actions.caller!); }); history.append(caller); }
     const add = button("+ Add beat", "button primary"); add.dataset.beatOpener = "root"; add.disabled = scene.sourceConflict;
     add.addEventListener("click", () => openNewBeat(scene));
@@ -1605,7 +1635,11 @@ export function renderStoryView(
     const stage = document.createElement("section"); stage.className = "story-stage"; stage.setAttribute("aria-label", "Game window");
     const editor = document.createElement("section"); editor.className = "story-editor"; editor.setAttribute("aria-label", "Selected beat editor");
     const bottom = document.createElement("div"); bottom.className = "story-bottom";
-    top.append(stage, editor); combined.append(top, bottom); host.append(combined);
+    // Writing focus resizes the sidebar from its left edge. As in combined-v1, the sidebar
+    // stays at least 320 px and leaves Tracks or Reel at least 480 px.
+    const side = resizeGrip({ key: "focus-side", label: "Sidebar width", host, widths: focusWidths, measure: () => editor.getBoundingClientRect().width, min: 320, max: () => combined.getBoundingClientRect().width - 480, grow: -1 });
+    side.classList.add("story-side-grip");
+    top.append(stage, editor, side); combined.append(top, bottom); host.append(combined);
     editorHost = editor; bottomHost = bottom;
     previewTarget = { stage, sceneId: scene.id }; renderStage(stage, scene);
     drawBottom(scene, scroll);
@@ -1645,30 +1679,35 @@ export function renderStoryView(
     bottomHost?.querySelector<HTMLElement>(`.story-view-option[data-view="${view}"]`)?.focus({ preventScroll: true });
   };
   // The Branch path and Tracks or Reel. Redrawn alone when a new beat's place or kind changes.
-  const drawBottom = (scene: SceneDocument, scroll?: number): void => {
+  const drawBottom = (scene: SceneDocument, scroll?: ScrollPosition): void => {
     if (!bottomHost) return;
-    const before = scroll ?? bottomHost.querySelector<HTMLElement>(".story-tracks-scroll")?.scrollLeft ?? 0;
+    const before = scroll ?? scrollOf(bottomHost.querySelector<HTMLElement>(".story-tracks-scroll"));
+    stopLaneWatch?.(); stopLaneWatch = undefined;
     const pending: PendingBeat[] = [...beatDrafts.entries()].flatMap(([key, draft]) => !draft.beatId && draft.sceneId === scene.id && draft.place ? [{ key, ...draft.place(), label: draft.kind() }] : []);
     const items = trackRoute(scene, openBranches, pending);
     const selected = selectedNewDraft ?? selectedBeatId;
     const path = renderBranchPath({ scene, items, numbers, open: openBranches, caption: forkCaption, branchName: header => branchName(scene, header), select: id => select(scene, id), toggle: (owner, body) => toggleBranch(scene, owner, body) });
     const panel = document.createElement("section"); panel.className = "story-panel"; panel.setAttribute("aria-label", viewName(routeView));
     const toolbar = document.createElement("div"); toolbar.className = "story-panel-toolbar";
-    toolbar.append(renderViewSwitch(routeView, view => showView(scene, view)), ...routeView === "tracks" ? [renderTracksKey()] : [], renderMarksLegend());
+    // Writing focus has no Key, as in Story Combined v1.
+    toolbar.append(renderViewSwitch(routeView, view => showView(scene, view)), ...routeView === "tracks" && !writingFocus ? [renderTracksKey()] : [], renderMarksLegend());
     const scroller = document.createElement("div"); scroller.className = "story-tracks-scroll";
     const accepted = (beat: SceneBeat): { background: boolean; characters: boolean; music: boolean; unknown: boolean } => {
       const state = deriveScenePreview(scene, beat.id, scene.beats.some(item => item.conditionalBranch) ? openBranches : undefined);
       return { background: !!state.background, characters: state.characters.length > 0, music: !!state.music, unknown: state.partial };
     };
-    scroller.append(renderRoute({ view: routeView, scene, items, numbers, selected, locked: scene.sourceConflict, label: beatName,
+    scroller.append(renderRoute({ view: routeView, focus: writingFocus, scene, items, numbers, selected, locked: scene.sourceConflict, label: beatName,
       summary: beat => beat.conditionalBranch ? branchName(scene, beat) : beatSummary(beat.payload, model), branchName: header => branchName(scene, header), endName: header => endName(scene, header),
       sceneName: id => model.scenes.find(item => item.id === id)?.displayName ?? "an unavailable scene", state: accepted,
       select: id => select(scene, id), selectNew: key => { if (navigate(() => { selectedBeatId = undefined; selectedNewDraft = key; })) beatDrafts.get(key)?.panel.querySelector<HTMLElement>("select, input, textarea")?.focus(); },
       insert: (body, position, opener) => insertAt(scene, body, position, opener), move: (beat, direction) => moveSibling(scene, beat, direction) }));
-    scroller.addEventListener("wheel", event => { if (Math.abs(event.deltaY) > Math.abs(event.deltaX) && scroller.scrollWidth > scroller.clientWidth) { scroller.scrollLeft += event.deltaY; event.preventDefault(); } }, { passive: false });
+    // The beat columns scroll sideways with the wheel; Writing focus rows scroll as usual.
+    scroller.addEventListener("wheel", event => { if (!writingFocus && Math.abs(event.deltaY) > Math.abs(event.deltaX) && scroller.scrollWidth > scroller.clientWidth) { scroller.scrollLeft += event.deltaY; event.preventDefault(); } }, { passive: false });
     panel.append(toolbar, scroller);
     bottomHost.replaceChildren(path, panel);
-    scroller.scrollLeft = before; pinRouteLabels(scroller);
+    scroller.scrollLeft = before.left; scroller.scrollTop = before.top;
+    if (!writingFocus) pinRouteLabels(scroller);
+    else if (routeView === "tracks") { laneGrips(scroller, host, focusWidths); stopLaneWatch = watchHiddenLanes(scroller, toolbar); }
     const column = [...scroller.querySelectorAll<HTMLElement>("[data-beat-id], [data-new-beat]")].find(item => (item.dataset.beatId ?? item.dataset.newBeat) === selected);
     if (column) revealColumn(column);
     markDrafts();
@@ -2117,7 +2156,7 @@ export function renderStoryView(
     applyStep,
     ownsDraftField: target => target instanceof HTMLElement && !target.closest(".choice-new-scene") && [...beatDrafts.values()].some(draft => draft.panel.contains(target)),
     dispose: () => {
-      disposed = true; closeText(); beatDrafts.clear(); steps.clear();
+      disposed = true; closeText(); beatDrafts.clear(); steps.clear(); stopLaneWatch?.();
       mediaGeneration += 1;
       pendingImages.clear();
       for (const image of imageCache.values()) URL.revokeObjectURL(image.url);

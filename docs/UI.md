@@ -421,9 +421,27 @@ covers moving, unwrapping and deleting branches.
 - Tracks has one column per beat and lanes for Beat, Background, Characters, Words,
   Sound and Flow. Reel shows beat cards in order, including the beats around a branch.
   Neither shows elapsed time, playback or keyframes.
-- Writing focus hides the stage and keeps the editor and Branch path. Its Tracks view
-  keeps every lane on wide windows, with a taller Words lane.
-- Production has the stage, editor, Branch path, Tracks (#116) and Reel (#118).
+- Writing focus hides the stage and keeps the editor and Branch path. The Branch path
+  spans the top. From 900 px, Tracks or Reel sits beside the editor with one row per
+  beat; Tracks keeps all six lanes and the route line runs down the left. Markers are
+  labelled: `+ First beat in If trust ≥ 5`, `+ After 06`. The sidebar is 560 px at
+  1600 px wide and 400 px from 900 to 1200 px. Below 900 px the editor sits above
+  Tracks, which shows Beat and Beat content. Writing focus has no Key, and the arrow
+  keys move up and down between rows. The scene toolbar button reads "Writing focus",
+  then "Show game window".
+- In Writing focus from 900 px, grips on the sidebar edge and on each lane edge resize
+  them by drag or by the arrow keys (Shift for larger steps). Escape cancels a drag or
+  the keyboard changes, and double-click or Enter resets the default. Words fills the
+  rest, and a lane grows only into the room Words has above its minimum. A drag keeps
+  the editor's focus and caret. Widths last for the project session, outside Undo.
+- When the sidebar or a scroll cuts off lanes, a button beside the Tracks and Reel
+  switch names them ("Sound, Flow ›") and scrolls them into view, and the cut edge gets
+  a line. A cut within a lane's 8 px padding hides no text and is not named.
+- Entering and leaving Writing focus moves no content: the editor, its drafts, focus and
+  caret, the selection, the open branches and a new beat's place stay. It sends nothing
+  to core and adds no Undo entry. The view lasts for the project session.
+- Production has the stage, editor, Branch path, Tracks (#116), Reel (#118) and Writing
+  focus (#119).
   Selecting a Tracks or Reel column edits its beat beside the stage; a condition or
   Choice column edits the condition, and an option opens from its Choice. Move up,
   Move down, Move to and Delete sit in the editor heading's menu, and Alt+Arrow on a
@@ -448,9 +466,7 @@ covers moving, unwrapping and deleting branches.
   empty-branch slots and route lines. Each beat is a card with its number and kind,
   then its text (five lines, four from 900 to 1200 px). A Return names itself in the
   card title. Alt+Arrow and the arrow keys work as in Tracks.
-- The Writing focus lane grid and resizing (#119), and the editor refinements,
-  pickers and Add a beat dialog (#117) come later; until then Writing focus only hides
-  the stage.
+- The editor refinements, pickers and Add a beat dialog (#117) come later.
 
 ### Branches in a scene
 
@@ -756,10 +772,10 @@ media rules.
 
 ### Not yet in production
 
-Production Story has the Combined stage, editor, Branch path, Tracks and Reel, with
-the approved status, marks and wording of `story-combined-status` / `header-v2`. The
-Writing focus lane grid (#119) and the Combined beat editors, pickers and Add a beat
-dialog (#117) are not built yet. The Move to and Add a beat forms and the
+Production Story has the Combined stage, editor, Branch path, Tracks, Reel and Writing
+focus, with the approved status, marks and wording of `story-combined-status` /
+`header-v2`. The Combined beat editors, pickers and Add a beat dialog (#117) are not
+built yet. The Move to and Add a beat forms and the
 Then states keep their earlier wording until #117.
 
 Choice editing follows #98: numbered option bodies, captions and order, explicit beat

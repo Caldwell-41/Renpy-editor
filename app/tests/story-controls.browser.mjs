@@ -13,7 +13,7 @@ const output=process.env.LOOMLIGHT_STORY_CAPTURE_DIR ?? join(tmpdir(),'loomlight
 const server=await createServer({root:fileURLToPath(new URL('..',import.meta.url)),logLevel:'error',server:{host:'127.0.0.1',port:0}});
 await mkdir(output,{recursive:true});let browser;
 const errors=[],results=[];let page,passed=false,failure;
-const shell='<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="/src/styles.css"><link rel="stylesheet" href="/src/ui-refresh.css"><style>body{margin:0}.review-shell{height:100vh;display:grid;grid-template-columns:230px minmax(0,1fr)}.review-tree{overflow:auto;border-right:1px solid var(--border-normal);padding:12px}.review-shell>.scene-workspace{height:100vh;box-sizing:border-box}@media(max-width:800px){.review-shell{grid-template-columns:minmax(0,1fr)}.review-tree{display:none}}</style></head><body><div class="review-shell"><aside class="review-tree"></aside><main class="scene-workspace"></main></div></body></html>';
+const shell='<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="/src/styles.css"><link rel="stylesheet" href="/src/ui-refresh.css"><style>body{margin:0}.review-shell{height:100vh;display:grid;grid-template-columns:230px minmax(0,1fr)}.review-tree{overflow:auto;border-right:1px solid var(--border-normal);padding:12px}.review-shell>.scene-workspace{height:100vh;box-sizing:border-box}.review-shell:has(>[data-writing-focus=true]){grid-template-columns:minmax(0,1fr)}.review-shell:has(>[data-writing-focus=true])>.review-tree{display:none}@media(max-width:800px){.review-shell{grid-template-columns:minmax(0,1fr)}.review-tree{display:none}}</style></head><body><div class="review-shell"><aside class="review-tree"></aside><main class="scene-workspace"></main></div></body></html>';
 const mount=resolution=>page.evaluate(async resolution=>{
  window.storyDispose?.();document.querySelector('main').replaceChildren();document.querySelector('aside').replaceChildren();
  const {renderStoryView}=await import('/tests/story-controls-fixture.ts');const {storyFixture}=await import('/tests/story-controls-fixture.ts');
@@ -95,10 +95,73 @@ try{
  assert(reelPinned.label>=reelPinned.edge&&reelPinned.labelRight<=reelPinned.end,`Reel route label stays in view: ${JSON.stringify(reelPinned)}`);
  await page.screenshot({path:`${output}/1280x720-dark-laptop-nested-reel.png`});await view('tracks');
  await page.screenshot({path:`${output}/1280x720-dark-laptop-nested.png`});results.push({label:'nested',filename:'1280x720-dark-laptop-nested.png',pathRows:nested.pathRows});
- // Writing focus hides the stage and keeps the editor, Branch path and Tracks.
- await page.getByRole('button',{name:'Writing focus',exact:true}).click();
- assert.equal(await page.locator('.story-stage').isVisible(),false);assert(await page.locator('.story-editor').isVisible()&&await page.locator('.story-branch-path').isVisible()&&await page.locator('.story-tracks').isVisible());
- await page.getByRole('button',{name:'Exit Writing focus',exact:true}).click();assert(await page.locator('.story-stage').isVisible());
+ // Writing focus (story-revamp / combined-v1) hides the stage. The Branch path spans the top; Tracks rows
+ // sit beside the editor with six lanes from 900 px, and below the editor with Beat and Beat content under it.
+ // Entering, leaving, resizing and window changes keep the editor's focus and caret.
+ await mount({width:1280,height:720});await page.setViewportSize({width:1100,height:720});
+ await page.locator('.story-branch-segment[data-branch-id="if"]').click();await page.locator('.story-track-column[data-beat-id="a"] > .story-track-beat').click();
+ const text=page.locator('.story-editor textarea').first();await text.click();await text.evaluate(field=>field.setSelectionRange(2,5));
+ const caret=()=>page.evaluate(()=>{const field=document.activeElement;return field?.tagName==='TEXTAREA'?[field.selectionStart,field.selectionEnd]:field?.className;});
+ const keeps=async label=>assert.deepEqual(await caret(),[2,5],`${label}: the editor keeps focus and caret`);
+ await page.getByRole('button',{name:'Writing focus',exact:true}).click();await keeps('entering');
+ // Two frames let the hidden-lane watcher see a new size.
+ const focusGeometry=()=>page.evaluate(async()=>{
+  await new Promise(done=>requestAnimationFrame(()=>requestAnimationFrame(done)));
+  const box=node=>{const b=node.getBoundingClientRect();return {left:b.left,right:b.right,top:b.top,bottom:b.bottom,width:b.width,height:b.height};};
+  const scroller=document.querySelector('.story-tracks-scroll');
+  return {editor:box(document.querySelector('.story-editor')),panel:box(document.querySelector('.story-panel')),path:box(document.querySelector('.story-branch-path')),
+   stage:document.querySelector('.story-stage').getClientRects().length,
+   lanes:[...document.querySelectorAll('.story-track-label')].filter(node=>node.getClientRects().length).map(node=>node.innerText.trim()),
+   grips:[...document.querySelectorAll('.story-grip')].filter(node=>node.getClientRects().length).length,
+   rows:[...document.querySelectorAll('.story-tracks .story-track-column')].slice(0,2).map(node=>box(node).top),
+   hidden:[...document.querySelectorAll('.story-lane-edge')].filter(node=>!node.hidden).map(node=>node.textContent),scrollLeft:scroller.scrollLeft,
+   pageOverflow:document.documentElement.scrollWidth>innerWidth+1};
+ });
+ for(const theme of ['dark','light'])for(const [width,height,side] of [[1600,1000,560],[1100,720,400],[900,720,400],[899,720],[560,640]]){
+  await page.setViewportSize({width,height});await page.evaluate(theme=>{document.documentElement.dataset.theme=theme;},theme);
+  const g=await focusGeometry(),label=`Writing focus ${width}x${height}/${theme}`;
+  assert.equal(g.stage,0,`${label}: no stage`);assert.equal(g.pageOverflow,false,`${label}: no page overflow`);
+  assert(g.path.bottom<=Math.min(g.editor.top,g.panel.top)+1,`${label}: the Branch path is above the editor and Tracks`);
+  assert(g.rows[1]>g.rows[0],`${label}: beats are rows`);
+  if(side){
+   assert(g.editor.left>=g.panel.right&&Math.abs(g.editor.width-side)<=1,`${label}: a ${side} px sidebar beside Tracks (${g.editor.width})`);
+   assert.deepEqual(g.lanes,['Beat','Background','Characters','Words','Sound','Flow'],`${label}: six lanes`);assert.equal(g.grips,6,`${label}: sidebar and lane grips`);
+  }else{
+   assert(g.editor.bottom<=g.panel.top+1,`${label}: the editor sits above Tracks`);
+   assert.deepEqual(g.lanes,['Beat','Beat content'],`${label}: two lanes`);assert.equal(g.grips,0,`${label}: no grips`);
+  }
+  // 1100 px fits every lane, as in the approved capture; 900 px names the ones cut off.
+  if(width===1100||width===1600)assert.deepEqual(g.hidden,[],`${label}: no lane hidden`);
+  if(width===900)assert.deepEqual(g.hidden,['Sound, Flow ›'],`${label}: the hidden lanes are named`);
+  await keeps(label);
+  if(theme==='dark'){await page.screenshot({path:`${output}/focus-${width}x${height}.png`});results.push({label,filename:`focus-${width}x${height}.png`,editor:Math.round(g.editor.width)});}
+ }
+ await page.evaluate(()=>{document.documentElement.dataset.theme='dark';});
+ // A pointer drag widens the sidebar without taking focus. Lanes it covers are named; the marker scrolls to them.
+ await page.setViewportSize({width:1100,height:720});
+ const drag=async(selector,dx,finish=true)=>{const grip=await page.locator(selector).boundingBox(),x=grip.x+grip.width/2,y=grip.y+Math.min(40,grip.height/2);await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+dx,y,{steps:4});if(finish)await page.mouse.up();};
+ await drag('.story-side-grip',-150);await keeps('dragging the sidebar');
+ let g=await focusGeometry();assert(Math.abs(g.editor.width-550)<=1,`the sidebar widens to 550 (${g.editor.width})`);assert.deepEqual(g.hidden,['Sound, Flow ›']);
+ await page.screenshot({path:`${output}/focus-1100x720-hidden.png`});
+ await page.locator('.story-lane-edge-end').click();g=await focusGeometry();assert(g.scrollLeft>0,'the marker scrolls the lanes into view');assert.equal(g.hidden.length,1);assert.match(g.hidden[0],/^‹ /);
+ await text.focus();await text.evaluate(field=>field.setSelectionRange(2,5));
+ // Escape cancels a drag; double-click resets the default.
+ await drag('.story-side-grip',-60,false);await page.keyboard.press('Escape');await page.mouse.up();
+ g=await focusGeometry();assert(Math.abs(g.editor.width-550)<=1,`Escape restores the width before the drag (${g.editor.width})`);await keeps('Escape on a drag');
+ await page.locator('.story-side-grip').dblclick();g=await focusGeometry();assert(Math.abs(g.editor.width-400)<=1,'double-click resets the sidebar');
+ await page.evaluate(()=>{document.querySelector('.story-tracks-scroll').scrollLeft=0;});
+ const lane=()=>page.locator('.story-track-label.story-lane-1').evaluate(node=>node.getBoundingClientRect().width);
+ // At 1100 px Words is at its minimum, so a lane widens only once the narrowest sidebar gives Words room.
+ await page.locator('.story-side-grip').focus();for(let step=0;step<4;step++)await page.keyboard.press('Shift+ArrowRight');
+ g=await focusGeometry();assert(Math.abs(g.editor.width-320)<=1,`the arrow keys narrow the sidebar to its minimum (${g.editor.width})`);
+ await text.focus();await text.evaluate(field=>field.setSelectionRange(2,5));
+ await drag('.story-track-label.story-lane-1 > .story-grip',30);assert.equal(Math.round(await lane()),126,'the Background lane widens');await keeps('dragging a lane');
+ // Reel rows stack too, and leaving Writing focus brings the stage back with the caret in place.
+ await view('reel');g=await focusGeometry();
+ const reel=await page.evaluate(()=>[...document.querySelectorAll('.story-reel .story-track-column')].slice(0,2).map(node=>node.getBoundingClientRect().top));assert(reel[1]>reel[0],'Reel cards are rows');
+ await page.screenshot({path:`${output}/focus-1100x720-reel.png`});await view('tracks');
+ await text.focus();await text.evaluate(field=>field.setSelectionRange(2,5));
+ await page.getByRole('button',{name:'Show game window',exact:true}).click();assert(await page.locator('.story-stage').isVisible());await keeps('leaving');
  assert.deepEqual(errors,[]);passed=true;console.log(JSON.stringify({passed:true,captures:results.length,runtimeErrors:errors.length}));
 }catch(error){failure=String(error);throw error;
 }finally{
