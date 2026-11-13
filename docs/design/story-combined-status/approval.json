@@ -1,0 +1,10 @@
+{
+ "schemaVersion": 1,
+ "screenId": "story-combined-status",
+ "currentApproved": null,
+ "revisions": [
+  { "id": "header-v1", "variantId": "header", "approval": null },
+  { "id": "footer-v1", "variantId": "footer", "approval": null },
+  { "id": "strip-v1", "variantId": "strip", "approval": null }
+ ]
+}
