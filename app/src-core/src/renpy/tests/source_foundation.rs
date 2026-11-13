@@ -48,7 +48,7 @@ fn source_foundation_sdk_eof_fixture_preflight() {
     let appended = ipc(
         &mut service,
         "scene.apply",
-        json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":model["scenes"][0]["sourceRevision"],"position":scene["bodies"][0]["defaultPlace"],"beat":{"type":"narration","text":"Foundation continuation"}}}),
+        json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":model["scenes"][0]["sourceRevision"],"position":{"type":"end"},"beat":{"type":"narration","text":"Foundation continuation"}}}),
     );
     assert_eq!(
         fs::read(root.join(scene["sourcePath"].as_str().unwrap())).unwrap(),

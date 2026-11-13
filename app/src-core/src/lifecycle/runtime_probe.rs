@@ -938,7 +938,7 @@ mod branches_tests {
             let appended = ipc(
                 &mut service,
                 "scene.apply",
-                json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":model["scenes"][0]["sourceRevision"],"position":scene["bodies"][0]["defaultPlace"],"beat":{"type":"narration","text":"Safe root"}}}),
+                json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":model["scenes"][0]["sourceRevision"],"position":{"type":"end"},"beat":{"type":"narration","text":"Safe root"}}}),
             );
             let expected = [
                 accepted.as_slice(),
