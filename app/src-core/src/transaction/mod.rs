@@ -25,8 +25,8 @@ use identity::identity_for_file;
 pub use identity::FileIdentity;
 pub use journal::JournalState;
 use journal::{Journal, JournalMutation, JournalStore};
-use path::resolve_target;
 pub use path::RelativePath;
+use path::{resolve_target, ResolvedTarget};
 use platform::{exchange_preserving_target, flush_directory, PlatformCapability};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -297,6 +297,9 @@ pub struct TransactionService {
     serial: Mutex<()>,
     executions: Mutex<HashMap<ProjectId, Arc<ExecutionGate>>>,
     execution_consent: Mutex<HashMap<ProjectId, ExecutionManifest>>,
+    /// Counts project root validations, which bound the file system work of a read.
+    #[cfg(test)]
+    pub(crate) root_validations: std::sync::atomic::AtomicUsize,
 }
 
 impl TransactionService {
@@ -841,23 +844,9 @@ impl TransactionService {
     ) -> Result<(Vec<u8>, Revision), PublicDiagnostic> {
         let approved = self.approved(project)?;
         self.validate_root(&approved)?;
-        let target = resolve_target(&approved.anchor, &path, true)
+        let target = resolve_target(&approved.anchor, &path, false)
             .map_err(|code| PublicDiagnostic::new(code, None))?;
-        let mut file = target
-            .parent_anchor
-            .open_file(&target.name)
-            .map_err(|code| PublicDiagnostic::new(code, None))?;
-        let identity = identity_for_file(&file)
-            .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
-        let bytes = read_bytes_bounded(&mut file, maximum.min(MAX_MUTATION_BYTES))
-            .map_err(|code| PublicDiagnostic::new(code, None))?;
-        Ok((
-            bytes.clone(),
-            Revision {
-                sha256: sha256(&bytes),
-                identity,
-            },
-        ))
+        read_resolved(&target, maximum)
     }
 
     pub fn snapshot_optional(
@@ -885,7 +874,7 @@ impl TransactionService {
         {
             return Ok(None);
         }
-        self.snapshot_bounded(project, path, maximum).map(Some)
+        read_resolved(&target, maximum).map(Some)
     }
 
     pub(crate) fn inspect_file(
@@ -1643,6 +1632,9 @@ impl TransactionService {
     }
 
     fn validate_root(&self, approved: &ApprovedProject) -> Result<(), PublicDiagnostic> {
+        #[cfg(test)]
+        self.root_validations
+            .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         let canonical = fs::canonicalize(&approved.root)
             .map_err(|_| PublicDiagnostic::new(ErrorCode::RootIdentityChanged, None))?;
         let meta = fs::symlink_metadata(&approved.root)
@@ -1670,6 +1662,24 @@ impl crate::ports::SourceTransactionPort for TransactionService {
     fn recover(&self, project: &ProjectId) -> RecoveryReport {
         TransactionService::recover(self, project)
     }
+}
+
+/// Reads a file through its resolved parent anchor. `open_file` refuses a missing
+/// entry, a link or a non-file, so callers need not resolve with `must_exist`.
+fn read_resolved(
+    target: &ResolvedTarget,
+    maximum: usize,
+) -> Result<(Vec<u8>, Revision), PublicDiagnostic> {
+    let mut file = target
+        .parent_anchor
+        .open_file(&target.name)
+        .map_err(|code| PublicDiagnostic::new(code, None))?;
+    let identity =
+        identity_for_file(&file).map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
+    let bytes = read_bytes_bounded(&mut file, maximum.min(MAX_MUTATION_BYTES))
+        .map_err(|code| PublicDiagnostic::new(code, None))?;
+    let sha256 = sha256(&bytes);
+    Ok((bytes, Revision { sha256, identity }))
 }
 
 pub(super) fn read_revision_file(mut file: File) -> Result<Revision, ErrorCode> {

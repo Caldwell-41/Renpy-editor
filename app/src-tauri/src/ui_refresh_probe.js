@@ -10,11 +10,13 @@
  const check=(ok,message)=>{if(!ok)throw Error(message);details.checks.push(message);};
  try{
   await wait(()=>document.querySelector('.recent-open'));
-  details.stage='project-opening';document.querySelector('.recent-open').click();
+  details.stage='project-opening';const openStarted=performance.now();document.querySelector('.recent-open').click();
   // The navigation shell appears before the initial real-service observation ends.
   // Wait for Story content, not just the newly mounted Source navigation button.
+  // A timeout here reports how long it waited; a pass reports how long open took.
   details.stage='initial-story-ready';
-  await wait(()=>document.querySelector('.scene-workspace .story-stage') && button('+ Add beat'));
+  try{await wait(()=>document.querySelector('.scene-workspace .story-stage') && button('+ Add beat'));}
+  finally{details.initialStoryMs=Math.round(performance.now()-openStarted);}
   details.stage='character-default-colour';button('Characters').click();
   await wait(()=>button('New character'));button('New character').click();
   await wait(()=>button('Game setup'));button('Game setup').click();

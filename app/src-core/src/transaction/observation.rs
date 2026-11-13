@@ -30,6 +30,38 @@ impl TransactionService {
         })
     }
 
+    /// Returns one value per path, in order. A path with a known value is not read.
+    /// Every other path is read as `snapshot_optional` does, under the same per-open
+    /// checks, and passed to `from_disk`; a missing file reads as `None`. Lists
+    /// longer than one observation run in consecutive batches.
+    pub(crate) fn snapshot_optional_many<T>(
+        &self,
+        project: &ProjectId,
+        paths: Vec<(&str, Option<T>)>,
+        from_disk: impl Fn(Result<Option<(Vec<u8>, Revision)>, PublicDiagnostic>) -> T,
+    ) -> Result<Vec<T>, PublicDiagnostic> {
+        let unread = paths
+            .iter()
+            .filter(|(_, known)| known.is_none())
+            .map(|(path, _)| *path)
+            .collect::<Vec<_>>();
+        let mut disk = Vec::with_capacity(unread.len());
+        for batch in unread.chunks(MAX_OBSERVATION_FILES) {
+            disk.extend(
+                self.with_observation_readers(project, batch, |reader, path| {
+                    let path = RelativePath::new(*path).map_err(diagnostic)?;
+                    reader.snapshot_optional(&path)
+                })?,
+            );
+        }
+        let mut disk = disk.into_iter().map(from_disk);
+        paths
+            .into_iter()
+            .map(|(_, known)| known.or_else(|| disk.next()))
+            .collect::<Option<Vec<_>>>()
+            .ok_or_else(|| diagnostic(ErrorCode::IoFailure))
+    }
+
     #[cfg(test)]
     pub(crate) fn observations_still_current(
         &self,
@@ -133,6 +165,28 @@ impl ObservationReader<'_> {
             .1
             .open_file(name)
             .map_err(diagnostic)
+    }
+
+    fn snapshot_optional(
+        &mut self,
+        path: &RelativePath,
+    ) -> Result<Option<(Vec<u8>, Revision)>, PublicDiagnostic> {
+        match self.snapshot_with_budget(path, MAX_MUTATION_BYTES, None) {
+            Ok(value) => Ok(Some(value)),
+            Err(_) if self.absent(path) => Ok(None),
+            Err(error) => Err(error),
+        }
+    }
+
+    /// True only when the retained parent of `path` reports its leaf missing. A
+    /// parent that failed to resolve leaves the read's own error in place.
+    fn absent(&self, path: &RelativePath) -> bool {
+        let (Some((parent, anchor)), Some(name)) = (&self.parent, path.as_path().file_name())
+        else {
+            return false;
+        };
+        path.as_path().parent() == Some(parent.as_path())
+            && matches!(anchor.entry_absent(name), Ok(true))
     }
 
     #[cfg(test)]
