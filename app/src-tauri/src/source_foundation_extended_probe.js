@@ -58,12 +58,18 @@ window.__loomlightFoundationExtended = async ({ details, check, wait, click, cal
   model = await apply({ type: 'insertBodyBeat', body: rootBody, position: before(root.id), beat: { type: 'narration', text: 'After group' } }); scene = model.scenes[0];
   check(owners(model) === baselineOwners && beats.every(b => scene.beats.some(n => n.id === b.id)) && (await source()).text.includes('    "Before group"\n    if flag:') && (await source()).text.includes('    "After group"\n    bec "Root one"'), 'Safe before/after insertion preserves child IDs and owners');
   details.stage = 'move-above-group';
+  // The commands above went straight to core; reopen so Story shows the current scene.
+  await reopen();
   const header = beats[0], rootNodes = () => scene.bodies.find(b => b.body.type === 'root').nodes.map(n => n.beatId);
   const next = scene.beats.find(b => b.id === rootNodes()[rootNodes().indexOf(header.id) + 1]);
   check(next?.payload.text === 'Root two', 'Root two directly follows the If/Otherwise group');
   const beforeMove = await source();
   await open(next); moveUp(next).click();
-  await wait(async () => (await source()).text !== beforeMove.text); await refresh();
+  // Wait on Story, not core: core serves one request at a time, so polling it here
+  // would make Story's own write busy.
+  const columns = () => [...document.querySelectorAll('.story-tracks .story-track-column')].map(c => c.dataset.beatId);
+  await wait(() => columns().indexOf(next.id) === columns().indexOf(header.id) - 1 && document.querySelector('#app-status')?.textContent !== 'Saving…');
+  await refresh();
   check((await source()).text === beforeMove.text.replace('    bec "Root two"\n', '').replace('    if flag:', '    bec "Root two"\n    if flag:'), 'Move up moves the root beat above the whole If/Otherwise group');
   check(rootNodes()[rootNodes().indexOf(header.id) - 1] === next.id && owners(model) === baselineOwners, 'Moving above the group keeps every child ID and owner');
   details.stage = 'unterminated-child-append';
