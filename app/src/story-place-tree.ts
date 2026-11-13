@@ -30,7 +30,7 @@ export interface PlaceTreeOptions {
   readonly move: (place: { readonly body: BodyRef; readonly position: Position }) => Promise<boolean>;
 }
 
-export function openPlaceTree(options: PlaceTreeOptions): () => void {
+export function openPlaceTree(options: PlaceTreeOptions): void {
   options.host.querySelector(":scope > .story-dialog-backdrop")?.remove();
   const nodes = new Map<string, PlaceNode>(), parents = new Map<string, string>();
   const index = (node: PlaceNode): void => { nodes.set(node.id, node); for (const child of node.children ?? []) { parents.set(child.id, node.id); index(child); } };
@@ -99,5 +99,4 @@ export function openPlaceTree(options: PlaceTreeOptions): () => void {
   });
   backdrop.addEventListener("pointerdown", event => { if (event.target === backdrop && !busy) close(); });
   draw(); options.host.append(backdrop); tree.querySelector<HTMLElement>('[tabindex="0"]')?.focus();
-  return close;
 }

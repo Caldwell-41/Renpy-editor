@@ -2,15 +2,15 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
 import { buildRuleBuilder } from "../src/story-condition-editor.js";
-import { deriveScenePreview, hasSceneDraft, type SceneCommand, type SceneWorkspace, type StoryTarget } from "../src/scene-ui.js";
+import { deriveScenePreview, hasSceneDraft, type SceneActions, type SceneCommand, type SceneWorkspace, type StoryTarget } from "../src/scene-ui.js";
 import { renderBranches, type FlowBody } from "../src/branches-ui.js";
-import { chooseIn, flagCondition, openBranch, pickKind, press, selectBeat, storyEditor, storyFixture, renderStoryView, trackColumn, type } from "./story-controls-fixture.js";
+import { chooseIn, editorFixture, flagCondition, withBodies, openBranch, pickKind, press, selectBeat, storyEditor, storyFixture, renderStoryView, trackColumn, type } from "./story-controls-fixture.js";
 import { shorten } from "../src/story-tracks.js";
 const tick = async (): Promise<void> => { await new Promise(resolve => setTimeout(resolve, 0)); };
-function setup(apply?: (command: SceneCommand) => Promise<SceneWorkspace>, fixture = storyFixture(3)) {
+function setup(apply?: (command: SceneCommand) => Promise<SceneWorkspace>, fixture = storyFixture(3), extra: Partial<SceneActions> = {}) {
   const browser = new Window(); Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, HTMLInputElement: browser.HTMLInputElement, HTMLSelectElement: browser.HTMLSelectElement, Event: browser.Event, KeyboardEvent: browser.KeyboardEvent });
   document.body.innerHTML = '<main></main><aside></aside>'; const host = document.querySelector<HTMLElement>("main")!; const model = fixture; const calls: { command: SceneCommand; expected: unknown }[] = []; const status: string[] = []; const navigation: StoryTarget[] = []; const continuations: unknown[] = [];
-  const dispose = renderStoryView(host, document.querySelector("aside")!, model, { apply: async (command, expected) => { calls.push({ command, expected }); return apply ? apply(command) : model; }, resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); }, status: text => status.push(text), viewScene: target => navigation.push(target), viewContinuation: (...args) => continuations.push(args), viewSource: () => {} }).dispose;
+  const dispose = renderStoryView(host, document.querySelector("aside")!, model, { apply: async (command, expected) => { calls.push({ command, expected }); return apply ? apply(command) : model; }, resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); }, status: text => status.push(text), viewScene: target => navigation.push(target), viewContinuation: (...args) => continuations.push(args), viewSource: () => {}, ...extra }).dispose;
   return { browser, host, model, calls, status, navigation, continuations, close: async () => { dispose(); await browser.happyDOM.close(); } };
 }
 function button(host: ParentNode, text: string): HTMLButtonElement { const found = [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === text); assert.ok(found, text); return found; }
@@ -22,8 +22,8 @@ test("rule builder reads variable rules, keeps half-typed numbers and leaves a t
   const trust = { type: "variable" as const, variableId: "trust", variableType: "int" as const }, flag = { type: "variable" as const, variableId: "flag", variableType: "bool" as const };
   const original = { status: "supported" as const, expression: { type: "and" as const, left: { type: "and" as const, left: { type: "compare" as const, operator: "greaterEqual" as const, left: trust, right: { type: "int" as const, value: "9223372036854775807" } }, right: flag }, right: { type: "compare" as const, operator: "notEqual" as const, left: { type: "variable" as const, variableId: "name", variableType: "string" as const }, right: { type: "string" as const, value: "Bec" } } } };
   const builder = buildRuleBuilder(variables, original, { keyword: "if", label: "If", empty: "", required: true }); document.body.append(builder.host);
-  // Untouched, it reads back the exact condition from source.
-  assert.equal(builder.read(), original); assert.equal(builder.host.querySelector(".story-rule-code")!.textContent, 'if trust >= 9223372036854775807 and flag == True and name != "Bec":');
+  // Untouched, it reads back the exact condition from source, and each rule shows as written.
+  assert.equal(builder.read(), original); assert.equal(builder.host.querySelector(".story-rule-code")!.textContent, 'if trust >= 9223372036854775807 and flag and name != "Bec":');
   const radio = (label: string, index: number): HTMLButtonElement => [...builder.host.querySelectorAll<HTMLElement>(".story-rule")[index]!.querySelectorAll<HTMLButtonElement>("[role=radio]")].find(item => item.textContent === label || item.getAttribute("aria-label") === label)!;
   radio("is at most", 0).click(); radio("is false", 1).click(); [...builder.host.querySelectorAll<HTMLButtonElement>("[role=radio]")].find(item => item.textContent === "Any")!.click();
   const value = builder.host.querySelector<HTMLInputElement>('input[aria-label="If rule 1 value"]')!;
@@ -41,6 +41,48 @@ test("rule builder reads variable rules, keeps half-typed numbers and leaves a t
   const readOnly = buildRuleBuilder(variables, mixed, { keyword: "elif", label: "Else if", empty: "", required: true, source: () => { opened++; }, caption: "flag and (flag or not flag)" });
   assert.equal(readOnly.editable, false); assert.equal(readOnly.read(), mixed); assert.equal(readOnly.host.querySelector("input, select"), null);
   [...readOnly.host.querySelectorAll<HTMLButtonElement>("button")].find(item => item.textContent === "Edit in Source")!.click(); assert.equal(opened, 1);
+  await s.close();
+});
+
+test("changing one rule keeps every other rule as source wrote it", async () => {
+  const s = setup(); const variables = s.model.authoring.variables;
+  const flag = { type: "variable" as const, variableId: "flag", variableType: "bool" as const }, trust = { type: "variable" as const, variableId: "trust", variableType: "int" as const };
+  const notFlag = { type: "not" as const, operand: flag }, unchanged = { type: "compare" as const, operator: "notEqual" as const, left: flag, right: { type: "bool" as const, value: false } };
+  const original = { status: "supported" as const, expression: { type: "and" as const, left: { type: "and" as const, left: notFlag, right: unchanged }, right: { type: "compare" as const, operator: "greaterEqual" as const, left: trust, right: { type: "int" as const, value: "3" } } } };
+  const builder = buildRuleBuilder(variables, original, { keyword: "if", label: "If", empty: "", required: true }); document.body.append(builder.host);
+  assert.equal(builder.host.querySelector(".story-rule-code")!.textContent, "if not flag and flag != False and trust >= 3:");
+  type(builder.host.querySelector<HTMLInputElement>('input[aria-label="If rule 3 value"]')!, "4");
+  assert.deepEqual(builder.read(), { status: "supported", expression: { type: "and", left: { type: "and", left: notFlag, right: unchanged }, right: { type: "compare", operator: "greaterEqual", left: trust, right: { type: "int", value: "4" } } } });
+  assert.equal(builder.host.querySelector(".story-rule-code")!.textContent, "if not flag and flag != False and trust >= 4:");
+  await s.close();
+});
+
+test("+ New variable creates a project variable in place and the rule uses it", async () => {
+  const requests: unknown[] = [];
+  const s = setup(undefined, storyFixture(3), { createVariable: async request => {
+    requests.push(request);
+    return withBodies({ ...s.model, projectRevision: "project-2", authoring: { ...s.model.authoring, variables: [...s.model.authoring.variables, { id: "late", technicalName: request.technicalName, variableType: request.variableType, defaultValue: false }] } });
+  } });
+  button(s.host, "Add Condition").click(); const panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Add Condition"]')!;
+  const summary = (): HTMLElement => panel.querySelector<HTMLElement>(".story-variable-picker > summary")!;
+  const dialog = (): HTMLElement | null => s.host.querySelector<HTMLElement>(".story-new-variable");
+  // Escape keeps nothing and returns to the variable list.
+  summary().click(); press(panel, "+ New variable…"); assert(dialog());
+  dialog()!.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  assert.equal(dialog(), null); assert.equal(document.activeElement, summary()); assert.deepEqual(requests, []);
+  // An invalid name stays in its field with the reason; nothing is created.
+  summary().click(); press(panel, "+ New variable…");
+  const name = dialog()!.querySelector<HTMLInputElement>('input[aria-label="Variable name"]')!; type(name, "9 late");
+  press(dialog()!, "Create variable"); await tick();
+  assert.match(dialog()!.querySelector(".field-error")!.textContent!, /^Variable name must begin with a letter/); assert.equal(name.value, "9 late"); assert.deepEqual(requests, []);
+  type(name, "late_tram"); press(dialog()!, "Create variable"); await tick();
+  assert.deepEqual(requests, [{ technicalName: "late_tram", variableType: "bool", defaultValue: false }]);
+  assert.equal(dialog(), null); assert.equal(summary().getAttribute("aria-label"), "If rule 1 variable: late_tram");
+  assert.equal(panel.querySelector(".story-rule-code")!.textContent, "if late_tram == True:");
+  // The condition commits against the workspace the new variable came from.
+  button(panel, "Create Condition").click(); await tick();
+  assert.deepEqual(s.calls[0]!.command.type === "insertCondition" && s.calls[0]!.command.condition, { status: "supported", expression: { type: "compare", operator: "equal", left: { type: "variable", variableId: "late", variableType: "bool" }, right: { type: "bool", value: true } } });
+  assert.deepEqual(s.calls[0]!.expected, { projectRevision: "project-2", sourceMapRevision: "map" });
   await s.close();
 });
 
@@ -210,7 +252,7 @@ test("Tracks insertion markers open Add a beat at the place core lists for them"
     const result = [...dialog.querySelectorAll(".story-where dd")].map(item => item.textContent!);
     dialog.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); assert.equal(s.host.querySelector(".story-add-beat"), null); return result;
   };
-  assert.deepEqual(place("after:call"), ["Before 04 Narration", "Arrival", "03 Call Scene"]);
+  assert.deepEqual(place("after:call"), ["Before 04 Narration", "Arrival", "03 Call scene"]);
   assert.deepEqual(place("end:scene"), ["Before 05 Return", "Arrival", "04 Narration"]);
   openBranch(s.host, "if");
   assert.deepEqual(place("after:if"), ["Before 02 Choice", "Arrival", "01 Condition"]);
@@ -260,4 +302,35 @@ test("Reel draws the Tracks route; switching views keeps selection, branches, a 
   // The nested draft is marked on its closed condition in both views.
   assert.equal(trackColumn(s.host, "if")!.dataset.beatDraft, "true"); view("reel"); assert.equal(trackColumn(s.host, "if")!.dataset.beatDraft, "true");
   assert.deepEqual(s.calls, [], "switching views commits nothing"); await s.close();
+});
+
+test("picker sheets preview on hover and focus, apply on click and keep the value on Escape", async () => {
+  const s = setup(undefined, editorFixture());
+  try {
+    const stage = (): string[] => [...s.host.querySelectorAll<HTMLImageElement>(".preview-canvas .preview-background, .preview-canvas .preview-character img")].map(image => image.alt);
+    const tile = (value: string): HTMLButtonElement => s.host.querySelector<HTMLButtonElement>(`.story-sheet .story-tile[data-value="${value}"]`)!;
+    let editor = selectBeat(s.host, "bg");
+    const background = (): HTMLSelectElement => storyEditor(s.host).querySelector<HTMLSelectElement>('select[aria-label="Background"]')!;
+    assert.equal(stage()[0], "Rainy platform");
+    const change = press(editor, "Change background: Rainy platform");
+    // Pointing at or focusing a tile previews it on the stage; nothing becomes a draft.
+    tile("depot").dispatchEvent(new Event("pointerenter")); assert.equal(stage()[0], "Depot at night");
+    tile("dawn").focus(); assert.equal(stage()[0], "Station at dawn");
+    assert.equal(background().value, "platform"); assert.equal(hasSceneDraft(s.host), false);
+    // Escape closes the sheet, restores the stage and keeps the value.
+    tile("dawn").dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    assert.equal(s.host.querySelector(".story-sheet"), null); assert.equal(document.activeElement, change);
+    assert.equal(stage()[0], "Rainy platform"); assert.equal(background().value, "platform"); assert.equal(hasSceneDraft(s.host), false);
+    // Click applies the picture to the draft without a write.
+    press(editor, "Change background: Rainy platform"); tile("depot").click();
+    assert.equal(s.host.querySelector(".story-sheet"), null); assert.equal(background().value, "depot");
+    assert.equal(stage()[0], "Depot at night"); assert.equal(hasSceneDraft(s.host), true); assert.equal(s.calls.length, 0);
+    press(storyEditor(s.host), "Cancel"); await tick();
+    // The expression sheet previews the character's appearance the same way.
+    editor = selectBeat(s.host, "show"); assert(stage().includes("Mara — Neutral"));
+    press(editor, "Change expression: Neutral"); tile("mara-concerned").dispatchEvent(new Event("pointerenter"));
+    assert(stage().includes("Mara — Concerned")); assert.equal(hasSceneDraft(s.host), false);
+    tile("mara-concerned").dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    assert(stage().includes("Mara — Neutral")); assert.equal(hasSceneDraft(s.host), false);
+  } finally { await s.close(); }
 });

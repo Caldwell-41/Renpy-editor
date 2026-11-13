@@ -3,22 +3,35 @@
 // pane names the highlighted kind and where it goes: Goes at, In and After, and any
 // ending it replaces. Click or Enter adds the highlighted row; Escape or Close cancels.
 import type { BeatPayload } from "./scene-ui.ts";
+import { beatLabels } from "./story-beat-editors.ts";
 import { element, iconButton } from "./story-editor-controls.ts";
 import { storyIcon } from "./story-icons.ts";
 
 /** A beat kind Add a beat offers. A condition is a node, not a beat payload. */
 export type AddKind = Exclude<BeatPayload["type"], "customCode" | "repeatChoice"> | "condition";
-const kinds: readonly (readonly [AddKind, string, string, string])[] = [
-  ["dialogue", "Dialogue", "Write", "A spoken line with a speaker."], ["narration", "Narration", "Write", "Story text with no speaker."],
-  ["background", "Background", "Stage", "Sets the scene and clears characters."], ["showCharacter", "Show character", "Stage", "Puts a character on the stage."],
-  ["hideCharacter", "Hide character", "Stage", "Takes a character off the stage."], ["changeAppearance", "Change appearance", "Stage", "Changes a shown character's expression."],
-  ["placement", "Move character", "Stage", "Moves a shown character."], ["transition", "Transition", "Stage", "Animates the next visual change."],
-  ["playMusic", "Play music", "Audio", "Starts a music track."], ["stopMusic", "Stop music", "Audio", "Stops the current music."], ["playSfx", "Sound effect", "Audio", "Plays a sound once."],
-  ["choice", "Choice", "Flow", "Options the player picks from."], ["condition", "Condition", "Flow", "Branches on a test, then the story continues."],
-  ["call", "Call scene", "Flow", "Visits a scene, then comes back."], ["jump", "Jump", "Flow", "Goes to a scene and does not return."], ["return", "Return", "Flow", "Returns to the caller, or the main menu."],
-  ["setVariable", "Set variable", "State", "Stores a value for later conditions."],
-  ["showScreen", "Show screen", "Screens", "Shows a screen while the story continues."], ["hideScreen", "Hide screen", "Screens", "Hides a screen while the story continues."], ["callScreen", "Call screen", "Screens", "Opens a screen and waits for it to close."],
-];
+// Each kind's name comes from beatLabels, so Add a beat, the new beat and its title agree.
+const kinds: readonly (readonly [AddKind, string, string, string])[] = ([
+  ["dialogue", "Write", "A spoken line with a speaker."],
+  ["narration", "Write", "Story text with no speaker."],
+  ["background", "Stage", "Sets the scene and clears characters."],
+  ["showCharacter", "Stage", "Puts a character on the stage."],
+  ["hideCharacter", "Stage", "Takes a character off the stage."],
+  ["changeAppearance", "Stage", "Changes a shown character's expression."],
+  ["placement", "Stage", "Moves a shown character."],
+  ["transition", "Stage", "Animates the next visual change."],
+  ["playMusic", "Audio", "Starts a music track."],
+  ["stopMusic", "Audio", "Stops the current music."],
+  ["playSfx", "Audio", "Plays a sound once."],
+  ["choice", "Flow", "Options the player picks from."],
+  ["condition", "Flow", "Branches on a test, then the story continues."],
+  ["call", "Flow", "Visits a scene, then comes back."],
+  ["jump", "Flow", "Goes to a scene and does not return."],
+  ["return", "Flow", "Returns to the caller, or the main menu."],
+  ["setVariable", "State", "Stores a value for later conditions."],
+  ["showScreen", "Screens", "Shows a screen while the story continues."],
+  ["hideScreen", "Screens", "Hides a screen while the story continues."],
+  ["callScreen", "Screens", "Opens a screen and waits for it to close."],
+] as const).map(([kind, group, description]) => [kind, kind === "condition" ? "Condition" : beatLabels[kind], group, description] as const);
 const aliases: Partial<Record<AddKind, string>> = { condition: "if else branch test", placement: "position move", call: "shared conversation returns", choice: "menu options decision", setVariable: "flag counter value", showScreen: "panel", callScreen: "dialog", playSfx: "sfx" };
 export const addKindName = (kind: AddKind): string => kinds.find(item => item[0] === kind)?.[1] ?? kind;
 
@@ -45,8 +58,8 @@ export interface AddBeatOptions {
   readonly choose: (kind: AddKind) => void;
 }
 
-/** Opens Add a beat. Returns a function that closes it. */
-export function openAddBeat(options: AddBeatOptions): () => void {
+/** Opens Add a beat. */
+export function openAddBeat(options: AddBeatOptions): void {
   options.host.querySelector(":scope > .story-dialog-backdrop")?.remove();
   const offered = kinds.filter(([, , group]) => group !== "Screens" || options.screens);
   const backdrop = element("div", "story-dialog-backdrop");
@@ -73,7 +86,7 @@ export function openAddBeat(options: AddBeatOptions): () => void {
     query.setAttribute("aria-activedescendant", button.id);
     const [kind, title, , description] = kinds.find(item => item[0] === button.dataset.insertKind)!, place = options.where(kind);
     const where = element("dl", "story-where");
-    const row = (term: string, value: string, accent = false): void => { const value_ = element("dd", accent ? "story-where-at" : "", value); where.append(element("dt", "", term), value_); };
+    const row = (term: string, value: string, accent = false): void => { where.append(element("dt", "", term), element("dd", accent ? "story-where-at" : "", value)); };
     row("Goes at", place.goesAt, true); row("In", place.in); if (place.after) row("After", place.after);
     details.append(element("h3", "", title), element("p", "", description), where);
     if (place.unavailable) details.append(element("p", "story-warn", place.unavailable));
@@ -114,5 +127,4 @@ export function openAddBeat(options: AddBeatOptions): () => void {
   });
   backdrop.addEventListener("pointerdown", event => { if (event.target === backdrop) close(); });
   filter(); options.host.append(backdrop); query.focus();
-  return close;
 }

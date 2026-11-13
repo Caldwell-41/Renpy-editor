@@ -25,6 +25,11 @@ export function element<K extends keyof HTMLElementTagNameMap>(tag: K, className
 export function button(text: string, className = "button secondary", run?: () => void): HTMLButtonElement {
   const node = element("button", className, text); node.type = "button"; if (run) node.addEventListener("click", run); return node;
 }
+/** A labelled form field: the label text above its control. */
+export function labelled(text: string, control: HTMLElement): HTMLLabelElement {
+  const wrapper = element("label", "field compact-field"); wrapper.append(element("span", "", text), control); return wrapper;
+}
+export function friendlyError(error: unknown, fallback: string): string { return error instanceof Error ? error.message : fallback; }
 export function iconButton(icon: string, label: string, run: () => void, className = "story-icon-button"): HTMLButtonElement {
   const node = button("", className, run); node.append(storyIcon(icon)); node.setAttribute("aria-label", node.title = label); return node;
 }
@@ -110,7 +115,7 @@ export function listChoice(select: HTMLSelectElement, items: readonly ChoiceItem
 }
 
 /** A character portrait: the thumbnail of an appearance, ringed in the character's colour. */
-export function avatar(item: ChoiceItem | undefined, thumbnail: Thumbnail, icon = "narration"): HTMLElement {
+function avatar(item: ChoiceItem | undefined, thumbnail: Thumbnail, icon = "narration"): HTMLElement {
   const node = element("span", "story-avatar"); node.setAttribute("aria-hidden", "true");
   if (item?.ring) node.style.setProperty("--ring", item.ring);
   if (item?.asset) { const image = element("img"); image.alt = ""; node.append(image); thumbnail(item.asset, image, node); }
@@ -167,7 +172,7 @@ export interface SheetOptions {
  * at or focusing a tile previews it; click or Enter chooses it; Escape or Close keeps the
  * current value. Focus returns to `trigger` when the sheet closes. Nothing here is a draft field.
  */
-export function openSheet(trigger: HTMLElement, options: SheetOptions): () => void {
+export function openSheet(trigger: HTMLElement, options: SheetOptions): void {
   const host = trigger.closest<HTMLElement>(".story-editor") ?? trigger.parentElement!;
   host.querySelector(":scope > .story-sheet")?.remove();
   const sheet = element("section", "story-sheet"); sheet.role = "dialog"; sheet.setAttribute("aria-label", options.title); sheet.dataset.sheet = options.kind;
@@ -211,7 +216,6 @@ export function openSheet(trigger: HTMLElement, options: SheetOptions): () => vo
   grid.append(...tiles); sheet.append(head, search, grid, empty, ...options.extra ?? [], element("p", "story-sheet-hint", options.hint));
   host.append(sheet);
   (tiles.find(tile => tile.getAttribute("aria-selected") === "true") ?? tiles[0] ?? search).focus({ preventScroll: true });
-  return close;
 }
 
 export interface PictureOptions {

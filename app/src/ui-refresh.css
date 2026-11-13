@@ -1074,6 +1074,9 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .story-avatar>.preview-media-error{display:none}
 .story-dropdown-list{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:20;display:flex;flex-direction:column;max-height:300px;overflow:auto;padding:4px;border:1px solid var(--border-strong);border-radius:var(--radius-small);background:var(--surface-raised);box-shadow:var(--elevation-preview)}
 .story-dropdown-option{display:flex;align-items:center;gap:10px;min-height:36px;padding:4px 8px;border:0;border-radius:3px;background:transparent;color:var(--text-primary);font:inherit;text-align:left;cursor:pointer}
+.story-dropdown-create{border-top:1px solid var(--border-normal);border-radius:0;color:var(--text-secondary)}
+.story-new-variable .story-variable-start>input,.story-new-variable .story-variable-start>select,.story-new-variable .story-field>input{width:100%;box-sizing:border-box}
+.story-new-variable .field-error:empty{display:none}
 .story-dropdown-option:hover,.story-dropdown-option:focus-visible{background:var(--surface-hover);outline:0}
 .story-dropdown-option[aria-selected=true]{background:var(--accent-subtle)}
 /* Picture rows and picker sheets. */
@@ -1190,7 +1193,7 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .story-outcome-words>strong{font-size:12.5px;font-weight:600}
 .story-outcome-words>span{font-size:11.5px;color:var(--text-muted)}
 .story-menu-foot{margin:4px 0 0;padding:6px 8px 2px;border-top:1px solid var(--border-normal);font-size:11px;line-height:1.45;color:var(--text-secondary)}
-.story-destination{gap:8px}
+.story-option-destination{gap:8px}
 .story-destination-pick{display:flex;flex:1;align-items:center;gap:10px;min-width:0;margin:-3px 0 -3px -3px;padding:3px 8px 3px 3px;border:1px solid transparent;border-radius:var(--radius-small);background:transparent;color:var(--text-primary);font:inherit;text-align:left;cursor:pointer}
 .story-destination-pick:hover:not(:disabled){background:var(--surface-hover);border-color:var(--border-normal)}
 .story-guard,.story-prompt-empty{display:flex;align-items:center;gap:8px;min-height:28px;font-size:12.5px;color:var(--text-muted)}

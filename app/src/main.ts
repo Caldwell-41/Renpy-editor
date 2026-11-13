@@ -1,4 +1,4 @@
-import { decimalValue } from "./numeric-input.ts";
+import { decimalValue, int64 } from "./numeric-input.ts";
 import { assignmentCaption } from "./story-arithmetic-editor.ts";
 import type { Options, PromptModel, Preview } from "./prompt-ui.ts";
 import { mountRewrite, type RewriteController } from "./rewrite-ui.ts";
@@ -861,6 +861,15 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
         if (sequence === historyRequestSequence && currentProject?.sessionId === project.sessionId) showHistory(state);
       },
       load: () => projectValue<SceneWorkspace>(project, "scene.list"),
+      // Story's "+ New variable…" uses the Variables create route, then reads the new workspace.
+      createVariable: async request => {
+        const operationToken = beginAuthoringCompletion(project, request);
+        if (!operationToken) throw new Error("Another persistence operation is still in progress.");
+        try {
+          await projectValue(project, "variable.create", { ...request });
+          return await projectValue<SceneWorkspace>(project, "scene.list");
+        } finally { finishAuthoringCompletion(operationToken); void refreshPersistenceStatus(project, viewGeneration); }
+      },
       apply: async (command: SceneCommand, expected, drafts = []) => {
         const operationToken = beginAuthoringCompletion(project, command);
         if (!operationToken) throw new Error("Another persistence operation is still in progress.");
@@ -1171,7 +1180,7 @@ function renderVariables(workspace: HTMLElement, project: OpenProject, model: Au
     problem.textContent=draft.error;if(draft.error)control.setAttribute("aria-invalid","true");
     const readDefault = (): boolean | number | string => {
       const raw = control.value;
-      if (variable.variableType === "int" && !validInt64(raw)) throw Error("Enter a canonical signed 64-bit whole number.");
+      if (variable.variableType === "int" && !int64(raw)) throw Error("Enter a canonical signed 64-bit whole number.");
       return variable.variableType === "bool" ? raw === "true" : variable.variableType === "decimal" ? decimalValue(raw) : raw;
     };
     const validateDefault = validateField(control, () => {
@@ -1205,7 +1214,7 @@ function renderVariables(workspace: HTMLElement, project: OpenProject, model: Au
     row.append(name,type,value);list.append(row);
   });
   const create = supportingSection(); create.append(formHeading("Create Variable")); const technical = input(); technicalNameInput(technical); const type = document.createElement("select"); ["bool", "int", "decimal", "string"].forEach((name) => { const option = document.createElement("option"); option.value = name; option.textContent = ({bool:"Boolean",int:"Whole number",decimal:"Decimal",string:"Text"} as Record<string,string>)[name]!; type.append(option); }); const defaultValue = input(); const boolValue = document.createElement("select"); [["false", "False"], ["true", "True"]].forEach(([value, label]) => { const option = document.createElement("option"); option.value = value!; option.textContent = label!; boolValue.append(option); }); const valueField = field("Default value", boolValue); const syncControl = (): void => { valueField.replaceChildren(document.createElement("span"), type.value === "bool" ? boolValue : defaultValue); valueField.firstElementChild!.textContent = "Default value"; defaultValue.inputMode = type.value === "int" ? "numeric" : type.value === "decimal" ? "decimal" : "text"; }; type.addEventListener("change", syncControl); syncControl(); create.addEventListener("catalog-discard",()=>{technical.value="";type.value="bool";defaultValue.value="";boolValue.value="false";syncControl();});
-  const submit = button("Create Variable", "button primary catalog-submit"); submit.addEventListener("click", async () => { let parsed: boolean | number | string = defaultValue.value; if (type.value === "decimal") { try { parsed = decimalValue(defaultValue.value); } catch (error) { setStatus(message(error, "Enter a finite decimal."), "error"); defaultValue.focus(); return; } } if (type.value === "bool") parsed = boolValue.value === "true"; if (type.value === "int" && !validInt64(defaultValue.value)) { setStatus("Enter a canonical signed 64-bit decimal integer.", "error"); defaultValue.focus(); return; } const token = beginAuthoringCompletion(project, submit); if (!token) return; let accepted=false;submit.disabled = true; setStatus("Saving…"); try { await projectValue(project, "variable.create", { technicalName: technicalName(technical.value), variableType: type.value, defaultValue: parsed }); accepted=true;if (completionIsCurrent(token)) await reload(); } catch (error) { if (!completionIsCurrent(token)) return; submit.disabled = false; setStatus(message(error, "Variable could not be created"), "error"); technical.focus(); } finally { finishAuthoringCompletion(token);if(accepted&&completionIsCurrent(token))void refreshPersistenceStatus(project,viewGeneration); } }); create.append(field("Technical name (fixed after creation)", technical), field("Type", type), valueField, submit); workspace.append(list, create);
+  const submit = button("Create Variable", "button primary catalog-submit"); submit.addEventListener("click", async () => { let parsed: boolean | number | string = defaultValue.value; if (type.value === "decimal") { try { parsed = decimalValue(defaultValue.value); } catch (error) { setStatus(message(error, "Enter a finite decimal."), "error"); defaultValue.focus(); return; } } if (type.value === "bool") parsed = boolValue.value === "true"; if (type.value === "int" && !int64(defaultValue.value)) { setStatus("Enter a canonical signed 64-bit decimal integer.", "error"); defaultValue.focus(); return; } const token = beginAuthoringCompletion(project, submit); if (!token) return; let accepted=false;submit.disabled = true; setStatus("Saving…"); try { await projectValue(project, "variable.create", { technicalName: technicalName(technical.value), variableType: type.value, defaultValue: parsed }); accepted=true;if (completionIsCurrent(token)) await reload(); } catch (error) { if (!completionIsCurrent(token)) return; submit.disabled = false; setStatus(message(error, "Variable could not be created"), "error"); technical.focus(); } finally { finishAuthoringCompletion(token);if(accepted&&completionIsCurrent(token))void refreshPersistenceStatus(project,viewGeneration); } }); create.append(field("Technical name (fixed after creation)", technical), field("Type", type), valueField, submit); workspace.append(list, create);
   const assignmentPanels=model.variables.map(v=>{const panel=document.createElement("section");panel.className="variable-assignments";const heading=formHeading("Assigned in");const note=document.createElement("p");note.className="muted";note.textContent="Known Set Variable Beats only. Custom code is not included.";const result=document.createElement("div");result.textContent="Loading known assignments…";const declaration=document.createElement("details");const label=document.createElement("summary");label.textContent="View declaration";const code=document.createElement("pre");code.textContent=v.source.statement;declaration.append(label,code);panel.append(heading,note,result,declaration);return {panel,result};});
   disposeCatalogue=catalogue(workspace,list,create,"Variables",model.variables.map((v,i)=>({id:v.id,label:v.technicalName,kind:({bool:"Boolean",int:"Whole number",decimal:"Decimal",string:"Text"} as Partial<Record<VariableType,string>>)[v.variableType] ?? v.variableType,extra:[defaultPanels[i]!,assignmentPanels[i]!.panel]})),id=>projectValue<MediaPresentation>(project,"media.present",{assetId:id,purpose:"thumbnail"}),`${project.projectId}:variables`);
   const selectedDefault=workspace.querySelector<HTMLInputElement | HTMLSelectElement>('.variable-default-editor[data-unsubmitted="true"] [aria-describedby]');
@@ -1215,7 +1224,6 @@ function renderVariables(workspace: HTMLElement, project: OpenProject, model: Au
   void projectValue<SceneWorkspace>(project,"scene.list").then(scenes=>{if(generation!==viewGeneration)return;model.variables.forEach((v,i)=>{const result=assignmentPanels[i]!.result;result.replaceChildren();let count=0;scenes.scenes.forEach(scene=>scene.beats.forEach((beat,index)=>{if(beat.payload.type!=="setVariable"||beat.payload.variableId!==v.id)return;count++;const link=button(`${scene.displayName} · Beat ${index+1} · ${assignmentCaption(beat.payload, scenes.authoring.variables)}`,"assignment-link");link.addEventListener("click",()=>void requestProjectNavigation(project,"story",{sceneId:scene.id,beatId:beat.id,expectedSourceRevision:scene.sourceRevision}));result.append(link);}));if(!count)result.textContent="No known assignments.";});}).catch(()=>{if(generation===viewGeneration)assignmentPanels.forEach(p=>p.result.textContent="Assignments unavailable. Try reopening this page.");});
 }
 
-function validInt64(value: string): boolean { if (!/^-?(0|[1-9][0-9]*)$/.test(value) || value === "-0") return false; try { const parsed = BigInt(value); return parsed >= -9223372036854775808n && parsed <= 9223372036854775807n; } catch { return false; } }
 function message(error: unknown, fallback: string): string { return error instanceof Error ? error.message : fallback; }
 // Story answers for itself: beat drafts never count, and its open forms come from hasOpenForm.
 function hasUnsubmittedInput(): boolean {

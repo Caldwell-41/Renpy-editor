@@ -12,7 +12,7 @@ import { characterItems, narrationItem, requiredText } from "./story-beat-editor
 import { buildRuleBuilder, type RuleBuilder } from "./story-condition-editor.ts";
 import { backingSelect, button, dropdownKeys, element, field, focusFirst, iconButton, openSheet, personList, segmented, type ChoiceItem } from "./story-editor-controls.ts";
 import { storyIcon } from "./story-icons.ts";
-import { armOf, bodyOf, nodeBeats } from "./story-tracks.ts";
+import { armOf, bodyOf, endingBeat, nodeBeats, unknownCause } from "./story-tracks.ts";
 
 type Choice = Extract<BeatPayload, { type: "choice" }>;
 /** What Then sets an option's ending to. */
@@ -30,7 +30,7 @@ export interface ChoiceHost {
   /** Opens an option in the Branch path and selects its first beat. */
   readonly openOption: (optionId: string) => void;
   /** Opens Add a beat for an option, before its ending. */
-  readonly addBeat: (optionId: string, opener: HTMLElement) => void;
+  readonly addBeat: (optionId: string) => void;
   readonly setEnding: (optionId: string, ending: Ending) => void;
   readonly viewSource: (beat: SceneBeat) => void;
   readonly openScene: (sceneId: string) => void;
@@ -74,7 +74,7 @@ export function buildChoiceEditor(payload: Choice, context: EditorContext, choic
   const original = (id?: string): ChoiceOption | undefined => id === undefined ? undefined : payload.options.find(option => option.id === id);
   const newOption = (option: ChoiceOption, key = ++keys): OptionState => ({
     key, ...(option.id ? { id: option.id } : {}), text: option.text, policy: option.unavailablePolicy ?? "hide", guardOpen: false,
-    builder: buildRuleBuilder(variables, option.condition, { keyword: "if", label: "Only when", empty: "Always available", required: false, caption: option.condition?.status === "unknown" ? option.condition.source : undefined, source: () => { const beat = choice.structure()?.scene.beats.find(item => item.id === option.id); if (beat) choice.viewSource(beat); } }),
+    builder: buildRuleBuilder(variables, option.condition, { keyword: "if", label: "Only when", empty: "Always available", required: false, newVariable: context.newVariable, caption: option.condition?.status === "unknown" ? option.condition.source : undefined, source: () => { const beat = choice.structure()?.scene.beats.find(item => item.id === option.id); if (beat) choice.viewSource(beat); } }),
   });
   let options: OptionState[] = payload.options.map(option => newOption(option));
   if (!options.length) options.push(newOption({ text: "" }));
@@ -89,11 +89,12 @@ export function buildChoiceEditor(payload: Choice, context: EditorContext, choic
     const { scene, numbers, locked } = shown, body = { type: "branch" as const, groupId, branchId: option.id }, info = bodyOf(scene, body);
     const nodes = nodeBeats(scene, body), ending = info?.ending;
     const endedBy = ending?.type === "ends" ? scene.beats.find(beat => beat.id === ending.beatId) : undefined;
-    const explicit = endedBy && ["jump", "repeatChoice", "return"].includes(endedBy.payload.type) ? endedBy : undefined;
+    const explicit = endedBy && endingBeat(endedBy) ? endedBy : undefined;
     const code = endedBy?.payload.type === "customCode" ? endedBy : undefined;
     // The option's own beats, before its ending. The Custom Code beat that may leave the option keeps its row and note.
     const beats = nodes.filter(beat => beat !== explicit && beat !== code), last = beats.at(-1);
-    const leaves = ending?.type === "unknown" && last?.payload.type === "customCode" ? last : undefined;
+    // The row that holds the cause: the Custom Code beat itself, or the condition or Choice it sits in.
+    const leaves = ending?.type === "unknown" && unknownCause(scene, body) ? last : undefined;
     const rows = beats.length > 3 ? [...beats.slice(0, leaves ? 2 : 3), ...leaves ? [leaves] : []] : beats;
     if (rows.length) {
       const group = element("div", "story-option-beats"); group.role = "group"; group.setAttribute("aria-label", `Option ${index + 1} beats`);
@@ -108,7 +109,7 @@ export function buildChoiceEditor(payload: Choice, context: EditorContext, choic
       slot.append(group);
     }
     const then = element("div", "story-then"); then.append(element("span", "story-then-label", "Then"));
-    const add = button("+ Beat", "button secondary story-then-add", () => choice.addBeat(option.id!, add)); add.disabled = locked;
+    const add = button("+ Beat", "button secondary story-then-add", () => choice.addBeat(option.id!)); add.disabled = locked;
     add.setAttribute("aria-label", add.title = `Add a beat to option ${index + 1}${explicit || code ? ", before its ending" : ""}`);
     add.dataset.beatOpener = `option:${option.id}`;
     if (code || (endedBy && !explicit)) {
@@ -130,15 +131,15 @@ export function buildChoiceEditor(payload: Choice, context: EditorContext, choic
     const next = choice.continuation();
     for (const item of endings) {
       const detail = item.type === "continue" ? next ? `Goes on to ${next}` : "Goes on to the end of the scene" : item.detail;
-      const option_ = button("", "story-dropdown-option", () => {
+      const entry = button("", "story-dropdown-option", () => {
         menu.open = false;
         if (item.type === current.type) { summary.focus(); return; }
         if (item.type === "jump") { pickScene(summary, index, undefined, sceneId => choice.setEnding(option.id!, { type: "jump", sceneId })); return; }
         choice.setEnding(option.id!, { type: item.type });
       });
-      option_.role = "option"; option_.tabIndex = -1; option_.setAttribute("aria-selected", String(item.type === current.type)); option_.setAttribute("aria-label", `${item.label}. ${detail}`);
+      entry.role = "option"; entry.tabIndex = -1; entry.setAttribute("aria-selected", String(item.type === current.type)); entry.setAttribute("aria-label", `${item.label}. ${detail}`);
       const words = element("span", "story-outcome-words"); words.append(element("strong", "", item.label), element("span", "", detail));
-      option_.append(storyIcon(item.icon), words); choices.append(option_);
+      entry.append(storyIcon(item.icon), words); choices.append(entry);
     }
     choices.append(element("p", "story-menu-foot", `Option ${index + 1}'s beats follow below. Then changes only its ending.`));
     dropdownKeys(menu, summary, choices); menu.append(summary, choices); then.append(menu, add); slot.append(then);
@@ -156,7 +157,7 @@ export function buildChoiceEditor(payload: Choice, context: EditorContext, choic
       hint: `Click a scene to send option ${index + 1} there. Esc keeps ${keep}.`, choose: value => { if (value !== selected) chosen(value); } });
   };
   const destinationRow = (index: number, sceneId: string, chosen: (sceneId: string) => void, locked: boolean): HTMLElement => {
-    const row = element("div", "story-asset-row story-destination"); row.role = "group"; row.setAttribute("aria-label", `Option ${index + 1} goes to`);
+    const row = element("div", "story-asset-row story-option-destination"); row.role = "group"; row.setAttribute("aria-label", `Option ${index + 1} goes to`);
     const target = model.scenes.find(scene => scene.id === sceneId);
     const picture = element("span", "story-thumb story-thumb-scene"); picture.setAttribute("aria-hidden", "true");
     const background = target?.beats.find(beat => !beat.owner && beat.payload.type === "background")?.payload;
@@ -170,7 +171,7 @@ export function buildChoiceEditor(payload: Choice, context: EditorContext, choic
     row.append(pick, open); return row;
   };
 
-  const twins = (index: number): number => options.findIndex((other, at) => at !== index && other.text.trim() && other.text.trim() === options[index]!.text.trim());
+  const twinOf = (index: number): number => options.findIndex((other, at) => at !== index && other.text.trim() && other.text.trim() === options[index]!.text.trim());
   const drawOptions = (): void => {
     const active = document.activeElement instanceof HTMLElement && list.contains(document.activeElement) ? document.activeElement.dataset.choiceFocus : undefined;
     list.replaceChildren(); structureSlots.clear();
@@ -192,7 +193,7 @@ export function buildChoiceEditor(payload: Choice, context: EditorContext, choic
     const top = element("div", "story-option-top");
     const text = element("input"); text.type = "text"; text.value = option.text; text.setAttribute("aria-label", "Choice option text"); text.placeholder = "What the player can choose"; text.dataset.choiceFocus = `text-${option.key}`;
     const validate = validateField(text, () => { requiredText(text, "Choice text"); });
-    text.addEventListener("input", () => { option.text = text.value; const twin = block.querySelector(".story-option-twin"); const at = twins(index); if (twin) twin.textContent = at >= 0 ? twinText(at) : ""; });
+    text.addEventListener("input", () => { option.text = text.value; const twin = block.querySelector(".story-option-twin"); const at = twinOf(index); if (twin) twin.textContent = at >= 0 ? twinText(at) : ""; });
     texts.set(option.key, { text, validate });
     const up = iconButton("up", `Move option ${index + 1} up`, () => move(index, -1), "story-icon-button story-option-move"); up.disabled = index === 0; up.dataset.choiceFocus = `move-${option.key}-up`;
     const down = iconButton("down", `Move option ${index + 1} down`, () => move(index, 1), "story-icon-button story-option-move"); down.disabled = index === options.length - 1; down.dataset.choiceFocus = `move-${option.key}-down`;
@@ -201,7 +202,7 @@ export function buildChoiceEditor(payload: Choice, context: EditorContext, choic
       list.querySelectorAll<HTMLInputElement>('input[aria-label="Choice option text"]')[Math.min(index, options.length - 1)]?.focus();
     }); remove.disabled = options.length === 1; if (remove.disabled) remove.title = "A Choice needs at least one option.";
     top.append(element("span", "story-option-number", String(index + 1)), text, up, down, remove); block.append(top);
-    const twin = element("p", "story-option-twin", twins(index) >= 0 ? twinText(twins(index)) : ""); block.append(twin);
+    const twin = element("p", "story-option-twin", twinOf(index) >= 0 ? twinText(twinOf(index)) : ""); block.append(twin);
     const slot = element("div", "story-option-structure"); structureSlots.set(option.key, slot); block.append(slot); drawStructure(option, index);
     block.append(guardRow(option, index));
     block.addEventListener("pointerenter", () => choice.markStage(option.id));
@@ -263,15 +264,15 @@ export function buildChoiceEditor(payload: Choice, context: EditorContext, choic
   const read = (): BeatPayload => {
     if (!options.length) throw new Error("A Choice needs at least one option.");
     const prompt: ChoicePrompt | undefined = hasPrompt && promptText.value.trim() ? speaker.value === "narration" ? { type: "narration", text: promptText.value } : { type: "dialogue", characterId: speaker.value, text: promptText.value } : undefined;
-    const read: ChoiceOption[] = [];
+    const accepted: ChoiceOption[] = [];
     for (const option of options) {
       texts.get(option.key)?.validate();
       let condition: Condition | undefined;
       // An incomplete rule opens its builder, so the author sees the field to fix.
       try { condition = option.builder.read(); } catch (error) { if (!option.guardOpen) { option.guardOpen = true; drawOptions(); } throw error; }
-      read.push({ ...(option.id ? { id: option.id } : {}), text: texts.get(option.key)?.text.value ?? option.text, ...(condition ? { condition, ...(option.policy === "showDisabled" ? { unavailablePolicy: "showDisabled" as const } : {}) } : {}) });
+      accepted.push({ ...(option.id ? { id: option.id } : {}), text: texts.get(option.key)?.text.value ?? option.text, ...(condition ? { condition, ...(option.policy === "showDisabled" ? { unavailablePolicy: "showDisabled" as const } : {}) } : {}) });
     }
-    return { type: "choice", ...((payload.pickedPolicy || pickedChanged) ? { pickedPolicy: picked.value as PickedPolicy } : {}), ...(prompt ? { prompt } : {}), options: read };
+    return { type: "choice", ...((payload.pickedPolicy || pickedChanged) ? { pickedPolicy: picked.value as PickedPolicy } : {}), ...(prompt ? { prompt } : {}), options: accepted };
   };
   // Draft-step Undo restores the prompt, the option blocks and their order (ADR 0025).
   const internals = {

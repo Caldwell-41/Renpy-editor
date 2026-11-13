@@ -7,27 +7,29 @@ import { validateField } from "./authoring-input.ts";
 import type { BeatPayload, PlacementRef, SceneActions, SceneWorkspace, TransitionRef } from "./scene-ui.ts";
 import type { ScreenRevisions, ScreenTargetBinding } from "./screen-contracts.ts";
 import { buildAssignmentEditor, type ValidateAssignment } from "./story-arithmetic-editor.ts";
-import { backingSelect, element, field, focusFirst, listChoice, personList, pictureField, refuseChoice, requireChoice, segmented, type ChoiceItem, type Thumbnail } from "./story-editor-controls.ts";
+import type { NewVariable } from "./story-condition-editor.ts";
+import { backingSelect, element, field, focusFirst, friendlyError, labelled, listChoice, personList, pictureField, refuseChoice, requireChoice, segmented, unavailable, type ChoiceItem, type Thumbnail } from "./story-editor-controls.ts";
 
+/** Beat kind names, as Story Combined v1 names them everywhere: titles, Add a beat, Tracks and Undo. */
 export const beatLabels: Record<BeatPayload["type"], string> = {
   background: "Background",
-  showCharacter: "Show Character",
-  hideCharacter: "Hide Character",
+  showCharacter: "Show character",
+  hideCharacter: "Hide character",
   showScreen: "Show screen",
   callScreen: "Call screen",
   hideScreen: "Hide screen",
-  changeAppearance: "Change Appearance",
-  placement: "Placement",
+  changeAppearance: "Change appearance",
+  placement: "Move character",
   dialogue: "Dialogue",
   narration: "Narration",
-  playMusic: "Play Music",
-  stopMusic: "Stop Music",
-  playSfx: "Play SFX",
+  playMusic: "Play music",
+  stopMusic: "Stop music",
+  playSfx: "Sound effect",
   transition: "Transition",
-  setVariable: "Set Variable",
+  setVariable: "Set variable",
   choice: "Choice",
   jump: "Jump",
-  call: "Call Scene",
+  call: "Call scene",
   repeatChoice: "Repeat this Choice",
   return: "Return",
   customCode: "Custom Code",
@@ -56,6 +58,8 @@ export interface EditorContext {
   readonly thumbnail: Thumbnail;
   /** Shows a payload on the stage while a picker sheet points at a picture; undefined stops. */
   readonly preview?: (payload?: BeatPayload) => void;
+  /** "+ New variable…" in a rule builder's variable list. */
+  readonly newVariable?: NewVariable;
 }
 
 export function requiredText(control: HTMLInputElement, name: string): string { if (!control.value.trim()) { control.focus(); throw new Error(`${name} is required.`); } return control.value.trim(); }
@@ -151,13 +155,11 @@ export function buildBeatEditor(payload: BeatPayload, context: EditorContext): B
     case "transition": { const fade = transition(false); host.append(hint("Applies to the next visual change.")); read = () => ({ type: "transition", transition: fade.value as "dissolve" | "fade" }); break; }
     case "jump": case "call": {
       const label = payload.type === "call" ? "Call destination Scene" : "Destination Scene";
-      const destination = element("select"); destination.setAttribute("aria-label", label);
-      const items = model.scenes.map(scene => ({ value: scene.id, label: scene.displayName }));
-      if (!items.some(item => item.value === payload.sceneId)) { const option = element("option", "", payload.sceneId ? `Unavailable · ${payload.sceneId}` : "Select a scene"); option.value = payload.sceneId; option.dataset.unavailable = "true"; destination.append(option); }
-      for (const item of items) { const option = element("option", "", item.label); option.value = item.value; destination.append(option); }
-      destination.value = payload.sceneId; controls.push(destination);
-      const wrapper = element("label", "field compact-field"); wrapper.append(element("span", "", label), destination); host.append(wrapper);
-      const required = (): string => { if (!destination.value || destination.options[destination.selectedIndex]?.dataset.unavailable === "true") { destination.focus(); throw new Error("Select an available item first."); } return destination.value; };
+      // A plain select of scenes; a missing scene stays as an unavailable row until replaced.
+      const destination = backingSelect(label, model.scenes.map(scene => ({ value: scene.id, label: scene.displayName })), payload.sceneId);
+      destination.hidden = false; destination.tabIndex = 0; destination.className = ""; controls.push(destination);
+      host.append(labelled(label, destination));
+      const required = (): string => { if (unavailable(destination)) { destination.focus(); throw new Error("Select an available item first."); } return destination.value; };
       const validate = validateField(destination, () => { required(); });
       host.append(hint(payload.type === "call" ? "Returns to the next beat. The editor preview does not run the called scene." : "Leaves this scene and does not return."));
       read = payload.type === "call" ? () => { validate(); return { type: "call", sceneId: required(), returnLabel: payload.returnLabel }; } : () => ({ type: "jump", sceneId: required() }); break;
@@ -170,8 +172,6 @@ export function buildBeatEditor(payload: BeatPayload, context: EditorContext): B
   return { host, controls, primary: primary ?? controls.at(-1) ?? host, read: read!, focus: () => { const invalid = host.querySelector<HTMLElement>('[aria-invalid="true"]:not([hidden])'); if (!invalid && primary) primary.focus(); else focusFirst(host); } };
 }
 
-function friendlyError(error: unknown, fallback: string): string { return error instanceof Error ? error.message : fallback; }
-function screenLabel(text: string, control: HTMLElement): HTMLLabelElement { const wrapper = element("label", "field compact-field"); wrapper.append(element("span", "", text), control); return wrapper; }
 
 function buildScreenBeatEditor(payload: Extract<BeatPayload, { type: "showScreen" | "hideScreen" | "callScreen" }>, existing: boolean, actions?: SceneActions): BeatEditor {
   const calling=payload.type==="callScreen",kind=calling?"dialog":"panel",caption=calling?"Dialog":"Panel";
@@ -182,7 +182,7 @@ function buildScreenBeatEditor(payload: Extract<BeatPayload, { type: "showScreen
     ? "Show keeps the panel open while dialogue continues. Hide, Close and game Escape dismiss it. Outside clicks keep it open."
     : "Hide removes the panel at this point in the story. Dialogue continues.";
   const message = document.createElement("p"); message.role = "status"; message.setAttribute("aria-live", "polite"); message.textContent = `Loading ${kind} screens…`;
-  host.append(screenLabel(`${caption} screen`, picker), purpose, message);
+  host.append(labelled(`${caption} screen`, picker), purpose, message);
   const secondary=document.createElement("details"),summary=document.createElement("summary");summary.textContent="Source and effects";
   const effects=document.createElement("p");effects.textContent="No screen Beat has been added. Source shows accepted appearance.";
   const source=document.createElement("button");source.type="button";source.className="text-button";source.textContent="View screen in Source";source.disabled=true;secondary.append(summary,effects,source);

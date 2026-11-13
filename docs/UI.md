@@ -754,6 +754,8 @@ The Story rules above define Loomlight's application of that reference.
   Custom Code:" and its source line, with Edit in Source. When Custom Code may leave
   the option, that Custom Code beat reads "Ending unknown: Custom Code can leave this
   option", and Then stays editable, so the author can add an explicit ending after it.
+  When the Custom Code sits in a condition or Choice inside the option, the option's
+  row for that node carries the line.
 - A destination is a scene card (opening background, name and first line) that opens a
   scene sheet. Create New Scene in the Choice editor adds a scene and an option that
   goes there.
@@ -799,7 +801,9 @@ Production Story has the Combined stage, beat editors, Branch path, Tracks, Reel
 Writing focus, with the approved status, marks and wording of `story-combined-status` /
 `header-v2`. The approved scene sheet's "+ New scene…" retargets an existing option to
 a new scene in one edit. Core has no such command yet, so the sheet has no New scene
-row and Create New Scene stays in the Choice editor. Until a capability exists, the
+row and Create New Scene stays in the Choice editor, off while any option has a
+condition. A condition's test edits in a form with Apply condition rather than a
+retained draft, because Story Save does not accept condition commands yet. Until a capability exists, the
 editor says it is not built instead of showing a working-looking control.
 
 ## Source workspace

@@ -1,5 +1,6 @@
 // Line icons for beat kinds and the Story editor controls, from Story Combined v1
 // (`story-revamp` / `combined-v1`), drawn on the 24 px grid of icons.ts.
+import { pathIcon } from "./icons.ts";
 const paths: Record<string, string> = {
   dialogue: "M4 5h16v11H9l-5 4zM8 9h8M8 12h5",
   narration: "M4 6h16M4 10h16M4 14h12M4 18h8",
@@ -32,11 +33,4 @@ const paths: Record<string, string> = {
   open: "M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5",
 };
 
-export function storyIcon(name: string): SVGSVGElement {
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.classList.add("story-icon"); svg.setAttribute("viewBox", "0 0 24 24"); svg.setAttribute("aria-hidden", "true");
-  const path = document.createElementNS(svg.namespaceURI, "path");
-  path.setAttribute("d", paths[name] ?? paths.narration!); path.setAttribute("fill", "none"); path.setAttribute("stroke", "currentColor");
-  path.setAttribute("stroke-width", "1.5"); path.setAttribute("stroke-linecap", "round"); path.setAttribute("stroke-linejoin", "round");
-  svg.append(path); return svg;
-}
+export function storyIcon(name: string): SVGSVGElement { return pathIcon(paths[name] ?? paths.narration!, "story-icon"); }

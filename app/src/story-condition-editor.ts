@@ -3,16 +3,21 @@
 // Python. Each rule picks a project variable, a preset test and a value; one All/Any
 // switch joins the rules. A condition it cannot show stays as written, with Edit in Source.
 // Half-typed numbers stay in their field with a message and are never read.
-import { decimalValue } from "./numeric-input.ts";
+import { decimalValue, int64 } from "./numeric-input.ts";
 import { validateField } from "./authoring-input.ts";
-import type { Condition, ConditionExpression, SceneWorkspace } from "./scene-ui.ts";
+import type { Condition, ConditionExpression } from "./scene-ui.ts";
 import { backingSelect, button, choose, dropdownKeys, element, field, iconButton, segmented, type ChoiceItem } from "./story-editor-controls.ts";
+import type { Variable } from "./story-new-variable.ts";
 
-type Variables = SceneWorkspace["authoring"]["variables"];
-type Variable = Variables[number];
+type Variables = readonly Variable[];
 type Operator = Extract<ConditionExpression, { type: "compare" }>["operator"];
-/** One rule as the author left it. `value` is the raw text, which may be half typed. */
-interface Rule { readonly variableId: string; readonly op: Operator; readonly value: string }
+/** Creates a variable from the variable list. Resolves with it, or undefined when cancelled. */
+export type NewVariable = (opener: HTMLElement) => Promise<Variable | undefined>;
+/**
+ * One rule as the author left it. `value` is the raw text, which may be half typed.
+ * `original` is the rule as source wrote it, kept until the author changes the rule.
+ */
+interface Rule { readonly variableId: string; readonly op: Operator; readonly value: string; readonly original?: ConditionExpression }
 interface State { readonly join: "and" | "or"; readonly rules: readonly Rule[]; readonly touched: boolean }
 
 const operators: readonly { readonly op: Operator; readonly symbol: string; readonly words: string; readonly python: string }[] = [
@@ -26,10 +31,6 @@ const badge = (variable?: Variable): HTMLElement => {
   const node = element("span", "story-type", variable ? ({ bool: "Y/N", int: "#", decimal: "#.#", string: "Aa" })[variable.variableType] : ""); node.setAttribute("aria-hidden", "true"); return node;
 };
 
-function int64(value: string): boolean {
-  if (!/^-?(0|[1-9][0-9]*)$/.test(value) || value === "-0") return false;
-  try { const parsed = BigInt(value); return parsed >= -9223372036854775808n && parsed <= 9223372036854775807n; } catch { return false; }
-}
 /** A number as ADR 0014 carries it: an exact whole number, else a decimal. */
 function numberLiteral(raw: string): { readonly type: "int" | "decimal"; readonly value: string } {
   if (/^[+-]?\d+$/.test(raw)) { if (!int64(raw)) throw Error("Enter an exact signed 64-bit whole number, or use decimal notation."); return { type: "int", value: raw }; }
@@ -48,7 +49,7 @@ function rulesOf(expression: ConditionExpression, variables: Variables): Omit<St
   if (!collect(expression, 0)) return undefined;
   const rules: Rule[] = [];
   for (const leaf of leaves) {
-    const rule = ruleOf(leaf, variables); if (!rule) return undefined; rules.push(rule);
+    const rule = ruleOf(leaf, variables); if (!rule) return undefined; rules.push({ ...rule, original: leaf });
   }
   return { join, rules };
 }
@@ -66,12 +67,13 @@ function ruleOf(node: ConditionExpression, variables: Variables): Rule | undefin
 function defaultRule(variable: Variable): Rule {
   return variable.variableType === "bool" ? { variableId: variable.id, op: "equal", value: "true" } : numeric(variable) ? { variableId: variable.id, op: "greaterEqual", value: "1" } : { variableId: variable.id, op: "equal", value: "" };
 }
-/** A rule as the editor writes it. Throws when its value is incomplete. */
+/** A rule as the editor writes it: as source wrote it until changed. Throws when its value is incomplete. */
 function expressionOf(rule: Rule, variables: Variables): ConditionExpression {
+  if (rule.original) return rule.original;
   const variable = variables.find(item => item.id === rule.variableId);
   if (!variable) throw Error("Select an available variable.");
   const ref = { type: "variable" as const, variableId: variable.id, variableType: variable.variableType };
-  // A yes/no rule is a comparison, `flag == True`, as the earlier editor wrote it, so accepted source keeps its form.
+  // A new or changed yes/no rule is a comparison, `flag == True`, as the earlier editor wrote it.
   if (variable.variableType === "bool") return { type: "compare", operator: "equal", left: ref, right: { type: "bool", value: rule.value !== "false" } };
   if (numeric(variable)) return { type: "compare", operator: rule.op, left: ref, right: numberLiteral(rule.value.trim()) };
   if (new TextEncoder().encode(rule.value).length > 4096) throw Error("Use at most 4096 bytes of text in a condition.");
@@ -79,13 +81,21 @@ function expressionOf(rule: Rule, variables: Variables): ConditionExpression {
 }
 /** How a rule reads in Ren'Py, for the line under the rules. Display only; core writes source. */
 function rulePython(rule: Rule, variables: Variables): string {
-  const variable = variables.find(item => item.id === rule.variableId), name = variable?.technicalName ?? "missing_variable";
+  const nameOf = (id: string): string => variables.find(item => item.id === id)?.technicalName ?? "missing_variable";
+  const original = rule.original;
+  if (original?.type === "variable") return nameOf(original.variableId);
+  if (original?.type === "not" && original.operand.type === "variable") return `not ${nameOf(original.operand.variableId)}`;
+  if (original?.type === "compare" && original.left.type === "variable") {
+    const right = original.right, literal = right.type === "bool" ? (right.value ? "True" : "False") : right.type === "string" ? JSON.stringify(right.value) : "value" in right ? String(right.value) : "?";
+    return `${nameOf(original.left.variableId)} ${operators.find(item => item.op === original.operator)?.python ?? "=="} ${literal}`;
+  }
+  const variable = variables.find(item => item.id === rule.variableId), name = nameOf(rule.variableId);
   if (variable?.variableType === "bool") return `${name} == ${rule.value === "false" ? "False" : "True"}`;
   const python = operators.find(item => item.op === rule.op)?.python ?? "==";
   return variable?.variableType === "string" ? `${name} ${python} ${JSON.stringify(rule.value)}` : `${name} ${python} ${rule.value.trim() || "?"}`;
 }
 /** How a rule reads in a summary: "trust is at least 3". */
-export function ruleWords(rule: Rule, variables: Variables): string {
+function ruleWords(rule: Rule, variables: Variables): string {
   const variable = variables.find(item => item.id === rule.variableId), name = variable?.technicalName ?? "Missing variable";
   if (variable?.variableType === "bool") return `${name} is ${rule.value === "false" ? "false" : "true"}`;
   const words = operators.find(item => item.op === rule.op)?.words ?? "is";
@@ -105,6 +115,8 @@ export interface RuleBuilderOptions {
   readonly source?: () => void;
   /** How a condition the builder cannot show reads. */
   readonly caption?: string;
+  /** Offers "+ New variable…" at the end of each variable list. */
+  readonly newVariable?: NewVariable;
 }
 export interface RuleBuilder {
   readonly host: HTMLElement;
@@ -120,7 +132,9 @@ export interface RuleBuilder {
 }
 
 /** The rule builder for one condition. `initial` is the condition in source, if any. */
-export function buildRuleBuilder(variables: Variables, initial: Condition | undefined, options: RuleBuilderOptions): RuleBuilder {
+export function buildRuleBuilder(projectVariables: Variables, initial: Condition | undefined, options: RuleBuilderOptions): RuleBuilder {
+  // The project's variables, and any the author creates from the list.
+  let variables = projectVariables;
   const host = element("div", "story-rules");
   const parsed = initial?.status === "supported" ? rulesOf(initial.expression, variables) : initial ? undefined : { join: "and" as const, rules: [] };
   if (!parsed) {
@@ -149,7 +163,7 @@ export function buildRuleBuilder(variables: Variables, initial: Condition | unde
     code.textContent = state.rules.length ? `${options.keyword} ${state.rules.map(rule => rulePython(rule, variables)).join(` ${state.join} `)}:` : options.empty;
     code.classList.toggle("story-rule-empty", !state.rules.length);
   };
-  const variableItems: ChoiceItem[] = variables.map(variable => ({ value: variable.id, label: variable.technicalName, detail: typeName(variable) }));
+  const variableItems = (): ChoiceItem[] => variables.map(variable => ({ value: variable.id, label: variable.technicalName, detail: typeName(variable) }));
   const draw = (): void => {
     const focused = document.activeElement instanceof HTMLElement && host.contains(document.activeElement) ? document.activeElement.closest<HTMLElement>("[data-rule-focus]")?.dataset.ruleFocus : undefined;
     checks = []; host.replaceChildren();
@@ -161,11 +175,12 @@ export function buildRuleBuilder(variables: Variables, initial: Condition | unde
     }
     state.rules.forEach((rule, index) => host.append(ruleRow(rule, index)));
     const add = button(state.rules.length ? "+ Add rule" : "+ Add a rule", "button secondary story-add-rule", () => {
-      const first = variables[0]; if (!first) return;
-      set({ rules: [...state.rules, defaultRule(first)] }, true, true);
-      host.querySelectorAll<HTMLElement>("[data-rule-focus^=variable]")[state.rules.length - 1]?.focus();
+      const first = variables[0];
+      if (first) { set({ rules: [...state.rules, defaultRule(first)] }, true, true); host.querySelectorAll<HTMLElement>("[data-rule-focus^=variable]")[state.rules.length - 1]?.focus(); return; }
+      // With no variables yet, the first rule starts by creating one.
+      void options.newVariable?.(add).then(created => { if (!created || !host.isConnected) return; variables = [created]; set({ rules: [defaultRule(created)] }, true, true); refocus("variable-0"); });
     });
-    add.disabled = !variables.length; if (!variables.length) add.title = "Create a variable in Variables first.";
+    add.disabled = !variables.length && !options.newVariable; if (add.disabled) add.title = "Create a variable in Variables first.";
     add.dataset.ruleFocus = "add";
     drawCode(); host.append(add, code);
     if (focused) refocus(focused);
@@ -177,9 +192,9 @@ export function buildRuleBuilder(variables: Variables, initial: Condition | unde
   const ruleRow = (rule: Rule, index: number): HTMLElement => {
     const row = element("div", "story-rule"); row.dataset.rule = String(index);
     const variable = variables.find(item => item.id === rule.variableId), title = `${options.label} rule ${index + 1}`;
-    const update = (next: Partial<Rule>, redraw = false): void => set({ rules: state.rules.map((item, at) => at === index ? { ...item, ...next } : item) }, redraw);
+    const update = (next: Partial<Rule>, redraw = false, notify = false): void => set({ rules: state.rules.map((item, at) => at === index ? { ...item, ...next, original: undefined } : item) }, redraw, notify);
     // The variable list: name and type, as in Story Combined v1.
-    const pick = backingSelect(`${title} variable`, variableItems, rule.variableId);
+    const pick = backingSelect(`${title} variable`, variableItems(), rule.variableId);
     const menu = element("details", "story-dropdown story-variable-picker"), summary = element("summary", "story-person"); summary.dataset.control = ""; summary.dataset.ruleFocus = `variable-${index}`;
     summary.append(badge(variable), element("span", "story-variable-name", variable?.technicalName ?? "Choose a variable"), element("span", "story-caret", "▾"));
     summary.setAttribute("aria-label", `${title} variable: ${variable?.technicalName ?? "none chosen"}`);
@@ -189,6 +204,18 @@ export function buildRuleBuilder(variables: Variables, initial: Condition | unde
       option.role = "option"; option.tabIndex = -1; option.dataset.value = item.id; option.setAttribute("aria-selected", String(item.id === rule.variableId)); option.setAttribute("aria-label", `${item.technicalName}, ${typeName(item)}`);
       const text = element("span", "story-variable-text"); text.append(element("span", "story-variable-name", item.technicalName), element("small", "", typeName(item)));
       option.append(badge(item), text); list.append(option);
+    }
+    const newVariable = options.newVariable;
+    if (newVariable) {
+      const create = button("+ New variable…", "story-dropdown-option story-dropdown-create", () => {
+        menu.open = false;
+        void newVariable(summary).then(created => {
+          if (!created || !host.isConnected) return;
+          variables = [...variables.filter(item => item.id !== created.id), created];
+          update(defaultRule(created), true, true); refocus(`variable-${index}`);
+        });
+      });
+      create.role = "option"; create.tabIndex = -1; create.setAttribute("aria-selected", "false"); list.append(create);
     }
     dropdownKeys(menu, summary, list); menu.append(summary, list);
     // A new variable starts a fresh rule of its type.
