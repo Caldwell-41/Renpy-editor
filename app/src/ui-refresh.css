@@ -1240,8 +1240,8 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .story-search{display:flex;align-items:center;gap:8px;padding:0 8px;border:1px solid var(--border-strong);border-radius:3px;background:var(--surface-panel);color:var(--text-muted)}
 .story-dialog .story-search>input:not([type=checkbox]):not([type=radio]){flex:1;min-width:0;min-height:0;padding:6px 0;border:0;background:transparent;color:var(--text-primary);font:inherit;outline:0}
 .story-search:focus-within{outline:2px solid var(--focus-ring);outline-offset:1px}
-.story-picker-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:16px;min-height:0}
-.story-results{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;align-content:start}
+.story-picker-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:16px;flex:0 1 auto;min-height:0}
+.story-results{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;align-content:start;min-height:0;overflow:auto}
 .story-results[data-layout=list]{grid-template-columns:1fr}
 .story-results h4{margin:0 0 2px;font-size:11px;font-weight:600;color:var(--text-secondary)}
 .story-result{display:flex;align-items:center;gap:7px;width:100%;min-height:0;padding:4px 6px;border:0;background:transparent;color:var(--text-primary);font:inherit;font-size:12px;text-align:left;cursor:pointer}
@@ -1268,5 +1268,5 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .story-summary{margin:0;font-size:12px;color:var(--accent-primary)}
 .story-summary.story-summary-choose{color:var(--text-secondary)}
 .story-dialog-actions{display:flex;justify-content:flex-end;gap:8px}
-@media(max-width:640px){.story-picker-body{grid-template-columns:1fr}.story-picker-details{padding:8px 0 0;border:0;border-top:1px solid var(--border-normal)}}
+@media(max-width:640px){.story-picker-body{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto}.story-picker-details{padding:8px 0 0;border:0;border-top:1px solid var(--border-normal)}}
 @media(min-width:900px) and (max-width:1200px){.story-thumb-scene{width:56px;height:32px}}

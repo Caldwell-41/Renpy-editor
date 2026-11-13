@@ -83,7 +83,7 @@ export function openAddBeat(options: AddBeatOptions): void {
     items.forEach((item, index) => { item.setAttribute("aria-selected", String(index === active)); item.dataset.highlighted = String(index === active); });
     const button = items[active]; details.replaceChildren();
     if (!button) { query.removeAttribute("aria-activedescendant"); return; }
-    query.setAttribute("aria-activedescendant", button.id);
+    query.setAttribute("aria-activedescendant", button.id); button.scrollIntoView?.({ block: "nearest" });
     const [kind, title, , description] = kinds.find(item => item[0] === button.dataset.insertKind)!, place = options.where(kind);
     const where = element("dl", "story-where");
     const row = (term: string, value: string, accent = false): void => { where.append(element("dt", "", term), element("dd", accent ? "story-where-at" : "", value)); };
