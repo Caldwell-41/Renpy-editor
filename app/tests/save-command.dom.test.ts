@@ -485,4 +485,11 @@ test("A refused Story Save counts failing drafts, links each scene and marks fai
   assert.equal(sent.length, 2); assert.equal(status(), "Saved");
   assert.deepEqual(failing(), []); assert.equal(links().length, 0);
   assert.equal(document.querySelector('[data-save-refused="true"]'), null);
+
+  // A draft whose beat then changes in source shows "Conflict with source" under its text in Reel.
+  await openScene("Arrival"); await draft("n1", "Hello once more");
+  texts.n1 = "Hello from source"; click("Source"); await ticks(8); click("Story"); await ticks(8);
+  view("reel");
+  assert.equal(card("n1").dataset.beatConflict, "true"); assert.equal(card("n1").dataset.saveRefused, undefined);
+  assert.equal(reason("n1").textContent, "Conflict with source"); assert.equal(reason("n1").hidden, false);
 });
