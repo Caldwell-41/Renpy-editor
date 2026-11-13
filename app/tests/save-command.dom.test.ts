@@ -458,7 +458,7 @@ test("A refused Story Save counts failing drafts, links each scene and marks fai
   assert.deepEqual(failing(), []); assert.equal(sceneRow("Arrival").dataset.saveRefused, undefined);
 
   // A new beat whose place is gone from core's candidate is a beat draft conflict, marked like the others.
-  click("Add Beat"); await ticks();
+  click("+ Add beat"); await ticks();
   const added = document.querySelector<HTMLElement>(".new-beat")!;
   const text = added.querySelector<HTMLTextAreaElement>("textarea")!;
   text.value = "A new line."; text.dispatchEvent(new window.Event("input", { bubbles: true })); await ticks();

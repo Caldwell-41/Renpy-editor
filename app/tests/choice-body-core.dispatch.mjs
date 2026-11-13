@@ -70,7 +70,7 @@ try {
  [...document.querySelectorAll('.tree-scene-open')].find(b=>b.textContent===entry.displayName).click();await wait(()=>document.querySelector('.tree-scene-row.selected .tree-scene-open')?.textContent===entry.displayName);await settle();
  const scene=()=>workspace.scenes.find(s=>s.id===entry.id),choice=()=>scene().beats.find(b=>b.payload.type==='choice');
  assert.equal(await source(path),original);
- button('Add Beat');let draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'choice','change');
+ button('+ Add beat');let draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'choice','change');
  enter(draft.querySelector('[aria-label="Insert before"]'),scene().beats.find(b=>b.payload.text==='Shared once').id,'change');
  enter(draft.querySelector('[aria-label="Choice option text"]'),'Yes');button('Add option',draft);
  enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'No');await applied(draft,'Add Beat');
@@ -224,8 +224,8 @@ try {
  await call('variable.create',{technicalName:'choice_visits',variableType:'int',defaultValue:0});
  await saveSource(path,`label ${entry.technicalLabel}:\n    "Shared once"\n    return\n`);
  button('Close Project');await wait(()=>document.querySelector('.recent-open'));button(document.querySelector('.recent-open').textContent);await wait(()=>document.querySelector('.story-track-column'));await settle();
- button('Add Beat');draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'setVariable','change');enter(draft.querySelector('[aria-label="Insert before"]'),scene().beats.find(b=>b.payload.text==='Shared once').id,'change');enter(draft.querySelector('[aria-label="Variable"]'),workspace.authoring.variables.find(v=>v.technicalName==='choice_visits').id,'change');enter(draft.querySelector('[aria-label="Formula"]'),'choice_visits + 1');await applied(draft,'Add Beat');
- button('Add Beat');draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'choice','change');enter(draft.querySelector('[aria-label="Insert before"]'),scene().beats.find(b=>b.payload.text==='Shared once').id,'change');
+ button('+ Add beat');draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'setVariable','change');enter(draft.querySelector('[aria-label="Insert before"]'),scene().beats.find(b=>b.payload.text==='Shared once').id,'change');enter(draft.querySelector('[aria-label="Variable"]'),workspace.authoring.variables.find(v=>v.technicalName==='choice_visits').id,'change');enter(draft.querySelector('[aria-label="Formula"]'),'choice_visits + 1');await applied(draft,'Add Beat');
+ button('+ Add beat');draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'choice','change');enter(draft.querySelector('[aria-label="Insert before"]'),scene().beats.find(b=>b.payload.text==='Shared once').id,'change');
  enter(draft.querySelector('[aria-label="Choice option text"]'),'Ask about the station');button('Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'Ask about the ticket');button('Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[2],'Leave');await applied(draft,'Add Beat');
  const conversationId=choice().id,[station,ticket,leave]=choice().payload.options;
  promptEditor=await editChoice(conversationId);button('Add a prompt shown with the options',promptEditor);enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'What would you like to ask?');availability(promptEditor.querySelectorAll('.choice-option')[1],true,'showDisabled');await applied(promptEditor,'Commit Beat');
@@ -277,7 +277,7 @@ try {
  await saveSource(target.sourcePath,`label ${target.technicalLabel}:\n    "Reenter Choice"\n    jump ${entry.technicalLabel}\n`);
  result.runtime.pickedTarget=await source(target.sourcePath);
  button('Close Project');await wait(()=>document.querySelector('.recent-open'));button(document.querySelector('.recent-open').textContent);await wait(()=>document.querySelector('.story-track-column'));await settle();
- button('Add Beat');draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'choice','change');enter(draft.querySelector('[aria-label="Insert before"]'),scene().beats.find(b=>b.payload.text==='Shared once').id,'change');
+ button('+ Add beat');draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'choice','change');enter(draft.querySelector('[aria-label="Insert before"]'),scene().beats.find(b=>b.payload.text==='Shared once').id,'change');
  enter(draft.querySelector('[aria-label="Choice option text"]'),'Same');button('Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'Same');button('Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[2],'Locked');
  enter(draft.querySelector('[aria-label="Picked options"]'),'showNormally','change');availability(draft.querySelectorAll('.choice-option')[2],true,'showDisabled');await applied(draft,'Add Beat');
  const pickedId=choice().id,[firstPick,secondPick,lockedPick]=choice().payload.options;
@@ -303,14 +303,14 @@ try {
  await thenOption(firstPick.id,'return');result.runtime.pickedReturn=await source(path);await applied(document,'Undo');
  await thenOption(firstPick.id,'repeatChoice');result.runtime.pickedImmediateRepeat=await source(path);await applied(document,'Undo');assert.equal(await source(path),result.runtime.pickedHide);
  // A separate Choice with identical captions must have independent history.
- button('Add Beat');draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'choice','change');enter(draft.querySelector('[aria-label="Insert before"]'),scene().beats.find(b=>b.payload.text==='Shared once').id,'change');enter(draft.querySelector('[aria-label="Choice option text"]'),'Same');button('Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'Same');enter(draft.querySelector('[aria-label="Picked options"]'),'markPicked','change');await applied(draft,'Add Beat');
+ button('+ Add beat');draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'choice','change');enter(draft.querySelector('[aria-label="Insert before"]'),scene().beats.find(b=>b.payload.text==='Shared once').id,'change');enter(draft.querySelector('[aria-label="Choice option text"]'),'Same');button('Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'Same');enter(draft.querySelector('[aria-label="Picked options"]'),'markPicked','change');await applied(draft,'Add Beat');
  const secondChoice=scene().beats.find(b=>b.payload.type==='choice'&&b.id!==pickedId);result.runtime.pickedInstanceIdentities={choice:secondChoice.id,options:secondChoice.payload.options.map(o=>o.id)};assert(![pickedId,firstPick.id,secondPick.id].includes(secondChoice.id));result.runtime.pickedInstances=await source(path);
  await applied(document,'Undo');assert.equal(await source(path),result.runtime.pickedHide);
  // Exhaustion makes the shared continuation reachable even when every option transfers.
  promptEditor=await editChoice(pickedId);button('Remove option',promptEditor.querySelectorAll('.choice-option')[2]);await applied(promptEditor,'Commit Beat');
  const transferOnly=await source(path),sharedAnchor=scene().beats.find(b=>b.payload.text==='Shared once'),finalReturn=scene().beats.at(-1);
  for(const anchor of [sharedAnchor,finalReturn]){
-  button('Add Beat');draft=document.querySelector('.new-beat');
+  button('+ Add beat');draft=document.querySelector('.new-beat');
   const position=draft.querySelector('[aria-label="Insert before"]');
   assert.deepEqual([...position.options].map(o=>o.value),[pickedId,sharedAnchor.id,finalReturn.id]);assert.equal(position.value,finalReturn.id);
   enter(position,anchor.id,'change');enter(draft.querySelector('[aria-label="Beat type"]'),'narration','change');enter(draft.querySelector('textarea'),'Exhaustion insertion');await applied(draft,'Add Beat');
@@ -351,7 +351,7 @@ try {
  assert.match(panel.textContent,/Ending unknown: Custom Code can leave this option/);enter(panel.querySelector('[aria-label="Then"]'),'return','change');await applied(panel,'Apply ending');
  assert.equal(await source(path),bodiesSource.replace('$ renpy.jump("elsewhere")\n','$ renpy.jump("elsewhere")\n            return\n'));await applied(document,'Undo');assert.equal(await source(path),bodiesSource);
  const conditionHeader=scene().beats.find(b=>b.conditionalBranch&&!b.owner&&!b.conditionalBranch.choiceOption&&!b.conditionalBranch.ordinal&&!b.conditionalBranch.otherwise);
- button('Add Beat');draft=document.querySelector('.new-beat');const rootPlaces=draft.querySelector('[aria-label="Insert before"]');
+ button('+ Add beat');draft=document.querySelector('.new-beat');const rootPlaces=draft.querySelector('[aria-label="Insert before"]');
  assert.deepEqual([...rootPlaces.options].map(o=>o.value),[endingMenu.id,conditionHeader.id]);assert(![...rootPlaces.options].some(o=>o.textContent==='End of body'),'the condition ends the scene body');
  assert.equal(rootPlaces.value,conditionHeader.id,'the default place is before the ending condition');button('Cancel',draft);
  assert.equal([...pick(endingMenu.id).querySelectorAll('.story-beat-menu button')].find(item=>item.textContent==='Move down').disabled,true,'Move down cannot pass the ending condition');

@@ -420,7 +420,7 @@ setTimeout(async () => {
 
     sceneAuthoringStage = "open-scene-workspace";
     click("Story");
-    await waitFor(() => [...document.querySelectorAll("button")].some((item) => item.textContent === "Add Beat"), "Add Beat");
+    await waitFor(() => [...document.querySelectorAll("button")].some((item) => item.textContent === "+ Add beat"), "+ Add beat");
     await waitFor(() => called.has("scene.list") && called.has("media.present"), "Scene data and image presentation");
     const previewVisible = document.body.textContent.includes("Game window")
       && document.body.textContent.includes("Branch path")

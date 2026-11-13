@@ -328,7 +328,7 @@ function shell(content: HTMLElement): void {
   brand.prepend(icon("story")); header.append(brand, projectLabel);
   const studioRequest=button("Studio request", "button");studioRequest.addEventListener("click",()=>openStudioRequest(currentProject?.sessionId??null));header.append(studioRequest,status);
   const footer = document.createElement("footer"); footer.className = "app-footer";
-  const context = document.createElement("span"); context.textContent = currentProject ? "Local project" : "Local workspace";
+  const context = document.createElement("span"); context.className = "app-context"; context.textContent = currentProject ? "Local project" : "Local workspace";
   const message = document.createElement("span"); message.id = "app-message"; message.className = "app-message"; message.role = "status"; message.ariaLive = "polite"; message.textContent = historyNotice?.view === viewGeneration ? historyNotice.text : "Ready"; message.toggleAttribute("data-idle", message.textContent === "Ready");
   const refusal = document.createElement("span"); refusal.id = "app-refusal"; refusal.className = "app-refusal";
   const settings = button("Settings", "text-button shell-settings"); settings.prepend(icon("settings")); settings.addEventListener("click", () => { const project=currentProject;if(!project){openSettings();return;}openProjectSettings(project);});
@@ -573,7 +573,8 @@ function revealHistoryItem(project: OpenProject, item: HistoryItem): void {
 function showProject(project: OpenProject, surface: ProjectSurface = "story", target?: ProjectTarget): void {
   const generation = beginView(project);
   const layout = document.createElement("section"); layout.className = "project-shell";
-  const layoutKey=`${project.projectId}:${surface}`; layout.dataset.navigationCollapsed=String(layoutFor(layoutKey).navigationCollapsed);
+  // Below 900 px Story keeps the icon rail, as Story Combined v1 does, so the stage keeps its width.
+  const layoutKey=`${project.projectId}:${surface}`; const railByDefault=():boolean=>surface==="story"&&window.innerWidth<900; layout.dataset.navigationCollapsed=String(layoutFor(layoutKey).navigationCollapsed||railByDefault());
   const sidebar = document.createElement("aside"); sidebar.className = "story-sidebar";sidebar.id="project-navigation";
   const projectName = document.createElement("h2"); projectName.textContent = project.title;
   const sectionLabel = document.createElement("p"); sectionLabel.className = "eyebrow"; sectionLabel.textContent = "Project";
@@ -593,7 +594,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   const setNavigationCollapsed=(collapsed:boolean):void=>{layout.dataset.navigationCollapsed=String(collapsed);collapse.ariaExpanded=String(!collapsed);collapse.replaceChildren(icon(collapsed?"panelOpen":"panel"));collapse.title=collapsed?"Expand navigation":"Collapse navigation";};
   setNavigationCollapsed(layout.dataset.navigationCollapsed==="true");
   collapse.addEventListener("click",()=>{const collapsed=layout.dataset.navigationCollapsed!=="true";setNavigationCollapsed(collapsed);saveLayout(layoutKey,{navigationCollapsed:collapsed});});sidebar.prepend(collapse);
-  layout.addEventListener("reset-panes",()=>setNavigationCollapsed(false));
+  layout.addEventListener("reset-panes",()=>setNavigationCollapsed(railByDefault()));
   const tree = document.createElement("div"); tree.className = "story-tree";
   const treePanel=document.createElement("aside");treePanel.className="project-tree-panel";treePanel.id="project-tree-panel";treePanel.ariaLabel=surface==="story"?"Scenes":"Project files";treePanel.append(tree);
   const hasTree=surface==="story"||surface==="source";

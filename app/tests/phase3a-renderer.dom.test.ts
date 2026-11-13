@@ -41,7 +41,7 @@ test("Unknown guarded Choice is read-only with exact Source navigation and no mu
   assert.deepEqual(sources, [["game/arrival.rpy", 95, 180, "saved"]]);
   assert.deepEqual(writes, []);
   assert.equal([...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === "Assist · Continue Scene")!.disabled, true);
-  [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === "Add Beat")!.click();
+  [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === "+ Add beat")!.click();
   assert.ok([...host.querySelectorAll<HTMLOptionElement>(".new-beat option")].some(option => option.value === "call"));
   dispose(); await browser.happyDOM.close();
 });

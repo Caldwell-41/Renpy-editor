@@ -193,7 +193,7 @@ test("Scene authoring exposes hierarchy, every Beat, natural dialogue continuati
   assert.equal(status, "Saved");
   assert.match(document.body.textContent ?? "", /Empty dialogue/);
 
-  click("Add Beat");
+  click("+ Add beat");
   const type = [...document.querySelectorAll("label")].find((item) => item.firstElementChild?.textContent === "Beat type")?.querySelector("select");
   assert.ok(type);
   const options = [...type.options].map((option) => option.textContent);
@@ -480,7 +480,7 @@ test("adding a Beat saves once and selects the added beat without a second commi
  const dispose=renderStoryView(document.querySelector('#host')!,document.querySelector('#tree')!,model,{status:()=>{},resolution:{width:1920,height:1080},present:async(assetId,purpose)=>({assetId,purpose,mimeType:'image/png',dataBase64:'',sha256:'a',byteCount:1,cacheKey:'a'}),apply:async command=>{
   assert.equal(command.type,'insertBodyBeat');calls++;const scene=model.scenes[0]!;model={...model,scenes:[{...scene,beats:[...scene.beats,{id:'new',byteStart:100,byteEnd:120,protected:false,payload:{type:'narration',text:'New text'}}]},model.scenes[1]!]};return model;
  }}).dispose;
- click('Add Beat');const type=document.querySelector<HTMLSelectElement>('.new-beat select')!;type.value='narration';type.dispatchEvent(new window.Event('change',{bubbles:true}));
+ click('+ Add beat');const type=document.querySelector<HTMLSelectElement>('.new-beat select')!;type.value='narration';type.dispatchEvent(new window.Event('change',{bubbles:true}));
  const text=document.querySelector<HTMLTextAreaElement>('.new-beat textarea')!;text.value='New text';text.dispatchEvent(new window.Event('input',{bubbles:true}));
  [...document.querySelectorAll<HTMLButtonElement>('.new-beat button')].find(b=>b.textContent==='Add Beat')!.click();await tick();
  assert.equal(calls,1);assert.equal(document.querySelector('.new-beat'),null);
@@ -492,7 +492,7 @@ test("adding a Beat saves once and selects the added beat without a second commi
 test("new Beat waits for its receipt, restores failure input, and focuses the added beat in Tracks",async()=>{
  const browser=installDom();const host=document.querySelector<HTMLElement>('#host')!;const model=sceneModel();const receipt=deferred<SceneWorkspace>();let calls=0,fail=true;let status='';
  const dispose=renderStoryView(host,document.querySelector('#tree')!,model,{status:text=>status=text,resolution:{width:1920,height:1080},present:async()=>{throw Error('unused');},apply:async()=>{calls++;if(fail)throw Error('Source changed');return receipt.promise;}}).dispose;
- click('Add Beat');const form=host.querySelector<HTMLElement>('.new-beat')!;const type=form.querySelector<HTMLSelectElement>('select')!;type.value='narration';type.dispatchEvent(new window.Event('change',{bubbles:true}));const text=form.querySelector<HTMLTextAreaElement>('textarea')!;text.value='Keep this text';text.dispatchEvent(new window.Event('input',{bubbles:true}));
+ click('+ Add beat');const form=host.querySelector<HTMLElement>('.new-beat')!;const type=form.querySelector<HTMLSelectElement>('select')!;type.value='narration';type.dispatchEvent(new window.Event('change',{bubbles:true}));const text=form.querySelector<HTMLTextAreaElement>('textarea')!;text.value='Keep this text';text.dispatchEvent(new window.Event('input',{bubbles:true}));
  const confirm=[...form.querySelectorAll('button')].find(b=>b.textContent==='Add Beat')!;const cancel=[...form.querySelectorAll('button')].find(b=>b.textContent==='Cancel')!;
  confirm.click();await tick();assert.match(status,/^Source changed Input retained\..*edit it in Source\.$/);assert.equal(confirm.disabled,false);assert.equal(text.value,'Keep this text');
  fail=false;confirm.click();confirm.click();cancel.click();assert.equal(calls,2);assert.equal(confirm.disabled,true);assert.equal(cancel.disabled,true);assert.equal(form.isConnected,true);

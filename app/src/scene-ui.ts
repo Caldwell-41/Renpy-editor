@@ -3,7 +3,7 @@ import { buildAvailabilityEditor, buildConditionEditor } from "./story-condition
 import { validateField } from "./authoring-input.ts";
 import { isTextField, typingStepIdleMs, type DraftStep, type DraftStepRecord, type HistoryDirection } from "./project-history.ts";
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenEffects, ScreenRevisions, ScreenTargetBinding } from "./screen-contracts.ts";
-import { armOf, beatBody, beatNumbers, bodyOf, laneOf, nodeBeats, nodeRef, ownedBodies, renderBranchPath, renderMarksLegend, renderTracks, renderTracksKey, sameNode, samePosition, shorten, trackCopy, trackRoute, type PendingBeat } from "./story-tracks.ts";
+import { armOf, beatBody, beatNumbers, bodyOf, laneOf, nodeBeats, nodeRef, ownedBodies, pinRouteLabels, renderBranchPath, renderMarksLegend, renderTracks, renderTracksKey, sameNode, samePosition, shorten, trackCopy, trackRoute, type PendingBeat } from "./story-tracks.ts";
 export type PlacementRef = "left" | "centre" | "right";
 export type TransitionRef = "none" | "dissolve" | "fade";
 
@@ -1192,7 +1192,9 @@ export function renderStoryView(
 
   const focusBeatOpener = (key: string): void => {
     const controls = [...host.querySelectorAll<HTMLButtonElement>("button[data-beat-opener]")].filter(control => !control.disabled && !control.closest("[hidden]"));
-    const opener=controls.find(control => control.dataset.beatOpener === key) ?? controls.find(control => control.dataset.beatOpener === "root");
+    const found=controls.find(control => control.dataset.beatOpener === key) ?? controls.find(control => control.dataset.beatOpener === "root");
+    // An opener under the closed More menu returns focus to More itself.
+    const opener=found?.closest("details:not([open])")?.querySelector<HTMLElement>(":scope > summary") ?? found;
     opener?.focus({preventScroll:true});
     opener?.scrollIntoView?.({block:"nearest",inline:"nearest"});
   };
@@ -1548,21 +1550,23 @@ export function renderStoryView(
     const title = document.createElement("h1"); title.textContent = scene.displayName; title.title = `${scene.technicalLabel} · ${scene.sourcePath}`;
     const history = document.createElement("div"); history.className = "scene-history";
     const mapped = scene.beats.find((beat) => beat.id === selectedBeatId) ?? scene.beats[0];
-    const viewSource = button("View in Source"); viewSource.disabled = actions.viewSource === undefined; viewSource.addEventListener("click", () => actions.viewSource?.(scene.sourcePath, mapped?.byteStart, mapped?.byteEnd, scene.sourceRevision));
     const focus = button(writingFocus ? "Exit Writing focus" : "Writing focus");focus.ariaPressed=String(writingFocus);focus.addEventListener("click",()=>{writingFocus=!writingFocus;host.dataset.writingFocus=String(writingFocus);host.closest<HTMLElement>(".project-shell")?.setAttribute("data-writing-focus",String(writingFocus));focus.textContent=writingFocus?"Exit Writing focus":"Writing focus";focus.ariaPressed=String(writingFocus);});
     if (actions.caller && actions.viewScene) { const caller = button("Back to caller"); caller.addEventListener("click", () => { if (draftGuard()) actions.viewScene?.(actions.caller!); }); history.append(caller); }
-    const add = button("Add Beat", "button primary"); add.dataset.beatOpener = "root"; add.disabled = scene.sourceConflict;
+    const add = button("+ Add beat", "button primary"); add.dataset.beatOpener = "root"; add.disabled = scene.sourceConflict;
     add.addEventListener("click", () => openNewBeat(scene));
-    history.append(viewSource, focus, add);
+    // Story Combined v1 keeps three scene controls; the rest sit under More.
+    const viewSource = button("View in Source"); viewSource.disabled = actions.viewSource === undefined; viewSource.addEventListener("click", () => actions.viewSource?.(scene.sourcePath, mapped?.byteStart, mapped?.byteEnd, scene.sourceRevision));
+    const more: HTMLButtonElement[] = [viewSource];
     if (actions.screenCatalog && actions.resolveScreenTarget) {
       const screenBeat = button("Add screen Beat"); screenBeat.dataset.beatOpener = "screen"; screenBeat.disabled = scene.sourceConflict;
       screenBeat.addEventListener("click", () => openNewBeat(scene,actions.screenHintKind === "dialog" ? "callScreen" : "showScreen",null,"screen"));
       if (actions.screenHint) screenBeat.title = `Use ${actions.screenHint.sourceName.replaceAll("_"," ")} in this Scene`;
-      history.append(screenBeat);
+      more.push(screenBeat);
     }
     const addCondition = button("Add Condition"); addCondition.disabled = scene.sourceConflict;
-    addCondition.addEventListener("click", () => openConditionForm(scene, { type: "root" }, defaultPlace(scene, { type: "root" }))); history.append(addCondition);
-    if (actions.assist) history.append(assistMenu(scene));
+    addCondition.addEventListener("click", () => openConditionForm(scene, { type: "root" }, defaultPlace(scene, { type: "root" }))); more.push(addCondition);
+    if (actions.assist) more.push(...assistActions(scene));
+    history.append(focus, add, moreMenu(more));
     header.append(title, history); host.append(header);
     if (scene.sourceConflict) {
       const conflict = document.createElement("section"); conflict.className = "state-banner error-state"; conflict.role = "alert";
@@ -1584,11 +1588,16 @@ export function renderStoryView(
     drawBottom(scene, scroll);
     drawEditor(scene);
   };
-  // Assist actions sit in the toolbar's More menu.
-  const assistMenu = (scene: SceneDocument): HTMLElement => {
+  // The scene toolbar's More menu. Choosing an item closes it.
+  const moreMenu = (items: readonly HTMLButtonElement[]): HTMLElement => {
     const menu = document.createElement("details"); menu.className = "story-more";
-    const summary = document.createElement("summary"); summary.className = "button secondary"; summary.textContent = "More"; menu.append(summary);
-    const tools = document.createElement("div"); tools.className = "story-more-list";
+    const summary = document.createElement("summary"); summary.className = "button secondary"; summary.textContent = "More";
+    const tools = document.createElement("div"); tools.className = "story-more-list"; tools.append(...items);
+    tools.addEventListener("click", event => { if ((event.target as Element).closest("button")) menu.open = false; });
+    menu.append(summary, tools);
+    return menu;
+  };
+  const assistActions = (scene: SceneDocument): HTMLButtonElement[] => {
     const selected=scene.beats.find(b=>b.id===selectedBeatId);
     const assist=button("Assist · Rewrite dialogue");
     assist.disabled=!selected||selected.protected||!!selected.owner||!!selected.conditionalBranch||!["dialogue","narration"].includes(selected.payload.type);
@@ -1604,8 +1613,7 @@ export function renderStoryView(
     lore.onclick=()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id,"generateLore");};
     const edits=button("Assist · Edit Scene");edits.disabled=scene.sourceConflict||(assist.disabled&&continuation.disabled);
     edits.onclick=()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id,"editScene");};
-    tools.append(assist,edits,continuation,card,lore); menu.append(tools);
-    return menu;
+    return [assist,edits,continuation,card,lore];
   };
   // The Branch path and Tracks. Redrawn alone when a new beat's place or kind changes.
   const drawBottom = (scene: SceneDocument, scroll?: number): void => {
@@ -1632,7 +1640,7 @@ export function renderStoryView(
     scroller.addEventListener("wheel", event => { if (Math.abs(event.deltaY) > Math.abs(event.deltaX) && scroller.scrollWidth > scroller.clientWidth) { scroller.scrollLeft += event.deltaY; event.preventDefault(); } }, { passive: false });
     panel.append(toolbar, scroller);
     bottomHost.replaceChildren(path, panel);
-    scroller.scrollLeft = before;
+    scroller.scrollLeft = before; pinRouteLabels(scroller);
     const column = [...scroller.querySelectorAll<HTMLElement>("[data-beat-id], [data-new-beat]")].find(item => (item.dataset.beatId ?? item.dataset.newBeat) === selected);
     if (column) revealColumn(column);
     markDrafts();

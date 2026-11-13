@@ -14,7 +14,7 @@
   // The navigation shell appears before the initial real-service observation ends.
   // Wait for Story content, not just the newly mounted Source navigation button.
   details.stage='initial-story-ready';
-  await wait(()=>document.querySelector('.scene-workspace .story-stage') && button('Add Beat'));
+  await wait(()=>document.querySelector('.scene-workspace .story-stage') && button('+ Add beat'));
   details.stage='character-default-colour';button('Characters').click();
   await wait(()=>button('New character'));button('New character').click();
   await wait(()=>button('Game setup'));button('Game setup').click();

@@ -145,7 +145,7 @@ try{
  input(typed,'One two');typed.blur();input(typed,'One two three');await settle();
  for(const expected of ['One two','One',beatA.payload.text]){assert.equal(await header('undo'),'committed');assert.equal((await open(beatA.id)).value,expected);}
  assert.equal(marked(beatA.id),false,'Undo past the first step ends the draft');
- button('Add Beat',document.querySelector('.scene-workspace .scene-history'));await wait(newBeat,'new beat');await settle();
+ button('+ Add beat',document.querySelector('.scene-workspace .scene-history'));await wait(newBeat,'new beat');await settle();
  await wait(()=>named('undo')===`Undo new dialogue draft in ${sceneName}`,'adding a beat is its first step');
  input(beatType(),'narration','change');await settle();input(newBeat().querySelector('textarea'),'New narration');await settle();
  assert.equal(await header('undo'),'committed');assert.equal(beatType().value,'narration');assert.equal(newBeat().querySelector('textarea').value,'');
@@ -200,7 +200,7 @@ try{
  stage('Undo of an existing beat Cancel restores its draft; Undo of a beat delete restores the beat but not its discarded draft');
 
  // A refused Story Save writes nothing and keeps every draft step; Undo then fixes the failing draft and Save succeeds.
- await type(beatA.id,'Refused save A');button('Add Beat',document.querySelector('.scene-workspace .scene-history'));await wait(newBeat,'new beat');input(beatType(),'choice','change');await settle();
+ await type(beatA.id,'Refused save A');button('+ Add beat',document.querySelector('.scene-workspace .scene-history'));await wait(newBeat,'new beat');input(beatType(),'choice','change');await settle();
  const available=()=>newBeat().querySelector('input[aria-label="Available when"]');available().checked=true;available().dispatchEvent(new Event('change',{bubbles:true}));await settle();
  const quiet=await disk();await headerSave(()=>/^Nothing saved/.test(status()));
  assert.deepEqual(await disk(),quiet,'a refused Story Save writes nothing');assert.equal(named('undo'),`Undo choice change in ${sceneName}`);

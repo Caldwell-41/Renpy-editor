@@ -353,6 +353,25 @@ export function renderTracks(context: TracksContext): HTMLElement {
   return grid;
 }
 
+/** Keeps each open branch's name beside the lane labels while its route is on screen, as
+ *  Story Combined v1 does: the label slides right with the scroll and stops before its end.
+ *  Call it once the scroller is in the document. */
+export function pinRouteLabels(scroller: HTMLElement): void {
+  const pin = (): void => {
+    const cover = (scroller.querySelector(".story-track-labels")?.getBoundingClientRect().right ?? 0) + 8;
+    const ends = [...scroller.querySelectorAll<HTMLElement>(".story-track-exit")];
+    for (const entry of scroller.querySelectorAll<HTMLElement>(".story-track-entry, .story-track-slot")) {
+      const label = entry.querySelector<HTMLElement>(".story-rail-label"); if (!label) continue;
+      label.style.translate = "";
+      const own = label.getBoundingClientRect();
+      const end = ends.find(mark => mark.dataset.branchId === entry.dataset.branchId)?.querySelector(".story-rail-end") ?? entry.querySelector(".story-rail-end");
+      const shift = Math.max(0, Math.min(cover - own.left, (end?.getBoundingClientRect().left ?? own.right) - 8 - own.right));
+      if (shift > 0) label.style.translate = `${shift}px 0`;
+    }
+  };
+  scroller.addEventListener("scroll", pin, { passive: true }); pin();
+}
+
 export interface BranchPathContext {
   readonly scene: SceneDocument;
   readonly items: readonly TrackItem[];

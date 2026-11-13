@@ -53,7 +53,7 @@ async function mountStory(sceneId) {
   return host;
 }
 async function openBeat(host, type) {
-  button(host, 'Add Beat').click(); const draft = host.querySelector('.new-beat');
+  button(host, '+ Add beat').click(); const draft = host.querySelector('.new-beat');
   const select = draft.querySelector('select'); select.value = type; select.dispatchEvent(new Event('change', {bubbles: true}));
   await wait(() => draft.querySelector('[aria-label="Panel screen"]')?.disabled === false && /Panel ready/.test(draft.textContent), 'Panel resolution'); return draft;
 }

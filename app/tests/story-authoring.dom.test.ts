@@ -70,7 +70,7 @@ test("explicit branch insertion preserves body, before-terminator position, and 
 
 test("root Call insertion is explicit before Return and generates no renderer-owned return label", async () => {
   const writes: SceneCommand[] = []; const s = setup([ending], async command => { writes.push(command); return s.model; });
-  click(s.host, "Add Beat"); const type = s.host.querySelector<HTMLSelectElement>('.new-beat > .field select')!; type.value = "call"; type.dispatchEvent(new Event("change")); select(s.host, "Call destination Scene", "two"); click(s.host.querySelector('.new-beat')!, "Add Beat"); await tick();
+  click(s.host, "+ Add beat"); const type = s.host.querySelector<HTMLSelectElement>('.new-beat > .field select')!; type.value = "call"; type.dispatchEvent(new Event("change")); select(s.host, "Call destination Scene", "two"); click(s.host.querySelector('.new-beat')!, "Add Beat"); await tick();
   assert.deepEqual(writes[0], { type: "insertBodyBeat", sceneId: "one", expectedSourceRevision: "source-open", body: { type: "root" }, position: { type: "before", anchor: { type: "beat", beatId: "end" } }, beat: { type: "call", sceneId: "two", returnLabel: null } }); await s.close();
 });
 
@@ -88,7 +88,7 @@ test("unchanged pending commit blocks another draft and late disposed refusal ca
   let reject!: (error: Error) => void; const pending = new Promise<SceneWorkspace>((_, fail) => { reject = fail; });
   const s = setup([call, ending], async () => pending);
   selectBeat(s.host, "call"); click(s.host, "Commit Beat");
-  assert.equal(hasSceneDraft(s.host), true); click(s.host, "Add Beat"); assert.equal(s.host.querySelector(".new-beat"), null);
+  assert.equal(hasSceneDraft(s.host), true); click(s.host, "+ Add beat"); assert.equal(s.host.querySelector(".new-beat"), null);
   const statusCount = s.statuses.length; await s.close(); reject(Error("Late old-session refusal")); await tick(); assert.equal(s.statuses.length, statusCount);
 });
 

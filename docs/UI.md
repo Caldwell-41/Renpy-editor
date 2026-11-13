@@ -427,7 +427,12 @@ covers moving, unwrapping and deleting branches.
   column edits its beat beside the stage; a condition or Choice column edits the
   condition, and an option opens from its Choice. Move up, Move down, Move to and
   Delete sit in the editor heading's menu, and Alt+Arrow on a column moves its beat.
-  Reel (#118), the Writing focus lane grid and resizing (#119), and the editor
+  The scene toolbar holds Writing focus, + Add beat and More. More holds View in
+  Source, Add screen Beat, Add Condition and the Assist actions.
+- Below 900 px, Story opens with the icon rail and the scene list as a drawer. The
+  workspace scrolls: stage, editor, Branch path, then Tracks, with the scene toolbar
+  pinned at the top. A 16:9 stage measures 480 × 270 at 560 × 640.
+- Reel (#118), the Writing focus lane grid and resizing (#119), and the editor
   refinements, pickers and Add a beat dialog (#117) come later; until then Writing
   focus only hides the stage.
 
@@ -441,7 +446,8 @@ covers moving, unwrapping and deleting branches.
   Each extra row takes about 30 px from the stage, up to three rows; beyond that the
   path scrolls.
 - Tracks and Reel draw a route line in the arm colour above each open branch, with a
-  light tint on its columns. Slim `+` markers add a beat after a column, the first
+  light tint on its columns. When Tracks scrolls past a branch's start, its name stays
+  beside the lane labels until it reaches the branch's end. Slim `+` markers add a beat after a column, the first
   beat in a branch or a beat after the condition. Each open branch or option ends in
   an end marker, and the scene ends in one: `+ End of "If trust ≥ 5"`,
   `+ End of option 2 "Leave"`, `+ End of Otherwise` or `+ End of scene`. An end marker

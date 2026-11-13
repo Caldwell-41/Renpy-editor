@@ -447,7 +447,7 @@ export const storyCases={
    [...c.document.querySelectorAll('.tree-scene-open')].find(x=>x.textContent===name).click();
    await c.wait(()=>shownScene(c)===id&&c.document.querySelector('.scene-workspace .story-track-column'));await c.settle();};
   const type=async(id,text)=>{await select(c,id);c.enter(card(c,id)?.querySelector('textarea'),text);await c.settle();};
-  const addBeat=async kind=>{await c.click('Add Beat',c.document.querySelector('.scene-workspace .scene-history'));await c.wait(newBeat);
+  const addBeat=async kind=>{await c.click('+ Add beat',c.document.querySelector('.scene-workspace .scene-history'));await c.wait(newBeat);
    c.enter(newBeat().querySelector(':scope > .field select'),kind,'change');await c.settle();return newBeat();};
   const save=async()=>{const at=c.requests().length,before=status();await c.click('Save',header);
    await c.wait(()=>!c.document.querySelector('.scene-workspace [disabled].story-track-beat')&&status()!==before&&/^(Saved|Nothing saved|Story changed)/.test(status()));await c.settle();return c.requests().slice(at);};

@@ -64,6 +64,15 @@ try{
  assert(narrow.pathRows>3&&narrow.pathScrolls,`a longer path scrolls after three rows (${narrow.pathRows} rows)`);assert.equal(narrow.pageOverflow,false);
  await page.setViewportSize({width:1100,height:720});
  assert.equal(await page.locator('.story-track-entry .story-rail-label').count()>0,true,'open branches label their route line');
+ // Scrolled past its entry, a branch name stays beside the lane labels and stops before its end.
+ const pinned=await page.evaluate(()=>{
+  const scroller=document.querySelector('.story-tracks-scroll'),entry=document.querySelector('.story-track-entry[data-branch-id="if"]');
+  scroller.scrollLeft=entry.offsetLeft+40;scroller.dispatchEvent(new Event('scroll'));
+  const label=entry.querySelector('.story-rail-label').getBoundingClientRect(),lanes=document.querySelector('.story-track-labels').getBoundingClientRect();
+  const end=document.querySelector('.story-track-exit[data-branch-id="if"] .story-rail-end').getBoundingClientRect();
+  const result={label:label.left,lanes:lanes.right,labelRight:label.right,end:end.left};scroller.scrollLeft=0;scroller.dispatchEvent(new Event('scroll'));return result;
+ });
+ assert(pinned.label>=pinned.lanes&&pinned.labelRight<=pinned.end,`route label stays beside the lane labels: ${JSON.stringify(pinned)}`);
  await page.screenshot({path:`${output}/1280x720-dark-laptop-nested.png`});results.push({label:'nested',filename:'1280x720-dark-laptop-nested.png',pathRows:nested.pathRows});
  // Writing focus hides the stage and keeps the editor, Branch path and Tracks.
  await page.getByRole('button',{name:'Writing focus',exact:true}).click();

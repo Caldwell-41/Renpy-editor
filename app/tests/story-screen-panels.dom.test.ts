@@ -31,7 +31,7 @@ function setup(overrides: Partial<SceneActions> = {}, model = fixture()) {
   return { host, view, commands, resolutions, messages, close: async () => { view.dispose(); await browser.happyDOM.close(); } };
 }
 function openNew(host: HTMLElement, type: string) {
-  button(host, "Add Beat").click();
+  button(host, "+ Add beat").click();
   const panel = host.querySelector<HTMLElement>(".new-beat")!;
   const select = panel.querySelector<HTMLSelectElement>("select")!; select.value = type; select.dispatchEvent(new Event("change", { bubbles: true })); return panel;
 }
@@ -211,14 +211,16 @@ test("Cancel and Escape return focus to the visible Story draft opener",async()=
  for(const entry of ["root","screen","branch"])for(const exit of ["cancel","escape"]){
   const s=setup({},entry==="branch"?storyFixture():fixture());
   try{
-   const caption=entry==="branch"?"Add Beat to If":entry==="screen"?"Add screen Beat":"Add Beat";
+   const caption=entry==="branch"?"Add Beat to If":entry==="screen"?"Add screen Beat":"+ Add beat";
    if(entry==="branch")selectBeat(s.host,"if");
    const opener=button(s.host,caption);opener.focus();opener.click();await tick();
    const draft=s.host.querySelector<HTMLElement>(".new-beat")!;
    const type=draft.querySelector<HTMLSelectElement>("select")!;type.value="showScreen";type.dispatchEvent(new Event("change",{bubbles:true}));
    if(exit==="cancel"){const cancel=button(draft,"Cancel");cancel.focus();cancel.click();}
    else{const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.focus();position.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true,cancelable:true}));}
-   assert.ok(document.activeElement===button(s.host,caption),`${entry} ${exit} must restore the recreated opener`);
+   // The screen opener sits under the closed More menu, so focus returns to More.
+   const restored=entry==="screen"?s.host.querySelector(".story-more > summary"):button(s.host,caption);
+   assert.ok(document.activeElement===restored,`${entry} ${exit} must restore the recreated opener`);
    assert.equal(s.host.querySelector(".new-beat"),null);assert.equal(s.commands.length,0);
   }finally{await s.close();}
  }
