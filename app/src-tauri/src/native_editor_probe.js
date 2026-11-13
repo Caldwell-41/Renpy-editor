@@ -45,13 +45,19 @@ window.__loomlightProbeHistory = async (direction, { refusal = false, timeoutMs 
   if (result.outcome !== 'committed' && !refusal) throw Object.assign(Error(`Header ${direction} ${result.outcome}`), { code: result.code });
   return result;
 };
-// Beat disclosure buttons toggle selection. Acceptance and history refreshes can
-// retain the fixture target, so clicking it unconditionally would deselect it.
+// Opens a nested Beat's branch in the Branch path; the branch's first Beat becomes selected.
+window.__loomlightProbeOpenBranch = branchId => {
+  const segment = [...document.querySelectorAll('.story-branch-segment')].find(item => item.dataset.branchId === branchId);
+  if (segment && segment.ariaPressed !== 'true') segment.click();
+};
+// The editor beside the stage while it edits this Beat.
+window.__loomlightProbeEditorFor = beatId => [...document.querySelectorAll('.story-editor')].find(editor => editor.dataset.editorFor === beatId);
+// Selects a Beat by its Tracks column. Selecting the selected Beat changes nothing.
 window.__loomlightProbeSelectBeat = beatId => {
-  const cards = [...document.querySelectorAll('.beat-card')].filter(card => card.dataset.beatId === beatId);
-  const select = cards.length === 1 && cards[0].querySelector('.beat-select');
+  const columns = [...document.querySelectorAll('.story-track-column')].filter(column => column.dataset.beatId === beatId);
+  const select = columns.length === 1 && columns[0].querySelector(':scope > .story-track-beat');
   if (!select) throw Error('Unique rendered fixture Beat required');
-  if (select.ariaExpanded !== 'true') select.click();
+  if (select.dataset.selected !== 'true') select.click();
 };
 // Only use for reads, idempotent preference writes, or probe checkpoint/report
 // delivery. Busy refuses before dispatch; other errors and the deadline still fail.

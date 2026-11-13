@@ -420,23 +420,24 @@ setTimeout(async () => {
 
     sceneAuthoringStage = "open-scene-workspace";
     click("Story");
-    await waitFor(() => [...document.querySelectorAll("button")].some((item) => item.textContent === "Add Beat"), "Add Beat");
+    await waitFor(() => [...document.querySelectorAll("button")].some((item) => item.textContent === "+ Add beat"), "+ Add beat");
     await waitFor(() => called.has("scene.list") && called.has("media.present"), "Scene data and image presentation");
-    const previewVisible = document.body.textContent.includes("Scene Preview")
-      && document.body.textContent.includes("Beats")
+    const previewVisible = document.body.textContent.includes("Game window")
+      && document.body.textContent.includes("Branch path")
       && document.body.textContent.includes("Partial / unknown")
-      && document.body.textContent.includes("Visible state and provenance");
-    const allocation = document.querySelector(".preview-divider");
-    const allocationCorrect = allocation?.getAttribute("aria-valuenow") === "34";
+      && document.body.textContent.includes("In effect");
+    // The stage keeps the project's ratio; Tracks has its six lanes.
+    const stageFitted = document.querySelector(".story-stage-slot")?.style.getPropertyValue("--stage-w") !== ""
+      && document.querySelectorAll(".story-track-label").length === 6;
+    sceneAuthoringStage = "continue-dialogue";
+    const dialogueButton = [...document.querySelectorAll(".story-track-beat")]
+      .find((item) => item.ariaLabel?.startsWith("03 Dialogue"));
+    if (!dialogueButton) throw new Error("Missing Dialogue Beat");
+    dialogueButton.click();
     const accessibleReorder = [...document.querySelectorAll("button")]
       .some((item) => item.ariaLabel === "Move scene Scene 1 down")
       && [...document.querySelectorAll("button")]
-        .some((item) => item.ariaLabel === "Move beat 3 down");
-    sceneAuthoringStage = "continue-dialogue";
-    const dialogueButton = [...document.querySelectorAll("button")]
-      .find((item) => item.textContent?.startsWith("3. Dialogue"));
-    if (!dialogueButton) throw new Error("Missing Dialogue Beat");
-    dialogueButton.click();
+        .some((item) => item.ariaLabel === "Move beat 03 down");
     const dialogue = document.querySelector(".expanded-beat textarea");
     if (!dialogue) throw new Error("Missing expanded Dialogue editor");
     dialogue.value = "Packaged Scene authoring";
@@ -444,8 +445,8 @@ setTimeout(async () => {
     dialogue.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, shiftKey:true, bubbles: true }));
     await awaitSceneCommit(1, "Dialogue continuation transaction");
     sceneAuthoringStage = "choice-create-scene";
-    const choiceButton = [...document.querySelectorAll("button")]
-      .find((item) => item.textContent?.startsWith("5. Choice"));
+    const choiceButton = [...document.querySelectorAll(".story-track-beat")]
+      .find((item) => item.ariaLabel?.startsWith("05 Choice"));
     if (!choiceButton) throw new Error("Missing Choice Beat");
     choiceButton.click();
     click("Create New Scene");
@@ -459,7 +460,6 @@ setTimeout(async () => {
     await awaitSceneCommit(2, "Create New Scene Choice transaction");
     sceneAuthoringStage = "audio-audition";
     const audioBeforeClick = mediaPurposes.filter((purpose) => purpose === "audioAudition").length;
-    if(document.querySelector(".scene-context-inspector").hidden) click("Scene details");
     click("Audition current music");
     await waitFor(() => mediaPurposes.filter((purpose) => purpose === "audioAudition").length > audioBeforeClick, "explicit audio audition");
     const audioIntentional = audioBeforeClick === 0;
@@ -575,7 +575,7 @@ setTimeout(async () => {
     const recoveryConfirm = document.querySelector("#confirm-smoke-recovery");
     if (!recoveryConfirm) throw new Error("Missing recovery confirmation");
     recoveryConfirm.click(); click("Keep current project files");
-    await waitFor(() => document.body.textContent.includes("Scene Preview"), "Scene Preview after recovery");
+    await waitFor(() => document.body.textContent.includes("Game window"), "Story stage after recovery");
     const safeRecoveryCompleted = projectStatus === "saved";
 
     sceneAuthoringStage = "ambiguous-recovery";
@@ -600,7 +600,7 @@ setTimeout(async () => {
     sceneWorkspace.scenes[0].sourceConflict = false;
     await checkpoint("post-source-conflict-complete");
     sceneAuthoringUiPassed = previewVisible
-      && allocationCorrect
+      && stageFitted
       && accessibleReorder
       && sceneApplyCount >= 2
       && audioIntentional

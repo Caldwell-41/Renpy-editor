@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
-import { renderStoryView, type SceneCommand, type SceneWorkspace } from "../src/scene-ui.js";
-import { storyFixture } from "./story-controls-fixture.js";
+import type { SceneCommand, SceneWorkspace } from "../src/scene-ui.js";
+import { renderStoryView, selectBeat, storyEditor, storyFixture, trackColumn } from "./story-controls-fixture.js";
 
 test("imported arithmetic opens as an equation and commits the retained formula through Story", async () => {
   const browser = new Window({url:"http://tauri.localhost"});
@@ -47,12 +47,12 @@ test("an unfinished formula stays in its beat draft across beats, scenes and rem
   const formula=host.querySelector<HTMLInputElement>('[aria-label="Formula"]')!;
   formula.focus();formula.value="(trust + ";formula.dispatchEvent(new Event("input",{bubbles:true}));
   const open=(name:string)=>[...tree.querySelectorAll<HTMLButtonElement>(".tree-scene-open")].find(item=>item.textContent===name)!.click();
-  host.querySelector<HTMLButtonElement>('[data-beat-id="end"] .beat-select')!.click();
-  assert.equal(host.querySelector<HTMLElement>('[data-beat-id="arithmetic"]')!.dataset.beatDraft,"true");
+  selectBeat(host,"end");
+  assert.equal(trackColumn(host,"arithmetic")!.dataset.beatDraft,"true");
   open("Shared conversation");await new Promise(r=>setTimeout(r,0));open("Arrival");await new Promise(r=>setTimeout(r,0));
   view.update(model,actions,"arithmetic");
   assert.equal(host.querySelector('[aria-label="Formula"]'),formula);assert.equal(formula.value,"(trust + ");assert.deepEqual(sent,[]);
-  [...host.querySelectorAll<HTMLButtonElement>('[data-beat-id="arithmetic"] button')].find(item=>item.textContent==="Commit Beat")!.click();
+  [...storyEditor(host).querySelectorAll<HTMLButtonElement>("button")].find(item=>item.textContent==="Commit Beat")!.click();
   await new Promise(r=>setTimeout(r,0));
   assert.equal(sent.length,1);assert.match(sent[0]!,/\(trust \+ /);assert.match(statuses.at(-1)!,/Input retained/);assert.equal(formula.value,"(trust + ");assert.ok(formula.isConnected);assert.equal(view.hasDrafts("one"),true);
   view.dispose();await browser.happyDOM.close();

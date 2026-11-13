@@ -27,9 +27,9 @@ try{
  await page.route('**/story-arithmetic',async route=>route.fulfill({contentType:'text/html',body:`<!doctype html><html data-theme="dark"><head>${await productionStylesheetLinks()}</head><body><div id="app"></div></body></html>`}));
  await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/story-arithmetic`);
  await page.evaluate(async()=>{const {startApplication}=await import('/src/main.ts');startApplication((operation,payload)=>window.arithmeticRpc({protocolVersion:1,requestId:crypto.randomUUID().replaceAll('-',''),operation,payload}));});
- await page.locator('.recent-open').click();await page.locator('.beat-card').first().waitFor();
+ await page.locator('.recent-open').click();await page.locator('.story-track-column').first().waitFor();
  const live=await call('scene.list'),beat=live.scenes.find(s=>s.id===scene.id).beats.find(b=>b.payload.value?.operation==='add');
- await page.locator(`[data-beat-id="${beat.id}"] .beat-select`).click();await page.getByRole('button',{name:'Writing focus',exact:true}).click();
+ await page.locator(`.story-track-column[data-beat-id="${beat.id}"] > .story-track-beat`).click();await page.getByRole('button',{name:'Writing focus',exact:true}).click();
  const formula=page.getByRole('combobox',{name:'Formula'});await formula.fill('bon');await page.keyboard.press('Tab');assert.equal(await formula.inputValue(),'bonus');assert(await formula.evaluate(n=>document.activeElement===n));
  await formula.fill('1 // 0');await page.getByLabel('Change: Add',{exact:true}).click();await page.getByRole('option',{name:'Floor divide by',exact:true}).focus();await page.getByText('This divides by zero.',{exact:true}).waitFor();assert(await page.getByRole('option',{name:'Floor divide by',exact:true}).evaluate(n=>document.activeElement===n),'Backend feedback must retain operation-menu focus');await page.keyboard.press('Escape');
  await formula.fill('(bonus + 2) * 3');await page.getByLabel('Change: Add',{exact:true}).click();await page.getByRole('option',{name:'Floor divide by',exact:true}).focus();await page.keyboard.press('Enter');assert.equal(await formula.inputValue(),'(bonus + 2) * 3');assert.equal(await page.getByLabel('Change: Floor divide by',{exact:true}).count(),1);

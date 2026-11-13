@@ -28,12 +28,13 @@ test('selectable native probe keeps the selected Beat target and reports bounded
   }, 'narration').dispose; // Acceptance and project Undo reveal this target.
   const scope: { __loomlightProbeSelectBeat?: (id: string) => void; __loomlightProbeFindButton?: (label: string) => HTMLButtonElement } = {};
   runInNewContext(helper, { window: scope, document, performance, setTimeout });
-  const selected = () => document.querySelector('.beat-select')!.ariaExpanded;
+  const selected = () => document.querySelector<HTMLElement>('.story-track-beat')!.dataset.selected;
   const assist = () => scope.__loomlightProbeFindButton!('Assist · Edit Scene')!;
   try {
     assert.equal(selected(), 'true');
-    document.querySelector<HTMLButtonElement>('.beat-select')!.click();
-    assert.equal(selected(), 'false'); assert.equal(assist().disabled, true, 'old unconditional probe click deselects the retained target');
+    // Clicking the selected Tracks column keeps the retained target selected.
+    document.querySelector<HTMLButtonElement>('.story-track-beat')!.click();
+    assert.equal(selected(), 'true'); assert.equal(assist().disabled, false);
     scope.__loomlightProbeSelectBeat!('narration');
     assert.equal(selected(), 'true'); assert.equal(assist().disabled, false);
     scope.__loomlightProbeSelectBeat!('narration');

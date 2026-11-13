@@ -24,12 +24,14 @@ import {
   renderStoryView,
   storyScene,
   type StatusLink,
+  type StatusDetail,
   type StoryStatus,
   type StoryView,
   type RecoveryReport,
   type SceneCommand,
   type SceneWorkspace,
   type MediaPresentation,
+  type SceneList,
 } from "./scene-ui.ts";
 import {
   renderSourceWorkspace,
@@ -183,7 +185,7 @@ function beginAuthoringCompletion(project: OpenProject, scope: object, edit = tr
   const token = beginCompletion(project, scope);
   activeAuthoringOperations.set(project.sessionId, token.operation);
   reflectAuthoringState();
-  if (edit) historyNotice = undefined;
+  if (edit) clearHistoryNotice();
   return token;
 }
 
@@ -242,16 +244,15 @@ function hasBlockingModal(): boolean {
   return document.querySelector<HTMLElement>('[aria-modal="true"]') !== null;
 }
 
-function persistenceMessage(state: PersistenceStatus, localPending: boolean): { readonly text: string; readonly kind: "normal" | "error"; readonly links?: readonly StatusLink[] } {
+function persistenceMessage(state: PersistenceStatus, localPending: boolean): { readonly text: string; readonly kind: "normal" | "error"; readonly links?: readonly StatusLink[] } & StatusDetail {
   if (state === "recoveryRequired") return { text: "Recovery required — writes are disabled", kind: "error" };
   if (state === "conflict") return { text: "Conflict — Source is invalid, missing, or changed outside Loomlight", kind: "error" };
   // A refused Story Save keeps its count and scene links until its drafts are saved or cancelled.
   const refusal: StoryStatus | undefined = storyView?.saveStatus();
   if (refusal) return refusal;
-  // "Undone: …" stays until the next edit or view, including over retained beat and Source drafts.
-  if (historyNotice?.view === viewGeneration && !localPending) return { text: historyNotice.text, kind: "normal" };
   if (localPending || state === "pendingValidation") return { text: "Unsaved Source draft", kind: "normal" };
-  if (storyView?.hasDrafts()) return { text: "Unsaved changes", kind: "normal" };
+  const drafts = storyView?.draftCount() ?? 0;
+  if (drafts) return { text: `${drafts} unsaved beat draft${drafts === 1 ? "" : "s"}`, kind: "normal", short: `${drafts} unsaved` };
   return { text: hasUnsubmittedInput() ? "Unsubmitted input — accepted changes saved" : "Saved", kind: "normal" };
 }
 
@@ -274,12 +275,31 @@ function statusLink(link: StatusLink): HTMLButtonElement {
   const count = document.createElement("b"); count.textContent = String(link.count); element.append(" ", count);
   element.addEventListener("click", link.open); return element;
 }
-function setStatus(message: string, kind: "normal" | "error" = "normal", links: readonly StatusLink[] = []): void {
+// The header save status, approved as story-combined-status / header-v2. A refused
+// Story Save bolds its lead and links each scene. At 560 px the header shows the short
+// form (data-short) and the bottom status bar repeats a refusal line in full.
+function statusContent(message: string, links: readonly StatusLink[], lead?: string): (string | HTMLElement)[] {
+  const text = lead && message.startsWith(lead) ? [Object.assign(document.createElement("b"), { textContent: lead }), message.slice(lead.length)] : [message];
+  return [...text, ...links.map(statusLink)];
+}
+// The bottom status bar: "Undone: …" and "Redone: …" until the next edit or view.
+function showMessage(text: string): void {
+  const message = document.querySelector<HTMLElement>("#app-message"); if (!message) return;
+  message.textContent = text; message.toggleAttribute("data-idle", text === "Ready");
+}
+function clearHistoryNotice(): void {
+  if (historyNotice) showMessage("Ready");
+  historyNotice = undefined;
+}
+function setStatus(message: string, kind: "normal" | "error" = "normal", links: readonly StatusLink[] = [], detail: StatusDetail = {}): void {
   const dialog=document.querySelector(".catalog-dialog-panel");if(dialog&&kind==="error"){let error=dialog.querySelector<HTMLElement>(".dialog-error");if(!error){error=document.createElement("p");error.className="error-message dialog-error";error.role="alert";dialog.append(error);}error.textContent=message;}else if(message==="Saving…"){dialog?.querySelector(".dialog-error")?.remove();}
   if(routineStatusTimer)clearTimeout(routineStatusTimer);
-  const status=document.querySelector<HTMLElement>("#app-status");
-  const content=[message,...links.map(statusLink)],text=content.map(item=>typeof item==="string"?item:item.textContent).join("");
-  const apply=():void=>{if(status?.isConnected&&(status.textContent!==text||status.dataset.kind!==kind)){status.replaceChildren(...content);status.title=message;status.dataset.kind=kind;}};
+  const status=document.querySelector<HTMLElement>("#app-status"),refusal=document.querySelector<HTMLElement>("#app-refusal");
+  const content=statusContent(message,links,detail.lead),text=content.map(item=>typeof item==="string"?item:item.textContent).join(""),short=detail.short;
+  const apply=():void=>{
+    if(status?.isConnected&&(status.textContent!==text||status.dataset.kind!==kind)){status.replaceChildren(...content);status.title=message;status.dataset.kind=kind;if(short)status.dataset.short=short;else delete status.dataset.short;}
+    if(refusal?.isConnected)refusal.replaceChildren(...(links.length?statusContent(message,links,detail.lead):[]));
+  };
   if(kind==="normal"&&["Saving…","Checking saved state…"].includes(message))routineStatusTimer=setTimeout(apply,200);else apply();
 }
 async function value<T>(operation: Parameters<typeof desktopRequestCore>[0], payload: Readonly<Record<string, unknown>> = {}): Promise<T> {
@@ -303,14 +323,17 @@ function shell(content: HTMLElement): void {
   const main = document.createElement("main"); main.className = "app-shell";
   const header = document.createElement("header"); header.className = "app-header";
   const brand = button("Loomlight", "brand"); brand.addEventListener("click", () => void (async () => { if (lifecycleBusy || !await allowSceneNavigation()) return; const project = currentProject; if (!project) { await showWelcome(); return; } await requestProjectClose(project); })());
-  const status = document.createElement("span"); status.id = "app-status"; status.className = "app-status"; status.role = "status"; status.ariaLive = "polite"; status.textContent = "Ready";
+  // The save status sits in the header before Undo, Redo and Save (header-undo icons-v1).
+  const status = document.createElement("span"); status.id = "app-status"; status.className = "app-status"; status.role = "status"; status.ariaLive = "polite"; status.setAttribute("aria-label", "Save status"); status.textContent = "Ready";
   const projectLabel = document.createElement("span"); projectLabel.className = "header-project"; projectLabel.textContent = currentProject?.title ?? "";
   brand.prepend(icon("story")); header.append(brand, projectLabel);
-  const studioRequest=button("Studio request", "button");studioRequest.addEventListener("click",()=>openStudioRequest(currentProject?.sessionId??null));header.append(studioRequest);
+  const studioRequest=button("Studio request", "button");studioRequest.addEventListener("click",()=>openStudioRequest(currentProject?.sessionId??null));header.append(studioRequest,status);
   const footer = document.createElement("footer"); footer.className = "app-footer";
-  const context = document.createElement("span"); context.textContent = currentProject ? "Local project" : "Local workspace";
+  const context = document.createElement("span"); context.className = "app-context"; context.textContent = currentProject ? "Local project" : "Local workspace";
+  const message = document.createElement("span"); message.id = "app-message"; message.className = "app-message"; message.role = "status"; message.ariaLive = "polite"; message.textContent = historyNotice?.view === viewGeneration ? historyNotice.text : "Ready"; message.toggleAttribute("data-idle", message.textContent === "Ready");
+  const refusal = document.createElement("span"); refusal.id = "app-refusal"; refusal.className = "app-refusal";
   const settings = button("Settings", "text-button shell-settings"); settings.prepend(icon("settings")); settings.addEventListener("click", () => { const project=currentProject;if(!project){openSettings();return;}openProjectSettings(project);});
-  footer.append(context,status,settings); main.append(header, content, footer); root.replaceChildren(main);
+  footer.append(context,message,refusal,settings); main.append(header, content, footer); root.replaceChildren(main);
 }
 
 async function showWelcome(): Promise<void> {
@@ -515,7 +538,8 @@ async function runHistory(project: OpenProject, direction: HistoryDirection): Pr
       revealHistoryItem(project, step.entry.item);
       showHistory(step.history);
       historyNotice = { text: `${direction === "undo" ? "Undone" : "Redone"}: ${step.entry.name}`, view: viewGeneration };
-      setStatus(historyNotice.text);
+      showMessage(historyNotice.text);
+      void refreshPersistenceStatus(project, viewGeneration);
       if (focused) document.querySelector<HTMLElement>(`[data-history="${focused}"]`)?.focus();
     } finally { transition?.release(); }
   } catch (error) {
@@ -550,7 +574,9 @@ function revealHistoryItem(project: OpenProject, item: HistoryItem): void {
 function showProject(project: OpenProject, surface: ProjectSurface = "story", target?: ProjectTarget): void {
   const generation = beginView(project);
   const layout = document.createElement("section"); layout.className = "project-shell";
-  const layoutKey=`${project.projectId}:${surface}`; layout.dataset.navigationCollapsed=String(layoutFor(layoutKey).navigationCollapsed);
+  // Below 1200 px Story opens with the icon rail and the scene list closed, so the stage keeps
+  // its room. Like the scene list's default, this is set on open; resizing keeps the choice.
+  const layoutKey=`${project.projectId}:${surface}`; const storyNarrow=():boolean=>surface==="story"&&window.innerWidth<1200; layout.dataset.navigationCollapsed=String(layoutFor(layoutKey).navigationCollapsed||storyNarrow());
   const sidebar = document.createElement("aside"); sidebar.className = "story-sidebar";sidebar.id="project-navigation";
   const projectName = document.createElement("h2"); projectName.textContent = project.title;
   const sectionLabel = document.createElement("p"); sectionLabel.className = "eyebrow"; sectionLabel.textContent = "Project";
@@ -570,19 +596,22 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   const setNavigationCollapsed=(collapsed:boolean):void=>{layout.dataset.navigationCollapsed=String(collapsed);collapse.ariaExpanded=String(!collapsed);collapse.replaceChildren(icon(collapsed?"panelOpen":"panel"));collapse.title=collapsed?"Expand navigation":"Collapse navigation";};
   setNavigationCollapsed(layout.dataset.navigationCollapsed==="true");
   collapse.addEventListener("click",()=>{const collapsed=layout.dataset.navigationCollapsed!=="true";setNavigationCollapsed(collapsed);saveLayout(layoutKey,{navigationCollapsed:collapsed});});sidebar.prepend(collapse);
-  layout.addEventListener("reset-panes",()=>setNavigationCollapsed(false));
+  layout.addEventListener("reset-panes",()=>setNavigationCollapsed(storyNarrow()));
   const tree = document.createElement("div"); tree.className = "story-tree";
   const treePanel=document.createElement("aside");treePanel.className="project-tree-panel";treePanel.id="project-tree-panel";treePanel.ariaLabel=surface==="story"?"Scenes":"Project files";treePanel.append(tree);
-  const hasTree=surface==="story"||surface==="source";
+  const hasTree=surface==="story"||surface==="source";let sceneList:SceneList|undefined;
   if(hasTree){
     layout.classList.add("with-tree");
     const toggle=button("","icon-button project-tree-toggle");toggle.prepend(icon("panel"));toggle.title="Toggle scene or file list";toggle.ariaLabel="Toggle scene or file list";toggle.setAttribute("aria-controls",treePanel.id);
     const restore=button("","icon-button tree-restore");restore.prepend(icon("panelOpen"));restore.ariaLabel="Show scene or file list";restore.title=restore.ariaLabel;restore.setAttribute("aria-controls",treePanel.id);
-    const setTreeCollapsed=(collapsed:boolean,transferFocus=false):void=>{layout.dataset.treeCollapsed=String(collapsed);toggle.ariaExpanded=restore.ariaExpanded=String(!collapsed);if(transferFocus)(collapsed?restore:toggle).focus();};
-    setTreeCollapsed(layoutFor(layoutKey).treeCollapsed||window.innerWidth<900);
+    // Every control for the list, including Story's scene title, shows whether it is open.
+    const setTreeCollapsed=(collapsed:boolean,transferFocus=false):void=>{layout.dataset.treeCollapsed=String(collapsed);toggle.ariaExpanded=restore.ariaExpanded=String(!collapsed);layout.querySelectorAll<HTMLElement>(`[aria-controls="${treePanel.id}"]`).forEach(control=>control.ariaExpanded=String(!collapsed));if(transferFocus)(collapsed?restore:toggle).focus();};
+    const collapsedOnOpen=():boolean=>window.innerWidth<900||storyNarrow();
+    setTreeCollapsed(layoutFor(layoutKey).treeCollapsed||collapsedOnOpen());
+    sceneList={panelId:treePanel.id,open:()=>layout.dataset.treeCollapsed!=="true",toggle:()=>{const collapsed=layout.dataset.treeCollapsed!=="true";setTreeCollapsed(collapsed);saveLayout(layoutKey,{treeCollapsed:collapsed});}};
     toggle.addEventListener("click",()=>{setTreeCollapsed(true,true);saveLayout(layoutKey,{treeCollapsed:true});});treePanel.prepend(toggle);
     restore.onclick=()=>{setTreeCollapsed(false,true);saveLayout(layoutKey,{treeCollapsed:false});};layout.append(restore);
-    layout.addEventListener("reset-panes",()=>{const active=document.activeElement;const collapsed=window.innerWidth<900;setTreeCollapsed(collapsed,collapsed?treePanel.contains(active):active===restore);});
+    layout.addEventListener("reset-panes",()=>{const active=document.activeElement;const collapsed=collapsedOnOpen();setTreeCollapsed(collapsed,collapsed?treePanel.contains(active):active===restore);});
   }
   if(hasTree){let width=layoutFor(layoutKey).treeWidth??230;layout.style.setProperty("--tree-width",`${width}px`);const resize=document.createElement("div");resize.className="tree-divider";resize.role="separator";resize.tabIndex=0;resize.ariaLabel="Resize scene or file list";resize.setAttribute("aria-orientation","vertical");treePanel.append(resize);const setWidth=(next:number,save=false):void=>{width=Math.max(160,Math.min(400,Math.round(next)));layout.style.setProperty("--tree-width",`${width}px`);resize.setAttribute("aria-valuenow",String(width));if(save)saveLayout(layoutKey,{treeWidth:width});};resize.addEventListener("keydown",e=>{if(e.key==="ArrowLeft"||e.key==="ArrowRight"){e.preventDefault();setWidth(width+(e.key==="ArrowLeft"?-10:10),true);}});let start:number|undefined;resize.addEventListener("pointerdown",e=>{start=e.clientX-width;resize.setPointerCapture(e.pointerId);});resize.addEventListener("pointermove",e=>{if(start!==undefined)setWidth(e.clientX-start);});resize.addEventListener("pointerup",()=>{start=undefined;setWidth(width,true);});resize.addEventListener("pointercancel",()=>{start=undefined;});}
   const close = button("Close Project", "text-button close-project"); close.addEventListener("click", async () => { if (!await allowSceneNavigation() || hasBlockingModal()) return; await requestProjectClose(project); }); sidebar.append(close);
@@ -607,7 +636,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   runtimeWorkspace.panel.hidden=true;
   const runtimeToggle=button("Runtime & diagnostics","text-button runtime-toggle");runtimeToggle.addEventListener("click",()=>{if(runtimeWorkspace){runtimeWorkspace.panel.hidden=!runtimeWorkspace.panel.hidden;runtimeToggle.ariaExpanded=String(!runtimeWorkspace.panel.hidden);}});document.querySelector(".app-footer")?.append(runtimeToggle);
   setStatus("Checking saved state…");
-  if (surface === "story") void renderStorySurface(workspace, tree, project, generation, target && "sceneId" in target ? target : undefined);
+  if (surface === "story") void renderStorySurface(workspace, tree, project, generation, target && "sceneId" in target ? target : undefined, sceneList);
   else if (surface === "source") void renderSourceSurface(workspace, tree, project, generation, target && "path" in target && !("screen" in target) ? target : undefined);
   else if (surface === "screens") {
     screensWorkspace ??= new ScreensWorkspace({ resolution: project.resolution, projectId: project.projectId,
@@ -696,7 +725,7 @@ async function refreshPersistenceStatus(project: OpenProject, generation: number
     if (requestSequence !== statusRequestSequence || generation !== viewGeneration || !completionIsCurrent(token)) return;
     if (activeAuthoringOperations.has(project.sessionId) || activeFlushOperations.has(project.sessionId)) return;
     const rendered = persistenceMessage(state, currentSourceController(project)?.hasUnretainedInput() ?? false);
-    setStatus(rendered.text, rendered.kind, rendered.links);
+    setStatus(rendered.text, rendered.kind, rendered.links, rendered);
   } catch (error) {
     if (requestSequence === statusRequestSequence && generation === viewGeneration && completionIsCurrent(token)) {
       const detail = message(error, "Saved state could not be checked");
@@ -713,7 +742,7 @@ function rememberStoryScene(project: OpenProject, sceneId: string): void {
   saveLayout(storyLayoutKey(project), { sceneSelection: sceneId });
 }
 
-async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, project: OpenProject, generation: number, target?: SceneTarget): Promise<void> {
+async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, project: OpenProject, generation: number, target?: SceneTarget, sceneList?: SceneList): Promise<void> {
   const token = beginCompletion(project, operationScopes.sceneLoad);
   try {
     const persistence = await projectValue<PersistenceStatus>(project, "project.status");
@@ -803,10 +832,10 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
         },action);
       },
       status: setStatus,
+      sceneList,
       resolution: project.resolution,
       present: (assetId, purpose) => projectValue(project, "media.present", { assetId, purpose }),
       viewSource: (path, byteStart, byteEnd, expectedRevision) => { void requestProjectNavigation(project, "source", { path, byteStart, byteEnd, expectedRevision }); },
-      layoutKey: storyLayoutKey(project),
       sceneId: preferredStoryScene(project),
       rememberScene: sceneId => rememberStoryScene(project, sceneId),
       draftsChanged: () => { if (currentProject?.sessionId === project.sessionId) void refreshPersistenceStatus(project, viewGeneration); },
@@ -827,7 +856,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
       // still delivers it before the Commit, Save or Undo that follows.
       recordStep: async step => {
         const sequence = ++historyRequestSequence;
-        historyNotice = undefined;
+        clearHistoryNotice();
         const state = await projectValue<HistoryState>(project, "history.draftStep", { ...step });
         if (sequence === historyRequestSequence && currentProject?.sessionId === project.sessionId) showHistory(state);
       },
@@ -850,7 +879,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
     if (storyView) { workspace.replaceWith(storyView.host); tree.replaceWith(storyView.treeHost); storyView.update(model, storyActions, beatId); }
     else storyView = renderStoryView(workspace, tree, model, storyActions, beatId);
     const rendered = persistenceMessage(persistence, false);
-    setStatus(rendered.text, rendered.kind, rendered.links);
+    setStatus(rendered.text, rendered.kind, rendered.links, rendered);
   } catch (error) {
     if (generation === viewGeneration && completionIsCurrent(token)) setStatus(message(error, "Scene workspace could not be loaded"), "error");
   }
@@ -870,7 +899,7 @@ async function renderSourceSurface(workspace: HTMLElement, tree: HTMLElement, pr
       // and the response carries the history that follows (ADR 0025).
       update: async (request) => {
         const document = await projectValue<SourceDocument>(project, "source.updateDraft", request);
-        if (document.history && currentProject?.sessionId === project.sessionId) { historyNotice = undefined; showHistory(document.history); }
+        if (document.history && currentProject?.sessionId === project.sessionId) { clearHistoryNotice(); showHistory(document.history); }
         return document;
       },
       save: (request) => projectValue<SourceDocument>(project, "source.save", request),
@@ -1271,7 +1300,7 @@ function requestProjectFlush(project: OpenProject, origin: "keyboard" | "toolbar
     const state = await projectValue<PersistenceStatus>(project, "project.status");
     if (!completionIsCurrent(token)) return;
     const rendered = persistenceMessage(state, currentSourceController(project)?.hasUnretainedInput() ?? false);
-    setStatus(rendered.text, rendered.kind, rendered.links);
+    setStatus(rendered.text, rendered.kind, rendered.links, rendered);
     recordSaveTrace(`route=flush;origin=${origin};context=non-source;phase=completed;status=${rendered.text}`);
   }).catch((error) => {
     recordSaveTrace(`route=flush;origin=${origin};context=non-source;phase=error`);

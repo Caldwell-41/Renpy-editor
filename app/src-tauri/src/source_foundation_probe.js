@@ -14,17 +14,20 @@
   let project, model, original;
   try {
     await click('Source foundation fixture');
-    await wait(() => document.querySelectorAll('.nested-dialogue').length === 2);
+    await wait(() => document.querySelector('.story-track-beat[data-beat-kind="condition"]'));
     project = await read('project.current');
     model = await read('scene.list', { sessionId: project.sessionId });
-    const scene = model.scenes[0], children = scene.beats.filter(b => b.owner);
+    // Core also keeps branch comments as owned trivia beats; the children here are the dialogue lines.
+    const scene = model.scenes[0], children = scene.beats.filter(b => b.owner && b.payload.type === 'dialogue');
     original = await read('source.open', { sessionId: project.sessionId, path: scene.sourcePath });
     check(children.length === 2 && children[0].owner.groupId === children[1].owner.groupId && children[0].owner.branchId !== children[1].owner.branchId, 'Two dialogue children have one group and distinct branches');
     check(original.hasBom && original.text.includes('\r\n') && original.text.includes('café 雪'), 'BOM, mixed newlines and Unicode fixture observed');
-    const card = () => [...document.querySelectorAll('.beat-card')].find(c => c.dataset.beatId === children[0].id);
-    check(card().querySelector('.beat-grip').disabled && [...card().querySelectorAll('.beat-controls button')].some(b => b.textContent === 'Move to…' && !b.disabled), 'Child drag stays unavailable; explicit body moves are offered');
-    card().querySelector('.beat-select').click();
-    await wait(() => card().querySelector('textarea'));
+    const card = () => window.__loomlightProbeEditorFor(children[0].id);
+    window.__loomlightProbeOpenBranch(children[0].owner.branchId);
+    await wait(() => document.querySelector(`.story-track-column[data-beat-id="${children[0].id}"]`));
+    window.__loomlightProbeSelectBeat(children[0].id);
+    await wait(() => card()?.querySelector('textarea'));
+    check([...card().querySelectorAll('.story-beat-menu button')].some(b => b.textContent === 'Move to…' && !b.disabled), 'Explicit body moves are offered for a nested child');
     details.stage = 'commit-child';
     const form = card().querySelector('.expanded-beat');
     const editor = card().querySelector('textarea');
@@ -56,7 +59,7 @@
     await call('source.discard', { sessionId: project.sessionId, path: scene.sourcePath }); await click('Cancel');
     details.stage = 'close';
     await click('Close Project'); details.stage = 'welcome-after-close'; await wait(() => find('Source foundation fixture'));
-    details.stage = 'reopen'; await click('Source foundation fixture'); details.stage = 'reopened-outline'; await wait(() => document.querySelectorAll('.nested-dialogue').length === 2);
+    details.stage = 'reopen'; await click('Source foundation fixture'); details.stage = 'reopened-outline'; await wait(() => document.querySelector('.story-track-beat[data-beat-kind="condition"]'));
     const reopenedProject = await read('project.current'), reopened = await read('scene.list', { sessionId: reopenedProject.sessionId });
     check(ids(model) === ids(reopened), 'Native close/reopen preserves child and structural IDs');
     check((await read('source.open', { sessionId: reopenedProject.sessionId, path: scene.sourcePath })).text === accepted.text, 'Native close/reopen preserves accepted source');

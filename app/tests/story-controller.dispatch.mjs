@@ -212,13 +212,13 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   startApplication(requester);
   await wait(()=>document.querySelector('.recent-open')&&!document.querySelector('.recent-open').disabled);
   document.querySelector('.recent-open').click();
-  await wait(()=>document.querySelector('.beat-card')&&latestWorkspace&&session);
+  await wait(()=>document.querySelector('.story-track-column')&&latestWorkspace&&session);
   // The seed leaves the last created scene open. Selecting the entry scene must write nothing.
   const opened=latestWorkspace,entryName=opened.scenes.find(s=>s.id===opened.entrySceneId).displayName;
   const historyBeforeSelection=await call('history.state');
   const selectionStart=transcript.length,beforeSelection=await snapshot();
   [...document.querySelectorAll('.tree-scene-open')].find(b=>b.textContent===entryName).click();
-  await wait(()=>document.querySelector('.tree-scene-row.selected .tree-scene-open')?.textContent===entryName&&document.querySelector('.beat-card'));
+  await wait(()=>document.querySelector('.tree-scene-row.selected .tree-scene-open')?.textContent===entryName&&document.querySelector('.story-track-column'));
   assert(!transcript.slice(selectionStart).some(r=>r.request.operation==='scene.apply'),'Selecting a scene must not send a Scene command');
   assert.deepEqual(await snapshot(),beforeSelection,'Selecting a scene must not change project files');
   const selected=await call('scene.list');
@@ -258,7 +258,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   await start(true);startApplication(requester);
   await wait(()=>document.querySelector('.recent-open')&&!document.querySelector('.recent-open').disabled);
   document.querySelector('.recent-open').click();
-  await wait(()=>document.querySelector('.beat-card')&&session!==oldSession);
+  await wait(()=>document.querySelector('.story-track-column')&&session!==oldSession);
   assert.equal(document.querySelector('.tree-scene-row.selected .tree-scene-open')?.textContent,selectedBeforeClose,'Reopen restores the selected scene from device preferences');
   const reopened=await call('scene.list');assert.deepEqual(reopened.scenes,beforeReopen.scenes);
   const reopenedSnapshot=await snapshot();assert.deepEqual(rpy(reopenedSnapshot),rpy(redone));

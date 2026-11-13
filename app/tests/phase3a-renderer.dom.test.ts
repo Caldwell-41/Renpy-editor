@@ -6,7 +6,7 @@ import { conditionCaption, deriveScenePreview, hasSceneDraft, type Condition, ty
 import { renderBranches, type FlowWorkspace } from "../src/branches-ui.js";
 import { routeBranches } from "../src/branches-routing.js";
 import { renderSourceWorkspace, type SourceTarget } from "../src/source-ui.js";
-import { sceneBodies, renderStoryView } from "./story-controls-fixture.js";
+import { sceneBodies, renderStoryView, selectBeat } from "./story-controls-fixture.js";
 
 const tick = async (): Promise<void> => { await new Promise(resolve => setTimeout(resolve, 0)); };
 const guard: Condition = { status: "supported", expression: { type: "compare", operator: "greaterEqual", left: { type: "variable", variableId: "trust", variableType: "int" }, right: { type: "int", value: "9223372036854775807" } } };
@@ -29,10 +29,8 @@ test("Unknown guarded Choice is read-only with exact Source navigation and no mu
   const { browser, host, tree } = setup(); const writes: unknown[] = []; const sources: unknown[] = [];
   const dispose = renderStoryView(host, tree, model([call, choice]), { apply: async command => { writes.push(command); throw Error("Unexpected write"); }, status: () => {}, present: async () => { throw Error("Unexpected media"); }, resolution: { width: 1280, height: 720 }, viewSource: (...args) => sources.push(args), assist: () => { throw Error("Unexpected AI action"); } }).dispose;
   for (const beat of [choice]) {
-    let card = host.querySelector<HTMLElement>(`[data-beat-id="${beat.id}"]`)!;
-    assert.ok([...card.querySelectorAll<HTMLButtonElement>(".beat-controls button,.beat-grip")].every(button => button.disabled));
-    card.querySelector<HTMLButtonElement>(".beat-select")!.click();
-    card = host.querySelector<HTMLElement>(`[data-beat-id="${beat.id}"]`)!;
+    const card = selectBeat(host, beat.id);
+    assert.ok([...card.querySelectorAll<HTMLButtonElement>(".story-beat-menu button")].every(button => button.disabled));
     assert.equal(card.querySelectorAll("input,textarea,select").length, 0);
     assert.equal(card.querySelector(".scene-draft"), null); assert.equal(hasSceneDraft(host), false);
     assert.ok(![...card.querySelectorAll("button")].some(button => button.textContent === "Commit Beat"));
@@ -43,7 +41,7 @@ test("Unknown guarded Choice is read-only with exact Source navigation and no mu
   assert.deepEqual(sources, [["game/arrival.rpy", 95, 180, "saved"]]);
   assert.deepEqual(writes, []);
   assert.equal([...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === "Assist · Continue Scene")!.disabled, true);
-  [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === "Add Beat")!.click();
+  [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === "+ Add beat")!.click();
   assert.ok([...host.querySelectorAll<HTMLOptionElement>(".new-beat option")].some(option => option.value === "call"));
   dispose(); await browser.happyDOM.close();
 });
@@ -61,10 +59,12 @@ test("Call and every guarded option leave preview state unknown without filterin
 
 test("recursive and unknown branch captions remain accurate and do not execute sibling bodies", async () => {
   const { browser, host, tree } = setup();
-  const branches: SceneBeat[] = [{ id: "elif", byteStart: 0, byteEnd: 20, protected: true, conditionalBranch: { groupId: "group", ordinal: 1, otherwise: false, condition: { status: "supported", expression: { type: "and", left: guard.expression, right: { type: "not", operand: { type: "bool", value: false } } } } }, payload: { type: "customCode", source: "elif trust >= 9223372036854775807 and not False:", reason: "Read-only branch" } }, { id: "unknown", byteStart: 20, byteEnd: 40, protected: true, conditionalBranch: { groupId: "group", ordinal: 2, otherwise: false, condition: unknown }, payload: { type: "customCode", source: "elif custom_check():", reason: "Read-only branch" } }];
+  const branches: SceneBeat[] = [{ id: "if", byteStart: 0, byteEnd: 0, protected: true, conditionalBranch: { groupId: "group", ordinal: 0, otherwise: false, condition: guard }, payload: { type: "customCode", source: "if trust >= 9223372036854775807:", reason: "Read-only branch" } }, { id: "elif", byteStart: 0, byteEnd: 20, protected: true, conditionalBranch: { groupId: "group", ordinal: 1, otherwise: false, condition: { status: "supported", expression: { type: "and", left: guard.expression, right: { type: "not", operand: { type: "bool", value: false } } } } }, payload: { type: "customCode", source: "elif trust >= 9223372036854775807 and not False:", reason: "Read-only branch" } }, { id: "unknown", byteStart: 20, byteEnd: 40, protected: true, conditionalBranch: { groupId: "group", ordinal: 2, otherwise: false, condition: unknown }, payload: { type: "customCode", source: "elif custom_check():", reason: "Read-only branch" } }];
   const dispose = renderStoryView(host, tree, model(branches), { apply: async () => { throw Error("Unexpected write"); }, status: () => {}, present: async () => { throw Error("Unexpected media"); }, resolution: { width: 1280, height: 720 } }).dispose;
-  assert.match(host.querySelector('[data-beat-id="elif"] .beat-select')!.textContent!, /Else If.*trust is at least 9223372036854775807.*and Not \(False\)/);
-  assert.match(host.querySelector('[data-beat-id="unknown"] .beat-select')!.textContent!, /Else If Unknown condition: custom_check\(\)/);
+  // The Branch path names each branch in its switch.
+  const names = [...host.querySelectorAll<HTMLButtonElement>(".story-branch-segment")].map(button => button.title);
+  assert.match(names[1]!, /Else if.*trust is at least 9223372036854775807.*and Not \(False\)/);
+  assert.match(names[2]!, /Else if Unknown condition: custom_check\(\)/);
   assert.equal(deriveScenePreview(model(branches).scenes[0]!).partial, true);
   assert.equal(conditionCaption({ status: "supported", expression: { type: "string", value: '雪 "quoted"' } }), '"雪 \\"quoted\\""');
   dispose(); await browser.happyDOM.close();
@@ -110,8 +110,8 @@ test("ordinary neighbors use explicit immediate-sibling moves around Call and Ch
   const after: SceneBeat = { id: "after", byteStart: 180, byteEnd: 210, protected: false, payload: { type: "narration", text: "After" } };
   const commands: unknown[] = []; const workspace = model([first, call, choice, after]);
   const dispose = renderStoryView(host, tree, workspace, { apply: async command => { commands.push(command); return workspace; }, status: () => {}, present: async () => { throw Error("Unexpected media"); }, resolution: { width: 1280, height: 720 } }).dispose;
-  const down = [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.ariaLabel === "Move beat 1 down")!; assert.equal(down.disabled, false); down.click(); await tick();
-  const up = [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.ariaLabel === "Move beat 4 up")!; assert.equal(up.disabled, false); up.click(); await tick();
+  const down = [...selectBeat(host, "before").querySelectorAll<HTMLButtonElement>("button")].find(button => button.ariaLabel === "Move beat 01 down")!; assert.equal(down.disabled, false); down.click(); await tick();
+  const up = [...selectBeat(host, "after").querySelectorAll<HTMLButtonElement>("button")].find(button => button.ariaLabel === "Move beat 04 up")!; assert.equal(up.disabled, false); up.click(); await tick();
   assert.deepEqual(commands, [{ type: "moveStoryNode", sceneId: "one", expectedSourceRevision: "saved", node: { type: "beat", beatId: "before" }, expectedBody: { type: "root" }, body: { type: "root" }, position: { type: "before", anchor: { type: "beat", beatId: "choice" } } }, { type: "moveStoryNode", sceneId: "one", expectedSourceRevision: "saved", node: { type: "beat", beatId: "after" }, expectedBody: { type: "root" }, body: { type: "root" }, position: { type: "before", anchor: { type: "beat", beatId: "choice" } } }]);
   dispose(); await browser.happyDOM.close();
 });

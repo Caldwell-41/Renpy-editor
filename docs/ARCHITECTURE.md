@@ -610,6 +610,11 @@ It marks runtime-dependent or unsupported state as partial/unknown rather than
 inventing fidelity. Navigating beats must not repeatedly audition audio; audio has
 explicit audition controls.
 
+In Story, the branches open in the Branch path are the route. A condition or Choice
+before the selected beat with no open branch leaves its state unknown rather than
+choosing a branch. Core supplies the bodies, endings and insertion places that Tracks
+lays out; the renderer works out no scene structure of its own.
+
 The selected Story design extends this preview with valid, uncommitted beat drafts.
 This is an inert preview of pending edits, not source acceptance or a second saved
 story document. [Stage preview](UI.md#stage-preview) owns live feedback and unsaved

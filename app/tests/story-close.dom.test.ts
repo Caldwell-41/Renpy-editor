@@ -42,10 +42,10 @@ test("closing the project asks before discarding Story beat drafts", async () =>
   const { startApplication } = await import("../src/main.js");
   startApplication(request);
   await ticks(); click("Open Loomlight Project"); await ticks();
-  document.querySelector<HTMLButtonElement>('[data-beat-id="line"] .beat-select')!.click();
-  const text = document.querySelector<HTMLTextAreaElement>('[data-beat-id="line"] textarea')!;
+  document.querySelector<HTMLButtonElement>('.story-track-column[data-beat-id="line"] > .story-track-beat')!.click();
+  const text = document.querySelector<HTMLTextAreaElement>('.story-editor[data-editor-for="line"] textarea')!;
   text.value = "Unsaved line"; text.dispatchEvent(new window.Event("input", { bubbles: true })); await ticks();
-  assert.match(document.querySelector("#app-status")!.textContent!, /Unsaved changes/);
+  assert.equal(document.querySelector("#app-status")!.textContent!, "1 unsaved beat draft");
 
   answers.push(false); click("Close Project"); await ticks();
   assert.equal(closes, 0); assert.ok(text.isConnected); assert.equal(text.value, "Unsaved line");
