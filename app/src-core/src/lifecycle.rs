@@ -4587,7 +4587,12 @@ mod tests {
                 scene_id: entry.id.clone(),
                 expected_source_revision: entry.source_revision.clone(),
                 choice_beat_id: choice.id.clone(),
-                option_text: "New road".into(),
+                option_id: match &choice.payload {
+                    crate::scene::BeatPayload::Choice { options, .. } => {
+                        options[0].id.clone().unwrap()
+                    }
+                    _ => unreachable!(),
+                },
                 chapter_id: chapter_two,
                 display_name: "Created from Choice".into(),
             },
@@ -4992,22 +4997,31 @@ mod tests {
             "scene.apply",
             json!({"sessionId":session,
             "expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],
-            "command":{"type":"createSceneFromChoice","sceneId":entry["id"],"expectedSourceRevision":entry["sourceRevision"],"choiceBeatId":edge["beatId"],"optionText":"New destination","chapterId":entry["chapterId"],"displayName":"Destination"}}),
+            "command":{"type":"createSceneFromChoice","sceneId":entry["id"],"expectedSourceRevision":entry["sourceRevision"],"choiceBeatId":edge["beatId"],"optionId":option_id,"chapterId":entry["chapterId"],"displayName":"Destination"}}),
         );
         assert_eq!(created["ok"], true, "{created}");
+        let destination = created["value"]["scenes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|scene| scene["displayName"] == "Destination")
+            .unwrap();
         let accepted = fs::read_to_string(root.join(&source_path)).unwrap();
-        assert!(accepted.contains("New destination"));
+        assert!(accepted.contains(&format!(
+            "jump {}",
+            destination["technicalLabel"].as_str().unwrap()
+        )));
         assert!(accepted.starts_with(before.split("    return").next().unwrap()));
+        // The option now goes to the new scene instead of back to this one.
         let graph = closeout_ipc(&mut service, "flow.list", json!({"sessionId":session}));
-        assert_eq!(
-            graph["value"]["edges"]
-                .as_array()
-                .unwrap()
-                .iter()
-                .filter(|edge| edge["kind"] == "choice")
-                .count(),
-            2
-        );
+        let choices: Vec<_> = graph["value"]["edges"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|edge| edge["kind"] == "choice")
+            .collect();
+        assert_eq!(choices.len(), 1);
+        assert_eq!(choices[0]["destination"]["sceneId"], destination["id"]);
         service.close().unwrap();
         drop(service);
         let mut service = LifecycleService::new(temp.path().join("state")).unwrap();

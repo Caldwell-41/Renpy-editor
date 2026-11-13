@@ -1526,7 +1526,7 @@ mod structural_review_tests {
             .find(|s| s["id"] == b["id"])
             .unwrap()
             .clone();
-        assert_eq!(f.reject(json!({"type":"createSceneFromChoice","sceneId":b["id"],"expectedSourceRevision":bs["sourceRevision"],"choiceBeatId":bs["beats"][0]["id"],"optionText":"New path","chapterId":w["chapters"][0]["id"],"displayName":"New destination"}))["error"]["code"], "UNSUPPORTED_CALL_ROUTE");
+        assert_eq!(f.reject(json!({"type":"createSceneFromChoice","sceneId":b["id"],"expectedSourceRevision":bs["sourceRevision"],"choiceBeatId":bs["beats"][0]["id"],"optionId":bs["beats"][0]["payload"]["options"][0]["id"],"chapterId":w["chapters"][0]["id"],"displayName":"New destination"}))["error"]["code"], "UNSUPPORTED_CALL_ROUTE");
         // Repair only the old recursive route through Source; adding a returning target then succeeds.
         f.save(
             &a,
@@ -1542,7 +1542,7 @@ mod structural_review_tests {
             .iter()
             .find(|s| s["id"] == b["id"])
             .unwrap();
-        let result = f.command(json!({"type":"createSceneFromChoice","sceneId":b["id"],"expectedSourceRevision":bs["sourceRevision"],"choiceBeatId":bs["beats"][0]["id"],"optionText":"New path","chapterId":w["chapters"][0]["id"],"displayName":"New destination"}));
+        let result = f.command(json!({"type":"createSceneFromChoice","sceneId":b["id"],"expectedSourceRevision":bs["sourceRevision"],"choiceBeatId":bs["beats"][0]["id"],"optionId":bs["beats"][0]["payload"]["options"][0]["id"],"chapterId":w["chapters"][0]["id"],"displayName":"New destination"}));
         assert_eq!(
             result["scenes"].as_array().unwrap().len(),
             w["scenes"].as_array().unwrap().len() + 1
@@ -1553,12 +1553,13 @@ mod structural_review_tests {
             .iter()
             .find(|s| s["id"] == b["id"])
             .unwrap();
+        // "Again" now goes to the new scene; the Choice keeps its one option.
         assert_eq!(
             bs["beats"][0]["payload"]["options"]
                 .as_array()
                 .unwrap()
                 .len(),
-            2
+            1
         );
         f.service.close().unwrap();
     }
