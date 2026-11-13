@@ -8,9 +8,9 @@ import mara from '../story-revamp/art/mara-neutral.webp';
 import '../story-combined-status/style.css';
 import './style.css';
 
-export type Variant = 'label' | 'blank' | 'replace';
-const variants: Variant[] = ['label', 'blank', 'replace'];
-const names: Record<Variant, string> = { label: '1 · Menu reads "Custom Code"', blank: '2 · Menu with no value', replace: '3 · Ending replaces the menu' };
+export type Variant = 'label' | 'blank' | 'replace' | 'replace-v2';
+const variants: Variant[] = ['label', 'blank', 'replace', 'replace-v2'];
+const names: Record<Variant, string> = { label: '1 · Menu reads "Custom Code"', blank: '2 · Menu with no value', replace: '3 · Ending replaces the menu', 'replace-v2': '3 · Ending replaces the menu v2' };
 type State = 'choice' | 'custom-code' | 'then-menu' | 'add-beat' | 'move' | 'protected';
 
 const escape = (value: string) => value.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
@@ -52,10 +52,32 @@ const places = [
   { owner: 'Option 2 "Leave"', path: 'The last service › Option 2 "Leave"', positions: ['Before 07.2.1 Narration', 'End of option 2 "Leave"'] },
 ];
 
+/** v2 Move to tree, in source order. 06.1 sits before 06.2, so that position is left out. */
+type TreeNode = { id: string; label: string; path?: string; parent?: string; children?: TreeNode[] };
+function moveTree(): TreeNode {
+  const pos = (place: string, n: number, label: string): TreeNode => ({ id: `${place}:${n}`, label, parent: place });
+  const place = (id: string, label: string, path: string, children: TreeNode[], parent?: string): TreeNode => ({ id, label, path, parent, children });
+  return place('scene', 'The last service', 'The last service', [
+    pos('scene', 0, "Before 05 Mara's line"), pos('scene', 1, 'Before 06 Condition'),
+    place('outer', `If ${outerShort}`, `The last service › If ${outerShort}`, [
+      place('inner', 'If trust ≥ 5', `The last service › If ${outerShort} › If trust ≥ 5`, [pos('inner', 0, "Before 06.2.1 Mara's line"), pos('inner', 1, 'End of "If trust ≥ 5"')], 'outer'),
+      pos('outer', 0, `End of "If ${outerShort}"`),
+    ], 'scene'),
+    pos('scene', 2, 'Before 07 Choice'),
+    place('opt2', 'Option 2 "Leave"', 'The last service › Option 2 "Leave"', [pos('opt2', 0, 'Before 07.2.1 Narration'), pos('opt2', 1, 'End of option 2 "Leave"')], 'scene'),
+    pos('scene', 3, 'End of scene'),
+  ]);
+}
+
 export function mountEditor(host: HTMLElement, context: LabContext, initial: Variant) {
   let variant = initial;
   let state = context.state as State;
   let menuOpen = state === 'then-menu', message = '', place = 2, position = 1;
+  const tree = moveTree(), nodes = new Map<string, TreeNode>();
+  (function index(n: TreeNode) { nodes.set(n.id, n); n.children?.forEach(index); })(tree);
+  // v2 opens on the beat's own location: 06.1 is in "If has_ticket…", inside the scene.
+  let expanded = new Set(['scene', 'outer']), chosen: string | null = 'outer:0', focusId = 'outer:0', pickedPlace = 'outer';
+  const isReplace = () => variant === 'replace' || variant === 'replace-v2';
   const opts = options();
   const button = (label: string, action: string, extra = '') => `<button type="button" data-action="${action}" ${extra}>${label}</button>`;
 
@@ -72,7 +94,7 @@ export function mountEditor(host: HTMLElement, context: LabContext, initial: Var
     const isUnknown = o.ending === 'unknown' && b.kind === 'code';
     const row = `<div class="sce-beat${b.kind === 'code' ? ' sce-code-beat' : ''}">${svg(glyph[b.kind === 'code' ? 'code' : b.kind])}<span class="sce-beat-id">${b.id}</span><span class="sce-beat-text">${b.kind === 'code' ? `Custom Code · <code>${escape(b.text)}</code>` : escape(b.text)}</span></div>`;
     // Variant 3 puts the unknown-ending note on the Custom Code beat that causes it.
-    return isUnknown && variant === 'replace' ? `${row}<p class="sce-warn sce-beat-note">Ending unknown: Custom Code can leave this option</p>` : row;
+    return isUnknown && isReplace() ? `${row}<p class="sce-warn sce-beat-note">Ending unknown: Custom Code can leave this option</p>` : row;
   }
   function menu(o: Option, i: number) {
     const chosen = endings[0]!, title = `Option ${i + 1} then`;
@@ -91,10 +113,10 @@ export function mountEditor(host: HTMLElement, context: LabContext, initial: Var
     const source = button('Edit in Source', 'noop', 'class="sce-link"');
     if (o.ending === 'code') {
       const sentence = `<p class="sce-ending">Ends with Custom Code: <code>${escape(endCode.replace(/^\$ /, ''))}</code></p>`;
-      if (variant === 'replace') return `<div class="sce-then sce-then-replaced"><span class="sce-then-label">Then</span><div class="sce-then-text">${sentence}${source}</div>${add}</div>`;
+      if (isReplace()) return `<div class="sce-then sce-then-replaced"><span class="sce-then-label">Then</span><div class="sce-then-text">${sentence}${source}</div>${add}</div>`;
       return `<div class="sce-then"><span class="sce-then-label">Then</span>${lockedMenu(i)}${add}</div><div class="sce-then-note">${sentence}${source}</div>`;
     }
-    const warn = o.ending === 'unknown' && variant !== 'replace' ? '<p class="sce-warn sce-then-note">Ending unknown: Custom Code can leave this option</p>' : '';
+    const warn = o.ending === 'unknown' && !isReplace() ? '<p class="sce-warn sce-then-note">Ending unknown: Custom Code can leave this option</p>' : '';
     const m = menu(o, i);
     return `<div class="sce-then"><span class="sce-then-label">Then</span>${m.button}${add}</div>${m.list}${warn}`;
   }
@@ -127,12 +149,45 @@ export function mountEditor(host: HTMLElement, context: LabContext, initial: Var
     const target = variant === 'label' ? `<p class="sce-target"><strong>Adds to</strong> ${escape(path)} · ${escape(where)}</p>`
       : variant === 'blank' ? `<p class="sce-target"><strong>Goes at ${escape(where)}</strong><span>${escape(path)}, after 07.2.1</span></p>` : '';
     const groups: [string, string[]][] = [['Write', ['Dialogue', 'Narration']], ['Stage', ['Background', 'Show character', 'Hide character', 'Change appearance']], ['Flow', ['Choice', 'Condition', 'Call scene', 'Jump', 'Return / end']], ['State', ['Set variable']]];
-    const details = `<div class="sce-picker-details"><h3>Dialogue</h3><p>A spoken line with a speaker.</p>${variant === 'replace' ? `<dl class="sce-where"><dt>Goes at</dt><dd>${escape(where)}</dd><dt>In</dt><dd>${escape(path)}</dd><dt>After</dt><dd>07.2.1 Narration</dd></dl>` : ''}</div>`;
+    const details = `<div class="sce-picker-details"><h3>Dialogue</h3><p>A spoken line with a speaker.</p>${isReplace() ? `<dl class="sce-where"><dt>Goes at</dt><dd>${escape(where)}</dd><dt>In</dt><dd>${escape(path)}</dd><dt>After</dt><dd>07.2.1 Narration</dd></dl>` : ''}</div>`;
     return dialog('Add a beat', `${target}<label class="sce-search">${svg(glyph.search)}<input type="search" placeholder="Search beats" aria-label="Find a beat"></label>
       <div class="sce-picker-body"><div class="sce-results" role="listbox" aria-label="Beat types">${groups.map(([g, items]) => `<section><h4>${g}</h4>${items.map((k, n) => `<button type="button" role="option" data-action="added" aria-selected="${g === 'Write' && n === 0}">${k}</button>`).join('')}</section>`).join('')}</div>${details}</div>
       <p class="sce-hint">Click or Enter adds · Escape cancels</p>`);
   }
+  function visible(n: TreeNode = tree): TreeNode[] { return [n, ...(n.children && expanded.has(n.id) ? n.children.flatMap(c => visible(c)) : [])]; }
+  function level(n: TreeNode): number { return n.parent ? level(nodes.get(n.parent)!) + 1 : 1; }
+  function treeV2() {
+    const item = (n: TreeNode) => {
+      const isPlace = !!n.children, focus = n.id === focusId;
+      const attrs = `role="treeitem" data-node="${n.id}" aria-level="${level(n)}" tabindex="${focus ? 0 : -1}" style="--depth:${level(n) - 1}" ${isPlace ? `aria-expanded="${expanded.has(n.id)}"` : `aria-selected="${n.id === chosen}"`}`;
+      return `<li ${attrs} class="${isPlace ? 'sce-tree2-place' : 'sce-tree2-pos'}"><span class="sce-tree2-mark" aria-hidden="true">${isPlace ? (expanded.has(n.id) ? '▾' : '▸') : n.id === chosen ? '●' : '○'}</span>${escape(n.label)}</li>`;
+    };
+    return `<ul class="sce-tree2" role="tree" aria-label="Move to">${visible().map(item).join('')}</ul>`;
+  }
+  function treeSummary() {
+    if (!chosen) return `Choose an available position in ${escape(nodes.get(pickedPlace)!.label)}.`;
+    const pos = nodes.get(chosen)!; return `Move to ${escape(nodes.get(pos.parent!)!.path!)} · ${escape(pos.label)}`;
+  }
+  /** Arrow keys move, Right opens and Left closes, Enter selects; Escape is handled by the dialog. */
+  function treeKey(event: KeyboardEvent) {
+    const list = visible(), at = list.findIndex(n => n.id === focusId), n = list[at]!;
+    const move = (id?: string) => { if (id) focusId = id; };
+    if (event.key === 'ArrowDown') move(list[at + 1]?.id);
+    else if (event.key === 'ArrowUp') move(list[at - 1]?.id);
+    else if (event.key === 'ArrowRight') { if (n.children && !expanded.has(n.id)) expanded.add(n.id); else if (n.children) move(n.children[0]?.id); }
+    else if (event.key === 'ArrowLeft') { if (n.children && expanded.has(n.id)) expanded.delete(n.id); else move(n.parent); }
+    else if (event.key === 'Enter') treeSelect(n);
+    else return;
+    event.preventDefault(); event.stopPropagation(); render();
+  }
+  /** Selecting a position chooses it. Selecting a branch or option opens it and asks for a position there. */
+  function treeSelect(n: TreeNode) {
+    focusId = n.id;
+    if (n.children) { expanded.add(n.id); pickedPlace = n.id; chosen = null; } else { chosen = n.id; pickedPlace = n.parent!; }
+  }
+  function resetTree() { expanded = new Set(['scene', 'outer']); chosen = 'outer:0'; focusId = 'outer:0'; pickedPlace = 'outer'; }
   function moveDialog() {
+    if (variant === 'replace-v2') return dialog("Move 06.1 Eli's line", `<p class="sce-dialog-note">Moves this beat to the chosen scene, branch or option.</p>${treeV2()}<p class="sce-summary" role="status">${treeSummary()}</p><p class="sce-hint">Arrow keys move · Right opens · Left closes · Enter selects · Escape cancels</p>`, `${button('Cancel', 'close')}${button('Move', 'moved', 'class="sdc-primary"')}`);
     const chosen = places[place]!, pos = chosen.positions[position] ?? '';
     const note = '<p class="sce-dialog-note">Moves this beat to the chosen scene, branch or option.</p>';
     const summary = `<p class="sce-summary" role="status">${pos ? `Move to ${escape(chosen.path)} · ${escape(pos)}` : `Choose an available position in ${escape(chosen.owner)}.`}</p>`;
@@ -182,29 +237,38 @@ export function mountEditor(host: HTMLElement, context: LabContext, initial: Var
       if (state === 'custom-code') work.scrollTop = work.scrollHeight;
     } else if (state === 'custom-code') { const editor = host.querySelector<HTMLElement>('.sdc-editor')!; editor.scrollTop = editor.scrollHeight; }
     if (state === 'then-menu') host.querySelector<HTMLElement>('.sce-menu-list')?.scrollIntoView({ block: 'end' });
-    const first = ['.sce-dialog [aria-selected=true]', '.sce-dialog select', '.sce-dialog input:checked', '.sce-dialog [aria-current=true]', '.sce-dialog', '.sce-menu-list [aria-selected=true]'].map(q => host.querySelector<HTMLElement>(q)).find(Boolean);
+    const first = ['.sce-tree2 [tabindex="0"]', '.sce-dialog [aria-selected=true]', '.sce-dialog select', '.sce-dialog input:checked', '.sce-dialog [aria-current=true]', '.sce-dialog', '.sce-menu-list [aria-selected=true]'].map(q => host.querySelector<HTMLElement>(q)).find(Boolean);
     first?.focus({ preventScroll: true });
   }
   const compact = () => host.clientWidth <= 640;
   function close(note = '') { state = 'choice'; menuOpen = false; message = note; render(); host.querySelector<HTMLElement>('.sdc-editor')?.focus(); }
 
   function onClick(event: MouseEvent) {
+    const node0 = (event.target as HTMLElement).closest<HTMLElement>('.sce-tree2 [data-node]');
     const target = (event.target as HTMLElement).closest<HTMLButtonElement>('button');
-    if (!target || !host.contains(target) || target.getAttribute('aria-disabled') === 'true') return;
+    if (!node0 && (!target || !host.contains(target) || target.getAttribute('aria-disabled') === 'true')) return;
+    const node = (event.target as HTMLElement).closest<HTMLElement>('.sce-tree2 [data-node]');
+    if (node && host.contains(node)) { const n = nodes.get(node.dataset.node!)!; if (n.children && expanded.has(n.id) && pickedPlace === n.id && !chosen) expanded.delete(n.id); else treeSelect(n); render(); return; }
+    if (!target) return;
     if (target.dataset.placeRow) { place = Number(target.dataset.placeRow); position = places[place]!.positions.length - 1; render(); return; }
     switch (target.dataset.action) {
-      case 'reset': state = context.state as State; menuOpen = state === 'then-menu'; message = ''; place = 2; position = 1; render(); break;
+      case 'reset': state = context.state as State; menuOpen = state === 'then-menu'; message = ''; place = 2; position = 1; resetTree(); render(); break;
       case 'toggle-menu': menuOpen = !menuOpen; render(); break;
       case 'pick': close('Option 1 keeps Continue after the Choice.'); break;
       case 'add-beat': state = 'add-beat'; menuOpen = false; render(); break;
       case 'added': close(`Added ${target.textContent} at End of option 2 "Leave".`); break;
-      case 'moved': close(`Moved 06.1 to ${places[place]!.positions[position]}.`); break;
+      case 'moved':
+        if (variant !== 'replace-v2') close(`Moved 06.1 to ${places[place]!.positions[position]}.`);
+        else if (chosen) close(`Moved 06.1 to ${nodes.get(chosen)!.label}.`);
+        else { message = `Choose an available position in ${nodes.get(pickedPlace)!.label}.`; render(); }
+        break;
       case 'close': close(); break;
       case 'noop': message = `${target.getAttribute('aria-label') ?? target.textContent?.trim()} is outside this study.`; render(); break;
     }
   }
   function onKey(event: KeyboardEvent) {
-    if (event.key !== 'Escape') return;
+    if ((event.target as HTMLElement).closest('.sce-tree2')) treeKey(event);
+    if (event.key !== 'Escape' || event.defaultPrevented) return;
     if (state === 'add-beat' || state === 'move' || menuOpen) { event.preventDefault(); close(); }
   }
   let width = 0;

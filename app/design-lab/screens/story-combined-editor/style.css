@@ -101,6 +101,16 @@
 .sce-shell .sce-tree-row[aria-current=true] { background:var(--accent-subtle); box-shadow:inset 2px 0 var(--accent-primary); }
 .sce-tree-leaf { padding-left:28px; }
 
+/* v2 Move to tree: one tab stop, arrow keys move focus. */
+.sce-tree2 { list-style:none; margin:0; padding:4px 0; border:1px solid var(--border-normal); max-height:260px; overflow:auto; }
+.sce-tree2>li { display:flex; align-items:center; gap:7px; padding:4px 10px 4px calc(10px + var(--depth) * 16px); font-size:12px; cursor:pointer; color:var(--text-secondary); }
+.sce-tree2>li:hover { background:var(--surface-hover); }
+.sce-tree2>li:focus-visible { outline:2px solid var(--focus-ring); outline-offset:-2px; }
+.sce-tree2-place { color:var(--text-primary)!important; font-weight:600; }
+.sce-tree2-mark { width:10px; flex:none; color:var(--text-muted); font-size:10px; }
+.sce-tree2>li[aria-selected=true] { color:var(--text-primary); background:var(--accent-subtle); box-shadow:inset 2px 0 var(--accent-primary); }
+.sce-tree2>li[aria-selected=true]>.sce-tree2-mark { color:var(--accent-primary); }
+
 @media(max-width:640px) {
   .sce-picker-body,.sce-places { grid-template-columns:1fr; }
   .sce-picker-details { border:0; border-top:1px solid var(--border-normal); padding:8px 0 0; }

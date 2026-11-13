@@ -3,8 +3,25 @@
  "screenId": "story-combined-editor",
  "currentApproved": null,
  "revisions": [
-  { "id": "label-v1", "variantId": "label", "approval": null },
-  { "id": "blank-v1", "variantId": "blank", "approval": null },
-  { "id": "replace-v1", "variantId": "replace", "approval": null }
+  {
+   "id": "label-v1",
+   "variantId": "label",
+   "approval": null
+  },
+  {
+   "id": "blank-v1",
+   "variantId": "blank",
+   "approval": null
+  },
+  {
+   "id": "replace-v1",
+   "variantId": "replace",
+   "approval": null
+  },
+  {
+   "id": "replace-v2",
+   "variantId": "replace-v2",
+   "approval": null
+  }
  ]
 }

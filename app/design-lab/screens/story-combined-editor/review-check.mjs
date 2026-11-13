@@ -14,7 +14,7 @@ export default async function ({ page, open, capture }) {
     // Option 3 ends with Custom Code: its Then never claims "Continue after the Choice".
     const option3 = await page.locator('fieldset.sce-option').nth(2).innerText();
     assert.doesNotMatch(option3, /Continue after the Choice/);
-    if (variant === 'replace') assert.equal(await page.locator('fieldset.sce-option').nth(2).locator('.sce-menu-button').count(), 0);
+    if (variant.startsWith('replace')) assert.equal(await page.locator('fieldset.sce-option').nth(2).locator('.sce-menu-button').count(), 0);
     else assert.equal(await page.locator('fieldset.sce-option').nth(2).locator('.sce-menu-button[aria-disabled=true]').count(), 1);
     await shot(`${variant}-choice-dark-${viewport}`);
 
@@ -34,7 +34,16 @@ export default async function ({ page, open, capture }) {
     await open({ state: 'move', viewport });
     const move = await page.locator('.sce-dialog').innerText();
     assert.match(move, /Moves this beat to the chosen scene, branch or option\./);
-    assert.match(await page.locator('.sce-summary').innerText(), /Move to The last service › If has_ticket and trust ≥ 3… › If trust ≥ 5 · End of "If trust ≥ 5"/);
+    if (variant === 'replace-v2') {
+      // Opens on 06.1's own location: the scene and "If has_ticket…" are open, the rest closed.
+      const expanded = name => page.locator(`.sce-tree2 [role=treeitem]:text-is(${JSON.stringify(name)})`).getAttribute('aria-expanded');
+      assert.equal(await expanded('The last service'), 'true');
+      assert.equal(await expanded('If has_ticket and trust ≥ 3…'), 'true');
+      assert.equal(await expanded('If trust ≥ 5'), 'false');
+      assert.equal(await expanded('Option 2 "Leave"'), 'false');
+      assert.match(await page.locator('.sce-summary').innerText(), /Move to The last service › If has_ticket and trust ≥ 3… · End of "If has_ticket and trust ≥ 3…"/);
+      assert.equal(await page.evaluate(() => document.activeElement?.textContent), '●End of "If has_ticket and trust ≥ 3…"');
+    } else assert.match(await page.locator('.sce-summary').innerText(), /Move to The last service › If has_ticket and trust ≥ 3… › If trust ≥ 5 · End of "If trust ≥ 5"/);
     assert.doesNotMatch(move, /\bbody\b/i);
     await shot(`${variant}-move-dark-${viewport}`);
 
@@ -47,7 +56,20 @@ export default async function ({ page, open, capture }) {
   await open({ state: 'move', viewport: 'wide' });
   if (variant === 'label') await page.locator('select[aria-label="Move to"]').selectOption('3');
   else if (variant === 'blank') await page.locator('input[data-place="3"][data-position="1"]').check();
-  else await page.locator('[data-place-row="3"]').click();
+  else if (variant === 'replace') await page.locator('[data-place-row="3"]').click();
+  else {
+    // Keyboard: Up to "If trust ≥ 5", Right opens it, Down twice, Enter selects; Left twice returns and closes it.
+    const focused = () => page.evaluate(() => document.activeElement?.textContent?.slice(1));
+    const key = async k => { await page.keyboard.press(k); };
+    await key('ArrowUp'); assert.equal(await focused(), 'If trust ≥ 5');
+    await key('ArrowRight'); await key('ArrowDown'); await key('ArrowDown'); assert.equal(await focused(), 'End of "If trust ≥ 5"');
+    await key('Enter'); assert.match(await page.locator('.sce-summary').innerText(), /If trust ≥ 5 · End of "If trust ≥ 5"/);
+    await key('ArrowLeft'); assert.equal(await focused(), 'If trust ≥ 5');
+    await key('ArrowLeft'); assert.equal(await page.locator('.sce-tree2 [role=treeitem]').filter({ hasText: 'End of "If trust ≥ 5"' }).count(), 0);
+    await key('ArrowDown'); await key('ArrowDown'); await key('ArrowDown'); assert.equal(await focused(), 'Option 2 "Leave"');
+    await key('Enter'); assert.match(await page.locator('.sce-summary').innerText(), /^Choose an available position in Option 2 "Leave"\.$/);
+    await key('ArrowRight'); await key('ArrowDown'); await key('Enter');
+  }
   assert.match(await page.locator('.sce-summary').innerText(), /Option 2 "Leave" · End of option 2 "Leave"/);
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('.sce-dialog').count(), 0);

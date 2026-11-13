@@ -14,5 +14,6 @@ export const definition: Omit<LabScreen, 'approval'> = {
     { id: 'label', title: '1 · Menu reads "Custom Code"', load: () => import('./label.ts') },
     { id: 'blank', title: '2 · Menu with no value', load: () => import('./blank.ts') },
     { id: 'replace', title: '3 · Ending replaces the menu', load: () => import('./replace.ts') },
+    { id: 'replace-v2', title: '3 · Ending replaces the menu v2', load: () => import('./replace-v2.ts') },
   ],
 };
