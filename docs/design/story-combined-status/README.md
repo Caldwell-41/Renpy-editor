@@ -12,8 +12,15 @@ Three earlier approvals were reviewed in the old Story layout. This Design Lab s
 Their approved behaviour stays. Only the presentation inside Combined is open. The
 screen also shows Kris's no-"body" wording from the 2026-11-13 comment on
 [#117](https://github.com/Caldwell-41/Renpy-editor/issues/117) in the Branch path,
-the editor path and the insertion markers. No variant is approved yet. The
-[approval record](approval.json) lists the three draft revisions.
+the editor path and the insertion markers.
+
+Kris picked variant 1, Header save status, on 2026-11-13 ("batch 1 - header"). Its
+header wrapped onto a second row at 560 px, which breaks the icons-v1 one-row rule.
+`header-v2` fixes that after his pick and is the approved revision:
+`story-combined-status` / `header-v2`, source commit `5df8889e`. The
+[approval record](approval.json) sets `currentApproved` to `header-v2` and holds the
+behaviour, deviations and capture hashes. `header-v1`, `footer-v1` and `strip-v1`
+stay in the lab as unapproved drafts.
 
 ## Sample
 
@@ -47,6 +54,7 @@ approved icons-v1 buttons between the save status and Save.
 | Revision / layout | Save state and refusal | "Undone: …" | Failing beat |
 | --- | --- | --- | --- |
 | `header-v1` / `header`, 1 · Header save status | Header save-status area, as approved in marked-v1: "Nothing saved. 3 of 5 drafts need changes:" and one link per scene. | Bottom status bar, as approved in icons-v1. | Red `!` and red top edge in Tracks. Error under the field. Labelled end markers. |
+| `header-v2` / `header-v2`, 1 · Header save status v2 (approved) | Same as header-v1 at wide sizes. At 560 px the header shows "Nothing saved" and stays on one row; the bottom status bar shows the full line and scene links. Validate, Run and Stop stay visible. | Bottom status bar. | Same as header-v1. |
 | `footer-v1` / `footer`, 2 · Status bar | Bottom status bar holds the full line. The header keeps one word: "Unsaved", "Nothing saved" or "Saved". | Bottom status bar, before the save line. | Red `!` and the reason in the Words lane. Error as a line at the top of the editor. Slim end markers with vertical labels. |
 | `strip-v1` / `strip`, 3 · Refusal above Tracks | A refusal row between the Branch path and Tracks. The header shows the draft count. No bottom status bar. | Header save-status area, followed by the count. | Red `!` on a tinted Beat lane cell. Error under the field. Labelled end markers. |
 
@@ -89,4 +97,5 @@ npm run design:check -- story-combined-status header --interaction ./screens/sto
 ```
 
 [captures/](captures/) holds `<revision>-<state>-dark-<wide|compact>.png` for every
-variant and state, at 1100 × 720 and 560 × 640. They are draft review images.
+variant and state, at 1100 × 720 and 560 × 640. The approval record lists the eight
+`header-v2` captures. The others are draft review images.

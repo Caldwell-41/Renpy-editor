@@ -1,7 +1,7 @@
 {
  "schemaVersion": 1,
  "screenId": "story-combined-status",
- "currentApproved": null,
+ "currentApproved": "header-v2",
  "revisions": [
   {
    "id": "header-v1",
@@ -11,7 +11,110 @@
   {
    "id": "header-v2",
    "variantId": "header-v2",
-   "approval": null
+   "approval": {
+    "date": "2026-11-13",
+    "decision": "Kris picked batch 1 variant 1, \"Header save status\", on 2026-11-13 with the words \"batch 1 - header\". Approve header-v2 (screen story-combined-status / header-v2), which is header-v1 with the compact one-row fix. It places the approved Save refusal (story-save-refusal marked-v1), header Undo and Redo (header-undo icons-v1) and conflict editor (story-draft-conflict compact-v2) inside Story Combined v1. Variants footer-v1 and strip-v1 are not approved.",
+    "reason": null,
+    "supersedes": null,
+    "source": {
+     "commit": "5df8889eadf442229e290aed5fdcfdf8d6e81dd8",
+     "fingerprint": "866b0387ae66a68b905e9500841852c933915a7b933acd2b59f6de9bfcdaa0ae"
+    },
+    "captures": [
+     {
+      "path": "docs/design/story-combined-status/captures/header-v2-pending-dark-wide.png",
+      "sha256": "c89e66937290f1e11e73d272edea317f114b3897f5b7614cb3f89fae2912e8e1",
+      "state": "pending",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-combined-status/captures/header-v2-pending-dark-compact.png",
+      "sha256": "43e4fe58190552d1699e50fcff584e2cb9bc9bffb5971b4c201d515f1aa22b5b",
+      "state": "pending",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-combined-status/captures/header-v2-refused-dark-wide.png",
+      "sha256": "17d03707ddc1f02c2ff8c453893b7b38a1b4cec221fc425356506259afbfba96",
+      "state": "refused",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-combined-status/captures/header-v2-refused-dark-compact.png",
+      "sha256": "e18e453a6b0242b102be54c4c0524ddd91907494fd7a1ac3b8fdd1872470c5f8",
+      "state": "refused",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-combined-status/captures/header-v2-conflict-dark-wide.png",
+      "sha256": "54235af852a6c00423a4a1ee982b9f5d09fbffb1f50db67018e85450473b3d53",
+      "state": "conflict",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-combined-status/captures/header-v2-conflict-dark-compact.png",
+      "sha256": "1f4e000cf006b61bbdc04050bf69d9de99a10c481eddbcffe5ab685f51e3dc1c",
+      "state": "conflict",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-combined-status/captures/header-v2-undone-dark-wide.png",
+      "sha256": "5d9300ac5833167745cac2d3e4fd346134b40c3e0837cc61aba1c23a21064ef4",
+      "state": "undone",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-combined-status/captures/header-v2-undone-dark-compact.png",
+      "sha256": "d5738992e9788519887757b8ca6ca0c36aa96cfba4eedc4292ae305cc7e0e89d",
+      "state": "undone",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+     }
+    ],
+    "behaviour": [
+     "Story Combined v1 with the header-undo icons-v1 header: save status, Undo, Redo, Save, then Validate, Run and Stop. Combined's toolbar Undo and Redo buttons are removed.",
+     "Save checks every beat draft. If any fails, it writes none of them, keeps all drafts and opens the first failing draft in project order with its error.",
+     "At wide sizes the header save status reads \"Nothing saved. 3 of 5 drafts need changes:\" (the numbers are the live counts), followed by one link per scene with its failure count. A link opens that scene's first failing draft.",
+     "At 560 px the header shows \"Nothing saved\" and stays on one row with no horizontal scroll. The bottom status bar then shows the full refusal line with the scene links.",
+     "Without a refusal the header save status shows the draft count, for example \"5 unsaved beat drafts\" (\"5 unsaved\" at 560 px), or \"Saved\". When no draft fails after a refusal it reads \"5 unsaved beat drafts. Ready to save.\"",
+     "Beat drafts show * in Tracks, Reel and the editor heading. A source conflict shows ! in the accent colour. After a refused Save, failing beats show a red ! and a red top edge in Tracks, the reason in Reel and the tooltip, and \"! Needs changes\" in the editor heading. The legend adds Needs changes.",
+     "Each failing beat shows its error under the field when selected. The count and marks update as the author fixes drafts. Marks appear only after a refused Save.",
+     "A source conflict uses the approved B editor from story-draft-conflict (compact-v2).",
+     "\"Undone: ...\" and \"Redone: ...\" appear in the bottom status bar. Undo selects the affected beat. Header tooltips name the next edit and the shortcut.",
+     "Insertion markers and paths name the scene, branch or option, never \"body\": \"End of scene\", \"End of \\\"If trust ≥ 5\\\"\", \"End of option 2 \\\"Leave\\\"\". Long conditions shorten with whole words and an ellipsis, as in the Branch path."
+    ],
+    "deviations": [
+     "Kris picked header-v1. At 560 px its header wrapped the refusal line onto a second row, which breaks the icons-v1 rule that the header stays on one row. header-v2 was made after his pick to meet that rule: at 560 px the header shows \"Nothing saved\" or \"N unsaved\", the bottom status bar holds the full refusal line and scene links, and Validate, Run and Stop stay visible as in icons-v1. The wide layout is unchanged.",
+     "Fictional browser-memory mock. It has no source transaction, revision check, Flush or persistent history. Only text beats are editable. The Branch path, Writing focus, Add beat, More, Validate, Run and insertion markers write a status message only.",
+     "The layout is a reduced copy of Story Combined v1 built on the story-revamp palette and the story-draft-conflict styles, not the full Combined source. It has no scene picker; scene links and Undo move between the two sample scenes.",
+     "Captures are dark theme only. Light theme was not reviewed.",
+     "The prototype bar reads \"Status study · draft\". The approval record owns the design status; that string is prototype scaffolding.",
+     "Variants header-v1, footer-v1 and strip-v1 remain in the lab as unapproved drafts for comparison."
+    ]
+   }
   },
   {
    "id": "footer-v1",
