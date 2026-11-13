@@ -282,9 +282,10 @@ reconciles from disk in the same way. This happens when the project opens and on
 Story, Source or Branches refresh, so Story sees an external edit whether or not Source
 opened the file. Core reads those files in one batch through the Branches observation
 reader, which validates the root once per file and keeps every per-open path check. A
-file that changes during its read stays unreconciled until the next refresh. A changed
-source that core cannot map opens as unavailable; it does not refuse the project. A dirty external revision keeps base, draft, and external bytes and
-blocks stale writes. Core computes conservative single exact base-relative patches;
+file that changes during its read stays unreconciled, and Story shows it as unavailable,
+until the next refresh. A changed source that core cannot map opens as unavailable; it
+does not refuse the project. A dirty external revision keeps base, draft, and external
+bytes and blocks stale writes. Core computes conservative single exact base-relative patches;
 only non-overlap exposes a combined preview and confirmed Apply Both proposal against
 the verified external revision. Confirmation uses
 `SourceApplyBothRequest`: path, accepted base hash, draft version, reviewed external

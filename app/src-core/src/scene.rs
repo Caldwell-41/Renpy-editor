@@ -2460,30 +2460,19 @@ impl AuthoringService {
         project: &ProjectId,
         scenes: &[SceneMetadata],
     ) -> Result<Vec<Result<Option<(Vec<u8>, Revision)>, SceneError>>, SceneError> {
-        let candidates = scenes
+        let paths = scenes
             .iter()
-            .map(|scene| drafts::candidate_file(project, &scene.source_path))
-            .collect::<Vec<_>>();
-        let unread = scenes
-            .iter()
-            .zip(&candidates)
-            .filter(|(_, candidate)| candidate.is_none())
-            .map(|(scene, _)| scene.source_path.clone())
-            .collect::<Vec<_>>();
-        let mut disk = self
-            .transactions
-            .snapshot_optional_many(project, &unread)
-            .map_err(diagnostic_error)?
-            .into_iter();
-        Ok(candidates
-            .into_iter()
-            .map(|candidate| match candidate {
-                Some(candidate) => Ok(Some(candidate)),
-                None => disk
-                    .next()
-                    .map_or(Err(SceneError::Io), |read| read.map_err(diagnostic_error)),
+            .map(|scene| {
+                let candidate = drafts::candidate_file(project, &scene.source_path);
+                (
+                    scene.source_path.as_str(),
+                    candidate.map(|read| Ok(Some(read))),
+                )
             })
-            .collect())
+            .collect();
+        self.transactions
+            .snapshot_optional_many(project, paths, |read| read.map_err(diagnostic_error))
+            .map_err(diagnostic_error)
     }
 
     fn snapshot_optional(

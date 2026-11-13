@@ -1160,49 +1160,44 @@ impl AuthoringService {
             .iter()
             .filter(|scene| only.is_none_or(|path| path == scene.source_path))
             .collect::<Vec<_>>();
-        // A clean Source buffer stands in for its file. Every other scene is read from
-        // disk in one batch, which validates the project root once per file instead
-        // of once per path component.
-        let buffered = {
+        // A clean Source buffer stands in for its file and a dirty one skips the scene.
+        // Every other scene is read from disk in one batch, which validates the
+        // project root once per file instead of once per path component.
+        let paths = {
             let sessions = self.source_sessions.lock().map_err(|_| SourceError::Io)?;
             let items = sessions.projects.get(project);
             scenes
                 .iter()
                 .map(|scene| {
-                    items
-                        .and_then(|items| items.get(&scene.source_path))
-                        .map(|item| {
-                            (item.draft.is_none() && item.external.is_none() && !item.unavailable)
-                                .then(|| {
-                                    (item.base_bytes.clone(), item.base_revision.sha256.clone())
-                                })
-                        })
+                    let buffer =
+                        items
+                            .and_then(|items| items.get(&scene.source_path))
+                            .map(|item| {
+                                (item.draft.is_none()
+                                    && item.external.is_none()
+                                    && !item.unavailable)
+                                    .then(|| {
+                                        (item.base_bytes.clone(), item.base_revision.sha256.clone())
+                                    })
+                            });
+                    (scene.source_path.as_str(), buffer)
                 })
-                .collect::<Vec<_>>()
+                .collect()
         };
-        let unbuffered = scenes
-            .iter()
-            .zip(&buffered)
-            .filter(|(_, buffer)| buffer.is_none())
-            .map(|(scene, _)| scene.source_path.clone())
-            .collect::<Vec<_>>();
-        let mut disk = self
+        // Story reports a missing or unsafe source as unavailable.
+        let sources = self
             .transactions
-            .snapshot_optional_many(project, &unbuffered)
-            .map_err(transaction_error)?
-            .into_iter();
+            .snapshot_optional_many(project, paths, |read| match read {
+                Ok(Some((bytes, revision))) => Some((bytes, revision.sha256)),
+                Ok(None) | Err(_) => None,
+            })
+            .map_err(transaction_error)?;
         let mut authoring = None;
         let mut reconciled = Vec::new();
-        for (scene, buffer) in scenes.into_iter().zip(buffered) {
+        for (scene, source) in scenes.into_iter().zip(sources) {
             let path = scene.source_path.as_str();
-            let (bytes, revision) = match buffer {
-                Some(Some(clean)) => clean,
-                Some(None) => continue,
-                None => match disk.next() {
-                    Some(Ok(Some((bytes, revision)))) => (bytes, revision.sha256),
-                    // Story reports a missing or unsafe source as unavailable.
-                    _ => continue,
-                },
+            let Some((bytes, revision)) = source else {
+                continue;
             };
             // Story reports a scene with no stored mapping as invalid metadata.
             let Some(index) = source_map

@@ -2088,18 +2088,17 @@ fn open_project_file(
     crate::metadata::validate_relative_path(relative)
         .map_err(|_| LifecycleError::InvalidMetadata)?;
     let (parent, name) = relative.rsplit_once('/').unwrap_or(("", relative));
-    if folder.as_ref().is_none_or(|(path, _)| path != parent) {
-        *folder = None;
-        let mut directory = root.clone();
-        for component in parent.split('/').filter(|component| !component.is_empty()) {
-            directory = open_present(&directory, component, |directory, name| {
-                directory.open_child(name, false)
-            })?;
+    let directory = match folder.take() {
+        Some((path, directory)) if path == parent => &folder.insert((path, directory)).1,
+        _ => {
+            let mut directory = root.clone();
+            for component in parent.split('/').filter(|component| !component.is_empty()) {
+                directory = open_present(&directory, component, |directory, name| {
+                    directory.open_child(name, false)
+                })?;
+            }
+            &folder.insert((parent.to_owned(), directory)).1
         }
-        *folder = Some((parent.to_owned(), directory));
-    }
-    let Some((_, directory)) = folder.as_ref() else {
-        return Err(LifecycleError::InvalidMetadata);
     };
     open_present(directory, name, |directory, name| directory.open_file(name))
 }

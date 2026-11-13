@@ -13,7 +13,7 @@
   details.stage='project-opening';const openStarted=performance.now();document.querySelector('.recent-open').click();
   // The navigation shell appears before the initial real-service observation ends.
   // Wait for Story content, not just the newly mounted Source navigation button.
-  // A timeout here reports how long it waited; a pass reports how long open took (#176).
+  // A timeout here reports how long it waited; a pass reports how long open took.
   details.stage='initial-story-ready';
   try{await wait(()=>document.querySelector('.scene-workspace .story-stage') && button('+ Add beat'));}
   finally{details.initialStoryMs=Math.round(performance.now()-openStarted);}

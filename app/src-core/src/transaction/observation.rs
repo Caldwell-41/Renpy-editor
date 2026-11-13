@@ -30,24 +30,36 @@ impl TransactionService {
         })
     }
 
-    /// Reads each path as `snapshot_optional` does, under the same per-open checks:
-    /// a missing file is `None` and any other failure stays with its path. Lists
+    /// Returns one value per path, in order. A path with a known value is not read.
+    /// Every other path is read as `snapshot_optional` does, under the same per-open
+    /// checks, and passed to `from_disk`; a missing file reads as `None`. Lists
     /// longer than one observation run in consecutive batches.
-    pub(crate) fn snapshot_optional_many(
+    pub(crate) fn snapshot_optional_many<T>(
         &self,
         project: &ProjectId,
-        paths: &[String],
-    ) -> Result<Vec<Result<Option<(Vec<u8>, Revision)>, PublicDiagnostic>>, PublicDiagnostic> {
-        let mut results = Vec::with_capacity(paths.len());
-        for batch in paths.chunks(MAX_OBSERVATION_FILES) {
-            results.extend(
+        paths: Vec<(&str, Option<T>)>,
+        from_disk: impl Fn(Result<Option<(Vec<u8>, Revision)>, PublicDiagnostic>) -> T,
+    ) -> Result<Vec<T>, PublicDiagnostic> {
+        let unread = paths
+            .iter()
+            .filter(|(_, known)| known.is_none())
+            .map(|(path, _)| *path)
+            .collect::<Vec<_>>();
+        let mut disk = Vec::with_capacity(unread.len());
+        for batch in unread.chunks(MAX_OBSERVATION_FILES) {
+            disk.extend(
                 self.with_observation_readers(project, batch, |reader, path| {
-                    let path = RelativePath::new(path).map_err(diagnostic)?;
+                    let path = RelativePath::new(*path).map_err(diagnostic)?;
                     reader.snapshot_optional(&path)
                 })?,
             );
         }
-        Ok(results)
+        let mut disk = disk.into_iter().map(from_disk);
+        paths
+            .into_iter()
+            .map(|(_, known)| known.or_else(|| disk.next()))
+            .collect::<Option<Vec<_>>>()
+            .ok_or_else(|| diagnostic(ErrorCode::IoFailure))
     }
 
     #[cfg(test)]
