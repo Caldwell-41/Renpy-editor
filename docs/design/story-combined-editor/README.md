@@ -4,8 +4,16 @@ This Design Lab screen, `story-combined-editor`, mocks three answers inside the
 Story Combined v1 Choice editor and dialogs (`story-revamp` / `combined`, revision
 `combined-v1`). It covers the Then line for an option that Custom Code ends or may
 leave, the disabled Then menu, and the no-"body" wording from the 2026-11-13 comment
-on [#117](https://github.com/Caldwell-41/Renpy-editor/issues/117). No variant is
-approved yet. The [approval record](approval.json) lists the three draft revisions.
+on [#117](https://github.com/Caldwell-41/Renpy-editor/issues/117).
+
+Kris approved variant 3 on 2026-11-13 for Then, Move to and Add a beat ("batch 2 -
+replace menu as you suggest", "i think 3 with the tree is the easiest to navigate
+for the user"). He also approved the four new strings and two tree rules: open on
+the beat's own location, and keyboard operation. `replace-v1` had neither rule, so
+`replace-v2` adds them and is the approved revision: `story-combined-editor` /
+`replace-v2`, source commit `f0bc4679`. The [approval record](approval.json) sets
+`currentApproved` to `replace-v2`. `label-v1`, `blank-v1` and `replace-v1` stay in
+the lab as unapproved drafts.
 
 ## Sample
 
@@ -55,8 +63,8 @@ strings outside the table:
 | Destination body / End of body | Move to / End of "If trust ≥ 5" |
 
 "Original body unavailable. Choose a body explicitly. Input retained." has no state
-in this mock. Following the same rule, it would read "The original scene, branch or
-option is unavailable. Choose one. Input retained."
+in this mock. The approved record uses "The original scene, branch or option is
+unavailable. Choose one. Input retained." Kris has not seen it on screen.
 
 ## Simulated parts
 
@@ -81,4 +89,5 @@ npm run design:check -- story-combined-editor label --interaction ./screens/stor
 ```
 
 [captures/](captures/) holds `<revision>-<state>-dark-<wide|compact>.png` for every
-variant and state. They are draft review images.
+variant and state. The approval record lists the twelve `replace-v2` captures. The
+others are draft review images.

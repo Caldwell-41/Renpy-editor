@@ -1,7 +1,7 @@
 {
  "schemaVersion": 1,
  "screenId": "story-combined-editor",
- "currentApproved": null,
+ "currentApproved": "replace-v2",
  "revisions": [
   {
    "id": "label-v1",
@@ -21,7 +21,148 @@
   {
    "id": "replace-v2",
    "variantId": "replace-v2",
-   "approval": null
+   "approval": {
+    "date": "2026-11-13",
+    "decision": "Kris approved batch 2 variant 3, \"Ending replaces the menu\", for Then, Move to and Add a beat on 2026-11-13. His words: \"batch 2 - replace menu as you suggest\", then \"i think 3 with the tree is the easiest to navigate for the user\", and \"Okay\" to the summary. He also approved the four strings written for the mock and two Move to tree rules: it opens with the beat's current location expanded, and it is keyboard operable. Approve replace-v2 (screen story-combined-editor / replace-v2), which is replace-v1 with those tree rules. Variants label-v1, blank-v1 and replace-v1 are not approved.",
+    "reason": null,
+    "supersedes": null,
+    "source": {
+     "commit": "f0bc4679c4868c63969de269cd5868a9a9fea7b1",
+     "fingerprint": "a00b19e86688007ccf4587d554e54dd3544effeb1dffae080a9e4f6095d5a67e"
+    },
+    "captures": [
+     {
+      "path": "docs/design/story-combined-editor/captures/replace-v2-choice-dark-wide.png",
+      "sha256": "804972fdd101b49bada32b92b868e2153c48d974cde72a9b22659ce50b0e8442",
+      "state": "choice",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-combined-editor/captures/replace-v2-choice-dark-compact.png",
+      "sha256": "2e53af6d495a3b939781b3f0e99117348b617e28325b9534d6a483d014f98e16",
+      "state": "choice",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-combined-editor/captures/replace-v2-custom-code-dark-wide.png",
+      "sha256": "8928eea7781a614ffc1210620b49149fe0bd01a4eddbf4fac01797194eb83d0c",
+      "state": "custom-code",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-combined-editor/captures/replace-v2-custom-code-dark-compact.png",
+      "sha256": "d20e38c074a648c8f3f4527291979957c72e30370607420398d2b5a370b8c879",
+      "state": "custom-code",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-combined-editor/captures/replace-v2-then-menu-dark-wide.png",
+      "sha256": "4fdc19b03d9430ae6e056b5eebad5d21ce6df281be0892c8998b5ab0a2d536ab",
+      "state": "then-menu",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-combined-editor/captures/replace-v2-then-menu-dark-compact.png",
+      "sha256": "89e9e2fb752453bf6125ee008f4e09368d362e8d3bef0b56df6f6fc7ef949116",
+      "state": "then-menu",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-combined-editor/captures/replace-v2-add-beat-dark-wide.png",
+      "sha256": "d2c5dffd79469f1f7639570d350051382c0b1796d4f7590165aec8deff12de16",
+      "state": "add-beat",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-combined-editor/captures/replace-v2-add-beat-dark-compact.png",
+      "sha256": "feecd234e3096476582b522e338b2f06451968f38c2b8347ba971ef27ec08c00",
+      "state": "add-beat",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-combined-editor/captures/replace-v2-move-dark-wide.png",
+      "sha256": "76a7d7d0ccd0dbedb5c23a1389dc06a8ae853e1741f5850919ad6f76f7dd8c17",
+      "state": "move",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-combined-editor/captures/replace-v2-move-dark-compact.png",
+      "sha256": "d1f35b536266d2be061aead9b45903c0d1a7c729f29c463fce0774d7ec4acd70",
+      "state": "move",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-combined-editor/captures/replace-v2-protected-dark-wide.png",
+      "sha256": "7c940e89cf29ac9e4e55696c3368f49f5a1448c7043832da2c1ffdfd53fd0366",
+      "state": "protected",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-combined-editor/captures/replace-v2-protected-dark-compact.png",
+      "sha256": "5c5f470ba88cbac0cc59756ce51221fa57ec1b42f33cc8ba97393bf2a520d20f",
+      "state": "protected",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+     }
+    ],
+    "behaviour": [
+     "The Story Combined v1 Choice editor shows each option with its beats, a Then row with + Beat, and its condition.",
+     "When Custom Code ends an option, the Then row has no menu. It shows \"Ends with Custom Code: renpy.jump(next_stop)\" with Edit in Source in place of the menu, and never shows \"Continue after the Choice\".",
+     "When Custom Code inside an option can leave it, that Custom Code beat row carries \"Ending unknown: Custom Code can leave this option\". The Then menu stays editable.",
+     "The Then menu lists Continue after the Choice, Go to a scene, Repeat this Choice and Return. Its footer reads \"Option 1's beats follow below. Then changes only its ending.\"",
+     "Add a beat from an option has no target line above the search. The details pane lists Goes at \"End of option 2 \\\"Leave\\\"\", In \"The last service › Option 2 \\\"Leave\\\"\" and After \"07.2.1 Narration\".",
+     "Move to reads \"Moves this beat to the chosen scene, branch or option.\" It shows a tree of the scene, its branches and options in source order, with \"Before …\" and \"End of …\" positions. The beat's own position is left out.",
+     "The tree opens with the beat's current location expanded and the selected position on its current branch. Other branches and options stay collapsed.",
+     "Keyboard: the tree is one tab stop. Up and Down move through visible entries, Right opens an entry or moves into it, Left closes it or moves to its parent, Enter selects, and Escape cancels the dialog.",
+     "Selecting a position shows \"Move to <path> · <position>\". Selecting a branch or option opens it and shows \"Choose an available position in Option 2 \\\"Leave\\\".\" until a position is chosen; Move does not run without one.",
+     "A protected Choice lists each option as \"Option 2's beats, then continues after the Choice\". An option that Custom Code ends reads \"Ends with Custom Code\".",
+     "No author-facing Story text says \"body\". \"Original body unavailable. Choose a body explicitly. Input retained.\" becomes \"The original scene, branch or option is unavailable. Choose one. Input retained.\""
+    ],
+    "deviations": [
+     "Kris picked variant 3 (replace-v1) with its tree. replace-v1 opened on another branch and had no tree keyboard handling, so replace-v2 adds the two tree rules he accepted after his pick. Nothing else changed.",
+     "Kris has not seen \"The original scene, branch or option is unavailable. Choose one. Input retained.\" on screen. No state in the mock shows it.",
+     "Fictional browser-memory mock. It has no source change, history or Undo entry. Option text, conditions, reorder, Edit in Source, Writing focus, Tracks and the header controls write a status message only. Add a beat and Move close the dialog and report the result.",
+     "The editor is a reduced copy of the Combined Choice editor built on the story-revamp palette and the story-combined-status shell, not the full Combined source.",
+     "Captures are dark theme only. Light theme was not reviewed.",
+     "The prototype bar reads \"Editor study · draft\". The approval record owns the design status; that string is prototype scaffolding.",
+     "Variants label-v1, blank-v1 and replace-v1 remain in the lab as unapproved drafts for comparison."
+    ]
+   }
   }
  ]
 }
