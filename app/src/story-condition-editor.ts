@@ -71,7 +71,8 @@ function expressionOf(rule: Rule, variables: Variables): ConditionExpression {
   const variable = variables.find(item => item.id === rule.variableId);
   if (!variable) throw Error("Select an available variable.");
   const ref = { type: "variable" as const, variableId: variable.id, variableType: variable.variableType };
-  if (variable.variableType === "bool") return rule.value === "false" ? { type: "not", operand: ref } : ref;
+  // A yes/no rule is a comparison, `flag == True`, as the earlier editor wrote it, so accepted source keeps its form.
+  if (variable.variableType === "bool") return { type: "compare", operator: "equal", left: ref, right: { type: "bool", value: rule.value !== "false" } };
   if (numeric(variable)) return { type: "compare", operator: rule.op, left: ref, right: numberLiteral(rule.value.trim()) };
   if (new TextEncoder().encode(rule.value).length > 4096) throw Error("Use at most 4096 bytes of text in a condition.");
   return { type: "compare", operator: rule.op === "notEqual" ? "notEqual" : "equal", left: ref, right: { type: "string", value: rule.value } };
@@ -79,7 +80,7 @@ function expressionOf(rule: Rule, variables: Variables): ConditionExpression {
 /** How a rule reads in Ren'Py, for the line under the rules. Display only; core writes source. */
 function rulePython(rule: Rule, variables: Variables): string {
   const variable = variables.find(item => item.id === rule.variableId), name = variable?.technicalName ?? "missing_variable";
-  if (variable?.variableType === "bool") return rule.value === "false" ? `not ${name}` : name;
+  if (variable?.variableType === "bool") return `${name} == ${rule.value === "false" ? "False" : "True"}`;
   const python = operators.find(item => item.op === rule.op)?.python ?? "==";
   return variable?.variableType === "string" ? `${name} ${python} ${JSON.stringify(rule.value)}` : `${name} ${python} ${rule.value.trim() || "?"}`;
 }

@@ -23,7 +23,7 @@ test("rule builder reads variable rules, keeps half-typed numbers and leaves a t
   const original = { status: "supported" as const, expression: { type: "and" as const, left: { type: "and" as const, left: { type: "compare" as const, operator: "greaterEqual" as const, left: trust, right: { type: "int" as const, value: "9223372036854775807" } }, right: flag }, right: { type: "compare" as const, operator: "notEqual" as const, left: { type: "variable" as const, variableId: "name", variableType: "string" as const }, right: { type: "string" as const, value: "Bec" } } } };
   const builder = buildRuleBuilder(variables, original, { keyword: "if", label: "If", empty: "", required: true }); document.body.append(builder.host);
   // Untouched, it reads back the exact condition from source.
-  assert.equal(builder.read(), original); assert.equal(builder.host.querySelector(".story-rule-code")!.textContent, 'if trust >= 9223372036854775807 and flag and name != "Bec":');
+  assert.equal(builder.read(), original); assert.equal(builder.host.querySelector(".story-rule-code")!.textContent, 'if trust >= 9223372036854775807 and flag == True and name != "Bec":');
   const radio = (label: string, index: number): HTMLButtonElement => [...builder.host.querySelectorAll<HTMLElement>(".story-rule")[index]!.querySelectorAll<HTMLButtonElement>("[role=radio]")].find(item => item.textContent === label || item.getAttribute("aria-label") === label)!;
   radio("is at most", 0).click(); radio("is false", 1).click(); [...builder.host.querySelectorAll<HTMLButtonElement>("[role=radio]")].find(item => item.textContent === "Any")!.click();
   const value = builder.host.querySelector<HTMLInputElement>('input[aria-label="If rule 1 value"]')!;
@@ -31,7 +31,7 @@ test("rule builder reads variable rules, keeps half-typed numbers and leaves a t
   assert.equal(value.hasAttribute("aria-invalid"), false, "Typing never marks a half-typed number");
   value.dispatchEvent(new Event("blur")); assert.equal(value.getAttribute("aria-invalid"), "true"); assert.throws(() => builder.read()); assert.equal(value.value, "-");
   value.value = "1.5"; value.dispatchEvent(new Event("input", { bubbles: true })); assert.equal(value.hasAttribute("aria-invalid"), false);
-  assert.deepEqual(builder.read(), { status: "supported", expression: { type: "or", left: { type: "or", left: { type: "compare", operator: "lessEqual", left: trust, right: { type: "decimal", value: "1.5" } }, right: { type: "not", operand: flag } }, right: original.expression.right } });
+  assert.deepEqual(builder.read(), { status: "supported", expression: { type: "or", left: { type: "or", left: { type: "compare", operator: "lessEqual", left: trust, right: { type: "decimal", value: "1.5" } }, right: { type: "compare", operator: "equal", left: flag, right: { type: "bool", value: false } } }, right: original.expression.right } });
   // Removing a rule leaves the others; the last rule cannot leave a branch without a test.
   for (const remove of [...builder.host.querySelectorAll<HTMLButtonElement>('button[aria-label^="Remove rule"]')].reverse()) remove.click();
   assert.throws(() => builder.read(), /Add a rule/);
@@ -51,10 +51,10 @@ test("create Condition writes the rule builder's typed test at the root place in
   press(panel, "+ Add rule"); const rule = panel.querySelectorAll<HTMLElement>(".story-rule")[1]!;
   rule.querySelector<HTMLElement>(".story-variable-picker > summary")!.click(); chooseIn(rule, "If rule 2 variable", "trust, whole number");
   chooseIn(panel, "If match", "Any"); type(panel.querySelector<HTMLInputElement>('input[aria-label="If rule 2 value"]')!, "3");
-  assert.equal(panel.querySelector(".story-rule-code")!.textContent, "if flag or trust >= 3:");
+  assert.equal(panel.querySelector(".story-rule-code")!.textContent, "if flag == True or trust >= 3:");
   (panel.querySelector<HTMLInputElement>('input[aria-label="Include Otherwise"]')!).checked = true; button(panel, "Create Condition").click(); await tick();
   const command = s.calls[0]!.command; assert.equal(command.type, "insertCondition"); assert.deepEqual(command.body, { type: "root" }); assert.equal(command.otherwise, true); assert.deepEqual(s.calls[0]!.expected, { projectRevision: "project", sourceMapRevision: "map" });
-  assert.deepEqual(command.condition, { status: "supported", expression: { type: "or", left: { type: "variable", variableId: "flag", variableType: "bool" }, right: { type: "compare", operator: "greaterEqual", left: { type: "variable", variableId: "trust", variableType: "int" }, right: { type: "int", value: "3" } } } });
+  assert.deepEqual(command.condition, { status: "supported", expression: { type: "or", left: { type: "compare", operator: "equal", left: { type: "variable", variableId: "flag", variableType: "bool" }, right: { type: "bool", value: true } }, right: { type: "compare", operator: "greaterEqual", left: { type: "variable", variableId: "trust", variableType: "int" }, right: { type: "int", value: "3" } } } });
   await s.close();
 });
 

@@ -1903,16 +1903,17 @@ export function renderStoryView(
     }
     return undefined;
   };
-  // What the Choice editor reads from the scene and does to other beats.
-  const choiceHost = (scene: SceneDocument, beat: SceneBeat): ChoiceHost => {
+  // What the Choice editor reads from the scene and does to other beats. A new Choice has no
+  // beat yet: its options start empty and it continues where it will be added.
+  const choiceHost = (scene: SceneDocument, beat?: SceneBeat): ChoiceHost => {
     const current = (): SceneDocument | undefined => model.scenes.find(item => item.id === scene.id);
     const optionBody = (optionId: string): BodyRef | undefined => { const header = current()?.beats.find(item => item.id === optionId); return header?.conditionalBranch ? { type: "branch", groupId: header.conditionalBranch.groupId, branchId: header.id } : undefined; };
     return {
-      structure: () => { const shown = current(), node = shown?.beats.find(item => item.id === beat.id); return shown && node ? { scene: shown, numbers: beatNumbers(shown), locked: shown.sourceConflict || node.protected } : undefined; },
+      structure: () => { const shown = current(), node = beat && shown?.beats.find(item => item.id === beat.id); return shown && (node || !beat) ? { scene: shown, numbers: beatNumbers(shown), locked: shown.sourceConflict || !!node?.protected } : undefined; },
       beatName: item => nodeName(item),
       beatSummary: item => item.conditionalBranch ? branchName(current() ?? scene, item) : beatSummary(item.payload, model),
       sceneName: id => model.scenes.find(item => item.id === id)?.displayName ?? "an unavailable scene",
-      continuation: () => { const shown = current(), node = shown?.beats.find(item => item.id === beat.id); return shown && node ? continuationAfter(shown, node) : undefined; },
+      continuation: () => { const shown = current(), node = beat && shown?.beats.find(item => item.id === beat.id); return shown && node ? continuationAfter(shown, node) : undefined; },
       select: id => { const shown = current(); if (shown) select(shown, id); },
       openOption: optionId => {
         const shown = current(), body = optionBody(optionId); if (!shown || body?.type !== "branch") return;
@@ -2301,7 +2302,8 @@ export function renderStoryView(
     }
     const validateNew = assignmentValidation(base, beat => insertCommand(beat, chosenLocation()));
     const payload = defaultPayload(type, model, actions.screenHint);
-    const editor: BeatEditor = buildBeatEditor(payload, editorContext(key, false, validateNew));
+    const context = editorContext(key, false, validateNew);
+    const editor: BeatEditor = payload.type === "choice" ? buildChoiceEditor(payload, context, choiceHost(scene)) : buildBeatEditor(payload, context);
     const secondaryHost = document.createElement("div"); secondaryHost.className = "story-screen-secondary"; if (editor.secondary) secondaryHost.append(editor.secondary);
     if (screenType) panel.classList.add("story-screen-editor");
     const actionsRow = document.createElement("div"); actionsRow.className = "row-actions";
@@ -2359,7 +2361,7 @@ export function renderStoryView(
           drawWhere(); relocate(); focusFirst(panel); return true;
         } });
     };
-    const draft=keepDraft(key,{panel,sceneId:scene.id,place,replaces:()=>replaces,read:()=>editor.read(),command:savedCommand,kind:()=>beatLabels[type].toLowerCase(),editors:()=>[editor],primary:()=>editor.primary,
+    const draft=keepDraft(key,{panel,sceneId:scene.id,place,replaces:()=>replaces,read:()=>editor.read(),command:savedCommand,kind:()=>{try{return beatLabels[editor.read().type].toLowerCase();}catch{return beatLabels[type].toLowerCase();}},editors:()=>[editor],primary:()=>editor.primary,
       // A new beat whose scene or branch left source has nowhere to go: only Discard draft resolves it.
       conflict:()=>{
         const current=model.scenes.find(item=>item.id===scene.id),{body:at}=place();
