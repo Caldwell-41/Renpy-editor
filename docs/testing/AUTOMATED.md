@@ -110,9 +110,7 @@ cargo build -p loomlight-core --locked --examples && npm run test:fixtures
 for affected browser/probe paths. `test:fixtures` runs every `tests/*.browser.mjs`
 and `tests/*.dispatch.mjs` file in the PR frontend job, so a new fixture runs by
 default. A fixture opts out only with `// fixture: skip <reason>` in its first five
-lines, when it needs the SDK or another workflow already runs it. `// fixture: skip on
-linux <reason>` skips it only in the Linux PR job, for a fixture that the Linux
-headless browser cannot run. Delete a
+lines, when it needs the SDK or another workflow already runs it. Delete a
 fixture that no longer matches the product; do not leave it unrun. System Chrome or locked Playwright Chromium is
 a renderer test surface, not native WebView or OS input evidence.
 
