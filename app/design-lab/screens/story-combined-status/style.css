@@ -1,0 +1,141 @@
+/* Story Combined status study only. Palette comes from story-revamp/combined-revision.css. */
+.scs-shell { height:100%; display:grid; grid-template-rows:auto minmax(0,1fr); padding:0; overflow:hidden; }
+.scs-shell .scs-plain { background:transparent; border-color:transparent; }
+.scs-spacer { flex:1; min-width:0; }
+.scs-dim { color:var(--text-disabled); }
+
+.scs-prototype { display:flex; align-items:center; gap:10px; padding:3px 12px; border-bottom:1px dashed var(--border-strong); font-size:11px; color:var(--text-secondary); }
+.scs-prototype>strong { color:var(--text-secondary); font-weight:600; }
+.scs-prototype label { display:flex; gap:6px; align-items:center; }
+.scs-shell .scs-prototype button,.scs-shell .scs-prototype select { min-height:22px; padding:1px 7px; font-size:11px; }
+.scs-prototype>button { margin-left:auto; }
+
+.scs-app { min-height:0; display:grid; grid-template-rows:auto minmax(0,1fr) auto; background:var(--surface-app); }
+.scs-header { min-height:40px; padding:5px 12px; display:flex; flex-wrap:wrap; align-items:center; gap:6px 12px; background:var(--surface-panel); border-bottom:1px solid var(--border-normal); font-size:12px; }
+.scs-brand { display:flex; align-items:center; gap:8px; font-size:15px; }
+.scs-brand svg { color:var(--accent-primary); }
+.scs-project { color:var(--text-secondary); padding-left:12px; border-left:1px solid var(--border-strong); white-space:nowrap; }
+.scs-save-state { margin-left:auto; display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:4px 8px; min-width:0; font-size:11px; color:var(--text-secondary); }
+.scs-refused { color:var(--text-primary); }
+.scs-refused>b { color:var(--status-error); font-weight:650; }
+.scs-message { color:var(--text-primary); }
+.scs-shell button.scs-scene-count { min-height:20px; padding:0 2px; font-size:11px; background:transparent; border:0; border-bottom:1px solid var(--border-strong); border-radius:0; }
+.scs-shell button.scs-scene-count:hover { background:transparent; border-bottom-color:var(--text-primary); }
+.scs-scene-count>b { color:var(--status-error); margin-left:3px; }
+.scs-runtime { display:flex; gap:6px; padding-left:12px; border-left:1px solid var(--border-strong); }
+
+/* Header Undo/Redo: icons-v1. Tooltip on focus at once, on hover after half a second. */
+.scs-history-group { display:flex; gap:4px; }
+.scs-cmd { position:relative; display:inline-flex; }
+.scs-shell .scs-history { width:30px; padding:0; display:inline-flex; align-items:center; justify-content:center; }
+.scs-shell .scs-history svg { width:16px; height:16px; }
+.scs-shell .scs-history[aria-disabled=true] { color:var(--text-muted); border-color:var(--border-normal); background:transparent; cursor:default; }
+.scs-tip { position:absolute; top:calc(100% + 7px); right:0; z-index:20; display:flex; gap:10px; align-items:center; white-space:nowrap; padding:4px 8px; font-size:11px; color:var(--surface-app); background:var(--text-primary); border-radius:3px; visibility:hidden; opacity:0; pointer-events:none; }
+.scs-tip kbd { font:inherit; opacity:.7; }
+.scs-cmd:hover>.scs-tip { visibility:visible; opacity:1; transition:opacity .1s linear .45s, visibility 0s .45s; }
+.scs-cmd:has(>.scs-history:focus-visible)>.scs-tip { visibility:visible; opacity:1; transition:none; }
+
+.scs-body { min-height:0; display:grid; grid-template-columns:46px minmax(0,1fr); }
+.scs-main { min-width:0; min-height:0; display:grid; grid-template-rows:38px minmax(0,1fr) auto auto auto; padding:0 12px; }
+.scs-toolbar { display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--border-normal); }
+.scs-scene-name { font-size:14px; }
+.scs-toolbar>button { font-size:12px; min-height:26px; padding:3px 9px; }
+.scs-workspace { min-height:0; display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:16px; padding:8px 0; }
+.scs-shell .sdc-stage { max-width:none; }
+
+.scs-editor-heading { align-items:baseline; gap:10px; }
+.scs-editor-state { font-size:11px; color:var(--accent-primary); }
+.scs-trail { font-size:11px; color:var(--text-secondary); margin:0 0 8px!important; line-height:1.5; }
+.scs-fail-text { color:var(--status-error)!important; }
+.scs-conflict-text { color:var(--accent-primary); }
+.scs-field-error { margin:-4px 0 10px!important; font-size:12px; color:var(--status-error); }
+.scs-editor-banner { margin:0 0 10px!important; padding:5px 0 5px 9px; border-left:2px solid var(--status-error); font-size:12px; color:var(--text-primary); }
+.scs-editor-banner>b { color:var(--status-error); margin-right:2px; }
+.scs-shell [aria-invalid=true] { border-color:var(--status-error)!important; }
+.scs-speaker>select { flex:1; min-width:0; }
+.scs-speaker>select[data-speaker=Mara] { color:var(--sc-char-mara); }
+.scs-speaker>select[data-speaker=Eli] { color:var(--sc-char-eli); }
+.scs-shell .sdc-saybox>strong.scs-say-eli { color:var(--sc-char-eli); }
+.scs-shell .sdc-effects { margin-top:10px; }
+
+/* Branch path. */
+.scs-shell .scs-path { display:flex; flex-wrap:wrap; align-items:center; min-height:34px; border-block:1px solid var(--border-normal); }
+.scs-path-groups { display:flex; flex-wrap:wrap; align-items:center; }
+.scs-path-group { display:inline-flex; align-items:center; }
+.scs-path-ref { font:11.5px var(--font-source); color:var(--text-muted); }
+
+/* Refusal strip above Tracks (variant 3). */
+.scs-strip { display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; padding:5px 0; border-bottom:1px solid var(--border-normal); font-size:12px; }
+.scs-strip .scs-refused { font-size:12px; }
+
+/* Tracks and Reel. */
+.scs-bottom { min-width:0; min-height:0; display:grid; grid-template-rows:28px auto; }
+.scs-legend { margin-left:auto; align-self:center; display:flex; gap:12px; white-space:nowrap; color:var(--text-muted); font-size:10.5px; }
+.scs-legend b { font-weight:700; }
+.scs-draft-mark { color:var(--accent-primary); }
+.scs-conflict-mark { color:var(--accent-primary); }
+.scs-fail-mark { color:var(--status-error); }
+.scs-shell .sdc-beat-number>b { float:none; margin-left:5px; font-size:12px; }
+.scs-shell .sdc-timeline { min-height:0; }
+.scs-columns { align-items:stretch; }
+.scs-col-wrap,.scs-end-wrap { display:flex; flex-direction:column; flex:none; }
+.scs-col-wrap[data-arm],.scs-end-wrap[data-arm] { background:color-mix(in srgb,var(--arm) 7%,transparent); }
+.scs-rail { position:relative; height:16px; flex:none; display:block; }
+.scs-rail-on::after { content:""; position:absolute; left:0; right:0; bottom:2px; height:3px; background:var(--arm); }
+.scs-rail-label { position:absolute; left:4px; bottom:6px; z-index:2; max-width:240px; overflow:visible; white-space:nowrap; color:var(--arm); font-size:10.5px; font-weight:600; line-height:1; }
+.scs-shell .scs-column { flex:none; width:118px; border-top:1px solid var(--border-normal); }
+.scs-shell .scs-column[aria-disabled=true] { cursor:default; color:var(--text-secondary); }
+.scs-shell .sdc-reel .scs-column { width:150px; height:100%; }
+.scs-reel-title { font-weight:600; font-size:11px; }
+.scs-reel-fail { color:var(--status-error); font-size:10.5px; }
+.scs-reel-conflict { color:var(--accent-primary); font-size:10.5px; }
+.scs-shell .scs-lanes { padding-top:16px; }
+
+/* Failure treatments differ by variant. */
+[data-variant^=header] .scs-column.scs-fail { box-shadow:inset 0 2px 0 var(--status-error); }
+[data-variant=strip] .scs-column.scs-fail>.sdc-beat-number { background:color-mix(in srgb,var(--status-error) 22%,transparent); }
+.scs-lane-reason>em { font-style:normal; color:var(--status-error); font-weight:600; }
+
+/* Insertion markers at the end of a scene, branch or option. */
+.scs-shell .scs-end { flex:1; width:92px; display:flex; flex-direction:column; align-items:flex-start; gap:4px; padding:3px 6px; text-align:left; border:1px dashed var(--border-strong); border-top-style:solid; border-radius:0; background:transparent; color:var(--text-secondary); font-size:10.5px; line-height:1.3; }
+.scs-shell .scs-end:hover,.scs-shell .scs-end:focus-visible { color:var(--text-primary); background:var(--accent-subtle); }
+.scs-end-plus { color:var(--accent-primary); font-size:14px; line-height:1; }
+.scs-end-text { overflow-wrap:anywhere; }
+.scs-end-wrap[data-arm] .scs-end-text { color:var(--arm); }
+/* Variant 2: a slim marker; its label runs down the column so neighbouring ends never collide. */
+.scs-shell .scs-end-slim>.scs-end { position:relative; width:30px; align-items:center; padding:3px 0; }
+.scs-end-slim .scs-end-text { position:absolute; top:22px; bottom:4px; left:50%; transform:translateX(-50%); writing-mode:vertical-rl; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:10px; }
+
+/* Footer status bar (variants 1 and 2). */
+.scs-footer { display:flex; align-items:center; gap:12px; min-height:26px; padding:3px 12px; border-top:1px solid var(--border-normal); background:var(--surface-panel); font-size:11px; color:var(--text-secondary); }
+.scs-footer-status { display:flex; align-items:center; flex-wrap:wrap; gap:3px 8px; min-width:0; }
+.scs-footer-context { margin-left:auto; color:var(--text-muted); white-space:nowrap; }
+
+@media(max-width:1200px) { .scs-shell .sdc-column,.scs-shell .sdc-lane-labels { grid-template-rows:19px 17px 17px 36px 17px 18px; } }
+@media(max-width:640px) {
+  .scs-header { gap:4px 8px; padding:5px 8px; }
+  .scs-project { display:none; }
+  .scs-shell:not([data-variant=header-v2]) .scs-runtime { display:none; }
+  [data-variant=header-v2] .scs-header { flex-wrap:nowrap; }
+  [data-variant=header-v2] .scs-runtime { gap:4px; padding-left:8px; }
+  [data-variant=header-v2] .scs-header button:not(.scs-history) { padding:3px 7px; }
+  [data-variant=header-v2] .scs-save-state { flex-wrap:nowrap; white-space:nowrap; overflow:hidden; }
+  .scs-shell .scs-header button { font-size:11px; }
+  [data-variant=header] .scs-save-state:has(.scs-refused) { order:9; flex-basis:100%; justify-content:flex-start; }
+  [data-variant=header] .scs-save-state:has(.scs-refused)+.scs-history-group { margin-left:auto; }
+  .scs-body { grid-template-columns:36px minmax(0,1fr); }
+  .scs-shell .sdc-nav { display:flex; }
+  .scs-shell .sdc-nav>span { width:30px; }
+  .scs-main { padding:0 8px; grid-template-rows:36px minmax(0,1fr) auto auto auto; }
+  .scs-toolbar>button:first-of-type { display:none; }
+  .scs-workspace { position:relative; display:block; overflow:auto; padding:6px 0; }
+  .scs-shell .sdc-editor { border:0; padding:8px 0 0; overflow:visible; }
+  .scs-shell .sdc-effects { display:none; }
+  .scs-shell .scs-path { padding:3px 0; gap:2px 8px; }
+  .scs-shell .sc-condition-groups { gap:4px 8px; }
+  .scs-legend { gap:8px; font-size:10px; }
+  .scs-shell .scs-column,.scs-shell .scs-lanes { grid-template-rows:19px 52px; }
+  .scs-shell .scs-column { width:112px; }
+  .scs-lanes { flex-basis:70px; }
+  .scs-footer-context { display:none; }
+}
