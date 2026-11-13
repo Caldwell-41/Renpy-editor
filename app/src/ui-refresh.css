@@ -857,12 +857,16 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .story-branch-empty{line-height:27px;color:var(--text-muted);white-space:nowrap}
 .story-panel{display:grid;grid-template-rows:24px minmax(0,1fr);min-width:0;min-height:0}
 .story-panel-toolbar{display:flex;align-items:center;gap:8px;min-width:0;font-size:12px}
-.story-panel-view{align-self:stretch;display:flex;align-items:center;padding:0 9px;border-bottom:2px solid var(--accent-primary);font-weight:600}
+.story-view-switch{align-self:stretch;display:flex;gap:4px;flex:none}
+.story-view-option{min-height:0;padding:0 9px;border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--text-secondary);font:inherit;cursor:pointer}
+.story-view-option:hover{color:var(--text-primary)}
+.story-view-option:focus-visible{outline:2px solid var(--focus-ring);outline-offset:-2px}
+.story-view-option[aria-pressed=true]{border-bottom-color:var(--accent-primary);color:var(--text-primary);font-weight:600}
 .story-track-key{position:relative}.story-track-key>summary{list-style:none;cursor:pointer;min-height:24px;padding:2px 10px;font-size:12px}.story-track-key>summary::-webkit-details-marker{display:none}
 .story-track-key-list{position:absolute;left:0;top:calc(100% + 4px);z-index:20;width:290px;padding:8px 10px;background:var(--surface-raised);border:1px solid var(--border-strong);border-radius:var(--radius-small);box-shadow:var(--elevation-preview)}
 .story-track-key-list>p{margin:0 0 4px;font-size:12px;color:var(--text-secondary)}
 .story-tracks-scroll{min-width:0;min-height:0;overflow:auto;scrollbar-width:thin}
-.story-tracks{display:flex;align-items:stretch;width:max-content;min-width:100%}
+.story-route{display:flex;align-items:stretch;width:max-content;min-width:100%}
 .story-track-labels{position:sticky;left:0;z-index:5;flex:0 0 86px;display:grid;grid-template-rows:var(--track-rows);padding-top:calc(var(--rail) * 2);background:var(--surface-panel)}
 .story-track-label{padding:2px 6px;border-bottom:1px solid var(--border-normal);color:var(--text-secondary);font-size:11px;white-space:nowrap}
 .story-track-column{position:relative;flex:0 0 154px;display:flex;flex-direction:column;min-width:0}
@@ -897,12 +901,31 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .story-track-slot>.story-slot-name[data-selected=true]{box-shadow:inset 2px 0 var(--accent-primary);background:var(--accent-subtle)}
 .story-track-slot>button:last-child{font-size:12px}
 .story-track-slot .story-rail-end{bottom:-14px}
+/* Reel (story-revamp / combined-v1): the same route as Tracks, one card per beat with its
+   number, kind and text, and the reason a draft needs attention (header-v2). */
+.story-reel{min-height:100%}
+.story-reel>.story-track-column{flex-basis:184px;border-left:1px solid var(--border-normal)}
+.story-reel .story-track-mark{border-left:1px solid var(--border-normal)}
+.story-reel .story-track-beat{display:flex;flex-direction:column;gap:8px;padding:10px 32px 4px 10px;border:0;border-bottom:2px solid transparent;font-size:12px}
+.story-reel .story-track-beat[data-selected=true]{border:0;border-bottom:2px solid var(--accent-primary)}
+.story-reel .story-track-beat[data-beat-kind=customCode]{border-left:2px dashed var(--text-secondary);background:var(--surface-panel)}
+.story-reel>.story-track-pending .story-track-beat{border-left:2px dashed var(--accent-primary)}
+.story-reel-title{font-size:11px;color:var(--text-secondary)}
+.story-reel-title>.story-beat-number{font-family:var(--font-source)}
+.story-reel .story-track-beat[data-selected=true] .story-reel-title{color:var(--accent-primary)}
+.story-reel-copy{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:5;max-height:100px;overflow:hidden;overflow-wrap:anywhere;line-height:1.55}
+.story-reel-copy:empty{display:none}
+.story-reel-reason{font-size:11px;color:var(--accent-primary)}
+.story-track-column[data-save-refused=true] .story-reel-reason{color:var(--status-error)}
+.story-reel .story-track-insert{top:44%;right:2px;height:26px}
 .scene-workspace[data-writing-focus="true"] .story-stage{display:none}
 .scene-workspace[data-writing-focus="true"] .story-top{grid-template-columns:minmax(0,1fr)}
 .scene-workspace[data-writing-focus="true"] .story-editor{border-left:0;padding-left:0;max-width:760px}
 @media(min-width:900px) and (max-width:1200px){
  .story-combined{--rail:13px;--track-rows:16px 14px 16px 30px 14px 16px;--panel-height:170px}
  .story-track-column,.story-track-slot{flex-basis:135px}
+ .story-reel>.story-track-column{flex-basis:165px}
+ .story-reel-copy{-webkit-line-clamp:4;max-height:61.6px;font-size:11px;line-height:1.4}
  .story-rail-label,.story-rail-end{font-size:10px;bottom:4px}
  .story-lane{font-size:10px;padding:1px 6px}
  .story-lane-copy{line-height:14px}

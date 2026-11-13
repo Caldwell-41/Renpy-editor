@@ -56,9 +56,9 @@ export function storyFixture(deep = 1): SceneWorkspace {
     chapters: [{ id: "chapter", displayName: "The Last Tram", directory: "game" }], scenes: [{ id: "one", chapterId: "chapter", displayName: "Arrival", technicalLabel: "arrival", sourcePath: "game/arrival.rpy", sourceRevision: "source", sourceConflict: false, partial: false, beats, bodies: sceneBodies(beats) }, { id: "two", chapterId: "chapter", displayName: "Shared conversation", technicalLabel: "shared", sourcePath: "game/shared.rpy", sourceRevision: "other", sourceConflict: false, partial: false, beats: [{ id: "callee", byteStart: 20, byteEnd: 40, protected: false, payload: { type: "narration", text: "We meet again." } }], bodies: [{ body: { type: "root" }, kind: "scene", nodes: [{ beatId: "callee" }], ending: { type: "continues" }, places: [{ position: { type: "end" }, fitsEnding: true }], defaultPlace: { type: "end" } }] }], authoring: { characters: [], assets: [], appearances: [], variables: [{ id: "flag", technicalName: "flag", variableType: "bool", defaultValue: true }, { id: "trust", technicalName: "trust", variableType: "int", defaultValue: "0" }, { id: "name", technicalName: "name", variableType: "string", defaultValue: "Bec" }] } };
 }
 
-/** Story Combined test helpers: Tracks columns, the Branch path and the editor beside the stage. */
+/** Story Combined test helpers: Tracks or Reel columns, the Branch path and the editor beside the stage. */
 export function trackColumn(host: ParentNode, id: string): HTMLElement | undefined {
-  return [...host.querySelectorAll<HTMLElement>(".story-tracks [data-beat-id]")].find(column => column.dataset.beatId === id);
+  return [...host.querySelectorAll<HTMLElement>(".story-route [data-beat-id]")].find(column => column.dataset.beatId === id);
 }
 export function storyEditor(host: ParentNode): HTMLElement {
   const editor = host.querySelector<HTMLElement>(".story-editor"); if (!editor) throw Error("Story editor is not shown"); return editor;
@@ -69,7 +69,7 @@ export function openBranch(host: ParentNode, branchId: string): void {
   if (!segment) throw Error(`No Branch path switch for ${branchId}`);
   if (segment.ariaPressed !== "true") segment.click();
 }
-/** Selects a beat by its Tracks column, opening the named branches first, and returns the editor. */
+/** Selects a beat by its Tracks or Reel column, opening the named branches first, and returns the editor. */
 export function selectBeat(host: ParentNode, id: string, ...branches: string[]): HTMLElement {
   for (const branch of branches) openBranch(host, branch);
   const column = trackColumn(host, id); if (!column) throw Error(`No Tracks column for ${id}`);
