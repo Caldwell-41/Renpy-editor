@@ -350,8 +350,12 @@ its state. When space runs short, secondary panels collapse before the main edit
 shrinks. The footer and warning regions keep a fixed height so editing content never
 moves.
 
-The header shows pending beat drafts as well as Saved, Saving, Unsaved Source draft,
-Conflict or Recovery required. Cmd/Ctrl+S has one shell-owned route. In Story it
+The header save status sits before Undo, Redo and Save. It shows the number of
+pending beat drafts ("5 unsaved beat drafts") as well as Saved, Saving, Unsaved Source
+draft, Conflict or Recovery required. The bottom status bar shows "Ready" and the
+"Undone: …" and "Redone: …" notices. The approved placement is `story-combined-status`
+/ `header-v2`. At 560 px the header stays on one row and shows a short form, such as
+"5 unsaved" or "Nothing saved". Cmd/Ctrl+S has one shell-owned route. In Story it
 accepts all pending beat drafts under [Saving Story drafts](#saving-story-drafts);
 in Source it accepts the focused Source draft. Other contexts retain their existing
 Save behaviour. Pending or refused drafts never report the whole project as Saved.
@@ -419,6 +423,13 @@ covers moving, unwrapping and deleting branches.
   Neither shows elapsed time, playback or keyframes.
 - Writing focus hides the stage and keeps the editor and Branch path. Its Tracks view
   keeps every lane on wide windows, with a taller Words lane.
+- Production has the stage, editor, Branch path and Tracks (#116). Selecting a Tracks
+  column edits its beat beside the stage; a condition or Choice column edits the
+  condition, and an option opens from its Choice. Move up, Move down, Move to and
+  Delete sit in the editor heading's menu, and Alt+Arrow on a column moves its beat.
+  Reel (#118), the Writing focus lane grid and resizing (#119), and the editor
+  refinements, pickers and Add a beat dialog (#117) come later; until then Writing
+  focus only hides the stage.
 
 ### Branches in a scene
 
@@ -430,9 +441,15 @@ covers moving, unwrapping and deleting branches.
   Each extra row takes about 30 px from the stage, up to three rows; beyond that the
   path scrolls.
 - Tracks and Reel draw a route line in the arm colour above each open branch, with a
-  light tint on its columns. Slim `+` markers add the first beat, the last beat or a
-  beat after the condition. An empty branch or option is one beat-wide slot holding
+  light tint on its columns. Slim `+` markers add a beat after a column, the first
+  beat in a branch or a beat after the condition. Each open branch or option ends in
+  an end marker, and the scene ends in one: `+ End of "If trust ≥ 5"`,
+  `+ End of option 2 "Leave"`, `+ End of Otherwise` or `+ End of scene`. An end marker
+  adds at its default place. An empty branch or option is one beat-wide slot holding
   its name, where it continues and Add a beat.
+- Story text names the scene, branch or option and never says "body". Editor paths
+  read "Arrival › If trust ≥ 5 › Option 2 "Leave"". Long conditions shorten with
+  whole words and an ellipsis, as in the Branch path; the full test is in the tooltip.
 - Every insertion names its body and position, and replacing an ending names what it
   replaces.
 - Core gives each [body](../GLOSSARY.md) its beats, body ending and insertion places.
@@ -490,7 +507,9 @@ would discard a draft, including deleting its beat or closing the project.
 
 The [beat draft conflict rules](#beat-draft-conflicts) handle changes to the source
 beneath a retained draft. A beat that the author has not edited is not a draft. A
-collapsed condition shows the draft marker on its heading. A beat with a draft can
+condition or Choice column shows the draft marker for drafts in any of its branches,
+open or closed. Drafts show `*` in Tracks and in the editor heading ("* Draft"); a
+draft that conflicts with source shows `!` in the accent colour ("! Conflict"). A beat with a draft can
 be moved, and the draft moves with it. A new beat that is not yet added moves with
 the place the author chooses. [Story Undo](#story-undo) orders draft steps with
 every other edit.
@@ -564,12 +583,16 @@ another Story form has input, Save refuses and writes nothing. If the project ch
 after Story last refreshed, Save refreshes Story, marks any beat draft conflicts and
 asks the author to save again. It never retries on its own.
 
-A refused Story Save follows the approved `story-save-refusal` design (`marked-v1`).
-Save reveals the first failing draft in project order. The status line reads "Nothing
-saved. 3 of 5 drafts need changes:", followed by one link per scene with its count of
-failing drafts. Each link reveals that scene's first failing draft. A failing beat and its
-scene row show a red `!` in place of the draft `*`, and the draft's editor shows why
-it failed. A new beat whose body or insertion anchor is gone from source is a beat
+A refused Story Save follows the approved `story-combined-status` design
+(`header-v2`), which places `story-save-refusal` (`marked-v1`) inside Story Combined.
+Save reveals the first failing draft in project order. The header save status reads
+"Nothing saved. 3 of 5 drafts need changes:", followed by one link per scene with its
+count of failing drafts. At 560 px the header shows "Nothing saved" and the bottom
+status bar holds the full line and links. Each link reveals that scene's first failing
+draft. A failing beat's Tracks column and its scene row show a red `!` in place of the
+draft `*`, and the column gets a red top edge and the reason as its tooltip. The Tracks
+legend adds "Needs changes". The editor heading reads "! Needs changes" and the reason
+sits under the fields. Marks appear only after a refused Save. A new beat whose body or insertion anchor is gone from source is a beat
 draft conflict. The marks and counts update as the author fixes or cancels each
 failing draft. When none fail, the status reads "5 unsaved beat drafts. Ready to
 save." The marks clear when a later Save succeeds.
@@ -597,8 +620,8 @@ References have no Undo or Redo buttons of their own. The header buttons are ico
 Their tooltip and accessible name name the next edit and the shortcut, for example
 "Undo button resize ⌘Z". With nothing to undo or redo, a button is dimmed, does
 nothing and reads "Nothing to undo" or "Nothing to redo". It stays in the Tab order
-(`aria-disabled`, not `disabled`). After Undo the status line reports it, for example
-"Undone: button resize".
+(`aria-disabled`, not `disabled`). After Undo the bottom status bar reports it, for
+example "Undone: button resize", until the next edit or view.
 
 Undo opens the edit's workspace and selects its item: the beat, screen element,
 Source file, prompt action or reference record. If the item no longer exists,
@@ -698,56 +721,31 @@ Save. An incomplete or invalid calculation never supplies an invented preview re
 Selecting a beat shows the scene-local state through that beat: background, visible
 characters and appearances, placement, music, simple variables and the current line or
 menu. A new Background clears characters. State the editor cannot prove is labelled
-partial or unknown, never guessed. Preview choices for branches and options are manual
-assumptions; they are separate from the editing target and never saved or added to
-Undo. The [preview boundary](ARCHITECTURE.md#preview-boundary) owns reconstruction and
+partial or unknown, never guessed. The branches open in the Branch path are the
+preview route. A condition or Choice before the selected beat with no open branch
+leaves its state unknown, and the preview continues to the selected beat. With no beat
+selected, the preview stops at the first such condition or Choice. Open branches are
+view state; they are never saved or added to Undo. "In effect at 05" beside the stage
+names the beat that set each item, with Edit and Add change here, and offers the
+explicit audio audition. The [preview boundary](ARCHITECTURE.md#preview-boundary) owns reconstruction and
 media rules.
 
 ### Not yet in production
 
-Production Story still has the earlier layout, with the preview above a beat list.
-The #101 slice adds numbered option bodies, caption/order controls, explicit Beat
-insertion positions and Then controls for Continue, Jump and Return in that editor.
-#102 adds conditions, nested Choices and Scene Calls inside options. #103 adds the
-approved prompt row above the options: "+ Prompt", a narration/existing Character
-picker, prompt text and removal. Commit and Cancel use the existing retained Beat
-draft. Accepted prompts appear with the options in the illustrative preview;
-manual option selection can expose a nested prompt without evaluating its guard.
-#104 adds each guarded option's If false control with Hide (default) and Show
-disabled. Commit/Cancel and refused drafts use the same existing Beat editor.
-The inert preview labels availability as unknown and retains the false-condition
-policy in hover/accessibility text; it does not infer values or allow game selection. Editing focus remains
-separate from game sensitivity and picked state. Unsupported runtime templates
-show a protected Source fallback reason. #105 adds Repeat this Choice to Then.
-It edits the same ending Beat, preserves earlier Beats, and revisits the owning
-menu with its prompt and reevaluated availability. Continue removes only the ending;
-Return retains its caller-sensitive meaning. Cancel and refused drafts retain the
-existing draft protections; accepted edits use shared Undo/Redo and reopen. Nested
-Choices own separate Repeat targets. Preview describes Repeat without executing it
-or inventing current values. #106 adds the whole-Choice Picked options selector
-with Show normally, Mark picked and Hide picked. New Choices start with Show
-normally and record selections from their first visit. Existing unconfigured
-Choices keep their source until an accepted policy edit. Stable source-backed
-Choice and option UUIDs preserve identity through caption changes and reorder.
-Mark picked keeps the native action selectable with a check; Show disabled rows
-have a distinct lock. Hide picked takes precedence over disabled display,
-and hiding the last selectable option continues after the Choice. Selection records
-precede authored option Beats and use ordinary current-save, rollback-aware state.
-Preview reports picked state unknown. Commit, Cancel, refused drafts, Source
-fallback, shared history and reopen retain their existing owners. The implementation
-uses schema 14 while preserving frozen older recognizers.
+Production Story has the Combined stage, editor, Branch path and Tracks, with the
+approved status, marks and wording of `story-combined-status` / `header-v2`. Reel
+(#118), the Writing focus lane grid (#119) and the Combined beat editors, pickers and
+Add a beat dialog (#117) are not built yet. The Move to and Add a beat forms and the
+Then states keep their earlier wording until #117.
 
-The approved [Choice preview A v2](design/choice-preview-correction/HANDOFF.md)
-keeps the existing Game canvas on the left and puts the prompt, picked-state notice
-and numbered options in one keyboard-scrollable summary on the right. Missing
-prompts leave no empty row. Duplicate captions stay separate and numbered. Only
-conditional rows say "Condition unknown"; Show normally adds no picked-state line.
-The picked-state notice stays separate from the configured Mark picked/Hide picked
-policy. Long text wraps and scrolls within the existing preview allocation. The
-Game canvas retains background/Character media and the other-character-state notice;
-the shortened background notice keeps its original reason in hover text.
-The full Combined layout and palette remain with #110. Arithmetic uses the accepted
-shared controls.
+Choice editing follows #98: numbered option bodies, captions and order, explicit beat
+insertion, Then (Continue, Go to a scene, Repeat this Choice, Return), the prompt row,
+If false (Hide or Show disabled) and Picked options. Commit, Cancel, refused drafts,
+Source fallback, shared history and reopen keep their existing owners. A Choice's
+editor links to each option's editor, which holds Add a beat, Add Condition and Then.
+The stage shows the prompt, the picked-state notice and the numbered options as the
+game's choice menu, read-only and keyboard-scrollable. Only conditional rows say
+"Condition unknown"; the false-condition policy is in the hover and accessible text.
 Until a capability exists, the editor says it is not built instead of showing a
 working-looking control.
 

@@ -14,7 +14,7 @@
   // The navigation shell appears before the initial real-service observation ends.
   // Wait for Story content, not just the newly mounted Source navigation button.
   details.stage='initial-story-ready';
-  await wait(()=>document.querySelector('.scene-workspace .preview-region') && button('Add Beat'));
+  await wait(()=>document.querySelector('.scene-workspace .story-stage') && button('Add Beat'));
   details.stage='character-default-colour';button('Characters').click();
   await wait(()=>button('New character'));button('New character').click();
   await wait(()=>button('Game setup'));button('Game setup').click();
@@ -64,7 +64,7 @@
    rendererDraftTotal:document.querySelector('.source-draft-total')?.textContent,
    draftWarningHidden:document.querySelector('.source-draft-warning')?.hidden,
    editorPresent:!!document.querySelector('.cm-content'),editorEditable:document.querySelector('.cm-content')?.contentEditable,
-   storyReady:!!document.querySelector('.scene-workspace .preview-region'),
+   storyReady:!!document.querySelector('.scene-workspace .story-stage'),
    recentCount:document.querySelectorAll('.recent-open').length,
    sourceFileCount:document.querySelectorAll('.source-file-row').length,
     workspaceText:document.querySelector('.source-workspace,.scene-workspace,.catalog-workspace')?.textContent?.slice(0,1500),

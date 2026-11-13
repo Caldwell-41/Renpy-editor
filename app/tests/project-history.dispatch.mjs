@@ -17,6 +17,8 @@ const wait=async(check,label='condition')=>{const until=Date.now()+8000;while(!a
 const settle=async()=>{await new Promise(r=>setTimeout(r,150));await wait(()=>inflight===0,'requests');};
 const button=(text,scope=document)=>{const b=[...scope.querySelectorAll('button')].find(b=>(b.textContent===text||b.getAttribute('aria-label')===text||b.ariaLabel===text)&&!b.disabled);assert(b,`Missing enabled ${text}`);b.click();return b;};
 const app=()=>document.querySelector('#app'),status=()=>document.querySelector('#app-status')?.textContent;
+// "Undone: …" and "Redone: …" appear in the bottom status bar (story-combined-status header-v2).
+const message=()=>document.querySelector('#app-message')?.textContent;
 const mac=/Mac|iPhone|iPad|iPod/.test(window.navigator.platform);
 // A public command outside the shell's controls: reload Story so the header reads the history again.
 async function refreshHistoryView(){button('Source');await wait(()=>workspace()==='Source','Source');await settle();button('Story');await wait(()=>workspace()==='Story','Story');await settle();}
@@ -40,14 +42,14 @@ async function disk(dir=join(scratch,'synthetic-project'),prefix='',files={}){
 const stage=text=>{result.stages.push(text);console.log(text);};
 async function storyEdit(text){
  const scene=(await call('scene.list')).scenes[0],beat=scene.beats.find(b=>b.payload.type==='narration');assert(beat,'fixture narration beat');
- const select=document.querySelector(`[data-beat-id="${beat.id}"] .beat-select`);if(select.ariaExpanded!=='true')select.click();await wait(()=>document.querySelector(`[data-beat-id="${beat.id}"] textarea`),'narration editor');
- const field=document.querySelector(`[data-beat-id="${beat.id}"] textarea`);field.value=text;field.dispatchEvent(new Event('input',{bubbles:true}));
- button('Commit Beat',document.querySelector(`[data-beat-id="${beat.id}"]`));await wait(async()=>(await source(scene.sourcePath)).includes(text),'Story commit reaches source');await settle();
+ const select=document.querySelector(`.story-track-column[data-beat-id="${beat.id}"] > .story-track-beat`);if(select.dataset.selected!=='true')select.click();await wait(()=>document.querySelector(`.story-editor[data-editor-for="${beat.id}"] textarea`),'narration editor');
+ const field=document.querySelector(`.story-editor[data-editor-for="${beat.id}"] textarea`);field.value=text;field.dispatchEvent(new Event('input',{bubbles:true}));
+ button('Commit Beat',document.querySelector(`.story-editor[data-editor-for="${beat.id}"]`));await wait(async()=>(await source(scene.sourcePath)).includes(text),'Story commit reaches source');await settle();
  return {scene,beat};
 }
 try{
  assert.equal((await child.next()).ready,true);document.body.innerHTML='<div id="app"></div>';const {startApplication}=await import('../dist-tests/src/main.js');startApplication((op,payload)=>request(op,payload,true));
- await wait(()=>document.querySelector('.recent-open')&&!document.querySelector('.recent-open').disabled,'recent');document.querySelector('.recent-open').click();await wait(()=>document.querySelector('.beat-card'),'story');await settle();
+ await wait(()=>document.querySelector('.recent-open')&&!document.querySelector('.recent-open').disabled,'recent');document.querySelector('.recent-open').click();await wait(()=>document.querySelector('.story-track-column'),'story');await settle();
  assert.equal(undoButton().getAttribute('aria-disabled'),'true');assert.equal(undoButton().getAttribute('aria-label'),'Undo');
  assert.match(undoButton().parentElement.querySelector('.header-history-tip').textContent,/^Nothing to undo/);
  // Disposable public-core setup: an owned screen with a Start button.
@@ -56,14 +58,14 @@ try{
  const start=(await call('screens.compose',{screenId:owner.id,expectedRevision:doc.revision,command:{type:'add',parentId:owner.rootId,kind:'textbutton',text:'Start'}})).selectedId;
 
  // Reload Story after the setup writes, then commit a Story edit, resize the Screens button and return to Story.
- button('Screens');await wait(()=>document.querySelector('.screen-picker select'),'screens');await settle();button('Story');await wait(()=>workspace()==='Story'&&document.querySelector('.beat-card'),'fresh Story');await settle();
+ button('Screens');await wait(()=>document.querySelector('.screen-picker select'),'screens');await settle();button('Story');await wait(()=>workspace()==='Story'&&document.querySelector('.story-track-column'),'fresh Story');await settle();
  const {scene}=await storyEdit('Foundation continuation, edited');
  button('Screens');await wait(()=>document.querySelector('.screen-picker select'),'screens');await settle();
  const picker=document.querySelector('.screen-picker select');picker.value=JSON.stringify(['owned',owner.id]);picker.dispatchEvent(new Event('change',{bubbles:true}));await settle();
  document.querySelector(`[data-node-id="${start}"]`).dispatchEvent(new MouseEvent('dblclick',{bubbles:true}));await settle();
  const width=document.querySelector('.screens-editor [data-layout-field="xsize"]');assert(width,'button width field');width.value='280';width.dispatchEvent(new Event('input',{bubbles:true}));
  const beforeResize=await source(owner.path);width.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));await wait(async()=>(await source(owner.path)).includes('xsize 280'),'resize');await settle();const resized=await source(owner.path);
- button('Story');await wait(()=>workspace()==='Story'&&document.querySelector('.beat-card'),'back to Story');await settle();
+ button('Story');await wait(()=>workspace()==='Story'&&document.querySelector('.story-track-column'),'back to Story');await settle();
  await wait(()=>undoButton().getAttribute('aria-label')==='Undo button resize','header names the resize');
  assert.match(undoButton().parentElement.querySelector('.header-history-tip').textContent,/^Undo button resize(⌘Z|Ctrl\+Z)$/);
  stage('Story edit, then Screens resize, then Story: the header names the latest edit');
@@ -72,15 +74,15 @@ try{
  assert.equal(await header('undo'),'committed');
  assert.equal(await source(owner.path),beforeResize,'Undo reverses the resize');
  await wait(()=>workspace()==='Screens'&&/Start/.test(selectedElement()),'Screens selects the button');
- assert.equal(status(),'Undone: button resize');assert.equal(redoButton().getAttribute('aria-label'),'Redo button resize');
+ assert.equal(message(),'Undone: button resize');assert.equal(redoButton().getAttribute('aria-label'),'Redo button resize');
  const buttonUndo={source:await source(owner.path),workspace:workspace(),selected:selectedElement(),status:status()};
  assert(scene.beats.length&&(await source(scene.sourcePath)).includes('Foundation continuation, edited'),'Undo leaves the older Story edit');
  stage('header Undo from Story reverses the resize, opens Screens with the button selected and reports its name');
 
  // Shift+Cmd/Ctrl+Z restores it; Cmd/Ctrl+Z from Story then gives the button's result.
- assert.equal(await shortcut('redo'),'committed');assert.equal(await source(owner.path),resized);assert.equal(status(),'Redone: button resize');
+ assert.equal(await shortcut('redo'),'committed');assert.equal(await source(owner.path),resized);assert.equal(message(),'Redone: button resize');
  await wait(()=>/Start/.test(selectedElement()),'Redo selects the button');
- button('Story');await wait(()=>workspace()==='Story'&&document.querySelector('.beat-card'),'Story again');await settle();
+ button('Story');await wait(()=>workspace()==='Story'&&document.querySelector('.story-track-column'),'Story again');await settle();
  assert.equal(await shortcut('undo'),'committed');await wait(()=>workspace()==='Screens'&&/Start/.test(selectedElement()),'shortcut reveal');
  assert.deepEqual({source:await source(owner.path),workspace:workspace(),selected:selectedElement(),status:status()},buttonUndo,'Cmd/Ctrl+Z gives the header button result');
  assert.equal(await header('redo'),'committed');assert.equal(await source(owner.path),resized);
@@ -102,7 +104,7 @@ try{
  stage('Cmd/Ctrl+Z in the file search changes only that field');
 
  // An open Story form refuses Undo like any navigation and keeps its input.
- button('Story');await wait(()=>workspace()==='Story'&&document.querySelector('.beat-card'),'Story for form');await settle();
+ button('Story');await wait(()=>workspace()==='Story'&&document.querySelector('.story-track-column'),'Story for form');await settle();
  button(`Rename scene ${scene.displayName}`);const rename=document.querySelector('.tree-inline input');assert(rename,'rename form');rename.value='Unsaved name';rename.dispatchEvent(new Event('input',{bubbles:true}));
  requests=historyRequests();assert.equal(await header('undo'),'blocked');assert.equal(historyRequests(),requests,'No history request while a Story form is open');
  assert.match(status(),/Finish the open Story form/);assert.equal(document.querySelector('.tree-inline input')?.value,'Unsaved name','The form keeps its input');assert.equal(await source(owner.path),resized);
@@ -112,8 +114,9 @@ try{
  // Beat draft steps (#113). A is the root narration, B the dialogue in the true branch.
  const current=(await call('scene.list')).scenes[0],path=current.sourcePath,sceneName=current.displayName;
  const beatA=current.beats.find(b=>b.payload.type==='narration'),beatB=current.beats.find(b=>b.payload.type==='dialogue'&&b.payload.text.startsWith('True'));assert(beatA&&beatB,'fixture beats A and B');
- const row=id=>document.querySelector(`.scene-workspace [data-beat-id="${id}"]`),field=id=>row(id)?.querySelector('textarea'),marked=id=>row(id)?.dataset.beatDraft==='true';
- const open=async id=>{if(!field(id)){row(id).querySelector('.beat-select').click();await wait(()=>field(id),`editor for ${id}`);}return field(id);};
+ // Tracks shows a beat as a column; its editor sits beside the stage. B needs its branch open.
+ const row=id=>document.querySelector(`.story-track-column[data-beat-id="${id}"]`),editorFor=id=>document.querySelector(`.story-editor[data-editor-for="${id}"]`),field=id=>editorFor(id)?.querySelector('textarea'),marked=id=>row(id)?.dataset.beatDraft==='true';
+ const open=async id=>{if(!field(id)){if(!row(id))[...document.querySelectorAll('.story-branch-segment')].find(item=>item.dataset.branchId===beatB.owner.branchId).click();await wait(()=>row(id),`column for ${id}`);row(id).querySelector('.story-track-beat').click();await wait(()=>field(id),`editor for ${id}`);}return field(id);};
  const input=(control,value,type='input')=>{control.focus();control.value=value;control.dispatchEvent(new Event(type,{bubbles:true}));};
  const type=async(id,text)=>{const control=await open(id);input(control,text);await settle();return control;};
  const named=direction=>(direction==='undo'?undoButton():redoButton()).getAttribute('aria-label');
@@ -126,7 +129,7 @@ try{
  let typed=await type(beatA.id,'Draft A typed');
  await wait(()=>named('undo')===`Undo narration typing in ${sceneName}`,'the header names the typing step');assert.equal(marked(beatA.id),true);
  assert.equal(await step(()=>{event=key(typed);},'Cmd/Ctrl+Z in a beat field'),'committed');assert.equal(event.defaultPrevented,true,'the beat field gives Cmd/Ctrl+Z to project Undo');
- const reversed=async()=>({text:(await open(beatA.id)).value,marked:marked(beatA.id),status:status(),redo:named('redo'),workspace:workspace()});
+ const reversed=async()=>({text:(await open(beatA.id)).value,marked:marked(beatA.id),status:message(),redo:named('redo'),workspace:workspace()});
  const byShortcut=await reversed();
  assert.deepEqual(byShortcut,{text:beatA.payload.text,marked:false,status:`Undone: narration typing in ${sceneName}`,redo:`Redo narration typing in ${sceneName}`,workspace:'Story'});
  assert.deepEqual(await disk(),files,'Undo of a draft step writes nothing');
@@ -142,7 +145,7 @@ try{
  input(typed,'One two');typed.blur();input(typed,'One two three');await settle();
  for(const expected of ['One two','One',beatA.payload.text]){assert.equal(await header('undo'),'committed');assert.equal((await open(beatA.id)).value,expected);}
  assert.equal(marked(beatA.id),false,'Undo past the first step ends the draft');
- button('Add Beat',document.querySelector('.scene-workspace .beats-tools'));await wait(newBeat,'new beat');await settle();
+ button('Add Beat',document.querySelector('.scene-workspace .scene-history'));await wait(newBeat,'new beat');await settle();
  await wait(()=>named('undo')===`Undo new dialogue draft in ${sceneName}`,'adding a beat is its first step');
  input(beatType(),'narration','change');await settle();input(newBeat().querySelector('textarea'),'New narration');await settle();
  assert.equal(await header('undo'),'committed');assert.equal(beatType().value,'narration');assert.equal(newBeat().querySelector('textarea').value,'');
@@ -158,7 +161,7 @@ try{
 
  // Type in A, commit an edit in B, then return to A without editing: Undo reverses B, then A's typing.
  const beforeAB=(await historyNow()).undo;await type(beatA.id,'A typing');
- await type(beatB.id,'B committed');button('Commit Beat',row(beatB.id));await wait(async()=>(await source(path)).includes('B committed'),'B commit');await settle();
+ await type(beatB.id,'B committed');button('Commit Beat',editorFor(beatB.id));await wait(async()=>(await source(path)).includes('B committed'),'B commit');await settle();
  const afterCommit=await historyNow();assert.equal(afterCommit.undo.name,`dialogue edit in ${sceneName}`);
  for(const name of ['Screens','Branches']){button(name);await wait(()=>workspace()===name,name);await settle();}
  button('Story');await wait(()=>workspace()==='Story'&&row(beatA.id),'Story');await settle();
@@ -166,13 +169,13 @@ try{
  assert.deepEqual(await historyNow(),afterCommit,'selecting beats and changing workspace add no entries');
  assert.equal(await header('undo'),'committed');assert.equal(await source(path),original,'Undo reverses B first, to the exact bytes');
  assert.equal((await open(beatA.id)).value,'A typing');const beforeA=await disk();
- assert.equal(await header('undo'),'committed');assert.equal(status(),`Undone: narration typing in ${sceneName}`);
+ assert.equal(await header('undo'),'committed');assert.equal(message(),`Undone: narration typing in ${sceneName}`);
  assert.equal((await open(beatA.id)).value,beatA.payload.text);assert.deepEqual(await disk(),beforeA);assert.deepEqual((await historyNow()).undo,beforeAB);
  stage('type in A, commit B, return to A: Undo reverses B, then the typing in A');
 
  // Commit joins a beat's steps into one edit on top; Story Save adds one per beat, the latest edited on top. Neither clears earlier history.
  const earlier=(await historyNow()).undo;typed=await type(beatA.id,'Joined one');typed.blur();input(typed,'Joined one two');await settle();
- button('Commit Beat',row(beatA.id));await wait(async()=>(await source(path)).includes('Joined one two'),'A commit');await settle();
+ button('Commit Beat',editorFor(beatA.id));await wait(async()=>(await source(path)).includes('Joined one two'),'A commit');await settle();
  assert.equal(named('undo'),`Undo narration edit in ${sceneName}`);assert.equal(await header('undo'),'committed');
  assert.equal(await source(path),original,'one Undo reverses the whole beat');assert.deepEqual((await historyNow()).undo,earlier,'Commit joined both typing steps');
  await type(beatA.id,'Saved A');await type(beatB.id,'Saved B');
@@ -186,10 +189,10 @@ try{
  stage('Commit joins its typing steps into one Undo; Story Save adds one entry per beat with the latest edited on top');
 
  // Cancel of an existing beat's draft is an edit too. Undo of a beat delete then brings back the beat, not the draft it discarded.
- await type(beatA.id,'Discarded A');button('Cancel',row(beatA.id));await settle();
+ await type(beatA.id,'Discarded A');button('Cancel',editorFor(beatA.id));await settle();
  assert.equal(marked(beatA.id),false);assert.equal(named('undo'),`Undo cancel of narration draft in ${sceneName}`);
  assert.equal(await header('undo'),'committed');assert.equal((await open(beatA.id)).value,'Discarded A');assert.equal(marked(beatA.id),true);
- button('Delete',row(beatA.id).querySelector('.beat-controls'));button('Delete this Beat',document.querySelector('.story-operation[aria-label="Delete Beat"]'));
+ await open(beatA.id);button('Delete',editorFor(beatA.id).querySelector('.story-beat-menu'));button('Delete this Beat',document.querySelector('.story-operation[aria-label="Delete Beat"]'));
  await wait(async()=>!(await source(path)).includes('Foundation continuation'),'delete');await settle();
  assert.equal(await header('undo'),'committed');assert.equal(await source(path),original,'Undo brings the beat back');
  assert.equal((await open(beatA.id)).value,beatA.payload.text,'not its discarded draft');assert.equal(marked(beatA.id),false);
@@ -197,7 +200,7 @@ try{
  stage('Undo of an existing beat Cancel restores its draft; Undo of a beat delete restores the beat but not its discarded draft');
 
  // A refused Story Save writes nothing and keeps every draft step; Undo then fixes the failing draft and Save succeeds.
- await type(beatA.id,'Refused save A');button('Add Beat',document.querySelector('.scene-workspace .beats-tools'));await wait(newBeat,'new beat');input(beatType(),'choice','change');await settle();
+ await type(beatA.id,'Refused save A');button('Add Beat',document.querySelector('.scene-workspace .scene-history'));await wait(newBeat,'new beat');input(beatType(),'choice','change');await settle();
  const available=()=>newBeat().querySelector('input[aria-label="Available when"]');available().checked=true;available().dispatchEvent(new Event('change',{bubbles:true}));await settle();
  const quiet=await disk();await headerSave(()=>/^Nothing saved/.test(status()));
  assert.deepEqual(await disk(),quiet,'a refused Story Save writes nothing');assert.equal(named('undo'),`Undo choice change in ${sceneName}`);
@@ -220,7 +223,7 @@ try{
  // Two typing steps, split by a 2 second pause, then a Story edit. Undo reverses the Story edit, then each step.
  let editor=await sourceType(`${styled}# one\n`);await wait(()=>named('undo')===`Undo Source typing in ${styleName}`,'the header names the Source typing step');
  await new Promise(r=>setTimeout(r,2100));await sourceType(`${styled}# two\n`);
- button('Story');await wait(()=>workspace()==='Story'&&document.querySelector('.beat-card'),'Story after Source');await settle();
+ button('Story');await wait(()=>workspace()==='Story'&&document.querySelector('.story-track-column'),'Story after Source');await settle();
  const storyPath=(await call('scene.list')).scenes[0].sourcePath,beforeStory=await source(storyPath);
  await storyEdit('Foundation continuation, after Source typing');
  assert.equal(await header('undo'),'committed');assert.equal(await source(storyPath),beforeStory,'the first Undo reverses the Story edit');
@@ -228,7 +231,7 @@ try{
  assert.equal(await header('undo'),'committed');
  const changed=styled.length+2;
  assert.deepEqual(revealed(),{workspace:'Source',file:stylePath,text:`${styled}# one\n`,selection:[changed,changed+3]},'Undo from Story opens the file with the restored range selected');
- assert.equal(status(),`Undone: Source typing in ${styleName}`);assert.equal(named('redo'),`Redo Source typing in ${styleName}`);
+ assert.equal(message(),`Undone: Source typing in ${styleName}`);assert.equal(named('redo'),`Redo Source typing in ${styleName}`);
  assert.deepEqual(await disk(),quietSource,'Undo of a Source draft step writes nothing');
  assert.equal(await header('undo'),'committed');assert.deepEqual(revealed().text,styled);assert.equal((await call('source.open',{path:stylePath})).dirty,false,'Undo past the first step ends the draft');
  assert.deepEqual((await historyNow()).undo,sourceBaseline);assert.deepEqual(await disk(),quietSource);
@@ -271,7 +274,7 @@ try{
  const kept=await call('source.open',{path:stylePath});assert.deepEqual([kept.dirty,kept.state,kept.externalText],[true,'conflict',external]);
  await call('source.discard',{path:stylePath});assert.equal(await source(stylePath),external);
  assert.deepEqual((await historyNow()).undo,sourceBaseline,'Discard Draft removes its steps');
- button('Story');await wait(()=>workspace()==='Story'&&document.querySelector('.beat-card'),'Story after Source');await settle();
+ button('Story');await wait(()=>workspace()==='Story'&&document.querySelector('.story-track-column'),'Story after Source');await settle();
  stage('an external edit while Source draft steps exist: Undo changes only the draft, keeps the conflict and both versions');
 
  // System prompts: a prompt edit, then a Story edit. Settings is a dialog, so it owns the shortcut.
@@ -282,12 +285,12 @@ try{
  requests=historyRequests();event=key(document.querySelector('.settings-overlay'));await settle();assert.equal(historyRequests(),requests,'An open dialog keeps Cmd/Ctrl+Z');assert.equal(event.defaultPrevented,false);
  button('Close settings');await wait(()=>!document.querySelector('.settings-overlay'),'Settings closed');
  const edited=await storyEdit('Foundation continuation, after the prompt');
- assert.equal(await header('undo'),'committed');await wait(()=>workspace()==='Story'&&document.querySelector('.beat-card'),'Story opens');
- assert(!(await source(edited.scene.sourcePath)).includes('after the prompt'),'Undo reverses the Story edit');assert.match(status(),/^Undone: narration edit in /);
+ assert.equal(await header('undo'),'committed');await wait(()=>workspace()==='Story'&&document.querySelector('.story-track-column'),'Story opens');
+ assert(!(await source(edited.scene.sourcePath)).includes('after the prompt'),'Undo reverses the Story edit');assert.match(message(),/^Undone: narration edit in /);
  assert.equal(await header('undo'),'committed');
  await wait(()=>document.querySelector('.settings-overlay [name="systemPrompt"]')&&document.querySelector('.prompt-preparation')?.dataset.busy==='false','Settings reopens at System prompts');
  assert.equal(document.querySelector('[name="assistanceAction"]').value,'rewriteDialogue');assert.equal(document.querySelector('[name="systemPrompt"]').value,baseline);assert.equal((await call('prompts.list')).customized,false);
- assert.equal(status(),'Undone: system prompt edit');button('Close settings');await settle();
+ assert.equal(message(),'Undone: system prompt edit');button('Close settings');await settle();
  stage('after closing Settings, the header Undo reverses the Story edit and opens Story, then the prompt edit and opens System prompts');
  result.passed=true;console.log(`PASS project history journey: ${result.stages.length} stages`);
 }finally{await browser.happyDOM.close();try{await child.stop();result.driver=child.exitStatus();await assert.rejects(access(scratch));result.cleanupComplete=true;}finally{await writeFile(join(output,'project-history.json'),JSON.stringify({...result,transcript:result.transcript.length},null,1));}}

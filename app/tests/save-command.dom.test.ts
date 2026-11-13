@@ -310,8 +310,8 @@ test("Story Save takes one route from toolbar and keyboard, and a refusal never 
   };
   const status = (): string => document.querySelector("#app-status")?.textContent ?? "";
   const draft = async (text: string): Promise<HTMLTextAreaElement> => {
-    if (!document.querySelector('[data-beat-id="line"] textarea')) document.querySelector<HTMLButtonElement>('[data-beat-id="line"] .beat-select')!.click();
-    const editor = document.querySelector<HTMLTextAreaElement>('[data-beat-id="line"] textarea')!;
+    if (!document.querySelector('.story-editor[data-editor-for="line"] textarea')) document.querySelector<HTMLButtonElement>('.story-track-column[data-beat-id="line"] > .story-track-beat')!.click();
+    const editor = document.querySelector<HTMLTextAreaElement>('.story-editor[data-editor-for="line"] textarea')!;
     editor.value = text; editor.dispatchEvent(new window.Event("input", { bubbles: true })); await ticks();
     return editor;
   };
@@ -333,7 +333,7 @@ test("Story Save takes one route from toolbar and keyboard, and a refusal never 
   window.dispatchEvent(saveEvent({ ctrl: true })); await ticks(10);
   assert.equal(sent.length, 4); assert.equal(flushes, 0); assert.equal(accepted, "From keyboard");
   assert.equal(status(), "Nothing saved. 1 of 1 draft needs changes:Scene 1");
-  editor = document.querySelector<HTMLTextAreaElement>('[data-beat-id="line"] textarea')!;
+  editor = document.querySelector<HTMLTextAreaElement>('.story-editor[data-editor-for="line"] textarea')!;
   assert.equal(editor.value, "Refused draft"); assert.equal(editor.closest<HTMLElement>("[data-beat-draft-key]")?.dataset.saveRefused, "true");
 
   // A stale refusal refreshes Story. A draft whose own beat changed in source is then a conflict.
@@ -342,8 +342,8 @@ test("Story Save takes one route from toolbar and keyboard, and a refusal never 
   click("Save"); await ticks(10);
   assert.equal(sent.length, 5); assert.equal(flushes, 0);
   assert.equal(status(), "Story changed in source and was refreshed. Nothing saved. 1 of 1 draft needs changes:Scene 1");
-  assert.equal(document.querySelector('[data-beat-id="line"] .story-conflict-source')?.textContent, "Edited elsewhere");
-  assert.equal(document.querySelector<HTMLTextAreaElement>('[data-beat-id="line"] textarea')?.value, "Refused draft");
+  assert.equal(document.querySelector('.story-editor[data-editor-for="line"] .story-conflict-source')?.textContent, "Edited elsewhere");
+  assert.equal(document.querySelector<HTMLTextAreaElement>('.story-editor[data-editor-for="line"] textarea')?.value, "Refused draft");
 
   // With no beat drafts, Save in Story still runs Flush.
   click("Discard draft"); await ticks();
@@ -390,19 +390,19 @@ test("A refused Story Save counts failing drafts, links each scene and marks fai
   };
   const status = (): string => document.querySelector("#app-status")?.textContent ?? "";
   const links = (): string[] => [...document.querySelectorAll<HTMLButtonElement>("#app-status .status-link")].map(link => link.getAttribute("aria-label") ?? "");
-  const card = (id: string): HTMLElement => document.querySelector<HTMLElement>(`.beat-card[data-beat-id="${id}"]`)!;
-  const failing = (): string[] => [...document.querySelectorAll<HTMLElement>('.beat-card[data-save-refused="true"]')].map(item => item.dataset.beatId!);
+  const card = (id: string): HTMLElement => document.querySelector<HTMLElement>(`.story-track-column[data-beat-id="${id}"]`)!;
+  const editorFor = (id: string): HTMLElement | null => document.querySelector<HTMLElement>(`.story-editor[data-editor-for="${id}"]`);
+  const open = async (id: string): Promise<HTMLElement> => { if (!editorFor(id)) { card(id).querySelector<HTMLButtonElement>(".story-track-beat")!.click(); await ticks(); } return editorFor(id)!; };
+  const failing = (): string[] => [...document.querySelectorAll<HTMLElement>('.story-track-column[data-save-refused="true"]')].map(item => item.dataset.beatId!);
   const sceneRow = (name: string): HTMLElement => [...document.querySelectorAll<HTMLElement>(".tree-scene-row")].find(row => row.querySelector(".tree-scene-open")?.textContent === name)!;
   const shown = (): string | undefined => document.querySelector<HTMLElement>(".tree-scene-row.selected .tree-scene-open")?.textContent ?? undefined;
   const openScene = async (name: string): Promise<void> => { sceneRow(name).querySelector<HTMLButtonElement>(".tree-scene-open")!.click(); await ticks(); };
   const draft = async (id: string, text: string): Promise<void> => {
-    if (!card(id).querySelector("textarea")) card(id).querySelector<HTMLButtonElement>(".beat-select")!.click();
-    const editor = card(id).querySelector<HTMLTextAreaElement>("textarea")!;
+    const editor = (await open(id)).querySelector<HTMLTextAreaElement>("textarea")!;
     editor.value = text; editor.dispatchEvent(new window.Event("input", { bubbles: true })); await ticks();
   };
   const pickSpeaker = async (id: string): Promise<void> => {
-    if (!card(id).querySelector("select")) { card(id).querySelector<HTMLButtonElement>(".beat-select")!.click(); await ticks(); }
-    const speaker = card(id).querySelector<HTMLSelectElement>("select")!;
+    const speaker = (await open(id)).querySelector<HTMLSelectElement>("select")!;
     speaker.value = "mara"; speaker.dispatchEvent(new window.Event("change", { bubbles: true })); await ticks();
   };
 
@@ -413,38 +413,48 @@ test("A refused Story Save counts failing drafts, links each scene and marks fai
   // Five drafts across two scenes, begun out of project order. Three keep the missing speaker.
   await openScene("Depot"); await draft("n2", "Steam rises."); await draft("g3", "You are late.");
   await openScene("Arrival"); await draft("n1", "Hello again"); await draft("g2", "Only me."); await draft("g1", "Who is there?");
+  // Before any Save, drafts show * and the header counts them; at 560 px it reads "5 unsaved".
+  const header = (): HTMLElement => document.querySelector<HTMLElement>("#app-status")!, mirror = (): string => document.querySelector("#app-refusal")?.textContent ?? "";
+  const state = (id: string): string | undefined => editorFor(id)?.querySelector<HTMLElement>(".story-editor-state")?.textContent ?? undefined;
+  const legendFails = (): boolean => !document.querySelector<HTMLElement>(".story-legend-fail")!.hidden;
+  assert.equal(status(), "5 unsaved beat drafts"); assert.equal(header().dataset.short, "5 unsaved");
+  assert.equal(state("g1"), "* Draft"); assert.equal(failing().length, 0, "marks appear only after a refused Save"); assert.equal(legendFails(), false);
   await openScene("Depot");
   click("Save"); await ticks(10);
+  // The header bolds "Nothing saved." and shows only that at 560 px; the bottom status bar then holds the full line.
+  assert.equal(header().querySelector("b")?.textContent, "Nothing saved."); assert.equal(header().dataset.short, "Nothing saved");
+  assert.equal(mirror(), "Nothing saved. 3 of 5 drafts need changes:Arrival 2Depot 1");
+  assert.equal(state("g1"), "! Needs changes"); assert.equal(legendFails(), true);
+  assert.equal(card("g1").querySelector(".story-track-beat")?.getAttribute("title"), "Select an available item first.", "the tooltip gives the reason");
   assert.equal(sent.length, 0, "a failing draft stops Story Save before any request");
   assert.equal(status(), "Nothing saved. 3 of 5 drafts need changes:Arrival 2Depot 1");
   assert.deepEqual(links(), ["Arrival, 2 to fix", "Depot, 1 to fix"]);
   // Save opens the first failing draft in project order, in its own scene, and shows why it failed.
   assert.equal(shown(), "Arrival");
-  assert.ok(card("g1").contains(document.activeElement), "Save reveals Arrival's first failing beat");
+  assert.ok(editorFor("g1")?.contains(document.activeElement), "Save reveals Arrival's first failing beat");
   assert.deepEqual(failing(), ["g1", "g2"]);
   assert.equal(card("n1").dataset.saveRefused, undefined, "a ready draft keeps the plain draft mark");
   assert.equal(card("n1").dataset.beatDraft, "true");
-  assert.equal(card("g1").querySelector(".beat-select")?.getAttribute("aria-description"), "Unsaved draft. Needs changes.");
-  assert.equal(card("g1").querySelector(".story-save-reason")?.textContent, "Select an available item first.");
+  assert.equal(card("g1").querySelector(".story-track-beat")?.getAttribute("aria-description"), "Unsaved draft. Needs changes.");
+  assert.equal(editorFor("g1")?.querySelector(".story-save-reason")?.textContent, "Select an available item first.");
   assert.deepEqual([sceneRow("Arrival").dataset.saveRefused, sceneRow("Depot").dataset.saveRefused], ["true", "true"]);
 
   // A scene link opens that scene's failing draft.
   document.querySelectorAll<HTMLButtonElement>("#app-status .status-link")[1]!.click(); await ticks();
   assert.equal(shown(), "Depot"); assert.deepEqual(failing(), ["g3"]);
-  assert.ok(card("g3").querySelector("textarea"), "the link opens the failing draft's editor");
+  assert.ok(editorFor("g3")?.querySelector("textarea"), "the link opens the failing draft's editor");
 
   // Fixing a draft clears its mark and its scene's link. Cancelling one lowers both counts.
   await pickSpeaker("g3");
   assert.deepEqual(failing(), []); assert.equal(sceneRow("Depot").dataset.saveRefused, undefined);
-  assert.equal(card("g3").querySelector(".story-save-reason"), null);
+  assert.equal(editorFor("g3")?.querySelector(".story-save-reason"), null);
   assert.equal(status(), "Nothing saved. 2 of 5 drafts need changes:Arrival 2");
   await openScene("Arrival");
-  card("g1").querySelector<HTMLButtonElement>(".beat-select")!.click(); await ticks();
-  [...card("g1").querySelectorAll<HTMLButtonElement>("button")].find(item => item.textContent === "Cancel")!.click(); await ticks(6);
+  [...(await open("g1")).querySelectorAll<HTMLButtonElement>("button")].find(item => item.textContent === "Cancel")!.click(); await ticks(6);
   assert.equal(status(), "Nothing saved. 1 of 4 drafts needs changes:Arrival 1");
   assert.deepEqual(failing(), ["g2"]);
   await pickSpeaker("g2");
-  assert.equal(status(), "4 unsaved beat drafts. Ready to save.");
+  assert.equal(status(), "4 unsaved beat drafts. Ready to save.");assert.equal(header().dataset.short, "4 unsaved");assert.equal(mirror(), "");assert.equal(legendFails(), false);
   assert.deepEqual(failing(), []); assert.equal(sceneRow("Arrival").dataset.saveRefused, undefined);
 
   // A new beat whose place is gone from core's candidate is a beat draft conflict, marked like the others.

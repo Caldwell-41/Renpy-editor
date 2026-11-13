@@ -87,13 +87,13 @@ try {
  await page.setViewportSize({width:1440,height:900});
  await page.evaluate(async()=>{const {enableRichSourceEditor}=await import('/src/source-editor.ts');enableRichSourceEditor();const {visualRequest}=await import('/tests/ui-refresh-fixture.ts');const {startApplication}=await import('/src/main.ts');startApplication(visualRequest);});
  await page.locator('.recent-open').click();await page.getByRole('button',{name:'Add Beat',exact:true}).waitFor();
- for(const theme of ['light','dark']){await page.evaluate(async theme=>{const {updatePreferences}=await import('/src/preferences.ts');await updatePreferences({theme});},theme);for(const surface of ['Story','Source','Branches','Characters','Assets','Variables']){await page.getByRole('button',{name:surface,exact:true}).click();await page.locator('#app-status').filter({hasText:'Saved'}).waitFor().catch(async error=>{throw new Error(`${theme}/${surface}: ${await page.locator('#app-status').textContent()}`,{cause:error});});if(surface==='Source')await page.locator('.cm-content').waitFor();if(surface==='Branches')await page.locator('.branch-node').first().waitFor();if(surface==='Story')await page.locator('.beat-select').nth(2).click();await page.waitForFunction(()=>[...document.querySelectorAll('.catalog-thumbnail')].every(i=>(i.getAttribute('src')&&i.complete)||i.alt==='Preview unavailable'));await page.screenshot({path:output+surface.toLowerCase()+'-'+theme+'.png'});}}
+ for(const theme of ['light','dark']){await page.evaluate(async theme=>{const {updatePreferences}=await import('/src/preferences.ts');await updatePreferences({theme});},theme);for(const surface of ['Story','Source','Branches','Characters','Assets','Variables']){await page.getByRole('button',{name:surface,exact:true}).click();await page.locator('#app-status').filter({hasText:'Saved'}).waitFor().catch(async error=>{throw new Error(`${theme}/${surface}: ${await page.locator('#app-status').textContent()}`,{cause:error});});if(surface==='Source')await page.locator('.cm-content').waitFor();if(surface==='Branches')await page.locator('.branch-node').first().waitFor();if(surface==='Story')await page.locator('.story-track-beat').nth(2).click();await page.waitForFunction(()=>[...document.querySelectorAll('.catalog-thumbnail')].every(i=>(i.getAttribute('src')&&i.complete)||i.alt==='Preview unavailable'));await page.screenshot({path:output+surface.toLowerCase()+'-'+theme+'.png'});}}
 
 
  // Long accepted Choice captions remain reachable inside a short preview.
  await page.getByRole('button',{name:'Story',exact:true}).click();
- await page.locator('.beat-select').nth(3).click();
- await page.evaluate(()=>{const surround=document.querySelector('.preview-surround');surround.style.flex='none';surround.style.height='90px';document.querySelectorAll('.preview-choice-caption').forEach((row,index)=>row.textContent=`Option ${index+1}: `+'Return to the origin, then take the English path to the garden and the station. '.repeat(4));});
+ await page.locator('.story-track-beat').nth(3).click();
+ await page.evaluate(()=>{const slot=document.querySelector('.story-stage-slot');slot.style.height='90px';document.querySelectorAll('.preview-choice-caption').forEach((row,index)=>row.textContent=`Option ${index+1}: `+'Return to the origin, then take the English path to the garden and the station. '.repeat(4));});
  await page.waitForFunction(()=>document.querySelector('.preview-canvas').getBoundingClientRect().height<=91);
  const caption=await page.locator('.preview-choice-summary').evaluate(e=>{const c=e.parentElement.getBoundingClientRect(),r=e.getBoundingClientRect();e.scrollTop=e.scrollHeight;return {inside:r.top>=c.top-1&&r.bottom<=c.bottom+1,scrollable:e.scrollHeight>e.clientHeight,reachedEnd:e.scrollTop+e.clientHeight>=e.scrollHeight-1};});
  assert.equal(caption.inside,true,'long caption extends outside the bounded preview');assert.equal(caption.scrollable,true);assert.equal(caption.reachedEnd,true,'end of long caption is unreachable');
@@ -221,7 +221,7 @@ try {
  await page.getByRole('button',{name:'Exit Writing focus',exact:true}).click();
  assert.equal(await page.locator('.story-sidebar').evaluate(el=>Math.round(el.getBoundingClientRect().width)),64);
  await page.getByRole('button',{name:'Toggle navigation size'}).click();
- await page.locator('.beat-select').nth(3).click();
+ await page.locator('.story-track-beat').nth(3).click();
  await page.getByRole('button',{name:'Create New Scene',exact:true}).click();
  const choice=await page.locator('.expanded-beat').boundingBox();
  const sceneForm=await page.locator('.choice-new-scene').boundingBox();
@@ -423,7 +423,7 @@ for key,value in [('stage','open'),('passed',False),('error','failure')]:
  await audit.route('**/audit-regressions',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><link rel="stylesheet" href="/src/styles.css"><link rel="stylesheet" href="/src/ui-refresh.css"><div id="app"></div>'}));
  await audit.goto(`http://127.0.0.1:${address.port}/audit-regressions`);
  await audit.evaluate(async()=>{
-  const {visualRequest}=await import('/tests/ui-refresh-fixture.ts');const {startApplication}=await import('/src/main.ts');
+  const {visualRequest}=await import('/tests/ui-refresh-fixture.ts');const {startApplication}=await import('/src/main.ts');const {sceneBodies}=await import('/tests/story-controls-fixture.ts');
   let preferences={schemaVersion:1,theme:'light',density:'default',sourceFontSize:14,rememberLayout:true,layouts:{}};
   window.__TAURI_INTERNALS__={invoke:async(_,{request})=>{if(request.operation==='preferences.write')preferences=structuredClone(request.payload);return {protocolVersion:1,requestId:request.requestId,ok:true,value:preferences};}};
   const authoring=structuredClone((await visualRequest('authoring.list')).value);
@@ -442,22 +442,20 @@ for key,value in [('stage','open'),('passed',False),('error','failure')]:
    if(op==='history.undo'){const entry=moveEntry();scene=previous;previous=undefined;return response({entry,history:{undo:null,redo:null}});}
    if(op==='scene.apply'){
     const command=payload.command;window.__auditCommands.push(command);
-    if(command.type==='moveStoryNode'){previous=structuredClone(scene);movedScene=command.sceneId;const beats=scene.scenes.find(s=>s.id===command.sceneId).beats;const moved=beats.splice(beats.findIndex(b=>b.id===command.node.beatId),1)[0];beats.splice(command.position.type==='end'?beats.length:beats.findIndex(b=>b.id===command.position.anchor.beatId),0,moved);}
-    if(command.type==='insertBodyBeat'){await new Promise(resolve=>window.__auditReleaseBeat=resolve);scene.scenes.find(s=>s.id===command.sceneId).beats.push({id:'audit-added',protected:false,byteStart:130,byteEnd:150,payload:command.beat});}
+    if(command.type==='moveStoryNode'){previous=structuredClone(scene);movedScene=command.sceneId;const beats=scene.scenes.find(s=>s.id===command.sceneId).beats;const moved=beats.splice(beats.findIndex(b=>b.id===command.node.beatId),1)[0];beats.splice(command.position.type==='end'?beats.length:beats.findIndex(b=>b.id===command.position.anchor.beatId),0,moved);scene.scenes.find(s=>s.id===command.sceneId).bodies=sceneBodies(beats);}
+    if(command.type==='insertBodyBeat'){await new Promise(resolve=>window.__auditReleaseBeat=resolve);const added=scene.scenes.find(s=>s.id===command.sceneId);added.beats.push({id:'audit-added',protected:false,byteStart:130,byteEnd:150,payload:command.beat});added.bodies=sceneBodies(added.beats);}
     return response(scene);
    }
    return visualRequest(op,payload);
   });
  });
- await audit.locator('.recent-open').click();await audit.locator('.preview-divider').waitFor();
+ await audit.locator('.recent-open').click();await audit.locator('.story-track-column').first().waitFor();
  const hide=audit.getByRole('button',{name:'Toggle scene or file list',exact:true}),restore=audit.getByRole('button',{name:'Show scene or file list',exact:true});
  assert.equal(await hide.getAttribute('aria-expanded'),'true');assert.equal(await hide.getAttribute('aria-controls'),'project-tree-panel');
  assert.equal(await audit.getByRole('button',{name:'Toggle navigation size',exact:true}).getAttribute('aria-expanded'),'true');
  await hide.click();assert.equal(await audit.locator('.project-tree-toggle').getAttribute('aria-expanded'),'false');assert.equal(await restore.evaluate(e=>document.activeElement===e&&e.checkVisibility()),true);
  await restore.click();assert.equal(await hide.evaluate(e=>document.activeElement===e&&e.checkVisibility()),true);
- await audit.locator('.preview-divider').focus();await audit.keyboard.press('ArrowDown');assert.equal(await audit.locator('.preview-divider').getAttribute('aria-valuenow'),'36');
- await audit.evaluate(()=>window.dispatchEvent(new Event('loomlight-reset-layout')));assert.equal(await audit.locator('.preview-divider').getAttribute('aria-valuenow'),'34');assert.equal(await audit.locator('input[type="range"]').count(),0);
- await audit.locator('.beat-select').nth(3).click();await audit.getByRole('button',{name:'Create New Scene',exact:true}).click();
+ await audit.locator('.story-track-beat').nth(3).click();await audit.getByRole('button',{name:'Create New Scene',exact:true}).click();
  for(const width of [1440,560]){
   await audit.setViewportSize({width,height:900});
   const metrics=await audit.locator('.choice-new-scene').evaluate(e=>({overflow:e.scrollWidth>e.clientWidth+1,fields:[...e.querySelectorAll(':scope > .field')].map(f=>f.getBoundingClientRect().x),buttons:[...e.querySelectorAll('button')].map(b=>({height:b.getBoundingClientRect().height,parent:b.parentElement.className,whiteSpace:getComputedStyle(b).whiteSpace}))}));
@@ -467,14 +465,11 @@ for key,value in [('stage','open'),('passed',False),('error','failure')]:
  await hide.click();await audit.getByRole('button',{name:'Writing focus',exact:true}).click();await audit.locator('.choice-new-scene').scrollIntoViewIfNeeded();await audit.screenshot({path:output+'audit-fixed-choice-compact.png'});
  await audit.getByRole('button',{name:'Exit Writing focus',exact:true}).click();await audit.setViewportSize({width:1440,height:900});
  await audit.locator('.choice-new-scene').getByRole('button',{name:'Cancel',exact:true}).click();await audit.locator('.expanded-beat > .row-actions').getByRole('button',{name:'Cancel',exact:true}).click();
- // Real mouse pointer capture, cancellation and protected-boundary rejection.
- const drag=async(target,escape=false)=>{const grip=await audit.locator('[data-beat-id="background"] .beat-grip').boundingBox();const box=await target.boundingBox();await audit.mouse.move(grip.x+grip.width/2,grip.y+grip.height/2);await audit.mouse.down();await audit.mouse.move(box.x+box.width/2,box.y+box.height/2,{steps:8});if(escape)await audit.keyboard.press('Escape');await audit.mouse.up();};
- await drag(audit.locator('[data-beat-id="dialogue"]'),true);assert.equal(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='moveStoryNode').length),0);
- await drag(audit.locator('[data-beat-id="choice"]'));assert.equal(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='moveStoryNode').length),0);
- await drag(audit.locator('.app-header'));assert.equal(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='moveStoryNode').length),0);
- await drag(audit.locator('[data-beat-id="dialogue"]'));await audit.waitForFunction(()=>document.activeElement?.closest('.beat-card')?.dataset.beatId==='background');
- assert.deepEqual(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='moveStoryNode').map(c=>c.node.beatId)),['background']);assert.equal(await audit.locator('.beat-card').nth(2).getAttribute('data-beat-id'),'background');
- await audit.locator('.app-header [data-history="undo"]:not([aria-disabled="true"])').click();await audit.waitForFunction(()=>document.querySelector('.beat-card')?.dataset.beatId==='background');
+ // Alt+Arrow on a Tracks column moves the beat to the next core-listed place; Undo puts it back.
+ await audit.locator('.story-track-column[data-beat-id="background"] > .story-track-beat').focus();await audit.keyboard.press('Alt+ArrowRight');
+ await audit.waitForFunction(()=>document.querySelectorAll('.story-track-column')[1]?.dataset.beatId==='background'&&document.activeElement?.closest('.story-track-column')?.dataset.beatId==='background');
+ assert.deepEqual(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='moveStoryNode').map(c=>c.node.beatId)),['background']);
+ await audit.locator('.app-header [data-history="undo"]:not([aria-disabled="true"])').click();await audit.waitForFunction(()=>document.querySelector('.story-track-column')?.dataset.beatId==='background');
  await audit.getByRole('button',{name:'Variables',exact:true}).click();
  const dialog=audit.getByRole('dialog');const type=dialog.locator('.field').filter({has:audit.locator('span:text-is("Type")')}).locator('select');const defaultField=dialog.locator('.field').filter({has:audit.locator('span:text-is("Default value")')});
  for(const [kind,value] of [['int','42'],['string','Discard this'],['bool','true']]){
@@ -496,7 +491,7 @@ for key,value in [('stage','open'),('passed',False),('error','failure')]:
  await audit.locator('.new-beat').getByRole('button',{name:'Add Beat',exact:true}).click();await audit.waitForFunction(()=>window.__auditReleaseBeat);
  assert.equal(await audit.locator('.new-beat').getByRole('button',{name:'Add Beat',exact:true}).isDisabled(),true);assert.equal(await audit.locator('.new-beat').getByRole('button',{name:'Cancel',exact:true}).isDisabled(),true);
  await audit.evaluate(()=>document.querySelector('.new-beat button.button.primary').click());assert.equal(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='insertBodyBeat').length),1);
- await audit.evaluate(()=>window.__auditReleaseBeat());await audit.locator('.new-beat').waitFor({state:'detached'});assert.equal(await audit.locator('[data-beat-id="audit-added"] .beat-select').evaluate(e=>document.activeElement===e),true);assert.equal(await audit.locator('[data-beat-id="audit-added"] .expanded-beat').count(),0);
+ await audit.evaluate(()=>window.__auditReleaseBeat());await audit.locator('.new-beat').waitFor({state:'detached'});assert.equal(await audit.locator('.story-track-column[data-beat-id="audit-added"] > .story-track-beat').evaluate(e=>document.activeElement===e),true);assert.equal(await audit.locator('.story-editor[data-editor-for="audit-added"] .expanded-beat').count(),1);
  assert.deepEqual(errors,[]);await audit.close();
- console.log('PASS: current Character library and Variable header alignment at three widths/both themes; staged PNG decode, chooser replacement, compact actions, remove/discard/reopen; all six workspaces in both themes; onboarding, Settings, compact layouts, Source edits keep raw line endings; shipped smoke and busy contention; audit regressions for Choice actions, Variable discard/reopen/submission, Character Game setup appearance retention, sidebar focus, divider reset, pending Beat creation and captured pointer reorder/cancellation. Fixture bridge only; not native SDK or security proof.');
+ console.log('PASS: current Character library and Variable header alignment at three widths/both themes; staged PNG decode, chooser replacement, compact actions, remove/discard/reopen; all six workspaces in both themes; onboarding, Settings, compact layouts, Source edits keep raw line endings; shipped smoke and busy contention; audit regressions for Choice actions, Variable discard/reopen/submission, Character Game setup appearance retention, sidebar focus, pending Beat creation and Tracks keyboard reorder with Undo. Fixture bridge only; not native SDK or security proof.');
 } finally {await browser?.close();await server.close();}

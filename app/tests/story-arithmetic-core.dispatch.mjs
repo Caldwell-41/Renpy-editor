@@ -40,8 +40,10 @@ const button=(text,scope=document)=>{const b=[...scope.querySelectorAll('button'
 const enter=(node,text,event='input')=>{assert(node?.isConnected&&!node.disabled);node.focus();node.value=text;node.dispatchEvent(new Event(event,{bubbles:true}));};
 const source=async path=>(await call('source.open',{path})).text;
 async function saveSource(path,text){const base=await call('source.open',{path});const draft=await call('source.updateDraft',{path,expectedBaseRevision:base.baseRevision,text,selectionStart:0,selectionEnd:0});await call('source.save',{path,expectedBaseRevision:draft.baseRevision,expectedDraftVersion:draft.draftVersion});}
-const selected=()=>document.querySelector('.beat-card.selected');
-async function selectBeat(id){document.querySelector(`[data-beat-id="${id}"] .beat-select`).click();await settle();assert(selected()?.dataset.beatId===id);}
+// Story Combined: the selected beat's editor sits beside the stage; Tracks shows each beat as a column.
+const selected=()=>document.querySelector('.story-editor[data-editor-for]');
+const column=id=>document.querySelector(`.story-track-column[data-beat-id="${id}"]`);
+async function selectBeat(id){column(id).querySelector('.story-track-beat').click();await settle();assert(selected()?.dataset.editorFor===id);}
 const formula=()=>selected().querySelector('[aria-label="Formula"]');
 async function commit(){lastApply=undefined;button('Commit Beat',selected());await wait(()=>lastApply);await settle();return lastApply;}
 try{
@@ -51,7 +53,7 @@ try{
  const fixture=(await readFile(new URL('../../tests/fixtures/arithmetic-96/story.rpy',import.meta.url),'utf8')).replace('ENTRY_LABEL',entry.technicalLabel).replace('    $ money = 9.5','    $ money = -0.0\n    $ money = 1.0\n    $ money = 9.5');
  await saveSource(path,fixture);await call('project.close');session=undefined;
  document.body.innerHTML='<div id="app"></div>';const {startApplication}=await import('../dist-tests/src/main.js');startApplication(requester);
- await wait(()=>document.querySelector('.recent-open')&&!document.querySelector('.recent-open').disabled);document.querySelector('.recent-open').click();await wait(()=>document.querySelector('.beat-card'));await settle();
+ await wait(()=>document.querySelector('.recent-open')&&!document.querySelector('.recent-open').disabled);document.querySelector('.recent-open').click();await wait(()=>document.querySelector('.story-track-column'));await settle();
  assert.equal(await source(path),fixture,'opening imported arithmetic preserves exact source');
  const scene=()=>workspace.scenes.find(s=>s.id===entry.id),numeric=()=>scene().beats.filter(b=>b.payload.type==='setVariable');
  const signedZero=numeric().find(b=>b.payload.value==='-0.0');assert(signedZero);await selectBeat(signedZero.id);assert.equal(formula().value,'-0.0');assert.equal((await commit()).ok,true);assert.equal(await source(path),fixture);assert.equal((await call('history.state')).undo,null);
@@ -60,7 +62,7 @@ try{
  assert.equal((await commit()).ok,true);assert.equal(await source(path),fixture,'unchanged decimal literal preserves bytes');assert.equal((await call('history.state')).undo,null,'unchanged decimal literal adds no history');
  stage('unchanged decimal literal commits through actual Story controls without source or history changes');
  const compound=numeric().find(b=>b.payload.value?.operation==='add'),decimal=numeric().find(b=>b.payload.value?.operand==='money / 2');assert(compound&&decimal);
- await selectBeat(compound.id);assert.equal(formula().value,'(bonus + 2) * 3');assert.match(selected().textContent,/Current value unknown/);assert(!selected().textContent.includes('Draft result 99'));assert.match(selected().querySelector('.beat-summary').textContent,/trust/);
+ await selectBeat(compound.id);assert.equal(formula().value,'(bonus + 2) * 3');assert.match(selected().textContent,/Current value unknown/);assert(!selected().textContent.includes('Draft result 99'));assert.match(column(compound.id).textContent,/trust/);
  assert.equal(lastValidation.ok,true);assert.equal(lastValidation.value.assignment.inferredResultType,'int');assert.equal(lastValidation.value.assignment.state.status,'unknown');
  const noOp=await source(path);assert.equal((await commit()).ok,true);assert.equal(await source(path),noOp,'no-op import preserves original compound/comments');
  stage('editable imported compound and explicit formulas; unknown draft state from core; open and semantic no-op bytes preserved');
@@ -80,7 +82,7 @@ try{
  await selectBeat(compound.id);enter(formula(),'bon');await settle();const input=formula();input.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',bubbles:true}));assert.equal(input.value,'bonus');assert(document.activeElement===input,"Suggestion must retain input focus");
  enter(input,'(bonus + 3) * 2');button('Writing focus');assert(formula()===input,"Writing focus must retain the same formula control");assert.equal(input.value,'(bonus + 3) * 2');button('Exit Writing focus');assert(formula()===input,"Writing focus must retain the same formula control");button('Cancel',selected());await settle();assert.equal(await source(path),accepted);
  const protectedBeat=scene().beats.find(b=>b.payload.type==='customCode'&&b.payload.source.includes('max('));assert(protectedBeat?.protected);await selectBeat(protectedBeat.id);assert.match(selected().textContent,/unsupported|protected|function/i);button('View in Source',selected());await wait(()=>document.querySelector('.source-editor'));assert(document.querySelector('.source-editor').value.includes('max(0, trust - 1)'));
- button('Story');await wait(()=>document.querySelector('.beat-card'));await settle();
+ button('Story');await wait(()=>document.querySelector('.story-track-column'));await settle();
  stage('keyboard numeric suggestions, focus and Writing focus retain draft; Cancel writes nothing; protected import navigates to real Source');
  await selectBeat(compound.id);enter(formula(),'bonus + 8');staleSession=true;assert.equal((await commit()).ok,false);staleSession=false;assert.equal(lastApply.error.code,'STALE_PROJECT_SESSION');assert.equal(formula().value,'bonus + 8');button('Cancel',selected());await settle();
  // Retain an unfinished Source buffer through the real public owner, then refuse the Story draft.
@@ -88,12 +90,12 @@ try{
  await selectBeat(compound.id);enter(formula(),'bonus + 9');assert.equal((await commit()).ok,false);assert.equal(lastApply.error.code,'DIRTY_SOURCE');assert.equal(formula().value,'bonus + 9');button('Cancel',selected());await settle();await call('source.discard',{path});
  await selectBeat(compound.id);enter(formula(),'bonus + 10');await saveSource(path,accepted+'# competing accepted Source\n');assert.equal((await commit()).ok,false);assert.equal(formula().value,'bonus + 10');assert.equal(await source(path),accepted+'# competing accepted Source\n');button('Cancel',selected());await settle();
  stage('ordinary session, dirty Source and stale revision refusals retain Story drafts and accepted source');
- button('Close Project');await wait(()=>document.querySelector('.recent-open'));document.querySelector('.recent-open').click();await wait(()=>document.querySelector('.beat-card'));await settle();assert.equal(await source(path),accepted+'# competing accepted Source\n');assert.equal((await call('history.state')).undo,null);assert.equal((await call('history.state')).redo,null);
+ button('Close Project');await wait(()=>document.querySelector('.recent-open'));document.querySelector('.recent-open').click();await wait(()=>document.querySelector('.story-track-column'));await settle();assert.equal(await source(path),accepted+'# competing accepted Source\n');assert.equal((await call('history.state')).undo,null);assert.equal((await call('history.state')).redo,null);
  await selectBeat(decimal.id);assert.equal(formula().value,'(9.5 + 0.5) / 4');assert.equal(numeric().find(b=>b.id===decimal.id).assignment.state.value,2.5);
  stage('real project close/reopen preserves accepted source, editable formulas and core results; session history resets');
  // Exercise every approved operation through actual menu controls and core admission.
  for (const [label,operation,operand,expectedValue] of [['Set to','assign','2',2],['Add','add','2',11.5],['Subtract','subtract','2',7.5],['Multiply by','multiply','2',19],['Divide by','divide','2',4.75],['Floor divide by','floorDivide','2',4],['Remainder after dividing by','remainder','2',1.5]]) {
-  const panel=selected();panel.querySelector('summary').click();button(label,panel);enter(formula(),operand);
+  const panel=selected();panel.querySelector('.story-operation-menu summary').click();button(label,panel);enter(formula(),operand);
   assert.equal((await commit()).ok,true);assert.equal(result.transcript.filter(t=>t.request.operation==='scene.apply').at(-1).request.payload.command.beat.value.operation,operation);
   assert.equal(numeric().find(b=>b.id===decimal.id).assignment.state.value,expectedValue);await selectBeat(decimal.id);
  }
@@ -102,6 +104,8 @@ try{
  for(const name of ['arith_flag','arith_title']) {const id=workspace.authoring.variables.find(v=>v.technicalName===name).id;const literal=numeric().find(b=>b.payload.variableId===id);assert(literal);await selectBeat(literal.id);assert(selected().querySelector('[aria-label="Value"]'));assert.equal((await commit()).ok,true);assert.equal(await source(path),literalSource);}
  stage('all seven operation menu choices reach core with correct results; bool/string literal paths and no-op source remain intact');
  // Existing explicit branch owner, insertion position and the same validation/apply envelope.
+ // The condition's editor owns Add Beat to If.
+ const ifHeader=scene().beats.find(b=>b.conditionalBranch&&!b.conditionalBranch.ordinal&&!b.conditionalBranch.otherwise);assert(ifHeader);await selectBeat(ifHeader.id);
  button('Add Beat to If');const newBeat=document.querySelector('.new-beat');enter(newBeat.querySelector('select'),'setVariable','change');
  enter(newBeat.querySelector('[aria-label="Variable"]'),workspace.authoring.variables.find(v=>v.technicalName==='trust').id,'change');
  enter(newBeat.querySelector('[aria-label="Formula"]'),'(bonus + 2) * 3');await settle();
@@ -110,7 +114,7 @@ try{
  const inserted=scene().beats.find(b=>b.payload.value?.operand==='(bonus + 2) * 3'&&b.owner);assert(inserted);assert.deepEqual(inserted.owner,{groupId:validated.request.payload.command.body.groupId,branchId:validated.request.payload.command.body.branchId});
  const finalSource=await source(path);assert(finalSource.includes('        $ trust = (bonus + 2) * 3\n'));assert(finalSource.includes('# competing accepted Source'));
  assert.equal((await historyStep('undo')).ok,true);assert.equal(await source(path),literalSource);assert.equal((await historyStep('redo')).ok,true);assert.equal(await source(path),finalSource);
- button('Close Project');await wait(()=>document.querySelector('.recent-open'));document.querySelector('.recent-open').click();await wait(()=>document.querySelector('.beat-card'));await settle();assert.equal(await source(path),finalSource);assert(scene().beats.some(b=>b.id===inserted.id&&b.owner?.branchId===inserted.owner.branchId));
+ button('Close Project');await wait(()=>document.querySelector('.recent-open'));document.querySelector('.recent-open').click();await wait(()=>document.querySelector('.story-track-column'));await settle();assert.equal(await source(path),finalSource);assert(scene().beats.some(b=>b.id===inserted.id&&b.owner?.branchId===inserted.owner.branchId));
  stage('nested formula insertion validates and commits its captured branch/position; exact shared history and reopen retain it');
  await selectBeat(decimal.id);
  result.sourceSHA256=hash(await source(path));await writeFile(join(output,'accepted.rpy'),await source(path));button('Cancel',selected());button('Close Project');await wait(()=>document.querySelector('.recent-open'));result.passed=true;

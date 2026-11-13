@@ -11,7 +11,7 @@ window.__loomlightFoundationExtended = async ({ details, check, wait, click, cal
   const apply = command => call('scene.apply', { sessionId: project.sessionId, expectedProjectRevision: model.projectRevision, expectedSourceMapRevision: model.sourceMapRevision, command: { sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, ...command } });
   const reopen = async () => {
     await click('Close Project'); await wait(() => window.__loomlightProbeFindButton('Source foundation fixture'));
-    await click('Source foundation fixture'); await wait(() => document.querySelectorAll('.nested-dialogue').length === 2); await refresh();
+    await click('Source foundation fixture'); await wait(() => document.querySelector('.story-track-beat[data-beat-kind="condition"]')); await refresh();
   };
   const save = async text => {
     const opened = await source();
@@ -19,7 +19,9 @@ window.__loomlightFoundationExtended = async ({ details, check, wait, click, cal
     await call('source.save', { sessionId: project.sessionId, path: scene.sourcePath, expectedBaseRevision: draft.baseRevision, expectedDraftVersion: draft.draftVersion });
     await reopen();
   };
-  const card = id => [...document.querySelectorAll('.beat-card')].find(c => c.dataset.beatId === id);
+  const column = id => [...document.querySelectorAll('.story-tracks [data-beat-id]')].find(c => c.dataset.beatId === id);
+  const card = id => window.__loomlightProbeEditorFor(id);
+  const open = async beat => { if (beat.owner) window.__loomlightProbeOpenBranch(beat.owner.branchId); await wait(() => column(beat.id)); window.__loomlightProbeSelectBeat(beat.id); await wait(() => card(beat.id)); };
   await refresh();
   details.stage = 'corrected-boundaries';
   const accepted = await source();
@@ -28,27 +30,17 @@ window.__loomlightFoundationExtended = async ({ details, check, wait, click, cal
   const baseline = model, baselineSource = await source(), baselineOwners = owners(model);
   const beats = scene.beats, root = beats.find(b => b.payload.text === 'Root one');
   const child = beats.find(b => b.payload.text === 'False café 雪');
-  check(card(root.id).querySelector('.beat-controls button').disabled, 'Root Move Up across child disabled');
-  const grip = card(root.id).querySelector('.beat-grip'), target = card(child.id);
-  const originalHit = document.elementFromPoint.bind(document);
-  document.elementFromPoint = () => target;
-  try {
-    const pointer = (type, x) => new PointerEvent(type, { button: 0, pointerId: 1, clientX: x, clientY: 20, bubbles: true });
-    grip.dispatchEvent(pointer('pointerdown', 10)); window.dispatchEvent(pointer('pointermove', 30));
-    check(!target.classList.contains('drop-before'), 'Root drag across child has no accepted target');
-    window.dispatchEvent(pointer('pointerup', 30));
-  } finally { document.elementFromPoint = originalHit; }
+  await open(root);
+  check([...card(root.id).querySelectorAll('.story-beat-menu button')].find(b => b.textContent === 'Move up')?.disabled, 'Root Move Up across child disabled');
   await refresh();
-  check(JSON.stringify(model) === JSON.stringify(baseline) && (await source()).text === baselineSource.text, 'Refused native drag leaves source, map revision and IDs unchanged');
+  check(JSON.stringify(model) === JSON.stringify(baseline) && (await source()).text === baselineSource.text, 'Selecting Beats leaves source, map revision and IDs unchanged');
   const rootBody = { type: 'root' }, beatRef = id => ({ type: 'beat', beatId: id }), before = id => ({ type: 'before', anchor: beatRef(id) });
   const commands = [ { type: 'moveStoryNode', node: beatRef(root.id), expectedBody: rootBody, body: rootBody, position: before(child.id) } ];
   const anchors = beats.filter(b => b.conditionalBranch?.otherwise || b.payload.source?.trimStart().startsWith('#'));
   check(anchors.length === 3, 'Otherwise and both body trivia anchors present');
   for (const anchor of anchors) {
-    card(anchor.id).querySelector('.beat-select').click();
-    const additions = [...document.querySelectorAll('.provenance-row button:last-child')];
-    check(additions.length > 0 && additions.every(b => b.disabled), `Insertion UI refused at ${anchor.payload.source.trim()}`);
-    card(anchor.id).querySelector('.beat-select').click();
+    // Headers and trivia are not nodes: Tracks offers no column, so no insertion UI, at them.
+    check(!column(anchor.id), `Insertion UI refused at ${anchor.payload.source.trim()}`);
     commands.push({ type: 'insertBodyBeat', body: rootBody, position: before(anchor.id), beat: { type: 'narration', text: 'Unsafe root' } });
   }
   for (const command of commands) {
@@ -80,7 +72,7 @@ window.__loomlightFoundationExtended = async ({ details, check, wait, click, cal
   check(owners(model) === eofOwners && (await source()).text === appended.text, 'EOF Redo and shell reopen retain bytes, IDs and owners');
   details.stage = 'external-refusal';
   const editing = scene.beats.find(b => b.owner);
-  card(editing.id).querySelector('.beat-select').click(); await wait(() => card(editing.id).querySelector('textarea'));
+  await open(editing); await wait(() => card(editing.id).querySelector('textarea'));
   const editor = card(editing.id).querySelector('textarea'); editor.value = 'Retained external Story draft'; editor.dispatchEvent(new Event('input', { bubbles: true }));
   const beforeExternal = await source();
   await call('probe.foundationExternalReady', { path: scene.sourcePath });

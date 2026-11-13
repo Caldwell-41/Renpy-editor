@@ -97,8 +97,11 @@
         const initialFlow = await read("flow.list",{sessionId});
         const initial = initialFlow.edges.filter(e=>e.sceneId===project.sceneId && e.kind==="choice").map(e=>e.destination.sceneId);
         const setFirstEnding = async destination => {
-          await until(()=>document.querySelector('.story-choice-option'));
-          const option=document.querySelector('.story-choice-option');
+          await until(()=>document.querySelector('.story-track-beat[data-beat-kind="choice"]'));
+          const choice=document.querySelector('.story-track-beat[data-beat-kind="choice"]');if(choice.dataset.selected!=='true')choice.click();
+          await until(()=>document.querySelector('.story-option-links button'));document.querySelector('.story-option-links button').click();
+          await until(()=>document.querySelector('.story-option-editor'));
+          const option=document.querySelector('.story-option-editor');
           [...option.querySelectorAll('button')].find(b=>b.textContent==='Then').click();
           await until(()=>document.querySelector('.story-operation[aria-label="Option ending"]'));
           const panel=document.querySelector('.story-operation[aria-label="Option ending"]');

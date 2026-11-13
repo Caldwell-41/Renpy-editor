@@ -99,7 +99,7 @@ try {
   const shownSource = await source(scene.sourcePath); assert.equal(shownSource, before.replace('    return', '    show screen travel_notes\n    return'));
   model = await call('scene.list'); const shown = model.scenes.find(item => item.id === scene.id).beats.find(beat => beat.payload.type === 'showScreen');
   assert.equal(shown.payload.target.screenId, panel.id);
-  host.querySelector(`[data-beat-id="${shown.id}"] .beat-select`).click();
+  host.querySelector(`.story-track-column[data-beat-id="${shown.id}"] > .story-track-beat`).click();
   await wait(() => /Panel ready/.test(host.querySelector('[data-beat-type="showScreen"]')?.textContent ?? ''), 'existing Show opened');
   button(host, 'View in Source').click(); assert.deepEqual(result.sourceNavigation, [scene.sourcePath, shown.byteStart, shown.byteEnd, model.scenes.find(item => item.id === scene.id).sourceRevision]);
   const editor = host.querySelector('[data-beat-type="showScreen"]'); button(editor, 'Commit Beat').click(); await wait(() => !editor.isConnected, 'no-op Show accepted');
@@ -134,7 +134,7 @@ try {
   assert.equal(unresolved.protected, true); assert.equal(unresolved.payload.target.screenId, panel.id); assert.equal(unresolved.payload.target.sourceName, 'travel_notes'); assert(!unresolved.payload.revisions);
   assert.equal(await source(scene.sourcePath), hiddenSource);
   assert.equal(await source(entry.sourcePath), opaqueNeighbor, 'unrelated comments and opaque Source remain exact');
-  host = await mountStory(scene.id); host.querySelector(`[data-beat-id="${shown.id}"] .beat-select`).click(); assert.equal(host.querySelector('[aria-label="Panel screen"]'), null);
+  host = await mountStory(scene.id); host.querySelector(`.story-track-column[data-beat-id="${shown.id}"] > .story-track-beat`).click(); assert.equal(host.querySelector('[aria-label="Panel screen"]'), null);
   result.stages.push('stale captured draft refuses -> Source rename -> reopen keeps protected stable intent');
   result.acceptedHashes = {panel: hash(acceptedPanel), show: hash(shownSource), hide: hash(hiddenSource)}; result.passed = true;
 } catch (error) {

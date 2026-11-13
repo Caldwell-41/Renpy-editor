@@ -183,7 +183,7 @@ function beginAuthoringCompletion(project: OpenProject, scope: object, edit = tr
   const token = beginCompletion(project, scope);
   activeAuthoringOperations.set(project.sessionId, token.operation);
   reflectAuthoringState();
-  if (edit) historyNotice = undefined;
+  if (edit) clearHistoryNotice();
   return token;
 }
 
@@ -248,10 +248,9 @@ function persistenceMessage(state: PersistenceStatus, localPending: boolean): { 
   // A refused Story Save keeps its count and scene links until its drafts are saved or cancelled.
   const refusal: StoryStatus | undefined = storyView?.saveStatus();
   if (refusal) return refusal;
-  // "Undone: …" stays until the next edit or view, including over retained beat and Source drafts.
-  if (historyNotice?.view === viewGeneration && !localPending) return { text: historyNotice.text, kind: "normal" };
   if (localPending || state === "pendingValidation") return { text: "Unsaved Source draft", kind: "normal" };
-  if (storyView?.hasDrafts()) return { text: "Unsaved changes", kind: "normal" };
+  const drafts = storyView?.draftCount() ?? 0;
+  if (drafts) return { text: `${drafts} unsaved beat draft${drafts === 1 ? "" : "s"}`, kind: "normal" };
   return { text: hasUnsubmittedInput() ? "Unsubmitted input — accepted changes saved" : "Saved", kind: "normal" };
 }
 
@@ -274,12 +273,36 @@ function statusLink(link: StatusLink): HTMLButtonElement {
   const count = document.createElement("b"); count.textContent = String(link.count); element.append(" ", count);
   element.addEventListener("click", link.open); return element;
 }
+// The header save status, approved as story-combined-status / header-v2. A refused
+// Story Save bolds "Nothing saved." and links each scene. At 560 px the header shows a
+// short form (data-short) and the bottom status bar repeats a refusal line in full.
+function statusContent(message: string, links: readonly StatusLink[]): (string | HTMLElement)[] {
+  const lead = links.length ? /^(.*?Nothing saved\.)(\s.*)$/s.exec(message) : null;
+  const text = lead ? [Object.assign(document.createElement("b"), { textContent: lead[1] }), lead[2]!] : [message];
+  return [...text, ...links.map(statusLink)];
+}
+function shortStatus(message: string, links: readonly StatusLink[]): string | undefined {
+  if (links.length) return "Nothing saved";
+  const drafts = /^(\d+) unsaved beat drafts?(\. Ready to save\.)?$/.exec(message);
+  return drafts ? `${drafts[1]} unsaved` : undefined;
+}
+// The bottom status bar: "Undone: …" and "Redone: …" until the next edit or view.
+function showMessage(text: string): void {
+  const message = document.querySelector<HTMLElement>("#app-message"); if (message) message.textContent = text;
+}
+function clearHistoryNotice(): void {
+  if (historyNotice) showMessage("Ready");
+  historyNotice = undefined;
+}
 function setStatus(message: string, kind: "normal" | "error" = "normal", links: readonly StatusLink[] = []): void {
   const dialog=document.querySelector(".catalog-dialog-panel");if(dialog&&kind==="error"){let error=dialog.querySelector<HTMLElement>(".dialog-error");if(!error){error=document.createElement("p");error.className="error-message dialog-error";error.role="alert";dialog.append(error);}error.textContent=message;}else if(message==="Saving…"){dialog?.querySelector(".dialog-error")?.remove();}
   if(routineStatusTimer)clearTimeout(routineStatusTimer);
-  const status=document.querySelector<HTMLElement>("#app-status");
-  const content=[message,...links.map(statusLink)],text=content.map(item=>typeof item==="string"?item:item.textContent).join("");
-  const apply=():void=>{if(status?.isConnected&&(status.textContent!==text||status.dataset.kind!==kind)){status.replaceChildren(...content);status.title=message;status.dataset.kind=kind;}};
+  const status=document.querySelector<HTMLElement>("#app-status"),refusal=document.querySelector<HTMLElement>("#app-refusal");
+  const content=statusContent(message,links),text=content.map(item=>typeof item==="string"?item:item.textContent).join(""),short=shortStatus(message,links);
+  const apply=():void=>{
+    if(status?.isConnected&&(status.textContent!==text||status.dataset.kind!==kind)){status.replaceChildren(...content);status.title=message;status.dataset.kind=kind;if(short)status.dataset.short=short;else delete status.dataset.short;}
+    if(refusal?.isConnected)refusal.replaceChildren(...(links.length?statusContent(message,links):[]));
+  };
   if(kind==="normal"&&["Saving…","Checking saved state…"].includes(message))routineStatusTimer=setTimeout(apply,200);else apply();
 }
 async function value<T>(operation: Parameters<typeof desktopRequestCore>[0], payload: Readonly<Record<string, unknown>> = {}): Promise<T> {
@@ -303,14 +326,17 @@ function shell(content: HTMLElement): void {
   const main = document.createElement("main"); main.className = "app-shell";
   const header = document.createElement("header"); header.className = "app-header";
   const brand = button("Loomlight", "brand"); brand.addEventListener("click", () => void (async () => { if (lifecycleBusy || !await allowSceneNavigation()) return; const project = currentProject; if (!project) { await showWelcome(); return; } await requestProjectClose(project); })());
-  const status = document.createElement("span"); status.id = "app-status"; status.className = "app-status"; status.role = "status"; status.ariaLive = "polite"; status.textContent = "Ready";
+  // The save status sits in the header before Undo, Redo and Save (header-undo icons-v1).
+  const status = document.createElement("span"); status.id = "app-status"; status.className = "app-status"; status.role = "status"; status.ariaLive = "polite"; status.setAttribute("aria-label", "Save status"); status.textContent = "Ready";
   const projectLabel = document.createElement("span"); projectLabel.className = "header-project"; projectLabel.textContent = currentProject?.title ?? "";
   brand.prepend(icon("story")); header.append(brand, projectLabel);
-  const studioRequest=button("Studio request", "button");studioRequest.addEventListener("click",()=>openStudioRequest(currentProject?.sessionId??null));header.append(studioRequest);
+  const studioRequest=button("Studio request", "button");studioRequest.addEventListener("click",()=>openStudioRequest(currentProject?.sessionId??null));header.append(studioRequest,status);
   const footer = document.createElement("footer"); footer.className = "app-footer";
   const context = document.createElement("span"); context.textContent = currentProject ? "Local project" : "Local workspace";
+  const message = document.createElement("span"); message.id = "app-message"; message.className = "app-message"; message.role = "status"; message.ariaLive = "polite"; message.textContent = historyNotice?.view === viewGeneration ? historyNotice.text : "Ready";
+  const refusal = document.createElement("span"); refusal.id = "app-refusal"; refusal.className = "app-refusal";
   const settings = button("Settings", "text-button shell-settings"); settings.prepend(icon("settings")); settings.addEventListener("click", () => { const project=currentProject;if(!project){openSettings();return;}openProjectSettings(project);});
-  footer.append(context,status,settings); main.append(header, content, footer); root.replaceChildren(main);
+  footer.append(context,message,refusal,settings); main.append(header, content, footer); root.replaceChildren(main);
 }
 
 async function showWelcome(): Promise<void> {
@@ -515,7 +541,8 @@ async function runHistory(project: OpenProject, direction: HistoryDirection): Pr
       revealHistoryItem(project, step.entry.item);
       showHistory(step.history);
       historyNotice = { text: `${direction === "undo" ? "Undone" : "Redone"}: ${step.entry.name}`, view: viewGeneration };
-      setStatus(historyNotice.text);
+      showMessage(historyNotice.text);
+      void refreshPersistenceStatus(project, viewGeneration);
       if (focused) document.querySelector<HTMLElement>(`[data-history="${focused}"]`)?.focus();
     } finally { transition?.release(); }
   } catch (error) {
@@ -806,7 +833,6 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
       resolution: project.resolution,
       present: (assetId, purpose) => projectValue(project, "media.present", { assetId, purpose }),
       viewSource: (path, byteStart, byteEnd, expectedRevision) => { void requestProjectNavigation(project, "source", { path, byteStart, byteEnd, expectedRevision }); },
-      layoutKey: storyLayoutKey(project),
       sceneId: preferredStoryScene(project),
       rememberScene: sceneId => rememberStoryScene(project, sceneId),
       draftsChanged: () => { if (currentProject?.sessionId === project.sessionId) void refreshPersistenceStatus(project, viewGeneration); },
@@ -827,7 +853,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
       // still delivers it before the Commit, Save or Undo that follows.
       recordStep: async step => {
         const sequence = ++historyRequestSequence;
-        historyNotice = undefined;
+        clearHistoryNotice();
         const state = await projectValue<HistoryState>(project, "history.draftStep", { ...step });
         if (sequence === historyRequestSequence && currentProject?.sessionId === project.sessionId) showHistory(state);
       },
@@ -870,7 +896,7 @@ async function renderSourceSurface(workspace: HTMLElement, tree: HTMLElement, pr
       // and the response carries the history that follows (ADR 0025).
       update: async (request) => {
         const document = await projectValue<SourceDocument>(project, "source.updateDraft", request);
-        if (document.history && currentProject?.sessionId === project.sessionId) { historyNotice = undefined; showHistory(document.history); }
+        if (document.history && currentProject?.sessionId === project.sessionId) { clearHistoryNotice(); showHistory(document.history); }
         return document;
       },
       save: (request) => projectValue<SourceDocument>(project, "source.save", request),

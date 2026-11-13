@@ -3,7 +3,7 @@ import test from "node:test";
 import { Window } from "happy-dom";
 import { hasSceneDraft, type SceneActions, type SceneCommand, type SceneWorkspace, type ScreenInsertion } from "../src/scene-ui.js";
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenTargetBinding } from "../src/screen-contracts.js";
-import { storyFixture, renderStoryView } from "./story-controls-fixture.js";
+import { selectBeat, storyEditor, storyFixture, renderStoryView } from "./story-controls-fixture.js";
 
 const binding: ScreenTargetBinding = { screenId: "panel-id", sourceName: "help_panel" };
 const revisions = { source: "panel-source", sourceMap: "map", inventory: "inventory", effects: "effect" };
@@ -66,7 +66,7 @@ test("a retained screen Beat draft resolves through the actions of the current S
 test("editor Escape cancels a new Hide operation without sending a game action or Beat write", async () => {
   const s = setup(); const panel = openNew(s.host, "hideScreen"); await tick();
   panel.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
-  assert.equal(panel.isConnected, false); assert.equal(s.commands.length, 0);assert.equal(s.host.querySelector(".story-screen-pending"),null);
+  assert.equal(panel.isConnected, false); assert.equal(s.commands.length, 0);assert.equal(s.host.querySelector(".story-track-pending"),null);
   await s.close();
 });
 
@@ -89,7 +89,7 @@ test("existing screen Beats keep exact Source navigation, conservative effects a
   const screenBeat = { id: "show", byteStart: 40, byteEnd: 67, protected: false, screenEffects: target.effects, payload: { type: "showScreen" as const, target: binding, revisions } };
   const model: SceneWorkspace = { ...base, scenes: [{ ...base.scenes[0]!, beats: [base.scenes[0]!.beats[0]!, screenBeat, { ...base.scenes[0]!.beats[1]!, byteStart: 67, byteEnd: 78 }] }] };
   const s = setup({ viewSource: (...args) => { sourceCalls.push(args); } }, model);
-  s.host.querySelector<HTMLButtonElement>('[data-beat-id="show"] .beat-select')!.click(); await tick();
+  selectBeat(s.host, "show"); await tick();
   const editor = s.host.querySelector<HTMLElement>('[data-beat-type="showScreen"]')!;
   assert.match(editor.textContent!, /Effects unknown/);
   assert.equal(s.resolutions.length, 0, "workspace revisions must not be refreshed by opening the row");
@@ -103,9 +103,9 @@ test("unresolved typed Beat stays protected even when a different Panel has the 
   const base = fixture(); const model: SceneWorkspace = { ...base, scenes: [{ ...base.scenes[0]!, beats: [
     { id: "unresolved", byteStart: 20, byteEnd: 47, protected: true, payload: { type: "showScreen", target: { screenId: "deleted-panel", sourceName: "help_panel" } } }, base.scenes[0]!.beats[1]!,
   ] }] };
-  const s = setup({}, model); s.host.querySelector<HTMLButtonElement>('[data-beat-id="unresolved"] .beat-select')!.click(); await tick();
+  const s = setup({}, model); selectBeat(s.host, "unresolved"); await tick();
   assert.equal(s.host.querySelector('[aria-label="Panel screen"]'), null); assert.equal(s.resolutions.length, 0); assert.equal(s.commands.length, 0);
-  assert.match(s.host.querySelector('[data-beat-id="unresolved"]')!.textContent!, /Protected source/);
+  assert.match(storyEditor(s.host).textContent!, /Protected source/);
   await s.close();
 });
 
@@ -138,7 +138,7 @@ test("existing Show draft refuses Commit when its accepted revisions change unde
     { id: "show", byteStart: 20, byteEnd: 47, protected: false, payload: { type: "showScreen", target: binding, revisions: supplied } }, base.scenes[0]!.beats[1]!,
   ] }] };
   const s = setup({ screenCatalog: async () => new Promise(resolve => { finish = resolve; }) }, model);
-  s.host.querySelector<HTMLButtonElement>('[data-beat-id="show"] .beat-select')!.click(); supplied.source = "newer-revision"; finish(catalog); await tick();
+  selectBeat(s.host, "show"); supplied.source = "newer-revision"; finish(catalog); await tick();
   button(s.host.querySelector('[data-beat-type="showScreen"]')!, "Commit Beat").click(); await tick();
   assert.equal(s.commands.length, 0); assert.match(s.messages.at(-1)!, /Conflict with source/);
   await s.close();
@@ -163,7 +163,8 @@ test("Call screen chooses only dialogs and retains the selected insertion anchor
   const picker=draft.querySelector<HTMLSelectElement>('[aria-label="Dialog screen"]');assert.ok(picker);assert.deepEqual([...picker.options].map(o=>o.value),[dialogBinding.screenId]);
   const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]');assert.ok(position);assert(![...position.options].some(o=>o.textContent==="End of body"));
   position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));
-  const marker=s.host.querySelector(".story-screen-pending");assert.ok(marker);assert.equal(marker.nextElementSibling?.getAttribute("data-beat-id"),"line");assert.match(marker.textContent!,/Pending Call screen/);
+  // The pending column in Tracks sits at the chosen place.
+  const marker=s.host.querySelector(".story-track-pending");assert.ok(marker);assert.equal(marker.nextElementSibling?.getAttribute("data-beat-id"),"line");assert.match(marker.textContent!,/call screen/);
   button(draft,"Add Beat").click();await tick();
   assert.deepEqual(s.commands[0]!.body,{type:"root"});assert.deepEqual(s.commands[0]!.position,{type:"before",anchor:{type:"beat",beatId:"line"}});
   assert.deepEqual(s.commands[0]!.beat,{type:"callScreen",target:dialogBinding,revisions});
@@ -203,30 +204,7 @@ test("screen insertion keeps existing nested body ownership",async()=>{
  ]}]};const s=setup({},model);const draft=openNew(s.host,"showScreen");await tick();
  const body=draft.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;body.value="branch";body.dispatchEvent(new Event("change",{bubbles:true}));
  const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));button(draft,"Add Beat").click();await tick();
- assert.deepEqual(s.commands[0]!.body,{type:"branch",groupId:"group",branchId:"branch"});assert.deepEqual(s.commands[0]!.position,{type:"before",anchor:{type:"beat",beatId:"line"}});assert.equal(s.host.querySelector(".story-screen-pending")!.parentElement?.getAttribute("data-branch-id"),"branch");button(draft,"Cancel").click();assert.equal(s.host.querySelector(".story-screen-pending"),null);await s.close();
-});
-
-test("Story reserves the wrapped sticky toolbar height when scrolling to focused controls",async()=>{
- const original=globalThis.ResizeObserver;
- const observed:{target?:Element;callback:ResizeObserverCallback;observer:ResizeObserver}[]=[];
- class Observer {
-  constructor(private callback:ResizeObserverCallback){}
-  observe(target:Element){observed.push({target,callback:this.callback,observer:this as unknown as ResizeObserver});}unobserve(){}disconnect(){}
- }
- globalThis.ResizeObserver=Observer as unknown as typeof ResizeObserver;
- const s=setup();
- try{
-  const toolbar=s.host.querySelector<HTMLElement>(".beats-toolbar")!,region=toolbar.closest<HTMLElement>(".beats-region")!;
-  const rect=toolbar.getBoundingClientRect();let height=148;Object.defineProperty(rect,"height",{get:()=>height});toolbar.getBoundingClientRect=()=>rect;
-  let available=400;Object.defineProperty(region,"clientHeight",{get:()=>available});
-  const controlRect=toolbar.querySelector("button")!.getBoundingClientRect();Object.defineProperty(controlRect,"height",{value:36});toolbar.querySelector("button")!.getBoundingClientRect=()=>controlRect;
-  const entry=observed.find(entry=>entry.target===toolbar);assert.ok(entry,"The sticky toolbar must be observed as its tools wrap");
-  entry.callback([],entry.observer);assert.equal(region.style.scrollPaddingTop,"152px");
-  height=190;entry.callback([],entry.observer);assert.equal(region.style.scrollPaddingTop,"194px");
-  available=100;entry.callback([],entry.observer);assert.equal(region.style.scrollPaddingTop,"4px","An oversized toolbar must not consume the focus viewport");assert.equal(toolbar.style.position,"static");
-  const resized=observed.find(entry=>entry.target===region);assert.ok(resized,"Changing the preview allocation must recheck toolbar fit");
-  available=400;resized.callback([],resized.observer);assert.equal(region.style.scrollPaddingTop,"194px");assert.equal(toolbar.style.position,"sticky");
- }finally{await s.close();if(original)globalThis.ResizeObserver=original;else Reflect.deleteProperty(globalThis,"ResizeObserver");}
+ assert.deepEqual(s.commands[0]!.body,{type:"branch",groupId:"group",branchId:"branch"});assert.deepEqual(s.commands[0]!.position,{type:"before",anchor:{type:"beat",beatId:"line"}});assert.equal(s.host.querySelector(".story-track-pending")!.previousElementSibling?.getAttribute("data-branch-id"),"branch");button(draft,"Cancel").click();assert.equal(s.host.querySelector(".story-track-pending"),null);await s.close();
 });
 
 test("Cancel and Escape return focus to the visible Story draft opener",async()=>{
@@ -234,6 +212,7 @@ test("Cancel and Escape return focus to the visible Story draft opener",async()=
   const s=setup({},entry==="branch"?storyFixture():fixture());
   try{
    const caption=entry==="branch"?"Add Beat to If":entry==="screen"?"Add screen Beat":"Add Beat";
+   if(entry==="branch")selectBeat(s.host,"if");
    const opener=button(s.host,caption);opener.focus();opener.click();await tick();
    const draft=s.host.querySelector<HTMLElement>(".new-beat")!;
    const type=draft.querySelector<HTMLSelectElement>("select")!;type.value="showScreen";type.dispatchEvent(new Event("change",{bubbles:true}));
@@ -264,7 +243,7 @@ test("Cancel and Escape restore the captured insertion context after a refused s
    assert.ok(draft.isConnected);
    if(cancel==="button")button(draft,"Cancel").click();else position.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true,cancelable:true}));
    assert.deepEqual(remembered,original,"Cancellation must restore the location captured before this draft");
-   assert.equal(s.host.querySelector(".story-screen-pending"),null);
+   assert.equal(s.host.querySelector(".story-track-pending"),null);
   }finally{await s.close();}
  }
 });

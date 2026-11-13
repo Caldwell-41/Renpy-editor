@@ -1,9 +1,10 @@
 import { assignmentCaption, buildAssignmentEditor, type ValidateAssignment } from "./story-arithmetic-editor.ts";
-import { layoutFor, saveLayout } from "./preferences.ts";
 import { buildAvailabilityEditor, buildConditionEditor } from "./story-condition-editor.ts";
 import { validateField } from "./authoring-input.ts";
 import { isTextField, typingStepIdleMs, type DraftStep, type DraftStepRecord, type HistoryDirection } from "./project-history.ts";
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenEffects, ScreenRevisions, ScreenTargetBinding } from "./screen-contracts.ts";
+import { armOf, beatBody, beatNumbers, bodyOf, nodeBeats, nodeRef, ownedBodies, renderBranchPath, renderMarksLegend, renderTracks, renderTracksKey, sameNode, samePosition, shorten, trackCopy, trackRoute, type PendingBeat } from "./story-tracks.ts";
+export { beatBody } from "./story-tracks.ts";
 export type PlacementRef = "left" | "centre" | "right";
 export type TransitionRef = "none" | "dissolve" | "fade";
 
@@ -86,28 +87,6 @@ export interface SceneBody {
   readonly ending: BodyEnding;
   readonly places: readonly InsertionPlace[];
   readonly defaultPlace?: Position;
-}
-export function beatBody(beat: SceneBeat): BodyRef {
-  return beat.owner ? { type: "branch", ...beat.owner } : { type: "root" };
-}
-function sameBody(a: BodyRef, b: BodyRef): boolean {
-  return a.type === "root" ? b.type === "root" : b.type === "branch" && a.groupId === b.groupId && a.branchId === b.branchId;
-}
-function sameNode(a: NodeRef, b: NodeRef): boolean {
-  return a.type === "beat" ? b.type === "beat" && a.beatId === b.beatId : b.type === "condition" && a.groupId === b.groupId;
-}
-function samePosition(a: Position, b: Position): boolean {
-  return a.type === "end" ? b.type === "end" : b.type === "before" && sameNode(a.anchor, b.anchor);
-}
-function bodyOf(scene: SceneDocument, body: BodyRef): SceneBody | undefined {
-  return scene.bodies.find(item => sameBody(item.body, body));
-}
-/** A body's nodes as beats, in source order. */
-function nodeBeats(scene: SceneDocument, body: BodyRef): SceneBeat[] {
-  return (bodyOf(scene, body)?.nodes ?? []).flatMap(node => scene.beats.find(beat => beat.id === node.beatId) ?? []);
-}
-function nodeRef(beat: SceneBeat): NodeRef {
-  return beat.conditionalBranch ? { type: "condition", groupId: beat.conditionalBranch.groupId } : { type: "beat", beatId: beat.id };
 }
 function defaultPlace(scene: SceneDocument, body: BodyRef): Position {
   return bodyOf(scene, body)?.defaultPlace ?? { type: "end" };
@@ -287,6 +266,12 @@ function renderChoiceSummary(choice: Extract<BeatPayload, { type: "choice" }>, c
   summary.append(options); return summary;
 }
 
+/**
+ * Scene-local state through `throughBeatId`, or through the whole scene. `manualBranches`
+ * (groupId → branch) is the route the Branch path opens. A condition or Choice with no
+ * open branch stops a whole-scene preview; before the selected beat it leaves its state
+ * unknown and the preview continues.
+ */
 export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string, manualBranches?: ReadonlyMap<string, string>): ScenePreviewState {
   const stop = throughBeatId === undefined ? scene.beats.length - 1 : scene.beats.findIndex((beat) => beat.id === throughBeatId);
   const limit = stop < 0 ? scene.beats.length - 1 : stop;
@@ -301,6 +286,12 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string,
   let overlay: ScenePreviewState["overlay"];
   const unknownBeatIds: string[] = [];
   let lastVisitedBeatId: string | undefined;
+  const passClosed = throughBeatId !== undefined && stop >= 0;
+  const forget = (beat: SceneBeat): void => {
+    if (!unknownBeatIds.includes(beat.id)) unknownBeatIds.push(beat.id);
+    background = undefined; backgroundUnknown = true; characters = []; charactersUnknown = true;
+    music = undefined; musicUnknown = true; variables = {}; variablesUnknown = true; overlay = undefined;
+  };
   for (const beat of scene.beats.slice(0, limit + 1)) {
     const payload = beat.payload;
     if (manualBranches) {
@@ -315,16 +306,14 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string,
         const groupId = beat.conditionalBranch.groupId;
         const selected = manualBranches.get(groupId);
         const branches = scene.beats.filter(item => item.conditionalBranch?.groupId === groupId);
-        if (branches.some(branch => branch.id === selected) || (selected === "no-match" && !branches.some(branch => branch.conditionalBranch?.otherwise))) { lastVisitedBeatId = beat.id; continue; }
+        if (branches.some(branch => branch.id === selected)) { lastVisitedBeatId = beat.id; continue; }
       }
     } else if (beat.owner && beat.id !== throughBeatId) continue;
     lastVisitedBeatId = beat.id;
     if (beat.structuralPlaceholder) continue;
     if (payload.type === "customCode" || previewLogicBoundary(beat)) {
-      unknownBeatIds.push(beat.id); background = undefined; backgroundUnknown = true;
-      characters = []; charactersUnknown = true; music = undefined; musicUnknown = true;
-      variables = {}; variablesUnknown = true; overlay = undefined;
-      if (payload.type === "customCode") { if (manualBranches && beat.conditionalBranch) break; continue; }
+      forget(beat);
+      if (payload.type === "customCode") { if (manualBranches && beat.conditionalBranch && !passClosed) break; continue; }
     }
     switch (payload.type) {
       case "background": background = { assetId: payload.assetId, beatId: beat.id }; backgroundUnknown = false; characters = []; charactersUnknown = false; break;
@@ -360,7 +349,7 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string,
       if (!unknownBeatIds.includes(beat.id)) unknownBeatIds.push(beat.id);
       const firstOption = scene.beats.find(b => b.id === payload.options[0]?.id);
       const selected = firstOption?.conditionalBranch && manualBranches?.get(firstOption.conditionalBranch.groupId);
-      if (!selected || !payload.options.some(option => option.id === selected)) break;
+      if (!selected || !payload.options.some(option => option.id === selected)) { if (!passClosed || beat.id === throughBeatId) break; forget(beat); }
     }
     if (payload.type === "jump" || payload.type === "repeatChoice" || payload.type === "return") break;
   }
@@ -392,7 +381,6 @@ export interface SceneActions {
   readonly viewScene?: (target: StoryTarget) => void;
   readonly viewContinuation?: (sceneId: string, beatId: string, expectedSourceRevision: string) => void;
   readonly assist?: (sceneId: string, beatId: string, action?: string) => void;
-  readonly layoutKey?: string;
   /** Scene to show first; falls back to the project's last open scene. */
   readonly sceneId?: string;
   /** Records a scene the author selected. Selection never writes project files. */
@@ -549,6 +537,8 @@ export interface StoryView {
   update(model: SceneWorkspace, actions: SceneActions, initialBeatId?: string): void;
   /** Whether beat drafts exist in the project, or in one scene. */
   hasDrafts(sceneId?: string): boolean;
+  /** How many beat drafts the project has, for the header save status. */
+  draftCount(): number;
   /** True while a Story write is in flight. */
   busy(): boolean;
   /** Whether a Story form other than a beat draft (a name, a move, a condition operation) has input. */
@@ -595,14 +585,14 @@ export function renderStoryView(
   let disposed = false;
   let writingFocus = false;
   const collapsedChapters=new Set<string>();
-  const collapsedConditions = new Set<string>();
-  const manualBranches = new Map<string, string>();
-  let focusedBranch: string | undefined;
-  const layoutObservers:ResizeObserver[]=[];
-  let resetPreviewAllocation:(()=>void)|undefined;
-  let cancelBeatDrag:(()=>void)|undefined;
-  const resetLayout=():void=>resetPreviewAllocation?.();
-  window.addEventListener("loomlight-reset-layout",resetLayout);
+  // The Branch path route: groupId → open branch or option. View state outside Undo.
+  const openBranches = new Map<string, string>();
+  // A new beat draft shown in the editor, by its draft key. A beat id is `selectedBeatId`.
+  let selectedNewDraft: string | undefined;
+  // A Story operation form (move, delete, condition, ending) shown in place of the editor.
+  let openOperation: HTMLElement | undefined;
+  let numbers = new Map<string, string>();
+  let editorHost: HTMLElement | undefined, bottomHost: HTMLElement | undefined, effectsHost: HTMLElement | undefined;
   let settling: Promise<boolean> | undefined;
   let composing = false;
   let pendingWrites = 0;
@@ -715,7 +705,14 @@ export function renderStoryView(
       }
     } finally { restoring = false; }
     draft.state = state; draft.lastStep = direction === "undo" ? record.previous : record.sequence;
-    draftsChanged(draft); refreshPreview();
+    draftsChanged(draft);
+    // A draft that comes back out of view is revealed in the editor; a shown one keeps focus.
+    const scene = model.scenes.find(item => item.id === draft.sceneId);
+    if (state && !draft.panel.isConnected && scene && draft.sceneId === selectedSceneId) {
+      openOperation = undefined;
+      if (draft.beatId) selectBeat(scene, draft.beatId); else { selectedBeatId = undefined; selectedNewDraft = key; const place = draft.place?.().body; if (place) openTo(scene, place); }
+      draw();
+    } else { refreshPreview(); if (!draft.beatId) redrawBottom(); }
     return true;
   };
   // Reads a draft without moving focus or the caret, which a failing field read can do.
@@ -745,13 +742,15 @@ export function renderStoryView(
       return payload ? { ...beat, payload } : beat;
     }) };
   };
-  let previewTarget: { readonly preview: HTMLElement; readonly sceneId: string } | undefined;
+  let previewTarget: { readonly stage: HTMLElement; readonly sceneId: string } | undefined;
   const refreshPreview = (): void => {
     const scene = previewTarget && model.scenes.find(item => item.id === previewTarget!.sceneId);
-    if (!previewTarget?.preview.isConnected || !scene || composing) return;
-    mediaGeneration++; previewTarget.preview.replaceChildren(); renderPreview(previewTarget.preview, scene);
+    if (!previewTarget?.stage.isConnected || !scene || composing) return;
+    mediaGeneration++; previewTarget.stage.replaceChildren(); renderStage(previewTarget.stage, scene);
+    if (effectsHost?.isConnected) { effectsHost.replaceChildren(); renderEffects(effectsHost, scene); }
   };
   const dropDraft = (key: string): void => { beatDrafts.delete(key); draftsChanged(); };
+  const redrawBottom = (): void => { const scene = storyScene(model, selectedSceneId); if (scene && bottomHost?.isConnected) drawBottom(scene); };
   // Other open forms (names, moves, condition operations) still settle before navigation.
   const drafts = (): HTMLElement[] => [host, treeHost].flatMap(root => [...root.querySelectorAll<HTMLElement>('.scene-draft[data-unsubmitted="true"]')]).filter(form => !form.closest("[data-beat-draft-key]"));
   const hasDraft = (): boolean => drafts().length > 0;
@@ -814,17 +813,31 @@ export function renderStoryView(
     } finally { unlock(); }
   };
 
-  // Shows a draft's editor: its scene, its beat and any condition that hides it.
+  // Opens every branch on the way to a body, so Tracks shows it.
+  const openTo = (scene: SceneDocument, body: BodyRef): void => {
+    for (let at: BodyRef | undefined = body, steps = 0; at?.type === "branch" && steps <= 32; steps++) { openBranches.set(at.groupId, at.branchId); at = bodyOf(scene, at)?.parent; }
+  };
+  // Selects a beat or a branch header and opens the branches around it. Blank lines and
+  // comments are not Tracks beats: a target there selects the next beat in its body.
+  const selectBeat = (scene: SceneDocument, target: string | undefined): void => {
+    const found = target === undefined ? undefined : scene.beats.find(item => item.id === target);
+    const shown = !found || found.conditionalBranch || scene.bodies.some(body => body.nodes.some(node => node.beatId === found.id));
+    const nodes = found && !shown ? nodeBeats(scene, beatBody(found)) : [];
+    const id = shown ? target : (nodes.find(node => node.byteStart >= found!.byteEnd) ?? nodes.at(-1))?.id ?? (found!.owner?.branchId);
+    selectedBeatId = id; selectedNewDraft = undefined;
+    const beat = id === undefined ? undefined : scene.beats.find(item => item.id === id);
+    if (!beat) return;
+    openTo(scene, beatBody(beat));
+    const header = beat.conditionalBranch;
+    if (header && (header.choiceOption || header.ordinal || header.otherwise)) openBranches.set(header.groupId, beat.id);
+  };
+  // Shows a draft's editor: its scene, its beat or place, and the branches around it.
   const reveal = (draft: BeatDraft): void => {
     const scene = model.scenes.find(item => item.id === draft.sceneId);
     if (scene && scene.id !== selectedSceneId) selectScene(scene.id);
-    const place = draft.place?.().body, anchor = draft.beatId ?? (place?.type === "branch" ? place.branchId : undefined);
-    if (scene && anchor) {
-      const ids = ancestry(scene, anchor);
-      for (const id of ids) collapsedConditions.delete(id);
-      if (focusedBranch && !ids.has(focusedBranch)) focusedBranch = undefined;
-    }
-    selectedBeatId = draft.beatId;
+    openOperation = undefined;
+    if (scene && draft.beatId) selectBeat(scene, draft.beatId);
+    else { selectedBeatId = undefined; selectedNewDraft = draft.panel.dataset.beatDraftKey; const place = draft.place?.().body; if (scene && place) openTo(scene, place); }
     draw();
     draft.panel.querySelector<HTMLElement>("input, textarea, select")?.focus();
   };
@@ -977,35 +990,34 @@ export function renderStoryView(
   const discardNote = (copy: HTMLElement, scene: SceneDocument, id: string, text = "Its unsaved beat drafts are discarded."): void => { if (draftsWithin(scene, id)) copy.textContent += ` ${text}`; };
 
   const draw = (): void => {
-    cancelBeatDrag?.();
-    layoutObservers.splice(0).forEach(o=>o.disconnect());
     // An unedited editor is rebuilt from accepted source; only edited ones are drafts.
     for (const [key, draft] of beatDrafts) if (!isPending(draft)) beatDrafts.delete(key);
     mediaGeneration += 1;
     for (const url of audioUrls) URL.revokeObjectURL?.(url);
     audioUrls.clear();
+    const scroll = host.querySelector<HTMLElement>(".story-tracks-scroll")?.scrollLeft ?? 0;
     treeHost.replaceChildren();
     host.replaceChildren();
     const selectedScene = storyScene(model, selectedSceneId);
     if (!selectedScene) {
       const empty = document.createElement("p"); empty.className = "error-message"; empty.textContent = "No valid Scene is available."; host.append(empty); return;
     }
+    if (selectedBeatId && !selectedScene.beats.some(beat => beat.id === selectedBeatId)) selectedBeatId = undefined;
+    if (selectedNewDraft && beatDrafts.get(selectedNewDraft)?.sceneId !== selectedScene.id) selectedNewDraft = undefined;
+    numbers = beatNumbers(selectedScene);
     drawTree(selectedScene);
-    drawBeats(selectedScene);
-    restoreNewBeatDrafts(selectedScene);
-    showLostDrafts(selectedScene);
+    drawStory(selectedScene, scroll);
     for (const draft of pendingDrafts()) drawConflict(draft);
     settleRefusal();
     markDrafts();
   };
 
   // A draft whose beat, place or scene left source has no beat to sit under. It shows
-  // above the shown scene's beats, with the comparison and Discard draft. So does a
-  // draft in a scene Story cannot map, with its own actions.
-  const showLostDrafts = (scene: SceneDocument): void => {
+  // at the top of the editor, with the comparison and Discard draft. So does a draft in
+  // a scene Story cannot map, with its own actions.
+  const lostDrafts = (scene: SceneDocument): HTMLElement[] => {
     const away = (draft: BeatDraft): boolean => scene.sourceConflict ? !draft.panel.isConnected : "missing" in (draft.conflict() ?? {});
-    const lost = pendingDrafts().filter(draft => (draft.sceneId === scene.id || !model.scenes.some(item => item.id === draft.sceneId)) && away(draft));
-    host.querySelector(".beats-list")?.prepend(...lost.map(draft => draft.panel));
+    return pendingDrafts().filter(draft => (draft.sceneId === scene.id || !model.scenes.some(item => item.id === draft.sceneId)) && away(draft) && draft.panel.dataset.beatDraftKey !== selectedNewDraft && draft.beatId !== selectedBeatId).map(draft => draft.panel);
   };
   // Shows or clears a draft's comparison (approved B, `story-draft-conflict` / `compact-v2`):
   // Conflict with source and the source text above the draft's field, then Discard draft
@@ -1053,13 +1065,6 @@ export function renderStoryView(
     cancelStep(key, "discard"); draft.detach?.(); dropDraft(key); draw();
   };
 
-  // A body's beat list: the root list or a condition or Choice branch.
-  const bodyList = (body: BodyRef): HTMLElement | undefined => body.type === "root"
-    ? host.querySelector<HTMLElement>(".beats-list") ?? undefined
-    : [...host.querySelectorAll<HTMLElement>(".story-branch-body")].find(node => node.dataset.branchId === body.branchId);
-  const restoreNewBeatDrafts = (scene: SceneDocument): void => {
-    for (const draft of beatDrafts.values()) if (!draft.beatId && draft.sceneId === scene.id && draft.place) bodyList(draft.place().body)?.prepend(draft.panel);
-  };
   // Quiet markers: the Screens draft convention on beat rows and scene rows. A draft
   // that conflicts with source gets a quiet "!". After a refused Save, failing drafts
   // get a red "!" and show why in their editor; a conflict shows its comparison instead.
@@ -1076,9 +1081,23 @@ export function renderStoryView(
       if (conflict) node.dataset.beatConflict = "true"; else node.removeAttribute("data-beat-conflict");
       if (has) label?.setAttribute("aria-description", fails ? "Unsaved draft. Needs changes." : conflict ? "Unsaved draft. Conflict with source." : "Unsaved draft"); else label?.removeAttribute("aria-description");
     };
-    host.querySelectorAll<HTMLElement>(".beat-card").forEach(card => { const id = card.dataset.beatId ?? ""; mark(card, card.querySelector(":scope > .beat-compact > .beat-select"), beats.has(id), failingBeats.has(id), conflicting.has(id)); });
+    // A condition or Choice column also marks the drafts inside its branches, open or not.
     const shown = storyScene(model, selectedSceneId);
-    host.querySelectorAll<HTMLElement>(".story-condition-group").forEach(group => { const id = group.dataset.conditionGroupId ?? ""; mark(group, group.querySelector(":scope > .story-group-heading > strong"), !!shown && draftsWithin(shown, id), !!shown && draftsWithin(shown, id, [...failing.keys()])); });
+    const inside = (id: string, drafts?: readonly BeatDraft[]): boolean => {
+      const node = shown?.beats.find(beat => beat.id === id);
+      return !!shown && !!node && ownedBodies(shown, node).some(body => body.type === "branch" && draftsWithin(shown, body.branchId, drafts));
+    };
+    // A failing beat's tooltip gives the reason; a conflict's says so.
+    const reasons = new Map([...failing].flatMap(([draft, reason]) => draft.beatId ? [[draft.beatId, reason] as const] : []));
+    const tip = (button: HTMLElement | null, reason: string | undefined): void => { if (!button) return; if (reason) button.title = reason; else button.removeAttribute("title"); };
+    host.querySelectorAll<HTMLElement>(".story-track-column[data-beat-id]").forEach(column => { const id = column.dataset.beatId ?? "", button = column.querySelector<HTMLElement>(":scope > .story-track-beat"); mark(column, button, beats.has(id) || inside(id), failingBeats.has(id) || inside(id, [...failing.keys()]), conflicting.has(id)); tip(button, reasons.get(id) ?? (conflicting.has(id) ? trackCopy.conflict : undefined)); });
+    host.querySelectorAll<HTMLElement>(".story-track-pending").forEach(column => { const draft = beatDrafts.get(column.dataset.newBeat ?? ""), button = column.querySelector<HTMLElement>(":scope > .story-track-beat"); mark(column, button, !!draft, !!draft && failing.has(draft)); tip(button, draft && failing.get(draft)); });
+    host.querySelectorAll<HTMLElement>(".story-editor-state").forEach(state => {
+      const id = state.dataset.beatId ?? "", fails = failingBeats.has(id), conflict = conflicting.has(id), has = beats.has(id);
+      state.textContent = fails ? `! ${trackCopy.needsChanges}` : conflict ? "! Conflict" : has ? `* ${trackCopy.draft}` : "";
+      state.dataset.mark = fails ? "fail" : conflict ? "conflict" : has ? "draft" : "";
+    });
+    host.querySelectorAll<HTMLElement>(".story-legend-fail").forEach(item => { item.hidden = !failing.size; });
     treeHost.querySelectorAll<HTMLElement>(".tree-scene-row").forEach(row => mark(row, row.querySelector(".tree-scene-open"), scenes.has(row.dataset.sceneId ?? ""), failingScenes.has(row.dataset.sceneId ?? "")));
     for (const draft of beatDrafts.values()) {
       const reason = failing.get(draft);
@@ -1086,7 +1105,8 @@ export function renderStoryView(
       if (reason === undefined) { draft.panel.removeAttribute("data-save-refused"); note?.remove(); continue; }
       draft.panel.dataset.saveRefused = "true";
       if (draft.conflict()) { note?.remove(); continue; }
-      if (!note) { note = document.createElement("p"); note.className = "error-message story-save-reason"; draft.panel.prepend(note); }
+      // The reason sits under the fields, above Commit and Cancel.
+      if (!note) { note = document.createElement("p"); note.className = "error-message story-save-reason"; const row = draft.panel.querySelector(":scope > .row-actions"); if (row) row.before(note); else draft.panel.append(note); }
       if (note.textContent !== reason) note.textContent = reason;
     }
   };
@@ -1160,23 +1180,27 @@ export function renderStoryView(
     opener?.focus({preventScroll:true});
     opener?.scrollIntoView?.({block:"nearest",inline:"nearest"});
   };
-  const openNewBeat = (scene: SceneDocument, initialType: BeatPayload["type"] = actions.screenHintKind === "dialog" ? "callScreen" : "dialogue", beforeBeatId: string | null = null, opener = "root"): void => {
+  // Opens a new beat draft at a place in a body and shows it in the editor.
+  const insertAt = (scene: SceneDocument, body: BodyRef, position: Position, opener: string, initialType: BeatPayload["type"] = "dialogue", hint?: ScreenInsertion): void => {
     if (!draftGuard()) return;
-    const anchor = beforeBeatId ? scene.beats.find(beat => beat.id === beforeBeatId) : undefined;
-    if (anchor && !nodeBeats(scene, { type: "root" }).includes(anchor)) {
-      actions.status("Add a root Beat before or after the whole condition group.", "error"); return;
-    }
-    selectedBeatId = undefined;
+    openOperation = undefined;
+    const current = model.scenes.find(item => item.id === scene.id); if (!current) return;
+    const key = renderNewBeat(current, initialType, body, position, hint, opener, selectedNewDraft ? undefined : selectedBeatId);
+    selectedBeatId = undefined; selectedNewDraft = key; openTo(current, body);
     draw();
-    const current = model.scenes.find((item) => item.id === scene.id);
-    const list = host.querySelector<HTMLElement>(".beats-list");
-    if (current && list) {
-      const screenBeat = ["showScreen", "hideScreen", "callScreen"].includes(initialType);
-      const remembered = screenInsertion;
-      const hint = !anchor && screenBeat && remembered && (remembered.sceneId === scene.id || !model.scenes.some(item=>item.id===remembered.sceneId)) ? structuredClone(remembered) : undefined;
-      const body = hint?.body ?? {type:"root"} as BodyRef;
-      renderNewBeat(list, current, initialType, body, anchor ? {type:"before",anchor:nodeRef(anchor)} : hint?.position ?? defaultPlace(current, body), hint, opener);
+    beatDrafts.get(key)?.panel.querySelector<HTMLElement>("select, input, textarea")?.focus();
+  };
+  const openNewBeat = (scene: SceneDocument, initialType: BeatPayload["type"] = actions.screenHintKind === "dialog" ? "callScreen" : "dialogue", beforeBeatId: string | null = null, opener = "root"): void => {
+    const anchor = beforeBeatId ? scene.beats.find(beat => beat.id === beforeBeatId) : undefined;
+    const before: Position | undefined = anchor && { type: "before", anchor: nodeRef(anchor) };
+    if (anchor && !bodyOf(scene, beatBody(anchor))?.places.some(place => samePosition(place.position, before!))) {
+      actions.status("This beat has no insertion place before it. Use + in Tracks.", "error"); return;
     }
+    const screenBeat = ["showScreen", "hideScreen", "callScreen"].includes(initialType);
+    const remembered = screenInsertion;
+    const hint = !anchor && screenBeat && remembered && (remembered.sceneId === scene.id || !model.scenes.some(item=>item.id===remembered.sceneId)) ? structuredClone(remembered) : undefined;
+    const body = anchor ? beatBody(anchor) : hint?.body ?? {type:"root"} as BodyRef;
+    insertAt(scene, body, before ?? hint?.position ?? defaultPlace(scene, body), opener, initialType, hint);
   };
 
   const loadImage = async (assetId: string, purpose: "thumbnail" | "imagePreview", image: HTMLImageElement, errorHost: HTMLElement): Promise<void> => {
@@ -1218,37 +1242,27 @@ export function renderStoryView(
     } catch (error) { if (generation === mediaGeneration) { trigger.disabled = false; actions.status(friendlyError(error, "Audio audition unavailable"), "error"); trigger.focus(); } }
   };
 
-  const renderPreview = (preview: HTMLElement, scene: SceneDocument): void => {
-    const hasConditions = scene.beats.some(beat => beat.conditionalBranch);
-    const state = deriveScenePreview(withDrafts(scene), hasConditions ? undefined : selectedBeatId, hasConditions ? manualBranches : undefined);
-    if (hasConditions) {
-      const manual = document.createElement("div"); manual.className = "illustrative-preview";
-      const heading = document.createElement("h3"); heading.textContent = "Illustrative branch preview";
-      const note = document.createElement("p"); note.textContent = "Manual selection · not a playthrough. Choose each encountered fork. Conditions and Choice availability are not evaluated."; manual.append(heading, note);
-      for (const first of scene.beats.filter(beat => beat.conditionalBranch && !beat.conditionalBranch.ordinal && !beat.conditionalBranch.otherwise)) {
-        const groupId = first.conditionalBranch!.groupId;
-        const branches = scene.beats.filter(beat => beat.conditionalBranch?.groupId === groupId);
-        const choices = [{ value: "", label: "Choose a branch" }, ...branches.map(branch => ({ value: branch.id, label: branchCaption(branch.conditionalBranch!, model) })), ...(!branches.some(branch => branch.conditionalBranch!.otherwise) ? [{ value: "no-match", label: "No branch matches · continue" }] : [])];
-        const selector = selectOf(choices, manualBranches.get(groupId) ?? ""); selector.setAttribute("aria-label", `Illustrative branch ${groupId}`); selector.dataset.previewGroupId = groupId;
-        selector.addEventListener("change", () => { if (selector.value) manualBranches.set(groupId, selector.value); else manualBranches.delete(groupId); mediaGeneration++; preview.replaceChildren(); renderPreview(preview, scene); });
-        manual.append(labelled(`Preview condition ${conditionCaption(first.conditionalBranch!.condition ?? { status: "supported", expression: { type: "bool", value: true } }, model.authoring.variables)}`, selector));
-      }
-      preview.append(manual);
-    }
-    const selectedIndex = state.throughBeatId ? scene.beats.findIndex((beat) => beat.id === state.throughBeatId) : scene.beats.length - 1;
-    const header = document.createElement("div"); header.className = "preview-header";
-    const heading = document.createElement("h2"); heading.textContent = "Scene Preview";
-    const through = document.createElement("span"); through.textContent = selectedIndex >= 0 ? `Through Beat ${selectedIndex + 1}` : "Scene start";
-    if (state.partial) { const badge = document.createElement("strong"); badge.className = "partial-badge"; badge.textContent = "Partial / unknown"; header.append(heading, through, badge); } else header.append(heading, through);
+  // The stage previews the open Branch path route through the selected beat.
+  const previewState = (scene: SceneDocument): ScenePreviewState => {
+    const forks = scene.beats.some(beat => beat.conditionalBranch);
+    return deriveScenePreview(withDrafts(scene), selectedBeatId, forks ? openBranches : undefined);
+  };
+  // The game stage keeps the project's width-to-height ratio and fits whole into its slot.
+  const renderStage = (stage: HTMLElement, scene: SceneDocument): void => {
+    const state = previewState(scene), { width, height } = actions.resolution;
+    const title = document.createElement("div"); title.className = "story-stage-title";
+    const name = document.createElement("strong"); name.textContent = "Game window";
+    const size = document.createElement("span"); size.className = "story-stage-resolution"; size.textContent = `${width} × ${height}`;
+    title.append(name, size);
+    const slot = document.createElement("div"); slot.className = "story-stage-slot";
+    slot.style.setProperty("--stage-w", String(width)); slot.style.setProperty("--stage-h", String(height));
+    const canvas = document.createElement("div"); canvas.className = "preview-canvas"; canvas.style.aspectRatio = `${width} / ${height}`; canvas.setAttribute("aria-label", "Game stage");
     const choice = state.overlay?.choice;
-    const surround = document.createElement("div"); surround.className = choice ? "preview-surround choice-preview" : "preview-surround";
-    const canvas = document.createElement("div"); canvas.className = "preview-canvas"; canvas.style.aspectRatio = `${actions.resolution.width} / ${actions.resolution.height}`;
     if (state.background) {
       const image = document.createElement("img"); image.className = "preview-background"; image.alt = model.authoring.assets.find((asset) => asset.id === state.background?.assetId)?.displayName ?? "Scene background";
       canvas.append(image); void loadImage(state.background.assetId, "imagePreview", image, canvas);
     } else {
       const empty = document.createElement("p"); empty.className = "preview-empty"; empty.textContent = state.backgroundUnknown ? "Background unknown after code or unevaluated flow" : "No background at this point";
-      if (choice && state.backgroundUnknown) { empty.title = empty.textContent; empty.textContent = "Background unknown"; }
       canvas.append(empty);
     }
     for (const visible of state.characters) {
@@ -1259,57 +1273,50 @@ export function renderStoryView(
       const caption = document.createElement("figcaption"); caption.textContent = character?.displayName ?? "Character"; figure.append(caption); canvas.append(figure);
     }
     if (state.charactersUnknown) { const unknown = document.createElement("span"); unknown.className = "preview-unknown-layer"; unknown.textContent = "Other character state may be unknown"; canvas.append(unknown); }
-    if (state.overlay && !choice) {
+    if (choice) canvas.append(renderChoiceSummary(choice, model.authoring.characters));
+    else if (state.overlay) {
       const overlay = document.createElement("div"); overlay.className = `preview-overlay ${state.overlay.kind}`;
       overlay.textContent = state.overlay.text || (state.overlay.kind === "dialogue" ? "Empty dialogue" : state.overlay.kind);
       if (state.overlay.kind === "dialogue") {
         const beat = scene.beats.find(b => b.id === state.overlay?.beatId);
         if (beat?.payload.type === "dialogue") {
           const characterId = beat.payload.characterId;
-          const name = document.createElement("strong"); name.className = "preview-speaker";
-          name.textContent = model.authoring.characters.find(character => character.id === characterId)?.displayName ?? ""; overlay.prepend(name);
+          const speaker = document.createElement("strong"); speaker.className = "preview-speaker";
+          speaker.textContent = model.authoring.characters.find(character => character.id === characterId)?.displayName ?? ""; overlay.prepend(speaker);
         }
       }
       canvas.append(overlay);
     }
-    let stage = surround;
-    if (choice) {
-      stage = document.createElement("div"); stage.className = "preview-game-stage"; stage.setAttribute("aria-label", "Game stage");
-      stage.append(canvas); surround.append(stage, renderChoiceSummary(choice, model.authoring.characters));
-    } else surround.append(canvas);
-    preview.append(header, surround);
-    if (typeof ResizeObserver !== "undefined") {
-      const observer = new ResizeObserver(() => {
-        const bounds = stage.getBoundingClientRect(), ratio = actions.resolution.width / actions.resolution.height;
-        const width = Math.max(1, Math.min(bounds.width, bounds.height * ratio));
-        canvas.style.width = `${width}px`; canvas.style.height = `${width / ratio}px`;
-      });
-      observer.observe(stage); layoutObservers.push(observer);
-    }
-
-    const details = document.createElement("div"); details.className = "preview-details scene-context-inspector";details.hidden=!(actions.layoutKey&&layoutFor(actions.layoutKey).inspectorOpen);
-    const toggle=button("Scene details");toggle.ariaExpanded=String(!details.hidden);toggle.addEventListener("click",()=>{details.hidden=!details.hidden;toggle.ariaExpanded=String(!details.hidden);if(actions.layoutKey)saveLayout(actions.layoutKey,{inspectorOpen:!details.hidden});});header.append(toggle);
-    const close=button("Close details");close.addEventListener("click",()=>{details.hidden=true;toggle.ariaExpanded="false";toggle.focus();if(actions.layoutKey)saveLayout(actions.layoutKey,{inspectorOpen:false});});details.append(close);
-    const provenance = document.createElement("div"); provenance.className = "preview-provenance";
-    const provenanceHeading = document.createElement("h3"); provenanceHeading.textContent = "Visible state and provenance"; provenance.append(provenanceHeading);
-    const contribution = (label: string, beatId: string | undefined, addType: BeatPayload["type"]): void => {
-      const row = document.createElement("div"); row.className = "provenance-row"; const name = document.createElement("span"); name.textContent = label; row.append(name);
-      if (beatId) { const index = scene.beats.findIndex((beat) => beat.id === beatId); const edit = button(`Edit Beat ${index + 1}`, "text-button"); edit.addEventListener("click", () => { if (draftGuard()) { selectedBeatId = beatId; draw(); host.querySelector<HTMLElement>(".beat-card.selected")?.scrollIntoView?.({ block: "nearest" }); } }); row.append(edit); }
-      const add = button("Add change here", "text-button"); add.dataset.beatOpener = `change:${addType}`; add.disabled = !!selectedBeatId && !nodeBeats(scene, { type: "root" }).some(beat => beat.id === selectedBeatId); add.addEventListener("click", () => openNewBeat(scene, addType, selectedBeatId ?? null, `change:${addType}`)); row.append(add); provenance.append(row);
+    slot.append(canvas);
+    const footer = document.createElement("div"); footer.className = "story-stage-footer";
+    const through = document.createElement("span"); through.className = "story-stage-status";
+    const at = state.throughBeatId ? scene.beats.find(beat => beat.id === state.throughBeatId) : undefined;
+    through.textContent = at ? `Through ${numbers.get(at.id) ?? ""} · ${beatName(at)}` : "Scene start";
+    footer.append(through);
+    if (state.partial) { const badge = document.createElement("strong"); badge.className = "partial-badge"; badge.textContent = "Partial / unknown"; footer.append(badge); }
+    stage.append(title, slot, footer);
+  };
+  // In effect at the selected beat: what set each visible item, with Edit and Add change here.
+  const renderEffects = (section: HTMLElement, scene: SceneDocument): void => {
+    const state = previewState(scene), selected = scene.beats.find(beat => beat.id === selectedBeatId);
+    const heading = document.createElement("h3"); heading.textContent = selected ? `In effect at ${numbers.get(selected.id) ?? ""}` : "In effect at the end of the scene";
+    section.append(heading);
+    const addable = !selected || !!bodyOf(scene, beatBody(selected))?.places.some(place => samePosition(place.position, { type: "before", anchor: nodeRef(selected) }));
+    const contribution = (label: string, beatId: string | undefined, addType: BeatPayload["type"], assetId?: string): void => {
+      const row = document.createElement("div"); row.className = "provenance-row";
+      if (assetId) { const tile = document.createElement("span"); tile.className = "asset-thumbnail"; const image = document.createElement("img"); image.alt = ""; tile.append(image); row.append(tile); void loadImage(assetId, "thumbnail", image, tile); }
+      const name = document.createElement("span"); name.textContent = label; row.append(name);
+      if (beatId) { const edit = button(`Edit ${numbers.get(beatId) ?? ""}`, "text-button"); edit.addEventListener("click", () => select(scene, beatId)); row.append(edit); }
+      const add = button("Add change here", "text-button"); add.dataset.beatOpener = `change:${addType}`; add.disabled = scene.sourceConflict || !addable; add.addEventListener("click", () => openNewBeat(scene, addType, selectedBeatId ?? null, `change:${addType}`)); row.append(add); section.append(row);
     };
-    contribution(state.backgroundUnknown ? "Background · unknown" : "Background", state.background?.beatId, "background");
-    state.characters.forEach((character) => contribution(`${model.authoring.characters.find((item) => item.id === character.characterId)?.displayName ?? "Character"} · ${character.placement}`, character.appearanceBeatId, "changeAppearance"));
-    contribution(state.musicUnknown ? "Music · unknown" : "Music", state.music?.beatId, "playMusic");
+    contribution(state.backgroundUnknown ? "Background · unknown" : state.background ? model.authoring.assets.find(asset => asset.id === state.background?.assetId)?.displayName ?? "Background" : "Background", state.background?.beatId, "background", state.background?.assetId);
+    state.characters.forEach((character) => contribution(`${model.authoring.characters.find((item) => item.id === character.characterId)?.displayName ?? "Character"} · ${character.placement}`, character.appearanceBeatId, "changeAppearance", model.authoring.appearances.find(item => item.id === character.appearanceId)?.assetId));
+    contribution(state.musicUnknown ? "Music · unknown" : state.music ? model.authoring.assets.find(asset => asset.id === state.music?.assetId)?.displayName ?? "Music" : "Music", state.music?.beatId, "playMusic");
     const knownVariables = Object.entries(state.variables); knownVariables.forEach(([id, value]) => contribution(`Variable ${model.authoring.variables.find((item) => item.id === id)?.technicalName ?? id} = ${String(value.value)}`, value.beatId, "setVariable"));
-    if (state.variablesUnknown && !knownVariables.length) { const unknown = document.createElement("p"); unknown.className = "muted"; unknown.textContent = "Variable state is unknown after code or unevaluated flow."; provenance.append(unknown); }
-    details.append(provenance);
-    const media = document.createElement("div"); media.className = "preview-media"; const mediaHeading = document.createElement("h3"); mediaHeading.textContent = "Scene media"; media.append(mediaHeading);
-    const referenced = new Set<string>(); if (state.background) referenced.add(state.background.assetId); state.characters.forEach((character) => { const assetId = model.authoring.appearances.find((item) => item.id === character.appearanceId)?.assetId; if (assetId) referenced.add(assetId); });
-    for (const assetId of referenced) { const tile = document.createElement("div"); tile.className = "asset-thumbnail"; const image = document.createElement("img"); const asset = model.authoring.assets.find((item) => item.id === assetId); image.alt = asset?.displayName ?? "Asset thumbnail"; const label = document.createElement("span"); label.textContent = asset?.displayName ?? "Asset"; tile.append(image, label); media.append(tile); void loadImage(assetId, "thumbnail", image, tile); }
-    const selectedBeat = scene.beats.find((beat) => beat.id === selectedBeatId);
-    const audible = selectedBeat?.payload.type === "playSfx" ? selectedBeat.payload.assetId : state.music?.assetId;
-    if (audible) { const audioHost = document.createElement("div"); audioHost.className = "audio-audition"; const play = button(selectedBeat?.payload.type === "playSfx" ? "Audition selected SFX" : "Audition current music"); play.addEventListener("click", () => void audition(audible, audioHost, play)); media.append(play, audioHost); }
-    details.append(media); preview.append(details);
+    if (state.variablesUnknown && !knownVariables.length) { const unknown = document.createElement("p"); unknown.className = "muted"; unknown.textContent = "Variable state is unknown after code or unevaluated flow."; section.append(unknown); }
+    // Audio plays only from this explicit action, never on selection.
+    const audible = selected?.payload.type === "playSfx" ? selected.payload.assetId : state.music?.assetId;
+    if (audible) { const audioHost = document.createElement("div"); audioHost.className = "audio-audition"; const play = button(selected?.payload.type === "playSfx" ? "Audition selected SFX" : "Audition current music"); play.addEventListener("click", () => void audition(audible, audioHost, play)); section.append(play, audioHost); }
   };
 
   const operation = (scene: SceneDocument, target: HTMLElement, title: string, fields: readonly HTMLElement[], read: () => SceneCommand, actionLabel: string, focusId?: string): HTMLElement => {
@@ -1320,7 +1327,8 @@ export function renderStoryView(
     const row = document.createElement("div"); row.className = "row-actions";
     const cancel = button("Cancel", "text-button"); const apply = button(actionLabel, "button primary"); apply.disabled = scene.sourceConflict;
     let pending = false;
-    const close = (): void => { if (pending) return; panel.remove(); selectedBeatId = undefined; composing = false; target.querySelector<HTMLElement>(".beat-select")?.focus(); };
+    // Closing reopens the editor: a standalone operation leaves it, an inline one resets.
+    const close = (): void => { if (pending) return; if (openOperation === panel) openOperation = undefined; panel.remove(); composing = false; draw(); focusColumn(selectedBeatId); };
     cancel.addEventListener("click", close);
     panel.addEventListener("compositionstart", () => { composing = true; }); panel.addEventListener("compositionend", () => { composing = false; });
     panel.addEventListener("keydown", event => { if (event.key !== "Escape") return; event.preventDefault(); if (pending) return; if (panel.dataset.unsubmitted === "true") { actions.status("Use Cancel to discard this draft, or keep editing."); cancel.focus(); } else close(); });
@@ -1331,26 +1339,29 @@ export function renderStoryView(
         try {
           const command = read(); pending = true; panel.dataset.unsubmitted = "true"; panel.setAttribute("aria-busy", "true");
           locks = [...panel.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLButtonElement>("input,select,textarea,button")].map(control => ({ control, disabled: control.disabled })); locks.forEach(({ control }) => { control.disabled = true; });
-          const saved = await mutate({ sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, ...command }, () => { selectedBeatId = undefined; }, expected, panel);
-          if (saved && focusId) { const row = [...host.querySelectorAll<HTMLElement>("[data-beat-id]")].find(item => item.dataset.beatId === focusId); row?.scrollIntoView?.({ block: "nearest" }); row?.querySelector<HTMLElement>(".beat-select")?.focus(); }
+          const saved = await mutate({ sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, ...command }, () => { if (openOperation === panel) openOperation = undefined; if (focusId) selectedBeatId = focusId; }, expected, panel);
+          if (saved) focusColumn(focusId ?? selectedBeatId);
           return saved;
         } catch (error) { actions.status(friendlyError(error, "Check these details. Input retained."), "error"); return false; }
         finally { pending = false; if (panel.isConnected) { panel.removeAttribute("aria-busy"); locks.forEach(({ control, disabled }) => { control.disabled = disabled; }); (panel.querySelector<HTMLElement>('[aria-invalid="true"]') ?? panel.querySelector<HTMLElement>("input,select,textarea"))?.focus(); } }
       };
       settling = save().finally(() => { settling = undefined; });
     });
-    row.append(cancel, apply); panel.append(heading, breadcrumb, ...fields, row); dirtyDraft(panel, []); target.append(panel);
+    row.append(cancel, apply); panel.append(heading, breadcrumb, ...fields, row); dirtyDraft(panel, []);
+    if (target === operationSlot) { openOperation = panel; operationSlot = undefined; }
+    target.append(panel);
     panel.querySelector<HTMLElement>("input,select,textarea")?.focus(); return panel;
   };
+  // A standalone operation (move, delete, condition, ending) takes the editor's place,
+  // with its beat, condition or option still selected in Tracks.
+  let operationSlot: HTMLElement | undefined;
   const prepareOperation = (scene: SceneDocument, beat?: SceneBeat): HTMLElement | undefined => {
     if (!draftGuard()) return;
-    selectedBeatId = undefined;
-    if (beat?.conditionalBranch) collapsedConditions.delete(beat.conditionalBranch.groupId);
-    let parent = beat ? beatBody(beat) : { type: "root" } as BodyRef;
-    while (parent.type === "branch") { const owner = parent; collapsedConditions.delete(owner.groupId); const header = scene.beats.find(item => item.id === owner.branchId); parent = header ? beatBody(header) : { type: "root" }; }
-    draw();
-    return beat?.conditionalBranch?.choiceOption ? [...host.querySelectorAll<HTMLElement>(".story-choice-option")].find(item => item.dataset.optionId === beat.id)
-      : beat ? [...host.querySelectorAll<HTMLElement>(".beat-card")].find(item => item.dataset.beatId === beat.id) : host.querySelector<HTMLElement>(".beats-list") ?? undefined;
+    if (beat) selectBeat(scene, beat.id);
+    openOperation = undefined; draw();
+    if (!editorHost) return;
+    editorHost.replaceChildren(); delete editorHost.dataset.editorFor;
+    operationSlot = editorHost; return editorHost;
   };
   const destinations = (scene: SceneDocument, initialBody: BodyRef, exclude?: SceneBeat, initialPosition?: Position, insertion = false, retained?: ScreenInsertion): { host: HTMLElement; read: () => { body: BodyRef; position: Position } } => {
     const panel = document.createElement("div"); panel.className = "story-destination";
@@ -1421,7 +1432,7 @@ export function renderStoryView(
   };
   const renderConditionBranch = (card: HTMLElement, scene: SceneDocument, beat: SceneBeat): void => {
     const branch = beat.conditionalBranch!, header = groupHeader(scene, branch.groupId);
-    const note = document.createElement("p"); note.className = "story-breadcrumb"; note.textContent = `${bodyCaption(scene, { type: "branch", groupId: branch.groupId, branchId: beat.id }, model)} · Branch ${(branch.ordinal ?? 0) + 1}. First matching branch wins.`; card.append(note);
+    const note = document.createElement("p"); note.className = "story-breadcrumb"; note.textContent = `${pathCaption(scene, { type: "branch", groupId: branch.groupId, branchId: beat.id })} · Branch ${(branch.ordinal ?? 0) + 1}. First matching branch wins.`; card.append(note);
     if (!branch.otherwise && branch.condition?.status === "supported") {
       const builder = buildConditionEditor(model.authoring.variables, branch.condition);
       operation(scene, card, branch.ordinal ? "Edit Else If" : "Edit Condition", [builder.host], () => ({ type: "updateConditionBranch", groupId: branch.groupId, branchId: beat.id, expectedBody: beatBody(header), condition: builder.read() }), "Apply condition", beat.id);
@@ -1437,10 +1448,13 @@ export function renderStoryView(
     const note = document.createElement("p"); note.textContent = beat.conditionalBranch ? "Moves the entire condition and every branch together." : "Moves this Beat to the chosen body and position.";
     operation(scene, target, "Move story content", [note, destination.host], () => ({ type: "moveStoryNode", node: nodeRef(beat), expectedBody: beatBody(beat), ...destination.read() }), "Move to destination", beat.id);
   };
+  // Story moves only nodes it can edit, never Custom Code, branch headers or read-only Choices.
+  const nodeEditable = (beat: SceneBeat): boolean => !readOnlyLogic(beat) && !beat.structuralPlaceholder && (!beat.protected || !!beat.conditionalBranch && !beat.conditionalBranch.ordinal && !beat.conditionalBranch.otherwise);
+  const movable = (scene: SceneDocument, beat: SceneBeat, direction: "up" | "down"): boolean => nodeEditable(beat) && !scene.sourceConflict && !!siblingPlace(scene, beat, direction);
   const moveSibling = (scene: SceneDocument, beat: SceneBeat, direction: "up" | "down"): void => {
-    if (!draftGuard()) return;
+    if (!movable(scene, beat, direction) || !draftGuard()) return;
     const position = siblingPlace(scene, beat, direction); if (!position) return;
-    void mutate({ type: "moveStoryNode", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, node: nodeRef(beat), expectedBody: beatBody(beat), body: beatBody(beat), position }, () => { selectedBeatId = undefined; }).then(saved => { if (saved) [...host.querySelectorAll<HTMLElement>(".beat-card")].find(item => item.dataset.beatId === beat.id)?.querySelector<HTMLElement>(".beat-select")?.focus(); });
+    void mutate({ type: "moveStoryNode", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, node: nodeRef(beat), expectedBody: beatBody(beat), body: beatBody(beat), position }, () => { selectedBeatId = beat.id; }).then(saved => { if (saved) focusColumn(beat.id); });
   };
   const removeNodeForm = (scene: SceneDocument, beat: SceneBeat): void => {
     const target = prepareOperation(scene, beat); if (!target) return;
@@ -1458,20 +1472,82 @@ export function renderStoryView(
     operation(scene, target, "Unwrap one branch", [labelled("Branch to keep", branch), copy, ...(note.textContent ? [note] : [])], () => ({ type: "unwrapCondition", groupId, branchId: required(branch), expectedBody: beatBody(header) }), "Unwrap selected branch");
   };
 
-  const drawBeats = (scene: SceneDocument): void => {
+  // A beat's name in the editor and on the stage: its kind, or its branch for a header.
+  const beatName = (beat: SceneBeat): string => beat.conditionalBranch ? beat.conditionalBranch.choiceOption ? "Option" : "Condition" : beatLabels[beat.payload.type];
+  const forkCaption = (beat: SceneBeat): string => beat.conditionalBranch?.condition ? conditionCaption(beat.conditionalBranch.condition, model.authoring.variables) : model.authoring.variables.find(variable => variable.id === beat.conditionalBranch?.variableId)?.technicalName ?? "Unknown condition";
+  // A branch or option as Tracks and the Branch path name it.
+  const branchName = (scene: SceneDocument, header: SceneBeat): string => {
+    const branch = header.conditionalBranch; if (!branch) return beatName(header);
+    if (branch.choiceOption) { const menu = bodyOf(scene, { type: "branch", groupId: branch.groupId, branchId: header.id })?.owningNode, choice = scene.beats.find(item => item.id === menu)?.payload; const option = choice?.type === "choice" ? choice.options.find(item => item.id === header.id) : undefined; return `Option ${(branch.ordinal ?? 0) + 1} "${option?.text.trim() ?? ""}"`; }
+    return branch.otherwise ? "Otherwise" : `${branch.ordinal ? "Else if" : "If"} ${forkCaption(header)}`;
+  };
+  // An end marker's name: a quoted If or Else if test, option 2 "Leave", or Otherwise.
+  const endName = (scene: SceneDocument, header: SceneBeat): string => {
+    const branch = header.conditionalBranch; if (!branch) return beatName(header);
+    if (branch.choiceOption) { const name = branchName(scene, header); return name.charAt(0).toLowerCase() + name.slice(1); }
+    return branch.otherwise ? "Otherwise" : `"${branch.ordinal ? "Else if" : "If"} ${shorten(forkCaption(header))}"`;
+  };
+  // An editor path: the scene, then each branch or option around the body. Never "body".
+  const pathCaption = (scene: SceneDocument, body: BodyRef): string => {
+    const parts: string[] = [];
+    for (let at: BodyRef | undefined = body, steps = 0; at?.type === "branch" && steps <= 32; steps++) {
+      const header = scene.beats.find(beat => beat.id === (at as { branchId: string }).branchId), branch = header?.conditionalBranch;
+      parts.unshift(!header || !branch ? "Missing branch" : branch.choiceOption ? branchName(scene, header) : branch.otherwise ? "Otherwise" : `${branch.ordinal ? "Else if" : "If"} ${shorten(forkCaption(header))}`);
+      at = bodyOf(scene, at)?.parent;
+    }
+    return [scene.displayName, ...parts].join(" › ");
+  };
+  const focusColumn = (id: string | undefined): void => {
+    if (id === undefined) return;
+    const column = [...host.querySelectorAll<HTMLElement>(".story-tracks [data-beat-id]")].find(item => item.dataset.beatId === id);
+    const control = column?.querySelector<HTMLElement>(":scope > .story-track-beat, :scope > .story-slot-name");
+    control?.focus({ preventScroll: true }); if (column) revealColumn(column);
+  };
+  // Keeps a Tracks column in view beside the sticky lane labels without scrolling the page.
+  const revealColumn = (column: HTMLElement): void => {
+    const scroll = column.closest<HTMLElement>(".story-tracks-scroll"); if (!scroll) return;
+    const labels = scroll.querySelector<HTMLElement>(".story-track-labels")?.offsetWidth ?? 0;
+    const left = column.offsetLeft - labels, right = column.offsetLeft + column.offsetWidth - scroll.clientWidth;
+    if (scroll.scrollLeft > left) scroll.scrollLeft = left; else if (scroll.scrollLeft < right) scroll.scrollLeft = right;
+  };
+  // Navigation: selection, branch switches and views keep drafts and add no history entry.
+  // An open form with input refuses it; a form without input closes.
+  const navigate = (change: () => void): boolean => {
+    if (!draftGuard()) return false;
+    openOperation = undefined; change(); draw(); return true;
+  };
+  const select = (scene: SceneDocument, id: string): void => { if (navigate(() => selectBeat(scene, id))) focusColumn(id); };
+  const toggleBranch = (scene: SceneDocument, owner: SceneBeat, body: BodyRef): void => {
+    if (body.type !== "branch") return;
+    const done = navigate(() => {
+      if (openBranches.get(body.groupId) === body.branchId) { openBranches.delete(body.groupId); selectBeat(scene, owner.id); return; }
+      openBranches.set(body.groupId, body.branchId);
+      selectBeat(scene, nodeBeats(scene, body)[0]?.id ?? body.branchId);
+    });
+    if (done) [...host.querySelectorAll<HTMLElement>(".story-branch-segment")].find(item => item.dataset.branchId === body.branchId)?.focus();
+  };
+
+  const drawStory = (scene: SceneDocument, scroll = 0): void => {
     const header = document.createElement("header"); header.className = "scene-header";
-    const titleBlock = document.createElement("div");
-    const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = model.chapters.find((chapter) => chapter.id === scene.chapterId)?.displayName ?? "Scene";
-    const title = document.createElement("h1"); title.textContent = scene.displayName;
-    const technical = document.createElement("code"); technical.textContent = `${scene.technicalLabel} · ${scene.sourcePath}`;
-    titleBlock.append(eyebrow, title, technical);
+    const title = document.createElement("h1"); title.textContent = scene.displayName; title.title = `${scene.technicalLabel} · ${scene.sourcePath}`;
     const history = document.createElement("div"); history.className = "scene-history";
     const mapped = scene.beats.find((beat) => beat.id === selectedBeatId) ?? scene.beats[0];
     const viewSource = button("View in Source"); viewSource.disabled = actions.viewSource === undefined; viewSource.addEventListener("click", () => actions.viewSource?.(scene.sourcePath, mapped?.byteStart, mapped?.byteEnd, scene.sourceRevision));
     const focus = button(writingFocus ? "Exit Writing focus" : "Writing focus");focus.ariaPressed=String(writingFocus);focus.addEventListener("click",()=>{writingFocus=!writingFocus;host.dataset.writingFocus=String(writingFocus);host.closest<HTMLElement>(".project-shell")?.setAttribute("data-writing-focus",String(writingFocus));focus.textContent=writingFocus?"Exit Writing focus":"Writing focus";focus.ariaPressed=String(writingFocus);});
     if (actions.caller && actions.viewScene) { const caller = button("Back to caller"); caller.addEventListener("click", () => { if (draftGuard()) actions.viewScene?.(actions.caller!); }); history.append(caller); }
-    if (focusedBranch) { const all = button("Show whole Scene"); all.addEventListener("click", () => { if (draftGuard()) { focusedBranch = undefined; draw(); } }); history.append(all); }
-    history.append(viewSource, focus); header.append(titleBlock, history); host.append(header);
+    const add = button("Add Beat", "button primary"); add.dataset.beatOpener = "root"; add.disabled = scene.sourceConflict;
+    add.addEventListener("click", () => openNewBeat(scene));
+    history.append(viewSource, focus, add);
+    if (actions.screenCatalog && actions.resolveScreenTarget) {
+      const screenBeat = button("Add screen Beat"); screenBeat.dataset.beatOpener = "screen"; screenBeat.disabled = scene.sourceConflict;
+      screenBeat.addEventListener("click", () => openNewBeat(scene,actions.screenHintKind === "dialog" ? "callScreen" : "showScreen",null,"screen"));
+      if (actions.screenHint) screenBeat.title = `Use ${actions.screenHint.sourceName.replaceAll("_"," ")} in this Scene`;
+      history.append(screenBeat);
+    }
+    const addCondition = button("Add Condition"); addCondition.disabled = scene.sourceConflict;
+    addCondition.addEventListener("click", () => openConditionForm(scene, { type: "root" }, defaultPlace(scene, { type: "root" }))); history.append(addCondition);
+    if (actions.assist) history.append(assistMenu(scene));
+    header.append(title, history); host.append(header);
     if (scene.sourceConflict) {
       const conflict = document.createElement("section"); conflict.className = "state-banner error-state"; conflict.role = "alert";
       const heading = document.createElement("h2"); heading.textContent = "Source projection unavailable";
@@ -1480,227 +1556,206 @@ export function renderStoryView(
     } else if (scene.partial) {
       const partial = document.createElement("p"); partial.className = "state-banner partial-state"; partial.textContent = "Preview and reference certainty are partial because this Scene contains protected Custom Code."; host.append(partial);
     }
-    const stack = document.createElement("div"); stack.className = "scene-stack";
-    const preview = document.createElement("section"); preview.className = "preview-region"; preview.setAttribute("aria-label", "Scene Preview");
-    const beatsRegion = document.createElement("section"); beatsRegion.className = "beats-region"; beatsRegion.setAttribute("aria-label", "Beats writing surface");
-    stack.append(preview, beatsRegion); host.append(stack); previewTarget = { preview, sceneId: scene.id }; renderPreview(preview, scene);
-    const toolbar = document.createElement("div"); toolbar.className = "beats-toolbar";
-    const heading = document.createElement("h2"); heading.textContent = "Beats";
-    const add = button("Add Beat", "button primary"); add.dataset.beatOpener = "root"; add.disabled = scene.sourceConflict;
-    add.addEventListener("click", () => openNewBeat(scene));
-    let allocation=actions.layoutKey ? layoutFor(actions.layoutKey).previewPercent ?? 34 : 34;
-    const divider=document.createElement("div");divider.className="preview-divider";divider.role="separator";divider.tabIndex=0;divider.ariaLabel="Resize scene preview";divider.setAttribute("aria-orientation","horizontal");divider.setAttribute("aria-valuemin","20");divider.setAttribute("aria-valuemax","70");
-    const adjust=(value:number,remember=false):void=>{allocation=Math.min(70,Math.max(20,Math.round(value)));stack.style.setProperty("--preview-share",`${allocation}fr`);stack.style.setProperty("--beats-share",`${100-allocation}fr`);divider.setAttribute("aria-valuenow",String(allocation));if(remember&&actions.layoutKey)saveLayout(actions.layoutKey,{previewPercent:allocation});};
-    adjust(allocation);resetPreviewAllocation=()=>adjust(34);
-    divider.addEventListener("keydown",e=>{if(e.key==="ArrowUp"||e.key==="ArrowDown"){e.preventDefault();adjust(allocation+(e.key==="ArrowUp"?-2:2),true);}});
-    let dragging=false;divider.addEventListener("pointerdown",e=>{dragging=true;divider.setPointerCapture(e.pointerId);});divider.addEventListener("pointermove",e=>{if(dragging){const b=stack.getBoundingClientRect();adjust((e.clientY-b.top)/b.height*100);}});divider.addEventListener("pointerup",()=>{dragging=false;adjust(allocation,true);});divider.addEventListener("pointercancel",()=>{dragging=false;});stack.insertBefore(divider,beatsRegion);
-    const tools = document.createElement("div"); tools.className = "beats-tools";tools.append(add);
-    if (actions.screenCatalog && actions.resolveScreenTarget) {
-      const screenBeat = button("Add screen Beat"); screenBeat.dataset.beatOpener = "screen"; screenBeat.disabled = scene.sourceConflict;
-      screenBeat.addEventListener("click", () => openNewBeat(scene,actions.screenHintKind === "dialog" ? "callScreen" : "showScreen",null,"screen"));
-      if (actions.screenHint) screenBeat.title = `Use ${actions.screenHint.sourceName.replaceAll("_"," ")} in this Scene`;
-      tools.append(screenBeat);
+    // Story Combined v1: the stage beside the selected-beat editor, the Branch path and Tracks below.
+    const combined = document.createElement("div"); combined.className = "story-combined";
+    const top = document.createElement("div"); top.className = "story-top";
+    const stage = document.createElement("section"); stage.className = "story-stage"; stage.setAttribute("aria-label", "Game window");
+    const editor = document.createElement("section"); editor.className = "story-editor"; editor.setAttribute("aria-label", "Selected beat editor");
+    const bottom = document.createElement("div"); bottom.className = "story-bottom";
+    top.append(stage, editor); combined.append(top, bottom); host.append(combined);
+    editorHost = editor; bottomHost = bottom;
+    previewTarget = { stage, sceneId: scene.id }; renderStage(stage, scene);
+    drawBottom(scene, scroll);
+    drawEditor(scene);
+  };
+  // Assist actions sit in the toolbar's More menu.
+  const assistMenu = (scene: SceneDocument): HTMLElement => {
+    const menu = document.createElement("details"); menu.className = "story-more";
+    const summary = document.createElement("summary"); summary.className = "button secondary"; summary.textContent = "More"; menu.append(summary);
+    const tools = document.createElement("div"); tools.className = "story-more-list";
+    const selected=scene.beats.find(b=>b.id===selectedBeatId);
+    const assist=button("Assist · Rewrite dialogue");
+    assist.disabled=!selected||selected.protected||!!selected.owner||!!selected.conditionalBranch||!["dialogue","narration"].includes(selected.payload.type);
+    assist.addEventListener("click",()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id);});
+    const continuation=button("Assist · Continue Scene");
+    const anchorIndex=scene.beats.findIndex(b=>b.id===selected?.id),terminalKinds=["return","jump","choice"];
+    const adjacent=scene.beats.slice(Math.max(0,anchorIndex-1),anchorIndex+1);
+    continuation.disabled=!selected||scene.sourceConflict||scene.beats.some(previewLogicBoundary)||!terminalKinds.includes(scene.beats.at(-1)?.payload.type??"")||scene.beats.slice(0,-1).some(b=>terminalKinds.includes(b.payload.type))||adjacent.some(b=>b.protected||!!b.owner||!!b.conditionalBranch)||!!scene.beats.at(-1)?.protected||!!scene.beats.at(-1)?.owner||!!scene.beats.at(-1)?.conditionalBranch;
+    continuation.addEventListener("click",()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id,"continueScene");});
+    const card=button("Assist · Draft Character card");card.disabled=assist.disabled||scene.sourceConflict;
+    card.onclick=()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id,"generateCard");};
+    const lore=button("Assist · Draft lore entry");lore.disabled=card.disabled;
+    lore.onclick=()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id,"generateLore");};
+    const edits=button("Assist · Edit Scene");edits.disabled=scene.sourceConflict||(assist.disabled&&continuation.disabled);
+    edits.onclick=()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id,"editScene");};
+    tools.append(assist,edits,continuation,card,lore); menu.append(tools);
+    return menu;
+  };
+  // The Branch path and Tracks. Redrawn alone when a new beat's place or kind changes.
+  const drawBottom = (scene: SceneDocument, scroll?: number): void => {
+    if (!bottomHost) return;
+    const before = scroll ?? bottomHost.querySelector<HTMLElement>(".story-tracks-scroll")?.scrollLeft ?? 0;
+    const pending: PendingBeat[] = [...beatDrafts.entries()].flatMap(([key, draft]) => !draft.beatId && draft.sceneId === scene.id && draft.place ? [{ key, ...draft.place(), label: draft.kind() }] : []);
+    const items = trackRoute(scene, openBranches, pending);
+    const selected = selectedNewDraft ?? selectedBeatId;
+    const path = renderBranchPath({ scene, items, numbers, open: openBranches, caption: forkCaption, branchName: header => branchName(scene, header), select: id => select(scene, id), toggle: (owner, body) => toggleBranch(scene, owner, body) });
+    const panel = document.createElement("section"); panel.className = "story-panel"; panel.setAttribute("aria-label", "Tracks");
+    const toolbar = document.createElement("div"); toolbar.className = "story-panel-toolbar";
+    const view = document.createElement("strong"); view.className = "story-panel-view"; view.textContent = "Tracks";
+    toolbar.append(view, renderTracksKey(), renderMarksLegend());
+    const scroller = document.createElement("div"); scroller.className = "story-tracks-scroll";
+    const accepted = (beat: SceneBeat): { background: boolean; characters: boolean; music: boolean; unknown: boolean } => {
+      const state = deriveScenePreview(scene, beat.id, scene.beats.some(item => item.conditionalBranch) ? openBranches : undefined);
+      return { background: !!state.background, characters: state.characters.length > 0, music: !!state.music, unknown: state.partial };
+    };
+    scroller.append(renderTracks({ scene, items, numbers, selected, locked: scene.sourceConflict, label: beatName,
+      summary: beat => beat.conditionalBranch ? branchName(scene, beat) : beatSummary(beat.payload, model), branchName: header => branchName(scene, header), endName: header => endName(scene, header),
+      sceneName: id => model.scenes.find(item => item.id === id)?.displayName ?? "an unavailable scene", state: accepted,
+      select: id => select(scene, id), selectNew: key => { if (navigate(() => { selectedBeatId = undefined; selectedNewDraft = key; })) beatDrafts.get(key)?.panel.querySelector<HTMLElement>("select, input, textarea")?.focus(); },
+      insert: (body, position, opener) => insertAt(scene, body, position, opener), move: (beat, direction) => moveSibling(scene, beat, direction) }));
+    scroller.addEventListener("wheel", event => { if (Math.abs(event.deltaY) > Math.abs(event.deltaX) && scroller.scrollWidth > scroller.clientWidth) { scroller.scrollLeft += event.deltaY; event.preventDefault(); } }, { passive: false });
+    panel.append(toolbar, scroller);
+    bottomHost.replaceChildren(path, panel);
+    scroller.scrollLeft = before;
+    const column = [...scroller.querySelectorAll<HTMLElement>("[data-beat-id], [data-new-beat]")].find(item => (item.dataset.beatId ?? item.dataset.newBeat) === selected);
+    if (column) revealColumn(column);
+    markDrafts();
+  };
+  // The editor beside the stage: the open operation, the selected new beat, the selected
+  // beat, branch or option, or what to do in an empty selection.
+  const drawEditor = (scene: SceneDocument): void => {
+    const editor = editorHost; if (!editor) return;
+    editor.replaceChildren(); delete editor.dataset.editorFor; effectsHost = undefined;
+    editor.append(...lostDrafts(scene));
+    if (openOperation) { editor.append(openOperation); return; }
+    const fresh = selectedNewDraft ? beatDrafts.get(selectedNewDraft) : undefined;
+    if (fresh) { editor.dataset.editorFor = selectedNewDraft; editor.append(fresh.panel); return; }
+    const beat = scene.beats.find(item => item.id === selectedBeatId);
+    if (beat) {
+      editor.dataset.editorFor = beat.id;
+      const branch = beat.conditionalBranch;
+      if (branch?.choiceOption) renderOptionEditor(editor, scene, beat);
+      else if (branch) renderConditionEditor(editor, scene, beat);
+      else { editor.append(beatHeading(scene, beat)); renderExistingBeat(editor, scene, beat); if (beat.payload.type === "choice") editor.append(optionLinks(scene, beat)); }
+    } else {
+      const empty = document.createElement("div"); empty.className = "story-editor-empty";
+      const heading = document.createElement("h2"); heading.textContent = nodeBeats(scene, { type: "root" }).some(item => item.payload.type !== "return") ? "No beat selected" : "No lines yet";
+      const copy = document.createElement("p"); copy.textContent = "Select a beat in Tracks to edit it, or add a beat with + in Tracks or Add Beat.";
+      empty.append(heading, copy); editor.append(empty);
     }
-    const addCondition = button("Add Condition"); addCondition.disabled = scene.sourceConflict;
-    addCondition.addEventListener("click", () => openConditionForm(scene, { type: "root" }, defaultPlace(scene, { type: "root" }))); tools.append(addCondition);
-    if (actions.assist) {
-      const selected=scene.beats.find(b=>b.id===selectedBeatId);
-      const assist=button("Assist · Rewrite dialogue");
-      assist.disabled=!selected||selected.protected||!!selected.owner||!!selected.conditionalBranch||!["dialogue","narration"].includes(selected.payload.type);
-      assist.addEventListener("click",()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id);});
-      const continuation=button("Assist · Continue Scene");
-      const anchorIndex=scene.beats.findIndex(b=>b.id===selected?.id),terminalKinds=["return","jump","choice"];
-      const adjacent=scene.beats.slice(Math.max(0,anchorIndex-1),anchorIndex+1);
-      continuation.disabled=!selected||scene.sourceConflict||scene.beats.some(previewLogicBoundary)||!terminalKinds.includes(scene.beats.at(-1)?.payload.type??"")||scene.beats.slice(0,-1).some(b=>terminalKinds.includes(b.payload.type))||adjacent.some(b=>b.protected||!!b.owner||!!b.conditionalBranch)||!!scene.beats.at(-1)?.protected||!!scene.beats.at(-1)?.owner||!!scene.beats.at(-1)?.conditionalBranch;
-      continuation.addEventListener("click",()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id,"continueScene");});
-      const card=button("Assist · Draft Character card");card.disabled=assist.disabled||scene.sourceConflict;
-      card.onclick=()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id,"generateCard");};
-      const lore=button("Assist · Draft lore entry");lore.disabled=card.disabled;
-      lore.onclick=()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id,"generateLore");};
-      const edits=button("Assist · Edit Scene");edits.disabled=scene.sourceConflict||(assist.disabled&&continuation.disabled);
-      edits.onclick=()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id,"editScene");};
-      tools.append(assist,edits,continuation,card,lore);
+    const effects = document.createElement("section"); effects.className = "story-effects"; effects.setAttribute("aria-label", "In effect");
+    editor.append(effects); effectsHost = effects; renderEffects(effects, scene);
+  };
+  // A Choice's options, each opening its own editor with Then and its beats.
+  const optionLinks = (scene: SceneDocument, choice: SceneBeat): HTMLElement => {
+    const links = document.createElement("nav"); links.className = "row-actions story-option-links"; links.setAttribute("aria-label", "Option editors");
+    for (const body of ownedBodies(scene, choice)) {
+      if (body.type !== "branch") continue;
+      const header = scene.beats.find(item => item.id === body.branchId); if (!header) continue;
+      const open = button(branchName(scene, header), "text-button"); open.dataset.arm = String(armOf(scene, body)); open.dataset.optionId = header.id;
+      open.addEventListener("click", () => select(scene, header.id)); links.append(open);
     }
-    toolbar.append(heading, tools); beatsRegion.append(toolbar);
-    const reserveToolbar=():void=>{
-      const height=toolbar.getBoundingClientRect().height;
-      const controlHeight=Math.max(0,...[...toolbar.querySelectorAll("button")].map(control=>control.getBoundingClientRect().height));
-      const focusClearance=4;
-      const sticky=height+controlHeight+focusClearance*2<=beatsRegion.clientHeight;
-      toolbar.style.position=sticky?"sticky":"static";
-      beatsRegion.style.scrollPaddingTop=`${sticky?height+focusClearance:focusClearance}px`;
-    };reserveToolbar();
-    if(typeof ResizeObserver!=="undefined"){const observer=new ResizeObserver(reserveToolbar);observer.observe(toolbar);observer.observe(beatsRegion);layoutObservers.push(observer);}
-    const list = document.createElement("div"); list.className = "beats-list"; list.setAttribute("role", "list"); beatsRegion.append(list);
-    let drag:{id:string;from:number;pointerId:number;startX:number;startY:number;x:number;y:number;active:boolean;target?:number;grip:HTMLButtonElement;ghost?:HTMLElement}|undefined;
-    let scrollFrame:number|undefined;
-    const cancelDrag=():void=>{
-      if(scrollFrame!==undefined)window.cancelAnimationFrame(scrollFrame);scrollFrame=undefined;
-      const previous=drag;drag=undefined;previous?.ghost?.remove();
-      if(previous?.grip.hasPointerCapture?.(previous.pointerId))previous.grip.releasePointerCapture(previous.pointerId);
-      list.querySelectorAll(".drop-before,.drop-after,.dragging-beat").forEach(e=>e.classList.remove("drop-before","drop-after","dragging-beat"));
-      window.removeEventListener("pointermove",moveDrag);window.removeEventListener("pointerup",dropDrag);window.removeEventListener("pointercancel",cancelDrag);window.removeEventListener("keydown",escapeDrag);window.removeEventListener("blur",cancelDrag);
-    };
-    cancelBeatDrag=cancelDrag;
-    const updateTarget=():void=>{
-      if(!drag)return;drag.target=undefined;
-      list.querySelectorAll(".drop-before,.drop-after").forEach(e=>e.classList.remove("drop-before","drop-after"));
-      const card=document.elementFromPoint(drag.x,drag.y)?.closest<HTMLElement>(".beat-card");
-      if(!card||!list.contains(card))return;
-      const target=scene.beats.findIndex(b=>b.id===card.dataset.beatId);
-      if(target<0||target===drag.from)return;
-      const interval=scene.beats.slice(Math.min(target,drag.from),Math.max(target,drag.from)+1);
-      if(interval.some(b=>b.owner||b.protected||previewLogicBoundary(b)||["choice","jump","return"].includes(b.payload.type))||interval.some((b,i)=>i>0&&interval[i-1]!.byteEnd!==b.byteStart))return;
-      drag.target=target;card.classList.add(target>drag.from?"drop-after":"drop-before");
-    };
-    const scrollDrag=():void=>{
-      if(!drag?.active)return;
-      // The panel owns scrolling; the list can extend far beyond its viewport.
-      const bounds=beatsRegion.getBoundingClientRect(), content=list.getBoundingClientRect();
-      const top=Math.max(bounds.top,content.top,toolbar.getBoundingClientRect().bottom);
-      const bottom=Math.min(bounds.bottom,content.bottom);
-      if(drag.x>=Math.max(bounds.left,content.left)&&drag.x<=Math.min(bounds.right,content.right)&&drag.y>=top&&drag.y<=bottom){const delta=drag.y<top+32?-10:drag.y>bottom-32?10:0;if(delta){beatsRegion.scrollTop+=delta;updateTarget();}}
-      scrollFrame=window.requestAnimationFrame(scrollDrag);
-    };
-    const moveDrag=(event:PointerEvent):void=>{
-      if(!drag||event.pointerId!==drag.pointerId)return;
-      drag.x=event.clientX;drag.y=event.clientY;
-      if(!drag.active&&Math.hypot(drag.x-drag.startX,drag.y-drag.startY)<6)return;
-      event.preventDefault();
-      if(!drag.active){drag.active=true;drag.grip.closest(".beat-card")?.classList.add("dragging-beat");const ghost=document.createElement("div");ghost.className="beat-drag-ghost";ghost.textContent=drag.grip.closest(".beat-compact")?.querySelector(".beat-select")?.textContent??"Move Beat";ghost.setAttribute("aria-hidden","true");document.body.append(ghost);drag.ghost=ghost;scrollFrame=window.requestAnimationFrame(scrollDrag);}
-      drag.ghost!.style.left=`${drag.x+12}px`;drag.ghost!.style.top=`${drag.y+12}px`;updateTarget();
-    };
-    const dropDrag=(event:PointerEvent):void=>{
-      if(!drag||event.pointerId!==drag.pointerId)return;
-      drag.x=event.clientX;drag.y=event.clientY;if(drag.active)updateTarget();
-      const {id,from,target,active,grip}=drag;cancelDrag();
-      const moved=scene.beats.find(b=>b.id===id),onto=target===undefined?undefined:scene.beats[target];
-      if(!active||!moved||!onto||target===undefined){if(grip.isConnected)grip.focus();return;}
-      // Dropping below the start lands after the target; above it, before the target.
-      const siblings=nodeBeats(scene,{type:"root"}),anchor=target>from?siblings[siblings.findIndex(b=>b.id===onto.id)+1]:onto;
-      const position:Position=anchor?{type:"before",anchor:nodeRef(anchor)}:{type:"end"};
-      if(!movePlaces(scene,moved,{type:"root"}).some(place=>samePosition(place.position,position))){actions.status("This beat cannot move there. Choose a listed place with Move to….","error");if(grip.isConnected)grip.focus();return;}
-      void mutate({type:"moveStoryNode",sceneId:scene.id,expectedSourceRevision:scene.sourceRevision,node:nodeRef(moved),expectedBody:beatBody(moved),body:{type:"root"},position})
-        .then(saved=>{if(saved)[...host.querySelectorAll<HTMLElement>(".beat-card")].find(row=>row.dataset.beatId===id)?.querySelector<HTMLElement>(".beat-grip")?.focus();});
-    };
-    const escapeDrag=(event:KeyboardEvent):void=>{if(event.key==="Escape"&&drag){event.preventDefault();const grip=drag.grip;cancelDrag();grip.focus();}};
-    const branchHosts = new Map<string, HTMLElement>();
-    const groupHosts = new Map<string, HTMLElement>();
-    scene.beats.forEach((beat, index) => {
-      if (beat.conditionalBranch?.choiceOption) {
-        const branch = beat.conditionalBranch;
-        const body: BodyRef = { type: "branch", groupId: branch.groupId, branchId: beat.id }, info = bodyOf(scene, body);
-        const menu = scene.beats.find(item => item.id === info?.owningNode);
-        const option = menu?.payload.type === "choice" ? menu.payload.options.find(o => o.id === beat.id) : undefined;
-        // Then edits an explicit ending beat. Custom Code that ends the option is edited in Source.
-        const bodyEnding = info?.ending, endedAt = bodyEnding?.type === "ends" ? scene.beats.find(item => item.id === bodyEnding.beatId) : undefined;
-        const code = endedAt?.payload.type === "customCode" ? endedAt : undefined;
-        const explicit = endedAt && ["jump", "repeatChoice", "return"].includes(endedAt.payload.type) ? endedAt : undefined;
-        const endingText = code?.payload.type === "customCode" ? `Ends with Custom Code: ${code.payload.source.trim()}` : bodyEnding?.type === "unknown" ? "Ending unknown: Custom Code can leave this option" : endedAt ? "Explicit transfer at the end of this option" : "Continue after the Choice";
-        const section = document.createElement("section"); section.className = "story-choice-option story-branch-body"; section.dataset.optionId = beat.id; section.dataset.branchId = beat.id;
-        section.style.setProperty("--option-color", ["var(--choice-arm-one)", "var(--choice-arm-two)", "var(--choice-arm-three)", "var(--choice-arm-four)"][(branch.ordinal ?? 0) % 4]!);
-        const heading = document.createElement("strong"); heading.textContent = `${(branch.ordinal ?? 0) + 1}. ${option?.text ?? "Option"}`;
-        const availability = document.createElement("p"); availability.textContent = option?.condition ? `Only when ${conditionCaption(option.condition, model.authoring.variables)}` : "Always available";
-        const add = button("Add a Beat", "text-button"); add.dataset.beatOpener = `branch:${beat.id}`; add.disabled = scene.sourceConflict;
-        add.addEventListener("click", () => { if (!draftGuard()) return; renderNewBeat(section, scene, "narration", body, defaultPlace(scene, body), undefined, `branch:${beat.id}`); });
-        const then = button("Then", "text-button"); then.disabled = scene.sourceConflict || !!menu?.protected;
-        then.addEventListener("click", () => {
-          const target = prepareOperation(scene); if (!target) return;
-          const ending = explicit;
-          const kind = selectOf([{ value: "continue", label: "Continue after the Choice" }, { value: "jump", label: "Go to a Scene" }, { value: "repeatChoice", label: "Repeat this Choice" }, { value: "return", label: "Return to caller or main menu" }], ending?.payload.type ?? "continue"); kind.setAttribute("aria-label", "Then");
-          const destination = entitySelect(model.scenes.map(s => ({ id: s.id, label: s.displayName })), ending?.payload.type === "jump" ? ending.payload.sceneId : ""); destination.setAttribute("aria-label", "Destination Scene");
-          const destinationLabel = labelled("Destination Scene", destination); const show = (): void => { destinationLabel.hidden = kind.value !== "jump"; }; kind.addEventListener("change", show); show();
-          const notes: HTMLElement[] = [];
-          if (code || bodyEnding?.type === "unknown") { const note = document.createElement("p"); note.className = "story-continuation"; note.textContent = endingText; notes.push(note); }
-          if (code) {
-            kind.disabled = true;
-            const source = button("Edit in Source", "button secondary"); source.disabled = !actions.viewSource;
-            source.addEventListener("click", () => actions.viewSource?.(scene.sourcePath, code.byteStart, code.byteEnd, scene.sourceRevision)); notes.push(source);
-          }
-          const panel = operation(scene, target, "Option ending", [...notes, labelled("Then", kind), destinationLabel], () => {
-            if (code) throw Error("Custom Code ends this option. Edit it in Source.");
-            if (kind.value === "continue") { if (!ending && menu) return { type: "updateBodyBeat", beatId: menu.id, expectedBody: beatBody(menu), beat: menu.payload }; if (!ending) throw Error("The owning Choice is unavailable."); return { type: "removeStoryNode", node: nodeRef(ending), expectedBody: body }; }
-            const payload: BeatPayload = kind.value === "jump" ? { type: "jump", sceneId: required(destination) } : kind.value === "repeatChoice" ? { type: "repeatChoice", target: ending?.payload.type === "repeatChoice" ? ending.payload.target : null } : { type: "return" };
-            return ending ? { type: "updateBodyBeat", beatId: ending.id, expectedBody: body, beat: payload } : { type: "insertBodyBeat", body, position: { type: "end" }, beat: payload };
-          }, "Apply ending");
-          if (code) panel.querySelectorAll<HTMLButtonElement>(".row-actions .button.primary").forEach(apply => { apply.disabled = true; });
-        });
-        const following = document.createElement("p"); following.className = "story-continuation"; following.textContent = endingText;
-        const context = document.createElement("p"); context.className = "story-breadcrumb"; context.textContent = bodyCaption(scene, body, model);
-        const addCondition = button("Add Condition", "text-button"); addCondition.disabled = scene.sourceConflict;
-        addCondition.addEventListener("click", () => openConditionForm(scene, body, defaultPlace(scene, body)));
-        const focus = button("Focus this branch", "text-button"); focus.addEventListener("click", () => { if (draftGuard()) { focusedBranch = beat.id; draw(); } });
-        following.textContent += ` · ${bodyCaption(scene, info?.parent ?? { type: "root" }, model)}`;
-        section.append(heading, context, availability, add, addCondition, focus, then, following); (beat.owner ? branchHosts.get(beat.owner.branchId) ?? list : list).append(section); branchHosts.set(beat.id, section); return;
+    return links;
+  };
+  // A node's number and kind, with its move and delete actions in a menu.
+  const beatHeading = (scene: SceneDocument, beat: SceneBeat): HTMLElement => {
+    const heading = document.createElement("div"); heading.className = "story-editor-heading";
+    const number = numbers.get(beat.id) ?? "";
+    const title = document.createElement("strong"); title.className = "story-editor-title"; title.textContent = `${number} · ${beatName(beat)}`;
+    // The beat's draft mark: "* Draft", "! Conflict" or, after a refused Save, "! Needs changes".
+    const state = document.createElement("span"); state.className = "story-editor-state"; state.dataset.beatId = beat.id;
+    const editable = nodeEditable(beat);
+    const menu = document.createElement("details"); menu.className = "story-beat-menu";
+    const summary = document.createElement("summary"); summary.textContent = "⋯"; summary.ariaLabel = `Actions for ${number}`;
+    const list = document.createElement("div"); list.className = "story-beat-menu-list";
+    const up = button("Move up", "text-button"); up.ariaLabel = `Move beat ${number} up`; up.disabled = !movable(scene, beat, "up");
+    up.addEventListener("click", () => moveSibling(scene, beat, "up"));
+    const down = button("Move down", "text-button"); down.ariaLabel = `Move beat ${number} down`; down.disabled = !movable(scene, beat, "down");
+    down.addEventListener("click", () => moveSibling(scene, beat, "down"));
+    const move = button("Move to…", "text-button"); move.disabled = !editable || scene.sourceConflict; move.addEventListener("click", () => moveNodeForm(scene, beat));
+    list.append(up, down, move);
+    if (!beat.conditionalBranch) { const remove = button("Delete", "text-button story-menu-delete"); remove.ariaLabel = `Delete beat ${number}`; remove.disabled = !editable || beat.payload.type === "return" && !beat.owner || scene.sourceConflict; remove.addEventListener("click", () => removeNodeForm(scene, beat)); list.append(remove); }
+    menu.append(summary, list); heading.append(title, state, menu);
+    return heading;
+  };
+  // A condition: its group actions, then the shown branch's own editor and actions. The
+  // shown branch is the selected header, or the open branch when the condition is selected.
+  const renderConditionEditor = (editor: HTMLElement, scene: SceneDocument, selected: SceneBeat): void => {
+    const groupId = selected.conditionalBranch!.groupId, node = groupHeader(scene, groupId);
+    const open = openBranches.get(groupId), shown = selected === node && open ? scene.beats.find(beat => beat.id === open) ?? node : selected;
+    const branch = shown.conditionalBranch!, kind = branch.otherwise ? "Otherwise" : branch.ordinal ? "Else If" : "If";
+    editor.append(beatHeading(scene, node));
+    const caption = document.createElement("p"); caption.className = "story-condition-summary";
+    caption.textContent = `Condition · ${node.conditionalBranch?.condition ? conditionCaption(node.conditionalBranch.condition, model.authoring.variables) : "Unknown condition"} · ${scene.beats.filter(item => item.conditionalBranch?.groupId === groupId).length} branches / ${groupCount(scene, node)} Beats`;
+    const tools = document.createElement("div"); tools.className = "row-actions story-editor-tools";
+    const elseif = button("Add Else If"); elseif.disabled = scene.sourceConflict; elseif.addEventListener("click", () => addBranchForm(scene, node, false));
+    const otherwise = button("Add Otherwise"); otherwise.disabled = scene.sourceConflict || scene.beats.some(item => item.conditionalBranch?.groupId === groupId && item.conditionalBranch.otherwise); otherwise.addEventListener("click", () => addBranchForm(scene, node, true));
+    const unwrap = button("Unwrap…"); unwrap.disabled = scene.sourceConflict; unwrap.addEventListener("click", () => unwrapForm(scene, node));
+    const remove = button("Delete condition"); remove.disabled = scene.sourceConflict; remove.addEventListener("click", () => removeNodeForm(scene, node));
+    tools.append(elseif, otherwise, unwrap, remove); editor.append(caption, tools);
+    const section = document.createElement("section"); section.className = "story-branch-editor"; section.dataset.branchId = shown.id;
+    section.dataset.arm = String(armOf(scene, { type: "branch", groupId, branchId: shown.id }));
+    renderConditionBranch(section, scene, shown);
+    const body: BodyRef = { type: "branch", groupId, branchId: shown.id };
+    const addChild = button(`Add Beat to ${kind}`); addChild.dataset.beatOpener = `branch:${shown.id}`;
+    addChild.disabled = scene.sourceConflict || branch.condition?.status === "unknown";
+    addChild.addEventListener("click", () => insertAt(scene, body, defaultPlace(scene, body), `branch:${shown.id}`));
+    const addInner = button(`Add Condition to ${kind}`); addInner.disabled = scene.sourceConflict;
+    addInner.addEventListener("click", () => openConditionForm(scene, body, defaultPlace(scene, body)));
+    const branchTools = document.createElement("div"); branchTools.className = "row-actions story-editor-tools"; branchTools.append(addChild, addInner);
+    section.append(branchTools); editor.append(section);
+  };
+  // An option header: its availability, Add a beat and Add Condition inside it, and Then.
+  const renderOptionEditor = (editor: HTMLElement, scene: SceneDocument, beat: SceneBeat): void => {
+    const branch = beat.conditionalBranch!;
+    const body: BodyRef = { type: "branch", groupId: branch.groupId, branchId: beat.id }, info = bodyOf(scene, body);
+    const menu = scene.beats.find(item => item.id === info?.owningNode);
+    const option = menu?.payload.type === "choice" ? menu.payload.options.find(o => o.id === beat.id) : undefined;
+    // Then edits an explicit ending beat. Custom Code that ends the option is edited in Source.
+    const bodyEnding = info?.ending, endedAt = bodyEnding?.type === "ends" ? scene.beats.find(item => item.id === bodyEnding.beatId) : undefined;
+    const code = endedAt?.payload.type === "customCode" ? endedAt : undefined;
+    const explicit = endedAt && ["jump", "repeatChoice", "return"].includes(endedAt.payload.type) ? endedAt : undefined;
+    const endingText = code?.payload.type === "customCode" ? `Ends with Custom Code: ${code.payload.source.trim()}` : bodyEnding?.type === "unknown" ? "Ending unknown: Custom Code can leave this option" : endedAt ? "Explicit transfer at the end of this option" : "Continue after the Choice";
+    const section = document.createElement("section"); section.className = "story-option-editor"; section.dataset.optionId = beat.id; section.dataset.arm = String(armOf(scene, body));
+    const heading = document.createElement("div"); heading.className = "story-editor-heading";
+    const title = document.createElement("strong"); title.className = "story-editor-title"; title.textContent = `${(branch.ordinal ?? 0) + 1}. ${option?.text ?? "Option"}`;
+    const owner = button(`Edit choice ${numbers.get(menu?.id ?? "") ?? ""}`, "text-button"); owner.disabled = !menu; owner.addEventListener("click", () => { if (menu) select(scene, menu.id); });
+    heading.append(title, owner);
+    const availability = document.createElement("p"); availability.textContent = option?.condition ? `Only when ${conditionCaption(option.condition, model.authoring.variables)}` : "Always available";
+    const add = button("Add a Beat", "text-button"); add.dataset.beatOpener = `branch:${beat.id}`; add.disabled = scene.sourceConflict;
+    add.addEventListener("click", () => insertAt(scene, body, defaultPlace(scene, body), `branch:${beat.id}`, "narration"));
+    const then = button("Then", "text-button"); then.disabled = scene.sourceConflict || !!menu?.protected;
+    then.addEventListener("click", () => {
+      const target = prepareOperation(scene); if (!target) return;
+      const ending = explicit;
+      const kind = selectOf([{ value: "continue", label: "Continue after the Choice" }, { value: "jump", label: "Go to a Scene" }, { value: "repeatChoice", label: "Repeat this Choice" }, { value: "return", label: "Return to caller or main menu" }], ending?.payload.type ?? "continue"); kind.setAttribute("aria-label", "Then");
+      const destination = entitySelect(model.scenes.map(s => ({ id: s.id, label: s.displayName })), ending?.payload.type === "jump" ? ending.payload.sceneId : ""); destination.setAttribute("aria-label", "Destination Scene");
+      const destinationLabel = labelled("Destination Scene", destination); const show = (): void => { destinationLabel.hidden = kind.value !== "jump"; }; kind.addEventListener("change", show); show();
+      const notes: HTMLElement[] = [];
+      if (code || bodyEnding?.type === "unknown") { const note = document.createElement("p"); note.className = "story-continuation"; note.textContent = endingText; notes.push(note); }
+      if (code) {
+        kind.disabled = true;
+        const source = button("Edit in Source", "button secondary"); source.disabled = !actions.viewSource;
+        source.addEventListener("click", () => actions.viewSource?.(scene.sourcePath, code.byteStart, code.byteEnd, scene.sourceRevision)); notes.push(source);
       }
-      const card = document.createElement("article"); card.className = `beat-card${selectedBeatId === beat.id ? " selected" : ""}`; card.setAttribute("role", "listitem");card.dataset.beatId=beat.id;
-      if (beat.owner) { card.classList.add("nested-dialogue"); card.dataset.groupId=beat.owner.groupId; card.dataset.branchId=beat.owner.branchId; }
-      if (beat.conditionalBranch) card.classList.add("conditional-branch");
-      const compact = document.createElement("div"); compact.className = "beat-compact";
-      const select = button(`${index + 1}. ${beat.conditionalBranch ? branchCaption(beat.conditionalBranch, model) : beatLabels[beat.payload.type]}`, "beat-select"); select.ariaExpanded = String(selectedBeatId === beat.id);
-      const summary = document.createElement("span"); summary.className = "beat-summary"; summary.textContent = beat.structuralPlaceholder ? "Empty branch" : beat.conditionalBranch ? `Branch ${(beat.conditionalBranch.ordinal ?? 0) + 1} · first match wins` : beatSummary(beat.payload, model);
-      select.append(summary); select.addEventListener("click",()=>{const selectBeat=():void=>{selectedBeatId=selectedBeatId===beat.id?undefined:beat.id;draw();[...host.querySelectorAll<HTMLElement>(".beat-card")].find(item=>item.dataset.beatId===beat.id)?.querySelector<HTMLElement>(".beat-select")?.focus();};if(!settling&&!pendingWrites&&!hasDraft()){selectBeat();return;}if(hasDraft()){actions.status("Commit or cancel the open form before changing Beats.","error");focusDraft();return;}actions.status("Wait for the current Beat change to finish.","error");});
-      const controls = document.createElement("div"); controls.className = "beat-controls";
-      const nodeEditable = !readOnlyLogic(beat) && !beat.structuralPlaceholder && (!beat.protected || !!beat.conditionalBranch && !beat.conditionalBranch.ordinal && !beat.conditionalBranch.otherwise);
-      const up = button("↑", "icon-button"); up.ariaLabel = `Move beat ${index + 1} up`; up.disabled = !nodeEditable || !siblingPlace(scene, beat, "up") || scene.sourceConflict;
-      up.addEventListener("click", () => moveSibling(scene, beat, "up"));
-      const down = button("↓", "icon-button"); down.ariaLabel = `Move beat ${index + 1} down`; down.disabled = !nodeEditable || !siblingPlace(scene, beat, "down") || scene.sourceConflict;
-      down.addEventListener("click", () => moveSibling(scene, beat, "down"));
-      const remove = button("Delete", "icon-button"); remove.ariaLabel = `Delete beat ${index + 1}`; remove.disabled = !nodeEditable || beat.payload.type === "return" && !beat.owner || scene.sourceConflict;
-      remove.addEventListener("click", () => removeNodeForm(scene, beat));
-      const move = button("Move to…", "text-button"); move.disabled = !nodeEditable || scene.sourceConflict; move.addEventListener("click", () => moveNodeForm(scene, beat));
-      select.addEventListener("keydown", event => { if (event.altKey && ["ArrowUp", "ArrowDown"].includes(event.key)) { event.preventDefault(); const direction = event.key === "ArrowUp" ? "up" : "down"; if (!(direction === "up" ? up : down).disabled) moveSibling(scene, beat, direction); } });
-      const grip=button("⠿","icon-button beat-grip");grip.draggable=false;grip.ariaLabel=`Drag beat ${index+1} to reorder`;grip.title="Drag to reorder; use arrow controls with the keyboard";grip.disabled=!!beat.owner||beat.protected||previewLogicBoundary(beat)||["choice","jump","return"].includes(beat.payload.type)||scene.sourceConflict;
-      grip.addEventListener("lostpointercapture",e=>{if(drag?.pointerId===e.pointerId)cancelDrag();});
-      grip.addEventListener("pointerdown",e=>{if(e.button!==0||grip.disabled)return;if(hasDraft()||settling){actions.status("Complete or cancel the current edit first.","error");return;}e.preventDefault();cancelDrag();grip.focus();drag={id:beat.id,from:index,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,x:e.clientX,y:e.clientY,active:false,grip};grip.setPointerCapture?.(e.pointerId);window.addEventListener("pointermove",moveDrag,{passive:false});window.addEventListener("pointerup",dropDrag);window.addEventListener("pointercancel",cancelDrag);window.addEventListener("keydown",escapeDrag);window.addEventListener("blur",cancelDrag);});
-      controls.append(up, down, remove, move); compact.append(grip,select, controls); card.append(compact);
-      if (selectedBeatId === beat.id) renderExistingBeat(card, scene, beat, index);
-      if (beat.conditionalBranch) {
-        const branch = beat.conditionalBranch;
-        let group = groupHosts.get(branch.groupId);
-        if (!group) {
-          group = document.createElement("section"); group.className = "story-condition-group"; group.dataset.conditionGroupId = branch.groupId;
-          let depth = 0, parent = beatBody(beat); while (parent.type === "branch" && depth < 16) { depth++; const owner = parent; const header = scene.beats.find(item => item.id === owner.branchId); parent = header ? beatBody(header) : { type: "root" }; }
-          if (depth >= 3) group.style.paddingInlineStart = "0";
-          const heading = document.createElement("div"); heading.className = "story-group-heading";
-          const selected = scene.beats.find(item => item.id === selectedBeatId);
-          if (selected && (selected.conditionalBranch?.groupId === branch.groupId || !!selected.owner && innerBodies(scene, beat).has(selected.owner.branchId))) group.classList.add("selected");
-          const caption = document.createElement("strong"); caption.textContent = `Condition · ${branch.condition ? conditionCaption(branch.condition, model.authoring.variables) : "Unknown condition"} · ${scene.beats.filter(item => item.conditionalBranch?.groupId === branch.groupId).length} branches / ${groupCount(scene, beat)} Beats${group.classList.contains("selected") ? " · Contains selection" : ""}`;
-          const collapse = button(collapsedConditions.has(branch.groupId) ? "Expand condition" : "Collapse condition"); collapse.setAttribute("aria-expanded", String(!collapsedConditions.has(branch.groupId))); collapse.dataset.collapseGroupId = branch.groupId;
-          collapse.addEventListener("click", () => { if (!draftGuard()) return; if (collapsedConditions.has(branch.groupId)) collapsedConditions.delete(branch.groupId); else collapsedConditions.add(branch.groupId); draw(); [...host.querySelectorAll<HTMLElement>("[data-collapse-group-id]")].find(item => item.dataset.collapseGroupId === branch.groupId)?.focus(); });
-          const elseif = button("Add Else If"); elseif.disabled = scene.sourceConflict; elseif.addEventListener("click", () => addBranchForm(scene, beat, false));
-          const otherwise = button("Add Otherwise"); otherwise.disabled = scene.sourceConflict || scene.beats.some(item => item.conditionalBranch?.groupId === branch.groupId && item.conditionalBranch.otherwise); otherwise.addEventListener("click", () => addBranchForm(scene, beat, true));
-          const unwrap = button("Unwrap…"); unwrap.disabled = scene.sourceConflict; unwrap.addEventListener("click", () => unwrapForm(scene, beat));
-          const remove = button("Delete condition"); remove.disabled = scene.sourceConflict; remove.addEventListener("click", () => removeNodeForm(scene, beat));
-          heading.append(caption, collapse, elseif, otherwise, unwrap, remove);
-          const branches = document.createElement("div"); branches.className = "story-branches"; branches.hidden = collapsedConditions.has(branch.groupId); group.append(heading, branches);
-          (beat.owner ? branchHosts.get(beat.owner.branchId) ?? list : list).append(group); groupHosts.set(branch.groupId, group);
-          const continuation = document.createElement("p"); continuation.className = "story-continuation"; continuation.textContent = "Continue after condition · reached by branches that fall through"; group.after(continuation);
-        }
-        const body = document.createElement("section"); body.className = "story-branch-body"; body.dataset.branchId = beat.id;
-        body.append(card); group.querySelector(".story-branches")!.append(body); branchHosts.set(beat.id, body);
-        const addChild = button(`Add Beat to ${branch.otherwise ? "Otherwise" : branch.ordinal ? "Else If" : "If"}`);
-        addChild.dataset.beatOpener = `branch:${beat.id}`;
-        addChild.disabled = scene.sourceConflict || branch.condition?.status === "unknown";
-        addChild.addEventListener("click", () => {
-          if (!draftGuard()) return;
-          selectedBeatId = undefined; draw();
-          const target = [...host.querySelectorAll<HTMLElement>(".story-branch-body")].find(node => node.dataset.branchId === beat.id);
-          if (target) { const parent: BodyRef = { type: "branch", groupId: branch.groupId, branchId: beat.id }; renderNewBeat(target, scene, "dialogue", parent, defaultPlace(scene, parent), undefined, `branch:${beat.id}`); }
-        });
-        const addCondition = button(`Add Condition to ${branch.otherwise ? "Otherwise" : branch.ordinal ? "Else If" : "If"}`); addCondition.disabled = scene.sourceConflict;
-        addCondition.addEventListener("click", () => { const parent: BodyRef = { type: "branch", groupId: branch.groupId, branchId: beat.id }; openConditionForm(scene, parent, defaultPlace(scene, parent)); });
-        const focus = button("Focus this branch", "text-button"); focus.addEventListener("click", () => { if (draftGuard()) { focusedBranch = beat.id; collapsedConditions.delete(branch.groupId); draw(); } });
-        body.append(addChild, addCondition, focus);
-      } else (beat.owner ? branchHosts.get(beat.owner.branchId) ?? list : list).append(card);
+      const panel = operation(scene, target, "Option ending", [...notes, labelled("Then", kind), destinationLabel], () => {
+        if (code) throw Error("Custom Code ends this option. Edit it in Source.");
+        if (kind.value === "continue") { if (!ending && menu) return { type: "updateBodyBeat", beatId: menu.id, expectedBody: beatBody(menu), beat: menu.payload }; if (!ending) throw Error("The owning Choice is unavailable."); return { type: "removeStoryNode", node: nodeRef(ending), expectedBody: body }; }
+        const payload: BeatPayload = kind.value === "jump" ? { type: "jump", sceneId: required(destination) } : kind.value === "repeatChoice" ? { type: "repeatChoice", target: ending?.payload.type === "repeatChoice" ? ending.payload.target : null } : { type: "return" };
+        return ending ? { type: "updateBodyBeat", beatId: ending.id, expectedBody: body, beat: payload } : { type: "insertBodyBeat", body, position: { type: "end" }, beat: payload };
+      }, "Apply ending");
+      if (code) panel.querySelectorAll<HTMLButtonElement>(".row-actions .button.primary").forEach(apply => { apply.disabled = true; });
     });
-    if (focusedBranch) {
-      const target = branchHosts.get(focusedBranch);
-      if (target) { for (const child of [...list.children]) if (!child.contains(target) && child !== target) (child as HTMLElement).hidden = true; for (const body of branchHosts.values()) if (body !== target && !body.contains(target) && !target.contains(body)) body.hidden = true; const breadcrumb = document.createElement("p"); breadcrumb.className = "story-breadcrumb"; const header = scene.beats.find(beat => beat.id === focusedBranch)!; breadcrumb.textContent = bodyCaption(scene, { type: "branch", groupId: header.conditionalBranch!.groupId, branchId: header.id }, model); list.prepend(breadcrumb); }
-    }
+    const following = document.createElement("p"); following.className = "story-continuation"; following.textContent = `${endingText} · ${pathCaption(scene, info?.parent ?? { type: "root" })}`;
+    const context = document.createElement("p"); context.className = "story-breadcrumb"; context.textContent = pathCaption(scene, body);
+    const addCondition = button("Add Condition", "text-button"); addCondition.disabled = scene.sourceConflict;
+    addCondition.addEventListener("click", () => openConditionForm(scene, body, defaultPlace(scene, body)));
+    const tools = document.createElement("div"); tools.className = "row-actions story-editor-tools"; tools.append(add, addCondition, then);
+    section.append(heading, context, availability, tools, following); editor.append(section);
   };
 
-  const renderExistingBeat = (card: HTMLElement, scene: SceneDocument, beat: SceneBeat, index: number): void => {
+  const renderExistingBeat = (card: HTMLElement, scene: SceneDocument, beat: SceneBeat): void => {
+    const number = numbers.get(beat.id) ?? "";
     if (readOnlyLogic(beat)) {
       const panel = document.createElement("div"); panel.className = "expanded-beat protected-code";
       const explanation = document.createElement("p");
@@ -1718,8 +1773,6 @@ export function renderStoryView(
       const source = button("View in Source", "button secondary"); source.disabled = !actions.viewSource;
       source.addEventListener("click", () => actions.viewSource?.(scene.sourcePath, beat.byteStart, beat.byteEnd, scene.sourceRevision)); panel.append(source); card.append(panel); return;
     }
-    if (beat.conditionalBranch) { renderConditionBranch(card, scene, beat); return; }
-    if (beat.structuralPlaceholder) { const empty = document.createElement("p"); empty.textContent = "Empty branch · source keeps pass until a Beat is added."; card.append(empty); return; }
     if (beat.protected) {
       const protectedPanel = document.createElement("div"); protectedPanel.className = "protected-code";
       const explanation = document.createElement("p"); explanation.textContent = beat.sourceFallback ?? (beat.payload.type === "customCode" ? beat.payload.reason : "Protected source");
@@ -1778,7 +1831,7 @@ export function renderStoryView(
       const context = document.createElement("pre");context.textContent=`${beat.payload.type === "callScreen" ? "call" : beat.payload.type === "showScreen" ? "show" : "hide"} screen ${beat.payload.target.sourceName}`;
       details.append(summary, effect, context); panel.append(details);
     }
-    const parent = document.createElement("p"); parent.className = "story-breadcrumb"; parent.textContent = bodyCaption(scene, beatBody(beat), model); panel.prepend(parent);
+    const parent = document.createElement("p"); parent.className = "story-breadcrumb"; parent.textContent = pathCaption(scene, beatBody(beat)); panel.prepend(parent);
     if (beat.payload.type === "call") {
       const called = model.scenes.find(item => beat.payload.type === "call" && item.id === beat.payload.sceneId);
       const open = button("Open called Scene"); open.disabled = !actions.viewScene || !called || called.sourceConflict;
@@ -1815,10 +1868,10 @@ export function renderStoryView(
       panel.append(createDestination);
     }
     const actionsRow = document.createElement("div"); actionsRow.className = "row-actions";
-    const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => { cancelStep(beat.id); dropDraft(beat.id); selectedBeatId = undefined; draw(); if (beat.payload.type === "setVariable") host.querySelector<HTMLElement>(`[data-beat-id="${beat.id}"] .beat-select`)?.focus(); });
+    const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => { cancelStep(beat.id); dropDraft(beat.id); draw(); focusColumn(beat.id); });
     if (beat.payload.type === "showScreen" || beat.payload.type === "hideScreen" || beat.payload.type === "callScreen") panel.addEventListener("keydown", event => {
       if (event.key !== "Escape" || event.isComposing || composing) return;
-      event.preventDefault(); event.stopPropagation(); if (!pendingWrites && !settling && !conflicted()) { cancelStep(beat.id); dropDraft(beat.id); selectedBeatId = undefined; draw(); }
+      event.preventDefault(); event.stopPropagation(); if (!pendingWrites && !settling && !conflicted()) { cancelStep(beat.id); dropDraft(beat.id); draw(); focusColumn(beat.id); }
     });
     const commit = button("Commit Beat", "button primary"); commit.disabled = scene.sourceConflict;
     const save = async (continueDialogue: boolean): Promise<boolean> => {
@@ -1838,13 +1891,15 @@ export function renderStoryView(
             saved=true;dropDraft(beat.id);selectedBeatId = next.scenes.find((item) => item.id === scene.id)?.beats.find((item) => item.payload.type === "dialogue" && !oldIds.has(item.id))?.id;
           }, current.captured, panel, draft);
         } else {
-          await mutate(updateCommand(payload, current), () => { saved=true;dropDraft(beat.id);selectedBeatId = undefined; }, current.captured, panel, draft);
+          await mutate(updateCommand(payload, current), () => { saved=true;dropDraft(beat.id); }, current.captured, panel, draft);
         }
       } catch (error) {
-        actions.status(friendlyError(error, `Beat ${index + 1} is invalid`), "error");
+        actions.status(friendlyError(error, `Beat ${number} is invalid`), "error");
         editor.focus();
       }
       if(!saved&&panel.isConnected){restoreControls();editor.focus();}
+      // The next line opens for writing; a committed beat stays selected in Tracks.
+      if (saved && continueDialogue) editorHost?.querySelector<HTMLElement>("textarea")?.focus(); else if (saved) focusColumn(selectedBeatId);
       return saved;
     };
     editor.primary.addEventListener("compositionstart",()=>{composing=true;});editor.primary.addEventListener("compositionend",()=>{composing=false;});
@@ -1874,11 +1929,13 @@ export function renderStoryView(
     return result;
   };
 
-  const renderNewBeat = (list: HTMLElement, scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", body: BodyRef = { type: "root" }, position: Position = defaultPlace(scene, body), insertion?: ScreenInsertion, opener = "root"): void => {
+  // Builds a new beat draft and returns its key. Story shows it in the editor and as a
+  // pending column in Tracks.
+  const renderNewBeat = (scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", body: BodyRef = { type: "root" }, position: Position = defaultPlace(scene, body), insertion?: ScreenInsertion, opener = "root", returnTo?: string): string => {
     // One pending new beat per insertion place: adding there again returns to it.
     const requested = JSON.stringify({ body, position });
-    const existing = [...beatDrafts.values()].find(draft => !draft.beatId && draft.sceneId === scene.id && JSON.stringify(draft.place?.()) === requested);
-    if (existing) { if (!existing.panel.isConnected) list.prepend(existing.panel); existing.panel.querySelector<HTMLElement>("select, input, textarea")?.focus(); return; }
+    const existing = [...beatDrafts.entries()].find(([, draft]) => !draft.beatId && draft.sceneId === scene.id && JSON.stringify(draft.place?.()) === requested);
+    if (existing) return existing[0];
     const key = `new:${++newBeatDrafts}`;
     const base = (): { scene: SceneDocument; captured: ExpectedRevisions } => {
       const current = model.scenes.find(item => item.id === scene.id);
@@ -1912,37 +1969,22 @@ export function renderStoryView(
     const usesPlacement = (): boolean => screenType() || !insertion && !screenInsertion;
     const chosenLocation = (): { body: BodyRef; position: Position } => usesPlacement() ? readLocation() : unavailableScene ? { body: { type: "root" }, position: defaultPlace(scene, { type: "root" }) } : { body, position };
     const readLocation=placement.read;
-    const pendingMarker=document.createElement("div");pendingMarker.className="story-screen-pending";pendingMarker.role="status";
-    const updatePendingMarker=()=>{
-      pendingMarker.remove();if(!screenType())return;
-      let location;try{location=readLocation();}catch{return;}
-      const body=location.body;
-      const bodyHost=body.type==="root"?host.querySelector<HTMLElement>(".beats-list"):[...host.querySelectorAll<HTMLElement>(".story-branch-body")].find(node=>node.dataset.branchId===body.branchId);
-      if(!bodyHost)return;
-      for(let parent=bodyHost.parentElement;parent&&parent!==host;parent=parent.parentElement){
-        if(!parent.classList.contains("story-branches"))continue;
-        parent.hidden=false;const group=parent.parentElement,id=group?.dataset.conditionGroupId;
-        if(id)collapsedConditions.delete(id);group?.querySelector("[data-collapse-group-id]")?.setAttribute("aria-expanded","true");
-      }
-      const anchor=location.position.type==="before"?location.position.anchor:undefined;
-      const before=anchor?.type==="beat"?[...bodyHost.querySelectorAll<HTMLElement>(".beat-card")].find(node=>node.dataset.beatId===anchor.beatId):anchor?.type==="condition"?[...bodyHost.querySelectorAll<HTMLElement>(".story-condition-group")].find(node=>node.dataset.conditionGroupId===anchor.groupId):undefined;
-      pendingMarker.textContent=`Pending ${beatLabels[type.value as BeatPayload["type"]]}`;
-      if(before)before.before(pendingMarker);else bodyHost.append(pendingMarker);
-    };
+    // The pending column in Tracks follows the chosen place and kind, with its branches open.
+    const relocate=()=>{const current=model.scenes.find(item=>item.id===scene.id);if(current)openTo(current,place().body);redrawBottom();};
     const remember=()=>{if(screenType())try{rememberScreenInsertion({sceneId:scene.id,...readLocation(),expectedSourceRevision:scene.sourceRevision});rememberedInsertion=true;return true;}catch{/* Retain the unavailable original position until an explicit choice. */}return false;};
     // Placement owns its retained navigation state and any incomplete recovery input.
     placement.host.classList.add("scene-draft");
-    for(const event of ["input","change"])placement.host.addEventListener(event,()=>{if(remember())delete placement.host.dataset.unsubmitted;else placement.host.dataset.unsubmitted="true";updatePendingMarker();});
-    const editorHost = document.createElement("div"),secondaryHost=document.createElement("div");secondaryHost.className="story-screen-secondary";
+    for(const event of ["input","change"])placement.host.addEventListener(event,()=>{if(remember())delete placement.host.dataset.unsubmitted;else placement.host.dataset.unsubmitted="true";relocate();});
+    const fieldsHost = document.createElement("div"),secondaryHost=document.createElement("div");secondaryHost.className="story-screen-secondary";
     const validateNew = assignmentValidation(base, beat => insertCommand(beat, chosenLocation()));
     let editor = buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, liveActions, validateNew);
     const typeDrafts = new Map<string, BeatEditor>([[type.value, editor]]);
-    const replaceEditor = (): void => { placement.host.hidden=!usesPlacement();if(placement.host.hidden)delete placement.host.dataset.unsubmitted;destination.hidden=screenType();remember();editor = typeDrafts.get(type.value) ?? buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, liveActions, validateNew); typeDrafts.set(type.value, editor); editorHost.replaceChildren(editor.host);secondaryHost.replaceChildren(...(editor.secondary?[editor.secondary]:[]));panel.classList.toggle("story-screen-editor",screenType());dirtyDraft(panel, editor.controls); };
+    const replaceEditor = (): void => { placement.host.hidden=!usesPlacement();if(placement.host.hidden)delete placement.host.dataset.unsubmitted;destination.hidden=screenType();remember();editor = typeDrafts.get(type.value) ?? buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, liveActions, validateNew); typeDrafts.set(type.value, editor); fieldsHost.replaceChildren(editor.host);secondaryHost.replaceChildren(...(editor.secondary?[editor.secondary]:[]));panel.classList.toggle("story-screen-editor",screenType());dirtyDraft(panel, editor.controls); };
     type.addEventListener("change", replaceEditor); replaceEditor();
     const actionsRow = document.createElement("div"); actionsRow.className = "row-actions";
     const cancel = button("Cancel", screenType()?"button secondary":"text-button");
-    const cancelDraft=()=>{cancelStep(key);if(rememberedInsertion)rememberScreenInsertion(openingInsertion);pendingMarker.remove();panel.remove();dropDraft(key);focusBeatOpener(opener);};cancel.addEventListener("click",cancelDraft);
-    type.addEventListener("change",()=>{cancel.className=screenType()?"button secondary":"text-button";updatePendingMarker();});
+    const cancelDraft=()=>{cancelStep(key);if(rememberedInsertion)rememberScreenInsertion(openingInsertion);panel.remove();dropDraft(key);if(selectedNewDraft===key){selectedNewDraft=undefined;selectedBeatId=returnTo;}draw();focusBeatOpener(opener);};cancel.addEventListener("click",cancelDraft);
+    type.addEventListener("change",()=>{cancel.className=screenType()?"button secondary":"text-button";relocate();});
     let pending=false;
     panel.addEventListener("keydown", event => {
       if (event.key !== "Escape" || event.isComposing || composing || !["showScreen", "hideScreen", "callScreen"].includes(type.value)) return;
@@ -1960,12 +2002,14 @@ export function renderStoryView(
         controls.forEach(control=>control.disabled=true);
         let insertedId:string|undefined;
         const saved=await mutate(insertCommand(payload, location, current), (before,next) => {
-          selectedBeatId = undefined;panel.remove();dropDraft(key);
+          panel.remove();dropDraft(key);if(selectedNewDraft===key)selectedNewDraft=undefined;
           const acceptedScene=next.scenes.find(s=>s.id===scene.id);if(screenType()&&acceptedScene)rememberScreenInsertion({sceneId:scene.id,...location,expectedSourceRevision:acceptedScene.sourceRevision});
           const previousIds=new Set(before.scenes.find(s=>s.id===scene.id)?.beats.map(b=>b.id));
           insertedId=next.scenes.find(s=>s.id===scene.id)?.beats.find(b=>!previousIds.has(b.id))?.id;
+          // The added beat stays selected, so its editor replaces the draft.
+          if(insertedId&&!selectedNewDraft)selectedBeatId=insertedId;
         }, current.captured, panel, draft);
-        if(saved&&insertedId){const row=[...host.querySelectorAll<HTMLElement>(".beat-card")].find(row=>row.dataset.beatId===insertedId);row?.scrollIntoView?.({block:"nearest"});row?.querySelector<HTMLElement>(".beat-select")?.focus({preventScroll:true});}
+        if(saved&&insertedId)focusColumn(insertedId);
         if(!saved&&panel.isConnected){locks.forEach(({control,disabled})=>{control.disabled=disabled;});editor.focus();}
       } catch (error) {
         actions.status(friendlyError(error, "Beat is invalid"), "error"); editor.focus();
@@ -1975,10 +2019,9 @@ export function renderStoryView(
       if (type.value === "setVariable" && (event.ctrlKey || event.metaKey) && event.key === "Enter" && !event.defaultPrevented && !event.isComposing) { event.preventDefault(); if (!pending && !composing) commit.click(); }
     });
     const orderActions=()=>actionsRow.replaceChildren(...(screenType()?[commit,cancel]:[cancel,commit]));orderActions();type.addEventListener("change",orderActions);
-    dirtyDraft(panel,[type]);panel.append(heading,destination,labelled("Beat type",type),placement.host,editorHost,actionsRow,secondaryHost);list.prepend(panel);
+    dirtyDraft(panel,[type]);panel.append(heading,destination,labelled("Beat type",type),placement.host,fieldsHost,actionsRow,secondaryHost);
     // A new beat moves with the place the author chooses, until it is added.
     const place=():{body:BodyRef;position:Position}=>{try{return chosenLocation();}catch{return {body,position};}};
-    placement.host.addEventListener("change",()=>{const target=bodyList(place().body);if(target&&panel.parentElement!==target)target.prepend(panel);});
     const draft=keepDraft(key,{panel,sceneId:scene.id,place,read:()=>editor.read(),command:savedCommand,kind:()=>beatLabels[type.value as BeatPayload["type"]].toLowerCase(),editors:()=>[...typeDrafts.values()],primary:()=>editor.primary,
       // A new beat whose scene or branch left source has nowhere to go: only Discard draft resolves it.
       conflict:()=>{
@@ -1987,11 +2030,13 @@ export function renderStoryView(
         if(current.sourceConflict||at.type==="root"||current.beats.some(item=>item.id===at.branchId))return undefined;
         return {missing:"This beat's place is no longer in source."};
       },
-      detach:()=>{pendingMarker.remove();panel.remove();}});updatePendingMarker();
+      detach:()=>{panel.remove();if(selectedNewDraft===key){selectedNewDraft=undefined;if(editorHost?.isConnected){const current=storyScene(model,selectedSceneId);if(current)drawEditor(current);}}}});
     // A new beat is a draft from the moment it is added, so adding it is its first step.
-    draft.state=captureDraft(draft);startStep(draft,"new",undefined,draft.state);type.focus();
+    draft.state=captureDraft(draft);startStep(draft,"new",undefined,draft.state);
+    return key;
   };
 
+  { const scene = storyScene(model, selectedSceneId); if (scene && initialBeatId) selectBeat(scene, initialBeatId); }
   draw();
   return {
     host, treeHost,
@@ -1999,12 +2044,17 @@ export function renderStoryView(
       if (disposed) return;
       actions = nextActions; model = next;
       screenInsertion = actions.screenInsertion ? structuredClone(actions.screenInsertion) : screenInsertion;
-      selectedSceneId = storyScene(next, actions.sceneId ?? selectedSceneId)?.id;
-      selectedBeatId = beatId;
+      const sceneId = storyScene(next, actions.sceneId ?? selectedSceneId)?.id;
+      // A new target selects its beat; returning to Story keeps the selection.
+      if (sceneId !== selectedSceneId || beatId !== undefined) { selectedNewDraft = undefined; openOperation = undefined; }
+      selectedSceneId = sceneId;
+      const scene = storyScene(next, sceneId);
+      if (scene && beatId !== undefined) selectBeat(scene, beatId); else if (beatId !== undefined) selectedBeatId = beatId;
       draw();
       host.closest<HTMLElement>(".project-shell")?.setAttribute("data-writing-focus", String(writingFocus));
     },
     hasDrafts: sceneId => pendingDrafts(sceneId).length > 0,
+    draftCount: () => pendingDrafts().length,
     hasOpenForm: hasDraft,
     firstDraft: () => { const draft = pendingDrafts()[0]; return draft && { sceneId: draft.sceneId, ...(draft.beatId ? { beatId: draft.beatId } : {}) }; },
     busy: () => pendingWrites > 0 || settling !== undefined,
@@ -2016,8 +2066,6 @@ export function renderStoryView(
     ownsDraftField: target => target instanceof HTMLElement && !target.closest(".choice-new-scene") && [...beatDrafts.values()].some(draft => draft.panel.contains(target)),
     dispose: () => {
       disposed = true; closeText(); beatDrafts.clear(); steps.clear();
-      cancelBeatDrag?.();window.removeEventListener("loomlight-reset-layout",resetLayout);
-      layoutObservers.splice(0).forEach(o=>o.disconnect());
       mediaGeneration += 1;
       pendingImages.clear();
       for (const image of imageCache.values()) URL.revokeObjectURL(image.url);

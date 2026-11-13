@@ -3,7 +3,7 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import { Window } from "happy-dom";
 import { deriveScenePreview, hasSceneDraft, renderRecoverySurface, storyScene, type RecoveryReport, type SceneCommand, type SceneWorkspace } from "../src/scene-ui.js";
-import { renderStoryView } from "./story-controls-fixture.js";
+import { renderStoryView, selectBeat, storyEditor, trackColumn, withBodies } from "./story-controls-fixture.js";
 
 const tick = async (): Promise<void> => { await new Promise((resolve) => setTimeout(resolve, 0)); };
 function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } { let resolve!: (value: T) => void; const promise = new Promise<T>((accept) => { resolve = accept; }); return { promise, resolve }; }
@@ -72,7 +72,8 @@ function foundationModel(): SceneWorkspace {
     { id:"other", byteStart:70, byteEnd:100, protected:false, owner:{groupId:"group",branchId:"else"}, payload:{type:"dialogue",characterId:"alice",text:"False café 雪"} },
     { id:"return",byteStart:100,byteEnd:111,protected:false,payload:{type:"return"} },
   ] }], authoring:{...base.authoring,variables:[{id:"flag",technicalName:"flag",variableType:"bool",defaultValue:true}]} };
-  return model;
+  // Core gives every scene its bodies; the native fixture serves this model directly.
+  return withBodies(model);
 }
 
 test("nested child commits carry owner and retain input on stale/session refusal", async () => {
@@ -82,13 +83,12 @@ test("nested child commits carry owner and retain input on stale/session refusal
     status:()=>{}, resolution:{width:1280,height:720}, present:async()=>{throw Error("unexpected media")},
     apply:async command=>{ calls.push(command); throw Error(calls.length===1 ? "SOURCE_CONFLICT" : "STALE_SESSION"); },
   }).dispose;
-  let card = document.querySelector<HTMLElement>('[data-beat-id="child"]')!;
-  assert.ok(card.classList.contains("nested-dialogue"));
-  assert.equal(document.querySelectorAll(".conditional-branch").length, 2);
-  assert.ok(card.querySelector<HTMLButtonElement>(".beat-grip")!.disabled);
-  assert.ok([...card.querySelectorAll<HTMLButtonElement>(".beat-controls button")].some(button => button.textContent === "Move to…" && !button.disabled));
-  card.querySelector<HTMLButtonElement>(".beat-select")!.click();
-  card = document.querySelector<HTMLElement>('[data-beat-id="child"]')!;
+  const host = document.querySelector<HTMLElement>("#host")!;
+  // A nested child shows in Tracks once the Branch path opens its branch.
+  assert.equal(trackColumn(host, "child"), undefined);
+  const card = selectBeat(host, "child", "if");
+  assert.equal(trackColumn(host, "child")!.dataset.depth, "1");
+  assert.ok([...card.querySelectorAll<HTMLButtonElement>(".story-beat-menu button")].some(button => button.textContent === "Move to…" && !button.disabled));
   const text = card.querySelector<HTMLTextAreaElement>("textarea")!;
   assert.equal(card.querySelector<HTMLSelectElement>("select")!.disabled,false);
   text.value = "Retained café 雪"; text.dispatchEvent(new Event("input",{bubbles:true}));
@@ -129,36 +129,29 @@ test("root controls respect nested children and conditional insertion boundaries
     apply: async command => { calls.push(command); return model; },
   }).dispose;
   try {
-    const root = host.querySelector<HTMLElement>('[data-beat-id="root-one"]')!;
-    const controls = root.querySelectorAll<HTMLButtonElement>(".beat-controls button");
-    assert.equal(controls[0]!.disabled, false, "root moves over the whole condition as one immediate sibling");
-    assert.equal(controls[1]!.disabled, false, "root-to-root move stays available");
-    const grip = root.querySelector<HTMLButtonElement>(".beat-grip")!;
-    const child = host.querySelector<HTMLElement>('[data-beat-id="other"]')!;
-    document.elementFromPoint = () => child;
-    const pointer = (type: string, x: number): Event => new browser.PointerEvent(type, { button: 0, pointerId: 1, clientX: x, clientY: 20, bubbles: true }) as unknown as Event;
-    grip.dispatchEvent(pointer("pointerdown", 10));
-    window.dispatchEvent(pointer("pointermove", 30));
-    assert.equal(child.classList.contains("drop-before"), false);
-    window.dispatchEvent(pointer("pointerup", 30));
+    const menu = (label: string): HTMLButtonElement => [...storyEditor(host).querySelectorAll<HTMLButtonElement>(".story-beat-menu button")].find(button => button.textContent === label)!;
+    selectBeat(host, "root-one");
+    assert.equal(menu("Move up").disabled, false, "root moves over the whole condition as one immediate sibling");
+    assert.equal(menu("Move down").disabled, false, "root-to-root move stays available");
+    // Alt+Arrow on the Tracks column moves the node to the core-listed place.
+    trackColumn(host, "root-one")!.querySelector<HTMLButtonElement>(".story-track-beat")!.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", altKey: true, bubbles: true }));
     await tick();
-    assert.equal(calls.length, 0, "root drag must not cross a child");
-    for (const id of ["else", "child", "if-trivia", "else-trivia"]) {
-      host.querySelector<HTMLButtonElement>(`[data-beat-id="${id}"] .beat-select`)!.click();
-      const additions = host.querySelectorAll<HTMLButtonElement>(".provenance-row button:last-child");
-      assert.ok(additions.length > 0);
-      assert.ok([...additions].every(button => button.disabled), "Add change here cannot insert inside a branch");
-      assert.equal(host.querySelector(".new-beat"), null);
-      host.querySelector<HTMLButtonElement>(`[data-beat-id="${id}"] .beat-select`)!.click();
-    }
-    host.querySelector<HTMLButtonElement>('[data-beat-id="if"] .beat-select')!.click();
+    assert.deepEqual(calls.pop(), { type: "moveStoryNode", sceneId: "scene-one", expectedSourceRevision: model.scenes[0]!.sourceRevision, node: { type: "beat", beatId: "root-one" }, expectedBody: { type: "root" }, body: { type: "root" }, position: { type: "before", anchor: { type: "beat", beatId: "return" } } });
+    // Headers and trivia are not Tracks beats, so nothing inserts at them.
+    for (const id of ["else", "if-trivia", "else-trivia"]) assert.equal(trackColumn(host, id), undefined);
+    // Add change here inserts before the selected beat in its own body.
+    selectBeat(host, "child", "if");
+    host.querySelector<HTMLButtonElement>(".provenance-row button:last-child")!.click();
+    host.querySelector<HTMLButtonElement>(".new-beat .button.primary")!.click(); await tick();
+    assert.deepEqual(calls.pop()?.body, { type: "branch", groupId: "group", branchId: "if" });
+    selectBeat(host, "if");
     const safeAdd = host.querySelector<HTMLButtonElement>(".provenance-row button:last-child")!;
     assert.equal(safeAdd.disabled, false, "insertion before the whole group is safe");
     safeAdd.click();
     assert.ok(host.querySelector(".new-beat"));
     assert.equal(calls.length, 0);
     host.querySelector<HTMLButtonElement>(".new-beat .text-button")!.click();
-    host.querySelector<HTMLButtonElement>('[data-beat-id="root-one"] .beat-select')!.click();
+    selectBeat(host, "root-one");
     assert.equal(host.querySelector<HTMLButtonElement>(".provenance-row button:last-child")!.disabled, false, "insertion after the group stays available");
   } finally { dispose(); await browser.happyDOM.close(); }
 });
@@ -188,8 +181,8 @@ test("Scene authoring exposes hierarchy, every Beat, natural dialogue continuati
   assert.ok([...document.querySelectorAll("button")].some((item) => item.ariaLabel === "Move chapter Opening down"));
   assert.ok([...document.querySelectorAll("button")].some((item) => item.ariaLabel === "Move scene Arrival down"));
 
-  const dialogue = [...document.querySelectorAll("button")].find((item) => item.textContent?.startsWith("1. Dialogue"));
-  assert.ok(dialogue); dialogue.click();
+  const host = document.querySelector<HTMLElement>("#host")!;
+  selectBeat(host, "dialogue");
   const textarea = document.querySelector<HTMLTextAreaElement>("textarea"); assert.ok(textarea);
   textarea.value = "First line\nSecond line"; textarea.dispatchEvent(new window.Event("input", { bubbles: true }));
   assert.equal(hasSceneDraft(document), true);
@@ -207,8 +200,8 @@ test("Scene authoring exposes hierarchy, every Beat, natural dialogue continuati
   for (const label of ["Background", "Show Character", "Hide Character", "Change Appearance", "Placement", "Dialogue", "Narration", "Play Music", "Stop Music", "Play SFX", "Transition", "Set Variable", "Choice", "Jump", "Return"]) assert.ok(options.includes(label), label);
   click("Cancel");
 
-  const choice = [...document.querySelectorAll("button")].find((item) => item.textContent?.startsWith("3. Choice"));
-  assert.ok(choice); choice.click(); click("Create New Scene");
+  assert.equal(trackColumn(host, "choice")!.querySelector(".story-lane-0")!.textContent, "03");
+  selectBeat(host, "choice"); click("Create New Scene");
   const newFields = [...document.querySelectorAll(".choice-new-scene input")];
   assert.equal(newFields.length, 2);
   (newFields[0] as HTMLInputElement).value = "Stay"; (newFields[0] as HTMLInputElement).dispatchEvent(new window.Event("input", { bubbles: true }));
@@ -268,7 +261,7 @@ test("failed Beat validation preserves the draft and restores focus", async () =
     present: async (assetId, purpose) => ({ assetId, purpose, mimeType: "image/png", dataBase64: "", sha256: "a", byteCount: 24, width: 1, height: 1, cacheKey: `${assetId}:a` }),
     apply: async () => { throw new Error("Source revision changed"); },
   }).dispose;
-  const dialogue = [...document.querySelectorAll("button")].find((item) => item.textContent?.startsWith("1. Dialogue"))!; dialogue.click();
+  selectBeat(document.querySelector<HTMLElement>("#host")!, "dialogue");
   const textarea = document.querySelector<HTMLTextAreaElement>("textarea")!; textarea.value = "Unsaved words"; textarea.dispatchEvent(new window.Event("input", { bubbles: true }));
   click("Commit Beat"); await tick();
   assert.equal(document.querySelector<HTMLTextAreaElement>("textarea")?.value, "Unsaved words");
@@ -311,7 +304,7 @@ test("preview presents images through the bounded bridge and auditions audio onl
   assert.equal(calls.filter((call) => call.assetId === "bg").length, 1);
   assert.equal(calls.filter((call) => call.assetId === "appearance").length, 1);
   assert.match(document.querySelector(".preview-overlay")?.textContent ?? "", /Return to caller or main menu/);
-  assert.ok([...document.querySelectorAll("button")].some((item) => item.textContent?.startsWith("Edit Beat")));
+  assert.ok([...document.querySelectorAll("button")].some((item) => item.textContent === "Edit 01"));
   assert.ok([...document.querySelectorAll("button")].some((item) => item.textContent === "Add change here"));
   click("Audition current music"); await tick();
   assert.equal(calls.some((call) => call.assetId === "music" && call.purpose === "audioAudition"), true);
@@ -353,7 +346,7 @@ test("simultaneous Story preview and thumbnail keep their displayed URLs alive",
       present: async (assetId, purpose) => ({ assetId, purpose, mimeType: "image/png", dataBase64: "", sha256: "hash", byteCount: 1, width: 1, height: 1, cacheKey: `${assetId}:hash` }),
     }).dispose;
     await tick();
-    const images = [...document.querySelectorAll<HTMLImageElement>(".preview-background, .asset-thumbnail img")];
+    const images = [...document.querySelectorAll<HTMLImageElement>(".preview-background, .story-effects .asset-thumbnail img")];
     assert.equal(images.length, 2);
     for (const image of images) {
       assert.ok(image.src.startsWith("blob:"));
@@ -384,7 +377,7 @@ test("closeout: Add change here retains selected Beat anchor", async () => {
     present: async (assetId, purpose) => ({ assetId, purpose, mimeType: "image/png", dataBase64: "", sha256: "a", byteCount: 24, width: 1, height: 1, cacheKey: `${assetId}:a` }),
     apply: async (command) => { calls.push(command); return model; },
   }).dispose;
-  [...document.querySelectorAll("button")].find(item => item.textContent?.startsWith("2. Dialogue"))!.click();
+  selectBeat(document.querySelector<HTMLElement>("#host")!, "dialogue");
   click("Add change here"); document.querySelector<HTMLButtonElement>(".new-beat .button.primary")!.click(); await tick();
   assert.deepEqual(calls.at(-1)?.position, { type: "before", anchor: { type: "beat", beatId: "dialogue" } });
 });
@@ -410,24 +403,23 @@ test("Background resolves default-layer uncertainty after Custom Code without cl
 test("a beat draft stays attached across beats, scenes and remounts, and Commit sends only that beat",async()=>{
  const browser=installDom();const host=document.querySelector<HTMLElement>("#host")!,tree=document.querySelector<HTMLElement>("#tree")!;host.className="scene-workspace";
  const original=sceneModel(),calls:{command:SceneCommand;expected:unknown}[]=[];
- const card=(id:string)=>host.querySelector<HTMLElement>(`[data-beat-id="${id}"]`)!;
+ const card=(id:string)=>trackColumn(host,id)!;
  const sceneRow=(name:string)=>[...tree.querySelectorAll<HTMLElement>(".tree-scene-row")].find(row=>row.querySelector(".tree-scene-open")?.textContent===name)!;
  const actions={status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error("unused");},apply:async(command:SceneCommand,expected:unknown)=>{calls.push({command,expected});return original;}};
  const view=renderStoryView(host,tree,original,actions);
- card("dialogue").querySelector<HTMLButtonElement>(".beat-select")!.click();
- const text=card("dialogue").querySelector("textarea")!;text.value="Kept through navigation";text.dispatchEvent(new window.Event("input",{bubbles:true}));
+ const text=selectBeat(host,"dialogue").querySelector("textarea")!;text.value="Kept through navigation";text.dispatchEvent(new window.Event("input",{bubbles:true}));
  text.dispatchEvent(new window.Event("compositionstart"));assert.equal(await view.settle(),false);
  text.dispatchEvent(new window.Event("compositionend"));assert.equal(await view.settle(),true);
- card("choice").querySelector<HTMLButtonElement>(".beat-select")!.click();
- assert.equal(card("dialogue").querySelector("textarea"),null);assert.equal(card("dialogue").dataset.beatDraft,"true");assert.equal(sceneRow("Arrival").dataset.beatDraft,"true");
+ selectBeat(host,"choice");
+ assert.equal(text.isConnected,false);assert.equal(card("dialogue").dataset.beatDraft,"true");assert.equal(sceneRow("Arrival").dataset.beatDraft,"true");
  sceneRow("Garden").querySelector<HTMLButtonElement>(".tree-scene-open")!.click();await tick();
  assert.equal(view.hasDrafts("scene-one"),true);assert.equal(view.hasDrafts("scene-two"),false);
  sceneRow("Arrival").querySelector<HTMLButtonElement>(".tree-scene-open")!.click();await tick();
  // Returning from another workspace shows a fresh model; another edit moved the project revision.
  const moved={...original,projectRevision:"9".repeat(64)};
  view.update(moved,actions,"dialogue");
- assert.equal(card("dialogue").querySelector("textarea"),text);assert.equal(text.value,"Kept through navigation");assert.equal(calls.length,0);
- [...card("dialogue").querySelectorAll("button")].find(item=>item.textContent==="Commit Beat")!.click();await tick();
+ assert.equal(storyEditor(host).dataset.editorFor,"dialogue");assert.equal(storyEditor(host).querySelector("textarea"),text);assert.equal(text.value,"Kept through navigation");assert.equal(calls.length,0);
+ [...storyEditor(host).querySelectorAll("button")].find(item=>item.textContent==="Commit Beat")!.click();await tick();
  assert.equal(calls.length,1);assert.equal(calls[0]!.command.type,"updateBodyBeat");assert.equal(calls[0]!.command.beatId,"dialogue");
  assert.equal((calls[0]!.command.beat as {text:string}).text,"Kept through navigation");
  assert.equal((calls[0]!.expected as {projectRevision:string}).projectRevision,moved.projectRevision);
@@ -438,12 +430,12 @@ test("a valid beat draft shows on the stage while typing, and Cancel restores th
  const browser=installDom();const host=document.querySelector<HTMLElement>("#host")!,tree=document.querySelector<HTMLElement>("#tree")!;
  const view=renderStoryView(host,tree,sceneModel(),{status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error("unused");},apply:async()=>{throw Error("unused");}});
  const overlay=()=>host.querySelector(".preview-overlay.dialogue")?.textContent;
- host.querySelector<HTMLButtonElement>('[data-beat-id="dialogue"] .beat-select')!.click();assert.match(overlay()!,/Hello/);
- const text=host.querySelector<HTMLTextAreaElement>('[data-beat-id="dialogue"] textarea')!;text.focus();text.value="Draft line";text.dispatchEvent(new window.Event("input",{bubbles:true}));
+ selectBeat(host,"dialogue");assert.match(overlay()!,/Hello/);
+ const text=storyEditor(host).querySelector<HTMLTextAreaElement>("textarea")!;text.focus();text.value="Draft line";text.dispatchEvent(new window.Event("input",{bubbles:true}));
  await new Promise(resolve=>setTimeout(resolve,200));
  assert.match(overlay()!,/Draft line/);assert.equal(document.activeElement,text);
- [...host.querySelectorAll<HTMLButtonElement>('[data-beat-id="dialogue"] button')].find(item=>item.textContent==="Cancel")!.click();
- host.querySelector<HTMLButtonElement>('[data-beat-id="dialogue"] .beat-select')!.click();assert.match(overlay()!,/Hello/);
+ [...storyEditor(host).querySelectorAll<HTMLButtonElement>("button")].find(item=>item.textContent==="Cancel")!.click();
+ assert.match(overlay()!,/Hello/);assert.equal(storyEditor(host).querySelector("textarea")!.value,"Hello");
  view.dispose();await browser.happyDOM.close();
 });
 
@@ -451,7 +443,7 @@ test("a draft whose beat left source offers only Discard draft; a scene Story ca
  const browser=installDom();const host=document.querySelector<HTMLElement>("#host")!,tree=document.querySelector<HTMLElement>("#tree")!;
  const original=sceneModel(),actions={status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error("unused");},apply:async()=>original};
  const view=renderStoryView(host,tree,original,actions);
- const type=(text:string)=>{host.querySelector<HTMLButtonElement>('[data-beat-id="dialogue"] .beat-select')!.click();const field=host.querySelector<HTMLTextAreaElement>('[data-beat-id="dialogue"] textarea')!;field.value=text;field.dispatchEvent(new window.Event("input",{bubbles:true}));return field;};
+ const type=(text:string)=>{const field=selectBeat(host,"dialogue").querySelector<HTMLTextAreaElement>("textarea")!;field.value=text;field.dispatchEvent(new window.Event("input",{bubbles:true}));return field;};
  const visible=(scope:Element)=>[...scope.querySelectorAll("button")].filter(item=>!item.closest("[hidden]")).map(item=>item.textContent);
  const withScene=(change:(scene:SceneWorkspace["scenes"][number])=>SceneWorkspace["scenes"][number])=>({...original,scenes:original.scenes.map((scene,i)=>i?scene:change(scene))});
  // A scene Story cannot map has no beats to compare with: the draft keeps its own actions and is not a conflict.
@@ -460,10 +452,10 @@ test("a draft whose beat left source offers only Discard draft; a scene Story ca
  assert.deepEqual(visible(text.closest("[data-beat-draft-key]")!).slice(-2),["Cancel","Commit Beat"]);
  // Once the beat leaves source, the draft shows the comparison with no source text and only Discard draft.
  view.update(withScene(scene=>({...scene,beats:scene.beats.filter(beat=>beat.id!=="dialogue")})),actions);
- const lost=host.querySelector<HTMLElement>(".beats-list > [data-beat-draft-key]")!;assert.ok(lost.contains(text));
+ const lost=host.querySelector<HTMLElement>(".story-editor > [data-beat-draft-key]")!;assert.ok(lost.contains(text));
  assert.equal(lost.querySelector(".story-conflict > p")?.textContent,"This beat is no longer in source.");assert.deepEqual(visible(lost),["Discard draft"]);
  [...lost.querySelectorAll("button")].find(item=>item.textContent==="Discard draft")!.click();
- assert.equal(view.hasDrafts(),false);assert.equal(host.querySelector(".beats-list > [data-beat-draft-key]"),null);
+ assert.equal(view.hasDrafts(),false);assert.equal(host.querySelector(".story-editor > [data-beat-draft-key]"),null);
  view.dispose();await browser.happyDOM.close();
 });
 
@@ -471,18 +463,19 @@ test("an unsaved new beat moves with the place the author chooses",async()=>{
  const browser=installDom();const host=document.querySelector<HTMLElement>("#host")!,tree=document.querySelector<HTMLElement>("#tree")!;
  const view=renderStoryView(host,tree,foundationModel(),{status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error("unused");},apply:async()=>{throw Error("unused");}});
  const addBeat=()=>host.querySelector<HTMLButtonElement>('button[data-beat-opener="root"]')!.click();
- const branch=()=>host.querySelector<HTMLElement>('.story-branch-body[data-branch-id="if"]')!;
+ // The pending column sits at the chosen place in Tracks, with its branch open.
+ const pending=()=>[...host.querySelectorAll<HTMLElement>(".story-tracks > *")].map(item=>item.dataset.beatId??(item.classList.contains("story-track-pending")?"new":item.className));
  addBeat();const panel=host.querySelector<HTMLElement>(".new-beat")!;
  const body=panel.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;body.value="if";body.dispatchEvent(new window.Event("change",{bubbles:true}));
- assert.ok(branch().contains(panel));
- host.querySelector<HTMLButtonElement>('[data-beat-id="return"] .beat-select')!.click();
- assert.ok(branch().contains(panel));assert.equal(view.hasDrafts(),true);
+ assert.deepEqual(pending().slice(1,5),["if","story-track-mark story-track-entry","child","new"]);
+ selectBeat(host,"return");
+ assert.equal(panel.isConnected,false);assert.ok(pending().includes("new"));assert.equal(view.hasDrafts(),true);
  // The root place is free again, so Add Beat there starts a second draft.
- addBeat();assert.equal(host.querySelectorAll(".new-beat").length,2);
+ addBeat();assert.equal(pending().filter(item=>item==="new").length,2);assert.notEqual(host.querySelector(".new-beat"),panel);
  view.dispose();await browser.happyDOM.close();
 });
 
-test("adding a Beat saves once and returns a collapsed row without a second commit",async()=>{
+test("adding a Beat saves once and selects the added beat without a second commit",async()=>{
  const browser=installDom();let model=sceneModel();let calls=0;
  const dispose=renderStoryView(document.querySelector('#host')!,document.querySelector('#tree')!,model,{status:()=>{},resolution:{width:1920,height:1080},present:async(assetId,purpose)=>({assetId,purpose,mimeType:'image/png',dataBase64:'',sha256:'a',byteCount:1,cacheKey:'a'}),apply:async command=>{
   assert.equal(command.type,'insertBodyBeat');calls++;const scene=model.scenes[0]!;model={...model,scenes:[{...scene,beats:[...scene.beats,{id:'new',byteStart:100,byteEnd:120,protected:false,payload:{type:'narration',text:'New text'}}]},model.scenes[1]!]};return model;
@@ -490,11 +483,13 @@ test("adding a Beat saves once and returns a collapsed row without a second comm
  click('Add Beat');const type=document.querySelector<HTMLSelectElement>('.new-beat select')!;type.value='narration';type.dispatchEvent(new window.Event('change',{bubbles:true}));
  const text=document.querySelector<HTMLTextAreaElement>('.new-beat textarea')!;text.value='New text';text.dispatchEvent(new window.Event('input',{bubbles:true}));
  [...document.querySelectorAll<HTMLButtonElement>('.new-beat button')].find(b=>b.textContent==='Add Beat')!.click();await tick();
- assert.equal(calls,1);assert.equal(document.querySelector('.new-beat'),null);assert.equal(document.querySelector('.expanded-beat'),null);assert.ok([...document.querySelectorAll('.beat-select')].some(b=>b.textContent?.includes('New text')));
+ assert.equal(calls,1);assert.equal(document.querySelector('.new-beat'),null);
+ // The added beat stays selected with its accepted editor, and Tracks shows it.
+ assert.equal(storyEditor(document).dataset.editorFor,'new');assert.match(trackColumn(document,'new')!.textContent!,/New text/);
  dispose();await browser.happyDOM.close();
 });
 
-test("new Beat waits for its receipt, restores failure input, and focuses the saved row",async()=>{
+test("new Beat waits for its receipt, restores failure input, and focuses the added beat in Tracks",async()=>{
  const browser=installDom();const host=document.querySelector<HTMLElement>('#host')!;const model=sceneModel();const receipt=deferred<SceneWorkspace>();let calls=0,fail=true;let status='';
  const dispose=renderStoryView(host,document.querySelector('#tree')!,model,{status:text=>status=text,resolution:{width:1920,height:1080},present:async()=>{throw Error('unused');},apply:async()=>{calls++;if(fail)throw Error('Source changed');return receipt.promise;}}).dispose;
  click('Add Beat');const form=host.querySelector<HTMLElement>('.new-beat')!;const type=form.querySelector<HTMLSelectElement>('select')!;type.value='narration';type.dispatchEvent(new window.Event('change',{bubbles:true}));const text=form.querySelector<HTMLTextAreaElement>('textarea')!;text.value='Keep this text';text.dispatchEvent(new window.Event('input',{bubbles:true}));
@@ -502,79 +497,8 @@ test("new Beat waits for its receipt, restores failure input, and focuses the sa
  confirm.click();await tick();assert.match(status,/^Source changed Input retained\..*edit it in Source\.$/);assert.equal(confirm.disabled,false);assert.equal(text.value,'Keep this text');
  fail=false;confirm.click();confirm.click();cancel.click();assert.equal(calls,2);assert.equal(confirm.disabled,true);assert.equal(cancel.disabled,true);assert.equal(form.isConnected,true);
  const next=structuredClone(model);const beats=[...next.scenes[0]!.beats];beats.splice(1,0,{id:'added',byteStart:35,byteEnd:40,protected:false,payload:{type:'narration',text:'Keep this text'}});receipt.resolve({...next,scenes:next.scenes.map((scene,i)=>i?scene:{...scene,beats})});await tick();
- const row=host.querySelector<HTMLElement>('[data-beat-id="added"]')!;assert.ok(row);assert.equal(document.activeElement,row.querySelector('.beat-select'));assert.equal(row.querySelector('.expanded-beat'),null);assert.equal(host.querySelector('.new-beat'),null);assert.equal(status,'Saved');dispose();await browser.happyDOM.close();
+ const row=trackColumn(host,'added')!;assert.ok(row);assert.equal(document.activeElement,row.querySelector('.story-track-beat'));assert.equal(storyEditor(host).dataset.editorFor,'added');assert.equal(host.querySelector('.new-beat'),null);assert.equal(status,'Saved');dispose();await browser.happyDOM.close();
 });
-
-test("held Beat drag scrolls the visible writing panel edges and stops on cancellation", async () => {
-  const browser = installDom();
-  const host = document.querySelector<HTMLElement>("#host")!;
-  let writes = 0;
-  const frames = new Map<number, FrameRequestCallback>();
-  let frameId = 0;
-  window.requestAnimationFrame = callback => { frames.set(++frameId, callback); return frameId; };
-  window.cancelAnimationFrame = id => { frames.delete(id); };
-  const dispose = renderStoryView(host, document.querySelector("#tree")!, sceneModel(), {
-    status: () => {}, resolution: { width: 1920, height: 1080 },
-    present: async () => { throw Error("unused"); }, apply: async () => { writes++; return sceneModel(); },
-  }).dispose;
-  try {
-    const panel = host.querySelector<HTMLElement>(".beats-region")!;
-    const list = host.querySelector<HTMLElement>(".beats-list")!;
-    const toolbar = host.querySelector<HTMLElement>(".beats-toolbar")!;
-    const grip = host.querySelector<HTMLButtonElement>(".beat-grip")!;
-    const bounds = (top: number, bottom: number): DOMRect => ({ left: 0, right: 300, top, bottom, x: 0, y: top, width: 300, height: bottom - top, toJSON: () => ({}) });
-    panel.getBoundingClientRect = () => bounds(100, 400);
-    toolbar.getBoundingClientRect = () => bounds(100, 160);
-    list.getBoundingClientRect = () => bounds(160 - panel.scrollTop, 2160 - panel.scrollTop);
-    // Shipped CSS scrolls the panel; the full-height inner list cannot scroll.
-    Object.defineProperty(list, "scrollTop", { configurable: true, get: () => 0, set: () => {} });
-    panel.scrollTop = 150;
-    document.elementFromPoint = () => grip.closest(".beat-card");
-    const pointer = (type: string, y: number) => new browser.PointerEvent(type, { button: 0, pointerId: 1, clientX: 100, clientY: y, bubbles: true }) as unknown as Event;
-    const frame = () => { const [id, callback] = frames.entries().next().value!; frames.delete(id); callback(0); };
-    grip.dispatchEvent(pointer("pointerdown", 220));
-    window.dispatchEvent(pointer("pointermove", 390));
-    frame(); assert.equal(panel.scrollTop, 160, "held pointer at visible bottom must scroll down");
-    frame(); assert.equal(panel.scrollTop, 170, "holding still must keep scrolling");
-    window.dispatchEvent(pointer("pointermove", 170));
-    frame(); assert.equal(panel.scrollTop, 160, "visible top below sticky toolbar must scroll up");
-    window.dispatchEvent(pointer("pointermove", 410));
-    frame(); assert.equal(panel.scrollTop, 160, "outside panel must not scroll");
-    window.dispatchEvent(pointer("pointermove", 140));
-    frame(); assert.equal(panel.scrollTop, 160, "sticky toolbar must not count as a list edge");
-    window.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape" }));
-    assert.equal(frames.size, 0);
-    assert.equal(document.querySelector(".beat-drag-ghost"), null);
-    window.dispatchEvent(pointer("pointerup", 170));
-    assert.equal(writes, 0);
-  } finally { dispose(); await browser.happyDOM.close(); }
-});
-
-test("preview reset updates the divider and layout without a hidden slider",async()=>{
- const browser=installDom();const host=document.querySelector<HTMLElement>('#host')!;
- const dispose=renderStoryView(host,document.querySelector('#tree')!,sceneModel(),{status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error('unused');},apply:async()=>sceneModel()}).dispose;
- const divider=host.querySelector<HTMLElement>('.preview-divider')!;divider.dispatchEvent(new window.KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true}));assert.equal(divider.getAttribute('aria-valuenow'),'36');
- window.dispatchEvent(new window.Event('loomlight-reset-layout'));assert.equal(divider.getAttribute('aria-valuenow'),'34');assert.equal(host.querySelector<HTMLElement>('.scene-stack')!.style.getPropertyValue('--preview-share'),'34fr');assert.equal(host.querySelector('input[type="range"]'),null);dispose();await browser.happyDOM.close();
-});
-
-test("pointer Beat reorder cancels outside, on Escape and across protected boundaries",async()=>{
- const browser=installDom();const host=document.querySelector<HTMLElement>('#host')!;let model=sceneModel();
- const beats=[...model.scenes[0]!.beats];beats.splice(1,0,{id:'narration',byteStart:35,byteEnd:40,protected:false,payload:{type:'narration',text:'Second'}});beats[2]={...beats[2]!,byteStart:40};model={...model,scenes:model.scenes.map((scene,i)=>i?scene:{...scene,beats})};
- const calls:SceneCommand[]=[];const dispose=renderStoryView(host,document.querySelector('#tree')!,model,{status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error('unused');},apply:async command=>{calls.push(command);return model;}}).dispose;
- const grip=host.querySelector<HTMLButtonElement>('.beat-grip')!;const target=host.querySelector<HTMLElement>('[data-beat-id="narration"]')!;
- let hit:Element|null=target;document.elementFromPoint=()=>hit;
- const pointer=(type:string,x:number)=>new browser.PointerEvent(type,{button:0,pointerId:1,clientX:x,clientY:20,bubbles:true}) as unknown as Event;
- grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));assert.ok(target.classList.contains('drop-after'));window.dispatchEvent(new window.KeyboardEvent('keydown',{key:'Escape'}));window.dispatchEvent(pointer('pointerup',30));assert.equal(calls.length,0);assert.equal(document.querySelector('.beat-drag-ghost'),null);
- hit=null;grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));window.dispatchEvent(pointer('pointerup',30));assert.equal(calls.length,0);
- hit=host.querySelector('[data-beat-id="choice"]');grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));window.dispatchEvent(pointer('pointerup',30));assert.equal(calls.length,0);
- hit=target;for(const cancel of ['pointercancel','blur','lostpointercapture']){grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));if(cancel==='lostpointercapture')grip.dispatchEvent(pointer(cancel,30));else window.dispatchEvent(cancel==='blur'?new window.Event('blur'):pointer(cancel,30));window.dispatchEvent(pointer('pointerup',30));assert.equal(calls.length,0);assert.equal(document.querySelector('.beat-drag-ghost'),null);}
- // A pending new beat does not block moving another beat; the drop moves the whole node.
- click('Add Beat');const form=host.querySelector<HTMLElement>('.new-beat')!;form.dataset.unsubmitted='true';
- hit=target;grip.dispatchEvent(pointer('pointerdown',10));window.dispatchEvent(pointer('pointermove',30));window.dispatchEvent(pointer('pointerup',30));await tick();assert.equal(calls.length,1);
- assert.equal(calls[0]!.type,'moveStoryNode');assert.deepEqual(calls[0]!.node,{type:'beat',beatId:'dialogue'});assert.deepEqual(calls[0]!.position,{type:'before',anchor:{type:'beat',beatId:'choice'}});
- assert.equal(grip.draggable,false);dispose();await browser.happyDOM.close();
-});
-
 
 test("shipped source-foundation native driver completes against strict renderer fixture", async () => {
   const browser = installDom();
