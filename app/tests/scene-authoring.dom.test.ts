@@ -3,7 +3,7 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import { Window } from "happy-dom";
 import { deriveScenePreview, hasSceneDraft, renderRecoverySurface, storyScene, type RecoveryReport, type SceneBeat, type SceneCommand, type SceneWorkspace } from "../src/scene-ui.js";
-import { renderStoryView, selectBeat, storyEditor, trackColumn, withBodies } from "./story-controls-fixture.js";
+import { pickKind, renderStoryView, selectBeat, storyEditor, trackColumn, withBodies } from "./story-controls-fixture.js";
 
 const tick = async (): Promise<void> => { await new Promise((resolve) => setTimeout(resolve, 0)); };
 function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } { let resolve!: (value: T) => void; const promise = new Promise<T>((accept) => { resolve = accept; }); return { promise, resolve }; }
@@ -195,12 +195,11 @@ test("Scene authoring exposes hierarchy, every Beat, natural dialogue continuati
   assert.equal(status, "Saved");
   assert.match(document.body.textContent ?? "", /Empty dialogue/);
 
+  // Add a beat offers every kind Story can add; Escape closes it without adding.
   click("+ Add beat");
-  const type = [...document.querySelectorAll("label")].find((item) => item.firstElementChild?.textContent === "Beat type")?.querySelector("select");
-  assert.ok(type);
-  const options = [...type.options].map((option) => option.textContent);
-  for (const label of ["Background", "Show Character", "Hide Character", "Change Appearance", "Placement", "Dialogue", "Narration", "Play Music", "Stop Music", "Play SFX", "Transition", "Set Variable", "Choice", "Jump", "Return"]) assert.ok(options.includes(label), label);
-  click("Cancel");
+  const dialog = document.querySelector<HTMLElement>(".story-add-beat"); assert.ok(dialog);
+  assert.deepEqual([...dialog.querySelectorAll(".story-result")].map(row => row.textContent), ["Dialogue", "Narration", "Background", "Show character", "Hide character", "Change appearance", "Move character", "Transition", "Play music", "Stop music", "Sound effect", "Choice", "Condition", "Call scene", "Jump", "Return", "Set variable"]);
+  dialog.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true })); assert.equal(document.querySelector(".story-add-beat"), null); assert.equal(document.querySelector(".new-beat"), null);
 
   assert.equal(trackColumn(host, "choice")!.querySelector(".story-lane-0")!.textContent, "03");
   selectBeat(host, "choice"); click("Create New Scene");
@@ -267,7 +266,8 @@ test("failed Beat validation preserves the draft and restores focus", async () =
   const textarea = document.querySelector<HTMLTextAreaElement>("textarea")!; textarea.value = "Unsaved words"; textarea.dispatchEvent(new window.Event("input", { bubbles: true }));
   click("Commit Beat"); await tick();
   assert.equal(document.querySelector<HTMLTextAreaElement>("textarea")?.value, "Unsaved words");
-  assert.equal(document.activeElement, document.querySelector(".expanded-beat select"));
+  // Focus returns to the text the author was writing.
+  assert.ok(document.activeElement === document.querySelector(".expanded-beat textarea"));
   assert.match(status, /^Source revision changed Input retained\..*edit it in Source\.$/);
 });
 
@@ -446,7 +446,8 @@ test("a draft whose beat left source offers only Discard draft; a scene Story ca
  const original=sceneModel(),actions={status:()=>{},resolution:{width:1920,height:1080},present:async()=>{throw Error("unused");},apply:async()=>original};
  const view=renderStoryView(host,tree,original,actions);
  const type=(text:string)=>{const field=selectBeat(host,"dialogue").querySelector<HTMLTextAreaElement>("textarea")!;field.value=text;field.dispatchEvent(new window.Event("input",{bubbles:true}));return field;};
- const visible=(scope:Element)=>[...scope.querySelectorAll("button")].filter(item=>!item.closest("[hidden]")).map(item=>item.textContent);
+ // A closed menu's options are not shown.
+ const visible=(scope:Element)=>[...scope.querySelectorAll("button")].filter(item=>!item.closest("[hidden]")&&!item.closest("details:not([open]) > :not(summary)")).map(item=>item.textContent);
  const withScene=(change:(scene:SceneWorkspace["scenes"][number])=>SceneWorkspace["scenes"][number])=>({...original,scenes:original.scenes.map((scene,i)=>i?scene:change(scene))});
  // A scene Story cannot map has no beats to compare with: the draft keeps its own actions and is not a conflict.
  let text=type("Waiting");view.update(withScene(scene=>({...scene,sourceConflict:true,beats:[],bodies:[]})),actions);
@@ -467,13 +468,18 @@ test("an unsaved new beat moves with the place the author chooses",async()=>{
  const addBeat=()=>host.querySelector<HTMLButtonElement>('button[data-beat-opener="root"]')!.click();
  // The pending column sits at the chosen place in Tracks, with its branch open.
  const pending=()=>[...host.querySelectorAll<HTMLElement>(".story-tracks > *")].map(item=>item.dataset.beatId??(item.classList.contains("story-track-pending")?"new":item.className));
- addBeat();const panel=host.querySelector<HTMLElement>(".new-beat")!;
- const body=panel.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;body.value="if";body.dispatchEvent(new window.Event("change",{bubbles:true}));
+ addBeat();const panel=pickKind(host,"Narration");
+ // Move to changes only where the unadded beat goes; nothing is sent.
+ panel.querySelector<HTMLElement>(".story-beat-menu > summary")!.click();[...panel.querySelectorAll<HTMLButtonElement>("button")].find(item=>item.textContent==="Move to…")!.click();
+ const places=host.querySelector<HTMLElement>(".story-move")!;[...places.querySelectorAll<HTMLElement>("[role=treeitem]")].find(item=>item.textContent==="▸If flag")!.click();
+ [...places.querySelectorAll<HTMLElement>("[role=treeitem]")].find(item=>item.textContent==='○End of "If flag"')!.click();
+ [...places.querySelectorAll<HTMLButtonElement>("button")].find(item=>item.textContent==="Move")!.click();await tick();
+ assert.equal(places.isConnected,false);assert.equal(panel.querySelector(".story-where dd")!.textContent,'End of "If flag"');
  assert.deepEqual(pending().slice(1,5),["if","story-track-mark story-track-entry","child","new"]);
  selectBeat(host,"return");
  assert.equal(panel.isConnected,false);assert.ok(pending().includes("new"));assert.equal(view.hasDrafts(),true);
  // The root place is free again, so Add Beat there starts a second draft.
- addBeat();assert.equal(pending().filter(item=>item==="new").length,2);assert.notEqual(host.querySelector(".new-beat"),panel);
+ addBeat();pickKind(host,"Narration");assert.equal(pending().filter(item=>item==="new").length,2);assert.notEqual(host.querySelector(".new-beat"),panel);
  view.dispose();await browser.happyDOM.close();
 });
 
@@ -482,7 +488,7 @@ test("adding a Beat saves once and selects the added beat without a second commi
  const dispose=renderStoryView(document.querySelector('#host')!,document.querySelector('#tree')!,model,{status:()=>{},resolution:{width:1920,height:1080},present:async(assetId,purpose)=>({assetId,purpose,mimeType:'image/png',dataBase64:'',sha256:'a',byteCount:1,cacheKey:'a'}),apply:async command=>{
   assert.equal(command.type,'insertBodyBeat');calls++;const scene=model.scenes[0]!;model={...model,scenes:[{...scene,beats:[...scene.beats,{id:'new',byteStart:100,byteEnd:120,protected:false,payload:{type:'narration',text:'New text'}}]},model.scenes[1]!]};return model;
  }}).dispose;
- click('+ Add beat');const type=document.querySelector<HTMLSelectElement>('.new-beat select')!;type.value='narration';type.dispatchEvent(new window.Event('change',{bubbles:true}));
+ click('+ Add beat');pickKind(document,'Narration');
  const text=document.querySelector<HTMLTextAreaElement>('.new-beat textarea')!;text.value='New text';text.dispatchEvent(new window.Event('input',{bubbles:true}));
  [...document.querySelectorAll<HTMLButtonElement>('.new-beat button')].find(b=>b.textContent==='Add Beat')!.click();await tick();
  assert.equal(calls,1);assert.equal(document.querySelector('.new-beat'),null);
@@ -494,7 +500,7 @@ test("adding a Beat saves once and selects the added beat without a second commi
 test("new Beat waits for its receipt, restores failure input, and focuses the added beat in Tracks",async()=>{
  const browser=installDom();const host=document.querySelector<HTMLElement>('#host')!;const model=sceneModel();const receipt=deferred<SceneWorkspace>();let calls=0,fail=true;let status='';
  const dispose=renderStoryView(host,document.querySelector('#tree')!,model,{status:text=>status=text,resolution:{width:1920,height:1080},present:async()=>{throw Error('unused');},apply:async()=>{calls++;if(fail)throw Error('Source changed');return receipt.promise;}}).dispose;
- click('+ Add beat');const form=host.querySelector<HTMLElement>('.new-beat')!;const type=form.querySelector<HTMLSelectElement>('select')!;type.value='narration';type.dispatchEvent(new window.Event('change',{bubbles:true}));const text=form.querySelector<HTMLTextAreaElement>('textarea')!;text.value='Keep this text';text.dispatchEvent(new window.Event('input',{bubbles:true}));
+ click('+ Add beat');const form=pickKind(host,'Narration');const text=form.querySelector<HTMLTextAreaElement>('textarea')!;text.value='Keep this text';text.dispatchEvent(new window.Event('input',{bubbles:true}));
  const confirm=[...form.querySelectorAll('button')].find(b=>b.textContent==='Add Beat')!;const cancel=[...form.querySelectorAll('button')].find(b=>b.textContent==='Cancel')!;
  confirm.click();await tick();assert.match(status,/^Source changed Input retained\..*edit it in Source\.$/);assert.equal(confirm.disabled,false);assert.equal(text.value,'Keep this text');
  fail=false;confirm.click();confirm.click();cancel.click();assert.equal(calls,2);assert.equal(confirm.disabled,true);assert.equal(cancel.disabled,true);assert.equal(form.isConnected,true);

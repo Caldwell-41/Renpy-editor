@@ -30,10 +30,11 @@ function setup(overrides: Partial<SceneActions> = {}, model = fixture()) {
   });
   return { host, view, commands, resolutions, messages, close: async () => { view.dispose(); await browser.happyDOM.close(); } };
 }
+// + Add beat opens Add a beat; picking a screen kind opens its new beat draft.
 function openNew(host: HTMLElement, type: string) {
   button(host, "+ Add beat").click();
-  const panel = host.querySelector<HTMLElement>(".new-beat")!;
-  const select = panel.querySelector<HTMLSelectElement>("select")!; select.value = type; select.dispatchEvent(new Event("change", { bubbles: true })); return panel;
+  host.querySelector<HTMLButtonElement>(`.story-add-beat [data-insert-kind="${type}"]`)!.click();
+  return host.querySelector<HTMLElement>(".new-beat")!;
 }
 
 test("Story Show picker resolves only owned Panels and retains captured revisions after a refused Apply", async () => {
@@ -149,7 +150,7 @@ test("Use in Story offers an explicit screen Beat action with the selected panel
   try {
     button(s.host,"Add screen Beat").click();await tick();
     const draft=s.host.querySelector<HTMLElement>(".new-beat")!;
-    assert.equal(draft.querySelector<HTMLSelectElement>("select")!.value,"showScreen");
+    assert.equal(draft.dataset.beatType,"showScreen");
     assert.equal(draft.querySelector<HTMLSelectElement>('[aria-label="Panel screen"]')!.value,binding.screenId);
     assert.deepEqual(s.commands,[]);
   } finally {await s.close();}
@@ -211,15 +212,16 @@ test("Cancel and Escape return focus to the visible Story draft opener",async()=
  for(const entry of ["root","screen","branch"])for(const exit of ["cancel","escape"]){
   const s=setup({},entry==="branch"?storyFixture():fixture());
   try{
-   const caption=entry==="branch"?"Add Beat to If":entry==="screen"?"Add screen Beat":"+ Add beat";
+   const caption=entry==="branch"?"Add a beat to If flag":entry==="screen"?"Add screen Beat":"+ Add beat";
    if(entry==="branch")selectBeat(s.host,"if");
-   const opener=button(s.host,caption);opener.focus();opener.click();await tick();
-   const draft=s.host.querySelector<HTMLElement>(".new-beat")!;
-   const type=draft.querySelector<HTMLSelectElement>("select")!;type.value="showScreen";type.dispatchEvent(new Event("change",{bubbles:true}));
+   const opener=[...s.host.querySelectorAll<HTMLButtonElement>("button")].find(item=>item.textContent===caption||item.getAttribute("aria-label")===caption)!;opener.focus();opener.click();await tick();
+   // + Add beat and a branch's + Beat open Add a beat; Add screen Beat opens its draft directly.
+   if(entry!=="screen")s.host.querySelector<HTMLButtonElement>('.story-add-beat [data-insert-kind="showScreen"]')!.click();
+   const draft=s.host.querySelector<HTMLElement>(".new-beat")!;assert.equal(draft.dataset.beatType,"showScreen");
    if(exit==="cancel"){const cancel=button(draft,"Cancel");cancel.focus();cancel.click();}
    else{const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.focus();position.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true,cancelable:true}));}
    // The screen opener sits under the closed More menu, so focus returns to More.
-   const restored=entry==="screen"?s.host.querySelector(".story-more > summary"):button(s.host,caption);
+   const restored=entry==="screen"?s.host.querySelector(".story-more > summary"):[...s.host.querySelectorAll<HTMLButtonElement>("button")].find(item=>item.textContent===caption||item.getAttribute("aria-label")===caption);
    assert.ok(document.activeElement===restored,`${entry} ${exit} must restore the recreated opener`);
    assert.equal(s.host.querySelector(".new-beat"),null);assert.equal(s.commands.length,0);
   }finally{await s.close();}
@@ -297,7 +299,7 @@ test("retained placement does not clear payload edits or a refused Add",async()=
 
 test("incomplete placement stays in its retained new beat draft",async()=>{
  for(const next of ["confirm placement","ordinary Beat"]){
- const model=fixture(),scene=model.scenes[0]!;
+ const base=fixture(),model:SceneWorkspace={...base,scenes:[{...base.scenes[0]!,beats:[base.scenes[0]!.beats[0]!,{id:"later",byteStart:30,byteEnd:40,protected:false,payload:{type:"narration",text:"Later."}},base.scenes[0]!.beats[1]!]}]},scene=model.scenes[0]!;
  const original:ScreenInsertion={sceneId:scene.id,body:{type:"root"},position:{type:"before",anchor:{type:"beat",beatId:"end"}},expectedSourceRevision:"old-source"};
  let insertion=structuredClone(original);
  const s=setup({screenHintKind:"dialog",screenInsertion:original,rememberScreenInsertion:value=>{insertion=structuredClone(value);}},model);s.host.classList.add("scene-workspace");
@@ -310,9 +312,12 @@ test("incomplete placement stays in its retained new beat draft",async()=>{
    const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));
    assert.equal(hasSceneDraft(s.host),false);assert.equal(await s.view.settle(),true);assert.equal(insertion.expectedSourceRevision,scene.sourceRevision);
   }else{
-   const type=draft.querySelector<HTMLSelectElement>("select")!;type.value="narration";type.dispatchEvent(new Event("change",{bubbles:true}));
-   draft.querySelector<HTMLTextAreaElement>("textarea")!.value="Ordinary Beat";button(draft,"Add Beat").click();await tick();
+   // An ordinary beat elsewhere is not blocked by the screen draft's incomplete placement.
+   s.host.querySelector<HTMLButtonElement>('[data-beat-opener="after:line"]')!.click();s.host.querySelector<HTMLButtonElement>('.story-add-beat [data-insert-kind="narration"]')!.click();
+   const ordinary=s.host.querySelector<HTMLElement>(".story-editor .new-beat")!;assert.notEqual(ordinary,draft);
+   ordinary.querySelector<HTMLTextAreaElement>("textarea")!.value="Ordinary Beat";button(ordinary,"Add Beat").click();await tick();
    assert.equal(s.commands.length,1,"A hidden incomplete screen placement must not block an ordinary Beat write");
+   s.host.querySelector<HTMLButtonElement>('.story-track-pending > .story-track-beat')!.click();
   }
   button(draft,"Cancel").click();assert.deepEqual(insertion,original);assert.equal(s.commands.length,next==="confirm placement"?0:1);
  }finally{await s.close();}
@@ -345,7 +350,7 @@ test("later screen drafts and cancellation retain the last accepted placement an
   const dialogTarget:ResolvedScreenTarget={...target,binding:dialogBinding,kind:"dialog",blocking:true,effects:{...target.effects,unknown:false,shownScreens:[],assignedVariables:[],hiddenScreens:[],finishesInteraction:true}};
   let remembered=structuredClone(original),writes=0;
   const s=setup({screenInsertion:original,rememberScreenInsertion:value=>{remembered=structuredClone(value);},screenCatalog:async()=>({...catalog,owned:[...catalog.owned,{...catalog.owned[2]!,id:dialogBinding.screenId,name:dialogBinding.sourceName,kind:"dialog"}]}),resolveScreenTarget:async value=>value.screenId===dialogBinding.screenId?dialogTarget:target,apply:async()=>{writes++;return {...model,scenes:[{...scene,sourceRevision:"accepted-source"}]};}},model);
-  const open=async()=>{button(s.host,"Add screen Beat").click();await tick();const draft=s.host.querySelector<HTMLElement>(".new-beat")!;const select=draft.querySelector<HTMLSelectElement>("select")!;select.value=type;select.dispatchEvent(new Event("change",{bubbles:true}));await tick();return draft;};
+  const open=async()=>{const draft=openNew(s.host,type);await tick();return draft;};
   try{
    const first=await open(),position=first.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));button(first,"Add Beat").click();await tick();
    assert.equal(first.isConnected,false);const accepted=structuredClone(remembered);assert.equal(accepted.expectedSourceRevision,"accepted-source");

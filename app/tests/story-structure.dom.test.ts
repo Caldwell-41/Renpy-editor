@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
-import { buildConditionEditor } from "../src/story-condition-editor.js";
+import { buildRuleBuilder } from "../src/story-condition-editor.js";
 import { deriveScenePreview, hasSceneDraft, type SceneCommand, type SceneWorkspace, type StoryTarget } from "../src/scene-ui.js";
 import { renderBranches, type FlowBody } from "../src/branches-ui.js";
-import { flagCondition, openBranch, selectBeat, storyEditor, storyFixture, renderStoryView, trackColumn } from "./story-controls-fixture.js";
+import { chooseIn, flagCondition, openBranch, pickKind, press, selectBeat, storyEditor, storyFixture, renderStoryView, trackColumn, type } from "./story-controls-fixture.js";
 import { shorten } from "../src/story-tracks.js";
 const tick = async (): Promise<void> => { await new Promise(resolve => setTimeout(resolve, 0)); };
 function setup(apply?: (command: SceneCommand) => Promise<SceneWorkspace>, fixture = storyFixture(3)) {
@@ -17,16 +17,45 @@ function button(host: ParentNode, text: string): HTMLButtonElement { const found
 function choose(host: ParentNode, aria: string, value: string): HTMLSelectElement { const control = host.querySelector<HTMLSelectElement>(`select[aria-label="${aria}"]`)!; assert.ok(control, aria); control.value = value; control.dispatchEvent(new Event("change", { bubbles: true })); return control; }
 function textarea(host: ParentNode): HTMLTextAreaElement { return storyEditor(host).querySelector<HTMLTextAreaElement>("textarea")!; }
 
-test("full condition builder hydrates All/Any/Not, exact values and boolean comparison operands without flattening", async () => {
-  const s = setup(); const expression = { type: "and" as const, left: { type: "not" as const, operand: { type: "variable" as const, variableId: "flag", variableType: "bool" as const } }, right: { type: "or" as const, left: { type: "compare" as const, operator: "equal" as const, left: { type: "bool" as const, value: true }, right: { type: "not" as const, operand: { type: "bool" as const, value: false } } }, right: { type: "compare" as const, operator: "greaterEqual" as const, left: { type: "variable" as const, variableId: "trust", variableType: "int" as const }, right: { type: "int" as const, value: "9223372036854775807" } } } };
-  const editor = buildConditionEditor(s.model.authoring.variables, { status: "supported", expression }); document.body.append(editor.host); assert.deepEqual(editor.read().expression, expression); await s.close();
+test("rule builder reads variable rules, keeps half-typed numbers and leaves a test it cannot show as written", async () => {
+  const s = setup(); const variables = s.model.authoring.variables;
+  const trust = { type: "variable" as const, variableId: "trust", variableType: "int" as const }, flag = { type: "variable" as const, variableId: "flag", variableType: "bool" as const };
+  const original = { status: "supported" as const, expression: { type: "and" as const, left: { type: "and" as const, left: { type: "compare" as const, operator: "greaterEqual" as const, left: trust, right: { type: "int" as const, value: "9223372036854775807" } }, right: flag }, right: { type: "compare" as const, operator: "notEqual" as const, left: { type: "variable" as const, variableId: "name", variableType: "string" as const }, right: { type: "string" as const, value: "Bec" } } } };
+  const builder = buildRuleBuilder(variables, original, { keyword: "if", label: "If", empty: "", required: true }); document.body.append(builder.host);
+  // Untouched, it reads back the exact condition from source.
+  assert.equal(builder.read(), original); assert.equal(builder.host.querySelector(".story-rule-code")!.textContent, 'if trust >= 9223372036854775807 and flag and name != "Bec":');
+  const radio = (label: string, index: number): HTMLButtonElement => [...builder.host.querySelectorAll<HTMLElement>(".story-rule")[index]!.querySelectorAll<HTMLButtonElement>("[role=radio]")].find(item => item.textContent === label || item.getAttribute("aria-label") === label)!;
+  radio("is at most", 0).click(); radio("is false", 1).click(); [...builder.host.querySelectorAll<HTMLButtonElement>("[role=radio]")].find(item => item.textContent === "Any")!.click();
+  const value = builder.host.querySelector<HTMLInputElement>('input[aria-label="If rule 1 value"]')!;
+  value.value = "-"; value.dispatchEvent(new Event("input", { bubbles: true }));
+  assert.equal(value.hasAttribute("aria-invalid"), false, "Typing never marks a half-typed number");
+  value.dispatchEvent(new Event("blur")); assert.equal(value.getAttribute("aria-invalid"), "true"); assert.throws(() => builder.read()); assert.equal(value.value, "-");
+  value.value = "1.5"; value.dispatchEvent(new Event("input", { bubbles: true })); assert.equal(value.hasAttribute("aria-invalid"), false);
+  assert.deepEqual(builder.read(), { status: "supported", expression: { type: "or", left: { type: "or", left: { type: "compare", operator: "lessEqual", left: trust, right: { type: "decimal", value: "1.5" } }, right: { type: "not", operand: flag } }, right: original.expression.right } });
+  // Removing a rule leaves the others; the last rule cannot leave a branch without a test.
+  for (const remove of [...builder.host.querySelectorAll<HTMLButtonElement>('button[aria-label^="Remove rule"]')].reverse()) remove.click();
+  assert.throws(() => builder.read(), /Add a rule/);
+  // Mixed All and Any stays as written, with Edit in Source.
+  let opened = 0;
+  const mixed = { status: "supported" as const, expression: { type: "and" as const, left: flag, right: { type: "or" as const, left: flag, right: { type: "not" as const, operand: flag } } } };
+  const readOnly = buildRuleBuilder(variables, mixed, { keyword: "elif", label: "Else if", empty: "", required: true, source: () => { opened++; }, caption: "flag and (flag or not flag)" });
+  assert.equal(readOnly.editable, false); assert.equal(readOnly.read(), mixed); assert.equal(readOnly.host.querySelector("input, select"), null);
+  [...readOnly.host.querySelectorAll<HTMLButtonElement>("button")].find(item => item.textContent === "Edit in Source")!.click(); assert.equal(opened, 1);
+  await s.close();
 });
 
-test("create Condition submits the root body and full typed boolean combinations in one command", async () => {
+test("create Condition writes the rule builder's typed test at the root place in one command", async () => {
   const s = setup(); button(s.host, "Add Condition").click(); const panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Add Condition"]')!;
-  choose(panel, "Condition type", "and"); const children = panel.querySelectorAll<HTMLElement>(".condition-combination > .condition-expression"); choose(children[0]!, "Condition type", "not"); choose(children[1]!, "Condition type", "bool");
+  assert.deepEqual([...panel.querySelectorAll(".story-where dd")].map(item => item.textContent), ["Before 05 Return", "Arrival", "04 Narration"]);
+  // The form starts with one rule on the first variable; a second rule joins it.
+  press(panel, "+ Add rule"); const rule = panel.querySelectorAll<HTMLElement>(".story-rule")[1]!;
+  rule.querySelector<HTMLElement>(".story-variable-picker > summary")!.click(); chooseIn(rule, "If rule 2 variable", "trust, whole number");
+  chooseIn(panel, "If match", "Any"); type(panel.querySelector<HTMLInputElement>('input[aria-label="If rule 2 value"]')!, "3");
+  assert.equal(panel.querySelector(".story-rule-code")!.textContent, "if flag or trust >= 3:");
   (panel.querySelector<HTMLInputElement>('input[aria-label="Include Otherwise"]')!).checked = true; button(panel, "Create Condition").click(); await tick();
-  const command = s.calls[0]!.command; assert.equal(command.type, "insertCondition"); assert.deepEqual(command.body, { type: "root" }); assert.equal((command.condition as {expression:{type:string}}).expression.type, "and"); assert.equal(command.otherwise, true); assert.deepEqual(s.calls[0]!.expected, { projectRevision: "project", sourceMapRevision: "map" }); await s.close();
+  const command = s.calls[0]!.command; assert.equal(command.type, "insertCondition"); assert.deepEqual(command.body, { type: "root" }); assert.equal(command.otherwise, true); assert.deepEqual(s.calls[0]!.expected, { projectRevision: "project", sourceMapRevision: "map" });
+  assert.deepEqual(command.condition, { status: "supported", expression: { type: "or", left: { type: "variable", variableId: "flag", variableType: "bool" }, right: { type: "compare", operator: "greaterEqual", left: { type: "variable", variableId: "trust", variableType: "int" }, right: { type: "int", value: "3" } } } });
+  await s.close();
 });
 
 test("Else If insertion exposes first-match order and captures containing group parent", async () => {
@@ -42,21 +71,40 @@ test("nested Otherwise creation and condition editing use group-parent qualifica
   const editor = storyEditor(s.host).querySelector<HTMLElement>('.story-operation[aria-label="Edit Condition"]')!; button(editor, "Apply condition").click(); await tick(); assert.deepEqual(s.calls[1]!.command.expectedBody, { type: "branch", groupId: "group", branchId: "if" }); await s.close();
 });
 
-test("explicit leaf move shows destination and retains every field on core refusal", async () => {
-  const s = setup(async () => { throw Error("Cannot safely promote inline comments. Use Source."); }); button(selectBeat(s.host, "a", "if"), "Move to…").click(); const panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Move story content"]')!;
-  choose(panel, "Destination body", "otherwise"); button(panel, "Move to destination").click(); await tick();
+test("Move to opens on the beat's own place, leaves its place out and keeps the choice on core refusal", async () => {
+  const s = setup(async () => { throw Error("Cannot safely promote inline comments. Use Source."); }); button(selectBeat(s.host, "a", "if"), "Move to…").click();
+  const dialog = s.host.querySelector<HTMLElement>(".story-move")!; assert.equal(dialog.getAttribute("aria-label"), "Move 01.1 Narration");
+  const items = (): { text: string; level: string; open: string | null; chosen: string | null }[] => [...dialog.querySelectorAll<HTMLElement>("[role=treeitem]")].map(item => ({ text: item.textContent!.slice(1), level: item.getAttribute("aria-level")!, open: item.getAttribute("aria-expanded"), chosen: item.getAttribute("aria-selected") }));
+  // The scene and If are open; the other branches stay closed. 01.1 and the place after it are left out.
+  assert.deepEqual(items().filter(item => item.open !== null).map(item => [item.text, item.open]), [["Arrival", "true"], ["If flag", "true"], ["If (trust is at least 5)", "false"], ['Else if (trust is at least 5)', "false"], ["Otherwise", "false"]]);
+  assert.ok(!items().some(item => item.text === "Before 01.1 Narration" || item.text === "Before 01.2 Narration"));
+  assert.deepEqual(items().find(item => item.chosen === "true")?.text, "Before 01.3 Condition");
+  assert.equal(dialog.querySelector(".story-summary")!.textContent, "Move to Arrival › If flag · Before 01.3 Condition");
+  // Keyboard: Down to the Otherwise branch, Right opens it, Down and Enter choose its end.
+  const tree = dialog.querySelector<HTMLElement>("[role=tree]")!; const key = (name: string): void => { tree.dispatchEvent(new KeyboardEvent("keydown", { key: name, bubbles: true })); };
+  while (document.activeElement?.textContent !== "▸Otherwise") key("ArrowDown");
+  key("ArrowRight"); key("ArrowDown"); key("Enter");
+  assert.equal(dialog.querySelector(".story-summary")!.textContent, "Move to Arrival › Otherwise · End of Otherwise");
+  button(dialog, "Move").click(); await tick();
   assert.deepEqual(s.calls[0]!.command, { sceneId: "one", expectedSourceRevision: "source", type: "moveStoryNode", node: { type: "beat", beatId: "a" }, expectedBody: { type: "branch", groupId: "group", branchId: "if" }, body: { type: "branch", groupId: "group", branchId: "otherwise" }, position: { type: "end" } });
-  assert.ok(panel.isConnected && hasSceneDraft(s.host)); assert.equal(panel.querySelector<HTMLSelectElement>('select[aria-label="Destination body"]')!.value, "otherwise"); assert.match(s.status.at(-1)!, /Input retained/); await s.close();
+  assert.ok(dialog.isConnected, "A refused move keeps the dialog and the chosen place"); assert.equal(dialog.querySelector('[aria-selected="true"]')!.textContent, "●End of Otherwise"); assert.match(s.status.at(-1)!, /Input retained/);
+  // Escape closes it without sending anything.
+  dialog.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); assert.equal(dialog.isConnected, false); assert.equal(s.calls.length, 1);
+  await s.close();
 });
 
 test("whole condition move excludes own descendant bodies; headers never become ordinary Beat targets", async () => {
-  const s = setup(); button(selectBeat(s.host, "if"), "Move to…").click(); const panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Move story content"]')!; assert.deepEqual([...panel.querySelector<HTMLSelectElement>('select[aria-label="Destination body"]')!.options].map(option => option.value), ["root"]); button(panel, "Move to destination").click(); await tick(); assert.deepEqual(s.calls[0]!.command.node, { type: "condition", groupId: "group" });
+  const s = setup(); button(selectBeat(s.host, "if"), "Move to…").click(); const dialog = s.host.querySelector<HTMLElement>(".story-move")!;
+  assert.deepEqual([...dialog.querySelectorAll<HTMLElement>('[role=treeitem][aria-expanded]')].map(item => item.textContent), ["▾Arrival"]);
+  button(dialog, "Move").click(); await tick(); assert.deepEqual(s.calls[0]!.command.node, { type: "condition", groupId: "group" });
   // An Else If header is a branch of its condition, never a Tracks beat of its own.
   openBranch(s.host, "elif"); assert.equal(trackColumn(s.host, "elif"), undefined); assert.ok(trackColumn(s.host, "maybe")); await s.close();
 });
 
 test("delete whole group and selected unwrap remain distinct; initial If cannot be removed as a branch", async () => {
-  const s = setup(); assert.equal([...selectBeat(s.host, "if").querySelectorAll("button")].some(button => button.textContent === "Delete branch"), false); button(storyEditor(s.host), "Unwrap…").click(); let panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Unwrap one branch"]')!; choose(panel, "Branch to keep", "elif"); button(panel, "Unwrap selected branch").click(); await tick();
+  const s = setup(); const branches = selectBeat(s.host, "if").querySelectorAll<HTMLElement>(".story-branch-editor");
+  assert.deepEqual([...branches].map(section => [section.dataset.branchId, [...section.querySelectorAll("button")].some(button => button.textContent === "Delete branch")]), [["if", false], ["elif", true], ["otherwise", true]]);
+  button(storyEditor(s.host), "Unwrap…").click(); let panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Unwrap one branch"]')!; choose(panel, "Branch to keep", "elif"); button(panel, "Unwrap selected branch").click(); await tick();
   assert.equal(s.calls[0]!.command.type, "unwrapCondition"); assert.equal(s.calls[0]!.command.branchId, "elif"); assert.deepEqual(s.calls[0]!.command.expectedBody, { type: "root" });
   button(storyEditor(s.host), "Delete condition").click(); panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Delete entire condition"]')!; button(panel, "Delete entire condition").click(); await tick(); assert.equal(s.calls[1]!.command.type, "removeStoryNode"); assert.deepEqual(s.calls[1]!.command.node, { type: "condition", groupId: "group" }); await s.close();
 });
@@ -113,7 +161,7 @@ test("whole-group confirmation and collapse summary count protected Custom Code 
 });
 
 test("dirty structural input blocks tree New/Rename entry; dirty tree input blocks unrelated Story forms", async () => {
-  const s = setup(); button(s.host, "Add Condition").click(); const panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Add Condition"]')!; choose(panel, "Condition type", "not");
+  const s = setup(); button(s.host, "Add Condition").click(); const panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Add Condition"]')!; chooseIn(panel, "If rule 1 test", "is false");
   const tree = document.querySelector<HTMLElement>("aside")!;
   button(tree, "New Chapter").click(); button(tree, "+ New Scene").click(); for (const rename of [...tree.querySelectorAll<HTMLButtonElement>("button")].filter(button => button.textContent === "Rename")) rename.click();
   assert.equal(tree.querySelector(".tree-inline"), null); assert.ok(panel.isConnected && hasSceneDraft(s.host)); assert.equal(s.calls.length, 0);
@@ -154,24 +202,31 @@ test("end markers and editor paths name the scene, branch or option and never sa
   await s.close();
 });
 
-test("Tracks insertion markers open a new beat at the place core lists for them", async () => {
+test("Tracks insertion markers open Add a beat at the place core lists for them", async () => {
   const s = setup(); const opener = (key: string) => s.host.querySelector<HTMLButtonElement>(`.story-tracks [data-beat-opener="${key}"]`)!;
-  // Each marker opens a new beat whose Insert in and Insert before name its core place.
-  const place = (key: string): [string, string] => {
-    opener(key).click(); const panel = s.host.querySelector<HTMLElement>(".new-beat")!; assert.ok(panel, key);
-    const result: [string, string] = [panel.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!.value, panel.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!.value];
-    button(panel, "Cancel").click(); return result;
+  // Each marker opens Add a beat, which names where the beat goes: Goes at, In and After.
+  const place = (key: string): string[] => {
+    opener(key).click(); const dialog = s.host.querySelector<HTMLElement>(".story-add-beat")!; assert.ok(dialog, key);
+    const result = [...dialog.querySelectorAll(".story-where dd")].map(item => item.textContent!);
+    dialog.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); assert.equal(s.host.querySelector(".story-add-beat"), null); return result;
   };
-  assert.deepEqual(place("after:call"), ["root", "after-call"]);
-  assert.deepEqual(place("end:scene"), ["root", "end"]);
+  assert.deepEqual(place("after:call"), ["Before 04 Narration", "Arrival", "03 Call Scene"]);
+  assert.deepEqual(place("end:scene"), ["Before 05 Return", "Arrival", "04 Narration"]);
   openBranch(s.host, "if");
-  assert.deepEqual(place("after:if"), ["root", "choice"]);
-  assert.deepEqual(place("last:if"), ["if", "end"]);
+  assert.deepEqual(place("after:if"), ["Before 02 Choice", "Arrival", "01 Condition"]);
+  assert.deepEqual(place("last:if"), ['End of "If flag"', "Arrival › If flag", "01.3 Condition"]);
   openBranch(s.host, "otherwise");
-  assert.deepEqual(place("first:otherwise"), ["otherwise", "end"]);
-  // The added beat goes through the ordinary insert command at that place.
-  opener("after:call").click(); const panel = s.host.querySelector<HTMLElement>(".new-beat")!;
-  choose(panel, "Beat type", "narration"); const text = panel.querySelector<HTMLTextAreaElement>("textarea")!; text.value = "Inserted from Tracks"; text.dispatchEvent(new Event("input", { bubbles: true }));
+  assert.deepEqual(place("first:otherwise"), ["End of Otherwise", "Arrival › Otherwise"]);
+  assert.equal(s.calls.length, 0, "Escape adds nothing");
+  // An ending goes at the end; where the scene already ends, Add a beat names the ending it replaces.
+  opener("after:call").click(); const dialog = s.host.querySelector<HTMLElement>(".story-add-beat")!;
+  dialog.querySelector<HTMLElement>('[data-insert-kind="jump"]')!.dispatchEvent(new Event("pointerenter"));
+  assert.deepEqual([...dialog.querySelectorAll(".story-where dd")].map(item => item.textContent), ["Replaces 05 Return", "Arrival", "04 Narration"]);
+  assert.equal(dialog.querySelector(".story-picker-note")!.textContent, "Jump replaces 05 Return. Undo restores it.");
+  // Enter adds the highlighted beat through the ordinary insert command at that place.
+  const search = dialog.querySelector<HTMLInputElement>('input[aria-label="Find a beat"]')!; type(search, "narr");
+  search.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true })); const panel = s.host.querySelector<HTMLElement>(".new-beat")!;
+  type(panel.querySelector<HTMLTextAreaElement>("textarea")!, "Inserted from Tracks");
   button(panel, "Add Beat").click(); await tick();
   assert.deepEqual({ body: s.calls[0]!.command.body, position: s.calls[0]!.command.position }, { body: { type: "root" }, position: { type: "before", anchor: { type: "beat", beatId: "after-call" } } });
   await s.close();
@@ -197,7 +252,7 @@ test("Reel draws the Tracks route; switching views keeps selection, branches, a 
   assert.equal(document.activeElement?.getAttribute("data-view"), "tracks", "focus stays on the view switch");
   // Add the first beat of the empty Otherwise from Reel. The new beat keeps its place in Tracks.
   view("reel"); openBranch(s.host, "otherwise"); assert.ok(trackColumn(s.host, "otherwise")?.classList.contains("story-track-slot"));
-  button(trackColumn(s.host, "otherwise")!, "+ Add a beat").click(); await tick();
+  button(trackColumn(s.host, "otherwise")!, "+ Add a beat").click(); pickKind(s.host, "Narration"); await tick();
   const added = storyEditor(s.host).querySelector<HTMLElement>(".new-beat")!; textarea(s.host).value = "First in Otherwise"; textarea(s.host).dispatchEvent(new Event("input", { bubbles: true })); await tick();
   const placed = route().find(item => item.includes("story-track-pending")); assert.ok(placed?.endsWith("|new|1"), "the new beat sits inside Otherwise");
   view("tracks"); assert.equal(route().find(item => item.includes("story-track-pending")), placed); assert.deepEqual(selected(), ["new"]);

@@ -4,7 +4,7 @@ import { Window } from "happy-dom";
 import type { CoreOperation, CoreResponse } from "../src/protocol.js";
 import type { SourceDocument, SourceInventory } from "../src/source-ui.js";
 import type { SceneBeat } from "../src/scene-ui.js";
-import { sceneBodies } from "./story-controls-fixture.js";
+import { pickKind, sceneBodies } from "./story-controls-fixture.js";
 
 const tick = async (): Promise<void> => { await new Promise((resolve) => setTimeout(resolve, 0)); };
 const ticks = async (count = 4): Promise<void> => { for (let index = 0; index < count; index += 1) await tick(); };
@@ -401,9 +401,10 @@ test("A refused Story Save counts failing drafts, links each scene and marks fai
     const editor = (await open(id)).querySelector<HTMLTextAreaElement>("textarea")!;
     editor.value = text; editor.dispatchEvent(new window.Event("input", { bubbles: true })); await ticks();
   };
+  // The speaker list: open it, then pick Mara.
   const pickSpeaker = async (id: string): Promise<void> => {
-    const speaker = (await open(id)).querySelector<HTMLSelectElement>("select")!;
-    speaker.value = "mara"; speaker.dispatchEvent(new window.Event("change", { bubbles: true })); await ticks();
+    const editor = await open(id); editor.querySelector<HTMLElement>(".story-dropdown > summary")!.click();
+    [...editor.querySelectorAll<HTMLButtonElement>('[role="listbox"][aria-label="Speaker"] [role="option"]')].find(item => item.getAttribute("aria-label") === "Mara")!.click(); await ticks();
   };
 
   const { startApplication } = await import("../src/main.js");
@@ -468,8 +469,7 @@ test("A refused Story Save counts failing drafts, links each scene and marks fai
   assert.deepEqual(failing(), []); assert.equal(sceneRow("Arrival").dataset.saveRefused, undefined);
 
   // A new beat whose place is gone from core's candidate is a beat draft conflict, marked like the others.
-  click("+ Add beat"); await ticks();
-  const added = document.querySelector<HTMLElement>(".new-beat")!;
+  click("+ Add beat"); const added = pickKind(document, "Narration"); await ticks();
   const text = added.querySelector<HTMLTextAreaElement>("textarea")!;
   text.value = "A new line."; text.dispatchEvent(new window.Event("input", { bubbles: true })); await ticks();
   refusal = { code: "BEAT_DRAFT_CONFLICT", message: "This beat's place changed in source after the draft began. Draft retained.", actionIndex: 4 };

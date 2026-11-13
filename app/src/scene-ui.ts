@@ -1,10 +1,16 @@
-import { assignmentCaption, buildAssignmentEditor, type ValidateAssignment } from "./story-arithmetic-editor.ts";
-import { buildAvailabilityEditor, buildConditionEditor } from "./story-condition-editor.ts";
+import { assignmentCaption, type ValidateAssignment } from "./story-arithmetic-editor.ts";
+import { buildRuleBuilder } from "./story-condition-editor.ts";
 import { validateField } from "./authoring-input.ts";
+import { addKindName, openAddBeat, type AddKind, type Placement } from "./story-add-beat.ts";
+import { beatLabels, buildBeatEditor, defaultPayload, requiredText, type BeatEditor, type EditorContext, type EditorInternals } from "./story-beat-editors.ts";
+import { buildChoiceEditor, type ChoiceHost, type Ending } from "./story-choice-editor.ts";
+import { storyIcon } from "./story-icons.ts";
+import { openPlaceTree, type PlaceNode } from "./story-place-tree.ts";
+import { focusFirst } from "./story-editor-controls.ts";
 import { isTextField, typingStepIdleMs, type DraftStep, type DraftStepRecord, type HistoryDirection } from "./project-history.ts";
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenEffects, ScreenRevisions, ScreenTargetBinding } from "./screen-contracts.ts";
 import { laneGrips, resizeGrip, watchHiddenLanes, type FocusWidths } from "./story-focus.ts";
-import { armOf, beatBody, beatNumbers, bodyOf, laneOf, nodeBeats, nodeRef, ownedBodies, pinRouteLabels, renderBranchPath, renderMarksLegend, renderRoute, renderTracksKey, renderViewSwitch, sameNode, samePosition, shorten, trackCopy, trackRoute, type PendingBeat, type RouteView, viewName } from "./story-tracks.ts";
+import { armOf, beatBody, beatNumbers, bodyOf, bodyOwner, laneOf, nodeBeats, nodeRef, ownedBodies, pinRouteLabels, renderBranchPath, renderMarksLegend, renderRoute, renderTracksKey, renderViewSwitch, sameBody, sameNode, samePosition, shorten, trackCopy, trackRoute, type PendingBeat, type RouteView, viewName } from "./story-tracks.ts";
 export type PlacementRef = "left" | "centre" | "right";
 export type TransitionRef = "none" | "dissolve" | "fade";
 
@@ -108,20 +114,6 @@ function innerBodies(scene: SceneDocument, node: SceneBeat): Set<string> {
   for (const item of scene.bodies) if (item.body.type === "branch" && (item.owningNode === node.id || item.parent?.type === "branch" && inner.has(item.parent.branchId))) inner.add(item.body.branchId);
   return inner;
 }
-function bodyCaption(scene: SceneDocument, body: BodyRef, model: SceneWorkspace): string {
-  const parts: string[] = [];
-  const menus = scene.beats.filter(beat => beat.payload.type === "choice");
-  let current = bodyOf(scene, body);
-  if (!current && body.type === "branch") parts.push("Missing branch");
-  for (let steps = 0; current && current.kind !== "scene" && steps <= 16; steps++) {
-    const owner = scene.beats.find(beat => beat.id === current!.owningNode), branchId = current.body.type === "branch" ? current.body.branchId : "";
-    const option = owner?.payload.type === "choice" ? owner.payload.options.find(item => item.id === branchId) : undefined;
-    const branch = scene.beats.find(beat => beat.id === branchId)?.conditionalBranch;
-    parts.unshift(current.kind === "option" ? `Choice ${menus.indexOf(owner!) + 1} / Option ${current.number}: ${option?.text ?? "Option"}` : branch ? branchCaption(branch, model) : "Missing branch");
-    current = current.parent && bodyOf(scene, current.parent);
-  }
-  return `${scene.displayName} / ${parts.length ? parts.join(" / ") : "Scene body"}`;
-}
 export interface ScreenInsertion { readonly sceneId:string; readonly body:BodyRef; readonly position:Position; readonly expectedSourceRevision:string }
 export interface StoryTarget { readonly sceneId: string; readonly beatId?: string; readonly expectedSourceRevision?: string; readonly body?: BodyRef; readonly caller?: StoryTarget; readonly screenHint?: ScreenTargetBinding; readonly screenHintKind?: "panel" | "dialog"; readonly screenInsertion?: ScreenInsertion }
 
@@ -139,7 +131,7 @@ export interface SceneDocument {
 }
 
 interface Chapter { readonly id: string; readonly displayName: string; readonly directory: string }
-interface Character { readonly id: string; readonly displayName: string; readonly technicalName: string }
+interface Character { readonly id: string; readonly displayName: string; readonly technicalName: string; readonly dialogueColor?: string; readonly defaultAppearanceId?: string | null }
 interface Appearance { readonly id: string; readonly characterId: string; readonly label: string; readonly assetId?: string }
 interface Asset { readonly id: string; readonly kind: "background" | "characterAppearance" | "uiImage" | "music" | "sfx"; readonly displayName: string; readonly status: string; readonly sha256?: string }
 interface Variable { readonly id: string; readonly technicalName: string; readonly variableType: "bool" | "int" | "decimal" | "string"; readonly defaultValue: boolean | number | string }
@@ -235,37 +227,6 @@ export interface ScenePreviewState {
   readonly variables: Readonly<Record<string, { readonly value: boolean | number | string; readonly beatId: string }>>;
   readonly variablesUnknown: boolean;
   readonly overlay?: { readonly kind: "dialogue" | "narration" | "choice" | "jump" | "call" | "return" | "repeatChoice"; readonly text: string; readonly beatId: string; readonly choice?: Extract<BeatPayload, { type: "choice" }> };
-}
-
-function renderChoiceSummary(choice: Extract<BeatPayload, { type: "choice" }>, characters: SceneWorkspace["authoring"]["characters"]): HTMLElement {
-  const text = (tag: string, className: string, value: string): HTMLElement => {
-    const node = document.createElement(tag); node.className = className; node.textContent = value; return node;
-  };
-  const summary = document.createElement("div"); summary.className = "preview-choice-summary";
-  summary.tabIndex = 0; summary.setAttribute("role", "region");
-  summary.setAttribute("aria-label", "Choice prompt and options. Scroll to read more.");
-  if (choice.prompt) {
-    const prompt = document.createElement("div"); prompt.className = "preview-choice-prompt";
-    const speaker = choice.prompt.type === "narration" ? "Narration" : characters.find(character => choice.prompt?.type === "dialogue" && character.id === choice.prompt.characterId)?.displayName ?? "Unavailable Character";
-    prompt.append(text("strong", "preview-choice-speaker", speaker), text("span", "preview-choice-prompt-text", choice.prompt.text)); summary.append(prompt);
-  }
-  if (choice.pickedPolicy && choice.pickedPolicy !== "showNormally") {
-    const picked = document.createElement("div"); picked.className = "preview-choice-picked";
-    picked.append(text("span", "preview-choice-unknown", "Picked state unknown"), text("span", "preview-choice-policy", choice.pickedPolicy === "markPicked" ? "Mark picked" : "Hide picked")); summary.append(picked);
-  }
-  const options = document.createElement("ol"); options.className = "preview-choice-options";
-  options.setAttribute("aria-label", "Choice options, read only");
-  choice.options.forEach((option, index) => {
-    const row = document.createElement("li"); row.className = "preview-choice-option";
-    row.append(text("span", "preview-choice-number", String(index + 1)), text("span", "preview-choice-caption", option.text));
-    if (option.condition) {
-      const condition = text("span", "preview-choice-condition", "Condition unknown");
-      const policy = `If false: ${option.unavailablePolicy === "showDisabled" ? "Show disabled" : "Hide"}`;
-      condition.title = policy; condition.setAttribute("aria-label", `Condition unknown. ${policy}.`); row.append(condition);
-    }
-    options.append(row);
-  });
-  summary.append(options); return summary;
 }
 
 /**
@@ -417,30 +378,6 @@ export interface RecoveryActions {
   readonly completed: () => void;
 }
 
-const beatLabels: Record<BeatPayload["type"], string> = {
-  background: "Background",
-  showCharacter: "Show Character",
-  hideCharacter: "Hide Character",
-  showScreen: "Show screen",
-  callScreen: "Call screen",
-  hideScreen: "Hide screen",
-  changeAppearance: "Change Appearance",
-  placement: "Placement",
-  dialogue: "Dialogue",
-  narration: "Narration",
-  playMusic: "Play Music",
-  stopMusic: "Stop Music",
-  playSfx: "Play SFX",
-  transition: "Transition",
-  setVariable: "Set Variable",
-  choice: "Choice",
-  jump: "Jump",
-  call: "Call Scene",
-  repeatChoice: "Repeat this Choice",
-  return: "Return",
-  customCode: "Custom Code",
-};
-
 function treeMenu(controls:HTMLElement):HTMLElement {const menu=document.createElement("details");menu.className="tree-menu";const toggle=document.createElement("summary");toggle.textContent="⋯";toggle.ariaLabel="Scene or chapter actions";menu.append(toggle,controls);return menu;}
 function button(label: string, className = "button secondary"): HTMLButtonElement {
   const element = document.createElement("button");
@@ -502,7 +439,7 @@ export function hasSceneDraft(root: ParentNode = document): boolean {
 }
 
 export function focusSceneDraft(root: ParentNode = document): void {
-  root.querySelector<HTMLElement>('.scene-draft[data-unsubmitted="true"] input, .scene-draft[data-unsubmitted="true"] textarea, .scene-draft[data-unsubmitted="true"] select')?.focus();
+  const form = root.querySelector<HTMLElement>('.scene-draft[data-unsubmitted="true"]'); if (form) focusFirst(form);
 }
 
 function friendlyError(error: unknown, fallback: string): string {
@@ -626,7 +563,7 @@ export function renderStoryView(
   // `lastStep` orders Story Save, so the most recently edited beat ends on top.
   // `conflict` compares the draft with source now (see DraftConflict); `primary` is the
   // field the comparison sits above.
-  interface BeatDraft { readonly id: string; readonly panel: HTMLElement; readonly sceneId: string; readonly beatId?: string; readonly place?: () => { body: BodyRef; position: Position }; readonly read?: () => BeatPayload; readonly command: () => SceneCommand; readonly kind: () => string; readonly editors: () => readonly BeatEditor[]; readonly conflict: () => DraftConflict | undefined; readonly primary: () => HTMLElement; readonly detach?: () => void; state?: DraftState; lastStep: number }
+  interface BeatDraft { readonly id: string; readonly panel: HTMLElement; readonly sceneId: string; readonly beatId?: string; readonly place?: () => { body: BodyRef; position: Position }; readonly read?: () => BeatPayload; readonly command: () => SceneCommand; readonly kind: () => string; readonly editors: () => readonly BeatEditor[]; readonly conflict: () => DraftConflict | undefined; readonly primary: () => HTMLElement; readonly detach?: () => void; readonly replaces?: () => string | undefined; readonly nextLine?: () => void; state?: DraftState; lastStep: number }
   let newBeatDrafts = 0, draftSequence = 0;
   const beatDrafts = new Map<string, BeatDraft>();
   const invalidDraft = "This beat draft is invalid. Draft retained.";
@@ -746,22 +683,45 @@ export function renderStoryView(
   };
   // Valid beat drafts preview on the stage; invalid input previews the accepted beat.
   const readQuietly = (read: () => BeatPayload): BeatPayload | undefined => { try { return keepFocus(read); } catch { return undefined; } };
+  // A picture a picker sheet points at, shown on the stage in place of its beat's draft.
+  let sheetPreview: { readonly key: string; readonly payload: BeatPayload } | undefined;
   const withDrafts = (scene: SceneDocument): SceneDocument => {
     const edits = new Map<string, BeatPayload>();
     const unknown = new Set<string>();
+    const added: { readonly key: string; readonly payload: BeatPayload; readonly body: BodyRef; readonly position: Position; readonly replaces?: string }[] = [];
     for (const draft of pendingDrafts(scene.id)) {
-      if (!draft.beatId || !draft.read) continue;
+      const key = draft.beatId ?? draft.panel.dataset.beatDraftKey!;
+      const sheet = sheetPreview?.key === key ? sheetPreview.payload : undefined;
+      if (!draft.read) continue;
       // Reading an arithmetic draft validates it, so it is not read for the preview.
-      if (scene.beats.find(beat => beat.id === draft.beatId)?.payload.type === "setVariable") { unknown.add(draft.beatId); continue; }
-      const payload = readQuietly(draft.read); if (payload) edits.set(draft.beatId, payload);
+      if (draft.beatId && scene.beats.find(beat => beat.id === draft.beatId)?.payload.type === "setVariable") { unknown.add(draft.beatId); continue; }
+      const payload = sheet ?? readQuietly(draft.read); if (!payload) continue;
+      if (draft.beatId) edits.set(draft.beatId, payload);
+      else if (draft.place && payload.type !== "setVariable") { const replaced = draft.replaces?.(); added.push({ key, payload, ...draft.place(), ...(replaced ? { replaces: replaced } : {}) }); }
     }
-    if (!edits.size && !unknown.size) return scene;
-    return { ...scene, beats: scene.beats.map(beat => {
+    // A picture pointed at in a sheet previews on a beat the author has not edited yet, too.
+    if (sheetPreview && scene.beats.some(beat => beat.id === sheetPreview!.key)) edits.set(sheetPreview.key, sheetPreview.payload);
+    if (!edits.size && !unknown.size && !added.length) return scene;
+    const beats: SceneBeat[] = scene.beats.map(beat => {
       const payload = edits.get(beat.id);
       // Without the accepted core result, a calculation previews as unknown.
       if (unknown.has(beat.id)) { const { assignment: _accepted, ...rest } = beat; return rest; }
       return payload ? { ...beat, payload } : beat;
-    }) };
+    });
+    // A valid new beat previews at its place, as a beat in source order. One that replaces an ending takes its place.
+    for (const item of added) {
+      const owner = item.body.type === "branch" ? { groupId: item.body.groupId, branchId: item.body.branchId } : undefined;
+      const beat: SceneBeat = { id: item.key, byteStart: 0, byteEnd: 0, protected: false, payload: item.payload, ...(owner ? { owner } : {}) };
+      const replaced = item.replaces === undefined ? -1 : beats.findIndex(other => other.id === item.replaces);
+      if (replaced >= 0) { beats[replaced] = { ...beat, ...(beats[replaced]!.owner ? { owner: beats[replaced]!.owner } : {}) }; continue; }
+      const position = item.position, anchor = position.type === "before" ? beats.findIndex(other => sameNode(nodeRef(other), position.anchor) && !other.conditionalBranch?.ordinal && !other.conditionalBranch?.otherwise) : -1;
+      const last = nodeBeats(scene, item.body).at(-1), after = last ? beats.findIndex(other => other.id === last.id) : item.body.type === "branch" ? beats.findIndex(other => other.id === (item.body as { branchId: string }).branchId) : beats.length - 1;
+      // The end of a body follows everything inside its last node.
+      let end = after;
+      if (last && position.type === "end") { const inner = innerBodies(scene, last); while (end + 1 < beats.length && beats[end + 1]!.owner && inner.has(beats[end + 1]!.owner!.branchId)) end++; }
+      beats.splice(anchor >= 0 ? anchor : end + 1, 0, beat);
+    }
+    return { ...scene, beats };
   };
   let previewTarget: { readonly stage: HTMLElement; readonly sceneId: string } | undefined;
   const refreshPreview = (): void => {
@@ -790,7 +750,7 @@ export function renderStoryView(
   // Other open forms (names, moves, condition operations) still settle before navigation.
   const drafts = (): HTMLElement[] => [host, treeHost].flatMap(root => [...root.querySelectorAll<HTMLElement>('.scene-draft[data-unsubmitted="true"]')]).filter(form => !form.closest("[data-beat-draft-key]"));
   const hasDraft = (): boolean => drafts().length > 0;
-  const focusDraft = (): void => { (drafts()[0] ?? host.querySelector<HTMLElement>("[data-beat-draft-key]"))?.querySelector<HTMLElement>("input, textarea, select")?.focus(); };
+  const focusDraft = (): void => { const form = drafts()[0] ?? host.querySelector<HTMLElement>("[data-beat-draft-key]"); if (form) focusFirst(form); };
   const settle = async (): Promise<boolean> => {
     if (settling) await settling.catch(() => false);
     if (pendingWrites || composing || hasDraft()) { focusDraft(); return false; }
@@ -875,7 +835,7 @@ export function renderStoryView(
     if (scene && draft.beatId) selectBeat(scene, draft.beatId);
     else { selectedBeatId = undefined; selectedNewDraft = draft.panel.dataset.beatDraftKey; const place = draft.place?.().body; if (scene && place) openTo(scene, place); }
     draw();
-    draft.panel.querySelector<HTMLElement>("input, textarea, select")?.focus();
+    draft.editors()[0]?.focus();
   };
   // Reads every pending draft's command. Nothing is sent while any draft fails.
   // Commands go in the order of each draft's last step, so core puts the most recently
@@ -1224,22 +1184,85 @@ export function renderStoryView(
     opener?.focus({preventScroll:true});
     opener?.scrollIntoView?.({block:"nearest",inline:"nearest"});
   };
-  // Opens a new beat draft at a place in a body and shows it in the editor.
-  const insertAt = (scene: SceneDocument, body: BodyRef, position: Position, opener: string, initialType: BeatPayload["type"] = "dialogue", hint?: ScreenInsertion): void => {
+  // Opens a new beat draft at a place in a body and shows it in the editor. `replaces`
+  // names an ending the new beat takes the place of.
+  const insertAt = (scene: SceneDocument, body: BodyRef, position: Position, opener: string, initialType: BeatPayload["type"], hint?: ScreenInsertion, replaces?: string): void => {
     if (!draftGuard()) return;
     openOperation = undefined;
     const current = model.scenes.find(item => item.id === scene.id); if (!current) return;
-    const key = renderNewBeat(current, initialType, body, position, hint, opener, selectedNewDraft ? undefined : selectedBeatId);
+    const key = renderNewBeat(current, initialType, body, position, hint, opener, selectedNewDraft ? undefined : selectedBeatId, replaces);
     selectedBeatId = undefined; selectedNewDraft = key; openTo(current, body);
     draw();
-    beatDrafts.get(key)?.panel.querySelector<HTMLElement>("select, input, textarea")?.focus();
+    beatDrafts.get(key)?.editors()[0]?.focus();
   };
-  const openNewBeat = (scene: SceneDocument, initialType: BeatPayload["type"] = actions.screenHintKind === "dialog" ? "callScreen" : "dialogue", beforeBeatId: string | null = null, opener = "root"): void => {
+  // The new beat draft already waiting at a place, if any. Adding there again returns to it.
+  const pendingAt = (scene: SceneDocument, body: BodyRef, position: Position): string | undefined => {
+    const requested = JSON.stringify({ body, position });
+    return [...beatDrafts.entries()].find(([, draft]) => !draft.beatId && draft.sceneId === scene.id && JSON.stringify(draft.place?.()) === requested)?.[0];
+  };
+  // Where a kind goes at a place, from core's places. An ending goes at the end of its
+  // scene, branch or option; where that already ends, it replaces the ending.
+  const placeFor = (scene: SceneDocument, body: BodyRef, position: Position, kind: AddKind): { readonly position: Position; readonly replaces?: SceneBeat; readonly unavailable?: string } => {
+    if (kind !== "jump" && kind !== "return") return { position };
+    const info = bodyOf(scene, body), places = info?.places ?? [];
+    if (places.some(place => place.fitsEnding && samePosition(place.position, position))) return { position };
+    const end = places.find(place => place.fitsEnding && place.position.type === "end");
+    if (end) return { position: end.position };
+    const ending = info?.ending, last = ending?.type === "ends" ? scene.beats.find(beat => beat.id === ending.beatId) : undefined;
+    if (last && !last.protected && ["jump", "return", "repeatChoice"].includes(last.payload.type)) return { position: { type: "before", anchor: nodeRef(last) }, replaces: last };
+    return { position, unavailable: last ? `${placeName(scene, body)} already ends at ${numbers.get(last.id) ?? ""} ${nodeName(last)}.` : `An ending cannot go in ${placeName(scene, body)}.` };
+  };
+  // "Before 05 Mara's line", or "End of …" for a body's end.
+  const positionLabel = (scene: SceneDocument, body: BodyRef, position: Position): string => {
+    if (position.type === "before") { const anchor = nodeBeats(scene, body).find(beat => sameNode(nodeRef(beat), position.anchor)); return anchor ? `Before ${numbers.get(anchor.id) ?? ""} ${nodeName(anchor)}` : "Before a beat that is no longer in source"; }
+    if (body.type === "root") return trackCopy.sceneEnd;
+    const header = scene.beats.find(beat => beat.id === body.branchId);
+    return header ? trackCopy.endOf(endName(scene, header)) : trackCopy.endOf("a branch that is no longer in source");
+  };
+  // The node right before a position, as Add a beat names it in After.
+  const nodeBefore = (scene: SceneDocument, body: BodyRef, position: Position): SceneBeat | undefined => {
+    const nodes = nodeBeats(scene, body);
+    if (position.type === "end") return nodes.at(-1);
+    const at = nodes.findIndex(beat => sameNode(nodeRef(beat), position.anchor)); return at > 0 ? nodes[at - 1] : undefined;
+  };
+  // Goes at, In and After for a new beat (story-combined-editor / replace-v2).
+  const placement = (scene: SceneDocument, body: BodyRef, position: Position, kind: AddKind): Placement => {
+    const resolved = placeFor(scene, body, position, kind), before = resolved.replaces ? nodeBefore(scene, body, resolved.position) : nodeBefore(scene, body, resolved.position);
+    const replaced = resolved.replaces && `${numbers.get(resolved.replaces.id) ?? ""} ${nodeName(resolved.replaces)}`;
+    return {
+      goesAt: replaced ? `Replaces ${replaced}` : positionLabel(scene, body, resolved.position), in: pathCaption(scene, body),
+      ...(before ? { after: `${numbers.get(before.id) ?? ""} ${nodeName(before)}` } : {}),
+      ...(replaced ? { note: `${addKindName(kind)} replaces ${replaced}. Undo restores it.` } : kind === "background" ? { note: "A new background clears the characters on stage." } : {}),
+      ...(resolved.unavailable ? { unavailable: resolved.unavailable } : {}),
+    };
+  };
+  // Add a beat at a place: the compact dialog picks the kind, then the new beat opens in the editor.
+  // From the scene toolbar, a screen beat starts at the place Screens last used, as Add screen Beat does.
+  const addBeat = (scene: SceneDocument, body: BodyRef, position: Position, opener: string, remembered = false): void => {
+    if (!draftGuard()) return;
+    const current = model.scenes.find(item => item.id === scene.id); if (!current || current.sourceConflict) return;
+    const waiting = pendingAt(current, body, position);
+    if (waiting) { if (navigate(() => { selectedBeatId = undefined; selectedNewDraft = waiting; openTo(current, body); })) beatDrafts.get(waiting)?.editors()[0]?.focus(); return; }
+    const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    openAddBeat({
+      host, opener: trigger, screens: !!(actions.screenCatalog && actions.resolveScreenTarget), where: kind => placement(current, body, position, kind),
+      choose: kind => {
+        if (kind === "condition") { openConditionForm(current, body, position); return; }
+        if (remembered && ["showScreen", "hideScreen", "callScreen"].includes(kind)) { openNewBeat(current, kind, null, opener); return; }
+        const resolved = placeFor(current, body, position, kind);
+        insertAt(current, body, resolved.position, opener, kind, undefined, resolved.replaces?.id);
+      },
+    });
+  };
+  // + Add beat in the scene toolbar adds at the scene's default place. Add screen Beat and
+  // Add change here name their kind, so they open it directly.
+  const openNewBeat = (scene: SceneDocument, initialType?: BeatPayload["type"], beforeBeatId: string | null = null, opener = "root"): void => {
     const anchor = beforeBeatId ? scene.beats.find(beat => beat.id === beforeBeatId) : undefined;
     const before: Position | undefined = anchor && { type: "before", anchor: nodeRef(anchor) };
     if (anchor && !bodyOf(scene, beatBody(anchor))?.places.some(place => samePosition(place.position, before!))) {
       actions.status(`This beat has no insertion place before it. Use + in ${viewName(routeView)}.`, "error"); return;
     }
+    if (!initialType) { addBeat(scene, { type: "root" }, defaultPlace(scene, { type: "root" }), opener, true); return; }
     const screenBeat = ["showScreen", "hideScreen", "callScreen"].includes(initialType);
     const remembered = screenInsertion;
     const hint = !anchor && screenBeat && remembered && (remembered.sceneId === scene.id || !model.scenes.some(item=>item.id===remembered.sceneId)) ? structuredClone(remembered) : undefined;
@@ -1247,8 +1270,10 @@ export function renderStoryView(
     insertAt(scene, body, before ?? hint?.position ?? defaultPlace(scene, body), opener, initialType, hint);
   };
 
-  const loadImage = async (assetId: string, purpose: "thumbnail" | "imagePreview", image: HTMLImageElement, errorHost: HTMLElement): Promise<void> => {
-    const generation = mediaGeneration;
+  // `staged` images belong to one stage draw and give up when it redraws. Editor and sheet
+  // thumbnails outlive stage redraws, so they only need to still be shown.
+  const loadImage = async (assetId: string, purpose: "thumbnail" | "imagePreview", image: HTMLImageElement, errorHost: HTMLElement, staged = true): Promise<void> => {
+    const generation = staged ? mediaGeneration : undefined;
     const assetHash = model.authoring.assets.find((asset) => asset.id === assetId)?.sha256;
     const cached = imageCache.get(assetId);
     if (cached && assetHash && cached.key.endsWith(assetHash)) { image.src = cached.url; return; }
@@ -1261,7 +1286,7 @@ export function renderStoryView(
         void pending.then(() => pendingImages.delete(assetId), () => pendingImages.delete(assetId));
       }
       const media = await pending;
-      if (disposed || generation !== mediaGeneration || !image.isConnected) return;
+      if (disposed || (generation !== undefined && generation !== mediaGeneration) || !image.isConnected) return;
       const replaced = imageCache.get(assetId);
       // Several images can await the same presentation (canvas and details).
       // Reuse its URL instead of revoking the URL just assigned to another image.
@@ -1270,7 +1295,7 @@ export function renderStoryView(
       if (replaced) URL.revokeObjectURL(replaced.url);
       imageCache.set(assetId, { key: media.cacheKey, url }); image.src = url;
     } catch (error) {
-      if (disposed || generation !== mediaGeneration || !errorHost.isConnected) return;
+      if (disposed || (generation !== undefined && generation !== mediaGeneration) || !errorHost.isConnected) return;
       image.remove(); const message = document.createElement("span"); message.className = "preview-media-error"; message.textContent = friendlyError(error, "Media unavailable"); errorHost.append(message);
     }
   };
@@ -1288,12 +1313,14 @@ export function renderStoryView(
 
   // The stage previews the open Branch path route through the selected beat.
   const previewState = (scene: SceneDocument): ScenePreviewState => {
-    const forks = scene.beats.some(beat => beat.conditionalBranch);
-    return deriveScenePreview(withDrafts(scene), selectedBeatId, forks ? openBranches : undefined);
+    const forks = scene.beats.some(beat => beat.conditionalBranch), shown = withDrafts(scene);
+    // A selected new beat previews through itself once it is valid.
+    const through = selectedBeatId ?? (selectedNewDraft && shown.beats.some(beat => beat.id === selectedNewDraft) ? selectedNewDraft : undefined);
+    return deriveScenePreview(shown, through, forks ? openBranches : undefined);
   };
   // The game stage keeps the project's width-to-height ratio and fits whole into its slot.
   const renderStage = (stage: HTMLElement, scene: SceneDocument): void => {
-    const state = previewState(scene), { width, height } = actions.resolution;
+    const state = previewState(scene), shown = withDrafts(scene), { width, height } = actions.resolution;
     const title = document.createElement("div"); title.className = "story-stage-title";
     const name = document.createElement("strong"); name.textContent = "Game window";
     const size = document.createElement("span"); size.className = "story-stage-resolution"; size.textContent = `${width} × ${height}`;
@@ -1317,12 +1344,12 @@ export function renderStoryView(
       const caption = document.createElement("figcaption"); caption.textContent = character?.displayName ?? "Character"; figure.append(caption); canvas.append(figure);
     }
     if (state.charactersUnknown) { const unknown = document.createElement("span"); unknown.className = "preview-unknown-layer"; unknown.textContent = "Other character state may be unknown"; canvas.append(unknown); }
-    if (choice) canvas.append(renderChoiceSummary(choice, model.authoring.characters));
+    if (choice) canvas.append(...stageChoice(choice, state.overlay!.beatId));
     else if (state.overlay) {
       const overlay = document.createElement("div"); overlay.className = `preview-overlay ${state.overlay.kind}`;
       overlay.textContent = state.overlay.text || (state.overlay.kind === "dialogue" ? "Empty dialogue" : state.overlay.kind);
       if (state.overlay.kind === "dialogue") {
-        const beat = scene.beats.find(b => b.id === state.overlay?.beatId);
+        const beat = shown.beats.find(b => b.id === state.overlay?.beatId);
         if (beat?.payload.type === "dialogue") {
           const characterId = beat.payload.characterId;
           const speaker = document.createElement("strong"); speaker.className = "preview-speaker";
@@ -1334,11 +1361,88 @@ export function renderStoryView(
     slot.append(canvas);
     const footer = document.createElement("div"); footer.className = "story-stage-footer";
     const through = document.createElement("span"); through.className = "story-stage-status";
-    const at = state.throughBeatId ? scene.beats.find(beat => beat.id === state.throughBeatId) : undefined;
-    through.textContent = at ? `Through ${numbers.get(at.id) ?? ""} · ${beatName(at)}` : "Scene start";
+    const at = state.throughBeatId ? shown.beats.find(beat => beat.id === state.throughBeatId) : undefined;
+    through.textContent = at ? `Through ${numbers.get(at.id) ?? "New"} · ${beatName(at)}` : "Scene start";
     footer.append(through);
     if (state.partial) { const badge = document.createElement("strong"); badge.className = "partial-badge"; badge.textContent = "Partial / unknown"; footer.append(badge); }
+    if (choice) footer.append(previewOptionsMenu(choice));
     stage.append(title, slot, footer);
+  };
+  // Preview options: per option, an assumed condition result and whether it was picked earlier
+  // in this save. They change only the stage: no draft, no Undo entry and no game state.
+  type OptionAssumption = { readonly truth?: "true" | "false"; readonly picked?: boolean };
+  const assumptions = new Map<string, OptionAssumption>();
+  let stageMark: string | undefined;
+  const optionKey = (option: ChoiceOption, index: number): string => option.id ?? `new:${index}`;
+  // What the game shows for each option under the assumptions. Hide picked wins over Show disabled.
+  const optionStates = (choice: Extract<BeatPayload, { type: "choice" }>): ("available" | "marked" | "unknown" | "disabled" | "hidden")[] => choice.options.map((option, index) => {
+    const assumed = assumptions.get(optionKey(option, index)) ?? {}, truth = option.condition ? assumed.truth : "true";
+    if (assumed.picked && choice.pickedPolicy === "hidePicked") return "hidden";
+    if (truth === "false") return option.unavailablePolicy === "showDisabled" ? "disabled" : "hidden";
+    if (assumed.picked && choice.pickedPolicy === "markPicked") return truth === undefined ? "unknown" : "marked";
+    return truth === undefined ? "unknown" : "available";
+  });
+  // The game's choice menu: the prompt in the text box, then the options as the player sees them.
+  const stageChoice = (choice: Extract<BeatPayload, { type: "choice" }>, beatId: string): HTMLElement[] => {
+    const nodes: HTMLElement[] = [];
+    const menu = document.createElement("div"); menu.className = "story-game-choices"; menu.dataset.choiceOwner = beatId; menu.setAttribute("aria-label", "Choice options in the game");
+    const states = optionStates(choice);
+    choice.options.forEach((option, index) => {
+      const state = states[index]!; if (state === "hidden") return;
+      const item = button("", "story-game-choice"); item.dataset.state = state; item.dataset.optionId = optionKey(option, index); item.dataset.active = String(stageMark === optionKey(option, index));
+      if (state === "marked") item.append(Object.assign(document.createElement("span"), { className: "story-stage-mark", textContent: "✓" }));
+      if (state === "disabled") item.append(storyIcon("lock"));
+      item.append(Object.assign(document.createElement("span"), { textContent: option.text || "New option" }));
+      item.setAttribute("aria-label", `Edit option ${index + 1}: ${option.text || "New option"}${state === "disabled" ? ", shown disabled in the game" : state === "marked" ? ", marked as picked" : state === "unknown" ? ", availability unknown" : ""}`);
+      item.addEventListener("click", () => editorHost?.querySelectorAll<HTMLInputElement>('input[aria-label="Choice option text"]')[index]?.focus());
+      menu.append(item);
+    });
+    if (!states.some(state => state === "available" || state === "marked" || state === "unknown")) {
+      const scene = storyScene(model, selectedSceneId), beat = scene?.beats.find(item => item.id === beatId), next = scene && beat ? continuationAfter(scene, beat) : undefined, where = next ? `at ${next}` : "after the Choice";
+      const none = document.createElement("p"); none.className = "story-choice-none";
+      none.textContent = states.includes("disabled") ? `Only disabled options are left, so the story continues ${where}. No pick is recorded.` : `No option can be picked, so the story continues ${where}. No pick is recorded.`;
+      menu.append(none);
+    }
+    nodes.push(menu);
+    if (choice.prompt) {
+      const say = document.createElement("div"); say.className = "preview-overlay dialogue";
+      const prompt = choice.prompt;
+      if (prompt.type === "dialogue") { const speaker = document.createElement("strong"); speaker.className = "preview-speaker"; speaker.textContent = model.authoring.characters.find(character => character.id === prompt.characterId)?.displayName ?? "Unavailable Character"; say.append(speaker); }
+      say.append(prompt.text); nodes.push(say);
+    }
+    return nodes;
+  };
+  const markStageOption = (optionId: string | undefined): void => {
+    stageMark = optionId;
+    for (const item of previewTarget?.stage.querySelectorAll<HTMLElement>(".story-game-choice") ?? []) item.dataset.active = String(item.dataset.optionId === optionId);
+  };
+  // The stage footer's Preview options menu. Illustrative only.
+  const previewOptionsMenu = (choice: Extract<BeatPayload, { type: "choice" }>): HTMLElement => {
+    const menu = document.createElement("details"); menu.className = "story-dropdown story-choice-preview";
+    const summary = document.createElement("summary"); summary.className = "button secondary"; summary.textContent = "Preview options ▾"; summary.title = "Illustrative: choose what to assume about conditions and picked history";
+    const panel = document.createElement("div"); panel.className = "story-choice-preview-panel"; panel.setAttribute("role", "group"); panel.setAttribute("aria-label", "Illustrative option preview");
+    const heading = document.createElement("strong"); heading.textContent = "Illustrative preview";
+    const hint = document.createElement("p"); hint.className = "story-field-hint"; hint.textContent = "Not a playthrough or a save. Choose what to assume for each option.";
+    panel.append(heading, hint);
+    choice.options.forEach((option, index) => {
+      const key = optionKey(option, index), current = (): OptionAssumption => assumptions.get(key) ?? {};
+      const row = document.createElement("div"); row.className = "story-preview-row";
+      const number = document.createElement("span"); number.className = "story-option-number"; number.textContent = String(index + 1);
+      const name = document.createElement("span"); name.className = "story-preview-name"; name.textContent = option.text || "New option";
+      const controls = document.createElement("div"); controls.className = "story-preview-controls";
+      const set = (patch: OptionAssumption): void => { assumptions.set(key, { ...current(), ...patch }); const open = menu.open; refreshPreview(); if (open) { const again = previewTarget?.stage.querySelector<HTMLDetailsElement>(".story-choice-preview"); if (again) { again.open = true; again.querySelector<HTMLElement>(`[data-assume="${key}:${String(patch.truth ?? (patch.picked !== undefined ? "picked" : "unknown"))}"]`)?.focus(); } } };
+      if (option.condition) for (const [value, text] of [[undefined, "?"], ["true", "True"], ["false", "False"]] as const) {
+        const toggle = button(text, "button secondary"); toggle.dataset.assume = `${key}:${value ?? "unknown"}`; toggle.setAttribute("aria-pressed", String(current().truth === value));
+        toggle.setAttribute("aria-label", toggle.title = value ? `Assume option ${index + 1}'s condition is ${value}` : `Option ${index + 1}'s availability unknown`);
+        toggle.addEventListener("click", () => set({ truth: value })); controls.append(toggle);
+      } else { const always = document.createElement("span"); always.className = "story-preview-always"; always.textContent = "Always"; controls.append(always); }
+      const picked = button("Picked", "button secondary"); picked.dataset.assume = `${key}:picked`; picked.setAttribute("aria-pressed", String(!!current().picked));
+      picked.setAttribute("aria-label", picked.title = `Assume option ${index + 1} was picked earlier in this save`);
+      picked.addEventListener("click", () => set({ picked: !current().picked })); controls.append(picked);
+      row.append(number, name, controls); panel.append(row);
+    });
+    menu.addEventListener("keydown", event => { if (event.key === "Escape" && menu.open) { event.preventDefault(); event.stopPropagation(); menu.open = false; summary.focus(); } });
+    menu.append(summary, panel); return menu;
   };
   // In effect at the selected beat: what set each visible item, with Edit and Add change here.
   const renderEffects = (section: HTMLElement, scene: SceneDocument): void => {
@@ -1363,9 +1467,11 @@ export function renderStoryView(
     if (audible) { const audioHost = document.createElement("div"); audioHost.className = "audio-audition"; const play = button(selected?.payload.type === "playSfx" ? "Audition selected SFX" : "Audition current music"); play.addEventListener("click", () => void audition(audible, audioHost, play)); section.append(play, audioHost); }
   };
 
-  const operation = (scene: SceneDocument, target: HTMLElement, title: string, fields: readonly HTMLElement[], read: () => SceneCommand, actionLabel: string, focusId?: string): HTMLElement => {
+  // An operation form. An inline one sits in the condition editor without its own heading
+  // and leaves focus where it is.
+  const operation = (scene: SceneDocument, target: HTMLElement, title: string, fields: readonly HTMLElement[], read: () => SceneCommand, actionLabel: string, focusId?: string, inline = false): HTMLElement => {
     const expected = { projectRevision: model.projectRevision, sourceMapRevision: model.sourceMapRevision };
-    const panel = document.createElement("section"); panel.className = "story-operation scene-draft"; panel.setAttribute("aria-label", title);
+    const panel = document.createElement("section"); panel.className = `story-operation scene-draft${inline ? " story-inline-operation" : ""}`; panel.setAttribute("aria-label", title);
     const heading = document.createElement("h3"); heading.textContent = title;
     const breadcrumb = document.createElement("p"); breadcrumb.className = "story-breadcrumb"; breadcrumb.textContent = `${scene.displayName} · changes apply once and can be undone`;
     const row = document.createElement("div"); row.className = "row-actions";
@@ -1391,10 +1497,10 @@ export function renderStoryView(
       };
       settling = save().finally(() => { settling = undefined; });
     });
-    row.append(cancel, apply); panel.append(heading, breadcrumb, ...fields, row); dirtyDraft(panel, []);
+    row.append(cancel, apply); panel.append(...inline ? [] : [heading, breadcrumb], ...fields, row); dirtyDraft(panel, []);
     if (target === operationSlot) { openOperation = panel; operationSlot = undefined; }
     target.append(panel);
-    panel.querySelector<HTMLElement>("input,select,textarea")?.focus(); return panel;
+    if (!inline) focusFirst(panel); return panel;
   };
   // A standalone operation (move, delete, condition, ending) takes the editor's place,
   // with its beat, condition or option still selected in Tracks.
@@ -1407,48 +1513,47 @@ export function renderStoryView(
     editorHost.replaceChildren(); delete editorHost.dataset.editorFor;
     operationSlot = editorHost; return editorHost;
   };
-  const destinations = (scene: SceneDocument, initialBody: BodyRef, exclude?: SceneBeat, initialPosition?: Position, insertion = false, retained?: ScreenInsertion): { host: HTMLElement; read: () => { body: BodyRef; position: Position } } => {
+  // A new screen beat's place: Insert in and Insert before. It keeps the place the author
+  // chose in Screens across workspaces, so it confirms a place that changed before it is
+  // used. Move to uses the tree in story-place-tree.ts instead.
+  const destinations = (scene: SceneDocument, initialBody: BodyRef, _exclude?: SceneBeat, initialPosition?: Position, _insertion = true, retained?: ScreenInsertion): { host: HTMLElement; read: () => { body: BodyRef; position: Position } } => {
     const panel = document.createElement("div"); panel.className = "story-destination";
-    // A node never moves into its own bodies.
-    const inner = exclude ? innerBodies(scene, exclude) : new Set<string>();
-    const parents = scene.bodies.filter(item => item.body.type === "root" || !inner.has(item.body.branchId))
-      .map(item => ({ key: item.body.type === "root" ? "root" : item.body.branchId, body: item.body, label: bodyCaption(scene, item.body, model) }));
+    const parents = scene.bodies.map(item => ({ key: item.body.type === "root" ? "root" : item.body.branchId, body: item.body, label: pathCaption(scene, item.body) }));
     const initialParent = parents.find(item => item.body.type === initialBody.type && (item.body.type === "root" || initialBody.type === "branch" && item.body.groupId === initialBody.groupId && item.body.branchId === initialBody.branchId));
-    const parent = selectOf(parents.map(item => ({ value: item.key, label: item.label })), initialParent?.key ?? ""); parent.setAttribute("aria-label", insertion ? "Insert in" : "Destination body");
-    if(insertion && !parent.value){const missing=document.createElement("option");missing.value="unavailable-body";missing.textContent="Original body unavailable";parent.prepend(missing);parent.value="unavailable-body";}
-    const position = document.createElement("select"); position.setAttribute("aria-label", insertion ? "Insert before" : "Destination position");
-    const summary = document.createElement("p"); summary.className = "story-insertion"; if (insertion) summary.role = "status";
+    const parent = selectOf(parents.map(item => ({ value: item.key, label: item.label })), initialParent?.key ?? ""); parent.setAttribute("aria-label", "Insert in");
+    if(!parent.value){const missing=document.createElement("option");missing.value="unavailable-body";missing.textContent="Original place unavailable";parent.prepend(missing);parent.value="unavailable-body";}
+    const position = document.createElement("select"); position.setAttribute("aria-label", "Insert before");
+    const summary = document.createElement("p"); summary.className = "story-insertion"; summary.role = "status";
     let placements: { key: string; position: Position; label: string }[] = [];
     let confirmationRequired = !!retained && (retained.sceneId !== scene.id || retained.expectedSourceRevision !== scene.sourceRevision);
     const confirmationMessage = retained?.sceneId !== scene.id ? "The original insertion Scene is unavailable. Choose a replacement position explicitly. Input retained." : "The original insertion Scene changed. Choose its position explicitly. Input retained.";
-    const show = (): void => { summary.textContent = confirmationRequired && !position.value ? confirmationMessage : `${insertion ? "Insert in" : "Move to"} ${parents.find(item => item.key === parent.value)?.label ?? "Missing body"} · ${placements.find(item => item.key === position.value)?.label ?? "Choose a position"}`; };
+    const show = (): void => { summary.textContent = confirmationRequired && !position.value ? confirmationMessage : `Insert in ${parents.find(item => item.key === parent.value)?.label ?? scene.displayName} · ${placements.find(item => item.key === position.value)?.label ?? "Choose a position"}`; };
     const rebuild = (): void => {
       const selectedBody=parents.find(item=>item.key===parent.value);
-      if(!selectedBody){placements=[];position.replaceChildren();summary.textContent="Original body unavailable. Choose a body explicitly. Input retained.";return;}
-      const body = selectedBody.body, nodes = nodeBeats(scene, body);
-      placements = (exclude ? movePlaces(scene, exclude, body) : bodyOf(scene, body)?.places ?? []).map(({ position }) => {
-        const anchor = position.type === "before" ? nodes.find(beat => sameNode(nodeRef(beat), position.anchor)) : undefined;
-        return anchor ? { key: anchor.id, position, label: `Before ${anchor.conditionalBranch ? "Condition" : beatLabels[anchor.payload.type]} · ${beatSummary(anchor.payload, model)}` } : { key: "end", position, label: "End of body" };
-      });
+      if(!selectedBody){placements=[];position.replaceChildren();summary.textContent="The original scene, branch or option is unavailable. Choose one. Input retained.";return;}
+      const body = selectedBody.body;
+      placements = (bodyOf(scene, body)?.places ?? []).map(({ position }) => ({ key: position.type === "before" ? nodeBeats(scene, body).find(beat => sameNode(nodeRef(beat), position.anchor))?.id ?? "missing" : "end", position, label: positionLabel(scene, body, position) }));
       position.replaceChildren(...placements.map(item => { const option = document.createElement("option"); option.value = item.key; option.textContent = item.label; return option; }));
       const preferred = initialPosition ?? defaultPlace(scene, body); const match = placements.find(item => samePosition(item.position, preferred));
       if (confirmationRequired) { const choose=document.createElement("option");choose.value="";choose.textContent="Choose a position";choose.disabled=true;position.prepend(choose);position.value=""; }
-      else if (insertion && initialPosition && !match) { const unavailable=document.createElement("option"); unavailable.value="unavailable";unavailable.textContent="Original position unavailable";position.prepend(unavailable);position.value="unavailable"; }
+      else if (initialPosition && !match) { const unavailable=document.createElement("option"); unavailable.value="unavailable";unavailable.textContent="Original position unavailable";position.prepend(unavailable);position.value="unavailable"; }
       else position.value = match?.key ?? placements[0]?.key ?? "";
       initialPosition=undefined; show();
     };
-    parent.addEventListener("change", rebuild); position.addEventListener("change", () => { if (placements.some(item => item.key === position.value)) confirmationRequired = false; show(); }); rebuild(); panel.append(labelled(insertion ? "Insert in" : "Destination body", parent), labelled(insertion ? "Insert before" : "Destination position", position), summary);
-    const validate = validateField(position, () => { if (!placements.some(item => item.key === position.value)) throw Error(confirmationRequired ? confirmationMessage : "Choose an available position in this body."); });
+    parent.addEventListener("change", rebuild); position.addEventListener("change", () => { if (placements.some(item => item.key === position.value)) confirmationRequired = false; show(); }); rebuild(); panel.append(labelled("Insert in", parent), labelled("Insert before", position), summary);
+    const validate = validateField(position, () => { if (!placements.some(item => item.key === position.value)) throw Error(confirmationRequired ? confirmationMessage : `Choose an available position in ${parents.find(item => item.key === parent.value) ? placeName(scene, parents.find(item => item.key === parent.value)!.body) : scene.displayName}.`); });
     return { host: panel, read: () => { validate(); return { body: parents.find(item => item.key === parent.value)!.body, position: placements.find(item => item.key === position.value)!.position }; } };
   };
+  // A new condition at a place, with its If test from the rule builder.
   const openConditionForm = (scene: SceneDocument, body: BodyRef, position: Position): void => {
     const branch = body.type === "branch" ? scene.beats.find(beat => beat.id === body.branchId) : undefined;
     const target = prepareOperation(scene, branch); if (!target) return;
-    const builder = buildConditionEditor(model.authoring.variables);
+    const builder = buildRuleBuilder(model.authoring.variables, undefined, { keyword: "if", label: "If", empty: "Add a rule to give this branch a test.", required: true });
+    builder.host.querySelector<HTMLButtonElement>(".story-add-rule")?.click();
     const otherwise = document.createElement("input"); otherwise.type = "checkbox"; otherwise.setAttribute("aria-label", "Include Otherwise");
-    const location = document.createElement("p"); location.className = "story-insertion";
-    const anchor = position.type === "before" ? position.anchor : undefined;
-    location.textContent = `Insert Condition in ${bodyCaption(scene, body, model)} · ${anchor ? `Before ${anchor.type === "condition" ? "Condition" : beatLabels[scene.beats.find(beat => beat.id === anchor.beatId)!.payload.type]}` : "End of body"}`;
+    const location = document.createElement("dl"); location.className = "story-where";
+    const before = nodeBefore(scene, body, position);
+    for (const [term, value] of [["Goes at", positionLabel(scene, body, position)], ["In", pathCaption(scene, body)], ...before ? [["After", `${numbers.get(before.id) ?? ""} ${nodeName(before)}`]] : []] as const) location.append(Object.assign(document.createElement("dt"), { textContent: term }), Object.assign(document.createElement("dd"), { textContent: value }));
     operation(scene, target, "Add Condition", [location, builder.host, labelled("Include Otherwise", otherwise)], () => ({ type: "insertCondition", body, position, condition: builder.read(), otherwise: otherwise.checked }), "Create Condition");
   };
   const groupHeader = (scene: SceneDocument, groupId: string): SceneBeat => scene.beats.find(beat => beat.conditionalBranch?.groupId === groupId && !beat.conditionalBranch.ordinal && !beat.conditionalBranch.otherwise)!;
@@ -1466,7 +1571,8 @@ export function renderStoryView(
     const target = prepareOperation(scene, header); if (!target) return;
     const groupId = header.conditionalBranch!.groupId, expectedBody = beatBody(header);
     const branches = scene.beats.filter(beat => beat.conditionalBranch?.groupId === groupId);
-    const builder = otherwise ? undefined : buildConditionEditor(model.authoring.variables);
+    const builder = otherwise ? undefined : buildRuleBuilder(model.authoring.variables, undefined, { keyword: "elif", label: "Else if", empty: "Add a rule to give this branch a test.", required: true });
+    builder?.host.querySelector<HTMLButtonElement>(".story-add-rule")?.click();
     const positions = branches.slice(1).map(branch => ({ value: branch.id, label: `Before ${branchCaption(branch.conditionalBranch!, model)}` }));
     if (!branches.some(branch => branch.conditionalBranch!.otherwise)) positions.push({ value: "end", label: "After the last Else If" });
     const position = selectOf(positions, branches.find(branch => branch.conditionalBranch!.otherwise)?.id ?? "end"); position.setAttribute("aria-label", "Branch position");
@@ -1474,23 +1580,50 @@ export function renderStoryView(
     const validate = validateField(position, () => { if (!positions.some(item => item.value === position.value)) throw Error("Choose a branch position."); });
     operation(scene, target, otherwise ? "Add Otherwise" : "Add Else If", [info, ...(builder ? [builder.host, labelled("Branch position", position)] : [])], () => { if (builder) validate(); return { type: "addConditionBranch", groupId, expectedBody, beforeBranchId: otherwise || position.value === "end" ? null : position.value, condition: builder?.read() ?? null }; }, otherwise ? "Create Otherwise" : "Create Else If", header.id);
   };
+  // A branch's test: the rule builder, applied with Apply condition. Otherwise has no test.
   const renderConditionBranch = (card: HTMLElement, scene: SceneDocument, beat: SceneBeat): void => {
     const branch = beat.conditionalBranch!, header = groupHeader(scene, branch.groupId);
-    const note = document.createElement("p"); note.className = "story-breadcrumb"; note.textContent = `${pathCaption(scene, { type: "branch", groupId: branch.groupId, branchId: beat.id })} · Branch ${(branch.ordinal ?? 0) + 1}. First matching branch wins.`; card.append(note);
-    if (!branch.otherwise && branch.condition?.status === "supported") {
-      const builder = buildConditionEditor(model.authoring.variables, branch.condition);
-      operation(scene, card, branch.ordinal ? "Edit Else If" : "Edit Condition", [builder.host], () => ({ type: "updateConditionBranch", groupId: branch.groupId, branchId: beat.id, expectedBody: beatBody(header), condition: builder.read() }), "Apply condition", beat.id);
-    } else if (!branch.otherwise) { const source = button("View condition in Source"); source.disabled = !actions.viewSource; source.addEventListener("click", () => { if (draftGuard()) actions.viewSource?.(scene.sourcePath, beat.byteStart, beat.byteEnd, scene.sourceRevision); }); card.append(source); }
-    if (branch.ordinal || branch.otherwise) {
-      const remove = button("Delete branch"); remove.disabled = scene.sourceConflict;
-      remove.addEventListener("click", () => { const target = prepareOperation(scene, beat); if (!target) return; const copy = document.createElement("p"); copy.textContent = `Delete ${branchCaption(branch, model)} and its contained Beats. Other branches remain.`; discardNote(copy, scene, beat.id); operation(scene, target, "Delete branch", [copy], () => ({ type: "removeConditionBranch", groupId: branch.groupId, branchId: beat.id, expectedBody: beatBody(header) }), "Delete this branch", header.id); }); card.append(remove);
-    }
+    const source = (): void => { if (draftGuard()) actions.viewSource?.(scene.sourcePath, beat.byteStart, beat.byteEnd, scene.sourceRevision); };
+    if (branch.otherwise) { const note = document.createElement("p"); note.className = "story-field-hint"; note.textContent = "Runs when no test above is true."; card.append(note); return; }
+    const builder = buildRuleBuilder(model.authoring.variables, branch.condition, { keyword: branch.ordinal ? "elif" : "if", label: branch.ordinal ? "Else if" : "If", empty: "Add a rule to give this branch a test.", required: true, ...actions.viewSource ? { source } : {}, ...branch.condition ? { caption: conditionCaption(branch.condition, model.authoring.variables) } : {} });
+    if (!builder.editable) { card.append(builder.host); return; }
+    operation(scene, card, branch.ordinal ? "Edit Else If" : "Edit Condition", [builder.host], () => ({ type: "updateConditionBranch", groupId: branch.groupId, branchId: beat.id, expectedBody: beatBody(header), condition: builder.read()! }), "Apply condition", beat.id, true);
   };
-  const moveNodeForm = (scene: SceneDocument, beat: SceneBeat): void => {
-    const target = prepareOperation(scene, beat); if (!target) return;
-    const destination = destinations(scene, beatBody(beat), beat);
-    const note = document.createElement("p"); note.textContent = beat.conditionalBranch ? "Moves the entire condition and every branch together." : "Moves this Beat to the chosen body and position.";
-    operation(scene, target, "Move story content", [note, destination.host], () => ({ type: "moveStoryNode", node: nodeRef(beat), expectedBody: beatBody(beat), ...destination.read() }), "Move to destination", beat.id);
+  // The Move to tree: the scene, its branches and options in source order, each with its
+  // "Before …" and "End of …" positions from core's places. `moved` is a node being moved:
+  // it never goes into its own branches, and its own place is left out.
+  const placeTree = (scene: SceneDocument, own: BodyRef, moved?: SceneBeat): { tree: PlaceNode; expanded: string[] } => {
+    const inner = moved ? innerBodies(scene, moved) : new Set<string>(), siblings = nodeBeats(scene, own), next = moved && siblings[siblings.indexOf(moved) + 1];
+    const stays = (body: BodyRef, position: Position): boolean => !!moved && sameBody(body, own) && (next ? position.type === "before" && sameNode(position.anchor, nodeRef(next)) : position.type === "end");
+    const build = (body: BodyRef, depth: number): PlaceNode => {
+      const id = body.type === "root" ? "root" : body.branchId, children: PlaceNode[] = [];
+      const places = (moved ? movePlaces(scene, moved, body) : bodyOf(scene, body)?.places ?? []).filter(place => !stays(body, place.position));
+      const position = (place: Position): void => { if (places.some(item => samePosition(item.position, place))) children.push({ id: `${id}:${children.length}`, label: positionLabel(scene, body, place), place: { body, position: place } }); };
+      for (const node of nodeBeats(scene, body)) {
+        position({ type: "before", anchor: nodeRef(node) });
+        if (node === moved || depth > 32) continue;
+        for (const child of ownedBodies(scene, node)) if (child.type === "branch" && !inner.has(child.branchId)) children.push(build(child, depth + 1));
+      }
+      position({ type: "end" });
+      return { id, label: placeName(scene, body), path: pathCaption(scene, body), children };
+    };
+    // It opens on the beat's own place: the scene, then each branch or option around it.
+    const expanded = ["root"]; for (let at: BodyRef | undefined = own, steps = 0; at?.type === "branch" && steps <= 32; steps++) { expanded.splice(1, 0, at.branchId); at = bodyOf(scene, at)?.parent; }
+    return { tree: build({ type: "root" }, 0), expanded };
+  };
+  const findPlace = (node: PlaceNode, match: (node: PlaceNode) => boolean): PlaceNode | undefined => match(node) ? node : node.children?.map(child => findPlace(child, match)).find(Boolean);
+  // Move to (story-combined-editor / replace-v2), chosen at the first place after the beat in its own scene, branch or option.
+  const moveNodeForm = (scene: SceneDocument, beat: SceneBeat, opener?: HTMLElement): void => {
+    if (!draftGuard()) return;
+    const own = beatBody(beat), siblings = nodeBeats(scene, own), { tree, expanded } = placeTree(scene, own, beat);
+    const positions = findPlace(tree, node => node.id === expanded.at(-1))?.children?.filter(child => child.place && sameBody(child.place.body, own)) ?? [];
+    const after = positions.find(child => { const place = child.place!.position; return place.type === "end" || siblings.findIndex(item => sameNode(nodeRef(item), place.anchor)) > siblings.indexOf(beat); }) ?? positions.at(-1);
+    const number = numbers.get(beat.id) ?? "";
+    openPlaceTree({
+      host, opener: opener ?? null, title: `Move ${number} ${beat.conditionalBranch ? "Condition" : nodeName(beat)}`, tree, expanded, ...after ? { chosen: after.id } : {},
+      note: beat.conditionalBranch ? "Moves the entire condition and every branch together." : "Moves this beat to the chosen scene, branch or option.",
+      move: place => mutate({ type: "moveStoryNode", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, node: nodeRef(beat), expectedBody: own, ...place }, () => { selectedBeatId = beat.id; openTo(model.scenes.find(item => item.id === scene.id) ?? scene, place.body); }).then(saved => { if (saved) focusColumn(beat.id); return saved; }),
+    });
   };
   // Story moves only nodes it can edit, never Custom Code, branch headers or read-only Choices.
   const nodeEditable = (beat: SceneBeat): boolean => !readOnlyLogic(beat) && !beat.structuralPlaceholder && (!beat.protected || !!beat.conditionalBranch && !beat.conditionalBranch.ordinal && !beat.conditionalBranch.otherwise);
@@ -1511,7 +1644,7 @@ export function renderStoryView(
     const groupId = header.conditionalBranch!.groupId;
     const branches = scene.beats.filter(beat => beat.conditionalBranch?.groupId === groupId);
     const branch = selectOf(branches.map(item => ({ value: item.id, label: branchCaption(item.conditionalBranch!, model) })), branches[0]?.id); branch.setAttribute("aria-label", "Branch to keep");
-    const copy = document.createElement("p"); const show = (): void => { copy.textContent = `Keep only ${branches.find(item => item.id === branch.value)?.conditionalBranch ? branchCaption(branches.find(item => item.id === branch.value)!.conditionalBranch!, model) : "the selected branch"} in ${bodyCaption(scene, beatBody(header), model)}. Remove the condition and all other branches; their bodies are not combined.`; }; branch.addEventListener("change", show); show();
+    const copy = document.createElement("p"); const show = (): void => { copy.textContent = `Keep only ${branches.find(item => item.id === branch.value)?.conditionalBranch ? branchCaption(branches.find(item => item.id === branch.value)!.conditionalBranch!, model) : "the selected branch"} in ${pathCaption(scene, beatBody(header))}. Remove the condition and all other branches; their beats are not combined.`; }; branch.addEventListener("change", show); show();
     const note = document.createElement("p"); discardNote(note, scene, groupId, "Unsaved beat drafts in branches you do not keep are discarded.");
     operation(scene, target, "Unwrap one branch", [labelled("Branch to keep", branch), copy, ...(note.textContent ? [note] : [])], () => ({ type: "unwrapCondition", groupId, branchId: required(branch), expectedBody: beatBody(header) }), "Unwrap selected branch");
   };
@@ -1699,8 +1832,8 @@ export function renderStoryView(
     scroller.append(renderRoute({ view: routeView, focus: writingFocus, scene, items, numbers, selected, locked: scene.sourceConflict, label: beatName,
       summary: beat => beat.conditionalBranch ? branchName(scene, beat) : beatSummary(beat.payload, model), branchName: header => branchName(scene, header), endName: header => endName(scene, header),
       sceneName: id => model.scenes.find(item => item.id === id)?.displayName ?? "an unavailable scene", state: accepted,
-      select: id => select(scene, id), selectNew: key => { if (navigate(() => { selectedBeatId = undefined; selectedNewDraft = key; })) beatDrafts.get(key)?.panel.querySelector<HTMLElement>("select, input, textarea")?.focus(); },
-      insert: (body, position, opener) => insertAt(scene, body, position, opener), move: (beat, direction) => moveSibling(scene, beat, direction) }));
+      select: id => select(scene, id), selectNew: key => { if (navigate(() => { selectedBeatId = undefined; selectedNewDraft = key; })) beatDrafts.get(key)?.editors()[0]?.focus(); },
+      insert: (body, position, opener) => addBeat(scene, body, position, opener), move: (beat, direction) => moveSibling(scene, beat, direction) }));
     // The beat columns scroll sideways with the wheel; Writing focus rows scroll as usual.
     scroller.addEventListener("wheel", event => { if (!writingFocus && Math.abs(event.deltaY) > Math.abs(event.deltaX) && scroller.scrollWidth > scroller.clientWidth) { scroller.scrollLeft += event.deltaY; event.preventDefault(); } }, { passive: false });
     panel.append(toolbar, scroller);
@@ -1716,7 +1849,9 @@ export function renderStoryView(
   // beat, branch or option, or what to do in an empty selection.
   const drawEditor = (scene: SceneDocument): void => {
     const editor = editorHost; if (!editor) return;
-    editor.replaceChildren(); delete editor.dataset.editorFor; effectsHost = undefined;
+    // A redraw closes a picker sheet, and with it the picture it previewed.
+    if (sheetPreview) sheetPreview = undefined;
+    editor.replaceChildren(); delete editor.dataset.editorFor; delete editor.dataset.sheet; effectsHost = undefined;
     editor.append(...lostDrafts(scene));
     if (openOperation) { editor.append(openOperation); return; }
     const fresh = selectedNewDraft ? beatDrafts.get(selectedNewDraft) : undefined;
@@ -1727,7 +1862,15 @@ export function renderStoryView(
       const branch = beat.conditionalBranch;
       if (branch?.choiceOption) renderOptionEditor(editor, scene, beat);
       else if (branch) renderConditionEditor(editor, scene, beat);
-      else { editor.append(beatHeading(scene, beat)); renderExistingBeat(editor, scene, beat); if (beat.payload.type === "choice") editor.append(optionLinks(scene, beat)); }
+      else {
+        const heading = beatHeading(scene, beat); editor.append(heading); renderExistingBeat(editor, scene, beat);
+        // A scene-level dialogue line adds the next line from its heading, as Shift+Cmd/Ctrl+Enter does.
+        const draft = beatDrafts.get(beat.id);
+        if (draft?.nextLine) { const next = button("+ Next line", "button secondary story-next-line"); next.title = "Commit this line and add the next one (Shift+Cmd/Ctrl+Enter)"; next.addEventListener("click", draft.nextLine); next.disabled = scene.sourceConflict; heading.querySelector(".story-editor-state")?.after(next); }
+        // Repeat this Choice is changed from its option's Then.
+        const owner = beat.payload.type === "repeatChoice" ? bodyOwner(scene, beatBody(beat)) : undefined;
+        if (owner?.payload.type === "choice") { const go = button(`Select Choice ${numbers.get(owner.id) ?? ""}`, "button secondary"); go.addEventListener("click", () => select(scene, owner.id)); editor.querySelector(".expanded-beat")?.append(go); }
+      }
     } else {
       const empty = document.createElement("div"); empty.className = "story-editor-empty";
       const heading = document.createElement("h2"); heading.textContent = nodeBeats(scene, { type: "root" }).some(item => item.payload.type !== "return") ? "No beat selected" : "No lines yet";
@@ -1737,16 +1880,70 @@ export function renderStoryView(
     const effects = document.createElement("section"); effects.className = "story-effects"; effects.setAttribute("aria-label", "In effect");
     editor.append(effects); effectsHost = effects; renderEffects(effects, scene);
   };
-  // A Choice's options, each opening its own editor with Then and its beats.
-  const optionLinks = (scene: SceneDocument, choice: SceneBeat): HTMLElement => {
-    const links = document.createElement("nav"); links.className = "row-actions story-option-links"; links.setAttribute("aria-label", "Option editors");
-    for (const body of ownedBodies(scene, choice)) {
-      if (body.type !== "branch") continue;
-      const header = scene.beats.find(item => item.id === body.branchId); if (!header) continue;
-      const open = button(branchName(scene, header), "text-button"); open.dataset.arm = String(armOf(scene, body)); open.dataset.optionId = header.id;
-      open.addEventListener("click", () => select(scene, header.id)); links.append(open);
+  // A node as Move to and Add a beat name it: "Mara's line", "Condition", "Narration".
+  const nodeName = (beat: SceneBeat): string => {
+    const payload = beat.payload;
+    if (!beat.conditionalBranch && payload.type === "dialogue") return `${model.authoring.characters.find(character => character.id === payload.characterId)?.displayName ?? "Unknown Character"}'s line`;
+    return beatName(beat);
+  };
+  // A scene, branch or option by its own name: "Arrival", "If trust ≥ 5", "Option 2 "Leave"".
+  const placeName = (scene: SceneDocument, body: BodyRef): string => {
+    if (body.type === "root") return scene.displayName;
+    const header = scene.beats.find(beat => beat.id === body.branchId);
+    return header ? branchName(scene, header) : "a branch that is no longer in source";
+  };
+  // The number of the beat the story reaches after a node, climbing out of its branches.
+  const continuationAfter = (scene: SceneDocument, beat: SceneBeat): string | undefined => {
+    const shown = beatNumbers(scene);
+    let node: SceneBeat | undefined = beat;
+    for (let steps = 0; node && steps <= 32; steps++) {
+      const nodes = bodyOf(scene, beatBody(node))?.nodes ?? [], index = nodes.findIndex(item => item.beatId === node!.id), next = nodes[index + 1];
+      if (next) return shown.get(next.beatId);
+      node = bodyOwner(scene, beatBody(node));
     }
-    return links;
+    return undefined;
+  };
+  // What the Choice editor reads from the scene and does to other beats.
+  const choiceHost = (scene: SceneDocument, beat: SceneBeat): ChoiceHost => {
+    const current = (): SceneDocument | undefined => model.scenes.find(item => item.id === scene.id);
+    const optionBody = (optionId: string): BodyRef | undefined => { const header = current()?.beats.find(item => item.id === optionId); return header?.conditionalBranch ? { type: "branch", groupId: header.conditionalBranch.groupId, branchId: header.id } : undefined; };
+    return {
+      structure: () => { const shown = current(), node = shown?.beats.find(item => item.id === beat.id); return shown && node ? { scene: shown, numbers: beatNumbers(shown), locked: shown.sourceConflict || node.protected } : undefined; },
+      beatName: item => nodeName(item),
+      beatSummary: item => item.conditionalBranch ? branchName(current() ?? scene, item) : beatSummary(item.payload, model),
+      sceneName: id => model.scenes.find(item => item.id === id)?.displayName ?? "an unavailable scene",
+      continuation: () => { const shown = current(), node = shown?.beats.find(item => item.id === beat.id); return shown && node ? continuationAfter(shown, node) : undefined; },
+      select: id => { const shown = current(); if (shown) select(shown, id); },
+      openOption: optionId => {
+        const shown = current(), body = optionBody(optionId); if (!shown || body?.type !== "branch") return;
+        if (navigate(() => { openBranches.set(body.groupId, body.branchId); selectBeat(shown, nodeBeats(shown, body)[0]?.id ?? optionId); })) focusColumn(selectedBeatId);
+      },
+      addBeat: optionId => { const shown = current(), body = optionBody(optionId); if (shown && body) addBeat(shown, body, defaultPlace(shown, body), `option:${optionId}`); },
+      setEnding: (optionId, ending) => setOptionEnding(scene.id, optionId, ending),
+      viewSource: item => { const shown = current() ?? scene; actions.viewSource?.(shown.sourcePath, item.byteStart, item.byteEnd, shown.sourceRevision); },
+      openScene: sceneId => { if (sceneId === selectedSceneId) return; void settle().then(ok => { if (ok && !disposed) { selectScene(sceneId); draw(); } else if (!ok) actions.status("Complete or cancel this edit before changing scenes.", "error"); }); },
+      markStage: markStageOption,
+    };
+  };
+  // Then: an option's ending is its last beat. Continue removes an explicit ending; the
+  // others add one at the option's end or change the one there. Each is one edit.
+  const setOptionEnding = (sceneId: string, optionId: string, ending: Ending): void => {
+    if (!draftGuard()) return;
+    const scene = model.scenes.find(item => item.id === sceneId), header = scene?.beats.find(item => item.id === optionId);
+    if (!scene || !header?.conditionalBranch) return;
+    const body: BodyRef = { type: "branch", groupId: header.conditionalBranch.groupId, branchId: header.id }, info = bodyOf(scene, body);
+    const endedBy = info?.ending.type === "ends" ? scene.beats.find(item => item.id === (info.ending as { beatId: string }).beatId) : undefined;
+    const explicit = endedBy && ["jump", "repeatChoice", "return"].includes(endedBy.payload.type) ? endedBy : undefined;
+    let command: SceneCommand;
+    if (ending.type === "continue") { if (!explicit) return; command = { type: "removeStoryNode", node: nodeRef(explicit), expectedBody: body }; }
+    else {
+      const payload: BeatPayload = ending.type === "jump" ? { type: "jump", sceneId: ending.sceneId } : ending.type === "repeatChoice" ? { type: "repeatChoice", target: explicit?.payload.type === "repeatChoice" ? explicit.payload.target : null } : { type: "return" };
+      const end = info?.places.find(place => place.fitsEnding && place.position.type === "end")?.position ?? { type: "end" };
+      command = explicit ? { type: "updateBodyBeat", beatId: explicit.id, expectedBody: body, beat: payload } : { type: "insertBodyBeat", body, position: end, beat: payload };
+    }
+    void mutate({ sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, ...command }).then(saved => {
+      if (saved) editorHost?.querySelector<HTMLElement>(`.story-option[data-option-id="${optionId}"] .story-outcome > summary, .story-option[data-option-id="${optionId}"] .story-then-add`)?.focus();
+    });
   };
   // A node's number and kind, with its move and delete actions in a menu.
   const beatHeading = (scene: SceneDocument, beat: SceneBeat): HTMLElement => {
@@ -1763,117 +1960,120 @@ export function renderStoryView(
     up.addEventListener("click", () => moveSibling(scene, beat, "up"));
     const down = button("Move down", "text-button"); down.ariaLabel = `Move beat ${number} down`; down.disabled = !movable(scene, beat, "down");
     down.addEventListener("click", () => moveSibling(scene, beat, "down"));
-    const move = button("Move to…", "text-button"); move.disabled = !editable || scene.sourceConflict; move.addEventListener("click", () => moveNodeForm(scene, beat));
+    const move = button("Move to…", "text-button"); move.disabled = !editable || scene.sourceConflict; move.addEventListener("click", () => { menu.open = false; moveNodeForm(scene, beat, summary); });
     list.append(up, down, move);
     if (!beat.conditionalBranch) { const remove = button("Delete", "text-button story-menu-delete"); remove.ariaLabel = `Delete beat ${number}`; remove.disabled = !editable || beat.payload.type === "return" && !beat.owner || scene.sourceConflict; remove.addEventListener("click", () => removeNodeForm(scene, beat)); list.append(remove); }
-    menu.append(summary, list); heading.append(title, state, menu);
+    menu.append(summary, list); heading.append(storyIcon(beat.conditionalBranch ? "condition" : beat.payload.type), title, state, menu);
     return heading;
   };
-  // A condition: its group actions, then the shown branch's own editor and actions. The
-  // shown branch is the selected header, or the open branch when the condition is selected.
+  // A condition: its group actions, then each branch with its test and its own actions.
+  // The branch open in the Branch path is marked; Open switches it there.
   const renderConditionEditor = (editor: HTMLElement, scene: SceneDocument, selected: SceneBeat): void => {
     const groupId = selected.conditionalBranch!.groupId, node = groupHeader(scene, groupId);
-    const open = openBranches.get(groupId), shown = selected === node && open ? scene.beats.find(beat => beat.id === open) ?? node : selected;
-    const branch = shown.conditionalBranch!, kind = branch.otherwise ? "Otherwise" : branch.ordinal ? "Else If" : "If";
     editor.append(beatHeading(scene, node));
     const caption = document.createElement("p"); caption.className = "story-condition-summary";
     caption.textContent = `Condition · ${node.conditionalBranch?.condition ? conditionCaption(node.conditionalBranch.condition, model.authoring.variables) : "Unknown condition"} · ${scene.beats.filter(item => item.conditionalBranch?.groupId === groupId).length} branches / ${groupCount(scene, node)} Beats`;
+    const note = document.createElement("p"); note.className = "story-field-hint"; note.textContent = "The first branch whose test is true runs. Tests are not evaluated in the preview.";
     const tools = document.createElement("div"); tools.className = "row-actions story-editor-tools";
     const elseif = button("Add Else If"); elseif.disabled = scene.sourceConflict; elseif.addEventListener("click", () => addBranchForm(scene, node, false));
     const otherwise = button("Add Otherwise"); otherwise.disabled = scene.sourceConflict || scene.beats.some(item => item.conditionalBranch?.groupId === groupId && item.conditionalBranch.otherwise); otherwise.addEventListener("click", () => addBranchForm(scene, node, true));
     const unwrap = button("Unwrap…"); unwrap.disabled = scene.sourceConflict; unwrap.addEventListener("click", () => unwrapForm(scene, node));
     const remove = button("Delete condition"); remove.disabled = scene.sourceConflict; remove.addEventListener("click", () => removeNodeForm(scene, node));
-    tools.append(elseif, otherwise, unwrap, remove); editor.append(caption, tools);
-    const section = document.createElement("section"); section.className = "story-branch-editor"; section.dataset.branchId = shown.id;
-    section.dataset.arm = String(armOf(scene, { type: "branch", groupId, branchId: shown.id }));
-    renderConditionBranch(section, scene, shown);
-    const body: BodyRef = { type: "branch", groupId, branchId: shown.id };
-    const addChild = button(`Add Beat to ${kind}`); addChild.dataset.beatOpener = `branch:${shown.id}`;
-    addChild.disabled = scene.sourceConflict || branch.condition?.status === "unknown";
-    addChild.addEventListener("click", () => insertAt(scene, body, defaultPlace(scene, body), `branch:${shown.id}`));
-    const addInner = button(`Add Condition to ${kind}`); addInner.disabled = scene.sourceConflict;
-    addInner.addEventListener("click", () => openConditionForm(scene, body, defaultPlace(scene, body)));
-    const branchTools = document.createElement("div"); branchTools.className = "row-actions story-editor-tools"; branchTools.append(addChild, addInner);
-    section.append(branchTools); editor.append(section);
+    tools.append(elseif, otherwise, unwrap, remove); editor.append(caption, note, tools);
+    for (const header of scene.beats.filter(item => item.conditionalBranch?.groupId === groupId)) {
+      const branch = header.conditionalBranch!, body: BodyRef = { type: "branch", groupId, branchId: header.id };
+      const section = document.createElement("section"); section.className = "story-branch-editor"; section.dataset.branchId = header.id;
+      section.dataset.arm = String(armOf(scene, body)); section.dataset.shown = String(openBranches.get(groupId) === header.id || selected === header);
+      const head = document.createElement("div"); head.className = "story-branch-head";
+      const name = document.createElement("strong"); name.textContent = branch.otherwise ? "Otherwise" : branch.ordinal ? "Else if" : "If";
+      const open = button("Open", "button secondary"); open.setAttribute("aria-pressed", String(openBranches.get(groupId) === header.id)); open.setAttribute("aria-label", `${openBranches.get(groupId) === header.id ? "Close" : "Open"} ${branchName(scene, header)} in Tracks`);
+      open.addEventListener("click", () => toggleBranch(scene, node, body));
+      const add = button("+ Beat", "button secondary"); add.dataset.beatOpener = `branch:${header.id}`; add.setAttribute("aria-label", add.title = `Add a beat to ${branchName(scene, header)}`);
+      add.disabled = scene.sourceConflict || branch.condition?.status === "unknown";
+      add.addEventListener("click", () => addBeat(scene, body, defaultPlace(scene, body), `branch:${header.id}`));
+      head.append(name, open, add);
+      if (branch.ordinal || branch.otherwise) {
+        const drop = button("Delete branch", "button secondary"); drop.disabled = scene.sourceConflict;
+        drop.addEventListener("click", () => { const target = prepareOperation(scene, header); if (!target) return; const copy = document.createElement("p"); copy.textContent = `Delete ${branchCaption(branch, model)} and its contained Beats. Other branches remain.`; discardNote(copy, scene, header.id); operation(scene, target, "Delete branch", [copy], () => ({ type: "removeConditionBranch", groupId, branchId: header.id, expectedBody: beatBody(node) }), "Delete this branch", node.id); });
+        head.append(drop);
+      }
+      section.append(head); renderConditionBranch(section, scene, header); editor.append(section);
+    }
   };
-  // An option header: its availability, Add a beat and Add Condition inside it, and Then.
+  // An option: its place, a way back to its Choice, and its first beats. Then, Only when and
+  // its text are edited in the Choice editor.
   const renderOptionEditor = (editor: HTMLElement, scene: SceneDocument, beat: SceneBeat): void => {
     const branch = beat.conditionalBranch!;
     const body: BodyRef = { type: "branch", groupId: branch.groupId, branchId: beat.id }, info = bodyOf(scene, body);
-    const menu = scene.beats.find(item => item.id === info?.owningNode);
-    const option = menu?.payload.type === "choice" ? menu.payload.options.find(o => o.id === beat.id) : undefined;
-    // Then edits an explicit ending beat. Custom Code that ends the option is edited in Source.
-    const bodyEnding = info?.ending, endedAt = bodyEnding?.type === "ends" ? scene.beats.find(item => item.id === bodyEnding.beatId) : undefined;
-    const code = endedAt?.payload.type === "customCode" ? endedAt : undefined;
-    const explicit = endedAt && ["jump", "repeatChoice", "return"].includes(endedAt.payload.type) ? endedAt : undefined;
-    const endingText = code?.payload.type === "customCode" ? `Ends with Custom Code: ${code.payload.source.trim()}` : bodyEnding?.type === "unknown" ? "Ending unknown: Custom Code can leave this option" : endedAt ? "Explicit transfer at the end of this option" : "Continue after the Choice";
+    const menu = scene.beats.find(item => item.id === info?.owningNode), index = branch.ordinal ?? 0;
     const section = document.createElement("section"); section.className = "story-option-editor"; section.dataset.optionId = beat.id; section.dataset.arm = String(armOf(scene, body));
     const heading = document.createElement("div"); heading.className = "story-editor-heading";
-    const title = document.createElement("strong"); title.className = "story-editor-title"; title.textContent = `${(branch.ordinal ?? 0) + 1}. ${option?.text ?? "Option"}`;
-    const owner = button(`Edit choice ${numbers.get(menu?.id ?? "") ?? ""}`, "text-button"); owner.disabled = !menu; owner.addEventListener("click", () => { if (menu) select(scene, menu.id); });
-    heading.append(title, owner);
-    const availability = document.createElement("p"); availability.textContent = option?.condition ? `Only when ${conditionCaption(option.condition, model.authoring.variables)}` : "Always available";
-    const add = button("Add a Beat", "text-button"); add.dataset.beatOpener = `branch:${beat.id}`; add.disabled = scene.sourceConflict;
-    add.addEventListener("click", () => insertAt(scene, body, defaultPlace(scene, body), `branch:${beat.id}`, "narration"));
-    const then = button("Then", "text-button"); then.disabled = scene.sourceConflict || !!menu?.protected;
-    then.addEventListener("click", () => {
-      const target = prepareOperation(scene); if (!target) return;
-      const ending = explicit;
-      const kind = selectOf([{ value: "continue", label: "Continue after the Choice" }, { value: "jump", label: "Go to a Scene" }, { value: "repeatChoice", label: "Repeat this Choice" }, { value: "return", label: "Return to caller or main menu" }], ending?.payload.type ?? "continue"); kind.setAttribute("aria-label", "Then");
-      const destination = entitySelect(model.scenes.map(s => ({ id: s.id, label: s.displayName })), ending?.payload.type === "jump" ? ending.payload.sceneId : ""); destination.setAttribute("aria-label", "Destination Scene");
-      const destinationLabel = labelled("Destination Scene", destination); const show = (): void => { destinationLabel.hidden = kind.value !== "jump"; }; kind.addEventListener("change", show); show();
-      const notes: HTMLElement[] = [];
-      if (code || bodyEnding?.type === "unknown") { const note = document.createElement("p"); note.className = "story-continuation"; note.textContent = endingText; notes.push(note); }
-      if (code) {
-        kind.disabled = true;
-        const source = button("Edit in Source", "button secondary"); source.disabled = !actions.viewSource;
-        source.addEventListener("click", () => actions.viewSource?.(scene.sourcePath, code.byteStart, code.byteEnd, scene.sourceRevision)); notes.push(source);
-      }
-      const panel = operation(scene, target, "Option ending", [...notes, labelled("Then", kind), destinationLabel], () => {
-        if (code) throw Error("Custom Code ends this option. Edit it in Source.");
-        if (kind.value === "continue") { if (!ending && menu) return { type: "updateBodyBeat", beatId: menu.id, expectedBody: beatBody(menu), beat: menu.payload }; if (!ending) throw Error("The owning Choice is unavailable."); return { type: "removeStoryNode", node: nodeRef(ending), expectedBody: body }; }
-        const payload: BeatPayload = kind.value === "jump" ? { type: "jump", sceneId: required(destination) } : kind.value === "repeatChoice" ? { type: "repeatChoice", target: ending?.payload.type === "repeatChoice" ? ending.payload.target : null } : { type: "return" };
-        return ending ? { type: "updateBodyBeat", beatId: ending.id, expectedBody: body, beat: payload } : { type: "insertBodyBeat", body, position: { type: "end" }, beat: payload };
-      }, "Apply ending");
-      if (code) panel.querySelectorAll<HTMLButtonElement>(".row-actions .button.primary").forEach(apply => { apply.disabled = true; });
-    });
-    const following = document.createElement("p"); following.className = "story-continuation"; following.textContent = `${endingText} · ${pathCaption(scene, info?.parent ?? { type: "root" })}`;
+    const title = document.createElement("strong"); title.className = "story-editor-title"; title.textContent = `${numbers.get(beat.id) ?? ""} · Option ${index + 1}`;
+    heading.append(storyIcon("choice"), title);
     const context = document.createElement("p"); context.className = "story-breadcrumb"; context.textContent = pathCaption(scene, body);
-    const addCondition = button("Add Condition", "text-button"); addCondition.disabled = scene.sourceConflict;
-    addCondition.addEventListener("click", () => openConditionForm(scene, body, defaultPlace(scene, body)));
-    const tools = document.createElement("div"); tools.className = "row-actions story-editor-tools"; tools.append(add, addCondition, then);
-    section.append(heading, context, availability, tools, following); editor.append(section);
+    const owner = button(`Edit Choice ${numbers.get(menu?.id ?? "") ?? ""}`, "button secondary"); owner.disabled = !menu;
+    owner.addEventListener("click", () => { if (!menu) return; select(scene, menu.id); editorHost?.querySelectorAll<HTMLInputElement>('input[aria-label="Choice option text"]')[index]?.focus(); });
+    section.append(heading, context, owner);
+    const beats = nodeBeats(scene, body);
+    if (!beats.length) {
+      const empty = document.createElement("div"); empty.className = "story-editor-empty";
+      const name = document.createElement("h2"); name.textContent = `${placeName(scene, body)} has no beats yet.`;
+      const copy = document.createElement("p"); copy.textContent = "Write a line or add a background in this option.";
+      const start = document.createElement("div"); start.className = "row-actions story-editor-tools";
+      for (const [label, kind] of [["Write dialogue", "dialogue"], ["Write narration", "narration"], ["Add background", "background"]] as const) {
+        const write = button(label, kind === "dialogue" ? "button primary" : "button secondary"); write.dataset.beatOpener = `first:${beat.id}`; write.disabled = scene.sourceConflict;
+        write.addEventListener("click", () => insertAt(scene, body, defaultPlace(scene, body), `first:${beat.id}`, kind)); start.append(write);
+      }
+      empty.append(name, copy, start); section.append(empty);
+    } else {
+      const add = button("+ Beat", "button secondary"); add.dataset.beatOpener = `branch:${beat.id}`; add.setAttribute("aria-label", add.title = `Add a beat to ${placeName(scene, body)}`); add.disabled = scene.sourceConflict;
+      add.addEventListener("click", () => addBeat(scene, body, defaultPlace(scene, body), `branch:${beat.id}`)); section.append(add);
+    }
+    editor.append(section);
   };
 
   const renderExistingBeat = (card: HTMLElement, scene: SceneDocument, beat: SceneBeat): void => {
     const number = numbers.get(beat.id) ?? "";
     if (readOnlyLogic(beat)) {
-      const panel = document.createElement("div"); panel.className = "expanded-beat protected-code";
+      // A Choice with an unsupported condition stays as written (story-combined-editor / replace-v2).
+      const panel = document.createElement("div"); panel.className = "expanded-beat protected-code story-protected-choice";
       const explanation = document.createElement("p");
       explanation.textContent = "This Choice contains an unsupported condition. Edit it in Source to preserve the expression. Availability is unknown in the editor preview.";
       panel.append(explanation);
       if (beat.payload.type === "choice") {
         const options = document.createElement("ul");
-        for (const option of beat.payload.options) {
-          const item = document.createElement("li"); const destination = "Option body, then shared continuation";
-          item.textContent = `${option.text} → ${destination} · ${option.condition ? `Available when ${conditionCaption(option.condition, model.authoring.variables)} · Availability unknown` : "Always available"}`;
-          options.append(item);
-        }
+        beat.payload.options.forEach((option, index) => {
+          const header = scene.beats.find(item => item.id === option.id), groupId = header?.conditionalBranch?.groupId;
+          const ending = groupId === undefined ? undefined : bodyOf(scene, { type: "branch", groupId, branchId: header!.id })?.ending;
+          const code = ending?.type === "ends" && scene.beats.find(item => item.id === ending.beatId)?.payload.type === "customCode";
+          const item = document.createElement("li"), name = document.createElement("strong"), goes = document.createElement("span"), available = document.createElement("span");
+          name.textContent = option.text;
+          goes.textContent = `→ Option ${index + 1}'s beats${code ? " · Ends with Custom Code" : ending?.type === "ends" ? "" : ", then continues after the Choice"}`;
+          available.textContent = option.condition ? `Available when ${conditionCaption(option.condition, model.authoring.variables)} · Availability unknown` : "Always available";
+          item.append(name, goes, available); options.append(item);
+        });
         panel.append(options);
       }
-      const source = button("View in Source", "button secondary"); source.disabled = !actions.viewSource;
+      const source = button("Edit in Source", "button secondary"); source.disabled = !actions.viewSource;
       source.addEventListener("click", () => actions.viewSource?.(scene.sourcePath, beat.byteStart, beat.byteEnd, scene.sourceRevision)); panel.append(source); card.append(panel); return;
     }
     if (beat.protected) {
       const protectedPanel = document.createElement("div"); protectedPanel.className = "protected-code";
       const explanation = document.createElement("p"); explanation.textContent = beat.sourceFallback ?? (beat.payload.type === "customCode" ? beat.payload.reason : "Protected source");
       const source = document.createElement("pre"); source.textContent = beat.payload.type === "customCode" ? beat.payload.source : "";
-      const open = button("View in Source", "button secondary"); open.disabled = !actions.viewSource;
+      protectedPanel.append(explanation, source);
+      // The Custom Code beat that may leave its option carries the unknown ending.
+      const info = bodyOf(scene, beatBody(beat));
+      if (info?.kind === "option" && info.ending.type === "unknown" && nodeBeats(scene, beatBody(beat)).at(-1)?.id === beat.id) {
+        const note = document.createElement("p"); note.className = "story-warn"; note.textContent = "Ending unknown: Custom Code can leave this option"; protectedPanel.append(note);
+      }
+      const open = button("Edit in Source", "button secondary"); open.disabled = !actions.viewSource;
       open.addEventListener("click", () => actions.viewSource?.(scene.sourcePath, beat.byteStart, beat.byteEnd, scene.sourceRevision));
-      protectedPanel.append(explanation, source, open); card.append(protectedPanel); return;
+      protectedPanel.append(open); card.append(protectedPanel); return;
     }
     const kept = beatDrafts.get(beat.id);
-    if (kept) { card.append(kept.panel); return; }
+    // A kept draft keeps its fields; what it shows from the scene, such as a Choice's option beats, redraws.
+    if (kept) { card.append(kept.panel); for (const editor of kept.editors()) editor.refresh?.(); return; }
     // A draft commits against current revisions while its beat's accepted payload is unchanged.
     // Otherwise it conflicts: only Discard draft or Override source resolves it.
     const accepted = JSON.stringify(beat.payload);
@@ -1911,7 +2111,8 @@ export function renderStoryView(
       })().finally(() => { settling = undefined; });
     };
     const updateCommand = (payload: BeatPayload, current = base()): SceneCommand => ({ type: "updateBodyBeat", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, beatId: beat.id, expectedBody: current.expectedBody, beat: payload });
-    const editor = buildBeatEditor(model, beat.payload, true, liveActions, assignmentValidation(() => base(), value => updateCommand(value)));
+    const context = editorContext(beat.id, true, assignmentValidation(() => base(), value => updateCommand(value)));
+    const editor = beat.payload.type === "choice" ? buildChoiceEditor(beat.payload, context, choiceHost(scene, beat)) : buildBeatEditor(beat.payload, context);
     const panel = editor.host; panel.classList.add("expanded-beat");panel.dataset.beatType=beat.payload.type;
     if (beat.payload.type === "showScreen" || beat.payload.type === "hideScreen" || beat.payload.type === "callScreen") {
       const details = document.createElement("details"), summary = document.createElement("summary"); summary.textContent = "Source and effects";
@@ -2001,15 +2202,19 @@ export function renderStoryView(
       if ((event.ctrlKey || event.metaKey) && event.key === "Enter" && !event.defaultPrevented) { event.preventDefault(); if (!event.isComposing && !settling && !pendingWrites && !conflicted()) settling = save(false).finally(() => { settling = undefined; }); }
       else if (event.key === "Escape" && !event.defaultPrevented && !event.isComposing) { event.preventDefault(); if (!pendingWrites && !settling && !conflicted()) { actions.status("Use Cancel to discard this draft, or keep editing."); cancel.focus(); } }
     });
-    if (beat.payload.type === "dialogue") editor.primary.addEventListener("keydown", (event) => {
+    // Cmd/Ctrl+Enter commits a line; Shift adds the next line after a scene-level dialogue line.
+    if (beat.payload.type === "dialogue" || beat.payload.type === "narration") editor.primary.addEventListener("keydown", (event) => {
       if ((event.ctrlKey || event.metaKey) && event.key === "Enter") { event.preventDefault(); if(!event.isComposing&&!settling&&!conflicted())settling=save(event.shiftKey).finally(()=>{settling=undefined;}); }
     });
     const screenBeat=["showScreen","hideScreen","callScreen"].includes(beat.payload.type);
     if(screenBeat){panel.classList.add("story-screen-editor");cancel.className="button secondary";}
     actionsRow.append(...(screenBeat?[commit,cancel]:[cancel,commit]));
+    // A Return, Stop music or Repeat this Choice has nothing to edit, so it has no Commit or Cancel.
+    actionsRow.hidden = !editor.controls.length && beat.payload.type !== "choice";
     const secondary=panel.querySelector("details.story-screen-secondary");panel.append(actionsRow);if(secondary)panel.append(secondary);
     dirtyDraft(panel, editor.controls); card.append(panel);
-    const draft = keepDraft(beat.id, { panel, sceneId: scene.id, beatId: beat.id, read: editor.read, command: () => updateCommand(editor.read()), kind: () => beatLabels[beat.payload.type].toLowerCase(), editors: () => [editor], conflict, primary: () => editor.primary });
+    const draft = keepDraft(beat.id, { panel, sceneId: scene.id, beatId: beat.id, read: editor.read, command: () => updateCommand(editor.read()), kind: () => beatLabels[beat.payload.type].toLowerCase(), editors: () => [editor], conflict, primary: () => editor.primary,
+      ...(beat.payload.type === "dialogue" && !beat.owner ? { nextLine: () => { if (!settling && !conflicted()) settling = save(true).finally(() => { settling = undefined; }); } } : {}) });
   };
 
   const assignmentValidation = (base: () => { scene: SceneDocument; captured: ExpectedRevisions }, command: (beat: BeatPayload) => SceneCommand): ValidateAssignment => async beat => {
@@ -2020,13 +2225,21 @@ export function renderStoryView(
     return result;
   };
 
-  // Builds a new beat draft and returns its key. Story shows it in the editor and as a
-  // pending column in Tracks.
-  const renderNewBeat = (scene: SceneDocument, initialType: BeatPayload["type"] = "dialogue", body: BodyRef = { type: "root" }, position: Position = defaultPlace(scene, body), insertion?: ScreenInsertion, opener = "root", returnTo?: string): string => {
+  // What every beat editor needs from Story: thumbnails, the stage preview of a picture
+  // the author points at in a picker sheet, and #96's backend checks.
+  const editorContext = (key: string, existing: boolean, validate: ValidateAssignment): EditorContext => ({
+    model, existing, actions: liveActions, validate,
+    thumbnail: (assetId, image, errorHost) => void loadImage(assetId, "thumbnail", image, errorHost, false),
+    preview: payload => { sheetPreview = payload ? { key, payload } : undefined; refreshPreview(); },
+  });
+
+  // Builds a new beat draft of one kind and returns its key. Story shows it in the editor
+  // and as a pending column in Tracks. A new beat that `replaces` an ending saves as an
+  // update of that ending beat.
+  const renderNewBeat = (scene: SceneDocument, type: BeatPayload["type"], body: BodyRef = { type: "root" }, position: Position = defaultPlace(scene, body), insertion?: ScreenInsertion, opener = "root", returnTo?: string, replaces?: string): string => {
     // One pending new beat per insertion place: adding there again returns to it.
-    const requested = JSON.stringify({ body, position });
-    const existing = [...beatDrafts.entries()].find(([, draft]) => !draft.beatId && draft.sceneId === scene.id && JSON.stringify(draft.place?.()) === requested);
-    if (existing) return existing[0];
+    const existing = pendingAt(scene, body, position);
+    if (existing) return existing;
     const key = `new:${++newBeatDrafts}`;
     const base = (): { scene: SceneDocument; captured: ExpectedRevisions } => {
       const current = model.scenes.find(item => item.id === scene.id);
@@ -2034,51 +2247,69 @@ export function renderStoryView(
       if (current.sourceConflict) throw new Error(unreadable);
       return { scene: current, captured: expectedRevisions(model) };
     };
-    const insertCommand = (payload: BeatPayload, location: { body: BodyRef; position: Position }, current = base()): SceneCommand => ({ type: "insertBodyBeat", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, ...location, beat: payload });
+    const insertCommand = (payload: BeatPayload, location: { body: BodyRef; position: Position }, current = base()): SceneCommand => replaces
+      ? { type: "updateBodyBeat", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, beatId: replaces, expectedBody: location.body, beat: payload }
+      : { type: "insertBodyBeat", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, ...location, beat: payload };
     // Story Save: a new beat finds its body and anchor by id; if source dropped either, the draft conflicts.
     // Core repeats this check on its candidate (BEAT_DRAFT_CONFLICT); this one lets Story refuse before sending.
+    const placeChanged = (current: SceneDocument, location: { body: BodyRef; position: Position }): boolean => {
+      const { body, position } = location, kept = body.type === "root" || !!bodyOf(current, body);
+      const ending = bodyOf(current, body)?.ending;
+      return !kept || (position.type === "before" && !nodeBeats(current, body).some(node => sameNode(nodeRef(node), position.anchor))) || (!!replaces && !(ending?.type === "ends" && ending.beatId === replaces));
+    };
     const savedCommand = (): SceneCommand => {
-      const payload = editor.read(), location = chosenLocation(), current = base(), { body, position } = location;
-      const bodyKept = body.type === "root" || !!bodyOf(current.scene, body);
-      if (!bodyKept || (position.type === "before" && !nodeBeats(current.scene, body).some(node => sameNode(nodeRef(node), position.anchor)))) throw new Error("This beat's place changed in source after the draft began. Draft retained.");
+      const payload = editor.read(), location = chosenLocation(), current = base();
+      if (placeChanged(current.scene, location)) throw new Error("This beat's place changed in source after the draft began. Draft retained.");
       return insertCommand(payload, location, current);
     };
     const openingInsertion = structuredClone(insertion ?? screenInsertion ?? {sceneId:scene.id,body,position,expectedSourceRevision:scene.sourceRevision});
     let rememberedInsertion = false;
-    const panel = document.createElement("section"); panel.className = "new-beat scene-draft";
-    panel.addEventListener("compositionstart", () => { composing = true; }); panel.addEventListener("compositionend", () => { composing = false; }); panel.setAttribute("aria-labelledby", "new-beat-title");
-    const heading = document.createElement("h3"); heading.id = "new-beat-title"; heading.textContent = "Add Beat";
-    const types = (Object.keys(beatLabels) as BeatPayload["type"][]).filter((type) => type !== "customCode" && type !== "repeatChoice");
-    const type = selectOf(types.map((value) => ({ value, label: beatLabels[value] })), initialType); type.setAttribute("aria-label", "Beat type");
-    const destination = document.createElement("p"); destination.className = "story-insertion";
-    const insertionAnchor = position.type === "before" ? position.anchor : undefined;
-    const anchor = insertionAnchor ? nodeBeats(scene, body).find(beat => sameNode(nodeRef(beat), insertionAnchor)) : undefined;
-    destination.textContent = `Insert in ${bodyCaption(scene, body, model)} · ${anchor ? `Before ${anchor.conditionalBranch ? "Condition" : beatLabels[anchor.payload.type]}` : "End of body"}`;
-    const placement=destinations(scene,body,undefined,position,true,insertion);
-    const screenType=()=>["showScreen","hideScreen","callScreen"].includes(type.value);
+    const panel = document.createElement("section"); panel.className = "new-beat scene-draft"; panel.dataset.beatType = type;
+    panel.addEventListener("compositionstart", () => { composing = true; }); panel.addEventListener("compositionend", () => { composing = false; }); panel.setAttribute("aria-labelledby", `new-beat-title-${key}`);
+    const heading = document.createElement("div"); heading.className = "story-editor-heading";
+    const title = document.createElement("h3"); title.className = "story-editor-title"; title.id = `new-beat-title-${key}`; title.textContent = `New · ${beatLabels[type]}`;
+    heading.append(storyIcon(type), title);
+    const screenType = ["showScreen", "hideScreen", "callScreen"].includes(type);
+    // Until it is added, Move to changes only where the new beat will go. A screen beat picks its place below.
+    if (!screenType) {
+      const menu = document.createElement("details"); menu.className = "story-beat-menu";
+      const summary = document.createElement("summary"); summary.textContent = "⋯"; summary.setAttribute("aria-label", "Actions for the new beat");
+      const list = document.createElement("div"); list.className = "story-beat-menu-list";
+      const move = button("Move to…", "text-button"); move.addEventListener("click", () => { menu.open = false; moveNewBeat(summary); });
+      list.append(move); menu.append(summary, list); heading.append(menu);
+    }
+    // Goes at, In and After, as Add a beat named them.
+    const where = document.createElement("dl"); where.className = "story-where story-new-place";
+    const drawWhere = (): void => {
+      const current = model.scenes.find(item => item.id === scene.id) ?? scene, place = placement(current, body, position, type as AddKind);
+      where.replaceChildren();
+      for (const [term, value] of [["Goes at", place.goesAt], ["In", place.in], ...place.after ? [["After", place.after]] : []] as const) where.append(Object.assign(document.createElement("dt"), { textContent: term }), Object.assign(document.createElement("dd"), { textContent: value }));
+    };
+    // A screen beat keeps the place it chose in Screens, so it can pick another one here.
+    const placementHost = screenType ? destinations(scene,body,undefined,position,true,insertion) : undefined;
     const unavailableScene = !!insertion && insertion.sceneId !== scene.id;
-    const usesPlacement = (): boolean => screenType() || !insertion && !screenInsertion;
-    const chosenLocation = (): { body: BodyRef; position: Position } => usesPlacement() ? readLocation() : unavailableScene ? { body: { type: "root" }, position: defaultPlace(scene, { type: "root" }) } : { body, position };
-    const readLocation=placement.read;
-    // The pending column in Tracks follows the chosen place and kind, with its branches open.
+    const usesPlacement = (): boolean => screenType && !!placementHost;
+    const chosenLocation = (): { body: BodyRef; position: Position } => usesPlacement() ? placementHost!.read() : unavailableScene ? { body: { type: "root" }, position: defaultPlace(scene, { type: "root" }) } : { body, position };
+    // The pending column in Tracks follows the chosen place, with its branches open.
     const relocate=()=>{const current=model.scenes.find(item=>item.id===scene.id);if(current)openTo(current,place().body);redrawBottom();};
-    const remember=()=>{if(screenType())try{rememberScreenInsertion({sceneId:scene.id,...readLocation(),expectedSourceRevision:scene.sourceRevision});rememberedInsertion=true;return true;}catch{/* Retain the unavailable original position until an explicit choice. */}return false;};
-    // Placement owns its retained navigation state and any incomplete recovery input.
-    placement.host.classList.add("scene-draft");
-    for(const event of ["input","change"])placement.host.addEventListener(event,()=>{if(remember())delete placement.host.dataset.unsubmitted;else placement.host.dataset.unsubmitted="true";relocate();});
-    const fieldsHost = document.createElement("div"),secondaryHost=document.createElement("div");secondaryHost.className="story-screen-secondary";
+    const remember=()=>{if(screenType&&placementHost)try{rememberScreenInsertion({sceneId:scene.id,...placementHost.read(),expectedSourceRevision:scene.sourceRevision});rememberedInsertion=true;return true;}catch{/* Retain the unavailable original position until an explicit choice. */}return false;};
+    if (placementHost) {
+      // Placement owns its retained navigation state and any incomplete recovery input.
+      placementHost.host.classList.add("scene-draft");
+      for(const event of ["input","change"])placementHost.host.addEventListener(event,()=>{if(remember())delete placementHost.host.dataset.unsubmitted;else placementHost.host.dataset.unsubmitted="true";relocate();});
+      remember();
+    }
     const validateNew = assignmentValidation(base, beat => insertCommand(beat, chosenLocation()));
-    let editor = buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, liveActions, validateNew);
-    const typeDrafts = new Map<string, BeatEditor>([[type.value, editor]]);
-    const replaceEditor = (): void => { placement.host.hidden=!usesPlacement();if(placement.host.hidden)delete placement.host.dataset.unsubmitted;destination.hidden=screenType();remember();editor = typeDrafts.get(type.value) ?? buildBeatEditor(model, defaultPayload(type.value as BeatPayload["type"], model, actions.screenHint), false, liveActions, validateNew); typeDrafts.set(type.value, editor); fieldsHost.replaceChildren(editor.host);secondaryHost.replaceChildren(...(editor.secondary?[editor.secondary]:[]));panel.classList.toggle("story-screen-editor",screenType());dirtyDraft(panel, editor.controls); };
-    type.addEventListener("change", replaceEditor); replaceEditor();
+    const payload = defaultPayload(type, model, actions.screenHint);
+    const editor: BeatEditor = buildBeatEditor(payload, editorContext(key, false, validateNew));
+    const secondaryHost = document.createElement("div"); secondaryHost.className = "story-screen-secondary"; if (editor.secondary) secondaryHost.append(editor.secondary);
+    if (screenType) panel.classList.add("story-screen-editor");
     const actionsRow = document.createElement("div"); actionsRow.className = "row-actions";
-    const cancel = button("Cancel", screenType()?"button secondary":"text-button");
+    const cancel = button("Cancel", screenType ? "button secondary" : "text-button");
     const cancelDraft=()=>{cancelStep(key);if(rememberedInsertion)rememberScreenInsertion(openingInsertion);panel.remove();dropDraft(key);if(selectedNewDraft===key){selectedNewDraft=undefined;selectedBeatId=returnTo;}draw();focusBeatOpener(opener);};cancel.addEventListener("click",cancelDraft);
-    type.addEventListener("change",()=>{cancel.className=screenType()?"button secondary":"text-button";relocate();});
     let pending=false;
     panel.addEventListener("keydown", event => {
-      if (event.key !== "Escape" || event.isComposing || composing || !["showScreen", "hideScreen", "callScreen"].includes(type.value)) return;
+      if (event.key !== "Escape" || event.isComposing || composing || !screenType || event.defaultPrevented) return;
       event.preventDefault(); event.stopPropagation(); if (!pending) cancelDraft();
     });
     const commit = button("Add Beat", "button primary"); commit.addEventListener("click", async () => {
@@ -2094,9 +2325,10 @@ export function renderStoryView(
         let insertedId:string|undefined;
         const saved=await mutate(insertCommand(payload, location, current), (before,next) => {
           panel.remove();dropDraft(key);if(selectedNewDraft===key)selectedNewDraft=undefined;
-          const acceptedScene=next.scenes.find(s=>s.id===scene.id);if(screenType()&&acceptedScene)rememberScreenInsertion({sceneId:scene.id,...location,expectedSourceRevision:acceptedScene.sourceRevision});
+          const acceptedScene=next.scenes.find(s=>s.id===scene.id);if(screenType&&acceptedScene)rememberScreenInsertion({sceneId:scene.id,...location,expectedSourceRevision:acceptedScene.sourceRevision});
           const previousIds=new Set(before.scenes.find(s=>s.id===scene.id)?.beats.map(b=>b.id));
-          insertedId=next.scenes.find(s=>s.id===scene.id)?.beats.find(b=>!previousIds.has(b.id))?.id;
+          // A replaced ending keeps its beat id.
+          insertedId=replaces??next.scenes.find(s=>s.id===scene.id)?.beats.find(b=>!previousIds.has(b.id))?.id;
           // The added beat stays selected, so its editor replaces the draft.
           if(insertedId&&!selectedNewDraft)selectedBeatId=insertedId;
         }, current.captured, panel, draft);
@@ -2107,13 +2339,27 @@ export function renderStoryView(
       }finally{pending=false;}
     });
     panel.addEventListener("keydown", event => {
-      if (type.value === "setVariable" && (event.ctrlKey || event.metaKey) && event.key === "Enter" && !event.defaultPrevented && !event.isComposing) { event.preventDefault(); if (!pending && !composing) commit.click(); }
+      if (type === "setVariable" && (event.ctrlKey || event.metaKey) && event.key === "Enter" && !event.defaultPrevented && !event.isComposing) { event.preventDefault(); if (!pending && !composing) commit.click(); }
     });
-    const orderActions=()=>actionsRow.replaceChildren(...(screenType()?[commit,cancel]:[cancel,commit]));orderActions();type.addEventListener("change",orderActions);
-    dirtyDraft(panel,[type]);panel.append(heading,destination,labelled("Beat type",type),placement.host,fieldsHost,actionsRow,secondaryHost);
+    actionsRow.append(...(screenType?[commit,cancel]:[cancel,commit]));
+    drawWhere();
+    panel.append(heading, ...placementHost ? [placementHost.host] : [where], editor.host, actionsRow, secondaryHost);
+    dirtyDraft(panel, editor.controls);
     // A new beat moves with the place the author chooses, until it is added.
     const place=():{body:BodyRef;position:Position}=>{try{return chosenLocation();}catch{return {body,position};}};
-    const draft=keepDraft(key,{panel,sceneId:scene.id,place,read:()=>editor.read(),command:savedCommand,kind:()=>beatLabels[type.value as BeatPayload["type"]].toLowerCase(),editors:()=>[...typeDrafts.values()],primary:()=>editor.primary,
+    const moveNewBeat = (opener: HTMLElement): void => {
+      const current = model.scenes.find(item => item.id === scene.id); if (!current) return;
+      const { tree, expanded } = placeTree(current, body), chosen = findPlace(tree, node => !!node.place && sameBody(node.place.body, body) && samePosition(node.place.position, position));
+      openPlaceTree({ host, opener, title: `Move new ${beatLabels[type].toLowerCase()}`, note: "Moves this beat to the chosen scene, branch or option. Nothing is written until you add it.", tree, expanded, ...chosen ? { chosen: chosen.id } : {},
+        move: async next => {
+          const resolved = placeFor(current, next.body, next.position, type as AddKind), waiting = pendingAt(current, next.body, resolved.position);
+          if (resolved.unavailable) { actions.status(`${resolved.unavailable} Draft retained.`, "error"); return false; }
+          if (waiting && waiting !== key) { actions.status("A new beat is already waiting there. Draft retained.", "error"); return false; }
+          body = next.body; position = resolved.position; replaces = resolved.replaces?.id;
+          drawWhere(); relocate(); focusFirst(panel); return true;
+        } });
+    };
+    const draft=keepDraft(key,{panel,sceneId:scene.id,place,replaces:()=>replaces,read:()=>editor.read(),command:savedCommand,kind:()=>beatLabels[type].toLowerCase(),editors:()=>[editor],primary:()=>editor.primary,
       // A new beat whose scene or branch left source has nowhere to go: only Discard draft resolves it.
       conflict:()=>{
         const current=model.scenes.find(item=>item.id===scene.id),{body:at}=place();
@@ -2221,10 +2467,6 @@ const unreadable = "Story cannot read this scene's source right now. Draft retai
 // Core refused an Override because the project changed after the comparison showed.
 const staleOverride = "Source changed. Review it, then choose again. Draft retained.";
 
-/** What an editor keeps outside its controls, such as a Choice's option rows, for draft-step Undo. */
-interface EditorInternals { readonly capture: () => unknown; readonly restore: (saved: unknown) => void }
-interface BeatEditor { readonly host: HTMLElement; readonly controls: readonly HTMLElement[]; readonly primary: HTMLElement; readonly secondary?: HTMLElement; readonly read: () => BeatPayload; readonly focus: () => void; readonly internals?: EditorInternals }
-
 /** A beat draft's controls and its editors' own state, kept for draft-step Undo (ADR 0025). */
 interface DraftState { readonly controls: readonly { readonly tag: string; readonly type: string; readonly value: string; readonly checked: boolean }[]; readonly editors: readonly (readonly [EditorInternals, unknown])[] }
 // A Choice's nested Create New Scene form is not part of its draft.
@@ -2253,198 +2495,7 @@ function restoreState(panel: HTMLElement, state: DraftState): void {
   for (const [editor, value] of state.editors) editor.restore(value);
 }
 
-function buildScreenBeatEditor(payload: Extract<BeatPayload, { type: "showScreen" | "hideScreen" | "callScreen" }>, existing: boolean, actions?: SceneActions): BeatEditor {
-  const calling=payload.type==="callScreen",kind=calling?"dialog":"panel",caption=calling?"Dialog":"Panel";
-  const intent = { ...payload.target }, originalRevisions = payload.revisions ? { ...payload.revisions } : undefined;
-  const host = document.createElement("div"); host.className = "beat-fields story-screen-fields";
-  const picker = document.createElement("select"); picker.setAttribute("aria-label", `${caption} screen`); picker.disabled = true;
-  const purpose = document.createElement("p"); purpose.textContent = calling ? "Call waits for Finish interaction. Dialog defaults use Close and Escape; outside clicks keep it open. Scene Call and Story Return are separate operations." : payload.type === "showScreen"
-    ? "Show keeps the panel open while dialogue continues. Hide, Close and game Escape dismiss it. Outside clicks keep it open."
-    : "Hide removes the panel at this point in the story. Dialogue continues.";
-  const message = document.createElement("p"); message.role = "status"; message.ariaLive = "polite"; message.textContent = `Loading ${kind} screens…`;
-  host.append(labelled(`${caption} screen`, picker), purpose, message);
-  const secondary=document.createElement("details"),summary=document.createElement("summary");summary.textContent="Source and effects";
-  const effects=document.createElement("p");effects.textContent="No screen Beat has been added. Source shows accepted appearance.";
-  const source=button("View screen in Source","text-button");source.disabled=true;secondary.append(summary,effects,source);
-  let captured: { target: ScreenTargetBinding; revisions: ScreenRevisions } | undefined;
-  let generation = 0;
-  const panels = new Map<string, ScreenTargetBinding>();
-  const placeholder = (label: string) => { const option = document.createElement("option"); option.value = intent.screenId; option.textContent = label; option.dataset.unavailable = "true"; picker.replaceChildren(option); };
-  placeholder(intent.sourceName || `Loading ${kind}s…`);
-  const fail = (error: unknown) => { captured = undefined;source.disabled=true;source.onclick=null;effects.textContent="No available accepted screen source for this selection."; message.textContent = `${friendlyError(error, `${caption} target unavailable.`)} Choose an available ${kind} explicitly. Input retained.`; };
-  const resolve = async () => {
-    const run = ++generation; captured = undefined;source.disabled=true;source.onclick=null;
-    const binding = panels.get(picker.value);
-    if (!binding || !actions?.resolveScreenTarget) { fail(Error(`${caption} target unavailable.`)); return; }
-    message.textContent = `Checking ${kind}…`;
-    try {
-      const resolved = await actions.resolveScreenTarget({ ...binding });
-      if (run !== generation || actions.current?.() === false) return;
-      if (resolved.kind !== kind || resolved.binding.screenId !== binding.screenId || resolved.binding.sourceName !== binding.sourceName) throw Error(`${caption} identity changed.`);
-      if(calling && (!resolved.blocking || resolved.effects.unknown)) throw Error("Call needs a blocking Dialog with known interaction effects.");
-      effects.textContent=resolved.effects.unknown ? "Effects unknown. Review accepted Source before play." : resolved.effects.finishesInteraction ? "Accepted Return() can finish this dialog. Normal play owns continuation." : "Accepted panel effects are qualified.";
-      source.disabled=!actions.viewSource;source.onclick=()=>actions.viewSource?.(resolved.path,undefined,undefined,resolved.revisions.source);
-      captured = { target: { ...resolved.binding }, revisions: { ...resolved.revisions } };
-      message.textContent = resolved.effects.unknown ? "Some screen effects are unknown. Review Source and effects before play." : `${caption} ready.`;
-    } catch (error) { if (run === generation) fail(error); }
-  };
-  picker.addEventListener("change", () => { void resolve(); });
-  void (async () => {
-    try {
-      if (!actions?.screenCatalog || !actions.resolveScreenTarget) throw Error(`${caption} screens are unavailable in this workspace.`);
-      const catalog = await actions.screenCatalog();
-      if (actions.current?.() === false) return;
-      const owned = catalog.owned.filter(screen => screen.kind === kind && screen.resolved);
-      picker.replaceChildren();
-      for (const screen of owned) {
-        const option = document.createElement("option"); option.value = screen.id; option.textContent = screen.name; picker.append(option);
-        panels.set(screen.id, { screenId: screen.id, sourceName: screen.name });
-      }
-      const match = owned.find(screen => screen.id === intent.screenId && screen.name === intent.sourceName);
-      if (intent.screenId && !match) {
-        const option = document.createElement("option"); option.value = ""; option.textContent = `${intent.sourceName} · Unavailable`; option.dataset.unavailable = "true"; picker.prepend(option); picker.value = "";
-        fail(Error(`The original ${kind} is missing or renamed.`));
-      } else if (!owned.length) { placeholder(`No available ${caption} screens`); fail(Error(`Create a ${caption} in Screens first.`)); }
-      else if (existing) {
-        picker.value = intent.screenId;
-        if (!originalRevisions) fail(Error("The original target is unresolved."));
-        else if (match?.sourceRevision !== originalRevisions.source) fail(Error(`The ${kind} changed after this Beat was loaded.`));
-        else { captured = { target: { ...intent }, revisions: originalRevisions }; message.textContent = `${caption} ready.`; }
-      } else { if (match) picker.value = match.id; await resolve(); }
-      picker.disabled = !owned.length;
-    } catch (error) { fail(error); }
-  })();
-  return { host, secondary:existing?undefined:secondary, controls: [picker], primary: picker, focus: () => picker.focus(), read: () => {
-    if (!captured || picker.selectedOptions[0]?.dataset.unavailable === "true") throw Error(message.textContent || `Select an available ${caption} first.`);
-    return { type: payload.type, target: { ...captured.target }, revisions: { ...captured.revisions } };
-  } };
-}
-
-function buildBeatEditor(model: SceneWorkspace, payload: BeatPayload, existing = false, actions?: SceneActions, validate?: ValidateAssignment): BeatEditor {
-  if (payload.type === "setVariable") return buildAssignmentEditor(model, payload, validate);
-  if (payload.type === "showScreen" || payload.type === "hideScreen" || payload.type === "callScreen") return buildScreenBeatEditor(payload, existing, actions);
-  const host = document.createElement("div"); host.className = "beat-fields"; const controls: HTMLElement[] = [];
-  const add = (label: string, control: HTMLElement): void => { controls.push(control); host.append(labelled(label, control)); };
-  const transitions = (includeNone = true) => selectOf(([...(includeNone ? [{ value: "none" as const, label: "None" }] : []), { value: "dissolve" as const, label: "Dissolve" }, { value: "fade" as const, label: "Fade" }]), "transition" in payload ? payload.transition : "none");
-  const placements = (selected?: string) => selectOf([{ value: "left" as const, label: "Left" }, { value: "centre" as const, label: "Centre" }, { value: "right" as const, label: "Right" }], selected);
-  const characters = (selected?: string) => entitySelect(model.authoring.characters.map((item) => ({ id: item.id, label: item.displayName })), selected);
-  const assets = (kind: Asset["kind"], selected?: string) => entitySelect(model.authoring.assets.filter((item) => item.kind === kind && item.status === "available").map((item) => ({ id: item.id, label: item.displayName })), selected);
-  const scenes = (selected?: string) => entitySelect(model.scenes.map((item) => ({ id: item.id, label: item.displayName })), selected);
-  let read: () => BeatPayload, internals: EditorInternals | undefined;
-  switch (payload.type) {
-    case "background": { const asset = assets("background", payload.assetId); const transition = transitions(); add("Background", asset); add("Transition", transition); read = () => ({ type: "background", assetId: required(asset), transition: transition.value as TransitionRef }); break; }
-    case "showCharacter": { const character = characters(payload.characterId); const appearance = entitySelect(model.authoring.appearances.map((item) => ({ id: item.id, label: item.label })), payload.appearanceId); const placement = placements(payload.placement); const transition = transitions(); add("Character", character); add("Appearance", appearance); add("Placement", placement); add("Transition", transition); read = () => ({ type: "showCharacter", characterId: required(character), appearanceId: required(appearance), placement: placement.value as PlacementRef, transition: transition.value as TransitionRef }); break; }
-    case "hideCharacter": { const character = characters(payload.characterId); const transition = transitions(); add("Character", character); add("Transition", transition); read = () => ({ type: "hideCharacter", characterId: required(character), transition: transition.value as TransitionRef }); break; }
-    case "changeAppearance": { const character = characters(payload.characterId); const appearance = entitySelect(model.authoring.appearances.map((item) => ({ id: item.id, label: item.label })), payload.appearanceId); const transition = transitions(); add("Character", character); add("Appearance", appearance); add("Transition", transition); read = () => ({ type: "changeAppearance", characterId: required(character), appearanceId: required(appearance), transition: transition.value as TransitionRef }); break; }
-    case "placement": { const character = characters(payload.characterId); const placement = placements(payload.placement); add("Character", character); add("Placement", placement); read = () => ({ type: "placement", characterId: required(character), placement: placement.value as PlacementRef }); break; }
-    case "dialogue": { const character = characters(payload.characterId); const text = document.createElement("textarea"); text.value = payload.text; text.rows = 4; add("Speaker", character); add("Dialogue", text); read = () => ({ type: "dialogue", characterId: required(character), text: text.value }); break; }
-    case "narration": { const text = document.createElement("textarea"); text.value = payload.text; text.rows = 4; add("Narration", text); read = () => ({ type: "narration", text: text.value }); break; }
-    case "playMusic": { const asset = assets("music", payload.assetId); add("Music", asset); read = () => ({ type: "playMusic", assetId: required(asset) }); break; }
-    case "stopMusic": read = () => ({ type: "stopMusic" }); break;
-    case "playSfx": { const asset = assets("sfx", payload.assetId); add("SFX", asset); read = () => ({ type: "playSfx", assetId: required(asset) }); break; }
-    case "transition": { const transition = transitions(false); add("Transition", transition); read = () => ({ type: "transition", transition: transition.value as "dissolve" | "fade" }); break; }
-    case "choice": {
-      const picked = selectOf([{ value: "showNormally", label: "Show normally" }, { value: "markPicked", label: "Mark picked" }, { value: "hidePicked", label: "Hide picked" }], payload.pickedPolicy ?? "showNormally");
-      picked.setAttribute("aria-label", "Picked options");
-      let pickedChanged = false;
-      picked.addEventListener("change", () => { pickedChanged = true; host.dispatchEvent(new Event("input", { bubbles: true })); });
-      host.append(labelled("Picked options", picked));
-      const promptRow = document.createElement("div"); promptRow.className = "choice-prompt";
-      let hasPrompt = !!payload.prompt;
-      const promptText = input(payload.prompt?.text ?? ""); promptText.setAttribute("aria-label", "Prompt text");
-      const speaker = entitySelect([{ id: "narration", label: "Narration (no speaker)" }, ...model.authoring.characters.map(c => ({ id: c.id, label: c.displayName }))], payload.prompt?.type === "dialogue" ? payload.prompt.characterId : "narration");
-      speaker.setAttribute("aria-label", "Prompt speaker");
-      const validatePrompt = validateField(promptText, () => { if (hasPrompt) requiredText(promptText, "Prompt text"); });
-      const addPrompt = button("+ Prompt", "text-button"); addPrompt.setAttribute("aria-label", "Add a prompt shown with the options");
-      const removePrompt = button("Remove prompt", "text-button");
-      const drawPrompt = (): void => {
-        promptRow.replaceChildren();
-        if (hasPrompt) promptRow.append(labelled("Prompt", speaker), labelled("Prompt text", promptText), removePrompt);
-        else { const empty = document.createElement("span"); empty.textContent = "No prompt with the options"; promptRow.append(empty, addPrompt); }
-      };
-      const changePrompt = (enabled: boolean): void => { hasPrompt = enabled; drawPrompt(); host.dispatchEvent(new Event("input", { bubbles: true })); (enabled ? promptText : addPrompt).focus(); };
-      addPrompt.addEventListener("click", () => changePrompt(true)); removePrompt.addEventListener("click", () => changePrompt(false));
-      controls.push(speaker, promptText); drawPrompt(); host.append(promptRow);
-      const optionHost = document.createElement("div"); optionHost.className = "choice-options"; host.append(optionHost);
-      const rows: { id?: string; text: HTMLInputElement; row: HTMLElement; guard: ReturnType<typeof buildAvailabilityEditor>; policy: HTMLSelectElement; validateText: () => void }[] = [];
-      const redraw = (): void => { rows.forEach((row, index) => { row.row.querySelector("strong")!.textContent = `Option ${index + 1}`; optionHost.append(row.row); }); host.dispatchEvent(new Event("input", { bubbles: true })); };
-      const addOption = (option: ChoiceOption = { text: "" }): void => {
-        const row = document.createElement("div"); row.className = "choice-option";
-        const number = document.createElement("strong"); number.textContent = `Option ${rows.length + 1}`;
-        const text = input(option.text); text.setAttribute("aria-label", "Choice option text");
-        row.append(number, labelled("Choice option text", text));
-        const validateText = validateField(text, () => { requiredText(text, "Choice text"); });
-        const guard = buildAvailabilityEditor(model.authoring.variables, option.condition); row.append(guard.host);
-        const policy = selectOf([{ value: "hide", label: "Hide" }, { value: "showDisabled", label: "Show disabled" }], option.unavailablePolicy ?? "hide");
-        policy.setAttribute("aria-label", "If false");
-        const policyField = labelled("If false", policy); guard.host.append(policyField);
-        const refreshPolicy = (): void => { policyField.hidden = !guard.host.querySelector<HTMLInputElement>('input[aria-label="Available when"]')!.checked; };
-        guard.host.addEventListener("change", refreshPolicy); refreshPolicy();
-        const remove = button("Remove option", "text-button"); remove.addEventListener("click", () => { const index = rows.findIndex(item => item.row === row); if (index >= 0) rows.splice(index, 1); row.remove(); redraw(); });
-        const up = button("Move option up", "text-button"), down = button("Move option down", "text-button");
-        const move = (delta: number): void => { const index = rows.findIndex(item => item.row === row), to = index + delta; if (to < 0 || to >= rows.length) return; [rows[index], rows[to]] = [rows[to]!, rows[index]!]; redraw(); };
-        up.addEventListener("click", () => move(-1)); down.addEventListener("click", () => move(1));
-        const note = document.createElement("p"); note.textContent = option.id ? "Option body follows below. Then changes only its ending." : "Starts empty. Continue after the Choice.";
-        row.append(note, up, down, remove); rows.push({ ...(option.id ? { id: option.id } : {}), text, row, guard, policy, validateText }); controls.push(text); optionHost.append(row);
-      };
-      payload.options.forEach(addOption); if (!rows.length) addOption();
-      const addChoice = button("Add option", "text-button"); addChoice.addEventListener("click", () => { addOption(); redraw(); }); host.append(addChoice);
-      // Draft-step Undo restores the prompt, the option rows and their order.
-      internals = {
-        capture: () => ({ hasPrompt, pickedChanged, rows: [...rows] }),
-        restore: saved => { const kept = saved as { hasPrompt: boolean; pickedChanged: boolean; rows: typeof rows }; hasPrompt = kept.hasPrompt; pickedChanged = kept.pickedChanged; rows.splice(0, rows.length, ...kept.rows); optionHost.replaceChildren(); drawPrompt(); redraw(); },
-      };
-      const note = document.createElement("p"); note.textContent = "Each option runs its own Beats, then continues after the Choice. Availability is unknown in this preview."; host.append(note);
-      read = () => {
-        if (!rows.length) throw new Error("A Choice needs at least one option.");
-        validatePrompt();
-        const prompt: ChoicePrompt | undefined = hasPrompt ? speaker.value === "narration" ? { type: "narration", text: promptText.value } : { type: "dialogue", characterId: required(speaker), text: promptText.value } : undefined;
-        return { type: "choice", ...((payload.pickedPolicy || pickedChanged) ? { pickedPolicy: picked.value as PickedPolicy } : {}), ...(prompt ? { prompt } : {}), options: rows.map(row => { row.validateText(); const condition = row.guard.read(); return { ...(row.id ? { id: row.id } : {}), text: row.text.value, ...(condition ? { condition, ...(row.policy.value === "showDisabled" ? { unavailablePolicy: "showDisabled" as const } : {}) } : {}) }; }) };
-      }; break;
-    }
-    case "jump": { const destination = scenes(payload.sceneId); add("Destination Scene", destination); read = () => ({ type: "jump", sceneId: required(destination) }); break; }
-    case "call": {
-      const destination = scenes(payload.sceneId); destination.setAttribute("aria-label", "Call destination Scene");
-      const validate = validateField(destination, () => { required(destination); });
-      add("Call destination Scene", destination);
-      const note = document.createElement("p"); note.textContent = "Returns to the next Beat. The editor preview does not execute the called Scene."; host.append(note);
-      read = () => { validate(); return { type: "call", sceneId: required(destination), returnLabel: payload.returnLabel }; }; break;
-    }
-    case "repeatChoice": read = () => payload; break;
-    case "return": read = () => ({ type: "return" }); break;
-    case "customCode": read = () => payload; break;
-  }
-  const primary = controls[controls.length - 1] ?? host;
-  return { host, controls, primary, read: read!, ...(internals ? { internals } : {}), focus: () => (host.querySelector<HTMLElement>('[aria-invalid="true"]') ?? controls[0] as HTMLElement | undefined)?.focus() };
-}
-
-function defaultPayload(type: BeatPayload["type"], model: SceneWorkspace, screenHint?: ScreenTargetBinding): BeatPayload {
-  const characterId = model.authoring.characters[0]?.id ?? ""; const appearanceId = model.authoring.appearances.find((item) => item.characterId === characterId)?.id ?? "";
-  switch (type) {
-    case "background": return { type, assetId: model.authoring.assets.find((item) => item.kind === "background")?.id ?? "", transition: "none" };
-    case "showCharacter": return { type, characterId, appearanceId, placement: "centre", transition: "none" };
-    case "hideCharacter": return { type, characterId, transition: "none" };
-    case "showScreen": case "hideScreen": case "callScreen": return { type, target: screenHint ? { ...screenHint } : { screenId: "", sourceName: "" } };
-    case "changeAppearance": return { type, characterId, appearanceId, transition: "none" };
-    case "placement": return { type, characterId, placement: "centre" };
-    case "dialogue": return { type, characterId, text: "" };
-    case "narration": return { type, text: "" };
-    case "playMusic": return { type, assetId: model.authoring.assets.find((item) => item.kind === "music")?.id ?? "" };
-    case "stopMusic": return { type };
-    case "playSfx": return { type, assetId: model.authoring.assets.find((item) => item.kind === "sfx")?.id ?? "" };
-    case "transition": return { type, transition: "dissolve" };
-    case "setVariable": { const variable = model.authoring.variables[0]; return { type, variableId: variable?.id ?? "", value: variable?.defaultValue ?? "" }; }
-    case "choice": return { type, pickedPolicy: "showNormally", options: [{ text: "" }] };
-    case "jump": return { type, sceneId: model.scenes[0]?.id ?? "" };
-    case "call": return { type, sceneId: model.scenes[0]?.id ?? "", returnLabel: null };
-    case "repeatChoice": return { type };
-    case "return": return { type };
-    case "customCode": return { type, source: "", reason: "Protected source" };
-  }
-}
-
 function required(control: HTMLSelectElement): string { if (!control.value || control.options[control.selectedIndex]?.dataset.unavailable === "true") { control.focus(); throw new Error("Select an available item first."); } return control.value; }
-function requiredText(control: HTMLInputElement, name: string): string { if (!control.value.trim()) { control.focus(); throw new Error(`${name} is required.`); } return control.value.trim(); }
 
 export function renderRecoverySurface(host: HTMLElement, report: RecoveryReport, actions: RecoveryActions): void {
   host.replaceChildren(); host.className = "recovery-workspace";
