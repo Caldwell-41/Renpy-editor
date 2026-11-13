@@ -3,7 +3,7 @@ import { buildAvailabilityEditor, buildConditionEditor } from "./story-condition
 import { validateField } from "./authoring-input.ts";
 import { isTextField, typingStepIdleMs, type DraftStep, type DraftStepRecord, type HistoryDirection } from "./project-history.ts";
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenEffects, ScreenRevisions, ScreenTargetBinding } from "./screen-contracts.ts";
-import { armOf, beatBody, beatNumbers, bodyOf, laneOf, nodeBeats, nodeRef, ownedBodies, pinRouteLabels, renderBranchPath, renderMarksLegend, renderRoute, renderTracksKey, renderViewSwitch, sameNode, samePosition, shorten, trackCopy, trackRoute, type PendingBeat, type RouteView } from "./story-tracks.ts";
+import { armOf, beatBody, beatNumbers, bodyOf, laneOf, nodeBeats, nodeRef, ownedBodies, pinRouteLabels, renderBranchPath, renderMarksLegend, renderRoute, renderTracksKey, renderViewSwitch, sameNode, samePosition, shorten, trackCopy, trackRoute, type PendingBeat, type RouteView, viewName } from "./story-tracks.ts";
 export type PlacementRef = "left" | "centre" | "right";
 export type TransitionRef = "none" | "dissolve" | "fade";
 
@@ -1229,7 +1229,7 @@ export function renderStoryView(
     const anchor = beforeBeatId ? scene.beats.find(beat => beat.id === beforeBeatId) : undefined;
     const before: Position | undefined = anchor && { type: "before", anchor: nodeRef(anchor) };
     if (anchor && !bodyOf(scene, beatBody(anchor))?.places.some(place => samePosition(place.position, before!))) {
-      actions.status(`This beat has no insertion place before it. Use + in ${routeView === "reel" ? "Reel" : "Tracks"}.`, "error"); return;
+      actions.status(`This beat has no insertion place before it. Use + in ${viewName(routeView)}.`, "error"); return;
     }
     const screenBeat = ["showScreen", "hideScreen", "callScreen"].includes(initialType);
     const remembered = screenInsertion;
@@ -1642,7 +1642,7 @@ export function renderStoryView(
   // drafts and focus, the selection, open branches and new beats stay as they are.
   const showView = (scene: SceneDocument, view: RouteView): void => {
     if (view !== routeView) { routeView = view; drawBottom(scene); }
-    bottomHost?.querySelector<HTMLElement>(`.story-view-option[data-view="${view}"]`)?.focus();
+    bottomHost?.querySelector<HTMLElement>(`.story-view-option[data-view="${view}"]`)?.focus({ preventScroll: true });
   };
   // The Branch path and Tracks or Reel. Redrawn alone when a new beat's place or kind changes.
   const drawBottom = (scene: SceneDocument, scroll?: number): void => {
@@ -1652,7 +1652,7 @@ export function renderStoryView(
     const items = trackRoute(scene, openBranches, pending);
     const selected = selectedNewDraft ?? selectedBeatId;
     const path = renderBranchPath({ scene, items, numbers, open: openBranches, caption: forkCaption, branchName: header => branchName(scene, header), select: id => select(scene, id), toggle: (owner, body) => toggleBranch(scene, owner, body) });
-    const panel = document.createElement("section"); panel.className = "story-panel"; panel.setAttribute("aria-label", routeView === "reel" ? "Reel" : "Tracks");
+    const panel = document.createElement("section"); panel.className = "story-panel"; panel.setAttribute("aria-label", viewName(routeView));
     const toolbar = document.createElement("div"); toolbar.className = "story-panel-toolbar";
     toolbar.append(renderViewSwitch(routeView, view => showView(scene, view)), ...routeView === "tracks" ? [renderTracksKey()] : [], renderMarksLegend());
     const scroller = document.createElement("div"); scroller.className = "story-tracks-scroll";

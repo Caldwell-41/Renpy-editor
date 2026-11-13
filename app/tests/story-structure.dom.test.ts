@@ -187,6 +187,8 @@ test("Reel draws the Tracks route; switching views keeps selection, branches, a 
   openBranch(s.host, "if"); openBranch(s.host, "nested-if-0"); const tracks = route().map(item => item.replace("story-route story-tracks", "")); view("reel");
   assert.equal(s.host.querySelector(".story-panel")?.getAttribute("aria-label"), "Reel"); assert.equal(s.host.querySelector(".story-track-labels"), null);
   assert.deepEqual(route(), tracks); assert.ok(route().some(item => item.startsWith("story-track-column|deep|2")));
+  // The scene's Return ends it, so Reel offers no + after it either.
+  assert.equal(trackColumn(s.host, "end")!.querySelector(".story-track-insert"), null); assert.ok(trackColumn(s.host, "after-call")!.querySelector(".story-track-insert"));
   // Edit a nested beat in Reel, then switch: the same editor keeps its draft, and nothing is sent.
   trackColumn(s.host, "deep")!.querySelector<HTMLButtonElement>(".story-track-beat")!.click(); const field = textarea(s.host);
   field.value = "Still writing"; field.dispatchEvent(new Event("input", { bubbles: true })); await tick();

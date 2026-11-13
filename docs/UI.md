@@ -425,8 +425,9 @@ covers moving, unwrapping and deleting branches.
   keeps every lane on wide windows, with a taller Words lane.
 - Production has the stage, editor, Branch path, Tracks (#116) and Reel (#118).
   Selecting a Tracks or Reel column edits its beat beside the stage; a condition or
-  Choice column edits the condition, and an option opens from its Choice. Move up, Move down, Move to and
-  Delete sit in the editor heading's menu, and Alt+Arrow on a column moves its beat.
+  Choice column edits the condition, and an option opens from its Choice. Move up,
+  Move down, Move to and Delete sit in the editor heading's menu, and Alt+Arrow on a
+  column moves its beat.
   The scene toolbar holds Writing focus, + Add beat and More. More holds View in
   Source, Add screen Beat, Add Condition and the Assist actions.
 - The scene title ("Arrival ▾") opens and closes the scene list, which keeps every
@@ -435,7 +436,7 @@ covers moving, unwrapping and deleting branches.
   opens; resizing the window keeps the current state, and the toggles still work.
   A 16:9 stage measures 599 × 337 at 1100 × 720.
 - Below 900 px the scene list opens over the workspace. The workspace scrolls: stage,
-  editor, Branch path, then Tracks, with the scene toolbar pinned at the top. A 16:9
+  editor, Branch path, then Tracks or Reel, with the scene toolbar pinned at the top. A 16:9
   stage measures 480 × 270 at 560 × 640.
 - The Tracks and Reel switch sits at the left of the bottom panel. Tracks shows its Key
   and Reel does not, since Reel has no lanes. Both keep the marks legend. Switching
@@ -461,8 +462,9 @@ covers moving, unwrapping and deleting branches.
   Each extra row takes about 30 px from the stage, up to three rows; beyond that the
   path scrolls.
 - Tracks and Reel draw a route line in the arm colour above each open branch, with a
-  light tint on its columns. When Tracks or Reel scrolls past a branch's start, its name
-  stays beside the lane labels, or at Reel's left edge, until it reaches the branch's end. Slim `+` markers add a beat after a column, the first
+  light tint on its columns. When Tracks or Reel scrolls past a branch's start, its
+  name stays beside the lane labels, or at Reel's left edge, until it reaches the
+  branch's end. Slim `+` markers add a beat after a column, the first
   beat in a branch or a beat after the condition. Each open branch or option ends in
   an end marker, and the scene ends in one: `+ End of "If trust ≥ 5"`,
   `+ End of option 2 "Leave"`, `+ End of Otherwise` or `+ End of scene`. An end marker
@@ -613,8 +615,8 @@ status bar holds the full line and links. Each link reveals that scene's first f
 draft. A failing beat's Tracks or Reel column and its scene row show a red `!` in place
 of the draft `*`, and the column gets a red top edge and the reason as its tooltip. Reel
 also shows the reason under the beat's text, in red, and "Conflict with source" in the
-accent colour for a conflict. The legend adds "Needs changes". The editor heading reads "! Needs changes" and the reason
-sits under the fields. Marks appear only after a refused Save. A new beat whose body or insertion anchor is gone from source is a beat
+accent colour for a conflict. The legend adds "Needs changes". The editor heading reads
+"! Needs changes" and the reason sits under the fields. Marks appear only after a refused Save. A new beat whose body or insertion anchor is gone from source is a beat
 draft conflict. The marks and counts update as the author fixes or cancels each
 failing draft. When none fail, the status reads "5 unsaved beat drafts. Ready to
 save." The marks clear when a later Save succeeds.

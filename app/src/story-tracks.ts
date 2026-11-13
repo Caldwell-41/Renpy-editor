@@ -166,6 +166,7 @@ export const trackCopy = {
 /** The bottom panel's two views of one route. Tracks starts selected. */
 export type RouteView = "tracks" | "reel";
 const routeViews: readonly { readonly view: RouteView; readonly name: string }[] = [{ view: "tracks", name: "Tracks" }, { view: "reel", name: "Reel" }];
+export const viewName = (view: RouteView): string => routeViews.find(item => item.view === view)!.name;
 
 /** What Tracks and Reel need from Story to draw and to act. */
 export interface RouteContext {
@@ -248,11 +249,13 @@ function rail(context: RouteContext, chain: readonly BodyRef[], label?: { readon
   return node;
 }
 
+/** A Tracks lane cell; the Beat lane holds the number that marks follow. */
+const laneCell = (index: number, text?: string): HTMLElement => element("span", `story-lane story-lane-${index}${index === 0 ? " story-beat-number" : ""}`, text);
 /** Tracks: the six lanes of a beat, each beat filling the lane its kind belongs to. */
 function laneCells(context: RouteContext, beat: SceneBeat, number: string): HTMLElement[] {
   const state = context.state(beat), lane = laneOf(beat);
   return lanes.map((_lane, index) => {
-    const cell = element("span", `story-lane story-lane-${index}${index === 0 ? " story-beat-number" : ""}`);
+    const cell = laneCell(index);
     if (index === 0) cell.textContent = number;
     else if (index === lane) cell.textContent = lane === 5 ? `${context.label(beat)} · ${context.summary(beat)}` : context.summary(beat);
     if (index === 3) { const copy = element("span", "story-lane-copy", cell.textContent ?? ""); cell.replaceChildren(copy); }
@@ -291,8 +294,8 @@ export function renderRoute(context: RouteContext): HTMLElement {
       button.ariaLabel = `${number} ${context.label(beat)}: ${context.summary(beat)}`; button.dataset.selected = String(selected);
       if (selected) button.ariaCurrent = "true";
       button.tabIndex = selected || (!context.selected && beat === beats[0]) ? 0 : -1;
-      const ending = beat.payload.type === "return";
-      button.append(...reel ? reelCard(number, ending ? context.summary(beat) : context.label(beat), ending ? "" : context.summary(beat)) : laneCells(context, beat, number));
+      const isReturn = beat.payload.type === "return";
+      button.append(...reel ? reelCard(number, isReturn ? context.summary(beat) : context.label(beat), isReturn ? "" : context.summary(beat)) : laneCells(context, beat, number));
       button.addEventListener("click", () => context.select(beat.id));
       button.addEventListener("keydown", event => {
         const index = beats.indexOf(beat);
@@ -321,7 +324,7 @@ export function renderRoute(context: RouteContext): HTMLElement {
       if (context.selected === item.pending.key) button.ariaCurrent = "true";
       button.ariaLabel = `New ${item.pending.label}, not yet added`;
       if (reel) button.append(...reelCard("New", item.pending.label, ""));
-      else lanes.forEach((_lane, index) => button.append(element("span", `story-lane story-lane-${index}${index === 0 ? " story-beat-number" : ""}`, index === 0 ? "New" : index === 3 ? item.pending.label : "")));
+      else lanes.forEach((_lane, index) => button.append(laneCell(index, index === 0 ? "New" : index === 3 ? item.pending.label : "")));
       button.addEventListener("click", () => context.selectNew(item.pending.key));
       column.append(button); grid.append(column);
       continue;
