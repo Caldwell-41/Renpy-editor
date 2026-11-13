@@ -24,6 +24,7 @@ export const STORY_CASES=[
  'Beat drafts stay attached across scenes and workspaces until Commit or Cancel',
  'Story Save accepts every beat draft across scenes in one transaction, or none',
  'Beat draft conflicts resolve with Discard draft or Override source',
+ 'Reel edits and inserts through the shared drafts and commands, and view switches keep them',
 ];
 const NARROW=STORY_CASES.filter((_,i)=>[0,1,2,7,8].includes(i));
 const REOPEN_CASE='Undo Redo preserves exact bytes and process reopen retains maps with session history reset';

@@ -13,14 +13,15 @@ const names=[
  'Beat drafts stay attached across scenes and workspaces until Commit or Cancel',
  'Story Save accepts every beat draft across scenes in one transaction, or none',
  'Beat draft conflicts resolve with Discard draft or Override source',
+ 'Reel edits and inserts through the shared drafts and commands, and view switches keep them',
 ];
 const scene=c=>c.workspace().scenes.find(s=>s.id===c.workspace().entrySceneId);
 // The scene Story shows, read from the selected row in the actual scene tree.
 const shownScene=c=>{const name=c.document.querySelector('.tree-scene-row.selected .tree-scene-open')?.textContent;return c.workspace().scenes.find(s=>s.displayName===name)?.id;};
-// Story Combined: a beat is a Tracks column; its editor sits beside the stage. Nested
-// beats show once the Branch path opens their branches.
+// Story Combined: a beat is a Tracks or Reel column; its editor sits beside the stage.
+// Nested beats show once the Branch path opens their branches.
 const shownBeats=c=>(c.workspace().scenes.find(s=>s.id===shownScene(c))??scene(c)).beats;
-const findRow=(c,id)=>[...c.document.querySelectorAll('.scene-workspace .story-tracks [data-beat-id]')].find(node=>node.dataset.beatId===id);
+const findRow=(c,id)=>[...c.document.querySelectorAll('.scene-workspace .story-route [data-beat-id]')].find(node=>node.dataset.beatId===id);
 const row=(c,id)=>{const node=findRow(c,id);c.assert(node,`Missing Tracks column ${id}`);return node;};
 const card=(c,id)=>c.document.querySelector(`.scene-workspace .story-editor[data-editor-for="${id}"]`);
 const openBranch=(c,branchId)=>{const segment=[...c.document.querySelectorAll('.scene-workspace .story-branch-segment')].find(item=>item.dataset.branchId===branchId);c.assert(segment,`Missing Branch path switch ${branchId}`);if(segment.ariaPressed!=='true')segment.click();};
@@ -78,7 +79,7 @@ const addNarration=async(c,header,value)=>{
  return scene(c).beats.find(b=>b.payload.text===value);
 };
 const newHeaders=c=>scene(c).beats.filter(b=>b.conditionalBranch?.groupId===authored.groupId);
-const previewBoundary=(c,beat)=>{c.assert(beat);const number=row(c,beat.id).querySelector('.story-lane-0').textContent;c.assert(c.document.querySelector('.story-stage-status').textContent.startsWith(`Through ${number} ·`),`Stage previews through ${number}`);};
+const previewBoundary=(c,beat)=>{c.assert(beat);const number=row(c,beat.id).querySelector('.story-beat-number').textContent;c.assert(c.document.querySelector('.story-stage-status').textContent.startsWith(`Through ${number} ·`),`Stage previews through ${number}`);};
 // Wait real mounted controls and typed completion, never the shell alone.
 const mountedSourceEditor=(c,path)=>{
  const surface=c.document.querySelector('.source-workspace'),editor=surface?.querySelector('textarea.source-editor');
@@ -614,5 +615,80 @@ export const storyCases={
   await c.wait(()=>c.requests().slice(saveAt).some(r=>r.request.operation==='scene.saveDrafts'&&r.responseOk));await c.settle();
   c.assert(c.sourceText(await c.snapshot(),called.sourcePath).includes('"Other draft B"'));c.assert.equal(status(),'Saved');
   c.assert.equal(ops('project.flush').length,0);
+ },
+ [names[12]]:async c=>{
+  // The last case ended with a Story Save, whose workspace the harness does not record; read it.
+  await c.call('scene.list');
+  const entry=scene(c),beats=entry.beats,header=()=>c.document.querySelector('.app-header'),status=()=>c.document.querySelector('#app-status').textContent;
+  const nested=beats.find(b=>b.payload.type==='narration'&&b.payload.text==='Nested retained');c.assert(nested?.owner);
+  const otherwise=beats.find(b=>b.conditionalBranch?.groupId===nested.owner.groupId&&b.conditionalBranch.otherwise);c.assert(otherwise);
+  c.assert.equal(entry.bodies.find(b=>b.body.type==='branch'&&b.body.branchId===otherwise.id)?.nodes.length,0,'Otherwise starts empty');
+  const choice=beats.find(b=>b.payload.type==='choice'&&!b.owner);c.assert(choice);
+  const ifHeader=beats.find(b=>b.id===nested.owner.branchId),returnBeat=beats.find(b=>b.payload.type==='return'&&!b.owner);c.assert(ifHeader&&returnBeat);
+  const opaque=beats.find(b=>b.protected&&!b.owner&&b.payload.type==='customCode'&&b.payload.source.includes('opaque_neighbor'));c.assert(opaque);
+  const view=async name=>{await c.click(name,c.document.querySelector('.scene-workspace .story-view-switch'));
+   await c.wait(()=>c.document.querySelector(`.scene-workspace .story-view-option[data-view="${name.toLowerCase()}"]`)?.getAttribute('aria-pressed')==='true');};
+  const inReel=id=>!!row(c,id).closest('.story-reel'),newBeat=()=>c.document.querySelector('.scene-workspace .new-beat');
+  const original=await c.snapshot();
+  // Protected source selected in Reel keeps its explanation and its way to Source. Reel stays the view after Source.
+  await view('Reel');const guarded=(await pick(c,opaque.id)).querySelector('.protected-code');c.assert(inReel(opaque.id)&&guarded);
+  c.assert.equal(guarded.querySelector('p').textContent,opaque.sourceFallback??opaque.payload.reason);c.assert(guarded.querySelector('pre').textContent.includes('opaque_neighbor'));
+  c.assert.equal(card(c,opaque.id).querySelector('textarea,input,select'),null,'Story offers no fields for protected source');
+  await c.click('View in Source',guarded);await c.wait(()=>mountedSourceEditor(c,entry.sourcePath));await c.settle();
+  await goStory(c);c.assert(c.document.querySelector('.scene-workspace .story-reel'),'Reel stays the view after Source');
+  // The scene's Return ends it, so Reel offers no + after it.
+  c.assert.equal(row(c,returnBeat.id).querySelector('.story-track-insert'),null,'Reel offers no + after a Return');
+  // In Reel: edit a nested beat, empty a Choice option (invalid), and start the first beat of the empty Otherwise.
+  await select(c,nested.id);c.assert(inReel(nested.id));previewBoundary(c,nested);
+  c.enter(card(c,nested.id).querySelector('textarea'),'Nested from Reel');await c.settle();
+  await select(c,choice.id);c.enter(card(c,choice.id).querySelector('[aria-label="Choice option text"]'),'');await c.settle();
+  // A new beat started from a card's + in Reel cancels with no write; the other drafts stay.
+  reveal(c,nested.id);const cancelAt=c.requests().length;row(c,nested.id).querySelector('.story-track-insert').click();await c.wait(newBeat);
+  c.enter(newBeat().querySelector('textarea'),'Cancelled in Reel');await c.settle();c.assert(c.document.querySelector('.scene-workspace .story-reel .story-track-pending'));
+  await c.click('Cancel',newBeat());await c.wait(()=>!newBeat());await c.settle();
+  c.assert.equal(c.document.querySelector('.scene-workspace .story-track-pending'),null);c.assert.deepEqual(await c.snapshot(),original);
+  c.assert(!c.requests().slice(cancelAt).some(r=>r.request.operation==='scene.apply'));c.assert.equal(row(c,choice.id).dataset.beatDraft,'true');
+  openBranch(c,otherwise.id);await c.click('+ Add a beat',row(c,otherwise.id));await c.wait(newBeat);
+  c.enter(newBeat().querySelector(':scope > .field select'),'narration','change');c.enter(newBeat().querySelector('textarea'),'Otherwise from Reel');await c.settle();
+  // Switching views sends nothing, adds no history entry, and keeps the drafts, selection, open branch and new beat's place.
+  const place=()=>{const node=c.document.querySelector('.scene-workspace .story-track-pending');return node&&[node.dataset.depth,node.dataset.arm,node.querySelector('.story-track-beat').dataset.selected];};
+  const steps=await c.call('history.state'),at=c.requests().length,panel=newBeat(),inside=place();c.assert.deepEqual(inside?.slice(0,1).concat(inside?.[2]),['1','true']);
+  await view('Tracks');c.assert.deepEqual(place(),inside);c.assert.equal(row(c,choice.id).dataset.beatDraft,'true');
+  await view('Reel');c.assert.deepEqual(place(),inside);
+  c.assert.equal(c.requests().length,at,'View switches send no request');c.assert.deepEqual(await c.call('history.state'),steps,'View switches add no history entry');
+  c.assert.equal(newBeat(),panel);c.assert.equal(panel.querySelector('textarea').value,'Otherwise from Reel');c.assert.deepEqual(await c.snapshot(),original);
+  // Add Beat in Reel inserts into Otherwise through the shared command.
+  let before=c.workspace();await c.click('Add Beat',panel);await c.wait(()=>c.lastMutation()?.response.ok&&!newBeat());await c.settle();
+  c.assert.deepEqual(envelope(c,before,'insertBodyBeat').body,bodyRef(otherwise));
+  const slotted=await c.snapshot();
+  c.assert.equal(c.sourceText(slotted,entry.sourcePath),replaceOnce(c,c.sourceText(original,entry.sourcePath),'    else:\n        pass\n','    else:\n        "Otherwise from Reel"\n'));
+  unchangedOtherSources(c,original,slotted,entry.sourcePath);
+  // The End of marker of the If branch adds its last beat, before the Else if.
+  openBranch(c,ifHeader.id);const exit=c.document.querySelector(`.scene-workspace .story-reel .story-track-exit[data-branch-id="${ifHeader.id}"]`);c.assert(exit);
+  await c.click(exit.querySelector('.story-track-end').getAttribute('aria-label'),exit);await c.wait(newBeat);
+  c.enter(newBeat().querySelector(':scope > .field select'),'narration','change');c.enter(newBeat().querySelector('textarea'),'End of If from Reel');await c.settle();
+  before=c.workspace();await c.click('Add Beat',newBeat());await c.wait(()=>c.lastMutation()?.response.ok&&!newBeat());await c.settle();
+  const ended=envelope(c,before,'insertBodyBeat');c.assert.deepEqual([ended.body,ended.position],[bodyRef(ifHeader),{type:'end'}]);
+  const inserted=await c.snapshot();
+  c.assert.equal(c.sourceText(inserted,entry.sourcePath),replaceOnce(c,c.sourceText(slotted,entry.sourcePath),'    elif trust == 4:\n','        "End of If from Reel"\n    elif trust == 4:\n'));
+  // Story Save refuses the invalid draft and writes nothing. Reel shows why, and both drafts survive another switch.
+  const refusedAt=c.requests().length,was=status();await c.click('Save',header());
+  await c.wait(()=>status()!==was&&/^Nothing saved/.test(status()));await c.settle();
+  c.assert(!c.requests().slice(refusedAt).some(r=>r.request.operation==='scene.saveDrafts'));c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(inserted));
+  c.assert.equal(status(),`Nothing saved. 1 of 2 drafts needs changes:${entry.displayName} 1`);
+  c.assert(inReel(choice.id));
+  await view('Tracks');await view('Reel');
+  c.assert.equal(row(c,choice.id).dataset.saveRefused,'true');c.assert.equal(card(c,choice.id).querySelector('[aria-label="Choice option text"]').value,'','The invalid draft is retained');
+  await c.click('Cancel',card(c,choice.id));await c.settle();c.assert.equal(row(c,choice.id).dataset.beatDraft,'false');
+  // Commit in Reel saves the nested beat in its own branch.
+  await select(c,nested.id);c.assert.equal(card(c,nested.id).querySelector('textarea').value,'Nested from Reel');
+  before=c.workspace();await c.click('Commit Beat',card(c,nested.id));await c.wait(accepted(c,nested.id));await c.settle();
+  c.assert.deepEqual(envelope(c,before,'updateBodyBeat').expectedBody,{type:'branch',...nested.owner});
+  const committed=await c.snapshot();
+  c.assert.equal(c.sourceText(committed,entry.sourcePath),replaceOnce(c,c.sourceText(inserted,entry.sourcePath),'"Nested retained"','"Nested from Reel"'));
+  // Undo and Redo reach the same edit and keep Reel. The harness then reopens the project and checks these bytes.
+  await c.history('undo');await c.settle();c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(inserted));
+  await c.history('redo');await c.settle();c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(committed));
+  c.assert(c.document.querySelector('.scene-workspace .story-reel'),'Undo and Redo keep the Reel view');
  },
 };

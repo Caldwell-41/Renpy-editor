@@ -176,3 +176,33 @@ test("Tracks insertion markers open a new beat at the place core lists for them"
   assert.deepEqual({ body: s.calls[0]!.command.body, position: s.calls[0]!.command.position }, { body: { type: "root" }, position: { type: "before", anchor: { type: "beat", beatId: "after-call" } } });
   await s.close();
 });
+
+test("Reel draws the Tracks route; switching views keeps selection, branches, a new beat's place and drafts, and sends nothing", async () => {
+  const s = setup(undefined, storyFixture(1)); const view = (name: string): void => { s.host.querySelector<HTMLButtonElement>(`.story-view-option[data-view="${name}"]`)!.click(); };
+  const route = (): string[] => [...s.host.querySelectorAll<HTMLElement>(".story-route > :not(.story-track-labels)")].map(item => `${item.className}|${item.dataset.beatId ?? item.dataset.branchId ?? (item.dataset.newBeat ? "new" : "")}|${item.dataset.depth ?? ""}`);
+  const pressed = (): string[] => [...s.host.querySelectorAll<HTMLElement>(".story-branch-segment")].filter(item => item.ariaPressed === "true").map(item => item.dataset.branchId!);
+  const selected = (): string[] => [...s.host.querySelectorAll<HTMLElement>('.story-route [data-selected="true"]')].map(item => item.closest<HTMLElement>("[data-beat-id], [data-new-beat]")!.dataset.beatId ?? "new");
+  // Tracks starts selected. Reel shows the same route: nested beats, markers and the empty slot.
+  assert.equal(s.host.querySelector('.story-view-option[aria-pressed="true"]')?.textContent, "Tracks");
+  openBranch(s.host, "if"); openBranch(s.host, "nested-if-0"); const tracks = route().map(item => item.replace("story-route story-tracks", "")); view("reel");
+  assert.equal(s.host.querySelector(".story-panel")?.getAttribute("aria-label"), "Reel"); assert.equal(s.host.querySelector(".story-track-labels"), null);
+  assert.deepEqual(route(), tracks); assert.ok(route().some(item => item.startsWith("story-track-column|deep|2")));
+  // The scene's Return ends it, so Reel offers no + after it either.
+  assert.equal(trackColumn(s.host, "end")!.querySelector(".story-track-insert"), null); assert.ok(trackColumn(s.host, "after-call")!.querySelector(".story-track-insert"));
+  // Edit a nested beat in Reel, then switch: the same editor keeps its draft, and nothing is sent.
+  trackColumn(s.host, "deep")!.querySelector<HTMLButtonElement>(".story-track-beat")!.click(); const field = textarea(s.host);
+  field.value = "Still writing"; field.dispatchEvent(new Event("input", { bubbles: true })); await tick();
+  view("tracks"); assert.equal(textarea(s.host), field); assert.equal(field.value, "Still writing");
+  assert.deepEqual(selected(), ["deep"]); assert.deepEqual(pressed(), ["if", "nested-if-0"]); assert.equal(trackColumn(s.host, "deep")!.dataset.beatDraft, "true");
+  assert.equal(document.activeElement?.getAttribute("data-view"), "tracks", "focus stays on the view switch");
+  // Add the first beat of the empty Otherwise from Reel. The new beat keeps its place in Tracks.
+  view("reel"); openBranch(s.host, "otherwise"); assert.ok(trackColumn(s.host, "otherwise")?.classList.contains("story-track-slot"));
+  button(trackColumn(s.host, "otherwise")!, "+ Add a beat").click(); await tick();
+  const added = storyEditor(s.host).querySelector<HTMLElement>(".new-beat")!; textarea(s.host).value = "First in Otherwise"; textarea(s.host).dispatchEvent(new Event("input", { bubbles: true })); await tick();
+  const placed = route().find(item => item.includes("story-track-pending")); assert.ok(placed?.endsWith("|new|1"), "the new beat sits inside Otherwise");
+  view("tracks"); assert.equal(route().find(item => item.includes("story-track-pending")), placed); assert.deepEqual(selected(), ["new"]);
+  assert.equal(storyEditor(s.host).querySelector(".new-beat"), added); assert.equal(textarea(s.host).value, "First in Otherwise");
+  // The nested draft is marked on its closed condition in both views.
+  assert.equal(trackColumn(s.host, "if")!.dataset.beatDraft, "true"); view("reel"); assert.equal(trackColumn(s.host, "if")!.dataset.beatDraft, "true");
+  assert.deepEqual(s.calls, [], "switching views commits nothing"); await s.close();
+});
