@@ -92,7 +92,7 @@
 .scs-shell .scs-lanes { padding-top:16px; }
 
 /* Failure treatments differ by variant. */
-[data-variant=header] .scs-column.scs-fail { box-shadow:inset 0 2px 0 var(--status-error); }
+[data-variant^=header] .scs-column.scs-fail { box-shadow:inset 0 2px 0 var(--status-error); }
 [data-variant=strip] .scs-column.scs-fail>.sdc-beat-number { background:color-mix(in srgb,var(--status-error) 22%,transparent); }
 .scs-lane-reason>em { font-style:normal; color:var(--status-error); font-weight:600; }
 
@@ -114,7 +114,12 @@
 @media(max-width:1200px) { .scs-shell .sdc-column,.scs-shell .sdc-lane-labels { grid-template-rows:19px 17px 17px 36px 17px 18px; } }
 @media(max-width:640px) {
   .scs-header { gap:4px 8px; padding:5px 8px; }
-  .scs-project,.scs-runtime { display:none; }
+  .scs-project { display:none; }
+  .scs-shell:not([data-variant=header-v2]) .scs-runtime { display:none; }
+  [data-variant=header-v2] .scs-header { flex-wrap:nowrap; }
+  [data-variant=header-v2] .scs-runtime { gap:4px; padding-left:8px; }
+  [data-variant=header-v2] .scs-header button:not(.scs-history) { padding:3px 7px; }
+  [data-variant=header-v2] .scs-save-state { flex-wrap:nowrap; white-space:nowrap; overflow:hidden; }
   .scs-shell .scs-header button { font-size:11px; }
   [data-variant=header] .scs-save-state:has(.scs-refused) { order:9; flex-basis:100%; justify-content:flex-start; }
   [data-variant=header] .scs-save-state:has(.scs-refused)+.scs-history-group { margin-left:auto; }

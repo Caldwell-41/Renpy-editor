@@ -22,6 +22,22 @@ export default async function ({ page, open, capture }) {
     assert.match(await page.locator('#scs-error-text').innerText(), /Close \{i\} with \{\/i\}/);
     assert.equal(await page.locator('[data-action=undo]').count(), 1);
     assert.equal(await page.locator('.scs-toolbar [data-action=undo]').count(), 0);
+    if (variant === 'header-v2') {
+      // icons-v1: the header stays on one row. At compact the scene links live in the bottom status bar.
+      const box = await page.locator('.scs-header').boundingBox();
+      assert.ok(box.height <= 46, `header height ${box.height}`);
+      const where = viewport === 'compact' ? '.scs-footer' : '.scs-header';
+      assert.equal(await page.locator(`${where} [data-scene-jump]`).count(), 2);
+      if (viewport === 'compact') {
+        assert.match(await page.locator('.scs-header').innerText(), /Nothing saved/);
+        assert.match(await page.locator('.scs-footer').innerText(), /Nothing saved\. 3 of 5 drafts need changes:/);
+        await page.locator('.scs-footer [data-scene-jump="depot"]').click();
+        assert.match(await heading(), /^03 · Dialogue/);
+        assert.match(await page.locator('.scs-footer').innerText(), /3 of 5 drafts need changes/);
+        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth && [...document.querySelectorAll('.scs-header > *')].every(n => n.getBoundingClientRect().right <= innerWidth)), true);
+        await open({ state: 'refused', viewport });
+      }
+    }
     await shot(`${variant}-refused-dark-${viewport}`);
 
     await open({ state: 'conflict', viewport });

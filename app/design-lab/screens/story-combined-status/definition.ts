@@ -10,6 +10,7 @@ export const definition: Omit<LabScreen, 'approval'> = {
   ],
   variants: [
     { id: 'header', title: '1 · Header save status', load: () => import('./header.ts') },
+    { id: 'header-v2', title: '1 · Header save status v2', load: () => import('./header-v2.ts') },
     { id: 'footer', title: '2 · Status bar', load: () => import('./footer.ts') },
     { id: 'strip', title: '3 · Refusal above Tracks', load: () => import('./strip.ts') },
   ],

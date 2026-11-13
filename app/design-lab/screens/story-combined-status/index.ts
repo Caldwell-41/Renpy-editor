@@ -10,9 +10,9 @@ import '../story-revamp/combined-revision.css';
 import '../story-draft-conflict/style.css';
 import './style.css';
 
-export type Variant = 'header' | 'footer' | 'strip';
-const variants: Variant[] = ['header', 'footer', 'strip'];
-const names: Record<Variant, string> = { header: '1 · Header save status', footer: '2 · Status bar', strip: '3 · Refusal above Tracks' };
+export type Variant = 'header' | 'header-v2' | 'footer' | 'strip';
+const variants: Variant[] = ['header', 'header-v2', 'footer', 'strip'];
+const names: Record<Variant, string> = { header: '1 · Header save status', 'header-v2': '1 · Header save status v2', footer: '2 · Status bar', strip: '3 · Refusal above Tracks' };
 
 type Lines = { speaker: string; text: string };
 type Kind = 'Background' | 'Music' | 'Character' | 'Narration' | 'Dialogue' | 'Condition' | 'Choice';
@@ -189,6 +189,11 @@ export function mountStatus(host: HTMLElement, context: LabContext, initial: Var
   }
   function headerStatus() {
     if (variant === 'header') return saveLine();
+    // v2 at compact width: "Nothing saved" keeps the header on one row; the bottom status bar holds the count and scene links.
+    if (variant === 'header-v2') {
+      if (!compact()) return saveLine();
+      return shortState();
+    }
     if (variant === 'footer') return shortState();
     // Strip: the header slot carries the last action, then the short state.
     return message ? `<span class="scs-message">${escape(message)}</span><span class="scs-dim">·</span>${shortState()}` : shortState();
@@ -196,7 +201,9 @@ export function mountStatus(host: HTMLElement, context: LabContext, initial: Var
   function footer() {
     if (variant === 'strip') return '';
     const where = `<span class="scs-footer-context">${mode === 'tracks' ? 'Tracks' : 'Reel'} · editing ${escape(name(beat()))}</span>`;
-    const left = variant === 'header' ? `<span class="scs-message">${escape(message || 'Ready')}</span>`
+    const v2Compact = variant === 'header-v2' && compact() && refused && drafts().length;
+    const left = v2Compact ? `${message ? `<span class="scs-message">${escape(message)}</span><span class="scs-dim">·</span>` : ''}${saveLine()}`
+      : variant === 'header' || variant === 'header-v2' ? `<span class="scs-message">${escape(message || 'Ready')}</span>`
       : `${message ? `<span class="scs-message">${escape(message)}</span><span class="scs-dim">·</span>` : ''}${saveLine()}`;
     return `<footer class="scs-footer" aria-label="Status"><div class="scs-footer-status" role="status">${left}</div>${where}</footer>`;
   }
