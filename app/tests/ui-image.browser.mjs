@@ -123,7 +123,7 @@ try {
  assert.equal(await ui.getByRole('button',{name:'Top left',exact:true,includeHidden:true}).isDisabled(),true);
  await original.evaluate(e=>e.click());assert.equal(await width.inputValue(),'200');assert.equal(await height.inputValue(),'100');
  assert.equal(await read(),placed,'The held Apply has not changed Source');
- // Every screens.* request shares one lane, so compose can still wait behind a canvas render here.
+ // Every screens.* request shares one lane, so the compose can still wait behind a canvas render here.
  let heldTimer;
  try{await Promise.race([held,new Promise((_,reject)=>{heldTimer=setTimeout(()=>reject(Error('compose never reached the core')),8000);})]);}finally{clearTimeout(heldTimer);}
  releaseCompose();await page.waitForFunction(()=>document.querySelector('.screen-image-state')?.textContent==='No pending changes');
