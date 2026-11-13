@@ -22,6 +22,8 @@ export interface HistoryStep { readonly entry: HistoryLabel; readonly step?: Dra
 export type HistoryDirection = "undo" | "redo";
 
 export const emptyHistory: HistoryState = { undo: null, redo: null };
+/** A typing step ends after this long without typing, or when its field loses focus. */
+export const typingStepIdleMs = 2000;
 
 export const isMacPlatform = (): boolean => /Mac|iPhone|iPad|iPod/.test(window.navigator.platform);
 /** Cmd on macOS and Ctrl elsewhere, alone with no Alt. */

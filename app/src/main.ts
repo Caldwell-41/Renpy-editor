@@ -170,7 +170,8 @@ function completionIsCurrent(token: CompletionToken): boolean {
     && token.sessionId === currentProject?.sessionId;
 }
 
-function beginAuthoringCompletion(project: OpenProject, scope: object): CompletionToken | undefined {
+// `edit` is false for a read that takes the lease, such as opening a Source file: it keeps "Undone: …".
+function beginAuthoringCompletion(project: OpenProject, scope: object, edit = true): CompletionToken | undefined {
   if (activeFlushOperations.has(project.sessionId)) {
     setStatus("Flush is still in progress.");
     return undefined;
@@ -182,7 +183,7 @@ function beginAuthoringCompletion(project: OpenProject, scope: object): Completi
   const token = beginCompletion(project, scope);
   activeAuthoringOperations.set(project.sessionId, token.operation);
   reflectAuthoringState();
-  historyNotice = undefined;
+  if (edit) historyNotice = undefined;
   return token;
 }
 
@@ -214,8 +215,8 @@ function refreshPersistenceAfterStaleCompletion(token: CompletionToken): void {
   }
 }
 
-async function runAuthoringOperation<T>(project: OpenProject, scope: object, task: () => Promise<T>): Promise<T> {
-  const token = beginAuthoringCompletion(project, scope);
+async function runAuthoringOperation<T>(project: OpenProject, scope: object, task: () => Promise<T>, edit = true): Promise<T> {
+  const token = beginAuthoringCompletion(project, scope, edit);
   if (!token) throw new Error("Another persistence operation is still in progress.");
   try {
     return await task();
@@ -881,9 +882,7 @@ async function renderSourceSurface(workspace: HTMLElement, tree: HTMLElement, pr
       runCoordinated: (label, task) => {
         let scope = sourceActionScopes.get(label);
         if (!scope) { scope = {}; sourceActionScopes.set(label, scope); }
-        // Opening a file is a read, so the "Undone: …" of the Undo that opened it stays.
-        const notice = label === "source.open" ? historyNotice : undefined;
-        return runAuthoringOperation(project, scope, () => { if (notice) historyNotice = notice; return task(); });
+        return runAuthoringOperation(project, scope, task, label !== "source.open");
       },
       refreshPersistence: () => { void refreshPersistenceStatus(project, viewGeneration); },
     }, target);

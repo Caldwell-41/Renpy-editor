@@ -3,7 +3,7 @@ import type { BeatOwner, ConditionalBranch } from "./scene-ui.ts";
 import { sourceEditor, type SourceEditor } from "./source-editor.ts";
 import type { EditorState } from "@codemirror/state";
 import { sourceTextareaSnapshot, textareaText, textareaOffset } from "./source-textarea.js";
-import type { HistoryState } from "./project-history.ts";
+import { typingStepIdleMs, type HistoryState } from "./project-history.ts";
 export type SourceFileState = "clean" | "dirty" | "conflict" | "invalid" | "readOnly" | "unavailable";
 
 export interface SourceFileSummary {
@@ -454,7 +454,7 @@ export function renderSourceWorkspace(
         snapshot = latestSnapshot = { ...snapshot, newStep: true };
       }
       window.clearTimeout(stepTimer);
-      stepTimer = window.setTimeout(endStep, 2000);
+      stepTimer = window.setTimeout(endStep, typingStepIdleMs);
     }
     updateStateOnly();
     actions.refreshPersistence();

@@ -263,6 +263,21 @@ impl HistoryStack {
         Ok(())
     }
 
+    /// Adds a draft-step entry on top and drops Redo. It records no bytes.
+    pub(crate) fn push_draft_step(
+        &mut self,
+        step: DraftStep,
+        label: HistoryLabel,
+    ) -> Result<HistoryState, ErrorCode> {
+        self.push(HistoryEntry {
+            transaction_id: step.step_id.clone(),
+            label,
+            mutations: Vec::new(),
+            step: Some(step),
+        })?;
+        Ok(self.state())
+    }
+
     /// The draft step Undo would reverse, if the next entry is one.
     pub(crate) fn undo_step(&self) -> Option<&DraftStep> {
         self.undo_entry()?.step.as_ref()
@@ -511,26 +526,26 @@ impl AuthoringService {
         project: &ProjectId,
         request: DraftStepRequest,
     ) -> Result<HistoryState, SceneError> {
+        // Source drafts belong to core; the renderer cannot add their steps.
         if ![&request.step_id, &request.draft, &request.name]
             .into_iter()
             .all(|value| draft_text(value))
+            || crate::source::is_source_draft(&request.draft)
         {
             return Err(SceneError::InvalidPayload);
         }
         let mut histories = self.project_history.lock().map_err(|_| SceneError::Io)?;
-        let history = histories.entry(project.clone()).or_default();
-        history
-            .push(HistoryEntry {
-                transaction_id: request.step_id.clone(),
-                label: HistoryLabel::new(request.name, request.item),
-                mutations: Vec::new(),
-                step: Some(DraftStep {
+        histories
+            .entry(project.clone())
+            .or_default()
+            .push_draft_step(
+                DraftStep {
                     step_id: request.step_id,
                     draft: request.draft,
-                }),
-            })
-            .map_err(|_| SceneError::InvalidPayload)?;
-        Ok(history.state())
+                },
+                HistoryLabel::new(request.name, request.item),
+            )
+            .map_err(|_| SceneError::InvalidPayload)
     }
 
     pub fn history_state(&self, project: &ProjectId) -> Result<HistoryState, SceneError> {

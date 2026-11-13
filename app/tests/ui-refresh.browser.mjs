@@ -264,7 +264,7 @@ try {
  await page.evaluate(()=>{for(let i=0;i<50;i++){document.querySelector('#app-status').textContent=i%2?'Unsaved Source draft':'Saved';document.querySelector('.source-draft-warning').hidden=Boolean(i%2);}});
  assert.deepEqual(await page.locator('.source-editor-shell').boundingBox(),stableBefore,'Source status and warning visibility moved editor');assert.equal(await page.locator('.cm-content').evaluate(el=>document.activeElement===el),true,'status update stole focus');
  const rawEvidence=await page.evaluate(async()=>{const {losslessEditorProof}=await import('/tests/source-editor-browser-proof.ts');return losslessEditorProof();});
- assert.equal(rawEvidence.after,rawEvidence.raw.replace('A','Alpha').replace('B','Beta'));assert.equal(rawEvidence.merged,'label start:\r\n    "雪 merged\r\nBeta"\r\n','a rich editor edit keeps the bytes around it');
+ assert.equal(rawEvidence.after,rawEvidence.raw.replace('A','Alpha').replace('B','Beta'));assert.equal(rawEvidence.undoHandled,false,'the rich editor leaves Cmd/Ctrl+Z to project Undo');assert.equal(rawEvidence.blurs,1,'leaving the rich editor ends its typing step');assert.equal(rawEvidence.merged,'label start:\r\n    "雪 merged\r\nBeta"\r\n','a rich editor edit keeps the bytes around it');
  assert.deepEqual(errors,[]);
  // Run the shipped native smoke interaction script against real CodeMirror DOM.
  // The desktop/security responses remain stubbed; this checks the driver, not native security.

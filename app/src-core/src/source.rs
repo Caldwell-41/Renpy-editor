@@ -6,7 +6,7 @@
 
 use crate::{
     authoring::{AuthoringService, PersistenceStatus},
-    history::{DraftStep, HistoryEntry, HistoryItem, HistoryLabel, HistoryPart, HistoryState},
+    history::{DraftStep, HistoryItem, HistoryLabel, HistoryPart, HistoryState},
     metadata::{ProjectMetadata, SceneMetadata, SceneSourceMapping, SourceMapMetadata},
     scene::{build_mapping, SceneBeat, SceneError},
     transaction::{
@@ -206,6 +206,11 @@ fn source_draft_id(path: &str) -> String {
     format!("{SOURCE_DRAFT_PREFIX}{path}")
 }
 
+/// Whether a history draft id names a Source file's draft.
+pub(crate) fn is_source_draft(draft: &str) -> bool {
+    draft.starts_with(SOURCE_DRAFT_PREFIX)
+}
+
 #[derive(Default)]
 pub(crate) struct SourceSessions {
     projects: HashMap<ProjectId, HashMap<String, SourceBuffer>>,
@@ -352,20 +357,7 @@ impl AuthoringService {
         let accepted_value = accepted_text(&accepted.base_bytes)?;
         let next_draft = (request.text != accepted_value).then_some(request.text);
         let draft_changed = accepted.draft != next_draft;
-        let mut dirty_count = 0usize;
-        let mut draft_bytes = 0usize;
-        for (path, buffer) in buffers.iter() {
-            let candidate = if path == &request.path {
-                next_draft.as_ref()
-            } else {
-                buffer.draft.as_ref()
-            };
-            if let Some(value) = candidate {
-                dirty_count += 1;
-                draft_bytes = draft_bytes.saturating_add(value.len());
-            }
-        }
-        if dirty_count > MAX_DIRTY_BUFFERS || draft_bytes > MAX_DRAFT_BYTES {
+        if !within_draft_limits(buffers, &request.path, next_draft.as_ref()) {
             return Err(SourceError::DraftLimit);
         }
         let buffer = buffers
@@ -393,6 +385,20 @@ impl AuthoringService {
             if !extends {
                 *step_sequence += 1;
                 let step_id = format!("source-step:{step_sequence}");
+                history = Some(
+                    stack
+                        .push_draft_step(
+                            DraftStep {
+                                step_id: step_id.clone(),
+                                draft,
+                            },
+                            HistoryLabel::new(
+                                format!("Source typing in {}", file_name(&request.path)),
+                                HistoryItem::source(&request.path),
+                            ),
+                        )
+                        .map_err(|_| SourceError::Io)?,
+                );
                 // Undone steps left the history when this entry dropped Redo.
                 buffer.steps.retain(|step| !step.undone);
                 if let Some(last) = buffer.steps.last_mut() {
@@ -401,23 +407,11 @@ impl AuthoringService {
                     }
                 }
                 buffer.steps.push(SourceStep {
-                    step_id: step_id.clone(),
+                    step_id,
                     base: buffer.base_revision.clone(),
                     change: StepChange::Open(before),
                     undone: false,
                 });
-                stack
-                    .push(HistoryEntry {
-                        transaction_id: step_id.clone(),
-                        label: HistoryLabel::new(
-                            format!("Source typing in {}", file_name(&request.path)),
-                            HistoryItem::source(&request.path),
-                        ),
-                        mutations: Vec::new(),
-                        step: Some(DraftStep { step_id, draft }),
-                    })
-                    .map_err(|_| SourceError::Io)?;
-                history = Some(stack.state());
             }
             buffer.draft_version = buffer.draft_version.saturating_add(1);
         }
@@ -522,7 +516,7 @@ impl AuthoringService {
     ) -> Result<SourceDocument, SourceError> {
         validate_source_path(&request.path)?;
         self.ensure_buffer(project, &request.path)?;
-        let stepped = {
+        let discarded = {
             let mut sessions = self.source_sessions.lock().map_err(|_| SourceError::Io)?;
             let buffer = sessions
                 .projects
@@ -534,7 +528,7 @@ impl AuthoringService {
             buffer.draft_version = buffer.draft_version.saturating_add(1);
             discard_steps(buffer)
         };
-        self.forget_source_steps(project, stepped.into_iter().collect())?;
+        self.forget_source_steps(project, discarded.into_iter().collect())?;
         self.refresh_buffer(project, &request.path)?;
         self.reconcile_clean_sources(project, project_id, Some(&request.path))?;
         self.source_document(project, project_id, &request.path)
@@ -545,19 +539,19 @@ impl AuthoringService {
         project: &ProjectId,
         project_id: &str,
     ) -> Result<SourceInventory, SourceError> {
-        let (paths, stepped) = {
+        let (paths, discarded) = {
             let mut sessions = self.source_sessions.lock().map_err(|_| SourceError::Io)?;
             let buffers = sessions.projects.entry(project.clone()).or_default();
-            let mut stepped = Vec::new();
+            let mut discarded = Vec::new();
             for buffer in buffers.values_mut() {
                 buffer.draft = None;
                 buffer.external = None;
                 buffer.draft_version = buffer.draft_version.saturating_add(1);
-                stepped.extend(discard_steps(buffer));
+                discarded.extend(discard_steps(buffer));
             }
-            (buffers.keys().cloned().collect::<Vec<_>>(), stepped)
+            (buffers.keys().cloned().collect::<Vec<_>>(), discarded)
         };
-        self.forget_source_steps(project, stepped)?;
+        self.forget_source_steps(project, discarded)?;
         for path in paths {
             self.refresh_buffer(project, &path)?;
             self.reconcile_clean_sources(project, project_id, Some(&path))?;
@@ -1376,20 +1370,8 @@ impl AuthoringService {
         let selection_start = text[..*start].encode_utf16().count() as u64;
         let selection_end = selection_start + to.encode_utf16().count() as u64;
         let next_draft = (text != accepted).then_some(text);
-        let (count, bytes) = buffers
-            .iter()
-            .filter_map(|(key, other)| {
-                if key == path {
-                    next_draft.as_ref()
-                } else {
-                    other.draft.as_ref()
-                }
-            })
-            .fold((0usize, 0usize), |(count, bytes), draft| {
-                (count + 1, bytes.saturating_add(draft.len()))
-            });
-        if count > MAX_DIRTY_BUFFERS || bytes > MAX_DRAFT_BYTES {
-            // Too many drafts: the author saves or discards one first.
+        if !within_draft_limits(buffers, path, next_draft.as_ref()) {
+            // Redo after another file's open step grew: save or discard a draft first.
             return Err(SceneError::DirtySource);
         }
         let buffer = buffers.get_mut(path).ok_or(SceneError::HistoryBoundary)?;
@@ -1659,6 +1641,28 @@ fn buffer_state(buffer: &SourceBuffer) -> SourceFileState {
     }
 }
 
+/// Whether the drafts stay within the registry's count and size limits once
+/// `path` holds `candidate`.
+fn within_draft_limits(
+    buffers: &HashMap<String, SourceBuffer>,
+    path: &str,
+    candidate: Option<&String>,
+) -> bool {
+    let (count, bytes) = buffers
+        .iter()
+        .filter_map(|(key, buffer)| {
+            if key == path {
+                candidate
+            } else {
+                buffer.draft.as_ref()
+            }
+        })
+        .fold((0usize, 0usize), |(count, bytes), draft| {
+            (count + 1, bytes.saturating_add(draft.len()))
+        });
+    count <= MAX_DIRTY_BUFFERS && bytes <= MAX_DRAFT_BYTES
+}
+
 fn draft_totals(buffers: Option<&HashMap<String, SourceBuffer>>) -> (usize, usize) {
     buffers.map_or((0, 0), |items| {
         items.values().fold((0, 0), |(count, bytes), item| {
@@ -1797,9 +1801,9 @@ fn commit_error(outcome: CommitOutcome) -> SourceError {
 
 /// Clears a file's draft steps and returns the draft id when it had any.
 fn discard_steps(buffer: &mut SourceBuffer) -> Option<String> {
-    let stepped = !buffer.steps.is_empty();
+    let had_steps = !buffer.steps.is_empty();
     buffer.steps.clear();
-    stepped.then(|| source_draft_id(&buffer.path))
+    had_steps.then(|| source_draft_id(&buffer.path))
 }
 
 /// The one span where `before` and `after` differ, on character boundaries.
