@@ -117,7 +117,9 @@ export function buildChoiceEditor(payload: Choice, context: EditorContext, choic
       then.classList.add("story-then-replaced");
       const text = element("div", "story-then-text");
       if (code?.payload.type === "customCode") {
-        const line = element("p", "story-ending"); line.append("Ends with Custom Code: ", element("code", "", code.payload.source.trim().replace(/^\$\s*/, "")));
+        const line = element("p", "story-ending"); // Break points after "." "(" and "," keep a long call from splitting inside a name.
+        const source = element("code"); for (const part of code.payload.source.trim().replace(/^\$\s*/, "").split(/(?<=[.(,])/)) source.append(part, element("wbr"));
+        line.append("Ends with Custom Code: ", source);
         text.append(line, button("Edit in Source", "story-link", () => choice.viewSource(code)));
       } else text.append(element("p", "story-ending", `Ends at ${numbers.get(endedBy!.id) ?? ""} ${choice.beatName(endedBy!)}`));
       then.append(text, add); slot.append(then); return;

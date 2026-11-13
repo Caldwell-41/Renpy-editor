@@ -1955,6 +1955,8 @@ export function renderStoryView(
     const title = document.createElement("strong"); title.className = "story-editor-title"; title.textContent = `${number} · ${beatName(beat)}`;
     // The beat's draft mark: "* Draft", "! Conflict" or, after a refused Save, "! Needs changes".
     const state = document.createElement("span"); state.className = "story-editor-state"; state.dataset.beatId = beat.id;
+    // A Choice the editor shows read-only says so beside its title (story-combined-editor / replace-v2).
+    const locked = readOnlyLogic(beat) ? Object.assign(document.createElement("span"), { className: "story-editor-protected", textContent: "Protected" }) : undefined;
     const editable = nodeEditable(beat);
     const menu = document.createElement("details"); menu.className = "story-beat-menu";
     const summary = document.createElement("summary"); summary.textContent = "⋯"; summary.ariaLabel = `Actions for ${number}`;
@@ -1966,7 +1968,7 @@ export function renderStoryView(
     const move = button("Move to…", "text-button"); move.disabled = !editable || scene.sourceConflict; move.addEventListener("click", () => { menu.open = false; moveNodeForm(scene, beat, summary); });
     list.append(up, down, move);
     if (!beat.conditionalBranch) { const remove = button("Delete", "text-button story-menu-delete"); remove.ariaLabel = `Delete beat ${number}`; remove.disabled = !editable || beat.payload.type === "return" && !beat.owner || scene.sourceConflict; remove.addEventListener("click", () => removeNodeForm(scene, beat)); list.append(remove); }
-    menu.append(summary, list); heading.append(storyIcon(beat.conditionalBranch ? "condition" : beat.payload.type), title, state, menu);
+    menu.append(summary, list); heading.append(storyIcon(beat.conditionalBranch ? "condition" : beat.payload.type), title, ...locked ? [locked] : [], state, menu);
     return heading;
   };
   // A condition: its group actions, then each branch with its test and its own actions.

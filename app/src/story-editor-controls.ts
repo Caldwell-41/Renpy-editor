@@ -147,7 +147,13 @@ export function dropdownKeys(menu: HTMLDetailsElement, summary: HTMLElement, lis
     if (event.key === "ArrowDown" || event.key === "ArrowUp") { event.preventDefault(); items[(at + (event.key === "ArrowDown" ? 1 : -1) + items.length) % items.length]?.focus(); }
     else if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); menu.open = false; summary.focus(); }
   });
-  menu.addEventListener("toggle", () => { if (menu.open) (list.querySelector<HTMLElement>('[aria-selected="true"]') ?? list.querySelector<HTMLElement>("[role=option]"))?.focus(); });
+  // An open list scrolls the editor down to show its last rows; it never scrolls sideways.
+  menu.addEventListener("toggle", () => {
+    if (!menu.open) return;
+    const box = menu.closest<HTMLElement>(".story-editor"), over = box ? list.getBoundingClientRect().bottom - box.getBoundingClientRect().bottom : 0;
+    if (box && over > 0) box.scrollTop += over + 4;
+    (list.querySelector<HTMLElement>('[aria-selected="true"]') ?? list.querySelector<HTMLElement>("[role=option]"))?.focus({ preventScroll: true });
+  });
   // Leaving the menu closes it.
   menu.addEventListener("focusout", event => { if (menu.open && !menu.contains(event.relatedTarget as Node | null) && event.relatedTarget) menu.open = false; });
 }
