@@ -3,11 +3,11 @@ import { buildRuleBuilder, type NewVariable } from "./story-condition-editor.ts"
 import { openNewVariable, type NewVariableRequest } from "./story-new-variable.ts";
 import { validateField } from "./authoring-input.ts";
 import { addKindName, openAddBeat, type AddKind, type Placement } from "./story-add-beat.ts";
-import { beatLabels, buildBeatEditor, defaultPayload, requiredText, type BeatEditor, type EditorContext, type EditorInternals } from "./story-beat-editors.ts";
+import { beatLabels, buildBeatEditor, defaultPayload, type BeatEditor, type EditorContext, type EditorInternals } from "./story-beat-editors.ts";
 import { buildChoiceEditor, type ChoiceHost, type Ending } from "./story-choice-editor.ts";
 import { storyIcon } from "./story-icons.ts";
 import { openPlaceTree, type PlaceNode } from "./story-place-tree.ts";
-import { button, focusFirst, friendlyError, labelled } from "./story-editor-controls.ts";
+import { button, FieldError, focusFirst, friendlyError, labelled, openFormDialog } from "./story-editor-controls.ts";
 import { isTextField, typingStepIdleMs, type DraftStep, type DraftStepRecord, type HistoryDirection } from "./project-history.ts";
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenEffects, ScreenRevisions, ScreenTargetBinding } from "./screen-contracts.ts";
 import { laneGrips, resizeGrip, watchHiddenLanes, type FocusWidths } from "./story-focus.ts";
@@ -556,16 +556,19 @@ export function renderStoryView(
       return created;
     },
   });
-  // Beat drafts for the project session, keyed by beat id or by a new beat's insertion place.
-  // A new beat is a draft from the moment it is added; an existing beat only once edited.
+  // Story drafts for the project session: beats, a new beat or condition at an insertion
+  // place, and a condition's branch tests, new branches and branch deletions. A new beat,
+  // condition or branch is a draft from the moment it is added; an existing beat or test
+  // only once edited. `beatId` names the beat, branch or condition the draft belongs to.
   // `command` throws when the draft is incomplete, invalid or conflicts with source.
   // For draft steps (ADR 0025), `id` names the draft in core's history, `kind` names its
   // beat, `editors` keep editor state that controls do not show, `detach` removes a new
   // beat's editor, `state` is the draft after its last step (none before its first) and
-  // `lastStep` orders Story Save, so the most recently edited beat ends on top.
+  // `lastStep` orders Story Save, so the most recently edited draft ends on top. A `last`
+  // draft, a branch deletion, saves after the others, so edits inside the branch land first.
   // `conflict` compares the draft with source now (see DraftConflict); `primary` is the
   // field the comparison sits above.
-  interface BeatDraft { readonly id: string; readonly panel: HTMLElement; readonly sceneId: string; readonly beatId?: string; readonly place?: () => { body: BodyRef; position: Position }; readonly read?: () => BeatPayload; readonly command: () => SceneCommand; readonly kind: () => string; readonly editors: () => readonly BeatEditor[]; readonly conflict: () => DraftConflict | undefined; readonly primary: () => HTMLElement; readonly detach?: () => void; readonly replaces?: () => string | undefined; readonly nextLine?: () => void; state?: DraftState; lastStep: number }
+  interface BeatDraft { readonly id: string; readonly panel: HTMLElement; readonly sceneId: string; readonly beatId?: string; readonly place?: () => { body: BodyRef; position: Position }; readonly read?: () => BeatPayload; readonly command: () => SceneCommand; readonly kind: () => string; readonly editors: () => readonly DraftEditor[]; readonly conflict: () => DraftConflict | undefined; readonly primary: () => HTMLElement; readonly detach?: () => void; readonly replaces?: () => string | undefined; readonly nextLine?: () => void; readonly last?: boolean; state?: DraftState; lastStep: number }
   let newBeatDrafts = 0, draftSequence = 0;
   const beatDrafts = new Map<string, BeatDraft>();
   const invalidDraft = "This beat draft is invalid. Draft retained.";
@@ -627,7 +630,7 @@ export function renderStoryView(
   };
   const stepEvent = (draft: BeatDraft) => (event: Event): void => {
     const target = event.target;
-    if (restoring || disposed || !(target instanceof HTMLElement) || target.closest(".choice-new-scene")) return;
+    if (restoring || disposed || !(target instanceof HTMLElement)) return;
     if (isTextField(target)) {
       // The field's change event follows its typing, which is already a step.
       if (event.type !== "input") return;
@@ -783,7 +786,7 @@ export function renderStoryView(
     if (drafts().some(draft => draft !== owner && !owner?.contains(draft))) { actions.status("Complete or cancel the other edit first. Input retained.", "error"); focusDraft(); return false; }
     if (pendingWrites) { actions.status("Wait for the current change to finish.", "error"); return false; }
     const before = model;
-    const joined = committed ? [committed] : discardedBy(command);
+    const joined = committed ? [committed, ...discardedBy(command).filter(draft => draft !== committed)] : discardedBy(command);
     closeText();
     const unlock = lockStory();
     actions.status("Saving…");
@@ -842,8 +845,8 @@ export function renderStoryView(
   // Reads every pending draft's command. Nothing is sent while any draft fails.
   // Commands go in the order of each draft's last step, so core puts the most recently
   // edited beat on top of the history.
-  const preflight = (): { readonly drafts: BeatDraft[]; readonly commands: SceneCommand[]; readonly failures: [BeatDraft, string][] } => {
-    const pending = pendingDrafts().sort((a, b) => a.lastStep - b.lastStep), commands: SceneCommand[] = [], failures: [BeatDraft, string][] = [];
+  const preflight = (only?: readonly BeatDraft[]): { readonly drafts: BeatDraft[]; readonly commands: SceneCommand[]; readonly failures: [BeatDraft, string][] } => {
+    const pending = (only ? pendingDrafts().filter(draft => only.includes(draft)) : pendingDrafts()).sort((a, b) => Number(!!a.last) - Number(!!b.last) || a.lastStep - b.lastStep), commands: SceneCommand[] = [], failures: [BeatDraft, string][] = [];
     for (const draft of pending) { try { commands.push(draft.command()); } catch (error) { failures.push([draft, friendlyError(error, invalidDraft)]); } }
     return { drafts: pending, commands, failures };
   };
@@ -900,12 +903,13 @@ export function renderStoryView(
     showRefusal();
     return { kind: "refused", failures: failures.map(([draft, message]) => ({ sceneId: draft.sceneId, ...(draft.beatId ? { beatId: draft.beatId } : {}), message })) };
   };
-  const saveDrafts = async (): Promise<StorySaveOutcome> => {
+  // Story Save, of every pending draft or of `only` those, such as a branch deletion and the drafts inside it.
+  const saveDrafts = async (only?: readonly BeatDraft[]): Promise<StorySaveOutcome> => {
     if (disposed || actions.current?.() === false || !actions.saveDrafts) return { kind: "blocked" };
     if (settling || pendingWrites) { actions.status("Wait for the current Story change to finish. Nothing saved.", "error"); return { kind: "busy" }; }
     if (hasDraft()) { actions.status("Commit or cancel the open Story form before saving. Nothing saved.", "error"); focusDraft(); return { kind: "blocked" }; }
     closeText();
-    const { drafts: saving, commands, failures } = preflight();
+    const { drafts: saving, commands, failures } = preflight(only);
     if (failures.length) return refuseSave(failures);
     const expected = expectedRevisions(model);
     refusal = undefined; markDrafts();
@@ -1188,7 +1192,7 @@ export function renderStoryView(
   };
   // Opens a new beat draft at a place in a body and shows it in the editor. `replaces`
   // names an ending the new beat takes the place of.
-  const insertAt = (scene: SceneDocument, body: BodyRef, position: Position, opener: string, initialType: BeatPayload["type"], hint?: ScreenInsertion, replaces?: string): void => {
+  const insertAt = (scene: SceneDocument, body: BodyRef, position: Position, opener: string, initialType: AddKind, hint?: ScreenInsertion, replaces?: string): void => {
     if (!draftGuard()) return;
     openOperation = undefined;
     const current = model.scenes.find(item => item.id === scene.id); if (!current) return;
@@ -1249,7 +1253,6 @@ export function renderStoryView(
     openAddBeat({
       host, opener: trigger, screens: !!(actions.screenCatalog && actions.resolveScreenTarget), where: kind => placement(current, body, position, kind),
       choose: kind => {
-        if (kind === "condition") { openConditionForm(current, body, position); return; }
         if (remembered && ["showScreen", "hideScreen", "callScreen"].includes(kind)) { openNewBeat(current, kind, null, opener); return; }
         const resolved = placeFor(current, body, position, kind);
         insertAt(current, body, resolved.position, opener, kind, undefined, resolved.replaces?.id);
@@ -1258,7 +1261,7 @@ export function renderStoryView(
   };
   // + Add beat in the scene toolbar adds at the scene's default place. Add screen Beat and
   // Add change here name their kind, so they open it directly.
-  const openNewBeat = (scene: SceneDocument, initialType?: BeatPayload["type"], beforeBeatId: string | null = null, opener = "root"): void => {
+  const openNewBeat = (scene: SceneDocument, initialType?: AddKind, beforeBeatId: string | null = null, opener = "root"): void => {
     const anchor = beforeBeatId ? scene.beats.find(beat => beat.id === beforeBeatId) : undefined;
     const before: Position | undefined = anchor && { type: "before", anchor: nodeRef(anchor) };
     if (anchor && !bodyOf(scene, beatBody(anchor))?.places.some(place => samePosition(place.position, before!))) {
@@ -1452,7 +1455,7 @@ export function renderStoryView(
     const heading = document.createElement("h3"); heading.textContent = selected ? `In effect at ${numbers.get(selected.id) ?? ""}` : "In effect at the end of the scene";
     section.append(heading);
     const addable = !selected || !!bodyOf(scene, beatBody(selected))?.places.some(place => samePosition(place.position, { type: "before", anchor: nodeRef(selected) }));
-    const contribution = (label: string, beatId: string | undefined, addType: BeatPayload["type"], assetId?: string): void => {
+    const contribution = (label: string, beatId: string | undefined, addType: AddKind, assetId?: string): void => {
       const row = document.createElement("div"); row.className = "provenance-row";
       if (assetId) { const tile = document.createElement("span"); tile.className = "asset-thumbnail"; const image = document.createElement("img"); image.alt = ""; tile.append(image); row.append(tile); void loadImage(assetId, "thumbnail", image, tile); }
       const name = document.createElement("span"); name.textContent = label; row.append(name);
@@ -1547,17 +1550,6 @@ export function renderStoryView(
     return { host: panel, read: () => { validate(); return { body: parents.find(item => item.key === parent.value)!.body, position: placements.find(item => item.key === position.value)!.position }; } };
   };
   // A new condition at a place, with its If test from the rule builder.
-  const openConditionForm = (scene: SceneDocument, body: BodyRef, position: Position): void => {
-    const branch = body.type === "branch" ? scene.beats.find(beat => beat.id === body.branchId) : undefined;
-    const target = prepareOperation(scene, branch); if (!target) return;
-    const builder = buildRuleBuilder(model.authoring.variables, undefined, { keyword: "if", label: "If", empty: "Add a rule to give this branch a test.", required: true, newVariable });
-    builder.host.querySelector<HTMLButtonElement>(".story-add-rule")?.click();
-    const otherwise = document.createElement("input"); otherwise.type = "checkbox"; otherwise.setAttribute("aria-label", "Include Otherwise");
-    const location = document.createElement("dl"); location.className = "story-where";
-    const before = nodeBefore(scene, body, position);
-    for (const [term, value] of [["Goes at", positionLabel(scene, body, position)], ["In", pathCaption(scene, body)], ...before ? [["After", `${numbers.get(before.id) ?? ""} ${nodeName(before)}`]] : []] as const) location.append(Object.assign(document.createElement("dt"), { textContent: term }), Object.assign(document.createElement("dd"), { textContent: value }));
-    operation(scene, target, "Add Condition", [location, builder.host, labelled("Include Otherwise", otherwise)], () => ({ type: "insertCondition", body, position, condition: builder.read(), otherwise: otherwise.checked }), "Create Condition");
-  };
   const groupHeader = (scene: SceneDocument, groupId: string): SceneBeat => scene.beats.find(beat => beat.conditionalBranch?.groupId === groupId && !beat.conditionalBranch.ordinal && !beat.conditionalBranch.otherwise)!;
   const groupCount = (scene: SceneDocument, header: SceneBeat): number => { const inner = innerBodies(scene, header); return scene.beats.filter(beat => !beat.conditionalBranch && !beat.structuralPlaceholder && !!beat.owner && inner.has(beat.owner.branchId)).length; };
   // Move up or down: the listed place one node earlier or later, never across protected Custom Code.
@@ -1569,27 +1561,143 @@ export function renderStoryView(
     const target: Position = anchor ? { type: "before", anchor: nodeRef(anchor) } : { type: "end" };
     return movePlaces(scene, beat, beatBody(beat)).some(place => samePosition(place.position, target)) ? target : undefined;
   };
-  const addBranchForm = (scene: SceneDocument, header: SceneBeat, otherwise: boolean): void => {
-    const target = prepareOperation(scene, header); if (!target) return;
-    const groupId = header.conditionalBranch!.groupId, expectedBody = beatBody(header);
-    const branches = scene.beats.filter(beat => beat.conditionalBranch?.groupId === groupId);
-    const builder = otherwise ? undefined : buildRuleBuilder(model.authoring.variables, undefined, { keyword: "elif", label: "Else if", empty: "Add a rule to give this branch a test.", required: true, newVariable });
-    builder?.host.querySelector<HTMLButtonElement>(".story-add-rule")?.click();
-    const positions = branches.slice(1).map(branch => ({ value: branch.id, label: `Before ${branchCaption(branch.conditionalBranch!, model)}` }));
-    if (!branches.some(branch => branch.conditionalBranch!.otherwise)) positions.push({ value: "end", label: "After the last Else If" });
-    const position = selectOf(positions, branches.find(branch => branch.conditionalBranch!.otherwise)?.id ?? "end"); position.setAttribute("aria-label", "Branch position");
-    const info = document.createElement("p"); info.textContent = otherwise ? "Otherwise goes last and runs when no earlier branch matches." : "The first matching branch wins. Choose this Else If's position.";
-    const validate = validateField(position, () => { if (!positions.some(item => item.value === position.value)) throw Error("Choose a branch position."); });
-    operation(scene, target, otherwise ? "Add Otherwise" : "Add Else If", [info, ...(builder ? [builder.host, labelled("Branch position", position)] : [])], () => { if (builder) validate(); return { type: "addConditionBranch", groupId, expectedBody, beforeBranchId: otherwise || position.value === "end" ? null : position.value, condition: builder?.read() ?? null }; }, otherwise ? "Create Otherwise" : "Create Else If", header.id);
+  // Condition drafts. Each branch's test, a new Else if or Otherwise and a branch deletion
+  // is its own retained draft, with Commit and Cancel; Story Save saves them with the beat
+  // drafts. Their panels sit in the condition editor and redraw it when they end.
+  const conditionPanel = (className: string, label: string): HTMLElement => {
+    const panel = document.createElement("div"); panel.className = `story-condition-draft ${className}`; panel.role = "group"; panel.setAttribute("aria-label", label);
+    panel.addEventListener("compositionstart", () => { composing = true; }); panel.addEventListener("compositionend", () => { composing = false; });
+    return panel;
   };
-  // A branch's test: the rule builder, applied with Apply condition. Otherwise has no test.
+  const redrawEditor = (): void => { const current = storyScene(model, selectedSceneId); if (current && editorHost?.isConnected) { drawEditor(current); markDrafts(); } };
+  // Commit writes one condition draft. A refused write keeps it, with focus in it.
+  const commitCondition = async (draft: BeatDraft, key: string, focusId?: string): Promise<void> => {
+    if (settling || composing || pendingWrites) return;
+    settling = (async (): Promise<boolean> => {
+      let command: SceneCommand;
+      try { command = draft.command(); } catch (error) { actions.status(friendlyError(error, invalidDraft), "error"); focusFirst(draft.panel); return false; }
+      const saved = await mutate(command, () => dropDraft(key), expectedRevisions(model), draft.panel, draft);
+      if (saved) focusColumn(focusId ?? selectedBeatId); else if (draft.panel.isConnected) focusFirst(draft.panel);
+      return saved;
+    })().finally(() => { settling = undefined; });
+  };
+  const cancelCondition = (key: string, focus?: HTMLElement | null): void => { if (pendingWrites || settling) return; cancelStep(key); beatDrafts.get(key)?.detach?.(); dropDraft(key); redrawEditor(); focus?.focus(); };
+  const draftActions = (key: string, commitLabel: string, draft: () => BeatDraft, focusId?: string): HTMLElement => {
+    const row = document.createElement("div"); row.className = "row-actions";
+    const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => cancelCondition(key));
+    const commit = button(commitLabel, "button primary"); commit.addEventListener("click", () => void commitCondition(draft(), key, focusId));
+    row.append(cancel, commit); return row;
+  };
+  // A branch's test. Otherwise has none.
   const renderConditionBranch = (card: HTMLElement, scene: SceneDocument, beat: SceneBeat): void => {
-    const branch = beat.conditionalBranch!, header = groupHeader(scene, branch.groupId);
+    const branch = beat.conditionalBranch!, groupId = branch.groupId, word = branch.ordinal ? "Else if" : "If";
     const source = (): void => { if (draftGuard()) actions.viewSource?.(scene.sourcePath, beat.byteStart, beat.byteEnd, scene.sourceRevision); };
     if (branch.otherwise) { const note = document.createElement("p"); note.className = "story-field-hint"; note.textContent = "Runs when no test above is true."; card.append(note); return; }
-    const builder = buildRuleBuilder(model.authoring.variables, branch.condition, { keyword: branch.ordinal ? "elif" : "if", label: branch.ordinal ? "Else if" : "If", empty: "Add a rule to give this branch a test.", required: true, newVariable, ...actions.viewSource ? { source } : {}, ...branch.condition ? { caption: conditionCaption(branch.condition, model.authoring.variables) } : {} });
+    const kept = beatDrafts.get(beat.id);
+    if (kept) { card.append(kept.panel); return; }
+    const builder = buildRuleBuilder(model.authoring.variables, branch.condition, { keyword: branch.ordinal ? "elif" : "if", label: word, empty: "Add a rule to give this branch a test.", required: true, newVariable, ...actions.viewSource ? { source } : {}, ...branch.condition ? { caption: conditionCaption(branch.condition, model.authoring.variables) } : {} });
     if (!builder.editable) { card.append(builder.host); return; }
-    operation(scene, card, branch.ordinal ? "Edit Else If" : "Edit Condition", [builder.host], () => ({ type: "updateConditionBranch", groupId: branch.groupId, branchId: beat.id, expectedBody: beatBody(header), condition: builder.read()! }), "Apply condition", beat.id, true);
+    // The test commits while the branch's accepted test is unchanged; otherwise it conflicts.
+    const accepted = JSON.stringify(branch.condition ?? null);
+    const located = () => { const current = model.scenes.find(item => item.id === scene.id), node = current?.beats.find(item => item.id === beat.id); return { current, node }; };
+    const command = (): SceneCommand => {
+      const { current, node } = located();
+      if (current?.sourceConflict) throw new Error(unreadable);
+      if (!current || !node?.conditionalBranch || JSON.stringify(node.conditionalBranch.condition ?? null) !== accepted) throw new Error("Conflict with source. Draft retained.");
+      return { type: "updateConditionBranch", sceneId: scene.id, expectedSourceRevision: current.sourceRevision, groupId, branchId: beat.id, expectedBody: beatBody(groupHeader(current, groupId)), condition: builder.read()! };
+    };
+    const conflict = (): DraftConflict | undefined => {
+      const { current, node } = located();
+      if (current?.sourceConflict) return undefined;
+      if (!current || !node?.conditionalBranch) return { missing: "This branch is no longer in source." };
+      if (JSON.stringify(node.conditionalBranch.condition ?? null) === accepted) return undefined;
+      // Override writes this test against the source the comparison shows.
+      const reviewed = current;
+      return { source: node.conditionalBranch.condition ? conditionCaption(node.conditionalBranch.condition, model.authoring.variables) : "No test", override: () => {
+        if (settling || pendingWrites || composing) return;
+        let condition; try { condition = builder.read()!; } catch (error) { actions.status(friendlyError(error, invalidDraft), "error"); focusFirst(panel); return; }
+        settling = mutate({ type: "updateConditionBranch", sceneId: scene.id, expectedSourceRevision: reviewed.sourceRevision, groupId, branchId: beat.id, expectedBody: beatBody(groupHeader(reviewed, groupId)), condition }, () => dropDraft(beat.id), expectedRevisions(model), panel, draft, staleOverride).finally(() => { settling = undefined; });
+      } };
+    };
+    const panel = conditionPanel("story-branch-test", `${word} test`);
+    panel.append(builder.host, draftActions(beat.id, "Commit test", () => draft, beat.id));
+    dirtyDraft(panel, []); card.append(panel);
+    const draft = keepDraft(beat.id, { panel, sceneId: scene.id, beatId: beat.id, command, kind: () => "condition", conflict,
+      editors: () => [{ focus: () => focusFirst(panel), internals: { capture: builder.capture, restore: builder.restore } }], primary: () => builder.host });
+  };
+  // A new Else if or Otherwise for a condition, as a draft until it is added. One of each
+  // waits per condition; adding again returns to it.
+  const newBranch = (scene: SceneDocument, header: SceneBeat, otherwise: boolean): void => {
+    const groupId = header.conditionalBranch!.groupId, key = `branch:${groupId}:${otherwise ? "otherwise" : "elif"}`, word = otherwise ? "Otherwise" : "Else if";
+    const waiting = beatDrafts.get(key); if (waiting) { focusFirst(waiting.panel); return; }
+    if (!draftGuard()) return;
+    const panel = conditionPanel("story-branch-editor story-branch-new", `New ${word}`);
+    const head = document.createElement("div"); head.className = "story-branch-head";
+    head.append(Object.assign(document.createElement("strong"), { textContent: word }), Object.assign(document.createElement("span"), { className: "story-branch-new-mark", textContent: "New" }));
+    panel.append(head);
+    const builder = otherwise ? undefined : buildRuleBuilder(model.authoring.variables, undefined, { keyword: "elif", label: "Else if", empty: "Add a rule to give this branch a test.", required: true, newVariable });
+    builder?.host.querySelector<HTMLButtonElement>(".story-add-rule")?.click();
+    // Where an Else if goes among the branches: before a later branch, or after the last Else if.
+    const branches = scene.beats.filter(beat => beat.conditionalBranch?.groupId === groupId);
+    const positions = branches.slice(1).map(branch => ({ value: branch.id, label: `Before ${branchCaption(branch.conditionalBranch!, model)}` }));
+    if (!branches.some(branch => branch.conditionalBranch!.otherwise)) positions.push({ value: "end", label: "After the last Else if" });
+    const position = selectOf(positions, branches.find(branch => branch.conditionalBranch!.otherwise)?.id ?? "end"); position.setAttribute("aria-label", "Branch position");
+    if (builder) panel.append(builder.host, labelled("Goes", position));
+    else panel.append(Object.assign(document.createElement("p"), { className: "story-field-hint", textContent: "Runs when no test above is true. Otherwise goes last." }));
+    const located = (): SceneDocument | undefined => model.scenes.find(item => item.id === scene.id);
+    const command = (): SceneCommand => {
+      const current = located();
+      if (current?.sourceConflict) throw new Error(unreadable);
+      const missing = conflict(); if (missing) throw new Error(`${"missing" in missing ? missing.missing : "Conflict with source."} Draft retained.`);
+      return { type: "addConditionBranch", sceneId: scene.id, expectedSourceRevision: current!.sourceRevision, groupId, expectedBody: beatBody(groupHeader(current!, groupId)), beforeBranchId: otherwise || position.value === "end" ? null : position.value, condition: builder?.read() ?? null };
+    };
+    const conflict = (): DraftConflict | undefined => {
+      const current = located();
+      if (current?.sourceConflict) return undefined;
+      if (!current || !current.beats.some(beat => beat.id === header.id)) return { missing: "This condition is no longer in source." };
+      if (otherwise && current.beats.some(beat => beat.conditionalBranch?.groupId === groupId && beat.conditionalBranch.otherwise)) return { missing: "This condition already has an Otherwise." };
+      if (!otherwise && position.value !== "end" && !current.beats.some(beat => beat.id === position.value)) return { missing: "This branch's place is no longer in source." };
+      return undefined;
+    };
+    panel.append(draftActions(key, otherwise ? "Add Otherwise" : "Add Else If", () => draft, header.id));
+    dirtyDraft(panel, [position]); panel.dataset.unsubmitted = "true";
+    const draft = keepDraft(key, { panel, sceneId: scene.id, beatId: header.id, command, kind: () => otherwise ? "otherwise" : "else if", conflict,
+      editors: () => builder ? [{ focus: () => focusFirst(panel), internals: { capture: builder.capture, restore: builder.restore } }] : [{ focus: () => focusFirst(panel) }],
+      primary: () => builder?.host ?? panel, detach: () => { panel.remove(); redrawEditor(); } });
+    // A new branch is a draft from the moment it is added, so adding it is its first step.
+    draft.state = captureDraft(draft); startStep(draft, "new", undefined, draft.state);
+    redrawEditor(); focusFirst(panel);
+  };
+  // Delete branch marks an Else if or Otherwise for deletion. Commit or Story Save deletes
+  // it, after every other draft, so edits inside it land first and Undo brings them back.
+  const markBranchDeletion = (scene: SceneDocument, header: SceneBeat): void => {
+    const branch = header.conditionalBranch!, groupId = branch.groupId, key = `remove:${header.id}`;
+    const waiting = beatDrafts.get(key); if (waiting) { focusFirst(waiting.panel); return; }
+    if (!draftGuard()) return;
+    const panel = conditionPanel("story-branch-removal", `Delete ${branchCaption(branch, model)}`);
+    const copy = document.createElement("p"); copy.className = "story-warn";
+    copy.textContent = `Deletes ${branchCaption(branch, model)} and the beats inside it when you commit or save. Other branches remain.`;
+    discardNote(copy, scene, header.id, "Drafts inside it are saved first, so Undo brings them back.");
+    const located = () => { const current = model.scenes.find(item => item.id === scene.id); return { current, node: current?.beats.find(item => item.id === header.id) }; };
+    const conflict = (): DraftConflict | undefined => { const { current, node } = located(); if (current?.sourceConflict) return undefined; return node?.conditionalBranch ? undefined : { missing: "This branch is no longer in source." }; };
+    const command = (): SceneCommand => {
+      const { current, node } = located();
+      if (current?.sourceConflict) throw new Error(unreadable);
+      if (!current || !node?.conditionalBranch) throw new Error("This branch is no longer in source. Draft retained.");
+      return { type: "removeConditionBranch", sceneId: scene.id, expectedSourceRevision: current.sourceRevision, groupId, branchId: header.id, expectedBody: beatBody(groupHeader(current, groupId)) };
+    };
+    const actionsRow = draftActions(key, "Delete branch", () => draft, groupHeader(scene, groupId).id);
+    const commit = actionsRow.querySelector<HTMLButtonElement>(".button.primary")!, deleteNow = commit.cloneNode(true) as HTMLButtonElement; commit.replaceWith(deleteNow);
+    deleteNow.addEventListener("click", () => {
+      const current = model.scenes.find(item => item.id === scene.id), inside = current ? pendingDrafts(scene.id).filter(item => item !== draft && draftsWithin(current, header.id, [item])) : [];
+      if (inside.length) void saveDrafts([...inside, draft]); else void commitCondition(draft, key, groupHeader(scene, groupId).id);
+    });
+    panel.append(copy, actionsRow);
+    dirtyDraft(panel, []); panel.dataset.unsubmitted = "true";
+    const draft = keepDraft(key, { panel, sceneId: scene.id, beatId: header.id, command, kind: () => "branch deletion", conflict, last: true,
+      editors: () => [{ focus: () => focusFirst(panel) }], primary: () => copy, detach: () => { panel.remove(); redrawEditor(); } });
+    draft.state = captureDraft(draft); startStep(draft, "new", undefined, draft.state);
+    redrawEditor(); focusFirst(panel);
   };
   // The Move to tree: the scene, its branches and options in source order, each with its
   // "Before …" and "End of …" positions from core's places. `moved` is a node being moved:
@@ -1752,7 +1860,7 @@ export function renderStoryView(
       more.push(screenBeat);
     }
     const addCondition = button("Add Condition"); addCondition.disabled = scene.sourceConflict;
-    addCondition.addEventListener("click", () => openConditionForm(scene, { type: "root" }, defaultPlace(scene, { type: "root" }))); more.push(addCondition);
+    addCondition.addEventListener("click", () => openNewBeat(scene, "condition")); more.push(addCondition);
     if (actions.assist) more.push(...assistActions(scene));
     history.append(focus, add, moreMenu(more));
     header.append(title, history); host.append(header);
@@ -1923,10 +2031,38 @@ export function renderStoryView(
       },
       addBeat: optionId => { const shown = current(), body = optionBody(optionId); if (shown && body) addBeat(shown, body, defaultPlace(shown, body), `option:${optionId}`); },
       setEnding: (optionId, ending) => setOptionEnding(scene.id, optionId, ending),
+      newScene: (optionId, opener) => { if (beat) newSceneFor(scene, beat, optionId, opener); },
       viewSource: item => { const shown = current() ?? scene; actions.viewSource?.(shown.sourcePath, item.byteStart, item.byteEnd, shown.sourceRevision); },
       openScene: sceneId => { if (sceneId === selectedSceneId) return; void settle().then(ok => { if (ok && !disposed) { selectScene(sceneId); draw(); } else if (!ok) actions.status("Complete or cancel this edit before changing scenes.", "error"); }); },
       markStage: markStageOption,
     };
+  };
+  // "+ New scene…" in an option's scene sheet: the author names the scene and its chapter,
+  // then core creates it and sends the option there, in one edit with one Undo. The author
+  // stays in this scene (`story-revamp` / `combined`).
+  const newSceneFor = (scene: SceneDocument, choice: SceneBeat, optionId: string, opener: HTMLElement): void => {
+    if (!draftGuard() || choice.payload.type !== "choice") return;
+    const index = choice.payload.options.findIndex(option => option.id === optionId), option = choice.payload.options[index], header = scene.beats.find(item => item.id === optionId);
+    if (!option || !header?.conditionalBranch) return;
+    const ending = bodyOf(scene, { type: "branch", groupId: header.conditionalBranch.groupId, branchId: optionId })?.ending;
+    const last = ending?.type === "ends" ? scene.beats.find(item => item.id === ending.beatId)?.payload : undefined;
+    const replaced = last?.type === "jump" ? model.scenes.find(item => item.id === last.sceneId)?.displayName : undefined;
+    const name = input(); name.setAttribute("aria-label", "Scene name"); name.placeholder = "For example: Platform at dawn";
+    const chapter = entitySelect(model.chapters.map(item => ({ id: item.id, label: item.displayName })), scene.chapterId); chapter.setAttribute("aria-label", "Chapter");
+    const context = document.createElement("p"); context.className = "story-dialog-note";
+    context.textContent = `Option ${index + 1} "${option.text}" will lead here.${replaced ? ` It currently goes to ${replaced}. The new scene replaces that destination; ${replaced} is kept.` : ""} You stay in this scene.`;
+    void openFormDialog({
+      host, opener, title: `New scene for option ${index + 1}`, className: "story-new-scene", closeLabel: "Close without creating",
+      fields: [context, labelled("Scene name", name), labelled("Chapter", chapter)], submitLabel: `Create scene and link option ${index + 1}`, first: name,
+      submit: async () => {
+        if (!name.value.trim()) throw new FieldError("Enter a scene name.", name);
+        const current = model.scenes.find(item => item.id === scene.id);
+        if (!current || current.sourceConflict) throw new Error("This scene cannot be changed now. Input retained.");
+        const saved = await mutate({ type: "createSceneFromChoice", sceneId: scene.id, expectedSourceRevision: current.sourceRevision, choiceBeatId: choice.id, optionId, chapterId: chapter.value, displayName: name.value.trim() });
+        if (!saved) throw new Error("The scene was not created. Input retained.");
+        return true;
+      },
+    });
   };
   // Then: an option's ending is its last beat. Continue removes an explicit ending; the
   // others add one at the option's end or change the one there. Each is one edit.
@@ -1971,8 +2107,9 @@ export function renderStoryView(
     menu.append(summary, list); heading.append(storyIcon(beat.conditionalBranch ? "condition" : beat.payload.type), title, ...locked ? [locked] : [], state, menu);
     return heading;
   };
-  // A condition: its group actions, then each branch with its test and its own actions.
-  // The branch open in the Branch path is marked; Open switches it there.
+  // A condition: its group actions, then each branch with its test and its own actions,
+  // then any new Else if or Otherwise waiting to be added. The branch open in the Branch
+  // path is marked; Open switches it there.
   const renderConditionEditor = (editor: HTMLElement, scene: SceneDocument, selected: SceneBeat): void => {
     const groupId = selected.conditionalBranch!.groupId, node = groupHeader(scene, groupId);
     editor.append(beatHeading(scene, node));
@@ -1980,11 +2117,10 @@ export function renderStoryView(
     caption.textContent = `Condition · ${node.conditionalBranch?.condition ? conditionCaption(node.conditionalBranch.condition, model.authoring.variables) : "Unknown condition"} · ${scene.beats.filter(item => item.conditionalBranch?.groupId === groupId).length} branches / ${groupCount(scene, node)} Beats`;
     const note = document.createElement("p"); note.className = "story-field-hint"; note.textContent = "The first branch whose test is true runs. Tests are not evaluated in the preview.";
     const tools = document.createElement("div"); tools.className = "row-actions story-editor-tools";
-    const elseif = button("Add Else If"); elseif.disabled = scene.sourceConflict; elseif.addEventListener("click", () => addBranchForm(scene, node, false));
-    const otherwise = button("Add Otherwise"); otherwise.disabled = scene.sourceConflict || scene.beats.some(item => item.conditionalBranch?.groupId === groupId && item.conditionalBranch.otherwise); otherwise.addEventListener("click", () => addBranchForm(scene, node, true));
+    const otherwise = button("Add Otherwise"); otherwise.disabled = scene.sourceConflict || scene.beats.some(item => item.conditionalBranch?.groupId === groupId && item.conditionalBranch.otherwise); otherwise.addEventListener("click", () => newBranch(scene, node, true));
     const unwrap = button("Unwrap…"); unwrap.disabled = scene.sourceConflict; unwrap.addEventListener("click", () => unwrapForm(scene, node));
     const remove = button("Delete condition"); remove.disabled = scene.sourceConflict; remove.addEventListener("click", () => removeNodeForm(scene, node));
-    tools.append(elseif, otherwise, unwrap, remove); editor.append(caption, note, tools);
+    tools.append(otherwise, unwrap, remove); editor.append(caption, note, tools);
     for (const header of scene.beats.filter(item => item.conditionalBranch?.groupId === groupId)) {
       const branch = header.conditionalBranch!, body: BodyRef = { type: "branch", groupId, branchId: header.id };
       const section = document.createElement("section"); section.className = "story-branch-editor"; section.dataset.branchId = header.id;
@@ -1999,11 +2135,19 @@ export function renderStoryView(
       head.append(name, open, add);
       if (branch.ordinal || branch.otherwise) {
         const drop = button("Delete branch", "button secondary"); drop.disabled = scene.sourceConflict;
-        drop.addEventListener("click", () => { const target = prepareOperation(scene, header); if (!target) return; const copy = document.createElement("p"); copy.textContent = `Delete ${branchCaption(branch, model)} and its contained Beats. Other branches remain.`; discardNote(copy, scene, header.id); operation(scene, target, "Delete branch", [copy], () => ({ type: "removeConditionBranch", groupId, branchId: header.id, expectedBody: beatBody(node) }), "Delete this branch", node.id); });
+        drop.addEventListener("click", () => markBranchDeletion(scene, header));
         head.append(drop);
       }
-      section.append(head); renderConditionBranch(section, scene, header); editor.append(section);
+      // The branch's draft mark: its test, or its deletion.
+      const state = document.createElement("span"); state.className = "story-editor-state"; state.dataset.beatId = header.id; name.after(state);
+      section.append(head);
+      const removal = beatDrafts.get(`remove:${header.id}`);
+      if (removal) section.append(removal.panel); else renderConditionBranch(section, scene, header);
+      editor.append(section);
     }
+    for (const kind of ["elif", "otherwise"]) { const waiting = beatDrafts.get(`branch:${groupId}:${kind}`); if (waiting) editor.append(waiting.panel); }
+    const elseif = button("+ Add Else if", "button secondary story-add-branch"); elseif.disabled = scene.sourceConflict; elseif.addEventListener("click", () => newBranch(scene, node, false));
+    editor.append(elseif);
   };
   // An option: its place, a way back to its Choice, and its first beats. Then, Only when and
   // its text are edited in the Choice editor.
@@ -2135,34 +2279,6 @@ export function renderStoryView(
       const continuation = button("View Call continuation"); continuation.disabled = !actions.viewContinuation; continuation.addEventListener("click", () => { if (draftGuard()) actions.viewContinuation?.(scene.id, beat.id, scene.sourceRevision); }); panel.append(open, continuation);
     }
     panel.addEventListener("compositionstart", () => { composing = true; }); panel.addEventListener("compositionend", () => { composing = false; });
-    if (beat.payload.type === "choice") {
-      const createDestination = button("Create New Scene", "button secondary");
-      createDestination.disabled = beat.payload.options.some(option => !!option.condition);
-      createDestination.addEventListener("click", () => {
-        if (panel.dataset.unsubmitted === "true") {
-          actions.status("Commit or cancel current Choice edits before creating a destination.", "error");
-          editor.focus();
-          return;
-        }
-        if (panel.querySelector(".choice-new-scene")) return;
-        const form = document.createElement("div"); form.className = "choice-new-scene scene-draft";
-        const optionText = input(); const sceneName = input("New Scene");
-        const chapter = entitySelect(model.chapters.map((item) => ({ id: item.id, label: item.displayName })), scene.chapterId);
-        const cancelNew = button("Cancel", "text-button"); cancelNew.addEventListener("click", () => form.remove());
-        const createNew = button("Create Scene and option", "button primary");
-        createNew.addEventListener("click", () => {
-          try {
-            const current = base();
-            void mutate({ type: "createSceneFromChoice", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, choiceBeatId: beat.id, optionText: requiredText(optionText, "Choice text"), chapterId: required(chapter), displayName: requiredText(sceneName, "Scene name") }, () => dropDraft(beat.id), current.captured, form, draft);
-          } catch (error) { actions.status(friendlyError(error, "New Scene details are invalid"), "error"); optionText.focus(); }
-        });
-        cancelNew.className="button secondary";
-        const creationActions=document.createElement("div");creationActions.className="row-actions choice-create-actions";creationActions.append(cancelNew,createNew);
-        form.append(labelled("Choice text", optionText), labelled("New Scene name", sceneName), labelled("Chapter", chapter), creationActions);
-        dirtyDraft(form, [optionText, sceneName, chapter]); panel.append(form); optionText.focus();
-      });
-      panel.append(createDestination);
-    }
     const actionsRow = document.createElement("div"); actionsRow.className = "row-actions";
     const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => { cancelStep(beat.id); dropDraft(beat.id); draw(); focusColumn(beat.id); });
     if (beat.payload.type === "showScreen" || beat.payload.type === "hideScreen" || beat.payload.type === "callScreen") panel.addEventListener("keydown", event => {
@@ -2237,10 +2353,22 @@ export function renderStoryView(
     preview: payload => { sheetPreview = payload ? { key, payload } : undefined; refreshPreview(); },
   });
 
+  // A new condition's fields: its If test, starting with one rule, and Include Otherwise.
+  const newConditionEditor = (): { editor: DraftEditor & Pick<BeatEditor, "host" | "controls" | "primary" | "secondary">; read: () => { condition: Condition; otherwise: boolean } } => {
+    const builder = buildRuleBuilder(model.authoring.variables, undefined, { keyword: "if", label: "If", empty: "Add a rule to give this branch a test.", required: true, newVariable });
+    builder.host.querySelector<HTMLButtonElement>(".story-add-rule")?.click();
+    const otherwise = document.createElement("input"); otherwise.type = "checkbox"; otherwise.setAttribute("aria-label", "Include Otherwise");
+    const host = document.createElement("div"); host.className = "beat-fields story-new-condition"; host.append(builder.host, labelled("Include Otherwise", otherwise));
+    const primary = (): HTMLElement => host.querySelector<HTMLElement>("summary, input, button") ?? host;
+    return {
+      editor: { host, controls: [otherwise], get primary() { return primary(); }, focus: () => focusFirst(host), internals: { capture: builder.capture, restore: builder.restore } },
+      read: () => ({ condition: builder.read()!, otherwise: otherwise.checked }),
+    };
+  };
   // Builds a new beat draft of one kind and returns its key. Story shows it in the editor
   // and as a pending column in Tracks. A new beat that `replaces` an ending saves as an
   // update of that ending beat.
-  const renderNewBeat = (scene: SceneDocument, type: BeatPayload["type"], body: BodyRef = { type: "root" }, position: Position = defaultPlace(scene, body), insertion?: ScreenInsertion, opener = "root", returnTo?: string, replaces?: string): string => {
+  const renderNewBeat = (scene: SceneDocument, type: AddKind, body: BodyRef = { type: "root" }, position: Position = defaultPlace(scene, body), insertion?: ScreenInsertion, opener = "root", returnTo?: string, replaces?: string): string => {
     // One pending new beat per insertion place: adding there again returns to it.
     const existing = pendingAt(scene, body, position);
     if (existing) return existing;
@@ -2261,17 +2389,21 @@ export function renderStoryView(
       const ending = bodyOf(current, body)?.ending;
       return !kept || (position.type === "before" && !nodeBeats(current, body).some(node => sameNode(nodeRef(node), position.anchor))) || (!!replaces && !(ending?.type === "ends" && ending.beatId === replaces));
     };
+    // A new condition adds its If test and, if chosen, an Otherwise; a new beat adds its payload.
+    const commandAt = (location: { body: BodyRef; position: Position }, current = base()): SceneCommand => condition
+      ? { type: "insertCondition", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, ...location, ...condition.read() }
+      : insertCommand((editor as BeatEditor).read(), location, current);
     const savedCommand = (): SceneCommand => {
-      const payload = editor.read(), location = chosenLocation(), current = base();
+      const location = chosenLocation(), current = base();
       if (placeChanged(current.scene, location)) throw new Error("This beat's place changed in source after the draft began. Draft retained.");
-      return insertCommand(payload, location, current);
+      return commandAt(location, current);
     };
     const openingInsertion = structuredClone(insertion ?? screenInsertion ?? {sceneId:scene.id,body,position,expectedSourceRevision:scene.sourceRevision});
     let rememberedInsertion = false;
     const panel = document.createElement("section"); panel.className = "new-beat scene-draft"; panel.dataset.beatType = type;
     panel.addEventListener("compositionstart", () => { composing = true; }); panel.addEventListener("compositionend", () => { composing = false; }); panel.setAttribute("aria-labelledby", `new-beat-title-${key}`);
     const heading = document.createElement("div"); heading.className = "story-editor-heading";
-    const title = document.createElement("h3"); title.className = "story-editor-title"; title.id = `new-beat-title-${key}`; title.textContent = `New · ${beatLabels[type]}`;
+    const title = document.createElement("h3"); title.className = "story-editor-title"; title.id = `new-beat-title-${key}`; title.textContent = `New · ${addKindName(type)}`;
     heading.append(storyIcon(type), title);
     const screenType = ["showScreen", "hideScreen", "callScreen"].includes(type);
     // Until it is added, Move to changes only where the new beat will go. A screen beat picks its place below.
@@ -2285,7 +2417,7 @@ export function renderStoryView(
     // Goes at, In and After, as Add a beat named them.
     const where = document.createElement("dl"); where.className = "story-where story-new-place";
     const drawWhere = (): void => {
-      const current = model.scenes.find(item => item.id === scene.id) ?? scene, place = placement(current, body, position, type as AddKind);
+      const current = model.scenes.find(item => item.id === scene.id) ?? scene, place = placement(current, body, position, type);
       where.replaceChildren();
       for (const [term, value] of [["Goes at", place.goesAt], ["In", place.in], ...place.after ? [["After", place.after]] : []] as const) where.append(Object.assign(document.createElement("dt"), { textContent: term }), Object.assign(document.createElement("dd"), { textContent: value }));
     };
@@ -2304,9 +2436,10 @@ export function renderStoryView(
       remember();
     }
     const validateNew = assignmentValidation(base, beat => insertCommand(beat, chosenLocation()));
-    const payload = defaultPayload(type, model, actions.screenHint);
+    // A new condition: its If test and whether it has an Otherwise. It has no beat payload.
+    const condition = type === "condition" ? newConditionEditor() : undefined;
     const context = editorContext(key, false, validateNew);
-    const editor: BeatEditor = payload.type === "choice" ? buildChoiceEditor(payload, context, choiceHost(scene)) : buildBeatEditor(payload, context);
+    const editor = condition?.editor ?? (payload => payload.type === "choice" ? buildChoiceEditor(payload, context, choiceHost(scene)) : buildBeatEditor(payload, context))(defaultPayload(type as BeatPayload["type"], model, actions.screenHint));
     const secondaryHost = document.createElement("div"); secondaryHost.className = "story-screen-secondary"; if (editor.secondary) secondaryHost.append(editor.secondary);
     if (screenType) panel.classList.add("story-screen-editor");
     const actionsRow = document.createElement("div"); actionsRow.className = "row-actions";
@@ -2317,18 +2450,18 @@ export function renderStoryView(
       if (event.key !== "Escape" || event.isComposing || composing || !screenType || event.defaultPrevented) return;
       event.preventDefault(); event.stopPropagation(); if (!pending) cancelDraft();
     });
-    const commit = button("Add Beat", "button primary"); commit.addEventListener("click", async () => {
+    const commit = button(condition ? "Add Condition" : "Add Beat", "button primary"); commit.addEventListener("click", async () => {
       if(pending || composing)return;
       try {
-        const payload = editor.read();
         const location=chosenLocation();
         const current=base();
+        const command=commandAt(location,current);
         pending=true;panel.dataset.unsubmitted="true";
         const controls=[...panel.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement|HTMLButtonElement>("input,select,textarea,button")];
         const locks = controls.map(control => ({ control, disabled: control.disabled }));
         controls.forEach(control=>control.disabled=true);
         let insertedId:string|undefined;
-        const saved=await mutate(insertCommand(payload, location, current), (before,next) => {
+        const saved=await mutate(command, (before,next) => {
           panel.remove();dropDraft(key);if(selectedNewDraft===key)selectedNewDraft=undefined;
           const acceptedScene=next.scenes.find(s=>s.id===scene.id);if(screenType&&acceptedScene)rememberScreenInsertion({sceneId:scene.id,...location,expectedSourceRevision:acceptedScene.sourceRevision});
           const previousIds=new Set(before.scenes.find(s=>s.id===scene.id)?.beats.map(b=>b.id));
@@ -2355,16 +2488,16 @@ export function renderStoryView(
     const moveNewBeat = (opener: HTMLElement): void => {
       const current = model.scenes.find(item => item.id === scene.id); if (!current) return;
       const { tree, expanded } = placeTree(current, body), chosen = findPlace(tree, node => !!node.place && sameBody(node.place.body, body) && samePosition(node.place.position, position));
-      openPlaceTree({ host, opener, title: `Move new ${beatLabels[type].toLowerCase()}`, note: "Moves this beat to the chosen scene, branch or option. Nothing is written until you add it.", tree, expanded, ...chosen ? { chosen: chosen.id } : {},
+      openPlaceTree({ host, opener, title: `Move new ${addKindName(type).toLowerCase()}`, note: "Moves this beat to the chosen scene, branch or option. Nothing is written until you add it.", tree, expanded, ...chosen ? { chosen: chosen.id } : {},
         move: async next => {
-          const resolved = placeFor(current, next.body, next.position, type as AddKind), waiting = pendingAt(current, next.body, resolved.position);
+          const resolved = placeFor(current, next.body, next.position, type), waiting = pendingAt(current, next.body, resolved.position);
           if (resolved.unavailable) { actions.status(`${resolved.unavailable} Draft retained.`, "error"); return false; }
           if (waiting && waiting !== key) { actions.status("A new beat is already waiting there. Draft retained.", "error"); return false; }
           body = next.body; position = resolved.position; replaces = resolved.replaces?.id;
           drawWhere(); relocate(); focusFirst(panel); return true;
         } });
     };
-    const draft=keepDraft(key,{panel,sceneId:scene.id,place,replaces:()=>replaces,read:()=>editor.read(),command:savedCommand,kind:()=>{try{return beatLabels[editor.read().type].toLowerCase();}catch{return beatLabels[type].toLowerCase();}},editors:()=>[editor],primary:()=>editor.primary,
+    const draft=keepDraft(key,{panel,sceneId:scene.id,place,replaces:()=>replaces,...condition?{}:{read:()=>(editor as BeatEditor).read()},command:savedCommand,kind:()=>{try{return condition?"condition":beatLabels[(editor as BeatEditor).read().type].toLowerCase();}catch{return addKindName(type).toLowerCase();}},editors:()=>[editor],primary:()=>editor.primary,
       // A new beat whose scene or branch left source has nowhere to go: only Discard draft resolves it.
       conflict:()=>{
         const current=model.scenes.find(item=>item.id===scene.id),{body:at}=place();
@@ -2401,11 +2534,11 @@ export function renderStoryView(
     firstDraft: () => { const draft = pendingDrafts()[0]; return draft && { sceneId: draft.sceneId, ...(draft.beatId ? { beatId: draft.beatId } : {}) }; },
     busy: () => pendingWrites > 0 || settling !== undefined,
     settle,
-    save: saveDrafts,
+    save: () => saveDrafts(),
     saveStatus,
     flushSteps: async () => { closeText(); await recording; },
     applyStep,
-    ownsDraftField: target => target instanceof HTMLElement && !target.closest(".choice-new-scene") && [...beatDrafts.values()].some(draft => draft.panel.contains(target)),
+    ownsDraftField: target => target instanceof HTMLElement && [...beatDrafts.values()].some(draft => draft.panel.contains(target)),
     dispose: () => {
       disposed = true; closeText(); beatDrafts.clear(); steps.clear(); stopLaneWatch?.();
       mediaGeneration += 1;
@@ -2474,10 +2607,11 @@ const staleOverride = "Source changed. Review it, then choose again. Draft retai
 
 /** A beat draft's controls and its editors' own state, kept for draft-step Undo (ADR 0025). */
 interface DraftState { readonly controls: readonly { readonly tag: string; readonly type: string; readonly value: string; readonly checked: boolean }[]; readonly editors: readonly (readonly [EditorInternals, unknown])[] }
-// A Choice's nested Create New Scene form is not part of its draft.
 const draftControls = (panel: HTMLElement): (HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement)[] =>
-  [...panel.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input, select, textarea")].filter(control => !control.closest(".choice-new-scene"));
-function captureState(panel: HTMLElement, editors: readonly BeatEditor[]): DraftState {
+  [...panel.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input, select, textarea")];
+/** What draft steps need from an editor: focus, state its controls do not show, and redraw. */
+type DraftEditor = Pick<BeatEditor, "focus" | "internals" | "refresh">;
+function captureState(panel: HTMLElement, editors: readonly DraftEditor[]): DraftState {
   return {
     controls: draftControls(panel).map(control => ({ tag: control.tagName, type: control.type, value: control.value, checked: control instanceof HTMLInputElement && control.checked })),
     editors: editors.flatMap(editor => editor.internals ? [[editor.internals, editor.internals.capture()] as const] : []),

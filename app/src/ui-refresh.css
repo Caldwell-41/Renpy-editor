@@ -346,23 +346,6 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
   gap:12px}
-.expanded-beat .choice-new-scene {
-  grid-template-columns:repeat(3,minmax(0,1fr))}
-.choice-new-scene>.choice-create-actions {
-  grid-column:1/-1;
-  display:flex;
-  justify-content:flex-end;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:8px}
-.choice-create-actions>.button {
-  flex:none;
-  width:auto;
-  align-self:center;
-  white-space:nowrap}
-@media(max-width:760px) {
- .expanded-beat .choice-new-scene {grid-template-columns:minmax(0,1fr)}
-}
 
 .media-feedback {font-size:12px;color:var(--text-muted)}
 .appearance-row>.media-feedback,.catalog-list .entity-row>.media-feedback {grid-column:1/-1}
@@ -1076,7 +1059,7 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .story-dropdown-option{display:flex;align-items:center;gap:10px;min-height:36px;padding:4px 8px;border:0;border-radius:3px;background:transparent;color:var(--text-primary);font:inherit;text-align:left;cursor:pointer}
 .story-dropdown-create{border-top:1px solid var(--border-normal);border-radius:0;color:var(--text-secondary)}
 .story-new-variable .story-variable-start>input,.story-new-variable .story-variable-start>select,.story-new-variable .story-field>input{width:100%;box-sizing:border-box}
-.story-new-variable .field-error:empty{display:none}
+.story-dialog .field-error:empty{display:none}
 .story-dropdown-option:hover,.story-dropdown-option:focus-visible{background:var(--surface-hover);outline:0}
 .story-dropdown-option[aria-selected=true]{background:var(--accent-subtle)}
 /* Picture rows and picker sheets. */
@@ -1144,6 +1127,13 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .story-branch-head>.button{min-height:26px;padding:2px 9px;font-size:12px}
 .story-branch-head>.button[aria-pressed=true]{border-color:var(--arm,var(--accent-primary));color:var(--text-primary)}
 .story-branch-editor[data-shown=true]{border-left-color:var(--arm,var(--accent-primary))}
+/* Condition drafts: a branch's test, a new Else if or Otherwise, a branch deletion. */
+.story-condition-draft>.row-actions{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:6px}
+.story-branch-new{border-left-style:dashed}
+.story-branch-new-mark{font-size:11px;color:var(--accent-primary)}
+.story-branch-removal>.story-warn{margin:0;font-size:12px}
+.story-editor .story-add-branch{min-height:26px;padding:2px 9px;font-size:12px}
+.story-sheet-new{align-self:flex-start}
 .story-branch-editor:not([data-shown=true]){border-left-color:color-mix(in srgb,var(--arm,var(--border-strong)) 40%,transparent)}
 .story-inline-operation{padding:0!important}
 .story-inline-operation:not([data-unsubmitted=true])>.row-actions{display:none}

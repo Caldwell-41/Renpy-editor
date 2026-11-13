@@ -158,7 +158,7 @@ test("root controls respect nested children and conditional insertion boundaries
   } finally { dispose(); await browser.happyDOM.close(); }
 });
 
-test("Scene authoring exposes hierarchy, every Beat, natural dialogue continuation, and Create New Scene", async () => {
+test("Scene authoring exposes hierarchy, every Beat and natural dialogue continuation", async () => {
   const browser = installDom(); let model = sceneModel(); const calls: SceneCommand[] = []; let status = "";
   renderStoryView(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
     status: (message) => { status = message; },
@@ -202,14 +202,6 @@ test("Scene authoring exposes hierarchy, every Beat, natural dialogue continuati
   dialog.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true })); assert.equal(document.querySelector(".story-add-beat"), null); assert.equal(document.querySelector(".new-beat"), null);
 
   assert.equal(trackColumn(host, "choice")!.querySelector(".story-lane-0")!.textContent, "03");
-  selectBeat(host, "choice"); click("Create New Scene");
-  const newFields = [...document.querySelectorAll(".choice-new-scene input")];
-  assert.equal(newFields.length, 2);
-  (newFields[0] as HTMLInputElement).value = "Stay"; (newFields[0] as HTMLInputElement).dispatchEvent(new window.Event("input", { bubbles: true }));
-  (newFields[1] as HTMLInputElement).value = "Quiet room"; (newFields[1] as HTMLInputElement).dispatchEvent(new window.Event("input", { bubbles: true }));
-  click("Create Scene and option"); await tick();
-  assert.equal(calls.at(-1)?.type, "createSceneFromChoice");
-  assert.equal(calls.at(-1)?.optionText, "Stay");
 });
 
 test("Story keeps the selected scene when a command moves the project's last open scene", async () => {

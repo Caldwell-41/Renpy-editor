@@ -245,13 +245,7 @@ try {
  assert.equal(await page.locator('.story-sidebar').evaluate(el=>Math.round(el.getBoundingClientRect().width)),64);
  await page.getByRole('button',{name:'Toggle navigation size'}).click();
  await page.locator('.story-track-beat').nth(3).click();
- await page.getByRole('button',{name:'Create New Scene',exact:true}).click();
- const choice=await page.locator('.expanded-beat').boundingBox();
- const sceneForm=await page.locator('.choice-new-scene').boundingBox();
- assert.ok(sceneForm.x>=choice.x && sceneForm.x+sceneForm.width<=choice.x+choice.width+1);
- assert.ok((await page.getByRole('button',{name:'Create New Scene',exact:true}).boundingBox()).height<=48);
  await page.screenshot({path:output+'choice-corrections.png'});
- await page.locator('.choice-new-scene').getByRole('button',{name:'Cancel',exact:true}).click();
  await page.locator('.expanded-beat>.row-actions').getByRole('button',{name:'Cancel',exact:true}).click();
  await page.getByRole('button',{name:'Assets',exact:true}).click();
  assert.equal(await page.locator('.asset-drop-target').isVisible(),true);
@@ -478,16 +472,10 @@ for key,value in [('stage','open'),('passed',False),('error','failure')]:
  assert.equal(await audit.getByRole('button',{name:'Toggle navigation size',exact:true}).getAttribute('aria-expanded'),'true');
  await hide.click();assert.equal(await audit.locator('.project-tree-toggle').getAttribute('aria-expanded'),'false');assert.equal(await restore.evaluate(e=>document.activeElement===e&&e.checkVisibility()),true);
  await restore.click();assert.equal(await hide.evaluate(e=>document.activeElement===e&&e.checkVisibility()),true);
- await audit.locator('.story-track-beat').nth(3).click();await audit.getByRole('button',{name:'Create New Scene',exact:true}).click();
- for(const width of [1440,560]){
-  await audit.setViewportSize({width,height:900});
-  const metrics=await audit.locator('.choice-new-scene').evaluate(e=>({overflow:e.scrollWidth>e.clientWidth+1,fields:[...e.querySelectorAll(':scope > .field')].map(f=>f.getBoundingClientRect().x),buttons:[...e.querySelectorAll('button')].map(b=>({height:b.getBoundingClientRect().height,parent:b.parentElement.className,whiteSpace:getComputedStyle(b).whiteSpace}))}));
-  assert.equal(metrics.overflow,false);assert.equal(metrics.buttons.length,2);for(const b of metrics.buttons){assert.ok(b.height>=32&&b.height<=40,JSON.stringify(metrics));assert.ok(b.parent.includes('choice-create-actions'));assert.equal(b.whiteSpace,'nowrap');}
-  if(width===560)assert.equal(new Set(metrics.fields.map(x=>Math.round(x))).size,1,'compact Choice fields did not stack');
- }
- await hide.click();await audit.getByRole('button',{name:'Writing focus',exact:true}).click();await audit.locator('.choice-new-scene').scrollIntoViewIfNeeded();await audit.screenshot({path:output+'audit-fixed-choice-compact.png'});
+ await audit.locator('.story-track-beat').nth(3).click();
+ await hide.click();await audit.getByRole('button',{name:'Writing focus',exact:true}).click();await audit.locator('.expanded-beat').scrollIntoViewIfNeeded();await audit.screenshot({path:output+'audit-fixed-choice-compact.png'});
  await audit.getByRole('button',{name:'Show game window',exact:true}).click();await audit.setViewportSize({width:1440,height:900});
- await audit.locator('.choice-new-scene').getByRole('button',{name:'Cancel',exact:true}).click();await audit.locator('.expanded-beat > .row-actions').getByRole('button',{name:'Cancel',exact:true}).click();
+ await audit.locator('.expanded-beat > .row-actions').getByRole('button',{name:'Cancel',exact:true}).click();
  // Alt+Arrow on a Tracks column moves the beat to the next core-listed place; Undo puts it back.
  await audit.locator('.story-track-column[data-beat-id="background"] > .story-track-beat').focus();await audit.keyboard.press('Alt+ArrowRight');
  await audit.waitForFunction(()=>document.querySelectorAll('.story-track-column')[1]?.dataset.beatId==='background'&&document.activeElement?.closest('.story-track-column')?.dataset.beatId==='background');

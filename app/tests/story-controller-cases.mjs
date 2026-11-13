@@ -56,7 +56,7 @@ const guard=async(c,choice,index,value)=>{
 // Add a beat: pick a kind in the open dialog; its new beat opens in the editor.
 const pickIn=async(c,kind)=>{await c.wait(()=>c.document.querySelector('.scene-workspace .story-add-beat'));c.document.querySelector(`.scene-workspace .story-add-beat [data-insert-kind="${kind}"]`).click();if(kind!=='condition')await c.wait(()=>c.document.querySelector('.scene-workspace .new-beat'));};
 // A branch's + Beat opens Add a beat for that branch.
-const addIn=async(c,header,kind)=>{const section=await branchBody(c,header.id);section.querySelector(`[data-beat-opener="branch:${header.id}"]`).click();await pickIn(c,kind);return kind==='condition'?panel(c,'Add Condition'):c.document.querySelector('.scene-workspace .new-beat');};
+const addIn=async(c,header,kind)=>{const section=await branchBody(c,header.id);section.querySelector(`[data-beat-opener="branch:${header.id}"]`).click();await pickIn(c,kind);return c.document.querySelector('.scene-workspace .new-beat');};
 // The rule builder: a rule's variable list, its test switch and its value.
 const ruleOf=(scope,index)=>scope.querySelectorAll('.story-rule')[index];
 const pickVariable=(c,scope,index,name)=>{const rule=ruleOf(scope,index);rule.querySelector('.story-variable-picker > summary').click();const option=[...rule.querySelectorAll('[role=option]')].find(item=>item.querySelector('.story-variable-name')?.textContent===name);c.assert(option,`variable ${name}`);option.click();};
@@ -72,7 +72,9 @@ const group=async(c,id)=>{const node=nodeOf(c,id);c.assert(node,`Missing actual 
 // A branch's section of its condition's editor: the branch opens in the Branch path first.
 const branchBody=async(c,id)=>{const header=shownBeats(c).find(b=>b.id===id);c.assert(header);reveal(c,id);openBranch(c,id);const editor=await pick(c,nodeOf(c,header.conditionalBranch.groupId).id);const section=editor.querySelector(`.story-branch-editor[data-branch-id="${id}"]`);c.assert(section,`Missing branch editor ${id}`);return section;};
 const panel=(c,title)=>{const node=c.document.querySelector(`.story-operation[aria-label="${title}"]`);c.assert(node,`Missing actual operation ${title}`);return node;};
-const openHeader=async(c,id)=>{const section=await branchBody(c,id);await c.wait(()=>section.querySelector('.story-operation'));return section.querySelector('.story-operation');};
+// A branch's test is a retained draft panel with Commit test and Cancel.
+const openHeader=async(c,id)=>{const section=await branchBody(c,id);await c.wait(()=>section.querySelector('.story-branch-test'));return section.querySelector('.story-branch-test');};
+const conditionDraft=(c,label)=>{const node=c.document.querySelector(`.story-condition-draft[aria-label="${label}"]`);c.assert(node,`Missing condition draft ${label}`);return node;};
 const applyOperation=async(c,scope,label,type)=>{
  const at=c.requests().length;await c.click(label,scope);
  await c.wait(()=>c.requests().slice(at).some(r=>r.request.operation==='scene.apply'&&r.request.payload.command.type===type));
@@ -202,36 +204,38 @@ export const storyCases={
  [names[3]]:async c=>{
   let before=c.workspace(),bytes=await c.snapshot(),original=c.sourceText(bytes,scene(c).sourcePath);const oldIds=scene(c).beats.map(b=>b.id);
   // The rule builder starts with one rule on the first variable. Two rules join with All.
-  await c.click('Add Condition',c.document.querySelector('.scene-workspace .scene-history'));let form=panel(c,'Add Condition');
+  // A new condition is a draft, like a new beat, until Add Condition.
+  await c.click('Add Condition',c.document.querySelector('.scene-workspace .scene-history'));let form=c.document.querySelector('.scene-workspace .new-beat');c.assert.equal(form?.dataset.beatType,'condition');
   pickVariable(c,form,0,'precision');ruleValue(c,form,0,'9007199254740993');
   await c.click('+ Add rule',form);pickVariable(c,form,1,'trust');pickTest(c,form,1,'is less than');ruleValue(c,form,1,'5');
   c.assert.equal(form.querySelector('.story-rule-code').textContent,'if precision >= 9007199254740993 and trust < 5:');
-  await applyOperation(c,form,'Create Condition','insertCondition');const cmd=envelope(c,before,'insertCondition');
+  await applyOperation(c,form,'Add Condition','insertCondition');const cmd=envelope(c,before,'insertCondition');
   c.assert.deepEqual(cmd.body,{type:'root'});c.assert.equal(cmd.condition.expression.type,'and');c.assert.deepEqual(cmd.condition.expression.left.right,{type:'int',value:'9007199254740993'});c.assert.equal(cmd.condition.expression.right.operator,'less');
   let current=scene(c),header=current.beats.find(b=>b.conditionalBranch&&!oldIds.includes(b.id));c.assert(header);authored.groupId=header.conditionalBranch.groupId;authored.headerId=header.id;
   let expected=replaceOnce(c,original,'    return\n','    if ((precision >= 9007199254740993) and (trust < 5)):\n        pass\n    return\n');
   c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);c.assert(current.beats.some(b=>b.structuralPlaceholder&&b.owner?.branchId===header.id));
-  // Editing the If test in place: remove the first rule and apply.
+  // Editing the If test in place: remove the first rule and commit the test.
   before=c.workspace();form=await openHeader(c,header.id);c.assert.equal(ruleOf(form,0).querySelector('.story-variable-name').textContent,'precision');
-  await c.click('Remove rule 1',form);await applyOperation(c,form,'Apply condition','updateConditionBranch');const update=envelope(c,before,'updateConditionBranch');c.assert.equal(update.branchId,header.id);c.assert.deepEqual(update.expectedBody,{type:'root'});
+  await c.click('Remove rule 1',form);await applyOperation(c,form,'Commit test','updateConditionBranch');const update=envelope(c,before,'updateConditionBranch');c.assert.equal(update.branchId,header.id);c.assert.deepEqual(update.expectedBody,{type:'root'});
   expected=replaceOnce(c,expected,'    if ((precision >= 9007199254740993) and (trust < 5)):\n','    if (trust < 5):\n');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
-  before=c.workspace();await c.click('Add Else If',await group(c,authored.groupId));form=panel(c,'Add Else If');
+  before=c.workspace();await c.click('+ Add Else if',await group(c,authored.groupId));form=conditionDraft(c,'New Else if');
   pickVariable(c,form,0,'mood');ruleValue(c,form,0,'ready');c.enter(form.querySelector('[aria-label="Branch position"]'),'end','change');
-  await applyOperation(c,form,'Create Else If','addConditionBranch');c.assert.equal(envelope(c,before,'addConditionBranch').beforeBranchId,null);
+  await applyOperation(c,form,'Add Else If','addConditionBranch');c.assert.equal(envelope(c,before,'addConditionBranch').beforeBranchId,null);
   expected=replaceOnce(c,expected,'    if (trust < 5):\n        pass\n','    if (trust < 5):\n        pass\n    elif (mood == "ready"):\n        pass\n');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
-  before=c.workspace();await c.click('Add Otherwise',await group(c,authored.groupId));form=panel(c,'Add Otherwise');
-  await applyOperation(c,form,'Create Otherwise','addConditionBranch');c.assert.equal(envelope(c,before,'addConditionBranch').condition,null);
+  before=c.workspace();await c.click('Add Otherwise',(await group(c,authored.groupId)).querySelector('.story-editor-tools'));form=conditionDraft(c,'New Otherwise');
+  await applyOperation(c,form,'Add Otherwise','addConditionBranch');c.assert.equal(envelope(c,before,'addConditionBranch').condition,null);
   expected=replaceOnce(c,expected,'    elif (mood == "ready"):\n        pass\n','    elif (mood == "ready"):\n        pass\n    else:\n        pass\n');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
   c.assert.equal(newHeaders(c).length,3);c.assert([...c.document.querySelectorAll('.story-branch-group')].some(item=>item.dataset.branchOwner===authored.headerId&&[...item.querySelectorAll('.story-branch-segment')].some(segment=>segment.textContent==='Otherwise')));
   const elseif=newHeaders(c).find(b=>b.conditionalBranch.ordinal===1);before=c.workspace();form=await openHeader(c,elseif.id);ruleValue(c,form,0,'blocked');
-  await applyOperation(c,form,'Apply condition','updateConditionBranch');c.assert.equal(envelope(c,before,'updateConditionBranch').branchId,elseif.id);
+  await applyOperation(c,form,'Commit test','updateConditionBranch');c.assert.equal(envelope(c,before,'updateConditionBranch').branchId,elseif.id);
   expected=replaceOnce(c,expected,'elif (mood == "ready")','elif (mood == "blocked")');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
-  // A half-typed number stays in its field, marked, and Apply sends nothing.
+  // A half-typed number stays in its field, marked, and Commit test sends nothing.
   form=await openHeader(c,header.id);const at=c.requests().length;ruleValue(c,form,0,'-');ruleOf(form,0).querySelector('.story-rule-how > input').dispatchEvent(new c.document.defaultView.Event('blur'));
-  c.assert.equal(ruleOf(form,0).querySelector('.story-rule-how > input').getAttribute('aria-invalid'),'true');await c.click('Apply condition',form);await c.settle();
+  c.assert.equal(ruleOf(form,0).querySelector('.story-rule-how > input').getAttribute('aria-invalid'),'true');await c.click('Commit test',form);await c.settle();
   c.assert.equal(c.requests().slice(at).filter(r=>r.request.operation==='scene.apply').length,0);c.assert.equal(ruleOf(form,0).querySelector('.story-rule-how > input').value,'-');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
   await c.click('Cancel',form);
-  before=c.workspace();await c.click('Delete branch',await branchBody(c,elseif.id));form=panel(c,'Delete branch');await applyOperation(c,form,'Delete this branch','removeConditionBranch');
+  // Delete branch marks the Else if; its Commit deletes it.
+  before=c.workspace();const marked=await branchBody(c,elseif.id);await c.click('Delete branch',marked);await c.settle();form=c.document.querySelector(`.story-branch-editor[data-branch-id="${elseif.id}"] .story-branch-removal`);c.assert(form);await applyOperation(c,form,'Delete branch','removeConditionBranch');
   c.assert.equal(envelope(c,before,'removeConditionBranch').branchId,elseif.id);
   expected=replaceOnce(c,expected,'    elif (mood == "blocked"):\n        pass\n','');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
   c.assert.deepEqual(newHeaders(c).map(b=>b.id),[header.id,newHeaders(c).find(b=>b.conditionalBranch.otherwise).id]);
@@ -244,11 +248,24 @@ export const storyCases={
   c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(controlBytes));c.assert.equal(c.requests().slice(controlsAt).filter(r=>r.request.operation==='scene.apply').length,0);
   // Create and remove an actual nested condition: Add a beat in Otherwise offers Condition, which starts on the first variable.
   before=c.workspace();form=await addIn(c,focusBranch,'condition');
-  const priorIds=scene(c).beats.map(b=>b.id);await applyOperation(c,form,'Create Condition','insertCondition');c.assert.deepEqual(envelope(c,before,'insertCondition').body,bodyRef(focusBranch));
+  const priorIds=scene(c).beats.map(b=>b.id);await applyOperation(c,form,'Add Condition','insertCondition');c.assert.deepEqual(envelope(c,before,'insertCondition').body,bodyRef(focusBranch));
   const nestedHeader=scene(c).beats.find(b=>b.conditionalBranch&&!priorIds.includes(b.id));c.assert(nestedHeader);c.assert.deepEqual(nestedHeader.owner,{groupId:authored.groupId,branchId:focusBranch.id});
   const nestedBytes=replaceOnce(c,expected,'    if (trust < 5):\n        pass\n    else:\n        pass\n','    if (trust < 5):\n        pass\n    else:\n        if (flag == True):\n            pass\n');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),nestedBytes);
   before=c.workspace();await c.click('Delete condition',await group(c,nestedHeader.conditionalBranch.groupId));form=panel(c,'Delete entire condition');await applyOperation(c,form,'Delete entire condition','removeStoryNode');c.assert.deepEqual(envelope(c,before,'removeStoryNode').expectedBody,bodyRef(focusBranch));
   c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
+  // Story Save writes a test edit and a new Else if as condition drafts, one Undo each.
+  const header2=c.document.querySelector('.app-header'),statusLine=c.document.querySelector('#app-status'),saveAt=c.requests().length;
+  form=await openHeader(c,header.id);ruleValue(c,form,0,'6');
+  await c.click('+ Add Else if',await group(c,authored.groupId));form=conditionDraft(c,'New Else if');pickVariable(c,form,0,'mood');ruleValue(c,form,0,'late');
+  await select(c,scene(c).beats.find(b=>!b.owner&&b.payload.type==='return').id);c.assert.equal(row(c,header.id).dataset.beatDraft,'true');
+  c.assert.equal(c.requests().slice(saveAt).filter(r=>r.request.operation==='scene.apply').length,0,'Condition drafts write nothing before Save');
+  await c.click('Save',header2);await c.wait(()=>statusLine.textContent==='Saved'&&c.requests().slice(saveAt).some(r=>r.request.operation==='scene.saveDrafts'));await c.settle();
+  const saved=c.requests().slice(saveAt).find(r=>r.request.operation==='scene.saveDrafts');
+  c.assert.deepEqual(saved.request.payload.commands.map(command=>command.type),['updateConditionBranch','addConditionBranch']);
+  const savedText=replaceOnce(c,replaceOnce(c,expected,'    if (trust < 5):\n','    if (trust < 6):\n'),'    if (trust < 6):\n        pass\n','    if (trust < 6):\n        pass\n    elif (mood == "late"):\n        pass\n');
+  c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),savedText);c.assert.equal(row(c,header.id).dataset.beatDraft,'false');
+  for(let i=0;i<2;i+=1){await c.history('undo');await c.settle();}
+  c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected,'Two Undos reverse the two saved condition drafts');
  },
  [names[4]]:async c=>{
   let before=c.workspace(),s=scene(c),bytes=await c.snapshot(),original=c.sourceText(bytes,s.sourcePath);

@@ -10,8 +10,8 @@ const tick = async (): Promise<void> => { await new Promise(resolve => setTimeou
 function setup(apply?: (command: SceneCommand) => Promise<SceneWorkspace>, fixture = storyFixture(3), extra: Partial<SceneActions> = {}) {
   const browser = new Window(); Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, HTMLInputElement: browser.HTMLInputElement, HTMLSelectElement: browser.HTMLSelectElement, Event: browser.Event, KeyboardEvent: browser.KeyboardEvent });
   document.body.innerHTML = '<main></main><aside></aside>'; const host = document.querySelector<HTMLElement>("main")!; const model = fixture; const calls: { command: SceneCommand; expected: unknown }[] = []; const status: string[] = []; const navigation: StoryTarget[] = []; const continuations: unknown[] = [];
-  const dispose = renderStoryView(host, document.querySelector("aside")!, model, { apply: async (command, expected) => { calls.push({ command, expected }); return apply ? apply(command) : model; }, resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); }, status: text => status.push(text), viewScene: target => navigation.push(target), viewContinuation: (...args) => continuations.push(args), viewSource: () => {}, ...extra }).dispose;
-  return { browser, host, model, calls, status, navigation, continuations, close: async () => { dispose(); await browser.happyDOM.close(); } };
+  const view = renderStoryView(host, document.querySelector("aside")!, model, { apply: async (command, expected) => { calls.push({ command, expected }); return apply ? apply(command) : model; }, resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); }, status: text => status.push(text), viewScene: target => navigation.push(target), viewContinuation: (...args) => continuations.push(args), viewSource: () => {}, ...extra }); const dispose = view.dispose;
+  return { browser, host, model, calls, status, navigation, continuations, view, close: async () => { dispose(); await browser.happyDOM.close(); } };
 }
 function button(host: ParentNode, text: string): HTMLButtonElement { const found = [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === text); assert.ok(found, text); return found; }
 function choose(host: ParentNode, aria: string, value: string): HTMLSelectElement { const control = host.querySelector<HTMLSelectElement>(`select[aria-label="${aria}"]`)!; assert.ok(control, aria); control.value = value; control.dispatchEvent(new Event("change", { bubbles: true })); return control; }
@@ -63,7 +63,7 @@ test("+ New variable creates a project variable in place and the rule uses it", 
     requests.push(request);
     return withBodies({ ...s.model, projectRevision: "project-2", authoring: { ...s.model.authoring, variables: [...s.model.authoring.variables, { id: "late", technicalName: request.technicalName, variableType: request.variableType, defaultValue: false }] } });
   } });
-  button(s.host, "Add Condition").click(); const panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Add Condition"]')!;
+  button(s.host, "Add Condition").click(); const panel = s.host.querySelector<HTMLElement>(".story-editor .new-beat")!;
   const summary = (): HTMLElement => panel.querySelector<HTMLElement>(".story-variable-picker > summary")!;
   const dialog = (): HTMLElement | null => s.host.querySelector<HTMLElement>(".story-new-variable");
   // Escape keeps nothing and returns to the variable list.
@@ -80,37 +80,46 @@ test("+ New variable creates a project variable in place and the rule uses it", 
   assert.equal(dialog(), null); assert.equal(summary().getAttribute("aria-label"), "If rule 1 variable: late_tram");
   assert.equal(panel.querySelector(".story-rule-code")!.textContent, "if late_tram == True:");
   // The condition commits against the workspace the new variable came from.
-  button(panel, "Create Condition").click(); await tick();
+  button(panel, "Add Condition").click(); await tick();
   assert.deepEqual(s.calls[0]!.command.type === "insertCondition" && s.calls[0]!.command.condition, { status: "supported", expression: { type: "compare", operator: "equal", left: { type: "variable", variableId: "late", variableType: "bool" }, right: { type: "bool", value: true } } });
   assert.deepEqual(s.calls[0]!.expected, { projectRevision: "project-2", sourceMapRevision: "map" });
   await s.close();
 });
 
-test("create Condition writes the rule builder's typed test at the root place in one command", async () => {
-  const s = setup(); button(s.host, "Add Condition").click(); const panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Add Condition"]')!;
+test("a new condition is a draft that writes the rule builder's typed test at its place in one command", async () => {
+  const s = setup(); button(s.host, "Add Condition").click(); const panel = s.host.querySelector<HTMLElement>(".story-editor .new-beat")!;
+  assert.equal(panel.dataset.beatType, "condition"); assert.equal(panel.querySelector(".story-editor-title")!.textContent, "New · Condition");
   assert.deepEqual([...panel.querySelectorAll(".story-where dd")].map(item => item.textContent), ["Before 05 Return", "Arrival", "04 Narration"]);
   // The form starts with one rule on the first variable; a second rule joins it.
   press(panel, "+ Add rule"); const rule = panel.querySelectorAll<HTMLElement>(".story-rule")[1]!;
   rule.querySelector<HTMLElement>(".story-variable-picker > summary")!.click(); chooseIn(rule, "If rule 2 variable", "trust, whole number");
   chooseIn(panel, "If match", "Any"); type(panel.querySelector<HTMLInputElement>('input[aria-label="If rule 2 value"]')!, "3");
   assert.equal(panel.querySelector(".story-rule-code")!.textContent, "if flag == True or trust >= 3:");
-  (panel.querySelector<HTMLInputElement>('input[aria-label="Include Otherwise"]')!).checked = true; button(panel, "Create Condition").click(); await tick();
+  // It waits as a draft, like a new beat: navigation keeps it and writes nothing.
+  const otherwise = panel.querySelector<HTMLInputElement>('input[aria-label="Include Otherwise"]')!; otherwise.checked = true; otherwise.dispatchEvent(new Event("change", { bubbles: true }));
+  selectBeat(s.host, "a", "if"); assert.equal(s.calls.length, 0); assert.equal(s.host.querySelector<HTMLElement>(".story-track-pending")!.dataset.beatDraft, "true");
+  s.host.querySelector<HTMLElement>(".story-track-pending > .story-track-beat")!.click(); assert.equal(storyEditor(s.host).querySelector(".new-beat"), panel);
+  button(panel, "Add Condition").click(); await tick();
   const command = s.calls[0]!.command; assert.equal(command.type, "insertCondition"); assert.deepEqual(command.body, { type: "root" }); assert.equal(command.otherwise, true); assert.deepEqual(s.calls[0]!.expected, { projectRevision: "project", sourceMapRevision: "map" });
   assert.deepEqual(command.condition, { status: "supported", expression: { type: "or", left: { type: "compare", operator: "equal", left: { type: "variable", variableId: "flag", variableType: "bool" }, right: { type: "bool", value: true } }, right: { type: "compare", operator: "greaterEqual", left: { type: "variable", variableId: "trust", variableType: "int" }, right: { type: "int", value: "3" } } } });
   await s.close();
 });
 
-test("Else If insertion exposes first-match order and captures containing group parent", async () => {
-  const s = setup(); button(selectBeat(s.host, "if"), "Add Else If").click();
-  const panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Add Else If"]')!; choose(panel, "Branch position", "elif"); button(panel, "Create Else If").click(); await tick();
+test("a new Else if is a draft that exposes first-match order and captures the containing group parent", async () => {
+  const s = setup(); button(selectBeat(s.host, "if"), "+ Add Else if").click();
+  const panel = s.host.querySelector<HTMLElement>('.story-branch-new[aria-label="New Else if"]')!; choose(panel, "Branch position", "elif");
+  // Adding again returns to the waiting draft.
+  button(storyEditor(s.host), "+ Add Else if").click(); assert.equal(s.host.querySelectorAll(".story-branch-new").length, 1);
+  button(panel, "Add Else If").click(); await tick();
   assert.equal(s.calls[0]!.command.type, "addConditionBranch"); assert.deepEqual(s.calls[0]!.command.expectedBody, { type: "root" }); assert.equal(s.calls[0]!.command.beforeBranchId, "elif"); await s.close();
 });
 
 test("nested Otherwise creation and condition editing use group-parent qualification, not selected branch ownership", async () => {
-  const s = setup(); button(selectBeat(s.host, "nested-if-0", "if"), "Add Otherwise").click(); button(s.host.querySelector('.story-operation[aria-label="Add Otherwise"]')!, "Create Otherwise").click(); await tick();
+  const s = setup(); button(selectBeat(s.host, "nested-if-0", "if"), "Add Otherwise").click(); button(s.host.querySelector('.story-branch-new[aria-label="New Otherwise"]')!, "Add Otherwise").click(); await tick();
   assert.deepEqual(s.calls[0]!.command.expectedBody, { type: "branch", groupId: "group", branchId: "if" }); assert.equal(s.calls[0]!.command.condition, null); assert.equal(s.calls[0]!.command.beforeBranchId, null);
-  // The accepted operation returns to the nested condition, whose editor edits its If test.
-  const editor = storyEditor(s.host).querySelector<HTMLElement>('.story-operation[aria-label="Edit Condition"]')!; button(editor, "Apply condition").click(); await tick(); assert.deepEqual(s.calls[1]!.command.expectedBody, { type: "branch", groupId: "group", branchId: "if" }); await s.close();
+  // The nested condition's editor edits its If test as a draft with Commit test.
+  const test = storyEditor(s.host).querySelector<HTMLElement>('.story-branch-test[aria-label="If test"]')!; button(test, "Commit test").click(); await tick();
+  assert.equal(s.calls[1]!.command.type, "updateConditionBranch"); assert.deepEqual(s.calls[1]!.command.expectedBody, { type: "branch", groupId: "group", branchId: "if" }); await s.close();
 });
 
 test("Move to opens on the beat's own place, leaves its place out and keeps the choice on core refusal", async () => {
@@ -202,17 +211,18 @@ test("whole-group confirmation and collapse summary count protected Custom Code 
   button(storyEditor(s.host), "Delete condition").click(); assert.match(s.host.querySelector('.story-operation[aria-label="Delete entire condition"]')!.textContent!, /all 5 contained Beats/); await s.close();
 });
 
-test("dirty structural input blocks tree New/Rename entry; dirty tree input blocks unrelated Story forms", async () => {
-  const s = setup(); button(s.host, "Add Condition").click(); const panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Add Condition"]')!; chooseIn(panel, "If rule 1 test", "is false");
-  const tree = document.querySelector<HTMLElement>("aside")!;
-  button(tree, "New Chapter").click(); button(tree, "+ New Scene").click(); for (const rename of [...tree.querySelectorAll<HTMLButtonElement>("button")].filter(button => button.textContent === "Rename")) rename.click();
-  assert.equal(tree.querySelector(".tree-inline"), null); assert.ok(panel.isConnected && hasSceneDraft(s.host)); assert.equal(s.calls.length, 0);
-  button(panel, "Cancel").click(); button(tree, "New Chapter").click(); const name = tree.querySelector<HTMLInputElement>(".tree-inline input")!; name.value = "Retained chapter name"; name.dispatchEvent(new Event("input", { bubbles: true })); button(s.host, "Add Condition").click(); assert.equal(s.host.querySelector(".story-operation"), null); assert.equal(name.value, "Retained chapter name"); assert.ok(name.isConnected); await s.close();
+test("a condition draft waits while tree New works; dirty tree input blocks adding a condition", async () => {
+  const s = setup(); const tree = document.querySelector<HTMLElement>("aside")!;
+  button(tree, "New Chapter").click(); const name = tree.querySelector<HTMLInputElement>(".tree-inline input")!; name.value = "Retained chapter name"; name.dispatchEvent(new Event("input", { bubbles: true }));
+  button(s.host, "Add Condition").click(); assert.equal(s.host.querySelector(".new-beat"), null); assert.equal(name.value, "Retained chapter name"); assert.ok(name.isConnected);
+  button(tree.querySelector<HTMLElement>(".tree-inline")!, "Cancel").click();
+  button(s.host, "Add Condition").click(); const panel = s.host.querySelector<HTMLElement>(".story-editor .new-beat")!; chooseIn(panel, "If rule 1 test", "is false");
+  button(tree, "New Chapter").click(); assert.ok(tree.querySelector(".tree-inline")); assert.ok(panel.isConnected && hasSceneDraft(s.host)); assert.equal(s.calls.length, 0); await s.close();
 });
 
 test("unchanged pending condition commit locks tree authoring and cannot admit another tree draft", async () => {
   let finish!: (value: SceneWorkspace) => void; const pending = new Promise<SceneWorkspace>(resolve => { finish = resolve; }); const s = setup(async () => pending);
-  button(selectBeat(s.host, "if"), "Apply condition").click(); const tree = document.querySelector<HTMLElement>("aside")!; assert.equal(button(tree, "New Chapter").disabled, true); button(tree, "New Chapter").click(); assert.equal(tree.querySelector(".tree-inline"), null); assert.equal(s.calls.length, 1); finish(s.model); await tick(); assert.equal(button(tree, "New Chapter").disabled, false); await s.close();
+  button(selectBeat(s.host, "if").querySelector<HTMLElement>('.story-branch-test[aria-label="If test"]')!, "Commit test").click(); const tree = document.querySelector<HTMLElement>("aside")!; assert.equal(button(tree, "New Chapter").disabled, true); button(tree, "New Chapter").click(); assert.equal(tree.querySelector(".tree-inline"), null); assert.equal(s.calls.length, 1); finish(s.model); await tick(); assert.equal(button(tree, "New Chapter").disabled, false); await s.close();
 });
 
 test("unresolved manual conditions stop a whole-scene preview at the header, and pass it with unknown state toward a selected beat", async () => {
@@ -333,4 +343,52 @@ test("picker sheets preview on hover and focus, apply on click and keep the valu
     tile("mara-concerned").dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
     assert(stage().includes("Mara — Neutral")); assert.equal(hasSceneDraft(s.host), false);
   } finally { await s.close(); }
+});
+
+test("condition drafts are retained and marked, and Story Save saves them with the branch deletion last", async () => {
+  const saved: { commands: readonly SceneCommand[]; drafts: readonly string[] }[] = [];
+  const s = setup(undefined, storyFixture(3), { saveDrafts: async (commands, _expected, drafts) => { saved.push({ commands, drafts }); return s.model; } });
+  const branch = (id: string): HTMLElement => storyEditor(s.host).querySelector<HTMLElement>(`.story-branch-editor[data-branch-id="${id}"]`)!;
+  selectBeat(s.host, "if");
+  // Editing the If test makes it a draft; the condition's column and the branch show it.
+  chooseIn(branch("if").querySelector<HTMLElement>(".story-branch-test")!, "If rule 1 test", "is false");
+  assert.equal(trackColumn(s.host, "if")!.dataset.beatDraft, "true");
+  assert.equal(branch("if").querySelector(".story-editor-state")!.textContent, "* Draft");
+  // Delete branch marks the Else if; + Add Else if adds a new one. Neither writes.
+  button(branch("elif"), "Delete branch").click(); assert.ok(branch("elif").querySelector(".story-branch-removal"));
+  button(storyEditor(s.host), "+ Add Else if").click(); assert.ok(storyEditor(s.host).querySelector(".story-branch-new"));
+  assert.equal(s.calls.length, 0);
+  // Leaving the condition and coming back keeps all three.
+  selectBeat(s.host, "a", "if"); selectBeat(s.host, "if");
+  assert.equal(branch("if").querySelector<HTMLElement>('[role=radiogroup][aria-label="If rule 1 test"] [aria-checked=true]')?.textContent, "is false");
+  assert.ok(branch("elif").querySelector(".story-branch-removal")); assert.ok(storyEditor(s.host).querySelector(".story-branch-new"));
+  assert.equal((await s.view.save()).kind, "saved");
+  assert.deepEqual(saved[0]!.commands.map(command => command.type), ["updateConditionBranch", "addConditionBranch", "removeConditionBranch"]);
+  assert.equal(new Set(saved[0]!.drafts).size, 3);
+  await s.close();
+});
+
+test("+ New scene in an option's scene sheet sends that option to a new scene in one command", async () => {
+  const s = setup(undefined, editorFixture());
+  const option = (id: string): HTMLElement => storyEditor(s.host).querySelector<HTMLElement>(`.story-option[data-option-id="${id}"]`)!;
+  const dialog = (): HTMLElement | null => s.host.querySelector<HTMLElement>(".story-new-scene");
+  selectBeat(s.host, "choice");
+  // Option 2 goes to Depot: its destination opens the sheet, whose "+ New scene…" names what it replaces.
+  press(option("opt2"), "Change where option 2 goes: Depot"); press(s.host.querySelector<HTMLElement>(".story-sheet")!, "+ New scene…");
+  assert.equal(s.host.querySelector(".story-sheet"), null); assert.equal(dialog()!.getAttribute("aria-label"), "New scene for option 2");
+  assert.equal(dialog()!.querySelector(".story-dialog-note")!.textContent, 'Option 2 "Leave" will lead here. It currently goes to Depot. The new scene replaces that destination; Depot is kept. You stay in this scene.');
+  // An empty name stays with the reason; Escape keeps nothing.
+  press(dialog()!, "Create scene and link option 2"); await tick();
+  assert.equal(dialog()!.querySelector(".field-error")!.textContent, "Enter a scene name."); assert.equal(s.calls.length, 0);
+  dialog()!.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); assert.equal(dialog(), null); assert.equal(s.calls.length, 0);
+  // Option 1 continues: Then's Go to a scene opens the same sheet.
+  option("opt1").querySelector<HTMLElement>(".story-outcome > summary")!.click();
+  [...option("opt1").querySelectorAll<HTMLElement>(".story-outcome [role=option]")].find(item => item.getAttribute("aria-label")!.startsWith("Go to a scene."))!.click();
+  press(s.host.querySelector<HTMLElement>(".story-sheet")!, "+ New scene…");
+  assert.equal(dialog()!.querySelector(".story-dialog-note")!.textContent, 'Option 1 "Ask about the last tram" will lead here. You stay in this scene.');
+  type(dialog()!.querySelector<HTMLInputElement>('input[aria-label="Scene name"]')!, "Quiet room");
+  press(dialog()!, "Create scene and link option 1"); await tick();
+  assert.deepEqual(s.calls.map(call => call.command), [{ type: "createSceneFromChoice", sceneId: "one", expectedSourceRevision: "source-one", choiceBeatId: "choice", optionId: "opt1", chapterId: "chapter", displayName: "Quiet room" }]);
+  assert.equal(dialog(), null);
+  await s.close();
 });

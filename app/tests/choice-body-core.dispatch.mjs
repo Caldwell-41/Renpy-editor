@@ -213,8 +213,8 @@ try {
  const callBeat=scene().beats.find(b=>b.payload.type==='call');const callLabel=callBeat.payload.returnLabel;
  assert(callLabel?.startsWith('_ll_call_'));
  // Add a beat in an option offers Condition. Its rule starts on the first variable, so choose choice_flag.
- button('+ Beat',option(yes.id));kind('condition');panel=document.querySelector('.story-operation[aria-label="Add Condition"]');conditionRule(panel,'true');
- await applied(panel,'Create Condition');
+ button('+ Beat',option(yes.id));panel=kind('condition');conditionRule(panel,'true');
+ await applied(panel,'Add Condition');
  const branch=scene().beats.find(b=>b.conditionalBranch&&!b.conditionalBranch.choiceOption);
  button(`Add a beat to ${ifName(branch.id)}`,ifBranch(branch.id));draft=kind('choice');
  enter(draft.querySelector('[aria-label="Choice option text"]'),'Inner normal');button('+ Add option',draft);
@@ -280,7 +280,7 @@ try {
  await applied(document,'Undo');assert.equal(await source(path),result.runtime.repeatConversation);
  // A Choice nested in a condition inside another option owns its own target.
  promptEditor=await editChoice(conversationId);button('+ Add option',promptEditor);enter(promptEditor.querySelectorAll('[aria-label="Choice option text"]')[3],'Nested conversation');await applied(promptEditor,'Commit Beat');
- const nestedOuter=choice().payload.options[3];button('+ Beat',option(nestedOuter.id));kind('condition');panel=document.querySelector('.story-operation[aria-label="Add Condition"]');conditionRule(panel,'false');await applied(panel,'Create Condition');
+ const nestedOuter=choice().payload.options[3];button('+ Beat',option(nestedOuter.id));panel=kind('condition');conditionRule(panel,'false');await applied(panel,'Add Condition');
  const repeatBranch=scene().beats.find(b=>b.conditionalBranch&&!b.conditionalBranch.choiceOption);button(`Add a beat to ${ifName(repeatBranch.id)}`,ifBranch(repeatBranch.id));draft=kind('choice');enter(draft.querySelector('[aria-label="Choice option text"]'),'Inner ask');button('+ Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'Inner leave');await applied(draft,'Add Beat');
  const repeatInner=scene().beats.find(b=>b.payload.type==='choice'&&b.owner),innerAsk=repeatInner.payload.options[0];promptEditor=await editChoice(repeatInner.id);button('Add a prompt shown with the options',promptEditor);promptSpeaker(promptEditor,speaker);enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'Inside, ask again?');await applied(promptEditor,'Commit Beat');
  await addBodyBeat(innerAsk.id,'narration',form=>enter(form.querySelector('textarea'),'Inner answer'));await thenOption(innerAsk.id,'repeatChoice');await addBodyBeat(nestedOuter.id,'narration',form=>enter(form.querySelector('textarea'),'Outer resumed'));result.runtime.repeatNested=await source(path);

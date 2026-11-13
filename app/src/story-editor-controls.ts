@@ -171,7 +171,8 @@ export interface SheetOptions {
   readonly choose: (value: string) => void;
   /** Shows a tile's value on the stage while the author points at or focuses it; undefined stops. */
   readonly preview?: (value?: string) => void;
-  readonly extra?: readonly HTMLElement[];
+  /** An action after the tiles that closes the sheet first, such as "+ New scene…". */
+  readonly create?: { readonly label: string; readonly run: () => void };
 }
 /**
  * A picker sheet over the editor: search, a grid of picture tiles and arrow keys. Pointing
@@ -219,7 +220,8 @@ export function openSheet(trigger: HTMLElement, options: SheetOptions): void {
   search.addEventListener("keydown", event => { if (event.key === "ArrowDown") { event.preventDefault(); tiles.find(tile => !tile.hidden)?.focus(); } });
   sheet.addEventListener("keydown", event => { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(); } });
   if (!tiles.length) { empty.textContent = "None available in this project."; empty.hidden = false; }
-  grid.append(...tiles); sheet.append(head, search, grid, empty, ...options.extra ?? [], element("p", "story-sheet-hint", options.hint));
+  grid.append(...tiles); const create = options.create && button(options.create.label, "button secondary story-sheet-new", () => { close(false); options.create!.run(); });
+  sheet.append(head, search, grid, empty, ...create ? [create] : [], element("p", "story-sheet-hint", options.hint));
   host.append(sheet);
   (tiles.find(tile => tile.getAttribute("aria-selected") === "true") ?? tiles[0] ?? search).focus({ preventScroll: true });
 }
@@ -264,4 +266,57 @@ export function pictureField(select: HTMLSelectElement, options: PictureOptions)
 /** Moves focus to an editor's first invalid field, or its first control. */
 export function focusFirst(host: HTMLElement): void {
   (host.querySelector<HTMLElement>('[aria-invalid="true"]:not([hidden])') ?? host.querySelector<HTMLElement>('input:not([type=hidden]):not([hidden]), textarea, summary, [role=radio][tabindex="0"], button:not([disabled])'))?.focus();
+}
+
+/** A reason a form dialog shows, with the field to fix. */
+export class FieldError extends Error {
+  constructor(message: string, readonly field: HTMLElement) { super(message); }
+}
+export interface FormDialogOptions<T> {
+  readonly host: HTMLElement;
+  readonly opener: HTMLElement;
+  readonly title: string;
+  readonly className: string;
+  /** The close button's name: "Close without creating". */
+  readonly closeLabel: string;
+  readonly fields: readonly Node[];
+  readonly note?: string;
+  readonly submitLabel: string;
+  /** Focused when the dialog opens and after a refusal without a field. */
+  readonly first: HTMLElement;
+  /** Reads the fields and does the work. A thrown reason shows in the dialog, which keeps its input. */
+  readonly submit: () => Promise<T>;
+}
+/**
+ * A compact form dialog: fields, the reason a submit failed, a note, Cancel and one primary
+ * action. Enter in a text field submits; Escape, Close or Cancel keeps nothing. Resolves with
+ * what `submit` returned, or undefined when closed without it.
+ */
+export function openFormDialog<T>(options: FormDialogOptions<T>): Promise<T | undefined> {
+  return new Promise(resolve => {
+    options.host.querySelector(":scope > .story-dialog-backdrop")?.remove();
+    const backdrop = element("div", "story-dialog-backdrop");
+    const dialog = element("div", `story-dialog ${options.className}`); dialog.role = "dialog"; dialog.setAttribute("aria-modal", "true"); dialog.setAttribute("aria-label", options.title); dialog.tabIndex = -1;
+    let busy = false;
+    const close = (result?: T): void => { if (!backdrop.isConnected) return; backdrop.remove(); options.opener.focus(); resolve(result); };
+    const head = element("div", "story-dialog-head"); head.append(element("h2", "", options.title), iconButton("close", options.closeLabel, () => { if (!busy) close(); }));
+    const problem = element("p", "field-error"); problem.role = "status";
+    const cancel = button("Cancel", "button secondary", () => { if (!busy) close(); });
+    const submit = button(options.submitLabel, "button primary", () => void run());
+    const actions = element("div", "story-dialog-actions"); actions.append(cancel, submit);
+    dialog.append(head, ...options.fields, problem, ...options.note ? [element("p", "story-dialog-note", options.note)] : [], actions);
+    backdrop.append(dialog);
+    const run = async (): Promise<void> => {
+      if (busy) return;
+      busy = true; submit.disabled = cancel.disabled = true; problem.textContent = "";
+      try { close(await options.submit()); }
+      catch (error) { problem.textContent = error instanceof Error ? error.message : String(error); (error instanceof FieldError ? error.field : options.first).focus(); }
+      finally { busy = false; if (backdrop.isConnected) submit.disabled = cancel.disabled = false; }
+    };
+    dialog.addEventListener("keydown", event => {
+      if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); if (!busy) close(); }
+      else if (event.key === "Enter" && event.target instanceof HTMLInputElement && event.target.type === "text") { event.preventDefault(); void run(); }
+    });
+    options.host.append(backdrop); options.first.focus();
+  });
 }

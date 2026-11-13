@@ -32,6 +32,8 @@ export interface ChoiceHost {
   /** Opens Add a beat for an option, before its ending. */
   readonly addBeat: (optionId: string) => void;
   readonly setEnding: (optionId: string, ending: Ending) => void;
+  /** Creates a scene and sends the option there, in one edit. */
+  readonly newScene: (optionId: string, opener: HTMLElement) => void;
   readonly viewSource: (beat: SceneBeat) => void;
   readonly openScene: (sceneId: string) => void;
   /** Marks an option's button on the stage while the author points at or focuses its block. */
@@ -136,7 +138,7 @@ export function buildChoiceEditor(payload: Choice, context: EditorContext, choic
       const entry = button("", "story-dropdown-option", () => {
         menu.open = false;
         if (item.type === current.type) { summary.focus(); return; }
-        if (item.type === "jump") { pickScene(summary, index, undefined, sceneId => choice.setEnding(option.id!, { type: "jump", sceneId })); return; }
+        if (item.type === "jump") { pickScene(summary, index, option.id!, undefined, sceneId => choice.setEnding(option.id!, { type: "jump", sceneId })); return; }
         choice.setEnding(option.id!, { type: item.type });
       });
       entry.role = "option"; entry.tabIndex = -1; entry.setAttribute("aria-selected", String(item.type === current.type)); entry.setAttribute("aria-label", `${item.label}. ${detail}`);
@@ -145,7 +147,7 @@ export function buildChoiceEditor(payload: Choice, context: EditorContext, choic
     }
     choices.append(element("p", "story-menu-foot", `Option ${index + 1}'s beats follow below. Then changes only its ending.`));
     dropdownKeys(menu, summary, choices); menu.append(summary, choices); then.append(menu, add); slot.append(then);
-    if (explicit?.payload.type === "jump") slot.append(destinationRow(index, explicit.payload.sceneId, sceneId => choice.setEnding(option.id!, { type: "jump", sceneId }), locked));
+    if (explicit?.payload.type === "jump") slot.append(destinationRow(index, option.id!, explicit.payload.sceneId, sceneId => choice.setEnding(option.id!, { type: "jump", sceneId }), locked));
   };
   // A scene card: the scene's opening background, name and first line. It opens the scene sheet.
   const sceneItem = (scene: SceneDocument, current: SceneDocument | undefined): ChoiceItem => {
@@ -153,12 +155,14 @@ export function buildChoiceEditor(payload: Choice, context: EditorContext, choic
     const chapter = model.chapters.find(item => item.id === scene.chapterId)?.displayName;
     return { value: scene.id, label: scene.displayName, ...(background?.type === "background" ? { asset: background.assetId } : {}), detail: scene.id === current?.id ? "This scene" : chapter ?? "" };
   };
-  const pickScene = (trigger: HTMLElement, index: number, selected: string | undefined, chosen: (sceneId: string) => void): void => {
+  // The scene sheet for an option, with "+ New scene…" to send the option to a new scene.
+  const pickScene = (trigger: HTMLElement, index: number, optionId: string, selected: string | undefined, chosen: (sceneId: string) => void): void => {
     const keep = selected ? choice.sceneName(selected) : "the current ending";
     openSheet(trigger, { kind: "scene", title: `Option ${index + 1} goes to`, search: "Search scenes", items: model.scenes.map(scene => sceneItem(scene, choice.structure()?.scene)), selected: selected ?? "", keep, thumbnail: context.thumbnail,
-      hint: `Click a scene to send option ${index + 1} there. Esc keeps ${keep}.`, choose: value => { if (value !== selected) chosen(value); } });
+      hint: `Click a scene to send option ${index + 1} there. Esc keeps ${keep}.`, choose: value => { if (value !== selected) chosen(value); },
+      create: { label: "+ New scene…", run: () => choice.newScene(optionId, trigger) } });
   };
-  const destinationRow = (index: number, sceneId: string, chosen: (sceneId: string) => void, locked: boolean): HTMLElement => {
+  const destinationRow = (index: number, optionId: string, sceneId: string, chosen: (sceneId: string) => void, locked: boolean): HTMLElement => {
     const row = element("div", "story-asset-row story-option-destination"); row.role = "group"; row.setAttribute("aria-label", `Option ${index + 1} goes to`);
     const target = model.scenes.find(scene => scene.id === sceneId);
     const picture = element("span", "story-thumb story-thumb-scene"); picture.setAttribute("aria-hidden", "true");
@@ -166,7 +170,7 @@ export function buildChoiceEditor(payload: Choice, context: EditorContext, choic
     if (background?.type === "background") { const image = element("img"); image.alt = ""; picture.append(image); context.thumbnail(background.assetId, image, picture); } else picture.classList.add("story-thumb-blank");
     const firstLine = target?.beats.find(beat => !beat.owner && (beat.payload.type === "dialogue" || beat.payload.type === "narration") && beat.payload.text.trim())?.payload;
     const text = element("span", "story-asset-text"); text.append(element("strong", "", target?.displayName ?? "Missing scene"), element("span", "", firstLine && "text" in firstLine ? `“${firstLine.text}”` : "No lines yet"));
-    const pick = button("", "story-destination-pick", () => pickScene(pick, index, sceneId, chosen)); pick.disabled = locked;
+    const pick = button("", "story-destination-pick", () => pickScene(pick, index, optionId, sceneId, chosen)); pick.disabled = locked;
     pick.setAttribute("aria-label", `Change where option ${index + 1} goes: ${target?.displayName ?? "missing scene"}`); pick.title = "Choose a scene";
     pick.append(picture, text, element("span", "story-caret", "▾"));
     const open = iconButton("open", `Open ${target?.displayName ?? "destination"}`, () => choice.openScene(sceneId)); open.disabled = !target;
