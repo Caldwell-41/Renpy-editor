@@ -48,7 +48,7 @@ try{
   await page.screenshot({path:join(output,files.production)});await reference.screenshot({path:join(output,files.reference)});await page.locator('.story-arithmetic-editor').screenshot({path:join(output,files.productionControl)});await reference.locator('[data-editor-for][data-kind=setVariable]').screenshot({path:join(output,files.referenceControl)});
   result.cases.push({size,production,approvedControl,files});
  }
- await formula.fill('1 /');await page.getByRole('button',{name:'Exit Writing focus',exact:true}).click();assert.equal(await formula.inputValue(),'1 /');await page.getByRole('button',{name:'Writing focus',exact:true}).click();assert.equal(await formula.inputValue(),'1 /');await page.getByRole('button',{name:'Cancel',exact:true}).click();
+ await formula.fill('1 /');await page.getByRole('button',{name:'Show game window',exact:true}).click();assert.equal(await formula.inputValue(),'1 /');await page.getByRole('button',{name:'Writing focus',exact:true}).click();assert.equal(await formula.inputValue(),'1 /');await page.getByRole('button',{name:'Cancel',exact:true}).click();
  const accepted=await call('source.open',{path:scene.sourcePath});assert(accepted.text.includes('$ trust += (bonus + 2) * 3  # imported compound'));
  result.keyboard={suggestionTab:true,suggestionFocus:true,operationEnterEscape:true,formulaRetained:true,writingFocus:true,cancelNoWrite:true};assert.deepEqual(result.errors,[]);result.passed=true;
 }catch(error){result.failure={message:error.message,stack:error.stack};if(browser)for(const [i,page] of browser.contexts().flatMap(c=>c.pages()).entries()){await page.screenshot({path:join(output,`failure-${i}.png`)}).catch(()=>{});}throw error;}
