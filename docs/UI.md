@@ -229,6 +229,11 @@ names. Dimensions show pixels, durations seconds and LLM limits tokens, with a s
 explanation of tokens. Do not relabel concepts so broadly that authors confuse scale
 with size, preview zoom with game resolution, or applying changes with saving.
 
+Author-facing text never says "body". It names the scene, branch or option that
+holds the beats: "End of scene", "End of "If trust ≥ 5"", "Option 2's beats follow
+below". Code, core and these docs keep body as the technical term from the
+[glossary](../GLOSSARY.md).
+
 Help for optional technical detail, such as anchors, ATL or naming rules, opens on
 keyboard focus as well as hover. Longer help expands in place. Required syntax, units,
 limits and recovery stay visible beside the field; a placeholder is not a label. Keep
@@ -323,9 +328,8 @@ Enter/Tab and Escape. Cmd/Ctrl+Enter commits the beat; Escape closes a suggestio
 or operation menu before returning to the retained draft. Cancel discards that
 draft and returns focus to the beat. Boolean and text targets keep literal fields.
 
-These reusable controls operate in the existing workspace and Writing focus.
-Tracks/Reel, cross-view retained drafts and the full Brass and slate layout remain
-with #110; shared decimal creation/default controls remain with #97.
+These controls work the same in Tracks, Reel and Writing focus. Shared decimal
+creation and default controls remain with #97.
 [#96 evidence](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/evidence/arithmetic-96.md) records the scoped visual comparison
 and real Story-to-core operations.
 
@@ -440,8 +444,8 @@ covers moving, unwrapping and deleting branches.
 - Entering and leaving Writing focus moves no content: the editor, its drafts, focus and
   caret, the selection, the open branches and a new beat's place stay. It sends nothing
   to core and adds no Undo entry. The view lasts for the project session.
-- Production has the stage, editor, Branch path, Tracks (#116), Reel (#118) and Writing
-  focus (#119).
+- Production has the stage, the Combined beat editors (#117), Branch path, Tracks
+  (#116), Reel (#118) and Writing focus (#119).
   Selecting a Tracks or Reel column edits its beat beside the stage; a condition or
   Choice column edits the condition, and an option opens from its Choice. Move up,
   Move down, Move to and Delete sit in the editor heading's menu, and Alt+Arrow on a
@@ -466,7 +470,6 @@ covers moving, unwrapping and deleting branches.
   empty-branch slots and route lines. Each beat is a card with its number and kind,
   then its text (five lines, four from 900 to 1200 px). A Return names itself in the
   card title. Alt+Arrow and the arrow keys work as in Tracks.
-- The editor refinements, pickers and Add a beat dialog (#117) come later.
 
 ### Branches in a scene
 
@@ -486,7 +489,8 @@ covers moving, unwrapping and deleting branches.
   `+ End of option 2 "Leave"`, `+ End of Otherwise` or `+ End of scene`. An end marker
   adds at its default place. An empty branch or option is one beat-wide slot holding
   its name, where it continues and Add a beat.
-- Story text names the scene, branch or option and never says "body". Editor paths
+- Story text names the scene, branch or option and never says "body"
+  ([interface language](#interface-language-and-help)). Editor paths
   read "Arrival › If trust ≥ 5 › Option 2 "Leave"". Long conditions shorten with
   whole words and an ellipsis, as in the Branch path; the full test is in the tooltip.
 - Every insertion names its body and position, and replacing an ending names what it
@@ -511,27 +515,42 @@ covers moving, unwrapping and deleting branches.
 
 ### Beat editors
 
-- Backgrounds and expressions use the [media picker](#media-pickers). Position is a
+The editors follow `story-revamp` / `combined` (`combined-v1`). Then, Move to and Add
+a beat follow `story-combined-editor` / `replace-v2`
+([approval](design/story-combined-editor/README.md)).
+
+- Every supported beat has an editor: dialogue and narration, background, show, hide
+  and move character, change appearance, transition, music, stop music, sound effect,
+  Set variable, Choice, Jump, Call scene, Return, Repeat this Choice, the three screen
+  beats and protected Custom Code. A condition edits its tests in the condition's
+  editor, with + Beat for each branch.
+- Backgrounds and appearances use the [media picker](#media-pickers). Position is a
   Left/Centre/Right switch. Selecting an audio beat never plays it; only the labelled
   audition action plays audio.
-- Narration is its own mode, not a fake Character. In dialogue, Enter adds a line
-  break, Cmd/Ctrl+Enter commits the draft, and
+- Narration is its own mode in the speaker list, not a fake Character. In dialogue,
+  Enter adds a line break, Cmd/Ctrl+Enter commits the draft, and
   Shift+Cmd/Ctrl+Enter commits and starts the next line with the last speaker on the
   current path. [Story Undo](#story-undo) defines the grouping of typing into steps.
 - Staging changes are explicit beats. A dialogue line never hides a `show` or
   appearance change.
 - Selecting a character or the background on the stage names the beat that set it, and
-  offers to edit that beat or add a change before the current beat in the same body. It
-  never edits the earlier beat silently.
+  offers to edit that beat or add a change before the current beat in the same scene,
+  branch or option. It never edits the earlier beat silently.
 - Source the editor cannot represent is a protected Custom Code beat with its reason
   and Edit in Source. Moves never cross it unless the source layer proves the move safe.
 - A pending beat edit has Commit and Cancel. The [beat draft rules](#beat-drafts)
   allow navigation without losing unfinished input. Failed commits keep the text
   and focus.
 - Set variable uses the [equation row](#arithmetic-equation-row) and conditions use the
-  [rule builder](#condition-rule-builder).
-- Add a beat is a [pick-one dialog](#pick-one-dialogs). Its destination line names
-  where the beat lands and any ending it replaces.
+  [rule builder](#condition-rule-builder). A number field keeps what the author typed,
+  including a half-entered number such as `-` or `1.`, until it is complete.
+- Add a beat is a [pick-one dialog](#pick-one-dialogs). Its details list Goes at, In
+  and After for the highlighted kind, or "Replaces …" when the kind replaces an
+  ending. A new beat's editor repeats those lines.
+- Move to is a tree of the scene, its branches and options in source order, with
+  "Before …" and "End of …" positions. It opens on the beat's own location with the
+  rest closed. Up and Down move, Right opens or moves in, Left closes or moves out,
+  Enter selects and Escape cancels. A beat never moves into its own branches.
 
 ### Beat drafts
 
@@ -727,16 +746,17 @@ The Story rules above define Loomlight's application of that reference.
 
 - Options are numbered blocks in their arm colours. Each option owns ordered beats,
   stored like a condition branch, so its path appears in the Branch path, Tracks, Reel
-  and Writing focus. Options move up and down with their bodies, and Undo restores the
-  order.
-- Then edits only the body's last beat: Continue after the Choice, Go to a scene (Jump),
-  Repeat this Choice or Return. Call is an ordinary beat inside the body.
-- When protected Custom Code ends the option, Then reads "Ends with Custom Code:"
-  and its source line, offers Edit in Source, and turns its four choices off. When
-  the ending is unknown, Then reads "Ending unknown: Custom Code can leave this
-  option" and keeps its choices, so the author can add an explicit ending after it.
+  and Writing focus. Options move up and down with their beats and keep their
+  identity, and Undo restores the order. "+ Beat" adds a beat to an option.
+- Then edits only the option's last beat: Continue after the Choice, Go to a scene
+  (Jump), Repeat this Choice or Return. Call is an ordinary beat in the option.
+- When Custom Code ends the option, the Then menu is gone. The row reads "Ends with
+  Custom Code:" and its source line, with Edit in Source. When Custom Code may leave
+  the option, that Custom Code beat reads "Ending unknown: Custom Code can leave this
+  option", and Then stays editable, so the author can add an explicit ending after it.
 - A destination is a scene card (opening background, name and first line) that opens a
-  scene sheet with New scene.
+  scene sheet. Create New Scene in the Choice editor adds a scene and an option that
+  goes there.
 - An option's condition reads as one line, "Always available" or "Only when ...", and
   opens the rule builder on request. A guarded option is hidden when false by default,
   or shown disabled. The Choice's Picked options setting is Show normally, Mark picked
@@ -744,6 +764,9 @@ The Story rules above define Loomlight's application of that reference.
 - The prompt is narration or a Character line shown with the options. When no option
   can be picked, the story continues after the Choice and records no pick.
 - Focusing or pointing at an option marks its button on the stage.
+- Preview options, under the stage, assume each condition's result and which options
+  the player picked earlier. They are illustrative: they never reach source, a save
+  or Undo, and Picked options never claim a real save's state.
 
 ### Stage preview
 
@@ -772,22 +795,12 @@ media rules.
 
 ### Not yet in production
 
-Production Story has the Combined stage, editor, Branch path, Tracks, Reel and Writing
-focus, with the approved status, marks and wording of `story-combined-status` /
-`header-v2`. The Combined beat editors, pickers and Add a beat dialog (#117) are not
-built yet. The Move to and Add a beat forms and the
-Then states keep their earlier wording until #117.
-
-Choice editing follows #98: numbered option bodies, captions and order, explicit beat
-insertion, Then (Continue, Go to a scene, Repeat this Choice, Return), the prompt row,
-If false (Hide or Show disabled) and Picked options. Commit, Cancel, refused drafts,
-Source fallback, shared history and reopen keep their existing owners. A Choice's
-editor links to each option's editor, which holds Add a beat, Add Condition and Then.
-The stage shows the prompt, the picked-state notice and the numbered options as the
-game's choice menu, read-only and keyboard-scrollable. Only conditional rows say
-"Condition unknown"; the false-condition policy is in the hover and accessible text.
-Until a capability exists, the editor says it is not built instead of showing a
-working-looking control.
+Production Story has the Combined stage, beat editors, Branch path, Tracks, Reel and
+Writing focus, with the approved status, marks and wording of `story-combined-status` /
+`header-v2`. The approved scene sheet's "+ New scene…" retargets an existing option to
+a new scene in one edit. Core has no such command yet, so the sheet has no New scene
+row and Create New Scene stays in the Choice editor. Until a capability exists, the
+editor says it is not built instead of showing a working-looking control.
 
 ## Source workspace
 

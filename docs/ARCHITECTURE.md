@@ -620,6 +620,14 @@ route with CSS, and its sidebar and lane widths are CSS custom properties kept f
 project session, so entering, leaving and resizing send nothing to core and add no
 history entry.
 
+The Story controller (`scene-ui.ts`) owns every beat draft, whichever view shows it.
+The beat, Choice and rule-builder editors (`story-*-editor.ts`) build controls and read
+a payload. An edit that applies at once, such as a Choice's Then, goes through the
+controller. Add a beat and Move to list core's insertion places, and a move is one
+`scene.apply` command. A picker sheet's hover or focus preview and the stage's
+Preview options are view state: they change only the stage, never a draft, source or
+history.
+
 The selected Story design extends this preview with valid, uncommitted beat drafts.
 This is an inert preview of pending edits, not source acceptance or a second saved
 story document. [Stage preview](UI.md#stage-preview) owns live feedback and unsaved
