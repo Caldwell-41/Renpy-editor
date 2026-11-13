@@ -1,7 +1,9 @@
 // Story Combined v1 (`story-revamp` / `combined-v1`): the route through a scene's bodies,
-// the Branch path and Tracks. Core gives every body its nodes, ending and insertion
-// places (UI.md "Branches in a scene"); this module lays them out and works out no
-// structure of its own. Open branches are view state: they add no history entry.
+// the Branch path, and its two views, Tracks and Reel. Core gives every body its nodes,
+// ending and insertion places (UI.md "Branches in a scene"); this module lays them out
+// and works out no structure of its own. Open branches and the view are view state: they
+// add no history entry. Both views draw the same route with the same columns, markers
+// and actions; only a beat column's contents differ.
 import type { BeatPayload, BodyRef, NodeRef, Position, SceneBeat, SceneBody, SceneDocument } from "./scene-ui.ts";
 
 /** groupId → the open branch or option (its header beat id). */
@@ -161,8 +163,13 @@ export const trackCopy = {
   draft: "Draft", conflict: "Conflict with source", needsChanges: "Needs changes",
 };
 
-/** What Tracks needs from Story to draw and to act. */
-export interface TracksContext {
+/** The bottom panel's two views of one route. Tracks starts selected. */
+export type RouteView = "tracks" | "reel";
+const routeViews: readonly { readonly view: RouteView; readonly name: string }[] = [{ view: "tracks", name: "Tracks" }, { view: "reel", name: "Reel" }];
+
+/** What Tracks and Reel need from Story to draw and to act. */
+export interface RouteContext {
+  readonly view: RouteView;
   readonly scene: SceneDocument;
   readonly items: readonly TrackItem[];
   readonly numbers: ReadonlyMap<string, string>;
@@ -175,7 +182,7 @@ export interface TracksContext {
   /** How an end marker names its branch or option: "If trust ≥ 5" in quotes, option 2 "Leave", Otherwise. */
   readonly endName: (header: SceneBeat) => string;
   readonly sceneName: (sceneId: string) => string;
-  /** Lane shading: which lanes carry state, and whether state is unknown. */
+  /** Tracks lane shading: which lanes carry state, and whether state is unknown. */
   readonly state: (beat: SceneBeat) => { readonly background: boolean; readonly characters: boolean; readonly music: boolean; readonly unknown: boolean };
   readonly select: (id: string) => void;
   readonly selectNew: (key: string) => void;
@@ -192,7 +199,7 @@ function action(text: string, className: string, run: () => void): HTMLButtonEle
 const forkKind = (beat: SceneBeat): "condition" | "choice" | undefined => beat.payload.type === "choice" ? "choice" : beat.conditionalBranch && !beat.conditionalBranch.choiceOption ? "condition" : undefined;
 
 /** Where a branch or option leads once its beats run out. */
-function thenText(context: TracksContext, owner: SceneBeat, branch: BodyRef): string {
+function thenText(context: RouteContext, owner: SceneBeat, branch: BodyRef): string {
   const { scene, numbers } = context, ending = bodyOf(scene, branch)?.ending;
   if (ending?.type === "unknown") return trackCopy.endingUnknown;
   if (ending?.type === "ends") {
@@ -214,7 +221,7 @@ function thenText(context: TracksContext, owner: SceneBeat, branch: BodyRef): st
 }
 
 /** An end marker: "+ End of …", adding at the default place of the scene, branch or option. */
-function endButton(context: TracksContext, body: BodyRef, label: string, opener: string): HTMLElement | undefined {
+function endButton(context: RouteContext, body: BodyRef, label: string, opener: string): HTMLElement | undefined {
   const place = bodyOf(context.scene, body)?.defaultPlace;
   if (!place || context.locked) return undefined;
   const add = element("button", "story-track-end"); add.type = "button"; add.dataset.beatOpener = opener;
@@ -224,7 +231,7 @@ function endButton(context: TracksContext, body: BodyRef, label: string, opener:
 }
 
 /** Route rows above a column: one coloured line per open branch level, at most two. */
-function rail(context: TracksContext, chain: readonly BodyRef[], label?: { readonly text: string; readonly end?: boolean; readonly empty?: boolean }): HTMLElement {
+function rail(context: RouteContext, chain: readonly BodyRef[], label?: { readonly text: string; readonly end?: boolean; readonly empty?: boolean }): HTMLElement {
   const node = element("div", "story-rail"); node.ariaHidden = "true";
   const levels = chain.length > 2 ? [chain[0]!, chain.at(-1)!] : chain;
   for (let row = 0; row < 2; row++) {
@@ -241,13 +248,36 @@ function rail(context: TracksContext, chain: readonly BodyRef[], label?: { reado
   return node;
 }
 
-/** The Tracks grid: lane labels, then one column per beat on the route. */
-export function renderTracks(context: TracksContext): HTMLElement {
-  const { scene, numbers } = context;
-  const grid = element("div", "story-tracks"); grid.role = "group"; grid.ariaLabel = "Beats in story order";
-  const labels = element("div", "story-track-labels"); labels.ariaHidden = "true";
-  lanes.forEach((lane, index) => labels.append(element("span", `story-track-label story-lane-${index}`, lane)));
-  grid.append(labels);
+/** Tracks: the six lanes of a beat, each beat filling the lane its kind belongs to. */
+function laneCells(context: RouteContext, beat: SceneBeat, number: string): HTMLElement[] {
+  const state = context.state(beat), lane = laneOf(beat);
+  return lanes.map((_lane, index) => {
+    const cell = element("span", `story-lane story-lane-${index}${index === 0 ? " story-beat-number" : ""}`);
+    if (index === 0) cell.textContent = number;
+    else if (index === lane) cell.textContent = lane === 5 ? `${context.label(beat)} · ${context.summary(beat)}` : context.summary(beat);
+    if (index === 3) { const copy = element("span", "story-lane-copy", cell.textContent ?? ""); cell.replaceChildren(copy); }
+    cell.classList.toggle("story-lane-present", index === 1 && state.background || index === 2 && state.characters || index === 4 && state.music);
+    cell.classList.toggle("story-lane-unknown", index > 0 && state.unknown);
+    return cell;
+  });
+}
+/** Reel: a beat's number and kind, its text, and the reason a draft needs attention
+ *  (story-combined-status / header-v2). A Return names itself in the title. */
+function reelCard(number: string, title: string, copy: string): HTMLElement[] {
+  const heading = element("span", "story-reel-title"); heading.append(element("span", "story-beat-number", number), ` · ${title}`);
+  const reason = element("span", "story-reel-reason"); reason.hidden = true;
+  return [heading, element("span", "story-reel-copy", copy), reason];
+}
+
+/** Tracks or Reel: one column per beat on the route, with the branch markers between them. */
+export function renderRoute(context: RouteContext): HTMLElement {
+  const { scene, numbers } = context, reel = context.view === "reel";
+  const grid = element("div", `story-route story-${context.view}`); grid.role = "group"; grid.ariaLabel = "Beats in story order";
+  if (!reel) {
+    const labels = element("div", "story-track-labels"); labels.ariaHidden = "true";
+    lanes.forEach((lane, index) => labels.append(element("span", `story-track-label story-lane-${index}`, lane)));
+    grid.append(labels);
+  }
   const beats = context.items.flatMap(item => item.kind === "beat" ? [item.beat] : []);
   const focusColumn = (id: string): void => { [...grid.querySelectorAll<HTMLElement>(".story-track-column")].find(column => column.dataset.beatId === id)?.querySelector<HTMLElement>(":scope > .story-track-beat")?.focus(); };
   for (const item of context.items) {
@@ -261,16 +291,8 @@ export function renderTracks(context: TracksContext): HTMLElement {
       button.ariaLabel = `${number} ${context.label(beat)}: ${context.summary(beat)}`; button.dataset.selected = String(selected);
       if (selected) button.ariaCurrent = "true";
       button.tabIndex = selected || (!context.selected && beat === beats[0]) ? 0 : -1;
-      const state = context.state(beat), lane = laneOf(beat);
-      lanes.forEach((_lane, index) => {
-        const cell = element("span", `story-lane story-lane-${index}`);
-        if (index === 0) cell.textContent = number;
-        else if (index === lane) cell.textContent = lane === 5 ? `${context.label(beat)} · ${context.summary(beat)}` : context.summary(beat);
-        if (index === 3) { const copy = element("span", "story-lane-copy", cell.textContent ?? ""); cell.replaceChildren(copy); }
-        cell.classList.toggle("story-lane-present", index === 1 && state.background || index === 2 && state.characters || index === 4 && state.music);
-        cell.classList.toggle("story-lane-unknown", index > 0 && state.unknown);
-        button.append(cell);
-      });
+      const ending = beat.payload.type === "return";
+      button.append(...reel ? reelCard(number, ending ? context.summary(beat) : context.label(beat), ending ? "" : context.summary(beat)) : laneCells(context, beat, number));
       button.addEventListener("click", () => context.select(beat.id));
       button.addEventListener("keydown", event => {
         const index = beats.indexOf(beat);
@@ -298,7 +320,8 @@ export function renderTracks(context: TracksContext): HTMLElement {
       const button = element("button", "story-track-beat"); button.type = "button"; button.dataset.selected = String(context.selected === item.pending.key);
       if (context.selected === item.pending.key) button.ariaCurrent = "true";
       button.ariaLabel = `New ${item.pending.label}, not yet added`;
-      lanes.forEach((_lane, index) => button.append(element("span", `story-lane story-lane-${index}`, index === 0 ? "New" : index === 3 ? item.pending.label : "")));
+      if (reel) button.append(...reelCard("New", item.pending.label, ""));
+      else lanes.forEach((_lane, index) => button.append(element("span", `story-lane story-lane-${index}${index === 0 ? " story-beat-number" : ""}`, index === 0 ? "New" : index === 3 ? item.pending.label : "")));
       button.addEventListener("click", () => context.selectNew(item.pending.key));
       column.append(button); grid.append(column);
       continue;
@@ -353,12 +376,13 @@ export function renderTracks(context: TracksContext): HTMLElement {
   return grid;
 }
 
-/** Keeps each open branch's name beside the lane labels while its route is on screen, as
- *  Story Combined v1 does: the label slides right with the scroll and stops before its end.
- *  Call it once the scroller is in the document. */
+/** Keeps each open branch's name in view while its route is on screen, as Story Combined
+ *  v1 does: the label slides right with the scroll, beside the Tracks lane labels or the
+ *  Reel's left edge, and stops before its end. Call it once the scroller is in the document. */
 export function pinRouteLabels(scroller: HTMLElement): void {
   const pin = (): void => {
-    const cover = (scroller.querySelector(".story-track-labels")?.getBoundingClientRect().right ?? 0) + 8;
+    const labels = scroller.querySelector(".story-track-labels");
+    const cover = (labels ? labels.getBoundingClientRect().right : scroller.getBoundingClientRect().left) + 8;
     const ends = [...scroller.querySelectorAll<HTMLElement>(".story-track-exit")];
     for (const entry of scroller.querySelectorAll<HTMLElement>(".story-track-entry, .story-track-slot")) {
       const label = entry.querySelector<HTMLElement>(".story-rail-label"); if (!label) continue;
@@ -421,7 +445,17 @@ function optionText(owner: SceneBeat, optionId: string): string {
   return owner.payload.type === "choice" ? owner.payload.options.find(option => option.id === optionId)?.text.trim() ?? "" : "";
 }
 
-/** The marks legend beside the view name. Needs changes shows only after a refused Save. */
+/** The Tracks and Reel switch. Choosing a view changes only the bottom panel. */
+export function renderViewSwitch(current: RouteView, choose: (view: RouteView) => void): HTMLElement {
+  const group = element("div", "story-view-switch"); group.role = "group"; group.ariaLabel = "Bottom panel view";
+  for (const { view, name } of routeViews) {
+    const button = action(name, "story-view-option", () => choose(view));
+    button.dataset.view = view; button.setAttribute("aria-pressed", String(view === current)); group.append(button);
+  }
+  return group;
+}
+
+/** The marks legend beside the view switch. Needs changes shows only after a refused Save. */
 export function renderMarksLegend(): HTMLElement {
   const legend = element("span", "story-marks-legend");
   const item = (mark: string, kind: string, text: string): HTMLElement => { const node = element("span", `story-legend-${kind}`); node.append(element("b", `story-mark-${kind}`, mark), ` ${text}`); return node; };
@@ -430,7 +464,8 @@ export function renderMarksLegend(): HTMLElement {
   return legend;
 }
 
-/** The Tracks key: what shading, dashes and route lines mean. */
+/** The Tracks key: what shading, dashes and route lines mean. Reel has no lanes and no key,
+ *  as in Story Combined v1. */
 export function renderTracksKey(): HTMLElement {
   const key = element("details", "story-track-key");
   const summary = element("summary", "button secondary", "Key"); summary.ariaLabel = "Tracks key";

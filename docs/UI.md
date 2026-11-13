@@ -423,9 +423,9 @@ covers moving, unwrapping and deleting branches.
   Neither shows elapsed time, playback or keyframes.
 - Writing focus hides the stage and keeps the editor and Branch path. Its Tracks view
   keeps every lane on wide windows, with a taller Words lane.
-- Production has the stage, editor, Branch path and Tracks (#116). Selecting a Tracks
-  column edits its beat beside the stage; a condition or Choice column edits the
-  condition, and an option opens from its Choice. Move up, Move down, Move to and
+- Production has the stage, editor, Branch path, Tracks (#116) and Reel (#118).
+  Selecting a Tracks or Reel column edits its beat beside the stage; a condition or
+  Choice column edits the condition, and an option opens from its Choice. Move up, Move down, Move to and
   Delete sit in the editor heading's menu, and Alt+Arrow on a column moves its beat.
   The scene toolbar holds Writing focus, + Add beat and More. More holds View in
   Source, Add screen Beat, Add Condition and the Assist actions.
@@ -437,9 +437,19 @@ covers moving, unwrapping and deleting branches.
 - Below 900 px the scene list opens over the workspace. The workspace scrolls: stage,
   editor, Branch path, then Tracks, with the scene toolbar pinned at the top. A 16:9
   stage measures 480 × 270 at 560 × 640.
-- Reel (#118), the Writing focus lane grid and resizing (#119), and the editor
-  refinements, pickers and Add a beat dialog (#117) come later; until then Writing
-  focus only hides the stage.
+- The Tracks and Reel switch sits at the left of the bottom panel. Tracks shows its Key
+  and Reel does not, since Reel has no lanes. Both keep the marks legend. Switching
+  redraws only the bottom panel: the editor, its drafts and focus, the selection, the
+  open branches and a new beat's place stay as they are. It sends nothing to core and
+  adds no Undo entry. The view lasts for the project session, and Tracks is the
+  starting view. Both views share one panel height, so switching moves nothing else.
+- Reel draws the same route as Tracks: the same columns, `+` markers, end markers,
+  empty-branch slots and route lines. Each beat is a card with its number and kind,
+  then its text (five lines, four from 900 to 1200 px). A Return names itself in the
+  card title. Alt+Arrow and the arrow keys work as in Tracks.
+- The Writing focus lane grid and resizing (#119), and the editor refinements,
+  pickers and Add a beat dialog (#117) come later; until then Writing focus only hides
+  the stage.
 
 ### Branches in a scene
 
@@ -451,8 +461,8 @@ covers moving, unwrapping and deleting branches.
   Each extra row takes about 30 px from the stage, up to three rows; beyond that the
   path scrolls.
 - Tracks and Reel draw a route line in the arm colour above each open branch, with a
-  light tint on its columns. When Tracks scrolls past a branch's start, its name stays
-  beside the lane labels until it reaches the branch's end. Slim `+` markers add a beat after a column, the first
+  light tint on its columns. When Tracks or Reel scrolls past a branch's start, its name
+  stays beside the lane labels, or at Reel's left edge, until it reaches the branch's end. Slim `+` markers add a beat after a column, the first
   beat in a branch or a beat after the condition. Each open branch or option ends in
   an end marker, and the scene ends in one: `+ End of "If trust ≥ 5"`,
   `+ End of option 2 "Leave"`, `+ End of Otherwise` or `+ End of scene`. An end marker
@@ -519,7 +529,7 @@ would discard a draft, including deleting its beat or closing the project.
 The [beat draft conflict rules](#beat-draft-conflicts) handle changes to the source
 beneath a retained draft. A beat that the author has not edited is not a draft. A
 condition or Choice column shows the draft marker for drafts in any of its branches,
-open or closed. Drafts show `*` in Tracks and in the editor heading ("* Draft"); a
+open or closed. Drafts show `*` in Tracks, Reel and the editor heading ("* Draft"); a
 draft that conflicts with source shows `!` in the accent colour ("! Conflict"). A beat with a draft can
 be moved, and the draft moves with it. A new beat that is not yet added moves with
 the place the author chooses. [Story Undo](#story-undo) orders draft steps with
@@ -600,9 +610,10 @@ Save reveals the first failing draft in project order. The header save status re
 "Nothing saved. 3 of 5 drafts need changes:", followed by one link per scene with its
 count of failing drafts. At 560 px the header shows "Nothing saved" and the bottom
 status bar holds the full line and links. Each link reveals that scene's first failing
-draft. A failing beat's Tracks column and its scene row show a red `!` in place of the
-draft `*`, and the column gets a red top edge and the reason as its tooltip. The Tracks
-legend adds "Needs changes". The editor heading reads "! Needs changes" and the reason
+draft. A failing beat's Tracks or Reel column and its scene row show a red `!` in place
+of the draft `*`, and the column gets a red top edge and the reason as its tooltip. Reel
+also shows the reason under the beat's text, in red, and "Conflict with source" in the
+accent colour for a conflict. The legend adds "Needs changes". The editor heading reads "! Needs changes" and the reason
 sits under the fields. Marks appear only after a refused Save. A new beat whose body or insertion anchor is gone from source is a beat
 draft conflict. The marks and counts update as the author fixes or cancels each
 failing draft. When none fail, the status reads "5 unsaved beat drafts. Ready to
@@ -743,10 +754,10 @@ media rules.
 
 ### Not yet in production
 
-Production Story has the Combined stage, editor, Branch path and Tracks, with the
-approved status, marks and wording of `story-combined-status` / `header-v2`. Reel
-(#118), the Writing focus lane grid (#119) and the Combined beat editors, pickers and
-Add a beat dialog (#117) are not built yet. The Move to and Add a beat forms and the
+Production Story has the Combined stage, editor, Branch path, Tracks and Reel, with
+the approved status, marks and wording of `story-combined-status` / `header-v2`. The
+Writing focus lane grid (#119) and the Combined beat editors, pickers and Add a beat
+dialog (#117) are not built yet. The Move to and Add a beat forms and the
 Then states keep their earlier wording until #117.
 
 Choice editing follows #98: numbered option bodies, captions and order, explicit beat

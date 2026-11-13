@@ -438,6 +438,16 @@ test("A refused Story Save counts failing drafts, links each scene and marks fai
   assert.equal(card("g1").querySelector(".story-track-beat")?.getAttribute("aria-description"), "Unsaved draft. Needs changes.");
   assert.equal(editorFor("g1")?.querySelector(".story-save-reason")?.textContent, "Select an available item first.");
   assert.deepEqual([sceneRow("Arrival").dataset.saveRefused, sceneRow("Depot").dataset.saveRefused], ["true", "true"]);
+  // Reel shows the same marks and puts the reason under the failing beat's text (header-v2).
+  const view = (name: string): void => { document.querySelector<HTMLButtonElement>(`.story-view-option[data-view="${name}"]`)!.click(); };
+  const reason = (id: string): HTMLElement => card(id).querySelector<HTMLElement>(".story-reel-reason")!;
+  view("reel");
+  assert.ok(document.querySelector(".story-reel")); assert.equal(document.querySelector(".story-track-key"), null, "Reel has no lanes and no Key");
+  assert.deepEqual(failing(), ["g1", "g2"]); assert.equal(legendFails(), true);
+  assert.equal(reason("g1").textContent, "Select an available item first."); assert.equal(reason("g1").hidden, false);
+  assert.equal(card("n1").dataset.beatDraft, "true"); assert.equal(reason("n1").hidden, true);
+  assert.equal(editorFor("g1")?.querySelector(".story-save-reason")?.textContent, "Select an available item first.", "the editor stays as it was");
+  view("tracks");
 
   // A scene link opens that scene's failing draft.
   document.querySelectorAll<HTMLButtonElement>("#app-status .status-link")[1]!.click(); await ticks();

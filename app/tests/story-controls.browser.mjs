@@ -1,6 +1,7 @@
 // Story Combined layout in Chromium: the stage fits the project ratio whole beside the
-// editor, Tracks keeps six lanes, the Branch path wraps to three rows and then scrolls,
-// and nothing overflows the page. Captures go to LOOMLIGHT_STORY_CAPTURE_DIR.
+// editor, Tracks keeps six lanes, Reel takes the same panel height without moving
+// anything else, the Branch path wraps to three rows and then scrolls, and nothing
+// overflows the page. Captures go to LOOMLIGHT_STORY_CAPTURE_DIR.
 import assert from 'node:assert/strict';
 import {mkdir, writeFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
@@ -28,8 +29,11 @@ const geometry=resolution=>page.evaluate(resolution=>{
   fills:Math.abs(canvas.width-slot.width)<=2||Math.abs(canvas.height-slot.height)<=2,
   lanes:[...document.querySelectorAll('.story-track-label')].map(node=>node.textContent),
   pathRows:Math.round(path.querySelector('.story-branch-groups').scrollHeight/line),pathScrolls:path.scrollHeight>path.clientHeight+1,
+  // Against the Story layout, so a scrolling compact workspace compares the same.
+  placed:Object.fromEntries(['.story-panel','.preview-canvas','.story-editor'].map(selector=>{const own=box(document.querySelector(selector)),root=box(document.querySelector('.story-combined'));return [selector,{top:own.top-root.top,left:own.left-root.left,width:own.width,height:own.height}];})),
   pageOverflow:document.documentElement.scrollWidth>innerWidth+1};
 },resolution);
+const view=name=>page.locator(`.story-view-option[data-view="${name}"]`).click();
 try{
  await server.listen();try{browser=await chromium.launch({channel:'chrome'});}catch{browser=await chromium.launch();}
  page=await browser.newPage();page.on('pageerror',error=>errors.push(error.message));page.setDefaultTimeout(8000);
@@ -50,6 +54,12 @@ try{
    if(spec.width>=900)assert(g.editor.left>=g.slot.right-1,`${label}: the editor sits beside the stage`);
    const filename=`${resolution.width}x${resolution.height}-${theme}-${spec.name}.png`;
    if(resolution.width===1280||spec.name==='laptop')await page.screenshot({path:`${output}/${filename}`});
+   // Reel keeps the bottom panel's height, the stage and the editor where Tracks left them.
+   await view('reel');const reel=await geometry(resolution);
+   assert.deepEqual(reel.placed,g.placed,`${label}: the panel, stage and editor stay put in Reel`);
+   assert.equal(reel.pageOverflow,false,`${label}: no page overflow in Reel`);
+   if(resolution.width===1280&&theme==='dark')await page.screenshot({path:`${output}/${filename.replace('.png','-reel.png')}`});
+   await view('tracks');
    results.push({label,filename,stage:{width:Math.round(g.canvas.width),height:Math.round(g.canvas.height)}});
   }
  }
@@ -73,6 +83,17 @@ try{
   const result={label:label.left,lanes:lanes.right,labelRight:label.right,end:end.left};scroller.scrollLeft=0;scroller.dispatchEvent(new Event('scroll'));return result;
  });
  assert(pinned.label>=pinned.lanes&&pinned.labelRight<=pinned.end,`route label stays beside the lane labels: ${JSON.stringify(pinned)}`);
+ // Reel draws the same route lines and keeps the branch name at its left edge.
+ await view('reel');
+ const reelPinned=await page.evaluate(()=>{
+  const scroller=document.querySelector('.story-tracks-scroll'),entry=document.querySelector('.story-reel .story-track-entry[data-branch-id="if"]');
+  scroller.scrollLeft=entry.offsetLeft+40;scroller.dispatchEvent(new Event('scroll'));
+  const label=entry.querySelector('.story-rail-label').getBoundingClientRect(),edge=scroller.getBoundingClientRect();
+  const end=document.querySelector('.story-reel .story-track-exit[data-branch-id="if"] .story-rail-end').getBoundingClientRect();
+  const result={label:label.left,edge:edge.left,labelRight:label.right,end:end.left};scroller.scrollLeft=0;scroller.dispatchEvent(new Event('scroll'));return result;
+ });
+ assert(reelPinned.label>=reelPinned.edge&&reelPinned.labelRight<=reelPinned.end,`Reel route label stays in view: ${JSON.stringify(reelPinned)}`);
+ await page.screenshot({path:`${output}/1280x720-dark-laptop-nested-reel.png`});await view('tracks');
  await page.screenshot({path:`${output}/1280x720-dark-laptop-nested.png`});results.push({label:'nested',filename:'1280x720-dark-laptop-nested.png',pathRows:nested.pathRows});
  // Writing focus hides the stage and keeps the editor, Branch path and Tracks.
  await page.getByRole('button',{name:'Writing focus',exact:true}).click();

@@ -3,7 +3,7 @@ import { buildAvailabilityEditor, buildConditionEditor } from "./story-condition
 import { validateField } from "./authoring-input.ts";
 import { isTextField, typingStepIdleMs, type DraftStep, type DraftStepRecord, type HistoryDirection } from "./project-history.ts";
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenEffects, ScreenRevisions, ScreenTargetBinding } from "./screen-contracts.ts";
-import { armOf, beatBody, beatNumbers, bodyOf, laneOf, nodeBeats, nodeRef, ownedBodies, pinRouteLabels, renderBranchPath, renderMarksLegend, renderTracks, renderTracksKey, sameNode, samePosition, shorten, trackCopy, trackRoute, type PendingBeat } from "./story-tracks.ts";
+import { armOf, beatBody, beatNumbers, bodyOf, laneOf, nodeBeats, nodeRef, ownedBodies, pinRouteLabels, renderBranchPath, renderMarksLegend, renderRoute, renderTracksKey, renderViewSwitch, sameNode, samePosition, shorten, trackCopy, trackRoute, type PendingBeat, type RouteView } from "./story-tracks.ts";
 export type PlacementRef = "left" | "centre" | "right";
 export type TransitionRef = "none" | "dissolve" | "fade";
 
@@ -597,6 +597,8 @@ export function renderStoryView(
   const collapsedChapters=new Set<string>();
   // The Branch path route: groupId → open branch or option. View state outside Undo.
   const openBranches = new Map<string, string>();
+  // The bottom panel's view of that route. View state outside Undo, kept for the project session.
+  let routeView: RouteView = "tracks";
   // A new beat draft shown in the editor, by its draft key. A beat id is `selectedBeatId`.
   let selectedNewDraft: string | undefined;
   // A Story operation form (move, delete, condition, ending) shown in place of the editor.
@@ -760,15 +762,17 @@ export function renderStoryView(
     if (effectsHost?.isConnected) { effectsHost.replaceChildren(); renderEffects(effectsHost, scene); }
     refreshLanes(scene);
   };
-  // Tracks lane text follows valid drafts, as the stage does; invalid input keeps the accepted text.
+  // Tracks lane text and Reel text follow valid drafts, as the stage does; invalid input
+  // keeps the accepted text.
   const refreshLanes = (scene: SceneDocument): void => {
     const shown = withDrafts(scene);
     for (const column of host.querySelectorAll<HTMLElement>(".story-track-column[data-beat-id]")) {
       const beat = shown.beats.find(item => item.id === column.dataset.beatId);
-      if (!beat || beat.conditionalBranch) continue;
-      const lane = laneOf(beat), cell = column.querySelector<HTMLElement>(`:scope > .story-track-beat > .story-lane-${lane}`);
-      const text = lane === 5 ? `${beatName(beat)} · ${beatSummary(beat.payload, model)}` : beatSummary(beat.payload, model);
-      const target = lane === 3 ? cell?.querySelector<HTMLElement>(".story-lane-copy") : cell;
+      if (!beat || beat.conditionalBranch || beat.payload.type === "return") continue;
+      const lane = laneOf(beat), reel = column.querySelector<HTMLElement>(":scope > .story-track-beat > .story-reel-copy");
+      const cell = column.querySelector<HTMLElement>(`:scope > .story-track-beat > .story-lane-${lane}`);
+      const text = lane === 5 && !reel ? `${beatName(beat)} · ${beatSummary(beat.payload, model)}` : beatSummary(beat.payload, model);
+      const target = reel ?? (lane === 3 ? cell?.querySelector<HTMLElement>(".story-lane-copy") : cell);
       if (target && target.textContent !== text) target.textContent = text;
     }
   };
@@ -1112,7 +1116,13 @@ export function renderStoryView(
     };
     // A failing beat's tooltip gives the reason; a conflict's says so.
     const reasons = new Map([...failing].flatMap(([draft, reason]) => draft.beatId ? [[draft.beatId, reason] as const] : []));
-    const tip = (button: HTMLElement | null, reason: string | undefined): void => { if (!button) return; if (reason) button.title = reason; else button.removeAttribute("title"); };
+    // Reel also shows it under the beat's text (story-combined-status / header-v2).
+    const tip = (button: HTMLElement | null, reason: string | undefined): void => {
+      if (!button) return;
+      if (reason) button.title = reason; else button.removeAttribute("title");
+      const line = button.querySelector<HTMLElement>(":scope > .story-reel-reason");
+      if (line) { line.textContent = reason ?? ""; line.hidden = !reason; }
+    };
     host.querySelectorAll<HTMLElement>(".story-track-column[data-beat-id]").forEach(column => { const id = column.dataset.beatId ?? "", button = column.querySelector<HTMLElement>(":scope > .story-track-beat"); mark(column, button, beats.has(id) || inside(id), failingBeats.has(id) || inside(id, [...failing.keys()]), conflicting.has(id)); tip(button, reasons.get(id) ?? (conflicting.has(id) ? trackCopy.conflict : undefined)); });
     host.querySelectorAll<HTMLElement>(".story-track-pending").forEach(column => { const draft = beatDrafts.get(column.dataset.newBeat ?? ""), button = column.querySelector<HTMLElement>(":scope > .story-track-beat"); mark(column, button, !!draft, !!draft && failing.has(draft)); tip(button, draft && failing.get(draft)); });
     host.querySelectorAll<HTMLElement>(".story-editor-state").forEach(state => {
@@ -1219,7 +1229,7 @@ export function renderStoryView(
     const anchor = beforeBeatId ? scene.beats.find(beat => beat.id === beforeBeatId) : undefined;
     const before: Position | undefined = anchor && { type: "before", anchor: nodeRef(anchor) };
     if (anchor && !bodyOf(scene, beatBody(anchor))?.places.some(place => samePosition(place.position, before!))) {
-      actions.status("This beat has no insertion place before it. Use + in Tracks.", "error"); return;
+      actions.status(`This beat has no insertion place before it. Use + in ${routeView === "reel" ? "Reel" : "Tracks"}.`, "error"); return;
     }
     const screenBeat = ["showScreen", "hideScreen", "callScreen"].includes(initialType);
     const remembered = screenInsertion;
@@ -1524,11 +1534,11 @@ export function renderStoryView(
   };
   const focusColumn = (id: string | undefined): void => {
     if (id === undefined) return;
-    const column = [...host.querySelectorAll<HTMLElement>(".story-tracks [data-beat-id]")].find(item => item.dataset.beatId === id);
+    const column = [...host.querySelectorAll<HTMLElement>(".story-route [data-beat-id]")].find(item => item.dataset.beatId === id);
     const control = column?.querySelector<HTMLElement>(":scope > .story-track-beat, :scope > .story-slot-name");
     control?.focus({ preventScroll: true }); if (column) revealColumn(column);
   };
-  // Keeps a Tracks column in view beside the sticky lane labels without scrolling the page.
+  // Keeps a Tracks or Reel column in view, beside the sticky lane labels in Tracks, without scrolling the page.
   const revealColumn = (column: HTMLElement): void => {
     const scroll = column.closest<HTMLElement>(".story-tracks-scroll"); if (!scroll) return;
     const labels = scroll.querySelector<HTMLElement>(".story-track-labels")?.offsetWidth ?? 0;
@@ -1628,7 +1638,13 @@ export function renderStoryView(
     edits.onclick=()=>{if(selected&&draftGuard())actions.assist?.(scene.id,selected.id,"editScene");};
     return [assist,edits,continuation,card,lore];
   };
-  // The Branch path and Tracks. Redrawn alone when a new beat's place or kind changes.
+  // Switching between Tracks and Reel redraws only the bottom panel: the editor, its
+  // drafts and focus, the selection, open branches and new beats stay as they are.
+  const showView = (scene: SceneDocument, view: RouteView): void => {
+    if (view !== routeView) { routeView = view; drawBottom(scene); }
+    bottomHost?.querySelector<HTMLElement>(`.story-view-option[data-view="${view}"]`)?.focus();
+  };
+  // The Branch path and Tracks or Reel. Redrawn alone when a new beat's place or kind changes.
   const drawBottom = (scene: SceneDocument, scroll?: number): void => {
     if (!bottomHost) return;
     const before = scroll ?? bottomHost.querySelector<HTMLElement>(".story-tracks-scroll")?.scrollLeft ?? 0;
@@ -1636,16 +1652,15 @@ export function renderStoryView(
     const items = trackRoute(scene, openBranches, pending);
     const selected = selectedNewDraft ?? selectedBeatId;
     const path = renderBranchPath({ scene, items, numbers, open: openBranches, caption: forkCaption, branchName: header => branchName(scene, header), select: id => select(scene, id), toggle: (owner, body) => toggleBranch(scene, owner, body) });
-    const panel = document.createElement("section"); panel.className = "story-panel"; panel.setAttribute("aria-label", "Tracks");
+    const panel = document.createElement("section"); panel.className = "story-panel"; panel.setAttribute("aria-label", routeView === "reel" ? "Reel" : "Tracks");
     const toolbar = document.createElement("div"); toolbar.className = "story-panel-toolbar";
-    const view = document.createElement("strong"); view.className = "story-panel-view"; view.textContent = "Tracks";
-    toolbar.append(view, renderTracksKey(), renderMarksLegend());
+    toolbar.append(renderViewSwitch(routeView, view => showView(scene, view)), ...routeView === "tracks" ? [renderTracksKey()] : [], renderMarksLegend());
     const scroller = document.createElement("div"); scroller.className = "story-tracks-scroll";
     const accepted = (beat: SceneBeat): { background: boolean; characters: boolean; music: boolean; unknown: boolean } => {
       const state = deriveScenePreview(scene, beat.id, scene.beats.some(item => item.conditionalBranch) ? openBranches : undefined);
       return { background: !!state.background, characters: state.characters.length > 0, music: !!state.music, unknown: state.partial };
     };
-    scroller.append(renderTracks({ scene, items, numbers, selected, locked: scene.sourceConflict, label: beatName,
+    scroller.append(renderRoute({ view: routeView, scene, items, numbers, selected, locked: scene.sourceConflict, label: beatName,
       summary: beat => beat.conditionalBranch ? branchName(scene, beat) : beatSummary(beat.payload, model), branchName: header => branchName(scene, header), endName: header => endName(scene, header),
       sceneName: id => model.scenes.find(item => item.id === id)?.displayName ?? "an unavailable scene", state: accepted,
       select: id => select(scene, id), selectNew: key => { if (navigate(() => { selectedBeatId = undefined; selectedNewDraft = key; })) beatDrafts.get(key)?.panel.querySelector<HTMLElement>("select, input, textarea")?.focus(); },
@@ -1677,7 +1692,7 @@ export function renderStoryView(
     } else {
       const empty = document.createElement("div"); empty.className = "story-editor-empty";
       const heading = document.createElement("h2"); heading.textContent = nodeBeats(scene, { type: "root" }).some(item => item.payload.type !== "return") ? "No beat selected" : "No lines yet";
-      const copy = document.createElement("p"); copy.textContent = "Select a beat in Tracks to edit it, or add a beat with + in Tracks or Add Beat.";
+      const copy = document.createElement("p"); copy.textContent = "Select a beat in Tracks or Reel to edit it. Add one with + there or with + Add beat.";
       empty.append(heading, copy); editor.append(empty);
     }
     const effects = document.createElement("section"); effects.className = "story-effects"; effects.setAttribute("aria-label", "In effect");
