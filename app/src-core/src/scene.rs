@@ -1804,7 +1804,6 @@ impl AuthoringService {
         })
     }
 
-    #[allow(clippy::too_many_arguments)]
     /// Creates a scene and sends an existing Choice option there, in one edit. The
     /// option's Jump, Return or Repeat becomes a Jump to the new scene; an option
     /// that continues gets that Jump at its end. The author stays in this scene.
@@ -1934,11 +1933,13 @@ impl AuthoringService {
                     payload,
                 }
             }
-            bodies::BodyEnding::Continues | bodies::BodyEnding::Unknown => structure::BodyEdit::Insert {
-                body,
-                position: Position::End,
-                payload,
-            },
+            bodies::BodyEnding::Continues | bodies::BodyEnding::Unknown => {
+                structure::BodyEdit::Insert {
+                    body,
+                    position: Position::End,
+                    payload,
+                }
+            }
         };
         let (proposed_source, forced) =
             structure::apply(&source_bytes, &beats, edit, &loaded, &source_scene)?;
@@ -6343,7 +6344,10 @@ mod tests {
         let undone = fixture.undo().unwrap();
         assert_eq!(undone.scenes.len(), 2);
         assert!(!fixture.root.join(&created.source_path).exists());
-        assert_eq!(fs::read(fixture.root.join(&entry.source_path)).unwrap(), before);
+        assert_eq!(
+            fs::read(fixture.root.join(&entry.source_path)).unwrap(),
+            before
+        );
     }
 
     #[test]

@@ -43,7 +43,7 @@ export function openNewVariable(options: NewVariableOptions): Promise<Variable |
     return { technicalName: technical, variableType, defaultValue: startControl.value };
   };
   return openFormDialog({
-    host: options.host, opener: options.opener, title: "New variable", className: "story-new-variable", closeLabel: "Close without creating",
+    host: options.host, opener: options.opener, title: "New variable", className: "story-new-variable",
     fields: [field("Name", name), field("Type", segmented(type, types), type), field("Starts as", start)],
     note: "Written as a default statement in the project. Saves and loads with the game.", submitLabel: "Create variable", first: name,
     submit: async () => {

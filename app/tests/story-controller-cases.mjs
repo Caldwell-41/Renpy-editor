@@ -54,7 +54,7 @@ const guard=async(c,choice,index,value)=>{
  await c.click('Commit Beat',editor);await c.wait(accepted(c,choice.id));
 };
 // Add a beat: pick a kind in the open dialog; its new beat opens in the editor.
-const pickIn=async(c,kind)=>{await c.wait(()=>c.document.querySelector('.scene-workspace .story-add-beat'));c.document.querySelector(`.scene-workspace .story-add-beat [data-insert-kind="${kind}"]`).click();if(kind!=='condition')await c.wait(()=>c.document.querySelector('.scene-workspace .new-beat'));};
+const pickIn=async(c,kind)=>{await c.wait(()=>c.document.querySelector('.scene-workspace .story-add-beat'));c.document.querySelector(`.scene-workspace .story-add-beat [data-insert-kind="${kind}"]`).click();await c.wait(()=>c.document.querySelector('.scene-workspace .new-beat'));};
 // A branch's + Beat opens Add a beat for that branch.
 const addIn=async(c,header,kind)=>{const section=await branchBody(c,header.id);section.querySelector(`[data-beat-opener="branch:${header.id}"]`).click();await pickIn(c,kind);return c.document.querySelector('.scene-workspace .new-beat');};
 // The rule builder: a rule's variable list, its test switch and its value.
@@ -234,8 +234,8 @@ export const storyCases={
   c.assert.equal(ruleOf(form,0).querySelector('.story-rule-how > input').getAttribute('aria-invalid'),'true');await c.click('Commit test',form);await c.settle();
   c.assert.equal(c.requests().slice(at).filter(r=>r.request.operation==='scene.apply').length,0);c.assert.equal(ruleOf(form,0).querySelector('.story-rule-how > input').value,'-');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
   await c.click('Cancel',form);
-  // Delete branch marks the Else if; its Commit deletes it.
-  before=c.workspace();const marked=await branchBody(c,elseif.id);await c.click('Delete branch',marked);await c.settle();form=c.document.querySelector(`.story-branch-editor[data-branch-id="${elseif.id}"] .story-branch-removal`);c.assert(form);await applyOperation(c,form,'Delete branch','removeConditionBranch');
+  // "Remove this Else if" marks the Else if; Remove branch removes it.
+  before=c.workspace();const marked=await branchBody(c,elseif.id);await c.click('Remove this Else if',marked);await c.settle();form=c.document.querySelector(`.story-branch-editor[data-branch-id="${elseif.id}"] .story-branch-removal`);c.assert(form);await applyOperation(c,form,'Remove branch','removeConditionBranch');
   c.assert.equal(envelope(c,before,'removeConditionBranch').branchId,elseif.id);
   expected=replaceOnce(c,expected,'    elif (mood == "blocked"):\n        pass\n','');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
   c.assert.deepEqual(newHeaders(c).map(b=>b.id),[header.id,newHeaders(c).find(b=>b.conditionalBranch.otherwise).id]);

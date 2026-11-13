@@ -546,8 +546,9 @@ a beat follow `story-combined-editor` / `replace-v2`
   including a half-entered number such as `-` or `1.`, until it is complete.
 - A condition's editor lists its branches. Each If or Else if test is a retained draft
   with Commit test and Cancel. "+ Add Else if" and Add Otherwise add a new branch as a
-  draft until Add Else If or Add Otherwise; Delete branch marks an Else if or Otherwise
-  as a draft until its Commit or Story Save. A new condition from Add a beat is a draft
+  draft until Add Else If or Add Otherwise. "Remove this Else if" (or Otherwise) marks
+  the branch as a draft until Remove branch or Story Save; it cancels the branch's own
+  unsaved test. A new condition from Add a beat is a draft
   like a new beat, with its test and Include Otherwise.
 - Add a beat is a [pick-one dialog](#pick-one-dialogs). Its details list Goes at, In
   and After for the highlighted kind, or "Replaces …" when the kind replaces an
@@ -635,16 +636,16 @@ like Commit. The [Story Undo](#story-undo) rules apply to both.
 In Story, the main Save button and Cmd/Ctrl+S save all pending drafts in the open
 project, including drafts outside the current selection or scene. Beat drafts and
 condition drafts save together: a branch's test, a new condition, a new Else if or
-Otherwise, and a branch deletion. A branch deletion saves after the other drafts, so
-edits inside the branch land first and its Undo brings them back. Check every draft
+Otherwise, and a branch removal. A branch removal saves after the other drafts, the
+deepest first, so edits inside the branch land first and its Undo brings them back. Check every draft
 before writing any of them. If any draft is incomplete, invalid or conflicted, retain
 all drafts and reveal the failing draft with its error. No draft is saved by that
 request until all pass validation. Commit remains available to save one draft on its
-own; a branch deletion's Commit saves the drafts inside the branch with it.
+own; a branch removal's Commit saves the drafts inside the branch with it.
 
-Story Save applies only while the Story workspace is open and beat drafts exist. In
-other workspaces, and in Story with no beat drafts, Save keeps its existing behaviour.
-The header still shows pending beat drafts. While
+Story Save applies only while the Story workspace is open and drafts exist. In other
+workspaces, and in Story with no drafts, Save keeps its existing behaviour. The header
+still shows pending drafts. While
 a Story Save runs, Story controls stay locked and a second Save reports busy. If
 another Story form has input, Save refuses and writes nothing. If the project changed
 after Story last refreshed, Save refreshes Story, marks any beat draft conflicts and

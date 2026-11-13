@@ -460,7 +460,10 @@ fn story_save_writes_condition_drafts_with_beat_drafts() {
         "label scene_one:\n    if (score >= 2):\n        \"High\"\n    else:\n        pass\n    if (score >= 5):\n        pass\n    \"After draft\"\n    return\n"
     );
     // The edited If keeps its id.
-    assert!(saved.scenes[0].beats.iter().any(|beat| beat.id == if_header.id));
+    assert!(saved.scenes[0]
+        .beats
+        .iter()
+        .any(|beat| beat.id == if_header.id));
     let after_save = project_bytes(&f);
 
     // One entry per draft, the last sent on top. Five Undos restore the scene; the

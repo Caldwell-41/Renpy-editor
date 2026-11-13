@@ -1135,8 +1135,6 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .story-editor .story-add-branch{min-height:26px;padding:2px 9px;font-size:12px}
 .story-sheet-new{align-self:flex-start}
 .story-branch-editor:not([data-shown=true]){border-left-color:color-mix(in srgb,var(--arm,var(--border-strong)) 40%,transparent)}
-.story-inline-operation{padding:0!important}
-.story-inline-operation:not([data-unsubmitted=true])>.row-actions{display:none}
 .story-where{display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 10px;margin:0;font-size:12px}
 .story-where dt{color:var(--text-secondary)}
 .story-where dd{margin:0;overflow-wrap:anywhere}

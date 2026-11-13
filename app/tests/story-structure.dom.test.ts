@@ -154,7 +154,7 @@ test("whole condition move excludes own descendant bodies; headers never become 
 
 test("delete whole group and selected unwrap remain distinct; initial If cannot be removed as a branch", async () => {
   const s = setup(); const branches = selectBeat(s.host, "if").querySelectorAll<HTMLElement>(".story-branch-editor");
-  assert.deepEqual([...branches].map(section => [section.dataset.branchId, [...section.querySelectorAll("button")].some(button => button.textContent === "Delete branch")]), [["if", false], ["elif", true], ["otherwise", true]]);
+  assert.deepEqual([...branches].map(section => [section.dataset.branchId, [...section.querySelectorAll("button")].some(button => button.getAttribute("aria-label")?.startsWith("Remove this "))]), [["if", false], ["elif", true], ["otherwise", true]]);
   button(storyEditor(s.host), "Unwrap…").click(); let panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Unwrap one branch"]')!; choose(panel, "Branch to keep", "elif"); button(panel, "Unwrap selected branch").click(); await tick();
   assert.equal(s.calls[0]!.command.type, "unwrapCondition"); assert.equal(s.calls[0]!.command.branchId, "elif"); assert.deepEqual(s.calls[0]!.command.expectedBody, { type: "root" });
   button(storyEditor(s.host), "Delete condition").click(); panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Delete entire condition"]')!; button(panel, "Delete entire condition").click(); await tick(); assert.equal(s.calls[1]!.command.type, "removeStoryNode"); assert.deepEqual(s.calls[1]!.command.node, { type: "condition", groupId: "group" }); await s.close();
@@ -354,8 +354,8 @@ test("condition drafts are retained and marked, and Story Save saves them with t
   chooseIn(branch("if").querySelector<HTMLElement>(".story-branch-test")!, "If rule 1 test", "is false");
   assert.equal(trackColumn(s.host, "if")!.dataset.beatDraft, "true");
   assert.equal(branch("if").querySelector(".story-editor-state")!.textContent, "* Draft");
-  // Delete branch marks the Else if; + Add Else if adds a new one. Neither writes.
-  button(branch("elif"), "Delete branch").click(); assert.ok(branch("elif").querySelector(".story-branch-removal"));
+  // "Remove this Else if" marks the Else if; + Add Else if adds a new one. Neither writes.
+  press(branch("elif"), "Remove this Else if"); assert.ok(branch("elif").querySelector(".story-branch-removal"));
   button(storyEditor(s.host), "+ Add Else if").click(); assert.ok(storyEditor(s.host).querySelector(".story-branch-new"));
   assert.equal(s.calls.length, 0);
   // Leaving the condition and coming back keeps all three.
@@ -390,5 +390,22 @@ test("+ New scene in an option's scene sheet sends that option to a new scene in
   press(dialog()!, "Create scene and link option 1"); await tick();
   assert.deepEqual(s.calls.map(call => call.command), [{ type: "createSceneFromChoice", sceneId: "one", expectedSourceRevision: "source-one", choiceBeatId: "choice", optionId: "opt1", chapterId: "chapter", displayName: "Quiet room" }]);
   assert.equal(dialog(), null);
+  await s.close();
+});
+
+test("Remove branch saves the drafts inside the branch first, and cancels the branch's own test", async () => {
+  const saved: { commands: readonly SceneCommand[] }[] = [];
+  const s = setup(undefined, storyFixture(3), { saveDrafts: async commands => { saved.push({ commands }); return s.model; } });
+  const branch = (id: string): HTMLElement => storyEditor(s.host).querySelector<HTMLElement>(`.story-branch-editor[data-branch-id="${id}"]`)!;
+  // A beat draft inside the Else if, and an edit to the Else if's own test.
+  type(selectBeat(s.host, "maybe", "elif").querySelector("textarea")!, "Edited inside");
+  selectBeat(s.host, "if"); chooseIn(branch("elif").querySelector<HTMLElement>(".story-branch-test")!, "Else if rule 1 test", "≤");
+  press(branch("elif"), "Remove this Else if");
+  const removal = branch("elif").querySelector<HTMLElement>(".story-branch-removal")!;
+  assert.match(removal.textContent!, /Drafts inside it are saved first/);
+  assert.equal(branch("elif").querySelector(".story-branch-test"), null);
+  press(removal, "Remove branch"); await tick();
+  assert.deepEqual(saved[0]!.commands.map(command => command.type), ["updateBodyBeat", "removeConditionBranch"], "the cancelled test is not saved; the inner beat saves before the removal");
+  assert.equal(s.calls.length, 0);
   await s.close();
 });

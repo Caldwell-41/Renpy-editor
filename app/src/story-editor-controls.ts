@@ -277,8 +277,6 @@ export interface FormDialogOptions<T> {
   readonly opener: HTMLElement;
   readonly title: string;
   readonly className: string;
-  /** The close button's name: "Close without creating". */
-  readonly closeLabel: string;
   readonly fields: readonly Node[];
   readonly note?: string;
   readonly submitLabel: string;
@@ -299,7 +297,7 @@ export function openFormDialog<T>(options: FormDialogOptions<T>): Promise<T | un
     const dialog = element("div", `story-dialog ${options.className}`); dialog.role = "dialog"; dialog.setAttribute("aria-modal", "true"); dialog.setAttribute("aria-label", options.title); dialog.tabIndex = -1;
     let busy = false;
     const close = (result?: T): void => { if (!backdrop.isConnected) return; backdrop.remove(); options.opener.focus(); resolve(result); };
-    const head = element("div", "story-dialog-head"); head.append(element("h2", "", options.title), iconButton("close", options.closeLabel, () => { if (!busy) close(); }));
+    const head = element("div", "story-dialog-head"); head.append(element("h2", "", options.title), iconButton("close", "Close without creating", () => { if (!busy) close(); }));
     const problem = element("p", "field-error"); problem.role = "status";
     const cancel = button("Cancel", "button secondary", () => { if (!busy) close(); });
     const submit = button(options.submitLabel, "button primary", () => void run());
