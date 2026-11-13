@@ -1,7 +1,6 @@
 // Run every tests/*.browser.mjs and tests/*.dispatch.mjs fixture once, from app/.
 // A new fixture runs by default. To opt out, put `// fixture: skip <reason>` in
-// its first five lines; the reason is printed on every run. `// fixture: skip on
-// linux <reason>` skips it only on that `process.platform`. A reason that starts
+// its first five lines; the reason is printed on every run. A reason that starts
 // `run by` must name a selector from `prSelectors`, which run on every PR; write
 // `manual: ...` for a fixture that only a dispatched workflow runs.
 // Expects `npm run build:tests` and `cargo build -p loomlight-core --examples`.
@@ -30,15 +29,15 @@ function run(name, env) {
 
 for (const name of names) {
   const source = await readFile(join(tests, name), 'utf8');
-  const skip = source.split('\n').slice(0, 5).join('\n').match(/\/\/ fixture: skip (?:on (\w+) )?(.+)/);
-  const claim = skip?.[2].match(/^run by (.+)/);
+  const skip = source.split('\n').slice(0, 5).join('\n').match(/\/\/ fixture: skip (.+)/);
+  const claim = skip?.[1].match(/^run by (.+)/);
   if (claim && !prSelectors.some(selector => claim[1].startsWith(selector))) {
     console.log(`FAIL ${name}: "run by" names a selector that no PR runs; use one of ${prSelectors.join(', ')} or write "manual: ..."`);
     results.push({name, passed: false});
     continue;
   }
-  if (skip && (!skip[1] || skip[1] === process.platform)) {
-    console.log(`SKIP ${name}: ${skip[2].trim()}`);
+  if (skip) {
+    console.log(`SKIP ${name}: ${skip[1].trim()}`);
     continue;
   }
   // Fixtures choose their own output variable; send each one to a fresh folder.

@@ -1350,3 +1350,27 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   `project_opens_after_scene_source_changed_while_closed`, and the Story case "Beat
   draft conflicts resolve with Discard draft or Override source" without Source opens.
 - **Evidence:** issue #168.
+
+## H93. Image fixture releases a held compose before the compose arrives
+
+- **Class/search:** harness readiness, macOS and Linux; `ui-image.browser.mjs`,
+  `releaseCompose`, stuck on "Applying image…", `screens.compose`,
+  `screens.canvasRender`, `RequestLane`, `skip on linux`.
+- **Cause:** the fixture's compose hold starts only when the request reaches the fake
+  handler, but the test released it as soon as the UI showed "Applying image…". All
+  `screens.*` requests share one `RequestLane`, so the compose can wait behind the
+  width draft's canvas render. A release that fires first calls the default no-op,
+  and the compose then waits forever. The product is correct (H42).
+- **Revised diagnosis:** PR #86 skipped the fixture on Linux because "Apply never sends
+  its compose". A held compose looks like that in `result.json`, because the fixture
+  records a receipt only after the request returns. Both cited Linux runs timed out
+  at the release statement, so they very likely hit this race.
+- **Correction:** the handler resolves a `held` promise when it reaches the hold. The
+  test waits up to 8 s for it, failing with "compose never reached the core", then
+  releases. The fixture runs in the Linux PR job again, and the runner no longer
+  accepts `// fixture: skip on <platform>`.
+- **Verification:** with a temporary 150 ms delay in the fake canvas render, the old
+  fixture failed 4 of 5 runs at the release and the fixed one passed 5 of 5. Without
+  the delay, the fixed fixture passed 10 of 10 runs on macOS.
+- **Evidence:** issue #170, Linux runs [42371963578](https://github.com/Caldwell-41/Renpy-editor/actions/runs/42371963578)
+  and [42372623332](https://github.com/Caldwell-41/Renpy-editor/actions/runs/42372623332).

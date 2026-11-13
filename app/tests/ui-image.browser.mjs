@@ -1,4 +1,3 @@
-// fixture: skip on linux Apply never sends its compose in Linux headless Chrome; it was only qualified on Windows and passes on macOS.
 // Actual Screens controller and application dispatch, with a disposable native-picker fixture.
 // Canvas requests build real inert plans; this check starts no SDK or native editor.
 import assert from 'node:assert/strict';
@@ -14,7 +13,7 @@ await mkdir(output,{recursive:true});
 const driver=resolve(process.env.CARGO_TARGET_DIR??'target',`debug/examples/help-controller-driver${process.platform==='win32'?'.exe':''}`);
 const child=driverProcess(driver,[join(tmpdir(),`loomlight-help-controller-${randomUUID()}`),'ui-image'],{startupTimeout:60000});
 const server=await createServer({root:resolve('.'),logLevel:'error',server:{host:'127.0.0.1',port:0}});
-const errors=[],receipts=[],plans=[];let browser,page,sessionId,passed=false,cancelPicker=true,alternate=false,onPlan=()=>{},holdCompose=false,releaseCompose=()=>{},brokenImport=true;
+const errors=[],receipts=[],plans=[];let browser,page,sessionId,passed=false,cancelPicker=true,alternate=false,onPlan=()=>{},holdCompose=false,composeHeld=()=>{},releaseCompose=()=>{},brokenImport=true;
 const rpc=async request=>{
  if(request.operation==='asset.chooseImports')return {ok:true,value:{choices:[await child.request({driver:'chooseImage',broken:brokenImport})]}};
  if(request.operation==='asset.chooseUiImage'){
@@ -26,7 +25,7 @@ const rpc=async request=>{
   const response=await child.request({...request,operation:'screens.canvasPlan'});plans.push(response);onPlan(request.payload,response);
   return {ok:true,value:{phase:'unavailable',message:'SDK proof is separate.'}};
  }
- if(request.operation==='screens.compose'&&holdCompose){holdCompose=false;await new Promise(resolve=>{releaseCompose=resolve;});releaseCompose=()=>{};}
+ if(request.operation==='screens.compose'&&holdCompose){holdCompose=false;composeHeld();await new Promise(resolve=>{releaseCompose=resolve;});releaseCompose=()=>{};}
  const response=await child.request(request);receipts.push({operation:request.operation,ok:response.ok,error:response.error?.code});
  if(response.value?.sessionId)sessionId=response.value.sessionId;return response;
 };
@@ -116,7 +115,7 @@ try {
  assert.equal(await read(),placed,'Canvas drafts do not change accepted Source');
  await width.press('Escape');assert.equal(await width.inputValue(),'320');assert.equal(await read(),placed);
  await ui.locator('.screen-image-layout').evaluate(e=>e.open=false);
- await width.fill('200');assert.equal(await height.inputValue(),'100');holdCompose=true;await width.press('Enter');
+ await width.fill('200');assert.equal(await height.inputValue(),'100');const held=new Promise(resolve=>{composeHeld=resolve;});holdCompose=true;await width.press('Enter');
  await page.waitForFunction(()=>document.querySelector('.screen-image-state')?.textContent==='Applying image…');
  const original=ui.getByRole('button',{name:'Use original',exact:true});
  assert.equal(await original.isDisabled(),true,'Original size is reserved while Apply is pending');
@@ -124,6 +123,9 @@ try {
  assert.equal(await ui.getByRole('button',{name:'Top left',exact:true,includeHidden:true}).isDisabled(),true);
  await original.evaluate(e=>e.click());assert.equal(await width.inputValue(),'200');assert.equal(await height.inputValue(),'100');
  assert.equal(await read(),placed,'The held Apply has not changed Source');
+ // Every screens.* request shares one lane, so compose can still wait behind a canvas render here.
+ let heldTimer;
+ try{await Promise.race([held,new Promise((_,reject)=>{heldTimer=setTimeout(()=>reject(Error('compose never reached the core')),8000);})]);}finally{clearTimeout(heldTimer);}
  releaseCompose();await page.waitForFunction(()=>document.querySelector('.screen-image-state')?.textContent==='No pending changes');
  assert.equal(await original.isEnabled(),true);
  assert.equal(await ui.getByRole('textbox',{name:'Horizontal position',exact:true,includeHidden:true}).evaluate(e=>e.readOnly),false);
