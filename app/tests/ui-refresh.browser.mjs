@@ -241,7 +241,7 @@ try {
  await page.getByRole('button',{name:'Writing focus',exact:true}).click();
  assert.equal(await page.locator('.story-sidebar').isVisible(),false);
  assert.equal(await page.locator('.project-tree-panel').isVisible(),false);
- await page.getByRole('button',{name:'Exit Writing focus',exact:true}).click();
+ await page.getByRole('button',{name:'Show game window',exact:true}).click();
  assert.equal(await page.locator('.story-sidebar').evaluate(el=>Math.round(el.getBoundingClientRect().width)),64);
  await page.getByRole('button',{name:'Toggle navigation size'}).click();
  await page.locator('.story-track-beat').nth(3).click();
@@ -486,7 +486,7 @@ for key,value in [('stage','open'),('passed',False),('error','failure')]:
   if(width===560)assert.equal(new Set(metrics.fields.map(x=>Math.round(x))).size,1,'compact Choice fields did not stack');
  }
  await hide.click();await audit.getByRole('button',{name:'Writing focus',exact:true}).click();await audit.locator('.choice-new-scene').scrollIntoViewIfNeeded();await audit.screenshot({path:output+'audit-fixed-choice-compact.png'});
- await audit.getByRole('button',{name:'Exit Writing focus',exact:true}).click();await audit.setViewportSize({width:1440,height:900});
+ await audit.getByRole('button',{name:'Show game window',exact:true}).click();await audit.setViewportSize({width:1440,height:900});
  await audit.locator('.choice-new-scene').getByRole('button',{name:'Cancel',exact:true}).click();await audit.locator('.expanded-beat > .row-actions').getByRole('button',{name:'Cancel',exact:true}).click();
  // Alt+Arrow on a Tracks column moves the beat to the next core-listed place; Undo puts it back.
  await audit.locator('.story-track-column[data-beat-id="background"] > .story-track-beat').focus();await audit.keyboard.press('Alt+ArrowRight');

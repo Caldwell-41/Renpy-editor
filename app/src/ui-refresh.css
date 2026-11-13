@@ -918,9 +918,6 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .story-reel-reason{font-size:11px;color:var(--accent-primary)}
 .story-track-column[data-save-refused=true] .story-reel-reason{color:var(--status-error)}
 .story-reel .story-track-insert{top:44%;right:2px;height:26px}
-.scene-workspace[data-writing-focus="true"] .story-stage{display:none}
-.scene-workspace[data-writing-focus="true"] .story-top{grid-template-columns:minmax(0,1fr)}
-.scene-workspace[data-writing-focus="true"] .story-editor{border-left:0;padding-left:0;max-width:760px}
 @media(min-width:900px) and (max-width:1200px){
  .story-combined{--rail:13px;--track-rows:16px 14px 16px 30px 14px 16px;--panel-height:170px}
  .story-track-column,.story-track-slot{flex-basis:135px}
@@ -942,6 +939,83 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
  .story-track-column,.story-track-slot{flex-basis:158px}
 }
 .story-option-links{flex-wrap:wrap;gap:4px 10px;margin:4px 0 8px}.story-option-links>.text-button{color:var(--arm)}
+
+/* Writing focus (story-revamp / combined-v1) hides the stage. The Branch path spans the top;
+   Tracks or Reel sits beside the editor from 900 px, with beats as rows and every lane, and
+   above it below 900 px with the Beat and Beat content lanes. Only CSS moves: the editor and
+   its drafts, focus and caret stay where they are. Grips set --focus-side and --lane-N. */
+.story-grip{display:none}
+.story-lane-all{display:none}
+.scene-workspace[data-writing-focus="true"]>.story-combined{display:grid;grid-template-columns:minmax(0,1fr) var(--focus-side,clamp(440px,38vw,560px));grid-template-rows:auto minmax(0,1fr);grid-template-areas:"path path" "panel editor";gap:0 18px}
+.scene-workspace[data-writing-focus="true"] :is(.story-top,.story-bottom){display:contents}
+.scene-workspace[data-writing-focus="true"] .story-stage{display:none}
+.scene-workspace[data-writing-focus="true"] .story-branch-path{grid-area:path}
+.scene-workspace[data-writing-focus="true"] .story-panel{grid-area:panel;grid-template-rows:30px minmax(0,1fr)}
+.scene-workspace[data-writing-focus="true"] .story-editor{grid-area:editor;position:relative;padding:10px 0 8px 18px;border-left:1px solid var(--border-normal)}
+.scene-workspace[data-writing-focus="true"] .story-editor textarea{min-height:240px;font-size:15px}
+.scene-workspace[data-writing-focus="true"] .story-grip{position:relative;display:block;width:9px;cursor:col-resize;touch-action:none}
+.story-grip::after{content:"";position:absolute;top:0;bottom:0;left:4px;width:1px}
+.story-grip:hover::after,.story-grip:focus-visible::after,.story-grip[data-dragging=true]::after{left:3px;width:3px;background:var(--accent-primary)}
+.story-grip:focus-visible{outline:0}
+.scene-workspace[data-writing-focus="true"] .story-side-grip{grid-area:editor;justify-self:start;z-index:6;margin-left:-5px}
+.story-track-label>.story-grip{position:absolute!important;top:0;bottom:0;z-index:6}
+.story-grip-end{right:-5px}.story-grip-start{left:-5px}
+/* Tracks rows: lanes run across, the route line runs down the left, markers are labelled rows. */
+.scene-workspace[data-writing-focus="true"] .story-route{display:block;width:auto;min-width:0}
+.scene-workspace[data-writing-focus="true"] .story-tracks{--words-min:220px}
+.scene-workspace[data-writing-focus="true"] .story-tracks :is(.story-track-labels,.story-track-beat){display:grid;grid-template-rows:none;grid-template-columns:var(--lane-0,52px) var(--lane-1,120px) var(--lane-2,132px) minmax(var(--words-min),1fr) var(--lane-4,108px) var(--lane-5,140px);min-width:min-content}
+.scene-workspace[data-writing-focus="true"] .story-track-labels{position:sticky;top:0;left:auto;z-index:7;padding:0 0 0 calc(var(--rail) * 2);border-bottom:1px solid var(--border-normal)}
+.scene-workspace[data-writing-focus="true"] .story-track-label{position:relative;padding:8px;border:0;font:11.5px var(--font-ui);overflow:visible}
+.scene-workspace[data-writing-focus="true"] .story-track-column{flex-direction:row;min-width:min-content}
+.scene-workspace[data-writing-focus="true"] .story-rail{grid-template-rows:none;grid-template-columns:repeat(2,var(--rail))}
+.scene-workspace[data-writing-focus="true"] .story-rail-on::after{left:50%;right:auto;top:0;bottom:0;width:3px;height:auto;margin-left:-1.5px}
+.scene-workspace[data-writing-focus="true"] :is(.story-rail-label,.story-rail-end){left:calc(100% + 6px);right:auto;top:50%;bottom:auto;transform:translateY(-50%);font-size:12px}
+.scene-workspace[data-writing-focus="true"] .story-rail-row:first-child>:is(.story-rail-label,.story-rail-end){left:calc(200% + 6px)}
+.scene-workspace[data-writing-focus="true"] .story-tracks .story-track-beat{min-height:52px;border-bottom:1px solid var(--border-normal)}
+.scene-workspace[data-writing-focus="true"] .story-tracks .story-lane{padding:10px 8px;border-bottom:0;font-size:11.5px}
+.scene-workspace[data-writing-focus="true"] .story-tracks .story-track-beat>.story-lane-3{padding-right:34px;font-size:13px}
+.scene-workspace[data-writing-focus="true"] .story-tracks .story-lane-copy{-webkit-line-clamp:3;line-height:1.6}
+.scene-workspace[data-writing-focus="true"] .story-tracks .story-track-beat>.story-lane-0,.scene-workspace[data-writing-focus="true"] .story-track-labels>.story-lane-0{position:sticky;left:0;z-index:1;background:var(--surface-panel)}
+.scene-workspace[data-writing-focus="true"] .story-tracks .story-track-column[data-arm] .story-track-beat>.story-lane-0{background:color-mix(in srgb,var(--arm) 8%,var(--surface-panel))}
+.scene-workspace[data-writing-focus="true"] .story-tracks .story-track-beat[data-selected=true]>.story-lane-0{background:var(--accent-subtle)}
+.scene-workspace[data-writing-focus="true"] .story-tracks .story-track-column>.story-track-insert{position:sticky;right:0;top:auto;flex:none;align-self:flex-end;margin:0 0 4px -26px;background:var(--surface-raised)}
+.scene-workspace[data-writing-focus="true"] .story-track-mark{flex:none;flex-direction:row;align-items:stretch;min-height:28px}
+.scene-workspace[data-writing-focus="true"] .story-track-mark>button{display:flex;align-items:center;justify-content:flex-end;padding:0 12px;font-size:12px;text-align:right}
+.scene-workspace[data-writing-focus="true"] .story-track-mark>.story-track-end{flex-direction:row;align-items:center;justify-content:flex-end;gap:6px;border:0}
+.scene-workspace[data-writing-focus="true"] .story-track-slot>.story-slot-name{flex:1;align-self:center;text-align:left;padding-left:12px}
+.scene-workspace[data-writing-focus="true"] .story-track-slot .story-rail-label{visibility:hidden}
+.scene-workspace[data-writing-focus="true"] .story-track-slot .story-rail-end{display:none}
+/* Reel rows: one card per line with its + at the right. */
+.scene-workspace[data-writing-focus="true"] .story-reel>.story-track-column{display:grid;grid-template-columns:calc(var(--rail) * 2) minmax(0,1fr) auto;border-left:0}
+.scene-workspace[data-writing-focus="true"] .story-reel .story-track-beat{min-height:72px;padding:10px 12px 10px 8px}
+.scene-workspace[data-writing-focus="true"] .story-reel .story-track-insert{position:static;width:28px;height:auto}
+.scene-workspace[data-writing-focus="true"] .story-reel .story-track-mark{border-left:0;border-top:1px solid var(--border-normal)}
+/* Hidden-lane markers sit beside the Tracks and Reel switch; the cut edge gets a line. */
+.story-lane-edge{flex:none;align-self:stretch;min-height:24px;padding:0 8px;border:0;border-radius:0;background:var(--surface-raised);color:var(--accent-primary);font-size:11.5px;font-weight:600;white-space:nowrap;cursor:pointer}
+.story-lane-edge:hover{background:var(--accent-subtle);color:var(--text-primary)}
+.story-lane-edge[hidden]{display:none}
+.story-lane-edge-start{margin-left:4px}
+.scene-workspace[data-writing-focus="true"] .story-marks-legend{min-width:0;overflow:hidden}
+.story-tracks-scroll[data-hidden-end=true]{box-shadow:inset -2px 0 var(--border-strong)}
+.story-tracks-scroll[data-hidden-start=true]{box-shadow:inset 2px 0 var(--border-strong)}
+.story-tracks-scroll[data-hidden-start=true][data-hidden-end=true]{box-shadow:inset 2px 0 var(--border-strong),inset -2px 0 var(--border-strong)}
+@media(min-width:900px) and (max-width:1200px){
+ .scene-workspace[data-writing-focus="true"]>.story-combined{grid-template-columns:minmax(0,1fr) var(--focus-side,400px)}
+ .scene-workspace[data-writing-focus="true"] .story-tracks{--words-min:192px}
+ .scene-workspace[data-writing-focus="true"] .story-tracks :is(.story-track-labels,.story-track-beat){grid-template-columns:var(--lane-0,52px) var(--lane-1,96px) var(--lane-2,96px) minmax(var(--words-min),1fr) var(--lane-4,88px) var(--lane-5,112px)}
+}
+@media(max-width:899px){
+ .scene-workspace[data-writing-focus="true"]{overflow:hidden}
+ .scene-workspace[data-writing-focus="true"]>.story-combined{flex:1;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(210px,1.2fr) minmax(160px,1fr);grid-template-areas:"path" "editor" "panel"}
+ .scene-workspace[data-writing-focus="true"] .story-editor{max-height:260px;padding:8px 0 0;border-left:0;overflow:auto}
+ .scene-workspace[data-writing-focus="true"] .story-editor textarea{min-height:96px;height:96px;max-height:160px}
+ .scene-workspace[data-writing-focus="true"] .story-panel{border-top:1px solid var(--border-normal)}
+ .scene-workspace[data-writing-focus="true"] .story-grip{display:none}
+ .scene-workspace[data-writing-focus="true"] .story-tracks :is(.story-track-labels,.story-track-beat){grid-template-columns:56px minmax(0,1fr);min-width:0}
+ .scene-workspace[data-writing-focus="true"] .story-tracks :is(.story-track-labels,.story-track-beat)>:not(.story-lane-0,.story-lane-3){display:none}
+ .scene-workspace[data-writing-focus="true"] .story-tracks .story-lane-all{display:inline}
+ .scene-workspace[data-writing-focus="true"] .story-tracks .story-lane-name{display:none}
+}
 
 /* Story Combined status, approved as story-combined-status / header-v2. The header save
    status sits before Undo, Redo and Save; the bottom status bar holds Undo and Redo

@@ -14,6 +14,7 @@ const names=[
  'Story Save accepts every beat draft across scenes in one transaction, or none',
  'Beat draft conflicts resolve with Discard draft or Override source',
  'Reel edits and inserts through the shared drafts and commands, and view switches keep them',
+ 'Writing focus keeps drafts, focus and caret, and edits, inserts and resizes through the shared commands',
 ];
 const scene=c=>c.workspace().scenes.find(s=>s.id===c.workspace().entrySceneId);
 // The scene Story shows, read from the selected row in the actual scene tree.
@@ -690,5 +691,68 @@ export const storyCases={
   await c.history('undo');await c.settle();c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(inserted));
   await c.history('redo');await c.settle();c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(committed));
   c.assert(c.document.querySelector('.scene-workspace .story-reel'),'Undo and Redo keep the Reel view');
+ },
+ [names[13]]:async c=>{
+  await c.call('scene.list');
+  const entry=scene(c),beats=entry.beats,header=()=>c.document.querySelector('.app-header'),status=()=>c.document.querySelector('#app-status').textContent;
+  const nested=beats.find(b=>b.payload.type==='narration'&&b.payload.text==='Nested from Reel');c.assert(nested?.owner);
+  const ifHeader=beats.find(b=>b.id===nested.owner.branchId),choice=beats.find(b=>b.payload.type==='choice'&&!b.owner);c.assert(ifHeader&&choice);
+  const workspace=()=>c.document.querySelector('.scene-workspace'),toggle=()=>workspace().querySelector('[data-writing-focus-toggle]');
+  const newBeat=()=>c.document.querySelector('.scene-workspace .new-beat');
+  const place=()=>{const node=c.document.querySelector('.scene-workspace .story-track-pending');return node&&[node.dataset.depth,node.dataset.arm,node.querySelector('.story-track-beat').dataset.selected];};
+  await c.click('Tracks',workspace().querySelector('.story-view-switch'));
+  const original=await c.snapshot();
+  // Drafts before Writing focus: an invalid Choice option and nested typing with a caret inside it.
+  await select(c,choice.id);c.enter(card(c,choice.id).querySelector('[aria-label="Choice option text"]'),'');await c.settle();
+  await select(c,nested.id);const field=card(c,nested.id).querySelector('textarea');c.enter(field,'Nested in focus');await c.settle();field.setSelectionRange(3,6);
+  const stage=workspace().querySelector('.story-stage-status').textContent;
+  // Entering and leaving send nothing, add no history entry, and keep the editor, its focus and caret, the selection and the open branch.
+  const steps=await c.call('history.state'),at=c.requests().length;
+  const same=()=>{c.assert.equal(c.document.activeElement,field);c.assert.deepEqual([field.selectionStart,field.selectionEnd,field.value],[3,6,'Nested in focus']);
+   c.assert.equal(card(c,nested.id)?.querySelector('textarea'),field);c.assert.equal(row(c,nested.id).querySelector('.story-track-beat').dataset.selected,'true');
+   c.assert.equal(workspace().querySelector(`.story-branch-segment[data-branch-id="${ifHeader.id}"]`).ariaPressed,'true');c.assert.equal(row(c,choice.id).dataset.beatDraft,'true');};
+  toggle().click();c.assert.equal(workspace().dataset.writingFocus,'true');c.assert.equal(toggle().textContent,'Show game window');same();
+  c.assert.equal(workspace().querySelector('.story-stage-status').textContent,stage,'Hiding the stage changes no preview state');
+  c.assert.equal(workspace().querySelectorAll('.story-track-label > .story-grip').length,5,'Every lane but Words has a grip');
+  c.assert.equal(workspace().querySelector('.story-track-key'),null,'Writing focus has no Key');
+  toggle().click();c.assert.equal(workspace().dataset.writingFocus,'false');same();toggle().click();same();
+  // Keyboard resizing: arrows set a session width, Escape cancels, double-click and Enter reset. The editor keeps its text and caret.
+  const side=workspace().querySelector('.story-side-grip'),lane=workspace().querySelector('.story-track-label.story-lane-1 > .story-grip'),width=key=>workspace().style.getPropertyValue(`--${key}`);
+  c.key(side,'ArrowLeft');c.assert.equal(width('focus-side'),'320px');c.key(side,'Escape');c.assert.equal(width('focus-side'),'');
+  c.key(side,'ArrowLeft',{shiftKey:true});side.dispatchEvent(new c.document.defaultView.MouseEvent('dblclick',{bubbles:true}));c.assert.equal(width('focus-side'),'');
+  c.key(lane,'ArrowRight');c.assert.equal(width('lane-1'),'40px');c.key(lane,'Enter');c.assert.equal(width('lane-1'),'');c.key(lane,'ArrowRight');
+  // A width survives redraws: arrow keys move between rows, and the draft and caret stay with the beat.
+  const button=()=>row(c,nested.id).querySelector('.story-track-beat');c.key(button(),'ArrowDown');await c.settle();
+  c.assert.equal(button().dataset.selected,'false');c.key(c.document.querySelector('.scene-workspace .story-track-beat[data-selected="true"]'),'ArrowUp');await c.settle();
+  c.assert.equal(card(c,nested.id).querySelector('textarea'),field);c.assert.equal(width('lane-1'),'40px');field.focus();same();
+  c.assert.equal(c.requests().length,at,'Writing focus, resizing and row moves send no request');c.assert.deepEqual(await c.call('history.state'),steps,'They add no history entry');
+  c.assert.deepEqual(await c.snapshot(),original);
+  // A new beat from the labelled first marker keeps its place through leaving and entering Writing focus, then inserts through the shared command.
+  const entryMark=workspace().querySelector(`.story-track-entry[data-branch-id="${ifHeader.id}"] > button`);c.assert(entryMark?.textContent.startsWith('+ First beat in If '),`labelled entry marker: ${entryMark?.textContent}`);
+  entryMark.click();await c.wait(newBeat);c.enter(newBeat().querySelector(':scope > .field select'),'narration','change');c.enter(newBeat().querySelector('textarea'),'First in focus');await c.settle();
+  const panel=newBeat(),inside=place();c.assert.equal(inside?.[0],'1');
+  toggle().click();c.assert.deepEqual(place(),inside);c.assert.equal(newBeat(),panel);toggle().click();c.assert.deepEqual(place(),inside);
+  let before=c.workspace();await c.click('Add Beat',panel);await c.wait(()=>c.lastMutation()?.response.ok&&!newBeat());await c.settle();
+  const first=envelope(c,before,'insertBodyBeat');c.assert.deepEqual(first.body,bodyRef(ifHeader));c.assert.equal(first.position.type,'before');
+  const inserted=await c.snapshot();
+  c.assert.equal(replaceOnce(c,c.sourceText(inserted,entry.sourcePath),'        "First in focus"\n',''),c.sourceText(original,entry.sourcePath),'One line is added');
+  const ifBody=scene(c).bodies.find(b=>b.body.type==='branch'&&b.body.branchId===ifHeader.id);c.assert.equal(scene(c).beats.find(b=>b.id===ifBody.nodes[0].beatId)?.payload.text,'First in focus','It is the first beat in the If');
+  unchangedOtherSources(c,original,inserted,entry.sourcePath);c.assert.equal(workspace().dataset.writingFocus,'true');
+  // Story Save refuses the invalid Choice draft and writes nothing; both drafts stay.
+  const refusedAt=c.requests().length,was=status();await c.click('Save',header());
+  await c.wait(()=>status()!==was&&/^Nothing saved/.test(status()));await c.settle();
+  c.assert(!c.requests().slice(refusedAt).some(r=>r.request.operation==='scene.saveDrafts'));c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(inserted));
+  c.assert.equal(row(c,choice.id).dataset.saveRefused,'true');c.assert.equal(card(c,choice.id).querySelector('[aria-label="Choice option text"]').value,'');
+  await c.click('Cancel',card(c,choice.id));await c.settle();
+  // Commit in Writing focus saves the nested beat; Undo and Redo reach it and keep Writing focus.
+  await select(c,nested.id);c.assert.equal(card(c,nested.id).querySelector('textarea').value,'Nested in focus');
+  before=c.workspace();await c.click('Commit Beat',card(c,nested.id));await c.wait(accepted(c,nested.id));await c.settle();
+  c.assert.deepEqual(envelope(c,before,'updateBodyBeat').expectedBody,{type:'branch',...nested.owner});
+  const committed=await c.snapshot();
+  c.assert.equal(c.sourceText(committed,entry.sourcePath),replaceOnce(c,c.sourceText(inserted,entry.sourcePath),'"Nested from Reel"','"Nested in focus"'));
+  await c.history('undo');await c.settle();c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(inserted));
+  await c.history('redo');await c.settle();c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(committed));
+  c.assert.equal(workspace().dataset.writingFocus,'true','Undo and Redo keep Writing focus');c.assert.equal(width('lane-1'),'40px','and the session widths');
+  toggle().click();c.assert.equal(workspace().dataset.writingFocus,'false');
  },
 };
