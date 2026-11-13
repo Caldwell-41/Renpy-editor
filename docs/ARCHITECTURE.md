@@ -395,10 +395,11 @@ untouched. This recognizer is intentionally not a general Ren'Py parser. Phase 1
 reuses it for bounded Source mapping and leaves all unproved syntax visibly opaque.
 
 The bounded source foundation adds a declared-bool If/Otherwise outline with direct
-dialogue children on source-map v3. `updateChildDialogue` verifies revision and explicit
-group/branch ownership, then patches only the existing quoted text through the same
-transaction/history service. Root mutations refuse nested child targets, movement
-ranges containing children and insertion inside a group's headers/body trivia. Structural
+dialogue children on source-map v3. `updateBodyBeat` with the child's branch as its
+expected body verifies revision and explicit group/branch ownership, then patches only
+the existing quoted text through the same transaction/history service. Root mutations
+refuse nested child targets, movement ranges containing children and insertion inside a
+group's headers/body trivia. Structural
 rows stay read-only, unsupported bodies stay opaque, and preview does not infer a
 branch route. [ADR 0012](adr/0012-bounded-nested-dialogue-ownership.md) owns the migration
 and minimal preparation contract. The reviewed 3A.1 extension uses source-map v4
@@ -559,10 +560,11 @@ special cases:
 
 ### Review correction transaction and presentation paths
 
-The Scene `reorderBeat` command moves a supported Beat to a final index through the
-existing revision-checked proposal/history path. It preserves exact source slices and
-stable IDs, rejects intervening gaps/protected or terminal Beats, and produces one
-Undo entry. Pointer grips and keyboard arrows share that existing authoring owner.
+The Scene `moveStoryNode` command moves a supported Beat to a named position through
+the existing revision-checked proposal/history path. It preserves exact source slices and
+stable IDs, rejects protected Beats, positions after a terminal Beat and anchors inside a
+condition, and produces one Undo entry. Pointer grips and keyboard arrows share that
+existing authoring owner.
 
 Appearance updates use typed, session-bound IPC. Replacement files use native import
 authorities; expression changes patch recognized token ranges and update mapping

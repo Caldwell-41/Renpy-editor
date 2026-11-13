@@ -87,7 +87,7 @@ fn context_exact_large_integer_defaults_survive_serialized_payload_without_runti
             .iter()
             .find(|b| b["payload"]["type"] == "narration")
             .unwrap();
-        f.ok("scene.apply", json!({"expectedProjectRevision":workspace["projectRevision"],"expectedSourceMapRevision":workspace["sourceMapRevision"],"command":{"type":"updateBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":beat["id"],"beat":{"type":"narration","text":"Exact [precision]"}}}));
+        f.ok("scene.apply", json!({"expectedProjectRevision":workspace["projectRevision"],"expectedSourceMapRevision":workspace["sourceMapRevision"],"command":{"type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":beat["id"],"beat":{"type":"narration","text":"Exact [precision]"}}}));
         let mut input = f.selection();
         input["beatId"] = beat["id"].clone();
         let preview = f.ok("context.preview", input);

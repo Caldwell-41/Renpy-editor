@@ -15,10 +15,15 @@
             },
             "variableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da"
           },
-          "beforeBeatId": null,
+          "body": {
+            "type": "root"
+          },
           "expectedSourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+          "position": {
+            "type": "end"
+          },
           "sceneId": "6cf87759-43ce-49fc-a001-4238be9e92c1",
-          "type": "insertBeat"
+          "type": "insertBodyBeat"
         },
         "expectedAuthoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
         "expectedProjectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",
@@ -206,10 +211,15 @@
               },
               "variableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da"
             },
-            "beforeBeatId": null,
+            "body": {
+              "type": "root"
+            },
             "expectedSourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+            "position": {
+              "type": "end"
+            },
             "sceneId": "6cf87759-43ce-49fc-a001-4238be9e92c1",
-            "type": "insertBeat"
+            "type": "insertBodyBeat"
           },
           "expectedAuthoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
           "expectedProjectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",
@@ -325,10 +335,15 @@
               },
               "variableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da"
             },
-            "beforeBeatId": null,
+            "body": {
+              "type": "root"
+            },
             "expectedSourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+            "position": {
+              "type": "end"
+            },
             "sceneId": "6cf87759-43ce-49fc-a001-4238be9e92c1",
-            "type": "insertBeat"
+            "type": "insertBodyBeat"
           },
           "expectedAuthoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
           "expectedProjectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",
@@ -436,10 +451,15 @@
               },
               "variableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da"
             },
-            "beforeBeatId": null,
+            "body": {
+              "type": "root"
+            },
             "expectedSourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+            "position": {
+              "type": "end"
+            },
             "sceneId": "6cf87759-43ce-49fc-a001-4238be9e92c1",
-            "type": "insertBeat"
+            "type": "insertBodyBeat"
           },
           "expectedAuthoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
           "expectedProjectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",
@@ -547,10 +567,15 @@
               },
               "variableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da"
             },
-            "beforeBeatId": null,
+            "body": {
+              "type": "root"
+            },
             "expectedSourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+            "position": {
+              "type": "end"
+            },
             "sceneId": "6cf87759-43ce-49fc-a001-4238be9e92c1",
-            "type": "insertBeat"
+            "type": "insertBodyBeat"
           },
           "expectedAuthoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
           "expectedProjectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",
@@ -658,10 +683,15 @@
               },
               "variableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da"
             },
-            "beforeBeatId": null,
+            "body": {
+              "type": "root"
+            },
             "expectedSourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+            "position": {
+              "type": "end"
+            },
             "sceneId": "6cf87759-43ce-49fc-a001-4238be9e92c1",
-            "type": "insertBeat"
+            "type": "insertBodyBeat"
           },
           "expectedAuthoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
           "expectedProjectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",
@@ -769,10 +799,15 @@
               },
               "variableId": "16ea66dc-425f-446a-9db2-51f38c3ee5da"
             },
-            "beforeBeatId": null,
+            "body": {
+              "type": "root"
+            },
             "expectedSourceRevision": "e4eaaf788252489c1d0b04c88f834ebf80a4cb7886a5b11eed3366991aa06716",
+            "position": {
+              "type": "end"
+            },
             "sceneId": "6cf87759-43ce-49fc-a001-4238be9e92c1",
-            "type": "insertBeat"
+            "type": "insertBodyBeat"
           },
           "expectedAuthoringRevision": "e5efa2ec9e246488034058661fc944d4aff5e98a3f8f000f008034e037247ebd",
           "expectedProjectRevision": "7fd9e65586d0f41d75a1dfd0c560d49383f8ed03b8cce304515d7990ba19908f",

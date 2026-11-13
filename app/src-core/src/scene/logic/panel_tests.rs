@@ -426,14 +426,21 @@ fn inserting_an_identical_screen_statement_does_not_adopt_or_replace_its_opaque_
     let opaque = before["beats"][0].clone();
     let owner = panel(&mut f, "help_panel");
     let target = resolved(&mut f, &owner);
-    let accepted = f.command(json!({"type":"insertBeat","sceneId":scene["id"],
-        "expectedSourceRevision":before["sourceRevision"],"beforeBeatId":opaque["id"],
+    // The explicit command refuses to anchor a new Beat on the opaque statement itself.
+    assert_eq!(
+        f.reject(json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],
+            "expectedSourceRevision":before["sourceRevision"],"position":{"type":"before","anchor":{"type":"beat","beatId":opaque["id"]}},
+            "beat":{"type":"showScreen","target":target["binding"],"revisions":target["revisions"]}}))["error"]["code"],
+        "OPAQUE_BOUNDARY"
+    );
+    let accepted = f.command(json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],
+        "expectedSourceRevision":before["sourceRevision"],"position":before["bodies"][0]["defaultPlace"],
         "beat":{"type":"showScreen","target":target["binding"],"revisions":target["revisions"]}}));
     let beats = &accepted["scenes"][0]["beats"];
-    assert_eq!(beats[0]["payload"]["type"], "showScreen");
-    assert_ne!(beats[0]["id"], opaque["id"]);
-    assert_eq!(beats[1]["payload"]["type"], "customCode");
-    assert_eq!(beats[1]["id"], opaque["id"]);
+    assert_eq!(beats[0]["payload"]["type"], "customCode");
+    assert_eq!(beats[0]["id"], opaque["id"]);
+    assert_eq!(beats[1]["payload"]["type"], "showScreen");
+    assert_ne!(beats[1]["id"], opaque["id"]);
     f.undo();
     assert_eq!(f.model()["scenes"][0]["beats"], before["beats"]);
     let redone = f.redo();
@@ -442,46 +449,40 @@ fn inserting_an_identical_screen_statement_does_not_adopt_or_replace_its_opaque_
 
 #[test]
 fn an_explicit_picker_update_changes_the_target_in_one_history_entry_and_preserves_the_beat_id() {
-    for legacy in [false, true] {
-        let mut f = Fixture::new();
-        let original = panel(&mut f, "help_panel");
-        let other = panel(&mut f, "other_panel");
-        let first = resolved(&mut f, &original);
-        let shown = insert(
-            &mut f,
-            json!({"type":"showScreen","target":first["binding"],"revisions":first["revisions"]}),
-        );
-        let scene = shown["scenes"][0].clone();
-        let show = scene["beats"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .find(|b| b["payload"]["type"] == "showScreen")
-            .unwrap()
-            .clone();
-        let selected = resolved(&mut f, &other);
-        let mut command = json!({"type":"updateBodyBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],
-            "beatId":show["id"],"expectedBody":{"type":"root"},
-            "beat":{"type":"showScreen","target":selected["binding"],"revisions":selected["revisions"]}});
-        if legacy {
-            command["type"] = json!("updateBeat");
-            command.as_object_mut().unwrap().remove("expectedBody");
-        }
-        let updated = f.command(command);
-        let after = updated["scenes"][0]["beats"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .find(|b| b["id"] == show["id"])
-            .unwrap();
-        assert_eq!(after["payload"]["target"], selected["binding"]);
-        assert_eq!(after["protected"], false);
-        assert!(after["payload"]["revisions"].is_object());
-        let undone = f.undo();
-        assert_eq!(undone["scenes"][0]["beats"], shown["scenes"][0]["beats"]);
-        let redone = f.redo();
-        assert_eq!(redone["scenes"][0]["beats"], updated["scenes"][0]["beats"]);
-    }
+    let mut f = Fixture::new();
+    let original = panel(&mut f, "help_panel");
+    let other = panel(&mut f, "other_panel");
+    let first = resolved(&mut f, &original);
+    let shown = insert(
+        &mut f,
+        json!({"type":"showScreen","target":first["binding"],"revisions":first["revisions"]}),
+    );
+    let scene = shown["scenes"][0].clone();
+    let show = scene["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["payload"]["type"] == "showScreen")
+        .unwrap()
+        .clone();
+    let selected = resolved(&mut f, &other);
+    let command = json!({"type":"updateBodyBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],
+        "beatId":show["id"],"expectedBody":{"type":"root"},
+        "beat":{"type":"showScreen","target":selected["binding"],"revisions":selected["revisions"]}});
+    let updated = f.command(command);
+    let after = updated["scenes"][0]["beats"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["id"] == show["id"])
+        .unwrap();
+    assert_eq!(after["payload"]["target"], selected["binding"]);
+    assert_eq!(after["protected"], false);
+    assert!(after["payload"]["revisions"].is_object());
+    let undone = f.undo();
+    assert_eq!(undone["scenes"][0]["beats"], shown["scenes"][0]["beats"]);
+    let redone = f.redo();
+    assert_eq!(redone["scenes"][0]["beats"], updated["scenes"][0]["beats"]);
 }
 
 #[test]
@@ -656,59 +657,53 @@ fn screen_comments_and_trailing_space_keep_source_bytes_identity_and_target_inte
 
 #[test]
 fn picker_updates_patch_only_screen_name_tokens_and_keep_comments_spacing_and_noop_history() {
-    for legacy in [true, false] {
-        let mut f = Fixture::new();
-        panel(&mut f, "help_panel");
-        let other = panel(&mut f, "other_panel");
-        let scene = f.model()["scenes"][0].clone();
-        let mut expected = format!("label {}:\r\n    show screen help_panel \t# keep show\r\n    hide screen help_panel\t # keep hide  \r\n    return\r\n", scene["technicalLabel"].as_str().unwrap());
-        f.save(&scene, &expected);
-        for index in [0, 1] {
-            let current = f.model()["scenes"][0].clone();
-            let beat = &current["beats"][index];
-            let target = resolved(&mut f, &other);
-            let mut command = json!({"type":"updateBodyBeat","sceneId":scene["id"],"expectedSourceRevision":current["sourceRevision"],
-                "beatId":beat["id"],"expectedBody":{"type":"root"},
-                "beat":{"type":beat["payload"]["type"],"target":target["binding"],"revisions":target["revisions"]}});
-            if legacy {
-                command["type"] = json!("updateBeat");
-                command.as_object_mut().unwrap().remove("expectedBody");
-            }
-            let updated = f.command(command.clone());
-            let changed = expected.replacen("screen help_panel", "screen other_panel", 1);
-            assert_eq!(
-                ipc(
-                    &mut f.service,
-                    "source.open",
-                    json!({"path":scene["sourcePath"]})
-                )["text"],
-                changed
-            );
-            assert_eq!(updated["scenes"][0]["beats"][index]["id"], beat["id"]);
-            let target = resolved(&mut f, &other);
-            command["expectedSourceRevision"] = updated["scenes"][0]["sourceRevision"].clone();
-            command["beat"]["revisions"] = target["revisions"].clone();
-            f.command(command);
-            f.undo();
-            assert_eq!(
-                ipc(
-                    &mut f.service,
-                    "source.open",
-                    json!({"path":scene["sourcePath"]})
-                )["text"],
-                expected
-            );
-            f.redo();
-            assert_eq!(
-                ipc(
-                    &mut f.service,
-                    "source.open",
-                    json!({"path":scene["sourcePath"]})
-                )["text"],
-                changed
-            );
-            expected = changed;
-        }
+    let mut f = Fixture::new();
+    panel(&mut f, "help_panel");
+    let other = panel(&mut f, "other_panel");
+    let scene = f.model()["scenes"][0].clone();
+    let mut expected = format!("label {}:\r\n    show screen help_panel \t# keep show\r\n    hide screen help_panel\t # keep hide  \r\n    return\r\n", scene["technicalLabel"].as_str().unwrap());
+    f.save(&scene, &expected);
+    for index in [0, 1] {
+        let current = f.model()["scenes"][0].clone();
+        let beat = &current["beats"][index];
+        let target = resolved(&mut f, &other);
+        let mut command = json!({"type":"updateBodyBeat","sceneId":scene["id"],"expectedSourceRevision":current["sourceRevision"],
+            "beatId":beat["id"],"expectedBody":{"type":"root"},
+            "beat":{"type":beat["payload"]["type"],"target":target["binding"],"revisions":target["revisions"]}});
+        let updated = f.command(command.clone());
+        let changed = expected.replacen("screen help_panel", "screen other_panel", 1);
+        assert_eq!(
+            ipc(
+                &mut f.service,
+                "source.open",
+                json!({"path":scene["sourcePath"]})
+            )["text"],
+            changed
+        );
+        assert_eq!(updated["scenes"][0]["beats"][index]["id"], beat["id"]);
+        let target = resolved(&mut f, &other);
+        command["expectedSourceRevision"] = updated["scenes"][0]["sourceRevision"].clone();
+        command["beat"]["revisions"] = target["revisions"].clone();
+        f.command(command);
+        f.undo();
+        assert_eq!(
+            ipc(
+                &mut f.service,
+                "source.open",
+                json!({"path":scene["sourcePath"]})
+            )["text"],
+            expected
+        );
+        f.redo();
+        assert_eq!(
+            ipc(
+                &mut f.service,
+                "source.open",
+                json!({"path":scene["sourcePath"]})
+            )["text"],
+            changed
+        );
+        expected = changed;
     }
 }
 

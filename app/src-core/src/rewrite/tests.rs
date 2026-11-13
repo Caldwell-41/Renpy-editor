@@ -87,7 +87,7 @@ impl Fixture {
             .iter()
             .find(|b| b["payload"]["type"] == "narration")
             .unwrap();
-        f.ok("scene.apply",json!({"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":{"type":"updateBeat","sceneId":s["id"],"expectedSourceRevision":s["sourceRevision"],"beatId":b["id"],"beat":{"type":"narration","text":"Hello [flag] {b}friend{/b} [[literal] {{brace}"}}}));
+        f.ok("scene.apply",json!({"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":{"type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":s["id"],"expectedSourceRevision":s["sourceRevision"],"beatId":b["id"],"beat":{"type":"narration","text":"Hello [flag] {b}friend{/b} [[literal] {{brace}"}}}));
         f
     }
     fn call(&mut self, op: &str, mut p: Value) -> Value {
@@ -1307,7 +1307,7 @@ fn generated_card_review_regressions_preserve_extensions_refuse_manual_bypass_an
                 .iter()
                 .find(|b| b["payload"]["type"] == "narration")
                 .unwrap();
-            f.ok("scene.apply",json!({"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":{"type":"updateBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":beat["id"],"beat":{"type":"dialogue","characterId":w["authoring"]["characters"][0]["id"],"text":"Hello [flag]"}}}));
+            f.ok("scene.apply",json!({"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":{"type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":beat["id"],"beat":{"type":"dialogue","characterId":w["authoring"]["characters"][0]["id"],"text":"Hello [flag]"}}}));
         }
         let path = f.root.join(crate::references::PATH);
         let mut raw: Value = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
@@ -1689,7 +1689,7 @@ fn generated_lore_review_regressions_preserve_extensions_refuse_manual_bypass_an
                 .iter()
                 .find(|b| b["payload"]["type"] == "narration")
                 .unwrap();
-            f.ok("scene.apply",json!({"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":{"type":"updateBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":beat["id"],"beat":{"type":"dialogue","characterId":w["authoring"]["characters"][0]["id"],"text":"Hello [flag]"}}}));
+            f.ok("scene.apply",json!({"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":{"type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":beat["id"],"beat":{"type":"dialogue","characterId":w["authoring"]["characters"][0]["id"],"text":"Hello [flag]"}}}));
         }
         let path = f.root.join(crate::references::PATH);
         let mut raw: Value = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
@@ -1844,7 +1844,7 @@ fn generated_lore_approved_supporting_definition_stale_blocks_inclusion_and_prom
         .iter()
         .find(|b| b["payload"]["type"] == "narration")
         .unwrap();
-    f.ok("scene.apply",json!({"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":{"type":"updateBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":beat["id"],"beat":{"type":"dialogue","characterId":w["authoring"]["characters"][0]["id"],"text":"Hello [flag]"}}}));
+    f.ok("scene.apply",json!({"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":{"type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":beat["id"],"beat":{"type":"dialogue","characterId":w["authoring"]["characters"][0]["id"],"text":"Hello [flag]"}}}));
     let o = f.ok("context.options", json!({}));
     assert_eq!(o["lorePrompt"]["effectiveText"], prompts::LORE_BASELINE);
     let custom=f.ok("prompts.apply",json!({"action":prompts::LORE,"expectedRevision":o["lorePrompt"]["revision"],"command":{"type":"save","text":"Custom lore instruction"}}));
@@ -2077,7 +2077,7 @@ impl Fixture {
         let mut f = Self::new();
         let w = f.ok("scene.list", json!({}));
         let s = &w["scenes"][0];
-        f.ok("scene.apply",json!({"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":{"type":"insertBeat","sceneId":s["id"],"expectedSourceRevision":s["sourceRevision"],"beforeBeatId":s["beats"].as_array().unwrap().last().unwrap()["id"],"beat":{"type":"narration","text":"A second independent narration"}}}));
+        f.ok("scene.apply",json!({"expectedProjectRevision":w["projectRevision"],"expectedSourceMapRevision":w["sourceMapRevision"],"command":{"type":"insertBodyBeat","body":{"type":"root"},"sceneId":s["id"],"expectedSourceRevision":s["sourceRevision"],"position":{"type":"before","anchor":{"type":"beat","beatId":s["beats"].as_array().unwrap().last().unwrap()["id"]}},"beat":{"type":"narration","text":"A second independent narration"}}}));
         f
     }
     fn batch_prepare(&mut self, create: bool) -> (Value, Value) {

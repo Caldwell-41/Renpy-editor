@@ -81,7 +81,7 @@ test('complete selectable native probe drives production shell/controller throug
       busy = true;
       try {
         await delay();
-        if (payload.command.type === 'insertBeat') {
+        if (payload.command.type === 'insertBodyBeat') {
           const scene = state.workspace.scenes[0]!;
           scene.beats = [...scene.beats.slice(0, -1), { id: 'second', byteStart: 20, byteEnd: 30, protected: false, payload: payload.command.beat }, scene.beats.at(-1)!];
           state.files['game/scene.rpy'] += '# second saved narration\n';

@@ -40,7 +40,8 @@ window.__loomlightFoundationExtended = async ({ details, check, wait, click, cal
   } finally { document.elementFromPoint = originalHit; }
   await refresh();
   check(JSON.stringify(model) === JSON.stringify(baseline) && (await source()).text === baselineSource.text, 'Refused native drag leaves source, map revision and IDs unchanged');
-  const commands = [ { type: 'moveBeat', beatId: root.id, direction: 'up' }, { type: 'reorderBeat', beatId: root.id, toIndex: beats.indexOf(child) } ];
+  const rootBody = { type: 'root' }, beatRef = id => ({ type: 'beat', beatId: id }), before = id => ({ type: 'before', anchor: beatRef(id) });
+  const commands = [ { type: 'moveStoryNode', node: beatRef(root.id), expectedBody: rootBody, body: rootBody, position: before(child.id) } ];
   const anchors = beats.filter(b => b.conditionalBranch?.otherwise || b.payload.source?.trimStart().startsWith('#'));
   check(anchors.length === 3, 'Otherwise and both body trivia anchors present');
   for (const anchor of anchors) {
@@ -48,18 +49,18 @@ window.__loomlightFoundationExtended = async ({ details, check, wait, click, cal
     const additions = [...document.querySelectorAll('.provenance-row button:last-child')];
     check(additions.length > 0 && additions.every(b => b.disabled), `Insertion UI refused at ${anchor.payload.source.trim()}`);
     card(anchor.id).querySelector('.beat-select').click();
-    commands.push({ type: 'insertBeat', beforeBeatId: anchor.id, beat: { type: 'narration', text: 'Unsafe root' } });
+    commands.push({ type: 'insertBodyBeat', body: rootBody, position: before(anchor.id), beat: { type: 'narration', text: 'Unsafe root' } });
   }
   for (const command of commands) {
     let code; try { await apply(command); } catch (error) { code = error.code; }
-    check(code === 'SCENE_INVARIANT', `Real core refuses ${command.type}${command.beforeBeatId ? ' at protected anchor' : ' across child'}`);
+    check(code === 'SCENE_INVARIANT', `Real core refuses ${command.type}${command.type === 'insertBodyBeat' ? ' at protected anchor' : ' across child'}`);
   }
   await refresh();
   check(JSON.stringify(model) === JSON.stringify(baseline) && (await source()).text === baselineSource.text, 'All structural refusals preserve exact source and workspace');
-  model = await apply({ type: 'moveBeat', beatId: root.id, direction: 'down' }); scene = model.scenes[0];
+  model = await apply({ type: 'moveStoryNode', node: beatRef(root.id), expectedBody: rootBody, body: rootBody, position: before(beats.find(b => b.payload.type === 'return').id) }); scene = model.scenes[0];
   check((await source()).text === baselineSource.text.replace('    bec "Root one"\n    bec "Root two"', '    bec "Root two"\n    bec "Root one"'), 'Safe root move outside group changes only adjacent roots');
-  model = await apply({ type: 'insertBeat', beforeBeatId: beats[0].id, beat: { type: 'narration', text: 'Before group' } }); scene = model.scenes[0];
-  model = await apply({ type: 'insertBeat', beforeBeatId: root.id, beat: { type: 'narration', text: 'After group' } }); scene = model.scenes[0];
+  model = await apply({ type: 'insertBodyBeat', body: rootBody, position: { type: 'before', anchor: { type: 'condition', groupId: beats[0].conditionalBranch.groupId } }, beat: { type: 'narration', text: 'Before group' } }); scene = model.scenes[0];
+  model = await apply({ type: 'insertBodyBeat', body: rootBody, position: before(root.id), beat: { type: 'narration', text: 'After group' } }); scene = model.scenes[0];
   check(owners(model) === baselineOwners && beats.every(b => scene.beats.some(n => n.id === b.id)) && (await source()).text.includes('    "Before group"\n    if flag:') && (await source()).text.includes('    "After group"\n    bec "Root one"'), 'Safe before/after insertion preserves child IDs and owners');
   details.stage = 'unterminated-child-append';
   const eofText = accepted.text.slice(0, accepted.text.indexOf('    python:')).trimEnd();

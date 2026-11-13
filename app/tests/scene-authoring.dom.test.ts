@@ -606,13 +606,11 @@ test("shipped source-foundation native driver completes against strict renderer 
       case "history.redo": if (!undone) throw Object.assign(Error("boundary"),{code:"HISTORY_BOUNDARY"}); text=accepted;model=saved;undone=false; return { entry, history: history() };
       case "scene.apply": {
         const command = payload.command as SceneCommand;
-        if (command.type === "updateBodyBeat" || command.type === "updateChildDialogue") {
+        if (command.type === "updateBodyBeat") {
           const child = model.scenes[0]!.beats.find(b=>b.id===command.beatId)!;
-          if (command.type === "updateBodyBeat") {
-            if (JSON.stringify(command.expectedBody)!==JSON.stringify({type:"branch",...child.owner})) throw Object.assign(Error("owner"),{code:"SCENE_INVARIANT"});
-          } else if (JSON.stringify(command.expectedOwner)!==JSON.stringify(child.owner)) throw Object.assign(Error("owner"),{code:"SCENE_INVARIANT"});
+          if (JSON.stringify(command.expectedBody)!==JSON.stringify({type:"branch",...child.owner})) throw Object.assign(Error("owner"),{code:"SCENE_INVARIANT"});
           if(draft!==undefined)throw Object.assign(Error("dirty source"),{code:"DIRTY_SOURCE"});
-          const changedText = command.type === "updateBodyBeat" ? (command.beat as {text:string}).text : command.text as string;
+          const changedText = (command.beat as {text:string}).text;
           text = original.replace("True café 雪",changedText); accepted=text;
           model={...model,sourceMapRevision:"5".repeat(64),scenes:[{...model.scenes[0]!,sourceRevision:"6".repeat(64),beats:model.scenes[0]!.beats.map(b=>b.id===child.id?{...b,payload:{type:"dialogue",characterId:"alice",text:changedText}}:b)}]};
           saved=model;committed=true;undone=false;

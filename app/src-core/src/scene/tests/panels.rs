@@ -53,10 +53,11 @@ fn panel_beats_remain_a_boundary_for_existing_continue_preparation() {
         let inserted = f
             .apply(
                 &workspace,
-                SceneCommand::InsertBeat {
+                SceneCommand::InsertBodyBeat {
                     scene_id: scene.id.clone(),
                     expected_source_revision: scene.source_revision.clone(),
-                    before_beat_id: None,
+                    body: BodyRef::Root,
+                    position: root_default_place(&scene),
                     beat: payload,
                 },
             )

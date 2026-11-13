@@ -1835,10 +1835,11 @@ mod tests {
                     expected_project_revision: workspace.project_revision.clone(),
                     expected_source_map_revision: workspace.source_map_revision.clone(),
                     expected_authoring_revision: None,
-                    command: SceneCommand::UpdateBeat {
+                    command: SceneCommand::UpdateBodyBeat {
                         scene_id: fixture.scene_id.clone(),
                         expected_source_revision: workspace.scenes[0].source_revision.clone(),
                         beat_id,
+                        expected_body: crate::scene::BodyRef::Root,
                         beat: BeatPayload::Narration {
                             text: "Visual edit".into(),
                         },
@@ -1938,10 +1939,11 @@ mod tests {
                     expected_project_revision: workspace.project_revision.clone(),
                     expected_source_map_revision: workspace.source_map_revision.clone(),
                     expected_authoring_revision: None,
-                    command: SceneCommand::UpdateBeat {
+                    command: SceneCommand::UpdateBodyBeat {
                         scene_id: fixture.scene_id.clone(),
                         expected_source_revision: workspace.scenes[0].source_revision.clone(),
                         beat_id: narration,
+                        expected_body: crate::scene::BodyRef::Root,
                         beat: BeatPayload::Narration {
                             text: "Next".into(),
                         },
@@ -2241,10 +2243,11 @@ mod tests {
                 expected_project_revision: workspace.project_revision,
                 expected_source_map_revision: workspace.source_map_revision,
                 expected_authoring_revision: None,
-                command: SceneCommand::UpdateBeat {
+                command: SceneCommand::UpdateBodyBeat {
                     scene_id: fixture.scene_id.clone(),
                     expected_source_revision: workspace.scenes[0].source_revision.clone(),
                     beat_id: workspace.scenes[0].beats[0].id.clone(),
+                    expected_body: crate::scene::BodyRef::Root,
                     beat: BeatPayload::Narration {
                         text: "Blocked".into(),
                     },

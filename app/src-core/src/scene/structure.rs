@@ -56,6 +56,8 @@ pub(super) enum BodyEdit {
         body: BodyRef,
         payload: BeatPayload,
     },
+    /// Dialogue continuation and core-prepared dialogue edits, addressed by Beat ID.
+    Dialogue(BeatEdit),
 }
 
 pub(super) fn transfer(payload: &BeatPayload) -> bool {
@@ -66,9 +68,6 @@ pub(super) fn transfer(payload: &BeatPayload) -> bool {
             | BeatPayload::RepeatChoice { .. }
             | BeatPayload::Choice { .. }
     )
-}
-pub(super) fn edit_changes_transfers(edit: &BeatEdit) -> bool {
-    matches!(edit, BeatEdit::Insert { payload, .. } | BeatEdit::Update { payload, .. } if transfer(payload))
 }
 
 impl AuthoringService {
@@ -178,57 +177,21 @@ impl AuthoringService {
                 &loaded.source_map.owned_screens,
             )),
         )?;
-        let edit = match edit {
-            edit @ BodyEdit::Structural(_) => edit,
-            BodyEdit::Insert {
-                body,
-                position,
-                payload,
-            } => {
-                if beats.len() >= MAX_BEATS_PER_SCENE {
-                    return Err(SceneError::InvariantBlocked);
-                }
-                let prepared = self.prepare_call_labels(
-                    project,
-                    &loaded,
-                    scene_id,
-                    &beats,
-                    BeatEdit::Insert {
-                        before: None,
-                        payload,
-                    },
-                )?;
-                let BeatEdit::Insert { payload, .. } = prepared else {
-                    unreachable!()
-                };
-                BodyEdit::Insert {
-                    body,
-                    position,
-                    payload,
-                }
-            }
-            BodyEdit::Update { id, body, payload } => {
-                let prepared = self.prepare_call_labels(
-                    project,
-                    &loaded,
-                    scene_id,
-                    &beats,
-                    BeatEdit::Update {
-                        id: id.clone(),
-                        payload,
-                    },
-                )?;
-                let BeatEdit::Update { payload, .. } = prepared else {
-                    unreachable!()
-                };
-                BodyEdit::Update { id, body, payload }
-            }
-        };
+        if beats.len() >= MAX_BEATS_PER_SCENE
+            && matches!(
+                edit,
+                BodyEdit::Insert { .. } | BodyEdit::Dialogue(BeatEdit::ContinueDialogue { .. })
+            )
+        {
+            return Err(SceneError::InvariantBlocked);
+        }
+        let edit = self.prepare_call_labels(project, &beats, edit)?;
         let transfer_edit = match &edit {
             BodyEdit::Structural(_) => true,
             BodyEdit::Insert { payload, .. } | BodyEdit::Update { payload, .. } => {
                 transfer(payload)
             }
+            BodyEdit::Dialogue(_) => false,
         };
         let screen_update = match &edit {
             BodyEdit::Update { id, payload, .. } => payload
@@ -378,7 +341,7 @@ fn generated_at_indent(
         .map(|line| format!("{prefix}{line}"))
         .collect())
 }
-fn apply(
+pub(super) fn apply(
     source: &[u8],
     beats: &[SceneBeat],
     edit: BodyEdit,
@@ -392,6 +355,7 @@ fn apply(
     };
     match edit {
         BodyEdit::Structural(edit) => operations::apply(source, beats, edit, loaded, scene),
+        BodyEdit::Dialogue(edit) => apply_beat_edit(source, beats, edit, loaded),
         BodyEdit::Insert {
             body,
             position,

@@ -275,7 +275,7 @@ impl LifecycleService {
             .iter()
             .find(|b| matches!(b.payload, crate::scene::BeatPayload::Narration { .. }))
             .ok_or("Rewrite fixture target missing")?;
-        let request=serde_json::from_value(json!({"expectedProjectRevision":ws.project_revision,"expectedSourceMapRevision":ws.source_map_revision,"command":{"type":"updateBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":beat.id,"beat":{"type":"narration","text":"Hello [flag] {b}friend{/b} [[literal] {{brace}"}}})).map_err(|_|"Rewrite fixture request failed")?;
+        let request=serde_json::from_value(json!({"expectedProjectRevision":ws.project_revision,"expectedSourceMapRevision":ws.source_map_revision,"command":{"type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":beat.id,"beat":{"type":"narration","text":"Hello [flag] {b}friend{/b} [[literal] {{brace}"}}})).map_err(|_|"Rewrite fixture request failed")?;
         service
             .scene_apply(request)
             .map_err(|_| "Rewrite fixture text failed")?;
@@ -538,6 +538,10 @@ mod branches_tests {
         (service, root)
     }
 
+    fn branch_body(owner: &serde_json::Value) -> serde_json::Value {
+        json!({"type":"branch","groupId":owner["groupId"],"branchId":owner["branchId"]})
+    }
+
     fn child_command(model: &serde_json::Value, text: &str) -> serde_json::Value {
         let scene = &model["scenes"][0];
         let child = scene["beats"]
@@ -546,8 +550,7 @@ mod branches_tests {
             .iter()
             .find(|b| b["owner"].is_object() && b["payload"]["type"] == "dialogue")
             .unwrap();
-        json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{
-            "type":"updateChildDialogue","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":child["id"],"expectedOwner":child["owner"],"characterId":child["payload"]["characterId"],"text":text}})
+        json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"updateBodyBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":child["id"],"expectedBody":{"type":"branch","groupId":child["owner"]["groupId"],"branchId":child["owner"]["branchId"]},"beat":{"type":"dialogue","characterId":child["payload"]["characterId"],"text":text}}})
     }
 
     #[test]
@@ -574,7 +577,7 @@ mod branches_tests {
             children[1]["owner"]["branchId"]
         );
         let mut wrong = child_command(&model, "lost");
-        wrong["command"]["expectedOwner"] = children[1]["owner"].clone();
+        wrong["command"]["expectedBody"] = branch_body(&children[1]["owner"]);
         wrong["sessionId"] = json!(service.current().unwrap().session_id);
         let refused = crate::lifecycle::tests::closeout_ipc(&mut service, "scene.apply", wrong);
         assert_eq!(refused["ok"], false, "wrong branch must reject: {refused}");
@@ -736,7 +739,7 @@ mod branches_tests {
             .unwrap();
         let mut duplicate = child_command(&before, "True café 雪");
         duplicate["command"]["beatId"] = second["id"].clone();
-        duplicate["command"]["expectedOwner"] = second["owner"].clone();
+        duplicate["command"]["expectedBody"] = branch_body(&second["owner"]);
         let after = ipc(&mut service, "scene.apply", duplicate);
         let old = before["scenes"][0]["beats"].as_array().unwrap();
         let new = after["scenes"][0]["beats"].as_array().unwrap();
@@ -750,11 +753,10 @@ mod branches_tests {
             .unwrap();
         let accepted = fs::read(root.join(path)).unwrap();
         for command in [
-            json!({"type":"updateBeat","beatId":child["id"],"beat":child["payload"]}),
-            json!({"type":"removeBeat","beatId":child["id"]}),
-            json!({"type":"moveBeat","beatId":child["id"],"direction":"up"}),
-            json!({"type":"reorderBeat","beatId":child["id"],"toIndex":0}),
-            json!({"type":"insertBeat","beforeBeatId":child["id"],"beat":child["payload"]}),
+            json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"beatId":child["id"],"beat":child["payload"]}),
+            json!({"type":"removeStoryNode","node":{"type":"beat","beatId":child["id"]},"expectedBody":{"type":"root"}}),
+            json!({"type":"moveStoryNode","node":{"type":"beat","beatId":child["id"]},"expectedBody":{"type":"root"},"body":{"type":"root"},"position":{"type":"end"}}),
+            json!({"type":"insertBodyBeat","body":{"type":"root"},"position":{"type":"before","anchor":{"type":"beat","beatId":child["id"]}},"beat":child["payload"]}),
             json!({"type":"continueDialogue","beatId":child["id"],"characterId":child["payload"]["characterId"],"text":"new"}),
         ] {
             let mut command = command;
@@ -804,15 +806,18 @@ mod branches_tests {
             .iter()
             .find(|b| b["payload"]["text"] == "Root one")
             .unwrap();
-        let child_index = beats
+        let child = beats
             .iter()
-            .position(|b| b["payload"]["text"] == "False")
+            .find(|b| b["payload"]["text"] == "False")
+            .unwrap();
+        let terminal = beats
+            .iter()
+            .find(|b| b["payload"]["type"] == "return")
             .unwrap();
         let accepted_source = fs::read(root.join(path)).unwrap();
         let accepted_map = fs::read(root.join(".renpy-editor/source-map.json")).unwrap();
         let mut commands = vec![
-            json!({"type":"moveBeat","beatId":first_root["id"],"direction":"up"}),
-            json!({"type":"reorderBeat","beatId":first_root["id"],"toIndex":child_index}),
+            json!({"type":"moveStoryNode","node":{"type":"beat","beatId":first_root["id"]},"expectedBody":{"type":"root"},"body":{"type":"root"},"position":{"type":"before","anchor":{"type":"beat","beatId":child["id"]}}}),
         ];
         // Headers and trivia inside either body must not become root insertion anchors.
         for beat in beats.iter().filter(|b| {
@@ -821,7 +826,7 @@ mod branches_tests {
                     .as_str()
                     .is_some_and(|s| s.trim_start().starts_with('#'))
         }) {
-            commands.push(json!({"type":"insertBeat","beforeBeatId":beat["id"],"beat":{"type":"narration","text":"Unsafe root"}}));
+            commands.push(json!({"type":"insertBodyBeat","body":{"type":"root"},"position":{"type":"before","anchor":{"type":"beat","beatId":beat["id"]}},"beat":{"type":"narration","text":"Unsafe root"}}));
         }
         for mut command in commands {
             command["sceneId"] = model["scenes"][0]["id"].clone();
@@ -844,7 +849,7 @@ mod branches_tests {
         let moved = ipc(
             &mut service,
             "scene.apply",
-            json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"moveBeat","sceneId":scene["id"],"expectedSourceRevision":model["scenes"][0]["sourceRevision"],"beatId":first_root["id"],"direction":"down"}}),
+            json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"moveStoryNode","sceneId":scene["id"],"expectedSourceRevision":model["scenes"][0]["sourceRevision"],"node":{"type":"beat","beatId":first_root["id"]},"expectedBody":{"type":"root"},"body":{"type":"root"},"position":{"type":"before","anchor":{"type":"beat","beatId":terminal["id"]}}}}),
         );
         assert_eq!(
             fs::read(root.join(path)).unwrap(),
@@ -859,7 +864,7 @@ mod branches_tests {
         let inserted = ipc(
             &mut service,
             "scene.apply",
-            json!({"expectedProjectRevision":moved["projectRevision"],"expectedSourceMapRevision":moved["sourceMapRevision"],"command":{"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":moved["scenes"][0]["sourceRevision"],"beforeBeatId":beats[0]["id"],"beat":{"type":"narration","text":"Safe root"}}}),
+            json!({"expectedProjectRevision":moved["projectRevision"],"expectedSourceMapRevision":moved["sourceMapRevision"],"command":{"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":moved["scenes"][0]["sourceRevision"],"position":{"type":"before","anchor":{"type":"condition","groupId":beats[0]["conditionalBranch"]["groupId"]}},"beat":{"type":"narration","text":"Safe root"}}}),
         );
         assert_eq!(
             inserted["scenes"][0]["beats"]
@@ -873,7 +878,7 @@ mod branches_tests {
         let after_group = ipc(
             &mut service,
             "scene.apply",
-            json!({"expectedProjectRevision":inserted["projectRevision"],"expectedSourceMapRevision":inserted["sourceMapRevision"],"command":{"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":inserted["scenes"][0]["sourceRevision"],"beforeBeatId":first_root["id"],"beat":{"type":"narration","text":"After group"}}}),
+            json!({"expectedProjectRevision":inserted["projectRevision"],"expectedSourceMapRevision":inserted["sourceMapRevision"],"command":{"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":inserted["scenes"][0]["sourceRevision"],"position":{"type":"before","anchor":{"type":"beat","beatId":first_root["id"]}},"beat":{"type":"narration","text":"After group"}}}),
         );
         let old_children = beats
             .iter()
@@ -933,7 +938,7 @@ mod branches_tests {
             let appended = ipc(
                 &mut service,
                 "scene.apply",
-                json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":model["scenes"][0]["sourceRevision"],"beforeBeatId":null,"beat":{"type":"narration","text":"Safe root"}}}),
+                json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":model["scenes"][0]["sourceRevision"],"position":{"type":"end"},"beat":{"type":"narration","text":"Safe root"}}}),
             );
             let expected = [
                 accepted.as_slice(),

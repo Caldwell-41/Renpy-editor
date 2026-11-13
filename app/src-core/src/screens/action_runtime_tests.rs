@@ -191,7 +191,7 @@ fn ordered_actions_export_public_core_normal_entry_without_engine_execution() {
             .unwrap();
         panel_fixture::apply(
             &mut service,
-            json!({"type":"updateBeat","sceneId":entry_id,"beatId":call["id"],"expectedSourceRevision":entry["sourceRevision"],
+            json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":entry_id,"beatId":call["id"],"expectedSourceRevision":entry["sourceRevision"],
             "beat":{"type":"callScreen","target":binding,"revisions":final_target["revisions"]}}),
         );
     }

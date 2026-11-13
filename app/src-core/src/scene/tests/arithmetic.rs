@@ -181,8 +181,8 @@ fn arithmetic_refuses_invalid_targets_operands_and_stale_definitions_without_his
     let before_source = fs::read(f.root.join(&scene.source_path)).unwrap();
     let before_map = fs::read(f.root.join(SOURCE_MAP_PATH)).unwrap();
     let command = |id: &str, value: Value| {
-        json!({"type":"insertBeat", "sceneId":scene.id,
-        "expectedSourceRevision":scene.source_revision,"beforeBeatId":null,
+        json!({"type":"insertBodyBeat","body":{"type":"root"}, "sceneId":scene.id,
+        "expectedSourceRevision":scene.source_revision,"position":{"type":"end"},
         "beat":{"type":"setVariable","variableId":id,"value":value}})
     };
     for (operand, error) in [
@@ -297,8 +297,8 @@ fn formula_commands_use_precedence_grouping_and_exact_variable_reads() {
     let after = apply_wire(
         &f,
         &model,
-        json!({"type":"insertBeat","sceneId":scene.id,
-        "expectedSourceRevision":scene.source_revision,"beforeBeatId":scene.beats[1].id,
+        json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene.id,
+        "expectedSourceRevision":scene.source_revision,"position":{"type":"before","anchor":{"type":"beat","beatId":scene.beats[1].id}},
         "beat":{"type":"setVariable","variableId":id,
         "value":{"operation":"assign","operand":"score + (2 + 3) * 4"}}}),
     )
@@ -367,7 +367,7 @@ fn formula_diagnostics_are_explicit_for_protected_source_and_refused_commands() 
             SceneError::ArithmeticOverflow,
         ),
     ] {
-        assert_eq!(apply_wire(&f, &model, json!({"type":"insertBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beforeBeatId":null,"beat":{"type":"setVariable","variableId":model.authoring.variables[0].id,"value":{"operation":"assign","operand":operand}}})).unwrap_err(), error);
+        assert_eq!(apply_wire(&f, &model, json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"position":{"type":"end"},"beat":{"type":"setVariable","variableId":model.authoring.variables[0].id,"value":{"operation":"assign","operand":operand}}})).unwrap_err(), error);
     }
     assert_eq!(fs::read(f.root.join(&scene.source_path)).unwrap(), source);
     assert_eq!(f.history(), history);
@@ -490,7 +490,7 @@ fn formula_edits_preserve_explicit_style_and_semantic_noop_bytes() {
     let history = f.history();
     let scene = &model.scenes[0];
     let beat = &scene.beats[0];
-    let edit = |operation: &str, operand: &str| json!({"type":"updateBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":beat.id,"beat":{"type":"setVariable","variableId":model.authoring.variables[0].id,"value":{"operation":operation,"operand":operand}}});
+    let edit = |operation: &str, operand: &str| json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":beat.id,"beat":{"type":"setVariable","variableId":model.authoring.variables[0].id,"value":{"operation":operation,"operand":operand}}});
     apply_wire(&f, &model, edit("add", "( +2 )")).unwrap();
     assert_eq!(fs::read(f.root.join(&scene.source_path)).unwrap(), source);
     assert_eq!(f.history(), history);
@@ -504,7 +504,7 @@ fn formula_edits_preserve_explicit_style_and_semantic_noop_bytes() {
     );
     let model = f.workspace();
     let scene = &model.scenes[0];
-    let after = apply_wire(&f, &model, json!({"type":"updateBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":scene.beats[1].id,"beat":{"type":"setVariable","variableId":model.authoring.variables[0].id,"value":{"operation":"subtract","operand":"score + 3"}}})).unwrap();
+    let after = apply_wire(&f, &model, json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":scene.beats[1].id,"beat":{"type":"setVariable","variableId":model.authoring.variables[0].id,"value":{"operation":"subtract","operand":"score + 3"}}})).unwrap();
     assert_eq!(
         serde_json::to_value(&after).unwrap()["scenes"][0]["beats"][1]["assignment"]["state"],
         json!({"status":"known","value":"-3"})
@@ -559,7 +559,7 @@ fn formula_dependencies_types_unknowns_and_stale_edits_use_declared_variables() 
         wire["scenes"][0]["beats"][1]["assignment"]["readVariables"],
         json!([{"variableId":bonus.id,"technicalName":"bonus","variableType":"int"}])
     );
-    let command = |operand: &str| json!({"type":"insertBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beforeBeatId":scene.beats[1].id,"beat":{"type":"setVariable","variableId":score.id,"value":{"operation":"assign","operand":operand}}});
+    let command = |operand: &str| json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"position":{"type":"before","anchor":{"type":"beat","beatId":scene.beats[1].id}},"beat":{"type":"setVariable","variableId":score.id,"value":{"operation":"assign","operand":operand}}});
     assert_eq!(
         apply_wire(&f, &model, command("flag + 1")).unwrap_err(),
         SceneError::ArithmeticOperandType
@@ -618,7 +618,7 @@ fn formula_replaces_only_literal_expression_bytes() {
     let model = f.workspace();
     let history = f.history();
     let scene = &model.scenes[0];
-    let command = |operand: &str| json!({"type":"updateBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":scene.beats[0].id,"beat":{"type":"setVariable","variableId":model.authoring.variables[0].id,"value":{"operation":"assign","operand":operand}}});
+    let command = |operand: &str| json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":scene.beats[0].id,"beat":{"type":"setVariable","variableId":model.authoring.variables[0].id,"value":{"operation":"assign","operand":operand}}});
     apply_wire(&f, &model, command("(2)")).unwrap();
     assert_eq!(f.history(), history);
     assert_eq!(
@@ -664,7 +664,7 @@ fn formula_recognition_keeps_bool_and_string_assignment_edits() {
             .iter()
             .find(|v| v.technical_name == name)
             .unwrap();
-        apply_wire(&f, &model, json!({"type":"updateBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":scene.beats[index].id,"beat":{"type":"setVariable","variableId":variable.id,"value":value}})).unwrap();
+        apply_wire(&f, &model, json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":scene.beats[index].id,"beat":{"type":"setVariable","variableId":variable.id,"value":value}})).unwrap();
     }
     let source = fs::read_to_string(f.root.join(&f.workspace().scenes[0].source_path)).unwrap();
     assert!(source.contains("$ caption = \"(score)\""));
@@ -731,7 +731,7 @@ fn decimal_formulas_use_python_types_rounding_and_diagnostics() {
         ("(2 + 3) * -0.5 + 1", -1.5, "decimal"),
     ] {
         let scene = &model.scenes[0];
-        model = apply_wire(&f, &model, json!({"type":"insertBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beforeBeatId":scene.beats.last().unwrap().id,"beat":{"type":"setVariable","variableId":id,"value":{"operation":"assign","operand":operand}}})).unwrap();
+        model = apply_wire(&f, &model, json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"position":{"type":"before","anchor":{"type":"beat","beatId":scene.beats.last().unwrap().id}},"beat":{"type":"setVariable","variableId":id,"value":{"operation":"assign","operand":operand}}})).unwrap();
         let beat = &model.scenes[0].beats[model.scenes[0].beats.len() - 2];
         let wire = serde_json::to_value(beat).unwrap();
         assert_eq!(
@@ -752,7 +752,7 @@ fn decimal_formulas_use_python_types_rounding_and_diagnostics() {
         (&id, "1.0 / 0", SceneError::ArithmeticZeroDivisor),
         (&id, "1e308 * 2.0", SceneError::ArithmeticOverflow),
     ] {
-        assert_eq!(apply_wire(&f, &model, json!({"type":"insertBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beforeBeatId":null,"beat":{"type":"setVariable","variableId":target,"value":{"operation":"assign","operand":operand}}})).unwrap_err(), error);
+        assert_eq!(apply_wire(&f, &model, json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"position":{"type":"end"},"beat":{"type":"setVariable","variableId":target,"value":{"operation":"assign","operand":operand}}})).unwrap_err(), error);
     }
     assert_eq!(fs::read(f.root.join(&scene.source_path)).unwrap(), before);
 }
@@ -867,7 +867,7 @@ fn decimal_source_edits_preserve_trivia_ids_history_unknowns_and_reopen() {
         json!({"status":"unknown","reason":"unobservedCurrentValue"})
     );
     let beat = &scene.beats[2];
-    let command = |value: Value| json!({"type":"updateBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":beat.id,"beat":{"type":"setVariable","variableId":var.id,"value":value}});
+    let command = |value: Value| json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":beat.id,"beat":{"type":"setVariable","variableId":var.id,"value":value}});
     apply_wire(
         &f,
         &model,
@@ -925,7 +925,7 @@ fn decimal_target_import_preserves_an_existing_integer_assignment_exactly() {
     let wire = serde_json::to_value(beat).unwrap();
     assert_eq!(wire["assignment"]["inferredResultType"], "int");
     assert_eq!(wire["assignment"]["state"]["value"], "9007199254740993");
-    apply_wire(&f, &model, json!({"type":"updateBeat","sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":beat.id,"beat":beat.payload})).unwrap();
+    apply_wire(&f, &model, json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":scene.id,"expectedSourceRevision":scene.source_revision,"beatId":beat.id,"beat":beat.payload})).unwrap();
     assert_eq!(fs::read(f.root.join(&scene.source_path)).unwrap(), source);
     assert_eq!(f.history(), history);
 }
