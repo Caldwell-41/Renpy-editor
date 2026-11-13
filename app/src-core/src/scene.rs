@@ -412,11 +412,12 @@ pub enum SceneCommand {
         chapter_id: String,
         display_name: String,
     },
+    /// Creates a scene and sends an existing option of the Choice there.
     CreateSceneFromChoice {
         scene_id: String,
         expected_source_revision: String,
         choice_beat_id: String,
-        option_text: String,
+        option_id: String,
         chapter_id: String,
         display_name: String,
     },
@@ -908,7 +909,7 @@ impl AuthoringService {
         drafts::check_draft_ids(&request.drafts, drafts::MAX_SAVE_DRAFTS)?;
         let loaded = self.prepare_scene_command(project, project_id, &request, &command)?;
         let label = history_label(&loaded.project, &command);
-        let proposal = if drafts::is_body_beat_command(&command) {
+        let proposal = if drafts::is_draft_command(&command) {
             self.build_drafts(project, project_id, loaded, vec![command])
                 .map_err(SceneError::unindexed)?
                 .0
@@ -1505,7 +1506,7 @@ impl AuthoringService {
                 scene_id,
                 expected_source_revision,
                 choice_beat_id,
-                option_text,
+                option_id,
                 chapter_id,
                 display_name,
             } => self.create_scene_from_choice_proposal(
@@ -1514,7 +1515,7 @@ impl AuthoringService {
                 &scene_id,
                 &expected_source_revision,
                 &choice_beat_id,
-                option_text,
+                &option_id,
                 &chapter_id,
                 display_name,
             ),
@@ -1803,6 +1804,9 @@ impl AuthoringService {
         })
     }
 
+    /// Creates a scene and sends an existing Choice option there, in one edit. The
+    /// option's Jump, Return or Repeat becomes a Jump to the new scene; an option
+    /// that continues gets that Jump at its end. The author stays in this scene.
     #[allow(clippy::too_many_arguments)]
     fn create_scene_from_choice_proposal(
         &self,
@@ -1811,12 +1815,11 @@ impl AuthoringService {
         source_scene_id: &str,
         expected_source_revision: &str,
         choice_beat_id: &str,
-        option_text: String,
+        option_id: &str,
         chapter_id: &str,
         display_name: String,
     ) -> Result<TransactionProposal, SceneError> {
         validate_display(&display_name)?;
-        validate_text(&option_text)?;
         if loaded.project.scenes.len() >= MAX_SCENES {
             return Err(SceneError::InvariantBlocked);
         }
@@ -1863,17 +1866,34 @@ impl AuthoringService {
             .iter()
             .find(|beat| beat.id == choice_beat_id)
             .ok_or(SceneError::UnknownEntity)?;
-        let BeatPayload::Choice {
-            mut options,
-            prompt,
-            picked_policy,
-        } = choice.payload.clone()
-        else {
+        let BeatPayload::Choice { options, .. } = &choice.payload else {
             return Err(SceneError::InvalidPayload);
         };
-        if choice.protected || options.len() >= 64 {
+        if choice.protected {
             return Err(SceneError::InvariantBlocked);
         }
+        if !options
+            .iter()
+            .any(|option| option.id.as_deref() == Some(option_id))
+        {
+            return Err(SceneError::UnknownEntity);
+        }
+        let group_id = beats
+            .iter()
+            .find(|beat| beat.id == option_id)
+            .and_then(|header| header.conditional_branch.as_ref())
+            .map(|branch| branch.group_id.clone())
+            .ok_or(SceneError::UnknownEntity)?;
+        let body = BodyRef::Branch {
+            group_id,
+            branch_id: option_id.into(),
+        };
+        let ending = bodies::Bodies::new(&source_bytes, &beats)?
+            .tree()?
+            .into_iter()
+            .find(|item| item.body == body)
+            .ok_or(SceneError::UnknownEntity)?
+            .ending;
 
         self.transactions
             .ensure_directory(project, &chapter.directory)
@@ -1891,74 +1911,38 @@ impl AuthoringService {
             source_path: destination_path.clone(),
             extra: Map::new(),
         };
-        options.push(ChoiceOption {
-            unavailable_policy: UnavailablePolicy::Hide,
-            condition: None,
-            text: option_text,
-            id: None,
-        });
         loaded.project.scenes.push(destination.clone());
-        loaded.project.last_open = Selection {
-            chapter_id: chapter_id.into(),
-            scene_id: destination_id,
-        };
         loaded.source_map.sources.push(destination_path.clone());
 
-        let (proposed_source, forced) = structure::apply(
-            &source_bytes,
-            &beats,
-            structure::BodyEdit::Update {
-                id: choice_beat_id.into(),
-                body: BodyRef::Root,
-                payload: BeatPayload::Choice {
-                    options,
-                    prompt,
-                    picked_policy,
-                },
-            },
-            &loaded,
-            &source_scene,
-        )?;
-        let (_, _, parsed) = parse_scene(
-            &source_scene,
-            &proposed_source,
-            Some((
-                &loaded.project,
-                &loaded.authoring,
-                &loaded.source_map.owned_screens,
-            )),
-        )?;
-        let new_option = parsed
-            .iter()
-            .find(|b| b.start == choice.byte_start as usize)
-            .and_then(|b| match &b.payload {
-                BeatPayload::Choice { options, .. } => options
-                    .last()
-                    .and_then(|o| o.id.as_ref())
-                    .and_then(|id| id.parse::<usize>().ok()),
-                _ => None,
-            })
-            .ok_or(SceneError::InvariantBlocked)?;
-        let new_pass=parsed.iter().find(|b|matches!(b.nesting,Some(ParsedNesting::Child{branch_start,..}) if branch_start==new_option) && matches!(&b.payload,BeatPayload::CustomCode{source,..} if source.trim()=="pass")).ok_or(SceneError::InvariantBlocked)?;
-        let indent = indentation(
-            std::str::from_utf8(&proposed_source[new_pass.start..new_pass.end])
-                .map_err(|_| SceneError::UnsupportedSource)?,
-        );
-        let newline = if proposed_source.windows(2).any(|w| w == b"\r\n") {
-            "\r\n"
-        } else {
-            "\n"
+        // Then edits only the option's ending, as the Then menu does.
+        let payload = BeatPayload::Jump {
+            scene_id: destination_id,
         };
-        let mut proposed_source = proposed_source;
-        proposed_source.splice(
-            new_pass.start..new_pass.end,
-            format!(
-                "{}jump {}{newline}",
-                " ".repeat(indent),
-                destination.technical_label
-            )
-            .bytes(),
-        );
+        let edit = match ending {
+            bodies::BodyEnding::Ends { beat_id } => {
+                let last = beats
+                    .iter()
+                    .find(|beat| beat.id == beat_id)
+                    .ok_or(SceneError::UnknownEntity)?;
+                if last.protected || !is_terminal_payload(&last.payload) {
+                    return Err(SceneError::InvariantBlocked);
+                }
+                structure::BodyEdit::Update {
+                    id: beat_id,
+                    body,
+                    payload,
+                }
+            }
+            bodies::BodyEnding::Continues | bodies::BodyEnding::Unknown => {
+                structure::BodyEdit::Insert {
+                    body,
+                    position: Position::End,
+                    payload,
+                }
+            }
+        };
+        let (proposed_source, forced) =
+            structure::apply(&source_bytes, &beats, edit, &loaded, &source_scene)?;
         self.validate_candidate_transfers(
             project,
             &loaded,
@@ -5031,7 +5015,7 @@ mod tests {
             json!({"type": "moveChapter", "chapterId": "c", "direction": "up"}),
             json!({"type": "deleteChapter", "chapterId": "c"}),
             json!({"type": "createScene", "chapterId": "c", "displayName": "Scene"}),
-            json!({"type": "createSceneFromChoice", "sceneId": "s", "expectedSourceRevision": "r", "choiceBeatId": "b", "optionText": "Go", "chapterId": "c", "displayName": "Scene"}),
+            json!({"type": "createSceneFromChoice", "sceneId": "s", "expectedSourceRevision": "r", "choiceBeatId": "b", "optionId": "o", "chapterId": "c", "displayName": "Scene"}),
             json!({"type": "renameScene", "sceneId": "s", "displayName": "Scene"}),
             json!({"type": "moveScene", "sceneId": "s", "chapterId": "c", "direction": null, "expectedSourceRevision": "r"}),
             json!({"type": "deleteScene", "sceneId": "s", "expectedSourceRevision": "r"}),
@@ -6248,19 +6232,39 @@ mod tests {
             ),
             Err(SceneError::InvariantBlocked)
         ));
-        let expanded = fixture
-            .apply(
-                &with_choice,
+        let option_id = match &entry
+            .beats
+            .iter()
+            .find(|beat| beat.id == choice_id)
+            .unwrap()
+            .payload
+        {
+            BeatPayload::Choice { options, .. } => options[0].id.clone().unwrap(),
+            _ => unreachable!(),
+        };
+        let before = fs::read(fixture.root.join(&entry.source_path)).unwrap();
+        let create = |model: &SceneWorkspace, display_name: &str| {
+            let entry = model
+                .scenes
+                .iter()
+                .find(|scene| scene.id == fixture.entry_scene_id)
+                .unwrap();
+            fixture.apply(
+                model,
                 SceneCommand::CreateSceneFromChoice {
                     scene_id: entry.id.clone(),
                     expected_source_revision: entry.source_revision.clone(),
-                    choice_beat_id: choice_id,
-                    option_text: "Create a new path".into(),
-                    chapter_id,
-                    display_name: "Created from Choice".into(),
+                    choice_beat_id: choice_id.clone(),
+                    option_id: option_id.clone(),
+                    chapter_id: chapter_id.clone(),
+                    display_name: display_name.into(),
                 },
             )
-            .unwrap();
+        };
+        let entry_source = || fs::read_to_string(fixture.root.join(&entry.source_path)).unwrap();
+        // The option continued, so it gains a Jump to the new scene. It keeps its id,
+        // the Choice gains no option, and the author stays in this scene.
+        let expanded = create(&with_choice, "Created from Choice").unwrap();
         assert_eq!(expanded.scenes.len(), 3);
         let created = expanded
             .scenes
@@ -6268,6 +6272,8 @@ mod tests {
             .find(|scene| scene.display_name == "Created from Choice")
             .unwrap();
         assert!(fixture.root.join(&created.source_path).is_file());
+        assert!(entry_source().contains(&format!("jump {}", created.technical_label)));
+        assert_eq!(expanded.last_open.scene_id, with_choice.last_open.scene_id);
         let source_scene = expanded
             .scenes
             .iter()
@@ -6276,14 +6282,14 @@ mod tests {
         let BeatPayload::Choice { options, .. } = &source_scene
             .beats
             .iter()
-            .find(|beat| matches!(beat.payload, BeatPayload::Choice { .. }))
+            .find(|beat| beat.id == choice_id)
             .unwrap()
             .payload
         else {
             panic!("choice was not preserved")
         };
-        assert_eq!(options.len(), 2);
-        assert!(options[1].id.is_some());
+        assert_eq!(options.len(), 1);
+        assert_eq!(options[0].id.as_deref(), Some(option_id.as_str()));
         assert!(matches!(
             fixture.apply(
                 &expanded,
@@ -6295,23 +6301,53 @@ mod tests {
             Err(SceneError::ReferenceBlocked)
         ));
 
+        // A second new scene replaces that Jump. The first new scene is kept.
+        let again = create(&expanded, "Second destination").unwrap();
+        let second = again
+            .scenes
+            .iter()
+            .find(|scene| scene.display_name == "Second destination")
+            .unwrap();
+        assert_eq!(again.scenes.len(), 4);
+        let source = entry_source();
+        assert!(source.contains(&format!("jump {}", second.technical_label)));
+        assert!(!source.contains(&format!("jump {}", created.technical_label)));
+        assert!(fixture.root.join(&created.source_path).is_file());
+
+        // An option that is not in this Choice is refused.
+        assert!(matches!(
+            fixture.apply(
+                &again,
+                SceneCommand::CreateSceneFromChoice {
+                    scene_id: entry.id.clone(),
+                    expected_source_revision: again
+                        .scenes
+                        .iter()
+                        .find(|scene| scene.id == fixture.entry_scene_id)
+                        .unwrap()
+                        .source_revision
+                        .clone(),
+                    choice_beat_id: choice_id.clone(),
+                    option_id: "missing-option".into(),
+                    chapter_id: chapter_id.clone(),
+                    display_name: "Nowhere".into(),
+                },
+            ),
+            Err(SceneError::UnknownEntity)
+        ));
+
+        // Each edit is one Undo: the second restores the first Jump, the first the source.
+        let undone = fixture.undo().unwrap();
+        assert_eq!(undone.scenes.len(), 3);
+        assert!(!fixture.root.join(&second.source_path).exists());
+        assert!(entry_source().contains(&format!("jump {}", created.technical_label)));
         let undone = fixture.undo().unwrap();
         assert_eq!(undone.scenes.len(), 2);
         assert!(!fixture.root.join(&created.source_path).exists());
-        let BeatPayload::Choice { options, .. } = &undone
-            .scenes
-            .iter()
-            .find(|scene| scene.id == fixture.entry_scene_id)
-            .unwrap()
-            .beats
-            .iter()
-            .find(|beat| matches!(beat.payload, BeatPayload::Choice { .. }))
-            .unwrap()
-            .payload
-        else {
-            panic!("choice was not restored")
-        };
-        assert_eq!(options.len(), 1);
+        assert_eq!(
+            fs::read(fixture.root.join(&entry.source_path)).unwrap(),
+            before
+        );
     }
 
     #[test]
@@ -6729,7 +6765,11 @@ mod tests {
                     scene_id: entry.id.clone(),
                     expected_source_revision: entry.source_revision.clone(),
                     choice_beat_id: choice.id.clone(),
-                    option_text: "A new road".into(),
+                    // "Library" goes to the new scene.
+                    option_id: match &choice.payload {
+                        BeatPayload::Choice { options, .. } => options[1].id.clone().unwrap(),
+                        _ => unreachable!(),
+                    },
                     chapter_id: chapter_two,
                     display_name: "Created from Choice".into(),
                 },
@@ -6789,7 +6829,7 @@ mod tests {
         assert!(entry.partial);
         assert!(matches!(
             &entry.beats.iter().find(|b|matches!(b.payload,BeatPayload::Choice{..})).unwrap().payload,
-            BeatPayload::Choice { options, .. } if options.len() == 3
+            BeatPayload::Choice { options, .. } if options.len() == 2
         ));
         let garden = workspace
             .scenes

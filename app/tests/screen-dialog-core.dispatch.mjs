@@ -72,7 +72,7 @@ try{
  const commented=await source(singleScene.sourcePath);
  singleHost=await mountStory(singleScene.id);singleDraft=await newCall(singleHost);
  let singlePosition=singleDraft.querySelector('[aria-label="Insert before"]');
- const terminalOption=[...singlePosition.options].find(option=>option.textContent.startsWith('Before Return'));assert(terminalOption);
+ const terminalOption=[...singlePosition.options].find(option=>/^Before \d+ Return$/.test(option.textContent));assert(terminalOption);
  assert.notEqual(singlePosition.value,terminalOption.value,'Stale insertion must require an actual selectable position change');
  const refusedAt=messages.length;button(singleDraft,'Add Beat').click();await wait(()=>messages.length>refusedAt,'stale sole-position refusal');
  assert(singleDraft.isConnected);assert.equal(await source(singleScene.sourcePath),commented);assert.deepEqual(insertion,retained);

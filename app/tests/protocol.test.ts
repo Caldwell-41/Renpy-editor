@@ -221,7 +221,7 @@ test("Phase 1E Preview and media stay bounded, responsive, and explicit", async 
     readFile(new URL("src/main.ts", sourceRoot), "utf8"),
     readFile(new URL("src/styles.css", sourceRoot), "utf8"),
   ]);
-  for (const marker of ["deriveScenePreview", "Partial / unknown", "In effect at", "Add change here", "Audition current music", "audioAudition", "Create New Scene"]) assert.equal(source.includes(marker), true, marker);
+  for (const marker of ["deriveScenePreview", "Partial / unknown", "In effect at", "Add change here", "Audition current music", "audioAudition", "createSceneFromChoice"]) assert.equal(source.includes(marker), true, marker);
   assert.match(source, /disposed \|\| generation !== mediaGeneration/);
   assert.match(source, /URL\.revokeObjectURL/);
   assert.doesNotMatch(`${source}\n${main}`, /file:\/\//);

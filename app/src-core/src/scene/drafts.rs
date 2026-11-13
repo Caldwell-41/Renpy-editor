@@ -1,5 +1,6 @@
-//! Story Save: build every pending beat draft on one cumulative candidate, then
-//! commit once. Single-beat Commit uses the same builder with one command.
+//! Story Save: build every pending beat and condition draft on one cumulative
+//! candidate, then commit once. Single-draft Commit uses the same builder with one
+//! command.
 use super::*;
 use std::cell::RefCell;
 
@@ -116,10 +117,17 @@ pub(super) fn check_draft_ids(drafts: &[String], max: usize) -> Result<(), Scene
     Ok(())
 }
 
-pub(super) fn is_body_beat_command(command: &SceneCommand) -> bool {
+/// The commands a Story draft saves: a beat's payload, a condition's test, a new
+/// condition, and an added or removed condition branch.
+pub(super) fn is_draft_command(command: &SceneCommand) -> bool {
     matches!(
         command,
-        SceneCommand::InsertBodyBeat { .. } | SceneCommand::UpdateBodyBeat { .. }
+        SceneCommand::InsertBodyBeat { .. }
+            | SceneCommand::UpdateBodyBeat { .. }
+            | SceneCommand::InsertCondition { .. }
+            | SceneCommand::UpdateConditionBranch { .. }
+            | SceneCommand::AddConditionBranch { .. }
+            | SceneCommand::RemoveConditionBranch { .. }
     )
 }
 
@@ -149,7 +157,7 @@ impl AuthoringService {
     ) -> Result<SceneWorkspace, SceneError> {
         if request.commands.is_empty()
             || request.commands.len() > MAX_SAVE_DRAFTS
-            || !request.commands.iter().all(is_body_beat_command)
+            || !request.commands.iter().all(is_draft_command)
             || (!request.drafts.is_empty() && request.drafts.len() != request.commands.len())
         {
             return Err(SceneError::InvalidPayload);
@@ -163,15 +171,15 @@ impl AuthoringService {
             request.expected_authoring_revision.as_deref(),
             &request.commands,
         )?;
-        // One entry per saved beat. The renderer sends the most recently edited
-        // beat last, so it ends on top.
+        // One entry per saved draft. The renderer sends the most recently edited
+        // draft last, so it ends on top.
         let labels: Vec<_> = request
             .commands
             .iter()
             .map(|command| history_label(&loaded.project, command))
             .collect();
         let (proposal, built) = self.build_drafts(project, project_id, loaded, request.commands)?;
-        // A saved beat whose bytes did not change adds no entry; its draft still ends.
+        // A saved draft whose bytes did not change adds no entry; its draft still ends.
         let parts = labels
             .into_iter()
             .zip(built)
@@ -182,7 +190,7 @@ impl AuthoringService {
         self.scene_workspace(project, project_id)
     }
 
-    /// Builds each beat draft command on the candidate the commands before it
+    /// Builds each draft command on the candidate the commands before it
     /// left, and merges them into one proposal. It also returns each command's
     /// own mutations, in order. A refused command returns its index and nothing
     /// is written.
@@ -212,6 +220,26 @@ impl AuthoringService {
                     ..
                 }
                 | SceneCommand::UpdateBodyBeat {
+                    scene_id,
+                    expected_source_revision,
+                    ..
+                }
+                | SceneCommand::InsertCondition {
+                    scene_id,
+                    expected_source_revision,
+                    ..
+                }
+                | SceneCommand::UpdateConditionBranch {
+                    scene_id,
+                    expected_source_revision,
+                    ..
+                }
+                | SceneCommand::AddConditionBranch {
+                    scene_id,
+                    expected_source_revision,
+                    ..
+                }
+                | SceneCommand::RemoveConditionBranch {
                     scene_id,
                     expected_source_revision,
                     ..

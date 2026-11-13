@@ -121,7 +121,9 @@ try{
  const type=async(id,text)=>{const control=await open(id);input(control,text);await settle();return control;};
  const named=direction=>(direction==='undo'?undoButton():redoButton()).getAttribute('aria-label');
  const historyNow=()=>call('history.state');
- const newBeat=()=>document.querySelector('.scene-workspace .new-beat'),beatType=()=>newBeat()?.querySelector(':scope > .field select');
+ const newBeat=()=>document.querySelector('.scene-workspace .new-beat'),speaker=()=>newBeat()?.querySelector('select[aria-label="Speaker"]');
+ // + Add beat opens the compact Add a beat dialog; picking a kind opens its new beat draft.
+ const addBeat=async kind=>{button('+ Add beat',document.querySelector('.scene-workspace .scene-history'));await wait(()=>document.querySelector(`.story-add-beat [data-insert-kind="${kind}"]`),'Add a beat');document.querySelector(`.story-add-beat [data-insert-kind="${kind}"]`).click();await wait(newBeat,'new beat');await settle();};
  const headerSave=async check=>{button('Save',document.querySelector('.app-header'));await wait(check,'Story Save');await settle();};
  const original=await source(path),files=await disk(),prior=(await historyNow()).undo;assert.equal(prior.name,'button resize');
 
@@ -145,14 +147,14 @@ try{
  input(typed,'One two');typed.blur();input(typed,'One two three');await settle();
  for(const expected of ['One two','One',beatA.payload.text]){assert.equal(await header('undo'),'committed');assert.equal((await open(beatA.id)).value,expected);}
  assert.equal(marked(beatA.id),false,'Undo past the first step ends the draft');
- button('+ Add beat',document.querySelector('.scene-workspace .scene-history'));await wait(newBeat,'new beat');await settle();
+ await addBeat('dialogue');const character=speaker().value;
  await wait(()=>named('undo')===`Undo new dialogue draft in ${sceneName}`,'adding a beat is its first step');
- input(beatType(),'narration','change');await settle();input(newBeat().querySelector('textarea'),'New narration');await settle();
- assert.equal(await header('undo'),'committed');assert.equal(beatType().value,'narration');assert.equal(newBeat().querySelector('textarea').value,'');
- assert.equal(await header('undo'),'committed');assert.equal(beatType().value,'dialogue','a menu change is one step');
+ input(speaker(),'narration','change');await settle();input(newBeat().querySelector('textarea'),'New narration');await settle();
+ assert.equal(await header('undo'),'committed');assert.equal(speaker().value,'narration');assert.equal(newBeat().querySelector('textarea').value,'');
+ assert.equal(await header('undo'),'committed');assert.equal(speaker().value,character,'a speaker change is one step');
  assert.equal(await header('undo'),'committed');assert.equal(newBeat(),null,'Undo of adding the beat ends its draft');
  for(let i=0;i<3;i+=1)assert.equal(await header('redo'),'committed');
- assert.equal(beatType().value,'narration');assert.equal(newBeat().querySelector('textarea').value,'New narration');
+ assert.equal(speaker().value,'narration');assert.equal(newBeat().querySelector('textarea').value,'New narration');
  // Cancel is an edit: Undo brings the draft back, and Redo cancels it again.
  button('Cancel',newBeat());await settle();assert.equal(newBeat(),null);assert.equal(named('undo'),`Undo cancel of narration draft in ${sceneName}`);
  assert.equal(await header('undo'),'committed');assert.equal(newBeat()?.querySelector('textarea').value,'New narration','Undo of Cancel brings the draft back');
@@ -200,13 +202,13 @@ try{
  stage('Undo of an existing beat Cancel restores its draft; Undo of a beat delete restores the beat but not its discarded draft');
 
  // A refused Story Save writes nothing and keeps every draft step; Undo then fixes the failing draft and Save succeeds.
- await type(beatA.id,'Refused save A');button('+ Add beat',document.querySelector('.scene-workspace .scene-history'));await wait(newBeat,'new beat');input(beatType(),'choice','change');await settle();
- const available=()=>newBeat().querySelector('input[aria-label="Available when"]');available().checked=true;available().dispatchEvent(new Event('change',{bubbles:true}));await settle();
+ // A new Choice starts with one empty option, which Save refuses.
+ await type(beatA.id,'Refused save A');await addBeat('choice');
+ const picked=()=>newBeat().querySelector('select[aria-label="Picked options"]');[...newBeat().querySelectorAll('[aria-label="Picked options"] [role=radio]')].find(item=>item.textContent==='Mark picked').click();await settle();
  const quiet=await disk();await headerSave(()=>/^Nothing saved/.test(status()));
  assert.deepEqual(await disk(),quiet,'a refused Story Save writes nothing');assert.equal(named('undo'),`Undo choice change in ${sceneName}`);
- assert.equal(await header('undo'),'committed');assert.equal(available().checked,false,'a checkbox change is one step');
- assert.equal(await header('undo'),'committed');assert.equal(beatType().value,'dialogue');await wait(()=>status()==='2 unsaved beat drafts. Ready to save.','Undo fixes the refusal');
- assert.equal(await header('undo'),'committed');assert.equal(newBeat(),null);assert.deepEqual(await disk(),quiet);
+ assert.equal(await header('undo'),'committed');assert.equal(picked().value,'showNormally','a Picked options change is one step');
+ assert.equal(await header('undo'),'committed');assert.equal(newBeat(),null);await wait(()=>status()==='1 unsaved beat draft. Ready to save.','Undo fixes the refusal');assert.deepEqual(await disk(),quiet);
  await headerSave(async()=>(await source(path)).includes('Refused save A'));assert.equal(status(),'Saved');
  assert.equal(named('undo'),`Undo narration edit in ${sceneName}`);assert.equal(await header('undo'),'committed');assert.equal(await source(path),original);
  stage('a refused Story Save keeps the drafts and their steps; Undo repairs the draft and the next Save succeeds');

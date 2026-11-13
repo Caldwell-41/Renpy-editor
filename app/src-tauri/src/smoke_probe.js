@@ -102,9 +102,13 @@ setTimeout(async () => {
           { id: "background", byteStart: 30, byteEnd: 50, protected: false, payload: { type: "background", assetId: "background", transition: "dissolve" } },
           { id: "dialogue", byteStart: 50, byteEnd: 70, protected: false, payload: { type: "dialogue", characterId: "character", text: "Hello" } },
           { id: "music", byteStart: 70, byteEnd: 90, protected: false, payload: { type: "playMusic", assetId: "music" } },
-          { id: "choice", byteStart: 90, byteEnd: 130, protected: false, payload: { type: "choice", options: [{ text: "Continue" }] } },
+          { id: "choice", byteStart: 90, byteEnd: 130, protected: false, payload: { type: "choice", options: [{ id: "continue", text: "Continue" }] } },
+          // The option's header and its empty body, as core maps them.
+          { id: "continue", byteStart: 100, byteEnd: 115, protected: true, conditionalBranch: { groupId: "menu", choiceOption: true, ordinal: 0, otherwise: false }, payload: { type: "customCode", source: "\"Continue\":", reason: "Choice option" } },
+          { id: "continue-pass", byteStart: 115, byteEnd: 130, protected: true, structuralPlaceholder: true, owner: { groupId: "menu", branchId: "continue" }, payload: { type: "customCode", source: "pass", reason: "Empty option" } },
         ],
-        bodies: [{ body: { type: "root" }, kind: "scene", nodes: ["custom", "background", "dialogue", "music", "choice"].map(beatId => ({ beatId })), ending: { type: "continues" },
+        bodies: [{ body: { type: "branch", groupId: "menu", branchId: "continue" }, kind: "option", number: 1, parent: { type: "root" }, owningNode: "choice", nodes: [], ending: { type: "continues" }, places: [{ position: { type: "end" }, fitsEnding: true }], defaultPlace: { type: "end" } },
+          { body: { type: "root" }, kind: "scene", nodes: ["custom", "background", "dialogue", "music", "choice"].map(beatId => ({ beatId, ...beatId === "choice" ? { bodies: [{ type: "branch", groupId: "menu", branchId: "continue" }] } : {} })), ending: { type: "continues" },
           places: [{ position: { type: "before", anchor: { type: "beat", beatId: "background" } }, fitsEnding: false }, { position: { type: "before", anchor: { type: "beat", beatId: "dialogue" } }, fitsEnding: false }, { position: { type: "before", anchor: { type: "beat", beatId: "music" } }, fitsEnding: false }, { position: { type: "before", anchor: { type: "beat", beatId: "choice" } }, fitsEnding: false }, { position: { type: "end" }, fitsEnding: true }], defaultPlace: { type: "end" } }],
       }, {
         id: "scene-two", chapterId: "chapter-two", displayName: "Scene 2", technicalLabel: "scene_two",
@@ -449,15 +453,18 @@ setTimeout(async () => {
       .find((item) => item.ariaLabel?.startsWith("05 Choice"));
     if (!choiceButton) throw new Error("Missing Choice Beat");
     choiceButton.click();
-    click("Create New Scene");
-    const choiceFields = [...document.querySelectorAll(".choice-new-scene input")];
-    if (choiceFields.length !== 2) throw new Error("Missing Create New Scene fields");
-    choiceFields[0].value = "A new path";
-    choiceFields[0].dispatchEvent(new Event("input", { bubbles: true }));
-    choiceFields[1].value = "New destination";
-    choiceFields[1].dispatchEvent(new Event("input", { bubbles: true }));
-    click("Create Scene and option");
-    await awaitSceneCommit(2, "Create New Scene Choice transaction");
+    // Option 1's Then: Go to a scene opens the scene sheet, whose "+ New scene…" names the new scene.
+    await waitFor(() => document.querySelector(".story-option .story-outcome > summary"), "Choice option Then");
+    document.querySelector(".story-option .story-outcome > summary").click();
+    click("Go to a scene. Jump. Does not come back");
+    await waitFor(() => document.querySelector(".story-sheet"), "scene sheet");
+    click("+ New scene…");
+    await waitFor(() => document.querySelector('.story-new-scene input[aria-label="Scene name"]'), "New scene dialog");
+    const sceneName = document.querySelector('.story-new-scene input[aria-label="Scene name"]');
+    sceneName.value = "New destination";
+    sceneName.dispatchEvent(new Event("input", { bubbles: true }));
+    click("Create scene and link option 1");
+    await awaitSceneCommit(2, "New scene for a Choice option transaction");
     sceneAuthoringStage = "audio-audition";
     const audioBeforeClick = mediaPurposes.filter((purpose) => purpose === "audioAudition").length;
     click("Audition current music");

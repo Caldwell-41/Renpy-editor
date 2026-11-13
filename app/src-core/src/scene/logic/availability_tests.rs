@@ -234,17 +234,17 @@ fn picked_choice_records_before_transfers_and_roundtrips_history() {
         map
     );
     let fresh = f.model();
-    let created = f.command(json!({"type":"createSceneFromChoice","sceneId":scene["id"],"expectedSourceRevision":fresh["scenes"][0]["sourceRevision"],"choiceBeatId":menu["id"],"optionText":"Same","chapterId":fresh["chapters"][0]["id"],"displayName":"New destination"}));
+    let created = f.command(json!({"type":"createSceneFromChoice","sceneId":scene["id"],"expectedSourceRevision":fresh["scenes"][0]["sourceRevision"],"choiceBeatId":menu["id"],"optionId":menu["payload"]["options"][1]["id"],"chapterId":fresh["chapters"][0]["id"],"displayName":"New destination"}));
     let origin = created["scenes"]
         .as_array()
         .unwrap()
         .iter()
         .find(|s| s["id"] == scene["id"])
         .unwrap();
+    // The second "Same" now jumps to the new scene, after its picked record. Both
+    // options keep their identities.
     let options = &origin["beats"][0]["payload"]["options"];
-    assert_eq!(options.as_array().unwrap().len(), 3);
-    assert_ne!(options[2]["id"], options[0]["id"]);
-    assert_ne!(options[2]["id"], options[1]["id"]);
+    assert_eq!(options, &menu["payload"]["options"]);
     let text = fs::read_to_string(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap();
     assert!(text.contains("] = True\n            jump "));
     f.service.close().unwrap();
@@ -457,7 +457,7 @@ fn choice_missing_existing_helper_refuses_changed_source_commands_without_histor
             json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"beatId":beats[0]["id"],"beat":{"type":"narration","text":"Changed"}}),
             json!({"type":"updateBodyBeat","expectedBody":body,"beatId":inside["id"],"beat":{"type":"narration","text":"Changed"}}),
             json!({"type":"insertBodyBeat","body":body,"position":{"type":"end"},"beat":{"type":"narration","text":"Added"}}),
-            json!({"type":"createSceneFromChoice","choiceBeatId":menu["id"],"optionText":"New answer","chapterId":w["chapters"][0]["id"],"displayName":"Must not exist"}),
+            json!({"type":"createSceneFromChoice","choiceBeatId":menu["id"],"optionId":menu["payload"]["options"][0]["id"],"chapterId":w["chapters"][0]["id"],"displayName":"Must not exist"}),
         ];
         for mut command in commands.clone() {
             command["sceneId"] = scene["id"].clone();

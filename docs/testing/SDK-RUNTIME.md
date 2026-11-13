@@ -118,7 +118,7 @@ accepted only in that context. Validation failures, other exit codes/phases, err
 missing evidence and incomplete cleanup still fail. Unix signal exits can lack a
 numeric exit code; Windows qualification requires its numeric result.
 
-The optional `source-foundation` case retains the extended 33-check nested source,
+The optional `source-foundation` case retains the extended 34-check nested source,
 EOF/ownership/draft/external-refusal and close/reopen contract. Optional Branches
 performance cases remain separately selected. Neither is silently appended to the
 routine smoke or authorised by a command reference.

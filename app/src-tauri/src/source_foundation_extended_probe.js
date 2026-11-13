@@ -76,9 +76,10 @@ window.__loomlightFoundationExtended = async ({ details, check, wait, click, cal
   const eofText = accepted.text.slice(0, accepted.text.indexOf('    python:')).trimEnd();
   await save(eofText); const eofOwners = owners(model);
   check(!(await source()).text.endsWith('\n'), 'EOF fixture ends at child without final newline');
-  await click('+ Add beat'); await wait(() => document.querySelector('.new-beat'));
-  const adding = document.querySelector('.new-beat'), type = adding.querySelector('select');
-  type.value = 'narration'; type.dispatchEvent(new Event('change', { bubbles: true }));
+  // + Add beat opens Add a beat at the scene's default place, here the end of the scene.
+  await click('+ Add beat'); await wait(() => document.querySelector('.story-add-beat [data-insert-kind="narration"]'));
+  document.querySelector('.story-add-beat [data-insert-kind="narration"]').click(); await wait(() => document.querySelector('.new-beat'));
+  const adding = document.querySelector('.new-beat');
   const narration = adding.querySelector('textarea'); narration.value = 'EOF continuation'; narration.dispatchEvent(new Event('input', { bubbles: true }));
   [...adding.querySelectorAll('button')].find(b => b.textContent === 'Add Beat').click();
   await wait(() => !adding.isConnected); await refresh();

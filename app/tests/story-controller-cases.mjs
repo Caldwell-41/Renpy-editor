@@ -46,11 +46,25 @@ const envelope=(c,before,command)=>{
 const unchangedOtherSources=(c,before,after,path)=>{
  c.assert.deepEqual(Object.fromEntries(Object.entries(c.rpy(after)).filter(([p])=>p!==path)),Object.fromEntries(Object.entries(c.rpy(before)).filter(([p])=>p!==path)));
 };
+// An option's Only when opens from Edit; its first rule's number is the test value.
 const guard=async(c,choice,index,value)=>{
- await select(c,choice.id);const editor=card(c,choice.id);const option=editor.querySelectorAll('.choice-option')[index];c.assert(option);
- c.enter(option.querySelector('[aria-label="Condition value"]'),value);
+ await select(c,choice.id);const editor=card(c,choice.id);const option=editor.querySelectorAll('.story-option')[index];c.assert(option);
+ option.querySelector('.story-guard > button').click();
+ c.enter(option.querySelector('[aria-label="Only when rule 1 value"]'),value);
  await c.click('Commit Beat',editor);await c.wait(accepted(c,choice.id));
 };
+// Add a beat: pick a kind in the open dialog; its new beat opens in the editor.
+const pickIn=async(c,kind)=>{await c.wait(()=>c.document.querySelector('.scene-workspace .story-add-beat'));c.document.querySelector(`.scene-workspace .story-add-beat [data-insert-kind="${kind}"]`).click();await c.wait(()=>c.document.querySelector('.scene-workspace .new-beat'));};
+// A branch's + Beat opens Add a beat for that branch.
+const addIn=async(c,header,kind)=>{const section=await branchBody(c,header.id);section.querySelector(`[data-beat-opener="branch:${header.id}"]`).click();await pickIn(c,kind);return c.document.querySelector('.scene-workspace .new-beat');};
+// The rule builder: a rule's variable list, its test switch and its value.
+const ruleOf=(scope,index)=>scope.querySelectorAll('.story-rule')[index];
+const pickVariable=(c,scope,index,name)=>{const rule=ruleOf(scope,index);rule.querySelector('.story-variable-picker > summary').click();const option=[...rule.querySelectorAll('[role=option]')].find(item=>item.querySelector('.story-variable-name')?.textContent===name);c.assert(option,`variable ${name}`);option.click();};
+const pickTest=(c,scope,index,label)=>{const radio=[...ruleOf(scope,index).querySelectorAll('[role=radio]')].find(item=>item.textContent===label||item.getAttribute('aria-label')===label);c.assert(radio,`test ${label}`);radio.click();};
+const ruleValue=(c,scope,index,value)=>c.enter(ruleOf(scope,index).querySelector('.story-rule-how > input'),value);
+// Move to: open a place in the tree, then choose one of its positions.
+const movePick=(c,dialog,place,label)=>{const node=dialog.querySelector(`[data-node="${place}"]`);c.assert(node,`place ${place}`);if(node.getAttribute('aria-expanded')!=='true')node.click();
+ const position=[...dialog.querySelectorAll(`[data-node^="${place}:"]`)].find(item=>item.textContent.slice(1)===label||label instanceof RegExp&&label.test(item.textContent));c.assert(position,`position ${label}`);position.click();};
 const headers=s=>s.beats.filter(b=>b.conditionalBranch&&!b.owner);
 const authored={};
 // A condition's editor, by its group.
@@ -58,7 +72,9 @@ const group=async(c,id)=>{const node=nodeOf(c,id);c.assert(node,`Missing actual 
 // A branch's section of its condition's editor: the branch opens in the Branch path first.
 const branchBody=async(c,id)=>{const header=shownBeats(c).find(b=>b.id===id);c.assert(header);reveal(c,id);openBranch(c,id);const editor=await pick(c,nodeOf(c,header.conditionalBranch.groupId).id);const section=editor.querySelector(`.story-branch-editor[data-branch-id="${id}"]`);c.assert(section,`Missing branch editor ${id}`);return section;};
 const panel=(c,title)=>{const node=c.document.querySelector(`.story-operation[aria-label="${title}"]`);c.assert(node,`Missing actual operation ${title}`);return node;};
-const openHeader=async(c,id)=>{const section=await branchBody(c,id);await c.wait(()=>section.querySelector('.story-operation'));return section.querySelector('.story-operation');};
+// A branch's test is a retained draft panel with Commit test and Cancel.
+const openHeader=async(c,id)=>{const section=await branchBody(c,id);await c.wait(()=>section.querySelector('.story-branch-test'));return section.querySelector('.story-branch-test');};
+const conditionDraft=(c,label)=>{const node=c.document.querySelector(`.story-condition-draft[aria-label="${label}"]`);c.assert(node,`Missing condition draft ${label}`);return node;};
 const applyOperation=async(c,scope,label,type)=>{
  const at=c.requests().length;await c.click(label,scope);
  await c.wait(()=>c.requests().slice(at).some(r=>r.request.operation==='scene.apply'&&r.request.payload.command.type===type));
@@ -66,16 +82,8 @@ const applyOperation=async(c,scope,label,type)=>{
 };
 const replaceOnce=(c,text,old,next)=>{c.assert.equal(text.split(old).length,2,`Expected unique byte oracle: ${old}`);return text.replace(old,next);};
 const bodyRef=header=>({type:'branch',groupId:header.conditionalBranch.groupId,branchId:header.id});
-const conditionType=(c,scope,value)=>{const expression=scope.querySelector('.condition-expression');c.assert(expression);c.enter(expression.querySelector(':scope > label select[aria-label="Condition type"]'),value,'change');return expression;};
-const compare=(c,expression,name,operator,value)=>{
- const variable=c.workspace().authoring.variables.find(v=>v.technicalName===name);c.assert(variable);
- c.enter(expression.querySelector('[aria-label="Condition Variable"]'),variable.id,'change');
- c.enter(expression.querySelector('[aria-label="Condition operator"]'),operator,'change');
- c.enter(expression.querySelector('[aria-label="Condition value"]'),value,variable.variableType==='bool'?'change':'input');
-};
 const addNarration=async(c,header,value)=>{
- const before=c.workspace();await c.click(`Add Beat to ${header.conditionalBranch.otherwise?'Otherwise':header.conditionalBranch.ordinal?'Else If':'If'}`,await branchBody(c,header.id));
- const draft=c.document.querySelector('.new-beat');c.assert(draft);c.enter(draft.querySelector(':scope > .field select'),'narration','change');c.enter(draft.querySelector('textarea'),value);
+ const before=c.workspace();const draft=await addIn(c,header,'narration');c.assert(draft);c.enter(draft.querySelector('textarea'),value);
  await applyOperation(c,draft,'Add Beat','insertBodyBeat');const cmd=envelope(c,before,'insertBodyBeat');c.assert.deepEqual(cmd.body,bodyRef(header));
  return scene(c).beats.find(b=>b.payload.text===value);
 };
@@ -179,13 +187,11 @@ export const storyCases={
   const before=c.workspace(),s=scene(c),header=headers(s).find(b=>b.conditionalBranch.ordinal===0);c.assert(header);
   const body={type:'branch',groupId:header.conditionalBranch.groupId,branchId:header.id};const bytes=await c.snapshot();
   const original=c.sourceText(bytes,s.sourcePath);const originalIds=s.beats.map(b=>b.id);
-  await c.click('Add Beat to If',await branchBody(c,header.id));
-  const panel=c.document.querySelector('.new-beat');c.assert(panel);c.assert.match(panel.querySelector('.story-insertion').textContent,/If/);
-  c.enter(panel.querySelector(':scope > .field select'),'narration','change');
+  const panel=await addIn(c,header,'narration');c.assert(panel);
+  // The new beat names where it goes: at the end of the If, in that branch.
+  const where=[...panel.querySelectorAll('.story-where dd')].map(item=>item.textContent);
+  c.assert.match(where[0],/^End of "If .+"$/);c.assert.match(where[1],new RegExp(`^${s.displayName} › If `));c.assert.equal(where[2],`${row(c,shownBeats(c).find(b=>b.payload.text==='Nested retained').id).querySelector('.story-beat-number').textContent} Narration`);
   c.enter(panel.querySelector('textarea'),'Inserted branch café 雪');
-  c.enter(panel.querySelector(':scope > .field select'),'call','change');
-  c.enter(panel.querySelector(':scope > .field select'),'narration','change');
-  c.assert.equal(panel.querySelector('textarea').value,'Inserted branch café 雪');
   await c.click('Add Beat',panel);await c.wait(()=>c.lastMutation()?.response.ok&&!c.document.querySelector('.new-beat'));
   const command=envelope(c,before,'insertBodyBeat');c.assert.deepEqual(command.body,body);c.assert.deepEqual(command.position,{type:'end'});
   const after=await c.snapshot();c.assert.equal(c.sourceText(after,s.sourcePath),original.replace('    elif trust == 4:\n','        "Inserted branch café 雪"\n    elif trust == 4:\n'));
@@ -197,34 +203,39 @@ export const storyCases={
  },
  [names[3]]:async c=>{
   let before=c.workspace(),bytes=await c.snapshot(),original=c.sourceText(bytes,scene(c).sourcePath);const oldIds=scene(c).beats.map(b=>b.id);
-  await c.click('Add Condition',c.document.querySelector('.scene-workspace .scene-history'));let form=panel(c,'Add Condition');
-  const expression=conditionType(c,form,'and');let children=expression.querySelector('.condition-combination').querySelectorAll(':scope > .condition-expression');c.assert.equal(children.length,2);
-  compare(c,children[0],'precision','greaterEqual','9007199254740993');
-  c.enter(children[1].querySelector(':scope > label select[aria-label="Condition type"]'),'not','change');
-  const operand=children[1].querySelector('.condition-combination > .condition-expression');
-  c.enter(operand.querySelector(':scope > label select[aria-label="Condition type"]'),'bool','change');c.enter(operand.querySelector('[aria-label="Condition value"]'),'false','change');
-  await applyOperation(c,form,'Create Condition','insertCondition');const cmd=envelope(c,before,'insertCondition');
-  c.assert.deepEqual(cmd.body,{type:'root'});c.assert.equal(cmd.condition.expression.type,'and');c.assert.equal(cmd.condition.expression.left.right.value,'9007199254740993');c.assert.equal(cmd.condition.expression.right.type,'not');
+  // The rule builder starts with one rule on the first variable. Two rules join with All.
+  // A new condition is a draft, like a new beat, until Add Condition.
+  await c.click('Add Condition',c.document.querySelector('.scene-workspace .scene-history'));let form=c.document.querySelector('.scene-workspace .new-beat');c.assert.equal(form?.dataset.beatType,'condition');
+  pickVariable(c,form,0,'precision');ruleValue(c,form,0,'9007199254740993');
+  await c.click('+ Add rule',form);pickVariable(c,form,1,'trust');pickTest(c,form,1,'is less than');ruleValue(c,form,1,'5');
+  c.assert.equal(form.querySelector('.story-rule-code').textContent,'if precision >= 9007199254740993 and trust < 5:');
+  await applyOperation(c,form,'Add Condition','insertCondition');const cmd=envelope(c,before,'insertCondition');
+  c.assert.deepEqual(cmd.body,{type:'root'});c.assert.equal(cmd.condition.expression.type,'and');c.assert.deepEqual(cmd.condition.expression.left.right,{type:'int',value:'9007199254740993'});c.assert.equal(cmd.condition.expression.right.operator,'less');
   let current=scene(c),header=current.beats.find(b=>b.conditionalBranch&&!oldIds.includes(b.id));c.assert(header);authored.groupId=header.conditionalBranch.groupId;authored.headerId=header.id;
-  let expected=replaceOnce(c,original,'    return\n','    if ((precision >= 9007199254740993) and not False):\n        pass\n    return\n');
+  let expected=replaceOnce(c,original,'    return\n','    if ((precision >= 9007199254740993) and (trust < 5)):\n        pass\n    return\n');
   c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);c.assert(current.beats.some(b=>b.structuralPlaceholder&&b.owner?.branchId===header.id));
-  before=c.workspace();form=await openHeader(c,header.id);const simple=conditionType(c,form,'bool');c.enter(simple.querySelector('[aria-label="Condition value"]'),'false','change');
-  await applyOperation(c,form,'Apply condition','updateConditionBranch');const update=envelope(c,before,'updateConditionBranch');c.assert.equal(update.branchId,header.id);c.assert.deepEqual(update.expectedBody,{type:'root'});
-  expected=replaceOnce(c,expected,'    if ((precision >= 9007199254740993) and not False):\n','    if False:\n');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
-  before=c.workspace();await c.click('Add Else If',await group(c,authored.groupId));form=panel(c,'Add Else If');
-  compare(c,form.querySelector('.condition-expression'),'mood','equal','ready');c.enter(form.querySelector('[aria-label="Branch position"]'),'end','change');
-  await applyOperation(c,form,'Create Else If','addConditionBranch');c.assert.equal(envelope(c,before,'addConditionBranch').beforeBranchId,null);
-  expected=replaceOnce(c,expected,'    if False:\n        pass\n','    if False:\n        pass\n    elif (mood == "ready"):\n        pass\n');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
-  before=c.workspace();await c.click('Add Otherwise',await group(c,authored.groupId));form=panel(c,'Add Otherwise');
-  await applyOperation(c,form,'Create Otherwise','addConditionBranch');c.assert.equal(envelope(c,before,'addConditionBranch').condition,null);
+  // Editing the If test in place: remove the first rule and commit the test.
+  before=c.workspace();form=await openHeader(c,header.id);c.assert.equal(ruleOf(form,0).querySelector('.story-variable-name').textContent,'precision');
+  await c.click('Remove rule 1',form);await applyOperation(c,form,'Commit test','updateConditionBranch');const update=envelope(c,before,'updateConditionBranch');c.assert.equal(update.branchId,header.id);c.assert.deepEqual(update.expectedBody,{type:'root'});
+  expected=replaceOnce(c,expected,'    if ((precision >= 9007199254740993) and (trust < 5)):\n','    if (trust < 5):\n');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
+  before=c.workspace();await c.click('+ Add Else if',await group(c,authored.groupId));form=conditionDraft(c,'New Else if');
+  pickVariable(c,form,0,'mood');ruleValue(c,form,0,'ready');c.enter(form.querySelector('[aria-label="Branch position"]'),'end','change');
+  await applyOperation(c,form,'Add Else If','addConditionBranch');c.assert.equal(envelope(c,before,'addConditionBranch').beforeBranchId,null);
+  expected=replaceOnce(c,expected,'    if (trust < 5):\n        pass\n','    if (trust < 5):\n        pass\n    elif (mood == "ready"):\n        pass\n');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
+  before=c.workspace();await c.click('Add Otherwise',(await group(c,authored.groupId)).querySelector('.story-editor-tools'));form=conditionDraft(c,'New Otherwise');
+  await applyOperation(c,form,'Add Otherwise','addConditionBranch');c.assert.equal(envelope(c,before,'addConditionBranch').condition,null);
   expected=replaceOnce(c,expected,'    elif (mood == "ready"):\n        pass\n','    elif (mood == "ready"):\n        pass\n    else:\n        pass\n');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
   c.assert.equal(newHeaders(c).length,3);c.assert([...c.document.querySelectorAll('.story-branch-group')].some(item=>item.dataset.branchOwner===authored.headerId&&[...item.querySelectorAll('.story-branch-segment')].some(segment=>segment.textContent==='Otherwise')));
-  const elseif=newHeaders(c).find(b=>b.conditionalBranch.ordinal===1);before=c.workspace();form=await openHeader(c,elseif.id);compare(c,form.querySelector('.condition-expression'),'mood','equal','blocked');
-  await applyOperation(c,form,'Apply condition','updateConditionBranch');c.assert.equal(envelope(c,before,'updateConditionBranch').branchId,elseif.id);
+  const elseif=newHeaders(c).find(b=>b.conditionalBranch.ordinal===1);before=c.workspace();form=await openHeader(c,elseif.id);ruleValue(c,form,0,'blocked');
+  await applyOperation(c,form,'Commit test','updateConditionBranch');c.assert.equal(envelope(c,before,'updateConditionBranch').branchId,elseif.id);
   expected=replaceOnce(c,expected,'elif (mood == "ready")','elif (mood == "blocked")');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
-  // Cancel resets the branch's clean edit form; its branch action then replaces that clean form.
-  form=await openHeader(c,elseif.id);await c.click('Cancel',form);
-  before=c.workspace();await c.click('Delete branch',await branchBody(c,elseif.id));form=panel(c,'Delete branch');await applyOperation(c,form,'Delete this branch','removeConditionBranch');
+  // A half-typed number stays in its field, marked, and Commit test sends nothing.
+  form=await openHeader(c,header.id);const at=c.requests().length;ruleValue(c,form,0,'-');ruleOf(form,0).querySelector('.story-rule-how > input').dispatchEvent(new c.document.defaultView.Event('blur'));
+  c.assert.equal(ruleOf(form,0).querySelector('.story-rule-how > input').getAttribute('aria-invalid'),'true');await c.click('Commit test',form);await c.settle();
+  c.assert.equal(c.requests().slice(at).filter(r=>r.request.operation==='scene.apply').length,0);c.assert.equal(ruleOf(form,0).querySelector('.story-rule-how > input').value,'-');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
+  await c.click('Cancel',form);
+  // "Remove this Else if" marks the Else if; Remove branch removes it.
+  before=c.workspace();const marked=await branchBody(c,elseif.id);await c.click('Remove this Else if',marked);await c.settle();form=c.document.querySelector(`.story-branch-editor[data-branch-id="${elseif.id}"] .story-branch-removal`);c.assert(form);await applyOperation(c,form,'Remove branch','removeConditionBranch');
   c.assert.equal(envelope(c,before,'removeConditionBranch').branchId,elseif.id);
   expected=replaceOnce(c,expected,'    elif (mood == "blocked"):\n        pass\n','');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
   c.assert.deepEqual(newHeaders(c).map(b=>b.id),[header.id,newHeaders(c).find(b=>b.conditionalBranch.otherwise).id]);
@@ -235,13 +246,26 @@ export const storyCases={
   openBranch(c,focusBranch.id);await c.settle();c.assert.equal(segment(focusBranch.id).ariaPressed,'true');c.assert(c.document.querySelector(`.story-track-slot[data-branch-id="${focusBranch.id}"]`),'An empty Otherwise is one named slot');
   segment(focusBranch.id).click();await c.settle();c.assert.equal(segment(focusBranch.id).ariaPressed,'false');c.assert.equal(c.document.querySelector(`.story-track-slot[data-branch-id="${focusBranch.id}"]`),null);
   c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(controlBytes));c.assert.equal(c.requests().slice(controlsAt).filter(r=>r.request.operation==='scene.apply').length,0);
-  // Create and remove an actual nested condition using its explicit branch body.
-  before=c.workspace();await c.click('Add Condition to Otherwise',await branchBody(c,focusBranch.id));form=panel(c,'Add Condition');const nestedExpr=conditionType(c,form,'bool');c.enter(nestedExpr.querySelector('[aria-label="Condition value"]'),'true','change');
-  const priorIds=scene(c).beats.map(b=>b.id);await applyOperation(c,form,'Create Condition','insertCondition');c.assert.deepEqual(envelope(c,before,'insertCondition').body,bodyRef(focusBranch));
+  // Create and remove an actual nested condition: Add a beat in Otherwise offers Condition, which starts on the first variable.
+  before=c.workspace();form=await addIn(c,focusBranch,'condition');
+  const priorIds=scene(c).beats.map(b=>b.id);await applyOperation(c,form,'Add Condition','insertCondition');c.assert.deepEqual(envelope(c,before,'insertCondition').body,bodyRef(focusBranch));
   const nestedHeader=scene(c).beats.find(b=>b.conditionalBranch&&!priorIds.includes(b.id));c.assert(nestedHeader);c.assert.deepEqual(nestedHeader.owner,{groupId:authored.groupId,branchId:focusBranch.id});
-  const nestedBytes=replaceOnce(c,expected,'    if False:\n        pass\n    else:\n        pass\n','    if False:\n        pass\n    else:\n        if True:\n            pass\n');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),nestedBytes);
+  const nestedBytes=replaceOnce(c,expected,'    if (trust < 5):\n        pass\n    else:\n        pass\n','    if (trust < 5):\n        pass\n    else:\n        if (flag == True):\n            pass\n');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),nestedBytes);
   before=c.workspace();await c.click('Delete condition',await group(c,nestedHeader.conditionalBranch.groupId));form=panel(c,'Delete entire condition');await applyOperation(c,form,'Delete entire condition','removeStoryNode');c.assert.deepEqual(envelope(c,before,'removeStoryNode').expectedBody,bodyRef(focusBranch));
   c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
+  // Story Save writes a test edit and a new Else if as condition drafts, one Undo each.
+  const header2=c.document.querySelector('.app-header'),statusLine=c.document.querySelector('#app-status'),saveAt=c.requests().length;
+  form=await openHeader(c,header.id);ruleValue(c,form,0,'6');
+  await c.click('+ Add Else if',await group(c,authored.groupId));form=conditionDraft(c,'New Else if');pickVariable(c,form,0,'mood');ruleValue(c,form,0,'late');
+  await select(c,scene(c).beats.find(b=>!b.owner&&b.payload.type==='return').id);c.assert.equal(row(c,header.id).dataset.beatDraft,'true');
+  c.assert.equal(c.requests().slice(saveAt).filter(r=>r.request.operation==='scene.apply').length,0,'Condition drafts write nothing before Save');
+  await c.click('Save',header2);await c.wait(()=>statusLine.textContent==='Saved'&&c.requests().slice(saveAt).some(r=>r.request.operation==='scene.saveDrafts'));await c.settle();
+  const saved=c.requests().slice(saveAt).find(r=>r.request.operation==='scene.saveDrafts');
+  c.assert.deepEqual(saved.request.payload.commands.map(command=>command.type),['updateConditionBranch','addConditionBranch']);
+  const savedText=replaceOnce(c,replaceOnce(c,expected,'    if (trust < 5):\n','    if (trust < 6):\n'),'    if (trust < 6):\n        pass\n','    if (trust < 6):\n        pass\n    elif (mood == "late"):\n        pass\n');
+  c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),savedText);c.assert.equal(row(c,header.id).dataset.beatDraft,'false');
+  for(let i=0;i<2;i+=1){await c.history('undo');await c.settle();}
+  c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected,'Two Undos reverse the two saved condition drafts');
  },
  [names[4]]:async c=>{
   let before=c.workspace(),s=scene(c),bytes=await c.snapshot(),original=c.sourceText(bytes,s.sourcePath);
@@ -253,24 +277,27 @@ export const storyCases={
   c.assert.deepEqual(scene(c).beats.find(b=>b.id===inserted.id).owner,inserted.owner);
   let branch=newHeaders(c).find(b=>!b.conditionalBranch.ordinal);const leaf=await addNarration(c,branch,'Movable subtree leaf');c.assert(leaf);authored.leafId=leaf.id;
   branch=newHeaders(c).find(b=>b.conditionalBranch.otherwise);const other=await addNarration(c,branch,'Other subtree branch');c.assert(other);authored.otherId=other.id;
-  const block='    if False:\n        "Movable subtree leaf"\n    else:\n        "Other subtree branch"\n';
-  const filled=c.sourceText(await c.snapshot(),s.sourcePath);c.assert.equal(filled,replaceOnce(c,original,'    if False:\n        pass\n    else:\n        pass\n',block));
+  const block='    if (trust < 5):\n        "Movable subtree leaf"\n    else:\n        "Other subtree branch"\n';
+  const filled=c.sourceText(await c.snapshot(),s.sourcePath);c.assert.equal(filled,replaceOnce(c,original,'    if (trust < 5):\n        pass\n    else:\n        pass\n',block));
   const groupMembers=scene(c).beats.filter(b=>b.conditionalBranch?.groupId===authored.groupId||b.owner?.groupId===authored.groupId).map(b=>b.id);
   const originalElse=headers(scene(c)).find(b=>b.conditionalBranch.otherwise&&b.conditionalBranch.groupId!==authored.groupId);c.assert(originalElse);
-  before=c.workspace();await c.click('Move to…',await pick(c,authored.headerId));let form=panel(c,'Move story content');c.enter(form.querySelector('[aria-label="Destination body"]'),originalElse.id,'change');c.enter(form.querySelector('[aria-label="Destination position"]'),'end','change');
-  await applyOperation(c,form,'Move to destination','moveStoryNode');let command=envelope(c,before,'moveStoryNode');c.assert.deepEqual(command.node,{type:'condition',groupId:authored.groupId});c.assert.deepEqual(command.expectedBody,{type:'root'});c.assert.deepEqual(command.body,bodyRef(originalElse));
+  // Move to opens the tree on the condition's place; the original Otherwise is a closed place in it.
+  const moveDialog=()=>c.document.querySelector('.scene-workspace .story-move');
+  before=c.workspace();await c.click('Move to…',await pick(c,authored.headerId));let form=moveDialog();c.assert(form);c.assert.equal(form.querySelector(`[data-node="${originalElse.id}"]`).getAttribute('aria-expanded'),'false');
+  movePick(c,form,originalElse.id,'End of Otherwise');c.assert.match(form.querySelector('.story-summary').textContent,/· End of Otherwise$/);
+  await applyOperation(c,form,'Move','moveStoryNode');let command=envelope(c,before,'moveStoryNode');c.assert.deepEqual(command.node,{type:'condition',groupId:authored.groupId});c.assert.deepEqual(command.expectedBody,{type:'root'});c.assert.deepEqual(command.body,bodyRef(originalElse));
   const indented=block.split('\n').map(line=>line?'    '+line:line).join('\n');const movedText=replaceOnce(c,replaceOnce(c,filled,block,''),'    else:\n        pass\n','    else:\n'+indented);
   c.assert.equal(c.sourceText(await c.snapshot(),s.sourcePath),movedText);c.assert.deepEqual(scene(c).beats.filter(b=>groupMembers.includes(b.id)).map(b=>b.id),groupMembers);
   c.assert.deepEqual(scene(c).beats.find(b=>b.id===authored.headerId).owner,{groupId:originalElse.conditionalBranch.groupId,branchId:originalElse.id});
-  before=c.workspace();await c.click('Move to…',await pick(c,authored.headerId));form=panel(c,'Move story content');c.enter(form.querySelector('[aria-label="Destination body"]'),'root','change');
-  const terminal=scene(c).beats.find(b=>b.payload.type==='return'&&!b.owner);c.enter(form.querySelector('[aria-label="Destination position"]'),terminal.id,'change');
-  await applyOperation(c,form,'Move to destination','moveStoryNode');command=envelope(c,before,'moveStoryNode');c.assert.deepEqual(command.expectedBody,bodyRef(originalElse));c.assert.deepEqual(command.body,{type:'root'});
+  before=c.workspace();await c.click('Move to…',await pick(c,authored.headerId));form=moveDialog();
+  movePick(c,form,'root',/^○Before \d+ Return$/);
+  await applyOperation(c,form,'Move','moveStoryNode');command=envelope(c,before,'moveStoryNode');c.assert.deepEqual(command.expectedBody,bodyRef(originalElse));c.assert.deepEqual(command.body,{type:'root'});
   c.assert.equal(c.sourceText(await c.snapshot(),s.sourcePath),filled);c.assert(!scene(c).beats.find(b=>b.id===authored.headerId).owner);
   c.assert(scene(c).beats.some(b=>b.structuralPlaceholder&&b.owner?.branchId===originalElse.id));unchangedOtherSources(c,bytes,await c.snapshot(),s.sourcePath);
  },
  [names[5]]:async c=>{
   let before=c.workspace(),s=scene(c),bytes=await c.snapshot(),original=c.sourceText(bytes,s.sourcePath);
-  const block='    if False:\n        "Movable subtree leaf"\n    else:\n        "Other subtree branch"\n';
+  const block='    if (trust < 5):\n        "Movable subtree leaf"\n    else:\n        "Other subtree branch"\n';
   const opaqueBlock=replaceOnce(c,block,'        "Movable subtree leaf"\n','        "Movable subtree leaf"\n        python:\n            opaque_deleted = "kept"\n');
   const withOpaque=replaceOnce(c,original,block,opaqueBlock);await editSource(c,withOpaque);before=c.workspace();
   const members=scene(c).beats.filter(b=>b.owner?.groupId===authored.groupId&&!b.conditionalBranch&&!b.structuralPlaceholder);
@@ -317,8 +344,9 @@ export const storyCases={
   c.assert(!stage().includes('After branch terminal'));c.assert(!stage().includes('Caller resumed'));
   const otherwise=headers(s).find(b=>b.conditionalBranch.groupId===root.conditionalBranch.groupId&&b.conditionalBranch.otherwise);openBranch(c,otherwise.id);await c.settle();await pick(c,choice.id);
   c.assert.equal(card(c,choice.id).querySelector('[aria-label="Choice option text"]'),pending);c.assert.equal(pending.value,'Preview preserves unfinished input');c.assert(!pending.disabled);
-  // Only the game's choice menu overlays the stage, and it is read-only.
-  c.assert.equal(c.document.querySelector('.preview-choice-summary')?.parentElement,c.document.querySelector('.preview-canvas'));c.assert.equal(c.document.querySelectorAll('.preview-choice-summary button').length,0);previewBoundary(c,choice);
+  // Only the game's choice menu overlays the stage. Its buttons go to the option in the editor and write nothing.
+  const menu=c.document.querySelector('.story-game-choices');c.assert.equal(menu?.parentElement,c.document.querySelector('.preview-canvas'));
+  menu.querySelector('.story-game-choice').click();c.assert.equal(c.document.activeElement,pending);previewBoundary(c,choice);
   c.assert(!effects().includes('Variable trust = 77'));c.assert(!stage().includes('Nothing available'));
   c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(terminalBytes));c.assert.equal(c.requests().slice(from).filter(r=>r.request.operation==='scene.apply').length,0);
   await c.click('Cancel',card(c,choice.id));
@@ -449,8 +477,7 @@ export const storyCases={
    [...c.document.querySelectorAll('.tree-scene-open')].find(x=>x.textContent===name).click();
    await c.wait(()=>shownScene(c)===id&&c.document.querySelector('.scene-workspace .story-track-column'));await c.settle();};
   const type=async(id,text)=>{await select(c,id);c.enter(card(c,id)?.querySelector('textarea'),text);await c.settle();};
-  const addBeat=async kind=>{await c.click('+ Add beat',c.document.querySelector('.scene-workspace .scene-history'));await c.wait(newBeat);
-   c.enter(newBeat().querySelector(':scope > .field select'),kind,'change');await c.settle();return newBeat();};
+  const addBeat=async kind=>{await c.click('+ Add beat',c.document.querySelector('.scene-workspace .scene-history'));await pickIn(c,kind);await c.settle();return newBeat();};
   const save=async()=>{const at=c.requests().length,before=status();await c.click('Save',header);
    await c.wait(()=>!c.document.querySelector('.scene-workspace [disabled].story-track-beat')&&status()!==before&&/^(Saved|Nothing saved|Story changed)/.test(status()));await c.settle();return c.requests().slice(at);};
   // Four drafts in two scenes. A Choice update and a new Choice have no option text.
@@ -484,7 +511,9 @@ export const storyCases={
   c.assert(stale.some(r=>r.request.operation==='scene.list'&&r.responseOk),'A stale refusal refreshes Story');
   c.assert.equal(status(),"Story changed in source and was refreshed. Nothing saved. Save again.");c.assert.equal(ops('project.flush').length,0);
   // A new beat placed before a beat that source then removes conflicts, marked like any failing draft.
-  const placed=await addBeat('narration');c.enter(placed.querySelector('[aria-label="Insert before"]'),anchor.id,'change');c.enter(placed.querySelector('textarea'),'Story Save placed');await c.settle();
+  // The Choice column's + adds right after it, before "Nothing available".
+  row(c,choice.id).querySelector(`[data-beat-opener="after:${choice.id}"]`).click();await pickIn(c,'narration');const placed=newBeat();
+  c.assert.equal(placed.querySelector('.story-where dd').textContent,`Before ${row(c,anchor.id).querySelector('.story-beat-number').textContent} Narration`);c.enter(placed.querySelector('textarea'),'Story Save placed');await c.settle();
   await c.raw({driver:'externalRemove',path:entry.sourcePath,remove:'    "Nothing available"\n'});const removed=await c.snapshot();
   const conflict=await save();
   c.assert.equal(conflict.find(r=>r.request.operation==='scene.saveDrafts')?.errorCode,'SOURCE_CONFLICT');
@@ -536,7 +565,8 @@ export const storyCases={
   // Story reads source again when the author comes back from another workspace.
   const refresh=async()=>{const shown=shownScene(c),owner=c.session();await c.click('Branches');await c.wait(()=>c.session()===owner&&c.document.querySelector('.branches-workspace'));await c.settle();await goStory(c,shown);};
   const lost=()=>c.document.querySelector('.scene-workspace .story-editor > [data-beat-draft-key]');
-  const buttons=scope=>[...scope.querySelectorAll('button')].filter(x=>!x.hidden&&!x.closest('[hidden]')).map(x=>x.textContent);
+  // A closed menu's options are not shown.
+  const buttons=scope=>[...scope.querySelectorAll('button')].filter(x=>!x.hidden&&!x.closest('[hidden]')&&!x.closest('details:not([open]) > :not(summary)')).map(x=>x.textContent);
   for(const [id,text] of [[a.id,'Conflict draft A'],[b.id,'Other draft B'],[h.id,'Lost draft H'],[l.id,'Discarded draft L']]){
    await openScene(c.workspace().scenes.find(x=>x.beats.some(y=>y.id===id)).id);await type(id,text);}
   // Ordinary external edits. Source has not opened the Called, High or Low files in this session (#168).
@@ -635,7 +665,7 @@ export const storyCases={
   await view('Reel');const guarded=(await pick(c,opaque.id)).querySelector('.protected-code');c.assert(inReel(opaque.id)&&guarded);
   c.assert.equal(guarded.querySelector('p').textContent,opaque.sourceFallback??opaque.payload.reason);c.assert(guarded.querySelector('pre').textContent.includes('opaque_neighbor'));
   c.assert.equal(card(c,opaque.id).querySelector('textarea,input,select'),null,'Story offers no fields for protected source');
-  await c.click('View in Source',guarded);await c.wait(()=>mountedSourceEditor(c,entry.sourcePath));await c.settle();
+  await c.click('Edit in Source',guarded);await c.wait(()=>mountedSourceEditor(c,entry.sourcePath));await c.settle();
   await goStory(c);c.assert(c.document.querySelector('.scene-workspace .story-reel'),'Reel stays the view after Source');
   // The scene's Return ends it, so Reel offers no + after it.
   c.assert.equal(row(c,returnBeat.id).querySelector('.story-track-insert'),null,'Reel offers no + after a Return');
@@ -644,13 +674,13 @@ export const storyCases={
   c.enter(card(c,nested.id).querySelector('textarea'),'Nested from Reel');await c.settle();
   await select(c,choice.id);c.enter(card(c,choice.id).querySelector('[aria-label="Choice option text"]'),'');await c.settle();
   // A new beat started from a card's + in Reel cancels with no write; the other drafts stay.
-  reveal(c,nested.id);const cancelAt=c.requests().length;row(c,nested.id).querySelector('.story-track-insert').click();await c.wait(newBeat);
+  reveal(c,nested.id);const cancelAt=c.requests().length;row(c,nested.id).querySelector('.story-track-insert').click();await pickIn(c,'narration');
   c.enter(newBeat().querySelector('textarea'),'Cancelled in Reel');await c.settle();c.assert(c.document.querySelector('.scene-workspace .story-reel .story-track-pending'));
   await c.click('Cancel',newBeat());await c.wait(()=>!newBeat());await c.settle();
   c.assert.equal(c.document.querySelector('.scene-workspace .story-track-pending'),null);c.assert.deepEqual(await c.snapshot(),original);
   c.assert(!c.requests().slice(cancelAt).some(r=>r.request.operation==='scene.apply'));c.assert.equal(row(c,choice.id).dataset.beatDraft,'true');
-  openBranch(c,otherwise.id);await c.click('+ Add a beat',row(c,otherwise.id));await c.wait(newBeat);
-  c.enter(newBeat().querySelector(':scope > .field select'),'narration','change');c.enter(newBeat().querySelector('textarea'),'Otherwise from Reel');await c.settle();
+  openBranch(c,otherwise.id);await c.click('+ Add a beat',row(c,otherwise.id));await pickIn(c,'narration');
+  c.enter(newBeat().querySelector('textarea'),'Otherwise from Reel');await c.settle();
   // Switching views sends nothing, adds no history entry, and keeps the drafts, selection, open branch and new beat's place.
   const place=()=>{const node=c.document.querySelector('.scene-workspace .story-track-pending');return node&&[node.dataset.depth,node.dataset.arm,node.querySelector('.story-track-beat').dataset.selected];};
   const steps=await c.call('history.state'),at=c.requests().length,panel=newBeat(),inside=place();c.assert.deepEqual(inside?.slice(0,1).concat(inside?.[2]),['1','true']);
@@ -666,8 +696,8 @@ export const storyCases={
   unchangedOtherSources(c,original,slotted,entry.sourcePath);
   // The End of marker of the If branch adds its last beat, before the Else if.
   openBranch(c,ifHeader.id);const exit=c.document.querySelector(`.scene-workspace .story-reel .story-track-exit[data-branch-id="${ifHeader.id}"]`);c.assert(exit);
-  await c.click(exit.querySelector('.story-track-end').getAttribute('aria-label'),exit);await c.wait(newBeat);
-  c.enter(newBeat().querySelector(':scope > .field select'),'narration','change');c.enter(newBeat().querySelector('textarea'),'End of If from Reel');await c.settle();
+  await c.click(exit.querySelector('.story-track-end').getAttribute('aria-label'),exit);await pickIn(c,'narration');
+  c.enter(newBeat().querySelector('textarea'),'End of If from Reel');await c.settle();
   before=c.workspace();await c.click('Add Beat',newBeat());await c.wait(()=>c.lastMutation()?.response.ok&&!newBeat());await c.settle();
   const ended=envelope(c,before,'insertBodyBeat');c.assert.deepEqual([ended.body,ended.position],[bodyRef(ifHeader),{type:'end'}]);
   const inserted=await c.snapshot();
@@ -729,7 +759,7 @@ export const storyCases={
   c.assert.deepEqual(await c.snapshot(),original);
   // A new beat from the labelled first marker keeps its place through leaving and entering Writing focus, then inserts through the shared command.
   const entryMark=workspace().querySelector(`.story-track-entry[data-branch-id="${ifHeader.id}"] > button`);c.assert(entryMark?.textContent.startsWith('+ First beat in If '),`labelled entry marker: ${entryMark?.textContent}`);
-  entryMark.click();await c.wait(newBeat);c.enter(newBeat().querySelector(':scope > .field select'),'narration','change');c.enter(newBeat().querySelector('textarea'),'First in focus');await c.settle();
+  entryMark.click();await pickIn(c,'narration');c.enter(newBeat().querySelector('textarea'),'First in focus');await c.settle();
   const panel=newBeat(),inside=place();c.assert.equal(inside?.[0],'1');
   toggle().click();c.assert.deepEqual(place(),inside);c.assert.equal(newBeat(),panel);toggle().click();c.assert.deepEqual(place(),inside);
   let before=c.workspace();await c.click('Add Beat',panel);await c.wait(()=>c.lastMutation()?.response.ok&&!newBeat());await c.settle();

@@ -381,3 +381,108 @@ fn commit_joins_its_draft_steps_into_one_entry_on_top() {
     assert_eq!(project_bytes(&f), before);
     assert_eq!(f.history(), crate::history::HistoryState::default());
 }
+
+/// A scene with an If and Else if on a whole-number variable.
+fn condition_scene() -> (Fixture, SceneWorkspace) {
+    let f = Fixture::new(
+        b"label scene_one:\n    if score >= 1:\n        \"High\"\n    elif score >= 0:\n        \"Middle\"\n    \"After\"\n    return\n",
+    );
+    f.service
+        .create_variable(
+            &f.project,
+            &f.project_id,
+            CreateVariableRequest {
+                technical_name: "score".into(),
+                variable_type: VariableType::Int,
+                default_value: serde_json::json!("0"),
+            },
+        )
+        .unwrap();
+    f.migrate();
+    let ws = f.workspace();
+    (f, ws)
+}
+
+#[test]
+fn story_save_writes_condition_drafts_with_beat_drafts() {
+    let (f, ws) = condition_scene();
+    let scene = &ws.scenes[0];
+    let score = &ws.authoring.variables[0].id;
+    let header = |ordinal: u32| {
+        scene
+            .beats
+            .iter()
+            .find(|beat| {
+                beat.conditional_branch
+                    .as_ref()
+                    .is_some_and(|branch| branch.ordinal == ordinal && !branch.choice_option)
+            })
+            .unwrap()
+    };
+    let (if_header, elif_header) = (header(0), header(1));
+    let group = &if_header.conditional_branch.as_ref().unwrap().group_id;
+    let after = scene
+        .beats
+        .iter()
+        .find(|beat| beat.payload == narration("After"))
+        .unwrap();
+    let test = |value: &str| {
+        serde_json::json!({"status":"supported","expression":{"type":"compare","operator":"greaterEqual",
+            "left":{"type":"variable","variableId":score,"variableType":"int"},"right":{"type":"int","value":value}}})
+    };
+    let command = |value: serde_json::Value| -> SceneCommand {
+        let mut value = value;
+        value["sceneId"] = scene.id.clone().into();
+        value["expectedSourceRevision"] = scene.source_revision.clone().into();
+        serde_json::from_value(value).unwrap()
+    };
+    let before = project_bytes(&f);
+    for draft in ["test", "otherwise", "new", "after", "remove", "kept"] {
+        step(&f, draft, &format!("{draft}-1"));
+    }
+    // One Save: a branch's test, a new Otherwise, a new condition, a beat, and a
+    // branch removal, which the renderer sends last.
+    let saved = save_drafts(
+        &f,
+        &ws,
+        vec![
+            command(serde_json::json!({"type":"updateConditionBranch","groupId":group,"branchId":if_header.id,"expectedBody":{"type":"root"},"condition":test("2")})),
+            command(serde_json::json!({"type":"addConditionBranch","groupId":group,"expectedBody":{"type":"root"},"beforeBranchId":null,"condition":null})),
+            command(serde_json::json!({"type":"insertCondition","body":{"type":"root"},"position":{"type":"before","anchor":{"type":"beat","beatId":after.id}},"condition":test("5"),"otherwise":false})),
+            update(scene, scene.beats.iter().position(|beat| beat.id == after.id).unwrap(), "After draft"),
+            command(serde_json::json!({"type":"removeConditionBranch","groupId":group,"branchId":elif_header.id,"expectedBody":{"type":"root"}})),
+        ],
+        ["test", "otherwise", "new", "after", "remove"].map(String::from).to_vec(),
+    )
+    .unwrap();
+    assert_eq!(
+        String::from_utf8(fs::read(f.root.join(&scene.source_path)).unwrap()).unwrap(),
+        "label scene_one:\n    if (score >= 2):\n        \"High\"\n    else:\n        pass\n    if (score >= 5):\n        pass\n    \"After draft\"\n    return\n"
+    );
+    // The edited If keeps its id.
+    assert!(saved.scenes[0]
+        .beats
+        .iter()
+        .any(|beat| beat.id == if_header.id));
+    let after_save = project_bytes(&f);
+
+    // One entry per draft, the last sent on top. Five Undos restore the scene; the
+    // saved drafts' steps left the history and the kept draft's step stays.
+    for name in [
+        "condition branch removal in Scene 1",
+        "narration edit in Scene 1",
+        "new condition in Scene 1",
+        "new condition branch in Scene 1",
+        "condition edit in Scene 1",
+    ] {
+        assert_eq!(f.history().undo.unwrap().name, name);
+        f.undo().unwrap();
+    }
+    assert_eq!(project_bytes(&f), before);
+    let kept = f.service.history_undo(&f.project).unwrap();
+    assert_eq!(kept.step.map(|step| step.draft), Some("kept".into()));
+    for _ in 0..6 {
+        f.redo().unwrap();
+    }
+    assert_eq!(project_bytes(&f), after_save);
+}

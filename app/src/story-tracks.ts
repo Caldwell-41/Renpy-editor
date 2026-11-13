@@ -33,6 +33,19 @@ const beatOf = (scene: SceneDocument, id: string): SceneBeat | undefined => scen
 export function nodeBeats(scene: SceneDocument, body: BodyRef): SceneBeat[] {
   return (bodyOf(scene, body)?.nodes ?? []).flatMap(node => beatOf(scene, node.beatId) ?? []);
 }
+/**
+ * The Custom Code beat that leaves a body's ending unknown. Core takes a body's ending from
+ * its last node, so the cause is that node, or the cause inside its branches or options.
+ */
+export function unknownCause(scene: SceneDocument, body: BodyRef, depth = 0): SceneBeat | undefined {
+  if (depth > 16 || bodyOf(scene, body)?.ending.type !== "unknown") return undefined;
+  const last = nodeBeats(scene, body).at(-1);
+  if (!last || (last.payload.type === "customCode" && !last.conditionalBranch)) return last;
+  for (const inner of ownedBodies(scene, last)) { const cause = unknownCause(scene, inner, depth + 1); if (cause) return cause; }
+  return undefined;
+}
+/** Jump, Repeat this Choice and Return: the beats that end a body, which Then edits. */
+export function endingBeat(beat: SceneBeat): boolean { return beat.payload.type === "jump" || beat.payload.type === "repeatChoice" || beat.payload.type === "return"; }
 /** The body a condition or Choice node owns, by its header beat id. */
 export function ownedBodies(scene: SceneDocument, node: SceneBeat): readonly BodyRef[] {
   for (const body of scene.bodies) { const found = body.nodes.find(item => item.beatId === node.id); if (found) return found.bodies ?? []; }

@@ -34,7 +34,7 @@ test("Unknown guarded Choice is read-only with exact Source navigation and no mu
     assert.equal(card.querySelectorAll("input,textarea,select").length, 0);
     assert.equal(card.querySelector(".scene-draft"), null); assert.equal(hasSceneDraft(host), false);
     assert.ok(![...card.querySelectorAll("button")].some(button => button.textContent === "Commit Beat"));
-    const source = [...card.querySelectorAll("button")].find(button => button.textContent === "View in Source")!; source.click();
+    const source = [...card.querySelectorAll("button")].find(button => button.textContent === "Edit in Source")!; source.click();
     if (beat.id === "call") assert.match(card.textContent!, /Shared conversation · Returns to next Beat/);
     else { assert.match(card.textContent!, /trust is at least 9223372036854775807/); assert.match(card.textContent!, /Unknown condition: custom_check\(\)/); assert.match(card.textContent!, /Availability unknown/); }
   }
@@ -42,7 +42,7 @@ test("Unknown guarded Choice is read-only with exact Source navigation and no mu
   assert.deepEqual(writes, []);
   assert.equal([...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === "Assist · Continue Scene")!.disabled, true);
   [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === "+ Add beat")!.click();
-  assert.ok([...host.querySelectorAll<HTMLOptionElement>(".new-beat option")].some(option => option.value === "call"));
+  assert.ok([...host.querySelectorAll<HTMLElement>(".story-add-beat .story-result")].some(row => row.dataset.insertKind === "call"));
   dispose(); await browser.happyDOM.close();
 });
 

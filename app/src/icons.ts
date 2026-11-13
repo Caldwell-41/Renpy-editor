@@ -14,8 +14,10 @@ const paths: Record<string,string> = {
   undo: 'M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11',
   redo: 'm15 14 5-5-5-5m5 5H9.5a5.5 5.5 0 0 0 0 11H13',
 };
-export function icon(name: string): SVGSVGElement {
+export function icon(name: string): SVGSVGElement { return pathIcon(paths[name] ?? paths.story!, 'navigation-icon'); }
+/** A 24 px line icon from one SVG path, drawn in the current text colour. */
+export function pathIcon(d: string, className: string): SVGSVGElement {
   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-  svg.classList.add('navigation-icon');svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('aria-hidden','true');
-  const path=document.createElementNS(svg.namespaceURI,'path');path.setAttribute('d',paths[name]??paths.story!);path.setAttribute('fill','none');path.setAttribute('stroke','currentColor');path.setAttribute('stroke-width','1.5');path.setAttribute('stroke-linecap','round');path.setAttribute('stroke-linejoin','round');svg.append(path);return svg;
+  svg.classList.add(className);svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('aria-hidden','true');
+  const path=document.createElementNS(svg.namespaceURI,'path');path.setAttribute('d',d);path.setAttribute('fill','none');path.setAttribute('stroke','currentColor');path.setAttribute('stroke-width','1.5');path.setAttribute('stroke-linecap','round');path.setAttribute('stroke-linejoin','round');svg.append(path);return svg;
 }

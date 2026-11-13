@@ -81,7 +81,7 @@ try{
  stage('invalid and incompatible formulas retain exact input, field diagnostics and accepted source');
  await selectBeat(compound.id);enter(formula(),'bon');await settle();const input=formula();input.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',bubbles:true}));assert.equal(input.value,'bonus');assert(document.activeElement===input,"Suggestion must retain input focus");
  enter(input,'(bonus + 3) * 2');button('Writing focus');assert(formula()===input,"Writing focus must retain the same formula control");assert.equal(input.value,'(bonus + 3) * 2');button('Show game window');assert(formula()===input,"Writing focus must retain the same formula control");button('Cancel',selected());await settle();assert.equal(await source(path),accepted);
- const protectedBeat=scene().beats.find(b=>b.payload.type==='customCode'&&b.payload.source.includes('max('));assert(protectedBeat?.protected);await selectBeat(protectedBeat.id);assert.match(selected().textContent,/unsupported|protected|function/i);button('View in Source',selected());await wait(()=>document.querySelector('.source-editor'));assert(document.querySelector('.source-editor').value.includes('max(0, trust - 1)'));
+ const protectedBeat=scene().beats.find(b=>b.payload.type==='customCode'&&b.payload.source.includes('max('));assert(protectedBeat?.protected);await selectBeat(protectedBeat.id);assert.match(selected().textContent,/unsupported|protected|function/i);button('Edit in Source',selected());await wait(()=>document.querySelector('.source-editor'));assert(document.querySelector('.source-editor').value.includes('max(0, trust - 1)'));
  button('Story');await wait(()=>document.querySelector('.story-track-column'));await settle();
  stage('keyboard numeric suggestions, focus and Writing focus retain draft; Cancel writes nothing; protected import navigates to real Source');
  await selectBeat(compound.id);enter(formula(),'bonus + 8');staleSession=true;assert.equal((await commit()).ok,false);staleSession=false;assert.equal(lastApply.error.code,'STALE_PROJECT_SESSION');assert.equal(formula().value,'bonus + 8');button('Cancel',selected());await settle();
@@ -104,9 +104,9 @@ try{
  for(const name of ['arith_flag','arith_title']) {const id=workspace.authoring.variables.find(v=>v.technicalName===name).id;const literal=numeric().find(b=>b.payload.variableId===id);assert(literal);await selectBeat(literal.id);assert(selected().querySelector('[aria-label="Value"]'));assert.equal((await commit()).ok,true);assert.equal(await source(path),literalSource);}
  stage('all seven operation menu choices reach core with correct results; bool/string literal paths and no-op source remain intact');
  // Existing explicit branch owner, insertion position and the same validation/apply envelope.
- // The condition's editor owns Add Beat to If.
+ // The condition's editor owns + Beat for each branch; Add a beat then picks Set Variable.
  const ifHeader=scene().beats.find(b=>b.conditionalBranch&&!b.conditionalBranch.ordinal&&!b.conditionalBranch.otherwise);assert(ifHeader);await selectBeat(ifHeader.id);
- button('Add Beat to If');const newBeat=document.querySelector('.new-beat');enter(newBeat.querySelector('select'),'setVariable','change');
+ document.querySelector(`[data-beat-opener="branch:${ifHeader.id}"]`).click();document.querySelector('.story-add-beat [data-insert-kind="setVariable"]').click();await settle();const newBeat=document.querySelector('.new-beat');assert.equal(newBeat.dataset.beatType,'setVariable');
  enter(newBeat.querySelector('[aria-label="Variable"]'),workspace.authoring.variables.find(v=>v.technicalName==='trust').id,'change');
  enter(newBeat.querySelector('[aria-label="Formula"]'),'(bonus + 2) * 3');await settle();
  const validated=result.transcript.filter(t=>t.request.operation==='scene.validateAssignment').at(-1);assert.equal(validated.request.payload.command.type,'insertBodyBeat');assert.equal(validated.request.payload.command.body.type,'branch');

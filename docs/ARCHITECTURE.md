@@ -281,10 +281,12 @@ accepts that exact draft once. A clean settled Source falls through to normal Fl
 without an ownership gap; refusal never falls through. Successful Source acceptance is
 already durable through the shared transaction and does not append another Flush.
 
-[ADR 0022](adr/0022-saving-retained-story-drafts.md) defines the selected Story
-extension, not yet implemented: Save accepts all retained beat drafts after
-validating the whole set. It replaces the Flush-only route in Story when drafts
-are pending and preserves the existing shell, Source and transaction ownership.
+[ADR 0022](adr/0022-saving-retained-story-drafts.md) defines Story Save: Save accepts
+all retained drafts after validating the whole set. `scene.saveDrafts` takes beat
+commands and the condition commands (`insertCondition`, `updateConditionBranch`,
+`addConditionBranch`, `removeConditionBranch`), one draft per command, and builds
+them on one candidate. It replaces the Flush-only route in Story when drafts are
+pending and preserves the existing shell, Source and transaction ownership.
 
 Undo/redo records semantic intent and exact patches across visual and source edits.
 External filesystem revisions are safety boundaries: undo/redo must not silently
@@ -619,6 +621,14 @@ Writing focus is view state in that controller too. It lays out the same editor 
 route with CSS, and its sidebar and lane widths are CSS custom properties kept for the
 project session, so entering, leaving and resizing send nothing to core and add no
 history entry.
+
+The Story controller (`scene-ui.ts`) owns every beat draft, whichever view shows it.
+The beat, Choice and rule-builder editors (`story-*-editor.ts`) build controls and read
+a payload. An edit that applies at once, such as a Choice's Then, goes through the
+controller. Add a beat and Move to list core's insertion places, and a move is one
+`scene.apply` command. A picker sheet's hover or focus preview and the stage's
+Preview options are view state: they change only the stage, never a draft, source or
+history.
 
 The selected Story design extends this preview with valid, uncommitted beat drafts.
 This is an inert preview of pending edits, not source acceptance or a second saved

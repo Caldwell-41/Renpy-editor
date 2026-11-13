@@ -77,3 +77,76 @@ export function selectBeat(host: ParentNode, id: string, ...branches: string[]):
   select.click();
   return storyEditor(host);
 }
+
+/** A scene for the Combined beat editors: pictures, characters, a condition and a Choice
+ *  whose options own beats. Option 1 may leave through Custom Code (ending unknown),
+ *  option 2 jumps, and Custom Code ends option 3. Bodies are complete, so tests render it
+ *  with the production Story view rather than `withBodies`. */
+export function editorFixture(): SceneWorkspace {
+  let offset = 20; const beats: SceneBeat[] = [];
+  const add = (beat: Omit<SceneBeat, "byteStart" | "byteEnd">): void => { beats.push({ ...beat, byteStart: offset, byteEnd: offset + 20 }); offset += 20; };
+  const option = (id: string, ordinal: number): void => add({ id, protected: true, conditionalBranch: { groupId: "menu", choiceOption: true, ordinal, otherwise: false }, payload: { type: "customCode", source: "", reason: "Option" } });
+  const opt = (branchId: string) => ({ groupId: "menu", branchId });
+  add({ id: "bg", protected: false, payload: { type: "background", assetId: "platform", transition: "none" } });
+  add({ id: "show", protected: false, payload: { type: "showCharacter", characterId: "mara", appearanceId: "mara-neutral", placement: "centre", transition: "dissolve" } });
+  add({ id: "line", protected: false, payload: { type: "dialogue", characterId: "mara", text: "You heard the bell too?" } });
+  add({ id: "if", protected: true, conditionalBranch: { groupId: "test", ordinal: 0, otherwise: false, condition: trustCondition }, payload: { type: "customCode", source: "if trust >= 5:", reason: "Condition header" } });
+  add({ id: "inside", protected: false, owner: { groupId: "test", branchId: "if" }, payload: { type: "narration", text: "She nods." } });
+  add({ id: "else", protected: true, conditionalBranch: { groupId: "test", ordinal: 1, otherwise: true }, payload: { type: "customCode", source: "else:", reason: "Condition header" } });
+  add({ id: "pass", protected: true, structuralPlaceholder: true, owner: { groupId: "test", branchId: "else" }, payload: { type: "customCode", source: "        pass", reason: "Empty branch" } });
+  add({ id: "choice", protected: false, payload: { type: "choice", prompt: { type: "dialogue", characterId: "eli", text: "Last call. Are you getting on?" }, pickedPolicy: "showNormally", options: [{ id: "opt1", text: "Ask about the last tram" }, { id: "opt2", text: "Leave" }, { id: "opt3", text: "Wait for the next service", condition: trustCondition }] } });
+  option("opt1", 0);
+  add({ id: "ask", protected: false, owner: opt("opt1"), payload: { type: "dialogue", characterId: "mara", text: "The last tram doesn't stop here." } });
+  add({ id: "maybe", protected: true, owner: opt("opt1"), payload: { type: "customCode", source: '$ renpy.jump("depot") if late else None', reason: "Custom Code" } });
+  option("opt2", 1);
+  add({ id: "walk", protected: false, owner: opt("opt2"), payload: { type: "narration", text: "Mara turns up her collar." } });
+  add({ id: "leave", protected: false, owner: opt("opt2"), payload: { type: "jump", sceneId: "two" } });
+  option("opt3", 2);
+  add({ id: "code", protected: true, owner: opt("opt3"), payload: { type: "customCode", source: "$ renpy.jump(next_stop)", reason: "Custom Code" } });
+  add({ id: "close", protected: false, payload: { type: "narration", text: "The doors close behind them." } });
+  add({ id: "end", protected: false, payload: { type: "return" } });
+  const bodies = sceneBodies(beats, ["code"]).map(body => body.body.type === "branch" && body.body.branchId === "opt1" ? { ...body, ending: { type: "unknown" as const } } : body);
+  const scene = (id: string, displayName: string, own: SceneBeat[]) => ({ id, chapterId: "chapter", displayName, technicalLabel: id, sourcePath: `game/${id}.rpy`, sourceRevision: `source-${id}`, sourceConflict: false, partial: false, beats: own, bodies: id === "one" ? bodies : sceneBodies(own) });
+  return { projectRevision: "project", sourceMapRevision: "map", entrySceneId: "one", lastOpen: { chapterId: "chapter", sceneId: "one" }, chapters: [{ id: "chapter", displayName: "The Last Tram", directory: "game" }],
+    scenes: [scene("one", "The last service", beats), scene("two", "Depot", [{ id: "depot-bg", byteStart: 20, byteEnd: 40, protected: false, payload: { type: "background", assetId: "depot", transition: "none" } }, { id: "depot-line", byteStart: 40, byteEnd: 60, protected: false, payload: { type: "narration", text: "The depot is dark." } }])],
+    authoring: {
+      characters: [{ id: "mara", displayName: "Mara", technicalName: "mara", dialogueColor: "#e0a0b0", defaultAppearanceId: "mara-neutral" }, { id: "eli", displayName: "Eli", technicalName: "eli", dialogueColor: "#8fc4e8", defaultAppearanceId: "eli-neutral" }],
+      appearances: [{ id: "mara-neutral", characterId: "mara", label: "Neutral", assetId: "mara-neutral-image" }, { id: "mara-concerned", characterId: "mara", label: "Concerned", assetId: "mara-concerned-image" }, { id: "eli-neutral", characterId: "eli", label: "Neutral", assetId: "eli-neutral-image" }],
+      assets: [{ id: "platform", kind: "background", displayName: "Rainy platform", status: "available" }, { id: "depot", kind: "background", displayName: "Depot at night", status: "available" }, { id: "dawn", kind: "background", displayName: "Station at dawn", status: "available" },
+        { id: "mara-neutral-image", kind: "characterAppearance", displayName: "Mara neutral", status: "available" }, { id: "mara-concerned-image", kind: "characterAppearance", displayName: "Mara concerned", status: "available" }, { id: "eli-neutral-image", kind: "characterAppearance", displayName: "Eli neutral", status: "available" },
+        { id: "night", kind: "music", displayName: "Night service", status: "available" }, { id: "bell", kind: "sfx", displayName: "Tram bell", status: "available" }],
+      variables: [{ id: "flag", technicalName: "has_ticket", variableType: "bool", defaultValue: true }, { id: "trust", technicalName: "trust", variableType: "int", defaultValue: "0" }, { id: "fare", technicalName: "fare", variableType: "decimal", defaultValue: 2.5 }, { id: "mood", technicalName: "mood", variableType: "string", defaultValue: "calm" }],
+    } };
+}
+
+/** Presses a button by its text or accessible name. */
+export function press(scope: ParentNode, label: string): HTMLButtonElement {
+  const found = [...scope.querySelectorAll<HTMLButtonElement>("button")].find(item => item.textContent === label || item.getAttribute("aria-label") === label);
+  if (!found) throw Error(`No button ${label}`);
+  found.click(); return found;
+}
+/** Picks a kind in the open Add a beat dialog and returns the new beat's editor panel. */
+export function pickKind(host: ParentNode, kind: string): HTMLElement {
+  const dialog = host.querySelector<HTMLElement>(".story-add-beat"); if (!dialog) throw Error("Add a beat is not open");
+  const row = [...dialog.querySelectorAll<HTMLButtonElement>(".story-result")].find(item => item.textContent === kind); if (!row) throw Error(`No beat kind ${kind}`);
+  row.click();
+  const panel = host.querySelector<HTMLElement>(".story-editor .new-beat"); if (!panel && kind !== "Condition") throw Error(`No new ${kind} beat`);
+  return panel ?? host.querySelector<HTMLElement>('.story-operation[aria-label="Add Condition"]')!;
+}
+/** Chooses a value in a switch, list or menu by the group's label and the value's text. */
+export function chooseIn(scope: ParentNode, group: string, value: string): void {
+  const control = [...scope.querySelectorAll<HTMLElement>("[role=radiogroup], [role=listbox]")].find(item => item.getAttribute("aria-label") === group);
+  if (!control) throw Error(`No ${group}`);
+  const option = [...control.querySelectorAll<HTMLButtonElement>("[role=radio], [role=option]")].find(item => item.textContent === value || item.getAttribute("aria-label") === value);
+  if (!option) throw Error(`No ${value} in ${group}`);
+  option.click();
+}
+/** A Choice editor's option blocks, in order. */
+export function optionBlocks(scope: ParentNode): HTMLElement[] { return [...scope.querySelectorAll<HTMLElement>(".story-option")]; }
+/** Opens an option's Only when rule builder and returns it. */
+export function openGuard(block: HTMLElement): HTMLElement {
+  const toggle = [...block.querySelectorAll<HTMLButtonElement>(".story-guard > button")][0]; if (toggle) toggle.click();
+  const rules = block.querySelector<HTMLElement>(".story-rules"); if (!rules) throw Error("No rule builder"); return rules;
+}
+/** Types into a field as the author does: the value, then an input event. */
+export function type(control: HTMLInputElement | HTMLTextAreaElement, value: string): void { control.value = value; control.dispatchEvent(new Event("input", { bubbles: true })); }
