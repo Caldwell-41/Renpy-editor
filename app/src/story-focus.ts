@@ -40,7 +40,10 @@ export function resizeGrip({ key, label, host, widths, measure, min, max, grow }
   let before: { readonly width: number | undefined } | undefined;
   let drag: { readonly x: number; readonly start: number } | undefined;
   const escape = (event: KeyboardEvent): void => {
-    if (event.key !== "Escape" || !drag) return;
+    if (!drag) return;
+    // A redraw during the drag removed the grip, so its pointer events stop here.
+    if (!grip.isConnected) { end(); return; }
+    if (event.key !== "Escape") return;
     event.preventDefault(); event.stopPropagation(); restore(before?.width); end();
   };
   const end = (): void => { drag = undefined; before = undefined; grip.dataset.dragging = "false"; document.removeEventListener("keydown", escape, true); };
@@ -69,15 +72,18 @@ export function resizeGrip({ key, label, host, widths, measure, min, max, grow }
  *  A lane grows only into the room Words has above its minimum (`--words-min`). */
 export function laneGrips(scroller: HTMLElement, host: HTMLElement, widths: FocusWidths): void {
   const labels = scroller.querySelector<HTMLElement>(".story-track-labels"); if (!labels) return;
-  const lane = (index: number): HTMLElement => labels.children[index] as HTMLElement;
-  const width = (index: number): number => lane(index).getBoundingClientRect().width;
+  const width = (index: number): number => laneLabel(labels, index).getBoundingClientRect().width;
   const view = labels.ownerDocument.defaultView!;
-  const room = (): number => width(3) - (parseFloat(view.getComputedStyle(labels).getPropertyValue("--words-min")) || 220);
-  for (const index of [0, 1, 2, 4, 5]) {
-    const grip = resizeGrip({ key: `lane-${index}`, label: `${lanes[index]} lane width`, host, widths, measure: () => width(index), min: 40, max: () => width(index) + room(), grow: index < 3 ? 1 : -1 });
-    grip.classList.add(index < 3 ? "story-grip-end" : "story-grip-start"); lane(index).append(grip);
-  }
+  const room = (): number => width(words) - (parseFloat(view.getComputedStyle(labels).getPropertyValue("--words-min")) || 220);
+  lanes.forEach((name, index) => {
+    if (index === words) return;
+    const before = index < words;
+    const grip = resizeGrip({ key: `lane-${index}`, label: `${name} lane width`, host, widths, measure: () => width(index), min: 40, max: () => width(index) + room(), grow: before ? 1 : -1 });
+    grip.classList.add(before ? "story-grip-end" : "story-grip-start"); laneLabel(labels, index).append(grip);
+  });
 }
+const words = lanes.indexOf("Words");
+const laneLabel = (labels: HTMLElement, index: number): HTMLElement => labels.children[index] as HTMLElement;
 
 /** Names the lanes cut off at either edge of Writing focus Tracks, in buttons that scroll
  *  them into view, and marks the cut edge. Returns a function that stops watching. */
@@ -93,9 +99,10 @@ export function watchHiddenLanes(scroller: HTMLElement, toolbar: HTMLElement): (
   // Lane cells keep 8 px of padding, so a cut within it hides no text.
   const slack = 8;
   const update = (): void => {
-    const box = scroller.getBoundingClientRect(), right = box.left + scroller.clientWidth;
-    const shown = lanes.flatMap((name, index) => { const rect = (labels.children[index] as HTMLElement).getBoundingClientRect(); return rect.width > 0 ? [{ name, rect }] : []; });
-    for (const [button, hidden, side] of [[start, shown.filter(lane => lane.rect.left < box.left - slack), "start"], [end, shown.filter(lane => lane.rect.right > right + slack), "end"]] as const) {
+    // The Beat lane stays at the left edge, so lanes slide under it.
+    const box = scroller.getBoundingClientRect(), left = laneLabel(labels, 0).getBoundingClientRect().right, right = box.left + scroller.clientWidth;
+    const shown = lanes.flatMap((name, index) => { const rect = laneLabel(labels, index).getBoundingClientRect(); return index > 0 && rect.width > 0 ? [{ name, rect }] : []; });
+    for (const [button, hidden, side] of [[start, shown.filter(lane => lane.rect.left < left - slack), "start"], [end, shown.filter(lane => lane.rect.right > right + slack), "end"]] as const) {
       const names = hidden.map(lane => lane.name);
       button.hidden = !names.length; scroller.dataset[side === "start" ? "hiddenStart" : "hiddenEnd"] = String(!!names.length);
       if (!names.length) continue;
@@ -107,5 +114,5 @@ export function watchHiddenLanes(scroller: HTMLElement, toolbar: HTMLElement): (
   const observer = new (scroller.ownerDocument.defaultView!.ResizeObserver)(update);
   observer.observe(scroller); observer.observe(labels);
   update();
-  return () => observer.disconnect();
+  return () => { observer.disconnect(); scroller.removeEventListener("scroll", update); };
 }

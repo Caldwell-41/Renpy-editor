@@ -571,6 +571,10 @@ export interface StoryView {
   dispose(): void;
 }
 
+/** Where Tracks or Reel is scrolled, kept across redraws. */
+interface ScrollPosition { readonly left: number; readonly top: number }
+const scrollOf = (scroller: HTMLElement | null): ScrollPosition => ({ left: scroller?.scrollLeft ?? 0, top: scroller?.scrollTop ?? 0 });
+
 export function renderStoryView(
   host: HTMLElement,
   treeHost: HTMLElement,
@@ -1027,7 +1031,7 @@ export function renderStoryView(
     mediaGeneration += 1;
     for (const url of audioUrls) URL.revokeObjectURL?.(url);
     audioUrls.clear();
-    const scroller = host.querySelector<HTMLElement>(".story-tracks-scroll"), scroll = { left: scroller?.scrollLeft ?? 0, top: scroller?.scrollTop ?? 0 };
+    const scroll = scrollOf(host.querySelector<HTMLElement>(".story-tracks-scroll"));
     treeHost.replaceChildren();
     host.replaceChildren();
     const selectedScene = storyScene(model, selectedSceneId);
@@ -1576,15 +1580,16 @@ export function renderStoryView(
 
   // Entering or leaving Writing focus moves no content: the editor, its drafts, focus and
   // caret stay, and only the bottom panel redraws for its rows. Nothing reaches core.
+  const focusToggleName = (on: boolean): string => on ? "Show game window" : "Writing focus";
   const setWritingFocus = (scene: SceneDocument, on: boolean, toggle: HTMLButtonElement): void => {
     writingFocus = on; host.dataset.writingFocus = String(on);
     host.closest<HTMLElement>(".project-shell")?.setAttribute("data-writing-focus", String(on));
-    toggle.textContent = on ? "Show game window" : "Writing focus";
+    toggle.textContent = focusToggleName(on);
     const inPanel = !!bottomHost?.contains(document.activeElement);
     drawBottom(scene, { left: 0, top: 0 });
     if (inPanel) focusColumn(selectedNewDraft ?? selectedBeatId);
   };
-  const drawStory = (scene: SceneDocument, scroll?: { readonly left: number; readonly top: number }): void => {
+  const drawStory = (scene: SceneDocument, scroll?: ScrollPosition): void => {
     const header = document.createElement("header"); header.className = "scene-header";
     const title = document.createElement("h1"); title.title = `${scene.technicalLabel} · ${scene.sourcePath}`;
     // Story Combined v1: the scene title ("Arrival ▾") opens and closes the scene list.
@@ -1595,7 +1600,7 @@ export function renderStoryView(
     } else title.textContent = scene.displayName;
     const history = document.createElement("div"); history.className = "scene-history";
     const mapped = scene.beats.find((beat) => beat.id === selectedBeatId) ?? scene.beats[0];
-    const focus = button(writingFocus ? "Show game window" : "Writing focus"); focus.dataset.writingFocusToggle = "";
+    const focus = button(focusToggleName(writingFocus)); focus.dataset.writingFocusToggle = "";
     // A mouse press would move focus out of the editor; Writing focus keeps it and the caret.
     focus.addEventListener("mousedown", event => event.preventDefault());
     focus.addEventListener("click", () => setWritingFocus(scene, !writingFocus, focus));
@@ -1630,7 +1635,8 @@ export function renderStoryView(
     const stage = document.createElement("section"); stage.className = "story-stage"; stage.setAttribute("aria-label", "Game window");
     const editor = document.createElement("section"); editor.className = "story-editor"; editor.setAttribute("aria-label", "Selected beat editor");
     const bottom = document.createElement("div"); bottom.className = "story-bottom";
-    // Writing focus resizes the sidebar from its left edge.
+    // Writing focus resizes the sidebar from its left edge. As in combined-v1, the sidebar
+    // stays at least 320 px and leaves Tracks or Reel at least 480 px.
     const side = resizeGrip({ key: "focus-side", label: "Sidebar width", host, widths: focusWidths, measure: () => editor.getBoundingClientRect().width, min: 320, max: () => combined.getBoundingClientRect().width - 480, grow: -1 });
     side.classList.add("story-side-grip");
     top.append(stage, editor, side); combined.append(top, bottom); host.append(combined);
@@ -1673,9 +1679,9 @@ export function renderStoryView(
     bottomHost?.querySelector<HTMLElement>(`.story-view-option[data-view="${view}"]`)?.focus({ preventScroll: true });
   };
   // The Branch path and Tracks or Reel. Redrawn alone when a new beat's place or kind changes.
-  const drawBottom = (scene: SceneDocument, scroll?: { readonly left: number; readonly top: number }): void => {
+  const drawBottom = (scene: SceneDocument, scroll?: ScrollPosition): void => {
     if (!bottomHost) return;
-    const previous = bottomHost.querySelector<HTMLElement>(".story-tracks-scroll"), before = scroll ?? { left: previous?.scrollLeft ?? 0, top: previous?.scrollTop ?? 0 };
+    const before = scroll ?? scrollOf(bottomHost.querySelector<HTMLElement>(".story-tracks-scroll"));
     stopLaneWatch?.(); stopLaneWatch = undefined;
     const pending: PendingBeat[] = [...beatDrafts.entries()].flatMap(([key, draft]) => !draft.beatId && draft.sceneId === scene.id && draft.place ? [{ key, ...draft.place(), label: draft.kind() }] : []);
     const items = trackRoute(scene, openBranches, pending);

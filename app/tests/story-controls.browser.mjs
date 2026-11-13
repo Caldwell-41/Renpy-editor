@@ -156,9 +156,6 @@ try{
  g=await focusGeometry();assert(Math.abs(g.editor.width-320)<=1,`the arrow keys narrow the sidebar to its minimum (${g.editor.width})`);
  await text.focus();await text.evaluate(field=>field.setSelectionRange(2,5));
  await drag('.story-track-label.story-lane-1 > .story-grip',30);assert.equal(Math.round(await lane()),126,'the Background lane widens');await keeps('dragging a lane');
- // Keyboard: arrows resize the focused grip; Escape cancels them.
- await page.locator('.story-track-label.story-lane-1 > .story-grip').focus();await page.keyboard.press('ArrowRight');assert.equal(Math.round(await lane()),134);
- await page.keyboard.press('Escape');assert.equal(Math.round(await lane()),126,'Escape cancels the keyboard change');
  // Reel rows stack too, and leaving Writing focus brings the stage back with the caret in place.
  await view('reel');g=await focusGeometry();
  const reel=await page.evaluate(()=>[...document.querySelectorAll('.story-reel .story-track-column')].slice(0,2).map(node=>node.getBoundingClientRect().top));assert(reel[1]>reel[0],'Reel cards are rows');

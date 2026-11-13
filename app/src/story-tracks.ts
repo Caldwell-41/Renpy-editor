@@ -259,14 +259,17 @@ function rail(context: RouteContext, chain: readonly BodyRef[], label?: { readon
 const laneCell = (index: number, text?: string): HTMLElement => element("span", `story-lane story-lane-${index}${index === 0 ? " story-beat-number" : ""}`, text);
 /** Tracks: the six lanes of a beat, each beat filling the lane its kind belongs to. */
 function laneCells(context: RouteContext, beat: SceneBeat, number: string): HTMLElement[] {
-  const state = context.state(beat), lane = laneOf(beat), content = lane === 3 ? context.summary(beat) : `${context.label(beat)} · ${context.summary(beat)}`;
+  const state = context.state(beat), lane = laneOf(beat), summary = context.summary(beat);
+  // Flow names the beat's kind; the other lanes show only what it sets. Below 900 px
+  // Writing focus folds every beat into Words, so there each one names its kind.
+  const named = `${context.label(beat)} · ${summary}`;
   return lanes.map((_lane, index) => {
     const cell = laneCell(index);
     if (index === 0) cell.textContent = number;
-    else if (index === lane) cell.textContent = content;
+    else if (index === lane) cell.textContent = lane === 5 ? named : summary;
     if (index === 3) {
       const copy = element("span", "story-lane-copy", cell.textContent ?? ""); cell.replaceChildren(copy);
-      if (context.focus && lane !== 3) copy.append(element("span", "story-lane-all", content));
+      if (context.focus && lane !== 3) copy.append(element("span", "story-lane-all", named));
     }
     cell.classList.toggle("story-lane-present", index === 1 && state.background || index === 2 && state.characters || index === 4 && state.music);
     cell.classList.toggle("story-lane-unknown", index > 0 && state.unknown);
@@ -286,7 +289,8 @@ export function renderRoute(context: RouteContext): HTMLElement {
   const { scene, numbers } = context, reel = context.view === "reel";
   const grid = element("div", `story-route story-${context.view}`); grid.role = "group"; grid.ariaLabel = "Beats in story order";
   if (!reel) {
-    const labels = element("div", "story-track-labels"); labels.ariaHidden = "true";
+    // Writing focus puts grips in the lane names, so screen readers read them there.
+    const labels = element("div", "story-track-labels"); if (!context.focus) labels.ariaHidden = "true";
     lanes.forEach((lane, index) => labels.append(element("span", `story-track-label story-lane-${index}`, lane)));
     // Below 900 px Writing focus keeps two lanes, and Words then holds every beat's content.
     if (context.focus) labels.children[3]!.replaceChildren(element("span", "story-lane-name", lanes[3]), element("span", "story-lane-all", "Beat content"));
