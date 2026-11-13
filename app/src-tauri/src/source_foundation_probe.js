@@ -17,7 +17,8 @@
     await wait(() => document.querySelector('.story-track-beat[data-beat-kind="condition"]'));
     project = await read('project.current');
     model = await read('scene.list', { sessionId: project.sessionId });
-    const scene = model.scenes[0], children = scene.beats.filter(b => b.owner);
+    // Core also keeps branch comments as owned trivia beats; the children here are the dialogue lines.
+    const scene = model.scenes[0], children = scene.beats.filter(b => b.owner && b.payload.type === 'dialogue');
     original = await read('source.open', { sessionId: project.sessionId, path: scene.sourcePath });
     check(children.length === 2 && children[0].owner.groupId === children[1].owner.groupId && children[0].owner.branchId !== children[1].owner.branchId, 'Two dialogue children have one group and distinct branches');
     check(original.hasBom && original.text.includes('\r\n') && original.text.includes('café 雪'), 'BOM, mixed newlines and Unicode fixture observed');

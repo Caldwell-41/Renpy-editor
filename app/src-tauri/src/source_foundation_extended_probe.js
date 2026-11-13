@@ -71,7 +71,7 @@ window.__loomlightFoundationExtended = async ({ details, check, wait, click, cal
   await window.__loomlightProbeHistory('redo'); await wait(async () => (await source()).text === appended.text); await reopen();
   check(owners(model) === eofOwners && (await source()).text === appended.text, 'EOF Redo and shell reopen retain bytes, IDs and owners');
   details.stage = 'external-refusal';
-  const editing = scene.beats.find(b => b.owner);
+  const editing = scene.beats.find(b => b.owner && b.payload.type === 'dialogue');
   await open(editing); await wait(() => card(editing.id).querySelector('textarea'));
   const editor = card(editing.id).querySelector('textarea'); editor.value = 'Retained external Story draft'; editor.dispatchEvent(new Event('input', { bubbles: true }));
   const beforeExternal = await source();

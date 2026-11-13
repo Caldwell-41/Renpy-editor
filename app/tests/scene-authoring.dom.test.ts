@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
 import { Window } from "happy-dom";
-import { deriveScenePreview, hasSceneDraft, renderRecoverySurface, storyScene, type RecoveryReport, type SceneCommand, type SceneWorkspace } from "../src/scene-ui.js";
+import { deriveScenePreview, hasSceneDraft, renderRecoverySurface, storyScene, type RecoveryReport, type SceneBeat, type SceneCommand, type SceneWorkspace } from "../src/scene-ui.js";
 import { renderStoryView, selectBeat, storyEditor, trackColumn, withBodies } from "./story-controls-fixture.js";
 
 const tick = async (): Promise<void> => { await new Promise((resolve) => setTimeout(resolve, 0)); };
@@ -67,6 +67,8 @@ function foundationModel(): SceneWorkspace {
   const group = { groupId: "group", variableId: "flag", otherwise: false };
   const model: SceneWorkspace = { ...base, scenes: [{ ...base.scenes[0]!, beats: [
     { id:"if", byteStart:15, byteEnd:28, protected:true, conditionalBranch:group, payload:{type:"customCode",source:"    if flag:",reason:"Protected source"} },
+    // Core keeps a comment inside a branch as an owned trivia beat (#125).
+    { id:"note", byteStart:28, byteEnd:28, protected:true, owner:{groupId:"group",branchId:"if"}, payload:{type:"customCode",source:"        # true branch comment",reason:"Comment"} },
     { id:"child", byteStart:28, byteEnd:60, protected:false, owner:{groupId:"group",branchId:"if"}, payload:{type:"dialogue",characterId:"alice",text:"True café 雪"} },
     { id:"else", byteStart:60, byteEnd:70, protected:true, conditionalBranch:{...group,otherwise:true}, payload:{type:"customCode",source:"    else:",reason:"Protected source"} },
     { id:"other", byteStart:70, byteEnd:100, protected:false, owner:{groupId:"group",branchId:"else"}, payload:{type:"dialogue",characterId:"alice",text:"False café 雪"} },
@@ -111,16 +113,16 @@ test("nested child commits carry owner and retain input on stale/session refusal
 
 test("root controls respect nested children and conditional insertion boundaries", async () => {
   const browser = installDom();
-  const base = foundationModel();
+  const base = foundationModel(), beat = (id: string): SceneBeat => base.scenes[0]!.beats.find(item => item.id === id)!;
   const model: SceneWorkspace = { ...base, scenes: [{ ...base.scenes[0]!, beats: [
-    ...base.scenes[0]!.beats.slice(0, 2),
+    beat("if"), beat("child"),
     { id: "if-trivia", byteStart: 60, byteEnd: 65, protected: true, payload: { type: "customCode", source: "        # before Otherwise", reason: "Protected" } },
-    { ...base.scenes[0]!.beats[2]!, byteStart: 65, byteEnd: 75 },
+    { ...beat("else"), byteStart: 65, byteEnd: 75 },
     { id: "else-trivia", byteStart: 75, byteEnd: 80, protected: true, payload: { type: "customCode", source: "        # before child", reason: "Protected" } },
-    { ...base.scenes[0]!.beats[3]!, byteStart: 80 },
+    { ...beat("other"), byteStart: 80 },
     { id: "root-one", byteStart: 100, byteEnd: 120, protected: false, payload: { type: "dialogue", characterId: "alice", text: "Root one" } },
     { id: "root-two", byteStart: 120, byteEnd: 140, protected: false, payload: { type: "dialogue", characterId: "alice", text: "Root two" } },
-    { ...base.scenes[0]!.beats[4]!, byteStart: 140, byteEnd: 151 },
+    { ...beat("return"), byteStart: 140, byteEnd: 151 },
   ] }] };
   const host = document.querySelector<HTMLElement>("#host")!;
   const calls: SceneCommand[] = [];
