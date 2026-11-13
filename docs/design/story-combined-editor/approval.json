@@ -1,0 +1,10 @@
+{
+ "schemaVersion": 1,
+ "screenId": "story-combined-editor",
+ "currentApproved": null,
+ "revisions": [
+  { "id": "label-v1", "variantId": "label", "approval": null },
+  { "id": "blank-v1", "variantId": "blank", "approval": null },
+  { "id": "replace-v1", "variantId": "replace", "approval": null }
+ ]
+}
