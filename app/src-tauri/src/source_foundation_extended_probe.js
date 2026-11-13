@@ -31,7 +31,10 @@ window.__loomlightFoundationExtended = async ({ details, check, wait, click, cal
   const beats = scene.beats, root = beats.find(b => b.payload.text === 'Root one');
   const child = beats.find(b => b.payload.text === 'False café 雪');
   await open(root);
-  check([...card(root.id).querySelectorAll('.story-beat-menu button')].find(b => b.textContent === 'Move up')?.disabled, 'Root Move Up across child disabled');
+  // Since #163 Move up crosses one sibling node: a root beat after the If/Otherwise group
+  // moves above the whole group, never into a branch (the move itself is checked below).
+  const moveUp = beat => [...card(beat.id).querySelectorAll('.story-beat-menu button')].find(b => b.textContent === 'Move up');
+  check(moveUp(root) && !moveUp(root).disabled, 'Root Move Up is offered across the whole If/Otherwise group');
   await refresh();
   check(JSON.stringify(model) === JSON.stringify(baseline) && (await source()).text === baselineSource.text, 'Selecting Beats leaves source, map revision and IDs unchanged');
   const rootBody = { type: 'root' }, beatRef = id => ({ type: 'beat', beatId: id }), before = id => ({ type: 'before', anchor: beatRef(id) });
@@ -45,7 +48,7 @@ window.__loomlightFoundationExtended = async ({ details, check, wait, click, cal
   }
   for (const command of commands) {
     let code; try { await apply(command); } catch (error) { code = error.code; }
-    check(code === 'SCENE_INVARIANT', `Real core refuses ${command.type}${command.type === 'insertBodyBeat' ? ' at protected anchor' : ' across child'}`);
+    check(code === 'SCENE_INVARIANT', command.type === 'insertBodyBeat' ? 'Real core refuses insertBodyBeat at protected anchor' : 'Real core refuses a root move into a branch');
   }
   await refresh();
   check(JSON.stringify(model) === JSON.stringify(baseline) && (await source()).text === baselineSource.text, 'All structural refusals preserve exact source and workspace');
@@ -54,6 +57,15 @@ window.__loomlightFoundationExtended = async ({ details, check, wait, click, cal
   model = await apply({ type: 'insertBodyBeat', body: rootBody, position: { type: 'before', anchor: { type: 'condition', groupId: beats[0].conditionalBranch.groupId } }, beat: { type: 'narration', text: 'Before group' } }); scene = model.scenes[0];
   model = await apply({ type: 'insertBodyBeat', body: rootBody, position: before(root.id), beat: { type: 'narration', text: 'After group' } }); scene = model.scenes[0];
   check(owners(model) === baselineOwners && beats.every(b => scene.beats.some(n => n.id === b.id)) && (await source()).text.includes('    "Before group"\n    if flag:') && (await source()).text.includes('    "After group"\n    bec "Root one"'), 'Safe before/after insertion preserves child IDs and owners');
+  details.stage = 'move-above-group';
+  const header = beats[0], rootNodes = () => scene.bodies.find(b => b.body.type === 'root').nodes.map(n => n.beatId);
+  const next = scene.beats.find(b => b.id === rootNodes()[rootNodes().indexOf(header.id) + 1]);
+  check(next?.payload.text === 'Root two', 'Root two directly follows the If/Otherwise group');
+  const beforeMove = await source();
+  await open(next); moveUp(next).click();
+  await wait(async () => (await source()).text !== beforeMove.text); await refresh();
+  check((await source()).text === beforeMove.text.replace('    bec "Root two"\n', '').replace('    if flag:', '    bec "Root two"\n    if flag:'), 'Move up moves the root beat above the whole If/Otherwise group');
+  check(rootNodes()[rootNodes().indexOf(header.id) - 1] === next.id && owners(model) === baselineOwners, 'Moving above the group keeps every child ID and owner');
   details.stage = 'unterminated-child-append';
   const eofText = accepted.text.slice(0, accepted.text.indexOf('    python:')).trimEnd();
   await save(eofText); const eofOwners = owners(model);
