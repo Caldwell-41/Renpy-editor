@@ -3,7 +3,8 @@
 //! one Undo and one Redo reverse its latest entry. Each entry restores exact bytes
 //! only while the current revisions still match its boundary (ADR 0006). A
 //! draft-step entry holds only the place of one unfinished draft edit; its Undo and
-//! Redo write nothing, and the renderer restores the draft.
+//! Redo write nothing. The renderer restores a beat draft, and the Source draft
+//! registry restores unsaved Source text.
 use crate::authoring::AuthoringService;
 use crate::scene::SceneError;
 use crate::transaction::{
@@ -263,7 +264,7 @@ impl HistoryStack {
     }
 
     /// The draft step Undo would reverse, if the next entry is one.
-    fn undo_step(&self) -> Option<&DraftStep> {
+    pub(crate) fn undo_step(&self) -> Option<&DraftStep> {
         self.undo_entry()?.step.as_ref()
     }
 
@@ -561,14 +562,16 @@ impl AuthoringService {
         let state = history.state();
         let entry =
             if redo { state.redo } else { state.undo }.ok_or(SceneError::HistoryBoundary)?;
-        // A draft step writes nothing: only the cursor moves.
+        // A draft step writes nothing: only the cursor moves, and a Source step
+        // changes its file's draft.
         let step = if redo {
             history.redo_step()
         } else {
             history.undo_step()
         }
         .cloned();
-        if step.is_some() {
+        if let Some(draft_step) = &step {
+            self.source_history_step(project, draft_step, redo)?;
             if redo {
                 history.accepted_redo_with_revisions(&[])
             } else {

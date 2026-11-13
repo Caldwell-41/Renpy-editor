@@ -816,12 +816,12 @@ fn draft_scene_exact_dispatch_inert_source_metadata_one_transaction_undo_redo_re
     // Native review reads the saved source, then refreshes inventory after Undo.
     let document = f.ok("source.open", json!({"path":path}));
     f.ok("source.updateDraft", json!({"path":path,"expectedBaseRevision":document["baseRevision"],"text":format!("{}# retained draft\n", document["text"].as_str().unwrap()),"selectionStart":0,"selectionEnd":0}));
+    // The retained draft is a draft step on top: its Undo ends the draft and writes nothing.
     assert_eq!(
-        f.call("history.undo", json!({}))["error"]["code"],
-        "DIRTY_SOURCE"
+        f.ok("history.undo", json!({}))["entry"]["name"],
+        format!("Source typing in {}", path.rsplit('/').next().unwrap())
     );
     assert_snapshots(&after, &f.snapshots());
-    f.ok("source.discard", json!({"path":path}));
     f.ok("history.undo", json!({}));
     assert!(!f.root.join(path).exists());
     for key in [

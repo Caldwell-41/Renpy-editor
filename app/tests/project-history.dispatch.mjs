@@ -18,6 +18,8 @@ const settle=async()=>{await new Promise(r=>setTimeout(r,150));await wait(()=>in
 const button=(text,scope=document)=>{const b=[...scope.querySelectorAll('button')].find(b=>(b.textContent===text||b.getAttribute('aria-label')===text||b.ariaLabel===text)&&!b.disabled);assert(b,`Missing enabled ${text}`);b.click();return b;};
 const app=()=>document.querySelector('#app'),status=()=>document.querySelector('#app-status')?.textContent;
 const mac=/Mac|iPhone|iPad|iPod/.test(window.navigator.platform);
+// A public command outside the shell's controls: reload Story so the header reads the history again.
+async function refreshHistoryView(){button('Source');await wait(()=>workspace()==='Source','Source');await settle();button('Story');await wait(()=>workspace()==='Story','Story');await settle();}
 const historyRequests=()=>result.transcript.filter(t=>t.ui&&t.operation.startsWith('history.')&&t.operation!=='history.state').length;
 const workspace=()=>document.querySelector('.story-sidebar .tree-item.selected')?.textContent;
 // The Screens selection path ends at the selected element in every step.
@@ -91,14 +93,13 @@ try{
  button('Close source');await wait(()=>!document.querySelector('.screen-source-dialog[open]'),'source dialog closed');
  stage('an open Screens dialog keeps Cmd/Ctrl+Z');
 
- // A text field keeps its own text Undo: Find a file, then the Source editor.
+ // A text field whose input does not survive navigation keeps its own text Undo: Find a file.
  const fileSearch=()=>[...document.querySelectorAll('input[type="search"]')].find(n=>n.ariaLabel==='Find a file');
  button('Source');await wait(fileSearch,'Source');await settle();
  const find=fileSearch();find.focus();find.value='scene';find.dispatchEvent(new Event('input',{bubbles:true}));
  requests=historyRequests();event=key(find);await settle();
  assert.equal(event.defaultPrevented,false,'Cmd/Ctrl+Z stays with the search field');assert.equal(historyRequests(),requests);assert.equal(find.value,'scene');assert.equal(await source(owner.path),resized);
- const editor=document.querySelector('.source-editor');if(editor){editor.focus();event=key(editor);await settle();assert.equal(event.defaultPrevented,false);assert.equal(historyRequests(),requests,'The Source editor keeps its text Undo');}
- stage('Cmd/Ctrl+Z in the file search and the Source editor changes only that field');
+ stage('Cmd/Ctrl+Z in the file search changes only that field');
 
  // An open Story form refuses Undo like any navigation and keeps its input.
  button('Story');await wait(()=>workspace()==='Story'&&document.querySelector('.beat-card'),'Story for form');await settle();
@@ -134,14 +135,7 @@ try{
  (await open(beatA.id)).focus();assert.equal(await header('undo'),'committed');
  assert.deepEqual(await reversed(),byShortcut,'the header Undo gives the Cmd/Ctrl+Z result');
  assert.deepEqual((await historyNow()).undo,prior);assert.deepEqual(await disk(),files);
- // Unfinished Source text in another file keeps its own draft through Story Undo and Redo (#155 moves it later).
- const stylePath='game/ui/a_styles.rpy',style=await call('source.open',{path:stylePath}),unfinished=`${style.text}# unfinished\n`;
- await call('source.updateDraft',{path:stylePath,expectedBaseRevision:style.baseRevision,text:unfinished,selectionStart:0,selectionEnd:0});
- assert.equal(await header('redo'),'committed');assert.equal((await open(beatA.id)).value,'Draft A typed');
- assert.equal(await header('undo'),'committed');assert.equal((await open(beatA.id)).value,beatA.payload.text);
- const kept=await call('source.open',{path:stylePath});assert.deepEqual([kept.dirty,kept.text],[true,unfinished],'Story Undo leaves unfinished Source text alone');
- await call('source.discard',{path:stylePath});assert.deepEqual(await disk(),files);
- stage('a beat draft change is a draft step; Cmd/Ctrl+Z in the beat field and the header Undo reverse it alike, write nothing and leave Source drafts alone');
+ stage('a beat draft change is a draft step; Cmd/Ctrl+Z in the beat field and the header Undo reverse it alike and write nothing');
 
  // A text step ends after 2 seconds without typing or when its field loses focus. Each other control change is one step.
  typed=await type(beatA.id,'One');await new Promise(r=>setTimeout(r,2100));
@@ -213,6 +207,72 @@ try{
  await headerSave(async()=>(await source(path)).includes('Refused save A'));assert.equal(status(),'Saved');
  assert.equal(named('undo'),`Undo narration edit in ${sceneName}`);assert.equal(await header('undo'),'committed');assert.equal(await source(path),original);
  stage('a refused Story Save keeps the drafts and their steps; Undo repairs the draft and the next Save succeeds');
+
+ // Source draft steps (#155), typed through the Source editor. The Source workspace opens the file and selects what changed.
+ const stylePath='game/ui/a_styles.rpy',styleName='a_styles.rpy',styled=await source(stylePath);
+ const sourceEditor=()=>document.querySelector('.source-workspace .source-editor');
+ const openSource=async(file=stylePath)=>{if(workspace()!=='Source'){button('Source');await wait(()=>workspace()==='Source'&&sourceEditor(),'Source');await settle();}
+  if(document.querySelector('.source-header h1')?.textContent!==file){[...document.querySelectorAll('.source-file-open')].find(b=>b.title===file).click();await wait(()=>document.querySelector('.source-header h1')?.textContent===file&&sourceEditor(),`open ${file}`);await settle();}
+  return sourceEditor();};
+ const sourceType=async(text,file=stylePath)=>{const editor=await openSource(file);input(editor,text);await settle();return editor;};
+ const revealed=()=>{const editor=sourceEditor();return {workspace:workspace(),file:document.querySelector('.source-header h1')?.textContent,text:editor.value,selection:[editor.selectionStart,editor.selectionEnd]};};
+ const sourceBaseline=(await historyNow()).undo;
+ // Two typing steps, split by a 2 second pause, then a Story edit. Undo reverses the Story edit, then each step.
+ let editor=await sourceType(`${styled}# one\n`);await wait(()=>named('undo')===`Undo Source typing in ${styleName}`,'the header names the Source typing step');
+ await new Promise(r=>setTimeout(r,2100));await sourceType(`${styled}# two\n`);
+ button('Story');await wait(()=>workspace()==='Story'&&document.querySelector('.beat-card'),'Story after Source');await settle();
+ const storyPath=(await call('scene.list')).scenes[0].sourcePath,beforeStory=await source(storyPath);
+ await storyEdit('Foundation continuation, after Source typing');
+ assert.equal(await header('undo'),'committed');assert.equal(await source(storyPath),beforeStory,'the first Undo reverses the Story edit');
+ await wait(()=>workspace()==='Story','Story edit revealed');const quietSource=await disk();
+ assert.equal(await header('undo'),'committed');
+ const changed=styled.length+2;
+ assert.deepEqual(revealed(),{workspace:'Source',file:stylePath,text:`${styled}# one\n`,selection:[changed,changed+3]},'Undo from Story opens the file with the restored range selected');
+ assert.equal(status(),`Undone: Source typing in ${styleName}`);assert.equal(named('redo'),`Redo Source typing in ${styleName}`);
+ assert.deepEqual(await disk(),quietSource,'Undo of a Source draft step writes nothing');
+ assert.equal(await header('undo'),'committed');assert.deepEqual(revealed().text,styled);assert.equal((await call('source.open',{path:stylePath})).dirty,false,'Undo past the first step ends the draft');
+ assert.deepEqual((await historyNow()).undo,sourceBaseline);assert.deepEqual(await disk(),quietSource);
+ for(let i=0;i<2;i+=1)assert.equal(await header('redo'),'committed');assert.equal(revealed().text,`${styled}# two\n`);assert.deepEqual(await disk(),quietSource,'Redo of a Source draft step writes nothing');
+ stage('Source typing, then a Story edit: header Undo reverses the Story edit, then each Source typing step, opening the file at the range, and writes nothing');
+
+ // Cmd/Ctrl+Z from Screens reaches the Source step; in the Source editor it runs project Undo, not text Undo.
+ button('Screens');await wait(()=>workspace()==='Screens'&&document.querySelector('.screen-picker select'),'Screens');await settle();
+ assert.equal(await shortcut('undo'),'committed');
+ assert.deepEqual(revealed(),{workspace:'Source',file:stylePath,text:`${styled}# one\n`,selection:[changed,changed+3]},'Undo from Screens reveals the range');
+ assert.equal(await header('redo'),'committed');editor=sourceEditor();
+ requests=historyRequests();assert.equal(await step(()=>{editor.focus();event=key(editor);},'Cmd/Ctrl+Z in the Source editor'),'committed');
+ assert.equal(event.defaultPrevented,true,'the Source editor gives Cmd/Ctrl+Z to project Undo');assert.equal(historyRequests(),requests+1);
+ assert.equal(revealed().text,`${styled}# one\n`);assert.deepEqual(await disk(),quietSource);
+ assert.equal(await step(()=>key(sourceEditor(),{shiftKey:true}),'Shift+Cmd/Ctrl+Z in the Source editor'),'committed');assert.equal(revealed().text,`${styled}# two\n`);
+ stage('Cmd/Ctrl+Z from Screens reaches a Source draft step; in the Source editor Cmd/Ctrl+Z and Shift+Cmd/Ctrl+Z run project Undo and Redo');
+
+ // Save Source joins the file's steps into one edit on top.
+ button('Save Source',document.querySelector('.source-workspace'));await wait(async()=>(await source(stylePath))===`${styled}# two\n`&&!(await call('source.open',{path:stylePath})).dirty,'Source saved');await settle();
+ assert.equal(named('undo'),`Undo Source edit in ${styleName}`);assert.equal(await header('undo'),'committed');
+ assert.equal(await source(stylePath),styled,'one Undo reverses the saved file');assert.deepEqual((await historyNow()).undo,sourceBaseline,'Save joined both typing steps');
+ stage('Save Source joins its typing steps into one edit; one Undo reverses the file');
+
+ // Source Save All keeps its one history action across files.
+ const menuPath=owner.path,menu=await source(menuPath);
+ await sourceType(`${styled}# all\n`);await sourceType(`${menu}# all\n`,menuPath);
+ assert.equal(named('undo'),`Undo Source typing in ${menuPath.split('/').at(-1)}`);
+ button('Story');await wait(()=>workspace()==='Story','Story before Save All');await settle();
+ await call('source.saveAll');await refreshHistoryView();
+ assert.equal(named('undo'),'Undo Source edits in 2 files');assert.equal(await header('undo'),'committed');
+ assert.deepEqual([await source(stylePath),await source(menuPath)],[styled,menu],'one Undo reverses Save All');assert.deepEqual((await historyNow()).undo,sourceBaseline,'Save All joined every typing step');
+ stage('Source Save All adds one history entry that joins the typing steps of every saved file');
+
+ // An external edit while Source draft steps exist: Undo changes only the draft and both versions stay.
+ await sourceType(`${styled}# one\n`);await new Promise(r=>setTimeout(r,2100));await sourceType(`${styled}# two\n`);
+ const external=`${styled}# external\n`;await writeFile(join(scratch,'synthetic-project',stylePath),external);
+ button('Refresh',document.querySelector('.source-workspace'));await wait(()=>document.querySelector('.source-workspace .source-conflict'),'conflict');await settle();const outside=await disk();
+ assert.equal(await header('undo'),'committed');assert.equal(revealed().text,`${styled}# one\n`);
+ assert(document.querySelector('.source-workspace .source-conflict'),'the conflict stays after Undo');assert.deepEqual(await disk(),outside,'Undo keeps the external bytes');
+ const kept=await call('source.open',{path:stylePath});assert.deepEqual([kept.dirty,kept.state,kept.externalText],[true,'conflict',external]);
+ await call('source.discard',{path:stylePath});assert.equal(await source(stylePath),external);
+ assert.deepEqual((await historyNow()).undo,sourceBaseline,'Discard Draft removes its steps');
+ button('Story');await wait(()=>workspace()==='Story'&&document.querySelector('.beat-card'),'Story after Source');await settle();
+ stage('an external edit while Source draft steps exist: Undo changes only the draft, keeps the conflict and both versions');
 
  // System prompts: a prompt edit, then a Story edit. Settings is a dialog, so it owns the shortcut.
  const baseline=(await call('prompts.list')).effectiveText;

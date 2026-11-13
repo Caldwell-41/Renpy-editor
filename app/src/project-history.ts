@@ -38,7 +38,7 @@ export function historyShortcut(event: KeyboardEvent): HistoryDirection | undefi
 }
 
 const textInputs = new Set(["text", "search", "email", "url", "tel", "password", "number"]);
-/** A field whose own text Undo Cmd/Ctrl+Z keeps: text inputs, text areas and editors such as Source. */
+/** A text input, text area or editor. Cmd/Ctrl+Z keeps its text Undo unless its draft joins the project history. */
 export function isTextField(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   if (target instanceof HTMLTextAreaElement || target.isContentEditable) return true;

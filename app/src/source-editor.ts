@@ -1,8 +1,8 @@
 import { tags } from "@lezer/highlight";
 import { sourceOffset } from "./source-textarea.ts";
-import { Compartment, EditorState, StateField, StateEffect, Text, Transaction } from "@codemirror/state";
+import { Compartment, EditorState, StateField, StateEffect, Text } from "@codemirror/state";
 import { EditorView, keymap, lineNumbers, highlightActiveLine, drawSelection } from "@codemirror/view";
-import { defaultKeymap, history, historyKeymap, indentWithTab, invertedEffects } from "@codemirror/commands";
+import { defaultKeymap, indentWithTab } from "@codemirror/commands";
 import { StreamLanguage, syntaxHighlighting, HighlightStyle } from "@codemirror/language";
 import { searchKeymap, highlightSelectionMatches, openSearchPanel } from "@codemirror/search";
 export interface SourceEditor {
@@ -12,9 +12,8 @@ export interface SourceEditor {
   focus():void; select():void; setSelectionRange(from:number,to:number):void;
   hasFocus():boolean; destroy():void; find():void; state():EditorState|undefined;
 }
-// Preserve the original newline bytes through grouped undo/redo as well as edits.
-// CodeMirror Text shares unchanged tree nodes, so history does not retain a full
-// copied source string for every keystroke.
+// Preserve the original newline bytes through edits. The editor keeps no text history
+// of its own: Cmd/Ctrl+Z in it runs project Undo over Source draft steps (UI.md "Story Undo").
 interface RawDocument { text: Text; newline: "LF" | "CRLF" }
 const restoreRaw = StateEffect.define<RawDocument>();
 const rawDocument = StateField.define<RawDocument>({
@@ -49,26 +48,27 @@ const renpy=StreamLanguage.define({
     stream.next();return null;
   }
 });
-export function sourceEditor(parent:HTMLElement, options:{text:string;rawText?:string;newline?:"LF"|"CRLF";from:number;to:number;readOnly:boolean;label:string;change:()=>void;retained?:EditorState}):SourceEditor {
+export function sourceEditor(parent:HTMLElement, options:{text:string;rawText?:string;newline?:"LF"|"CRLF";from:number;to:number;readOnly:boolean;label:string;change:()=>void;blur?:()=>void;retained?:EditorState}):SourceEditor {
   if(!rich){
     const gutter=document.createElement("pre");gutter.className="source-line-numbers";gutter.ariaHidden="true";
     const text=document.createElement("textarea");text.className="source-editor";text.spellcheck=false;text.wrap="off";text.value=options.text;text.readOnly=options.readOnly;text.ariaLabel=options.label;text.setSelectionRange(options.from,options.to);
     const numbers=()=>gutter.textContent=Array.from({length:text.value.split("\n").length},(_,i)=>String(i+1)).join("\n");numbers();text.addEventListener("scroll",()=>gutter.scrollTop=text.scrollTop);
-    text.addEventListener("input",()=>{numbers();options.change();});["select","keyup","mouseup"].forEach(e=>text.addEventListener(e,options.change));parent.append(gutter,text);
+    text.addEventListener("input",()=>{numbers();options.change();});if(options.blur)text.addEventListener("blur",options.blur);["select","keyup","mouseup"].forEach(e=>text.addEventListener(e,options.change));parent.append(gutter,text);
     return {get value(){return text.value;},get selectionStart(){return text.selectionStart;},get selectionEnd(){return text.selectionEnd;},get readOnly(){return text.readOnly;},set readOnly(v){text.readOnly=v;},get ariaBusy(){return text.ariaBusy;},set ariaBusy(v){text.ariaBusy=v;},get isConnected(){return text.isConnected;},focus:()=>text.focus(),select:()=>text.select(),setSelectionRange:(a,b)=>text.setSelectionRange(a,b),hasFocus:()=>document.activeElement===text,destroy:()=>{},find:()=>text.focus(),state:()=>undefined};
   }
   const readonly=new Compartment();
-  const extensions=[rawDocument,invertedEffects.of(tr=>tr.docChanged?[restoreRaw.of(tr.startState.field(rawDocument))]:[]),lineNumbers(),history(),drawSelection(),highlightActiveLine(),highlightSelectionMatches(),syntaxHighlighting(HighlightStyle.define([{tag:tags.keyword,color:"var(--syntax-keyword)"},{tag:tags.string,color:"var(--syntax-string)"},{tag:tags.comment,color:"var(--syntax-comment)",fontStyle:"italic"},{tag:tags.number,color:"var(--syntax-number)"}])),renpy,
-    keymap.of([...defaultKeymap,...historyKeymap,...searchKeymap,indentWithTab]),readonly.of([EditorState.readOnly.of(options.readOnly),EditorView.editable.of(!options.readOnly)]),
+  const extensions=[rawDocument,lineNumbers(),drawSelection(),highlightActiveLine(),highlightSelectionMatches(),syntaxHighlighting(HighlightStyle.define([{tag:tags.keyword,color:"var(--syntax-keyword)"},{tag:tags.string,color:"var(--syntax-string)"},{tag:tags.comment,color:"var(--syntax-comment)",fontStyle:"italic"},{tag:tags.number,color:"var(--syntax-number)"}])),renpy,
+    keymap.of([...defaultKeymap,...searchKeymap,indentWithTab]),readonly.of([EditorState.readOnly.of(options.readOnly),EditorView.editable.of(!options.readOnly)]),
     EditorView.contentAttributes.of({"aria-label":options.label,spellcheck:"false"}),
     EditorView.cspNonce.of(document.querySelector<HTMLMetaElement>('meta[name="style-nonce"]')?.content??""),
     EditorView.theme({"&":{height:"100%",fontSize:"var(--source-size)",backgroundColor:"var(--surface-app)",color:"var(--text-primary)"},".cm-scroller":{overflow:"auto",fontFamily:"var(--font-source)",lineHeight:"1.65"},".cm-content":{padding:"16px 0"},".cm-gutters":{backgroundColor:"var(--surface-panel)",color:"var(--text-muted)",borderRight:"1px solid var(--border-normal)"},".cm-activeLine":{backgroundColor:"var(--accent-subtle)"},".cm-cursor":{borderLeftColor:"var(--text-primary)"},".cm-selectionBackground":{backgroundColor:"var(--surface-selected) !important"},".cm-panels":{backgroundColor:"var(--surface-panel)",color:"var(--text-primary)"}}),
     EditorView.updateListener.of(update=>{
-      if(update.docChanged||update.selectionSet)options.change();})];
+      if(update.docChanged||update.selectionSet)options.change();
+      if(update.focusChanged&&!update.view.hasFocus)options.blur?.();})];
   let state=options.retained;
   if(!state || state.doc.toString()!==options.text)state=EditorState.create({doc:options.text,selection:{anchor:options.from,head:options.to},extensions});
   else state=state.update({effects:StateEffect.reconfigure.of(extensions),selection:{anchor:options.from,head:options.to}}).state;
-  state=state.update({effects:restoreRaw.of({text:Text.of((options.rawText??options.text).split("\n")),newline:options.newline??"LF"}),annotations:Transaction.addToHistory.of(false)}).state;
-  const view=new EditorView({state,parent});parent.classList.add("rich-source-shell");view.contentDOM.classList.add("source-editor");let locked=options.readOnly;
+  state=state.update({effects:restoreRaw.of({text:Text.of((options.rawText??options.text).split("\n")),newline:options.newline??"LF"})}).state;
+  const view=new EditorView({state,parent});view.dispatch({effects:EditorView.scrollIntoView(view.state.selection.main,{y:"center"})});parent.classList.add("rich-source-shell");view.contentDOM.classList.add("source-editor");let locked=options.readOnly;
   return {snapshot:()=>{const raw=view.state.field(rawDocument).text.toString();return {text:raw,selectionStart:sourceOffset(raw,view.state.selection.main.from),selectionEnd:sourceOffset(raw,view.state.selection.main.to)};},get value(){return view.state.doc.toString();},get selectionStart(){return view.state.selection.main.from;},get selectionEnd(){return view.state.selection.main.to;},get readOnly(){return locked;},set readOnly(v){if(v===locked)return;locked=v;view.dispatch({effects:readonly.reconfigure([EditorState.readOnly.of(v),EditorView.editable.of(!v)])});},get ariaBusy(){return view.contentDOM.ariaBusy;},set ariaBusy(v){view.contentDOM.ariaBusy=v;},get isConnected(){return view.dom.isConnected;},focus:()=>view.focus(),select:()=>view.dispatch({selection:{anchor:0,head:view.state.doc.length}}),setSelectionRange:(a,b)=>view.dispatch({selection:{anchor:a,head:b},scrollIntoView:true}),hasFocus:()=>view.hasFocus,destroy:()=>view.destroy(),find:()=>{openSearchPanel(view);},state:()=>view.state};
 }

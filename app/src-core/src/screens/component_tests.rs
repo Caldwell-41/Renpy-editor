@@ -510,6 +510,7 @@ fn extraction_refusals_keep_source_metadata_history_and_source_drafts() {
                 text: draft.clone(),
                 selection_start: 18,
                 selection_end: 18,
+                new_step: false,
             },
         )
         .unwrap();
@@ -534,12 +535,13 @@ fn extraction_refusals_keep_source_metadata_history_and_source_drafts() {
         .unwrap();
     assert_eq!(after.source_map_revision, before.source_map_revision);
     assert_eq!(after.inventory_revision, before.inventory_revision);
+    // The refusal adds nothing: the retained Source draft's typing step stays on top.
     assert!(fixture
         .service
         .history_state(&fixture.project)
         .unwrap()
         .undo
-        .is_none());
+        .is_some_and(|label| label.name.starts_with("Source typing in ")));
 }
 
 #[test]
@@ -861,6 +863,7 @@ fn stale_place_and_copy_keep_the_source_draft_and_competing_external_revision() 
                 text: draft.clone(),
                 selection_start: 21,
                 selection_end: 21,
+                new_step: false,
             },
         )
         .unwrap();
@@ -892,12 +895,13 @@ fn stale_place_and_copy_keep_the_source_draft_and_competing_external_revision() 
         .unwrap();
     assert_eq!(after.source_map_revision, before.source_map_revision);
     assert_eq!(after.owned.len(), before.owned.len());
+    // The refusal adds nothing: the retained Source draft's typing step stays on top.
     assert!(fixture
         .service
         .history_state(&fixture.project)
         .unwrap()
         .undo
-        .is_none());
+        .is_some_and(|label| label.name.starts_with("Source typing in ")));
 }
 
 #[test]
@@ -1440,6 +1444,7 @@ fn prepare_extract_refuses_dirty_source_and_retains_the_draft() {
                 text: draft.clone(),
                 selection_start: 12,
                 selection_end: 12,
+                new_step: false,
             },
         )
         .unwrap();
@@ -1455,12 +1460,13 @@ fn prepare_extract_refuses_dirty_source_and_retains_the_draft() {
     assert_eq!(retained.text, Some(draft));
     assert_eq!(retained.base_revision, before.base_revision);
     assert_eq!(retained.selection_start, 12);
+    // The refusal adds nothing: the retained Source draft's typing step stays on top.
     assert!(fixture
         .service
         .history_state(&fixture.project)
         .unwrap()
         .undo
-        .is_none());
+        .is_some_and(|label| label.name.starts_with("Source typing in ")));
 }
 
 #[test]

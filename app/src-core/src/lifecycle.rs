@@ -4637,6 +4637,7 @@ mod tests {
                 text: "label incomplete:\n    menu:\n".into(),
                 selection_start: 0,
                 selection_end: 0,
+                new_step: false,
             })
             .unwrap();
         assert!(!invalid_source.diagnostics.is_empty());
@@ -4665,6 +4666,7 @@ mod tests {
                 text: accepted_source_text.clone(),
                 selection_start: 3,
                 selection_end: 3,
+                new_step: false,
             })
             .unwrap();
         let retained_version = retained_source.draft_version;
@@ -4675,6 +4677,7 @@ mod tests {
                 text: accepted_source_text.clone(),
                 selection_start: 5,
                 selection_end: 5,
+                new_step: false,
             })
             .unwrap();
         assert_eq!(selection_only.draft_version, retained_version);
@@ -4697,6 +4700,7 @@ mod tests {
                 text: accepted_source_text.clone(),
                 selection_start: 7,
                 selection_end: 7,
+                new_step: false,
             })
             .unwrap();
         assert!(!clean_selection_only.dirty);

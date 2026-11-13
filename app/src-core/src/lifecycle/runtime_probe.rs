@@ -247,6 +247,7 @@ impl LifecycleService {
                 text: source,
                 selection_start: 0,
                 selection_end: 0,
+                new_step: false,
             })
             .map_err(|e| format!("{e:?}"))?;
         service
