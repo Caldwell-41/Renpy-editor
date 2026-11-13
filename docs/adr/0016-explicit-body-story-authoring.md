@@ -45,7 +45,7 @@ remain unchanged, so no new migration is needed.
 
 Keep root ending protections: authoring may not introduce a new Scene fallthrough.
 Validate possible transfer routes against the actual patched candidate, replacing old
-edges, through both legacy and explicit-body commands. Preserve pure Jump loops and
+edges, through the explicit-body commands. Preserve pure Jump loops and
 the existing conservative Call bounds; source-defined unknown flow stays explicit.
 No command evaluates Python or changes deliberate execution permission.
 

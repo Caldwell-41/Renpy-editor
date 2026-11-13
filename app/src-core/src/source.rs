@@ -1838,7 +1838,7 @@ mod tests {
                     command: SceneCommand::UpdateBodyBeat {
                         scene_id: fixture.scene_id.clone(),
                         expected_source_revision: workspace.scenes[0].source_revision.clone(),
-                        beat_id: beat_id,
+                        beat_id,
                         expected_body: crate::scene::BodyRef::Root,
                         beat: BeatPayload::Narration {
                             text: "Visual edit".into(),

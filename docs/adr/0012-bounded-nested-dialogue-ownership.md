@@ -25,7 +25,7 @@ The existing recoverable migration handles v1/v2 maps, preserving UUIDs and unkn
 fields. A v2 opaque child is refined only when its range/hash and the entire Scene
 revision match. No `.rpy` write occurs. Unchanged reopen does not rewrite metadata.
 
-`updateChildDialogue` supplies Scene ID, child Beat ID, exact displayed owner, source
+`updateChildDialogue` (later removed; `updateBodyBeat` with the child's branch as its expected body replaces it) supplies Scene ID, child Beat ID, exact displayed owner, source
 revision and the existing Character ID. Preparation checks that owner and refuses
 speaker changes. It patches only the quoted text using the existing transaction,
 history, conflict and recovery services. Anchored forced-ID reuse prevents a new

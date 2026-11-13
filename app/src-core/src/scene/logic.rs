@@ -1338,15 +1338,11 @@ mod body_tests {
             .unwrap()
             .clone();
         let last = bs["beats"].as_array().unwrap().last().unwrap();
-        for fields in [
-            json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"beatId":last["id"],"beat":{"type":"jump","sceneId":a["id"]}}),
-            json!({"type":"updateBodyBeat","beatId":last["id"],"expectedBody":{"type":"root"},"beat":{"type":"jump","sceneId":a["id"]}}),
-        ] {
-            assert_eq!(
-                f.reject(command(&bs, fields))["error"]["code"],
-                "UNSUPPORTED_CALL_ROUTE"
-            );
-        }
+        let fields = json!({"type":"updateBodyBeat","beatId":last["id"],"expectedBody":{"type":"root"},"beat":{"type":"jump","sceneId":a["id"]}});
+        assert_eq!(
+            f.reject(command(&bs, fields))["error"]["code"],
+            "UNSUPPORTED_CALL_ROUTE"
+        );
         f.save(
             &b,
             &format!(

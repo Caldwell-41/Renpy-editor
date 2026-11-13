@@ -4950,6 +4950,7 @@ mod tests {
     use crate::metadata::{Resolution, SdkIdentity};
     use std::collections::BTreeMap;
     use std::fs;
+    use tempfile::TempDir;
 
     /// Move a root Beat before another root Beat, or to the end of the root body.
     pub(super) fn move_root_beat(
@@ -4980,7 +4981,6 @@ mod tests {
             expected_body: BodyRef::Root,
         }
     }
-    use tempfile::TempDir;
 
     #[test]
     fn scene_commands_decode_renderer_camel_case_fields() {

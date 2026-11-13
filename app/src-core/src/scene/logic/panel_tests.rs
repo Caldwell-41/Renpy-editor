@@ -426,6 +426,13 @@ fn inserting_an_identical_screen_statement_does_not_adopt_or_replace_its_opaque_
     let opaque = before["beats"][0].clone();
     let owner = panel(&mut f, "help_panel");
     let target = resolved(&mut f, &owner);
+    // The explicit command refuses to anchor a new Beat on the opaque statement itself.
+    assert_eq!(
+        f.reject(json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],
+            "expectedSourceRevision":before["sourceRevision"],"position":{"type":"before","anchor":{"type":"beat","beatId":opaque["id"]}},
+            "beat":{"type":"showScreen","target":target["binding"],"revisions":target["revisions"]}}))["error"]["code"],
+        "OPAQUE_BOUNDARY"
+    );
     let accepted = f.command(json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],
         "expectedSourceRevision":before["sourceRevision"],"position":before["bodies"][0]["defaultPlace"],
         "beat":{"type":"showScreen","target":target["binding"],"revisions":target["revisions"]}}));
