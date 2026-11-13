@@ -1099,6 +1099,44 @@ mod branches_tests {
     }
 
     #[test]
+    fn opening_many_scenes_reconciles_each_source_with_one_root_validation_per_read() {
+        // Open and Story's first load make four read passes over the scenes: reconcile
+        // and verify on open, then reconcile and read for Story. Each file read
+        // validates the root once, so a fifth pass, or per-path validation (about
+        // fifteen per scene, 17 s on Windows in #176), breaks the bound.
+        let temporary = tempfile::tempdir().unwrap();
+        let mut service =
+            LifecycleService::prepare_branches_ui_probe(temporary.path().join("profile")).unwrap();
+        let root = service.data_root.join("synthetic-project");
+        // Edits made while the project was closed, spread across the read workers.
+        let edited = [1, 200, 499];
+        for index in edited {
+            let path = root.join(format!("game/chapters/chapter_01/scene_{index:03}.rpy"));
+            let source = fs::read_to_string(&path).unwrap();
+            fs::write(&path, source.replace("\"Route 0\"", "\"Edited route\"")).unwrap();
+        }
+        let validations = &service.authoring.transactions.root_validations;
+        let before = validations.load(std::sync::atomic::Ordering::Relaxed);
+        service.open_path(&root).unwrap();
+        let workspace = service.scene_workspace().unwrap();
+        let validations = &service.authoring.transactions.root_validations;
+        let used = validations.load(std::sync::atomic::Ordering::Relaxed) - before;
+        let scenes = workspace.scenes.len();
+        assert_eq!(scenes, 500);
+        assert!(
+            used <= 5 * scenes,
+            "{used} root validations for {scenes} scenes"
+        );
+        // A source paired with the wrong scene would not map and would show as unavailable.
+        assert!(workspace.scenes.iter().all(|scene| !scene.source_conflict));
+        for index in edited {
+            let scene = &workspace.scenes[index];
+            assert_eq!(scene.technical_label, format!("scene_{index:03}"));
+            assert!(format!("{:?}", scene.beats).contains("Edited route"));
+        }
+    }
+
+    #[test]
     fn branches_native_fixture_has_full_workload_without_sdk_or_execution() {
         let temporary = tempfile::tempdir().unwrap();
         let mut service =

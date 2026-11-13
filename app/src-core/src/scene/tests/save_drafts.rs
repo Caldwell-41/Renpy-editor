@@ -114,7 +114,8 @@ fn project_bytes(f: &Fixture) -> BTreeMap<String, Vec<u8>> {
                     .strip_prefix(&f.root)
                     .unwrap()
                     .to_string_lossy()
-                    .into_owned();
+                    // Keys match `source_path`, which uses `/` on every host.
+                    .replace('\\', "/");
                 files.insert(relative, fs::read(&path).unwrap());
             }
         }
