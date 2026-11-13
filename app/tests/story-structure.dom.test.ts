@@ -153,3 +153,26 @@ test("end markers and editor paths name the scene, branch or option and never sa
   assert.equal(shorten("has_ticket and trust ≥ 3 and not missed_tram"), "has_ticket and trust ≥ 3…"); assert.equal(shorten("trust ≥ 5"), "trust ≥ 5");
   await s.close();
 });
+
+test("Tracks insertion markers open a new beat at the place core lists for them", async () => {
+  const s = setup(); const opener = (key: string) => s.host.querySelector<HTMLButtonElement>(`.story-tracks [data-beat-opener="${key}"]`)!;
+  // Each marker opens a new beat whose Insert in and Insert before name its core place.
+  const place = (key: string): [string, string] => {
+    opener(key).click(); const panel = s.host.querySelector<HTMLElement>(".new-beat")!; assert.ok(panel, key);
+    const result: [string, string] = [panel.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!.value, panel.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!.value];
+    button(panel, "Cancel").click(); return result;
+  };
+  assert.deepEqual(place("after:call"), ["root", "after-call"]);
+  assert.deepEqual(place("end:scene"), ["root", "end"]);
+  openBranch(s.host, "if");
+  assert.deepEqual(place("after:if"), ["root", "choice"]);
+  assert.deepEqual(place("last:if"), ["if", "end"]);
+  openBranch(s.host, "otherwise");
+  assert.deepEqual(place("first:otherwise"), ["otherwise", "end"]);
+  // The added beat goes through the ordinary insert command at that place.
+  opener("after:call").click(); const panel = s.host.querySelector<HTMLElement>(".new-beat")!;
+  choose(panel, "Beat type", "narration"); const text = panel.querySelector<HTMLTextAreaElement>("textarea")!; text.value = "Inserted from Tracks"; text.dispatchEvent(new Event("input", { bubbles: true }));
+  button(panel, "Add Beat").click(); await tick();
+  assert.deepEqual({ body: s.calls[0]!.command.body, position: s.calls[0]!.command.position }, { body: { type: "root" }, position: { type: "before", anchor: { type: "beat", beatId: "after-call" } } });
+  await s.close();
+});

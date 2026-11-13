@@ -24,6 +24,7 @@ import {
   renderStoryView,
   storyScene,
   type StatusLink,
+  type StatusDetail,
   type StoryStatus,
   type StoryView,
   type RecoveryReport,
@@ -242,7 +243,7 @@ function hasBlockingModal(): boolean {
   return document.querySelector<HTMLElement>('[aria-modal="true"]') !== null;
 }
 
-function persistenceMessage(state: PersistenceStatus, localPending: boolean): { readonly text: string; readonly kind: "normal" | "error"; readonly links?: readonly StatusLink[] } {
+function persistenceMessage(state: PersistenceStatus, localPending: boolean): { readonly text: string; readonly kind: "normal" | "error"; readonly links?: readonly StatusLink[] } & StatusDetail {
   if (state === "recoveryRequired") return { text: "Recovery required — writes are disabled", kind: "error" };
   if (state === "conflict") return { text: "Conflict — Source is invalid, missing, or changed outside Loomlight", kind: "error" };
   // A refused Story Save keeps its count and scene links until its drafts are saved or cancelled.
@@ -250,7 +251,7 @@ function persistenceMessage(state: PersistenceStatus, localPending: boolean): { 
   if (refusal) return refusal;
   if (localPending || state === "pendingValidation") return { text: "Unsaved Source draft", kind: "normal" };
   const drafts = storyView?.draftCount() ?? 0;
-  if (drafts) return { text: `${drafts} unsaved beat draft${drafts === 1 ? "" : "s"}`, kind: "normal" };
+  if (drafts) return { text: `${drafts} unsaved beat draft${drafts === 1 ? "" : "s"}`, kind: "normal", short: `${drafts} unsaved` };
   return { text: hasUnsubmittedInput() ? "Unsubmitted input — accepted changes saved" : "Saved", kind: "normal" };
 }
 
@@ -274,34 +275,29 @@ function statusLink(link: StatusLink): HTMLButtonElement {
   element.addEventListener("click", link.open); return element;
 }
 // The header save status, approved as story-combined-status / header-v2. A refused
-// Story Save bolds "Nothing saved." and links each scene. At 560 px the header shows a
-// short form (data-short) and the bottom status bar repeats a refusal line in full.
-function statusContent(message: string, links: readonly StatusLink[]): (string | HTMLElement)[] {
-  const lead = links.length ? /^(.*?Nothing saved\.)(\s.*)$/s.exec(message) : null;
-  const text = lead ? [Object.assign(document.createElement("b"), { textContent: lead[1] }), lead[2]!] : [message];
+// Story Save bolds its lead and links each scene. At 560 px the header shows the short
+// form (data-short) and the bottom status bar repeats a refusal line in full.
+function statusContent(message: string, links: readonly StatusLink[], lead?: string): (string | HTMLElement)[] {
+  const text = lead && message.startsWith(lead) ? [Object.assign(document.createElement("b"), { textContent: lead }), message.slice(lead.length)] : [message];
   return [...text, ...links.map(statusLink)];
-}
-function shortStatus(message: string, links: readonly StatusLink[]): string | undefined {
-  if (links.length) return "Nothing saved";
-  const drafts = /^(\d+) unsaved beat drafts?(\. Ready to save\.)?$/.exec(message);
-  return drafts ? `${drafts[1]} unsaved` : undefined;
 }
 // The bottom status bar: "Undone: …" and "Redone: …" until the next edit or view.
 function showMessage(text: string): void {
-  const message = document.querySelector<HTMLElement>("#app-message"); if (message) message.textContent = text;
+  const message = document.querySelector<HTMLElement>("#app-message"); if (!message) return;
+  message.textContent = text; message.toggleAttribute("data-idle", text === "Ready");
 }
 function clearHistoryNotice(): void {
   if (historyNotice) showMessage("Ready");
   historyNotice = undefined;
 }
-function setStatus(message: string, kind: "normal" | "error" = "normal", links: readonly StatusLink[] = []): void {
+function setStatus(message: string, kind: "normal" | "error" = "normal", links: readonly StatusLink[] = [], detail: StatusDetail = {}): void {
   const dialog=document.querySelector(".catalog-dialog-panel");if(dialog&&kind==="error"){let error=dialog.querySelector<HTMLElement>(".dialog-error");if(!error){error=document.createElement("p");error.className="error-message dialog-error";error.role="alert";dialog.append(error);}error.textContent=message;}else if(message==="Saving…"){dialog?.querySelector(".dialog-error")?.remove();}
   if(routineStatusTimer)clearTimeout(routineStatusTimer);
   const status=document.querySelector<HTMLElement>("#app-status"),refusal=document.querySelector<HTMLElement>("#app-refusal");
-  const content=statusContent(message,links),text=content.map(item=>typeof item==="string"?item:item.textContent).join(""),short=shortStatus(message,links);
+  const content=statusContent(message,links,detail.lead),text=content.map(item=>typeof item==="string"?item:item.textContent).join(""),short=detail.short;
   const apply=():void=>{
     if(status?.isConnected&&(status.textContent!==text||status.dataset.kind!==kind)){status.replaceChildren(...content);status.title=message;status.dataset.kind=kind;if(short)status.dataset.short=short;else delete status.dataset.short;}
-    if(refusal?.isConnected)refusal.replaceChildren(...(links.length?statusContent(message,links):[]));
+    if(refusal?.isConnected)refusal.replaceChildren(...(links.length?statusContent(message,links,detail.lead):[]));
   };
   if(kind==="normal"&&["Saving…","Checking saved state…"].includes(message))routineStatusTimer=setTimeout(apply,200);else apply();
 }
@@ -333,7 +329,7 @@ function shell(content: HTMLElement): void {
   const studioRequest=button("Studio request", "button");studioRequest.addEventListener("click",()=>openStudioRequest(currentProject?.sessionId??null));header.append(studioRequest,status);
   const footer = document.createElement("footer"); footer.className = "app-footer";
   const context = document.createElement("span"); context.textContent = currentProject ? "Local project" : "Local workspace";
-  const message = document.createElement("span"); message.id = "app-message"; message.className = "app-message"; message.role = "status"; message.ariaLive = "polite"; message.textContent = historyNotice?.view === viewGeneration ? historyNotice.text : "Ready";
+  const message = document.createElement("span"); message.id = "app-message"; message.className = "app-message"; message.role = "status"; message.ariaLive = "polite"; message.textContent = historyNotice?.view === viewGeneration ? historyNotice.text : "Ready"; message.toggleAttribute("data-idle", message.textContent === "Ready");
   const refusal = document.createElement("span"); refusal.id = "app-refusal"; refusal.className = "app-refusal";
   const settings = button("Settings", "text-button shell-settings"); settings.prepend(icon("settings")); settings.addEventListener("click", () => { const project=currentProject;if(!project){openSettings();return;}openProjectSettings(project);});
   footer.append(context,message,refusal,settings); main.append(header, content, footer); root.replaceChildren(main);
@@ -723,7 +719,7 @@ async function refreshPersistenceStatus(project: OpenProject, generation: number
     if (requestSequence !== statusRequestSequence || generation !== viewGeneration || !completionIsCurrent(token)) return;
     if (activeAuthoringOperations.has(project.sessionId) || activeFlushOperations.has(project.sessionId)) return;
     const rendered = persistenceMessage(state, currentSourceController(project)?.hasUnretainedInput() ?? false);
-    setStatus(rendered.text, rendered.kind, rendered.links);
+    setStatus(rendered.text, rendered.kind, rendered.links, rendered);
   } catch (error) {
     if (requestSequence === statusRequestSequence && generation === viewGeneration && completionIsCurrent(token)) {
       const detail = message(error, "Saved state could not be checked");
@@ -876,7 +872,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
     if (storyView) { workspace.replaceWith(storyView.host); tree.replaceWith(storyView.treeHost); storyView.update(model, storyActions, beatId); }
     else storyView = renderStoryView(workspace, tree, model, storyActions, beatId);
     const rendered = persistenceMessage(persistence, false);
-    setStatus(rendered.text, rendered.kind, rendered.links);
+    setStatus(rendered.text, rendered.kind, rendered.links, rendered);
   } catch (error) {
     if (generation === viewGeneration && completionIsCurrent(token)) setStatus(message(error, "Scene workspace could not be loaded"), "error");
   }
@@ -1297,7 +1293,7 @@ function requestProjectFlush(project: OpenProject, origin: "keyboard" | "toolbar
     const state = await projectValue<PersistenceStatus>(project, "project.status");
     if (!completionIsCurrent(token)) return;
     const rendered = persistenceMessage(state, currentSourceController(project)?.hasUnretainedInput() ?? false);
-    setStatus(rendered.text, rendered.kind, rendered.links);
+    setStatus(rendered.text, rendered.kind, rendered.links, rendered);
     recordSaveTrace(`route=flush;origin=${origin};context=non-source;phase=completed;status=${rendered.text}`);
   }).catch((error) => {
     recordSaveTrace(`route=flush;origin=${origin};context=non-source;phase=error`);

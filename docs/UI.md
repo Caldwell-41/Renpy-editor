@@ -84,8 +84,8 @@ contract and compares all tokens in the table with `styles.css`.
 The values come from [`combined-revision.css`](../app/design-lab/screens/story-revamp/combined-revision.css),
 which scopes them to the Story mock. There the last three rows are `--sc-arm-1` to
 `--sc-arm-4`, `--sc-stage-edge` and `--sc-tile`; the `sc-` prefix belongs to the mock.
-The app names the four arm tokens `--choice-arm-one` to `--choice-arm-four`. Stage edge and
-thumbnail tile stay in the Story layout slice, which adds them where it uses them.
+The app names the four arm tokens `--choice-arm-one` to `--choice-arm-four`, and the stage
+edge and thumbnail tile `--stage-edge` and `--thumbnail-tile`.
 
 Kris approved darker light arm values on 2026-11-12 so arm text reaches 4.5:1. Light
 arm 1, 2 and 4 are darker than the mock's `#1c7a6d`, `#b24f2e` and `#66771a`; arm 3

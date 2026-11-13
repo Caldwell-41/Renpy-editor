@@ -25,6 +25,8 @@
   --choice-arm-two: #e47d62;
   --choice-arm-three: #6aa9d8;
   --choice-arm-four: #7fbf73;
+  --stage-edge: #0d1114;
+  --thumbnail-tile: #10161b;
   --shadow-preview: 0 2px 10px rgb(0 0 0 / 24%);
 }
 :root[data-theme="light"] {
@@ -54,6 +56,8 @@
   --choice-arm-two: #a94726;
   --choice-arm-three: #2b67a0;
   --choice-arm-four: #5c6c07;
+  --stage-edge: #c9c6be;
+  --thumbnail-tile: #d9d6ce;
   --shadow-preview: 0 2px 8px rgb(35 37 45 / 14%);
 }
 :root { --font-ui: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; --font-source: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; --radius-small: 4px; --radius-medium: 6px; --elevation-preview: var(--shadow-preview); font-family: var(--font-ui); font-synthesis: none; background: var(--surface-app); color: var(--text-primary); }
@@ -144,8 +148,8 @@ h2 { margin: 0; font-size: 1rem; font-weight: 650; }
 .tree-scene-open { flex: 1; }
 /* Quiet beat draft markers, the same convention as Screens layout drafts. */
 .tree-scene-row[data-beat-draft=true] .tree-scene-open::after { content: "*"; color: var(--accent-primary); }
-/* Story Combined marks the beat lane of its Tracks column. A condition or Choice column also
-   marks drafts inside its branches. These markers wait on the batch 1 Combined status design. */
+/* Story Combined marks (story-combined-status / header-v2) sit on the beat lane of a Tracks
+   column. A condition or Choice column also marks drafts inside its branches. */
 .story-track-column[data-beat-draft=true] > .story-track-beat > .story-lane-0::after { content: "*"; margin-left: 3px; color: var(--accent-primary); }
 /* A draft that conflicts with source gets a quiet "!" until a Story Save refuses it. */
 .story-track-column[data-beat-conflict=true] > .story-track-beat > .story-lane-0::after { content: "!"; margin-left: 3px; color: var(--accent-primary); font-weight: 700; }

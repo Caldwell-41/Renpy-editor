@@ -131,9 +131,8 @@ export function laneOf(beat: SceneBeat): 1 | 2 | 3 | 4 | 5 {
 }
 
 /**
- * Author-facing wording for the Branch path and insertion markers. It names the scene,
- * branch or option itself and never says "body" (Kris, 2026-11-13). The approved
- * Combined status mock (batch 1) may still change these strings.
+ * Author-facing wording for the Branch path, insertion markers and draft marks. It names
+ * the scene, branch or option itself and never says "body" (story-combined-status / header-v2).
  */
 export const trackCopy = {
   pathTitle: "Branch path",

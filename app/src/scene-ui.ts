@@ -3,8 +3,7 @@ import { buildAvailabilityEditor, buildConditionEditor } from "./story-condition
 import { validateField } from "./authoring-input.ts";
 import { isTextField, typingStepIdleMs, type DraftStep, type DraftStepRecord, type HistoryDirection } from "./project-history.ts";
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenEffects, ScreenRevisions, ScreenTargetBinding } from "./screen-contracts.ts";
-import { armOf, beatBody, beatNumbers, bodyOf, nodeBeats, nodeRef, ownedBodies, renderBranchPath, renderMarksLegend, renderTracks, renderTracksKey, sameNode, samePosition, shorten, trackCopy, trackRoute, type PendingBeat } from "./story-tracks.ts";
-export { beatBody } from "./story-tracks.ts";
+import { armOf, beatBody, beatNumbers, bodyOf, laneOf, nodeBeats, nodeRef, ownedBodies, renderBranchPath, renderMarksLegend, renderTracks, renderTracksKey, sameNode, samePosition, shorten, trackCopy, trackRoute, type PendingBeat } from "./story-tracks.ts";
 export type PlacementRef = "left" | "centre" | "right";
 export type TransitionRef = "none" | "dissolve" | "fade";
 
@@ -185,11 +184,13 @@ export function conditionCaption(condition: Condition, variables?: SceneWorkspac
   return caption(condition.expression);
 }
 
-function branchCaption(branch: ConditionalBranch, model: SceneWorkspace): string {
-  if (branch.otherwise) return "Otherwise";
-  const condition = branch.condition ? conditionCaption(branch.condition, model.authoring.variables)
+/** A branch's test as text: its typed condition, or its Variable for older sources. */
+function branchTest(branch: ConditionalBranch, model: SceneWorkspace): string {
+  return branch.condition ? conditionCaption(branch.condition, model.authoring.variables)
     : model.authoring.variables.find(variable => variable.id === branch.variableId)?.technicalName ?? "Unknown condition";
-  return `${branch.ordinal ? "Else If" : "If"} ${condition}`;
+}
+function branchCaption(branch: ConditionalBranch, model: SceneWorkspace): string {
+  return branch.otherwise ? "Otherwise" : `${branch.ordinal ? "Else If" : "If"} ${branchTest(branch, model)}`;
 }
 
 function readOnlyLogic(beat: SceneBeat): boolean {
@@ -396,7 +397,7 @@ export interface SceneActions {
   readonly recordStep?: (step: DraftStepRecord) => Promise<void>;
   /** Reads the current workspace, so Story can refresh after a stale refusal. */
   readonly load?: () => Promise<SceneWorkspace>;
-  readonly status: (message: string, kind?: "normal" | "error", links?: readonly StatusLink[]) => void;
+  readonly status: (message: string, kind?: "normal" | "error", links?: readonly StatusLink[], detail?: StatusDetail) => void;
   readonly present: (assetId: string, purpose: MediaPresentation["purpose"]) => Promise<MediaPresentation>;
   readonly resolution: { readonly width: number; readonly height: number };
   readonly viewSource?: (path: string, byteStart?: number, byteEnd?: number, expectedRevision?: string) => void;
@@ -517,7 +518,9 @@ export function storyScene(model: SceneWorkspace, preferred?: string): SceneDocu
 
 /** A status-line link: one scene and its failing drafts after a refused Story Save. */
 export interface StatusLink { readonly label: string; readonly count: number; readonly open: () => void }
-export interface StoryStatus { readonly text: string; readonly kind: "normal" | "error"; readonly links: readonly StatusLink[] }
+/** How the header save status shows a message: the bold lead of a refusal, and its 560 px form. */
+export interface StatusDetail { readonly lead?: string; readonly short?: string }
+export interface StoryStatus extends StatusDetail { readonly text: string; readonly kind: "normal" | "error"; readonly links: readonly StatusLink[] }
 /** A beat draft that stopped a Story Save, and why. */
 export interface StorySaveFailure { readonly sceneId: string; readonly beatId?: string; readonly message: string }
 export type StorySaveOutcome =
@@ -748,6 +751,19 @@ export function renderStoryView(
     if (!previewTarget?.stage.isConnected || !scene || composing) return;
     mediaGeneration++; previewTarget.stage.replaceChildren(); renderStage(previewTarget.stage, scene);
     if (effectsHost?.isConnected) { effectsHost.replaceChildren(); renderEffects(effectsHost, scene); }
+    refreshLanes(scene);
+  };
+  // Tracks lane text follows valid drafts, as the stage does; invalid input keeps the accepted text.
+  const refreshLanes = (scene: SceneDocument): void => {
+    const shown = withDrafts(scene);
+    for (const column of host.querySelectorAll<HTMLElement>(".story-track-column[data-beat-id]")) {
+      const beat = shown.beats.find(item => item.id === column.dataset.beatId);
+      if (!beat || beat.conditionalBranch) continue;
+      const lane = laneOf(beat), cell = column.querySelector<HTMLElement>(`:scope > .story-track-beat > .story-lane-${lane}`);
+      const text = lane === 5 ? `${beatName(beat)} · ${beatSummary(beat.payload, model)}` : beatSummary(beat.payload, model);
+      const target = lane === 3 ? cell?.querySelector<HTMLElement>(".story-lane-copy") : cell;
+      if (target && target.textContent !== text) target.textContent = text;
+    }
   };
   const dropDraft = (key: string): void => { beatDrafts.delete(key); draftsChanged(); };
   const redrawBottom = (): void => { const scene = storyScene(model, selectedSceneId); if (scene && bottomHost?.isConnected) drawBottom(scene); };
@@ -871,18 +887,18 @@ export function renderStoryView(
   const saveStatus = (): StoryStatus | undefined => {
     if (!refusal || !host.isConnected) return undefined;
     const total = pendingDrafts().length, failing = [...refusal.failing.keys()], drafts = total === 1 ? "draft" : "drafts";
-    if (!failing.length) return { text: `${total} unsaved beat ${drafts}. Ready to save.`, kind: "normal", links: [] };
+    if (!failing.length) return { text: `${total} unsaved beat ${drafts}. Ready to save.`, kind: "normal", links: [], short: `${total} unsaved` };
     // Each link reveals the scene's first failing draft at the time of the click.
     const open = (sceneId: string): void => { const draft = inProjectOrder([...refusal?.failing.keys() ?? []].filter(item => item.sceneId === sceneId), item => item)[0]; if (draft) reveal(draft); };
     const links = model.scenes.flatMap(scene => {
       const count = failing.filter(draft => draft.sceneId === scene.id).length;
       return count ? [{ label: scene.displayName, count, open: () => open(scene.id) }] : [];
     });
-    return { text: `${refusal.lead} ${failing.length} of ${total} ${drafts} ${failing.length === 1 ? "needs" : "need"} changes:`, kind: "error", links };
+    return { text: `${refusal.lead} ${failing.length} of ${total} ${drafts} ${failing.length === 1 ? "needs" : "need"} changes:`, kind: "error", links, lead: refusal.lead, short: "Nothing saved" };
   };
   // Status changes only when the count or links change, so typing does not replace other status.
   const statusKey = (): string => { const status = saveStatus(); return JSON.stringify(status && [status.text, status.links.map(link => [link.label, link.count])]); };
-  const showRefusal = (): void => { const status = saveStatus(); if (status) actions.status(status.text, status.kind, status.links); };
+  const showRefusal = (): void => { const status = saveStatus(); if (status) actions.status(status.text, status.kind, status.links, status); };
   // Drops failing drafts that were saved or cancelled, and rechecks the one the author edited.
   const settleRefusal = (edited?: BeatDraft): void => {
     if (!refusal) return;
@@ -1474,7 +1490,7 @@ export function renderStoryView(
 
   // A beat's name in the editor and on the stage: its kind, or its branch for a header.
   const beatName = (beat: SceneBeat): string => beat.conditionalBranch ? beat.conditionalBranch.choiceOption ? "Option" : "Condition" : beatLabels[beat.payload.type];
-  const forkCaption = (beat: SceneBeat): string => beat.conditionalBranch?.condition ? conditionCaption(beat.conditionalBranch.condition, model.authoring.variables) : model.authoring.variables.find(variable => variable.id === beat.conditionalBranch?.variableId)?.technicalName ?? "Unknown condition";
+  const forkCaption = (beat: SceneBeat): string => beat.conditionalBranch ? branchTest(beat.conditionalBranch, model) : "Unknown condition";
   // A branch or option as Tracks and the Branch path name it.
   const branchName = (scene: SceneDocument, header: SceneBeat): string => {
     const branch = header.conditionalBranch; if (!branch) return beatName(header);
