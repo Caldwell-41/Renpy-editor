@@ -51,10 +51,47 @@ const pick=id=>{const beats=beatsOf(id),chain=[];let beat=beats.find(b=>b.id===i
  const target=column(id).querySelector(':scope > .story-track-beat, :scope > .story-slot-name');if(target.dataset.selected!=='true')target.click();return editorFor(id);};
 // A condition's editor with its If branch open, by the If header.
 const ifBranch=id=>{pick(id);openBranch(id);return pick(id);};
-// An option's editor opens from its Choice's editor.
-const option=id=>{const shown=document.querySelector(`.story-option-editor[data-option-id="${id}"]`);if(shown)return shown;
- const menu=beatsOf(id).find(b=>b.payload.type==='choice'&&b.payload.options.some(o=>o.id===id));pick(menu.id);
- [...document.querySelectorAll('.story-option-links button')].find(item=>item.dataset.optionId===id).click();return document.querySelector(`.story-option-editor[data-option-id="${id}"]`);};
+// An option is a numbered block in its Choice's editor.
+const option=id=>{const shown=document.querySelector(`.story-editor .story-option[data-option-id="${id}"]`);if(shown)return shown;
+ const menu=beatsOf(id).find(b=>b.payload.type==='choice'&&b.payload.options.some(o=>o.id===id));pick(menu.id);return document.querySelector(`.story-editor .story-option[data-option-id="${id}"]`);};
+// Add a beat: pick a kind in the open dialog; its new beat opens in the editor.
+const kind=type=>{const row=document.querySelector(`.story-add-beat [data-insert-kind="${type}"]`);assert(row,`Add a beat offers ${type}`);row.click();return document.querySelector('.story-editor .new-beat');};
+// + Add beat in the scene toolbar, then a kind.
+const addBeat=type=>{button('+ Add beat');return kind(type);};
+// An unadded new beat's Move to tree: its positions in its own place, and choosing one.
+const placeTree=draft=>{draft.querySelector('.story-beat-menu > summary').click();button('Move to…',draft);return document.querySelector('.story-move');};
+const positionsIn=tree=>{const chosen=tree.querySelector('[role=treeitem][aria-selected="true"]'),level=chosen?.getAttribute('aria-level');return [...tree.querySelectorAll('[role=treeitem][aria-selected]')].filter(item=>item.getAttribute('aria-level')===level).map(item=>item.textContent.slice(1));};
+const beatNumber=id=>column(id).querySelector('.story-beat-number').textContent;
+async function placeBefore(draft,beatId){const tree=placeTree(draft);const position=[...tree.querySelectorAll('[role=treeitem][aria-selected]')].find(item=>item.textContent.slice(1).startsWith(`Before ${beatNumber(beatId)} `));assert(position,`place before ${beatId}`);position.click();button('Move',tree);await settle();assert(!tree.isConnected);}
+// Only when: the rule builder tests choice_flag; If false is Hide or Show disabled.
+function availability(row,enabled,policy='hide',value='true'){
+ const number=Number(row.dataset.choiceIndex)+1,toggle=row.querySelector('.story-guard > button');if(toggle)toggle.click();
+ const rules=row.querySelector('.story-rules');
+ if(!enabled){for(const remove of [...rules.querySelectorAll('button[aria-label^="Remove rule"]')].reverse())remove.click();button('Done',row);return;}
+ const rule=rules.querySelector('.story-rule');rule.querySelector('.story-variable-picker > summary').click();
+ const variable=[...rule.querySelectorAll('[role=option]')].find(item=>item.querySelector('.story-variable-name')?.textContent==='choice_flag');if(variable.getAttribute('aria-selected')!=='true')variable.click();
+ [...row.querySelector('.story-rule').querySelectorAll('[role=radio]')].find(item=>item.textContent===(value==='true'?'is true':'is false')).click();
+ button('Done',row);
+ [...row.querySelectorAll(`[role=radiogroup][aria-label="Option ${number} if false"] [role=radio]`)].find(item=>item.textContent===(policy==='showDisabled'?'Show disabled':'Hide')).click();
+}
+// A new condition's first rule tests choice_flag.
+function conditionRule(form,value){const rule=form.querySelector('.story-rule');rule.querySelector('.story-variable-picker > summary').click();
+ [...rule.querySelectorAll('[role=option]')].find(item=>item.querySelector('.story-variable-name')?.textContent==='choice_flag').click();
+ [...form.querySelector('.story-rule').querySelectorAll('[role=radio]')].find(item=>item.textContent===(value==='true'?'is true':'is false')).click();}
+// A branch's + Beat is named after the branch: "Add a beat to If (choice_flag is True)".
+const ifName=id=>{const editor=pick(id);return editor.querySelector(`[data-beat-opener="branch:${id}"]`).getAttribute('aria-label').replace(/^Add a beat to /,'');};
+// Picked options and the prompt speaker are a switch and a portrait list.
+const pickedMode=(editor,mode)=>[...editor.querySelectorAll('[role=radiogroup][aria-label="Picked options"] [role=radio]')].find(item=>item.textContent===({showNormally:'Show normally',markPicked:'Mark picked',hidePicked:'Hide picked'})[mode]).click();
+const promptSpeaker=(editor,character)=>{editor.querySelector('.story-prompt .story-dropdown > summary').click();[...editor.querySelectorAll('.story-prompt [role=option]')].find(item=>item.getAttribute('aria-label')===character.displayName).click();};
+// Then: choose an ending in an option's Then menu; Go to a scene picks its scene in the sheet.
+const endingLabels={continue:'Continue after the Choice',jump:'Go to a scene',repeatChoice:'Repeat this Choice',return:'Return'};
+async function thenOption(id,ending,sceneId,commit=true){const block=option(id);block.querySelector('.story-outcome > summary').click();
+ const item=[...block.querySelectorAll('.story-outcome [role=option]')].find(o=>o.getAttribute('aria-label').startsWith(`${endingLabels[ending]}.`));assert(item,`Then offers ${ending}`);
+ // Choosing the ending already there changes nothing.
+ if(item.getAttribute('aria-selected')==='true'&&ending!=='jump'){item.click();await settle();return undefined;}
+ lastApply=undefined;item.click();
+ if(ending==='jump'){const tile=[...document.querySelectorAll('.story-sheet .story-tile')].find(t=>t.dataset.value===sceneId);assert(tile,'scene sheet');tile.click();}
+ await wait(()=>lastApply);await settle();if(commit)assert.equal(lastApply.ok,true,JSON.stringify(lastApply));return lastApply;}
 async function applied(scope,label){if(label==='Undo'||label==='Redo'){assert.equal((await historyStep(label.toLowerCase())).ok,true,JSON.stringify(lastApply));return;}lastApply=undefined;button(label,scope);await wait(()=>lastApply);await settle();assert.equal(lastApply.ok,true,JSON.stringify(lastApply));}
 try {
  assert.equal((await child.next()).ready,true);
@@ -70,9 +107,8 @@ try {
  [...document.querySelectorAll('.tree-scene-open')].find(b=>b.textContent===entry.displayName).click();await wait(()=>document.querySelector('.tree-scene-row.selected .tree-scene-open')?.textContent===entry.displayName);await settle();
  const scene=()=>workspace.scenes.find(s=>s.id===entry.id),choice=()=>scene().beats.find(b=>b.payload.type==='choice');
  assert.equal(await source(path),original);
- button('+ Add beat');let draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'choice','change');
- enter(draft.querySelector('[aria-label="Insert before"]'),scene().beats.find(b=>b.payload.text==='Shared once').id,'change');
- enter(draft.querySelector('[aria-label="Choice option text"]'),'Yes');button('Add option',draft);
+ let draft=addBeat('choice');await placeBefore(draft,scene().beats.find(b=>b.payload.text==='Shared once').id);
+ enter(draft.querySelector('[aria-label="Choice option text"]'),'Yes');button('+ Add option',draft);
  enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'No');await applied(draft,'Add Beat');
  assert(choice());const [yes,no]=choice().payload.options;assert(yes.id&&no.id&&yes.id!==no.id);
  const empty=await source(path);
@@ -82,7 +118,7 @@ try {
 
  const ids=[choice().id,yes.id,no.id];
  stage('production Add Choice creates two inert empty bodies before one shared continuation');
- button('Add a Beat',option(yes.id));draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'setVariable','change');
+ button('+ Beat',option(yes.id));draft=kind('setVariable');
  enter(draft.querySelector('[aria-label="Variable"]'),workspace.authoring.variables.find(v=>v.technicalName==='choice_flag').id,'change');enter(draft.querySelector('[aria-label="Value"]'),'true','change');await applied(draft,'Add Beat');
  const accepted=await source(path);result.runtime={continuation:accepted,entryLabel:entry.technicalLabel,target:await source(target.sourcePath)};assert.equal(accepted,empty.replace('            pass','            $ choice_flag = True'));
  assert.equal(scene().beats.filter(b=>b.structuralPlaceholder).length,1);assert.equal(scene().beats.filter(b=>b.payload.text==='Shared once').length,1);
@@ -95,120 +131,113 @@ try {
  async function editChoice(id) { pick(id); await settle(); return editorFor(id).querySelector('.expanded-beat'); }
  let promptEditor=await editChoice(choice().id);
  button('Add a prompt shown with the options',promptEditor);
- let promptText=promptEditor.querySelector('[aria-label="Prompt text"]');
- lastApply=undefined;button('Commit Beat',promptEditor);await settle();assert.equal(lastApply,undefined);assert.equal(promptText.getAttribute('aria-invalid'),'true');
+ // An empty prompt is no prompt: Commit changes nothing.
+ let promptText=promptEditor.querySelector('[aria-label="Prompt text"]');assert.equal(document.activeElement,promptText);
+ await applied(promptEditor,'Commit Beat');assert.equal(await source(path),accepted);
+ promptEditor=await editChoice(choice().id);button('Add a prompt shown with the options',promptEditor);promptText=promptEditor.querySelector('[aria-label="Prompt text"]');
  enter(promptText,'Choose a route');await applied(promptEditor,'Commit Beat');
  const narrationPrompt=await source(path);result.runtime.narrationPrompt=narrationPrompt;
  assert.equal(narrationPrompt,accepted.replace(initialHeader,initialHeader+'        "Choose a route"\n'));
  assert.deepEqual(choice().payload.options,[yes,no]);
- assert.match(document.querySelector('.preview-choice-summary').textContent,/Choose a route.*Yes.*No/);
+ assert.equal(document.querySelector('.preview-canvas .preview-overlay').textContent,'Choose a route');assert.deepEqual([...document.querySelectorAll('.preview-canvas .story-game-choice')].map(item=>item.textContent),['Yes','No']);
  const mapPath=join(scratch,'synthetic-project/.renpy-editor/source-map.json');
  const noOpMap=await readFile(mapPath);promptEditor=await editChoice(choice().id);await applied(promptEditor,'Commit Beat');assert.deepEqual(await readFile(mapPath),noOpMap);assert.equal(await source(path),narrationPrompt);
  promptEditor=await editChoice(choice().id);enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'Cancelled prompt');button('Cancel',promptEditor);assert.equal(await source(path),narrationPrompt);
- promptEditor=await editChoice(choice().id);enter(promptEditor.querySelector('[aria-label="Prompt speaker"]'),speaker.id,'change');enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'Where shall we go?');await applied(promptEditor,'Commit Beat');
+ promptEditor=await editChoice(choice().id);promptSpeaker(promptEditor,speaker);enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'Where shall we go?');await applied(promptEditor,'Commit Beat');
  const characterPrompt=await source(path);result.runtime.characterPrompt=characterPrompt;
  assert.equal(characterPrompt,narrationPrompt.replace('"Choose a route"',`${speaker.technicalName} "Where shall we go?"`));
  assert.equal(choice().payload.prompt.characterId,speaker.id);
- assert.match(document.querySelector('.preview-choice-summary').textContent,new RegExp(`${speaker.displayName}.*Where shall we go.*Yes.*No`));
+ assert.equal(document.querySelector('.preview-canvas .preview-overlay').textContent,`${speaker.displayName}Where shall we go?`);
  await applied(document,'Undo');assert.equal(await source(path),narrationPrompt);await applied(document,'Redo');assert.equal(await source(path),characterPrompt);
- promptEditor=await editChoice(choice().id);button('Remove prompt',promptEditor);await applied(promptEditor,'Commit Beat');assert.equal(await source(path),accepted);assert.deepEqual(choice().payload.options,[yes,no]);
+ // Clearing the prompt text removes the prompt.
+ promptEditor=await editChoice(choice().id);enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'');await applied(promptEditor,'Commit Beat');assert.equal(await source(path),accepted);assert.deepEqual(choice().payload.options,[yes,no]);
  stage('production prompt controls add narration, switch existing Character, preview with options, cancel/no-op, history and exact removal');
 
  // #104 source is exported only after real production availability controls accept it.
  const flagId=workspace.authoring.variables.find(v=>v.technicalName==='choice_flag').id;
- function availability(row, enabled, policy='hide') {
-   const checkbox=row.querySelector('[aria-label="Available when"]');checkbox.checked=enabled;checkbox.dispatchEvent(new Event('change',{bubbles:true}));
-   if(enabled){enter(row.querySelector('[aria-label="Condition Variable"]'),flagId,'change');enter(row.querySelector('[aria-label="Condition value"]'),'true','change');enter(row.querySelector('[aria-label="If false"]'),policy,'change');}
- }
- let policyEditor=await editChoice(choice().id);button('Add option',policyEditor);
- let policyRows=policyEditor.querySelectorAll('.choice-option');enter(policyRows[0].querySelector('[aria-label="Choice option text"]'),'Secret');enter(policyRows[1].querySelector('[aria-label="Choice option text"]'),'Locked');enter(policyRows[2].querySelector('[aria-label="Choice option text"]'),'Available');
+ let policyEditor=await editChoice(choice().id);button('+ Add option',policyEditor);
+ let policyRows=policyEditor.querySelectorAll('.story-option');enter(policyRows[0].querySelector('[aria-label="Choice option text"]'),'Secret');enter(policyRows[1].querySelector('[aria-label="Choice option text"]'),'Locked');enter(policyRows[2].querySelector('[aria-label="Choice option text"]'),'Available');
  availability(policyRows[0],true);availability(policyRows[1],true,'showDisabled');
  await applied(policyEditor,'Commit Beat');
  await addBodyBeat(no.id,'setVariable',form=>{enter(form.querySelector('[aria-label="Variable"]'),flagId,'change');enter(form.querySelector('[aria-label="Value"]'),'true','change');});
  const mixed=await source(path);result.runtime.mixedAvailability=mixed;result.runtime.choiceAdapter=await source('game/loomlight_choice_v1.rpy');result.runtime.choiceTemplate=generatedChoice;
  assert(mixed.includes('_ll_mode="showNormally"'));assert(mixed.includes('_ll_available=(choice_flag == True), _ll_guarded=True, _ll_locked=True'));assert.equal(choice().payload.options[0].text,'Secret');
- assert.match(document.querySelector('.preview-choice-summary').textContent,/Condition unknown/);assert.equal(document.querySelectorAll('.preview-choice-summary button').length,0);
+ assert.deepEqual([...document.querySelectorAll('.preview-canvas .story-game-choice')].map(item=>item.dataset.state),['unknown','unknown','available'],'guarded options read unknown on the stage');
  const policies=choice().payload.options;assert.equal(policies[0].unavailablePolicy,undefined);assert.equal(policies[1].unavailablePolicy,'showDisabled');
  const policyMap=await readFile(mapPath);policyEditor=await editChoice(choice().id);await applied(policyEditor,'Commit Beat');assert.equal(await source(path),mixed);assert.deepEqual(await readFile(mapPath),policyMap);
- policyEditor=await editChoice(choice().id);policyRows=policyEditor.querySelectorAll('.choice-option');availability(policyRows[2],true,'showDisabled');await applied(policyEditor,'Commit Beat');
+ policyEditor=await editChoice(choice().id);policyRows=policyEditor.querySelectorAll('.story-option');availability(policyRows[2],true,'showDisabled');await applied(policyEditor,'Commit Beat');
  result.runtime.allUnavailable=await source(path);
  assert(result.runtime.allUnavailable.includes('if ((choice_flag == True)) or ((choice_flag == True)) or ((choice_flag == True)):'));
  // All-disabled and all-hidden variants are both authored with the same controls.
- policyEditor=await editChoice(choice().id);policyRows=policyEditor.querySelectorAll('.choice-option');availability(policyRows[0],true,'showDisabled');await applied(policyEditor,'Commit Beat');result.runtime.allDisabled=await source(path);
- policyEditor=await editChoice(choice().id);policyRows=policyEditor.querySelectorAll('.choice-option');for(const row of policyRows)availability(row,true,'hide');await applied(policyEditor,'Commit Beat');result.runtime.allHidden=await source(path);
+ policyEditor=await editChoice(choice().id);policyRows=policyEditor.querySelectorAll('.story-option');availability(policyRows[0],true,'showDisabled');await applied(policyEditor,'Commit Beat');result.runtime.allDisabled=await source(path);
+ policyEditor=await editChoice(choice().id);policyRows=policyEditor.querySelectorAll('.story-option');for(const row of policyRows)availability(row,true,'hide');await applied(policyEditor,'Commit Beat');result.runtime.allHidden=await source(path);
  await applied(document,'Undo');assert.equal(await source(path),result.runtime.allDisabled);await applied(document,'Redo');assert.equal(await source(path),result.runtime.allHidden);
- policyEditor=await editChoice(choice().id);policyRows=policyEditor.querySelectorAll('.choice-option');availability(policyRows[1],true,'showDisabled');await applied(policyEditor,'Commit Beat');
+ policyEditor=await editChoice(choice().id);policyRows=policyEditor.querySelectorAll('.story-option');availability(policyRows[1],true,'showDisabled');await applied(policyEditor,'Commit Beat');
  assert.equal(choice().payload.options[1].unavailablePolicy,'showDisabled');
- policyEditor=await editChoice(choice().id);enter(policyEditor.querySelector('[aria-label="If false"]'),'showDisabled','change');button('Cancel',policyEditor);
+ policyEditor=await editChoice(choice().id);[...policyEditor.querySelectorAll('[role=radiogroup][aria-label="Option 1 if false"] [role=radio]')].find(item=>item.textContent==='Show disabled').click();button('Cancel',policyEditor);
  // Restore the earlier two-option source through accepted history before continuing #101/#103.
  while((await source(path))!==accepted)await applied(document,'Undo');
  stage('production availability controls author mixed, all-disabled and all-hidden menus; inert unknown preview, exact no-op and history pass');
 
 
 
- // A stale retained Then draft must not overwrite competing Source.
- button('Then',option(yes.id));let panel=document.querySelector('.story-operation[aria-label="Option ending"]');enter(panel.querySelector('[aria-label="Then"]'),'return','change');
- await saveSource(path,accepted+'# external accepted change\n');lastApply=undefined;button('Apply ending',panel);await wait(()=>lastApply);await settle();assert.equal(lastApply.ok,false);assert.equal(lastApply.error.code,'SOURCE_CONFLICT');assert.equal(panel.querySelector('[aria-label="Then"]').value,'return');assert(panel.isConnected);assert.equal(await source(path),accepted+'# external accepted change\n');button('Cancel',panel);
- stage('stale option ending retains input and accepted Source; Cancel discards the draft');
+ // Then acts at once on the option's ending beat. Against source that changed underneath, core refuses and nothing is written.
+ option(yes.id);await saveSource(path,accepted+'# external accepted change\n');let panel;const staleEnding=await thenOption(yes.id,'return',undefined,false);
+ assert.equal(staleEnding.ok,false);assert.equal(staleEnding.error.code,'SOURCE_CONFLICT');assert.equal(await source(path),accepted+'# external accepted change\n');
+ stage('a stale option ending refuses and keeps accepted Source');
  button('Close Project');await wait(()=>document.querySelector('.recent-open'));button(document.querySelector('.recent-open').textContent);await wait(()=>document.querySelector('.story-track-column'));await settle();
  assert.deepEqual([choice().id,...choice().payload.options.map(o=>o.id)],ids);assert.equal(await source(path),accepted+'# external accepted change\n');
  // Then Return replaces no earlier Beat. Continue removes only that Return.
- button('Then',option(yes.id));panel=document.querySelector('.story-operation');enter(panel.querySelector('[aria-label="Then"]'),'return','change');await applied(panel,'Apply ending');
+ await thenOption(yes.id,'return');
  assert.equal(await source(path),(accepted+'# external accepted change\n').replace('$ choice_flag = True\n','$ choice_flag = True\n            return\n'));result.runtime.return=await source(path);
- button('Then',option(yes.id));panel=document.querySelector('.story-operation');enter(panel.querySelector('[aria-label="Then"]'),'continue','change');await applied(panel,'Apply ending');assert.equal(await source(path),accepted+'# external accepted change\n');
- button('Then',option(yes.id));panel=document.querySelector('.story-operation');enter(panel.querySelector('[aria-label="Then"]'),'jump','change');enter(panel.querySelector('[aria-label="Destination Scene"]'),target.id,'change');await applied(panel,'Apply ending');result.runtime.jump=await source(path);await applied(document,'Undo');assert.equal(await source(path),accepted+'# external accepted change\n');stage('reopen preserves identities; Then Return, Jump and Continue preserve the preceding boolean');
+ await thenOption(yes.id,'continue');assert.equal(await source(path),accepted+'# external accepted change\n');
+ await thenOption(yes.id,'jump',target.id);result.runtime.jump=await source(path);await applied(document,'Undo');assert.equal(await source(path),accepted+'# external accepted change\n');stage('reopen preserves identities; Then Return, Jump and Continue preserve the preceding boolean');
  // Empty text is a local validation refusal; caption rename is a minimal patch.
  pick(choice().id);await settle();let editor=editorFor(choice().id).querySelector('.expanded-beat');const text=editor.querySelector('[aria-label="Choice option text"]');enter(text,'');lastApply=undefined;button('Commit Beat',editor);await settle();assert.equal(lastApply,undefined);assert.equal(text.value,'');button('Cancel',editor);
  pick(choice().id);editor=editorFor(choice().id).querySelector('.expanded-beat');enter(editor.querySelector('[aria-label="Choice option text"]'),'Yes, please');await applied(editor,'Commit Beat');assert.equal(await source(path),(accepted+'# external accepted change\n').replace('"Yes" (','"Yes, please" ('));
  stage('invalid caption retained without a write; accepted caption changes only its quoted token');
  const flow=await call('flow.list');const menuEdges=flow.edges.filter(e=>e.kind==='choice'&&e.beatId===choice().id);assert.equal(menuEdges.length,2);assert(menuEdges.every(e=>e.destination.kind==='body'));
  // #102 uses the same production body controls and source/history owner.
+ // An option's + Beat opens Add a beat for that option.
  async function addBodyBeat(id,type,fill) {
-  button('Add a Beat',option(id)); const form=document.querySelector('.new-beat');
-  const types=form.querySelector('[aria-label="Beat type"]');
-  assert([...types.options].some(o=>o.value===type),`Option body must offer ${type}`);
-  enter(types,type,'change');fill?.(form);await applied(form,'Add Beat');
+  button('+ Beat',option(id)); const form=kind(type);assert(form,`Option body must offer ${type}`);
+  fill?.(form);await applied(form,'Add Beat');
  }
  await addBodyBeat(yes.id,'narration',form=>enter(form.querySelector('textarea'),'Before call'));
  const beforeInvalidCall=await source(path);
- button('Add a Beat',option(yes.id));draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'call','change');
+ button('+ Beat',option(yes.id));draft=kind('call');
  enter(draft.querySelector('[aria-label="Call destination Scene"]'),entry.id,'change');lastApply=undefined;button('Add Beat',draft);await wait(()=>lastApply);await settle();
  assert.equal(lastApply.ok,false);assert.equal(lastApply.error.code,'UNSUPPORTED_CALL_ROUTE');assert(draft.isConnected);assert.equal(await source(path),beforeInvalidCall);button('Cancel',draft);assert.equal(await source(path),beforeInvalidCall);
  await addBodyBeat(yes.id,'call',form=>enter(form.querySelector('[aria-label="Call destination Scene"]'),target.id,'change'));
  await addBodyBeat(yes.id,'narration',form=>enter(form.querySelector('textarea'),'Resume inside option'));
  const callBeat=scene().beats.find(b=>b.payload.type==='call');const callLabel=callBeat.payload.returnLabel;
  assert(callLabel?.startsWith('_ll_call_'));
- button('Add Condition',option(yes.id));panel=document.querySelector('.story-operation[aria-label="Add Condition"]');
- // Select the declared fixture variable explicitly; default comparison may use another project variable.
- enter(panel.querySelector('[aria-label="Condition Variable"]'),workspace.authoring.variables.find(v=>v.technicalName==='choice_flag').id,'change');
+ // Add a beat in an option offers Condition. Its rule starts on the first variable, so choose choice_flag.
+ button('+ Beat',option(yes.id));kind('condition');panel=document.querySelector('.story-operation[aria-label="Add Condition"]');conditionRule(panel,'true');
  await applied(panel,'Create Condition');
  const branch=scene().beats.find(b=>b.conditionalBranch&&!b.conditionalBranch.choiceOption);
- button('Add Beat to If',ifBranch(branch.id));
- draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'choice','change');
- enter(draft.querySelector('[aria-label="Choice option text"]'),'Inner normal');button('Add option',draft);
- enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'Inner jump');button('Add option',draft);
+ button(`Add a beat to ${ifName(branch.id)}`,ifBranch(branch.id));draft=kind('choice');
+ enter(draft.querySelector('[aria-label="Choice option text"]'),'Inner normal');button('+ Add option',draft);
+ enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'Inner jump');button('+ Add option',draft);
  enter(draft.querySelectorAll('[aria-label="Choice option text"]')[2],'Inner return');await applied(draft,'Add Beat');
  const nested=scene().beats.find(b=>b.payload.type==='choice'&&b.owner);
  const [normal,jump,ret]=nested.payload.options;
  await addBodyBeat(normal.id,'narration',form=>enter(form.querySelector('textarea'),'Inside inner'));
- for(const [id,kind] of [[jump.id,'jump'],[ret.id,'return']]) {
-  button('Then',option(id));panel=document.querySelector('.story-operation[aria-label="Option ending"]');
-  enter(panel.querySelector('[aria-label="Then"]'),kind,'change');if(kind==='jump')enter(panel.querySelector('[aria-label="Destination Scene"]'),target.id,'change');await applied(panel,'Apply ending');
- }
+ for(const [id,kind] of [[jump.id,'jump'],[ret.id,'return']]) await thenOption(id,kind,target.id);
  await addBodyBeat(yes.id,'narration',form=>enter(form.querySelector('textarea'),'After nested'));
  const recursive=await source(path);result.runtime.recursive=recursive;
  assert.equal(scene().beats.find(b=>b.id===callBeat.id).payload.returnLabel,callLabel);
  const recursiveFlow=await call('flow.list');const callEdge=recursiveFlow.edges.find(e=>e.kind==='call'&&e.beatId===callBeat.id);
  assert.equal(callEdge.continuation.beatId,scene().beats.find(b=>b.payload.text==='Resume inside option').id);
  assert.equal(callEdge.guardPath[0].branchId,yes.id);
- assert.match(option(normal.id).textContent,/Choice.*Option/);
+ assert(option(normal.id),'The nested Choice shows its own option blocks');
  await applied(document,'Undo');await applied(document,'Redo');assert.equal(await source(path),recursive);
  button('Close Project');await wait(()=>document.querySelector('.recent-open'));button(document.querySelector('.recent-open').textContent);await wait(()=>document.querySelector('.story-track-column'));await settle();
  assert.equal(await source(path),recursive);assert.equal(scene().beats.find(b=>b.id===callBeat.id).payload.returnLabel,callLabel);
  stage('recursive production controls author dialogue, stable Call, condition and nested Choice with normal/Jump/Return paths; history and reopen preserve source');
 
  promptEditor=await editChoice(choice().id);button('Add a prompt shown with the options',promptEditor);enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'Choose a route');await applied(promptEditor,'Commit Beat');
- promptEditor=await editChoice(nested.id);button('Add a prompt shown with the options',promptEditor);enter(promptEditor.querySelector('[aria-label="Prompt speaker"]'),speaker.id,'change');enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'Inside, which route?');await applied(promptEditor,'Commit Beat');
+ promptEditor=await editChoice(nested.id);button('Add a prompt shown with the options',promptEditor);promptSpeaker(promptEditor,speaker);enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'Inside, which route?');await applied(promptEditor,'Commit Beat');
  const recursivePrompt=await source(path);result.runtime.recursivePrompt=recursivePrompt;
  const outerHeader=recursive.split('\n').find(l=>l.startsWith('    menu '))+'\n',innerHeader=recursive.split('\n').find(l=>l.startsWith('                menu '))+'\n';assert.equal(recursivePrompt,recursive.replace(outerHeader,outerHeader+'        "Choose a route"\n').replace(innerHeader,innerHeader+`                    ${speaker.technicalName} "Inside, which route?"\n`));
  const nestedNow=scene().beats.find(b=>b.id===nested.id);assert.equal(nestedNow.payload.prompt.characterId,speaker.id);assert.deepEqual(nestedNow.payload.options,nested.payload.options);
@@ -224,44 +253,43 @@ try {
  await call('variable.create',{technicalName:'choice_visits',variableType:'int',defaultValue:0});
  await saveSource(path,`label ${entry.technicalLabel}:\n    "Shared once"\n    return\n`);
  button('Close Project');await wait(()=>document.querySelector('.recent-open'));button(document.querySelector('.recent-open').textContent);await wait(()=>document.querySelector('.story-track-column'));await settle();
- button('+ Add beat');draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'setVariable','change');enter(draft.querySelector('[aria-label="Insert before"]'),scene().beats.find(b=>b.payload.text==='Shared once').id,'change');enter(draft.querySelector('[aria-label="Variable"]'),workspace.authoring.variables.find(v=>v.technicalName==='choice_visits').id,'change');enter(draft.querySelector('[aria-label="Formula"]'),'choice_visits + 1');await applied(draft,'Add Beat');
- button('+ Add beat');draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'choice','change');enter(draft.querySelector('[aria-label="Insert before"]'),scene().beats.find(b=>b.payload.text==='Shared once').id,'change');
- enter(draft.querySelector('[aria-label="Choice option text"]'),'Ask about the station');button('Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'Ask about the ticket');button('Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[2],'Leave');await applied(draft,'Add Beat');
+ draft=addBeat('setVariable');await placeBefore(draft,scene().beats.find(b=>b.payload.text==='Shared once').id);enter(draft.querySelector('[aria-label="Variable"]'),workspace.authoring.variables.find(v=>v.technicalName==='choice_visits').id,'change');enter(draft.querySelector('[aria-label="Formula"]'),'choice_visits + 1');await applied(draft,'Add Beat');
+ draft=addBeat('choice');await placeBefore(draft,scene().beats.find(b=>b.payload.text==='Shared once').id);
+ enter(draft.querySelector('[aria-label="Choice option text"]'),'Ask about the station');button('+ Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'Ask about the ticket');button('+ Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[2],'Leave');await applied(draft,'Add Beat');
  const conversationId=choice().id,[station,ticket,leave]=choice().payload.options;
- promptEditor=await editChoice(conversationId);button('Add a prompt shown with the options',promptEditor);enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'What would you like to ask?');availability(promptEditor.querySelectorAll('.choice-option')[1],true,'showDisabled');await applied(promptEditor,'Commit Beat');
+ promptEditor=await editChoice(conversationId);button('Add a prompt shown with the options',promptEditor);enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'What would you like to ask?');availability(promptEditor.querySelectorAll('.story-option')[1],true,'showDisabled');await applied(promptEditor,'Commit Beat');
  await addBodyBeat(station.id,'narration',form=>enter(form.querySelector('textarea'),'Station answer'));
  await addBodyBeat(station.id,'call',form=>enter(form.querySelector('[aria-label="Call destination Scene"]'),target.id,'change'));
  await addBodyBeat(station.id,'narration',form=>enter(form.querySelector('textarea'),'Station call resumed'));
  await addBodyBeat(station.id,'setVariable',form=>{enter(form.querySelector('[aria-label="Variable"]'),flagId,'change');enter(form.querySelector('[aria-label="Value"]'),'true','change');});
  await addBodyBeat(ticket.id,'narration',form=>enter(form.querySelector('textarea'),'Ticket answer'));
- async function thenOption(id,kind,commit=true){button('Then',option(id));const form=document.querySelector('.story-operation[aria-label="Option ending"]');enter(form.querySelector('[aria-label="Then"]'),kind,'change');if(commit)await applied(form,'Apply ending');return form;}
  const beforeRepeat=await source(path),beforeRepeatMap=await readFile(mapPath);
- panel=await thenOption(station.id,'repeatChoice',false);assert([...panel.querySelector('[aria-label="Then"]').options].some(o=>o.textContent==='Repeat this Choice'));button('Cancel',panel);assert.equal(await source(path),beforeRepeat);assert.deepEqual(await readFile(mapPath),beforeRepeatMap);
+ // The Then menu offers Repeat this Choice; Escape closes it without a change.
+ {const block=option(station.id);block.querySelector('.story-outcome > summary').click();const list=block.querySelector('.story-outcome [role=listbox]');assert([...list.querySelectorAll('[role=option]')].some(o=>o.getAttribute('aria-label').startsWith('Repeat this Choice.')));
+  list.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));assert.equal(block.querySelector('.story-outcome').open,false);await settle();assert.equal(await source(path),beforeRepeat);assert.deepEqual(await readFile(mapPath),beforeRepeatMap);}
  await thenOption(station.id,'repeatChoice');const oneRepeat=await source(path);assert.equal((oneRepeat.match(/label _ll_choice_/g)??[]).length,1);assert(oneRepeat.includes('"Station call resumed"\n            $ choice_flag = True\n            jump _ll_choice_'));
  assert.equal(choice().id,conversationId);assert.deepEqual(choice().payload.options.map(o=>o.id),[station.id,ticket.id,leave.id]);
  const repeatMap=await readFile(mapPath);await thenOption(station.id,'repeatChoice');assert.equal(await source(path),oneRepeat);assert.deepEqual(await readFile(mapPath),repeatMap);
  await applied(document,'Undo');assert.equal(await source(path),beforeRepeat);await applied(document,'Redo');assert.equal(await source(path),oneRepeat);
- panel=await thenOption(ticket.id,'repeatChoice',false);staleSession=true;lastApply=undefined;button('Apply ending',panel);await wait(()=>lastApply);await settle();staleSession=false;assert.equal(lastApply.ok,false);assert.equal(panel.querySelector('[aria-label="Then"]').value,'repeatChoice');assert(panel.isConnected);assert.equal(await source(path),oneRepeat);button('Cancel',panel);
+ staleSession=true;const staleRepeat=await thenOption(ticket.id,'repeatChoice',undefined,false);staleSession=false;assert.equal(staleRepeat.ok,false);assert.equal(await source(path),oneRepeat);
  await thenOption(ticket.id,'repeatChoice');result.runtime.repeatConversation=await source(path);assert.equal((result.runtime.repeatConversation.match(/label _ll_choice_/g)??[]).length,1);
  await thenOption(station.id,'continue');assert((await source(path)).includes('"Station call resumed"\n            $ choice_flag = True\n'));await applied(document,'Undo');assert.equal(await source(path),result.runtime.repeatConversation);
  const repeatFlow=await call('flow.list');assert.equal(repeatFlow.edges.filter(e=>e.kind==='repeat'&&e.destination.beatId===conversationId).length,2);
  // No selectable options after Repeat must traverse the same aggregate gate.
- promptEditor=await editChoice(conversationId);for(const row of promptEditor.querySelectorAll('.choice-option')){availability(row,true,'showDisabled');enter(row.querySelector('[aria-label="Condition value"]'),'false','change');}await applied(promptEditor,'Commit Beat');result.runtime.repeatExhausted=await source(path);
+ promptEditor=await editChoice(conversationId);for(const row of promptEditor.querySelectorAll('.story-option')){availability(row,true,'showDisabled','false');}await applied(promptEditor,'Commit Beat');result.runtime.repeatExhausted=await source(path);
  await applied(document,'Undo');assert.equal(await source(path),result.runtime.repeatConversation);
  // A Choice nested in a condition inside another option owns its own target.
- promptEditor=await editChoice(conversationId);button('Add option',promptEditor);enter(promptEditor.querySelectorAll('[aria-label="Choice option text"]')[3],'Nested conversation');await applied(promptEditor,'Commit Beat');
- const nestedOuter=choice().payload.options[3];button('Add Condition',option(nestedOuter.id));panel=document.querySelector('.story-operation[aria-label="Add Condition"]');enter(panel.querySelector('[aria-label="Condition Variable"]'),flagId,'change');enter(panel.querySelector('[aria-label="Condition value"]'),'false','change');await applied(panel,'Create Condition');
- const repeatBranch=scene().beats.find(b=>b.conditionalBranch&&!b.conditionalBranch.choiceOption);button('Add Beat to If',ifBranch(repeatBranch.id));draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'choice','change');enter(draft.querySelector('[aria-label="Choice option text"]'),'Inner ask');button('Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'Inner leave');await applied(draft,'Add Beat');
- const repeatInner=scene().beats.find(b=>b.payload.type==='choice'&&b.owner),innerAsk=repeatInner.payload.options[0];promptEditor=await editChoice(repeatInner.id);button('Add a prompt shown with the options',promptEditor);enter(promptEditor.querySelector('[aria-label="Prompt speaker"]'),speaker.id,'change');enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'Inside, ask again?');await applied(promptEditor,'Commit Beat');
+ promptEditor=await editChoice(conversationId);button('+ Add option',promptEditor);enter(promptEditor.querySelectorAll('[aria-label="Choice option text"]')[3],'Nested conversation');await applied(promptEditor,'Commit Beat');
+ const nestedOuter=choice().payload.options[3];button('+ Beat',option(nestedOuter.id));kind('condition');panel=document.querySelector('.story-operation[aria-label="Add Condition"]');conditionRule(panel,'false');await applied(panel,'Create Condition');
+ const repeatBranch=scene().beats.find(b=>b.conditionalBranch&&!b.conditionalBranch.choiceOption);button(`Add a beat to ${ifName(repeatBranch.id)}`,ifBranch(repeatBranch.id));draft=kind('choice');enter(draft.querySelector('[aria-label="Choice option text"]'),'Inner ask');button('+ Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'Inner leave');await applied(draft,'Add Beat');
+ const repeatInner=scene().beats.find(b=>b.payload.type==='choice'&&b.owner),innerAsk=repeatInner.payload.options[0];promptEditor=await editChoice(repeatInner.id);button('Add a prompt shown with the options',promptEditor);promptSpeaker(promptEditor,speaker);enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'Inside, ask again?');await applied(promptEditor,'Commit Beat');
  await addBodyBeat(innerAsk.id,'narration',form=>enter(form.querySelector('textarea'),'Inner answer'));await thenOption(innerAsk.id,'repeatChoice');await addBodyBeat(nestedOuter.id,'narration',form=>enter(form.querySelector('textarea'),'Outer resumed'));result.runtime.repeatNested=await source(path);
  assert.equal((result.runtime.repeatNested.match(/label _ll_choice_/g)??[]).length,2);const innerRepeat=scene().beats.find(b=>b.payload.type==='repeatChoice'&&b.owner?.branchId===innerAsk.id);assert(innerRepeat);assert((await call('flow.list')).edges.some(e=>e.kind==='repeat'&&e.beatId===innerRepeat.id&&e.destination.beatId===repeatInner.id));
  const allRepeatIds=scene().beats.map(b=>b.id);button('Close Project');await wait(()=>document.querySelector('.recent-open'));button(document.querySelector('.recent-open').textContent);await wait(()=>document.querySelector('.story-track-column'));await settle();assert.deepEqual(scene().beats.map(b=>b.id),allRepeatIds);assert.equal(await source(path),result.runtime.repeatNested);
  stage('production Repeat preserves preceding Beats and Call, shares one target per Choice, supports no-op/cancel/history/reopen, and exports prompted nested and availability-changing runtime sources');
  // #106 uses the approved whole-Choice selector through the actual editor.
  promptEditor=await editChoice(conversationId);
- const pickedControl=promptEditor.querySelector('[aria-label="Picked options"]');
- assert(pickedControl, 'The real Story editor must offer Picked options');
- enter(pickedControl,'markPicked','change');await applied(promptEditor,'Commit Beat');
+ pickedMode(promptEditor,'markPicked');await applied(promptEditor,'Commit Beat');
  result.runtime.pickedRepeat=await source(path);
  result.runtime.pickedAdapter=await source('game/loomlight_choice_v1.rpy');
  assert.equal(choice().payload.pickedPolicy,'markPicked');
@@ -271,66 +299,66 @@ try {
  stage('production Picked options controls accept current-save history through the shared transaction');
 
  // Hide picked must win when a picked Repeat answer becomes disabled.
- promptEditor=await editChoice(conversationId);enter(promptEditor.querySelector('[aria-label="Picked options"]'),'hidePicked','change');availability(promptEditor.querySelectorAll('.choice-option')[0],true,'showDisabled');enter(promptEditor.querySelectorAll('.choice-option')[0].querySelector('[aria-label="Condition value"]'),'false','change');await applied(promptEditor,'Commit Beat');result.runtime.pickedRepeatHide=await source(path);
+ promptEditor=await editChoice(conversationId);pickedMode(promptEditor,'hidePicked');availability(promptEditor.querySelectorAll('.story-option')[0],true,'showDisabled','false');await applied(promptEditor,'Commit Beat');result.runtime.pickedRepeatHide=await source(path);
  // Independent Scene reentry fixtures. Only the exported accepted bytes reach the SDK.
  await saveSource(path,`label ${entry.technicalLabel}:\n    "Shared once"\n    return\n`);
  await saveSource(target.sourcePath,`label ${target.technicalLabel}:\n    "Reenter Choice"\n    jump ${entry.technicalLabel}\n`);
  result.runtime.pickedTarget=await source(target.sourcePath);
  button('Close Project');await wait(()=>document.querySelector('.recent-open'));button(document.querySelector('.recent-open').textContent);await wait(()=>document.querySelector('.story-track-column'));await settle();
- button('+ Add beat');draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'choice','change');enter(draft.querySelector('[aria-label="Insert before"]'),scene().beats.find(b=>b.payload.text==='Shared once').id,'change');
- enter(draft.querySelector('[aria-label="Choice option text"]'),'Same');button('Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'Same');button('Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[2],'Locked');
- enter(draft.querySelector('[aria-label="Picked options"]'),'showNormally','change');availability(draft.querySelectorAll('.choice-option')[2],true,'showDisabled');await applied(draft,'Add Beat');
+ draft=addBeat('choice');await placeBefore(draft,scene().beats.find(b=>b.payload.text==='Shared once').id);
+ enter(draft.querySelector('[aria-label="Choice option text"]'),'Same');button('+ Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'Same');button('+ Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[2],'Locked');
+ pickedMode(draft,'showNormally');availability(draft.querySelectorAll('.story-option')[2],true,'showDisabled');await applied(draft,'Add Beat');
  const pickedId=choice().id,[firstPick,secondPick,lockedPick]=choice().payload.options;
- for(const id of [firstPick.id,secondPick.id]){panel=await thenOption(id,'jump',false);enter(panel.querySelector('[aria-label="Destination Scene"]'),target.id,'change');await applied(panel,'Apply ending');}
+ for(const id of [firstPick.id,secondPick.id])await thenOption(id,'jump',target.id);
  promptEditor=await editChoice(pickedId);button('Add a prompt shown with the options',promptEditor);enter(promptEditor.querySelector('[aria-label="Prompt text"]'),'Choose independently');await applied(promptEditor,'Commit Beat');
  result.runtime.pickedShow=await source(path);
- promptEditor=await editChoice(pickedId);enter(promptEditor.querySelector('[aria-label="Picked options"]'),'markPicked','change');await applied(promptEditor,'Commit Beat');result.runtime.pickedMark=await source(path);
- assert.match(document.querySelector('.preview-choice-summary').textContent,/Picked state unknown/);assert.equal(document.querySelectorAll('.preview-choice-summary button').length,0);
+ promptEditor=await editChoice(pickedId);pickedMode(promptEditor,'markPicked');await applied(promptEditor,'Commit Beat');result.runtime.pickedMark=await source(path);
+ assert.deepEqual([...document.querySelectorAll('.preview-canvas .story-game-choice')].map(item=>item.dataset.state),['available','available','unknown'],'without Preview options nothing is marked picked');
  const pickedMap=await readFile(mapPath);promptEditor=await editChoice(pickedId);await applied(promptEditor,'Commit Beat');assert.equal(await source(path),result.runtime.pickedMark);assert.deepEqual(await readFile(mapPath),pickedMap);
- promptEditor=await editChoice(pickedId);enter(promptEditor.querySelector('[aria-label="Picked options"]'),'hidePicked','change');button('Cancel',promptEditor);assert.equal(await source(path),result.runtime.pickedMark);
- promptEditor=await editChoice(pickedId);enter(promptEditor.querySelector('[aria-label="Picked options"]'),'hidePicked','change');await applied(promptEditor,'Commit Beat');result.runtime.pickedHide=await source(path);
+ promptEditor=await editChoice(pickedId);pickedMode(promptEditor,'hidePicked');button('Cancel',promptEditor);assert.equal(await source(path),result.runtime.pickedMark);
+ promptEditor=await editChoice(pickedId);pickedMode(promptEditor,'hidePicked');await applied(promptEditor,'Commit Beat');result.runtime.pickedHide=await source(path);
  await applied(document,'Undo');assert.equal(await source(path),result.runtime.pickedMark);await applied(document,'Redo');assert.equal(await source(path),result.runtime.pickedHide);
  result.runtime.pickedIdentities={choice:pickedId,options:[firstPick.id,secondPick.id,lockedPick.id]};
  // Rename/reorder preserves keys. A newly added identical caption gets a fresh key.
- promptEditor=await editChoice(pickedId);button('Move option down',promptEditor.querySelectorAll('.choice-option')[0]);enter(promptEditor.querySelectorAll('.choice-option')[0].querySelector('[aria-label="Choice option text"]'),'Renamed');button('Add option',promptEditor);enter(promptEditor.querySelectorAll('.choice-option')[3].querySelector('[aria-label="Choice option text"]'),'Same');await applied(promptEditor,'Commit Beat');
+ promptEditor=await editChoice(pickedId);button('Move option 1 down',promptEditor.querySelectorAll('.story-option')[0]);enter(promptEditor.querySelectorAll('.story-option')[0].querySelector('[aria-label="Choice option text"]'),'Renamed');button('+ Add option',promptEditor);enter(promptEditor.querySelectorAll('.story-option')[3].querySelector('[aria-label="Choice option text"]'),'Same');await applied(promptEditor,'Commit Beat');
  assert.equal(choice().payload.options[0].id,secondPick.id);assert.equal(choice().payload.options[1].id,firstPick.id);assert(![firstPick.id,secondPick.id,lockedPick.id].includes(choice().payload.options[3].id));
  await applied(document,'Undo');assert.equal(await source(path),result.runtime.pickedHide);
  button('Close Project');await wait(()=>document.querySelector('.recent-open'));button(document.querySelector('.recent-open').textContent);await wait(()=>document.querySelector('.story-track-column'));await settle();assert.equal(await source(path),result.runtime.pickedHide);assert.equal(choice().id,pickedId);
  // Retain the whole Choice draft on invalid text, stale session and external conflict.
- promptEditor=await editChoice(pickedId);enter(promptEditor.querySelector('[aria-label="Picked options"]'),'markPicked','change');enter(promptEditor.querySelector('[aria-label="Choice option text"]'),'');lastApply=undefined;button('Commit Beat',promptEditor);await settle();assert.equal(lastApply,undefined);assert.equal(promptEditor.querySelector('[aria-label="Picked options"]').value,'markPicked');button('Cancel',promptEditor);
- promptEditor=await editChoice(pickedId);enter(promptEditor.querySelector('[aria-label="Picked options"]'),'markPicked','change');staleSession=true;lastApply=undefined;button('Commit Beat',promptEditor);await wait(()=>lastApply);await settle();staleSession=false;assert.equal(lastApply.ok,false);assert(promptEditor.isConnected);assert.equal(promptEditor.querySelector('[aria-label="Picked options"]').value,'markPicked');assert.equal(await source(path),result.runtime.pickedHide);button('Cancel',promptEditor);
+ promptEditor=await editChoice(pickedId);pickedMode(promptEditor,'markPicked');enter(promptEditor.querySelector('[aria-label="Choice option text"]'),'');lastApply=undefined;button('Commit Beat',promptEditor);await settle();assert.equal(lastApply,undefined);assert.equal(promptEditor.querySelector('select[aria-label="Picked options"]').value,'markPicked');button('Cancel',promptEditor);
+ promptEditor=await editChoice(pickedId);pickedMode(promptEditor,'markPicked');staleSession=true;lastApply=undefined;button('Commit Beat',promptEditor);await wait(()=>lastApply);await settle();staleSession=false;assert.equal(lastApply.ok,false);assert(promptEditor.isConnected);assert.equal(promptEditor.querySelector('select[aria-label="Picked options"]').value,'markPicked');assert.equal(await source(path),result.runtime.pickedHide);button('Cancel',promptEditor);
  // Immediate Return and immediate Repeat are accepted through the same Then controls.
  await thenOption(firstPick.id,'return');result.runtime.pickedReturn=await source(path);await applied(document,'Undo');
  await thenOption(firstPick.id,'repeatChoice');result.runtime.pickedImmediateRepeat=await source(path);await applied(document,'Undo');assert.equal(await source(path),result.runtime.pickedHide);
  // A separate Choice with identical captions must have independent history.
- button('+ Add beat');draft=document.querySelector('.new-beat');enter(draft.querySelector('[aria-label="Beat type"]'),'choice','change');enter(draft.querySelector('[aria-label="Insert before"]'),scene().beats.find(b=>b.payload.text==='Shared once').id,'change');enter(draft.querySelector('[aria-label="Choice option text"]'),'Same');button('Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'Same');enter(draft.querySelector('[aria-label="Picked options"]'),'markPicked','change');await applied(draft,'Add Beat');
+ draft=addBeat('choice');await placeBefore(draft,scene().beats.find(b=>b.payload.text==='Shared once').id);enter(draft.querySelector('[aria-label="Choice option text"]'),'Same');button('+ Add option',draft);enter(draft.querySelectorAll('[aria-label="Choice option text"]')[1],'Same');pickedMode(draft,'markPicked');await applied(draft,'Add Beat');
  const secondChoice=scene().beats.find(b=>b.payload.type==='choice'&&b.id!==pickedId);result.runtime.pickedInstanceIdentities={choice:secondChoice.id,options:secondChoice.payload.options.map(o=>o.id)};assert(![pickedId,firstPick.id,secondPick.id].includes(secondChoice.id));result.runtime.pickedInstances=await source(path);
  await applied(document,'Undo');assert.equal(await source(path),result.runtime.pickedHide);
  // Exhaustion makes the shared continuation reachable even when every option transfers.
- promptEditor=await editChoice(pickedId);button('Remove option',promptEditor.querySelectorAll('.choice-option')[2]);await applied(promptEditor,'Commit Beat');
+ promptEditor=await editChoice(pickedId);button('Remove option 3',promptEditor.querySelectorAll('.story-option')[2]);await applied(promptEditor,'Commit Beat');
  const transferOnly=await source(path),sharedAnchor=scene().beats.find(b=>b.payload.text==='Shared once'),finalReturn=scene().beats.at(-1);
  for(const anchor of [sharedAnchor,finalReturn]){
-  button('+ Add beat');draft=document.querySelector('.new-beat');
-  const position=draft.querySelector('[aria-label="Insert before"]');
-  assert.deepEqual([...position.options].map(o=>o.value),[pickedId,sharedAnchor.id,finalReturn.id]);assert.equal(position.value,finalReturn.id);
-  enter(position,anchor.id,'change');enter(draft.querySelector('[aria-label="Beat type"]'),'narration','change');enter(draft.querySelector('textarea'),'Exhaustion insertion');await applied(draft,'Add Beat');
+  // Add a beat starts before the scene's Return; Move to lists every scene place.
+  draft=addBeat('narration');assert.equal(draft.querySelector('.story-where dd').textContent,`Before ${beatNumber(finalReturn.id)} Return`);
+  {const tree=placeTree(draft);assert.deepEqual(positionsIn(tree),[`Before ${beatNumber(pickedId)} Choice`,`Before ${beatNumber(sharedAnchor.id)} Narration`,`Before ${beatNumber(finalReturn.id)} Return`]);tree.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));}
+  await placeBefore(draft,anchor.id);enter(draft.querySelector('textarea'),'Exhaustion insertion');await applied(draft,'Add Beat');
   const inserted=scene().beats.find(b=>b.payload.text==='Exhaustion insertion');assert(inserted&&!inserted.owner);assert.equal(lastApply.ok,true);
   assert.deepEqual(result.transcript.filter(t=>t.request.operation==='scene.apply').at(-1).request.payload.command.position,{type:'before',anchor:{type:'beat',beatId:anchor.id}});
   await applied(document,'Undo');assert.equal(await source(path),transferOnly);
  }
- await addBodyBeat(firstPick.id,'choice',form=>{enter(form.querySelector('[aria-label="Choice option text"]'),'Nested leave');enter(form.querySelector('[aria-label="Picked options"]'),'hidePicked','change');});
+ await addBodyBeat(firstPick.id,'choice',form=>{enter(form.querySelector('[aria-label="Choice option text"]'),'Nested leave');pickedMode(form,'hidePicked');});
  const exhaustionInner=scene().beats.find(b=>b.payload.type==='choice'&&b.owner?.branchId===firstPick.id);
  await thenOption(exhaustionInner.payload.options[0].id,'return');
  const nestedBefore=await source(path),sharedJump=scene().beats.find(b=>b.payload.type==='jump'&&b.owner?.branchId===firstPick.id);
- button('Add a Beat',option(firstPick.id));draft=document.querySelector('.new-beat');
- const nestedPosition=draft.querySelector('[aria-label="Insert before"]');assert.deepEqual([...nestedPosition.options].map(o=>o.value),[exhaustionInner.id,sharedJump.id]);
- enter(nestedPosition,sharedJump.id,'change');enter(draft.querySelector('[aria-label="Beat type"]'),'narration','change');enter(draft.querySelector('textarea'),'Nested exhaustion insertion');await applied(draft,'Add Beat');
+ button('+ Beat',option(firstPick.id));draft=kind('narration');
+ {const tree=placeTree(draft);assert.deepEqual(positionsIn(tree),[`Before ${beatNumber(exhaustionInner.id)} Choice`,`Before ${beatNumber(sharedJump.id)} Jump`]);tree.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));}
+ await placeBefore(draft,sharedJump.id);enter(draft.querySelector('textarea'),'Nested exhaustion insertion');await applied(draft,'Add Beat');
  const nestedInserted=scene().beats.find(b=>b.payload.text==='Nested exhaustion insertion');assert.equal(nestedInserted.owner.branchId,firstPick.id);assert.equal(lastApply.ok,true);
  await applied(document,'Undo');assert.equal(await source(path),nestedBefore);
  await applied(document,'Undo');await applied(document,'Undo');assert.equal(await source(path),transferOnly);
  await applied(document,'Undo');assert.equal(await source(path),result.runtime.pickedHide);
  stage('Hide picked exposes shared Beat/final Return and nested continuation positions through actual controls and public dispatch');
- promptEditor=await editChoice(pickedId);enter(promptEditor.querySelector('[aria-label="Picked options"]'),'markPicked','change');await appendFile(join(scratch,'synthetic-project',path),'# picked external writer\n');const pickedExternal=await readFile(join(scratch,'synthetic-project',path));lastApply=undefined;button('Commit Beat',promptEditor);await wait(()=>lastApply);await settle();assert.equal(lastApply.ok,false);assert.equal(lastApply.error.code,'SOURCE_CONFLICT');assert(promptEditor.isConnected);assert.equal(promptEditor.querySelector('[aria-label="Picked options"]').value,'markPicked');assert.deepEqual(await readFile(join(scratch,'synthetic-project',path)),pickedExternal);button('Cancel',promptEditor);
+ promptEditor=await editChoice(pickedId);pickedMode(promptEditor,'markPicked');await appendFile(join(scratch,'synthetic-project',path),'# picked external writer\n');const pickedExternal=await readFile(join(scratch,'synthetic-project',path));lastApply=undefined;button('Commit Beat',promptEditor);await wait(()=>lastApply);await settle();assert.equal(lastApply.ok,false);assert.equal(lastApply.error.code,'SOURCE_CONFLICT');assert(promptEditor.isConnected);assert.equal(promptEditor.querySelector('select[aria-label="Picked options"]').value,'markPicked');assert.deepEqual(await readFile(join(scratch,'synthetic-project',path)),pickedExternal);button('Cancel',promptEditor);
  stage('independent Scene routes export all three picked policies, duplicate-caption identities, immediate Jumps, inert preview, Cancel/no-op/history and reopen');
  // Core bodies drive the Then ending states and every place list (#144). The condition
  // is the issue's example: Custom Code before Return does not hide the ending.
@@ -341,19 +369,24 @@ try {
  const endingMenu=choice(),[coded,unknownOption]=endingMenu.payload.options,bodyOf=id=>scene().bodies.find(b=>b.body.branchId===id);
  const codeEnding=scene().beats.find(b=>b.payload.source?.trim()==='return "good"');
  assert.deepEqual(bodyOf(coded.id).ending,{type:'ends',beatId:codeEnding.id});assert.equal(bodyOf(unknownOption.id).ending.type,'unknown');
- button('Then',option(coded.id));panel=document.querySelector('.story-operation[aria-label="Option ending"]');
- assert.match(panel.textContent,/Ends with Custom Code: return "good"/);assert([...panel.querySelectorAll('button')].some(b=>b.textContent==='Edit in Source'&&!b.disabled));
- assert.equal(panel.querySelector('[aria-label="Then"]').disabled,true);assert.equal([...panel.querySelectorAll('button')].find(b=>b.textContent==='Apply ending').disabled,true);
- assert.match(option(coded.id).querySelector(':scope > .story-continuation').textContent,/^Ends with Custom Code: return "good"/);button('Cancel',panel);
- button('Add a Beat',option(coded.id));draft=document.querySelector('.new-beat');
- assert.deepEqual([...draft.querySelector('[aria-label="Insert before"]').options].map(o=>o.value),[scene().beats.find(b=>b.payload.text==='Before code').id],'no place before Custom Code or after the ending');button('Cancel',draft);
- button('Then',option(unknownOption.id));panel=document.querySelector('.story-operation[aria-label="Option ending"]');
- assert.match(panel.textContent,/Ending unknown: Custom Code can leave this option/);enter(panel.querySelector('[aria-label="Then"]'),'return','change');await applied(panel,'Apply ending');
+ // story-combined-editor / replace-v2: Custom Code that ends an option takes the Then menu's place.
+ let block=option(coded.id);const then=block.querySelector('.story-then');
+ assert(then.classList.contains('story-then-replaced'));assert.equal(block.querySelector('.story-outcome'),null,'no Then menu when Custom Code ends the option');
+ assert.equal(then.querySelector('.story-ending').textContent,'Ends with Custom Code: return "good"');assert(!then.textContent.includes('Continue after the Choice'));
+ assert([...then.querySelectorAll('button')].some(b=>b.textContent==='Edit in Source'&&!b.disabled));
+ // + Beat goes before the ending: no place before Custom Code or after the ending.
+ button('+ Beat',block);draft=kind('narration');
+ {const tree=placeTree(draft);assert.deepEqual(positionsIn(tree),[`Before ${beatNumber(scene().beats.find(b=>b.payload.text==='Before code').id)} Narration`],'no place before Custom Code or after the ending');tree.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));}
+ button('Cancel',draft);
+ // Ending unknown sits on the Custom Code beat that causes it; Then stays editable.
+ block=option(unknownOption.id);assert.equal(block.querySelector('.story-beat-note').textContent,'Ending unknown: Custom Code can leave this option');
+ assert.equal(block.querySelector('.story-outcome > summary').getAttribute('aria-label'),'Option 2 then: Continue after the Choice');
+ await thenOption(unknownOption.id,'return');
  assert.equal(await source(path),bodiesSource.replace('$ renpy.jump("elsewhere")\n','$ renpy.jump("elsewhere")\n            return\n'));await applied(document,'Undo');assert.equal(await source(path),bodiesSource);
  const conditionHeader=scene().beats.find(b=>b.conditionalBranch&&!b.owner&&!b.conditionalBranch.choiceOption&&!b.conditionalBranch.ordinal&&!b.conditionalBranch.otherwise);
- button('+ Add beat');draft=document.querySelector('.new-beat');const rootPlaces=draft.querySelector('[aria-label="Insert before"]');
- assert.deepEqual([...rootPlaces.options].map(o=>o.value),[endingMenu.id,conditionHeader.id]);assert(![...rootPlaces.options].some(o=>o.textContent==='End of body'),'the condition ends the scene body');
- assert.equal(rootPlaces.value,conditionHeader.id,'the default place is before the ending condition');button('Cancel',draft);
+ draft=addBeat('narration');assert.equal(draft.querySelector('.story-where dd').textContent,`Before ${beatNumber(conditionHeader.id)} Condition`,'the default place is before the ending condition');
+ {const tree=placeTree(draft);const places=positionsIn(tree);assert.deepEqual(places,[`Before ${beatNumber(endingMenu.id)} Choice`,`Before ${beatNumber(conditionHeader.id)} Condition`]);assert(!places.some(label=>label.startsWith('End of')),'the condition ends the scene');tree.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));}
+ button('Cancel',draft);
  assert.equal([...pick(endingMenu.id).querySelectorAll('.story-beat-menu button')].find(item=>item.textContent==='Move down').disabled,true,'Move down cannot pass the ending condition');
  const otherwiseHeader=scene().beats.find(b=>b.conditionalBranch?.otherwise),otherwiseReturn=scene().beats.find(b=>b.payload.type==='return'&&b.owner?.branchId===otherwiseHeader.id);
  button('Delete',pick(otherwiseReturn.id).querySelector('.story-beat-menu'));panel=document.querySelector('.story-operation[aria-label="Delete Beat"]');

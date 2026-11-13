@@ -582,23 +582,6 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
 
 /* Approved Choice preview A v2. The existing Game canvas keeps its media. */
 
-.preview-choice-summary{box-sizing:border-box;min-width:0;min-height:0;overflow:auto;scrollbar-gutter:stable;padding:4px 10px}
-.preview-choice-summary:focus-visible{outline:2px solid var(--focus-ring);outline-offset:-2px}
-.preview-choice-prompt{display:flex;align-items:baseline;gap:8px;overflow-wrap:anywhere}
-.preview-choice-speaker{flex:none;font-weight:650}
-.preview-choice-picked{display:flex;flex-wrap:wrap;gap:3px 10px;margin-top:2px;font-size:calc(var(--ui-size,14px) * 11 / 14);line-height:1.4}
-.preview-choice-unknown,.preview-choice-condition{color:var(--status-partial)}
-.preview-choice-policy,.preview-choice-number{color:var(--text-secondary)}
-.preview-choice-options{list-style:none;margin:4px 0 0;padding:0}
-.preview-choice-summary>.preview-choice-options:first-child{margin-top:0}
-.preview-choice-option{display:grid;grid-template-columns:18px minmax(0,1fr);gap:6px;align-items:baseline;margin:0;padding:1px 0;border-top:1px solid var(--border-normal);overflow-wrap:anywhere}
-.preview-choice-option:has(.preview-choice-condition){grid-template-columns:18px minmax(0,1fr) auto}
-.preview-choice-number{font:calc(var(--ui-size,14px) * 11 / 14)/1.5 var(--font-source,monospace)}
-.preview-choice-condition{font-size:calc(var(--ui-size,14px) * 11 / 14);line-height:1.4}
-.preview-choice-summary::-webkit-scrollbar{width:7px;height:7px}
-.preview-choice-summary::-webkit-scrollbar-thumb{background:#8d887b}
-.preview-choice-summary::-webkit-scrollbar-track{background:var(--surface-app)}
-@container(max-width:510px){.preview-choice-option:has(.preview-choice-condition){grid-template-columns:18px minmax(0,1fr)}.preview-choice-condition{grid-column:2}}
 
 .import-preview-status {font-size:.85em;color:var(--text-muted);overflow-wrap:anywhere}
 .import-staged-toolbar {display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -801,9 +784,6 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .story-stage-footer>.partial-badge{margin-left:auto;font-size:11px}
 .story-stage-slot{container-type:size;display:grid;place-items:start center;min-width:0;min-height:0}
 .story-stage-slot>.preview-canvas{width:min(100cqw,calc(100cqh * var(--stage-w) / var(--stage-h)));max-width:none;max-height:none;box-shadow:0 0 0 1px var(--stage-edge)}
-.preview-canvas>.preview-choice-summary{position:absolute;z-index:4;top:10%;left:18%;right:18%;max-height:80%;padding:8px 12px;color:#f2eee5;background:#19212bef;border:1px solid #c8d1da66}
-.preview-canvas>.preview-choice-summary .preview-choice-option{border-top-color:#c8d1da33}
-.preview-canvas>.preview-choice-summary .preview-choice-policy,.preview-canvas>.preview-choice-summary .preview-choice-number{color:#c5c8d0}
 .story-editor{min-width:0;min-height:0;overflow:auto;border-left:1px solid var(--border-normal);padding:0 4px 8px 12px;scroll-padding:44px 8px 8px}
 .story-editor-heading{position:sticky;top:0;z-index:4;display:flex;align-items:center;gap:8px;min-height:36px;background:var(--surface-app)}
 .story-editor-title{font-size:13px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

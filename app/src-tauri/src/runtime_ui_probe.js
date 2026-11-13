@@ -99,15 +99,11 @@
         const setFirstEnding = async destination => {
           await until(()=>document.querySelector('.story-track-beat[data-beat-kind="choice"]'));
           const choice=document.querySelector('.story-track-beat[data-beat-kind="choice"]');if(choice.dataset.selected!=='true')choice.click();
-          await until(()=>document.querySelector('.story-option-links button'));document.querySelector('.story-option-links button').click();
-          await until(()=>document.querySelector('.story-option-editor'));
-          const option=document.querySelector('.story-option-editor');
-          [...option.querySelectorAll('button')].find(b=>b.textContent==='Then').click();
-          await until(()=>document.querySelector('.story-operation[aria-label="Option ending"]'));
-          const panel=document.querySelector('.story-operation[aria-label="Option ending"]');
-          const kind=panel.querySelector('[aria-label="Then"]');kind.value='jump';kind.dispatchEvent(new Event('change',{bubbles:true}));
-          const target=panel.querySelector('[aria-label="Destination Scene"]');target.value=destination;target.dispatchEvent(new Event('change',{bubbles:true}));
-          await click('Apply ending');await until(()=>!document.querySelector('.story-operation'));await settled();
+          // Option 1 already jumps: its destination row opens the scene sheet, and picking a scene applies the ending.
+          const pick=()=>document.querySelector('.story-editor .story-option .story-destination-pick');
+          await until(pick);const before=pick().getAttribute('aria-label');pick().click();
+          const tile=()=>[...document.querySelectorAll('.story-sheet .story-tile')].find(t=>t.dataset.value===destination);
+          await until(tile,15000);tile().click();await until(()=>pick()&&pick().getAttribute('aria-label')!==before);await settled();
         };
         await click("Open Scene");await setFirstEnding(initial[1]);
         let flow = await read("flow.list",{sessionId});

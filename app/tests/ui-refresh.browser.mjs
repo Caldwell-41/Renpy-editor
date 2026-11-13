@@ -93,9 +93,9 @@ try {
  // Long accepted Choice captions remain reachable inside a short preview.
  await page.getByRole('button',{name:'Story',exact:true}).click();
  await page.locator('.story-track-beat').nth(3).click();
- await page.evaluate(()=>{const slot=document.querySelector('.story-stage-slot');slot.style.height='90px';document.querySelectorAll('.preview-choice-caption').forEach((row,index)=>row.textContent=`Option ${index+1}: `+'Return to the origin, then take the English path to the garden and the station. '.repeat(4));});
+ await page.evaluate(()=>{const slot=document.querySelector('.story-stage-slot');slot.style.height='90px';document.querySelectorAll('.story-game-choice > span:last-child').forEach((row,index)=>row.textContent=`Option ${index+1}: `+'Return to the origin, then take the English path to the garden and the station. '.repeat(4));});
  await page.waitForFunction(()=>document.querySelector('.preview-canvas').getBoundingClientRect().height<=91);
- const caption=await page.locator('.preview-choice-summary').evaluate(e=>{const c=e.parentElement.getBoundingClientRect(),r=e.getBoundingClientRect();e.scrollTop=e.scrollHeight;return {inside:r.top>=c.top-1&&r.bottom<=c.bottom+1,scrollable:e.scrollHeight>e.clientHeight,reachedEnd:e.scrollTop+e.clientHeight>=e.scrollHeight-1};});
+ const caption=await page.locator('.preview-canvas > .story-game-choices').evaluate(e=>{const c=e.parentElement.getBoundingClientRect(),r=e.getBoundingClientRect();e.scrollTop=e.scrollHeight;return {inside:r.top>=c.top-1&&r.bottom<=c.bottom+1,scrollable:e.scrollHeight>e.clientHeight,reachedEnd:e.scrollTop+e.clientHeight>=e.scrollHeight-1};});
  assert.equal(caption.inside,true,'long caption extends outside the bounded preview');assert.equal(caption.scrollable,true);assert.equal(caption.reachedEnd,true,'end of long caption is unreachable');
  await page.getByRole('button',{name:'Source',exact:true}).click();
 
@@ -510,7 +510,7 @@ for key,value in [('stage','open'),('passed',False),('error','failure')]:
  const appearanceThumbnails=audit.locator('.character-game-setup .catalog-inspector .appearance-thumbnail:visible');
  for(let index=0;index<await appearanceThumbnails.count();index++){const image=appearanceThumbnails.nth(index);await image.scrollIntoViewIfNeeded();await audit.waitForFunction(index=>{const images=[...document.querySelectorAll('.character-game-setup .catalog-inspector .appearance-thumbnail')].filter(n=>!n.closest('[hidden]')&&n.checkVisibility({visibilityProperty:true}));const img=images[index];return img?.getAttribute('src')&&img.complete&&img.naturalWidth>0;},index);await image.evaluate(img=>img.decode());}
  await audit.screenshot({path:output+'audit-fixed-appearance.png'});
- await audit.getByRole('button',{name:'Story',exact:true}).click();await audit.getByRole('button',{name:'+ Add beat',exact:true}).click();await audit.locator('.new-beat select').first().selectOption('narration');await audit.locator('.new-beat textarea').fill('Saved narration');
+ await audit.getByRole('button',{name:'Story',exact:true}).click();await audit.getByRole('button',{name:'+ Add beat',exact:true}).click();await audit.locator('.story-add-beat [data-insert-kind="narration"]').click();await audit.locator('.new-beat textarea').fill('Saved narration');
  await audit.locator('.new-beat').getByRole('button',{name:'Add Beat',exact:true}).click();await audit.waitForFunction(()=>window.__auditReleaseBeat);
  assert.equal(await audit.locator('.new-beat').getByRole('button',{name:'Add Beat',exact:true}).isDisabled(),true);assert.equal(await audit.locator('.new-beat').getByRole('button',{name:'Cancel',exact:true}).isDisabled(),true);
  await audit.evaluate(()=>document.querySelector('.new-beat button.button.primary').click());assert.equal(await audit.evaluate(()=>window.__auditCommands.filter(c=>c.type==='insertBodyBeat').length),1);
