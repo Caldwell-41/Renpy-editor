@@ -4606,14 +4606,16 @@ mod tests {
             .iter()
             .find(|scene| scene.id == garden_id)
             .unwrap();
+        // Garden ends at its Return. A Jump goes only at a body's end, so it replaces that
+        // Return, as Add a beat does (the index-based InsertBeat this replaced is gone).
         scene_workspace = apply_scene_target(
             &service,
             &scene_workspace,
-            crate::scene::SceneCommand::InsertBodyBeat {
+            crate::scene::SceneCommand::UpdateBodyBeat {
                 scene_id: garden.id.clone(),
                 expected_source_revision: garden.source_revision.clone(),
-                body: crate::scene::BodyRef::Root,
-                position: crate::scene::root_default_place(&garden),
+                beat_id: garden.beats.last().unwrap().id.clone(),
+                expected_body: crate::scene::BodyRef::Root,
                 beat: crate::scene::BeatPayload::Jump {
                     scene_id: library_id,
                 },
