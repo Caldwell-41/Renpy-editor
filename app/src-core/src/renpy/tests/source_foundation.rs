@@ -48,7 +48,7 @@ fn source_foundation_sdk_eof_fixture_preflight() {
     let appended = ipc(
         &mut service,
         "scene.apply",
-        json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":model["scenes"][0]["sourceRevision"],"beforeBeatId":null,"beat":{"type":"narration","text":"Foundation continuation"}}}),
+        json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":model["scenes"][0]["sourceRevision"],"position":scene["bodies"][0]["defaultPlace"],"beat":{"type":"narration","text":"Foundation continuation"}}}),
     );
     assert_eq!(
         fs::read(root.join(scene["sourcePath"].as_str().unwrap())).unwrap(),
@@ -160,7 +160,7 @@ fn run(temporary: &tempfile::TempDir) {
     ipc(
         &mut service,
         "scene.apply",
-        json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"updateChildDialogue","sceneId":scene.id,"expectedSourceRevision":model["scenes"][0]["sourceRevision"],"beatId":child["id"],"expectedOwner":child["owner"],"characterId":child["payload"]["characterId"],"text":"Edited café 雪"}}),
+        json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"updateBodyBeat","sceneId":scene.id,"expectedSourceRevision":model["scenes"][0]["sourceRevision"],"beatId":child["id"],"expectedBody":{"type":"branch","groupId":child["owner"]["groupId"],"branchId":child["owner"]["branchId"]},"beat":{"type":"dialogue","characterId":child["payload"]["characterId"],"text":"Edited café 雪"}}}),
     );
     let model = ipc(&mut service, "scene.list", json!({}));
     let children = |model: &serde_json::Value| {
@@ -176,7 +176,7 @@ fn run(temporary: &tempfile::TempDir) {
     let appended = ipc(
         &mut service,
         "scene.apply",
-        json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"insertBeat","sceneId":scene.id,"expectedSourceRevision":model["scenes"][0]["sourceRevision"],"beforeBeatId":null,"beat":{"type":"narration","text":"Foundation continuation"}}}),
+        json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene.id,"expectedSourceRevision":model["scenes"][0]["sourceRevision"],"position":{"type":"end"},"beat":{"type":"narration","text":"Foundation continuation"}}}),
     );
     assert_eq!(children(&appended), children(&model));
     let accepted = fs::read(root.join(&scene.source_path)).unwrap();

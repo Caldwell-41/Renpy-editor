@@ -148,10 +148,11 @@ fn g1_o1_feasibility() {
     let before_hook = before.elapsed();
     f.apply(
         &workspace,
-        SceneCommand::UpdateBeat {
+        SceneCommand::UpdateBodyBeat {
             scene_id: origin.id.clone(),
             expected_source_revision: origin.source_revision.clone(),
             beat_id: origin.beats[0].id.clone(),
+            expected_body: BodyRef::Root,
             beat: BeatPayload::Choice {
                 options,
                 prompt,
@@ -412,10 +413,11 @@ fn g1_o1_absent_authoring_and_poisoned_index_cannot_authorize_scene_write() {
     assert!(f
         .apply(
             &workspace,
-            SceneCommand::UpdateBeat {
+            SceneCommand::UpdateBodyBeat {
                 scene_id: origin.id.clone(),
                 expected_source_revision: origin.source_revision.clone(),
                 beat_id: origin.beats[0].id.clone(),
+                expected_body: BodyRef::Root,
                 beat: BeatPayload::Return
             }
         )

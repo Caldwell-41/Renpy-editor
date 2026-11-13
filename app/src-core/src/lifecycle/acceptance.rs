@@ -3,8 +3,8 @@
 use super::*;
 use crate::authoring::AssetKind;
 use crate::scene::{
-    BeatPayload as Beat, PlacementRef as Place, SceneCommand as Command,
-    TransitionRef as Transition,
+    BeatPayload as Beat, BodyRef, NodeRef, PlacementRef as Place, Position,
+    SceneCommand as Command, TransitionRef as Transition,
 };
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
@@ -70,15 +70,24 @@ fn insert(service: &LifecycleService, id: &str, beat: Beat) {
         .into_iter()
         .find(|s| s.id == id)
         .unwrap();
-    apply(
-        service,
-        Command::InsertBeat {
+    // A Jump ends the Scene, so it replaces the Scene's closing Return.
+    let command = match (&beat, scene.beats.last()) {
+        (Beat::Jump { .. }, Some(ending)) => Command::UpdateBodyBeat {
             scene_id: id.into(),
-            expected_source_revision: scene.source_revision,
-            before_beat_id: None,
+            expected_source_revision: scene.source_revision.clone(),
+            beat_id: ending.id.clone(),
+            expected_body: BodyRef::Root,
             beat,
         },
-    );
+        _ => Command::InsertBodyBeat {
+            scene_id: id.into(),
+            expected_source_revision: scene.source_revision.clone(),
+            body: BodyRef::Root,
+            position: crate::scene::root_default_place(&scene),
+            beat,
+        },
+    };
+    apply(service, command);
 }
 
 pub(crate) fn create_authored_game(data: &Path, parent: &Path, sdk: &Path) -> LifecycleService {
@@ -118,10 +127,13 @@ fn author_game(mut service: LifecycleService) -> LifecycleService {
         .unwrap();
     apply(
         &service,
-        Command::RemoveBeat {
+        Command::RemoveStoryNode {
             scene_id: entry.clone(),
             expected_source_revision: initial.source_revision,
-            beat_id: initial.beats[0].id.clone(),
+            node: NodeRef::Beat {
+                beat_id: initial.beats[0].id.clone(),
+            },
+            expected_body: BodyRef::Root,
         },
     );
 
@@ -449,15 +461,23 @@ fn author_game(mut service: LifecycleService) -> LifecycleService {
     let movable = entry_source
         .beats
         .iter()
-        .find(|b| matches!(b.payload, Beat::Narration { .. }))
+        .position(|b| matches!(b.payload, Beat::Narration { .. }))
         .unwrap();
     apply(
         &service,
-        Command::MoveBeat {
+        Command::MoveStoryNode {
             scene_id: entry.clone(),
             expected_source_revision: entry_source.source_revision,
-            beat_id: movable.id.clone(),
-            direction: crate::scene::MoveDirection::Up,
+            node: NodeRef::Beat {
+                beat_id: entry_source.beats[movable].id.clone(),
+            },
+            expected_body: BodyRef::Root,
+            body: BodyRef::Root,
+            position: Position::Before {
+                anchor: NodeRef::Beat {
+                    beat_id: entry_source.beats[movable - 1].id.clone(),
+                },
+            },
         },
     );
     let changed = fs::read(parent_path(&service).join(&entry_source.source_path)).unwrap();

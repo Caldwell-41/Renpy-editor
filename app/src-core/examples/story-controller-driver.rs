@@ -181,8 +181,9 @@ fn seed(host: &ApplicationHost, session: &str, root: &Path, evidence: &Path) {
     apply(
         host,
         session,
-        json!({"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],
-        "beforeBeatId":anchor["id"],"beat":{"type":"call","sceneId":created[0]["id"],"returnLabel":null}}),
+        json!({"type":"insertBodyBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],
+        "body":{"type":"root"},"position":{"type":"before","anchor":{"type":"beat","beatId":anchor["id"]}},
+        "beat":{"type":"call","sceneId":created[0]["id"],"returnLabel":null}}),
     );
 }
 fn files(dir: &Path, base: &Path, snapshot: &mut serde_json::Map<String, Value>) {

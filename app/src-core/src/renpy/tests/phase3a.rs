@@ -196,7 +196,7 @@ fn insert_call(
         service,
         "scene.apply",
         json!({"expectedProjectRevision": model["projectRevision"], "expectedSourceMapRevision": model["sourceMapRevision"], "command": {
-            "type": "insertBeat", "sceneId": scene_id, "expectedSourceRevision": scene["sourceRevision"], "beforeBeatId": anchor["id"],
+            "type":"insertBodyBeat","body":{"type":"root"}, "sceneId": scene_id, "expectedSourceRevision": scene["sourceRevision"], "position":{"type":"before","anchor":{"type":"beat","beatId":anchor["id"]}},
             "beat": {"type": "call", "sceneId": target["id"], "returnLabel": null}
         }}),
     );
@@ -276,7 +276,7 @@ fn author_guarded_choice(service: &mut LifecycleService, root: &Path, scene_id: 
         service,
         "scene.apply",
         json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{
-            "type":"updateBeat","sceneId":scene_id,"expectedSourceRevision":scene["sourceRevision"],"beatId":choice["id"],"beat":{"type":"choice","options":options}
+            "type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":scene_id,"expectedSourceRevision":scene["sourceRevision"],"beatId":choice["id"],"beat":{"type":"choice","options":options}
         }}),
     );
     let current = accepted["scenes"]
@@ -437,7 +437,7 @@ fn edit_nested_dialogue(
     ipc(
         service,
         "scene.apply",
-        json!({"expectedProjectRevision": model["projectRevision"], "expectedSourceMapRevision": model["sourceMapRevision"], "command": {"type": "updateChildDialogue", "sceneId": entry_id, "expectedSourceRevision": entry["sourceRevision"], "beatId": child["id"], "expectedOwner": child["owner"], "characterId": child["payload"]["characterId"], "text": "Edited deep café 雪"}}),
+        json!({"expectedProjectRevision": model["projectRevision"], "expectedSourceMapRevision": model["sourceMapRevision"], "command": {"type":"updateBodyBeat","sceneId":entry_id,"expectedSourceRevision":entry["sourceRevision"],"beatId":child["id"],"expectedBody":{"type":"branch","groupId":child["owner"]["groupId"],"branchId":child["owner"]["branchId"]},"beat":{"type":"dialogue","characterId":child["payload"]["characterId"],"text":"Edited deep café 雪"}}}),
     );
     let produced = fs::read(root.join(entry["sourcePath"].as_str().unwrap())).unwrap();
     let before_text = std::str::from_utf8(&accepted_before).unwrap();

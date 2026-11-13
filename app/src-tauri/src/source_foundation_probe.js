@@ -41,7 +41,7 @@
     check(true, 'Native Story Undo/Redo restores exact source');
     const current = await read('scene.list', { sessionId: project.sessionId });
     let rejected = false;
-    try { await call('scene.apply', { sessionId: project.sessionId, expectedProjectRevision: current.projectRevision, expectedSourceMapRevision: current.sourceMapRevision, command: { type: 'updateChildDialogue', sceneId: scene.id, expectedSourceRevision: current.scenes[0].sourceRevision, beatId: children[0].id, expectedOwner: children[1].owner, characterId: children[0].payload.characterId, text: 'wrong owner' } }); }
+    try { await call('scene.apply', { sessionId: project.sessionId, expectedProjectRevision: current.projectRevision, expectedSourceMapRevision: current.sourceMapRevision, command: { type: 'updateBodyBeat', sceneId: scene.id, expectedSourceRevision: current.scenes[0].sourceRevision, beatId: children[0].id, expectedBody: { type: 'branch', groupId: children[1].owner.groupId, branchId: children[1].owner.branchId }, beat: { type: 'dialogue', characterId: children[0].payload.characterId, text: 'wrong owner' } } }); }
     catch (error) { rejected = error.code === 'SCENE_INVARIANT'; details.ownerRejection = error.code; }
     check(rejected, 'Wrong child owner rejected by real core dispatch');
     details.stage = 'retained-draft';

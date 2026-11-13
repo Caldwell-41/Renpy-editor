@@ -197,7 +197,7 @@ fn preflight(formulas: bool, decimal: bool) {
         .iter()
         .find(|v| v["technicalName"] == "score")
         .unwrap();
-    let request = json!({"sessionId":service.current().unwrap().session_id,"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"expectedAuthoringRevision":model["authoringRevision"],"command":{"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beforeBeatId":null,"beat":{"type":"setVariable","variableId":variable["id"],"value":{"operation":"add","operand":"1.5"}}}});
+    let request = json!({"sessionId":service.current().unwrap().session_id,"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"expectedAuthoringRevision":model["authoringRevision"],"command":{"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"position":scene["bodies"][0]["defaultPlace"],"beat":{"type":"setVariable","variableId":variable["id"],"value":{"operation":"add","operand":"1.5"}}}});
     let response = serde_json::to_value(crate::handle_application_request(json!({"protocolVersion":1,"requestId":"arithmetic-refusal","operation":"scene.apply","payload":request}),false,&mut service)).unwrap();
     assert_eq!(response["error"]["code"], "ARITHMETIC_TARGET_TYPE");
     let opened = ipc(&mut service, "source.open", json!({"path":path}));
@@ -429,7 +429,7 @@ fn decimal_draft_contract_is_revision_bound_and_does_not_commit() {
         .find(|v| v["technicalName"] == "fraction")
         .unwrap();
     let before = sources(&root.join("game"));
-    let request = json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"expectedAuthoringRevision":model["authoringRevision"],"command":{"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beforeBeatId":null,"beat":{"type":"setVariable","variableId":fraction["id"],"value":{"operation":"assign","operand":"4 / 2"}}}});
+    let request = json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"expectedAuthoringRevision":model["authoringRevision"],"command":{"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"position":scene["bodies"][0]["defaultPlace"],"beat":{"type":"setVariable","variableId":fraction["id"],"value":{"operation":"assign","operand":"4 / 2"}}}});
     let valid = ipc(&mut service, "scene.validateAssignment", request.clone());
     assert_eq!(valid["support"], "supported");
     assert_eq!(valid["assignment"]["inferredResultType"], "decimal");
@@ -664,7 +664,7 @@ fn variable_defaults_share_history_with_scene_edits_and_reopen() {
     ipc(
         &mut service,
         "scene.apply",
-        json!({"expectedProjectRevision":before["projectRevision"],"expectedSourceMapRevision":before["sourceMapRevision"],"command":{"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beforeBeatId":null,"beat":{"type":"narration","text":"History interleave"}}}),
+        json!({"expectedProjectRevision":before["projectRevision"],"expectedSourceMapRevision":before["sourceMapRevision"],"command":{"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"position":scene["bodies"][0]["defaultPlace"],"beat":{"type":"narration","text":"History interleave"}}}),
     );
     history(&mut service, "undo");
     assert_eq!(

@@ -58,13 +58,11 @@ impl AuthoringService {
     pub(super) fn prepare_call_labels(
         &self,
         project: &ProjectId,
-        _loaded: &Loaded,
-        _source_id: &str,
         beats: &[SceneBeat],
-        mut edit: BeatEdit,
-    ) -> Result<BeatEdit, SceneError> {
+        mut edit: structure::BodyEdit,
+    ) -> Result<structure::BodyEdit, SceneError> {
         match &mut edit {
-            BeatEdit::Insert {
+            structure::BodyEdit::Insert {
                 payload: BeatPayload::Call { return_label, .. },
                 ..
             } => {
@@ -78,9 +76,10 @@ impl AuthoringService {
                 }
                 *return_label = Some(candidate);
             }
-            BeatEdit::Update {
+            structure::BodyEdit::Update {
                 id,
                 payload: BeatPayload::Call { return_label, .. },
+                ..
             } => {
                 let old = beats
                     .iter()
@@ -584,7 +583,7 @@ mod tests {
             .iter()
             .find(|b| b["payload"]["type"] == "call")
             .unwrap();
-        let after = f.command(json!({"type":"updateBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":call["id"],"beat":{"type":"call","sceneId":c["id"],"returnLabel":null}}));
+        let after = f.command(json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":call["id"],"beat":{"type":"call","sceneId":c["id"],"returnLabel":null}}));
         let changed = fs::read(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap();
         assert_eq!(
             changed,
@@ -599,7 +598,7 @@ mod tests {
             after["scenes"][0]["beats"][0]["payload"]["returnLabel"],
             "retained_return"
         );
-        f.reject(json!({"type":"updateBeat","sceneId":scene["id"],"expectedSourceRevision":after["scenes"][0]["sourceRevision"],"beatId":call["id"],"beat":{"type":"call","sceneId":b["id"],"returnLabel":"invented_return"}}));
+        f.reject(json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":after["scenes"][0]["sourceRevision"],"beatId":call["id"],"beat":{"type":"call","sceneId":b["id"],"returnLabel":"invented_return"}}));
         f.undo();
         assert_eq!(
             fs::read(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap(),
@@ -608,11 +607,11 @@ mod tests {
         let w = f.model();
         let scene = &w["scenes"][0];
         let terminal = scene["beats"].as_array().unwrap().last().unwrap();
-        f.command(json!({"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beforeBeatId":terminal["id"],"beat":{"type":"call","sceneId":b["id"],"returnLabel":null}}));
+        f.command(json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"position":{"type":"before","anchor":{"type":"beat","beatId":terminal["id"]}},"beat":{"type":"call","sceneId":b["id"],"returnLabel":null}}));
         let w = f.model();
         let scene = &w["scenes"][0];
         let terminal = scene["beats"].as_array().unwrap().last().unwrap();
-        f.command(json!({"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beforeBeatId":terminal["id"],"beat":{"type":"call","sceneId":b["id"]}}));
+        f.command(json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"position":{"type":"before","anchor":{"type":"beat","beatId":terminal["id"]}},"beat":{"type":"call","sceneId":b["id"]}}));
         let w = f.model();
         let labels: Vec<_> = w["scenes"][0]["beats"]
             .as_array()
@@ -647,18 +646,18 @@ mod tests {
         let w = f.model();
         let scene = &w["scenes"][0];
         let guard = json!({"status":"supported","expression":{"type":"bool","value":false}});
-        let inserted = f.command(json!({"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beforeBeatId":null,"beat":{"type":"choice","options":[{"text":"Unavailable","condition":guard}]}}));
+        let inserted = f.command(json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"position":scene["bodies"][0]["defaultPlace"],"beat":{"type":"choice","options":[{"text":"Unavailable","condition":guard}]}}));
         let beats = inserted["scenes"][0]["beats"].as_array().unwrap();
         assert_eq!(beats[0]["payload"]["type"], "choice");
         assert_eq!(beats[0]["payload"]["options"][0]["condition"], guard);
         assert_eq!(beats.last().unwrap()["payload"]["type"], "return");
-        f.reject(json!({"type":"removeBeat","sceneId":scene["id"],"expectedSourceRevision":inserted["scenes"][0]["sourceRevision"],"beatId":beats.last().unwrap()["id"]}));
+        f.reject(json!({"type":"removeStoryNode","sceneId":scene["id"],"expectedSourceRevision":inserted["scenes"][0]["sourceRevision"],"node":{"type":"beat","beatId":beats.last().unwrap()["id"]},"expectedBody":{"type":"root"}}));
         f.undo();
         let w = f.model();
         let scene = &w["scenes"][0];
-        let terminal = f.command(json!({"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beforeBeatId":null,"beat":{"type":"choice","options":[{"text":"End"}]}}));
+        let terminal = f.command(json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"position":scene["bodies"][0]["defaultPlace"],"beat":{"type":"choice","options":[{"text":"End"}]}}));
         let choice = &terminal["scenes"][0]["beats"][0];
-        f.command(json!({"type":"updateBeat","sceneId":scene["id"],"expectedSourceRevision":terminal["scenes"][0]["sourceRevision"],"beatId":choice["id"],"beat":{"type":"choice","options":[{"text":"Unavailable","condition":guard}]}}));
+        f.command(json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":terminal["scenes"][0]["sourceRevision"],"beatId":choice["id"],"beat":{"type":"choice","options":[{"text":"Unavailable","condition":guard}]}}));
         f.service.close().unwrap();
     }
     #[test]
@@ -855,7 +854,7 @@ mod flow_tests {
         );
         let w = f.model();
         let scene = &w["scenes"][0];
-        assert_eq!(f.reject(json!({"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beforeBeatId":null,"beat":{"type":"call","sceneId":a["id"]}}))["error"]["code"], "UNSUPPORTED_CALL_ROUTE");
+        assert_eq!(f.reject(json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"position":scene["bodies"][0]["defaultPlace"],"beat":{"type":"call","sceneId":a["id"]}}))["error"]["code"], "UNSUPPORTED_CALL_ROUTE");
         f.save(
             &b,
             &format!(
@@ -866,7 +865,7 @@ mod flow_tests {
         );
         let w = f.model();
         let scene = &w["scenes"][0];
-        assert_eq!(f.reject(json!({"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beforeBeatId":null,"beat":{"type":"call","sceneId":b["id"]}}))["error"]["code"], "UNSUPPORTED_CALL_ROUTE");
+        assert_eq!(f.reject(json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"position":scene["bodies"][0]["defaultPlace"],"beat":{"type":"call","sceneId":b["id"]}}))["error"]["code"], "UNSUPPORTED_CALL_ROUTE");
         f.save(
             &b,
             &format!(
@@ -877,7 +876,7 @@ mod flow_tests {
         );
         let w = f.model();
         let scene = &w["scenes"][0];
-        assert_eq!(f.reject(json!({"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beforeBeatId":null,"beat":{"type":"call","sceneId":b["id"]}}))["error"]["code"], "UNSUPPORTED_CALL_ROUTE");
+        assert_eq!(f.reject(json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"position":scene["bodies"][0]["defaultPlace"],"beat":{"type":"call","sceneId":b["id"]}}))["error"]["code"], "UNSUPPORTED_CALL_ROUTE");
         f.save(
             &a,
             &format!(
@@ -928,7 +927,7 @@ mod boundary_tests {
         let mut options = choice["payload"]["options"].clone();
         options[0]["text"] = json!("New café");
 
-        let changed=f.command(json!({"type":"updateBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":choice["id"],"beat":{"type":"choice","options":options}}));
+        let changed=f.command(json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":choice["id"],"beat":{"type":"choice","options":options}}));
         let expected = source.replace("Old café", "New café");
         let path = f.root.join(a["sourcePath"].as_str().unwrap());
         assert_eq!(
@@ -939,7 +938,7 @@ mod boundary_tests {
         let mut options = choice["payload"]["options"].clone();
         options[0]["condition"] =
             json!({"status":"supported","expression":{"type":"bool","value":true}});
-        f.command(json!({"type":"updateBeat","sceneId":scene["id"],"expectedSourceRevision":changed["scenes"][0]["sourceRevision"],"beatId":choice["id"],"beat":{"type":"choice","options":options}}));
+        f.command(json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":changed["scenes"][0]["sourceRevision"],"beatId":choice["id"],"beat":{"type":"choice","options":options}}));
         assert_eq!(
             fs::read(&path).unwrap(),
             [
@@ -999,7 +998,7 @@ mod boundary_tests {
         assert!(flow["edges"].as_array().unwrap().iter().any(
             |e| e["kind"] == "unknown" && e["text"].as_str().unwrap().contains("Return label")
         ));
-        assert_eq!(f.reject(json!({"type":"updateBeat","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":scene["beats"][0]["id"],"beat":{"type":"call","sceneId":c["id"]}}))["error"]["code"],"AMBIGUOUS_RETURN_LABEL");
+        assert_eq!(f.reject(json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"beatId":scene["beats"][0]["id"],"beat":{"type":"call","sceneId":c["id"]}}))["error"]["code"],"AMBIGUOUS_RETURN_LABEL");
         f.service.close().unwrap();
     }
     #[test]
@@ -1340,7 +1339,7 @@ mod body_tests {
             .clone();
         let last = bs["beats"].as_array().unwrap().last().unwrap();
         for fields in [
-            json!({"type":"updateBeat","beatId":last["id"],"beat":{"type":"jump","sceneId":a["id"]}}),
+            json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"beatId":last["id"],"beat":{"type":"jump","sceneId":a["id"]}}),
             json!({"type":"updateBodyBeat","beatId":last["id"],"expectedBody":{"type":"root"},"beat":{"type":"jump","sceneId":a["id"]}}),
         ] {
             assert_eq!(
@@ -1382,7 +1381,7 @@ mod body_tests {
             .find(|s| s["id"] == b["id"])
             .unwrap()
             .clone();
-        f.command(command(&bs, json!({"type":"updateBeat","beatId":bs["beats"][0]["id"],"beat":{"type":"jump","sceneId":c["id"]}})));
+        f.command(command(&bs, json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"beatId":bs["beats"][0]["id"],"beat":{"type":"jump","sceneId":c["id"]}})));
         f.save(
             &a,
             &format!(
@@ -1399,7 +1398,7 @@ mod body_tests {
             .find(|s| s["id"] == b["id"])
             .unwrap()
             .clone();
-        f.command(command(&bs, json!({"type":"updateBeat","beatId":bs["beats"][0]["id"],"beat":{"type":"jump","sceneId":a["id"]}})));
+        f.command(command(&bs, json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"beatId":bs["beats"][0]["id"],"beat":{"type":"jump","sceneId":a["id"]}})));
         let flow = crate::lifecycle::acceptance::ipc(&mut f.service, "flow.list", json!({}));
         assert!(!flow["edges"]
             .as_array()

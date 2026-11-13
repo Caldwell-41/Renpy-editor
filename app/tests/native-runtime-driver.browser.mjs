@@ -79,7 +79,7 @@ try {
         const response=await fixture.request(operation,payload);
         // The saved receipt can arrive within the 200 ms status debounce window.
         // Retain the real renderer's authoring lease until that receipt arrives.
-        if(operation==='scene.apply'&&payload.command.type==='updateBeat')await new Promise(resolve=>setTimeout(resolve,150));
+        if(operation==='scene.apply'&&payload.command.type==='updateBodyBeat')await new Promise(resolve=>setTimeout(resolve,150));
         return response;
       });
     },mode);

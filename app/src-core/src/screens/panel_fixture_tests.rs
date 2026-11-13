@@ -23,8 +23,8 @@ pub(super) fn append(service: &mut LifecycleService, scene_id: &Value, payload: 
     let ending = scene["beats"].as_array().unwrap().last().unwrap();
     apply(
         service,
-        json!({"type":"insertBeat","sceneId":scene_id,
-        "expectedSourceRevision":scene["sourceRevision"],"beforeBeatId":ending["id"],"beat":payload}),
+        json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene_id,
+        "expectedSourceRevision":scene["sourceRevision"],"position":{"type":"before","anchor":{"type":"beat","beatId":ending["id"]}},"beat":payload}),
     );
 }
 
@@ -146,7 +146,7 @@ fn export_fixture(output: &Path) -> Value {
         .unwrap();
     apply(
         &mut service,
-        json!({"type":"updateBeat","sceneId":entry_id,
+        json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":entry_id,
         "expectedSourceRevision":entry["sourceRevision"],"beatId":entry["beats"].as_array().unwrap().last().unwrap()["id"],
         "beat":{"type":"jump","sceneId":story_id}}),
     );

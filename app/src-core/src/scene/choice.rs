@@ -789,9 +789,7 @@ impl AuthoringService {
         project: &ProjectId,
         mut command: SceneCommand,
     ) -> SceneCommand {
-        if let SceneCommand::InsertBeat { beat, .. } | SceneCommand::InsertBodyBeat { beat, .. } =
-            &mut command
-        {
+        if let SceneCommand::InsertBodyBeat { beat, .. } = &mut command {
             if let BeatPayload::Choice {
                 options,
                 picked_policy: policy @ Some(PickedPolicy::ShowNormally),

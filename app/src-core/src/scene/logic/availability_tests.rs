@@ -453,7 +453,7 @@ fn choice_missing_existing_helper_refuses_changed_source_commands_without_histor
             .unwrap();
         let body = json!({"type":"branch","groupId":inside["owner"]["groupId"],"branchId":inside["owner"]["branchId"]});
         let commands = [
-            json!({"type":"updateBeat","beatId":beats[0]["id"],"beat":{"type":"narration","text":"Changed"}}),
+            json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"beatId":beats[0]["id"],"beat":{"type":"narration","text":"Changed"}}),
             json!({"type":"updateBodyBeat","expectedBody":{"type":"root"},"beatId":beats[0]["id"],"beat":{"type":"narration","text":"Changed"}}),
             json!({"type":"updateBodyBeat","expectedBody":body,"beatId":inside["id"],"beat":{"type":"narration","text":"Changed"}}),
             json!({"type":"insertBodyBeat","body":body,"position":{"type":"end"},"beat":{"type":"narration","text":"Added"}}),

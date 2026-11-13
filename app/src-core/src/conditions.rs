@@ -969,7 +969,7 @@ mod source_tests {
             .unwrap();
         for target in [branch, nested_branch, trivia] {
             let response = crate::handle_application_request(
-                json!({"protocolVersion":1,"requestId":"phase3a-refusal","operation":"scene.apply","payload":{"sessionId":service.current().unwrap().session_id,"expectedProjectRevision":before["projectRevision"],"expectedSourceMapRevision":before["sourceMapRevision"],"command":{"type":"insertBeat","sceneId":scene["id"],"expectedSourceRevision":before["scenes"][0]["sourceRevision"],"beforeBeatId":target["id"],"beat":{"type":"narration","text":"Must not split condition"}}}}),
+                json!({"protocolVersion":1,"requestId":"phase3a-refusal","operation":"scene.apply","payload":{"sessionId":service.current().unwrap().session_id,"expectedProjectRevision":before["projectRevision"],"expectedSourceMapRevision":before["sourceMapRevision"],"command":{"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":before["scenes"][0]["sourceRevision"],"position":{"type":"before","anchor":{"type":"beat","beatId":target["id"]}},"beat":{"type":"narration","text":"Must not split condition"}}}}),
                 false,
                 &mut service,
             );
@@ -983,7 +983,7 @@ mod source_tests {
         let changed = ipc(
             &mut service,
             "scene.apply",
-            json!({"expectedProjectRevision":before["projectRevision"],"expectedSourceMapRevision":before["sourceMapRevision"],"command":{"type":"updateChildDialogue","sceneId":scene["id"],"expectedSourceRevision":before["scenes"][0]["sourceRevision"],"beatId":deep["id"],"expectedOwner":deep["owner"],"characterId":deep["payload"]["characterId"],"text":"Edited café 雪"}}),
+            json!({"expectedProjectRevision":before["projectRevision"],"expectedSourceMapRevision":before["sourceMapRevision"],"command":{"type":"updateBodyBeat","sceneId":scene["id"],"expectedSourceRevision":before["scenes"][0]["sourceRevision"],"beatId":deep["id"],"expectedBody":{"type":"branch","groupId":deep["owner"]["groupId"],"branchId":deep["owner"]["branchId"]},"beat":{"type":"dialogue","characterId":deep["payload"]["characterId"],"text":"Edited café 雪"}}}),
         );
         let path = root.join(scene["sourcePath"].as_str().unwrap());
         let accepted = source.replace("Deep café 雪", "Edited café 雪");

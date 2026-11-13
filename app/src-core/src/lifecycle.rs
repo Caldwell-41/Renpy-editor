@@ -2954,7 +2954,7 @@ mod tests {
             "expectedProjectRevision": workspace["projectRevision"],
             "expectedSourceMapRevision": workspace["sourceMapRevision"],
             "command": {
-                "type": "updateBeat", "sceneId": scene_id,
+                "type":"updateBodyBeat","expectedBody":{"type":"root"}, "sceneId": scene_id,
                 "expectedSourceRevision": scene["sourceRevision"], "beatId": beat_id,
                 "beat": {"type": "narration", "text": "Edited via renderer IPC"},
             },
@@ -2991,8 +2991,8 @@ mod tests {
                 "expectedProjectRevision": workspace["projectRevision"],
                 "expectedSourceMapRevision": workspace["sourceMapRevision"],
                 "command": {
-                    "type": "insertBeat", "sceneId": scene_id,
-                    "expectedSourceRevision": scene["sourceRevision"], "beforeBeatId": beat_id,
+                    "type":"insertBodyBeat","body":{"type":"root"}, "sceneId": scene_id,
+                    "expectedSourceRevision": scene["sourceRevision"], "position":{"type":"before","anchor":{"type":"beat","beatId":beat_id}},
                     "beat": {"type": "narration", "text": "Inserted via renderer IPC"},
                 },
             }),
@@ -3025,8 +3025,8 @@ mod tests {
                 "sessionId": session,
                 "expectedProjectRevision": inserted["value"]["projectRevision"],
                 "expectedSourceMapRevision": inserted["value"]["sourceMapRevision"],
-                "command": {"type": "insertBeat", "sceneId": scene_id,
-                    "expectedSourceRevision": accepted_scene["sourceRevision"], "beforeBeatId": "missing-beat",
+                "command": {"type":"insertBodyBeat","body":{"type":"root"}, "sceneId": scene_id,
+                    "expectedSourceRevision": accepted_scene["sourceRevision"], "position":{"type":"before","anchor":{"type":"beat","beatId":"missing-beat"}},
                     "beat": {"type": "narration", "text": "Must not be appended"}}
             }),
         );
@@ -4507,11 +4507,12 @@ mod tests {
             scene_workspace = apply_scene_target(
                 &service,
                 &scene_workspace,
-                crate::scene::SceneCommand::InsertBeat {
+                crate::scene::SceneCommand::InsertBodyBeat {
                     scene_id: entry.id.clone(),
                     expected_source_revision: entry.source_revision.clone(),
-                    before_beat_id: None,
-                    beat,
+                    body: crate::scene::BodyRef::Root,
+                    position: crate::scene::root_default_place(&entry),
+                    beat: beat,
                 },
             );
         }
@@ -4523,10 +4524,11 @@ mod tests {
         scene_workspace = apply_scene_target(
             &service,
             &scene_workspace,
-            crate::scene::SceneCommand::InsertBeat {
+            crate::scene::SceneCommand::InsertBodyBeat {
                 scene_id: entry.id.clone(),
                 expected_source_revision: entry.source_revision.clone(),
-                before_beat_id: None,
+                body: crate::scene::BodyRef::Root,
+                position: crate::scene::root_default_place(&entry),
                 beat: crate::scene::BeatPayload::Choice {
                     picked_policy: None,
                     prompt: None,
@@ -4581,10 +4583,11 @@ mod tests {
         scene_workspace = apply_scene_target(
             &service,
             &scene_workspace,
-            crate::scene::SceneCommand::InsertBeat {
+            crate::scene::SceneCommand::InsertBodyBeat {
                 scene_id: garden.id.clone(),
                 expected_source_revision: garden.source_revision.clone(),
-                before_beat_id: None,
+                body: crate::scene::BodyRef::Root,
+                position: crate::scene::root_default_place(&garden),
                 beat: crate::scene::BeatPayload::Jump {
                     scene_id: library_id,
                 },

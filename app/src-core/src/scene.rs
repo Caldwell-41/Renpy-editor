@@ -434,18 +434,6 @@ pub enum SceneCommand {
         scene_id: String,
         expected_source_revision: String,
     },
-    InsertBeat {
-        scene_id: String,
-        expected_source_revision: String,
-        before_beat_id: Option<String>,
-        beat: BeatPayload,
-    },
-    UpdateBeat {
-        scene_id: String,
-        expected_source_revision: String,
-        beat_id: String,
-        beat: BeatPayload,
-    },
     InsertBodyBeat {
         scene_id: String,
         expected_source_revision: String,
@@ -512,37 +500,12 @@ pub enum SceneCommand {
         branch_id: String,
         expected_body: BodyRef,
     },
-    UpdateChildDialogue {
-        scene_id: String,
-        expected_source_revision: String,
-        beat_id: String,
-        expected_owner: crate::metadata::BeatOwner,
-        character_id: String,
-        text: String,
-    },
     ContinueDialogue {
         scene_id: String,
         expected_source_revision: String,
         beat_id: String,
         character_id: String,
         text: String,
-    },
-    RemoveBeat {
-        scene_id: String,
-        expected_source_revision: String,
-        beat_id: String,
-    },
-    MoveBeat {
-        scene_id: String,
-        expected_source_revision: String,
-        beat_id: String,
-        direction: MoveDirection,
-    },
-    ReorderBeat {
-        scene_id: String,
-        expected_source_revision: String,
-        beat_id: String,
-        to_index: usize,
     },
 }
 
@@ -1028,8 +991,7 @@ impl AuthoringService {
         for (index, command) in commands.iter().enumerate() {
             let at = SceneError::at(index);
             let arithmetic = matches!(command,
-                    SceneCommand::InsertBeat { beat, .. } | SceneCommand::UpdateBeat { beat, .. }
-                    | SceneCommand::InsertBodyBeat { beat, .. } | SceneCommand::UpdateBodyBeat { beat, .. }
+                    SceneCommand::InsertBodyBeat { beat, .. } | SceneCommand::UpdateBodyBeat { beat, .. }
                     if matches!(beat, BeatPayload::SetVariable { value, .. } if value.is_object()));
             if arithmetic {
                 if expected_authoring_revision != Some(authoring_revision.as_str()) {
@@ -1059,9 +1021,7 @@ impl AuthoringService {
         request: SceneCommandRequest,
     ) -> Result<AssignmentDraftValidation, SceneError> {
         let (target, value) = match &request.command {
-            SceneCommand::InsertBeat { beat, .. }
-            | SceneCommand::UpdateBeat { beat, .. }
-            | SceneCommand::InsertBodyBeat { beat, .. }
+            SceneCommand::InsertBodyBeat { beat, .. }
             | SceneCommand::UpdateBodyBeat { beat, .. } => match beat {
                 BeatPayload::SetVariable { variable_id, value } => {
                     (variable_id.clone(), value.clone())
@@ -1074,15 +1034,7 @@ impl AuthoringService {
             return Err(SceneError::InvalidPayload);
         }
         let source_revision = match &request.command {
-            SceneCommand::InsertBeat {
-                expected_source_revision,
-                ..
-            }
-            | SceneCommand::UpdateBeat {
-                expected_source_revision,
-                ..
-            }
-            | SceneCommand::InsertBodyBeat {
+            SceneCommand::InsertBodyBeat {
                 expected_source_revision,
                 ..
             }
@@ -1154,9 +1106,7 @@ impl AuthoringService {
         command: &SceneCommand,
     ) -> Result<(), SceneError> {
         let payload = match command {
-            SceneCommand::InsertBeat { beat, .. }
-            | SceneCommand::UpdateBeat { beat, .. }
-            | SceneCommand::InsertBodyBeat { beat, .. }
+            SceneCommand::InsertBodyBeat { beat, .. }
             | SceneCommand::UpdateBodyBeat { beat, .. } => beat,
             _ => return Ok(()),
         };
@@ -1191,15 +1141,15 @@ impl AuthoringService {
         encoded: String,
     ) -> Result<TransactionProposal, SceneError> {
         let loaded = self.load(project, project_id)?;
-        self.beat_proposal(
+        self.body_beat_proposal(
             project,
             loaded,
             scene_id,
             source_revision,
-            BeatEdit::PreparedDialogue {
+            structure::BodyEdit::Dialogue(BeatEdit::PreparedDialogue {
                 id: beat_id.into(),
                 encoded,
-            },
+            }),
         )
     }
 
@@ -1213,15 +1163,15 @@ impl AuthoringService {
         entries: Vec<(Option<String>, String)>,
     ) -> Result<TransactionProposal, SceneError> {
         let loaded = self.load(project, project_id)?;
-        self.beat_proposal(
+        self.body_beat_proposal(
             project,
             loaded,
             scene_id,
             source_revision,
-            BeatEdit::PreparedInsertion {
+            structure::BodyEdit::Dialogue(BeatEdit::PreparedInsertion {
                 before: before.into(),
                 entries,
-            },
+            }),
         )
     }
 
@@ -1594,36 +1544,6 @@ impl AuthoringService {
                 scene_id,
                 expected_source_revision,
             } => self.delete_scene_proposal(project, loaded, &scene_id, &expected_source_revision),
-            SceneCommand::InsertBeat {
-                scene_id,
-                expected_source_revision,
-                before_beat_id,
-                beat,
-            } => self.beat_proposal(
-                project,
-                loaded,
-                &scene_id,
-                &expected_source_revision,
-                BeatEdit::Insert {
-                    before: before_beat_id,
-                    payload: beat,
-                },
-            ),
-            SceneCommand::UpdateBeat {
-                scene_id,
-                expected_source_revision,
-                beat_id,
-                beat,
-            } => self.beat_proposal(
-                project,
-                loaded,
-                &scene_id,
-                &expected_source_revision,
-                BeatEdit::Update {
-                    id: beat_id,
-                    payload: beat,
-                },
-            ),
             SceneCommand::InsertBodyBeat {
                 scene_id,
                 expected_source_revision,
@@ -1783,82 +1703,22 @@ impl AuthoringService {
                     expected_body,
                 }),
             ),
-            SceneCommand::UpdateChildDialogue {
-                scene_id,
-                expected_source_revision,
-                beat_id,
-                expected_owner,
-                character_id,
-                text,
-            } => self.beat_proposal(
-                project,
-                loaded,
-                &scene_id,
-                &expected_source_revision,
-                BeatEdit::ChildDialogue {
-                    id: beat_id,
-                    owner: expected_owner,
-                    character_id,
-                    text,
-                },
-            ),
             SceneCommand::ContinueDialogue {
                 scene_id,
                 expected_source_revision,
                 beat_id,
                 character_id,
                 text,
-            } => self.beat_proposal(
+            } => self.body_beat_proposal(
                 project,
                 loaded,
                 &scene_id,
                 &expected_source_revision,
-                BeatEdit::ContinueDialogue {
+                structure::BodyEdit::Dialogue(BeatEdit::ContinueDialogue {
                     id: beat_id,
                     character_id,
                     text,
-                },
-            ),
-            SceneCommand::RemoveBeat {
-                scene_id,
-                expected_source_revision,
-                beat_id,
-            } => self.beat_proposal(
-                project,
-                loaded,
-                &scene_id,
-                &expected_source_revision,
-                BeatEdit::Remove { id: beat_id },
-            ),
-            SceneCommand::MoveBeat {
-                scene_id,
-                expected_source_revision,
-                beat_id,
-                direction,
-            } => self.beat_proposal(
-                project,
-                loaded,
-                &scene_id,
-                &expected_source_revision,
-                BeatEdit::Move {
-                    id: beat_id,
-                    direction,
-                },
-            ),
-            SceneCommand::ReorderBeat {
-                scene_id,
-                expected_source_revision,
-                beat_id,
-                to_index,
-            } => self.beat_proposal(
-                project,
-                loaded,
-                &scene_id,
-                &expected_source_revision,
-                BeatEdit::Reorder {
-                    id: beat_id,
-                    to_index,
-                },
+                }),
             ),
         }
     }
@@ -2039,11 +1899,12 @@ impl AuthoringService {
         };
         loaded.source_map.sources.push(destination_path.clone());
 
-        let (proposed_source, forced) = apply_beat_edit(
+        let (proposed_source, forced) = structure::apply(
             &source_bytes,
             &beats,
-            BeatEdit::Update {
+            structure::BodyEdit::Update {
                 id: choice_beat_id.into(),
+                body: BodyRef::Root,
                 payload: BeatPayload::Choice {
                     options,
                     prompt,
@@ -2051,6 +1912,7 @@ impl AuthoringService {
                 },
             },
             &loaded,
+            &source_scene,
         )?;
         let (_, _, parsed) = parse_scene(
             &source_scene,
@@ -2373,117 +2235,6 @@ impl AuthoringService {
         Ok(())
     }
 
-    fn beat_proposal(
-        &self,
-        project: &ProjectId,
-        mut loaded: Loaded,
-        scene_id: &str,
-        expected_source_revision: &str,
-        edit: BeatEdit,
-    ) -> Result<TransactionProposal, SceneError> {
-        let scene = loaded
-            .project
-            .scenes
-            .iter()
-            .find(|scene| scene.id == scene_id)
-            .cloned()
-            .ok_or(SceneError::UnknownEntity)?;
-        let stored = loaded
-            .source_map
-            .scene_mappings
-            .iter()
-            .find(|mapping| mapping.scene_id == scene_id)
-            .cloned()
-            .ok_or(SceneError::InvalidMetadata)?;
-        let (source_bytes, source_revision) = self.scene_snapshot(project, &scene.source_path)?;
-        require_revision(&source_revision, expected_source_revision)?;
-        if stored.source_revision != expected_source_revision {
-            return Err(SceneError::SourceConflict);
-        }
-        let (_, beats) = build_mapping(
-            &scene,
-            &source_bytes,
-            &source_revision.sha256,
-            Some(&stored),
-            &[],
-            Some((
-                &loaded.project,
-                &loaded.authoring,
-                &loaded.source_map.owned_screens,
-            )),
-        )?;
-        if beats.len() >= MAX_BEATS_PER_SCENE
-            && matches!(
-                edit,
-                BeatEdit::Insert { .. } | BeatEdit::ContinueDialogue { .. }
-            )
-        {
-            return Err(SceneError::InvariantBlocked);
-        }
-        let transfer_edit = structure::edit_changes_transfers(&edit);
-        let edit = self.prepare_call_labels(project, &loaded, scene_id, &beats, edit)?;
-        let screen_update = match &edit {
-            BeatEdit::Update { id, payload } => payload
-                .screen_target()
-                .map(|target| (id.clone(), target.clone())),
-            _ => None,
-        };
-        let (proposed_source, forced) = apply_beat_edit(&source_bytes, &beats, edit, &loaded)?;
-        logic::validate_conditional_completion(&proposed_source, &scene, &loaded)?;
-        if transfer_edit {
-            self.validate_candidate_transfers(
-                project,
-                &loaded,
-                &[(scene_id, proposed_source.as_slice())],
-            )?;
-        }
-        let proposed_revision = sha256(&proposed_source);
-        let (mut new_mapping, next_beats) = build_mapping(
-            &scene,
-            &proposed_source,
-            &proposed_revision,
-            Some(&stored),
-            &forced,
-            Some((
-                &loaded.project,
-                &loaded.authoring,
-                &loaded.source_map.owned_screens,
-            )),
-        )?;
-        set_prepared_screen_target(&mut new_mapping, screen_update)?;
-        *loaded
-            .source_map
-            .scene_mappings
-            .iter_mut()
-            .find(|mapping| mapping.scene_id == scene_id)
-            .ok_or(SceneError::InvalidMetadata)? = new_mapping;
-        let mut runtime = self.choice_scene_runtime(
-            project,
-            &scene.source_path,
-            &source_bytes,
-            &proposed_source,
-            &next_beats,
-        )?;
-        runtime.extend(vec![
-            replace_mutation(
-                &scene.source_path,
-                source_bytes,
-                source_revision,
-                proposed_source,
-            )?,
-            replace_mutation(
-                SOURCE_MAP_PATH,
-                loaded.source_map_bytes,
-                loaded.source_map_revision,
-                source_map_bytes(&loaded.source_map)?,
-            )?,
-        ]);
-        Ok(TransactionProposal {
-            mutations: runtime,
-            intent: TransactionIntent::Edit,
-        })
-    }
-
     pub(crate) fn appearance_reference_mutations(
         &self,
         project: &ProjectId,
@@ -2716,6 +2467,8 @@ impl AuthoringService {
     }
 }
 
+/// Dialogue edits that name their Beat directly: continuation and the core-prepared
+/// proposal edits. Story writes use the explicit-body commands instead.
 enum BeatEdit {
     PreparedInsertion {
         before: String,
@@ -2725,35 +2478,10 @@ enum BeatEdit {
         id: String,
         encoded: String,
     },
-    ChildDialogue {
-        id: String,
-        owner: crate::metadata::BeatOwner,
-        character_id: String,
-        text: String,
-    },
-    Insert {
-        before: Option<String>,
-        payload: BeatPayload,
-    },
-    Update {
-        id: String,
-        payload: BeatPayload,
-    },
     ContinueDialogue {
         id: String,
         character_id: String,
         text: String,
-    },
-    Remove {
-        id: String,
-    },
-    Reorder {
-        id: String,
-        to_index: usize,
-    },
-    Move {
-        id: String,
-        direction: MoveDirection,
     },
 }
 
@@ -2763,18 +2491,6 @@ fn apply_beat_edit(
     edit: BeatEdit,
     loaded: &Loaded,
 ) -> Result<(Vec<u8>, Vec<ForcedBeatId>), SceneError> {
-    if matches!(
-        &edit,
-        BeatEdit::Insert {
-            payload: BeatPayload::RepeatChoice { .. },
-            ..
-        } | BeatEdit::Update {
-            payload: BeatPayload::RepeatChoice { .. },
-            ..
-        }
-    ) {
-        return Err(SceneError::InvariantBlocked);
-    }
     if beats
         .iter()
         .take(beats.len().saturating_sub(1))
@@ -2786,20 +2502,15 @@ fn apply_beat_edit(
     {
         return Err(SceneError::InvariantBlocked);
     }
-    // Nested edits require their dedicated revision-bound owner assertion. No
-    // structural operation may accidentally promote a child to a root statement.
+    // Nested edits go through the explicit-body commands. A root-addressed dialogue
+    // edit must not promote a child to a root statement.
     let target = match &edit {
-        BeatEdit::PreparedInsertion { before, .. } => Some(before.as_str()),
-        BeatEdit::Insert { before, .. } => before.as_deref(),
-        BeatEdit::Update { id, .. }
-        | BeatEdit::PreparedDialogue { id, .. }
-        | BeatEdit::ContinueDialogue { id, .. }
-        | BeatEdit::Remove { id }
-        | BeatEdit::Reorder { id, .. }
-        | BeatEdit::Move { id, .. } => Some(id.as_str()),
-        BeatEdit::ChildDialogue { .. } => None,
+        BeatEdit::PreparedInsertion { before, .. } => before.as_str(),
+        BeatEdit::PreparedDialogue { id, .. } | BeatEdit::ContinueDialogue { id, .. } => {
+            id.as_str()
+        }
     };
-    if target.is_some_and(|id| beats.iter().any(|b| b.id == id && b.owner.is_some())) {
+    if beats.iter().any(|b| b.id == target && b.owner.is_some()) {
         return Err(SceneError::InvariantBlocked);
     }
     let newline = if source.windows(2).any(|window| window == b"\r\n") {
@@ -2875,277 +2586,6 @@ fn apply_beat_edit(
                 )],
             ))
         }
-        BeatEdit::ChildDialogue {
-            id,
-            owner,
-            character_id,
-            text,
-        } => {
-            let beat = beats
-                .iter()
-                .find(|beat| beat.id == id)
-                .ok_or(SceneError::UnknownEntity)?;
-            if beat.owner.as_ref() != Some(&owner) || beat.protected {
-                return Err(SceneError::InvariantBlocked);
-            }
-            let BeatPayload::Dialogue {
-                character_id: previous,
-                ..
-            } = &beat.payload
-            else {
-                return Err(SceneError::InvalidPayload);
-            };
-            // This bounded operation changes existing dialogue text only.
-            if previous != &character_id {
-                return Err(SceneError::InvalidPayload);
-            }
-            validate_payload(
-                &BeatPayload::Dialogue {
-                    character_id,
-                    text: text.clone(),
-                },
-                loaded,
-            )?;
-            let original =
-                std::str::from_utf8(&source[beat.byte_start as usize..beat.byte_end as usize])
-                    .map_err(|_| SceneError::UnsupportedSource)?;
-            let (quote_start, quote_end) =
-                dialogue_quotes(original).ok_or(SceneError::UnsupportedSource)?;
-            let replacement = escape_string(&text)?;
-            let mut rendered = original.to_owned();
-            rendered.replace_range(quote_start + 1..quote_end, &replacement);
-            let mut output = source.to_vec();
-            output.splice(
-                beat.byte_start as usize..beat.byte_end as usize,
-                rendered.bytes(),
-            );
-            Ok((
-                output,
-                vec![(
-                    "dialogue".into(),
-                    sha256(rendered.as_bytes()),
-                    id,
-                    Some(beat.byte_start as usize),
-                )],
-            ))
-        }
-
-        BeatEdit::Insert { before, payload } => {
-            validate_payload(&payload, loaded)?;
-            if matches!(payload, BeatPayload::CustomCode { .. }) {
-                return Err(SceneError::InvalidPayload);
-            }
-            let requested = before
-                .as_deref()
-                .map(|id| {
-                    beats
-                        .iter()
-                        .find(|beat| beat.id == id)
-                        .ok_or(SceneError::UnknownEntity)
-                })
-                .transpose()?;
-            if is_terminal_payload(&payload) {
-                if let Some(last) = beats
-                    .last()
-                    .filter(|beat| is_terminal_payload(&beat.payload))
-                {
-                    if last.protected || requested.is_some_and(|requested| requested.id != last.id)
-                    {
-                        return Err(SceneError::InvariantBlocked);
-                    }
-                    let rendered = render_payload(&payload, loaded, newline)?;
-                    let id = uuid::Uuid::new_v4().to_string();
-                    let mut output = source.to_vec();
-                    output.splice(
-                        last.byte_start as usize..last.byte_end as usize,
-                        rendered.bytes(),
-                    );
-                    return Ok((
-                        output,
-                        vec![(payload.kind().into(), sha256(rendered.as_bytes()), id, None)],
-                    ));
-                }
-                if requested.is_some() {
-                    return Err(SceneError::InvariantBlocked);
-                }
-            }
-            let insertion = if let Some(id) = before {
-                requested
-                    .filter(|beat| beat.id == id)
-                    .ok_or(SceneError::UnknownEntity)?
-                    .byte_start as usize
-            } else {
-                beats.last().map_or(source.len(), |beat| {
-                    if is_terminal_payload(&beat.payload) {
-                        beat.byte_start as usize
-                    } else {
-                        beat.byte_end as usize
-                    }
-                })
-            };
-            if root_insertion_is_nested(beats, insertion) {
-                return Err(SceneError::InvariantBlocked);
-            }
-            if boundary_is_opaque(beats, insertion) {
-                return Err(SceneError::OpaqueBoundary);
-            }
-            let rendered = render_payload(&payload, loaded, newline)?;
-            let id = uuid::Uuid::new_v4().to_string();
-            let anchor = matches!(
-                payload,
-                BeatPayload::ShowScreen { .. }
-                    | BeatPayload::HideScreen { .. }
-                    | BeatPayload::CallScreen { .. }
-            )
-            .then_some(
-                insertion
-                    + usize::from(insertion > 0 && source[insertion - 1] != b'\n') * newline.len(),
-            );
-            let mut forced = vec![(
-                payload.kind().into(),
-                sha256(rendered.as_bytes()),
-                id,
-                anchor,
-            )];
-            let mut output = Vec::with_capacity(source.len() + rendered.len());
-            output.extend_from_slice(&source[..insertion]);
-            // An EOF child can have no line terminator. Separate the new root
-            // statement without changing any existing source bytes.
-            if insertion > 0 && source[insertion - 1] != b'\n' {
-                output.extend_from_slice(newline.as_bytes());
-                // The separator extends the preceding Beat's physical range;
-                // retain its identity despite the changed range hash.
-                if let Some(previous) = beats
-                    .iter()
-                    .find(|beat| beat.byte_end as usize == insertion)
-                {
-                    forced.push((
-                        previous.payload.kind().into(),
-                        sha256(&output[previous.byte_start as usize..]),
-                        previous.id.clone(),
-                        Some(previous.byte_start as usize),
-                    ));
-                }
-            }
-            if matches!(payload, BeatPayload::Choice { .. }) {
-                choice::retain_insertion(
-                    source,
-                    beats,
-                    insertion,
-                    insertion,
-                    rendered.len() + output.len() - insertion,
-                    &mut forced,
-                );
-            }
-            output.extend_from_slice(rendered.as_bytes());
-            output.extend_from_slice(&source[insertion..]);
-            Ok((output, forced))
-        }
-        BeatEdit::Update { id, payload } => {
-            validate_payload(&payload, loaded)?;
-            if matches!(payload, BeatPayload::CustomCode { .. }) {
-                return Err(SceneError::InvalidPayload);
-            }
-            let beat = beats
-                .iter()
-                .find(|beat| beat.id == id)
-                .ok_or(SceneError::UnknownEntity)?;
-            if beat.protected {
-                return Err(SceneError::OpaqueBoundary);
-            }
-            if matches!(beat.payload, BeatPayload::Choice { .. })
-                != matches!(payload, BeatPayload::Choice { .. })
-                || is_terminal_payload(&beat.payload) != is_terminal_payload(&payload)
-                || (is_terminal_payload(&payload)
-                    && beats.last().is_none_or(|last| last.id != beat.id))
-            {
-                return Err(SceneError::InvariantBlocked);
-            }
-            let rendered = if let (
-                BeatPayload::Call {
-                    return_label: previous,
-                    ..
-                },
-                BeatPayload::Call {
-                    scene_id,
-                    return_label,
-                },
-            ) = (&beat.payload, &payload)
-            {
-                if previous != return_label {
-                    return Err(SceneError::InvariantBlocked);
-                }
-                logic::patch_call_target(
-                    &source[beat.byte_start as usize..beat.byte_end as usize],
-                    &loaded
-                        .project
-                        .scenes
-                        .iter()
-                        .find(|s| &s.id == scene_id)
-                        .ok_or(SceneError::UnknownEntity)?
-                        .technical_label,
-                )?
-            } else if let BeatPayload::Choice {
-                options,
-                prompt,
-                picked_policy,
-            } = &payload
-            {
-                return choice::update(
-                    source,
-                    beats,
-                    beat,
-                    options,
-                    prompt.as_ref(),
-                    *picked_policy,
-                    loaded,
-                );
-            } else if let Some(patched) = patch_variable_assignment(
-                &source[beat.byte_start as usize..beat.byte_end as usize],
-                &beat.payload,
-                &payload,
-                loaded,
-            )? {
-                patched
-            } else if let Some(patched) = patch_screen_beat(
-                &source[beat.byte_start as usize..beat.byte_end as usize],
-                &beat.payload,
-                &payload,
-            )? {
-                patched
-            } else {
-                if beat.payload.screen_target().is_some() {
-                    let original = std::str::from_utf8(
-                        &source[beat.byte_start as usize..beat.byte_end as usize],
-                    )
-                    .map_err(|_| SceneError::UnsupportedSource)?;
-                    if logic::without_comment(original).len() != original.len() {
-                        return Err(SceneError::OpaqueBoundary);
-                    }
-                }
-                render_payload(&payload, loaded, newline)?
-            };
-            let mut output = source.to_vec();
-            output.splice(
-                beat.byte_start as usize..beat.byte_end as usize,
-                rendered.bytes(),
-            );
-            Ok((
-                output,
-                vec![(
-                    payload.kind().into(),
-                    sha256(rendered.as_bytes()),
-                    id,
-                    matches!(
-                        payload,
-                        BeatPayload::ShowScreen { .. }
-                            | BeatPayload::HideScreen { .. }
-                            | BeatPayload::CallScreen { .. }
-                    )
-                    .then_some(beat.byte_start as usize),
-                )],
-            ))
-        }
         BeatEdit::ContinueDialogue {
             id,
             character_id,
@@ -3191,114 +2631,6 @@ fn apply_beat_edit(
                     ),
                 ],
             ))
-        }
-        BeatEdit::Remove { id } => {
-            let beat = beats
-                .iter()
-                .find(|beat| beat.id == id)
-                .ok_or(SceneError::UnknownEntity)?;
-            if beat.protected {
-                return Err(SceneError::OpaqueBoundary);
-            }
-            if is_terminal_payload(&beat.payload) {
-                return Err(SceneError::InvariantBlocked);
-            }
-            let mut output = source.to_vec();
-            output.drain(beat.byte_start as usize..structure::node_end(beat, beats)?);
-            Ok((output, Vec::new()))
-        }
-        BeatEdit::Reorder { id, to_index } => {
-            let from = beats
-                .iter()
-                .position(|b| b.id == id)
-                .ok_or(SceneError::UnknownEntity)?;
-            if to_index >= beats.len() || from == to_index {
-                return Err(SceneError::InvariantBlocked);
-            }
-            let (first, last) = (from.min(to_index), from.max(to_index));
-            let window = &beats[first..=last];
-            if window
-                .iter()
-                .any(|b| b.owner.is_some() || matches!(b.payload, BeatPayload::Choice { .. }))
-            {
-                return Err(SceneError::InvariantBlocked);
-            }
-            if window.iter().any(|b| b.protected)
-                || window.windows(2).any(|p| p[0].byte_end != p[1].byte_start)
-            {
-                return Err(SceneError::OpaqueBoundary);
-            }
-            if window.iter().any(|b| is_terminal_payload(&b.payload)) {
-                return Err(SceneError::InvariantBlocked);
-            }
-            let mut order: Vec<&SceneBeat> = window.iter().collect();
-            let moved = order.remove(from - first);
-            order.insert(to_index - first, moved);
-            let mut output = source[..beats[first].byte_start as usize].to_vec();
-            let mut forced = Vec::new();
-            for beat in order {
-                let bytes = &source[beat.byte_start as usize..beat.byte_end as usize];
-                output.extend_from_slice(bytes);
-                forced.push((
-                    beat.payload.kind().into(),
-                    sha256(bytes),
-                    beat.id.clone(),
-                    None,
-                ));
-            }
-            output.extend_from_slice(&source[beats[last].byte_end as usize..]);
-            Ok((output, forced))
-        }
-        BeatEdit::Move { id, direction } => {
-            let index = beats
-                .iter()
-                .position(|beat| beat.id == id)
-                .ok_or(SceneError::UnknownEntity)?;
-            let other = match direction {
-                MoveDirection::Up => index.checked_sub(1),
-                MoveDirection::Down => (index + 1 < beats.len()).then_some(index + 1),
-            }
-            .ok_or(SceneError::InvariantBlocked)?;
-            if beats[other].owner.is_some() {
-                return Err(SceneError::InvariantBlocked);
-            }
-            if beats[index].protected || beats[other].protected {
-                return Err(SceneError::OpaqueBoundary);
-            }
-            if is_terminal_payload(&beats[index].payload)
-                || is_terminal_payload(&beats[other].payload)
-            {
-                return Err(SceneError::InvariantBlocked);
-            }
-            let (first, second) = if index < other {
-                (index, other)
-            } else {
-                (other, index)
-            };
-            if beats[first].byte_end != beats[second].byte_start {
-                return Err(SceneError::OpaqueBoundary);
-            }
-            let a = &source[beats[first].byte_start as usize..beats[first].byte_end as usize];
-            let b = &source[beats[second].byte_start as usize..beats[second].byte_end as usize];
-            let mut output = Vec::with_capacity(source.len());
-            output.extend_from_slice(&source[..beats[first].byte_start as usize]);
-            output.extend_from_slice(b);
-            output.extend_from_slice(a);
-            output.extend_from_slice(&source[beats[second].byte_end as usize..]);
-            let moved_order = [&beats[second], &beats[first]];
-            let forced = moved_order
-                .into_iter()
-                .map(|beat| {
-                    let bytes = &source[beat.byte_start as usize..beat.byte_end as usize];
-                    (
-                        beat.payload.kind().into(),
-                        sha256(bytes),
-                        beat.id.clone(),
-                        None,
-                    )
-                })
-                .collect();
-            Ok((output, forced))
         }
     }
 }
@@ -4825,8 +4157,6 @@ fn command_source_paths(
         SceneCommand::CreateSceneFromChoice { scene_id, .. }
         | SceneCommand::MoveScene { scene_id, .. }
         | SceneCommand::DeleteScene { scene_id, .. }
-        | SceneCommand::InsertBeat { scene_id, .. }
-        | SceneCommand::UpdateBeat { scene_id, .. }
         | SceneCommand::InsertBodyBeat { scene_id, .. }
         | SceneCommand::UpdateBodyBeat { scene_id, .. }
         | SceneCommand::InsertCondition { scene_id, .. }
@@ -4836,11 +4166,7 @@ fn command_source_paths(
         | SceneCommand::MoveStoryNode { scene_id, .. }
         | SceneCommand::RemoveStoryNode { scene_id, .. }
         | SceneCommand::UnwrapCondition { scene_id, .. }
-        | SceneCommand::UpdateChildDialogue { scene_id, .. }
-        | SceneCommand::ContinueDialogue { scene_id, .. }
-        | SceneCommand::RemoveBeat { scene_id, .. }
-        | SceneCommand::MoveBeat { scene_id, .. }
-        | SceneCommand::ReorderBeat { scene_id, .. } => Some(scene_id),
+        | SceneCommand::ContinueDialogue { scene_id, .. } => Some(scene_id),
         _ => None,
     };
     scene_id
@@ -5497,17 +4823,10 @@ fn history_label(project: &ProjectMetadata, command: &SceneCommand) -> HistoryLa
             format!("deletion of {}", scene(scene_id)),
             HistoryItem::beat(scene_id, None),
         ),
-        SceneCommand::InsertBeat { scene_id, beat, .. }
-        | SceneCommand::InsertBodyBeat { scene_id, beat, .. } => {
+        SceneCommand::InsertBodyBeat { scene_id, beat, .. } => {
             in_scene(&format!("new {}", beat_kind(beat)), scene_id, None)
         }
-        SceneCommand::UpdateBeat {
-            scene_id,
-            beat_id,
-            beat,
-            ..
-        }
-        | SceneCommand::UpdateBodyBeat {
+        SceneCommand::UpdateBodyBeat {
             scene_id,
             beat_id,
             beat,
@@ -5544,21 +4863,9 @@ fn history_label(project: &ProjectMetadata, command: &SceneCommand) -> HistoryLa
             node: removed,
             ..
         } => in_scene("deletion", scene_id, node(removed)),
-        SceneCommand::UpdateChildDialogue {
-            scene_id, beat_id, ..
-        } => in_scene("dialogue edit", scene_id, Some(beat_id)),
         SceneCommand::ContinueDialogue {
             scene_id, beat_id, ..
         } => in_scene("dialogue continuation", scene_id, Some(beat_id)),
-        SceneCommand::RemoveBeat {
-            scene_id, beat_id, ..
-        } => in_scene("beat deletion", scene_id, Some(beat_id)),
-        SceneCommand::MoveBeat {
-            scene_id, beat_id, ..
-        }
-        | SceneCommand::ReorderBeat {
-            scene_id, beat_id, ..
-        } => in_scene("beat move", scene_id, Some(beat_id)),
     }
 }
 
@@ -5620,6 +4927,13 @@ impl BoolNot for bool {
     }
 }
 
+/// Where a root insertion lands when the author names no anchor: before the ending
+/// Beat, or at the end of a Scene without one.
+#[cfg(test)]
+pub(crate) fn root_default_place(scene: &SceneDocument) -> Position {
+    scene.bodies[0].default_place.clone().unwrap()
+}
+
 #[cfg(test)]
 mod tests {
     mod arithmetic;
@@ -5636,6 +4950,36 @@ mod tests {
     use crate::metadata::{Resolution, SdkIdentity};
     use std::collections::BTreeMap;
     use std::fs;
+
+    /// Move a root Beat before another root Beat, or to the end of the root body.
+    pub(super) fn move_root_beat(
+        scene: &SceneDocument,
+        id: &str,
+        before: Option<&str>,
+    ) -> SceneCommand {
+        let beat = |beat_id: &str| NodeRef::Beat {
+            beat_id: beat_id.into(),
+        };
+        SceneCommand::MoveStoryNode {
+            scene_id: scene.id.clone(),
+            expected_source_revision: scene.source_revision.clone(),
+            node: beat(id),
+            expected_body: BodyRef::Root,
+            body: BodyRef::Root,
+            position: before.map_or(Position::End, |anchor| Position::Before {
+                anchor: beat(anchor),
+            }),
+        }
+    }
+
+    pub(super) fn remove_root_beat(scene: &SceneDocument, id: &str) -> SceneCommand {
+        SceneCommand::RemoveStoryNode {
+            scene_id: scene.id.clone(),
+            expected_source_revision: scene.source_revision.clone(),
+            node: NodeRef::Beat { beat_id: id.into() },
+            expected_body: BodyRef::Root,
+        }
+    }
     use tempfile::TempDir;
 
     #[test]
@@ -5652,11 +4996,11 @@ mod tests {
             json!({"type": "renameScene", "sceneId": "s", "displayName": "Scene"}),
             json!({"type": "moveScene", "sceneId": "s", "chapterId": "c", "direction": null, "expectedSourceRevision": "r"}),
             json!({"type": "deleteScene", "sceneId": "s", "expectedSourceRevision": "r"}),
-            json!({"type": "insertBeat", "sceneId": "s", "expectedSourceRevision": "r", "beforeBeatId": "before", "beat": {"type": "narration", "text": "New"}}),
-            json!({"type": "updateBeat", "sceneId": "s", "expectedSourceRevision": "r", "beatId": "b", "beat": {"type": "narration", "text": "Edited"}}),
+            json!({"type": "insertBodyBeat", "sceneId": "s", "expectedSourceRevision": "r", "body": {"type": "root"}, "position": {"type": "before", "anchor": {"type": "beat", "beatId": "before"}}, "beat": {"type": "narration", "text": "New"}}),
+            json!({"type": "updateBodyBeat", "sceneId": "s", "expectedSourceRevision": "r", "beatId": "b", "expectedBody": {"type": "root"}, "beat": {"type": "narration", "text": "Edited"}}),
             json!({"type": "continueDialogue", "sceneId": "s", "expectedSourceRevision": "r", "beatId": "b", "characterId": "character", "text": "Next"}),
-            json!({"type": "removeBeat", "sceneId": "s", "expectedSourceRevision": "r", "beatId": "b"}),
-            json!({"type": "moveBeat", "sceneId": "s", "expectedSourceRevision": "r", "beatId": "b", "direction": "down"}),
+            json!({"type": "removeStoryNode", "sceneId": "s", "expectedSourceRevision": "r", "node": {"type": "beat", "beatId": "b"}, "expectedBody": {"type": "root"}}),
+            json!({"type": "moveStoryNode", "sceneId": "s", "expectedSourceRevision": "r", "node": {"type": "beat", "beatId": "b"}, "expectedBody": {"type": "root"}, "body": {"type": "root"}, "position": {"type": "end"}}),
         ];
         for command in commands {
             let request = json!({
@@ -5666,8 +5010,15 @@ mod tests {
             });
             let decoded: SceneCommandRequest = serde_json::from_value(request.clone())
                 .unwrap_or_else(|error| panic!("renderer request {request}: {error}"));
-            if let SceneCommand::InsertBeat { before_beat_id, .. } = decoded.command {
-                assert_eq!(before_beat_id.as_deref(), Some("before"));
+            if let SceneCommand::InsertBodyBeat { position, .. } = decoded.command {
+                assert_eq!(
+                    position,
+                    Position::Before {
+                        anchor: NodeRef::Beat {
+                            beat_id: "before".into()
+                        }
+                    }
+                );
             }
         }
     }
@@ -5862,15 +5213,7 @@ mod tests {
         let scene = &before.scenes[0];
         let ids: Vec<_> = scene.beats.iter().map(|b| b.id.clone()).collect();
         let after = fixture
-            .apply(
-                &before,
-                SceneCommand::ReorderBeat {
-                    scene_id: scene.id.clone(),
-                    expected_source_revision: scene.source_revision.clone(),
-                    beat_id: ids[0].clone(),
-                    to_index: 2,
-                },
-            )
+            .apply(&before, move_root_beat(scene, &ids[0], Some(&ids[3])))
             .unwrap();
         assert_eq!(
             after.scenes[0]
@@ -5897,15 +5240,7 @@ mod tests {
         );
         let current = &undone.scenes[0];
         assert!(matches!(
-            fixture.apply(
-                &undone,
-                SceneCommand::ReorderBeat {
-                    scene_id: current.id.clone(),
-                    expected_source_revision: current.source_revision.clone(),
-                    beat_id: ids[0].clone(),
-                    to_index: 3
-                }
-            ),
+            fixture.apply(&undone, move_root_beat(current, &ids[0], None)),
             Err(SceneError::InvariantBlocked)
         ));
         let source_path = fixture.root.join(&scene.source_path);
@@ -5913,15 +5248,7 @@ mod tests {
         external.extend_from_slice(b"# external edit\r\n");
         std::fs::write(&source_path, external).unwrap();
         assert!(fixture
-            .apply(
-                &before,
-                SceneCommand::ReorderBeat {
-                    scene_id: scene.id.clone(),
-                    expected_source_revision: scene.source_revision.clone(),
-                    beat_id: ids[0].clone(),
-                    to_index: 1
-                }
-            )
+            .apply(&before, move_root_beat(scene, &ids[0], Some(&ids[2])))
             .is_err());
     }
 
@@ -5970,10 +5297,15 @@ mod tests {
         let shown = fixture
             .apply(
                 &first,
-                SceneCommand::InsertBeat {
+                SceneCommand::InsertBodyBeat {
                     scene_id: scene.id.clone(),
                     expected_source_revision: scene.source_revision.clone(),
-                    before_beat_id: Some(scene.beats[0].id.clone()),
+                    body: BodyRef::Root,
+                    position: Position::Before {
+                        anchor: NodeRef::Beat {
+                            beat_id: scene.beats[0].id.clone(),
+                        },
+                    },
                     beat: BeatPayload::ShowCharacter {
                         character_id: characters.characters[0].id.clone(),
                         appearance_id: appearance.id.clone(),
@@ -6231,17 +5563,12 @@ mod tests {
         let target = scene
             .beats
             .iter()
-            .position(|b| matches!(&b.payload,BeatPayload::Narration{text} if text=="After"))
+            .find(|b| matches!(&b.payload,BeatPayload::Narration{text} if text=="After"))
             .unwrap();
         assert!(matches!(
             fixture.apply(
                 &before,
-                SceneCommand::ReorderBeat {
-                    scene_id: scene.id.clone(),
-                    expected_source_revision: scene.source_revision.clone(),
-                    beat_id: scene.beats[0].id.clone(),
-                    to_index: target
-                }
+                move_root_beat(scene, &scene.beats[0].id, Some(&target.id))
             ),
             Err(SceneError::OpaqueBoundary)
         ));
@@ -6669,10 +5996,13 @@ mod tests {
         fixture
             .apply(
                 &before,
-                SceneCommand::InsertBeat {
+                SceneCommand::InsertBodyBeat {
                     scene_id: scene.id.clone(),
                     expected_source_revision: scene.source_revision.clone(),
-                    before_beat_id: Some(return_id),
+                    body: BodyRef::Root,
+                    position: Position::Before {
+                        anchor: NodeRef::Beat { beat_id: return_id },
+                    },
                     beat: BeatPayload::Narration {
                         text: "Snowman ☃".into(),
                     },
@@ -6708,12 +6038,7 @@ mod tests {
         assert!(matches!(
             fixture.apply(
                 &workspace,
-                SceneCommand::MoveBeat {
-                    scene_id: scene.id.clone(),
-                    expected_source_revision: scene.source_revision.clone(),
-                    beat_id: return_beat.id.clone(),
-                    direction: MoveDirection::Up,
-                }
+                move_root_beat(scene, &return_beat.id, Some(&scene.beats[0].id))
             ),
             Err(SceneError::OpaqueBoundary)
         ));
@@ -6746,10 +6071,11 @@ mod tests {
         let linked = clean
             .apply(
                 &with_scene,
-                SceneCommand::InsertBeat {
+                SceneCommand::UpdateBodyBeat {
                     scene_id: entry.id.clone(),
                     expected_source_revision: entry.source_revision.clone(),
-                    before_beat_id: Some(return_id),
+                    beat_id: return_id,
+                    expected_body: BodyRef::Root,
                     beat: BeatPayload::Jump {
                         scene_id: target.id.clone(),
                     },
@@ -6792,11 +6118,12 @@ mod tests {
         assert!(matches!(
             clean.apply(
                 &refreshed,
-                SceneCommand::InsertBeat {
+                SceneCommand::InsertBodyBeat {
                     scene_id: current_entry.id.clone(),
                     expected_source_revision: current_entry.source_revision.clone(),
-                    before_beat_id: None,
-                    beat: BeatPayload::Return,
+                    body: BodyRef::Root,
+                    position: root_default_place(&current_entry),
+                    beat: BeatPayload::Return
                 }
             ),
             Err(SceneError::SourceConflict)
@@ -6826,10 +6153,11 @@ mod tests {
         let with_choice = fixture
             .apply(
                 &with_target,
-                SceneCommand::InsertBeat {
+                SceneCommand::InsertBodyBeat {
                     scene_id: entry.id.clone(),
                     expected_source_revision: entry.source_revision.clone(),
-                    before_beat_id: None,
+                    body: BodyRef::Root,
+                    position: root_default_place(&entry),
                     beat: BeatPayload::Choice {
                         picked_policy: None,
                         prompt: None,
@@ -6862,27 +6190,21 @@ mod tests {
             .id
             .clone();
         fixture
-            .apply(
-                &with_choice,
-                SceneCommand::RemoveBeat {
-                    scene_id: entry.id.clone(),
-                    expected_source_revision: entry.source_revision.clone(),
-                    beat_id: choice_id.clone(),
-                },
-            )
+            .apply(&with_choice, remove_root_beat(entry, &choice_id))
             .unwrap();
         let restored = fixture.undo().unwrap();
         assert_eq!(restored.scenes[0].source_revision, entry.source_revision);
         assert!(matches!(
             fixture.apply(
                 &with_choice,
-                SceneCommand::UpdateBeat {
+                SceneCommand::UpdateBodyBeat {
                     scene_id: entry.id.clone(),
                     expected_source_revision: entry.source_revision.clone(),
                     beat_id: choice_id.clone(),
+                    expected_body: BodyRef::Root,
                     beat: BeatPayload::Narration {
                         text: "Not a terminal".into(),
-                    },
+                    }
                 }
             ),
             Err(SceneError::InvariantBlocked)
@@ -6975,10 +6297,11 @@ mod tests {
         let with_dialogue = fixture
             .apply(
                 &first,
-                SceneCommand::InsertBeat {
+                SceneCommand::InsertBodyBeat {
                     scene_id: entry.id.clone(),
                     expected_source_revision: entry.source_revision.clone(),
-                    before_beat_id: None,
+                    body: BodyRef::Root,
+                    position: root_default_place(&entry),
                     beat: BeatPayload::Dialogue {
                         character_id: character_id.clone(),
                         text: "Draft".into(),
@@ -7306,10 +6629,11 @@ mod tests {
             workspace = fixture
                 .apply(
                     &workspace,
-                    SceneCommand::InsertBeat {
+                    SceneCommand::InsertBodyBeat {
                         scene_id: entry.id.clone(),
                         expected_source_revision: entry.source_revision.clone(),
-                        before_beat_id: None,
+                        body: BodyRef::Root,
+                        position: root_default_place(&entry),
                         beat: payload,
                     },
                 )
@@ -7323,10 +6647,11 @@ mod tests {
         workspace = fixture
             .apply(
                 &workspace,
-                SceneCommand::InsertBeat {
+                SceneCommand::InsertBodyBeat {
                     scene_id: entry.id.clone(),
                     expected_source_revision: entry.source_revision.clone(),
-                    before_beat_id: None,
+                    body: BodyRef::Root,
+                    position: root_default_place(&entry),
                     beat: BeatPayload::Choice {
                         picked_policy: None,
                         prompt: None,
@@ -7379,10 +6704,11 @@ mod tests {
         workspace = fixture
             .apply(
                 &workspace,
-                SceneCommand::InsertBeat {
+                SceneCommand::UpdateBodyBeat {
                     scene_id: garden.id.clone(),
                     expected_source_revision: garden.source_revision.clone(),
-                    before_beat_id: None,
+                    beat_id: garden.beats.last().unwrap().id.clone(),
+                    expected_body: BodyRef::Root,
                     beat: BeatPayload::Jump {
                         scene_id: library_id,
                     },
@@ -7397,8 +6723,7 @@ mod tests {
         let movable = entry
             .beats
             .iter()
-            .rev()
-            .find(|beat| {
+            .rposition(|beat| {
                 !beat.protected
                     && beat.owner.is_none()
                     && !matches!(beat.payload, BeatPayload::Choice { .. })
@@ -7408,12 +6733,11 @@ mod tests {
         fixture
             .apply(
                 &workspace,
-                SceneCommand::MoveBeat {
-                    scene_id: entry.id.clone(),
-                    expected_source_revision: entry.source_revision.clone(),
-                    beat_id: movable.id.clone(),
-                    direction: MoveDirection::Up,
-                },
+                move_root_beat(
+                    entry,
+                    &entry.beats[movable].id,
+                    Some(&entry.beats[movable - 1].id),
+                ),
             )
             .unwrap();
         fixture.undo().unwrap();
@@ -7925,10 +7249,11 @@ mod tests {
             model = fixture
                 .apply(
                     &model,
-                    SceneCommand::UpdateBeat {
+                    SceneCommand::UpdateBodyBeat {
                         scene_id: scene.id.clone(),
                         expected_source_revision: scene.source_revision.clone(),
                         beat_id: scene.beats[0].id.clone(),
+                        expected_body: BodyRef::Root,
                         beat: payload,
                     },
                 )
@@ -8156,10 +7481,11 @@ mod tests {
                     .service
                     .load(&fixture.project, &fixture.project_id)
                     .unwrap(),
-                SceneCommand::UpdateBeat {
+                SceneCommand::UpdateBodyBeat {
                     scene_id: origin.id.clone(),
                     expected_source_revision: origin.source_revision.clone(),
                     beat_id: origin.beats[0].id.clone(),
+                    expected_body: BodyRef::Root,
                     beat: BeatPayload::Choice {
                         options,
                         prompt,
