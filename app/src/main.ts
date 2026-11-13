@@ -170,7 +170,8 @@ function completionIsCurrent(token: CompletionToken): boolean {
     && token.sessionId === currentProject?.sessionId;
 }
 
-function beginAuthoringCompletion(project: OpenProject, scope: object): CompletionToken | undefined {
+// `edit` is false for a read that takes the lease, such as opening a Source file: it keeps "Undone: …".
+function beginAuthoringCompletion(project: OpenProject, scope: object, edit = true): CompletionToken | undefined {
   if (activeFlushOperations.has(project.sessionId)) {
     setStatus("Flush is still in progress.");
     return undefined;
@@ -182,7 +183,7 @@ function beginAuthoringCompletion(project: OpenProject, scope: object): Completi
   const token = beginCompletion(project, scope);
   activeAuthoringOperations.set(project.sessionId, token.operation);
   reflectAuthoringState();
-  historyNotice = undefined;
+  if (edit) historyNotice = undefined;
   return token;
 }
 
@@ -214,8 +215,8 @@ function refreshPersistenceAfterStaleCompletion(token: CompletionToken): void {
   }
 }
 
-async function runAuthoringOperation<T>(project: OpenProject, scope: object, task: () => Promise<T>): Promise<T> {
-  const token = beginAuthoringCompletion(project, scope);
+async function runAuthoringOperation<T>(project: OpenProject, scope: object, task: () => Promise<T>, edit = true): Promise<T> {
+  const token = beginAuthoringCompletion(project, scope, edit);
   if (!token) throw new Error("Another persistence operation is still in progress.");
   try {
     return await task();
@@ -244,12 +245,12 @@ function hasBlockingModal(): boolean {
 function persistenceMessage(state: PersistenceStatus, localPending: boolean): { readonly text: string; readonly kind: "normal" | "error"; readonly links?: readonly StatusLink[] } {
   if (state === "recoveryRequired") return { text: "Recovery required — writes are disabled", kind: "error" };
   if (state === "conflict") return { text: "Conflict — Source is invalid, missing, or changed outside Loomlight", kind: "error" };
-  if (localPending || state === "pendingValidation") return { text: "Unsaved Source draft", kind: "normal" };
   // A refused Story Save keeps its count and scene links until its drafts are saved or cancelled.
   const refusal: StoryStatus | undefined = storyView?.saveStatus();
   if (refusal) return refusal;
-  // "Undone: …" stays until the next edit or view, including over retained drafts.
-  if (historyNotice?.view === viewGeneration) return { text: historyNotice.text, kind: "normal" };
+  // "Undone: …" stays until the next edit or view, including over retained beat and Source drafts.
+  if (historyNotice?.view === viewGeneration && !localPending) return { text: historyNotice.text, kind: "normal" };
+  if (localPending || state === "pendingValidation") return { text: "Unsaved Source draft", kind: "normal" };
   if (storyView?.hasDrafts()) return { text: "Unsaved changes", kind: "normal" };
   return { text: hasUnsubmittedInput() ? "Unsubmitted input — accepted changes saved" : "Saved", kind: "normal" };
 }
@@ -485,8 +486,8 @@ async function refreshHistory(project: OpenProject): Promise<void> {
 
 // The one Undo and Redo command for the header buttons and Cmd/Ctrl+Z. It follows
 // ordinary navigation: a refused leave keeps the input, and "Keep editing?" must be
-// answered Discard and leave. Beat drafts never block it: an unfinished typing step
-// ends first, so Undo reverses it, and a draft step writes nothing (ADR 0025).
+// answered Discard and leave. Beat and Source drafts never block it: an unfinished
+// typing step ends first, so Undo reverses it, and a draft step writes nothing (ADR 0025).
 // Each run reports `committed`, `refused` or `blocked` on the app root for tests and probes.
 // An open dialog, including a native modal <dialog>, owns Cmd/Ctrl+Z.
 const dialogOpen = (): boolean => hasBlockingModal() || document.querySelector("dialog[open]") !== null;
@@ -498,6 +499,7 @@ async function runHistory(project: OpenProject, direction: HistoryDirection): Pr
   const focused = (document.activeElement as HTMLElement | null)?.dataset.history;
   try {
     await storyView?.flushSteps();
+    await currentSourceController(project)?.flushSteps();
     if (currentProject?.sessionId !== project.sessionId || !historyState[direction]) return;
     ran = true;
     if (activeReferenceController?.isBusy()) return;
@@ -864,7 +866,13 @@ async function renderSourceSurface(workspace: HTMLElement, tree: HTMLElement, pr
       status: setStatus,
       reloadInventory: () => projectValue<SourceInventory>(project, "source.list"),
       open: (selection) => projectValue<SourceDocument>(project, "source.open", { ...selection }),
-      update: (request) => projectValue<SourceDocument>(project, "source.updateDraft", request),
+      // The first change of a typing step adds its draft step to the project history,
+      // and the response carries the history that follows (ADR 0025).
+      update: async (request) => {
+        const document = await projectValue<SourceDocument>(project, "source.updateDraft", request);
+        if (document.history && currentProject?.sessionId === project.sessionId) { historyNotice = undefined; showHistory(document.history); }
+        return document;
+      },
       save: (request) => projectValue<SourceDocument>(project, "source.save", request),
       discard: (path) => projectValue<SourceDocument>(project, "source.discard", { path }),
       applyBoth: (request) => projectValue<SourceDocument>(project, "source.applyBoth", request),
@@ -874,7 +882,7 @@ async function renderSourceSurface(workspace: HTMLElement, tree: HTMLElement, pr
       runCoordinated: (label, task) => {
         let scope = sourceActionScopes.get(label);
         if (!scope) { scope = {}; sourceActionScopes.set(label, scope); }
-        return runAuthoringOperation(project, scope, task);
+        return runAuthoringOperation(project, scope, task, label !== "source.open");
       },
       refreshPersistence: () => { void refreshPersistenceStatus(project, viewGeneration); },
     }, target);
@@ -1295,12 +1303,13 @@ function installListeners(): void {
       setStatus("Unsubmitted input");
     }
   });
-  // Project Undo and Redo when no text field has focus, or in a beat draft field. Other
-  // text fields keep their own text Undo, and an open dialog keeps the shortcut.
+  // Project Undo and Redo when no text field has focus, or in a beat draft field or the
+  // Source editor. Other text fields keep their own text Undo, and an open dialog keeps the shortcut.
   window.addEventListener("keydown", (event) => {
     const direction = historyShortcut(event);
     const project = currentProject;
-    if (!direction || !project || event.isComposing || dialogOpen() || (isTextField(event.target) && !storyView?.ownsDraftField(event.target))) return;
+    if (!direction || !project || event.isComposing || dialogOpen()) return;
+    if (isTextField(event.target) && !storyView?.ownsDraftField(event.target) && !currentSourceController(project)?.ownsDraftField(event.target)) return;
     event.preventDefault();
     if (!event.repeat) void runHistory(project, direction);
   });

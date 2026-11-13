@@ -30,3 +30,8 @@ renderer reload leaves none behind. Unsaved Source text gets draft steps under t
 same rule. That is target behaviour, and a separate issue delivers it. Until then
 the Source editor keeps its own text Undo. Revisit this decision if history must
 survive a restart, or if Undo must reverse a saved edit without restoring bytes.
+
+Update, 2026-11-13 (#155): Source draft steps are built. Core already holds Source
+drafts, so the Source draft registry, not the renderer, keeps what a Source step's
+Undo restores. The history entry still carries no text. The Source editor no longer
+has its own text Undo; Cmd/Ctrl+Z in it runs project Undo.

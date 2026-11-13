@@ -6,7 +6,7 @@
 
 use crate::{
     authoring::{AuthoringService, PersistenceStatus},
-    history::{HistoryItem, HistoryLabel},
+    history::{DraftStep, HistoryItem, HistoryLabel, HistoryPart, HistoryState},
     metadata::{ProjectMetadata, SceneMetadata, SceneSourceMapping, SourceMapMetadata},
     scene::{build_mapping, SceneBeat, SceneError},
     transaction::{
@@ -104,6 +104,9 @@ pub struct SourceDocument {
     pub can_apply_both: bool,
     pub combined_preview: Option<String>,
     pub external_text: Option<String>,
+    /// The project history after this request started a draft step; absent otherwise.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub history: Option<HistoryState>,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -125,6 +128,9 @@ pub struct SourceDraftRequest {
     pub text: String,
     pub selection_start: u64,
     pub selection_end: u64,
+    /// The renderer ended the previous typing step: a text change starts a new one.
+    #[serde(default)]
+    pub new_step: bool,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -164,11 +170,51 @@ struct SourceBuffer {
     external: Option<(Vec<u8>, Revision)>,
     unavailable: bool,
     projection_invalid: bool,
+    /// The draft steps of this file's unsaved text, oldest first.
+    steps: Vec<SourceStep>,
+}
+
+/// One draft step in a file's unsaved text (ADR 0025). The history entry holds only
+/// its place. Core holds Source drafts, so the step's text lives here, with the
+/// draft. Undo and Redo of it change the draft and write nothing.
+#[derive(Clone, Debug)]
+struct SourceStep {
+    step_id: String,
+    /// The accepted revision the step's text belongs to. Undo and Redo stop at a
+    /// history boundary once it changes.
+    base: Revision,
+    change: StepChange,
+    undone: bool,
+}
+
+#[derive(Clone, Debug)]
+enum StepChange {
+    /// The file's latest step, still taking typing: the whole text before it.
+    Open(String),
+    /// A finished step: at byte `start`, the text changed from `before` to `after`.
+    Closed {
+        start: usize,
+        before: String,
+        after: String,
+    },
+}
+
+/// Source draft ids in the project history, so Save can join a file's steps.
+const SOURCE_DRAFT_PREFIX: &str = "source:";
+
+fn source_draft_id(path: &str) -> String {
+    format!("{SOURCE_DRAFT_PREFIX}{path}")
+}
+
+/// Whether a history draft id names a Source file's draft.
+pub(crate) fn is_source_draft(draft: &str) -> bool {
+    draft.starts_with(SOURCE_DRAFT_PREFIX)
 }
 
 #[derive(Default)]
 pub(crate) struct SourceSessions {
     projects: HashMap<ProjectId, HashMap<String, SourceBuffer>>,
+    step_sequence: u64,
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -296,11 +342,14 @@ impl AuthoringService {
             return Err(SourceError::Oversize);
         }
         self.ensure_buffer(project, &request.path)?;
+        // History before sessions, the order Undo takes them in.
+        let mut histories = self.project_history.lock().map_err(|_| SourceError::Io)?;
         let mut sessions = self.source_sessions.lock().map_err(|_| SourceError::Io)?;
-        let buffers = sessions
-            .projects
-            .get_mut(project)
-            .ok_or(SourceError::UnknownFile)?;
+        let SourceSessions {
+            projects,
+            step_sequence,
+        } = &mut *sessions;
+        let buffers = projects.get_mut(project).ok_or(SourceError::UnknownFile)?;
         let accepted = buffers.get(&request.path).ok_or(SourceError::UnknownFile)?;
         if accepted.base_revision.sha256 != request.expected_base_revision {
             return Err(SourceError::SourceConflict);
@@ -308,29 +357,65 @@ impl AuthoringService {
         let accepted_value = accepted_text(&accepted.base_bytes)?;
         let next_draft = (request.text != accepted_value).then_some(request.text);
         let draft_changed = accepted.draft != next_draft;
-        let mut dirty_count = 0usize;
-        let mut draft_bytes = 0usize;
-        for (path, buffer) in buffers.iter() {
-            let candidate = if path == &request.path {
-                next_draft.as_ref()
-            } else {
-                buffer.draft.as_ref()
-            };
-            if let Some(value) = candidate {
-                dirty_count += 1;
-                draft_bytes = draft_bytes.saturating_add(value.len());
-            }
-        }
-        if dirty_count > MAX_DIRTY_BUFFERS || draft_bytes > MAX_DRAFT_BYTES {
+        if !within_draft_limits(buffers, &request.path, next_draft.as_ref()) {
             return Err(SourceError::DraftLimit);
         }
         let buffer = buffers
             .get_mut(&request.path)
             .ok_or(SourceError::UnknownFile)?;
-        buffer.draft = next_draft;
+        let mut history = None;
         if draft_changed {
+            // A text change extends the file's open step while that step is the
+            // latest history entry and the renderer has not ended it. Otherwise
+            // it starts a step, which takes its place in the history now.
+            let before = buffer
+                .draft
+                .clone()
+                .unwrap_or_else(|| accepted_value.clone());
+            let draft = source_draft_id(&request.path);
+            let stack = histories.entry(project.clone()).or_default();
+            let extends = !request.new_step
+                && stack.undo_step().is_some_and(|top| {
+                    top.draft == draft
+                        && buffer.steps.last().is_some_and(|last| {
+                            last.step_id == top.step_id
+                                && matches!(last.change, StepChange::Open(_))
+                        })
+                });
+            if !extends {
+                *step_sequence += 1;
+                let step_id = format!("source-step:{step_sequence}");
+                history = Some(
+                    stack
+                        .push_draft_step(
+                            DraftStep {
+                                step_id: step_id.clone(),
+                                draft,
+                            },
+                            HistoryLabel::new(
+                                format!("Source typing in {}", file_name(&request.path)),
+                                HistoryItem::source(&request.path),
+                            ),
+                        )
+                        .map_err(|_| SourceError::Io)?,
+                );
+                // Undone steps left the history when this entry dropped Redo.
+                buffer.steps.retain(|step| !step.undone);
+                if let Some(last) = buffer.steps.last_mut() {
+                    if let StepChange::Open(previous) = &last.change {
+                        last.change = closed_change(previous, &before);
+                    }
+                }
+                buffer.steps.push(SourceStep {
+                    step_id,
+                    base: buffer.base_revision.clone(),
+                    change: StepChange::Open(before),
+                    undone: false,
+                });
+            }
             buffer.draft_version = buffer.draft_version.saturating_add(1);
         }
+        buffer.draft = next_draft;
         let length = buffer
             .draft
             .as_deref()
@@ -340,7 +425,10 @@ impl AuthoringService {
         buffer.selection_start = request.selection_start.min(length);
         buffer.selection_end = request.selection_end.min(length);
         drop(sessions);
-        self.source_document(project, project_id, &request.path)
+        drop(histories);
+        let mut document = self.source_document(project, project_id, &request.path)?;
+        document.history = history;
+        Ok(document)
     }
 
     pub fn source_save(
@@ -371,7 +459,12 @@ impl AuthoringService {
                 format!("Source edit in {}", file_name(&request.path)),
                 HistoryItem::source(&request.path),
             );
-            self.commit_source_history(project, proposal, label)?;
+            self.commit_source_history(
+                project,
+                proposal,
+                label,
+                std::slice::from_ref(&request.path),
+            )?;
             self.accept_committed_paths(project, std::slice::from_ref(&request.path))?;
         }
         self.source_document(project, project_id, &request.path)
@@ -409,7 +502,7 @@ impl AuthoringService {
                 ),
                 [] => unreachable!("Save All commits only prepared buffers"),
             };
-            self.commit_source_history(project, proposal, label)?;
+            self.commit_source_history(project, proposal, label, &paths)?;
             self.accept_committed_paths(project, &paths)?;
         }
         self.source_inventory(project, project_id)
@@ -423,7 +516,7 @@ impl AuthoringService {
     ) -> Result<SourceDocument, SourceError> {
         validate_source_path(&request.path)?;
         self.ensure_buffer(project, &request.path)?;
-        {
+        let discarded = {
             let mut sessions = self.source_sessions.lock().map_err(|_| SourceError::Io)?;
             let buffer = sessions
                 .projects
@@ -433,7 +526,9 @@ impl AuthoringService {
             buffer.draft = None;
             buffer.external = None;
             buffer.draft_version = buffer.draft_version.saturating_add(1);
-        }
+            discard_steps(buffer)
+        };
+        self.forget_source_steps(project, discarded.into_iter().collect())?;
         self.refresh_buffer(project, &request.path)?;
         self.reconcile_clean_sources(project, project_id, Some(&request.path))?;
         self.source_document(project, project_id, &request.path)
@@ -444,16 +539,19 @@ impl AuthoringService {
         project: &ProjectId,
         project_id: &str,
     ) -> Result<SourceInventory, SourceError> {
-        let paths = {
+        let (paths, discarded) = {
             let mut sessions = self.source_sessions.lock().map_err(|_| SourceError::Io)?;
             let buffers = sessions.projects.entry(project.clone()).or_default();
+            let mut discarded = Vec::new();
             for buffer in buffers.values_mut() {
                 buffer.draft = None;
                 buffer.external = None;
                 buffer.draft_version = buffer.draft_version.saturating_add(1);
+                discarded.extend(discard_steps(buffer));
             }
-            buffers.keys().cloned().collect::<Vec<_>>()
+            (buffers.keys().cloned().collect::<Vec<_>>(), discarded)
         };
+        self.forget_source_steps(project, discarded)?;
         for path in paths {
             self.refresh_buffer(project, &path)?;
             self.reconcile_clean_sources(project, project_id, Some(&path))?;
@@ -472,7 +570,12 @@ impl AuthoringService {
             format!("combined Source edit in {}", file_name(&request.path)),
             HistoryItem::source(&request.path),
         );
-        self.commit_source_history(project, proposal, label)?;
+        self.commit_source_history(
+            project,
+            proposal,
+            label,
+            std::slice::from_ref(&request.path),
+        )?;
         self.accept_committed_paths(project, std::slice::from_ref(&request.path))?;
         self.source_document(project, project_id, &request.path)
     }
@@ -693,6 +796,7 @@ impl AuthoringService {
             external: None,
             unavailable: false,
             projection_invalid: false,
+            steps: Vec::new(),
         };
         self.source_sessions
             .lock()
@@ -859,6 +963,7 @@ impl AuthoringService {
             can_apply_both: combined.is_some(),
             combined_preview: combined.and_then(|bytes| accepted_text(&bytes).ok()),
             external_text,
+            history: None,
         })
     }
 
@@ -1173,15 +1278,110 @@ impl AuthoringService {
         Ok(())
     }
 
+    /// Commits accepted Source as one history entry on top, joining the draft
+    /// steps of the saved `paths` into it (ADR 0025).
     fn commit_source_history(
         &self,
         project: &ProjectId,
         proposal: TransactionProposal,
         label: HistoryLabel,
+        paths: &[String],
     ) -> Result<(), SourceError> {
-        self.commit_history(project, proposal, label)
-            .map(|_| ())
+        let joined: Vec<String> = paths.iter().map(|path| source_draft_id(path)).collect();
+        let mutations = proposal.mutations.clone();
+        self.commit_history_parts(
+            project,
+            proposal,
+            vec![HistoryPart { label, mutations }],
+            &joined,
+        )
+        .map(|_| ())
+        .map_err(scene_source_error)
+    }
+
+    /// A discarded draft's steps leave the history: Discard Draft is permanent.
+    fn forget_source_steps(
+        &self,
+        project: &ProjectId,
+        drafts: Vec<String>,
+    ) -> Result<(), SourceError> {
+        self.forget_draft_steps(project, &drafts)
             .map_err(scene_source_error)
+    }
+
+    /// Undo or Redo of a Source draft step. The file's draft returns to its text
+    /// before or after the step, and the changed range becomes the selection that
+    /// the reveal opens. Nothing is written. A step of another draft is left to the
+    /// renderer. The draft registry's limits still hold.
+    pub(crate) fn source_history_step(
+        &self,
+        project: &ProjectId,
+        step: &DraftStep,
+        redo: bool,
+    ) -> Result<(), SceneError> {
+        let Some(path) = step.draft.strip_prefix(SOURCE_DRAFT_PREFIX) else {
+            return Ok(());
+        };
+        let mut sessions = self.source_sessions.lock().map_err(|_| SceneError::Io)?;
+        let buffers = sessions
+            .projects
+            .get_mut(project)
+            .ok_or(SceneError::HistoryBoundary)?;
+        let buffer = buffers.get(path).ok_or(SceneError::HistoryBoundary)?;
+        let index = buffer
+            .steps
+            .iter()
+            .position(|item| item.step_id == step.step_id)
+            .ok_or(SceneError::HistoryBoundary)?;
+        let item = &buffer.steps[index];
+        if item.base != buffer.base_revision || item.undone != redo {
+            return Err(SceneError::HistoryBoundary);
+        }
+        let accepted =
+            accepted_text(&buffer.base_bytes).map_err(|_| SceneError::HistoryBoundary)?;
+        let current = buffer.draft.as_deref().unwrap_or(&accepted);
+        let change = match &item.change {
+            StepChange::Open(before) => closed_change(before, current),
+            closed => closed.clone(),
+        };
+        let StepChange::Closed {
+            start,
+            before,
+            after,
+        } = &change
+        else {
+            return Err(SceneError::Io);
+        };
+        // Undo puts `before` back where `after` is; Redo does the reverse.
+        let (from, to) = if redo {
+            (before, after)
+        } else {
+            (after, before)
+        };
+        if current.get(*start..start + from.len()) != Some(from.as_str()) {
+            return Err(SceneError::HistoryBoundary);
+        }
+        let text = [
+            &current[..*start],
+            to.as_str(),
+            &current[start + from.len()..],
+        ]
+        .concat();
+        let selection_start = text[..*start].encode_utf16().count() as u64;
+        let selection_end = selection_start + to.encode_utf16().count() as u64;
+        let next_draft = (text != accepted).then_some(text);
+        if !within_draft_limits(buffers, path, next_draft.as_ref()) {
+            // Redo after another file's open step grew: save or discard a draft first.
+            return Err(SceneError::DirtySource);
+        }
+        let buffer = buffers.get_mut(path).ok_or(SceneError::HistoryBoundary)?;
+        buffer.draft = next_draft;
+        buffer.draft_version = buffer.draft_version.saturating_add(1);
+        buffer.selection_start = selection_start;
+        buffer.selection_end = selection_end;
+        buffer.steps[index].change = change;
+        buffer.steps[index].undone = !redo;
+        Ok(())
     }
 
     fn accept_committed_paths(
@@ -1215,6 +1415,8 @@ impl AuthoringService {
             buffer.unavailable = false;
             buffer.projection_invalid = false;
             buffer.draft_version = buffer.draft_version.saturating_add(1);
+            // The saved entry joined these steps.
+            buffer.steps.clear();
         }
         Ok(())
     }
@@ -1439,6 +1641,28 @@ fn buffer_state(buffer: &SourceBuffer) -> SourceFileState {
     }
 }
 
+/// Whether the drafts stay within the registry's count and size limits once
+/// `path` holds `candidate`.
+fn within_draft_limits(
+    buffers: &HashMap<String, SourceBuffer>,
+    path: &str,
+    candidate: Option<&String>,
+) -> bool {
+    let (count, bytes) = buffers
+        .iter()
+        .filter_map(|(key, buffer)| {
+            if key == path {
+                candidate
+            } else {
+                buffer.draft.as_ref()
+            }
+        })
+        .fold((0usize, 0usize), |(count, bytes), draft| {
+            (count + 1, bytes.saturating_add(draft.len()))
+        });
+    count <= MAX_DIRTY_BUFFERS && bytes <= MAX_DRAFT_BYTES
+}
+
 fn draft_totals(buffers: Option<&HashMap<String, SourceBuffer>>) -> (usize, usize) {
     buffers.map_or((0, 0), |items| {
         items.values().fold((0, 0), |(count, bytes), item| {
@@ -1572,6 +1796,39 @@ fn commit_error(outcome: CommitOutcome) -> SourceError {
         CommitOutcome::RecoveryRequired { .. } => SourceError::RecoveryRequired,
         CommitOutcome::Rejected { diagnostic } => transaction_error(diagnostic),
         CommitOutcome::Committed { .. } => SourceError::Io,
+    }
+}
+
+/// Clears a file's draft steps and returns the draft id when it had any.
+fn discard_steps(buffer: &mut SourceBuffer) -> Option<String> {
+    let had_steps = !buffer.steps.is_empty();
+    buffer.steps.clear();
+    had_steps.then(|| source_draft_id(&buffer.path))
+}
+
+/// The one span where `before` and `after` differ, on character boundaries.
+fn closed_change(before: &str, after: &str) -> StepChange {
+    let (old, new) = (before.as_bytes(), after.as_bytes());
+    let mut start = old.iter().zip(new).take_while(|(a, b)| a == b).count();
+    while !before.is_char_boundary(start) {
+        start -= 1;
+    }
+    let room = old.len().min(new.len()) - start;
+    let mut suffix = old
+        .iter()
+        .rev()
+        .zip(new.iter().rev())
+        .take(room)
+        .take_while(|(a, b)| a == b)
+        .count();
+    // Identical suffix bytes start a character in both texts or in neither.
+    while !before.is_char_boundary(old.len() - suffix) {
+        suffix -= 1;
+    }
+    StepChange::Closed {
+        start,
+        before: before[start..old.len() - suffix].to_owned(),
+        after: after[start..new.len() - suffix].to_owned(),
     }
 }
 
@@ -1736,6 +1993,7 @@ mod tests {
                         text: text.into(),
                         selection_start: text.encode_utf16().count() as u64,
                         selection_end: text.encode_utf16().count() as u64,
+                        new_step: false,
                     },
                 )
                 .unwrap()
@@ -2227,6 +2485,93 @@ mod tests {
     }
 
     #[test]
+    fn source_draft_steps_undo_without_writing_and_save_joins_them() {
+        let fixture = Fixture::new(b"label scene_one:\n    return\n");
+        let path = "game/other.rpy";
+        let disk = || fs::read(fixture.root.join(path)).unwrap();
+        let original = disk();
+        let type_text = |text: &str, new_step: bool| {
+            let base = fixture.open(path).base_revision;
+            fixture
+                .service
+                .source_update_draft(
+                    &fixture.project,
+                    &fixture.project_id,
+                    SourceDraftRequest {
+                        path: path.into(),
+                        expected_base_revision: base,
+                        text: text.into(),
+                        selection_start: 0,
+                        selection_end: 0,
+                        new_step,
+                    },
+                )
+                .unwrap()
+        };
+        let undo_name = || {
+            let state = fixture.service.history_state(&fixture.project).unwrap();
+            state.undo.map(|label| label.name)
+        };
+        // The first change starts a step; typing extends it until the renderer ends it.
+        let first = type_text("one two three four\n", false);
+        assert_eq!(
+            first
+                .history
+                .and_then(|state| state.undo)
+                .map(|label| label.name),
+            Some("Source typing in other.rpy".into())
+        );
+        assert!(type_text("one two three four five\n", false)
+            .history
+            .is_none());
+        assert!(type_text("one 雪 three four five\n", true)
+            .history
+            .is_some());
+        // Undo restores the draft before each step and selects what changed. Nothing is written.
+        let step = fixture.service.history_undo(&fixture.project).unwrap();
+        assert!(step.step.is_some());
+        let reverted = fixture.open(path);
+        assert_eq!(reverted.text.as_deref(), Some("one two three four five\n"));
+        assert_eq!((reverted.selection_start, reverted.selection_end), (4, 7));
+        fixture.service.history_undo(&fixture.project).unwrap();
+        let clean = fixture.open(path);
+        assert!(!clean.dirty);
+        assert_eq!(disk(), original);
+        assert_eq!(
+            fixture.service.history_undo(&fixture.project),
+            Err(SceneError::HistoryBoundary)
+        );
+        fixture.service.history_redo(&fixture.project).unwrap();
+        fixture.service.history_redo(&fixture.project).unwrap();
+        assert_eq!(
+            fixture.open(path).text.as_deref(),
+            Some("one 雪 three four five\n")
+        );
+        assert_eq!(disk(), original);
+        // Save joins both steps into one entry; one Undo reverses the file.
+        fixture.save(&fixture.open(path)).unwrap();
+        assert_eq!(undo_name(), Some("Source edit in other.rpy".into()));
+        fixture.service.history_undo(&fixture.project).unwrap();
+        assert_eq!(disk(), original);
+        assert_eq!(
+            fixture.service.history_undo(&fixture.project),
+            Err(SceneError::HistoryBoundary)
+        );
+        // Discard Draft is permanent: its steps leave the history.
+        fixture.service.history_redo(&fixture.project).unwrap();
+        type_text("one two\n", true);
+        fixture
+            .service
+            .source_discard(
+                &fixture.project,
+                &fixture.project_id,
+                SourcePathRequest { path: path.into() },
+            )
+            .unwrap();
+        assert_eq!(undo_name(), Some("Source edit in other.rpy".into()));
+    }
+
+    #[test]
     fn dirty_same_file_blocks_scene_and_history_but_unrelated_source_remains_editable() {
         let fixture = Fixture::new(b"label scene_one:\n    \"Hello\"\n    return\n");
         let scene = fixture.open(&fixture.scene_path);
@@ -2364,6 +2709,7 @@ mod tests {
                     text: format!("draft {index}\n"),
                     selection_start: 0,
                     selection_end: 0,
+                    new_step: false,
                 },
             );
             if index < MAX_DIRTY_BUFFERS {
@@ -2388,6 +2734,7 @@ mod tests {
                     text: "x".repeat(MAX_SOURCE_BYTES + 1),
                     selection_start: 0,
                     selection_end: 0,
+                    new_step: false,
                 }
             ),
             Err(SourceError::Oversize)
@@ -2412,6 +2759,7 @@ mod tests {
                         text: "x".repeat(MAX_SOURCE_BYTES),
                         selection_start: 0,
                         selection_end: 0,
+                        new_step: false,
                     },
                 )
                 .is_ok());
@@ -2427,6 +2775,7 @@ mod tests {
                     text: "x".into(),
                     selection_start: 0,
                     selection_end: 0,
+                    new_step: false,
                 },
             ),
             Err(SourceError::DraftLimit)
@@ -2454,6 +2803,7 @@ mod tests {
                     text: draft.into(),
                     selection_start: 22,
                     selection_end: 24,
+                    new_step: false,
                 },
             )
             .unwrap();

@@ -638,14 +638,22 @@ conflict and recovery checks.
 
 Input that Loomlight keeps when the author leaves joins the project history. That
 is beat drafts and unsaved Source text. In those fields, and when no text field has
-focus, Cmd/Ctrl+Z runs project Undo. Source typing makes draft steps under the same
-grouping, and Source Save joins a file's steps into one edit. Other text fields,
-such as search, open Story forms, unapplied Screens fields and unsaved prompt text,
-keep the browser's text Undo and add no entries.
+focus, Cmd/Ctrl+Z runs project Undo and Shift+Cmd/Ctrl+Z runs project Redo. Other
+text fields, such as search, Find and replace, open Story forms, unapplied Screens
+fields and unsaved prompt text, keep the browser's text Undo and add no entries.
 
-Source draft steps are target behaviour (#155). Until then, Source typing keeps the
-Source editor's per-file text history, Cmd/Ctrl+Z in Source does text Undo, and
-accepted Source saves join the project history.
+Source typing makes draft steps under the same grouping: a step ends when the editor
+loses focus or after 2 seconds without typing. The header names a step by its file,
+for example "Undo Source typing in script.rpy". Undo of a Source step changes the
+file's draft and writes nothing. It opens the file in Source and selects the restored
+text, or puts the caret where text was removed. The Source editor has no text Undo of
+its own (#155), the same rule as beat fields, so Cmd/Ctrl+Z in it reverses a whole
+step. Save Source, Apply Both and Save All join the steps of the files they save into
+their one edit at the top of the history. Discard Draft and Discard All are permanent,
+as their confirmation says, and remove the draft's steps. After an external change to
+a file with a draft, both versions stay and Undo changes only the draft. If the file's
+accepted text changes under a step, for example an external edit while the draft
+matched the file, Undo and Redo stop at that step.
 
 Kris selected familiar Word-like editing behaviour. Microsoft's
 [Undo guidance](https://support.microsoft.com/en-us/office/foundations-experiences/undo-redo-or-repeat-an-action)
@@ -752,8 +760,8 @@ filename, draft marker and Close; overflow adds scroll controls and an Open file
 Typing makes a session-local draft. Only Save Source or Cmd/Ctrl+S in Source accepts
 it; changing tabs or workspaces, or closing a tab, keeps it. A dirty file shows
 Unsaved Source draft with a crash warning. Close, project switch and exit offer Save
-All, Discard All or Cancel. Saving keeps the caret, selection and native undo, including
-after a refusal. View in Source selects the exact mapped range, and Source goes back to
+All, Discard All or Cancel. Saving keeps the caret and selection, including after a
+refusal, and Undo follows the [Story Undo](#story-undo) rules. View in Source selects the exact mapped range, and Source goes back to
 the owning beat only when ownership is proven. An external change to a dirty file keeps
 both texts; Apply Both appears only for proven non-overlapping changes and shows the
 combined result first. [Source acceptance](TRANSACTIONS.md#phase-1f-source-acceptance-and-reconciliation)

@@ -236,6 +236,7 @@ fn canvas_render_recovers_after_helper_exit_without_losing_drafts() {
             text: source_draft.clone(),
             selection_start: 0,
             selection_end: 0,
+            new_step: false,
         })
         .unwrap();
     let failed = project.render();
@@ -382,6 +383,7 @@ fn canvas_sdk_retries_refused_helper_before_project_close() {
             text: source_draft.clone(),
             selection_start: 0,
             selection_end: 0,
+            new_step: false,
         })
         .unwrap();
     let mut project = Project {

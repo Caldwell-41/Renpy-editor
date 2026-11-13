@@ -2,7 +2,7 @@ import { assignmentCaption, buildAssignmentEditor, type ValidateAssignment } fro
 import { layoutFor, saveLayout } from "./preferences.ts";
 import { buildAvailabilityEditor, buildConditionEditor } from "./story-condition-editor.ts";
 import { validateField } from "./authoring-input.ts";
-import { isTextField, type DraftStep, type DraftStepRecord, type HistoryDirection } from "./project-history.ts";
+import { isTextField, typingStepIdleMs, type DraftStep, type DraftStepRecord, type HistoryDirection } from "./project-history.ts";
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenEffects, ScreenRevisions, ScreenTargetBinding } from "./screen-contracts.ts";
 export type PlacementRef = "left" | "centre" | "right";
 export type TransitionRef = "none" | "dissolve" | "fade";
@@ -682,7 +682,7 @@ export function renderStoryView(
       // The field's change event follows its typing, which is already a step.
       if (event.type !== "input") return;
       if (openText?.field !== target) { closeText(); openText = { draft, field: target, stepId: startStep(draft, "typing", draft.state) }; }
-      const open = openText; clearTimeout(open.timer); open.timer = setTimeout(() => { if (openText === open) closeText(); }, 2000);
+      const open = openText; clearTimeout(open.timer); open.timer = setTimeout(() => { if (openText === open) closeText(); }, typingStepIdleMs);
       return;
     }
     closeText();

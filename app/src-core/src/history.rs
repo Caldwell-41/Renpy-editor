@@ -3,7 +3,8 @@
 //! one Undo and one Redo reverse its latest entry. Each entry restores exact bytes
 //! only while the current revisions still match its boundary (ADR 0006). A
 //! draft-step entry holds only the place of one unfinished draft edit; its Undo and
-//! Redo write nothing, and the renderer restores the draft.
+//! Redo write nothing. The renderer restores a beat draft, and the Source draft
+//! registry restores unsaved Source text.
 use crate::authoring::AuthoringService;
 use crate::scene::SceneError;
 use crate::transaction::{
@@ -262,8 +263,23 @@ impl HistoryStack {
         Ok(())
     }
 
+    /// Adds a draft-step entry on top and drops Redo. It records no bytes.
+    pub(crate) fn push_draft_step(
+        &mut self,
+        step: DraftStep,
+        label: HistoryLabel,
+    ) -> Result<HistoryState, ErrorCode> {
+        self.push(HistoryEntry {
+            transaction_id: step.step_id.clone(),
+            label,
+            mutations: Vec::new(),
+            step: Some(step),
+        })?;
+        Ok(self.state())
+    }
+
     /// The draft step Undo would reverse, if the next entry is one.
-    fn undo_step(&self) -> Option<&DraftStep> {
+    pub(crate) fn undo_step(&self) -> Option<&DraftStep> {
         self.undo_entry()?.step.as_ref()
     }
 
@@ -510,26 +526,26 @@ impl AuthoringService {
         project: &ProjectId,
         request: DraftStepRequest,
     ) -> Result<HistoryState, SceneError> {
+        // Source drafts belong to core; the renderer cannot add their steps.
         if ![&request.step_id, &request.draft, &request.name]
             .into_iter()
             .all(|value| draft_text(value))
+            || crate::source::is_source_draft(&request.draft)
         {
             return Err(SceneError::InvalidPayload);
         }
         let mut histories = self.project_history.lock().map_err(|_| SceneError::Io)?;
-        let history = histories.entry(project.clone()).or_default();
-        history
-            .push(HistoryEntry {
-                transaction_id: request.step_id.clone(),
-                label: HistoryLabel::new(request.name, request.item),
-                mutations: Vec::new(),
-                step: Some(DraftStep {
+        histories
+            .entry(project.clone())
+            .or_default()
+            .push_draft_step(
+                DraftStep {
                     step_id: request.step_id,
                     draft: request.draft,
-                }),
-            })
-            .map_err(|_| SceneError::InvalidPayload)?;
-        Ok(history.state())
+                },
+                HistoryLabel::new(request.name, request.item),
+            )
+            .map_err(|_| SceneError::InvalidPayload)
     }
 
     pub fn history_state(&self, project: &ProjectId) -> Result<HistoryState, SceneError> {
@@ -561,14 +577,16 @@ impl AuthoringService {
         let state = history.state();
         let entry =
             if redo { state.redo } else { state.undo }.ok_or(SceneError::HistoryBoundary)?;
-        // A draft step writes nothing: only the cursor moves.
+        // A draft step writes nothing: only the cursor moves, and a Source step
+        // changes its file's draft.
         let step = if redo {
             history.redo_step()
         } else {
             history.undo_step()
         }
         .cloned();
-        if step.is_some() {
+        if let Some(draft_step) = &step {
+            self.source_history_step(project, draft_step, redo)?;
             if redo {
                 history.accepted_redo_with_revisions(&[])
             } else {

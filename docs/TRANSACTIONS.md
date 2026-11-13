@@ -237,6 +237,17 @@ removal does the same for the drafts it discards, so its Undo restores the beats
 without them. A Commit that changes no bytes still removes its draft's steps. A new
 project session starts with no draft-step entries.
 
+Unsaved Source text uses the same draft-step entries (#155). Core already holds Source
+drafts, so the Source draft registry keeps each step's text beside the draft: the
+whole text before the file's latest step, and the changed span of each earlier one.
+`source.updateDraft` starts a step on a text change when the renderer ended the last
+one (`newStep`) or when the file's open step is no longer the latest entry. Its
+response then carries the new history. Undo or Redo of a Source step sets the draft
+and the selection in memory and writes nothing. It refuses with `HISTORY_BOUNDARY`
+when the file's accepted revision changed after the step, and with `DIRTY_SOURCE`
+when the restored draft would pass the draft count or size limit. Source Save, Save
+All and Apply Both join the saved files' steps into their entry. Discard removes them.
+
 Story Save builds every beat draft command on one cumulative candidate before it
 writes. Each command finds its beat or anchor by id in that candidate. The whole set
 shares one project, source-map and authoring revision check. A refused command stops

@@ -22,6 +22,8 @@ export interface HistoryStep { readonly entry: HistoryLabel; readonly step?: Dra
 export type HistoryDirection = "undo" | "redo";
 
 export const emptyHistory: HistoryState = { undo: null, redo: null };
+/** A typing step ends after this long without typing, or when its field loses focus. */
+export const typingStepIdleMs = 2000;
 
 export const isMacPlatform = (): boolean => /Mac|iPhone|iPad|iPod/.test(window.navigator.platform);
 /** Cmd on macOS and Ctrl elsewhere, alone with no Alt. */
@@ -38,7 +40,7 @@ export function historyShortcut(event: KeyboardEvent): HistoryDirection | undefi
 }
 
 const textInputs = new Set(["text", "search", "email", "url", "tel", "password", "number"]);
-/** A field whose own text Undo Cmd/Ctrl+Z keeps: text inputs, text areas and editors such as Source. */
+/** A text input, text area or editor. Cmd/Ctrl+Z keeps its text Undo unless its draft joins the project history. */
 export function isTextField(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   if (target instanceof HTMLTextAreaElement || target.isContentEditable) return true;

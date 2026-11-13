@@ -3,6 +3,7 @@ import type { BeatOwner, ConditionalBranch } from "./scene-ui.ts";
 import { sourceEditor, type SourceEditor } from "./source-editor.ts";
 import type { EditorState } from "@codemirror/state";
 import { sourceTextareaSnapshot, textareaText, textareaOffset } from "./source-textarea.js";
+import { typingStepIdleMs, type HistoryState } from "./project-history.ts";
 export type SourceFileState = "clean" | "dirty" | "conflict" | "invalid" | "readOnly" | "unavailable";
 
 export interface SourceFileSummary {
@@ -60,6 +61,8 @@ export interface SourceDocument {
   readonly canApplyBoth: boolean;
   readonly combinedPreview?: string;
   readonly externalText?: string;
+  /** Present when this update started a draft step: the project history after it. */
+  readonly history?: HistoryState;
 }
 
 export interface SourceTarget {
@@ -98,6 +101,10 @@ export interface SourceWorkspaceController {
   readonly prepareTransition: (reason: "navigation" | "leave" | "runtime") => Promise<SourceTransitionHandle | undefined>;
   readonly refreshAccepted: () => Promise<void>;
   readonly hasUnretainedInput: () => boolean;
+  /** Ends the typing step and resolves once the latest input, and its step, reached core. */
+  readonly flushSteps: () => Promise<void>;
+  /** The Source editor, where Cmd/Ctrl+Z runs project Undo. */
+  readonly ownsDraftField: (target: EventTarget | null) => boolean;
   readonly setModalBlocked: (blocked: boolean) => void;
   readonly dispose: () => void;
 }
@@ -105,7 +112,7 @@ export interface SourceWorkspaceController {
 export interface SourceActions {
   readonly layoutKey?: string;
   readonly open: (target: SourceTarget) => Promise<SourceDocument>;
-  readonly update: (request: { readonly path: string; readonly expectedBaseRevision: string; readonly text: string; readonly selectionStart: number; readonly selectionEnd: number }) => Promise<SourceDocument>;
+  readonly update: (request: { readonly path: string; readonly expectedBaseRevision: string; readonly text: string; readonly selectionStart: number; readonly selectionEnd: number; readonly newStep?: true }) => Promise<SourceDocument>;
   readonly save: (request: { readonly path: string; readonly expectedBaseRevision: string; readonly expectedDraftVersion: number }) => Promise<SourceDocument>;
   readonly discard: (path: string) => Promise<SourceDocument>;
   readonly applyBoth: (request: { readonly path: string; readonly expectedBaseRevision: string; readonly expectedDraftVersion: number; readonly expectedExternalRevision: string; readonly expectedCombinedText: string }) => Promise<SourceDocument>;
@@ -127,6 +134,8 @@ interface InputSnapshot {
   readonly text: string;
   readonly selectionStart: number;
   readonly selectionEnd: number;
+  /** The first text change after a step ended: core starts a draft step with it. */
+  readonly newStep?: true;
 }
 
 type RetentionResult =
@@ -207,6 +216,15 @@ export function renderSourceWorkspace(
   const barriers = new Set<number>();
   const priorDisabled = new Map<HTMLButtonElement, boolean>();
   let unregisterController: (() => void) | undefined;
+  // Draft steps (ADR 0025): a typing step ends when the editor loses focus or after
+  // 2 seconds without typing. The next text change then starts a step in core.
+  let stepEnded = true;
+  let stepTimer: number | undefined;
+  const endStep = (): void => {
+    window.clearTimeout(stepTimer);
+    stepTimer = undefined;
+    stepEnded = true;
+  };
 
   const identityMatches = (generation: number, path: string): boolean =>
     !disposed && generation === documentGeneration && current?.path === path;
@@ -330,6 +348,7 @@ export function renderSourceWorkspace(
           text: snapshot.text,
           selectionStart: snapshot.selectionStart,
           selectionEnd: snapshot.selectionEnd,
+          ...(snapshot.newStep ? { newStep: true as const } : {}),
         });
         if (identityMatches(snapshot.documentGeneration, snapshot.path) && snapshot.sequence >= acknowledgedSequence) {
           acknowledgedSequence = snapshot.sequence;
@@ -356,6 +375,8 @@ export function renderSourceWorkspace(
       } catch (cause) {
         const error = cause instanceof Error ? cause : new Error("Source draft could not be retained");
         const result = { ok: false as const, error, snapshot };
+        // Core started no step, so the next change starts it.
+        if (snapshot.newStep) stepEnded = true;
         if (identityMatches(snapshot.documentGeneration, snapshot.path) && latestSnapshot?.sequence === snapshot.sequence) {
           latestRetentionFailure = result;
           actions.status(error.message, "error");
@@ -424,8 +445,17 @@ export function renderSourceWorkspace(
   };
 
   const recordEditorEvent = (): void => {
-    const snapshot = captureSnapshot(true);
+    const previous = latestSnapshot;
+    let snapshot = captureSnapshot(true);
     if (!snapshot) return;
+    if (previous?.documentGeneration === snapshot.documentGeneration && previous.path === snapshot.path && previous.text !== snapshot.text) {
+      if (stepEnded) {
+        stepEnded = false;
+        snapshot = latestSnapshot = { ...snapshot, newStep: true };
+      }
+      window.clearTimeout(stepTimer);
+      stepTimer = window.setTimeout(endStep, typingStepIdleMs);
+    }
     updateStateOnly();
     actions.refreshPersistence();
     void queueRetention(snapshot);
@@ -903,7 +933,7 @@ export function renderSourceWorkspace(
 
     const editorShell = document.createElement("div");
     editorShell.className = "source-editor-shell";
-    const text=sourceEditor(editorShell,{rawText:current.text??"",newline:current.newline,text:textareaText(current.text??""),from:textareaOffset(current.text??"",current.selectionStart),to:textareaOffset(current.text??"",current.selectionEnd),readOnly:barriers.size>0||!current.editable,label:`Source editor for ${current.path}`,change:()=>{if(barriers.size===0)recordEditorEvent();},retained:retainedEditors.get(current.path)});
+    const text=sourceEditor(editorShell,{rawText:current.text??"",newline:current.newline,text:textareaText(current.text??""),from:textareaOffset(current.text??"",current.selectionStart),to:textareaOffset(current.text??"",current.selectionEnd),readOnly:barriers.size>0||!current.editable,label:`Source editor for ${current.path}`,change:()=>{if(barriers.size===0)recordEditorEvent();},blur:endStep,retained:retainedEditors.get(current.path)});
     editorPath=current.path;
     editor = text;
     latestSnapshot = {
@@ -968,10 +998,16 @@ export function renderSourceWorkspace(
       actions.refreshPersistence();
     },
     hasUnretainedInput: hasLocalInput,
+    flushSteps: async () => {
+      endStep();
+      const snapshot = captureSnapshot(false);
+      if (snapshot) await settleSnapshot(snapshot);
+    },
+    ownsDraftField: target => target instanceof HTMLElement && target.classList.contains("source-editor") && host.contains(target),
     setModalBlocked: (blocked) => { modalBlocked = blocked; },
     dispose: () => {
       if (disposed) return;
-      disposed = true;tabObserver?.disconnect();
+      disposed = true;tabObserver?.disconnect();endStep();
       editor?.destroy();retainedEditors.clear();
       documentGeneration += 1;
       unregisterController?.();
