@@ -544,6 +544,11 @@ a beat follow `story-combined-editor` / `replace-v2`
 - Set variable uses the [equation row](#arithmetic-equation-row) and conditions use the
   [rule builder](#condition-rule-builder). A number field keeps what the author typed,
   including a half-entered number such as `-` or `1.`, until it is complete.
+- A condition's editor lists its branches. Each If or Else if test is a retained draft
+  with Commit test and Cancel. "+ Add Else if" and Add Otherwise add a new branch as a
+  draft until Add Else If or Add Otherwise; Delete branch marks an Else if or Otherwise
+  as a draft until its Commit or Story Save. A new condition from Add a beat is a draft
+  like a new beat, with its test and Include Otherwise.
 - Add a beat is a [pick-one dialog](#pick-one-dialogs). Its details list Goes at, In
   and After for the highlighted kind, or "Replaces …" when the kind replaces an
   ending. A new beat's editor repeats those lines.
@@ -627,11 +632,15 @@ like Commit. The [Story Undo](#story-undo) rules apply to both.
 
 ### Saving Story drafts
 
-In Story, the main Save button and Cmd/Ctrl+S save all pending beat drafts in the
-open project, including beats outside the current selection or scene. Check every
-draft before writing any of them. If any draft is incomplete, invalid or conflicted,
-retain all drafts and reveal the failing draft with its error. No draft is saved by that request
-until all pass validation. Commit remains available to save one beat on its own.
+In Story, the main Save button and Cmd/Ctrl+S save all pending drafts in the open
+project, including drafts outside the current selection or scene. Beat drafts and
+condition drafts save together: a branch's test, a new condition, a new Else if or
+Otherwise, and a branch deletion. A branch deletion saves after the other drafts, so
+edits inside the branch land first and its Undo brings them back. Check every draft
+before writing any of them. If any draft is incomplete, invalid or conflicted, retain
+all drafts and reveal the failing draft with its error. No draft is saved by that
+request until all pass validation. Commit remains available to save one draft on its
+own; a branch deletion's Commit saves the drafts inside the branch with it.
 
 Story Save applies only while the Story workspace is open and beat drafts exist. In
 other workspaces, and in Story with no beat drafts, Save keeps its existing behaviour.
@@ -757,8 +766,10 @@ The Story rules above define Loomlight's application of that reference.
   When the Custom Code sits in a condition or Choice inside the option, the option's
   row for that node carries the line.
 - A destination is a scene card (opening background, name and first line) that opens a
-  scene sheet. Create New Scene in the Choice editor adds a scene and an option that
-  goes there.
+  scene sheet. The sheet's "+ New scene…" opens "New scene for option N": a scene name
+  and chapter. Core creates the scene and sends the option there in one edit with one
+  Undo; the option's Jump, Return or Repeat becomes a Jump to it, and an option that
+  continues gains one. The author stays in this scene.
 - An option's condition reads as one line, "Always available" or "Only when ...", and
   opens the rule builder on request. A guarded option is hidden when false by default,
   or shown disabled. The Choice's Picked options setting is Show normally, Mark picked
@@ -799,12 +810,8 @@ media rules.
 
 Production Story has the Combined stage, beat editors, Branch path, Tracks, Reel and
 Writing focus, with the approved status, marks and wording of `story-combined-status` /
-`header-v2`. The approved scene sheet's "+ New scene…" retargets an existing option to
-a new scene in one edit. Core has no such command yet, so the sheet has no New scene
-row and Create New Scene stays in the Choice editor, off while any option has a
-condition. A condition's test edits in a form with Apply condition rather than a
-retained draft, because Story Save does not accept condition commands yet. Until a capability exists, the
-editor says it is not built instead of showing a working-looking control.
+`header-v2`. Until a capability exists, the editor says it is not built instead of
+showing a working-looking control.
 
 ## Source workspace
 
