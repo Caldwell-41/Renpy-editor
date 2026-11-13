@@ -429,9 +429,14 @@ covers moving, unwrapping and deleting branches.
   Delete sit in the editor heading's menu, and Alt+Arrow on a column moves its beat.
   The scene toolbar holds Writing focus, + Add beat and More. More holds View in
   Source, Add screen Beat, Add Condition and the Assist actions.
-- Below 900 px, Story opens with the icon rail and the scene list as a drawer. The
-  workspace scrolls: stage, editor, Branch path, then Tracks, with the scene toolbar
-  pinned at the top. A 16:9 stage measures 480 × 270 at 560 × 640.
+- The scene title ("Arrival ▾") opens and closes the scene list, which keeps every
+  scene and chapter action. Below 1200 px, Story opens with the icon rail and the
+  scene list closed. Like the scene list's other defaults, this is set when Story
+  opens; resizing the window keeps the current state, and the toggles still work.
+  A 16:9 stage measures 599 × 337 at 1100 × 720.
+- Below 900 px the scene list opens over the workspace. The workspace scrolls: stage,
+  editor, Branch path, then Tracks, with the scene toolbar pinned at the top. A 16:9
+  stage measures 480 × 270 at 560 × 640.
 - Reel (#118), the Writing focus lane grid and resizing (#119), and the editor
   refinements, pickers and Add a beat dialog (#117) come later; until then Writing
   focus only hides the stage.

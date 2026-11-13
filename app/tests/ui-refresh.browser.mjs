@@ -99,15 +99,24 @@ try {
  assert.equal(caption.inside,true,'long caption extends outside the bounded preview');assert.equal(caption.scrollable,true);assert.equal(caption.reachedEnd,true,'end of long caption is unreachable');
  await page.getByRole('button',{name:'Source',exact:true}).click();
 
- // Story Combined v1 scene toolbar: Writing focus, + Add beat and More on one row at 1100 px,
- // and at 560 px the icon rail with the stage above the editor.
- const storyAt=async(width,height)=>{await page.setViewportSize({width,height});await page.getByRole('button',{name:'Source',exact:true}).click();await page.getByRole('button',{name:'Story',exact:true}).click();await page.locator('.story-track-column').first().waitFor();
-  return page.evaluate(()=>({nav:document.querySelector('.story-sidebar').getBoundingClientRect().width,stage:document.querySelector('.preview-canvas').getBoundingClientRect().toJSON(),editorTop:document.querySelector('.story-editor').getBoundingClientRect().top,
-   tools:[...document.querySelectorAll('.scene-history > :is(button,details)')].map(e=>({text:e.matches('details')?e.querySelector('summary').textContent:e.textContent,top:Math.round(e.getBoundingClientRect().top)})),overflow:document.documentElement.scrollWidth>innerWidth}));};
+ // Story Combined v1 at 1100 px: Story opens with the icon rail and the scene list closed, the
+ // title opens the list, and Writing focus, + Add beat and More stay on one row. At 560 px the
+ // stage sits above the editor.
+ const storyLayout=()=>page.evaluate(()=>({nav:document.querySelector('.story-sidebar').getBoundingClientRect().width,listOpen:document.querySelector('.project-shell').dataset.treeCollapsed!=='true',title:document.querySelector('.story-scene-toggle')?.ariaExpanded,stage:document.querySelector('.preview-canvas').getBoundingClientRect().toJSON(),editorTop:document.querySelector('.story-editor').getBoundingClientRect().top,
+  tools:[...document.querySelectorAll('.scene-history > :is(button,details)')].map(e=>({text:e.matches('details')?e.querySelector('summary').textContent:e.textContent,top:Math.round(e.getBoundingClientRect().top)})),overflow:document.documentElement.scrollWidth>innerWidth}));
+ const storyAt=async(width,height)=>{await page.setViewportSize({width,height});await page.getByRole('button',{name:'Source',exact:true}).click();await page.getByRole('button',{name:'Story',exact:true}).click();await page.locator('.story-track-column').first().waitFor();return storyLayout();};
  const laptop=await storyAt(1100,720);
- assert.deepEqual(laptop.tools.map(tool=>tool.text),['Writing focus','+ Add beat','More']);assert.equal(new Set(laptop.tools.map(tool=>tool.top)).size,1,`scene toolbar wraps at 1100 px: ${JSON.stringify(laptop.tools)}`);
+ assert.equal(Math.round(laptop.nav),64,'Story opens with the icon rail below 1200 px');assert.equal(laptop.listOpen,false,'Story opens with the scene list closed below 1200 px');assert.equal(laptop.title,'false');
+ assert.ok(Math.abs(laptop.stage.width-599)<=2&&Math.abs(laptop.stage.height-337)<=2,`1100 x 720 stage: ${JSON.stringify(laptop.stage)}`);
+ assert.deepEqual(laptop.tools.map(tool=>tool.text),['Writing focus','+ Add beat','More']);assert.equal(new Set(laptop.tools.map(tool=>tool.top)).size,1);
+ await page.locator('.navigation-toggle').click();await page.locator('.story-scene-toggle').click();
+ const opened=await storyLayout();
+ assert.equal(Math.round(opened.nav),180);assert.equal(opened.listOpen,true,'the scene title opens the scene list');assert.equal(opened.title,'true');
+ assert.equal(new Set(opened.tools.map(tool=>tool.top)).size,1,`scene toolbar wraps at 1100 px with both panels open: ${JSON.stringify(opened.tools)}`);
+ await page.locator('.story-scene-toggle').click();assert.equal((await storyLayout()).listOpen,false,'the scene title closes the scene list');
+ await page.locator('.navigation-toggle').click();
  const compact=await storyAt(560,640);
- assert.equal(Math.round(compact.nav),64,'Story opens with the icon rail below 900 px');assert.ok(Math.abs(compact.stage.width-480)<=2&&Math.abs(compact.stage.height-270)<=2,`compact stage: ${JSON.stringify(compact.stage)}`);
+ assert.equal(Math.round(compact.nav),64);assert.ok(Math.abs(compact.stage.width-480)<=2&&Math.abs(compact.stage.height-270)<=2,`compact stage: ${JSON.stringify(compact.stage)}`);
  assert.ok(compact.editorTop>=compact.stage.bottom,'the editor sits below the stage');assert.equal(new Set(compact.tools.map(tool=>tool.top)).size,1);assert.equal(compact.overflow,false);
  await page.setViewportSize({width:1440,height:900});await page.getByRole('button',{name:'Source',exact:true}).click();
 

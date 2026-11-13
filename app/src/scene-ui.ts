@@ -370,6 +370,12 @@ export interface RecoveryItem {
 }
 export interface RecoveryReport { readonly items: readonly RecoveryItem[] }
 
+/** The project's scene list beside Story. The scene title opens and closes it. */
+export interface SceneList {
+  readonly panelId: string;
+  readonly open: () => boolean;
+  readonly toggle: () => void;
+}
 export interface SceneActions {
   readonly screenCatalog?: () => Promise<ScreenCatalog>;
   readonly resolveScreenTarget?: (binding: ScreenTargetBinding) => Promise<ResolvedScreenTarget>;
@@ -398,6 +404,7 @@ export interface SceneActions {
   /** Reads the current workspace, so Story can refresh after a stale refusal. */
   readonly load?: () => Promise<SceneWorkspace>;
   readonly status: (message: string, kind?: "normal" | "error", links?: readonly StatusLink[], detail?: StatusDetail) => void;
+  readonly sceneList?: SceneList;
   readonly present: (assetId: string, purpose: MediaPresentation["purpose"]) => Promise<MediaPresentation>;
   readonly resolution: { readonly width: number; readonly height: number };
   readonly viewSource?: (path: string, byteStart?: number, byteEnd?: number, expectedRevision?: string) => void;
@@ -1547,7 +1554,13 @@ export function renderStoryView(
 
   const drawStory = (scene: SceneDocument, scroll = 0): void => {
     const header = document.createElement("header"); header.className = "scene-header";
-    const title = document.createElement("h1"); title.textContent = scene.displayName; title.title = `${scene.technicalLabel} · ${scene.sourcePath}`;
+    const title = document.createElement("h1"); title.title = `${scene.technicalLabel} · ${scene.sourcePath}`;
+    // Story Combined v1: the scene title ("Arrival ▾") opens and closes the scene list.
+    const list = actions.sceneList;
+    if (list) {
+      const toggle = button(scene.displayName, "story-scene-toggle"); toggle.setAttribute("aria-controls", list.panelId); toggle.ariaExpanded = String(list.open());
+      toggle.addEventListener("click", () => list.toggle()); title.append(toggle);
+    } else title.textContent = scene.displayName;
     const history = document.createElement("div"); history.className = "scene-history";
     const mapped = scene.beats.find((beat) => beat.id === selectedBeatId) ?? scene.beats[0];
     const focus = button(writingFocus ? "Exit Writing focus" : "Writing focus");focus.ariaPressed=String(writingFocus);focus.addEventListener("click",()=>{writingFocus=!writingFocus;host.dataset.writingFocus=String(writingFocus);host.closest<HTMLElement>(".project-shell")?.setAttribute("data-writing-focus",String(writingFocus));focus.textContent=writingFocus?"Exit Writing focus":"Writing focus";focus.ariaPressed=String(writingFocus);});

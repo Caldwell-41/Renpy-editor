@@ -31,6 +31,7 @@ import {
   type SceneCommand,
   type SceneWorkspace,
   type MediaPresentation,
+  type SceneList,
 } from "./scene-ui.ts";
 import {
   renderSourceWorkspace,
@@ -573,8 +574,9 @@ function revealHistoryItem(project: OpenProject, item: HistoryItem): void {
 function showProject(project: OpenProject, surface: ProjectSurface = "story", target?: ProjectTarget): void {
   const generation = beginView(project);
   const layout = document.createElement("section"); layout.className = "project-shell";
-  // Below 900 px Story keeps the icon rail, as Story Combined v1 does, so the stage keeps its width.
-  const layoutKey=`${project.projectId}:${surface}`; const railByDefault=():boolean=>surface==="story"&&window.innerWidth<900; layout.dataset.navigationCollapsed=String(layoutFor(layoutKey).navigationCollapsed||railByDefault());
+  // Below 1200 px Story opens with the icon rail and the scene list closed, so the stage keeps
+  // its room. Like the scene list's default, this is set on open; resizing keeps the choice.
+  const layoutKey=`${project.projectId}:${surface}`; const storyNarrow=():boolean=>surface==="story"&&window.innerWidth<1200; layout.dataset.navigationCollapsed=String(layoutFor(layoutKey).navigationCollapsed||storyNarrow());
   const sidebar = document.createElement("aside"); sidebar.className = "story-sidebar";sidebar.id="project-navigation";
   const projectName = document.createElement("h2"); projectName.textContent = project.title;
   const sectionLabel = document.createElement("p"); sectionLabel.className = "eyebrow"; sectionLabel.textContent = "Project";
@@ -594,19 +596,22 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   const setNavigationCollapsed=(collapsed:boolean):void=>{layout.dataset.navigationCollapsed=String(collapsed);collapse.ariaExpanded=String(!collapsed);collapse.replaceChildren(icon(collapsed?"panelOpen":"panel"));collapse.title=collapsed?"Expand navigation":"Collapse navigation";};
   setNavigationCollapsed(layout.dataset.navigationCollapsed==="true");
   collapse.addEventListener("click",()=>{const collapsed=layout.dataset.navigationCollapsed!=="true";setNavigationCollapsed(collapsed);saveLayout(layoutKey,{navigationCollapsed:collapsed});});sidebar.prepend(collapse);
-  layout.addEventListener("reset-panes",()=>setNavigationCollapsed(railByDefault()));
+  layout.addEventListener("reset-panes",()=>setNavigationCollapsed(storyNarrow()));
   const tree = document.createElement("div"); tree.className = "story-tree";
   const treePanel=document.createElement("aside");treePanel.className="project-tree-panel";treePanel.id="project-tree-panel";treePanel.ariaLabel=surface==="story"?"Scenes":"Project files";treePanel.append(tree);
-  const hasTree=surface==="story"||surface==="source";
+  const hasTree=surface==="story"||surface==="source";let sceneList:SceneList|undefined;
   if(hasTree){
     layout.classList.add("with-tree");
     const toggle=button("","icon-button project-tree-toggle");toggle.prepend(icon("panel"));toggle.title="Toggle scene or file list";toggle.ariaLabel="Toggle scene or file list";toggle.setAttribute("aria-controls",treePanel.id);
     const restore=button("","icon-button tree-restore");restore.prepend(icon("panelOpen"));restore.ariaLabel="Show scene or file list";restore.title=restore.ariaLabel;restore.setAttribute("aria-controls",treePanel.id);
-    const setTreeCollapsed=(collapsed:boolean,transferFocus=false):void=>{layout.dataset.treeCollapsed=String(collapsed);toggle.ariaExpanded=restore.ariaExpanded=String(!collapsed);if(transferFocus)(collapsed?restore:toggle).focus();};
-    setTreeCollapsed(layoutFor(layoutKey).treeCollapsed||window.innerWidth<900);
+    // Every control for the list, including Story's scene title, shows whether it is open.
+    const setTreeCollapsed=(collapsed:boolean,transferFocus=false):void=>{layout.dataset.treeCollapsed=String(collapsed);toggle.ariaExpanded=restore.ariaExpanded=String(!collapsed);layout.querySelectorAll<HTMLElement>(`[aria-controls="${treePanel.id}"]`).forEach(control=>control.ariaExpanded=String(!collapsed));if(transferFocus)(collapsed?restore:toggle).focus();};
+    const collapsedOnOpen=():boolean=>window.innerWidth<900||storyNarrow();
+    setTreeCollapsed(layoutFor(layoutKey).treeCollapsed||collapsedOnOpen());
+    sceneList={panelId:treePanel.id,open:()=>layout.dataset.treeCollapsed!=="true",toggle:()=>{const collapsed=layout.dataset.treeCollapsed!=="true";setTreeCollapsed(collapsed);saveLayout(layoutKey,{treeCollapsed:collapsed});}};
     toggle.addEventListener("click",()=>{setTreeCollapsed(true,true);saveLayout(layoutKey,{treeCollapsed:true});});treePanel.prepend(toggle);
     restore.onclick=()=>{setTreeCollapsed(false,true);saveLayout(layoutKey,{treeCollapsed:false});};layout.append(restore);
-    layout.addEventListener("reset-panes",()=>{const active=document.activeElement;const collapsed=window.innerWidth<900;setTreeCollapsed(collapsed,collapsed?treePanel.contains(active):active===restore);});
+    layout.addEventListener("reset-panes",()=>{const active=document.activeElement;const collapsed=collapsedOnOpen();setTreeCollapsed(collapsed,collapsed?treePanel.contains(active):active===restore);});
   }
   if(hasTree){let width=layoutFor(layoutKey).treeWidth??230;layout.style.setProperty("--tree-width",`${width}px`);const resize=document.createElement("div");resize.className="tree-divider";resize.role="separator";resize.tabIndex=0;resize.ariaLabel="Resize scene or file list";resize.setAttribute("aria-orientation","vertical");treePanel.append(resize);const setWidth=(next:number,save=false):void=>{width=Math.max(160,Math.min(400,Math.round(next)));layout.style.setProperty("--tree-width",`${width}px`);resize.setAttribute("aria-valuenow",String(width));if(save)saveLayout(layoutKey,{treeWidth:width});};resize.addEventListener("keydown",e=>{if(e.key==="ArrowLeft"||e.key==="ArrowRight"){e.preventDefault();setWidth(width+(e.key==="ArrowLeft"?-10:10),true);}});let start:number|undefined;resize.addEventListener("pointerdown",e=>{start=e.clientX-width;resize.setPointerCapture(e.pointerId);});resize.addEventListener("pointermove",e=>{if(start!==undefined)setWidth(e.clientX-start);});resize.addEventListener("pointerup",()=>{start=undefined;setWidth(width,true);});resize.addEventListener("pointercancel",()=>{start=undefined;});}
   const close = button("Close Project", "text-button close-project"); close.addEventListener("click", async () => { if (!await allowSceneNavigation() || hasBlockingModal()) return; await requestProjectClose(project); }); sidebar.append(close);
@@ -631,7 +636,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   runtimeWorkspace.panel.hidden=true;
   const runtimeToggle=button("Runtime & diagnostics","text-button runtime-toggle");runtimeToggle.addEventListener("click",()=>{if(runtimeWorkspace){runtimeWorkspace.panel.hidden=!runtimeWorkspace.panel.hidden;runtimeToggle.ariaExpanded=String(!runtimeWorkspace.panel.hidden);}});document.querySelector(".app-footer")?.append(runtimeToggle);
   setStatus("Checking saved state…");
-  if (surface === "story") void renderStorySurface(workspace, tree, project, generation, target && "sceneId" in target ? target : undefined);
+  if (surface === "story") void renderStorySurface(workspace, tree, project, generation, target && "sceneId" in target ? target : undefined, sceneList);
   else if (surface === "source") void renderSourceSurface(workspace, tree, project, generation, target && "path" in target && !("screen" in target) ? target : undefined);
   else if (surface === "screens") {
     screensWorkspace ??= new ScreensWorkspace({ resolution: project.resolution, projectId: project.projectId,
@@ -737,7 +742,7 @@ function rememberStoryScene(project: OpenProject, sceneId: string): void {
   saveLayout(storyLayoutKey(project), { sceneSelection: sceneId });
 }
 
-async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, project: OpenProject, generation: number, target?: SceneTarget): Promise<void> {
+async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, project: OpenProject, generation: number, target?: SceneTarget, sceneList?: SceneList): Promise<void> {
   const token = beginCompletion(project, operationScopes.sceneLoad);
   try {
     const persistence = await projectValue<PersistenceStatus>(project, "project.status");
@@ -827,6 +832,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
         },action);
       },
       status: setStatus,
+      sceneList,
       resolution: project.resolution,
       present: (assetId, purpose) => projectValue(project, "media.present", { assetId, purpose }),
       viewSource: (path, byteStart, byteEnd, expectedRevision) => { void requestProjectNavigation(project, "source", { path, byteStart, byteEnd, expectedRevision }); },
