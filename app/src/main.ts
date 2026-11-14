@@ -304,16 +304,18 @@ function setStatus(message: string, kind: "normal" | "error" = "normal", links: 
 }
 async function value<T>(operation: Parameters<typeof desktopRequestCore>[0], payload: Readonly<Record<string, unknown>> = {}): Promise<T> {
   const capturedView = viewGeneration;
-  const retryableRead = ["sdk.discover", "project.listRecent", "project.status", "history.state", "scene.recovery", "scene.validateAssignment", "source.list", "source.open", "screens.list", "screens.inspect", "screens.canvasPlan", "screens.canvasStatus", "scene.list", "authoring.list", "references.list", "prompts.list", "context.options", "flow.list", "runtime.resolveDiagnostic", "media.present", "asset.previewImport"].includes(operation);
-  for (let attempt = 0; ; attempt += 1) {
-    const requester = coreRequester;
-    const response = await requestLane.run(operation, () => requester<T>(operation, payload));
-    if (response.ok) return response.value;
-    // The host has not checked out the service for this refusal. Retry only reads;
-    // writes, trust and process starts are never replayed after an ambiguous result.
-    if (!retryableRead || response.error.code !== "RUNTIME_BUSY" || attempt >= 40 || viewGeneration !== capturedView) throw Object.assign(new Error(response.error.message), response.error);
-    await new Promise(resolve => setTimeout(resolve,25));
-  }
+  // RUNTIME_BUSY means the host refused before the handler ran, so sending the same
+  // request again, write or read, cannot repeat an effect. The retry keeps its lane turn,
+  // and a write still carries its expected revisions, so a stale retry is refused.
+  const response = await requestLane.run(operation, async () => {
+    for (let attempt = 0; ; attempt += 1) {
+      const response = await coreRequester<T>(operation, payload);
+      if (response.ok || response.error.code !== "RUNTIME_BUSY" || attempt >= 40 || viewGeneration !== capturedView) return response;
+      await new Promise(resolve => setTimeout(resolve, 25));
+    }
+  });
+  if (response.ok) return response.value;
+  throw Object.assign(new Error(response.error.message), response.error);
 }
 async function projectValue<T>(project: OpenProject, operation: Parameters<typeof desktopRequestCore>[0], payload: Readonly<Record<string, unknown>> = {}): Promise<T> {
   if (currentProject?.sessionId !== project.sessionId) throw new Error("This project view is no longer active.");

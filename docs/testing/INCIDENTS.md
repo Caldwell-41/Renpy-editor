@@ -1419,3 +1419,32 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   (`source.updateDraft`, the owner-rejection `scene.apply`) can still be refused; that
   is a separate, unfixed hypothesis for native runs.
 - **Evidence:** issue #120, PR #185.
+
+## H96. Commit, Story Save and Undo fail when the host is busy
+
+- **Class/search:** product, shown in a Chromium bridge against real core; the native
+  trigger is likely but not shown. `RUNTIME_BUSY`, "Another request is in progress.",
+  "Input retained. If this source structure cannot be moved safely, edit it in Source.",
+  "Nothing saved. Another request is in progress. Drafts retained.", `value()`,
+  `checkout_failure`, `INTERNAL_ERROR`. Same host refusal as H94.
+- **Cause:** `ApplicationHost` refuses a request that overlaps another one with
+  `RUNTIME_BUSY` before the handler runs. Formula checks, `scene.recovery`, project
+  reads, `ai.*` calls and the native AI credential check run outside the request lane,
+  so they can hold the service while Commit, Story Save or Undo arrives. `value()`
+  retried only a list of reads, so each write failed and did nothing. Commit also added
+  the Source advice to the busy message. Separately, the host mapped a handler panic and
+  a lock poisoned after the handler to `RUNTIME_BUSY`, although the request may have
+  written.
+- **Correction:** `dispatch::checkout_failure` returns `RUNTIME_BUSY` only for a refusal
+  before checkout and `INTERNAL_ERROR` for any later failure, for dispatch and native
+  dialog completion. `value()` retries every request refused with `RUNTIME_BUSY` inside
+  its lane turn, with the same payload and bound as the reads. A busy Commit says
+  "Another request is in progress. Input retained."
+- **Regression:** the Story controller cases "Commit, Story Save and Undo land once when
+  the host refuses each write as busy" and "A Commit the host keeps refusing as busy
+  keeps its input and shows a plain busy message"; `dispatch::tests` for the overlap and
+  the panic.
+- **Verification:** before the fix, the first case failed with the Commit message above.
+  After it, all 20 controller cases passed. With the old Commit message restored, the
+  second case failed.
+- **Evidence:** issue #120, PR #185.

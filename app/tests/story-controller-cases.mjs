@@ -19,6 +19,8 @@ const names=[
  'Branch beat drafts stay with their branch through ordinary external edits',
  'Missing and mismatched condition Variables show their reason in Tracks, Branch path and the builder',
  'Undo of a nested beat keeps Redo when the host refuses a history read as busy',
+ 'Commit, Story Save and Undo land once when the host refuses each write as busy',
+ 'A Commit the host keeps refusing as busy keeps its input and shows a plain busy message',
 ];
 const scene=c=>c.workspace().scenes.find(s=>s.id===c.workspace().entrySceneId);
 // The number Tracks shows for a beat. History names an existing beat by it (header-v2).
@@ -86,6 +88,9 @@ const applyOperation=async(c,scope,label,type)=>{
  await c.wait(()=>c.requests().slice(at).some(r=>r.request.operation==='scene.apply'&&r.request.payload.command.type===type));
  await c.settle();c.assert(c.lastMutation()?.response.ok,`Actual ${type} transaction must pass`);
 };
+// The busy cases start in Story on the entry scene; the status is the header save status.
+const busyStatus=c=>c.document.querySelector('#app-status').textContent;
+const busyScene=c=>{c.assert(c.document.querySelector('.scene-workspace .story-track-column')&&shownScene(c)===scene(c).id,'Story shows the entry scene');return scene(c);};
 const replaceOnce=(c,text,old,next)=>{c.assert.equal(text.split(old).length,2,`Expected unique byte oracle: ${old}`);return text.replace(old,next);};
 const bodyRef=header=>({type:'branch',groupId:header.conditionalBranch.groupId,branchId:header.id});
 const addNarration=async(c,header,value)=>{
@@ -960,6 +965,49 @@ export const storyCases={
   c.assert.equal(card(c,child.id).querySelector('.expanded-beat').dataset.unsubmitted,undefined,'Showing the undone beat starts no draft');
   await c.history('redo');await c.settle();
   c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(committed));c.assert.equal(c.document.querySelector('.scene-workspace [data-unsubmitted="true"]'),null);
+ },
+ // A request outside the request lane, such as a formula check, can hold the native
+ // host's service, so the host refuses a write as busy before dispatch. The app sends
+ // it again: each write lands once, with its expected revisions and exact bytes.
+ [names[17]]:async c=>{
+  const s=busyScene(c),path=s.sourcePath,original=c.sourceText(await c.snapshot(),path);
+  const unique=b=>!b.protected&&b.payload.type==='narration'&&original.split(`"${b.payload.text}"`).length===2;
+  const child=s.beats.find(b=>b.owner&&unique(b)),top=s.beats.find(b=>!b.owner&&unique(b));c.assert(child&&top,'A nested and a top-level narration');
+  const retried=(operation,from)=>{const sent=c.requests().slice(from).filter(r=>r.request.operation===operation);
+   c.assert(!/Another request|Source/.test(busyStatus(c)),`${operation} shows "${busyStatus(c)}"`);
+   c.assert.deepEqual(sent.map(r=>r.errorCode??'ok'),['RUNTIME_BUSY','ok'],`${operation} is sent again after a busy refusal`);
+   c.assert.deepEqual(sent[1].request.payload,sent[0].request.payload,'The retry carries the same expected revisions');};
+  const answered=(operation,from)=>()=>c.requests().slice(from).some(r=>r.request.operation===operation&&r.responseOk)||/Another request/.test(busyStatus(c));
+  let from=c.requests().length;
+  const editor=await pick(c,child.id),form=editor.querySelector('.expanded-beat');
+  c.enter(editor.querySelector('textarea'),'Busy commit');c.busy('scene.apply',1);await c.click('Commit Beat',editor);
+  await c.wait(answered('scene.apply',from));await c.settle();retried('scene.apply',from);c.assert(!form.isConnected,'Commit closes the editor');
+  const committed=replaceOnce(c,original,`"${child.payload.text}"`,'"Busy commit"');
+  c.assert.equal(c.sourceText(await c.snapshot(),path),committed);
+  from=c.requests().length;
+  await select(c,top.id);c.enter(card(c,top.id).querySelector('textarea'),'Busy save');await c.settle();
+  c.busy('scene.saveDrafts',1);await c.click('Save',c.document.querySelector('.app-header'));
+  await c.wait(answered('scene.saveDrafts',from));await c.settle();retried('scene.saveDrafts',from);
+  c.assert.equal(c.sourceText(await c.snapshot(),path),replaceOnce(c,committed,`"${top.payload.text}"`,'"Busy save"'));
+  c.assert.equal(busyStatus(c),'Saved');c.assert.equal(c.document.querySelector('.scene-workspace [data-beat-draft="true"], .scene-workspace [data-unsubmitted="true"]'),null,'Story Save keeps no draft behind');
+  from=c.requests().length;c.busy('history.undo',1);await c.click('Undo',c.document.querySelector('.app-header'));
+  await c.wait(answered('history.undo',from));await c.settle();retried('history.undo',from);
+  c.assert.equal(c.sourceText(await c.snapshot(),path),committed);
+ },
+ // When the host stays busy past the app's bounded wait, Commit says only that, and the
+ // input stays in the editor for the next Commit.
+ [names[18]]:async c=>{
+  const s=busyScene(c),path=s.sourcePath,before=await c.snapshot(),original=c.sourceText(before,path);
+  const child=s.beats.find(b=>b.owner&&!b.protected&&b.payload.type==='narration'&&original.split(`"${b.payload.text}"`).length===2);c.assert(child,'A nested narration');
+  const editor=await pick(c,child.id);c.enter(editor.querySelector('textarea'),'Busy past the wait');
+  // The first send and every retry are refused.
+  c.busy('scene.apply',41);await c.click('Commit Beat',editor);
+  await c.wait(()=>busyStatus(c).startsWith('Another request'));await c.settle();
+  c.assert.equal(busyStatus(c),'Another request is in progress. Input retained.');
+  c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(before),'A refused Commit writes nothing');
+  c.assert.equal(card(c,child.id).querySelector('textarea').value,'Busy past the wait');
+  await c.click('Commit Beat',card(c,child.id));await c.wait(()=>c.lastMutation()?.response.ok);await c.settle();
+  c.assert.equal(c.sourceText(await c.snapshot(),path),replaceOnce(c,original,`"${child.payload.text}"`,'"Busy past the wait"'));
  },
  [RELEASE_JOURNEY]:async c=>{
   const view=async(c,name)=>{await c.click(name,c.document.querySelector('.scene-workspace .story-view-switch'));

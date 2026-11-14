@@ -803,12 +803,20 @@ a race where diagnostic polling could refuse a concurrent Source read. The held-
 regression now includes diagnostics, malformed payload/session refusal and responsive
 Stop. Diagnostic resolution alone uses the Source/transaction authority.
 
-The renderer retries only specific read requests refused with `RUNTIME_BUSY` before
-service checkout, for at most 40 retries at 25 ms. Payload/session identity never
-changes. Writes, trust grants and process starts are never replayed. This covers
-Source opening/status observations overlapping normal background read consumers.
-It also covers the header's `history.state` read, so a busy refusal after Undo or Redo
-cannot dim both buttons while core still holds the entries (H94).
+`RUNTIME_BUSY` means the handler never ran. `ApplicationHost` returns it when another
+request holds the service, and the runtime gate returns it before writing. A handler
+that panics, or a state lock poisoned after the handler, returns `INTERNAL_ERROR`,
+because the request may already have written. `dispatch::checkout_failure` owns this
+mapping for dispatch and for native dialog completion.
+
+`value()` sends any request again, read or write, while the host refuses it with
+`RUNTIME_BUSY`, up to 40 times at 25 ms intervals, inside the request's lane turn. The payload
+and session never change, so a retried write still carries its expected revisions and a
+stale retry gets the ordinary conflict. No other code is retried. When the wait runs out,
+the surface shows the busy message. Commit shows "Another request is in progress. Input
+retained." without the Source advice. This retry also keeps the header's `history.state`
+read from dimming Undo and Redo while core still holds the entries (H94), and it lets
+Commit, Story Save and Undo overlap out-of-lane requests such as formula checks (H96).
 
 Source retention/observation, project status/flush, device preference reads/writes and
 scene/authoring/flow observations share one renderer request lane. Selection persistence
@@ -818,7 +826,9 @@ navigation uses the same service, and background observations cannot take it dur
 Save. Short runtime submissions and SDK discovery join the lane; runtime control/status
 bypass it so Stop remains responsive. Picker and unrelated surface lifetimes retain
 existing coordination. A failed
-read releases the lane. Only explicit pre-dispatch busy reads retry; no write is replayed.
+read releases the lane. Formula checks (`scene.validateAssignment`) and `scene.recovery`
+stay outside the lane. A formula check already waits for Story's writes (B10, B23), and
+`scene.recovery` runs only while recovery disables writes.
 
 Native main-window close and application quit route into the same Runtime Stop/Cancel
 and existing Source draft leave flow as Close Project. The narrow desktop-only

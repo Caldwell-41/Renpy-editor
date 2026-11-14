@@ -29,6 +29,8 @@ export const STORY_CASES=[
  'Branch beat drafts stay with their branch through ordinary external edits',
  'Missing and mismatched condition Variables show their reason in Tracks, Branch path and the builder',
  'Undo of a nested beat keeps Redo when the host refuses a history read as busy',
+ 'Commit, Story Save and Undo land once when the host refuses each write as busy',
+ 'A Commit the host keeps refusing as busy keeps its input and shows a plain busy message',
 ];
 const NARROW=STORY_CASES.filter((_,i)=>[0,1,2,7,8].includes(i));
 const REOPEN_CASE='Undo Redo preserves exact bytes and process reopen retains maps with session history reset';
@@ -56,7 +58,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
  let domSequence=0,lastEvent,caseActive=false,caseEventStart=0;
  const panelEvents=new Map(),sourceDocuments=new Map();let sourceInputEvent,sourceNavigationEvent;
  let stopFailure;let inFlight=0;let responseBarrier;
- // Reads the native host refuses before dispatch, as it does while another request holds the service.
+ // Requests the native host refuses before dispatch, as it does while another request holds the service.
  const refusals=new Map();
  const transcript=[];
  const w=new Window({url:'http://tauri.localhost'});
@@ -198,7 +200,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   try{actionPromise=action();await wait(()=>barrier.observed);await observe();}
   finally{release();responseBarrier=undefined;await actionPromise;}
  };
- const busy=(operation,times)=>{assert(caseActive&&reads.has(operation)&&times>0,'Only typed reads may be refused as busy');refusals.set(operation,times);};
+ const busy=(operation,times)=>{assert(caseActive&&(reads.has(operation)||['scene.apply','scene.saveDrafts','history.undo'].includes(operation))&&times>0,'Only typed reads and Story writes may be refused as busy');refusals.set(operation,times);};
  const raw=async request=>{
   assert(['snapshot','externalAppend','externalRemove','externalReplace','interruptedSave'].includes(request?.driver),'Only owned fixture controls allowed');return child.request(request);
  };

@@ -793,12 +793,8 @@ fn core_request(
                             register_import_batch(service, &paths),
                         )
                     })
-                    .unwrap_or_else(|_| {
-                        CoreResponse::failure(
-                            request_id,
-                            "RUNTIME_BUSY",
-                            "Another request is in progress.",
-                        )
+                    .unwrap_or_else(|error| {
+                        loomlight_core::dispatch::checkout_failure(request_id, error)
                     }));
             }
             let path = match operation.as_str() {
@@ -851,13 +847,7 @@ fn core_request(
                     Err(error) => loomlight_core::lifecycle_failure(request_id.clone(), error),
                 }
             })
-            .unwrap_or_else(|_| {
-                CoreResponse::failure(
-                    request_id,
-                    "RUNTIME_BUSY",
-                    "Another request is in progress.",
-                )
-            })
+            .unwrap_or_else(|error| loomlight_core::dispatch::checkout_failure(request_id, error))
         } else {
             if matches!(operation.as_str(), "sdk.install" | "project.create") {
                 loomlight_core::progress::scoped(

@@ -361,7 +361,7 @@ impl ApplicationHost {
             return CoreResponse::success(id, json!({"pending": true, "requestToken": token}));
         }
         self.with_service(|service| handle_application_request(request, smoke, service))
-            .unwrap_or_else(|_| busy(id))
+            .unwrap_or_else(|error| checkout_failure(id, error))
     }
     #[cfg(test)]
     pub(crate) fn request_spawns(&self) -> usize {
@@ -417,10 +417,62 @@ fn stale(id: String) -> CoreResponse {
 fn busy(id: String) -> CoreResponse {
     CoreResponse::failure(id, "RUNTIME_BUSY", "Another request is in progress.")
 }
+/// `RUNTIME_BUSY` means the handler never ran, so the app may send the request again.
+/// Every other checkout failure is `INTERNAL_ERROR`. A panic or a lock poisoned after the
+/// handler may follow a write, and a retry cannot outlast shutdown or a poisoned lock.
+pub fn checkout_failure(id: String, error: &'static str) -> CoreResponse {
+    match error {
+        "Another request is in progress." => busy(id),
+        _ => CoreResponse::failure(id, "INTERNAL_ERROR", error),
+    }
+}
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    const DARK: &str = r#"{"schemaVersion":1,"theme":"dark","density":"default","sourceFontSize":14,"rememberLayout":true,"layouts":{}}"#;
+    fn theme(host: &ApplicationHost) -> Value {
+        let read = json!({"protocolVersion":1,"requestId":"read","operation":"preferences.read","payload":{}});
+        serde_json::to_value(host.dispatch(read, false)).unwrap()["value"]["theme"].clone()
+    }
+    #[test]
+    fn an_overlapping_request_is_refused_busy_before_it_runs() {
+        let dir = tempfile::tempdir().unwrap();
+        let host = ApplicationHost::new(LifecycleService::new(dir.path().to_owned()).unwrap());
+        let (entered, ready) = std::sync::mpsc::channel();
+        let (release, wait) = std::sync::mpsc::channel::<()>();
+        let owner = host.clone();
+        let held = std::thread::spawn(move || {
+            owner.with_service(|_| {
+                entered.send(()).unwrap();
+                wait.recv().unwrap();
+            })
+        });
+        ready.recv().unwrap();
+        let write = json!({"protocolVersion":1,"requestId":"write","operation":"preferences.write",
+            "payload":serde_json::from_str::<Value>(DARK).unwrap()});
+        let refused = serde_json::to_value(host.dispatch(write, false)).unwrap();
+        release.send(()).unwrap();
+        held.join().unwrap().unwrap();
+        assert_eq!(refused["error"]["code"], "RUNTIME_BUSY");
+        assert_eq!(theme(&host), "system");
+    }
+    #[test]
+    fn a_handler_that_panics_after_writing_is_not_reported_busy() {
+        let dir = tempfile::tempdir().unwrap();
+        let host = ApplicationHost::new(LifecycleService::new(dir.path().to_owned()).unwrap());
+        let error = host
+            .with_service(|service| {
+                service
+                    .write_preferences(serde_json::from_str(DARK).unwrap())
+                    .unwrap();
+                panic!("synthetic handler failure");
+            })
+            .unwrap_err();
+        let response = serde_json::to_value(checkout_failure("write".into(), error)).unwrap();
+        assert_eq!(theme(&host), "dark");
+        assert_eq!(response["error"]["code"], "INTERNAL_ERROR");
+    }
     #[test]
     fn connection_publication_waits_for_checkout_and_expired_deadline_never_runs_task() {
         let dir = tempfile::tempdir().unwrap();
