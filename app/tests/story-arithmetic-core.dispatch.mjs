@@ -50,17 +50,22 @@ try{
  assert.equal((await child.next()).ready,true);const recent=(await call('project.listRecent'))[0];const opened=await call('project.openRecent',{recentId:recent.id});
  for(const [technicalName,variableType,defaultValue] of [['trust','int','99'],['bonus','int','7'],['money','decimal',99.5],['arith_flag','bool',false],['arith_title','string','literal']])await call('variable.create',{technicalName,variableType,defaultValue});
  const initial=await call('scene.list'),entry=initial.scenes.find(s=>s.id===initial.entrySceneId);const path=entry.sourcePath;
- const fixture=(await readFile(new URL('../../tests/fixtures/arithmetic-96/story.rpy',import.meta.url),'utf8')).replace('ENTRY_LABEL',entry.technicalLabel).replace('    $ money = 9.5','    $ money = -0.0\n    $ money = 1.0\n    $ money = 9.5');
+ const fixture=(await readFile(new URL('../../tests/fixtures/arithmetic-96/story.rpy',import.meta.url),'utf8')).replace('ENTRY_LABEL',entry.technicalLabel).replace('    $ money = 9.5','    $ money = -0.0\n    $ money = 1.0\n    $ money = 4.50\n    $ money = 9.5');
  await saveSource(path,fixture);await call('project.close');session=undefined;
  document.body.innerHTML='<div id="app"></div>';const {startApplication}=await import('../dist-tests/src/main.js');startApplication(requester);
  await wait(()=>document.querySelector('.recent-open')&&!document.querySelector('.recent-open').disabled);document.querySelector('.recent-open').click();await wait(()=>document.querySelector('.story-track-column'));await settle();
  assert.equal(await source(path),fixture,'opening imported arithmetic preserves exact source');
  const scene=()=>workspace.scenes.find(s=>s.id===entry.id),numeric=()=>scene().beats.filter(b=>b.payload.type==='setVariable');
- const signedZero=numeric().find(b=>b.payload.value==='-0.0');assert(signedZero);await selectBeat(signedZero.id);assert.equal(formula().value,'-0.0');assert.equal((await commit()).ok,true);assert.equal(await source(path),fixture);assert.equal((await call('history.state')).undo,null);
- const literal=numeric().find(b=>b.payload.value===1);assert(literal);
- await selectBeat(literal.id);assert.equal(formula().value,'1');assert.equal((await call('history.state')).undo,null);
+ const signedZero=numeric().find(b=>b.payload.value?.operand==='-0.0');assert(signedZero);await selectBeat(signedZero.id);assert.equal(formula().value,'-0.0');assert.equal((await commit()).ok,true);assert.equal(await source(path),fixture);assert.equal((await call('history.state')).undo,null);
+ const literal=numeric().find(b=>b.payload.value?.operand==='1.0');assert(literal);
+ await selectBeat(literal.id);assert.equal(formula().value,'1.0');assert.equal((await call('history.state')).undo,null);
  assert.equal((await commit()).ok,true);assert.equal(await source(path),fixture,'unchanged decimal literal preserves bytes');assert.equal((await call('history.state')).undo,null,'unchanged decimal literal adds no history');
  stage('unchanged decimal literal commits through actual Story controls without source or history changes');
+ // B22: an imported decimal shows as written, with its trailing zero, in Tracks, the Formula and the source line.
+ const imported=numeric().find(b=>b.payload.value?.operand==='4.50');assert(imported);assert.match(column(imported.id).textContent,/money = 4\.50/);
+ await selectBeat(imported.id);assert.equal(formula().value,'4.50');await settle();assert.equal(selected().querySelector('.story-assignment-source').textContent,'$ money = 4.50');
+ assert.equal((await commit()).ok,true);assert.equal(await source(path),fixture,'an unchanged written decimal keeps its bytes');
+ stage('an imported decimal such as 4.50 shows as written in Tracks, the Formula and the source line');
  const compound=numeric().find(b=>b.payload.value?.operation==='add'),decimal=numeric().find(b=>b.payload.value?.operand==='money / 2');assert(compound&&decimal);
  await selectBeat(compound.id);assert.equal(formula().value,'(bonus + 2) * 3');assert.match(selected().textContent,/Current value unknown/);assert(!selected().textContent.includes('Draft result 99'));assert.match(column(compound.id).textContent,/trust/);
  assert.equal(lastValidation.ok,true);assert.equal(lastValidation.value.assignment.inferredResultType,'int');assert.equal(lastValidation.value.assignment.state.status,'unknown');
@@ -116,6 +121,16 @@ try{
  assert.equal((await historyStep('undo')).ok,true);assert.equal(await source(path),literalSource);assert.equal((await historyStep('redo')).ok,true);assert.equal(await source(path),finalSource);
  button('Close Project');await wait(()=>document.querySelector('.recent-open'));document.querySelector('.recent-open').click();await wait(()=>document.querySelector('.story-track-column'));await settle();assert.equal(await source(path),finalSource);assert(scene().beats.some(b=>b.id===inserted.id&&b.owner?.branchId===inserted.owner.branchId));
  stage('nested formula insertion validates and commits its captured branch/position; exact shared history and reopen retain it');
+ // B22: a decimal keeps the author's written form, such as the trailing zero in 4.50.
+ const written=numeric().find(b=>b.payload.variableId===workspace.authoring.variables.find(v=>v.technicalName==='money').id&&!b.owner&&b.payload.value?.operand==='9.5');assert(written);
+ await selectBeat(written.id);assert.equal(formula().value,'9.5');enter(formula(),'4.50');assert.equal((await commit()).ok,true);
+ const trailing=await source(path);assert(trailing.includes('    $ money = 4.50\n'),trailing);
+ await selectBeat(written.id);assert.equal(formula().value,'4.50','Set variable shows the decimal as written');await settle();assert.equal(selected().querySelector('.story-assignment-source').textContent,'$ money = 4.50');assert.match(column(written.id).textContent,/money = 4\.50/);
+ assert.equal((await commit()).ok,true);assert.equal(await source(path),trailing,'an unchanged written decimal keeps its bytes');
+ button('Close Project');await wait(()=>document.querySelector('.recent-open'));document.querySelector('.recent-open').click();await wait(()=>document.querySelector('.story-track-column'));await settle();
+ await selectBeat(written.id);assert.equal(formula().value,'4.50','reopen keeps the written decimal');
+ button('Cancel',selected());await settle();
+ stage('a written decimal such as 4.50 keeps its text through Commit, the editor, Tracks and reopen');
  await selectBeat(decimal.id);
  result.sourceSHA256=hash(await source(path));await writeFile(join(output,'accepted.rpy'),await source(path));button('Cancel',selected());button('Close Project');await wait(()=>document.querySelector('.recent-open'));result.passed=true;
 }catch(error){result.failure={message:error.message,stack:error.stack};result.dom=document.body.innerHTML;throw error;}

@@ -3633,16 +3633,18 @@ fn parse_line(body: &str, loaded: Option<SceneParseContext<'_>>) -> Option<BeatP
         {
             return None;
         }
-        let value =
-            if adjustment.operation == crate::conditions::arithmetic::IntegerOperation::Assign {
-                line.strip_prefix("$ ")
-                    .and_then(|rest| rest.split_once(" = "))
-                    .filter(|(target, _)| *target == name)
-                    .and_then(|(_, literal)| parse_value(variable.variable_type, literal))
-                    .unwrap_or(serde_json::to_value(&adjustment).ok()?)
-            } else {
-                serde_json::to_value(adjustment).ok()?
-            };
+        // A decimal keeps its operand text, so `4.50` is not read back as `4.5`.
+        let value = if variable.variable_type == VariableType::Int
+            && adjustment.operation == crate::conditions::arithmetic::IntegerOperation::Assign
+        {
+            line.strip_prefix("$ ")
+                .and_then(|rest| rest.split_once(" = "))
+                .filter(|(target, _)| *target == name)
+                .and_then(|(_, literal)| parse_value(variable.variable_type, literal))
+                .unwrap_or(serde_json::to_value(&adjustment).ok()?)
+        } else {
+            serde_json::to_value(adjustment).ok()?
+        };
         return Some(BeatPayload::SetVariable {
             variable_id: variable.id.clone(),
             value,

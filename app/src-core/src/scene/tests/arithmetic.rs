@@ -1029,7 +1029,11 @@ fn decimal_literal_commands_and_formula_results_keep_negative_zero() {
         "expectedBody":{"type":"root"},"beat":{"type":"setVariable","variableId":model.authoring.variables[0].id,"value":"-0.0"}});
     let after = apply_wire(&f, &model, command).unwrap();
     let wire = serde_json::to_value(&after).unwrap();
-    assert_eq!(wire["scenes"][0]["beats"][0]["payload"]["value"], "-0.0");
+    // Read back, a decimal keeps its written text as an assignment operand.
+    assert_eq!(
+        wire["scenes"][0]["beats"][0]["payload"]["value"],
+        json!({"operation":"assign","operand":"-0.0"})
+    );
     for beat in &wire["scenes"][0]["beats"].as_array().unwrap()[..2] {
         assert_eq!(
             beat["assignment"]["state"],

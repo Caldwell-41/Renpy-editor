@@ -448,10 +448,14 @@ in one entry through the existing shared session history. Semantic no-ops and re
 edits add no entry. Undo/Redo restores both files and their actual revisions; project
 reopen retains accepted values and starts a new empty history. Existing types stay fixed after creation. Decimal defaults and values use
 finite binary64 JSON numbers, with the exact JSON string `"-0.0"` for negative
-zero. This applies to defaults, literal assignments, inspected arithmetic results
-and canvas samples. Core also accepts a signed numeric zero and returns the string
+zero. This applies to defaults, literal assignment commands, inspected arithmetic
+results and canvas samples. Core also accepts a signed numeric zero and returns the string
 form; other decimal strings are refused. Positive zero remains a JSON number.
-Condition decimal atoms and arithmetic operands remain source strings. Integer
+Condition decimal atoms and arithmetic operands remain source strings. Story reads a
+decimal Set variable from source as `{operation: "assign", operand}` with the written
+text, so `$ fare = 4.50` shows and saves as `4.50`. When Screens rewrites a button's
+actions, an unchanged decimal `SetVariable` literal keeps its source text. A decimal
+default is written in canonical form, so `4.50` is saved as `4.5`. Integer
 values retain exact signed i64 strings. Story
 also supports bounded numeric formulas. Set variable keeps
 `variableId` and `value`; arithmetic uses `{operation, operand}` in `value`.

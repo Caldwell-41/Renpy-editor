@@ -294,7 +294,9 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string,
       case "setVariable": {
         if (typeof payload.value === "object") {
           const state = beat.assignment?.state;
-          if (state?.status === "known" && !manualBranches) variables[payload.variableId] = { value: state.value, beatId: beat.id };
+          // A constant, such as a decimal kept as written, has the same value on every route.
+          const constant = payload.value.operation === "assign" && beat.assignment?.readVariables.length === 0;
+          if (state?.status === "known" && (!manualBranches || constant)) variables[payload.variableId] = { value: state.value, beatId: beat.id };
           else { delete variables[payload.variableId]; variablesUnknown = true; unknownBeatIds.push(beat.id); }
         } else variables[payload.variableId] = { value: payload.value, beatId: beat.id };
         break;

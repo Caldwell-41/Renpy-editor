@@ -203,6 +203,16 @@ test("manual selected branch terminals and Choices stop before unvisited root ef
   const state = deriveScenePreview(guarded, undefined, new Map([["group", "if"]])); assert.equal(state.partial, true); assert.equal(state.variablesUnknown, true); assert.deepEqual(state.unknownBeatIds, ["guarded"]); assert.equal(state.overlay?.kind, "choice"); assert.notEqual(state.overlay?.text, "Possible continuation"); assert.equal(state.throughBeatId, "guarded"); assert.equal(state.variables.trust, undefined); assert.equal(state.background, undefined); await s.close();
 });
 
+test("a manual branch preview keeps a constant Set variable, such as fare = 4.50, and drops one that reads a variable", async () => {
+  const s = setup(); const header = s.model.scenes[0]!.beats[0]!;
+  const assigned = (id: string, operand: string, readVariables: { variableId: string; technicalName: string; variableType: "decimal" }[]) => ({ id, owner: { groupId: "group", branchId: "if" }, byteStart: 40, byteEnd: 50, protected: false,
+    payload: { type: "setVariable" as const, variableId: id, value: { operation: "assign" as const, operand } },
+    assignment: { inferredResultType: "decimal" as const, readVariables, diagnostics: [], reads: readVariables.map(v => v.technicalName), writes: [id], state: { status: "known" as const, value: 4.5 } } });
+  const scene = { ...s.model.scenes[0]!, beats: [header, assigned("fare", "4.50", []), assigned("tip", "fare * 1", [{ variableId: "fare", technicalName: "fare", variableType: "decimal" }])] };
+  const state = deriveScenePreview(scene, "tip", new Map([["group", "if"]]));
+  assert.equal(state.variables.fare?.value, 4.5); assert.equal(state.variables.tip, undefined); assert.deepEqual(state.unknownBeatIds, ["tip"]); await s.close();
+});
+
 test("whole-group confirmation and collapse summary count protected Custom Code and branches", async () => {
   const fixture = storyFixture(); const scene = fixture.scenes[0]!;
   const opaque = { id: "opaque", byteStart: 65, byteEnd: 70, protected: true, owner: { groupId: "group", branchId: "if" }, payload: { type: "customCode" as const, source: "        custom_code()", reason: "Unsupported source" } };
