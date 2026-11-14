@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
 import { type SceneWorkspace, type SceneBeat, type SceneCommand } from "../src/scene-ui.js";
-import { chooseIn, editorProject, mountStory, openGuard, optionBlocks, pickKind, press, sceneBodies, renderStoryView, selectBeat, storyBeat, storyEditor, texts, type } from "./story-controls-fixture.js";
+import { chooseIn, editorProject, openGuard, optionBlocks, pickKind, press, sceneBodies, renderStoryView, selectBeat, storyBeat, storyEditor, texts, type } from "./story-controls-fixture.js";
+import { mountStory } from "./story-dom-mount.js";
 const tick = async (): Promise<void> => { await new Promise(resolve => setTimeout(resolve, 0)); };
 function setup(beats: readonly SceneBeat[], apply: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision">) => Promise<SceneWorkspace>, steps?: string[]) {
   const browser = new Window(); Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, HTMLInputElement: browser.HTMLInputElement, HTMLTextAreaElement: browser.HTMLTextAreaElement, HTMLSelectElement: browser.HTMLSelectElement, Event: browser.Event, KeyboardEvent: browser.KeyboardEvent });

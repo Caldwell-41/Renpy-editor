@@ -4,7 +4,8 @@ import { Window } from "happy-dom";
 import { buildRuleBuilder } from "../src/story-condition-editor.js";
 import { deriveScenePreview, type Condition, type SceneActions, type SceneBeat, type SceneCommand, type SceneWorkspace, type StoryTarget } from "../src/scene-ui.js";
 import { renderBranches, type FlowBody } from "../src/branches-ui.js";
-import { chooseIn, editorFixture, editorProject, flagCondition, withBodies, mountStory, openBranch, pickKind, placeRows, press, selectBeat, storyBeat, storyEditor, storyFixture, renderStoryView, texts, trackColumn, type } from "./story-controls-fixture.js";
+import { chooseIn, editorFixture, editorProject, flagCondition, withBodies, openBranch, pickKind, placeRows, press, selectBeat, storyBeat, storyEditor, storyFixture, renderStoryView, texts, trackColumn, type } from "./story-controls-fixture.js";
+import { mountStory } from "./story-dom-mount.js";
 import { shorten } from "../src/story-tracks.js";
 const tick = async (): Promise<void> => { await new Promise(resolve => setTimeout(resolve, 0)); };
 function setup(apply?: (command: SceneCommand) => Promise<SceneWorkspace>, fixture = storyFixture(3), extra: Partial<SceneActions> = {}) {

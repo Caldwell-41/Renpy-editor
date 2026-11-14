@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
 import type { SceneCommand, SceneWorkspace } from "../src/scene-ui.js";
-import { chooseIn, editorProject, mountStory, pickKind, press, renderStoryView, sceneBodies, selectBeat, storyBeat, storyEditor, storyFixture, texts, trackColumn } from "./story-controls-fixture.js";
+import { chooseIn, editorProject, pickKind, press, renderStoryView, sceneBodies, selectBeat, storyBeat, storyEditor, storyFixture, texts, trackColumn } from "./story-controls-fixture.js";
+import { mountStory } from "./story-dom-mount.js";
 const tick = async (): Promise<void> => { await new Promise(resolve => setTimeout(resolve, 0)); };
 
 test("imported arithmetic opens as an equation and commits the retained formula through Story", async () => {

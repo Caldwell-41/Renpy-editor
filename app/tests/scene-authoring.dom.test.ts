@@ -3,7 +3,8 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import { Window } from "happy-dom";
 import { deriveScenePreview, renderRecoverySurface, storyScene, type RecoveryReport, type SceneBeat, type SceneCommand, type SceneWorkspace } from "../src/scene-ui.js";
-import { editorProject, mountStory, pickKind, press, renderStoryView, selectBeat, storyBeat, storyEditor, texts, trackColumn, withBodies } from "./story-controls-fixture.js";
+import { editorProject, pickKind, press, renderStoryView, selectBeat, storyBeat, storyEditor, texts, trackColumn, withBodies } from "./story-controls-fixture.js";
+import { mountStory } from "./story-dom-mount.js";
 
 const tick = async (): Promise<void> => { await new Promise((resolve) => setTimeout(resolve, 0)); };
 function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } { let resolve!: (value: T) => void; const promise = new Promise<T>((accept) => { resolve = accept; }); return { promise, resolve }; }

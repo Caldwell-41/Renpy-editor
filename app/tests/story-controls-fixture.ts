@@ -1,5 +1,4 @@
-import { Window } from "happy-dom";
-import { renderStoryView as renderStory, type BodyRef, type Condition, type InsertionPlace, type SceneActions, type SceneBeat, type SceneBody, type SceneCommand, type SceneWorkspace } from "../src/scene-ui.ts";
+import { renderStoryView as renderStory, type BodyRef, type Condition, type InsertionPlace, type SceneActions, type SceneBeat, type SceneBody, type SceneWorkspace } from "../src/scene-ui.ts";
 /** Gives every scene the small bodies value its current beats describe. */
 export function withBodies(model: SceneWorkspace): SceneWorkspace {
   return { ...model, scenes: model.scenes.map(scene => ({ ...scene, bodies: sceneBodies(scene.beats) })) };
@@ -125,14 +124,6 @@ export function editorFixture(): SceneWorkspace {
 export function editorProject(beats: readonly SceneBeat[]): SceneWorkspace {
   const model = editorFixture();
   return { ...model, scenes: model.scenes.map(scene => scene.id === "one" ? { ...scene, beats, bodies: sceneBodies(beats) } : scene) };
-}
-/** Story over `model` in a fresh document, recording each command it sends and each status line. */
-export function mountStory(model: SceneWorkspace, extra: Partial<SceneActions> = {}) {
-  const browser = new Window(); Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, HTMLInputElement: browser.HTMLInputElement, HTMLTextAreaElement: browser.HTMLTextAreaElement, HTMLSelectElement: browser.HTMLSelectElement, Event: browser.Event, KeyboardEvent: browser.KeyboardEvent });
-  document.body.innerHTML = "<main></main><aside></aside>";
-  const host = document.querySelector<HTMLElement>("main")!, calls: SceneCommand[] = [], status: string[] = [];
-  const view = renderStoryView(host, document.querySelector("aside")!, model, { apply: async command => { calls.push(command); return model; }, status: text => status.push(text), resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); }, viewSource: () => {}, ...extra });
-  return { host, calls, status, view, close: async () => { view.dispose(); await browser.happyDOM.close(); } };
 }
 let beatOffset = 0;
 /** A beat for `editorProject`, each at its own bytes. */

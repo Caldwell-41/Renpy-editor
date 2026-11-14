@@ -3,7 +3,8 @@ import test from "node:test";
 import { Window } from "happy-dom";
 import { type SceneActions, type SceneCommand, type SceneWorkspace, type ScreenInsertion } from "../src/scene-ui.js";
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenTargetBinding } from "../src/screen-contracts.js";
-import { choosePlace, editorProject, mountStory, placeRows, press, selectBeat, storyBeat, storyEditor, storyFixture, renderStoryView, texts } from "./story-controls-fixture.js";
+import { choosePlace, editorProject, placeRows, press, selectBeat, storyBeat, storyEditor, storyFixture, renderStoryView, texts } from "./story-controls-fixture.js";
+import { mountStory } from "./story-dom-mount.js";
 
 const binding: ScreenTargetBinding = { screenId: "panel-id", sourceName: "help_panel" };
 const revisions = { source: "panel-source", sourceMap: "map", inventory: "inventory", effects: "effect" };
