@@ -48,9 +48,18 @@ try{
   await page.screenshot({path:join(output,files.production)});await reference.screenshot({path:join(output,files.reference)});await page.locator('.story-arithmetic-editor').screenshot({path:join(output,files.productionControl)});await reference.locator('[data-editor-for][data-kind=setVariable]').screenshot({path:join(output,files.referenceControl)});
   result.cases.push({size,production,approvedControl,files});
  }
- await formula.fill('1 /');await page.getByRole('button',{name:'Show game window',exact:true}).click();assert.equal(await formula.inputValue(),'1 /');await page.getByRole('button',{name:'Writing focus',exact:true}).click();assert.equal(await formula.inputValue(),'1 /');await page.getByRole('button',{name:'Cancel',exact:true}).click();
+ await formula.fill('1 /');await page.getByRole('button',{name:'Show game window',exact:true}).click();assert.equal(await formula.inputValue(),'1 /');
+ // Mouse clicks through Reel, Writing focus and back to Tracks keep the Formula's text, focus and caret.
+ // At the wide size, where the scene list leaves the view switch uncovered.
+ await page.setViewportSize({width:1600,height:1000});await formula.evaluate(n=>{n.focus();n.setSelectionRange(1,2);});
+ const kept=async where=>assert.deepEqual(await formula.evaluate(n=>[n.value,document.activeElement===n,n.selectionStart,n.selectionEnd]),['1 /',true,1,2],where);
+ await page.locator('.story-view-option[data-view="reel"]').click();await page.locator('.story-reel').waitFor();await kept('Reel');
+ await page.getByRole('button',{name:'Writing focus',exact:true}).click();await kept('Writing focus');
+ await page.getByRole('button',{name:'Show game window',exact:true}).click();await kept('Show game window');
+ await page.locator('.story-view-option[data-view="tracks"]').click();await page.locator('.story-reel').waitFor({state:'detached'});await kept('Tracks');
+ await page.getByRole('button',{name:'Cancel',exact:true}).click();
  const accepted=await call('source.open',{path:scene.sourcePath});assert(accepted.text.includes('$ trust += (bonus + 2) * 3  # imported compound'));
- result.keyboard={suggestionTab:true,suggestionFocus:true,operationEnterEscape:true,formulaRetained:true,writingFocus:true,cancelNoWrite:true};assert.deepEqual(result.errors,[]);result.passed=true;
+ result.keyboard={suggestionTab:true,suggestionFocus:true,operationEnterEscape:true,formulaRetained:true,writingFocus:true,reelCaret:true,cancelNoWrite:true};assert.deepEqual(result.errors,[]);result.passed=true;
 }catch(error){result.failure={message:error.message,stack:error.stack};if(browser)for(const [i,page] of browser.contexts().flatMap(c=>c.pages()).entries()){await page.screenshot({path:join(output,`failure-${i}.png`)}).catch(()=>{});}throw error;}
 finally{await browser?.close();await server.close();await child.stop();result.driver=child.exitStatus();await assert.rejects(access(scratch));result.cleanupComplete=true;for(const c of result.cases)for(const filename of Object.values(c.files)){const bytes=await readFile(join(output,filename));(result.captures??=[]).push({filename,sha256:createHash('sha256').update(bytes).digest('hex')});}await writeFile(join(output,'result.json'),JSON.stringify(result,null,2)+'\n');}
 console.log('PASS focused real-browser arithmetic controls/core and scoped approved reference comparison.');
