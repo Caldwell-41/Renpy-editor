@@ -233,6 +233,8 @@ export interface RouteContext {
   readonly sceneName: (sceneId: string) => string;
   /** Tracks lane shading: which lanes carry state, and whether state is unknown. */
   readonly state: (beat: SceneBeat) => { readonly background: boolean; readonly characters: boolean; readonly music: boolean; readonly unknown: boolean };
+  /** What needs the author's attention in a beat, shown in its place in warning colour: "2 branches to fix". */
+  readonly warning: (beat: SceneBeat) => string | undefined;
   readonly select: (id: string) => void;
   readonly selectNew: (key: string) => void;
   readonly insert: (body: BodyRef, position: Position, opener: string) => void;
@@ -301,14 +303,15 @@ function rail(context: RouteContext, chain: readonly BodyRef[], label?: { readon
 const laneCell = (index: number, text?: string): HTMLElement => element("span", `story-lane story-lane-${index}${index === 0 ? " story-beat-number" : ""}`, text);
 /** Tracks: the six lanes of a beat, each beat filling the lane its kind belongs to. */
 function laneCells(context: RouteContext, beat: SceneBeat, number: string): HTMLElement[] {
-  const state = context.state(beat), lane = laneOf(beat), summary = context.summary(beat);
+  const state = context.state(beat), lane = laneOf(beat), summary = context.summary(beat), warning = context.warning(beat);
   // Flow names the beat's kind; the other lanes show only what it sets. Below 900 px
   // Writing focus folds every beat into Words, so there each one names its kind.
-  const named = `${context.label(beat)} · ${summary}`;
+  // A warning takes the beat's place: "2 branches to fix".
+  const named = warning ?? `${context.label(beat)} · ${summary}`;
   return lanes.map((_lane, index) => {
     const cell = laneCell(index);
     if (index === 0) cell.textContent = number;
-    else if (index === lane) cell.textContent = lane === 5 ? named : summary;
+    else if (index === lane) { cell.textContent = warning ?? (lane === 5 ? named : summary); cell.classList.toggle("story-lane-warn", !!warning); }
     if (index === 3) {
       const copy = element("span", "story-lane-copy", cell.textContent ?? ""); cell.replaceChildren(copy);
       if (context.focus && lane !== 3) copy.append(element("span", "story-lane-all", named));
@@ -320,10 +323,10 @@ function laneCells(context: RouteContext, beat: SceneBeat, number: string): HTML
 }
 /** Reel: a beat's number and kind, its text, and the reason a draft needs attention
  *  (story-combined-status / header-v2). A Return names itself in the title. */
-function reelCard(number: string, title: string, copy: string): HTMLElement[] {
+function reelCard(number: string, title: string, copy: string, warn = false): HTMLElement[] {
   const heading = element("span", "story-reel-title"); heading.append(element("span", "story-beat-number", number), ` · ${title}`);
   const reason = element("span", "story-reel-reason"); reason.hidden = true;
-  return [heading, element("span", "story-reel-copy", copy), reason];
+  return [heading, element("span", `story-reel-copy${warn ? " story-lane-warn" : ""}`, copy), reason];
 }
 
 /** Tracks or Reel: one column per beat on the route, with the branch markers between them. */
@@ -348,11 +351,12 @@ export function renderRoute(context: RouteContext): HTMLElement {
       column.append(rail(context, item.chain));
       const selected = context.selected === beat.id;
       const button = element("button", "story-track-beat"); button.type = "button"; button.dataset.beatKind = beat.conditionalBranch ? "condition" : beat.payload.type;
-      button.ariaLabel = `${number} ${context.label(beat)}: ${context.summary(beat)}`; button.dataset.selected = String(selected);
+      const warning = context.warning(beat);
+      button.ariaLabel = `${number} ${context.label(beat)}: ${context.summary(beat)}${warning ? `, ${warning}` : ""}`; button.dataset.selected = String(selected);
       if (selected) button.ariaCurrent = "true";
       button.tabIndex = selected || (!context.selected && beat === beats[0]) ? 0 : -1;
       const isReturn = beat.payload.type === "return";
-      button.append(...reel ? reelCard(number, isReturn ? context.summary(beat) : context.label(beat), isReturn ? "" : context.summary(beat)) : laneCells(context, beat, number));
+      button.append(...reel ? reelCard(number, isReturn ? context.summary(beat) : context.label(beat), isReturn ? "" : warning ?? context.summary(beat), !!warning) : laneCells(context, beat, number));
       button.addEventListener("click", () => context.select(beat.id));
       button.addEventListener("keydown", event => {
         const index = beats.indexOf(beat);
@@ -463,6 +467,8 @@ export interface BranchPathContext {
   readonly numbers: ReadonlyMap<string, string>;
   readonly open: OpenBranches;
   readonly caption: (owner: SceneBeat) => string;
+  /** A condition branch whose test core could not read: its short problem and reason. */
+  readonly problem: (header: SceneBeat) => { readonly short: string; readonly reason: string } | undefined;
   readonly branchName: (header: SceneBeat) => string;
   readonly select: (id: string) => void;
   readonly toggle: (owner: SceneBeat, branch: BodyRef) => void;
@@ -482,8 +488,11 @@ export function renderBranchPath(context: BranchPathContext): HTMLElement {
     const group = element("div", "story-branch-group"); group.dataset.branchOwner = owner.id;
     if (groups.children.length) { const arrow = element("span", "story-path-arrow", "›"); arrow.ariaHidden = "true"; group.append(arrow); }
     const edit = action(number, "story-branch-ref", () => context.select(owner.id)); edit.ariaLabel = trackCopy.editFork(fork, number);
-    const caption = fork === "choice" ? trackCopy.choice : context.caption(owner);
-    const test = element("span", "story-branch-test", shorten(caption)); test.title = caption;
+    // A condition's caption follows its open If or Else if, and names that branch's problem.
+    const open = context.open.get(owner.conditionalBranch?.groupId ?? ""), shown = fork === "condition" ? scene.beats.find(header => header.id === open && !header.conditionalBranch?.otherwise) ?? owner : owner;
+    const problem = fork === "condition" ? context.problem(shown) : undefined;
+    const caption = fork === "choice" ? trackCopy.choice : `${shorten(context.caption(shown))}${problem ? ` · ${problem.short}` : ""}`;
+    const test = element("span", `story-branch-test${problem ? " story-branch-warn" : ""}`, caption); test.title = problem ? `${context.caption(shown)}: ${problem.reason}` : context.caption(shown);
     const switches = element("div", "story-branch-switch"); switches.role = "group"; switches.ariaLabel = `${fork === "choice" ? "Options of choice" : "Branches of condition"} ${number}`;
     bodies.forEach((body, index) => {
       if (body.type !== "branch") return;
@@ -491,9 +500,10 @@ export function renderBranchPath(context: BranchPathContext): HTMLElement {
       const open = context.open.get(body.groupId) === body.branchId, name = context.branchName(header);
       const text = fork === "choice" ? (open ? `${index + 1} ${optionText(owner, body.branchId)}`.trim() : String(index + 1))
         : !header.conditionalBranch?.ordinal && !header.conditionalBranch?.otherwise ? "If" : header.conditionalBranch.otherwise ? "Otherwise" : "Else if";
-      const button = action(text, "story-branch-segment", () => context.toggle(owner, body));
+      const problem = fork === "condition" ? context.problem(header) : undefined;
+      const button = action(problem ? `${text} !` : text, `story-branch-segment${problem ? " story-branch-warn" : ""}`, () => context.toggle(owner, body));
       button.dataset.branchId = body.branchId; button.dataset.arm = String(armOf(scene, body)); button.ariaPressed = String(open);
-      button.ariaLabel = button.title = open ? trackCopy.hide(name) : trackCopy.show(name);
+      button.ariaLabel = button.title = `${open ? trackCopy.hide(name) : trackCopy.show(name)}${problem ? `, needs changes: ${problem.reason}` : ""}`;
       switches.append(button);
     });
     group.append(edit, test, switches); groups.append(group);

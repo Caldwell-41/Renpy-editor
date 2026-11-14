@@ -17,6 +17,8 @@ export interface NewVariableOptions {
   readonly opener: HTMLElement;
   /** Creates the variable. Resolves with it, or throws with a reason the dialog shows. */
   readonly create: (request: NewVariableRequest) => Promise<Variable>;
+  /** A name and type to start from, such as a test's missing variable. */
+  readonly initial?: { readonly name: string; readonly variableType: Variable["variableType"] };
 }
 
 export const variableTypeName = (variable: Variable): string => ({ bool: "yes/no", int: "whole number", decimal: "decimal", string: "text" })[variable.variableType];
@@ -62,7 +64,8 @@ const types = [{ value: "bool", label: "Yes/no" }, { value: "int", label: "Whole
 /** Opens New variable. Resolves with the created variable, or undefined when cancelled. */
 export function openNewVariable(options: NewVariableOptions): Promise<Variable | undefined> {
   const name = element("input"); name.type = "text"; name.setAttribute("aria-label", "Variable name"); name.placeholder = "e.g. found_letter"; technicalNameInput(name);
-  const type = backingSelect("Variable type", types, "bool");
+  if (options.initial) name.value = options.initial.name;
+  const type = backingSelect("Variable type", types, options.initial?.variableType ?? "bool");
   const start = element("div", "story-variable-start");
   let startControl: HTMLInputElement | HTMLSelectElement;
   const drawStart = (): void => {

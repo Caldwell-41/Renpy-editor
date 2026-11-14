@@ -118,7 +118,7 @@ test("nested Otherwise creation and condition editing use group-parent qualifica
   const s = setup(); button(selectBeat(s.host, "nested-if-0", "if"), "Add Otherwise").click(); button(s.host.querySelector('.story-branch-new[aria-label="New Otherwise"]')!, "Add Otherwise").click(); await tick();
   assert.deepEqual(s.calls[0]!.command.expectedBody, { type: "branch", groupId: "group", branchId: "if" }); assert.equal(s.calls[0]!.command.condition, null); assert.equal(s.calls[0]!.command.beforeBranchId, null);
   // The nested condition's editor edits its If test as a draft with Commit test.
-  const test = storyEditor(s.host).querySelector<HTMLElement>('.story-branch-test[aria-label="If test"]')!; button(test, "Commit test").click(); await tick();
+  const test = storyEditor(s.host).querySelector<HTMLElement>('.story-branch-test[aria-label="If comparison"]')!; button(test, "Commit test").click(); await tick();
   assert.equal(s.calls[1]!.command.type, "updateConditionBranch"); assert.deepEqual(s.calls[1]!.command.expectedBody, { type: "branch", groupId: "group", branchId: "if" }); await s.close();
 });
 
@@ -236,13 +236,13 @@ test("a condition draft waits while tree New works; dirty tree input blocks addi
   button(tree, "New Chapter").click(); const name = tree.querySelector<HTMLInputElement>(".tree-inline input")!; name.value = "Retained chapter name"; name.dispatchEvent(new Event("input", { bubbles: true }));
   button(s.host, "Add Condition").click(); assert.equal(s.host.querySelector(".new-beat"), null); assert.equal(name.value, "Retained chapter name"); assert.ok(name.isConnected);
   button(tree.querySelector<HTMLElement>(".tree-inline")!, "Cancel").click();
-  button(s.host, "Add Condition").click(); const panel = s.host.querySelector<HTMLElement>(".story-editor .new-beat")!; chooseIn(panel, "If rule 1 test", "is false");
+  button(s.host, "Add Condition").click(); const panel = s.host.querySelector<HTMLElement>(".story-editor .new-beat")!; chooseIn(panel, "If rule 1 comparison", "is false");
   button(tree, "New Chapter").click(); assert.ok(tree.querySelector(".tree-inline")); assert.ok(panel.isConnected && s.view.hasDrafts()); assert.equal(s.calls.length, 0); await s.close();
 });
 
 test("unchanged pending condition commit locks tree authoring and cannot admit another tree draft", async () => {
   let finish!: (value: SceneWorkspace) => void; const pending = new Promise<SceneWorkspace>(resolve => { finish = resolve; }); const s = setup(async () => pending);
-  button(selectBeat(s.host, "if").querySelector<HTMLElement>('.story-branch-test[aria-label="If test"]')!, "Commit test").click(); const tree = document.querySelector<HTMLElement>("aside")!; assert.equal(button(tree, "New Chapter").disabled, true); button(tree, "New Chapter").click(); assert.equal(tree.querySelector(".tree-inline"), null); assert.equal(s.calls.length, 1); finish(s.model); await tick(); assert.equal(button(tree, "New Chapter").disabled, false); await s.close();
+  button(selectBeat(s.host, "if").querySelector<HTMLElement>('.story-branch-test[aria-label="If comparison"]')!, "Commit test").click(); const tree = document.querySelector<HTMLElement>("aside")!; assert.equal(button(tree, "New Chapter").disabled, true); button(tree, "New Chapter").click(); assert.equal(tree.querySelector(".tree-inline"), null); assert.equal(s.calls.length, 1); finish(s.model); await tick(); assert.equal(button(tree, "New Chapter").disabled, false); await s.close();
 });
 
 test("unresolved manual conditions stop a whole-scene preview at the header, and pass it with unknown state toward a selected beat", async () => {
@@ -407,7 +407,7 @@ test("condition drafts are retained and marked, and Story Save saves them with t
   const branch = (id: string): HTMLElement => storyEditor(s.host).querySelector<HTMLElement>(`.story-branch-editor[data-branch-id="${id}"]`)!;
   selectBeat(s.host, "if");
   // Editing the If test makes it a draft; the condition's column and the branch show it.
-  chooseIn(branch("if").querySelector<HTMLElement>(".story-branch-test")!, "If rule 1 test", "is false");
+  chooseIn(branch("if").querySelector<HTMLElement>(".story-branch-test")!, "If rule 1 comparison", "is false");
   assert.equal(trackColumn(s.host, "if")!.dataset.beatDraft, "true");
   assert.equal(branch("if").querySelector(".story-editor-state")!.textContent, "* Draft");
   // "Remove this Else if" marks the Else if; + Add Else if adds a new one. Neither writes.
@@ -416,7 +416,7 @@ test("condition drafts are retained and marked, and Story Save saves them with t
   assert.equal(s.calls.length, 0);
   // Leaving the condition and coming back keeps all three.
   selectBeat(s.host, "a", "if"); selectBeat(s.host, "if");
-  assert.equal(branch("if").querySelector<HTMLElement>('[role=radiogroup][aria-label="If rule 1 test"] [aria-checked=true]')?.textContent, "is false");
+  assert.equal(branch("if").querySelector<HTMLElement>('[role=radiogroup][aria-label="If rule 1 comparison"] [aria-checked=true]')?.textContent, "is false");
   assert.ok(branch("elif").querySelector(".story-branch-removal")); assert.ok(storyEditor(s.host).querySelector(".story-branch-new"));
   assert.equal((await s.view.save()).kind, "saved");
   assert.deepEqual(saved[0]!.commands.map(command => command.type), ["updateConditionBranch", "addConditionBranch", "removeConditionBranch"]);
@@ -455,7 +455,7 @@ test("Remove branch saves the drafts inside the branch first, and cancels the br
   const branch = (id: string): HTMLElement => storyEditor(s.host).querySelector<HTMLElement>(`.story-branch-editor[data-branch-id="${id}"]`)!;
   // A beat draft inside the Else if, and an edit to the Else if's own test.
   type(selectBeat(s.host, "maybe", "elif").querySelector("textarea")!, "Edited inside");
-  selectBeat(s.host, "if"); chooseIn(branch("elif").querySelector<HTMLElement>(".story-branch-test")!, "Else if rule 1 test", "≤");
+  selectBeat(s.host, "if"); chooseIn(branch("elif").querySelector<HTMLElement>(".story-branch-test")!, "Else if rule 1 comparison", "≤");
   press(branch("elif"), "Remove this Else if");
   const removal = branch("elif").querySelector<HTMLElement>(".story-branch-removal")!;
   assert.match(removal.textContent!, /Drafts inside it are saved first/);

@@ -1,5 +1,5 @@
 import { assignmentCaption, type ValidateAssignment } from "./story-arithmetic-editor.ts";
-import { buildRuleBuilder, type NewVariable, type RuleBuilder, type RuleBuilderOptions } from "./story-condition-editor.ts";
+import { buildRuleBuilder, conditionProblem, type ConditionProblem, type NewVariable, type RuleBuilder, type RuleBuilderOptions } from "./story-condition-editor.ts";
 import { openNewVariable, type NewVariableRequest } from "./story-new-variable.ts";
 import { validateField } from "./authoring-input.ts";
 import { addKindName, openAddBeat, type AddKind, type Placement } from "./story-add-beat.ts";
@@ -178,9 +178,10 @@ export function conditionCaption(condition: Condition, variables?: SceneWorkspac
   return caption(condition.expression);
 }
 
-/** A branch's test as text: its typed condition, or its Variable for older sources. */
+/** A branch's test as text: its typed condition, its line when core could not read it, or its Variable for older sources. */
 function branchTest(branch: ConditionalBranch, model: SceneWorkspace): string {
-  return branch.condition ? conditionCaption(branch.condition, model.authoring.variables)
+  const problem = conditionProblem(branch.condition, model.authoring.variables);
+  return problem ? problem.test : branch.condition ? conditionCaption(branch.condition, model.authoring.variables)
     : model.authoring.variables.find(variable => variable.id === branch.variableId)?.technicalName ?? "Unknown condition";
 }
 function branchCaption(branch: ConditionalBranch, model: SceneWorkspace): string {
@@ -536,8 +537,8 @@ export function renderStoryView(
   // "+ New variable…" in a rule builder: core creates the variable as one edit with Undo.
   // Story takes the new workspace without redrawing, so the open draft keeps its input
   // and commits against the new revisions.
-  const newVariable: NewVariable = opener => openNewVariable({
-    host, opener,
+  const newVariable: NewVariable = (opener, initial) => openNewVariable({
+    host, opener, ...initial ? { initial } : {},
     create: async request => {
       if (!actions.createVariable) throw Error("Create the variable in Variables.");
       if (pendingWrites) throw Error("Wait for the current change to finish.");
@@ -1578,7 +1579,7 @@ export function renderStoryView(
   };
   // A rule builder for a test. A new test starts with one rule on the first variable.
   const testBuilder = (word: "If" | "Else if", condition: Condition | undefined, more: Partial<RuleBuilderOptions> = {}): RuleBuilder => {
-    const builder = buildRuleBuilder(model.authoring.variables, condition, { keyword: word === "If" ? "if" : "elif", label: word, empty: "Add a rule to give this branch a test.", required: true, newVariable, ...more });
+    const builder = buildRuleBuilder(model.authoring.variables, condition, { keyword: word === "If" ? "if" : "elif", label: word, empty: "Add a rule to this branch.", required: true, newVariable, ...more });
     if (!condition) builder.host.querySelector<HTMLButtonElement>(".story-add-rule")?.click();
     return builder;
   };
@@ -1613,7 +1614,7 @@ export function renderStoryView(
     if (branch.otherwise) { const note = document.createElement("p"); note.className = "story-field-hint"; note.textContent = "Runs when no test above is true."; card.append(note); return; }
     const kept = beatDrafts.get(beat.id);
     if (kept) { card.append(kept.panel); return; }
-    const builder = testBuilder(word, branch.condition, { ...actions.viewSource ? { source } : {}, ...branch.condition ? { caption: conditionCaption(branch.condition, model.authoring.variables) } : {} });
+    const builder = testBuilder(word, branch.condition, { ...actions.viewSource ? { source } : {}, ...branch.condition ? { caption: conditionCaption(branch.condition, model.authoring.variables) } : {}, created: () => { if (!disposed) draw(); } });
     if (!builder.editable) { card.append(builder.host); return; }
     // The test commits while the branch's accepted test is unchanged; otherwise it conflicts.
     const accepted = JSON.stringify(branch.condition ?? null);
@@ -1636,7 +1637,7 @@ export function renderStoryView(
         settling = mutate(write(current, condition), () => dropDraft(beat.id), expectedRevisions(model), panel, draft, staleOverride).finally(() => { settling = undefined; });
       } };
     };
-    const panel = conditionPanel("story-branch-test", `${word} test`);
+    const panel = conditionPanel("story-branch-test", `${word} comparison`);
     panel.append(builder.host, draftActions(beat.id, "Commit test", () => void commitCondition(draft, beat.id, beat.id), `${branchSelector(beat.id)} .story-branch-test summary`));
     dirtyDraft(panel, []); card.append(panel);
     const draft = keepDraft(beat.id, { panel, sceneId: scene.id, beatId: beat.id, command, kind: () => "condition", conflict, editors: () => [builderEditor(panel, builder)], primary: () => builder.host });
@@ -1776,6 +1777,10 @@ export function renderStoryView(
   // A beat's name in the editor and on the stage: its kind, or its branch for a header.
   const beatName = (beat: SceneBeat): string => beat.conditionalBranch ? beat.conditionalBranch.choiceOption ? "Option" : "Condition" : beatLabels[beat.payload.type];
   const forkCaption = (beat: SceneBeat): string => beat.conditionalBranch ? branchTest(beat.conditionalBranch, model) : "Unknown condition";
+  // A condition branch whose test core could not read, and a condition's such branches (story-release-fixes / a-v2).
+  const branchProblem = (header: SceneBeat): ConditionProblem | undefined => header.conditionalBranch && !header.conditionalBranch.choiceOption ? conditionProblem(header.conditionalBranch.condition, model.authoring.variables) : undefined;
+  const groupProblems = (scene: SceneDocument, groupId: string): [SceneBeat, ConditionProblem][] => scene.beats.flatMap(header => { const problem = header.conditionalBranch?.groupId === groupId ? branchProblem(header) : undefined; return problem ? [[header, problem] as [SceneBeat, ConditionProblem]] : []; });
+  const toFix = (count: number): string => `${count} ${count === 1 ? "branch" : "branches"} to fix`;
   // A branch or option as Tracks and the Branch path name it.
   const branchName = (scene: SceneDocument, header: SceneBeat): string => {
     const branch = header.conditionalBranch; if (!branch) return beatName(header);
@@ -1943,7 +1948,7 @@ export function renderStoryView(
     const pending: PendingBeat[] = [...beatDrafts.entries()].flatMap(([key, draft]) => !draft.beatId && draft.sceneId === scene.id && draft.place ? [{ key, ...draft.place(), label: draft.kind() }] : []);
     const items = trackRoute(scene, openBranches, pending);
     const selected = selectedNewDraft ?? selectedBeatId;
-    const path = renderBranchPath({ scene, items, numbers, open: openBranches, caption: forkCaption, branchName: header => branchName(scene, header), select: id => select(scene, id), toggle: (owner, body) => toggleBranch(scene, owner, body) });
+    const path = renderBranchPath({ scene, items, numbers, open: openBranches, caption: forkCaption, problem: branchProblem, branchName: header => branchName(scene, header), select: id => select(scene, id), toggle: (owner, body) => toggleBranch(scene, owner, body) });
     const panel = document.createElement("section"); panel.className = "story-panel"; panel.setAttribute("aria-label", viewName(routeView));
     const toolbar = document.createElement("div"); toolbar.className = "story-panel-toolbar";
     // Writing focus has no Key, as in Story Combined v1.
@@ -1956,6 +1961,7 @@ export function renderStoryView(
     scroller.append(renderRoute({ view: routeView, focus: writingFocus, scene, items, numbers, selected, locked: scene.sourceConflict, label: beatName,
       summary: beat => beat.conditionalBranch ? branchName(scene, beat) : beatSummary(beat.payload, model), branchName: header => branchName(scene, header), endName: header => endName(scene, header),
       sceneName: id => model.scenes.find(item => item.id === id)?.displayName ?? "an unavailable scene", state: accepted,
+      warning: beat => { const problems = beat.conditionalBranch && !beat.conditionalBranch.choiceOption ? groupProblems(scene, beat.conditionalBranch.groupId).length : 0; return problems ? toFix(problems) : undefined; },
       select: id => select(scene, id), selectNew: key => { if (navigate(() => { selectedBeatId = undefined; selectedNewDraft = key; })) beatDrafts.get(key)?.editors()[0]?.focus(); },
       insert: (body, position, opener) => addBeat(scene, body, position, opener), move: (beat, direction) => moveSibling(scene, beat, direction) }));
     // The beat columns scroll sideways with the wheel; Writing focus rows scroll as usual.
@@ -2128,13 +2134,16 @@ export function renderStoryView(
     const groupId = selected.conditionalBranch!.groupId, node = groupHeader(scene, groupId);
     editor.append(beatHeading(scene, node));
     const caption = document.createElement("p"); caption.className = "story-condition-summary";
-    caption.textContent = `Condition · ${node.conditionalBranch?.condition ? conditionCaption(node.conditionalBranch.condition, model.authoring.variables) : "Unknown condition"} · ${scene.beats.filter(item => item.conditionalBranch?.groupId === groupId).length} branches / ${groupCount(scene, node)} Beats`;
+    caption.textContent = `Condition · ${forkCaption(node)} · ${scene.beats.filter(item => item.conditionalBranch?.groupId === groupId).length} branches / ${groupCount(scene, node)} Beats`;
+    // Each branch the builder can't edit, and why.
+    const problems = groupProblems(scene, groupId), list = document.createElement("ul"); list.className = "story-condition-problems"; list.setAttribute("aria-label", "Branches to fix");
+    for (const [header, problem] of problems) { const item = document.createElement("li"), mark = document.createElement("b"); mark.textContent = "!"; mark.ariaHidden = "true"; item.append(mark, Object.assign(document.createElement("span"), { textContent: `${branchName(scene, header)}: ${problem.reason}` })); list.append(item); }
     const note = document.createElement("p"); note.className = "story-field-hint"; note.textContent = "The first branch whose test is true runs. Tests are not evaluated in the preview.";
     const tools = document.createElement("div"); tools.className = "row-actions story-editor-tools";
     const otherwise = button("Add Otherwise", "button secondary story-add-otherwise"); otherwise.disabled = scene.sourceConflict || scene.beats.some(item => item.conditionalBranch?.groupId === groupId && item.conditionalBranch.otherwise); otherwise.addEventListener("click", () => newBranch(scene, node, true));
     const unwrap = button("Unwrap…"); unwrap.disabled = scene.sourceConflict; unwrap.addEventListener("click", () => unwrapForm(scene, node));
     const remove = button("Delete condition"); remove.disabled = scene.sourceConflict; remove.addEventListener("click", () => removeNodeForm(scene, node));
-    tools.append(otherwise, unwrap, remove); editor.append(caption, note, tools);
+    tools.append(otherwise, unwrap, remove); editor.append(caption, ...problems.length ? [list] : [], note, tools);
     for (const header of scene.beats.filter(item => item.conditionalBranch?.groupId === groupId)) {
       const branch = header.conditionalBranch!, body: BodyRef = { type: "branch", groupId, branchId: header.id };
       const section = document.createElement("section"); section.className = "story-branch-editor"; section.dataset.branchId = header.id;
@@ -2152,6 +2161,7 @@ export function renderStoryView(
         head.append(drop);
       }
       // The branch's draft mark: its test, or its removal.
+      if (branchProblem(header)) { const mark = document.createElement("b"); mark.className = "story-problem-mark"; mark.textContent = "!"; name.append(" ", mark); }
       const state = document.createElement("span"); state.className = "story-editor-state"; state.dataset.draftKeys = `${header.id} ${conditionKey.removal(header.id)}`; name.after(state);
       section.append(head);
       const removal = beatDrafts.get(conditionKey.removal(header.id));

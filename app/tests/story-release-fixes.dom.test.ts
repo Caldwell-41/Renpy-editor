@@ -2,7 +2,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
-import type { SceneActions, SceneBeat, SceneCommand, SceneWorkspace } from "../src/scene-ui.js";
+import type { Condition, SceneActions, SceneBeat, SceneCommand, SceneWorkspace } from "../src/scene-ui.js";
+import { buildRuleBuilder } from "../src/story-condition-editor.js";
 import { chooseIn, editorFixture, pickKind, press, renderStoryView, sceneBodies, selectBeat, storyEditor } from "./story-controls-fixture.js";
 const tick = async (): Promise<void> => { await new Promise(resolve => setTimeout(resolve, 0)); };
 
@@ -61,7 +62,7 @@ test("Add a beat describes Transition by what it animates, and a new Transition 
   const panel = pickKind(s.host, "Transition");
   assert.deepEqual(texts(panel.querySelector(".story-transition-help")!, "li"), ["03 Hide character · Eli"]);
   assert.equal(storyEditor(s.host).contains(panel), true);
-  await s.close(); void tick;
+  await s.close();
 });
 
 test("the Tracks Characters lane names the character, expression and position", async () => {
@@ -99,5 +100,81 @@ test("Set variable's list ends with + New variable…, says when there are none,
   assert.deepEqual(requests, [{ technicalName: "ticket_count", variableType: "int", defaultValue: "0" }]);
   assert.equal(summary().getAttribute("aria-label"), "Variable: ticket_count"); assert.equal(document.activeElement, summary());
   assert.ok(panel.querySelector('input[aria-label="Formula"]'), "A whole number takes a calculation");
+  await s.close();
+});
+
+/** Condition 01: If has_ticket, two Else if tests core could not read, and Otherwise. */
+function brokenCondition(missing: Condition = { status: "unknown", source: "ticket_count == 2", diagnostic: "missingVariable" }): SceneWorkspace {
+  const header = (id: string, ordinal: number, condition?: Condition): SceneBeat => beat(id, { type: "customCode", source: "", reason: "Condition header" }, { protected: true, conditionalBranch: { groupId: "test", ordinal, otherwise: !condition, ...condition ? { condition } : {} } });
+  const inside = (id: string, branchId: string): SceneBeat => beat(id, { type: "narration", text: `Inside ${branchId}.` }, { owner: { groupId: "test", branchId } });
+  const model = project([
+    header("if", 0, { status: "supported", expression: { type: "variable", variableId: "flag", variableType: "bool" } }), inside("in-if", "if"),
+    header("missing", 1, missing), inside("in-missing", "missing"),
+    header("type", 2, { status: "unknown", source: "destination >= 3", diagnostic: "typeMismatch" }), inside("in-type", "type"),
+    header("else", 3), inside("in-else", "else"),
+    beat("after", { type: "narration", text: "The doors close behind them." }),
+  ]);
+  return { ...model, authoring: { ...model.authoring, variables: [...model.authoring.variables, { id: "destination", technicalName: "destination", variableType: "string", defaultValue: "Depot" }] } };
+}
+
+test("a condition names each branch the builder can't edit, why, and what to do, in the builder, Tracks and the Branch path", async () => {
+  const fixed = brokenCondition({ status: "supported", expression: { type: "compare", operator: "equal", left: { type: "variable", variableId: "count", variableType: "int" }, right: { type: "int", value: "2" } } });
+  const requests: unknown[] = [];
+  const s = mount(brokenCondition(), { createVariable: async request => { requests.push(request); return { ...fixed, projectRevision: "project-2", authoring: { ...fixed.authoring, variables: [...fixed.authoring.variables, { id: "count", technicalName: "ticket_count", variableType: "int", defaultValue: "0" }] } }; } });
+  const flow = (): HTMLElement => [...s.host.querySelectorAll<HTMLElement>(".story-route [data-beat-id]")].find(column => column.dataset.beatId === "if")!.querySelector<HTMLElement>(".story-lane-5")!;
+  assert.equal(flow().textContent, "2 branches to fix"); assert.ok(flow().classList.contains("story-lane-warn"));
+  const editor = selectBeat(s.host, "if");
+  assert.deepEqual(texts(editor, ".story-condition-problems li > span"), ["Else if ticket_count = 2: ticket_count is not a project variable.", "Else if destination ≥ 3: destination is text, and ≥ only compares numbers."]);
+  const branch = (id: string): HTMLElement => editor.querySelector<HTMLElement>(`.story-branch-editor[data-branch-id="${id}"]`)!;
+  assert.deepEqual(["if", "missing", "type", "else"].map(id => branch(id).querySelector(".story-branch-head > strong")!.textContent), ["If", "Else if !", "Else if !", "Otherwise"]);
+  const code = branch("missing").querySelector<HTMLElement>(".story-rule-code")!;
+  assert.equal(code.textContent, "elif ticket_count == 2:"); assert.equal(code.getAttribute("aria-invalid"), "true");
+  assert.equal(document.getElementById(code.getAttribute("aria-describedby")!)!.textContent, "ticket_count is not a project variable. Create it, or change this line in Source. Until then, the builder can't edit this branch.");
+  assert.deepEqual(texts(branch("missing"), ".story-rule-actions > button"), ["Create ticket_count…", "Edit in Source"]);
+  assert.equal(branch("type").querySelector(".story-rule-error")!.textContent, "destination is text, and ≥ only compares numbers. Use = or ≠ in Source. Until then, the builder can't edit this branch.");
+  assert.deepEqual(texts(branch("type"), ".story-rule-actions > button"), ["Edit in Source"]);
+  // The Branch path caption follows the pressed branch and names its problem.
+  const caption = (): HTMLElement => s.host.querySelector<HTMLElement>(".story-branch-test")!;
+  assert.deepEqual(texts(s.host, ".story-branch-segment"), ["If", "Else if !", "Else if !", "Otherwise"]);
+  press(branch("type"), "Open");
+  assert.equal(caption().textContent, "destination ≥ 3 · wrong type"); assert.ok(caption().classList.contains("story-branch-warn"));
+  [...s.host.querySelectorAll<HTMLButtonElement>(".story-branch-segment")].find(item => item.dataset.branchId === "else")!.click();
+  assert.equal(caption().textContent, "has_ticket"); assert.equal(caption().classList.contains("story-branch-warn"), false);
+  // Create ticket_count… opens New variable for it; the branch the variable fixes leaves the list.
+  press(selectBeat(s.host, "if").querySelector<HTMLElement>('.story-branch-editor[data-branch-id="missing"]')!, "Create ticket_count…");
+  const dialog = s.host.querySelector<HTMLElement>(".story-new-variable")!;
+  assert.equal(dialog.querySelector<HTMLInputElement>('input[aria-label="Variable name"]')!.value, "ticket_count");
+  press(dialog, "Create variable"); await tick();
+  assert.deepEqual(requests, [{ technicalName: "ticket_count", variableType: "int", defaultValue: "0" }]);
+  assert.deepEqual(texts(storyEditor(s.host), ".story-condition-problems li > span"), ["Else if destination ≥ 3: destination is text, and ≥ only compares numbers."]);
+  assert.equal(flow().textContent, "1 branch to fix");
+  await s.close();
+});
+
+test("the rule builder words each problem for a branch or an option, and names its comparisons", async () => {
+  const s = mount(brokenCondition()), variables = editorFixture().authoring.variables;
+  const flag = { type: "variable" as const, variableId: "flag", variableType: "bool" as const };
+  const shown = (condition: Condition, subject?: "branch" | "option"): HTMLElement => { const builder = buildRuleBuilder(variables, condition, { keyword: "if", label: "Only when", empty: "", required: false, newVariable: async () => undefined, source: () => {}, ...subject ? { subject } : {} }); document.body.append(builder.host); return builder.host; };
+  const missing = shown({ status: "unknown", source: "ticket_count == 2", diagnostic: "missingVariable" }, "option");
+  assert.equal(missing.querySelector(".story-rule-error")!.textContent, "ticket_count is not a project variable. Create it, or change this line in Source. Until then, the builder can't edit this option.");
+  assert.equal(shown({ status: "unknown", source: "renpy.seen_label('x')", diagnostic: "unsupportedSyntax" }).querySelector(".story-rule-error")!.textContent, "The builder can't show this Python. Until then, edit it in Source.");
+  assert.equal(shown({ status: "supported", expression: { type: "and", left: flag, right: { type: "or", left: flag, right: flag } } }).querySelector(".story-field-hint")!.textContent, "This mixes All and Any. The builder can't edit it. Edit it in Source.");
+  // Screen readers name each rule's test a comparison.
+  const rule = shown({ status: "supported", expression: { type: "compare", operator: "greaterEqual", left: { type: "variable", variableId: "trust", variableType: "int" }, right: { type: "int", value: "3" } } });
+  chooseIn(rule, "Only when rule 1 comparison", "≤"); assert.ok(rule.querySelector('select[aria-label="Only when rule 1 comparison"]'));
+  await s.close();
+});
+
+test("Add a beat says Condition branches on a variable, and a branch with no rules says to add one", async () => {
+  const s = mount(brokenCondition());
+  const editor = selectBeat(s.host, "if");
+  assert.ok(editor.querySelector('.story-branch-test[aria-label="If comparison"]'));
+  press(editor.querySelector<HTMLElement>('.story-branch-editor[data-branch-id="if"]')!, "Remove rule 1");
+  assert.equal(editor.querySelector('.story-branch-editor[data-branch-id="if"] .story-rule-code')!.textContent, "Add a rule to this branch.");
+  press(editor.querySelector<HTMLElement>('.story-branch-editor[data-branch-id="if"]')!, "Commit test"); await tick();
+  assert.equal(s.status.at(-1), "Add a rule to this branch."); assert.deepEqual(s.calls, []);
+  press(s.host, "+ Add beat"); const dialog = s.host.querySelector<HTMLElement>(".story-add-beat")!;
+  [...dialog.querySelectorAll<HTMLButtonElement>(".story-result")].find(item => item.textContent === "Condition")!.dispatchEvent(new Event("pointerenter"));
+  assert.equal(dialog.querySelector(".story-picker-details > p")!.textContent, "Branches on a variable, then the story continues.");
   await s.close();
 });

@@ -855,24 +855,31 @@ export const storyCases={
   const changed=await c.snapshot(),owner=c.session();
   await c.click('Branches');await c.wait(()=>c.session()===owner&&c.document.querySelector('.branches-workspace'));await c.settle();await goStory(c,entry.id);
   const branchOf=source=>shownBeats(c).find(b=>b.conditionalBranch?.condition?.source===source);
-  // What Story shows today for each test: Branch path, Tracks, the condition editor and its rule builder.
-  const shown=async(source,word,reason)=>{
+  // Each test names its problem and what to do (story-release-fixes / a-v2): the builder,
+  // Branch path, Tracks entry and the condition's summary and Tracks cell.
+  const shown=async(source,word,test,short,message)=>{
    const branch=branchOf(source);c.assert(branch);c.assert.equal(branch.conditionalBranch.condition.status,'unknown');
-   const caption=`Unknown condition: ${source} (${reason})`,ifId=nodeOf(c,branch.conditionalBranch.groupId).id;
+   const ifId=nodeOf(c,branch.conditionalBranch.groupId).id,reason=message.slice(0,message.indexOf('.')+1);
    const section=await branchBody(c,branch.id),workspace=c.document.querySelector('.scene-workspace');
-   c.assert.equal(workspace.querySelector(`.story-branch-segment[data-branch-id="${branch.id}"]`).title,`Close ${word} ${caption}`);
-   c.assert.equal(workspace.querySelector(`.story-track-entry[data-branch-id="${branch.id}"] [title]`).title,`${word} ${caption}`);
-   c.assert.equal(section.querySelector('.story-rule-code').textContent,`${word==='If'?'if':'elif'} ${source}:`);
-   c.assert.equal(section.querySelector('.story-field-hint').textContent,'This test uses Python the builder cannot show. It stays as written.');
+   c.assert.equal(workspace.querySelector(`.story-branch-segment[data-branch-id="${branch.id}"]`).title,`Close ${word} ${test}, needs changes: ${reason}`);
+   c.assert.equal(workspace.querySelector(`.story-branch-segment[data-branch-id="${branch.id}"]`).textContent,`${word} !`);
+   c.assert.equal(workspace.querySelector(`.story-track-entry[data-branch-id="${branch.id}"] [title]`).title,`${word} ${test}`);
+   const code=section.querySelector('.story-rule-code');
+   c.assert.equal(code.textContent,`${word==='If'?'if':'elif'} ${source}:`);c.assert.equal(code.getAttribute('aria-invalid'),'true');
+   c.assert.equal(c.document.getElementById(code.getAttribute('aria-describedby')).textContent,message);
    c.assert.equal([...section.querySelectorAll('button')].find(b=>b.textContent==='Edit in Source')?.disabled,false);
-   c.assert.equal(section.querySelector(`[data-beat-opener="branch:${branch.id}"]`).disabled,true,'+ Beat is off while the test is unknown');
-   return {test:workspace.querySelector(`.story-branch-group[data-branch-owner="${ifId}"] .story-branch-test`).title,summary:card(c,ifId).querySelector('.story-condition-summary').textContent};
+   c.assert.equal(section.querySelector(`[data-beat-opener="branch:${branch.id}"]`).disabled,true,'+ Beat is off while the builder cannot edit the test');
+   const flow=findRow(c,ifId).querySelector('.story-lane-5');c.assert.equal(flow.textContent,'1 branch to fix');c.assert(flow.classList.contains('story-lane-warn'));
+   const caption=workspace.querySelector(`.story-branch-group[data-branch-owner="${ifId}"] .story-branch-test`);
+   c.assert.deepEqual([...card(c,ifId).querySelectorAll('.story-condition-problems li > span')].map(item=>item.textContent),[`${word} ${test}: ${reason}`]);
+   return {test:caption.textContent,warn:caption.classList.contains('story-branch-warn'),summary:card(c,ifId).querySelector('.story-condition-summary').textContent,section};
   };
-  const mismatch=await shown('trust == True','If','Variable type mismatch');
-  c.assert.deepEqual(mismatch,{test:'Unknown condition: trust == True (Variable type mismatch)',summary:'Condition · Unknown condition: trust == True (Variable type mismatch) · 1 branches / 1 Beats'});
-  // An Else if's reason is not in its condition's Branch path caption or summary, which show the If test.
-  const missing=await shown('missing_flag == 4','Else if','missing Variable');
-  c.assert.equal(missing.test,'flag');c.assert.match(missing.summary,/^Condition · flag · 3 branches \/ \d+ Beats$/);
+  const mismatch=await shown('trust == True','If','trust = True','wrong type',"trust is a whole number, and True is yes/no. Compare it with a whole number in Source. Until then, the builder can't edit this branch.");
+  c.assert.deepEqual({test:mismatch.test,warn:mismatch.warn,summary:mismatch.summary},{test:'trust = True · wrong type',warn:true,summary:'Condition · trust = True · 1 branches / 1 Beats'});
+  // The Branch path caption follows the open Else if and names its problem; the summary keeps the If test.
+  const missing=await shown('missing_flag == 4','Else if','missing_flag = 4','not a variable',"missing_flag is not a project variable. Create it, or change this line in Source. Until then, the builder can't edit this branch.");
+  c.assert.equal(missing.test,'missing_flag = 4 · not a variable');c.assert.equal(missing.warn,true);c.assert.match(missing.summary,/^Condition · flag · 3 branches \/ \d+ Beats$/);
+  c.assert.deepEqual([...missing.section.querySelectorAll('.story-rule-actions > button')].map(b=>b.textContent),['Create missing_flag…','Edit in Source']);
   // An unrelated draft still saves.
   const root=scene(c).beats.find(b=>b.payload.text==='Override A'&&!b.owner);c.assert(root);
   await select(c,root.id);c.enter(card(c,root.id).querySelector('textarea'),'Saved beside unknown tests');await c.settle();
@@ -881,6 +888,14 @@ export const storyCases={
   const saved=await c.snapshot();
   c.assert.equal(c.sourceText(saved,path),replaceOnce(c,c.sourceText(changed,path),'"Override A"','"Saved beside unknown tests"'));
   unchangedOtherSources(c,changed,saved,path);
+  // Create missing_flag… opens the shared New variable dialog for it, as a whole number to match 4.
+  // Cancel keeps nothing.
+  const elseIf=branchOf('missing_flag == 4'),section=await branchBody(c,elseIf.id),writes=c.requests().length;
+  [...section.querySelectorAll('button')].find(b=>b.textContent==='Create missing_flag…').click();
+  const dialog=c.document.querySelector('.story-new-variable');c.assert.equal(dialog.querySelector('input[aria-label="Variable name"]').value,'missing_flag');
+  c.assert.equal(dialog.querySelector('select[aria-label="Variable type"]').value,'int');
+  await c.click('Cancel',dialog);c.assert.equal(c.document.querySelector('.story-new-variable'),null);
+  c.assert.equal(c.requests().slice(writes).filter(r=>r.request.operation==='variable.create').length,0);
  },
  [RELEASE_JOURNEY]:async c=>{
   const view=async(c,name)=>{await c.click(name,c.document.querySelector('.scene-workspace .story-view-switch'));

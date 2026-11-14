@@ -23,7 +23,7 @@ const kinds: readonly (readonly [AddKind, string, string, string])[] = ([
   ["stopMusic", "Audio", "Stops the current music."],
   ["playSfx", "Audio", "Plays a sound once."],
   ["choice", "Flow", "Options the player picks from."],
-  ["condition", "Flow", "Branches on a test, then the story continues."],
+  ["condition", "Flow", "Branches on a variable, then the story continues."],
   ["call", "Flow", "Visits a scene, then comes back."],
   ["jump", "Flow", "Goes to a scene and does not return."],
   ["return", "Flow", "Returns to the caller, or the main menu."],

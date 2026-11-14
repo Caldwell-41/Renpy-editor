@@ -64,7 +64,7 @@ test("recursive and unknown branch captions remain accurate and do not execute s
   // The Branch path names each branch in its switch.
   const names = [...host.querySelectorAll<HTMLButtonElement>(".story-branch-segment")].map(button => button.title);
   assert.match(names[1]!, /Else if.*trust is at least 9223372036854775807.*and Not \(False\)/);
-  assert.match(names[2]!, /Else if Unknown condition: custom_check\(\)/);
+  assert.equal(names[2]!, "Show Else if custom_check(), needs changes: The builder can't show this Python.");
   assert.equal(deriveScenePreview(model(branches).scenes[0]!).partial, true);
   assert.equal(conditionCaption({ status: "supported", expression: { type: "string", value: '雪 "quoted"' } }), '"雪 \\"quoted\\""');
   dispose(); await browser.happyDOM.close();

@@ -303,7 +303,35 @@ Each rule picks a project variable (yes/no, whole number, decimal or text), a pr
 value. Numbers offer `= ≠ < ≤ > ≥`; yes/no and text offer equality only. One All/Any
 switch joins the rules, and each branch shows its Ren'Py line. Mixed groups and Python
 the editor cannot read stay read-only with Edit in Source; the builder never writes
-raw Python. The variable list can create a variable in place, with Undo: it ends with
+raw Python. A mixed group says "This mixes All and Any. The builder can't edit it.
+Edit it in Source." Screen readers name each rule's test a comparison ("If rule 1
+comparison").
+
+A test core could not read (`story-release-fixes` / `a-v2`) keeps its line in a
+red-bordered box, with why and what to do in red under it, then Create and Edit in
+Source as they apply. The builder derives the names from the line and the project's
+variables:
+
+- Missing variable: "ticket_count is not a project variable. Create it, or change this
+  line in Source." Create ticket_count… opens New variable with that name and the type
+  its comparison suggests.
+- Wrong type: "destination is text, and ≥ only compares numbers. Use = or ≠ in Source.",
+  or "trust is a whole number, and True is yes/no. Compare it with a whole number in
+  Source."
+- Out-of-range number, or a line too long: "A number in this line is out of range.
+  Change this line in Source." and "This line is too long for the builder. Shorten it
+  in Source."
+- Each of these ends "Until then, the builder can't edit this branch." ("this option"
+  in a Choice's Only when).
+- Python the builder can't show: "The builder can't show this Python. Until then, edit
+  it in Source."
+
+The condition's editor lists each such branch under its summary, "Else if ticket_count
+= 2: ticket_count is not a project variable.", and marks its name with `!`. Its Tracks
+cell reads "2 branches to fix". The Branch path caption follows the open If or Else if
+and names its problem, "ticket_count = 2 · not a variable", and the branch's switch
+reads "Else if !". The list, the marks, the caption and the Tracks cell use the warning
+colour. The variable list can create a variable in place, with Undo: it ends with
 "+ New variable…", says "No variables yet." when the project has none, and selects the
 new variable. Story conditions, Choice "Only when" and Set variable use the same list.
 
