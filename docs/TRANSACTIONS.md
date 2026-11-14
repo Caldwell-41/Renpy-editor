@@ -215,7 +215,12 @@ move must not be misreported as recovery-required merely because the wrong handl
 was used for the final flush.
 
 Entry/last Scene constraints, incoming Choice/Jump references, and opaque ownership
-are checked before producing a destructive proposal. Chapter order remains metadata
+are checked before producing a destructive proposal. Protected source in another
+Scene blocks a Scene delete only when it names that Scene's label as a whole name.
+Supported Jump and Call references to the Scene still block it, and so does protected
+source inside the deleted Scene, since the delete would drop it. Core does not detect
+a label built at runtime, such as one joined from strings in Python. Undo restores a
+deleted Scene. Chapter order remains metadata
 organisation and does not rewrite runtime flow. A display rename changes metadata only.
 
 Every completed semantic commit returns the actual revisions and identities for all

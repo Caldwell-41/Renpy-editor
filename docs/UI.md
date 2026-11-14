@@ -452,6 +452,10 @@ covers moving, unwrapping and deleting branches.
   column moves its beat.
   The scene toolbar holds Writing focus, + Add beat and More. More holds View in
   Source, Add screen Beat, Add Condition and the Assist actions.
+  + Add beat adds after the selected beat, in that beat's own scene, branch or option,
+  and never past the place before that body's ending. A selected branch or option
+  header stands for its condition or Choice. With nothing selected, + Add beat adds at
+  the scene's default place.
 - The scene title ("Arrival ▾") opens and closes the scene list, which keeps every
   scene and chapter action. Below 1200 px, Story opens with the icon rail and the
   scene list closed. Like the scene list's other defaults, this is set when Story
@@ -473,6 +477,11 @@ covers moving, unwrapping and deleting branches.
 
 ### Branches in a scene
 
+- Scene beats are numbered from 01. A condition's branch beats count on from its
+  number through all its branches, so condition 06 numbers its beats 06.1, 06.2 and on
+  into Else if and Otherwise. Option beats nest as Choice.option.beat: 07.2.1 is the
+  first beat of option 2 in Choice 07. Tracks, Reel, Writing focus, the Branch path,
+  the editors and the pickers show the same numbers.
 - The Branch path only switches branches. Each open condition shows its number, its
   If test and a two-way switch in its arm colours. Choice options show only their
   number unless open.

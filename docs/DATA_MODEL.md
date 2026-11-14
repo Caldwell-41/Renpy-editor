@@ -138,6 +138,14 @@ after its containing Choice. Completion analysis traverses the same owners witho
 evaluating conditions. Branches records the originating option header and ancestor
 guards, each transfer and the continuation in its actual containing body.
 
+Source-map v15 maps an unsupported statement and its deeper lines as one Custom Code
+beat. A `python:` block is one beat, not one beat per line. Blank and comment lines
+inside the block stay in it; those after its last line are trivia. Older maps have one
+row per line. On open, core checks those rows with the old recognizer, then folds each
+block's rows into one. The first row keeps its ID, and the other rows go under
+`refinedChildMappings`. Only Custom Code rows fold, so a legacy Choice row that would
+become Custom Code refuses. Opening never writes `.rpy` bytes.
+
 Caption, guard, reorder and option-count edits carry each retained body's exact
 bytes and mapped IDs. New options get new IDs. Then controls edit only the last
 Jump/Repeat/Return, or its absence for Continue. Source reconciliation refuses ambiguous
