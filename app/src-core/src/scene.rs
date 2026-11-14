@@ -685,9 +685,6 @@ impl AuthoringService {
                         mapped.byte_start as usize != parsed.start
                             || mapped.byte_end as usize != parsed.end
                             || mapped.source_sha256 != sha256(&bytes[parsed.start..parsed.end])
-                            || !compatible_arithmetic_kind(&mapped.kind, &parsed.payload)
-                                && !(mapped.kind == "customCode"
-                                    && matches!(parsed.nesting, Some(ParsedNesting::Child { .. })))
                     })
                 {
                     return Err(SceneError::InvalidMetadata);
@@ -3855,9 +3852,11 @@ pub(crate) fn build_mapping(
                 .iter()
                 .zip(parsed.iter())
                 .any(|(mapped, parsed)| {
+                    // The kind is not checked: it also depends on the characters,
+                    // assets and variables a line names, which can change while the
+                    // source does not (#120).
                     mapped.byte_start as usize != parsed.start
                         || mapped.byte_end as usize != parsed.end
-                        || !compatible_arithmetic_kind(&mapped.kind, &parsed.payload)
                         || parsed.end > bytes.len()
                         || mapped.source_sha256 != sha256(&bytes[parsed.start..parsed.end])
                 })
@@ -3881,26 +3880,25 @@ pub(crate) fn build_mapping(
             .or_default()
             .push_back((id.clone(), *anchor));
     }
-    let arithmetic_ranges: HashMap<_, _> = parsed
-        .iter()
-        .filter(
-            |p| matches!(&p.payload, BeatPayload::SetVariable { value, .. } if value.is_object()),
-        )
-        .map(|p| ((p.start, p.end), sha256(&bytes[p.start..p.end])))
-        .collect();
+    // The same bytes are the same line even when what they name now exists, or no
+    // longer does, and so their kind changed.
+    let mut current_kinds = HashMap::<String, HashSet<&str>>::new();
+    for p in &parsed {
+        current_kinds
+            .entry(sha256(&bytes[p.start..p.end]))
+            .or_default()
+            .insert(p.payload.kind());
+    }
     if let Some(previous) = previous {
         for beat in &previous.beats {
             if forced_ids.contains(beat.id.as_str()) {
                 continue;
             }
-            let kind = if beat.kind == "customCode"
-                && arithmetic_ranges
-                    .get(&(beat.byte_start as usize, beat.byte_end as usize))
-                    .is_some_and(|hash| hash == &beat.source_sha256)
-            {
-                "setVariable".into()
-            } else {
-                beat.kind.clone()
+            let kind = match current_kinds.get(&beat.source_sha256) {
+                Some(kinds) if kinds.len() == 1 && !kinds.contains(beat.kind.as_str()) => {
+                    kinds.iter().next().unwrap().to_string()
+                }
+                _ => beat.kind.clone(),
             };
             ids.entry((kind, beat.source_sha256.clone()))
                 .or_default()
@@ -4440,12 +4438,6 @@ fn arithmetic_error(reason: crate::conditions::arithmetic::ArithmeticUnknown) ->
         LimitExceeded => SceneError::ArithmeticLimitExceeded,
         _ => SceneError::InvalidArithmeticOperand,
     }
-}
-
-fn compatible_arithmetic_kind(old: &str, payload: &BeatPayload) -> bool {
-    old == payload.kind()
-        || old == "customCode"
-            && matches!(payload, BeatPayload::SetVariable { value, .. } if value.is_object() || value.is_number())
 }
 
 fn patch_variable_assignment(
@@ -7964,5 +7956,113 @@ mod tests {
         assert!(after.scenes[0].beats.iter().all(|b| b.id != if_header[0]));
         // An unrelated line keeps its ID through each edit.
         assert_eq!(ids(&before, "After")[0].0, ids(&after, "After")[0].0);
+    }
+
+    #[test]
+    fn source_lines_keep_opening_and_their_ids_when_what_they_name_is_created_later() {
+        let mut fixture = Fixture::new(b"label scene_one:\n    return\n");
+        fixture.migrate();
+        let path = fixture
+            .root
+            .join(&fixture.workspace().scenes[0].source_path);
+        fs::write(
+            &path,
+            "label scene_one:\n    scene bg booth\n    bec \"Hi\"\n    $ trust = 3\n    return\n",
+        )
+        .unwrap();
+        let kinds = |ws: &SceneWorkspace| {
+            ws.scenes[0]
+                .beats
+                .iter()
+                .map(|b| (b.id.clone(), b.payload.kind().to_owned()))
+                .collect::<Vec<_>>()
+        };
+        let before = kinds(&fixture.workspace());
+        assert_eq!(before[0].1, "customCode");
+        assert_eq!(before[1].1, "customCode");
+        let image = fixture.root.join("booth.png");
+        fs::write(&image, b"booth raster").unwrap();
+        let choice = fixture
+            .service
+            .select_import(&fixture.project, &image)
+            .unwrap();
+        fixture
+            .service
+            .import_asset(
+                &fixture.project,
+                &fixture.project_id,
+                ImportAssetRequest {
+                    authority_id: choice.authority_id,
+                    kind: AssetKind::Background,
+                    technical_name: "booth".into(),
+                    display_name: "Booth".into(),
+                    character_id: None,
+                    expression: None,
+                },
+            )
+            .unwrap();
+        fixture
+            .service
+            .create_character(
+                &fixture.project,
+                &fixture.project_id,
+                CreateCharacterRequest {
+                    technical_name: "bec".into(),
+                    display_name: "Bec".into(),
+                    dialogue_color: "#ffffff".into(),
+                },
+            )
+            .unwrap();
+        fixture
+            .service
+            .create_variable(
+                &fixture.project,
+                &fixture.project_id,
+                CreateVariableRequest {
+                    technical_name: "trust".into(),
+                    variable_type: VariableType::Int,
+                    default_value: Value::String("0".into()),
+                },
+            )
+            .unwrap();
+        let after = kinds(&fixture.workspace());
+        let expected = ["background", "dialogue", "setVariable", "return"];
+        assert_eq!(
+            after.iter().map(|(_, k)| k.as_str()).collect::<Vec<_>>(),
+            expected
+        );
+        // The same lines keep their IDs, so drafts and selection stay on them.
+        assert_eq!(
+            after.iter().map(|(id, _)| id).collect::<Vec<_>>(),
+            before.iter().map(|(id, _)| id).collect::<Vec<_>>()
+        );
+        // The stored map still names the old kinds, as a released build leaves it.
+        fixture.migrate();
+        let reopened = fixture.workspace();
+        assert_eq!(kinds(&reopened), after);
+        let scene = &reopened.scenes[0];
+        let edited = fixture
+            .apply(
+                &reopened,
+                SceneCommand::UpdateBodyBeat {
+                    scene_id: scene.id.clone(),
+                    expected_source_revision: scene.source_revision.clone(),
+                    beat_id: after[1].0.clone(),
+                    expected_body: BodyRef::Root,
+                    beat: BeatPayload::Dialogue {
+                        character_id: match &scene.beats[1].payload {
+                            BeatPayload::Dialogue { character_id, .. } => character_id.clone(),
+                            _ => unreachable!(),
+                        },
+                        text: "Hello".into(),
+                    },
+                },
+            )
+            .unwrap();
+        assert_eq!(kinds(&edited), after);
+        assert_eq!(
+            fs::read_to_string(&path).unwrap(),
+            "label scene_one:\n    scene bg booth\n    bec \"Hello\"\n    $ trust = 3\n    return\n"
+        );
     }
 }

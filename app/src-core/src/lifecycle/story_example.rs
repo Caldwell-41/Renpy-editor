@@ -172,15 +172,13 @@ impl Example {
                 })
         };
         // Platform keeps the source-foundation BOM through Source Save.
-        for (name, _) in SCENES.iter().filter(|(name, _)| *name != "Tram") {
+        for (name, _) in SCENES {
             let path = self.scene(name)?["sourcePath"].clone();
             self.save(path.as_str().unwrap(), &source(name))?;
         }
         self.author_phase3a()?;
         self.author_choices()?;
         // Imported after the Scene commands, which would hash the art again on each write.
-        // Tram names the art, so it is saved after the import: importing an asset that a
-        // saved scene already names currently leaves Story unable to read the project.
         for (path, kind, name, appearance) in ASSETS {
             let choice = self
                 .service
@@ -198,8 +196,7 @@ impl Example {
                 "displayName": name, "characterId": character, "expression": expression}),
             )?;
         }
-        let path = self.scene("Tram")?["sourcePath"].clone();
-        self.save(path.as_str().unwrap(), &source("Tram"))
+        Ok(())
     }
 
     /// The Story edits the Phase 3A SDK gate plays: the nested dialogue, the outer
