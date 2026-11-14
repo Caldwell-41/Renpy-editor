@@ -489,7 +489,21 @@ covers moving, unwrapping and deleting branches.
   header stands for its condition or Choice. With nothing selected, + Add beat adds at
   the scene's default place.
 - The scene title ("Arrival ▾") opens and closes the scene list, which keeps every
-  scene and chapter action. Below 1200 px, Story opens with the icon rail and the
+  scene and chapter action. Each chapter is a heading, and ▾ or ▸ before its name
+  shows or hides its scenes. The scenes sit under a thin guide line. Collapsing a
+  chapter is view state: it sends nothing to core and lasts until Story closes. The
+  chapter's own actions stay in its ⋯ menu (`story-release-fixes` / `a-v2`).
+- Delete in a scene's menu asks "Delete scene "Depot"? Undo restores it." When core
+  refuses the delete with the beats and Custom Code that need the scene, the refusal
+  takes the confirmation's place under the scene's row. A header line with × reads
+  "Can't delete "Platform 4". 2 beats go to it:". One row per beat gives its scene,
+  then its number and kind, such as "The last service · 07 Jump", and opens that
+  beat. The closing line reads "Change or remove them, then delete again. Nothing
+  was deleted." When only Custom Code elsewhere names the scene's label, the header
+  ends "Custom Code may jump to it, and Loomlight can't check where it goes:" and the
+  closing line is "Change that code in Source first. Nothing was deleted." Custom Code
+  inside the scene adds "it holds Custom Code that deleting would drop".
+- Below 1200 px, Story opens with the icon rail and the
   scene list closed. Like the scene list's other defaults, this is set when Story
   opens; resizing the window keeps the current state, and the toggles still work.
   A 16:9 stage measures 599 × 337 at 1100 × 720.
@@ -539,8 +553,10 @@ covers moving, unwrapping and deleting branches.
 - Core gives each [body](../GLOSSARY.md) its beats, body ending and insertion places.
   Story views, Add a beat and moves read them and never work them out again.
 - A body has an insertion place before each node up to its ending, and one at its end
-  when it does not end. There is none after the ending, before protected Custom Code
-  or before an Else if or Otherwise header. Jump, Repeat this Choice and Return fit
+  when it does not end. There is none after the ending, inside protected Custom Code
+  or before an Else if or Otherwise header. A place right before protected Custom Code
+  puts the new beat before the region's first line. The `+` on the beat before the
+  region says so: "Add after 03 Mara's line, before 04 Custom Code". Jump, Repeat this Choice and Return fit
   only at the end. An empty body has one insertion place, and its new beat replaces
   the `pass`.
 - Add a beat starts at the place before the body's ending, or at the end when the
@@ -603,6 +619,13 @@ a beat follow `story-combined-editor` / `replace-v2`
   "Before …" and "End of …" positions. It opens on the beat's own location with the
   rest closed. Up and Down move, Right opens or moves in, Left closes or moves out,
   Enter selects and Escape cancels. A beat never moves into its own branches.
+- Move to opens with no position chosen and says where the beat is now: "05 Eli's
+  line is after 04 Custom Code now. Choose where to move it." It leaves out the two
+  positions that would leave the beat where it is. Protected Custom Code and the
+  beat's own place show in order as rows that can't be chosen: "04 Custom Code ·
+  protected, stays in place" and "05 Eli's line · here now". A beat may move past
+  protected Custom Code, and the note adds "Protected Custom Code stays where it is."
+  (`story-release-fixes` / `a-v2`).
 
 ### Beat drafts
 
