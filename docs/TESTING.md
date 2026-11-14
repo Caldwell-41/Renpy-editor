@@ -46,7 +46,9 @@ Use the narrowest real integration seam for changed asynchronous paths, across t
 actual frontend controller or helper and the production dispatch or service. Include
 relevant cancellation, held-owner contention, stale completion and retained input.
 Two isolated unit tests do not prove the combined path. Keep unit tests; do not
-copy every case into an expensive end-to-end suite.
+copy every case into an expensive end-to-end suite. An SDK gate gets the edits that
+build its project from a function that a routine test also calls. A gate makes its
+own edits only to check SDK output, such as compiled files.
 
 Prefer the relevant existing DOM or unit test file, and create one only when none
 fits. Write a browser fixture only for behavior a DOM test cannot reach, such as
