@@ -396,8 +396,12 @@ test("Reel draws the Tracks route; switching views keeps selection, branches, a 
   // Edit a nested beat in Reel, then switch: the same editor keeps its draft, and nothing is sent.
   trackColumn(s.host, "deep")!.querySelector<HTMLButtonElement>(".story-track-beat")!.click(); const field = textarea(s.host);
   field.value = "Still writing"; field.dispatchEvent(new Event("input", { bubbles: true })); await tick();
+  field.focus(); field.setSelectionRange(2, 5);
   view("tracks"); assert.equal(textarea(s.host), field); assert.equal(field.value, "Still writing");
   assert.deepEqual(selected(), ["deep"]); assert.deepEqual(pressed(), ["if", "nested-if-0"]); assert.equal(trackColumn(s.host, "deep")!.dataset.beatDraft, "true");
+  assert.ok(document.activeElement === field, "the editor keeps focus"); assert.deepEqual([field.selectionStart, field.selectionEnd], [2, 5], "and its caret");
+  // From the keyboard, focus stays on the view switch.
+  s.host.querySelector<HTMLButtonElement>('.story-view-option[data-view="reel"]')!.focus(); view("reel"); view("tracks");
   assert.equal(document.activeElement?.getAttribute("data-view"), "tracks", "focus stays on the view switch");
   // Add the first beat of the empty Otherwise from Reel. The new beat keeps its place in Tracks.
   view("reel"); openBranch(s.host, "otherwise"); assert.ok(trackColumn(s.host, "otherwise")?.classList.contains("story-track-slot"));

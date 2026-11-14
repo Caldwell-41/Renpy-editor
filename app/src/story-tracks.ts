@@ -537,6 +537,8 @@ export function renderViewSwitch(current: RouteView, choose: (view: RouteView) =
   const group = element("div", "story-view-switch"); group.role = "group"; group.ariaLabel = "Bottom panel view";
   for (const { view, name } of routeViews) {
     const button = action(name, "story-view-option", () => choose(view));
+    // A mouse press would move focus out of the editor; switching keeps it and the caret.
+    button.addEventListener("mousedown", event => event.preventDefault());
     button.dataset.view = view; button.setAttribute("aria-pressed", String(view === current)); group.append(button);
   }
   return group;

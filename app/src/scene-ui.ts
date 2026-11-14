@@ -1984,9 +1984,11 @@ export function renderStoryView(
   };
   // Switching between Tracks and Reel redraws only the bottom panel: the editor, its
   // drafts and focus, the selection, open branches and new beats stay as they are.
+  // Focus in the redrawn panel, such as on the switch itself, moves to the chosen view.
   const showView = (scene: SceneDocument, view: RouteView): void => {
+    const inPanel = !!bottomHost?.contains(document.activeElement);
     if (view !== routeView) { routeView = view; drawBottom(scene); }
-    bottomHost?.querySelector<HTMLElement>(`.story-view-option[data-view="${view}"]`)?.focus({ preventScroll: true });
+    if (inPanel) bottomHost?.querySelector<HTMLElement>(`.story-view-option[data-view="${view}"]`)?.focus({ preventScroll: true });
   };
   // The Branch path and Tracks or Reel. Redrawn alone when a new beat's place or kind changes.
   const drawBottom = (scene: SceneDocument, scroll?: ScrollPosition): void => {
