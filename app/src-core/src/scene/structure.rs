@@ -1,5 +1,5 @@
 //! Explicit-body Beat edits over verified disjoint source ranges.
-use super::bodies::{qualify_body, root_may_continue, trivia, Bodies, Body};
+use super::bodies::{qualify_body, root_ending, trivia, Bodies, Body};
 use super::*;
 mod operations;
 
@@ -282,7 +282,9 @@ impl AuthoringService {
         if next_beats.len() > MAX_BEATS_PER_SCENE {
             return Err(SceneError::InvariantBlocked);
         }
-        if !root_may_continue(&source, &beats)? && root_may_continue(&proposed, &next_beats)? {
+        // A scene that ends must keep ending, and an unknown ending must not become
+        // a certain fallthrough. A scene that already continues stays editable.
+        if root_ending(&proposed, &next_beats)? > root_ending(&source, &beats)? {
             return Err(SceneError::InvariantBlocked);
         }
         *loaded

@@ -607,3 +607,95 @@ fn a_beat_moves_across_protected_custom_code_and_the_region_stays() {
         f.service.close().unwrap();
     }
 }
+
+fn refused(f: &mut Fixture, scene: &Value, fields: Value) {
+    let refused = f.reject(with_scene(scene, fields));
+    assert_eq!(refused["error"]["code"], "SCENE_INVARIANT");
+}
+fn owner_body(beat: &Value) -> Value {
+    json!({"type":"branch","groupId":beat["owner"]["groupId"],"branchId":beat["owner"]["branchId"]})
+}
+
+/// Custom Code may leave B, so the scene ending is unknown. A path that certainly
+/// falls through after the edit is still a new fallthrough.
+#[test]
+fn an_unknown_ending_refuses_an_edit_that_makes_a_path_fall_through() {
+    for body in [
+        "    menu:\n        \"A\":\n            return\n        \"B\":\n            $ renpy.jump(\"x\")\n",
+        "    if flag:\n        return\n    else:\n        $ renpy.jump(\"x\")\n",
+    ] {
+        let mut f = Fixture::new();
+        let a = save(&mut f, body);
+        assert_eq!(scene_body(&a)["ending"], json!({"type":"unknown"}));
+        let ending = beats(&a)
+            .iter()
+            .find(|b| b["payload"]["type"] == "return")
+            .unwrap()
+            .clone();
+        refused(
+            &mut f,
+            &a,
+            json!({"type":"updateBodyBeat","beatId":ending["id"],"expectedBody":owner_body(&ending),"beat":narration()}),
+        );
+        refused(
+            &mut f,
+            &a,
+            json!({"type":"removeStoryNode","node":{"type":"beat","beatId":ending["id"]},"expectedBody":owner_body(&ending)}),
+        );
+        f.service.close().unwrap();
+    }
+}
+
+#[test]
+fn branch_edits_that_open_a_path_past_an_ending_condition_are_refused() {
+    let mut f = Fixture::new();
+    let a = save(
+        &mut f,
+        "    if flag:\n        return\n    else:\n        return\n",
+    );
+    let group = beats(&a)
+        .iter()
+        .find(|b| b["conditionalBranch"]["ordinal"] == 0)
+        .unwrap()["conditionalBranch"]["groupId"]
+        .clone();
+    let otherwise = beats(&a)
+        .iter()
+        .find(|b| b["conditionalBranch"]["otherwise"] == true)
+        .unwrap()
+        .clone();
+    // Without Otherwise, a false condition passes the condition.
+    refused(
+        &mut f,
+        &a,
+        json!({"type":"removeConditionBranch","groupId":group,"branchId":otherwise["id"],"expectedBody":{"type":"root"}}),
+    );
+    // A new Else If starts with an empty body, which continues.
+    refused(
+        &mut f,
+        &a,
+        json!({"type":"addConditionBranch","groupId":group,"expectedBody":{"type":"root"},"beforeBranchId":otherwise["id"],
+            "condition":{"status":"supported","expression":{"type":"bool","value":true}}}),
+    );
+    f.service.close().unwrap();
+}
+
+#[test]
+fn moving_the_scene_return_into_a_branch_is_refused() {
+    let mut f = Fixture::new();
+    let a = save(
+        &mut f,
+        "    if flag:\n        \"In\"\n    \"After\"\n    return\n",
+    );
+    let ending = beats(&a)
+        .iter()
+        .find(|b| b["payload"]["type"] == "return")
+        .unwrap()
+        .clone();
+    refused(
+        &mut f,
+        &a,
+        json!({"type":"moveStoryNode","node":{"type":"beat","beatId":ending["id"]},"expectedBody":{"type":"root"},
+            "body":owner_body(beat(&a, "In")),"position":{"type":"end"}}),
+    );
+    f.service.close().unwrap();
+}
