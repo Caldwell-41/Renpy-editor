@@ -34,7 +34,7 @@ export interface PlaceTreeOptions {
   readonly idle?: string;
   /** The confirm button: "Move" unless given. */
   readonly confirm?: string;
-  /** How the summary names a chosen position: "Move to" unless given. */
+  /** How the place tree and its summary name a chosen position: "Move to" unless given. */
   readonly lead?: string;
   /** Moves the beat. Resolves true once it moved; the dialog then closes. */
   readonly move: (place: { readonly body: BodyRef; readonly position: Position }) => Promise<boolean>;
@@ -59,7 +59,7 @@ export function openPlaceTree(options: PlaceTreeOptions): void {
   const dialog = element("div", "story-dialog story-move"); dialog.role = "dialog"; dialog.setAttribute("aria-modal", "true"); dialog.setAttribute("aria-label", options.title); dialog.tabIndex = -1;
   const close = (refocus = true): void => { if (!backdrop.isConnected) return; backdrop.remove(); if (refocus) options.opener?.focus(); };
   const head = element("div", "story-dialog-head"); head.append(element("h2", "", options.title), iconButton("close", "Close without moving", () => close()));
-  const tree = element("ul", "story-place-tree"); tree.role = "tree"; tree.setAttribute("aria-label", "Move to");
+  const tree = element("ul", "story-place-tree"); tree.role = "tree"; tree.setAttribute("aria-label", options.lead ?? "Move to");
   const summary = element("p", "story-summary"); summary.role = "status";
   const cancel = button("Cancel", "button secondary", () => close());
   const confirm = button(options.confirm ?? "Move", "button primary", () => void run());
