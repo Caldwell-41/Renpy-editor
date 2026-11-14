@@ -1,7 +1,6 @@
 import { assignmentCaption, type ValidateAssignment } from "./story-arithmetic-editor.ts";
 import { buildRuleBuilder, conditionProblem, type ConditionProblem, type NewVariable, type RuleBuilder, type RuleBuilderOptions } from "./story-condition-editor.ts";
 import { openNewVariable, type NewVariableRequest } from "./story-new-variable.ts";
-import { validateField } from "./authoring-input.ts";
 import { addKindName, openAddBeat, type AddKind, type Placement } from "./story-add-beat.ts";
 import { beatLabels, buildBeatEditor, defaultPayload, type BeatEditor, type EditorContext, type EditorInternals } from "./story-beat-editors.ts";
 import { buildChoiceEditor, type ChoiceHost, type Ending } from "./story-choice-editor.ts";
@@ -1527,37 +1526,6 @@ export function renderStoryView(
     editorHost.replaceChildren(); delete editorHost.dataset.editorFor;
     operationSlot = editorHost; return editorHost;
   };
-  // A new screen beat's place: Insert in and Insert before. It keeps the place the author
-  // chose in Screens across workspaces, so it confirms a place that changed before it is
-  // used. Move to uses the tree in story-place-tree.ts instead.
-  const destinations = (scene: SceneDocument, initialBody: BodyRef, initialPosition?: Position, retained?: ScreenInsertion): { host: HTMLElement; read: () => { body: BodyRef; position: Position } } => {
-    const panel = document.createElement("div"); panel.className = "story-destination";
-    const parents = scene.bodies.map(item => ({ key: item.body.type === "root" ? "root" : item.body.branchId, body: item.body, label: pathCaption(scene, item.body) }));
-    const initialParent = parents.find(item => item.body.type === initialBody.type && (item.body.type === "root" || initialBody.type === "branch" && item.body.groupId === initialBody.groupId && item.body.branchId === initialBody.branchId));
-    const parent = selectOf(parents.map(item => ({ value: item.key, label: item.label })), initialParent?.key ?? ""); parent.setAttribute("aria-label", "Insert in");
-    if(!parent.value){const missing=document.createElement("option");missing.value="unavailable-body";missing.textContent="Original place unavailable";parent.prepend(missing);parent.value="unavailable-body";}
-    const position = document.createElement("select"); position.setAttribute("aria-label", "Insert before");
-    const summary = document.createElement("p"); summary.className = "story-insertion"; summary.role = "status";
-    let placements: { key: string; position: Position; label: string }[] = [];
-    let confirmationRequired = !!retained && (retained.sceneId !== scene.id || retained.expectedSourceRevision !== scene.sourceRevision);
-    const confirmationMessage = retained?.sceneId !== scene.id ? "The original insertion Scene is unavailable. Choose a replacement position explicitly. Input retained." : "The original insertion Scene changed. Choose its position explicitly. Input retained.";
-    const show = (): void => { summary.textContent = confirmationRequired && !position.value ? confirmationMessage : `Insert in ${parents.find(item => item.key === parent.value)?.label ?? scene.displayName} · ${placements.find(item => item.key === position.value)?.label ?? "Choose a position"}`; };
-    const rebuild = (): void => {
-      const selectedBody=parents.find(item=>item.key===parent.value);
-      if(!selectedBody){placements=[];position.replaceChildren();summary.textContent="The original scene, branch or option is unavailable. Choose one. Input retained.";return;}
-      const body = selectedBody.body;
-      placements = (bodyOf(scene, body)?.places ?? []).map(({ position }) => ({ key: position.type === "before" ? nodeBeats(scene, body).find(beat => sameNode(nodeRef(beat), position.anchor))?.id ?? "missing" : "end", position, label: positionLabel(scene, body, position) }));
-      position.replaceChildren(...placements.map(item => { const option = document.createElement("option"); option.value = item.key; option.textContent = item.label; return option; }));
-      const preferred = initialPosition ?? defaultPlace(scene, body); const match = placements.find(item => samePosition(item.position, preferred));
-      if (confirmationRequired) { const choose=document.createElement("option");choose.value="";choose.textContent="Choose a position";choose.disabled=true;position.prepend(choose);position.value=""; }
-      else if (initialPosition && !match) { const unavailable=document.createElement("option"); unavailable.value="unavailable";unavailable.textContent="Original position unavailable";position.prepend(unavailable);position.value="unavailable"; }
-      else position.value = match?.key ?? placements[0]?.key ?? "";
-      initialPosition=undefined; show();
-    };
-    parent.addEventListener("change", rebuild); position.addEventListener("change", () => { if (placements.some(item => item.key === position.value)) confirmationRequired = false; show(); }); rebuild(); panel.append(labelled("Insert in", parent), labelled("Insert before", position), summary);
-    const validate = validateField(position, () => { if (!placements.some(item => item.key === position.value)) throw Error(confirmationRequired ? confirmationMessage : `Choose an available position in ${parents.find(item => item.key === parent.value) ? placeName(scene, parents.find(item => item.key === parent.value)!.body) : scene.displayName}.`); });
-    return { host: panel, read: () => { validate(); return { body: parents.find(item => item.key === parent.value)!.body, position: placements.find(item => item.key === position.value)!.position }; } };
-  };
   // A new condition at a place, with its If test from the rule builder.
   const groupHeader = (scene: SceneDocument, groupId: string): SceneBeat => scene.beats.find(beat => beat.conditionalBranch?.groupId === groupId && !beat.conditionalBranch.ordinal && !beat.conditionalBranch.otherwise)!;
   const groupCount = (scene: SceneDocument, header: SceneBeat): number => { const inner = innerBodies(scene, header); return scene.beats.filter(beat => !beat.conditionalBranch && !beat.structuralPlaceholder && !!beat.owner && inner.has(beat.owner.branchId)).length; };
@@ -2445,38 +2413,37 @@ export function renderStoryView(
     const title = document.createElement("h3"); title.className = "story-editor-title"; title.id = `new-beat-title-${key}`; title.textContent = `New · ${addKindName(type)}`;
     heading.append(storyIcon(type), title);
     const screenType = ["showScreen", "hideScreen", "callScreen"].includes(type);
-    // Until it is added, Move to changes only where the new beat will go. A screen beat picks its place below.
-    if (!screenType) {
-      const menu = document.createElement("details"); menu.className = "story-beat-menu";
-      const summary = document.createElement("summary"); summary.textContent = "⋯"; summary.setAttribute("aria-label", "Actions for the new beat");
-      const list = document.createElement("div"); list.className = "story-beat-menu-list";
-      const move = button("Move to…", "text-button"); move.addEventListener("click", () => { menu.open = false; moveNewBeat(summary); });
-      list.append(move); menu.append(summary, list); heading.append(menu);
-    }
-    // Goes at, In and After, as Add a beat named them.
+    // A screen beat starts at the place Screens picked. When that place is no longer valid,
+    // it has no place until the author chooses one (story-release-fixes / a-v2).
+    let unplaced = screenType && !!insertion && (insertion.sceneId !== scene.id || insertion.expectedSourceRevision !== scene.sourceRevision || placeChanged(scene, { body, position }) || !bodyOf(scene, body)?.places.some(place => samePosition(place.position, position)));
+    // Its Tracks column waits at the scene's default place, so the author can return to it.
+    if (unplaced && !(bodyOf(scene, body)?.places.some(place => samePosition(place.position, position)))) { body = { type: "root" }; position = defaultPlace(scene, body); }
+    // Until it is added, Move to changes only where the new beat will go.
+    const menu = document.createElement("details"); menu.className = "story-beat-menu";
+    const summary = document.createElement("summary"); summary.textContent = "⋯"; summary.setAttribute("aria-label", "Actions for the new beat");
+    const list = document.createElement("div"); list.className = "story-beat-menu-list";
+    const move = button("Move to…", "text-button"); move.addEventListener("click", () => { menu.open = false; moveNewBeat(summary); });
+    list.append(move); menu.append(summary, list); heading.append(menu);
+    // Goes at, In and After, as Add a beat named them; or Choose a place, with why.
     const where = document.createElement("dl"); where.className = "story-where story-new-place";
+    const choose = document.createElement("div"); choose.className = "story-place-note";
+    const why = document.createElement("p"); why.append(Object.assign(document.createElement("b"), { textContent: "The scene changed after you picked this place in Screens." }), " Choose where this beat goes.");
+    const chooseButton = button("Choose a place…", "button secondary", () => moveNewBeat(chooseButton)); choose.append(why, chooseButton);
     const drawWhere = (): void => {
       const current = model.scenes.find(item => item.id === scene.id) ?? scene, place = placement(current, body, position, type);
-      where.replaceChildren();
-      for (const [term, value] of [["Goes at", place.goesAt], ["In", place.in], ...place.after ? [["After", place.after]] : []] as const) where.append(Object.assign(document.createElement("dt"), { textContent: term }), Object.assign(document.createElement("dd"), { textContent: value }));
+      where.replaceChildren(); menu.hidden = unplaced; choose.hidden = !unplaced;
+      const rows = unplaced ? [["Goes at", "Choose a place"], ["In", place.in]] : [["Goes at", place.goesAt], ["In", place.in], ...place.after ? [["After", place.after]] : []];
+      for (const [term, value] of rows) where.append(Object.assign(document.createElement("dt"), { textContent: term }), Object.assign(document.createElement("dd"), { textContent: value, ...term === "Goes at" && unplaced ? { className: "story-where-warn" } : {} }));
       beatEditor?.refresh?.();
     };
-    // A screen beat keeps the place it chose in Screens, so it can pick another one here.
-    const placementHost = screenType ? destinations(scene,body,position,insertion) : undefined;
-    const unavailableScene = !!insertion && insertion.sceneId !== scene.id;
-    const usesPlacement = (): boolean => screenType && !!placementHost;
-    const chosenLocation = (): { body: BodyRef; position: Position } => usesPlacement() ? placementHost!.read() : unavailableScene ? { body: { type: "root" }, position: defaultPlace(scene, { type: "root" }) } : { body, position };
+    const chosenLocation = (): { body: BodyRef; position: Position } => { if (unplaced) throw new Error("Choose where this beat goes. Draft retained."); return { body, position }; };
     // A new beat moves with the place the author chooses, until it is added.
-    const place=():{body:BodyRef;position:Position}=>{try{return chosenLocation();}catch{return {body,position};}};
+    const place=():{body:BodyRef;position:Position}=>({body,position});
     // The pending column in Tracks follows the chosen place, with its branches open.
     const relocate=()=>{const current=model.scenes.find(item=>item.id===scene.id);if(current)openTo(current,place().body);redrawBottom();};
-    const remember=()=>{if(screenType&&placementHost)try{rememberScreenInsertion({sceneId:scene.id,...placementHost.read(),expectedSourceRevision:scene.sourceRevision});rememberedInsertion=true;return true;}catch{/* Retain the unavailable original position until an explicit choice. */}return false;};
-    if (placementHost) {
-      // Placement owns its retained navigation state and any incomplete recovery input.
-      placementHost.host.classList.add("scene-draft");
-      for(const event of ["input","change"])placementHost.host.addEventListener(event,()=>{if(remember())delete placementHost.host.dataset.unsubmitted;else placementHost.host.dataset.unsubmitted="true";relocate();});
-      remember();
-    }
+    // A screen beat's place is where Screens' next screen beat goes, until Cancel restores the earlier one.
+    const remember=()=>{if(!screenType||unplaced)return;const current=model.scenes.find(item=>item.id===scene.id)??scene;rememberScreenInsertion({sceneId:scene.id,body,position,expectedSourceRevision:current.sourceRevision});rememberedInsertion=true;};
+    remember();
     const validateNew = assignmentValidation(base, beat => insertCommand(beat, chosenLocation()), () => panel.isConnected);
     // A new condition: its If test and whether it has an Otherwise. It has no beat payload.
     const condition = type === "condition" ? newConditionEditor() : undefined;
@@ -2524,7 +2491,7 @@ export function renderStoryView(
     });
     actionsRow.append(...(screenType?[commit,cancel]:[cancel,commit]));
     drawWhere();
-    panel.append(heading, ...placementHost ? [placementHost.host] : [where], editor.host, actionsRow, secondaryHost);
+    panel.append(heading, where, choose, editor.host, actionsRow, secondaryHost);
     dirtyDraft(panel, editor.controls);
     const moveNewBeat = (opener: HTMLElement): void => {
       const current = model.scenes.find(item => item.id === scene.id); if (!current) return;
@@ -2534,8 +2501,8 @@ export function renderStoryView(
           const resolved = placeFor(current, next.body, next.position, type), waiting = pendingAt(current, next.body, resolved.position);
           if (resolved.unavailable) { actions.status(`${resolved.unavailable} Draft retained.`, "error"); return false; }
           if (waiting && waiting !== key) { actions.status("A new beat is already waiting there. Draft retained.", "error"); return false; }
-          body = next.body; position = resolved.position; replaces = resolved.replaces?.id;
-          drawWhere(); relocate(); focusFirst(panel); return true;
+          body = next.body; position = resolved.position; replaces = resolved.replaces?.id; unplaced = false;
+          drawWhere(); remember(); relocate(); focusFirst(panel); return true;
         } });
     };
     const draft=keepDraft(key,{panel,sceneId:scene.id,place,replaces:()=>replaces,...beatEditor?{read:beatEditor.read}:{},command:savedCommand,kind:()=>{try{return beatEditor?beatLabels[beatEditor.read().type].toLowerCase():"condition";}catch{return addKindName(type).toLowerCase();}},editors:()=>[editor],primary:()=>editor.primary,
@@ -2543,6 +2510,7 @@ export function renderStoryView(
       conflict:()=>{
         const current=model.scenes.find(item=>item.id===scene.id),{body:at}=place();
         if(!current)return {missing:"This beat's scene is no longer in source."};
+        if(unplaced)return undefined;
         if(current.sourceConflict||at.type==="root"||current.beats.some(item=>item.id===at.branchId))return undefined;
         return {missing:"This beat's place is no longer in source."};
       },

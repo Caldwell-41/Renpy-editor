@@ -150,3 +150,16 @@ export function openGuard(block: HTMLElement): HTMLElement {
 }
 /** Types into a field as the author does: the value, then an input event. */
 export function type(control: HTMLInputElement | HTMLTextAreaElement, value: string): void { control.value = value; control.dispatchEvent(new Event("input", { bubbles: true })); }
+/** Chooses a new beat's place, as the author does: Choose a place… when shown, else ⋯ Move to…;
+ *  then opens each named branch and picks the position. */
+export async function choosePlace(host: ParentNode, panel: HTMLElement, position: string, ...branches: string[]): Promise<void> {
+  const shown = (label: string): HTMLButtonElement | undefined => [...panel.querySelectorAll<HTMLButtonElement>("button")].find(item => item.textContent === label && !item.closest("[hidden]"));
+  const choose = shown("Choose a place…");
+  if (choose) choose.click(); else { panel.querySelector<HTMLElement>(".story-beat-menu > summary")!.click(); shown("Move to…")!.click(); }
+  const places = host.querySelector<HTMLElement>(".story-move"); if (!places) throw Error("Move to is not open");
+  const item = (label: string, selector = "[role=treeitem]"): HTMLElement | undefined => [...places.querySelectorAll<HTMLElement>(selector)].find(node => node.textContent!.slice(1) === label);
+  for (const branch of branches) item(branch, '[role=treeitem][aria-expanded="false"]')?.click();
+  const target = item(position); if (!target) throw Error(`No place ${position} in ${[...places.querySelectorAll("[role=treeitem]")].map(node => node.textContent).join(" | ")}`);
+  target.click(); [...places.querySelectorAll<HTMLButtonElement>("button")].find(node => node.textContent === "Move")!.click();
+  await new Promise(resolve => setTimeout(resolve, 0));
+}

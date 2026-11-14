@@ -21,7 +21,7 @@
 .screen-panels-form .button { border-radius:0;font-size:11px;min-height:28px; }
 @media(max-width:680px) { .screen-create { padding:16px; } }
 
-.screen-panels-preview[hidden], .story-destination[hidden], .story-screen-secondary:empty { display:none; }
+.screen-panels-preview[hidden], .story-screen-secondary:empty { display:none; }
 .screen-panels-form .screen-create-actions { display:flex; flex-wrap:wrap; gap:8px; }
 .scene-draft.story-screen-editor > .row-actions, .expanded-beat.story-screen-editor > .row-actions { justify-content:flex-start; gap:8px; margin-top:20px; }
 .story-screen-editor > .story-screen-secondary { margin-top:14px; }

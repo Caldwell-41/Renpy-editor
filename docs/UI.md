@@ -986,7 +986,12 @@ geometry. Number and resize drafts render before acceptance; canvas-only sample 
 and button states never change source. Fit and 100% scale the same composition.
 Unsupported code stays in place and marks only its region as partly visual. Story
 offers Show screen, Hide screen and Call screen for owned parameterless screens; Call
-waits for Finish interaction. The [Screens contract](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-3b-screens.md)
+waits for Finish interaction. A new screen beat uses Goes at, In, After and ⋯ Move to…
+like other new beats, starting at the place Screens last used. When the scene changed
+after that place was picked, Goes at reads "Choose a place" and one warning block says
+"The scene changed after you picked this place in Screens. Choose where this beat
+goes." with Choose a place…. Add Beat refuses until a place is chosen
+(`story-release-fixes` / `a-v2`). The [Screens contract](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-3b-screens.md)
 owns requirements, including its
 [creation and reuse controls](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-3b-screens.md#implemented-creation-and-reuse-controls),
 and [ADR 0021](adr/0021-separate-renpy-canvas-helper.md) owns the canvas helper.
