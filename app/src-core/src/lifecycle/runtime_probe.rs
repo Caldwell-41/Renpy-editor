@@ -635,6 +635,10 @@ mod branches_tests {
         let mut map: crate::metadata::SourceMapMetadata =
             serde_json::from_slice(&fs::read(&map_path).unwrap()).unwrap();
         map.schema_version = 2;
+        map.scene_mappings[0].beats = crate::scene::per_line_rows(
+            &map.scene_mappings[0].beats,
+            &fs::read(root.join(path)).unwrap(),
+        );
         for beat in &mut map.scene_mappings[0].beats {
             if beat.owner.is_some() {
                 beat.kind = "customCode".into();

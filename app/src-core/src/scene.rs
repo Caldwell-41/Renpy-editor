@@ -3249,6 +3249,18 @@ fn parse_condition_group(
             });
             // Unsupported indented blocks are opaque as a unit. In particular, Python
             // internals must never become editable dialogue or conditional children.
+            if source_version >= 15 && matches!(payload, BeatPayload::CustomCode { .. }) {
+                let after = opaque_block_end(lines, next, indent + 4, lexical);
+                let mut block = custom_block(&lines[next..after]);
+                block.nesting = Some(ParsedNesting::Child {
+                    group_start,
+                    branch_start,
+                });
+                result.push(block);
+                next = after;
+                statements += 1;
+                continue;
+            }
             let mut after = next + 1;
             if matches!(payload, BeatPayload::CustomCode { .. }) {
                 while after < lines.len()
@@ -3444,6 +3456,16 @@ fn parse_scene_mode(
             source: body.into(),
             reason: "Unsupported or runtime-dependent Ren'Py source".into(),
         });
+        if source_version >= 15
+            && matches!(payload, BeatPayload::CustomCode { .. })
+            && !body.trim().is_empty()
+            && !body.trim_start().starts_with('#')
+        {
+            let after = opaque_block_end(&lines, index, indentation(body), &lexical);
+            beats.push(custom_block(&lines[index..after]));
+            index = after;
+            continue;
+        }
         beats.push(ParsedBeat {
             nesting: None,
             start,
@@ -4703,6 +4725,40 @@ fn physical_lines(source: &str) -> Vec<(usize, usize, &str)> {
     result
 }
 
+/// The end of the unsupported statement at `index`: its deeper lines and any line
+/// that is not a whole one-line statement, such as a bracket's continuation. Blank and
+/// comment lines never end it, but those after its last line stay outside as trivia.
+fn opaque_block_end(
+    lines: &[(usize, usize, &str)],
+    index: usize,
+    indent: usize,
+    lexical: &HashSet<usize>,
+) -> usize {
+    let mut end = index + 1;
+    for (offset, (start, _, body)) in lines.iter().enumerate().skip(index + 1) {
+        let trivia = body.trim().is_empty()
+            || body.trim_start().starts_with('#') && indentation(body) <= indent;
+        if trivia {
+            continue;
+        }
+        if lexical.contains(start) && indentation(body) <= indent {
+            break;
+        }
+        end = offset + 1;
+    }
+    end
+}
+
+/// One Custom Code beat for a whole unsupported statement and its block.
+fn custom_block(lines: &[(usize, usize, &str)]) -> ParsedBeat {
+    let source = lines
+        .iter()
+        .map(|(_, _, body)| *body)
+        .collect::<Vec<_>>()
+        .join("\n");
+    custom(lines[0].0, lines[lines.len() - 1].1, &source)
+}
+
 fn custom(start: usize, end: usize, body: &str) -> ParsedBeat {
     ParsedBeat {
         nesting: None,
@@ -4989,6 +5045,44 @@ impl BoolNot for bool {
     fn not(self) -> bool {
         !self
     }
+}
+
+/// `rows` as a build before source-map v15 wrote them: a row for each line of an
+/// unsupported block. The first line keeps the block's ID. Tests that relabel a
+/// current map as an older schema use this.
+#[cfg(test)]
+pub(crate) fn per_line_rows(rows: &[BeatSourceMapping], bytes: &[u8]) -> Vec<BeatSourceMapping> {
+    let mut result = Vec::new();
+    for row in rows {
+        let mut start = row.byte_start as usize;
+        if row.kind != "customCode" || row.conditional_branch.is_some() {
+            result.push(row.clone());
+            continue;
+        }
+        for line in bytes[start..row.byte_end as usize].split_inclusive(|b| *b == b'\n') {
+            let mut split = row.clone();
+            if start != row.byte_start as usize {
+                split.id = uuid::Uuid::new_v4().to_string();
+            }
+            split.byte_start = start as u64;
+            split.byte_end = (start + line.len()) as u64;
+            split.source_sha256 = sha256(line);
+            result.push(split);
+            start += line.len();
+        }
+    }
+    result
+}
+
+/// A whole source-map JSON value, under project `root`, with `per_line_rows`.
+#[cfg(test)]
+pub(crate) fn per_line_map(root: &std::path::Path, map: Value) -> Value {
+    let mut map: SourceMapMetadata = serde_json::from_value(map).unwrap();
+    for scene in &mut map.scene_mappings {
+        let bytes = std::fs::read(root.join(&scene.path)).unwrap();
+        scene.beats = per_line_rows(&scene.beats, &bytes);
+    }
+    serde_json::to_value(map).unwrap()
 }
 
 /// Where a root insertion lands when the author names no anchor: before the ending
@@ -6350,6 +6444,118 @@ mod tests {
             "label scene_one:\n    if missing_flag == 4:\n        \"A\"\n    return\n"
         ));
         assert!(partial("label scene_one:\n    if (flag == True):\n        $ trust = trust * 2 + len(\"x\")\n    return\n"));
+    }
+
+    #[test]
+    fn a_protected_block_is_one_beat_in_every_body() {
+        let f = Fixture::new(b"label scene_one:\n    return\n");
+        f.migrate();
+        f.service
+            .create_variable(
+                &f.project,
+                &f.project_id,
+                CreateVariableRequest {
+                    technical_name: "flag".into(),
+                    variable_type: VariableType::Bool,
+                    default_value: Value::Bool(true),
+                },
+            )
+            .unwrap();
+        let path = f.root.join(&f.workspace().scenes[0].source_path);
+        let source = "label scene_one:\n    \"Before\"\n    python:\n        x = 1\n\n        renpy.notify(\"x\") # done\n\n    # Next\n    if flag:\n        python:\n            y = 2\n        \"In\"\n    menu:\n        \"Go\":\n            python:\n                z = 3\n            \"Went\"\n    \"After\"\n    return\n";
+        fs::write(&path, source).unwrap();
+        let ws = f.workspace();
+        let code = |ws: &SceneWorkspace| {
+            ws.scenes[0]
+                .beats
+                .iter()
+                .filter_map(|b| match &b.payload {
+                    BeatPayload::CustomCode { source, .. }
+                        if b.conditional_branch.is_none() && !source.trim().is_empty() =>
+                    {
+                        Some((b.id.clone(), source.clone()))
+                    }
+                    _ => None,
+                })
+                .collect::<Vec<_>>()
+        };
+        let blocks = code(&ws);
+        assert_eq!(
+            blocks.iter().map(|(_, s)| s.as_str()).collect::<Vec<_>>(),
+            [
+                "    python:\n        x = 1\n\n        renpy.notify(\"x\") # done",
+                "    # Next",
+                "        python:\n            y = 2",
+                "            python:\n                z = 3",
+            ]
+        );
+        // A beat added after a block lands after its last line; the block is unchanged.
+        let scene = &ws.scenes[0];
+        let before = scene
+            .beats
+            .iter()
+            .find(|b| b.payload == BeatPayload::Narration { text: "In".into() })
+            .unwrap();
+        let added = f
+            .apply(
+                &ws,
+                SceneCommand::InsertBodyBeat {
+                    scene_id: scene.id.clone(),
+                    expected_source_revision: scene.source_revision.clone(),
+                    body: BodyRef::Branch {
+                        group_id: before.owner.as_ref().unwrap().group_id.clone(),
+                        branch_id: before.owner.as_ref().unwrap().branch_id.clone(),
+                    },
+                    position: Position::Before {
+                        anchor: NodeRef::Beat {
+                            beat_id: before.id.clone(),
+                        },
+                    },
+                    beat: BeatPayload::Narration {
+                        text: "Added".into(),
+                    },
+                },
+            )
+            .unwrap();
+        assert_eq!(
+            fs::read_to_string(&path).unwrap(),
+            source.replace("        \"In\"\n", "        \"Added\"\n        \"In\"\n")
+        );
+        assert_eq!(code(&added), blocks);
+        // A v14 map, saved by released builds, has a row for each line of a block.
+        let map_path = f.root.join(SOURCE_MAP_PATH);
+        let mut map =
+            SourceMapMetadata::read_bytes(&fs::read(&map_path).unwrap(), &f.project_id).unwrap();
+        let bytes = fs::read(&path).unwrap();
+        let rows = per_line_rows(&map.scene_mappings[0].beats, &bytes);
+        let inner = rows
+            .iter()
+            .filter(|row| map.scene_mappings[0].beats.iter().all(|b| b.id != row.id))
+            .map(|row| row.id.clone())
+            .collect::<Vec<_>>();
+        assert_eq!(inner.len(), 5);
+        map.schema_version = 14;
+        map.scene_mappings[0].beats = rows;
+        fs::write(&map_path, source_map_bytes(&map).unwrap()).unwrap();
+        f.migrate();
+        let migrated = f.workspace();
+        assert_eq!(code(&migrated), code(&added));
+        assert_eq!(
+            migrated.scenes[0]
+                .beats
+                .iter()
+                .map(|b| &b.id)
+                .collect::<Vec<_>>(),
+            added.scenes[0]
+                .beats
+                .iter()
+                .map(|b| &b.id)
+                .collect::<Vec<_>>()
+        );
+        // The old rows are kept with the block's first line, as for v9 Choices.
+        let saved = String::from_utf8(fs::read(&map_path).unwrap()).unwrap();
+        assert!(inner.iter().all(|id| saved.contains(id.as_str())));
+        assert_eq!(fs::read(&path).unwrap(), bytes);
     }
 
     #[test]

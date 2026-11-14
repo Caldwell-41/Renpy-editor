@@ -632,7 +632,8 @@ mod tests {
                 .find(|b| b["payload"]["source"].as_str().map(str::trim) == Some(text))
                 .unwrap_or_else(|| panic!("Code scene keeps {text} as Custom Code"))
         };
-        for text in ["$ tram_number = 40", "python:"] {
+        // A `python:` block is one beat.
+        for text in ["$ tram_number = 40", "python:\n        late_minutes = 7"] {
             assert_eq!(source(text)["protected"], true);
         }
         let diagnostics = code
