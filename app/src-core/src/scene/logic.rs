@@ -327,35 +327,6 @@ pub(super) fn parse_menu(
         },
     ))
 }
-pub(super) fn validate_conditional_completion(
-    bytes: &[u8],
-    scene: &SceneMetadata,
-    loaded: &Loaded,
-) -> Result<(), SceneError> {
-    let (_, beats) = build_mapping(
-        scene,
-        bytes,
-        &sha256(bytes),
-        None,
-        &[],
-        Some((
-            &loaded.project,
-            &loaded.authoring,
-            &loaded.source_map.owned_screens,
-        )),
-    )?;
-    if beats.iter().any(|b| {
-        matches!(
-            b.payload,
-            BeatPayload::Call { .. } | BeatPayload::Choice { .. }
-        )
-    }) && bodies::root_may_continue(bytes, &beats)?
-    {
-        return Err(SceneError::InvariantBlocked);
-    }
-    Ok(())
-}
-
 /// Called only after the entire old projection has passed its versioned byte/hash
 /// verification. Retained records are extensions, never live patch authority.
 pub(super) fn refine_legacy_ids(
@@ -1591,6 +1562,41 @@ mod structural_review_tests {
     use serde_json::{json, Value};
     fn root(f: &mut Fixture) -> Value {
         f.model()["scenes"][0].clone()
+    }
+    /// A scene that already falls off its end is not a new fallthrough: its beats stay
+    /// editable, with a Choice or a Call in it too.
+    #[test]
+    fn a_scene_that_already_continues_keeps_its_beats_editable() {
+        let mut f = Fixture::new();
+        let a = root(&mut f);
+        let callee = f.scene("Callee");
+        f.save(
+            &a,
+            &format!(
+                "label {}:\n    \"Before\"\n    call {} from _ll_call_7f3a\n    menu:\n        \"Go\":\n            pass\n    \"After\"\n",
+                a["technicalLabel"].as_str().unwrap(),
+                callee["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        let a = root(&mut f);
+        let before = a["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["payload"]["text"] == "Before")
+            .unwrap();
+        let next = f.command(json!({"type":"updateBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"beatId":before["id"],"expectedBody":{"type":"root"},"beat":{"type":"narration","text":"Edited"}}));
+        let edited = next["scenes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|s| s["id"] == a["id"])
+            .unwrap();
+        assert!(edited["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|b| b["payload"]["text"] == "Edited"));
     }
     #[test]
     fn phase3a_body_new_fallthrough_and_opaque_root_end_refuse() {

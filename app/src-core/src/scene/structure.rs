@@ -259,7 +259,6 @@ impl AuthoringService {
                 Some(start),
             ));
         }
-        logic::validate_conditional_completion(&proposed, &scene, &loaded)?;
         if transfer_edit {
             self.validate_candidate_transfers(
                 project,

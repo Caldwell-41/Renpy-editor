@@ -89,7 +89,8 @@ containing body. A new option is empty; its source contains a sole verified `pas
 until a Beat replaces it. Jump and Return are explicit transfers inside an option.
 Return returns to the caller, or to the main menu when there is no caller. A newly
 created Scene still starts with Return. Structural commands refuse a new Scene
-fallthrough, including when every guarded option can be unavailable.
+fallthrough, including when every guarded option can be unavailable. A Scene whose
+source already continues past its end, with or without a Call or Choice, stays editable.
 
 The Choice payload has an optional `prompt`, either
 `{"type":"narration","text":"..."}` or
