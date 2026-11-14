@@ -2155,7 +2155,7 @@ export function renderStoryView(
     const caption = document.createElement("p"); caption.className = "story-condition-summary";
     caption.textContent = `Condition · ${forkCaption(node)} · ${scene.beats.filter(item => item.conditionalBranch?.groupId === groupId).length} branches / ${groupCount(scene, node)} Beats`;
     // Each branch the builder can't edit, and why.
-    const problems = groupProblems(scene, groupId), list = document.createElement("ul"); list.className = "story-condition-problems"; list.setAttribute("aria-label", "Branches to fix");
+    const problems = groupProblems(scene, groupId), list = document.createElement("ul"); list.className = "story-condition-problems"; list.setAttribute("aria-label", "Branches that need changes");
     for (const [header, problem] of problems) { const item = document.createElement("li"), mark = document.createElement("b"); mark.textContent = "!"; mark.ariaHidden = "true"; item.append(mark, Object.assign(document.createElement("span"), { textContent: `${branchName(scene, header)}: ${problem.reason}` })); list.append(item); }
     const note = document.createElement("p"); note.className = "story-field-hint"; note.textContent = "The first branch whose test is true runs. Tests are not evaluated in the preview.";
     const tools = document.createElement("div"); tools.className = "row-actions story-editor-tools";

@@ -504,8 +504,11 @@ test("a condition names each branch the builder can't edit, why, and what to do,
   assert.equal(flow().textContent, "2 branches to fix"); assert.ok(flow().classList.contains("story-lane-warn"));
   const editor = selectBeat(s.host, "if");
   assert.deepEqual(texts(editor, ".story-condition-problems li > span"), ["Else if ticket_count = 2: ticket_count is not a project variable.", "Else if destination ≥ 3: destination is text, and ≥ only compares numbers."]);
+  assert.equal(editor.querySelector(".story-condition-problems")!.getAttribute("aria-label"), "Branches that need changes");
   const branch = (id: string): HTMLElement => editor.querySelector<HTMLElement>(`.story-branch-editor[data-branch-id="${id}"]`)!;
   assert.deepEqual(["if", "missing", "type", "else"].map(id => branch(id).querySelector(".story-branch-head > strong")!.textContent), ["If", "Else if !", "Else if !", "Otherwise"]);
+  // A branch the builder can't edit takes no new beat until its test is fixed.
+  assert.deepEqual(["if", "missing", "type", "else"].map(id => branch(id).querySelector<HTMLButtonElement>('.story-branch-head [data-beat-opener^="branch:"]')!.disabled), [false, true, true, false]);
   const code = branch("missing").querySelector<HTMLElement>(".story-rule-code")!;
   assert.equal(code.textContent, "elif ticket_count == 2:"); assert.equal(code.getAttribute("aria-invalid"), "true");
   assert.equal(document.getElementById(code.getAttribute("aria-describedby")!)!.textContent, "ticket_count is not a project variable. Create it, or change this line in Source. Until then, the builder can't edit this branch.");
