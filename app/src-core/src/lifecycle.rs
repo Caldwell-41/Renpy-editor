@@ -4401,63 +4401,8 @@ mod tests {
                 "standard screens missing {expected}"
             );
         }
-        let mut scene_workspace = service.scene_workspace().unwrap();
+        let scene_workspace = service.scene_workspace().unwrap();
         let entry_scene_id = scene_workspace.entry_scene_id.clone();
-        let chapter_one = scene_workspace.chapters[0].id.clone();
-        scene_workspace = apply_scene_target(
-            &service,
-            &scene_workspace,
-            crate::scene::SceneCommand::CreateChapter {
-                display_name: "Branches".into(),
-            },
-        );
-        let chapter_two = scene_workspace.chapters[1].id.clone();
-        scene_workspace = apply_scene_target(
-            &service,
-            &scene_workspace,
-            crate::scene::SceneCommand::CreateScene {
-                chapter_id: chapter_one,
-                display_name: "Garden".into(),
-            },
-        );
-        let garden = scene_workspace
-            .scenes
-            .iter()
-            .find(|scene| scene.display_name == "Garden")
-            .unwrap()
-            .clone();
-        scene_workspace = apply_scene_target(
-            &service,
-            &scene_workspace,
-            crate::scene::SceneCommand::MoveScene {
-                scene_id: garden.id.clone(),
-                chapter_id: chapter_two.clone(),
-                direction: None,
-                expected_source_revision: garden.source_revision,
-            },
-        );
-        scene_workspace = apply_scene_target(
-            &service,
-            &scene_workspace,
-            crate::scene::SceneCommand::CreateScene {
-                chapter_id: chapter_two.clone(),
-                display_name: "Library".into(),
-            },
-        );
-        let garden_id = scene_workspace
-            .scenes
-            .iter()
-            .find(|scene| scene.display_name == "Garden")
-            .unwrap()
-            .id
-            .clone();
-        let library_id = scene_workspace
-            .scenes
-            .iter()
-            .find(|scene| scene.display_name == "Library")
-            .unwrap()
-            .id
-            .clone();
         let appearance_id = authored
             .appearances
             .iter()
@@ -4493,7 +4438,7 @@ mod tests {
             .unwrap()
             .id
             .clone();
-        for beat in [
+        let entry_beats = vec![
             crate::scene::BeatPayload::Background {
                 asset_id: background_id.clone(),
                 transition: crate::scene::TransitionRef::Dissolve,
@@ -4519,108 +4464,35 @@ mod tests {
                 variable_id: flag_id,
                 value: serde_json::Value::Bool(true),
             },
-        ] {
-            let entry = scene_workspace
+        ];
+        // "Garden" (option 0) gets the new scene.
+        let (_, garden_id) = crate::scene::author_branching_story(
+            scene_workspace,
+            &entry_scene_id,
+            entry_beats,
+            0,
+            |workspace, command| apply_scene_target(&service, workspace, command),
+        );
+        // Undo the Jump and the scene created from the Choice, then Redo both.
+        service.history_undo().unwrap();
+        service.history_undo().unwrap();
+        assert_eq!(service.scene_workspace().unwrap().scenes.len(), 3);
+        service.history_redo().unwrap();
+        service.history_redo().unwrap();
+        let mut scene_workspace = service.scene_workspace().unwrap();
+        assert_eq!(scene_workspace.scenes.len(), 4);
+        assert!(matches!(
+            scene_workspace
                 .scenes
                 .iter()
-                .find(|scene| scene.id == entry_scene_id)
-                .unwrap();
-            scene_workspace = apply_scene_target(
-                &service,
-                &scene_workspace,
-                crate::scene::SceneCommand::InsertBodyBeat {
-                    scene_id: entry.id.clone(),
-                    expected_source_revision: entry.source_revision.clone(),
-                    body: crate::scene::BodyRef::Root,
-                    position: crate::scene::root_default_place(&entry),
-                    beat: beat,
-                },
-            );
-        }
-        let entry = scene_workspace
-            .scenes
-            .iter()
-            .find(|scene| scene.id == entry_scene_id)
-            .unwrap();
-        scene_workspace = apply_scene_target(
-            &service,
-            &scene_workspace,
-            crate::scene::SceneCommand::InsertBodyBeat {
-                scene_id: entry.id.clone(),
-                expected_source_revision: entry.source_revision.clone(),
-                body: crate::scene::BodyRef::Root,
-                position: crate::scene::root_default_place(&entry),
-                beat: crate::scene::BeatPayload::Choice {
-                    picked_policy: None,
-                    prompt: None,
-                    options: vec![
-                        crate::scene::ChoiceOption {
-                            unavailable_policy: crate::scene::UnavailablePolicy::Hide,
-                            condition: None,
-                            text: "Garden".into(),
-                            id: None,
-                        },
-                        crate::scene::ChoiceOption {
-                            unavailable_policy: crate::scene::UnavailablePolicy::Hide,
-                            condition: None,
-                            text: "Library".into(),
-                            id: None,
-                        },
-                    ],
-                },
-            },
-        );
-        let entry = scene_workspace
-            .scenes
-            .iter()
-            .find(|scene| scene.id == entry_scene_id)
-            .unwrap();
-        let choice = entry
-            .beats
-            .iter()
-            .find(|beat| matches!(beat.payload, crate::scene::BeatPayload::Choice { .. }))
-            .unwrap();
-        apply_scene_target(
-            &service,
-            &scene_workspace,
-            crate::scene::SceneCommand::CreateSceneFromChoice {
-                scene_id: entry.id.clone(),
-                expected_source_revision: entry.source_revision.clone(),
-                choice_beat_id: choice.id.clone(),
-                option_id: match &choice.payload {
-                    crate::scene::BeatPayload::Choice { options, .. } => {
-                        options[0].id.clone().unwrap()
-                    }
-                    _ => unreachable!(),
-                },
-                chapter_id: chapter_two,
-                display_name: "Created from Choice".into(),
-            },
-        );
-        service.history_undo().unwrap();
-        service.history_redo().unwrap();
-        scene_workspace = service.scene_workspace().unwrap();
-        assert_eq!(scene_workspace.scenes.len(), 4);
-        let garden = scene_workspace
-            .scenes
-            .iter()
-            .find(|scene| scene.id == garden_id)
-            .unwrap();
-        // Garden ends at its Return. A Jump goes only at a body's end, so it replaces that
-        // Return, as Add a beat does (the index-based InsertBeat this replaced is gone).
-        scene_workspace = apply_scene_target(
-            &service,
-            &scene_workspace,
-            crate::scene::SceneCommand::UpdateBodyBeat {
-                scene_id: garden.id.clone(),
-                expected_source_revision: garden.source_revision.clone(),
-                beat_id: garden.beats.last().unwrap().id.clone(),
-                expected_body: crate::scene::BodyRef::Root,
-                beat: crate::scene::BeatPayload::Jump {
-                    scene_id: library_id,
-                },
-            },
-        );
+                .find(|scene| scene.id == garden_id)
+                .unwrap()
+                .beats
+                .last()
+                .unwrap()
+                .payload,
+            crate::scene::BeatPayload::Jump { .. }
+        ));
         let phase_1e_selection = scene_workspace.last_open.clone();
         let image_presentation = service
             .media_present(crate::media::MediaRequest {

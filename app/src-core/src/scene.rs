@@ -4957,6 +4957,130 @@ pub(crate) fn root_default_place(scene: &SceneDocument) -> Position {
     scene.bodies[0].default_place.clone().unwrap()
 }
 
+/// Build the branching Garden and Library Story, then return the workspace and Garden's
+/// id. The routine scene test and the Phase 1C SDK gate both call this, so a command
+/// change that breaks the gate breaks a routine test too. Change the edits here; do not
+/// copy them into a gate (docs/TESTING.md). The caller gives the entry scene's beats and
+/// the Choice option that gets the new scene.
+#[cfg(test)]
+pub(crate) fn author_branching_story(
+    mut workspace: SceneWorkspace,
+    entry_scene_id: &str,
+    entry_beats: Vec<BeatPayload>,
+    new_scene_option: usize,
+    mut apply: impl FnMut(&SceneWorkspace, SceneCommand) -> SceneWorkspace,
+) -> (SceneWorkspace, String) {
+    let scene_named = |workspace: &SceneWorkspace, name: &str| {
+        workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.display_name == name)
+            .unwrap()
+            .clone()
+    };
+    let entry = |workspace: &SceneWorkspace| {
+        workspace
+            .scenes
+            .iter()
+            .find(|scene| scene.id == entry_scene_id)
+            .unwrap()
+            .clone()
+    };
+    let chapter_one = workspace.chapters[0].id.clone();
+    workspace = apply(
+        &workspace,
+        SceneCommand::CreateChapter {
+            display_name: "Branches".into(),
+        },
+    );
+    let chapter_two = workspace.chapters[1].id.clone();
+    workspace = apply(
+        &workspace,
+        SceneCommand::CreateScene {
+            chapter_id: chapter_one,
+            display_name: "Garden".into(),
+        },
+    );
+    let garden = scene_named(&workspace, "Garden");
+    workspace = apply(
+        &workspace,
+        SceneCommand::MoveScene {
+            scene_id: garden.id.clone(),
+            chapter_id: chapter_two.clone(),
+            direction: None,
+            expected_source_revision: garden.source_revision,
+        },
+    );
+    workspace = apply(
+        &workspace,
+        SceneCommand::CreateScene {
+            chapter_id: chapter_two.clone(),
+            display_name: "Library".into(),
+        },
+    );
+    let library_id = scene_named(&workspace, "Library").id;
+    let option = |text: &str| ChoiceOption {
+        unavailable_policy: UnavailablePolicy::Hide,
+        condition: None,
+        text: text.into(),
+        id: None,
+    };
+    let choice = BeatPayload::Choice {
+        picked_policy: None,
+        prompt: None,
+        options: vec![option("Garden"), option("Library")],
+    };
+    for beat in entry_beats.into_iter().chain([choice]) {
+        let scene = entry(&workspace);
+        workspace = apply(
+            &workspace,
+            SceneCommand::InsertBodyBeat {
+                scene_id: scene.id.clone(),
+                expected_source_revision: scene.source_revision.clone(),
+                body: BodyRef::Root,
+                position: root_default_place(&scene),
+                beat,
+            },
+        );
+    }
+    let scene = entry(&workspace);
+    let choice = scene
+        .beats
+        .iter()
+        .find(|beat| matches!(beat.payload, BeatPayload::Choice { .. }))
+        .unwrap();
+    let BeatPayload::Choice { options, .. } = &choice.payload else {
+        unreachable!()
+    };
+    workspace = apply(
+        &workspace,
+        SceneCommand::CreateSceneFromChoice {
+            scene_id: scene.id.clone(),
+            expected_source_revision: scene.source_revision.clone(),
+            choice_beat_id: choice.id.clone(),
+            option_id: options[new_scene_option].id.clone().unwrap(),
+            chapter_id: chapter_two,
+            display_name: "Created from Choice".into(),
+        },
+    );
+    // Garden ends at its Return. A Jump goes only at a body's end, so it replaces that
+    // Return, as Add a beat does.
+    let garden = scene_named(&workspace, "Garden");
+    workspace = apply(
+        &workspace,
+        SceneCommand::UpdateBodyBeat {
+            scene_id: garden.id.clone(),
+            expected_source_revision: garden.source_revision.clone(),
+            beat_id: garden.beats.last().unwrap().id.clone(),
+            expected_body: BodyRef::Root,
+            beat: BeatPayload::Jump {
+                scene_id: library_id,
+            },
+        },
+    );
+    (workspace, garden.id)
+}
+
 #[cfg(test)]
 mod tests {
     mod arithmetic;
@@ -6561,66 +6685,7 @@ mod tests {
             assert_eq!(presented.sha256, asset.sha256);
             assert!(!presented.data_base64.is_empty());
         }
-        let mut workspace = fixture.workspace();
-        let chapter_one = workspace.chapters[0].id.clone();
-        workspace = fixture
-            .apply(
-                &workspace,
-                SceneCommand::CreateChapter {
-                    display_name: "Branches".into(),
-                },
-            )
-            .unwrap();
-        let chapter_two = workspace.chapters[1].id.clone();
-        workspace = fixture
-            .apply(
-                &workspace,
-                SceneCommand::CreateScene {
-                    chapter_id: chapter_one,
-                    display_name: "Garden".into(),
-                },
-            )
-            .unwrap();
-        let garden = workspace
-            .scenes
-            .iter()
-            .find(|scene| scene.display_name == "Garden")
-            .unwrap()
-            .clone();
-        workspace = fixture
-            .apply(
-                &workspace,
-                SceneCommand::MoveScene {
-                    scene_id: garden.id.clone(),
-                    chapter_id: chapter_two.clone(),
-                    direction: None,
-                    expected_source_revision: garden.source_revision,
-                },
-            )
-            .unwrap();
-        workspace = fixture
-            .apply(
-                &workspace,
-                SceneCommand::CreateScene {
-                    chapter_id: chapter_two.clone(),
-                    display_name: "Library".into(),
-                },
-            )
-            .unwrap();
-        let garden_id = workspace
-            .scenes
-            .iter()
-            .find(|scene| scene.display_name == "Garden")
-            .unwrap()
-            .id
-            .clone();
-        let library_id = workspace
-            .scenes
-            .iter()
-            .find(|scene| scene.display_name == "Library")
-            .unwrap()
-            .id
-            .clone();
+        let workspace = fixture.workspace();
         let authoring = &workspace.authoring;
         let appearance_id = authoring.appearances[0].id.clone();
         let asset_id = |kind| {
@@ -6695,105 +6760,14 @@ mod tests {
                 transition: TransitionRef::Fade,
             },
         ];
-        for payload in payloads {
-            let entry = workspace
-                .scenes
-                .iter()
-                .find(|scene| scene.id == fixture.entry_scene_id)
-                .unwrap();
-            workspace = fixture
-                .apply(
-                    &workspace,
-                    SceneCommand::InsertBodyBeat {
-                        scene_id: entry.id.clone(),
-                        expected_source_revision: entry.source_revision.clone(),
-                        body: BodyRef::Root,
-                        position: root_default_place(&entry),
-                        beat: payload,
-                    },
-                )
-                .unwrap();
-        }
-        let entry = workspace
-            .scenes
-            .iter()
-            .find(|scene| scene.id == fixture.entry_scene_id)
-            .unwrap();
-        workspace = fixture
-            .apply(
-                &workspace,
-                SceneCommand::InsertBodyBeat {
-                    scene_id: entry.id.clone(),
-                    expected_source_revision: entry.source_revision.clone(),
-                    body: BodyRef::Root,
-                    position: root_default_place(&entry),
-                    beat: BeatPayload::Choice {
-                        picked_policy: None,
-                        prompt: None,
-                        options: vec![
-                            ChoiceOption {
-                                unavailable_policy: UnavailablePolicy::Hide,
-                                condition: None,
-                                text: "Garden".into(),
-                                id: None,
-                            },
-                            ChoiceOption {
-                                unavailable_policy: UnavailablePolicy::Hide,
-                                condition: None,
-                                text: "Library".into(),
-                                id: None,
-                            },
-                        ],
-                    },
-                },
-            )
-            .unwrap();
-        let entry = workspace
-            .scenes
-            .iter()
-            .find(|scene| scene.id == fixture.entry_scene_id)
-            .unwrap();
-        let choice = entry
-            .beats
-            .iter()
-            .find(|beat| matches!(beat.payload, BeatPayload::Choice { .. }))
-            .unwrap();
-        workspace = fixture
-            .apply(
-                &workspace,
-                SceneCommand::CreateSceneFromChoice {
-                    scene_id: entry.id.clone(),
-                    expected_source_revision: entry.source_revision.clone(),
-                    choice_beat_id: choice.id.clone(),
-                    // "Library" goes to the new scene.
-                    option_id: match &choice.payload {
-                        BeatPayload::Choice { options, .. } => options[1].id.clone().unwrap(),
-                        _ => unreachable!(),
-                    },
-                    chapter_id: chapter_two,
-                    display_name: "Created from Choice".into(),
-                },
-            )
-            .unwrap();
-        let garden = workspace
-            .scenes
-            .iter()
-            .find(|scene| scene.id == garden_id)
-            .unwrap();
-        workspace = fixture
-            .apply(
-                &workspace,
-                SceneCommand::UpdateBodyBeat {
-                    scene_id: garden.id.clone(),
-                    expected_source_revision: garden.source_revision.clone(),
-                    beat_id: garden.beats.last().unwrap().id.clone(),
-                    expected_body: BodyRef::Root,
-                    beat: BeatPayload::Jump {
-                        scene_id: library_id,
-                    },
-                },
-            )
-            .unwrap();
+        // "Library" (option 1) gets the new scene.
+        let (mut workspace, garden_id) = author_branching_story(
+            workspace,
+            &fixture.entry_scene_id,
+            payloads,
+            1,
+            |workspace, command| fixture.apply(workspace, command).unwrap(),
+        );
         let entry = workspace
             .scenes
             .iter()
