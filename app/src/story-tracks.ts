@@ -56,6 +56,31 @@ export function bodyOwner(scene: SceneDocument, body: BodyRef): SceneBeat | unde
   const owner = bodyOf(scene, body)?.owningNode;
   return owner === undefined ? undefined : beatOf(scene, owner);
 }
+/**
+ * The stage beats a Transition at a place animates, in source order. Ren'Py's `with`
+ * animates the stage changes since the previous interaction, so the walk goes back to the
+ * last line, choice, transition or other interaction. A stage beat with its own transition
+ * ran it, so it ends the walk too. A branch's first place continues above its condition;
+ * a Choice option's begins after the Choice. Music, sound, variables and screens change
+ * no stage and are passed over. Another condition above ends the walk.
+ */
+export function stageBeatsAbove(scene: SceneDocument, body: BodyRef, position: Position): SceneBeat[] {
+  const stage = new Set<BeatPayload["type"]>(["background", "showCharacter", "hideCharacter", "changeAppearance", "placement"]);
+  const passed = new Set<BeatPayload["type"]>(["playMusic", "stopMusic", "playSfx", "setVariable", "showScreen", "hideScreen"]);
+  const found: SceneBeat[] = [];
+  let nodes = nodeBeats(scene, body), at = position.type === "end" ? nodes.length : nodes.findIndex(node => sameNode(nodeRef(node), position.anchor));
+  for (let depth = 0; depth <= 32 && at >= 0; depth++) {
+    for (let index = at - 1; index >= 0; index--) {
+      const beat = nodes[index]!, type = beat.payload.type;
+      if (!beat.conditionalBranch && stage.has(type) && (!("transition" in beat.payload) || beat.payload.transition === "none")) { found.unshift(beat); continue; }
+      if (beat.conditionalBranch || !passed.has(type)) return found;
+    }
+    const owner = bodyOwner(scene, body);
+    if (!owner || bodyOf(scene, body)?.kind !== "branch") break;
+    body = beatBody(owner); nodes = nodeBeats(scene, body); at = nodes.findIndex(node => node.id === owner.id);
+  }
+  return found;
+}
 /** The place right after a node in its body, when core offers one. */
 export function placeAfter(scene: SceneDocument, beat: SceneBeat): Position | undefined {
   const body = beatBody(beat), info = bodyOf(scene, body), nodes = info?.nodes ?? [];

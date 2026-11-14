@@ -543,6 +543,11 @@ a beat follow `story-combined-editor` / `replace-v2`
   current path. [Story Undo](#story-undo) defines the grouping of typing into steps.
 - Staging changes are explicit beats. A dialogue line never hides a `show` or
   appearance change.
+- A Transition writes a standalone `with`, which animates the stage beats above it,
+  back to the last line, choice, transition or other interaction. Its editor lists
+  those beats ("This fade animates 2 beats above it:") and says to move the Transition
+  under a beat to animate it (`story-release-fixes` / `a-v2`). A stage beat with its
+  own transition ends the list, and a branch's first beats continue above its condition.
 - Selecting a character or the background on the stage names the beat that set it, and
   offers to edit that beat or add a change before the current beat in the same scene,
   branch or option. It never edits the earlier beat silently.

@@ -11,7 +11,7 @@ import { button, FieldError, focusFirst, friendlyError, iconButton, labelled, op
 import { isTextField, typingStepIdleMs, type DraftStep, type DraftStepRecord, type HistoryDirection } from "./project-history.ts";
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenEffects, ScreenRevisions, ScreenTargetBinding } from "./screen-contracts.ts";
 import { laneGrips, resizeGrip, watchHiddenLanes, type FocusWidths } from "./story-focus.ts";
-import { armOf, beatBody, beatNumbers, bodyOf, bodyOwner, laneOf, nodeBeats, nodeRef, ownedBodies, pinRouteLabels, renderBranchPath, renderMarksLegend, renderRoute, renderTracksKey, renderViewSwitch, sameBody, sameNode, samePosition, shorten, trackCopy, trackRoute, unknownCause, endingBeat, type PendingBeat, type RouteView, viewName } from "./story-tracks.ts";
+import { armOf, beatBody, beatNumbers, bodyOf, bodyOwner, laneOf, nodeBeats, nodeRef, ownedBodies, pinRouteLabels, renderBranchPath, renderMarksLegend, renderRoute, renderTracksKey, renderViewSwitch, sameBody, sameNode, samePosition, shorten, stageBeatsAbove, trackCopy, trackRoute, unknownCause, endingBeat, type PendingBeat, type RouteView, viewName } from "./story-tracks.ts";
 export type PlacementRef = "left" | "centre" | "right";
 export type TransitionRef = "none" | "dissolve" | "fade";
 
@@ -2274,7 +2274,7 @@ export function renderStoryView(
       })().finally(() => { settling = undefined; });
     };
     const updateCommand = (payload: BeatPayload, current = base()): SceneCommand => ({ type: "updateBodyBeat", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, beatId: beat.id, expectedBody: current.expectedBody, beat: payload });
-    const context = editorContext(beat.id, true, assignmentValidation(() => base(), value => updateCommand(value), () => editor.host.isConnected));
+    const context = editorContext(beat.id, true, assignmentValidation(() => base(), value => updateCommand(value), () => editor.host.isConnected), () => ({ scene: located().current ?? scene, body: owner, position: { type: "before", anchor: nodeRef(beat) } }));
     const editor = beat.payload.type === "choice" ? buildChoiceEditor(beat.payload, context, choiceHost(scene, beat)) : buildBeatEditor(beat.payload, context);
     const panel = editor.host; panel.classList.add("expanded-beat");panel.dataset.beatType=beat.payload.type;
     if (beat.payload.type === "showScreen" || beat.payload.type === "hideScreen" || beat.payload.type === "callScreen") {
@@ -2367,8 +2367,9 @@ export function renderStoryView(
 
   // What every beat editor needs from Story: thumbnails, the stage preview of a picture
   // the author points at in a picker sheet, and #96's backend checks.
-  const editorContext = (key: string, existing: boolean, validate: ValidateAssignment): EditorContext => ({
+  const editorContext = (key: string, existing: boolean, validate: ValidateAssignment, place?: () => { scene: SceneDocument; body: BodyRef; position: Position }): EditorContext => ({
     model, existing, actions: liveActions, validate, newVariable,
+    ...place ? { animates: () => { const { scene, body, position } = place(); return stageBeatsAbove(scene, body, position).map(beat => `${numbers.get(beat.id) ?? ""} ${beatLabels[beat.payload.type]} · ${stageSubject(beat.payload, model)}`); } } : {},
     thumbnail: (assetId, image, errorHost) => void loadImage(assetId, "thumbnail", image, errorHost, false),
     preview: payload => { sheetPreview = payload ? { key, payload } : undefined; refreshPreview(); },
   });
@@ -2439,12 +2440,15 @@ export function renderStoryView(
       const current = model.scenes.find(item => item.id === scene.id) ?? scene, place = placement(current, body, position, type);
       where.replaceChildren();
       for (const [term, value] of [["Goes at", place.goesAt], ["In", place.in], ...place.after ? [["After", place.after]] : []] as const) where.append(Object.assign(document.createElement("dt"), { textContent: term }), Object.assign(document.createElement("dd"), { textContent: value }));
+      beatEditor?.refresh?.();
     };
     // A screen beat keeps the place it chose in Screens, so it can pick another one here.
     const placementHost = screenType ? destinations(scene,body,position,insertion) : undefined;
     const unavailableScene = !!insertion && insertion.sceneId !== scene.id;
     const usesPlacement = (): boolean => screenType && !!placementHost;
     const chosenLocation = (): { body: BodyRef; position: Position } => usesPlacement() ? placementHost!.read() : unavailableScene ? { body: { type: "root" }, position: defaultPlace(scene, { type: "root" }) } : { body, position };
+    // A new beat moves with the place the author chooses, until it is added.
+    const place=():{body:BodyRef;position:Position}=>{try{return chosenLocation();}catch{return {body,position};}};
     // The pending column in Tracks follows the chosen place, with its branches open.
     const relocate=()=>{const current=model.scenes.find(item=>item.id===scene.id);if(current)openTo(current,place().body);redrawBottom();};
     const remember=()=>{if(screenType&&placementHost)try{rememberScreenInsertion({sceneId:scene.id,...placementHost.read(),expectedSourceRevision:scene.sourceRevision});rememberedInsertion=true;return true;}catch{/* Retain the unavailable original position until an explicit choice. */}return false;};
@@ -2457,7 +2461,7 @@ export function renderStoryView(
     const validateNew = assignmentValidation(base, beat => insertCommand(beat, chosenLocation()), () => panel.isConnected);
     // A new condition: its If test and whether it has an Otherwise. It has no beat payload.
     const condition = type === "condition" ? newConditionEditor() : undefined;
-    const context = editorContext(key, false, validateNew);
+    const context = editorContext(key, false, validateNew, () => ({ scene: model.scenes.find(item => item.id === scene.id) ?? scene, ...place() }));
     const beatEditor = condition ? undefined : (payload => payload.type === "choice" ? buildChoiceEditor(payload, context, choiceHost(scene)) : buildBeatEditor(payload, context))(defaultPayload(type as BeatPayload["type"], model, actions.screenHint));
     const editor = condition?.editor ?? beatEditor!;
     const secondaryHost = document.createElement("div"); secondaryHost.className = "story-screen-secondary"; if (editor.secondary) secondaryHost.append(editor.secondary);
@@ -2503,8 +2507,6 @@ export function renderStoryView(
     drawWhere();
     panel.append(heading, ...placementHost ? [placementHost.host] : [where], editor.host, actionsRow, secondaryHost);
     dirtyDraft(panel, editor.controls);
-    // A new beat moves with the place the author chooses, until it is added.
-    const place=():{body:BodyRef;position:Position}=>{try{return chosenLocation();}catch{return {body,position};}};
     const moveNewBeat = (opener: HTMLElement): void => {
       const current = model.scenes.find(item => item.id === scene.id); if (!current) return;
       const { tree, expanded } = placeTree(current, body), chosen = findPlace(tree, node => !!node.place && sameBody(node.place.body, body) && samePosition(node.place.position, position));
@@ -2585,6 +2587,11 @@ function confirmAction(host: HTMLElement, copy: string, commit: () => Promise<un
   const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => panel.remove()); const confirm = button("Confirm delete", "button danger"); confirm.addEventListener("click", () => void commit()); panel.append(text, cancel, confirm); host.append(panel);
 }
 
+/** What a stage beat changes, by name: the background, or the character. */
+function stageSubject(payload: BeatPayload, model: SceneWorkspace): string {
+  if (payload.type === "background") return model.authoring.assets.find(item => item.id === payload.assetId)?.displayName ?? "Unknown Asset";
+  return "characterId" in payload ? model.authoring.characters.find(item => item.id === payload.characterId)?.displayName ?? "Unknown Character" : beatLabels[payload.type];
+}
 function beatSummary(payload: BeatPayload, model: SceneWorkspace): string {
   const character = (id: string): string => model.authoring.characters.find((item) => item.id === id)?.displayName ?? "Unknown Character";
   const asset = (id: string): string => model.authoring.assets.find((item) => item.id === id)?.displayName ?? "Unknown Asset";

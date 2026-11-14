@@ -18,7 +18,7 @@ const kinds: readonly (readonly [AddKind, string, string, string])[] = ([
   ["hideCharacter", "Stage", "Takes a character off the stage."],
   ["changeAppearance", "Stage", "Changes a shown character's expression."],
   ["placement", "Stage", "Moves a shown character."],
-  ["transition", "Stage", "Animates the next visual change."],
+  ["transition", "Stage", "Animates the stage changes above it, since the last line or choice."],
   ["playMusic", "Audio", "Starts a music track."],
   ["stopMusic", "Audio", "Stops the current music."],
   ["playSfx", "Audio", "Plays a sound once."],
