@@ -815,9 +815,15 @@ export const storyCases={
   // (a) The external edit cuts the nested beat's line from If and pastes it into the Else if.
   const a=inIf('Nested in focus');await type(a,'Draft from If');
   await refusedThenDiscarded(a.id,await external(move('        "Nested in focus"\n','        "Boundary preserved"\n'),a.id));
-  // (b) It adds an earlier condition holding an identical line.
+  // (b) It adds an earlier condition holding an identical line. The If's own lines did not
+  // change, so the draft stays with its beat there, and Commit writes only the If's copy.
   const b=inIf('First in focus');await type(b,'Draft from If');
-  await refusedThenDiscarded(b.id,await external(()=>({remove:'    if flag:\n',insert:'    if trust == 9:\n        "First in focus"\n    if flag:\n'}),b.id));
+  const earlier=await external(()=>({remove:'    if flag:\n',insert:'    if trust == 9:\n        "First in focus"\n    if flag:\n'}),b.id);
+  c.assert.equal(!!panel(b.id).querySelector('.story-conflict'),false,'No conflict');c.assert.equal(scene(c).beats.find(x=>x.id===b.id)?.owner?.branchId,b.owner.branchId);
+  const beforeB=c.workspace();await c.click('Commit Beat',card(c,b.id));await c.wait(accepted(c,b.id));await c.settle();
+  c.assert.deepEqual(envelope(c,beforeB,'updateBodyBeat').expectedBody,{type:'branch',...b.owner});
+  const was=c.sourceText(earlier,path),own=was.indexOf('"First in focus"',was.indexOf('    if flag:\n'));c.assert(own>was.indexOf('"First in focus"'),'The If holds the second copy');
+  c.assert.equal(c.sourceText(await c.snapshot(),path),was.slice(0,own)+'"Draft from If"'+was.slice(own+'"First in focus"'.length));
   // (c) It adds an identical copy of the condition's If and the beat's line above them.
   const copied=inIf('End of If from Reel');await type(copied,'Draft from If');
   await refusedThenDiscarded(copied.id,await external(()=>({remove:'    if trust == 9:\n',insert:'    if flag:\n        "End of If from Reel"\n    if trust == 9:\n'}),copied.id));

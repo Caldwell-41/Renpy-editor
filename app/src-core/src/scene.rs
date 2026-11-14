@@ -3940,6 +3940,9 @@ fn build_mapping_mode(
         }
     }
     let mut ids: HashMap<(String, String), VecDeque<(String, Option<usize>)>> = HashMap::new();
+    // IDs whose line the scene now has more or fewer copies of, by the body that held
+    // them: the branch ID that owned them, or None for the root.
+    let mut body_ids: HashMap<(String, String, Option<String>), VecDeque<String>> = HashMap::new();
     let old_extra: HashMap<String, Map<String, Value>> = previous
         .map(|mapping| {
             mapping
@@ -3980,29 +3983,72 @@ fn build_mapping_mode(
                 .push_back((beat.id.clone(), None));
         }
         // An ID follows its bytes only while they name one line. If an edit adds or
-        // removes a copy, nothing says which copy is the beat, so no copy keeps an ID;
+        // removes a copy, the scene's copies no longer say which copy is the beat;
         // otherwise a copy elsewhere, such as in another branch, would take it (#120).
-        let mut lines = HashMap::<(String, String), usize>::new();
+        // A body whose own copies did not change still says it: its copies keep
+        // their IDs in that body, and every other copy gets a new one.
+        let mut parsed_line_counts = HashMap::<(String, String), usize>::new();
         for parsed in &parsed {
             let key = (
                 parsed.payload.kind().to_owned(),
                 sha256(&bytes[parsed.start..parsed.end]),
             );
-            *lines.entry(key).or_default() += 1;
+            *parsed_line_counts.entry(key).or_default() += 1;
         }
+        let previous_body: HashMap<&str, Option<&str>> = previous
+            .beats
+            .iter()
+            .map(|beat| {
+                let body = beat.owner.as_ref().map(|owner| owner.branch_id.as_str());
+                (beat.id.as_str(), body)
+            })
+            .collect();
         for (key, queue) in &mut ids {
             let forced = |id: &String| forced_ids.contains(id.as_str());
             let claimed = queue.iter().filter(|(id, _)| forced(id)).count();
             let carried = queue.len() - claimed;
             if carried > 0
-                && lines.get(key).copied().unwrap_or(0).saturating_sub(claimed) != carried
+                && parsed_line_counts
+                    .get(key)
+                    .copied()
+                    .unwrap_or(0)
+                    .saturating_sub(claimed)
+                    != carried
             {
+                for (id, _) in queue.iter().filter(|(id, _)| claimed == 0 && !forced(id)) {
+                    let body = previous_body[id.as_str()].map(str::to_owned);
+                    body_ids
+                        .entry((key.0.clone(), key.1.clone(), body))
+                        .or_default()
+                        .push_back(id.clone());
+                }
                 queue.retain(|(id, _)| forced(id));
             }
         }
     }
+    // The parsed lines of each body by kind and bytes, for `body_ids`. A body is the
+    // byte start of the branch header that owns it, or None for the root.
+    let body_of = |nesting: &Option<ParsedNesting>| match nesting {
+        Some(ParsedNesting::Child { branch_start, .. })
+        | Some(ParsedNesting::Branch {
+            parent: Some((_, branch_start)),
+            ..
+        }) => Some(*branch_start),
+        _ => None,
+    };
+    let mut body_line_counts = HashMap::<(String, String, Option<usize>), usize>::new();
+    for parsed in &parsed {
+        let key = (
+            parsed.payload.kind().to_owned(),
+            sha256(&bytes[parsed.start..parsed.end]),
+            body_of(&parsed.nesting),
+        );
+        *body_line_counts.entry(key).or_default() += 1;
+    }
     let mut mappings = Vec::new();
     let mut beats = Vec::new();
+    let mut assigned = HashMap::<usize, String>::new();
+    let mut checked_bodies = HashSet::new();
     let nesting = parsed
         .iter()
         .map(|p| (p.start, p.nesting.clone()))
@@ -4030,11 +4076,25 @@ fn build_mapping_mode(
                     .position(|(_, anchor)| anchor.is_none_or(|start| start == parsed.start))?;
                 queue.remove(index).map(|(id, _)| id)
             })
+            .or_else(|| {
+                let start = body_of(&parsed.nesting);
+                let body = start.map(|start| assigned[&start].clone());
+                let queue = body_ids.get_mut(&(kind.clone(), hash.clone(), body))?;
+                // The body keeps its IDs only when it holds as many copies as before.
+                let line = (kind.clone(), hash.clone(), start);
+                if checked_bodies.insert(line.clone())
+                    && body_line_counts.get(&line) != Some(&queue.len())
+                {
+                    queue.clear();
+                }
+                queue.pop_front()
+            })
             .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
         let id = embedded.unwrap_or(id);
         if mappings.iter().any(|b: &BeatSourceMapping| b.id == id) {
             return Err(SceneError::InvariantBlocked);
         }
+        assigned.insert(parsed.start, id.clone());
         let screen_target = match &mut parsed.payload {
             BeatPayload::ShowScreen { target, .. }
             | BeatPayload::HideScreen { target, .. }
@@ -8306,6 +8366,94 @@ mod tests {
         }
     }
 
+    // A copy of a line in another body says nothing about the beat in its own body,
+    // which keeps its ID and stored fields. A copy in the same body is ambiguous (#120).
+    #[test]
+    fn an_external_copy_of_a_line_in_another_body_leaves_the_beat_its_id_and_fields() {
+        let original =
+            "label scene_one:\n    \"Root\"\n    if flag:\n        \"Kept\"\n    \"After\"\n    return\n";
+        let f = Fixture::new(b"label scene_one:\n    return\n");
+        f.migrate();
+        for (name, variable_type, default_value) in [
+            ("flag", VariableType::Bool, Value::Bool(true)),
+            ("trust", VariableType::Int, Value::String("5".into())),
+        ] {
+            f.service
+                .create_variable(
+                    &f.project,
+                    &f.project_id,
+                    CreateVariableRequest {
+                        technical_name: name.into(),
+                        variable_type,
+                        default_value,
+                    },
+                )
+                .unwrap();
+        }
+        let path = f.root.join(&f.workspace().scenes[0].source_path);
+        fs::write(&path, original).unwrap();
+        let narration = |ws: &SceneWorkspace, text: &str| {
+            ws.scenes[0]
+                .beats
+                .iter()
+                .filter(|b| matches!(&b.payload, BeatPayload::Narration { text: t } if t == text))
+                .map(|b| (b.id.clone(), b.owner.as_ref().map(|o| o.branch_id.clone())))
+                .collect::<Vec<_>>()
+        };
+        let before = f.workspace();
+        let (root, kept) = (
+            narration(&before, "Root")[0].clone(),
+            narration(&before, "Kept")[0].clone(),
+        );
+        // Fields a later build stored on both rows.
+        let map_path = f.root.join(SOURCE_MAP_PATH);
+        let mut map =
+            SourceMapMetadata::read_bytes(&fs::read(&map_path).unwrap(), &f.project_id).unwrap();
+        for row in &mut map.scene_mappings[0].beats {
+            if row.id == root.0 || row.id == kept.0 {
+                row.extra
+                    .insert("futureRecord".into(), Value::String(row.id.clone()));
+            }
+        }
+        fs::write(&map_path, source_map_bytes(&map).unwrap()).unwrap();
+        let fields = |id: &str| {
+            SourceMapMetadata::read_bytes(&fs::read(&map_path).unwrap(), &f.project_id)
+                .unwrap()
+                .scene_mappings[0]
+                .beats
+                .iter()
+                .find(|row| row.id == id)
+                .map(|row| row.extra.get("futureRecord").cloned())
+        };
+        // A new condition holds copies of both lines; neither copy takes an ID.
+        let copied = original.replace(
+            "    \"After\"\n",
+            "    if trust == 9:\n        \"Kept\"\n        \"Root\"\n    \"After\"\n",
+        );
+        fs::write(&path, &copied).unwrap();
+        let after = f.workspace();
+        assert_eq!(narration(&after, "Root")[0], root);
+        let copies = narration(&after, "Kept");
+        assert_eq!(copies.len(), 2);
+        assert_eq!(copies[0], kept);
+        assert!(copies[1].0 != kept.0 && copies[1].1 != kept.1);
+        for id in [&root.0, &kept.0] {
+            assert_eq!(fields(id), Some(Some(Value::String(id.clone()))));
+        }
+        // A second copy in the beat's own body: nothing says which is the beat.
+        fs::write(
+            &path,
+            copied.replace(
+                "        \"Kept\"\n    if trust",
+                "        \"Kept\"\n        \"Kept\"\n    if trust",
+            ),
+        )
+        .unwrap();
+        let ambiguous = narration(&f.workspace(), "Kept");
+        assert_eq!(ambiguous.len(), 3);
+        assert!(ambiguous.iter().all(|(id, _)| id != &kept.0));
+    }
+
     // A beat ID names one line. When an external edit adds or removes a copy of a line,
     // bytes cannot say which copy is the beat, so no copy keeps its ID (#120).
     #[test]
@@ -8365,15 +8513,17 @@ mod tests {
         let elif = ids(&before, "Boundary")[0].1.clone();
         assert_eq!(ids(&after, "Nested"), vec![(nested.clone(), elif)]);
         assert_ne!(if_branch, ids(&after, "Nested")[0].1);
-        // An earlier condition with an identical line: neither copy is the beat.
+        // An earlier condition with an identical line: the beat's own If did not change,
+        // so its copy keeps the ID there and the earlier copy never takes it.
         let (before, after) = edit(original.replace(
             "    if flag:\n",
             "    if trust == 9:\n        \"Nested\"\n    if flag:\n",
         ));
-        let nested = ids(&before, "Nested")[0].0.clone();
+        let nested = ids(&before, "Nested")[0].clone();
         let copies = ids(&after, "Nested");
         assert_eq!(copies.len(), 2);
-        assert!(copies.iter().all(|(id, _)| id != &nested), "{copies:?}");
+        assert_eq!(copies[1], nested, "{copies:?}");
+        assert_ne!(copies[0].0, nested.0);
         // A copy of the whole condition: neither If header nor either line keeps its ID.
         let (before, after) = edit(original.replace(
             "    if flag:\n",

@@ -526,8 +526,10 @@ The Scene recognizer follows the same rule: supported canonical Beats retain sta
 IDs, exact byte ranges, hashes, and lexical context; unsupported regions become
 protected Custom Code. Insert, replace, remove, and reorder refuse ambiguous ownership
 or opaque crossings. When source changes outside a Story command, an ID follows its exact
-line bytes only while they name one line. Adding or removing a copy of a line gives every
-copy a new ID, so no copy in another branch takes the beat's ID. A beat also keeps its ID
+line bytes while the scene has as many copies of that line as before. When an edit adds
+or removes a copy, an ID stays only in a body (the root or one branch) that holds as many
+copies as before, on its copy there. Every other copy gets a new ID, so no copy in
+another branch takes the beat's ID. A beat also keeps its ID
 when its unchanged bytes now parse as a different kind. For example, `scene bg booth`
 is Custom Code until `booth` is imported, and then it is a Background beat with the same
 ID. Scene create/move/delete commits source, metadata, references,
