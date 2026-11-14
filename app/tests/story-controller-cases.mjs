@@ -989,5 +989,23 @@ export const storyCases={
   // project in a new process and checks every source byte.
   for(let index=0;index<5;index++){await c.history('redo');await c.settle();}
   c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(saved)));
+  // An ordinary save that an I/O failure stopped after staging leaves its journal. Story
+  // shows Recovery required on its next read; keeping the current files resumes writing.
+  await c.raw({driver:'interruptedSave',path:path(c,'Tram')});
+  c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(saved)),'The interrupted save left every source as it was');
+  await c.click('Branches');await c.wait(()=>c.document.querySelector('.branches-workspace'));await c.settle();
+  const recovery=()=>c.document.querySelector('.recovery-workspace');
+  await c.click('Story');await c.wait(()=>recovery()?.querySelector('.recovery-item'));await c.settle();
+  c.assert.equal(recovery().querySelector('h1').textContent,'Recovery required');c.assert.equal(status(c),'Recovery required — writes are disabled');
+  // Only the interrupted save shows; finished transactions are not recovery work.
+  c.assert.equal(recovery().querySelectorAll('.recovery-item').length,1,[...recovery().querySelectorAll('.recovery-item p:first-of-type')].map(p=>p.textContent).join(', '));
+  const item=recovery().querySelector('.recovery-item');
+  c.assert.deepEqual([...item.querySelectorAll('tr td:first-child')].map(cell=>cell.textContent),[path(c,'Tram')]);
+  c.assert.equal(item.querySelector('p.muted').textContent,'The current project bytes are still the verified base. Keeping them is supported.');
+  const keep=[...item.querySelectorAll('button')].find(b=>b.textContent==='Keep current project files');c.assert(keep?.disabled,'Keep waits for the review checkbox');
+  const reviewed=c.labelled('I reviewed the affected files and retained evidence',item);reviewed.checked=true;reviewed.dispatchEvent(new window.Event('change',{bubbles:true}));
+  at=c.requests().length;await c.click('Keep current project files',item);
+  await c.wait(()=>c.requests().slice(at).some(r=>r.request.operation==='scene.resolveRecovery'&&r.responseOk)&&c.document.querySelector('.scene-workspace .story-track-column'));await c.settle();
+  c.assert.equal(recovery(),null);c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(saved)),'Keeping the current files writes no source');
  },
 };

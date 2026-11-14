@@ -63,7 +63,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
  document.body.innerHTML='<div id="app"></div>';
  for(const type of ['click','keydown','input','change'])document.addEventListener(type,event=>{
   const target=event.target?.closest?.('button,input,select,textarea,[role="button"]')??event.target;
-  const panel=target?.closest?.('.scene-workspace')?'story':target?.closest?.('.source-workspace')?'source':target?.closest?.('.app-header')?'header':null;
+  const panel=target?.closest?.('.scene-workspace, .story-tree')?'story':target?.closest?.('.source-workspace')?'source':target?.closest?.('.app-header')?'header':null;
   // prepareTransition retains the editor being left, never the destination row's path.
   const navigationTarget=target?.matches?.('.source-file-tree .source-file-open, .story-sidebar > .tree-item');
   const navigationActivation=type==='click'||(type==='keydown'&&['Enter',' '].includes(event.key));
@@ -189,7 +189,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   finally{release();responseBarrier=undefined;await actionPromise;}
  };
  const raw=async request=>{
-  assert(['snapshot','externalAppend','externalRemove','externalReplace'].includes(request?.driver),'Only owned fixture controls allowed');return child.request(request);
+  assert(['snapshot','externalAppend','externalRemove','externalReplace','interruptedSave'].includes(request?.driver),'Only owned fixture controls allowed');return child.request(request);
  };
  const start=async reopen=>{
   evidence.driverStarts++;

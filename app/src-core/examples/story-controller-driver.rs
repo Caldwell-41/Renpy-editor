@@ -325,6 +325,51 @@ fn main() {
             emit(json!({"externalBytes":bytes}));
             continue;
         }
+        // An ordinary save that an I/O failure stops after it stages its bytes. Its
+        // journal waits for recovery and the source keeps its bytes; no process ends.
+        if request["driver"] == "interruptedSave" {
+            use loomlight_core::transaction::{
+                CommitOutcome, ErrorCode, FaultInjector, FaultPoint, FileMutation, MutationKind,
+                RelativePath, TransactionIntent, TransactionProposal, TransactionService,
+            };
+            struct FailAfterStage;
+            impl FaultInjector for FailAfterStage {
+                fn visit(&mut self, point: FaultPoint, _: &Path) -> Result<(), ErrorCode> {
+                    if point == FaultPoint::MutationStaged(0) {
+                        Err(ErrorCode::IoFailure)
+                    } else {
+                        Ok(())
+                    }
+                }
+            }
+            let relative = request["path"].as_str().unwrap();
+            let project_root = std::fs::canonicalize(root.join("synthetic-project")).unwrap();
+            let transactions = TransactionService::default();
+            let project = transactions
+                .register_trusted_project(&project_root)
+                .unwrap();
+            let path = RelativePath::new(relative).unwrap();
+            let (expected, base) = transactions.snapshot(&project, path.clone()).unwrap();
+            let mut proposed = expected.clone();
+            proposed.extend(b"# interrupted save\n");
+            let outcome = transactions.commit_with_injector(
+                &project,
+                TransactionProposal {
+                    mutations: vec![FileMutation {
+                        path,
+                        kind: MutationKind::ReplaceExisting,
+                        base,
+                        expected_bytes: expected,
+                        proposed,
+                    }],
+                    intent: TransactionIntent::Edit,
+                },
+                &mut FailAfterStage,
+            );
+            assert!(matches!(outcome, CommitOutcome::RecoveryRequired { .. }));
+            emit(json!({"interrupted": relative}));
+            continue;
+        }
         let op = request["operation"].as_str().unwrap();
         // Narrow test process: unexpected execution/content-send operations fail closed.
         let allowed = matches!(
@@ -354,6 +399,7 @@ fn main() {
                 | "scene.resolveRecovery"
                 | "flow.list"
                 | "authoring.list"
+                | "variable.create"
                 | "source.list"
                 | "source.open"
                 | "source.updateDraft"

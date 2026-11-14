@@ -1420,8 +1420,12 @@ impl AuthoringService {
         })
     }
 
+    /// The transactions the recovery screen asks about. Finished ones need no choice,
+    /// so they stay out; their evidence is still kept on disk.
     pub fn scene_recovery(&self, project: &ProjectId) -> RecoveryReport {
-        self.transactions.recover(project)
+        let mut report = self.transactions.recover(project);
+        report.items.retain(|item| !item.state.is_terminal());
+        report
     }
 
     pub fn scene_resolve_recovery(
@@ -1442,7 +1446,7 @@ impl AuthoringService {
         {
             self.ensure_phase_1e_metadata(project, project_id)?;
         }
-        Ok(self.transactions.recover(project))
+        Ok(self.scene_recovery(project))
     }
 
     fn build_command(
@@ -6649,6 +6653,72 @@ mod tests {
                 "indent {indent}"
             );
         }
+    }
+
+    // The recovery screen lists the interrupted save that needs a choice, not the
+    // finished transactions every edit leaves behind; resolving it leaves none.
+    #[test]
+    fn recovery_lists_only_the_interrupted_save_and_resolving_it_leaves_none() {
+        use crate::transaction::{
+            CommitOutcome, ErrorCode, FaultInjector, FaultPoint, FileMutation, MutationKind,
+            RecoveryResolution, RelativePath, TransactionIntent, TransactionProposal,
+        };
+        struct FailAfterStage;
+        impl FaultInjector for FailAfterStage {
+            fn visit(&mut self, point: FaultPoint, _: &std::path::Path) -> Result<(), ErrorCode> {
+                if point == FaultPoint::MutationStaged(0) {
+                    Err(ErrorCode::IoFailure)
+                } else {
+                    Ok(())
+                }
+            }
+        }
+        let f = Fixture::new(b"label scene_one:\n    \"Line\"\n    return\n");
+        f.migrate();
+        let path = RelativePath::new(&f.workspace().scenes[0].source_path).unwrap();
+        let (expected, base) = f
+            .service
+            .transactions
+            .snapshot(&f.project, path.clone())
+            .unwrap();
+        let outcome = f.service.transactions.commit_with_injector(
+            &f.project,
+            TransactionProposal {
+                mutations: vec![FileMutation {
+                    path,
+                    kind: MutationKind::ReplaceExisting,
+                    base,
+                    expected_bytes: expected,
+                    proposed: b"label scene_one:\n    return\n".to_vec(),
+                }],
+                intent: TransactionIntent::Edit,
+            },
+            &mut FailAfterStage,
+        );
+        let CommitOutcome::RecoveryRequired { diagnostic } = outcome else {
+            panic!("{outcome:?}")
+        };
+        let report = f.service.scene_recovery(&f.project);
+        assert_eq!(
+            report
+                .items
+                .iter()
+                .map(|item| item.transaction_id.as_str())
+                .collect::<Vec<_>>(),
+            [diagnostic.transaction_id.as_deref().unwrap()]
+        );
+        let resolved = f
+            .service
+            .scene_resolve_recovery(
+                &f.project,
+                &f.project_id,
+                RecoveryResolveRequest {
+                    transaction_id: diagnostic.transaction_id.unwrap(),
+                    resolution: RecoveryResolution::KeepCurrent,
+                },
+            )
+            .unwrap();
+        assert!(resolved.items.is_empty(), "{:?}", resolved.items);
     }
 
     /// The source map as the build that saved schema `version` wrote it, with new IDs.

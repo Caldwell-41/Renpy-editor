@@ -194,7 +194,9 @@ resolution choices that the report proves safe, requires explicit confirmation,
 revalidates after completion, and resumes authoring only from a terminal non-blocking
 state. Ambiguous records remain blocked. Advanced merge and evidence retention/pruning
 remain later work. The recovery screen stays available without executing the project
-and lists affected paths and retained evidence. Acknowledging a warning or deleting a
+and lists affected paths and retained evidence. It lists only transactions that still
+block writes; durable, rejected and cleaned ones keep their evidence on disk but need no
+choice, so resolving the last blocking one completes recovery. Acknowledging a warning or deleting a
 journal is never offered as a resolution.
 
 Phase 1B adds no renderer operation or ambient filesystem/process/network authority.
