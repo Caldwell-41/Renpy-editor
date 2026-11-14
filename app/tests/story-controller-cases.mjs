@@ -136,8 +136,16 @@ const treeControls=c=>{
  const controls=[c.document.querySelector('.tree-heading button'),[...c.document.querySelectorAll('.tree-new-scene')].find(b=>b.textContent==='+ New Scene'),[...menu.querySelectorAll('button')].find(b=>b.textContent==='Rename')];
  controls.forEach(control=>c.assert(control?.isConnected&&!control.hidden));return controls;
 };
+// Example scenes by name, and opening one from the scene tree.
+const byName=(c,name)=>c.workspace().scenes.find(s=>s.displayName===name);
+const beatIn=(c,name,test)=>byName(c,name).beats.find(test);
+const openScene=async(c,name)=>{const id=byName(c,name).id;
+ [...c.document.querySelectorAll('.tree-scene-open')].find(x=>x.textContent===name).click();
+ await c.wait(()=>shownScene(c)===id&&c.document.querySelector('.scene-workspace .story-track-column'));await c.settle();};
 // The assembled release journey on the public example (story-release.dispatch.mjs).
 export const RELEASE_JOURNEY='Drafts across scenes and views, refused Save, Commit, Source edit, B conflict, Save and Undo/Redo keep unrelated source';
+// Story controls the other cases leave out, on the public example after the journey.
+export const STORY_CONTROLS='Stage media, Audition, Add change here, + Next line, Select Choice, + New variable, + New scene, and chapter and scene moves and deletes reach real core';
 export const storyCases={
  [names[0]]:async c=>{
   const before=c.workspace(),s=scene(c),choice=s.beats.find(b=>b.payload.type==='choice');c.assert(choice);
@@ -875,11 +883,6 @@ export const storyCases={
   unchangedOtherSources(c,changed,saved,path);
  },
  [RELEASE_JOURNEY]:async c=>{
-  const byName=(c,name)=>c.workspace().scenes.find(s=>s.displayName===name);
-  const beatIn=(c,name,test)=>byName(c,name).beats.find(test);
-  const openScene=async(c,name)=>{const id=byName(c,name).id;
-   [...c.document.querySelectorAll('.tree-scene-open')].find(x=>x.textContent===name).click();
-   await c.wait(()=>shownScene(c)===id&&c.document.querySelector('.scene-workspace .story-track-column'));await c.settle();};
   const view=async(c,name)=>{await c.click(name,c.document.querySelector('.scene-workspace .story-view-switch'));
    await c.wait(()=>c.document.querySelector(`.scene-workspace .story-view-option[data-view="${name.toLowerCase()}"]`)?.getAttribute('aria-pressed')==='true');};
   const focusToggle=c=>c.document.querySelector('.scene-workspace [data-writing-focus-toggle]');
@@ -1007,5 +1010,102 @@ export const storyCases={
   at=c.requests().length;await c.click('Keep current project files',item);
   await c.wait(()=>c.requests().slice(at).some(r=>r.request.operation==='scene.resolveRecovery'&&r.responseOk)&&c.document.querySelector('.scene-workspace .story-track-column'));await c.settle();
   c.assert.equal(recovery(),null);c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(saved)),'Keeping the current files writes no source');
+ },
+ [STORY_CONTROLS]:async c=>{
+  const status=()=>c.document.querySelector('#app-status').textContent;
+  const path=name=>byName(c,name).sourcePath;
+  const effects=()=>c.document.querySelector('.scene-workspace .story-effects');
+  // Story keeps each picture core presents, so an earlier view may have asked for it.
+  const presented=(from,purpose,assetId)=>c.requests().slice(from).some(r=>r.request.operation==='media.present'&&(!purpose||r.request.payload.purpose===purpose)&&r.request.payload.assetId===assetId&&r.responseOk);
+  const applied=(from,type)=>c.requests().slice(from).find(r=>r.request.operation==='scene.apply'&&r.request.payload.command.type===type&&r.responseOk);
+  const writes=from=>c.requests().slice(from).filter(r=>['scene.apply','scene.saveDrafts','source.save','variable.create'].includes(r.request.operation)).length;
+  // Only the named files changed.
+  const othersKept=(before,after,paths)=>{const strip=snapshot=>Object.fromEntries(Object.entries(c.hashes(c.rpy(snapshot))).filter(([p])=>!paths.includes(p)));c.assert.deepEqual(strip(after),strip(before));};
+  // The stage asks core for the background picture at the selected beat.
+  await openScene(c,'Tram');
+  const background=beatIn(c,'Tram',b=>b.payload.type==='background'),music=beatIn(c,'Tram',b=>b.payload.type==='playMusic');
+  const line=beatIn(c,'Tram',b=>b.payload.type==='dialogue'&&b.payload.text==='The last tram is late again.');c.assert(background&&music&&line);
+  let from=c.requests().length;await select(c,line.id);
+  await c.wait(()=>presented(0,undefined,background.payload.assetId)&&c.document.querySelector('.scene-workspace .preview-canvas img.preview-background')?.getAttribute('src'));
+  // Audition plays the music in effect only when pressed.
+  c.assert(!presented(from,'audioAudition',music.payload.assetId),'Selecting a beat plays nothing');
+  from=c.requests().length;await c.click('Audition current music',effects());
+  await c.wait(()=>presented(from,'audioAudition',music.payload.assetId)&&effects()?.querySelector('.audio-audition audio'));
+  c.assert.equal(status(),'Audio audition started by user');c.assert.equal(writes(from),0);
+  // Add change here on the Background row opens a background beat at this line.
+  let before=await c.snapshot();
+  const backgroundRow=[...effects().querySelectorAll('.provenance-row')].find(r=>r.querySelector('.asset-thumbnail'));c.assert(backgroundRow);
+  from=c.requests().length;await c.click('Add change here',backgroundRow);
+  const change=c.document.querySelector('.scene-workspace .new-beat');c.assert(change);
+  await c.click('Add Beat',change);await c.wait(()=>applied(from,'insertBodyBeat'));await c.settle();
+  c.assert.deepEqual(applied(from,'insertBodyBeat').request.payload.command.position,{type:'before',anchor:{type:'beat',beatId:line.id}});
+  let after=await c.snapshot();
+  const lines=t=>c.sourceText(t,path('Tram')).split('\n'),at=lines(before).indexOf('    mara "The last tram is late again."');
+  c.assert.deepEqual(lines(after).filter((_,i)=>i!==at),lines(before),'One line is added');c.assert.match(lines(after)[at],/^    scene bg /);
+  othersKept(before,after,[path('Tram')]);
+  // + Next line commits the line and adds an empty line for the same speaker after it.
+  before=after;await select(c,line.id);c.enter(card(c,line.id).querySelector('textarea'),'The last tram is later still.');await c.settle();
+  from=c.requests().length;await c.click('+ Next line',card(c,line.id));await c.wait(()=>applied(from,'continueDialogue'));await c.settle();
+  after=await c.snapshot();
+  c.assert.equal(c.sourceText(after,path('Tram')),replaceOnce(c,c.sourceText(before,path('Tram')),'    mara "The last tram is late again."\n','    mara "The last tram is later still."\n    mara ""\n'));
+  othersKept(before,after,[path('Tram')]);
+  // A Repeat this Choice beat's Select Choice opens its Choice, and writes nothing.
+  await openScene(c,'Choices');
+  const repeat=beatIn(c,'Choices',b=>b.payload.type==='repeatChoice'),menu=beatIn(c,'Choices',b=>b.payload.type==='choice'&&b.payload.options.some(o=>o.id===repeat?.owner?.branchId));c.assert(repeat&&menu);
+  from=c.requests().length;await select(c,repeat.id);
+  await c.click(`Select Choice ${row(c,menu.id).querySelector('.story-beat-number').textContent}`,card(c,repeat.id));await c.wait(()=>card(c,menu.id));
+  c.assert.equal(writes(from),0);
+  // + New variable… in a new condition's rule creates the variable through core; the
+  // rule then uses it. Cancelling the condition writes no scene.
+  before=await c.snapshot();from=c.requests().length;
+  await c.click('+ Add beat',c.document.querySelector('.scene-workspace'));await pickIn(c,'condition');
+  const condition=c.document.querySelector('.scene-workspace .new-beat'),picker=()=>condition.querySelector('.story-variable-picker > summary');
+  picker().click();await c.click('+ New variable…',condition);
+  const dialog=()=>c.document.querySelector('.scene-workspace .story-new-variable');c.assert(dialog());
+  c.enter(dialog().querySelector('input[aria-label="Variable name"]'),'late_tram');await c.click('Create variable',dialog());
+  await c.wait(()=>!dialog()&&c.requests().slice(from).some(r=>r.request.operation==='variable.create'&&r.responseOk));await c.settle();
+  c.assert.equal(picker().getAttribute('aria-label'),'If rule 1 variable: late_tram');
+  c.assert(c.workspace().authoring.variables.some(v=>v.technicalName==='late_tram'));
+  await c.click('Cancel',condition);await c.settle();c.assert(!applied(from,'insertCondition'),'Cancel adds no condition');
+  after=await c.snapshot();c.assert.match(c.sourceText(after,'game/definitions/variables.rpy'),/^default late_tram = False$/m);
+  othersKept(before,after,['game/definitions/variables.rpy']);
+  // The scene tree: a new chapter, a scene in it, moving that scene to the first chapter,
+  // then deleting the scene and the empty chapter. Each is one Story write.
+  const tree=()=>c.document.querySelector('.story-tree'),chapterGroup=name=>[...tree().querySelectorAll('.tree-chapter')].find(g=>g.querySelector('.tree-chapter-row strong')?.textContent===name);
+  const sceneRow=name=>[...tree().querySelectorAll('.tree-scene-row')].find(r=>r.querySelector('.tree-scene-open')?.textContent===name);
+  const named=async(scope,value,type)=>{const at=c.requests().length;const inline=scope.querySelector(':scope > .tree-inline');c.assert(inline);c.enter(inline.querySelector('input'),value);await c.click('Save',inline);await c.wait(()=>applied(at,type));await c.settle();};
+  const menuOf=row=>{const menu=row.querySelector('.tree-menu');if(!menu.open)menu.querySelector('summary').click();return menu;};
+  const firstChapter=c.workspace().chapters[0];before=await c.snapshot();
+  await c.click('New Chapter',tree().querySelector('.tree-heading'));await named(tree(),'Night','createChapter');
+  const nightChapter=c.workspace().chapters.find(ch=>ch.displayName==='Night');c.assert(nightChapter);
+  await c.click('+ New Scene',chapterGroup('Night'));await named(chapterGroup('Night'),'Spare','createScene');
+  c.assert.equal(byName(c,'Spare').chapterId,nightChapter.id);const spareInNight=byName(c,'Spare').sourcePath;
+  c.assert((await c.snapshot())[spareInNight],'The scene file is in the Night chapter');
+  // The menu's controls name their scene or chapter in ariaLabel.
+  from=c.requests().length;let menuNode=menuOf(sceneRow('Spare'));const destination=menuNode.querySelector('select');c.assert.equal(destination.ariaLabel,'Destination chapter for Spare');
+  c.enter(destination,firstChapter.id,'change');await c.click('Move',menuNode);
+  await c.wait(()=>applied(from,'moveScene'));await c.settle();
+  c.assert.equal(byName(c,'Spare').chapterId,firstChapter.id);after=await c.snapshot();
+  c.assert(!after[spareInNight]&&after[byName(c,'Spare').sourcePath],'Move writes the scene file in the first chapter');
+  from=c.requests().length;menuNode=menuOf(sceneRow('Spare'));c.assert.equal([...menuNode.querySelectorAll('button')].find(b=>b.textContent==='Delete').ariaLabel,'Delete scene Spare');await c.click('Delete',menuNode);await c.click('Confirm delete',sceneRow('Spare'));
+  await c.wait(()=>applied(from,'deleteScene'));await c.settle();c.assert.equal(byName(c,'Spare'),undefined);
+  from=c.requests().length;menuNode=menuOf(chapterGroup('Night').querySelector('.tree-chapter-row'));c.assert.equal([...menuNode.querySelectorAll('button')].find(b=>b.textContent==='Delete').ariaLabel,'Delete empty chapter Night');await c.click('Delete',menuNode);await c.click('Confirm delete',chapterGroup('Night'));
+  await c.wait(()=>applied(from,'deleteChapter'));await c.settle();
+  c.assert.deepEqual(c.workspace().chapters.map(ch=>ch.id),[firstChapter.id]);
+  after=await c.snapshot();c.assert.deepEqual(c.hashes(c.rpy(after)),c.hashes(c.rpy(before)),'The scene and chapter leave no file behind');
+  // + New scene… in an option's scene sheet creates the scene and sends that option there.
+  // It writes last, so the harness's Undo and Redo after this case reverse source.
+  const first=beatIn(c,'Choices',b=>b.payload.type==='choice'&&b.payload.options[0]?.text==='By the window');c.assert(first);
+  await openScene(c,'Choices');before=await c.snapshot();await select(c,first.id);from=c.requests().length;
+  await c.click('Change where option 3 goes: Variables',card(c,first.id));
+  await c.click('+ New scene…',c.document.querySelector('.scene-workspace .story-sheet'));
+  const sceneDialog=()=>c.document.querySelector('.scene-workspace .story-new-scene');c.assert(sceneDialog());
+  c.enter(sceneDialog().querySelector('input[aria-label="Scene name"]'),'Night bus');await c.click('Create scene and link option 3',sceneDialog());
+  await c.wait(()=>applied(from,'createSceneFromChoice')&&!sceneDialog());await c.settle();
+  const night=byName(c,'Night bus');c.assert.equal(night?.chapterId,byName(c,'Choices').chapterId);
+  after=await c.snapshot();
+  c.assert.equal(c.sourceText(after,path('Choices')),replaceOnce(c,c.sourceText(before,path('Choices')),`jump ${byName(c,'Variables').technicalLabel}\n`,`jump ${night.technicalLabel}\n`));
+  c.assert(c.sourceText(after,night.sourcePath).startsWith(`label ${night.technicalLabel}:`));
+  othersKept(before,after,[path('Choices'),night.sourcePath]);
  },
 };

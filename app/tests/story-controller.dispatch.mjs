@@ -142,7 +142,8 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   if(operation==='scene.list'&&response.ok)latestWorkspace=response.value;
   if(operation==='scene.apply'){
    assert.equal(payload.sessionId,session);assert(payload.expectedProjectRevision&&payload.expectedSourceMapRevision);
-   assert(payload.command.sceneId&&payload.command.expectedSourceRevision);
+   // Chapter commands and a new scene name no existing scene.
+   if(!['createChapter','renameChapter','moveChapter','deleteChapter','createScene'].includes(payload.command.type))assert(payload.command.sceneId&&payload.command.expectedSourceRevision);
    if(payload.command.type==='updateBodyBeat')assert(payload.command.beatId&&payload.command.expectedBody);
    if(payload.command.type==='insertBodyBeat')assert(payload.command.body&&payload.command.position);
    lastMutation={request,response,event};

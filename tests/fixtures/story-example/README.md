@@ -66,7 +66,10 @@ Together the scenes hold every Add a beat kind, Repeat this Choice and Custom Co
   bytes after the Story edits, the Call continuations, and a lossless reopen.
 - `app/tests/story-release.dispatch.mjs` (`npm run test:fixtures`) runs the assembled
   release journey through the production Story, Source and header controls against
-  real core.
+  real core. The journey ends with an ordinary interrupted save and its recovery. A
+  second case then uses the controls the journey leaves out: the stage picture,
+  Audition, Add change here, + Next line, Select Choice, + New variable…, the scene
+  tree's chapter and scene create, move and delete, and a Choice option's + New scene….
 - `renpy::tests::phase3a::phase3a_conditions_calls_sdk_gate` plays the Platform routes
   in the pinned Ren'Py SDK, and its routine preflight
   `phase3a_sdk_fixture_source_save_preserves_bom` opens the same project.
