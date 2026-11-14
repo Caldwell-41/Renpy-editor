@@ -1131,14 +1131,15 @@ export function renderStoryView(
   // what refuses it (story-release-fixes / a-v2). Each row opens its beat.
   const refuseSceneDelete = (sceneId: string, references: IncomingReferences): void => {
     const row = [...treeHost.querySelectorAll<HTMLElement>(".tree-scene-row")].find(item => item.dataset.sceneId === sceneId), name = model.scenes.find(item => item.id === sceneId)?.displayName ?? "this scene";
-    actions.status(`Can't delete "${name}". Nothing was deleted.`, "error");
     if (!row) return;
     row.querySelector(":scope > .confirm-row")?.remove(); row.querySelector("details.tree-menu")?.removeAttribute("open");
     const { intro, tail } = refusalCopy(sceneId, references), lead = document.createElement("b"); lead.textContent = `Can't delete "${name}".`;
     const block = document.createElement("div"); block.className = "story-scene-refusal"; block.role = "alert"; block.tabIndex = -1;
     const head = document.createElement("div"); head.className = "story-refusal-head";
     const copy = document.createElement("p"); copy.append(lead, ` ${intro}`);
-    const close = iconButton("close", "Close", () => { block.remove(); row.querySelector<HTMLElement>(".tree-scene-open")?.focus(); }); head.append(copy, close);
+    const dismiss = (): void => { block.remove(); row.querySelector<HTMLElement>(".tree-scene-open")?.focus(); };
+    const close = iconButton("close", "Close", dismiss); head.append(copy, close);
+    block.addEventListener("keydown", event => { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); dismiss(); } });
     const rows = document.createElement("div"); rows.className = "story-refusal-rows";
     for (const item of [...references.beats, ...references.protectedCode]) {
       const scene = model.scenes.find(entry => entry.id === item.sceneId), number = scene ? beatNumbers(scene).get(item.beatId) ?? "" : "";

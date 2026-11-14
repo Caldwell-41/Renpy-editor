@@ -672,7 +672,8 @@ test("a refused scene delete names each beat that goes to it in the scene list, 
   assert.equal(refusal.head, "Can't delete \"Depot\". 2 beats go to it:");
   assert.deepEqual(refusal.rows, [["The last service", "05.2.2 Jump"], ["Platform 4", "02 Call scene"]]);
   assert.equal(refusal.tail, "Change or remove them, then delete again. Nothing was deleted.");
-  assert.equal(s.status.at(-1), "Can't delete \"Depot\". Nothing was deleted.");
+  // The alert announces the refusal once; the status bar does not repeat it.
+  assert.equal(s.status.some(line => line.startsWith("Can't delete")), false);
   // A row opens its beat, in its option.
   refusal.block.querySelector<HTMLButtonElement>(".story-refusal-row")!.click(); await tick();
   assert.equal(s.host.querySelector<HTMLElement>('.story-route [data-beat-id="leave"] > .story-track-beat')!.dataset.selected, "true");
@@ -688,6 +689,12 @@ test("the refusal names Custom Code that may jump to the scene, or Custom Code i
   assert.equal(refusal.tail, "Change that code in Source first. Nothing was deleted.");
   const row = refusal.block.previousElementSibling as HTMLElement;
   press(refusal.block, "Close"); assert.equal(refusal.block.isConnected, false); assert.equal(document.activeElement, row.querySelector(".tree-scene-open"));
+  await s.close();
+  // Escape closes it as × does.
+  s = mountStory(chapters(), { apply: refused({ beats: [], protectedCode: [reference("code", "customCode")] }) });
+  const escaped = await deleteScene(document.querySelector("aside")!, "Depot"); refusal = refusalOf(escaped);
+  refusal.block.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  assert.equal(refusal.block.isConnected, false); assert.equal(document.activeElement, escaped.querySelector(".tree-scene-open"));
   await s.close();
   s = mountStory(chapters(), { apply: refused({ beats: [reference("leave", "jump")], protectedCode: [reference("depot-line", "customCode", "two", "Depot")] }) });
   refusal = refusalOf(await deleteScene(document.querySelector("aside")!, "Depot"));

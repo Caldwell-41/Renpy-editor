@@ -493,7 +493,8 @@ covers moving, unwrapping and deleting branches.
   shows or hides its scenes. The scenes sit under a thin guide line. Collapsing a
   chapter is view state: it sends nothing to core and lasts until Story closes. The
   chapter's own actions stay in its ⋯ menu (`story-release-fixes` / `a-v2`).
-- Delete in a scene's menu asks "Delete scene "Depot"? Undo restores it." When core
+- Delete in a scene's menu asks "Delete scene "Depot"? Undo restores it." beside a
+  Delete scene button. When core
   refuses the delete with the beats and Custom Code that need the scene, the refusal
   takes the confirmation's place under the scene's row. A header line with × reads
   "Can't delete "Platform 4". 2 beats go to it:". One row per beat gives its scene,
@@ -502,7 +503,9 @@ covers moving, unwrapping and deleting branches.
   was deleted." When only Custom Code elsewhere names the scene's label, the header
   ends "Custom Code may jump to it, and Loomlight can't check where it goes:" and the
   closing line is "Change that code in Source first. Nothing was deleted." Custom Code
-  inside the scene adds "it holds Custom Code that deleting would drop".
+  inside the scene adds "it holds Custom Code that deleting would drop". The block
+  is an alert, so the status bar does not repeat it. × or Escape closes it and returns
+  focus to the scene's name.
 - Below 1200 px, Story opens with the icon rail and the
   scene list closed. Like the scene list's other defaults, this is set when Story
   opens; resizing the window keeps the current state, and the toggles still work.
