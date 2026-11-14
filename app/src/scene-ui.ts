@@ -1265,15 +1265,30 @@ export function renderStoryView(
       },
     });
   };
-  // + Add beat in the scene toolbar adds at the scene's default place. Add screen Beat and
-  // Add change here name their kind, so they open it directly.
+  // + Add beat in the scene toolbar adds after the selected beat in its own scene, branch or
+  // option, but never past the place before that body's ending (story-revamp / combined-v1).
+  // A branch or option header stands for its condition or Choice. With no beat selected it
+  // adds at the scene's default place.
+  const toolbarPlace = (scene: SceneDocument): { body: BodyRef; position: Position } => {
+    const root = { body: { type: "root" } as BodyRef, position: defaultPlace(scene, { type: "root" }) };
+    const selected = scene.beats.find(beat => beat.id === selectedBeatId), header = selected?.conditionalBranch;
+    const node = header ? bodyOwner(scene, { type: "branch", groupId: header.groupId, branchId: selected!.id }) : selected;
+    if (!node) return root;
+    const body = beatBody(node), nodes = nodeBeats(scene, body), at = nodes.indexOf(node), fallback = defaultPlace(scene, body);
+    if (at < 0) return root;
+    const indexOf = (position: Position): number => position.type === "end" ? nodes.length : nodes.findIndex(item => sameNode(nodeRef(item), position.anchor));
+    const limit = indexOf(fallback);
+    const after = bodyOf(scene, body)?.places.map(place => place.position).find(position => indexOf(position) > at && indexOf(position) <= limit);
+    return { body, position: after ?? fallback };
+  };
+  // Add screen Beat and Add change here name their kind, so they open it directly.
   const openNewBeat = (scene: SceneDocument, initialType?: AddKind, beforeBeatId: string | null = null, opener = "root"): void => {
     const anchor = beforeBeatId ? scene.beats.find(beat => beat.id === beforeBeatId) : undefined;
     const before: Position | undefined = anchor && { type: "before", anchor: nodeRef(anchor) };
     if (anchor && !bodyOf(scene, beatBody(anchor))?.places.some(place => samePosition(place.position, before!))) {
       actions.status(`This beat has no insertion place before it. Use + in ${viewName(routeView)}.`, "error"); return;
     }
-    if (!initialType) { addBeat(scene, { type: "root" }, defaultPlace(scene, { type: "root" }), opener, true); return; }
+    if (!initialType) { const { body, position } = toolbarPlace(scene); addBeat(scene, body, position, opener, true); return; }
     const screenBeat = ["showScreen", "hideScreen", "callScreen"].includes(initialType);
     const remembered = screenInsertion;
     const hint = !anchor && screenBeat && remembered && (remembered.sceneId === scene.id || !model.scenes.some(item=>item.id===remembered.sceneId)) ? structuredClone(remembered) : undefined;

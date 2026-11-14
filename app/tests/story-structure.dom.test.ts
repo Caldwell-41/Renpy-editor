@@ -284,6 +284,27 @@ test("Tracks insertion markers open Add a beat at the place core lists for them"
   await s.close();
 });
 
+test("the toolbar's + Add beat adds after the selected beat in its own scene, branch or option, never past its ending", async () => {
+  const s = setup();
+  // story-revamp / combined-v1: the toolbar adds after the selection, at most at the place before its body's ending.
+  const place = (id: string, ...branches: string[]): string[] => {
+    selectBeat(s.host, id, ...branches); button(s.host, "+ Add beat").click();
+    const dialog = s.host.querySelector<HTMLElement>(".story-add-beat")!; assert.ok(dialog, id);
+    const result = [...dialog.querySelectorAll(".story-where dd")].map(item => item.textContent!);
+    dialog.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); return result;
+  };
+  assert.deepEqual(place("a", "if"), ["Before 01.2 Narration", "Arrival › If flag", "01.1 Narration"]);
+  assert.deepEqual(place("b"), ["Before 01.3 Condition", "Arrival › If flag", "01.2 Narration"]);
+  assert.deepEqual(place("nested-if-0"), ['End of "If flag"', "Arrival › If flag", "01.3 Condition"]);
+  assert.deepEqual(place("call"), ["Before 04 Narration", "Arrival", "03 Call scene"]);
+  assert.deepEqual(place("end"), ["Before 05 Return", "Arrival", "04 Narration"]);
+  // The new beat goes where the dialog said.
+  selectBeat(s.host, "a"); button(s.host, "+ Add beat").click(); const panel = pickKind(s.host, "Narration");
+  type(panel.querySelector<HTMLTextAreaElement>("textarea")!, "After the first line"); button(panel, "Add Beat").click(); await tick();
+  assert.deepEqual({ body: s.calls[0]!.command.body, position: s.calls[0]!.command.position }, { body: { type: "branch", groupId: "group", branchId: "if" }, position: { type: "before", anchor: { type: "beat", beatId: "b" } } });
+  await s.close();
+});
+
 test("Reel draws the Tracks route; switching views keeps selection, branches, a new beat's place and drafts, and sends nothing", async () => {
   const s = setup(undefined, storyFixture(1)); const view = (name: string): void => { s.host.querySelector<HTMLButtonElement>(`.story-view-option[data-view="${name}"]`)!.click(); };
   const route = (): string[] => [...s.host.querySelectorAll<HTMLElement>(".story-route > :not(.story-track-labels)")].map(item => `${item.className}|${item.dataset.beatId ?? item.dataset.branchId ?? (item.dataset.newBeat ? "new" : "")}|${item.dataset.depth ?? ""}`);
