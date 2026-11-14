@@ -4473,7 +4473,11 @@ mod tests {
             0,
             |workspace, command| apply_scene_target(&service, workspace, command),
         );
+        // Undo the Jump and the scene created from the Choice, then Redo both.
         service.history_undo().unwrap();
+        service.history_undo().unwrap();
+        assert_eq!(service.scene_workspace().unwrap().scenes.len(), 3);
+        service.history_redo().unwrap();
         service.history_redo().unwrap();
         let mut scene_workspace = service.scene_workspace().unwrap();
         assert_eq!(scene_workspace.scenes.len(), 4);

@@ -4970,7 +4970,7 @@ pub(crate) fn author_branching_story(
     new_scene_option: usize,
     mut apply: impl FnMut(&SceneWorkspace, SceneCommand) -> SceneWorkspace,
 ) -> (SceneWorkspace, String) {
-    let find = |workspace: &SceneWorkspace, name: &str| {
+    let scene_named = |workspace: &SceneWorkspace, name: &str| {
         workspace
             .scenes
             .iter()
@@ -5001,7 +5001,7 @@ pub(crate) fn author_branching_story(
             display_name: "Garden".into(),
         },
     );
-    let garden = find(&workspace, "Garden");
+    let garden = scene_named(&workspace, "Garden");
     workspace = apply(
         &workspace,
         SceneCommand::MoveScene {
@@ -5018,7 +5018,7 @@ pub(crate) fn author_branching_story(
             display_name: "Library".into(),
         },
     );
-    let library_id = find(&workspace, "Library").id;
+    let library_id = scene_named(&workspace, "Library").id;
     let option = |text: &str| ChoiceOption {
         unavailable_policy: UnavailablePolicy::Hide,
         condition: None,
@@ -5065,7 +5065,7 @@ pub(crate) fn author_branching_story(
     );
     // Garden ends at its Return. A Jump goes only at a body's end, so it replaces that
     // Return, as Add a beat does.
-    let garden = find(&workspace, "Garden");
+    let garden = scene_named(&workspace, "Garden");
     workspace = apply(
         &workspace,
         SceneCommand::UpdateBodyBeat {
