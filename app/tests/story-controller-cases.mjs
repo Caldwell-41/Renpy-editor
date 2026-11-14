@@ -305,16 +305,17 @@ export const storyCases={
   const opaqueBlock=replaceOnce(c,block,'        "Movable subtree leaf"\n','        "Movable subtree leaf"\n        python:\n            opaque_deleted = "kept"\n');
   const withOpaque=replaceOnce(c,original,block,opaqueBlock);await editSource(c,withOpaque);before=c.workspace();
   const members=scene(c).beats.filter(b=>b.owner?.groupId===authored.groupId&&!b.conditionalBranch&&!b.structuralPlaceholder);
-  c.assert.equal(members.length,4);c.assert.equal(newHeaders(c).length,2);
-  c.assert.deepEqual(members.map(b=>b.payload.type),['narration','customCode','customCode','narration']);
+  c.assert.equal(members.length,3);c.assert.equal(newHeaders(c).length,2);
+  // The python: block and its deeper line are one Custom Code beat (B12).
+  c.assert.deepEqual(members.map(b=>b.payload.type),['narration','customCode','narration']);
   c.assert.deepEqual(members.filter(b=>b.payload.type==='narration').map(b=>b.payload.text),['Movable subtree leaf','Other subtree branch']);
-  const opaque=members.filter(b=>b.payload.type==='customCode');c.assert.equal(opaque.length,2);
+  const opaque=members.filter(b=>b.payload.type==='customCode');c.assert.equal(opaque.length,1);
   for(const beat of opaque){c.assert(beat.protected);c.assert.deepEqual(beat.owner,members[0].owner);}
   const acceptedBytes=Buffer.from(withOpaque,'utf8');
-  c.assert.deepEqual(opaque.map(b=>acceptedBytes.subarray(b.byteStart,b.byteEnd).toString('utf8')),['        python:\n','            opaque_deleted = "kept"\n']);
-  c.assert.match((await group(c,authored.groupId)).querySelector('.story-condition-summary').textContent,/2 branches \/ 4 Beats/);
+  c.assert.deepEqual(opaque.map(b=>acceptedBytes.subarray(b.byteStart,b.byteEnd).toString('utf8')),['        python:\n            opaque_deleted = "kept"\n']);
+  c.assert.match((await group(c,authored.groupId)).querySelector('.story-condition-summary').textContent,/2 branches \/ 3 Beats/);
   await c.click('Delete condition',await group(c,authored.groupId));let form=panel(c,'Delete entire condition');
-  c.assert.match(form.textContent,/all 4 contained Beats/);c.assert(form.textContent.includes(`all ${members.length} contained Beats`));await applyOperation(c,form,'Delete entire condition','removeStoryNode');
+  c.assert.match(form.textContent,/all 3 contained Beats/);c.assert(form.textContent.includes(`all ${members.length} contained Beats`));await applyOperation(c,form,'Delete entire condition','removeStoryNode');
   c.assert.deepEqual(envelope(c,before,'removeStoryNode').node,{type:'condition',groupId:authored.groupId});c.assert.equal(c.sourceText(await c.snapshot(),s.sourcePath),replaceOnce(c,withOpaque,opaqueBlock,''));c.assert.equal(newHeaders(c).length,0);
   await c.history('undo');await c.settle();c.assert.equal(c.sourceText(await c.snapshot(),s.sourcePath),withOpaque);
   await editSource(c,original);
