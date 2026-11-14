@@ -2556,7 +2556,7 @@ export function renderStoryView(
       const current = model.scenes.find(item => item.id === scene.id); if (!current) return;
       const { tree, expanded } = placeTree(current, body), chosen = unplaced ? undefined : findPlace(tree, node => !!node.place && sameBody(node.place.body, body) && samePosition(node.place.position, position));
       // A screen beat with no place yet chooses one, with nothing chosen at the start (story-release-fixes / a-v2).
-      const wording = unplaced ? { title: `Place the new ${addKindName(type)}`, note: "Puts the new beat at the chosen place.", idle: "Choose where this beat goes.", confirm: "Choose" } : { title: `Move new ${addKindName(type).toLowerCase()}`, note: "Moves this beat to the chosen scene, branch or option. Nothing is written until you add it." };
+      const wording = unplaced ? { title: `Place the new ${addKindName(type)}`, note: "Puts the new beat at the chosen place.", idle: "Choose where this beat goes.", confirm: "Choose", lead: "Goes at" } : { title: `Move new ${addKindName(type).toLowerCase()}`, note: "Moves this beat to the chosen scene, branch or option. Nothing is written until you add it." };
       openPlaceTree({ host, opener, ...wording, tree, expanded, ...chosen ? { chosen: chosen.id } : {},
         move: async next => {
           const resolved = placeFor(current, next.body, next.position, type), waiting = pendingAt(current, next.body, resolved.position);

@@ -34,6 +34,8 @@ export interface PlaceTreeOptions {
   readonly idle?: string;
   /** The confirm button: "Move" unless given. */
   readonly confirm?: string;
+  /** How the summary names a chosen position: "Move to" unless given. */
+  readonly lead?: string;
   /** Moves the beat. Resolves true once it moved; the dialog then closes. */
   readonly move: (place: { readonly body: BodyRef; readonly position: Position }) => Promise<boolean>;
 }
@@ -85,7 +87,7 @@ export function openPlaceTree(options: PlaceTreeOptions): void {
       tree.append(item);
     }
     const position = chosen ? nodes.get(chosen) : undefined;
-    summary.textContent = position ? `Move to ${nodes.get(parents.get(position.id)!)?.path ?? ""} · ${position.label}` : idle ?? `Choose an available position in ${nodes.get(pickedPlace)?.label ?? options.tree.label}.`;
+    summary.textContent = position ? `${options.lead ?? "Move to"} ${nodes.get(parents.get(position.id)!)?.path ?? ""} · ${position.label}` : idle ?? `Choose an available position in ${nodes.get(pickedPlace)?.label ?? options.tree.label}.`;
     summary.classList.toggle("story-summary-choose", !position);
     if (refocus) tree.querySelector<HTMLElement>('[tabindex="0"]')?.focus();
   };

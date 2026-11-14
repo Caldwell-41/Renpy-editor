@@ -419,6 +419,9 @@ test("a place picked in Screens that changed reads Choose a place, and Add Beat 
   assert.equal(dialog.querySelector(".story-dialog-note")!.textContent, "Puts the new beat at the chosen place.");
   assert.equal(dialog.querySelector('[aria-selected="true"]'), null); assert.equal(dialog.querySelector(".story-summary")!.textContent, "Choose where this beat goes.");
   assert.deepEqual(texts(dialog, ".story-dialog-actions button"), ["Cancel", "Choose"]);
+  // A picked place reads Goes at, as a-v2 names it; ⋯ Move to… keeps Move to.
+  [...dialog.querySelectorAll<HTMLElement>("[role=treeitem]")].find(node => node.textContent!.slice(1) === "Before 03 Narration")!.click();
+  assert.equal(dialog.querySelector(".story-summary")!.textContent, "Goes at The last service · Before 03 Narration");
   press(dialog, "Cancel");
   await choosePlace(s.host, panel, "Before 03 Narration");
   assert.deepEqual(placeRows(panel), ["Goes at", "Before 03 Narration", "In", "The last service", "After", "02 Mara's line"]);
