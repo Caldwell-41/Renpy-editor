@@ -178,3 +178,28 @@ test("Add a beat says Condition branches on a variable, and a branch with no rul
   assert.equal(dialog.querySelector(".story-picker-details > p")!.textContent, "Branches on a variable, then the story continues.");
   await s.close();
 });
+
+test("a draft whose beat moved to another branch names where it went, and Override source writes it there", async () => {
+  const header = (id: string, ordinal: number, otherwise = false): SceneBeat => beat(id, { type: "customCode", source: "", reason: "Condition header" }, { protected: true, conditionalBranch: { groupId: "test", ordinal, otherwise, ...otherwise ? {} : { condition: { status: "supported", expression: { type: "variable", variableId: "flag", variableType: "bool" } } } } });
+  const line = beat("eli", { type: "dialogue", characterId: "eli", text: "Keep your ticket. Some doors only open once." }, { owner: { groupId: "test", branchId: "if" } });
+  const before = [header("if", 0), line, header("else", 1, true), beat("pass", { type: "customCode", source: "        pass", reason: "Empty branch" }, { protected: true, structuralPlaceholder: true, owner: { groupId: "test", branchId: "else" } }), beat("after", { type: "narration", text: "The doors close behind them." })];
+  const s = mount(project(before));
+  const draft = selectBeat(s.host, "eli", "if").querySelector<HTMLTextAreaElement>("textarea")!;
+  draft.value = "Keep your ticket. Some doors only open once, and this one is closing."; draft.dispatchEvent(new Event("input", { bubbles: true }));
+  // Source moves the line into Otherwise.
+  const moved = project([before[0]!, before[2]!, { ...line, owner: { groupId: "test", branchId: "else" } }, before[4]!]);
+  s.view.update(moved, { apply: async command => { s.calls.push(command); return moved; }, status: () => {}, resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); } });
+  const panel = s.host.querySelector<HTMLElement>('.story-editor [data-beat-draft-key="eli"]')!;
+  assert.equal(panel.querySelector(".story-conflict > p")!.textContent, "This beat moved to Otherwise in source. Your draft is still for this beat.");
+  assert.equal(panel.querySelector(".story-conflict label > span")!.textContent, "Source, now in Otherwise");
+  assert.equal(panel.querySelector(".story-conflict-source")!.textContent, "Keep your ticket. Some doors only open once.");
+  assert.deepEqual(texts(panel, ".story-resolution button"), ["Discard draft", "Override source"]);
+  assert.equal(panel.querySelector(".story-resolution p")!.textContent, "Override source saves your draft to this beat in Otherwise. Other drafts stay unsaved.");
+  // Show it in Otherwise opens that branch with the beat selected.
+  press(panel, "Show it in Otherwise");
+  assert.equal([...s.host.querySelectorAll<HTMLElement>(".story-branch-segment")].find(item => item.dataset.branchId === "else")!.ariaPressed, "true");
+  assert.equal(s.host.querySelector<HTMLElement>('.story-route [data-beat-id="eli"] > .story-track-beat')!.dataset.selected, "true");
+  press(s.host.querySelector<HTMLElement>('[data-beat-draft-key="eli"]')!, "Override source"); await tick();
+  assert.deepEqual(s.calls.at(-1), { type: "updateBodyBeat", sceneId: "one", expectedSourceRevision: "source-one", beatId: "eli", expectedBody: { type: "branch", groupId: "test", branchId: "else" }, beat: { type: "dialogue", characterId: "eli", text: "Keep your ticket. Some doors only open once, and this one is closing." } });
+  await s.close();
+});

@@ -821,8 +821,21 @@ export const storyCases={
   };
   const move=(line,after)=>text=>{const from=text.indexOf(line),to=text.indexOf(after)+after.length;c.assert(from>=0&&to>from);const middle=text.slice(from+line.length,to);return {remove:line+middle,insert:middle+line};};
   // (a) The external edit cuts the nested beat's line from If and pastes it into the Else if.
+  // Story Save still refuses it; the draft names where the beat went, and Override source
+  // writes the draft to the beat there (story-release-fixes / a-v2).
   const a=inIf('Nested in focus');await type(a,'Draft from If');
-  await refusedThenDiscarded(a.id,await external(move('        "Nested in focus"\n','        "Boundary preserved"\n'),a.id));
+  const movedOut=await external(move('        "Nested in focus"\n','        "Boundary preserved"\n'),a.id);
+  const moved=scene(c).beats.find(x=>x.id===a.id);c.assert(moved?.owner&&moved.owner.branchId!==ifHeader.id,'Core keeps the beat in its new branch');
+  {const at=c.requests().length,was=status();await c.click('Save',header());await c.wait(()=>status()!==was&&/^Nothing saved/.test(status()));await c.settle();
+   c.assert(!c.requests().slice(at).some(r=>r.request.operation==='scene.saveDrafts'),'The conflict stops Save before any request');}
+  const copy=panel(a.id).querySelector('.story-conflict > p').textContent,to=copy.match(/^This beat moved to (.+) in source\. Your draft is still for this beat\.$/)?.[1];
+  c.assert(to,copy);c.assert.equal(panel(a.id).querySelector('.story-conflict label > span').textContent,`Source, now in ${to}`);
+  c.assert.equal(panel(a.id).querySelector('.story-conflict-source').textContent,'Nested in focus');
+  c.assert.deepEqual(buttons(panel(a.id)).filter(x=>['Commit Beat','Override source','Discard draft',`Show it in ${to}`].includes(x)),[`Show it in ${to}`,'Discard draft','Override source']);
+  await c.click('Override source',panel(a.id));await c.settle();c.assert.equal(status(),'Saved');
+  c.assert.equal(!!panel(a.id)?.querySelector('.story-conflict'),false);c.assert.equal(!!c.document.querySelector('.scene-workspace [data-beat-draft="true"]'),false,'Override source leaves no draft');
+  c.assert.equal(c.sourceText(await c.snapshot(),path),replaceOnce(c,c.sourceText(movedOut,path),'"Nested in focus"','"Draft from If"'));
+  c.assert.equal(scene(c).beats.find(x=>x.id===a.id)?.owner?.branchId,moved.owner.branchId);
   // (b) It adds an earlier condition holding an identical line. The If's own lines did not
   // change, so the draft stays with its beat there, and Commit writes only the If's copy.
   const b=inIf('First in focus');await type(b,'Draft from If');

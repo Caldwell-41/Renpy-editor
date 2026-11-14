@@ -661,8 +661,11 @@ It shows above the shown scene's beats with "Conflict with source" and, in place
 source text, why there is none, for example "This beat is no longer in source." A
 beat that became protected says to edit it in Source. Only Discard draft resolves
 these drafts. A beat draft also keeps the branch it began in. If source moves its beat
-to another branch, the draft shows "This beat is no longer in source." and never saves
-into the other branch. An external edit that adds or removes a copy of the beat's line
+to another branch, the draft says so (`story-release-fixes` / `a-v2`): "This beat moved
+to Otherwise in source. Your draft is still for this beat.", with the source under
+"Source, now in Otherwise" and a "Show it in Otherwise" link. Commit and Story Save
+refuse it. Discard draft keeps source; Override source saves the draft to the beat where
+it is now, through the same Override path and revision checks. An external edit that adds or removes a copy of the beat's line
 in the beat's own branch has the same result, because source no longer says which copy
 is the beat. A copy added or removed in another branch leaves the draft with its beat. A scene whose source Story cannot map has no beats to compare with. That
 happens when its file is missing or invalid, or when a Source draft of that file is
