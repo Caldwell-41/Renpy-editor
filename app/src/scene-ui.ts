@@ -2508,7 +2508,7 @@ export function renderStoryView(
           drawWhere(); relocate(); focusFirst(panel); return true;
         } });
     };
-    const draft=keepDraft(key,{panel,sceneId:scene.id,place,replaces:()=>replaces,...beatEditor?{read:beatEditor.read}:{},command:savedCommand,kind:()=>{try{return beatEditor?beatLabels[beatEditor.read().type].toLowerCase():"condition";}catch{return addKindName(type).toLowerCase();}},editors:()=>[editor],primary:()=>editor.primary,
+    const draft=keepDraft(key,{panel,sceneId:scene.id,place,replaces:()=>replaces,...beatEditor?{read:beatEditor.read}:{},command:savedCommand,kind:()=>{try{return beatEditor?beatLabels[keepFocus(beatEditor.read).type].toLowerCase():"condition";}catch{return addKindName(type).toLowerCase();}},editors:()=>[editor],primary:()=>editor.primary,
       // A new beat whose scene or branch left source has nowhere to go: only Discard draft resolves it.
       conflict:()=>{
         const current=model.scenes.find(item=>item.id===scene.id),{body:at}=place();

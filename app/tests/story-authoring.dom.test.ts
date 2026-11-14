@@ -4,14 +4,14 @@ import { Window } from "happy-dom";
 import { hasSceneDraft, type SceneWorkspace, type SceneBeat, type SceneCommand } from "../src/scene-ui.js";
 import { chooseIn, openGuard, optionBlocks, pickKind, press, sceneBodies, renderStoryView, selectBeat, type } from "./story-controls-fixture.js";
 const tick = async (): Promise<void> => { await new Promise(resolve => setTimeout(resolve, 0)); };
-function setup(beats: readonly SceneBeat[], apply: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision">) => Promise<SceneWorkspace>) {
-  const browser = new Window(); Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, HTMLInputElement: browser.HTMLInputElement, HTMLSelectElement: browser.HTMLSelectElement, Event: browser.Event, KeyboardEvent: browser.KeyboardEvent });
+function setup(beats: readonly SceneBeat[], apply: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision">) => Promise<SceneWorkspace>, steps?: string[]) {
+  const browser = new Window(); Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, HTMLInputElement: browser.HTMLInputElement, HTMLTextAreaElement: browser.HTMLTextAreaElement, HTMLSelectElement: browser.HTMLSelectElement, Event: browser.Event, KeyboardEvent: browser.KeyboardEvent });
   document.body.innerHTML = '<main></main><aside></aside>';
   const model: SceneWorkspace = { projectRevision: "project-open", sourceMapRevision: "map-open", entrySceneId: "one", lastOpen: { chapterId: "chapter", sceneId: "one" }, chapters: [{ id: "chapter", displayName: "Chapter", directory: "game" }],
     scenes: [{ id: "one", chapterId: "chapter", displayName: "Arrival", technicalLabel: "arrival", sourcePath: "game/arrival.rpy", sourceRevision: "source-open", sourceConflict: false, partial: false, beats, bodies: sceneBodies(beats) }, { id: "two", chapterId: "chapter", displayName: "Conversation", technicalLabel: "conversation", sourcePath: "game/conversation.rpy", sourceRevision: "other", sourceConflict: false, partial: false, beats: [], bodies: [] }],
     authoring: { characters: [], assets: [], appearances: [], variables: [{ id:"money",technicalName:"money",variableType:"decimal",defaultValue:2.5 },{ id: "trust", technicalName: "trust", variableType: "int", defaultValue: "0" }, { id: "flag", technicalName: "flag", variableType: "bool", defaultValue: true }] } };
   const host = document.querySelector<HTMLElement>("main")!; const statuses: string[] = [];
-  const dispose = renderStoryView(host, document.querySelector("aside")!, model, { apply, status: text => statuses.push(text), resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); } }).dispose;
+  const dispose = renderStoryView(host, document.querySelector("aside")!, model, { apply, status: text => statuses.push(text), ...steps ? { recordStep: async step => { steps.push(step.name); } } : {}, resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); } }).dispose;
   return { browser, host, model, statuses, close: async () => { dispose(); await browser.happyDOM.close(); } };
 }
 function click(host: ParentNode, label: string): void { const button = [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === label); assert.ok(button, label); button.click(); }
@@ -177,4 +177,22 @@ test("Choice unavailable policy is per option and retained after refusal without
   assert.equal(policy.value, "showDisabled"); assert.ok(policy.isConnected);
   assert.equal(s.host.querySelector<HTMLElement>(".story-game-choice")!.dataset.state, "unknown", "The stage never guesses the live value");
   await s.close();
+});
+
+test("a new Choice keeps its typed Prompt in the Prompt field while option 1 is still empty", async () => {
+  const writes: SceneCommand[] = [], steps: string[] = [];
+  const s = setup([ending], async command => { writes.push(command); throw Error("Hold input"); }, steps);
+  try {
+    // Keys go to whichever field has focus, as they do for the author.
+    const keys = (text: string): void => { for (const char of text) { const field = document.activeElement as HTMLInputElement; field.value += char; field.dispatchEvent(new Event("input", { bubbles: true })); } };
+    click(s.host, "+ Add beat"); const draft = pickKind(s.host, "Choice");
+    click(draft, "+ Prompt");
+    const prompt = draft.querySelector<HTMLInputElement>('[aria-label="Prompt text"]')!;
+    prompt.focus(); keys("Hello world");
+    assert.equal(document.activeElement?.getAttribute("aria-label"), "Prompt text", "Typing stays in the Prompt"); assert.equal(prompt.value, "Hello world");
+    draft.querySelector<HTMLInputElement>('[aria-label="Choice option text"]')!.focus(); keys("One");
+    click(draft, "Add Beat"); await tick();
+    assert.ok(steps.includes("choice typing in Arrival"), "Draft steps are recorded, as in the app");
+    assert.deepEqual(writes[0]!.beat, { type: "choice", pickedPolicy: "showNormally", prompt: { type: "narration", text: "Hello world" }, options: [{ text: "One" }] });
+  } finally { await s.close(); }
 });
