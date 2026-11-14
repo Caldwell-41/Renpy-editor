@@ -59,8 +59,9 @@ window.__loomlightProbeSelectBeat = beatId => {
   if (!select) throw Error(`Unique rendered fixture Beat required; ${columns.length} rendered`);
   if (select.dataset.selected !== 'true') select.click();
 };
-// Only use for reads, idempotent preference writes, or probe checkpoint/report
-// delivery. Busy refuses before dispatch; other errors and the deadline still fail.
+// ApplicationHost refuses a request that overlaps another one with RUNTIME_BUSY before
+// it dispatches it, so the refused request had no effect and any request may retry.
+// Other errors and the deadline still fail.
 window.__loomlightProbeRetryBusy = async (task, timeoutMs = 10000) => {
   const deadline = performance.now() + timeoutMs;
   for (;;) {

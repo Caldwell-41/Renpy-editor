@@ -5,21 +5,22 @@
   const wait = async condition => { const start = performance.now(); while (!await condition()) { if (performance.now() - start > 20000) throw Error(`Timeout: ${details.stage}`); await new Promise(r => setTimeout(r, 30)); } };
   const find = window.__loomlightProbeFindButton;
   const click = async name => { await wait(() => find(name) && !find(name).disabled); find(name).click(); };
-  const call = async (operation, payload = {}) => {
+  // The host refuses a request that overlaps another one before dispatch, so every
+  // request, write or read, retries a RUNTIME_BUSY refusal. Checks below test the effect.
+  const call = (operation, payload = {}) => window.__loomlightProbeRetryBusy(async () => {
     const result = await window.__TAURI_INTERNALS__.invoke('core_request', { request: { protocolVersion: 1, requestId: crypto.randomUUID(), operation, payload } });
     if (!result.ok) throw Object.assign(Error(`${operation}: ${result.error.code}`), { code: result.error.code }); return result.value;
-  };
-  const read = (operation, payload) => window.__loomlightProbeRetryBusy(() => call(operation, payload));
+  });
   const ids = model => model.scenes[0].beats.map(b => b.id).join(',');
   let project, model, original;
   try {
     await click('Source foundation fixture');
     await wait(() => document.querySelector('.story-track-beat[data-beat-kind="condition"]'));
-    project = await read('project.current');
-    model = await read('scene.list', { sessionId: project.sessionId });
+    project = await call('project.current');
+    model = await call('scene.list', { sessionId: project.sessionId });
     // Core also keeps branch comments as owned trivia beats; the children here are the dialogue lines.
     const scene = model.scenes[0], children = scene.beats.filter(b => b.owner && b.payload.type === 'dialogue');
-    original = await read('source.open', { sessionId: project.sessionId, path: scene.sourcePath });
+    original = await call('source.open', { sessionId: project.sessionId, path: scene.sourcePath });
     check(children.length === 2 && children[0].owner.groupId === children[1].owner.groupId && children[0].owner.branchId !== children[1].owner.branchId, 'Two dialogue children have one group and distinct branches');
     check(original.hasBom && original.text.includes('\r\n') && original.text.includes('café 雪'), 'BOM, mixed newlines and Unicode fixture observed');
     const card = () => window.__loomlightProbeEditorFor(children[0].id);
@@ -33,16 +34,16 @@
     const editor = card().querySelector('textarea');
     editor.value = 'Edited café 雪'; editor.dispatchEvent(new Event('input', { bubbles: true }));
     await click('Commit Beat'); await wait(() => !form.isConnected);
-    const accepted = await read('source.open', { sessionId: project.sessionId, path: scene.sourcePath });
-    const changed = await read('scene.list', { sessionId: project.sessionId });
+    const accepted = await call('source.open', { sessionId: project.sessionId, path: scene.sourcePath });
+    const changed = await call('scene.list', { sessionId: project.sessionId });
     check(accepted.text === original.text.replace('True café 雪', 'Edited café 雪') && accepted.hasBom, 'Real Story commit changes only dialogue token and preserves BOM/source neighbors');
     check(ids(model) === ids(changed), 'All existing Beat IDs preserved');
     details.sourceRevision = accepted.baseRevision;
     details.stage = 'undo-redo';
-    await window.__loomlightProbeHistory('undo'); await wait(async () => (await read('source.open', { sessionId: project.sessionId, path: scene.sourcePath })).text === original.text);
-    await window.__loomlightProbeHistory('redo'); await wait(async () => (await read('source.open', { sessionId: project.sessionId, path: scene.sourcePath })).text === accepted.text);
+    await window.__loomlightProbeHistory('undo'); await wait(async () => (await call('source.open', { sessionId: project.sessionId, path: scene.sourcePath })).text === original.text);
+    await window.__loomlightProbeHistory('redo'); await wait(async () => (await call('source.open', { sessionId: project.sessionId, path: scene.sourcePath })).text === accepted.text);
     check(true, 'Native Story Undo/Redo restores exact source');
-    const current = await read('scene.list', { sessionId: project.sessionId });
+    const current = await call('scene.list', { sessionId: project.sessionId });
     let rejected = false;
     try { await call('scene.apply', { sessionId: project.sessionId, expectedProjectRevision: current.projectRevision, expectedSourceMapRevision: current.sourceMapRevision, command: { type: 'updateBodyBeat', sceneId: scene.id, expectedSourceRevision: current.scenes[0].sourceRevision, beatId: children[0].id, expectedBody: { type: 'branch', groupId: children[1].owner.groupId, branchId: children[1].owner.branchId }, beat: { type: 'dialogue', characterId: children[0].payload.characterId, text: 'wrong owner' } } }); }
     catch (error) { rejected = error.code === 'SCENE_INVARIANT'; details.ownerRejection = error.code; }
@@ -56,23 +57,23 @@
     await call('source.updateDraft', { sessionId: project.sessionId, path: scene.sourcePath, expectedBaseRevision: accepted.baseRevision, text: accepted.text + '# dirty source draft\n', selectionStart: 0, selectionEnd: 0 });
     await click('Commit Beat'); await wait(() => !retainedEditor.disabled && document.querySelector('#app-status')?.textContent !== 'Saving…');
     check(retainedEditor.isConnected && retainedEditor.value === 'Retained Story draft' && retainedEditor.closest('.scene-draft').dataset.unsubmitted === 'true', 'Refused child edit retains exact Story draft');
-    const retainedSource = await read('source.open', { sessionId: project.sessionId, path: scene.sourcePath });
+    const retainedSource = await call('source.open', { sessionId: project.sessionId, path: scene.sourcePath });
     check(retainedSource.dirty && retainedSource.text === accepted.text + '# dirty source draft\n', 'Concurrent Source draft retained');
     await call('source.discard', { sessionId: project.sessionId, path: scene.sourcePath }); await click('Cancel');
     details.stage = 'close';
     await click('Close Project'); details.stage = 'welcome-after-close'; await wait(() => find('Source foundation fixture'));
     details.stage = 'reopen'; await click('Source foundation fixture'); details.stage = 'reopened-outline'; await wait(() => document.querySelector('.story-track-beat[data-beat-kind="condition"]'));
-    const reopenedProject = await read('project.current'), reopened = await read('scene.list', { sessionId: reopenedProject.sessionId });
+    const reopenedProject = await call('project.current'), reopened = await call('scene.list', { sessionId: reopenedProject.sessionId });
     check(ids(model) === ids(reopened), 'Native close/reopen preserves child and structural IDs');
-    check((await read('source.open', { sessionId: reopenedProject.sessionId, path: scene.sourcePath })).text === accepted.text, 'Native close/reopen preserves accepted source');
-    if (window.__loomlightFoundationExtended) await window.__loomlightFoundationExtended({ details, check, wait, click, call, read });
+    check((await call('source.open', { sessionId: reopenedProject.sessionId, path: scene.sourcePath })).text === accepted.text, 'Native close/reopen preserves accepted source');
+    if (window.__loomlightFoundationExtended) await window.__loomlightFoundationExtended({ details, check, wait, click, call });
     details.stage = 'complete'; details.passed = true;
   } catch (error) {
     details.passed = false; details.error = String(error);
     details.failureState = { status: document.querySelector('#app-status')?.textContent, text: document.querySelector('.scene-workspace')?.textContent?.slice(0, 1500), buttons: [...document.querySelectorAll('button')].map(b => ({ text: b.textContent, disabled: b.disabled })).slice(0, 60),
       header: [...document.querySelectorAll('.app-header [data-history]')].map(b => ({ history: b.dataset.history, label: b.getAttribute('aria-label'), disabled: b.getAttribute('aria-disabled') })) };
     // Core's history beside the header's, so a stale header shows apart from a lost entry.
-    if (project) details.failureState.history = await read('history.state', { sessionId: project.sessionId }).catch(e => String(e));
+    if (project) details.failureState.history = await call('history.state', { sessionId: project.sessionId }).catch(e => String(e));
   }
   await call('probe.runtimeUiReport', details);
 })();
