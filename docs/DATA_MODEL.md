@@ -830,7 +830,11 @@ when its statement, at the body's indentation, starts with the word `jump` or `r
 `places` lists each insertion place core accepts as an ADR 0016 `Position` with
 `fitsEnding`, and `defaultPlace` is the place before the ending node, or the end, or else
 the last listed place. Insert, condition insert and move check a request with the same
-code that lists the places. Unknown endings count as "may continue" for the scene
+code that lists the places. The place before protected Custom Code is the region's first
+byte: the new or moved lines go directly before it and its bytes stay unchanged. A move
+may pass protected Custom Code in the same body, and the region stays where it is. There
+is no place inside a region, and none before an empty body's `pass`, whose end place
+replaces it. Unknown endings count as "may continue" for the scene
 fallthrough guard, Call and Choice completion and the Branches continuation lines.
 
 Source-map v6 adds `ownedScreens` for explicitly created custom screens. Each entry

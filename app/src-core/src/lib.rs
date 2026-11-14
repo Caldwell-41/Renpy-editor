@@ -175,6 +175,9 @@ pub struct CoreError {
     message: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     action_index: Option<usize>,
+    /// The beats and protected source that refuse a Scene delete.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    references: Option<Box<scene::IncomingReferences>>,
 }
 
 #[derive(Debug, Serialize)]
@@ -210,6 +213,7 @@ impl CoreResponse {
                 code,
                 message: message.into(),
                 action_index: None,
+                references: None,
             }),
         }
     }
@@ -1271,8 +1275,17 @@ fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
         }
         return response;
     }
+    if let IncomingReferences(references) = error {
+        let mut response = scene_failure(request_id, ReferenceBlocked);
+        if let Some(error) = &mut response.error {
+            error.references = Some(references);
+        }
+        return response;
+    }
     let (code, message) = match error {
-        Indexed { .. } => unreachable!("action context handled above"),
+        Indexed { .. } | IncomingReferences(_) => {
+            unreachable!("context handled above")
+        }
         RuntimeBusy => ("RUNTIME_BUSY", "Stop the runtime operation before changing these files."),
         InvalidPayload => ("INVALID_PAYLOAD", "The Scene operation is invalid."),
         MissingArithmeticTarget => ("MISSING_ARITHMETIC_TARGET", "variableId: Choose an existing variable."),

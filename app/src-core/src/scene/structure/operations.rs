@@ -484,19 +484,8 @@ pub(super) fn apply(
             if target >= start && target <= end {
                 return Err(SceneError::InvariantBlocked);
             }
-            if same_body
-                && beats.iter().any(|b| {
-                    b.byte_start as usize >= start.min(target)
-                        && b.byte_end as usize <= end.max(target)
-                        && !(b.byte_start as usize >= start && b.byte_end as usize <= end)
-                        && b.protected
-                        && b.conditional_branch.is_none()
-                        && !trivia(b)
-                        && !b.structural_placeholder
-                })
-            {
-                return Err(SceneError::OpaqueBoundary);
-            }
+            // Protected Custom Code between the two places stays where it is: neither
+            // patch touches its bytes, and `patches` proves it keeps its range and kind.
             let (bytes, kept) = preserved(
                 source,
                 beats,
