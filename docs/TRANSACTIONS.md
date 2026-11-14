@@ -221,8 +221,11 @@ are checked before producing a destructive proposal. Protected source in another
 Scene blocks a Scene delete only when it names that Scene's label as a whole name.
 Supported Jump and Call references to the Scene still block it, and so does protected
 source inside the deleted Scene, since the delete would drop it. Core does not detect
-a label built at runtime, such as one joined from strings in Python. Undo restores a
-deleted Scene. Chapter order remains metadata
+a label built at runtime, such as one joined from strings in Python. The
+`INCOMING_REFERENCE` refusal carries `references`: `beats` lists each Jump and Call that
+goes to the Scene, and `protectedCode` lists each protected region that blocks it. Each
+entry names its Scene (`sceneId`, `sceneName`), `beatId` and payload `kind`. Story
+numbers the beat from that Scene's bodies. Undo restores a deleted Scene. Chapter order remains metadata
 organisation and does not rewrite runtime flow. A display rename changes metadata only.
 
 Every completed semantic commit returns the actual revisions and identities for all

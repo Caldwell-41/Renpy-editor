@@ -334,7 +334,7 @@ fn run_integrated_gate(temporary: &tempfile::TempDir) {
             }
         }),
         Err(crate::lifecycle::LifecycleError::Scene(
-            crate::scene::SceneError::ReferenceBlocked
+            crate::scene::SceneError::IncomingReferences(_)
         ))
     ));
     service.history_undo().unwrap();

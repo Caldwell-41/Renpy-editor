@@ -524,6 +524,26 @@ pub enum SceneCommand {
     },
 }
 
+/// What refuses a Scene delete: supported Jump and Call beats that go to the Scene,
+/// and protected source that names its label or sits in the Scene itself.
+#[derive(Debug, Default, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct IncomingReferences {
+    pub beats: Vec<ReferringBeat>,
+    pub protected_code: Vec<ReferringBeat>,
+}
+
+/// One beat by Scene and ID. Story numbers it from the Scene's bodies.
+#[derive(Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ReferringBeat {
+    pub scene_id: String,
+    pub scene_name: String,
+    pub beat_id: String,
+    /// The beat payload type, such as `jump`, `call` or `customCode`.
+    pub kind: &'static str,
+}
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum SceneError {
     /// The refused item of a set: a screen action, or a Story Save command.
@@ -550,6 +570,8 @@ pub enum SceneError {
     DirtySource,
     UnknownEntity,
     ReferenceBlocked,
+    /// A Scene delete refused by these references, under the ReferenceBlocked code.
+    IncomingReferences(Box<IncomingReferences>),
     StyleUnavailable,
     ImageMissing,
     ImageChanged,
@@ -2206,6 +2228,7 @@ impl AuthoringService {
             .find(|scene| scene.id == scene_id)
             .ok_or(SceneError::UnknownEntity)?
             .technical_label;
+        let mut references = IncomingReferences::default();
         for scene in &loaded.project.scenes {
             let stored = loaded
                 .source_map
@@ -2229,28 +2252,35 @@ impl AuthoringService {
                     &loaded.source_map.owned_screens,
                 )),
             )?;
-            // Protected source elsewhere can reach the Scene only by naming its label.
-            // The Scene's own protected source still blocks: deleting would drop it.
-            if beats.iter().any(|beat| {
-                opaque_source(beat)
+            for beat in &beats {
+                let referring = || ReferringBeat {
+                    scene_id: scene.id.clone(),
+                    scene_name: scene.display_name.clone(),
+                    beat_id: beat.id.clone(),
+                    kind: beat.payload.kind(),
+                };
+                if matches!(&beat.payload, BeatPayload::Jump { scene_id: target }
+                    | BeatPayload::Call { scene_id: target, .. } if target == scene_id)
+                {
+                    references.beats.push(referring());
+                // Protected source elsewhere can reach the Scene only by naming its label.
+                // The Scene's own protected source still blocks: deleting would drop it.
+                } else if opaque_source(beat)
                     && (scene.id == scene_id
                         || names_label(
                             &bytes[beat.byte_start as usize..beat.byte_end as usize],
                             label,
                         ))
-                    || match &beat.payload {
-                        BeatPayload::Jump { scene_id: target }
-                        | BeatPayload::Call {
-                            scene_id: target, ..
-                        } => target == scene_id,
-                        BeatPayload::Choice { .. } => false,
-                        _ => false,
-                    }
-            }) {
-                return Err(SceneError::ReferenceBlocked);
+                {
+                    references.protected_code.push(referring());
+                }
             }
         }
-        Ok(())
+        if references.beats.is_empty() && references.protected_code.is_empty() {
+            Ok(())
+        } else {
+            Err(SceneError::IncomingReferences(Box::new(references)))
+        }
     }
 
     pub(crate) fn appearance_reference_mutations(
@@ -5944,32 +5974,6 @@ mod tests {
     }
 
     #[test]
-    fn review_reorder_refuses_crossing_protected_source() {
-        let source=b"label scene_one:\n    \"Before\"\n    python:\n        custom = 42\n    \"After\"\n    return\n";
-        let fixture = Fixture::new(source);
-        fixture.migrate();
-        let before = fixture.workspace();
-        let scene = &before.scenes[0];
-        let target = scene
-            .beats
-            .iter()
-            .find(|b| matches!(&b.payload,BeatPayload::Narration{text} if text=="After"))
-            .unwrap();
-        assert!(matches!(
-            fixture.apply(
-                &before,
-                move_root_beat(scene, &scene.beats[0].id, Some(&target.id))
-            ),
-            Err(SceneError::OpaqueBoundary)
-        ));
-        assert_eq!(
-            fs::read(fixture.root.join(&scene.source_path)).unwrap(),
-            source
-        );
-        assert_eq!(fixture.history(), Default::default());
-    }
-
-    #[test]
     fn source_mapping_uses_exact_byte_ranges_and_preserves_custom_code() {
         let scene = SceneMetadata {
             id: uuid::Uuid::new_v4().to_string(),
@@ -6420,16 +6424,9 @@ mod tests {
         fixture.migrate();
         let workspace = fixture.workspace();
         let scene = &workspace.scenes[0];
-        let return_beat = scene
-            .beats
-            .iter()
-            .find(|beat| matches!(beat.payload, BeatPayload::Return))
-            .unwrap();
+        // Protected source never moves.
         assert!(matches!(
-            fixture.apply(
-                &workspace,
-                move_root_beat(scene, &return_beat.id, Some(&scene.beats[0].id))
-            ),
+            fixture.apply(&workspace, move_root_beat(scene, &scene.beats[0].id, None)),
             Err(SceneError::OpaqueBoundary)
         ));
 
@@ -6480,7 +6477,7 @@ mod tests {
                     expected_source_revision: target.source_revision.clone()
                 }
             ),
-            Err(SceneError::ReferenceBlocked)
+            Err(SceneError::IncomingReferences(_))
         ));
         let current_entry = linked
             .scenes
@@ -6975,7 +6972,7 @@ mod tests {
         // Protected code that names a Scene's label may reach it.
         assert!(matches!(
             delete(&workspace, &named(&workspace, "Named")),
-            Err(SceneError::ReferenceBlocked)
+            Err(SceneError::IncomingReferences(_))
         ));
     }
 
@@ -7124,7 +7121,7 @@ mod tests {
                     expected_source_revision: created.source_revision.clone(),
                 }
             ),
-            Err(SceneError::ReferenceBlocked)
+            Err(SceneError::IncomingReferences(_))
         ));
 
         // A second new scene replaces that Jump. The first new scene is kept.
@@ -8037,7 +8034,7 @@ mod tests {
                     expected_source_revision: end.source_revision.clone()
                 }
             ),
-            Err(SceneError::ReferenceBlocked)
+            Err(SceneError::IncomingReferences(_))
         ));
         fixture.undo().unwrap();
         assert_eq!(

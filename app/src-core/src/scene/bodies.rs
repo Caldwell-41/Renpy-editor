@@ -640,8 +640,12 @@ impl<'a> Body<'a> {
         terminating: bool,
     ) -> Result<(usize, usize), SceneError> {
         let opaque = |b: &SceneBeat| b.protected && b.conditional_branch.is_none();
+        // A place before protected Custom Code is its first byte, outside the region.
+        // An empty body's `pass` is replaced at its end place, never written before.
         let start = match kept.get(index) {
-            Some((target, _)) if opaque(target) => return Err(SceneError::OpaqueBoundary),
+            Some((target, _)) if target.structural_placeholder => {
+                return Err(SceneError::OpaqueBoundary)
+            }
             Some((target, _)) => target.byte_start as usize,
             None => {
                 if self.owner.is_none()

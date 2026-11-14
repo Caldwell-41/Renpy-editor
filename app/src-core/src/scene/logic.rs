@@ -1175,6 +1175,96 @@ mod boundary_tests {
             f.service.close().unwrap();
         }
     }
+
+    fn found(scene: &Value, kind: &str) -> Value {
+        scene["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["payload"]["type"] == kind)
+            .unwrap()
+            .clone()
+    }
+    fn delete(f: &mut Fixture, name: &str) -> Value {
+        let w = f.model();
+        let scene = w["scenes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|s| s["displayName"] == name)
+            .unwrap()
+            .clone();
+        let refused = f.reject(json!({"type":"deleteScene","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"]}));
+        assert_eq!(refused["error"]["code"], "INCOMING_REFERENCE");
+        refused["error"]["references"].clone()
+    }
+
+    #[test]
+    fn a_refused_scene_delete_names_each_jump_and_call_that_goes_to_it() {
+        let mut f = Fixture::new();
+        let target = f.scene("Platform 4");
+        let morning = f.scene("Morning at the depot");
+        let root = f.model()["scenes"][0].clone();
+        let label = target["technicalLabel"].as_str().unwrap();
+        f.save(
+            &root,
+            &format!(
+                "label {}:\n    \"Hello\"\n    menu:\n        \"Go\":\n            jump {label}\n    return\n",
+                root["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        f.save(
+            &morning,
+            &format!(
+                "label {}:\n    call {label} from back_here\n    return\n",
+                morning["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        let w = f.model();
+        let root = w["scenes"][0].clone();
+        let morning = w["scenes"][2].clone();
+        let jump = found(&root, "jump");
+        let call = found(&morning, "call");
+        assert_eq!(
+            delete(&mut f, "Platform 4"),
+            json!({
+                "beats": [
+                    {"sceneId":root["id"],"sceneName":root["displayName"],"beatId":jump["id"],"kind":"jump"},
+                    {"sceneId":morning["id"],"sceneName":"Morning at the depot","beatId":call["id"],"kind":"call"},
+                ],
+                "protectedCode": [],
+            })
+        );
+        f.service.close().unwrap();
+    }
+
+    #[test]
+    fn a_refused_scene_delete_names_protected_code_that_names_its_label() {
+        let mut f = Fixture::new();
+        let target = f.scene("Depot yard");
+        let root = f.model()["scenes"][0].clone();
+        f.save(
+            &root,
+            &format!(
+                "label {}:\n    \"Hello\"\n    $ renpy.jump(\"{}\")\n    return\n",
+                root["technicalLabel"].as_str().unwrap(),
+                target["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        let root = f.model()["scenes"][0].clone();
+        let code = found(&root, "customCode");
+        assert_eq!(code["protected"], true);
+        assert_eq!(
+            delete(&mut f, "Depot yard"),
+            json!({
+                "beats": [],
+                "protectedCode": [
+                    {"sceneId":root["id"],"sceneName":root["displayName"],"beatId":code["id"],"kind":"customCode"},
+                ],
+            })
+        );
+        f.service.close().unwrap();
+    }
 }
 
 #[cfg(test)]
