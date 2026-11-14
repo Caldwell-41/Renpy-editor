@@ -3789,7 +3789,30 @@ pub(crate) fn build_mapping(
     forced: &[ForcedBeatId],
     context: Option<SceneParseContext<'_>>,
 ) -> Result<(SceneSourceMapping, Vec<SceneBeat>), SceneError> {
-    let (label_start, label_end, mut parsed) = parse_scene(scene, bytes, context)?;
+    build_mapping_mode(
+        scene,
+        bytes,
+        revision,
+        previous,
+        forced,
+        context,
+        SOURCE_MAP_SCHEMA_VERSION,
+    )
+}
+
+/// `build_mapping` with an older recognizer. Tests use it to write a map exactly as
+/// the build that saved that schema did.
+fn build_mapping_mode(
+    scene: &SceneMetadata,
+    bytes: &[u8],
+    revision: &str,
+    previous: Option<&SceneSourceMapping>,
+    forced: &[ForcedBeatId],
+    context: Option<SceneParseContext<'_>>,
+    source_version: u32,
+) -> Result<(SceneSourceMapping, Vec<SceneBeat>), SceneError> {
+    let (label_start, label_end, mut parsed) =
+        parse_scene_mode(scene, bytes, context, source_version)?;
     let mut unresolved_screens = HashSet::new();
     if let Some(previous) = previous.filter(|mapping| !mapping.source_revision.is_empty()) {
         let assigned = forced
@@ -6446,6 +6469,88 @@ mod tests {
             "label scene_one:\n    if missing_flag == 4:\n        \"A\"\n    return\n"
         ));
         assert!(partial("label scene_one:\n    if (flag == True):\n        $ trust = trust * 2 + len(\"x\")\n    return\n"));
+    }
+
+    /// The source map as the build that saved schema `version` wrote it, with new IDs.
+    fn map_as_saved_by(f: &Fixture, version: u32) -> SourceMapMetadata {
+        let loaded = f.service.load(&f.project, &f.project_id).unwrap();
+        let mut map = loaded.source_map.clone();
+        map.schema_version = version;
+        for mapping in &mut map.scene_mappings {
+            let scene = loaded
+                .project
+                .scenes
+                .iter()
+                .find(|s| s.id == mapping.scene_id)
+                .unwrap();
+            let bytes = fs::read(f.root.join(&scene.source_path)).unwrap();
+            let context = (
+                &loaded.project,
+                &loaded.authoring,
+                loaded.source_map.owned_screens.as_slice(),
+            );
+            *mapping = build_mapping_mode(
+                scene,
+                &bytes,
+                &sha256(&bytes),
+                None,
+                &[],
+                Some(context),
+                version,
+            )
+            .unwrap()
+            .0;
+        }
+        map
+    }
+
+    #[test]
+    fn a_v14_map_with_beats_inside_a_top_level_block_opens_and_keeps_ids() {
+        // v14 read lines of a top-level block as beats: the dialogue inside
+        // `init python:` and the If header and its child inside a screen.
+        let source = "label scene_one:\n    \"Known\"\n    return\ninit python:\n    \"Opaque Python\"\nscreen custom():\n    if flag:\n        text \"Opaque\"\n";
+        let f = Fixture::new(source.as_bytes());
+        f.migrate();
+        let old = map_as_saved_by(&f, 14);
+        let rows = &old.scene_mappings[0].beats;
+        // The rows the build at 3621778f (schema 14) saved for this source.
+        assert_eq!(
+            rows.iter()
+                .map(|row| (
+                    row.kind.as_str(),
+                    row.byte_start,
+                    row.byte_end,
+                    row.owner.is_some(),
+                    row.conditional_branch.is_some()
+                ))
+                .collect::<Vec<_>>(),
+            [
+                ("narration", 17, 29, false, false),
+                ("return", 29, 40, false, false),
+                ("customCode", 40, 53, false, false),
+                ("narration", 53, 73, false, false),
+                ("customCode", 73, 90, false, false),
+                ("customCode", 90, 103, false, true),
+                ("customCode", 103, 125, true, false),
+            ]
+        );
+        let map_path = f.root.join(SOURCE_MAP_PATH);
+        fs::write(&map_path, source_map_bytes(&old).unwrap()).unwrap();
+        f.migrate();
+        let beats = f.workspace().scenes[0].beats.clone();
+        // Known, return and one beat for each block, which keeps its first line's ID.
+        assert_eq!(beats.len(), 4);
+        for beat in &beats {
+            let row = rows.iter().find(|row| row.byte_start == beat.byte_start);
+            assert_eq!(Some(&beat.id), row.map(|row| &row.id));
+        }
+        assert!(beats[2..].iter().all(|beat| beat.protected));
+        let saved = String::from_utf8(fs::read(&map_path).unwrap()).unwrap();
+        assert!(rows.iter().all(|row| saved.contains(row.id.as_str())));
+        assert_eq!(
+            fs::read(f.root.join(&f.workspace().scenes[0].source_path)).unwrap(),
+            source.as_bytes()
+        );
     }
 
     #[test]

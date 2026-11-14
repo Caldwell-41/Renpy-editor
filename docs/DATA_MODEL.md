@@ -143,8 +143,11 @@ beat. A `python:` block is one beat, not one beat per line. Blank and comment li
 inside the block stay in it; those after its last line are trivia. Older maps have one
 row per line. On open, core checks those rows with the old recognizer, then folds each
 block's rows into one. The first row keeps its ID, and the other rows go under
-`refinedChildMappings`. Only Custom Code rows fold, so a legacy Choice row that would
-become Custom Code refuses. Opening never writes `.rpy` bytes.
+`refinedChildMappings` with their IDs and unknown fields. Older builds also read
+some lines inside a top-level block as beats, such as dialogue in `init python:` or
+an If header and its child in a screen. Those rows fold the same way. A Choice row
+inside a block refuses, because folding it would turn a supported menu into
+protected code. Opening never writes `.rpy` bytes.
 
 Caption, guard, reorder and option-count edits carry each retained body's exact
 bytes and mapped IDs. New options get new IDs. Then controls edit only the last

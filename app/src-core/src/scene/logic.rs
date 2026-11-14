@@ -394,7 +394,10 @@ pub(super) fn refine_legacy_ids(
             }
         }
         // v15 makes an unsupported block one Custom Code beat. Its first line's row
-        // keeps the ID and holds the others, as a refined Choice does.
+        // keeps the ID and holds the others, as a refined Choice does. Older builds
+        // also read lines inside a top-level block as beats, such as dialogue in
+        // `init python:` or an If in a screen; those rows fold too. A Choice row
+        // refuses, because folding it would turn a supported menu into protected code.
         if matches!(parsed.payload, BeatPayload::CustomCode { .. }) {
             let rows: Vec<_> = old
                 .beats
@@ -414,11 +417,7 @@ pub(super) fn refine_legacy_ids(
                 || rows
                     .windows(2)
                     .any(|pair| pair[0].byte_end != pair[1].byte_start)
-                || rows.iter().any(|row| {
-                    row.kind != "customCode"
-                        || row.conditional_branch.is_some()
-                        || row.owner != first.owner
-                })
+                || rows.iter().any(|row| row.kind == "choice")
             {
                 return Err(SceneError::InvalidMetadata);
             }
