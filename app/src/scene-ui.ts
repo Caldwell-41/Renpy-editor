@@ -537,6 +537,8 @@ export function renderStoryView(
   let settling: Promise<boolean> | undefined;
   let composing = false;
   let pendingWrites = 0;
+  // Settles when Story's write in flight ends, so a check can wait for the revisions it makes.
+  let writing: Promise<void> | undefined;
   // "+ New variable…" in a rule builder: core creates the variable as one edit with Undo.
   // Story takes the new workspace without redrawing, so the open draft keeps its input
   // and commits against the new revisions.
@@ -763,7 +765,8 @@ export function renderStoryView(
   const lockStory = (): (() => void) => {
     const locks = [host, treeHost].flatMap(root => [...root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLButtonElement>("input,select,textarea,button")]).map(control => ({ control, disabled: control.disabled }));
     locks.forEach(({ control }) => { control.disabled = true; }); pendingWrites++;
-    return () => { pendingWrites--; locks.forEach(({ control, disabled }) => { if (control.isConnected) control.disabled = disabled; }); };
+    let written!: () => void; writing = new Promise(resolve => { written = resolve; });
+    return () => { pendingWrites--; writing = undefined; written(); locks.forEach(({ control, disabled }) => { if (control.isConnected) control.disabled = disabled; }); };
   };
 
   // Reloads Story after core refuses a stale request, keeping every draft. A failed
@@ -2270,7 +2273,7 @@ export function renderStoryView(
       })().finally(() => { settling = undefined; });
     };
     const updateCommand = (payload: BeatPayload, current = base()): SceneCommand => ({ type: "updateBodyBeat", sceneId: scene.id, expectedSourceRevision: current.scene.sourceRevision, beatId: beat.id, expectedBody: current.expectedBody, beat: payload });
-    const context = editorContext(beat.id, true, assignmentValidation(() => base(), value => updateCommand(value)));
+    const context = editorContext(beat.id, true, assignmentValidation(() => base(), value => updateCommand(value), () => editor.host.isConnected));
     const editor = beat.payload.type === "choice" ? buildChoiceEditor(beat.payload, context, choiceHost(scene, beat)) : buildBeatEditor(beat.payload, context);
     const panel = editor.host; panel.classList.add("expanded-beat");panel.dataset.beatType=beat.payload.type;
     if (beat.payload.type === "showScreen" || beat.payload.type === "hideScreen" || beat.payload.type === "callScreen") {
@@ -2348,8 +2351,13 @@ export function renderStoryView(
       ...(beat.payload.type === "dialogue" && !beat.owner ? { nextLine: () => { if (!settling && !conflicted()) settling = save(true).finally(() => { settling = undefined; }); } } : {}) });
   };
 
-  const assignmentValidation = (base: () => { scene: SceneDocument; captured: ExpectedRevisions }, command: (beat: BeatPayload) => SceneCommand): ValidateAssignment => async beat => {
+  // A check is bound to the revisions it sends. While Story's own write is in flight those
+  // revisions are about to be replaced, so the check waits for the write and then tests
+  // the result, or stops when that write removed its editor.
+  const assignmentValidation = (base: () => { scene: SceneDocument; captured: ExpectedRevisions }, command: (beat: BeatPayload) => SceneCommand, shown: () => boolean): ValidateAssignment => async beat => {
+    while (writing) await writing;
     if (!actions.validateAssignment || disposed || actions.current?.() === false) throw Error("Story session is unavailable.");
+    if (!shown()) throw Error("This beat's editor closed.");
     const { scene, captured: expected } = base();
     const result = await actions.validateAssignment(command(beat), expected);
     if (disposed || actions.current?.() === false || result.projectRevision !== expected.projectRevision || result.sourceMapRevision !== expected.sourceMapRevision || result.authoringRevision !== expected.authoringRevision || result.sourceRevision !== scene.sourceRevision) throw Error("Story revision changed. Review the current source before committing.");
@@ -2445,7 +2453,7 @@ export function renderStoryView(
       for(const event of ["input","change"])placementHost.host.addEventListener(event,()=>{if(remember())delete placementHost.host.dataset.unsubmitted;else placementHost.host.dataset.unsubmitted="true";relocate();});
       remember();
     }
-    const validateNew = assignmentValidation(base, beat => insertCommand(beat, chosenLocation()));
+    const validateNew = assignmentValidation(base, beat => insertCommand(beat, chosenLocation()), () => panel.isConnected);
     // A new condition: its If test and whether it has an Otherwise. It has no beat payload.
     const condition = type === "condition" ? newConditionEditor() : undefined;
     const context = editorContext(key, false, validateNew);

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
 import type { SceneCommand, SceneWorkspace } from "../src/scene-ui.js";
-import { renderStoryView, selectBeat, storyEditor, storyFixture, trackColumn } from "./story-controls-fixture.js";
+import { pickKind, renderStoryView, sceneBodies, selectBeat, storyEditor, storyFixture, trackColumn } from "./story-controls-fixture.js";
 
 test("imported arithmetic opens as an equation and commits the retained formula through Story", async () => {
   const browser = new Window({url:"http://tauri.localhost"});
@@ -90,4 +90,39 @@ test("Story format errors wait for blur, stay associated, and clear while correc
   const id=field.getAttribute('aria-describedby');assert.ok(id&&document.getElementById(id)?.textContent?.includes('Check the formula'));
   field.value='2';field.dispatchEvent(new Event('input',{bubbles:true}));await settle();assert.notEqual(field.getAttribute('aria-invalid'),'true');
  }finally{await browser.happyDOM.close();}
+});
+
+test("a Set variable check waits for Story's own write and never tests the revisions that write replaces",async()=>{
+  const browser = new Window({url:"http://tauri.localhost"});
+  Object.assign(globalThis, {window:browser,document:browser.document,HTMLElement:browser.HTMLElement,HTMLInputElement:browser.HTMLInputElement,HTMLTextAreaElement:browser.HTMLTextAreaElement,HTMLSelectElement:browser.HTMLSelectElement,KeyboardEvent:browser.KeyboardEvent,Event:browser.Event});
+  document.body.innerHTML='<main></main><aside></aside>';
+  const base=storyFixture(),host=document.querySelector<HTMLElement>("main")!;
+  const scene=(revision:string,beats:SceneWorkspace["scenes"][number]["beats"]):SceneWorkspace=>({...base,projectRevision:`project-${revision}`,authoringRevision:"authoring",scenes:[{...base.scenes[0]!,sourceRevision:`source-${revision}`,beats,bodies:sceneBodies(beats)},base.scenes[1]!]});
+  const end={id:"end",byteStart:30,byteEnd:41,protected:false,payload:{type:"return" as const}};
+  const arithmetic=(operand:string,id="arithmetic",byteStart=0)=>({id,byteStart,byteEnd:byteStart+30,protected:false,payload:{type:"setVariable" as const,variableId:"trust",value:{operation:"add" as const,operand}}});
+  const checks:{project:string;source:string}[]=[];let finish!:(next:SceneWorkspace)=>void;
+  const view=renderStoryView(host,document.querySelector("aside")!,scene("1",[arithmetic("trust + 2"),end]),{
+    validateAssignment:async(command,expected)=>{checks.push({project:expected.projectRevision,source:String((command as {expectedSourceRevision?:unknown}).expectedSourceRevision)});throw Error("offline");},
+    resolution:{width:1280,height:720},present:async()=>{throw Error("no media");},status:()=>{},
+    apply:async()=>new Promise<SceneWorkspace>(resolve=>{finish=resolve;}),
+  },"arithmetic");
+  const wait=()=>new Promise(r=>setTimeout(r,200));
+  const formula=()=>host.querySelector<HTMLInputElement>('.story-editor [aria-label="Formula"]')!;
+  const press=(scope:ParentNode,label:string)=>[...scope.querySelectorAll<HTMLButtonElement>("button")].find(item=>item.textContent===label)!.click();
+  try{
+    // Commit Beat: the write is in flight while the formula's check comes due.
+    formula().value="trust + 3";formula().dispatchEvent(new Event("input",{bubbles:true}));await wait();
+    let sent=checks.length;press(storyEditor(host),"Commit Beat");await wait();
+    assert.deepEqual(checks.slice(sent),[],"No check runs against the revisions a pending Commit replaces");
+    finish(scene("2",[arithmetic("trust + 3"),end]));await wait();
+    assert.ok(checks.slice(sent).every(check=>check.project==="project-2"&&check.source==="source-2"),JSON.stringify(checks.slice(sent)));
+    // Add Beat: a new Set variable beat, the same way.
+    press(host,"+ Add beat");const variable=pickKind(host,"Set variable").querySelector<HTMLSelectElement>('[aria-label="Variable"]')!;
+    variable.value="trust";variable.dispatchEvent(new Event("change",{bubbles:true}));
+    formula().value="trust + 1";formula().dispatchEvent(new Event("input",{bubbles:true}));await wait();
+    sent=checks.length;press(host.querySelector(".new-beat")!,"Add Beat");await wait();
+    assert.deepEqual(checks.slice(sent),[],"No check runs against the revisions a pending Add Beat replaces");
+    finish(scene("3",[arithmetic("trust + 3"),arithmetic("trust + 1","added",30),{...end,byteStart:60,byteEnd:71}]));await wait();
+    assert.ok(checks.slice(sent).every(check=>check.project==="project-3"&&check.source==="source-3"),JSON.stringify(checks.slice(sent)));
+  }finally{view.dispose();await browser.happyDOM.close();}
 });
