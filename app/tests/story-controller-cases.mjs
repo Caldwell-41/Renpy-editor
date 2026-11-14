@@ -935,8 +935,12 @@ export const storyCases={
  // The source-foundation runtime probe reads source while the app reads history, so the
  // native host can refuse the app's history.state as busy. Undo must still leave Redo.
  [names[16]]:async c=>{
-  const s=scene(c),child=s.beats.find(b=>b.owner&&b.payload.type==='narration'&&!b.protected);c.assert(child,'A nested narration child');
-  const before=await c.snapshot(),original=c.sourceText(before,s.sourcePath);
+  if(!c.document.querySelector('.scene-workspace .story-track-column')){await c.click('Story',c.document.querySelector('.story-sidebar'));await c.wait(()=>c.document.querySelector('.scene-workspace .story-track-column'));await c.settle();}
+  if(shownScene(c)!==scene(c).id)await openScene(c,scene(c).displayName);
+  const s=scene(c),before=await c.snapshot(),original=c.sourceText(before,s.sourcePath);
+  // A narration line, written once, in a top-level branch that the Branch path offers.
+  const segment=id=>[...c.document.querySelectorAll('.scene-workspace .story-branch-segment')].some(item=>item.dataset.branchId===id);
+  const child=s.beats.find(b=>b.owner&&b.payload.type==='narration'&&!b.protected&&!s.beats.find(h=>h.id===b.owner.branchId)?.owner&&segment(b.owner.branchId)&&original.split(`"${b.payload.text}"`).length===2);c.assert(child,'A nested narration child');
   const editor=await pick(c,child.id),form=editor.querySelector('.expanded-beat');
   c.enter(editor.querySelector('textarea'),'Redo survives a busy read');await c.click('Commit Beat',editor);
   await c.wait(()=>!form.isConnected&&c.lastMutation()?.response.ok);await c.settle();
@@ -947,7 +951,7 @@ export const storyCases={
   c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(before));
   // No input follows: Story shows the undone beat, and Redo stays available.
   await c.wait(()=>card(c,child.id)?.querySelector('textarea')?.value===child.payload.text);await c.settle();
-  c.assert.equal((await c.call('history.state')).redo?.name,'narration edit in Scene 1');
+  c.assert.equal((await c.call('history.state')).redo?.name,`narration edit in ${s.displayName}`);
   const redo=c.document.querySelector('.app-header [data-history="redo"]');c.assert.notEqual(redo.getAttribute('aria-disabled'),'true','Header Redo stays available after Undo');
   c.assert.equal(card(c,child.id).querySelector('.expanded-beat').dataset.unsubmitted,undefined,'Showing the undone beat starts no draft');
   await c.history('redo');await c.settle();
