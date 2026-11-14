@@ -8,8 +8,27 @@ Every item sits inside the approved Story Combined v1 layout (`story-revamp` /
 `replace-v2`) and conflict B (`story-draft-conflict` / `compact-v2`). The logic fixes
 on #120 are separate work and are not in this mock.
 
-Nothing here is approved yet. Kris picks A or B for each item that has two answers.
-Items with one answer show the same design in both.
+Kris approved the combined revision `a-v2` on 2026-11-14. It is the variant
+"Combined" in the layout picker and has no A/B switch. The drafts `a-v1` and `b-v1`
+stay as they were reviewed. [approval.json](approval.json) holds the decision, his
+words for each item, the behaviour, the deviations and the captures in
+[captures/a-v2/](captures/a-v2/).
+
+| State | Approved |
+| --- | --- |
+| `diagnostics` | A, with B's red error style on the broken branch and "branch" wording. Each message ends "Until then, the builder can't edit this branch." Tracks reads "2 branches to fix". |
+| `set-variable` | As mocked |
+| `protected` | A |
+| `move-protected` | B |
+| `delete-scene` | A, refusal tidied: a header line with ×, scene and beat rows, one closing line. The scene list groups scenes under collapsible chapter headings. |
+| `transition` | B, help reworded: "This fade animates 2 beats above it:", the list, then "A transition animates the stage beats between it and the last line, choice or transition above it. To animate a beat below, move this Transition under that beat." |
+| `transition-add` | As mocked |
+| `moved-draft` | A |
+| `screen-beat` | As mocked |
+| `screen-beat-changed` | As mocked, with the note and Choose a place… in one block |
+| `tracks-summary` | As mocked |
+
+The tables below describe the A and B drafts as reviewed.
 
 ## How the screen is organised
 
@@ -99,6 +118,8 @@ Focused check and captures, once per variant and once more in light:
 npm run design:check -- story-release-fixes a --interaction ./screens/story-release-fixes/review-check.mjs --capture
 npm run design:check -- story-release-fixes b --interaction ./screens/story-release-fixes/review-check.mjs --capture
 npm run design:check -- story-release-fixes a --theme light --interaction ./screens/story-release-fixes/review-check.mjs
+npm run design:check -- story-release-fixes a-v2 --interaction ./screens/story-release-fixes/review-check.mjs --capture
+npm run design:check -- --approval story-release-fixes
 ```
 
 [captures/](captures/) holds `<revision>-<state>-dark-<wide|compact>.png` for both
