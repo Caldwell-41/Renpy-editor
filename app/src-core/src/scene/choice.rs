@@ -182,19 +182,19 @@ pub(super) fn parse(
             };
             let payload = payload.unwrap_or_else(|| custom(child_start, child_end, line).payload);
             // Keep unsupported blocks opaque, including their quoted/Python contents.
-            if source_version >= 15 && matches!(payload, BeatPayload::CustomCode { .. }) && !trivia
+            let owner = ParsedNesting::Child {
+                group_start: group,
+                branch_start: option_start,
+            };
+            if let Some((after, block)) =
+                opaque_block(lines, next, lexical, &payload, source_version, Some(owner))
             {
-                let after = opaque_block_end(lines, next, indent + 8, lexical);
-                let mut block = custom_block(&lines[next..after]);
-                block.nesting = Some(ParsedNesting::Child {
-                    group_start: group,
-                    branch_start: option_start,
-                });
                 result.push(block);
                 next = after;
                 statements += 1;
                 continue;
             }
+            // Maps before v15 have a row for each line of a block; migration reads them so.
             result.push(ParsedBeat {
                 start: child_start,
                 end: child_end,

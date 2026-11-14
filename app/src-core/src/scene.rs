@@ -3249,18 +3249,19 @@ fn parse_condition_group(
             });
             // Unsupported indented blocks are opaque as a unit. In particular, Python
             // internals must never become editable dialogue or conditional children.
-            if source_version >= 15 && matches!(payload, BeatPayload::CustomCode { .. }) {
-                let after = opaque_block_end(lines, next, indent + 4, lexical);
-                let mut block = custom_block(&lines[next..after]);
-                block.nesting = Some(ParsedNesting::Child {
-                    group_start,
-                    branch_start,
-                });
+            let owner = ParsedNesting::Child {
+                group_start,
+                branch_start,
+            };
+            if let Some((after, block)) =
+                opaque_block(lines, next, lexical, &payload, source_version, Some(owner))
+            {
                 result.push(block);
                 next = after;
                 statements += 1;
                 continue;
             }
+            // Maps before v15 have a row for each line of a block; migration reads them so.
             let mut after = next + 1;
             if matches!(payload, BeatPayload::CustomCode { .. }) {
                 while after < lines.len()
@@ -3456,16 +3457,14 @@ fn parse_scene_mode(
             source: body.into(),
             reason: "Unsupported or runtime-dependent Ren'Py source".into(),
         });
-        if source_version >= 15
-            && matches!(payload, BeatPayload::CustomCode { .. })
-            && !body.trim().is_empty()
-            && !body.trim_start().starts_with('#')
+        if let Some((after, block)) =
+            opaque_block(&lines, index, &lexical, &payload, source_version, None)
         {
-            let after = opaque_block_end(&lines, index, indentation(body), &lexical);
-            beats.push(custom_block(&lines[index..after]));
+            beats.push(block);
             index = after;
             continue;
         }
+        // Maps before v15 have a row for each line of a block; migration reads them so.
         beats.push(ParsedBeat {
             nesting: None,
             start,
@@ -4834,14 +4833,34 @@ fn opaque_block_end(
     end
 }
 
-/// One Custom Code beat for a whole unsupported statement and its block.
-fn custom_block(lines: &[(usize, usize, &str)]) -> ParsedBeat {
-    let source = lines
+/// From source-map v15, the unsupported statement at `index` and its block are one
+/// Custom Code beat in `nesting`'s body. Returns it and the next line's index, or None
+/// for a supported statement, a blank or comment line, or an older map.
+fn opaque_block(
+    lines: &[(usize, usize, &str)],
+    index: usize,
+    lexical: &HashSet<usize>,
+    payload: &BeatPayload,
+    source_version: u32,
+    nesting: Option<ParsedNesting>,
+) -> Option<(usize, ParsedBeat)> {
+    let body = lines[index].2;
+    if source_version < 15
+        || !matches!(payload, BeatPayload::CustomCode { .. })
+        || body.trim().is_empty()
+        || body.trim_start().starts_with('#')
+    {
+        return None;
+    }
+    let after = opaque_block_end(lines, index, indentation(body), lexical);
+    let source = lines[index..after]
         .iter()
         .map(|(_, _, body)| *body)
         .collect::<Vec<_>>()
         .join("\n");
-    custom(lines[0].0, lines[lines.len() - 1].1, &source)
+    let mut block = custom(lines[index].0, lines[after - 1].1, &source);
+    block.nesting = nesting;
+    Some((after, block))
 }
 
 fn custom(start: usize, end: usize, body: &str) -> ParsedBeat {
@@ -6531,6 +6550,107 @@ mod tests {
         assert!(partial("label scene_one:\n    if (flag == True):\n        $ trust = trust * 2 + len(\"x\")\n    return\n"));
     }
 
+    // A blank or comment line inside a block stays in it, and those after its last line
+    // are trivia, in the root, an If branch and a Choice option alike.
+    #[test]
+    fn trivia_inside_and_after_a_protected_block_is_the_same_in_every_body() {
+        let block = [
+            "python:",
+            "    x = 1",
+            "",
+            "# between",
+            "    y = 2",
+            "",
+            "# after",
+            "\"Next\"",
+        ];
+        let at = |indent: usize| {
+            block
+                .iter()
+                .map(|line| {
+                    if line.is_empty() {
+                        "\n".to_owned()
+                    } else {
+                        format!("{}{line}\n", " ".repeat(indent))
+                    }
+                })
+                .collect::<String>()
+        };
+        let f = Fixture::new(b"label scene_one:\n    return\n");
+        f.migrate();
+        f.service
+            .create_variable(
+                &f.project,
+                &f.project_id,
+                CreateVariableRequest {
+                    technical_name: "flag".into(),
+                    variable_type: VariableType::Bool,
+                    default_value: Value::Bool(true),
+                },
+            )
+            .unwrap();
+        let path = f.root.join(&f.workspace().scenes[0].source_path);
+        for (indent, source) in [
+            (4, format!("label scene_one:\n{}    return\n", at(4))),
+            (
+                8,
+                format!("label scene_one:\n    if flag:\n{}    return\n", at(8)),
+            ),
+            (
+                12,
+                format!(
+                    "label scene_one:\n    menu:\n        \"Go\":\n{}    return\n",
+                    at(12)
+                ),
+            ),
+        ] {
+            fs::write(&path, &source).unwrap();
+            let ws = f.workspace();
+            let beats = &ws.scenes[0].beats;
+            // The body holding the block: the root, or the branch its first beat sits in.
+            let first = beats
+                .iter()
+                .find(|b| matches!(&b.payload, BeatPayload::CustomCode { source, .. } if source.contains("python:")))
+                .unwrap();
+            let shown = beats
+                .iter()
+                .filter(|b| b.conditional_branch.is_none() && b.owner == first.owner)
+                .take(4)
+                .map(|b| {
+                    let text = match &b.payload {
+                        BeatPayload::CustomCode { source, .. } => source.clone(),
+                        BeatPayload::Narration { text } => text.clone(),
+                        other => panic!("{other:?}"),
+                    };
+                    let dedented = text
+                        .split('\n')
+                        .map(|line| {
+                            &line[line
+                                .len()
+                                .min(indent)
+                                .min(line.len() - line.trim_start().len())..]
+                        })
+                        .collect::<Vec<_>>()
+                        .join("\n");
+                    (b.payload.kind(), dedented)
+                })
+                .collect::<Vec<_>>();
+            assert_eq!(
+                shown,
+                [
+                    (
+                        "customCode",
+                        "python:\n    x = 1\n\n# between\n    y = 2".to_owned()
+                    ),
+                    ("customCode", String::new()),
+                    ("customCode", "# after".to_owned()),
+                    ("narration", "Next".to_owned()),
+                ],
+                "indent {indent}"
+            );
+        }
+    }
+
     /// The source map as the build that saved schema `version` wrote it, with new IDs.
     fn map_as_saved_by(f: &Fixture, version: u32) -> SourceMapMetadata {
         let loaded = f.service.load(&f.project, &f.project_id).unwrap();
@@ -6719,9 +6839,18 @@ mod tests {
                 .map(|b| &b.id)
                 .collect::<Vec<_>>()
         );
-        // The old rows are kept with the block's first line, as for v9 Choices.
+        // The old rows are kept with the block's first line, as for v9 Choices. Only
+        // the three blocks of more than one line hold any.
         let saved = String::from_utf8(fs::read(&map_path).unwrap()).unwrap();
         assert!(inner.iter().all(|id| saved.contains(id.as_str())));
+        let holders = SourceMapMetadata::read_bytes(saved.as_bytes(), &f.project_id)
+            .unwrap()
+            .scene_mappings[0]
+            .beats
+            .iter()
+            .filter(|row| row.extra.contains_key("refinedChildMappings"))
+            .count();
+        assert_eq!(holders, 3);
         assert_eq!(fs::read(&path).unwrap(), bytes);
     }
 
