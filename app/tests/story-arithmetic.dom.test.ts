@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
 import type { SceneCommand, SceneWorkspace } from "../src/scene-ui.js";
-import { pickKind, renderStoryView, sceneBodies, selectBeat, storyEditor, storyFixture, trackColumn } from "./story-controls-fixture.js";
+import { chooseIn, editorProject, mountStory, pickKind, press, renderStoryView, sceneBodies, selectBeat, storyBeat, storyEditor, storyFixture, texts, trackColumn } from "./story-controls-fixture.js";
+const tick = async (): Promise<void> => { await new Promise(resolve => setTimeout(resolve, 0)); };
 
 test("imported arithmetic opens as an equation and commits the retained formula through Story", async () => {
   const browser = new Window({url:"http://tauri.localhost"});
@@ -125,4 +126,30 @@ test("a Set variable check waits for Story's own write and never tests the revis
     finish(scene("3",[arithmetic("trust + 3"),arithmetic("trust + 1","added",30),{...end,byteStart:60,byteEnd:71}]));await wait();
     assert.ok(checks.slice(sent).every(check=>check.project==="project-3"&&check.source==="source-3"),JSON.stringify(checks.slice(sent)));
   }finally{view.dispose();await browser.happyDOM.close();}
+});
+
+test("Set variable's list ends with + New variable…, says when there are none, and selects the new variable", async () => {
+  const empty = editorProject([storyBeat("words", { type: "narration", text: "The timetable has not changed in thirty years." })]);
+  const model: SceneWorkspace = { ...empty, authoring: { ...empty.authoring, variables: [] } };
+  const requests: unknown[] = [];
+  const s = mountStory(model, { createVariable: async request => {
+    requests.push(request);
+    return { ...model, projectRevision: "project-2", authoring: { ...model.authoring, variables: [{ id: "count", technicalName: request.technicalName, variableType: request.variableType, defaultValue: "0" }] } };
+  } });
+  selectBeat(s.host, "words"); press(s.host, "+ Add beat"); const panel = pickKind(s.host, "Set variable");
+  const summary = (): HTMLElement => panel.querySelector<HTMLElement>(".story-variable-picker > summary")!;
+  assert.equal(summary().textContent, "Choose a variable▾");
+  summary().click();
+  assert.deepEqual(texts(panel.querySelector(".story-variable-picker [role=listbox]")!, ":scope > *"), ["No variables yet.", "+ New variable…"]);
+  const value = panel.querySelector<HTMLInputElement>('input[aria-label="Value"]')!;
+  assert.equal(value.disabled, true); assert.equal(value.placeholder, "Choose a variable first");
+  press(panel, "+ New variable…");
+  const dialog = s.host.querySelector<HTMLElement>(".story-new-variable")!;
+  const name = dialog.querySelector<HTMLInputElement>('input[aria-label="Variable name"]')!; name.value = "ticket_count"; name.dispatchEvent(new Event("input", { bubbles: true }));
+  chooseIn(dialog, "Variable type", "Whole number");
+  press(dialog, "Create variable"); await tick();
+  assert.deepEqual(requests, [{ technicalName: "ticket_count", variableType: "int", defaultValue: "0" }]);
+  assert.equal(summary().getAttribute("aria-label"), "Variable: ticket_count"); assert.equal(document.activeElement, summary());
+  assert.ok(panel.querySelector('input[aria-label="Formula"]'), "A whole number takes a calculation");
+  await s.close();
 });

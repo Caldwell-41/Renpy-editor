@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
 import { type SceneWorkspace, type SceneBeat, type SceneCommand } from "../src/scene-ui.js";
-import { chooseIn, openGuard, optionBlocks, pickKind, press, sceneBodies, renderStoryView, selectBeat, type } from "./story-controls-fixture.js";
+import { chooseIn, editorProject, mountStory, openGuard, optionBlocks, pickKind, press, sceneBodies, renderStoryView, selectBeat, storyBeat, storyEditor, texts, type } from "./story-controls-fixture.js";
 const tick = async (): Promise<void> => { await new Promise(resolve => setTimeout(resolve, 0)); };
 function setup(beats: readonly SceneBeat[], apply: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision">) => Promise<SceneWorkspace>, steps?: string[]) {
   const browser = new Window(); Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, HTMLInputElement: browser.HTMLInputElement, HTMLTextAreaElement: browser.HTMLTextAreaElement, HTMLSelectElement: browser.HTMLSelectElement, Event: browser.Event, KeyboardEvent: browser.KeyboardEvent });
@@ -206,4 +206,46 @@ test("a new Choice keeps its typed Prompt in the Prompt field while option 1 is 
     assert.ok(steps.includes("choice typing in Arrival"), "Draft steps are recorded, as in the app");
     assert.deepEqual(writes[0]!.beat, { type: "choice", pickedPolicy: "showNormally", prompt: { type: "narration", text: "Hello world" }, options: [{ text: "One" }] });
   } finally { await s.close(); }
+});
+
+test("the Transition editor names the stage beats it animates, back to the last line, choice or transition", async () => {
+  const s = mountStory(editorProject([
+    storyBeat("words", { type: "narration", text: "The timetable has not changed in thirty years." }),
+    storyBeat("bg", { type: "background", assetId: "platform", transition: "none" }),
+    storyBeat("music", { type: "playMusic", assetId: "night" }),
+    storyBeat("show", { type: "showCharacter", characterId: "mara", appearanceId: "mara-neutral", placement: "centre", transition: "none" }),
+    storyBeat("fade", { type: "transition", transition: "fade" }),
+    storyBeat("line", { type: "dialogue", characterId: "mara", text: "You heard the bell too?" }),
+    storyBeat("move", { type: "placement", characterId: "mara", placement: "left" }),
+    storyBeat("again", { type: "transition", transition: "dissolve" }),
+    storyBeat("faded", { type: "transition", transition: "fade" }),
+  ]));
+  const editor = selectBeat(s.host, "fade"), help = (): HTMLElement => editor.querySelector<HTMLElement>(".story-transition-help")!;
+  assert.deepEqual(texts(help(), "p, li"), ["This fade animates 2 beats above it:", "02 Background · Rainy platform", "04 Show character · Mara",
+    "A transition animates the stage beats between it and the last line, choice or transition above it. To animate a beat below, move this Transition under that beat."]);
+  // The help follows the chosen transition.
+  chooseIn(editor, "Transition", "Dissolve");
+  assert.equal(help().querySelector("p")!.textContent, "This dissolve animates 2 beats above it:");
+  // One beat, and none: a transition right after another has nothing above it to animate.
+  assert.equal(selectBeat(s.host, "again").querySelector(".story-transition-help p")!.textContent, "This dissolve animates 1 beat above it:");
+  const none = selectBeat(s.host, "faded").querySelector<HTMLElement>(".story-transition-help")!;
+  assert.equal(none.querySelector("p")!.textContent, "This fade animates no beats above it."); assert.equal(none.querySelector("li"), null);
+  await s.close();
+});
+
+test("Add a beat describes Transition by what it animates, and a new Transition names the beats above its place", async () => {
+  const s = mountStory(editorProject([
+    storyBeat("bg", { type: "background", assetId: "platform", transition: "none" }),
+    storyBeat("show", { type: "showCharacter", characterId: "mara", appearanceId: "mara-neutral", placement: "centre", transition: "dissolve" }),
+    storyBeat("hide", { type: "hideCharacter", characterId: "eli", transition: "none" }),
+  ]));
+  selectBeat(s.host, "hide"); press(s.host, "+ Add beat");
+  const dialog = s.host.querySelector<HTMLElement>(".story-add-beat")!;
+  [...dialog.querySelectorAll<HTMLButtonElement>(".story-result")].find(item => item.textContent === "Transition")!.dispatchEvent(new Event("pointerenter"));
+  assert.equal(dialog.querySelector(".story-picker-details > p")!.textContent, "Animates the stage changes above it, since the last line or choice.");
+  // A stage beat with its own transition already animated itself, so the new beat stops there.
+  const panel = pickKind(s.host, "Transition");
+  assert.deepEqual(texts(panel.querySelector(".story-transition-help")!, "li"), ["03 Hide character · Eli"]);
+  assert.equal(storyEditor(s.host).contains(panel), true);
+  await s.close();
 });

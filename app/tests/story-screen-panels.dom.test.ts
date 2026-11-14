@@ -3,7 +3,7 @@ import test from "node:test";
 import { Window } from "happy-dom";
 import { type SceneActions, type SceneCommand, type SceneWorkspace, type ScreenInsertion } from "../src/scene-ui.js";
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenTargetBinding } from "../src/screen-contracts.js";
-import { choosePlace, selectBeat, storyEditor, storyFixture, renderStoryView } from "./story-controls-fixture.js";
+import { choosePlace, editorProject, mountStory, placeRows, press, selectBeat, storyBeat, storyEditor, storyFixture, renderStoryView, texts } from "./story-controls-fixture.js";
 
 const binding: ScreenTargetBinding = { screenId: "panel-id", sourceName: "help_panel" };
 const revisions = { source: "panel-source", sourceMap: "map", inventory: "inventory", effects: "effect" };
@@ -378,4 +378,43 @@ test("a deleted screen insertion Scene does not block ordinary Add Beat",async()
   button(draft,"Add Beat").click();await tick();assert.equal(s.commands.length,1);assert.deepEqual(s.commands[0]!.beat,{type:"narration",text:"A replacement line."});assert.deepEqual(s.commands[0]!.body,{type:"root"});assert.deepEqual(s.commands[0]!.position,{type:"before",anchor:{type:"beat",beatId:"end"}});
  }finally{await s.close();}
  }
+});
+
+/** A Story with one owned panel screen, for screen beats. */
+function withScreens(model: SceneWorkspace, extra: Partial<SceneActions> = {}) {
+  const binding = { screenId: "panel-id", sourceName: "timetable" }, revisions = { source: "panel-source", sourceMap: "map", inventory: "inventory", effects: "effect" };
+  return mountStory(model, { screenCatalog: async () => ({ projectRevision: "project", sourceMapRevision: "map", inventoryRevision: "inventory", owned: [{ id: binding.screenId, name: binding.sourceName, path: "game/ui/timetable.rpy", rootId: "root", kind: "panel", resolved: true, sourceRevision: revisions.source }] }),
+    resolveScreenTarget: async () => ({ binding, kind: "panel", blocking: false, canShowHide: true, path: "game/ui/timetable.rpy", rootId: "root", revisions, effects: { revision: "effect", unknown: false, shownScreens: [], assignedVariables: [], hiddenScreens: [], finishesInteraction: false, dependencies: [] } }), ...extra });
+}
+
+const screenScene = (): SceneWorkspace => editorProject([storyBeat("words", { type: "narration", text: "The timetable has not changed in thirty years." }), storyBeat("line", { type: "dialogue", characterId: "mara", text: "You heard the bell too?" }), storyBeat("close", { type: "narration", text: "The doors close behind them." })]);
+
+test("a new screen beat uses Goes at, In and After, and ⋯ Move to…, like other beats", async () => {
+  const model = screenScene(), scene = model.scenes[0]!;
+  const s = withScreens(model, { screenInsertion: { sceneId: "one", body: { type: "root" }, position: { type: "before", anchor: { type: "beat", beatId: "close" } }, expectedSourceRevision: scene.sourceRevision } });
+  press(s.host, "Add screen Beat"); await tick();
+  const panel = s.host.querySelector<HTMLElement>(".new-beat")!;
+  assert.deepEqual(placeRows(panel), ["Goes at", "Before 03 Narration", "In", "The last service", "After", "02 Mara's line"]);
+  await choosePlace(s.host, panel, "Before 02 Mara's line");
+  assert.deepEqual(placeRows(panel), ["Goes at", "Before 02 Mara's line", "In", "The last service", "After", "01 Narration"]);
+  press(panel, "Add Beat"); await tick();
+  assert.deepEqual(s.calls.at(-1), { type: "insertBodyBeat", sceneId: "one", expectedSourceRevision: scene.sourceRevision, body: { type: "root" }, position: { type: "before", anchor: { type: "beat", beatId: "line" } }, beat: { type: "showScreen", target: { screenId: "panel-id", sourceName: "timetable" }, revisions: { source: "panel-source", sourceMap: "map", inventory: "inventory", effects: "effect" } } });
+  await s.close();
+});
+
+test("a place picked in Screens that changed reads Choose a place, and Add Beat refuses until one is chosen", async () => {
+  const s = withScreens(screenScene(), { screenInsertion: { sceneId: "one", body: { type: "root" }, position: { type: "before", anchor: { type: "beat", beatId: "gone" } }, expectedSourceRevision: "older" } });
+  press(s.host, "Add screen Beat"); await tick();
+  const panel = s.host.querySelector<HTMLElement>(".new-beat")!;
+  assert.deepEqual(placeRows(panel), ["Goes at", "Choose a place", "In", "The last service"]);
+  assert.equal(panel.querySelector(".story-place-note > p")!.textContent, "The scene changed after you picked this place in Screens. Choose where this beat goes.");
+  assert.ok(panel.querySelector(".story-where-warn")); assert.equal(panel.querySelector<HTMLElement>(".story-beat-menu")!.hidden, true);
+  press(panel, "Add Beat"); await tick();
+  assert.deepEqual(s.calls, []); assert.equal(s.status.at(-1), "Choose where this beat goes. Draft retained.");
+  await choosePlace(s.host, panel, "Before 03 Narration");
+  assert.deepEqual(placeRows(panel), ["Goes at", "Before 03 Narration", "In", "The last service", "After", "02 Mara's line"]);
+  assert.equal(panel.querySelector<HTMLElement>(".story-place-note")!.hidden, true);
+  press(panel, "Add Beat"); await tick();
+  assert.deepEqual(s.calls.length, 1);
+  await s.close();
 });

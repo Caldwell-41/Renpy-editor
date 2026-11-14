@@ -1,4 +1,5 @@
-import { renderStoryView as renderStory, type BodyRef, type Condition, type InsertionPlace, type SceneActions, type SceneBeat, type SceneBody, type SceneWorkspace } from "../src/scene-ui.ts";
+import { Window } from "happy-dom";
+import { renderStoryView as renderStory, type BodyRef, type Condition, type InsertionPlace, type SceneActions, type SceneBeat, type SceneBody, type SceneCommand, type SceneWorkspace } from "../src/scene-ui.ts";
 /** Gives every scene the small bodies value its current beats describe. */
 export function withBodies(model: SceneWorkspace): SceneWorkspace {
   return { ...model, scenes: model.scenes.map(scene => ({ ...scene, bodies: sceneBodies(scene.beats) })) };
@@ -119,6 +120,26 @@ export function editorFixture(): SceneWorkspace {
       variables: [{ id: "flag", technicalName: "has_ticket", variableType: "bool", defaultValue: true }, { id: "trust", technicalName: "trust", variableType: "int", defaultValue: "0" }, { id: "fare", technicalName: "fare", variableType: "decimal", defaultValue: 2.5 }, { id: "mood", technicalName: "mood", variableType: "string", defaultValue: "calm" }],
     } };
 }
+
+/** editorFixture's project, with scene one holding `beats`. */
+export function editorProject(beats: readonly SceneBeat[]): SceneWorkspace {
+  const model = editorFixture();
+  return { ...model, scenes: model.scenes.map(scene => scene.id === "one" ? { ...scene, beats, bodies: sceneBodies(beats) } : scene) };
+}
+/** Story over `model` in a fresh document, recording each command it sends and each status line. */
+export function mountStory(model: SceneWorkspace, extra: Partial<SceneActions> = {}) {
+  const browser = new Window(); Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, HTMLInputElement: browser.HTMLInputElement, HTMLTextAreaElement: browser.HTMLTextAreaElement, HTMLSelectElement: browser.HTMLSelectElement, Event: browser.Event, KeyboardEvent: browser.KeyboardEvent });
+  document.body.innerHTML = "<main></main><aside></aside>";
+  const host = document.querySelector<HTMLElement>("main")!, calls: SceneCommand[] = [], status: string[] = [];
+  const view = renderStoryView(host, document.querySelector("aside")!, model, { apply: async command => { calls.push(command); return model; }, status: text => status.push(text), resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); }, viewSource: () => {}, ...extra });
+  return { host, calls, status, view, close: async () => { view.dispose(); await browser.happyDOM.close(); } };
+}
+let beatOffset = 0;
+/** A beat for `editorProject`, each at its own bytes. */
+export const storyBeat = (id: string, payload: SceneBeat["payload"], more: Partial<SceneBeat> = {}): SceneBeat => ({ id, byteStart: beatOffset += 20, byteEnd: beatOffset + 20, protected: false, payload, ...more });
+export const texts = (scope: ParentNode, selector: string): string[] => [...scope.querySelectorAll(selector)].map(node => node.textContent ?? "");
+/** A new beat's Goes at, In and After, as label and value pairs. */
+export const placeRows = (panel: ParentNode): string[] => texts(panel, ".story-where > *");
 
 /** Presses a button by its text or accessible name. */
 export function press(scope: ParentNode, label: string): HTMLButtonElement {
