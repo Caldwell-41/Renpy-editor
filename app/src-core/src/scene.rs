@@ -206,17 +206,17 @@ pub(crate) fn logic_boundary(payload: &BeatPayload) -> bool {
     ) || matches!(payload, BeatPayload::Choice { options, .. } if options.iter().any(|o| o.condition.is_some()))
 }
 
-// Supported option headers and a verified inert placeholder are protected edit
-// targets, but do not make reference inspection or the Scene projection opaque.
+// Supported If, Else if, Else and Choice option headers and a verified inert
+// placeholder are protected edit targets, but do not make reference inspection or
+// the Scene projection opaque.
 fn opaque_source(beat: &SceneBeat) -> bool {
     beat.protected
         && !beat.structural_placeholder
         && !beat.conditional_branch.as_ref().is_some_and(|branch| {
-            branch.choice_option
-                && !matches!(
-                    branch.condition,
-                    Some(crate::conditions::Condition::Unknown { .. })
-                )
+            !matches!(
+                branch.condition,
+                Some(crate::conditions::Condition::Unknown { .. })
+            )
         })
 }
 
@@ -6316,6 +6316,40 @@ mod tests {
             ),
             Err(SceneError::SourceConflict)
         ));
+    }
+
+    #[test]
+    fn supported_condition_headers_leave_the_scene_whole() {
+        let f = Fixture::new(b"label scene_one:\n    return\n");
+        f.migrate();
+        for (name, variable_type, default_value) in [
+            ("flag", VariableType::Bool, Value::Bool(true)),
+            ("trust", VariableType::Int, Value::String("5".into())),
+        ] {
+            f.service
+                .create_variable(
+                    &f.project,
+                    &f.project_id,
+                    CreateVariableRequest {
+                        technical_name: name.into(),
+                        variable_type,
+                        default_value,
+                    },
+                )
+                .unwrap();
+        }
+        let path = f.root.join(&f.workspace().scenes[0].source_path);
+        let partial = |source: &str| {
+            fs::write(&path, source).unwrap();
+            f.workspace().scenes[0].partial
+        };
+        // If, nested If and Else headers with supported tests are edit targets only.
+        assert!(!partial("label scene_one:\n    if (flag == True):\n        \"A\"\n        if (trust >= 3):\n            \"B\"\n            return\n        else:\n            \"C\"\n            return\n    else:\n        \"D\"\n        return\n    return\n"));
+        // A test the builder cannot read, and Custom Code, stay partial.
+        assert!(partial(
+            "label scene_one:\n    if missing_flag == 4:\n        \"A\"\n    return\n"
+        ));
+        assert!(partial("label scene_one:\n    if (flag == True):\n        $ trust = trust * 2 + len(\"x\")\n    return\n"));
     }
 
     #[test]
