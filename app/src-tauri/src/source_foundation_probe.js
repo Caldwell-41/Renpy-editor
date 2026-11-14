@@ -67,7 +67,10 @@
     details.stage = 'complete'; details.passed = true;
   } catch (error) {
     details.passed = false; details.error = String(error);
-    details.failureState = { status: document.querySelector('#app-status')?.textContent, text: document.querySelector('.scene-workspace')?.textContent?.slice(0, 1500), buttons: [...document.querySelectorAll('button')].map(b => ({ text: b.textContent, disabled: b.disabled })).slice(0, 60) };
+    details.failureState = { status: document.querySelector('#app-status')?.textContent, text: document.querySelector('.scene-workspace')?.textContent?.slice(0, 1500), buttons: [...document.querySelectorAll('button')].map(b => ({ text: b.textContent, disabled: b.disabled })).slice(0, 60),
+      header: [...document.querySelectorAll('.app-header [data-history]')].map(b => ({ history: b.dataset.history, label: b.getAttribute('aria-label'), disabled: b.getAttribute('aria-disabled') })) };
+    // Core's history beside the header's, so a stale header shows apart from a lost entry.
+    if (project) details.failureState.history = await read('history.state', { sessionId: project.sessionId }).catch(e => String(e));
   }
   await call('probe.runtimeUiReport', details);
 })();

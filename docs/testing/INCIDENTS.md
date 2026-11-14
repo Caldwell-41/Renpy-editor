@@ -1375,3 +1375,27 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   5 of 5. Without the delay, the fixed fixture passed 10 of 10 runs on macOS.
 - **Evidence:** issue #170, Linux runs [42371963578](https://github.com/Caldwell-41/Renpy-editor/actions/runs/42371963578)
   and [42372623332](https://github.com/Caldwell-41/Renpy-editor/actions/runs/42372623332).
+
+## H94. Header Redo stays disabled after Undo while core still has the redo entry
+
+- **Class/search:** product, demonstrated on Windows native and reproduced in real
+  Chromium with real core; `source-foundation`, "Header redo is unavailable",
+  "Header undo is unavailable", `refreshHistory`, `history.state`, `RUNTIME_BUSY`,
+  `retryableRead`, `with_service`.
+- **Cause:** the native host refuses a request with `RUNTIME_BUSY` while another one
+  holds the service. The runtime probe reads `source.open` while the app reads
+  `history.state` after Undo. The app retried busy reads only from a list that left
+  out `history.state`, so `refreshHistory` showed an empty history and dimmed Undo and
+  Redo until the next write. Core still had the redo entry, and no draft step was
+  recorded. Slower Windows IPC made the overlap more likely, so the Mac passed.
+- **Correction:** `value()` retries `history.state`, `project.listRecent`,
+  `scene.recovery` and `scene.validateAssignment` on `RUNTIME_BUSY`, like the other
+  reads. The source-foundation probe's failure report now includes core's
+  `history.state` and the header buttons' state.
+- **Regression:** the Story case "Undo of a nested beat keeps Redo when the host
+  refuses a history read as busy" refuses the app's next two `history.state` reads.
+- **Verification:** the native probe ran in Chromium against real core, with each
+  overlapping request refused as busy and 10 ms of added latency. Before the fix,
+  9 of 15 runs failed with "Header redo is unavailable" or "Header undo is
+  unavailable". After it, none of 8 runs did.
+- **Evidence:** issue #120, PR #185.

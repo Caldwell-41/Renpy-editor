@@ -805,6 +805,8 @@ The renderer retries only specific read requests refused with `RUNTIME_BUSY` bef
 service checkout, for at most 40 retries at 25 ms. Payload/session identity never
 changes. Writes, trust grants and process starts are never replayed. This covers
 Source opening/status observations overlapping normal background read consumers.
+It also covers the header's `history.state` read, so a busy refusal after Undo or Redo
+cannot dim both buttons while core still holds the entries (H94).
 
 Source retention/observation, project status/flush, device preference reads/writes and
 scene/authoring/flow observations share one renderer request lane. Selection persistence
