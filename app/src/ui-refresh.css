@@ -1269,6 +1269,7 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .story-rule-actions{justify-content:flex-start;margin-bottom:2px}
 .story-condition-problems{display:flex;flex-direction:column;gap:3px;margin:0 0 8px;padding:0;list-style:none;font-size:11.5px;line-height:1.45;color:var(--text-primary)}
 .story-condition-problems b,.story-problem-mark{color:var(--status-warning)}
+.story-condition-problems b{margin-right:5px}
 .story-lane.story-lane-warn,.story-reel-copy.story-lane-warn,.story-branch-test.story-branch-warn,.story-branch-segment.story-branch-warn{color:var(--status-warning)}
 /* D1: a draft whose beat moved to another branch links to it there. */
 .story-conflict-link{margin:6px 0 0;font-size:11.5px}
@@ -1279,4 +1280,5 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .story-place-note{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin:2px 0 4px;padding:2px 0 2px 10px;border-left:2px solid var(--status-warning);font-size:12px;line-height:1.5;color:var(--text-secondary)}
 .story-place-note[hidden]{display:none}
 .story-place-note>p{margin:0}
+.story-place-note>.button{align-self:flex-start;margin:0}
 .story-place-note b{color:var(--text-primary);font-weight:600}

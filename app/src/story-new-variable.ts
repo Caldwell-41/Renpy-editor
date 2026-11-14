@@ -39,7 +39,7 @@ export function variableMenu(select: HTMLSelectElement, options: { readonly labe
     const variables = options.variables(), chosen = variables.find(item => item.id === select.value);
     // A variable that left the project keeps its select's own caption, such as "Missing Variable".
     const name = chosen?.technicalName ?? (select.value ? select.selectedOptions[0]?.textContent ?? undefined : undefined);
-    summary.replaceChildren(variableBadge(chosen), element("span", name ? "story-variable-name" : "story-variable-name story-placeholder", name ?? "Choose a variable"), element("span", "story-caret", "▾"));
+    summary.replaceChildren(...name ? [variableBadge(chosen)] : [], element("span", name ? "story-variable-name" : "story-variable-name story-placeholder", name ?? "Choose a variable"), element("span", "story-caret", "▾"));
     summary.setAttribute("aria-label", `${options.label}: ${name ?? "none chosen"}`);
     list.replaceChildren();
     for (const item of variables) {
