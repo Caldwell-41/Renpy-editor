@@ -380,10 +380,11 @@ export interface SceneActions {
   /** Called when the number of pending beat drafts changes. */
   readonly draftsChanged?: () => void;
   readonly validateAssignment?: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision">) => Promise<AssignmentDraftValidation>;
-  /** `drafts` names the beat drafts the command commits or discards; core joins their draft steps. */
-  readonly apply: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision">, drafts?: readonly string[]) => Promise<SceneWorkspace>;
+  /** `drafts` names the beat drafts the command commits or discards; core joins their draft steps.
+   *  `beat` is the number Tracks shows for the beat it edits, which its history entry names. */
+  readonly apply: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision">, drafts?: readonly string[], beat?: string) => Promise<SceneWorkspace>;
   /** Story Save: accepts every beat draft command in one transaction, or none. `drafts[i]` is the draft `commands[i]` saves. */
-  readonly saveDrafts?: (commands: readonly SceneCommand[], expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision">, drafts: readonly string[]) => Promise<SceneWorkspace>;
+  readonly saveDrafts?: (commands: readonly SceneCommand[], expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision">, drafts: readonly string[], beats?: readonly (string | null)[]) => Promise<SceneWorkspace>;
   /** Adds a draft step to the project history (ADR 0025). */
   readonly recordStep?: (step: DraftStepRecord) => Promise<void>;
   /** Reads the current workspace, so Story can refresh after a stale refusal. */
@@ -636,9 +637,10 @@ export function renderStoryView(
   let openText: { readonly draft: BeatDraft; readonly field: EventTarget; readonly stepId: string; timer?: ReturnType<typeof setTimeout> } | undefined;
   let openChange: string | undefined;
   const captureDraft = (draft: BeatDraft): DraftState => captureState(draft.panel, draft.editors());
+  // An existing beat's steps name it by its Tracks number; a new beat's name its scene.
   const stepName = (draft: BeatDraft, kind: "typing" | "change" | "new" | "cancel" | "discard"): string => {
-    const scene = model.scenes.find(item => item.id === draft.sceneId)?.displayName ?? "a scene", beat = draft.kind();
-    return `${kind === "new" ? `new ${beat} draft` : kind === "cancel" || kind === "discard" ? `${kind} of ${beat} draft` : `${beat} ${kind}`} in ${scene}`;
+    const scene = model.scenes.find(item => item.id === draft.sceneId), number = scene && draft.beatId ? beatNumbers(scene).get(draft.beatId) : undefined, beat = draft.kind();
+    return `${kind === "new" ? `new ${beat} draft` : kind === "cancel" || kind === "discard" ? `${kind} of ${beat} draft` : `${beat} ${kind}`} in ${number ? `beat ${number}` : scene?.displayName ?? "a scene"}`;
   };
   const startStep = (draft: BeatDraft, kind: Parameters<typeof stepName>[1], before: DraftState | undefined, after?: DraftState): string => {
     const stepId = `step:${++stepSequence}`;
@@ -806,6 +808,15 @@ export function renderStoryView(
   // `committed` is the beat draft a Commit saves. A removal discards the drafts inside
   // what it removes. Core joins both drafts' steps into this edit (ADR 0025).
   // With `staleStatus`, a stale refusal reloads Story and reports that status (ADR 0007: no retry).
+  // The number Tracks shows for the beat, branch or condition a command edits, for its
+  // history name (story-combined-status / header-v2: "dialogue edit in beat 06.2.1").
+  // A new beat has no number yet.
+  const historyBeat = (command: SceneCommand): string | undefined => {
+    const scene = model.scenes.find(item => item.id === command.sceneId); if (!scene) return undefined;
+    const node = command.node as NodeRef | undefined, groupId = node?.type === "condition" ? node.groupId : typeof command.groupId === "string" ? command.groupId : undefined;
+    const id = typeof command.beatId === "string" ? command.beatId : typeof command.branchId === "string" ? command.branchId : node?.type === "beat" ? node.beatId : groupId ? groupHeader(scene, groupId)?.id : undefined;
+    return id ? beatNumbers(scene).get(id) : undefined;
+  };
   const mutate = async (command: SceneCommand, after?: (before: SceneWorkspace, next: SceneWorkspace) => void, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision" | "authoringRevision"> = model, owner?: HTMLElement, committed?: BeatDraft, staleStatus?: string): Promise<boolean> => {
     if(disposed || actions.current?.() === false)return false;
     if (drafts().some(draft => draft !== owner && !owner?.contains(draft))) { actions.status("Complete or cancel the other edit first. Input retained.", "error"); focusDraft(); return false; }
@@ -816,7 +827,7 @@ export function renderStoryView(
     const unlock = lockStory();
     actions.status("Saving…");
     try {
-      const next = await actions.apply(command, expected, joined.map(draft => draft.id));
+      const next = await actions.apply(command, expected, joined.map(draft => draft.id), historyBeat(command));
       if (disposed || actions.current?.() === false) return false;
       model = next;
       forgetSteps(joined);
@@ -947,7 +958,7 @@ export function renderStoryView(
     const unlock = lockStory();
     actions.status("Saving…");
     try {
-      const next = await actions.saveDrafts(commands, expected, saving.map(draft => draft.id));
+      const next = await actions.saveDrafts(commands, expected, saving.map(draft => draft.id), commands.map(command => historyBeat(command) ?? null));
       if (disposed || actions.current?.() === false) return { kind: "blocked" };
       for (const [key, draft] of beatDrafts) if (saving.includes(draft)) { if (!draft.beatId) draft.panel.remove(); beatDrafts.delete(key); }
       forgetSteps(saving);

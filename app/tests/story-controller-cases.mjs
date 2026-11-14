@@ -1,5 +1,6 @@
 // Real production Story/Source/Branches DOM scenarios. All mutations use UI callbacks.
 // The full gate refuses missing cases until reviewed broad controls are implemented here.
+import {beatNumbers} from '../dist-tests/src/story-tracks.js';
 const names=[
  'Guarded Choice actual Story dispatch preserves exact neighbours',
  'Call destination actual Story dispatch preserves its return label',
@@ -20,6 +21,8 @@ const names=[
  'Undo of a nested beat keeps Redo when the host refuses a history read as busy',
 ];
 const scene=c=>c.workspace().scenes.find(s=>s.id===c.workspace().entrySceneId);
+// The number Tracks shows for a beat. History names an existing beat by it (header-v2).
+const numberIn=(c,sceneId,id)=>beatNumbers(c.workspace().scenes.find(s=>s.id===sceneId)).get(id);
 // The scene Story shows, read from the selected row in the actual scene tree.
 const shownScene=c=>{const name=c.document.querySelector('.tree-scene-row.selected .tree-scene-open')?.textContent;return c.workspace().scenes.find(s=>s.displayName===name)?.id;};
 // Story Combined: a beat is a Tracks or Reel column; its editor sits beside the stage.
@@ -550,11 +553,11 @@ export const storyCases={
   // One entry per beat whose bytes changed, the most recently edited on top. The Choice
   // draft was set back to its saved text, so it adds none.
   const undoName=()=>c.document.querySelector('.app-header [data-history="undo"]').getAttribute('aria-label');
-  c.assert.equal(undoName(),'Undo narration edit in Called scene');
+  c.assert.equal(undoName(),`Undo narration edit in beat ${numberIn(c,called.id,b.id)}`);
   await c.history('undo');await c.settle();const undone=await c.snapshot();
   c.assert.equal(c.sourceText(undone,called.sourcePath),c.sourceText(accepted,called.sourcePath),'Undo reverses B first');
   c.assert.equal(c.sourceText(undone,entry.sourcePath),c.sourceText(after,entry.sourcePath),'A stays saved');
-  c.assert.equal(undoName(),`Undo narration edit in ${entry.displayName}`);
+  c.assert.equal(undoName(),`Undo narration edit in beat ${numberIn(c,entry.id,a.id)}`);
   await c.history('undo');await c.settle();
   c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(removed)),'Two Undos revert the Story Save');
   // As the last case, the harness then reopens the project and checks these accepted bytes.
@@ -610,6 +613,7 @@ export const storyCases={
   await openScene(high.id);c.assert(lost());c.assert.equal(lost().querySelector('textarea').value,'Lost draft H');
   c.assert.equal(lost().querySelector('.story-conflict > p').textContent,'This beat is no longer in source.');c.assert.deepEqual(buttons(lost()),['Discard draft']);
   await c.click('Discard draft',lost());await c.settle();c.assert.equal(lost(),null);
+  // H has left source, so it has no number and its scene names it.
   c.assert.equal(undoName(),'Undo discard of narration draft in High ending');
   // Discard draft keeps source and removes only that draft. Undo brings it back with its comparison; neither writes.
   await openScene(low.id);const lowCard=await open(l.id);c.assert.equal(lowCard.querySelector('.story-conflict-source').textContent,'Source L changed');
@@ -617,7 +621,7 @@ export const storyCases={
   await c.wait(()=>c.document.querySelector('.preview-overlay')?.textContent.includes('Discarded draft L'));
   await c.click('Discard draft',lowCard);await c.settle();
   c.assert.equal(row(c,l.id).dataset.beatDraft,'false');c.assert.equal(card(c,l.id)?.querySelector('textarea').value,'Source L changed','The beat stays open on source');
-  c.assert.equal(undoName(),'Undo discard of narration draft in Low ending');
+  c.assert.equal(undoName(),`Undo discard of narration draft in beat ${numberIn(c,low.id,l.id)}`);
   await c.history('undo');await c.wait(()=>card(c,l.id)?.querySelector('textarea')?.value==='Discarded draft L');await c.settle();
   c.assert.equal(card(c,l.id)?.querySelector('.story-conflict-source').textContent,'Source L changed');c.assert.equal(row(c,l.id).dataset.beatConflict,'true');
   await c.history('redo');await c.wait(()=>findRow(c,l.id)?.dataset.beatDraft==='false');await c.settle();
@@ -651,7 +655,7 @@ export const storyCases={
   c.assert.equal(row(c,a.id).dataset.beatDraft,'false');c.assert.equal(row(c,a.id).dataset.beatConflict,undefined);
   await openScene(called.id);c.assert.equal(row(c,b.id).dataset.beatDraft,'true');c.assert.equal((await open(b.id)).querySelector('textarea').value,'Other draft B');
   // Override is one edit: Undo restores the source it replaced, without the draft, and Redo applies it again.
-  c.assert.equal(undoName(),`Undo narration edit in ${entry.displayName}`);
+  c.assert.equal(undoName(),`Undo narration edit in beat ${numberIn(c,entry.id,a.id)}`);
   await c.history('undo');await c.settle();c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(twice)));
   await c.wait(()=>shownScene(c)===entry.id&&findRow(c,a.id));c.assert.equal(row(c,a.id).dataset.beatDraft,'false');
   await c.history('redo');await c.settle();c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(overridden)));
@@ -951,7 +955,7 @@ export const storyCases={
   c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(before));
   // No input follows: Story shows the undone beat, and Redo stays available.
   await c.wait(()=>card(c,child.id)?.querySelector('textarea')?.value===child.payload.text);await c.settle();
-  c.assert.equal((await c.call('history.state')).redo?.name,`narration edit in ${s.displayName}`);
+  c.assert.equal((await c.call('history.state')).redo?.name,`narration edit in beat ${numberIn(c,s.id,child.id)}`);
   const redo=c.document.querySelector('.app-header [data-history="redo"]');c.assert.notEqual(redo.getAttribute('aria-disabled'),'true','Header Redo stays available after Undo');
   c.assert.equal(card(c,child.id).querySelector('.expanded-beat').dataset.unsubmitted,undefined,'Showing the undone beat starts no draft');
   await c.history('redo');await c.settle();

@@ -392,6 +392,10 @@ pub struct SceneCommandRequest {
     /// leave the project history when it succeeds (ADR 0025).
     #[serde(default)]
     pub drafts: Vec<String>,
+    /// The number Story shows for the beat the command edits, such as "06.2.1".
+    /// Its history entry names that beat instead of the scene.
+    #[serde(default)]
+    pub history_beat: Option<String>,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -945,8 +949,9 @@ impl AuthoringService {
     ) -> Result<SceneWorkspace, SceneError> {
         let command = request.command.clone();
         drafts::check_draft_ids(&request.drafts, drafts::MAX_SAVE_DRAFTS)?;
+        check_history_beat(request.history_beat.as_deref())?;
         let loaded = self.prepare_scene_command(project, project_id, &request, &command)?;
-        let label = history_label(&loaded.project, &command);
+        let label = history_label(&loaded.project, &command, request.history_beat.as_deref());
         let proposal = if drafts::is_draft_command(&command) {
             self.build_drafts(project, project_id, loaded, vec![command])
                 .map_err(SceneError::unindexed)?
@@ -5025,9 +5030,29 @@ fn changes_bytes(mutation: &FileMutation) -> bool {
     mutation.kind != MutationKind::ReplaceExisting || mutation.expected_bytes != mutation.proposed
 }
 
+/// The longest beat number Story may send for a history name.
+const MAX_HISTORY_BEAT: usize = 64;
+
+/// A beat number as Tracks shows it: "06", "06.2" or "07.2.1".
+pub(crate) fn check_history_beat(beat: Option<&str>) -> Result<(), SceneError> {
+    let Some(beat) = beat else { return Ok(()) };
+    let mut parts = beat.split('.');
+    let root = parts.next().unwrap_or_default();
+    let digits = |part: &str| !part.is_empty() && part.bytes().all(|b| b.is_ascii_digit());
+    if beat.len() > MAX_HISTORY_BEAT || root.len() < 2 || !digits(root) || !parts.all(digits) {
+        return Err(SceneError::InvalidPayload);
+    }
+    Ok(())
+}
+
 /// The project history name and item for a Story command, for example
-/// "dialogue edit in Arrival" revealing the edited beat.
-fn history_label(project: &ProjectMetadata, command: &SceneCommand) -> HistoryLabel {
+/// "dialogue edit in Arrival" revealing the edited beat. With the number Story
+/// shows for the beat, the name says "dialogue edit in beat 06.2.1".
+pub(crate) fn history_label(
+    project: &ProjectMetadata,
+    command: &SceneCommand,
+    beat: Option<&str>,
+) -> HistoryLabel {
     let scene = |id: &str| {
         project
             .scenes
@@ -5050,8 +5075,9 @@ fn history_label(project: &ProjectMetadata, command: &SceneCommand) -> HistoryLa
         beat_id: None,
     };
     let in_scene = |name: &str, scene_id: &str, beat_id: Option<&String>| {
+        let place = beat.map_or_else(|| scene(scene_id), |number| format!("beat {number}"));
         HistoryLabel::new(
-            format!("{name} in {}", scene(scene_id)),
+            format!("{name} in {place}"),
             HistoryItem::beat(scene_id, beat_id.cloned()),
         )
     };
@@ -5625,6 +5651,7 @@ mod tests {
                 &self.project_id,
                 SceneCommandRequest {
                     drafts: Vec::new(),
+                    history_beat: None,
                     expected_project_revision: workspace.project_revision.clone(),
                     expected_source_map_revision: workspace.source_map_revision.clone(),
                     expected_authoring_revision: None,

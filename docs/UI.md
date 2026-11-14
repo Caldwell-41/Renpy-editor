@@ -792,7 +792,12 @@ Their tooltip and accessible name name the next edit and the shortcut, for examp
 "Undo button resize ⌘Z". With nothing to undo or redo, a button is dimmed, does
 nothing and reads "Nothing to undo" or "Nothing to redo". It stays in the Tab order
 (`aria-disabled`, not `disabled`). After Undo the bottom status bar reports it, for
-example "Undone: button resize", until the next edit or view.
+example "Undone: button resize", until the next edit or view. A Story edit to an existing
+beat, branch or condition names it by the number Tracks shows, as `story-combined-status`
+(`header-v2`) does: "Undone: dialogue edit in beat 06.2.1". Story sends that number with
+the command, and core puts it in the name. A beat that is not yet added, or that has
+left source, has no number, so its edits name the scene: "new dialogue draft in Arrival".
+Edits outside Story keep their names.
 
 Undo opens the edit's workspace and selects its item: the beat, screen element,
 Source file, prompt action or reference record. If the item no longer exists,

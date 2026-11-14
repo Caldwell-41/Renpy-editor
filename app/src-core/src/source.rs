@@ -2106,6 +2106,7 @@ mod tests {
                 &fixture.project_id,
                 SceneCommandRequest {
                     drafts: Vec::new(),
+                    history_beat: None,
                     expected_project_revision: workspace.project_revision.clone(),
                     expected_source_map_revision: workspace.source_map_revision.clone(),
                     expected_authoring_revision: None,
@@ -2210,6 +2211,7 @@ mod tests {
                 &fixture.project_id,
                 SceneCommandRequest {
                     drafts: Vec::new(),
+                    history_beat: None,
                     expected_project_revision: workspace.project_revision.clone(),
                     expected_source_map_revision: workspace.source_map_revision.clone(),
                     expected_authoring_revision: None,
@@ -2601,6 +2603,7 @@ mod tests {
             &fixture.project_id,
             SceneCommandRequest {
                 drafts: Vec::new(),
+                history_beat: None,
                 expected_project_revision: workspace.project_revision,
                 expected_source_map_revision: workspace.source_map_revision,
                 expected_authoring_revision: None,

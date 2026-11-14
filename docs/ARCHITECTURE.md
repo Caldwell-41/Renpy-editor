@@ -296,7 +296,9 @@ file/scene while allowing unrelated scenes to remain editable when safe.
 Core's `history` module keeps the [project history](../GLOSSARY.md#language). Every
 commit records the edit's name and the item it changed. `history.draftStep` adds a
 beat draft's step, and `scene.apply` and `scene.saveDrafts` name the drafts whose
-steps they join. `history.undo` and `history.redo` are the only Undo routes, and
+steps they join. Their optional `historyBeat` and `historyBeats` give the number Story
+shows for each command's beat, such as `06.2.1`; core checks its form and names the
+entry by it. `history.undo` and `history.redo` are the only Undo routes, and
 `history.state` gives the header the next names. The shell owns the one Undo command
 ([Story Undo](UI.md#story-undo)).
 

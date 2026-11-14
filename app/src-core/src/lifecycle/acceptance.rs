@@ -54,6 +54,7 @@ pub(crate) fn apply(service: &LifecycleService, command: Command) -> crate::scen
     service
         .scene_apply(SceneCommandRequest {
             drafts: Vec::new(),
+            history_beat: None,
             expected_project_revision: workspace.project_revision,
             expected_source_map_revision: workspace.source_map_revision,
             expected_authoring_revision: None,

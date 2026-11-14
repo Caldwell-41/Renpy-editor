@@ -6,7 +6,7 @@ export function withBodies(model: SceneWorkspace): SceneWorkspace {
 /** Story for presentation tests: each model it shows, including accepted results, gets
  *  bodies from `withBodies`. Hand-built beats then never carry stale bodies. */
 export const renderStoryView: typeof renderStory = (host, tree, model, actions, beatId) => {
-  const wrap = (next: SceneActions): SceneActions => ({ ...next, apply: async (command, expected) => withBodies(await next.apply(command, expected)) });
+  const wrap = (next: SceneActions): SceneActions => ({ ...next, apply: async (command, expected, ...rest) => withBodies(await next.apply(command, expected, ...rest)) });
   const view = renderStory(host, tree, withBodies(model), wrap(actions), beatId);
   return { ...view, update: (next, nextActions, selected) => view.update(withBodies(next), wrap(nextActions), selected) };
 };

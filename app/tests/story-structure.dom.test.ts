@@ -184,6 +184,18 @@ test("Move to opens on the beat's own place with the next place after it chosen,
   await s.close();
 });
 
+test("a beat's history names use its number as Tracks shows it; a new beat keeps its scene", async () => {
+  const fixture = storyFixture(3), names: string[] = [], sent: [string, string | undefined][] = [];
+  const s = mountStory(fixture, { recordStep: async step => { names.push(step.name); }, apply: async (command, _expected, _drafts, beat) => { sent.push([command.type, beat]); return fixture; } });
+  selectBeat(s.host, "a", "if"); type(textarea(s.host), "Edited");
+  button(storyEditor(s.host), "Commit Beat").click(); await tick();
+  assert.equal(names[0], "narration typing in beat 01.1");
+  assert.deepEqual(sent, [["updateBodyBeat", "01.1"]]);
+  button(s.host, "+ Add beat").click(); pickKind(s.host, "Narration");
+  assert.equal(names.at(-1), "new narration draft in Arrival");
+  await s.close();
+});
+
 test("a write refused because the scene ends with Custom Code shows core's reason alone", async () => {
   const reason = "Can't make this change. This scene ends with Custom Code that may leave it, so a beat after it could run on into the next scene. Add a Return or Jump after the Custom Code first, or edit the scene in Source.";
   const s = setup(async () => { throw Object.assign(Error(reason), { code: "CUSTOM_CODE_ENDING" }); });

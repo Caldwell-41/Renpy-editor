@@ -111,7 +111,8 @@ try{
  button('Cancel',document.querySelector('.tree-inline'));await settle();
  stage('an open Story form stops Undo with its input kept and the existing message');
 
- // Beat draft steps (#113). A is the root narration, B the dialogue in the true branch.
+ // Beat draft steps (#113). A is the root narration, 03; B the dialogue in the true branch, 01.1.
+ // History names an existing beat by its Tracks number and a new beat by its scene (header-v2).
  const current=(await call('scene.list')).scenes[0],path=current.sourcePath,sceneName=current.displayName;
  const beatA=current.beats.find(b=>b.payload.type==='narration'),beatB=current.beats.find(b=>b.payload.type==='dialogue'&&b.payload.text.startsWith('True'));assert(beatA&&beatB,'fixture beats A and B');
  // Tracks shows a beat as a column; its editor sits beside the stage. B needs its branch open.
@@ -129,11 +130,11 @@ try{
 
  // A beat field change is a draft step. Cmd/Ctrl+Z in the focused field and the header Undo reverse it the same way, and neither writes.
  let typed=await type(beatA.id,'Draft A typed');
- await wait(()=>named('undo')===`Undo narration typing in ${sceneName}`,'the header names the typing step');assert.equal(marked(beatA.id),true);
+ await wait(()=>named('undo')==='Undo narration typing in beat 03','the header names the typing step');assert.equal(marked(beatA.id),true);
  assert.equal(await step(()=>{event=key(typed);},'Cmd/Ctrl+Z in a beat field'),'committed');assert.equal(event.defaultPrevented,true,'the beat field gives Cmd/Ctrl+Z to project Undo');
  const reversed=async()=>({text:(await open(beatA.id)).value,marked:marked(beatA.id),status:message(),redo:named('redo'),workspace:workspace()});
  const byShortcut=await reversed();
- assert.deepEqual(byShortcut,{text:beatA.payload.text,marked:false,status:`Undone: narration typing in ${sceneName}`,redo:`Redo narration typing in ${sceneName}`,workspace:'Story'});
+ assert.deepEqual(byShortcut,{text:beatA.payload.text,marked:false,status:'Undone: narration typing in beat 03',redo:'Redo narration typing in beat 03',workspace:'Story'});
  assert.deepEqual(await disk(),files,'Undo of a draft step writes nothing');
  assert.equal(await shortcut('redo'),'committed');assert.equal((await open(beatA.id)).value,'Draft A typed');assert.equal(marked(beatA.id),true);
  assert.deepEqual(await disk(),files,'Redo of a draft step writes nothing');
@@ -164,27 +165,27 @@ try{
  // Type in A, commit an edit in B, then return to A without editing: Undo reverses B, then A's typing.
  const beforeAB=(await historyNow()).undo;await type(beatA.id,'A typing');
  await type(beatB.id,'B committed');button('Commit Beat',editorFor(beatB.id));await wait(async()=>(await source(path)).includes('B committed'),'B commit');await settle();
- const afterCommit=await historyNow();assert.equal(afterCommit.undo.name,`dialogue edit in ${sceneName}`);
+ const afterCommit=await historyNow();assert.equal(afterCommit.undo.name,'dialogue edit in beat 01.1');
  for(const name of ['Screens','Branches']){button(name);await wait(()=>workspace()===name,name);await settle();}
  button('Story');await wait(()=>workspace()==='Story'&&row(beatA.id),'Story');await settle();
  assert.equal((await open(beatA.id)).value,'A typing','A keeps its draft through navigation');
  assert.deepEqual(await historyNow(),afterCommit,'selecting beats and changing workspace add no entries');
  assert.equal(await header('undo'),'committed');assert.equal(await source(path),original,'Undo reverses B first, to the exact bytes');
  assert.equal((await open(beatA.id)).value,'A typing');const beforeA=await disk();
- assert.equal(await header('undo'),'committed');assert.equal(message(),`Undone: narration typing in ${sceneName}`);
+ assert.equal(await header('undo'),'committed');assert.equal(message(),'Undone: narration typing in beat 03');
  assert.equal((await open(beatA.id)).value,beatA.payload.text);assert.deepEqual(await disk(),beforeA);assert.deepEqual((await historyNow()).undo,beforeAB);
  stage('type in A, commit B, return to A: Undo reverses B, then the typing in A');
 
  // Commit joins a beat's steps into one edit on top; Story Save adds one per beat, the latest edited on top. Neither clears earlier history.
  const earlier=(await historyNow()).undo;typed=await type(beatA.id,'Joined one');typed.blur();input(typed,'Joined one two');await settle();
  button('Commit Beat',editorFor(beatA.id));await wait(async()=>(await source(path)).includes('Joined one two'),'A commit');await settle();
- assert.equal(named('undo'),`Undo narration edit in ${sceneName}`);assert.equal(await header('undo'),'committed');
+ assert.equal(named('undo'),'Undo narration edit in beat 03');assert.equal(await header('undo'),'committed');
  assert.equal(await source(path),original,'one Undo reverses the whole beat');assert.deepEqual((await historyNow()).undo,earlier,'Commit joined both typing steps');
  await type(beatA.id,'Saved A');await type(beatB.id,'Saved B');
  await headerSave(async()=>{const text=await source(path);return text.includes('Saved A')&&text.includes('Saved B');});const saved=await source(path);
- assert.equal(named('undo'),`Undo dialogue edit in ${sceneName}`,'the most recently edited beat is on top');
+ assert.equal(named('undo'),'Undo dialogue edit in beat 01.1','the most recently edited beat is on top');
  assert.equal(await header('undo'),'committed');let text=await source(path);assert(text.includes('Saved A')&&!text.includes('Saved B'),'Undo reverses only B');
- assert.equal(named('undo'),`Undo narration edit in ${sceneName}`);assert.equal(await header('undo'),'committed');assert.equal(await source(path),original);
+ assert.equal(named('undo'),'Undo narration edit in beat 03');assert.equal(await header('undo'),'committed');assert.equal(await source(path),original);
  assert.deepEqual((await historyNow()).undo,earlier,'Story Save clears no earlier history');
  for(let i=0;i<2;i+=1)assert.equal(await header('redo'),'committed');assert.equal(await source(path),saved);
  for(let i=0;i<2;i+=1)assert.equal(await header('undo'),'committed');assert.equal(await source(path),original);
@@ -192,7 +193,7 @@ try{
 
  // Cancel of an existing beat's draft is an edit too. Undo of a beat delete then brings back the beat, not the draft it discarded.
  await type(beatA.id,'Discarded A');button('Cancel',editorFor(beatA.id));await settle();
- assert.equal(marked(beatA.id),false);assert.equal(named('undo'),`Undo cancel of narration draft in ${sceneName}`);
+ assert.equal(marked(beatA.id),false);assert.equal(named('undo'),'Undo cancel of narration draft in beat 03');
  assert.equal(await header('undo'),'committed');assert.equal((await open(beatA.id)).value,'Discarded A');assert.equal(marked(beatA.id),true);
  await open(beatA.id);button('Delete',editorFor(beatA.id).querySelector('.story-beat-menu'));button('Delete this Beat',document.querySelector('.story-operation[aria-label="Delete Beat"]'));
  await wait(async()=>!(await source(path)).includes('Foundation continuation'),'delete');await settle();
@@ -210,7 +211,7 @@ try{
  assert.equal(await header('undo'),'committed');assert.equal(picked().value,'showNormally','a Picked options change is one step');
  assert.equal(await header('undo'),'committed');assert.equal(newBeat(),null);await wait(()=>status()==='1 unsaved beat draft. Ready to save.','Undo fixes the refusal');assert.deepEqual(await disk(),quiet);
  await headerSave(async()=>(await source(path)).includes('Refused save A'));assert.equal(status(),'Saved');
- assert.equal(named('undo'),`Undo narration edit in ${sceneName}`);assert.equal(await header('undo'),'committed');assert.equal(await source(path),original);
+ assert.equal(named('undo'),'Undo narration edit in beat 03');assert.equal(await header('undo'),'committed');assert.equal(await source(path),original);
  stage('a refused Story Save keeps the drafts and their steps; Undo repairs the draft and the next Save succeeds');
 
  // Source draft steps (#155), typed through the Source editor. The Source workspace opens the file and selects what changed.
@@ -288,7 +289,7 @@ try{
  button('Close settings');await wait(()=>!document.querySelector('.settings-overlay'),'Settings closed');
  const edited=await storyEdit('Foundation continuation, after the prompt');
  assert.equal(await header('undo'),'committed');await wait(()=>workspace()==='Story'&&document.querySelector('.story-track-column'),'Story opens');
- assert(!(await source(edited.scene.sourcePath)).includes('after the prompt'),'Undo reverses the Story edit');assert.match(message(),/^Undone: narration edit in /);
+ assert(!(await source(edited.scene.sourcePath)).includes('after the prompt'),'Undo reverses the Story edit');assert.equal(message(),'Undone: narration edit in beat 03');
  assert.equal(await header('undo'),'committed');
  await wait(()=>document.querySelector('.settings-overlay [name="systemPrompt"]')&&document.querySelector('.prompt-preparation')?.dataset.busy==='false','Settings reopens at System prompts');
  assert.equal(document.querySelector('[name="assistanceAction"]').value,'rewriteDialogue');assert.equal(document.querySelector('[name="systemPrompt"]').value,baseline);assert.equal((await call('prompts.list')).customized,false);

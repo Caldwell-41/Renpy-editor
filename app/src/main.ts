@@ -850,12 +850,13 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
         expectedAuthoringRevision: expected.authoringRevision,
         command,
       }),
-      saveDrafts: async (commands, expected, drafts) => runAuthoringOperation(project, operationScopes.storySave, () => projectValue<SceneWorkspace>(project, "scene.saveDrafts", {
+      saveDrafts: async (commands, expected, drafts, beats = []) => runAuthoringOperation(project, operationScopes.storySave, () => projectValue<SceneWorkspace>(project, "scene.saveDrafts", {
         expectedProjectRevision: expected.projectRevision,
         expectedSourceMapRevision: expected.sourceMapRevision,
         expectedAuthoringRevision: expected.authoringRevision,
         commands,
         drafts,
+        ...(beats.some(beat => beat !== null) ? { historyBeats: beats } : {}),
       })),
       // A draft step writes nothing, so it takes no authoring turn; the request lane
       // still delivers it before the Commit, Save or Undo that follows.
@@ -875,7 +876,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
           return await projectValue<SceneWorkspace>(project, "scene.list");
         } finally { finishAuthoringCompletion(operationToken); void refreshPersistenceStatus(project, viewGeneration); }
       },
-      apply: async (command: SceneCommand, expected, drafts = []) => {
+      apply: async (command: SceneCommand, expected, drafts = [], beat?: string) => {
         const operationToken = beginAuthoringCompletion(project, command);
         if (!operationToken) throw new Error("Another persistence operation is still in progress.");
         try {
@@ -885,6 +886,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
             expectedAuthoringRevision: expected.authoringRevision,
             command,
             ...(drafts.length ? { drafts } : {}),
+            ...(beat ? { historyBeat: beat } : {}),
           });
         } finally { finishAuthoringCompletion(operationToken); }
       },
