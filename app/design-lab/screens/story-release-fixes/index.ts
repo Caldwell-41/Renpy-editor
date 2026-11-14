@@ -80,15 +80,30 @@ const branches: Branch[] = [
 ];
 const branchName = (b: Branch) => b.test ? `${b.word} ${b.test}` : b.word;
 
+// a-v2 shows two chapters; the v1 drafts show one list without the a-v2-only scene.
 const scenes = [
-  { id: 'service', name: 'The last service', refs: [] as string[] },
-  { id: 'depot', name: 'Morning at the depot', refs: [] as string[] },
-  { id: 'platform', name: 'Platform 4', refs: ['The last service · 07 Jump', 'Morning at the depot · 05 Call scene'] },
-  { id: 'yard', name: 'Depot yard', refs: [] as string[], unknown: 'The last service · 09 Custom Code' },
+  { id: 'service', name: 'The last service', chapter: 'Chapter 1', refs: [] as string[] },
+  { id: 'depot', name: 'Morning at the depot', chapter: 'Chapter 1', refs: [] as string[] },
+  { id: 'platform', name: 'Platform 4', chapter: 'Chapter 1', refs: ['The last service · 07 Jump', 'Morning at the depot · 05 Call scene'] },
+  { id: 'yard', name: 'Depot yard', chapter: 'Chapter 2', refs: [] as string[], unknown: 'The last service · 09 Custom Code' },
+  { id: 'night', name: 'The night shift', chapter: 'Chapter 2', refs: [] as string[], v2Only: true },
 ];
 
-export function mountFixes(host: HTMLElement, context: LabContext, initial: Variant) {
+/** Revision 'a-v2' combines Kris's review picks: A for most items, B's Move to list and B's Transition help (reworded),
+ *  plus the review refinements. It has no A/B compare. */
+const combined: Partial<Record<State, string>> = {
+  diagnostics: 'A, red errors on the branch, "branch" wording',
+  'move-protected': 'B, region and current place listed',
+  'delete-scene': 'A, tidied refusal, chapters in the scene list',
+  transition: 'B, help reworded',
+  'screen-beat-changed': 'Place changed since Screens, respaced',
+};
+export function mountFixes(host: HTMLElement, context: LabContext, initial: Variant, revision = `${initial}-v1`) {
   let variant = initial;
+  const v2 = () => variant === 'a' && revision === 'a-v2';
+  // a-v2 names the branch instead of "test" and says what the builder can't do.
+  const reasonOf = (b: Branch) => v2() && b.key === 'type' ? 'destination is text, and ≥ only compares numbers.' : b.reason!;
+  const needChanges = (n: number) => v2() ? `${n} ${n === 1 ? 'branch' : 'branches'} to fix` : `${n} ${n === 1 ? 'test needs' : 'tests need'} changes`;
   let state = context.state as State;
   const compact = () => host.clientWidth <= 640;
 
@@ -99,7 +114,7 @@ export function mountFixes(host: HTMLElement, context: LabContext, initial: Vari
   let newVar = { name: '', type: 'int' as VarType, start: '0', error: '' };
   let setVar = '', addAt = '', highlight = 'Dialogue';
   let movePick = '', moveFocus = '', placeFor: 'move' | 'screen' = 'move';
-  let scenesOpen = false, confirming = '', refused = '';
+  let scenesOpen = false, confirming = '', refused = '', collapsed = new Set<string>();
   let transition: 'dissolve' | 'fade' = 'fade';
   let draftText = '', resolved = '';
   let screenPlace = '', screenName = 'timetable';
@@ -108,7 +123,7 @@ export function mountFixes(host: HTMLElement, context: LabContext, initial: Vari
     message = ''; messageError = false; dialog = ''; fixed = new Set(); drafted = new Map(); pressed = 0; listOpen = ''; newVarFor = ''; scrollToEnd = state === 'moved-draft';
     variables = state === 'set-variable' ? [] : [{ name: 'has_ticket', type: 'bool' }, { name: 'trust', type: 'int' }, { name: 'fare', type: 'decimal' }, { name: 'destination', type: 'string' }];
     newVar = { name: '', type: 'int', start: '0', error: '' }; setVar = ''; addAt = ''; highlight = 'Dialogue';
-    movePick = ''; moveFocus = ''; placeFor = 'move'; scenesOpen = false; confirming = ''; refused = '';
+    movePick = ''; moveFocus = ''; placeFor = 'move'; scenesOpen = false; confirming = ''; refused = ''; collapsed = new Set();
     transition = 'fade'; draftText = 'Keep your ticket. Some doors only open once, and this one is closing.'; resolved = '';
     screenPlace = state === 'screen-beat' ? 'Before 06 Narration' : ''; screenName = 'timetable';
     if (state === 'set-variable') listOpen = 'set';
@@ -123,9 +138,9 @@ export function mountFixes(host: HTMLElement, context: LabContext, initial: Vari
     switch (state) {
       case 'diagnostics': {
         const open = problems(), b = branches[pressed]!;
-        const flow = variant === 'a' && open.length ? `${open.length} ${open.length === 1 ? 'test needs' : 'tests need'} changes` : 'Condition · If has_ticket is true';
+        const flow = variant === 'a' && open.length ? needChanges(open.length) : 'Condition · If has_ticket is true';
         const inside = b.key === 'if' ? [col('06.1', 'Dialogue', 2, 'Eli: Keep your ticket. Some doors only open once.', { arm: 1, rail: 'If has_ticket is true' }), end('End of "If has_ticket is true"', 1)] : [end(`End of "${branchName(b)}"`, b.arm)];
-        return [...plain, col('06', 'Condition', 4, flow, { warn: variant === 'a' && open.length ? 4 : undefined, mark: variant === 'b' && open.length ? '!' : undefined, title: open.map(p => `${branchName(p)}: ${p.reason}`).join('\n') }), ...inside, col('07', 'Narration', 2, 'The doors close behind them.'), end('End of scene')];
+        return [...plain, col('06', 'Condition', 4, flow, { warn: variant === 'a' && open.length ? 4 : undefined, mark: variant === 'b' && open.length ? '!' : undefined, title: open.map(p => `${branchName(p)}: ${reasonOf(p)}`).join('\n') }), ...inside, col('07', 'Narration', 2, 'The doors close behind them.'), end('End of scene')];
       }
       case 'set-variable': return [...plain.slice(0, 1), col('New', 'Set variable', 4, setVar ? `${setVar} = …` : 'Set variable', { mark: '*' }), plain[1]!, end('End of scene')];
       case 'protected': case 'move-protected': return protectedCols();
@@ -200,7 +215,10 @@ export function mountFixes(host: HTMLElement, context: LabContext, initial: Vari
     if (variant === 'a') {
       const next = b.key === 'missing' ? 'Create it, or change the test in Source.' : 'Compare it with = or ≠, or change the test in Source.';
       const actions = b.key === 'missing' ? `${button('Create ticket_count…', 'new-variable', 'data-list="missing" data-name="ticket_count"')}${button('Edit in Source', 'noop')}` : button('Edit in Source', 'noop');
-      return `${code(b.code)}<p class="srf-diag" id="srf-${b.key}-reason"><b>${escape(b.reason!)}</b> ${next} The test stays as written until then.</p><div class="sdc-row">${actions}</div>`;
+      const id = `srf-${b.key}-reason`;
+      const nextV2 = b.key === 'missing' ? 'Create it, or change this line in Source.' : 'Use = or ≠ in Source.';
+      if (v2()) return `<code class="sc-test-code srf-test-invalid" aria-invalid="true" aria-describedby="${id}">${escape(b.code)}</code><p class="srf-field-error" id="${id}">${escape(reasonOf(b))} ${nextV2} Until then, the builder can't edit this branch.</p><div class="sdc-row">${actions}</div>`;
+      return `${code(b.code)}<p class="srf-diag" id="${id}"><b>${escape(b.reason!)}</b> ${next} The test stays as written until then.</p><div class="sdc-row">${actions}</div>`;
     }
     if (b.key === 'missing') return ruleRow(b, undefined, 'ticket_count', '=', '2', { variable: 'ticket_count is not a project variable. Choose one, or create it.' }) + code(b.code);
     return ruleRow(b, variable, 'destination', '≥', '3', { op: 'destination is text. Choose = or ≠.' }) + code(b.code);
@@ -209,7 +227,7 @@ export function mountFixes(host: HTMLElement, context: LabContext, initial: Vari
     const open = problems();
     const caption = `<p class="srf-caption">Condition · If has_ticket is true · 4 branches / 1 beat</p>`;
     const summary = !open.length ? '' : variant === 'a'
-      ? `<ul class="srf-problems" aria-label="Tests that need changes">${open.map(p => `<li><b aria-hidden="true">!</b> <span>${escape(branchName(p))}: ${escape(p.reason!)}</span></li>`).join('')}</ul>`
+      ? `<ul class="srf-problems" aria-label="${v2() ? 'Branches' : 'Tests'} that need changes">${open.map(p => `<li><b aria-hidden="true">!</b> <span>${escape(branchName(p))}: ${escape(reasonOf(p))}</span></li>`).join('')}</ul>`
       : `<p class="srf-problem-line"><b aria-hidden="true">!</b> ${open.length} ${open.length === 1 ? 'test needs' : 'tests need'} changes: ${open.map(p => `<button type="button" class="srf-link" data-action="jump-branch" data-branch="${p.key}">${escape(branchName(p))}</button>`).join(', ')}</p>`;
     return `<div class="sdc-editor-heading scs-editor-heading"><strong>06 · Condition</strong>${drafted.size ? '<span class="scs-editor-state">* Draft</span>' : ''}</div><p class="scs-trail">The last service</p>${caption}${summary}
       ${branches.map((b, i) => `<section class="sc-branch srf-branch" data-arm="${b.arm}" data-branch="${b.key}" tabindex="-1" aria-label="${escape(branchName(b))}"><div class="sc-branch-head"><strong>${b.word}${b.reason && open.includes(b) ? ' <b class="srf-warn-text" aria-hidden="true">!</b>' : ''}</strong>${button('Open', 'press-branch', `class="button" data-index="${i}" aria-pressed="${pressed === i}"`)}${button('+ Beat', 'noop', `class="button" ${b.reason && open.includes(b) ? 'disabled' : ''}`)}</div>${testBlock(b)}</section>`).join('')}
@@ -218,9 +236,9 @@ export function mountFixes(host: HTMLElement, context: LabContext, initial: Vari
   function conditionPath() {
     const b = branches[pressed]!, open = problems();
     const caption = variant === 'a' && b.key !== 'if' && b.key !== 'else'
-      ? open.includes(b) ? `<span class="sc-condition-test srf-warn-text" title="${escape(b.reason!)}">${escape(b.test)} · ${b.key === 'missing' ? 'not a variable' : 'wrong type'}</span>` : `<span class="sc-condition-test">${escape(b.test)}</span>`
+      ? open.includes(b) ? `<span class="sc-condition-test srf-warn-text" title="${escape(reasonOf(b))}">${escape(b.test)} · ${b.key === 'missing' ? 'not a variable' : 'wrong type'}</span>` : `<span class="sc-condition-test">${escape(b.test)}</span>`
       : '<span class="sc-condition-test">has_ticket is true</span>';
-    const switches = branches.map((x, i) => { const bad = open.includes(x); return `<button type="button" class="button${bad ? ' srf-path-warn' : ''}" aria-pressed="${i === pressed}" data-action="press-branch" data-index="${i}" ${bad ? `title="${escape(x.reason!)}" aria-label="${escape(branchName(x))}, needs changes: ${escape(x.reason!)}"` : ''}>${x.word}${bad ? ' !' : ''}</button>`; }).join('');
+    const switches = branches.map((x, i) => { const bad = open.includes(x); return `<button type="button" class="button${bad ? ' srf-path-warn' : ''}" aria-pressed="${i === pressed}" data-action="press-branch" data-index="${i}" ${bad ? `title="${escape(reasonOf(x))}" aria-label="${escape(branchName(x))}, needs changes: ${escape(reasonOf(x))}"` : ''}>${x.word}${bad ? ' !' : ''}</button>`; }).join('');
     return `<strong class="sc-conditions-title">Branch path</strong><span class="sc-condition-groups scs-path-groups"><span class="sc-condition-group scs-path-group" data-arm="${b.arm}"><span class="scs-path-ref">06</span>${caption}<span class="sc-branch-switch">${switches}</span></span></span>`;
   }
 
@@ -260,9 +278,9 @@ export function mountFixes(host: HTMLElement, context: LabContext, initial: Vari
     const cols = list.filter((i): i is Col => i.type === 'beat' && i.id !== 'New');
     cols.forEach((c, n) => {
       const prev = cols[n - 1];
-      if (c.id === skip) { if (variant === 'b' && placeFor === 'move') out.push({ label: `${nameOf(c)} · here now`, kind: 'here' }); return; }
+      if (c.id === skip) { if ((variant === 'b' || v2()) && placeFor === 'move') out.push({ label: `${nameOf(c)} · here now`, kind: 'here' }); return; }
       if (!(skip && prev?.id === skip)) out.push({ label: `Before ${nameOf(c)}`, kind: 'pos', after: prev ? nameOf(prev) : undefined });
-      if (c.locked && variant === 'b' && placeFor === 'move') out.push({ label: `${nameOf(c)} · protected, stays in place`, kind: 'locked' });
+      if (c.locked && (variant === 'b' || v2()) && placeFor === 'move') out.push({ label: `${nameOf(c)} · protected, stays in place`, kind: 'locked' });
     });
     const last = cols.at(-1);
     if (!(skip && last?.id === skip)) out.push({ label: 'End of scene', kind: 'pos', after: last ? nameOf(last) : undefined });
@@ -306,16 +324,28 @@ export function mountFixes(host: HTMLElement, context: LabContext, initial: Vari
       const current = s.id === 'service';
       let extra = '';
       if (confirming === s.id) extra = `<div class="srf-confirm" role="group" aria-label="Delete ${escape(s.name)}"><p>Delete scene "${escape(s.name)}"? Undo restores it.</p><div class="sdc-row">${button('Cancel', 'cancel-delete')}${button('Delete scene', 'delete-scene', `class="srf-danger" data-scene="${s.id}"`)}</div></div>`;
-      if (refused === s.id && variant === 'a') { const r = refusalText(s.id); extra = `<div class="srf-refusal" role="alert" tabindex="-1"><p><b>${escape(r.lead)}</b> ${escape(r.intro)}</p><ul>${r.refs.map(l => `<li>${l}</li>`).join('')}</ul><p>${escape(r.tail)}</p><div class="sdc-row">${button('Close', 'cancel-delete')}</div></div>`; }
+      if (refused === s.id && v2()) {
+        // a-v2: one header line with the close, links as aligned scene/beat rows, one closing line.
+        const r = refusalText(s.id), refs = s.unknown ? [s.unknown] : s.refs;
+        const rows = refs.map(ref => { const [scene, beat] = ref.split(' · '); return `<button type="button" class="srf-ref-row" data-action="ref" data-ref="${escape(ref)}"><span>${escape(scene!)}</span><span>${escape(beat!)}</span></button>`; }).join('');
+        extra = `<div class="srf-refusal srf-refusal-v2" role="alert" tabindex="-1"><div class="srf-refusal-head"><p><b>${escape(r.lead)}</b> ${escape(r.intro)}</p>${button(svg(glyph.close), 'cancel-delete', 'class="srf-menu" aria-label="Close"')}</div><div class="srf-ref-rows">${rows}</div><p class="srf-refusal-tail">${escape(r.tail)}</p></div>`;
+      } else if (refused === s.id && variant === 'a') { const r = refusalText(s.id); extra = `<div class="srf-refusal" role="alert" tabindex="-1"><p><b>${escape(r.lead)}</b> ${escape(r.intro)}</p><ul>${r.refs.map(l => `<li>${l}</li>`).join('')}</ul><p>${escape(r.tail)}</p><div class="sdc-row">${button('Close', 'cancel-delete')}</div></div>`; }
       return `<li><div class="srf-scene-row${current ? ' srf-scene-current' : ''}"><button type="button" class="srf-scene-name" data-action="noop" ${current ? 'aria-current="page"' : ''}>${escape(s.name)}</button>${button('⋯', 'scene-menu', `class="srf-menu" data-scene="${s.id}" aria-label="Delete ${escape(s.name)}" title="Delete scene"`)}</div>${extra}</li>`;
     };
-    return `<div class="srf-scenes" role="dialog" aria-label="Scenes"><h3>Chapter 1</h3><ul>${scenes.map(row).join('')}</ul>${button('+ New scene', 'noop', 'class="srf-small"')}</div>`;
+    if (v2()) {
+      const groups = [...new Set(scenes.map(s => s.chapter))].map(c => { const open = !collapsed.has(c); return `<h3><button type="button" class="srf-chapter" data-action="toggle-chapter" data-chapter="${escape(c)}" aria-expanded="${open}"><span class="sce-caret" aria-hidden="true">${open ? '▾' : '▸'}</span>${escape(c)}</button></h3>${open ? `<ul aria-label="${escape(c)}">${scenes.filter(s => s.chapter === c).map(row).join('')}</ul>` : ''}`; }).join('');
+      return `<div class="srf-scenes srf-scenes-v2" role="dialog" aria-label="Scenes">${groups}${button('+ New scene', 'noop', 'class="srf-small"')}</div>`;
+    }
+    return `<div class="srf-scenes" role="dialog" aria-label="Scenes"><h3>Chapter 1</h3><ul>${scenes.filter(s => !s.v2Only).map(row).join('')}</ul>${button('+ New scene', 'noop', 'class="srf-small"')}</div>`;
   }
 
   // ---- B14: Transition.
   function transitionEditor() {
     const word = transition === 'fade' ? 'Fades' : 'Dissolves';
-    const help = variant === 'a'
+    // a-v2: B's list, reworded in review to say what this beat animates and how to change it.
+    const help = v2()
+      ? `<p class="srf-hint srf-lead">This ${transition} animates 2 beats above it:</p><ul class="srf-plain-list"><li>02 Background · Rainy platform</li><li>03 Show character · Mara</li></ul><p class="srf-hint">A transition animates the stage beats between it and the last line, choice or transition above it. To animate a beat below, move this Transition under that beat.</p>`
+      : variant === 'a'
       ? '<p class="srf-hint">Ren\'Py plays this transition for every stage change since the last line, choice or transition. Put it after the Background or Show character beats it should animate.</p>'
       : `<p class="srf-hint srf-lead">${word} in the stage changes since 01 Narration:</p><ul class="srf-plain-list"><li>02 Background · Rainy platform</li><li>03 Show character · Mara</li></ul><p class="srf-hint">Ren'Py plays this transition for every stage change since the last line, choice or transition.</p>`;
     return `<div class="sdc-editor-heading scs-editor-heading"><strong>04 · Transition</strong></div><p class="scs-trail">The last service</p>
@@ -341,7 +371,9 @@ export function mountFixes(host: HTMLElement, context: LabContext, initial: Vari
   function screenEditor() {
     const changed = state === 'screen-beat-changed' && !screenPlace;
     const cols = beatCols(), at = cols.findIndex(c => c.id === 'New'), after = at > 0 ? nameOf(cols[at - 1]!) : undefined;
-    const placeNote = changed ? `<p class="srf-diag"><b>The scene changed after you picked this place in Screens.</b> Choose where this beat goes.</p><div class="sdc-row">${button('Choose a place…', 'open-place')}</div>` : '';
+    // a-v2: the note and its button sit together in one block, spaced from the place and from Panel screen.
+    const placeNote = changed && v2() ? `<div class="srf-place-note"><p><b>The scene changed after you picked this place in Screens.</b> Choose where this beat goes.</p>${button('Choose a place…', 'open-place')}</div>`
+      : changed ? `<p class="srf-diag"><b>The scene changed after you picked this place in Screens.</b> Choose where this beat goes.</p><div class="sdc-row">${button('Choose a place…', 'open-place')}</div>` : '';
     return `${newBeatHeading('Show screen', !changed)}${where(changed ? 'Choose a place' : screenPlace, 'The last service', changed ? undefined : after, changed)}${placeNote}
       <label class="srf-field"><span>Panel screen</span><select aria-label="Panel screen" data-field="screen"><option ${screenName === 'timetable' ? 'selected' : ''}>timetable</option><option ${screenName === 'ticket_card' ? 'selected' : ''}>ticket_card</option></select></label>
       <p class="srf-hint">Show keeps the panel open while dialogue continues. Hide, Close and game Escape dismiss it. Outside clicks keep it open.</p>
@@ -420,6 +452,10 @@ export function mountFixes(host: HTMLElement, context: LabContext, initial: Vari
   }
   function protoBar() {
     const it = items[state];
+    if (revision === 'a-v2') return `<section class="scs-prototype srf-prototype" aria-label="Prototype controls"><strong>Release fixes · combined</strong>
+      <label>Item <select aria-label="Fix item">${definition.states.map(s => `<option value="${s.id}" ${s.id === state ? 'selected' : ''}>${escape(s.title)}</option>`).join('')}</select></label>
+      <select aria-label="Fix variant" hidden><option value="a" selected>a</option></select>
+      <span class="srf-item">${escape(`${it.code} · ${combined[state] ?? (it.b ? `A, ${it.a}` : it.a)}`)}</span>${button('Reset', 'reset')}</section>`;
     const pick = it.b ? `${it.code} · ${variant === 'a' ? 'A' : 'B'}: ${variant === 'a' ? it.a : it.b}` : `${it.code} · ${it.a} · one design, same in A and B`;
     return `<section class="scs-prototype srf-prototype" aria-label="Prototype controls"><strong>Release fixes · draft</strong>
       <label>Item <select aria-label="Fix item">${definition.states.map(s => `<option value="${s.id}" ${s.id === state ? 'selected' : ''}>${escape(s.title)}</option>`).join('')}</select></label>
@@ -431,7 +467,7 @@ export function mountFixes(host: HTMLElement, context: LabContext, initial: Vari
     const focusKey = (document.activeElement as HTMLElement | null)?.closest('[data-field]')?.getAttribute('data-field');
     const sel = beatCols().find(c => c.id === selectedId());
     const contextLine = state === 'moved-draft' ? 'Tracks · draft for Eli\'s line' : sel ? `Tracks · editing ${sel.id === 'New' ? `new ${sel.kind}` : `${sel.id} ${sel.kind}`}` : 'Tracks · new Show screen, no place yet';
-    host.innerHTML = `<div class="sdc-shell sc-combined-shell scs-shell sce-shell srf-shell" data-variant="${variant}" data-state="${state}">${protoBar()}
+    host.innerHTML = `<div class="sdc-shell sc-combined-shell scs-shell sce-shell srf-shell" data-variant="${variant}" data-revision="${variant === 'a' ? revision : 'b-v1'}" data-state="${state}">${protoBar()}
       <div class="scs-app">${header()}
         <div class="scs-body"><nav class="sdc-nav" aria-label="Workspaces"><span data-icon="panelOpen"></span><span data-icon="story" class="sdc-nav-selected" title="Story"></span><span data-icon="source"></span><span data-icon="branches"></span><span data-icon="characters"></span><span data-icon="assets"></span></nav>
         <main class="scs-main">
@@ -507,6 +543,7 @@ export function mountFixes(host: HTMLElement, context: LabContext, initial: Vari
       // B4
       case 'toggle-scenes': scenesOpen = !scenesOpen; confirming = ''; refused = ''; break;
       case 'scene-menu': confirming = a.scene!; refused = ''; if (scenes.find(s => s.id === a.scene)!.id === 'service') { confirming = ''; say('Switch to another scene before deleting this one.'); } break;
+      case 'toggle-chapter': { const c = a.chapter!; if (collapsed.has(c)) collapsed.delete(c); else collapsed.add(c); break; }
       case 'cancel-delete': confirming = ''; refused = ''; break;
       case 'delete-scene': refused = a.scene!; confirming = ''; if (variant === 'b') scenesOpen = false; break;
       case 'ref': scenesOpen = false; refused = variant === 'b' ? refused : ''; say(`Opening ${a.ref} is outside this study.`); break;

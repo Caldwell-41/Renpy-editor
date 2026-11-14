@@ -12,6 +12,11 @@
    "id": "b-v1",
    "variantId": "b",
    "approval": null
+  },
+  {
+   "id": "a-v2",
+   "variantId": "a-v2",
+   "approval": null
   }
  ]
 }

@@ -18,5 +18,6 @@ export const definition: Omit<LabScreen, 'approval'> = {
   variants: [
     { id: 'a', title: 'A · First option for each item', load: () => import('./a.ts') },
     { id: 'b', title: 'B · Second option for each item', load: () => import('./b.ts') },
+    { id: 'a-v2', title: 'Combined · Picks and refinements from review', load: () => import('./a-v2.ts') },
   ],
 };

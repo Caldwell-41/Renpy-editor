@@ -62,6 +62,7 @@
 .srf-rule-how>input { flex:1; min-width:56px; }
 .srf-diag { font-size:11.5px; line-height:1.5; color:var(--text-secondary); padding-left:8px; border-left:2px solid var(--status-warning); }
 .srf-diag>b { color:var(--text-primary); font-weight:600; }
+.srf-shell .sc-test-code.srf-test-invalid { color:var(--text-primary); background:var(--surface-panel); border:1px solid var(--border-strong); border-radius:3px; padding:5px 8px; }
 .srf-draft-actions { margin-top:2px; }
 .srf-shell .sc-branch-switch>.srf-path-warn { color:var(--status-warning); }
 
@@ -109,7 +110,7 @@
 .srf-rule-inline>.srf-rule-top { flex:1; min-width:140px; }
 .srf-shell .scs-column.srf-locked { border:1px dashed var(--border-strong); background:color-mix(in srgb,var(--surface-panel) 60%,transparent); }
 .srf-refusal>ul { margin:0; padding-left:16px; }
-.srf-diag+.sdc-row { margin-bottom:10px; }
+.srf-diag+.sdc-row,.srf-field-error+.sdc-row { margin-bottom:10px; }
 .srf-shell .sdc-field>textarea { min-height:56px; }
 .srf-shell .sdc-saved-line { font-size:12.5px; padding:6px 8px; }
 @media(max-width:640px) {
@@ -118,3 +119,28 @@
   .srf-shell .scs-header button:not(.scs-history) { padding:3px 7px; }
   .srf-shell .scs-save-state { flex-wrap:nowrap; white-space:nowrap; overflow:hidden; }
 }
+
+/* a-v2: B4 refusal tidied. Header line with close, aligned scene/beat rows, one closing line. */
+.srf-refusal.srf-refusal-v2 { gap:4px; padding:4px 0 4px 10px; margin:0 0 6px 8px; }
+.srf-refusal-head { display:flex; align-items:flex-start; gap:6px; }
+.srf-refusal-head>p { flex:1; margin:0; padding-top:3px; }
+.srf-shell .srf-refusal-head>.srf-menu { flex:none; padding:0 4px; }
+.srf-refusal-head svg { width:14px; height:14px; }
+.srf-ref-rows { display:grid; grid-template-columns:1fr auto; }
+.srf-shell button.srf-ref-row { display:grid; grid-column:1/-1; grid-template-columns:subgrid; min-height:24px; padding:0 6px; border:0; border-radius:3px; background:transparent; text-align:left; font-size:inherit; color:var(--text-primary); }
+.srf-shell button.srf-ref-row:hover { background:var(--surface-hover); }
+.srf-ref-row>span+span { color:var(--text-secondary); padding-left:12px; }
+.srf-refusal-tail { margin:0; color:var(--text-secondary); }
+
+/* a-v2: scene list hierarchy. Chapter reads as the parent, scenes indent under a guide line. */
+.srf-scenes-v2>h3 { margin:0; }
+.srf-shell button.srf-chapter { display:flex; align-items:center; gap:5px; width:100%; min-height:26px; padding:0 4px 0 0; border:0; background:transparent; font-size:12px; font-weight:600; color:var(--text-primary); text-align:left; }
+.srf-chapter>.sce-caret { color:var(--text-secondary); font-size:10px; width:10px; }
+.srf-scenes-v2>ul+h3 { margin-top:4px; }
+.srf-scenes-v2>ul { margin-left:4px; padding-left:10px; border-left:1px solid var(--border-strong); }
+.srf-scenes-v2 .srf-refusal.srf-refusal-v2 { margin-left:9px; }
+
+/* a-v2: B13 changed-place note. Text and button in one bar, even spacing around it. */
+.srf-place-note { display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin:12px 0 14px; padding:2px 0 2px 10px; border-left:2px solid var(--status-warning); font-size:12px; line-height:1.5; color:var(--text-secondary); }
+.srf-place-note>p { margin:0; }
+.srf-place-note b { color:var(--text-primary); font-weight:600; }

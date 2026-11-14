@@ -2,9 +2,11 @@ import assert from 'node:assert/strict';
 // Focused proof and review captures for the release fixes study. Run once per variant, and once with --theme light.
 export default async function ({ page, open, capture }) {
   const variant = await page.locator('[aria-label="Fix variant"]').inputValue();
+  // a-v2 (combined) reports variant a, so the checks follow `variant`; captures use the revision name.
+  const revision = await page.locator('.srf-shell').getAttribute('data-revision');
   const theme = await page.evaluate(() => document.documentElement.dataset.theme || 'dark');
   const shell = () => page.locator('.srf-shell').innerText();
-  const shot = async name => { await page.waitForFunction(() => [...document.images].every(i => i.complete && i.naturalWidth > 0)); await capture(`${variant}-${name}-${theme}`); };
+  const shot = async name => { await page.waitForFunction(() => [...document.images].every(i => i.complete && i.naturalWidth > 0)); await capture(`${revision}-${name}-${theme}`); };
   const states = ['diagnostics', 'set-variable', 'protected', 'move-protected', 'delete-scene', 'transition', 'transition-add', 'moved-draft', 'screen-beat', 'screen-beat-changed', 'tracks-summary'];
   const viewports = theme === 'dark' ? ['wide', 'compact'] : ['wide'];
 
@@ -45,7 +47,7 @@ export default async function ({ page, open, capture }) {
       }
     }
   }
-  if (theme !== 'dark') { console.log(`ok - ${variant}: ${states.length} states, light, wide`); return; }
+  if (theme !== 'dark') { console.log(`ok - ${revision}: ${states.length} states, light, wide`); return; }
 
   // B9: + New variable… creates and selects the variable.
   await open({ state: 'set-variable', viewport: 'wide' });
@@ -82,5 +84,5 @@ export default async function ({ page, open, capture }) {
   await page.locator('[data-place="Before 06 Narration"]').click();
   await page.getByRole('button', { name: 'Choose', exact: true }).click();
   assert.match(await page.locator('.sdc-editor').innerText(), /Goes at\s+Before 06 Narration[\s\S]*After\s+05 Mara's line/);
-  console.log(`ok - ${variant}: ${states.length} states at wide and compact, B9, D2, B8 and B13 interactions`);
+  console.log(`ok - ${revision}: ${states.length} states at wide and compact, B9, D2, B8 and B13 interactions`);
 }
