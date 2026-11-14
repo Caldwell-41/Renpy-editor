@@ -1,0 +1,120 @@
+/* Story Combined release fixes only. The shell comes from story-combined-status and story-combined-editor. */
+.srf-prototype { flex-wrap:wrap; }
+.srf-item { color:var(--text-primary); }
+.srf-item[data-single=true] { color:var(--text-secondary); }
+.srf-shell .sdc-editor { font-size:12px; }
+.srf-hint { font-size:11.5px; line-height:1.5; color:var(--text-secondary); margin:0 0 8px!important; }
+.srf-lead { color:var(--text-primary); margin-bottom:2px!important; }
+.srf-warn-text { color:var(--status-warning)!important; }
+.srf-warn-mark { color:var(--status-warning); }
+.srf-shell .sdc-beat-number>.srf-warn-mark { float:none; margin-left:5px; font-size:12px; }
+.srf-error-text { color:var(--status-error); }
+.srf-error-text>b { font-weight:650; }
+.srf-shell button.srf-link { min-height:0; padding:0; border:0; border-bottom:1px solid var(--border-strong); border-radius:0; background:transparent; font-size:inherit; color:var(--text-primary); }
+.srf-shell button.srf-link:hover { background:transparent; border-bottom-color:var(--text-primary); }
+.srf-shell button.srf-small { min-height:26px; padding:2px 9px; font-size:12px; align-self:flex-start; }
+.srf-shell button.srf-menu { min-height:24px; padding:0 7px; border-color:transparent; background:transparent; color:var(--text-secondary); }
+.srf-shell button.srf-danger { color:var(--status-error); border-color:color-mix(in srgb,var(--status-error) 60%,transparent); background:transparent; }
+
+/* Fields used by the mocked editors. */
+.srf-field { display:flex; flex-direction:column; gap:4px; margin:0 0 10px; font-size:12px; position:relative; }
+.srf-field>input,.srf-field>select { width:100%; }
+.srf-shell input:not([type]),.srf-shell input[type=search],.srf-shell .srf-field>select { font:inherit; color:var(--text-primary); background:var(--surface-panel); border:1px solid var(--border-strong); border-radius:3px; padding:5px 8px; min-height:28px; }
+.srf-shell input:disabled { color:var(--text-disabled); }
+.srf-shell [aria-invalid=true] { border-color:var(--status-error)!important; }
+.srf-field-error { margin:2px 0 4px!important; font-size:11.5px; color:var(--status-error); line-height:1.45; }
+.srf-actions { justify-content:flex-end; margin-top:4px; }
+.srf-where { margin:0 0 10px!important; }
+.srf-placeholder { flex:1; text-align:left; color:var(--text-muted); }
+.srf-shell button.srf-select { width:100%; display:flex; align-items:center; gap:8px; text-align:left; background:var(--surface-panel); }
+.srf-select>.sc-variable-name { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; }
+.srf-list { display:flex; flex-direction:column; margin:2px 0 4px; padding:4px; border:1px solid var(--border-strong); border-radius:4px; background:var(--surface-raised); box-shadow:0 8px 20px #0006; }
+.srf-shell .srf-list>button { display:flex; align-items:center; gap:8px; border:0; background:transparent; text-align:left; min-height:30px; }
+.srf-shell .srf-list>button[aria-selected=true] { background:var(--accent-subtle); }
+.srf-list small { margin-left:auto; color:var(--text-muted); font-size:11px; }
+.srf-list-empty { padding:6px 8px; color:var(--text-muted); font-size:12px; }
+.srf-shell .srf-list>.srf-create { margin-top:2px; border-top:1px solid var(--border-normal); border-radius:0; color:var(--accent-primary); }
+.srf-seg { display:inline-flex; flex-wrap:wrap; }
+.srf-shell .srf-seg>button { min-height:28px; min-width:30px; padding:3px 8px; border-radius:0; margin-left:-1px; background:transparent; color:var(--text-secondary); font-size:12px; }
+.srf-shell .srf-seg>button[aria-pressed=true] { color:var(--accent-primary); background:var(--accent-subtle); border-color:var(--accent-primary); position:relative; }
+.srf-shell .srf-seg>button[aria-invalid=true] { color:var(--status-error); background:transparent; position:relative; }
+.srf-seg-wide { display:flex; }
+.srf-seg-wide>button { flex:1; }
+.srf-equation { display:flex; align-items:center; gap:6px; }
+.srf-equation>input { flex:1; min-width:0; }
+.srf-op-chip { padding:3px 8px; border:1px solid var(--border-strong); border-radius:3px; font:12px var(--font-source); }
+.srf-expression { display:flex; align-items:center; gap:10px; }
+.srf-expression>img { width:40px; height:40px; object-fit:cover; object-position:top; border:1px solid var(--border-normal); }
+.srf-expression>span { flex:1; display:flex; flex-direction:column; }
+.srf-expression small { color:var(--text-muted); font-size:11px; }
+.srf-plain-list { margin:0 0 8px; padding-left:16px; font-size:11.5px; line-height:1.6; }
+
+/* D2/B5: condition branches and their problems. */
+.srf-caption { font-size:12px; color:var(--text-primary); margin:0 0 6px!important; }
+.srf-problems { list-style:none; margin:0 0 8px; padding:0; display:flex; flex-direction:column; gap:3px; font-size:11.5px; line-height:1.45; }
+.srf-problems b,.srf-problem-line>b { color:var(--status-warning); }
+.srf-problem-line { font-size:11.5px; line-height:1.6; margin:0 0 8px!important; }
+.srf-shell .srf-branch { gap:6px; margin-bottom:8px; }
+.srf-shell .srf-branch:focus { outline:2px solid var(--focus-ring); outline-offset:2px; }
+.srf-rule { gap:4px; }
+.srf-rule-top { display:flex; }
+.srf-rule-how { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.srf-rule-how>input { flex:1; min-width:56px; }
+.srf-diag { font-size:11.5px; line-height:1.5; color:var(--text-secondary); padding-left:8px; border-left:2px solid var(--status-warning); }
+.srf-diag>b { color:var(--text-primary); font-weight:600; }
+.srf-draft-actions { margin-top:2px; }
+.srf-shell .sc-branch-switch>.srf-path-warn { color:var(--status-warning); }
+
+/* B8: protected Custom Code in Tracks and Move to. */
+.srf-shell .scs-col-wrap { position:relative; }
+.srf-shell .scs-column.srf-locked { border-style:dashed; color:var(--text-secondary); }
+.srf-shell button.srf-plus { position:absolute; top:16px; right:1px; z-index:2; min-height:0; height:19px; padding:0 5px; border:0; background:transparent; color:var(--text-muted); font-size:13px; line-height:19px; }
+.srf-shell button.srf-plus:hover,.srf-shell button.srf-plus:focus-visible { color:var(--accent-primary); background:var(--accent-subtle); }
+.srf-shell .srf-slot { width:76px; }
+.srf-tree-note { display:flex; align-items:center; gap:7px; padding:4px 10px 4px calc(10px + var(--depth) * 16px); font-size:12px; color:var(--text-muted); }
+.srf-tree-note svg { width:11px!important; height:11px!important; }
+.srf-tree-here { color:var(--text-secondary); font-style:italic; }
+.srf-summary-idle { color:var(--text-secondary)!important; }
+
+/* B4: scene list with the delete confirmation and refusal. */
+.srf-toolbar { position:relative; }
+.srf-shell button.srf-scene-button { padding:0; border:0; background:transparent; font-size:14px; font-weight:650; }
+.srf-scenes { position:absolute; top:calc(100% + 2px); left:0; z-index:30; width:min(340px,100%); padding:8px; background:var(--surface-raised); border:1px solid var(--border-strong); box-shadow:0 10px 26px #0007; font-size:12px; }
+.srf-scenes>h3 { margin:0 0 4px; font-size:11px; font-weight:600; color:var(--text-secondary); }
+.srf-scenes>ul { list-style:none; margin:0 0 6px; padding:0; }
+.srf-scene-row { display:flex; align-items:center; }
+.srf-shell button.srf-scene-name { flex:1; text-align:left; border:0; background:transparent; min-height:28px; }
+.srf-scene-current>.srf-scene-name { color:var(--accent-primary); font-weight:600; }
+.srf-confirm,.srf-refusal { margin:2px 0 6px 8px; padding:6px 0 6px 10px; border-left:2px solid var(--status-error); display:flex; flex-direction:column; gap:6px; line-height:1.5; }
+.srf-refusal:focus { outline:0; }
+.srf-refusal b { color:var(--status-error); font-weight:650; }
+.srf-refusal>.sdc-row,.srf-confirm>.sdc-row { justify-content:flex-end; }
+
+/* D1. */
+.srf-conflict-link { margin:6px 0 0!important; font-size:11.5px; }
+
+/* Dialog widths. */
+.srf-shell .srf-narrow { width:min(420px,100%); }
+.srf-shell .srf-wide { width:min(700px,100%); }
+.srf-results { grid-template-columns:1fr 1fr 1fr; }
+
+@media(max-width:640px) {
+  .srf-results { grid-template-columns:1fr 1fr; }
+  .srf-prototype>label:first-of-type select { max-width:150px; }
+  .srf-item { flex-basis:100%; order:9; }
+}
+
+/* Second pass: inline yes/no rules, protected columns, the refusal list and compact header-v2. */
+.srf-rule-inline { flex-direction:row; align-items:center; flex-wrap:wrap; }
+.srf-rule-inline>.srf-rule-top { flex:1; min-width:140px; }
+.srf-shell .scs-column.srf-locked { border:1px dashed var(--border-strong); background:color-mix(in srgb,var(--surface-panel) 60%,transparent); }
+.srf-refusal>ul { margin:0; padding-left:16px; }
+.srf-diag+.sdc-row { margin-bottom:10px; }
+.srf-shell .sdc-field>textarea { min-height:56px; }
+.srf-shell .sdc-saved-line { font-size:12.5px; padding:6px 8px; }
+@media(max-width:640px) {
+  .srf-shell .scs-header { flex-wrap:nowrap; }
+  .srf-shell.scs-shell[data-variant] .scs-runtime { display:flex; gap:4px; padding-left:8px; }
+  .srf-shell .scs-header button:not(.scs-history) { padding:3px 7px; }
+  .srf-shell .scs-save-state { flex-wrap:nowrap; white-space:nowrap; overflow:hidden; }
+}

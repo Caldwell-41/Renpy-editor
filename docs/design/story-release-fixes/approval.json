@@ -1,0 +1,17 @@
+{
+ "schemaVersion": 1,
+ "screenId": "story-release-fixes",
+ "currentApproved": null,
+ "revisions": [
+  {
+   "id": "a-v1",
+   "variantId": "a",
+   "approval": null
+  },
+  {
+   "id": "b-v1",
+   "variantId": "b",
+   "approval": null
+  }
+ ]
+}
