@@ -56,7 +56,7 @@ window.__loomlightProbeEditorFor = beatId => [...document.querySelectorAll('.sto
 window.__loomlightProbeSelectBeat = beatId => {
   const columns = [...document.querySelectorAll('.story-track-column')].filter(column => column.dataset.beatId === beatId);
   const select = columns.length === 1 && columns[0].querySelector(':scope > .story-track-beat');
-  if (!select) throw Error('Unique rendered fixture Beat required');
+  if (!select) throw Error(`Unique rendered fixture Beat required; ${columns.length} rendered`);
   if (select.dataset.selected !== 'true') select.click();
 };
 // Only use for reads, idempotent preference writes, or probe checkpoint/report

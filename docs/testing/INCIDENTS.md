@@ -1399,3 +1399,23 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   9 of 15 runs failed with "Header redo is unavailable" or "Header undo is
   unavailable". After it, none of 8 runs did.
 - **Evidence:** issue #120, PR #185.
+
+## H95. Source-foundation probe selects the redone beat before Story renders
+
+- **Class/search:** harness readiness, probe; `source-foundation`, `retained-draft`,
+  "Unique rendered fixture Beat required", `__loomlightProbeSelectBeat`, Redo,
+  "Checking saved state…".
+- **Cause:** after Redo the app reopens Story, which loads the scene and then reveals
+  and selects the edited child. The probe waited only for the source bytes, so with
+  slower IPC it selected the child while Story still showed no Tracks columns. The
+  product is correct.
+- **Correction:** the retained-draft stage waits until Story shows the child's editor,
+  then selects it. The helper's error now says how many matching columns it found.
+- **Regression:** the source-foundation probe itself.
+- **Verification:** the probe scripts ran in Chromium at 1280 px against real core
+  through the help-controller driver, with 50 ms added each way per request. Before the
+  fix, 6 of 6 runs without busy refusals failed at this stage; after it, none of 6 did.
+  With every overlapping request refused as busy, the probe's own writes
+  (`source.updateDraft`, the owner-rejection `scene.apply`) can still be refused; that
+  is a separate, unfixed hypothesis for native runs.
+- **Evidence:** issue #120, PR #185.

@@ -48,7 +48,9 @@
     catch (error) { rejected = error.code === 'SCENE_INVARIANT'; details.ownerRejection = error.code; }
     check(rejected, 'Wrong child owner rejected by real core dispatch');
     details.stage = 'retained-draft';
-    // Redo reveals and selects the edited child, so select it without toggling.
+    // Redo reopens Story, which loads the scene and then reveals and selects the edited child.
+    // Wait for that render to show the child's editor before selecting it.
+    await wait(() => card()?.querySelector('textarea'));
     window.__loomlightProbeSelectBeat(children[0].id); await wait(() => card().querySelector('textarea'));
     const retainedEditor = card().querySelector('textarea'); retainedEditor.value = 'Retained Story draft'; retainedEditor.dispatchEvent(new Event('input', { bubbles: true }));
     await call('source.updateDraft', { sessionId: project.sessionId, path: scene.sourcePath, expectedBaseRevision: accepted.baseRevision, text: accepted.text + '# dirty source draft\n', selectionStart: 0, selectionEnd: 0 });
