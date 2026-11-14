@@ -303,9 +303,11 @@ Each rule picks a project variable (yes/no, whole number, decimal or text), a pr
 value. Numbers offer `= ≠ < ≤ > ≥`; yes/no and text offer equality only. One All/Any
 switch joins the rules, and each branch shows its Ren'Py line. Mixed groups and Python
 the editor cannot read stay read-only with Edit in Source; the builder never writes
-raw Python. A mixed group says "This mixes All and Any. The builder can't edit it.
-Edit it in Source." Screen readers name each rule's test a comparison ("If rule 1
-comparison").
+raw Python. A test that joins with both All and Any says "This mixes All and Any.
+The builder can't edit it. Edit it in Source." Another test the builder can't take,
+such as `trust > fare`, `3 < trust` or a bare `True`, says "The builder can't show
+this Python. Until then, edit it in Source." Screen readers name each rule's test a
+comparison ("If rule 1 comparison", "Option 2 rule 1 comparison").
 
 A test core could not read (`story-release-fixes` / `a-v2`) keeps its line in a
 red-bordered box, with why and what to do in red under it, then Create and Edit in

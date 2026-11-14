@@ -49,6 +49,16 @@ function rulesOf(expression: ConditionExpression, variables: Variables): Omit<St
   }
   return { join, rules };
 }
+/** Whether a test joins rules with both All (`and`) and Any (`or`). */
+function mixesJoins(expression: ConditionExpression): boolean {
+  const joins = new Set<string>();
+  const visit = (node: ConditionExpression): void => {
+    if (node.type === "and" || node.type === "or") { joins.add(node.type); visit(node.left); visit(node.right); }
+    else if (node.type === "not") visit(node.operand);
+    else if (node.type === "compare") { visit(node.left); visit(node.right); }
+  };
+  visit(expression); return joins.size === 2;
+}
 function ruleOf(node: ConditionExpression, variables: Variables): Rule | undefined {
   const known = (id: string, type: Variable["variableType"]): boolean => variables.some(variable => variable.id === id && variable.variableType === type);
   if (node.type === "variable" && node.variableType === "bool" && known(node.variableId, "bool")) return { variableId: node.variableId, op: "equal", value: "true" };
@@ -223,8 +233,9 @@ export function buildRuleBuilder(projectVariables: Variables, initial: Condition
       host.append(code, error, ...fixes.children.length ? [fixes] : []);
       return done;
     }
-    // Mixed All and Any, or a test that is not variable-against-value.
-    host.append(element("code", "story-rule-code", options.caption ?? ""), element("p", "story-field-hint", "This mixes All and Any. The builder can't edit it. Edit it in Source."));
+    // Mixed All and Any, or another test that is not variable-against-value, such as trust > fare.
+    const note = initial?.status === "supported" && mixesJoins(initial.expression) ? "This mixes All and Any. The builder can't edit it. Edit it in Source." : "The builder can't show this Python. Until then, edit it in Source.";
+    host.append(element("code", "story-rule-code", options.caption ?? ""), element("p", "story-field-hint", note));
     if (options.source) host.append(button("Edit in Source", "button secondary", options.source));
     return done;
   }

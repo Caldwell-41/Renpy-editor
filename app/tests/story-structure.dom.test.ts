@@ -541,6 +541,10 @@ test("the rule builder words each problem for a branch or an option, and names i
   assert.equal(missing.querySelector(".story-rule-error")!.textContent, "ticket_count is not a project variable. Create it, or change this line in Source. Until then, the builder can't edit this option.");
   assert.equal(shown({ status: "unknown", source: "renpy.seen_label('x')", diagnostic: "unsupportedSyntax" }).querySelector(".story-rule-error")!.textContent, "The builder can't show this Python. Until then, edit it in Source.");
   assert.equal(shown({ status: "supported", expression: { type: "and", left: flag, right: { type: "or", left: flag, right: flag } } }).querySelector(".story-field-hint")!.textContent, "This mixes All and Any. The builder can't edit it. Edit it in Source.");
+  // A test that mixes nothing but is not variable-against-value, such as trust > fare, 3 < trust or True, is Python the builder can't show.
+  const trust = { type: "variable" as const, variableId: "trust", variableType: "int" as const }, fare = { type: "variable" as const, variableId: "fare", variableType: "decimal" as const };
+  for (const expression of [{ type: "compare" as const, operator: "greater" as const, left: trust, right: fare }, { type: "compare" as const, operator: "less" as const, left: { type: "int" as const, value: "3" }, right: trust }, { type: "bool" as const, value: true }, { type: "and" as const, left: flag, right: { type: "bool" as const, value: true } }])
+    assert.equal(shown({ status: "supported", expression }).querySelector(".story-field-hint")!.textContent, "The builder can't show this Python. Until then, edit it in Source.", JSON.stringify(expression));
   // Screen readers name each rule's test a comparison.
   const rule = shown({ status: "supported", expression: { type: "compare", operator: "greaterEqual", left: { type: "variable", variableId: "trust", variableType: "int" }, right: { type: "int", value: "3" } } });
   chooseIn(rule, "Option 1 rule 1 comparison", "≤"); assert.ok(rule.querySelector('select[aria-label="Option 1 rule 1 comparison"]'));
