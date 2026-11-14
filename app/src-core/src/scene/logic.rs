@@ -749,6 +749,47 @@ mod tests {
             assert_eq!(fs::read(&map_path).unwrap(), before_map);
         }
     }
+    #[test]
+    fn decimal_tests_keep_the_authors_trailing_zero() {
+        let mut f = Fixture::new();
+        let created = ipc(
+            &mut f.service,
+            "variable.create",
+            json!({"technicalName":"fare","variableType":"decimal","defaultValue":2.5}),
+        );
+        let fare = created["variables"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|v| v["technicalName"] == "fare")
+            .unwrap()["id"]
+            .clone();
+        let test = json!({"status":"supported","expression":{"type":"compare","operator":"greaterEqual",
+            "left":{"type":"variable","variableId":fare,"variableType":"decimal"},"right":{"type":"decimal","value":"2.40"}}});
+        let scene = f.model()["scenes"][0].clone();
+        let place = scene["bodies"][0]["defaultPlace"].clone();
+        let inserted = f.command(json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"position":place,
+            "beat":{"type":"choice","options":[{"text":"Pay","condition":test}]}}));
+        let scene = inserted["scenes"][0].clone();
+        let place = scene["bodies"][0]["defaultPlace"].clone();
+        f.command(json!({"type":"insertCondition","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"position":place,
+            "condition":test,"otherwise":false}));
+        let source =
+            fs::read_to_string(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap();
+        assert!(source.contains("\"Pay\" if (fare >= 2.40):"), "{source}");
+        assert!(source.contains("    if (fare >= 2.40):"), "{source}");
+        f.service.close().unwrap();
+        f.service.open_path(&f.root).unwrap();
+        let beats = f.model()["scenes"][0]["beats"].clone();
+        let choice = beats
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["payload"]["type"] == "choice")
+            .unwrap();
+        assert_eq!(choice["payload"]["options"][0]["condition"], test);
+        f.service.close().unwrap();
+    }
 }
 
 #[cfg(test)]

@@ -224,12 +224,13 @@ fn tokenize(source: &str) -> Result<Vec<Token>, ConditionError> {
                     return Err(ConditionError::UnsupportedSyntax);
                 }
                 if value.contains(['.', 'e', 'E']) {
-                    let number = value
+                    // The author's text, such as 2.40, is kept so a rewrite keeps it.
+                    value
                         .parse::<f64>()
                         .ok()
                         .filter(|v| v.is_finite())
                         .ok_or(ConditionError::InvalidValue)?;
-                    tokens.push(Token::Decimal(crate::authoring::decimal_literal(number)));
+                    tokens.push(Token::Decimal(value));
                     continue;
                 }
                 if value.parse::<i64>().is_err()
@@ -578,9 +579,8 @@ pub fn render(
         Ok(match expression {
             Bool { value } => if *value { "True" } else { "False" }.into(),
             Int { value } => value.clone(),
-            Decimal { value } => crate::authoring::decimal_literal(
-                value.parse().map_err(|_| ConditionError::InvalidValue)?,
-            ),
+            // The round trip below admits only text that reads back as this literal.
+            Decimal { value } => value.clone(),
             String { value } => {
                 if value
                     .chars()
