@@ -652,7 +652,10 @@ incomplete or invalid input never reaches the source files. Ask before an action
 would discard a draft, including deleting its beat or closing the project.
 
 The [beat draft conflict rules](#beat-draft-conflicts) handle changes to the source
-beneath a retained draft. A beat that the author has not edited is not a draft. A
+beneath a retained draft. A beat that the author has not edited is not a draft: its
+editor shows no Cancel or Commit Beat (`story-combined-status` / `header-v2`). Escape
+asks for Cancel only while there is a draft, and that hint lasts until the editor shows
+another beat or scene. A
 condition or Choice column shows the draft marker for drafts in any of its branches,
 open or closed. Drafts show `*` in Tracks, Reel and the editor heading ("* Draft"); a
 draft that conflicts with source shows `!` in the accent colour ("! Conflict"). A beat with a draft can
