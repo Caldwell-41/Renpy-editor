@@ -224,12 +224,13 @@ fn tokenize(source: &str) -> Result<Vec<Token>, ConditionError> {
                     return Err(ConditionError::UnsupportedSyntax);
                 }
                 if value.contains(['.', 'e', 'E']) {
-                    let number = value
+                    // The author's text, such as 2.40, is kept so a rewrite keeps it.
+                    value
                         .parse::<f64>()
                         .ok()
                         .filter(|v| v.is_finite())
                         .ok_or(ConditionError::InvalidValue)?;
-                    tokens.push(Token::Decimal(crate::authoring::decimal_literal(number)));
+                    tokens.push(Token::Decimal(value));
                     continue;
                 }
                 if value.parse::<i64>().is_err()
@@ -578,9 +579,8 @@ pub fn render(
         Ok(match expression {
             Bool { value } => if *value { "True" } else { "False" }.into(),
             Int { value } => value.clone(),
-            Decimal { value } => crate::authoring::decimal_literal(
-                value.parse().map_err(|_| ConditionError::InvalidValue)?,
-            ),
+            // The round trip below admits only text that reads back as this literal.
+            Decimal { value } => value.clone(),
             String { value } => {
                 if value
                     .chars()
@@ -853,7 +853,19 @@ mod source_tests {
             LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
         let root = profile.join("synthetic-project");
         let path = root.join(".renpy-editor/source-map.json");
-        let mut map: Value = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
+        let current: crate::metadata::SourceMapMetadata =
+            serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
+        let before_ids = current.scene_mappings[0]
+            .beats
+            .iter()
+            .map(|b| json!(b.id))
+            .collect::<Vec<_>>();
+        let mut legacy = current.clone();
+        for scene in &mut legacy.scene_mappings {
+            let bytes = fs::read(root.join(&scene.path)).unwrap();
+            scene.beats = crate::scene::per_line_rows(&scene.beats, &bytes);
+        }
+        let mut map = serde_json::to_value(&legacy).unwrap();
         map["schemaVersion"] = json!(3);
         for scene in map["sceneMappings"].as_array_mut().unwrap() {
             for beat in scene["beats"].as_array_mut().unwrap() {
@@ -879,7 +891,6 @@ mod source_tests {
                 .map(|b| b["id"].clone())
                 .collect::<Vec<_>>()
         };
-        let before_ids = ids(&map);
         let source_path = root.join(map["sceneMappings"][0]["path"].as_str().unwrap());
         let source = fs::read(&source_path).unwrap();
         fs::write(&path, serde_json::to_vec(&map).unwrap()).unwrap();

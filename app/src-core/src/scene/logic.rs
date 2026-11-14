@@ -393,6 +393,56 @@ pub(super) fn refine_legacy_ids(
                 continue;
             }
         }
+        // v15 makes an unsupported block one Custom Code beat. Its first line's row
+        // keeps the ID and holds the others, as a refined Choice does.
+        if matches!(parsed.payload, BeatPayload::CustomCode { .. }) {
+            let rows: Vec<_> = old
+                .beats
+                .iter()
+                .filter(|m| {
+                    m.byte_start as usize >= parsed.start && m.byte_end as usize <= parsed.end
+                })
+                .cloned()
+                .collect();
+            let Some(first) = rows.first() else {
+                continue;
+            };
+            if first.byte_start as usize != parsed.start
+                || rows
+                    .last()
+                    .is_none_or(|m| m.byte_end as usize != parsed.end)
+                || rows
+                    .windows(2)
+                    .any(|pair| pair[0].byte_end != pair[1].byte_start)
+                || rows.iter().any(|row| {
+                    row.kind != "customCode"
+                        || row.conditional_branch.is_some()
+                        || row.owner != first.owner
+                })
+            {
+                return Err(SceneError::InvalidMetadata);
+            }
+            let header = old
+                .beats
+                .iter_mut()
+                .find(|m| m.id == first.id)
+                .ok_or(SceneError::InvalidMetadata)?;
+            if header.extra.contains_key("refinedChildMappings") {
+                return Err(SceneError::InvalidMetadata);
+            }
+            header.extra.insert(
+                "refinedChildMappings".into(),
+                serde_json::to_value(&rows[1..]).map_err(|_| SceneError::InvalidMetadata)?,
+            );
+            covered.extend(rows.iter().map(|row| row.id.clone()));
+            forced.push((
+                "customCode".into(),
+                hash,
+                first.id.clone(),
+                Some(parsed.start),
+            ));
+            continue;
+        }
         if !matches!(parsed.payload, BeatPayload::Choice { .. }) {
             continue;
         }
@@ -748,6 +798,47 @@ mod tests {
             f.service.close().unwrap();
             assert_eq!(fs::read(&map_path).unwrap(), before_map);
         }
+    }
+    #[test]
+    fn decimal_tests_keep_the_authors_trailing_zero() {
+        let mut f = Fixture::new();
+        let created = ipc(
+            &mut f.service,
+            "variable.create",
+            json!({"technicalName":"fare","variableType":"decimal","defaultValue":2.5}),
+        );
+        let fare = created["variables"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|v| v["technicalName"] == "fare")
+            .unwrap()["id"]
+            .clone();
+        let test = json!({"status":"supported","expression":{"type":"compare","operator":"greaterEqual",
+            "left":{"type":"variable","variableId":fare,"variableType":"decimal"},"right":{"type":"decimal","value":"2.40"}}});
+        let scene = f.model()["scenes"][0].clone();
+        let place = scene["bodies"][0]["defaultPlace"].clone();
+        let inserted = f.command(json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"position":place,
+            "beat":{"type":"choice","options":[{"text":"Pay","condition":test}]}}));
+        let scene = inserted["scenes"][0].clone();
+        let place = scene["bodies"][0]["defaultPlace"].clone();
+        f.command(json!({"type":"insertCondition","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"position":place,
+            "condition":test,"otherwise":false}));
+        let source =
+            fs::read_to_string(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap();
+        assert!(source.contains("\"Pay\" if (fare >= 2.40):"), "{source}");
+        assert!(source.contains("    if (fare >= 2.40):"), "{source}");
+        f.service.close().unwrap();
+        f.service.open_path(&f.root).unwrap();
+        let beats = f.model()["scenes"][0]["beats"].clone();
+        let choice = beats
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["payload"]["type"] == "choice")
+            .unwrap();
+        assert_eq!(choice["payload"]["options"][0]["condition"], test);
+        f.service.close().unwrap();
     }
 }
 
@@ -1462,23 +1553,33 @@ mod structural_review_tests {
             ),
         );
         let a = root(&mut f);
-        let opaque = a["beats"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .find(|b| b["payload"]["text"] == "Opaque Python")
-            .unwrap();
-        assert_eq!(f.reject(json!({"type":"updateBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"beatId":opaque["id"],"expectedBody":{"type":"root"},"beat":{"type":"narration","text":"Lost"}}))["error"]["code"], "SCENE_INVARIANT");
+        // A later top-level block is one protected beat; its lines are never beats.
+        let block = |a: &Value, header: &str| {
+            let beats = a["beats"].as_array().unwrap();
+            assert!(beats.iter().all(
+                |b| b["conditionalBranch"].is_null() && b["payload"]["text"] != "Opaque Python"
+            ));
+            beats
+                .iter()
+                .find(|b| {
+                    b["payload"]["source"]
+                        .as_str()
+                        .is_some_and(|s| s.starts_with(header))
+                })
+                .unwrap()
+                .clone()
+        };
+        let opaque = block(&a, "init python:\n    \"Opaque Python\"");
+        assert_eq!(opaque["protected"], true);
+        f.reject(json!({"type":"updateBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"beatId":opaque["id"],"expectedBody":{"type":"root"},"beat":{"type":"narration","text":"Lost"}}));
         f.save(&a, &format!("label {}:\n    \"Known\"\n    return\nscreen custom():\n    if flag:\n        text \"Opaque\"\n", a["technicalLabel"].as_str().unwrap()));
         let a = root(&mut f);
-        let header = a["beats"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .find(|b| !b["conditionalBranch"].is_null())
-            .unwrap();
-        assert_eq!(f.reject(json!({"type":"insertBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"body":{"type":"branch","groupId":header["conditionalBranch"]["groupId"],"branchId":header["id"]},"position":{"type":"end"},"beat":{"type":"narration","text":"Lost"}}))["error"]["code"], "OPAQUE_BOUNDARY");
-        assert_eq!(f.reject(json!({"type":"insertBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"body":{"type":"root"},"position":{"type":"before","anchor":{"type":"condition","groupId":header["conditionalBranch"]["groupId"]}},"beat":{"type":"narration","text":"Lost"}}))["error"]["code"], "SCENE_INVARIANT");
+        let screen = block(
+            &a,
+            "screen custom():\n    if flag:\n        text \"Opaque\"",
+        );
+        assert_eq!(screen["protected"], true);
+        f.reject(json!({"type":"insertBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"body":{"type":"root"},"position":{"type":"before","anchor":{"type":"beat","beatId":screen["id"]}},"beat":{"type":"narration","text":"Lost"}}));
         // A qualified earlier Scene edit still preserves the later screen bytes.
         let known = a["beats"]
             .as_array()
@@ -1612,7 +1713,7 @@ mod choice_body_tests {
             9,
         )
         .unwrap();
-        let physical = map.scene_mappings[0].beats.clone();
+        let physical = per_line_rows(&map.scene_mappings[0].beats, &bytes);
         map.schema_version = 9;
         map.scene_mappings[0].beats = parsed
             .iter()
@@ -1673,13 +1774,17 @@ mod choice_body_tests {
             .any(|b| b["conditionalBranch"]["condition"]["status"] == "unknown"));
         let new = SourceMapMetadata::read_bytes(&fs::read(&map_path).unwrap(), &project.project_id)
             .unwrap();
+        // A block's later lines are kept with its first line (v15).
+        let saved = String::from_utf8(fs::read(&map_path).unwrap()).unwrap();
         for b in old {
-            let retained = new.scene_mappings[0]
-                .beats
-                .iter()
-                .find(|n| n.id == b.id)
-                .unwrap();
-            assert_eq!(retained.extra, b.extra);
+            match new.scene_mappings[0].beats.iter().find(|n| n.id == b.id) {
+                Some(retained) => {
+                    let mut extra = retained.extra.clone();
+                    extra.remove("refinedChildMappings");
+                    assert_eq!(extra, b.extra);
+                }
+                None => assert!(saved.contains(&b.id)),
+            }
         }
         let accepted_map = fs::read(&map_path).unwrap();
         f.service.close().unwrap();

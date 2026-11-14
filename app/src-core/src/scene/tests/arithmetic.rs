@@ -133,6 +133,13 @@ fn arithmetic_source_styles_preserve_noop_comments_legacy_ids_and_minimal_edits(
             fs::read(f.root.join(&scene.source_path)).unwrap(),
             source.as_bytes()
         );
+        let mut rows: crate::metadata::SourceMapMetadata =
+            serde_json::from_value(legacy.clone()).unwrap();
+        rows.scene_mappings[0].beats = per_line_rows(
+            &rows.scene_mappings[0].beats,
+            &fs::read(f.root.join(&scene.source_path)).unwrap(),
+        );
+        legacy = serde_json::to_value(&rows).unwrap();
         legacy["schemaVersion"] = json!(7);
         fs::write(
             f.root.join(SOURCE_MAP_PATH),
@@ -166,8 +173,9 @@ fn arithmetic_inspection_has_lossless_results_and_never_uses_defaults() {
         beats[4]["assignment"]["state"],
         json!({"status":"unknown","reason":"integerOverflow"})
     );
+    // The python: block is one beat.
     assert_eq!(
-        beats[7]["assignment"]["state"],
+        beats[6]["assignment"]["state"],
         json!({"status":"unknown","reason":"unsupportedControlFlow"})
     );
 }

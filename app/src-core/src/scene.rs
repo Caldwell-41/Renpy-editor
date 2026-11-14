@@ -206,17 +206,31 @@ pub(crate) fn logic_boundary(payload: &BeatPayload) -> bool {
     ) || matches!(payload, BeatPayload::Choice { options, .. } if options.iter().any(|o| o.condition.is_some()))
 }
 
-// Supported option headers and a verified inert placeholder are protected edit
-// targets, but do not make reference inspection or the Scene projection opaque.
+// Supported If, Else if, Else and Choice option headers and a verified inert
+// placeholder are protected edit targets, but do not make reference inspection or
+// the Scene projection opaque.
 fn opaque_source(beat: &SceneBeat) -> bool {
     beat.protected
         && !beat.structural_placeholder
         && !beat.conditional_branch.as_ref().is_some_and(|branch| {
-            branch.choice_option
-                && !matches!(
-                    branch.condition,
-                    Some(crate::conditions::Condition::Unknown { .. })
-                )
+            !matches!(
+                branch.condition,
+                Some(crate::conditions::Condition::Unknown { .. })
+            )
+        })
+}
+
+/// Whether `source` holds `label` as a whole Ren'Py name, as any static jump, call or
+/// action string that reaches the label must.
+fn names_label(source: &[u8], label: &str) -> bool {
+    let name = |byte: &u8| byte.is_ascii_alphanumeric() || *byte == b'_';
+    source
+        .windows(label.len())
+        .enumerate()
+        .any(|(start, window)| {
+            window == label.as_bytes()
+                && !source[..start].last().is_some_and(name)
+                && !source.get(start + label.len()).is_some_and(name)
         })
 }
 
@@ -685,9 +699,6 @@ impl AuthoringService {
                         mapped.byte_start as usize != parsed.start
                             || mapped.byte_end as usize != parsed.end
                             || mapped.source_sha256 != sha256(&bytes[parsed.start..parsed.end])
-                            || !compatible_arithmetic_kind(&mapped.kind, &parsed.payload)
-                                && !(mapped.kind == "customCode"
-                                    && matches!(parsed.nesting, Some(ParsedNesting::Child { .. })))
                     })
                 {
                     return Err(SceneError::InvalidMetadata);
@@ -2184,6 +2195,13 @@ impl AuthoringService {
         loaded: &Loaded,
         scene_id: &str,
     ) -> Result<(), SceneError> {
+        let label = &loaded
+            .project
+            .scenes
+            .iter()
+            .find(|scene| scene.id == scene_id)
+            .ok_or(SceneError::UnknownEntity)?
+            .technical_label;
         for scene in &loaded.project.scenes {
             let stored = loaded
                 .source_map
@@ -2207,8 +2225,15 @@ impl AuthoringService {
                     &loaded.source_map.owned_screens,
                 )),
             )?;
+            // Protected source elsewhere can reach the Scene only by naming its label.
+            // The Scene's own protected source still blocks: deleting would drop it.
             if beats.iter().any(|beat| {
                 opaque_source(beat)
+                    && (scene.id == scene_id
+                        || names_label(
+                            &bytes[beat.byte_start as usize..beat.byte_end as usize],
+                            label,
+                        ))
                     || match &beat.payload {
                         BeatPayload::Jump { scene_id: target }
                         | BeatPayload::Call {
@@ -3224,6 +3249,18 @@ fn parse_condition_group(
             });
             // Unsupported indented blocks are opaque as a unit. In particular, Python
             // internals must never become editable dialogue or conditional children.
+            if source_version >= 15 && matches!(payload, BeatPayload::CustomCode { .. }) {
+                let after = opaque_block_end(lines, next, indent + 4, lexical);
+                let mut block = custom_block(&lines[next..after]);
+                block.nesting = Some(ParsedNesting::Child {
+                    group_start,
+                    branch_start,
+                });
+                result.push(block);
+                next = after;
+                statements += 1;
+                continue;
+            }
             let mut after = next + 1;
             if matches!(payload, BeatPayload::CustomCode { .. }) {
                 while after < lines.len()
@@ -3419,6 +3456,16 @@ fn parse_scene_mode(
             source: body.into(),
             reason: "Unsupported or runtime-dependent Ren'Py source".into(),
         });
+        if source_version >= 15
+            && matches!(payload, BeatPayload::CustomCode { .. })
+            && !body.trim().is_empty()
+            && !body.trim_start().starts_with('#')
+        {
+            let after = opaque_block_end(&lines, index, indentation(body), &lexical);
+            beats.push(custom_block(&lines[index..after]));
+            index = after;
+            continue;
+        }
         beats.push(ParsedBeat {
             nesting: None,
             start,
@@ -3855,9 +3902,11 @@ pub(crate) fn build_mapping(
                 .iter()
                 .zip(parsed.iter())
                 .any(|(mapped, parsed)| {
+                    // The kind is not checked: it also depends on the characters,
+                    // assets and variables a line names, which can change while the
+                    // source does not (#120).
                     mapped.byte_start as usize != parsed.start
                         || mapped.byte_end as usize != parsed.end
-                        || !compatible_arithmetic_kind(&mapped.kind, &parsed.payload)
                         || parsed.end > bytes.len()
                         || mapped.source_sha256 != sha256(&bytes[parsed.start..parsed.end])
                 })
@@ -3881,26 +3930,25 @@ pub(crate) fn build_mapping(
             .or_default()
             .push_back((id.clone(), *anchor));
     }
-    let arithmetic_ranges: HashMap<_, _> = parsed
-        .iter()
-        .filter(
-            |p| matches!(&p.payload, BeatPayload::SetVariable { value, .. } if value.is_object()),
-        )
-        .map(|p| ((p.start, p.end), sha256(&bytes[p.start..p.end])))
-        .collect();
+    // The same bytes are the same line even when what they name now exists, or no
+    // longer does, and so their kind changed.
+    let mut current_kinds = HashMap::<String, HashSet<&str>>::new();
+    for p in &parsed {
+        current_kinds
+            .entry(sha256(&bytes[p.start..p.end]))
+            .or_default()
+            .insert(p.payload.kind());
+    }
     if let Some(previous) = previous {
         for beat in &previous.beats {
             if forced_ids.contains(beat.id.as_str()) {
                 continue;
             }
-            let kind = if beat.kind == "customCode"
-                && arithmetic_ranges
-                    .get(&(beat.byte_start as usize, beat.byte_end as usize))
-                    .is_some_and(|hash| hash == &beat.source_sha256)
-            {
-                "setVariable".into()
-            } else {
-                beat.kind.clone()
+            let kind = match current_kinds.get(&beat.source_sha256) {
+                Some(kinds) if kinds.len() == 1 && !kinds.contains(beat.kind.as_str()) => {
+                    kinds.iter().next().unwrap().to_string()
+                }
+                _ => beat.kind.clone(),
             };
             ids.entry((kind, beat.source_sha256.clone()))
                 .or_default()
@@ -4442,12 +4490,6 @@ fn arithmetic_error(reason: crate::conditions::arithmetic::ArithmeticUnknown) ->
     }
 }
 
-fn compatible_arithmetic_kind(old: &str, payload: &BeatPayload) -> bool {
-    old == payload.kind()
-        || old == "customCode"
-            && matches!(payload, BeatPayload::SetVariable { value, .. } if value.is_object() || value.is_number())
-}
-
 fn patch_variable_assignment(
     original: &[u8],
     previous: &BeatPayload,
@@ -4681,6 +4723,40 @@ fn physical_lines(source: &str) -> Vec<(usize, usize, &str)> {
         result.push((start, source.len(), &source[start..]));
     }
     result
+}
+
+/// The end of the unsupported statement at `index`: its deeper lines and any line
+/// that is not a whole one-line statement, such as a bracket's continuation. Blank and
+/// comment lines never end it, but those after its last line stay outside as trivia.
+fn opaque_block_end(
+    lines: &[(usize, usize, &str)],
+    index: usize,
+    indent: usize,
+    lexical: &HashSet<usize>,
+) -> usize {
+    let mut end = index + 1;
+    for (offset, (start, _, body)) in lines.iter().enumerate().skip(index + 1) {
+        let trivia = body.trim().is_empty()
+            || body.trim_start().starts_with('#') && indentation(body) <= indent;
+        if trivia {
+            continue;
+        }
+        if lexical.contains(start) && indentation(body) <= indent {
+            break;
+        }
+        end = offset + 1;
+    }
+    end
+}
+
+/// One Custom Code beat for a whole unsupported statement and its block.
+fn custom_block(lines: &[(usize, usize, &str)]) -> ParsedBeat {
+    let source = lines
+        .iter()
+        .map(|(_, _, body)| *body)
+        .collect::<Vec<_>>()
+        .join("\n");
+    custom(lines[0].0, lines[lines.len() - 1].1, &source)
 }
 
 fn custom(start: usize, end: usize, body: &str) -> ParsedBeat {
@@ -4969,6 +5045,44 @@ impl BoolNot for bool {
     fn not(self) -> bool {
         !self
     }
+}
+
+/// `rows` as a build before source-map v15 wrote them: a row for each line of an
+/// unsupported block. The first line keeps the block's ID. Tests that relabel a
+/// current map as an older schema use this.
+#[cfg(test)]
+pub(crate) fn per_line_rows(rows: &[BeatSourceMapping], bytes: &[u8]) -> Vec<BeatSourceMapping> {
+    let mut result = Vec::new();
+    for row in rows {
+        let mut start = row.byte_start as usize;
+        if row.kind != "customCode" || row.conditional_branch.is_some() {
+            result.push(row.clone());
+            continue;
+        }
+        for line in bytes[start..row.byte_end as usize].split_inclusive(|b| *b == b'\n') {
+            let mut split = row.clone();
+            if start != row.byte_start as usize {
+                split.id = uuid::Uuid::new_v4().to_string();
+            }
+            split.byte_start = start as u64;
+            split.byte_end = (start + line.len()) as u64;
+            split.source_sha256 = sha256(line);
+            result.push(split);
+            start += line.len();
+        }
+    }
+    result
+}
+
+/// A whole source-map JSON value, under project `root`, with `per_line_rows`.
+#[cfg(test)]
+pub(crate) fn per_line_map(root: &std::path::Path, map: Value) -> Value {
+    let mut map: SourceMapMetadata = serde_json::from_value(map).unwrap();
+    for scene in &mut map.scene_mappings {
+        let bytes = std::fs::read(root.join(&scene.path)).unwrap();
+        scene.beats = per_line_rows(&scene.beats, &bytes);
+    }
+    serde_json::to_value(map).unwrap()
 }
 
 /// Where a root insertion lands when the author names no anchor: before the ending
@@ -6295,6 +6409,207 @@ mod tests {
                 }
             ),
             Err(SceneError::SourceConflict)
+        ));
+    }
+
+    #[test]
+    fn supported_condition_headers_leave_the_scene_whole() {
+        let f = Fixture::new(b"label scene_one:\n    return\n");
+        f.migrate();
+        for (name, variable_type, default_value) in [
+            ("flag", VariableType::Bool, Value::Bool(true)),
+            ("trust", VariableType::Int, Value::String("5".into())),
+        ] {
+            f.service
+                .create_variable(
+                    &f.project,
+                    &f.project_id,
+                    CreateVariableRequest {
+                        technical_name: name.into(),
+                        variable_type,
+                        default_value,
+                    },
+                )
+                .unwrap();
+        }
+        let path = f.root.join(&f.workspace().scenes[0].source_path);
+        let partial = |source: &str| {
+            fs::write(&path, source).unwrap();
+            f.workspace().scenes[0].partial
+        };
+        // If, nested If and Else headers with supported tests are edit targets only.
+        assert!(!partial("label scene_one:\n    if (flag == True):\n        \"A\"\n        if (trust >= 3):\n            \"B\"\n            return\n        else:\n            \"C\"\n            return\n    else:\n        \"D\"\n        return\n    return\n"));
+        // A test the builder cannot read, and Custom Code, stay partial.
+        assert!(partial(
+            "label scene_one:\n    if missing_flag == 4:\n        \"A\"\n    return\n"
+        ));
+        assert!(partial("label scene_one:\n    if (flag == True):\n        $ trust = trust * 2 + len(\"x\")\n    return\n"));
+    }
+
+    #[test]
+    fn a_protected_block_is_one_beat_in_every_body() {
+        let f = Fixture::new(b"label scene_one:\n    return\n");
+        f.migrate();
+        f.service
+            .create_variable(
+                &f.project,
+                &f.project_id,
+                CreateVariableRequest {
+                    technical_name: "flag".into(),
+                    variable_type: VariableType::Bool,
+                    default_value: Value::Bool(true),
+                },
+            )
+            .unwrap();
+        let path = f.root.join(&f.workspace().scenes[0].source_path);
+        let source = "label scene_one:\n    \"Before\"\n    python:\n        x = 1\n\n        renpy.notify(\"x\") # done\n\n    # Next\n    if flag:\n        python:\n            y = 2\n        \"In\"\n    menu:\n        \"Go\":\n            python:\n                z = 3\n            \"Went\"\n    \"After\"\n    return\n";
+        fs::write(&path, source).unwrap();
+        let ws = f.workspace();
+        let code = |ws: &SceneWorkspace| {
+            ws.scenes[0]
+                .beats
+                .iter()
+                .filter_map(|b| match &b.payload {
+                    BeatPayload::CustomCode { source, .. }
+                        if b.conditional_branch.is_none() && !source.trim().is_empty() =>
+                    {
+                        Some((b.id.clone(), source.clone()))
+                    }
+                    _ => None,
+                })
+                .collect::<Vec<_>>()
+        };
+        let blocks = code(&ws);
+        assert_eq!(
+            blocks.iter().map(|(_, s)| s.as_str()).collect::<Vec<_>>(),
+            [
+                "    python:\n        x = 1\n\n        renpy.notify(\"x\") # done",
+                "    # Next",
+                "        python:\n            y = 2",
+                "            python:\n                z = 3",
+            ]
+        );
+        // A beat added after a block lands after its last line; the block is unchanged.
+        let scene = &ws.scenes[0];
+        let before = scene
+            .beats
+            .iter()
+            .find(|b| b.payload == BeatPayload::Narration { text: "In".into() })
+            .unwrap();
+        let added = f
+            .apply(
+                &ws,
+                SceneCommand::InsertBodyBeat {
+                    scene_id: scene.id.clone(),
+                    expected_source_revision: scene.source_revision.clone(),
+                    body: BodyRef::Branch {
+                        group_id: before.owner.as_ref().unwrap().group_id.clone(),
+                        branch_id: before.owner.as_ref().unwrap().branch_id.clone(),
+                    },
+                    position: Position::Before {
+                        anchor: NodeRef::Beat {
+                            beat_id: before.id.clone(),
+                        },
+                    },
+                    beat: BeatPayload::Narration {
+                        text: "Added".into(),
+                    },
+                },
+            )
+            .unwrap();
+        assert_eq!(
+            fs::read_to_string(&path).unwrap(),
+            source.replace("        \"In\"\n", "        \"Added\"\n        \"In\"\n")
+        );
+        assert_eq!(code(&added), blocks);
+        // A v14 map, saved by released builds, has a row for each line of a block.
+        let map_path = f.root.join(SOURCE_MAP_PATH);
+        let mut map =
+            SourceMapMetadata::read_bytes(&fs::read(&map_path).unwrap(), &f.project_id).unwrap();
+        let bytes = fs::read(&path).unwrap();
+        let rows = per_line_rows(&map.scene_mappings[0].beats, &bytes);
+        let inner = rows
+            .iter()
+            .filter(|row| map.scene_mappings[0].beats.iter().all(|b| b.id != row.id))
+            .map(|row| row.id.clone())
+            .collect::<Vec<_>>();
+        assert_eq!(inner.len(), 5);
+        map.schema_version = 14;
+        map.scene_mappings[0].beats = rows;
+        fs::write(&map_path, source_map_bytes(&map).unwrap()).unwrap();
+        f.migrate();
+        let migrated = f.workspace();
+        assert_eq!(code(&migrated), code(&added));
+        assert_eq!(
+            migrated.scenes[0]
+                .beats
+                .iter()
+                .map(|b| &b.id)
+                .collect::<Vec<_>>(),
+            added.scenes[0]
+                .beats
+                .iter()
+                .map(|b| &b.id)
+                .collect::<Vec<_>>()
+        );
+        // The old rows are kept with the block's first line, as for v9 Choices.
+        let saved = String::from_utf8(fs::read(&map_path).unwrap()).unwrap();
+        assert!(inner.iter().all(|id| saved.contains(id.as_str())));
+        assert_eq!(fs::read(&path).unwrap(), bytes);
+    }
+
+    #[test]
+    fn protected_source_blocks_a_scene_delete_only_when_it_names_the_scene() {
+        let fixture =
+            Fixture::new(b"label scene_one:\n    python:\n        score += 1\n    return\n");
+        fixture.migrate();
+        let create = |workspace: &SceneWorkspace, name: &str| {
+            fixture
+                .apply(
+                    workspace,
+                    SceneCommand::CreateScene {
+                        chapter_id: workspace.chapters[0].id.clone(),
+                        display_name: name.into(),
+                    },
+                )
+                .unwrap()
+        };
+        let named = |workspace: &SceneWorkspace, name: &str| {
+            workspace
+                .scenes
+                .iter()
+                .find(|scene| scene.display_name == name)
+                .unwrap()
+                .clone()
+        };
+        let delete = |workspace: &SceneWorkspace, scene: &SceneDocument| {
+            fixture.apply(
+                workspace,
+                SceneCommand::DeleteScene {
+                    scene_id: scene.id.clone(),
+                    expected_source_revision: scene.source_revision.clone(),
+                },
+            )
+        };
+        let workspace = create(&create(&fixture.workspace(), "Empty"), "Named");
+        let named_scene = named(&workspace, "Named");
+        let entry_path = fixture.root.join(&workspace.scenes[0].source_path);
+        fs::write(
+            &entry_path,
+            format!(
+                "label scene_one:\n    python:\n        score += 1\n    $ renpy.jump(\"{}\")\n    return\n",
+                named_scene.technical_label
+            ),
+        )
+        .unwrap();
+        let workspace = fixture.workspace();
+        // Nothing names Empty, so the protected code elsewhere cannot reach it.
+        let workspace = delete(&workspace, &named(&workspace, "Empty")).unwrap();
+        assert!(workspace.scenes.iter().all(|s| s.display_name != "Empty"));
+        // Protected code that names a Scene's label may reach it.
+        assert!(matches!(
+            delete(&workspace, &named(&workspace, "Named")),
+            Err(SceneError::ReferenceBlocked)
         ));
     }
 
@@ -7964,5 +8279,113 @@ mod tests {
         assert!(after.scenes[0].beats.iter().all(|b| b.id != if_header[0]));
         // An unrelated line keeps its ID through each edit.
         assert_eq!(ids(&before, "After")[0].0, ids(&after, "After")[0].0);
+    }
+
+    #[test]
+    fn source_lines_keep_opening_and_their_ids_when_what_they_name_is_created_later() {
+        let mut fixture = Fixture::new(b"label scene_one:\n    return\n");
+        fixture.migrate();
+        let path = fixture
+            .root
+            .join(&fixture.workspace().scenes[0].source_path);
+        fs::write(
+            &path,
+            "label scene_one:\n    scene bg booth\n    bec \"Hi\"\n    $ trust = 3\n    return\n",
+        )
+        .unwrap();
+        let kinds = |ws: &SceneWorkspace| {
+            ws.scenes[0]
+                .beats
+                .iter()
+                .map(|b| (b.id.clone(), b.payload.kind().to_owned()))
+                .collect::<Vec<_>>()
+        };
+        let before = kinds(&fixture.workspace());
+        assert_eq!(before[0].1, "customCode");
+        assert_eq!(before[1].1, "customCode");
+        let image = fixture.root.join("booth.png");
+        fs::write(&image, b"booth raster").unwrap();
+        let choice = fixture
+            .service
+            .select_import(&fixture.project, &image)
+            .unwrap();
+        fixture
+            .service
+            .import_asset(
+                &fixture.project,
+                &fixture.project_id,
+                ImportAssetRequest {
+                    authority_id: choice.authority_id,
+                    kind: AssetKind::Background,
+                    technical_name: "booth".into(),
+                    display_name: "Booth".into(),
+                    character_id: None,
+                    expression: None,
+                },
+            )
+            .unwrap();
+        fixture
+            .service
+            .create_character(
+                &fixture.project,
+                &fixture.project_id,
+                CreateCharacterRequest {
+                    technical_name: "bec".into(),
+                    display_name: "Bec".into(),
+                    dialogue_color: "#ffffff".into(),
+                },
+            )
+            .unwrap();
+        fixture
+            .service
+            .create_variable(
+                &fixture.project,
+                &fixture.project_id,
+                CreateVariableRequest {
+                    technical_name: "trust".into(),
+                    variable_type: VariableType::Int,
+                    default_value: Value::String("0".into()),
+                },
+            )
+            .unwrap();
+        let after = kinds(&fixture.workspace());
+        let expected = ["background", "dialogue", "setVariable", "return"];
+        assert_eq!(
+            after.iter().map(|(_, k)| k.as_str()).collect::<Vec<_>>(),
+            expected
+        );
+        // The same lines keep their IDs, so drafts and selection stay on them.
+        assert_eq!(
+            after.iter().map(|(id, _)| id).collect::<Vec<_>>(),
+            before.iter().map(|(id, _)| id).collect::<Vec<_>>()
+        );
+        // The stored map still names the old kinds, as a released build leaves it.
+        fixture.migrate();
+        let reopened = fixture.workspace();
+        assert_eq!(kinds(&reopened), after);
+        let scene = &reopened.scenes[0];
+        let edited = fixture
+            .apply(
+                &reopened,
+                SceneCommand::UpdateBodyBeat {
+                    scene_id: scene.id.clone(),
+                    expected_source_revision: scene.source_revision.clone(),
+                    beat_id: after[1].0.clone(),
+                    expected_body: BodyRef::Root,
+                    beat: BeatPayload::Dialogue {
+                        character_id: match &scene.beats[1].payload {
+                            BeatPayload::Dialogue { character_id, .. } => character_id.clone(),
+                            _ => unreachable!(),
+                        },
+                        text: "Hello".into(),
+                    },
+                },
+            )
+            .unwrap();
+        assert_eq!(kinds(&edited), after);
+        assert_eq!(
+            fs::read_to_string(&path).unwrap(),
+            "label scene_one:\n    scene bg booth\n    bec \"Hello\"\n    $ trust = 3\n    return\n"
+        );
     }
 }

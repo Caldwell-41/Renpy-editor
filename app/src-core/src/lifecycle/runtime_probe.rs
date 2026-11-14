@@ -635,6 +635,10 @@ mod branches_tests {
         let mut map: crate::metadata::SourceMapMetadata =
             serde_json::from_slice(&fs::read(&map_path).unwrap()).unwrap();
         map.schema_version = 2;
+        map.scene_mappings[0].beats = crate::scene::per_line_rows(
+            &map.scene_mappings[0].beats,
+            &fs::read(root.join(path)).unwrap(),
+        );
         for beat in &mut map.scene_mappings[0].beats {
             if beat.owner.is_some() {
                 beat.kind = "customCode".into();
@@ -1051,7 +1055,11 @@ mod branches_tests {
                 fs::read(root.join(scene["sourcePath"].as_str().unwrap())).unwrap(),
                 [prefix, source.as_bytes()].concat()
             );
-            assert!(result.scenes[0].partial);
+            // Supported tests and bodies leave the Scene whole (#120).
+            assert_eq!(
+                result.scenes[0].partial,
+                condition == "missing" || body.starts_with("$ unknown")
+            );
             service.close().unwrap();
         }
     }
