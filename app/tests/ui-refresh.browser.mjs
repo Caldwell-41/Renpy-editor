@@ -234,10 +234,10 @@ try {
  assert.equal(await page.locator('.project-tree-panel').evaluate(el=>getComputedStyle(el).display),'block');
  assert.equal((await page.locator('.project-tree-panel').boundingBox()).width,treeBefore.width);
  assert.equal(await page.getByRole('button',{name:'The Apartment',exact:true}).isVisible(),true);
- await page.getByRole('button',{name:'Toggle chapter Chapter One'}).click();
+ await page.getByRole('button',{name:'Chapter One',exact:true}).click();
  assert.equal(await page.getByRole('button',{name:'The Apartment',exact:true}).isVisible(),false);
  assert.equal(await page.locator('.scene-header h1').textContent(),'The Apartment');
- await page.getByRole('button',{name:'Toggle chapter Chapter One'}).click();
+ await page.getByRole('button',{name:'Chapter One',exact:true}).click();
  await page.getByRole('button',{name:'Writing focus',exact:true}).click();
  assert.equal(await page.locator('.story-sidebar').isVisible(),false);
  assert.equal(await page.locator('.project-tree-panel').isVisible(),false);

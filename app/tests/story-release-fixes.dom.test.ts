@@ -302,3 +302,80 @@ test("Move to never offers the place that leaves a beat where it is", async () =
   await s.close();
 });
 
+/** editorFixture with a second chapter: Depot and Platform 4 in Chapter 2. */
+function chapters(): SceneWorkspace {
+  const model = editorFixture(), platform = { ...model.scenes[1]!, id: "platform", displayName: "Platform 4", technicalLabel: "platform", sourcePath: "game/platform.rpy", chapterId: "second" };
+  return { ...model, chapters: [...model.chapters, { id: "second", displayName: "Chapter 2", directory: "game/chapter_02" }], scenes: [...model.scenes.map(scene => scene.id === "two" ? { ...scene, chapterId: "second" } : scene), platform] };
+}
+const scenesOf = (tree: ParentNode): string[] => [...tree.querySelectorAll<HTMLElement>(".tree-chapter")].flatMap(chapter => [chapter.querySelector(".tree-chapter-toggle")!.textContent!,
+  ...[...chapter.querySelectorAll<HTMLElement>(".tree-scene-open")].filter(row => !row.closest("[hidden]")).map(row => `  ${row.textContent}`)]);
+
+test("the scene list groups scenes under chapter headings that collapse and expand", async () => {
+  const s = mount(chapters()), tree = document.querySelector("aside")!;
+  assert.deepEqual(scenesOf(tree), ["▾The Last Tram", "  The last service", "▾Chapter 2", "  Depot", "  Platform 4"]);
+  const toggle = [...tree.querySelectorAll<HTMLButtonElement>(".tree-chapter-toggle")].find(item => item.textContent === "▾Chapter 2")!;
+  const scenes = document.getElementById(toggle.getAttribute("aria-controls")!)!;
+  assert.equal(toggle.ariaExpanded, "true"); assert.ok(scenes.classList.contains("tree-chapter-scenes")); assert.equal(scenes.querySelectorAll(".tree-scene-row").length, 2);
+  // The chapter's own actions stay in its menu beside the heading.
+  assert.deepEqual(texts(toggle.closest(".tree-chapter-row")!, ".tree-menu button"), ["Rename", "↑", "↓", "Delete"]);
+  toggle.click();
+  assert.equal(toggle.ariaExpanded, "false"); assert.equal(scenes.hidden, true);
+  assert.deepEqual(scenesOf(tree), ["▾The Last Tram", "  The last service", "▸Chapter 2"]);
+  // Collapsing is view state: it sends nothing and outlasts a redraw.
+  selectBeat(s.host, "line");
+  assert.deepEqual(scenesOf(tree), ["▾The Last Tram", "  The last service", "▸Chapter 2"]);
+  [...tree.querySelectorAll<HTMLButtonElement>(".tree-chapter-toggle")].find(item => item.textContent === "▸Chapter 2")!.click();
+  assert.deepEqual(scenesOf(tree), ["▾The Last Tram", "  The last service", "▾Chapter 2", "  Depot", "  Platform 4"]);
+  assert.deepEqual(s.calls, []);
+  await s.close();
+});
+
+/** Deletes a scene from its menu in the scene list, as the author does, and returns its row. */
+async function deleteScene(tree: ParentNode, name: string): Promise<HTMLElement> {
+  const row = [...tree.querySelectorAll<HTMLElement>(".tree-scene-row")].find(item => item.querySelector(".tree-scene-open")!.textContent === name)!;
+  row.querySelector<HTMLElement>(".tree-menu > summary")!.click();
+  press(row.querySelector(".tree-menu")!, "Delete");
+  assert.equal(row.querySelector(".confirm-row > span")!.textContent, `Delete scene "${name}"? Undo restores it.`);
+  press(row, "Confirm delete"); await tick();
+  return row;
+}
+const refused = (references: { beats: object[]; protectedCode: object[] }) => async (): Promise<never> => { throw Object.assign(Error("The Scene has incoming or unknown references and cannot be deleted safely."), { code: "INCOMING_REFERENCE", references }); };
+const reference = (beatId: string, kind: string, sceneId = "one", sceneName = "The last service") => ({ sceneId, sceneName, beatId, kind });
+const refusalOf = (row: HTMLElement) => {
+  const block = row.nextElementSibling as HTMLElement;
+  assert.ok(block.classList.contains("story-scene-refusal")); assert.equal(block.role, "alert"); assert.equal(document.activeElement, block);
+  return { block, head: block.querySelector(".story-refusal-head > p")!.textContent, rows: [...block.querySelectorAll<HTMLButtonElement>(".story-refusal-row")].map(item => texts(item, "span")), tail: block.querySelector(".story-refusal-tail")!.textContent };
+};
+
+test("a refused scene delete names each beat that goes to it in the scene list, and each opens that beat", async () => {
+  const s = mount(chapters(), { apply: refused({ beats: [reference("leave", "jump"), reference("depot-line", "call", "platform", "Platform 4")], protectedCode: [] }) }), tree = document.querySelector("aside")!;
+  const row = await deleteScene(tree, "Depot");
+  const refusal = refusalOf(row);
+  assert.equal(row.querySelector(".confirm-row"), null);
+  assert.equal(refusal.head, "Can't delete \"Depot\". 2 beats go to it:");
+  assert.deepEqual(refusal.rows, [["The last service", "05.2.2 Jump"], ["Platform 4", "02 Call scene"]]);
+  assert.equal(refusal.tail, "Change or remove them, then delete again. Nothing was deleted.");
+  assert.equal(s.status.at(-1), "Can't delete \"Depot\". Nothing was deleted.");
+  // A row opens its beat, in its option.
+  refusal.block.querySelector<HTMLButtonElement>(".story-refusal-row")!.click(); await tick();
+  assert.equal(s.host.querySelector<HTMLElement>('.story-route [data-beat-id="leave"] > .story-track-beat')!.dataset.selected, "true");
+  assert.equal(document.activeElement, s.host.querySelector('.story-route [data-beat-id="leave"] > .story-track-beat'));
+  await s.close();
+});
+
+test("the refusal names Custom Code that may jump to the scene, or Custom Code inside it, and × closes it", async () => {
+  let s = mount(chapters(), { apply: refused({ beats: [], protectedCode: [reference("code", "customCode")] }) });
+  let refusal = refusalOf(await deleteScene(document.querySelector("aside")!, "Depot"));
+  assert.equal(refusal.head, "Can't delete \"Depot\". Custom Code may jump to it, and Loomlight can't check where it goes:");
+  assert.deepEqual(refusal.rows, [["The last service", "05.3.1 Custom Code"]]);
+  assert.equal(refusal.tail, "Change that code in Source first. Nothing was deleted.");
+  const row = refusal.block.previousElementSibling as HTMLElement;
+  press(refusal.block, "Close"); assert.equal(refusal.block.isConnected, false); assert.equal(document.activeElement, row.querySelector(".tree-scene-open"));
+  await s.close();
+  s = mount(chapters(), { apply: refused({ beats: [reference("leave", "jump")], protectedCode: [reference("depot-line", "customCode", "two", "Depot")] }) });
+  refusal = refusalOf(await deleteScene(document.querySelector("aside")!, "Depot"));
+  assert.equal(refusal.head, "Can't delete \"Depot\". 1 beat goes to it, and it holds Custom Code that deleting would drop:");
+  assert.deepEqual(refusal.rows, [["The last service", "05.2.2 Jump"], ["Depot", "02 Custom Code"]]);
+  assert.equal(refusal.tail, "Change or remove them, then delete again. Nothing was deleted.");
+  await s.close();
+});

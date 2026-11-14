@@ -324,11 +324,100 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
 .project-shell[data-writing-focus="true"]>.story-sidebar,.project-shell[data-writing-focus="true"]>.project-tree-panel,.project-shell[data-writing-focus="true"]>.tree-restore {
   display:none}
 
-.chapter-disclosure {
-  min-width:24px;
-  padding:0}
 .tree-chapter-row {
   gap:6px}
+/* story-release-fixes / a-v2: a chapter is a heading that collapses its scenes, which sit
+   under a guide line. */
+.tree-chapter {
+  padding:4px 0;
+  border-bottom:0}
+.tree-chapter-toggle {
+  flex:1;
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  min-height:26px;
+  padding:0;
+  border:0;
+  background:none;
+  color:var(--text-primary);
+  font:inherit;
+  font-size:12px;
+  text-align:left;
+  cursor:pointer}
+.tree-chapter-toggle>strong {
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-weight:600}
+.tree-chapter-caret {
+  flex:none;
+  width:10px;
+  font-size:10px;
+  color:var(--text-secondary)}
+.tree-chapter-scenes {
+  margin-left:10px;
+  padding-left:6px;
+  border-left:1px solid var(--border-strong)}
+/* The refusal of a scene delete, under the scene's row. */
+.story-scene-refusal {
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  margin:2px 0 6px 8px;
+  padding:4px 0 4px 10px;
+  border-left:2px solid var(--status-error);
+  font-size:12px;
+  line-height:1.5;
+  color:var(--text-primary)}
+.story-scene-refusal:focus {
+  outline:0}
+.story-scene-refusal:focus-visible {
+  outline:2px solid var(--focus-ring);
+  outline-offset:2px}
+.story-refusal-head {
+  display:flex;
+  align-items:flex-start;
+  gap:6px}
+.story-refusal-head>p {
+  flex:1;
+  margin:0;
+  padding-top:3px}
+.story-refusal-head b {
+  color:var(--status-error);
+  font-weight:650}
+.story-refusal-head>.story-icon-button {
+  flex:none}
+.story-refusal-rows {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto}
+.story-refusal-row {
+  display:grid;
+  grid-column:1/-1;
+  grid-template-columns:subgrid;
+  min-height:24px;
+  padding:0 6px;
+  border:0;
+  border-radius:3px;
+  background:none;
+  color:var(--text-primary);
+  font:inherit;
+  text-align:left;
+  cursor:pointer}
+.story-refusal-row:hover {
+  background:var(--surface-hover)}
+.story-refusal-row>span {
+  align-self:center;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap}
+.story-refusal-row>span+span {
+  padding-left:12px;
+  color:var(--text-secondary)}
+.story-refusal-tail {
+  margin:0;
+  color:var(--text-secondary)}
 .expanded-beat {
   display:flex;
   flex-direction:column;

@@ -10,6 +10,7 @@ import { button, FieldError, focusFirst, friendlyError, iconButton, labelled, op
 import { isTextField, typingStepIdleMs, type DraftStep, type DraftStepRecord, type HistoryDirection } from "./project-history.ts";
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenEffects, ScreenRevisions, ScreenTargetBinding } from "./screen-contracts.ts";
 import { laneGrips, resizeGrip, watchHiddenLanes, type FocusWidths } from "./story-focus.ts";
+import type { IncomingReferences } from "./protocol.ts";
 import { armOf, beatBody, beatNumbers, bodyOf, bodyOwner, laneOf, nodeBeats, nodeRef, ownedBodies, pinRouteLabels, protectedRegion, renderBranchPath, renderMarksLegend, renderRoute, renderTracksKey, renderViewSwitch, sameBody, sameNode, samePosition, shorten, stageBeatsAbove, trackCopy, trackRoute, unknownCause, endingBeat, type PendingBeat, type RouteView, viewName } from "./story-tracks.ts";
 export type PlacementRef = "left" | "centre" | "right";
 export type TransitionRef = "none" | "dissolve" | "fade";
@@ -792,6 +793,8 @@ export function renderStoryView(
       return true;
     } catch (error) {
       if (disposed || actions.current?.() === false) return false;
+      const references = (error as { references?: IncomingReferences }).references;
+      if (command.type === "deleteScene" && typeof command.sceneId === "string" && references) { refuseSceneDelete(command.sceneId, references); return false; }
       if (staleStatus && (error as { code?: string }).code === "SOURCE_CONFLICT" && actions.load) {
         if (await reload()) actions.status(staleStatus, "error");
         return false;
@@ -1124,6 +1127,36 @@ export function renderStoryView(
       return mutate(command(displayName), undefined, expected, panel);
     });
   };
+  // A refused scene delete takes the confirmation's place under the scene's row and names
+  // what refuses it (story-release-fixes / a-v2). Each row opens its beat.
+  const refuseSceneDelete = (sceneId: string, references: IncomingReferences): void => {
+    const row = [...treeHost.querySelectorAll<HTMLElement>(".tree-scene-row")].find(item => item.dataset.sceneId === sceneId), name = model.scenes.find(item => item.id === sceneId)?.displayName ?? "this scene";
+    actions.status(`Can't delete "${name}". Nothing was deleted.`, "error");
+    if (!row) return;
+    row.querySelector(":scope > .confirm-row")?.remove(); row.querySelector("details.tree-menu")?.removeAttribute("open");
+    const { intro, tail } = refusalCopy(sceneId, references), lead = document.createElement("b"); lead.textContent = `Can't delete "${name}".`;
+    const block = document.createElement("div"); block.className = "story-scene-refusal"; block.role = "alert"; block.tabIndex = -1;
+    const head = document.createElement("div"); head.className = "story-refusal-head";
+    const copy = document.createElement("p"); copy.append(lead, ` ${intro}`);
+    const close = iconButton("close", "Close", () => { block.remove(); row.querySelector<HTMLElement>(".tree-scene-open")?.focus(); }); head.append(copy, close);
+    const rows = document.createElement("div"); rows.className = "story-refusal-rows";
+    for (const item of [...references.beats, ...references.protectedCode]) {
+      const scene = model.scenes.find(entry => entry.id === item.sceneId), number = scene ? beatNumbers(scene).get(item.beatId) ?? "" : "";
+      const open = document.createElement("button"); open.type = "button"; open.className = "story-refusal-row";
+      const where = document.createElement("span"); where.textContent = item.sceneName; const what = document.createElement("span"); what.textContent = `${number} ${beatLabels[item.kind as BeatPayload["type"]] ?? item.kind}`.trim();
+      open.append(where, what); open.title = `${where.textContent} · ${what.textContent}`;
+      open.addEventListener("click", () => void settle().then(ok => {
+        const current = model.scenes.find(entry => entry.id === item.sceneId);
+        if (!ok || disposed || !current) return;
+        if (navigate(() => { selectScene(current.id); selectBeat(current, item.beatId); })) focusColumn(item.beatId);
+      }));
+      rows.append(open);
+    }
+    const end = document.createElement("p"); end.className = "story-refusal-tail"; end.textContent = tail;
+    block.append(head, rows, end);
+    if (row.nextElementSibling?.matches(".story-scene-refusal")) row.nextElementSibling.remove();
+    row.after(block); block.focus();
+  };
   const drawTree = (selectedScene: SceneDocument): void => {
     const heading = document.createElement("div"); heading.className = "tree-heading";
     const label = document.createElement("p"); label.className = "eyebrow"; label.textContent = "Story tree";
@@ -1144,8 +1177,15 @@ export function renderStoryView(
       const remove = button("Delete", "icon-button"); remove.ariaLabel = `Delete empty chapter ${chapter.displayName}`;
       remove.disabled = model.chapters.length === 1 || model.scenes.some((scene) => scene.chapterId === chapter.id);
       remove.addEventListener("click", () => confirmAction(chapterGroup, `Delete empty chapter “${chapter.displayName}”?`, () => mutate({ type: "deleteChapter", chapterId: chapter.id })));
-      tools.append(rename, up, down, remove); const disclosure=button(collapsedChapters.has(chapter.id)?"▸":"▾","icon-button chapter-disclosure");disclosure.ariaLabel=`Toggle chapter ${chapter.displayName}`;disclosure.ariaExpanded=String(!collapsedChapters.has(chapter.id));
-      disclosure.onclick=()=>{const collapsed=!collapsedChapters.has(chapter.id);if(collapsed)collapsedChapters.add(chapter.id);else collapsedChapters.delete(chapter.id);chapterGroup.querySelectorAll<HTMLElement>(".tree-scene-row,.tree-new-scene").forEach(e=>e.hidden=collapsed);disclosure.textContent=collapsed?"▸":"▾";disclosure.ariaExpanded=String(!collapsed);};row.append(disclosure,name, treeMenu(tools)); chapterGroup.append(row);
+      tools.append(rename, up, down, remove);
+      // The chapter is a heading that collapses its scenes (story-release-fixes / a-v2).
+      // Collapsing is view state only. The scenes sit under a guide line.
+      const group = document.createElement("div"); group.className = "tree-chapter-scenes"; group.id = `tree-chapter-${chapterIndex}`; group.role = "group"; group.ariaLabel = chapter.displayName;
+      const disclosure = document.createElement("button"); disclosure.type = "button"; disclosure.className = "tree-chapter-toggle"; disclosure.setAttribute("aria-controls", group.id);
+      const caret = document.createElement("span"); caret.className = "tree-chapter-caret"; caret.ariaHidden = "true"; disclosure.append(caret, name);
+      const show = (): void => { const collapsed = collapsedChapters.has(chapter.id); group.hidden = collapsed; caret.textContent = collapsed ? "▸" : "▾"; disclosure.ariaExpanded = String(!collapsed); };
+      disclosure.addEventListener("click", () => { if (!collapsedChapters.delete(chapter.id)) collapsedChapters.add(chapter.id); show(); });
+      row.append(disclosure, treeMenu(tools)); chapterGroup.append(row, group); show();
       const scenes = model.scenes.filter((scene) => scene.chapterId === chapter.id);
       scenes.forEach((scene, sceneIndex) => {
         const sceneRow = document.createElement("div"); sceneRow.className = `tree-scene-row${scene.id === selectedScene.id ? " selected" : ""}`; sceneRow.dataset.sceneId = scene.id;
@@ -1161,7 +1201,7 @@ export function renderStoryView(
         moveDown.addEventListener("click", () => void mutate({ type: "moveScene", sceneId: scene.id, chapterId: chapter.id, direction: "down", expectedSourceRevision: scene.sourceRevision }));
         const removeScene = button("Delete", "icon-button"); removeScene.ariaLabel = `Delete scene ${scene.displayName}`;
         removeScene.disabled = scene.id === model.entrySceneId || model.scenes.length === 1;
-        removeScene.addEventListener("click", () => confirmAction(sceneRow, `Delete Scene “${scene.displayName}”? Incoming or opaque references will refuse this operation.${pendingDrafts(scene.id).length ? " Its unsaved beat drafts are discarded." : ""}`, () => mutate({ type: "deleteScene", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision })));
+        removeScene.addEventListener("click", () => { if (sceneRow.nextElementSibling?.matches(".story-scene-refusal")) sceneRow.nextElementSibling.remove(); confirmAction(sceneRow, `Delete scene "${scene.displayName}"? Undo restores it.${pendingDrafts(scene.id).length ? " Its unsaved beat drafts are discarded." : ""}`, () => mutate({ type: "deleteScene", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision })); });
         controls.append(renameScene, moveUp, moveDown, removeScene);
         if (model.chapters.length > 1) {
           const target = entitySelect(model.chapters.filter((item) => item.id !== chapter.id).map((item) => ({ id: item.id, label: item.displayName })));
@@ -1169,12 +1209,12 @@ export function renderStoryView(
           const move = button("Move", "icon-button"); move.addEventListener("click", () => void mutate({ type: "moveScene", sceneId: scene.id, chapterId: target.value, direction: null, expectedSourceRevision: scene.sourceRevision }));
           controls.append(target, move);
         }
-        sceneRow.append(open, treeMenu(controls)); chapterGroup.append(sceneRow);
+        sceneRow.append(open, treeMenu(controls)); group.append(sceneRow);
       });
       const newScene = button("+ New Scene", "tree-new-scene");
       newScene.addEventListener("click", () => treeName(chapterGroup, "Scene name", "New Scene", displayName => ({ type: "createScene", chapterId: chapter.id, displayName })));
-      if(actions.assist){const draft=button("Assist · Draft Scene","tree-new-scene");draft.ariaLabel=`Draft Scene in ${chapter.displayName}`;draft.onclick=()=>{if(draftGuard())actions.assist?.(chapter.id,"","draftScene");};chapterGroup.append(draft);}
-      chapterGroup.append(newScene);chapterGroup.querySelectorAll<HTMLElement>(".tree-scene-row,.tree-new-scene").forEach(e=>e.hidden=collapsedChapters.has(chapter.id)); treeHost.append(chapterGroup);
+      if(actions.assist){const draft=button("Assist · Draft Scene","tree-new-scene");draft.ariaLabel=`Draft Scene in ${chapter.displayName}`;draft.onclick=()=>{if(draftGuard())actions.assist?.(chapter.id,"","draftScene");};group.append(draft);}
+      group.append(newScene); treeHost.append(chapterGroup);
     });
   };
 
@@ -2576,6 +2616,16 @@ function inlineName(host: HTMLElement, label: string, current: string, commit: (
   cancel.addEventListener("click", () => panel.remove()); panel.append(labelled(label, name), cancel, save); dirtyDraft(panel, [name]); host.append(panel); name.select();
 }
 
+/** What a scene delete refusal says about its references: the beats that go to the scene,
+ *  Custom Code elsewhere that may jump to it, and Custom Code inside it that the delete
+ *  would drop. */
+function refusalCopy(sceneId: string, references: IncomingReferences): { readonly intro: string; readonly tail: string } {
+  const beats = references.beats.length, inside = references.protectedCode.some(item => item.sceneId === sceneId), elsewhere = references.protectedCode.some(item => item.sceneId !== sceneId);
+  if (!beats && !inside) return { intro: "Custom Code may jump to it, and Loomlight can't check where it goes:", tail: "Change that code in Source first. Nothing was deleted." };
+  const parts = [...beats ? [`${beats} ${beats === 1 ? "beat goes" : "beats go"} to it`] : [], ...elsewhere ? ["Custom Code may jump to it"] : [], ...inside ? ["it holds Custom Code that deleting would drop"] : []];
+  const intro = parts.join(", and ");
+  return { intro: `${intro[0]!.toUpperCase()}${intro.slice(1)}:`, tail: beats ? "Change or remove them, then delete again. Nothing was deleted." : "Change that code in Source first. Nothing was deleted." };
+}
 function confirmAction(host: HTMLElement, copy: string, commit: () => Promise<unknown>): void {
   if (host.querySelector(":scope > .confirm-row")) return;
   const panel = document.createElement("div"); panel.className = "confirm-row"; const text = document.createElement("span"); text.textContent = copy;
