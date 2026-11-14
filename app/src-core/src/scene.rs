@@ -220,6 +220,20 @@ fn opaque_source(beat: &SceneBeat) -> bool {
         })
 }
 
+/// Whether `source` holds `label` as a whole Ren'Py name, as any static jump, call or
+/// action string that reaches the label must.
+fn names_label(source: &[u8], label: &str) -> bool {
+    let name = |byte: &u8| byte.is_ascii_alphanumeric() || *byte == b'_';
+    source
+        .windows(label.len())
+        .enumerate()
+        .any(|(start, window)| {
+            window == label.as_bytes()
+                && !source[..start].last().is_some_and(name)
+                && !source.get(start + label.len()).is_some_and(name)
+        })
+}
+
 fn is_terminal_payload(payload: &BeatPayload) -> bool {
     matches!(
         payload,
@@ -2181,6 +2195,13 @@ impl AuthoringService {
         loaded: &Loaded,
         scene_id: &str,
     ) -> Result<(), SceneError> {
+        let label = &loaded
+            .project
+            .scenes
+            .iter()
+            .find(|scene| scene.id == scene_id)
+            .ok_or(SceneError::UnknownEntity)?
+            .technical_label;
         for scene in &loaded.project.scenes {
             let stored = loaded
                 .source_map
@@ -2204,8 +2225,15 @@ impl AuthoringService {
                     &loaded.source_map.owned_screens,
                 )),
             )?;
+            // Protected source elsewhere can reach the Scene only by naming its label.
+            // The Scene's own protected source still blocks: deleting would drop it.
             if beats.iter().any(|beat| {
                 opaque_source(beat)
+                    && (scene.id == scene_id
+                        || names_label(
+                            &bytes[beat.byte_start as usize..beat.byte_end as usize],
+                            label,
+                        ))
                     || match &beat.payload {
                         BeatPayload::Jump { scene_id: target }
                         | BeatPayload::Call {
@@ -6287,6 +6315,61 @@ mod tests {
                 }
             ),
             Err(SceneError::SourceConflict)
+        ));
+    }
+
+    #[test]
+    fn protected_source_blocks_a_scene_delete_only_when_it_names_the_scene() {
+        let fixture =
+            Fixture::new(b"label scene_one:\n    python:\n        score += 1\n    return\n");
+        fixture.migrate();
+        let create = |workspace: &SceneWorkspace, name: &str| {
+            fixture
+                .apply(
+                    workspace,
+                    SceneCommand::CreateScene {
+                        chapter_id: workspace.chapters[0].id.clone(),
+                        display_name: name.into(),
+                    },
+                )
+                .unwrap()
+        };
+        let named = |workspace: &SceneWorkspace, name: &str| {
+            workspace
+                .scenes
+                .iter()
+                .find(|scene| scene.display_name == name)
+                .unwrap()
+                .clone()
+        };
+        let delete = |workspace: &SceneWorkspace, scene: &SceneDocument| {
+            fixture.apply(
+                workspace,
+                SceneCommand::DeleteScene {
+                    scene_id: scene.id.clone(),
+                    expected_source_revision: scene.source_revision.clone(),
+                },
+            )
+        };
+        let workspace = create(&create(&fixture.workspace(), "Empty"), "Named");
+        let named_scene = named(&workspace, "Named");
+        let entry_path = fixture.root.join(&workspace.scenes[0].source_path);
+        fs::write(
+            &entry_path,
+            format!(
+                "label scene_one:\n    python:\n        score += 1\n    $ renpy.jump(\"{}\")\n    return\n",
+                named_scene.technical_label
+            ),
+        )
+        .unwrap();
+        let workspace = fixture.workspace();
+        // Nothing names Empty, so the protected code elsewhere cannot reach it.
+        let workspace = delete(&workspace, &named(&workspace, "Empty")).unwrap();
+        assert!(workspace.scenes.iter().all(|s| s.display_name != "Empty"));
+        // Protected code that names a Scene's label may reach it.
+        assert!(matches!(
+            delete(&workspace, &named(&workspace, "Named")),
+            Err(SceneError::ReferenceBlocked)
         ));
     }
 
