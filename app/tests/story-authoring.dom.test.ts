@@ -244,6 +244,24 @@ test("the Transition editor names the stage beats it animates, back to the last 
   await s.close();
 });
 
+test("a Transition lists the Show and Hide screen beats above it, stops at Call screen, and climbs out of an Else if", async () => {
+  const panel = { screenId: "panel-id", sourceName: "timetable" }, notice = { screenId: "notice-id", sourceName: "notice" };
+  const header = (id: string, ordinal: number): SceneBeat => storyBeat(id, { type: "customCode", source: "", reason: "Condition header" }, { protected: true, conditionalBranch: { groupId: "late", ordinal, otherwise: false, condition: { status: "supported", expression: { type: "variable", variableId: "flag", variableType: "bool" } } } });
+  const s = mountStory(editorProject([
+    storyBeat("words", { type: "narration", text: "The timetable has not changed in thirty years." }),
+    storyBeat("dialog", { type: "callScreen", target: notice }),
+    storyBeat("bg", { type: "background", assetId: "platform", transition: "none" }),
+    storyBeat("panel", { type: "showScreen", target: panel }),
+    storyBeat("hide", { type: "hideScreen", target: notice }),
+    header("if", 0), storyBeat("in-if", { type: "narration", text: "She nods." }, { owner: { groupId: "late", branchId: "if" } }),
+    header("elif", 1), storyBeat("fade", { type: "transition", transition: "fade" }, { owner: { groupId: "late", branchId: "elif" } }),
+    storyBeat("close", { type: "narration", text: "The doors close behind them." }),
+  ]));
+  const help = selectBeat(s.host, "fade", "elif").querySelector<HTMLElement>(".story-transition-help")!;
+  assert.deepEqual(texts(help, "p, li").slice(0, 4), ["This fade animates 3 beats above it:", "03 Background · Rainy platform", "04 Show screen · timetable", "05 Hide screen · notice"]);
+  await s.close();
+});
+
 test("Add a beat describes Transition by what it animates, and a new Transition names the beats above its place", async () => {
   const s = mountStory(editorProject([
     storyBeat("bg", { type: "background", assetId: "platform", transition: "none" }),

@@ -2645,8 +2645,9 @@ function confirmAction(host: HTMLElement, copy: string, commit: () => Promise<un
   const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => panel.remove()); const confirm = button(confirmLabel, "button danger"); confirm.addEventListener("click", () => void commit()); panel.append(text, cancel, confirm); host.append(panel);
 }
 
-/** What a stage beat changes, by name: the background, or the character. */
+/** What a stage beat changes, by name: the background, the character, or the screen. */
 function stageSubject(payload: BeatPayload, model: SceneWorkspace): string {
+  if (payload.type === "showScreen" || payload.type === "hideScreen" || payload.type === "callScreen") return payload.target.sourceName;
   if (payload.type === "background") return model.authoring.assets.find(item => item.id === payload.assetId)?.displayName ?? "Unknown Asset";
   return "characterId" in payload ? model.authoring.characters.find(item => item.id === payload.characterId)?.displayName ?? "Unknown Character" : beatLabels[payload.type];
 }

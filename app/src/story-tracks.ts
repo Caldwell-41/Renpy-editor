@@ -65,12 +65,15 @@ export function bodyOwner(scene: SceneDocument, body: BodyRef): SceneBeat | unde
  * animates the stage changes since the previous interaction, so the walk goes back to the
  * last line, choice, transition or other interaction. A stage beat with its own transition
  * ran it, so it ends the walk too. A branch's first place continues above its condition;
- * a Choice option's begins after the Choice. Music, sound, variables and screens change
- * no stage and are passed over. Another condition above ends the walk.
+ * a Choice option's begins after the Choice. Show screen and Hide screen count: with
+ * `config.transition_screens` (true by default) the transition also animates screens shown
+ * or hidden since the last interaction. Call screen is an interaction and ends the walk.
+ * Music, sound and variables change no stage and are passed over. Another condition above
+ * ends the walk.
  */
 export function stageBeatsAbove(scene: SceneDocument, body: BodyRef, position: Position): SceneBeat[] {
-  const stage = new Set<BeatPayload["type"]>(["background", "showCharacter", "hideCharacter", "changeAppearance", "placement"]);
-  const passed = new Set<BeatPayload["type"]>(["playMusic", "stopMusic", "playSfx", "setVariable", "showScreen", "hideScreen"]);
+  const stage = new Set<BeatPayload["type"]>(["background", "showCharacter", "hideCharacter", "changeAppearance", "placement", "showScreen", "hideScreen"]);
+  const passed = new Set<BeatPayload["type"]>(["playMusic", "stopMusic", "playSfx", "setVariable"]);
   const found: SceneBeat[] = [];
   let nodes = nodeBeats(scene, body), at = position.type === "end" ? nodes.length : nodes.findIndex(node => sameNode(nodeRef(node), position.anchor));
   for (let depth = 0; depth <= MAX_NESTING && at >= 0; depth++) {

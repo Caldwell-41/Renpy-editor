@@ -600,6 +600,9 @@ a beat follow `story-combined-editor` / `replace-v2`
   those beats ("This fade animates 2 beats above it:") and says to move the Transition
   under a beat to animate it (`story-release-fixes` / `a-v2`). A stage beat with its
   own transition ends the list, and a branch's first beats continue above its condition.
+  Show screen and Hide screen beats are listed too, because Ren'Py's
+  `config.transition_screens` (true by default) also animates screens shown or hidden
+  since the last interaction. Call screen is an interaction and ends the list.
 - Selecting a character or the background on the stage names the beat that set it, and
   offers to edit that beat or add a change before the current beat in the same scene,
   branch or option. It never edits the earlier beat silently.
