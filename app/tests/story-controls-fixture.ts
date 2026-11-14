@@ -26,7 +26,8 @@ export function sceneBodies(beats: readonly SceneBeat[], ends: readonly string[]
     const trivia = (beat: SceneBeat): boolean => !beat.conditionalBranch && beat.payload.type === "customCode" && (!beat.payload.source.trim() || beat.payload.source.trim().startsWith("#"));
     const nodes = beats.filter(beat => owned(shell.body, beat) && !trivia(beat) && !beat.structuralPlaceholder && !beat.conditionalBranch?.choiceOption && !beat.conditionalBranch?.otherwise && !beat.conditionalBranch?.ordinal);
     const ending = nodes.findIndex(beat => ends.includes(beat.id) || ["jump", "repeatChoice", "return"].includes(beat.payload.type)), reached = ending < 0 ? nodes : nodes.slice(0, ending + 1);
-    const places: InsertionPlace[] = reached.filter(beat => !beat.protected || beat.conditionalBranch).map(beat => ({ position: { type: "before" as const, anchor: beat.conditionalBranch ? { type: "condition" as const, groupId: beat.conditionalBranch.groupId } : { type: "beat" as const, beatId: beat.id } }, fitsEnding: false }));
+    // As core lists them: a place before every node, protected Custom Code included.
+    const places: InsertionPlace[] = reached.map(beat => ({ position: { type: "before" as const, anchor: beat.conditionalBranch ? { type: "condition" as const, groupId: beat.conditionalBranch.groupId } : { type: "beat" as const, beatId: beat.id } }, fitsEnding: false }));
     if (ending < 0) places.push({ position: { type: "end" }, fitsEnding: true });
     return { ...shell, nodes: nodes.map(beat => ({ beatId: beat.id, bodies: shells.filter(item => item.owningNode === beat.id).map(item => item.body) })),
       ending: ending < 0 ? { type: "continues" as const } : { type: "ends" as const, beatId: nodes[ending]!.id }, places, defaultPlace: ending < 0 ? { type: "end" as const } : places.at(-1)?.position };

@@ -2,9 +2,11 @@
 // its options in source order, with "Before …" and "End of …" positions from core's
 // insertion places. It opens on the beat's own location, with the rest closed. The tree
 // is one tab stop: Up and Down move, Right opens or moves in, Left closes or moves out,
-// Enter selects and Escape cancels.
+// Enter selects and Escape cancels. Rows that can't be chosen, such as protected Custom
+// Code, show in place and are passed over.
 import type { BodyRef, Position } from "./scene-ui.ts";
 import { button, element, iconButton } from "./story-editor-controls.ts";
+import { storyIcon } from "./story-icons.ts";
 
 /** A scene, branch or option with its positions and inner places, or one position. */
 export interface PlaceNode {
@@ -15,6 +17,8 @@ export interface PlaceNode {
   readonly children?: readonly PlaceNode[];
   /** For a position: where the beat would go. */
   readonly place?: { readonly body: BodyRef; readonly position: Position };
+  /** A row that can't be chosen: protected Custom Code, or the moved beat's own place. */
+  readonly note?: "locked" | "here";
 }
 export interface PlaceTreeOptions {
   readonly host: HTMLElement;
@@ -26,6 +30,8 @@ export interface PlaceTreeOptions {
   readonly expanded: readonly string[];
   /** The position chosen at the start, if any. */
   readonly chosen?: string;
+  /** The summary until a place or position is selected: where the beat is now. */
+  readonly idle?: string;
   /** Moves the beat. Resolves true once it moved; the dialog then closes. */
   readonly move: (place: { readonly body: BodyRef; readonly position: Position }) => Promise<boolean>;
 }
@@ -39,7 +45,7 @@ export function openPlaceTree(options: PlaceTreeOptions): void {
   let chosen = options.chosen && nodes.get(options.chosen)?.place ? options.chosen : undefined;
   let focusId = chosen ?? options.expanded.at(-1) ?? options.tree.id;
   // The place the summary names while no position is chosen.
-  let pickedPlace = chosen ? parents.get(chosen)! : focusId;
+  let pickedPlace = chosen ? parents.get(chosen)! : focusId, idle = chosen ? undefined : options.idle;
   let busy = false;
   const backdrop = element("div", "story-dialog-backdrop");
   const dialog = element("div", "story-dialog story-move"); dialog.role = "dialog"; dialog.setAttribute("aria-modal", "true"); dialog.setAttribute("aria-label", options.title); dialog.tabIndex = -1;
@@ -53,12 +59,19 @@ export function openPlaceTree(options: PlaceTreeOptions): void {
   dialog.append(head, element("p", "story-dialog-note", options.note), tree, summary, element("p", "story-hint", "Arrow keys move · Right opens · Left closes · Enter selects · Escape cancels"), actions);
   backdrop.append(dialog);
   const visible = (node: PlaceNode = options.tree): PlaceNode[] => [node, ...node.children && expanded.has(node.id) ? node.children.flatMap(child => visible(child)) : []];
+  const reachable = (): PlaceNode[] => visible().filter(node => !node.note);
   const level = (id: string): number => { let depth = 1; for (let at = parents.get(id); at; at = parents.get(at)) depth++; return depth; };
   const draw = (refocus = false): void => {
     tree.replaceChildren();
     for (const node of visible()) {
       const item = element("li", node.children ? "story-place" : "story-position"); item.role = "treeitem"; item.dataset.node = node.id;
       item.setAttribute("aria-level", String(level(node.id))); item.style.setProperty("--depth", String(level(node.id) - 1)); item.tabIndex = node.id === focusId ? 0 : -1;
+      if (node.note) {
+        // Shown in source order, never chosen or focused.
+        item.className = `story-position story-place-fixed story-place-${node.note}`; item.setAttribute("aria-disabled", "true"); item.removeAttribute("tabindex");
+        const mark = element("span", "story-place-mark", node.note === "here" ? "◆" : ""); mark.setAttribute("aria-hidden", "true"); if (node.note === "locked") mark.append(storyIcon("lock"));
+        item.append(mark, element("span", "", node.label)); tree.append(item); continue;
+      }
       if (node.children) item.setAttribute("aria-expanded", String(expanded.has(node.id))); else item.setAttribute("aria-selected", String(node.id === chosen));
       const mark = element("span", "story-place-mark", node.children ? expanded.has(node.id) ? "▾" : "▸" : node.id === chosen ? "●" : "○"); mark.setAttribute("aria-hidden", "true");
       item.append(mark, element("span", "", node.label));
@@ -66,20 +79,20 @@ export function openPlaceTree(options: PlaceTreeOptions): void {
       tree.append(item);
     }
     const position = chosen ? nodes.get(chosen) : undefined;
-    summary.textContent = position ? `Move to ${nodes.get(parents.get(position.id)!)?.path ?? ""} · ${position.label}` : `Choose an available position in ${nodes.get(pickedPlace)?.label ?? options.tree.label}.`;
+    summary.textContent = position ? `Move to ${nodes.get(parents.get(position.id)!)?.path ?? ""} · ${position.label}` : idle ?? `Choose an available position in ${nodes.get(pickedPlace)?.label ?? options.tree.label}.`;
     summary.classList.toggle("story-summary-choose", !position);
     if (refocus) tree.querySelector<HTMLElement>('[tabindex="0"]')?.focus();
   };
   /** Selecting a position chooses it. Selecting a place opens it and asks for a position there. */
   const select = (node: PlaceNode): void => {
-    focusId = node.id;
+    focusId = node.id; idle = undefined;
     if (node.children) { expanded.add(node.id); pickedPlace = node.id; chosen = undefined; } else { chosen = node.id; pickedPlace = parents.get(node.id)!; }
   };
   tree.addEventListener("keydown", event => {
-    const list = visible(), at = list.findIndex(node => node.id === focusId), node = list[at]; if (!node) return;
+    const list = reachable(), at = list.findIndex(node => node.id === focusId), node = list[at]; if (!node) return;
     if (event.key === "ArrowDown") focusId = list[at + 1]?.id ?? focusId;
     else if (event.key === "ArrowUp") focusId = list[at - 1]?.id ?? focusId;
-    else if (event.key === "ArrowRight") { if (node.children && !expanded.has(node.id)) expanded.add(node.id); else if (node.children?.[0]) focusId = node.children[0].id; }
+    else if (event.key === "ArrowRight") { if (node.children && !expanded.has(node.id)) expanded.add(node.id); else { const first = node.children?.find(child => !child.note); if (first) focusId = first.id; } }
     else if (event.key === "ArrowLeft") { if (node.children && expanded.has(node.id)) expanded.delete(node.id); else focusId = parents.get(node.id) ?? focusId; }
     else if (event.key === "Enter") select(node);
     else return;

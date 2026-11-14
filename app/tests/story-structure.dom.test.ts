@@ -122,15 +122,16 @@ test("nested Otherwise creation and condition editing use group-parent qualifica
   assert.equal(s.calls[1]!.command.type, "updateConditionBranch"); assert.deepEqual(s.calls[1]!.command.expectedBody, { type: "branch", groupId: "group", branchId: "if" }); await s.close();
 });
 
-test("Move to opens on the beat's own place, leaves its place out and keeps the choice on core refusal", async () => {
+test("Move to opens on the beat's own place with nothing chosen, leaves its place out and keeps the choice on core refusal", async () => {
   const s = setup(async () => { throw Error("Cannot safely promote inline comments. Use Source."); }); button(selectBeat(s.host, "a", "if"), "Move to…").click();
   const dialog = s.host.querySelector<HTMLElement>(".story-move")!; assert.equal(dialog.getAttribute("aria-label"), "Move 01.1 Narration");
   const items = (): { text: string; level: string; open: string | null; chosen: string | null }[] => [...dialog.querySelectorAll<HTMLElement>("[role=treeitem]")].map(item => ({ text: item.textContent!.slice(1), level: item.getAttribute("aria-level")!, open: item.getAttribute("aria-expanded"), chosen: item.getAttribute("aria-selected") }));
   // The scene and If are open; the other branches stay closed. 01.1 and the place after it are left out.
   assert.deepEqual(items().filter(item => item.open !== null).map(item => [item.text, item.open]), [["Arrival", "true"], ["If flag", "true"], ["If (trust is at least 5)", "false"], ['Else if (trust is at least 5)', "false"], ["Otherwise", "false"]]);
   assert.ok(!items().some(item => item.text === "Before 01.1 Narration" || item.text === "Before 01.2 Narration"));
-  assert.deepEqual(items().find(item => item.chosen === "true")?.text, "Before 01.3 Condition");
-  assert.equal(dialog.querySelector(".story-summary")!.textContent, "Move to Arrival › If flag · Before 01.3 Condition");
+  assert.equal(items().find(item => item.text === "01.1 Narration · here now")?.chosen, null);
+  assert.equal(items().find(item => item.chosen === "true"), undefined);
+  assert.equal(dialog.querySelector(".story-summary")!.textContent, "01.1 Narration is first in If flag now. Choose where to move it.");
   // Keyboard: Down to the Otherwise branch, Right opens it, Down and Enter choose its end.
   const tree = dialog.querySelector<HTMLElement>("[role=tree]")!; const key = (name: string): void => { tree.dispatchEvent(new KeyboardEvent("keydown", { key: name, bubbles: true })); };
   while (document.activeElement?.textContent !== "▸Otherwise") key("ArrowDown");
@@ -147,6 +148,9 @@ test("Move to opens on the beat's own place, leaves its place out and keeps the 
 test("whole condition move excludes own descendant bodies; headers never become ordinary Beat targets", async () => {
   const s = setup(); button(selectBeat(s.host, "if"), "Move to…").click(); const dialog = s.host.querySelector<HTMLElement>(".story-move")!;
   assert.deepEqual([...dialog.querySelectorAll<HTMLElement>('[role=treeitem][aria-expanded]')].map(item => item.textContent), ["▾Arrival"]);
+  // Move needs a chosen place.
+  button(dialog, "Move").click(); await tick(); assert.equal(s.calls.length, 0);
+  dialog.querySelector<HTMLElement>("[role=treeitem][aria-selected]")!.click();
   button(dialog, "Move").click(); await tick(); assert.deepEqual(s.calls[0]!.command.node, { type: "condition", groupId: "group" });
   // An Else If header is a branch of its condition, never a Tracks beat of its own.
   openBranch(s.host, "elif"); assert.equal(trackColumn(s.host, "elif"), undefined); assert.ok(trackColumn(s.host, "maybe")); await s.close();

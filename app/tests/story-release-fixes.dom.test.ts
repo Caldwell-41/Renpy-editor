@@ -4,7 +4,7 @@ import test from "node:test";
 import { Window } from "happy-dom";
 import type { Condition, SceneActions, SceneBeat, SceneCommand, SceneWorkspace } from "../src/scene-ui.js";
 import { buildRuleBuilder } from "../src/story-condition-editor.js";
-import { chooseIn, choosePlace, editorFixture, pickKind, press, renderStoryView, sceneBodies, selectBeat, storyEditor } from "./story-controls-fixture.js";
+import { chooseIn, choosePlace, editorFixture, pickKind, press, renderStoryView, sceneBodies, selectBeat, storyEditor, type } from "./story-controls-fixture.js";
 const tick = async (): Promise<void> => { await new Promise(resolve => setTimeout(resolve, 0)); };
 
 /** editorFixture's project, with scene one holding `beats`. */
@@ -243,3 +243,62 @@ test("a place picked in Screens that changed reads Choose a place, and Add Beat 
   assert.deepEqual(s.calls.length, 1);
   await s.close();
 });
+
+/** The last service with protected Custom Code at 04, between Mara's line and Eli's line. */
+const protectedScene = (): SceneWorkspace => project([
+  beat("bg", { type: "background", assetId: "platform", transition: "none" }),
+  beat("show", { type: "showCharacter", characterId: "mara", appearanceId: "mara-neutral", placement: "centre", transition: "none" }),
+  beat("line", { type: "dialogue", characterId: "mara", text: "You heard the bell too?" }),
+  beat("code", { type: "customCode", source: "    $ renpy.notify(\"Last call\")", reason: "Custom Code" }, { protected: true }),
+  beat("eli", { type: "dialogue", characterId: "eli", text: "Last call. Are you getting on?" }),
+  beat("close", { type: "narration", text: "The doors close behind them." }),
+]);
+
+test("the + on the beat before protected Custom Code adds right before the region", async () => {
+  const model = protectedScene(), s = mount(model);
+  const plus = s.host.querySelector<HTMLButtonElement>('.story-route [data-beat-opener="after:line"]')!;
+  assert.equal(plus.title, "Add after 03 Mara's line, before 04 Custom Code"); assert.equal(plus.ariaLabel, plus.title);
+  plus.click();
+  const panel = pickKind(s.host, "Narration");
+  assert.deepEqual(where(panel), ["Goes at", "Before 04 Custom Code", "In", "The last service", "After", "03 Mara's line"]);
+  type(panel.querySelector("textarea")!, "The bell rings twice.");
+  press(panel, "Add Beat"); await tick();
+  assert.deepEqual(s.calls.at(-1), { type: "insertBodyBeat", sceneId: "one", expectedSourceRevision: model.scenes[0]!.sourceRevision, body: { type: "root" }, position: { type: "before", anchor: { type: "beat", beatId: "code" } }, beat: { type: "narration", text: "The bell rings twice." } });
+  // The region itself adds after it.
+  assert.equal(s.host.querySelector<HTMLButtonElement>('.story-route [data-beat-opener="after:code"]')!.title, "Add after 04 Custom Code");
+  await s.close();
+});
+
+test("Move to lists the place before protected Custom Code, shows the region and the beat's own place, and preselects nothing", async () => {
+  const model = protectedScene(), s = mount(model);
+  press(selectBeat(s.host, "eli"), "Move to…");
+  const dialog = s.host.querySelector<HTMLElement>(".story-move")!;
+  const rows = (): string[] => [...dialog.querySelectorAll<HTMLElement>("[role=treeitem]")].map(item => `${item.getAttribute("aria-disabled") === "true" ? "-" : item.getAttribute("aria-selected") === "true" ? "*" : " "}${item.lastElementChild!.textContent}`);
+  // Before 06 Narration would leave 05 where it is, so it is not offered.
+  assert.deepEqual(rows(), [" The last service", " Before 01 Background", " Before 02 Show character", " Before 03 Mara's line", " Before 04 Custom Code",
+    "-04 Custom Code · protected, stays in place", "-05 Eli's line · here now", " End of scene"]);
+  assert.equal(dialog.querySelector(".story-dialog-note")!.textContent, "Moves this beat to the chosen scene, branch or option. Protected Custom Code stays where it is.");
+  assert.equal(dialog.querySelector(".story-summary")!.textContent, "05 Eli's line is after 04 Custom Code now. Choose where to move it.");
+  // A row that can't be chosen stays unchosen, by click and by keyboard.
+  const row = (text: string): HTMLElement => [...dialog.querySelectorAll<HTMLElement>("[role=treeitem]")].find(item => item.lastElementChild!.textContent === text)!;
+  row("04 Custom Code · protected, stays in place").click();
+  assert.equal(dialog.querySelector('[aria-selected="true"]'), null);
+  press(dialog, "Move"); await tick(); assert.deepEqual(s.calls, []);
+  const tree = dialog.querySelector<HTMLElement>("[role=tree]")!, key = (name: string): void => { tree.dispatchEvent(new KeyboardEvent("keydown", { key: name, bubbles: true })); };
+  row("Before 04 Custom Code").click(); key("ArrowDown");
+  assert.equal(document.activeElement!.textContent!.slice(1), "End of scene");
+  key("ArrowUp"); key("Enter");
+  assert.equal(dialog.querySelector(".story-summary")!.textContent, "Move to The last service · Before 04 Custom Code");
+  press(dialog, "Move"); await tick();
+  assert.deepEqual(s.calls.at(-1), { type: "moveStoryNode", sceneId: "one", expectedSourceRevision: model.scenes[0]!.sourceRevision, node: { type: "beat", beatId: "eli" }, expectedBody: { type: "root" }, body: { type: "root" }, position: { type: "before", anchor: { type: "beat", beatId: "code" } } });
+  await s.close();
+});
+
+test("Move to never offers the place that leaves a beat where it is", async () => {
+  const s = mount(protectedScene());
+  const offered = (id: string): string[] => { press(selectBeat(s.host, id), "Move to…"); const dialog = s.host.querySelector<HTMLElement>(".story-move")!; const list = texts(dialog, '[role=treeitem][aria-selected]').map(text => text.slice(1)); press(dialog, "Close without moving"); return list; };
+  assert.deepEqual(offered("line"), ["Before 01 Background", "Before 02 Show character", "Before 05 Eli's line", "Before 06 Narration", "End of scene"]);
+  assert.deepEqual(offered("close"), ["Before 01 Background", "Before 02 Show character", "Before 03 Mara's line", "Before 04 Custom Code", "Before 05 Eli's line"]);
+  await s.close();
+});
+

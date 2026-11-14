@@ -81,14 +81,19 @@ export function stageBeatsAbove(scene: SceneDocument, body: BodyRef, position: P
   }
   return found;
 }
+/** The node right after a node in its body, if any. */
+function nextNode(scene: SceneDocument, beat: SceneBeat): SceneBeat | undefined {
+  const nodes = bodyOf(scene, beatBody(beat))?.nodes ?? [], index = nodes.findIndex(node => node.beatId === beat.id);
+  return index < 0 ? undefined : nodes[index + 1] && beatOf(scene, nodes[index + 1]!.beatId);
+}
 /** The place right after a node in its body, when core offers one. */
 export function placeAfter(scene: SceneDocument, beat: SceneBeat): Position | undefined {
-  const body = beatBody(beat), info = bodyOf(scene, body), nodes = info?.nodes ?? [];
-  const index = nodes.findIndex(node => node.beatId === beat.id); if (index < 0) return undefined;
-  const next = nodes[index + 1] && beatOf(scene, nodes[index + 1]!.beatId);
-  const position: Position = next ? { type: "before", anchor: nodeRef(next) } : { type: "end" };
-  return info!.places.some(place => samePosition(place.position, position)) ? position : undefined;
+  const info = bodyOf(scene, beatBody(beat)); if (!info?.nodes.some(node => node.beatId === beat.id)) return undefined;
+  const next = nextNode(scene, beat), position: Position = next ? { type: "before", anchor: nodeRef(next) } : { type: "end" };
+  return info.places.some(place => samePosition(place.position, position)) ? position : undefined;
 }
+/** Protected Custom Code, which keeps its place: a move passes it, nothing goes inside it. */
+export function protectedRegion(beat: SceneBeat): boolean { return beat.protected && !beat.conditionalBranch; }
 /** The first place in a body: before its first node, or its only place when empty. */
 export function firstPlace(scene: SceneDocument, body: BodyRef): Position | undefined {
   return bodyOf(scene, body)?.places[0]?.position;
@@ -183,7 +188,7 @@ export const trackCopy = {
   pathTitle: "Branch path",
   noForks: "No conditions or choices in this scene.",
   choice: "Choice",
-  addAfter: (name: string, fork: "condition" | "choice" | undefined) => `Add after ${name}${fork === "choice" ? " and its options" : fork ? " and its branches" : ""}`,
+  addAfter: (name: string, fork: "condition" | "choice" | undefined, region?: string) => `Add after ${name}${fork === "choice" ? " and its options" : fork ? " and its branches" : ""}${region ? `, before ${region}` : ""}`,
   firstBeat: (branch: string) => `Add the first beat in ${branch}`,
   // Writing focus labels its markers.
   firstIn: (branch: string) => `+ First beat in ${branch}`,
@@ -226,6 +231,8 @@ export interface RouteContext {
   readonly selected?: string;
   readonly locked: boolean;
   readonly label: (beat: SceneBeat) => string;
+  /** A beat as a place names it: "Mara's line", or its kind. */
+  readonly name: (beat: SceneBeat) => string;
   readonly summary: (beat: SceneBeat) => string;
   readonly branchName: (header: SceneBeat) => string;
   /** How an end marker names its branch or option: "If trust ≥ 5" in quotes, option 2 "Leave", Otherwise. */
@@ -372,7 +379,9 @@ export function renderRoute(context: RouteContext): HTMLElement {
       const after = open ? undefined : placeAfter(scene, beat);
       if (after && !context.locked) {
         const add = action("+", "story-track-insert", () => context.insert(beatBody(beat), after, `after:${beat.id}`));
-        add.dataset.beatOpener = `after:${beat.id}`; add.ariaLabel = add.title = trackCopy.addAfter(`${number} ${context.label(beat)}`, fork);
+        // Before protected Custom Code, the + says the new beat goes right before the region.
+        const next = nextNode(scene, beat), region = next && protectedRegion(next) ? `${numbers.get(next.id) ?? ""} ${context.name(next)}` : undefined;
+        add.dataset.beatOpener = `after:${beat.id}`; add.ariaLabel = add.title = trackCopy.addAfter(`${number} ${context.name(beat)}`, fork, region);
         column.append(add);
       }
       grid.append(column);

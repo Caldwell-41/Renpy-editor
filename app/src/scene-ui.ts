@@ -10,7 +10,7 @@ import { button, FieldError, focusFirst, friendlyError, iconButton, labelled, op
 import { isTextField, typingStepIdleMs, type DraftStep, type DraftStepRecord, type HistoryDirection } from "./project-history.ts";
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenEffects, ScreenRevisions, ScreenTargetBinding } from "./screen-contracts.ts";
 import { laneGrips, resizeGrip, watchHiddenLanes, type FocusWidths } from "./story-focus.ts";
-import { armOf, beatBody, beatNumbers, bodyOf, bodyOwner, laneOf, nodeBeats, nodeRef, ownedBodies, pinRouteLabels, renderBranchPath, renderMarksLegend, renderRoute, renderTracksKey, renderViewSwitch, sameBody, sameNode, samePosition, shorten, stageBeatsAbove, trackCopy, trackRoute, unknownCause, endingBeat, type PendingBeat, type RouteView, viewName } from "./story-tracks.ts";
+import { armOf, beatBody, beatNumbers, bodyOf, bodyOwner, laneOf, nodeBeats, nodeRef, ownedBodies, pinRouteLabels, protectedRegion, renderBranchPath, renderMarksLegend, renderRoute, renderTracksKey, renderViewSwitch, sameBody, sameNode, samePosition, shorten, stageBeatsAbove, trackCopy, trackRoute, unknownCause, endingBeat, type PendingBeat, type RouteView, viewName } from "./story-tracks.ts";
 export type PlacementRef = "left" | "centre" | "right";
 export type TransitionRef = "none" | "dissolve" | "fade";
 
@@ -102,11 +102,13 @@ function endsBody(scene: SceneDocument, beat: SceneBeat): boolean {
   const ending = bodyOf(scene, beatBody(beat))?.ending;
   return ending?.type === "ends" && ending.beatId === beat.id;
 }
-/** Places for a moved node: the destination's places without the node's own place.
+/** Places for a moved node: the destination's places without the two that leave it where
+ *  it is, before itself and before the node after it (or the end, when it is last).
  *  A node that ends its body goes only where an ending fits. Core still checks the move. */
 function movePlaces(scene: SceneDocument, moved: SceneBeat, body: BodyRef): InsertionPlace[] {
-  const own = nodeRef(moved), ends = endsBody(scene, moved);
-  return (bodyOf(scene, body)?.places ?? []).filter(place => !(place.position.type === "before" && sameNode(place.position.anchor, own)) && (!ends || place.fitsEnding));
+  const ends = endsBody(scene, moved), siblings = nodeBeats(scene, body), at = siblings.indexOf(moved), next = siblings[at + 1];
+  const stays = (position: Position): boolean => at >= 0 && (position.type === "before" ? [moved, next].some(node => node && sameNode(position.anchor, nodeRef(node))) : !next);
+  return (bodyOf(scene, body)?.places ?? []).filter(place => !stays(place.position) && (!ends || place.fitsEnding));
 }
 /** Branch IDs of every body inside a condition or Choice, nested ones included. */
 function innerBodies(scene: SceneDocument, node: SceneBeat): Set<string> {
@@ -1686,16 +1688,21 @@ export function renderStoryView(
   };
   // The Move to tree: the scene, its branches and options in source order, each with its
   // "Before …" and "End of …" positions from core's places. `moved` is a node being moved:
-  // it never goes into its own branches, and its own place is left out.
-  const placeTree = (scene: SceneDocument, own: BodyRef, moved?: SceneBeat): { tree: PlaceNode; expanded: string[] } => {
-    const inner = moved ? innerBodies(scene, moved) : new Set<string>(), siblings = nodeBeats(scene, own), next = moved && siblings[siblings.indexOf(moved) + 1];
-    const stays = (body: BodyRef, position: Position): boolean => !!moved && sameBody(body, own) && (next ? position.type === "before" && sameNode(position.anchor, nodeRef(next)) : position.type === "end");
+  // it never goes into its own branches, and its places that leave it where it is are left
+  // out. Rows that can't be chosen name protected Custom Code and the node's own place
+  // (story-release-fixes / a-v2).
+  const placeTree = (scene: SceneDocument, own: BodyRef, moved?: SceneBeat): { tree: PlaceNode; expanded: string[]; region: boolean } => {
+    const inner = moved ? innerBodies(scene, moved) : new Set<string>();
+    let region = false;
     const build = (body: BodyRef, depth: number): PlaceNode => {
       const id = body.type === "root" ? "root" : body.branchId, children: PlaceNode[] = [];
-      const places = (moved ? movePlaces(scene, moved, body) : bodyOf(scene, body)?.places ?? []).filter(place => !stays(body, place.position));
+      const places = moved ? movePlaces(scene, moved, body) : bodyOf(scene, body)?.places ?? [];
       const position = (place: Position): void => { if (places.some(item => samePosition(item.position, place))) children.push({ id: `${id}:${children.length}`, label: positionLabel(scene, body, place), place: { body, position: place } }); };
+      const note = (node: SceneBeat, kind: "locked" | "here"): void => { children.push({ id: `${id}:${children.length}`, label: `${numbers.get(node.id) ?? ""} ${nodeName(node)} · ${kind === "locked" ? "protected, stays in place" : "here now"}`, note: kind }); };
       for (const node of nodeBeats(scene, body)) {
         position({ type: "before", anchor: nodeRef(node) });
+        if (moved && protectedRegion(node)) { note(node, "locked"); region = true; }
+        if (node === moved) note(node, "here");
         if (node === moved || depth > 32) continue;
         for (const child of ownedBodies(scene, node)) if (child.type === "branch" && !inner.has(child.branchId)) children.push(build(child, depth + 1));
       }
@@ -1704,19 +1711,20 @@ export function renderStoryView(
     };
     // It opens on the beat's own place: the scene, then each branch or option around it.
     const expanded = ["root"]; for (let at: BodyRef | undefined = own, steps = 0; at?.type === "branch" && steps <= 32; steps++) { expanded.splice(1, 0, at.branchId); at = bodyOf(scene, at)?.parent; }
-    return { tree: build({ type: "root" }, 0), expanded };
+    const tree = build({ type: "root" }, 0);
+    return { tree, expanded, region };
   };
   const findPlace = (node: PlaceNode, match: (node: PlaceNode) => boolean): PlaceNode | undefined => match(node) ? node : node.children?.map(child => findPlace(child, match)).find(Boolean);
-  // Move to (story-combined-editor / replace-v2), chosen at the first place after the beat in its own scene, branch or option.
+  // Move to (story-combined-editor / replace-v2) opens on the beat's own place with nothing
+  // chosen, and says where the beat is now (story-release-fixes / a-v2).
   const moveNodeForm = (scene: SceneDocument, beat: SceneBeat, opener?: HTMLElement): void => {
     if (!draftGuard()) return;
-    const own = beatBody(beat), siblings = nodeBeats(scene, own), { tree, expanded } = placeTree(scene, own, beat);
-    const positions = findPlace(tree, node => node.id === expanded.at(-1))?.children?.filter(child => child.place && sameBody(child.place.body, own)) ?? [];
-    const after = positions.find(child => { const place = child.place!.position; return place.type === "end" || siblings.findIndex(item => sameNode(nodeRef(item), place.anchor)) > siblings.indexOf(beat); }) ?? positions.at(-1);
-    const number = numbers.get(beat.id) ?? "";
+    const own = beatBody(beat), siblings = nodeBeats(scene, own), { tree, expanded, region } = placeTree(scene, own, beat);
+    const name = `${numbers.get(beat.id) ?? ""} ${beat.conditionalBranch ? "Condition" : nodeName(beat)}`, previous = siblings[siblings.indexOf(beat) - 1];
+    const now = previous ? `after ${numbers.get(previous.id) ?? ""} ${nodeName(previous)}` : `first in ${placeName(scene, own)}`;
     openPlaceTree({
-      host, opener: opener ?? null, title: `Move ${number} ${beat.conditionalBranch ? "Condition" : nodeName(beat)}`, tree, expanded, ...after ? { chosen: after.id } : {},
-      note: beat.conditionalBranch ? "Moves the entire condition and every branch together." : "Moves this beat to the chosen scene, branch or option.",
+      host, opener: opener ?? null, title: `Move ${name}`, tree, expanded, idle: `${name} is ${now} now. Choose where to move it.`,
+      note: `${beat.conditionalBranch ? "Moves the entire condition and every branch together." : "Moves this beat to the chosen scene, branch or option."}${region ? " Protected Custom Code stays where it is." : ""}`,
       move: place => mutate({ type: "moveStoryNode", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, node: nodeRef(beat), expectedBody: own, ...place }, () => { selectedBeatId = beat.id; openTo(model.scenes.find(item => item.id === scene.id) ?? scene, place.body); }).then(saved => { if (saved) focusColumn(beat.id); return saved; }),
     });
   };
@@ -1928,7 +1936,7 @@ export function renderStoryView(
       const state = deriveScenePreview(scene, beat.id, scene.beats.some(item => item.conditionalBranch) ? openBranches : undefined);
       return { background: !!state.background, characters: state.characters.length > 0, music: !!state.music, unknown: state.partial };
     };
-    scroller.append(renderRoute({ view: routeView, focus: writingFocus, scene, items, numbers, selected, locked: scene.sourceConflict, label: beatName,
+    scroller.append(renderRoute({ view: routeView, focus: writingFocus, scene, items, numbers, selected, locked: scene.sourceConflict, label: beatName, name: nodeName,
       summary: beat => beat.conditionalBranch ? branchName(scene, beat) : beatSummary(beat.payload, model), branchName: header => branchName(scene, header), endName: header => endName(scene, header),
       sceneName: id => model.scenes.find(item => item.id === id)?.displayName ?? "an unavailable scene", state: accepted,
       warning: beat => { const problems = beat.conditionalBranch && !beat.conditionalBranch.choiceOption ? groupProblems(scene, beat.conditionalBranch.groupId).length : 0; return problems ? toFix(problems) : undefined; },

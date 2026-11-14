@@ -1250,6 +1250,11 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .story-place-tree>li[aria-selected=true]{color:var(--text-primary);background:var(--accent-subtle);box-shadow:inset 2px 0 var(--accent-primary)}
 .story-place-mark{flex:none;width:10px;font-size:10px;color:var(--text-muted)}
 .story-place-tree>li[aria-selected=true]>.story-place-mark{color:var(--accent-primary)}
+/* story-release-fixes / a-v2: rows Move to shows but can't choose. */
+.story-place-tree>.story-place-fixed{color:var(--text-muted);cursor:default}
+.story-place-tree>.story-place-fixed:hover{background:none}
+.story-place-tree>.story-place-here{color:var(--text-secondary);font-style:italic}
+.story-place-fixed>.story-place-mark>svg{display:block;width:11px;height:11px}
 .story-summary{margin:0;font-size:12px;color:var(--accent-primary)}
 .story-summary.story-summary-choose{color:var(--text-secondary)}
 .story-dialog-actions{display:flex;justify-content:flex-end;gap:8px}
