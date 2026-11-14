@@ -616,12 +616,12 @@ test("a branch whose test is custom Python gets no ! and is not counted as a bra
   await s.close();
 });
 
-test("the partial banner names tests the builder can't read, or protected Custom Code when the scene has it", async () => {
+test("the partial banner names conditions the builder can't read, or protected Custom Code when the scene has it", async () => {
   const partial = (model: SceneWorkspace): SceneWorkspace => ({ ...model, scenes: model.scenes.map(scene => scene.id === "one" ? { ...scene, partial: true } : scene) });
   const banner = async (model: SceneWorkspace): Promise<string> => { const s = mountStory(partial(model)); const text = s.host.querySelector(".partial-state")!.textContent!; await s.close(); return text; };
-  assert.equal(await banner(brokenCondition()), "Preview and reference certainty are partial because the builder can't read 2 tests in this scene.");
+  assert.equal(await banner(brokenCondition()), "Preview and reference certainty are partial because the builder can't read 2 conditions in this scene.");
   const one = brokenCondition({ status: "supported", expression: { type: "variable", variableId: "flag", variableType: "bool" } });
-  assert.equal(await banner(one), "Preview and reference certainty are partial because the builder can't read a test in this scene.");
+  assert.equal(await banner(one), "Preview and reference certainty are partial because the builder can't read a condition in this scene.");
   const code = { ...one, scenes: one.scenes.map(scene => scene.id === "one" ? { ...scene, beats: [...scene.beats, storyBeat("code", { type: "customCode", source: "$ renpy.pause(1)", reason: "Unsupported statement" }, { protected: true })] } : scene) };
   assert.equal(await banner(withBodies(code)), "Preview and reference certainty are partial because this Scene contains protected Custom Code.");
 });

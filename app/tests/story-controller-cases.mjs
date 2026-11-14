@@ -1004,7 +1004,7 @@ export const storyCases={
   await openScene(c,'Code');const segments=[...c.document.querySelectorAll('.scene-workspace .story-branch-segment')].map(x=>x.title);
   for(const caption of ['Show If trust in (1, 2)','Show If missing_flag = 4, needs changes: missing_flag is not a project variable.','Show Else if mood, needs changes: mood is text, not yes/no.'])
    c.assert(segments.includes(caption),`The Branch path shows ${caption}`);
-  // Its Custom Code, not its tests, is why the preview is partial.
+  // Its Custom Code, not its conditions, is why the preview is partial.
   c.assert.equal(c.document.querySelector('.scene-workspace .partial-state').textContent,'Preview and reference certainty are partial because this Scene contains protected Custom Code.');
   // The main Save refuses while the Set variable draft is invalid, writes nothing and
   // reveals that draft.

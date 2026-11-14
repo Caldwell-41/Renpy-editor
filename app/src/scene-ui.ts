@@ -199,12 +199,12 @@ function branchCaption(branch: ConditionalBranch, model: SceneWorkspace): string
   return branch.otherwise ? "Otherwise" : `${branch.ordinal ? "Else If" : "If"} ${branchTest(branch, model)}`;
 }
 
-/** Why a scene's preview is partial: protected Custom Code, or else tests the builder can't read. */
+/** Why a scene's preview is partial: protected Custom Code, or else conditions the builder can't read. */
 function partialReason(scene: SceneDocument): string {
-  const tests = scene.beats.filter(beat => beat.conditionalBranch?.condition?.status === "unknown").length;
+  const conditions = scene.beats.filter(beat => beat.conditionalBranch?.condition?.status === "unknown").length;
   const code = scene.beats.some(beat => beat.protected && !beat.conditionalBranch && !beat.structuralPlaceholder);
-  return code || !tests ? "Preview and reference certainty are partial because this Scene contains protected Custom Code."
-    : `Preview and reference certainty are partial because the builder can't read ${tests === 1 ? "a test" : `${tests} tests`} in this scene.`;
+  return code || !conditions ? "Preview and reference certainty are partial because this Scene contains protected Custom Code."
+    : `Preview and reference certainty are partial because the builder can't read ${conditions === 1 ? "a condition" : `${conditions} conditions`} in this scene.`;
 }
 
 function readOnlyLogic(beat: SceneBeat): boolean {
