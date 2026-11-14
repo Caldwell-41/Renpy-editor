@@ -577,6 +577,13 @@ covers moving, unwrapping and deleting branches.
 - When a body's ending is unknown, Story says so and never claims that the story
   continues. Authoring treats an unknown ending as one that may continue, so it
   never relies on an ending it cannot prove.
+- An edit that would let a scene ending in such Custom Code run past its end is
+  refused: "Can't add a beat here. This scene ends with Custom Code that may leave
+  it, so a beat after it could run on into the next scene. Add a Return or Jump after
+  the Custom Code first, or edit the scene in Source." Other edits read "Can't make
+  this change." in place of the first sentence. An edit that would let a scene that
+  ends run on keeps the general refusal "That operation would break a required
+  Chapter or Scene invariant."
 
 ### Beat editors
 

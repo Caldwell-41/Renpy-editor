@@ -838,7 +838,9 @@ is no place inside a region, and none before an empty body's `pass`, whose end p
 replaces it. Unknown endings count as "may continue" for the Branches continuation
 lines. The scene fallthrough guard compares the scene body's ending before and after
 each write. A scene that ends must keep ending, and an `unknown` ending must not become
-`continues`. A scene that already continues stays editable. Story Save checks each
+`continues`. A scene that already continues stays editable. When the ending was
+`unknown`, core refuses with `CUSTOM_CODE_ENDING`, whose message names Custom Code as
+the cause. Other refusals of this guard use `SCENE_INVARIANT`. Story Save checks each
 command against the candidate the commands before it left.
 
 Source-map v6 adds `ownedScreens` for explicitly created custom screens. Each entry

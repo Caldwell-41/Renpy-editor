@@ -835,7 +835,9 @@ export function renderStoryView(
         if (await reload()) actions.status(staleStatus, "error");
         return false;
       }
-      actions.status(`${friendlyError(error, "Scene change could not be saved")} Input retained. If this source structure cannot be moved safely, edit it in Source.`, "error");
+      // Core's Custom Code ending refusal already says what to do next.
+      const complete = (error as { code?: string }).code === "CUSTOM_CODE_ENDING";
+      actions.status(`${friendlyError(error, "Scene change could not be saved")}${complete ? "" : " Input retained. If this source structure cannot be moved safely, edit it in Source."}`, "error");
       focusDraft();
       return false;
     } finally { unlock(); }

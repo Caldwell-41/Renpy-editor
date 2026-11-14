@@ -184,6 +184,15 @@ test("Move to opens on the beat's own place with the next place after it chosen,
   await s.close();
 });
 
+test("a write refused because the scene ends with Custom Code shows core's reason alone", async () => {
+  const reason = "Can't make this change. This scene ends with Custom Code that may leave it, so a beat after it could run on into the next scene. Add a Return or Jump after the Custom Code first, or edit the scene in Source.";
+  const s = setup(async () => { throw Object.assign(Error(reason), { code: "CUSTOM_CODE_ENDING" }); });
+  button(selectBeat(s.host, "a", "if"), "Move to…").click();
+  const dialog = s.host.querySelector<HTMLElement>(".story-move")!; button(dialog, "Move").click(); await tick();
+  assert.equal(s.calls.length, 1); assert.equal(s.status.at(-1), reason);
+  await s.close();
+});
+
 test("whole condition move excludes own descendant bodies; headers never become ordinary Beat targets", async () => {
   const s = setup(); button(selectBeat(s.host, "if"), "Move to…").click(); const dialog = s.host.querySelector<HTMLElement>(".story-move")!;
   assert.deepEqual([...dialog.querySelectorAll<HTMLElement>('[role=treeitem][aria-expanded]')].map(item => item.textContent), ["▾Arrival"]);

@@ -1341,6 +1341,14 @@ fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
             "SCENE_INVARIANT",
             "That operation would break a required Chapter or Scene invariant.",
         ),
+        CustomCodeEnding { adds_beat: true } => (
+            "CUSTOM_CODE_ENDING",
+            "Can't add a beat here. This scene ends with Custom Code that may leave it, so a beat after it could run on into the next scene. Add a Return or Jump after the Custom Code first, or edit the scene in Source.",
+        ),
+        CustomCodeEnding { adds_beat: false } => (
+            "CUSTOM_CODE_ENDING",
+            "Can't make this change. This scene ends with Custom Code that may leave it, so a beat after it could run on into the next scene. Add a Return or Jump after the Custom Code first, or edit the scene in Source.",
+        ),
         OpaqueBoundary => (
             "OPAQUE_BOUNDARY",
             "The operation cannot cross or modify protected Custom Code.",

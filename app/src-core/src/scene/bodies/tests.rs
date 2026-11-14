@@ -612,6 +612,15 @@ fn refused(f: &mut Fixture, scene: &Value, fields: Value) {
     let refused = f.reject(with_scene(scene, fields));
     assert_eq!(refused["error"]["code"], "SCENE_INVARIANT");
 }
+/// The guard's refusal when Custom Code that may leave ends the scene before the edit.
+fn refused_after_code(f: &mut Fixture, scene: &Value, fields: Value, change: &str) {
+    let refused = f.reject(with_scene(scene, fields));
+    assert_eq!(refused["error"]["code"], "CUSTOM_CODE_ENDING");
+    assert_eq!(
+        refused["error"]["message"],
+        format!("Can't {change}. This scene ends with Custom Code that may leave it, so a beat after it could run on into the next scene. Add a Return or Jump after the Custom Code first, or edit the scene in Source.")
+    );
+}
 fn owner_body(beat: &Value) -> Value {
     json!({"type":"branch","groupId":beat["owner"]["groupId"],"branchId":beat["owner"]["branchId"]})
 }
@@ -632,18 +641,40 @@ fn an_unknown_ending_refuses_an_edit_that_makes_a_path_fall_through() {
             .find(|b| b["payload"]["type"] == "return")
             .unwrap()
             .clone();
-        refused(
+        refused_after_code(
             &mut f,
             &a,
             json!({"type":"updateBodyBeat","beatId":ending["id"],"expectedBody":owner_body(&ending),"beat":narration()}),
+            "make this change",
         );
-        refused(
+        refused_after_code(
             &mut f,
             &a,
             json!({"type":"removeStoryNode","node":{"type":"beat","beatId":ending["id"]},"expectedBody":owner_body(&ending)}),
+            "make this change",
         );
         f.service.close().unwrap();
     }
+}
+
+/// Custom Code that may leave ends the scene's last path. A beat added after it is
+/// refused with that cause.
+#[test]
+fn a_beat_after_custom_code_that_ends_the_scene_is_refused_with_its_cause() {
+    let mut f = Fixture::new();
+    let a = save(
+        &mut f,
+        "    if flag:\n        return\n    else:\n        $ renpy.pause(1)\n",
+    );
+    assert_eq!(scene_body(&a)["ending"], json!({"type":"unknown"}));
+    let code = beat(&a, "$ renpy.pause(1)").clone();
+    refused_after_code(
+        &mut f,
+        &a,
+        json!({"type":"insertBodyBeat","body":owner_body(&code),"position":{"type":"end"},"beat":narration()}),
+        "add a beat here",
+    );
+    f.service.close().unwrap();
 }
 
 #[test]

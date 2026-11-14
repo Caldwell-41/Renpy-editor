@@ -580,6 +580,11 @@ pub enum SceneError {
     FontChanged,
     FontInvalid,
     InvariantBlocked,
+    /// The scene ends with Custom Code that may leave it, and the edit would let the
+    /// story run past the end. `adds_beat` when the edit adds a beat.
+    CustomCodeEnding {
+        adds_beat: bool,
+    },
     UnsupportedCallRoute,
     AmbiguousReturnLabel,
     OpaqueBoundary,
